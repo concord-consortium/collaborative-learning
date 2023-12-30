@@ -1,17 +1,20 @@
-import { observer } from "mobx-react";
-import { useStores } from "../../hooks/use-stores";
 import React, { useState } from "react";
+import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
+import { useStores, usePersistentUIStore, useAppConfig } from "../../hooks/use-stores";
+import { useUserContext } from "../../hooks/use-user-context";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
+import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
 import { DocumentContextReact } from "./document-context";
 import { DEBUG_SORT_WORK } from "../../lib/debug";
 import { isSortableType } from "../../models/document/document-types";
+import { useQueryClient } from "react-query";
 
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
-
+import { DocumentView } from "../navigation/document-view";
 
 // 2. Map over those groups, rendering the documents in groups in the sort view.
 //    It could be a map in a map or broken out into a separate component for groups.
@@ -19,11 +22,17 @@ import "./sort-work-view.scss";
 // 4. Get the functionality that opens a doc from the sort view to work
 // ----------------------------------------------------------------------------------------
 
-export const SortWorkView:React.FC = observer(function SortWorkView(){
+interface IProps {
+  tabSpec: NavTabModelType
+}
+
+export const SortWorkView:React.FC<IProps> = observer(function SortWorkView({tabSpec}){
   const sortOptions = ["Group", "Student"];
   const stores = useStores();
   const groupsModel = stores.groups;
   const [sortBy, setSortBy] = useState("Group");
+
+  //******************************* Sorting Documents *************************************
 
   const filteredDocsByType = stores.documents.all.filter((doc:DocumentModelType) => {
     return isSortableType(doc.type);
@@ -88,6 +97,43 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
     });
   };
 
+  //******************************* Opening Documents *************************************
+  const persistentUI = usePersistentUIStore();
+  const appConfigStore = useAppConfig();
+  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
+  const subTabs = tabSpec.subTabs;
+  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
+
+  console.log("\t🥩 subTabs:", subTabs);
+  //TODO: fix subTab object to look like correct,
+  //needs to match subtabs object to look like section-document-or-browser
+  const selectedSubTab = subTabs[0];
+  console.log("\t🥩 selectedSubTab:", selectedSubTab);
+  const focusDocument = persistentUI.focusDocument;
+  const [showDocument, setShowDocument] = useState(false);
+  const queryClient = useQueryClient();
+  const context = useUserContext();
+
+  const renderDocumentView = (subTab: ISubTabSpec) => {
+    console.log("➡️ renderDocumentView");
+    console.log("\t🥩 subTab:", subTab);
+    return (
+      <>
+        <div>hello world</div>
+        <DocumentView
+          tabSpec={tabSpec}
+          subTab={subTab}
+        />
+        {/* { renderSubTabPanel(subTab) } */}
+      </>
+    );
+  };
+
+  const handleSelectDocument = (document: DocumentModelType) => {
+    setShowDocument(prev => !prev);
+    persistentUI.openSubTabDocument(tabSpec.tab, "None", document.key);
+  };
+
 
   return (
     <div key="sort-work-view" className="sort-work-view">
@@ -95,6 +141,10 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
       <div className="documents-panel">
         <div className={"tab-panel-documents-section"}>
           {
+
+            showDocument ?
+            renderDocumentView(tabSpec)
+            :
             sortedDocuments.map((sortedSection: any, idx)=>{
               return (
                 <div className="sorted-sections" key={`sortedSection-${idx}`}>
@@ -104,7 +154,7 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
                     </div>
                   </div>
 
-                    <div className={"list"}>
+                      <div className={"list"}>
                       {
                         sortedSection.documents.map((doc: DocumentModelType, sortIdx: number) => {
                           const documentContext = getDocumentContext(doc);
@@ -117,13 +167,17 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
                                 tab={"sort-work"}
                                 shouldHandleStarClick={true}
                                 allowDelete={false}
+                                onSelectDocument={handleSelectDocument}
                               />
                             </DocumentContextReact.Provider>
 
                           );
                         })
                       }
-                    </div>
+                      </div>
+
+
+
                 </div>
 
               );
@@ -163,6 +217,5 @@ export const SortWorkView:React.FC = observer(function SortWorkView(){
     </div>
   );
 });
-
 
 

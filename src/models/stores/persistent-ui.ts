@@ -63,9 +63,14 @@ export const PersistentUIModel = types
     get focusDocument () {
       if (self.activeNavTab === ENavTab.kProblems || self.activeNavTab === ENavTab.kTeacherGuide) {
         const facet = self.activeNavTab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
+        // console.log("persistentUI Model > focusDocument > problem or teacher guide > buildSectionPath");
         return buildSectionPath(self.problemPath, self.openSubTab, facet);
       } else {
+        // console.log("persistentUI Model > focusDocument > other activeNavTab > return ... ");
+
         const activeTabState = self.tabs.get(self.activeNavTab);
+        // console.log("openSubTab:", self.openSubTab);
+        // console.log("openDocuments?:", self.openSubTab && activeTabState?.openDocuments.get(self.openSubTab));
         return self.openSubTab && activeTabState?.openDocuments.get(self.openSubTab);
       }
     },
@@ -155,10 +160,15 @@ export const PersistentUIModel = types
        * @param documentKey
        */
       openSubTabDocument(tab: string, subTab: string, documentKey: string) {
+
         const tabState = getTabState(tab);
         self.activeNavTab = tab;
         tabState.openSubTab = subTab;
         tabState.openDocuments.set(subTab, documentKey);
+        console.log("📁 persistent-ui.ts ------------------------");
+        console.log("➡️ openSubTabDocument");
+        console.log("\t🥩 tabState:", tabState);
+        console.log("tabState openDocuments:", tabState.openDocuments);
       },
       openSubTabSecondaryDocument(tab: string, subTab: string, documentKey: string) {
         const tabState = getTabState(tab);

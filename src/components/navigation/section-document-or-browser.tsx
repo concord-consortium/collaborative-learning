@@ -12,9 +12,9 @@ import { useUserContext } from "../../hooks/use-user-context";
 import { NetworkDocumentsSection } from "./network-documents-section";
 import { DocumentCollectionList, kNavItemScale } from "../thumbnail/document-collection-list";
 import { SubTabsPanel } from "./sub-tabs-panel";
-import { DocumentView } from "./document-view";
 
 import "./section-document-or-browser.scss";
+import { DocumentView } from "./document-view";
 
 interface IProps {
   tabSpec: NavTabModelType;
@@ -33,9 +33,17 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const classStore = useClassStore();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const subTabs = tabSpec.subTabs;
+
+  console.log("\t🥩 subTabs:", subTabs);
   const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
   const subTabIndex = Math.max(subTabs.findIndex((subTab) => tabState?.openSubTab === subTab.label), 0);
   const selectedSubTab = subTabs[subTabIndex];
+
+  // console.log("📁 section-document-or-browser.tsx ------------------------");
+  // console.log("\t🔪 subTabs:", subTabs);
+  // console.log("\t🔪 tabState:", tabState);
+  // console.log("\t🔪 navTabSpec:", navTabSpec);
+
 
   useEffect(() => {
     // Set the default open subTab if a subTab isn't already set.
@@ -65,13 +73,25 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const handleSelectDocument = (document: DocumentModelType) => {
+
+    // console.log("📁 section-document-or-browser.tsx ------------------------");
+    // console.log("➡️handleSelectDocument");
     if (persistentUI.focusDocument === document.key) {
+      // console.log("\tclosingSubTabDocument!!");
       persistentUI.closeSubTabDocument(tabSpec.tab, selectedSubTab.label);
     } else {
       if (!document.hasContent && document.isRemote) {
+        console.log("\tloading Document!!");
         loadDocumentContent(document);
       }
+      // console.log("\topenSubTabDocument!");
+      // console.log("\t🔪 document.key:", document.key);
+      // console.log("\t🔪 tabSpec.tab:", tabSpec.tab);
+      // console.log("\t💩 selectedSubTab.label:", selectedSubTab.label);
+
+
       persistentUI.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
+
       const logEvent = document.isRemote
         ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
         : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
@@ -84,6 +104,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const renderDocumentBrowserView = (subTab: ISubTabSpec) => {
+    // console.log("functon renderDocumentBrowserView");
     const openDocumentKey = tabState?.openDocuments.get(subTab.label);
     const classHash = classStore.classHash;
     return (
@@ -111,14 +132,22 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const renderDocumentView = (subTab: ISubTabSpec) => {
+    // console.log("➡️ renderDocumentView");
+    // console.log("\t🥩 subTab:", subTab);
+
     const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
                             store.networkDocuments.getDocument(openDocumentKey);
     const isStarredTab = subTab.label === "Starred";
     if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
+    console.log("calling DocumentView from sec-doc-or-browser");
     return (
       <DocumentView tabSpec={tabSpec} subTab={subTab} />
     );
+    // return (
+    //   <div>hello world</div>
+    // );
+
   };
 
   return (
@@ -130,4 +159,5 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
       renderSubTabPanel={subTab => renderDocumentView(subTab) || renderDocumentBrowserView(subTab)}
     />
   );
+
 });

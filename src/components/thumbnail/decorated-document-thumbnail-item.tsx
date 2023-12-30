@@ -80,6 +80,10 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
                                         : undefined;
 
     const handleDocumentClick = () => {
+      console.log("📁 decorated-document-thumbnail-item.tsx ------------------------");
+      console.log("➡️ handleDocumentClick");
+      console.log("\t🥩 document:", document);
+
       onSelectDocument?.(document);
     };
 
