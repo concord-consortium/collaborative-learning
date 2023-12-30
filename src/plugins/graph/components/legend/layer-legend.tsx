@@ -10,16 +10,15 @@ import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../../../m
 import { DataConfigurationContext, useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { IGraphLayerModel } from "../../models/graph-layer-model";
 import { ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
-import {
-  kMultiLegendHRuleHeight, kMultiLegendLabelHeight, kMultiLegendMenuHeight, kMultiLegendVerticalGap,
-  kMultiLegendVerticalPadding
-} from "./legend-constants";
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import XAxisIcon from "../../assets/x-axis-icon.svg";
 import YAxisIcon from "../../assets/y-axis-icon.svg";
 
 export const layerLegendType = "layer-legend";
+
+const kLayerLegendHeaderHeight = 58;
+const kLayerLegendRowHeight = 52;
 
 /**
  * The Legend for a single dataset in an xy-plot
@@ -166,16 +165,15 @@ export const LayerLegend = observer(function LayerLegend(props: ILegendPartProps
   );
 });
 
-// TODO: Improve this calculation
 function heightOfOneLayerLegend(layer: IGraphLayerModel) {
-  // Menu for each Y attribute, plus one for "Add series" button
-  const menuCount = (layer.config.yAttributeDescriptions.length || 0) + 1;
-  const legendRows = Math.ceil(menuCount/2);
-  return kMultiLegendHRuleHeight
-    + kMultiLegendVerticalPadding * 3 // above title, below title, below all.
-    + kMultiLegendLabelHeight
-    + kMultiLegendMenuHeight * legendRows
-    + kMultiLegendVerticalGap * legendRows * 2; // above each row
+  if (!layer.config.dataset) return 0;
+
+  const yAttrDescriptions = layer.config.yAttributeDescriptions.length;
+  // Only include the add series button if we have unused attributes
+  const attributeCount = layer.config.dataset?.attributes?.length ?? 0;
+  const addSeriesButton = (yAttrDescriptions + 1) < attributeCount ? 1 : 0;
+  const rows = Math.ceil((yAttrDescriptions + addSeriesButton) / 2);
+  return kLayerLegendHeaderHeight + kLayerLegendRowHeight * rows;
 }
 export function heightOfLayerLegend({ graphModel }: ILegendHeightFunctionProps) {
   return graphModel.layers.reduce((prev, layer) => {

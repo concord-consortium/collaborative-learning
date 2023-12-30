@@ -20,8 +20,9 @@ import YAxisIcon from "../../assets/y-axis-icon.svg";
 
 export const variableFunctionLegendType = "variable-function-legend";
 
-const kPlottedVariableHeader = 40;
-const kPlottedVariableRow = 46;
+const kPlottedVariableHeaderHeight = 48;
+const kPlottedVariableRowHeight = 52;
+const kPlottedVariableAddButtonHeight = 50;
 
 interface IColorKeyProps {
   color: string;
@@ -175,6 +176,6 @@ export function heightOfVariableFunctionLegend({ graphModel }: ILegendHeightFunc
     return adornment.plottedVariables.size;
   }, 0);
   // Each adornment has a header and an add variable row, plus one row for each plot
-  return plottedVariableAdornments.length * (kPlottedVariableHeader + kPlottedVariableRow)
-    + plottedVariableTraces * kPlottedVariableRow;
+  return plottedVariableAdornments.length * (kPlottedVariableHeaderHeight + kPlottedVariableAddButtonHeight)
+    + plottedVariableTraces * kPlottedVariableRowHeight;
 }

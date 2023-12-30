@@ -37,11 +37,9 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   }, [layout.computedBounds.legend.height, layout.graphWidth, legendBounds, transform]);
 
   const heightFunctionProps = { graphModel };
-  // TODO Remove this extra buffer space to make sure the whole legend can be seen before refactoring height calculation
-  const extraHeight = 100;
   const totalHeight = multiLegendParts.reduce((prev, part) => {
     return prev + part.getHeight(heightFunctionProps);
-  }, extraHeight);
+  }, 0);
 
   useEffect(function RespondToLayoutChange() {
     layout.setDesiredExtent("legend", totalHeight);
