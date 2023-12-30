@@ -43,7 +43,6 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
   const instanceKey = model.instanceKey(cellKey);
   const path = useRef("");
   const plottedFunctionRef = useRef<SVGGElement>(null);
-  const sharedVariables = graphModel.sharedVariables;
 
   const addPath = useCallback(() => {
     const xMin = xScale.domain()[0];
@@ -96,7 +95,7 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
       }
       refreshValues();
     }, { name: "PlottedFunctionAdornmentComponent.refreshAxisChange" }, model);
-  }, [dataConfig, model, plotWidth, plotHeight, refreshValues, sharedVariables, xAxis, yAxis]);
+  }, [dataConfig, model, plotWidth, plotHeight, refreshValues, xAxis, yAxis]);
 
   return (
     <svg className={`plotted-function-${classFromKey}`}>
