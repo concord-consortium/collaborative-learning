@@ -5,7 +5,6 @@ import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { useGraphLayoutContext } from "../../models/graph-layout";
 import { IDataSet } from "../../../../models/data/data-set";
 
-import { useGraphSettingsContext } from "../../hooks/use-graph-settings-context";
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
 import { kGraphDefaultHeight } from "../../graph-types";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
@@ -28,7 +27,6 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   const multiLegendRef = useRef<HTMLDivElement>(null);
   const graphModel = useGraphModelContext();
   const instanceId = useInstanceIdContext();
-  const { defaultSeriesLegend } = useGraphSettingsContext();
 
   useEffect(() => {
     const legendTransform = `translateY(${-layout.computedBounds.legend.height}px)`;
