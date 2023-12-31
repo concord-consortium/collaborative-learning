@@ -7,8 +7,7 @@ export const kGraphAdornmentsClassSelector = `.${kGraphAdornmentsClass}`;
 
 const adornmentTypeDispatcher = (adornmentSnap: IAdornmentModel) => {
   const adornmentInfo = gAdornmentContentInfoMap[adornmentSnap.type];
-  if (adornmentInfo) return adornmentInfo.modelClass;
-  return UnknownAdornmentModel;
+  return adornmentInfo.modelClass ?? UnknownAdornmentModel;
 };
 
 export const AdornmentModelUnion = types.late<typeof AdornmentModel>(() => {
