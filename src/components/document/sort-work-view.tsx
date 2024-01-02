@@ -50,7 +50,7 @@ export const SortWorkView:React.FC<IProps> = observer(function SortWorkView({tab
       if (sortByOption === "Group") {
         const userId = doc.uid; // Find the user that owns the document
         const group = groupsModel.groupForUser(userId); // Find the group the user is in from the groupsModel
-        return group ? `Group ${group.id}` : null;
+        return group ? `Group ${group.id}` : "Ungrouped";
       }  else { //"Student"
         const user = stores.class.getUserById(doc.uid);
         return (user && user.type === "student") ? user.displayName : null;
