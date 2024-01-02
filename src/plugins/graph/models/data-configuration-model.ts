@@ -773,6 +773,8 @@ export const DataConfigurationModel = types
      * @param id - ID of Attribute to remove.
      */
     removeYAttributeWithID(id: string) {
+      console.log('Removing Y attribute', id);
+      console.trace();
       const index = self._yAttributeDescriptions.findIndex((aDesc) => aDesc.attributeID === id);
       if (index >= 0) {
         self._yAttributeDescriptions.splice(index, 1);
