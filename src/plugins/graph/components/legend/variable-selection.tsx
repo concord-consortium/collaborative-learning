@@ -36,7 +36,7 @@ export const VariableSelection = observer(function VariableSelection({
   const buttonLabel = selectedVariable ? variableDisplay(selectedVariable) : alternateButtonLabel;
   return (
     <div className="variable-selection">
-      <div className="variable-icon">{icon}</div>
+      <div className="legend-icon">{icon}</div>
       <Menu boundary="scrollParent">
         {({ isOpen }) => (
           <>

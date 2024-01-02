@@ -1,6 +1,6 @@
-import { destroy, Instance, types } from "mobx-state-tree";
+import { destroy, getType, Instance, types } from "mobx-state-tree";
 import { Variable, VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
-import { SharedModel } from "../../models/shared/shared-model";
+import { SharedModel, SharedModelType } from "../../models/shared/shared-model";
 import { withoutUndo } from "../../models/history/without-undo";
 import { getSharedModelManager } from "../../models/tiles/tile-environment";
 
@@ -61,3 +61,7 @@ export const SharedVariables = SharedModel.named("SharedVariables")
   }
 }));
 export interface SharedVariablesType extends Instance<typeof SharedVariables> {}
+
+export function isSharedVariables(model?: SharedModelType): model is SharedVariablesType {
+  return model ? getType(model) === SharedVariables : false;
+}

@@ -4,42 +4,33 @@
   display: flex;
   margin: 0 10px 0 0;
 
-  .variable-function-legend-button {
-    height: 100%;
-    text-align: start;
-    width: 100%;
+  .variable-label {
+    margin-left: 6px;
 
-    .button-content {
-      align-items: center;
-      display: flex;
-      justify-content: space-between;
+    .variable-function-legend-button {
+      height: 100%;
+      text-align: start;
+      width: 100%;
 
-      .caret {
-        transform: rotate(0deg);
-        transition: transform 0.2s ease-in-out;
+      .button-content {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
 
-        svg {
-          margin-top:4px;
-          stroke:$codap-menu-border-color;
-        }
+        .caret {
+          transform: rotate(0deg);
+          transition: transform 0.2s ease-in-out;
 
-        &.open {
-          transform: rotate(180deg);
+          svg {
+            margin-top:4px;
+            stroke:$codap-menu-border-color;
+          }
+
+          &.open {
+            transform: rotate(180deg);
+          }
         }
       }
-    }
-  }
-
-  .variable-icon {
-    align-items: center;
-    display: flex;
-    height: $label-height;
-    justify-content: center;
-    padding: 0 4px;
-
-    svg {
-      height: auto;
-      width: auto;
     }
   }
 }

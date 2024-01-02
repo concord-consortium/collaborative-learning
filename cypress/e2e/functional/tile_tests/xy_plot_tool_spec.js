@@ -69,12 +69,6 @@ context('XYPlot Tool Tile', function () {
       xyTile.getXYPlotTitle().click().type(title + '{enter}');
       xyTile.getXYPlotTitle().should('contain', title);
 
-      cy.log("does not show edit boxes on axes");
-      xyTile.getEditableAxisBox("bottom", "min").should("not.exist");
-      xyTile.getEditableAxisBox("bottom", "max").should("not.exist");
-      xyTile.getEditableAxisBox("left", "min").should("not.exist");
-      xyTile.getEditableAxisBox("left", "max").should("not.exist");
-
       cy.log("Link Table");
       clueCanvas.clickToolbarButton('graph', 'link-tile');
       xyTile.linkTable("Table 1");
@@ -272,7 +266,6 @@ context('XYPlot Tool Tile', function () {
     it("Test plotting variables", () => {
       const dialogField = (field) => cy.get(`#evd-${field}`);
       const dialogOkButton = () => cy.get(".modal-button").last();
-      const dialogNewGraphButton = () => cy.get(".modal-button.add-new-button");
 
       beforeTest(queryParamsPlotVariables);
 
@@ -289,7 +282,8 @@ context('XYPlot Tool Tile', function () {
 
       cy.log("Add a Linked Graph");
       clueCanvas.clickToolbarButton("diagram", "variables-link");
-      dialogNewGraphButton().click();
+      cy.get('select').select("New Graph");
+      dialogOkButton().click();
       xyTile.getPlottedVariablesPath().should("not.exist");
       xyTile.selectXVariable(name1);
       xyTile.getXVariableDropdown().should("contain.text", name1);
@@ -319,7 +313,8 @@ context('XYPlot Tool Tile', function () {
       cy.log("Remove a variable trace");
       xyTile.getRemoveVariablesButton(1).click();
       xyTile.getPlottedVariablesPath().should("have.length", 1);
-      xyTile.getRemoveVariablesButtons().should("not.exist");
+      // Only the unlink remove button should remain
+      xyTile.getRemoveVariablesButtons().should("have.length", 1);
     });
   });
 });

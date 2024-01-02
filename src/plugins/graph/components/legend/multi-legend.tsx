@@ -8,6 +8,7 @@ import {
   IPlottedVariablesAdornmentModel, isPlottedVariablesAdornment
 } from "../../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
 import { DataConfigurationContext } from "../../hooks/use-data-configuration-context";
+import { useGraphSettingsContext } from "../../hooks/use-graph-settings-context";
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
 import { axisPlaceToAttrRole, kGraphDefaultHeight } from "../../graph-types";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
@@ -42,6 +43,7 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   const multiLegendRef = useRef<HTMLDivElement>(null);
   const graphModel = useGraphModelContext();
   const instanceId = useInstanceIdContext();
+  const { defaultSeriesLegend } = useGraphSettingsContext();
 
   useEffect(() =>{
     const legendTransform = `translateY(${-layout.computedBounds.legend.height}px)`;
@@ -74,8 +76,11 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     return plottedVariableAdornments.length * (kPlottedVariableHeader + kPlottedVariableRow)
       + plottedVariableTraces * kPlottedVariableRow;
   }
-  // Total height is height of X-axis menus, plus sum of all the layer and plotted variables sections
-  const totalHeight = kMultiLegendMenuHeight + kMultiLegendVerticalPadding
+  // Total height is height of X-axis menus, plus sum of all the plotted data and variable sections
+  const xMenuHeight = defaultSeriesLegend ? 0 : kMultiLegendMenuHeight + kMultiLegendVerticalPadding;
+  // TODO Remove this extra buffer space to make sure the whole legend can be seen before refactoring height calculation
+  const extraHeight = 100;
+  const totalHeight = extraHeight + xMenuHeight
     + heightOfLayers()
     + heightOfPlottedVariablesLegend();
 
@@ -83,6 +88,18 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     layout.setDesiredExtent("legend", totalHeight);
     onRequestRowHeight?.(instanceId, kGraphDefaultHeight + totalHeight);
   }, [instanceId, layout, onRequestRowHeight, totalHeight]);
+
+  const variableLegends = graphModel.adornments.map(adornment => {
+    if (isPlottedVariablesAdornment(adornment)) {
+      return (
+        <VariableFunctionLegend
+          key={adornment.id}
+          plottedVariablesAdornment={adornment}
+        />
+      );
+    }
+    return null;
+  });
 
   const layerLegends = graphModel.layers.map((layer) => {
     return (
@@ -96,46 +113,38 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     }
   );
 
-  const thisRole = axisPlaceToAttrRole.bottom;
+  const bottomRole = axisPlaceToAttrRole.bottom;
 
-  const xMenus = graphModel.layers.map((layer) => {
-    const attrId = layer.config?.attributeID(thisRole);
-    if (!attrId) return;
+  const xMenus = defaultSeriesLegend ? null : (
+    <div className="x-axis-menu">
+      {
+        graphModel.layers.map((layer) => {
+          const attrId = layer.config?.attributeID(bottomRole);
+          if (!attrId) return;
 
-    return (
-      <div className="x-axis-item" key={layer.id}>
-        <DataConfigurationContext.Provider value={layer.config}>
-          <SimpleAttributeLabel
-            place="bottom"
-            attrId={attrId}
-            onChangeAttribute={onChangeAttribute}
-            onRemoveAttribute={onRemoveAttribute}
-            onTreatAttributeAs={onTreatAttributeAs}
-          />
-        </DataConfigurationContext.Provider>
-      </div>
-    );
-  });
+          return (
+            <div className="x-axis-item" key={layer.id}>
+              <DataConfigurationContext.Provider value={layer.config}>
+                <SimpleAttributeLabel
+                  place="bottom"
+                  attrId={attrId}
+                  onChangeAttribute={onChangeAttribute}
+                  onRemoveAttribute={onRemoveAttribute}
+                  onTreatAttributeAs={onTreatAttributeAs}
+                />
+              </DataConfigurationContext.Provider>
+            </div>
+          );
+        })
+      }
+    </div>
+  );
 
   return (
     <div className="multi-legend" ref={ multiLegendRef }>
-      <div className="x-axis-menu">
-        { xMenus }
-      </div>
+      { xMenus }
+      { variableLegends }
       { layerLegends }
-      {
-        graphModel.adornments.map(adornment => {
-          if (isPlottedVariablesAdornment(adornment)) {
-            return (
-              <VariableFunctionLegend
-                key={adornment.id}
-                plottedVariablesAdornment={adornment}
-              />
-            );
-          }
-          return null;
-        })
-      }
     </div>
   );
 });
