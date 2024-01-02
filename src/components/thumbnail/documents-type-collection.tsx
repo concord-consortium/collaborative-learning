@@ -16,6 +16,7 @@ import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
 import "./document-type-collection.sass";
 
+
 interface IProps {
   topTab?: ENavTab;
   tab: string;

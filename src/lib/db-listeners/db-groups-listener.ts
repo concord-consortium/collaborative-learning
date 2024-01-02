@@ -17,6 +17,7 @@ export class DBGroupsListener extends BaseListener {
     return new Promise<void>((resolve, reject) => {
       const {user, groups} = this.db.stores;
       const groupsRef = this.groupsRef = this.db.firebase.ref(this.db.firebase.getGroupsPath(user));
+
       // use once() so we are ensured that groups are set before we resolve
       this.debugLogHandler("#start", "adding", "once", groupsRef);
       groupsRef.once("value")

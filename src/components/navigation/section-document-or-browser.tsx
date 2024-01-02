@@ -130,5 +130,4 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
       renderSubTabPanel={subTab => renderDocumentView(subTab) || renderDocumentBrowserView(subTab)}
     />
   );
-
 });
