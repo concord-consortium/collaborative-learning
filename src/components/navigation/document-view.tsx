@@ -21,9 +21,6 @@ interface IProps {
 }
 //TODO: Need to refactor this if we want to deploy to all tabs
 export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IProps) {
-  console.log("➡️ DocumentView");
-  console.log("\t🥩 subTab:", subTab);
-  console.log("\t🥩 tabSpec:", tabSpec);
   const persistentUI = usePersistentUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();

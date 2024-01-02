@@ -160,15 +160,10 @@ export const PersistentUIModel = types
        * @param documentKey
        */
       openSubTabDocument(tab: string, subTab: string, documentKey: string) {
-
         const tabState = getTabState(tab);
         self.activeNavTab = tab;
         tabState.openSubTab = subTab;
         tabState.openDocuments.set(subTab, documentKey);
-        console.log("📁 persistent-ui.ts ------------------------");
-        console.log("➡️ openSubTabDocument");
-        console.log("\t🥩 tabState:", tabState);
-        console.log("tabState openDocuments:", tabState.openDocuments);
       },
       openSubTabSecondaryDocument(tab: string, subTab: string, documentKey: string) {
         const tabState = getTabState(tab);
