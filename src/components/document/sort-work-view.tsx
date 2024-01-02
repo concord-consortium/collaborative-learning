@@ -17,6 +17,14 @@ interface IProps {
   tabSpec: NavTabModelType
 }
 
+//TODO Joe -
+//Style the dropdown menu to be #ecc9ff
+//change dropdown option from "Student" to "Name"
+//test m2s bullet point
+//make each section header flex widthable (ex: show long student names)
+//review and polish for PR
+
+
 export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ tabSpec }) {
   const sortOptions = ["Group", "Student"];
   const stores = useStores();
@@ -67,9 +75,7 @@ export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ t
         return numA - numB;
       });
     } else {
-      sortedSectionLabels = Array.from(documentMap.keys())
-        .filter(label => label != null && !label.includes("Teacher"))
-        .sort(customSort);
+      sortedSectionLabels = Array.from(documentMap.keys()).sort(customSort);
     }
     return sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel));
   };
