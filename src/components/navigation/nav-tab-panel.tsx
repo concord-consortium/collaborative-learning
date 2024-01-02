@@ -78,7 +78,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
               }
             </div>
             { tabs?.map((tabSpec) => {
-                // console.log("tabSpec label:", tabSpec.label);
                 return (
                   <TabPanel key={tabSpec.tab} className={["react-tabs__tab-panel", "top-level-tab-panel"]}>
                     {this.renderTabContent(tabSpec)}
@@ -96,11 +95,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
   }
 
   private renderTabContent = (tabSpec: NavTabModelType) => {
-    // console.log("\t🏭 renderTabContent");
-
-    const {persistentUI} = this.stores;
-    // console.log("\t🏭 focusDocument", persistentUI.focusDocument);
-
     switch (tabSpec.tab) {
       case ENavTab.kProblems:
         return this.renderProblem();

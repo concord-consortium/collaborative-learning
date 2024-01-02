@@ -16,7 +16,6 @@
       margin-top: 5px;
       margin-bottom: 5px;
 
-
       &::after{ //divider line drawn across
         content: "";
         position: absolute;
@@ -39,12 +38,7 @@
         justify-content: center;
         color: var(--text-black);
         z-index: 1;
-
-
-
       }
-
     }
-
   }
 }

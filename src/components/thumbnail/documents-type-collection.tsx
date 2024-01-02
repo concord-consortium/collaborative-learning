@@ -16,7 +16,6 @@ import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
 import "./document-type-collection.sass";
 
-
 interface IProps {
   topTab?: ENavTab;
   tab: string;
@@ -89,15 +88,6 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
                                   topTab, tab, section, index, numSections=0, scale, selectedDocument,
                                   selectedSecondaryDocument, horizontal, onSelectNewDocument, onSelectDocument,
                                   shouldHandleStarClick, allowDelete }: IProps) => {
-
-
-  // console.log("\t🔪 tab:", tab);
-  // console.log("\t🥩 topTab:", topTab);
-  // console.log("\t🥩 section:", section);
-  // console.log("------------");
-
-
-
   const appConfigStore = useAppConfig();
   const classStore = useClassStore();
   const documents = useLocalDocuments();
