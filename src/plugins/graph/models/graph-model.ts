@@ -31,13 +31,7 @@ import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel, IGraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-model";
-import {
-  IPlottedVariablesAdornmentModel, isPlottedVariablesAdornment, PlottedVariablesAdornmentModel
-} from "../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
-import { SharedVariables } from "../../shared-variables/shared-variables";
-import {
-  kPlottedVariablesType
-} from "../adornments/plotted-function/plotted-variables/plotted-variables-adornment-types";
+import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -466,19 +460,7 @@ export const GraphModel = TileContentModel
       const smm = getSharedModelManager(self);
       if (!smm || !smm.isReady) return;
 
-      // Display a plotted variables adornment when this is linked to a shared variables model
-      const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
-      if (sharedVariableModels && sharedVariableModels.length > 0) {
-        let plottedVariablesAdornment: IPlottedVariablesAdornmentModel | undefined =
-          self.adornments.find(adornment => isPlottedVariablesAdornment(adornment)) as IPlottedVariablesAdornmentModel;
-        if (!plottedVariablesAdornment) {
-          plottedVariablesAdornment = PlottedVariablesAdornmentModel.create();
-          plottedVariablesAdornment.addPlottedVariables();
-        }
-        self.showAdornment(plottedVariablesAdornment);
-      } else {
-        self.hideAdornment(kPlottedVariablesType);
-      }
+      graphSharedModelUpdateFunctions.forEach(func => func(self as IGraphModel, smm));
 
       const sharedDataSets = smm.getTileSharedModelsByType(self, SharedDataSet);
       if (!sharedDataSets) {
@@ -662,4 +644,11 @@ export function isGraphVisualPropsAction(action: ISerializedActionCall): action 
 
 export function isGraphModel(model?: ITileContentModel): model is IGraphModel {
   return model?.type === kGraphTileType;
+}
+
+type GraphSharedModelUpdateFunction = (graphModel: IGraphModel, sharedModelManager: ISharedModelManager) => void;
+const graphSharedModelUpdateFunctions: GraphSharedModelUpdateFunction[] = [];
+
+export function registerGraphSharedModelUpdateFunction(func: GraphSharedModelUpdateFunction) {
+  graphSharedModelUpdateFunctions.push(func);
 }
