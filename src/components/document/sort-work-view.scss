@@ -1,0 +1,21 @@
+.sort-work-view {
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+
+  .sort-work-documents {
+    width: 100%;
+    height: 100%;
+    margin-top: 10px;
+    border-bottom: 2px solid black;
+
+    .sort-document {
+      height: 32px;
+      background-color: brown;
+      border-bottom: 1px solid black;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+  }
+}
