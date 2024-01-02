@@ -26,6 +26,7 @@ export class DBGroupsListener extends BaseListener {
           this.debugLogSnapshot("#start", snapshot);
           // Groups may be invalid at this point, but the listener will resolve it once connection times are set
           groups.updateFromDB(dbGroups, this.db.stores.class);
+
           const group = groups.groupForUser(user.id);
           if (group) {
             // update our connection time so we report as connected/disconnected
