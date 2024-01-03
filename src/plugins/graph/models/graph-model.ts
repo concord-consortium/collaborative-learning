@@ -316,8 +316,8 @@ export const GraphModel = TileContentModel
     removeColorForId(id: string) {
       self._idColors.delete(id);
     },
-    setColorForId(id: string, colorIndex: number) {
-      self._idColors.set(id, colorIndex);
+    setColorForId(id: string, colorIndex?: number) {
+      self._idColors.set(id, colorIndex ?? self.nextColor);
     },
     setAxis(place: AxisPlace, axis: IAxisModelUnion) {
       self.axes.set(place, axis);
