@@ -15,7 +15,7 @@ interface IMenuItemInfo {
   onClick?: () => void;
 }
 
-interface IVariableSelectionProps {
+interface ILegendDropdownProps {
   buttonContentClass?: string;
   buttonLabel: string | ReactElement;
   icon?: ReactElement;
@@ -26,7 +26,7 @@ interface IVariableSelectionProps {
 }
 export const LegendDropdown = observer(function LegendDropdown({
   buttonContentClass, buttonLabel, icon, labelClass, menuItems, menuListClass, showCaret
-}: IVariableSelectionProps) {
+}: ILegendDropdownProps) {
   const readOnly = useContext(ReadOnlyContext);
   const [buttonContainer, setButtonContainer] = useState<HTMLDivElement | null>(null);
   const portalParentElt = buttonContainer?.closest(kGraphPortalClass) as HTMLDivElement ?? null;
