@@ -49,6 +49,15 @@ context('Diagram Tool Tile', function () {
     diagramTile.getTileTitleContainer().type(newName + '{enter}');
     diagramTile.getTileTitleText().should("contain", newName);
 
+    // Diagram tile title restore upon page reload
+    cy.wait(2000);
+    cy.reload();
+    cy.waitForLoad();
+    cy.showOnlyDocumentWorkspace();
+    diagramTile.getDiagramTile().should("exist").click();
+
+    diagramTile.getTileTitleText().should("contain", newName);
+
     // Navigator can be hidden and shown
     const navigator = () => diagramTile.getDiagramTile().find(".react-flow__minimap");
     navigator().should("exist");

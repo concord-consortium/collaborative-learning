@@ -302,15 +302,15 @@ context('Dataflow Tool Tile', function () {
 
     cy.log("verify logic operator types");
     const transformOperator = "transformOperator";
-    const transformOperatorTypes = ["Absolute Value", "Negation", "Not", "Round", "Floor", "Ceil"];
+    const transformOperatorTypes = ["Absolute Value", "Negation", "Not", "Round", "Floor", "Ceil", "Ramp"];
     dataflowToolTile.getDropdown(transformNode, transformOperator).click();
-    dataflowToolTile.getDropdownOptions(transformNode, transformOperator).should("have.length", 6);
+    dataflowToolTile.getDropdownOptions(transformNode, transformOperator).should("have.length", 7);
     dataflowToolTile.getDropdownOptions(transformNode, transformOperator).each(($tab, index, $typeList) => {
       expect($tab.text()).to.contain(transformOperatorTypes[index]);
     });
     dataflowToolTile.getDropdownOptions(transformNode, transformOperator).last().click();
     dataflowToolTile.getDropdownOptions(transformNode, transformOperator).should("have.length", 0);
-    dataflowToolTile.getDropdown(transformNode, transformOperator).contains("Ceil").should("exist");
+    dataflowToolTile.getDropdown(transformNode, transformOperator).contains("Ramp").should("exist");
 
     cy.log("verify node inputs outputs");
     dataflowToolTile.getNodeInput().should("exist");

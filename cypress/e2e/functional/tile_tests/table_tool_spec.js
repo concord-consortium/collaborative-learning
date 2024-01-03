@@ -38,6 +38,13 @@ context('Table Tool Tile', function () {
     tableToolTile.getTableTitle().click().type(title + '{enter}');
     tableToolTile.getTableTitle().should('contain', title);
 
+    // Table tile title restore upon page reload
+    cy.wait(2000);
+    cy.reload();
+    cy.waitForLoad();
+
+    tableToolTile.getTableTitle().should('contain', title);
+
     cy.log('will verify there are only two columns x & y');
     cy.get(".primary-workspace").within((workspace) => {
       tableToolTile.getColumnHeaderText().then(($headers) => {
