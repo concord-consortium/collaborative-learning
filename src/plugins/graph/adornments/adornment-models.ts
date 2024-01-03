@@ -5,7 +5,7 @@
 import {Instance, types} from "mobx-state-tree";
 import { IAxisModel } from "../imports/components/axis/models/axis-model";
 import {typedId} from "../../../utilities/js-utils";
-import {Point} from "../graph-types";
+import {GraphAttrRole, Point} from "../graph-types";
 
 export const PointModel = types.model("Point", {
     x: types.optional(types.number, NaN),
@@ -59,6 +59,14 @@ export const AdornmentModel = types.model("AdornmentModel", {
         className += `${className ? "-" : ""}${key}-${valueNoSpaces}`;
       });
       return className;
+    },
+    /**
+     * Return a list of numeric values for the given role that are contributed by this adornment.
+     * This is used in auto-scaling the graph to ensure these values are visible.
+     * Normally an empty list, but can be overridden by subclasses.
+     */
+    numericValuesForAttrRole(role: GraphAttrRole) {
+      return [] as number[];
     }
   }))
   .actions(self => ({

@@ -8,6 +8,7 @@ import { SharedVariables, SharedVariablesType } from "../../../../shared-variabl
 import { IAdornmentModel } from "../../adornment-models";
 import { kPlottedVariablesType } from "./plotted-variables-adornment-types";
 import { PlottedFunctionAdornmentModel } from "../plotted-function-adornment-model";
+import { GraphAttrRole } from "../../../graph-types";
 
 function getSharedVariables(node: IAnyStateTreeNode) {
   const sharedModelManager = getSharedModelManager(node);
@@ -116,6 +117,16 @@ export const PlottedVariablesAdornmentModel = PlottedFunctionAdornmentModel
         }
       }
       return lists;
+    }
+  }))
+  .views(self => ({
+    numericValuesForAttrRole(role: GraphAttrRole) {
+      const values = self.variableValues;
+      if (role in values) {
+        return values[role as 'x'|'y'];
+      } else {
+        return [] as number[];
+      }
     }
   }))
   .actions(self => ({

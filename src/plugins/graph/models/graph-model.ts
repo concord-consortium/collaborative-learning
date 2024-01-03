@@ -189,9 +189,12 @@ export const GraphModel = TileContentModel
      * Return list of all values for attributes of the given role across all layers.
      */
     numericValuesForAttrRole(role: GraphAttrRole): number[] {
-      const allValues: number[] = [];
-      return self.layers.reduce((acc: number[], layer) => {
+      let allValues: number[] = [];
+      allValues = self.layers.reduce((acc: number[], layer) => {
         return acc.concat(layer.config.numericValuesForAttrRole(role));
+      }, allValues);
+      return self.adornments.reduce((acc: number[], adornment) => {
+        return acc.concat(adornment.numericValuesForAttrRole(role));
       }, allValues);
     },
     /**
