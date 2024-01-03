@@ -10,12 +10,14 @@ import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
 import "./legend-dropdown.scss";
 
 interface IMenuItemInfo {
+  ariaLabel?: string;
   key: string;
   label: string | ReactElement;
   onClick?: () => void;
 }
 
 interface ILegendDropdownProps {
+  buttonAriaLabel?: string;
   buttonContentClass?: string;
   buttonLabel: string | ReactElement;
   icon?: ReactElement;
@@ -25,7 +27,7 @@ interface ILegendDropdownProps {
   showCaret?: boolean;
 }
 export const LegendDropdown = observer(function LegendDropdown({
-  buttonContentClass, buttonLabel, icon, labelClass, menuItems, menuListClass, showCaret
+  buttonAriaLabel, buttonContentClass, buttonLabel, icon, labelClass, menuItems, menuListClass, showCaret
 }: ILegendDropdownProps) {
   const readOnly = useContext(ReadOnlyContext);
   const [buttonContainer, setButtonContainer] = useState<HTMLDivElement | null>(null);
@@ -41,7 +43,7 @@ export const LegendDropdown = observer(function LegendDropdown({
         {({ isOpen }) => (
           <>
             <div ref={(e) => setButtonContainer(e)} className={labelClassNames}>
-              <MenuButton className="legend-dropdown-button" disabled={readOnly}>
+              <MenuButton aria-label={buttonAriaLabel} className="legend-dropdown-button" disabled={readOnly}>
                 <div className={classNames("button-content", buttonContentClass)}>
                   <div>{buttonLabel}</div>
                   {showCaret &&
@@ -58,6 +60,7 @@ export const LegendDropdown = observer(function LegendDropdown({
                   menuItems.map(menuItemInfo => {
                     return (
                       <MenuItem
+                        aria-label={menuItemInfo.ariaLabel}
                         key={menuItemInfo.key}
                         onClick={menuItemInfo.onClick}
                       >
