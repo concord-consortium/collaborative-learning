@@ -1,8 +1,11 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { select } from "d3";
 import { observer } from "mobx-react-lite";
+
+import { useTileModelContext } from "../../../../../components/tiles/hooks/use-tile-model-context";
 import { getSharedModelManager } from "../../../../../models/tiles/tile-environment";
 import { mstAutorun } from "../../../../../utilities/mst-autorun";
+import { SharedVariables } from "../../../../shared-variables/shared-variables";
 import { INumericAxisModel } from "../../../imports/components/axis/models/axis-model";
 import { useAxisLayoutContext } from "../../../imports/components/axis/models/axis-layout-context";
 import { ScaleNumericBaseType } from "../../../imports/components/axis/axis-types";
@@ -12,8 +15,6 @@ import { useDataConfigurationContext } from "../../../hooks/use-data-configurati
 import { curveBasis } from "../../../utilities/graph-utils";
 
 import "../plotted-function-adornment-component.scss";
-import { useTileModelContext } from "../../../../../components/tiles/hooks/use-tile-model-context";
-import { SharedVariables } from "../../../../shared-variables/shared-variables";
 
 interface IProps {
   containerId?: string
