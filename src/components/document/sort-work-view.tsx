@@ -17,16 +17,8 @@ interface IProps {
   tabSpec: NavTabModelType
 }
 
-//TODO Joe -
-//Style the dropdown menu to be #ecc9ff
-//change dropdown option from "Student" to "Name"
-//test m2s bullet point
-//make each section header flex widthable (ex: show long student names)
-//review and polish for PR
-
-
 export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ tabSpec }) {
-  const sortOptions = ["Group", "Student"];
+  const sortOptions = ["Group", "Name"];
   const stores = useStores();
   const groupsModel = stores.groups;
   const [sortBy, setSortBy] = useState("Group");

@@ -10,7 +10,6 @@
     height: 100%;
 
     .section-header{
-      width: 100%;
       height: 30px;
       position: relative;
       margin-top: 5px;
@@ -28,7 +27,6 @@
       .section-header-label{
         position: absolute;
         left: 10px;
-        width: 71px;
         height: 26px;
         border-radius: 5px;
         background-color: $classwork-purple-light-7;
@@ -38,6 +36,7 @@
         justify-content: center;
         color: var(--text-black);
         z-index: 1;
+        padding: 0px 7px;
       }
     }
   }
