@@ -183,7 +183,7 @@ function getPlottedVariableAdornments(graphModel: Partial<IGraphModel>) {
 export function heightOfVariableFunctionLegend({ graphModel }: ILegendHeightFunctionProps) {
   const plottedVariableAdornments = getPlottedVariableAdornments(graphModel);
   const plottedVariableTraces = plottedVariableAdornments.reduce((prev, adornment) => {
-    return adornment.plottedVariables.size;
+    return prev + adornment.plottedVariables.size;
   }, 0);
   // Each adornment has a header and an add variable row, plus one row for each plot
   return plottedVariableAdornments.length * (kPlottedVariableHeaderHeight + kPlottedVariableAddButtonHeight)
