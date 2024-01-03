@@ -208,5 +208,28 @@ class ChatPanel{
         }
       });
     }
+    getCommentedDocumentList() {
+      return this.getChatPanel().find('.commented-document-list');
+    }
+    documentCommentList() {
+      let i;
+      let totalCount;
+      this.getNotificationToggle().click();
+      cy.wait(3000);
+      this.getCommentedDocumentList().find('.document-box').then(((value) => {
+        totalCount = Cypress.$(value).length;
+        expect(value).to.have.length(totalCount);
+          for(i=0; i < totalCount; i++) {     
+            this.getCommentedDocumentList().find('.document-box').eq(i).click({ force: true });
+            cy.wait(3000);
+            this.addDocumentCommentAndVerify("This is " + (i+1) + " document list comment");
+            this.getDeleteMessageButton("This is " + (i+1) + " document list comment").click({ force: true });
+            this.getDeleteConfirmModalButton().click();
+            this.getNotificationToggle().click();
+            cy.wait(3000);
+          }
+        })
+      )  
+    }
 }
 export default ChatPanel;
