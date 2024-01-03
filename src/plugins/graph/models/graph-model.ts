@@ -134,7 +134,7 @@ export const GraphModel = TileContentModel
       if (plotIndex < self._pointColors.length) {
         return self._pointColors[plotIndex];
       } else {
-        return clueGraphColors[plotIndex % clueGraphColors.length];
+        return clueGraphColors[plotIndex % clueGraphColors.length].color;
       }
     },
     get pointColor() {
@@ -445,7 +445,12 @@ export const GraphModel = TileContentModel
     getColorForId(id: string) {
       const colorIndex = self._idColors.get(id);
       if (colorIndex === undefined) return "#000000";
-      return clueGraphColors[colorIndex % clueGraphColors.length];
+      return clueGraphColors[colorIndex % clueGraphColors.length].color;
+    },
+    getColorNameForId(id: string) {
+      const colorIndex = self._idColors.get(id);
+      if (colorIndex === undefined) return "black";
+      return clueGraphColors[colorIndex % clueGraphColors.length].name;
     }
   }))
   .actions(self => ({
