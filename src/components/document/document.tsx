@@ -389,8 +389,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         }
         {hasDisplayId && <div className="display-id">{displayId}</div>}
         <div className="actions">
+          {/* TODO: figure out when these conditions would not be true to make sure we rendering when needed */}
           {(!hideButtons || supportStackedTwoUpView) &&
             <div className="actions">
+              <ShareButton isShared={document.visibility === "public"} onClick={this.handleToggleVisibility} />
               {supportStackedTwoUpView && isPrimary &&
                 <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
               {supportStackedTwoUpView && isPrimary &&
@@ -417,8 +419,16 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     this.props.workspace.toggleMode();
   };
 
+  // TODO: hopefully once schema works this will work the same for personal/learningLog docs
+  // Right now, it does not toggle because document.visiblity is not set for personal/learningLog docs
   private handleToggleVisibility = () => {
     const document = this.props.document;
+    console.log("| handleToggleVisibility: ",
+      "\n document.type:          ", document.type,
+      "\n document.visibility:    ", document.visibility,
+      "\n document.isRemote:      ", document.isRemote,
+      "\n document.isPublished:   ", document.isPublished
+    );
     document.toggleVisibility();
     logDocumentEvent(LogEventName.SHOW_WORK, { document });
   };
