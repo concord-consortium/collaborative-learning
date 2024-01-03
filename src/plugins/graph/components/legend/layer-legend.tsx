@@ -183,13 +183,8 @@ export function heightOfLayerLegend({ graphModel }: ILegendHeightFunctionProps) 
 
 export const colorIdsOfLayerLegend: ColorIdListFunction = function colorIdsOfLayerLegend(graphModel) {
   let ids: string[] = [];
-  const sharedModelManager = getSharedModelManager(graphModel);
-  if (sharedModelManager?.isReady) {
-    const sharedDataSets =
-      sharedModelManager.getTileSharedModelsByType(graphModel, SharedDataSet) as SharedDataSetType[];
-    sharedDataSets.forEach(dataSet => {
-      ids = ids.concat(Array.from(dataSet.dataSet.attributes).map(attr => attr.id));
-    });
-  }
+  graphModel.layers?.forEach(layer => {
+    ids = ids.concat(layer.config.yAttributeDescriptions.map(description => description.attributeID));
+  });
   return ids;
 };
