@@ -463,6 +463,11 @@ export const GraphModel = TileContentModel
         self.setColorForIdWithoutUndo(id, colorIndex);
       }
       return clueGraphColors[colorIndex % clueGraphColors.length].color;
+    },
+    getColorNameForId(id: string) {
+      const colorIndex = self._idColors.get(id);
+      if (colorIndex === undefined) return "black";
+      return clueGraphColors[colorIndex % clueGraphColors.length].name;
     }
   }))
   .actions(self => ({

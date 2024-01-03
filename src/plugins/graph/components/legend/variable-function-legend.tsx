@@ -78,7 +78,7 @@ export const VariableFunctionLegend = observer(function(
               return (
                 <div className="legend-row" key={instanceKey}>
                   <LegendDropdown
-                    buttonAriaLabel="select trace color"
+                    buttonAriaLabel={graphModel.getColorNameForId(instanceKey)}
                     buttonLabel={<ColorKey color={graphModel.getColorForId(instanceKey)} />}
                     menuItems={
                       clueGraphColors.map((color, index) => ({
