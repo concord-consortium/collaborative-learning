@@ -65,6 +65,15 @@ export function useDocumentSyncToFirebase(
   const commonSyncEnabled = !disableFirebaseSync && contentStatus === ContentStatus.Valid;
 
   // sync visibility (public/private) for problem documents
+  /**
+   * in Firebase, the visibility is stored at
+   * [classId]/offerings/[offeringId]/users/[userId]/documents/[documentId]/visibility
+   *
+   * Lets compare that to comprable path for LL/P
+   * [classId]/users/[userId]/documents/[documentId]/...
+   *
+   * TODO: So we can actively just sync to a the spot? We need to see how we are supposed to trigger useSyncMstPropToFirebase?
+   */
   useSyncMstPropToFirebase<typeof document.visibility>({
     firebase, model: document, prop: "visibility", path: typedMetadata,
     enabled: commonSyncEnabled && !readOnly && (type === ProblemDocument),
