@@ -14,10 +14,11 @@ import { Logger } from "../lib/logger";
 import { LogEventName } from "../lib/logger-types";
 import { uniqueId } from "../utilities/js-utils";
 import { getUnitCodeFromUnitParam } from "../utilities/url-utils";
+import { getBearerToken } from "../utilities/auth-utils";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
-export const FIREBASE_JWT_QUERY = "?firebase_app=collaborative-learning";
+export const FIREBASE_APP_NAME = "collaborative-learning";
 
 export const DEV_STUDENT: StudentUser = {
   type: "student",
@@ -106,7 +107,9 @@ export const getAppMode = (appModeParam?: AppMode, token?: string, host?: string
 
 export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string, rawToken: string) => {
   return new Promise<[string, PortalJWT]>((resolve, reject) => {
-    const url = `${basePortalUrl}${PORTAL_JWT_URL_SUFFIX}`;
+    const resourceLinkIdSuffix =
+      pageUrlParams.resourceLinkId ? `?resource_link_id=${ pageUrlParams.resourceLinkId }` : "";
+    const url = `${basePortalUrl}${PORTAL_JWT_URL_SUFFIX}${resourceLinkIdSuffix}`;
     superagent
       .get(url)
       .set("Authorization", `${type} ${rawToken}`)
@@ -129,7 +132,17 @@ export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string,
 };
 
 export const getFirebaseJWTParams = (classHash?: string) => {
-  return `${FIREBASE_JWT_QUERY}${classHash ? `&class_hash=${classHash}` : ""}`;
+  const params: Record<string,string> = {
+    firebase_app: FIREBASE_APP_NAME
+  };
+  if (classHash) {
+    params.class_hash = classHash;
+  }
+  if (pageUrlParams.resourceLinkId) {
+    params.resource_link_id = pageUrlParams.resourceLinkId;
+  }
+
+  return `?${(new URLSearchParams(params)).toString()}`;
 };
 
 export const getFirebaseJWTWithBearerToken = (basePortalUrl: string, type: string,
@@ -243,7 +256,7 @@ export const authenticate = async (appMode: AppMode, appConfig: AppConfigModelTy
   const unitCode = urlParams.unit || "";
   // when launched as a report, the params will not contain the problemOrdinal
   const problemOrdinal = urlParams.problem || appConfig.defaultProblemOrdinal;
-  const bearerToken = urlParams.token;
+  const bearerToken = getBearerToken(urlParams);
   let basePortalUrl: string;
 
   let {fakeClass, fakeUser} = urlParams;
@@ -322,7 +335,8 @@ export const authenticate = async (appMode: AppMode, appConfig: AppConfigModelTy
   const [rawPortalJWT, portalJWT] = await getPortalJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken);
 
   if (!((portalJWT.user_type === "learner") || (portalJWT.user_type === "teacher"))) {
-    throw new Error("Only student and teacher logins are currently supported!");
+    throw new Error(`Only student and teacher logins are currently supported! ` +
+      `Unsupported type: ${portalJWT.user_type}`);
   }
 
   const portal = parseUrl(basePortalUrl).host;
