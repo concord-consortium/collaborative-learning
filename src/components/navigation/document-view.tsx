@@ -29,6 +29,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const documents = useLocalDocuments();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
+  console.log("\t🥩 subTab.label:", subTab.label);
   const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
   const openDocument = store.documents.getDocument(openDocumentKey) ||
     store.networkDocuments.getDocument(openDocumentKey);

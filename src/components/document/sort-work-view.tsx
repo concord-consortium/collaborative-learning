@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
-import { useStores, usePersistentUIStore } from "../../hooks/use-stores";
+import { useStores, usePersistentUIStore, useAppConfig } from "../../hooks/use-stores";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
@@ -12,6 +12,7 @@ import { isSortableType } from "../../models/document/document-types";
 
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
+import { DocumentView } from "../navigation/document-view";
 
 interface IProps {
   tabSpec: NavTabModelType
@@ -110,15 +111,42 @@ export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ t
   const persistentUI = usePersistentUIStore();
   const subTabs = tabSpec.subTabs;
   const selectedSubTab = subTabs[0];
+
+  const appConfigStore = useAppConfig();
+  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
+  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
+
+  console.log("📁 sort-work-view.tsx ------------------------");
+  console.log("➡️ navTabSpec");
+  console.log("\t🥩 tabSpec:", tabSpec);
+  console.log("\t🥩 selectedSubTab:", selectedSubTab);
+  console.log("\t🥩 subTabs:", subTabs);
+  console.log("\t🥩 tabSpec.tab:", tabSpec.tab);
+
   const [showDocument, setShowDocument] = useState(false);
 
+  //TODO: fix subTab object to look like correct
+  //needs to match subtabs object to look like section-document-or-browser
   const renderDocumentView = (subTab: ISubTabSpec) => {
-    // TODO: Next ticket render document view
+    console.log("➡️ renderDocumentView");
+    console.log("\t🥩 subTab:", subTab);
+    return (
+      <>
+        <div>hello world</div>
+        <DocumentView
+          tabSpec={tabSpec}
+          subTab={subTab}
+        />
+        {/* { renderSubTabPanel(subTab) } */}
+      </>
+    );
+
   };
 
   const handleSelectDocument = (document: DocumentModelType) => {
-    // setShowDocument(prev => !prev);
+    setShowDocument(prev => !prev);
     persistentUI.openSubTabDocument(tabSpec.tab, "None", document.key);
+
   };
 
   //******************************* Handle Debug View ***************************************
