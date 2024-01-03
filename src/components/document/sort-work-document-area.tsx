@@ -25,7 +25,7 @@ interface ISortWorkDocumentArea {
   onChangeDocument?: (shift: number, secondary?: boolean) => void;
 }
 
-export const SortWorkDocumentArea = observer(function sortWorkView({
+export const SortWorkDocumentArea: React.FC<ISortWorkDocumentArea> = observer(function SortWorkDocumentArea({
                        tabSpec,
                        tab,
                       }: ISortWorkDocumentArea){
