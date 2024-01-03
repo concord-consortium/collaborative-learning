@@ -148,7 +148,7 @@ export const GraphModel = TileContentModel
       if (plotIndex < self._pointColors.length) {
         return self._pointColors[plotIndex];
       } else {
-        return clueGraphColors[plotIndex % clueGraphColors.length];
+        return clueGraphColors[plotIndex % clueGraphColors.length].color;
       }
     },
     get pointColor() {
@@ -324,24 +324,14 @@ export const GraphModel = TileContentModel
         self.layers.push(initialLayer);
         initialLayer.configureUnlinkedLayer();
       }
-    },
+    }
   }))
   .actions(self => ({
-    // Returns an objet's color, given its id.
-    // This is an action because if the id doesn't have a specified color, this will assign one to it.
-    getColorForId(id: string) {
-      let colorIndex = self._idColors.get(id);
-      if (colorIndex === undefined) {
-        // This function gets called automatically in response to plots being added to a graph.
-        // withoutUndo prevents a second action being added to the undo stack when this happens.
-        withoutUndo();
-        colorIndex = self.nextColor;
-        self._idColors.set(id, colorIndex);
-      }
-      return clueGraphColors[colorIndex % clueGraphColors.length];
-    },
     removeColorForId(id: string) {
       self._idColors.delete(id);
+    },
+    setColorForId(id: string, colorIndex: number) {
+      self._idColors.set(id, colorIndex);
     },
     setAxis(place: AxisPlace, axis: IAxisModelUnion) {
       self.axes.set(place, axis);
@@ -459,6 +449,25 @@ export const GraphModel = TileContentModel
       for (const layer of self.layers) {
         layer.clearAutoAssignedAttributes();
       }
+    },
+    setColorForIdWithoutUndo(id: string, colorIndex: number) {
+      withoutUndo();
+      self.setColorForId(id, colorIndex);
+    }
+  }))
+  .views(self => ({
+    getColorForId(id: string) {
+      let colorIndex = self._idColors.get(id);
+      if (colorIndex === undefined) {
+        colorIndex = self.nextColor;
+        self.setColorForIdWithoutUndo(id, colorIndex);
+      }
+      return clueGraphColors[colorIndex % clueGraphColors.length].color;
+    },
+    getColorNameForId(id: string) {
+      const colorIndex = self._idColors.get(id);
+      if (colorIndex === undefined) return "black";
+      return clueGraphColors[colorIndex % clueGraphColors.length].name;
     }
   }))
   .actions(self => ({
