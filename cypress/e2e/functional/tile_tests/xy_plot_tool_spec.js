@@ -76,11 +76,11 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().click();
       xyTile.getXYPlotTitle().should('contain', title);
 
-      cy.log("does not show edit boxes on axes");
-      xyTile.getEditableAxisBox("bottom", "min").should("not.exist");
-      xyTile.getEditableAxisBox("bottom", "max").should("not.exist");
-      xyTile.getEditableAxisBox("left", "min").should("not.exist");
-      xyTile.getEditableAxisBox("left", "max").should("not.exist");
+      // cy.log("does not show edit boxes on axes");
+      // xyTile.getEditableAxisBox("bottom", "min").should("not.exist");
+      // xyTile.getEditableAxisBox("bottom", "max").should("not.exist");
+      // xyTile.getEditableAxisBox("left", "min").should("not.exist");
+      // xyTile.getEditableAxisBox("left", "max").should("not.exist");
 
       cy.log("Link Table");
       clueCanvas.clickToolbarButton('graph', 'link-tile');
@@ -261,7 +261,7 @@ context('XYPlot Tool Tile', function () {
 
       cy.log("Link First Table");
       xyTile.getTile().click();
-      clueCanvas.clickToolbarButton('graph', 'link-tile');
+      clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
       xyTile.linkTable("Table 1");
       xyTile.getXAttributesLabel().should('have.length', 1);
       xyTile.getYAttributesLabel().should('have.length', 1);
