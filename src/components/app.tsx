@@ -76,7 +76,9 @@ function resolveAppMode(
           }
         }
       })
-      .catch(error => ui.setError(error));
+      .catch(error => {
+        return ui.setError(error);
+      });
   }
 }
 

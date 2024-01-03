@@ -15,6 +15,7 @@ import { DBCommentsListener } from "./db-comments-listener";
 import { DBStarsListener } from "./db-stars-listener";
 import { BaseListener } from "./base-listener";
 import { DBDocumentsContentListener } from "./db-docs-content-listener";
+import { DBStudentPersonalDocsListener } from "./db-student-personal-docs-listener";
 
 export class DBListeners extends BaseListener {
   @observable public isListening = false;
@@ -26,6 +27,7 @@ export class DBListeners extends BaseListener {
   private personalDocumentsListener: DBOtherDocumentsListener;
   private learningLogsListener: DBOtherDocumentsListener;
   private publicationListener: DBPublicationsListener;
+  private studentPersonalDocsListener: DBStudentPersonalDocsListener;
   private supportsListener: DBSupportsListener;
   private commentsListener: DBCommentsListener;
   private starsListener: DBStarsListener;
@@ -41,6 +43,7 @@ export class DBListeners extends BaseListener {
     this.personalDocumentsListener = new DBOtherDocumentsListener(db, PersonalDocument);
     this.learningLogsListener = new DBOtherDocumentsListener(db, LearningLogDocument);
     this.publicationListener = new DBPublicationsListener(db);
+    this.studentPersonalDocsListener = new DBStudentPersonalDocsListener(db, PersonalDocument);
     this.supportsListener = new DBSupportsListener(db);
     this.commentsListener = new DBCommentsListener(db);
     this.starsListener = new DBStarsListener(db);
@@ -57,6 +60,7 @@ export class DBListeners extends BaseListener {
       this.personalDocumentsListener.start(),
       this.learningLogsListener.start(),
       this.publicationListener.start(),
+      this.studentPersonalDocsListener.start(),
       this.supportsListener.start()
     ]);
     // start listeners that depend on documents
@@ -77,6 +81,7 @@ export class DBListeners extends BaseListener {
     this.commentsListener.stop();
     this.supportsListener.stop();
     this.publicationListener.stop();
+    this.studentPersonalDocsListener.stop();
     this.learningLogsListener.stop();
     this.personalDocumentsListener.stop();
     this.problemDocumentsListener.stop();

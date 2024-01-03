@@ -42,6 +42,8 @@ import HoldPreviousArrowIcon from "../../assets/icons/control/hold-previous.svg"
 import HoldCurrentArrowIcon from "../../assets/icons/control/hold-this.svg";
 import HoldZeroArrowIcon from "../../assets/icons/control/hold-zero.svg";
 
+import { isFiniteNumber } from "../../../../utilities/math-utils";
+
 export const kMaxNodeValues = 16;
 
 interface NodeNameValuePair {
@@ -170,6 +172,30 @@ export const NodeOperationTypes = [
     type: "transform",
     method: (n1: number, n2: number) => Math.ceil(n1),
     numberSentence: (n1: string, n2: string) => `ceil(${n1}) = `,
+    icon: EmgIcon
+  },
+  {
+    name: "Ramp",
+    type: "transform",
+    method: (n1: number, n2: number, prevValue?: number) => {
+      if (!isFiniteNumber(prevValue)) return n1;
+
+      const delta = n1 - prevValue;
+      const isSteep = Math.abs(delta) > 0.1 * prevValue;
+
+      if (delta > 0) {
+        const increaseBy = n1 * 0.1;
+        return isSteep ? prevValue + increaseBy : n1;
+      }
+
+      if (delta < 0) {
+        const decreaseBy = prevValue * 0.1;
+        return isSteep ? prevValue - decreaseBy : n1;
+      }
+
+      return n1;
+    },
+    numberSentence: (n1: string, n2: string) => `${n1} → `,
     icon: EmgIcon
   },
   {
