@@ -78,6 +78,7 @@ export const GraphLayerModel = types
         const isValidYAttr = yAttrId && !!data?.attrFromID(yAttrId);
 
         if (!isValidXAttr && !isValidYAttr) {
+          console.log('Doing auto-assign of x/y');
           this.autoAssignAttributeID("bottom", "x", data?.id ?? "", data?.attributes[0].id || '');
           if (attributeCount > 1) {
             this.autoAssignAttributeID("left", "y", data?.id ?? "", data?.attributes[1].id || '');
