@@ -82,6 +82,14 @@
     padding: 0 8px 0 0;
     text-align: left;
 
+    &.disabled {
+      opacity: .3;
+
+      &:hover {
+        background-color: $charcoal-light-6;
+      }
+    }
+
     &:hover {
       background-color: $workspace-teal-light-4;
     }

@@ -169,10 +169,8 @@ function heightOfOneLayerLegend(layer: IGraphLayerModel) {
   if (!layer.config.dataset) return 0;
 
   const yAttrDescriptions = layer.config.yAttributeDescriptions.length;
-  // Only include the add series button if we have unused attributes
-  const attributeCount = layer.config.dataset?.attributes?.length ?? 0;
-  const addSeriesButton = (yAttrDescriptions + 1) < attributeCount ? 1 : 0;
-  const rows = Math.ceil((yAttrDescriptions + addSeriesButton) / 2);
+  // The extra 1 is for the add series button, which is present but disabled if there are no more attributes to add
+  const rows = Math.ceil((yAttrDescriptions + 1) / 2);
   return kLayerLegendHeaderHeight + kLayerLegendRowHeight * rows;
 }
 export function heightOfLayerLegend({ graphModel }: ILegendHeightFunctionProps) {
