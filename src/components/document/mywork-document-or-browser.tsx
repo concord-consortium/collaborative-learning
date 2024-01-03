@@ -13,6 +13,10 @@ interface IProps extends IEditableDocumentContentProps {
 }
 
 export const MyWorkDocumentOrBrowser: React.FC<IProps> = props => {
+
+  console.log("📁 mywork-document-or-browser.tsx ------------------------");
+  console.log("➡️ MyWorkDocumentOrBrowser");
+
   const navTabs = useAppConfig().navTabs;
   const myWorkTabSpec = navTabs.getNavTabSpec(ENavTab.kMyWork);
   const { showBrowser, document, onSelectNewDocument, onSelectDocument, ...others } = props;

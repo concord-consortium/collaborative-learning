@@ -25,8 +25,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     { tabSpec, isChatOpen }) {
   const persistentUI = usePersistentUIStore();
 
-  console.log("📁 section-document-or-browser.tsx ------------------------");
-  console.log("\t🥩 tabSpec:", tabSpec);
+  // console.log("📁 section-document-or-browser.tsx ------------------------");
+  // console.log("\t🥩 tabSpec:", tabSpec);
   const store = useStores();
   const appConfigStore = useAppConfig();
   const problemStore = useProblemStore();
@@ -88,6 +88,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const renderDocumentBrowserView = (subTab: ISubTabSpec) => {
+    // console.log("➡️ renderDocumentBrowserView");
+
     const openDocumentKey = tabState?.openDocuments.get(subTab.label);
     const classHash = classStore.classHash;
     return (
@@ -115,6 +117,9 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const renderDocumentView = (subTab: ISubTabSpec) => {
+    // console.log("📁 section-document-or-browser.tsx ------------------------");
+    // console.log("➡️ renderDocumentView");
+
     const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
                             store.networkDocuments.getDocument(openDocumentKey);

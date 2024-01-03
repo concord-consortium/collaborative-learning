@@ -1,30 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
 import { useStores, usePersistentUIStore, useAppConfig } from "../../hooks/use-stores";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
-import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
+import { NavTabModelType } from "../../models/view/nav-tabs";
 import { DocumentContextReact } from "./document-context";
 import { DEBUG_SORT_WORK } from "../../lib/debug";
 import { isSortableType } from "../../models/document/document-types";
 
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
-import { DocumentView } from "../navigation/document-view";
+import { SortWorkDocumentArea } from "./sort-work-document-area";
 
 interface IProps {
   tabSpec: NavTabModelType
 }
-
-//TODO Joe -
-//Style the dropdown menu to be #ecc9ff
-//change dropdown option from "Student" to "Name"
-//test m2s bullet point
-//make each section header flex widthable (ex: show long student names)
-//review and polish for PR
-
 
 export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ tabSpec }) {
   const sortOptions = ["Group", "Student"];
@@ -109,49 +101,42 @@ export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ t
 
   //******************************* Show Document View ***************************************
   const persistentUI = usePersistentUIStore();
-  const subTabs = tabSpec.subTabs;
-  const selectedSubTab = subTabs[0];
-
+  const store = useStores();
   const appConfigStore = useAppConfig();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
+  //or you can pass below tabSpec.tab === "sort-work"
+
+
 
   console.log("📁 sort-work-view.tsx ------------------------");
   console.log("➡️ navTabSpec");
   console.log("\t🥩 tabSpec:", tabSpec);
   console.log("\t🥩 navTabSpec:", navTabSpec);
-
-  console.log("\t🥩 selectedSubTab:", selectedSubTab);
-  console.log("\t🥩 subTabs:", subTabs);
   console.log("\t🥩 tabSpec.tab:", tabSpec.tab);
 
-  //how is subtabs created?
-
   const [showDocument, setShowDocument] = useState(false);
+  const [selectedDocumentKey, setSelectedDocumentKey] = useState("");
+  const [openDocument, setOpenDocument] = useState<DocumentModelType | null>(null);
 
-  //TODO: fix subTab object to look like correct
-  //needs to match subtabs object to look like section-document-or-browser
-  const renderDocumentView = (subTab: ISubTabSpec) => {
-    console.log("➡️ renderDocumentView");
-    console.log("\t🥩 subTab:", subTab);
-    return (
-      <>
-        <div>hello world</div>
-        <DocumentView
-          tabSpec={tabSpec}
-          subTab={subTab}
-        />
-        {/* { renderSubTabPanel(subTab) } */}
-      </>
-    );
-
-  };
-
+  //<SortWorkDocumentView> //
+  //persistentUI.tabs state (?) - tabs model ...  open documents(?)
   const handleSelectDocument = (document: DocumentModelType) => {
+    console.log("➡️ handleSelectDocument");
     setShowDocument(prev => !prev);
-    persistentUI.openSubTabDocument(tabSpec.tab, "None", document.key);
-
+    persistentUI.openSubTabDocument(tabSpec.tab, "sort-work", document.key);
+    setSelectedDocumentKey(document.key); // Update the state
   };
+
+  useEffect(()=>{
+    console.log("im in here!!!");
+    console.log("selectedDocumentKey", selectedDocumentKey);
+    const document = store.documents.getDocument(selectedDocumentKey) ||
+                     store.networkDocuments.getDocument(selectedDocumentKey);
+    setOpenDocument(document ?? null); // The '??' operator will set the value to null if document is undefined
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[selectedDocumentKey]);
+
 
   //******************************* Handle Debug View ***************************************
   const renderDebugView = () => {
@@ -167,13 +152,20 @@ export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ t
     });
   };
 
+
+
   return (
     <div key="sort-work-view" className="sort-work-view">
       <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
       <div className="documents-panel">
         <div className="tab-panel-documents-section">
-          {showDocument ?
-            renderDocumentView(selectedSubTab) :
+          {
+            (showDocument && openDocument) ?
+            <SortWorkDocumentArea
+              openDocument={openDocument}
+              tab={"sort-work"}
+            />
+            :
             sortedDocuments.map((sortedSection, idx) => {
               return (
                 <div className="sorted-sections" key={`sortedSection-${idx}`}>

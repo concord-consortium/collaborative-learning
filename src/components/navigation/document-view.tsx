@@ -21,6 +21,10 @@ interface IProps {
 }
 //TODO: Need to refactor this if we want to deploy to all tabs
 export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IProps) {
+  console.log("➡️ DocumentView");
+  console.log("📁 document-view.tsx ------------------------");
+  // console.log("\t🥩 subTab:", subTab);
+  // console.log("\t🥩 tabSpec:", tabSpec);
   const persistentUI = usePersistentUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
@@ -29,7 +33,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const documents = useLocalDocuments();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
-  console.log("\t🥩 subTab.label:", subTab.label);
+  // console.log("\t🥩 subTab.label:", subTab.label);
   const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
   const openDocument = store.documents.getDocument(openDocumentKey) ||
     store.networkDocuments.getDocument(openDocumentKey);
@@ -39,7 +43,6 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const isStarredTab = subTab.label === "Starred";
   const noValidDocument = !openDocument || openDocument.getProperty("isDeleted");
   const noSecondaryDocument = !openSecondaryDocument || openSecondaryDocument.getProperty("isDeleted");
-
   const documentTypes: DocumentType[] = tabSpec.tab === "class-work"
                                           ? ["publication"]
                                           : tabSpec.tab === "my-work" && subTab.label === "Starred"
@@ -205,6 +208,11 @@ interface IDocumentAreaProps {
 
 const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocument,
     hasSecondaryDocument, hideLeftFlipper, hideRightFlipper, onChangeDocument}: IDocumentAreaProps) => {
+  console.log("\t🥩 openDocument:", openDocument);
+  console.log("\t🥩 subTab:", subTab);
+  console.log("\t🥩 tab:", tab);
+  console.log("\t🥩 sectionClass:", sectionClass);
+
   const ui = useUIStore();
   const persistentUI = usePersistentUIStore();
   const user = useUserStore();
@@ -230,8 +238,12 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   // knew the state of playback controls. It no longer knows that state, so now
   // the edit button is shown all of the time.
   // PT Story: https://www.pivotaltracker.com/story/show/183416176
+
+
   const editButton = (type: string, sClass: {secondary: boolean | undefined; primary: boolean | undefined} | string,
                       document: DocumentModelType) => {
+
+    //TODO: keep this editButton component, if owner is me then render the button
     return (
       (type === "my-work") || (type === "learningLog")
         ?
@@ -269,7 +281,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
         document={openDocument}
         readOnly={true}
         showPlayback={showPlayback}
-        fullHeight={subTab.label !== "Starred" }
+        fullHeight={subTab.label !== "Starred" } //pass true in new component
       />
       {onChangeDocument && !hideRightFlipper &&
         <ScrollButton side="right" theme={tab} className="document-flipper"
