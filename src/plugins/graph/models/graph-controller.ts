@@ -72,7 +72,7 @@ export class GraphController {
 
   initializeGraph() {
     const {graphModel, layout} = this;
-    console.log("initializing graph", graphModel);
+
     // handle any attributes auto-assigned before our handlers were in place
     if (graphModel?.autoAssignedAttributes.length) {
       graphModel.autoAssignedAttributes.forEach(({ layer, place, role, dataSetID, attrID }) => {
