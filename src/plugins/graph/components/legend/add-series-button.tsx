@@ -30,7 +30,7 @@ export const AddSeriesButton = observer(function AddSeriesButton() {
           <AddSeriesIcon/>
         </div>
         <div className="add-series-label">
-          Add Series
+          Add series
         </div>
       </button>
     );
