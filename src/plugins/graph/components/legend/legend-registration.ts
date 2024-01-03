@@ -19,8 +19,8 @@ export const multiLegendParts: IMultiLegendPart[] = [
   }
 ];
 
-export function registerMultiLegendPart(part: IMultiLegendPart, start?: boolean) {
-  if (start) {
+export function registerMultiLegendPart(part: IMultiLegendPart, prepend?: boolean) {
+  if (prepend) {
     multiLegendParts.unshift(part);
   } else {
     multiLegendParts.push(part);
