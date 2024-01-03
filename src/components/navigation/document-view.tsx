@@ -24,7 +24,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   console.log("➡️ DocumentView");
   console.log("📁 document-view.tsx ------------------------");
   // console.log("\t🥩 subTab:", subTab);
-  // console.log("\t🥩 tabSpec:", tabSpec);
+  console.log("\t🥩 tabSpec:", tabSpec);
   const persistentUI = usePersistentUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
@@ -32,6 +32,8 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const queryClient = useQueryClient();
   const documents = useLocalDocuments();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
+  console.log("\t🥩 tabSpec.tab:", tabSpec.tab);
+
   const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
   // console.log("\t🥩 subTab.label:", subTab.label);
   const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";

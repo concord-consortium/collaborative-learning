@@ -1,18 +1,22 @@
 import React from "react";
 import classNames from "classnames";
 import { useAppConfig, useProblemStore,
-  usePersistentUIStore, useUserStore, useClassStore, useUIStore } from "../../hooks/use-stores";
+  usePersistentUIStore, useUserStore, useClassStore, useUIStore, useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { EditableDocumentContent } from "./editable-document-content";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
+import { NavTabModelType } from "../../models/view/nav-tabs";
+import { observer } from "mobx-react";
 
 
 interface ISortWorkDocumentArea {
   // tabSpec: NavTabModelType;
-  openDocument: DocumentModelType;
+  // openDocument: DocumentModelType;
   // subTab: ISubTabSpec;
   tab: string;
+  tabSpec: NavTabModelType;
+
   // sectionClass: string;
   isSecondaryDocument?: boolean;
   hasSecondaryDocument?: boolean;
@@ -21,18 +25,25 @@ interface ISortWorkDocumentArea {
   onChangeDocument?: (shift: number, secondary?: boolean) => void;
 }
 
-export const SortWorkDocumentArea = ({
-                          // tabSpec,
-                          openDocument,
-                      //  subTab,
+export const SortWorkDocumentArea = observer(function sortWorkView({
+                       tabSpec,
                        tab,
-                      }: ISortWorkDocumentArea) => {
+                      }: ISortWorkDocumentArea){
+  const store = useStores();
   const ui = useUIStore();
   const persistentUI = usePersistentUIStore();
   const user = useUserStore();
   const appConfig = useAppConfig();
   const classStore = useClassStore();
   const problemStore = useProblemStore();
+  const appConfigStore = useAppConfig();
+
+  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
+  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
+  const openDocumentKey = tabState?.openDocuments.get("sort-work") || "";
+  const openDocument = store.documents.getDocument(openDocumentKey) ||
+  store.networkDocuments.getDocument(openDocumentKey);
+
   const showPlayback = user.type && !openDocument?.isPublished
                           ? appConfig.enableHistoryRoles.includes(user.type) : false;
   const getDisplayTitle = (document: DocumentModelType) => {
@@ -40,7 +51,8 @@ export const SortWorkDocumentArea = ({
     const documentTitle = getDocumentDisplayTitle(document, appConfig, problemStore);
     return {owner: documentOwner ? documentOwner.fullName : "", title: documentTitle};
   };
-  const displayTitle = getDisplayTitle(openDocument);
+
+  const displayTitle = openDocument && getDisplayTitle(openDocument);
 
   function handleEditClick(document: DocumentModelType) {
     persistentUI.problemWorkspace.setPrimaryDocument(document);
@@ -82,16 +94,17 @@ export const SortWorkDocumentArea = ({
       <div className={classNames("document-header", tab, sectionClass, sideClasses)}
             onClick={() => ui.setSelectedTile()}>
         <div className="document-title">
-          {(displayTitle.owner && tab === "class-work")
+          {(displayTitle && displayTitle.owner && tab === "class-work")
               && <span className="document-owner">{displayTitle.owner}: </span>}
           <span className={classNames("document-title", {"class-work": tab === "class-work"})}>
-            {displayTitle.title}
+            {displayTitle && displayTitle.title}
           </span>
         </div>
-        {(!openDocument.isRemote)
+        {(openDocument && !openDocument.isRemote)
             && editButton(tab, sectionClass || sideClasses, openDocument)}
       </div>
-
+     {
+      openDocument &&
       <EditableDocumentContent
         mode={"1-up"}
         isPrimary={false}
@@ -100,6 +113,7 @@ export const SortWorkDocumentArea = ({
         showPlayback={showPlayback}
         fullHeight={true} //pass true in new component
       />
+     }
     </div>
   );
-};
+});

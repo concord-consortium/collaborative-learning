@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
-import { useStores, usePersistentUIStore, useAppConfig } from "../../hooks/use-stores";
+import { useStores, usePersistentUIStore } from "../../hooks/use-stores";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
@@ -101,42 +101,12 @@ export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ t
 
   //******************************* Show Document View ***************************************
   const persistentUI = usePersistentUIStore();
-  const store = useStores();
-  const appConfigStore = useAppConfig();
-  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
-  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
-  //or you can pass below tabSpec.tab === "sort-work"
-
-
-
-  console.log("📁 sort-work-view.tsx ------------------------");
-  console.log("➡️ navTabSpec");
-  console.log("\t🥩 tabSpec:", tabSpec);
-  console.log("\t🥩 navTabSpec:", navTabSpec);
-  console.log("\t🥩 tabSpec.tab:", tabSpec.tab);
-
   const [showDocument, setShowDocument] = useState(false);
-  const [selectedDocumentKey, setSelectedDocumentKey] = useState("");
-  const [openDocument, setOpenDocument] = useState<DocumentModelType | null>(null);
 
-  //<SortWorkDocumentView> //
-  //persistentUI.tabs state (?) - tabs model ...  open documents(?)
   const handleSelectDocument = (document: DocumentModelType) => {
-    console.log("➡️ handleSelectDocument");
     setShowDocument(prev => !prev);
     persistentUI.openSubTabDocument(tabSpec.tab, "sort-work", document.key);
-    setSelectedDocumentKey(document.key); // Update the state
   };
-
-  useEffect(()=>{
-    console.log("im in here!!!");
-    console.log("selectedDocumentKey", selectedDocumentKey);
-    const document = store.documents.getDocument(selectedDocumentKey) ||
-                     store.networkDocuments.getDocument(selectedDocumentKey);
-    setOpenDocument(document ?? null); // The '??' operator will set the value to null if document is undefined
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[selectedDocumentKey]);
-
 
   //******************************* Handle Debug View ***************************************
   const renderDebugView = () => {
@@ -152,17 +122,15 @@ export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ t
     });
   };
 
-
-
   return (
     <div key="sort-work-view" className="sort-work-view">
       <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
       <div className="documents-panel">
         <div className="tab-panel-documents-section">
           {
-            (showDocument && openDocument) ?
+            showDocument ?
             <SortWorkDocumentArea
-              openDocument={openDocument}
+              tabSpec={tabSpec}
               tab={"sort-work"}
             />
             :
