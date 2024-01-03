@@ -87,7 +87,7 @@ export const SingleVariableFunctionLegend = observer(function SingleVariableFunc
               return (
                 <div className="legend-row" key={instanceKey}>
                   <LegendDropdown
-                    buttonAriaLabel={graphModel.getColorNameForId(instanceKey)}
+                    buttonAriaLabel={`Color: ${graphModel.getColorNameForId(instanceKey)}`}
                     buttonLabel={<ColorKey color={graphModel.getColorForId(instanceKey)} />}
                     menuItems={
                       clueGraphColors.map((color, index) => ({
