@@ -70,23 +70,28 @@ export function useDocumentSyncToFirebase(
     enabled: commonSyncEnabled && !readOnly && (type === ProblemDocument),
     options: {
       onSuccess: (data, visibility) => {
+        console.log("| useDocumentSyncToFirebase | syncing VISIBILITY |", visibility);
         debugLog(`DEBUG: Updated document visibility for ${type} document ${key}:`, visibility);
       },
       onError: (err, visibility) => {
+        console.log("| useDocumentSyncToFirebase | FAILING to sync VISIBILITY |", visibility);
         console.warn(`ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
       }
     }
   });
 
   // sync title for personal and learning log documents
+  // TODO: sync visibility here? in a similar hook?
   useSyncMstPropToFirebase<typeof document.title>({
     firebase, model: document, prop: "title", path: typedMetadata,
     enabled: commonSyncEnabled && !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
     options: {
       onSuccess: (data, title) => {
+        console.log("| useDocumentSyncToFirebase | syncing PERSONAL TITLE |", title);
         debugLog(`DEBUG: Updated document title for ${type} document ${key}:`, title);
       },
       onError: (err, title) => {
+        console.log("| useDocumentSyncToFirebase | FAILING TO SYNC PERSONAL TITLE |", title);
         console.warn(`ERROR: Failed to update document title for ${type} document ${key}:`, title);
       }
     }
@@ -98,6 +103,7 @@ export function useDocumentSyncToFirebase(
     enabled: commonSyncEnabled && !readOnly && [ProblemDocument, PersonalDocument, LearningLogDocument].includes(type),
     options: {
       onSuccess: (data, properties) => {
+        console.log("| useDocumentSyncToFirebase | onSuccess | properties |", properties);
         debugLog(`DEBUG: Updated document properties for ${type} document ${key}:`, JSON.stringify(properties));
       },
       onError: (err, properties) => {

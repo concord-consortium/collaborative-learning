@@ -380,6 +380,7 @@ export class DB {
   }
 
   public createDocument(params: { type: DBDocumentType, content?: string }) {
+    console.log("| createDocument!", params.type);
     const { type, content } = params;
     const {user} = this.stores;
     return new Promise<{document: DBDocument, metadata: DBDocumentMetadata}>((resolve, reject) => {
@@ -401,7 +402,7 @@ export class DB {
         case PersonalDocument:
         case LearningLogDocument:
         case PersonalPublication:
-        case LearningLogPublication:
+        case LearningLogPublication: // TODO: notice we create special metadata for these
           metadata = {version, self, createdAt, type};
           break;
         case PlanningDocument:
