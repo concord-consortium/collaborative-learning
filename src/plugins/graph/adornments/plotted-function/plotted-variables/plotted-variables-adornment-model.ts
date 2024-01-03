@@ -83,6 +83,9 @@ export const PlottedVariablesAdornmentModel = PlottedFunctionAdornmentModel
     type: types.optional(types.literal(kPlottedVariablesType), kPlottedVariablesType)
   })
   .views(self => ({
+    get instanceKeys() {
+      return Array.from(self.plottedVariables.keys());
+    },
     get sharedVariables() {
       return getSharedVariables(self);
     }

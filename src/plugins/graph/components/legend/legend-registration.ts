@@ -1,16 +1,22 @@
 import { FunctionComponent } from "react";
 
-import { heightOfLayerLegend, LayerLegend, layerLegendType } from "./layer-legend";
-import { ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
+import { colorIdsOfLayerLegend, heightOfLayerLegend, LayerLegend, layerLegendType } from "./layer-legend";
+import { ColorIdListFunction, ILegendPartProps, LegendHeightFunction } from "./legend-types";
 
 interface IMultiLegendPart {
   component: FunctionComponent<ILegendPartProps>;
-  getHeight: (props: ILegendHeightFunctionProps) => number;
+  getHeight: LegendHeightFunction;
+  getColorIdList: ColorIdListFunction;
   type: string;
 }
 
 export const multiLegendParts: IMultiLegendPart[] = [
-  { component: LayerLegend, getHeight: heightOfLayerLegend, type: layerLegendType }
+  {
+    component: LayerLegend,
+    getHeight: heightOfLayerLegend,
+    getColorIdList: colorIdsOfLayerLegend,
+    type: layerLegendType
+  }
 ];
 
 export function registerMultiLegendPart(part: IMultiLegendPart, start?: boolean) {

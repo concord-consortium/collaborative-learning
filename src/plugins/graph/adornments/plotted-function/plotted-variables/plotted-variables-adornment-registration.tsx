@@ -1,6 +1,6 @@
 import { registerMultiLegendPart } from "../../../components/legend/legend-registration";
 import {
-  heightOfVariableFunctionLegend, VariableFunctionLegend, variableFunctionLegendType
+  colorIdsOfVariableFunctionLegend, heightOfVariableFunctionLegend, VariableFunctionLegend, variableFunctionLegendType
 } from "../../../components/legend/variable-function-legend";
 import { registerAdornmentComponentInfo } from "../../adornment-component-info";
 import { registerAdornmentContentInfo } from "../../adornment-content-info";
@@ -28,5 +28,6 @@ registerAdornmentComponentInfo({
 registerMultiLegendPart({
   component: VariableFunctionLegend,
   getHeight: heightOfVariableFunctionLegend,
+  getColorIdList: colorIdsOfVariableFunctionLegend,
   type: variableFunctionLegendType
 }, true);

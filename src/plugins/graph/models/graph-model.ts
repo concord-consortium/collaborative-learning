@@ -32,6 +32,7 @@ import { GraphLayerModel, IGraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-model";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
+import { multiLegendParts } from "../components/legend/legend-registration";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -442,11 +443,8 @@ export const GraphModel = TileContentModel
   }))
   .views(self => ({
     getColorForId(id: string) {
-      let colorIndex = self._idColors.get(id);
-      if (colorIndex === undefined) {
-        colorIndex = self.nextColor;
-        self.setColorForIdWithoutUndo(id, colorIndex);
-      }
+      const colorIndex = self._idColors.get(id);
+      if (colorIndex === undefined) return "#000000";
       return clueGraphColors[colorIndex % clueGraphColors.length];
     }
   }))
@@ -565,6 +563,22 @@ export const GraphModel = TileContentModel
           }
         ));
       }
+
+      // Automatically asign colors to anything that might need them.
+      addDisposer(self, reaction(
+        () => {
+          let ids: string[] = [];
+          multiLegendParts.forEach(part => ids = ids.concat(part.getColorIdList(self)));
+          return ids;
+        },
+        (ids) => {
+          ids.forEach(id => {
+            if (!self._idColors.has(id)) {
+              self.setColorForIdWithoutUndo(id, self.nextColor);
+            }
+          });
+        }
+      ));
     },
     setDataConfigurationReferences() {
       // Updates pre-existing DataConfiguration objects that don't have the now-required references

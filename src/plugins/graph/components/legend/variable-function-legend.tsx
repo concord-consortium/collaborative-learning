@@ -9,8 +9,9 @@ import {
   IPlottedVariablesAdornmentModel, isPlottedVariablesAdornment
 } from "../../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
+import { IGraphModel } from "../../models/graph-model";
 import { LegendDropdown } from "./legend-dropdown";
-import { ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
+import { ColorIdListFunction, ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
 import { VariableSelection } from "./variable-selection";
 
 import AddSeriesIcon from "../../imports/assets/add-series-icon.svg";
@@ -169,9 +170,16 @@ export const VariableFunctionLegend = observer(function VariableFunctionsLegend(
   );
 });
 
+function getPlottedVariableAdornments(graphModel: Partial<IGraphModel>) {
+  if (graphModel.adornments) {
+    return graphModel.adornments
+      .filter(adornment => isPlottedVariablesAdornment(adornment)) as IPlottedVariablesAdornmentModel[];
+  }
+  return [];
+}
+
 export function heightOfVariableFunctionLegend({ graphModel }: ILegendHeightFunctionProps) {
-  const plottedVariableAdornments = graphModel.adornments
-    .filter(adornment => isPlottedVariablesAdornment(adornment)) as IPlottedVariablesAdornmentModel[];
+  const plottedVariableAdornments = getPlottedVariableAdornments(graphModel);
   const plottedVariableTraces = plottedVariableAdornments.reduce((prev, adornment) => {
     return adornment.plottedVariables.size;
   }, 0);
@@ -179,3 +187,11 @@ export function heightOfVariableFunctionLegend({ graphModel }: ILegendHeightFunc
   return plottedVariableAdornments.length * (kPlottedVariableHeaderHeight + kPlottedVariableAddButtonHeight)
     + plottedVariableTraces * kPlottedVariableRowHeight;
 }
+
+export const colorIdsOfVariableFunctionLegend: ColorIdListFunction =
+function colorIdsOfVariableFunctionLegend(graphModel) {
+  let ids: string[] = [];
+  const plottedVariableAdornments = getPlottedVariableAdornments(graphModel);
+  plottedVariableAdornments.forEach(adornment => ids = ids.concat(adornment.instanceKeys));
+  return ids;
+};

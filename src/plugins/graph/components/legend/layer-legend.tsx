@@ -9,7 +9,7 @@ import { getSharedModelManager } from "../../../../models/tiles/tile-environment
 import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../../../models/shared/shared-data-set";
 import { DataConfigurationContext, useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { IGraphLayerModel } from "../../models/graph-layer-model";
-import { ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
+import { ColorIdListFunction, ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import XAxisIcon from "../../assets/x-axis-icon.svg";
@@ -180,3 +180,16 @@ export function heightOfLayerLegend({ graphModel }: ILegendHeightFunctionProps) 
     return prev + heightOfOneLayerLegend(layer);
   }, 0);
 }
+
+export const colorIdsOfLayerLegend: ColorIdListFunction = function colorIdsOfLayerLegend(graphModel) {
+  let ids: string[] = [];
+  const sharedModelManager = getSharedModelManager(graphModel);
+  if (sharedModelManager?.isReady) {
+    const sharedDataSets =
+      sharedModelManager.getTileSharedModelsByType(graphModel, SharedDataSet) as SharedDataSetType[];
+    sharedDataSets.forEach(dataSet => {
+      ids = ids.concat(Array.from(dataSet.dataSet.attributes).map(attr => attr.id));
+    });
+  }
+  return ids;
+};
