@@ -18,6 +18,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const groupsModel = stores.groups;
   const [sortBy, setSortBy] = useState("Group");
 
+  //******************************* Sorting Documents *************************************
   const filteredDocsByType = stores.documents.all.filter((doc: DocumentModelType) => {
     return isSortableType(doc.type);
   });
@@ -81,6 +82,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
 
   const sortedDocuments = getSortedDocuments(filteredDocsByType, sortBy);
 
+  //******************************* Handle Debug View ***************************************
   const renderDebugView = () => {
     //returns a list lf all documents (unsorted)
     return filteredDocsByType.map((doc, idx) => {
