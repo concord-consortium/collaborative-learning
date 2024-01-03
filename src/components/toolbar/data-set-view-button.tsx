@@ -22,7 +22,7 @@ export function DataSetViewButton({name, args}: IProps) {
   }
 
   const newTileType = args[1];
-  const tooltip = `Create a linked ${newTileType} tile`;
+  const tooltip = `${newTileType} It!`;
 
   // TODO: if the document or tile are undefined then disable the button
 

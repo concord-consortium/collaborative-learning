@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import React, { useContext } from "react";
 import { AttributeType } from "../../../../models/data/attribute";
 import { IDataSet } from "../../../../models/data/data-set";
+import { axisPlaceToAttrRole } from "../../graph-types";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
 import { AddSeriesButton } from "./add-series-button";
@@ -12,6 +13,8 @@ import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../../../m
 import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
+import XAxisIcon from "../../assets/x-axis-icon.svg";
+import YAxisIcon from "../../assets/y-axis-icon.svg";
 
 interface ILayerLegendProps {
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
@@ -31,6 +34,7 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
   const graphModel = useGraphModelContext();
   const dataConfiguration = useDataConfigurationContext();
   const readOnly = useContext(ReadOnlyContext);
+  const xAttrId = dataConfiguration?.attributeID(axisPlaceToAttrRole.bottom);
 
   function handleRemoveIconClick() {
     if (dataConfiguration?.dataset) {
@@ -51,15 +55,21 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
     const yAttributes = dataConfiguration.yAttributeDescriptions;
 
     legendItems = yAttributes.map((description, index) =>
-      <SimpleAttributeLabel
-        key={description.attributeID}
-        place={'left'}
-        index={index}
-        attrId={description.attributeID}
-        onChangeAttribute={onChangeAttribute}
-        onRemoveAttribute={onRemoveAttribute}
-        onTreatAttributeAs={onTreatAttributeAs}
-      />);
+      <>
+        <div className="legend-icon">
+          <YAxisIcon />
+        </div>
+        <SimpleAttributeLabel
+          attrId={description.attributeID}
+          includePoint={true}
+          key={description.attributeID}
+          onChangeAttribute={onChangeAttribute}
+          onRemoveAttribute={onRemoveAttribute}
+          onTreatAttributeAs={onTreatAttributeAs}
+          place={'left'}
+        />
+      </>
+    );
     if (!readOnly) {
       legendItems.push(<AddSeriesButton />);
     }
@@ -103,17 +113,35 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
   return (
     <>
       { dataConfiguration?.dataset !== undefined &&
-        <div className="legend-title-row">
-          <div className="legend-title">
-            Data from: <strong>{getOriginString()}</strong>&nbsp;
-          </div>
-          { !readOnly &&
-            <div className="legend-icon">
-              <button onClick={handleRemoveIconClick} className="remove-button" title="Unlink data provider">
-                <RemoveDataIcon />
-              </button>
+        <div className="legend-row legend-title-row">
+          <div className="legend-cell-1">
+            { !readOnly &&
+              <div className="legend-icon">
+                <button onClick={handleRemoveIconClick} className="remove-button" title="Unlink data provider">
+                    <RemoveDataIcon />
+                </button>
+              </div>
+            }
+            <div className="legend-title">
+              Data from: <strong>{getOriginString()}</strong>&nbsp;
             </div>
-          }
+          </div>
+          <div className="legend-cell-2">
+            { xAttrId &&
+              <>
+                <div className="legend-icon">
+                  <XAxisIcon />
+                </div>
+                <SimpleAttributeLabel
+                  place="bottom"
+                  attrId={xAttrId}
+                  onChangeAttribute={onChangeAttribute}
+                  onRemoveAttribute={onRemoveAttribute}
+                  onTreatAttributeAs={onTreatAttributeAs}
+                />
+              </>
+            }
+          </div>
         </div>
       }
       {legendItemRows}

@@ -47,8 +47,9 @@ export const ConnectingLines = observer(function ConnectingLines({dotsRef}: ICon
   // installed by a useEffect() (which should also improve the render lag currently present).
   cleanUpPaths(dotsRef.current);
   //first clean up paths then render each line
-  foundLinePoints.forEach((singleLinePoints, idx) => {
-    const color = graphModel.pointColorAtIndex(idx);
+  Object.keys(foundLinePoints).forEach(attributeId => {
+    const singleLinePoints = foundLinePoints[attributeId];
+    const color = graphModel.getColorForId(attributeId);
     const adjustedColor = lightenColor(color, 0.5);
     drawPath(dotsRef.current as DotsElt, singleLinePoints, adjustedColor);
   });

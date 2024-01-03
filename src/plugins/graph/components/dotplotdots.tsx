@@ -259,6 +259,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
 
       setPointCoordinates({
         dataConfiguration, pointRadius: graphModel.getPointRadius(),
+        getColorForId: graphModel.getColorForId,
         selectedPointRadius: graphModel.getPointRadius('select'),
         dotsRef, selectedOnly, pointColor, pointStrokeColor,
         getScreenX, getScreenY, getLegendColor, enableAnimation

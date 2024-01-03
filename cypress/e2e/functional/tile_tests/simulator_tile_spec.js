@@ -48,6 +48,12 @@ context('Simulator Tile', function () {
     simulatorTile.getSimulatorTileTitle().type(newName + '{enter}');
     simulatorTile.getTileTitle().should("contain", newName);
 
+     //Simulator tile title restore upon page reload
+     cy.wait(2000);
+     cy.reload();
+     cy.waitForLoad();
+     simulatorTile.getTileTitle().should("contain", newName);
+
     cy.log("links to dataflow tile");
     clueCanvas.addTile("dataflow");
     dataflowTile.selectSamplingRate("50ms");

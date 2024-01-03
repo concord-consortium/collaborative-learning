@@ -29,10 +29,10 @@ class XYPlotToolTile {
     return cy.get(`${wsClass(workspaceClass)} .display-label.bottom`);
   }
   getXAttributesLabel(workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .x-axis-menu .simple-attribute-label`);
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .bottom .simple-attribute-label`);
   }
   getYAttributesLabel(workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .simple-attribute-label`);
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .left .simple-attribute-label`);
   }
   getPortalButton(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .chakra-portal button`);
@@ -53,22 +53,36 @@ class XYPlotToolTile {
   getMultiLegend(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .graph-tool-tile .multi-legend`);
   }
+  getPlottedVariablesLegend(workspaceClass) {
+    return this.getMultiLegend(workspaceClass).find(".plotted-variables-legend");
+  }
   getVariableDropdowns(workspaceClass) {
-    return this.getMultiLegend(workspaceClass).find(".variable-function-legend-button");
+    return this.getPlottedVariablesLegend(workspaceClass).find(".variable-function-legend-button");
   }
-  getXVariableDropdown(workspaceClass) {
-    return this.getVariableDropdowns(workspaceClass).eq(0);
+  getXVariableDropdown(traceNumber = 0, workspaceClass) {
+    return this.getVariableDropdowns(workspaceClass).eq(traceNumber * 2);
   }
-  selectXVariable(variableName, workspaceClass) {
-    this.getXVariableDropdown().click();
+  // This function only works for the first menu, including y variables :\
+  selectXVariable(variableName, traceNumber = 0, workspaceClass) {
+    this.getXVariableDropdown(traceNumber).click();
     this.clickPortalButton(variableName, workspaceClass);
   }
-  getYVariableDropdown(workspaceClass) {
-    return this.getVariableDropdowns(workspaceClass).eq(1);
+  getYVariableDropdown(traceNumber = 0, workspaceClass) {
+    return this.getVariableDropdowns(workspaceClass).eq(traceNumber * 2 + 1);
   }
-  selectYVariable(variableName, workspaceClass) {
-    this.getYVariableDropdown().click();
+  // This function only works for the first menu, including x variables :\
+  selectYVariable(variableName, traceNumber = 0, workspaceClass) {
+    this.getYVariableDropdown(traceNumber).click();
     this.clickPortalButton(variableName, workspaceClass);
+  }
+  getRemoveVariablesButtons(workspaceClass) {
+    return this.getPlottedVariablesLegend(workspaceClass).find("button.remove-button");
+  }
+  getRemoveVariablesButton(traceNumber = 0, workspaceClass) {
+    return this.getRemoveVariablesButtons().eq(traceNumber);
+  }
+  getAddVariablesButton(workspaceClass) {
+    return this.getPlottedVariablesLegend(workspaceClass).find("button.add-series-button");
   }
   getEditableAxisBox(axis, minOrMax) {
     return this.getTile().find(`[data-testid=editable-border-box-${axis}-${minOrMax}]`);

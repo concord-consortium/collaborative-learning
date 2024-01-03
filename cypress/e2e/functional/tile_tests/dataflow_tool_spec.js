@@ -25,6 +25,18 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDataflowTileTitle().type(newName + '{enter}');
     dataflowToolTile.getTileTitle().should("contain", newName);
 
+    cy.log("add new tile");
+    const newName2 = "Dataflow Tile 2";
+    clueCanvas.addTile("dataflow");
+    dataflowToolTile.getTileTitle().last().should("contain", "Program 1");
+    dataflowToolTile.getDataflowTileTitle().last().click();
+    dataflowToolTile.getDataflowTileTitle().last().type(newName2 + '{enter}');
+    dataflowToolTile.getTileTitle().last().should("contain", newName2);
+
+    cy.log("remove second dataflow tile");
+    dataflowToolTile.getDataflowTile().last().click();
+    clueCanvas.deleteTile("dataflow");
+
     cy.log("makes link button active when table is present");
     dataflowToolTile.getLinkTileButton().should("exist");
     dataflowToolTile.getLinkTileButton().should("have.class", "disabled");
@@ -290,15 +302,15 @@ context('Dataflow Tool Tile', function () {
 
     cy.log("verify logic operator types");
     const transformOperator = "transformOperator";
-    const transformOperatorTypes = ["Absolute Value", "Negation", "Not", "Round", "Floor", "Ceil"];
+    const transformOperatorTypes = ["Absolute Value", "Negation", "Not", "Round", "Floor", "Ceil", "Ramp"];
     dataflowToolTile.getDropdown(transformNode, transformOperator).click();
-    dataflowToolTile.getDropdownOptions(transformNode, transformOperator).should("have.length", 6);
+    dataflowToolTile.getDropdownOptions(transformNode, transformOperator).should("have.length", 7);
     dataflowToolTile.getDropdownOptions(transformNode, transformOperator).each(($tab, index, $typeList) => {
       expect($tab.text()).to.contain(transformOperatorTypes[index]);
     });
     dataflowToolTile.getDropdownOptions(transformNode, transformOperator).last().click();
     dataflowToolTile.getDropdownOptions(transformNode, transformOperator).should("have.length", 0);
-    dataflowToolTile.getDropdown(transformNode, transformOperator).contains("Ceil").should("exist");
+    dataflowToolTile.getDropdown(transformNode, transformOperator).contains("Ramp").should("exist");
 
     cy.log("verify node inputs outputs");
     dataflowToolTile.getNodeInput().should("exist");

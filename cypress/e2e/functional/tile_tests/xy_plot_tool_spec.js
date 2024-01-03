@@ -69,9 +69,28 @@ context('XYPlot Tool Tile', function () {
       xyTile.getXYPlotTitle().click().type(title + '{enter}');
       xyTile.getXYPlotTitle().should('contain', title);
 
+      //XY Plot tile title restore upon page reload
+      cy.wait(2000);
+      cy.reload();
+      cy.waitForLoad();
+      xyTile.getTile().click();
+      xyTile.getXYPlotTitle().should('contain', title);
+
+      cy.log("does not show edit boxes on axes");
+      xyTile.getEditableAxisBox("bottom", "min").should("not.exist");
+      xyTile.getEditableAxisBox("bottom", "max").should("not.exist");
+      xyTile.getEditableAxisBox("left", "min").should("not.exist");
+      xyTile.getEditableAxisBox("left", "max").should("not.exist");
+
       cy.log("Link Table");
       clueCanvas.clickToolbarButton('graph', 'link-tile');
       xyTile.linkTable("Table 1");
+
+      cy.log("shows edit boxes on axes");
+      xyTile.getEditableAxisBox("bottom", "min").should("exist");
+      xyTile.getEditableAxisBox("bottom", "max").should("exist");
+      xyTile.getEditableAxisBox("left", "min").should("exist");
+      xyTile.getEditableAxisBox("left", "max").should("exist");
 
       cy.log("verify graph dot is displayed");
       xyTile.getGraphDot().should('have.length', 1);
@@ -120,14 +139,23 @@ context('XYPlot Tool Tile', function () {
       cy.log("verify edit box for horizontal and vertical axes");
       xyTile.getEditableAxisBox("bottom", "min").click().type('-10{enter}');
       xyTile.getEditableAxisBox("bottom", "min").should('contain', '-10');
-      // This check was failing because the bottom max area is blocked by another element
-      // xyTile.getEditableAxisBox("bottom", "max").click({ force: true }).type('50.02345{enter}', { force: true });
-      // xyTile.getEditableAxisBox("bottom", "max").should('contain', '50.02345');
       xyTile.getEditableAxisBox("left", "min").click().type('-10.55{enter}');
       xyTile.getEditableAxisBox("left", "min").should('contain', '-10.55');
       xyTile.getEditableAxisBox("left", "max").click().type('50{enter}');
       xyTile.getEditableAxisBox("left", "max").should('contain', '50');
+
+      cy.log("verify nonnumeric inputs are not accepted");
       xyTile.getEditableAxisBox("left", "max").click().type('abc{enter}');
+      xyTile.getEditableAxisBox("left", "max").should('contain', '50');
+
+      cy.log("check that values more or less than the other bounding box are not accepted");
+      // Excluding the bottom max edit box from these tests because currently, the
+      // scrollbar is covering up that element and causing click and type fail on it
+      xyTile.getEditableAxisBox("bottom", "min").click().type('60{enter}');
+      xyTile.getEditableAxisBox("bottom", "min").should('contain', '-10');
+      xyTile.getEditableAxisBox("left", "min").click().type('60{enter}');
+      xyTile.getEditableAxisBox("left", "min").should('contain', '-10.55');
+      xyTile.getEditableAxisBox("left", "max").click().type('-20{enter}');
       xyTile.getEditableAxisBox("left", "max").should('contain', '50');
 
       cy.log("restore points to canvas");
@@ -251,12 +279,11 @@ context('XYPlot Tool Tile', function () {
     it("Test plotting variables", () => {
       const dialogField = (field) => cy.get(`#evd-${field}`);
       const dialogOkButton = () => cy.get(".modal-button").last();
-      const dialogNewGraphButton = () => cy.get(".modal-button.add-new-button");
 
       beforeTest(queryParamsPlotVariables);
 
       cy.log("Add Diagram Tile with a Variable");
-      const name1 = "a";
+      const name1 = "variable_name";
       const value1 = "2";
       clueCanvas.addTile("diagram");
       diagramTile.getDiagramTile().click();
@@ -268,7 +295,8 @@ context('XYPlot Tool Tile', function () {
 
       cy.log("Add a Linked Graph");
       clueCanvas.clickToolbarButton("diagram", "variables-link");
-      dialogNewGraphButton().click();
+      cy.get('select').select("New Graph");
+      dialogOkButton().click();
       xyTile.getPlottedVariablesPath().should("not.exist");
       xyTile.selectXVariable(name1);
       xyTile.getXVariableDropdown().should("contain.text", name1);
@@ -276,9 +304,30 @@ context('XYPlot Tool Tile', function () {
       // xyTile.selectYVariable was failing because it was catching the button from the x "dropdown" instead
       xyTile.getYVariableDropdown().click();
       xyTile.getPortalButton().eq(1).click({ force: true });
-
       xyTile.getYVariableDropdown().should("contain.text", name1);
-      xyTile.getPlottedVariablesPath().should("exist");
+
+      xyTile.getPlottedVariablesPath().should("have.length", 1);
+
+      cy.log("Plot multiple traces");
+      xyTile.getAddVariablesButton().should("exist").click();
+
+      // Select the x variable for the 2nd trace
+      xyTile.getXVariableDropdown(1).click();
+      xyTile.getPortalButton().eq(2).click({ force: true });
+      xyTile.getXVariableDropdown(1).should("contain.text", name1);
+
+      // Select the y variable for the 2nd trace
+      xyTile.getYVariableDropdown(1).click();
+      xyTile.getPortalButton().eq(3).click({ force: true });
+      xyTile.getYVariableDropdown().should("contain.text", name1);
+
+      xyTile.getPlottedVariablesPath().should("have.length", 2);
+
+      cy.log("Remove a variable trace");
+      xyTile.getRemoveVariablesButton(1).click();
+      xyTile.getPlottedVariablesPath().should("have.length", 1);
+      // Only the unlink remove button should remain
+      xyTile.getRemoveVariablesButtons().should("have.length", 1);
     });
   });
 });

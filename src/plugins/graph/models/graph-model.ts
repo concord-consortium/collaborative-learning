@@ -13,6 +13,7 @@ import {
   GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType,
   PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
 } from "../graph-types";
+import { withoutUndo } from "../../../models/history/without-undo";
 import { SharedModelType } from "../../../models/shared/shared-model";
 
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
@@ -20,7 +21,7 @@ import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-co
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import {
-  defaultBackgroundColor, defaultPointColor, defaultStrokeColor, kellyColors
+  clueGraphColors, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
 } from "../../../utilities/color-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
 import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
@@ -65,6 +66,8 @@ export const GraphModel = TileContentModel
     plotType: types.optional(types.enumeration([...PlotTypes]), "casePlot"),
     layers: types.array(GraphLayerModel /*, () => GraphLayerModel.create() */),
     // Visual properties
+    // A map from IDs (which can refer to anything) to indexes to an array of colors
+    _idColors: types.map(types.number),
     _pointColors: types.optional(types.array(types.string), [defaultPointColor]),
     _pointStrokeColor: defaultStrokeColor,
     pointStrokeSameAsFill: false,
@@ -111,6 +114,24 @@ export const GraphModel = TileContentModel
         }));
       }
       return all;
+    },
+    get nextColor() {
+      const colorCounts: Record<number, number> = {};
+      self._idColors.forEach(index => {
+        if (!colorCounts[index]) colorCounts[index] = 0;
+        colorCounts[index]++;
+      });
+      const usedColorIndices = Object.keys(colorCounts).map(index => Number(index));
+      if (usedColorIndices.length < clueGraphColors.length) {
+        // If there are unused colors, return the index of the first one
+        return Object.keys(clueGraphColors).map(index => Number(index))
+          .filter(index => !usedColorIndices.includes(index))[0];
+      } else {
+        // Otherwise, use the next minimally used color's index
+        const counts = usedColorIndices.map(index => colorCounts[index]);
+        const minCount = Math.min(...counts);
+        return usedColorIndices.find(index => colorCounts[index] === minCount) ?? 0;
+      }
     }
   }))
   .views(self => ({
@@ -127,7 +148,7 @@ export const GraphModel = TileContentModel
       if (plotIndex < self._pointColors.length) {
         return self._pointColors[plotIndex];
       } else {
-        return kellyColors[plotIndex % kellyColors.length];
+        return clueGraphColors[plotIndex % clueGraphColors.length];
       }
     },
     get pointColor() {
@@ -306,6 +327,22 @@ export const GraphModel = TileContentModel
     },
   }))
   .actions(self => ({
+    // Returns an objet's color, given its id.
+    // This is an action because if the id doesn't have a specified color, this will assign one to it.
+    getColorForId(id: string) {
+      let colorIndex = self._idColors.get(id);
+      if (colorIndex === undefined) {
+        // This function gets called automatically in response to plots being added to a graph.
+        // withoutUndo prevents a second action being added to the undo stack when this happens.
+        withoutUndo();
+        colorIndex = self.nextColor;
+        self._idColors.set(id, colorIndex);
+      }
+      return clueGraphColors[colorIndex % clueGraphColors.length];
+    },
+    removeColorForId(id: string) {
+      self._idColors.delete(id);
+    },
     setAxis(place: AxisPlace, axis: IAxisModelUnion) {
       self.axes.set(place, axis);
     },

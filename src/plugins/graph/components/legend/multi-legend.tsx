@@ -5,9 +5,10 @@ import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { useGraphLayoutContext } from "../../models/graph-layout";
 import { IDataSet } from "../../../../models/data/data-set";
 import {
-  isPlottedVariablesAdornment
+  IPlottedVariablesAdornmentModel, isPlottedVariablesAdornment
 } from "../../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
 import { DataConfigurationContext } from "../../hooks/use-data-configuration-context";
+import { useGraphSettingsContext } from "../../hooks/use-graph-settings-context";
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
 import { axisPlaceToAttrRole, kGraphDefaultHeight } from "../../graph-types";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
@@ -23,7 +24,8 @@ const kMultiLegendVerticalPadding = 10;
 const kMultiLegendVerticalGap = 8;
 const kMultiLegendLabelHeight = 28;
 const kMultiLegendHRuleHeight = 2;
-const kTemporarySpaceForVariablesLegend = 80; // TODO: actually calculate height for variables legend
+const kPlottedVariableHeader = 40;
+const kPlottedVariableRow = 46;
 
 interface IMultiLegendProps {
   graphElt: HTMLDivElement | null;
@@ -41,6 +43,7 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   const multiLegendRef = useRef<HTMLDivElement>(null);
   const graphModel = useGraphModelContext();
   const instanceId = useInstanceIdContext();
+  const { defaultSeriesLegend } = useGraphSettingsContext();
 
   useEffect(() =>{
     const legendTransform = `translateY(${-layout.computedBounds.legend.height}px)`;
@@ -60,22 +63,43 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
       + kMultiLegendMenuHeight * legendRows
       + kMultiLegendVerticalGap * legendRows * 2; // above each row
   }
-  // Total height is height of X-axis menus, plus sum of all the layer sections
-  const totalHeight = kMultiLegendMenuHeight + kMultiLegendVerticalPadding
-    + graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0)
-    + graphModel.adornments.reduce((prev, adornment) => {
-      if (isPlottedVariablesAdornment(adornment)) {
-        if (adornment.sharedVariables) {
-          return prev + kTemporarySpaceForVariablesLegend;
-        }
-      }
-      return prev;
+  function heightOfLayers() {
+    return graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0);
+  }
+  function heightOfPlottedVariablesLegend() {
+    const plottedVariableAdornments = graphModel.adornments
+      .filter(adornment => isPlottedVariablesAdornment(adornment)) as IPlottedVariablesAdornmentModel[];
+    const plottedVariableTraces = plottedVariableAdornments.reduce((prev, adornment) => {
+      return adornment.plottedVariables.size;
     }, 0);
+    // Each adornment has a header and an add variable row, plus one row for each plot
+    return plottedVariableAdornments.length * (kPlottedVariableHeader + kPlottedVariableRow)
+      + plottedVariableTraces * kPlottedVariableRow;
+  }
+  // Total height is height of X-axis menus, plus sum of all the plotted data and variable sections
+  const xMenuHeight = defaultSeriesLegend ? 0 : kMultiLegendMenuHeight + kMultiLegendVerticalPadding;
+  // TODO Remove this extra buffer space to make sure the whole legend can be seen before refactoring height calculation
+  const extraHeight = 100;
+  const totalHeight = extraHeight + xMenuHeight
+    + heightOfLayers()
+    + heightOfPlottedVariablesLegend();
 
   useEffect(function RespondToLayoutChange() {
     layout.setDesiredExtent("legend", totalHeight);
     onRequestRowHeight?.(instanceId, kGraphDefaultHeight + totalHeight);
   }, [instanceId, layout, onRequestRowHeight, totalHeight]);
+
+  const variableLegends = graphModel.adornments.map(adornment => {
+    if (isPlottedVariablesAdornment(adornment)) {
+      return (
+        <VariableFunctionLegend
+          key={adornment.id}
+          plottedVariablesAdornment={adornment}
+        />
+      );
+    }
+    return null;
+  });
 
   const layerLegends = graphModel.layers.map((layer) => {
     return (
@@ -89,46 +113,38 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     }
   );
 
-  const thisRole = axisPlaceToAttrRole.bottom;
+  const bottomRole = axisPlaceToAttrRole.bottom;
 
-  const xMenus = graphModel.layers.map((layer) => {
-    const attrId = layer.config?.attributeID(thisRole);
-    if (!attrId) return;
+  const xMenus = defaultSeriesLegend ? null : (
+    <div className="x-axis-menu">
+      {
+        graphModel.layers.map((layer) => {
+          const attrId = layer.config?.attributeID(bottomRole);
+          if (!attrId) return;
 
-    return (
-      <div className="x-axis-item" key={layer.id}>
-        <DataConfigurationContext.Provider value={layer.config}>
-          <SimpleAttributeLabel
-            place="bottom"
-            attrId={attrId}
-            onChangeAttribute={onChangeAttribute}
-            onRemoveAttribute={onRemoveAttribute}
-            onTreatAttributeAs={onTreatAttributeAs}
-          />
-        </DataConfigurationContext.Provider>
-      </div>
-    );
-  });
+          return (
+            <div className="x-axis-item" key={layer.id}>
+              <DataConfigurationContext.Provider value={layer.config}>
+                <SimpleAttributeLabel
+                  place="bottom"
+                  attrId={attrId}
+                  onChangeAttribute={onChangeAttribute}
+                  onRemoveAttribute={onRemoveAttribute}
+                  onTreatAttributeAs={onTreatAttributeAs}
+                />
+              </DataConfigurationContext.Provider>
+            </div>
+          );
+        })
+      }
+    </div>
+  );
 
   return (
     <div className="multi-legend" ref={ multiLegendRef }>
-      <div className="x-axis-menu">
-        { xMenus }
-      </div>
+      { xMenus }
+      { variableLegends }
       { layerLegends }
-      {
-        graphModel.adornments.map(adornment => {
-          if (isPlottedVariablesAdornment(adornment)) {
-            return (
-              <VariableFunctionLegend
-                key={adornment.id}
-                plottedVariablesAdornment={adornment}
-              />
-            );
-          }
-          return null;
-        })
-      }
     </div>
   );
 });

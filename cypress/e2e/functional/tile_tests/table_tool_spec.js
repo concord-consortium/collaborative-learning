@@ -38,6 +38,13 @@ context('Table Tool Tile', function () {
     tableToolTile.getTableTitle().click().type(title + '{enter}');
     tableToolTile.getTableTitle().should('contain', title);
 
+    // Table tile title restore upon page reload
+    cy.wait(2000);
+    cy.reload();
+    cy.waitForLoad();
+
+    tableToolTile.getTableTitle().should('contain', title);
+
     cy.log('will verify there are only two columns x & y');
     cy.get(".primary-workspace").within((workspace) => {
       tableToolTile.getColumnHeaderText().then(($headers) => {
@@ -270,7 +277,8 @@ context('Table Tool Tile', function () {
     tableToolTile.typeInTableCell(5, '4');
     tableToolTile.typeInTableCell(6, '7');
     clueCanvas.clickToolbarButton('table', 'link-graph');
-    tableToolTile.getLinkGraphModalCreateNewButton().click();
+    tableToolTile.getLinkGraphModalTileMenu().select('New Graph');
+    tableToolTile.getLinkGraphModalLinkButton().should("contain", "Graph It!").click();
     xyplot.getTile().should("exist").contains("Table 1");
 
     cy.log('can unlink and link data from a table using the "Link Table" button');

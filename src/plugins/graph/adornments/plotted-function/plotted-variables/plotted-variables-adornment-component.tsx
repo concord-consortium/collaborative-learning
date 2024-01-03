@@ -41,8 +41,6 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   const xCellCount = xCats.length * xSubAxesCount;
   const yCellCount = yCats.length * ySubAxesCount;
   const classFromKey = model.classNameFromKey(cellKey);
-  // const instanceKey = model.instanceKey(cellKey);
-  const path = useRef("");
   const plottedFunctionRef = useRef<SVGGElement>(null);
   const plottedFunctionCurrentValueRef = useRef<SVGGElement>(null);
   const sharedVariables = graphModel.sharedVariables;
@@ -53,19 +51,20 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
     const tPixelMin = xScale(xMin);
     const tPixelMax = xScale(xMax);
     const kPixelGap = 1;
-    const instanceKey = Array.from(model.plottedVariables.keys())[0];
-    const tPoints = model.computePoints({
-      instanceKey, min: tPixelMin, max: tPixelMax, xCellCount, yCellCount, gap: kPixelGap, xScale, yScale
-    });
-    if (tPoints.length === 0) return;
-    path.current = `M${tPoints[0].x},${tPoints[0].y},${curveBasis(tPoints)}`;
+    for (const instanceKey of model.plottedVariables.keys()) {
+      const tPoints = model.computePoints({
+        instanceKey, min: tPixelMin, max: tPixelMax, xCellCount, yCellCount, gap: kPixelGap, xScale, yScale
+      });
+      if (tPoints.length > 0) {
+        const path = `M${tPoints[0].x},${tPoints[0].y},${curveBasis(tPoints)}`;
 
-    const selection = select(plottedFunctionRef.current);
-    selection.append("path")
-      .attr("class", `plotted-function plotted-function-${classFromKey}`)
-      .attr("data-testid", `plotted-function-path${classFromKey ? `-${classFromKey}` : ""}`)
-      .attr("d", path.current);
-
+        const selection = select(plottedFunctionRef.current);
+        selection.append("path")
+          .attr("class", `plotted-function plotted-function-${classFromKey}`)
+          .attr("data-testid", `plotted-function-path${classFromKey ? `-${classFromKey}` : ""}`)
+          .attr("d", path);
+      }
+    }
   }, [classFromKey, model, xCellCount, xScale, yCellCount, yScale]);
 
   // Add the lines and their associated covers and labels
@@ -127,9 +126,10 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         const { domain: xDomain } = xAxis; // eslint-disable-line unused-imports/no-unused-vars
         const { domain: yDomain } = yAxis; // eslint-disable-line unused-imports/no-unused-vars
       }
-      // Trigger an autorun if any inputs or the expression of y change
+      // Trigger an autorun if any inputs or the expression of y change, or if the x variable changes
       Array.from(model.plottedVariables.values()).forEach(plottedVariables => {
         plottedVariables.yVariable?.computedValueIncludingMessageAndError; // eslint-disable-line no-unused-expressions
+        plottedVariables.xVariable; // eslint-disable-line no-unused-expressions
       });
       refreshValues();
       refreshCurrentValue();

@@ -7,7 +7,7 @@ import { IToolbarButtonComponentProps, registerTileToolbarButtons }
   import { GraphControllerContext } from "../models/graph-controller";
 
 import LinkTableIcon from "../../../clue/assets/icons/geometry/link-table-icon.svg";
-import AddIcon from "../assets/add-data-graph-icon.svg";
+import AddIcon from "../../../assets/icons/add-data-graph-icon.svg";
 import FitAllIcon from "../assets/fit-all-icon.svg";
 
 function LinkTileButton(name: string, title: string, allowMultiple: boolean) {
