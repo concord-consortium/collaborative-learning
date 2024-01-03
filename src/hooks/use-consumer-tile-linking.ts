@@ -10,6 +10,7 @@ import { useLinkableTiles } from "./use-linkable-tiles";
 import { AddTilesContext } from "../components/tiles/tile-api";
 import { getSharedModelManager } from "../models/tiles/tile-environment";
 import { SharedModelUnion } from "../models/shared/shared-model-manager";
+import { SharedModelType } from "../models/shared/shared-model";
 
 interface IProps {
   // TODO: This should be replaced with a generic disabled
@@ -82,16 +83,18 @@ export const useConsumerTileLinking = ({
     const consumerTile = getTileContentById(model.content, tileInfo.id);
     if (!readOnly && consumerTile) {
       if (sharedModelManager?.isReady) {
-        // If the consumer tile does not support multiple shared data sets, remove it from
-        // any existing shared data sets before linking.
+        // If the consumer tile does not support multiple shared data sets, we will remove it from
+        // any existing shared data sets later.
+        // Don't remove old links before adding the new one, since some models (eg, table) take action
+        // if they see they have no linked data.
+        let dataSetsToRemove = [] as SharedModelType[];
         if (shareType === SharedDataSet && !getTileContentInfo(consumerTile.type)?.consumesMultipleDataSets) {
-          const allSharedDataSets
-            = sharedModelManager.getTileSharedModelsByType(consumerTile, SharedDataSet);
-          allSharedDataSets.forEach(sharedDataSet => {
-            sharedModelManager.removeTileSharedModel(consumerTile, sharedDataSet);
-          });
+          dataSetsToRemove = sharedModelManager.getTileSharedModelsByType(consumerTile, SharedDataSet);
         }
         modelToShare && sharedModelManager.addTileSharedModel(consumerTile, modelToShare);
+        dataSetsToRemove.forEach(sharedDataSet => {
+          sharedModelManager.removeTileSharedModel(consumerTile, sharedDataSet);
+        });
       }
     }
   }, [model.content, modelToShare, readOnly, shareType, sharedModelManager]);
