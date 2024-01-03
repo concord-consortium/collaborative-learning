@@ -119,9 +119,13 @@ export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ t
   console.log("📁 sort-work-view.tsx ------------------------");
   console.log("➡️ navTabSpec");
   console.log("\t🥩 tabSpec:", tabSpec);
+  console.log("\t🥩 navTabSpec:", navTabSpec);
+
   console.log("\t🥩 selectedSubTab:", selectedSubTab);
   console.log("\t🥩 subTabs:", subTabs);
   console.log("\t🥩 tabSpec.tab:", tabSpec.tab);
+
+  //how is subtabs created?
 
   const [showDocument, setShowDocument] = useState(false);
 
