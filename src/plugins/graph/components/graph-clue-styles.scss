@@ -29,6 +29,11 @@
   background: transparent;
   border: none;
   cursor: pointer;
+
+  &.graph-legend-label {
+    background: transparent;
+    border: none;
+  }
 }
 
 .chakra-menu__menu-list {
