@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
-import { useStores, usePersistentUIStore } from "../../hooks/use-stores";
+import { useStores, usePersistentUIStore, useAppConfig } from "../../hooks/use-stores";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
@@ -9,10 +9,10 @@ import { NavTabModelType } from "../../models/view/nav-tabs";
 import { DocumentContextReact } from "./document-context";
 import { DEBUG_SORT_WORK } from "../../lib/debug";
 import { isSortableType } from "../../models/document/document-types";
+import { SortWorkDocumentArea } from "./sort-work-document-area";
 
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
-import { SortWorkDocumentArea } from "./sort-work-document-area";
 
 interface IProps {
   tabSpec: NavTabModelType
@@ -101,6 +101,7 @@ export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ t
 
   //******************************* Show Document View ***************************************
   const persistentUI = usePersistentUIStore();
+  //TODO: looks like we don't need this state since we use the length of the openDocuments
   const [showDocument, setShowDocument] = useState(false);
 
   const handleSelectDocument = (document: DocumentModelType) => {
@@ -122,13 +123,22 @@ export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ t
     });
   };
 
+  const appConfigStore = useAppConfig();
+  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
+
+  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
+  const openDocumentsLength = tabState?.openDocuments.size;
+  const showSortWorkDocumentArea = openDocumentsLength && (openDocumentsLength > 1);
+  console.log("\t🔪 openDocumentsLength:", openDocumentsLength);
+
   return (
     <div key="sort-work-view" className="sort-work-view">
       <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
+
       <div className="documents-panel">
         <div className="tab-panel-documents-section">
           {
-            showDocument ?
+            showSortWorkDocumentArea ?
             <SortWorkDocumentArea
               tabSpec={tabSpec}
               tab={"sort-work"}

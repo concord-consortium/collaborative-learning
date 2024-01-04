@@ -33,7 +33,6 @@ export const SortWorkDocumentArea: React.FC<ISortWorkDocumentArea> = observer(fu
   const ui = useUIStore();
   const persistentUI = usePersistentUIStore();
   const user = useUserStore();
-  const appConfig = useAppConfig();
   const classStore = useClassStore();
   const problemStore = useProblemStore();
   const appConfigStore = useAppConfig();
@@ -42,13 +41,13 @@ export const SortWorkDocumentArea: React.FC<ISortWorkDocumentArea> = observer(fu
   const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
   const openDocumentKey = tabState?.openDocuments.get("sort-work") || "";
   const openDocument = store.documents.getDocument(openDocumentKey) ||
-  store.networkDocuments.getDocument(openDocumentKey);
+                       store.networkDocuments.getDocument(openDocumentKey);
 
   const showPlayback = user.type && !openDocument?.isPublished
-                          ? appConfig.enableHistoryRoles.includes(user.type) : false;
+                          ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
   const getDisplayTitle = (document: DocumentModelType) => {
     const documentOwner = classStore.users.get(document.uid);
-    const documentTitle = getDocumentDisplayTitle(document, appConfig, problemStore);
+    const documentTitle = getDocumentDisplayTitle(document, appConfigStore, problemStore);
     return {owner: documentOwner ? documentOwner.fullName : "", title: documentTitle};
   };
 
@@ -87,8 +86,8 @@ export const SortWorkDocumentArea: React.FC<ISortWorkDocumentArea> = observer(fu
 
   const sideClasses = { secondary: false, primary: false && !false };
 
-  console.log("📁 sort-work-document-area.tsx ------------------------");
-  console.log("\t🥩 sideClasses:", sideClasses);
+  // console.log("📁 sort-work-document-area.tsx ------------------------");
+  // console.log("\t🥩 sideClasses:", sideClasses);
   return (
     <div className={classNames("focus-document", tab, sideClasses)}>
       <div className={classNames("document-header", tab, sectionClass, sideClasses)}

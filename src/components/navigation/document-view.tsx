@@ -21,10 +21,10 @@ interface IProps {
 }
 //TODO: Need to refactor this if we want to deploy to all tabs
 export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IProps) {
-  console.log("➡️ DocumentView");
-  console.log("📁 document-view.tsx ------------------------");
+  // console.log("➡️ DocumentView");
+  // console.log("📁 document-view.tsx ------------------------");
   // console.log("\t🥩 subTab:", subTab);
-  console.log("\t🥩 tabSpec:", tabSpec);
+  // console.log("\t🥩 tabSpec:", tabSpec);
   const persistentUI = usePersistentUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
@@ -32,7 +32,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const queryClient = useQueryClient();
   const documents = useLocalDocuments();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
-  console.log("\t🥩 tabSpec.tab:", tabSpec.tab);
+  // console.log("\t🥩 tabSpec.tab:", tabSpec.tab);
 
   const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
   // console.log("\t🥩 subTab.label:", subTab.label);
@@ -210,10 +210,10 @@ interface IDocumentAreaProps {
 
 const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocument,
     hasSecondaryDocument, hideLeftFlipper, hideRightFlipper, onChangeDocument}: IDocumentAreaProps) => {
-  console.log("\t🥩 openDocument:", openDocument);
-  console.log("\t🥩 subTab:", subTab);
-  console.log("\t🥩 tab:", tab);
-  console.log("\t🥩 sectionClass:", sectionClass);
+  // console.log("\t🥩 openDocument:", openDocument);
+  // console.log("\t🥩 subTab:", subTab);
+  // console.log("\t🥩 tab:", tab);
+  // console.log("\t🥩 sectionClass:", sectionClass);
 
   const ui = useUIStore();
   const persistentUI = usePersistentUIStore();

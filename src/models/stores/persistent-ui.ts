@@ -167,7 +167,11 @@ export const PersistentUIModel = types
         tabState.openSecondaryDocuments.set(subTab, documentKey);
       },
       closeSubTabDocument(tab: string, subTab: string) {
+        console.log("➡️ closeSubTabDocument");
+        console.log("\t🔪 subTab:", subTab);
+        console.log("\t🔪 tab:", tab);
         const tabState = getTabState(tab);
+        console.log("\t🔪 tabState:", tabState);
         tabState.openDocuments.delete(subTab);
       },
       closeSubTabSecondaryDocument(tab: string, subTab: string) {

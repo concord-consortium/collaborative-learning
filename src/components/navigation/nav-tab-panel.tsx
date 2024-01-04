@@ -32,7 +32,8 @@ export class NavTabPanel extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { persistentUI: { activeNavTab, focusDocument, showChatPanel }, ui: { selectedTileIds },
+    const { persistentUI: { activeNavTab, focusDocument, showChatPanel,
+                           closeSubTabDocument }, ui: { selectedTileIds },
             user } = this.stores;
     const tabs = this.stores.tabsToDisplay;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
@@ -55,9 +56,20 @@ export class NavTabPanel extends BaseComponent<IProps> {
                 { tabs?.map((tabSpec, index) => {
                     const tabClass = `top-tab tab-${tabSpec.tab}
                                       ${selectedTabIndex === index ? "selected" : ""}`;
+                    const handleSortWorkClick = () => {
+                      closeSubTabDocument("sort-work", "sort-work");
+                      // const tabState = getTabState("sort-work");
+                      console.log("tabState:", tabSpec);
+
+                    };
                     return (
                       <React.Fragment key={tabSpec.tab}>
-                        <Tab className={tabClass}>{tabSpec.label}</Tab>
+                        <Tab
+                          className={tabClass}
+                          onClick={tabSpec.tab === "sort-work" ? handleSortWorkClick : undefined}
+                        >
+                          {tabSpec.label}
+                        </Tab>
                       </React.Fragment>
                     );
                   })
@@ -93,6 +105,8 @@ export class NavTabPanel extends BaseComponent<IProps> {
       </div>
     );
   }
+
+
 
   private renderTabContent = (tabSpec: NavTabModelType) => {
     switch (tabSpec.tab) {
