@@ -25,7 +25,7 @@ const Content: React.FC<IContentProps>
   return (
       <>
         <div className="prompt">
-          Select a data or variables source to link or unlink:
+          Select a data or variables source to graph or clear:
         </div>
         <select ref={selectElt} value={selectValue} data-test="link-tile-select"
                                 onChange={e => {
@@ -96,7 +96,7 @@ export const useLinkProviderTileDialog = ({
       selectValue, tileTitle, setSelectValue },
     buttons: [
       { label: "Cancel" },
-      { label: selectedModel && linkedSharedModels.includes(selectedModel) ? "Unlink" : "Link",
+      { label: selectedModel && linkedSharedModels.includes(selectedModel) ? "Clear It!" : "Graph It!",
         isDefault: true,
         isDisabled: !selectValue,
         onClick: handleClick
