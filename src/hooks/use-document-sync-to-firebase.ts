@@ -72,7 +72,7 @@ export function useDocumentSyncToFirebase(
    * Lets compare that to comprable path for LL/P
    * [classId]/users/[userId]/documents/[documentId]/...
    *
-   * TODO: So we can actively just sync to a the spot? We need to see how we are supposed to trigger useSyncMstPropToFirebase?
+   * Or can we use document.metadata.properties that exists for personal docs?
    */
   useSyncMstPropToFirebase<typeof document.visibility>({
     firebase, model: document, prop: "visibility", path: typedMetadata,
@@ -89,8 +89,8 @@ export function useDocumentSyncToFirebase(
     }
   });
 
+  // TODO: sync visibility here? In the hook below? Elsewhere?
   // sync title for personal and learning log documents
-  // TODO: sync visibility here? in a similar hook?
   useSyncMstPropToFirebase<typeof document.title>({
     firebase, model: document, prop: "title", path: typedMetadata,
     enabled: commonSyncEnabled && !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
@@ -106,6 +106,7 @@ export function useDocumentSyncToFirebase(
     }
   });
 
+  // TODO: write/sync visibility here? In the hook above? Elsewhere?
   // sync properties for problem, personal, and learning log documents
   useSyncMstNodeToFirebase({
     firebase, model: document.properties, path: `${metadata}/properties`,
