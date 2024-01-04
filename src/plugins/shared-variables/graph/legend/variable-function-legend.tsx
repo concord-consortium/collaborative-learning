@@ -4,20 +4,22 @@ import { observer } from "mobx-react";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
 import { clueGraphColors } from "../../../../utilities/color-utils";
-import { isSharedVariables, SharedVariables } from "../../../shared-variables/shared-variables";
+import { LegendDropdown } from "../../../graph/components/legend/legend-dropdown";
+import {
+  LegendIdListFunction, ILegendHeightFunctionProps, ILegendPartProps
+} from "../../../graph/components/legend/legend-types";
+import { useGraphModelContext } from "../../../graph/hooks/use-graph-model-context";
+import { IGraphModel } from "../../../graph/models/graph-model";
+import { isSharedVariables, SharedVariables } from "../../shared-variables";
 import {
   IPlottedVariablesAdornmentModel, isPlottedVariablesAdornment
-} from "../../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
-import { useGraphModelContext } from "../../hooks/use-graph-model-context";
-import { IGraphModel } from "../../models/graph-model";
-import { LegendDropdown } from "./legend-dropdown";
-import { LegendIdListFunction, ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
+} from "../plotted-variables-adornment/plotted-variables-adornment-model";
 import { VariableSelection } from "./variable-selection";
 
-import AddSeriesIcon from "../../imports/assets/add-series-icon.svg";
-import RemoveDataIcon from "../../assets/remove-data-icon.svg";
-import XAxisIcon from "../../assets/x-axis-icon.svg";
-import YAxisIcon from "../../assets/y-axis-icon.svg";
+import AddSeriesIcon from "../../../graph/imports/assets/add-series-icon.svg";
+import RemoveDataIcon from "../../../graph/assets/remove-data-icon.svg";
+import XAxisIcon from "../../../graph/assets/x-axis-icon.svg";
+import YAxisIcon from "../../../graph/assets/y-axis-icon.svg";
 
 export const variableFunctionLegendType = "variable-function-legend";
 
