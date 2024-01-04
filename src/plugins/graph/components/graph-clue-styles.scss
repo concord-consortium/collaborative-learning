@@ -30,6 +30,8 @@
   border: none;
   cursor: pointer;
 
+  // The above class was sometimes getting overwritten by another class, sometimes not.
+  // The following & ensures that the important styling is applied no matter what the order.
   &.graph-legend-label {
     background: transparent;
     border: none;
