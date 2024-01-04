@@ -4,7 +4,6 @@ import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
 import { CanvasComponent } from "./canvas";
 import { createDocumentModel } from "../../models/document/document";
-import { DocumentContentModel } from "../../models/document/document-content";
 import { ProblemDocument } from "../../models/document/document-types";
 import { specStores } from "../../models/stores/spec-stores";
 import { createSingleTileContent } from "../../utilities/test-utils";
@@ -86,15 +85,23 @@ describe("Canvas Component", () => {
   });
 
   it("can render with content", () => {
-    const content = DocumentContentModel.create(createSingleTileContent({
+    const content = createSingleTileContent({
       type: "Text",
       text: "test"
-    }));
+    });
+    const document = createDocumentModel({
+      type: ProblemDocument,
+      uid: "1",
+      key: "test",
+      createdAt: 1,
+      content,
+      visibility: "public"
+    });
     const stores = specStores();
     render(
       <Provider stores={stores}>
         <ModalProvider>
-          <CanvasComponent context="test" content={content} readOnly={true} />
+          <CanvasComponent context="test" content={document.content} readOnly={true} />
         </ModalProvider>
       </Provider>
     );
