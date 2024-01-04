@@ -42,12 +42,6 @@ context('Expression Tool Tile', function () {
     exp.getTitleInput().type("new title{enter}");
     exp.getTileTitle().should("contain", "(new title)");
 
-    //Expression tile title restore upon page reload
-    cy.wait(2000);
-    cy.reload();
-    cy.waitForLoad();
-    exp.getTileTitle().should("contain", "(new title)");
-
     cy.log("should accept basic keyboard input");
     // Can now perform keyboard input
     // but thus far cannot get sequences like {del} to work in test
@@ -55,6 +49,13 @@ context('Expression Tool Tile', function () {
     exp.getMathField().eq(0).type("hi", { force: true });
     exp.getMathField().eq(0).should("have.value", "hia=\\pi r^2");
     cy.wait(2000);
+
+    //Expression tile restore upon page reload
+    cy.wait(2000);
+    cy.reload();
+    cy.waitForLoad();
+    exp.getTileTitle().should("contain", "(new title)");
+    exp.getMathField().eq(0).should("have.value", "hia=\\pi r^2");
 
     cy.log("expression can be changed and re-renders");
     //  The below tests a change, but does not follow a genuine user path
