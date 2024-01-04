@@ -285,7 +285,7 @@ context('Table Tool Tile', function () {
     // Unlink
     clueCanvas.clickToolbarButton('table', 'link-tile');
     tableToolTile.getLinkGraphModalTileMenu().select('Table 1');
-    tableToolTile.getLinkGraphModalLinkButton().should("contain", "Unlink").click();
+    tableToolTile.getLinkGraphModalLinkButton().should("contain", "Clear It!").click();
     // Re-link
     clueCanvas.clickToolbarButton('table', 'link-tile');
     tableToolTile.getLinkGraphModalTileMenu().select('Table 1');
