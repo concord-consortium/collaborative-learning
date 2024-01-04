@@ -175,7 +175,6 @@ export class AppComponent extends BaseComponent<IProps, IState> {
       return this.renderApp(this.renderLoading());
     }
 
-    // Is this dead now?
     if (urlParams.qaClear) {
       const {qaCleared, qaClearError} = this.state;
       return this.renderApp(
