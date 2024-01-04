@@ -164,19 +164,22 @@ describe('GraphModel', () => {
 
       // Colors should loop once we've gone through them all
       clueGraphColors.forEach(color => {
-        graphModel.getColorForId(color);
+        graphModel.setColorForId(color.color);
+        // graphModel.getColorForId(color.color);
       });
       const extraId = "extra";
-      graphModel.getColorForId(extraId);
+      graphModel.setColorForId(extraId);
+      // graphModel.getColorForId(extraId);
       expect(getUniqueColorIndices().length).toEqual(clueGraphColors.length);
 
       // After removing a color, we should get it when we add a new color
       const uniqueKey =
-        clueGraphColors.find(id => graphModel.getColorForId(id) !== graphModel.getColorForId(extraId)) as string;
+        clueGraphColors.find(id => graphModel.getColorForId(id.color) !== graphModel.getColorForId(extraId))!.color;
       const oldColor = graphModel.getColorForId(uniqueKey);
       graphModel.removeColorForId(uniqueKey);
       expect(getUniqueColorIndices().length).toEqual(clueGraphColors.length - 1);
       const newKey = "new";
+      graphModel.setColorForId(newKey);
       const newColor = graphModel.getColorForId(newKey);
       expect(newColor).toEqual(oldColor);
     });

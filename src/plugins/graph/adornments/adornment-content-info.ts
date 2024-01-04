@@ -8,7 +8,7 @@ export interface IAdornmentContentInfo {
   type: string
 }
 
-const gAdornmentContentInfoMap: Record<string, IAdornmentContentInfo> = {};
+export const gAdornmentContentInfoMap: Record<string, IAdornmentContentInfo> = {};
 
 export function registerAdornmentContentInfo(info: IAdornmentContentInfo) {
   gAdornmentContentInfoMap[info.type] = info;

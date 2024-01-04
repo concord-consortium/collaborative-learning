@@ -1,26 +1,24 @@
 import { observer } from "mobx-react";
-import React, { useContext } from "react";
-import { AttributeType } from "../../../../models/data/attribute";
-import { IDataSet } from "../../../../models/data/data-set";
+import React from "react";
 import { axisPlaceToAttrRole } from "../../graph-types";
-import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
 import { AddSeriesButton } from "./add-series-button";
-import { ReadOnlyContext } from "../../../../components/document/read-only-context";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
 import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../../../models/shared/shared-data-set";
-import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
+import { DataConfigurationContext, useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
+import { IGraphLayerModel } from "../../models/graph-layer-model";
+import { LegendIdListFunction, ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import XAxisIcon from "../../assets/x-axis-icon.svg";
 import YAxisIcon from "../../assets/y-axis-icon.svg";
 
-interface ILayerLegendProps {
-  onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
-  onRemoveAttribute: (place: GraphPlace, attrId: string) => void;
-  onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
-}
+export const layerLegendType = "layer-legend";
+
+const kLayerLegendHeaderHeight = 58;
+const kLayerLegendRowHeight = 52;
 
 /**
  * The Legend for a single dataset in an xy-plot
@@ -28,13 +26,14 @@ interface ILayerLegendProps {
  * Adds an Add Series button when appropriate
  * Adds unlink button to remove layer
  */
-export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProps) {
+const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPartProps) {
   let legendItems = [] as React.ReactNode[];
-  const { onChangeAttribute, onRemoveAttribute, onTreatAttributeAs } = props;
   const graphModel = useGraphModelContext();
   const dataConfiguration = useDataConfigurationContext();
-  const readOnly = useContext(ReadOnlyContext);
+  const readOnly = useReadOnlyContext();
   const xAttrId = dataConfiguration?.attributeID(axisPlaceToAttrRole.bottom);
+  const { onChangeAttribute, onRemoveAttribute, onTreatAttributeAs } = props;
+  if (!onChangeAttribute || !onRemoveAttribute || !onTreatAttributeAs) return null;
 
   function handleRemoveIconClick() {
     if (dataConfiguration?.dataset) {
@@ -148,3 +147,44 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
     </>
   );
 });
+
+export const LayerLegend = observer(function LayerLegend(props: ILegendPartProps) {
+  const graphModel = useGraphModelContext();
+  return (
+    <>
+      {
+        graphModel.layers.map((layer) => {
+          return (
+            <DataConfigurationContext.Provider key={layer.id} value={layer.config}>
+              <SingleLayerLegend {...props} />
+            </DataConfigurationContext.Provider>);
+          }
+        )
+      }
+    </>
+  );
+});
+
+function heightOfOneLayerLegend(layer: IGraphLayerModel) {
+  if (!layer.config.dataset) return 0;
+
+  const yAttrDescriptions = layer.config.yAttributeDescriptions.length;
+  // Only include the add series button if we have unused attributes
+  const attributeCount = layer.config.dataset?.attributes?.length ?? 0;
+  const addSeriesButton = (yAttrDescriptions + 1) < attributeCount ? 1 : 0;
+  const rows = Math.ceil((yAttrDescriptions + addSeriesButton) / 2);
+  return kLayerLegendHeaderHeight + kLayerLegendRowHeight * rows;
+}
+export function heightOfLayerLegend({ graphModel }: ILegendHeightFunctionProps) {
+  return graphModel.layers.reduce((prev, layer) => {
+    return prev + heightOfOneLayerLegend(layer);
+  }, 0);
+}
+
+export const getLayerLegendIdList: LegendIdListFunction = function getLayerLegendIdList(graphModel) {
+  let ids: string[] = [];
+  graphModel.layers?.forEach(layer => {
+    ids = ids.concat(layer.config.yAttributeDescriptions.map(description => description.attributeID));
+  });
+  return ids;
+};

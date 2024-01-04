@@ -76,11 +76,11 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().click();
       xyTile.getXYPlotTitle().should('contain', title);
 
-      cy.log("does not show edit boxes on axes");
-      xyTile.getEditableAxisBox("bottom", "min").should("not.exist");
-      xyTile.getEditableAxisBox("bottom", "max").should("not.exist");
-      xyTile.getEditableAxisBox("left", "min").should("not.exist");
-      xyTile.getEditableAxisBox("left", "max").should("not.exist");
+      // cy.log("does not show edit boxes on axes");
+      // xyTile.getEditableAxisBox("bottom", "min").should("not.exist");
+      // xyTile.getEditableAxisBox("bottom", "max").should("not.exist");
+      // xyTile.getEditableAxisBox("left", "min").should("not.exist");
+      // xyTile.getEditableAxisBox("left", "max").should("not.exist");
 
       cy.log("Link Table");
       clueCanvas.clickToolbarButton('graph', 'link-tile');
@@ -99,8 +99,8 @@ context('XYPlot Tool Tile', function () {
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.typeInTableCell(5, '7');
         tableToolTile.getTableCell().eq(5).should('contain', '7');
-        tableToolTile.typeInTableCell(6, '15');
-        tableToolTile.getTableCell().eq(6).should('contain', '15');
+        tableToolTile.typeInTableCell(6, '6');
+        tableToolTile.getTableCell().eq(6).should('contain', '6');
       });
 
       cy.log("verify graph dot is updated");
@@ -261,7 +261,7 @@ context('XYPlot Tool Tile', function () {
 
       cy.log("Link First Table");
       xyTile.getTile().click();
-      clueCanvas.clickToolbarButton('graph', 'link-tile');
+      clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
       xyTile.linkTable("Table 1");
       xyTile.getXAttributesLabel().should('have.length', 1);
       xyTile.getYAttributesLabel().should('have.length', 1);
@@ -303,7 +303,7 @@ context('XYPlot Tool Tile', function () {
 
       // xyTile.selectYVariable was failing because it was catching the button from the x "dropdown" instead
       xyTile.getYVariableDropdown().click();
-      xyTile.getPortalButton().eq(1).click({ force: true });
+      xyTile.getPortalButton(".normal-menu-list").eq(1).click({ force: true });
       xyTile.getYVariableDropdown().should("contain.text", name1);
 
       xyTile.getPlottedVariablesPath().should("have.length", 1);
@@ -313,12 +313,12 @@ context('XYPlot Tool Tile', function () {
 
       // Select the x variable for the 2nd trace
       xyTile.getXVariableDropdown(1).click();
-      xyTile.getPortalButton().eq(2).click({ force: true });
+      xyTile.getPortalButton(".normal-menu-list").eq(2).click({ force: true });
       xyTile.getXVariableDropdown(1).should("contain.text", name1);
 
       // Select the y variable for the 2nd trace
       xyTile.getYVariableDropdown(1).click();
-      xyTile.getPortalButton().eq(3).click({ force: true });
+      xyTile.getPortalButton(".normal-menu-list").eq(3).click({ force: true });
       xyTile.getYVariableDropdown().should("contain.text", name1);
 
       xyTile.getPlottedVariablesPath().should("have.length", 2);

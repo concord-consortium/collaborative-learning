@@ -1,5 +1,5 @@
 import { Menu, MenuItem, MenuList, MenuButton, MenuDivider, Portal } from "@chakra-ui/react";
-import React, { CSSProperties, useContext, useEffect, useRef, useState } from "react";
+import React, { CSSProperties, useEffect, useRef, useState } from "react";
 import classNames from "classnames";
 
 import t from "../../../utilities/translation/translate";
@@ -14,7 +14,7 @@ import { AttributeType } from "../../../../../../models/data/attribute";
 import { IDataSet } from "../../../../../../models/data/data-set";
 import { isSetAttributeNameAction } from "../../../../../../models/data/data-set-actions";
 import { useGraphSettingsContext } from "../../../../hooks/use-graph-settings-context";
-import { ReadOnlyContext } from "../../../../../../components/document/read-only-context";
+import { useReadOnlyContext } from "../../../../../../components/document/read-only-context";
 
 import DropdownCaretIcon from "../../../../assets/dropdown-caret.svg";
 
@@ -73,7 +73,7 @@ export const AxisOrLegendAttributeMenu = ({
     position: "absolute", inset: 0, padding: 0, color: "transparent"
   };
 
-  const readOnly = useContext(ReadOnlyContext);
+  const readOnly = useReadOnlyContext();
 
   const draggableOptions: IUseDraggableAttribute = {
     prefix: instanceId, dataSet: data, attributeId: attrId
@@ -100,7 +100,7 @@ export const AxisOrLegendAttributeMenu = ({
     : (
       <MenuButton
         className={classNames(
-          "graph-legend-label simple-attribute-label",
+          "graph-legend-label normal-dropdown-label simple-attribute-label",
           {"target-open": isOpen, "target-closed": !isOpen}
         )}
       >

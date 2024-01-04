@@ -1,17 +1,21 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { select } from "d3";
 import { observer } from "mobx-react-lite";
-import { mstAutorun } from "../../../../../utilities/mst-autorun";
-import { mstReaction } from "../../../../../utilities/mst-reaction";
-import { IAxisModel, INumericAxisModel } from "../../../imports/components/axis/models/axis-model";
-import { useAxisLayoutContext } from "../../../imports/components/axis/models/axis-layout-context";
-import { ScaleNumericBaseType } from "../../../imports/components/axis/axis-types";
-import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
-import { useGraphModelContext } from "../../../hooks/use-graph-model-context";
-import { useDataConfigurationContext } from "../../../hooks/use-data-configuration-context";
-import { curveBasis, setNiceDomain } from "../../../utilities/graph-utils";
 
-import "../plotted-function-adornment-component.scss";
+import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
+import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
+import { mstAutorun } from "../../../../utilities/mst-autorun";
+import { useDataConfigurationContext } from "../../../graph/hooks/use-data-configuration-context";
+import { useGraphModelContext } from "../../../graph/hooks/use-graph-model-context";
+import { ScaleNumericBaseType } from "../../../graph/imports/components/axis/axis-types";
+import { useAxisLayoutContext } from "../../../graph/imports/components/axis/models/axis-layout-context";
+import { IAxisModel, INumericAxisModel } from "../../../graph/imports/components/axis/models/axis-model";
+import { curveBasis, setNiceDomain } from "../../../graph/utilities/graph-utils";
+import { SharedVariables } from "../../shared-variables";
+import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
+
+import "../../../graph/adornments/plotted-function/plotted-function-adornment-component.scss";
+import { mstReaction } from "../../../../utilities/mst-reaction";
 
 interface IProps {
   containerId?: string
@@ -25,6 +29,7 @@ interface IProps {
 
 export const PlottedVariablesAdornmentComponent = observer(function PlottedVariablesAdornment(props: IProps) {
   const {model, cellKey = {}, plotWidth, plotHeight, xAxis, yAxis} = props;
+  const { tile } = useTileModelContext();
   const graphModel = useGraphModelContext();
   const dataConfig = useDataConfigurationContext();
   const layout = useAxisLayoutContext();
@@ -43,7 +48,8 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   const classFromKey = model.classNameFromKey(cellKey);
   const plottedFunctionRef = useRef<SVGGElement>(null);
   const plottedFunctionCurrentValueRef = useRef<SVGGElement>(null);
-  const sharedVariables = graphModel.sharedVariables;
+  const smm = getSharedModelManager(graphModel);
+  const sharedVariables = tile && smm?.isReady && smm.findFirstSharedModelByType(SharedVariables, tile.id);
 
   const addPath = useCallback(() => {
     const xMin = xScale.domain()[0];
@@ -62,10 +68,11 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         selection.append("path")
           .attr("class", `plotted-function plotted-function-${classFromKey}`)
           .attr("data-testid", `plotted-function-path${classFromKey ? `-${classFromKey}` : ""}`)
+          .attr("stroke", graphModel.getColorForId(instanceKey))
           .attr("d", path);
       }
     }
-  }, [classFromKey, model, xCellCount, xScale, yCellCount, yScale]);
+  }, [classFromKey, graphModel, model, xCellCount, xScale, yCellCount, yScale]);
 
   // Add the lines and their associated covers and labels
   const refreshValues = useCallback(() => {
@@ -134,29 +141,29 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
       refreshValues();
       refreshCurrentValue();
     }, { name: "PlottedVariablesAdornmentComponent.refreshAxisChange" }, model);
-  }, [dataConfig, model, plotWidth, plotHeight, refreshValues, sharedVariables, xAxis, yAxis, refreshCurrentValue]);
+  }, [dataConfig, model, plotWidth, plotHeight, sharedVariables, xAxis, yAxis, refreshValues, refreshCurrentValue]);
 
   // Scale graph when a new X or Y variable is selected
   useEffect(function scaleOnVariableChange() {
     return mstReaction(() => {
       return Array.from(model.plottedVariables.values()).map((pvi) => [pvi.xVariableId, pvi.yVariableId]);
     },
-    (varlist) => {
-      // Set a range that includes 0 to 2x for all the given values.
-      function fitValues(values: number[], axis: IAxisModel) {
-        if (values.length) {
-          setNiceDomain([0, ...values.map(x=>2*x)], axis);
+      (varlist) => {
+        // Set a range that includes 0 to 2x for all the given values.
+        function fitValues(values: number[], axis: IAxisModel) {
+          if (values.length) {
+            setNiceDomain([0, ...values.map(x => 2 * x)], axis);
+          }
         }
-      }
 
-      const variableValues = model.variableValues;
-      if (xAxis && yAxis) {
-        fitValues(variableValues.x, xAxis);
-        fitValues(variableValues.y, yAxis);
-      }
-    },
-    { name: "PlottedVariablesAdornmentComponent.scaleOnVariableChange" },
-    model);
+        const variableValues = model.variableValues;
+        if (xAxis && yAxis) {
+          fitValues(variableValues.x, xAxis);
+          fitValues(variableValues.y, yAxis);
+        }
+      },
+      { name: "PlottedVariablesAdornmentComponent.scaleOnVariableChange" },
+      model);
   }, [model, xAxis, yAxis]);
 
   return (

@@ -1,14 +1,16 @@
 import { destroy, getSnapshot, IAnyStateTreeNode, Instance, types } from "mobx-state-tree";
 import { Variable, VariableType } from "@concord-consortium/diagram-view";
 
-import { getTileModel } from "../../../../../models/document/shared-model-document-manager";
-import { getSharedModelManager } from "../../../../../models/tiles/tile-environment";
-import { uniqueId } from "../../../../../utilities/js-utils";
-import { SharedVariables, SharedVariablesType } from "../../../../shared-variables/shared-variables";
-import { IAdornmentModel } from "../../adornment-models";
+import { getTileModel } from "../../../../models/document/shared-model-document-manager";
+import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
+import { uniqueId } from "../../../../utilities/js-utils";
+import { IAdornmentModel } from "../../../graph/adornments/adornment-models";
+import {
+  PlottedFunctionAdornmentModel
+} from "../../../graph/adornments/plotted-function/plotted-function-adornment-model";
+import { SharedVariables, SharedVariablesType } from "../../shared-variables";
 import { kPlottedVariablesType } from "./plotted-variables-adornment-types";
-import { PlottedFunctionAdornmentModel } from "../plotted-function-adornment-model";
-import { GraphAttrRole } from "../../../graph-types";
+import { GraphAttrRole } from "../../../graph/graph-types";
 
 function getSharedVariables(node: IAnyStateTreeNode) {
   const sharedModelManager = getSharedModelManager(node);
@@ -97,6 +99,9 @@ export const PlottedVariablesAdornmentModel = PlottedFunctionAdornmentModel
     type: types.optional(types.literal(kPlottedVariablesType), kPlottedVariablesType)
   })
   .views(self => ({
+    get instanceKeys() {
+      return Array.from(self.plottedVariables.keys());
+    },
     get sharedVariables() {
       return getSharedVariables(self);
     },
