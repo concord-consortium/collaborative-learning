@@ -3,21 +3,21 @@ import { ISharedModelManager } from "../../models/shared/shared-model-manager";
 import { registerSharedModelInfo } from "../../models/shared/shared-model-registry";
 import { registerTextPluginInfo } from "../../models/tiles/text/text-plugin-info";
 import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
+import { IGraphModel, registerGraphSharedModelUpdateFunction } from "../graph/models/graph-model";
+import {
+  EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject
+} from "./drawing/variable-object";
 import {
   IPlottedVariablesAdornmentModel, isPlottedVariablesAdornment, PlottedVariablesAdornmentModel
-} from "../graph/adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
-import "../graph/adornments/plotted-function/plotted-variables/plotted-variables-adornment-registration";
+} from "./graph/plotted-variables-adornment/plotted-variables-adornment-model";
+import "./graph/plotted-variables-adornment/plotted-variables-adornment-registration";
 import {
   kPlottedVariablesType
-} from "../graph/adornments/plotted-function/plotted-variables/plotted-variables-adornment-types";
-import { IGraphModel, registerGraphSharedModelUpdateFunction } from "../graph/models/graph-model";
+} from "./graph/plotted-variables-adornment/plotted-variables-adornment-types";
 import { kSharedVariablesID, SharedVariables } from "./shared-variables";
 import { NewVariableTextButton, InsertVariableTextButton, EditVariableTextButton,
   kNewVariableButtonName, kInsertVariableButtonName, kEditVariableButtonName} from "./slate/text-tile-buttons";
 import { kVariableTextPluginName, VariablesPlugin } from "./slate/variables-plugin";
-import {
-  EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject
-} from "./drawing/variable-object";
 
 registerSharedModelInfo({
   type: kSharedVariablesID,

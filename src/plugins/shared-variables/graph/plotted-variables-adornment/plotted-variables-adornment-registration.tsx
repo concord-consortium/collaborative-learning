@@ -1,9 +1,9 @@
-import { registerMultiLegendPart } from "../../../components/legend/legend-registration";
+import { registerAdornmentComponentInfo } from "../../../graph/adornments/adornment-component-info";
+import { registerAdornmentContentInfo } from "../../../graph/adornments/adornment-content-info";
+import { registerMultiLegendPart } from "../../../graph/components/legend/legend-registration";
 import {
-  colorIdsOfVariableFunctionLegend, heightOfVariableFunctionLegend, VariableFunctionLegend, variableFunctionLegendType
-} from "../../../components/legend/variable-function-legend";
-import { registerAdornmentComponentInfo } from "../../adornment-component-info";
-import { registerAdornmentContentInfo } from "../../adornment-content-info";
+  getVariableFunctionLegendIdList, heightOfVariableFunctionLegend, VariableFunctionLegend, variableFunctionLegendType
+} from "../legend/variable-function-legend";
 import { PlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
 import {
   kPlottedVariablesClass, kPlottedVariablesLabelKey, kPlottedVariablesPrefix, kPlottedVariablesType
@@ -28,6 +28,6 @@ registerAdornmentComponentInfo({
 registerMultiLegendPart({
   component: VariableFunctionLegend,
   getHeight: heightOfVariableFunctionLegend,
-  getColorIdList: colorIdsOfVariableFunctionLegend,
+  getLegendIdList: getVariableFunctionLegendIdList,
   type: variableFunctionLegendType
 }, true);

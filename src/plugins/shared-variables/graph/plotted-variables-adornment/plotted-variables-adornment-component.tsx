@@ -1,19 +1,20 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { select } from "d3";
 import { observer } from "mobx-react-lite";
-import { getSharedModelManager } from "../../../../../models/tiles/tile-environment";
-import { mstAutorun } from "../../../../../utilities/mst-autorun";
-import { INumericAxisModel } from "../../../imports/components/axis/models/axis-model";
-import { useAxisLayoutContext } from "../../../imports/components/axis/models/axis-layout-context";
-import { ScaleNumericBaseType } from "../../../imports/components/axis/axis-types";
-import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
-import { useGraphModelContext } from "../../../hooks/use-graph-model-context";
-import { useDataConfigurationContext } from "../../../hooks/use-data-configuration-context";
-import { curveBasis } from "../../../utilities/graph-utils";
 
-import "../plotted-function-adornment-component.scss";
-import { useTileModelContext } from "../../../../../components/tiles/hooks/use-tile-model-context";
-import { SharedVariables } from "../../../../shared-variables/shared-variables";
+import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
+import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
+import { mstAutorun } from "../../../../utilities/mst-autorun";
+import { useDataConfigurationContext } from "../../../graph/hooks/use-data-configuration-context";
+import { useGraphModelContext } from "../../../graph/hooks/use-graph-model-context";
+import { ScaleNumericBaseType } from "../../../graph/imports/components/axis/axis-types";
+import { useAxisLayoutContext } from "../../../graph/imports/components/axis/models/axis-layout-context";
+import { INumericAxisModel } from "../../../graph/imports/components/axis/models/axis-model";
+import { curveBasis } from "../../../graph/utilities/graph-utils";
+import { SharedVariables } from "../../shared-variables";
+import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
+
+import "../../../graph/adornments/plotted-function/plotted-function-adornment-component.scss";
 
 interface IProps {
   containerId?: string

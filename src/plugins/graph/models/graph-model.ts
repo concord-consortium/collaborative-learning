@@ -573,7 +573,7 @@ export const GraphModel = TileContentModel
       addDisposer(self, reaction(
         () => {
           let ids: string[] = [];
-          multiLegendParts.forEach(part => ids = ids.concat(part.getColorIdList(self)));
+          multiLegendParts.forEach(part => ids = ids.concat(part.getLegendIdList(self)));
           return ids;
         },
         (ids) => {

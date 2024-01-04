@@ -1,12 +1,13 @@
 import { FunctionComponent } from "react";
 
-import { colorIdsOfLayerLegend, heightOfLayerLegend, LayerLegend, layerLegendType } from "./layer-legend";
-import { ColorIdListFunction, ILegendPartProps, LegendHeightFunction } from "./legend-types";
+import { getLayerLegendIdList, heightOfLayerLegend, LayerLegend, layerLegendType } from "./layer-legend";
+import { LegendIdListFunction, ILegendPartProps, LegendHeightFunction } from "./legend-types";
 
 interface IMultiLegendPart {
   component: FunctionComponent<ILegendPartProps>;
   getHeight: LegendHeightFunction;
-  getColorIdList: ColorIdListFunction;
+  // The legend id list is used to assign colors to items that appear in the legend and graph
+  getLegendIdList: LegendIdListFunction;
   type: string;
 }
 
@@ -14,13 +15,13 @@ export const multiLegendParts: IMultiLegendPart[] = [
   {
     component: LayerLegend,
     getHeight: heightOfLayerLegend,
-    getColorIdList: colorIdsOfLayerLegend,
+    getLegendIdList: getLayerLegendIdList,
     type: layerLegendType
   }
 ];
 
-export function registerMultiLegendPart(part: IMultiLegendPart, start?: boolean) {
-  if (start) {
+export function registerMultiLegendPart(part: IMultiLegendPart, prepend?: boolean) {
+  if (prepend) {
     multiLegendParts.unshift(part);
   } else {
     multiLegendParts.push(part);
