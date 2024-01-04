@@ -5,6 +5,7 @@ import { observer } from "mobx-react-lite";
 import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
 import { mstAutorun } from "../../../../utilities/mst-autorun";
+import { mstReaction } from "../../../../utilities/mst-reaction";
 import { useDataConfigurationContext } from "../../../graph/hooks/use-data-configuration-context";
 import { useGraphModelContext } from "../../../graph/hooks/use-graph-model-context";
 import { ScaleNumericBaseType } from "../../../graph/imports/components/axis/axis-types";
@@ -15,7 +16,6 @@ import { SharedVariables } from "../../shared-variables";
 import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
 
 import "../../../graph/adornments/plotted-function/plotted-function-adornment-component.scss";
-import { mstReaction } from "../../../../utilities/mst-reaction";
 
 interface IProps {
   containerId?: string

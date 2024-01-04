@@ -95,7 +95,7 @@ export const PlottedFunctionAdornmentComponent = observer(function PlottedFuncti
       }
       refreshValues();
     }, { name: "PlottedFunctionAdornmentComponent.refreshAxisChange" }, model);
-  }, [dataConfig, model, plotWidth, plotHeight, xAxis, yAxis, refreshValues]);
+  }, [dataConfig, model, plotWidth, plotHeight, refreshValues, xAxis, yAxis]);
 
   return (
     <svg className={`plotted-function-${classFromKey}`}>
