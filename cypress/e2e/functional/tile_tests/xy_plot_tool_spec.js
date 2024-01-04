@@ -258,7 +258,7 @@ context('XYPlot Tool Tile', function () {
 
       cy.log("Link First Table");
       xyTile.getTile().click();
-      clueCanvas.clickToolbarButton('graph', 'link-tile');
+      clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
       xyTile.linkTable("Table 1");
       xyTile.getXAttributesLabel().should('have.length', 1);
       xyTile.getYAttributesLabel().should('have.length', 1);
