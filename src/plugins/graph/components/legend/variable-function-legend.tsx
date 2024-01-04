@@ -11,7 +11,7 @@ import {
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { IGraphModel } from "../../models/graph-model";
 import { LegendDropdown } from "./legend-dropdown";
-import { ColorIdListFunction, ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
+import { LegendIdListFunction, ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
 import { VariableSelection } from "./variable-selection";
 
 import AddSeriesIcon from "../../imports/assets/add-series-icon.svg";
@@ -190,8 +190,8 @@ export function heightOfVariableFunctionLegend({ graphModel }: ILegendHeightFunc
     + plottedVariableTraces * kPlottedVariableRowHeight;
 }
 
-export const colorIdsOfVariableFunctionLegend: ColorIdListFunction =
-function colorIdsOfVariableFunctionLegend(graphModel) {
+export const getVariableFunctionLegendIdList: LegendIdListFunction =
+function getVariableFunctionLegendIdList(graphModel) {
   let ids: string[] = [];
   const plottedVariableAdornments = getPlottedVariableAdornments(graphModel);
   plottedVariableAdornments.forEach(adornment => ids = ids.concat(adornment.instanceKeys));

@@ -9,7 +9,7 @@ import { getSharedModelManager } from "../../../../models/tiles/tile-environment
 import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../../../models/shared/shared-data-set";
 import { DataConfigurationContext, useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { IGraphLayerModel } from "../../models/graph-layer-model";
-import { ColorIdListFunction, ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
+import { LegendIdListFunction, ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import XAxisIcon from "../../assets/x-axis-icon.svg";
@@ -181,7 +181,7 @@ export function heightOfLayerLegend({ graphModel }: ILegendHeightFunctionProps) 
   }, 0);
 }
 
-export const colorIdsOfLayerLegend: ColorIdListFunction = function colorIdsOfLayerLegend(graphModel) {
+export const getLayerLegendIdList: LegendIdListFunction = function getLayerLegendIdList(graphModel) {
   let ids: string[] = [];
   graphModel.layers?.forEach(layer => {
     ids = ids.concat(layer.config.yAttributeDescriptions.map(description => description.attributeID));

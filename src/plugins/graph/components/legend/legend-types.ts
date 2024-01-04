@@ -14,4 +14,4 @@ export interface ILegendHeightFunctionProps {
 }
 export type LegendHeightFunction = (props: ILegendHeightFunctionProps) => number;
 
-export type ColorIdListFunction = (graphModel: Partial<IGraphModel>) => string[];
+export type LegendIdListFunction = (graphModel: Partial<IGraphModel>) => string[];
