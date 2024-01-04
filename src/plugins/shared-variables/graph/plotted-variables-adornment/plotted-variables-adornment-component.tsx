@@ -87,34 +87,37 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
     addPath();
   }, [addPath, model]);
 
-  const refreshCurrentValue = useCallback(() => {
+  const refreshCurrentValues = useCallback(() => {
     if (!model.isVisible) return;
-    for (const pvi of model.plottedVariables.values()) {
-      const selection = select(plottedFunctionCurrentValueRef.current).selectAll("circle");
-      const vals = pvi.variableValues;
+    const valueData = [] as {key: string, x: number, y: number}[];
+    for (const key of model.plottedVariables.keys()) {
+      const vals = model.plottedVariables.get(key)?.variableValues;
       if (vals) {
-        selection
-          .data([vals])
-          .join(
-            enter => {
-              return enter.append('circle')
-                .attr('r', '5')
-                .attr('class', 'variable-value')
-                .attr('cx', (data) => model.pointPosition(data.x, xScale, xCellCount))
-                .attr('cy', (data) => model.pointPosition(data.y, yScale, yCellCount));
-            },
-            update => {
-              return update
-                .attr('cx', (data) => model.pointPosition(data.x, xScale, xCellCount))
-                .attr('cy', (data) => model.pointPosition(data.y, yScale, yCellCount));
-            },
-            exit => {
-              exit.remove();
-            }
-          );
+        valueData.push({ key, x: vals.x, y: vals.y });
       }
     }
-  }, [model, xCellCount, xScale, yCellCount, yScale]);
+    const selection = select(plottedFunctionCurrentValueRef.current).selectAll("circle");
+    selection
+      .data(valueData)
+      .join(
+        enter => {
+          return enter.append('circle')
+            .attr('r', '5')
+            .attr('class', 'variable-valuex')
+            .attr("fill", (data) => graphModel.getColorForId(data.key))
+            .attr('cx', (data) => model.pointPosition(data.x, xScale, xCellCount))
+            .attr('cy', (data) => model.pointPosition(data.y, yScale, yCellCount));
+        },
+        update => {
+          return update
+            .attr('cx', (data) => model.pointPosition(data.x, xScale, xCellCount))
+            .attr('cy', (data) => model.pointPosition(data.y, yScale, yCellCount));
+        },
+        exit => {
+          exit.remove();
+        }
+      );
+  }, [graphModel, model, xCellCount, xScale, yCellCount, yScale]);
 
   // Refresh values on expression changes
   useEffect(function refreshExpressionChange() {
@@ -139,9 +142,9 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         plottedVariables.xVariable; // eslint-disable-line no-unused-expressions
       });
       refreshValues();
-      refreshCurrentValue();
+      refreshCurrentValues();
     }, { name: "PlottedVariablesAdornmentComponent.refreshAxisChange" }, model);
-  }, [dataConfig, model, plotWidth, plotHeight, sharedVariables, xAxis, yAxis, refreshValues, refreshCurrentValue]);
+  }, [dataConfig, model, plotWidth, plotHeight, sharedVariables, xAxis, yAxis, refreshValues, refreshCurrentValues]);
 
   // Scale graph when a new X or Y variable is selected
   useEffect(function scaleOnVariableChange() {
