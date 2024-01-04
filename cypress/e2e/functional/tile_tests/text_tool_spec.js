@@ -78,6 +78,19 @@ context('Text tool tile functionalities', function () {
     clueCanvas.clickToolbarButton('text', 'list-ul');
     textToolTile.getTextEditor().last().should('have.descendants', 'ul');
 
+    // Text tile restore upon page reload
+    cy.wait(1000);
+    cy.reload();
+    cy.waitForLoad();
+    textToolTile.getTextTile().last().should('exist').and('contain', 'Hello World');
+    textToolTile.getTextEditor().last().should('have.descendants', 'strong');
+    textToolTile.getTextEditor().last().should('have.descendants', 'em');
+    textToolTile.getTextEditor().last().should('have.descendants', 'u');
+    textToolTile.getTextEditor().last().should('have.descendants', 'sub');
+    textToolTile.getTextEditor().last().should('have.descendants', 'sup');
+    textToolTile.getTextEditor().last().should('have.descendants', 'ol');
+    textToolTile.getTextEditor().last().should('have.descendants', 'ul');
+
     cy.log('verifies restore of text field content');
     canvas.createNewExtraDocumentFromFileMenu('text tool test', 'my-work');
     cy.wait(2000);
