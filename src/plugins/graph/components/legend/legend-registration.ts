@@ -6,6 +6,7 @@ import { LegendIdListFunction, ILegendPartProps, LegendHeightFunction } from "./
 interface IMultiLegendPart {
   component: FunctionComponent<ILegendPartProps>;
   getHeight: LegendHeightFunction;
+  // The legend id list is used to assign colors to items that appear in the legend and graph
   getLegendIdList: LegendIdListFunction;
   type: string;
 }
