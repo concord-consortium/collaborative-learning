@@ -9,11 +9,10 @@ import { DocumentContextReact } from "./document-context";
 import { DEBUG_SORT_WORK } from "../../lib/debug";
 import { isSortableType } from "../../models/document/document-types";
 import { SortWorkDocumentArea } from "./sort-work-document-area";
+import { ENavTab } from "../../models/view/nav-tabs";
 
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
-
-export const tabName = "sort-work";
 
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const sortOptions = ["Group", "Student"];
@@ -100,7 +99,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const persistentUI = usePersistentUIStore();
 
   const handleSelectDocument = (document: DocumentModelType) => {
-    persistentUI.openSubTabDocument(tabName, tabName, document.key);
+    persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, document.key);
   };
 
   //******************************* Handle Debug View ***************************************
@@ -118,9 +117,9 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   };
 
   const appConfigStore = useAppConfig();
-  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabName);
+  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(ENavTab.kSortWork);
   const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
-  const showSortWorkDocumentArea = !!tabState?.openDocuments.get(tabName);
+  const showSortWorkDocumentArea = !!tabState?.openDocuments.get(ENavTab.kSortWork);
 
   return (
     <div key="sort-work-view" className="sort-work-view">
@@ -148,7 +147,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
                             key={doc.key}
                             scale={0.1}
                             document={doc}
-                            tab={tabName}
+                            tab={ENavTab.kSortWork}
                             shouldHandleStarClick={true}
                             allowDelete={false}
                             onSelectDocument={handleSelectDocument}

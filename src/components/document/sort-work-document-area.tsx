@@ -7,8 +7,7 @@ import { EditableDocumentContent } from "./editable-document-content";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 import { observer } from "mobx-react";
-import { tabName } from "./sort-work-view";
-
+import { ENavTab } from "../../models/view/nav-tabs";
 
 export const SortWorkDocumentArea: React.FC = observer(function SortWorkDocumentArea() {
   const store = useStores();
@@ -19,9 +18,9 @@ export const SortWorkDocumentArea: React.FC = observer(function SortWorkDocument
   const problemStore = useProblemStore();
   const appConfigStore = useAppConfig();
 
-  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabName);
+  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(ENavTab.kSortWork);
   const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
-  const openDocumentKey = tabState?.openDocuments.get(tabName) || "";
+  const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
   const openDocument = store.documents.getDocument(openDocumentKey) ||
                        store.networkDocuments.getDocument(openDocumentKey);
 
@@ -61,8 +60,8 @@ export const SortWorkDocumentArea: React.FC = observer(function SortWorkDocument
   const sideClasses = { secondary: false, primary: false && !false };
 
   return (
-    <div className={classNames("focus-document", tabName, sideClasses)}>
-      <div className={classNames("document-header", tabName, sectionClass, sideClasses)}
+    <div className={classNames("focus-document", ENavTab.kSortWork, sideClasses)}>
+      <div className={classNames("document-header", ENavTab.kSortWork, sectionClass, sideClasses)}
             onClick={() => ui.setSelectedTile()}>
         <div className="document-title">
           {(displayTitle && displayTitle.owner)
@@ -72,7 +71,7 @@ export const SortWorkDocumentArea: React.FC = observer(function SortWorkDocument
           </span>
         </div>
         {
-          openDocument && editButton(tabName, sectionClass || sideClasses, openDocument)
+          openDocument && editButton(ENavTab.kSortWork, sectionClass || sideClasses, openDocument)
         }
       </div>
      {
