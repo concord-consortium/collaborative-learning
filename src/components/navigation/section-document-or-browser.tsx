@@ -33,7 +33,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const classStore = useClassStore();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const subTabs = tabSpec.subTabs;
-
   const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
   const subTabIndex = Math.max(subTabs.findIndex((subTab) => tabState?.openSubTab === subTab.label), 0);
   const selectedSubTab = subTabs[subTabIndex];

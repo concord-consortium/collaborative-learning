@@ -101,7 +101,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
       case ENavTab.kTeacherGuide:
         return this.renderTeacherGuide();
       case ENavTab.kStudentWork:
-        return <StudentGroupView />;
+        return <StudentGroupView/>;
       case ENavTab.kSortWork:
         return <SortWorkView/>;
       case ENavTab.kClassWork:
