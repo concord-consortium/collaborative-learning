@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite";
 import React, { ReactElement } from "react";
 import { VariableType } from "@concord-consortium/diagram-view";
 
-import { LegendDropdown } from "./legend-dropdown";
+import { LegendDropdown } from "../../../graph/components/legend/legend-dropdown";
 
 function variableDisplay(variable: VariableType) {
   const namePart = variable.name || "<no name>";

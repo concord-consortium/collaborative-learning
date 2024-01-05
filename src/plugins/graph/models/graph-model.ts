@@ -31,13 +31,8 @@ import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel, IGraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-model";
-import {
-  IPlottedVariablesAdornmentModel, isPlottedVariablesAdornment, PlottedVariablesAdornmentModel
-} from "../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
-import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
-import {
-  kPlottedVariablesType
-} from "../adornments/plotted-function/plotted-variables/plotted-variables-adornment-types";
+import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
+import { multiLegendParts } from "../components/legend/legend-registration";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -135,15 +130,6 @@ export const GraphModel = TileContentModel
     }
   }))
   .views(self => ({
-    get sharedVariables() {
-      const smm = getSharedModelManager(self);
-      if (smm?.isReady) {
-        const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
-        if (sharedVariableModels && sharedVariableModels.length > 0) {
-          return sharedVariableModels[0] as SharedVariablesType;
-        }
-      }
-    },
     pointColorAtIndex(plotIndex = 0) {
       if (plotIndex < self._pointColors.length) {
         return self._pointColors[plotIndex];
@@ -330,8 +316,8 @@ export const GraphModel = TileContentModel
     removeColorForId(id: string) {
       self._idColors.delete(id);
     },
-    setColorForId(id: string, colorIndex: number) {
-      self._idColors.set(id, colorIndex);
+    setColorForId(id: string, colorIndex?: number) {
+      self._idColors.set(id, colorIndex ?? self.nextColor);
     },
     setAxis(place: AxisPlace, axis: IAxisModelUnion) {
       self.axes.set(place, axis);
@@ -457,11 +443,8 @@ export const GraphModel = TileContentModel
   }))
   .views(self => ({
     getColorForId(id: string) {
-      let colorIndex = self._idColors.get(id);
-      if (colorIndex === undefined) {
-        colorIndex = self.nextColor;
-        self.setColorForIdWithoutUndo(id, colorIndex);
-      }
+      const colorIndex = self._idColors.get(id);
+      if (colorIndex === undefined) return "#000000";
       return clueGraphColors[colorIndex % clueGraphColors.length].color;
     },
     getColorNameForId(id: string) {
@@ -480,19 +463,7 @@ export const GraphModel = TileContentModel
       const smm = getSharedModelManager(self);
       if (!smm || !smm.isReady) return;
 
-      // Display a plotted variables adornment when this is linked to a shared variables model
-      const sharedVariableModels = smm.getTileSharedModelsByType(self, SharedVariables);
-      if (sharedVariableModels && sharedVariableModels.length > 0) {
-        let plottedVariablesAdornment: IPlottedVariablesAdornmentModel | undefined =
-          self.adornments.find(adornment => isPlottedVariablesAdornment(adornment)) as IPlottedVariablesAdornmentModel;
-        if (!plottedVariablesAdornment) {
-          plottedVariablesAdornment = PlottedVariablesAdornmentModel.create();
-          plottedVariablesAdornment.addPlottedVariables();
-        }
-        self.showAdornment(plottedVariablesAdornment);
-      } else {
-        self.hideAdornment(kPlottedVariablesType);
-      }
+      graphSharedModelUpdateFunctions.forEach(func => func(self as IGraphModel, smm));
 
       const sharedDataSets = smm.getTileSharedModelsByType(self, SharedDataSet);
       if (!sharedDataSets) {
@@ -597,6 +568,22 @@ export const GraphModel = TileContentModel
           }
         ));
       }
+
+      // Automatically asign colors to anything that might need them.
+      addDisposer(self, reaction(
+        () => {
+          let ids: string[] = [];
+          multiLegendParts.forEach(part => ids = ids.concat(part.getLegendIdList(self)));
+          return ids;
+        },
+        (ids) => {
+          ids.forEach(id => {
+            if (!self._idColors.has(id)) {
+              self.setColorForIdWithoutUndo(id, self.nextColor);
+            }
+          });
+        }
+      ));
     },
     setDataConfigurationReferences() {
       // Updates pre-existing DataConfiguration objects that don't have the now-required references
@@ -676,4 +663,11 @@ export function isGraphVisualPropsAction(action: ISerializedActionCall): action 
 
 export function isGraphModel(model?: ITileContentModel): model is IGraphModel {
   return model?.type === kGraphTileType;
+}
+
+type GraphSharedModelUpdateFunction = (graphModel: IGraphModel, sharedModelManager: ISharedModelManager) => void;
+const graphSharedModelUpdateFunctions: GraphSharedModelUpdateFunction[] = [];
+
+export function registerGraphSharedModelUpdateFunction(func: GraphSharedModelUpdateFunction) {
+  graphSharedModelUpdateFunctions.push(func);
 }

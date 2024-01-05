@@ -1,21 +1,31 @@
-import React, { useContext } from "react";
+import React from "react";
 import { observer } from "mobx-react";
 
-import { ReadOnlyContext } from "../../../../components/document/read-only-context";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
 import { clueGraphColors } from "../../../../utilities/color-utils";
-import { isSharedVariables, SharedVariables } from "../../../shared-variables/shared-variables";
+import { LegendDropdown } from "../../../graph/components/legend/legend-dropdown";
 import {
-  IPlottedVariablesAdornmentModel
-} from "../../adornments/plotted-function/plotted-variables/plotted-variables-adornment-model";
-import { useGraphModelContext } from "../../hooks/use-graph-model-context";
-import { LegendDropdown } from "./legend-dropdown";
+  LegendIdListFunction, ILegendHeightFunctionProps, ILegendPartProps
+} from "../../../graph/components/legend/legend-types";
+import { useGraphModelContext } from "../../../graph/hooks/use-graph-model-context";
+import { IGraphModel } from "../../../graph/models/graph-model";
+import { isSharedVariables, SharedVariables } from "../../shared-variables";
+import {
+  IPlottedVariablesAdornmentModel, isPlottedVariablesAdornment
+} from "../plotted-variables-adornment/plotted-variables-adornment-model";
 import { VariableSelection } from "./variable-selection";
 
-import AddSeriesIcon from "../../imports/assets/add-series-icon.svg";
-import RemoveDataIcon from "../../assets/remove-data-icon.svg";
-import XAxisIcon from "../../assets/x-axis-icon.svg";
-import YAxisIcon from "../../assets/y-axis-icon.svg";
+import AddSeriesIcon from "../../../graph/imports/assets/add-series-icon.svg";
+import RemoveDataIcon from "../../../graph/assets/remove-data-icon.svg";
+import XAxisIcon from "../../../graph/assets/x-axis-icon.svg";
+import YAxisIcon from "../../../graph/assets/y-axis-icon.svg";
+
+export const variableFunctionLegendType = "variable-function-legend";
+
+const kPlottedVariableHeaderHeight = 48;
+const kPlottedVariableRowHeight = 52;
+const kPlottedVariableAddButtonHeight = 50;
 
 interface IColorKeyProps {
   color: string;
@@ -34,13 +44,14 @@ interface IVariableFunctionLegendProps {
 }
 
 /**
- * XY Plot legend component that will control variables-based adornment.
+ * XY Plot legend component that will control a single variables-based adornment.
  */
-export const VariableFunctionLegend = observer(function(
-  { plottedVariablesAdornment }: IVariableFunctionLegendProps
-) {
+export const SingleVariableFunctionLegend = observer(function SingleVariableFunctionLegend({
+  plottedVariablesAdornment
+}: IVariableFunctionLegendProps) {
   const graphModel = useGraphModelContext();
-  const readOnly = useContext(ReadOnlyContext);
+  const readOnly = useReadOnlyContext();
+
   if (!plottedVariablesAdornment || plottedVariablesAdornment.plottedVariables.size <= 0) return null;
 
   function handleRemoveIconClick() {
@@ -78,7 +89,7 @@ export const VariableFunctionLegend = observer(function(
               return (
                 <div className="legend-row" key={instanceKey}>
                   <LegendDropdown
-                    buttonAriaLabel={graphModel.getColorNameForId(instanceKey)}
+                    buttonAriaLabel={`Color: ${graphModel.getColorNameForId(instanceKey)}`}
                     buttonLabel={<ColorKey color={graphModel.getColorForId(instanceKey)} />}
                     menuItems={
                       clueGraphColors.map((color, index) => ({
@@ -139,5 +150,52 @@ export const VariableFunctionLegend = observer(function(
   } else {
     return null;
   }
-
 });
+
+export const VariableFunctionLegend = observer(function VariableFunctionsLegend(props: ILegendPartProps) {
+  const graphModel = useGraphModelContext();
+
+  return (
+    <>
+      {
+        graphModel.adornments.map(adornment => {
+          if (isPlottedVariablesAdornment(adornment)) {
+            return (
+              <SingleVariableFunctionLegend
+                key={adornment.id}
+                plottedVariablesAdornment={adornment}
+              />
+            );
+          }
+          return null;
+        })
+      }
+    </>
+  );
+});
+
+function getPlottedVariableAdornments(graphModel: Partial<IGraphModel>) {
+  if (graphModel.adornments) {
+    return graphModel.adornments
+      .filter(adornment => isPlottedVariablesAdornment(adornment)) as IPlottedVariablesAdornmentModel[];
+  }
+  return [];
+}
+
+export function heightOfVariableFunctionLegend({ graphModel }: ILegendHeightFunctionProps) {
+  const plottedVariableAdornments = getPlottedVariableAdornments(graphModel);
+  const plottedVariableTraces = plottedVariableAdornments.reduce((prev, adornment) => {
+    return prev + adornment.plottedVariables.size;
+  }, 0);
+  // Each adornment has a header and an add variable row, plus one row for each plot
+  return plottedVariableAdornments.length * (kPlottedVariableHeaderHeight + kPlottedVariableAddButtonHeight)
+    + plottedVariableTraces * kPlottedVariableRowHeight;
+}
+
+export const getVariableFunctionLegendIdList: LegendIdListFunction =
+function getVariableFunctionLegendIdList(graphModel) {
+  let ids: string[] = [];
+  const plottedVariableAdornments = getPlottedVariableAdornments(graphModel);
+  plottedVariableAdornments.forEach(adornment => ids = ids.concat(adornment.instanceKeys));
+  return ids;
+};

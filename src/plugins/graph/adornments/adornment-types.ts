@@ -1,36 +1,16 @@
 import { types } from "mobx-state-tree";
-import { IAdornmentModel, IUnknownAdornmentModel, UnknownAdornmentModel } from "./adornment-models";
-import { IMovableLineModel, MovableLineModel } from "./movable-line/movable-line-model";
-import { IMovablePointModel, MovablePointModel } from "./movable-point/movable-point-model";
-import { IMovableValueModel, MovableValueModel } from "./movable-value/movable-value-model";
-import { CountModel, ICountModel } from "./count/count-model";
-import { ConnectingLinesModel, IConnectingLinesModel } from "./connecting-lines/connecting-lines-model";
-import {
-  PlottedFunctionAdornmentModel, IPlottedFunctionAdornmentModel
-} from "./plotted-function/plotted-function-adornment-model";
-import {
-  PlottedVariablesAdornmentModel, IPlottedVariablesAdornmentModel
-} from "./plotted-function/plotted-variables/plotted-variables-adornment-model";
+import { gAdornmentContentInfoMap } from "./adornment-content-info";
+import { AdornmentModel, IAdornmentModel, UnknownAdornmentModel } from "./adornment-models";
 
 export const kGraphAdornmentsClass = "graph-adornments-grid";
 export const kGraphAdornmentsClassSelector = `.${kGraphAdornmentsClass}`;
 
 const adornmentTypeDispatcher = (adornmentSnap: IAdornmentModel) => {
-  switch (adornmentSnap.type) {
-    case "Count": return CountModel;
-    case "Movable Line": return MovableLineModel;
-    case "Movable Point": return MovablePointModel;
-    case "Movable Value": return MovableValueModel;
-    case "Connecting Lines": return ConnectingLinesModel;
-    case "Plotted Function": return PlottedFunctionAdornmentModel;
-    case "Plotted Variables": return PlottedVariablesAdornmentModel;
-    default: return UnknownAdornmentModel;
-  }
+  const adornmentInfo = gAdornmentContentInfoMap[adornmentSnap.type];
+  return adornmentInfo.modelClass ?? UnknownAdornmentModel;
 };
 
-export const AdornmentModelUnion = types.union({ dispatcher: adornmentTypeDispatcher },
-  CountModel, MovableValueModel, MovableLineModel, MovablePointModel, ConnectingLinesModel,
-  PlottedFunctionAdornmentModel, PlottedVariablesAdornmentModel, UnknownAdornmentModel);
-export type IAdornmentModelUnion =
-  ICountModel | IMovableValueModel | IMovableLineModel | IMovablePointModel | IConnectingLinesModel |
-  IPlottedFunctionAdornmentModel | IPlottedVariablesAdornmentModel | IUnknownAdornmentModel ;
+export const AdornmentModelUnion = types.late<typeof AdornmentModel>(() => {
+  const adornmentModels = Object.values(gAdornmentContentInfoMap).map(info => info!.modelClass);
+  return types.union({ dispatcher: adornmentTypeDispatcher }, ...adornmentModels) as typeof AdornmentModel;
+});
