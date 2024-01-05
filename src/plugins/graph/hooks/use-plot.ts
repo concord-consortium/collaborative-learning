@@ -169,6 +169,17 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     }
   }, [dataset, callRefreshPointPositions]);
 
+  // respond to color changes
+  useEffect(() => {
+    return reaction(() => {
+      const colors: Record<string, string> = {};
+      const layers = Array.from(graphModel.layers);
+      const descriptions = layers.map(l => l.config.yAttributeDescriptions);
+      descriptions.forEach(desc => desc.forEach(d => colors[d.attributeID] = graphModel.getColorForId(d.attributeID)));
+      return JSON.stringify(colors);
+    }, colorString => callRefreshPointPositions(false));
+  }, [graphModel, callRefreshPointPositions]);
+
   // respond to selection change
   useEffect(function respondToSelectionChange() {
     return reaction(

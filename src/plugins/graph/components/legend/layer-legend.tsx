@@ -7,8 +7,10 @@ import { useReadOnlyContext } from "../../../../components/document/read-only-co
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
 import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../../../models/shared/shared-data-set";
+import { clueGraphColors } from "../../../../utilities/color-utils";
 import { DataConfigurationContext, useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { IGraphLayerModel } from "../../models/graph-layer-model";
+import { LegendDropdown } from "./legend-dropdown";
 import { LegendIdListFunction, ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
@@ -19,6 +21,18 @@ export const layerLegendType = "layer-legend";
 
 const kLayerLegendHeaderHeight = 58;
 const kLayerLegendRowHeight = 52;
+
+interface IColorKeyProps {
+  color: string;
+}
+function ColorKey({ color }: IColorKeyProps) {
+  const colorKeyStyle = { backgroundColor: color };
+  return (
+    <div className="symbol-container">
+      <div className="attr-symbol" style={colorKeyStyle}></div>
+    </div>
+  );
+}
 
 /**
  * The Legend for a single dataset in an xy-plot
@@ -55,12 +69,23 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
 
     legendItems = yAttributes.map((description, index) =>
       <>
+        <LegendDropdown
+          buttonAriaLabel={`Color: ${graphModel.getColorNameForId(description.attributeID)}`}
+          buttonLabel={<ColorKey color={graphModel.getColorForId(description.attributeID)} />}
+          menuItems={
+            clueGraphColors.map((color, colorIndex) => ({
+              ariaLabel: color.name,
+              key: color.color,
+              label: <ColorKey color={color.color} />,
+              onClick: () => graphModel.setColorForId(description.attributeID, colorIndex)
+            }))
+          }
+        />
         <div className="legend-icon">
           <YAxisIcon />
         </div>
         <SimpleAttributeLabel
           attrId={description.attributeID}
-          includePoint={true}
           key={description.attributeID}
           onChangeAttribute={onChangeAttribute}
           onRemoveAttribute={onRemoveAttribute}
