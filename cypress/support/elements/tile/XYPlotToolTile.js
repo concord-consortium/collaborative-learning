@@ -35,7 +35,7 @@ class XYPlotToolTile {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .left .simple-attribute-label`);
   }
   getPortalButton(listClass="", workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .chakra-portal ${listClass} button`);
+    return cy.get(`${wsClass(workspaceClass)} .chakra-portal ${listClass} button`).filter(':visible');
   }
   clickPortalButton(buttonText, listClass, workspaceClass) {
     this.getPortalButton(listClass, workspaceClass).contains(buttonText).click({ force: true });

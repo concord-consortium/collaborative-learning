@@ -282,15 +282,21 @@ context('XYPlot Tool Tile', function () {
 
       beforeTest(queryParamsPlotVariables);
 
-      cy.log("Add Diagram Tile with a Variable");
-      const name1 = "variable_name";
-      const value1 = "2";
+      cy.log("Add Diagram Tile with two variables");
+      const name1 = "variable_name", name2 = "second_variable";
+      const value1 = "2", value2 = "3";
       clueCanvas.addTile("diagram");
       diagramTile.getDiagramTile().click();
       clueCanvas.clickToolbarButton("diagram", "new-variable");
       diagramTile.getDiagramDialog().should("exist");
       dialogField("name").should("exist").type(name1);
       dialogField("value").should("exist").type(value1);
+      dialogOkButton().click();
+
+      clueCanvas.clickToolbarButton("diagram", "new-variable");
+      diagramTile.getDiagramDialog().should("exist");
+      dialogField("name").should("exist").type(name2);
+      dialogField("value").should("exist").type(value2);
       dialogOkButton().click();
 
       cy.log("Add a Linked Graph");
@@ -304,9 +310,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.selectXVariable(name1);
       xyTile.getXVariableDropdown().should("contain.text", name1);
 
-      // xyTile.selectYVariable was failing because it was catching the button from the x "dropdown" instead
-      xyTile.getYVariableDropdown().click();
-      xyTile.getPortalButton(".normal-menu-list").eq(1).click({ force: true });
+      xyTile.selectYVariable(name1);
       xyTile.getYVariableDropdown().should("contain.text", name1);
 
       xyTile.getPlottedVariablesPath().should("have.length", 1);
@@ -318,16 +322,19 @@ context('XYPlot Tool Tile', function () {
       xyTile.getAddVariablesButton().should("exist").click();
 
       // Select the x variable for the 2nd trace
-      xyTile.getXVariableDropdown(1).click();
-      xyTile.getPortalButton(".normal-menu-list").eq(2).click({ force: true });
-      xyTile.getXVariableDropdown(1).should("contain.text", name1);
+      xyTile.selectXVariable(name2, 1);
+      xyTile.getXVariableDropdown(1).should("contain.text", name2);
 
       // Select the y variable for the 2nd trace
-      xyTile.getYVariableDropdown(1).click();
-      xyTile.getPortalButton(".normal-menu-list").eq(3).click({ force: true });
-      xyTile.getYVariableDropdown().should("contain.text", name1);
+      xyTile.selectYVariable(name2, 1);
+      xyTile.getYVariableDropdown(1).should("contain.text", name2);
 
       xyTile.getPlottedVariablesPath().should("have.length", 2);
+
+      // Fit button should adjust bounds to narrowly include (2,2) and (3,3)
+      clueCanvas.clickToolbarButton('graph', 'fit-all');
+      xyTile.getEditableAxisBox('bottom', 'min').invoke('text').then(parseFloat).should("be.within", 1.5, 2);
+      xyTile.getEditableAxisBox('bottom', 'max').invoke('text').then(parseFloat).should("be.within", 3, 4);
 
       cy.log("Remove a variable trace");
       xyTile.getRemoveVariablesButton(1).click();
