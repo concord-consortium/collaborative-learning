@@ -38,6 +38,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const isStarredTab = subTab.label === "Starred";
   const noValidDocument = !openDocument || openDocument.getProperty("isDeleted");
   const noSecondaryDocument = !openSecondaryDocument || openSecondaryDocument.getProperty("isDeleted");
+
   const documentTypes: DocumentType[] = tabSpec.tab === "class-work"
                                           ? ["publication"]
                                           : tabSpec.tab === "my-work" && subTab.label === "Starred"
@@ -228,8 +229,6 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   // knew the state of playback controls. It no longer knows that state, so now
   // the edit button is shown all of the time.
   // PT Story: https://www.pivotaltracker.com/story/show/183416176
-
-
   const editButton = (type: string, sClass: {secondary: boolean | undefined; primary: boolean | undefined} | string,
                       document: DocumentModelType) => {
 
