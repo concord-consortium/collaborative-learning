@@ -419,18 +419,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     this.props.workspace.toggleMode();
   };
 
-  // TODO: hopefully once schema works this will work the same for personal/learningLog docs
-  // Right now, it does not toggle because document.visiblity is not set for personal/learningLog docs
   private handleToggleVisibility = () => {
     const document = this.props.document;
     document.toggleVisibility();
     logDocumentEvent(LogEventName.SHOW_WORK, { document });
-    console.log("| handleToggleVisibility: ",
-    "\n document.type:          ", document.type,
-    "\n document.visibility:    ", document.visibility,
-    "\n document.isRemote:      ", document.isRemote,
-    "\n document.isPublished:   ", document.isPublished
-  );
   };
 
   private handleShowTwoUp = () => {

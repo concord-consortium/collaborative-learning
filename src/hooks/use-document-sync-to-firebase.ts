@@ -84,7 +84,7 @@ export function useDocumentSyncToFirebase(
     enabled: commonSyncEnabled && !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
     options: {
       onSuccess: (data, visibility) => {
-        console.log("| sync visibility for personal or learning log doc!", visibility);
+        console.log("| 3 sync visibility for PERSONAL!", visibility);
         debugLog(`DEBUG: Updated document visibility for ${type} document ${key}:`, visibility);
       },
       onError: (err, visibility) => {

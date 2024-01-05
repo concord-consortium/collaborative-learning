@@ -223,7 +223,6 @@ export const DocumentModel = Tree.named("Document")
       self.visibility = !visibility
                           ? (self.visibility === "public" ? "private" : "public")
                           : visibility;
-       console.log("| toggleVisibility", self.visibility);
     },
 
     setVisibility(visibility: "public" | "private") {

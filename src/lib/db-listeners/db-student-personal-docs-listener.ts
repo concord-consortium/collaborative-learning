@@ -23,6 +23,7 @@ export class DBStudentPersonalDocsListener extends BaseListener {
       this.debugLogHandler("#start", "adding", "on", offeringUsersRef);
 
       offeringUsersRef.on("value", (snapshot) => {
+        console.log("|| > did listener pickup on change?");
         const snapVal = snapshot.val();
         if (!snapVal) return resolve();
         const userKeys = Object.keys(snapVal).filter(key => key !== user.id);
@@ -55,15 +56,16 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   private handlePersonalDocumentAdded = (snapshot: firebase.database.DataSnapshot) => {
     this.debugLogSnapshot("#handlePersonalDocumentAdded", snapshot);
     const docMetaSnap = snapshot.val();
+    console.log("|> 1 of 2 - docMetaSnap", docMetaSnap);
     const docKey = docMetaSnap.self.documentKey;
 
     if (!docKey || !docMetaSnap?.self?.uid) return;
     const documents = this.db.stores.documents;
     const existingDoc = documents.getDocument(docKey);
-
+    console.log("existingDoc", existingDoc);
     if (existingDoc) return;
 
-    this.db.createDocumentModelFromOtherDocument(docMetaSnap, PersonalDocument);
+    this.db.createDocumentModelFromOtherDocument(docMetaSnap, PersonalDocument); // NOTE: this could be it
   };
 }
 
