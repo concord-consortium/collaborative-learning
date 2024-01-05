@@ -54,9 +54,9 @@ export const PlottedVariables = types.model("PlottedVariables", {})
     get variableValues() {
       const x = self.xVariable?.computedValue,
         y = self.yVariable?.computedValue;
-    if (x !== undefined && y !== undefined) {
-      return { x, y };
-    }
+      if (x !== undefined && y !== undefined) {
+        return { x, y };
+      }
     }
   }))
   .actions(self => ({
