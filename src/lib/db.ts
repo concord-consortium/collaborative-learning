@@ -752,7 +752,7 @@ export class DB {
     const {title, properties, self: {uid, documentKey}} = dbDocument;
     const group = this.stores.groups.groupForUser(uid);
     const groupId = group && group.id;
-    const viz = (dbDocument as any).visibility || "private";
+    const viz = (dbDocument as any).visibility || "private";  // type is not right
     return this.openDocument({
       type,
       userId: uid,
