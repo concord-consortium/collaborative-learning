@@ -6,7 +6,7 @@ import {AxisBounds, axisPlaceToAxisFn, AxisScaleType, otherPlace} from "../axis-
 import {useAxisLayoutContext} from "../models/axis-layout-context";
 import {IAxisModel, isCategoricalAxisModel, isNumericAxisModel} from "../models/axis-model";
 import {isVertical} from "../../axis-graph-shared";
-import {between} from "../../../../utilities/math-utils";
+// import {between} from "../../../../utilities/math-utils";
 import {kAxisTickLength, transitionDuration} from "../../../../graph-types";
 import {DragInfo, collisionExists, computeBestNumberOfTicks,
         getCategoricalLabelPlacement,getCoordFunctions, IGetCoordFunctionsProps} from "../axis-utils";
@@ -122,12 +122,14 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
           .attr('class', 'grid')
           .call(axis(numericScale).tickSizeInner(-tickLength));
         select(subAxisElt).select('.grid').selectAll('text').remove();
-        if (between(0, numericScale.domain()[0], numericScale.domain()[1])) {
-          select(subAxisElt).append('g')
-            .attr('class', 'zero')
-            .call(axis(numericScale).tickSizeInner(-tickLength).tickValues([0]));
-          select(subAxisElt).select('.zero').selectAll('text').remove();
-        }
+        // This code makes the x=0 and y=0 grid lines black.
+        // I'm leaving it commented out for now in case we change our minds about not highlighting these.
+        // if (between(0, numericScale.domain()[0], numericScale.domain()[1])) {
+        //   select(subAxisElt).append('g')
+        //     .attr('class', 'zero')
+        //     .call(axis(numericScale).tickSizeInner(-tickLength).tickValues([0]));
+        //   select(subAxisElt).select('.zero').selectAll('text').remove();
+        // }
       }
     };
 
