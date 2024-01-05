@@ -56,17 +56,10 @@ export class NavTabPanel extends BaseComponent<IProps> {
                 { tabs?.map((tabSpec, index) => {
                     const tabClass = `top-tab tab-${tabSpec.tab}
                                       ${selectedTabIndex === index ? "selected" : ""}`;
-                    const handleSortWorkClick = () => {
-                      closeSubTabDocument("sort-work", "sort-work");
-                      // const tabState = getTabState("sort-work");
-                      console.log("tabState:", tabSpec);
-
-                    };
                     return (
                       <React.Fragment key={tabSpec.tab}>
                         <Tab
                           className={tabClass}
-                          onClick={tabSpec.tab === "sort-work" ? handleSortWorkClick : undefined}
                         >
                           {tabSpec.label}
                         </Tab>
@@ -117,7 +110,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
       case ENavTab.kStudentWork:
         return <StudentGroupView/>;
       case ENavTab.kSortWork:
-        return <SortWorkView tabSpec={tabSpec}/>;
+        return <SortWorkView/>;
       case ENavTab.kClassWork:
       case ENavTab.kLearningLog:
       case ENavTab.kMyWork:
@@ -165,7 +158,9 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const { persistentUI } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];
+      console.log("➡️ tabSpec", tabSpec);
       if (persistentUI.activeNavTab !== tabSpec.tab) {
+        console.log("switching tabs");
         persistentUI.setActiveNavTab(tabSpec.tab);
         const logParameters = {
           tab_name: tabSpec.tab.toString()
@@ -173,6 +168,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
         const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
         logEvent();
       } else {
+        console.log("staying on same tab - clicked!");
         if (persistentUI.openSubTab) {
           // If there is a document open then a click on the active top level tab
           // closes the document. Also a click on the active sub tab closes the

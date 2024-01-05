@@ -10,7 +10,7 @@ export const NavTabsConfigModel = types
     showNavPanel: false
   })
   .views(self => ({
-    getNavTabSpec(tabId: ENavTab) {
+    getNavTabSpec(tabId: ENavTab | string) {
       return self.tabSpecs.find(tab => tabId === tab.tab);
     }
   }))

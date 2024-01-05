@@ -5,7 +5,6 @@ import { useStores, usePersistentUIStore, useAppConfig } from "../../hooks/use-s
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
-import { NavTabModelType } from "../../models/view/nav-tabs";
 import { DocumentContextReact } from "./document-context";
 import { DEBUG_SORT_WORK } from "../../lib/debug";
 import { isSortableType } from "../../models/document/document-types";
@@ -14,11 +13,9 @@ import { SortWorkDocumentArea } from "./sort-work-document-area";
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
-interface IProps {
-  tabSpec: NavTabModelType
-}
+export const tabName = "sort-work";
 
-export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ tabSpec }) {
+export const SortWorkView: React.FC = observer(function SortWorkView() {
   const sortOptions = ["Group", "Student"];
   const stores = useStores();
   const groupsModel = stores.groups;
@@ -101,12 +98,9 @@ export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ t
 
   //******************************* Show Document View ***************************************
   const persistentUI = usePersistentUIStore();
-  //TODO: looks like we don't need this state since we use the length of the openDocuments
-  const [showDocument, setShowDocument] = useState(false);
 
   const handleSelectDocument = (document: DocumentModelType) => {
-    setShowDocument(prev => !prev);
-    persistentUI.openSubTabDocument(tabSpec.tab, "sort-work", document.key);
+    persistentUI.openSubTabDocument(tabName, tabName, document.key);
   };
 
   //******************************* Handle Debug View ***************************************
@@ -124,26 +118,19 @@ export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ t
   };
 
   const appConfigStore = useAppConfig();
-  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
-
+  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabName);
   const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
-  const openDocumentsLength = tabState?.openDocuments.size;
-  const showSortWorkDocumentArea = openDocumentsLength && (openDocumentsLength > 1);
-  console.log("\t🔪 openDocumentsLength:", openDocumentsLength);
+  const showSortWorkDocumentArea = !!tabState?.openDocuments.get(tabName);
 
   return (
     <div key="sort-work-view" className="sort-work-view">
       <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
 
-      <div className="documents-panel">
+      {
+        showSortWorkDocumentArea ?
+        <SortWorkDocumentArea/> :
         <div className="tab-panel-documents-section">
           {
-            showSortWorkDocumentArea ?
-            <SortWorkDocumentArea
-              tabSpec={tabSpec}
-              tab={"sort-work"}
-            />
-            :
             sortedDocuments.map((sortedSection, idx) => {
               return (
                 <div className="sorted-sections" key={`sortedSection-${idx}`}>
@@ -161,7 +148,7 @@ export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ t
                             key={doc.key}
                             scale={0.1}
                             document={doc}
-                            tab={"sort-work"}
+                            tab={tabName}
                             shouldHandleStarClick={true}
                             allowDelete={false}
                             onSelectDocument={handleSelectDocument}
@@ -172,10 +159,11 @@ export const SortWorkView: React.FC<IProps> = observer(function SortWorkView({ t
                   </div>
                 </div>
               );
-            })}
+            })
+          }
           {DEBUG_SORT_WORK && renderDebugView()}
         </div>
-      </div>
+      }
     </div>
   );
 });
