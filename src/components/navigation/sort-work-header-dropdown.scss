@@ -1,55 +1,62 @@
+@import "../../components/vars";
 
-.sort-work-header{
+.sort-work-header {
   height: 36px;
   width: 100%;
-  background-color: #ecc9ff;
+  background-color: $classwork-purple-light-4;
   display: flex;
 
-  .custom-select-header {
-    height: 28px;
-  }
-
-  .header {
-    height: 28px;
-  }
-
-  .header-text{
+  .header-text {
     width: 50px;
     display: flex;
     align-items: center;
     margin-left: 10px;
   }
 
-  .header-dropdown{
+  .header-dropdown {
     display: flex;
     align-items: center;
 
-    &.option-two{
-      margin-left: 10px;
-    }
+    .custom-select.sort-work-sort-menu {
+      color: $charcoal-dark-2;
+      .header {
+        width: 151px;
+        min-width: 151px;
+        max-width: 151px;
+        height: 26px;
+        background-color: $classwork-purple-light-4;
+        padding-left: 5px;
+        font-weight: bold;
+      }
+      .header.show-list {
+        background-color: $classwork-purple-dark-1;
+      }
 
-    .sort-work-header-menu{
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      .list {
+        width: 151px;
+        min-width: 151px;
+        max-width: 151px;
+        margin-top: -1px;
 
-      &.custom-select{
-
-        .header{
-          width: 151px;
-          min-width: 151px;
-          max-width: 151px;
-          height: 26px;
-        }
-
-        .list-item{
-          width: 151px;
-          min-width: 151px;
-          max-width: 151px;
+        .list-item {
+          height: 30px;
+          padding-left:9px;
+          &:hover {
+            background-color: $classwork-purple-light-5;
+          }
+          &.selected {
+            color:$charcoal-dark-2;
+            font-weight: bold;
+          }
+          &:active {
+            color:$charcoal-dark-2;
+            font-weight: bold;
+          }
+          div.check {
+            display: none;
+          }
         }
       }
     }
   }
 }
-
-

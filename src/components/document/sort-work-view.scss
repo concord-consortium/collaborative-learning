@@ -11,7 +11,6 @@ $title-margin: 2px;
     height: 100%;
 
     .section-header{
-      width: 100%;
       height: 30px;
       position: relative;
       margin-top: 5px;
@@ -29,7 +28,6 @@ $title-margin: 2px;
       .section-header-label{
         position: absolute;
         left: 10px;
-        width: 71px;
         height: 26px;
         border-radius: 5px;
         background-color: $classwork-purple-light-7;
@@ -37,8 +35,9 @@ $title-margin: 2px;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--text-black);
+        color: $charcoal-dark-2;
         z-index: 1;
+        padding: 0px 7px;
       }
     }
   }
