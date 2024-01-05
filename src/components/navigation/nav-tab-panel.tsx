@@ -32,8 +32,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { persistentUI: { activeNavTab, focusDocument, showChatPanel,
-                           closeSubTabDocument }, ui: { selectedTileIds },
+    const { persistentUI: { activeNavTab, focusDocument, showChatPanel }, ui: { selectedTileIds },
             user } = this.stores;
     const tabs = this.stores.tabsToDisplay;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
@@ -58,11 +57,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
                                       ${selectedTabIndex === index ? "selected" : ""}`;
                     return (
                       <React.Fragment key={tabSpec.tab}>
-                        <Tab
-                          className={tabClass}
-                        >
-                          {tabSpec.label}
-                        </Tab>
+                        <Tab className={tabClass}>{tabSpec.label}</Tab>
                       </React.Fragment>
                     );
                   })
@@ -99,8 +94,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
     );
   }
 
-
-
   private renderTabContent = (tabSpec: NavTabModelType) => {
     switch (tabSpec.tab) {
       case ENavTab.kProblems:
@@ -108,7 +101,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
       case ENavTab.kTeacherGuide:
         return this.renderTeacherGuide();
       case ENavTab.kStudentWork:
-        return <StudentGroupView/>;
+        return <StudentGroupView />;
       case ENavTab.kSortWork:
         return <SortWorkView/>;
       case ENavTab.kClassWork:
@@ -158,9 +151,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const { persistentUI } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];
-      console.log("➡️ tabSpec", tabSpec);
       if (persistentUI.activeNavTab !== tabSpec.tab) {
-        console.log("switching tabs");
         persistentUI.setActiveNavTab(tabSpec.tab);
         const logParameters = {
           tab_name: tabSpec.tab.toString()
@@ -168,7 +159,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
         const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
         logEvent();
       } else {
-        console.log("staying on same tab - clicked!");
         if (persistentUI.openSubTab) {
           // If there is a document open then a click on the active top level tab
           // closes the document. Also a click on the active sub tab closes the

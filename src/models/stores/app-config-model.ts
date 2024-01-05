@@ -41,8 +41,6 @@ export const AppConfigModel = types
       self.configMgr = new ConfigurationManager(self.config, configs);
       self.navTabs = NavTabsConfigModel.create(self.configMgr.navTabs);
       self.disabledFeatures = self.configMgr.disabledFeatures;
-
-      console.log("\t🥩 navTabs:", self.navTabs);
       self.toolbar = ToolbarModel.create(self.configMgr.toolbar);
       self.settings = self.configMgr.settings;
     }
