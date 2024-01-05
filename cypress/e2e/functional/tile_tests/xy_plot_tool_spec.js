@@ -298,6 +298,9 @@ context('XYPlot Tool Tile', function () {
       cy.get('select').select("New Graph");
       dialogOkButton().click();
       xyTile.getPlottedVariablesPath().should("not.exist");
+      xyTile.getEditableAxisBox('bottom', 'min').invoke('text').then(parseFloat).should("be.within", -11, -9);
+      xyTile.getEditableAxisBox('bottom', 'max').invoke('text').then(parseFloat).should("be.within", 9, 11);
+
       xyTile.selectXVariable(name1);
       xyTile.getXVariableDropdown().should("contain.text", name1);
 
@@ -307,6 +310,9 @@ context('XYPlot Tool Tile', function () {
       xyTile.getYVariableDropdown().should("contain.text", name1);
 
       xyTile.getPlottedVariablesPath().should("have.length", 1);
+      // Variable value is 2 so should autoscale to [0, 4]
+      xyTile.getEditableAxisBox('bottom', 'min').invoke('text').then(parseFloat).should("be.within", -1, 1);
+      xyTile.getEditableAxisBox('bottom', 'max').invoke('text').then(parseFloat).should("be.within", 3, 5);
 
       cy.log("Plot multiple traces");
       xyTile.getAddVariablesButton().should("exist").click();
