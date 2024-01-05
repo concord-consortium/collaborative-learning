@@ -43,6 +43,14 @@ context('Numberline Tile', function () {
     numberlineToolTile.deleteAllPointsOnNumberline();
     numberlineToolTile.getPointsOnGraph().should('have.length', 0);
 
+    //Numberline tile restore upon page reload
+    cy.wait(2000);
+    cy.reload();
+    cy.waitForLoad();
+    numberlineToolTile.getNumberlineTileTitleText().should("contain", newName);
+    numberlineToolTile.getMaxBox().should('contain', 10);
+    numberlineToolTile.getMinBox().should('contain', -10);
+
     cy.log("deletes numberline tile");
     clueCanvas.deleteTile('numberline');
     numberlineToolTile.getNumberlineTile().should("not.exist");

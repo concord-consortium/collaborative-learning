@@ -146,6 +146,27 @@ context('Draw Tool Tile', function () {
     drawToolTile.getSelectionBox().should("exist");
     drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click();
     drawToolTile.getFreehandDrawing().should("not.exist");
+
+    cy.log("verify Draw tile restore upon page reload");
+    const newName = "Drawing Tile";
+    drawToolTile.getTileTitle().first().should("contain", "Sketch 1");
+    drawToolTile.getDrawTileTitle().first().click();
+    drawToolTile.getDrawTileTitle().first().type(newName + '{enter}');
+    drawToolTile.getTileTitle().should("contain", newName);
+
+    drawToolTile.getDrawToolRectangle().click();
+    drawToolTile.getDrawTile()
+      .trigger("mousedown", 250, 50)
+      .trigger("mousemove", 100, 150)
+      .trigger("mouseup", 100, 50);
+
+    cy.log("verify Draw tile restore upon page reload");
+    cy.wait(2000);
+    cy.reload();
+    cy.waitForLoad();
+
+    drawToolTile.getTileTitle().should("contain", newName);
+    drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
   });
   it("Vector", { scrollBehavior: false }, () => {
     beforeTest();

@@ -109,6 +109,19 @@ context('Table Tool Tile', function () {
       tableToolTile.getTableRow().should('have.length', 2);
     });
 
+  // Table tile restore upon page reload
+    cy.wait(2000);
+    cy.reload();
+    cy.waitForLoad();
+
+    tableToolTile.getTableTitle().should('contain', title);
+    cy.get(".primary-workspace").within((workspace) => {
+      tableToolTile.getTableCell().eq(1).should('contain', '5');
+      tableToolTile.getTableCell().eq(2).should('contain', '2.5');
+      tableToolTile.getTableRow().should('have.length', 2);
+    });
+
+    tableToolTile.getTableTile().click();
     cy.log('delete button works');
     cy.get(".primary-workspace").within((workspace) => {
       tableToolTile.getTableCell().eq(1).should('contain', '5');

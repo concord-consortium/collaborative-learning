@@ -155,6 +155,14 @@ context('XYPlot Tool Tile', function () {
       xyTile.getGraphDot().should('have.length', 3);
       xyTile.getXYPlotTitle().should('contain', title);
 
+       //XY Plot tile restore upon page reload
+       cy.wait(2000);
+       cy.reload();
+       cy.waitForLoad();
+       xyTile.getTile().click();
+       xyTile.getXYPlotTitle().should('contain', title);
+       xyTile.getGraphDot().should('have.length', 3);
+
       cy.log("Delete XY Plot Tile");
       xyTile.getTile().click();
       clueCanvas.deleteTile('xyplot');
@@ -251,7 +259,7 @@ context('XYPlot Tool Tile', function () {
 
       cy.log("Link First Table");
       xyTile.getTile().click();
-      clueCanvas.clickToolbarButton('graph', 'link-tile');
+      clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
       xyTile.linkTable("Table 1");
       xyTile.getXAttributesLabel().should('have.length', 1);
       xyTile.getYAttributesLabel().should('have.length', 1);

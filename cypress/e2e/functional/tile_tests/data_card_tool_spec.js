@@ -155,5 +155,23 @@ context('Data Card Tool Tile', () => {
     dc.getAttrValue().eq(1).dblclick().clear().type("rhinocerotter{enter}");
     dc.getAttrValueInput().eq(0).invoke('val').should('eq', "river");
     dc.getAttrValueInput().eq(1).invoke('val').should('eq', "rhinocerotter");
+
+    cy.log("verify Datacard tile title restore upon page reload")
+    const newName = "Data Card Title";
+    dc.getTile().find('.title-text-element').first().dblclick();
+    dc.getTile().find('.title-text-element').first().type(newName + '{enter}');
+    dc.getTile().contains(newName);
+    cy.wait(2000);
+
+    cy.log("verify Datacard tile restore upon page reload");
+    cy.reload();
+    cy.waitForLoad();
+
+    dc.getTile().contains(newName);
+    dc.getCardNofTotalListing().contains("Card 3 of 4");
+    dc.getAttrName().eq(0).contains("habitat");
+    dc.getAttrName().eq(1).contains("animal");
+    dc.getAttrValueInput().eq(0).invoke('val').should('eq', "river");
+    dc.getAttrValueInput().eq(1).invoke('val').should('eq', "rhinocerotter");
   });
 });

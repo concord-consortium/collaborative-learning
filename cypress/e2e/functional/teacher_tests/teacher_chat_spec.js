@@ -8,7 +8,8 @@ let selectedChatBackground = 'rgb(247, 251, 199)';
 let expandedChatBackground = 'rgb(234, 242, 142)';
 
 const queryParams = {
-  teacher7NetworkQueryParams: "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa&network=foo"
+  teacher7NetworkQueryParams: "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa&network=foo",
+  teacherQueryParams: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6"
 };
 
 const ss = [{ "section": "problems",
@@ -42,6 +43,14 @@ function beforeTest(params) {
   chatPanel.getChatPanelToggle().should('exist');
   chatPanel.getChatPanelToggle().click();
   chatPanel.getChatPanel().should('exist');
+}
+
+function beforeTestCommentedDocumentList(params) {
+  cy.clearQAData('all');
+  cy.visit(params);
+  cy.waitForLoad();
+  cy.openTopTab("my-work");
+  cy.wait(5000);
 }
 
 context('Chat Panel', () => {
@@ -195,5 +204,14 @@ context('Chat Panel', () => {
       chatPanel.getDeleteMessageButton(comment[1]+message).click({ force: true });
       chatPanel.getDeleteConfirmModalButton().click();
     });
+  });
+});
+
+context('Commented Document List', () => {
+  it('Comment all document list', () => {
+    beforeTestCommentedDocumentList(queryParams.teacherQueryParams);
+    chatPanel.openChatPanel();
+    cy.wait(2000);
+    chatPanel.documentCommentList();
   });
 });

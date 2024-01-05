@@ -100,6 +100,17 @@ context('Simulator Tile', function () {
 
     // Pressure variable updates when the gripper changes
     simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor300");
+
+    //Simulator tile restore upon page reload
+    cy.wait(2000);
+    cy.reload();
+    cy.waitForLoad();
+    simulatorTile.getTileTitle().should("contain", newName);
+    dataflowTile.getOutputNodeValueText().should("contain", "100% closed");
+    simulatorTile.getSimulatorTile().should("contain.text", "Gripper Output100");
+    simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor300");
+
+    simulatorTile.getSimulatorTile().click();
     clueCanvas.deleteTile("simulator");
 
     cy.log("Make sure only one simulator tile is allowed");

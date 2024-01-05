@@ -80,6 +80,20 @@ context('Geometry Tool', function () {
           expect($el).to.have.text('');
         });
       });
+
+    const newName = "Graph Tile";
+    geometryToolTile.getGraphTitle().first().should("contain", "Shapes Graph 1");
+    geometryToolTile.getGraphTileTitle().first().click();
+    geometryToolTile.getGraphTileTitle().first().type(newName + '{enter}');
+    geometryToolTile.getGraphTitle().should("contain", newName);
+    cy.wait(2000);
+
+    cy.log("verify geometry tile restore upon page reload");
+    cy.reload();
+    cy.waitForLoad();
+
+    geometryToolTile.getGraphTitle().should("contain", newName);
+    geometryToolTile.getGraphPoint().should('have.length', 3);
   });
 
   it('will test Geometry tile undo redo', () => {
