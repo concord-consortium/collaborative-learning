@@ -60,6 +60,7 @@ export class DBStudentPersonalDocsListener extends BaseListener {
     if (!docKey || !docMetaSnap?.self?.uid) return;
     const documents = this.db.stores.documents;
     const existingDoc = documents.getDocument(docKey);
+
     if (existingDoc) return;
 
     this.db.createDocumentModelFromOtherDocument(docMetaSnap, PersonalDocument);

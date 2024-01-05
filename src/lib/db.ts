@@ -380,7 +380,6 @@ export class DB {
   }
 
   public createDocument(params: { type: DBDocumentType, content?: string }) {
-    console.log("| createDocument!", params.type);
     const { type, content } = params;
     const {user} = this.stores;
     return new Promise<{document: DBDocument, metadata: DBDocumentMetadata}>((resolve, reject) => {
@@ -667,7 +666,6 @@ export class DB {
     return this.createOtherDocument(copyType, { content, ...titleProps });
   }
 
-  // NOTE: This is never called
   public openOtherDocument(documentType: OtherDocumentType, documentKey: string) {
     const { user } = this.stores;
 
