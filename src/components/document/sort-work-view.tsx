@@ -69,13 +69,24 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     return sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel));
   };
 
-  function customSort(a: string, b: string) {
-    const parseName = (name: string) => {
-      const [lastName, firstName] = name.split(", ").map((part: string) => part.trim());
-      return { firstName, lastName };
+  function customSort(a: any, b: any) { //sort by last name alphabetically
+    const parseName = (name: any) => {
+      const [lastName, firstName] = name.split(", ").map((part: any) => part.trim());
+      const lastNameNum = parseInt(lastName, 10);
+      return {
+        firstName,
+        lastName,
+        isNumericLastName: !isNaN(lastNameNum),
+        lastNameNum
+      };
     };
     const aParsed = parseName(a);
     const bParsed = parseName(b);
+    if (aParsed.isNumericLastName && bParsed.isNumericLastName) {
+      return aParsed.lastNameNum - bParsed.lastNameNum;
+    }
+    if (aParsed.isNumericLastName) return -1;
+    if (bParsed.isNumericLastName) return 1;
 
     const lastNameCompare = aParsed.lastName.localeCompare(bParsed.lastName);
     if (lastNameCompare !== 0) return lastNameCompare;
@@ -120,7 +131,6 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
         <SortWorkDocumentArea openDocumentKey={openDocumentKey}/> :
         <div className="tab-panel-documents-section">
           {
-          {
             sortedDocuments.map((sortedSection, idx) => {
               return (
                 <div className="sorted-sections" key={`sortedSection-${idx}`}>
@@ -141,6 +151,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
                             tab={ENavTab.kSortWork}
                             shouldHandleStarClick={true}
                             allowDelete={false}
+                            onSelectDocument={handleSelectDocument}
                           />
                         </DocumentContextReact.Provider>
                       );
