@@ -65,55 +65,54 @@ export function useDocumentSyncToFirebase(
   const commonSyncEnabled = !disableFirebaseSync && contentStatus === ContentStatus.Valid;
 
   // sync visibility (public/private) for problem documents
-  /**
-   * in Firebase, the visibility is stored at
-   * [classId]/offerings/[offeringId]/users/[userId]/documents/[documentId]/visibility
-   *
-   * Lets compare that to comprable path for LL/P
-   * [classId]/users/[userId]/documents/[documentId]/...
-   *
-   * Or can we use document.metadata.properties that exists for personal docs?
-   */
   useSyncMstPropToFirebase<typeof document.visibility>({
     firebase, model: document, prop: "visibility", path: typedMetadata,
     enabled: commonSyncEnabled && !readOnly && (type === ProblemDocument),
     options: {
       onSuccess: (data, visibility) => {
-        console.log("| useDocumentSyncToFirebase | syncing VISIBILITY |", visibility);
         debugLog(`DEBUG: Updated document visibility for ${type} document ${key}:`, visibility);
       },
       onError: (err, visibility) => {
-        console.log("| useDocumentSyncToFirebase | FAILING to sync VISIBILITY |", visibility);
         console.warn(`ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
       }
     }
   });
 
-  // TODO: sync visibility here? In the hook below? Elsewhere?
+  // sync visibility (public/private) for personal documents
+  useSyncMstPropToFirebase<typeof document.visibility>({
+    firebase, model: document, prop: "visibility", path: metadata,
+    enabled: commonSyncEnabled && !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
+    options: {
+      onSuccess: (data, visibility) => {
+        console.log("| sync visibility for personal or learning log doc!", visibility);
+        debugLog(`DEBUG: Updated document visibility for ${type} document ${key}:`, visibility);
+      },
+      onError: (err, visibility) => {
+        console.warn(`ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
+      }
+    }
+  });
+
   // sync title for personal and learning log documents
   useSyncMstPropToFirebase<typeof document.title>({
     firebase, model: document, prop: "title", path: typedMetadata,
     enabled: commonSyncEnabled && !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
     options: {
       onSuccess: (data, title) => {
-        console.log("| useDocumentSyncToFirebase | syncing PERSONAL TITLE |", title);
         debugLog(`DEBUG: Updated document title for ${type} document ${key}:`, title);
       },
       onError: (err, title) => {
-        console.log("| useDocumentSyncToFirebase | FAILING TO SYNC PERSONAL TITLE |", title);
         console.warn(`ERROR: Failed to update document title for ${type} document ${key}:`, title);
       }
     }
   });
 
-  // TODO: write/sync visibility here? In the hook above? Elsewhere?
   // sync properties for problem, personal, and learning log documents
   useSyncMstNodeToFirebase({
     firebase, model: document.properties, path: `${metadata}/properties`,
     enabled: commonSyncEnabled && !readOnly && [ProblemDocument, PersonalDocument, LearningLogDocument].includes(type),
     options: {
       onSuccess: (data, properties) => {
-        console.log("| useDocumentSyncToFirebase | onSuccess | properties |", properties);
         debugLog(`DEBUG: Updated document properties for ${type} document ${key}:`, JSON.stringify(properties));
       },
       onError: (err, properties) => {
