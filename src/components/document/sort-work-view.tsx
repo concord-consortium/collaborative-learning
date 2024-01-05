@@ -15,6 +15,7 @@ import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
 export const SortWorkView: React.FC = observer(function SortWorkView() {
+  console.log("one change for PR/publish");
   const sortOptions = ["Group", "Student"];
   const stores = useStores();
   const groupsModel = stores.groups;
