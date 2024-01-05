@@ -68,13 +68,16 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
           const tX = xScale.invert(pixelX * xCellCount);
           const tY = computeY(tX);
           if (Number.isFinite(tY)) {
-            const pixelY = yScale(tY) / yCellCount;
+            const pixelY = this.pointPosition(tY, yScale, yCellCount);
             tPoints.push({ x: pixelX, y: pixelY });
           }
         }
       }
       dispose?.();
       return tPoints;
+    },
+    pointPosition(value: number, scale: ScaleNumericBaseType, cellCount: number) {
+      return (scale(value) / cellCount);
     }
   }));
 
