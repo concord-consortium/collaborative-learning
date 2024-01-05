@@ -389,7 +389,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         }
         {hasDisplayId && <div className="display-id">{displayId}</div>}
         <div className="actions">
-          {/* TODO: figure out when these conditions would not be true to make sure we rendering when needed */}
           {(!hideButtons || supportStackedTwoUpView) &&
             <div className="actions">
               <ShareButton isShared={document.visibility === "public"} onClick={this.handleToggleVisibility} />

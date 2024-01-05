@@ -358,7 +358,7 @@ export class DB {
                     offeringId: user.offeringId,
                     uid: user.id
                   },
-                  visibility: "private", // NOTE 1: default visiblity is set
+                  visibility: "private",
                   documentKey: document.self.documentKey,
                 };
                 const newDocumentPath = type === PlanningDocument
@@ -667,29 +667,28 @@ export class DB {
     return this.createOtherDocument(copyType, { content, ...titleProps });
   }
 
-  // NOTE: It seems like this is never called, openDocument is used for other type as well.
-  // SO experimenting with commenting this out
-  // public openOtherDocument(documentType: OtherDocumentType, documentKey: string) {
-  //   const { user } = this.stores;
+  // NOTE: This is never called
+  public openOtherDocument(documentType: OtherDocumentType, documentKey: string) {
+    const { user } = this.stores;
 
-  //   return new Promise<DocumentModelType>((resolve, reject) => {
-  //     const documentPath = this.firebase.getOtherDocumentPath(user, documentType, documentKey);
-  //     const documentRef = this.firebase.ref(documentPath);
-  //     return documentRef.once("value")
-  //       .then((snapshot) => {
-  //         const document: DBOtherDocument|null = snapshot.val();
-  //         if (!document) {
-  //           throw new Error("Unable to find specified document!");
-  //         }
-  //         return document;
-  //       })
-  //       .then((document) => {
-  //         return this.createDocumentModelFromOtherDocument(document, documentType);
-  //       })
-  //       .then(resolve)
-  //       .catch(reject);
-  //   });
-  // }
+    return new Promise<DocumentModelType>((resolve, reject) => {
+      const documentPath = this.firebase.getOtherDocumentPath(user, documentType, documentKey);
+      const documentRef = this.firebase.ref(documentPath);
+      return documentRef.once("value")
+        .then((snapshot) => {
+          const document: DBOtherDocument|null = snapshot.val();
+          if (!document) {
+            throw new Error("Unable to find specified document!");
+          }
+          return document;
+        })
+        .then((document) => {
+          return this.createDocumentModelFromOtherDocument(document, documentType);
+        })
+        .then(resolve)
+        .catch(reject);
+    });
+  }
 
   public async destroyFirebaseDocument(document: DocumentModelType) {
     const { content, metadata, typedMetadata } =
@@ -741,7 +740,7 @@ export class DB {
       userId,
       groupId: group?.id,
       documentKey,
-      visibility: metadata.visibility // NOTE 2:
+      visibility: metadata.visibility
     });
   }
 
