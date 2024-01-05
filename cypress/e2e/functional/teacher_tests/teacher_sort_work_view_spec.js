@@ -1,11 +1,6 @@
 import TeacherDashboard from "../../../support/elements/common/TeacherDashboard";
-// import ResourcesPanel from "../../../support/elements/common/ResourcesPanel";
-// import ClueCanvas from "../../../support/elements/common/cCanvas";
 
-// let resourcesPanel = new ResourcesPanel();
-// let clueCanvas = new ClueCanvas;
 let dashboard = new TeacherDashboard();
-
 
 function beforeTest() {
   const queryParams = "/?appMode=demo&demoName=CLUE-Test&fakeClass=1&fakeOffering=1&problem=1.1&fakeUser=teacher:1&unit=example-config-subtabs&curriculumBranch=sort-tab-dev-3&noPersistentUI";
