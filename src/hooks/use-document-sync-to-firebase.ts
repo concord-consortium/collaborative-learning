@@ -78,13 +78,40 @@ export function useDocumentSyncToFirebase(
     }
   });
 
-  // sync visibility (public/private) for personal documents
+  // OPTION 1 of 3 sync visibility (public/private) for personal documents to typedMetadata
+  useSyncMstPropToFirebase<typeof document.visibility>({
+    firebase, model: document, prop: "visibility", path: typedMetadata,
+    enabled: commonSyncEnabled && !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
+    options: {
+      onSuccess: (data, visibility) => {
+        debugLog(`DEBUG: Updated document visibility for ${type} document ${key}:`, visibility);
+      },
+      onError: (err, visibility) => {
+        console.warn(`ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
+      }
+    }
+  });
+
+  // OPTION 2 of 3 sync visibility (public/private) for personal documents to metadata
   useSyncMstPropToFirebase<typeof document.visibility>({
     firebase, model: document, prop: "visibility", path: metadata,
     enabled: commonSyncEnabled && !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
     options: {
       onSuccess: (data, visibility) => {
-        console.log("| 3 sync visibility for PERSONAL!", visibility);
+        debugLog(`DEBUG: Updated document visibility for ${type} document ${key}:`, visibility);
+      },
+      onError: (err, visibility) => {
+        console.warn(`ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
+      }
+    }
+  });
+
+  // OPTION 3 of 3 sync visibility (public/private) for personal documents
+  useSyncMstPropToFirebase<typeof document.visibility>({
+    firebase, model: document, prop: "visibility", path: `${metadata}/properties`,
+    enabled: commonSyncEnabled && !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
+    options: {
+      onSuccess: (data, visibility) => {
         debugLog(`DEBUG: Updated document visibility for ${type} document ${key}:`, visibility);
       },
       onError: (err, visibility) => {
@@ -113,6 +140,7 @@ export function useDocumentSyncToFirebase(
     enabled: commonSyncEnabled && !readOnly && [ProblemDocument, PersonalDocument, LearningLogDocument].includes(type),
     options: {
       onSuccess: (data, properties) => {
+        console.log("| candidate 3 sync properties for PERSONAL!", properties);
         debugLog(`DEBUG: Updated document properties for ${type} document ${key}:`, JSON.stringify(properties));
       },
       onError: (err, properties) => {

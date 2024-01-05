@@ -752,6 +752,7 @@ export class DB {
     const {title, properties, self: {uid, documentKey}} = dbDocument;
     const group = this.stores.groups.groupForUser(uid);
     const groupId = group && group.id;
+    const viz = (dbDocument as any).visibility || "private";
     return this.openDocument({
       type,
       userId: uid,
@@ -759,7 +760,7 @@ export class DB {
       groupId,
       title,
       properties,
-      //visibility: "public" // NOTE this hack "works"
+      visibility: viz
     });
   }
 
