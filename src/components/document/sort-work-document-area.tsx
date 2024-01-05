@@ -9,7 +9,11 @@ import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 import { observer } from "mobx-react";
 import { ENavTab } from "../../models/view/nav-tabs";
 
-export const SortWorkDocumentArea: React.FC = observer(function SortWorkDocumentArea() {
+interface IProps {
+  openDocumentKey: string;
+}
+
+export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWorkDocumentArea({openDocumentKey}) {
   const store = useStores();
   const ui = useUIStore();
   const persistentUI = usePersistentUIStore();
@@ -17,21 +21,15 @@ export const SortWorkDocumentArea: React.FC = observer(function SortWorkDocument
   const classStore = useClassStore();
   const problemStore = useProblemStore();
   const appConfigStore = useAppConfig();
-
-  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(ENavTab.kSortWork);
-  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
-  const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
   const openDocument = store.documents.getDocument(openDocumentKey) ||
                        store.networkDocuments.getDocument(openDocumentKey);
-
   const showPlayback = user.type && !openDocument?.isPublished
-                          ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
+                       ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
   const getDisplayTitle = (document: DocumentModelType) => {
     const documentOwner = classStore.users.get(document.uid);
     const documentTitle = getDocumentDisplayTitle(document, appConfigStore, problemStore);
     return {owner: documentOwner ? documentOwner.fullName : "", title: documentTitle};
   };
-
   const displayTitle = openDocument && getDisplayTitle(openDocument);
 
   function handleEditClick(document: DocumentModelType) {

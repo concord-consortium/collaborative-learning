@@ -119,7 +119,8 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const appConfigStore = useAppConfig();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(ENavTab.kSortWork);
   const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
-  const showSortWorkDocumentArea = !!tabState?.openDocuments.get(ENavTab.kSortWork);
+  const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
+  const showSortWorkDocumentArea = !!openDocumentKey;
 
   return (
     <div key="sort-work-view" className="sort-work-view">
@@ -127,7 +128,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
 
       {
         showSortWorkDocumentArea ?
-        <SortWorkDocumentArea/> :
+        <SortWorkDocumentArea openDocumentKey={openDocumentKey}/> :
         <div className="tab-panel-documents-section">
           {
             sortedDocuments.map((sortedSection, idx) => {
