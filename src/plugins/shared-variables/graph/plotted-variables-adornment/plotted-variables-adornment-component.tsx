@@ -16,6 +16,7 @@ import { SharedVariables } from "../../shared-variables";
 import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
 
 import "../../../graph/adornments/plotted-function/plotted-function-adornment-component.scss";
+import "./plotted-variables.scss";
 
 interface IProps {
   containerId?: string
@@ -65,10 +66,20 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         const path = `M${tPoints[0].x},${tPoints[0].y},${curveBasis(tPoints)}`;
 
         const selection = select(plottedFunctionRef.current);
+        // Path for hover state, visible on hover
+        selection.append("path")
+          .attr("class", `plotted-function-highlight plotted-function-${classFromKey}`)
+          .attr("data-testid", `plotted-function-highlight-path${classFromKey ? `-${classFromKey}` : ""}`)
+          .attr("d", path)
+          .attr("pointer-events", "all")
+          .on('mouseover', function(d, i) { this.classList.add('selected'); })
+          .on('mouseout', function(d, i) { this.classList.remove('selected'); });
+        // Path for main line
         selection.append("path")
           .attr("class", `plotted-function plotted-function-${classFromKey}`)
           .attr("data-testid", `plotted-function-path${classFromKey ? `-${classFromKey}` : ""}`)
           .attr("stroke", graphModel.getColorForId(instanceKey))
+          .attr("stroke-width", "3")
           .attr("d", path);
       }
     }
@@ -102,11 +113,14 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
       .join(
         enter => {
           return enter.append('circle')
-            .attr('r', '5')
-            .attr('class', 'variable-valuex')
-            .attr("fill", (data) => graphModel.getColorForId(data.key))
+            .attr('r', graphModel.getPointRadius())
+            .attr('stroke-width', '2')
+            .attr("stroke", (data) => graphModel.getColorForId(data.key))
+            .attr("fill", "#fff")
             .attr('cx', (data) => model.pointPosition(data.x, xScale, xCellCount))
-            .attr('cy', (data) => model.pointPosition(data.y, yScale, yCellCount));
+            .attr('cy', (data) => model.pointPosition(data.y, yScale, yCellCount))
+            .on('mouseover', function(d, i) { console.log('mouseover'); this.classList.add('selected'); });
+
         },
         update => {
           return update

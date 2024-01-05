@@ -1,0 +1,9 @@
+path.plotted-function-highlight {
+  stroke: none;
+  stroke-width: 13;
+
+  &.selected {
+    stroke: rgba(20, 244, 158, 0.5);
+  }
+}
+
