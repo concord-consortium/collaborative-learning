@@ -89,34 +89,45 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
 
   const refreshCurrentValues = useCallback(() => {
     if (!model.isVisible) return;
-    const valueData = [] as {key: string, x: number, y: number}[];
+
+    interface IData {
+      key: string;
+      x: number;
+      y: number;
+    }
+
+    const valueData = [] as IData[];
     for (const key of model.plottedVariables.keys()) {
       const vals = model.plottedVariables.get(key)?.variableValues;
       if (vals) {
         valueData.push({ key, x: vals.x, y: vals.y });
       }
     }
-    const selection = select(plottedFunctionCurrentValueRef.current).selectAll("circle");
-    selection
-      .data(valueData)
-      .join(
-        enter => {
-          return enter.append('circle')
-            .attr('r', '5')
-            .attr('class', 'variable-valuex')
-            .attr("fill", (data) => graphModel.getColorForId(data.key))
-            .attr('cx', (data) => model.pointPosition(data.x, xScale, xCellCount))
-            .attr('cy', (data) => model.pointPosition(data.y, yScale, yCellCount));
-        },
-        update => {
-          return update
-            .attr('cx', (data) => model.pointPosition(data.x, xScale, xCellCount))
-            .attr('cy', (data) => model.pointPosition(data.y, yScale, yCellCount));
-        },
-        exit => {
-          exit.remove();
-        }
-      );
+    if (plottedFunctionCurrentValueRef.current) {
+      const selection = select(plottedFunctionCurrentValueRef.current)
+        .selectAll<SVGCircleElement, IData>("circle");
+      selection
+        .data(valueData, d => d.key)
+        .join(
+          enter => {
+            return enter.append('circle')
+              .attr('r', '5')
+              .attr('class', 'variable-valuex')
+              .attr("fill", (data) => graphModel.getColorForId(data.key))
+              .attr('cx', (data) => model.pointPosition(data.x, xScale, xCellCount))
+              .attr('cy', (data) => model.pointPosition(data.y, yScale, yCellCount));
+          },
+          update => {
+            return update
+              .attr('cx', (data) => model.pointPosition(data.x, xScale, xCellCount))
+              .attr('cy', (data) => model.pointPosition(data.y, yScale, yCellCount))
+              .attr("fill", (data) => graphModel.getColorForId(data.key));
+          },
+          exit => {
+            exit.remove();
+          }
+        );
+    }
   }, [graphModel, model, xCellCount, xScale, yCellCount, yScale]);
 
   // Refresh values on expression changes
