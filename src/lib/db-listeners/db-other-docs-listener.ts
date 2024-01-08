@@ -99,7 +99,6 @@ export class DBOtherDocumentsListener extends BaseListener {
       const documentModel = documents.getDocument(dbDoc.self.documentKey);
       if (documentModel) {
         documentModel.setTitle(dbDoc.title);
-        // doing setVisibility here does not fix
       }
     }
   };

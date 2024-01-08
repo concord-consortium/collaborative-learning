@@ -742,30 +742,16 @@ export class DB {
     });
   }
 
-  // do we need something similar for personal documents?
-  public updateDocumentFromProblemDocument(
-    document: DocumentModelType,
-    problemDocument: DBOfferingUserProblemDocument
-  ) {
-    console.log("| EXTRA? updateDocumentFromProblemDocument! |", document, problemDocument);
+  public updateDocumentFromProblemDocument(document: DocumentModelType,
+                                           problemDocument: DBOfferingUserProblemDocument) {
     document.setVisibility(problemDocument.visibility);
   }
-
   // handles personal documents and learning logs
   public createDocumentModelFromOtherDocument(dbDocument: DBOtherDocument, type: OtherDocumentType) {
     const {title, properties, self: {uid, documentKey}} = dbDocument;
     const group = this.stores.groups.groupForUser(uid);
     const groupId = group && group.id;
-    //const viz = dbDocument.visibility;
-    return this.openDocument({
-      type,
-      userId: uid,
-      documentKey,
-      groupId,
-      title,
-      properties
-      //visibility: viz
-    });
+    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties});
   }
 
   // handles published personal documents and published learning logs
