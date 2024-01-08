@@ -80,7 +80,7 @@ export function useDocumentSyncToFirebase(
 
   // sync visibility (public/private) for personal and learning log documents
   useSyncMstPropToFirebase<typeof document.visibility>({
-    firebase, model: document, prop: "visibility", path: typedMetadata,
+    firebase, model: document, prop: "visibility", path: metadata,
     enabled: commonSyncEnabled && !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
     options: {
       onSuccess: (data, visibility) => {
