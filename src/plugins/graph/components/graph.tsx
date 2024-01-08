@@ -223,76 +223,76 @@ export const Graph = observer(
   // TODO multi-dataset: DataConfigurationContext should not be provided here, but is still used in some places.
   return (
     <DataConfigurationContext.Provider value={graphModel.config}>
-        <div className={kGraphClass} ref={graphRef} data-testid="graph">
-          <svg className='graph-svg' ref={svgRef}>
-            <Background
-              marqueeState={marqueeState}
-              ref={backgroundSvgRef}
-            />
+      <div className={kGraphClass} ref={graphRef} data-testid="graph">
+        <svg className='graph-svg' ref={svgRef}>
+          <Background
+            marqueeState={marqueeState}
+            ref={backgroundSvgRef}
+          />
 
-            {renderGraphAxes()}
+          {renderGraphAxes()}
 
-            <svg ref={plotAreaSVGRef}>
-              <svg className={`graph-dot-area ${instanceId}`}>
-                {renderPlotComponents()}
-              </svg>
-              <Marquee marqueeState={marqueeState}/>
+          <svg ref={plotAreaSVGRef}>
+            <svg className={`graph-dot-area ${instanceId}`}>
+              {renderPlotComponents()}
             </svg>
-
-            { !disableAttributeDnD &&
-              <DroppablePlot
-                graphElt={graphRef.current}
-                plotElt={backgroundSvgRef.current}
-                onDropAttribute={handleChangeAttribute}
-              />
-            }
-
-            <Legend
-              legendAttrID={graphModel.getAttributeID('legend')}
-              graphElt={graphRef.current}
-              onDropAttribute={handleChangeAttribute}
-              onRemoveAttribute={handleRemoveAttribute}
-              onTreatAttributeAs={handleTreatAttrAs}
-            />
+            <Marquee marqueeState={marqueeState}/>
           </svg>
-          {!disableAttributeDnD && renderDroppableAddAttributes()}
-          <Adornments/>
-          {defaultSeriesLegend &&
-            <MultiLegend
-              onChangeAttribute={handleChangeAttribute}
-              onRemoveAttribute={handleRemoveAttribute}
-              onTreatAttributeAs={handleTreatAttrAs}
-              onRequestRowHeight={onRequestRowHeight}
+
+          { !disableAttributeDnD &&
+            <DroppablePlot
+              graphElt={graphRef.current}
+              plotElt={backgroundSvgRef.current}
+              onDropAttribute={handleChangeAttribute}
             />
           }
-          {
-            axes.map((axis: AxisPlace, idx) => {
-              const axisModel = graphModel?.getAxis(axis);
-              if (isNumericAxisModel(axisModel)){
-                const minVal = axisModel.min;
-                const maxVal = axisModel.max;
-                return (
-                  <div key={`${axis}-min-max`}>
-                    <AxisEndComponents
-                      value={minVal}
-                      minOrMax={"min"}
-                      axis={axis}
-                      onValueChange={(newValue) => handleMinMaxChange("min", axisModel, newValue)}
-                      readOnly={readOnly}
-                    />
-                    <AxisEndComponents
-                      value={maxVal}
-                      minOrMax={"max"}
-                      axis={axis}
-                      onValueChange={(newValue) => handleMinMaxChange("max", axisModel, newValue)}
-                      readOnly={readOnly}
-                    />
-                  </div>
-                );
-              }
-            })
-          }
-        </div>
+
+          <Legend
+            legendAttrID={graphModel.getAttributeID('legend')}
+            graphElt={graphRef.current}
+            onDropAttribute={handleChangeAttribute}
+            onRemoveAttribute={handleRemoveAttribute}
+            onTreatAttributeAs={handleTreatAttrAs}
+          />
+        </svg>
+        {!disableAttributeDnD && renderDroppableAddAttributes()}
+        <Adornments/>
+        {defaultSeriesLegend &&
+          <MultiLegend
+            onChangeAttribute={handleChangeAttribute}
+            onRemoveAttribute={handleRemoveAttribute}
+            onTreatAttributeAs={handleTreatAttrAs}
+            onRequestRowHeight={onRequestRowHeight}
+          />
+        }
+        {
+          axes.map((axis: AxisPlace, idx) => {
+            const axisModel = graphModel?.getAxis(axis);
+            if (isNumericAxisModel(axisModel)){
+              const minVal = axisModel.min;
+              const maxVal = axisModel.max;
+              return (
+                <div key={`${axis}-min-max`}>
+                  <AxisEndComponents
+                    value={minVal}
+                    minOrMax={"min"}
+                    axis={axis}
+                    onValueChange={(newValue) => handleMinMaxChange("min", axisModel, newValue)}
+                    readOnly={readOnly}
+                  />
+                  <AxisEndComponents
+                    value={maxVal}
+                    minOrMax={"max"}
+                    axis={axis}
+                    onValueChange={(newValue) => handleMinMaxChange("max", axisModel, newValue)}
+                    readOnly={readOnly}
+                  />
+                </div>
+              );
+            }
+          })
+        }
+      </div>
     </DataConfigurationContext.Provider>
   );
 });
