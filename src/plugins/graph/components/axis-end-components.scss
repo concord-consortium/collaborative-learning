@@ -1,18 +1,37 @@
 @import "../../../components/vars.sass";
 
-.editable-border-box{
+.graph-plot svg.arrow {
+  height: 14px;
+  position: absolute;
+  width: 18px;
+}
+
+.axis-extension {
+  background-color: #707070;
+  position: absolute;
+}
+
+.editable-border-box {
   //width is determined dynamically by how many characters in the number
-  height: 22px;
-  display: flex;
   align-items: center;
   border-radius: 5px;
   border: solid 1.5px #949494;
   background-color: #f0f9fb;
+  display: flex;
   font: 12px sans-serif;
+  height: 22px; // Keep in sync with kEditableBoxHeight in editable-graph-value.tsx
+  padding: 0 2px;
   position: absolute;
 
+  &.bottom {
+    justify-content: center;
+  }
 
-  .input-textbox{
+  &.left {
+    justify-content: flex-end;
+  }
+
+  .input-textbox {
     position: absolute;
     top: 50%;
     left: 50%;

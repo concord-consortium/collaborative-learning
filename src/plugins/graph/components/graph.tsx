@@ -7,7 +7,7 @@ import {Background} from "./background";
 import {DroppablePlot} from "./droppable-plot";
 import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
 import {GraphAxis} from "./graph-axis";
-import {attrRoleToGraphPlace, graphPlaceToAttrRole, kDefaultNumericAxisBounds, kGraphClass} from "../graph-types";
+import {attrRoleToGraphPlace, graphPlaceToAttrRole, kGraphClass} from "../graph-types";
 import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useGraphModel} from "../hooks/use-graph-model";
@@ -30,7 +30,7 @@ import {IDataSet} from "../../../models/data/data-set";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
-import { EditableGraphValue } from "./editable-graph-value";
+import { AxisEndComponents } from "./axis-end-components";
 import { GraphLayer } from "./graph-layer";
 
 import "./graph.scss";
@@ -212,8 +212,7 @@ export const Graph = observer(
 
   useGraphModel({ graphModel, enableAnimation, instanceId });
 
-  const handleMinMaxChange = (minOrMax: string, axis: AxisPlace, newValue: number) => {
-    const axisModel = graphModel.getAxis(axis) as INumericAxisModel;
+  const handleMinMaxChange = (minOrMax: string, axisModel: INumericAxisModel, newValue: number) => {
     if (minOrMax === "min" && newValue < axisModel.max){
       axisModel.setMin(newValue);
     } else if (minOrMax === "max" && newValue > axisModel.min){
@@ -269,23 +268,23 @@ export const Graph = observer(
           {
             axes.map((axis: AxisPlace, idx) => {
               const axisModel = graphModel?.getAxis(axis);
-              const minVal = isNumericAxisModel(axisModel) ? axisModel.min : kDefaultNumericAxisBounds[0];
-              const maxVal = isNumericAxisModel(axisModel) ? axisModel.max : kDefaultNumericAxisBounds[1];
               if (isNumericAxisModel(axisModel)){
+                const minVal = axisModel.min;
+                const maxVal = axisModel.max;
                 return (
                   <div key={`${axis}-min-max`}>
-                    <EditableGraphValue
+                    <AxisEndComponents
                       value={minVal}
                       minOrMax={"min"}
                       axis={axis}
-                      onValueChange={(newValue) => handleMinMaxChange("min", axis, newValue)}
+                      onValueChange={(newValue) => handleMinMaxChange("min", axisModel, newValue)}
                       readOnly={readOnly}
                     />
-                    <EditableGraphValue
+                    <AxisEndComponents
                       value={maxVal}
                       minOrMax={"max"}
                       axis={axis}
-                      onValueChange={(newValue) => handleMinMaxChange("max", axis, newValue)}
+                      onValueChange={(newValue) => handleMinMaxChange("max", axisModel, newValue)}
                       readOnly={readOnly}
                     />
                   </div>

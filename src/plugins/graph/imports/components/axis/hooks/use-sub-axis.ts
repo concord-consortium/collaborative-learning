@@ -7,7 +7,9 @@ import {useAxisLayoutContext} from "../models/axis-layout-context";
 import {IAxisModel, isCategoricalAxisModel, isNumericAxisModel} from "../models/axis-model";
 import {isVertical} from "../../axis-graph-shared";
 // import {between} from "../../../../utilities/math-utils";
-import {kAxisTickLength, transitionDuration} from "../../../../graph-types";
+import {
+  kAxisStrokeWidth, kAxisTickLength, kAxisTickPadding, kTickAndGridColor, transitionDuration
+} from "../../../../graph-types";
 import {DragInfo, collisionExists, computeBestNumberOfTicks,
         getCategoricalLabelPlacement,getCoordFunctions, IGetCoordFunctionsProps} from "../axis-utils";
 import { useGraphModelContext } from "../../../../hooks/use-graph-model-context";
@@ -86,7 +88,11 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     const renderNumericAxis = () => {
       select(subAxisElt).selectAll('*').remove();
       const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
-      const axisScale = axis(numericScale).tickSizeOuter(0).tickFormat(format('.9'));
+      const axisScale = axis(numericScale)
+        .tickSize(kAxisTickLength)
+        .tickPadding(kAxisTickPadding)
+        .tickSizeOuter(0)
+        .tickFormat(format('.9'));
       const duration = enableAnimation.current ? transitionDuration : 0;
       if (!axisIsVertical && numericScale.ticks) {
         const horizontalTicks = numericScale.ticks(computeBestNumberOfTicks(numericScale)); //array of all ticks
@@ -100,11 +106,11 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         // @ts-ignore types are incompatible
         .call(axisScale)
         .selectAll("line,path")
-        .style("stroke", "lightgrey")
-        .style("stroke-opacity", "0.7");
+        .style("stroke", kTickAndGridColor);
 
       select(subAxisElt)
         .selectAll('.tick text')
+        .style("fill", "#3f3f3f")
         .style('display', (d, i, nodes) => {
           const  hideMinAndMax = (i === 0 || i === nodes.length - 1) && isNumericAxisModel(axisModel)
                                  && graphModel.isLinkedToDataSet; //hide first and last tick labels when linked
@@ -112,7 +118,6 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         });
     };
 
-    //******  VERTICAL AXIS *****************
     const renderScatterPlotGridLines = () => {
       if (axis) {
         const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
@@ -120,8 +125,16 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         const tickLength = layout.getAxisLength(otherPlace(place)) ?? 0;
         select(subAxisElt).append('g')
           .attr('class', 'grid')
-          .call(axis(numericScale).tickSizeInner(-tickLength));
+          .call(axis(numericScale)
+          .tickSizeInner(-tickLength)
+          .tickSizeOuter(0))
+          .selectAll("line")
+          .style("stroke", kTickAndGridColor);
         select(subAxisElt).select('.grid').selectAll('text').remove();
+        // Style the axes
+        select(subAxisElt).select('.grid path.domain')
+          .style("stroke", "#707070")
+          .style("stroke-width", `${kAxisStrokeWidth}px`);
         // This code makes the x=0 and y=0 grid lines black.
         // I'm leaving it commented out for now in case we change our minds about not highlighting these.
         // if (between(0, numericScale.domain()[0], numericScale.domain()[1])) {

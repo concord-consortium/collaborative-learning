@@ -1,8 +1,10 @@
+@use "../../../../components/vars.sass";
+
 // Menu sizing here must match calculations in multi-legend.tsx:
 $menu-height: 30px;
 $vertical-padding: 10px;
 $vertical-gap: 8px;
 $label-height: 28px;
 $min-menu-width: 144px;
-$codap-menu-border-color: #0592af;
-$codap-bg-color: #f9f9f9;
+$codap-menu-border-color: vars.$workspace-teal;
+$codap-bg-color: #fff;

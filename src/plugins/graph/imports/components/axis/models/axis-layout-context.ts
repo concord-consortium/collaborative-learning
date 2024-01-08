@@ -17,6 +17,7 @@ export interface IAxisLayout {
   // desired/computed bounds via model
   getComputedBounds: (place: AxisPlace) => AxisBounds | undefined
   setDesiredExtent: (place: AxisPlace, extent: number) => void
+  getDesiredExtent: (place: AxisPlace) => number
 }
 
 const nullAxisLayout: IAxisLayout = {
@@ -28,7 +29,8 @@ const nullAxisLayout: IAxisLayout = {
   getAxisScale: () => undefined,
   setAxisScaleType: () => undefined,
   getComputedBounds: () => undefined,
-  setDesiredExtent: () => undefined
+  setDesiredExtent: () => undefined,
+  getDesiredExtent: () => 0
 };
 
 export const AxisLayoutContext = createContext(nullAxisLayout);
