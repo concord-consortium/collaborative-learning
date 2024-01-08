@@ -68,7 +68,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
 
         const selection = select(plottedFunctionRef.current);
         const traceGroup = selection.append("g")
-          .attr("class", `plotted-variable plotted-function-${classFromKey}`)
+          .attr("class", 'plotted-variable')
           .on('mouseover', function(d, i) { this.classList.add('selected'); })
           .on('mouseout', function(d, i) { this.classList.remove('selected'); });
 
@@ -78,10 +78,8 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
           .attr('d', path);
         // Path for main line
         traceGroup.append('path')
-          .attr('class', `plotted-function plotted-function-${classFromKey}`)
-          .attr('data-testid', `plotted-function-path${classFromKey ? `-${classFromKey}` : ''}`)
+          .attr('class', `plotted-variable-path`)
           .attr('stroke', graphModel.getColorForId(instanceKey))
-          .attr('stroke-width', '3')
           .attr('d', path);
         if (values) {
           const x = model.pointPosition(values.x, xScale, xCellCount),
@@ -93,7 +91,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
             label = `${labelFormat(values.x)}, ${labelFormat(values.y)}`;
           // Highlight for value marker
           traceGroup.append('circle')
-            .attr('class', 'plotted-variable-highlight plotted-variable-highlight-point')
+            .attr('class', 'plotted-variable-highlight plotted-variable-highlight-value')
             .attr('r', graphModel.getPointRadius() + 2.5)
             .attr('stroke-width', '5')
             .attr('cx', x)
@@ -102,7 +100,6 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
           traceGroup.append('circle')
             .attr('class', 'plotted-variable-value')
             .attr('r', graphModel.getPointRadius())
-            .attr('stroke-width', '2')
             .attr('stroke', (data) => graphModel.getColorForId(instanceKey))
             .attr('fill', '#fff')
             .attr('cx', x)
@@ -110,14 +107,14 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
           // Value label background
           const labelRectHeight = textHeight + 2 * padding;
           const labelRect = traceGroup.append('rect')
-            .attr('class', 'plotted-variable-label')
+            .attr('class', 'plotted-variable-highlight plotted-variable-labelbox')
             .attr('y', y - offsetFromPoint - labelRectHeight)
             .attr('rx', labelRectHeight / 2)
             .attr('ry', labelRectHeight / 2)
             .attr('height', labelRectHeight);
           // Value label
           const valueLabel = traceGroup.append('text')
-            .attr('class', 'plotted-variable-label')
+            .attr('class', 'plotted-variable-highlight plotted-variable-label')
             .attr('text-anchor', 'middle')
             .attr('x', x)
             .attr('y', y - offsetFromPoint - padding - 2) // up 2px to account for borders
@@ -130,7 +127,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         }
       }
     }
-  }, [classFromKey, graphModel, model, xCellCount, xScale, yCellCount, yScale]);
+  }, [graphModel, model, xCellCount, xScale, yCellCount, yScale]);
 
   // Add the lines and their associated covers and labels
   const refreshValues = useCallback(() => {
