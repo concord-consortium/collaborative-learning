@@ -131,7 +131,7 @@ context('Data Card Tool Tile', () => {
     // Unlink
     dc.getLinkGraphButton().should('not.be.disabled').click();
     dc.getLinkGraphModalTileMenu().select('Data Card Collection 1');
-    dc.getLinkGraphModalLinkButton().should("contain", "Unlink").click();
+    dc.getLinkGraphModalLinkButton().should("contain", "Clear It!").click();
     xyplot.getXAxisLabel().should("not.contain", "habitat");
     // Re-link
     dc.getLinkGraphButton().should('not.be.disabled').click();
@@ -157,7 +157,7 @@ context('Data Card Tool Tile', () => {
     dc.getAttrValueInput().eq(0).invoke('val').should('eq', "river");
     dc.getAttrValueInput().eq(1).invoke('val').should('eq', "rhinocerotter");
 
-    cy.log("verify Datacard tile title restore upon page reload")
+    cy.log("verify Datacard tile title restore upon page reload");
     const newName = "Data Card Title";
     dc.getTile().find('.title-text-element').first().dblclick();
     dc.getTile().find('.title-text-element').first().type(newName + '{enter}');
