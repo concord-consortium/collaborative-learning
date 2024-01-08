@@ -1,9 +1,39 @@
-path.plotted-function-highlight {
-  stroke: none;
-  stroke-width: 13;
+g.plotted-variable {
+  pointer-events: stroke;
+
+  .plotted-variable-highlight {
+    stroke: none;
+
+    &.plotted-variable-highlight-path {
+      stroke-width: 13;
+    }
+  }
+
+  .plotted-variable-label {
+    opacity: 0;
+  }
 
   &.selected {
-    stroke: rgba(20, 244, 158, 0.5);
-  }
-}
 
+    .plotted-variable-highlight {
+      stroke: rgba(20, 244, 158, 0.5);
+    }
+
+    .plotted-variable-label {
+      opacity: 1;
+    }
+
+  }
+
+  rect.plotted-variable-label {
+    fill: #14f49e;
+    stroke: #949494;  // --text-gray
+    stroke-width: 1.5;
+  }
+
+  text.plotted-variable-label {
+      fill: #3f3f3f;
+      font-size: 12px;
+  }
+
+}
