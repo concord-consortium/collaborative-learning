@@ -59,6 +59,11 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     }
   }))
   .views(self => ({
+    pointPosition(value: number, scale: ScaleNumericBaseType, cellCount: number) {
+      return (scale(value) / cellCount);
+    }
+  }))
+  .actions(self => ({
     computePoints(options: IComputePointsOptions) {
       const { instanceKey, min, max, xCellCount, yCellCount, gap, xScale, yScale } = options;
       const tPoints: Point[] = [];
@@ -68,16 +73,13 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
           const tX = xScale.invert(pixelX * xCellCount);
           const tY = computeY(tX);
           if (Number.isFinite(tY)) {
-            const pixelY = this.pointPosition(tY, yScale, yCellCount);
+            const pixelY = self.pointPosition(tY, yScale, yCellCount);
             tPoints.push({ x: pixelX, y: pixelY });
           }
         }
       }
       dispose?.();
       return tPoints;
-    },
-    pointPosition(value: number, scale: ScaleNumericBaseType, cellCount: number) {
-      return (scale(value) / cellCount);
     }
   }));
 
