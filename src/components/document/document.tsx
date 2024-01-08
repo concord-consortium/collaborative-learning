@@ -92,11 +92,12 @@ const TwoUpStackedButton = ({ onClick, selected }: { onClick: () => void, select
 
 const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boolean }) => {
   const visibility = isShared ? "public" : "private";
+  console.log("|    render share button so called 'visibility': ", visibility);
   return (
     <>
       {<div className="share-separator" />}
       <ToggleControl className={`share-button ${visibility}`} dataTest="share-button"
-                      initialValue={isShared} onChange={onClick}
+                      value={isShared} onChange={onClick}
                       title={`${isShared ? "Shared: click to unshare from" : "Unshared: click to share to"} group`} />
       <div className="share-label">Share</div>
     </>
@@ -161,6 +162,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { workspace, document, toolbar, side, readOnly } = this.props;
+    console.log("| render document", document.visibility, document.title);
     return (
       <div key="document" className="document" ref={(el) => this.documentContainer = el}>
         {this.renderTitleBar(document.type)}

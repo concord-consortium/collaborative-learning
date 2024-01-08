@@ -747,7 +747,7 @@ export class DB {
     document: DocumentModelType,
     problemDocument: DBOfferingUserProblemDocument
   ) {
-    console.log("| 🤔 updateDocumentFromProblemDocument! |", document, problemDocument);
+    console.log("| EXTRA? updateDocumentFromProblemDocument! |", document, problemDocument);
     document.setVisibility(problemDocument.visibility);
   }
 
