@@ -186,7 +186,8 @@ export const DocumentsModel = types
           key: document.key,
           title: document.title,
           uid: document.uid,
-          type: document.type
+          type: document.type,
+          visibility: document.visibility
         });
       }
       if (!self.getDocument(document.key)) {

@@ -742,8 +742,12 @@ export class DB {
     });
   }
 
-  public updateDocumentFromProblemDocument(document: DocumentModelType,
-                                           problemDocument: DBOfferingUserProblemDocument) {
+  // do we need something similar for personal documents?
+  public updateDocumentFromProblemDocument(
+    document: DocumentModelType,
+    problemDocument: DBOfferingUserProblemDocument
+  ) {
+    console.log("| 🤔 updateDocumentFromProblemDocument! |", document, problemDocument);
     document.setVisibility(problemDocument.visibility);
   }
 
