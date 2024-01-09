@@ -13,6 +13,8 @@ import {DragInfo, collisionExists, computeBestNumberOfTicks,
         getCategoricalLabelPlacement,getCoordFunctions, IGetCoordFunctionsProps} from "../axis-utils";
 import { useGraphModelContext } from "../../../../hooks/use-graph-model-context";
 
+// This function is used to style to style the axes of multiple types of plots below.
+// It would be better if we had functions like this to style other features consistently (tick marks, grid lines).
 function styleAxis(axisSelection: Selection<any, any, any, any>, duration?: number) {
   axisSelection.select(".domain")
   .transition().duration(duration ?? 0)
