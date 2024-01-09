@@ -114,12 +114,10 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
               commentData.tags.forEach((tag: string) => {
                 let docKeysSet = tempTagDocumentMap.get(tag);
                 if (!docKeysSet) {
-                  // If the Set for this tag doesn't exist yet, create it
                   docKeysSet = new Set<string>();
                   tempTagDocumentMap.set(tag, docKeysSet);
                 }
-                // Add the docKey to the Set, duplicates will be ignored
-                docKeysSet.add(docKey);
+                docKeysSet.add(docKey); //only unique doc keys will be stored
               });
             }
           });
