@@ -9,6 +9,7 @@ import NumberlineArrowLeft from "../../../assets/numberline-arrow-left.svg";
 import NumberlineArrowRight from "../../../assets/numberline-arrow-right.svg";
 
 import "./axis-end-components.scss";
+import { isFiniteNumber } from '../../../utilities/math-utils';
 
 // This component includes a handful of componets that get added to a graph near the end of its left and bottom axes.
 // An editable box allows the user to adjust the min or max of the axis.
@@ -145,7 +146,7 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
   };
 
   const updateValue = (val: string) => {
-    if (checkIfNumber(val)) {
+    if (isFiniteNumber(Number(val))) {
       onValueChange(Number(val));
     }
     setIsEditing(false);
@@ -162,12 +163,6 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
         setIsEditing(false);
         break;
     }
-  };
-
-  const checkIfNumber = (input: string): boolean => {
-    const result = Number(input);
-    const isNumeric = !isNaN(result) && isFinite(result);
-    return isNumeric;
   };
 
   const borderBoxClasses = classNames("editable-border-box", axis);
