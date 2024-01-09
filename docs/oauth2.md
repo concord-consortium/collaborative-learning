@@ -2,7 +2,14 @@
 
 CLUE will use an OAuth2 flow to authenticate with the portal if an `authDomain` parameter is included in the URL. A typical value of `authDomain` would be `https://learn.concord.org`. However the production portal is not configured to allow CLUE to use OAuth2, so for testing you should use `https://learn.portal.staging.concord.org`.
 
-This OAuth2 authentication will result in a `accessToken`. This `accessToken` can be used by CLUE to access other portal APIs the same way that the nonce `token` parameter is used by the current portal launches. However the portal's nonce `token` has some extra information in it in addition to the user authentication. So in order for the OAuth2 launch to work property a second parameter `resourceLinkId` needs to be included in the CLUE URL. This is an LTI name for the portal's offering id. This `resourceLinkId` is passed to the Portal JWT and Firebase JWT requests and it takes the place of the extra info that was original included in the portal's nonce `token`.
+This OAuth2 authentication will result in an `accessToken`. This `accessToken` can be used by CLUE to access other portal APIs the same way that the nonce `token` parameter is used by the current portal launches. However the portal's nonce `token` has some extra information in it in addition to the user authentication. So in order for the OAuth2 launch to work property a second parameter `resourceLinkId` needs to be included in the CLUE URL. This is an LTI name for the portal's offering id. This `resourceLinkId` is passed to the Portal JWT and Firebase JWT requests and it takes the place of the extra info that was original included in the portal's nonce `token`.
+
+This diagram describes how OAuth2 works:
+https://github.com/concord-consortium/portal-report/blob/master/docs/launch.md#launched-from-third-party-site-and-authenticate-user
+- Replace "Portal Report" with "CLUE".
+- Replace "Activity Player" with some other way a user can open a link. Planned cases are:
+  - including links in the researcher log reports
+  - updating the portal to use links like this to launch CLUE, this way the user can reload CLUE and be re-authenticated with the Portal and continue working where they left off.
 
 # Example URLS
 
