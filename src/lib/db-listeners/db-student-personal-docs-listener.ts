@@ -2,6 +2,7 @@ import firebase from "firebase/app";
 import { DB } from "../db";
 import { OtherDocumentType, PersonalDocument } from "../../models/document/document-types";
 import { BaseListener } from "./base-listener";
+import { ENavTab } from "../../models/view/nav-tabs";
 
 export class DBStudentPersonalDocsListener extends BaseListener {
   private db: DB;
@@ -13,6 +14,10 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   }
 
   public start() {
+    const tabNames = this.db.stores.tabsToDisplay.map(tab => tab.tab);
+    const usesSortWork = tabNames.includes(ENavTab.kSortWork);
+    if (!usesSortWork) return;
+    console.log("| starting DBStudentPersonalDocsListener because we have a sort work tab");
     const { user } = this.db.stores;
     return new Promise<void>((resolve, reject) => {
       const offeringUsersRef = this.db.firebase.ref(
