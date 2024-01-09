@@ -165,6 +165,14 @@ context('XYPlot Tool Tile', function () {
       xyTile.getGraphDot().should('have.length', 3);
       xyTile.getXYPlotTitle().should('contain', title);
 
+       //XY Plot tile restore upon page reload
+       cy.wait(2000);
+       cy.reload();
+       cy.waitForLoad();
+       xyTile.getTile().click();
+       xyTile.getXYPlotTitle().should('contain', title);
+       xyTile.getGraphDot().should('have.length', 3);
+
       cy.log("Delete XY Plot Tile");
       xyTile.getTile().click();
       clueCanvas.deleteTile('xyplot');
