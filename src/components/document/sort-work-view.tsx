@@ -114,47 +114,50 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     });
   };
 
+
+
   return (
     <div key="sort-work-view" className="sort-work-view">
-      <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
-
       {
         showSortWorkDocumentArea ?
         <SortWorkDocumentArea openDocumentKey={openDocumentKey}/> :
-        <div className="tab-panel-documents-section">
-          {
-            sortedDocuments.map((sortedSection, idx) => {
-              return (
-                <div className="sorted-sections" key={`sortedSection-${idx}`}>
-                  <div className="section-header">
-                    <div className="section-header-label">
-                      {sortedSection.sectionLabel}
+        <>
+          <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
+          <div className="tab-panel-documents-section">
+            {
+              sortedDocuments.map((sortedSection, idx) => {
+                return (
+                  <div className="sorted-sections" key={`sortedSection-${idx}`}>
+                    <div className="section-header">
+                      <div className="section-header-label">
+                        {sortedSection.sectionLabel}
+                      </div>
+                    </div>
+                    <div className="list">
+                      {sortedSection.documents.map((doc: any, sortIdx: number) => {
+                        const documentContext = getDocumentContext(doc);
+                        return (
+                          <DocumentContextReact.Provider key={doc.key} value={documentContext}>
+                            <DecoratedDocumentThumbnailItem
+                              key={doc.key}
+                              scale={0.1}
+                              document={doc}
+                              tab={ENavTab.kSortWork}
+                              shouldHandleStarClick={true}
+                              allowDelete={false}
+                              onSelectDocument={handleSelectDocument}
+                            />
+                          </DocumentContextReact.Provider>
+                        );
+                      })}
                     </div>
                   </div>
-                  <div className="list">
-                    {sortedSection.documents.map((doc: any, sortIdx: number) => {
-                      const documentContext = getDocumentContext(doc);
-                      return (
-                        <DocumentContextReact.Provider key={doc.key} value={documentContext}>
-                          <DecoratedDocumentThumbnailItem
-                            key={doc.key}
-                            scale={0.1}
-                            document={doc}
-                            tab={ENavTab.kSortWork}
-                            shouldHandleStarClick={true}
-                            allowDelete={false}
-                            onSelectDocument={handleSelectDocument}
-                          />
-                        </DocumentContextReact.Provider>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })
-          }
-          {DEBUG_SORT_WORK && renderDebugView()}
-        </div>
+                );
+              })
+            }
+            {DEBUG_SORT_WORK && renderDebugView()}
+          </div>
+        </>
       }
     </div>
   );
