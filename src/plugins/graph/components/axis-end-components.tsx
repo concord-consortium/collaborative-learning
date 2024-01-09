@@ -85,8 +85,6 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
   const borderBoxStyles = calculateBorderBoxStyles();
 
   // The arrow adds an arrowhead to the end of the axis.
-  // Note that for min, it's actually the other axis that gets the arrowhead.
-  // So axis: left, minOrMax: min adds an arrowhead to the bottom axis at its min.
   const calculateArrowStyle = () => {
     const style: CSSProperties = {};
 
@@ -116,8 +114,6 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
 
   // The axis extension adds a bit of extra axis to connect the d3 axis with the arrowheads.
   // This is only drawn for min, not max.
-  // Just like with the min arrowheads, the extensions are actually for the other axis,
-  // so if axis is "left", the extension is actually for the bottom axis.
   const calculateAxisExtensionStyle = () => {
     // The axis only gets extended at the min
     if (minOrMax === "max") return;
@@ -125,17 +121,17 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
     const style: CSSProperties = {};
 
     if (axis === "bottom") {
-      style.left = `${axisBounds.left - kAxisStrokeWidth / 2}px`;
-      style.top = `${axisBounds.top}px`;
-      style.height = `${kAxisTickLength}px`;
-      style.width = `${kAxisStrokeWidth}px`;
+      style.left = `${axisBounds.left - kAxisTickLength}px`;
+      style.top = `${axisBounds.top - kAxisStrokeWidth / 2}px`;
+      style.height = `${kAxisStrokeWidth}px`;
+      style.width = `${kAxisTickLength}px`;
     }
 
     if (axis === "left") {
-      style.left = `${axisBounds.left + axisBounds.width - kAxisTickLength}px`;
-      style.top = `${axisBounds.top + axisBounds.height - kAxisStrokeWidth / 2}px`;
-      style.height = `${kAxisStrokeWidth}px`;
-      style.width = `${kAxisTickLength}px`;
+      style.left = `${axisBounds.left + axisBounds.width - kAxisStrokeWidth / 2}px`;
+      style.top = `${axisBounds.top + axisBounds.height}px`;
+      style.height = `${kAxisTickLength}px`;
+      style.width = `${kAxisStrokeWidth}px`;
     }
 
     return style;
