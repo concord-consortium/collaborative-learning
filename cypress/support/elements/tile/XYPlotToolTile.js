@@ -47,8 +47,14 @@ class XYPlotToolTile {
   getAdornments(adornmentType, workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .graph-tool-tile .graph-adornments-grid${adornmentType ? " ." + adornmentType : ""}`);
   }
-  getPlottedVariablesPath(workspaceClass) {
-    return this.getAdornments("plotted-function", workspaceClass).find("path");
+  getPlottedVariablesGroup(workspaceClass) {
+    return this.getAdornments("plotted-function", workspaceClass).find("g.plotted-variable");
+  }
+  getPlottedVariablesPoint(workspaceClass) {
+    return this.getPlottedVariablesGroup(workspaceClass).find("circle.plotted-variable-value");
+  }
+  getPlottedVariablesLabel(workspaceClass) {
+    return this.getPlottedVariablesGroup(workspaceClass).find("text.plotted-variable-label");
   }
   getMultiLegend(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .graph-tool-tile .multi-legend`);

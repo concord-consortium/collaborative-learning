@@ -1,0 +1,43 @@
+g.plotted-variable {
+  pointer-events: stroke;
+
+  // All 'highlight' elements are invisible unless g.plotted-variable has 'selected' class.
+  .plotted-variable-highlight {
+    opacity: 0;
+  }
+
+  &.selected {
+    .plotted-variable-highlight {
+      opacity: 1;
+    }
+  }
+
+  .plotted-variable-path {
+    stroke-width: 3;
+  }
+
+  .plotted-variable-highlight-path {
+    stroke: rgba(20, 244, 158, 0.5);
+    stroke-width: 13;
+  }
+
+  .plotted-variable-value {
+    stroke-width: 3;
+  }
+
+  .plotted-variable-highlight-value {
+    stroke: rgba(20, 244, 158, 0.5);
+  }
+
+  .plotted-variable-labelbox {
+    fill: #14f49e;
+    stroke: #949494;  // --text-gray
+    stroke-width: 1.5;
+  }
+
+  .plotted-variable-label {
+      fill: #3f3f3f;
+      font-size: 12px;
+  }
+
+}
