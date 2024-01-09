@@ -86,7 +86,7 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
 
   // The arrow adds an arrowhead to the end of the axis.
   // Note that for min, it's actually the other axis that gets the arrowhead.
-  // So axis left minOrMax min adds an arrowhead to the bottom axis at its min.
+  // So axis: left, minOrMax: min adds an arrowhead to the bottom axis at its min.
   const calculateArrowStyle = () => {
     const style: CSSProperties = {};
 
