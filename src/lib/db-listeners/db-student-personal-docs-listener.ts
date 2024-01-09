@@ -16,8 +16,7 @@ export class DBStudentPersonalDocsListener extends BaseListener {
   public start() {
     const tabNames = this.db.stores.tabsToDisplay.map(tab => tab.tab);
     const usesSortWork = tabNames.includes(ENavTab.kSortWork);
-    if (!usesSortWork) return;
-    console.log("| starting DBStudentPersonalDocsListener because we have a sort work tab");
+    if (!usesSortWork) return Promise.resolve();
     const { user } = this.db.stores;
     return new Promise<void>((resolve, reject) => {
       const offeringUsersRef = this.db.firebase.ref(
