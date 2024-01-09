@@ -40,12 +40,12 @@ http://localhost:8080/?unit=msa&problem=1.4&domain=https://learn.portal.staging.
 
 # Future Work
 - update Portal with a new launch option for students and reports which includes the `authDomain` and `resourceLinkId` params.
-- add support for researcher access to CLUE student work. The portal already has a `target_user_id` param that is used for portal report researcher access to student data. There are special rules in the portal report firebase to allow this target_user_id claim to access the answers for students. CLUE doesn't have these rules, and the app will also fail because the user type in the JWT will not be student. See below for more details.
-- add support for researcher access to CLUE teacher dashboards. The researcher should only see students in the dashboard with permission forms. And most likely the student names should be replaced with ids so researchers can correlate the data with the log data without knowing the student name. The same "target_user_id" support in the portal can be used for this, but CLUE app code and the firebase rules will need to be updated to make it work.
+- add support for researcher access to CLUE student work. The portal already has a `target_user_id` param that is used for portal report researcher access to student data. There are special rules in the portal report firebase to allow this `target_user_id` claim to access the answers for students. CLUE doesn't have these rules, and the app will also fail because the user type in the JWT will not be student. See below for more details.
+- add support for researcher access to CLUE teacher dashboards. The researcher should only see students in the dashboard with permission forms. And most likely the student names should be replaced with ids so researchers can correlate the data with the log data without knowing the student name. The same `target_user_id` support in the portal can be used for this, but CLUE app code and the firebase rules will need to be updated to make it work.
 - when the URL includes a current user id, we should pass this to the portal during the OAuth2 flow. This way if a different user is signed into the portal, the portal can give them them the option to logout and login with the correct user. This can happen when testing different users, it can also happen when a computer is shared by multiple students. If the wrong user is logged in the current message is confusing: "Error: Unable to get classInfoUrl or offeringId"
 
 # Notes on parameter names
-It is tempting to use the existing `domain` url parameter, but that would cause problems because CLUE wouldn't be able tell the difference between an nonce token Portal launch and OAuth2 Portal launch. But if we drop support for the nonce token Portal launch we might want to considate the two parameters. In the AP, portal-report, and researcher report SPAs the URL param is `auth-domain` instead of the `authDomain` used in CLUE. I switched to camel case in CLUE because that is our convention, and if CLUE projects are going to fund a new OAuth2 Portal launch type we might as well use that as an opportunity to switch preferred camel case style.
+It is tempting to use the existing `domain` url parameter, but that would cause problems because CLUE wouldn't be able tell the difference between a nonce token Portal launch and OAuth2 Portal launch. But if we drop support for the nonce token Portal launch we might want to consolidate the two parameters. In the AP, portal-report, and researcher report SPAs the URL param is `auth-domain` instead of the `authDomain` used in CLUE. I switched to camel case in CLUE because that is our convention, and if CLUE projects are going to fund a new OAuth2 Portal launch type we might as well use that as an opportunity to switch preferred camel case style.
 
 # Handling Researcher Launches
 
@@ -55,7 +55,7 @@ Issues we'll have to address in CLUE:
 
 Currently CLUE requests a Portal JWT and then it checks the user type in this JWT. The user type will be set in the Portal JWT if a single use token is used to get the JWT. The user type will also be set if a resource_link_id is passed to the JWT api and the current user is a student or teacher in the class of the resourceLinkId.
 
-If a researcher is launching CLUE they will likely not be a student or teacher in the class of the offering. So they will have a user type of "user" in the Portal JWT. Even when a target_user_id is passed along with the resource_link_id to the JWT API, and this target user is a student or teacher in the class, the portal will continue to set the user type to be "user".
+If a researcher is launching CLUE they will likely not be a student or teacher in the class of the offering. So they will have a user type of "user" in the Portal JWT. Even when a `target_user_id` is passed along with the `resource_link_id` to the JWT API, and this target user is a student or teacher in the class, the portal will continue to set the user type to be "user".
 
 Here is where the `resource_link_id` and `target_user_id` are discussed when requesting portal JWTs:
 https://github.com/concord-consortium/rigse/blob/18df1de769a9098101eb10b2fa92846de23d7b6e/rails/app/controllers/api/v1/jwt_controller.rb#L89
@@ -69,7 +69,7 @@ Otherwise if the JWT user type is teacher (and user if we allow it above)
 - the classInfoUrl is taken from a class parameter in URL itself
 - the offeringId is taken from the offering parameter in the URL itself
 
-Currently when the portal generates a Portal JWT for a resource_link_id and a target_user_id it does not add the class_info_url or offering_id to the JWT. So without changes to Portal or CLUE we'd need include the class and offering parameters in the links the researchers are using. This would be the same approach used when the Activity Player researcher reports have links to the portal-report to show the student work.
+Currently when the portal generates a Portal JWT for a resource_link_id and a target_user_id it does not add the class_info_url or offering_id to the JWT. So without changes to Portal or CLUE we'd need to include the class and offering parameters in the links the researchers are using. This would be the same approach used when the Activity Player researcher reports have links to the portal-report to show the student work.
 
 To simplify these URLs we could update CLUE to get the offeringId from the resourceLinkId, and then make a API request to get the offering information and from that information it could construct the classInfoUrl. I'm not sure if the portal will allow a class or offering information request given the Portal JWT it currently generates for the researchers resource_link_id and target_user_id request.
 
@@ -83,9 +83,9 @@ CLUE uses this domain for somethings. It seems reasonable for the Portal to alwa
 # Tech Debt
 
 - figure out a way to handle branches with the OAuth2 redirects, so we don't have to update the portal configuration each time we want to test a new branch.
-- simplify params used by a report launch of CLUE. With just the resourceLinkId and a domain it can discover all of the information it needs for the report. This makes the report launch more symmetric with the student launch. Especially if the offering api (or perhaps new resourceLinkId api) provided info about class (or context). The biggest problem with using a single id like that is that either we need an dynamic api where we can specify the shape of the result, or we have to make one request to get the offering info, wait for it, and then make a second request to get the class info. The next bullet can be used to simplify this.
-- update the portal apis so it is easier for apps like CLUE to get all of the info they need for a teacher and a student via a single request. But note that if the user is a researcher and not a student or teacher in the class, then the response should not include student names. And it should only include students that have consented for their work to be visible to researchers.
-- see if we can simplify the app mode calculation. There are currently a few places to use the token to compute the app mode or whether the app is previewing. It would be easier to separate the qaClear from the qa app mode. Then we wouldn't need to work with the app mode right at the beginning. This way working with the token could be postponed until initializeApp which could figure out the appModel itself. But the current clear code is making sure we the appMode is QA so it doesn't accidentally clear out production data.
+- simplify params used by a report launch of CLUE. With just the resourceLinkId and a domain it can discover all of the information it needs for the report. This makes the report launch more symmetric with the student launch. Especially if the offering api (or perhaps new resourceLinkId api) provided info about class (or context). The biggest problem with using a single id like that is that either we need a dynamic api where we can specify the shape of the result, or we have to make one request to get the offering info, wait for it, and then make a second request to get the class info. The next bullet can be used to simplify this.
+- update the portal APIs so it is easier for apps like CLUE to get all of the info they need for a teacher and a student via a single request. But note that if the user is a researcher and not a student or teacher in the class, then the response should not include student names. And it should only include students that have consented for their work to be visible to researchers.
+- see if we can simplify the app mode calculation. There are currently a few places to use the token to compute the app mode or whether the app is previewing. It would be easier to separate the `qaClear` from the `qa` app mode. Then we wouldn't need to work with the app mode right at the beginning. This way working with the token could be postponed until `initializeApp` which could figure out the `appMode` itself. But the current clear code is making sure the `appMode` is`qa` so it doesn't accidentally clear out production data.
 - consider changing urlParams approach so it is an interface to the actual URL. This way if the URL is changed then any code accessing the urlParams will get this updated version. Even better would be to make this observable, so components using url parameters would get re-rendered if the parameter was changed. This way the URL is the source of truth instead of some object that was copied from it.
 - move all qaClear code out of AppComponent. The `qaClear=all` is handled outside but other types of qaClear (offering and class) are still handled by the AppComponent.
 - something simple like qaClear is still downloading all of the javascript needed by CLUE. It looks like it is also downloading the cms libraries, but it is not. These bundles include the common code that both CLUE and the cms code use. To improve the loading time, we'd need to make CLUE loading even more dynamic. So something like qaClear and the initial OAuth2 load would not have to wait for all of the CLUE javascript to be loaded. If we make this change, we probably want to optimize it so the other core files do start downloading right away, but if all we are doing is qaClear or oauth2 redirecting we just don't wait for them.
@@ -95,8 +95,8 @@ CLUE uses this domain for somethings. It seems reasonable for the Portal to alwa
 
 This isn't really needed for this work. We have the offeringId provided by the resourceLinkId in the url params. But it'd be nice to fix this.
 
-- create a IUserContext interface with user, offering, and class info
-- all of the places that currently pass a user object to getOfferingPath update them to pass the stores directly which would then implement this interface.
+- create an IUserContext interface with user, offering, and class info
+- update all of the places that currently pass a user object to getOfferingPath to pass the stores directly which would then implement this interface.
 - this way we can remove the class and offering info out of the user object which would then match the actual user concept in the portal.
 
 # Notes on affected code
@@ -104,7 +104,7 @@ This isn't really needed for this work. We have the offeringId provided by the r
 Old use of `urlParams.token`:
 - to figure out the app mode in index.tsx
 - to figure out if we are "previewing" in initializeApp (initialize-app.tsx). This approach might be broken if we drop the token from student launches.
-- bearToken in authenticate (auth.ts)
+- bearerToken in authenticate (auth.ts)
 - token param in getPortalClassOfferings (portal-apis.ts)
 
 Use of `bearerToken` in auth.ts
@@ -167,7 +167,7 @@ Note that preview launch is the same for students and teachers, the student prev
   - problem=1.4
   - domain=https%3A%2F%2Flearn.portal.staging.concord.org%2F
   - domain_uid=9
-- as a researcher trying to look at a specific answer. This is not current supported by CLUE but the AP report supports it. If we add an OAuth2 launching option to the portal we should to take this case into account. And this type of launch is useful for reference when we add support to CLUE so a researcher can open a specific document.
+- as a researcher trying to look at a specific answer. This is not currently supported by CLUE but the AP report supports it. If we add an OAuth2 launching option to the portal we should to take this case into account. And this type of launch is useful for reference when we add support to CLUE so a researcher can open a specific document.
   https://portal-report.concord.org/branch/master/index.html?
   - auth-domain=https%3A%2F%2Flearn-report.portal.staging.concord.org
   - firebase-app=report-service-dev
