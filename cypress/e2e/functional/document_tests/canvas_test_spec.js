@@ -53,7 +53,7 @@ context('Test Canvas', function () {
     canvas.createNewExtraDocumentFromFileMenu(studentWorkspace, "my-work");
     canvas.getEditTitleIcon().should('be.visible');
     canvas.getPersonalPublishIcon().should('be.visible');
-    clueCanvas.getShareButton().should('not.exist');
+    clueCanvas.getShareButton().should('be.visible');
     clueCanvas.getFourUpViewToggle().should('not.exist');
 
     cy.log('Test personal workspace canvas');

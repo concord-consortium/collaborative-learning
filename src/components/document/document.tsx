@@ -96,7 +96,7 @@ const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boo
     <>
       {<div className="share-separator" />}
       <ToggleControl className={`share-button ${visibility}`} dataTest="share-button"
-                      initialValue={isShared} onChange={onClick}
+                      value={isShared} onChange={onClick}
                       title={`${isShared ? "Shared: click to unshare from" : "Unshared: click to share to"} group`} />
       <div className="share-label">Share</div>
     </>
@@ -391,6 +391,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div className="actions">
           {(!hideButtons || supportStackedTwoUpView) &&
             <div className="actions">
+              <ShareButton isShared={document.visibility === "public"} onClick={this.handleToggleVisibility} />
               {supportStackedTwoUpView && isPrimary &&
                 <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
               {supportStackedTwoUpView && isPrimary &&
