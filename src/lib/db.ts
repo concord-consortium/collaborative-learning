@@ -567,7 +567,7 @@ export class DB {
               title,
               properties: { ...properties, ...metadata.properties },
               groupId,
-              visibility,
+              visibility: visibility || metadata.visibility,
               uid: userId,
               originDoc,
               key: document.self.documentKey,
@@ -746,7 +746,6 @@ export class DB {
                                            problemDocument: DBOfferingUserProblemDocument) {
     document.setVisibility(problemDocument.visibility);
   }
-
   // handles personal documents and learning logs
   public createDocumentModelFromOtherDocument(dbDocument: DBOtherDocument, type: OtherDocumentType) {
     const {title, properties, self: {uid, documentKey}} = dbDocument;
