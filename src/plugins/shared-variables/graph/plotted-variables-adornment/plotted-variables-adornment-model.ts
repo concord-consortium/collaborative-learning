@@ -10,6 +10,7 @@ import {
 } from "../../../graph/adornments/plotted-function/plotted-function-adornment-model";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables";
 import { kPlottedVariablesType } from "./plotted-variables-adornment-types";
+import { GraphAttrRole } from "../../../graph/graph-types";
 
 function getSharedVariables(node: IAnyStateTreeNode) {
   const sharedModelManager = getSharedModelManager(node);
@@ -43,6 +44,19 @@ export const PlottedVariables = types.model("PlottedVariables", {})
     },
     get yVariable() {
       return self.sharedVariables?.variables.find(variable => variable.id === self.yVariableId);
+    }
+  }))
+  .views(self => ({
+    /**
+     * Return the current values of the X and Y variables.
+     * Returns an object with { x, y }, or undefined if either one is not set.
+     */
+    get variableValues() {
+      const x = self.xVariable?.computedValue,
+        y = self.yVariable?.computedValue;
+      if (x !== undefined && y !== undefined) {
+        return { x, y };
+      }
     }
   }))
   .actions(self => ({
@@ -90,6 +104,34 @@ export const PlottedVariablesAdornmentModel = PlottedFunctionAdornmentModel
     },
     get sharedVariables() {
       return getSharedVariables(self);
+    },
+    /**
+     * Returns an object with all X and Y values of plotted variables.
+     * Format is { x: [list of x values], y: [list of y values] }
+     */
+    get variableValues() {
+      const lists = {
+        x: [] as number[],
+        y: [] as number[]
+      };
+      for (const pvi of self.plottedVariables.values()) {
+        const vals = pvi.variableValues;
+        if (vals) {
+          lists.x.push(vals.x);
+          lists.y.push(vals.y);
+        }
+      }
+      return lists;
+    }
+  }))
+  .views(self => ({
+    numericValuesForAttrRole(role: GraphAttrRole) {
+      const values = self.variableValues;
+      if (role in values) {
+        return values[role as 'x'|'y'];
+      } else {
+        return [] as number[];
+      }
     }
   }))
   .actions(self => ({

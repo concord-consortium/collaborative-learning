@@ -115,7 +115,7 @@ export const useLinkConsumerTileDialog =
     .filter(tileInfo => modelToShare && isLinkedToTile(modelToShare, tileInfo.id) && tileInfo.id !== model.id);
 
   const primaryButtonText = modelToShare && isLinkedToTile(modelToShare, selectValue)
-    ? 'Unlink'
+    ? 'Clear It!'
     : tileType ? `${tileType} It!` : 'Link';
 
   // Builds an appopriate icon for the dialog.
