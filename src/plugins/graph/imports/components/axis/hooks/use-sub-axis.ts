@@ -13,6 +13,13 @@ import {DragInfo, collisionExists, computeBestNumberOfTicks,
         getCategoricalLabelPlacement,getCoordFunctions, IGetCoordFunctionsProps} from "../axis-utils";
 import { useGraphModelContext } from "../../../../hooks/use-graph-model-context";
 
+function styleAxis(axisSelection: Selection<any, any, any, any>, duration?: number) {
+  axisSelection.select(".domain")
+  .transition().duration(duration ?? 0)
+    .style("stroke", "#707070")
+    .style("stroke-width", `${kAxisStrokeWidth}px`);
+}
+
 export interface IUseSubAxis {
   subAxisIndex: number
   axisModel: IAxisModel
@@ -50,19 +57,6 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
   const swapInProgress = useRef(false);
   const subAxisSelectionRef = useRef<Selection<SVGGElement, any, any, any>>();
   const categoriesSelectionRef = useRef<Selection<SVGGElement | BaseType, CatObject, SVGGElement, any>>();
-
-  const actuallyStyleAxis = useCallback((axisSelection: Selection<any, any, any, any>,
-    selector: string, duration?: number) => {
-      axisSelection.select(selector)
-      .transition().duration(duration ?? 0)
-        .style("stroke", "#707070")
-        .style("stroke-width", `${kAxisStrokeWidth}px`);
-  }, []);
-  const styleAxis = useCallback((axisSelection: Selection<any, any, any, any>,
-    duration?: number) => {
-      actuallyStyleAxis(axisSelection, "path.domain", duration);
-      actuallyStyleAxis(axisSelection, "line.domain", duration);
-  }, [actuallyStyleAxis]);
 
   const renderSubAxis = useCallback(() => {
     const place = axisModel.place;
@@ -237,7 +231,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         break;
     }
   }, [subAxisElt, layout, showScatterPlotGridLines, enableAnimation, centerCategoryLabels,
-      axisModel, styleAxis, subAxisIndex, graphModel.isLinkedToDataSet]);
+      axisModel, subAxisIndex, graphModel.isLinkedToDataSet]);
 
   const onDragStart = useCallback((event: any) => {
     const dI = dragInfo.current;
@@ -343,7 +337,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         .attr('y', 0);
     });
 
-  }, [axisModel.place, dragBehavior, layout, styleAxis, subAxisElt]);
+  }, [axisModel.place, dragBehavior, layout, subAxisElt]);
 
   // update d3 scale and axis when scale type changes
   useEffect(() => {
