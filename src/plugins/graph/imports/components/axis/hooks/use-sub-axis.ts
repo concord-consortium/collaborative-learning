@@ -326,10 +326,13 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     categoriesSelectionRef.current.each(function () {
       const catGroup = select(this);
       // ticks
-      catGroup.append('line').attr('class', 'tick');
+      catGroup.append('line')
+        .attr('class', 'tick')
+        .style("stroke", kTickAndGridColor);
       // divider between groups
       catGroup.append('line')
-        .attr('class', 'divider');
+        .attr('class', 'divider')
+        .style("stroke", kTickAndGridColor);
       // labels
       catGroup.append('text')
         .attr('class', 'category-label')
