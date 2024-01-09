@@ -165,7 +165,6 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         plottedVariables.xVariable; // eslint-disable-line no-unused-expressions
       });
       refreshValues();
-      // refreshCurrentValues();
     }, { name: "PlottedVariablesAdornmentComponent.refreshAxisChange" }, model);
   }, [dataConfig, model, plotWidth, plotHeight, sharedVariables, xAxis, yAxis, refreshValues]);
 
