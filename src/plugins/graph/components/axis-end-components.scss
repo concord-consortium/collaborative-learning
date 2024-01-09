@@ -18,9 +18,9 @@
   border: solid 1.5px #949494;
   background-color: #f0f9fb;
   display: flex;
-  font: 12px sans-serif;
+  font: 12px sans-serif; // Keep in sync with boxFont in editable-graph-value.tsx
   height: 22px; // Keep in sync with kEditableBoxHeight in editable-graph-value.tsx
-  padding: 0 2px;
+  padding: 0 3px;
   position: absolute;
 
   &.bottom {

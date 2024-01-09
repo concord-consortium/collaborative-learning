@@ -10,6 +10,7 @@ import NumberlineArrowRight from "../../../assets/numberline-arrow-right.svg";
 
 import "./axis-end-components.scss";
 import { isFiniteNumber } from '../../../utilities/math-utils';
+import { measureText } from '../../../components/tiles/hooks/use-measure-text';
 
 // This component includes a handful of componets that get added to a graph near the end of its left and bottom axes.
 // An editable box allows the user to adjust the min or max of the axis.
@@ -44,17 +45,11 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
 
   // The editable border box allows the user to change the min or max of each axis
   const calculateBorderBoxStyles = () => {
-    const numOfCharacters = value.toString().length;
-    const widthPerCharacter = 8;
-    let boxWidth: number;
-    // Calculate boxWidth based on the number of characters
-    if (numOfCharacters === 1) {
-      boxWidth = 15;
-    } else if (numOfCharacters === 2) {
-      boxWidth = 20;
-    } else {
-      boxWidth = numOfCharacters * widthPerCharacter;
-    }
+    const minWidth = 25;
+    const boxHorizontalPadding = 4;
+    const boxFont = "12px sans-serif";
+    const textWidth = measureText(value.toString(), boxFont);
+    const boxWidth = Math.max(textWidth + 2 * boxHorizontalPadding, minWidth);
 
     const style: CSSProperties = {
       width: `${boxWidth}px`
