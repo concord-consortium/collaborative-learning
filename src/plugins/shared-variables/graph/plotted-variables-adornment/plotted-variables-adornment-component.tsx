@@ -87,13 +87,14 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
             textHeight = 12,
             padding = 4,
             offsetFromPoint = 14,
+            highlightStrokeWidth = 5,
             labelFormat = format('.3~r'),
             label = `${labelFormat(values.x)}, ${labelFormat(values.y)}`;
           // Highlight for value marker
           traceGroup.append('circle')
             .attr('class', 'plotted-variable-highlight plotted-variable-highlight-value')
-            .attr('r', graphModel.getPointRadius() + 2.5)
-            .attr('stroke-width', '5')
+            .attr('r', graphModel.getPointRadius() + highlightStrokeWidth/2)
+            .attr('stroke-width', highlightStrokeWidth)
             .attr('cx', x)
             .attr('cy', y);
           // Value marker circle
