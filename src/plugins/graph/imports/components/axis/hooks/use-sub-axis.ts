@@ -71,6 +71,13 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
       : (place === 'top') ? `translate(${axisBounds.left}, ${axisBounds.top + axisBounds.height})`
       : `translate(${axisBounds.left}, ${axisBounds.top})`;
 
+    const styleAxis = (axisSelection: Selection<SVGGElement | null, unknown, null, undefined>, duration?: number) => {
+      axisSelection.select('path.domain')
+      .transition().duration(duration ?? 0)
+        .style("stroke", "#707070")
+        .style("stroke-width", `${kAxisStrokeWidth}px`);
+    };
+
     const renderEmptyAxis = () => {
       select(subAxisElt).selectAll('*').remove();
       select(subAxisElt)
@@ -115,6 +122,8 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
                                  && graphModel.isLinkedToDataSet; //hide first and last tick labels when linked
           return hideMinAndMax  ? 'none' : null;
         });
+
+      styleAxis(select(subAxisElt), duration);
     };
 
     const renderScatterPlotGridLines = () => {
@@ -130,10 +139,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
           .selectAll("line")
           .style("stroke", kTickAndGridColor);
         select(subAxisElt).select('.grid').selectAll('text').remove();
-        // Style the axes
-        select(subAxisElt).select('.grid path.domain')
-          .style("stroke", "#707070")
-          .style("stroke-width", `${kAxisStrokeWidth}px`);
+        styleAxis(select(subAxisElt).select(".grid"));
       }
     };
 
