@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
 import { useStores, useAppConfig } from "../../hooks/use-stores";
@@ -16,24 +16,10 @@ import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
 
-//TODO:✔️
-//In this component we need to call firestore to find the tag
-// documents > document id > comments > comment id > (property )tag:
-
-//✔️ find all available tags from the comments panel (where you select the tag)
-//find all tags through iterated documents: for each document youd have to itate through comments to find each tag
-// combine both above for a superset of all "tags"
-
-//two approaches
-//get all documents from doc store, then find comments with a tag(simpler approach)
-//look for all documens in a class, for each document find a comment with a tag (could be a compound query)
-
 //****************************************** GUIDELINES  ***********************************************
-//Questions? - Do I need to make a 2nd dropdown in this ticket? an't exactly tell from the ticket guidelines
-// •introduce a Strategy Sort as a choice in the sorts for any unit that has tags in comments
 
-// •use the first dropdown choice as the name of the filter (or make a unique tag in the unit for this).
-//  For example - in the CMP math units it says Select Student Strategy, so 'Student Strategy'
+//✔️ •use the first dropdown choice as the name of the filter (or make a unique tag in the unit for this).
+// ✔️ For example - in the CMP math units it says Select Student Strategy, so 'Student Strategy'
 //  would be the name of the sort.
 
 // •Strategy lists all the strategies in the tags list, with suitably tagged documents beneath that section.
@@ -42,52 +28,122 @@ import "./sort-work-view.scss";
 // •if there are no documents in a strategy a 'No workspaces' message appears.
 // •If more than one is applied, show under each that matches
 
-
-//Test URLS:
-//Below should be Identify Design Approach
-//http://localhost:8080/?appMode=demo&demoName=dennis1&fakeClass=1&fakeUser=teacher:1&problem=1.1&unit=example-config-subtabs&curriculumBranch=sort-tab-dev-3
-//Find another URL that has a different default first tag
-//*****************************************************************************************************
-
-//TODO: move the creation of documents, sorting, into MST Model
-// start by making a new store - see if you can put it into documents.ts model
-
-//issue : when a comment is changed or added - no re-render happens
+//*******  Other **************** */
+////issue : when a comment is changed or added - no re-render happens
 //long term - have a listener on the comments if that changes, then it would change the model,
 // which would force a re-render
+
+//•the document's last comment (with a tag) is the valid tag that we show on the UI
+//  we need to sort them by time
+
+//•TODO: move the creation of documents, sorting, into MST Model
+// start by making a new store - see if you can put it into documents.ts model
+
+
+//*****************************************************************************************************
+
+
 
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, persistentUI } = useStores();
 
-  //************************* Determine Sort Options & State  *************************************
+  //***************************** Determine Sort Options & State  *************************************
   const {tagPrompt, commentTags} = appConfig;
-  console.log("commentTags:", commentTags);
   const sortTagPrompt = tagPrompt || ""; //first dropdown choice for comment tags
   const sortOptions = ["Group", "Name", sortTagPrompt];
   const stores = useStores();
   const groupsModel = stores.groups;
   const [sortBy, setSortBy] = useState("Group");
 
-  //******************************** Sort by Strategy **********************************************
+  const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
+    text: option,
+    onClick: () => setSortBy(option)
+  }));
 
-  // Our state tagsWithDocs will be a Record of TagWithDocs structures
+  //**************************** Sorting by "Group" & "Name" ******************************************
+
+  const getSortedDocuments = (documents: DocumentModelType[], sortByOption: string) => {
+    const documentMap = new Map();
+
+    documents.forEach((doc) => {
+      const sectionLabel = getSectionLabel(doc);
+      if (!documentMap.has(sectionLabel)) {
+        documentMap.set(sectionLabel, {
+          sectionLabel,
+          documents: []
+        });
+      }
+      documentMap.get(sectionLabel).documents.push(doc);
+    });
+
+    function getSectionLabel(doc: DocumentModelType){
+      //Only used in sortBy "Group" & "Name"
+      switch (sortByOption){
+        case "Group": {
+          const userId = doc.uid;
+          const group = groupsModel.groupForUser(userId);
+          return group ? `Group ${group.id}` : "No Group";
+          break;
+        }
+        case "Name":{
+          const user = stores.class.getUserById(doc.uid);
+          return (user && user.type === "student") ? `${user.lastName}, ${user.firstName}` : "Teacher";
+          break;
+        }
+        default:
+          break;
+      }
+    }
+
+    let sortedSectionLabels: SortedDocument[] = [];
+
+    switch (sortByOption){
+      case "Group": {
+        sortedSectionLabels = Array.from(documentMap.keys()).sort((a, b) => {
+          const numA = parseInt(a.replace(/^\D+/g, ''), 10);
+          const numB = parseInt(b.replace(/^\D+/g, ''), 10);
+          return numA - numB;
+        });
+        break;
+      }
+      case "Name": {
+        sortedSectionLabels = Array.from(documentMap.keys()).sort(customSortByName);
+        break;
+      }
+      case sortTagPrompt: {
+        break;
+      }
+
+    }
+    console.log("getSortedDocuments returns:", sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel)));
+    return sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel));
+  };
+
+  function customSortByName(a: any, b: any) { //Sort by last name alphabetically
+    const parseName = (name: any) => {
+      const [lastName, firstName] = name.split(", ").map((part: any) => part.trim());
+      return { firstName, lastName };
+    };
+    const aParsed = parseName(a);
+    const bParsed = parseName(b);
+
+    const lastNameCompare = aParsed.lastName.localeCompare(bParsed.lastName);
+    if (lastNameCompare !== 0) {
+      return lastNameCompare;
+    }
+    return aParsed.firstName.localeCompare(bParsed.firstName);
+  }
+
+  //******************************** Sort by Strategy *************************************************
   type TagWithDocs = {
     tagKey: string;
     tagValue: string;
     docKeysFoundWithTag: string[];
   };
 
-  const [db] = useFirestore();
-  //initialize state with commentTags
-  const [tagsWithDocs, setTagsWithDocs] = useState<Record<string, TagWithDocs>>(() => {
-    const initialTags: Record<string, TagWithDocs> = {
-      "": { //this accounts for when user commented with tagPrompt (no tag selected)
-        tagKey: "",
-        tagValue: "Comment w/o Tags",
-        docKeysFoundWithTag: []
-      }
-    };
-    // Check if commentTags is defined before using it
+  const tagsWithDocs: Record<string, TagWithDocs> = useMemo(() => {
+
+    const initialTags: Record<string, TagWithDocs> = {};
     if (commentTags) {
       // Use the keys from commentTags to initialize the structure
       for (const key of Object.keys(commentTags)) {
@@ -97,10 +153,18 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
           docKeysFoundWithTag: []
         };
       }
+      initialTags[""] = { //this accounts for when user commented with tagPrompt (no tag selected)
+        tagKey: "",
+        tagValue: "Not Tagged",
+        docKeysFoundWithTag: []
+      };
     }
     return initialTags;
-  });
+  }, [commentTags]); //Recalculate this when commentTags have changed.
 
+  //------- Query Firestore for documents, for each doc with a comment
+  // populate docKeysFoundWithTag with docKey
+  const [db] = useFirestore();
   useEffect(() => {
     const tempTagDocumentMap = new Map<string, Set<string>>();
     const unsubscribeFromDocs = db.collection("documents").onSnapshot(docsSnapshot => {
@@ -122,135 +186,66 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
               });
             }
           });
-
-          // After all comments are processed, update the state
-          setTagsWithDocs(prevTagsWithDocs => {
-            const updatedTagsWithDocs = { ...prevTagsWithDocs };
-            tempTagDocumentMap.forEach((docKeysSet, tag) => {
-              const docKeysArray = Array.from(docKeysSet); // Convert the Set to an array
-              if (updatedTagsWithDocs[tag]) {
-                // If the tag is already in the state, update the docKeys
-                updatedTagsWithDocs[tag].docKeysFoundWithTag = docKeysArray;
-              } else {
-                // If the tag is new (not in the initial tags), add it to the state
-                updatedTagsWithDocs[tag] = {
-                  tagKey: tag,
-                  tagValue: tag, // Since we don't have a value, use the tag itself
-                  docKeysFoundWithTag: docKeysArray
-                };
-              }
-            });
-            // Return the updated object for the state
-            return updatedTagsWithDocs;
+          //Update docKeysFoundWithTag property in tagsWithArray
+          tempTagDocumentMap.forEach((docKeysSet, tag) => {
+            const docKeysArray = Array.from(docKeysSet); // Convert the Set to an array
+            if (tagsWithDocs[tag]) {
+              tagsWithDocs[tag].docKeysFoundWithTag = docKeysArray;
+            }
           });
         });
       });
+      return tagsWithDocs;
     });
 
-    // Cleanup function to unsubscribe from Firestore when the component unmounts
-    return () => unsubscribeFromDocs();
-  }, [db]);
+    return () => unsubscribeFromDocs(); // Cleanup function to unsubscribe from Firestore
+  }, [db, tagsWithDocs]);
+
+  const convertTagsWithDocsToSortedDocuments = (tagsWithDocsObj: Record<string, TagWithDocs>) => {
+    const sortedDocsArr: SortedDocument[] = [];
+
+    Object.entries(tagsWithDocsObj).forEach((tagKeyAndValObj) => {
+      const tagWithDocs = tagKeyAndValObj[1] as TagWithDocs;
+      const sectionLabel = tagWithDocs.tagValue;
+      const docKeys = tagWithDocs.docKeysFoundWithTag;
+      const documents = allDocuments.filter(doc => docKeys.includes(doc.key));
+      sortedDocsArr.push({
+        sectionLabel,
+        documents
+      });
+    });
+
+    return sortedDocsArr;
+  };
 
 
+  //************************** Determine sortedDocuments to render ***********************************
+  //-- "Group" and "Name" need to be displayed in a sorted order
+  //-- "sortTagPrompt" (or sort by strategy) should be rendered order of commentTags
+  const allDocuments = stores.documents.all;
 
-
-  console.log("tagsWithDocs:", tagsWithDocs);
-
-
-
-
-
-
-
-  //******************************* Sorting Documents *************************************
-  const filteredDocsByType = stores.documents.all.filter((doc: DocumentModelType) => {
+  const filteredDocsByType = allDocuments.filter((doc: DocumentModelType) => {
     return isSortableType(doc.type);
   });
 
-  const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
-    text: option,
-    onClick: () => setSortBy(option)
-  }));
-
-  const getSortedDocuments = (documents: DocumentModelType[], sortByOption: string) => {
-
-    const getSectionLabel = (doc: DocumentModelType) => {
-      switch (sortByOption){
-        case "Group": {
-          const userId = doc.uid;
-          const group = groupsModel.groupForUser(userId);
-          return group ? `Group ${group.id}` : "No Group";
-          break;
-        }
-        case "Name":{
-          const user = stores.class.getUserById(doc.uid);
-          return (user && user.type === "student") ? `${user.lastName}, ${user.firstName}` : "Teacher";
-          break;
-        }
-        case sortTagPrompt: {
-          // Initialize the label as "Documents w/o Tags"
-
-          break; // Found the document key, no need to continue the search
-
-
-        }
-      }
-    };
-
-    const documentMap = new Map();
-
-    documents.forEach((doc) => {
-
-      const sectionLabel = getSectionLabel(doc);
-      // console.log("--------------");
-      // console.log("\tdoc.title:", doc.title);
-      // console.log("\tsectionLabel:", sectionLabel);
-
-      if (!documentMap.has(sectionLabel)) {
-        documentMap.set(sectionLabel, {
-          sectionLabel,
-          documents: []
-        });
-      }
-      documentMap.get(sectionLabel).documents.push(doc);
-    });
-
-    let sortedSectionLabels;
-
-    if (sortByOption === "Group") {
-      sortedSectionLabels = Array.from(documentMap.keys()).sort((a, b) => {
-        const numA = parseInt(a.replace(/^\D+/g, ''), 10);
-        const numB = parseInt(b.replace(/^\D+/g, ''), 10);
-        return numA - numB;
-      });
-    } else {
-      sortedSectionLabels = Array.from(documentMap.keys()).sort(customSort);
-    }
-    const returnVal = sortedSectionLabels && sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel));
-
-    // console.log("\t💩 returnVal:", returnVal);
-    return sortedSectionLabels && sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel));
-  };
-
-  function customSort(a: any, b: any) { //Sort by last name alphabetically
-    const parseName = (name: any) => {
-      const [lastName, firstName] = name.split(", ").map((part: any) => part.trim());
-      return { firstName, lastName };
-    };
-    const aParsed = parseName(a);
-    const bParsed = parseName(b);
-
-    const lastNameCompare = aParsed.lastName.localeCompare(bParsed.lastName);
-    if (lastNameCompare !== 0) {
-      return lastNameCompare;
-    }
-
-    return aParsed.firstName.localeCompare(bParsed.firstName);
+  type SortedDocument = {
+    sectionLabel: string;
+    documents: DocumentModelType[];
   }
 
-  const sortedDocuments = getSortedDocuments(filteredDocsByType, sortBy);
+  let sortedDocuments;
 
-  //******************************* Click/Open Document ***************************************
+  switch (sortBy) {
+    case "Group":
+    case "Name":
+      sortedDocuments = getSortedDocuments(filteredDocsByType, sortBy);
+      break;
+    case sortTagPrompt:
+      sortedDocuments = convertTagsWithDocsToSortedDocuments(tagsWithDocs);
+      break;
+  }
+
+  //******************************* Click/Open Document View ********************************
   const handleSelectDocument = (document: DocumentModelType) => {
     persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, document.key);
   };
@@ -283,7 +278,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
         <>
           <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
           <div className="tab-panel-documents-section">
-            {
+            { sortedDocuments &&
               sortedDocuments.map((sortedSection, idx) => {
                 return (
                   <div className="sorted-sections" key={`sortedSection-${idx}`}>
