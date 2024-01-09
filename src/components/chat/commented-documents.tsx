@@ -22,7 +22,7 @@ interface PromisedCurriculumDocument extends CurriculumDocument {
   title?: string,
   numComments?: number
 }
-interface PromisedDocumentDocument extends DocumentDocument {
+export interface PromisedDocumentDocument extends DocumentDocument {
   id?: string,
   numComments?: number,
   title?: string
