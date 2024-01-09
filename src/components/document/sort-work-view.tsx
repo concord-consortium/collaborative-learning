@@ -117,8 +117,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   };
 
   const appConfigStore = useAppConfig();
-  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(ENavTab.kSortWork);
-  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
+  const tabState = navTabSpec && persistentUI.tabs.get(ENavTab.kSortWork);
   const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
   const showSortWorkDocumentArea = !!openDocumentKey;
 
