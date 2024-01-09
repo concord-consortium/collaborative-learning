@@ -16,33 +16,35 @@ import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
 
+//TODO: Go over each edge case for No Workspaces to show so that you can create a smart algorithm to display it -
+// may need to change structure of sortedDocuments to include a flag
+
+
 //****************************************** GUIDELINES  ***********************************************
 
 //✔️ •use the first dropdown choice as the name of the filter (or make a unique tag in the unit for this).
 // ✔️ For example - in the CMP math units it says Select Student Strategy, so 'Student Strategy'
 //  would be the name of the sort.
 
-// •Strategy lists all the strategies in the tags list, with suitably tagged documents beneath that section.
-// •Untagged documents are listed in a "Not Tagged" at the bottom
-// •As documents are tagged they are automatically resorted
+// ✔️Strategy lists all the strategies in the tags list, with suitably tagged documents beneath that section.
+// ✔️Untagged documents are listed in a "Not Tagged" at the bottom
+// can't due to our infrastructure --->•As documents are tagged they are automatically resorted -
 // •if there are no documents in a strategy a 'No workspaces' message appears.
 // •If more than one is applied, show under each that matches
 
-//*******  Other **************** */
+/* ----------------  Other Issues ------------------ */
 ////issue : when a comment is changed or added - no re-render happens
 //long term - have a listener on the comments if that changes, then it would change the model,
 // which would force a re-render
-
-//•the document's last comment (with a tag) is the valid tag that we show on the UI
-//  we need to sort them by time
-
 //•TODO: move the creation of documents, sorting, into MST Model
 // start by making a new store - see if you can put it into documents.ts model
 
+//***** Possible other requirement */
+//•the document's last comment (with a tag) is the valid tag that we show on the UI,
+// same document for different tags)
+// if so- we would need to sort them by time
 
 //*****************************************************************************************************
-
-
 
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, persistentUI } = useStores();
