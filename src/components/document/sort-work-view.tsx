@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
-import { useStores } from "../../hooks/use-stores";
-import { useFirestore } from "../../hooks/firestore-hooks";
+import { useStores, useAppConfig } from "../../hooks/use-stores";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
@@ -216,23 +215,15 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     });
 
     let sortedSectionLabels;
-    switch (sortByOption){
-      case "Group":{
-        sortedSectionLabels = Array.from(documentMap.keys()).sort((a, b) => {
-          const numA = parseInt(a.replace(/^\D+/g, ''), 10);
-          const numB = parseInt(b.replace(/^\D+/g, ''), 10);
-          return numA - numB;
-        });
-        break;
-      }
-      case "Name":{
-        sortedSectionLabels = Array.from(documentMap.keys()).sort(customSort);
-        break;
-      }
-      case sortTagPrompt:{
-        // console.log("sortTagPRompt");
-        break;
-      }
+
+    if (sortByOption === "Group") {
+      sortedSectionLabels = Array.from(documentMap.keys()).sort((a, b) => {
+        const numA = parseInt(a.replace(/^\D+/g, ''), 10);
+        const numB = parseInt(b.replace(/^\D+/g, ''), 10);
+        return numA - numB;
+      });
+    } else {
+      sortedSectionLabels = Array.from(documentMap.keys()).sort(customSort);
     }
     const returnVal = sortedSectionLabels && sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel));
 
@@ -240,27 +231,19 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     return sortedSectionLabels && sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel));
   };
 
-  function customSort(a: any, b: any) { //sort by last name alphabetically
+  function customSort(a: any, b: any) { //Sort by last name alphabetically
     const parseName = (name: any) => {
       const [lastName, firstName] = name.split(", ").map((part: any) => part.trim());
-      const lastNameNum = parseInt(lastName, 10);
-      return {
-        firstName,
-        lastName,
-        isNumericLastName: !isNaN(lastNameNum),
-        lastNameNum
-      };
+      return { firstName, lastName };
     };
     const aParsed = parseName(a);
     const bParsed = parseName(b);
-    if (aParsed.isNumericLastName && bParsed.isNumericLastName) {
-      return aParsed.lastNameNum - bParsed.lastNameNum;
-    }
-    if (aParsed.isNumericLastName) return -1;
-    if (bParsed.isNumericLastName) return 1;
 
     const lastNameCompare = aParsed.lastName.localeCompare(bParsed.lastName);
-    if (lastNameCompare !== 0) return lastNameCompare;
+    if (lastNameCompare !== 0) {
+      return lastNameCompare;
+    }
+
     return aParsed.firstName.localeCompare(bParsed.firstName);
   }
 
@@ -271,13 +254,13 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, document.key);
   };
 
-  const navTabSpec = appConfig.navTabs.getNavTabSpec(ENavTab.kSortWork);
-  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
+  const appConfigStore = useAppConfig();
+  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(ENavTab.kSortWork);
+  const tabState = navTabSpec && persistentUI.tabs.get(ENavTab.kSortWork);
   const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
   const showSortWorkDocumentArea = !!openDocumentKey;
 
-
-  //******************************* Handle Debug View *****************************************
+  //******************************* Handle Debug View ***************************************
   const renderDebugView = () => {
     //returns a list lf all documents (unsorted)
     return filteredDocsByType.map((doc, idx) => {
@@ -291,48 +274,48 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     });
   };
 
-
   return (
     <div key="sort-work-view" className="sort-work-view">
-      <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
-
       {
         showSortWorkDocumentArea ?
         <SortWorkDocumentArea openDocumentKey={openDocumentKey}/> :
-        <div className="tab-panel-documents-section">
-          { sortedDocuments &&
-            sortedDocuments.map((sortedSection, idx) => {
-              return (
-                <div className="sorted-sections" key={`sortedSection-${idx}`}>
-                  <div className="section-header">
-                    <div className="section-header-label">
-                      {sortedSection.sectionLabel}
+        <>
+          <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
+          <div className="tab-panel-documents-section">
+            {
+              sortedDocuments.map((sortedSection, idx) => {
+                return (
+                  <div className="sorted-sections" key={`sortedSection-${idx}`}>
+                    <div className="section-header">
+                      <div className="section-header-label">
+                        {sortedSection.sectionLabel}
+                      </div>
+                    </div>
+                    <div className="list">
+                      {sortedSection.documents.map((doc: any, sortIdx: number) => {
+                        const documentContext = getDocumentContext(doc);
+                        return (
+                          <DocumentContextReact.Provider key={doc.key} value={documentContext}>
+                            <DecoratedDocumentThumbnailItem
+                              key={doc.key}
+                              scale={0.1}
+                              document={doc}
+                              tab={ENavTab.kSortWork}
+                              shouldHandleStarClick={true}
+                              allowDelete={false}
+                              onSelectDocument={handleSelectDocument}
+                            />
+                          </DocumentContextReact.Provider>
+                        );
+                      })}
                     </div>
                   </div>
-                  <div className="list">
-                    {sortedSection.documents.map((doc: any, sortIdx: number) => {
-                      const documentContext = getDocumentContext(doc);
-                      return (
-                        <DocumentContextReact.Provider key={doc.key} value={documentContext}>
-                          <DecoratedDocumentThumbnailItem
-                            key={doc.key}
-                            scale={0.1}
-                            document={doc}
-                            tab={ENavTab.kSortWork}
-                            shouldHandleStarClick={true}
-                            allowDelete={false}
-                            onSelectDocument={handleSelectDocument}
-                          />
-                        </DocumentContextReact.Provider>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })
-          }
-          {DEBUG_SORT_WORK && renderDebugView()}
-        </div>
+                );
+              })
+            }
+            {DEBUG_SORT_WORK && renderDebugView()}
+          </div>
+        </>
       }
     </div>
   );
