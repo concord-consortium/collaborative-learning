@@ -69,27 +69,19 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     return sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel));
   };
 
-  function customSort(a: any, b: any) { //sort by last name alphabetically
+  function customSort(a: any, b: any) { //Sort by last name alphabetically
     const parseName = (name: any) => {
       const [lastName, firstName] = name.split(", ").map((part: any) => part.trim());
-      const lastNameNum = parseInt(lastName, 10);
-      return {
-        firstName,
-        lastName,
-        isNumericLastName: !isNaN(lastNameNum),
-        lastNameNum
-      };
+      return { firstName, lastName };
     };
     const aParsed = parseName(a);
     const bParsed = parseName(b);
-    if (aParsed.isNumericLastName && bParsed.isNumericLastName) {
-      return aParsed.lastNameNum - bParsed.lastNameNum;
-    }
-    if (aParsed.isNumericLastName) return -1;
-    if (bParsed.isNumericLastName) return 1;
 
     const lastNameCompare = aParsed.lastName.localeCompare(bParsed.lastName);
-    if (lastNameCompare !== 0) return lastNameCompare;
+    if (lastNameCompare !== 0) {
+      return lastNameCompare;
+    }
+
     return aParsed.firstName.localeCompare(bParsed.firstName);
   }
 
@@ -101,6 +93,12 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const handleSelectDocument = (document: DocumentModelType) => {
     persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, document.key);
   };
+
+  const appConfigStore = useAppConfig();
+  const navTabSpec = appConfigStore.navTabs.getNavTabSpec(ENavTab.kSortWork);
+  const tabState = navTabSpec && persistentUI.tabs.get(ENavTab.kSortWork);
+  const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
+  const showSortWorkDocumentArea = !!openDocumentKey;
 
   //******************************* Handle Debug View ***************************************
   const renderDebugView = () => {
@@ -115,11 +113,6 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
       );
     });
   };
-
-  const appConfigStore = useAppConfig();
-  const tabState = navTabSpec && persistentUI.tabs.get(ENavTab.kSortWork);
-  const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
-  const showSortWorkDocumentArea = !!openDocumentKey;
 
   return (
     <div key="sort-work-view" className="sort-work-view">
