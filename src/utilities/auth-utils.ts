@@ -40,8 +40,8 @@ export const getBearerToken = (sourceUrlParams: QueryParams) => {
 };
 
 /**
- * Get params needed when constructed CLUE URLs, so CLUE will be re-authenticate with the
- * portal.
+ * Get params needed when constructed additional client URLS. When these client URLs
+ * are opened the client will re-authenticate with the portal.
  *
  * Notes: A token param from a student launch is only valid for 3 minutes.
  * A token param from a teacher dashboard launch is valid for 2 hours.
@@ -61,8 +61,26 @@ export const getAuthParams = (sourceUrlParams: QueryParams) => {
   return {};
 };
 
-// Returns true if it is redirecting
+/**
+ * Handle the OAuth2 flow. If the URL has an authDomain parameter, this will
+ * save the current url parameters in session storage and redirect the browser
+ * to the authDomain. If the URL has state and access_token hash parameters
+ * this is the redirect back from the authDomain, so it saves the accessToken
+ * globally and reloads the parameters from session storage.
+ *
+ * If this function returns true, it is redirecting to the authDomain so the
+ * client shouldn't do anything else.
+ *
+ * @returns true if it is redirecting to the authDomain
+ */
 export const initializeAuthorization = () => {
+  // Hash params are used here by the OAuth2 flow instead of query parameters.
+  // This is to increase security. Browsers do not send hash params to the server when making
+  // the http request. So in this case when the Portal does a browser based redirect back
+  // to the client, these state and access_token params should never leave the browser.
+  // Most of our clients are hosted on S3 with CloudFront for a CDN. So in our case this means
+  // these params are not sent to AWS. Also if a user is using an http proxy these params
+  // won't be sent to the proxy either.
   const state = hashValue("state");
   accessToken = hashValue("access_token");
 
