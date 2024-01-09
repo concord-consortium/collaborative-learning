@@ -53,7 +53,8 @@ import "./sort-work-view.scss";
 // start by making a new store - see if you can put it into documents.ts model
 
 //issue : when a comment is changed or added - no re-render happens
-//long term - have a listener on the comments if that changes, then it would change the model, which would re-render
+//long term - have a listener on the comments if that changes, then it would change the model,
+// which would force a re-render
 
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, persistentUI } = useStores();
