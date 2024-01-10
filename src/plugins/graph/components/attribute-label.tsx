@@ -8,10 +8,10 @@ import {AttributeType} from "../../../models/data/attribute";
 import {IDataSet} from "../../../models/data/data-set";
 import {isSetAttributeNameAction} from "../../../models/data/data-set-actions";
 import {GraphPlace, isVertical} from "../imports/components/axis-graph-shared";
-import {graphPlaceToAttrRole, kGraphClassSelector} from "../graph-types";
+import {graphPlaceToAttrRole, kGraphClassSelector, kGraphPortalClass} from "../graph-types";
 import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
-import {useTileModelContext} from "../imports/hooks/use-tile-model-context";
+import {useTileModelContext} from "../../../components/tiles/hooks/use-tile-model-context";
 import {getStringBounds} from "../imports/components/axis/axis-utils";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
 import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
@@ -37,7 +37,7 @@ export const AttributeLabel = observer(
       hideClickHereCue = useClickHereCue &&
         !dataConfiguration?.placeAlwaysShowsClickHereCue(place) && !isTileSelected(),
       [labelElt, setLabelElt] = useState<SVGGElement | null>(null),
-      portalParentElt = labelElt?.closest('.document-content') as HTMLDivElement ?? null,
+      portalParentElt = labelElt?.closest(kGraphPortalClass) as HTMLDivElement ?? null,
       positioningParentElt = labelElt?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
 
     const getAttributeIDs = useCallback(() => {

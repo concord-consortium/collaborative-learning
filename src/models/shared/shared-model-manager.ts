@@ -62,6 +62,15 @@ export interface ISharedModelManager {
   get isReady(): boolean;
 
   /**
+   * Return a user-friendly name for the shared model.
+   * This is currently based on the title(s) of connected tiles,
+   * but may be changed in the future.
+   * @param model the sharedModel to be named.
+   * @returns a string
+   */
+  getSharedModelLabel(model: SharedModelType): string;
+
+  /**
    * Find the shared model at the container level. If the tile wants to use this
    * shared model it should call `addTileSharedModel`. This is necessary so the
    * container knows to call the tile's updateAfterSharedModelChanges action

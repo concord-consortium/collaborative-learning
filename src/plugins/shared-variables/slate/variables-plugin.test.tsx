@@ -7,6 +7,7 @@ import { SharedVariables, SharedVariablesType } from "../shared-variables";
 import { kVariableTextPluginName, VariablesPlugin } from "./variables-plugin";
 import { insertTextVariable } from "./text-tile-buttons";
 import { TileModel } from "../../../models/tiles/tile-model";
+import { SharedModelType } from "../../../models/shared/shared-model";
 
 // The text tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
@@ -30,6 +31,9 @@ const TestTextContentModelContainer = types.model("TestTileContentModelContainer
 const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelManager => {
   return {
     isReady: true,
+    getSharedModelLabel(model: SharedModelType) {
+      return model.id;
+    },
     findFirstSharedModelByType<IT extends IAnyType>(sharedModelType: IT): IT["Type"] | undefined {
       return variables;
     },

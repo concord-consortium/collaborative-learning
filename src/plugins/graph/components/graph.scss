@@ -1,6 +1,6 @@
 $graph-label-font: 400 14px Montserrat-Regular, sans-serif;
 $graph-empty-label-font: 12px Montserrat-Regular, sans-serif;
-$graph-background-fill: #f9f9f9;
+$graph-background-fill: #fff;
 
 :export {
   graphLabelFont: $graph-label-font;
@@ -31,8 +31,7 @@ $graph-background-fill: #f9f9f9;
   }
 
   text {
-    fill: black;
-    font: 12px sans-serif;
+    font: 14px sans-serif;
   }
 
   .axis-wrapper {
@@ -43,7 +42,7 @@ $graph-background-fill: #f9f9f9;
 
     .axis {
       line {
-        stroke: #DDDDDD;
+        stroke-width: 1.5px;
       }
     }
 

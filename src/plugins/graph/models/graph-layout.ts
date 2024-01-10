@@ -1,5 +1,6 @@
 import {action, computed, makeObservable, observable} from "mobx";
 import {createContext, useContext} from "react";
+import { kAxisTickLength, kAxisTickPadding, kTopAndRightDefaultExtent } from "../graph-types";
 import {AxisPlace, AxisPlaces, AxisBounds, IScaleType} from "../imports/components/axis/axis-types";
 import {GraphPlace, isVertical} from "../imports/components/axis-graph-shared";
 import {IAxisLayout} from "../imports/components/axis/models/axis-layout-context";
@@ -109,6 +110,19 @@ export class GraphLayout implements IAxisLayout {
     this.updateScaleRanges(this.plotWidth, this.plotHeight);
   }
 
+  getDesiredExtent(place: GraphPlace) {
+    const desiredExtent = this.desiredExtents.get(place);
+    if (desiredExtent) return desiredExtent;
+    const defaultExtent = place === "legend" ? 0
+      : place === "top" ? kTopAndRightDefaultExtent
+      : place === "left" ? 20 + kAxisTickLength + kAxisTickPadding
+      : place === "bottom" ? 20 + kAxisTickLength + kAxisTickPadding
+      : place === "rightNumeric" ? kTopAndRightDefaultExtent
+      : place === "rightCat" ? kTopAndRightDefaultExtent
+      : 0;
+    return defaultExtent;
+  }
+
   updateScaleRanges(plotWidth: number, plotHeight: number) {
     AxisPlaces.forEach(place => {
       const length = isVertical(place) ? plotHeight : plotWidth;
@@ -128,7 +142,7 @@ export class GraphLayout implements IAxisLayout {
    * Todo: Eventually there will be additional room set aside at the top for formulas
    */
   @computed get computedBounds() {
-    const {desiredExtents, graphWidth, graphHeight} = this;
+    const {graphWidth, graphHeight} = this;
     if (graphWidth<1 || graphHeight<0) {
       // Layout functions can be called before tile size is known,
       // leading to ugly errors if negative sizes are returned.
@@ -145,12 +159,12 @@ export class GraphLayout implements IAxisLayout {
       };
     }
     const
-      legendHeight = desiredExtents.get('legend') ?? 0,
-      topAxisHeight = desiredExtents.get('top') ?? 0,
-      leftAxisWidth = desiredExtents.get('left') ?? 20,
-      bottomAxisHeight = desiredExtents.get('bottom') ?? 20,
-      v2AxisWidth = desiredExtents.get('rightNumeric') ?? 0,
-      rightAxisWidth = desiredExtents.get('rightCat') ?? 0,
+      legendHeight = this.getDesiredExtent('legend'),
+      topAxisHeight = this.getDesiredExtent('top'),
+      leftAxisWidth = this.getDesiredExtent('left'),
+      bottomAxisHeight = this.getDesiredExtent('bottom'),
+      v2AxisWidth = this.getDesiredExtent('rightNumeric'),
+      rightAxisWidth = this.getDesiredExtent('rightCat'),
       plotWidth = graphWidth - leftAxisWidth - v2AxisWidth - rightAxisWidth,
       plotHeight = graphHeight - topAxisHeight - bottomAxisHeight - legendHeight,
       newBounds: Record<GraphPlace, Bounds> = {

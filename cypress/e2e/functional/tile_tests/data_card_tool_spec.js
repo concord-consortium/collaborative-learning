@@ -121,7 +121,8 @@ context('Data Card Tool Tile', () => {
 
     cy.log("can create a graph from the data");
     dc.getLinkGraphButton().should('not.be.disabled').click();
-    dc.getLinkGraphModalCreateNewButton().click();
+    dc.getLinkGraphModalTileMenu().select('New Graph');
+    dc.getLinkGraphModalLinkButton().click();
     xyplot.getTile().should("exist").contains("Data Card Collection 1");
     xyplot.getXYPlotTitle().should("contain", "Data Card Collection 1");
     xyplot.getXAxisLabel().should("contain", "habitat");
@@ -130,12 +131,12 @@ context('Data Card Tool Tile', () => {
     // Unlink
     dc.getLinkGraphButton().should('not.be.disabled').click();
     dc.getLinkGraphModalTileMenu().select('Data Card Collection 1');
-    dc.getLinkGraphModalLinkButton().should("contain", "Unlink").click();
+    dc.getLinkGraphModalLinkButton().should("contain", "Clear It!").click();
     xyplot.getXAxisLabel().should("not.contain", "habitat");
     // Re-link
     dc.getLinkGraphButton().should('not.be.disabled').click();
     dc.getLinkGraphModalTileMenu().select('Data Card Collection 1');
-    dc.getLinkGraphModalLinkButton().should("contain", "Link").click();
+    dc.getLinkGraphModalLinkButton().should("contain", "Graph It!").click();
     xyplot.getXAxisLabel().should("contain", "habitat");
 
     cy.log("Copy card functionality");
@@ -156,7 +157,7 @@ context('Data Card Tool Tile', () => {
     dc.getAttrValueInput().eq(0).invoke('val').should('eq', "river");
     dc.getAttrValueInput().eq(1).invoke('val').should('eq', "rhinocerotter");
 
-    cy.log("verify Datacard tile title restore upon page reload")
+    cy.log("verify Datacard tile title restore upon page reload");
     const newName = "Data Card Title";
     dc.getTile().find('.title-text-element').first().dblclick();
     dc.getTile().find('.title-text-element').first().type(newName + '{enter}');

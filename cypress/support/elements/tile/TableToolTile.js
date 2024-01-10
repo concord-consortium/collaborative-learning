@@ -89,10 +89,6 @@ class TableToolTile{
     getLinkGraphButton(){
       return cy.get('.link-tile-button');
     }
-    getLinkGraphModalCreateNewButton() {
-      const selector = ".ReactModalPortal .modal-footer button.add-new-button";
-      return cy.get(`${selector}`).eq(0);
-    }
     getLinkGraphModalLinkButton() {
       const selector = ".ReactModalPortal .modal-footer button.default";
       return cy.get(`${selector}`).eq(0);
@@ -111,7 +107,8 @@ class TableToolTile{
     createNewLinkedGraph() {
       this.getTableTile().click();
       cy.get('.toolbar-button.link-graph').click();
-      cy.get('.modal-button.add-new-button').click();
+      this.getLinkGraphModalTileMenu().select('New Graph');
+      this.getLinkGraphModalLinkButton().click();
     }
     createNewDatacard() {
       this.getTableTile().click();

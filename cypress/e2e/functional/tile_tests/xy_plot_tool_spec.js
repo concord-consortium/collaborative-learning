@@ -1,17 +1,20 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import PrimaryWorkspace from '../../../support/elements/common/PrimaryWorkspace';
 import ResourcePanel from '../../../support/elements/common/ResourcesPanel';
+import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
 
 let clueCanvas = new ClueCanvas;
 let xyTile = new XYPlotToolTile;
 let tableToolTile = new TableToolTile;
+let diagramTile = new DiagramToolTile;
 const primaryWorkspace = new PrimaryWorkspace;
 const resourcePanel = new ResourcePanel;
 
 const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=brain";
 const queryParamsMultiDataset = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-config-subtabs";
+const queryParamsPlotVariables = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-no-group-share";
 
 const problemDoc = 'Lesson 1.1 - What is a bionic arm?';
 
@@ -66,11 +69,18 @@ context('XYPlot Tool Tile', function () {
       xyTile.getXYPlotTitle().click().type(title + '{enter}');
       xyTile.getXYPlotTitle().should('contain', title);
 
-      cy.log("does not show edit boxes on axes");
-      xyTile.getEditableAxisBox("bottom", "min").should("not.exist");
-      xyTile.getEditableAxisBox("bottom", "max").should("not.exist");
-      xyTile.getEditableAxisBox("left", "min").should("not.exist");
-      xyTile.getEditableAxisBox("left", "max").should("not.exist");
+      //XY Plot tile title restore upon page reload
+      cy.wait(2000);
+      cy.reload();
+      cy.waitForLoad();
+      xyTile.getTile().click();
+      xyTile.getXYPlotTitle().should('contain', title);
+
+      // cy.log("does not show edit boxes on axes");
+      // xyTile.getEditableAxisBox("bottom", "min").should("not.exist");
+      // xyTile.getEditableAxisBox("bottom", "max").should("not.exist");
+      // xyTile.getEditableAxisBox("left", "min").should("not.exist");
+      // xyTile.getEditableAxisBox("left", "max").should("not.exist");
 
       cy.log("Link Table");
       clueCanvas.clickToolbarButton('graph', 'link-tile');
@@ -89,8 +99,8 @@ context('XYPlot Tool Tile', function () {
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.typeInTableCell(5, '7');
         tableToolTile.getTableCell().eq(5).should('contain', '7');
-        tableToolTile.typeInTableCell(6, '15');
-        tableToolTile.getTableCell().eq(6).should('contain', '15');
+        tableToolTile.typeInTableCell(6, '6');
+        tableToolTile.getTableCell().eq(6).should('contain', '6');
       });
 
       cy.log("verify graph dot is updated");
@@ -272,6 +282,77 @@ context('XYPlot Tool Tile', function () {
       xyTile.getXAttributesLabel().should('have.length', 2);
       xyTile.getYAttributesLabel().should('have.length', 2);
 
+    });
+
+    it("Test plotting variables", () => {
+      const dialogField = (field) => cy.get(`#evd-${field}`);
+      const dialogOkButton = () => cy.get(".modal-button").last();
+
+      beforeTest(queryParamsPlotVariables);
+
+      cy.log("Add Diagram Tile with two variables");
+      const name1 = "variable_name", name2 = "second_variable";
+      const value1 = "2", value2 = "3";
+      clueCanvas.addTile("diagram");
+      diagramTile.getDiagramTile().click();
+      clueCanvas.clickToolbarButton("diagram", "new-variable");
+      diagramTile.getDiagramDialog().should("exist");
+      dialogField("name").should("exist").type(name1);
+      dialogField("value").should("exist").type(value1);
+      dialogOkButton().click();
+
+      clueCanvas.clickToolbarButton("diagram", "new-variable");
+      diagramTile.getDiagramDialog().should("exist");
+      dialogField("name").should("exist").type(name2);
+      dialogField("value").should("exist").type(value2);
+      dialogOkButton().click();
+
+      cy.log("Add a Linked Graph");
+      clueCanvas.clickToolbarButton("diagram", "variables-link");
+      cy.get('select').select("New Graph");
+      dialogOkButton().click();
+      xyTile.getPlottedVariablesGroup().should("not.exist");
+      xyTile.getEditableAxisBox('bottom', 'min').invoke('text').then(parseFloat).should("be.within", -11, -9);
+      xyTile.getEditableAxisBox('bottom', 'max').invoke('text').then(parseFloat).should("be.within", 9, 11);
+
+      xyTile.selectXVariable(name1);
+      xyTile.getXVariableDropdown().should("contain.text", name1);
+
+      xyTile.selectYVariable(name1);
+      xyTile.getYVariableDropdown().should("contain.text", name1);
+
+      xyTile.getPlottedVariablesGroup().should("have.length", 1);
+      xyTile.getPlottedVariablesPoint().should("have.length", 1);
+      xyTile.getPlottedVariablesLabel().should("have.length", 1).should("have.text", "2, 2");
+      // Variable value is 2 so should autoscale to [0, 4]
+      xyTile.getEditableAxisBox('bottom', 'min').invoke('text').then(parseFloat).should("be.within", -1, 1);
+      xyTile.getEditableAxisBox('bottom', 'max').invoke('text').then(parseFloat).should("be.within", 3, 5);
+
+      cy.log("Plot multiple traces");
+      xyTile.getAddVariablesButton().should("exist").click();
+
+      // Select the x variable for the 2nd trace
+      xyTile.selectXVariable(name2, 1);
+      xyTile.getXVariableDropdown(1).should("contain.text", name2);
+
+      // Select the y variable for the 2nd trace
+      xyTile.selectYVariable(name2, 1);
+      xyTile.getYVariableDropdown(1).should("contain.text", name2);
+
+      xyTile.getPlottedVariablesGroup().should("have.length", 2);
+      xyTile.getPlottedVariablesPoint().should("have.length", 2);
+      xyTile.getPlottedVariablesLabel().should("have.length", 2).eq(1).should("have.text", "3, 3");
+
+      // Fit button should adjust bounds to narrowly include (2,2) and (3,3)
+      clueCanvas.clickToolbarButton('graph', 'fit-all');
+      xyTile.getEditableAxisBox('bottom', 'min').invoke('text').then(parseFloat).should("be.within", 1.5, 2);
+      xyTile.getEditableAxisBox('bottom', 'max').invoke('text').then(parseFloat).should("be.within", 3, 4);
+
+      cy.log("Remove a variable trace");
+      xyTile.getRemoveVariablesButton(1).click();
+      xyTile.getPlottedVariablesGroup().should("have.length", 1);
+      // Only the unlink remove button should remain
+      xyTile.getRemoveVariablesButtons().should("have.length", 1);
     });
   });
 });
