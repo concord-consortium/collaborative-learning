@@ -4,7 +4,7 @@ import { GeometryContentModel, GeometryMetadataModel, defaultGeometryContent } f
 import { kGeometryTileType } from "./geometry-types";
 import { kGeometryDefaultHeight } from "./jxg-types";
 import GeometryToolComponent from "../../../components/tiles/geometry/geometry-tile";
-import GeometryToolIcon from "../../../clue/assets/icons/graph-tool.svg";
+import GeometryToolIcon from "../../../clue/assets/icons/geometry-tool.svg";
 
 export function tileSnapshotPreProcessor(tileSnap: any) {
   // Move the title up to handle legacy geometry tiles
@@ -15,7 +15,7 @@ export function tileSnapshotPreProcessor(tileSnap: any) {
 
 registerTileContentInfo({
   type: kGeometryTileType,
-  titleBase: "Graph",
+  titleBase: "Shapes Graph",
   modelClass: GeometryContentModel,
   metadataClass: GeometryMetadataModel,
   addSidecarNotes: true,

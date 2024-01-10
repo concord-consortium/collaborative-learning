@@ -67,6 +67,17 @@ context('Diagram Tool Tile', function () {
     diagramTile.getVariableCard().should("exist");
     diagramTile.getVariableCardField("name").should("have.value", name);
 
+    // Diagram tile restore upon page reload
+    cy.wait(2000);
+    cy.reload();
+    cy.waitForLoad();
+    cy.showOnlyDocumentWorkspace();
+    diagramTile.getDiagramTile().should("exist").click();
+
+    diagramTile.getTileTitleText().should("contain", newName);
+    diagramTile.getVariableCard().should("exist");
+    diagramTile.getVariableCardField("name").should("have.value", name);
+
     // Insert variable button is disabled when all variables are in the diagram
     clueCanvas.toolbarButtonIsDisabled("diagram", "insert-variable");
 

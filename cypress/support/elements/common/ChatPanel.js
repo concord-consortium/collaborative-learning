@@ -10,6 +10,14 @@ class ChatPanel{
     getChatPanelToggle() {
       return cy.get('.chat-panel-toggle');
     }
+    openChatPanel() {
+      cy.get('.resource-and-chat-panel .top-row').then(topRow => {
+        if(topRow.find(".chat-panel-toggle").length > 0) {
+          this.getChatPanelToggle().click();
+          cy.wait(10000);
+        }
+      })
+    }
     getChatPanel() {
       return cy.get('.chat-panel');
     }
@@ -199,6 +207,29 @@ class ChatPanel{
           cy.log("No Comments to Delete"); 
         }
       });
+    }
+    getCommentedDocumentList() {
+      return this.getChatPanel().find('.commented-document-list');
+    }
+    documentCommentList() {
+      let i;
+      let totalCount;
+      this.getNotificationToggle().click();
+      cy.wait(3000);
+      this.getCommentedDocumentList().find('.document-box').then(((value) => {
+        totalCount = Cypress.$(value).length;
+        expect(value).to.have.length(totalCount);
+          for(i=0; i < totalCount; i++) {     
+            this.getCommentedDocumentList().find('.document-box').eq(i).click({ force: true });
+            cy.wait(3000);
+            this.addDocumentCommentAndVerify("This is " + (i+1) + " document list comment");
+            this.getDeleteMessageButton("This is " + (i+1) + " document list comment").click({ force: true });
+            this.getDeleteConfirmModalButton().click();
+            this.getNotificationToggle().click();
+            cy.wait(3000);
+          }
+        })
+      )  
     }
 }
 export default ChatPanel;

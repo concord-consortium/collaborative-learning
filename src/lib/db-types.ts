@@ -55,6 +55,7 @@ export interface DBBaseDocumentMetadata {
   type: DBDocumentType;
   // previously in DBOtherDocument
   properties?: IDocumentProperties;
+  visibility?: "public" | "private";
 }
 
 export interface DBBaseProblemDocumentMetadata extends DBBaseDocumentMetadata {

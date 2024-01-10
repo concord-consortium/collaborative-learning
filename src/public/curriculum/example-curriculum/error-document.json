@@ -1,0 +1,25 @@
+{
+  "rowMap": {
+    "row1": {"id": "row1", "isSectionHeader": false, "tiles": [{"tileId": "tile1"}]},
+    "OfYbICNpRaOMedfu": {
+      "id": "OfYbICNpRaOMedfu",
+      "height": 320,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "wVdeVNVICWwijmJU"}]
+    }
+  },
+  "rowOrder": ["row1", "OfYbICNpRaOMedfu"],
+  "tileMap": {
+    "tile1": {
+      "id": "tile1",
+      "content": {"type": "Text", "text": "Welcome to the standalone document editor"}
+    },
+    "wVdeVNVICWwijmJU": {
+      "id": "wVdeVNVICWwijmJU",
+      "title": "ErrorTest 1",
+      "content": {"type": "ErrorTest", "throwRenderError": true}
+    }
+  },
+  "sharedModelMap": {},
+  "annotations": {}
+}

@@ -1,7 +1,7 @@
 import ResourcesPanel from '../../../support/elements/common/ResourcesPanel';
 import Canvas from '../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../support/elements/common/cCanvas';
-import GraphToolTile from '../../../support/elements/tile/GraphToolTile';
+import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
 import ImageToolTile from '../../../support/elements/tile/ImageToolTile';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import TextToolTile from '../../../support/elements/tile/TextToolTile';
@@ -10,7 +10,7 @@ import TableToolTile from '../../../support/elements/tile/TableToolTile';
 let resourcesPanel = new ResourcesPanel;
 let canvas = new Canvas;
 let clueCanvas = new ClueCanvas;
-let graphToolTile = new GraphToolTile;
+let geometryToolTile = new GeometryToolTile;
 let imageToolTile = new ImageToolTile;
 let drawToolTile = new DrawToolTile;
 let textToolTile = new TextToolTile;
@@ -53,7 +53,7 @@ context('Test Canvas', function () {
     canvas.createNewExtraDocumentFromFileMenu(studentWorkspace, "my-work");
     canvas.getEditTitleIcon().should('be.visible');
     canvas.getPersonalPublishIcon().should('be.visible');
-    clueCanvas.getShareButton().should('not.exist');
+    clueCanvas.getShareButton().should('be.visible');
     clueCanvas.getFourUpViewToggle().should('not.exist');
 
     cy.log('Test personal workspace canvas');
@@ -70,7 +70,7 @@ context('Test Canvas', function () {
     cy.log('verify copy of personal workspace');
     canvas.copyDocument(copyTitle);
     canvas.getPersonalDocTitle().should('contain', copyTitle);
-    graphToolTile.getGraphTile().should('be.visible');
+    geometryToolTile.getGeometryTile().should('be.visible');
     tableToolTile.getTableTile().should('be.visible');
     textToolTile.getTextTile().should('be.visible').and('contain', studentWorkspace);
 
@@ -190,9 +190,9 @@ context('Test Canvas', function () {
     clueCanvas.openOneUpViewFromFourUp(); //clean up
 
     cy.log('test the tool palette');
-    //This should test the tools in the tool shelf
-    // Tool palettes for Graph, Image, Draw,and Table are tested in respective tool spec test
-    //Selection tool is tested as a functionality of graph tool tiles
+    // This should test the tools in the tool shelf
+    // Tool palettes for Geometry, Image, Draw,and Table are tested in respective tool spec test
+    // Selection tool is tested as a functionality of geometry tool tiles
 
     cy.log('adds text tool');
     clueCanvas.addTile('text');
@@ -200,9 +200,9 @@ context('Test Canvas', function () {
     textToolTile.enterText('This is the Investigation ' + title);
     clueCanvas.exportTileAndDocument('text-tool-tile');
 
-    cy.log('adds a graph tool');
+    cy.log('adds a geometry tool');
     clueCanvas.addTile('geometry');
-    graphToolTile.getGraphTile().should('exist');
+    geometryToolTile.getGeometryTile().should('exist');
     // clueCanvas.exportTileAndDocument('geometry-tool-tile');
     // in case we created a point while exporting
     cy.get('.primary-workspace .geometry-toolbar .button.delete').click({ force: true });
@@ -223,7 +223,7 @@ context('Test Canvas', function () {
     // clueCanvas.exportTileAndDocument('table-tool-tile');
 
     cy.log('verifies scrolling');
-    graphToolTile.getGraphTile().scrollIntoView();
+    geometryToolTile.getGeometryTile().scrollIntoView();
     textToolTile.getTextTile().first().scrollIntoView();
 
     // TODO:4-up view canvas selector does not work in cypress even though it works in Chrome. it currently selects the entire canvas and not the scaled one
@@ -231,7 +231,7 @@ context('Test Canvas', function () {
     // canvas.openFourUpView();
     // canvas.scrollToBottom(canvas.getNorthWestCanvas());
     // cy.get('.single-workspace > .document> .canvas-area > .four-up > .canvas-container.north-west >.canvas-scaler >.canvas').scrollTo('bottom');
-    // canvas.getGraphTile().last().should('be.visible');
+    // canvas.getGeometryTile().last().should('be.visible');
     // canvas.getSouthWestCanvas().should('be.visible');
     // canvas.openOneUpViewFromFourUp(); //clean up
 
@@ -242,7 +242,7 @@ context('Test Canvas', function () {
     resourcesPanel.openTopTab("my-work");
     cy.openDocumentWithTitle('my-work', 'workspaces', studentWorkspace);
     canvas.getPersonalDocTitle().should('contain', studentWorkspace);
-    graphToolTile.getGraphTile().should('be.visible');
+    geometryToolTile.getGeometryTile().should('be.visible');
     tableToolTile.getTableTile().should('be.visible');
     textToolTile.getTextTile().should('be.visible').and('contain', studentWorkspace);
 
@@ -252,7 +252,7 @@ context('Test Canvas', function () {
     cy.openDocumentWithTitle('my-work', 'workspaces', title);
     clueCanvas.getInvestigationCanvasTitle().should('contain', title);
     textToolTile.getTextTile().should('be.visible').and('contain', title);
-    graphToolTile.getGraphTile().should('exist');
+    geometryToolTile.getGeometryTile().should('exist');
     drawToolTile.getDrawTile().should('exist');
     imageToolTile.getImageTile().should('exist');
     tableToolTile.getTableTile().should('exist');
@@ -284,14 +284,14 @@ context('Test Canvas', function () {
 
     cy.log('will delete elements from canvas');
     // Delete elements in the canvas
-    clueCanvas.deleteTile('graph');
+    clueCanvas.deleteTile('geometry');
     clueCanvas.deleteTile('image');
     clueCanvas.deleteTile('draw');
     clueCanvas.deleteTile('table');
     clueCanvas.deleteTile('text');
     clueCanvas.deleteTile('text');
     textToolTile.getTextTile().should('not.exist');
-    graphToolTile.getGraphTile().should('not.exist');
+    geometryToolTile.getGeometryTile().should('not.exist');
     drawToolTile.getDrawTile().should('not.exist');
     imageToolTile.getImageTile().should('not.exist');
     tableToolTile.getTableTile().should('not.exist');

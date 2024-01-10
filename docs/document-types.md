@@ -54,6 +54,8 @@ export interface DBDocument {
 }
 ```
 
+In each case, the same `documentKey` is used, so the metadata is stored at `/{classPath}/users/{userId}/documentMetadata/{documentKey}` and the contents are stored at `/{classPath}/users/{userId}/documents/{documentKey}`.
+
 ## Problem/Planning Documents
 
 Every user (student or teacher) has a problem document created for them the first time they launch CLUE for a given problem (e.g. Stretching and Shrinking 1.2). This is meant to be their primary workspace for that problem. It is a sectioned document with sections defined in the JSON for the curriculum unit, although currently all curriculum units share the same sections (Introduction, Initial Challenge, ...). For students, this document can be shared with other members of their group via the four-up view. A student can control the visibility of the problem document to the group by sharing/unsharing the document. Type-specific metadata for the problem document is stored at `/{classPath}/offerings/{offeringId}/users/{userId}/documents`. By convention there is only one such document, but there's nothing at the database level that enforces that constraint and bugs have been known to result in multiple problem document instances.
@@ -99,19 +101,51 @@ Note that only personal documents and learning logs have the `title` property (o
 
 ## Publications
 
-The user has the option of publishing many of the preceding document types for the whole class. Under the hood, a published document is just a read-only copy of the document with some additional metadata, e.g. the `originDoc`, which indicates the id of the document from which it was published. A user can publish a given document multiple times, resulting in multiple versions of the published document. By convention, only the most recent version of a given publication is shown in the UI, but all published version are (currently) maintained internally.
+The user has the option of publishing many of the preceding document types for the whole class. Under the hood, a published document is just a read-only copy of the document with some additional metadata, e.g. the `originDoc`, which indicates the id of the document from which it was published. A user can publish a given document multiple times, resulting in multiple versions of the published document. By convention, only the most recent version of a given publication is shown in the UI, but all published versions are (currently) maintained internally.
 
 ### Published Problem Documents
 
 Type-specific metadata for published problem documents is stored at `/{classPath}/offerings/{offeringId}/publications`.
+For published problem documents, the same `documentKey` is used for the key of the type-specific metadata as is used for the common metadata and the document contents.
 
-### Published Personal Documents
+Type-specific metadata for published problem documents is typed as:
+```typescript
+export interface DBPublication {
+  version: "1.0";
+  self: {
+    classHash: string;
+    offeringId: string;
+  };
+  documentKey: string;
+  groupId?: string;
+  userId: string;
+  groupUserConnections?: DBGroupUserConnections;
+  pubVersion: number;
+}
+```
+
+### Published Personal and Learning Log Documents
 
 Type-specific metadata for published personal documents is stored at `/{classPath}/personalPublications`.
-
-### Published Learning Log Documents
-
 Type-specific metadata for published learning log documents is stored at `/{classPath}/publications` (which seems like an oddly generic name, but was probably the only type of document that could be published to the root of the class at the time that the ability to publish learning logs was implemented).
+
+Type-specific metadata for published personal and learning log documents is typed as:
+```typescript
+export interface DBOtherPublication {
+  version: "1.0";
+  self: {
+    classHash: string;
+    documentKey: string;
+  };
+  title: string;
+  properties: IDocumentProperties;
+  uid: string;
+  originDoc: string;
+  pubVersion: number
+}
+```
+
+For reasons that have been lost to history (but were probably inadvertent), published personal documents and learning logs use a unique `documentKey` as the key of the type-specific metadata and the corresponding `documentKey` for the common metadata and the document contents must be retrieved from the `self/documentKey` property. ¯\\_(ツ)_/¯
 
 ### Published Multi-class Support Documents
 

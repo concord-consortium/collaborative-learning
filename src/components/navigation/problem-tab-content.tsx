@@ -109,7 +109,7 @@ const SolutionsButton = ({ onClick, isToggled }: { onClick: () => void, isToggle
   return (
     <div className="solutions-switch">
       <ToggleControl className={classes} dataTest="solutions-button"
-                      initialValue={isToggled} onChange={onClick}
+                      value={isToggled} onChange={onClick}
                       title={isToggled
                                   ? "Showing solutions: click to hide"
                                   : "Hiding solutions: click to show"} />
