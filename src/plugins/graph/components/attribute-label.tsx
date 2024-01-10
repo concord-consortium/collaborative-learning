@@ -7,12 +7,12 @@ import {useDataConfigurationContext} from "../hooks/use-data-configuration-conte
 import {AttributeType} from "../../../models/data/attribute";
 import {IDataSet} from "../../../models/data/data-set";
 // import {isSetAttributeNameAction} from "../../../models/data/data-set-actions";
-import {GraphPlace, /*isVertical*/} from "../imports/components/axis-graph-shared";
+import { GraphPlace, isVertical } from "../imports/components/axis-graph-shared";
 import {graphPlaceToAttrRole, kGraphClassSelector, kGraphPortalClass} from "../graph-types";
 import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import { useGraphLayoutContext } from "../models/graph-layout";
 // import {useTileModelContext} from "../../../components/tiles/hooks/use-tile-model-context";
-// import {getStringBounds} from "../imports/components/axis/axis-utils";
+import {getStringBounds} from "../imports/components/axis/axis-utils";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
 import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
 
@@ -61,41 +61,52 @@ export const AttributeLabel = observer(
         .filter(aName => aName !== '').join(', ');
     }, [dataset, defaultAxisLabels, getAttributeIDs, place, useClickHereCue]);
 
+    const horizontalPadding = 10;
+    const verticalPadding = 5;
+    const displayText = getLabel();
+    const vertical = isVertical(place);
     const placeBounds = layout.getComputedBounds(place);
-    const x = place === "left" ?
+    const stringBounds = getStringBounds(displayText);
+    const boxHeight = stringBounds.height + 2 * verticalPadding;
+    const boxWidth = stringBounds.width + 2 * horizontalPadding;
+    const height = vertical ? boxWidth : boxHeight;
+    const width = vertical ? boxHeight : boxWidth;
+    const x = placeBounds.left + (placeBounds.width - width) / 2;
+    const y = placeBounds.top + (placeBounds.height - height) / 2;
+    const foreignObjectStyle = { height, width, x, y };
 
-    const refreshAxisTitle = useCallback(() => {
-      const labelFont = useClickHereCue ? graphVars.graphEmptyLabelFont : graphVars.graphLabelFont,
-        bounds = layout.getComputedBounds(place),
-        layoutIsVertical = isVertical(place),
-        halfRange = layoutIsVertical ? bounds.height / 2 : bounds.width / 2,
-        label = getLabel(),
-        labelBounds = getStringBounds(label, labelFont),
-        labelTransform = `translate(${bounds.left}, ${bounds.top})`,
-        tX = place === 'left' ? labelBounds.height
-          : place === 'legend' ? bounds.left
-            : ['rightNumeric', 'rightCat'].includes(place) ? bounds.width - labelBounds.height / 2
-              : halfRange,
-        tY = isVertical(place) ? halfRange
-          : place === 'legend' ? labelBounds.height / 2
-            : place === 'top' ? labelBounds.height : bounds.height - labelBounds.height / 2,
-        tRotation = isVertical(place) ? ` rotate(-90,${tX},${tY})` : '',
-        className = useClickHereCue ? 'empty-label' : 'attribute-label';
-      select(labelElt)
-        .selectAll(`text.${className}`)
-        .data([1])
-        .join(
-          enter => enter,
-          (update) =>
-            update
-              .attr("transform", labelTransform + tRotation)
-              .attr('class', className)
-              .style('visibility', hideClickHereCue ? 'hidden' : 'visible')
-              .attr('x', tX)
-              .attr('y', tY)
-              .text(label)
-        );
-    }, [layout, place, labelElt, getLabel, useClickHereCue, hideClickHereCue]);
+    // const refreshAxisTitle = useCallback(() => {
+    //   const labelFont = useClickHereCue ? graphVars.graphEmptyLabelFont : graphVars.graphLabelFont,
+    //     bounds = layout.getComputedBounds(place),
+    //     layoutIsVertical = isVertical(place),
+    //     halfRange = layoutIsVertical ? bounds.height / 2 : bounds.width / 2,
+    //     label = getLabel(),
+    //     labelBounds = getStringBounds(label, labelFont),
+    //     labelTransform = `translate(${bounds.left}, ${bounds.top})`,
+    //     tX = place === 'left' ? labelBounds.height
+    //       : place === 'legend' ? bounds.left
+    //         : ['rightNumeric', 'rightCat'].includes(place) ? bounds.width - labelBounds.height / 2
+    //           : halfRange,
+    //     tY = isVertical(place) ? halfRange
+    //       : place === 'legend' ? labelBounds.height / 2
+    //         : place === 'top' ? labelBounds.height : bounds.height - labelBounds.height / 2,
+    //     tRotation = isVertical(place) ? ` rotate(-90,${tX},${tY})` : '',
+    //     className = useClickHereCue ? 'empty-label' : 'attribute-label';
+    //   select(labelElt)
+    //     .selectAll(`text.${className}`)
+    //     .data([1])
+    //     .join(
+    //       enter => enter,
+    //       (update) =>
+    //         update
+    //           .attr("transform", labelTransform + tRotation)
+    //           .attr('class', className)
+    //           .style('visibility', hideClickHereCue ? 'hidden' : 'visible')
+    //           .attr('x', tX)
+    //           .attr('y', tY)
+    //           .text(label)
+    //     );
+    // }, [layout, place, labelElt, getLabel, useClickHereCue, hideClickHereCue]);
 
     // useEffect(function observeAttributeNameChange() {
     //   const disposer = dataConfiguration?.onAction(action => {
@@ -169,7 +180,11 @@ export const AttributeLabel = observer(
 
     return (
       <>
-        <div className="axis-label" ref={(elt) => setLabelElt(elt)}>{getLabel()}</div>
+        <foreignObject {...foreignObjectStyle}>
+          <div className="axis-label" ref={(elt) => setLabelElt(elt)} >
+            {displayText}
+          </div>
+        </foreignObject>
         {/* <g ref={(elt) => setLabelElt(elt)} className={`display-label ${place}`} /> */}
         {readyForPortal && !skipPortal &&
           <AxisOrLegendAttributeMenu
