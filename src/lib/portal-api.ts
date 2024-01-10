@@ -7,6 +7,7 @@ import { QueryParams } from "../utilities/url-params";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { IUserPortalOffering, UserPortalOffering } from "../models/stores/user";
 import { IPortalOffering } from "./portal-types";
+import { getAuthParams } from "../utilities/auth-utils";
 
 const isClueAssignment = (offering: IPortalOffering) => {
   const clueActivityUrlRegex = /collaborative-learning/;
@@ -162,12 +163,15 @@ export function getPortalClassOfferings(portalOfferings: IPortalOffering[],
   const addOffering = (offering: IPortalOffering) => {
     if (isClueAssignment(offering) && urlParams) {
       let newLocationUrl = "";
-      if (urlParams && urlParams.class && urlParams.offering && urlParams.reportType && urlParams.token) {
-        newLocationUrl =
-          `?class=${urlParams.class.replace(/\/classes\/.*$/, `/classes/${offering.clazz_id}`)}` +
-          `&offering=${urlParams.offering.replace(/\/offerings\/.*$/, `/offerings/${offering.id}`)}` +
-          `&reportType=${urlParams.reportType}` +
-          `&token=${urlParams.token}`;
+      if (urlParams && urlParams.class && urlParams.offering && urlParams.reportType) {
+        const newLocationParams: Record<string, string> = {
+          class: urlParams.class.replace(/\/classes\/.*$/, `/classes/${offering.clazz_id}`),
+          offering: urlParams.offering.replace(/\/offerings\/.*$/, `/offerings/${offering.id}`),
+          reportType: urlParams.reportType,
+        };
+        const authParams = getAuthParams(urlParams);
+        Object.assign(newLocationParams, authParams);
+        newLocationUrl = `?${(new URLSearchParams(newLocationParams)).toString()}`;
       }
       result.push(UserPortalOffering.create({
         classId: `${offering.clazz_id}`,
