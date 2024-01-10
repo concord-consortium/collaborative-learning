@@ -1,19 +1,21 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
-import { useStores } from "../../hooks/use-stores";
+import { useStores, usePersistentUIStore, useAppConfig } from "../../hooks/use-stores";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { DocumentContextReact } from "./document-context";
 import { DEBUG_SORT_WORK } from "../../lib/debug";
 import { isSortableType } from "../../models/document/document-types";
+import { SortWorkDocumentArea } from "./sort-work-document-area";
+import { ENavTab } from "../../models/view/nav-tabs";
 
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
 export const SortWorkView: React.FC = observer(function SortWorkView() {
-  const sortOptions = ["Group", "Name"];
+  const sortOptions = ["Group", "Student"];
   const stores = useStores();
   const groupsModel = stores.groups;
   const [sortBy, setSortBy] = useState("Group");
@@ -67,20 +69,34 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     return sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel));
   };
 
-  function customSort(a: string, b: string) {
-    const parseName = (name: string) => {
-      const [lastName, firstName] = name.split(", ").map((part: string) => part.trim());
+  function customSort(a: any, b: any) { //Sort by last name alphabetically
+    const parseName = (name: any) => {
+      const [lastName, firstName] = name.split(", ").map((part: any) => part.trim());
       return { firstName, lastName };
     };
     const aParsed = parseName(a);
     const bParsed = parseName(b);
 
     const lastNameCompare = aParsed.lastName.localeCompare(bParsed.lastName);
-    if (lastNameCompare !== 0) return lastNameCompare;
+    if (lastNameCompare !== 0) {
+      return lastNameCompare;
+    }
+
     return aParsed.firstName.localeCompare(bParsed.firstName);
   }
 
   const sortedDocuments = getSortedDocuments(filteredDocsByType, sortBy);
+
+  //******************************* Show Document View ***************************************
+  const persistentUI = usePersistentUIStore();
+
+  const handleSelectDocument = (document: DocumentModelType) => {
+    persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, document.key);
+  };
+
+  const tabState = persistentUI.tabs.get(ENavTab.kSortWork);
+  const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
+  const showSortWorkDocumentArea = !!openDocumentKey;
 
   //******************************* Handle Debug View ***************************************
   const renderDebugView = () => {
@@ -98,41 +114,47 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
 
   return (
     <div key="sort-work-view" className="sort-work-view">
-      <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
-      <div className="documents-panel">
-        <div className="tab-panel-documents-section">
-          {
-            sortedDocuments.map((sortedSection, idx) => {
-              return (
-                <div className="sorted-sections" key={`sortedSection-${idx}`}>
-                  <div className="section-header">
-                    <div className="section-header-label">
-                      {sortedSection.sectionLabel}
+      {
+        showSortWorkDocumentArea ?
+        <SortWorkDocumentArea openDocumentKey={openDocumentKey}/> :
+        <>
+          <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
+          <div className="tab-panel-documents-section">
+            {
+              sortedDocuments.map((sortedSection, idx) => {
+                return (
+                  <div className="sorted-sections" key={`sortedSection-${idx}`}>
+                    <div className="section-header">
+                      <div className="section-header-label">
+                        {sortedSection.sectionLabel}
+                      </div>
+                    </div>
+                    <div className="list">
+                      {sortedSection.documents.map((doc: any, sortIdx: number) => {
+                        const documentContext = getDocumentContext(doc);
+                        return (
+                          <DocumentContextReact.Provider key={doc.key} value={documentContext}>
+                            <DecoratedDocumentThumbnailItem
+                              key={doc.key}
+                              scale={0.1}
+                              document={doc}
+                              tab={ENavTab.kSortWork}
+                              shouldHandleStarClick={true}
+                              allowDelete={false}
+                              onSelectDocument={handleSelectDocument}
+                            />
+                          </DocumentContextReact.Provider>
+                        );
+                      })}
                     </div>
                   </div>
-                  <div className="list">
-                    {sortedSection.documents.map((doc: any, sortIdx: number) => {
-                      const documentContext = getDocumentContext(doc);
-                      return (
-                        <DocumentContextReact.Provider key={doc.key} value={documentContext}>
-                          <DecoratedDocumentThumbnailItem
-                            key={doc.key}
-                            scale={0.1}
-                            document={doc}
-                            tab={"sort-work"}
-                            shouldHandleStarClick={true}
-                            allowDelete={false}
-                          />
-                        </DocumentContextReact.Provider>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          {DEBUG_SORT_WORK && renderDebugView()}
-        </div>
-      </div>
+                );
+              })
+            }
+            {DEBUG_SORT_WORK && renderDebugView()}
+          </div>
+        </>
+      }
     </div>
   );
 });
