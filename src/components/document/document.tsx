@@ -201,6 +201,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     return !!navTabs.getNavTabSpec(ENavTab.kMyWork);
   }
 
+  private showPersonalShareToggle() {
+    const tabNames = this.stores.tabsToDisplay.map(tab => tab.tab);
+    return tabNames.includes(ENavTab.kSortWork);
+  }
+
   private renderTitleBar(type: string) {
     const { document, side } = this.props;
     const hideButtons = (side === "comparison") || document.isPublished;
@@ -360,6 +365,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const displayId = document.getDisplayId(appConfig);
     const hasDisplayId = !!displayId;
     const showFileMenu = this.showFileMenu();
+    const showPersonalShareToggle = this.showPersonalShareToggle();
     return (
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
@@ -391,7 +397,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div className="actions">
           {(!hideButtons || supportStackedTwoUpView) &&
             <div className="actions">
-              <ShareButton isShared={document.visibility === "public"} onClick={this.handleToggleVisibility} />
+              {showPersonalShareToggle &&
+                <ShareButton isShared={document.visibility === "public"} onClick={this.handleToggleVisibility} />}
               {supportStackedTwoUpView && isPrimary &&
                 <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
               {supportStackedTwoUpView && isPrimary &&
