@@ -1,22 +1,23 @@
-import React, {useCallback, useEffect, useState} from "react";
-import {reaction} from "mobx";
+import React, {useCallback, /*useEffect,*/ useState} from "react";
+// import {reaction} from "mobx";
 import {observer} from "mobx-react-lite";
-import {select} from "d3";
+// import {select} from "d3";
 import t from "../imports/utilities/translation/translate";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {AttributeType} from "../../../models/data/attribute";
 import {IDataSet} from "../../../models/data/data-set";
-import {isSetAttributeNameAction} from "../../../models/data/data-set-actions";
-import {GraphPlace, isVertical} from "../imports/components/axis-graph-shared";
+// import {isSetAttributeNameAction} from "../../../models/data/data-set-actions";
+import {GraphPlace, /*isVertical*/} from "../imports/components/axis-graph-shared";
 import {graphPlaceToAttrRole, kGraphClassSelector, kGraphPortalClass} from "../graph-types";
 import { useGraphModelContext } from "../hooks/use-graph-model-context";
-import {useGraphLayoutContext} from "../models/graph-layout";
-import {useTileModelContext} from "../../../components/tiles/hooks/use-tile-model-context";
-import {getStringBounds} from "../imports/components/axis/axis-utils";
+import { useGraphLayoutContext } from "../models/graph-layout";
+// import {useTileModelContext} from "../../../components/tiles/hooks/use-tile-model-context";
+// import {getStringBounds} from "../imports/components/axis/axis-utils";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
 import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
 
-import graphVars from "./graph.scss";
+import "./attribute-label.scss";
+// import graphVars from "./graph.scss";
 
 interface IAttributeLabelProps {
   place: GraphPlace;
@@ -31,12 +32,12 @@ export const AttributeLabel = observer(
       dataConfiguration = useDataConfigurationContext(),
       { defaultSeriesLegend, defaultAxisLabels } = useGraphSettingsContext(),
       layout = useGraphLayoutContext(),
-      {isTileSelected} = useTileModelContext(),
+      // {isTileSelected} = useTileModelContext(),
       dataset = dataConfiguration?.dataset,
       useClickHereCue = dataConfiguration?.placeCanShowClickHereCue(place) ?? false,
-      hideClickHereCue = useClickHereCue &&
-        !dataConfiguration?.placeAlwaysShowsClickHereCue(place) && !isTileSelected(),
-      [labelElt, setLabelElt] = useState<SVGGElement | null>(null),
+      // hideClickHereCue = useClickHereCue &&
+      //   !dataConfiguration?.placeAlwaysShowsClickHereCue(place) && !isTileSelected(),
+      [labelElt, setLabelElt] = useState<HTMLDivElement | null>(null),
       portalParentElt = labelElt?.closest(kGraphPortalClass) as HTMLDivElement ?? null,
       positioningParentElt = labelElt?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
 
@@ -59,6 +60,9 @@ export const AttributeLabel = observer(
       return attrIDs.map(anID => dataset?.attrFromID(anID)?.name)
         .filter(aName => aName !== '').join(', ');
     }, [dataset, defaultAxisLabels, getAttributeIDs, place, useClickHereCue]);
+
+    const placeBounds = layout.getComputedBounds(place);
+    const x = place === "left" ?
 
     const refreshAxisTitle = useCallback(() => {
       const labelFont = useClickHereCue ? graphVars.graphEmptyLabelFont : graphVars.graphLabelFont,
@@ -93,79 +97,80 @@ export const AttributeLabel = observer(
         );
     }, [layout, place, labelElt, getLabel, useClickHereCue, hideClickHereCue]);
 
-    useEffect(function observeAttributeNameChange() {
-      const disposer = dataConfiguration?.onAction(action => {
-        if (isSetAttributeNameAction(action)) {
-          const [changedAttributeID] = action.args;
-          if (getAttributeIDs().includes(changedAttributeID)) {
-            refreshAxisTitle();
-          }
-        }
-      });
+    // useEffect(function observeAttributeNameChange() {
+    //   const disposer = dataConfiguration?.onAction(action => {
+    //     if (isSetAttributeNameAction(action)) {
+    //       const [changedAttributeID] = action.args;
+    //       if (getAttributeIDs().includes(changedAttributeID)) {
+    //         refreshAxisTitle();
+    //       }
+    //     }
+    //   });
 
-      return () => disposer?.();
-    }, [dataConfiguration, refreshAxisTitle, getAttributeIDs]);
+    //   return () => disposer?.();
+    // }, [dataConfiguration, refreshAxisTitle, getAttributeIDs]);
 
     // Install reaction to bring about rerender when layout's computedBounds changes
-    useEffect(() => {
-      const disposer = reaction(
-        () => layout.getComputedBounds(place),
-        () => refreshAxisTitle()
-      );
-      return () => disposer();
-    }, [place, layout, refreshAxisTitle]);
+    // useEffect(() => {
+    //   const disposer = reaction(
+    //     () => layout.getComputedBounds(place),
+    //     () => refreshAxisTitle()
+    //   );
+    //   return () => disposer();
+    // }, [place, layout, refreshAxisTitle]);
 
-    useEffect(function setupTitle() {
+    // useEffect(function setupTitle() {
 
-      const removeUnusedLabel = () => {
-        const classNameToRemove = useClickHereCue ? 'attribute-label' : 'empty-label';
-        select(labelElt)
-          .selectAll(`text.${classNameToRemove}`)
-          .remove();
-      };
+    //   const removeUnusedLabel = () => {
+    //     const classNameToRemove = useClickHereCue ? 'attribute-label' : 'empty-label';
+    //     select(labelElt)
+    //       .selectAll(`text.${classNameToRemove}`)
+    //       .remove();
+    //   };
 
-      if (labelElt) {
-        removeUnusedLabel();
-        const anchor = place === 'legend' ? 'start' : 'middle',
-          className = useClickHereCue ? 'empty-label' : 'attribute-label';
-        select(labelElt)
-          .selectAll(`text.${className}`)
-          .data([1])
-          .join(
-            (enter) =>
-              enter.append('text')
-                .attr('class', className)
-                .attr('text-anchor', anchor)
-                .attr('data-testid', `attribute-label-${place}`)
-          );
-        refreshAxisTitle();
-      }
-    }, [labelElt, place, useClickHereCue, refreshAxisTitle]);
+    //   if (labelElt) {
+    //     removeUnusedLabel();
+    //     const anchor = place === 'legend' ? 'start' : 'middle',
+    //       className = useClickHereCue ? 'empty-label' : 'attribute-label';
+    //     select(labelElt)
+    //       .selectAll(`text.${className}`)
+    //       .data([1])
+    //       .join(
+    //         (enter) =>
+    //           enter.append('text')
+    //             .attr('class', className)
+    //             .attr('text-anchor', anchor)
+    //             .attr('data-testid', `attribute-label-${place}`)
+    //       );
+    //     refreshAxisTitle();
+    //   }
+    // }, [labelElt, place, useClickHereCue, refreshAxisTitle]);
 
     // Respond to changes in attributeID assigned to my place
-    useEffect(() => {
-      const disposer = reaction(
-        () => {
-          if (place === 'left') {
-            return dataConfiguration?.yAttributeDescriptionsExcludingY2.map((desc) => desc.attributeID);
-          }
-          else {
-            return dataConfiguration?.attributeID(graphPlaceToAttrRole[place]);
-          }
-        },
-        () => {
-          refreshAxisTitle();
-        }
-      );
-      return () => disposer();
-    }, [place, dataConfiguration, refreshAxisTitle]);
+    // useEffect(() => {
+    //   const disposer = reaction(
+    //     () => {
+    //       if (place === 'left') {
+    //         return dataConfiguration?.yAttributeDescriptionsExcludingY2.map((desc) => desc.attributeID);
+    //       }
+    //       else {
+    //         return dataConfiguration?.attributeID(graphPlaceToAttrRole[place]);
+    //       }
+    //     },
+    //     () => {
+    //       refreshAxisTitle();
+    //     }
+    //   );
+    //   return () => disposer();
+    // }, [place, dataConfiguration, refreshAxisTitle]);
 
     const readyForPortal = positioningParentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
     const skipPortal = defaultSeriesLegend && place === "left";
 
     return (
       <>
-        <g ref={(elt) => setLabelElt(elt)} className={`display-label ${place}`} />
+        <div className="axis-label" ref={(elt) => setLabelElt(elt)}>{getLabel()}</div>
+        {/* <g ref={(elt) => setLabelElt(elt)} className={`display-label ${place}`} /> */}
         {readyForPortal && !skipPortal &&
           <AxisOrLegendAttributeMenu
             target={labelElt}
