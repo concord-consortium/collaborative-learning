@@ -102,12 +102,14 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const renderDebugView = () => {
     //returns a list lf all documents (unsorted)
     return filteredDocsByType.map((doc, idx) => {
+      console.log("| doc can we find viz? ", doc);
       const ct = idx + 1;
       return (
         <pre key={idx} style={{ margin: "0px", padding: "0px", fontSize: "10px" }}>
           {ct < 10 && " "}{ct}
           | {doc.key}&nbsp;
           | {doc.type}{' '.repeat(12 - doc.type.length)}
+          | {doc.visibility ? doc.visibility + " ".repeat(10 - doc.visibility.length) : "undefined "}
           | {doc.uid}{' '.repeat(5 - doc.uid.length)}
           | {doc.title?.slice(0, 20)}
         </pre>
