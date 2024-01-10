@@ -17,6 +17,7 @@ import "./sort-work-view.scss";
 
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, persistentUI } = useStores();
+  console.log("one change for PR");
 
   //***************************** Determine Sort Options & State  *************************************
   const {tagPrompt, commentTags} = appConfig;
