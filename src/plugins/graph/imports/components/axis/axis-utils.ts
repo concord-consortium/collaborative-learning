@@ -2,7 +2,7 @@ import {ScaleLinear} from "d3";
 import {MutableRefObject} from "react";
 import {AxisPlace} from "./axis-types";
 import {measureText, measureTextExtent} from "../../../../../components/tiles/hooks/use-measure-text";
-import {kAxisGap, kAxisTickLength, kGraphFont} from "../../../graph-types";
+import {kAxisGap, kAxisTickLength, kAxisTickPadding, kGraphFont} from "../../../graph-types";
 import {ICategorySet} from "../../../../../models/data/category-set";
 
 export const getStringBounds = (s = 'Wy', font = kGraphFont) => {
@@ -157,7 +157,7 @@ export const getCoordFunctions = (props: IGetCoordFunctionsProps): ICoordFunctio
       getTickY,
       getDividerX: () => 0,
       getDividerY: (i) => rangeMax - (i + 1) * bandWidth,
-      getLabelX: () => (isRightCat ? 1.5 : -1) * (kAxisTickLength + kAxisGap + labelXOffset),
+      getLabelX: () => (isRightCat ? 1.5 : -1) * (kAxisTickLength + kAxisGap + kAxisTickPadding + labelXOffset),
       getLabelY: (i) =>
         (getTickY ? getTickY(i) : 0) + (collision ? 0.25 * labelTextHeight : 0)
     };
@@ -170,7 +170,7 @@ export const getCoordFunctions = (props: IGetCoordFunctionsProps): ICoordFunctio
       getDividerY: () => 0,
       getLabelX: (i) => (getTickX ? getTickX(i) : 0) +
         (collision ? 0.25 * labelTextHeight : 0),
-      getLabelY: () => (isTop ? -1 : 1) * (kAxisTickLength + kAxisGap) + labelYOffset
+      getLabelY: () => (isTop ? -1 : 1) * (kAxisTickLength + kAxisGap + kAxisTickPadding) + labelYOffset
     };
   }
 };

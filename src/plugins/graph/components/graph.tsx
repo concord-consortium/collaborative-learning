@@ -7,7 +7,7 @@ import {Background} from "./background";
 import {DroppablePlot} from "./droppable-plot";
 import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
 import {GraphAxis} from "./graph-axis";
-import {attrRoleToGraphPlace, graphPlaceToAttrRole, kDefaultNumericAxisBounds, kGraphClass} from "../graph-types";
+import {attrRoleToGraphPlace, graphPlaceToAttrRole, kGraphClass} from "../graph-types";
 import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useGraphModel} from "../hooks/use-graph-model";
@@ -30,7 +30,7 @@ import {IDataSet} from "../../../models/data/data-set";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
 import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
-import { EditableGraphValue } from "./editable-graph-value";
+import { AxisEndComponents } from "./axis-end-components";
 import { GraphLayer } from "./graph-layer";
 
 import "./graph.scss";
@@ -212,8 +212,7 @@ export const Graph = observer(
 
   useGraphModel({ graphModel, enableAnimation, instanceId });
 
-  const handleMinMaxChange = (minOrMax: string, axis: AxisPlace, newValue: number) => {
-    const axisModel = graphModel.getAxis(axis) as INumericAxisModel;
+  const handleMinMaxChange = (minOrMax: string, axisModel: INumericAxisModel, newValue: number) => {
     if (minOrMax === "min" && newValue < axisModel.max){
       axisModel.setMin(newValue);
     } else if (minOrMax === "max" && newValue > axisModel.min){
@@ -224,76 +223,76 @@ export const Graph = observer(
   // TODO multi-dataset: DataConfigurationContext should not be provided here, but is still used in some places.
   return (
     <DataConfigurationContext.Provider value={graphModel.config}>
-        <div className={kGraphClass} ref={graphRef} data-testid="graph">
-          <svg className='graph-svg' ref={svgRef}>
-            <Background
-              marqueeState={marqueeState}
-              ref={backgroundSvgRef}
-            />
+      <div className={kGraphClass} ref={graphRef} data-testid="graph">
+        <svg className='graph-svg' ref={svgRef}>
+          <Background
+            marqueeState={marqueeState}
+            ref={backgroundSvgRef}
+          />
 
-            {renderGraphAxes()}
+          {renderGraphAxes()}
 
-            <svg ref={plotAreaSVGRef}>
-              <svg className={`graph-dot-area ${instanceId}`}>
-                {renderPlotComponents()}
-              </svg>
-              <Marquee marqueeState={marqueeState}/>
+          <svg ref={plotAreaSVGRef}>
+            <svg className={`graph-dot-area ${instanceId}`}>
+              {renderPlotComponents()}
             </svg>
-
-            { !disableAttributeDnD &&
-              <DroppablePlot
-                graphElt={graphRef.current}
-                plotElt={backgroundSvgRef.current}
-                onDropAttribute={handleChangeAttribute}
-              />
-            }
-
-            <Legend
-              legendAttrID={graphModel.getAttributeID('legend')}
-              graphElt={graphRef.current}
-              onDropAttribute={handleChangeAttribute}
-              onRemoveAttribute={handleRemoveAttribute}
-              onTreatAttributeAs={handleTreatAttrAs}
-            />
+            <Marquee marqueeState={marqueeState}/>
           </svg>
-          {!disableAttributeDnD && renderDroppableAddAttributes()}
-          <Adornments/>
-          {defaultSeriesLegend &&
-            <MultiLegend
-              onChangeAttribute={handleChangeAttribute}
-              onRemoveAttribute={handleRemoveAttribute}
-              onTreatAttributeAs={handleTreatAttrAs}
-              onRequestRowHeight={onRequestRowHeight}
+
+          { !disableAttributeDnD &&
+            <DroppablePlot
+              graphElt={graphRef.current}
+              plotElt={backgroundSvgRef.current}
+              onDropAttribute={handleChangeAttribute}
             />
           }
-          {
-            axes.map((axis: AxisPlace, idx) => {
-              const axisModel = graphModel?.getAxis(axis);
-              const minVal = isNumericAxisModel(axisModel) ? axisModel.min : kDefaultNumericAxisBounds[0];
-              const maxVal = isNumericAxisModel(axisModel) ? axisModel.max : kDefaultNumericAxisBounds[1];
-              if (isNumericAxisModel(axisModel)){
-                return (
-                  <div key={`${axis}-min-max`}>
-                    <EditableGraphValue
-                      value={minVal}
-                      minOrMax={"min"}
-                      axis={axis}
-                      onValueChange={(newValue) => handleMinMaxChange("min", axis, newValue)}
-                      readOnly={readOnly}
-                    />
-                    <EditableGraphValue
-                      value={maxVal}
-                      minOrMax={"max"}
-                      axis={axis}
-                      onValueChange={(newValue) => handleMinMaxChange("max", axis, newValue)}
-                      readOnly={readOnly}
-                    />
-                  </div>
-                );
-              }
-            })
-          }
-        </div>
+
+          <Legend
+            legendAttrID={graphModel.getAttributeID('legend')}
+            graphElt={graphRef.current}
+            onDropAttribute={handleChangeAttribute}
+            onRemoveAttribute={handleRemoveAttribute}
+            onTreatAttributeAs={handleTreatAttrAs}
+          />
+        </svg>
+        {!disableAttributeDnD && renderDroppableAddAttributes()}
+        <Adornments/>
+        {defaultSeriesLegend &&
+          <MultiLegend
+            onChangeAttribute={handleChangeAttribute}
+            onRemoveAttribute={handleRemoveAttribute}
+            onTreatAttributeAs={handleTreatAttrAs}
+            onRequestRowHeight={onRequestRowHeight}
+          />
+        }
+        {
+          axes.map((axis: AxisPlace, idx) => {
+            const axisModel = graphModel?.getAxis(axis);
+            if (isNumericAxisModel(axisModel)){
+              const minVal = axisModel.min;
+              const maxVal = axisModel.max;
+              return (
+                <div key={`${axis}-min-max`}>
+                  <AxisEndComponents
+                    value={minVal}
+                    minOrMax={"min"}
+                    axis={axis}
+                    onValueChange={(newValue) => handleMinMaxChange("min", axisModel, newValue)}
+                    readOnly={readOnly}
+                  />
+                  <AxisEndComponents
+                    value={maxVal}
+                    minOrMax={"max"}
+                    axis={axis}
+                    onValueChange={(newValue) => handleMinMaxChange("max", axisModel, newValue)}
+                    readOnly={readOnly}
+                  />
+                </div>
+              );
+            }
+          })
+        }
+      </div>
     </DataConfigurationContext.Provider>
   );
 });

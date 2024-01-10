@@ -5,7 +5,7 @@ import { mstAutorun } from "../../../../../../utilities/mst-autorun";
 import {axisGap} from "../axis-types";
 import {useAxisLayoutContext} from "../models/axis-layout-context";
 import {IAxisModel, isNumericAxisModel} from "../models/axis-model";
-import {graphPlaceToAttrRole} from "../../../../graph-types";
+import {graphPlaceToAttrRole, kAxisTickLength, kAxisTickPadding} from "../../../../graph-types";
 import {maxWidthOfStringsD3} from "../../../../utilities/graph-utils";
 import {useDataConfigurationContext} from "../../../../hooks/use-data-configuration-context";
 import {collisionExists, getStringBounds} from "../axis-utils";
@@ -66,7 +66,7 @@ export const useAxis = ({
       collision = collisionExists({bandWidth, categories, centerCategoryLabels}),
       maxLabelExtent = maxWidthOfStringsD3(dataConfiguration?.categoryArrayForAttrRole(attrRole) ?? []),
       d3Scale = multiScale?.scale ?? (type === 'numeric' ? scaleLinear() : scaleOrdinal());
-    let desiredExtent = axisTitleHeight + 2 * axisGap;
+    let desiredExtent = axisTitleHeight + 2 * axisGap + kAxisTickLength + kAxisTickPadding;
     let ticks: string[] = [];
     switch (type) {
       case 'numeric': {
