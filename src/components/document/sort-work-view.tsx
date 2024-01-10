@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
-import { useStores, useAppConfig } from "../../hooks/use-stores";
+import { useStores } from "../../hooks/use-stores";
 import { useFirestore } from "../../hooks/firestore-hooks";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
@@ -14,37 +14,6 @@ import { ENavTab } from "../../models/view/nav-tabs";
 
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
-
-
-//TODO: Go over each edge case for No Workspaces to show so that you can create a smart algorithm to display it -
-// may need to change structure of sortedDocuments to include a flag
-
-
-//****************************************** GUIDELINES  ***********************************************
-
-//✔️ •use the first dropdown choice as the name of the filter (or make a unique tag in the unit for this).
-// ✔️ For example - in the CMP math units it says Select Student Strategy, so 'Student Strategy'
-//  would be the name of the sort.
-
-// ✔️Strategy lists all the strategies in the tags list, with suitably tagged documents beneath that section.
-// ✔️Untagged documents are listed in a "Not Tagged" at the bottom
-// can't due to our infrastructure --->•As documents are tagged they are automatically resorted -
-// •if there are no documents in a strategy a 'No workspaces' message appears.
-// •If more than one is applied, show under each that matches
-
-/* ----------------  Other Issues ------------------ */
-////issue : when a comment is changed or added - no re-render happens
-//long term - have a listener on the comments if that changes, then it would change the model,
-// which would force a re-render
-//•TODO: move the creation of documents, sorting, into MST Model
-// start by making a new store - see if you can put it into documents.ts model
-
-//***** Possible other requirement */
-//•the document's last comment (with a tag) is the valid tag that we show on the UI,
-// same document for different tags)
-// if so- we would need to sort them by time
-
-//*****************************************************************************************************
 
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, persistentUI } = useStores();
@@ -117,7 +86,6 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
       }
 
     }
-    console.log("getSortedDocuments returns:", sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel)));
     return sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel));
   };
 
@@ -220,8 +188,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     return sortedDocsArr;
   };
 
-
-  //************************** Determine sortedDocuments to render ***********************************
+  //************************** Determine sortedDocuments to render ************************************
   //-- "Group" and "Name" need to be displayed in a sorted order
   //-- "sortTagPrompt" (or sort by strategy) should be rendered order of commentTags
   const allDocuments = stores.documents.all;
@@ -247,7 +214,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
       break;
   }
 
-  //******************************* Click/Open Document View ********************************
+  //******************************* Click/Open Document View ******************************************
   const handleSelectDocument = (document: DocumentModelType) => {
     persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, document.key);
   };
@@ -256,7 +223,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
   const showSortWorkDocumentArea = !!openDocumentKey;
 
-  //******************************* Handle Debug View ***************************************
+  //******************************* Handle Debug View *************************************************
   const renderDebugView = () => {
     //returns a list lf all documents (unsorted)
     return filteredDocsByType.map((doc, idx) => {

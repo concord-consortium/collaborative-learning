@@ -26,24 +26,16 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const [chatPanelTitle, setChatPanelTitle] = useState("Comments");
   const document = useDocumentOrCurriculumMetadata(focusDocument);
   const content = useCurriculumOrDocumentContent(focusDocument);
-
   const ordering = content?.getTilesInDocumentOrder();
   const { data: comments } = useDocumentComments(focusDocument);
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
   const documentComments = comments?.filter(comment => comment.tileId == null);
   const allTileComments = comments?.filter(comment=> comment.tileId != null);
-  // console.log("📁 chat-panel.tsx ------------------------");
-  // console.log("\t🥩 content:", content);
-  // console.log("\t🥩 documentComments:", documentComments);
   const commentsInDocumentOrder = ordering && allTileComments
     ? allTileComments.sort((a: any, b: any) => ordering.indexOf(a.tileId) - ordering.indexOf(b.tileId))
     : [];
   const postedComments = documentComments?.concat(commentsInDocumentOrder);
-
-  // console.log("\t🥩 postedComments:", postedComments);
   const commentThreads = makeChatThreads(postedComments, content);
-
-  // console.log("\t🥩 commentThreads:", commentThreads );
   const postCommentMutation = usePostDocumentComment();
 
   const postComment = useCallback((comment: string, tags?: string[]) => {
