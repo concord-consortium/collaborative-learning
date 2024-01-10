@@ -15,8 +15,8 @@ import { IAxisModel, INumericAxisModel } from "../../../graph/imports/components
 import { curveBasis, setNiceDomain } from "../../../graph/utilities/graph-utils";
 import { SharedVariables } from "../../shared-variables";
 import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
-import { Point } from "../../../graph/graph-types";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
+import { isFiniteNumber } from "../../../../utilities/math-utils";
 
 import "../../../graph/adornments/plotted-function/plotted-function-adornment-component.scss";
 import "./plotted-variables.scss";
@@ -54,23 +54,48 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   const plottedFunctionRef = useRef<SVGGElement>(null);
   const smm = getSharedModelManager(graphModel);
   const sharedVariables = tile && smm?.isReady && smm.findFirstSharedModelByType(SharedVariables, tile.id);
+  const textHeight = 12;
+  const padding = 4;
+  const offsetFromPoint = 14;
+  const highlightStrokeWidth = 5;
+  const labelRectHeight = textHeight + 2 * padding;
+  const labelFormat = format('.3~r');
 
+  // Set the positions of the point-related SVG objects and the contents of the label when the variable value changes.
+  const positionPointMarkers = useCallback((xValue: number, yValue: number,
+      xPos: number, yPos: number,
+      point: Selection<SVGCircleElement, unknown, null, undefined>,
+      pointHighlight: Selection<SVGCircleElement, unknown, null, undefined>,
+      labelRect: Selection<SVGRectElement, unknown, null, undefined>,
+      labelText: Selection<SVGTextElement, unknown, null, undefined>) => {
+    point
+        .attr('cx', xPos)
+        .attr('cy', yPos);
+    pointHighlight
+        .attr('cx', xPos)
+        .attr('cy', yPos);
+    const label = `${labelFormat(xValue)}, ${labelFormat(yValue)}`;
+    labelText
+      .attr('x', xPos)
+      .attr('y', yPos - offsetFromPoint - padding - 2) // up 2px to account for borders
+      .text(label);
+    const labelWidth = labelText.node()?.getComputedTextLength() || 0;
+      labelRect
+        .attr('x', xPos - labelWidth / 2 - padding)
+        .attr('y', yPos - offsetFromPoint - labelRectHeight)
+        .attr('width', labelWidth + padding * 2);
+  }, [labelFormat, labelRectHeight]);
+
+  // Assign a new value to the Variable based on the given pixel position
+  const setVariableValue = useCallback((variable: VariableType, position: number) => {
+    const newValue = model.valueForPosition(position, xScale, xCellCount);
+    if (isFiniteNumber(newValue)) {
+      variable.setValue(newValue);
+    }
+  }, [model, xCellCount, xScale]);
+
+  // Draw the variable traces
   const addPath = useCallback(() => {
-
-    const dragPoint = (point: Selection<SVGCircleElement, unknown, null, undefined>,
-      tPoints: Point[],
-      event: MouseEvent) => {
-      const { x: newX } = event;
-      const newY = tPoints[Math.round(newX)].y;
-      if (newX && newY) {
-        point.attr('cx', newX).attr('cy', newY);
-      }
-    };
-
-    const setVariableValueFromDragPosition = (variable: VariableType, event: MouseEvent) => {
-      variable.setValue(model.valueForPoint(event.x, xScale, xCellCount));
-    };
-
     const xMin = xScale.domain()[0];
     const xMax = xScale.domain()[1];
     const tPixelMin = xScale(xMin);
@@ -88,8 +113,8 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         const selection = select(plottedFunctionRef.current);
         const traceGroup = selection.append("g")
           .attr("class", 'plotted-variable')
-          .on('mouseover', function(d, i) { this.classList.add('selected'); })
-          .on('mouseout', function(d, i) { this.classList.remove('selected'); });
+          .on('mouseover', function(d, i) { this.classList.add('hovered'); })
+          .on('mouseout', function(d, i) { this.classList.remove('hovered'); });
 
         // Highlight of line (visible on mouseover)
         traceGroup.append('path')
@@ -101,63 +126,63 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
           .attr('stroke', graphModel.getColorForId(instanceKey))
           .attr('d', path);
         if (values) {
-          const x = model.pointPosition(values.x, xScale, xCellCount),
-            y = model.pointPosition(values.y, yScale, yCellCount),
-            textHeight = 12,
-            padding = 4,
-            offsetFromPoint = 14,
-            highlightStrokeWidth = 5,
-            labelFormat = format('.3~r'),
-            label = `${labelFormat(values.x)}, ${labelFormat(values.y)}`;
+          const x = model.positionForValue(values.x, xScale, xCellCount),
+            y = model.positionForValue(values.y, yScale, yCellCount);
           // Highlight for value marker
-          traceGroup.append('circle')
+          const pointHighlight = traceGroup.append('circle')
             .attr('class', 'plotted-variable-highlight plotted-variable-highlight-value')
             .attr('r', graphModel.getPointRadius() + highlightStrokeWidth/2)
-            .attr('stroke-width', highlightStrokeWidth)
-            .attr('cx', x)
-            .attr('cy', y);
+            .attr('stroke-width', highlightStrokeWidth);
           // Value marker circle
           const point = traceGroup.append('circle')
             .attr('class', 'plotted-variable-value')
             .attr('r', graphModel.getPointRadius())
             .attr('stroke', graphModel.getColorForId(instanceKey))
-            .attr('fill', '#fff')
-            .attr('cx', x)
-            .attr('cy', y);
+            .attr('fill', '#fff');
           // Value label background
-          const labelRectHeight = textHeight + 2 * padding;
           const labelRect = traceGroup.append('rect')
             .attr('class', 'plotted-variable-highlight plotted-variable-labelbox')
-            .attr('y', y - offsetFromPoint - labelRectHeight)
             .attr('rx', labelRectHeight / 2)
             .attr('ry', labelRectHeight / 2)
             .attr('height', labelRectHeight);
           // Value label
           const valueLabel = traceGroup.append('text')
             .attr('class', 'plotted-variable-highlight plotted-variable-label')
-            .attr('text-anchor', 'middle')
-            .attr('x', x)
-            .attr('y', y - offsetFromPoint - padding - 2) // up 2px to account for borders
-            .text(label);
-          // Go back and size value label background rectangle to fit nicely under the label
-          const labelWidth = valueLabel.node()?.getComputedTextLength() || 0;
-          labelRect
-            .attr('width', labelWidth + padding * 2)
-            .attr('x', x - labelWidth / 2 - padding);
+            .attr('text-anchor', 'middle');
+          positionPointMarkers(values.x, values.y, x, y,
+            point, pointHighlight, labelRect, valueLabel);
 
+          // Set up drag handling for point if needed
           if (!readOnly && sharedVariables && plottedVar.xVariableId) {
             const variable = sharedVariables.getVariableById(plottedVar.xVariableId);
+            let currentX = x;
             if (variable) {
               point
                 .call(drag<SVGCircleElement, unknown>()
-                  .on('drag', (e) => dragPoint(point, tPoints, e))
-                  .on('end', (e) => setVariableValueFromDragPosition(variable, e)));
+                  .on('start', (e) => traceGroup.classed('dragging', true))
+                  .on('drag', (e) => {
+                    const newX = Math.round(e.x);
+                    if (newX < tPixelMin || newX > tPixelMax) return;
+                    const newY = tPoints[newX].y;
+                    const xValue = model.valueForPosition(newX, xScale, xCellCount);
+                    const yValue = model.valueForPosition(newY, yScale, yCellCount);
+                    if (xValue && yValue) {
+                      currentX = newX;
+                      positionPointMarkers(xValue, yValue, newX, newY,
+                        point, pointHighlight, labelRect, valueLabel);
+                    }
+                  })
+                  .on('end', (e) => {
+                    traceGroup.classed('dragging', false);
+                    setVariableValue(variable, currentX);
+                  }));
             }
           }
         }
       }
     }
-  }, [graphModel, model, readOnly, sharedVariables, xCellCount, xScale, yCellCount, yScale]);
+  }, [xScale, model, xCellCount, yCellCount, yScale, graphModel, labelRectHeight,
+      positionPointMarkers, readOnly, sharedVariables, setVariableValue]);
 
   // Add the lines and their associated covers and labels
   const refreshValues = useCallback(() => {

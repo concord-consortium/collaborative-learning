@@ -6,7 +6,7 @@ g.plotted-variable {
     opacity: 0;
   }
 
-  &.selected {
+  &.hovered, &.dragging {
     .plotted-variable-highlight {
       opacity: 1;
     }
