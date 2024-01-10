@@ -48,7 +48,8 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   );
   const enabled = !readOnly && !!board && !!actionHandlers;
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled, onRegisterTileApi, onUnregisterTileApi });
-  const { isLinkEnabled, showLinkTileDialog } = useProviderTileLinking({ model, readOnly });
+  const { isLinkEnabled, showLinkTileDialog }
+    = useProviderTileLinking({ model, readOnly, sharedModelTypes: [ "SharedDataSet" ] });
   // We must listen for pointer events because we want to get the events before
   // JSXGraph, which appears to listen to pointer events on browsers that support them.
   // We must listen for mouse events because some browsers (notably Safari) don't

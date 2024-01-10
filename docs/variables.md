@@ -28,6 +28,9 @@ Much like the Text Tile, `VariableChip`s are available in the Drawing Tile when 
 #### Variable Dialogs
 While users often use the Diagram Tile to create and modify variables, there are two dialogs which let users create and modify variables via the toolbars of Text and Drawing Tiles when they are set up properly.
 
+#### Graph Tile
+The graph tile uses a `PlottedVariablesAdornment` to display functions of variables in terms of each other. This allows students to visualize the relationships between different variables. A corresponding `MultiLegendPart` is also registered with the graph tile when the `PlottedVariablesAdornment` is included.
+
 ### Case 2: Simulations and the Simulator Tile
 The second use case involves premade simulations, which users access through Simulator Tiles. Here, the `SharedVariable` model starts with built in variables defined by a developer, and the user generally does not add additional variables or directly modify variables. Instead, the user uses a Dataflow Tile to import data from certain variables into sensor nodes, modifies the data via a dataflow program, then sends values to output variables via live output nodes.
 

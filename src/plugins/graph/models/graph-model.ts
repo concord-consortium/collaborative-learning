@@ -4,7 +4,7 @@ import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, 
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { IAdornmentModel } from "../adornments/adornment-models";
-import {AxisPlace} from "../imports/components/axis/axis-types";
+import { AxisPlace } from "../imports/components/axis/axis-types";
 import {
   AxisModelUnion, EmptyAxisModel, IAxisModelUnion, NumericAxisModel
 } from "../imports/components/axis/models/axis-model";
@@ -13,6 +13,7 @@ import {
   GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType,
   PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
 } from "../graph-types";
+import { withoutUndo } from "../../../models/history/without-undo";
 import { SharedModelType } from "../../../models/shared/shared-model";
 
 import { AppConfigModelType } from "../../../models/stores/app-config-model";
@@ -20,16 +21,17 @@ import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-co
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import {
-  defaultBackgroundColor, defaultPointColor, defaultStrokeColor, kellyColors
+  clueGraphColors, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
 } from "../../../utilities/color-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
 import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
 import { isSharedCaseMetadata, SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
-import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel, IGraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
 import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-model";
+import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
+import { multiLegendParts } from "../components/legend/legend-registration";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -58,6 +60,8 @@ export const GraphModel = TileContentModel
     plotType: types.optional(types.enumeration([...PlotTypes]), "casePlot"),
     layers: types.array(GraphLayerModel /*, () => GraphLayerModel.create() */),
     // Visual properties
+    // A map from IDs (which can refer to anything) to indexes to an array of colors
+    _idColors: types.map(types.number),
     _pointColors: types.optional(types.array(types.string), [defaultPointColor]),
     _pointStrokeColor: defaultStrokeColor,
     pointStrokeSameAsFill: false,
@@ -104,6 +108,24 @@ export const GraphModel = TileContentModel
         }));
       }
       return all;
+    },
+    get nextColor() {
+      const colorCounts: Record<number, number> = {};
+      self._idColors.forEach(index => {
+        if (!colorCounts[index]) colorCounts[index] = 0;
+        colorCounts[index]++;
+      });
+      const usedColorIndices = Object.keys(colorCounts).map(index => Number(index));
+      if (usedColorIndices.length < clueGraphColors.length) {
+        // If there are unused colors, return the index of the first one
+        return Object.keys(clueGraphColors).map(index => Number(index))
+          .filter(index => !usedColorIndices.includes(index))[0];
+      } else {
+        // Otherwise, use the next minimally used color's index
+        const counts = usedColorIndices.map(index => colorCounts[index]);
+        const minCount = Math.min(...counts);
+        return usedColorIndices.find(index => colorCounts[index] === minCount) ?? 0;
+      }
     }
   }))
   .views(self => ({
@@ -111,7 +133,7 @@ export const GraphModel = TileContentModel
       if (plotIndex < self._pointColors.length) {
         return self._pointColors[plotIndex];
       } else {
-        return kellyColors[plotIndex % kellyColors.length];
+        return clueGraphColors[plotIndex % clueGraphColors.length].color;
       }
     },
     get pointColor() {
@@ -152,9 +174,12 @@ export const GraphModel = TileContentModel
      * Return list of all values for attributes of the given role across all layers.
      */
     numericValuesForAttrRole(role: GraphAttrRole): number[] {
-      const allValues: number[] = [];
-      return self.layers.reduce((acc: number[], layer) => {
+      let allValues: number[] = [];
+      allValues = self.layers.reduce((acc: number[], layer) => {
         return acc.concat(layer.config.numericValuesForAttrRole(role));
+      }, allValues);
+      return self.adornments.reduce((acc: number[], adornment) => {
+        return acc.concat(adornment.numericValuesForAttrRole(role));
       }, allValues);
     },
     /**
@@ -269,11 +294,6 @@ export const GraphModel = TileContentModel
       return objects;
     }
   }))
-  .views(self => tileContentAPIViews({
-    get contentTitle() {
-      return self.layers[0].config.dataset?.name;
-    }
-  }))
   .actions(self => ({
     afterCreate() {
       this.createDefaultLayerIfNeeded();
@@ -287,9 +307,15 @@ export const GraphModel = TileContentModel
         self.layers.push(initialLayer);
         initialLayer.configureUnlinkedLayer();
       }
-    },
+    }
   }))
   .actions(self => ({
+    removeColorForId(id: string) {
+      self._idColors.delete(id);
+    },
+    setColorForId(id: string, colorIndex?: number) {
+      self._idColors.set(id, colorIndex ?? self.nextColor);
+    },
     setAxis(place: AxisPlace, axis: IAxisModelUnion) {
       self.axes.set(place, axis);
     },
@@ -406,6 +432,22 @@ export const GraphModel = TileContentModel
       for (const layer of self.layers) {
         layer.clearAutoAssignedAttributes();
       }
+    },
+    setColorForIdWithoutUndo(id: string, colorIndex: number) {
+      withoutUndo();
+      self.setColorForId(id, colorIndex);
+    }
+  }))
+  .views(self => ({
+    getColorForId(id: string) {
+      const colorIndex = self._idColors.get(id);
+      if (colorIndex === undefined) return "#000000";
+      return clueGraphColors[colorIndex % clueGraphColors.length].color;
+    },
+    getColorNameForId(id: string) {
+      const colorIndex = self._idColors.get(id);
+      if (colorIndex === undefined) return "black";
+      return clueGraphColors[colorIndex % clueGraphColors.length].name;
     }
   }))
   .actions(self => ({
@@ -417,6 +459,9 @@ export const GraphModel = TileContentModel
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       const smm = getSharedModelManager(self);
       if (!smm || !smm.isReady) return;
+
+      graphSharedModelUpdateFunctions.forEach(func => func(self as IGraphModel, smm));
+
       const sharedDataSets = smm.getTileSharedModelsByType(self, SharedDataSet);
       if (!sharedDataSets) {
         console.warn("Unable to query for shared datasets");
@@ -520,6 +565,22 @@ export const GraphModel = TileContentModel
           }
         ));
       }
+
+      // Automatically asign colors to anything that might need them.
+      addDisposer(self, reaction(
+        () => {
+          let ids: string[] = [];
+          multiLegendParts.forEach(part => ids = ids.concat(part.getLegendIdList(self)));
+          return ids;
+        },
+        (ids) => {
+          ids.forEach(id => {
+            if (!self._idColors.has(id)) {
+              self.setColorForIdWithoutUndo(id, self.nextColor);
+            }
+          });
+        }
+      ));
     },
     setDataConfigurationReferences() {
       // Updates pre-existing DataConfiguration objects that don't have the now-required references
@@ -569,6 +630,7 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
                           ? NumericAxisModel.create({place: "left", min, max})
                           : EmptyAxisModel.create({place: "left"});
   const createdGraphModel = GraphModel.create({
+    plotType: emptyPlotIsNumeric ? "scatterPlot" : "casePlot",
     axes: {
       bottom: bottomAxisModel,
       left: leftAxisModel
@@ -582,6 +644,7 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
     const cLines = ConnectingLinesModel.create();
     createdGraphModel.showAdornment(cLines);
   }
+
   return createdGraphModel;
 }
 
@@ -597,4 +660,11 @@ export function isGraphVisualPropsAction(action: ISerializedActionCall): action 
 
 export function isGraphModel(model?: ITileContentModel): model is IGraphModel {
   return model?.type === kGraphTileType;
+}
+
+type GraphSharedModelUpdateFunction = (graphModel: IGraphModel, sharedModelManager: ISharedModelManager) => void;
+const graphSharedModelUpdateFunctions: GraphSharedModelUpdateFunction[] = [];
+
+export function registerGraphSharedModelUpdateFunction(func: GraphSharedModelUpdateFunction) {
+  graphSharedModelUpdateFunctions.push(func);
 }

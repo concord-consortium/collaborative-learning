@@ -283,14 +283,15 @@ context('Table Tool Tile', function () {
     tableToolTile.typeInTableCell(5, '4');
     tableToolTile.typeInTableCell(6, '7');
     clueCanvas.clickToolbarButton('table', 'link-graph');
-    tableToolTile.getLinkGraphModalCreateNewButton().click();
+    tableToolTile.getLinkGraphModalTileMenu().select('New Graph');
+    tableToolTile.getLinkGraphModalLinkButton().should("contain", "Graph It!").click();
     xyplot.getTile().should("exist").contains("Table 1");
 
     cy.log('can unlink and link data from a table using the "Link Table" button');
     // Unlink
     clueCanvas.clickToolbarButton('table', 'link-tile');
     tableToolTile.getLinkGraphModalTileMenu().select('Table 1');
-    tableToolTile.getLinkGraphModalLinkButton().should("contain", "Unlink").click();
+    tableToolTile.getLinkGraphModalLinkButton().should("contain", "Clear It!").click();
     // Re-link
     clueCanvas.clickToolbarButton('table', 'link-tile');
     tableToolTile.getLinkGraphModalTileMenu().select('Table 1');
