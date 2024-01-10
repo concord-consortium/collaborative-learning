@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
-import { useStores, usePersistentUIStore, useAppConfig } from "../../hooks/use-stores";
+import { useStores, usePersistentUIStore } from "../../hooks/use-stores";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
@@ -105,8 +105,11 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
       const ct = idx + 1;
       return (
         <pre key={idx} style={{ margin: "0px", padding: "0px", fontSize: "10px" }}>
-          {ct < 10 && " "}{ct} | {doc.title?.slice(0, 20) || "                    "}
-          | {doc.key} | {doc.type} | {doc.uid}
+          {ct < 10 && " "}{ct}
+          | {doc.key}&nbsp;
+          | {doc.type}{' '.repeat(12 - doc.type.length)}
+          | {doc.uid}{' '.repeat(5 - doc.uid.length)}
+          | {doc.title?.slice(0, 20)}
         </pre>
       );
     });
