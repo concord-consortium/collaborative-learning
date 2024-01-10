@@ -91,5 +91,132 @@ These properties are configurable at the unit, investigation, or problem levels 
   defaultDocumentTemplate?: IAuthoredDocumentContent;
   placeholderText: string;
   stamps: SnapshotIn<typeof StampModel>[];
+  // See next section for what can go in 'settings'
   settings: SnapshotIn<typeof SettingsMstType>;
 ```
+
+### Settings properties
+
+Settings is primarily concerned with configuring each tile type,
+plus there is a section to configure dataset options.
+Some settings are available for all tile types, others are specific to the tile.
+
+All tile types that have been migrated to the common toolbar framework support a `tools` option, in which you can list the buttons that should appear on the tile toolbar, in order. You can also specify separators that are drawn between buttons in the toolbar by including the string `"|"` at the appropriate position(s) in the list.
+
+#### Dataset
+
+Under 'dataset', there is one option:
+
+- `cellsSelectCases`: boolean
+
+#### Data Deck
+
+Not updated to common toolbar framework. However, supports toolbar configuration in a similar manner. Default buttons:
+`["duplicate", "link-tile", "link-graph", "merge-in",
+  ["data-set-view", "Table"], "image-upload", "delete-attribute"]`
+
+#### Dataflow
+
+(no toolbar?)
+
+#### Diagram
+
+- `maxTiles`: number
+
+Common toolbar framework. Supports and defaults to the following toolbar buttons:
+
+- `new-variable`
+- `insert-variable`
+- `edit-variable`
+- `zoom-in`
+- `zoom-out`
+- `fit-view`
+- `toggle-lock`
+- `toggle-navigator`
+- `delete`
+
+#### Drawing
+
+Not updated to common toolbar framework. However, supports toolbar configuration in a similar manner. Default buttons:
+`["select", "line", "vector", "rectangle", "ellipse",
+  "stamp", "stroke-color", "fill-color", "text", "image-upload", "group", "ungroup", "duplicate", "delete"]`
+
+In addition, if shared variables are configured, adds additional buttons:
+
+- `new-variable`
+- `insert-variable`
+- `edit-variable`
+
+#### Expression
+
+(Custom toolbar implementation?)
+
+#### Geometry (Shapes Graph)
+
+Not updated to common toolbar framework and does not support toolbar configuration.
+
+#### Graph
+
+- `autoAssignAttributes`: boolean, default true
+- `connectPointsByDefault`: boolean, default true
+- `defaultSeriesLegend`: boolean, default true
+- `defaultAxisLabels`: { "bottom": "x", "left": "y" }, default none
+- `disableAttributeDnD`: boolean, default true
+- `emptyPlotIsNumeric`: boolean, default true
+- `scalePlotOnValueChange`: boolean, default true
+
+Common toolbar framework; default toolbar buttons:
+
+- `link-tile` (opens dialog to replace dataset with a new one)
+- `fit-all` (rescale axes to fit all points in view)
+
+Also available:
+
+- `link-tile-multiple` (opens dialog to add an additional dataset or link variables)
+
+#### Image
+
+Not updated to common toolbar framework and does not support toolbar configuration.
+
+#### Numberline
+
+Not updated to common toolbar framework. However, supports toolbar configuration in a similar manner. Default buttons: `["place-point", "clear-points", "delete-points"]`
+
+#### Simulation
+
+- `defaultSimulation`: string
+- `maxTiles`: int
+
+(no toolbar)
+
+#### Table
+
+- `numFormat`: string (A D3 format specification)
+
+Common toolbar framework; default toolbar buttons:
+
+- `set-expression`
+- `link-tile`
+- `link-graph`
+- `merge-in`
+- `["data-set-view", "DataCard"]`
+- `delete`
+
+#### Text
+
+Common toolbar framework; default buttons:
+
+- `bold`
+- `italic`
+- `underline`
+- `subscript`
+- `superscript`
+- `list-ol`
+- `list-ul`
+- `link`
+
+Additionally these buttons are supported and can be added to the toolbar if the configuration makes use of shared variables:
+
+- `new-variable`
+- `insert-variable`
+- `edit-variable`
