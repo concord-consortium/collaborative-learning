@@ -58,6 +58,9 @@ export const SharedVariables = SharedModel.named("SharedVariables")
   },
   getVariables() {
     return self.variables;
+  },
+  getVariableById(id: string) {
+    return self.variables.find(v => v.id === id);
   }
 }));
 export interface SharedVariablesType extends Instance<typeof SharedVariables> {}

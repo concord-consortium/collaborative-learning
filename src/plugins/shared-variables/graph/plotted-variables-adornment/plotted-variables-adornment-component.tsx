@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
-import { format, select } from "d3";
+import { drag, format, select, Selection } from "d3";
 import { observer } from "mobx-react-lite";
+import { VariableType } from "@concord-consortium/diagram-view";
 
 import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
@@ -14,6 +15,8 @@ import { IAxisModel, INumericAxisModel } from "../../../graph/imports/components
 import { curveBasis, setNiceDomain } from "../../../graph/utilities/graph-utils";
 import { SharedVariables } from "../../shared-variables";
 import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
+import { Point } from "../../../graph/graph-types";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 
 import "../../../graph/adornments/plotted-function/plotted-function-adornment-component.scss";
 import "./plotted-variables.scss";
@@ -33,6 +36,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   const { tile } = useTileModelContext();
   const graphModel = useGraphModelContext();
   const dataConfig = useDataConfigurationContext();
+  const readOnly = useReadOnlyContext();
   const layout = useAxisLayoutContext();
   const xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType;
   const yScale = layout.getAxisScale("left") as ScaleNumericBaseType;
@@ -52,6 +56,21 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   const sharedVariables = tile && smm?.isReady && smm.findFirstSharedModelByType(SharedVariables, tile.id);
 
   const addPath = useCallback(() => {
+
+    const dragPoint = (point: Selection<SVGCircleElement, unknown, null, undefined>,
+      tPoints: Point[],
+      event: MouseEvent) => {
+      const { x: newX } = event;
+      const newY = tPoints[Math.round(newX)].y;
+      if (newX && newY) {
+        point.attr('cx', newX).attr('cy', newY);
+      }
+    };
+
+    const setVariableValueFromDragPosition = (variable: VariableType, event: MouseEvent) => {
+      variable.setValue(model.valueForPoint(event.x, xScale, xCellCount));
+    };
+
     const xMin = xScale.domain()[0];
     const xMax = xScale.domain()[1];
     const tPixelMin = xScale(xMin);
@@ -98,10 +117,10 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
             .attr('cx', x)
             .attr('cy', y);
           // Value marker circle
-          traceGroup.append('circle')
+          const point = traceGroup.append('circle')
             .attr('class', 'plotted-variable-value')
             .attr('r', graphModel.getPointRadius())
-            .attr('stroke', (data) => graphModel.getColorForId(instanceKey))
+            .attr('stroke', graphModel.getColorForId(instanceKey))
             .attr('fill', '#fff')
             .attr('cx', x)
             .attr('cy', y);
@@ -125,10 +144,20 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
           labelRect
             .attr('width', labelWidth + padding * 2)
             .attr('x', x - labelWidth / 2 - padding);
+
+          if (!readOnly && sharedVariables && plottedVar.xVariableId) {
+            const variable = sharedVariables?.getVariableById(plottedVar.xVariableId);
+            if (variable) {
+              point
+                .call(drag<SVGCircleElement, unknown>()
+                  .on('drag', (e) => dragPoint(point, tPoints, e))
+                  .on('end', (e) => setVariableValueFromDragPosition(variable, e)));
+            }
+          }
         }
       }
     }
-  }, [graphModel, model, xCellCount, xScale, yCellCount, yScale]);
+  }, [graphModel, model, readOnly, sharedVariables, xCellCount, xScale, yCellCount, yScale]);
 
   // Add the lines and their associated covers and labels
   const refreshValues = useCallback(() => {

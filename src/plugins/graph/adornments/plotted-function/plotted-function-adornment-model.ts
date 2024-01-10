@@ -80,6 +80,18 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
       }
       dispose?.();
       return tPoints;
+    },
+    /**
+     * Calculate the pixel position of a value given the axis scale and number of cells
+     */
+    pointPosition(value: number, scale: ScaleNumericBaseType, cellCount: number) {
+      return (scale(value) / cellCount);
+    },
+    /**
+     * Calculate the value given a pixel position; inverse of `pointPosition`.
+     */
+    valueForPoint(position: number, scale: ScaleNumericBaseType, cellCount: number) {
+      return scale.invert(position * cellCount);
     }
   }));
 
