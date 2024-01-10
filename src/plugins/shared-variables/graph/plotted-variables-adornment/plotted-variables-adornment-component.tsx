@@ -146,7 +146,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
             .attr('x', x - labelWidth / 2 - padding);
 
           if (!readOnly && sharedVariables && plottedVar.xVariableId) {
-            const variable = sharedVariables?.getVariableById(plottedVar.xVariableId);
+            const variable = sharedVariables.getVariableById(plottedVar.xVariableId);
             if (variable) {
               point
                 .call(drag<SVGCircleElement, unknown>()
