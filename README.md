@@ -199,25 +199,23 @@ Note that currently, some of the jest tests (notably `db.test.ts`) and many of t
 
 There are a number of URL parameters that can aid in testing:
 
-|Parameter  |Value(s)                  |Description|
-|-----------|--------------------------|-----------|
-|`appMode`  |`dev`, `qa`, `test`       |Unsecured modes that are partitioned off from authenticated sections of the database.|
-|`unit`     |`sas`, `msa`, etc.        |Abbreviated code or URL for the curriculum unit.|
-|`problem`  |`2.1`, `3.2`, etc.        |Reference to individual problem in curriculum unit.|
-|`demo`     |none                      |Launches demo creator UI|
-|`demoName` |string (default: `CLUE`)  |Used to partition the demo portion of the database.|
-|`network`  |string                    |Specify the network with which a teacher user is affiliated.|
-|`fakeClass`|string                    |Class id for demo, qa, or test modes.|
-|`fakeUser` |`(student\|teacher):<id>` |Configure user type and (optionally) id.|
-|`qaGroup`  |string                    |Group id for qa, e.g. automated tests.|
-|`qaClear`  |`all`, `class`, `offering`|Extent of database clearing for automated tests.|
-|`firebase` |`emulator` (for default) or `host:port`|Target emulator for firebase realtime database calls.|
-|`firestore`|`emulator` (for default) or `host:port`|Target emulator for firestore database calls.|
-|`functions`|`emulator` (for default) or `host:port`|Target emulator-hosted firebase functions.|
-|`noPersistentUI`|none                  |Do not initialize persistent ui store.|
+|Parameter       |Value(s)                 |Description|
+|----------------|-------------------------|-----------|
+|`appMode`       |`dev`, `qa`, `test`      |Unsecured modes that are partitioned off from authenticated sections of the database.|
+|`unit`          |`sas`, `msa`, etc.       |Abbreviated code or URL for the curriculum unit.|
+|`problem`       |`2.1`, `3.2`, etc.       |Reference to individual problem in curriculum unit.|
+|`demo`          |none                     |Launches demo creator UI|
+|`demoName`      |string (default: `CLUE`) |Used to partition the demo portion of the database.|
+|`network`       |string                   |Specify the network with which a teacher user is affiliated.|
+|`fakeClass`     |string                   |Class id for demo, qa, or test modes.|
+|`fakeUser`      |`(student\|teacher):<id>`|Configure user type and (optionally) id.|
+|`qaGroup`       |string                   |Group id for qa, e.g. automated tests.|
+|`qaClear`       |`all\|class\|offering`   |Extent of database clearing for automated tests.|
+|`firebase`      |`emulator\|<URL>`        |Target emulator for firebase realtime database calls.|
+|`firestore`     |`emulator\|<URL>`        |Target emulator for firestore database calls.|
+|`functions`     |`emulator\|<URL>`        |Target emulator-hosted firebase functions.|
+|`noPersistentUI`|none                     |Do not initialize persistent ui store.|
 
-  // do not use persistentUI in some cy tests that rely on demo
-  ?: boolean;
 The `unit` parameter can be in 3 forms:
 - a valid URL starting with `https:` or `http:` will be treated as an absolute URL.
 - a string starting with `./` will be treated as a URL relative to the current page in the browser.
@@ -225,6 +223,8 @@ The `unit` parameter can be in 3 forms:
   - `curriculumBaseUrl` defaults to `https://models-resources.concord.org/clue-curriculum`.
   - `branchName` defaults to `main`.
   - To find out more about customizing these values look at `app-config-model.ts`.
+
+The `firebase`, `firestore`, and `functions` params can take an `emulator` value which will make CLUE use the default host and port for the emulator of that service. Alternatively you can pass a URL like `http://localhost:1234` for the emulated service.
 
 ### Standalone Document Editor
 
