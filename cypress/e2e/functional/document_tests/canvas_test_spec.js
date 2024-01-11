@@ -22,7 +22,8 @@ let renameTitlePencil = "Renamed Title pencil";
 
 const queryParams1 = `${Cypress.config("queryParams")}`;
 const queryParams2 = "?appMode=qa&fakeClass=5&fakeUser=student:5&fakeOffering=5&problem=3.3&qaGroup=5&unit=example-no-group-share";
-const queryParams3 = "?appMode=demo&demoName=BrokenDocs&fakeClass=1&fakeUser=student:1&unit=sas&problem=0.1";
+const queryParams3 = "?appMode=qa&fakeClass=5&fakeUser=student:5&fakeOffering=5&qaGroup=5&unit=example-config-subtabs";
+const queryParams4 = "?appMode=demo&demoName=BrokenDocs&fakeClass=1&fakeUser=student:1&unit=sas&problem=0.1";
 
 const title = "SAS 2.1 Drawing Wumps";
 
@@ -53,7 +54,7 @@ context('Test Canvas', function () {
     canvas.createNewExtraDocumentFromFileMenu(studentWorkspace, "my-work");
     canvas.getEditTitleIcon().should('be.visible');
     canvas.getPersonalPublishIcon().should('be.visible');
-    clueCanvas.getShareButton().should('be.visible');
+    clueCanvas.getShareButton().should('not.exist');
     clueCanvas.getFourUpViewToggle().should('not.exist');
 
     cy.log('Test personal workspace canvas');
@@ -396,10 +397,16 @@ context('Test Canvas', function () {
     cy.log("verify publish button is not visible when publish is disabled");
     cy.get(".icon-button.icon-publish").should("not.exist");
 
+    cy.log("Share button visible on personal docs, only when sort-work tab is visible");
+    beforeTest(queryParams3);
+    canvas.createNewExtraDocumentFromFileMenu(studentWorkspace, "my-work");
+    canvas.getEditTitleIcon().should('be.visible');
+    clueCanvas.getShareButton().should('be.visible');
+
     // This is using an intentionally broken document.
     // Info about this document can be found here: src/test-fixtures/broken-doc-content.md
     cy.log("Canvas document error test");
-    beforeTest(queryParams3);
+    beforeTest(queryParams4);
 
     cy.log("verify an error message is shown");
     cy.get('[data-test="document-title"]').should("contain", "0.1 Intro to CLUE");
