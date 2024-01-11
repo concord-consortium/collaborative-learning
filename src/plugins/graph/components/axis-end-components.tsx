@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import React, { useState, useRef, useEffect, CSSProperties } from 'react';
-import { kAxisStrokeWidth, kAxisTickLength, kAxisTickPadding } from '../graph-types';
+import { kAxisStrokeWidth, kAxisTickLength, kAxisTickPadding, kTopAndRightDefaultExtent } from '../graph-types';
 import { AxisPlace } from '../imports/components/axis/axis-types';
 import { useAxisLayoutContext } from '../imports/components/axis/models/axis-layout-context';
 
@@ -47,7 +47,7 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
   const calculateBorderBoxStyles = () => {
     const minWidth = 25;
     const boxHorizontalPadding = 4;
-    const boxFont = "12px sans-serif";
+    const boxFont = "14px sans-serif";
     const textWidth = measureText(value.toString(), boxFont);
     const boxWidth = Math.max(textWidth + 2 * boxHorizontalPadding, minWidth);
 
@@ -58,21 +58,21 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
     // For left axis determine min/max left offset based on axisBounds accounting for boxWidth
     if (axis === 'left') {
       const yTickRightEdgePosition = axisBounds.left + axisBounds.width - kAxisTickLength - kAxisTickPadding;
-      const leftOffset = yTickRightEdgePosition - boxWidth;
+      const leftOffset = yTickRightEdgePosition - boxWidth + boxHorizontalPadding;
       style.left = `${leftOffset}px`;
       const topOffsetMin = axisBounds.height + layout.getDesiredExtent("top") - kEditableBoxHeight / 2;
-      style.top = minOrMax === 'max' ? `0px` : `${topOffsetMin}px`;
+      style.top = minOrMax === 'max' ? `${kTopAndRightDefaultExtent}px` : `${topOffsetMin}px`;
     }
 
     //For bottom axis place min/max under numberline and for min calc left offset
     if (axis === 'bottom') {
-      const xTickTopEdgePosition = axisBounds.top + kAxisTickLength + kAxisTickPadding - 1;
+      const xTickTopEdgePosition = axisBounds.top + kAxisTickLength + kAxisTickPadding - 5;
       style.top = `${xTickTopEdgePosition}px`;
       if (minOrMax === 'min') {
         const leftOffset = axisBounds.left - (boxWidth / 2);
         style.left = `${leftOffset}px`;
       } else {
-        style.right = `0px`;
+        style.right = `${kTopAndRightDefaultExtent}px`;
       }
     }
 
@@ -87,7 +87,7 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
     if (axis === "bottom") {
       style.top = `${axisBounds.top - 7}`;
       if (minOrMax === "min") {
-        style.left = `${axisBounds.left - kAxisTickLength - 5}px`;
+        style.left = `${axisBounds.left - kAxisTickLength - 2}px`;
       } else {
         style.left = `${axisBounds.left + axisBounds.width - 14}px`;
       }
@@ -97,7 +97,7 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
       style.transform = "rotate(-90deg)";
       style.left = `${axisBounds.left + axisBounds.width - 9}`;
       if (minOrMax === "min") {
-        style.top = `${axisBounds.top + axisBounds.height + kAxisTickLength - 11}px`;
+        style.top = `${axisBounds.top + axisBounds.height + kAxisTickLength - 14}px`;
       } else {
         style.top = `${axisBounds.top - 1}px`;
       }
