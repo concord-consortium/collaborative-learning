@@ -23,11 +23,13 @@ g.plotted-variable {
 
   .plotted-variable-value {
     stroke-width: 3;
+    cursor: move;
     pointer-events: all;
   }
 
   .plotted-variable-highlight-value {
     stroke: rgba(20, 244, 158, 0.5);
+    cursor: move;
     pointer-events: all;
   }
 

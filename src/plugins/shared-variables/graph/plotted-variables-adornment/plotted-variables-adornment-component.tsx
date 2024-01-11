@@ -162,6 +162,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
                   .on('start', (e) => traceGroup.classed('dragging', true))
                   .on('drag', (e) => {
                     const newX = Math.round(e.x);
+                    // console.log('drag', e.x);
                     if (newX < tPixelMin || newX > tPixelMax) return;
                     const newY = tPoints[newX].y;
                     const xValue = model.valueForPosition(newX, xScale, xCellCount);
