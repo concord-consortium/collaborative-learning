@@ -202,7 +202,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private showPersonalShareToggle() {
-    const tabNames = this.stores.tabsToDisplay.map(tab => tab.tab);
+    const tabNames = this.stores.appConfig.navTabs.tabSpecs.map(tab => tab.tab);
     return tabNames.includes(ENavTab.kSortWork);
   }
 
