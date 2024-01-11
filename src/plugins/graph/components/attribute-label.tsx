@@ -1,15 +1,21 @@
+import classNames from "classnames";
 import React, {useCallback, /*useEffect,*/ useState} from "react";
 // import {reaction} from "mobx";
 import {observer} from "mobx-react-lite";
 // import {select} from "d3";
 import t from "../imports/utilities/translation/translate";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
+import { defaultFont } from "../../../components/constants";
 import {AttributeType} from "../../../models/data/attribute";
 import {IDataSet} from "../../../models/data/data-set";
 // import {isSetAttributeNameAction} from "../../../models/data/data-set-actions";
-import { GraphPlace, isVertical } from "../imports/components/axis-graph-shared";
-import {graphPlaceToAttrRole, kGraphClassSelector, kGraphPortalClass} from "../graph-types";
+import {
+  graphPlaceToAttrRole, kAxisLabelBorderWidth, kAxisLabelHorizontalPadding, kAxisLabelVerticalPadding,
+  kGraphClassSelector, kGraphPortalClass
+} from "../graph-types";
 import { useGraphModelContext } from "../hooks/use-graph-model-context";
+import { axisGap } from "../imports/components/axis/axis-types";
+import { GraphPlace, isVertical } from "../imports/components/axis-graph-shared";
 import { useGraphLayoutContext } from "../models/graph-layout";
 // import {useTileModelContext} from "../../../components/tiles/hooks/use-tile-model-context";
 import {getStringBounds} from "../imports/components/axis/axis-utils";
@@ -61,19 +67,19 @@ export const AttributeLabel = observer(
         .filter(aName => aName !== '').join(', ');
     }, [dataset, defaultAxisLabels, getAttributeIDs, place, useClickHereCue]);
 
-    const horizontalPadding = 10;
-    const verticalPadding = 5;
     const displayText = getLabel();
     const vertical = isVertical(place);
     const placeBounds = layout.getComputedBounds(place);
-    const stringBounds = getStringBounds(displayText);
-    const boxHeight = stringBounds.height + 2 * verticalPadding;
-    const boxWidth = stringBounds.width + 2 * horizontalPadding;
+    const stringBounds = getStringBounds(displayText, defaultFont);
+    const boxHeight = stringBounds.height + 2 * (kAxisLabelVerticalPadding + kAxisLabelBorderWidth) + 1;
+    const boxWidth = stringBounds.width + 2 * (kAxisLabelHorizontalPadding + kAxisLabelBorderWidth) + 1;
     const height = vertical ? boxWidth : boxHeight;
     const width = vertical ? boxHeight : boxWidth;
-    const x = placeBounds.left + (placeBounds.width - width) / 2;
-    const y = placeBounds.top + (placeBounds.height - height) / 2;
+    const x = place === "left" ? axisGap : placeBounds.left + (placeBounds.width - width) / 2;
+    const y = place === "left" ? placeBounds.top + (placeBounds.height - height) / 2
+      : placeBounds.top + placeBounds.height - height - axisGap;
     const foreignObjectStyle = { height, width, x, y };
+    const divStyle = { height, width };
 
     // const refreshAxisTitle = useCallback(() => {
     //   const labelFont = useClickHereCue ? graphVars.graphEmptyLabelFont : graphVars.graphLabelFont,
@@ -181,8 +187,14 @@ export const AttributeLabel = observer(
     return (
       <>
         <foreignObject {...foreignObjectStyle}>
-          <div className="axis-label" ref={(elt) => setLabelElt(elt)} >
-            {displayText}
+          <div
+            className="axis-label"
+            ref={(elt) => setLabelElt(elt)}
+            style={divStyle}
+          >
+            <div className={classNames({ vertical })} >
+              {displayText}
+            </div>
           </div>
         </foreignObject>
         {/* <g ref={(elt) => setLabelElt(elt)} className={`display-label ${place}`} /> */}

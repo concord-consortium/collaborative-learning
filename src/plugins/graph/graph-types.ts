@@ -88,7 +88,10 @@ export const
   kAxisStrokeWidth = 2,
   kAxisTickLength = 25,
   kAxisTickPadding = 6,
-  kAxisGap = 2;
+  kAxisGap = 2,
+  kAxisLabelHorizontalPadding = 10, // Match .axis-label padding in attribute-label.scss
+  kAxisLabelVerticalPadding = 5, // Match .axis-label padding in attribute-label.scss
+  kAxisLabelBorderWidth = 1.5; // Match .axis-label border in attribute-label.scss
 export const outerCircleSelectedRadius = 10;
 export const outerCircleUnselectedRadius = 0;
 
