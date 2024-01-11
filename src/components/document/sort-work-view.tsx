@@ -171,6 +171,13 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     docKeysFoundWithTag: string[];
   };
 
+  {
+  //   "diverging": {
+  //     tagKey: "diverging"
+  //     tagValue:"Diverging ... (section label)"
+  //   }
+  // }
+
   const tagsWithDocs: Record<string, TagWithDocs> = useMemo(() => {
 
     const initialTags: Record<string, TagWithDocs> = {};
@@ -271,11 +278,12 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     case "Name":
       sortedDocumentsOld = sortedDocuments.sortByName;
 
-      // sortedDocumentsOld = getSortedDocuments(filteredDocsByType, sortBy); //old method for group and name
+      // sortedDocumentsOld = getSortedDocuments(filteredDocsByType, sortBy); //old method for group and name //remove
 
       break;
     case sortTagPrompt:
-      sortedDocumentsOld = convertTagsWithDocsToSortedDocuments(tagsWithDocs);
+      // sortedDocumentsOld = convertTagsWithDocsToSortedDocuments(tagsWithDocs); //remove
+      sortedDocumentsOld = sortedDocuments.sortByStrategy
       break;
   }
 
