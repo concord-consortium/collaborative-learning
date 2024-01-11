@@ -157,7 +157,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
             const variable = sharedVariables.getVariableById(plottedVar.xVariableId);
             let currentX = x;
             if (variable) {
-              point
+              pointHighlight
                 .call(drag<SVGCircleElement, unknown>()
                   .on('start', (e) => traceGroup.classed('dragging', true))
                   .on('drag', (e) => {
