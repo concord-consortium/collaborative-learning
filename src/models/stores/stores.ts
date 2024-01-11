@@ -23,6 +23,7 @@ import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
 import { IBaseStores } from "./base-stores-types";
 import { NavTabModelType } from "../view/nav-tabs";
+import { SortedDocuments } from "./sortable-documents";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -34,6 +35,7 @@ export interface IStores extends IBaseStores {
   setAppMode: (appMode: AppMode) => void;
   initializeStudentWorkTab: () => void;
   setUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
+  sortedDocuments: SortedDocuments;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -47,6 +49,7 @@ export function createStores(params?: ICreateStores): IStores {
   return new Stores(params);
 }
 
+//TODO: doesnt need implements
 class Stores implements IStores{
   appMode: AppMode;
   isPreviewing?: boolean;
@@ -71,7 +74,9 @@ class Stores implements IStores{
   selection: SelectionStoreModelType;
   serialDevice: SerialDevice;
   userContextProvider: UserContextProvider;
+  sortedDocuments: SortedDocuments;
 
+  //TODO: make sure to have makeAutoObservable in constructor
   constructor(params?: ICreateStores){
     // This will mark all properties as observable
     // all getters as computed, all setters as actions
@@ -119,6 +124,7 @@ class Stores implements IStores{
     });
     this.persistentUI.setProblemPath(this.problemPath);
     this.userContextProvider = new UserContextProvider(this);
+    this.sortedDocuments = new SortedDocuments(this); //use new because its a class
   }
 
   get tabsToDisplay() {

@@ -34,6 +34,11 @@ export interface IRequiredDocumentPromise {
   resolve: (document: DocumentModelType | null) => void;
   isResolved: boolean;
 }
+//TODO:
+//stored-documents.ts (in aother file) - its in this stores folder.
+//write it as an Mob X class - stores.ts is an example
+//since Mob x class isn't serializable, MobX model is slower, can't use interfaces, looks slopier
+//mobX class looks cleaner, can use interfaces.
 
 export const DocumentsModel = types
   .model("Documents", {
@@ -290,7 +295,7 @@ export const DocumentsModel = types
     };
 
     const findDocumentOfTile = (tileId: string): DocumentModelType | null => {
-      const parentDocument = self.all.find(document => !!document.content?.tileMap.get(tileId));
+      const parentDocument =  self.all.find(document => !!document.content?.tileMap.get(tileId));
       return parentDocument || null;
     };
 
