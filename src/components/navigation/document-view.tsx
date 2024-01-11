@@ -231,6 +231,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   // PT Story: https://www.pivotaltracker.com/story/show/183416176
   const editButton = (type: string, sClass: {secondary: boolean | undefined; primary: boolean | undefined} | string,
                       document: DocumentModelType) => {
+
     return (
       (type === "my-work") || (type === "learningLog")
         ?

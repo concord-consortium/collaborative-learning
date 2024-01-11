@@ -96,7 +96,7 @@ const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boo
     <>
       {<div className="share-separator" />}
       <ToggleControl className={`share-button ${visibility}`} dataTest="share-button"
-                      initialValue={isShared} onChange={onClick}
+                      value={isShared} onChange={onClick}
                       title={`${isShared ? "Shared: click to unshare from" : "Unshared: click to share to"} group`} />
       <div className="share-label">Share</div>
     </>
@@ -199,6 +199,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const { appConfig: { navTabs } } = this.stores;
     // show the File menu if my work navigation is enabled
     return !!navTabs.getNavTabSpec(ENavTab.kMyWork);
+  }
+
+  private showPersonalShareToggle() {
+    const tabNames = this.stores.appConfig.navTabs.tabSpecs.map(tab => tab.tab);
+    return tabNames.includes(ENavTab.kSortWork);
   }
 
   private renderTitleBar(type: string) {
@@ -360,6 +365,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const displayId = document.getDisplayId(appConfig);
     const hasDisplayId = !!displayId;
     const showFileMenu = this.showFileMenu();
+    const showPersonalShareToggle = this.showPersonalShareToggle();
     return (
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
@@ -391,6 +397,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div className="actions">
           {(!hideButtons || supportStackedTwoUpView) &&
             <div className="actions">
+              {showPersonalShareToggle &&
+                <ShareButton isShared={document.visibility === "public"} onClick={this.handleToggleVisibility} />}
               {supportStackedTwoUpView && isPrimary &&
                 <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
               {supportStackedTwoUpView && isPrimary &&
