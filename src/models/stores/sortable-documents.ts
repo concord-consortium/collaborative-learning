@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { ObservableSet, makeAutoObservable, runInAction } from "mobx";
 import { DocumentModelType } from "../document/document";
 import { isSortableType } from "../document/document-types";
 import { IBaseStores } from "./base-stores-types";
@@ -115,6 +115,12 @@ export class SortedDocuments {
 
   //***************** Sort by Strategy ***********************
 
+  //TODO: optimize query:
+  //look at documents store itself go through that iterate them,,
+  //they'll have key and only query those documents at first.
+  //personal, problem, learning documents.
+  //there should be a function that grabs the uid:#_documentKey;
+
   //---Actions
   updateTagDocumentMap () {
     const db = this.db.firestore;
@@ -124,29 +130,35 @@ export class SortedDocuments {
         const docKey = docData.key;
         const commentsRef = doc.ref.collection("comments"); //access sub collection
         commentsRef.get().then(commentsSnapshot => {
-          commentsSnapshot.forEach(commentDoc => {
-            const commentData = commentDoc.data();
-            if (commentData && commentData.tags) {
-              commentData.tags.forEach((tag: string) => {
-                let docKeysSet = this.tempTagDocumentMap.get(tag);
-                if (!docKeysSet) {
-                  docKeysSet = new Set<string>();
-                  this.tempTagDocumentMap.set(tag, docKeysSet);
-                }
-                docKeysSet.add(docKey); //only unique doc keys will be stored
-              });
-            }
+          runInAction(()=>{
+            commentsSnapshot.forEach(commentDoc => {
+              const commentData = commentDoc.data();
+              if (commentData && commentData.tags) {
+                commentData.tags.forEach((tag: string) => {
+                  let docKeysSet = this.tempTagDocumentMap.get(tag);
+                  if (!docKeysSet) {
+                    docKeysSet = new ObservableSet<string>();
+                    this.tempTagDocumentMap.set(tag, docKeysSet);
+                    // docKeysSet = this.tempTagDocumentMap.get(tag) as Set<string>;
+                  }
+                  // console.log("key added:", docKey, "tag:", tag);
+                  docKeysSet.add(docKey); //only unique doc keys will be stored
+                  console.log("docKeysSet: ", docKeysSet);
+                });
+              }
+            });
+            console.log("tempTagDocumentMap:", this.tempTagDocumentMap);
           });
-          //Update docKeysFoundWithTag property in tagsWithArray
 
         });
       });
       unsubscribeFromDocs();
     });
+
+
   }
 
 
-  //TODO: optimize tagsWithDocs to be a state and initialize it in constructor
   get sortByStrategy(): SortedDocument[]{
     const commentTags = this.commentTags;
     const tagsWithDocs: Record<string, TagWithDocs> = {};
@@ -171,6 +183,9 @@ export class SortedDocuments {
         tagsWithDocs[tag].docKeysFoundWithTag = docKeysArray;
       }
     });
+
+    // console.log("tempTagDocumentMap:", this.tempTagDocumentMap);
+    // console.log("tagsWithDocs:", tagsWithDocs);
     //from convertTagsWithDocsToSortedDocuments
     const sortedDocsArr: SortedDocument[] = [];
 
@@ -184,6 +199,8 @@ export class SortedDocuments {
         documents
       });
     });
+
+    // console.log("sortByStrategy returning: ", sortedDocsArr);
     return sortedDocsArr;
 
   }
