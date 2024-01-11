@@ -93,7 +93,7 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
       }
       dispose?.();
       return tPoints;
-    },
+    }
   }));
 
 export interface IPlottedFunctionAdornmentModel extends Instance<typeof PlottedFunctionAdornmentModel> {}
