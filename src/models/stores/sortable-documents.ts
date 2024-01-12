@@ -124,36 +124,71 @@ export class SortedDocuments {
   //---Actions
   updateTagDocumentMap () {
     const db = this.db.firestore;
-    const unsubscribeFromDocs = db.collection("documents").onSnapshot(docsSnapshot => {
-      docsSnapshot.forEach(doc => {
-        const docData = doc.data();
-        const docKey = docData.key;
-        const commentsRef = doc.ref.collection("comments"); //access sub collection
-        commentsRef.get().then(commentsSnapshot => {
-          runInAction(()=>{
-            commentsSnapshot.forEach(commentDoc => {
-              const commentData = commentDoc.data();
-              if (commentData && commentData.tags) {
-                commentData.tags.forEach((tag: string) => {
-                  let docKeysSet = this.tempTagDocumentMap.get(tag);
-                  if (!docKeysSet) {
-                    docKeysSet = new ObservableSet<string>();
-                    this.tempTagDocumentMap.set(tag, docKeysSet);
-                    // docKeysSet = this.tempTagDocumentMap.get(tag) as Set<string>;
-                  }
-                  // console.log("key added:", docKey, "tag:", tag);
-                  docKeysSet.add(docKey); //only unique doc keys will be stored
-                  console.log("docKeysSet: ", docKeysSet);
-                });
-              }
-            });
-            console.log("tempTagDocumentMap:", this.tempTagDocumentMap);
-          });
-
-        });
-      });
-      unsubscribeFromDocs();
+    const filteredDocs = this.filteredDocsByType;
+    const documentIDs= filteredDocs.map(doc => {
+     return `${doc.uid}_${doc.key}`;
     });
+
+    documentIDs.forEach(docId =>{
+      const [uid, docKey] = docId.split("_");
+
+      const docRef = db.collection("documents").doc(docId);
+      const commentsRef = docRef.collection("comments");
+      commentsRef.get().then(commentsSnapshot => {
+        runInAction(() => {
+          commentsSnapshot.forEach(commentDoc => {
+            const commentData = commentDoc.data();
+            if (commentData && commentData.tags) {
+              commentData.tags.forEach((tag: string) => {
+                let docKeysSet = this.tempTagDocumentMap.get(tag);
+                if (!docKeysSet) {
+                  docKeysSet = new ObservableSet<string>();
+                  this.tempTagDocumentMap.set(tag, docKeysSet);
+                }
+                docKeysSet.add(docKey); //only unique doc keys will be stored
+                console.log("docKeysSet: ", docKeysSet);
+              });
+            }
+          });
+          console.log("tempTagDocumentMap:", this.tempTagDocumentMap);
+        });
+
+      });
+    });
+
+    // //old
+    // const unsubscribeFromDocs = db.collection("documents").onSnapshot(docsSnapshot => {
+    //   docsSnapshot.forEach(doc => {
+    //     const docData = doc.data();
+    //     const docKey = docData.key;
+    //     const commentsRef = doc.ref.collection("comments"); //access sub collection
+    //     commentsRef.get().then(commentsSnapshot => {
+    //       runInAction(()=>{
+    //         commentsSnapshot.forEach(commentDoc => {
+    //           const commentData = commentDoc.data();
+    //           if (commentData && commentData.tags) {
+    //             commentData.tags.forEach((tag: string) => {
+    //               let docKeysSet = this.tempTagDocumentMap.get(tag);
+    //               if (!docKeysSet) {
+    //                 docKeysSet = new ObservableSet<string>();
+    //                 this.tempTagDocumentMap.set(tag, docKeysSet);
+    //                 // docKeysSet = this.tempTagDocumentMap.get(tag) as Set<string>;
+    //               }
+    //               // console.log("key added:", docKey, "tag:", tag);
+    //               docKeysSet.add(docKey); //only unique doc keys will be stored
+    //               console.log("docKeysSet: ", docKeysSet);
+    //             });
+    //           }
+    //         });
+    //         console.log("tempTagDocumentMap:", this.tempTagDocumentMap);
+    //       });
+
+    //     });
+    //   });
+    //   unsubscribeFromDocs();
+    // });
+
+
 
 
   }
