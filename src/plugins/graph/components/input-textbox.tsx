@@ -1,17 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 
 interface IInputTextboxProps {
   defaultValue: string;
   finishEditing: () => void;
-  inputRef: React.MutableRefObject<HTMLInputElement | null>;
+  inputRef?: React.MutableRefObject<HTMLInputElement | null>;
+  setWidth?: (width: number) => void;
   updateValue: (val: string) => void;
 }
-export function InputTextbox({ defaultValue, finishEditing, inputRef, updateValue }: IInputTextboxProps) {
+export function InputTextbox({ defaultValue, finishEditing, inputRef, setWidth, updateValue }: IInputTextboxProps) {
   const [inputValue, setInputValue] = useState(defaultValue);
 
   const width = measureText(inputValue) + 2 * 5;
   const inputStyle = { width: `${width}px` };
+
+  useEffect(() => {
+    setWidth?.(width);
+  }, [setWidth, width]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const { key } = e;
@@ -39,7 +44,11 @@ export function InputTextbox({ defaultValue, finishEditing, inputRef, updateValu
   return (
     <input
       className="input-textbox"
-      ref={el => inputRef.current = el}
+      ref={el => {
+        if (inputRef) {
+          inputRef.current = el;
+        }
+      }}
       onKeyDown={handleKeyDown}
       defaultValue={defaultValue} // Set the initial value
       onBlur={handleBlur}

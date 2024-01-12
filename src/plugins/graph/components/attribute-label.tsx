@@ -48,6 +48,7 @@ export const AttributeLabel = observer(
       //   !dataConfiguration?.placeAlwaysShowsClickHereCue(place) && !isTileSelected(),
       [editing, setEditing] = useState(false),
       inputRef = useRef<HTMLInputElement | null>(null),
+      [inputWidth, setInputWidth] = useState(0),
       [labelElt, setLabelElt] = useState<HTMLDivElement | null>(null),
       portalParentElt = labelElt?.closest(kGraphPortalClass) as HTMLDivElement ?? null,
       positioningParentElt = labelElt?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
@@ -94,10 +95,11 @@ export const AttributeLabel = observer(
     const boxWidth = stringBounds.width + 2 * (kAxisLabelHorizontalPadding + kAxisLabelBorderWidth) + 1;
     const height = vertical ? boxWidth : boxHeight;
     const width = vertical ? boxHeight : boxWidth;
+    const foreignObjectWidth = vertical && editing ? inputWidth + 2 : width; // Accommodate text box when editing
     const x = place === "left" ? axisGap : placeBounds.left + (placeBounds.width - width) / 2;
     const y = place === "left" ? placeBounds.top + (placeBounds.height - height) / 2
       : placeBounds.top + placeBounds.height - height - axisGap;
-    const foreignObjectStyle = { height, width, x, y };
+    const foreignObjectStyle = { height, width: foreignObjectWidth, x, y };
     const divStyle = { height, width };
 
     // const refreshAxisTitle = useCallback(() => {
@@ -234,6 +236,7 @@ export const AttributeLabel = observer(
                   defaultValue={displayText}
                   finishEditing={() => setEditing(false)}
                   inputRef={inputRef}
+                  setWidth={setInputWidth}
                   updateValue={updateValue}
                 />
               ) : (
