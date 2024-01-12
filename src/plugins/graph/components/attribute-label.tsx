@@ -112,7 +112,7 @@ export const AttributeLabel = observer(
     const readyForPortal = positioningParentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
     const codapLegend = !defaultSeriesLegend;
 
-    const divClassName = classNames("axis-label", { vertical, editing });
+    const divClassName = classNames("axis-label", place, { vertical, editing });
     return (
       <>
         <foreignObject {...foreignObjectStyle}>

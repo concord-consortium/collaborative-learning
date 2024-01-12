@@ -26,7 +26,7 @@ class XYPlotToolTile {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-dot .outer-circle.selected`);
   }
   getXAxisLabel(workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .display-label.bottom`);
+    return cy.get(`${wsClass(workspaceClass)} .axis-label.bottom`);
   }
   getXAttributesLabel(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .bottom .simple-attribute-label`);
