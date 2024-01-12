@@ -13,7 +13,6 @@
     height: $label-height;
     justify-content: flex-end;
     padding: 0 4px;
-    width: 40px;
 
     svg {
       height: auto;
@@ -22,7 +21,7 @@
   }
 
   .legend-title-row {
-    border-top: 2px solid $workspace-teal;
+    border-top: 1.5px solid #92c7d5;
 
     .legend-title {
       padding-left: 6px;
@@ -75,12 +74,20 @@
     cursor: pointer;
     display: flex;
     font-family: Lato;
-    font-size: 14pt;
+    font-size: 14px;
     font-style: italic;
     height: $menu-height;
     min-width: $min-menu-width;
     padding: 0 8px 0 0;
     text-align: left;
+
+    &.disabled {
+      opacity: .3;
+
+      &:hover {
+        background-color: $charcoal-light-6;
+      }
+    }
 
     &:hover {
       background-color: $workspace-teal-light-4;
@@ -121,7 +128,7 @@
   background-color: $workspace-teal-light-8;
 
   &.normal-dropdown-label {
-    min-width: $min-menu-width;
+    min-width: 220px;
     height: $menu-height;
   }
 }
@@ -143,6 +150,17 @@
   }
 }
 
+.symbol-container {
+  padding: 3px;
+}
+
+.attr-symbol {
+  height: $menu-height - 8px;
+  width: $menu-height - 8px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+}
+
 .simple-attribute-label {
   display: flex;
   align-items: center;
@@ -155,18 +173,6 @@
   .symbol-title {
     display: flex;
     height: 100%;
-  }
-
-  .symbol-container {
-    padding: 3px;
-    border-right: 1px solid #3f3f3f;
-  }
-
-  .attr-symbol {
-    height: $menu-height - 8px;
-    width: $menu-height - 8px;
-    border: 2px solid #ffffff;
-    border-radius: 50%;
   }
 
   .attr-title {

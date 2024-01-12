@@ -26,7 +26,6 @@ import {
 import { AdornmentModelUnion } from "../adornments/adornment-types";
 import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
 import { isSharedCaseMetadata, SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
-import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel, IGraphLayerModel } from "./graph-layer-model";
 import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-data-set";
@@ -293,11 +292,6 @@ export const GraphModel = TileContentModel
         });
       });
       return objects;
-    }
-  }))
-  .views(self => tileContentAPIViews({
-    get contentTitle() {
-      return self.layers[0].config.dataset?.name;
     }
   }))
   .actions(self => ({

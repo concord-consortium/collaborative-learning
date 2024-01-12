@@ -3,7 +3,6 @@ import { authenticate,
         DEV_STUDENT,
         PORTAL_JWT_URL_SUFFIX,
         FIREBASE_JWT_URL_SUFFIX,
-        FIREBASE_JWT_QUERY,
         getAppMode,
         createFakeUser,
         getFirebaseJWTParams,
@@ -358,7 +357,7 @@ describe("student authentication", () => {
         authorization: `Bearer ${BAD_STUDENT_TOKEN}`
       }
     })
-    .get(FIREBASE_JWT_PATH + FIREBASE_JWT_QUERY)
+    .get(FIREBASE_JWT_PATH + getFirebaseJWTParams())
     .reply(400);
 
     authenticate("authed", appConfig, {token: BAD_STUDENT_TOKEN, domain: BASE_PORTAL_URL})
@@ -573,7 +572,7 @@ describe("teacher authentication", () => {
         Authorization: `Bearer ${BAD_TEACHER_TOKEN}`
       }
     })
-    .get(FIREBASE_JWT_PATH + FIREBASE_JWT_QUERY)
+    .get(FIREBASE_JWT_PATH + getFirebaseJWTParams())
     .reply(400);
 
     urlParams.token = BAD_TEACHER_TOKEN;

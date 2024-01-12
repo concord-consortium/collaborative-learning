@@ -244,28 +244,28 @@ describe("useDocumentSyncToFirebase hook", () => {
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
 
-    // doesn't respond to visibility change (personal documents don't have visibility)
+    // responds to visibility change
     document.setVisibility("public");
-    expect(mockRef).toHaveBeenCalledTimes(0);
-    expect(mockUpdate).toHaveBeenCalledTimes(0);
+    expect(mockRef).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
 
     // saves when content changes
     document.content?.addTile("text");
-    expect(mockRef).toHaveBeenCalledTimes(1);
+    expect(mockRef).toHaveBeenCalledTimes(2);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-    expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(2);
 
     // updates title when it changes
     document.setTitle("New Title");
-    expect(mockRef).toHaveBeenCalledTimes(2);
-    expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
-    expect(mockUpdate).toHaveBeenCalledTimes(2);
-
-    // updates properties when they change
-    document.setProperty("foo", "bar");
     expect(mockRef).toHaveBeenCalledTimes(3);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(3);
+
+    // updates properties when they change
+    document.setProperty("foo", "bar");
+    expect(mockRef).toHaveBeenCalledTimes(4);
+    expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
+    expect(mockUpdate).toHaveBeenCalledTimes(4);
   });
 
   it("monitors learning log documents", () => {
@@ -274,28 +274,28 @@ describe("useDocumentSyncToFirebase hook", () => {
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
 
-    // doesn't respond to visibility change (learning logs don't have visibility)
+    // responds to visibility change
     document.setVisibility("public");
-    expect(mockRef).toHaveBeenCalledTimes(0);
-    expect(mockUpdate).toHaveBeenCalledTimes(0);
+    expect(mockRef).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
 
     // saves when content changes
     document.content?.addTile("text");
-    expect(mockRef).toHaveBeenCalledTimes(1);
+    expect(mockRef).toHaveBeenCalledTimes(2);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-    expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(2);
 
     // updates title when it changes
     document.setTitle("New Title");
-    expect(mockRef).toHaveBeenCalledTimes(2);
-    expect(mockRef).toHaveBeenCalledWith(`${user.id}/learningLog/${document.key}`);
-    expect(mockUpdate).toHaveBeenCalledTimes(2);
-
-    // updates properties when they change
-    document.setProperty("foo", "bar");
     expect(mockRef).toHaveBeenCalledTimes(3);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/learningLog/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(3);
+
+    // updates properties when they change
+    document.setProperty("foo", "bar");
+    expect(mockRef).toHaveBeenCalledTimes(4);
+    expect(mockRef).toHaveBeenCalledWith(`${user.id}/learningLog/${document.key}`);
+    expect(mockUpdate).toHaveBeenCalledTimes(4);
   });
 
   it("monitors problem documents with additional logging when DEBUG_SAVE == true", async () => {
@@ -385,14 +385,14 @@ describe("useDocumentSyncToFirebase hook", () => {
       expect(mockUpdate).toHaveBeenCalledTimes(0);
     });
 
-    // doesn't respond to visibility change
+    // responds to visibility change
     await jestSpyConsole("log", spy => {
       document.setVisibility("public");
       jest.runAllTimers();
       expect(spy).not.toBeCalled();
     });
-    expect(mockRef).toHaveBeenCalledTimes(0);
-    expect(mockUpdate).toHaveBeenCalledTimes(0);
+    expect(mockRef).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
 
     // saves when title changes with additional logging
     mockRef.mockClear();

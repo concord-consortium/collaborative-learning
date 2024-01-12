@@ -1,5 +1,7 @@
-import React from "react";
+import classNames from "classnames";
 import { observer } from "mobx-react";
+import React from "react";
+
 import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import AddSeriesIcon from "../../imports/assets/add-series-icon.svg";
 
@@ -23,20 +25,18 @@ export const AddSeriesButton = observer(function AddSeriesButton() {
     }
   }
 
-  if (findUnplottedAttribute()) {
-    return (
-      <button onClick={handleClick} className="add-series-button">
-        <div className="legend-icon">
-          <AddSeriesIcon/>
-        </div>
-        <div className="add-series-label">
-          Add Series
-        </div>
-      </button>
-    );
-  } else {
-    return null;
-  }
+  const disabled = !findUnplottedAttribute();
+  const classes = classNames("add-series-button", { disabled });
+  return (
+    <button disabled={disabled} onClick={handleClick} className={classes}>
+      <div className="legend-icon">
+        <AddSeriesIcon/>
+      </div>
+      <div className="add-series-label">
+        Add series
+      </div>
+    </button>
+  );
 });
 
 

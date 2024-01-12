@@ -45,7 +45,7 @@ export const LegendDropdown = observer(function LegendDropdown({
             <div ref={(e) => setButtonContainer(e)} className={labelClassNames}>
               <MenuButton aria-label={buttonAriaLabel} className="legend-dropdown-button" disabled={readOnly}>
                 <div className={classNames("button-content", buttonContentClass)}>
-                  <div>{buttonLabel}</div>
+                  <div className="button-label">{buttonLabel}</div>
                   {showCaret &&
                     <div className={classNames("caret", { open: isOpen })}>
                       <DropdownCaretIcon />
