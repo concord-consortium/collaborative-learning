@@ -1,22 +1,37 @@
 import { observer } from "mobx-react";
-import React, { useContext } from "react";
-import { AttributeType } from "../../../../models/data/attribute";
-import { IDataSet } from "../../../../models/data/data-set";
-import { GraphPlace } from "../../imports/components/axis-graph-shared";
+import React from "react";
+import { axisPlaceToAttrRole } from "../../graph-types";
 import { SimpleAttributeLabel } from "../simple-attribute-label";
 import { AddSeriesButton } from "./add-series-button";
-import { ReadOnlyContext } from "../../../../components/document/read-only-context";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
 import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../../../models/shared/shared-data-set";
-import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
+import { clueGraphColors } from "../../../../utilities/color-utils";
+import { DataConfigurationContext, useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
+import { IGraphLayerModel } from "../../models/graph-layer-model";
+import { LegendDropdown } from "./legend-dropdown";
+import { LegendIdListFunction, ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
+import XAxisIcon from "../../assets/x-axis-icon.svg";
+import YAxisIcon from "../../assets/y-axis-icon.svg";
 
-interface ILayerLegendProps {
-  onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
-  onRemoveAttribute: (place: GraphPlace, attrId: string) => void;
-  onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
+export const layerLegendType = "layer-legend";
+
+const kLayerLegendHeaderHeight = 58;
+const kLayerLegendRowHeight = 52;
+
+interface IColorKeyProps {
+  color: string;
+}
+function ColorKey({ color }: IColorKeyProps) {
+  const colorKeyStyle = { backgroundColor: color };
+  return (
+    <div className="symbol-container">
+      <div className="attr-symbol" style={colorKeyStyle}></div>
+    </div>
+  );
 }
 
 /**
@@ -25,12 +40,14 @@ interface ILayerLegendProps {
  * Adds an Add Series button when appropriate
  * Adds unlink button to remove layer
  */
-export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProps) {
+const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPartProps) {
   let legendItems = [] as React.ReactNode[];
-  const { onChangeAttribute, onRemoveAttribute, onTreatAttributeAs } = props;
   const graphModel = useGraphModelContext();
   const dataConfiguration = useDataConfigurationContext();
-  const readOnly = useContext(ReadOnlyContext);
+  const readOnly = useReadOnlyContext();
+  const xAttrId = dataConfiguration?.attributeID(axisPlaceToAttrRole.bottom);
+  const { onChangeAttribute, onRemoveAttribute, onTreatAttributeAs } = props;
+  if (!onChangeAttribute || !onRemoveAttribute || !onTreatAttributeAs) return null;
 
   function handleRemoveIconClick() {
     if (dataConfiguration?.dataset) {
@@ -51,15 +68,32 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
     const yAttributes = dataConfiguration.yAttributeDescriptions;
 
     legendItems = yAttributes.map((description, index) =>
-      <SimpleAttributeLabel
-        key={description.attributeID}
-        place={'left'}
-        index={index}
-        attrId={description.attributeID}
-        onChangeAttribute={onChangeAttribute}
-        onRemoveAttribute={onRemoveAttribute}
-        onTreatAttributeAs={onTreatAttributeAs}
-      />);
+      <>
+        <LegendDropdown
+          buttonAriaLabel={`Color: ${graphModel.getColorNameForId(description.attributeID)}`}
+          buttonLabel={<ColorKey color={graphModel.getColorForId(description.attributeID)} />}
+          menuItems={
+            clueGraphColors.map((color, colorIndex) => ({
+              ariaLabel: color.name,
+              key: color.color,
+              label: <ColorKey color={color.color} />,
+              onClick: () => graphModel.setColorForId(description.attributeID, colorIndex)
+            }))
+          }
+        />
+        <div className="legend-icon">
+          <YAxisIcon />
+        </div>
+        <SimpleAttributeLabel
+          attrId={description.attributeID}
+          key={description.attributeID}
+          onChangeAttribute={onChangeAttribute}
+          onRemoveAttribute={onRemoveAttribute}
+          onTreatAttributeAs={onTreatAttributeAs}
+          place={'left'}
+        />
+      </>
+    );
     if (!readOnly) {
       legendItems.push(<AddSeriesButton />);
     }
@@ -103,20 +137,77 @@ export const LayerLegend = observer(function LayerLegend(props: ILayerLegendProp
   return (
     <>
       { dataConfiguration?.dataset !== undefined &&
-        <div className="legend-title-row">
-          <div className="legend-title">
-            Data from: <strong>{getOriginString()}</strong>&nbsp;
-          </div>
-          { !readOnly &&
-            <div className="legend-icon">
-              <button onClick={handleRemoveIconClick} className="remove-button" title="Unlink data provider">
-                <RemoveDataIcon />
-              </button>
+        <div className="legend-row legend-title-row">
+          <div className="legend-cell-1">
+            { !readOnly &&
+              <div className="legend-icon">
+                <button onClick={handleRemoveIconClick} className="remove-button" title="Unlink data provider">
+                    <RemoveDataIcon />
+                </button>
+              </div>
+            }
+            <div className="legend-title">
+              Data from: <strong>{getOriginString()}</strong>&nbsp;
             </div>
-          }
+          </div>
+          <div className="legend-cell-2">
+            { xAttrId &&
+              <>
+                <div className="legend-icon">
+                  <XAxisIcon />
+                </div>
+                <SimpleAttributeLabel
+                  place="bottom"
+                  attrId={xAttrId}
+                  onChangeAttribute={onChangeAttribute}
+                  onRemoveAttribute={onRemoveAttribute}
+                  onTreatAttributeAs={onTreatAttributeAs}
+                />
+              </>
+            }
+          </div>
         </div>
       }
       {legendItemRows}
     </>
   );
 });
+
+export const LayerLegend = observer(function LayerLegend(props: ILegendPartProps) {
+  const graphModel = useGraphModelContext();
+  return (
+    <>
+      {
+        graphModel.layers.map((layer) => {
+          return (
+            <DataConfigurationContext.Provider key={layer.id} value={layer.config}>
+              <SingleLayerLegend {...props} />
+            </DataConfigurationContext.Provider>);
+          }
+        )
+      }
+    </>
+  );
+});
+
+function heightOfOneLayerLegend(layer: IGraphLayerModel) {
+  if (!layer.config.dataset) return 0;
+
+  const yAttrDescriptions = layer.config.yAttributeDescriptions.length;
+  // The extra 1 is for the add series button, which is present but disabled if there are no more attributes to add
+  const rows = Math.ceil((yAttrDescriptions + 1) / 2);
+  return kLayerLegendHeaderHeight + kLayerLegendRowHeight * rows;
+}
+export function heightOfLayerLegend({ graphModel }: ILegendHeightFunctionProps) {
+  return graphModel.layers.reduce((prev, layer) => {
+    return prev + heightOfOneLayerLegend(layer);
+  }, 0);
+}
+
+export const getLayerLegendIdList: LegendIdListFunction = function getLayerLegendIdList(graphModel) {
+  let ids: string[] = [];
+  graphModel.layers?.forEach(layer => {
+    ids = ids.concat(layer.config.yAttributeDescriptions.map(description => description.attributeID));
+  });
+  return ids;
+};

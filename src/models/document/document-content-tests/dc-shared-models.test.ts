@@ -8,6 +8,9 @@ import { IDropRowInfo } from "../tile-row";
 import { IDocumentImportSnapshot } from "../document-content-import-types";
 import { SharedModelDocumentManager } from "../shared-model-document-manager";
 import { ITileEnvironment } from "../../tiles/tile-content";
+
+import "../../../plugins/diagram-viewer/diagram-registration";
+
 // mock Logger calls
 const mockLogTileCopyEvent = jest.fn();
 jest.mock("../../tiles/log/log-tile-copy-event", () => ({
@@ -700,4 +703,13 @@ Object {
 `);
     });
   });
+
+  it("queries for consumer and provider tiles", () => {
+    const { consumers, providers } = documentContent.getLinkableTiles();
+    expect(providers).toHaveLength(1);
+    expect(providers[0].type).toEqual("Table");
+    expect(consumers).toHaveLength(2);
+    expect(consumers.map(t => t.type).sort()).toEqual(["Geometry", "Table"]);
+  });
+
 });

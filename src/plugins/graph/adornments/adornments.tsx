@@ -8,7 +8,7 @@ import { Adornment } from "./adornment";
 import { getAdornmentContentInfo } from "./adornment-content-info";
 import { IAdornmentModel } from "./adornment-models";
 import { useInstanceIdContext } from "../imports/hooks/use-instance-id-context";
-import { useTileModelContext } from "../imports/hooks/use-tile-model-context";
+import { useTileModelContext } from "../../../components/tiles/hooks/use-tile-model-context";
 import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
 import { DotsElt } from "../d3-types";
 
@@ -118,7 +118,7 @@ export const Adornments = observer(function Adornments(props: AdornmmentsProps) 
                 adornments.map((adornment: IAdornmentModel) => {
                   // skip adornments that don't support current plot type
                   const adornmentContentInfo = getAdornmentContentInfo(adornment.type);
-                  if (!adornmentContentInfo.plots.includes(graphModel.plotType)) return;
+                  if (!adornmentContentInfo?.plots.includes(graphModel.plotType)) return;
 
                   return <Adornment
                           key={`graph-adornment-${adornment.id}-${yIndex}-${xIndex}-${rightIndex}-${topIndex}`}
@@ -148,8 +148,9 @@ export const Adornments = observer(function Adornments(props: AdornmmentsProps) 
     { 'tile-selected': isTileSelected() }
   );
   return (
-    <svg ref={dotsRef} className={containerClass} data-testid={kGraphAdornmentsClass} style={outerGridStyle}>
+    <div className={containerClass} data-testid={kGraphAdornmentsClass} style={outerGridStyle}>
       {outerGridCells}
-    </svg>
+      <svg ref={dotsRef} className="connecting-lines-svg" />
+    </div>
   );
 });

@@ -4,24 +4,15 @@ import { AttributeType } from "../../../../models/data/attribute";
 import { GraphPlace } from "../../imports/components/axis-graph-shared";
 import { useGraphLayoutContext } from "../../models/graph-layout";
 import { IDataSet } from "../../../../models/data/data-set";
-import { DataConfigurationContext } from "../../hooks/use-data-configuration-context";
+
 import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
-import { axisPlaceToAttrRole, kGraphDefaultHeight } from "../../graph-types";
+import { kGraphDefaultHeight } from "../../graph-types";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
-import { LayerLegend } from "./layer-legend";
-import { IGraphLayerModel } from "../../models/graph-layer-model";
-import { SimpleAttributeLabel } from "../simple-attribute-label";
+import { multiLegendParts } from "./legend-registration";
 
 import "./multi-legend.scss";
 
-const kMultiLegendMenuHeight = 30;
-const kMultiLegendVerticalPadding = 10;
-const kMultiLegendVerticalGap = 8;
-const kMultiLegendLabelHeight = 28;
-const kMultiLegendHRuleHeight = 2;
-
 interface IMultiLegendProps {
-  graphElt: HTMLDivElement | null;
   onChangeAttribute: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
   onRemoveAttribute: (place: GraphPlace, attrId: string) => void;
   onTreatAttributeAs: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
@@ -29,7 +20,7 @@ interface IMultiLegendProps {
 }
 
 export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProps) {
-  const {onChangeAttribute, onRemoveAttribute, onTreatAttributeAs, onRequestRowHeight} = props;
+  const { onRequestRowHeight } = props;
   const layout = useGraphLayoutContext();
   const legendBounds = layout.computedBounds.legend;
   const transform = `translate(${legendBounds.left}, ${legendBounds.top})`;
@@ -37,7 +28,7 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
   const graphModel = useGraphModelContext();
   const instanceId = useInstanceIdContext();
 
-  useEffect(() =>{
+  useEffect(() => {
     const legendTransform = `translateY(${-layout.computedBounds.legend.height}px)`;
     if (!multiLegendRef.current) return;
     multiLegendRef.current.style.transform = legendTransform;
@@ -45,64 +36,24 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
     multiLegendRef.current.style.height = `${legendBounds.height}px`;
   }, [layout.computedBounds.legend.height, layout.graphWidth, legendBounds, transform]);
 
-  function heightOfLayerLegend(layer: IGraphLayerModel) {
-    // Menu for each Y attribute, plus one for "Add series" button
-    const menuCount = (layer.config.yAttributeDescriptions.length || 0) + 1;
-    const legendRows = Math.ceil(menuCount/2);
-    return kMultiLegendHRuleHeight
-      + kMultiLegendVerticalPadding * 3 // above title, below title, below all.
-      + kMultiLegendLabelHeight
-      + kMultiLegendMenuHeight * legendRows
-      + kMultiLegendVerticalGap * legendRows * 2; // above each row
-  }
-  // Total height is height of X-axis menus, plus sum of all the layer sections
-  const totalHeight = kMultiLegendMenuHeight + kMultiLegendVerticalPadding
-    + graphModel.layers.reduce((prev, layer)=>{ return prev + heightOfLayerLegend(layer);}, 0);
+  const heightFunctionProps = { graphModel };
+  const totalHeight = multiLegendParts.reduce((prev, part) => {
+    return prev + part.getHeight(heightFunctionProps);
+  }, 0);
 
   useEffect(function RespondToLayoutChange() {
     layout.setDesiredExtent("legend", totalHeight);
     onRequestRowHeight?.(instanceId, kGraphDefaultHeight + totalHeight);
   }, [instanceId, layout, onRequestRowHeight, totalHeight]);
 
-  const layerLegends = graphModel.layers.map((layer) => {
-    return (
-      <DataConfigurationContext.Provider key={layer.id} value={layer.config}>
-        <LayerLegend
-          onChangeAttribute={onChangeAttribute}
-          onRemoveAttribute={onRemoveAttribute}
-          onTreatAttributeAs={onTreatAttributeAs}
-        />
-      </DataConfigurationContext.Provider>);
-    }
-  );
-
-  const thisRole = axisPlaceToAttrRole.bottom;
-
-  const xMenus = graphModel.layers.map((layer) => {
-    const attrId = layer.config?.attributeID(thisRole);
-    if (!attrId) return;
-
-    return (
-      <div className="x-axis-item" key={layer.id}>
-        <DataConfigurationContext.Provider value={layer.config}>
-          <SimpleAttributeLabel
-            place="bottom"
-            attrId={attrId}
-            onChangeAttribute={onChangeAttribute}
-            onRemoveAttribute={onRemoveAttribute}
-            onTreatAttributeAs={onTreatAttributeAs}
-          />
-        </DataConfigurationContext.Provider>
-      </div>
-    );
-  });
-
   return (
     <div className="multi-legend" ref={ multiLegendRef }>
-      <div className="x-axis-menu">
-        { xMenus }
-      </div>
-      { layerLegends }
+      {
+        multiLegendParts.map(part => {
+          const Component = part.component;
+          return <Component {...props} key={part.type} />;
+        })
+      }
     </div>
   );
 });

@@ -82,7 +82,11 @@ export const
   hoverRadiusFactor = 1.0,
   kGraphFont = "12px sans-serif",
   kChoroplethHeight = 16,
-  kAxisTickLength = 4,
+  kTopAndRightDefaultExtent = 3,
+  kTickAndGridColor = "#bfbfbf",
+  kAxisStrokeWidth = 2,
+  kAxisTickLength = 25,
+  kAxisTickPadding = 6,
   kAxisGap = 2;
 export const outerCircleSelectedRadius = 10;
 export const outerCircleUnselectedRadius = 0;
@@ -97,3 +101,5 @@ export const kGraphAdornmentsClassSelector = `.${kGraphAdornmentsClass}`;
 
 // TODO: determine this via configuration, e.g. appConfig, since apps may prefer different defaults
 export const kDefaultNumericAxisBounds = [-10, 11] as const;
+
+export const kGraphPortalClass = ".canvas-area";

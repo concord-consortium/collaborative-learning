@@ -44,7 +44,7 @@ export const getScreenY = ({ caseId, dataset, layout, dataConfig, plotNum = 0 }:
 export const usePointLocations = () => {
   const layout = useGraphLayoutContext();
   const graphModel = useGraphModelContext();
-  const result: Iterable<[number, number]>[] = [];
+  const result: Record<string, Iterable<[number, number]>> = {};
   // Outer loop over layer
   for (const layer of graphModel.layers) {
     const dataConfig = layer.config;
@@ -64,7 +64,8 @@ export const usePointLocations = () => {
             }
           }
         });
-        result.push(series);
+        const attributeId = dataConfig.yAttributeID(plotNum);
+        result[attributeId] = series;
       }
     }
   }
