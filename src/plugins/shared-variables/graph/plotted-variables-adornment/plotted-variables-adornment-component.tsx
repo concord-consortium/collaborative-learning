@@ -82,11 +82,11 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
       .attr('x', xPos)
       .attr('y', yPos - offsetFromPoint - padding - 2) // up 2px to account for borders
       .text(label);
-    const labelWidth = labelText.node()?.getComputedTextLength() || 0;
+    const labelWidth = (labelText.node()?.getComputedTextLength() || 0) + padding * 2;
       labelRect
-        .attr('x', xPos - labelWidth / 2 - padding)
+        .attr('x', xPos - labelWidth / 2)
         .attr('y', yPos - offsetFromPoint - labelRectHeight)
-        .attr('width', labelWidth + padding * 2);
+        .attr('width', labelWidth);
   }, [labelFormat, labelRectHeight]);
 
   // Assign a new value to the Variable based on the given pixel position
