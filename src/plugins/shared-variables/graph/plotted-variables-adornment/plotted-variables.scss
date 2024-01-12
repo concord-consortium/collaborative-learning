@@ -1,12 +1,12 @@
 g.plotted-variable {
   pointer-events: stroke;
 
-  // All 'highlight' elements are invisible unless g.plotted-variable has 'selected' class.
+  // All 'highlight' elements are invisible until hover/select.
   .plotted-variable-highlight {
     opacity: 0;
   }
 
-  &.hovered, &.dragging {
+  .tool-tile.selected &.hovered, &.dragging {
     .plotted-variable-highlight {
       opacity: 1;
     }
@@ -28,8 +28,11 @@ g.plotted-variable {
 
   .plotted-variable-highlight-value {
     stroke: rgba(20, 244, 158, 0.5);
-    cursor: move;
-    pointer-events: all;
+
+    .tool-tile.selected & {
+      cursor: move;
+      pointer-events: all;
+    }
   }
 
   .plotted-variable-labelbox {

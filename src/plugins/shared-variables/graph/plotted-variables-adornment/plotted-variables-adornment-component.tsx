@@ -17,6 +17,7 @@ import { SharedVariables } from "../../shared-variables";
 import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { isFiniteNumber } from "../../../../utilities/math-utils";
+import { useUIStore } from "../../../../hooks/use-stores";
 
 import "../../../graph/adornments/plotted-function/plotted-function-adornment-component.scss";
 import "./plotted-variables.scss";
@@ -38,6 +39,8 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   const dataConfig = useDataConfigurationContext();
   const readOnly = useReadOnlyContext();
   const layout = useAxisLayoutContext();
+  const ui = useUIStore();
+  const isTileSelected = !!tile && ui.isSelectedTile(tile);
   const xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType;
   const yScale = layout.getAxisScale("left") as ScaleNumericBaseType;
   const xAttrType = dataConfig?.attributeType("x");
@@ -159,10 +162,11 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
             if (variable) {
               pointHighlight
                 .call(drag<SVGCircleElement, unknown>()
+                  .container(() => { return plottedFunctionRef.current!; })
+                  .filter((e) => { return !e.ctrlKey && !e.button && isTileSelected; })
                   .on('start', (e) => traceGroup.classed('dragging', true))
                   .on('drag', (e) => {
                     const newX = Math.round(e.x);
-                    // console.log('drag', e.x);
                     if (newX < tPixelMin || newX > tPixelMax) return;
                     const newY = tPoints[newX].y;
                     const xValue = model.valueForPosition(newX, xScale, xCellCount);
@@ -182,8 +186,8 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         }
       }
     }
-  }, [xScale, model, xCellCount, yCellCount, yScale, graphModel, labelRectHeight,
-      positionPointMarkers, readOnly, sharedVariables, setVariableValue]);
+  }, [xScale, model, xCellCount, yCellCount, yScale, graphModel,
+      labelRectHeight, positionPointMarkers, readOnly, sharedVariables, isTileSelected, setVariableValue]);
 
   // Add the lines and their associated covers and labels
   const refreshValues = useCallback(() => {
