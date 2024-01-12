@@ -58,6 +58,14 @@ export const AttributeLabel = observer(
     }, [dataConfiguration, graphModel.plotType, place]);
 
     const getLabel = useCallback(() => {
+      // If we're using the CLUE legend, use a customizable label
+      if (defaultSeriesLegend) {
+        if (place === "left") {
+          return graphModel.yAttributeLabel;
+        } else {
+          return graphModel.xAttributeLabel;
+        }
+      }
       if (useClickHereCue) {
         // empty axis shows the default axis label (if configured) or the click here prompt
         return defaultAxisLabels?.[place] || t('DG.AxisView.emptyGraphCue');
@@ -65,7 +73,7 @@ export const AttributeLabel = observer(
       const attrIDs = getAttributeIDs();
       return attrIDs.map(anID => dataset?.attrFromID(anID)?.name)
         .filter(aName => aName !== '').join(', ');
-    }, [dataset, defaultAxisLabels, getAttributeIDs, place, useClickHereCue]);
+    }, [dataset, defaultAxisLabels, defaultSeriesLegend, getAttributeIDs, graphModel, place, useClickHereCue]);
 
     const displayText = getLabel();
     const vertical = isVertical(place);
@@ -182,7 +190,7 @@ export const AttributeLabel = observer(
     // }, [place, dataConfiguration, refreshAxisTitle]);
 
     const readyForPortal = positioningParentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
-    const skipPortal = defaultSeriesLegend && place === "left";
+    const codapLegend = !defaultSeriesLegend;
 
     return (
       <>
@@ -198,7 +206,7 @@ export const AttributeLabel = observer(
           </div>
         </foreignObject>
         {/* <g ref={(elt) => setLabelElt(elt)} className={`display-label ${place}`} /> */}
-        {readyForPortal && !skipPortal &&
+        {readyForPortal && codapLegend &&
           <AxisOrLegendAttributeMenu
             target={labelElt}
             parent={positioningParentElt}
