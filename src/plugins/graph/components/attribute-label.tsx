@@ -1,11 +1,12 @@
 import classNames from "classnames";
-import React, {useCallback, /*useEffect,*/ useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 // import {reaction} from "mobx";
 import {observer} from "mobx-react-lite";
 // import {select} from "d3";
 import t from "../imports/utilities/translation/translate";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import { defaultFont } from "../../../components/constants";
+import { useReadOnlyContext } from "../../../components/document/read-only-context";
 import {AttributeType} from "../../../models/data/attribute";
 import {IDataSet} from "../../../models/data/data-set";
 // import {isSetAttributeNameAction} from "../../../models/data/data-set-actions";
@@ -23,6 +24,7 @@ import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/a
 import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
 
 import "./attribute-label.scss";
+import { InputTextbox } from "./input-textbox";
 // import graphVars from "./graph.scss";
 
 interface IAttributeLabelProps {
@@ -38,14 +40,23 @@ export const AttributeLabel = observer(
       dataConfiguration = useDataConfigurationContext(),
       { defaultSeriesLegend, defaultAxisLabels } = useGraphSettingsContext(),
       layout = useGraphLayoutContext(),
+      readOnly = useReadOnlyContext(),
       // {isTileSelected} = useTileModelContext(),
       dataset = dataConfiguration?.dataset,
       useClickHereCue = dataConfiguration?.placeCanShowClickHereCue(place) ?? false,
       // hideClickHereCue = useClickHereCue &&
       //   !dataConfiguration?.placeAlwaysShowsClickHereCue(place) && !isTileSelected(),
+      [editing, setEditing] = useState(false),
+      inputRef = useRef<HTMLInputElement | null>(null),
       [labelElt, setLabelElt] = useState<HTMLDivElement | null>(null),
       portalParentElt = labelElt?.closest(kGraphPortalClass) as HTMLDivElement ?? null,
       positioningParentElt = labelElt?.closest(kGraphClassSelector) as HTMLDivElement ?? null;
+
+    useEffect(() => {
+      if (editing && inputRef.current) {
+        inputRef.current.select();
+      }
+    }, [editing]);
 
     const getAttributeIDs = useCallback(() => {
       const isScatterPlot = graphModel.plotType === 'scatterPlot',
@@ -189,20 +200,48 @@ export const AttributeLabel = observer(
     //   return () => disposer();
     // }, [place, dataConfiguration, refreshAxisTitle]);
 
+    const startEditing = readOnly || editing ? undefined
+      : () => {
+          if (!readOnly) {
+            setEditing(true);
+          }
+        };
+
+    const updateValue = (val: string) => {
+      if (place === "left") {
+        return graphModel.setYAttributeLabel(val);
+      } else {
+        return graphModel.setXAttributeLabel(val);
+      }
+    };
+
     const readyForPortal = positioningParentElt && onChangeAttribute && onTreatAttributeAs && onRemoveAttribute;
     const codapLegend = !defaultSeriesLegend;
 
+    const divClassName = classNames("axis-label", { vertical, editing });
     return (
       <>
         <foreignObject {...foreignObjectStyle}>
           <div
-            className="axis-label"
+            className={divClassName}
+            onClick={startEditing}
             ref={(elt) => setLabelElt(elt)}
             style={divStyle}
           >
-            <div className={classNames({ vertical })} >
-              {displayText}
-            </div>
+            {editing
+              ? (
+                <InputTextbox
+                  defaultValue={displayText}
+                  finishEditing={() => setEditing(false)}
+                  inputRef={inputRef}
+                  updateValue={updateValue}
+                />
+              ) : (
+                <div className={classNames({ vertical })} >
+                  {displayText}
+                </div>
+              )
+            }
           </div>
         </foreignObject>
         {/* <g ref={(elt) => setLabelElt(elt)} className={`display-label ${place}`} /> */}

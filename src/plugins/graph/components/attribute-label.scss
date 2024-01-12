@@ -5,9 +5,15 @@
   border-radius: 5px;
   display: flex;
   justify-content: center;
+  overflow: visible;
   // Match kAxisLabelHorizontalVerticalPadding and kAxisLabelVerticalPadding in graph-types.ts
   padding: 5px 10px;
   position: absolute;
+
+  &.vertical.editing {
+    justify-content: flex-start;
+    padding-left: 1px;
+  }
 
   div {
     white-space: nowrap;

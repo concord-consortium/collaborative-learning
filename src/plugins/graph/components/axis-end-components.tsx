@@ -1,16 +1,17 @@
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import React, { useState, useRef, useEffect, CSSProperties } from 'react';
+import { measureText } from '../../../components/tiles/hooks/use-measure-text';
+import { isFiniteNumber } from '../../../utilities/math-utils';
 import { kAxisStrokeWidth, kAxisTickLength, kAxisTickPadding, kTopAndRightDefaultExtent } from '../graph-types';
 import { AxisPlace } from '../imports/components/axis/axis-types';
 import { useAxisLayoutContext } from '../imports/components/axis/models/axis-layout-context';
+import { InputTextbox } from './input-textbox';
 
 import NumberlineArrowLeft from "../../../assets/numberline-arrow-left.svg";
 import NumberlineArrowRight from "../../../assets/numberline-arrow-right.svg";
 
 import "./axis-end-components.scss";
-import { isFiniteNumber } from '../../../utilities/math-utils';
-import { measureText } from '../../../components/tiles/hooks/use-measure-text';
 
 // This component includes a handful of componets that get added to a graph near the end of its left and bottom axes.
 // An editable box allows the user to adjust the min or max of the axis.
@@ -144,20 +145,6 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
     if (isFiniteNumber(Number(val))) {
       onValueChange(Number(val));
     }
-    setIsEditing(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    const { key } = e;
-    switch (key) {
-      case "Enter": {
-        updateValue((e.target as HTMLInputElement).value);
-        break;
-      }
-      case "Escape":
-        setIsEditing(false);
-        break;
-    }
   };
 
   const borderBoxClasses = classNames("editable-border-box", axis);
@@ -168,20 +155,11 @@ export const AxisEndComponents: React.FC<IAxisEndComponentsProps> = observer(fun
       <div style={borderBoxStyles} className={borderBoxClasses} onClick={handleClick}
         data-testid={`editable-border-box-${axis}-${minOrMax}`}>
         { isEditing ?
-          <input
-            className="input-textbox"
-            ref={(el) => {
-              inputRef.current = el;
-            }}
-            onKeyDown={handleKeyDown}
-            defaultValue={value.toString()} // Set the initial value
-            onBlur={(e) => updateValue(e.target.value)}
-            onChange={(e) => {
-              // Set the width of the input based on the length of the input value
-              if (inputRef.current) {
-                inputRef.current.style.width = `${Math.max(5, e.target.value.length)}ch`;
-              }
-            }}
+          <InputTextbox
+            defaultValue={value.toString()}
+            finishEditing={() => setIsEditing(false)}
+            inputRef={inputRef}
+            updateValue={updateValue}
           /> :
           <div>{value}</div>
         }
