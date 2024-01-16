@@ -20,11 +20,22 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const groupsModel = stores.groups;
   const [sortBy, setSortBy] = useState("Group");
 
-  // console.log("| user info: ", stores.user.type, stores.user.id);
+  const includeDocForStudent = (doc: DocumentModelType) => {
+    // problem documents are always included
+    if (doc.type === "problem") return true;
+    // for personal docs, only include when user is in the same group as the doc owner
+    return groupsModel.groupForUser(stores.user.id)?.id === groupsModel.groupForUser(doc.uid)?.id;
+  };
 
   //******************************* Sorting Documents *************************************
   const filteredDocsByType = stores.documents.all.filter((doc: DocumentModelType) => {
-    return isSortableType(doc.type);
+    // comment the following to restrict to group for students
+    //return isSortableType(doc.type);
+    if (stores.user.type === "student") {
+      return isSortableType(doc.type) && includeDocForStudent(doc);
+    } else {
+      return isSortableType(doc.type);
+    }
   });
 
   const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
