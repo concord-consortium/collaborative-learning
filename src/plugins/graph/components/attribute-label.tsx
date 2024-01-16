@@ -84,9 +84,11 @@ export const AttributeLabel = observer(
     const placeBounds = layout.getComputedBounds(place);
     const stringBounds = getStringBounds(displayText, defaultFont);
     const boxHeight = stringBounds.height + 2 * (kAxisLabelVerticalPadding + kAxisLabelBorderWidth) + 1;
-    const boxWidth = stringBounds.width + 2 * (kAxisLabelHorizontalPadding + kAxisLabelBorderWidth) + 1;
+    const extraWidth = 2 * (kAxisLabelHorizontalPadding + kAxisLabelBorderWidth);
+    const boxWidth = stringBounds.width + extraWidth + 1;
     const height = vertical ? boxWidth : boxHeight;
-    const width = vertical ? boxHeight : boxWidth;
+    const width = vertical ? boxHeight
+      : editing ? inputWidth + extraWidth : boxWidth;
     const foreignObjectWidth = vertical && editing ? inputWidth + 2 : width; // Accommodate text box when editing
     const x = place === "left" ? axisGap : placeBounds.left + (placeBounds.width - width) / 2;
     const y = place === "left" ? placeBounds.top + (placeBounds.height - height) / 2
