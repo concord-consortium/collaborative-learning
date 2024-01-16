@@ -58,7 +58,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
       title={documentTitle} onClick={isPrivate ? undefined : handleDocumentClick}>
       <div className="scaled-list-item-container" onDragStart={handleDocumentDragStart}
         draggable={!!onDocumentDragStart && !isPrivate}>
-        { isPrivate
+        { isPrivate && stores.user.type === "student"
           ? <ThumbnailPrivateIcon />
           : document.content
             ? <div className="scaled-list-item">
