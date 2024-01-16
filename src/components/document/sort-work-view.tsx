@@ -37,6 +37,8 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
 
   //TODO: should we get rid of this and call on a method inside sortedDocuments where we pass the sortBy option
   //and it returns sortByGroup, sortByName, etc
+  //TODO: Should we submit a PR for all this class refactoring + work done in sort-by- strategy, rename?
+
   let sortedDocumentsOld; //this is what is rendered
   switch (sortBy) {
     case "Group":

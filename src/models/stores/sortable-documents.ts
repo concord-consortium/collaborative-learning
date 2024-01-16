@@ -20,7 +20,7 @@ type TagWithDocs = {
 };
 
 export class SortedDocuments {
-  stores: IBaseStores; //instance variable will be "state" - if makeAutoObservable is called
+  stores: IBaseStores;
   tempTagDocumentMap = new Map<string, Set<string>>();
 
   constructor(stores: IBaseStores) {
