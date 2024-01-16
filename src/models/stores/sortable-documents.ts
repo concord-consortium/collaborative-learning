@@ -151,6 +151,9 @@ export class SortedDocuments {
     return sortedDocsArr;
   }
 
+  //Ideas with Scott:
+  //possibly could be an "auto-run"
+
   updateTagDocumentMap () {
     const db = this.db.firestore;
     const filteredDocs = this.filteredDocsByType;
@@ -159,13 +162,12 @@ export class SortedDocuments {
       //Comments are stored in the Firestore document with `uid:teacher_documentKey`
       //where uid:teacher is the teacher who made the comments on the document with documentKey
       //docsRef may be a reference to multiple documents
-      //one for student (who made document) any for teachers who commented
+      //i.e one for student (who made document) plus any for teachers who commented
       const docsRef = db.collection("documents").where("key", "==", doc.key);
       docsRef.get().then(docsSnapshot => {
         if (!docsSnapshot.empty){
           docsSnapshot.forEach(docSnapshot =>{
-            const fireStoreDocKey = docSnapshot.id;
-            const commentsRef = db.collection("documents").doc(fireStoreDocKey).collection("comments");
+            const commentsRef = docSnapshot.ref.collection("comments");
             commentsRef.get().then(commentsSnapshot => {
               if (!commentsSnapshot.empty){
                 runInAction(() => {

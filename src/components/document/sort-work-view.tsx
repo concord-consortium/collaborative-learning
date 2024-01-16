@@ -35,23 +35,18 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     onClick: () => setSortBy(option)
   }));
 
-  //TODO: should we get rid of this and call on a method inside sortedDocuments where we pass the sortBy option
-  //and it returns sortByGroup, sortByName, etc
-  //TODO: Should we submit a PR for all this class refactoring + work done in sort-by- strategy, rename?
-
-  let sortedDocumentsOld; //this is what is rendered
+  let renderedSortedDocuments;
   switch (sortBy) {
     case "Group":
-      sortedDocumentsOld = sortedDocuments.sortByGroup;
+      renderedSortedDocuments = sortedDocuments.sortByGroup;
       break;
     case "Name":
-      sortedDocumentsOld = sortedDocuments.sortByName;
+      renderedSortedDocuments = sortedDocuments.sortByName;
       break;
     case sortTagPrompt:
-      sortedDocumentsOld = sortedDocuments.sortByStrategy;
+      renderedSortedDocuments = sortedDocuments.sortByStrategy;
       break;
   }
-
 
   //******************************* Click to Open Document  ***************************************
   const handleSelectDocument = (document: DocumentModelType) => {
@@ -90,8 +85,8 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
         <>
           <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
           <div className="tab-panel-documents-section">
-            { sortedDocumentsOld &&
-              sortedDocumentsOld.map((sortedSection, idx) => {
+            { renderedSortedDocuments &&
+              renderedSortedDocuments.map((sortedSection, idx) => {
                 return (
                   <div className="sorted-sections" key={`sortedSection-${idx}`}>
                     <div className="section-header">
