@@ -53,6 +53,9 @@ class XYPlotToolTile {
   getPlottedVariablesPoint(workspaceClass) {
     return this.getPlottedVariablesGroup(workspaceClass).find("circle.plotted-variable-value");
   }
+  getPlottedVariablesPointHighlight(workspaceClass) {
+    return this.getPlottedVariablesGroup(workspaceClass).find("circle.plotted-variable-highlight-value");
+  }
   getPlottedVariablesLabel(workspaceClass) {
     return this.getPlottedVariablesGroup(workspaceClass).find("text.plotted-variable-label");
   }
