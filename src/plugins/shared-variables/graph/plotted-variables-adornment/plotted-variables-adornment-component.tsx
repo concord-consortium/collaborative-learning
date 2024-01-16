@@ -56,7 +56,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   const classFromKey = model.classNameFromKey(cellKey);
   const plottedFunctionRef = useRef<SVGGElement>(null);
   const smm = getSharedModelManager(graphModel);
-  const sharedVariables = tile && smm?.isReady && smm.findFirstSharedModelByType(SharedVariables, tile.id);
+  const sharedVariables = (tile && smm?.isReady) ? smm.findFirstSharedModelByType(SharedVariables, tile.id) : undefined;
   const textHeight = 12;
   const padding = 4;
   const offsetFromPoint = 14;
@@ -106,6 +106,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
     const kPixelGap = 1;
     for (const instanceKey of model.plottedVariables.keys()) {
       const plottedVar = model.plottedVariables.get(instanceKey);
+      const variable = plottedVar && plottedVar.xVariableId && sharedVariables?.getVariableById(plottedVar.xVariableId);
       const values = plottedVar?.variableValues;
       const tPoints = model.computePoints({
         instanceKey, min: tPixelMin, max: tPixelMax, xCellCount, yCellCount, gap: kPixelGap, xScale, yScale
@@ -120,9 +121,18 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
           .on('mouseout', function(d, i) { this.classList.remove('hovered'); });
 
         // Highlight of line (visible on mouseover)
-        traceGroup.append('path')
+        const pathHighlight = traceGroup.append('path')
           .attr('class', 'plotted-variable-highlight plotted-variable-highlight-path')
           .attr('d', path);
+        if (!readOnly && variable) {
+          pathHighlight.on('click', (e) => {
+            // "Position" is the click x value relative to the left edge of the graph area.
+            const containerLeft = plottedFunctionRef.current?.getBoundingClientRect().left;
+            if (isFiniteNumber(containerLeft)) {
+              setVariableValue(variable, e.x-containerLeft);
+            }
+          });
+        }
         // Path for main line
         traceGroup.append('path')
           .attr('class', `plotted-variable-path`)
@@ -156,32 +166,29 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
             point, pointHighlight, labelRect, valueLabel);
 
           // Set up drag handling for point if needed
-          if (!readOnly && sharedVariables && plottedVar.xVariableId) {
-            const variable = sharedVariables.getVariableById(plottedVar.xVariableId);
+          if (!readOnly && variable) {
             let currentX = x;
-            if (variable) {
-              pointHighlight
-                .call(drag<SVGCircleElement, unknown>()
-                  .container(() => { return plottedFunctionRef.current!; })
-                  .filter((e) => { return !e.ctrlKey && !e.button && isTileSelected; })
-                  .on('start', (e) => traceGroup.classed('dragging', true))
-                  .on('drag', (e) => {
-                    const newX = Math.round(e.x);
-                    if (newX < tPixelMin || newX > tPixelMax) return;
-                    const newY = tPoints[newX].y;
-                    const xValue = model.valueForPosition(newX, xScale, xCellCount);
-                    const yValue = model.valueForPosition(newY, yScale, yCellCount);
-                    if (xValue && yValue) {
-                      currentX = newX;
-                      positionPointMarkers(xValue, yValue, newX, newY,
-                        point, pointHighlight, labelRect, valueLabel);
-                    }
-                  })
-                  .on('end', (e) => {
-                    traceGroup.classed('dragging', false);
-                    setVariableValue(variable, currentX);
-                  }));
-            }
+            pointHighlight
+              .call(drag<SVGCircleElement, unknown>()
+                .container(() => { return plottedFunctionRef.current!; })
+                .filter((e) => { return !e.ctrlKey && !e.button && isTileSelected; })
+                .on('start', (e) => traceGroup.classed('dragging', true))
+                .on('drag', (e) => {
+                  const newX = Math.round(e.x);
+                  if (newX < tPixelMin || newX > tPixelMax) return;
+                  const newY = tPoints[newX].y;
+                  const xValue = model.valueForPosition(newX, xScale, xCellCount);
+                  const yValue = model.valueForPosition(newY, yScale, yCellCount);
+                  if (xValue && yValue) {
+                    currentX = newX;
+                    positionPointMarkers(xValue, yValue, newX, newY,
+                      point, pointHighlight, labelRect, valueLabel);
+                  }
+                })
+                .on('end', (e) => {
+                  traceGroup.classed('dragging', false);
+                  setVariableValue(variable, currentX);
+                }));
           }
         }
       }
