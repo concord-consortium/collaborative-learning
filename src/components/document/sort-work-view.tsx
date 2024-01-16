@@ -29,8 +29,11 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
 
   //******************************* Sorting Documents *************************************
   const filteredDocsByType = stores.documents.all.filter((doc: DocumentModelType) => {
-    // comment the following to restrict to group for students
-    //return isSortableType(doc.type);
+    // load all documents regardless of type
+    return isSortableType(doc.type);
+
+    // not implemented, but saving while story in progress
+    // as student user, only load personal docs when I am in same group as the doc owner
     if (stores.user.type === "student") {
       return isSortableType(doc.type) && includeDocForStudent(doc);
     } else {
