@@ -351,8 +351,7 @@ export type DocumentModelType = Instance<typeof DocumentModel>;
 export type DocumentModelSnapshotType = SnapshotIn<typeof DocumentModel>;
 
 export const getDocumentContext = (document: DocumentModelType): IDocumentContext => {
-  // console.log("➡️ getDocumentContext");
-  const { type, key, title, originDoc, stars } = document;
+  const { type, key, title, originDoc } = document;
   return {
     type, key, title, originDoc,
     getProperty: (prop: string) => document.properties.get(prop),
