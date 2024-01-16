@@ -20,7 +20,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const groupsModel = stores.groups;
   const [sortBy, setSortBy] = useState("Group");
 
-  console.log("| user info: ", stores.user.type, stores.user.id);
+  // console.log("| user info: ", stores.user.type, stores.user.id);
 
   //******************************* Sorting Documents *************************************
   const filteredDocsByType = stores.documents.all.filter((doc: DocumentModelType) => {
@@ -104,7 +104,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const renderDebugView = () => {
     //returns a list lf all documents (unsorted)
     return filteredDocsByType.map((doc, idx) => {
-      const masked = doc.visibility === "private" && doc.uid !== stores.user.id;
+      const masked = (doc.visibility === "private" || doc.visibility === undefined) && doc.uid !== stores.user.id;
       const ct = idx + 1;
       return (
         <pre key={idx} style={{ margin: "0px", padding: "0px", fontSize: "10px" }}>

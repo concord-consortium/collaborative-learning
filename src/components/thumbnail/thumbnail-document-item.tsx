@@ -47,7 +47,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
     onDocumentDeleteClick?.(document);
     e.stopPropagation();
   };
-  const isPrivate = document.visibility === "private" && document.uid !== stores.user.id;
+  const isPrivate = (!document.visibility || document.visibility === "private") && document.uid !== stores.user.id;
   const privateClass = isPrivate ? "private" : "";
   const documentTitle = appMode !== "authed" && appMode !== "demo"
                           ? `Firebase UID: ${document.key}` : undefined;
