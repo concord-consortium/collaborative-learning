@@ -93,6 +93,7 @@ export const GraphAxis = observer(function GraphAxis({
       dataConfig?.onAction(action => {
         if (
             isAlive(graphModel) &&
+            !graphModel.lockAxes &&
             (isAddCasesAction(action) || isSetCaseValuesAction(action))
            )
         {

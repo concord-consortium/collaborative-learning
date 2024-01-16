@@ -74,8 +74,10 @@ export const Graph = observer(
     const attrRole = graphPlaceToAttrRole[computedPlace];
     if (attrRole === 'y' && oldAttrId) {
       graphModel.replaceYAttributeID(oldAttrId, attrId);
-      const yAxisModel = graphModel.getAxis('left') as IAxisModel;
-      setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
+      if (!graphModel.lockAxes) {
+        const yAxisModel = graphModel.getAxis('left') as IAxisModel;
+        setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
+      }
     } else {
       graphModel.setAttributeID(attrRole, dataSet.id, attrId);
     }
@@ -89,7 +91,9 @@ export const Graph = observer(
     if (place === 'left') {
       graphModel.removeYAttributeID(idOfAttributeToRemove);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
-      setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
+      if (!graphModel.lockAxes) {
+        setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
+      }
     } else {
       const role = graphPlaceToAttrRole[place];
       if (role === 'y') {

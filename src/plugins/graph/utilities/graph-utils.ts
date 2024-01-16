@@ -477,8 +477,8 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
   const setPositions = (dots: DotSelection | null) => {
     if (dots !== null) {
       dots
-        .transition()
-        .duration(duration)
+        // .transition()
+        // .duration(duration)
         .attr('transform', (aCaseData: CaseData) => {
           const x = getScreenX(aCaseData.caseID), y = getScreenY(aCaseData.caseID, aCaseData.plotNum);
           if (isFiniteNumber(x) && isFiniteNumber(y)) {
