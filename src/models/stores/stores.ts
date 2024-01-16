@@ -49,7 +49,6 @@ export function createStores(params?: ICreateStores): IStores {
   return new Stores(params);
 }
 
-//TODO: doesnt need implements
 class Stores implements IStores{
   appMode: AppMode;
   isPreviewing?: boolean;
@@ -76,7 +75,6 @@ class Stores implements IStores{
   userContextProvider: UserContextProvider;
   sortedDocuments: SortedDocuments;
 
-  //TODO: make sure to have makeAutoObservable in constructor
   constructor(params?: ICreateStores){
     // This will mark all properties as observable
     // all getters as computed, all setters as actions
@@ -85,12 +83,10 @@ class Stores implements IStores{
     // will do with async functions, but whatever it
     // does seems to work without warnings.
     makeAutoObservable(this);
-
     this.appMode = params?.appMode || "dev";
     this.isPreviewing = params?.isPreviewing || false;
     this.appVersion = params?.appVersion || "unknown";
     this.appConfig = params?.appConfig || AppConfigModel.create();
-
     // for testing, we create a null problem or investigation if none is provided
     this.investigation = params?.investigation ||
       InvestigationModel.create({ ordinal: 0, title: "Null Investigation" });
@@ -124,7 +120,7 @@ class Stores implements IStores{
     });
     this.persistentUI.setProblemPath(this.problemPath);
     this.userContextProvider = new UserContextProvider(this);
-    this.sortedDocuments = new SortedDocuments(this); //use new because its a class
+    this.sortedDocuments = new SortedDocuments(this);
   }
 
   get tabsToDisplay() {
