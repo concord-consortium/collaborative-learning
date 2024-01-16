@@ -637,12 +637,16 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
   const leftAxisModel = emptyPlotIsNumeric
                           ? NumericAxisModel.create({place: "left", min, max})
                           : EmptyAxisModel.create({place: "left"});
+  const defaultAxisLabels = appConfig?.getSetting("defaultAxisLabels", "graph");
+  const axisLabels = defaultAxisLabels && defaultAxisLabels as Record<string, string>;
   const createdGraphModel = GraphModel.create({
     plotType: emptyPlotIsNumeric ? "scatterPlot" : "casePlot",
     axes: {
       bottom: bottomAxisModel,
       left: leftAxisModel
     },
+    xAttributeLabel: axisLabels && axisLabels.bottom,
+    yAttributeLabel: axisLabels && axisLabels.left,
     ...snap
   });
   // TODO: make a dedicated setting for this rather than using defaultSeriesLegend as a proxy:
