@@ -1,7 +1,4 @@
-import { ObservableSet,
-  makeAutoObservable,
-  runInAction
-} from "mobx";
+import { ObservableSet, makeAutoObservable, runInAction } from "mobx";
 import { DocumentModelType } from "../document/document";
 import { isSortableType } from "../document/document-types";
 import { IBaseStores } from "./base-stores-types";
@@ -31,7 +28,7 @@ export class SortedDocuments {
     this.stores = stores;
   }
 
-  //***************** Stores ***********************
+  //********************************************* Views *******************************************
   get documents(): DocumentsModelType {
     return this.stores.documents;
   }
@@ -48,16 +45,13 @@ export class SortedDocuments {
     return this.stores.appConfig.commentTags;
   }
 
-  //***************** Sort Utility ***********************
-
   get filteredDocsByType(): DocumentModelType[] {
     return this.documents.all.filter((doc: DocumentModelType) => {
       return isSortableType(doc.type);
     });
   }
 
-  //***************** Sort by Group ***********************
-
+  //******************************************* Sort By Group *************************************
   get sortByGroup(): SortedDocument[]{
     const documentMap = new Map();
     this.filteredDocsByType.forEach((doc) => {
@@ -81,6 +75,7 @@ export class SortedDocuments {
     return sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel));
   }
 
+  //******************************************* Sort By Name **************************************
   get sortByName(): SortedDocument[]{
     const documentMap = new Map();
     this.filteredDocsByType.forEach((doc) => {
@@ -96,12 +91,10 @@ export class SortedDocuments {
     });
 
     const sortedSectionLabels = Array.from(documentMap.keys()).sort((a, b) => {
-      // Parse the names
       const parseName = (name: any) => {
         const [lastName, firstName] = name.split(", ").map((part: any) => part.trim());
         return { firstName, lastName };
       };
-
       const aParsed = parseName(a);
       const bParsed = parseName(b);
 
@@ -113,101 +106,9 @@ export class SortedDocuments {
       return aParsed.firstName.localeCompare(bParsed.firstName);
     });
     return sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel));
-
   }
 
-  //***************** Sort by Strategy ***********************
-
-  //TODO: optimize query:
-  //look at documents store itself go through that iterate them,,
-  //they'll have key and only query those documents at first.
-  //personal, problem, learning documents.
-  //there should be a function that grabs the uid:#_documentKey;
-
-  //---Actions
-  updateTagDocumentMap () {
-    const db = this.db.firestore;
-
-    //------------------new--------------------
-    const filteredDocs = this.filteredDocsByType;
-    const documentIDs= filteredDocs.map(doc => {
-     return `uid:${doc.uid}_${doc.key}`;
-    });
-
-    console.log("documentIds:", documentIDs);
-    documentIDs.forEach(docId =>{
-      const [uid, docKey] = docId.split("_");
-      const docRef = db.collection("documents").doc(docId);
-      const commentsRef = docRef.collection("comments");
-
-      // commentsRef.get().then(commentsSnapshot => {
-      commentsRef.onSnapshot(commentsSnapshot => {
-        console.log("\t🥩 commentsSnapshot:", commentsSnapshot);
-        runInAction(() => {
-          commentsSnapshot.forEach(commentDoc => {
-            const commentData = commentDoc.data();
-
-            if (commentData && commentData.tags) {
-              console.log("enters if");
-              console.log("commentData:", commentData);
-              commentData.tags.forEach((tag: string) => {
-                let docKeysSet = this.tempTagDocumentMap.get(tag);
-                if (!docKeysSet) {
-                  docKeysSet = new ObservableSet<string>();
-                  this.tempTagDocumentMap.set(tag, docKeysSet);
-                }
-                docKeysSet.add(docKey); //only unique doc keys will be stored
-                console.log("docKeysSet: ", docKeysSet);
-              });
-            }
-          });
-          // console.log("tempTagDocumentMap:", this.tempTagDocumentMap);
-        });
-      });
-    });
-
-    //---------------end new --------------
-
-    //------------- new 2 ----------------------
-
-    //------------- end new 2-----------------
-
-    //old
-
-    // const unsubscribeFromDocs = db.collection("documents").onSnapshot(docsSnapshot => {
-    //   docsSnapshot.forEach(doc => {
-    //     const docData = doc.data();
-    //     const docKey = docData.key;
-    //     const commentsRef = doc.ref.collection("comments"); //access sub collection
-    //     commentsRef.get().then(commentsSnapshot => {
-    //       console.log("commentssnapshot:", commentsSnapshot);
-    //       runInAction(() => {
-    //         commentsSnapshot.forEach(commentDoc => {
-    //           const commentData = commentDoc.data();
-    //           if (commentData && commentData.tags) {
-    //             console.log("old - enters if");
-    //             console.log("commentData:", commentData);
-    //             commentData.tags.forEach((tag: string) => {
-    //               let docKeysSet = this.tempTagDocumentMap.get(tag);
-    //               if (!docKeysSet) {
-    //                 docKeysSet = new ObservableSet<string>();
-    //                 this.tempTagDocumentMap.set(tag, docKeysSet);
-    //               }
-    //               docKeysSet.add(docKey); //only unique doc keys will be stored
-    //             });
-    //           }
-    //         });
-    //       });
-
-    //     });
-    //   });
-    //   unsubscribeFromDocs();
-    // });
-
-    //end old
-
-  }
-
+  //*************************************** Sort By Strategy **************************************
 
   get sortByStrategy(): SortedDocument[]{
     const commentTags = this.commentTags;
@@ -234,9 +135,6 @@ export class SortedDocuments {
       }
     });
 
-    // console.log("tempTagDocumentMap:", this.tempTagDocumentMap);
-    // console.log("tagsWithDocs:", tagsWithDocs);
-    //from convertTagsWithDocsToSortedDocuments
     const sortedDocsArr: SortedDocument[] = [];
 
     Object.entries(tagsWithDocs).forEach((tagKeyAndValObj) => {
@@ -250,13 +148,47 @@ export class SortedDocuments {
       });
     });
 
-    // console.log("sortByStrategy returning: ", sortedDocsArr);
     return sortedDocsArr;
-
   }
 
+  updateTagDocumentMap () {
+    const db = this.db.firestore;
+    const filteredDocs = this.filteredDocsByType;
 
-
-
+    filteredDocs.forEach(doc => {
+      //Comments are stored in the Firestore document with `uid:teacher_documentKey`
+      //where uid:teacher is the teacher who made the comments on the document with documentKey
+      //docsRef may be a reference to multiple documents
+      //one for student (who made document) any for teachers who commented
+      const docsRef = db.collection("documents").where("key", "==", doc.key);
+      docsRef.get().then(docsSnapshot => {
+        if (!docsSnapshot.empty){
+          docsSnapshot.forEach(docSnapshot =>{
+            const fireStoreDocKey = docSnapshot.id;
+            const commentsRef = db.collection("documents").doc(fireStoreDocKey).collection("comments");
+            commentsRef.get().then(commentsSnapshot => {
+              if (!commentsSnapshot.empty){
+                runInAction(() => {
+                  commentsSnapshot.forEach(commentDoc => {
+                    const commentData = commentDoc.data();
+                    if (commentData && commentData.tags) {
+                      commentData.tags.forEach((tag: string) => {
+                        let docKeysSet = this.tempTagDocumentMap.get(tag);
+                        if (!docKeysSet) {
+                          docKeysSet = new ObservableSet<string>();
+                          this.tempTagDocumentMap.set(tag, docKeysSet);
+                        }
+                        docKeysSet.add(doc.key); //only unique doc keys will be stored
+                      });
+                    }
+                  });
+                });
+              }
+            });
+          });
+        }
+      });
+    });
+  }
 
 }
