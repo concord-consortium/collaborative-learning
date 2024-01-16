@@ -1,4 +1,7 @@
-import { ObservableSet, makeAutoObservable, runInAction } from "mobx";
+import { ObservableSet,
+  makeAutoObservable,
+  runInAction
+} from "mobx";
 import { DocumentModelType } from "../document/document";
 import { isSortableType } from "../document/document-types";
 import { IBaseStores } from "./base-stores-types";
@@ -124,21 +127,29 @@ export class SortedDocuments {
   //---Actions
   updateTagDocumentMap () {
     const db = this.db.firestore;
+
+    //------------------new--------------------
     const filteredDocs = this.filteredDocsByType;
     const documentIDs= filteredDocs.map(doc => {
-     return `${doc.uid}_${doc.key}`;
+     return `uid:${doc.uid}_${doc.key}`;
     });
 
+    console.log("documentIds:", documentIDs);
     documentIDs.forEach(docId =>{
       const [uid, docKey] = docId.split("_");
-
       const docRef = db.collection("documents").doc(docId);
       const commentsRef = docRef.collection("comments");
-      commentsRef.get().then(commentsSnapshot => {
+
+      // commentsRef.get().then(commentsSnapshot => {
+      commentsRef.onSnapshot(commentsSnapshot => {
+        console.log("\t🥩 commentsSnapshot:", commentsSnapshot);
         runInAction(() => {
           commentsSnapshot.forEach(commentDoc => {
             const commentData = commentDoc.data();
+
             if (commentData && commentData.tags) {
+              console.log("enters if");
+              console.log("commentData:", commentData);
               commentData.tags.forEach((tag: string) => {
                 let docKeysSet = this.tempTagDocumentMap.get(tag);
                 if (!docKeysSet) {
@@ -150,37 +161,42 @@ export class SortedDocuments {
               });
             }
           });
-          console.log("tempTagDocumentMap:", this.tempTagDocumentMap);
+          // console.log("tempTagDocumentMap:", this.tempTagDocumentMap);
         });
-
       });
     });
 
-    // //old
+    //---------------end new --------------
+
+    //------------- new 2 ----------------------
+
+    //------------- end new 2-----------------
+
+    //old
+
     // const unsubscribeFromDocs = db.collection("documents").onSnapshot(docsSnapshot => {
     //   docsSnapshot.forEach(doc => {
     //     const docData = doc.data();
     //     const docKey = docData.key;
     //     const commentsRef = doc.ref.collection("comments"); //access sub collection
     //     commentsRef.get().then(commentsSnapshot => {
-    //       runInAction(()=>{
+    //       console.log("commentssnapshot:", commentsSnapshot);
+    //       runInAction(() => {
     //         commentsSnapshot.forEach(commentDoc => {
     //           const commentData = commentDoc.data();
     //           if (commentData && commentData.tags) {
+    //             console.log("old - enters if");
+    //             console.log("commentData:", commentData);
     //             commentData.tags.forEach((tag: string) => {
     //               let docKeysSet = this.tempTagDocumentMap.get(tag);
     //               if (!docKeysSet) {
     //                 docKeysSet = new ObservableSet<string>();
     //                 this.tempTagDocumentMap.set(tag, docKeysSet);
-    //                 // docKeysSet = this.tempTagDocumentMap.get(tag) as Set<string>;
     //               }
-    //               // console.log("key added:", docKey, "tag:", tag);
     //               docKeysSet.add(docKey); //only unique doc keys will be stored
-    //               console.log("docKeysSet: ", docKeysSet);
     //             });
     //           }
     //         });
-    //         console.log("tempTagDocumentMap:", this.tempTagDocumentMap);
     //       });
 
     //     });
@@ -188,8 +204,7 @@ export class SortedDocuments {
     //   unsubscribeFromDocs();
     // });
 
-
-
+    //end old
 
   }
 
