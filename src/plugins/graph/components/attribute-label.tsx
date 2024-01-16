@@ -18,9 +18,9 @@ import { useGraphLayoutContext } from "../models/graph-layout";
 import {getStringBounds} from "../imports/components/axis/axis-utils";
 import {AxisOrLegendAttributeMenu} from "../imports/components/axis/components/axis-or-legend-attribute-menu";
 import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
+import { InputTextbox } from "./input-textbox";
 
 import "./attribute-label.scss";
-import { InputTextbox } from "./input-textbox";
 
 interface IAttributeLabelProps {
   place: GraphPlace;
