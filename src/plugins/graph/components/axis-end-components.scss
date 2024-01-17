@@ -11,15 +11,21 @@
   position: absolute;
 }
 
+.input-textbox {
+  height: 22px;
+  text-align: center;
+}
+
 .editable-border-box {
   //width is determined dynamically by how many characters in the number
   align-items: center;
   border-radius: 5px;
   border: solid 1.5px #949494;
   background-color: #f0f9fb;
+  color: #3f3f3f;
   display: flex;
-  font: 12px sans-serif; // Keep in sync with boxFont in editable-graph-value.tsx
-  height: 22px; // Keep in sync with kEditableBoxHeight in editable-graph-value.tsx
+  font: 14px sans-serif; // Keep in sync with boxFont in axis-end-components.tsx
+  height: 22px; // Keep in sync with kEditableBoxHeight in axis-end-components.tsx
   padding: 0 3px;
   position: absolute;
 
@@ -38,9 +44,5 @@
     transform: translate(-50%, -50%);
     min-width: 25px;
     width: 50%;
-    height: 22px;
-    text-align: center;
-    margin-left: '4px';
-    margin-right: '4px',
   }
 }

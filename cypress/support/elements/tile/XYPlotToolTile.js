@@ -25,8 +25,23 @@ class XYPlotToolTile {
   getHighlightedDot(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-dot .outer-circle.selected`);
   }
+  getAxisLabel(place, workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .axis-label.${place}`);
+  }
   getXAxisLabel(workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .display-label.bottom`);
+    return this.getAxisLabel("bottom", workspaceClass);
+  }
+  getYAxisLabel(workspaceClass) {
+    return this.getAxisLabel("left", workspaceClass);
+  }
+  getAxisInput(place, workspaceClass) {
+    return this.getAxisLabel(place, workspaceClass).find(".input-textbox");
+  }
+  getXAxisInput(workspaceClass) {
+    return this.getAxisInput("bottom", workspaceClass);
+  }
+  getYAxisInput(workspaceClass) {
+    return this.getAxisInput("left", workspaceClass);
   }
   getXAttributesLabel(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .bottom .simple-attribute-label`);
