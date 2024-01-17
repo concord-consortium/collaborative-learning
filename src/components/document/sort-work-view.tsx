@@ -116,16 +116,31 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
       const masked = (doc.visibility === "private" || doc.visibility === undefined) && doc.uid !== stores.user.id;
       const ct = idx + 1;
       return (
-        <pre key={idx} style={{ margin: "0px", padding: "0px", fontSize: "10px" }}>
-          {ct < 10 && " "}{ct}
-          | {doc.key}&nbsp;
-          | {doc.type}{' '.repeat(12 - doc.type.length)}
-          | {doc.visibility ? doc.visibility + " ".repeat(10 - doc.visibility.length) : "undefined "}
-          | {doc.uid}{' '.repeat(5 - doc.uid.length)}
-          | {doc.groupId ?? " "}&nbsp;
-          | {masked ? "mask " : "     "}
-          | {doc.title?.slice(0, 20)}
-        </pre>
+        <>
+          { idx === 0 &&
+            <pre style={{ margin: "0px", padding: "0px", fontSize: "10px", color:"blue" }}>
+              &nbsp;
+              | key  {" ".repeat(17)}
+              | type {" ".repeat(7)}
+              | viz  {" ".repeat(5)}
+              | uid {" ".repeat(1)}
+              | gp {" ".repeat(0)}
+              | eye {" ".repeat(1)}
+              | title {" ".repeat(4)}
+            </pre>
+          }
+          <hr style={{ margin: "0px", padding: "0px" }}/>
+          <pre key={idx} style={{ margin: "0px", padding: "0px", fontSize: "10px" }}>
+            {ct < 10 && " "}{ct}
+            | {doc.key}&nbsp;
+            | {doc.type}{' '.repeat(12 - doc.type.length)}
+            | {doc.visibility ? doc.visibility + " ".repeat(10 - doc.visibility.length) : "undefined "}
+            | {doc.uid}{' '.repeat(5 - doc.uid.length)}
+            | {doc.groupId ?? " "}&nbsp;
+            | {masked ? "mask " : "     "}
+            | {doc.title?.slice(0, 20)}
+          </pre>
+        </>
       );
     });
   };
