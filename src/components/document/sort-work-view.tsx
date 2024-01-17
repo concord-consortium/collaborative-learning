@@ -21,12 +21,6 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const [sortBy, setSortBy] = useState("Group");
 
   //******************************* Sorting Documents *************************************
-  const filteredDocsByType = stores.documents.all.filter((doc: DocumentModelType) => {
-    // if the user is a student, subject the document to additional filtering tests
-    return stores.user.type === "student"
-      ? isSortableType(doc.type) && includeDocForStudent(doc)
-      : isSortableType(doc.type);
-  });
 
   const includeDocForStudent = (doc: DocumentModelType) => {
     const isAStudentDoc = doc.groupId !== undefined;
@@ -34,6 +28,13 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     if (doc.type === "problem") return isAStudentDoc;
     if (doc.type === "personal") return isInSameGroup;
   };
+
+  const filteredDocsByType = stores.documents.all.filter((doc: DocumentModelType) => {
+    // if the user is a student, subject the document to additional filtering tests
+    return stores.user.type === "student"
+      ? isSortableType(doc.type) && includeDocForStudent(doc)
+      : isSortableType(doc.type);
+  });
 
   const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
     text: option,
