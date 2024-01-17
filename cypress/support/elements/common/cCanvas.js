@@ -393,6 +393,32 @@ class ClueCanvas {
     }
 
     /**
+     * Locate the requested toolbar button and make sure it is selected.
+     * This escapes from any "within" restriction since toolbars are at the HTML document level.
+     * @param {*} tileType string name of the tile
+     * @param {*} buttonName string name of the button
+     */
+    toolbarButtonIsSelected(tileType, buttonName) {
+      return cy.document().within(() => {
+        cy.get(`.tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+          .should('have.class', 'selected');
+      });
+    }
+
+    /**
+     * Locate the requested toolbar button and make sure it is not selected.
+     * This escapes from any "within" restriction since toolbars are at the HTML document level.
+     * @param {*} tileType string name of the tile
+     * @param {*} buttonName string name of the button
+     */
+    toolbarButtonIsNotSelected(tileType, buttonName) {
+      return cy.document().within(() => {
+        cy.get(`.tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+          .should('not.have.class', 'selected');
+      });
+    }
+
+    /**
      * Locate the requested toolbar button and, make sure it is enabled, and click it.
      * This escapes from any "within" restriction since toolbars are at the HTML document level.
      * @param {*} tileType string name of the tile
