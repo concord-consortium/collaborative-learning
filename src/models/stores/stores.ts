@@ -23,7 +23,7 @@ import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
 import { IBaseStores } from "./base-stores-types";
 import { NavTabModelType } from "../view/nav-tabs";
-import { SortedDocuments } from "./sortable-documents";
+import { SortedDocuments } from "./sorted-documents";
 
 export interface IStores extends IBaseStores {
   problemPath: string;

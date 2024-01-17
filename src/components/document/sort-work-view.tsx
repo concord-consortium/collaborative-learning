@@ -14,9 +14,14 @@ import { isSortableType } from "../../models/document/document-types";
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
+export const filteredDocsByType = (allDocuments: DocumentModelType[]) =>{
+  return allDocuments.filter((doc: DocumentModelType) => {
+    return isSortableType(doc.type);
+  });
+};
+
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, persistentUI, sortedDocuments, documents } = useStores();
-  const allDocuments = documents.all;
 
   //*************************** Determine Sort Options & State  ***********************************
   const {tagPrompt} = appConfig;
@@ -61,7 +66,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
 
   const renderDebugView = () => {
     //returns a list lf all documents (unsorted)
-    return filteredDocsByType.map((doc, idx) => {
+    return filteredDocsByType(documents.all).map((doc, idx) => {
       const ct = idx + 1;
       return (
         <pre key={idx} style={{ margin: "0px", padding: "0px", fontSize: "10px" }}>
@@ -73,9 +78,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     });
   };
 
-  const filteredDocsByType = allDocuments.filter((doc: DocumentModelType) => { //remove
-    return isSortableType(doc.type);
-  });
+
 
   return (
     <div key="sort-work-view" className="sort-work-view">

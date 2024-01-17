@@ -6,6 +6,8 @@ import { DocumentsModelType } from "./documents";
 import { GroupsModelType } from "./groups";
 import { ClassModelType } from "./class";
 import { DB } from "../../lib/db";
+import { filteredDocsByType } from "../../components/document/sort-work-view";
+
 
 
 type SortedDocument = {
@@ -112,6 +114,7 @@ export class SortedDocuments {
 
   get sortByStrategy(): SortedDocument[]{
     const commentTags = this.commentTags;
+
     const tagsWithDocs: Record<string, TagWithDocs> = {};
     if (commentTags) {
       for (const key of Object.keys(commentTags)) {
@@ -128,15 +131,31 @@ export class SortedDocuments {
       };
     }
 
+    // Find all unique document keys in tagsWithDocs. Compare this with all sortable documents
+    // in store to find "Documents with no comments" then place those doc keys to "Not Tagged"
+    const uniqueDocKeysWithComments = new Set<string>();
+
     this.tempTagDocumentMap.forEach((docKeysSet, tag) => {
+      docKeysSet.forEach((docKey: string) =>{
+        uniqueDocKeysWithComments.add(docKey);
+      });
       const docKeysArray = Array.from(docKeysSet); // Convert the Set to an array
       if (tagsWithDocs[tag]) {
         tagsWithDocs[tag].docKeysFoundWithTag = docKeysArray;
       }
     });
 
-    const sortedDocsArr: SortedDocument[] = [];
+    const allSortableDocKeys = filteredDocsByType(this.documents.all);
+    allSortableDocKeys.forEach(doc => {
+      if (!uniqueDocKeysWithComments.has(doc.key)) {
+        // This document has no comments
+        if (tagsWithDocs[""]) {
+          tagsWithDocs[""].docKeysFoundWithTag.push(doc.key);
+        }
+      }
+    });
 
+    const sortedDocsArr: SortedDocument[] = [];
     Object.entries(tagsWithDocs).forEach((tagKeyAndValObj) => {
       const tagWithDocs = tagKeyAndValObj[1] as TagWithDocs;
       const sectionLabel = tagWithDocs.tagValue;
@@ -147,12 +166,8 @@ export class SortedDocuments {
         documents
       });
     });
-
     return sortedDocsArr;
   }
-
-  //Ideas with Scott:
-  //possibly could be an "auto-run"
 
   updateTagDocumentMap () {
     const db = this.db.firestore;
