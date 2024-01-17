@@ -47,7 +47,30 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
     onDocumentDeleteClick?.(document);
     e.stopPropagation();
   };
-  const isPrivate = (!document.visibility || document.visibility === "private") && document.uid !== stores.user.id;
+
+  const getIsPrivate = (doc: DocumentModelType) => {
+    const visibleTypes = ["publication", "learningLogPublication", "supportPublication", "personalPublication"];
+    const isVisibleType = visibleTypes.includes(doc.type);
+    const notUsersDocument = document.uid !== stores.user.id;
+    const isUsersDocument = document.uid === stores.user.id;
+    const userIsStudent = stores.user.type === "student";
+    const userIsTeacher = stores.user.type === "teacher";
+    if (userIsTeacher || isVisibleType) return false;
+
+    if (userIsStudent) {
+      if (isUsersDocument) return false;
+      if (notUsersDocument) {
+        if (document.visibility === "public"){
+          return false;
+        }
+        else {
+          return true;
+        }
+      }
+    }
+  };
+
+  const isPrivate = getIsPrivate(document);
   const privateClass = isPrivate ? "private" : "";
   const documentTitle = appMode !== "authed" && appMode !== "demo"
                           ? `Firebase UID: ${document.key}` : undefined;
@@ -58,7 +81,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
       title={documentTitle} onClick={isPrivate ? undefined : handleDocumentClick}>
       <div className="scaled-list-item-container" onDragStart={handleDocumentDragStart}
         draggable={!!onDocumentDragStart && !isPrivate}>
-        { isPrivate && stores.user.type === "student"
+        { isPrivate
           ? <ThumbnailPrivateIcon />
           : document.content
             ? <div className="scaled-list-item">

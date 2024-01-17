@@ -118,7 +118,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
       return (
         <>
           { idx === 0 &&
-            <pre style={{ margin: "0px", padding: "0px", fontSize: "10px", color:"blue" }}>
+            <pre  key={`title-row`} style={{ margin: "0px", padding: "0px", fontSize: "10px", color:"blue" }}>
               &nbsp;
               | key  {" ".repeat(17)}
               | type {" ".repeat(7)}
@@ -129,7 +129,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
               | title {" ".repeat(4)}
             </pre>
           }
-          <hr style={{ margin: "0px", padding: "0px" }}/>
+          <hr key={`hr-1`} style={{ margin: "0px", padding: "0px" }}/>
           <pre key={idx} style={{ margin: "0px", padding: "0px", fontSize: "10px" }}>
             {ct < 10 && " "}{ct}
             | {doc.key}&nbsp;
