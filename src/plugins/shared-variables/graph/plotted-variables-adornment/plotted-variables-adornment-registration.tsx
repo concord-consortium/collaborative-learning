@@ -4,11 +4,11 @@ import { registerMultiLegendPart } from "../../../graph/components/legend/legend
 import {
   getVariableFunctionLegendIdList, heightOfVariableFunctionLegend, VariableFunctionLegend, variableFunctionLegendType
 } from "../legend/variable-function-legend";
+import { PlottedVariablesAdornmentComponent } from "./plotted-variables-adornment-component";
 import { PlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
 import {
   kPlottedVariablesClass, kPlottedVariablesLabelKey, kPlottedVariablesPrefix, kPlottedVariablesType
 } from "./plotted-variables-adornment-types";
-import { PlottedVariablesAdornmentComponent } from "./plotted-variables-adornment-component";
 
 registerAdornmentContentInfo({
   type: kPlottedVariablesType,

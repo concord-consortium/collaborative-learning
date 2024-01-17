@@ -120,7 +120,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   return (
     <GraphSettingsContext.Provider value={graphSettings}>
       <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
-        <BasicEditableTileTitle readOnly={readOnly} />
+        <BasicEditableTileTitle />
         <GraphComponent
           layout={layout}
           tile={model}

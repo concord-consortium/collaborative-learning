@@ -328,6 +328,18 @@ context('XYPlot Tool Tile', function () {
       xyTile.getEditableAxisBox('bottom', 'min').invoke('text').then(parseFloat).should("be.within", -1, 1);
       xyTile.getEditableAxisBox('bottom', 'max').invoke('text').then(parseFloat).should("be.within", 3, 5);
 
+      cy.log("Change axis labels");
+      const xAxisLabel = "x axis";
+      xyTile.getXAxisLabel().click();
+      xyTile.getXAxisInput().should("be.focused").type(`${xAxisLabel}{enter}`);
+      xyTile.getXAxisInput().should("not.exist");
+      xyTile.getXAxisLabel().should("contain.text", xAxisLabel);
+      const yAxisLabel = "y axis";
+      xyTile.getYAxisLabel().click();
+      xyTile.getYAxisInput().should("be.focused").type(`${yAxisLabel}{enter}`);
+      xyTile.getYAxisInput().should("not.exist");
+      xyTile.getYAxisLabel().should("contain.text", yAxisLabel);
+
       cy.log("Plot multiple traces");
       xyTile.getAddVariablesButton().should("exist").click();
 
