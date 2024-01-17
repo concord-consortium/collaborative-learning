@@ -7,7 +7,7 @@ import {useAxisLayoutContext} from "../models/axis-layout-context";
 import {IAxisModel, isCategoricalAxisModel, isNumericAxisModel} from "../models/axis-model";
 import {isVertical} from "../../axis-graph-shared";
 import {
-  kAxisStrokeWidth, kAxisTickLength, kAxisTickPadding, kTickAndGridColor, transitionDuration
+  kAxisStrokeWidth, kAxisTickLength, kAxisTickPadding, kTickAndGridColor, kTickFontColor, transitionDuration
 } from "../../../../graph-types";
 import {DragInfo, collisionExists, computeBestNumberOfTicks,
         getCategoricalLabelPlacement,getCoordFunctions, IGetCoordFunctionsProps} from "../axis-utils";
@@ -118,7 +118,7 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
 
       select(subAxisElt)
         .selectAll('.tick text')
-        .style("fill", "#3f3f3f")
+        .style("fill", kTickFontColor)
         .style('display', (d, i, nodes) => {
           const  hideMinAndMax = (i === 0 || i === nodes.length - 1) && isNumericAxisModel(axisModel)
                                  && graphModel.isLinkedToDataSet; //hide first and last tick labels when linked

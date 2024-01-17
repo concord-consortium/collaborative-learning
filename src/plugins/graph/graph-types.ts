@@ -84,10 +84,15 @@ export const
   kChoroplethHeight = 16,
   kTopAndRightDefaultExtent = 3,
   kTickAndGridColor = "#bfbfbf",
+  kTickFontColor = "#3f3f3f",
   kAxisStrokeWidth = 2,
   kAxisTickLength = 25,
   kAxisTickPadding = 6,
-  kAxisGap = 2;
+  kAxisGap = 2,
+  kAxisLabelHorizontalPadding = 10, // Match .axis-label padding in attribute-label.scss
+  kAxisLabelVerticalPadding = 5, // Match .axis-label padding in attribute-label.scss
+  kAxisLabelBorderWidth = 1.5, // Match .axis-label border in attribute-label.scss
+  kDefaultAxisLabel = "axis label";
 export const outerCircleSelectedRadius = 10;
 export const outerCircleUnselectedRadius = 0;
 

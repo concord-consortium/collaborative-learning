@@ -1,7 +1,7 @@
 import {axisBottom, axisLeft, axisRight, axisTop,
   ScaleBand, ScaleContinuousNumeric, ScaleOrdinal, select, Selection} from "d3";
 
-export const axisGap = 5;
+export const axisGap = 8;
 
 // "rightCat" and "top" can only be categorical axes. "rightNumeric" can only be numeric
 export const AxisPlaces = ["bottom", "left", "rightCat", "top", "rightNumeric"] as const;
