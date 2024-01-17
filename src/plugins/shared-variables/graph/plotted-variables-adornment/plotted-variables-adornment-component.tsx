@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from "react";
-import { drag, format, select, Selection } from "d3";
+import { drag, select, Selection } from "d3";
 import { observer } from "mobx-react-lite";
 import { VariableType } from "@concord-consortium/diagram-view";
 
@@ -16,7 +16,7 @@ import { curveBasis, setNiceDomain } from "../../../graph/utilities/graph-utils"
 import { SharedVariables } from "../../shared-variables";
 import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
-import { isFiniteNumber } from "../../../../utilities/math-utils";
+import { isFiniteNumber, roundForDisplay } from "../../../../utilities/math-utils";
 import { useUIStore } from "../../../../hooks/use-stores";
 
 import "../../../graph/adornments/plotted-function/plotted-function-adornment-component.scss";
@@ -62,7 +62,6 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   const offsetFromPoint = 14;
   const highlightStrokeWidth = 5;
   const labelRectHeight = textHeight + 2 * padding;
-  const labelFormat = format('.3~r');
 
   // Set the positions of the point-related SVG objects and the contents of the label when the variable value changes.
   const positionPointMarkers = useCallback((xValue: number, yValue: number,
@@ -77,7 +76,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
     pointHighlight
         .attr('cx', xPos)
         .attr('cy', yPos);
-    const label = `${labelFormat(xValue)}, ${labelFormat(yValue)}`;
+    const label = `${roundForDisplay(xValue, 3)}, ${roundForDisplay(yValue, 3)}`;
     labelText
       .attr('x', xPos)
       .attr('y', yPos - offsetFromPoint - padding - 2) // up 2px to account for borders
@@ -87,7 +86,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         .attr('x', xPos - labelWidth / 2)
         .attr('y', yPos - offsetFromPoint - labelRectHeight)
         .attr('width', labelWidth);
-  }, [labelFormat, labelRectHeight]);
+  }, [labelRectHeight]);
 
   // Assign a new value to the Variable based on the given pixel position
   const setVariableValue = useCallback((variable: VariableType, position: number) => {
