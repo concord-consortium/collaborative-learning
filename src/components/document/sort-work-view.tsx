@@ -20,26 +20,20 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const groupsModel = stores.groups;
   const [sortBy, setSortBy] = useState("Group");
 
-  const includeDocForStudent = (doc: DocumentModelType) => {
-    // problem documents are always included
-    if (doc.type === "problem") return true;
-    // for personal docs, only include when user is in the same group as the doc owner
-    return groupsModel.groupForUser(stores.user.id)?.id === groupsModel.groupForUser(doc.uid)?.id;
-  };
-
   //******************************* Sorting Documents *************************************
   const filteredDocsByType = stores.documents.all.filter((doc: DocumentModelType) => {
-    // load all documents regardless of type
-    return isSortableType(doc.type);
-
-    // not implemented, but saving while story in progress
-    // as student user, only load personal docs when I am in same group as the doc owner
-    if (stores.user.type === "student") {
-      return isSortableType(doc.type) && includeDocForStudent(doc);
-    } else {
-      return isSortableType(doc.type);
-    }
+    // if the user is a student, subject the document to additional filtering tests
+    return stores.user.type === "student"
+      ? isSortableType(doc.type) && includeDocForStudent(doc)
+      : isSortableType(doc.type);
   });
+
+  const includeDocForStudent = (doc: DocumentModelType) => {
+    const isAStudentDoc = doc.groupId !== undefined;
+    const isInSameGroup = groupsModel.groupForUser(stores.user.id)?.id === groupsModel.groupForUser(doc.uid)?.id;
+    if (doc.type === "problem") return isAStudentDoc;
+    if (doc.type === "personal") return isInSameGroup;
+  };
 
   const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
     text: option,
@@ -127,6 +121,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
           | {doc.type}{' '.repeat(12 - doc.type.length)}
           | {doc.visibility ? doc.visibility + " ".repeat(10 - doc.visibility.length) : "undefined "}
           | {doc.uid}{' '.repeat(5 - doc.uid.length)}
+          | {doc.groupId ?? " "}&nbsp;
           | {masked ? "mask " : "     "}
           | {doc.title?.slice(0, 20)}
         </pre>
