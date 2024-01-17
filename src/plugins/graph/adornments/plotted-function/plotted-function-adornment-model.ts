@@ -59,8 +59,21 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
     }
   }))
   .views(self => ({
-    pointPosition(value: number, scale: ScaleNumericBaseType, cellCount: number) {
-      return (scale(value) / cellCount);
+    /**
+     * Calculate the pixel position of a value given the axis scale and number of cells.
+     */
+    positionForValue(value: number, scale: ScaleNumericBaseType, cellCount: number) {
+        return (scale(value) / cellCount);
+    },
+    /**
+     * Calculate the value given a pixel position; inverse of `positionForValue`.
+     * Returns undefined if the position is not in the range of the scale.
+     */
+    valueForPosition(position: number, scale: ScaleNumericBaseType, cellCount: number) {
+      const [min, max] = scale.range().sort();
+      if (position >= min && position <= max) {
+        return scale.invert(position * cellCount);
+      }
     }
   }))
   .actions(self => ({
@@ -73,7 +86,7 @@ export const PlottedFunctionAdornmentModel = AdornmentModel
           const tX = xScale.invert(pixelX * xCellCount);
           const tY = computeY(tX);
           if (Number.isFinite(tY)) {
-            const pixelY = self.pointPosition(tY, yScale, yCellCount);
+            const pixelY = self.positionForValue(tY, yScale, yCellCount);
             tPoints.push({ x: pixelX, y: pixelY });
           }
         }
