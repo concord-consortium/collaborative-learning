@@ -1,12 +1,14 @@
 import React from "react";
+import classNames from "classnames";
 import { observer } from "mobx-react";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentCaption } from "./document-caption";
 import { ThumbnailPlaceHolderIcon } from "./thumbnail-placeholder-icon";
 import { ThumbnailPrivateIcon } from "./thumbnail-private-icon";
-import { useAppMode } from "../../hooks/use-stores";
-import classNames from "classnames";
+import { useAppMode, useStores } from "../../hooks/use-stores";
+import { isPublishedType } from "../../models/document/document-types";
+
 
 interface IProps {
   canvasContext: string;
@@ -30,6 +32,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
   } = props;
   const selectedClass = isSelected ? "selected" : "";
   const appMode = useAppMode();
+  const stores = useStores();
 
   const handleDocumentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     onDocumentClick?.(document);
@@ -46,8 +49,23 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
     onDocumentDeleteClick?.(document);
     e.stopPropagation();
   };
-  // TODO: add proper state of isPrivate based on document properties
-  const isPrivate = false; // document.visibility === "private" && document.isRemote;
+
+  const getIsPrivate = () => {
+    const isUsersDocument = document.uid === stores.user.id;
+    const setToPublic = document.visibility === "public";
+    const isPublication = isPublishedType(document.type);
+
+    if (stores.user.type === "teacher") return false;
+    if (stores.user.type === "student") {
+      if (setToPublic || isUsersDocument || isPublication ) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+  };
+
+  const isPrivate = getIsPrivate();
   const privateClass = isPrivate ? "private" : "";
   const documentTitle = appMode !== "authed" && appMode !== "demo"
                           ? `Firebase UID: ${document.key}` : undefined;
