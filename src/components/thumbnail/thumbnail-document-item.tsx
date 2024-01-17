@@ -7,6 +7,7 @@ import { ThumbnailPlaceHolderIcon } from "./thumbnail-placeholder-icon";
 import { ThumbnailPrivateIcon } from "./thumbnail-private-icon";
 import { useAppMode, useStores } from "../../hooks/use-stores";
 import classNames from "classnames";
+import { isPublishedType } from "../../models/document/document-types";
 
 interface IProps {
   canvasContext: string;
@@ -48,29 +49,22 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
     e.stopPropagation();
   };
 
-  const getIsPrivate = (doc: DocumentModelType) => {
-    const visibleTypes = ["publication", "learningLogPublication", "supportPublication", "personalPublication"];
-    const isVisibleType = visibleTypes.includes(doc.type);
-    const notUsersDocument = document.uid !== stores.user.id;
+  const getIsPrivate = () => {
     const isUsersDocument = document.uid === stores.user.id;
-    const userIsStudent = stores.user.type === "student";
-    const userIsTeacher = stores.user.type === "teacher";
-    if (userIsTeacher || isVisibleType) return false;
+    const setToPublic = document.visibility === "public";
+    const isPublication = isPublishedType(document.type);
 
-    if (userIsStudent) {
-      if (isUsersDocument) return false;
-      if (notUsersDocument) {
-        if (document.visibility === "public"){
-          return false;
-        }
-        else {
-          return true;
-        }
+    if (stores.user.type === "teacher") return false;
+    if (stores.user.type === "student") {
+      if (setToPublic || isUsersDocument || isPublication ) {
+        return false;
+      } else {
+        return true;
       }
     }
   };
 
-  const isPrivate = getIsPrivate(document);
+  const isPrivate = getIsPrivate();
   const privateClass = isPrivate ? "private" : "";
   const documentTitle = appMode !== "authed" && appMode !== "demo"
                           ? `Firebase UID: ${document.key}` : undefined;

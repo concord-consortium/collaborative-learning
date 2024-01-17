@@ -111,14 +111,14 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
 
   //******************************* Handle Debug View ***************************************
   const renderDebugView = () => {
-    //returns a list lf all documents (unsorted)
+    //returns a list of all documents (unsorted)
     return filteredDocsByType.map((doc, idx) => {
       const masked = (doc.visibility === "private" || doc.visibility === undefined) && doc.uid !== stores.user.id;
       const ct = idx + 1;
       return (
-        <>
+        <React.Fragment key={idx}>
           { idx === 0 &&
-            <pre  key={`title-row`} style={{ margin: "0px", padding: "0px", fontSize: "10px", color:"blue" }}>
+            <pre key={`title-row`} style={{ margin: "0px", padding: "0px", fontSize: "10px", color:"blue" }}>
               &nbsp;
               | key  {" ".repeat(17)}
               | type {" ".repeat(7)}
@@ -129,8 +129,8 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
               | title {" ".repeat(4)}
             </pre>
           }
-          <hr key={`hr-1`} style={{ margin: "0px", padding: "0px" }}/>
-          <pre key={idx} style={{ margin: "0px", padding: "0px", fontSize: "10px" }}>
+          <hr style={{ margin: "0px", padding: "0px" }}/>
+          <pre key={`pre-${idx}`} style={{ margin: "0px", padding: "0px", fontSize: "10px" }}>
             {ct < 10 && " "}{ct}
             | {doc.key}&nbsp;
             | {doc.type}{' '.repeat(12 - doc.type.length)}
@@ -140,7 +140,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
             | {masked ? "mask " : "     "}
             | {doc.title?.slice(0, 20)}
           </pre>
-        </>
+        </React.Fragment>
       );
     });
   };
