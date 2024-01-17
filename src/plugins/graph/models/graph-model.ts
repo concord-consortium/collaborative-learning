@@ -10,7 +10,7 @@ import {
 } from "../imports/components/axis/models/axis-model";
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
-  GraphAttrRole, hoverRadiusFactor, kDefaultNumericAxisBounds, kGraphTileType,
+  GraphAttrRole, hoverRadiusFactor, kDefaultAxisLabel, kDefaultNumericAxisBounds, kGraphTileType,
   PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
 } from "../graph-types";
 import { withoutUndo } from "../../../models/history/without-undo";
@@ -74,7 +74,9 @@ export const GraphModel = TileContentModel
     plotBackgroundLockInfo: types.maybe(types.frozen<BackgroundLockInfo>()),
     // numberToggleModel: types.optional(types.union(NumberToggleModel, null))
     showParentToggles: false,
-    showMeasuresForSelection: false
+    showMeasuresForSelection: false,
+    xAttributeLabel: types.optional(types.string, kDefaultAxisLabel),
+    yAttributeLabel: types.optional(types.string, kDefaultAxisLabel)
   })
   .volatile(self => ({
     // prevDataSetId: "",
@@ -308,6 +310,12 @@ export const GraphModel = TileContentModel
         self.layers.push(initialLayer);
         initialLayer.configureUnlinkedLayer();
       }
+    },
+    setXAttributeLabel(label: string) {
+      self.xAttributeLabel = label;
+    },
+    setYAttributeLabel(label: string) {
+      self.yAttributeLabel = label;
     }
   }))
   .actions(self => ({
@@ -633,12 +641,16 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
   const leftAxisModel = emptyPlotIsNumeric
                           ? NumericAxisModel.create({place: "left", min, max})
                           : EmptyAxisModel.create({place: "left"});
+  const defaultAxisLabels = appConfig?.getSetting("defaultAxisLabels", "graph");
+  const axisLabels = defaultAxisLabels && defaultAxisLabels as Record<string, string>;
   const createdGraphModel = GraphModel.create({
     plotType: emptyPlotIsNumeric ? "scatterPlot" : "casePlot",
     axes: {
       bottom: bottomAxisModel,
       left: leftAxisModel
     },
+    xAttributeLabel: axisLabels && axisLabels.bottom,
+    yAttributeLabel: axisLabels && axisLabels.left,
     ...snap
   });
   // TODO: make a dedicated setting for this rather than using defaultSeriesLegend as a proxy:

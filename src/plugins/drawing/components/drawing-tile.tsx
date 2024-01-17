@@ -147,7 +147,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
 
   return (
     <DrawingContentModelContext.Provider value={contentRef.current} >
-      <BasicEditableTileTitle readOnly={readOnly} />
+      <BasicEditableTileTitle />
       <div
         ref={drawingToolElement}
         className={classNames("drawing-tool", { "read-only": readOnly })}

@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useContext, useState } from "react";
+import { useReadOnlyContext } from "../document/read-only-context";
 import { TileModelContext } from "../tiles/tile-api";
 import { TileLabelInput } from "./tile-label-input";
 
@@ -13,14 +14,14 @@ import "./tile-title-area.scss";
 
 interface IProps {
   className?: string;
-  readOnly?: boolean;
   measureText: (text: string) => number;
   onBeginEdit?: () => void;
   onEndEdit?: (title?: string) => void;
 }
 export const EditableTileTitle: React.FC<IProps> = observer(({
-  className, readOnly, measureText, onBeginEdit, onEndEdit
+  className, measureText, onBeginEdit, onEndEdit
 }) => {
+  const readOnly = useReadOnlyContext();
   // model and observer() allow this component to re-render
   // when the title changes without re-rendering the entire tile
   const model = useContext(TileModelContext);

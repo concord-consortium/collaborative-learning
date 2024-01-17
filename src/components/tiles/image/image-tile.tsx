@@ -176,7 +176,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             onIsEnabled={this.handleIsEnabled}
             onUploadImageFile={this.handleUploadImageFile}
           />
-          <BasicEditableTileTitle readOnly={readOnly} />
+          <BasicEditableTileTitle />
           <ImageComponent
             ref={elt => this.imageElt = elt}
             content={this.getContent()}

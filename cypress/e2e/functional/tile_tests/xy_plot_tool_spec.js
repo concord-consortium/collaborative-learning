@@ -328,6 +328,18 @@ context('XYPlot Tool Tile', function () {
       xyTile.getEditableAxisBox('bottom', 'min').invoke('text').then(parseFloat).should("be.within", -1, 1);
       xyTile.getEditableAxisBox('bottom', 'max').invoke('text').then(parseFloat).should("be.within", 3, 5);
 
+      cy.log("Change axis labels");
+      const xAxisLabel = "x axis";
+      xyTile.getXAxisLabel().click();
+      xyTile.getXAxisInput().should("be.focused").type(`${xAxisLabel}{enter}`);
+      xyTile.getXAxisInput().should("not.exist");
+      xyTile.getXAxisLabel().should("contain.text", xAxisLabel);
+      const yAxisLabel = "y axis";
+      xyTile.getYAxisLabel().click();
+      xyTile.getYAxisInput().should("be.focused").type(`${yAxisLabel}{enter}`);
+      xyTile.getYAxisInput().should("not.exist");
+      xyTile.getYAxisLabel().should("contain.text", yAxisLabel);
+
       cy.log("Plot multiple traces");
       xyTile.getAddVariablesButton().should("exist").click();
 
@@ -336,17 +348,29 @@ context('XYPlot Tool Tile', function () {
       xyTile.getXVariableDropdown(1).should("contain.text", name2);
 
       // Select the y variable for the 2nd trace
-      xyTile.selectYVariable(name2, 1);
-      xyTile.getYVariableDropdown(1).should("contain.text", name2);
+      xyTile.selectYVariable(name1, 1);
+      xyTile.getYVariableDropdown(1).should("contain.text", name1);
 
       xyTile.getPlottedVariablesGroup().should("have.length", 2);
       xyTile.getPlottedVariablesPoint().should("have.length", 2);
-      xyTile.getPlottedVariablesLabel().should("have.length", 2).eq(1).should("have.text", "3, 3");
+      xyTile.getPlottedVariablesLabel().should("have.length", 2).eq(1).should("have.text", "3, 2");
 
       // Fit button should adjust bounds to narrowly include (2,2) and (3,3)
       clueCanvas.clickToolbarButton('graph', 'fit-all');
       xyTile.getEditableAxisBox('bottom', 'min').invoke('text').then(parseFloat).should("be.within", 1.5, 2);
       xyTile.getEditableAxisBox('bottom', 'max').invoke('text').then(parseFloat).should("be.within", 3, 4);
+
+      // Drag point to change value
+      diagramTile.getVariableCardField("value").eq(1).should("have.value", "3");
+      xyTile.getPlottedVariablesPointHighlight().eq(1).should("exist").should("not.be.visible");
+      xyTile.getPlottedVariablesPointHighlight().eq(1).trigger("mouseover");
+      xyTile.getPlottedVariablesPointHighlight().eq(1).should("be.visible")
+        .trigger('mousedown', { eventConstructor: 'MouseEvent' })
+        .trigger('mousemove', { eventConstructor: 'MouseEvent', clientX: 500, clientY: 500 })
+        .trigger('mouseup', { eventConstructor: 'MouseEvent', clientX: 500, clientY: 500 });
+
+      // hard to determine exactly what the new value will be, but it should have changed.
+      diagramTile.getVariableCardField("value").eq(1).should("not.have.value", "3");
 
       cy.log("Remove a variable trace");
       xyTile.getRemoveVariablesButton(1).click();
