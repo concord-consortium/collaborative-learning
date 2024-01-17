@@ -16,9 +16,12 @@ import "./sort-work-view.scss";
 
 
 //GUIDELINES•✔️
-//•stars should persist when they are created in the sort tab view
+//• stars should persist when they are created in the sort tab view
+// (given below URL they currently only persist for for My Work > Workspaces > Teacher 1 Toolbar Configuration (problem document??))
+//https://collaborative-learning.concord.org/branch/sort-by-strategy/?appMode=demo&demoName=dennis1&fakeClass=1&fakeUser=teacher:1&problem=1.1&unit=example-config-subtabs&curriculumBranch=sort-tab-dev-3
+// ⚡TODO: - need to implement with persistentUI?? or look in the document model properties - is there a star?
 
-//•introduce a Bookmark Sort as a choice in the sorts for any unit that allows bookmarking (Starring) in the Sort Workspaces Tab.
+//✔️introduce a Bookmark Sort as a choice in the sorts for any unit that allows bookmarking (Starring) in the Sort Workspaces Tab.
 
 //•Revise the styling of stars to the new bookmarks - students got upset that they weren't all getting gold stars.
 // Both the unclicked and clicked bookmarks need to be redone on thumbnails in my/class work and the new Sort Workspaces tab.

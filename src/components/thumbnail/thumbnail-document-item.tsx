@@ -6,6 +6,7 @@ import { DocumentCaption } from "./document-caption";
 import { ThumbnailPlaceHolderIcon } from "./thumbnail-placeholder-icon";
 import { ThumbnailPrivateIcon } from "./thumbnail-private-icon";
 import { useAppMode } from "../../hooks/use-stores";
+import ThumbnailBookmark from "../../assets/thumbnail-bookmark-icon.svg";
 import classNames from "classnames";
 
 interface IProps {
@@ -72,8 +73,9 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
             : <ThumbnailPlaceHolderIcon />
         }
       </div>
-      { onDocumentStarClick &&
-          <DocumentStar isStarred={onIsStarred()} onStarClick={handleDocumentStarClick} />
+      {
+        onDocumentStarClick &&
+        <DocumentBookmark isStarred={onIsStarred()} onStarClick={handleDocumentStarClick} />
       }
       <DocumentCaption
         captionText={captionText}
@@ -92,15 +94,15 @@ interface IDocumentStarProps {
   onStarClick: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-const DocumentStar = (props: IDocumentStarProps) => {
+const DocumentBookmark = (props: IDocumentStarProps) => {
   const { isStarred, onStarClick } = props;
   return (
     <div className="icon-holder" onClick={onStarClick}>
       <svg className={"icon-star " + (isStarred ? "starred" : "")} >
-        <use xlinkHref="#icon-star"/>
+        <ThumbnailBookmark />
       </svg>
     </div>
-  );
+    );
 };
 
 
