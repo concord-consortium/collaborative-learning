@@ -33,7 +33,7 @@ describe('SortWorkView Tests', () => {
     cy.get('.custom-select.sort-work-sort-menu').click(); // Open the sort menu
     cy.wait(1000);
 
-    cy.get('[data-test="list-item-student"]').click(); //Select 'Student' sort type
+    cy.get('[data-test="list-item-name"]').click(); //Select 'Name' sort type
     cy.wait(1000);
 
     cy.get('.custom-select.sort-work-sort-menu').click(); // Open the sort menu again
