@@ -18,4 +18,4 @@ export const DEBUG_SAVE = debugContains("save");
 export const DEBUG_SHARED_MODELS = debugContains("sharedModels");
 export const DEBUG_STORES = debugContains("stores");
 export const DEBUG_UNDO = debugContains("undo");
-export const DEBUG_SORT_WORK = debugContains("sortWork");
+export const DEBUG_DOC_LIST = debugContains("docList");

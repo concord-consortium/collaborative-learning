@@ -6,7 +6,7 @@ import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { DocumentContextReact } from "./document-context";
-import { DEBUG_SORT_WORK } from "../../lib/debug";
+import { DEBUG_DOC_LIST } from "../../lib/debug";
 import { isSortableType } from "../../models/document/document-types";
 import { SortWorkDocumentArea } from "./sort-work-document-area";
 import { ENavTab } from "../../models/view/nav-tabs";
@@ -138,7 +138,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
                 );
               })
             }
-            {DEBUG_SORT_WORK && <DocListDebug docs={filteredDocsByType} />}
+            {DEBUG_DOC_LIST && <DocListDebug docs={filteredDocsByType} />}
           </div>
         </>
       }

@@ -112,20 +112,6 @@ export const DocumentModel = Tree.named("Document")
       return { contextId: "ignored", uid, type, key, createdAt, title,
         originDoc, properties: properties.toJSON() } as IDocumentMetadata;
     },
-    isAccessibleToUser(user: UserModelType) {
-      const ownDocument = self.uid === user.id;
-      const isShared = self.visibility === "public";
-      const isPub = (self.type === ProblemPublication)
-        || (self.type === LearningLogPublication)
-        || (self.type === PersonalPublication)
-        || (self.type === SupportPublication);
-
-      if (user.type === "teacher") return true;
-      if (user.type === "student") {
-        return ownDocument || isShared || isPub;
-      }
-      return false;
-    },
     getProperty(key: string) {
       return self.properties.get(key);
     },
@@ -195,6 +181,13 @@ export const DocumentModel = Tree.named("Document")
     },
     getUniqueTitle(tileType: string, titleBase: string) {
       return self.content?.getUniqueTitle(tileType, titleBase);
+    },
+    isAccessibleToUser(user: UserModelType) {
+      const ownDocument = self.uid === user.id;
+      const isShared = self.visibility === "public";
+      if (user.type === "teacher") return true;
+      if (user.type === "student") return ownDocument || isShared || self.isPublished;
+      return false;
     }
   }))
   .views(self => ({
