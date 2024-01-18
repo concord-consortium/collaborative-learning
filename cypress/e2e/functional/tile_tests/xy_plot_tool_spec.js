@@ -136,6 +136,33 @@ context('XYPlot Tool Tile', function () {
       xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
       xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 15, 20);
 
+      cy.log("add y2 column to table and show it");
+      tableToolTile.getTableTile().click();
+      tableToolTile.getAddColumnButton().click();
+      tableToolTile.typeInTableCellXY(0, 2, '30');
+      tableToolTile.typeInTableCellXY(1, 2, '31');
+      tableToolTile.typeInTableCellXY(2, 2, '32');
+
+      xyTile.getTile().click();
+      xyTile.getYAttributesLabel().should("contain.text", "y");
+      xyTile.selectYAttribute("y2");
+      // Should have rescaled to the new Y range, approx 30-32
+      xyTile.getEditableAxisBox("left", "min").invoke('text').then(parseFloat).should("be.within", 29, 30);
+      xyTile.getEditableAxisBox("left", "max").invoke('text').then(parseFloat).should("be.within", 32, 33);
+
+      // Lock axes button
+      clueCanvas.clickToolbarButton("graph", "toggle-lock");
+      clueCanvas.toolbarButtonIsSelected("graph", "toggle-lock");
+
+      xyTile.selectYAttribute("y");
+      // Should NOT have rescaled this time.
+      xyTile.getEditableAxisBox("left", "min").invoke('text').then(parseFloat).should("be.within", 29, 30);
+      xyTile.getEditableAxisBox("left", "max").invoke('text').then(parseFloat).should("be.within", 32, 33);
+
+      // Toggle lock back off
+      clueCanvas.clickToolbarButton("graph", "toggle-lock");
+      clueCanvas.toolbarButtonIsNotSelected("graph", "toggle-lock");
+
       cy.log("verify edit box for horizontal and vertical axes");
       xyTile.getEditableAxisBox("bottom", "min").click().type('-10{enter}');
       xyTile.getEditableAxisBox("bottom", "min").should('contain', '-10');
