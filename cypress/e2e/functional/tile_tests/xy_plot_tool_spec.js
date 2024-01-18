@@ -312,7 +312,7 @@ context('XYPlot Tool Tile', function () {
       cy.get('select').select("New Graph");
       dialogOkButton().click();
       xyTile.getPlottedVariablesGroup().should("not.exist");
-      xyTile.getEditableAxisBox('bottom', 'min').invoke('text').then(parseFloat).should("be.within", -11, -9);
+      xyTile.getEditableAxisBox('bottom', 'min').invoke('text').then(parseFloat).should("be.within", -1, 0);
       xyTile.getEditableAxisBox('bottom', 'max').invoke('text').then(parseFloat).should("be.within", 9, 11);
 
       xyTile.selectXVariable(name1);
@@ -355,10 +355,10 @@ context('XYPlot Tool Tile', function () {
       xyTile.getPlottedVariablesPoint().should("have.length", 2);
       xyTile.getPlottedVariablesLabel().should("have.length", 2).eq(1).should("have.text", "3, 2");
 
-      // Fit button should adjust bounds to narrowly include (2,2) and (3,3)
+      // Fit button should adjust bounds to center points (2,2) and (3,3) - so, 0 to 6 on each axis
       clueCanvas.clickToolbarButton('graph', 'fit-all');
-      xyTile.getEditableAxisBox('bottom', 'min').invoke('text').then(parseFloat).should("be.within", 1.5, 2);
-      xyTile.getEditableAxisBox('bottom', 'max').invoke('text').then(parseFloat).should("be.within", 3, 4);
+      xyTile.getEditableAxisBox('bottom', 'min').invoke('text').then(parseFloat).should("be.within", -1, 0);
+      xyTile.getEditableAxisBox('bottom', 'max').invoke('text').then(parseFloat).should("be.within", 6, 8);
 
       // Drag point to change value
       diagramTile.getVariableCardField("value").eq(1).should("have.value", "3");
