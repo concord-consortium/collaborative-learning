@@ -241,6 +241,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
       return Array.from(model.plottedVariables.values()).map((pvi) => [pvi.xVariableId, pvi.yVariableId]);
     },
       (varlist) => {
+        if (graphModel.lockAxes) return;
         // Set a range that includes 0 to 2x for all the given values.
         function fitValues(values: number[], axis: IAxisModel) {
           if (values.length) {
@@ -256,7 +257,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
       },
       { name: "PlottedVariablesAdornmentComponent.scaleOnVariableChange" },
       model);
-  }, [model, xAxis, yAxis]);
+  }, [graphModel.lockAxes, model, xAxis, yAxis]);
 
   return (
     <svg className={`plotted-function-${classFromKey}`}>

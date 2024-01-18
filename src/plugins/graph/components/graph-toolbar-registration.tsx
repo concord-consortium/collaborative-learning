@@ -1,14 +1,18 @@
 import React, { useContext } from "react";
+import { observer } from "mobx-react";
 import { TileToolbarButton } from "../../../components/toolbar/tile-toolbar-button";
 import { TileModelContext } from "../../../components/tiles/tile-api";
 import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking";
 import { IToolbarButtonComponentProps, registerTileToolbarButtons }
   from "../../../components/toolbar/toolbar-button-manager";
-  import { GraphControllerContext } from "../models/graph-controller";
+import { GraphControllerContext } from "../models/graph-controller";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 
 import LinkTableIcon from "../../../clue/assets/icons/geometry/link-table-icon.svg";
 import AddIcon from "../../../assets/icons/add-data-graph-icon.svg";
 import FitAllIcon from "../assets/fit-all-icon.svg";
+import LockAxesIcon from "../assets/lock-axes-icon.svg";
+import UnlockAxesIcon from "../assets/unlock-axes-icon.svg";
 
 function LinkTileButton(name: string, title: string, allowMultiple: boolean) {
 
@@ -64,6 +68,26 @@ function FitAllButton({name}: IToolbarButtonComponentProps) {
 
 }
 
+const ToggleLockAxesButton = observer(function ToggleLockAxesButton({name}: IToolbarButtonComponentProps) {
+  const graph = useGraphModelContext();
+  const locked = graph.lockAxes;
+
+  function handleClick() {
+    graph.setLockAxes(!graph.lockAxes);
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title={locked ? "Unlock Axes: Autoscale" : "Lock Axes"}
+      onClick={handleClick}
+      selected={locked}
+      >
+        { locked ? <UnlockAxesIcon/> : <LockAxesIcon/> }
+    </TileToolbarButton>
+  );
+});
+
 registerTileToolbarButtons("graph",
 [
   {
@@ -77,5 +101,9 @@ registerTileToolbarButtons("graph",
   {
     name: 'fit-all',
     component: FitAllButton
+  },
+  {
+    name: 'toggle-lock',
+    component: ToggleLockAxesButton
   }
 ]);

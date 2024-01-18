@@ -56,6 +56,7 @@ export const GraphModel = TileContentModel
     adornments: types.array(AdornmentModelUnion),
     // keys are AxisPlaces
     axes: types.map(AxisModelUnion),
+    lockAxes: false,
     // TODO: should the default plot be something like "nullPlot" (which doesn't exist yet)?
     plotType: types.optional(types.enumeration([...PlotTypes]), "casePlot"),
     layers: types.array(GraphLayerModel /*, () => GraphLayerModel.create() */),
@@ -329,6 +330,9 @@ export const GraphModel = TileContentModel
     },
     removeAxis(place: AxisPlace) {
       self.axes.delete(place);
+    },
+    setLockAxes(value: boolean) {
+      self.lockAxes = value;
     },
     /**
      * Set the primary role for all layers.

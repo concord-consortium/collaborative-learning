@@ -117,7 +117,9 @@ export class GraphController {
     } else if (graphPlace === 'yPlus') {
       // The yPlus attribute utilizes the left numeric axis for plotting but doesn't change anything else
       const yAxisModel = graphModel.getAxis('left');
-      yAxisModel && setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
+      if (!graphModel.lockAxes) {
+        yAxisModel && setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
+      }
       return;
     }
 

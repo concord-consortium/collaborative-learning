@@ -474,19 +474,29 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     }
   };
 
+  const transformForCase = (aCaseData: CaseData) => {
+    const x = getScreenX(aCaseData.caseID), y = getScreenY(aCaseData.caseID, aCaseData.plotNum);
+    if (isFiniteNumber(x) && isFiniteNumber(y)) {
+      return `translate(${x} ${y})`;
+    } else {
+      console.log('position of point became undefined in setPositions');
+      return '';
+    }
+  };
+
   const setPositions = (dots: DotSelection | null) => {
     if (dots !== null) {
       dots
         .transition()
         .duration(duration)
-        .attr('transform', (aCaseData: CaseData) => {
-          const x = getScreenX(aCaseData.caseID), y = getScreenY(aCaseData.caseID, aCaseData.plotNum);
-          if (isFiniteNumber(x) && isFiniteNumber(y)) {
-            return `translate(${x} ${y})`;
-          } else {
-            console.log('position of point became undefined in setPositions');
-            return '';
-          }
+        .attr('transform', transformForCase)
+        // The rest of this should not be necessary, but works around an apparent Chrome bug.
+        // At least in Chrome v120 on MacOS, if the points are animated from a position far off-screen,
+        // they never show up when transitioned to visible positions.
+        // The no-op setting of the SVG 'x' attribute makes them snap into position if that happened.
+        .end()
+        .then(() => {
+          dotsRef.current?.setAttribute('x', '0');
         });
     }
   };
