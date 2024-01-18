@@ -27,6 +27,7 @@ import { TreeManager } from "../history/tree-manager";
 import { ESupportType } from "../curriculum/support";
 import { IDocumentLogEvent, logDocumentEvent } from "./log-document-event";
 import { LogEventMethod, LogEventName } from "../../lib/logger-types";
+import { UserModelType } from "../stores/user";
 
 interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
@@ -110,6 +111,20 @@ export const DocumentModel = Tree.named("Document")
       // code can work with the old functions.
       return { contextId: "ignored", uid, type, key, createdAt, title,
         originDoc, properties: properties.toJSON() } as IDocumentMetadata;
+    },
+    isAccessibleToUser(user: UserModelType) {
+      const ownDocument = self.uid === user.id;
+      const isShared = self.visibility === "public";
+      const isPub = (self.type === ProblemPublication)
+        || (self.type === LearningLogPublication)
+        || (self.type === PersonalPublication)
+        || (self.type === SupportPublication);
+
+      if (user.type === "teacher") return true;
+      if (user.type === "student") {
+        return ownDocument || isShared || isPub;
+      }
+      return false;
     },
     getProperty(key: string) {
       return self.properties.get(key);
