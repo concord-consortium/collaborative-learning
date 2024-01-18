@@ -78,8 +78,6 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     });
   };
 
-
-
   return (
     <div key="sort-work-view" className="sort-work-view">
       {
