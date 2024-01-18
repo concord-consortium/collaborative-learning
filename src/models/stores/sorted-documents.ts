@@ -19,7 +19,7 @@ type TagWithDocs = {
   docKeysFoundWithTag: string[];
 };
 
-interface ISortedDocumentsStores {
+export interface ISortedDocumentsStores {
   documents: DocumentsModelType;
   groups: GroupsModelType;
   class: ClassModelType;
