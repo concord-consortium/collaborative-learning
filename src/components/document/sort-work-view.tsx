@@ -69,11 +69,29 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     return filteredDocsByType(documents.all).map((doc, idx) => {
       const ct = idx + 1;
       return (
-        <pre key={idx} style={{ margin: "0px", padding: "0px", fontSize: "10px" }}>
-          {ct < 10 && " "}{ct} | {doc.title?.slice(0, 20) || "                    "}
-          | {doc.key} | {doc.type} | {doc.uid}
-          | {doc?.isStarred? "T": "F"}
-        </pre>
+        <React.Fragment key={idx}>
+          { idx === 0 &&
+            <pre key={`title-row`} style={{ margin: "0px", padding: "0px", fontSize: "10px", color:"blue" }}>
+              &nbsp;
+              | key  {" ".repeat(17)}
+              | type {" ".repeat(7)}
+              | viz  {" ".repeat(5)}
+              | uid {" ".repeat(1)}
+              | gp {" ".repeat(0)}
+              | title {" ".repeat(4)}
+            </pre>
+          }
+          <hr style={{ margin: "0px", padding: "0px" }}/>
+          <pre key={`pre-${idx}`} style={{ margin: "0px", padding: "0px", fontSize: "10px" }}>
+            {ct < 10 && " "}{ct}
+            | {doc.key}&nbsp;
+            | {doc.type}{' '.repeat(12 - doc.type.length)}
+            | {doc.visibility ? doc.visibility + " ".repeat(10 - doc.visibility.length) : "undefined "}
+            | {doc.uid}{' '.repeat(5 - doc.uid.length)}
+            | {doc.groupId ?? " "}&nbsp;
+            | {doc.title?.slice(0, 20)}
+          </pre>
+        </React.Fragment>
       );
     });
   };
