@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
-import { useStores, usePersistentUIStore, useAppConfig } from "../../hooks/use-stores";
+import { useStores, usePersistentUIStore } from "../../hooks/use-stores";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
@@ -100,14 +100,32 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
 
   //******************************* Handle Debug View ***************************************
   const renderDebugView = () => {
-    //returns a list lf all documents (unsorted)
     return filteredDocsByType.map((doc, idx) => {
       const ct = idx + 1;
       return (
-        <pre key={idx} style={{ margin: "0px", padding: "0px", fontSize: "10px" }}>
-          {ct < 10 && " "}{ct} | {doc.title?.slice(0, 20) || "                    "}
-          | {doc.key} | {doc.type} | {doc.uid}
-        </pre>
+        <React.Fragment key={idx}>
+          { idx === 0 &&
+            <pre className="debug-header">
+              &nbsp;
+              | key  {" ".repeat(17)}
+              | type {" ".repeat(7)}
+              | viz  {" ".repeat(5)}
+              | uid {" ".repeat(1)}
+              | gp {" ".repeat(0)}
+              | title {" ".repeat(4)}
+            </pre>
+          }
+          <hr className="debug-line" />
+          <pre className="debug-row">
+            {ct < 10 && " "}{ct}
+            | {doc.key}&nbsp;
+            | {doc.type}{" ".repeat(12 - doc.type.length)}
+            | {doc.visibility ? doc.visibility + " ".repeat(10 - doc.visibility.length) : "undefined "}
+            | {doc.uid}{" ".repeat(5 - doc.uid.length)}
+            | {doc.groupId ?? " "}&nbsp;
+            | {doc.title?.slice(0, 20)}
+          </pre>
+        </React.Fragment>
       );
     });
   };
