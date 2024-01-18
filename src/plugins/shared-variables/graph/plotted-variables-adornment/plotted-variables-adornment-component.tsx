@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from "react";
-import { drag, format, select, Selection } from "d3";
+import { drag, select, Selection } from "d3";
 import { observer } from "mobx-react-lite";
 import { VariableType } from "@concord-consortium/diagram-view";
 
@@ -62,7 +62,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   const offsetFromPoint = 14;
   const highlightStrokeWidth = 5;
   const labelRectHeight = textHeight + 2 * padding;
-  const labelFormat = format('.3~r');
+  const numberFormatter = Intl.NumberFormat(undefined, { maximumFractionDigits: 4, useGrouping: false});
 
   // Set the positions of the point-related SVG objects and the contents of the label when the variable value changes.
   const positionPointMarkers = useCallback((xValue: number, yValue: number,
@@ -77,7 +77,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
     pointHighlight
         .attr('cx', xPos)
         .attr('cy', yPos);
-    const label = `${labelFormat(xValue)}, ${labelFormat(yValue)}`;
+    const label = `${numberFormatter.format(xValue)}, ${numberFormatter.format(yValue)}`;
     labelText
       .attr('x', xPos)
       .attr('y', yPos - offsetFromPoint - padding - 2) // up 2px to account for borders
@@ -87,15 +87,16 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         .attr('x', xPos - labelWidth / 2)
         .attr('y', yPos - offsetFromPoint - labelRectHeight)
         .attr('width', labelWidth);
-  }, [labelFormat, labelRectHeight]);
+  }, [labelRectHeight, numberFormatter]);
 
   // Assign a new value to the Variable based on the given pixel position
   const setVariableValue = useCallback((variable: VariableType, position: number) => {
     const newValue = model.valueForPosition(position, xScale, xCellCount);
     if (isFiniteNumber(newValue)) {
-      variable.setValue(newValue);
+      // Truncate extra decimals to match the value that is displayed.
+      variable.setValue(+numberFormatter.format(newValue));
     }
-  }, [model, xCellCount, xScale]);
+  }, [model, numberFormatter, xCellCount, xScale]);
 
   // Draw the variable traces
   const addPath = useCallback(() => {
@@ -241,6 +242,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
       return Array.from(model.plottedVariables.values()).map((pvi) => [pvi.xVariableId, pvi.yVariableId]);
     },
       (varlist) => {
+        if (graphModel.lockAxes) return;
         // Set a range that includes 0 to 2x for all the given values.
         function fitValues(values: number[], axis: IAxisModel) {
           if (values.length) {
@@ -256,7 +258,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
       },
       { name: "PlottedVariablesAdornmentComponent.scaleOnVariableChange" },
       model);
-  }, [model, xAxis, yAxis]);
+  }, [graphModel.lockAxes, model, xAxis, yAxis]);
 
   return (
     <svg className={`plotted-function-${classFromKey}`}>

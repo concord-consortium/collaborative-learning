@@ -135,11 +135,9 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   };
 
   private renderTitle() {
-    const { readOnly } = this.props;
     return (
       <EditableTileTitle
         key="dataflow-title"
-        readOnly={readOnly}
         measureText={(text) => measureText(text, defaultTileTitleFont)}
         onBeginEdit={this.handleBeginEditTitle}
         onEndEdit={this.handleTitleChange}

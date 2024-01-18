@@ -1,12 +1,12 @@
 import { ObservableSet, makeAutoObservable, runInAction } from "mobx";
 import { DocumentModelType } from "../document/document";
 import { isSortableType } from "../document/document-types";
-import { IBaseStores } from "./base-stores-types";
 import { DocumentsModelType } from "./documents";
 import { GroupsModelType } from "./groups";
 import { ClassModelType } from "./class";
 import { DB } from "../../lib/db";
-
+import { filteredDocsByType } from "../../components/document/sort-work-view";
+import { AppConfigModelType } from "./app-config-model";
 
 type SortedDocument = {
   sectionLabel: string;
@@ -19,11 +19,19 @@ type TagWithDocs = {
   docKeysFoundWithTag: string[];
 };
 
+export interface ISortedDocumentsStores {
+  documents: DocumentsModelType;
+  groups: GroupsModelType;
+  class: ClassModelType;
+  db: DB;
+  appConfig: AppConfigModelType;
+}
+
 export class SortedDocuments {
-  stores: IBaseStores;
+  stores: ISortedDocumentsStores;
   tempTagDocumentMap = new Map<string, Set<string>>();
 
-  constructor(stores: IBaseStores) {
+  constructor(stores: ISortedDocumentsStores) {
     makeAutoObservable(this);
     this.stores = stores;
   }
@@ -112,6 +120,7 @@ export class SortedDocuments {
 
   get sortByStrategy(): SortedDocument[]{
     const commentTags = this.commentTags;
+
     const tagsWithDocs: Record<string, TagWithDocs> = {};
     if (commentTags) {
       for (const key of Object.keys(commentTags)) {
@@ -128,15 +137,31 @@ export class SortedDocuments {
       };
     }
 
+    // Find all unique document keys in tagsWithDocs. Compare this with all sortable documents
+    // in store to find "Documents with no comments" then place those doc keys to "Not Tagged"
+    const uniqueDocKeysWithComments = new Set<string>();
+
     this.tempTagDocumentMap.forEach((docKeysSet, tag) => {
+      docKeysSet.forEach((docKey: string) =>{
+        uniqueDocKeysWithComments.add(docKey);
+      });
       const docKeysArray = Array.from(docKeysSet); // Convert the Set to an array
       if (tagsWithDocs[tag]) {
         tagsWithDocs[tag].docKeysFoundWithTag = docKeysArray;
       }
     });
 
-    const sortedDocsArr: SortedDocument[] = [];
+    const allSortableDocKeys = filteredDocsByType(this.documents.all);
+    allSortableDocKeys.forEach(doc => {
+      if (!uniqueDocKeysWithComments.has(doc.key)) {
+        // This document has no comments
+        if (tagsWithDocs[""]) {
+          tagsWithDocs[""].docKeysFoundWithTag.push(doc.key);
+        }
+      }
+    });
 
+    const sortedDocsArr: SortedDocument[] = [];
     Object.entries(tagsWithDocs).forEach((tagKeyAndValObj) => {
       const tagWithDocs = tagKeyAndValObj[1] as TagWithDocs;
       const sectionLabel = tagWithDocs.tagValue;
@@ -147,50 +172,33 @@ export class SortedDocuments {
         documents
       });
     });
-
     return sortedDocsArr;
   }
 
-  //Ideas with Scott:
-  //possibly could be an "auto-run"
-
-  updateTagDocumentMap () {
+  async updateTagDocumentMap () {
     const db = this.db.firestore;
     const filteredDocs = this.filteredDocsByType;
 
-    filteredDocs.forEach(doc => {
-      //Comments are stored in the Firestore document with `uid:teacher_documentKey`
-      //where uid:teacher is the teacher who made the comments on the document with documentKey
-      //docsRef may be a reference to multiple documents
-      //i.e one for student (who made document) plus any for teachers who commented
-      const docsRef = db.collection("documents").where("key", "==", doc.key);
-      docsRef.get().then(docsSnapshot => {
-        if (!docsSnapshot.empty){
-          docsSnapshot.forEach(docSnapshot =>{
-            const commentsRef = docSnapshot.ref.collection("comments");
-            commentsRef.get().then(commentsSnapshot => {
-              if (!commentsSnapshot.empty){
-                runInAction(() => {
-                  commentsSnapshot.forEach(commentDoc => {
-                    const commentData = commentDoc.data();
-                    if (commentData && commentData.tags) {
-                      commentData.tags.forEach((tag: string) => {
-                        let docKeysSet = this.tempTagDocumentMap.get(tag);
-                        if (!docKeysSet) {
-                          docKeysSet = new ObservableSet<string>();
-                          this.tempTagDocumentMap.set(tag, docKeysSet);
-                        }
-                        docKeysSet.add(doc.key); //only unique doc keys will be stored
-                      });
-                    }
-                  });
-                });
-              }
-            });
+    filteredDocs.forEach(async doc => {
+      const docsSnapshot = await db.collection("documents").where("key", "==", doc.key).get();
+      docsSnapshot.docs.forEach(async docSnapshot => {
+        const commentsSnapshot = await docSnapshot.ref.collection("comments").get();
+        runInAction(() => {
+          commentsSnapshot.docs.forEach(commentDoc => {
+            const commentData = commentDoc.data();
+            if (commentData?.tags) {
+              commentData.tags.forEach((tag: string) => {
+                let docKeysSet = this.tempTagDocumentMap.get(tag);
+                if (!docKeysSet) {
+                  docKeysSet = new ObservableSet<string>();
+                  this.tempTagDocumentMap.set(tag, docKeysSet);
+                }
+                docKeysSet.add(doc.key);
+              });
+            }
           });
-        }
+        });
       });
     });
   }
-
 }

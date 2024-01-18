@@ -269,7 +269,9 @@
         "disableAttributeDnD": true,
         "tools": [
           "link-tile",
-          "fit-all"
+          "|",
+          "fit-all",
+          "toggle-lock"
         ]
       },
       "simulator": {
