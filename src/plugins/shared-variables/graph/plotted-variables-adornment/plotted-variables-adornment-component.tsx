@@ -16,7 +16,7 @@ import { curveBasis, setNiceDomain } from "../../../graph/utilities/graph-utils"
 import { SharedVariables } from "../../shared-variables";
 import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
-import { isFiniteNumber, roundForDisplay } from "../../../../utilities/math-utils";
+import { isFiniteNumber } from "../../../../utilities/math-utils";
 import { useUIStore } from "../../../../hooks/use-stores";
 
 import "../../../graph/adornments/plotted-function/plotted-function-adornment-component.scss";
@@ -62,6 +62,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   const offsetFromPoint = 14;
   const highlightStrokeWidth = 5;
   const labelRectHeight = textHeight + 2 * padding;
+  const numberFormatter = Intl.NumberFormat(undefined, { maximumFractionDigits: 4, useGrouping: false});
 
   // Set the positions of the point-related SVG objects and the contents of the label when the variable value changes.
   const positionPointMarkers = useCallback((xValue: number, yValue: number,
@@ -76,7 +77,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
     pointHighlight
         .attr('cx', xPos)
         .attr('cy', yPos);
-    const label = `${roundForDisplay(xValue, 3)}, ${roundForDisplay(yValue, 3)}`;
+    const label = `${numberFormatter.format(xValue)}, ${numberFormatter.format(yValue)}`;
     labelText
       .attr('x', xPos)
       .attr('y', yPos - offsetFromPoint - padding - 2) // up 2px to account for borders
@@ -86,15 +87,16 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         .attr('x', xPos - labelWidth / 2)
         .attr('y', yPos - offsetFromPoint - labelRectHeight)
         .attr('width', labelWidth);
-  }, [labelRectHeight]);
+  }, [labelRectHeight, numberFormatter]);
 
   // Assign a new value to the Variable based on the given pixel position
   const setVariableValue = useCallback((variable: VariableType, position: number) => {
     const newValue = model.valueForPosition(position, xScale, xCellCount);
     if (isFiniteNumber(newValue)) {
-      variable.setValue(newValue);
+      // Truncate extra decimals to match the value that is displayed.
+      variable.setValue(+numberFormatter.format(newValue));
     }
-  }, [model, xCellCount, xScale]);
+  }, [model, numberFormatter, xCellCount, xScale]);
 
   // Draw the variable traces
   const addPath = useCallback(() => {
