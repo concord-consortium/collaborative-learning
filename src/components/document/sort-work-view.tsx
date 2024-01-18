@@ -10,6 +10,7 @@ import { DEBUG_SORT_WORK } from "../../lib/debug";
 import { isSortableType } from "../../models/document/document-types";
 import { SortWorkDocumentArea } from "./sort-work-document-area";
 import { ENavTab } from "../../models/view/nav-tabs";
+import { DocListDebug } from "./doc-list-debug";
 
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
@@ -98,38 +99,6 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
   const showSortWorkDocumentArea = !!openDocumentKey;
 
-  //******************************* Handle Debug View ***************************************
-  const renderDebugView = () => {
-    return filteredDocsByType.map((doc, idx) => {
-      const ct = idx + 1;
-      return (
-        <React.Fragment key={idx}>
-          { idx === 0 &&
-            <pre className="debug-header">
-              &nbsp;
-              | key  {" ".repeat(17)}
-              | type {" ".repeat(7)}
-              | viz  {" ".repeat(5)}
-              | uid {" ".repeat(1)}
-              | gp {" ".repeat(0)}
-              | title {" ".repeat(4)}
-            </pre>
-          }
-          <hr className="debug-line" />
-          <pre className="debug-row">
-            {ct < 10 && " "}{ct}
-            | {doc.key}&nbsp;
-            | {doc.type}{" ".repeat(12 - doc.type.length)}
-            | {doc.visibility ? doc.visibility + " ".repeat(10 - doc.visibility.length) : "undefined "}
-            | {doc.uid}{" ".repeat(5 - doc.uid.length)}
-            | {doc.groupId ?? " "}&nbsp;
-            | {doc.title?.slice(0, 20)}
-          </pre>
-        </React.Fragment>
-      );
-    });
-  };
-
   return (
     <div key="sort-work-view" className="sort-work-view">
       {
@@ -169,7 +138,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
                 );
               })
             }
-            {DEBUG_SORT_WORK && renderDebugView()}
+            {DEBUG_SORT_WORK && <DocListDebug docs={filteredDocsByType} />}
           </div>
         </>
       }

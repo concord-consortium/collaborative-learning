@@ -1,0 +1,20 @@
+.doc-list-debug {
+  font-family: monospace;
+  font-size: 10px;
+  border-collapse: collapse;
+  max-width: 800px;
+
+  th, td {
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  th {
+    border-bottom: 2px solid #ddd;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+}
