@@ -20,20 +20,17 @@ export const filteredDocsByType = (allDocuments: DocumentModelType[]) =>{
   });
 };
 
+//OBSERVATIONS
+// 1) ⚡ Notied that bookmarking "planning documents" does not persist even appMode=dev
+// 2) Scott said that in a new PR (need to make) - change all the classes, functions,
+//     variables i.e anything alluding to “star” and rename them to allude to “bookmark” correct?
 
 //GUIDELINES•✔️
 //• stars should persist when they are created in the sort tab view
-// (given below URL they currently only persist for for My Work > Workspaces > Teacher 1 Toolbar Configuration (problem document??))
-//https://collaborative-learning.concord.org/branch/sort-by-strategy/?appMode=demo&demoName=dennis1&fakeClass=1&fakeUser=teacher:1&problem=1.1&unit=example-config-subtabs&curriculumBranch=sort-tab-dev-3
-// ⚡TODO: - need to implement with persistentUI?? or look in the document model properties - is there a star?
+// ↳ Fix non persistence of stars(now bookmarks) when appMode=demo
 
-//✔️introduce a Bookmark Sort as a choice in the sorts for any unit that allows bookmarking (Starring) in the Sort Workspaces Tab.
-
-//•Revise the styling of stars to the new bookmarks - students got upset that they weren't all getting gold stars.
-// Both the unclicked and clicked bookmarks need to be redone on thumbnails in my/class work and the new Sort Workspaces tab.
 
 //•Revise the styling of stars to bookmarks in the Teacher Dashboard.
-
 //•Revise the tab name of the "Starred" tab in any unit which shows it to Bookmarks
 
 //•Bookmarks lists all the Bookmarked thumbs first, and "Not Bookmarked" second. , with suitably tagged documents beneath that section.
@@ -41,7 +38,17 @@ export const filteredDocsByType = (allDocuments: DocumentModelType[]) =>{
 //•Untagged documents are listed in a "Not Bookmarked" at the bottom
 
 //•As documents are tagged they are automatically resorted
-//•if there are no documents in a section say 'No workspaces' message appears~~ Moved to No Workspaces ticket
+
+//---------------------------------- Done -------------------------------------
+//✔️introduce a Bookmark Sort as a choice in the sorts for any unit that allows
+// bookmarking (Starring) in the Sort Workspaces Tab.
+
+//✔️Revise the styling of stars to the new bookmarks - students got upset that they weren't all getting gold stars.
+
+//✔️ Both the unclicked and clicked bookmarks need to be redone on thumbnails in my/class work and the new Sort Workspaces tab.
+
+
+
 
 // Specs: https://zpl.io/Dl5M5nw
 
