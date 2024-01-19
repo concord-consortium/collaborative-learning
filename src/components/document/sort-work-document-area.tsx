@@ -55,6 +55,12 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
     );
   };
 
+  const handleCloseButtonClick = () => {
+    if (persistentUI.openSubTab) {
+      persistentUI.closeSubTabDocument(persistentUI.activeNavTab, persistentUI.openSubTab);
+    }
+  };
+
   const sideClasses = { secondary: false, primary: false && !false };
 
   return (
@@ -68,6 +74,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
             {displayTitle && displayTitle.title}
           </span>
         </div>
+        <button className={"close-doc-button"} onClick={handleCloseButtonClick}>&times;</button>
         {
           openDocument && editButton(ENavTab.kSortWork, sectionClass || sideClasses, openDocument)
         }
