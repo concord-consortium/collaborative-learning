@@ -13,6 +13,7 @@ import { CellPositions, FourUpGridCellModelType, FourUpGridModel, FourUpGridMode
 import { Logger } from "../lib/logger";
 import { LogEventName } from "../lib/logger-types";
 import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
+import ThumbnailBookmark from "../assets/thumbnail-bookmark-icon.svg";
 
 import "./four-up.sass";
 
@@ -262,12 +263,14 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
           document.toggleUserStar(user.id);
         }
       };
+      // const temp = <ThumbnailBookmark/>;
 
       const isStarred = document.isStarredByUser(user.id);
       return (
         <div className="icon-holder" onClick={handleStarClick}>
           <svg className={"icon-star " + (isStarred ? "starred" : "")} >
-            <use xlinkHref="#icon-outline-star"/>
+            {/* <use xlinkHref="#icon-outline-star"/> */}
+            <ThumbnailBookmark/>
           </svg>
         </div>
       );
