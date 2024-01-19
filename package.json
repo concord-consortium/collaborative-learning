@@ -211,7 +211,7 @@
   "dependencies": {
     "@chakra-ui/react": "^1.8.9",
     "@concord-consortium/compute-engine": "^0.12.3-cc.2",
-    "@concord-consortium/diagram-view": "^0.0.53",
+    "@concord-consortium/diagram-view": "1.0.0-beta.1",
     "@concord-consortium/mobx-state-tree": "^5.1.8-cc.2",
     "@concord-consortium/react-components": "^0.7.1",
     "@concord-consortium/react-modal-hook": "^3.0.0-cc.1",
@@ -249,7 +249,7 @@
     "patch-package": "^6.4.7",
     "promise-assist": "^2.0.1",
     "query-string": "7.1.1",
-    "rc-slider": "^10.0.1",
+    "rc-slider": "^10.5.0",
     "react": "^17.0.2",
     "react-chartjs-2": "^2.11.2",
     "react-data-grid": "7.0.0-canary.46",
