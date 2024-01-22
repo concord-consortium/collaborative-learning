@@ -128,7 +128,10 @@ export const PlottedVariablesAdornmentModel = PlottedFunctionAdornmentModel
     numericValuesForAttrRole(role: GraphAttrRole) {
       const values = self.variableValues;
       if (role in values) {
-        return values[role as 'x'|'y'];
+        // We don't return the actual variable values, but rather 0 and 2 times each value.
+        // This is because of how autoscale is defined for variables - not just the current-value point
+        // has to fit in the graph, but a range of values around it so the function line can be seen.
+        return [0, ...values[role as 'x'|'y'].map(x => 2*x)];
       } else {
         return [] as number[];
       }
