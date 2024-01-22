@@ -80,7 +80,6 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
             editButton(ENavTab.kSortWork, sectionClass || sideClasses, openDocument)
           }
         </div>
-
       </div>
      {
         openDocument &&
