@@ -22,7 +22,7 @@ export const filteredDocsByType = (allDocuments: DocumentModelType[]) =>{
 };
 
 export const SortWorkView: React.FC = observer(function SortWorkView() {
-  const { appConfig, persistentUI, sortedDocuments, documents } = useStores();
+  const { appConfig, persistentUI, sortedDocuments } = useStores();
 
   //*************************** Determine Sort Options & State  ***********************************
   const {tagPrompt} = appConfig;
