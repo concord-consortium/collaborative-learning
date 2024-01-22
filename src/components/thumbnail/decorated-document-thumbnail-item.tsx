@@ -49,7 +49,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     function handleDocumentStarClick() {
       shouldHandleStarClick && document?.toggleUserStar(user.id);
       //TODO: store this in persistentUI here?
-      console.log("persistentUI:", persistentUI);
+      // console.log("persistentUI:", persistentUI);
     }
 
     function handleDocumentDeleteClick() {

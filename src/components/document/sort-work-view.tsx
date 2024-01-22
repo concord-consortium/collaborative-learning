@@ -20,28 +20,46 @@ export const filteredDocsByType = (allDocuments: DocumentModelType[]) =>{
   });
 };
 
-//OBSERVATIONS
+//-------------------------------OBSERVATIONS-------------------------------------
 // 1) ⚡ Notied that bookmarking "planning documents" does not persist even appMode=dev
 // 2) Scott said that in a new PR (need to make) - change all the classes, functions,
 //     variables i.e anything alluding to “star” and rename them to allude to “bookmark” correct?
 
-//GUIDELINES•✔️
-//• stars should persist when they are created in the sort tab view
-// ↳ Fix non persistence of stars(now bookmarks) when appMode=demo
+//-------------------------------GUIDELINES•✔️-------------------------------------
 
 
-//•Revise the styling of stars to bookmarks in the Teacher Dashboard.
-//•Revise the tab name of the "Starred" tab in any unit which shows it to Bookmarks
-
-//•Bookmarks lists all the Bookmarked thumbs first, and "Not Bookmarked" second. , with suitably tagged documents beneath that section.
 
 //•Untagged documents are listed in a "Not Bookmarked" at the bottom
-
 //•As documents are tagged they are automatically resorted
 
-//---------------------------------- Done -------------------------------------
+//----------------------------------TODO: ---------------------------------------
+//• stars should persist when they are created in the sort tab view
+// ↳ Fix non persistence of stars(now bookmarks) when appMode=demo (to do another ticket)
+
+
+
+//Comments from coworker
+// The saving to firebase is handled by sync-stars.ts,
+// which calls db.createUserStar and db.setUserStarState.
+// These db functions store the stars under the getUserDocumentStarsPath.
+// This is storing the stars under the "offering user".
+// The loading from firebase is handled by db-stars-listener.ts.
+//It watches the current user's stars path in firebase and adds stars to the appropriate DocumentModel.
+// It seems like a good time to track down the demo mode bug, so we can test the
+//new bookmark/star code without having to run through the portal.
+
+
+//---------------------------------- Done ✔️-------------------------------------
+//✔️Bookmarks lists all the Bookmarked thumbs first, and "Not Bookmarked" second. ,
+// with suitably tagged documents beneath that section.
+
+
+//✔️Revise the tab name of the "Starred" tab in any unit which shows it to Bookmarks
+
 //✔️introduce a Bookmark Sort as a choice in the sorts for any unit that allows
 // bookmarking (Starring) in the Sort Workspaces Tab.
+
+//✔️ Revise the styling of stars to bookmarks in the Teacher Dashboard.
 
 //✔️Revise the styling of stars to the new bookmarks - students got upset that they weren't all getting gold stars.
 
@@ -81,8 +99,11 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     case "Name":
       renderedSortedDocuments = sortedDocuments.sortByName;
       break;
-    case sortTagPrompt:
+    case sortTagPrompt: //Sort by Strategy
       renderedSortedDocuments = sortedDocuments.sortByStrategy;
+      break;
+    case "Bookmarked":
+      renderedSortedDocuments = sortedDocuments.sortByBookmarks;
       break;
   }
 

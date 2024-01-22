@@ -112,12 +112,16 @@ export interface QueryParams {
 
 export const processUrlParams = (): QueryParams => {
   const params = parse(location.search);
+  const appModeReturn = (typeof params.appMode === "string") && AppModes.includes(params.appMode as AppMode)
+  ? params.appMode as AppMode
+  : undefined; // appMode will be determined internally
+
+  console.log("appModeReturn:", appModeReturn);
+
   return {
     ...params,
     // validate appMode
-    appMode: (typeof params.appMode === "string") && AppModes.includes(params.appMode as AppMode)
-                  ? params.appMode as AppMode
-                  : undefined,  // appMode will be determined internally
+    appMode: appModeReturn,
     // allows use of ?demo without a value for demo mode
     demo: (params.demo !== undefined),
     // allows use of localCMSBackend without a value
