@@ -27,6 +27,7 @@ import { TreeManager } from "../history/tree-manager";
 import { ESupportType } from "../curriculum/support";
 import { IDocumentLogEvent, logDocumentEvent } from "./log-document-event";
 import { LogEventMethod, LogEventName } from "../../lib/logger-types";
+import { UserModelType } from "../stores/user";
 
 interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
@@ -180,6 +181,13 @@ export const DocumentModel = Tree.named("Document")
     },
     getUniqueTitle(tileType: string, titleBase: string) {
       return self.content?.getUniqueTitle(tileType, titleBase);
+    },
+    isAccessibleToUser(user: UserModelType) {
+      const ownDocument = self.uid === user.id;
+      const isShared = self.visibility === "public";
+      if (user.type === "teacher") return true;
+      if (user.type === "student") return ownDocument || isShared || self.isPublished;
+      return false;
     }
   }))
   .views(self => ({

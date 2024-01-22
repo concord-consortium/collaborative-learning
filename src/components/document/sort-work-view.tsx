@@ -6,10 +6,11 @@ import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { DocumentContextReact } from "./document-context";
-import { DEBUG_SORT_WORK } from "../../lib/debug";
+import { DEBUG_DOC_LIST } from "../../lib/debug";
+import { isSortableType } from "../../models/document/document-types";
 import { SortWorkDocumentArea } from "./sort-work-document-area";
 import { ENavTab } from "../../models/view/nav-tabs";
-import { isSortableType } from "../../models/document/document-types";
+import { DocListDebug } from "./doc-list-debug";
 
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
@@ -62,22 +63,6 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
   const showSortWorkDocumentArea = !!openDocumentKey;
 
-  //****************************************** Handle Debug View **********************************
-
-  const renderDebugView = () => {
-    //returns a list lf all documents (unsorted)
-    return filteredDocsByType(documents.all).map((doc, idx) => {
-      const ct = idx + 1;
-      return (
-        <pre key={idx} style={{ margin: "0px", padding: "0px", fontSize: "10px" }}>
-          {ct < 10 && " "}{ct} | {doc.title?.slice(0, 20) || "                    "}
-          | {doc.key} | {doc.type} | {doc.uid}
-          | {doc?.isStarred? "T": "F"}
-        </pre>
-      );
-    });
-  };
-
   return (
     <div key="sort-work-view" className="sort-work-view">
       {
@@ -117,7 +102,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
                 );
               })
             }
-            {DEBUG_SORT_WORK && renderDebugView()}
+            {DEBUG_DOC_LIST && <DocListDebug docs={filteredDocsByType} />}
           </div>
         </>
       }
