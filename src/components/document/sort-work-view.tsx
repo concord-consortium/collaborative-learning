@@ -15,54 +15,8 @@ import { DocListDebug } from "./doc-list-debug";
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
-//-------------------------------OBSERVATIONS-------------------------------------
-// 1) ⚡ Notied that bookmarking "planning documents" does not persist even appMode=dev
-// 2) Scott said that in a new PR (need to make) - change all the classes, functions,
-//     variables i.e anything alluding to “star” and rename them to allude to “bookmark” correct?
-
-//-------------------------------GUIDELINES•✔️-------------------------------------
-
-
-
-//•Untagged documents are listed in a "Not Bookmarked" at the bottom
-//•As documents are tagged they are automatically resorted
-
-//----------------------------------TODO: ---------------------------------------
-
-
-
-//Comments from coworker
-// The saving to firebase is handled by sync-stars.ts,
-// which calls db.createUserStar and db.setUserStarState.
-// These db functions store the stars under the getUserDocumentStarsPath.
-// This is storing the stars under the "offering user".
-// The loading from firebase is handled by db-stars-listener.ts.
-//It watches the current user's stars path in firebase and adds stars to the appropriate DocumentModel.
-// It seems like a good time to track down the demo mode bug, so we can test the
-//new bookmark/star code without having to run through the portal.
-
-
-//---------------------------------- Done ✔️-------------------------------------
-//✔️Bookmarks lists all the Bookmarked thumbs first, and "Not Bookmarked" second. ,
-// with suitably tagged documents beneath that section.
-
-
-//✔️Revise the tab name of the "Starred" tab in any unit which shows it to Bookmarks
-
-//✔️introduce a Bookmark Sort as a choice in the sorts for any unit that allows
-// bookmarking (Starring) in the Sort Workspaces Tab.
-
-//✔️ Revise the styling of stars to bookmarks in the Teacher Dashboard.
-
-//✔️Revise the styling of stars to the new bookmarks - students got upset that they weren't all getting gold stars.
-
-//✔️ Both the unclicked and clicked bookmarks need to be redone on thumbnails in my/class work and the new Sort Workspaces tab.
-
-
-
-
-// Specs: https://zpl.io/Dl5M5nw
-
+//TODO-
+//- double check the opacity - particularly the selected bookmark ?
 
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, persistentUI, sortedDocuments, documents } = useStores();
@@ -76,7 +30,6 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const filteredDocsByType = documents.all.filter((doc: DocumentModelType) => {
     return isSortableType(doc.type);
   });
-
 
   useEffect(()=>{
     if (sortBy === sortTagPrompt){

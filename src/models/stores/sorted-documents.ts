@@ -203,7 +203,6 @@ export class SortedDocuments {
   //*************************************** Sort By Bookmarks *************************************
 
   get sortByBookmarks(): SortedDocument[] {
-    console.log("sortByBookmarks");
     const documentMap = new Map();
     this.filteredDocsByType.forEach((doc) => {
       const sectionLabel = doc.isStarred ? "Bookmarked" : "Not Bookmarked";
