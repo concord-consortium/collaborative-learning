@@ -222,6 +222,12 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   function handleEditClick(document: DocumentModelType) {
     persistentUI.problemWorkspace.setPrimaryDocument(document);
   }
+
+  function handleCloseButtonClick() {
+    if (persistentUI.openSubTab) {
+      persistentUI.closeSubTabDocument(persistentUI.activeNavTab, persistentUI.openSubTab);
+    }
+  }
   // TODO: this edit button is confusing when the history is being viewed. It
   // opens the original document for editing, not some old version of the
   // document they might be looking at. Previously this edit button was disabled
@@ -256,6 +262,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
             {displayTitle.title}
           </span>
         </div>
+        <button className={"close-doc-button"} onClick={handleCloseButtonClick}/>
         {(!openDocument.isRemote)
             && editButton(tab, sectionClass || sideClasses, openDocument)}
       </div>
