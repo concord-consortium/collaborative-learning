@@ -5,7 +5,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { DocumentCaption } from "./document-caption";
 import { ThumbnailPlaceHolderIcon } from "./thumbnail-placeholder-icon";
 import { ThumbnailPrivateIcon } from "./thumbnail-private-icon";
-import { useAppMode } from "../../hooks/use-stores";
+import { useAppMode, useStores } from "../../hooks/use-stores";
 import ThumbnailBookmark from "../../assets/thumbnail-bookmark-icon.svg";
 import classNames from "classnames";
 

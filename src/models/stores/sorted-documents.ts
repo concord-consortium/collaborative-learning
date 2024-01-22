@@ -5,7 +5,6 @@ import { DocumentsModelType } from "./documents";
 import { GroupsModelType } from "./groups";
 import { ClassModelType } from "./class";
 import { DB } from "../../lib/db";
-import { filteredDocsByType } from "../../components/document/sort-work-view";
 import { AppConfigModelType } from "./app-config-model";
 
 type SortedDocument = {
@@ -150,8 +149,7 @@ export class SortedDocuments {
       }
     });
 
-    const allSortableDocKeys = filteredDocsByType(this.documents.all);
-    allSortableDocKeys.forEach(doc => {
+    this.filteredDocsByType.forEach(doc => {
       if (!uniqueDocKeysWithComments.has(doc.key)) {
         // This document has no comments
         if (tagsWithDocs[""]) {

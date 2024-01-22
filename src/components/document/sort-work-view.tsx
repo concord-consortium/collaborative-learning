@@ -15,12 +15,6 @@ import { DocListDebug } from "./doc-list-debug";
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
-export const filteredDocsByType = (allDocuments: DocumentModelType[]) =>{
-  return allDocuments.filter((doc: DocumentModelType) => {
-    return isSortableType(doc.type);
-  });
-};
-
 //-------------------------------OBSERVATIONS-------------------------------------
 // 1) ⚡ Notied that bookmarking "planning documents" does not persist even appMode=dev
 // 2) Scott said that in a new PR (need to make) - change all the classes, functions,
@@ -34,8 +28,6 @@ export const filteredDocsByType = (allDocuments: DocumentModelType[]) =>{
 //•As documents are tagged they are automatically resorted
 
 //----------------------------------TODO: ---------------------------------------
-//• stars should persist when they are created in the sort tab view
-// ↳ Fix non persistence of stars(now bookmarks) when appMode=demo (to do another ticket)
 
 
 
@@ -73,13 +65,18 @@ export const filteredDocsByType = (allDocuments: DocumentModelType[]) =>{
 
 
 export const SortWorkView: React.FC = observer(function SortWorkView() {
-  const { appConfig, persistentUI, sortedDocuments } = useStores();
+  const { appConfig, persistentUI, sortedDocuments, documents } = useStores();
 
   //*************************** Determine Sort Options & State  ***********************************
   const {tagPrompt} = appConfig;
   const sortTagPrompt = tagPrompt || ""; //first dropdown choice for comment tags
   const sortOptions = ["Group", "Name", sortTagPrompt, "Bookmarked"];
   const [sortBy, setSortBy] = useState("Group");
+
+  const filteredDocsByType = documents.all.filter((doc: DocumentModelType) => {
+    return isSortableType(doc.type);
+  });
+
 
   useEffect(()=>{
     if (sortBy === sortTagPrompt){
