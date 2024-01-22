@@ -75,9 +75,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
           </span>
         </div>
         <div className="document-buttons">
-          <button className={"close-doc-button"} onClick={handleCloseButtonClick}>
-            &times;
-          </button>
+          <button className={"close-doc-button"} onClick={handleCloseButtonClick}/>
           { openDocument &&
             editButton(ENavTab.kSortWork, sectionClass || sideClasses, openDocument)
           }
