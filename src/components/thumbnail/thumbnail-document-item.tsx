@@ -31,6 +31,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
   } = props;
   const selectedClass = isSelected ? "selected" : "";
   const appMode = useAppMode();
+  const stores = useStores();
 
   const handleDocumentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     onDocumentClick?.(document);
@@ -47,8 +48,8 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
     onDocumentDeleteClick?.(document);
     e.stopPropagation();
   };
-  // TODO: add proper state of isPrivate based on document properties
-  const isPrivate = false; // document.visibility === "private" && document.isRemote;
+
+  const isPrivate = !document.isAccessibleToUser(stores.user);
   const privateClass = isPrivate ? "private" : "";
   const documentTitle = appMode !== "authed" && appMode !== "demo"
                           ? `Firebase UID: ${document.key}` : undefined;
