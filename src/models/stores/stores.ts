@@ -178,7 +178,6 @@ class Stores implements IStores{
   }
 
   setAppMode(mode: AppMode) {
-    console.log("setAppMode:", mode);
     this.appMode = mode;
   }
 

@@ -263,13 +263,11 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
           document.toggleUserStar(user.id);
         }
       };
-      // const temp = <ThumbnailBookmark/>;
 
       const isStarred = document.isStarredByUser(user.id);
       return (
         <div className="icon-holder" onClick={handleStarClick}>
           <svg className={"icon-star " + (isStarred ? "starred" : "")} >
-            {/* <use xlinkHref="#icon-outline-star"/> */}
             <ThumbnailBookmark/>
           </svg>
         </div>

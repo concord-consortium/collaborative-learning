@@ -260,16 +260,10 @@ export const DocumentModel = Tree.named("Document")
 
     toggleUserStar(userId: string) {
       const userStar = self.stars.find(star => star.uid === userId);
-      //TODO: store this in persistentUI?
-      // const persistentUI = usePersistentUIStore();
-
       if (userStar) {
-        // console.log("userStar exists");
         userStar.starred = !userStar.starred;
       }
       else {
-        // console.log("userStar does NOT exist");
-
         self.stars.push(UserStarModel.create({ uid: userId, starred: true }));
       }
     },
