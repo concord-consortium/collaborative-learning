@@ -15,9 +15,6 @@ import { DocListDebug } from "./doc-list-debug";
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
-//TODO-
-//- double check the opacity - particularly the selected bookmark ?
-
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, persistentUI, sortedDocuments, documents } = useStores();
 
