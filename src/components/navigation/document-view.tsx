@@ -15,8 +15,6 @@ import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { DocumentBrowserScroller, ScrollButton } from "./document-browser-scroller";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 import CloseIcon from "../../../src/assets/icons/close/close.svg";
-import CloseMyWorkIcon from "../../../src/assets/icons/close/close-my-work.svg";
-import CloseClassWorkIcon from "../../../src/assets/icons/close/close-class-work.svg";
 
 interface IProps {
   tabSpec: NavTabModelType;
@@ -256,16 +254,6 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
 
   const sideClasses = { secondary: isSecondaryDocument, primary: hasSecondaryDocument && !isSecondaryDocument };
 
-  const closeIcon = () => {
-    if (tab === "my-work") {
-      return <CloseMyWorkIcon className="close-icon" />;
-    }
-    if (tab === "class-work") {
-      return <CloseClassWorkIcon className="close-icon" />;
-    } else {
-      return <CloseIcon className="close-icon" />;
-    }
-  };
 
   return (
     <div className={classNames("focus-document", tab, sideClasses)}>
@@ -282,8 +270,8 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
           {(!openDocument.isRemote) &&
             editButton(tab, sectionClass || sideClasses, openDocument)
           }
-          <button className={"close-doc-button"} onClick={handleCloseButtonClick}>
-            {closeIcon()}
+          <button className={`close-doc-button ${tab}`} onClick={handleCloseButtonClick}>
+            <CloseIcon className="close-icon" />
           </button>
         </div>
       </div>

@@ -149,9 +149,6 @@ $title-margin: 2px;
               svg {
                 position: relative;
                 left:-2px;
-                .x-shape {
-                  fill: rgba(0,0,0,0.6);
-                }
               }
               margin-left: 6px;
               display: flex;
@@ -164,53 +161,43 @@ $title-margin: 2px;
               padding: 3px;
               height:26px;
               width: 26px;
-              &:hover {
-                background-color: rgba(0,0,0,0.2);
-              }
-              &:active {
-                background-color: rgba(0,0,0,0.4);
-                .x-shape {
-                  fill: white;
-                }
-              }
               &.disabled {
                 pointer-events: none;
                 opacity: 0.35;
               }
+              &.class-work {
+                background-color: $classwork-purple-light-5;
+                .x-shape {
+                  fill: $classwork-purple-dark-1;
+                }
+                &:hover {
+                  background-color: $classwork-purple-light-3;
+                }
+                &:active {
+                  background-color: $classwork-purple-dark-1;
+                  color: white;
+                  .x-shape {
+                    fill: white;
+                  }
+                }
+              }
+              &.my-work {
+                background-color: $workspace-teal-light-4;
+                .x-shape {
+                  fill: $workspace-teal-dark-1;
+                }
+                &:hover {
+                  background-color: $workspace-teal-light-3;
+                }
+                &:active {
+                  background-color: $workspace-teal-light-1;
+                  color: white;
+                  .x-shape {
+                    fill: white;
+                  }
+                }
+              }
             }
-            // .close-doc-button {
-            //   svg {
-            //     position: relative;
-            //     left:-2px;
-            //     .x-shape {
-            //       fill: rgba(0,0,0,0.6);
-            //     }
-            //   }
-            //   margin-left: 6px;
-            //   display: flex;
-            //   justify-content: center;
-            //   align-items: center;
-            //   cursor: pointer;
-            //   background-color: transparent;
-            //   border-width: 0px;
-            //   border-radius: 50%;
-            //   padding: 3px;
-            //   height:26px;
-            //   width: 26px;
-            //   &:hover {
-            //     background-color: rgba(0,0,0,0.2);
-            //   }
-            //   &:active {
-            //     background-color: rgba(0,0,0,0.4);
-            //     .x-shape {
-            //       fill: white;
-            //     }
-            //   }
-            //   &.disabled {
-            //     pointer-events: none;
-            //     opacity: 0.35;
-            //   }
-            // }
           }
         }
       }
