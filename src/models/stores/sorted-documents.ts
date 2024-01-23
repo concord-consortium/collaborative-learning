@@ -149,7 +149,8 @@ export class SortedDocuments {
       }
     });
 
-    this.filteredDocsByType.forEach(doc => {
+    const allSortableDocKeys = this.filteredDocsByType;
+    allSortableDocKeys.forEach(doc => {
       if (!uniqueDocKeysWithComments.has(doc.key)) {
         // This document has no comments
         if (tagsWithDocs[""]) {

@@ -7,7 +7,6 @@ import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { DocumentContextReact } from "./document-context";
 import { DEBUG_DOC_LIST } from "../../lib/debug";
-import { isSortableType } from "../../models/document/document-types";
 import { SortWorkDocumentArea } from "./sort-work-document-area";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { DocListDebug } from "./doc-list-debug";
@@ -103,7 +102,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
                 );
               })
             }
-            {DEBUG_DOC_LIST && <DocListDebug docs={filteredDocsByType} />}
+            {DEBUG_DOC_LIST && <DocListDebug docs={sortedDocuments.filteredDocsByType} />}
           </div>
         </>
       }
