@@ -33,17 +33,26 @@ export class DBStarsListener extends BaseListener {
   }
 
   private handleUpdateStars = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
-    const { documents } = this.db.stores;
+    const { documents, stars } = this.db.stores;
     const dbDocStars = snapshot.val();
     this.debugLogSnapshot(`#handleUpdateStars (${eventType})`, snapshot);
-    if (dbDocStars) {
-      const docModel = snapshot.ref.key && documents.getDocument(snapshot.ref.key);
+    const docKey = snapshot.ref.key;
+    if (dbDocStars && docKey) {
+      // New separate stars store approach
+      forEach(dbDocStars, (userStar, starKey) => {
+        const { uid, starred } = userStar;
+        stars.updateDocumentStar(docKey, { key: starKey, uid, starred});
+      });
+
+      const docModel = docKey && documents.getDocument(docKey);
       if (docModel) {
         forEach(dbDocStars, (userStar, starKey) => {
           const { uid, starred } = userStar;
           const starModel = UserStarModel.create({ key: starKey, uid, starred });
           docModel.setUserStar(starModel);
         });
+      } else {
+        console.log("Can't find document to add star to", snapshot.ref.key);
       }
     }
   };

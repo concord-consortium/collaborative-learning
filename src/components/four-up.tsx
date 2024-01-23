@@ -250,7 +250,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     };
 
     const renderStar = (document?: DocumentModelType) => {
-      const { user } = this.stores;
+      const { user, stars } = this.stores;
       if (!document || (documentViewMode !== DocumentViewMode.Published)) {
         return;
       }
@@ -263,7 +263,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         }
       };
 
-      const isStarred = document.isStarredByUser(user.id);
+      const isStarred = stars.isDocumentStarredByUser(document.key, user.id);
       return (
         <div className="icon-holder" onClick={handleStarClick}>
           <svg className={"icon-star " + (isStarred ? "starred" : "")} >

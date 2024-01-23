@@ -141,6 +141,7 @@ export const DocumentModel = Tree.named("Document")
         const property = match && match[2];
         const wantsProperty = !(match && match[1]); // not negated => has property
         // treat "starred" as a virtual property
+        // This will be a problem if we extract starred
         if (property === "starred") {
           return self.isStarred === wantsProperty;
         }

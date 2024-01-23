@@ -15,6 +15,7 @@ import { ClipboardModelType } from "./clipboard";
 import { SelectionStoreModelType } from "./selection";
 import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
+import { Stars } from "./stars";
 
 
 export interface IBaseStores {
@@ -40,4 +41,5 @@ export interface IBaseStores {
   clipboard: ClipboardModelType;
   selection: SelectionStoreModelType;
   serialDevice: SerialDevice;
+  stars: Stars;
 }

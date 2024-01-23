@@ -23,6 +23,7 @@ import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
 import { IBaseStores } from "./base-stores-types";
 import { NavTabModelType } from "../view/nav-tabs";
+import { Stars } from "./stars";
 import { SortedDocuments } from "./sorted-documents";
 
 export interface IStores extends IBaseStores {
@@ -68,6 +69,7 @@ class Stores implements IStores{
   db: DB;
   demo: DemoModelType;
   showDemoCreator: boolean;
+  stars: Stars;
   supports: SupportsModelType;
   clipboard: ClipboardModelType;
   selection: SelectionStoreModelType;
@@ -120,6 +122,7 @@ class Stores implements IStores{
     });
     this.persistentUI.setProblemPath(this.problemPath);
     this.userContextProvider = new UserContextProvider(this);
+    this.stars = new Stars();
     this.sortedDocuments = new SortedDocuments(this);
   }
 

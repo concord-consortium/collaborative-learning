@@ -60,7 +60,8 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
           });
         }
       });
-    const starredDocs = docs.filter((doc: DocumentModelType) => !doc.getProperty("isDeleted") && doc.isStarred);
+    const starredDocs = docs.filter((doc: DocumentModelType) =>
+      !doc.getProperty("isDeleted") && store.stars.isDocumentStarred(doc.key));
     return starredDocs;
   };
   const starredDocuments = getStarredDocuments(documentTypes);

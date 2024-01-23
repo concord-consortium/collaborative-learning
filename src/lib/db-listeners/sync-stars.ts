@@ -4,6 +4,7 @@ import { onPatch } from "mobx-state-tree";
 
 export const syncStars = (doc: DocumentModelType, db: DB) => {
   onPatch(doc.stars, patch => {
+    console.log("syncStars", {docKey: doc.key});
     const [, index, replaceKey] = patch.path.split("/");
     if (patch.op === "add") {
       const star = patch.value;

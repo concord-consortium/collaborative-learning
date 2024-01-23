@@ -5,7 +5,7 @@ import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { useDocumentCaption } from "../../hooks/use-document-caption";
 import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
 import { DocumentModelType } from "../../models/document/document";
-import { useDBStore, useUIStore, useUserStore } from "../../hooks/use-stores";
+import { useDBStore, useStores, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { LogEventName } from "../../lib/logger-types";
@@ -33,6 +33,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     const tabName = tab.toLowerCase().replace(' ', '-');
     const caption = useDocumentCaption(document);
     const ui = useUIStore();
+    const { stars } = useStores();
 
     // sync delete a publication to firebase
     useDocumentSyncToFirebase(user, dbStore.firebase, document, true);
@@ -68,7 +69,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
               // ? user.isTeacher
               //   ? sectionDocument.isStarredByUser(user.id)
               //   : sectionDocument.isStarred
-                ? document.isStarred
+                ? stars.isDocumentStarred(document.key)
                 : false;
     };
     const _handleDocumentStarClick = shouldHandleStarClick && !document.isRemote
