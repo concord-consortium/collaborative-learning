@@ -65,19 +65,15 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
 
-  const validCompletions = useCallback((aValues: string[], prefixString: string) => {
-    const prefixStringLC = prefixString.toLowerCase();
-    const values = uniq(aValues).sort();
-    if (editingValue && valueCandidate.length > 0){
-      return values.filter((value) => {
-        return value && typeof(value)==='string' && !isImageUrl(value)
-               && value.toLowerCase().startsWith(prefixStringLC);
-      }) as string[];
-    } else {
-      return values.filter((value) => {
-        return value && typeof(value)==='string' && !isImageUrl(value);
-      }) as string[];
-    }
+  const validCompletions = useCallback((aValues: string[], userString: string) => {
+    const values = uniq(aValues).filter(value => typeof value === 'string').sort();
+    const regex = new RegExp(`${userString}`, 'i');
+
+
+    return editingValue && valueCandidate.length > 0
+      ? values.filter((value) => value && !isImageUrl(value) && regex.test(value))
+      : values.filter((value) => value && !isImageUrl(value));
+
   }, [editingValue, valueCandidate.length]);
 
   const {
@@ -344,6 +340,17 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     return <span></span>; // There may be more cases in the future, e.g. date picker
   };
 
+  const itemWithBoldedMatch = (fullString: string, matchString: string) => {
+    // If full string is "Orange" and matchString is "ran"
+    // the result will be "O<b>ran</b>ge"
+    const matchIndex = fullString.toLowerCase().indexOf(matchString.toLowerCase());
+    const matchEndIndex = matchIndex + matchString.length;
+    const match = fullString.slice(matchIndex, matchEndIndex);
+    const lettersBeforeMatch = fullString.slice(0, matchIndex);
+    const lettersAfterMatch = fullString.slice(matchEndIndex);
+    return <span>{lettersBeforeMatch}<b>{match}</b>{lettersAfterMatch}</span>;
+  };
+
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onClick={handleLabelClick}>
@@ -384,7 +391,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
                   key={`${item}${index}`}
                   {...getItemProps({item, index})}
                 >
-                  {item}
+                  { itemWithBoldedMatch(item, valueCandidate) }
                 </li>
             ))}
           </ul>
