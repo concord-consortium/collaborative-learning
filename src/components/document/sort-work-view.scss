@@ -84,13 +84,9 @@ $title-margin: 2px;
       }
 
       .close-doc-button {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
         height: 26px;
         border-radius: 5px;
         border: solid 1.5px $charcoal-light-1;
-        background-image: url("../../assets/icons/close/close.svg");
         width: 26px;
         margin-left:3px;
         align-items: center;

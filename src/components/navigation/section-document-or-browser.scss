@@ -80,61 +80,83 @@ $title-margin: 2px;
               font-weight: normal;
             }
           }
-          .edit-button {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            width: 66px;
-            height: 26px;
-            border-radius: 5px;
-            border: solid 1.5px $charcoal-light-1;
-            background-color: $workspace-teal-light-4;
+          .document-buttons {
+            display:flex;
             position: absolute;
-            right: 5px;
-            padding: 0;
-            box-sizing: border-box;
-            cursor: pointer;
-            &:hover {
-              background-color: $workspace-teal-light-3;
-            }
-            &:active {
-              background-color: $workspace-teal-light-1;
-              color: white;
-              .edit-icon {
-                fill: white;
-              }
-            }
-            &.disabled {
-              pointer-events: none;
-              opacity: 0.35;
-            }
-            &.primary {
-              background-color: $document-select-green;
-            }
-            &.secondary {
-              background-color: $document-select-blue;
-            }
-            &.learning-log {
-              background-color: $learninglog-green-light-5;
+            right: 0;
+            align-items: center;
+            padding: 3px;
+            .edit-button {
+              display: flex;
+              flex-direction: row;
+              align-items: center;
+              width: 66px;
+              height: 26px;
+              border-radius: 5px;
+              border: solid 1.5px $charcoal-light-1;
+              background-color: $workspace-teal-light-4;
+              right: 5px;
+              padding: 0;
+              box-sizing: border-box;
+              cursor: pointer;
               &:hover {
-                background-color: $learninglog-green-light-4;
+                background-color: $workspace-teal-light-3;
               }
               &:active {
-                background-color: $learninglog-green-dark-1;
+                background-color: $workspace-teal-light-1;
                 color: white;
                 .edit-icon {
                   fill: white;
                 }
               }
-            }
-            .edit-icon {
-              fill: $workspace-teal-dark-1;
-              width: 24px;
-              height: 24px;
-              margin-left: 4px;
-              margin-right: 3px;
+              &.disabled {
+                pointer-events: none;
+                opacity: 0.35;
+              }
+              &.primary {
+                background-color: $document-select-green;
+              }
+              &.secondary {
+                background-color: $document-select-blue;
+              }
               &.learning-log {
-                fill: $learninglog-green-dark-1;
+                background-color: $learninglog-green-light-5;
+                &:hover {
+                  background-color: $learninglog-green-light-4;
+                }
+                &:active {
+                  background-color: $learninglog-green-dark-1;
+                  color: white;
+                  .edit-icon {
+                    fill: white;
+                  }
+                }
+              }
+              .edit-icon {
+                fill: $workspace-teal-dark-1;
+                width: 24px;
+                height: 24px;
+                margin-left: 4px;
+                margin-right: 3px;
+                &.learning-log {
+                  fill: $learninglog-green-dark-1;
+                }
+              }
+            }
+            .close-doc-button {
+              width: 26px;
+              height: 26px;
+              margin-left:7px;
+              cursor: pointer;
+              background-image: url("../../assets/icons/close/close.svg");
+              background-position: center; // Centers the background image
+              background-repeat: no-repeat; // Prevents the image from repeating
+              background-size: 22px 22px; // Ensures the image is scaled to the correct size
+              border-radius: 26px;
+              background-color: transparent;
+              border-width: 0px;
+              &:hover {
+                background-color: rgba(0,0,0,0.2);
               }
             }
           }

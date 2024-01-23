@@ -262,9 +262,12 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
             {displayTitle.title}
           </span>
         </div>
-        <button className={"close-doc-button"} onClick={handleCloseButtonClick}/>
-        {(!openDocument.isRemote)
-            && editButton(tab, sectionClass || sideClasses, openDocument)}
+        <div className="document-buttons">
+          {(!openDocument.isRemote) &&
+            editButton(tab, sectionClass || sideClasses, openDocument)
+          }
+          <button className={"close-doc-button"} onClick={handleCloseButtonClick}/>
+        </div>
       </div>
       {onChangeDocument && !hideLeftFlipper &&
         <ScrollButton side="left" theme={tab} className="document-flipper"
