@@ -15,17 +15,13 @@ import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
 export const SortWorkView: React.FC = observer(function SortWorkView() {
-  const { appConfig, persistentUI, sortedDocuments, documents } = useStores();
+  const { appConfig, persistentUI, sortedDocuments } = useStores();
 
   //*************************** Determine Sort Options & State  ***********************************
   const {tagPrompt} = appConfig;
   const sortTagPrompt = tagPrompt || ""; //first dropdown choice for comment tags
   const sortOptions = ["Group", "Name", sortTagPrompt, "Bookmarked"];
   const [sortBy, setSortBy] = useState("Group");
-
-  const filteredDocsByType = documents.all.filter((doc: DocumentModelType) => {
-    return isSortableType(doc.type);
-  });
 
   useEffect(()=>{
     if (sortBy === sortTagPrompt){
