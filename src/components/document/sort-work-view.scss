@@ -76,49 +76,35 @@ $title-margin: 2px;
         display:flex;
         flex-direction: row;
         height: 100%;
-        position: absolute;
-        right: 0;
         align-items: center;
-        padding:3px;
-        transform: translateY(-1.5px);
+        position: absolute;
+        top: -1px;
+        right: 7px;
       }
 
       .close-doc-button {
-        height: 26px;
-        border-radius: 5px;
-        border: solid 1.5px $charcoal-light-1;
-        width: 26px;
-        margin-left:3px;
-        align-items: center;
+        margin-left: 6px;
+        display: flex;
         justify-content: center;
-        font-size: 20px;
-        padding: 0;
-        box-sizing: border-box;
+        align-items: center;
         cursor: pointer;
+        background-color: transparent;
+        border-width: 0px;
+        border-radius: 50%;
+        padding: 3px;
+        height:25px;
+        width: 25px;
         &:hover {
-          background-color: $workspace-teal-light-3;
+          background-color: rgba(0,0,0,0.2);
         }
         &:active {
-          background-color: $workspace-teal-light-1;
-          color: white;
-          .close-icon {
-            fill: white;
-          }
+          background-color: pink;
         }
         &.disabled {
           pointer-events: none;
           opacity: 0.35;
         }
-
-        .close-icon {
-          fill: $workspace-teal-dark-1;
-          width: 24px;
-          height: 24px;
-          margin-left: 4px;
-          margin-right: 3px;
-        }
       }
-
       .edit-button {
         display: flex;
         flex-direction: row;

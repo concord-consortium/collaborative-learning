@@ -14,11 +14,13 @@ import { EditableDocumentContent } from "../document/editable-document-content";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { DocumentBrowserScroller, ScrollButton } from "./document-browser-scroller";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
+import CloseIcon from "../../../src/assets/icons/close/close.svg";
 
 interface IProps {
   tabSpec: NavTabModelType;
   subTab: ISubTabSpec;
 }
+
 //TODO: Need to refactor this if we want to deploy to all tabs
 export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IProps) {
   const persistentUI = usePersistentUIStore();
@@ -266,7 +268,9 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
           {(!openDocument.isRemote) &&
             editButton(tab, sectionClass || sideClasses, openDocument)
           }
-          <button className={"close-doc-button"} onClick={handleCloseButtonClick}/>
+          <button className={"close-doc-button"} onClick={handleCloseButtonClick}>
+            <CloseIcon />
+          </button>
         </div>
       </div>
       {onChangeDocument && !hideLeftFlipper &&

@@ -6,6 +6,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { EditableDocumentContent } from "./editable-document-content";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
+import CloseIcon from "../../../src/assets/icons/close/close.svg";
 import { observer } from "mobx-react";
 import { ENavTab } from "../../models/view/nav-tabs";
 
@@ -78,7 +79,9 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
           { openDocument &&
             editButton(ENavTab.kSortWork, sectionClass || sideClasses, openDocument)
           }
-          <button className="close-doc-button" onClick={handleCloseButtonClick}/>
+          <button className="close-doc-button" onClick={handleCloseButtonClick}>
+            <CloseIcon />
+          </button>
         </div>
       </div>
      {
