@@ -254,7 +254,6 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
 
   const sideClasses = { secondary: isSecondaryDocument, primary: hasSecondaryDocument && !isSecondaryDocument };
 
-
   return (
     <div className={classNames("focus-document", tab, sideClasses)}>
       <div className={classNames("document-header", tab, sectionClass, sideClasses)}
