@@ -97,6 +97,7 @@ interface IDocumentStarProps {
 
 const DocumentBookmark = (props: IDocumentStarProps) => {
   const { isStarred, onStarClick } = props;
+
   return (
     <div className="icon-holder" onClick={onStarClick}>
       <svg className={"icon-star " + (isStarred ? "starred" : "")} >
