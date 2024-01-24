@@ -18,7 +18,6 @@ import { isImageUrl } from "../../../models/data/data-types";
 
 import '../data-card-tile.scss';
 
-
 const typeIcons = {
   "date": "📅",
   "categorical": "🔤",
