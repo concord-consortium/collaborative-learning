@@ -69,7 +69,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     const values = uniq(aValues).filter(value => typeof value === 'string').sort();
     const regex = new RegExp(`${userString}`, 'i');
 
-
     return editingValue && valueCandidate.length > 0
       ? values.filter((value) => value && !isImageUrl(value) && regex.test(value))
       : values.filter((value) => value && !isImageUrl(value));
