@@ -31,7 +31,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
   } = props;
   const selectedClass = isSelected ? "selected" : "";
   const appMode = useAppMode();
-  const { stars, user } = useStores();
+  const { bookmarks, user } = useStores();
   const classStore = useClassStore();
 
   const handleDocumentClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -54,13 +54,13 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
   // We were only showing stars to teachers if that teacher owned the star. This was changed to show all
   // stars regardless of who placed the star.
   // const isStarred = user.isTeacher
-  //   ? stars.isDocumentStarredByUser(document.key, user.id)
-  //   : stars.isDocumentStarred(document.key);
+  //   ? stars.isDocumentBookmarkedByUser(document.key, user.id)
+  //   : stars.isDocumentBookmarked(document.key);
 
-  const isStarred = stars.isDocumentStarred(document.key);
+  const isStarred = bookmarks.isDocumentBookmarked(document.key);
 
   const getBookmarkLabel = () => {
-    const docStars = stars.starMap.get(document.key);
+    const docStars = bookmarks.bookmarkMap.get(document.key);
     if (!docStars) return "";
     const starOwners = { user: 0, teacher: 0, others: 0};
     docStars.forEach(star => {

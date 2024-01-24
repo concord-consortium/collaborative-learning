@@ -168,7 +168,7 @@ $ npm run deploy:firebase:rules     # deploys firebase (realtime database) rules
 
 To enable per component debugging set the "debug" localstorage key with one or more of the following:
 
-- `bookmarks` this will show a tiny text status above the bookmark indicating which users have bookmarked this document.
+- `bookmarks` this will show a tiny text status above the bookmark indicating which users have bookmarked this document. It will also print information about the document bookmarks each time a bookmark is toggled.
 - `canvas` this will show the document key over the canvas, useful for looking up documents in Firebase
 - `cms` this will print info to the console as changes are made to authored content via the CMS
 - `docList` - this will print a table of information about a list of documents

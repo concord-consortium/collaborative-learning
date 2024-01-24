@@ -33,7 +33,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     const tabName = tab.toLowerCase().replace(' ', '-');
     const caption = useDocumentCaption(document);
     const ui = useUIStore();
-    const { stars } = useStores();
+    const { bookmarks } = useStores();
 
     // sync delete a publication to firebase
     useDocumentSyncToFirebase(user, dbStore.firebase, document, true);
@@ -43,7 +43,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     }
 
     function handleDocumentStarClick() {
-      shouldHandleStarClick && stars.toggleUserStar(document.key, user.id);
+      shouldHandleStarClick && bookmarks.toggleUserBookmark(document.key, user.id);
     }
 
     function handleDocumentDeleteClick() {

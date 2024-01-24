@@ -1,8 +1,9 @@
 import firebase from "firebase/app";
 import { forEach } from "lodash";
 import { DB } from "../db";
-import { Star } from "../../models/stores/stars";
+import { Bookmark } from "../../models/stores/bookmarks";
 import { BaseListener } from "./base-listener";
+import { DEBUG_BOOKMARKS } from "../debug";
 
 export class DBStarsListener extends BaseListener {
   private db: DB;
@@ -34,7 +35,7 @@ export class DBStarsListener extends BaseListener {
 
   // See bookmarks.md for details about this
   private handleUpdateStars = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
-    const { stars } = this.db.stores;
+    const { bookmarks } = this.db.stores;
     const dbDocStars = snapshot.val();
     this.debugLogSnapshot(`#handleUpdateStars (${eventType})`, snapshot);
     const docKey = snapshot.ref.key;
@@ -42,13 +43,11 @@ export class DBStarsListener extends BaseListener {
 
     // In the past there have been multiple stars for the same user on the same document.
     // The code below cleans this up when it finds them.
-    const consolidatedStars: Record<string, Star> = {};
-    const duplicateStars: Star[] = [];
+    const consolidatedStars: Record<string, Bookmark> = {};
+    const duplicateStars: Bookmark[] = [];
     forEach(dbDocStars, (userStar, starKey) => {
       const { uid, starred } = userStar;
-      const star = new Star(uid);
-      star.key = starKey;
-      star.starred = starred;
+      const star = new Bookmark(uid, starKey, starred);
       const existingStar = consolidatedStars[uid];
       if (existingStar) {
         // There was already a star for this document and user.
@@ -63,19 +62,17 @@ export class DBStarsListener extends BaseListener {
     });
 
     Object.values(consolidatedStars).forEach(star => {
-      stars.updateDocumentStar(docKey, star);
+      bookmarks.updateDocumentBookmark(docKey, star);
     });
 
     duplicateStars.forEach(duplicateStar => {
-      if (!duplicateStar.key) {
-        console.warn("Trying to delete a star without a key", {docKey, uid: duplicateStar.uid});
-        return;
-      }
-
       const starRef = this.db.firebase.ref(
         this.db.firebase.getUserDocumentStarsPath(this.db.stores.user, docKey, duplicateStar.key)
       );
-      console.log("Deleting duplicate star", {path: starRef.toString(), duplicateStar: duplicateStar.toJSON() });
+      if (DEBUG_BOOKMARKS) {
+        // eslint-disable-next-line no-console
+        console.log("Deleting duplicate star", {path: starRef.toString(), duplicateStar: duplicateStar.toJSON() });
+      }
       starRef.remove();
     });
   };

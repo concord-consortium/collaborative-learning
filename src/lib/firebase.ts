@@ -165,7 +165,6 @@ export class Firebase {
     const docSuffix = documentKey ? `/${documentKey}` : "";
     const starSuffix = starKey ? `/${starKey}` : "";
     const result =  `${this.getOfferingPath(user)}/commentaries/stars${docSuffix}${starSuffix}`;
-    console.log("getUserDocumentStarsPath", result);
     return result;
   }
 

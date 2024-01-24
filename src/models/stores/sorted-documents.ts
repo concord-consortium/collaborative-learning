@@ -6,7 +6,7 @@ import { GroupsModelType } from "./groups";
 import { ClassModelType } from "./class";
 import { DB } from "../../lib/db";
 import { AppConfigModelType } from "./app-config-model";
-import { Stars } from "./stars";
+import { Bookmarks } from "./bookmarks";
 import { ENavTabOrder, NavTabSectionModelType } from "../view/nav-tabs";
 import { UserModelType } from "./user";
 
@@ -27,7 +27,7 @@ export interface ISortedDocumentsStores {
   class: ClassModelType;
   db: DB;
   appConfig: AppConfigModelType;
-  stars: Stars;
+  bookmarks: Bookmarks;
   user: UserModelType;
 }
 
@@ -59,8 +59,8 @@ export class SortedDocuments {
   get commentTags(): Record<string, string> | undefined {
     return this.stores.appConfig.commentTags;
   }
-  get stars() {
-    return this.stores.stars;
+  get bookmarks() {
+    return this.stores.bookmarks;
   }
   get user() {
     return this.stores.user;
@@ -221,7 +221,7 @@ export class SortedDocuments {
   get sortByBookmarks(): SortedDocument[] {
     const documentMap = new Map();
     this.filteredDocsByType.forEach((doc) => {
-      const sectionLabel = this.stars.isDocumentStarred(doc.key) ? "Bookmarked" : "Not Bookmarked";
+      const sectionLabel = this.bookmarks.isDocumentBookmarked(doc.key) ? "Bookmarked" : "Not Bookmarked";
       if (!documentMap.has(sectionLabel)) {
         documentMap.set(sectionLabel, {
           sectionLabel,
@@ -246,7 +246,7 @@ export class SortedDocuments {
       // treat "starred" as a virtual property
       // This will be a problem if we extract starred
       if (property === "starred") {
-        return this.stars.isDocumentStarred(doc.key) === wantsProperty;
+        return this.bookmarks.isDocumentBookmarked(doc.key) === wantsProperty;
       }
       if (property === "isTeacherDocument") {
         return !!options?.isTeacherDocument === wantsProperty;
