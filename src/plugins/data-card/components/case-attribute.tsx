@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
+import escapeStringRegexp from "escape-string-regexp";
 import { useCombobox } from "downshift";
 import { uniq } from "lodash";
 import { VisuallyHidden } from "@chakra-ui/react";
@@ -16,6 +17,7 @@ import { getClipboardContent } from "../../../utilities/clipboard-utils";
 import { isImageUrl } from "../../../models/data/data-types";
 
 import '../data-card-tile.scss';
+
 
 const typeIcons = {
   "date": "📅",
@@ -67,7 +69,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const validCompletions = useCallback((aValues: string[], userString: string) => {
     const values = uniq(aValues).filter(value => typeof value === 'string').sort();
-    const regex = new RegExp(`${userString}`, 'i');
+    const escapedStr = escapeStringRegexp(userString);
+    const regex = new RegExp(`${escapedStr}`, 'i');
 
     return editingValue && valueCandidate.length > 0
       ? values.filter((value) => value && !isImageUrl(value) && regex.test(value))
