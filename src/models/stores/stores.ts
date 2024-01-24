@@ -122,7 +122,7 @@ class Stores implements IStores{
     });
     this.persistentUI.setProblemPath(this.problemPath);
     this.userContextProvider = new UserContextProvider(this);
-    this.stars = new Stars();
+    this.stars = new Stars({db: this.db});
     this.sortedDocuments = new SortedDocuments(this);
   }
 

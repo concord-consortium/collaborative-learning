@@ -1,4 +1,6 @@
 import { IObservableArray, makeAutoObservable, observable, ObservableMap, toJS } from "mobx";
+import { DB } from "../../lib/db";
+import { DEBUG_BOOKMARKS } from "../../lib/debug";
 
 export class Star{
   readonly uid: string;
@@ -26,9 +28,11 @@ export class Star{
 export class Stars {
   // Map of document Key to an array of stars
   starMap = new ObservableMap<string, IObservableArray<Star>>();
+  db: DB;
 
-  constructor() {
+  constructor({db}:{db: DB}) {
     makeAutoObservable(this);
+    this.db = db;
   }
 
   isDocumentStarred(docKey: string): boolean {
@@ -70,13 +74,13 @@ export class Stars {
 
   updateDocumentStar(docKey: string, star: Star) {
     if (!star.key) {
-      console.warn("Cannot update star without a star.key", {docKey, uid: star.uid});
+      console.warn("bookmarks: Cannot update star without a star.key", {docKey, uid: star.uid});
       return;
     }
     const existingStar = this.getDocumentStar(docKey, star.key);
     if (existingStar) {
       if (existingStar.uid !== star.uid) {
-        console.warn("Trying to change the user of an existing star",
+        console.warn("bookmarks: Trying to change the user of an existing star",
           {docKey, existingStar: existingStar.toJSON(), newStar: star.toJSON()});
         return;
       }
@@ -98,14 +102,20 @@ export class Stars {
    */
   toggleUserStar(docKey: string, userId: string) {
     const userStar = this.getDocumentUserStar(docKey, userId);
+    if (DEBUG_BOOKMARKS) {
+      const allDocStars = (this.starMap.get(docKey) ?? []).map(star => star.toJSON());
+      console.log("bookmarks: toggling bookmark", {docKey, userId, starKey: userStar?.key, allDocStars});
+    }
     if (userStar) {
-      userStar.starred = !userStar.starred;
+      if (!userStar.key) {
+        console.warn("bookmarks: star being toggled doesn't have a key", {docKey, star: userStar.toJSON()});
+        return;
+      }
+      this.db.setUserStarState(docKey, userStar.key, !userStar.starred);
       return;
     }
 
-    const newStar = new Star(userId);
-    const docStars = this.getOrCreateDocumentStars(docKey);
-    docStars.push(newStar);
+    this.db.createUserStar(docKey, true);
   }
 
   toJSON() {

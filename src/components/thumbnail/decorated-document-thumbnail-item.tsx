@@ -59,19 +59,6 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
       });
     }
 
-    // pass function so logic stays here but access occurs from child
-    // so that mobx-react triggers child render not parent render.
-    const onIsStarred = () => {
-      return shouldHandleStarClick
-          // We weren't showing stars that a "co-teacher" has placed on a document even though the document
-          // is classified as "isStarred". We commented out lines 88-90 to show all starred documents regardless of who
-          // placed the star.
-              // ? user.isTeacher
-              //   ? sectionDocument.isStarredByUser(user.id)
-              //   : sectionDocument.isStarred
-                ? stars.isDocumentStarred(document.key)
-                : false;
-    };
     const _handleDocumentStarClick = shouldHandleStarClick && !document.isRemote
                                       ? handleDocumentStarClick
                                       : undefined;
@@ -96,7 +83,6 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
         captionText={caption}
         onDocumentClick={handleDocumentClick}
         onDocumentDragStart={!document.isRemote ? handleDocumentDragStart: undefined}
-        onIsStarred={onIsStarred}
         onDocumentStarClick={_handleDocumentStarClick}
         onDocumentDeleteClick={_handleDocumentDeleteClick}
       />
