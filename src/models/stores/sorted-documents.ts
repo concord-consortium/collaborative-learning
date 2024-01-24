@@ -215,6 +215,27 @@ export class SortedDocuments {
     });
   }
 
+
+  //*************************************** Sort By Bookmarks *************************************
+
+  get sortByBookmarks(): SortedDocument[] {
+    const documentMap = new Map();
+    this.filteredDocsByType.forEach((doc) => {
+      const sectionLabel = this.stars.isDocumentStarred(doc.key) ? "Bookmarked" : "Not Bookmarked";
+      if (!documentMap.has(sectionLabel)) {
+        documentMap.set(sectionLabel, {
+          sectionLabel,
+          documents: []
+        });
+      }
+      documentMap.get(sectionLabel).documents.push(doc);
+    });
+
+    const sortedSectionLabels = ["Bookmarked", "Not Bookmarked"];
+    return sortedSectionLabels.filter(label => documentMap.has(label)).map(label => documentMap.get(label));
+
+  }
+
   matchProperties(doc: DocumentModelType, properties?: readonly string[], options?: IMatchPropertiesOptions) {
     // if no properties specified then consider it a match
     if (!properties?.length) return true;

@@ -96,7 +96,7 @@
               "addDocument": true
             },
             {
-              "title": "Starred",
+              "title": "Bookmarks",
               "type": "starred-problem-documents",
               "dataTestHeader": "my-work-section-starred",
               "documentTypes": ["personal", "problem"],
@@ -165,7 +165,7 @@
             },
             {
               "className": "section problem starred",
-              "title": "Starred",
+              "title": "Bookmarks",
               "type": "starred-problem-documents",
               "dataTestHeader": "class-work-section-starred",
               "documentTypes": ["publication"],

@@ -114,7 +114,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
                             store.networkDocuments.getDocument(openDocumentKey);
-    const isStarredTab = subTab.label === "Starred";
+    const isStarredTab = subTab.label === "Bookmarks";
     if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
     return (
       <DocumentView tabSpec={tabSpec} subTab={subTab} />
