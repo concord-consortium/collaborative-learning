@@ -43,7 +43,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     }
 
     function handleDocumentStarClick() {
-      shouldHandleStarClick && document?.toggleUserStar(user.id);
+      shouldHandleStarClick && stars.toggleUserStar(document.key, user.id);
     }
 
     function handleDocumentDeleteClick() {

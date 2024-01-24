@@ -1,11 +1,14 @@
 import { ObservableSet, makeAutoObservable, runInAction } from "mobx";
 import { DocumentModelType } from "../document/document";
-import { isSortableType } from "../document/document-types";
+import { isPublishedType, isSortableType, isUnpublishedType } from "../document/document-types";
 import { DocumentsModelType } from "./documents";
 import { GroupsModelType } from "./groups";
 import { ClassModelType } from "./class";
 import { DB } from "../../lib/db";
 import { AppConfigModelType } from "./app-config-model";
+import { Stars } from "./stars";
+import { ENavTabOrder, NavTabSectionModelType } from "../view/nav-tabs";
+import { UserModelType } from "./user";
 
 type SortedDocument = {
   sectionLabel: string;
@@ -24,8 +27,13 @@ export interface ISortedDocumentsStores {
   class: ClassModelType;
   db: DB;
   appConfig: AppConfigModelType;
+  stars: Stars;
+  user: UserModelType;
 }
 
+interface IMatchPropertiesOptions {
+  isTeacherDocument?: boolean;
+}
 export class SortedDocuments {
   stores: ISortedDocumentsStores;
   tempTagDocumentMap = new Map<string, Set<string>>();
@@ -50,6 +58,12 @@ export class SortedDocuments {
   }
   get commentTags(): Record<string, string> | undefined {
     return this.stores.appConfig.commentTags;
+  }
+  get stars() {
+    return this.stores.stars;
+  }
+  get user() {
+    return this.stores.user;
   }
 
   get filteredDocsByType(): DocumentModelType[] {
@@ -200,4 +214,76 @@ export class SortedDocuments {
       });
     });
   }
+
+  matchProperties(doc: DocumentModelType, properties?: readonly string[], options?: IMatchPropertiesOptions) {
+    // if no properties specified then consider it a match
+    if (!properties?.length) return true;
+    return properties?.every(p => {
+      const match = /(!)?(.*)/.exec(p);
+      const property = match && match[2];
+      const wantsProperty = !(match && match[1]); // not negated => has property
+      // treat "starred" as a virtual property
+      // This will be a problem if we extract starred
+      if (property === "starred") {
+        return this.stars.isDocumentStarred(doc.key) === wantsProperty;
+      }
+      if (property === "isTeacherDocument") {
+        return !!options?.isTeacherDocument === wantsProperty;
+      }
+      if (property) {
+          return !!doc.getProperty(property) === wantsProperty;
+      }
+      // ignore empty strings, etc.
+      return true;
+    });
+  }
+
+  isMatchingSpec(doc: DocumentModelType, type: string, properties?: readonly string[]) {
+    return (type === doc.type) && this.matchProperties(doc, properties);
+  }
+
+  isTeacherDocument(doc: DocumentModelType){
+    return this.class.isTeacher(doc.uid);
+  }
+
+  getSectionDocs(section: NavTabSectionModelType) {
+    let sectDocs: DocumentModelType[] = [];
+    (section.documentTypes || []).forEach(type => {
+      if (isUnpublishedType(type)) {
+        sectDocs.push(...this.documents.byTypeForUser(type as any, this.user.id));
+      }
+      else if (isPublishedType(type)) {
+        const publishedDocs: { [source: string]: DocumentModelType[] } = {};
+        this.documents
+          .byType(type as any)
+          .forEach(doc => {
+            // personal documents and learning logs have originDocs.
+            // problem documents only have the uids of their creator,
+            // but as long as we're scoped to a single problem, there
+            // shouldn't be published documents from other problems.
+            const source = doc.originDoc || doc.uid;
+            if (source) {
+              if (!publishedDocs.source) {
+                publishedDocs.source = [];
+              }
+              publishedDocs.source.push(doc);
+            }
+          });
+        for (const sourceId in publishedDocs) {
+          sectDocs.push(...publishedDocs[sourceId]);
+        }
+      }
+    });
+    // Reverse the order to approximate a most-recently-used ordering.
+    if (section.order === ENavTabOrder.kReverse) {
+      sectDocs = sectDocs.reverse();
+    }
+    // filter by additional properties
+    if (section.properties && section.properties.length) {
+      sectDocs = sectDocs.filter(doc => this.matchProperties(doc, section.properties,
+                                                            { isTeacherDocument: this.isTeacherDocument(doc) }));
+    }
+    return sectDocs;
+  }
+
 }

@@ -259,7 +259,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         e.preventDefault();
         e.stopPropagation();
         if (document) {
-          document.toggleUserStar(user.id);
+          stars.toggleUserStar(document.key, user.id);
         }
       };
 

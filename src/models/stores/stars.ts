@@ -1,4 +1,4 @@
-import { IObservableArray, makeAutoObservable, observable, ObservableMap } from "mobx";
+import { IObservableArray, makeAutoObservable, observable, ObservableMap, toJS } from "mobx";
 
 export class Star{
   readonly uid: string;
@@ -12,6 +12,14 @@ export class Star{
 
   toggleStarred() {
     this.starred = !this.starred;
+  }
+
+  toJSON() {
+    return {
+      uid: this.uid,
+      key: this.key,
+      starred: this.starred
+    };
   }
 }
 
@@ -45,6 +53,11 @@ export class Stars {
     return docStars?.find((star) => star.uid === uid);
   }
 
+  getDocumentStar(docKey: string, starKey: string) {
+    const docStars = this.starMap.get(docKey);
+    return docStars?.find((star) => star.key === starKey);
+  }
+
   getOrCreateDocumentUserStar(docKey: string, uid: string) {
     const userStar = this.getDocumentUserStar(docKey, uid);
     if (userStar) return userStar;
@@ -55,9 +68,48 @@ export class Stars {
     return newStar;
   }
 
-  updateDocumentStar(docKey: string, star: { key: string; uid: string; starred: boolean; }) {
-    const ourStar = this.getOrCreateDocumentUserStar(docKey, star.uid);
-    ourStar.key = star.key;
-    ourStar.starred = star.starred;
+  updateDocumentStar(docKey: string, star: Star) {
+    if (!star.key) {
+      console.warn("Cannot update star without a star.key", {docKey, uid: star.uid});
+      return;
+    }
+    const existingStar = this.getDocumentStar(docKey, star.key);
+    if (existingStar) {
+      if (existingStar.uid !== star.uid) {
+        console.warn("Trying to change the user of an existing star",
+          {docKey, existingStar: existingStar.toJSON(), newStar: star.toJSON()});
+        return;
+      }
+      existingStar.starred = star.starred;
+    } else {
+      const docStars = this.getOrCreateDocumentStars(docKey);
+      docStars.push(star);
+    }
   }
+
+  /**
+   * If the document has a star for this user, toggle its starred state.
+   * If the document doesn't have a star for this user, create one that
+   * that is starred.
+   *
+   * @param docKey
+   * @param userId
+   * @returns
+   */
+  toggleUserStar(docKey: string, userId: string) {
+    const userStar = this.getDocumentUserStar(docKey, userId);
+    if (userStar) {
+      userStar.starred = !userStar.starred;
+      return;
+    }
+
+    const newStar = new Star(userId);
+    const docStars = this.getOrCreateDocumentStars(docKey);
+    docStars.push(newStar);
+  }
+
+  toJSON() {
+    return toJS(this.starMap);
+  }
+
 }

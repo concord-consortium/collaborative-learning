@@ -6,7 +6,6 @@ import {
   LearningLogPublication, OtherDocumentType, OtherPublicationType, PersonalDocument, PersonalPublication
 } from "../../models/document/document-types";
 import { BaseListener } from "./base-listener";
-import { syncStars } from "./sync-stars";
 
 export class DBOtherDocumentsListener extends BaseListener {
   private db: DB;
@@ -74,7 +73,6 @@ export class DBOtherDocumentsListener extends BaseListener {
         .then(doc => {
           if (doc.uid === user.id) {
             !doc.getProperty("isDeleted") && documents.resolveRequiredDocumentPromise(doc);
-            (doc.type === PersonalDocument) && syncStars(doc, this.db);
           }
           return doc;
         });
