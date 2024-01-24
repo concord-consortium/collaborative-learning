@@ -260,6 +260,29 @@ export const BaseDocumentContentModel = types
       });
       return tiles;
     },
+    getAllTilesByType() {
+      const tilesByType: Record<string, string[]> = {};
+
+      self.tileMap.forEach(tile => {
+        const tileType = tile.content.type;
+        // console.log("tileType:", tileType);
+        if (!tilesByType[tileType]) {
+          tilesByType[tileType] = []; //begin the list of tileIds
+        }
+        tilesByType[tileType].push(tile.id);
+      });
+      return tilesByType;
+    },
+    //notes below
+    //getAllTilesByType
+    // returns Record<string, string[]>
+    //{
+      // key is tileType, val is tileIDs,
+      // "Image": ["tileIds",]
+    // }
+    //
+    //include placeHolder dont do any filtering
+
     getLinkableTiles(): ILinkableTiles {
       const providers: ITypedTileLinkMetadata[] = [];
       const consumers: ITypedTileLinkMetadata[] = [];

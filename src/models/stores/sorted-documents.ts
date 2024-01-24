@@ -170,6 +170,7 @@ export class SortedDocuments {
         documents
       });
     });
+    console.log("sortedDocsArray:", sortedDocsArr);
     return sortedDocsArr;
   }
 
@@ -200,7 +201,6 @@ export class SortedDocuments {
     });
   }
 
-
   //*************************************** Sort By Bookmarks *************************************
 
   get sortByBookmarks(): SortedDocument[] {
@@ -218,6 +218,62 @@ export class SortedDocuments {
 
     const sortedSectionLabels = ["Bookmarked", "Not Bookmarked"];
     return sortedSectionLabels.filter(label => documentMap.has(label)).map(label => documentMap.get(label));
-
   }
+
+  //**************************************** Sort By Tools ****************************************
+
+  get sortByTools(): SortedDocument[] {
+    const tileTypeToDocumentsMap: Record<string, DocumentModelType[]> = {};
+
+    console.log("📁 sorted-documents.ts ------------------------");
+    console.log("➡️ sortByTools()");
+    this.filteredDocsByType.forEach((doc) => {
+      console.log("--------doc: ${doc.key}-----------");
+      const tilesByTypeMap = doc.content?.getAllTilesByType();// Type is Record<string, string[]>
+
+      // console.log("\t🥩 tilesByTypeMap:", tilesByTypeMap);
+      if (tilesByTypeMap) {
+        const tileTypes = Object.keys(tilesByTypeMap);
+        const nonPlaceholderTiles = tileTypes.filter(type => type !== "Placeholder");
+
+        // If a document only has "Placeholder" tiles or no tiles, treat it as "No Tools"
+        if (nonPlaceholderTiles.length === 0) {
+          if (!tileTypeToDocumentsMap["No Tools"]) {
+            tileTypeToDocumentsMap["No Tools"] = [];
+          }
+          tileTypeToDocumentsMap["No Tools"].push(doc);
+        } else {
+          // Add the tileType as the key to the Map, and doc(s) as values
+          nonPlaceholderTiles.forEach(tileType => {
+            if (!tileTypeToDocumentsMap[tileType]) {
+              tileTypeToDocumentsMap[tileType] = [];
+            }
+            tileTypeToDocumentsMap[tileType].push(doc);
+          });
+        }
+      } else {
+        // Handle documents with no tiles
+        if (!tileTypeToDocumentsMap["No Tools"]) {
+          tileTypeToDocumentsMap["No Tools"] = [];
+        }
+        tileTypeToDocumentsMap["No Tools"].push(doc);
+      }
+      console.log("\t🔪 tileTypeToDocumentsMap:", tileTypeToDocumentsMap);
+    });
+
+    // Sort the tile types. 'No Tools' should be at the end.
+    const sortedTileTypes = Object.keys(tileTypeToDocumentsMap).sort((a, b) => {
+      if (a === "No Tools") return 1;   //Move 'No Tools' to the end
+      if (b === "No Tools") return -1;  //Alphabetically sort all others
+      return a.localeCompare(b);
+    });
+
+    const sortedDocuments = sortedTileTypes.map(tileType => ({
+      sectionLabel: tileType,
+      documents: tileTypeToDocumentsMap[tileType]
+    }));
+
+    return sortedDocuments;
+  }
+
 }
