@@ -24,6 +24,14 @@ export const kNavItemScale = 0.11;
 export const DocumentCollectionList: React.FC<IProps> = observer(function DocumentCollectionList(
     { setCollectionElement, subTab, tabSpec, horizontal, collapsed, selectedDocument, selectedSecondaryDocument,
         onSelectNewDocument, onSelectDocument}) {
+
+  // console.log("📁 document-collection-list.tsx ------------------------");
+  // console.log("\ttabSpec label:", tabSpec.label) ;
+  // console.log("\ttabSpec:", (tabSpec as any).toJSON()) ;
+  // console.log("\tsubTab:", (subTab as any).toJSON()) ;
+    // console.log("\tsubTab Label:", subTab.label);
+
+  // const arr = subTab.sections.map((section: any)=> )
   const appConfigStore = useAppConfig();
   const user = useUserStore();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
@@ -33,8 +41,10 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
         ref={element => element && setCollectionElement?.(element)}>
       {
         subTab.sections.map((section: any, index: any) => {
+          // console.log("-----------");
+          // console.log("\tsection:", section);
           const shouldHandleStarClick = section.showStarsForUser(user);
-
+          // console.log("\t🥩 shouldHandleStarClick:", shouldHandleStarClick);
           return (
             <DocumentCollectionByType
               key={`${section.type}_${index}`}

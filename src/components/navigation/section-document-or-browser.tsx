@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import { useQueryClient } from 'react-query';
 import { DocumentModelType } from "../../models/document/document";
 import { logDocumentEvent } from "../../models/document/log-document-event";
-import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
+import { ISubTabSpec, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
 import { useAppConfig, useClassStore, useProblemStore, useStores,
          useUserStore, usePersistentUIStore } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
@@ -111,11 +111,23 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const renderDocumentView = (subTab: ISubTabSpec) => {
+    console.log("----renderDocumentView----");
+    console.log("\tsubTab:", subTab);
+
+    console.log("\tsubTab label:", subTab.label);
+
+
     const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
                             store.networkDocuments.getDocument(openDocumentKey);
-    const isStarredTab = subTab.label === "Bookmarks";
-    if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
+    const isStarredTab = subTab.label === kBookmarksTabTitle;
+    console.log("\tisStarredTab:", isStarredTab);
+    console.log("\topenDocument:", openDocument);
+    console.log("\tgetProperty:",  openDocument?.getProperty("isDeleted"));
+    if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) {
+      // console.log("returning false for subTab:", subTab.label);
+      return false;
+    }
     return (
       <DocumentView tabSpec={tabSpec} subTab={subTab} />
     );
