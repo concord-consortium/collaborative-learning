@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import { useQueryClient } from 'react-query';
 import { DocumentModelType } from "../../models/document/document";
 import { logDocumentEvent } from "../../models/document/log-document-event";
-import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
+import { ISubTabSpec, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
 import { useAppConfig, useClassStore, useProblemStore, useStores,
          useUserStore, usePersistentUIStore } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
@@ -114,7 +114,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
                             store.networkDocuments.getDocument(openDocumentKey);
-    const isStarredTab = subTab.label === "Bookmarks";
+    const isStarredTab = subTab.label === kBookmarksTabTitle;
     if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
     return (
       <DocumentView tabSpec={tabSpec} subTab={subTab} />

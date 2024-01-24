@@ -544,7 +544,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("verify sensor select");
     const sensorSelectdropdown = "sensor-select";
     const sensorSelect = [
-      "Humidity Demo Data", "CO2 Demo Data", "O2 Demo Data", "Light Demo Data", "Particulates Demo Data",
+      "Temperature Demo Data", "Humidity Demo Data", "CO2 Demo Data", "O2 Demo Data", "Light Demo Data", "Particulates Demo Data",
       "⚠️ Connect Arduino for live EMG",
       "⚠️ Connect Arduino for live Pressure",
       "⚠️ Connect Arduino for live Temperature",
@@ -559,7 +559,7 @@ context('Dataflow Tool Tile', function () {
     ];
     dataflowToolTile.getCreateNodeButton(sensorNode).click();
     dataflowToolTile.getDropdown(sensorNode, sensorSelectdropdown).click();
-    dataflowToolTile.getSensorDropdownOptions(sensorNode).should("have.length", 16);
+    dataflowToolTile.getSensorDropdownOptions(sensorNode).should("have.length", 17);
     dataflowToolTile.getSensorDropdownOptions(sensorNode).each(($tab, index, $typeList) => {
       expect($tab.text()).to.contain(sensorSelect[index]);
     });
