@@ -13,6 +13,8 @@ export enum ENavTab {
   kSupports = "supports"
 }
 
+export const kBookmarksTabTitle = "Bookmarks";
+
 // generic type which maps tab id to values of another type
 export type NavTabMap<T> = {
   [K in ENavTab]: T;
