@@ -1,13 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
-import { useStores, usePersistentUIStore } from "../../hooks/use-stores";
+import { useStores } from "../../hooks/use-stores";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { DocumentContextReact } from "./document-context";
 import { DEBUG_DOC_LIST } from "../../lib/debug";
-import { isSortableType } from "../../models/document/document-types";
 import { SortWorkDocumentArea } from "./sort-work-document-area";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { DocListDebug } from "./doc-list-debug";
@@ -16,81 +15,39 @@ import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
 export const SortWorkView: React.FC = observer(function SortWorkView() {
-  const sortOptions = ["Group", "Student"];
-  const stores = useStores();
-  const groupsModel = stores.groups;
+  const { appConfig, persistentUI, sortedDocuments } = useStores();
+
+  //*************************** Determine Sort Options & State  ***********************************
+  const {tagPrompt} = appConfig;
+  const sortTagPrompt = tagPrompt || ""; //first dropdown choice for comment tags
+  const sortOptions = ["Group", "Name", sortTagPrompt, "Bookmarked"];
   const [sortBy, setSortBy] = useState("Group");
 
-  //******************************* Sorting Documents *************************************
-  const filteredDocsByType = stores.documents.all.filter((doc: DocumentModelType) => {
-    return isSortableType(doc.type);
-  });
+  useEffect(()=>{
+    if (sortBy === sortTagPrompt){
+      sortedDocuments.updateTagDocumentMap();
+    }
+  },[sortedDocuments, sortBy, sortTagPrompt]);
 
   const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
     text: option,
     onClick: () => setSortBy(option)
   }));
 
-  const getSortedDocuments = (documents: DocumentModelType[], sortByOption: string) => {
-    const getSectionLabel = (doc: DocumentModelType) => {
-      if (sortByOption === "Group") {
-        const userId = doc.uid;
-        const group = groupsModel.groupForUser(userId);
-        return group ? `Group ${group.id}` : "No Group";
-      } else {
-        const user = stores.class.getUserById(doc.uid);
-        return (user && user.type === "student") ? `${user.lastName}, ${user.firstName}` : "Teacher";
-      }
-    };
-
-    const documentMap = new Map();
-
-    documents.forEach((doc) => {
-      const sectionLabel = getSectionLabel(doc);
-      if (!documentMap.has(sectionLabel)) {
-        documentMap.set(sectionLabel, {
-          sectionLabel,
-          documents: []
-        });
-      }
-      documentMap.get(sectionLabel).documents.push(doc);
-    });
-
-    let sortedSectionLabels;
-
-    if (sortByOption === "Group") {
-      sortedSectionLabels = Array.from(documentMap.keys()).sort((a, b) => {
-        const numA = parseInt(a.replace(/^\D+/g, ''), 10);
-        const numB = parseInt(b.replace(/^\D+/g, ''), 10);
-        return numA - numB;
-      });
-    } else {
-      sortedSectionLabels = Array.from(documentMap.keys()).sort(customSort);
-    }
-    return sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel));
-  };
-
-  function customSort(a: any, b: any) { //Sort by last name alphabetically
-    const parseName = (name: any) => {
-      const [lastName, firstName] = name.split(", ").map((part: any) => part.trim());
-      return { firstName, lastName };
-    };
-    const aParsed = parseName(a);
-    const bParsed = parseName(b);
-
-    const lastNameCompare = aParsed.lastName.localeCompare(bParsed.lastName);
-    if (lastNameCompare !== 0) {
-      return lastNameCompare;
-    }
-
-    return aParsed.firstName.localeCompare(bParsed.firstName);
+  let renderedSortedDocuments;
+  switch (sortBy) {
+    case "Group":
+      renderedSortedDocuments = sortedDocuments.sortByGroup;
+      break;
+    case "Name":
+      renderedSortedDocuments = sortedDocuments.sortByName;
+      break;
+    case sortTagPrompt:
+      renderedSortedDocuments = sortedDocuments.sortByStrategy;
+      break;
   }
 
-  const sortedDocuments = getSortedDocuments(filteredDocsByType, sortBy);
-
-  //******************************* Show Document View ***************************************
-  const persistentUI = usePersistentUIStore();
-
+  //******************************* Click to Open Document  ***************************************
   const handleSelectDocument = (document: DocumentModelType) => {
     persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, document.key);
   };
@@ -107,8 +64,8 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
         <>
           <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
           <div className="tab-panel-documents-section">
-            {
-              sortedDocuments.map((sortedSection, idx) => {
+            { renderedSortedDocuments &&
+              renderedSortedDocuments.map((sortedSection, idx) => {
                 return (
                   <div className="sorted-sections" key={`sortedSection-${idx}`}>
                     <div className="section-header">
@@ -138,7 +95,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
                 );
               })
             }
-            {DEBUG_DOC_LIST && <DocListDebug docs={filteredDocsByType} />}
+            {DEBUG_DOC_LIST && <DocListDebug docs={sortedDocuments.filteredDocsByType} />}
           </div>
         </>
       }

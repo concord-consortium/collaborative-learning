@@ -23,6 +23,7 @@ import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
 import { IBaseStores } from "./base-stores-types";
 import { NavTabModelType } from "../view/nav-tabs";
+import { SortedDocuments } from "./sorted-documents";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -34,6 +35,7 @@ export interface IStores extends IBaseStores {
   setAppMode: (appMode: AppMode) => void;
   initializeStudentWorkTab: () => void;
   setUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
+  sortedDocuments: SortedDocuments;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -71,6 +73,7 @@ class Stores implements IStores{
   selection: SelectionStoreModelType;
   serialDevice: SerialDevice;
   userContextProvider: UserContextProvider;
+  sortedDocuments: SortedDocuments;
 
   constructor(params?: ICreateStores){
     // This will mark all properties as observable
@@ -80,12 +83,10 @@ class Stores implements IStores{
     // will do with async functions, but whatever it
     // does seems to work without warnings.
     makeAutoObservable(this);
-
     this.appMode = params?.appMode || "dev";
     this.isPreviewing = params?.isPreviewing || false;
     this.appVersion = params?.appVersion || "unknown";
     this.appConfig = params?.appConfig || AppConfigModel.create();
-
     // for testing, we create a null problem or investigation if none is provided
     this.investigation = params?.investigation ||
       InvestigationModel.create({ ordinal: 0, title: "Null Investigation" });
@@ -119,6 +120,7 @@ class Stores implements IStores{
     });
     this.persistentUI.setProblemPath(this.problemPath);
     this.userContextProvider = new UserContextProvider(this);
+    this.sortedDocuments = new SortedDocuments(this);
   }
 
   get tabsToDisplay() {
