@@ -16,7 +16,7 @@ import { DiagramHelperContext } from "./use-diagram-helper-context";
 import { TileToolbar } from "../../components/toolbar/tile-toolbar";
 
 import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
-import "@concord-consortium/diagram-view/dist/index.css";
+
 import "./diagram-tile.scss";
 
 /**
