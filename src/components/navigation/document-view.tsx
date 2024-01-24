@@ -14,11 +14,13 @@ import { EditableDocumentContent } from "../document/editable-document-content";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { DocumentBrowserScroller, ScrollButton } from "./document-browser-scroller";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
+import CloseIcon from "../../../src/assets/icons/close/close.svg";
 
 interface IProps {
   tabSpec: NavTabModelType;
   subTab: ISubTabSpec;
 }
+
 //TODO: Need to refactor this if we want to deploy to all tabs
 export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IProps) {
   const persistentUI = usePersistentUIStore();
@@ -222,6 +224,12 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   function handleEditClick(document: DocumentModelType) {
     persistentUI.problemWorkspace.setPrimaryDocument(document);
   }
+
+  function handleCloseButtonClick() {
+    if (persistentUI.openSubTab) {
+      persistentUI.closeSubTabDocument(persistentUI.activeNavTab, persistentUI.openSubTab);
+    }
+  }
   // TODO: this edit button is confusing when the history is being viewed. It
   // opens the original document for editing, not some old version of the
   // document they might be looking at. Previously this edit button was disabled
@@ -245,6 +253,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   };
 
   const sideClasses = { secondary: isSecondaryDocument, primary: hasSecondaryDocument && !isSecondaryDocument };
+
   return (
     <div className={classNames("focus-document", tab, sideClasses)}>
       <div className={classNames("document-header", tab, sectionClass, sideClasses)}
@@ -256,8 +265,14 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
             {displayTitle.title}
           </span>
         </div>
-        {(!openDocument.isRemote)
-            && editButton(tab, sectionClass || sideClasses, openDocument)}
+        <div className="document-buttons">
+          {(!openDocument.isRemote) &&
+            editButton(tab, sectionClass || sideClasses, openDocument)
+          }
+          <button className={`close-doc-button ${tab}`} onClick={handleCloseButtonClick}>
+            <CloseIcon className="close-icon" />
+          </button>
+        </div>
       </div>
       {onChangeDocument && !hideLeftFlipper &&
         <ScrollButton side="left" theme={tab} className="document-flipper"
