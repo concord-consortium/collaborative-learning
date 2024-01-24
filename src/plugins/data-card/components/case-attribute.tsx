@@ -15,14 +15,19 @@ import { useCautionAlert } from "../../../components/utilities/use-caution-alert
 import { useErrorAlert } from "../../../components/utilities/use-error-alert";
 import { getClipboardContent } from "../../../utilities/clipboard-utils";
 import { isImageUrl } from "../../../models/data/data-types";
+import DateTypeIcon from "../assets/id-type-date.svg";
+import ImageTypeIcon from "../assets/id-type-image.svg";
+import TextTypeIcon from "../assets/id-type-text.svg";
+import NumberTypeIcon from "../assets/id-type-number.svg";
+import ExpandDownIcon from "../assets/expand-more-icon.svg";
 
 import '../data-card-tile.scss';
 
 const typeIcons = {
-  "date": "📅",
-  "categorical": "🔤",
-  "numeric": "#️⃣",
-  "image": "📷",
+  "date": <DateTypeIcon />,
+  "categorical": <TextTypeIcon />,
+  "numeric": <NumberTypeIcon />,
+  "image": <ImageTypeIcon />,
   "boundary": "?",
   "color": "?",
   "checkbox": "?",
@@ -334,9 +339,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const displayArrow = () => {
     if (inputItems.length > 0) {
-      return isOpen
-        ? <span className="up">&#x25B2;</span>
-        : <span className="down">&#x25BC;</span>;
+      return <ExpandDownIcon className={ isOpen ? "down" : "up"}/>;
     }
     return <span></span>; // There may be more cases in the future, e.g. date picker
   };
