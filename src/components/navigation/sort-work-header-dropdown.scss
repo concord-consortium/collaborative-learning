@@ -20,9 +20,8 @@
     .custom-select.sort-work-sort-menu {
       color: $charcoal-dark-2;
       .header {
-        width: 151px;
         min-width: 151px;
-        max-width: 151px;
+        width: auto;
         height: 26px;
         background-color: $classwork-purple-light-4;
         padding-left: 5px;
@@ -33,14 +32,14 @@
       }
 
       .list {
-        width: 151px;
         min-width: 151px;
-        max-width: 151px;
+        width: auto;
         margin-top: -1px;
 
         .list-item {
           height: 30px;
           padding-left:9px;
+
           &:hover {
             background-color: $classwork-purple-light-5;
           }
