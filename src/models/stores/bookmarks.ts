@@ -34,7 +34,7 @@ export class Bookmarks {
   }
 
   isDocumentBookmarked(docKey: string): boolean {
-    return !!this.bookmarkMap.get(docKey)?.find(star => star.starred);
+    return !!this.bookmarkMap.get(docKey)?.find(bookmark => bookmark.starred);
   }
 
   isDocumentBookmarkedByUser(docKey: string, uid: string): boolean {
@@ -76,8 +76,8 @@ export class Bookmarks {
   }
 
   /**
-   * If the document has a star for this user, toggle its starred state.
-   * If the document doesn't have a star for this user, create one that
+   * If the document has a bookmark for this user, toggle its starred state.
+   * If the document doesn't have a bookmark for this user, create one that
    * that is starred.
    *
    * @param docKey

@@ -267,7 +267,7 @@ export class SortedDocuments {
     return this.class.isTeacher(doc.uid);
   }
 
-  getSectionDocs(section: NavTabSectionModelType) {
+  getSectionDocs(section: NavTabSectionModelType): DocumentModelType[] {
     let sectDocs: DocumentModelType[] = [];
     (section.documentTypes || []).forEach(type => {
       if (isUnpublishedType(type)) {

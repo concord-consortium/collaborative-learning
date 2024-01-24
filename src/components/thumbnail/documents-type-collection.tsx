@@ -54,7 +54,7 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
   const newDocumentLabel = getNewDocumentLabel(section, appConfigStore);
   const isSinglePanel = numSections < 2;
   const tabName = tab?.toLowerCase().replace(' ', '-');
-  const sectionDocs: DocumentModelType[] = sortedDocuments.getSectionDocs(section);
+  const sectionDocs = sortedDocuments.getSectionDocs(section);
   const isTopPanel = index === 0 && numSections > 1;
   const isBottomPanel = index > 0 && index === numSections - 1;
 
