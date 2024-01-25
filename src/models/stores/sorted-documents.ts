@@ -51,7 +51,6 @@ export class SortedDocuments {
   get commentTags(): Record<string, string> | undefined {
     return this.stores.appConfig.commentTags;
   }
-
   get filteredDocsByType(): DocumentModelType[] {
     return this.documents.all.filter((doc: DocumentModelType) => {
       return isSortableType(doc.type);
@@ -199,5 +198,26 @@ export class SortedDocuments {
         });
       });
     });
+  }
+
+
+  //*************************************** Sort By Bookmarks *************************************
+
+  get sortByBookmarks(): SortedDocument[] {
+    const documentMap = new Map();
+    this.filteredDocsByType.forEach((doc) => {
+      const sectionLabel = doc.isStarred ? "Bookmarked" : "Not Bookmarked";
+      if (!documentMap.has(sectionLabel)) {
+        documentMap.set(sectionLabel, {
+          sectionLabel,
+          documents: []
+        });
+      }
+      documentMap.get(sectionLabel).documents.push(doc);
+    });
+
+    const sortedSectionLabels = ["Bookmarked", "Not Bookmarked"];
+    return sortedSectionLabels.filter(label => documentMap.has(label)).map(label => documentMap.get(label));
+
   }
 }

@@ -42,8 +42,11 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     case "Name":
       renderedSortedDocuments = sortedDocuments.sortByName;
       break;
-    case sortTagPrompt:
+    case sortTagPrompt: //Sort by Strategy
       renderedSortedDocuments = sortedDocuments.sortByStrategy;
+      break;
+    case "Bookmarked":
+      renderedSortedDocuments = sortedDocuments.sortByBookmarks;
       break;
   }
 

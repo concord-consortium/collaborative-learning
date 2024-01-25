@@ -5,7 +5,7 @@ import classNames from "classnames";
 import { useAppConfig, useLocalDocuments, useProblemStore, useStores,
   usePersistentUIStore, useUserStore, useClassStore, useUIStore } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
-import { ISubTabSpec, NavTabModelType } from "src/models/view/nav-tabs";
+import { ISubTabSpec, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
 import { DocumentType } from "../../models/document/document-types";
 import { LogEventName } from "../../lib/logger-types";
 import { logDocumentEvent } from "../../models/document/log-document-event";
@@ -37,13 +37,13 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const openSecondaryDocumentKey = tabState?.openSecondaryDocuments.get(subTab.label) || "";
   const openSecondaryDocument = store.documents.getDocument(openSecondaryDocumentKey) ||
     store.networkDocuments.getDocument(openSecondaryDocumentKey);
-  const isStarredTab = subTab.label === "Starred";
+  const isStarredTab = subTab.label === kBookmarksTabTitle;
   const noValidDocument = !openDocument || openDocument.getProperty("isDeleted");
   const noSecondaryDocument = !openSecondaryDocument || openSecondaryDocument.getProperty("isDeleted");
 
   const documentTypes: DocumentType[] = tabSpec.tab === "class-work"
                                           ? ["publication"]
-                                          : tabSpec.tab === "my-work" && subTab.label === "Starred"
+                                          : tabSpec.tab === "my-work" && subTab.label === kBookmarksTabTitle
                                             ? ["problem", "personal"]
                                             : [];
   const getStarredDocuments = (types: DocumentType[]) => {
@@ -87,11 +87,11 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
       } else {
         persistentUI.closeSubTabDocument(tabSpec.tab, subTab.label);
       }
-    } else if (tabState?.openDocuments.get("Starred")) {
+    } else if (tabState?.openDocuments.get(kBookmarksTabTitle)) {
       if (persistentUI.focusSecondaryDocument === document.key) {
-        persistentUI.closeSubTabSecondaryDocument(tabSpec.tab, "Starred");
+        persistentUI.closeSubTabSecondaryDocument(tabSpec.tab, kBookmarksTabTitle);
       } else {
-        persistentUI.openSubTabSecondaryDocument(tabSpec.tab, "Starred", document.key);
+        persistentUI.openSubTabSecondaryDocument(tabSpec.tab, kBookmarksTabTitle, document.key);
       }
     } else {
       if (!document.hasContent && document.isRemote) {
@@ -284,7 +284,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
         document={openDocument}
         readOnly={true}
         showPlayback={showPlayback}
-        fullHeight={subTab.label !== "Starred" }
+        fullHeight={subTab.label !== kBookmarksTabTitle }
       />
       {onChangeDocument && !hideRightFlipper &&
         <ScrollButton side="right" theme={tab} className="document-flipper"

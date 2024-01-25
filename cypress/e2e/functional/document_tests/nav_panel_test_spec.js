@@ -22,6 +22,9 @@ function beforeTest(params) {
   cy.waitForLoad();
 }
 
+//TODO: change all syntax from starred to bookmarks/"bookmarked"
+//https://www.pivotaltracker.com/n/projects/2441242/stories/186891632
+
 context('Nav Panel', function () {
   it('Test nav panel tabs', function () {
     beforeTest(queryParams1);
@@ -102,13 +105,13 @@ context('Nav Panel', function () {
       resourcesPanel.getCanvasStarIcon('my-work', 'workspaces', copyDocumentTitle).should('have.class', 'starred');
 
       cy.log('verify starred document appears in the Starred section');
-      cy.openSection('my-work', 'starred');
-      resourcesPanel.getCanvasItemTitle('my-work', 'starred').contains(copyDocumentTitle).should('exist');
+      cy.openSection('my-work', 'bookmarks');
+      resourcesPanel.getCanvasItemTitle('my-work', 'bookmarks').contains(copyDocumentTitle).should('exist');
 
       cy.log('remains open after the resources panel is collapsed and expand');
       cy.collapseResourceTabs();
       cy.openResourceTabs();
-      cy.get('.doc-tab.my-work.starred').should('have.class', 'selected');
+      cy.get('.doc-tab.my-work.bookmarks').should('have.class', 'selected');
 
       cy.log('verify Learning Log Section');
       cy.openTopTab('my-work');
@@ -136,7 +139,6 @@ context('Nav Panel', function () {
       cy.openTopTab("class-work");
       cy.openSection("class-work", "learning-logs");
       resourcesPanel.getCanvasItemTitle("class-work", "learning-logs", "Learning Log Copy");
-
 
       cy.log('Class Work tab tests');
       cy.openTopTab('class-work');
@@ -188,6 +190,7 @@ context('Nav Panel', function () {
 
     cy.log('Customized tabs');
     const exampleProblemSubTabTitles = ["First Section", "Second Section", "Third Section"];
+    //TODO: Need to change the syntax to "Bookmarks"
     const exampleMyWorkSubTabTitles = ["Workspaces", "Starred"];
     const exampleClassWorkSubTabTitles = ["Workspaces", "Supplemental Work", "Starred"];
 
