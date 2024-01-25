@@ -141,6 +141,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   };
 
   public componentDidMount() {
+    console.log("componentDidMount!");
     this.configureDeleteHandler();
   }
 
