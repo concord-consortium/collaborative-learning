@@ -106,6 +106,12 @@ context('Data Card Tool Tile', () => {
     dc.getDownshiftOptions().should('have.length', 1);
     dc.getDownshiftOptions().eq(0).contains("desert");
 
+    cy.log("shows type-ahead options that match value substring");
+    dc.getAttrValueInput().eq(0).click().type("{backspace}");
+    dc.getDownshiftOptions().should('have.length', 2);
+    dc.getAttrValueInput().eq(0).click().type("e");
+    dc.getDownshiftOptions().should('have.length', 2);
+
     cy.log("can drag a card into another stack in sort view");
     dc.getSortSelect().select("animal");
     dc.getSortView().should('exist');
@@ -116,7 +122,7 @@ context('Data Card Tool Tile', () => {
     dc.getAttrValueInput().eq(1).invoke('val').should('eq', "camel");
     dc.getNextCardButton().click();
     dc.getCardNofTotalListing().contains("Card 2 of 2");
-    dc.getAttrValueInput().eq(0).invoke('val').should('eq', "d");
+    dc.getAttrValueInput().eq(0).invoke('val').should('eq', "e");
     dc.getAttrValueInput().eq(1).invoke('val').should('eq', "camel");
 
     cy.log("can create a graph from the data");
