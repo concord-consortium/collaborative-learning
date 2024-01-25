@@ -260,7 +260,6 @@ export const BaseDocumentContentModel = types
       });
       return tiles;
     },
-
     getAllTilesByType() {
       const tilesByType: Record<string, string[]> = {};
       self.tileMap.forEach(tile => {
@@ -270,7 +269,6 @@ export const BaseDocumentContentModel = types
         }
         tilesByType[tileType].push(tile.id);
       });
-      console.log("tilesByType:", tilesByType);
       return tilesByType;
     },
     getLinkableTiles(): ILinkableTiles {
