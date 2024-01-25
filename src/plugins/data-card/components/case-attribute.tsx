@@ -67,9 +67,9 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
 
   const validCompletions = useCallback((aValues: string[], userString: string) => {
-    const values = uniq(aValues).filter(value => typeof value === 'string').sort();
+    const values = uniq(aValues).sort();
     const escapedStr = escapeStringRegexp(userString);
-    const regex = new RegExp(`${escapedStr}`, 'i');
+    const regex = new RegExp(escapedStr, 'i');
 
     return editingValue && valueCandidate.length > 0
       ? values.filter((value) => value && !isImageUrl(value) && regex.test(value))
@@ -342,6 +342,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const itemWithBoldedMatch = (fullString: string, matchString: string) => {
+    if (!matchString) return <span>{fullString}</span>; // no match string, no bolding
     // If full string is "Orange" and matchString is "ran"
     // the result will be "O<b>ran</b>ge"
     const matchIndex = fullString.toLowerCase().indexOf(matchString.toLowerCase());
