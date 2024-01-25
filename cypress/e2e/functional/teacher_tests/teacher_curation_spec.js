@@ -46,8 +46,8 @@ describe('verify document curation', function() {//adding a star to a student do
         cy.wait(1000);
         dashboard.switchView('Workspace & Resources');
         cy.openTopTab('class-work');
-        cy.openSection('class-work','starred');
-        cy.getCanvasItemTitle('class-work', 'starred', studentDoc).should('not.exist');
+        cy.openSection('class-work','bookmarks');
+        cy.getCanvasItemTitle('class-work', 'bookmarks', studentDoc).should('not.exist');
         cy.openSection('class-work','workspaces');
         resourcesPanel.getCanvasStarIcon('class-work','workspaces',studentDoc).should('not.have.class','starred');
     });

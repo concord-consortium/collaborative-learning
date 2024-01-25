@@ -120,23 +120,9 @@ context('Data Card Tool Tile', () => {
     dc.getAttrValueInput().eq(1).invoke('val').should('eq', "camel");
 
     cy.log("can create a graph from the data");
-    dc.getLinkGraphButton().should('not.be.disabled').click();
-    dc.getLinkGraphModalTileMenu().select('New Graph');
-    dc.getLinkGraphModalLinkButton().click();
-    xyplot.getTile().should("exist").contains("Data Card Collection 1");
-    xyplot.getXYPlotTitle().should("contain", "Data Card Collection 1");
-    xyplot.getXAxisLabel().should("contain", "habitat");
-
-    cy.log("can link and unlink data from a graph");
-    // Unlink
-    dc.getLinkGraphButton().should('not.be.disabled').click();
-    dc.getLinkGraphModalTileMenu().select('Data Card Collection 1');
-    dc.getLinkGraphModalLinkButton().should("contain", "Clear It!").click();
-    xyplot.getXAxisLabel().should("not.contain", "habitat");
-    // Re-link
-    dc.getLinkGraphButton().should('not.be.disabled').click();
-    dc.getLinkGraphModalTileMenu().select('Data Card Collection 1');
-    dc.getLinkGraphModalLinkButton().should("contain", "Graph It!").click();
+    dc.getGraphItButton().should('not.be.disabled').click();
+    xyplot.getTile().should("exist").contains("Graph 1");
+    xyplot.getXYPlotTitle().should("contain", "Graph 1");
     xyplot.getXAxisLabel().should("contain", "habitat");
 
     cy.log("Copy card functionality");

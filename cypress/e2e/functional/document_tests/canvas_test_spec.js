@@ -385,8 +385,8 @@ context('Test Canvas', function () {
     resourcesPanel.getCanvasItemTitle("my-work", "workspaces").contains(studentWorkspace).should('not.exist');
 
     cy.log('verify starred document is no longer in the Starred section after delete');
-    cy.openSection('my-work', 'starred');
-    cy.getCanvasItemTitle('my-work', 'starred').should('not.exist');
+    cy.openSection('my-work', 'bookmarks');
+    cy.getCanvasItemTitle('my-work', 'bookmarks').should('not.exist');
 
     cy.log("Canvas unit config test");
     beforeTest(queryParams2);

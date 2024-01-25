@@ -16,7 +16,7 @@ class SimulatorTile {
     return cy.get(`${wsClass(workspaceClass)} .animation-image`);
   }
   getEMGSlider(workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .simulator-tool-tile .emg-slider .rc-slider-rail`);
+    return cy.get(`${wsClass(workspaceClass)} .simulator-tool-tile .emg-slider .rc-slider-step`);
   }
   getSelectionButtons(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .selection-button`);

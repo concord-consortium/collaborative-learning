@@ -1,6 +1,6 @@
-import ClueCanvas from '../../../support/elements/common/cCanvas';
+import ClueCanvas from "../../../support/elements/common/cCanvas";
 import DataflowTile from "../../../support/elements/tile/DataflowToolTile";
-import SimulatorTile from '../../../support/elements/tile/SimulatorTile';
+import SimulatorTile from "../../../support/elements/tile/SimulatorTile";
 
 let clueCanvas = new ClueCanvas;
 const dataflowTile = new DataflowTile;
@@ -124,7 +124,7 @@ context('Simulator Tile', function () {
 
   it("Simulator Tile with Terrarium Simulation", () => {
     beforeTest(queryParams2);
-    
+
     cy.log("links to dataflow tile");
     // Copy a simulator tile over from curriculum
     simulatorTile.getSimulatorTile().should("not.exist");
@@ -146,7 +146,7 @@ context('Simulator Tile', function () {
     dataflowTile.getDropdown(sensor, "sensor-type").click();
     dataflowTile.getSensorDropdownOptions(sensor).eq(0).find(".label").click(); // Temperature
     dataflowTile.getDropdown(sensor, "sensor-select").click();
-    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 6);
+    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 7);
     dataflowTile.getDropdown(sensor, "sensor-type").click();
     dataflowTile.getSensorDropdownOptions(sensor).eq(1).find(".label").click(); // Humidity
     dataflowTile.getDropdown(sensor, "sensor-select").click();

@@ -63,6 +63,8 @@ $title-margin: 2px;
       width: 100%;
 
       .document-title {
+        text-align: center;
+        flex-grow: 1;
         font-size: 13px;
         font-weight: bold;
         .sort-work {
@@ -70,6 +72,49 @@ $title-margin: 2px;
         }
       }
 
+      .document-buttons {
+        display:flex;
+        flex-direction: row;
+        height: 100%;
+        align-items: center;
+        position: absolute;
+        top: -1px;
+        right: 5px;
+      }
+
+      .close-doc-button {
+        svg {
+          position: relative;
+          left:-2px;
+          .x-shape {
+            fill: rgba(0,0,0,0.6);
+          }
+        }
+        margin-left: 6px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        background-color: transparent;
+        border-width: 0px;
+        border-radius: 50%;
+        padding: 3px;
+        height:26px;
+        width: 26px;
+        &:hover {
+          background-color: rgba(0,0,0,0.2);
+        }
+        &:active {
+          background-color: rgba(0,0,0,0.4);
+          .x-shape {
+            fill: white;
+          }
+        }
+        &.disabled {
+          pointer-events: none;
+          opacity: 0.35;
+        }
+      }
       .edit-button {
         display: flex;
         flex-direction: row;
@@ -79,8 +124,6 @@ $title-margin: 2px;
         border-radius: 5px;
         border: solid 1.5px $charcoal-light-1;
         background-color: $workspace-teal-light-4;
-        position: absolute;
-        right: 5px;
         padding: 0;
         box-sizing: border-box;
         cursor: pointer;
@@ -117,6 +160,7 @@ $title-margin: 2px;
         }
       }
     }
+
     .editable-document-content {
       top: $nav-tab-height;
       flex: 1;

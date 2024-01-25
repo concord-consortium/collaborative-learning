@@ -1,6 +1,7 @@
 import TeacherDashboard from "../../../support/elements/common/TeacherDashboard";
 
 let dashboard = new TeacherDashboard();
+const sortWorkItem = '.sort-work-view .sorted-sections .list-item';
 
 function beforeTest() {
   const queryParams = "/?appMode=demo&demoName=CLUE-Test&fakeClass=1&fakeOffering=1&problem=1.1&fakeUser=teacher:1&unit=example-config-subtabs&curriculumBranch=sort-tab-dev-3&noPersistentUI";
@@ -26,6 +27,7 @@ function beforeTest() {
 //   ↳Verify that the teacher sees the new group disappear
 // Note that even though the group would disappear, the personal and problem documents would still exist but will be in the "No Group" section - I don't think you necessarily need to test this
 
+
 describe('SortWorkView Tests', () => {
   it('should open SortWorkView tab and interact with it', () => {
     beforeTest();
@@ -41,5 +43,13 @@ describe('SortWorkView Tests', () => {
 
     cy.get('[data-test="list-item-group"]').click(); // Select 'Group' sort type
     cy.wait(1000);
+  });
+  it('should open a document from the SortWorkView tab', () => {
+    beforeTest();
+    cy.log('verify opening and closing a document from the sort work view');
+    cy.get(sortWorkItem).eq(1).click(); // Open the first document in the list
+    cy.get('.document-content').should('be.visible');
+    cy.get('.document-buttons .close-doc-button').click();
+    cy.get(sortWorkItem).should('be.visible'); // Verify the document is closed
   });
 });

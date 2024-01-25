@@ -1,15 +1,13 @@
 import { NodeChannelInfo } from "./channel";
-// import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
+import { demoStreams } from "../../../shared-assets/data/dataflow/demo-data";
 
-// Virtual channels have just been commented out rather than fully removed in case we want to add them back
-// in at least some contexts in the future.
-// const virtualTempChannel: NodeChannelInfo = {
-//   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Temperature", channelId: "00001-VIR",
-//   missing: false, type: "temperature", units: "°C", value: 0, virtual: true, timeFactor: 1000,
-//   virtualValueMethod: (t: number) => {
-//     const vals = demoStreams.fastBoil;
-//     return vals[t % vals.length];
-//   } };
+const virtualTempChannel: NodeChannelInfo = {
+  hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Temperature", channelId: "00001-VIR",
+  missing: false, type: "temperature", units: "°C", value: 0, virtual: true, timeFactor: 1000,
+  virtualValueMethod: (t: number) => {
+    const vals = demoStreams.fastBoil;
+    return vals[t % vals.length];
+  } };
 const virtualHumidChannel: NodeChannelInfo = {
   hubId: "00000-VIRTUAL-HUB", hubName: "Virtual Sensor", name: "Humidity", channelId: "00002-VIR",
   missing: false, type: "humidity", units: "%", value: 0, virtual: true, timeFactor: 1000,
@@ -47,6 +45,6 @@ const virtualPartChannel: NodeChannelInfo = {
   } };
 
 export const virtualSensorChannels: NodeChannelInfo[] = [
-  virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
+  virtualTempChannel, virtualHumidChannel, virtualCO2Channel, virtualO2Channel,
   virtualLightChannel, virtualPartChannel
 ];
