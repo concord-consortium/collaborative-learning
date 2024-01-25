@@ -170,7 +170,7 @@ export class SortedDocuments {
         documents
       });
     });
-    console.log("sortedDocsArray:", sortedDocsArr);
+
     return sortedDocsArr;
   }
 
@@ -225,13 +225,9 @@ export class SortedDocuments {
   get sortByTools(): SortedDocument[] {
     const tileTypeToDocumentsMap: Record<string, DocumentModelType[]> = {};
 
-    console.log("📁 sorted-documents.ts ------------------------");
-    console.log("➡️ sortByTools()");
     this.filteredDocsByType.forEach((doc) => {
-      console.log("--------doc: ${doc.key}-----------");
       const tilesByTypeMap = doc.content?.getAllTilesByType();// Type is Record<string, string[]>
 
-      // console.log("\t🥩 tilesByTypeMap:", tilesByTypeMap);
       if (tilesByTypeMap) {
         const tileTypes = Object.keys(tilesByTypeMap);
         const nonPlaceholderTiles = tileTypes.filter(type => type !== "Placeholder");
@@ -258,7 +254,6 @@ export class SortedDocuments {
         }
         tileTypeToDocumentsMap["No Tools"].push(doc);
       }
-      console.log("\t🔪 tileTypeToDocumentsMap:", tileTypeToDocumentsMap);
     });
 
     // Sort the tile types. 'No Tools' should be at the end.

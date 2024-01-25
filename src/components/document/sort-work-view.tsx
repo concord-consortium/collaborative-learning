@@ -14,26 +14,6 @@ import { DocListDebug } from "./doc-list-debug";
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
-//********************************************* Guidelines ✔️ ↳ • **************************************
-// • introduce a Tools Filter for any unit that has one or more of the Tool/Tile Types specified in the unit
-
-// documents with no tool tiles are listed in a "No Tools" at the bottom
-// as documents gain content they are automatically resorted
-
-
-//TileTypes =
-// Text, Table, Data card, Image, Drawing, Expression, XYPlot, Graph, Numberline, Dataflow.
-// Simulator, Diagram, Program (same as Dataflow)
-//"Geometry
-
-//doesn't seem like we care about Placeholders
-
-//TODO:
-//Treat filtering of sparrows as a seperate story
-//Treat stretch goal as seperate story (kirk)
-    // Stretch goal - Identify and store the tool type and count with each document
-
-
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, persistentUI, sortedDocuments } = useStores();
 
