@@ -3,7 +3,6 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import { useCombobox } from "downshift";
 import { uniq } from "lodash";
-import { VisuallyHidden } from "@chakra-ui/react";
 import { gImageMap } from "../../../models/image-map";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
@@ -21,6 +20,7 @@ import NumberTypeIcon from "../assets/id-type-number.svg";
 import ExpandDownIcon from "../assets/expand-more-icon.svg";
 
 import '../data-card-tile.scss';
+import { VisuallyHidden } from "@chakra-ui/react";
 
 const typeIcons = {
   "date": <DateTypeIcon />,
@@ -62,7 +62,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     return String(value);
   };
   const valueStr = getValue();
-  const [labelCandidate, setLabelCandidate] = useState(() => getLabel());
+  const [nameCadidate, setNameCandidate] = useState(() => getLabel());
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
   const [imageUrl, setImageUrl] = useState("");
   const [inputItems, setInputItems] = useState([] as string[]);
@@ -125,7 +125,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    editingLabel && setLabelCandidate(event.target.value);
+    editingLabel && setNameCandidate(event.target.value);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -140,7 +140,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         break;
       case "Escape":
         if (currEditFacet === "name") {
-          setLabelCandidate(getLabel());
+          setNameCandidate(getLabel());
         }
         else if (currEditFacet === "value") {
           setValueCandidate(getValue());
@@ -159,7 +159,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     if (readOnly) return;
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("name");
-    !editingLabel && setLabelCandidate(getLabel());
+    !editingLabel && setNameCandidate(getLabel());
   };
 
   const handleValueClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
@@ -176,10 +176,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleCompleteName = () => {
-    if (labelCandidate !== getLabel()) {
+    if (nameCadidate !== getLabel()) {
       const names = content.existingAttributesWithNames().map(a => a.attrName);
-      if (!names.includes(labelCandidate)){
-        caseId && content.setAttName(attrKey, labelCandidate);
+      if (!names.includes(nameCadidate)){
+        caseId && content.setAttName(attrKey, nameCadidate);
       } else {
         showRequireUniqueAlert();
       }
@@ -269,61 +269,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   };
 
-  const pairClassNames = `attribute-name-value-pair ${attrKey}`;
-
   const attributeSelected = dataSet.isAttributeSelected(attrKey);
-
-  const labelClassNames = classNames(
-    "name", attrKey,
-    {
-      editing: editingLabel,
-      highlighted: attributeSelected,
-      linked: isLinked
-    }
-  );
-
-  const labelInputClassNames = classNames(
-    "input",
-    {
-      highlighted: attributeSelected,
-      linked: isLinked
-    }
-  );
-
   const valueHighlighted = attributeSelected || content.caseSelected || dataSet.isCellSelected(cell);
-
-  const valueClassNames = classNames(
-    "value", attrKey,
-    {
-      editing: editingValue,
-      "has-image": gImageMap.isImageUrl(valueStr),
-      highlighted: valueHighlighted,
-      linked: isLinked
-    }
-  );
-  const valueInputClassNames = classNames(
-    "value-input", attrKey,
-    {
-      highlighted: valueHighlighted,
-      linked: isLinked
-    }
-  );
-
-  const typeIconClassNames = classNames(
-    "type-icon", attrKey,
-    { highlighted: valueHighlighted, linked: isLinked }
-  );
-
-  const deleteAttrButtonClassNames = classNames(
-    `delete-attribute ${attrKey}`,
-    { "show": currEditAttrId === attrKey }
-  );
-
-  const cellLabelClasses = classNames(
-    "cell-value",
-    { "default-label": looksLikeDefaultLabel(getLabel()) }
-  );
-
   const typeIcon = typeIcons[content.dataSet.attrFromID(attrKey).mostCommonType || ""];
 
   // Add some custom behavior to the properties returned by useCombobox
@@ -347,64 +294,123 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     return <span></span>; // There may be more cases in the future, e.g. date picker
   };
 
+  const pairClasses = classNames("case-attribute pair", attrKey);
+
+  const nameAreaClasses = classNames(
+    "name-area", attrKey,
+    { editing: editingLabel, highlighted: attributeSelected, linked: isLinked }
+  );
+
+  const nameInputClasses = classNames(
+    "name-input",
+    { highlighted: attributeSelected, linked: isLinked }
+  );
+
+  const nameTextClasses = classNames(
+    "name-text",
+    { "default-label": looksLikeDefaultLabel(getLabel()) }
+  );
+
+  const valueAreaClasses = classNames(
+    "value-area", attrKey,
+    {
+      editing: editingValue,
+      "has-image": gImageMap.isImageUrl(valueStr),
+      highlighted: valueHighlighted,
+      linked: isLinked
+    }
+  );
+
+  const valueInputClasses = classNames(
+    "value-input", attrKey,
+    { highlighted: valueHighlighted, linked: isLinked }
+  );
+
+  const dropdownClasses = classNames(
+    "dropdown",
+    { open: isOpen, closed: !isOpen }
+  );
+
+  const typeIconClasses = classNames(
+    "type-icon", attrKey,
+    { highlighted: valueHighlighted, linked: isLinked }
+  );
+
+  const deleteAttrClasses = classNames(
+    `delete-attribute ${attrKey}`,
+    { "show": currEditAttrId === attrKey }
+  );
+
   return (
-    <div className={pairClassNames}>
-      <div className={labelClassNames} onClick={handleLabelClick}>
+    <div className={pairClasses}>
+
+      {/* NAME */}
+      <div className={nameAreaClasses} onClick={handleLabelClick}>
         { !readOnly && editingLabel
           ? <input
               type="text"
-              className={labelInputClassNames}
-              value={labelCandidate}
+              className={nameInputClasses}
+              value={nameCadidate}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               onBlur={handleCompleteName}
               onDoubleClick={handleInputDoubleClick}
             />
-          : <div className={cellLabelClasses}>{getLabel()}</div>
+          : <div className={nameTextClasses}>{getLabel()}</div>
         }
       </div>
 
-      <div className={valueClassNames} onClick={handleValueClick}>
-        <div style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}} className="downshift-dropdown">
-          <VisuallyHidden>
-            <label {...getLabelProps()} className="">
-              Value for {labelCandidate}
-            </label>
-          </VisuallyHidden>
-          <input
-            {...customizedGetInputProps()}
-            className={valueInputClassNames}
-            onFocus={handleValueInputFocus}
-            onPaste={handleValuePaste}
-          />
-          <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
-            {displayArrow()}
-          </button>
-          <ul {...getMenuProps()} className={ isOpen ? "open" : "closed" }>
-            {isOpen &&
-              inputItems.map((item, index) => (
-                <li className="dropdown-item" style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }
-                  key={`${item}${index}`}
-                  {...getItemProps({item, index})}
-                >
-                  {item}
-                </li>
-            ))}
-          </ul>
-        </div>
+      {/* VALUE */}
+      <div className={valueAreaClasses} onClick={handleValueClick}>
+        <VisuallyHidden>
+          <label {...getLabelProps()} className="">
+            Value for {nameCadidate}
+          </label>
+        </VisuallyHidden>
+        <input
+          type="text"
+          style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}}
+          {...customizedGetInputProps()}
+          className={valueInputClasses}
+          onFocus={handleValueInputFocus}
+          onPaste={handleValuePaste}
+        />
+        { valueIsImage() && <img src={imageUrl} className="value-image" /> }
+        { readOnly && !valueIsImage() && <div className="value-text">{valueStr}</div> }
 
-        { valueIsImage() &&
-          <img src={imageUrl} className="image-value" />
-        }
-        { readOnly && !valueIsImage() &&
-          <div className="cell-value">{valueStr}</div>
+        {/* DROPDOWN */}
+        <ul {...getMenuProps()} className={dropdownClasses}>
+          { isOpen && inputItems.map((item, index) => {
+            const isHighlighted = highlightedIndex === index;
+            const itemProps = getItemProps({ item, index });
+            return (
+              <li
+                className="dropdown-item"
+                style={isHighlighted ? { backgroundColor: '#bde4ff' } : {}}
+                key={`${item}${index}`}
+                {...itemProps}
+              >
+                {item}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+
+
+      {/* BUTTONS */}
+      <div className="buttons-area">
+        <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
+          {displayArrow()}
+        </button>
+
+        <div className={typeIconClasses} >{typeIcon}</div>
+
+        { !readOnly &&
+          <RemoveIconButton className={deleteAttrClasses} onClick={handleDeleteAttribute} />
         }
       </div>
-      <div className={typeIconClassNames} >{typeIcon}</div>
-
-      { !readOnly &&
-        <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
-      }
     </div>
   );
 });
