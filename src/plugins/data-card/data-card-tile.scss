@@ -211,7 +211,7 @@ $default-button-border-color: #979797;
   align-items: center;
   font-size:14px;
 
-  input {
+  input, textarea {
     width: 100%;
     min-height: $data-row-min-height;
     font-family: "Lato";
@@ -220,23 +220,24 @@ $default-button-border-color: #979797;
     font-size: 14px;
   }
 
-  .name-area {
+  .name-area{
+    background-color: $workspace-teal-light-5;
     min-height: $data-row-min-height;
     width: $name-area-width;
     border-right:1px solid $charcoal-light-1;
     text-align: right;
+    font-weight: bold;
 
+    .name-input {
+      text-align: right;
+    }
     .name-text {
       min-height: $data-row-min-height;
       display: flex;
       align-items: center;
-      padding-left:2px;
+      padding-right:3px;
       text-align: right;
       justify-content: flex-end;
-    }
-
-    .name-input {
-      text-align: right;
     }
   }
 
@@ -316,7 +317,7 @@ $default-button-border-color: #979797;
 //   border-top-width: 0px;
 
 //   .name {
-//     background-color: $workspace-teal-light-5;
+//
 //     border-right: 1.5px solid $charcoal-light-1;
 //     font-weight: bold;
 //     color: $cell-text-color;

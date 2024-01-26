@@ -195,7 +195,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     });
   };
 
-  const handleValuePaste = async (event: React.ClipboardEvent<HTMLInputElement>) => {
+  const handleValuePaste = async (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
     // If the clipboard contains an image element, process the image so it can be saved
     // and rendered. If the clipboard contains a text element, check if it is an image URL.
     // If it is, immediately set the value to the URL. Otherwise, simply let the default
@@ -367,8 +367,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
             Value for {nameCadidate}
           </label>
         </VisuallyHidden>
-        <input
-          type="text"
+        <textarea
           style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}}
           {...customizedGetInputProps()}
           className={valueInputClasses}
