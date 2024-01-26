@@ -897,7 +897,6 @@ export class DB {
       starred
     };
     starRef.set(star);
-    return starRef;
   }
 
   public setUserStarState(docKey: string, starKey: string, starred: boolean) {

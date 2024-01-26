@@ -164,8 +164,7 @@ export class Firebase {
   public getUserDocumentStarsPath(user: UserModelType, documentKey?: string, starKey?: string) {
     const docSuffix = documentKey ? `/${documentKey}` : "";
     const starSuffix = starKey ? `/${starKey}` : "";
-    const result =  `${this.getOfferingPath(user)}/commentaries/stars${docSuffix}${starSuffix}`;
-    return result;
+    return `${this.getOfferingPath(user)}/commentaries/stars${docSuffix}${starSuffix}`;
   }
 
   // Basic metadata for all document types (in addition to type-specific metadata stored elsewhere)
