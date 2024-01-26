@@ -1,15 +1,14 @@
 @import "../../components/vars.sass";
 
 $single-view-card-width: 359px;
-$name-area-width: 39%;
-$value-area-width: 48%;
+$name-area-width: 50%;
+$value-area-width: 37%;
 $buttons-area-width: 13%;
 $data-row-min-height: 24px;
 $charcoal-light-border: rgb(206, 206, 206);
 $cell-padding: 0px 8px;
 $cell-text-color: #3f3f3f;
 $default-button-border-color: #979797;
-
 
 .data-card-tool {
   width: 100%;
@@ -208,45 +207,68 @@ $default-button-border-color: #979797;
   border:1px solid $charcoal-light-1;
   border-top-width: 0px;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   font-size:14px;
+  height: $data-row-min-height;
+  max-height: $data-row-min-height * 2;
 
   input, textarea {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; // Add this if you want the text to start from the left
     width: 100%;
-    min-height: $data-row-min-height;
     font-family: "Lato";
     border-width: 0px;
     outline: none;
     font-size: 14px;
+    overflow:hidden; // comment out to disable scrollbar in value textarea
+    resize:none;
   }
 
   .name-area{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     background-color: $workspace-teal-light-5;
-    min-height: $data-row-min-height;
+    //min-height: $data-row-min-height;
     width: $name-area-width;
     border-right:1px solid $charcoal-light-1;
     text-align: right;
     font-weight: bold;
+    //overflow: hidden;
+    &.editing {
+      border: 1px solid $highlight-blue;
+    }
 
     .name-input {
       text-align: right;
+      background-color: $workspace-teal-light-5;
+      padding-right:6px;
     }
     .name-text {
-      min-height: $data-row-min-height;
+      //min-height: $data-row-min-height;
       display: flex;
       align-items: center;
-      padding-right:3px;
+      padding-right:6px;
       text-align: right;
       justify-content: flex-end;
     }
   }
 
   .value-area {
+    position: relative;
     width: $value-area-width;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
 
+    textarea{
+      padding-top:4px;
+      padding-left: 6px;
+    }
     .dropdown {
       position: absolute;
-      width:200px;
+      width:188px;
     }
 
     .dropdown.open {
@@ -255,6 +277,7 @@ $default-button-border-color: #979797;
       background-color: white;
       z-index:1;
       border-radius: 0px 0px 3px 3px;
+      top:14px;
     }
   }
 

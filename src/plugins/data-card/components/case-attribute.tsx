@@ -119,6 +119,20 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setInputValue(valueStr);
   }, [setInputValue, valueStr]);
 
+  // When the value in the name input field or the value textarea changes
+  // console log the new value
+  useEffect(() => {
+    if (editingLabel) {
+      console.log(`Name changed to ${nameCadidate} adjust height and truncate text as needed`);
+      // if the name value is more than 1 line, adjust the height of the input
+    }
+    if (editingValue) {
+      console.log(`Value changed to ${valueCandidate} adjust height and truncaste text as needed`);
+      // if the value is more than 1 line, adjust the height of the textarea
+    }
+  }, [editingLabel, editingValue, nameCadidate, valueCandidate]);
+
+
   gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
     .then((image)=>{
       setImageUrl(image.displayUrl || "");
