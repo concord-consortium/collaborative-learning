@@ -1,6 +1,7 @@
-import { IObservableArray, makeAutoObservable, observable, ObservableMap, toJS } from "mobx";
+import { IObservableArray, makeAutoObservable, observable, ObservableMap } from "mobx";
 import { DB } from "../../lib/db";
 import { DEBUG_BOOKMARKS } from "../../lib/debug";
+import { ClassModelType } from "./class";
 
 export class Bookmark {
   readonly uid: string;
@@ -100,8 +101,26 @@ export class Bookmarks {
     this.db.createUserStar(docKey, true);
   }
 
-  toJSON() {
-    return toJS(this.bookmarkMap);
-  }
+  // This is used for debugging
+  getBookmarkLabel(docKey: string, currentUserId: string, classStore: ClassModelType) {
+    const docStars = this.bookmarkMap.get(docKey);
+    if (!docStars) return "";
+    const starOwners = { user: 0, teacher: 0, others: 0};
+    docStars.forEach(star => {
+      if (!star.starred) return;
 
+      if (star.uid === currentUserId) {
+        starOwners.user++;
+      } else if (classStore.isTeacher(star.uid)) {
+        starOwners.teacher++;
+      } else {
+        starOwners.others++;
+      }
+    });
+    const abbreviations: Record<string, string> = { user: "U", teacher: "T", others: "O" };
+    return Object.entries(starOwners).map(([key, value]) => {
+      if (value === 0) return "  ";
+      return `${abbreviations[key]}${value}`;
+    }).join(" ");
+  }
 }

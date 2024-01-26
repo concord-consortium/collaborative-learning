@@ -41,3 +41,27 @@ If there is more than one teacher in the class, each of them might want to contr
 - remove the flag of `starred` on the star in Firebase, and just use the presence of the star.
 - move the bookmarks to Firestore, they fit the firestore model a better because we can query them for the ones owned by a user and ones owned by a teacher.
 - make bookmarks independent of the offering so a document bookmarked is bookmarked for all offerings in the class. It isn't clear if this is really what a user would want, but it might be.
+
+
+# Use of ts-jest-mocker
+
+To get the typescript mocking to work properly for MobX classes, we need the function below to return false. This is a function in MobX. Without changes it will return true because the constructor of prototype of the mocked object provided by ts-jest-mocker matches `Object.toString()`.
+```
+function isPlainObject(value) {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  var proto = Object.getPrototypeOf(value);
+
+  if (proto == null) {
+    return true;
+  }
+
+  var protoConstructor = Object.hasOwnProperty.call(proto, "constructor") && proto.constructor;
+  return typeof protoConstructor === "function" && protoConstructor.toString() === plainObjectString;
+} // https://stackoverflow.com/a/37865170
+```
+
+This issue is worked around in the test by calling `Object.setPrototypeOf(mock, ClassBeingMocked);`
+This issue could probably be fixed within ts-jest-mocker by defining the getPrototypeOf() on the handler in its createClassProxy.

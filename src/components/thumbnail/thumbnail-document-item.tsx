@@ -56,31 +56,9 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
   // const isStarred = user.isTeacher
   //   ? stars.isDocumentBookmarkedByUser(document.key, user.id)
   //   : stars.isDocumentBookmarked(document.key);
-
   const isStarred = bookmarks.isDocumentBookmarked(document.key);
 
-  const getBookmarkLabel = () => {
-    const docStars = bookmarks.bookmarkMap.get(document.key);
-    if (!docStars) return "";
-    const starOwners = { user: 0, teacher: 0, others: 0};
-    docStars.forEach(star => {
-      if (!star.starred) return;
-
-      if (star.uid === user.id) {
-        starOwners.user++;
-      } else if (classStore.isTeacher(star.uid)) {
-        starOwners.teacher++;
-      } else {
-        starOwners.others++;
-      }
-    });
-    const abbreviations: Record<string, string> = { user: "U", teacher: "T", others: "O" };
-    return Object.entries(starOwners).map(([key, value]) => {
-      if (value === 0) return "  ";
-      return `${abbreviations[key]}${value}`;
-    }).join(" ");
-  };
-  const label = DEBUG_BOOKMARKS ? getBookmarkLabel() : "";
+  const label = DEBUG_BOOKMARKS ? bookmarks.getBookmarkLabel(document.key, user.id, classStore) : "";
 
   const isPrivate = !document.isAccessibleToUser(user);
   const privateClass = isPrivate ? "private" : "";
