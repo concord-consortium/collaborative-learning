@@ -19,6 +19,7 @@ import { useReadOnlyContext } from "../../../../../../components/document/read-o
 import DropdownCaretIcon from "../../../../assets/dropdown-caret.svg";
 
 interface IProps {
+  hideRemoveOption?: boolean;
   place: GraphPlace;
   attributeId?: string;
   // element to be mirrored. If null, a styled button will be created.
@@ -45,8 +46,8 @@ const removeAttrItemLabelKeys: Record<string, string> = {
 };
 
 export const AxisOrLegendAttributeMenu = ({
-  place, attributeId, target, parent, portal, onChangeAttribute, onRemoveAttribute, onTreatAttributeAs,
-  highlighted, pointColor
+  hideRemoveOption, place, attributeId, target, parent, portal, onChangeAttribute, onRemoveAttribute,
+  onTreatAttributeAs, highlighted, pointColor
 }: IProps) => {
   const dataConfig = useDataConfigurationContext();
   const data = dataConfig?.dataset;
@@ -64,7 +65,7 @@ export const AxisOrLegendAttributeMenu = ({
   const portalRef = useRef(portal);
   portalRef.current = portal;
   const menuListRef = useRef<HTMLDivElement>(null);
-  const showRemoveOption = true; // Used to be a setting; for now we always want it available.
+  // const showRemoveOption = true; // Used to be a setting; for now we always want it available.
   const { disableAttributeDnD }  = useGraphSettingsContext();
   const onCloseRef = useRef<() => void>();
   const overlayBounds = useOverlayBounds({ target, portal: parent });
@@ -148,7 +149,7 @@ export const AxisOrLegendAttributeMenu = ({
           { attribute &&
             <>
               <MenuDivider />
-              { showRemoveOption &&
+              { !hideRemoveOption &&
                 <MenuItem onClick={() => onRemoveAttribute(place, attrId)}>
                 {removeAttrItemLabel}
                 </MenuItem>
