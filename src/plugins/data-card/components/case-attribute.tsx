@@ -21,7 +21,7 @@ import TextTypeIcon from "../assets/id-type-text.svg";
 import NumberTypeIcon from "../assets/id-type-number.svg";
 import ExpandDownIcon from "../assets/expand-more-icon.svg";
 
-import '../data-card-tile.scss';
+import './single-card-data-area.scss';
 
 const typeIcons = {
   "date": <DateTypeIcon />,
@@ -121,11 +121,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       setImageUrl(image.displayUrl || "");
     });
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLabelChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     editingLabel && setLabelCandidate(event.target.value);
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const { key } = event;
     switch (key) {
       case "Enter":
@@ -168,7 +168,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     !editingValue && setValueCandidate(getValue());
   };
 
-  const handleInputDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
+  const handleInputDoubleClick = (event: React.MouseEvent<HTMLTextAreaElement>) => {
     event.currentTarget.select();
   };
 
@@ -192,7 +192,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     });
   };
 
-  const handleValuePaste = async (event: React.ClipboardEvent<HTMLInputElement>) => {
+  const handleValuePaste = async (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
     // If the clipboard contains an image element, process the image so it can be saved
     // and rendered. If the clipboard contains a text element, check if it is an image URL.
     // If it is, immediately set the value to the URL. Otherwise, simply let the default
@@ -298,6 +298,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       linked: isLinked
     }
   );
+
   const valueInputClassNames = classNames(
     "value-input", attrKey,
     {
@@ -360,11 +361,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     <div className={pairClassNames}>
       <div className={labelClassNames} onClick={handleLabelClick}>
         { !readOnly && editingLabel
-          ? <input
-              type="text"
+          ? <textarea
               className={labelInputClassNames}
               value={labelCandidate}
-              onChange={handleChange}
+              onChange={handleLabelChange}
               onKeyDown={handleKeyDown}
               onBlur={handleCompleteName}
               onDoubleClick={handleInputDoubleClick}
@@ -380,7 +380,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
               Value for {labelCandidate}
             </label>
           </VisuallyHidden>
-          <input
+          <textarea
             {...customizedGetInputProps()}
             className={valueInputClassNames}
             onFocus={handleValueInputFocus}
