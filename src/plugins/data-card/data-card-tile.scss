@@ -209,19 +209,23 @@ $default-button-border-color: #979797;
   display: flex;
   align-items: stretch;
   font-size:14px;
-  height: $data-row-min-height;
-  max-height: $data-row-min-height * 2;
+  &.one-line {
+    height: $data-row-min-height;
+  }
+  &.two-lines {
+    height: $data-row-min-height * 1.8;
+  }
 
   input, textarea {
     display: flex;
     align-items: center;
-    justify-content: flex-start; // Add this if you want the text to start from the left
+    justify-content: flex-start;
     width: 100%;
     font-family: "Lato";
     border-width: 0px;
     outline: none;
     font-size: 14px;
-    overflow:hidden; // comment out to disable scrollbar in value textarea
+    overflow: hidden;
     resize:none;
   }
 
@@ -235,7 +239,7 @@ $default-button-border-color: #979797;
     border-right:1px solid $charcoal-light-1;
     text-align: right;
     font-weight: bold;
-    //overflow: hidden;
+    overflow: hidden;
     &.editing {
       border: 1px solid $highlight-blue;
     }

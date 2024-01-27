@@ -13,6 +13,7 @@ import { useCautionAlert } from "../../../components/utilities/use-caution-alert
 import { useErrorAlert } from "../../../components/utilities/use-error-alert";
 import { getClipboardContent } from "../../../utilities/clipboard-utils";
 import { isImageUrl } from "../../../models/data/data-types";
+import { measureTextLines } from "../../../components/tiles/hooks/use-measure-text";
 import DateTypeIcon from "../assets/id-type-date.svg";
 import ImageTypeIcon from "../assets/id-type-image.svg";
 import TextTypeIcon from "../assets/id-type-text.svg";
@@ -62,10 +63,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     return String(value);
   };
   const valueStr = getValue();
-  const [nameCadidate, setNameCandidate] = useState(() => getLabel());
+  const [nameCandidate, setNameCandidate] = useState(() => getLabel());
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
   const [imageUrl, setImageUrl] = useState("");
   const [inputItems, setInputItems] = useState([] as string[]);
+  const [textLinesNeeded, setTextLinesNeeded] = useState(measureTextLines(getLabel(), 120));
 
   const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
@@ -122,15 +124,9 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   // When the value in the name input field or the value textarea changes
   // console log the new value
   useEffect(() => {
-    if (editingLabel) {
-      console.log(`Name changed to ${nameCadidate} adjust height and truncate text as needed`);
-      // if the name value is more than 1 line, adjust the height of the input
-    }
-    if (editingValue) {
-      console.log(`Value changed to ${valueCandidate} adjust height and truncaste text as needed`);
-      // if the value is more than 1 line, adjust the height of the textarea
-    }
-  }, [editingLabel, editingValue, nameCadidate, valueCandidate]);
+    if (editingLabel) setTextLinesNeeded(measureTextLines(nameCandidate, 149));
+    if (editingValue) setTextLinesNeeded(measureTextLines(valueCandidate, 120));
+  }, [editingLabel, editingValue, nameCandidate, valueCandidate]);
 
 
   gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
@@ -138,11 +134,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       setImageUrl(image.displayUrl || "");
     });
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     editingLabel && setNameCandidate(event.target.value);
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const { key } = event;
     switch (key) {
       case "Enter":
@@ -185,15 +181,15 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     !editingValue && setValueCandidate(getValue());
   };
 
-  const handleInputDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
+  const handleInputDoubleClick = (event: React.MouseEvent<HTMLTextAreaElement>) => {
     event.currentTarget.select();
   };
 
   const handleCompleteName = () => {
-    if (nameCadidate !== getLabel()) {
+    if (nameCandidate !== getLabel()) {
       const names = content.existingAttributesWithNames().map(a => a.attrName);
-      if (!names.includes(nameCadidate)){
-        caseId && content.setAttName(attrKey, nameCadidate);
+      if (!names.includes(nameCandidate)){
+        caseId && content.setAttName(attrKey, nameCandidate);
       } else {
         showRequireUniqueAlert();
       }
@@ -308,7 +304,9 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     return <span></span>; // There may be more cases in the future, e.g. date picker
   };
 
-  const pairClasses = classNames("case-attribute pair", attrKey);
+  const pairClasses = classNames("case-attribute pair", attrKey,
+    { "two-lines": textLinesNeeded > 1, "one-line": textLinesNeeded < 2 }
+  );
 
   const nameAreaClasses = classNames(
     "name-area", attrKey,
@@ -361,10 +359,9 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       {/* NAME */}
       <div className={nameAreaClasses} onClick={handleLabelClick}>
         { !readOnly && editingLabel
-          ? <input
-              type="text"
+          ? <textarea
               className={nameInputClasses}
-              value={nameCadidate}
+              value={nameCandidate}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               onBlur={handleCompleteName}
@@ -378,7 +375,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       <div className={valueAreaClasses} onClick={handleValueClick}>
         <VisuallyHidden>
           <label {...getLabelProps()} className="">
-            Value for {nameCadidate}
+            Value for {nameCandidate}
           </label>
         </VisuallyHidden>
         <textarea
@@ -409,8 +406,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
           })}
         </ul>
       </div>
-
-
 
       {/* BUTTONS */}
       <div className="buttons-area">
