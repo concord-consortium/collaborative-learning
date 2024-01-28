@@ -19,16 +19,16 @@ To expose this confusing logic the debug option `bookmarks` can be used. It will
 - `O1` means 1 other user in the class has a bookmark for the document
 The numbers will increase if more than one teacher or other user has bookmarked the document.
 
-Additionally the `bookmarks` debug option will console log a message when the bookmark is click. This message includes all of the bookmarks on the document prior to the click.
+Additionally the `bookmarks` debug option will console log a message when the bookmark is clicked. This message includes all of the bookmarks on the document prior to the click.
 
 # How to represent multiple bookmarks on a single doc
 
 If we want to continue to show bookmarks made by anyone to everyone here is my proposal:
-- have 4 groups of bookmarks in the sort work tab: you, teacher, others(or other students), none
+- have 4 groups of bookmarks in the sort work tab: you, teacher, others (or other students), none
 - add some indication to the bookmark to indicate who has bookmarked it: you, teacher, others. You can see a rough demo of this with the debugging option described above.
 
 ## Why you might want to bookmark something the Teacher already has:
-You want to bookmark some document even though the teacher did, because the teacher tends to removing bookmarks after that document isn't relevant anymore, and you want to keep track of it. So you still need to toggle your own bookmark of this document.
+You want to bookmark some document even though the teacher did, because the teacher tends to remove bookmarks after that document isn't relevant anymore, and you want to keep track of it. So you still need to toggle your own bookmark of this document.
 
 ## Why the teacher might not want to see bookmarks from other class members
 They might curate the bookmarks for the class so if anyone can bookmark stuff the teacher will lose control. Without the separate grouping, the teacher would have no way to hide other student bookmarks.
@@ -36,10 +36,10 @@ They might curate the bookmarks for the class so if anyone can bookmark stuff th
 ## Why have a teacher bookmark section
 If there is more than one teacher in the class, each of them might want to control this list of bookmarks. Even with improved display of the bookmarks, this case isn't handled well. If Teacher A has bookmarked a document, then Teacher B cannot un-bookmark it. This means the document would still continue to show in the teacher bookmark section.
 
-# Improvements
-- rename all references to `stars` to `bookmarks`
+# Suggestions for Future Improvements
+- rename all references to `stars` to `bookmarks`.
 - remove the flag of `starred` on the star in Firebase, and just use the presence of the star.
-- move the bookmarks to Firestore, they fit the firestore model a better because we can query them for the ones owned by a user and ones owned by a teacher.
+- move the bookmarks to Firestore, they fit the firestore model better because we can query them for the ones owned by a user and ones owned by a teacher.
 - make bookmarks independent of the offering so a document bookmarked is bookmarked for all offerings in the class. It isn't clear if this is really what a user would want, but it might be.
 
 

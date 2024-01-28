@@ -18,7 +18,7 @@ function initialize() {
   // than the default which is just Object. Without this change MobX tries
   // to wrap the mock db object to make it observable. This happens when
   // the db is assigned to the bookmarks.db property. Since we have to
-  // set the prototype we might as well as set it to the actual DB class.
+  // set the prototype we might as well set it to the actual DB class.
   // This issue could probably be fixed within ts-jest-mocker by defining
   // the getPrototypeOf() on the handler in its createClassProxy.
   Object.setPrototypeOf(db, DB);
