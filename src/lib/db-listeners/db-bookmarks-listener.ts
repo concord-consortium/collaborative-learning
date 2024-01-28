@@ -41,7 +41,7 @@ export class DBBookmarksListener extends BaseListener {
     const docKey = snapshot.ref.key;
     if (!dbDocBookmarks || !docKey) return;
 
-    // In the past there have been multiple bookmarks for the same user on the same document.
+    // In the past there could be multiple bookmarks for the same user on the same document.
     // The code below cleans this up when it finds them.
     const consolidatedBookmarks: Record<string, Bookmark> = {};
     const duplicateBookmarks: Bookmark[] = [];
