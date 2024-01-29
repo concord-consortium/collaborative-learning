@@ -1,11 +1,11 @@
 import { DEBUG_LOADING } from "../lib/debug";
 
-const localStorageStartTimeItem = 'loading-time-start';
-const localStorageMessageItem = 'loading-message';
+const sessionStorageStartTimeItem = 'loading-time-start';
+const sessionStorageMessageItem = 'loading-message';
 const messageSeparator = '<br/>';
 
 function getTimestamp() {
-  const start = localStorage.getItem(localStorageStartTimeItem);
+  const start = sessionStorage.getItem(sessionStorageStartTimeItem);
   if (!start) {
     return "??";
   }
@@ -13,23 +13,23 @@ function getTimestamp() {
 }
 
 export function getCurrentLoadingMessage() {
-  return localStorage.getItem(localStorageMessageItem) || '...';
+  return sessionStorage.getItem(sessionStorageMessageItem) || '...';
 }
 
 export function showLoadingMessage(msg: string) {
   if (DEBUG_LOADING) {
     console.log(`Loading @${getTimestamp()}ms: ${msg}`);
   }
-  const existingMessages = localStorage.getItem(localStorageMessageItem);
-  localStorage.setItem('loading-message', existingMessages + msg + messageSeparator);
+  const existingMessages = sessionStorage.getItem(sessionStorageMessageItem);
+  sessionStorage.setItem('loading-message', existingMessages + msg + messageSeparator);
 }
 
 export function removeLoadingMessage(msg: string) {
   if (DEBUG_LOADING) {
     console.log(`Loading @${getTimestamp()}ms: Done with: ${msg}`);
   }
-  const existingMessages = localStorage.getItem(localStorageMessageItem);
+  const existingMessages = sessionStorage.getItem(sessionStorageMessageItem);
   if (existingMessages) {
-    localStorage.setItem('loading-message', existingMessages.replace(msg + messageSeparator, ''));
+    sessionStorage.setItem('loading-message', existingMessages.replace(msg + messageSeparator, ''));
   }
 }
