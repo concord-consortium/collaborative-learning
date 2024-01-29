@@ -68,7 +68,6 @@ $default-button-border-color: #979797;
       border: 1px solid $highlight-blue;
     }
 
-
     .name-input {
       text-align: right;
       background-color: $workspace-teal-light-5;
@@ -80,6 +79,9 @@ $default-button-border-color: #979797;
       padding-right:6px;
       text-align: right;
       justify-content: flex-end;
+      &.default-label {
+        font-style: italic;
+      }
     }
   }
 
@@ -90,22 +92,54 @@ $default-button-border-color: #979797;
     align-items: center;
     justify-content: flex-start;
 
-    textarea{
-      padding-top:3px;
+    textarea {
+      padding-top: 3px;
       padding-left: 6px;
     }
-    .dropdown {
-      position: absolute;
-      width:188px;
+
+    &.has-image {
+      padding:6px;
+      display:flex;
+      align-items: center;
+      justify-content: center;
+      &:hover {
+        background:rgba(245, 245, 245);
+      }
+      &.editing {
+        // simulate highlight without using border, which distorts height
+        box-shadow: 0px 0px 0px 2px $highlight-blue inset;
+      }
+      img {
+        max-width: 95%;
+        max-height: 90%;
+        margin: 0 auto;
+      }
     }
 
-    .dropdown.open {
-      border:1px solid $charcoal-light-border;
-      box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.4);
+    ul.dropdown {
+      position: absolute;
+      width: 179px;
+      padding: 0;
+      margin: 0;
       background-color: white;
-      z-index:1;
-      border-radius: 0px 0px 3px 3px;
-      top:14px;
+
+      &.open {
+        border: 1px solid $charcoal-light-border;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        z-index: 1;
+        border-radius: 0 0 3px 3px;
+        top: $data-row-min-height;
+      }
+
+      li {
+        list-style: none;
+        height: $data-row-min-height + 2;
+        padding-left:5px;
+        padding-top:3.5px;
+        &:last-child {
+          border-radius: 0 0 3px 3px;
+        }
+      }
     }
   }
 
@@ -113,6 +147,8 @@ $default-button-border-color: #979797;
     width: $buttons-area-width;
     display: flex;
     align-items: flex-start;
+    overflow: hidden;
+
     button {
       width: 50%;
       background-color: transparent;
@@ -122,145 +158,29 @@ $default-button-border-color: #979797;
       padding: 0px;
       right: 0;
     }
+
     .type-icon {
       display: flex;
       align-items: center;
     }
+
     .delete-attribute {
       position: absolute;
-      display:none;
-      left:$single-view-card-width + 15px;
+      display: none;
+      left: $single-view-card-width + 15px;
+
       &.show {
         display: inherit;
       }
     }
   }
-
-  // .attribute-name {
-  //   width: $attribute-name-width;
-
-
-
-  // .attribute-value {
-  //   position: relative;
-  //   width: $attribute-value-width;
-  // }
-
-
-
 }
-// .attribute-name-value-pair {
-//   display:flex;
-//   align-items: center;
-//   border: 1px solid $charcoal-light-1;
-//   border-top-width: 0px;
 
-//   .name {
-//
-//     border-right: 1.5px solid $charcoal-light-1;
-//     font-weight: bold;
-//     color: $cell-text-color;
-
-
-
-//     .cell-value {
-//       text-align: right;
-//       &.default-label {
-//         font-style: italic;
-//       }
-//     }
-
-//     input {
-//       &.highlighted {
-//         box-shadow: inset 0 0 0 3px $highlight-unlinked-edit;
-//         &.linked {
-//           box-shadow: inset 0 0 0 3px $highlight-linked-edit;
-//         }
-//       }
-//       &:hover {
-//         background:rgba(245, 245, 245);
-//       }
-//     }
-//   }
-
-//   .value {
-//     font-weight: normal;
-//     color:$cell-text-color;
-
-//     &.highlighted {
-//       background-color: $highlight-unlinked-cell;
-
-//       &.linked {
-//         background-color: $highlight-linked-cell;
-//       }
-//     }
-
-//     // downshift value input
-//     input {
-//       border:1px dotted green;
-//       &:focus {
-//         background-color: white;
-//         &.highlighted {
-//           box-shadow: inset 0 0 0 1px $highlight-unlinked-edit;
-
-//           &.linked {
-//             background-color: white;
-//             box-shadow: inset 0 0 0 1px $highlight-linked-edit;
-//           }
-//         }
-//       }
-//     }
-//   }
-
-//   .type-icon {
-//     &.highlighted {
-//       background-color: $highlight-unlinked-cell;
-//       &.linked {
-//         background-color: $highlight-linked-cell;
-//       }
-//     }
-//   }
-// }
-
-// .downshift-dropdown {
-//   display: flex;
-//   ul {
-//     padding: 0px;
-//     margin: 0px;
-
-//     li {
-//       list-style: none;
-//       background-color: white;
-//       padding-left:7px;
-//     }
-//     &:last-of-type {
-//       li {
-//         border-radius: 0px 0px 3px 3px;
-//       }
-//     }
-//   }
-// }
-
-
-
-
-// }
-
-.value-area.has-image {
-  padding:6px;
-  display:flex;
-  align-items: center;
-  justify-content: center;
-  &:hover {
-    background:rgba(245, 245, 245);
-  }
-  &.editing {
-    // simulate highlight without using border, which distorts height
-    box-shadow: 0px 0px 0px 2px $highlight-blue inset;
-  }
-  img {
-    max-width: 95%;
-    max-height: 90%;
-    margin: 0 auto;
+.type-icon, .value-area, .buttons-area {
+  &.highlighted {
+    background-color: $highlight-unlinked-cell;
+    &.linked {
+      background-color: $highlight-linked-cell;
+    }
   }
 }
