@@ -13,6 +13,7 @@ export const DEBUG_DROP = debugContains("drop");
 export const DEBUG_HISTORY = debugContains("history");
 export const DEBUG_IMAGES = debugContains("images");
 export const DEBUG_LISTENERS = debugContains("listeners");
+export const DEBUG_LOADING = debugContains("loading");
 export const DEBUG_LOGGER = debugContains("logger");
 export const DEBUG_SAVE = debugContains("save");
 export const DEBUG_SHARED_MODELS = debugContains("sharedModels");

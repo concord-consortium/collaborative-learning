@@ -1,3 +1,5 @@
+import { DEBUG_LOADING } from "../lib/debug";
+
 const localStorageStartTimeItem = 'loading-time-start';
 const localStorageMessageItem = 'loading-message';
 const messageSeparator = '<br/>';
@@ -15,13 +17,17 @@ export function getCurrentLoadingMessage() {
 }
 
 export function showLoadingMessage(msg: string) {
-  console.log(`Loading sequence @${getTimestamp()}ms: ${msg}`);
+  if (DEBUG_LOADING) {
+    console.log(`Loading @${getTimestamp()}ms: ${msg}`);
+  }
   const existingMessages = localStorage.getItem(localStorageMessageItem);
   localStorage.setItem('loading-message', existingMessages + msg + messageSeparator);
 }
 
 export function removeLoadingMessage(msg: string) {
-  console.log(`Loading sequence @${getTimestamp()}ms: Done with ${msg}`);
+  if (DEBUG_LOADING) {
+    console.log(`Loading @${getTimestamp()}ms: Done with: ${msg}`);
+  }
   const existingMessages = localStorage.getItem(localStorageMessageItem);
   if (existingMessages) {
     localStorage.setItem('loading-message', existingMessages.replace(msg + messageSeparator, ''));
