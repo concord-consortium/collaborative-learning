@@ -1,4 +1,4 @@
- 
+
 // Taken from @blueprintjs/core/lib/css/blueprint.css, which was in use until ~ CLUE 2.2.
 @charset "UTF-8";
 
@@ -27,7 +27,7 @@ p {
 ::selection {
   background:rgba(125, 188, 255, 0.6);
 }
-    
+
 // Original contents of this file before merging with blueprint.css
 html, body {
   margin: 0;
@@ -37,6 +37,10 @@ html, body {
 body {
   font-family: 'Lato', 'Noto Sans Symbols 2', 'Noto Sans Math', sans-serif;
   user-select: none;
+}
+
+.center {
+  margin: auto;
 }
 
 .progress {

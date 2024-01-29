@@ -24,6 +24,7 @@ import { SerialDevice } from "./serial";
 import { IBaseStores } from "./base-stores-types";
 import { NavTabModelType } from "../view/nav-tabs";
 import { SortedDocuments } from "./sorted-documents";
+import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -188,11 +189,13 @@ class Stores implements IStores{
   // be some weird interactions with action tracking if we mix them.
   async setUnitAndProblem(unitId: string | undefined, problemOrdinal?: string) {
     const { appConfig } = this;
+    showLoadingMessage("Loading curriculum content");
     let unitJson = await getUnitJson(unitId, appConfig);
     if (unitJson.status === 404) {
       unitJson = await getUnitJson(appConfig.defaultUnit, appConfig);
     }
-
+    removeLoadingMessage("Loading curriculum content");
+    showLoadingMessage("Setting up curriculum content");
     // read the unit content, but don't instantiate section contents (DocumentModels) yet
     const unit = createUnitWithoutContent(unitJson);
 
@@ -202,10 +205,12 @@ class Stores implements IStores{
     appConfig.setConfigs([unit.config || {}, _investigation?.config || {}, _problem?.config || {}]);
 
     // load/initialize the necessary tools
+    showLoadingMessage("Loading tile types");
     const { authorTools = [], toolbar = [], tools: tileTypes = [] } = appConfig;
     const unitTileTypes = new Set(
       [...toolbar.map(button => button.id), ...authorTools.map(button => button.id), ...tileTypes]);
     await registerTileTypes([...unitTileTypes]);
+    removeLoadingMessage("Loading tile types");
 
     // We are changing our observable state here so we need to be in an action.
     // Because this is an async function, we'd have to switch it to a flow to
@@ -238,6 +243,7 @@ class Stores implements IStores{
       if (tabs.length > 0) {
         this.persistentUI.setActiveNavTab(tabs[0].tab);
       }
+      removeLoadingMessage("Setting up curriculum content");
     });
 
     addDisposer(unit, when(() => {

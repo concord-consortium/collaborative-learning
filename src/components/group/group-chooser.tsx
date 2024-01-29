@@ -1,9 +1,10 @@
-import { inject, observer } from "mobx-react";
 import React from "react";
+import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "../base";
+import { GroupModelType } from "../../models/stores/groups";
+import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
 
 import "./group-chooser.sass";
-import { GroupModelType } from "../../models/stores/groups";
 
 const MAX_GROUPS = 99;
 
@@ -20,12 +21,18 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
   private groupSelect: HTMLSelectElement|null;
   private _isMounted: boolean;
 
+  constructor(props: IProps) {
+    super(props);
+    showLoadingMessage("Joining group");
+  }
+
   public componentDidMount() {
     this._isMounted = true;
   }
 
   public componentWillUnmount() {
     this._isMounted = false;
+    removeLoadingMessage("Joining group");
   }
 
   public render() {

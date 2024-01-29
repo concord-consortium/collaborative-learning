@@ -10,6 +10,7 @@ import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
+import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
 
 import "./document-workspace.sass";
 
@@ -24,13 +25,17 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   constructor(props: IProps) {
     super(props);
 
+    showLoadingMessage("Building workspace");
+
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
   }
 
   public componentDidMount() {
-    this.guaranteeInitialDocuments();
+    this.guaranteeInitialDocuments().then(() => {
+      removeLoadingMessage("Building workspace");
+    });
   }
 
   public render() {

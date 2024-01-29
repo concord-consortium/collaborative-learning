@@ -8,6 +8,10 @@ import { urlParams } from "./utilities/url-params";
 import { QAClear } from "./components/qa-clear";
 import { setPageTitle } from "./lib/misc";
 import { getBearerToken, initializeAuthorization } from "./utilities/auth-utils";
+import { removeLoadingMessage, showLoadingMessage } from "./utilities/loading-utils";
+
+removeLoadingMessage("Loading the application");
+showLoadingMessage("Initializing");
 
 const redirectingToAuthDomain = initializeAuthorization();
 if (!redirectingToAuthDomain) {
@@ -37,6 +41,7 @@ if (!redirectingToAuthDomain) {
         </AppProvider>,
         document.getElementById("app")
       );
+      removeLoadingMessage("Initializing");
     });
   }
 }
