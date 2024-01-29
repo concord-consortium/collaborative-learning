@@ -224,6 +224,12 @@ export class SortedDocuments {
 
   get sortByTools(): SortedDocument[] {
     const tileTypeToDocumentsMap: Record<string, DocumentModelType[]> = {};
+    const addDocByType = (docToAdd: DocumentModelType, type: string) => {
+      if (!tileTypeToDocumentsMap[type]) {
+        tileTypeToDocumentsMap[type] = [];
+      }
+      tileTypeToDocumentsMap[type].push(docToAdd);
+    };
 
     this.filteredDocsByType.forEach((doc) => {
       const tilesByTypeMap = doc.content?.getAllTilesByType();// Type is Record<string, string[]>
@@ -231,28 +237,17 @@ export class SortedDocuments {
       if (tilesByTypeMap) {
         const tileTypes = Object.keys(tilesByTypeMap);
         const nonPlaceholderTiles = tileTypes.filter(type => type !== "Placeholder");
-
         // If a document only has "Placeholder" tiles or no tiles, treat it as "No Tools"
         if (nonPlaceholderTiles.length === 0) {
-          if (!tileTypeToDocumentsMap["No Tools"]) {
-            tileTypeToDocumentsMap["No Tools"] = [];
-          }
-          tileTypeToDocumentsMap["No Tools"].push(doc);
+          addDocByType(doc, "No Tools");
         } else {
           // Add the tileType as the key to the Map, and doc(s) as values
           nonPlaceholderTiles.forEach(tileType => {
-            if (!tileTypeToDocumentsMap[tileType]) {
-              tileTypeToDocumentsMap[tileType] = [];
-            }
-            tileTypeToDocumentsMap[tileType].push(doc);
+            addDocByType(doc, tileType);
           });
         }
-      } else {
-        // Handle documents with no tiles
-        if (!tileTypeToDocumentsMap["No Tools"]) {
-          tileTypeToDocumentsMap["No Tools"] = [];
-        }
-        tileTypeToDocumentsMap["No Tools"].push(doc);
+      } else { // Handle documents with no tiles
+        addDocByType(doc, "No Tools");
       }
     });
 
