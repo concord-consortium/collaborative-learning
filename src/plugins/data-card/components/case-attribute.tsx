@@ -84,6 +84,14 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   }, [editingValue, valueCandidate.length]);
 
+  useEffect(() => {
+    if (!imageUrl){
+      setTextLinesNeeded(measureTextLines(getLabel(), 120));
+    } else {
+      setTextLinesNeeded(5);
+    }
+  }, [getLabel, getValue, imageUrl]);
+
   const {
     isOpen,
     getToggleButtonProps,
@@ -307,7 +315,13 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const typeIcon = typeIcons[content.dataSet.attrFromID(attrKey).mostCommonType || ""];
 
   const pairClasses = classNames("case-attribute pair", attrKey,
-    { "two-lines": textLinesNeeded > 1, "one-line": textLinesNeeded < 2 }
+    {
+      "one-line": textLinesNeeded < 2,
+      "two-lines": textLinesNeeded === 2,
+      "three-lines": textLinesNeeded === 3,
+      "four-lines": textLinesNeeded === 4,
+      "five-lines": textLinesNeeded > 4
+    }
   );
 
   const nameAreaClasses = classNames(

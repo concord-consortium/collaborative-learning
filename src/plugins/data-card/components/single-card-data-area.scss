@@ -10,45 +10,16 @@ $cell-padding: 0px 8px;
 $cell-text-color: #3f3f3f;
 $default-button-border-color: #979797;
 
-.data-card-tool {
-  width: 100%;
-  height: 100%;
-  text-align: left;
-  overflow: auto;
+.single-card-data-area {
+  width: $single-view-card-width;
+}
 
-  .data-card-content {
-    width: 100%;
-    height: 100%;
-    padding: 20px;
-  }
-
-  &.editable {
-    border: 1px solid #cccccc;
-  }
-
+.case-attribute.pair {
   textarea {
     width: 100%;
     height: 100%;
   }
 
-  .data-card-container{
-
-    .single-card-data-area {
-      width: $single-view-card-width;
-    }
-
-    .delete-attribute {
-      position: absolute;
-      display:none;
-      transform: translateX(351px);
-      &.show {
-        display: inherit;
-      }
-    }
-  }
-}
-
-.case-attribute.pair {
   border:1px solid $charcoal-light-1;
   border-top-width: 0px;
   display: flex;
@@ -59,6 +30,15 @@ $default-button-border-color: #979797;
   }
   &.two-lines {
     height: $data-row-min-height * 1.8;
+  }
+  &.three-lines {
+    height: $data-row-min-height * 2.6;
+  }
+  &.four-lines {
+    height: $data-row-min-height * 3.4;
+  }
+  &.five-lines {
+    height: $data-row-min-height * 4.2;
   }
 
   input, textarea {
@@ -88,6 +68,7 @@ $default-button-border-color: #979797;
       border: 1px solid $highlight-blue;
     }
 
+
     .name-input {
       text-align: right;
       background-color: $workspace-teal-light-5;
@@ -110,7 +91,7 @@ $default-button-border-color: #979797;
     justify-content: flex-start;
 
     textarea{
-      padding-top:4px;
+      padding-top:3px;
       padding-left: 6px;
     }
     .dropdown {
@@ -131,7 +112,7 @@ $default-button-border-color: #979797;
   .buttons-area {
     width: $buttons-area-width;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     button {
       width: 50%;
       background-color: transparent;
@@ -145,39 +126,27 @@ $default-button-border-color: #979797;
       display: flex;
       align-items: center;
     }
+    .delete-attribute {
+      position: absolute;
+      display:none;
+      left:$single-view-card-width + 15px;
+      &.show {
+        display: inherit;
+      }
+    }
   }
 
   // .attribute-name {
   //   width: $attribute-name-width;
 
-  //   input {
-  //     width: 100%;
-  //   }
-  // }
+
 
   // .attribute-value {
   //   position: relative;
   //   width: $attribute-value-width;
   // }
 
-  // .card-row-end {
-  //   height: 100%;
-  //   position: absolute;
-  //   width:20%;
-  //   display: flex;
-  //   justify-content: flex-end;
-  //   right: 0;
-  //   top: 0;
 
-  //   button {
-  //     background-color: transparent;
-  //     display: flex;
-  //     align-items: center;
-  //     height: 24px;
-  //     border: none;
-  //     padding: 0px;
-  //   }
-  // }
 
 }
 // .attribute-name-value-pair {
@@ -192,12 +161,7 @@ $default-button-border-color: #979797;
 //     font-weight: bold;
 //     color: $cell-text-color;
 
-//     &.highlighted {
-//       background-color: $highlight-unlinked-header;
-//       &.linked {
-//         background-color: $highlight-linked-header;
-//       }
-//     }
+
 
 //     .cell-value {
 //       text-align: right;
@@ -275,13 +239,14 @@ $default-button-border-color: #979797;
 //       }
 //     }
 //   }
+// }
 
 
 
 
 // }
 
-.value.has-image {
+.value-area.has-image {
   padding:6px;
   display:flex;
   align-items: center;
@@ -296,5 +261,6 @@ $default-button-border-color: #979797;
   img {
     max-width: 95%;
     max-height: 90%;
+    margin: 0 auto;
   }
 }
