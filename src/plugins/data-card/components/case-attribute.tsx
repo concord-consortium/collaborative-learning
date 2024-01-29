@@ -22,6 +22,7 @@ import NumberTypeIcon from "../assets/id-type-number.svg";
 import ExpandDownIcon from "../assets/expand-more-icon.svg";
 
 import './single-card-data-area.scss';
+import { measureTextLines } from "../../../components/tiles/hooks/use-measure-text";
 
 const typeIcons = {
   "date": <DateTypeIcon />,
@@ -67,6 +68,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
   const [imageUrl, setImageUrl] = useState("");
   const [inputItems, setInputItems] = useState([] as string[]);
+  const [textLinesNeeded, setTextLinesNeeded] = useState(measureTextLines(getLabel(), 120));
 
   const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
@@ -102,6 +104,33 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       setInputItems(completions);
     }
   });
+
+  // Add some custom behavior to the properties returned by useCombobox
+  function customizedGetInputProps() {
+    const propsCreated = getInputProps();
+
+    const defaultBlur = propsCreated.onBlur;
+    const newBlur = function(e: React.FocusEvent<Element, Element>) {
+      handleCompleteValue();
+      if (defaultBlur) defaultBlur(e);
+    };
+    propsCreated.onBlur = newBlur;
+
+    return propsCreated;
+  }
+
+  const itemWithBoldedMatch = (fullString: string, matchString: string) => {
+    if (!matchString) return <span>{fullString}</span>; // no match string, no bolding
+    // If full string is "Orange" and matchString is "ran"
+    // the result will be "O<b>ran</b>ge"
+    const matchIndex = fullString.toLowerCase().indexOf(matchString.toLowerCase());
+    const matchEndIndex = matchIndex + matchString.length;
+    const match = fullString.slice(matchIndex, matchEndIndex);
+    const lettersBeforeMatch = fullString.slice(0, matchIndex);
+    const lettersAfterMatch = fullString.slice(matchEndIndex);
+    return <span>{lettersBeforeMatch}<b>{match}</b>{lettersAfterMatch}</span>;
+  };
+
 
   useEffect(()=>{
     const attrValues = content.dataSet.attrFromID(attrKey)?.values || [];
@@ -266,31 +295,38 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   };
 
-  const pairClassNames = `attribute-name-value-pair ${attrKey}`;
+  const displayArrow = () => {
+    if (inputItems.length > 0) {
+      return <ExpandDownIcon className={ isOpen ? "down" : "up"}/>;
+    }
+    return <span></span>; // There may be more cases in the future, e.g. date picker
+  };
 
   const attributeSelected = dataSet.isAttributeSelected(attrKey);
-
-  const labelClassNames = classNames(
-    "name", attrKey,
-    {
-      editing: editingLabel,
-      highlighted: attributeSelected,
-      linked: isLinked
-    }
-  );
-
-  const labelInputClassNames = classNames(
-    "input",
-    {
-      highlighted: attributeSelected,
-      linked: isLinked
-    }
-  );
-
   const valueHighlighted = attributeSelected || content.caseSelected || dataSet.isCellSelected(cell);
+  const typeIcon = typeIcons[content.dataSet.attrFromID(attrKey).mostCommonType || ""];
 
-  const valueClassNames = classNames(
-    "value", attrKey,
+  const pairClasses = classNames("case-attribute pair", attrKey,
+    { "two-lines": textLinesNeeded > 1, "one-line": textLinesNeeded < 2 }
+  );
+
+  const nameAreaClasses = classNames(
+    "name-area", attrKey,
+    { editing: editingLabel, highlighted: attributeSelected, linked: isLinked }
+  );
+
+  const nameInputClasses = classNames(
+    "name-input",
+    { highlighted: attributeSelected, linked: isLinked }
+  );
+
+  const nameTextClasses = classNames(
+    "name-text",
+    { "default-label": looksLikeDefaultLabel(getLabel()) }
+  );
+
+  const valueAreaClasses = classNames(
+    "value-area", attrKey,
     {
       editing: editingValue,
       "has-image": gImageMap.isImageUrl(valueStr),
@@ -299,121 +335,92 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   );
 
-  const valueInputClassNames = classNames(
+  const valueInputClasses = classNames(
     "value-input", attrKey,
-    {
-      highlighted: valueHighlighted,
-      linked: isLinked
-    }
+    { highlighted: valueHighlighted, linked: isLinked }
   );
 
-  const typeIconClassNames = classNames(
+  const dropdownClasses = classNames(
+    "dropdown",
+    { open: isOpen, closed: !isOpen }
+  );
+
+  const typeIconClasses = classNames(
     "type-icon", attrKey,
     { highlighted: valueHighlighted, linked: isLinked }
   );
 
-  const deleteAttrButtonClassNames = classNames(
+  const deleteAttrClasses = classNames(
     `delete-attribute ${attrKey}`,
     { "show": currEditAttrId === attrKey }
   );
 
-  const cellLabelClasses = classNames(
-    "cell-value",
-    { "default-label": looksLikeDefaultLabel(getLabel()) }
-  );
-
-  const typeIcon = typeIcons[content.dataSet.attrFromID(attrKey).mostCommonType || ""];
-
-  // Add some custom behavior to the properties returned by useCombobox
-  function customizedGetInputProps() {
-    const propsCreated = getInputProps();
-
-    const defaultBlur = propsCreated.onBlur;
-    const newBlur = function(e: React.FocusEvent<Element, Element>) {
-      handleCompleteValue();
-      if (defaultBlur) defaultBlur(e);
-    };
-    propsCreated.onBlur = newBlur;
-
-    return propsCreated;
-  }
-
-  const displayArrow = () => {
-    if (inputItems.length > 0) {
-      return <ExpandDownIcon className={ isOpen ? "down" : "up"}/>;
-    }
-    return <span></span>; // There may be more cases in the future, e.g. date picker
-  };
-
-  const itemWithBoldedMatch = (fullString: string, matchString: string) => {
-    if (!matchString) return <span>{fullString}</span>; // no match string, no bolding
-    // If full string is "Orange" and matchString is "ran"
-    // the result will be "O<b>ran</b>ge"
-    const matchIndex = fullString.toLowerCase().indexOf(matchString.toLowerCase());
-    const matchEndIndex = matchIndex + matchString.length;
-    const match = fullString.slice(matchIndex, matchEndIndex);
-    const lettersBeforeMatch = fullString.slice(0, matchIndex);
-    const lettersAfterMatch = fullString.slice(matchEndIndex);
-    return <span>{lettersBeforeMatch}<b>{match}</b>{lettersAfterMatch}</span>;
-  };
-
   return (
-    <div className={pairClassNames}>
-      <div className={labelClassNames} onClick={handleLabelClick}>
+    <div className={pairClasses}>
+
+      {/* NAME */}
+      <div className={nameAreaClasses} onClick={handleLabelClick}>
         { !readOnly && editingLabel
           ? <textarea
-              className={labelInputClassNames}
+              className={nameInputClasses}
               value={labelCandidate}
               onChange={handleLabelChange}
               onKeyDown={handleKeyDown}
               onBlur={handleCompleteName}
               onDoubleClick={handleInputDoubleClick}
             />
-          : <div className={cellLabelClasses}>{getLabel()}</div>
+          : <div className={nameTextClasses}>{getLabel()}</div>
         }
       </div>
 
-      <div className={valueClassNames} onClick={handleValueClick}>
-        <div style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}} className="downshift-dropdown">
-          <VisuallyHidden>
-            <label {...getLabelProps()} className="">
-              Value for {labelCandidate}
-            </label>
-          </VisuallyHidden>
-          <textarea
-            {...customizedGetInputProps()}
-            className={valueInputClassNames}
-            onFocus={handleValueInputFocus}
-            onPaste={handleValuePaste}
-          />
-          <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
-            {displayArrow()}
-          </button>
-          <ul {...getMenuProps()} className={ isOpen ? "open" : "closed" }>
-            {isOpen &&
-              inputItems.map((item, index) => (
-                <li className="dropdown-item" style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }
-                  key={`${item}${index}`}
-                  {...getItemProps({item, index})}
-                >
-                  { itemWithBoldedMatch(item, valueCandidate) }
-                </li>
-            ))}
-          </ul>
-        </div>
+      {/* VALUE */}
+      <div className={valueAreaClasses} onClick={handleValueClick}>
+        <VisuallyHidden>
+          <label {...getLabelProps()} className="">
+            Value for {labelCandidate}
+          </label>
+        </VisuallyHidden>
+        <textarea
+          style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}}
+          {...customizedGetInputProps()}
+          className={valueInputClasses}
+          onFocus={handleValueInputFocus}
+          onPaste={handleValuePaste}
+        />
+        { valueIsImage() && <img src={imageUrl} className="value-image" /> }
+        { readOnly && !valueIsImage() && <div className="value-text">{valueStr}</div> }
 
-        { valueIsImage() &&
-          <img src={imageUrl} className="image-value" />
-        }
-        { readOnly && !valueIsImage() &&
-          <div className="cell-value">{valueStr}</div>
+        {/* DROPDOWN */}
+        <ul {...getMenuProps()} className={dropdownClasses}>
+          { isOpen && inputItems.map((item, index) => {
+            const isHighlighted = highlightedIndex === index;
+            const itemProps = getItemProps({ item, index });
+            return (
+              <li
+                className="dropdown-item"
+                style={isHighlighted ? { backgroundColor: '#bde4ff' } : {}}
+                key={`${item}${index}`}
+                {...itemProps}
+              >
+                {item}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      {/* BUTTONS */}
+      <div className="buttons-area">
+        <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
+          {displayArrow()}
+        </button>
+
+        <div className={typeIconClasses} >{typeIcon}</div>
+
+        { !readOnly &&
+          <RemoveIconButton className={deleteAttrClasses} onClick={handleDeleteAttribute} />
         }
       </div>
-      <div className={typeIconClassNames} >{typeIcon}</div>
-
-      { !readOnly &&
-        <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
-      }
     </div>
   );
 });
