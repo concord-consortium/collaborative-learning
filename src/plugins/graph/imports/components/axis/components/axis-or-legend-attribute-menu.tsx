@@ -3,7 +3,7 @@ import React, { CSSProperties, useEffect, useRef, useState } from "react";
 import classNames from "classnames";
 
 import t from "../../../utilities/translation/translate";
-import {GraphPlace} from "../../axis-graph-shared";
+import {GraphPlace, isVertical} from "../../axis-graph-shared";
 import { graphPlaceToAttrRole } from "../../../../graph-types";
 import { useDataConfigurationContext } from "../../../../hooks/use-data-configuration-context";
 import { IUseDraggableAttribute, useDraggableAttribute } from "../../../hooks/use-drag-drop";
@@ -136,9 +136,8 @@ export const AxisOrLegendAttributeMenu = ({
           }
           { data?.attributes?.map((attr) => {
             const isCurrent = attr.id === attrId;
-            const isPlottedX = dataConfig?.attributeID("x") === attr.id;
-            const isPlottedY = yAttributesPlotted?.includes(attr.id);
-            const showAttr = (!isCurrent && !isPlottedX && !isPlottedY);
+            const isPlottedY = isVertical(place) && yAttributesPlotted?.includes(attr.id);
+            const showAttr = (!isCurrent && !isPlottedY);
 
             return showAttr && (
               <MenuItem onClick={() => onChangeAttribute(place, data, attr.id, attrId)} key={attr.id}>
