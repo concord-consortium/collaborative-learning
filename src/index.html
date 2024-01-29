@@ -25,28 +25,29 @@
             environment: isProduction ? "production" : "staging"
           }
       };
-      // Rollbar Snippet
-      if (_rollbarConfig.enabled) {
-        <%= rollbarSnippet %>
-      }
-      // End Rollbar Snippet
       // Show some informative messages to users about what is happening while the application loads.
-      // Any javascript code can write a message into localStorage.
+      // Any javascript code can write a message into sessionStorage.
       const requestStart = performance.getEntriesByType('navigation')[0].requestStart;
-      localStorage.setItem('loading-time-start', requestStart || performance.now());
-      if ((window.localStorage.getItem("debug")||"").indexOf('loading') > -1) {
+      sessionStorage.setItem('loading-time-start', requestStart || performance.now());
+      if ((sessionStorage.getItem("debug")||"").indexOf('loading') > -1) {
         console.log(`Loading @${Math.floor(performance.now()-requestStart)}ms: Loading the application`);
       }
-      localStorage.setItem('loading-message', 'Loading the application<br/>');
+      sessionStorage.setItem('loading-message', 'Loading the application<br/>');
       window.loadingMessageTimer = setInterval(function() {
         var elt = document.getElementById('loading-message');
-        var msg = localStorage.getItem('loading-message');
+        var msg = sessionStorage.getItem('loading-message');
         if (elt) {
           elt.innerHTML = msg;
         } else {
           clearInterval(window.loadingMessageTimer);
         }
       }, 500);
+
+      // Rollbar Snippet
+      if (_rollbarConfig.enabled) {
+        <%= rollbarSnippet %>
+      }
+      // End Rollbar Snippet
     </script>
   </head>
   <body>
