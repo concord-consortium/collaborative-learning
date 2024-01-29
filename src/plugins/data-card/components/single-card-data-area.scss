@@ -18,6 +18,7 @@ $default-button-border-color: #979797;
   textarea {
     width: 100%;
     height: 100%;
+    background-color: transparent;
   }
 
   border:1px solid $charcoal-light-1;
@@ -148,6 +149,7 @@ $default-button-border-color: #979797;
     display: flex;
     align-items: flex-start;
     overflow: hidden;
+    background-color: transparent;
 
     button {
       width: 50%;
@@ -176,11 +178,24 @@ $default-button-border-color: #979797;
   }
 }
 
-.type-icon, .value-area, .buttons-area {
+
+@mixin highlight-rules {
   &.highlighted {
     background-color: $highlight-unlinked-cell;
     &.linked {
       background-color: $highlight-linked-cell;
     }
   }
+}
+
+.value-area {
+  @include highlight-rules;
+}
+
+.type-icon {
+  @include highlight-rules;
+}
+
+.value-area button {
+  background-color: aqua;
 }
