@@ -30,6 +30,24 @@
         <%= rollbarSnippet %>
       }
       // End Rollbar Snippet
+      // Show some informative messages to users about what is happening while the application loads.
+      // Any javascript code can write a message into localStorage.
+      const requestStart = performance.getEntriesByType('navigation')[0].requestStart;
+      localStorage.setItem('loading-time-start', requestStart || performance.now());
+      console.log(`Loading sequence @${Math.floor(performance.now()-requestStart)}: Javascript in index.html\'s <head> is running`);
+      localStorage.setItem('loading-message', 'Loading the application<br/>');
+      window.loadingMessageTimer = setInterval(function() {
+        var elt = document.getElementById('loading-message');
+        var msg = localStorage.getItem('loading-message');
+        var start = localStorage.getItem('loading-time-start');
+        var time = Math.floor((performance.now() - start)/1000);
+        if (elt) {
+          elt.innerHTML = msg + '...' + time;
+        } else {
+          console.log('Loading sequence complete');
+          clearInterval(window.loadingMessageTimer);
+        }
+      }, 1000);
     </script>
   </head>
   <body>
@@ -76,6 +94,8 @@
         </symbol>
       </defs>
     </svg>
-    <div id="app"></div>
+    <div id="app">
+      <p id="loading-message" class="center progress"></p>
+    </div>
   </body>
 </html>
