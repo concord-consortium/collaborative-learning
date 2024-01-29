@@ -10,6 +10,9 @@ interface ISortHeaderProps{
 }
 
 export const SortWorkHeader:React.FC<ISortHeaderProps>= observer(function SortWorkView({sortBy, sortByOptions}){
+
+  // console.log("\t🥩 sortByOptions:", sortByOptions);
+  // console.log("\t🥩 sortBy:", sortBy);
   return (
     <div className="sort-work-header">
       <div className="header-text">Sort by</div>
