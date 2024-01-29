@@ -65,7 +65,6 @@ export const AxisOrLegendAttributeMenu = ({
   const portalRef = useRef(portal);
   portalRef.current = portal;
   const menuListRef = useRef<HTMLDivElement>(null);
-  // const showRemoveOption = true; // Used to be a setting; for now we always want it available.
   const { disableAttributeDnD }  = useGraphSettingsContext();
   const onCloseRef = useRef<() => void>();
   const overlayBounds = useOverlayBounds({ target, portal: parent });
@@ -137,7 +136,7 @@ export const AxisOrLegendAttributeMenu = ({
           { data?.attributes?.map((attr) => {
             const isCurrent = attr.id === attrId;
             const isPlottedY = isVertical(place) && yAttributesPlotted?.includes(attr.id);
-            const showAttr = (!isCurrent && !isPlottedY);
+            const showAttr = !isCurrent && !isPlottedY;
 
             return showAttr && (
               <MenuItem onClick={() => onChangeAttribute(place, data, attr.id, attrId)} key={attr.id}>
