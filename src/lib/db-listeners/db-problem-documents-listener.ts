@@ -4,7 +4,6 @@ import { DB } from "../db";
 import { DBOfferingUser, DBOfferingUserMap } from "../db-types";
 import { PlanningDocument, ProblemDocument } from "../../models/document/document-types";
 import { BaseListener } from "./base-listener";
-import { syncStars } from "./sync-stars";
 
 export class DBProblemDocumentsListener extends BaseListener {
   private db: DB;
@@ -98,7 +97,6 @@ export class DBProblemDocumentsListener extends BaseListener {
           .then((docModel) => {
             if (isCurrentUser) {
               documents.resolveRequiredDocumentPromise(docModel);
-              syncStars(docModel, this.db);
             }
           });
       }
