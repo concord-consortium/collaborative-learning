@@ -70,7 +70,7 @@ $default-button-border-color: #979797;
 
     .panel.sort {
       background-color: $workspace-teal-light-6;
-      border-bottom:0px;
+      border-bottom:1px $charcoal-light-1 solid;
       select {
         margin-left: 8px;
         width: 145px;
@@ -78,9 +78,10 @@ $default-button-border-color: #979797;
     }
 
     .panel.nav {
-      background-color: $workspace-teal-light-5;
+      background-color: $workspace-teal-light-3;
       display: flex;
       justify-content: space-between;
+      margin-top:40px;
 
       &.highlighted {
         background-color: $highlight-unlinked-header;
