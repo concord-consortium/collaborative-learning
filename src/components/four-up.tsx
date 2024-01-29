@@ -251,7 +251,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     };
 
     const renderStar = (document?: DocumentModelType) => {
-      const { user } = this.stores;
+      const { user, bookmarks } = this.stores;
       if (!document || (documentViewMode !== DocumentViewMode.Published)) {
         return;
       }
@@ -260,11 +260,11 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         e.preventDefault();
         e.stopPropagation();
         if (document) {
-          document.toggleUserStar(user.id);
+          bookmarks.toggleUserBookmark(document.key, user.id);
         }
       };
 
-      const isStarred = document.isStarredByUser(user.id);
+      const isStarred = bookmarks.isDocumentBookmarkedByUser(document.key, user.id);
       return (
         <div className="icon-holder" onClick={handleStarClick}>
           <svg className={"icon-star " + (isStarred ? "starred" : "")} >
