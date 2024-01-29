@@ -14,6 +14,7 @@ import { UserModelType } from "./user";
 import { DB } from "../../lib/db";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { urlParams } from "../../utilities/url-params";
+import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
 
 export const kPersistentUiStateVersion = "1.0.0";
 export const kSparrowAnnotationMode = "sparrow";
@@ -227,8 +228,9 @@ export const PersistentUIModel = types
       self.setActiveNavTab(navTab);
       self.setOpenSubTab(navTab, subTab);
     },
-    async initializePersistentUISync(user: UserModelType, db: DB){
+    async initializePersistentUISync(user: UserModelType, db: DB) {
       if (urlParams.noPersistentUI) return;
+      showLoadingMessage("Loading current activity");
       const path = db.firebase.getPersistentUIPath(user);
       const getRef = db.firebase.ref(path);
       const theData: string | undefined = (await getRef.once("value"))?.val();
@@ -241,6 +243,7 @@ export const PersistentUIModel = types
         const snapshotStr = JSON.stringify(snapshot);
         const updateRef = db.firebase.ref(path);
         updateRef.set(snapshotStr);
+        removeLoadingMessage("Loading current activity");
       });
     }
 }));
