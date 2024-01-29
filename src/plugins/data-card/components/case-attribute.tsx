@@ -349,6 +349,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   );
 
+  const buttonsAreaClasses = classNames(
+    "buttons-area",
+    { highlighted: valueHighlighted, linked: isLinked }
+  );
+
   const valueInputClasses = classNames(
     "value-input", attrKey,
     { highlighted: valueHighlighted, linked: isLinked }
@@ -416,7 +421,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
                 key={`${item}${index}`}
                 {...itemProps}
               >
-                {item}
+                { itemWithBoldedMatch(item, valueCandidate) }
               </li>
             );
           })}
@@ -424,7 +429,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       </div>
 
       {/* BUTTONS */}
-      <div className="buttons-area">
+      <div className={buttonsAreaClasses}>
         <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
           {displayArrow()}
         </button>

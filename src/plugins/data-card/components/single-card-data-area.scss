@@ -11,6 +11,8 @@ $cell-text-color: #3f3f3f;
 $default-button-border-color: #979797;
 
 .single-card-data-area {
+  margin-top:20px;
+  border-top:1px solid $charcoal-light-1;
   width: $single-view-card-width;
 }
 
@@ -55,7 +57,7 @@ $default-button-border-color: #979797;
     resize:none;
   }
 
-  .name-area{
+  .name-area {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -65,15 +67,22 @@ $default-button-border-color: #979797;
     text-align: right;
     font-weight: bold;
     overflow: hidden;
-    &.editing {
-      border: 1px solid $highlight-blue;
+    &.highlighted {
+      background-color: $highlight-unlinked-header;
+      &.linked {
+        background-color: $highlight-linked-header;
+      }
     }
 
     .name-input {
       text-align: right;
       background-color: $workspace-teal-light-5;
       padding-right:6px;
+      &.editing {
+        background-color: white;
+      }
     }
+
     .name-text {
       display: flex;
       align-items: center;
@@ -83,6 +92,14 @@ $default-button-border-color: #979797;
       &.default-label {
         font-style: italic;
       }
+    }
+  }
+
+  .name-area.editing {
+    background-color: white;
+    textarea {
+      background-color: white;
+      box-shadow: 0px 0px 0px 3px $highlight-linked-header inset;
     }
   }
 
@@ -176,26 +193,20 @@ $default-button-border-color: #979797;
       }
     }
   }
-}
 
 
-@mixin highlight-rules {
-  &.highlighted {
-    background-color: $highlight-unlinked-cell;
-    &.linked {
-      background-color: $highlight-linked-cell;
+  .value-area,
+  .buttons-area,
+  .type-icon {
+    &.highlighted {
+      background-color: $highlight-unlinked-cell;
+      &.linked {
+        background-color: $highlight-linked-cell;
+      }
     }
   }
 }
 
-.value-area {
-  @include highlight-rules;
-}
 
-.type-icon {
-  @include highlight-rules;
-}
 
-.value-area button {
-  background-color: aqua;
-}
+
