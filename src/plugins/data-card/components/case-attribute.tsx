@@ -15,6 +15,8 @@ import { useErrorAlert } from "../../../components/utilities/use-error-alert";
 import { getClipboardContent } from "../../../utilities/clipboard-utils";
 import { isImageUrl } from "../../../models/data/data-types";
 import { useAttributeClassNames } from "../use-case-attribute-class-names";
+import { measureTextLines } from "../../../components/tiles/hooks/use-measure-text";
+import { TypeAheadItemSpan } from "../data-card-utils";
 import DateTypeIcon from "../assets/id-type-date.svg";
 import ImageTypeIcon from "../assets/id-type-image.svg";
 import TextTypeIcon from "../assets/id-type-text.svg";
@@ -22,8 +24,6 @@ import NumberTypeIcon from "../assets/id-type-number.svg";
 import ExpandDownIcon from "../assets/expand-more-icon.svg";
 
 import './single-card-data-area.scss';
-import { measureTextLines } from "../../../components/tiles/hooks/use-measure-text";
-import { TypeAheadItemSpan } from "../data-card-utils";
 
 const typeIcons = {
   "date": <DateTypeIcon />,
