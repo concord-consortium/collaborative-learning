@@ -69,7 +69,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [imageUrl, setImageUrl] = useState("");
   const [inputItems, setInputItems] = useState([] as string[]);
   const [textLinesNeeded, setTextLinesNeeded] = useState(measureTextLines(getLabel(), 120));
-
+  const maxLines = 4; // TODO: implement with useSettingFromStores()
   const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
 
@@ -85,12 +85,17 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   }, [editingValue, valueCandidate.length]);
 
   useEffect(() => {
-    if (!imageUrl){
-      setTextLinesNeeded(measureTextLines(getLabel(), 120));
-    } else {
-      setTextLinesNeeded(5);
-    }
-  }, [getLabel, getValue, imageUrl]);
+    const labelLines = measureTextLines(getLabel(), 120);
+    const labelCandidateLines = measureTextLines(labelCandidate, 120);
+    const labelLinesNeeded = Math.max(labelLines, labelCandidateLines);
+
+    const valueLines = measureTextLines(valueStr, 120);
+    const valueCandidateLines = measureTextLines(valueCandidate, 120);
+    const valueLinesNeeded = !isImageUrl(valueStr) ? Math.max(valueLines, valueCandidateLines) : 4;
+
+    setTextLinesNeeded(Math.max(labelLinesNeeded, valueLinesNeeded));
+    console.log("| just setTextLinesNeeded", textLinesNeeded);
+  }, [getLabel, getValue, imageUrl, valueCandidate, labelCandidate, valueStr]);
 
   const {
     isOpen,
@@ -127,8 +132,17 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     return propsCreated;
   }
 
-  const itemWithBoldedMatch = (fullString: string, matchString: string) => {
-    if (!matchString) return <span>{fullString}</span>; // no match string, no bolding
+  const itemWithBoldedMatchTruncated = (fullString: string, matchString: string) => {
+    const lettersLength = fullString.length;
+    if (!matchString) {
+      // we are presenting all options, with no match, so we truncate from start of string
+      if (lettersLength < 20){
+        return <span>{fullString}</span>;
+      } else {
+        const lettersTruncated = fullString.slice(0, 20);
+        return <span>{lettersTruncated}...</span>;
+      }
+    }
     // If full string is "Orange" and matchString is "ran"
     // the result will be "O<b>ran</b>ge"
     const matchIndex = fullString.toLowerCase().indexOf(matchString.toLowerCase());
@@ -136,14 +150,21 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     const match = fullString.slice(matchIndex, matchEndIndex);
     const lettersBeforeMatch = fullString.slice(0, matchIndex);
     const lettersAfterMatch = fullString.slice(matchEndIndex);
-    return <span>{lettersBeforeMatch}<b>{match}</b>{lettersAfterMatch}</span>;
-  };
 
+    if (lettersLength < 20){
+      return <span>{lettersBeforeMatch}<b>{match}</b>{lettersAfterMatch}</span>;
+    } else {
+      const lettersBeforeMatchTruncated = lettersBeforeMatch.slice(0, 5);
+      const lettersAfterMatchTruncated = lettersAfterMatch.slice(0, 5);
+      return <span>...{lettersBeforeMatchTruncated}<b>{match}</b>{lettersAfterMatchTruncated}...</span>;
+    }
+  };
 
   useEffect(()=>{
     const attrValues = content.dataSet.attrFromID(attrKey)?.values || [];
     const completions = validCompletions(attrValues as string[], valueCandidate);
     setInputItems(completions);
+    console.log("| effect of valueCandidate change");
   }, [content.dataSet, attrKey, valueCandidate, validCompletions]);
 
   // reset contents of input when attribute value changes without direct user input
@@ -377,7 +398,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   return (
     <div className={pairClasses}>
 
-      {/* NAME */}
       <div className={nameAreaClasses} onClick={handleLabelClick}>
         { !readOnly && editingLabel
           ? <textarea
@@ -392,7 +412,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         }
       </div>
 
-      {/* VALUE */}
       <div className={valueAreaClasses} onClick={handleValueClick}>
         <VisuallyHidden>
           <label {...getLabelProps()} className="">
@@ -409,7 +428,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         { valueIsImage() && <img src={imageUrl} className="value-image" /> }
         { readOnly && !valueIsImage() && <div className="value-text">{valueStr}</div> }
 
-        {/* DROPDOWN */}
         <ul {...getMenuProps()} className={dropdownClasses}>
           { isOpen && inputItems.map((item, index) => {
             const isHighlighted = highlightedIndex === index;
@@ -421,14 +439,13 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
                 key={`${item}${index}`}
                 {...itemProps}
               >
-                { itemWithBoldedMatch(item, valueCandidate) }
+              { itemWithBoldedMatchTruncated(item, valueCandidate) }
               </li>
             );
           })}
         </ul>
       </div>
 
-      {/* BUTTONS */}
       <div className={buttonsAreaClasses}>
         <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
           {displayArrow()}
