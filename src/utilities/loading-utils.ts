@@ -10,12 +10,15 @@ const messageSeparator = '<br/>';
 const loadingMeasurements: Record<string, number | string> = {};
 //Buildingworkspace
 //Connecting
-//Initializing
+//Initializing: [start: number, end: number]
 //Joining group
 //Loading curriculum content
 //Loading the application
 //Loading tile types
 //Setting up curriculum content
+
+//OR
+//initializing + doneInitializing (two keys instead)
 
 
 function getTimestamp() {

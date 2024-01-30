@@ -35,14 +35,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   public componentDidMount() {
     this.guaranteeInitialDocuments().then(() => {
       removeLoadingMessage("Building workspace");
+      printOutAllMeasurements();
     });
-    //console.log
-
-    //loading
-    //TODO: Is there where want to log?
-    printOutAllMeasurements();
-
-
   }
 
   public render() {
