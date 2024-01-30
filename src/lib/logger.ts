@@ -59,7 +59,7 @@ interface LogMessage {
   tzOffset: string;
   method: string;
   disconnects?: string;
-  parameters: any; // add loadingMeasurements: {} //filled with statistics
+  parameters: any;
 }
 
 export class Logger {
@@ -83,17 +83,13 @@ export class Logger {
   }
 
   public static log(event: LogEventName, parameters?: Record<string, unknown>, method?: LogEventMethod) {
-    // console.log("📁 logger.ts ------------------------");
-    // console.log("➡️ log");
-    // console.log("\t🥩 event:", event);
-    // console.log("\t🥩 parameters:", parameters);
-
     if (!this._instance) return;
 
     const eventString = LogEventName[event];
-    // console.log("\t🔪 eventString:", eventString);
     const logMessage = Logger.Instance.createLogMessage(eventString, parameters, method);
-    // console.log("\tlogMessage:", logMessage);
+
+
+    console.log("logMessage:", logMessage);
     sendToLoggingService(logMessage, this._instance.stores.user);
   }
 
