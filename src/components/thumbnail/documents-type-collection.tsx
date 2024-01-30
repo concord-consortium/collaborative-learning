@@ -1,13 +1,11 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
-import { useAppConfig, useClassStore, useLocalDocuments, useUserStore } from "../../hooks/use-stores";
+import { useAppConfig, useClassStore, useStores, useUserStore } from "../../hooks/use-stores";
 import { AppConfigModelType } from "../../models/stores/app-config-model";
-import { DocumentsModelType } from "../../models/stores/documents";
-import { UserModelType } from "../../models/stores/user";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
-import { isPublishedType, isUnpublishedType, PersonalDocument } from "../../models/document/document-types";
-import { ENavTab, ENavTabOrder, NavTabSectionModelType  } from "../../models/view/nav-tabs";
+import { PersonalDocument } from "../../models/document/document-types";
+import { ENavTab, NavTabSectionModelType  } from "../../models/view/nav-tabs";
 import { CanvasComponent } from "../document/canvas";
 import { DocumentContextReact } from "../document/document-context";
 import { DecoratedDocumentThumbnailItem } from "./decorated-document-thumbnail-item";
@@ -44,63 +42,19 @@ function getNewDocumentLabel(section: NavTabSectionModelType , appConfigStore: A
   return "New " + (documentLabel || "Workspace");
 }
 
-function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsModelType, user: UserModelType,
-  isTeacherDocument: (document: DocumentModelType) => boolean) {
-  let sectDocs: DocumentModelType[] = [];
-  (section.documentTypes || []).forEach(type => {
-    if (isUnpublishedType(type)) {
-      sectDocs.push(...documents.byTypeForUser(type as any, user.id));
-    }
-    else if (isPublishedType(type)) {
-      const publishedDocs: { [source: string]: DocumentModelType[] } = {};
-      documents
-        .byType(type as any)
-        .forEach(doc => {
-          // personal documents and learning logs have originDocs.
-          // problem documents only have the uids of their creator,
-          // but as long as we're scoped to a single problem, there
-          // shouldn't be published documents from other problems.
-          const source = doc.originDoc || doc.uid;
-          if (source) {
-            if (!publishedDocs.source) {
-              publishedDocs.source = [];
-            }
-            publishedDocs.source.push(doc);
-          }
-        });
-      for (const sourceId in publishedDocs) {
-        sectDocs.push(...publishedDocs[sourceId]);
-      }
-    }
-  });
-  // Reverse the order to approximate a most-recently-used ordering.
-  if (section.order === ENavTabOrder.kReverse) {
-    sectDocs = sectDocs.reverse();
-  }
-  // filter by additional properties
-  if (section.properties && section.properties.length) {
-    sectDocs = sectDocs.filter(doc => doc.matchProperties(section.properties,
-                                                          { isTeacherDocument: isTeacherDocument(doc) }));
-  }
-  return sectDocs;
-}
-
 export const DocumentCollectionByType: React.FC<IProps> = observer(({
                                   topTab, tab, section, index, numSections=0, scale, selectedDocument,
                                   selectedSecondaryDocument, horizontal, onSelectNewDocument, onSelectDocument,
                                   shouldHandleStarClick, allowDelete }: IProps) => {
   const appConfigStore = useAppConfig();
   const classStore = useClassStore();
-  const documents = useLocalDocuments();
   const user = useUserStore();
+  const { sortedDocuments } = useStores();
   const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
   const newDocumentLabel = getNewDocumentLabel(section, appConfigStore);
   const isSinglePanel = numSections < 2;
   const tabName = tab?.toLowerCase().replace(' ', '-');
-  const isTeacherDocument = useCallback((document: DocumentModelType) => {
-      return classStore.isTeacher(document.uid);
-    },[classStore]);
-  const sectionDocs: DocumentModelType[] = getSectionDocs(section, documents, user, isTeacherDocument);
+  const sectionDocs = sortedDocuments.getSectionDocs(section);
   const isTopPanel = index === 0 && numSections > 1;
   const isBottomPanel = index > 0 && index === numSections - 1;
 

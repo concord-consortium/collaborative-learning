@@ -268,8 +268,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     if (document.type === "planning" || appConfig.disablePublish === true) return false;
     return appConfig.disablePublish
             .findIndex(spec => {
-              return (document.type === spec.documentType) &&
-                      document.matchProperties(spec.properties);
+              return this.stores.sortedDocuments.isMatchingSpec(document, spec.documentType, spec.properties);
             }) < 0;
   }
 

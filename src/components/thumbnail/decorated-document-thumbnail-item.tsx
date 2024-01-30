@@ -5,7 +5,7 @@ import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { useDocumentCaption } from "../../hooks/use-document-caption";
 import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
 import { DocumentModelType } from "../../models/document/document";
-import { useDBStore, useUIStore, useUserStore } from "../../hooks/use-stores";
+import { useDBStore, useStores, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { LogEventName } from "../../lib/logger-types";
@@ -33,6 +33,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     const tabName = tab.toLowerCase().replace(' ', '-');
     const caption = useDocumentCaption(document);
     const ui = useUIStore();
+    const { bookmarks } = useStores();
 
     // sync delete a publication to firebase
     useDocumentSyncToFirebase(user, dbStore.firebase, document, true);
@@ -42,7 +43,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     }
 
     function handleDocumentStarClick() {
-      shouldHandleStarClick && document?.toggleUserStar(user.id);
+      shouldHandleStarClick && bookmarks.toggleUserBookmark(document.key, user.id);
     }
 
     function handleDocumentDeleteClick() {
@@ -58,19 +59,6 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
       });
     }
 
-    // pass function so logic stays here but access occurs from child
-    // so that mobx-react triggers child render not parent render.
-    const onIsStarred = () => {
-      return shouldHandleStarClick
-          // We weren't showing stars that a "co-teacher" has placed on a document even though the document
-          // is classified as "isStarred". We commented out lines 88-90 to show all starred documents regardless of who
-          // placed the star.
-              // ? user.isTeacher
-              //   ? sectionDocument.isStarredByUser(user.id)
-              //   : sectionDocument.isStarred
-                ? document.isStarred
-                : false;
-    };
     const _handleDocumentStarClick = shouldHandleStarClick && !document.isRemote
                                       ? handleDocumentStarClick
                                       : undefined;
@@ -95,7 +83,6 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
         captionText={caption}
         onDocumentClick={handleDocumentClick}
         onDocumentDragStart={!document.isRemote ? handleDocumentDragStart: undefined}
-        onIsStarred={onIsStarred}
         onDocumentStarClick={_handleDocumentStarClick}
         onDocumentDeleteClick={_handleDocumentDeleteClick}
       />
