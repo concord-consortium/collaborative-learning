@@ -197,6 +197,9 @@ class Stores implements IStores{
     if (unitJson.status === 404) {
       unitJson = await getUnitJson(appConfig.defaultUnit, appConfig);
     }
+    console.log("\t🥩 unitJson:", unitJson);
+
+
     removeLoadingMessage("Loading curriculum content");
     showLoadingMessage("Setting up curriculum content");
     // read the unit content, but don't instantiate section contents (DocumentModels) yet

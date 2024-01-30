@@ -44,6 +44,8 @@ interface LogMessage {
   method: string;
   disconnects?: string;
   parameters: any;
+
+  //TODO: add loadingMeasurements here
 }
 
 export class Logger {
@@ -159,7 +161,8 @@ function sendToLoggingService(data: LogMessage, user: UserModelType) {
   const url = logManagerUrl[isProduction ? "production" : "dev"];
   if (DEBUG_LOGGER) {
     // eslint-disable-next-line no-console
-    console.log("Logger#sendToLoggingService sending", data, "to", url);
+    console.log("Logger#sendToLoggingService sending eventName", data.event); //added
+    // console.log("Logger#sendToLoggingService sending", data, "to", url); //original
   }
   if (!Logger.isLoggingEnabled) return;
 

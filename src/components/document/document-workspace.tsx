@@ -10,7 +10,7 @@ import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
-import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
+import { printOutAllMeasurements, removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
 
 import "./document-workspace.sass";
 
@@ -36,6 +36,13 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     this.guaranteeInitialDocuments().then(() => {
       removeLoadingMessage("Building workspace");
     });
+    //console.log
+
+    //loading
+    //TODO: Is there where want to log?
+    printOutAllMeasurements();
+
+
   }
 
   public render() {

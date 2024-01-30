@@ -2,7 +2,7 @@ import { getSnapshot, applySnapshot, types,
   onSnapshot
 } from "mobx-state-tree";
 import { AppConfigModelType } from "./app-config-model";
-import { kDividerHalf, kDividerMax, kDividerMin } from "./ui-types";
+import { kDividerMax, kDividerMin } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ENavTab } from "../view/nav-tabs";
@@ -34,7 +34,7 @@ export const UITabModel = types
 
 export const PersistentUIModel = types
   .model("PersistentUI", {
-    dividerPosition: kDividerHalf,
+    dividerPosition: kDividerMax,
     activeNavTab: ENavTab.kProblems,
     showAnnotations: true,
     showTeacherContent: true,
