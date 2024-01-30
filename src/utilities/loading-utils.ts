@@ -1,14 +1,11 @@
 import { DEBUG_LOADING } from "../lib/debug";
-import { LogEventName } from "../lib/logger-types";
-import { Logger } from "../lib/logger";
-// import { useStores } from "src/hooks/use-stores";
 
 
 const sessionStorageStartTimeItem = 'loading-time-start';
 const sessionStorageMessageItem = 'loading-message';
 const messageSeparator = '<br/>';
 
-const loadingMeasurements: Record<string, number> = {};
+const loadingMeasurements: Record<string, number> = {}; //holds start and stop timestamps of each performance message
 
 function getTimestamp() {
   const start = sessionStorage.getItem(sessionStorageStartTimeItem);
@@ -56,22 +53,8 @@ export function removeLoadingMessage(msg: string) {
   loadingMeasurements[msgEnd] = timeStamp; //End time
 }
 
-export function finishLoadingLogAllMeasurements(){
-  //log message should include
-  //•Performance metrics (loading measurements)
-  //•Class/Unit/Problem/User(should already exist)
-  //TODO:
-  //HTTP2 or higher?
-  //Number of docs loaded
-  //Total # of tiles loaded
-  //Summary of document on the right
-  //Summary of the loaded curriculum documents
-
-  //Find total # of docs
-  // const { documents } = useStores();
-
-
-  Logger.log(LogEventName.LOADING_MEASUREMENTS, {loadingMeasurements});
+export function getLoadingMeasurements(){
+  return {loadingMeasurements};
 }
 
 

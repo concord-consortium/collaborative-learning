@@ -10,23 +10,30 @@ import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
-import { finishLoadingLogAllMeasurements, removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
+import { removeLoadingMessage, showLoadingMessage, getLoadingMeasurements } from "../../utilities/loading-utils";
+import { Logger } from "../../../src/lib/logger";
+import { LogEventName } from "../../../src/lib/logger-types";
 
 import "./document-workspace.sass";
 
 interface IProps extends IBaseProps {
 }
 
+interface IDocumentWorkspaceState {
+  loadingMeasurements: any;
+}
+
 @inject("stores")
 @observer
-export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
+export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentWorkspaceState> {
   private imageDragDrop: ImageDragDrop;
 
   constructor(props: IProps) {
     super(props);
-
+    this.state = {
+      loadingMeasurements: {},
+    };
     showLoadingMessage("Building workspace");
-
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
@@ -35,12 +42,47 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   public componentDidMount() {
     this.guaranteeInitialDocuments().then(() => {
       removeLoadingMessage("Building workspace");
-      finishLoadingLogAllMeasurements();
+      const loadingMeasurements = getLoadingMeasurements();
+      //Okay to log down in render function or should it be up here right after the measurements are received?
+      this.setState({ loadingMeasurements });
+      this.logLoadingAndDocumentMeasurements();
+
     });
+  }
+
+  public logLoadingAndDocumentMeasurements(){
+    const { documents } = this.stores;
+    const { loadingMeasurements } = this.state.loadingMeasurements;
+    const documentMeasurements = {
+      numDocumentsLoaded: documents.all.length,
+      numTilesLoaded: 5  //for now
+    };
+
+    const finalLogObject = {
+      loadingMeasurements,
+      documentMeasurements
+    };
+    // Final Log object
+    //✔️ Performance metrics (loading measurements)
+    //✔️ Class/Unit/Problem/User(should already exist)
+    //✔️ Number of docs loaded
+    //TODO:
+    //HTTP2 or higher?
+    //Total # of tiles loaded
+    //Summary of document on the right
+    //Summary of the loaded curriculum documents
+
+  //Find total # of docs
+  // const { documents } = useStores();
+
+    // Log the final object
+    Logger.log(LogEventName.LOADING_MEASUREMENTS, finalLogObject);
+
   }
 
   public render() {
     const { appMode, appConfig: { toolbar }, documents, persistentUI, groups } = this.stores;
+
     const { problemWorkspace } = persistentUI;
     const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible } = problemWorkspace;
     const showPrimary = !hidePrimaryForCompare;
@@ -336,4 +378,5 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       return this.stores.documents.getDocument(documentKey);
     }
   }
+
 }

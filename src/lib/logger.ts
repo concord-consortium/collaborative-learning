@@ -15,22 +15,6 @@ const logManagerUrl: Record<LoggerEnvironment, string> = {
 
 const productionPortal = "learn.concord.org";
 
-
-
-//Guidelines
-// - these events need to include the class, unit, problem, and user, if http2 or higher is being used.
-//class - classHash : "democlass1"
-//unit = problemPath : "sas/0/1"
-//problem - "0.1 Intro to CLUE"
-//
-
-
-// - Instrument performance metrics so we can see the depth of the problem across users, perhaps rollbar has built in support for this, we can record these events in our log system
-// - these events need to include the class, unit, problem, and user, if http2 or higher is being used.
-// - Alternatively we could include the info from the environment that we think is related: number of documents loaded, total number of tiles loaded, summary of document on the right,  summary of the loaded curriculum documents
-// - if any of this can or should be instrumented using our logging for research we should.
-
-
 interface LogMessage {
   // these top-level properties are treated specially by the log-ingester:
   // https://github.com/concord-consortium/log-ingester/blob/a8b16fdb02f4cef1f06965a55c5ec6c1f5d3ae1b/canonicalize.js#L3
@@ -73,7 +57,7 @@ export class Logger {
 
     if (DEBUG_LOGGER) {
       // eslint-disable-next-line no-console
-      // console.log("Logger#initializeLogger called.");
+      console.log("Logger#initializeLogger called.");
     }
     this._instance = new Logger(stores, appContext);
   }
@@ -89,7 +73,6 @@ export class Logger {
     const logMessage = Logger.Instance.createLogMessage(eventString, parameters, method);
 
 
-    console.log("logMessage:", logMessage);
     sendToLoggingService(logMessage, this._instance.stores.user);
   }
 
@@ -178,8 +161,7 @@ function sendToLoggingService(data: LogMessage, user: UserModelType) {
   const url = logManagerUrl[isProduction ? "production" : "dev"];
   if (DEBUG_LOGGER) {
     // eslint-disable-next-line no-console
-    // console.log("Logger#sendToLoggingService sending eventName", data.event); //added
-    // console.log("Logger#sendToLoggingService sending", data, "to", url); //original
+    console.log("Logger#sendToLoggingService sending", data, "to", url); //original
   }
   if (!Logger.isLoggingEnabled) return;
 
