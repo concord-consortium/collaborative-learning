@@ -96,8 +96,12 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     const valueCandidateLines = measureTextLines(valueCandidate, 120);
     const valueLinesNeeded = !isImageUrl(valueStr) ? Math.max(valueLines, valueCandidateLines) : 4;
     setTextLinesNeeded(Math.max(labelLinesNeeded, valueLinesNeeded));
-
   }, [getLabel, getValue, imageUrl, valueCandidate, labelCandidate, valueStr]);
+
+  useEffect(() => {
+    console.log("| valueCandidate: ", valueCandidate);
+
+  }, [valueStr, valueCandidate, imageUrl]);
 
   const {
     isOpen,
@@ -410,6 +414,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
               onKeyDown={handleKeyDown}
               onBlur={handleCompleteName}
               onDoubleClick={handleInputDoubleClick}
+              maxLength={60}
             />
           : <div className={nameTextClasses}>{getLabel()}</div>
         }
@@ -427,6 +432,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
           className={valueInputClasses}
           onFocus={handleValueInputFocus}
           onPaste={handleValuePaste}
+          maxLength={80}
         />
         { valueIsImage() && <img src={imageUrl} className="value-image" /> }
         { readOnly && !valueIsImage() && <div className="value-text">{valueStr}</div> }

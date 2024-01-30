@@ -75,7 +75,6 @@ $default-button-border-color: #979797;
     border-left-color: transparent;
     text-align: right;
     font-weight: bold;
-    overflow: hidden;
     &.highlighted {
       background-color: $highlight-unlinked-header;
       &.linked {
@@ -130,6 +129,7 @@ $default-button-border-color: #979797;
     textarea {
       padding-top: 3px;
       padding-left: 6px;
+      overflow-y: auto;
     }
 
     &.has-image {
