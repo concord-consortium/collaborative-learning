@@ -23,6 +23,7 @@ import ExpandDownIcon from "../assets/expand-more-icon.svg";
 
 import './single-card-data-area.scss';
 import { measureTextLines } from "../../../components/tiles/hooks/use-measure-text";
+import { TypeAheadItemSpan } from "../data-card-utils";
 
 const typeIcons = {
   "date": <DateTypeIcon />,
@@ -132,36 +133,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
     return propsCreated;
   }
-
-  const itemWithBoldedMatchTruncated = (fullString: string, matchString: string) => {
-    const lettersLength = fullString.length;
-
-    if (!matchString) {
-      // we are presenting all options, with no match, so we truncate from start of string
-      if (lettersLength < 20){
-        return <span>{fullString}</span>;
-      } else {
-        const lettersTruncated = fullString.slice(0, 20);
-        return <span>{lettersTruncated}...</span>;
-      }
-    }
-    // If full string is "Orange" and matchString is "ran"
-    // the result will be "O<b>ran</b>ge"
-    const matchIndex = fullString.toLowerCase().indexOf(matchString.toLowerCase());
-    const matchEndIndex = matchIndex + matchString.length;
-    const match = fullString.slice(matchIndex, matchEndIndex);
-    const lettersBeforeMatch = fullString.slice(0, matchIndex);
-    const lettersAfterMatch = fullString.slice(matchEndIndex);
-
-    if (lettersLength < 20){
-      return <span>{lettersBeforeMatch}<b>{match}</b>{lettersAfterMatch}</span>;
-    } else {
-      const lettersBeforeMatchTruncated = lettersBeforeMatch.slice(0, 5);
-      const lettersAfterMatchTruncated = lettersAfterMatch.slice(0, 5);
-      const truncatedMatch = matchString.slice(0, 18) + "...";
-      return <span>{lettersBeforeMatchTruncated}<b>{truncatedMatch}</b>{lettersAfterMatchTruncated}...</span>;
-    }
-  };
 
   useEffect(()=>{
     const attrValues = content.dataSet.attrFromID(attrKey)?.values || [];
@@ -411,7 +382,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
                 key={`${item}${index}`}
                 {...itemProps}
               >
-              { itemWithBoldedMatchTruncated(item, valueCandidate) }
+                <TypeAheadItemSpan fullString={item} matchString={valueCandidate} />
               </li>
             );
           })}
