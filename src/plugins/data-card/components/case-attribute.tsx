@@ -98,11 +98,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setTextLinesNeeded(Math.max(labelLinesNeeded, valueLinesNeeded));
   }, [getLabel, getValue, imageUrl, valueCandidate, labelCandidate, valueStr]);
 
-  useEffect(() => {
-    console.log("| valueCandidate: ", valueCandidate);
-
-  }, [valueStr, valueCandidate, imageUrl]);
-
   const {
     isOpen,
     getToggleButtonProps,
