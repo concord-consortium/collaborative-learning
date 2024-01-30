@@ -58,18 +58,22 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const dataSet = content.dataSet;
   const cell = { attributeId: attrKey, caseId: caseId ?? "" };
   const isLinked = useIsLinked();
-  const getLabel = () => content.dataSet.attrFromID(attrKey).name;
-  const getValue = () => {
+
+  const getLabel = useCallback(() => {
+    return content.dataSet.attrFromID(attrKey).name;
+  }, [attrKey, content.dataSet]);
+
+  const getValue = useCallback(() => {
     const value = caseId && content.dataSet.getValue(caseId, attrKey) || "";
     return String(value);
-  };
+  }, [attrKey, caseId, content.dataSet]);
+
   const valueStr = getValue();
   const [labelCandidate, setLabelCandidate] = useState(() => getLabel());
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
   const [imageUrl, setImageUrl] = useState("");
   const [inputItems, setInputItems] = useState([] as string[]);
   const [textLinesNeeded, setTextLinesNeeded] = useState(measureTextLines(getLabel(), 120));
-  const maxLines = 4; // TODO: implement with useSettingFromStores()
   const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
 
@@ -78,9 +82,12 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     const escapedStr = escapeStringRegexp(userString);
     const regex = new RegExp(escapedStr, 'i');
 
-    return editingValue && valueCandidate.length > 0
+    const result = editingValue && valueCandidate.length > 0
       ? values.filter((value) => value && !isImageUrl(value) && regex.test(value))
       : values.filter((value) => value && !isImageUrl(value));
+
+    console.log(">> validCompletions:", result);
+    return result;
 
   }, [editingValue, valueCandidate.length]);
 
@@ -88,13 +95,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     const labelLines = measureTextLines(getLabel(), 120);
     const labelCandidateLines = measureTextLines(labelCandidate, 120);
     const labelLinesNeeded = Math.max(labelLines, labelCandidateLines);
-
     const valueLines = measureTextLines(valueStr, 120);
     const valueCandidateLines = measureTextLines(valueCandidate, 120);
     const valueLinesNeeded = !isImageUrl(valueStr) ? Math.max(valueLines, valueCandidateLines) : 4;
-
     setTextLinesNeeded(Math.max(labelLinesNeeded, valueLinesNeeded));
-    console.log("| just setTextLinesNeeded", textLinesNeeded);
+
   }, [getLabel, getValue, imageUrl, valueCandidate, labelCandidate, valueStr]);
 
   const {
@@ -134,6 +139,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const itemWithBoldedMatchTruncated = (fullString: string, matchString: string) => {
     const lettersLength = fullString.length;
+
     if (!matchString) {
       // we are presenting all options, with no match, so we truncate from start of string
       if (lettersLength < 20){
@@ -156,7 +162,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     } else {
       const lettersBeforeMatchTruncated = lettersBeforeMatch.slice(0, 5);
       const lettersAfterMatchTruncated = lettersAfterMatch.slice(0, 5);
-      return <span>...{lettersBeforeMatchTruncated}<b>{match}</b>{lettersAfterMatchTruncated}...</span>;
+      const truncatedMatch = matchString.slice(0, 18) + "...";
+      return <span>{lettersBeforeMatchTruncated}<b>{truncatedMatch}</b>{lettersAfterMatchTruncated}...</span>;
     }
   };
 
@@ -164,7 +171,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     const attrValues = content.dataSet.attrFromID(attrKey)?.values || [];
     const completions = validCompletions(attrValues as string[], valueCandidate);
     setInputItems(completions);
-    console.log("| effect of valueCandidate change");
   }, [content.dataSet, attrKey, valueCandidate, validCompletions]);
 
   // reset contents of input when attribute value changes without direct user input
@@ -382,7 +388,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const dropdownClasses = classNames(
     "dropdown",
-    { open: isOpen, closed: !isOpen }
+    { open: isOpen, closed: !isOpen, empty: validCompletions.length === 0}
   );
 
   const typeIconClasses = classNames(
