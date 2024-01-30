@@ -46,8 +46,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const displaySingle = !content.selectedSortAttributeId;
   const shouldShowAddField = !readOnly && isTileSelected && displaySingle;
   const attrIdsNames = content.existingAttributesWithNames();
+  const cardOf = `Card ${content.caseIndex + 1 } of `;
 
-  const cardOf = `Card ${content.caseIndex + 1 } of`;
   // When a highlighted case or cell is set, show it
   const selectedCaseId = dataSet.firstSelectedCaseId ? dataSet.firstSelectedCaseId : dataSet.firstSelectedCell?.caseId;
   useEffect(() => {

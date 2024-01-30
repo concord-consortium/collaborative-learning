@@ -165,7 +165,7 @@ $default-button-border-color: #979797;
         border-radius: 0 0 3px 3px;
         top: $data-row-min-height;
         &:empty {
-          display: none;
+          box-shadow: none;
         }
       }
 
