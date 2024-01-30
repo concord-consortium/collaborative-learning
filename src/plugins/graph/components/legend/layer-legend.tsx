@@ -86,6 +86,7 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
         </div>
         <SimpleAttributeLabel
           attrId={description.attributeID}
+          hideRemoveOption={yAttributes.length <= 1}
           key={description.attributeID}
           onChangeAttribute={onChangeAttribute}
           onRemoveAttribute={onRemoveAttribute}
@@ -157,6 +158,7 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
                   <XAxisIcon />
                 </div>
                 <SimpleAttributeLabel
+                  hideRemoveOption={true}
                   place="bottom"
                   attrId={xAttrId}
                   onChangeAttribute={onChangeAttribute}

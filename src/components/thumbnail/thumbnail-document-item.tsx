@@ -5,9 +5,10 @@ import { DocumentModelType } from "../../models/document/document";
 import { DocumentCaption } from "./document-caption";
 import { ThumbnailPlaceHolderIcon } from "./thumbnail-placeholder-icon";
 import { ThumbnailPrivateIcon } from "./thumbnail-private-icon";
-import { useAppMode, useStores } from "../../hooks/use-stores";
+import { useAppMode, useClassStore, useStores } from "../../hooks/use-stores";
 import ThumbnailBookmark from "../../assets/thumbnail-bookmark-icon.svg";
 import classNames from "classnames";
+import { DEBUG_BOOKMARKS } from "../../lib/debug";
 
 interface IProps {
   canvasContext: string;
@@ -20,18 +21,18 @@ interface IProps {
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
   onDocumentDragStart?: (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => void;
   onDocumentStarClick?: (document: DocumentModelType) => void;
-  onIsStarred: () => boolean;
   scale: number;
 }
 
 export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) => {
   const {
     dataTestName, canvasContext, document, scale, captionText, isSelected, isSecondarySelected,
-    onIsStarred, onDocumentClick, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
+    onDocumentClick, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
   } = props;
   const selectedClass = isSelected ? "selected" : "";
   const appMode = useAppMode();
-  const stores = useStores();
+  const { bookmarks, user } = useStores();
+  const classStore = useClassStore();
 
   const handleDocumentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     onDocumentClick?.(document);
@@ -49,7 +50,17 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
     e.stopPropagation();
   };
 
-  const isPrivate = !document.isAccessibleToUser(stores.user);
+
+  // We were only showing stars to teachers if that teacher owned the star. This was changed to show all
+  // stars regardless of who placed the star.
+  // const isStarred = user.isTeacher
+  //   ? stars.isDocumentBookmarkedByUser(document.key, user.id)
+  //   : stars.isDocumentBookmarked(document.key);
+  const isStarred = bookmarks.isDocumentBookmarked(document.key);
+
+  const label = DEBUG_BOOKMARKS ? bookmarks.getBookmarkLabel(document.key, user.id, classStore) : "";
+
+  const isPrivate = !document.isAccessibleToUser(user);
   const privateClass = isPrivate ? "private" : "";
   const documentTitle = appMode !== "authed" && appMode !== "demo"
                           ? `Firebase UID: ${document.key}` : undefined;
@@ -76,7 +87,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
       </div>
       {
         onDocumentStarClick &&
-        <DocumentBookmark isStarred={onIsStarred()} onStarClick={handleDocumentStarClick} />
+        <DocumentBookmark isStarred={isStarred} onStarClick={handleDocumentStarClick} label={label}/>
       }
       <DocumentCaption
         captionText={captionText}
@@ -93,16 +104,18 @@ ThumbnailDocumentItem.displayName = "ThumbnailDocumentItem";
 interface IDocumentStarProps {
   isStarred: boolean;
   onStarClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+  label: string;
 }
 
 const DocumentBookmark = (props: IDocumentStarProps) => {
-  const { isStarred, onStarClick } = props;
+  const { isStarred, onStarClick, label } = props;
 
   return (
     <div className="icon-holder" onClick={onStarClick}>
       <svg className={"icon-star " + (isStarred ? "starred" : "")} >
         <ThumbnailBookmark />
       </svg>
+      {label && <pre className={"bookmark-label"}>{label}</pre> }
     </div>
     );
 };

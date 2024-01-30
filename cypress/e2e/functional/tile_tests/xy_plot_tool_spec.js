@@ -280,6 +280,22 @@ context('XYPlot Tool Tile', function () {
       xyTile.getAddSeriesButton().click();
       xyTile.getXAttributesLabel().should('have.length', 1);
       xyTile.getYAttributesLabel().should('have.length', 2);
+
+      cy.log("verify that x attribute cannot be removed and y variables appear in x axis dropdown");
+      xyTile.getXAttributesLabel().click();
+      xyTile.getPortalButton().contains("Remove").should("not.exist");
+      xyTile.getPortalButton().contains("y").should("exist");
+      xyTile.getPortalButton().contains("y2").should("exist");
+
+      cy.log("verify that y attribute can be removed when there is more than one and y variables do not appear in the y axis dropdown");
+      xyTile.getYAttributesLabel().first().click();
+      xyTile.getPortalButton().contains("x").should("exist");
+      xyTile.getPortalButton().contains("y2").should("not.exist");
+      xyTile.getPortalButton().contains("Remove").should("exist").click();
+
+      cy.log("verify that y attribute cannot be removed when there's only one");
+      xyTile.getYAttributesLabel().should("have.length", 1).click();
+      xyTile.getPortalButton().contains("Remove").should("not.exist");
     });
 
     it("Test linking two datasets", () => {
