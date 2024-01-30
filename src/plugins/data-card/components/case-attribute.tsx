@@ -16,7 +16,7 @@ import { getClipboardContent } from "../../../utilities/clipboard-utils";
 import { isImageUrl } from "../../../models/data/data-types";
 import { useAttributeClassNames } from "../use-case-attribute-class-names";
 import { measureTextLines } from "../../../components/tiles/hooks/use-measure-text";
-import { TypeAheadItemSpan } from "../data-card-utils";
+import { TypeAheadItemSpan } from "../type-ahead-item-span";
 import DateTypeIcon from "../assets/id-type-date.svg";
 import ImageTypeIcon from "../assets/id-type-image.svg";
 import TextTypeIcon from "../assets/id-type-text.svg";
