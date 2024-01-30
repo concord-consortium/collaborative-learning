@@ -67,7 +67,11 @@ export class Logger {
   }
 
   public static log(event: LogEventName, parameters?: Record<string, unknown>, method?: LogEventMethod) {
-    if (!this._instance) return;
+    if (!this._instance) {
+      // This is temporary because there are cases where the logger isn't ever initialized
+      console.warn("Trying to log before logger is initialized", event);
+      return;
+    }
 
     const eventString = LogEventName[event];
     const logMessage = Logger.Instance.createLogMessage(eventString, parameters, method);

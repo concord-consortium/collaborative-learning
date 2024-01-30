@@ -37,6 +37,7 @@ export interface IStores extends IBaseStores {
   initializeStudentWorkTab: () => void;
   setUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
   sortedDocuments: SortedDocuments;
+  unitLoadedPromise: Promise<void>;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -75,6 +76,7 @@ class Stores implements IStores{
   serialDevice: SerialDevice;
   userContextProvider: UserContextProvider;
   sortedDocuments: SortedDocuments;
+  unitLoadedPromise: Promise<void>;
 
   constructor(params?: ICreateStores){
     // This will mark all properties as observable

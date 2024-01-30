@@ -57,16 +57,28 @@ export const initializeApp = async (appMode: AppMode, authoring?: boolean): Prom
     (window as any).stores = stores;
   }
 
-  await stores.setUnitAndProblem(unitId, problemOrdinal);
+  // Removing the await caused:
+  // - left side to start out with Null Problem and Null Unit
+  // - the tile types take a long time to come in, and they are required
+  //   before we can display the right side document
+  // Our plan is to save the promise from setUnitAndProblem and then block
+  // other parts of the code on it. We want to get the persistentUI loaded as
+  // soon as possible so we only render what we need. We should be able to
+  // load the persistentUI without the tile types or unit content.
+  // We have to deal with:
+  // - log messages sent before unit is ready
+  const promise = stores.setUnitAndProblem(unitId, problemOrdinal);
+  promise.then(() => {
+    // The logger will only be enabled if the appMode is "authed", or DEBUG_LOGGER is true
+    Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
+  });
+  stores.unitLoadedPromise = promise;
 
   gImageMap.initialize(stores.db);
 
   if (kEnableLivelinessChecking) {
     setLivelinessChecking("error");
   }
-
-  // The logger will only be enabled if the appMode is "authed", or DEBUG_LOGGER is true
-  Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
 
   if (authoring) {
     // Make the user a teacher and show solution tiles

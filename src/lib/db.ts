@@ -153,8 +153,17 @@ export class DB {
           this.firebase.setFirebaseUser(firebaseUser);
           this.firestore.setFirebaseUser(firebaseUser);
           if (!options.dontStartListeners) {
-            // resolve after listeners have started
-            this.listeners.start().then(resolve).catch(reject);
+            const { persistentUI, user, db, unitLoadedPromise} = this.stores;
+            // Start fetching the persistent UI. We want this to happen as early as possible.
+            persistentUI.initializePersistentUISync(user, db);
+
+            // Resolve after listeners have started.
+            // Before they can be started  we need to wait for the unit to be loaded,
+            // since it includes the list of tile types being registered.
+            // We need those types to be registered so the listeners can safely create documents.
+            unitLoadedPromise.then(() => {
+              this.listeners.start().then(resolve).catch(reject);
+            });
           }
         }
       });

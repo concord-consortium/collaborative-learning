@@ -42,14 +42,12 @@ export const passThroughQueryItemsFromUrl = (href: string) => {
 export class DemoCreatorComponent extends BaseComponent<IProps> {
   private problemOptions: IProblemOption[] = [];
 
-  constructor(props: IProps) {
-    super(props);
-
+  public render() {
     const { appConfig, unit, demo } = this.stores;
+
     const problemTitleTemplate = appConfig.demoProblemTitle || "%investigationTitle%: %problemTitle%";
 
     demo.setClass("1", "Class 1");
-
     unit.investigations.forEach(investigation => {
       investigation.problems.forEach(problem => {
         const title = problemTitleTemplate
@@ -62,10 +60,7 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
         }
       });
     });
-  }
 
-  public render() {
-    const { demo } = this.stores;
     const studentLinks: JSX.Element[] = [];
     const teacherLinks: JSX.Element[] = [];
     const classes: JSX.Element[] = [];
@@ -108,7 +103,7 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
             {problems}
           </select>
         </div>
-        <h2>Links for {demo.class.name}: {selectedProblem.title}</h2>
+        <h2>Links for {demo.class.name}: {selectedProblem?.title||''}</h2>
         <ul className="student-links">
           {studentLinks}
         </ul>
