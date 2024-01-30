@@ -17,6 +17,7 @@ const loadingMeasurements: Record<string, number | string> = {};
 //Loading tile types
 //Setting up curriculum content
 
+
 function getTimestamp() {
   const start = sessionStorage.getItem(sessionStorageStartTimeItem);
   if (!start) {

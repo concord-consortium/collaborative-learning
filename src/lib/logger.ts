@@ -15,6 +15,15 @@ const logManagerUrl: Record<LoggerEnvironment, string> = {
 
 const productionPortal = "learn.concord.org";
 
+
+
+//Guidelines
+// - these events need to include the class, unit, problem, and user, if http2 or higher is being used.
+//class - classHash : "democlass1"
+//unit = problemPath : "sas/0/1"
+//problem - "0.1 Intro to CLUE"
+//
+
 interface LogMessage {
   // these top-level properties are treated specially by the log-ingester:
   // https://github.com/concord-consortium/log-ingester/blob/a8b16fdb02f4cef1f06965a55c5ec6c1f5d3ae1b/canonicalize.js#L3
@@ -43,9 +52,7 @@ interface LogMessage {
   tzOffset: string;
   method: string;
   disconnects?: string;
-  parameters: any;
-
-  //TODO: add loadingMeasurements here
+  parameters: any; //add loadingMeasurements here
 }
 
 export class Logger {
@@ -69,10 +76,17 @@ export class Logger {
   }
 
   public static log(event: LogEventName, parameters?: Record<string, unknown>, method?: LogEventMethod) {
+    console.log("📁 logger.ts ------------------------");
+    console.log("➡️ log");
+    console.log("\t🥩 event:", event);
+    console.log("\t🥩 parameters:", parameters);
+
     if (!this._instance) return;
 
     const eventString = LogEventName[event];
+    console.log("\t🔪 eventString:", eventString);
     const logMessage = Logger.Instance.createLogMessage(eventString, parameters, method);
+    console.log("\tlogMessage:", logMessage);
     sendToLoggingService(logMessage, this._instance.stores.user);
   }
 
@@ -133,7 +147,7 @@ export class Logger {
       event,
       method,
       ...disconnects,
-      parameters
+      parameters,
     };
 
     if (loggingRemoteEndpoint) {

@@ -83,5 +83,5 @@ export enum LogEventName {
   HISTORY_PLAYBACK_STOP,
   HISTORY_PLAYBACK_SEEK,
 
-  LOADING_MEASUREMENTS //TODO: Maybe its best to move this out?
+  LOADING_MEASUREMENTS
 }
