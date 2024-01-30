@@ -5,14 +5,8 @@ interface TypeAheadItemSpanProps {
   matchString: string;
 }
 
-/**
- * The Downshift Dropdown typeahead component renders values that match the user's input.
- * In downshift dropdown, we want to highlight the part of the value that matches the user's input.
- * We don't want to display the entire value if it is too long.
- * @param fullString The full value of the item
- * @param matchString The string to highlight, if any
- * @returns jsx for the span
- */
+// This component is used to create the span for the item(s) in the typeahead list
+// It will highlight the match string in bold, and keep the result under 20 chars
 export const TypeAheadItemSpan: React.FC<TypeAheadItemSpanProps> = ({ fullString, matchString }) => {
   const lettersLength = fullString.length;
 
