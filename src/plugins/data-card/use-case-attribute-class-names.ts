@@ -76,7 +76,7 @@ export function useAttributeClassNames({
       ),
       dropdownClasses: classNames(
         "dropdown",
-        { open: isOpen, closed: !isOpen, empty: validCompletions.length === 0}
+        { open: isOpen, closed: !isOpen, empty: validCompletions.length === 0 }
       ),
       typeIconClasses: classNames(
         "type-icon", attrKey,
@@ -87,5 +87,20 @@ export function useAttributeClassNames({
         { "show": currEditAttrId === attrKey }
       )
     };
-  }, [attrKey, textLinesNeeded, editingLabel, attributeSelected, isLinked, looksLikeDefaultLabel, getLabel, editingValue, valueStr, gImageMap, valueHighlighted, isOpen, validCompletions, currEditAttrId]);
+  }, [attrKey,
+    textLinesNeeded,
+    editingLabel,
+    attributeSelected,
+    isLinked,
+    looksLikeDefaultLabel,
+    getLabel,
+    editingValue,
+    valueStr,
+    gImageMap,
+    valueHighlighted,
+    isOpen,
+    validCompletions,
+    currEditAttrId
+  ]
+  );
 }
