@@ -82,12 +82,9 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     const escapedStr = escapeStringRegexp(userString);
     const regex = new RegExp(escapedStr, 'i');
 
-    const result = editingValue && valueCandidate.length > 0
+    return editingValue && valueCandidate.length > 0
       ? values.filter((value) => value && !isImageUrl(value) && regex.test(value))
       : values.filter((value) => value && !isImageUrl(value));
-
-    console.log(">> validCompletions:", result);
-    return result;
 
   }, [editingValue, valueCandidate.length]);
 
