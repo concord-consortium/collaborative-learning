@@ -12,6 +12,7 @@ import "../components/legend/multi-legend.scss";
 
 interface ISimpleAttributeLabelProps {
   attrId: string;
+  hideRemoveOption?: boolean;
   includePoint?: boolean;
   onChangeAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => void;
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void;
@@ -20,8 +21,9 @@ interface ISimpleAttributeLabelProps {
 }
 
 export const SimpleAttributeLabel = observer(
-  function SimpleAttributeLabel(props: ISimpleAttributeLabelProps) {
-    const { attrId, includePoint, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute, place } = props;
+  function SimpleAttributeLabel({
+    attrId, hideRemoveOption, includePoint, onTreatAttributeAs, onRemoveAttribute, onChangeAttribute, place
+  }: ISimpleAttributeLabelProps) {
     // Must be State, not Ref, so that the menu gets re-rendered when this becomes non-null
     const [simpleLabelElement, setSimpleLabelElement] = useState<HTMLSpanElement|null>(null);
     const canvasAreaElt = simpleLabelElement?.closest(kGraphPortalClass) as HTMLDivElement ?? null;
@@ -35,6 +37,7 @@ export const SimpleAttributeLabel = observer(
       return  (
         <span ref={e => setSimpleLabelElement(e)}>
           <AxisOrLegendAttributeMenu
+            hideRemoveOption={hideRemoveOption}
             pointColor={pointColor || undefined}
             target={null}
             parent={graphElement}
