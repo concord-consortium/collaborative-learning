@@ -20,9 +20,19 @@ $default-button-border-color: #979797;
     height: 100%;
     background-color: transparent;
   }
+  &:last-child {
+    border-bottom-width:0px;
+    .name-area {
+      border-radius: 0px 0px 0px 3px;
+    }
+    .value-area {
+      border-radius: 0px 0px 3px 0px;
+    }
+  }
 
-  border:1px solid $charcoal-light-1;
+  border-bottom:1px solid $charcoal-light-1;
   border-top-width: 0px;
+  border-left-color: $workspace-teal-light-5;
   display: flex;
   align-items: stretch;
   font-size:14px;
@@ -62,6 +72,7 @@ $default-button-border-color: #979797;
     background-color: $workspace-teal-light-5;
     width: $name-area-width;
     border-right:1px solid $charcoal-light-1;
+    border-left-color: transparent;
     text-align: right;
     font-weight: bold;
     overflow: hidden;
@@ -171,8 +182,15 @@ $default-button-border-color: #979797;
     width: $buttons-area-width;
     display: flex;
     align-items: flex-start;
-    overflow: hidden;
     background-color: transparent;
+    border-radius: 0px 0px 3px 0px;
+    position: relative;
+    svg {
+      height: 22px;
+      &.down { // this means the menu is down, not the arrow
+        transform: rotate(180deg) translateY(-2px);
+      }
+    }
 
     button {
       width: 50%;
@@ -192,8 +210,8 @@ $default-button-border-color: #979797;
     .delete-attribute {
       position: absolute;
       display: none;
-      left: $single-view-card-width + 15px;
-
+      left: 40px;
+      z-index: 1;
       &.show {
         display: inherit;
       }
