@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { observer } from "mobx-react";
-import classNames from "classnames";
 import escapeStringRegexp from "escape-string-regexp";
 import { useCombobox } from "downshift";
 import { uniq } from "lodash";
@@ -15,6 +14,7 @@ import { useCautionAlert } from "../../../components/utilities/use-caution-alert
 import { useErrorAlert } from "../../../components/utilities/use-error-alert";
 import { getClipboardContent } from "../../../utilities/clipboard-utils";
 import { isImageUrl } from "../../../models/data/data-types";
+import { useAttributeClassNames } from "../use-case-attribute-class-names";
 import DateTypeIcon from "../assets/id-type-date.svg";
 import ImageTypeIcon from "../assets/id-type-image.svg";
 import TextTypeIcon from "../assets/id-type-text.svg";
@@ -337,65 +337,33 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const valueHighlighted = attributeSelected || content.caseSelected || dataSet.isCellSelected(cell);
   const typeIcon = typeIcons[content.dataSet.attrFromID(attrKey).mostCommonType || ""];
 
-  const pairClasses = classNames("case-attribute pair", attrKey,
-    {
-      "one-line": textLinesNeeded < 2,
-      "two-lines": textLinesNeeded === 2,
-      "three-lines": textLinesNeeded === 3,
-      "four-lines": textLinesNeeded === 4,
-      "five-lines": textLinesNeeded > 4
-    }
-  );
-
-  const nameAreaClasses = classNames(
-    "name-area", attrKey,
-    { editing: editingLabel, highlighted: attributeSelected, linked: isLinked }
-  );
-
-  const nameInputClasses = classNames(
-    "name-input",
-    { highlighted: attributeSelected, linked: isLinked }
-  );
-
-  const nameTextClasses = classNames(
-    "name-text",
-    { "default-label": looksLikeDefaultLabel(getLabel()) }
-  );
-
-  const valueAreaClasses = classNames(
-    "value-area", attrKey,
-    {
-      editing: editingValue,
-      "has-image": gImageMap.isImageUrl(valueStr),
-      highlighted: valueHighlighted,
-      linked: isLinked
-    }
-  );
-
-  const buttonsAreaClasses = classNames(
-    "buttons-area",
-    { highlighted: valueHighlighted, linked: isLinked }
-  );
-
-  const valueInputClasses = classNames(
-    "value-input", attrKey,
-    { highlighted: valueHighlighted, linked: isLinked }
-  );
-
-  const dropdownClasses = classNames(
-    "dropdown",
-    { open: isOpen, closed: !isOpen, empty: validCompletions.length === 0}
-  );
-
-  const typeIconClasses = classNames(
-    "type-icon", attrKey,
-    { highlighted: valueHighlighted, linked: isLinked }
-  );
-
-  const deleteAttrClasses = classNames(
-    `delete-attribute ${attrKey}`,
-    { "show": currEditAttrId === attrKey }
-  );
+  const {
+    pairClasses,
+    nameAreaClasses,
+    nameInputClasses,
+    nameTextClasses,
+    valueAreaClasses,
+    buttonsAreaClasses,
+    valueInputClasses,
+    dropdownClasses,
+    typeIconClasses,
+    deleteAttrClasses
+  } = useAttributeClassNames({
+    attrKey,
+    textLinesNeeded,
+    editingLabel,
+    attributeSelected,
+    isLinked,
+    looksLikeDefaultLabel,
+    getLabel,
+    editingValue,
+    valueStr,
+    gImageMap,
+    valueHighlighted,
+    isOpen,
+    validCompletions,
+    currEditAttrId
+  });
 
   return (
     <div className={pairClasses}>
