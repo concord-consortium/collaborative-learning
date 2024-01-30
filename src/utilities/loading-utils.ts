@@ -18,6 +18,7 @@ export function getCurrentLoadingMessage() {
 
 export function showLoadingMessage(msg: string) {
   if (DEBUG_LOADING) {
+    // eslint-disable-next-line no-console
     console.log(`Loading @${getTimestamp()}ms: ${msg}`);
   }
   const existingMessages = sessionStorage.getItem(sessionStorageMessageItem);
@@ -26,6 +27,7 @@ export function showLoadingMessage(msg: string) {
 
 export function removeLoadingMessage(msg: string) {
   if (DEBUG_LOADING) {
+    // eslint-disable-next-line no-console
     console.log(`Loading @${getTimestamp()}ms: Done with: ${msg}`);
   }
   const existingMessages = sessionStorage.getItem(sessionStorageMessageItem);
