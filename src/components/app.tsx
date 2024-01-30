@@ -215,7 +215,6 @@ export class AppComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderLoading() {
-    const { appConfig: { appName } } = this.stores;
     return (
       // Shouldn't be any actual danger since we're only copying text from localStorage
       // eslint-disable-next-line react/no-danger

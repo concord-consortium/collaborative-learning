@@ -238,6 +238,7 @@ export const PersistentUIModel = types
       if (asObj) {
         applySnapshot(self, asObj);
       }
+      removeLoadingMessage("Loading current activity");
 
       onSnapshot(self, (snapshot)=>{
         const snapshotStr = JSON.stringify(snapshot);
