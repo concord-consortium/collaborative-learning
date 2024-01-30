@@ -153,6 +153,12 @@ export class AppComponent extends BaseComponent<IProps, IState> {
     });
   }
 
+  public componentDidMount(){
+
+    console.log("📁 app.tsx ------------------------");
+    showLoadingMessage("Loading the application");
+  }
+
   public componentWillUnmount() {
     this.stores.db.disconnect();
   }

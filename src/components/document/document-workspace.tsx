@@ -27,6 +27,7 @@ interface IDocumentWorkspaceState {
 @observer
 export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentWorkspaceState> {
   private imageDragDrop: ImageDragDrop;
+  private primaryDocument?: DocumentModelType;
 
   constructor(props: IProps) {
     super(props);
@@ -43,7 +44,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
     this.guaranteeInitialDocuments().then(() => {
       removeLoadingMessage("Building workspace");
       const loadingMeasurements = getLoadingMeasurements();
-      //Okay to log down in render function or should it be up here right after the measurements are received?
+      this.primaryDocument = this.getPrimaryDocument(this.stores.persistentUI.problemWorkspace.primaryDocumentKey);
       this.setState({ loadingMeasurements });
       this.logLoadingAndDocumentMeasurements();
 
@@ -53,27 +54,51 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
   public logLoadingAndDocumentMeasurements(){
     const { documents } = this.stores;
     const { loadingMeasurements } = this.state.loadingMeasurements;
+
+    const totalNumDocumentsLoaded = documents.all.length;
+    const totalNumTilesLoaded = documents.all.reduce((total: number, doc: DocumentModelType) => {
+      return total + (doc.content?.tileMap.size || 0);
+    }, 0); //need to be filtered?
+
+    console.log("primaryDocument:", this.primaryDocument);
+
+    // const primaryDocumentTilesByType = this.primaryDocument?.
+
     const documentMeasurements = {
-      numDocumentsLoaded: documents.all.length,
-      numTilesLoaded: 5  //for now
+      totalNumDocumentsLoaded,
+      totalNumTilesLoaded,
+
     };
 
     const finalLogObject = {
       loadingMeasurements,
       documentMeasurements
     };
+
     // Final Log object
     //✔️ Performance metrics (loading measurements)
     //✔️ Class/Unit/Problem/User(should already exist)
     //✔️ Number of docs loaded
-    //TODO:
-    //HTTP2 or higher?
-    //Total # of tiles loaded
-    //Summary of document on the right
-    //Summary of the loaded curriculum documents
 
-  //Find total # of docs
-  // const { documents } = useStores();
+    //✔️ Total # of tiles loaded
+    // Summary of document on the right - tiles by type
+
+    //data structure needs modification
+    //which ones don't have an end time
+    //insertion order should be in tact, either an array of array, set
+
+    //don't forget!! "Loading the application" which is recorded in index.html.
+
+    //Summary of the loaded curriculum documents //"what if,
+                //initial challenge on the left", how many tiles of each type?
+
+  //HTTP2 or higher? - request the javascript and requesting the curriculum files ,
+                //you can look at the response and you see if it's using http2
+
+
+
+  //TODO (might be new ticket):
+  // Scott mentioned a refactor where we move this structure to sessionStorage (index.html ~ line 50)
 
     // Log the final object
     Logger.log(LogEventName.LOADING_MEASUREMENTS, finalLogObject);
@@ -86,14 +111,13 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
     const { problemWorkspace } = persistentUI;
     const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible } = problemWorkspace;
     const showPrimary = !hidePrimaryForCompare;
-    const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
     const comparisonDocument = comparisonDocumentKey
                                && documents.getDocument(comparisonDocumentKey);
 
     const groupVirtualDocument = comparisonDocumentKey
       && groups.virtualDocumentForGroup(comparisonDocumentKey);
 
-    if (!primaryDocument) {
+    if (!this.primaryDocument) {
       return this.renderDocument("single-workspace", "primary");
     }
 
@@ -118,7 +142,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
 
     const Primary =
       <DocumentComponent
-        document={primaryDocument}
+        document={this.primaryDocument}
         workspace={problemWorkspace}
         onNewDocument={this.handleNewDocument}
         onCopyDocument={this.handleCopyDocument}

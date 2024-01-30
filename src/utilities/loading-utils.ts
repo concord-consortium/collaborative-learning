@@ -20,6 +20,7 @@ export function getCurrentLoadingMessage() {
 }
 
 export function showLoadingMessage(msg: string) {
+  // console.log("showLoadingMessage with msg", msg);
   const timeStamp = getTimestamp();
 
   if(timeStamp === null) {
@@ -28,7 +29,7 @@ export function showLoadingMessage(msg: string) {
   }
 
   if (DEBUG_LOADING) {
-    console.log(`Loading @${timeStamp}ms: ${msg}`);
+    // console.log(`Loading @${timeStamp}ms: ${msg}`);
   }
   const existingMessages = sessionStorage.getItem(sessionStorageMessageItem);
   sessionStorage.setItem('loading-message', existingMessages + msg + messageSeparator);
@@ -43,7 +44,7 @@ export function removeLoadingMessage(msg: string) {
     return;
   }
   if (DEBUG_LOADING) {
-    console.log(`Loading @${timeStamp}ms: Done with: ${msg}`);
+    // console.log(`Loading @${timeStamp}ms: Done with: ${msg}`);
   }
   const existingMessages = sessionStorage.getItem(sessionStorageMessageItem);
   if (existingMessages) {

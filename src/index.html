@@ -31,6 +31,7 @@
       sessionStorage.setItem('loading-time-start', requestStart || performance.now());
       if ((localStorage.getItem("debug")||"").indexOf('loading') > -1) {
         console.log(`Loading @${Math.floor(performance.now()-requestStart)}ms: Loading the application`);
+        //TODO: right here I want to call showLoadingMessage("Loading the application");
       }
       sessionStorage.setItem('loading-message', 'Loading the application<br/>');
       window.loadingMessageTimer = setInterval(function() {
