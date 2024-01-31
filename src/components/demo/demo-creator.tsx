@@ -51,18 +51,25 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
     const { appConfig, unit, demo } = this.stores;
     const problemTitleTemplate = appConfig.demoProblemTitle || "%investigationTitle%: %problemTitle%";
 
-    unit.investigations.forEach(investigation => {
-      investigation.problems.forEach(problem => {
-        const title = problemTitleTemplate
-                        .replace("%investigationTitle%", investigation.title)
-                        .replace("%problemTitle%", problem.fullTitle);
-        const ordinal = `${investigation.ordinal}.${problem.ordinal}`;
-        this.problemOptions.push({investigation, problem, ordinal, title});
-        if (!demo.problemOrdinal) {
-          demo.setProblemOrdinal(ordinal);
-        }
+    // Assemble the list of problems once unit data has been loaded.
+    if (!this.problemOptions.length) {
+      unit.investigations.forEach(investigation => {
+        investigation.problems.forEach(problem => {
+          const title = problemTitleTemplate
+                          .replace("%investigationTitle%", investigation.title)
+                          .replace("%problemTitle%", problem.fullTitle);
+          const ordinal = `${investigation.ordinal}.${problem.ordinal}`;
+          this.problemOptions.push({investigation, problem, ordinal, title});
+          if (!demo.problemOrdinal) {
+            demo.setProblemOrdinal(ordinal);
+          }
+        });
       });
-    });
+    }
+    if (!this.problemOptions.length) {
+      // Did not find any problems in unit; probably unit info hasn't been loaded yet.
+      return (<p>Loading...</p>);
+    }
 
     const studentLinks: JSX.Element[] = [];
     const teacherLinks: JSX.Element[] = [];
@@ -72,11 +79,11 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
     const passThroughQueryItems = passThroughQueryItemsFromUrl(location.href);
 
     const problems = this.problemOptions.map((problem) => {
-      return <option key={problem.ordinal} value={problem.ordinal}>{problem.title}</option>;
+      return <option key={'p'+problem.ordinal} value={problem.ordinal}>{problem.title}</option>;
     });
 
     for (let classIndex = 1; classIndex <= NUM_FAKE_CLASSES; classIndex++) {
-      classes.push(<option key={classIndex} value={classIndex}>Class {classIndex}</option>);
+      classes.push(<option key={'c' + classIndex} value={classIndex}>Class {classIndex}</option>);
     }
 
     for (let studentIndex = 1; studentIndex <= NUM_FAKE_STUDENTS_VISIBLE; studentIndex++) {
@@ -124,7 +131,7 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
     // eslint-disable-next-line max-len
     const href = `?appMode=demo${demoNameParam}&fakeClass=${demo.class.id}&fakeUser=${fakeUser}&problem=${demo.problemOrdinal}${passThroughQueryItems}`;
     return (
-      <li key={userIndex}>
+      <li key={'u' + userIndex}>
         <a href={href} target="_blank" rel="noreferrer">{userType} {userIndex}</a>
       </li>
     );
