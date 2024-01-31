@@ -52,22 +52,40 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
   }
 
   public logLoadingAndDocumentMeasurements(){
-    const { documents } = this.stores;
+    const { documents, problem: { sections }, teacherGuide } = this.stores;
     const { loadingMeasurements } = this.state.loadingMeasurements;
 
     const totalNumDocumentsLoaded = documents.all.length;
     const totalNumTilesLoaded = documents.all.reduce((total: number, doc: DocumentModelType) => {
       return total + (doc.content?.tileMap.size || 0);
-    }, 0); //need to be filtered?
+    }, 0);
 
-    console.log("primaryDocument:", this.primaryDocument);
+    const primaryDocNumTilesByType = this.primaryDocument?.content?.getAllTilesByType() as any;
+    //convert all values from a string[] of tileKeys to the number of tiles (length)
+    for (const tileType of Object.keys(primaryDocNumTilesByType)){
+      primaryDocNumTilesByType[tileType] = primaryDocNumTilesByType[tileType].length;
+    }
 
-    // const primaryDocumentTilesByType = this.primaryDocument?.
+    // ----------------------- Curriculum Documents Summary  --------------------------------------
+    // How many tiles of each type all curriculum documents
+    //take into account student vs teacher
+    //also convert string of keys to number
+
+    const curriculumDocGetAllTilesByType = sections.map((section) => {
+      console.log(`----------${section.title}----------`);
+      console.log(`\t----------${section.content?.tileMap.size}----------`);
+      return section.content?.getAllTilesByType();
+    });
+
+    console.log("📁 document-workspace.tsx ------------------------");
+    console.log("curriculumDocGetAllTilesByType:", curriculumDocGetAllTilesByType);
+
+
 
     const documentMeasurements = {
       totalNumDocumentsLoaded,
       totalNumTilesLoaded,
-
+      primaryDocNumTilesByType,
     };
 
     const finalLogObject = {
@@ -75,32 +93,43 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
       documentMeasurements
     };
 
-    // Final Log object
+
+
+
+
+
+
+
+    //***************************  Final Log Object  ********************************
+
+    // -----------------------   DONE  -----------------------------------------
     //✔️ Performance metrics (loading measurements)
     //✔️ Class/Unit/Problem/User(should already exist)
     //✔️ Number of docs loaded
-
     //✔️ Total # of tiles loaded
-    // Summary of document on the right - tiles by type
+    //✔️ Summary of document on the right(primaryDocument) - how many tiles of each type?
+    //✔️ don't forget "Loading the application" which is recorded in index.html.
+    //• Summary of the loaded curriculum documents - how many tiles of each type?
 
-    //data structure needs modification
-    //which ones don't have an end time
-    //insertion order should be in tact, either an array of array, set
 
-    //don't forget!! "Loading the application" which is recorded in index.html.
+    // -----------------------   //TODO:  -----------------------------------------
 
-    //Summary of the loaded curriculum documents //"what if,
-                //initial challenge on the left", how many tiles of each type?
+    //Measure the tileMap calculations with performance.now
+    //TODO: tilesbyType (on both priary and curriculum) - store a count instead of an array of doc keys
 
-  //HTTP2 or higher? - request the javascript and requesting the curriculum files ,
+
+
+
+    //• data structure needs modification
+      //which ones don't have an end time
+      //insertion order should be in tact, either an array of array, set
+    //•HTTP2 or higher? - request the javascript and requesting the curriculum files ,
                 //you can look at the response and you see if it's using http2
+    //•TODO (might be new ticket):
+      //Scott mentioned a refactor where we move this structure to sessionStorage (index.html ~ line 50)
 
+    console.log("finalLogObject:", finalLogObject);
 
-
-  //TODO (might be new ticket):
-  // Scott mentioned a refactor where we move this structure to sessionStorage (index.html ~ line 50)
-
-    // Log the final object
     Logger.log(LogEventName.LOADING_MEASUREMENTS, finalLogObject);
 
   }

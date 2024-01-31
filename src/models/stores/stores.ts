@@ -199,7 +199,6 @@ class Stores implements IStores{
     }
     console.log("\t🥩 unitJson:", unitJson);
 
-
     removeLoadingMessage("Loading curriculum content");
     showLoadingMessage("Setting up curriculum content");
     // read the unit content, but don't instantiate section contents (DocumentModels) yet

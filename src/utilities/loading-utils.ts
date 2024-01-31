@@ -1,11 +1,17 @@
 import { DEBUG_LOADING } from "../lib/debug";
 
-
 const sessionStorageStartTimeItem = 'loading-time-start';
 const sessionStorageMessageItem = 'loading-message';
 const messageSeparator = '<br/>';
 
-const loadingMeasurements: Record<string, number> = {}; //holds start and stop timestamps of each performance message
+//loadingMeasurements is a global object (declared in index.html)
+//keys are action start and end labels, values are milliseconds
+declare global {
+  interface Window { loadingMeasurements: Record<string, number> }
+}
+const loadingMeasurements = window.loadingMeasurements;
+
+console.log("~~~~ window is made ~~~~~");
 
 function getTimestamp() {
   const start = sessionStorage.getItem(sessionStorageStartTimeItem);
@@ -20,16 +26,13 @@ export function getCurrentLoadingMessage() {
 }
 
 export function showLoadingMessage(msg: string) {
-  // console.log("showLoadingMessage with msg", msg);
   const timeStamp = getTimestamp();
-
   if(timeStamp === null) {
     console.error(`Timestamp for message "${msg}" is null.`);
     return;
   }
-
   if (DEBUG_LOADING) {
-    // console.log(`Loading @${timeStamp}ms: ${msg}`);
+    console.log(`Loading @${timeStamp}ms: ${msg}`);
   }
   const existingMessages = sessionStorage.getItem(sessionStorageMessageItem);
   sessionStorage.setItem('loading-message', existingMessages + msg + messageSeparator);
@@ -44,7 +47,7 @@ export function removeLoadingMessage(msg: string) {
     return;
   }
   if (DEBUG_LOADING) {
-    // console.log(`Loading @${timeStamp}ms: Done with: ${msg}`);
+    console.log(`Loading @${timeStamp}ms: Done with: ${msg}`);
   }
   const existingMessages = sessionStorage.getItem(sessionStorageMessageItem);
   if (existingMessages) {
