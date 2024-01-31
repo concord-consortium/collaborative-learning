@@ -260,6 +260,17 @@ export const BaseDocumentContentModel = types
       });
       return tiles;
     },
+    getAllTilesByType() {
+      const tilesByType: Record<string, string[]> = {};
+      self.tileMap.forEach(tile => {
+        const tileType = tile.content.type;
+        if (!tilesByType[tileType]) {
+          tilesByType[tileType] = [];
+        }
+        tilesByType[tileType].push(tile.id);
+      });
+      return tilesByType;
+    },
     getLinkableTiles(): ILinkableTiles {
       const providers: ITypedTileLinkMetadata[] = [];
       const consumers: ITypedTileLinkMetadata[] = [];
