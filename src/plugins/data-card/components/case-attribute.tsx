@@ -7,7 +7,8 @@ import { VisuallyHidden } from "@chakra-ui/react";
 import { gImageMap } from "../../../models/image-map";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
-import { looksLikeDefaultLabel, EditFacet } from "../data-card-types";
+import { looksLikeDefaultLabel, EditFacet,
+  kFieldWidthFactor, kNameCharsLimit, kValueCharsLimit } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
 import { useIsLinked } from "../use-is-linked";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
@@ -90,11 +91,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   }, [editingValue, valueCandidate.length]);
 
   useEffect(() => {
-    const labelLines = measureTextLines(getLabel(), 120);
-    const labelCandidateLines = measureTextLines(labelCandidate, 120);
+    const labelLines = measureTextLines(getLabel(), kFieldWidthFactor);
+    const labelCandidateLines = measureTextLines(labelCandidate, kFieldWidthFactor);
     const labelLinesNeeded = Math.max(labelLines, labelCandidateLines);
-    const valueLines = measureTextLines(valueStr, 120);
-    const valueCandidateLines = measureTextLines(valueCandidate, 120);
+    const valueLines = measureTextLines(valueStr, kFieldWidthFactor);
+    const valueCandidateLines = measureTextLines(valueCandidate, kFieldWidthFactor);
     const valueLinesNeeded = !isImageUrl(valueStr) ? Math.max(valueLines, valueCandidateLines) : 4;
     setTextLinesNeeded(Math.max(labelLinesNeeded, valueLinesNeeded));
   }, [getLabel, getValue, imageUrl, valueCandidate, labelCandidate, valueStr]);
@@ -348,7 +349,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
               onKeyDown={handleKeyDown}
               onBlur={handleCompleteName}
               onDoubleClick={handleInputDoubleClick}
-              maxLength={60}
+              maxLength={kNameCharsLimit}
             />
           : <div className={nameTextClasses}>{getLabel()}</div>
         }
@@ -366,7 +367,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
           className={valueInputClasses}
           onFocus={handleValueInputFocus}
           onPaste={handleValuePaste}
-          maxLength={80}
+          maxLength={kValueCharsLimit}
         />
         { valueIsImage() && <img src={imageUrl} className="value-image" /> }
         { readOnly && !valueIsImage() && <div className="value-text">{valueStr}</div> }

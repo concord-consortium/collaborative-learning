@@ -6,6 +6,9 @@ export const kButtonSpace = 70;
 
 export const kDefaultLabelPrefix = "Label";
 export const kDefaultLabel = `${kDefaultLabelPrefix} 1`;
+export const kFieldWidthFactor = 120; // passed to measureTextLines
+export const kNameCharsLimit = 60;
+export const kValueCharsLimit = 80;
 
 export const looksLikeDefaultLabel = (label: string) => {
   return label.startsWith(kDefaultLabelPrefix);
