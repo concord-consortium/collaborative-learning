@@ -1,0 +1,254 @@
+@import "../../../components/vars.sass";
+
+$single-view-card-width: 359px;
+$name-area-width: 50%;
+$value-area-width: 37%;
+$buttons-area-width: 13%;
+$data-row-min-height: 24px;
+$charcoal-light-border: rgb(206, 206, 206);
+$cell-padding: 0px 8px;
+$cell-text-color: #3f3f3f;
+$default-button-border-color: #979797;
+
+.single-card-data-area {
+  width: $single-view-card-width;
+}
+
+.case-attribute.pair {
+  textarea {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+  }
+  &:last-child {
+    border-bottom-width:0px;
+    .name-area {
+      border-radius: 0px 0px 0px 3px;
+    }
+    .value-area {
+      border-radius: 0px 0px 3px 0px;
+    }
+  }
+
+  border-bottom:1px solid $charcoal-light-1;
+  border-top-width: 0px;
+  border-left-color: $workspace-teal-light-5;
+  display: flex;
+  align-items: stretch;
+  font-size:14px;
+  &.one-line {
+    height: $data-row-min-height;
+  }
+  &.two-lines {
+    height: $data-row-min-height * 1.8;
+  }
+  &.three-lines {
+    height: $data-row-min-height * 2.6;
+  }
+  &.four-lines {
+    height: $data-row-min-height * 3.4;
+  }
+  &.five-lines {
+    height: $data-row-min-height * 4.2;
+  }
+
+  input, textarea {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    font-family: "Lato";
+    border-width: 0px;
+    outline: none;
+    font-size: 14px;
+    overflow: hidden;
+    resize:none;
+  }
+
+  .name-area {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    background-color: $workspace-teal-light-5;
+    width: $name-area-width;
+    border-right:1px solid $charcoal-light-1;
+    border-left-color: transparent;
+    text-align: right;
+    font-weight: bold;
+    &.highlighted {
+      background-color: $highlight-unlinked-header;
+      &.linked {
+        background-color: $highlight-linked-header;
+      }
+    }
+
+    .name-input {
+      text-align: right;
+      background-color: $workspace-teal-light-5;
+      padding-right:6px;
+      &.editing {
+        background-color: white;
+      }
+    }
+
+    .name-text {
+      display: flex;
+      align-items: center;
+      padding-right:6px;
+      text-align: right;
+      justify-content: flex-end;
+      &.default-label {
+        font-style: italic;
+      }
+    }
+  }
+
+  .name-area.editing {
+    background-color: white;
+    textarea {
+      background-color: white;
+      box-shadow: 0px 0px 0px 2px $highlight-blue inset;
+    }
+  }
+
+  .name-area.linked.editing {
+    background-color: white;
+    textarea {
+      background-color: white;
+      box-shadow: 0px 0px 0px 2px $highlight-linked-header inset;
+    }
+  }
+
+  .value-area {
+    position: relative;
+    width: $value-area-width;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    textarea {
+      padding-top: 3px;
+      padding-left: 6px;
+      overflow-y: auto;
+    }
+
+    &.has-image {
+      padding:6px;
+      display:flex;
+      align-items: center;
+      justify-content: center;
+      &:hover {
+        background:rgba(245, 245, 245);
+      }
+      &.editing {
+        // simulate highlight without using border, which distorts height
+        box-shadow: 0px 0px 0px 2px $highlight-blue inset;
+      }
+      img {
+        max-width: 95%;
+        max-height: 90%;
+        margin: 0 auto;
+      }
+    }
+
+    ul.dropdown {
+      position: absolute;
+      width: 179px;
+      padding: 0;
+      margin: 0;
+      background-color: white;
+
+      &.open {
+        border: 1px solid $charcoal-light-border;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        z-index: 1;
+        border-radius: 0 0 3px 3px;
+        &.top-one {
+          top: $data-row-min-height;
+        }
+        &.top-two {
+          top: $data-row-min-height * 1.8;
+        }
+        &.top-three {
+          top: $data-row-min-height * 2.6;
+        }
+        &.top-four {
+          top: $data-row-min-height * 3.4;
+        }
+        &.top-five {
+          top: $data-row-min-height * 4.2;
+        }
+        &:empty {
+          box-shadow: none;
+          border-width: 0px;
+          display:none;
+        }
+      }
+
+      li {
+        list-style: none;
+        height: $data-row-min-height + 2;
+        padding-left:5px;
+        padding-top:3.5px;
+        &.selecting-item {
+          background-color: $highlight-unlinked-cell;
+        }
+        &:last-child {
+          border-radius: 0 0 3px 3px;
+        }
+      }
+    }
+  }
+
+  .buttons-area {
+    width: $buttons-area-width;
+    display: flex;
+    align-items: flex-start;
+    background-color: transparent;
+    border-radius: 0px 0px 3px 0px;
+    position: relative;
+    svg {
+      height: 22px;
+      &.down { // this means the menu is down, not the arrow
+        transform: rotate(180deg) translateY(-2px);
+      }
+    }
+
+    button {
+      width: 50%;
+      background-color: transparent;
+      display: flex;
+      align-items: center;
+      border: none;
+      padding: 0px;
+      right: 0;
+    }
+
+    .type-icon {
+      display: flex;
+      align-items: center;
+    }
+
+    .delete-attribute {
+      position: absolute;
+      display: none;
+      left: 40px;
+      z-index: 1;
+      &.show {
+        display: inherit;
+      }
+    }
+  }
+
+
+  .value-area,
+  .buttons-area,
+  .type-icon {
+    &.highlighted {
+      background-color: $highlight-unlinked-cell;
+      &.linked {
+        background-color: $highlight-linked-cell;
+      }
+    }
+  }
+}
