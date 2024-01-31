@@ -40,7 +40,7 @@ async function processFile(file: string) {
     // For files named like documentXXX.txt, read the file
     const content = fs.readFileSync(path, "utf8");
     const parsedContent = JSON.parse(content);
-    const { documentContent, ...documentIds } = parsedContent;
+    const { documentContent, offeringId, ...documentIds } = parsedContent;
 
     // Set up infrastructure to count tiles
     const annotationCounts: Record<string, number> = {};
@@ -58,9 +58,14 @@ async function processFile(file: string) {
     }
     const annotationCount: number = Object.values(annotationCounts).reduce((prev, count) => prev + count, 0);
     if (annotationCount > 0) {
+      const classInfoUrl = `https://learn.concord.org/api/v1/offerings/${offeringId}`;
+      const dashboardUrl = `https://learn.concord.org/portal/offerings/${offeringId}/external_report/11`;
       documentInfo[file] = {
         ...documentIds,
+        offeringId,
         fileName: file,
+        classInfoUrl,
+        dashboardUrl,
         annotationCounts
       };
     }
