@@ -1,7 +1,7 @@
 #!/usr/bin/node
 
-// This script determines which documents downloaded with download-documents-with-info.ts use sparrows,
-// then saves information about those documents in an output file.
+// This script determines which documents downloaded with download-documents-with-info.ts use specified types of
+// annoations (sparrows have type "arrowAnnotation"), then saves information about those documents in an output file.
 
 // to run this script type the following in the terminal
 // cf. https://stackoverflow.com/a/66626333/16328462
