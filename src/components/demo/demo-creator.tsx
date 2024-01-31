@@ -42,12 +42,15 @@ export const passThroughQueryItemsFromUrl = (href: string) => {
 export class DemoCreatorComponent extends BaseComponent<IProps> {
   private problemOptions: IProblemOption[] = [];
 
+  constructor(props: IProps) {
+    super(props);
+    this.stores.demo.setClass("1", "Class 1");
+  }
+
   public render() {
     const { appConfig, unit, demo } = this.stores;
-
     const problemTitleTemplate = appConfig.demoProblemTitle || "%investigationTitle%: %problemTitle%";
 
-    demo.setClass("1", "Class 1");
     unit.investigations.forEach(investigation => {
       investigation.problems.forEach(problem => {
         const title = problemTitleTemplate
