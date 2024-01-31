@@ -26,16 +26,6 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
 
   const [sortDragActive, setSortDragActive] = useState(false);
 
-  // const renderPlaceholderCells = () => {
-  //   const columnsCount = 3; // local constant now, but may be dynamic in future
-  //   const rowsNeeded = Math.ceil(uniqueOrderedValues.length / columnsCount);
-  //   const placeholdersNeeded = (rowsNeeded * columnsCount) - uniqueOrderedValues.length;
-  //   const placeholders = Array.from({ length: placeholdersNeeded }, (v, i) => {
-  //     return <SortStackPlaceholder key={i} />;
-  //   });
-  //   return placeholders;
-  // };
-
   useDndMonitor({
     onDragStart: (e) => {
       e.active.data.current?.sortDrag && setSortDragActive(true);
@@ -67,7 +57,6 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
           );
         })
       }
-      {/* {renderPlaceholderCells()} */}
     </div>
   );
 };
