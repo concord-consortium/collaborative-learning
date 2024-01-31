@@ -41,7 +41,6 @@ context('single student functional test', () => {
     cy.openDocumentWithTitle('my-work', 'learning-log', 'My First Learning Log');
     cy.get('.editable-document-content [data-test=canvas]').should('be.visible');
     cy.get('.edit-button.learning-log').should('be.visible');
-
     cy.log('verify click on Edit button opens document in main workspace');
     cy.get('.edit-button.learning-log').click();
     cy.get('.primary-workspace [data-test=learning-log-title]').should('contain', "Learning Log: My First Learning Log");

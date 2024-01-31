@@ -19,21 +19,19 @@ import "./document-workspace.sass";
 interface IProps extends IBaseProps {
 }
 
-interface IDocumentWorkspaceState {
-  loadingMeasurements: any;
-}
+// interface IDocumentWorkspaceState {
+//   loadingMeasurements: any;
+// }
 
 @inject("stores")
 @observer
-export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentWorkspaceState> {
+export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private imageDragDrop: ImageDragDrop;
   private primaryDocument?: DocumentModelType;
 
   constructor(props: IProps) {
     super(props);
-    this.state = {
-      loadingMeasurements: {},
-    };
+
     showLoadingMessage("Building workspace");
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
@@ -43,27 +41,32 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
   public componentDidMount() {
     this.guaranteeInitialDocuments().then(() => {
       removeLoadingMessage("Building workspace");
-      const loadingMeasurements = getLoadingMeasurements();
       this.primaryDocument = this.getPrimaryDocument(this.stores.persistentUI.problemWorkspace.primaryDocumentKey);
-      this.setState({ loadingMeasurements });
       this.logLoadingAndDocumentMeasurements();
-
     });
   }
 
   public logLoadingAndDocumentMeasurements(){
     const startTime = performance.now();
     const { documents, problem: { sections }, teacherGuide } = this.stores;
-    const { loadingMeasurements } = this.state.loadingMeasurements;
-
+    const loadingMeasurements = getLoadingMeasurements();
     const totalNumDocumentsLoaded = documents.all.length;
+    console.log("\t🥩 totalNumDocumentsLoaded:", totalNumDocumentsLoaded);
     const totalNumTilesLoaded = documents.all.reduce((total: number, doc: DocumentModelType) => {
       return total + (doc.content?.tileMap.size || 0);
     }, 0);
 
-    const primaryDocTilesByType = this.primaryDocument?.content?.getAllTilesByType() as any;
-    const primaryDocNumTilesByType = countTileKeys(primaryDocTilesByType);
 
+
+
+    console.log("\t🥩 totalNumTilesLoaded", totalNumTilesLoaded);
+
+    const primaryDocTilesByType = this.primaryDocument?.content?.getAllTilesByType() as any;
+    console.log("this.primaryDocument:",  this.primaryDocument);
+    const primaryDocNumTilesByType = countTileKeys(primaryDocTilesByType);
+    console.log("\t🥩 primaryDocTilesByType:", primaryDocTilesByType);
+    //TODO: Faiing to load right side document, check async behavior for primaryDocument
+    console.log("-----------------------------");
     //getAllTilesByType returns a map with the tileKeys as values, we want to convert this to the length
     function countTileKeys(tilesByType: Record<string, string[]>): Record<string, number> {
       const tileCounts: Record<string, number>= {};
