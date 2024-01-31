@@ -10,7 +10,7 @@ export const kFieldWidthFactor = 120; // passed to measureTextLines
 export const kNameCharsLimit = 60;
 export const kValueCharsLimit = 80;
 
-export const looksLikeDefaultLabel = (label: string) => {
+export const looksLikeDefaultName = (label: string) => {
   return label.startsWith(kDefaultLabelPrefix);
 };
 

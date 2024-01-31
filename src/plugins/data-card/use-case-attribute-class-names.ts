@@ -4,11 +4,11 @@ import classNames from 'classnames';
 interface AttributeClassNamesProps {
   attrKey: string;
   textLinesNeeded: number;
-  editingLabel: boolean;
+  editingName: boolean;
   attributeSelected: boolean;
   isLinked: boolean;
-  looksLikeDefaultLabel: (label: string) => boolean;
-  getLabel: () => string;
+  looksLikeDefaultName: (label: string) => boolean;
+  getName: () => string;
   editingValue: boolean;
   valueStr: string;
   gImageMap: { isImageUrl: (url: string) => boolean };
@@ -21,11 +21,11 @@ interface AttributeClassNamesProps {
 export function useAttributeClassNames({
   attrKey,
   textLinesNeeded,
-  editingLabel,
+  editingName: editingLabel,
   attributeSelected,
   isLinked,
-  looksLikeDefaultLabel,
-  getLabel,
+  looksLikeDefaultName,
+  getName: getLabel,
   editingValue,
   valueStr,
   gImageMap,
@@ -55,7 +55,7 @@ export function useAttributeClassNames({
       ),
       nameTextClasses: classNames(
         "name-text",
-        { "default-label": looksLikeDefaultLabel(getLabel()) }
+        { "default-label": looksLikeDefaultName(getLabel()) }
       ),
       valueAreaClasses: classNames(
         "value-area", attrKey,
@@ -101,7 +101,7 @@ export function useAttributeClassNames({
     editingLabel,
     attributeSelected,
     isLinked,
-    looksLikeDefaultLabel,
+    looksLikeDefaultName,
     getLabel,
     editingValue,
     valueStr,
