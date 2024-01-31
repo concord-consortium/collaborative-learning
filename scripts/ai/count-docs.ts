@@ -31,7 +31,7 @@ const startTime = Date.now();
 let checkedFiles = 0;
 let processedFiles = 0;
 const typeCounts: Record<string, number> = {};
-const titles = 0;
+let titles = 0;
 
 // Porcesses a file, counting the relevant tiles in it if it's a document
 async function processFile(file: string) {
