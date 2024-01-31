@@ -44,10 +44,7 @@ context('single student functional test', () => {
 
     cy.log('verify click on Edit button opens document in main workspace');
     cy.get('.edit-button.learning-log').click();
-    cy.log("-----------------0----------------------");
-    cy.pause();
     cy.get('.primary-workspace [data-test=learning-log-title]').should('contain', "Learning Log: My First Learning Log");
-    cy.log("-----------------1----------------------");
 
 
     cy.log('verify close of nav tabs');
