@@ -52,6 +52,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
   }
 
   public logLoadingAndDocumentMeasurements(){
+    const startTime = performance.now();
     const { documents, problem: { sections }, teacherGuide } = this.stores;
     const { loadingMeasurements } = this.state.loadingMeasurements;
 
@@ -119,13 +120,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
     };
 
 
-
-
-
-
-
-    //***************************  Final Log Object  ********************************
-
     // -----------------------   DONE  -----------------------------------------
     //✔️ Performance metrics (loading measurements)
     //✔️ Class/Unit/Problem/User(should already exist)
@@ -135,13 +129,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
     //✔️ don't forget "Loading the application" which is recorded in index.html.
     //✔️ Summary of the loaded curriculum documents - how many tiles of each type
 
-    // -----------------------   //TODO:  -----------------------------------------
+    // -----------------------  TODO: -----------------------------------------
 
     //Measure the tileMap calculations with performance.now
-
-
-
-
     //• data structure needs modification
       //which ones don't have an end time
       //insertion order should be in tact, either an array of array, set
@@ -151,6 +141,10 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
       //Scott mentioned a refactor where we move this structure to sessionStorage (index.html ~ line 50)
 
     console.log("finalLogObject:", finalLogObject);
+
+    // -----------------------   Measure performance of calculation/logging -----------------------------------------
+    const endTime = performance.now();
+    console.log(`logLoadingAndDocumentMeasurements executed in ${endTime - startTime} milliseconds`);
 
     Logger.log(LogEventName.LOADING_MEASUREMENTS, finalLogObject);
 
