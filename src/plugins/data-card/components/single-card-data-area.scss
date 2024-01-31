@@ -163,10 +163,25 @@ $default-button-border-color: #979797;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
         z-index: 1;
         border-radius: 0 0 3px 3px;
-        top: $data-row-min-height;
+        &.top-one {
+          top: $data-row-min-height;
+        }
+        &.top-two {
+          top: $data-row-min-height * 1.8;
+        }
+        &.top-three {
+          top: $data-row-min-height * 2.6;
+        }
+        &.top-four {
+          top: $data-row-min-height * 3.4;
+        }
+        &.top-five {
+          top: $data-row-min-height * 4.2;
+        }
         &:empty {
           box-shadow: none;
           border-width: 0px;
+          display:none;
         }
       }
 

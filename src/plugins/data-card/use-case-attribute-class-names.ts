@@ -76,7 +76,16 @@ export function useAttributeClassNames({
       ),
       dropdownClasses: classNames(
         "dropdown",
-        { open: isOpen, closed: !isOpen, empty: validCompletions.length === 0 }
+        {
+          open: isOpen,
+          closed: !isOpen,
+          empty: validCompletions.length === 0,
+          "top-one": textLinesNeeded < 2,
+          "top-two": textLinesNeeded === 2,
+          "top-three": textLinesNeeded === 3,
+          "top-four": textLinesNeeded === 4,
+          "top-five": textLinesNeeded > 4
+        }
       ),
       typeIconClasses: classNames(
         "type-icon", attrKey,
