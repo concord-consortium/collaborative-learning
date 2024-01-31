@@ -20,7 +20,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   //*************************** Determine Sort Options & State  ***********************************
   const {tagPrompt} = appConfig;
   const sortTagPrompt = tagPrompt || ""; //first dropdown choice for comment tags
-  const sortOptions = ["Group", "Name", sortTagPrompt, "Bookmarked"];
+  const sortOptions = ["Group", "Name", sortTagPrompt, "Bookmarked", "Tools"];
   const [sortBy, setSortBy] = useState("Group");
 
   useEffect(()=>{
@@ -47,6 +47,9 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
       break;
     case "Bookmarked":
       renderedSortedDocuments = sortedDocuments.sortByBookmarks;
+      break;
+    case "Tools":
+      renderedSortedDocuments = sortedDocuments.sortByTools;
       break;
   }
 
