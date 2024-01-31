@@ -11,8 +11,6 @@ declare global {
 }
 const loadingMeasurements = window.loadingMeasurements;
 
-console.log("~~~~ window is made ~~~~~");
-
 function getTimestamp() {
   const start = sessionStorage.getItem(sessionStorageStartTimeItem);
   if (!start) {
@@ -37,7 +35,7 @@ export function showLoadingMessage(msg: string) {
   const existingMessages = sessionStorage.getItem(sessionStorageMessageItem);
   sessionStorage.setItem('loading-message', existingMessages + msg + messageSeparator);
   const msgStart = msg + " Start";
-  loadingMeasurements[msgStart] = timeStamp; //start time
+  loadingMeasurements[msgStart] = timeStamp; //Start time
 }
 
 export function removeLoadingMessage(msg: string) {

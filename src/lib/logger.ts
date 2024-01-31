@@ -161,7 +161,7 @@ function sendToLoggingService(data: LogMessage, user: UserModelType) {
   const url = logManagerUrl[isProduction ? "production" : "dev"];
   if (DEBUG_LOGGER) {
     // eslint-disable-next-line no-console
-    console.log("Logger#sendToLoggingService sending", data, "to", url); //original
+    console.log("Logger#sendToLoggingService sending", data, "to", url);
   }
   if (!Logger.isLoggingEnabled) return;
 

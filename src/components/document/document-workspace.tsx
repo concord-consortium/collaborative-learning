@@ -81,31 +81,21 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
     }
 
     const curriculumSectionsTilesByType = curriculumDocSections.map((section) => {
-      console.log(`----------${section.title}----------`);
       const sectionDocTilesByType = section.content?.getAllTilesByType() as any;
-      console.log("sectionDocTilesByType:", sectionDocTilesByType);
       const sectionDocNumTilesByType = countTileKeys(sectionDocTilesByType);
       return sectionDocNumTilesByType;
     });
 
-    //We want to reduce this further and count all tiles in each section
+    //Convert curriculumSectionsTileByType further and count all tiles in each section
     const curriculumSumTileTypes: Record<string, number> = {};
     curriculumSectionsTilesByType.forEach((section) => {
       Object.keys(section).forEach((tileType) => {
-        console.log(`tileType: ${tileType}`);
         if(!curriculumSumTileTypes[tileType]) {
-          console.log("create entry!!!");
-          curriculumSumTileTypes[tileType] = 0; //create entry
+          curriculumSumTileTypes[tileType] = 0; //Create entry
         }
         curriculumSumTileTypes[tileType] += section[tileType];
       });
     });
-
-
-    console.log(`---------------------------------------------`);
-    console.log("\tcurriculumSectionsTilesByType:", curriculumSectionsTilesByType);
-
-    console.log("\tcurriculumSumTileTypes:", curriculumSumTileTypes);
 
     const documentMeasurements = {
       totalNumDocumentsLoaded,
@@ -119,35 +109,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
       documentMeasurements
     };
 
-
-    // -----------------------   DONE  -----------------------------------------
-    //✔️ Performance metrics (loading measurements)
-    //✔️ Class/Unit/Problem/User(should already exist)
-    //✔️ Number of docs loaded
-    //✔️ Total # of tiles loaded
-    //✔️ Summary of document on the right(primaryDocument) - how many tiles of each type
-    //✔️ don't forget "Loading the application" which is recorded in index.html.
-    //✔️ Summary of the loaded curriculum documents - how many tiles of each type
-
-    // -----------------------  TODO: -----------------------------------------
-
-    //Measure the tileMap calculations with performance.now
-    //• data structure needs modification
-      //which ones don't have an end time
-      //insertion order should be in tact, either an array of array, set
-    //•HTTP2 or higher? - request the javascript and requesting the curriculum files ,
-                //you can look at the response and you see if it's using http2
-    //•TODO (might be new ticket):
-      //Scott mentioned a refactor where we move this structure to sessionStorage (index.html ~ line 50)
-
-    console.log("finalLogObject:", finalLogObject);
-
-    // -----------------------   Measure performance of calculation/logging -----------------------------------------
     const endTime = performance.now();
     console.log(`logLoadingAndDocumentMeasurements executed in ${endTime - startTime} milliseconds`);
-
     Logger.log(LogEventName.LOADING_MEASUREMENTS, finalLogObject);
-
   }
 
   public render() {
