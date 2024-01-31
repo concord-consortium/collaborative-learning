@@ -58,5 +58,3 @@ export function removeLoadingMessage(msg: string) {
 export function getLoadingMeasurements(){
   return {loadingMeasurements};
 }
-
-

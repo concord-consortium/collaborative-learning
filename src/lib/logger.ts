@@ -71,8 +71,6 @@ export class Logger {
 
     const eventString = LogEventName[event];
     const logMessage = Logger.Instance.createLogMessage(eventString, parameters, method);
-
-
     sendToLoggingService(logMessage, this._instance.stores.user);
   }
 
