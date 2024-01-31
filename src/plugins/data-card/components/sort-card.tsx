@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { ITileModel } from "../../../models/tiles/tile-model";
@@ -6,7 +6,6 @@ import { DataCardContentModelType } from "../data-card-content";
 import { useIsLinked } from "../use-is-linked";
 import { SortCardAttribute } from "./sort-card-attribute";
 import { useDraggable } from "@dnd-kit/core";
-import TileDragHandle from "../../../assets/icons/drag-tile/move.svg";
 
 interface IProps {
   caseId: string;
@@ -39,18 +38,10 @@ export const SortCard: React.FC<IProps> = observer(
   const atStackTop = stackCardNumberDisplay === totalInStack;
   const isLinked = useIsLinked();
 
-  const [expanded, setExpanded] = useState(false);
-  useEffect(()=> setExpanded(atStackTop), [atStackTop]); // "top" card loads expanded
-
-  const toggleExpanded = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setExpanded(!expanded);
-  };
-
   const cardClasses = classNames(
-    "sortable", "card",
-    { collapsed: !expanded, expanded }
+    "drag-handle", "sortable", "card", { "at-stack-top": atStackTop }
   );
+
   const headingClasses = classNames(
     "heading", { highlighted: caseHighlighted, linked: isLinked }
   );
@@ -73,6 +64,8 @@ export const SortCard: React.FC<IProps> = observer(
 
   return (
     <div
+      {...listeners}
+      {...attributes}
       className={cardClasses} id={caseId}
       onDoubleClick={loadAsSingle}
       ref={setNodeRef}
@@ -83,31 +76,24 @@ export const SortCard: React.FC<IProps> = observer(
         onClick={() => content.dataSet.setSelectedCases([caseId])}
         style={capStyle}
       >
-        <div className="expand-toggle-area">
-          <button className="expand-toggle" onClick={toggleExpanded}>▶</button>
-        </div>
         <div className="card-count-info">
           { `Card ${ deckCardNumberDisplay } of ${ content.totalCases } `}
         </div>
-        <div className="drag-handle" {...listeners} {...attributes}>
-          <TileDragHandle />
-        </div>
       </div>
 
-      { expanded &&
-        <div className="content">
-          { content.dataSet.attributes.map((attr)=>{
-            return (
-              <SortCardAttribute
-                key={attr.id}
-                model={model}
-                caseId={caseId}
-                attr={attr}
-              />
-            );
-          })}
-        </div>
-      }
+      <div className="content">
+        { content.dataSet.attributes.map((attr)=>{
+          return (
+            <SortCardAttribute
+              key={attr.id}
+              model={model}
+              caseId={caseId}
+              attr={attr}
+            />
+          );
+        })}
+      </div>
+
       <div
         className={classNames("footer", { highlighted: caseHighlighted, linked: isLinked })}
         style={capStyle}
