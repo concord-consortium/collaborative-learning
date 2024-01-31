@@ -28,7 +28,7 @@ const portal = "learn.concord.org";
 const demo = false;
 
 // Make falsy to include all documents
-const documentLimit = 100;
+const documentLimit = false;
 
 console.log(`*** Starting to Download Documents ***`);
 
