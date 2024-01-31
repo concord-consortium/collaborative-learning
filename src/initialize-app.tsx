@@ -15,6 +15,7 @@ import { AppConfigModel } from "./models/stores/app-config-model";
 import { IStores } from "./models/stores/stores";
 import { UserModel } from "./models/stores/user";
 import { urlParams } from "./utilities/url-params";
+import { getBearerToken } from "./utilities/auth-utils";
 import { DEBUG_STORES } from "./lib/debug";
 import { gImageMap } from "./models/image-map";
 import PackageJson from "./../package.json";
@@ -49,7 +50,7 @@ export const initializeApp = async (appMode: AppMode, authoring?: boolean): Prom
   const showDemoCreator = urlParams.demo;
   const demoName = urlParams.demoName;
 
-  const isPreviewing = !!(urlParams.domain && urlParams.domain_uid && !urlParams.token);
+  const isPreviewing = !!(urlParams.domain && urlParams.domain_uid && !getBearerToken(urlParams));
   const stores = createStores({ appMode, appVersion, appConfig, user, showDemoCreator, demoName, isPreviewing });
 
   if (DEBUG_STORES) {
@@ -70,7 +71,7 @@ export const initializeApp = async (appMode: AppMode, authoring?: boolean): Prom
   if (authoring) {
     // Make the user a teacher and show solution tiles
     stores.user.setType("teacher");
-    stores.ui.toggleShowTeacherContent(true);
+    stores.persistentUI.toggleShowTeacherContent(true);
   }
 
   return stores;

@@ -1,4 +1,4 @@
-import { merge } from "lodash";
+import { assign, assignWith } from "lodash";
 import { UnitConfiguration } from "./unit-configuration";
 
 type UC = UnitConfiguration;
@@ -177,8 +177,12 @@ export class ConfigurationManager implements UnitConfiguration {
 
   get settings(): UC["settings"]  {
     // settings are merged rather than simply returning the closest non-empty value
+    // merge is just two levels deep: eg merges items under settings.table, but not elements of settings.table.tools
     const reverseSettings = [...this.configs].reverse().map(config => config.settings);
-    return merge({}, this.defaults.settings, ...reverseSettings);
+    return assignWith({}, this.defaults.settings, ...reverseSettings,
+      (objValue: any, srcValue: any) => {
+        return assign({}, objValue, srcValue);
+      });
   }
 }
 

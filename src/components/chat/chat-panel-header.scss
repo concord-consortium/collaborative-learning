@@ -82,7 +82,8 @@
         background-image: url("../../assets/icons/arrow-back/arrow-back-problems.svg");
       }
     }
-    &.student-work {
+    &.student-work, &.sort-work {
+      // TODO - if sort work ends up with its own theme, implement in its own block
       background-image: url("../../assets/icons/close/close-student-work.svg");
       background-repeat: no-repeat;
       &:hover, &:active{

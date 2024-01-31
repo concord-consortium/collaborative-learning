@@ -96,7 +96,7 @@
               "addDocument": true
             },
             {
-              "title": "Starred",
+              "title": "Bookmarks",
               "type": "starred-problem-documents",
               "dataTestHeader": "my-work-section-starred",
               "documentTypes": ["personal", "problem"],
@@ -165,7 +165,7 @@
             },
             {
               "className": "section problem starred",
-              "title": "Starred",
+              "title": "Bookmarks",
               "type": "starred-problem-documents",
               "dataTestHeader": "class-work-section-starred",
               "documentTypes": ["publication"],
@@ -240,11 +240,65 @@
     "placeholderText": "",
     "stamps": [],
     "settings": {
+      "dataset": {
+        "cellsSelectCases": false
+      },
+      "diagram": {
+        "tools": [
+          "new-variable",
+          "insert-variable",
+          "edit-variable",
+          "|",
+          "zoom-in",
+          "zoom-out",
+          "fit-view",
+          "toggle-lock",
+          "toggle-navigator",
+          "|",
+          ["variables-link", "Graph"],
+          "|",
+          "delete"
+        ]
+      },
       "graph": {
-        "autoAssignAttributes": true
+        "emptyPlotIsNumeric": true,
+        "scalePlotOnValueChange": true,
+        "defaultSeriesLegend": true,
+        "connectPointsByDefault": true,
+        "autoAssignAttributes": true,
+        "disableAttributeDnD": true,
+        "tools": [
+          "link-tile",
+          "|",
+          "fit-all",
+          "toggle-lock"
+        ]
       },
       "simulator": {
         "defaultSimulation": "EMG_and_claw"
+      },
+      "table": {
+        "numFormat": ".2~f",
+        "tools": [
+          "set-expression",
+          "link-tile",
+          "link-graph",
+          "merge-in",
+          ["data-set-view", "DataCard"],
+          "delete"
+        ]
+      },
+      "text": {
+        "tools": [
+          "bold",
+          "italic",
+          "underline",
+          "subscript",
+          "superscript",
+          "list-ol",
+          "list-ul",
+          "link"
+        ]
       }
     }
   },

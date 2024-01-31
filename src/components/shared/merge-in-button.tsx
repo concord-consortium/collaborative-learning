@@ -10,6 +10,9 @@ interface IProps {
   isDisabled?: boolean;
 }
 
+/**
+ * Deprecated; Tiles should move to the shared toolbar components in src/components/toolbar
+ */
 export const MergeInButton = observer(function MergeButton({ isDisabled }: IProps) {
   const model = useContext(TileModelContext)!;
   const { isMergeEnabled, showMergeTileDialog } = useTileDataMerging({model});

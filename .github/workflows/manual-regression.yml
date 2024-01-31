@@ -17,46 +17,47 @@ on:
         default: all
         options:
           - all
-          - branch/author_tests/doc-editor_spec.js
-          - branch/student_tests/arrow_annotation_spec.js
-          - branch/student_tests/canvas_test_spec.js
-          - branch/student_tests/data_card_tool_spec.js
-          - branch/student_tests/dataflow_table_integration_test_spec.js
-          - branch/student_tests/dataflow_tool_spec.js
-          - branch/student_tests/diagram_tool_spec.js
-          - branch/student_tests/drawing_tool_spec.js
-          - branch/student_tests/duplicate_tile_spec.js
-          - branch/student_tests/expression_tool_spec.js
-          - branch/student_tests/graph_table_integraton_test_spec.js
-          - branch/student_tests/graph_tool_spec.js
-          - branch/student_tests/group_test_spec.js
-          - branch/student_tests/image_tool_spec.js
-          - branch/student_tests/nav_panel_test_spec.js
-          - branch/student_tests/numberline_tool_spec.js
-          - branch/student_tests/shared_variables_test_spec.js
-          - branch/student_tests/simulator_tile_spec.js
-          - branch/student_tests/student_test_spec.js
-          - branch/student_tests/table_tool_spec.js
-          - branch/student_tests/text_tool_spec.js
-          - branch/student_tests/workspace_test_spec.js
-          - branch/student_tests/xy_plot_tool_spec.js
-          - branch/teacher_tests/history_playback_spec.js
-          - branch/teacher_tests/teacher_chat_spec.js
-          - branch/teacher_tests/teacher_curation_spec.js
-          - branch/teacher_tests/teacher_dashboard_4_quadrants_spec.js
-          - branch/teacher_tests/teacher_dashboard_spec.js
-          - branch/teacher_tests/teacher_network_spec.js
-          - branch/teacher_tests/teacher_six_pack_spec.js
-          - branch/teacher_tests/teacher_support_note.js
-          - branch/teacher_tests/teacher_support_spec.js
-          - branch/teacher_tests/teacher_workspace_spec.js
-          - full/student_tests/group_chooser_spec.js
-          - full/teacher_tests/teacher_chat_spec.js
-          - full/teacher_tests/teacher_dashboard_six_pack_spec.js
-          - full/teacher_tests/teacher_dashboard_spec.js
-          - full/teacher_tests/teacher_network_dividers_spec.js
-          - full/teacher_tests/teacher_network_workspace_chat_spec.js
-          - full/teacher_tests/teacher_workspace_spec.js
+          - cleanup/remove_teacher_comment_spec.js
+          - functional/author_tests/doc-editor_spec.js
+          - functional/document_tests/canvas_test_spec.js
+          - functional/document_tests/group_chooser_spec.js
+          - functional/document_tests/group_test_readonly_spec.js
+          - functional/document_tests/group_test_spec.js
+          - functional/document_tests/header_test_spec.js
+          - functional/document_tests/nav_panel_test_spec.js
+          - functional/document_tests/student_test_spec.js
+          - functional/document_tests/workspace_test_spec.js
+          - functional/portal_user_tests/teacher_chat_spec.js
+          - functional/teacher_tests/history_playback_spec.js
+          - functional/teacher_tests/teacher_chat_spec.js
+          - functional/teacher_tests/teacher_curation_spec.js
+          - functional/teacher_tests/teacher_dashboard_4_quadrants_spec.js
+          - functional/teacher_tests/teacher_dashboard_spec.js
+          - functional/teacher_tests/teacher_network_spec.js
+          - functional/teacher_tests/teacher_six_pack_spec.js
+          - functional/teacher_tests/teacher_starreddocument_scroller_spec.js
+          - functional/teacher_tests/teacher_support_spec.js
+          - functional/teacher_tests/teacher_tagged_comments_spec.js
+          - functional/teacher_tests/teacher_workspace_spec.js
+          - functional/tile_tests/arrow_annotation_spec.js
+          - functional/tile_tests/data_card_tool_spec.js
+          - functional/tile_tests/datacard_merge_spec.js
+          - functional/tile_tests/dataflow_table_integration_test_spec.js
+          - functional/tile_tests/dataflow_tool_spec.js
+          - functional/tile_tests/diagram_tool_spec.js
+          - functional/tile_tests/drawing_tool_spec.js
+          - functional/tile_tests/duplicate_tile_spec.js
+          - functional/tile_tests/expression_tool_spec.js
+          - functional/tile_tests/graph_table_integraton_test_spec.js
+          - functional/tile_tests/graph_tool_spec.js
+          - functional/tile_tests/image_tool_spec.js
+          - functional/tile_tests/numberline_tool_spec.js
+          - functional/tile_tests/shared_dataset_spec.js
+          - functional/tile_tests/shared_variables_test_spec.js
+          - functional/tile_tests/simulator_tile_spec.js
+          - functional/tile_tests/table_tool_spec.js
+          - functional/tile_tests/text_tool_spec.js
+          - functional/tile_tests/xy_plot_tool_spec.js
           - smoke/single_student_canvas_test.js
 jobs:
   all-tests:
@@ -96,9 +97,8 @@ jobs:
           record: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           # only do parallel if we have a record key
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
-          # upload videos for failing specs
-          config: video=true,videoUploadOnPasses=false
           browser: ${{ env.BROWSER }}
+          spec: cypress/e2e/functional/**
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -148,10 +148,8 @@ jobs:
           record: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           # only do parallel if we have a record key
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
-          # upload videos for failing specs
-          config: video=true,videoUploadOnPasses=false
           browser: ${{ env.BROWSER }}
-          spec: 'cypress/e2e/clue/${{ github.event.inputs.test }}'
+          spec: 'cypress/e2e/${{ github.event.inputs.test }}'
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}

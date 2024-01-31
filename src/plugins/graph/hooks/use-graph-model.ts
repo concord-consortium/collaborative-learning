@@ -1,71 +1,72 @@
 import {MutableRefObject, useCallback, useEffect} from "react";
 import {isAddCasesAction, isRemoveCasesAction} from "../../../models/data/data-set-actions";
 import {IGraphModel, isGraphVisualPropsAction} from "../models/graph-model";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
-import {INumericAxisModel} from "../imports/components/axis/models/axis-model";
-import {IDotsRef} from "../graph-types";
-import {matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
+import {matchAllCirclesToData, matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {onAnyAction} from "../../../utilities/mst-utils";
 
 interface IProps {
-  graphModel: IGraphModel
-  enableAnimation: MutableRefObject<boolean>
-  dotsRef: IDotsRef
-  instanceId: string | undefined
+  graphModel: IGraphModel;
+  enableAnimation: MutableRefObject<boolean>;
+  instanceId: string | undefined;
 }
 
 export function useGraphModel(props: IProps) {
-  const {graphModel, enableAnimation, dotsRef, instanceId} = props,
-    dataConfig = graphModel.config,
-    yAttrID = graphModel.getAttributeID('y'),
-    dataset = useDataSetContext();
+  const { graphModel, enableAnimation, instanceId } = props;
 
-  const callMatchCirclesToData = useCallback(() => {
+  const callMatchCirclesToData = useCallback((layer) => {
     matchCirclesToData({
-      dataConfiguration: dataConfig,
+      dataConfiguration: layer.config,
       pointRadius: graphModel.getPointRadius(),
       pointColor: graphModel.pointColor,
       pointStrokeColor: graphModel.pointStrokeColor,
-      dotsElement: dotsRef.current,
+      dotsElement: layer.dotsElt,
       enableAnimation, instanceId
     });
-  }, [dataConfig, graphModel, dotsRef, enableAnimation, instanceId]);
+  }, [graphModel, enableAnimation, instanceId]);
+
+  const callMatchAllCirclesToData = useCallback(() => {
+    matchAllCirclesToData({
+      graphModel, enableAnimation, instanceId
+    });
+  }, [graphModel, enableAnimation, instanceId]);
 
   // respond to added/removed cases
   useEffect(function installAddRemoveCaseHandler() {
-    return dataConfig.onAction(action => {
-      if (isAddCasesAction(action) || isRemoveCasesAction(action)) {
-        callMatchCirclesToData();
-      }
-    });
-  }, [callMatchCirclesToData, dataConfig]);
+    const disposers: (()=>void)[] = [];
+    for (const layer of graphModel.layers) {
+      disposers.push(layer.config.onAction(action => {
+        if (isAddCasesAction(action) || isRemoveCasesAction(action)) {
+          callMatchCirclesToData(layer);
+        }
+      }));
+    }
+    return () => { disposers.forEach((d) => { d(); }); };
+  }, [graphModel.layers, callMatchCirclesToData]);
 
   // respond to change in plotType
   useEffect(function installPlotTypeAction() {
     const disposer = onAnyAction(graphModel, action => {
       if (action.name === 'setPlotType') {
-        const newPlotType = action.args?.[0];/*,
-          attrIDs = newPlotType === 'dotPlot' ? [xAttrID] : [xAttrID, yAttrID]*/
+        const newPlotType = action.args?.[0];
         startAnimation(enableAnimation);
         // In case the y-values have changed we rescale
         if (newPlotType === 'scatterPlot') {
           const yAxisModel = graphModel.getAxis('left');
-          const values = dataConfig.caseDataArray.map(({ caseID }) => dataset?.getNumeric(caseID, yAttrID)) as number[];
-          setNiceDomain(values || [], yAxisModel as INumericAxisModel);
+          yAxisModel && setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
         }
       }
     });
     return () => disposer();
-  }, [dataConfig.caseDataArray, dataset, enableAnimation, graphModel, yAttrID]);
+  }, [enableAnimation, graphModel]);
 
   // respond to point properties change
   useEffect(function respondToGraphPointVisualAction() {
     const disposer = onAnyAction(graphModel, action => {
       if (isGraphVisualPropsAction(action)) {
-        callMatchCirclesToData();
+        callMatchAllCirclesToData();
       }
     });
     return () => disposer();
-  }, [callMatchCirclesToData, graphModel]);
+  }, [callMatchAllCirclesToData, graphModel]);
 
 }

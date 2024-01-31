@@ -117,7 +117,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   }
 
   private getDocument() {
-    const { documents, ui: { problemWorkspace: { primaryDocumentKey } } } = this.stores;
+    const { documents, persistentUI: { problemWorkspace: { primaryDocumentKey } } } = this.stores;
     return primaryDocumentKey ? documents.getDocument(primaryDocumentKey) : undefined;
   }
 
@@ -135,11 +135,9 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   };
 
   private renderTitle() {
-    const { readOnly } = this.props;
     return (
       <EditableTileTitle
         key="dataflow-title"
-        readOnly={readOnly}
         measureText={(text) => measureText(text, defaultTileTitleFont)}
         onBeginEdit={this.handleBeginEditTitle}
         onEndEdit={this.handleTitleChange}

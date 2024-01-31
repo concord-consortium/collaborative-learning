@@ -4,8 +4,6 @@ import React, {useCallback, useRef, useState} from "react";
 import {CaseData} from "../d3-types";
 import {PlotProps} from "../graph-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
-import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
 import {
@@ -14,13 +12,16 @@ import {
   setPointSelection,
   startAnimation
 } from "../utilities/graph-utils";
-import {useGraphModelContext} from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
+import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { useGraphLayerContext } from "../hooks/use-graph-layer-context";
 
 export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
   const {dotsRef, enableAnimation} = props,
     graphModel = useGraphModelContext(),
+    layer = useGraphLayerContext(),
     dataConfiguration = useDataConfigurationContext(),
-    dataset = useDataSetContext(),
+    dataset = dataConfiguration?.dataset,
     layout = useGraphLayoutContext(),
     primaryAttrRole = dataConfiguration?.primaryRole ?? 'x',
     primaryIsBottom = primaryAttrRole === 'x',
@@ -49,11 +50,11 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
         setDragID(() => tItsID);
         currPos.current = primaryIsBottom ? event.clientX : event.clientY;
 
-        handleClickOnDot(event, tItsID, dataset);
+        handleClickOnDot(event, aCaseData, dataConfiguration);
         // Record the current values, so we can change them during the drag and restore them when done
-        const {selection} = dataConfiguration || {},
+        const { caseSelection } = dataConfiguration || {},
           primaryAttrID = dataConfiguration?.attributeID(dataConfiguration?.primaryRole ?? 'x') ?? '';
-        selection?.forEach(anID => {
+          caseSelection?.forEach(anID => {
           const itsValue = dataset?.getNumeric(anID, primaryAttrID) || undefined;
           if (itsValue != null) {
             selectedDataObjects.current[anID] = itsValue;
@@ -75,8 +76,8 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
           const delta = Number(primaryAxisScale.invert(deltaPixels)) -
               Number(primaryAxisScale.invert(0)),
             caseValues: ICase[] = [],
-            {selection} = dataConfiguration || {};
-          selection?.forEach(anID => {
+            { caseSelection } = dataConfiguration || {};
+            caseSelection?.forEach(anID => {
             const currValue = Number(dataset?.getNumeric(anID, primaryAttrID));
             if (isFinite(currValue)) {
               caseValues.push({__id__: anID, [primaryAttrID]: currValue + delta});
@@ -100,8 +101,8 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
 
         if (didDrag.current) {
           const caseValues: ICase[] = [],
-            {selection} = dataConfiguration || {};
-          selection?.forEach(anID => {
+            { caseSelection } = dataConfiguration || {};
+            caseSelection?.forEach(anID => {
             caseValues.push({
               __id__: anID,
               [dataConfiguration?.attributeID(primaryAttrRole) ?? '']: selectedDataObjects.current[anID]
@@ -124,6 +125,8 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
   }, [dataConfiguration, dotsRef, graphModel, pointColor, pointStrokeColor]);
 
   const refreshPointPositions = useCallback((selectedOnly: boolean) => {
+      if (!dataConfiguration) return;
+
       const primaryPlace = primaryIsBottom ? 'bottom' : 'left',
         secondaryPlace = primaryIsBottom ? 'left' : 'bottom',
         extraPrimaryPlace = primaryIsBottom ? 'top' : 'rightCat',
@@ -255,7 +258,8 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
           ? dataConfiguration?.getLegendColorForCase : undefined;
 
       setPointCoordinates({
-        dataset, pointRadius: graphModel.getPointRadius(),
+        dataConfiguration, pointRadius: graphModel.getPointRadius(),
+        getColorForId: graphModel.getColorForId,
         selectedPointRadius: graphModel.getPointRadius('select'),
         dotsRef, selectedOnly, pointColor, pointStrokeColor,
         getScreenX, getScreenY, getLegendColor, enableAnimation
@@ -264,7 +268,7 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
     [graphModel, dataConfiguration, layout, primaryAttrRole, secondaryAttrRole, dataset, dotsRef,
       enableAnimation, primaryIsBottom, pointColor, pointStrokeColor]);
 
-  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
+  usePlotResponders({layer, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
 
   return (
     <>

@@ -18,8 +18,8 @@ import {
   kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax
 } from '../numberline-tile-constants';
 import { NumberlineToolbar } from "./numberline-toolbar";
-import NumberlineArrowLeft from "../assets/numberline-arrow-left.svg";
-import NumberlineArrowRight from "../assets/numberline-arrow-right.svg";
+import NumberlineArrowLeft from "../../../assets/numberline-arrow-left.svg";
+import NumberlineArrowRight from "../../../assets/numberline-arrow-right.svg";
 import { EditableNumberlineValue } from './editable-numberline-value';
 
 import "./numberline-tile.scss";
@@ -364,7 +364,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       tabIndex={0}
     >
       <div className={"numberline-title"}>
-        <BasicEditableTileTitle readOnly={readOnly} />
+        <BasicEditableTileTitle />
       </div>
       <NumberlineToolbar
         documentContent={documentContent}

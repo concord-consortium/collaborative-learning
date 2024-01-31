@@ -15,31 +15,47 @@ export interface QueryParams {
   testMigration?: string;
 
   //
+  // Portal common auth parameters
+  //
+
+  // OAuth2 base URL for site providing authentication, replaces token. Typically https://learn.concord.org
+  authDomain?: string;
+  // If set, this is passed to the portal APIs for JWTs. It should be the offering id that the user is
+  // trying to access. The resource link terminology comes from the LTI standard.
+  resourceLinkId?: string;
+  // short-lived nonce token from portal for authentication
+  token?: string;
+
+  //
   // Portal student auth parameters
   //
 
-  // short-lived nonce token from portal for authentication
-  token?: string;
   // The domain of the portal opening the app
   domain?: string;
   // the user ID of the user launching from the portal domain
   domain_uid?: string;
 
-  // If this exists then the demo ui is shown
-  demo?: boolean;
-
-  // Optional name of the demo to use as a namespace under the demo key
-  demoName?: string;
-
   //
   // Portal external report auth parameters (classOfferings is ignored)
   //
+
   // class info url
   class?: string;
   // offering info url
   offering?: string;
   // type of report
   reportType?: string;
+
+  //
+  // demo features
+  //
+
+  // If this exists then the demo ui is shown
+  demo?: boolean;
+  // Optional name of the demo to use as a namespace under the demo key
+  demoName?: string;
+
+
 
   //
   // teacher network development features
@@ -72,6 +88,8 @@ export interface QueryParams {
   firestore?: string; // "emulator" or host:port url
   // direct firebase function calls to the emulator
   functions?: string; // "emulator" or host:port url
+  // do not use persistentUI in some cy tests that rely on demo
+  noPersistentUI?: boolean;
 
   //
   // CMS options (admin.html)
@@ -103,8 +121,35 @@ export const processUrlParams = (): QueryParams => {
     // allows use of ?demo without a value for demo mode
     demo: (params.demo !== undefined),
     // allows use of localCMSBackend without a value
-    localCMSBackend: (params.localCMSBackend !== undefined)
+    localCMSBackend: (params.localCMSBackend !== undefined),
+    // disables persistentUI store initialization
+    noPersistentUI: (params.noPersistentUI !== undefined)
   };
 };
 
 export const urlParams = processUrlParams();
+
+export const reprocessUrlParams = () => {
+  const newParams = processUrlParams();
+  // clear the old params
+  Object.keys(urlParams).forEach(key => delete (urlParams as any)[key]);
+  // add new params
+  Object.assign(urlParams, newParams);
+};
+
+/**
+ * Simplifies query-string library by only returning `string | undefined`, instead
+ * of `string | string[] | null | undefined`.
+ * @param prop
+ */
+export function hashValue(prop: string): string | undefined {
+  const query = parse(window.location.hash);
+  const val = query[prop];
+  if (!val) {
+    return undefined;
+  }
+  if (Array.isArray(val)) {
+    throw `May only have one hash parameter for ${prop}. Found: ${val}`;
+  }
+  return val;
+}

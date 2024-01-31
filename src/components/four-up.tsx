@@ -13,6 +13,7 @@ import { CellPositions, FourUpGridCellModelType, FourUpGridModel, FourUpGridMode
 import { Logger } from "../lib/logger";
 import { LogEventName } from "../lib/logger-types";
 import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
+import ThumbnailBookmark from "../assets/thumbnail-bookmark-icon.svg";
 
 import "./four-up.sass";
 
@@ -135,9 +136,9 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   }
 
   private getFocusedUserDocKey() {
-    const {ui} = this.stores;
+    const {persistentUI} = this.stores;
     const {group} = this.props;
-    return ui.tabs.get(this.getNavTabName())?.openDocuments.get(group.id);
+    return persistentUI.tabs.get(this.getNavTabName())?.openDocuments.get(group.id);
   }
 
   private getFocusedGroupUser() {
@@ -153,7 +154,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const {documentViewMode, viaStudentGroupView,
-        group, isGhostUser, ...others } = this.props;
+        group, isGhostUser, ...others} = this.props;
 
     const {width, height} = this.grid;
     const nwCell = this.grid.cells[CellPositions.NorthWest];
@@ -250,7 +251,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     };
 
     const renderStar = (document?: DocumentModelType) => {
-      const { user } = this.stores;
+      const { user, bookmarks } = this.stores;
       if (!document || (documentViewMode !== DocumentViewMode.Published)) {
         return;
       }
@@ -259,15 +260,15 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         e.preventDefault();
         e.stopPropagation();
         if (document) {
-          document.toggleUserStar(user.id);
+          bookmarks.toggleUserBookmark(document.key, user.id);
         }
       };
 
-      const isStarred = document.isStarredByUser(user.id);
+      const isStarred = bookmarks.isDocumentBookmarkedByUser(document.key, user.id);
       return (
         <div className="icon-holder" onClick={handleStarClick}>
           <svg className={"icon-star " + (isStarred ? "starred" : "")} >
-            <use xlinkHref="#icon-outline-star"/>
+            <ThumbnailBookmark/>
           </svg>
         </div>
       );
@@ -399,13 +400,13 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleFourUpClick = () => {
-    const { ui } = this.stores;
+    const { persistentUI } = this.stores;
     const { group } = this.props;
-    ui.closeSubTabDocument(this.getNavTabName(),  group.id);
+    persistentUI.closeSubTabDocument(this.getNavTabName(),  group.id);
   };
 
   private handleOverlayClick = (groupUser?: GroupUserModelType) => {
-    const { ui } = this.stores;
+    const { persistentUI } = this.stores;
     const { group } = this.props;
     const focusedUser = this.getFocusedGroupUser();
     const document = this.getGroupUserDoc(groupUser);
@@ -413,10 +414,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     if (groupUser && document) {
       const logInfo = {groupId: group.id, studentId: groupUser.id};
       if (focusedUser){
-        ui.closeSubTabDocument(this.getNavTabName(), group.id);
+        persistentUI.closeSubTabDocument(this.getNavTabName(), group.id);
         Logger.log(LogEventName.DASHBOARD_DESELECT_STUDENT, logInfo);
       } else {
-        ui.setOpenSubTabDocument(this.getNavTabName(), group.id, document.key); //sets the focus document;
+        persistentUI.setOpenSubTabDocument(this.getNavTabName(), group.id, document.key); //sets the focus document;
         Logger.log(LogEventName.DASHBOARD_SELECT_STUDENT, logInfo);
       }
     }

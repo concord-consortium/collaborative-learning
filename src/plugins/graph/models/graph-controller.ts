@@ -1,19 +1,22 @@
-import React from "react";
+import React, { createContext } from "react";
 import {IGraphModel} from "./graph-model";
 import {GraphLayout} from "./graph-layout";
-import {getDataSetFromId} from "../../../models/shared/shared-data-utils";
 import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
 import {
   CategoricalAxisModel, EmptyAxisModel, isCategoricalAxisModel, isEmptyAxisModel, isNumericAxisModel, NumericAxisModel
 } from "../imports/components/axis/models/axis-model";
 import {
-  axisPlaceToAttrRole, graphPlaceToAttrRole, IDotsRef, kDefaultNumericAxisBounds, PlotType
+  axisPlaceToAttrRole, graphPlaceToAttrRole, kDefaultNumericAxisBounds, PlotType
 } from "../graph-types";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
-import {matchCirclesToData, setNiceDomain} from "../utilities/graph-utils";
+import {matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import { getAppConfig } from "../../../models/tiles/tile-environment";
+import { IDataConfigurationModel } from "./data-configuration-model";
 
-// keys are [primaryAxisType][secondaryAxisType]
+/**
+ * This determines the type of plot that will be drawn, based on the types of the two axes.
+ * The keys are [primaryAxisType][secondaryAxisType]
+ */
 const plotChoices: Record<string, Record<string, PlotType>> = {
   empty: {empty: 'casePlot', numeric: 'dotPlot', categorical: 'dotChart'},
   numeric: {empty: 'dotPlot', numeric: 'scatterPlot', categorical: 'dotPlot'},
@@ -29,12 +32,10 @@ interface IGraphControllerConstructorProps {
 
 interface IGraphControllerProps {
   graphModel: IGraphModel
-  dotsRef: IDotsRef
 }
 
 export class GraphController {
   graphModel?: IGraphModel;
-  dotsRef?: IDotsRef;
   layout: GraphLayout;
   enableAnimation: React.MutableRefObject<boolean>;
   instanceId: string;
@@ -49,37 +50,37 @@ export class GraphController {
 
   setProperties(props: IGraphControllerProps) {
     this.graphModel = props.graphModel;
-    this.dotsRef = props.dotsRef;
-    if (this.graphModel.config.dataset !== this.graphModel.data) {
-      this.graphModel.config.setDataset(this.graphModel.data, this.graphModel.metadata);
-    }
     this.initializeGraph();
   }
 
   callMatchCirclesToData() {
-    const {graphModel, dotsRef, enableAnimation, instanceId} = this;
-    if (graphModel && dotsRef?.current) {
-      const { config: dataConfiguration, pointColor, pointStrokeColor } = graphModel,
+    const {graphModel, enableAnimation, instanceId} = this;
+    if (graphModel) {
+      const { pointColor, pointStrokeColor } = graphModel,
         pointRadius = graphModel.getPointRadius();
-      matchCirclesToData({
-        dataConfiguration, dotsElement: dotsRef.current,
-        pointRadius, enableAnimation, instanceId, pointColor, pointStrokeColor
-      });
+      for (const layer of graphModel.layers) {
+        const dataConfiguration = layer.config;
+        if (dataConfiguration && layer.dotsElt) {
+          matchCirclesToData({
+            dataConfiguration, dotsElement: layer.dotsElt,
+            pointRadius, enableAnimation, instanceId, pointColor, pointStrokeColor
+          });
+      }
+      }
     }
   }
 
   initializeGraph() {
-    const {graphModel, dotsRef, layout} = this,
-      dataConfig = graphModel?.config;
+    const {graphModel, layout} = this;
 
     // handle any attributes auto-assigned before our handlers were in place
     if (graphModel?.autoAssignedAttributes.length) {
-      graphModel.autoAssignedAttributes.forEach(({ place, role, dataSetID, attrID }) => {
-        this.handleAttributeAssignment(place, dataSetID, attrID);
+      graphModel.autoAssignedAttributes.forEach(({ layer, place, role, dataSetID, attrID }) => {
+        this.handleAttributeAssignment(layer.config, place, attrID);
       });
       graphModel.clearAutoAssignedAttributes();
     }
-    if (dataConfig && layout && dotsRef?.current) {
+    if (graphModel && layout) {
       AxisPlaces.forEach((axisPlace: AxisPlace) => {
         const axisModel = graphModel.getAxis(axisPlace),
           attrRole = axisPlaceToAttrRole[axisPlace];
@@ -90,7 +91,8 @@ export class GraphController {
             axisMultiScale.setScaleType('ordinal');
           }
           if (isCategoricalAxisModel(axisModel)) {
-            axisMultiScale.setCategorySet(dataConfig.categorySetForAttrRole(attrRole));
+            // FIXME handle multiple layers
+            axisMultiScale.setCategorySet(graphModel.layers[0].config.categorySetForAttrRole(attrRole));
           }
           if (isNumericAxisModel(axisModel)) {
             axisMultiScale.setNumericDomain(axisModel.domain);
@@ -101,13 +103,11 @@ export class GraphController {
     }
   }
 
-  handleAttributeAssignment(graphPlace: GraphPlace, dataSetID: string, attrID: string) {
+  handleAttributeAssignment(dataConfiguration: IDataConfigurationModel, graphPlace: GraphPlace, attrID: string) {
     const {graphModel, layout} = this,
-      dataset = getDataSetFromId(graphModel, dataSetID),
-      dataConfig = graphModel?.config,
       appConfig = getAppConfig(graphModel),
       emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
-    if (!(graphModel && layout && dataConfig)) {
+    if (!(graphModel && layout)) {
       return;
     }
     this.callMatchCirclesToData();
@@ -117,7 +117,9 @@ export class GraphController {
     } else if (graphPlace === 'yPlus') {
       // The yPlus attribute utilizes the left numeric axis for plotting but doesn't change anything else
       const yAxisModel = graphModel.getAxis('left');
-      yAxisModel && setNiceDomain(dataConfig.numericValuesForYAxis, yAxisModel);
+      if (!graphModel.lockAxes) {
+        yAxisModel && setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
+      }
       return;
     }
 
@@ -126,30 +128,25 @@ export class GraphController {
         graphAttributeRole = axisPlaceToAttrRole[axisPlace];
       if (['left', 'bottom'].includes(axisPlace)) { // Only assignment to 'left' and 'bottom' change plotType
         const defaultAttrType = emptyPlotIsNumeric ? 'numeric' : 'empty';
-        const attributeType = dataConfig.attributeType(graphPlaceToAttrRole[graphPlace]) ?? defaultAttrType,
+        const attributeType = graphModel.attributeType(graphPlaceToAttrRole[graphPlace]) ?? defaultAttrType,
           primaryType = attributeType,
           otherAxisPlace = axisPlace === 'bottom' ? 'left' : 'bottom',
           otherAttrRole = axisPlaceToAttrRole[otherAxisPlace],
-          otherAttributeType = dataConfig.attributeType(graphPlaceToAttrRole[otherAxisPlace]) ?? defaultAttrType,
+          otherAttributeType = graphModel.attributeType(graphPlaceToAttrRole[otherAxisPlace]) ?? defaultAttrType,
           // Numeric attributes get priority for primaryRole when present. First one that is already present
           // and then the newly assigned one. If there is an already assigned categorical then its place is
           // the primaryRole, or, lastly, the newly assigned place
           primaryRole = otherAttributeType === 'numeric' ? otherAttrRole
             : attributeType === 'numeric' ? graphAttributeRole
               : otherAttributeType !== 'empty' ? otherAttrRole : graphAttributeRole;
-        dataConfig.setPrimaryRole(primaryRole);
+        graphModel.setPrimaryRole(primaryRole);
         graphModel.setPlotType(plotChoices[primaryType][otherAttributeType]);
-      }
-      if (dataConfig.attributeID(graphAttributeRole) !== attrID) {
-        dataConfig.setAttribute(graphAttributeRole, {attributeID: attrID});
       }
     };
 
     const setupAxis = (place: AxisPlace) => {
       const attrRole = graphPlaceToAttrRole[place],
-        attributeID = dataConfig.attributeID(attrRole),
-        attr = attributeID ? dataset?.attrFromID(attributeID) : undefined,
-        attrType = dataConfig.attributeType(attrRole) ?? 'empty',
+        attrType = dataConfiguration.attributeType(attrRole) ?? 'empty',
         currAxisModel = graphModel.getAxis(place),
         currentType = currAxisModel?.type ?? 'empty',
         [min, max] = kDefaultNumericAxisBounds;
@@ -158,11 +155,11 @@ export class GraphController {
           if (!currAxisModel || !isNumericAxisModel(currAxisModel)) {
             const newAxisModel = NumericAxisModel.create({place, min, max});
             graphModel.setAxis(place, newAxisModel);
-            dataConfig.setAttributeType(attrRole, 'numeric');
+            dataConfiguration.setAttributeType(attrRole, 'numeric');
             layout.setAxisScaleType(place, 'linear');
-            setNiceDomain(attr?.numValues || [], newAxisModel);
+            setNiceDomain(graphModel.numericValuesForAttrRole(attrRole), newAxisModel);
           } else {
-            setNiceDomain(attr?.numValues || [], currAxisModel);
+            setNiceDomain(graphModel.numericValuesForAttrRole(attrRole), currAxisModel);
           }
         }
           break;
@@ -170,10 +167,10 @@ export class GraphController {
           if (currentType !== 'categorical') {
             const newAxisModel = CategoricalAxisModel.create({place});
             graphModel.setAxis(place, newAxisModel);
-            dataConfig.setAttributeType(attrRole, 'categorical');
+            dataConfiguration.setAttributeType(attrRole, 'categorical');
             layout.setAxisScaleType(place, 'band');
           }
-          layout.getAxisMultiScale(place)?.setCategorySet(dataConfig.categorySetForAttrRole(attrRole));
+          layout.getAxisMultiScale(place)?.setCategorySet(dataConfiguration.categorySetForAttrRole(attrRole));
         }
           break;
         case 'empty': {
@@ -196,4 +193,21 @@ export class GraphController {
     setPrimaryRoleAndPlotType();
     AxisPlaces.forEach(setupAxis);
   }
+
+  /**
+   * Set the domains of all axes to fit all of the data points.
+   */
+  autoscaleAllAxes() {
+    if (!this.graphModel) return;
+    startAnimation(this.enableAnimation);
+    for (const place of AxisPlaces) {
+      const role = graphPlaceToAttrRole[place];
+      const axisModel = this.graphModel.getAxis(place);
+      if (isNumericAxisModel(axisModel)) {
+        setNiceDomain(this.graphModel.numericValuesForAttrRole(role), axisModel);
+      }
+    }
+  }
 }
+
+export const GraphControllerContext = createContext<GraphController|undefined>(undefined);

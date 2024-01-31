@@ -1,0 +1,188 @@
+@import "../vars";
+$title-margin: 2px;
+
+.sort-work-view {
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+
+  .sorted-sections{
+    width: 100%;
+    height: 100%;
+
+    .section-header{
+      height: 30px;
+      position: relative;
+      margin-top: 5px;
+      margin-bottom: 5px;
+
+      &::after{ //divider line drawn across
+        content: "";
+        position: absolute;
+        left: 0px;
+        right: 0px;
+        bottom: 50%;
+        border-bottom: 1px solid $charcoal-light-1;
+      }
+
+      .section-header-label{
+        position: absolute;
+        left: 10px;
+        height: 26px;
+        border-radius: 5px;
+        background-color: $classwork-purple-light-7;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $charcoal-dark-2;
+        z-index: 1;
+        padding: 0px 7px;
+      }
+    }
+  }
+
+  .focus-document {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
+    .document-header {
+      display: flex;
+      align-items: center;
+      height: $workspace-titlebar-height;
+      background-color: $charcoal-light-5;
+      margin-top: $title-margin;
+      justify-content: center;
+      position: relative;
+      top: 0;
+      width: 100%;
+
+      .document-title {
+        text-align: center;
+        flex-grow: 1;
+        font-size: 13px;
+        font-weight: bold;
+        .sort-work {
+          font-weight: normal;
+        }
+      }
+
+      .document-buttons {
+        display:flex;
+        flex-direction: row;
+        height: 100%;
+        align-items: center;
+        position: absolute;
+        top: -1px;
+        right: 5px;
+      }
+
+      .close-doc-button {
+        svg {
+          position: relative;
+          left:-2px;
+          .x-shape {
+            fill: rgba(0,0,0,0.6);
+          }
+        }
+        margin-left: 6px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        background-color: transparent;
+        border-width: 0px;
+        border-radius: 50%;
+        padding: 3px;
+        height:26px;
+        width: 26px;
+        &:hover {
+          background-color: rgba(0,0,0,0.2);
+        }
+        &:active {
+          background-color: rgba(0,0,0,0.4);
+          .x-shape {
+            fill: white;
+          }
+        }
+        &.disabled {
+          pointer-events: none;
+          opacity: 0.35;
+        }
+      }
+      .edit-button {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 66px;
+        height: 26px;
+        border-radius: 5px;
+        border: solid 1.5px $charcoal-light-1;
+        background-color: $workspace-teal-light-4;
+        padding: 0;
+        box-sizing: border-box;
+        cursor: pointer;
+        &:hover {
+          background-color: $workspace-teal-light-3;
+        }
+        &:active {
+          background-color: $workspace-teal-light-1;
+          color: white;
+          .edit-icon {
+            fill: white;
+          }
+        }
+        &.disabled {
+          pointer-events: none;
+          opacity: 0.35;
+        }
+        &.primary {
+          background-color: $document-select-green;
+        }
+        &.secondary {
+          background-color: $document-select-blue;
+        }
+
+        .edit-icon {
+          fill: $workspace-teal-dark-1;
+          width: 24px;
+          height: 24px;
+          margin-left: 4px;
+          margin-right: 3px;
+          &.learning-log {
+            fill: $learninglog-green-dark-1;
+          }
+        }
+      }
+    }
+
+    .editable-document-content {
+      top: $nav-tab-height;
+      flex: 1;
+      .canvas-area {
+        // Not sure why - 4px is necessary here, but the document would always scroll otherwise
+        height: calc(100% - 4px);
+        width: 100%;
+
+        .comment-select {
+          .tool-tile.readonly {
+            border: 2px solid $comment-select-background;
+            &.selected {
+              border: 2px solid white;
+            }
+          }
+        }
+
+        .playback-component {
+          // This is to compensate for the - 4px above
+          bottom: -4px;
+        }
+      }
+    }
+  }
+}

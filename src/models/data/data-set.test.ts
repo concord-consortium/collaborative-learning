@@ -390,6 +390,55 @@ function createEvens(source: IDataSet) {
                       });
 }
 
+test("Selection", () => {
+  const ds = createDataSet("source");
+
+  // Select and deselect all cases
+  expect(ds.selectedCaseIds.length).toBe(0);
+  ds.selectAllCases();
+  expect(ds.selectedCaseIds.length).toBe(5);
+  ds.selectAllCases(false);
+  expect(ds.selectedCaseIds.length).toBe(0);
+
+  // Select and deselect all attributes
+  expect(ds.selectedAttributeIds.length).toBe(0);
+  ds.selectAllAttributes();
+  expect(ds.selectedAttributeIds.length).toBe(2);
+  ds.selectAllAttributes(false);
+  expect(ds.selectedAttributeIds.length).toBe(0);
+
+  // Select and deselect all cells
+  expect(ds.selectedCells.length).toBe(0);
+  ds.selectAllCells();
+  expect(ds.selectedCells.length).toBe(10);
+  ds.selectAllCells(false);
+  expect(ds.selectedCells.length).toBe(0);
+
+  // Select cases
+  const caseId = ds.caseIDFromIndex(0) ?? "caseId";
+  expect(ds.selectedCaseIds.length).toBe(0);
+  ds.selectCases([caseId]);
+  expect(ds.selectedCaseIds.length).toBe(1);
+  ds.selectCases([caseId], false);
+  expect(ds.selectedCaseIds.length).toBe(0);
+
+  // Select attributes
+  const attributeId = ds.attrIDFromIndex(0) ?? "attributeId";
+  expect(ds.selectedAttributeIds.length).toBe(0);
+  ds.selectAttributes([attributeId]);
+  expect(ds.selectedAttributeIds.length).toBe(1);
+  ds.selectAttributes([attributeId], false);
+  expect(ds.selectedAttributeIds.length).toBe(0);
+
+  // Select cell
+  const cell = { attributeId, caseId };
+  expect(ds.isAnyCellSelected).toBe(false);
+  ds.selectCells([cell]);
+  expect(ds.isAnyCellSelected).toBe(true);
+  ds.selectCells([cell], false);
+  expect(ds.isAnyCellSelected).toBe(false);
+});
+
 test("Derived DataSet synchronization (subset attributes)", () => {
   const source = createDataSet("source"),
         odds = createOdds(source);

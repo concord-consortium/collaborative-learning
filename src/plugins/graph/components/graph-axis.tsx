@@ -7,7 +7,7 @@ import {Active} from "@dnd-kit/core";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {AttributeType} from "../../../models/data/attribute";
 import { IDataSet } from "../../../models/data/data-set";
-import {useGraphModelContext} from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {getDragAttributeInfo, useDropHandler} from "../imports/hooks/use-drag-drop";
@@ -20,8 +20,8 @@ import {useDropHintString} from "../imports/hooks/use-drop-hint-string";
 import { isAddCasesAction, isSetCaseValuesAction } from "../../../models/data/data-set-actions";
 import { computeNiceNumericBounds } from "../utilities/graph-utils";
 import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
-import { useSettingFromStores } from "../../../hooks/use-stores";
 import { DroppableAxis } from "./droppable-axis";
+import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
 
 interface IProps {
   place: AxisPlace
@@ -42,7 +42,7 @@ export const GraphAxis = observer(function GraphAxis({
     layout = useGraphLayoutContext(),
     droppableId = `${instanceId}-${place}-axis-drop`,
     hintString = useDropHintString({role: axisPlaceToAttrRole[place]}),
-    emptyPlotIsNumeric = useSettingFromStores("emptyPlotIsNumeric", "graph") as boolean | undefined,
+    { disableAttributeDnD, emptyPlotIsNumeric } = useGraphSettingsContext(),
     axisShouldShowGridlines = emptyPlotIsNumeric || graphModel.axisShouldShowGridLines(place),
     parentEltRef = useRef<HTMLDivElement | null>(null),
     [wrapperElt, _setWrapperElt] = useState<SVGGElement | null>(null),
@@ -72,13 +72,14 @@ export const GraphAxis = observer(function GraphAxis({
   useEffect(function installBackground() {
     return autorun(() => {
       if (wrapperElt) {
-        const bounds = layout.getComputedBounds(place),
-          graphWidth = layout.graphWidth,
-          left = ['bottom', 'top'].includes(place) ? 0 : bounds.left,
-          width = ['bottom', 'top'].includes(place) ? graphWidth : bounds.width,
-          transform = `translate(${left}, ${bounds.top})`;
+        const bounds = layout.getComputedBounds(place);
+        const graphWidth = layout.graphWidth;
+        const left = ['bottom', 'top'].includes(place) ? 0 : bounds.left;
+        const width = ['bottom', 'top'].includes(place) ? graphWidth : bounds.width;
+        const transform = `translate(${left}, ${bounds.top})`;
+
         select(wrapperElt)
-          .selectAll<SVGRectElement, number>('rect')
+          .selectAll<SVGRectElement, number>('rect.axis-background')
           .attr('transform', transform)
           .attr('width', width)
           .attr('height', bounds.height);
@@ -88,9 +89,11 @@ export const GraphAxis = observer(function GraphAxis({
 
   useEffect(() => {
     if (autoAdjust?.current) {
+      // TODO multi dataset - this should consider all layers
       dataConfig?.onAction(action => {
         if (
             isAlive(graphModel) &&
+            !graphModel.lockAxes &&
             (isAddCasesAction(action) || isSetCaseValuesAction(action))
            )
         {
@@ -129,31 +132,35 @@ export const GraphAxis = observer(function GraphAxis({
   }, [layout, place, graphModel]);
 
   const axisModel = graphModel?.getAxis(place);
+
   return (
     <g className='axis-wrapper' ref={elt => setWrapperElt(elt)}>
       <rect className='axis-background'/>
       {axisModel && isAlive(axisModel) &&
-      <Axis axisModel={axisModel}
-            label={''}  // Remove
-            enableAnimation={enableAnimation}
-            showScatterPlotGridLines={axisShouldShowGridlines}
-            centerCategoryLabels={graphModel.config.categoriesForAxisShouldBeCentered(place)}
-      />}
+        <Axis
+          axisModel={axisModel}
+          label={''}  // Remove
+          enableAnimation={enableAnimation}
+          showScatterPlotGridLines={axisShouldShowGridlines}
+          centerCategoryLabels={graphModel.categoriesForAxisShouldBeCentered(place)}
+        />
+      }
       <AttributeLabel
         place={place}
         onChangeAttribute={onDropAttribute}
         onRemoveAttribute={onRemoveAttribute}
         onTreatAttributeAs={onTreatAttributeAs}
       />
-      {onDropAttribute &&
-         <DroppableAxis
-            place={`${place}`}
-            dropId={droppableId}
-            hintString={hintString}
-            portal={parentEltRef.current}
-            target={wrapperElt}
-            onIsActive={handleIsActive}
-         />}
+      {onDropAttribute && !disableAttributeDnD &&
+        <DroppableAxis
+          place={`${place}`}
+          dropId={droppableId}
+          hintString={hintString}
+          portal={parentEltRef.current}
+          target={wrapperElt}
+          onIsActive={handleIsActive}
+        />
+      }
     </g>
   );
 });

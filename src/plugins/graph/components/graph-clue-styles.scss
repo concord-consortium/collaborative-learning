@@ -1,7 +1,9 @@
 @import "../../../components/vars.sass";
+@import "./legend/legend-vars.scss";
 
 .graph-plot {
-  background-color: $workspace-teal-light-7;
+  position: relative; //used to position EditableGraphValue
+
   .display-label.left text {
     fill: black;
     text-decoration: none;
@@ -27,13 +29,24 @@
   background: transparent;
   border: none;
   cursor: pointer;
+
+  // The above class was sometimes getting overwritten by another class, sometimes not.
+  // The following & ensures that the important styling is applied no matter what the order.
+  &.graph-legend-label {
+    background: transparent;
+    border: none;
+  }
 }
+
 .chakra-menu__menu-list {
   background: $workspace-teal-light-9;
   border: solid 2px $workspace-teal;
   border-radius: 5px;
-  min-width: 100px;
   padding: 5px;
+
+  &.normal-menu-list {
+    min-width: $min-menu-width;
+  }
 
   button {
     background: $workspace-teal-light-9;
@@ -58,6 +71,7 @@
       }
     }
   }
+
   hr {
     border: none;
     border-top: 1px solid $workspace-teal-light-2;

@@ -8,7 +8,7 @@ import { getDefaultPeak } from "../annotations/annotation-utilities";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { PreviewArrow } from "../annotations/preview-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
-import { useUIStore } from "../../hooks/use-stores";
+import { usePersistentUIStore, useUIStore } from "../../hooks/use-stores";
 import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
 import { ClueObjectModel, IClueObject, OffsetModel } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
@@ -38,6 +38,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [mouseY, setMouseY] = useState<number | undefined>();
   const divRef = useRef<Element|null>(null);
   const ui = useUIStore();
+  const persistentUI = usePersistentUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
 
   // Clear a partially completed annotation when the mode changes
@@ -60,8 +61,14 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   }
 
   const documentWidth = canvasElement?.offsetWidth ?? 0;
-  // TODO Would it be better to use canvasElement?.offsetHeight here?
-  const documentHeight = content?.height ?? 0;
+  let documentHeight = 0;
+  const rows = canvasElement?.getElementsByClassName("tile-row");
+  if (rows) {
+    Array.from(rows).forEach(row => {
+      const boundingBox = row.getBoundingClientRect();
+      documentHeight += boundingBox.height;
+    });
+  }
   const documentLeft = 0;
   const documentRight = documentWidth;
   const documentBottom = documentHeight - (documentScrollY ?? 0);
@@ -201,7 +208,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
   const rowIds = content?.rowOrder || [];
   const editing = ui.annotationMode !== undefined;
-  const hidden = !ui.showAnnotations;
+  const hidden = !persistentUI.showAnnotations;
   const classes = classNames("annotation-layer", { editing, hidden });
   return (
     <div

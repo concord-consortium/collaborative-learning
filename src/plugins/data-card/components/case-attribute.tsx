@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
+import escapeStringRegexp from "escape-string-regexp";
 import { useCombobox } from "downshift";
 import { uniq } from "lodash";
 import { VisuallyHidden } from "@chakra-ui/react";
@@ -9,6 +10,7 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { looksLikeDefaultLabel, EditFacet } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
+import { useIsLinked } from "../use-is-linked";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
 import { useErrorAlert } from "../../../components/utilities/use-error-alert";
 import { getClipboardContent } from "../../../utilities/clipboard-utils";
@@ -47,6 +49,9 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setCurrEditFacet, setCurrEditAttrId, readOnly
   } = props;
   const content = model.content as DataCardContentModelType;
+  const dataSet = content.dataSet;
+  const cell = { attributeId: attrKey, caseId: caseId ?? "" };
+  const isLinked = useIsLinked();
   const getLabel = () => content.dataSet.attrFromID(attrKey).name;
   const getValue = () => {
     const value = caseId && content.dataSet.getValue(caseId, attrKey) || "";
@@ -61,20 +66,16 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
 
-  const validCompletions = (aValues: string[], prefixString: string) => {
-    const prefixStringLC = prefixString.toLowerCase();
+  const validCompletions = useCallback((aValues: string[], userString: string) => {
     const values = uniq(aValues).sort();
-    if (editingValue && valueCandidate.length > 0){
-      return values.filter((value) => {
-        return value && typeof(value)==='string' && !isImageUrl(value)
-               && value.toLowerCase().startsWith(prefixStringLC);
-      }) as string[];
-    } else {
-      return values.filter((value) => {
-        return value && typeof(value)==='string' && !isImageUrl(value);
-      }) as string[];
-    }
-  };
+    const escapedStr = escapeStringRegexp(userString);
+    const regex = new RegExp(escapedStr, 'i');
+
+    return editingValue && valueCandidate.length > 0
+      ? values.filter((value) => value && !isImageUrl(value) && regex.test(value))
+      : values.filter((value) => value && !isImageUrl(value));
+
+  }, [editingValue, valueCandidate.length]);
 
   const {
     isOpen,
@@ -101,7 +102,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     const attrValues = content.dataSet.attrFromID(attrKey)?.values || [];
     const completions = validCompletions(attrValues as string[], valueCandidate);
     setInputItems(completions);
-  }, [content.dataSet, attrKey, valueCandidate]);
+  }, [content.dataSet, attrKey, valueCandidate, validCompletions]);
 
   // reset contents of input when attribute value changes without direct user input
   // (when it is deleted by toolbar or the underlying case has changed )
@@ -146,6 +147,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const handleLabelClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     event.stopPropagation();
+    dataSet.setSelectedAttributes([attrKey]);
     if (readOnly) return;
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("name");
@@ -154,6 +156,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const handleValueClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     event.stopPropagation();
+    dataSet.setSelectedCells([cell]);
     if (readOnly) return;
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("value");
@@ -219,8 +222,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   };
 
-  function deleteAttribute(){
-    if(attrKey){
+  function deleteAttribute() {
+    if (attrKey){
       content.dataSet.removeAttribute(attrKey);
     }
   }
@@ -259,21 +262,48 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const pairClassNames = `attribute-name-value-pair ${attrKey}`;
-  const valueInputClassNames = `value-input ${attrKey}`;
+
+  const attributeSelected = dataSet.isAttributeSelected(attrKey);
 
   const labelClassNames = classNames(
-    `name ${attrKey}`,
-    { "editing": editingLabel }
+    "name", attrKey,
+    {
+      editing: editingLabel,
+      highlighted: attributeSelected,
+      linked: isLinked
+    }
   );
 
+  const labelInputClassNames = classNames(
+    "input",
+    {
+      highlighted: attributeSelected,
+      linked: isLinked
+    }
+  );
+
+  const valueHighlighted = attributeSelected || content.caseSelected || dataSet.isCellSelected(cell);
+
   const valueClassNames = classNames(
-    `value ${attrKey}`,
-    { "editing": editingValue },
-    {"has-image": gImageMap.isImageUrl(valueStr)}
+    "value", attrKey,
+    {
+      editing: editingValue,
+      "has-image": gImageMap.isImageUrl(valueStr),
+      highlighted: valueHighlighted,
+      linked: isLinked
+    }
+  );
+  const valueInputClassNames = classNames(
+    "value-input", attrKey,
+    {
+      highlighted: valueHighlighted,
+      linked: isLinked
+    }
   );
 
   const typeIconClassNames = classNames(
-    `type-icon ${attrKey}`
+    "type-icon", attrKey,
+    { highlighted: valueHighlighted, linked: isLinked }
   );
 
   const deleteAttrButtonClassNames = classNames(
@@ -311,13 +341,25 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     return <span></span>; // There may be more cases in the future, e.g. date picker
   };
 
+  const itemWithBoldedMatch = (fullString: string, matchString: string) => {
+    if (!matchString) return <span>{fullString}</span>; // no match string, no bolding
+    // If full string is "Orange" and matchString is "ran"
+    // the result will be "O<b>ran</b>ge"
+    const matchIndex = fullString.toLowerCase().indexOf(matchString.toLowerCase());
+    const matchEndIndex = matchIndex + matchString.length;
+    const match = fullString.slice(matchIndex, matchEndIndex);
+    const lettersBeforeMatch = fullString.slice(0, matchIndex);
+    const lettersAfterMatch = fullString.slice(matchEndIndex);
+    return <span>{lettersBeforeMatch}<b>{match}</b>{lettersAfterMatch}</span>;
+  };
+
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onClick={handleLabelClick}>
         { !readOnly && editingLabel
           ? <input
               type="text"
-              className="input"
+              className={labelInputClassNames}
               value={labelCandidate}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
@@ -329,40 +371,40 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       </div>
 
       <div className={valueClassNames} onClick={handleValueClick}>
-          <div style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}} className="downshift-dropdown">
-            <VisuallyHidden>
-              <label {...getLabelProps()} className="">
-                Value for {labelCandidate}
-              </label>
-            </VisuallyHidden>
-            <input
-              {...customizedGetInputProps()}
-              className={valueInputClassNames}
-              onFocus={handleValueInputFocus}
-              onPaste={handleValuePaste}
-            />
-            <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
-              {displayArrow()}
-            </button>
-            <ul {...getMenuProps()} className={ isOpen ? "open" : "closed"}>
-              {isOpen &&
-                inputItems.map((item, index) => (
-                  <li className="dropdown-item" style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }
-                    key={`${item}${index}`}
-                    {...getItemProps({item, index})}
-                  >
-                    {item}
-                  </li>
-              ))}
-            </ul>
-          </div>
+        <div style={{display: (!readOnly && !valueIsImage()) ? 'block' : 'none'}} className="downshift-dropdown">
+          <VisuallyHidden>
+            <label {...getLabelProps()} className="">
+              Value for {labelCandidate}
+            </label>
+          </VisuallyHidden>
+          <input
+            {...customizedGetInputProps()}
+            className={valueInputClassNames}
+            onFocus={handleValueInputFocus}
+            onPaste={handleValuePaste}
+          />
+          <button aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
+            {displayArrow()}
+          </button>
+          <ul {...getMenuProps()} className={ isOpen ? "open" : "closed" }>
+            {isOpen &&
+              inputItems.map((item, index) => (
+                <li className="dropdown-item" style={highlightedIndex === index ? {backgroundColor: '#bde4ff'} : {} }
+                  key={`${item}${index}`}
+                  {...getItemProps({item, index})}
+                >
+                  { itemWithBoldedMatch(item, valueCandidate) }
+                </li>
+            ))}
+          </ul>
+        </div>
 
-          { valueIsImage() &&
-            <img src={imageUrl} className="image-value" />
-          }
-          { readOnly && !valueIsImage() &&
-            <div className="cell-value">{valueStr}</div>
-          }
+        { valueIsImage() &&
+          <img src={imageUrl} className="image-value" />
+        }
+        { readOnly && !valueIsImage() &&
+          <div className="cell-value">{valueStr}</div>
+        }
       </div>
       <div className={typeIconClassNames} >{typeIcon}</div>
 

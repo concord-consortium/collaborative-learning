@@ -1,5 +1,4 @@
 import {observer} from "mobx-react-lite";
-import {appConfig} from "../../../initialize-app";
 import React, { MutableRefObject, useEffect, useMemo, useRef} from "react";
 import {select} from "d3";
 import {GraphController} from "../models/graph-controller";
@@ -8,32 +7,31 @@ import {Background} from "./background";
 import {DroppablePlot} from "./droppable-plot";
 import {AxisPlace, AxisPlaces} from "../imports/components/axis/axis-types";
 import {GraphAxis} from "./graph-axis";
-import {attrRoleToGraphPlace, graphPlaceToAttrRole, IDotsRef, kGraphClass} from "../graph-types";
-import {ScatterDots} from "./scatterdots";
-import {DotPlotDots} from "./dotplotdots";
-import {CaseDots} from "./casedots";
-import {ChartDots} from "./chartdots";
+import {attrRoleToGraphPlace, graphPlaceToAttrRole, kGraphClass} from "../graph-types";
 import {Marquee} from "./marquee";
 import {DataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphModel} from "../hooks/use-graph-model";
+import {useGraphSettingsContext} from "../hooks/use-graph-settings-context";
 import {setNiceDomain, startAnimation} from "../utilities/graph-utils";
-import {IAxisModel} from "../imports/components/axis/models/axis-model";
+import {IAxisModel, INumericAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {useGraphLayoutContext} from "../models/graph-layout";
-import {
-  isAttributeAssignmentAction, isRemoveYAttributeAction, isReplaceYAttributeAction, isSetAttributeIDAction,
-  useGraphModelContext
-} from "../models/graph-model";
+import { isAttributeAssignmentAction, isRemoveAttributeFromRoleAction, isRemoveYAttributeWithIDAction,
+  isReplaceYAttributeAction, isSetAttributeForRoleAction }
+  from "../models/data-configuration-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {MarqueeState} from "../models/marquee-state";
 import {Legend} from "./legend/legend";
 import {MultiLegend} from "./legend/multi-legend";
 import {AttributeType} from "../../../models/data/attribute";
 import {IDataSet} from "../../../models/data/data-set";
-import {useDataTips} from "../hooks/use-data-tips";
+// import {useDataTips} from "../hooks/use-data-tips";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
+import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
+import { AxisEndComponents } from "./axis-end-components";
+import { GraphLayer } from "./graph-layer";
 
 import "./graph.scss";
 import "./graph-clue-styles.scss";
@@ -41,20 +39,20 @@ import "./graph-clue-styles.scss";
 interface IProps {
   graphController: GraphController;
   graphRef: MutableRefObject<HTMLDivElement | null>;
-  dotsRef: IDotsRef;
   onRequestRowHeight?: (id: string, size: number) => void;
+  readOnly?: boolean
 }
 
 export const Graph = observer(
-    function Graph({ graphController, graphRef, dotsRef, onRequestRowHeight }: IProps) {
+    function Graph({ graphController, readOnly, graphRef, onRequestRowHeight }: IProps) {
 
   const graphModel = useGraphModelContext(),
     {autoAdjustAxes, enableAnimation} = graphController,
     {plotType} = graphModel,
     instanceId = useInstanceIdContext(),
     marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []),
-    dataset = useDataSetContext(),
     layout = useGraphLayoutContext(),
+    {defaultSeriesLegend, disableAttributeDnD} = useGraphSettingsContext(),
     xScale = layout.getAxisScale("bottom"),
     svgRef = useRef<SVGSVGElement>(null),
     plotAreaSVGRef = useRef<SVGSVGElement>(null),
@@ -69,31 +67,40 @@ export const Graph = observer(
         .attr('width', layout.plotWidth > 0 ? layout.plotWidth : 0)
         .attr('height', layout.plotHeight > 0 ? layout.plotHeight : 0);
     }
-  }, [dataset, plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale]);
+  }, [plotAreaSVGRef, layout, layout.plotHeight, layout.plotWidth, xScale]);
 
   const handleChangeAttribute = (place: GraphPlace, dataSet: IDataSet, attrId: string, oldAttrId?: string) => {
-    const computedPlace = place === 'plot' && graphModel.config.noAttributesAssigned ? 'bottom' : place;
+    const computedPlace = place === 'plot' && graphModel.noAttributesAssigned ? 'bottom' : place;
     const attrRole = graphPlaceToAttrRole[computedPlace];
     if (attrRole === 'y' && oldAttrId) {
       graphModel.replaceYAttributeID(oldAttrId, attrId);
-      const yAxisModel = graphModel.getAxis('left') as IAxisModel;
-      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
+      if (!graphModel.lockAxes) {
+        const yAxisModel = graphModel.getAxis('left') as IAxisModel;
+        setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
+      }
     } else {
       graphModel.setAttributeID(attrRole, dataSet.id, attrId);
     }
   };
 
   /**
-   * Only in the case that place === 'y' and there is more than one attribute assigned to the y-axis
-   * do we have to do anything special. Otherwise, we can just call handleChangeAttribute.
+   * Remove a given Attribute from the graph.
+   * This is called by 'Remove...' menu options.
    */
   const handleRemoveAttribute = (place: GraphPlace, idOfAttributeToRemove: string) => {
-    if (place === 'left' && graphModel.config?.yAttributeDescriptions.length > 1) {
+    if (place === 'left') {
       graphModel.removeYAttributeID(idOfAttributeToRemove);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;
-      setNiceDomain(graphModel.config.numericValuesForYAxis, yAxisModel);
+      if (!graphModel.lockAxes) {
+        setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
+      }
     } else {
-      dataset && handleChangeAttribute(place, dataset, '');
+      const role = graphPlaceToAttrRole[place];
+      if (role === 'y') {
+        graphModel.removeYAttributeID(idOfAttributeToRemove);
+      } else {
+        graphModel.removeAttribute(role, idOfAttributeToRemove);
+      }
     }
   };
 
@@ -102,16 +109,34 @@ export const Graph = observer(
     const disposer = graphModel && onAnyAction(graphModel, action => {
       if (isAttributeAssignmentAction(action)) {
         let graphPlace: GraphPlace = "yPlus";
-        let dataSetId = dataset?.id ?? "";
-        let attrId = "";
-        if (isSetAttributeIDAction(action)) {
-          const [role, _dataSetId, _attrId] = action.args;
-          graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
-          dataSetId = _dataSetId;
-          attrId = _attrId;
+        // This should trigger only on changes in one of the attached DataConfiguration objects.
+        // We can determine which one from the path.
+        if (!action.path) return;
+        const match = action.path.match(/^\/layers\/([0-9]+)\/config$/);
+        if (!match) {
+          console.warn('Unexpected action.path: ', action.path);
+          return;
         }
-        else if (isRemoveYAttributeAction(action)) {
-          graphPlace = "yPlus";
+        const layerNumber = Number(match[1]);
+        if (!isFinite(layerNumber) || layerNumber >= graphModel.layers.length) {
+          console.warn('Unexpected layer number: ', action.path);
+          return;
+        }
+        const layer = graphModel.layers[layerNumber];
+        let attrId = "";
+        if (isSetAttributeForRoleAction(action)) {
+          const [role, _desc] = action.args;
+          graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
+          attrId = _desc?.attributeID || "";
+        }
+        else if (isRemoveAttributeFromRoleAction(action)) {
+          const [role] = action.args;
+          graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
+        }
+        else if (isRemoveYAttributeWithIDAction(action)) {
+          const [_attrId] = action.args; // "old" attr ID, do not pass to handleAttributeAssignment
+          const removingLastOne = layer.config.yAttributeDescriptions.length === 0;
+          graphPlace = removingLastOne ? "left" : "yPlus";
         }
         else if (isReplaceYAttributeAction(action)) {
           const [ , newAttrId] = action.args;
@@ -119,50 +144,43 @@ export const Graph = observer(
           attrId = newAttrId;
         }
         startAnimation(enableAnimation);
-        graphPlace && graphController?.handleAttributeAssignment(graphPlace, dataSetId, attrId);
+        graphPlace && graphController?.handleAttributeAssignment(layer.config, graphPlace, attrId);
       }
     });
     return () => disposer?.();
-  }, [graphController, dataset, layout, enableAnimation, graphModel]);
+  }, [graphController, layout, enableAnimation, graphModel]);
 
   const handleTreatAttrAs = (place: GraphPlace, attrId: string, treatAs: AttributeType) => {
-    graphModel.config.setAttributeType(graphPlaceToAttrRole[place], treatAs);
-    dataset && graphController?.handleAttributeAssignment(place, dataset.id, attrId);
+    const layer = graphModel.layerForAttributeId(attrId);
+    if (!layer) return;
+    layer.config.setAttributeType(graphPlaceToAttrRole[place], treatAs);
+    layer.config.dataset && graphController?.handleAttributeAssignment(layer.config, place, attrId);
 
-    const connectingLines = graphModel.adornments.find(a => a.type === "Connecting Lines");
+    const connectingLines = graphModel.adornments.find(a => a.type === kConnectingLinesType);
     if (connectingLines && place === "left") {
-      treatAs === 'categorical' && graphModel.hideAdornment("Connecting Lines");
-      treatAs === 'numeric' && graphModel.showAdornment(connectingLines, "Connecting Lines");
-    }
-
-    // TODO: use isVisible state, set above, instead of this hack
-    if (!connectingLines?.isVisible){
-      const dotArea = select(dotsRef.current);
-      const anyFoundPath = dotArea.selectAll("path");
-      if (anyFoundPath) anyFoundPath.remove();
+      treatAs === 'categorical' && graphModel.hideAdornment(kConnectingLinesType);
+      treatAs === 'numeric' && graphModel.showAdornment(connectingLines);
     }
   };
 
-  useDataTips({dotsRef, dataset, graphModel, enableAnimation});
+  // useDataTips({dotsRef, graphModel, enableAnimation});
+  //useDataTips hook is used to identify individual points in a dense scatterplot
+  //it should be commented out for now as it shrinks outer circle when hovered over, but may prove useful in the future
 
-  const renderPlotComponent = () => {
-    const props = {
-        dotsRef, enableAnimation
-      },
-      typeToPlotComponentMap = {
-        casePlot: <CaseDots {...props}/>,
-        dotChart: <ChartDots {...props}/>,
-        dotPlot: <DotPlotDots {...props}/>,
-        scatterPlot: <ScatterDots {...props}/>
-      };
-    return typeToPlotComponentMap[plotType];
+  const renderPlotComponents = () => {
+    const layers = graphModel.layers.map((layer) => {
+      return (<GraphLayer key={layer.id} graphModel={graphModel} layer={layer} enableAnimation={enableAnimation}/>);
+    });
+    return layers;
   };
+
+//******************** Render Graph Axes **********************
+  const axes = AxisPlaces.filter((place: AxisPlace) => {
+    return !!graphModel.getAxis(place);
+  });
 
   const renderGraphAxes = () => {
-    const places = AxisPlaces.filter((place: AxisPlace) => {
-      return !!graphModel.getAxis(place);
-    });
-    return places.map((place: AxisPlace) => {
+    return axes.map((place: AxisPlace) => {
       return <GraphAxis key={place}
                         place={place}
                         enableAnimation={enableAnimation}
@@ -196,8 +214,17 @@ export const Graph = observer(
     return droppables;
   };
 
-  useGraphModel({dotsRef, graphModel, enableAnimation, instanceId});
+  useGraphModel({ graphModel, enableAnimation, instanceId });
 
+  const handleMinMaxChange = (minOrMax: string, axisModel: INumericAxisModel, newValue: number) => {
+    if (minOrMax === "min" && newValue < axisModel.max){
+      axisModel.setMin(newValue);
+    } else if (minOrMax === "max" && newValue > axisModel.min){
+      axisModel.setMax(newValue);
+    }
+  };
+
+  // TODO multi-dataset: DataConfigurationContext should not be provided here, but is still used in some places.
   return (
     <DataConfigurationContext.Provider value={graphModel.config}>
       <div className={kGraphClass} ref={graphRef} data-testid="graph">
@@ -210,17 +237,19 @@ export const Graph = observer(
           {renderGraphAxes()}
 
           <svg ref={plotAreaSVGRef}>
-            <svg ref={dotsRef} className={`graph-dot-area ${instanceId}`}>
-              {renderPlotComponent()}
+            <svg className={`graph-dot-area ${instanceId}`}>
+              {renderPlotComponents()}
             </svg>
             <Marquee marqueeState={marqueeState}/>
           </svg>
 
-          <DroppablePlot
-            graphElt={graphRef.current}
-            plotElt={backgroundSvgRef.current}
-            onDropAttribute={handleChangeAttribute}
-          />
+          { !disableAttributeDnD &&
+            <DroppablePlot
+              graphElt={graphRef.current}
+              plotElt={backgroundSvgRef.current}
+              onDropAttribute={handleChangeAttribute}
+            />
+          }
 
           <Legend
             legendAttrID={graphModel.getAttributeID('legend')}
@@ -230,16 +259,42 @@ export const Graph = observer(
             onTreatAttributeAs={handleTreatAttrAs}
           />
         </svg>
-        {renderDroppableAddAttributes()}
-        <Adornments dotsRef={dotsRef}/>
-        { appConfig.getSetting("defaultSeriesLegend", "graph") &&
+        {!disableAttributeDnD && renderDroppableAddAttributes()}
+        <Adornments/>
+        {defaultSeriesLegend &&
           <MultiLegend
-            graphElt={graphRef.current}
             onChangeAttribute={handleChangeAttribute}
             onRemoveAttribute={handleRemoveAttribute}
             onTreatAttributeAs={handleTreatAttrAs}
             onRequestRowHeight={onRequestRowHeight}
           />
+        }
+        {
+          axes.map((axis: AxisPlace, idx) => {
+            const axisModel = graphModel?.getAxis(axis);
+            if (isNumericAxisModel(axisModel)){
+              const minVal = axisModel.min;
+              const maxVal = axisModel.max;
+              return (
+                <div key={`${axis}-min-max`}>
+                  <AxisEndComponents
+                    value={minVal}
+                    minOrMax={"min"}
+                    axis={axis}
+                    onValueChange={(newValue) => handleMinMaxChange("min", axisModel, newValue)}
+                    readOnly={readOnly}
+                  />
+                  <AxisEndComponents
+                    value={maxVal}
+                    minOrMax={"max"}
+                    axis={axis}
+                    onValueChange={(newValue) => handleMinMaxChange("max", axisModel, newValue)}
+                    readOnly={readOnly}
+                  />
+                </div>
+              );
+            }
+          })
         }
       </div>
     </DataConfigurationContext.Provider>

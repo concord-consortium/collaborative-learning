@@ -97,26 +97,38 @@ $section-padding: 6px
 
       .icon-holder
         position: absolute
-        top: 12px
-        right: 14px
+        top: 5px
+        right: 12px
         cursor: pointer
+
         .icon-star
           height: 24px
           width: 24px
-          fill: $charcoal-light-1
+          fill: $charcoal
           opacity: .25
+
           &.starred
             opacity: .75
             fill: $problem-orange
+
         &:hover .icon-star
-          opacity: .25
           fill: $problem-orange
+          opacity: 0.35
+
         &:active .icon-star
           opacity: .75
           fill: $problem-orange
+
         &:active .icon-star.starred
-          opacity: .25
-          fill: $charcoal-light-1
+          opacity: .75
+          fill: $problem-orange
+
+        .bookmark-label
+          position: absolute
+          top: -2px
+          right: -4px
+          margin: 0
+          font-size: 5pt
 
       .info
         margin-top: $half-margin

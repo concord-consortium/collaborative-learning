@@ -3,41 +3,39 @@ import {observer} from "mobx-react-lite";
 import React, {useEffect, useMemo, useRef} from "react";
 import {useResizeDetector} from "react-resize-detector";
 import {ITileBaseProps} from '../imports/components/tiles/tile-base-props';
-import {DataSetContext} from '../imports/hooks/use-data-set-context';
 import {useGraphController} from "../hooks/use-graph-controller";
 import {InstanceIdContext, useNextInstanceId} from "../imports/hooks/use-instance-id-context";
 import {AxisLayoutContext} from "../imports/components/axis/models/axis-layout-context";
-import {GraphController} from "../models/graph-controller";
+import {GraphController, GraphControllerContext} from "../models/graph-controller";
 import {GraphLayout, GraphLayoutContext} from "../models/graph-layout";
-import {GraphModelContext, isGraphModel} from "../models/graph-model";
+import {isGraphModel} from "../models/graph-model";
+import {GraphModelContext} from "../hooks/use-graph-model-context";
 import {Graph} from "./graph";
-import {DotsElt} from '../d3-types';
 import {AttributeDragOverlay} from "../imports/components/drag-drop/attribute-drag-overlay";
+import { TileToolbar } from '../../../components/toolbar/tile-toolbar';
 import "../register-adornment-types";
-import { IDataSet } from '../../../models/data/data-set';
 
 interface IGraphComponentProps extends ITileBaseProps {
-  data?: IDataSet;
   layout: GraphLayout;
   onRequestRowHeight?: (id: string, size: number) => void;
+  readOnly?: boolean;
+  tileElt: HTMLElement | null;
 }
 export const GraphComponent = observer(
-    function GraphComponent({ data, layout, tile, onRequestRowHeight }: IGraphComponentProps) {
+    function GraphComponent({ layout, tile, tileElt, onRequestRowHeight, readOnly }: IGraphComponentProps) {
   const graphModel = isGraphModel(tile?.content) ? tile?.content : undefined;
-
   const instanceId = useNextInstanceId("graph");
   // Removed debouncing, but we can bring it back if we find we need it
   const graphRef = useRef<HTMLDivElement | null>(null);
   const {width, height} = useResizeDetector<HTMLDivElement>({ targetRef: graphRef });
   const enableAnimation = useRef(true);
   const autoAdjustAxes = useRef(true);
-  const dotsRef = useRef<DotsElt>(null);
   const graphController = useMemo(
     () => new GraphController({layout, enableAnimation, instanceId, autoAdjustAxes}),
     [layout, instanceId]
   );
 
-  useGraphController({graphController, graphModel, dotsRef});
+  useGraphController({graphController, graphModel});
 
   useEffect(() => {
     (width != null) && (height != null) && layout.setParentExtent(width, height);
@@ -55,21 +53,22 @@ export const GraphComponent = observer(
   if (!graphModel) return null;
 
   return (
-    <DataSetContext.Provider value={data}>
-      <InstanceIdContext.Provider value={instanceId}>
-        <GraphLayoutContext.Provider value={layout}>
-          <AxisLayoutContext.Provider value={layout}>
-            <GraphModelContext.Provider value={graphModel}>
+    <InstanceIdContext.Provider value={instanceId}>
+      <GraphLayoutContext.Provider value={layout}>
+        <AxisLayoutContext.Provider value={layout}>
+          <GraphModelContext.Provider value={graphModel}>
+            <GraphControllerContext.Provider value={graphController}>
               <Graph graphController={graphController}
                 graphRef={graphRef}
-                dotsRef={dotsRef}
                 onRequestRowHeight={onRequestRowHeight}
+                readOnly={readOnly}
               />
               <AttributeDragOverlay activeDragId={overlayDragId} />
-            </GraphModelContext.Provider>
-          </AxisLayoutContext.Provider>
-        </GraphLayoutContext.Provider>
-      </InstanceIdContext.Provider>
-    </DataSetContext.Provider>
+              <TileToolbar tileType="graph" readOnly={!!readOnly} tileElement={tileElt}/>
+            </GraphControllerContext.Provider>
+          </GraphModelContext.Provider>
+        </AxisLayoutContext.Provider>
+      </GraphLayoutContext.Provider>
+    </InstanceIdContext.Provider>
   );
 });

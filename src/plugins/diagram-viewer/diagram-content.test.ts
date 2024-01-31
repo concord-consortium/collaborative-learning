@@ -15,6 +15,9 @@ const TestContainer = types.model("TestContainer", {
 const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelManager => {
   return {
     isReady: true,
+    getSharedModelLabel(model: SharedModelType) {
+      return model.id;
+    },
     findFirstSharedModelByType<IT extends IAnyType>(sharedModelType: IT): IT["Type"] | undefined {
       return variables;
     },

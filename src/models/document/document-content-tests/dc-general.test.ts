@@ -59,11 +59,11 @@ describe("DocumentContentModel", () => {
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
-          { title: "Graph 1", content: { type: "Geometry", objects: [] } },
+          { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
         { title: "Table 1", content: { type: "Table", columnWidths } },
-        { title: "Drawing 1", content: { type: "Drawing", objects: [] } }
+        { title: "Sketch 1", content: { type: "Drawing", objects: [] } }
       ]
     });
   });
@@ -198,7 +198,7 @@ describe("DocumentContentModel", () => {
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
-          { title: "Graph 1", content: { type: "Geometry", objects: [] } },
+          { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
         { title: "Text 2", content: { type: "Text", format: "html", text: ["<p></p>"] } }
@@ -241,7 +241,7 @@ describe("DocumentContentModel", () => {
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
-          { title: "Graph 1", content: { type: "Geometry", objects: [] } },
+          { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } },
           { title: "Text 2", content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ]
@@ -555,7 +555,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(parsedContentExport()).toEqual({
       tiles: [
         [
-          { title: "Graph 1", content: { type: "Geometry", objects: [] } },
+          { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
@@ -572,7 +572,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       tiles: [
         { content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
-          { title: "Graph 1", content: { type: "Geometry", objects: [] } },
+          { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } },
           { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ]
       ]
@@ -586,7 +586,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(parsedContentExport()).toEqual({
       tiles: [
         [
-          { title: "Graph 1", content: { type: "Geometry", objects: [] } },
+          { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
@@ -606,7 +606,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       tiles: [
         [
           { content: { type: "Text", format: "html", text: ["<p></p>"] } },
-          { title: "Graph 1", content: { type: "Geometry", objects: [] } }
+          { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } }
         ],
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -623,7 +623,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { title: "Graph 1", content: { type: "Geometry", objects: [] } },
+        { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } },
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });

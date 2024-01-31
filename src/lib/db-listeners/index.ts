@@ -12,9 +12,10 @@ import { LearningLogDocument, PersonalDocument } from "../../models/document/doc
 import { DatabaseType } from "../db-types";
 import { DBSupportsListener } from "./db-supports-listener";
 import { DBCommentsListener } from "./db-comments-listener";
-import { DBStarsListener } from "./db-stars-listener";
+import { DBBookmarksListener } from "./db-bookmarks-listener";
 import { BaseListener } from "./base-listener";
 import { DBDocumentsContentListener } from "./db-docs-content-listener";
+import { DBStudentPersonalDocsListener } from "./db-student-personal-docs-listener";
 
 export class DBListeners extends BaseListener {
   @observable public isListening = false;
@@ -26,9 +27,10 @@ export class DBListeners extends BaseListener {
   private personalDocumentsListener: DBOtherDocumentsListener;
   private learningLogsListener: DBOtherDocumentsListener;
   private publicationListener: DBPublicationsListener;
+  private studentPersonalDocsListener: DBStudentPersonalDocsListener;
   private supportsListener: DBSupportsListener;
   private commentsListener: DBCommentsListener;
-  private starsListener: DBStarsListener;
+  private bookmarksListener: DBBookmarksListener;
   private documentsContentListener: DBDocumentsContentListener;
 
   constructor(db: DB) {
@@ -41,9 +43,10 @@ export class DBListeners extends BaseListener {
     this.personalDocumentsListener = new DBOtherDocumentsListener(db, PersonalDocument);
     this.learningLogsListener = new DBOtherDocumentsListener(db, LearningLogDocument);
     this.publicationListener = new DBPublicationsListener(db);
+    this.studentPersonalDocsListener = new DBStudentPersonalDocsListener(db, PersonalDocument);
     this.supportsListener = new DBSupportsListener(db);
     this.commentsListener = new DBCommentsListener(db);
-    this.starsListener = new DBStarsListener(db);
+    this.bookmarksListener = new DBBookmarksListener(db);
     this.documentsContentListener = new DBDocumentsContentListener(db);
   }
 
@@ -57,12 +60,13 @@ export class DBListeners extends BaseListener {
       this.personalDocumentsListener.start(),
       this.learningLogsListener.start(),
       this.publicationListener.start(),
+      this.studentPersonalDocsListener.start(),
       this.supportsListener.start()
     ]);
     // start listeners that depend on documents
     await Promise.all([
       this.commentsListener.start(),
-      this.starsListener.start(),
+      this.bookmarksListener.start(),
       this.documentsContentListener.start()
     ]);
 
@@ -73,10 +77,11 @@ export class DBListeners extends BaseListener {
     runInAction(() => this.isListening = false);
 
     this.documentsContentListener.stop();
-    this.starsListener.stop();
+    this.bookmarksListener.stop();
     this.commentsListener.stop();
     this.supportsListener.stop();
     this.publicationListener.stop();
+    this.studentPersonalDocsListener.stop();
     this.learningLogsListener.stop();
     this.personalDocumentsListener.stop();
     this.problemDocumentsListener.stop();

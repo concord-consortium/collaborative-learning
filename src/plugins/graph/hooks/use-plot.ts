@@ -1,14 +1,15 @@
 import React, {useCallback, useEffect, useRef} from "react";
 import {autorun, reaction} from "mobx";
-import {isSelectionAction, isSetCaseValuesAction} from "../../../models/data/data-set-actions";
+import { isSetCaseValuesAction } from "../../../models/data/data-set-actions";
 import {IDotsRef, GraphAttrRoles} from "../graph-types";
 import {INumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {useGraphLayoutContext} from "../models/graph-layout";
-import {useGraphModelContext} from "../models/graph-model";
+import {useGraphModelContext} from "../hooks/use-graph-model-context";
 import {matchCirclesToData, startAnimation} from "../utilities/graph-utils";
 import {useCurrent} from "../../../hooks/use-current";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {onAnyAction} from "../../../utilities/mst-utils";
+import { IGraphLayerModel } from "../models/graph-layer-model";
 
 interface IDragHandlers {
   start: (event: MouseEvent) => void
@@ -33,20 +34,39 @@ export const useDragHandlers = (target: any, {start, drag, end}: IDragHandlers) 
 };
 
 export interface IPlotResponderProps {
-  refreshPointPositions: (selectedOnly: boolean) => void
-  refreshPointSelection: () => void
-  dotsRef: IDotsRef
-  enableAnimation: React.MutableRefObject<boolean>
+  layer: IGraphLayerModel;
+  refreshPointPositions: (selectedOnly: boolean) => void;
+  refreshPointSelection: () => void;
+  dotsRef: IDotsRef;
+  enableAnimation: React.MutableRefObject<boolean>;
 }
 
 export const usePlotResponders = (props: IPlotResponderProps) => {
-  const {enableAnimation, refreshPointPositions, refreshPointSelection, dotsRef} = props,
+  const {layer, enableAnimation, refreshPointPositions, refreshPointSelection, dotsRef} = props,
+    dataConfiguration = layer.config,
+    dataset = dataConfiguration?.dataset,
     graphModel = useGraphModelContext(),
     layout = useGraphLayoutContext(),
-    dataConfiguration = graphModel.config,
-    dataset = dataConfiguration.dataset,
     instanceId = useInstanceIdContext(),
     refreshPointPositionsRef = useCurrent(refreshPointPositions);
+
+  useEffect(function respondToLayerDotsEltCreation() {
+    return reaction(
+      () => { return layer.dotsElt; },
+      (dotsElt) => {
+        matchCirclesToData({
+          dataConfiguration,
+          pointRadius: graphModel.getPointRadius(),
+          pointColor: graphModel.pointColor,
+          pointStrokeColor: graphModel.pointStrokeColor,
+          dotsElement: dotsElt,
+          enableAnimation,
+          instanceId
+        });
+
+      }
+    );
+  }, [dataConfiguration, enableAnimation, graphModel, instanceId, layer.dotsElt]);
 
   /* This routine is frequently called many times in a row when something about the graph changes that requires
   * refreshing the plot's point positions. That, by itself, would be a reason to ensure that
@@ -130,13 +150,11 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     return () => disposer();
   }, [layout, callRefreshPointPositions]);
 
-  // respond to selection and value changes
+  // respond to value changes
   useEffect(() => {
     if (dataset) {
       const disposer = onAnyAction(dataset, action => {
-        if (isSelectionAction(action)) {
-          refreshPointSelection();
-        } else if (isSetCaseValuesAction(action)) {
+        if (isSetCaseValuesAction(action)) {
           // assumes that if we're caching then only selected cases are being updated
           callRefreshPointPositions(dataset.isCaching);
           // TODO: handling of add/remove cases was added specifically for the case plot.
@@ -149,7 +167,26 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
       });
       return () => disposer();
     }
-  }, [dataset, callRefreshPointPositions, refreshPointSelection]);
+  }, [dataset, callRefreshPointPositions]);
+
+  // respond to color changes
+  useEffect(() => {
+    return reaction(() => {
+      const colors: Record<string, string> = {};
+      const layers = Array.from(graphModel.layers);
+      const descriptions = layers.map(l => l.config.yAttributeDescriptions);
+      descriptions.forEach(desc => desc.forEach(d => colors[d.attributeID] = graphModel.getColorForId(d.attributeID)));
+      return JSON.stringify(colors);
+    }, colorString => callRefreshPointPositions(false));
+  }, [graphModel, callRefreshPointPositions]);
+
+  // respond to selection change
+  useEffect(function respondToSelectionChange() {
+    return reaction(
+      () => [dataset?.selectionIdString],
+      () => refreshPointSelection()
+    );
+  }, [dataset, refreshPointSelection]);
 
   // respond to added or removed cases and change in attribute type
   useEffect(function handleAddRemoveCases() {
@@ -174,8 +211,8 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
   useEffect(() => {
     return autorun(
       () => {
-        !graphModel.config?.pointsNeedUpdating && callRefreshPointPositions(false);
+        !dataConfiguration?.pointsNeedUpdating && callRefreshPointPositions(false);
       });
-  }, [graphModel, callRefreshPointPositions]);
+  }, [dataConfiguration, callRefreshPointPositions]);
 
 };

@@ -3,42 +3,41 @@ import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 
 import { kSmallAnnotationNodeRadius } from "../../../components/annotations/annotation-utilities";
-import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { ITileProps } from "../../../components/tiles/tile-component";
-import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking";
 import { OffsetModel } from "../../../models/annotations/clue-object";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
+import {
+  GraphSettingsContext, IGraphSettings, IGraphSettingsFromStores, kDefaultGraphSettings
+} from "../hooks/use-graph-settings-context";
 import { useInitGraphLayout } from "../hooks/use-init-graph-layout";
 import { getScreenX, getScreenY } from "../hooks/use-point-locations";
-import { useDataSet } from "../imports/hooks/use-data-set";
+import { useSettingFromStores } from "../../../hooks/use-stores";
 import { IGraphModel } from "../models/graph-model";
 import { decipherDotId } from "../utilities/graph-utils";
 import { GraphComponent } from "./graph-component";
-import { GraphToolbar } from "./graph-toolbar";
+
+import "./graph-toolbar-registration";
 
 import "./graph-wrapper-component.scss";
 
 export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(props) {
   const {
-    documentContent, documentId, model, readOnly, scale, tileElt,
-    onRegisterTileApi, onUnregisterTileApi, onRequestRowHeight
+    model, readOnly, tileElt, onRegisterTileApi, onRequestRowHeight
   } = props;
-  const enabled = !readOnly;
+  const graphSettingsFromStores = useSettingFromStores("graph") as IGraphSettingsFromStores;
+  const graphSettings: IGraphSettings = { ...kDefaultGraphSettings, ...graphSettingsFromStores };
   const content = model.content as IGraphModel;
-  const toolbarProps = useToolbarTileApi({ id: model.id, enabled, onRegisterTileApi, onUnregisterTileApi });
 
-  const { isLinkEnabled, showLinkTileDialog } = useProviderTileLinking({
-    model, readOnly
-  });
-
-  const { data } = useDataSet(content?.data);
+  const data = content.config.dataset; // TODO: this only considers layer 0
   const layout = useInitGraphLayout(content);
   const xAttrID = content.getAttributeID("x");
   const yAttrID = content.getAttributeID("y");
   const xAttrType = content.config.attributeType("x");
   const yAttrType = content.config.attributeType("y");
 
+  // This is used for locating Sparrow endpoints.
+  // TODO multi-dataset update, needs to check if attribute ID is currently showing in any layer
   const getDotCenter = useCallback((dotId: string) => {
     // FIXME Currently, getScreenX and getScreenY only handle numeric axes, so just bail if they are a different type.
     if (xAttrType !== "numeric" || yAttrType !== "numeric") return;
@@ -119,19 +118,17 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   }, [layout]);
 
   return (
-    <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
-      <GraphToolbar
-        documentContent={documentContent}
-        documentId={documentId}
-        tileElt={tileElt}
-        scale={scale}
-        model={model}
-        content={content} {...toolbarProps}
-        isLinkEnabled={isLinkEnabled}
-        onLinkTableButtonClick={showLinkTileDialog}
-      />
-      <BasicEditableTileTitle readOnly={readOnly} />
-      <GraphComponent data={data} layout={layout} tile={model} onRequestRowHeight={onRequestRowHeight} />
-    </div>
+    <GraphSettingsContext.Provider value={graphSettings}>
+      <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
+        <BasicEditableTileTitle />
+        <GraphComponent
+          layout={layout}
+          tile={model}
+          tileElt={tileElt}
+          onRequestRowHeight={onRequestRowHeight}
+          readOnly={readOnly}
+        />
+      </div>
+    </GraphSettingsContext.Provider>
   );
 });

@@ -24,40 +24,13 @@
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 import '@testing-library/cypress/add-commands';
-import ClueHeader from './elements/clue/cHeader';
 import PrimaryWorkspace from './elements/common/PrimaryWorkspace';
 import Canvas from './elements/common/Canvas';
-import TeacherDashboard from "./elements/clue/TeacherDashboard";
+import TeacherDashboard from "./elements/common/TeacherDashboard";
 import 'cypress-file-upload';
 import 'cypress-commands';
-import ResourcesPanel from "./elements/clue/ResourcesPanel";
-import ClueCanvas from './elements/clue/cCanvas';
+import ResourcesPanel from "./elements/common/ResourcesPanel";
 import {platformCmdKey} from '../../src/utilities/hot-keys';
-
-const clueCanvas = new ClueCanvas;
-
-Cypress.Commands.add("setupGroup", (students, group) => {
-    let qaClass = 10,
-        problem = 2.3;
-
-    let header = new ClueHeader;
-    let i=0, j=0;
-
-    for (i=0;i<students.length;i++) {
-        cy.visit('?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
-        // These checks are here to make sure the workspace has loaded enough to create
-        // the student
-        cy.waitForLoad();
-        header.getGroupName().should('contain','Group '+group);
-        header.getGroupMembers().find('div.member').should('contain','S'+students[i]);
-        clueCanvas.shareCanvas();
-    }
-    // Verify Group num and the correct 4 students are listed, now that all 4 are loaded
-    header.getGroupName().should('contain','Group '+group);
-    for (j=0; j<students.length; j++) {
-        header.getGroupMembers().find('div.member').should('contain','S'+students[j]);
-    }
-});
 
 Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
     // cy.fixture(filename).as("image");
@@ -98,17 +71,6 @@ Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (curre
 // Login using cy.request, this is faster than using visit, and it makes it possible
 // to visit a local domain after logging in
 Cypress.Commands.add("login", (baseUrl, testTeacher) => {
-    /*
-      Cookies should be cleared automatically, but that doesn't seem to happen
-      with cy.request to other domains.
-      The use of {domain: null} is an undocumented feature that I found here:
-      https://github.com/cypress-io/cypress/issues/408
-      Without this, the tests will typically pass, but if you leave your cypress browser
-      open long enough, then an invalid cookie will be sent when the test is run and
-      the login will fail in a strange way. It returns success, but doesn't set a valid
-      cookie.
-    */
-    cy.clearCookies({domain: null});
 
     cy.request({
         url: `${baseUrl}/api/v1/users/sign_in`,
@@ -120,6 +82,16 @@ Cypress.Commands.add("login", (baseUrl, testTeacher) => {
         form: true
     })
     .its("status").should("equal", 200);
+});
+
+Cypress.Commands.add("logout", (baseUrl) => {
+    cy.request({
+        url: `${baseUrl}/api/v1/users/sign_out`,
+        method: "GET"
+    })
+    .then((resp) => {
+        expect(resp.status).to.eq(200);
+      });
 });
 
 // Launch a local report, this uses cy.request to first launch the portal report
@@ -176,9 +148,11 @@ Cypress.Commands.add("openResourceTabs", () => {
 } );
 Cypress.Commands.add("openTopTab", (tab) => {
   cy.get('.top-tab.tab-'+tab).click();
+  cy.get('.top-tab.tab-'+tab).invoke("attr", "class").should("contain", "selected");
 } );
 Cypress.Commands.add("openProblemSection", (section) => {//doc-tab my-work workspaces problem-documents selected
   cy.get('.prob-tab').contains(section).click({force:true});
+  cy.get('.prob-tab').contains(section).invoke("attr", "class").should("contain", "selected");
 });
 Cypress.Commands.add("openSection", (tab, section) => {//doc-tab my-work workspaces problem-documents selected
   cy.get('.doc-tab.'+tab+'.'+section).click({force:true});
@@ -204,10 +178,20 @@ Cypress.Commands.add("openDocumentWithIndex", (tab, section, docIndex) => {
   cy.get('.edit-button').click();
 });
 Cypress.Commands.add("clickProblemResourceTile", (subsection, tileIndex = 0) => {
-  cy.get('[data-focus-section='+subsection+'] .problem-panel .document-content .tile-row').eq(tileIndex).click();
+  cy.get('[data-focus-section='+subsection+'] .problem-panel .document-content .tile-row').eq(tileIndex).then($tileRow => {
+    cy.wrap($tileRow).click();
+    cy.wrap($tileRow).find(".tool-tile").invoke("attr", "class").should("contain", "selected");
+  });
+
 });
 Cypress.Commands.add("getToolTile", (tileIndex = 0) => {
   cy.get('.problem-panel .document-content .tile-row .tool-tile').eq(tileIndex);
+});
+Cypress.Commands.add("clickProblemResource", () => {
+  cy.get(".prob-tab.selected").eq(0).click();
+});
+Cypress.Commands.add("clickDocumentResource", () => {
+  cy.get(".documents-panel div.document-title").eq(0).click();
 });
 Cypress.Commands.add("clickDocumentResourceTile", (tileIndex = 0) => {
   cy.get('.documents-panel .editable-document-content .tile-row').eq(tileIndex).click();
@@ -238,24 +222,20 @@ Cypress.Commands.add('collapseWorkspace', () => {
     cy.get('.divider-container .resources-expander').click();
   });
 });
-Cypress.Commands.add('linkTableToGraph', (table, graph) => {
+Cypress.Commands.add('linkTableToTile', (table, tile) => {
   cy.get('.primary-workspace .table-title').contains(table).click();
-  cy.get(".primary-workspace").within((workspace) => {
-    cy.get(".table-toolbar .toolbar-button.link-tile-button").click();
-  });
+  cy.get(".table-toolbar .toolbar-button.link-tile").click();
   cy.get('.ReactModalPortal').within(() => {
-    cy.get('[data-test=link-tile-select]').select(graph);
+    cy.get('[data-test=link-tile-select]').select(tile);
     cy.get('button').contains('Link').click();
   });
 });
-Cypress.Commands.add('unlinkTableToGraph', (table, graph) => {
+Cypress.Commands.add('unlinkTableToTile', (table, tile) => {
   cy.get('.primary-workspace .table-title').contains(table).click();
-  cy.get(".primary-workspace").within((workspace) => {
-    cy.get(".table-toolbar .toolbar-button.link-tile-button").click();
-  });
+  cy.get(".table-toolbar .toolbar-button.link-tile").click();
   cy.get('.ReactModalPortal').within(() => {
-    cy.get('[data-test=link-tile-select]').select(graph);
-    cy.get('button').contains('Unlink').click();
+    cy.get('[data-test=link-tile-select]').select(tile);
+    cy.get('button').contains('Clear It!').click();
   });
 });
 Cypress.Commands.add('linkTableToDataflow', (program, table) => {
@@ -273,7 +253,7 @@ Cypress.Commands.add('unlinkTableToDataflow', (program, table) => {
   });
   cy.get('.ReactModalPortal').within(() => {
     cy.get('[data-test=link-tile-select]').select(table);
-    cy.get('button').contains('Unlink').click();
+    cy.get('button').contains('Clear It!').click();
   });
 });
 Cypress.Commands.add("deleteDocumentThumbnail", (tab, section,title) => {

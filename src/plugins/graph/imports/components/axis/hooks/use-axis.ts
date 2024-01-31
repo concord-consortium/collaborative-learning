@@ -1,10 +1,13 @@
 import {ScaleBand, ScaleLinear, scaleLinear, scaleOrdinal} from "d3";
-import {autorun, reaction} from "mobx";
+import {reaction} from "mobx";
 import {MutableRefObject, useCallback, useEffect, useRef} from "react";
+import { mstAutorun } from "../../../../../../utilities/mst-autorun";
 import {axisGap} from "../axis-types";
 import {useAxisLayoutContext} from "../models/axis-layout-context";
 import {IAxisModel, isNumericAxisModel} from "../models/axis-model";
-import {graphPlaceToAttrRole} from "../../../../graph-types";
+import {
+  graphPlaceToAttrRole, kAxisLabelVerticalPadding, kAxisTickLength, kAxisTickPadding
+} from "../../../../graph-types";
 import {maxWidthOfStringsD3} from "../../../../utilities/graph-utils";
 import {useDataConfigurationContext} from "../../../../hooks/use-data-configuration-context";
 import {collisionExists, getStringBounds} from "../axis-utils";
@@ -65,7 +68,8 @@ export const useAxis = ({
       collision = collisionExists({bandWidth, categories, centerCategoryLabels}),
       maxLabelExtent = maxWidthOfStringsD3(dataConfiguration?.categoryArrayForAttrRole(attrRole) ?? []),
       d3Scale = multiScale?.scale ?? (type === 'numeric' ? scaleLinear() : scaleOrdinal());
-    let desiredExtent = axisTitleHeight + 2 * axisGap;
+    let desiredExtent =
+      axisTitleHeight + 2 * (axisGap + kAxisLabelVerticalPadding) + kAxisTickLength + kAxisTickPadding;
     let ticks: string[] = [];
     switch (type) {
       case 'numeric': {
@@ -104,11 +108,10 @@ export const useAxis = ({
   // update d3 scale and axis when axis domain changes
   useEffect(function installDomainSync() {
     if (isNumeric) {
-      const disposer = autorun(() => {
-        multiScale?.setNumericDomain(axisModel.domain);
+      return mstAutorun(() => {
+        axisModel.domain && multiScale?.setNumericDomain(axisModel.domain);
         layout.setDesiredExtent(axisPlace, computeDesiredExtent());
-      });
-      return () => disposer();
+      }, { name: "useAxis.installDomainSync" }, axisModel);
     }
     // Note axisModelChanged as a dependent. Shouldn't be necessary.
   }, [axisModelChanged, isNumeric, axisModel, multiScale,

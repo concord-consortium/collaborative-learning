@@ -168,17 +168,21 @@ $ npm run deploy:firebase:rules     # deploys firebase (realtime database) rules
 
 To enable per component debugging set the "debug" localstorage key with one or more of the following:
 
+- `bookmarks` this will show a tiny text status above the bookmark indicating which users have bookmarked this document. It will also print information about the document bookmarks each time a bookmark is toggled.
 - `canvas` this will show the document key over the canvas, useful for looking up documents in Firebase
 - `cms` this will print info to the console as changes are made to authored content via the CMS
+- `docList` - this will print a table of information about a list of documents
 - `document` this will add the active document as `window.currentDocument`, you can use MST's hidden toJSON() like `currentDocument.toJSON()` to views its content.
 - `drop` console log the dataTransfer object from drop events on the document.
 - `history` this will: print some info to the console as the history system records changes, print the full history as JSON each time it is loaded from Firestore, and provide a `window.historyDocument` so you can inspect the document while navigating the history.
 - `images` this will set `window.imageMap` so you can look at the status and URLs of images that have been loaded.
 - `listeners` console log the adding, removing, and firing of firebase listeners
+- `loading` console log timing information for various phases of the startup process
 - `logger` console log all messages sent to the logging service
 - `sharedModels` console log messages about shared models, currently this is only used in the variables shared model
 - `stores` this will set `window.stores` so you can monitor the stores global from the browser console.
 - `undo` this will print information about each action that is added to the undo stack.
+
 
 ## Testing
 
@@ -199,21 +203,22 @@ Note that currently, some of the jest tests (notably `db.test.ts`) and many of t
 
 There are a number of URL parameters that can aid in testing:
 
-|Parameter  |Value(s)                  |Description|
-|-----------|--------------------------|-----------|
-|`appMode`  |`dev`, `qa`, `test`       |Unsecured modes that are partitioned off from authenticated sections of the database.|
-|`unit`     |`sas`, `msa`, etc.        |Abbreviated code or URL for the curriculum unit.|
-|`problem`  |`2.1`, `3.2`, etc.        |Reference to individual problem in curriculum unit.|
-|`demo`     |none                      |Launches demo creator UI|
-|`demoName` |string (default: `CLUE`)  |Used to partition the demo portion of the database.|
-|`network`  |string                    |Specify the network with which a teacher user is affiliated.|
-|`fakeClass`|string                    |Class id for demo, qa, or test modes.|
-|`fakeUser` |`(student\|teacher):<id>` |Configure user type and (optionally) id.|
-|`qaGroup`  |string                    |Group id for qa, e.g. automated tests.|
-|`qaClear`  |`all`, `class`, `offering`|Extent of database clearing for automated tests.|
-|`firebase` |`emulator` (for default) or `host:port`|Target emulator for firebase realtime database calls.|
-|`firestore`|`emulator` (for default) or `host:port`|Target emulator for firestore database calls.|
-|`functions`|`emulator` (for default) or `host:port`|Target emulator-hosted firebase functions.|
+|Parameter       |Value(s)                 |Description|
+|----------------|-------------------------|-----------|
+|`appMode`       |`dev`, `qa`, `test`      |Unsecured modes that are partitioned off from authenticated sections of the database.|
+|`unit`          |`sas`, `msa`, etc.       |Abbreviated code or URL for the curriculum unit.|
+|`problem`       |`2.1`, `3.2`, etc.       |Reference to individual problem in curriculum unit.|
+|`demo`          |none                     |Launches demo creator UI|
+|`demoName`      |string (default: `CLUE`) |Used to partition the demo portion of the database.|
+|`network`       |string                   |Specify the network with which a teacher user is affiliated.|
+|`fakeClass`     |string                   |Class id for demo, qa, or test modes.|
+|`fakeUser`      |`(student\|teacher):<id>`|Configure user type and (optionally) id.|
+|`qaGroup`       |string                   |Group id for qa, e.g. automated tests.|
+|`qaClear`       |`all\|class\|offering`   |Extent of database clearing for automated tests.|
+|`firebase`      |`emulator\|<URL>`        |Target emulator for firebase realtime database calls.|
+|`firestore`     |`emulator\|<URL>`        |Target emulator for firestore database calls.|
+|`functions`     |`emulator\|<URL>`        |Target emulator-hosted firebase functions.|
+|`noPersistentUI`|none                     |Do not initialize persistent ui store.|
 
 The `unit` parameter can be in 3 forms:
 - a valid URL starting with `https:` or `http:` will be treated as an absolute URL.
@@ -222,6 +227,8 @@ The `unit` parameter can be in 3 forms:
   - `curriculumBaseUrl` defaults to `https://models-resources.concord.org/clue-curriculum`.
   - `branchName` defaults to `main`.
   - To find out more about customizing these values look at `app-config-model.ts`.
+
+The `firebase`, `firestore`, and `functions` params can take an `emulator` value which will make CLUE use the default host and port for the emulator of that service. Alternatively you can pass a URL like `http://localhost:1234` for the emulated service.
 
 ### Standalone Document Editor
 

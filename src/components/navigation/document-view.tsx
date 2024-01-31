@@ -3,9 +3,9 @@ import { observer } from "mobx-react";
 import { useQueryClient } from "react-query";
 import classNames from "classnames";
 import { useAppConfig, useLocalDocuments, useProblemStore, useStores,
-  useUIStore, useUserStore, useClassStore } from "../../hooks/use-stores";
+  usePersistentUIStore, useUserStore, useClassStore, useUIStore } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
-import { ISubTabSpec, NavTabModelType } from "src/models/view/nav-tabs";
+import { ISubTabSpec, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
 import { DocumentType } from "../../models/document/document-types";
 import { LogEventName } from "../../lib/logger-types";
 import { logDocumentEvent } from "../../models/document/log-document-event";
@@ -14,34 +14,36 @@ import { EditableDocumentContent } from "../document/editable-document-content";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { DocumentBrowserScroller, ScrollButton } from "./document-browser-scroller";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
+import CloseIcon from "../../../src/assets/icons/close/close.svg";
 
 interface IProps {
   tabSpec: NavTabModelType;
   subTab: ISubTabSpec;
 }
+
 //TODO: Need to refactor this if we want to deploy to all tabs
 export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IProps) {
-  const ui = useUIStore();
+  const persistentUI = usePersistentUIStore();
   const store = useStores();
   const appConfigStore = useAppConfig();
   const context = useUserContext();
   const queryClient = useQueryClient();
   const documents = useLocalDocuments();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
-  const tabState = navTabSpec && ui.tabs.get(navTabSpec?.tab);
+  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
   const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
   const openDocument = store.documents.getDocument(openDocumentKey) ||
     store.networkDocuments.getDocument(openDocumentKey);
   const openSecondaryDocumentKey = tabState?.openSecondaryDocuments.get(subTab.label) || "";
   const openSecondaryDocument = store.documents.getDocument(openSecondaryDocumentKey) ||
     store.networkDocuments.getDocument(openSecondaryDocumentKey);
-  const isStarredTab = subTab.label === "Starred";
+  const isStarredTab = subTab.label === kBookmarksTabTitle;
   const noValidDocument = !openDocument || openDocument.getProperty("isDeleted");
   const noSecondaryDocument = !openSecondaryDocument || openSecondaryDocument.getProperty("isDeleted");
 
   const documentTypes: DocumentType[] = tabSpec.tab === "class-work"
                                           ? ["publication"]
-                                          : tabSpec.tab === "my-work" && subTab.label === "Starred"
+                                          : tabSpec.tab === "my-work" && subTab.label === kBookmarksTabTitle
                                             ? ["problem", "personal"]
                                             : [];
   const getStarredDocuments = (types: DocumentType[]) => {
@@ -60,7 +62,8 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
           });
         }
       });
-    const starredDocs = docs.filter((doc: DocumentModelType) => !doc.getProperty("isDeleted") && doc.isStarred);
+    const starredDocs = docs.filter((doc: DocumentModelType) =>
+      !doc.getProperty("isDeleted") && store.bookmarks.isDocumentBookmarked(doc.key));
     return starredDocs;
   };
   const starredDocuments = getStarredDocuments(documentTypes);
@@ -78,24 +81,24 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
     // we make the secondary document primary, and close the secondary document.
     // If there is a primary and secondary document open, and the user clicks on a third document,
     // we close the secondary document, and make the open the third document as the secondary document.
-    if (ui.focusDocument === document.key) {
-      if (ui.focusSecondaryDocument) {
-        ui.openSubTabDocument(tabSpec.tab, subTab.label, ui.focusSecondaryDocument);
-        ui.closeSubTabSecondaryDocument(tabSpec.tab, subTab.label);
+    if (persistentUI.focusDocument === document.key) {
+      if (persistentUI.focusSecondaryDocument) {
+        persistentUI.openSubTabDocument(tabSpec.tab, subTab.label, persistentUI.focusSecondaryDocument);
+        persistentUI.closeSubTabSecondaryDocument(tabSpec.tab, subTab.label);
       } else {
-        ui.closeSubTabDocument(tabSpec.tab, subTab.label);
+        persistentUI.closeSubTabDocument(tabSpec.tab, subTab.label);
       }
-    } else if (tabState?.openDocuments.get("Starred")) {
-      if (ui.focusSecondaryDocument === document.key) {
-        ui.closeSubTabSecondaryDocument(tabSpec.tab, "Starred");
+    } else if (tabState?.openDocuments.get(kBookmarksTabTitle)) {
+      if (persistentUI.focusSecondaryDocument === document.key) {
+        persistentUI.closeSubTabSecondaryDocument(tabSpec.tab, kBookmarksTabTitle);
       } else {
-        ui.openSubTabSecondaryDocument(tabSpec.tab, "Starred", document.key);
+        persistentUI.openSubTabSecondaryDocument(tabSpec.tab, kBookmarksTabTitle, document.key);
       }
     } else {
       if (!document.hasContent && document.isRemote) {
         loadDocumentContent(document);
       }
-      ui.openSubTabDocument(tabSpec.tab, subTab.label, document.key);
+      persistentUI.openSubTabDocument(tabSpec.tab, subTab.label, document.key);
       const logEvent = document.isRemote
         ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
         : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
@@ -126,9 +129,9 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
       const newDocKey = starredDocuments.at(newDocIndex)?.key;
 
       if (secondary) {
-        newDocKey && ui.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, newDocKey);
+        newDocKey && persistentUI.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, newDocKey);
       } else {
-        newDocKey && ui.openSubTabDocument(tabSpec.tab, subTab.label, newDocKey);
+        newDocKey && persistentUI.openSubTabDocument(tabSpec.tab, subTab.label, newDocKey);
       }
     }
   };
@@ -205,6 +208,7 @@ interface IDocumentAreaProps {
 const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocument,
     hasSecondaryDocument, hideLeftFlipper, hideRightFlipper, onChangeDocument}: IDocumentAreaProps) => {
   const ui = useUIStore();
+  const persistentUI = usePersistentUIStore();
   const user = useUserStore();
   const appConfig = useAppConfig();
   const classStore = useClassStore();
@@ -219,7 +223,13 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   const displayTitle = getDisplayTitle(openDocument);
 
   function handleEditClick(document: DocumentModelType) {
-    ui.problemWorkspace.setPrimaryDocument(document);
+    persistentUI.problemWorkspace.setPrimaryDocument(document);
+  }
+
+  function handleCloseButtonClick() {
+    if (persistentUI.openSubTab) {
+      persistentUI.closeSubTabDocument(persistentUI.activeNavTab, persistentUI.openSubTab);
+    }
   }
   // TODO: this edit button is confusing when the history is being viewed. It
   // opens the original document for editing, not some old version of the
@@ -230,6 +240,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   // PT Story: https://www.pivotaltracker.com/story/show/183416176
   const editButton = (type: string, sClass: {secondary: boolean | undefined; primary: boolean | undefined} | string,
                       document: DocumentModelType) => {
+
     return (
       (type === "my-work") || (type === "learningLog")
         ?
@@ -243,6 +254,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   };
 
   const sideClasses = { secondary: isSecondaryDocument, primary: hasSecondaryDocument && !isSecondaryDocument };
+
   return (
     <div className={classNames("focus-document", tab, sideClasses)}>
       <div className={classNames("document-header", tab, sectionClass, sideClasses)}
@@ -254,8 +266,14 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
             {displayTitle.title}
           </span>
         </div>
-        {(!openDocument.isRemote)
-            && editButton(tab, sectionClass || sideClasses, openDocument)}
+        <div className="document-buttons">
+          {(!openDocument.isRemote) &&
+            editButton(tab, sectionClass || sideClasses, openDocument)
+          }
+          <button className={`close-doc-button ${tab}`} onClick={handleCloseButtonClick}>
+            <CloseIcon className="close-icon" />
+          </button>
+        </div>
       </div>
       {onChangeDocument && !hideLeftFlipper &&
         <ScrollButton side="left" theme={tab} className="document-flipper"
@@ -267,7 +285,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
         document={openDocument}
         readOnly={true}
         showPlayback={showPlayback}
-        fullHeight={subTab.label !== "Starred" }
+        fullHeight={subTab.label !== kBookmarksTabTitle }
       />
       {onChangeDocument && !hideRightFlipper &&
         <ScrollButton side="right" theme={tab} className="document-flipper"

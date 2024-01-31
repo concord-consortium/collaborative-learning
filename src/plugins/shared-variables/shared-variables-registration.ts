@@ -1,13 +1,23 @@
+import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-button-manager";
+import { ISharedModelManager } from "../../models/shared/shared-model-manager";
 import { registerSharedModelInfo } from "../../models/shared/shared-model-registry";
 import { registerTextPluginInfo } from "../../models/tiles/text/text-plugin-info";
+import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
+import { IGraphModel, registerGraphSharedModelUpdateFunction } from "../graph/models/graph-model";
+import {
+  EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject
+} from "./drawing/variable-object";
+import {
+  IPlottedVariablesAdornmentModel, isPlottedVariablesAdornment, PlottedVariablesAdornmentModel
+} from "./graph/plotted-variables-adornment/plotted-variables-adornment-model";
+import "./graph/plotted-variables-adornment/plotted-variables-adornment-registration";
+import {
+  kPlottedVariablesType
+} from "./graph/plotted-variables-adornment/plotted-variables-adornment-types";
 import { kSharedVariablesID, SharedVariables } from "./shared-variables";
 import { NewVariableTextButton, InsertVariableTextButton, EditVariableTextButton,
   kNewVariableButtonName, kInsertVariableButtonName, kEditVariableButtonName} from "./slate/text-tile-buttons";
 import { kVariableTextPluginName, VariablesPlugin } from "./slate/variables-plugin";
-import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
-import { EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject }
-  from "./drawing/variable-object";
-import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-button-manager";
 
 registerSharedModelInfo({
   type: kSharedVariablesID,
@@ -26,17 +36,14 @@ registerTextPluginInfo({
 registerTileToolbarButtons('text', [
   {
     name: kNewVariableButtonName,
-    title: "New Variable",
     component: NewVariableTextButton
   },
   {
     name: kInsertVariableButtonName,
-    title: "Insert Variable",
     component: InsertVariableTextButton
   },
   {
     name: kEditVariableButtonName,
-    title: "Edit Variable",
     component: EditVariableTextButton
   },
 ]);
@@ -61,3 +68,22 @@ registerDrawingToolInfo({
   name: "edit-variable",
   buttonComponent: EditVariableButton
 });
+
+registerGraphSharedModelUpdateFunction(
+  function handleSharedVariablesUpdate(graphModel: IGraphModel, smm: ISharedModelManager) {
+    // Display a plotted variables adornment when this is linked to a shared variables model
+    const sharedVariableModels = smm.getTileSharedModelsByType(graphModel, SharedVariables);
+    if (sharedVariableModels && sharedVariableModels.length > 0) {
+      let plottedVariablesAdornment: IPlottedVariablesAdornmentModel | undefined =
+      graphModel.adornments.find(
+        adornment => isPlottedVariablesAdornment(adornment)) as IPlottedVariablesAdornmentModel;
+      if (!plottedVariablesAdornment) {
+        plottedVariablesAdornment = PlottedVariablesAdornmentModel.create();
+        plottedVariablesAdornment.addPlottedVariables();
+      }
+      graphModel.showAdornment(plottedVariablesAdornment);
+    } else {
+      graphModel.hideAdornment(kPlottedVariablesType);
+    }
+  }
+);

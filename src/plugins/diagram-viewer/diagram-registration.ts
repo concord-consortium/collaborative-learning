@@ -5,6 +5,10 @@ import { defaultDiagramContent, DiagramContentModel } from "./diagram-content";
 import { DiagramToolComponent } from "./diagram-tile";
 import DiagramToolIcon from "./src/assets/program.svg";
 import { DiagramMigrator } from "./diagram-migrator";
+import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-button-manager";
+import { DeleteButton, EditVariableButton, FitViewToolbarButton, HideNavigatorButton, InsertVariableButton,
+  LockLayoutButton, NewVariableButton, VariablesLinkButton, ZoomInToolbarButton, ZoomOutToolbarButton }
+    from "./diagram-toolbar-buttons";
 
 registerTileContentInfo({
   type: kDiagramTileType,
@@ -15,7 +19,8 @@ registerTileContentInfo({
   //   typescript type for a MST "Class" which is less restrictive
   modelClass: DiagramMigrator as typeof DiagramContentModel,
   defaultContent: defaultDiagramContent,
-  defaultHeight: kDiagramDefaultHeight
+  defaultHeight: kDiagramDefaultHeight,
+  isVariableProvider: true
 });
 
 registerTileComponentInfo({
@@ -24,3 +29,16 @@ registerTileComponentInfo({
   tileEltClass: "diagram-tool-tile disable-tile-content-drag nowheel",
   Icon: DiagramToolIcon
 });
+
+registerTileToolbarButtons("diagram", [
+  { name: "new-variable", component: NewVariableButton },
+  { name: "insert-variable", component: InsertVariableButton },
+  { name: "edit-variable", component: EditVariableButton },
+  { name: "zoom-in", component: ZoomInToolbarButton },
+  { name: "zoom-out", component: ZoomOutToolbarButton },
+  { name: "fit-view", component: FitViewToolbarButton },
+  { name: "toggle-lock", component: LockLayoutButton },
+  { name: "toggle-navigator", component: HideNavigatorButton },
+  { name: "variables-link", component: VariablesLinkButton },
+  { name: "delete", component: DeleteButton }
+]);

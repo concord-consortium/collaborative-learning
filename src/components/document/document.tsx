@@ -96,7 +96,7 @@ const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boo
     <>
       {<div className="share-separator" />}
       <ToggleControl className={`share-button ${visibility}`} dataTest="share-button"
-                      initialValue={isShared} onChange={onClick}
+                      value={isShared} onChange={onClick}
                       title={`${isShared ? "Shared: click to unshare from" : "Unshared: click to share to"} group`} />
       <div className="share-label">Share</div>
     </>
@@ -147,7 +147,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   public componentDidUpdate() {
     this.openHandlerDisposer = reaction(
       // data function: changes to primaryDocumentKey trigger the reaction
-      () => this.stores.ui.problemWorkspace.primaryDocumentKey,
+      () => this.stores.persistentUI.problemWorkspace.primaryDocumentKey,
       // reaction function
       () => this.setState({ showBrowser: false })
     );
@@ -188,7 +188,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         const isDeleted = document.getProperty("isDeleted");
         // close comparison when comparison document is deleted
         if (isDeleted && (side === "comparison")) {
-          const { ui: { problemWorkspace } } = stores;
+          const { persistentUI: { problemWorkspace } } = stores;
           problemWorkspace.toggleComparisonVisible({ override: false, muteLog: true });
         }
       });
@@ -199,6 +199,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const { appConfig: { navTabs } } = this.stores;
     // show the File menu if my work navigation is enabled
     return !!navTabs.getNavTabSpec(ENavTab.kMyWork);
+  }
+
+  private showPersonalShareToggle() {
+    const tabNames = this.stores.appConfig.navTabs.tabSpecs.map(tab => tab.tab);
+    return tabNames.includes(ENavTab.kSortWork);
   }
 
   private renderTitleBar(type: string) {
@@ -262,8 +267,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     if (document.type === "planning" || appConfig.disablePublish === true) return false;
     return appConfig.disablePublish
             .findIndex(spec => {
-              return (document.type === spec.documentType) &&
-                      document.matchProperties(spec.properties);
+              return this.stores.sortedDocuments.isMatchingSpec(document, spec.documentType, spec.properties);
             }) < 0;
   }
 
@@ -360,6 +364,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const displayId = document.getDisplayId(appConfig);
     const hasDisplayId = !!displayId;
     const showFileMenu = this.showFileMenu();
+    const showPersonalShareToggle = this.showPersonalShareToggle();
     return (
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
@@ -391,6 +396,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div className="actions">
           {(!hideButtons || supportStackedTwoUpView) &&
             <div className="actions">
+              {showPersonalShareToggle &&
+                <ShareButton isShared={document.visibility === "public"} onClick={this.handleToggleVisibility} />}
               {supportStackedTwoUpView && isPrimary &&
                 <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
               {supportStackedTwoUpView && isPrimary &&
@@ -465,8 +472,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleSelectDocument = (document: DocumentModelType) => {
-    const { appConfig, ui } = this.stores;
-    ui.rightNavDocumentSelected(appConfig, document);
+    const { appConfig, persistentUI } = this.stores;
+    persistentUI.rightNavDocumentSelected(appConfig, document);
     this.setState({ showBrowser: false });
   };
 

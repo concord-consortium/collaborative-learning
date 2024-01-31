@@ -5,7 +5,6 @@ import {useDataConfigurationContext} from "../../hooks/use-data-configuration-co
 import {isSelectionAction} from "../../../../models/data/data-set-actions";
 import {useGraphLayoutContext} from "../../models/graph-layout";
 import {choroplethLegend} from "./choropleth-legend/choropleth-legend";
-import {useDataSetContext} from "../../imports/hooks/use-data-set-context";
 import {kChoroplethHeight} from "../../graph-types";
 import {axisGap} from "../../imports/components/axis/axis-types";
 import {getStringBounds} from "../../imports/components/axis/axis-utils";
@@ -14,13 +13,13 @@ import graphVars from "../graph.scss";
 
 
 interface INumericLegendProps {
-  legendAttrID: string
+  legendAttrID: string;
 }
 
 export const NumericLegend = memo(function NumericLegend({legendAttrID}: INumericLegendProps) {
   const dataConfiguration = useDataConfigurationContext(),
     layout = useGraphLayoutContext(),
-    dataset = useDataSetContext(),
+    dataset = dataConfiguration?.dataset,
     quantileScale = useRef<ScaleQuantile<string>>(scaleQuantile()),
     [choroplethElt, setChoroplethElt] = useState<SVGGElement | null>(null),
     valuesRef = useRef<number[]>([]),

@@ -75,15 +75,26 @@ export interface counterProps {
 
 export const
   transitionDuration = 1000,
-  pointRadiusMax = 10,
+  pointRadiusMax = 5,
   pointRadiusMin = 3,
   pointRadiusLogBase = 2.0, // reduce point radius from max by log of (num. cases) base (LogBase).
-  pointRadiusSelectionAddend = 1,
-  hoverRadiusFactor = 1.5,
+  pointRadiusSelectionAddend = 0, // Zero for now - could be used to increase point radius when selected.
+  hoverRadiusFactor = 1.0,
   kGraphFont = "12px sans-serif",
   kChoroplethHeight = 16,
-  kAxisTickLength = 4,
-  kAxisGap = 2;
+  kTopAndRightDefaultExtent = 3,
+  kTickAndGridColor = "#bfbfbf",
+  kTickFontColor = "#3f3f3f",
+  kAxisStrokeWidth = 2,
+  kAxisTickLength = 25,
+  kAxisTickPadding = 6,
+  kAxisGap = 2,
+  kAxisLabelHorizontalPadding = 10, // Match .axis-label padding in attribute-label.scss
+  kAxisLabelVerticalPadding = 5, // Match .axis-label padding in attribute-label.scss
+  kAxisLabelBorderWidth = 1.5, // Match .axis-label border in attribute-label.scss
+  kDefaultAxisLabel = "axis label";
+export const outerCircleSelectedRadius = 10;
+export const outerCircleUnselectedRadius = 0;
 
 export const PlotTypes = ["casePlot", "dotPlot", "dotChart", "scatterPlot"] as const;
 export type PlotType = typeof PlotTypes[number];
@@ -94,4 +105,6 @@ export const kGraphAdornmentsClass = "graph-adornments-grid";
 export const kGraphAdornmentsClassSelector = `.${kGraphAdornmentsClass}`;
 
 // TODO: determine this via configuration, e.g. appConfig, since apps may prefer different defaults
-export const kDefaultNumericAxisBounds = [-10, 11] as const;
+export const kDefaultNumericAxisBounds = [0, 10] as const;
+
+export const kGraphPortalClass = ".canvas-area";

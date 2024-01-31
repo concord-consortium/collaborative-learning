@@ -83,10 +83,8 @@ jobs:
           record: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           # only do parallel if we have a record key
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
-          # upload videos for failing specs
-          config: video=true,videoUploadOnPasses=false
           browser: chrome
-          spec: cypress/e2e/clue/smoke/**
+          spec: cypress/e2e/smoke/**
           group: 'Smoke tests'
         env:
           # pass the Dashboard record key as an environment variable

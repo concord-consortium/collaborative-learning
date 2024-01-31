@@ -12,6 +12,9 @@ interface IProps {
   args: string[];
 }
 
+/**
+ * Deprecated; Tiles should move to the shared toolbar components in src/components/toolbar
+ */
 export const DataSetViewButton: React.FC<IProps> = ({args}) => {
   const addTilesContext = useContext(AddTilesContext);
   const tile = useContext(TileModelContext);
@@ -43,7 +46,7 @@ export const DataSetViewButton: React.FC<IProps> = ({args}) => {
   return (
     <TileToolbarButton
         className="dataset-view-button" onClick={handleClick}
-        title={`Create a linked ${newTileType} tile`}>
+        title={`${newTileType} It!`}>
       { Icon ? <Icon/> : "??" }
       <ViewBadgeIcon className="button-badge"/>
     </TileToolbarButton>

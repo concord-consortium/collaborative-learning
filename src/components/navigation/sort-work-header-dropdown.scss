@@ -1,0 +1,61 @@
+@import "../../components/vars";
+
+.sort-work-header {
+  height: 36px;
+  width: 100%;
+  background-color: $classwork-purple-light-4;
+  display: flex;
+
+  .header-text {
+    width: 50px;
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+  }
+
+  .header-dropdown {
+    display: flex;
+    align-items: center;
+
+    .custom-select.sort-work-sort-menu {
+      color: $charcoal-dark-2;
+      .header {
+        min-width: 151px;
+        width: auto;
+        height: 26px;
+        background-color: $classwork-purple-light-4;
+        padding-left: 5px;
+        font-weight: bold;
+      }
+      .header.show-list {
+        background-color: $classwork-purple-dark-1;
+      }
+
+      .list {
+        min-width: 151px;
+        width: auto;
+        margin-top: -1px;
+
+        .list-item {
+          height: 30px;
+          padding-left:9px;
+
+          &:hover {
+            background-color: $classwork-purple-light-5;
+          }
+          &.selected {
+            color:$charcoal-dark-2;
+            font-weight: bold;
+          }
+          &:active {
+            color:$charcoal-dark-2;
+            font-weight: bold;
+          }
+          div.check {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+}

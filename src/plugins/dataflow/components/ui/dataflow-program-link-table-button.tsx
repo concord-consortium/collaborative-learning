@@ -1,10 +1,11 @@
 import React from "react";
 import classNames from "classnames";
-import LinkTableIcon from "../../assets/icons/link-table-icon.svg"; //we may need to change to icon with icon up
 import { useFeatureFlag } from "../../../../hooks/use-stores";
 import { useConsumerTileLinking } from "../../../../hooks/use-consumer-tile-linking";
 import { ITileModel } from "../../../../models/tiles/tile-model";
 import { IDataFlowActionHandlers } from "../dataflow-shared";
+import { SharedDataSet } from "../../../../models/shared/shared-data-set";
+import LinkTableIcon from "../../assets/icons/link-table-icon.svg"; //we may need to change to icon with icon up
 
 import "./dataflow-program-link-table-button.scss";
 
@@ -25,6 +26,7 @@ export const DataflowLinkTableButton: React.FC<IProps> = (props: IProps) => {
   const { showLinkTileDialog } = useConsumerTileLinking({
                                     hasLinkableRows: true,
                                     model,
+                                    shareType: SharedDataSet,
                                     onLinkTile: actionHandlers.handleRequestTableLink,
                                     onUnlinkTile: actionHandlers.handleRequestTableUnlink
                                   });

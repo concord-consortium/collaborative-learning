@@ -76,9 +76,8 @@ jobs:
           record: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           # only do parallel if we have a record key
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
-          # upload videos for failing specs
-          config: video=true,videoUploadOnPasses=false
           browser: chrome
+          spec: cypress/e2e/functional/**
           group: 'Regression tests'
         env:
           # pass the Dashboard record key as an environment variable

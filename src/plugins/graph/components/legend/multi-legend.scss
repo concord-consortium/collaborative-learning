@@ -1,103 +1,206 @@
 @import "../../../../components/vars.sass";
-
-// Menu sizing here must match calculations in multi-legend.tsx:
-$menu-height: 30px;
-$menu-vertical-padding: 10px;
-$menu-vertical-gap: 10px;
-$menu-label-height: 15px;
-$min-menu-width: 144px;
-$codap-menu-border-color: #0592af;
-$codap-bg-color: #f9f9f9;
+@import "./legend-vars.scss";
 
 .multi-legend {
-  padding: $menu-vertical-padding 0;
   background-color:$codap-bg-color;
   width: 100%;
+  text-align: left;
+  font-size: 14px;
+
+  .legend-icon {
+    align-items: center;
+    display: flex;
+    height: $label-height;
+    justify-content: flex-end;
+    padding: 0 4px;
+
+    svg {
+      height: auto;
+      width: auto;
+    }
+  }
+
+  .legend-title-row {
+    border-top: 1.5px solid #92c7d5;
+
+    .legend-title {
+      padding-left: 6px;
+    }
+  }
+
+  .remove-button {
+    align-items: flex-start;
+    background: inherit;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    height: 27px;
+    justify-content: center;
+    margin: 0;
+    padding: 1px;
+    width: 27px;
+
+    &:hover {
+      background-color: $workspace-teal-light-6;
+    }
+
+    svg {
+      height: 22px;
+      width: 22px;
+    }
+  }
 
   .legend-row {
-    display: block;
-    margin-top: $menu-vertical-gap;
-    margin-bottom: $menu-vertical-gap;
-    height: $menu-height;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: $vertical-padding 10px;
+    min-height: $label-height;
 
-    .legend-cell-1, .legend-cell-2{
-      display: inline-block;
+    .legend-cell-1, .legend-cell-2 {
+      align-items: center;
+      display: flex;
       width: 50%;
-      padding: 0 10%;
     }
+  }
 
-    .add-series-button {
-      height: $menu-height;
-      width: $min-menu-width;
-      border: none;
-      padding: 0;
-      background-color: inherit;
-      text-align: left;
-      font-family: Lato;
-      font-size: 14pt;
-      font-style: italic;
-      color: #707070;
+  .add-series-button {
+    align-items: center;
+    background-color: inherit;
+    border: none;
+    border-radius: 6px;
+    color: #707070;
+    cursor: pointer;
+    display: flex;
+    font-family: Lato;
+    font-size: 14px;
+    font-style: italic;
+    height: $menu-height;
+    min-width: $min-menu-width;
+    padding: 0 8px 0 0;
+    text-align: left;
+
+    &.disabled {
+      opacity: .3;
 
       &:hover {
-        background-color: $workspace-teal-light-4;
-      }
-
-      svg {
-        width: 22px;
-        height: 22px;
-        margin-right: 8px;
-        vertical-align: bottom;
+        background-color: $charcoal-light-6;
       }
     }
 
-    .simple-attribute-label {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      min-width: $min-menu-width;
-      height: $menu-height;
+    &:hover {
+      background-color: $workspace-teal-light-4;
+    }
 
-      border: 1px solid #3f3f3f;
-      border-radius: 4px;
-      padding: 6px;
-      color: #3f3f3f;
+    svg {
+      width: 22px;
+      height: 22px;
+    }
 
-      // TODO: does not work as expected
-      // &:hover {
-      //   background-color: $workspace-teal-light-4;
-      // }
+    .add-series-label {
+      padding-left: 6px;
+    }
+  }
+}
 
-      .symbol-title {
-        display: flex;
-      }
+.styled-button {
+  align-items: center;
+  display: flex;
+  height: $menu-height;
+  justify-content: space-between;
+  min-width: $min-menu-width;
 
-      .attr-symbol {
-        height: $menu-label-height;
-        width: $menu-label-height;
-        margin-right: 6px;
-        margin-top:2px;
-        border-radius: 50%;
-      }
+  border: 1px solid #3f3f3f;
+  border-radius: 4px;
+  color: #3f3f3f;
+  background-color: $workspace-teal-light-8;
 
-      .caret {
-        transform: rotate(0deg);
-        transition: transform 0.2s ease-in-out;
-        svg {
-          margin-top:4px;
-          stroke:#3f3f3f;
-        }
-      }
+  &.highlighted {
+    background-color: $highlight-linked-header;
+  }
+}
 
-      &.target-open {
-        border-color:$codap-menu-border-color;
-        background-color: $codap-bg-color;
-        .caret {
-          transform: rotate(180deg);
-          transition: transform 0.2s ease-in-out;
-          svg {
-            stroke:$codap-menu-border-color;
-          }
-        }
+.graph-legend-label {
+  border: 1px solid #3f3f3f;
+  border-radius: 4px;
+  color: #3f3f3f;
+  background-color: $workspace-teal-light-8;
+
+  &.normal-dropdown-label {
+    min-width: 220px;
+    height: $menu-height;
+  }
+}
+
+.color-label {
+  align-items: center;
+  display: flex;
+  height: $menu-height;
+  justify-content: center;
+  min-width: $menu-height;
+  width: $menu-height;
+
+  .color-line {
+    border-bottom: 2px solid white;
+    border-top: 2px solid white;
+    height: 7px;
+    margin: 0 4px;
+    width: 100%;
+  }
+}
+
+.symbol-container {
+  padding: 3px;
+}
+
+.attr-symbol {
+  height: $menu-height - 8px;
+  width: $menu-height - 8px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+}
+
+.simple-attribute-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &.highlighted {
+    background-color: $highlight-linked-header;
+  }
+
+  .symbol-title {
+    display: flex;
+    height: 100%;
+  }
+
+  .attr-title {
+    padding: 6px;
+    overflow: hidden;
+  }
+
+  .caret {
+    transform: rotate(0deg);
+    transition: transform 0.2s ease-in-out;
+    svg {
+      margin-top:4px;
+      stroke:#3f3f3f;
+    }
+  }
+
+  &.target-open {
+    border-color:$codap-menu-border-color;
+    background-color: $codap-bg-color;
+
+    &.highlighted {
+       background-color: $highlight-linked-header;
+    }
+    .caret {
+      transform: rotate(180deg);
+      transition: transform 0.2s ease-in-out;
+      svg {
+        stroke:$codap-menu-border-color;
       }
     }
   }

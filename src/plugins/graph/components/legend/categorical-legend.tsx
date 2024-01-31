@@ -16,7 +16,7 @@ import './legend.scss';
 import graphVars from "../graph.scss";
 
 interface ICategoricalLegendProps {
-  transform: string,
+  transform: string;
 }
 
 interface Key {

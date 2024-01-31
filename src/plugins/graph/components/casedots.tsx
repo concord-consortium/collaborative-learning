@@ -1,28 +1,26 @@
 import {randomUniform, select} from "d3";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {CaseData} from "../d3-types";
-import {IDotsRef} from "../graph-types";
+import { PlotProps} from "../graph-types";
 import {ICase} from "../../../models/data/data-set-types";
 import {isAddCasesAction} from "../../../models/data/data-set-actions";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
-import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {handleClickOnDot, setPointCoordinates, setPointSelection} from "../utilities/graph-utils";
-import {useGraphModelContext} from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import {onAnyAction} from "../../../utilities/mst-utils";
+import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { useGraphLayerContext } from "../hooks/use-graph-layer-context";
 
-export const CaseDots = function CaseDots(props: {
-  dotsRef: IDotsRef
-  enableAnimation: React.MutableRefObject<boolean>
-}) {
+export const CaseDots = function CaseDots(props: PlotProps) {
   const {
       dotsRef,
       enableAnimation
     } = props,
     graphModel = useGraphModelContext(),
-    dataset = useDataSetContext(),
+    layer = useGraphLayerContext(),
     dataConfiguration = useDataConfigurationContext(),
+    dataset = dataConfiguration?.dataset,
     layout = useGraphLayoutContext(),
     randomPointsRef = useRef<Record<string, { x: number, y: number }>>({}),
     dragPointRadius = graphModel.getPointRadius('hover-drag'),
@@ -39,9 +37,9 @@ export const CaseDots = function CaseDots(props: {
           .attr('r', dragPointRadius);
         setDragID(aCaseData.caseID);
         currPos.current = {x: event.clientX, y: event.clientY};
-        handleClickOnDot(event, aCaseData.caseID, dataset);
+        handleClickOnDot(event, aCaseData, dataConfiguration);
       }
-    }, [dragPointRadius, dataset, enableAnimation]),
+    }, [dragPointRadius, dataConfiguration, enableAnimation]),
 
     onDrag = useCallback((event: MouseEvent) => {
       if (dotsRef.current && dragID !== '') {
@@ -85,7 +83,7 @@ export const CaseDots = function CaseDots(props: {
   }, [dataConfiguration, graphModel, dotsRef]);
 
   const refreshPointPositions = useCallback((selectedOnly: boolean) => {
-    if (!dotsRef.current) return;
+    if (!dotsRef.current || !dataConfiguration) return;
     const
       pointRadius = graphModel.getPointRadius(),
       selectedPointRadius = graphModel.getPointRadius('select'),
@@ -102,10 +100,11 @@ export const CaseDots = function CaseDots(props: {
         ? dataConfiguration?.getLegendColorForCase : undefined;
 
     setPointCoordinates({
-      dataset, pointRadius, selectedPointRadius, dotsRef, selectedOnly,
+      dataConfiguration, pointRadius, selectedPointRadius, dotsRef, selectedOnly,
+      getColorForId: graphModel.getColorForId,
       pointColor, pointStrokeColor, getScreenX, getScreenY, getLegendColor, enableAnimation
     });
-  }, [dataset, dataConfiguration, graphModel, layout, dotsRef, enableAnimation]);
+  }, [dataConfiguration, graphModel, layout, dotsRef, enableAnimation]);
 
   useEffect(function initDistribution() {
     const {cases} = dataset || {};
@@ -127,7 +126,7 @@ export const CaseDots = function CaseDots(props: {
     return () => disposer?.();
   }, [dataset]);
 
-  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
+  usePlotResponders({layer, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
 
   return (
     <>

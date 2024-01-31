@@ -4,6 +4,7 @@ import { AppConfigModel, AppConfigModelType } from "./app-config-model";
 import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
 import { InvestigationModel, InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
+import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui";
 import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
@@ -22,6 +23,9 @@ import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
 import { IBaseStores } from "./base-stores-types";
 import { NavTabModelType } from "../view/nav-tabs";
+import { Bookmarks } from "./bookmarks";
+import { SortedDocuments } from "./sorted-documents";
+import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -33,6 +37,7 @@ export interface IStores extends IBaseStores {
   setAppMode: (appMode: AppMode) => void;
   initializeStudentWorkTab: () => void;
   setUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
+  sortedDocuments: SortedDocuments;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -56,6 +61,7 @@ class Stores implements IStores{
   problem: ProblemModelType;
   teacherGuide?: ProblemModelType;
   user: UserModelType;
+  persistentUI: PersistentUIModelType;
   ui: UIModelType;
   groups: GroupsModelType;
   class: ClassModelType;
@@ -64,11 +70,13 @@ class Stores implements IStores{
   db: DB;
   demo: DemoModelType;
   showDemoCreator: boolean;
+  bookmarks: Bookmarks;
   supports: SupportsModelType;
   clipboard: ClipboardModelType;
   selection: SelectionStoreModelType;
   serialDevice: SerialDevice;
   userContextProvider: UserContextProvider;
+  sortedDocuments: SortedDocuments;
 
   constructor(params?: ICreateStores){
     // This will mark all properties as observable
@@ -78,27 +86,15 @@ class Stores implements IStores{
     // will do with async functions, but whatever it
     // does seems to work without warnings.
     makeAutoObservable(this);
-
     this.appMode = params?.appMode || "dev";
     this.isPreviewing = params?.isPreviewing || false;
     this.appVersion = params?.appVersion || "unknown";
     this.appConfig = params?.appConfig || AppConfigModel.create();
-
     // for testing, we create a null problem or investigation if none is provided
     this.investigation = params?.investigation ||
       InvestigationModel.create({ ordinal: 0, title: "Null Investigation" });
     this.problem = params?.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" });
     this.user = params?.user || UserModel.create({ id: "0" });
-    this.ui = params?.ui || UIModel.create({
-        problemWorkspace: {
-          type: ProblemWorkspace,
-          mode: "1-up"
-        },
-        learningLogWorkspace: {
-          type: LearningLogWorkspace,
-          mode: "1-up"
-        },
-      });
     this.groups = params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing });
     this.groups.setEnvironment(this);
     this.class = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });
@@ -113,8 +109,22 @@ class Stores implements IStores{
     this.clipboard = ClipboardModel.create();
     this.selection = SelectionStoreModel.create();
     this.serialDevice = new SerialDevice();
-    this.ui.setProblemPath(this.problemPath);
+    this.ui = params?.ui || UIModel.create({
+      learningLogWorkspace: {
+        type: LearningLogWorkspace,
+        mode: "1-up"
+      },
+    });
+    this.persistentUI = params?.persistentUI || PersistentUIModel.create({
+      problemWorkspace: {
+        type: ProblemWorkspace,
+        mode: "1-up"
+      }
+    });
+    this.persistentUI.setProblemPath(this.problemPath);
     this.userContextProvider = new UserContextProvider(this);
+    this.bookmarks = new Bookmarks({db: this.db});
+    this.sortedDocuments = new SortedDocuments(this);
   }
 
   get tabsToDisplay() {
@@ -138,7 +148,7 @@ class Stores implements IStores{
   }
 
   get isShowingTeacherContent() {
-    const { ui: { showTeacherContent }, user: { isTeacher } } = this;
+    const { persistentUI: { showTeacherContent }, user: { isTeacher } } = this;
     return isTeacher && showTeacherContent;
   }
 
@@ -146,8 +156,8 @@ class Stores implements IStores{
    * The currently open group in the Student Work tab
    */
   get studentWorkTabSelectedGroupId() {
-    const { ui, groups } = this;
-    return ui.tabs.get("student-work")?.openSubTab
+    const { persistentUI, groups } = this;
+    return persistentUI.tabs.get("student-work")?.openSubTab
         || (groups.nonEmptyGroups.length ? groups.nonEmptyGroups[0].id : "");
   }
 
@@ -163,7 +173,7 @@ class Stores implements IStores{
     // waiting
     when(
       () => this.studentWorkTabSelectedGroupId !== "",
-      () => this.ui.setOpenSubTab("student-work", this.studentWorkTabSelectedGroupId)
+      () => this.persistentUI.setOpenSubTab("student-work", this.studentWorkTabSelectedGroupId)
     );
   }
 
@@ -182,11 +192,13 @@ class Stores implements IStores{
   // be some weird interactions with action tracking if we mix them.
   async setUnitAndProblem(unitId: string | undefined, problemOrdinal?: string) {
     const { appConfig } = this;
+    showLoadingMessage("Loading curriculum content");
     let unitJson = await getUnitJson(unitId, appConfig);
     if (unitJson.status === 404) {
       unitJson = await getUnitJson(appConfig.defaultUnit, appConfig);
     }
-
+    removeLoadingMessage("Loading curriculum content");
+    showLoadingMessage("Setting up curriculum content");
     // read the unit content, but don't instantiate section contents (DocumentModels) yet
     const unit = createUnitWithoutContent(unitJson);
 
@@ -196,10 +208,12 @@ class Stores implements IStores{
     appConfig.setConfigs([unit.config || {}, _investigation?.config || {}, _problem?.config || {}]);
 
     // load/initialize the necessary tools
+    showLoadingMessage("Loading tile types");
     const { authorTools = [], toolbar = [], tools: tileTypes = [] } = appConfig;
     const unitTileTypes = new Set(
       [...toolbar.map(button => button.id), ...authorTools.map(button => button.id), ...tileTypes]);
     await registerTileTypes([...unitTileTypes]);
+    removeLoadingMessage("Loading tile types");
 
     // We are changing our observable state here so we need to be in an action.
     // Because this is an async function, we'd have to switch it to a flow to
@@ -225,13 +239,14 @@ class Stores implements IStores{
         this.investigation = investigation;
         this.problem = problem;
       }
-      this.ui.setProblemPath(this.problemPath);
+      this.persistentUI.setProblemPath(this.problemPath);
 
       // Set the active tab to be the first tab
       const tabs = this.tabsToDisplay;
       if (tabs.length > 0) {
-        this.ui.setActiveNavTab(tabs[0].tab);
+        this.persistentUI.setActiveNavTab(tabs[0].tab);
       }
+      removeLoadingMessage("Setting up curriculum content");
     });
 
     addDisposer(unit, when(() => {

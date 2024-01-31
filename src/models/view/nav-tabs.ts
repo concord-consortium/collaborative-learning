@@ -8,9 +8,12 @@ export enum ENavTab {
   kStudentWork = "student-work",
   kMyWork = "my-work",
   kClassWork = "class-work",
+  kSortWork = "sort-work",
   kLearningLog = "learning-log",
   kSupports = "supports"
 }
+
+export const kBookmarksTabTitle = "Bookmarks";
 
 // generic type which maps tab id to values of another type
 export type NavTabMap<T> = {
@@ -56,16 +59,14 @@ export const NavTabSectionModel =
     showStarsForUser(user: UserModelType) {
       return user.type && (self.showStars.indexOf(user.type) !== -1);
     },
-    showDeleteForUser(user: UserModelType, userDocument?: any) { //DocumentModelType is a circular logic?
-      const userOwnsDocument = (userDocument && (user.id === userDocument || user.id === userDocument.uid));
-      // allow users to delete published document
+    get allowDelete(){
       const deletableTypes = [ENavTabSectionType.kPublishedPersonalDocuments,
         ENavTabSectionType.kPublishedProblemDocuments,
         ENavTabSectionType.kPublishedLearningLogs,
         ENavTabSectionType.kTeacherSupports,
        ];
-      return (deletableTypes.includes(self.type) && userOwnsDocument);
-    },
+      return deletableTypes.includes(self.type);
+    }
   }));
 export type NavTabSectionSpec = SnapshotIn<typeof NavTabSectionModel>;
 export type NavTabSectionModelType  = Instance<typeof NavTabSectionModel>;

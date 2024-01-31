@@ -1,0 +1,48 @@
+@import "../../../components/vars.sass";
+
+.graph-plot svg.arrow {
+  height: 14px;
+  position: absolute;
+  width: 18px;
+}
+
+.axis-extension {
+  background-color: #707070;
+  position: absolute;
+}
+
+.input-textbox {
+  height: 22px;
+  text-align: center;
+}
+
+.editable-border-box {
+  //width is determined dynamically by how many characters in the number
+  align-items: center;
+  border-radius: 5px;
+  border: solid 1.5px #949494;
+  background-color: #f0f9fb;
+  color: #3f3f3f;
+  display: flex;
+  font: 14px sans-serif; // Keep in sync with boxFont in axis-end-components.tsx
+  height: 22px; // Keep in sync with kEditableBoxHeight in axis-end-components.tsx
+  padding: 0 3px;
+  position: absolute;
+
+  &.bottom {
+    justify-content: center;
+  }
+
+  &.left {
+    justify-content: flex-end;
+  }
+
+  .input-textbox {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 25px;
+    width: 50%;
+  }
+}

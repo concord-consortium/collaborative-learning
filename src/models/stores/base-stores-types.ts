@@ -3,6 +3,7 @@ import { UnitModelType } from "../curriculum/unit";
 import { InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModelType } from "../curriculum/problem";
 import { UIModelType } from "./ui";
+import { PersistentUIModelType } from "./persistent-ui";
 import { UserModelType } from "./user";
 import { GroupsModelType } from "./groups";
 import { ClassModelType } from "./class";
@@ -14,6 +15,7 @@ import { ClipboardModelType } from "./clipboard";
 import { SelectionStoreModelType } from "./selection";
 import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
+import { Bookmarks } from "./bookmarks";
 
 
 export interface IBaseStores {
@@ -26,6 +28,7 @@ export interface IBaseStores {
   problem: ProblemModelType;
   teacherGuide?: ProblemModelType;
   user: UserModelType;
+  persistentUI: PersistentUIModelType;
   ui: UIModelType;
   groups: GroupsModelType;
   class: ClassModelType;
@@ -38,4 +41,5 @@ export interface IBaseStores {
   clipboard: ClipboardModelType;
   selection: SelectionStoreModelType;
   serialDevice: SerialDevice;
+  bookmarks: Bookmarks;
 }

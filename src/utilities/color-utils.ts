@@ -25,28 +25,49 @@ export const isLightColorRequiringContrastOffset = (color?: string) => {
   return (luminance != null) && (luminance >= kLightLuminanceThreshold);
 };
 
+interface ClueColor {
+  color: string;
+  name: string;
+}
+export const kGraphDataBlue = "#0069ff";
+export const kGraphDataOrange = "#ff9617";
+export const kGraphDataGreen = "#19a90f";
+export const kGraphDataRed = "#e00";
+export const kGraphDataYellow = "#cbd114";
+export const kGraphDataPurple = "#d51eff";
+export const kGraphDataIndigo = "#6b00d2";
+export const clueGraphColors: ClueColor[] = [
+  { color: kGraphDataBlue, name: "blue" },
+  { color: kGraphDataOrange, name: "orange" },
+  { color: kGraphDataGreen, name: "green" },
+  { color: kGraphDataRed, name: "red" },
+  { color: kGraphDataYellow, name: "yellow" },
+  { color: kGraphDataPurple, name: "purple" },
+  { color: kGraphDataIndigo, name: "indigo" }
+];
+
 /*
   The following list of 20 colors are maximally visually distinct from each other.
   See http://eleanormaclure.files.wordpress.com/2011/03/colour-coding.pdf
   and https://stackoverflow.com/questions/470690/how-to-automatically-generate-n-distinct-colors
 
   The first seven are also visually distinct for people with defective color vision
-   */
-  export const kellyColors = [
-    '#FF6800', '#803E75', '#A6BDD7', '#FFB300',
-    '#C10020', '#CEA262', '#817066', '#007D34',
-    '#00538A', '#F13A13', '#53377A', '#FF8E00',
-    '#B32851', '#F4C800', '#7F180D', '#93AA00',
-    '#593315', '#232C16', '#FF7A5C', '#F6768E'
-  ];
-  
-  export const defaultPointColor = '#E6805B',
-    defaultSelectedColor = '#4682B4',
-    defaultStrokeWidth = 1,
-    defaultStrokeOpacity = 0.4,
-    missingColor = '#888888',
-    defaultStrokeColor = '#FFFFFF',
-    defaultSelectedStroke = '#FF0000',
-    defaultSelectedStrokeWidth = 2,
-    defaultSelectedStrokeOpacity = 1,
-    defaultBackgroundColor = '#FFFFFF';
+*/
+export const kellyColors = [
+  '#FF6800', '#803E75', '#A6BDD7', '#FFB300',
+  '#C10020', '#CEA262', '#817066', '#007D34',
+  '#00538A', '#F13A13', '#53377A', '#FF8E00',
+  '#B32851', '#F4C800', '#7F180D', '#93AA00',
+  '#593315', '#232C16', '#FF7A5C', '#F6768E'
+];
+
+export const defaultPointColor = '#E6805B';
+export const defaultStrokeWidth = 1;
+export const missingColor = '#888888';
+export const defaultStrokeColor = '#FFFFFF';
+export const defaultBackgroundColor = '#FFFFFF';
+
+export const selectedStrokeWidth = 1; //1 for now - may change such that the stroke-width increases when selected
+export const selectedOuterCircleFillColor = "#14F49E";
+export const selectedOuterCircleStrokeColor = "#FFFFFF";
+
