@@ -21,7 +21,6 @@ import { DataCardToolbarContext } from "./data-card-toolbar-context";
 import { CasesCountDisplay } from "./components/cases-count-display";
 
 import "./data-card-tile.scss";
-import "./components/cases-count-display.scss";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer(function DataCardToolComponent(props) {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
