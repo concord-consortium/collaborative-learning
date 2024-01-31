@@ -1,6 +1,6 @@
 #!/usr/bin/node
 
-// This script determines which documents downloaded with download-documents.ts use sparrows,
+// This script determines which documents downloaded with download-documents-with-info.ts use sparrows,
 // then saves information about those documents in an output file.
 
 // to run this script type the following in the terminal
@@ -15,10 +15,9 @@ import fs from "fs";
 import stringify from "json-stringify-pretty-compact";
 
 import { datasetPath } from "./script-constants";
-import { DocumentInfo } from "./script-types";
 import { prettyDuration } from "./script-utils";
 
-const sourceDirectory = "dataset1699369801517";
+const sourceDirectory = "dataset1706665974404";
 const annotationTypes = ["arrowAnnotation"];
 
 // The number of files to process in parallel
@@ -32,24 +31,24 @@ console.log(`* Counting ${annotationTypes.join(", ")} Annotations *`);
 const startTime = Date.now();
 let checkedFiles = 0;
 let processedFiles = 0;
-const documentInfo: Record<string, DocumentInfo> = {};
-const tagCounts = {};
+const documentInfo: Record<string, any> = {};
 
 // Porcesses a file, counting the relevant tiles in it if it's a document
 async function processFile(file: string) {
   const path = `${sourcePath}/${file}`;
-  if (file.startsWith("document")) {
+  if (file.startsWith("documentInfo")) {
     // For files named like documentXXX.txt, read the file
     const content = fs.readFileSync(path, "utf8");
     const parsedContent = JSON.parse(content);
+    const { documentContent, ...documentIds } = parsedContent;
 
     // Set up infrastructure to count tiles
-    const annotationCounts = {};
-    annotationTypes.forEach(tileType => annotationCounts[tileType] = 0);
+    const annotationCounts: Record<string, number> = {};
+    annotationTypes.forEach(annotationType => annotationCounts[annotationType] = 0);
 
     // Check each tile in the document and count the relevant ones
-    if (parsedContent.annotations) {
-      const annotations = Object.values<any>(parsedContent.annotations);
+    if (documentContent.annotations) {
+      const annotations = Object.values<any>(documentContent.annotations);
       for (const annotation of annotations) {
         const annotationType = annotation.type;
         if (annotationTypes.includes(annotationType)) {
@@ -57,18 +56,10 @@ async function processFile(file: string) {
         }
       }
     }
-    // const tags: string[] = [];
-    // annotationTypes.forEach(annotationType => {
-    //   const typeCount = annotationCounts[annotationType];
-    //   const tagNumber = typeCount >= maxTileCount ? `${maxTileCount}+` : `${typeCount}`;
-    //   const tag = `${annotationType}${tagNumber}`;
-    //   tags.push(tag);
-    //   if (!tagCounts[tag]) tagCounts[tag] = 0;
-    //   tagCounts[tag]++;
-    // });
-    const annotationCount = Object.values(annotationCounts).reduce((prev, count) => prev + count, 0);
+    const annotationCount: number = Object.values(annotationCounts).reduce((prev, count) => prev + count, 0);
     if (annotationCount > 0) {
       documentInfo[file] = {
+        ...documentIds,
         fileName: file,
         annotationCounts
       };
