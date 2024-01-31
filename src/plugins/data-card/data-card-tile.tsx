@@ -18,6 +18,7 @@ import { mergeTwoDataSets } from "../../models/data/data-set-utils";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { useDataCardTileHeight } from "./use-data-card-tile-height";
 import { DataCardToolbarContext } from "./data-card-toolbar-context";
+import { CasesCountDisplay } from "./components/cases-count-display";
 
 import "./data-card-tile.scss";
 
@@ -44,6 +45,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const displaySingle = !content.selectedSortAttributeId;
   const shouldShowAddField = !readOnly && isTileSelected && displaySingle;
   const attrIdsNames = content.existingAttributesWithNames();
+  const cardOf = `Card ${content.caseIndex + 1 } of `;
 
   // When a highlighted case or cell is set, show it
   const selectedCaseId = dataSet.firstSelectedCaseId ? dataSet.firstSelectedCaseId : dataSet.firstSelectedCell?.caseId;
@@ -286,18 +288,20 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
                 onSortAttrChange={setSort}
                 attrIdNamePairs={attrIdsNames}
               />
+              <CasesCountDisplay label="Total" totalCases={content.totalCases} />
             </div>
             { displaySingle &&
-              <>
+              <div className="single-card-view-wrap">
                 <div
                   className={classNames("panel nav", { highlighted: content.caseSelected, linked: isLinked })}
                   onClick={handleNavPanelClick}
                 >
                   <div className="card-number-of-listing">
                     <div className="cell-text">
-                      { content.totalCases > 0
-                          ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
-                          : "Add a card" }
+                        { content.totalCases > 0 &&
+                          <CasesCountDisplay label={cardOf} totalCases={content.totalCases} />
+                        }
+                        { (!content.totalCases || content.totalCases < 1) && <>Add a card</> }
                     </div>
                   </div>
                   <div className="card-nav-buttons">
@@ -327,7 +331,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
                     />
                   }
                 </div>
-              </>
+              </div>
             }
             { shouldShowAddField && !readOnly &&
               <AddIconButton className="add-field" onClick={handleAddField} />

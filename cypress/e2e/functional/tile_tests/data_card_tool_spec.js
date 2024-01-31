@@ -119,7 +119,7 @@ context('Data Card Tool Tile', () => {
     dc.getSortSelect().select("None");
     dc.getCardNofTotalListing().contains("Card 1 of 2");
     dc.getAttrValueInput().eq(0).invoke('val').should('eq', "ocean");
-    dc.getAttrValueInput().eq(1).invoke('val').should('eq', "camel");
+    dc.getAttrValueInput().eq(1).invoke('val').should('eq', "whale");
     dc.getNextCardButton().click();
     dc.getCardNofTotalListing().contains("Card 2 of 2");
     dc.getAttrValueInput().eq(0).invoke('val').should('eq', "e");
