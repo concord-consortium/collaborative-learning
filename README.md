@@ -177,6 +177,7 @@ To enable per component debugging set the "debug" localstorage key with one or m
 - `history` this will: print some info to the console as the history system records changes, print the full history as JSON each time it is loaded from Firestore, and provide a `window.historyDocument` so you can inspect the document while navigating the history.
 - `images` this will set `window.imageMap` so you can look at the status and URLs of images that have been loaded.
 - `listeners` console log the adding, removing, and firing of firebase listeners
+- `loading` console log timing information for various phases of the startup process
 - `logger` console log all messages sent to the logging service
 - `sharedModels` console log messages about shared models, currently this is only used in the variables shared model
 - `stores` this will set `window.stores` so you can monitor the stores global from the browser console.

@@ -12,6 +12,7 @@ import { IStores } from "../models/stores/stores";
 import { isDifferentUnitAndProblem } from "../models/curriculum/unit";
 import { updateProblem } from "../lib/misc";
 import ErrorAlert from "./utilities/error-alert";
+import { getCurrentLoadingMessage, removeLoadingMessage, showLoadingMessage } from "../utilities/loading-utils";
 
 // used for tooltips in various parts of the application
 import "react-tippy/dist/tippy.css";
@@ -86,6 +87,8 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
   const {appConfig, appMode, db, user, ui} = stores;
   let rawPortalJWT: string | undefined;
 
+  showLoadingMessage("Connecting");
+
   authenticate(appMode, appConfig, urlParams)
     .then(async ({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
       // authentication can trigger appMode change (e.g. preview => demo)
@@ -119,6 +122,9 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
           syncTeacherClassesAndOfferings(db.firestore, user, rawPortalJWT);
         }
       }
+    })
+    .then(() => {
+      removeLoadingMessage("Connecting");
     })
     .catch((error) => {
       let errorMessage = error.toString();
@@ -209,10 +215,10 @@ export class AppComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderLoading() {
-    const { appConfig: { appName } } = this.stores;
     return (
-      <div className="progress">
-        Loading {appName} ...
+      // Shouldn't be any actual danger since we're only copying text from localStorage
+      // eslint-disable-next-line react/no-danger
+      <div id="loading-message" className="progress" dangerouslySetInnerHTML={{__html: getCurrentLoadingMessage()}}>
       </div>
     );
   }
