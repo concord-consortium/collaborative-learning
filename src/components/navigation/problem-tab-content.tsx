@@ -77,8 +77,8 @@ export const ProblemTabContent: React.FC<IProps>
         <TabList className={classNames("tab-list", {"chat-open" : persistentUI.showChatPanel})}>
           {sections?.map((section, index) => {
 
-            console.log("📁 problem-tab-content.tsx ------------------------");
-            console.log("\t🥩 section:", section);
+            // console.log("📁 problem-tab-content.tsx ------------------------");
+            // console.log("\t🥩 section:", section);
             const sectionTitle = getSectionTitle(section.type);
             return (
               <Tab

@@ -60,39 +60,63 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
       return total + (doc.content?.tileMap.size || 0);
     }, 0);
 
-    const primaryDocNumTilesByType = this.primaryDocument?.content?.getAllTilesByType() as any;
-    //convert all values from a string[] of tileKeys to the number of tiles (length)
-    for (const tileType of Object.keys(primaryDocNumTilesByType)){
-      primaryDocNumTilesByType[tileType] = primaryDocNumTilesByType[tileType].length;
+    const primaryDocTilesByType = this.primaryDocument?.content?.getAllTilesByType() as any;
+    const primaryDocNumTilesByType = countTileKeys(primaryDocTilesByType);
+
+    //getAllTilesByType returns a map with the tileKeys as values, we want to convert this to the length
+    function countTileKeys(tilesByType: Record<string, string[]>): Record<string, number> {
+      const tileCounts: Record<string, number>= {};
+      for (const tileType of Object.keys(tilesByType)) {
+        tileCounts[tileType] = tilesByType[tileType].length;
+      }
+      return tileCounts;
     }
 
     // ----------------------- Curriculum Documents Summary  --------------------------------------
-    // How many tiles of each type all curriculum documents
-    //take into account student vs teacher
-    //also convert string of keys to number
+    // Take into account that teachers have extra "curriculum documents" in the TeacherGuide tab
+    let curriculumDocSections = [...sections]; //these are for the "Problem" tab
+    if(teacherGuide) {
+      curriculumDocSections = [...curriculumDocSections, ...teacherGuide.sections];
+    }
 
-    const curriculumDocGetAllTilesByType = sections.map((section) => {
+    const curriculumSectionsTilesByType = curriculumDocSections.map((section) => {
       console.log(`----------${section.title}----------`);
-      console.log(`\t----------${section.content?.tileMap.size}----------`);
-      return section.content?.getAllTilesByType();
+      const sectionDocTilesByType = section.content?.getAllTilesByType() as any;
+      console.log("sectionDocTilesByType:", sectionDocTilesByType);
+      const sectionDocNumTilesByType = countTileKeys(sectionDocTilesByType);
+      return sectionDocNumTilesByType;
     });
 
-    console.log("📁 document-workspace.tsx ------------------------");
-    console.log("curriculumDocGetAllTilesByType:", curriculumDocGetAllTilesByType);
+    //We want to reduce this further and count all tiles in each section
+    const curriculumSumTileTypes: Record<string, number> = {};
+    curriculumSectionsTilesByType.forEach((section) => {
+      Object.keys(section).forEach((tileType) => {
+        console.log(`tileType: ${tileType}`);
+        if(!curriculumSumTileTypes[tileType]) {
+          console.log("create entry!!!");
+          curriculumSumTileTypes[tileType] = 0; //create entry
+        }
+        curriculumSumTileTypes[tileType] += section[tileType];
+      });
+    });
 
 
+    console.log(`---------------------------------------------`);
+    console.log("\tcurriculumSectionsTilesByType:", curriculumSectionsTilesByType);
+
+    console.log("\tcurriculumSumTileTypes:", curriculumSumTileTypes);
 
     const documentMeasurements = {
       totalNumDocumentsLoaded,
       totalNumTilesLoaded,
       primaryDocNumTilesByType,
+      curriculumSumTileTypes,
     };
 
     const finalLogObject = {
       loadingMeasurements,
       documentMeasurements
     };
-
 
 
 
@@ -107,15 +131,13 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
     //✔️ Class/Unit/Problem/User(should already exist)
     //✔️ Number of docs loaded
     //✔️ Total # of tiles loaded
-    //✔️ Summary of document on the right(primaryDocument) - how many tiles of each type?
+    //✔️ Summary of document on the right(primaryDocument) - how many tiles of each type
     //✔️ don't forget "Loading the application" which is recorded in index.html.
-    //• Summary of the loaded curriculum documents - how many tiles of each type?
-
+    //✔️ Summary of the loaded curriculum documents - how many tiles of each type
 
     // -----------------------   //TODO:  -----------------------------------------
 
     //Measure the tileMap calculations with performance.now
-    //TODO: tilesbyType (on both priary and curriculum) - store a count instead of an array of doc keys
 
 
 
