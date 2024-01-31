@@ -50,11 +50,11 @@ context('Merge Data Card Tool Tile', function () {
 
     dc.getAttrs(1).should("have.length", 2);
     dc.getAttrName(1).eq(0).should("have.text", "vegetable");
-    dc.getAttrValue(1).eq(0).invoke("attr", "value").should("contain", "beet");
+    dc.getAttrValue(1).eq(0).invoke("val").should("contain", "beet");
     dc.getAttrName(1).eq(1).should("have.text", "animal");
     dc.getNextCardButton(1).click();
-    dc.getAttrValue(1).eq(1).invoke("attr", "value").should("contain", "cat");
-  
+    dc.getAttrValue(1).eq(1).invoke("val").should("contain", "cat");
+
     cy.log("merges two empty Data Card tool tiles");
     beforeTest();
     clueCanvas.addTile("datacard");
@@ -84,7 +84,7 @@ context('Merge Data Card Tool Tile', function () {
     dc.getAttrName(1).should("have.text", "Label 1");
     dc.getPreviousCardButton(1).click();
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
-  
+
     cy.log("merges filled-in into empty Data Card tool tile");
     beforeTest();
     clueCanvas.addTile("datacard");
@@ -109,24 +109,24 @@ context('Merge Data Card Tool Tile', function () {
     dc.getAttrs(0).should("have.length", 1);
     dc.getCardNofTotalListing(0).should("have.text", "Card 1 of 1");
     dc.getAttrName(0).should("have.text", "Attr1 Name");
-    dc.getAttrValue(0).invoke("attr", "value").should("contain", "Attr1 Value");
+    dc.getAttrValue(0).invoke("val").should("contain", "Attr1 Value");
 
     dc.getAttrs(1).should("have.length", 2);
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
     dc.getAttrName(1).eq(0).should("have.text", "Label 1");
-    dc.getAttrValue(1).eq(0).invoke("attr", "value").should("be.empty");
+    dc.getAttrValue(1).eq(0).invoke("val").should("be.empty");
     dc.getAttrName(1).eq(1).should("have.text", "Attr1 Name");
-    dc.getAttrValue(1).eq(1).invoke("attr", "value").should("be.empty");
+    dc.getAttrValue(1).eq(1).invoke("val").should("be.empty");
     dc.getNextCardButton(1).click();
     dc.getCardNofTotalListing(1).should("have.text", "Card 2 of 2");
     dc.getAttrs(1).should("have.length", 2);
     dc.getAttrName(1).eq(0).should("have.text", "Label 1");
-    dc.getAttrValue(1).eq(0).invoke("attr", "value").should("be.empty");
+    dc.getAttrValue(1).eq(0).invoke("val").should("be.empty");
     dc.getAttrName(1).eq(1).should("have.text", "Attr1 Name");
-    dc.getAttrValue(1).eq(1).invoke("attr", "value").should("contain", "Attr1 Value");
+    dc.getAttrValue(1).eq(1).invoke("val").should("contain", "Attr1 Value");
     dc.getPreviousCardButton(1).click();
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
-  
+
     cy.log("merges empty into filled-in Data Card tool tile");
     beforeTest();
     clueCanvas.addTile("datacard");
@@ -151,24 +151,24 @@ context('Merge Data Card Tool Tile', function () {
     dc.getAttrs(0).should("have.length", 1);
     dc.getCardNofTotalListing(0).should("have.text", "Card 1 of 1");
     dc.getAttrName(0).should("have.text", "Label 1");
-    dc.getAttrValue(0).invoke("attr", "value").should("be.empty");
+    dc.getAttrValue(0).invoke("val").should("be.empty");
 
     dc.getAttrs(1).should("have.length", 2);
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
     dc.getAttrName(1).eq(0).should("have.text", "Attr1 Name");
-    dc.getAttrValue(1).eq(0).invoke("attr", "value").should("contain", "Attr1 Value");
+    dc.getAttrValue(1).eq(0).invoke("val").should("contain", "Attr1 Value");
     dc.getAttrName(1).eq(1).should("have.text", "Label 1");
-    dc.getAttrValue(1).eq(1).invoke("attr", "value").should("be.empty");
+    dc.getAttrValue(1).eq(1).invoke("val").should("be.empty");
     dc.getNextCardButton(1).click();
     dc.getCardNofTotalListing(1).should("have.text", "Card 2 of 2");
     dc.getAttrs(1).should("have.length", 2);
     dc.getAttrName(1).eq(0).should("have.text", "Attr1 Name");
-    dc.getAttrValue(1).eq(0).invoke("attr", "value").should("be.empty");
+    dc.getAttrValue(1).eq(0).invoke("val").should("be.empty");
     dc.getAttrName(1).eq(1).should("have.text", "Label 1");
-    dc.getAttrValue(1).eq(1).invoke("attr", "value").should("be.empty");
+    dc.getAttrValue(1).eq(1).invoke("val").should("be.empty");
     dc.getPreviousCardButton(1).click();
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
-  
+
     cy.log("merges two filled-in Data Card tool tiles");
     beforeTest();
     clueCanvas.addTile("datacard");
@@ -197,24 +197,24 @@ context('Merge Data Card Tool Tile', function () {
     dc.getAttrs(0).should("have.length", 1);
     dc.getCardNofTotalListing(0).should("have.text", "Card 1 of 1");
     dc.getAttrName(0).should("have.text", "Attr1 Name");
-    dc.getAttrValue(0).invoke("attr", "value").should("contain", "Attr1 Value");
+    dc.getAttrValue(0).invoke("val").should("contain", "Attr1 Value");
 
     dc.getAttrs(1).should("have.length", 2);
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
     dc.getAttrName(1).eq(0).should("have.text", "Attr2 Name");
-    dc.getAttrValue(1).eq(0).invoke("attr", "value").should("contain", "Attr2 Value");
+    dc.getAttrValue(1).eq(0).invoke("val").should("contain", "Attr2 Value");
     dc.getAttrName(1).eq(1).should("have.text", "Attr1 Name");
-    dc.getAttrValue(1).eq(1).invoke("attr", "value").should("be.empty");
+    dc.getAttrValue(1).eq(1).invoke("val").should("be.empty");
     dc.getNextCardButton(1).click();
     dc.getCardNofTotalListing(1).should("have.text", "Card 2 of 2");
     dc.getAttrs(1).should("have.length", 2);
     dc.getAttrName(1).eq(0).should("have.text", "Attr2 Name");
-    dc.getAttrValue(1).eq(0).invoke("attr", "value").should("be.empty");
+    dc.getAttrValue(1).eq(0).invoke("val").should("be.empty");
     dc.getAttrName(1).eq(1).should("have.text", "Attr1 Name");
-    dc.getAttrValue(1).eq(1).invoke("attr", "value").should("contain", "Attr1 Value");
+    dc.getAttrValue(1).eq(1).invoke("val").should("contain", "Attr1 Value");
     dc.getPreviousCardButton(1).click();
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
-  
+
     cy.log("merges datacards with same attribute labels");
     beforeTest();
     clueCanvas.addTile("datacard");
@@ -243,12 +243,12 @@ context('Merge Data Card Tool Tile', function () {
     dc.getAttrs(1).should("have.length", 1);
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
     dc.getAttrName(1).eq(0).should("have.text", "Attr1 Name");
-    dc.getAttrValue(1).eq(0).invoke("attr", "value").should("contain", "Attr2 Value");
+    dc.getAttrValue(1).eq(0).invoke("val").should("contain", "Attr2 Value");
     dc.getNextCardButton(1).click();
     dc.getCardNofTotalListing(1).should("have.text", "Card 2 of 2");
     dc.getAttrs(1).should("have.length", 1);
     dc.getAttrName(1).eq(0).should("have.text", "Attr1 Name");
-    dc.getAttrValue(1).eq(0).invoke("attr", "value").should("contain", "Attr1 Value");
+    dc.getAttrValue(1).eq(0).invoke("val").should("contain", "Attr1 Value");
     dc.getPreviousCardButton(1).click();
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
   });
@@ -289,16 +289,16 @@ context('Merge Data Card Tool Tile', function () {
     dc.getAttrs(1).should("have.length", 2);
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
     dc.getAttrName(1).eq(0).should("have.text", "Attr2 Name");
-    dc.getAttrValue(1).eq(0).invoke("attr", "value").should("contain", "Attr2 Value");
+    dc.getAttrValue(1).eq(0).invoke("val").should("contain", "Attr2 Value");
     dc.getAttrName(1).eq(1).should("have.text", "Attr1 Name");
-    dc.getAttrValue(1).eq(1).invoke("attr", "value").should("be.empty");
+    dc.getAttrValue(1).eq(1).invoke("val").should("be.empty");
     dc.getNextCardButton(1).click();
     dc.getCardNofTotalListing(1).should("have.text", "Card 2 of 2");
     dc.getAttrs(1).should("have.length", 2);
     dc.getAttrName(1).eq(0).should("have.text", "Attr2 Name");
-    dc.getAttrValue(1).eq(0).invoke("attr", "value").should("be.empty");
+    dc.getAttrValue(1).eq(0).invoke("val").should("be.empty");
     dc.getAttrName(1).eq(1).should("have.text", "Attr1 Name");
-    dc.getAttrValue(1).eq(1).invoke("attr", "value").should("contain", "Attr1 Value");
+    dc.getAttrValue(1).eq(1).invoke("val").should("contain", "Attr1 Value");
     dc.getPreviousCardButton(1).click();
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
   });
@@ -337,16 +337,16 @@ context('Merge Data Card Tool Tile', function () {
     dc.getAttrs(0).should("have.length", 2);
     dc.getCardNofTotalListing(0).should("have.text", "Card 1 of 2");
     dc.getAttrName(0).eq(0).should("have.text", "Attr2 Name");
-    dc.getAttrValue(0).eq(0).invoke("attr", "value").should("contain", "Attr2 Value");
+    dc.getAttrValue(0).eq(0).invoke("val").should("contain", "Attr2 Value");
     dc.getAttrName(0).eq(1).should("have.text", "Attr1 Name");
-    dc.getAttrValue(0).eq(1).invoke("attr", "value").should("be.empty");
+    dc.getAttrValue(0).eq(1).invoke("val").should("be.empty");
     dc.getNextCardButton(0).click();
     dc.getCardNofTotalListing(0).should("have.text", "Card 2 of 2");
     dc.getAttrs(0).should("have.length", 2);
     dc.getAttrName(0).eq(0).should("have.text", "Attr2 Name");
-    dc.getAttrValue(0).eq(0).invoke("attr", "value").should("be.empty");
+    dc.getAttrValue(0).eq(0).invoke("val").should("be.empty");
     dc.getAttrName(0).eq(1).should("have.text", "Attr1 Name");
-    dc.getAttrValue(0).eq(1).invoke("attr", "value").should("contain", "Attr1 Value");
+    dc.getAttrValue(0).eq(1).invoke("val").should("contain", "Attr1 Value");
     dc.getPreviousCardButton(0).click();
     dc.getCardNofTotalListing(0).should("have.text", "Card 1 of 2");
   });

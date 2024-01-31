@@ -12,27 +12,27 @@ class DataCardToolTile {
     return this.getTile(tileIndex, workspaceClass).find(`.sort-select-input`);
   }
   getAttrs(tileIndex, workspaceClass) {
-    const nameSelector = ".attribute-name-value-pair .name";
+    const nameSelector = ".case-attribute .name-area";
     return this.getTile(tileIndex, workspaceClass).find(`${nameSelector}`);
   }
   getAttrName(tileIndex = 0, workspaceClass){
-    const nameSelector = ".attribute-name-value-pair .name";
+    const nameSelector = ".case-attribute .name-area";
     return this.getTile(tileIndex, workspaceClass).find(`${nameSelector}`);
   }
   getAttrValueCell(tileIndex = 0, workspaceClass){
-    const valueSelector = ".attribute-name-value-pair .value";
+    const valueSelector = ".case-attribute .value-area";
     return this.getTile(tileIndex, workspaceClass).find(`${valueSelector}`);
   }
   getAttrValue(tileIndex = 0, workspaceClass){
-    const valueSelector = ".attribute-name-value-pair .value input";
+    const valueSelector = ".case-attribute .value-area textarea";
     return this.getTile(tileIndex, workspaceClass).find(`${valueSelector}`);
   }
   getAttrValueInput(tileIndex = 0, workspaceClass){
-    const valueSelector = ".attribute-name-value-pair .value .value-input";
+    const valueSelector = ".case-attribute .value-area .value-input";
     return this.getTile(tileIndex, workspaceClass).find(`${valueSelector}`);
   }
   getDownshiftOptions(tileIndex = 0, workspaceClass){
-    const optionsSelector = ".downshift-dropdown ul li";
+    const optionsSelector = "ul.dropdown li";
     return this.getTile(tileIndex, workspaceClass).find(`${optionsSelector}`);
   }
   getSingleCardView(tileIndex = 0, workspaceClass){

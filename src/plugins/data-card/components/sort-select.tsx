@@ -19,7 +19,7 @@ export const SortSelect: React.FC<IProps> = ({ model, attrIdNamePairs, onSortAtt
   return (
     <div className="sort-select">
       <label>
-        Sort
+        Sort by
         <select
           className="sort-select-input"
           name="selectedSortAttribute"
