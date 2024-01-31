@@ -5,35 +5,22 @@ $card-space-factor: 5px;
 $card-border: 1px solid $charcoal-light-1;
 $sort-view-column-width: $sort-view-card-width + 10px;
 $sort-view-font-size:10px;
-$cards-per-row: 3; // this may be dynamic in the future
-$sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
+$sort-view-width: ($sort-view-card-width * 3 ) + 3;
 
 .data-card-tool.display-as-sorted {
   font-size: $sort-view-font-size;
-  // .panel {
-  //   width: ($sort-view-width);
-  // }
 
   .sorting-cards-data-area {
     margin: 0 auto;
     margin-top:40px;
-    // display:flex;
     max-width: $sort-view-width * 2.1;
 
     .sort-area-grid {
-      //border: 2px dotted red;
       display: grid;
       grid-template-columns: repeat(auto-fill, $sort-view-card-width);
       grid-gap: $card-space-factor * 2;
 
-      // grid-template-columns: $sort-view-card-width $sort-view-card-width $sort-view-card-width;
-      // border-left: $card-border;
-      // border-right: $card-border;
-      // border-bottom: $card-border;
-      //flex-wrap: wrap;
-
       .stack {
-        //flex: 0 0 auto;
         border:$card-border;
         border-radius: 6px;
         margin-bottom: 5px;
@@ -61,17 +48,9 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
           background-color: $workspace-teal-light-4;
         }
       }
-
-      // .empty.cell {
-      //   width: $sort-view-card-width;
-      //   background-color: $workspace-teal-light-4;
-      //   height:27px;
-      //   border-top: $card-border;
-      // }
     }
 
     .sortable.card {
-      //display: grid;
       border-radius:$card-space-factor;
       margin:3px;
 
@@ -137,7 +116,7 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
         display: flex;
         .attribute {
           border-right: $card-border;
-          width: 60px;
+          width: 50%;
           padding: $card-space-factor;
           background-color: $workspace-teal-light-4;
           font-weight: bold;
@@ -151,7 +130,7 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
           }
         }
         .value {
-          width: 100%;
+          width: 50%;
           padding: $card-space-factor;
 
           &.highlighted {
@@ -163,7 +142,7 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
           }
         }
         .image-value {
-          width: 100%;
+          max-height: 60px;
         }
       }
       .expand-toggle {

@@ -51,13 +51,21 @@ export const SortCardAttribute: React.FC<IProps> = observer(({ model, caseId, at
       linked: isLinked
     }
   );
+
+  const truncatedForSortView = (str: string) => {
+    const maxChars = 22;
+    if (str === "") return "(no value)";
+    if (str.length < maxChars + 1) return str;
+    return str.slice(0, maxChars) + '... ';
+  };
+
   return (
     <div className="attribute-value-row">
       <div className={attributeClassNames} onClick={handleAttributeClick}>
         {attr.name}
       </div>
       <div className={valueClassNames} onClick={handleValueClick}>
-        { !isImage && value }
+        { !isImage && truncatedForSortView(value) }
         { isImage && <img src={imageUrl} className="image-value" /> }
       </div>
     </div>
