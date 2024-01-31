@@ -10,21 +10,31 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
 
 .data-card-tool.display-as-sorted {
   font-size: $sort-view-font-size;
-  .panel {
-    width: ($sort-view-width);
-  }
+  // .panel {
+  //   width: ($sort-view-width);
+  // }
 
   .sorting-cards-data-area {
-    width: $sort-view-width;
+    margin-top:60px;
+    // display:flex;
+    //width: $sort-view-width;
 
     .sort-area-grid {
+      border: 2px dotted red;
       display: grid;
-      grid-template-columns: $sort-view-card-width $sort-view-card-width $sort-view-card-width;
-      border-left: $card-border;
-      border-right: $card-border;
-      border-bottom: $card-border;
+      grid-template-columns: repeat(auto-fill, $sort-view-card-width);
+      grid-gap: $card-space-factor;
+
+      // grid-template-columns: $sort-view-card-width $sort-view-card-width $sort-view-card-width;
+      // border-left: $card-border;
+      // border-right: $card-border;
+      // border-bottom: $card-border;
+      //flex-wrap: wrap;
 
       .stack {
+        //flex: 0 0 auto;
+        border:2px dotted purple;
+        margin-bottom: 5px;
         width: $sort-view-card-width;
         .stack-heading {
           background-color: $workspace-teal-light-4;
@@ -57,7 +67,7 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
     }
 
     .sortable.card {
-      display: grid;
+      //display: grid;
       border-radius:$card-space-factor;
       margin:3px;
 
