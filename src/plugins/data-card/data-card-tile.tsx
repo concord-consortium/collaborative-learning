@@ -289,7 +289,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
                 onSortAttrChange={setSort}
                 attrIdNamePairs={attrIdsNames}
               />
-              <CasesCountDisplay label="Total" totalCases={content.totalCases} />
+              <div className="total-label">Total </div>
+              <CasesCountDisplay totalCases={content.totalCases} />
             </div>
             { displaySingle &&
               <div className="single-card-view-wrap">
@@ -300,7 +301,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
                   <div className="card-number-of-listing">
                     <div className="cell-text">
                         { content.totalCases > 0 &&
-                          <CasesCountDisplay label={cardOf} totalCases={content.totalCases} />
+                          <CasesCountDisplay totalCases={content.totalCases} />
                         }
                         { (!content.totalCases || content.totalCases < 1) && <>Add a card</> }
                     </div>

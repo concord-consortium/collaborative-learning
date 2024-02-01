@@ -7,6 +7,7 @@ $charcoal-light-border: rgb(206, 206, 206);
 $cell-padding: 0px 8px;
 $cell-text-color: #3f3f3f;
 $default-button-border-color: #979797;
+$panel-height: 34px;
 
 .data-card-tool {
   width: 100%;
@@ -45,7 +46,7 @@ $default-button-border-color: #979797;
     .panel {
       border: solid 1px $charcoal-light-1;
       width: $deck-controls-width;
-      height: 34px;
+      height: $panel-height;
       font-family: Lato;
       font-size: 14px;
       font-weight: bold;
@@ -84,7 +85,7 @@ $default-button-border-color: #979797;
       display: flex;
       align-items: center;
       select {
-        margin-left: 8px;
+        margin: 8px;
         width: 145px;
         height: 26px;
         border: 1.5px solid $charcoal;
@@ -122,10 +123,6 @@ $default-button-border-color: #979797;
         position: absolute;
         left: 50%;
         transform: translateX(-50%);
-
-        .cell-text {
-          //padding: $cell-padding;
-        }
       }
 
       .card-nav-buttons {

@@ -4,23 +4,23 @@ import './cases-count-display.scss';
 
 interface IProps {
   totalCases: number;
-  label?: string;
 }
 
-export const CasesCountDisplay: React.FC<IProps> = ({ totalCases, label }) => {
+export const CasesCountDisplay: React.FC<IProps> = ({ totalCases }) => {
   const countRef = useRef<HTMLDivElement>(null);
   const shadowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (countRef.current && shadowRef.current) {
-      const width = countRef.current.offsetWidth;
-      shadowRef.current.style.width = `${width}px`;
+      const w = countRef.current.offsetWidth;
+      const h = countRef.current.offsetHeight;
+      shadowRef.current.style.width = `${w}px`;
+      shadowRef.current.style.height = `${h}px`;
     }
   }, [totalCases]);
 
   return (
     <div className="total-cards-area">
-      {label}
       <div className="cases-count" ref={countRef}>
         { totalCases }
       </div>
