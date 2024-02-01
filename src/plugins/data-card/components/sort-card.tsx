@@ -77,7 +77,7 @@ export const SortCard: React.FC<IProps> = observer(
         style={capStyle}
       >
         <div className="card-count-info">
-          { `Card ${ deckCardNumberDisplay } of ${ content.totalCases } `}
+          Card <span className="card-count">{deckCardNumberDisplay}</span>
         </div>
       </div>
 
