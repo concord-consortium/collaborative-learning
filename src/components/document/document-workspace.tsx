@@ -39,6 +39,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     this.guaranteeInitialDocuments().then(() => {
       removeLoadingMessage("Building workspace");
       // ----------------------- Logging Loading & Document Measurements -------------------------
+      console.log("one change for PR");
       const { documents, problem: { sections }, teacherGuide, persistentUI } = this.stores;
       const { problemWorkspace } = persistentUI;
       const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
