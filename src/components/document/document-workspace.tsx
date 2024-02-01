@@ -10,30 +10,25 @@ import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
-import { removeLoadingMessage, showLoadingMessage, getLoadingMeasurements } from "../../utilities/loading-utils";
-import { Logger } from "../../../src/lib/logger";
-import { LogEventName } from "../../../src/lib/logger-types";
+import {
+  removeLoadingMessage, showLoadingMessage, logLoadingAndDocumentMeasurements
+} from "../../utilities/loading-utils";
 
 import "./document-workspace.sass";
 
 interface IProps extends IBaseProps {
 }
 
-interface IDocumentWorkspaceState {
-  loadingMeasurements: any;
-}
 
 @inject("stores")
 @observer
-export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentWorkspaceState> {
+export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private imageDragDrop: ImageDragDrop;
   private primaryDocument?: DocumentModelType;
 
   constructor(props: IProps) {
     super(props);
-    this.state = {
-      loadingMeasurements: {},
-    };
+
     showLoadingMessage("Building workspace");
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
@@ -43,75 +38,18 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
   public componentDidMount() {
     this.guaranteeInitialDocuments().then(() => {
       removeLoadingMessage("Building workspace");
-      const loadingMeasurements = getLoadingMeasurements();
-      this.primaryDocument = this.getPrimaryDocument(this.stores.persistentUI.problemWorkspace.primaryDocumentKey);
-      this.setState({ loadingMeasurements });
-      this.logLoadingAndDocumentMeasurements();
 
-    });
-  }
-
-  public logLoadingAndDocumentMeasurements(){
-    const startTime = performance.now();
+    // ----------------------- Logging Loading & Document Measurements --------------------------------------
     const { documents, problem: { sections }, teacherGuide } = this.stores;
-    const { loadingMeasurements } = this.state.loadingMeasurements;
-
-    const totalNumDocumentsLoaded = documents.all.length;
-    const totalNumTilesLoaded = documents.all.reduce((total: number, doc: DocumentModelType) => {
-      return total + (doc.content?.tileMap.size || 0);
-    }, 0);
-
-    const primaryDocTilesByType = this.primaryDocument?.content?.getAllTilesByType() as any;
-    const primaryDocNumTilesByType = countTileKeys(primaryDocTilesByType);
-
-    //getAllTilesByType returns a map with the tileKeys as values, we want to convert this to the length
-    function countTileKeys(tilesByType: Record<string, string[]>): Record<string, number> {
-      const tileCounts: Record<string, number>= {};
-      for (const tileType of Object.keys(tilesByType)) {
-        tileCounts[tileType] = tilesByType[tileType].length;
-      }
-      return tileCounts;
-    }
-
-    // ----------------------- Curriculum Documents Summary  --------------------------------------
     // Take into account that teachers have extra "curriculum documents" in the TeacherGuide tab
+    const primaryDocument = this.getPrimaryDocument();
     let curriculumDocSections = [...sections]; //these are for the "Problem" tab
     if(teacherGuide) {
       curriculumDocSections = [...curriculumDocSections, ...teacherGuide.sections];
     }
+    logLoadingAndDocumentMeasurements(documents, curriculumDocSections, primaryDocument);
 
-    const curriculumSectionsTilesByType = curriculumDocSections.map((section) => {
-      const sectionDocTilesByType = section.content?.getAllTilesByType() as any;
-      const sectionDocNumTilesByType = countTileKeys(sectionDocTilesByType);
-      return sectionDocNumTilesByType;
     });
-
-    //Convert curriculumSectionsTileByType further and count all tiles in each section
-    const curriculumSumTileTypes: Record<string, number> = {};
-    curriculumSectionsTilesByType.forEach((section) => {
-      Object.keys(section).forEach((tileType) => {
-        if(!curriculumSumTileTypes[tileType]) {
-          curriculumSumTileTypes[tileType] = 0; //Create entry
-        }
-        curriculumSumTileTypes[tileType] += section[tileType];
-      });
-    });
-
-    const documentMeasurements = {
-      totalNumDocumentsLoaded,
-      totalNumTilesLoaded,
-      primaryDocNumTilesByType,
-      curriculumSumTileTypes,
-    };
-
-    const finalLogObject = {
-      loadingMeasurements,
-      documentMeasurements
-    };
-
-    const endTime = performance.now();
-    console.log(`logLoadingAndDocumentMeasurements executed in ${endTime - startTime} milliseconds`);
-    Logger.log(LogEventName.LOADING_MEASUREMENTS, finalLogObject);
   }
 
   public render() {
@@ -411,5 +349,4 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps, IDocumentW
       return this.stores.documents.getDocument(documentKey);
     }
   }
-
 }

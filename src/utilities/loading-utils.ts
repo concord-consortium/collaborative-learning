@@ -1,4 +1,10 @@
+import { DocumentsModelType } from "../models/stores/documents";
+import { DocumentModelType } from "../models/document/document";
+import { SectionModelType } from "../models/curriculum/section";
+
 import { DEBUG_LOADING } from "../lib/debug";
+import { LogEventName } from "../lib/logger-types";
+import { Logger } from "../lib/logger";
 
 const sessionStorageStartTimeItem = 'loading-time-start';
 const sessionStorageMessageItem = 'loading-message';
@@ -56,5 +62,72 @@ export function removeLoadingMessage(msg: string) {
 }
 
 export function getLoadingMeasurements(){
-  return {loadingMeasurements};
+  return { loadingMeasurements };
+}
+
+
+export function logLoadingAndDocumentMeasurements(documents: DocumentsModelType,
+  curriculumDocSections: SectionModelType[],
+  primaryDocument?: DocumentModelType ){
+  const startTime = performance.now();
+
+  const totalNumDocumentsLoaded = documents.all.length;
+  const totalNumTilesLoaded = documents.all.reduce((total: number, doc: DocumentModelType) => {
+    return total + (doc.content?.tileMap.size || 0);
+  }, 0);
+
+  console.log("\t🥩 totalNumDocumentsLoaded:", totalNumDocumentsLoaded);
+  console.log("\t🥩 totalNumTilesLoaded:", totalNumTilesLoaded);
+
+
+  const primaryDocTilesByType = primaryDocument?.content?.getAllTilesByType() as any;
+  console.log("\t🥩 primaryDocTilesByType:", primaryDocTilesByType);
+  const primaryDocNumTilesByType = countTileKeys(primaryDocTilesByType);
+
+  console.log("\t🥩 primaryDocNumTilesByType:", primaryDocNumTilesByType);
+
+  //getAllTilesByType returns a map with the tileKeys as values, we want to convert this to the length
+  function countTileKeys(tilesByType: Record<string, string[]>): Record<string, number> {
+    const tileCounts: Record<string, number>= {};
+    for (const tileType of Object.keys(tilesByType)) {
+      tileCounts[tileType] = tilesByType[tileType].length;
+    }
+    return tileCounts;
+  }
+
+  // ----------------------- Curriculum Documents Summary  --------------------------------------
+  const curriculumSectionsTilesByType = curriculumDocSections.map((section) => {
+    const sectionDocTilesByType = section.content?.getAllTilesByType() as any;
+    const sectionDocNumTilesByType = countTileKeys(sectionDocTilesByType);
+    return sectionDocNumTilesByType;
+  });
+
+  //Convert curriculumSectionsTileByType further and count all tiles in each section
+  const curriculumSumTileTypes: Record<string, number> = {};
+  curriculumSectionsTilesByType.forEach((section) => {
+    Object.keys(section).forEach((tileType) => {
+      if(!curriculumSumTileTypes[tileType]) {
+        curriculumSumTileTypes[tileType] = 0; //Create entry
+      }
+      curriculumSumTileTypes[tileType] += section[tileType];
+    });
+  });
+
+  const documentMeasurements = {
+    totalNumDocumentsLoaded,
+    totalNumTilesLoaded,
+    primaryDocNumTilesByType,
+    curriculumSumTileTypes,
+  };
+
+  const finalLogObject = {
+    loadingMeasurements,
+    documentMeasurements
+  };
+
+  const endTime = performance.now();
+  if(DEBUG_LOADING) {
+    console.log(`logLoadingAndDocumentMeasurements executed in ${endTime - startTime} milliseconds`);
+  }
+  Logger.log(LogEventName.LOADING_MEASUREMENTS, finalLogObject);
 }
