@@ -20,6 +20,12 @@ interface IProps extends IBaseProps {
 }
 
 
+//***************************************** GUIDELINES ************************************************
+
+// Gather the same set of metrics that GA instruments on the Activity player
+// we should know the page/problem, the number of accesses, and the time it took to load.
+// we should know the version of browser, OS and IP info that GA can give
+
 @inject("stores")
 @observer
 export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
