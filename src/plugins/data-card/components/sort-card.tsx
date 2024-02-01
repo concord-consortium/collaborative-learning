@@ -15,14 +15,10 @@ interface IProps {
   id?: string;
 }
 
-const getShadeRGB = (index: number) => {
-  const fadeBy = 12;
-  const base =  { r: 111, g: 198, b: 218 }; // $workspace-teal-light-2
-  return {
-    r: base.r,
-    g: base.g + (index * fadeBy),
-    b: base.b + (index * fadeBy)
-  };
+const getTiltAngle = (index: number) => {
+  const angles = [-2, -1, 0, 1, 2];
+  const angle = angles[index % angles.length];
+  return angle;
 };
 
 export const SortCard: React.FC<IProps> = observer(
@@ -32,9 +28,7 @@ export const SortCard: React.FC<IProps> = observer(
   const deckCardNumberDisplay = content.dataSet.caseIndexFromID(caseId) + 1;
   const stackCardNumberDisplay = indexInStack + 1;
   const caseHighlighted = content.dataSet.isCaseSelected(caseId);
-  const { r, g, b } = getShadeRGB(indexInStack);
-  const shadeStr = `rgb(${r},${g},${b})`;
-  const capStyle = !caseHighlighted ? { backgroundColor: shadeStr } : undefined;
+  const angle = getTiltAngle(indexInStack);
   const atStackTop = stackCardNumberDisplay === totalInStack;
   const isLinked = useIsLinked();
 
@@ -74,7 +68,6 @@ export const SortCard: React.FC<IProps> = observer(
       <div
         className={headingClasses}
         onClick={() => content.dataSet.setSelectedCases([caseId])}
-        style={capStyle}
       >
         <div className="card-count-info">
           Card <span className="card-count">{deckCardNumberDisplay}</span>
@@ -93,11 +86,6 @@ export const SortCard: React.FC<IProps> = observer(
           );
         })}
       </div>
-
-      <div
-        className={classNames("footer", { highlighted: caseHighlighted, linked: isLinked })}
-        style={capStyle}
-      />
     </div>
   );
 });

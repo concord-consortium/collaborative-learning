@@ -41,10 +41,16 @@ $sort-view-width: ($sort-view-card-width * 3 ) + 3;
           background-color: $workspace-teal-light-4;
           display: flex;
           justify-content: space-evenly;
+          padding: $card-space-factor;
+          border-bottom: 1px solid $charcoal-light-1;
 
           .stack-nav-buttons {
             display: flex;
           }
+        }
+
+        .stack-cards {
+          padding: $card-space-factor;
         }
 
         .stack-drop-zone.show-droppable {
@@ -106,22 +112,6 @@ $sort-view-width: ($sort-view-card-width * 3 ) + 3;
         border-bottom: $card-border;
       }
 
-      .footer {
-        border-left: $card-border;
-        border-right: $card-border;
-        border-bottom: $card-border;
-        height:$card-space-factor;
-        border-radius: 0px 0px 5px 5px;
-
-        &.highlighted {
-          background-color: $highlight-unlinked-header;
-
-          &.linked {
-            background-color: $highlight-linked-header;
-          }
-        }
-      }
-
       .attribute-value-row {
         display: flex;
         .attribute {
@@ -154,24 +144,6 @@ $sort-view-width: ($sort-view-card-width * 3 ) + 3;
         .image-value {
           max-height: 60px;
         }
-      }
-      .expand-toggle {
-        cursor: pointer;
-        border: 0px;
-        padding: 0px;
-        margin-right: 2px;
-        font-size: 12px;
-        text-align: left;
-        transition: all .4s;
-        color: $charcoal-dark-2;
-        background-color: transparent;
-        translate: 0px 1px;
-        height: 13px;
-        width: 13px;
-      }
-      &.expanded .expand-toggle {
-        transform: rotate(90deg);
-        translate: -1px 3px;
       }
     }
   }
