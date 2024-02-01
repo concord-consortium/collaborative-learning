@@ -42,6 +42,7 @@ $panel-height: 34px;
         }
 
         .stack-controls {
+          position: relative;
           font-size: 13px;
           height: $panel-height;
           background-color: $workspace-teal-light-5;
@@ -50,15 +51,20 @@ $panel-height: 34px;
           padding: $card-space-factor;
           border-bottom: 1px solid $charcoal-light-1;
 
+          .stack-expand-toggle {
+            position: absolute;
+            left: 0;
+          }
+
           .stack-nav-buttons {
             display: flex;
-            border: 1px solid pink;
             justify-content: center;
             align-items: center;
           }
         }
 
         .stack-cards {
+          position: relative;
           padding: $card-space-factor;
         }
 
@@ -79,6 +85,8 @@ $panel-height: 34px;
       border-radius:$card-space-factor;
       margin:3px;
       box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+      width: $sort-view-card-width - 17px;
+      //position: absolute;
 
       .heading {
         border: $card-border;

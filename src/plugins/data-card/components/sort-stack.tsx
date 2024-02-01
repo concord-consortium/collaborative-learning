@@ -28,6 +28,7 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
   const caseIds = content.caseIdsFromAttributeValue(inAttributeId, stackValue);
   const stackValueDisplayString = getStackValueDisplayString(stackValue);
   const stackClasses = classNames("stack-cards", inAttributeId);
+  const [isExpanded, setIsExpanded] = React.useState(false);
 
   const { isOver, setNodeRef } = useDroppable({
     id: `droppable-sort-stack-${inAttributeId}-${stackValue}}`,
@@ -40,13 +41,21 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
    { "is-over" : isOver}
   );
 
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const cellStackClasses = classNames("cell stack",
+    {"expanded": isExpanded, "collapsed": !isExpanded}
+  );
+
   return (
-    <div className="cell stack">
+    <div className={cellStackClasses}>
       <div className="stack-heading">
         {stackValueDisplayString}
       </div>
       <div className="stack-controls">
-        <button className="stack-expand-toggle">tog</button>
+        <button className="stack-expand-toggle" onClick={toggleExpanded}>tog</button>
         <div className="stack-nav-buttons">
           <button className="prev">&lt;</button>
           <CasesCountDisplay totalCases={caseIds.length} />
@@ -69,8 +78,4 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
       </div>
     </div>
   );
-};
-
-export const SortStackPlaceholder: React.FC = () => {
-  return <div className="empty cell"></div>;
 };
