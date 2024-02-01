@@ -5,6 +5,7 @@ import { SortCard } from "./sort-card";
 import classNames from "classnames";
 import { gImageMap } from "../../../models/image-map";
 import { useDroppable } from "@dnd-kit/core";
+import { CasesCountDisplay } from "./cases-count-display";
 
 interface IProps {
   stackValue: string;
@@ -15,7 +16,7 @@ interface IProps {
   draggingActive?: boolean;
 }
 
-const getStackValueDisplay = (value: string) => {
+const getStackValueDisplayString = (value: string) => {
   if (value === "") return "(no value)";
   if (gImageMap.isImageUrl(value)) return "(image)";
   if (value.length < 14) return value;
@@ -25,8 +26,7 @@ const getStackValueDisplay = (value: string) => {
 export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, draggingActive }) => {
   const content = model.content as DataCardContentModelType;
   const caseIds = content.caseIdsFromAttributeValue(inAttributeId, stackValue);
-  const units = caseIds.length > 1 ? "cards" : "card";
-  const stackValueDisplay = getStackValueDisplay(stackValue);
+  const stackValueDisplayString = getStackValueDisplayString(stackValue);
   const stackClasses = classNames("stack-cards", inAttributeId);
 
   const { isOver, setNodeRef } = useDroppable({
@@ -43,7 +43,15 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
   return (
     <div className="cell stack">
       <div className="stack-heading">
-        {stackValueDisplay}: {caseIds.length} {units}
+        {stackValueDisplayString}
+      </div>
+      <div className="stack-controls">
+        <button className="stack-expand-toggle">tog</button>
+        <div className="stack-nav-buttons">
+          <button className="prev">&lt;</button>
+          <CasesCountDisplay totalCases={caseIds.length} />
+          <button className="next">&gt;</button>
+        </div>
       </div>
       <div className={dropZoneClasses} ref={setNodeRef}></div>
       <div className={stackClasses}>

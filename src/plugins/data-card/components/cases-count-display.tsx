@@ -4,7 +4,7 @@ import './cases-count-display.scss';
 
 interface IProps {
   totalCases: number;
-  label: string;
+  label?: string;
 }
 
 export const CasesCountDisplay: React.FC<IProps> = ({ totalCases, label }) => {
