@@ -38,33 +38,33 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   public componentDidMount() {
     this.guaranteeInitialDocuments().then(() => {
       removeLoadingMessage("Building workspace");
+      // ----------------------- Logging Loading & Document Measurements -------------------------
+      const { documents, problem: { sections }, teacherGuide, persistentUI } = this.stores;
+      const { problemWorkspace } = persistentUI;
+      const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
+      // Take into account that teachers have extra "curriculum documents" in the TeacherGuide tab
+      let curriculumDocSections = [...sections]; //these are for the "Problem" tab
+      if(teacherGuide) {
+        curriculumDocSections = [...curriculumDocSections, ...teacherGuide.sections];
+      }
 
-    // ----------------------- Logging Loading & Document Measurements --------------------------------------
-    const { documents, problem: { sections }, teacherGuide } = this.stores;
-    // Take into account that teachers have extra "curriculum documents" in the TeacherGuide tab
-    const primaryDocument = this.getPrimaryDocument();
-    let curriculumDocSections = [...sections]; //these are for the "Problem" tab
-    if(teacherGuide) {
-      curriculumDocSections = [...curriculumDocSections, ...teacherGuide.sections];
-    }
-    logLoadingAndDocumentMeasurements(documents, curriculumDocSections, primaryDocument);
-
+      logLoadingAndDocumentMeasurements(documents, curriculumDocSections, primaryDocument);
     });
   }
 
   public render() {
     const { appMode, appConfig: { toolbar }, documents, persistentUI, groups } = this.stores;
-
     const { problemWorkspace } = persistentUI;
     const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible } = problemWorkspace;
     const showPrimary = !hidePrimaryForCompare;
+    const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
     const comparisonDocument = comparisonDocumentKey
                                && documents.getDocument(comparisonDocumentKey);
 
     const groupVirtualDocument = comparisonDocumentKey
       && groups.virtualDocumentForGroup(comparisonDocumentKey);
 
-    if (!this.primaryDocument) {
+    if (!primaryDocument) {
       return this.renderDocument("single-workspace", "primary");
     }
 
@@ -89,7 +89,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
     const Primary =
       <DocumentComponent
-        document={this.primaryDocument}
+        document={primaryDocument}
         workspace={problemWorkspace}
         onNewDocument={this.handleNewDocument}
         onCopyDocument={this.handleCopyDocument}
