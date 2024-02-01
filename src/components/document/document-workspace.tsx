@@ -56,13 +56,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       return total + (doc.content?.tileMap.size || 0);
     }, 0);
 
-
-
-
     console.log("\t🥩 totalNumTilesLoaded", totalNumTilesLoaded);
-
+    console.log("this.primaryDocument content:",  this.primaryDocument?.content);
     const primaryDocTilesByType = this.primaryDocument?.content?.getAllTilesByType() as any;
-    console.log("this.primaryDocument:",  this.primaryDocument);
     const primaryDocNumTilesByType = countTileKeys(primaryDocTilesByType);
     console.log("\t🥩 primaryDocTilesByType:", primaryDocTilesByType);
     //TODO: Faiing to load right side document, check async behavior for primaryDocument
@@ -107,10 +103,14 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       curriculumSumTileTypes,
     };
 
+    console.log("documentMeaasurements:", documentMeasurements);
+
     const finalLogObject = {
       loadingMeasurements,
       documentMeasurements
     };
+
+    console.log("finalLogObject:", finalLogObject);
 
     const endTime = performance.now();
     console.log(`logLoadingAndDocumentMeasurements executed in ${endTime - startTime} milliseconds`);
