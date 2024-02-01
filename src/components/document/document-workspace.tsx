@@ -26,6 +26,14 @@ interface IProps extends IBaseProps {
 // we should know the page/problem, the number of accesses, and the time it took to load.
 // we should know the version of browser, OS and IP info that GA can give
 
+//Also from last ticket:
+
+// TODO:
+// • Data structure needs a refactor, and we can refactor calls to `sessionStorage`.
+//     ↳Insertion order should be in tact, either an array of array, set
+// • Detect HTTP2 or higher? - request the javascript and requesting the curriculum files ,
+//      ↳you can look at the response and you see if it's using HTTP2.
+
 @inject("stores")
 @observer
 export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
