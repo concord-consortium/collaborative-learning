@@ -5,15 +5,13 @@ $card-space-factor: 5px;
 $card-border: 1px solid $charcoal-light-1;
 $sort-view-column-width: $sort-view-card-width + 10px;
 $sort-view-font-size:10px;
-$sort-view-width: ($sort-view-card-width * 3 ) + 3;
 
 .data-card-tool.display-as-sorted {
   font-size: $sort-view-font-size;
 
   .sorting-cards-data-area {
-    margin: 0 auto;
     margin-top:40px;
-    max-width: $sort-view-width * 2.1;
+    padding: 2px;
 
     .sort-area-grid {
       display: grid;
