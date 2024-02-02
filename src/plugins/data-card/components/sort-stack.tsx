@@ -79,9 +79,9 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
       <div className="stack-controls">
         <button className={expandToggleClasses} onClick={toggleExpanded}/>
         <div className="stack-nav-buttons">
-          <button className="previous" onClick={advanceStack} />
+          <button className="previous" onClick={rewindStack} />
           <CasesCountDisplay totalCases={caseIds.length} />
-          <button className="next" onClick={rewindStack} />
+          <button className="next" onClick={advanceStack} />
         </div>
       </div>
       <div className={dropZoneClasses} ref={setNodeRef}></div>
