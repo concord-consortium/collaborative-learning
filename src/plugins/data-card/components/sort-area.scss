@@ -5,27 +5,25 @@ $card-space-factor: 5px;
 $card-border: 1px solid $charcoal-light-1;
 $sort-view-column-width: $sort-view-card-width + 10px;
 $sort-view-font-size:10px;
-$cards-per-row: 3; // this may be dynamic in the future
-$sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
 
 .data-card-tool.display-as-sorted {
   font-size: $sort-view-font-size;
-  .panel {
-    width: ($sort-view-width);
-  }
 
   .sorting-cards-data-area {
-    width: $sort-view-width;
+    margin-top:40px;
+    padding: 2px;
 
     .sort-area-grid {
       display: grid;
-      grid-template-columns: $sort-view-card-width $sort-view-card-width $sort-view-card-width;
-      border-left: $card-border;
-      border-right: $card-border;
-      border-bottom: $card-border;
+      grid-template-columns: repeat(auto-fill, $sort-view-card-width);
+      grid-gap: $card-space-factor * 2;
 
       .stack {
+        border:$card-border;
+        border-radius: 6px;
+        margin-bottom: 5px;
         width: $sort-view-card-width;
+
         .stack-heading {
           background-color: $workspace-teal-light-4;
           font-size: 13px;
@@ -33,8 +31,9 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
           text-align: center;
           padding-top: $card-space-factor;
           padding-bottom: $card-space-factor;
-          border-top: $card-border;
           height: 27px;
+          border-radius: 6px 6px 0px 0px;
+          border-bottom: $card-border;
         }
         .stack-drop-zone.show-droppable {
           background-color: $workspace-teal-light-6;
@@ -47,17 +46,9 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
           background-color: $workspace-teal-light-4;
         }
       }
-
-      .empty.cell {
-        width: $sort-view-card-width;
-        background-color: $workspace-teal-light-4;
-        height:27px;
-        border-top: $card-border;
-      }
     }
 
     .sortable.card {
-      display: grid;
       border-radius:$card-space-factor;
       margin:3px;
 
@@ -123,7 +114,7 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
         display: flex;
         .attribute {
           border-right: $card-border;
-          width: 60px;
+          width: 50%;
           padding: $card-space-factor;
           background-color: $workspace-teal-light-4;
           font-weight: bold;
@@ -137,7 +128,7 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
           }
         }
         .value {
-          width: 100%;
+          width: 50%;
           padding: $card-space-factor;
 
           &.highlighted {
@@ -149,7 +140,7 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
           }
         }
         .image-value {
-          width: 100%;
+          max-height: 60px;
         }
       }
       .expand-toggle {
