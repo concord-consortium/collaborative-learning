@@ -49,17 +49,21 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
     {"expanded": isExpanded, "collapsed": !isExpanded}
   );
 
+  const expandToggleClasses = classNames("stack-expand-toggle",
+  {"expanded": isExpanded, "collapsed": !isExpanded}
+);
+
   return (
     <div className={cellStackClasses}>
       <div className="stack-heading">
         {stackValueDisplayString}
       </div>
       <div className="stack-controls">
-        <button className="stack-expand-toggle" onClick={toggleExpanded}>tog</button>
+        <button className={expandToggleClasses} onClick={toggleExpanded}/>
         <div className="stack-nav-buttons">
-          <button className="prev">&lt;</button>
+          <button className="previous" />
           <CasesCountDisplay totalCases={caseIds.length} />
-          <button className="next">&gt;</button>
+          <button className="next"/>
         </div>
       </div>
       <div className={dropZoneClasses} ref={setNodeRef}></div>

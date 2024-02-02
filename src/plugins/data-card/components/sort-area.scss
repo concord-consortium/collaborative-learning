@@ -53,13 +53,59 @@ $panel-height: 34px;
 
           .stack-expand-toggle {
             position: absolute;
-            left: 0;
+            left: 4px;
+            width: 23px; // Adjust as needed
+            height: 23px; // Adjust as needed
+            border-radius: 3px; // This makes the button round. Adjust as needed
+            background-repeat: no-repeat;
+            background-position: center;
+            border:1px solid $charcoal-light-1;
+            background-color: $workspace-teal-light-8;
+            &.expanded {
+                background-image: url('./../assets/collapse-all-icon.svg');
+            }
+            &.collapsed {
+                background-image: url('./../assets/expand-all-icon.svg');
+            }
+            background-size: 20px;
+            &:hover {
+              cursor: pointer;
+              background-color: $workspace-teal-light-6;
+            }
+            &:active {
+              background-color: $workspace-teal-light-3;
+            }
           }
 
           .stack-nav-buttons {
             display: flex;
             justify-content: center;
             align-items: center;
+            button {
+              background-color: $workspace-teal-light-8;
+              width: 23px;
+              height: 23px;
+              border-radius: 3px;
+              background-repeat: no-repeat;
+              background-position: center;
+              border:1px solid $charcoal-light-1;
+              &.previous {
+                background-image: url('./../assets/arrow-back-icon.svg');
+                transform: translateX(2px);
+              }
+              &.next {
+                background-image: url('./../assets/arrow-back-icon.svg');
+                transform: rotate(180deg) translateX(-2px);
+              }
+              background-size: 20px;
+              &:hover {
+                cursor: pointer;
+                background-color: $workspace-teal-light-6;
+              }
+              &:active {
+                background-color: $workspace-teal-light-3;
+              }
+            }
           }
         }
 
