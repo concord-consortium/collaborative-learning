@@ -3,7 +3,7 @@ import { LogEventMethod, LogEventName } from "./logger-types";
 import { IStores } from "../models/stores/stores";
 import { UserModelType } from "../models/stores/user";
 import { ENavTab } from "../models/view/nav-tabs";
-import { DEBUG_LOGGER } from "../lib/debug";
+import { debugLog, DEBUG_LOGGER } from "../lib/debug";
 import { timeZoneOffsetString } from "../utilities/js-utils";
 
 type LoggerEnvironment = "dev" | "production";
@@ -49,6 +49,7 @@ interface LogMessage {
 // List of log messages that were generated before a Logger is initialized;
 // will be sent when possible.
 interface PendingMessage {
+  time: number;
   event: LogEventName;
   parameters?: Record<string, unknown>;
   method?: LogEventMethod;
@@ -65,12 +66,10 @@ export class Logger {
     const logModes: Array<typeof appMode> = ["authed"];
     this.isLoggingEnabled = logModes.includes(appMode) || DEBUG_LOGGER;
 
-    if (DEBUG_LOGGER) {
-      // eslint-disable-next-line no-console
-      console.log("Logger#initializeLogger called.");
-    }
+    debugLog(DEBUG_LOGGER, "Logger#initializeLogger called.");
+
     this._instance = new Logger(stores, appContext);
-    this.logPendingMessages();
+    this.sendPendingMessages();
   }
 
   public static updateAppContext(appContext: Record<string, any>) {
@@ -78,23 +77,19 @@ export class Logger {
   }
 
   public static log(event: LogEventName, parameters?: Record<string, unknown>, method?: LogEventMethod) {
-    if (!this._instance) {
-      // This is temporary because there are cases where the logger isn't ever initialized
-      console.warn("Trying to log before logger is initialized", LogEventName[event]);
-      this.pendingMessages.push({event, parameters, method});
-      return;
+    const time = Date.now(); // eventually we will want server skew (or to add this via FB directly)
+    if (this._instance) {
+      this._instance.formatAndSend(time, event, parameters, method);
+    } else {
+      debugLog(DEBUG_LOGGER, "Queueing log message for later delivery", LogEventName[event]);
+      this.pendingMessages.push({ time, event, parameters, method });
     }
-
-    const eventString = LogEventName[event];
-    const logMessage = Logger.Instance.createLogMessage(eventString, parameters, method);
-    sendToLoggingService(logMessage, this._instance.stores.user);
   }
 
-  private static logPendingMessages() {
+  private static sendPendingMessages() {
     if (!this._instance) return;
     for (const message of this.pendingMessages) {
-      console.log("Sending pending message: ", LogEventName[message.event]);
-      this.log(message.event, message.parameters, message.method);
+      this._instance.formatAndSend(message.time, message.event, message.parameters, message.method);
     }
     this.pendingMessages = [];
   }
@@ -120,7 +115,15 @@ export class Logger {
     this.session = uuid();
   }
 
+  private formatAndSend(time: number,
+      event: LogEventName, parameters?: Record<string, unknown>, method?: LogEventMethod) {
+    const eventString = LogEventName[event];
+    const logMessage = this.createLogMessage(time, eventString, parameters, method);
+    sendToLoggingService(logMessage, this.stores.user);
+  }
+
   private createLogMessage(
+    time: number,
     event: string,
     parameters?: {section?: string},
     method: LogEventMethod = LogEventMethod.DO
@@ -137,6 +140,7 @@ export class Logger {
     const disconnects = totalDisconnects
                           ? { disconnects: `${firebaseDisconnects}/${loggingDisconnects}/${networkStatusAlerts}` }
                           : undefined;
+
     const logMessage: LogMessage = {
       application: appName,
       activity: activityUrl,
@@ -149,7 +153,7 @@ export class Logger {
       problemPath,
       navTabsOpen: navTabContentShown,
       selectedNavTab: activeNavTab,
-      time: Date.now(),       // eventually we will want server skew (or to add this via FB directly)
+      time,
       tzOffset: timeZoneOffsetString(),
       event,
       method,
@@ -180,10 +184,7 @@ export class Logger {
 function sendToLoggingService(data: LogMessage, user: UserModelType) {
   const isProduction = user.portal === productionPortal || data.parameters?.portal === productionPortal;
   const url = logManagerUrl[isProduction ? "production" : "dev"];
-  if (DEBUG_LOGGER) {
-    // eslint-disable-next-line no-console
-    console.log("Logger#sendToLoggingService sending", data, "to", url);
-  }
+  debugLog(DEBUG_LOGGER, "Logger#sendToLoggingService sending", data, "to", url);
   if (!Logger.isLoggingEnabled) return;
 
   const request = new XMLHttpRequest();
