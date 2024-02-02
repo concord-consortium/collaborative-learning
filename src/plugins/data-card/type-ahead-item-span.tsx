@@ -20,9 +20,8 @@ export const TypeAheadItemSpan: React.FC<IProps> = ({ fullString, matchString })
         <span>{fullString}</span>
       );
     } else {
-      const lettersTruncated = fullString.slice(0, 20);
       return (
-        <span>{lettersTruncated}...</span>
+        <span>{fullString.slice(0, 20)}...</span>
       );
     }
   }
@@ -31,27 +30,26 @@ export const TypeAheadItemSpan: React.FC<IProps> = ({ fullString, matchString })
     const matchIndex = fullString.toLowerCase().indexOf(matchString.toLowerCase());
     const matchEndIndex = matchIndex + matchString.length;
     const match = fullString.slice(matchIndex, matchEndIndex);
-    const lettersBeforeMatch = fullString.slice(0, matchIndex);
-    const lettersAfterMatch = fullString.slice(matchEndIndex);
+    const charsBefore = fullString.slice(0, matchIndex);
+    const charsAfter = fullString.slice(matchEndIndex);
+
 
     // our whole string, match inclusive, is going to fit in the dropdown
     if (lettersLength < 20){
       return (
         <span>
-          {lettersBeforeMatch}<b>{match}</b>{lettersAfterMatch}
+          {charsBefore}<b>{match}</b>{charsAfter}
         </span>
       );
     }
 
-    // the whole string is probably too long to fit in the dropdown
-    // but we want to show the full match, with some of the characters before and after
+    // the whole string is too long to fit in the dropdown
+    // but we want to show the match in context
     else {
-      const lettersBeforeMatchTruncated = lettersBeforeMatch.slice(0, 5);
-      const lettersAfterMatchTruncated = lettersAfterMatch.slice(0, 5);
-      const truncatedMatch = matchString.slice(0, maxBoldedCharsToShow) + " ...";
+      const truncatedMatch = matchString.slice(0, maxBoldedCharsToShow);
       return (
         <span>
-          {lettersBeforeMatchTruncated}<b>{truncatedMatch}</b>{lettersAfterMatchTruncated}...
+          ...{charsBefore.slice(-5)}<b>{truncatedMatch}</b>{charsAfter.slice(0, 5)}...
         </span>
       );
     }
