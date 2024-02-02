@@ -6,41 +6,26 @@ import { DataCardContentModelType } from "../data-card-content";
 import { useIsLinked } from "../use-is-linked";
 import { SortCardAttribute } from "./sort-card-attribute";
 import { useDraggable } from "@dnd-kit/core";
+import { useSortableCardStyles } from "../use-sortable-card-style";
 
 interface IProps {
   caseId: string;
   model: ITileModel;
   indexInStack: number;
   totalInStack: number;
-  stackIsExpanded?: boolean;
+  stackIsExpanded: boolean;
   id?: string;
 }
 
-const getTiltAngle = (index: number) => {
-  const angles = [-2, -1, 0, 1, 2];
-  const angle = angles[index % angles.length];
-  return angle;
-};
-
-export const SortCard: React.FC<IProps> = observer(
-  function SortCard({ model, caseId, indexInStack, totalInStack, stackIsExpanded })
-{
+export const SortCard: React.FC<IProps> = observer( function SortCard({
+  model, caseId, indexInStack, totalInStack, stackIsExpanded
+}){
   const content = model.content as DataCardContentModelType;
   const deckCardNumberDisplay = content.dataSet.caseIndexFromID(caseId) + 1;
   const stackCardNumberDisplay = indexInStack + 1;
   const caseHighlighted = content.dataSet.isCaseSelected(caseId);
-  const angle = getTiltAngle(indexInStack);
   const atStackTop = stackCardNumberDisplay === totalInStack;
   const isLinked = useIsLinked();
-
-  const cardClasses = classNames(
-    "drag-handle", "sortable", "card",
-    {
-      "at-stack-top": atStackTop,
-      "in-expanded-stack": stackIsExpanded,
-       "in-collapsed-stack": !stackIsExpanded
-    },
-  );
 
   const headingClasses = classNames(
     "heading", { highlighted: caseHighlighted, linked: isLinked }
@@ -51,25 +36,23 @@ export const SortCard: React.FC<IProps> = observer(
     data: { caseId, sortedByAttrId: content.selectedSortAttributeId, sortDrag: true }
   });
 
-  const style = transform ? {
-    transform: `translate3d(${transform.x}px, ${transform.y -25}px, 0)`,
-    zIndex: 1000,
-    opacity: 0.8
-  } : undefined;
-
   const loadAsSingle = () => {
     content.setSelectedSortAttributeId("");
     content.setCaseIndex(content.dataSet.caseIndexFromID(caseId));
   };
 
+  const { dynamicClasses, dynamicStyles } = useSortableCardStyles(
+    { transform, indexInStack, atStackTop, stackIsExpanded }
+  );
+
   return (
     <div
       {...listeners}
       {...attributes}
-      className={cardClasses} id={caseId}
+      className={dynamicClasses} id={caseId}
       onDoubleClick={loadAsSingle}
       ref={setNodeRef}
-      style={style}
+      style={dynamicStyles}
     >
       <div
         className={headingClasses}
