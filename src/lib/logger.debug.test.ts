@@ -13,7 +13,8 @@ const investigation = InvestigationModel.create({
 const problem = investigation.getProblem(1);
 
 jest.mock("../lib/debug", () => ({
-  DEBUG_LOGGER: true
+  DEBUG_LOGGER: true,
+  debugLog: (enabled: boolean, message: any, ...params: any[]) => { console.log(message, ...params); }
 }));
 
 describe("dev/qa/test logger with DEBUG_LOGGER true", () => {
