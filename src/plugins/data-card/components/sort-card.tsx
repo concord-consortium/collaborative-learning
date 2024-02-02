@@ -12,6 +12,7 @@ interface IProps {
   model: ITileModel;
   indexInStack: number;
   totalInStack: number;
+  stackIsExpanded?: boolean;
   id?: string;
 }
 
@@ -22,7 +23,7 @@ const getTiltAngle = (index: number) => {
 };
 
 export const SortCard: React.FC<IProps> = observer(
-  function SortCard({ model, caseId, indexInStack, totalInStack })
+  function SortCard({ model, caseId, indexInStack, totalInStack, stackIsExpanded })
 {
   const content = model.content as DataCardContentModelType;
   const deckCardNumberDisplay = content.dataSet.caseIndexFromID(caseId) + 1;
@@ -33,7 +34,12 @@ export const SortCard: React.FC<IProps> = observer(
   const isLinked = useIsLinked();
 
   const cardClasses = classNames(
-    "drag-handle", "sortable", "card", { "at-stack-top": atStackTop }
+    "drag-handle", "sortable", "card",
+    {
+      "at-stack-top": atStackTop,
+      "in-expanded-stack": stackIsExpanded,
+       "in-collapsed-stack": !stackIsExpanded
+    },
   );
 
   const headingClasses = classNames(

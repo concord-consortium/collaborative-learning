@@ -25,10 +25,28 @@ const getStackValueDisplayString = (value: string) => {
 
 export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, draggingActive }) => {
   const content = model.content as DataCardContentModelType;
-  const caseIds = content.caseIdsFromAttributeValue(inAttributeId, stackValue);
   const stackValueDisplayString = getStackValueDisplayString(stackValue);
   const stackClasses = classNames("stack-cards", inAttributeId);
   const [isExpanded, setIsExpanded] = React.useState(false);
+  const [caseIds, setCaseIds] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    setCaseIds(content.caseIdsFromAttributeValue(inAttributeId, stackValue));
+  }, [inAttributeId, stackValue, content]);
+
+  const advanceStack = () => {
+    console.log("advance stack", caseIds);
+    const fromFirst = caseIds.shift() as string;
+    caseIds.push(fromFirst);
+    setCaseIds([...caseIds]);
+  };
+
+  const rewindStack = () => {
+    console.log("rewind stack", caseIds);
+    const fromLast = caseIds.pop() as string;
+    caseIds.unshift(fromLast);
+    setCaseIds([...caseIds]);
+  };
 
   const { isOver, setNodeRef } = useDroppable({
     id: `droppable-sort-stack-${inAttributeId}-${stackValue}}`,
@@ -61,9 +79,9 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
       <div className="stack-controls">
         <button className={expandToggleClasses} onClick={toggleExpanded}/>
         <div className="stack-nav-buttons">
-          <button className="previous" />
+          <button className="previous" onClick={advanceStack} />
           <CasesCountDisplay totalCases={caseIds.length} />
-          <button className="next"/>
+          <button className="next" onClick={rewindStack} />
         </div>
       </div>
       <div className={dropZoneClasses} ref={setNodeRef}></div>
@@ -76,6 +94,7 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
               caseId={cid}
               indexInStack={i}
               totalInStack={caseIds.length}
+              stackIsExpanded={isExpanded}
             />;
           })
         }

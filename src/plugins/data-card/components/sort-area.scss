@@ -50,6 +50,7 @@ $panel-height: 34px;
           justify-content: space-evenly;
           padding: $card-space-factor;
           border-bottom: 1px solid $charcoal-light-1;
+          font-weight: medium;
 
           .stack-expand-toggle {
             position: absolute;
