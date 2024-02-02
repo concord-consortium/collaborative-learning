@@ -33,9 +33,8 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public componentDidMount() {
-    this.guaranteeInitialDocuments().then(() => {
-      removeLoadingMessage("Building workspace");
-    });
+    removeLoadingMessage("Building workspace");
+    this.guaranteeInitialDocuments();
   }
 
   public render() {
