@@ -49,7 +49,9 @@ export const TypeAheadItemSpan: React.FC<IProps> = ({ fullString, matchString })
       const truncatedMatch = matchString.slice(0, maxBoldedCharsToShow);
       return (
         <span>
-          ...{charsBefore.slice(-5)}<b>{truncatedMatch}</b>{charsAfter.slice(0, 5)}...
+          {charsBefore.length > 5 && "..." + charsBefore.slice(-5)}
+          <b>{truncatedMatch}</b>
+          {charsAfter.length > 5 && charsAfter.slice(0, 5) + "..."}
         </span>
       );
     }
