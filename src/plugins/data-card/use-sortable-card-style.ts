@@ -8,7 +8,7 @@ interface IProps {
 }
 
 export const useSortableCardStyles = (props: IProps) => {
-  const { transform, indexInStack, atStackTop, stackIsExpanded } = props;
+  const { transform: draggingTransform, indexInStack, atStackTop, stackIsExpanded } = props;
 
   const dynamicClasses = classNames(
     "drag-handle", "sortable", "card",
@@ -21,10 +21,19 @@ export const useSortableCardStyles = (props: IProps) => {
 
   let dynamicStyles;
 
-  if (transform) {
+  if (draggingTransform) {
     dynamicStyles = {
-      transform: `translate3d(${transform.x}px, ${transform.y - 25}px, 0)`,
+      transform: `translate3d(${draggingTransform.x}px, ${draggingTransform.y - 25}px, 0)`,
       zIndex: 1000,
+      opacity: stackIsExpanded ? 1 : 0.8,
+    };
+  } else {
+    // get a random number between -3 and 3
+    const randomAngle = Math.floor(Math.random() * 7) - 3;
+    const angle = randomAngle;
+    dynamicStyles = {
+      transform: `rotate(${angle}deg)`,
+      zIndex: indexInStack,
       opacity: stackIsExpanded ? 1 : 0.8,
     };
   }
