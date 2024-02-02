@@ -122,7 +122,9 @@ $panel-height: 34px;
       .card-number-of-listing {
         position: absolute;
         left: 50%;
-        transform: translateX(-50%);
+        transform: translateX(-50%) (translateY(-1px));
+        display: flex;
+        align-items: center;
       }
 
       .card-nav-buttons {

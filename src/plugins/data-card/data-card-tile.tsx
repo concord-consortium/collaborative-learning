@@ -298,6 +298,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
                   onClick={handleNavPanelClick}
                 >
                   <div className="card-number-of-listing">
+                    <span>{cardOf}</span>
                     <div className="cell-text">
                         { content.totalCases > 0 &&
                           <CasesCountDisplay totalCases={content.totalCases} />
