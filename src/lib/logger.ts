@@ -46,8 +46,18 @@ interface LogMessage {
   parameters: any;
 }
 
+// List of log messages that were generated before a Logger is initialized;
+// will be sent when possible.
+interface PendingMessage {
+  event: LogEventName;
+  parameters?: Record<string, unknown>;
+  method?: LogEventMethod;
+}
+
 export class Logger {
   public static isLoggingEnabled = false;
+  private static _instance: Logger;
+  private static pendingMessages: PendingMessage[] = [];
 
   // `appContext` properties are logged with every event
   public static initializeLogger(stores: IStores, appContext?: Record<string, any>) {
@@ -60,6 +70,7 @@ export class Logger {
       console.log("Logger#initializeLogger called.");
     }
     this._instance = new Logger(stores, appContext);
+    this.logPendingMessages();
   }
 
   public static updateAppContext(appContext: Record<string, any>) {
@@ -69,7 +80,8 @@ export class Logger {
   public static log(event: LogEventName, parameters?: Record<string, unknown>, method?: LogEventMethod) {
     if (!this._instance) {
       // This is temporary because there are cases where the logger isn't ever initialized
-      console.warn("Trying to log before logger is initialized", event);
+      console.warn("Trying to log before logger is initialized", LogEventName[event]);
+      this.pendingMessages.push({event, parameters, method});
       return;
     }
 
@@ -78,7 +90,14 @@ export class Logger {
     sendToLoggingService(logMessage, this._instance.stores.user);
   }
 
-  private static _instance: Logger;
+  private static logPendingMessages() {
+    if (!this._instance) return;
+    for (const message of this.pendingMessages) {
+      console.log("Sending pending message: ", LogEventName[message.event]);
+      this.log(message.event, message.parameters, message.method);
+    }
+    this.pendingMessages = [];
+  }
 
   public static get Instance() {
     if (this._instance) {
