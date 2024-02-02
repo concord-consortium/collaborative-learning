@@ -12,9 +12,8 @@ $panel-height: 34px;
   font-size: $sort-view-font-size;
 
   .sorting-cards-data-area {
-    margin: 0 auto;
     margin-top:40px;
-    max-width: $sort-view-width * 2.1;
+    padding: 2px;
 
     .sort-area-grid {
       display: grid;

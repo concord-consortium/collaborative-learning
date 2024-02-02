@@ -7,7 +7,8 @@ import { VisuallyHidden } from "@chakra-ui/react";
 import { gImageMap } from "../../../models/image-map";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
-import { looksLikeDefaultLabel, EditFacet } from "../data-card-types";
+import { looksLikeDefaultName, EditFacet,
+  kFieldWidthFactor, kNameCharsLimit, kValueCharsLimit } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
 import { useIsLinked } from "../use-is-linked";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
@@ -24,6 +25,7 @@ import NumberTypeIcon from "../assets/id-type-number.svg";
 import ExpandDownIcon from "../assets/expand-more-icon.svg";
 
 import './single-card-data-area.scss';
+import classNames from "classnames";
 
 const typeIcons = {
   "date": <DateTypeIcon />,
@@ -60,7 +62,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const cell = { attributeId: attrKey, caseId: caseId ?? "" };
   const isLinked = useIsLinked();
 
-  const getLabel = useCallback(() => {
+  const getName = useCallback(() => {
     return content.dataSet.attrFromID(attrKey).name;
   }, [attrKey, content.dataSet]);
 
@@ -70,12 +72,12 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   }, [attrKey, caseId, content.dataSet]);
 
   const valueStr = getValue();
-  const [labelCandidate, setLabelCandidate] = useState(() => getLabel());
+  const [nameCandidate, setNameCandidate] = useState(() => getName());
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
   const [imageUrl, setImageUrl] = useState("");
-  const [inputItems, setInputItems] = useState([] as string[]);
-  const [textLinesNeeded, setTextLinesNeeded] = useState(measureTextLines(getLabel(), 120));
-  const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
+  const [inputItems, setInputItems] = useState<string[]>([]);
+  const [textLinesNeeded, setTextLinesNeeded] = useState(measureTextLines(getName(), 120));
+  const editingName = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
 
   const validCompletions = useCallback((aValues: string[], userString: string) => {
@@ -90,14 +92,14 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   }, [editingValue, valueCandidate.length]);
 
   useEffect(() => {
-    const labelLines = measureTextLines(getLabel(), 120);
-    const labelCandidateLines = measureTextLines(labelCandidate, 120);
-    const labelLinesNeeded = Math.max(labelLines, labelCandidateLines);
-    const valueLines = measureTextLines(valueStr, 120);
-    const valueCandidateLines = measureTextLines(valueCandidate, 120);
+    const nameLines = measureTextLines(getName(), kFieldWidthFactor);
+    const nameCandidateLines = measureTextLines(nameCandidate, kFieldWidthFactor);
+    const nameLinesNeeded = Math.max(nameLines, nameCandidateLines);
+    const valueLines = measureTextLines(valueStr, kFieldWidthFactor);
+    const valueCandidateLines = measureTextLines(valueCandidate, kFieldWidthFactor);
     const valueLinesNeeded = !isImageUrl(valueStr) ? Math.max(valueLines, valueCandidateLines) : 4;
-    setTextLinesNeeded(Math.max(labelLinesNeeded, valueLinesNeeded));
-  }, [getLabel, getValue, imageUrl, valueCandidate, labelCandidate, valueStr]);
+    setTextLinesNeeded(Math.max(nameLinesNeeded, valueLinesNeeded));
+  }, [getName, getValue, imageUrl, valueCandidate, nameCandidate, valueStr]);
 
   const {
     isOpen,
@@ -135,8 +137,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   }
 
   useEffect(()=>{
-    const attrValues = content.dataSet.attrFromID(attrKey)?.values || [];
-    const completions = validCompletions(attrValues as string[], valueCandidate);
+    const attrValues = content.dataSet.attrFromID(attrKey)?.strValues || [];
+    const completions = validCompletions(attrValues, valueCandidate);
     setInputItems(completions);
   }, [content.dataSet, attrKey, valueCandidate, validCompletions]);
 
@@ -152,8 +154,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       setImageUrl(image.displayUrl || "");
     });
 
-  const handleLabelChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    editingLabel && setLabelCandidate(event.target.value);
+  const handleNameChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    editingName && setNameCandidate(event.target.value);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -168,7 +170,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         break;
       case "Escape":
         if (currEditFacet === "name") {
-          setLabelCandidate(getLabel());
+          setNameCandidate(getName());
         }
         else if (currEditFacet === "value") {
           setValueCandidate(getValue());
@@ -181,13 +183,13 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   };
 
-  const handleLabelClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
+  const handleNameClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     event.stopPropagation();
     dataSet.setSelectedAttributes([attrKey]);
     if (readOnly) return;
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("name");
-    !editingLabel && setLabelCandidate(getLabel());
+    !editingName && setNameCandidate(getName());
   };
 
   const handleValueClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
@@ -204,10 +206,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleCompleteName = () => {
-    if (labelCandidate !== getLabel()) {
+    if (nameCandidate !== getName()) {
       const names = content.existingAttributesWithNames().map(a => a.attrName);
-      if (!names.includes(labelCandidate)){
-        caseId && content.setAttName(attrKey, labelCandidate);
+      if (!names.includes(nameCandidate)){
+        caseId && content.setAttName(attrKey, nameCandidate);
       } else {
         showRequireUniqueAlert();
       }
@@ -267,7 +269,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const DeleteAttributeAlertContent = () => {
     return (
       <p>
-        Are you sure you want to remove the <em style={{ fontWeight: "bold"}}>{ getLabel() }</em>&nbsp;
+        Are you sure you want to remove the <em style={{ fontWeight: "bold"}}>{ getName() }</em>&nbsp;
         attribute from the Data Card? If you remove it from this card it will delete the data in the field,
         and it will also be removed from all the Cards in this collection.
       </p>
@@ -322,11 +324,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   } = useAttributeClassNames({
     attrKey,
     textLinesNeeded,
-    editingLabel,
+    editingName,
     attributeSelected,
     isLinked,
-    looksLikeDefaultLabel,
-    getLabel,
+    looksLikeDefaultName,
+    getName,
     editingValue,
     valueStr,
     gImageMap,
@@ -339,25 +341,25 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   return (
     <div className={pairClasses}>
 
-      <div className={nameAreaClasses} onClick={handleLabelClick}>
-        { !readOnly && editingLabel
+      <div className={nameAreaClasses} onClick={handleNameClick}>
+        { !readOnly && editingName
           ? <textarea
               className={nameInputClasses}
-              value={labelCandidate}
-              onChange={handleLabelChange}
+              value={nameCandidate}
+              onChange={handleNameChange}
               onKeyDown={handleKeyDown}
               onBlur={handleCompleteName}
               onDoubleClick={handleInputDoubleClick}
-              maxLength={60}
+              maxLength={kNameCharsLimit}
             />
-          : <div className={nameTextClasses}>{getLabel()}</div>
+          : <div className={nameTextClasses}>{getName()}</div>
         }
       </div>
 
       <div className={valueAreaClasses} onClick={handleValueClick}>
         <VisuallyHidden>
           <label {...getLabelProps()} className="">
-            Value for {labelCandidate}
+            Value for {nameCandidate}
           </label>
         </VisuallyHidden>
         <textarea
@@ -366,7 +368,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
           className={valueInputClasses}
           onFocus={handleValueInputFocus}
           onPaste={handleValuePaste}
-          maxLength={80}
+          maxLength={kValueCharsLimit}
         />
         { valueIsImage() && <img src={imageUrl} className="value-image" /> }
         { readOnly && !valueIsImage() && <div className="value-text">{valueStr}</div> }
@@ -377,8 +379,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
             const itemProps = getItemProps({ item, index });
             return (
               <li
-                className="dropdown-item"
-                style={isHighlighted ? { backgroundColor: '#bde4ff' } : {}}
+                className={classNames("dropdown-item", { "selecting-item" : isHighlighted })}
                 key={`${item}${index}`}
                 {...itemProps}
               >
