@@ -10,8 +10,6 @@ interface IProps {
 export const useSortableCardStyles = (props: IProps) => {
   const { transform, indexInStack, atStackTop, stackIsExpanded } = props;
 
-  let dynamicStyles;
-
   const dynamicClasses = classNames(
     "drag-handle", "sortable", "card",
     {
@@ -20,6 +18,8 @@ export const useSortableCardStyles = (props: IProps) => {
        "in-collapsed-stack": !stackIsExpanded
     },
   );
+
+  let dynamicStyles;
 
   if (transform) {
     dynamicStyles = {
