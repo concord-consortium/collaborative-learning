@@ -7,6 +7,33 @@ interface IProps {
   stackIsExpanded: boolean;
 }
 
+
+function getTiltAngle(index: number, stackIsExpanded: boolean) {
+  if (stackIsExpanded) {
+    return 0;
+  }
+  const angles = [0, 1.25, -1.25, 3.5, -3.5];
+  const angle = angles[index % angles.length];
+  return angle;
+}
+
+function getCollapsedVerticalLocation(index: number) {
+  // we need to know how tall this card is,
+
+  // and we need to know the location of the top of the stack
+
+  // then we need to place the card at the top.  The cards will be on top of eachother
+}
+
+function getExpandedVerticalLocation(index: number) {
+  // we need to know how tall this card is,
+
+  // and we need to know the location of the top of the stack
+
+  // then we need to place the card at the top.  The cards will be on top of eachother
+}
+
+
 export const useSortableCardStyles = (props: IProps) => {
   const { transform: draggingTransform, indexInStack, atStackTop, stackIsExpanded } = props;
 
@@ -28,13 +55,11 @@ export const useSortableCardStyles = (props: IProps) => {
       opacity: stackIsExpanded ? 1 : 0.8,
     };
   } else {
-    // get a random number between -3 and 3
-    const randomAngle = Math.floor(Math.random() * 7) - 3;
-    const angle = randomAngle;
+    const angle = getTiltAngle(indexInStack, stackIsExpanded);
     dynamicStyles = {
       transform: `rotate(${angle}deg)`,
       zIndex: indexInStack,
-      opacity: stackIsExpanded ? 1 : 0.8,
+      opacity: 1,
     };
   }
 

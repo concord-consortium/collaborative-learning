@@ -132,7 +132,16 @@ $panel-height: 34px;
       margin:3px;
       box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
       width: $sort-view-card-width - 17px;
-      //position: absolute;
+      &.in-collapsed-stack {
+        position: absolute;
+        top: 0;
+        transition-property: all;
+        transition-duration: 0.3s;
+        transition-timing-function: ease-in-out;
+      }
+      transition-property: all;
+      transition-duration: 0.3s;
+      transition-timing-function: ease-in-out;
 
       .heading {
         border: $card-border;
