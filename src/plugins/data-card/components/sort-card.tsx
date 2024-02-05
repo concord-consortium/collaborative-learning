@@ -42,7 +42,7 @@ export const SortCard: React.FC<IProps> = observer( function SortCard({
   };
 
   const { dynamicClasses, dynamicStyles } = useSortableCardStyles(
-    { transform, indexInStack, atStackTop, stackIsExpanded }
+    { transform, atStackTop, stackIsExpanded }
   );
 
   return (
