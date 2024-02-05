@@ -7,6 +7,14 @@ interface IProps {
   stackIsExpanded: boolean;
 }
 
+function getTiltAngle(index: number, stackIsExpanded: boolean) {
+  if (stackIsExpanded) {
+    return 0;
+  }
+  const angles = [0, 1.25, -1.25, 3.5, -3.5];
+  return angles[index % angles.length];
+}
+
 export const useSortableCardStyles = (props: IProps) => {
   const { transform, indexInStack, atStackTop, stackIsExpanded } = props;
 
@@ -29,14 +37,13 @@ export const useSortableCardStyles = (props: IProps) => {
     };
   }
 
+  else {
+    dynamicStyles = {
+      transform: `rotate(${getTiltAngle(indexInStack, stackIsExpanded)}deg)`,
+    };
+  }
+
   return {dynamicClasses, dynamicStyles};
 };
 
-/**
- *   const angle = getTiltAngle(indexInStack);
- * const getTiltAngle = (index: number) => {
-  const angles = [-2, -1, 0, 1, 2];
-  const angle = angles[index % angles.length];
-  return angle;
-};
- */
+
