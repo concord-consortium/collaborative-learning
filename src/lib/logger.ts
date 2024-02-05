@@ -34,7 +34,7 @@ interface LogMessage {
   problem?: string;
   problemPath: string;
   navTabsOpen: boolean;
-  selectedNavTab: string;
+  selectedNavTab: string|undefined;
   group?: string;
   workspaceMode?: string;
   teacherPanel?: string;

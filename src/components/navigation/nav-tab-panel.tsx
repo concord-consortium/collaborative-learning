@@ -86,7 +86,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
               })
             }
           </Tabs>
-          {showChatPanel &&
+          {showChatPanel && activeNavTab &&
             <ChatPanel user={user} activeNavTab={activeNavTab} focusDocument={focusDocument} focusTileId={focusTileId}
                         onCloseChatPanel={this.handleShowChatColumn} />}
         </div>
