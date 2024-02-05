@@ -28,12 +28,12 @@ const setStackHeight = (stackRef: React.RefObject<HTMLDivElement>, isExpanded: b
   if (isExpanded){
     stackRef.current.style.height = "auto";
   } else {
-    setTimeout(() => {
+    setTimeout(() => { // issue 1: hack to get the height to update after the cards have been rendered
       if (!stackRef.current) return;
-      console.log("| ...setting stack height...");
       let maxHeight = 0;
       Array.from(stackRef.current.children).forEach(child => {
         const rect = child.getBoundingClientRect();
+        console.log("| too small?", child.id, Math.round(rect.height)); // issue 2: too small expand/unexpand or drag
         if (rect.height > maxHeight) {
           maxHeight = rect.height;
         }
@@ -51,13 +51,14 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
   const [caseIds, setCaseIds] = useState<string[]>([]);
   const stackRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setStackHeight(stackRef, isExpanded);
-  }, [isExpanded]);
+  // useEffect(() => {
+  //   setStackHeight(stackRef, isExpanded);
+  // }, [isExpanded]);
 
   useEffect(() => {
     setCaseIds(content.caseIdsFromAttributeValue(inAttributeId, stackValue));
-  }, [inAttributeId, stackValue, content, draggingActive]);
+    setStackHeight(stackRef, isExpanded);
+  }, [inAttributeId, stackValue, content, draggingActive, isExpanded]);
 
   const advanceStack = () => {
     const fromFirst = caseIds.shift() as string;
