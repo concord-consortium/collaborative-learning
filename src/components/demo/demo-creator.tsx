@@ -79,11 +79,11 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
     const passThroughQueryItems = passThroughQueryItemsFromUrl(location.href);
 
     const problems = this.problemOptions.map((problem) => {
-      return <option key={'p'+problem.ordinal} value={problem.ordinal}>{problem.title}</option>;
+      return <option key={problem.ordinal} value={problem.ordinal}>{problem.title}</option>;
     });
 
     for (let classIndex = 1; classIndex <= NUM_FAKE_CLASSES; classIndex++) {
-      classes.push(<option key={'c' + classIndex} value={classIndex}>Class {classIndex}</option>);
+      classes.push(<option key={classIndex} value={classIndex}>Class {classIndex}</option>);
     }
 
     for (let studentIndex = 1; studentIndex <= NUM_FAKE_STUDENTS_VISIBLE; studentIndex++) {
@@ -131,7 +131,7 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
     // eslint-disable-next-line max-len
     const href = `?appMode=demo${demoNameParam}&fakeClass=${demo.class.id}&fakeUser=${fakeUser}&problem=${demo.problemOrdinal}${passThroughQueryItems}`;
     return (
-      <li key={'u' + userIndex}>
+      <li key={userIndex}>
         <a href={href} target="_blank" rel="noreferrer">{userType} {userIndex}</a>
       </li>
     );

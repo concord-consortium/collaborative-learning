@@ -14,6 +14,7 @@ const problem = investigation.getProblem(1);
 
 jest.mock("../lib/debug", () => ({
   DEBUG_LOGGER: true,
+  // eslint-disable-next-line no-console
   debugLog: (enabled: boolean, message: any, ...params: any[]) => { console.log(message, ...params); }
 }));
 

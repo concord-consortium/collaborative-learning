@@ -57,22 +57,16 @@ export const initializeApp = async (appMode: AppMode, authoring?: boolean): Prom
     (window as any).stores = stores;
   }
 
-  // Removing the await caused:
-  // - left side to start out with Null Problem and Null Unit
-  // - the tile types take a long time to come in, and they are required
-  //   before we can display the right side document
-  // Our plan is to save the promise from setUnitAndProblem and then block
-  // other parts of the code on it. We want to get the persistentUI loaded as
-  // soon as possible so we only render what we need. We should be able to
-  // load the persistentUI without the tile types or unit content.
-  // We have to deal with:
-  // - log messages sent before unit is ready
-  const promise = stores.setUnitAndProblem(unitId, problemOrdinal);
-  promise.then(() => {
+  // Start setUnitAndProblem asynchronously.
+  // The promise that it returns is saved in `stores.unitLoadedPromise` and blocks
+  // various dependent operations, but the bulk of the initialization code can continue
+  // while that unit information is loaded, including getting the persistentUI loaded as
+  // soon as possible so we only render what we need.
+  stores.unitLoadedPromise = stores.setUnitAndProblem(unitId, problemOrdinal);
+  stores.unitLoadedPromise.then(() => {
     // The logger will only be enabled if the appMode is "authed", or DEBUG_LOGGER is true
     Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
   });
-  stores.unitLoadedPromise = promise;
 
   gImageMap.initialize(stores.db);
 
