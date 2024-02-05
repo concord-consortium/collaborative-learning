@@ -894,9 +894,8 @@ export class DB {
     });
   }
 
-  public createUserStar(document: DocumentModelType, starred: boolean) {
+  public createUserStar(docKey: string, starred: boolean) {
     const { user } = this.stores;
-    const { key: docKey } = document;
     const starsRef = this.firebase.ref(
       this.firebase.getUserDocumentStarsPath(user, docKey)
     );

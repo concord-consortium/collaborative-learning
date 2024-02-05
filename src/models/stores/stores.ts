@@ -23,6 +23,7 @@ import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
 import { IBaseStores } from "./base-stores-types";
 import { NavTabModelType } from "../view/nav-tabs";
+import { Bookmarks } from "./bookmarks";
 import { SortedDocuments } from "./sorted-documents";
 import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
 
@@ -70,6 +71,7 @@ class Stores implements IStores{
   db: DB;
   demo: DemoModelType;
   showDemoCreator: boolean;
+  bookmarks: Bookmarks;
   supports: SupportsModelType;
   clipboard: ClipboardModelType;
   selection: SelectionStoreModelType;
@@ -123,6 +125,7 @@ class Stores implements IStores{
     });
     this.persistentUI.setProblemPath(this.problemPath);
     this.userContextProvider = new UserContextProvider(this);
+    this.bookmarks = new Bookmarks({db: this.db});
     this.sortedDocuments = new SortedDocuments(this);
   }
 

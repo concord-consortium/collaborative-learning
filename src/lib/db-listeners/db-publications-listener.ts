@@ -4,7 +4,6 @@ import { DBPublication } from "../db-types";
 import { forEach } from "lodash";
 import { onPatch } from "mobx-state-tree";
 import { BaseListener } from "./base-listener";
-import { syncStars } from "./sync-stars";
 
 export class DBPublicationsListener extends BaseListener {
   private db: DB;
@@ -70,7 +69,6 @@ export class DBPublicationsListener extends BaseListener {
       this.handledPublications.add(publication.documentKey);
       this.db.createDocumentFromPublication(publication)
         .then(doc => {
-          syncStars(doc, this.db);
           onPatch(doc.comments, patch => {
             const [, tileId, , index, replaceKey] = patch.path.split("/");
             if (patch.op === "add") {

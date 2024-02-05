@@ -112,10 +112,10 @@ context('Data Card Tool Tile', () => {
     dc.getAttrValueInput().eq(0).click().type("e");
     dc.getDownshiftOptions().should('have.length', 2);
 
-    cy.log("can drag a card into another stack in sort view");
+    cy.log("can drag a card into another stack in sort view, changing the data");
     dc.getSortSelect().select("animal");
     dc.getSortView().should('exist');
-    dc.dragCardToStack(1, 0);
+    dc.dragCardToStack(1, 0); // changes the animal from whale to camel
     dc.getSortSelect().select("None");
     dc.getCardNofTotalListing().contains("Card 1 of 2");
     dc.getAttrValueInput().eq(0).invoke('val').should('eq', "ocean");

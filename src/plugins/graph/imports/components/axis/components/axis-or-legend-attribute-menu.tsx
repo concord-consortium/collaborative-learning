@@ -3,7 +3,7 @@ import React, { CSSProperties, useEffect, useRef, useState } from "react";
 import classNames from "classnames";
 
 import t from "../../../utilities/translation/translate";
-import {GraphPlace} from "../../axis-graph-shared";
+import {GraphPlace, isVertical} from "../../axis-graph-shared";
 import { graphPlaceToAttrRole } from "../../../../graph-types";
 import { useDataConfigurationContext } from "../../../../hooks/use-data-configuration-context";
 import { IUseDraggableAttribute, useDraggableAttribute } from "../../../hooks/use-drag-drop";
@@ -19,6 +19,7 @@ import { useReadOnlyContext } from "../../../../../../components/document/read-o
 import DropdownCaretIcon from "../../../../assets/dropdown-caret.svg";
 
 interface IProps {
+  hideRemoveOption?: boolean;
   place: GraphPlace;
   attributeId?: string;
   // element to be mirrored. If null, a styled button will be created.
@@ -45,8 +46,8 @@ const removeAttrItemLabelKeys: Record<string, string> = {
 };
 
 export const AxisOrLegendAttributeMenu = ({
-  place, attributeId, target, parent, portal, onChangeAttribute, onRemoveAttribute, onTreatAttributeAs,
-  highlighted, pointColor
+  hideRemoveOption, place, attributeId, target, parent, portal, onChangeAttribute, onRemoveAttribute,
+  onTreatAttributeAs, highlighted, pointColor
 }: IProps) => {
   const dataConfig = useDataConfigurationContext();
   const data = dataConfig?.dataset;
@@ -64,7 +65,6 @@ export const AxisOrLegendAttributeMenu = ({
   const portalRef = useRef(portal);
   portalRef.current = portal;
   const menuListRef = useRef<HTMLDivElement>(null);
-  const showRemoveOption = true; // Used to be a setting; for now we always want it available.
   const { disableAttributeDnD }  = useGraphSettingsContext();
   const onCloseRef = useRef<() => void>();
   const overlayBounds = useOverlayBounds({ target, portal: parent });
@@ -135,9 +135,8 @@ export const AxisOrLegendAttributeMenu = ({
           }
           { data?.attributes?.map((attr) => {
             const isCurrent = attr.id === attrId;
-            const isPlottedX = dataConfig?.attributeID("x") === attr.id;
-            const isPlottedY = yAttributesPlotted?.includes(attr.id);
-            const showAttr = (!isCurrent && !isPlottedX && !isPlottedY);
+            const isPlottedY = isVertical(place) && yAttributesPlotted?.includes(attr.id);
+            const showAttr = !isCurrent && !isPlottedY;
 
             return showAttr && (
               <MenuItem onClick={() => onChangeAttribute(place, data, attr.id, attrId)} key={attr.id}>
@@ -148,7 +147,7 @@ export const AxisOrLegendAttributeMenu = ({
           { attribute &&
             <>
               <MenuDivider />
-              { showRemoveOption &&
+              { !hideRemoveOption &&
                 <MenuItem onClick={() => onRemoveAttribute(place, attrId)}>
                 {removeAttrItemLabel}
                 </MenuItem>

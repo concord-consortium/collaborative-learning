@@ -1,11 +1,14 @@
 import { ObservableSet, makeAutoObservable, runInAction } from "mobx";
 import { DocumentModelType } from "../document/document";
-import { isSortableType } from "../document/document-types";
+import { isPublishedType, isSortableType, isUnpublishedType } from "../document/document-types";
 import { DocumentsModelType } from "./documents";
 import { GroupsModelType } from "./groups";
 import { ClassModelType } from "./class";
 import { DB } from "../../lib/db";
 import { AppConfigModelType } from "./app-config-model";
+import { Bookmarks } from "./bookmarks";
+import { ENavTabOrder, NavTabSectionModelType } from "../view/nav-tabs";
+import { UserModelType } from "./user";
 
 type SortedDocument = {
   sectionLabel: string;
@@ -24,8 +27,13 @@ export interface ISortedDocumentsStores {
   class: ClassModelType;
   db: DB;
   appConfig: AppConfigModelType;
+  bookmarks: Bookmarks;
+  user: UserModelType;
 }
 
+interface IMatchPropertiesOptions {
+  isTeacherDocument?: boolean;
+}
 export class SortedDocuments {
   stores: ISortedDocumentsStores;
   tempTagDocumentMap = new Map<string, Set<string>>();
@@ -51,6 +59,13 @@ export class SortedDocuments {
   get commentTags(): Record<string, string> | undefined {
     return this.stores.appConfig.commentTags;
   }
+  get bookmarks() {
+    return this.stores.bookmarks;
+  }
+  get user() {
+    return this.stores.user;
+  }
+
   get filteredDocsByType(): DocumentModelType[] {
     return this.documents.all.filter((doc: DocumentModelType) => {
       return isSortableType(doc.type);
@@ -170,6 +185,7 @@ export class SortedDocuments {
         documents
       });
     });
+
     return sortedDocsArr;
   }
 
@@ -200,13 +216,12 @@ export class SortedDocuments {
     });
   }
 
-
   //*************************************** Sort By Bookmarks *************************************
 
   get sortByBookmarks(): SortedDocument[] {
     const documentMap = new Map();
     this.filteredDocsByType.forEach((doc) => {
-      const sectionLabel = doc.isStarred ? "Bookmarked" : "Not Bookmarked";
+      const sectionLabel = this.bookmarks.isDocumentBookmarked(doc.key) ? "Bookmarked" : "Not Bookmarked";
       if (!documentMap.has(sectionLabel)) {
         documentMap.set(sectionLabel, {
           sectionLabel,
@@ -218,6 +233,123 @@ export class SortedDocuments {
 
     const sortedSectionLabels = ["Bookmarked", "Not Bookmarked"];
     return sortedSectionLabels.filter(label => documentMap.has(label)).map(label => documentMap.get(label));
-
   }
+
+  //**************************************** Sort By Tools ****************************************
+
+  get sortByTools(): SortedDocument[] {
+    const tileTypeToDocumentsMap: Record<string, DocumentModelType[]> = {};
+    const addDocByType = (docToAdd: DocumentModelType, type: string) => {
+      if (!tileTypeToDocumentsMap[type]) {
+        tileTypeToDocumentsMap[type] = [];
+      }
+      tileTypeToDocumentsMap[type].push(docToAdd);
+    };
+
+    this.filteredDocsByType.forEach((doc) => {
+      const tilesByTypeMap = doc.content?.getAllTilesByType();// Type is Record<string, string[]>
+
+      if (tilesByTypeMap) {
+        const tileTypes = Object.keys(tilesByTypeMap);
+        const nonPlaceholderTiles = tileTypes.filter(type => type !== "Placeholder");
+        // If a document only has "Placeholder" tiles or no tiles, treat it as "No Tools"
+        if (nonPlaceholderTiles.length === 0) {
+          addDocByType(doc, "No Tools");
+        } else {
+          // Add the tileType as the key to the Map, and doc(s) as values
+          nonPlaceholderTiles.forEach(tileType => {
+            addDocByType(doc, tileType);
+          });
+        }
+      } else { // Handle documents with no tiles
+        addDocByType(doc, "No Tools");
+      }
+    });
+
+    // Sort the tile types. 'No Tools' should be at the end.
+    const sortedTileTypes = Object.keys(tileTypeToDocumentsMap).sort((a, b) => {
+      if (a === "No Tools") return 1;   //Move 'No Tools' to the end
+      if (b === "No Tools") return -1;  //Alphabetically sort all others
+      return a.localeCompare(b);
+    });
+
+    const sortedDocuments = sortedTileTypes.map(tileType => ({
+      sectionLabel: tileType,
+      documents: tileTypeToDocumentsMap[tileType]
+    }));
+
+    return sortedDocuments;
+  }
+
+  matchProperties(doc: DocumentModelType, properties?: readonly string[], options?: IMatchPropertiesOptions) {
+    // if no properties specified then consider it a match
+    if (!properties?.length) return true;
+    return properties?.every(p => {
+      const match = /(!)?(.*)/.exec(p);
+      const property = match && match[2];
+      const wantsProperty = !(match && match[1]); // not negated => has property
+      // treat "starred" as a virtual property
+      // This will be a problem if we extract starred
+      if (property === "starred") {
+        return this.bookmarks.isDocumentBookmarked(doc.key) === wantsProperty;
+      }
+      if (property === "isTeacherDocument") {
+        return !!options?.isTeacherDocument === wantsProperty;
+      }
+      if (property) {
+          return !!doc.getProperty(property) === wantsProperty;
+      }
+      // ignore empty strings, etc.
+      return true;
+    });
+  }
+
+  isMatchingSpec(doc: DocumentModelType, type: string, properties?: readonly string[]) {
+    return (type === doc.type) && this.matchProperties(doc, properties);
+  }
+
+  isTeacherDocument(doc: DocumentModelType){
+    return this.class.isTeacher(doc.uid);
+  }
+
+  getSectionDocs(section: NavTabSectionModelType): DocumentModelType[] {
+    let sectDocs: DocumentModelType[] = [];
+    (section.documentTypes || []).forEach(type => {
+      if (isUnpublishedType(type)) {
+        sectDocs.push(...this.documents.byTypeForUser(type as any, this.user.id));
+      }
+      else if (isPublishedType(type)) {
+        const publishedDocs: { [source: string]: DocumentModelType[] } = {};
+        this.documents
+          .byType(type as any)
+          .forEach(doc => {
+            // personal documents and learning logs have originDocs.
+            // problem documents only have the uids of their creator,
+            // but as long as we're scoped to a single problem, there
+            // shouldn't be published documents from other problems.
+            const source = doc.originDoc || doc.uid;
+            if (source) {
+              if (!publishedDocs.source) {
+                publishedDocs.source = [];
+              }
+              publishedDocs.source.push(doc);
+            }
+          });
+        for (const sourceId in publishedDocs) {
+          sectDocs.push(...publishedDocs[sourceId]);
+        }
+      }
+    });
+    // Reverse the order to approximate a most-recently-used ordering.
+    if (section.order === ENavTabOrder.kReverse) {
+      sectDocs = sectDocs.reverse();
+    }
+    // filter by additional properties
+    if (section.properties && section.properties.length) {
+      sectDocs = sectDocs.filter(doc => this.matchProperties(doc, section.properties,
+                                                            { isTeacherDocument: this.isTeacherDocument(doc) }));
+    }
+    return sectDocs;
+  }
+
 }
