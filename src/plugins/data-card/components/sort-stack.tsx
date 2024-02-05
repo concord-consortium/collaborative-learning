@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { SortCard } from "./sort-card";
@@ -23,12 +23,37 @@ const getStackValueDisplayString = (value: string) => {
   return value.slice(0, 13) + '... ';
 };
 
+const setStackHeight = (stackRef: React.RefObject<HTMLDivElement>, isExpanded: boolean) => {
+  if (!stackRef.current) return;
+  if (isExpanded){
+    stackRef.current.style.height = "auto";
+  } else {
+    setTimeout(() => {
+      if (!stackRef.current) return;
+      console.log("| ...setting stack height...");
+      let maxHeight = 0;
+      Array.from(stackRef.current.children).forEach(child => {
+        const rect = child.getBoundingClientRect();
+        if (rect.height > maxHeight) {
+          maxHeight = rect.height;
+        }
+      });
+      stackRef.current.style.height = `${maxHeight}px`;
+    }, 0);
+  }
+};
+
 export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, draggingActive }) => {
   const content = model.content as DataCardContentModelType;
   const stackValueDisplayString = getStackValueDisplayString(stackValue);
   const stackClasses = classNames("stack-cards", inAttributeId);
   const [isExpanded, setIsExpanded] = useState(false);
   const [caseIds, setCaseIds] = useState<string[]>([]);
+  const stackRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setStackHeight(stackRef, isExpanded);
+  }, [isExpanded]);
 
   useEffect(() => {
     setCaseIds(content.caseIdsFromAttributeValue(inAttributeId, stackValue));
@@ -83,7 +108,7 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
         </div>
       </div>
       <div className={dropZoneClasses} ref={setNodeRef}></div>
-      <div className={stackClasses}>
+      <div className={stackClasses} ref={stackRef}>
         {
           caseIds.map((cid, i) => {
             return <SortCard
