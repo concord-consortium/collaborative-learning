@@ -8,13 +8,14 @@ interface IProps {
 }
 
 function getTiltAngle(index: number, stackIsExpanded: boolean) {
-  if (stackIsExpanded) {
-    return 0;
-  }
+  if (stackIsExpanded) return 0;
   const angles = [0, -4, 3, -3, 3];
-  // const offsets = [0, 0, 0, 0, 0];
-  // const opacities = [1, 1, 1, 0.75, 0.5, 0.25];
   return angles[index % angles.length];
+}
+
+function getOpacity(index: number) {
+  const gradualFade = 1 - (index - 2) * 0.25;
+  return index > 2 ? gradualFade : 1;
 }
 
 export const useSortableCardStyles = (props: IProps) => {
@@ -44,6 +45,7 @@ export const useSortableCardStyles = (props: IProps) => {
       transform: `rotate(${getTiltAngle(indexInStack, stackIsExpanded)}deg)`,
       transition: "transform 0.5s",
       zIndex: indexInStack * -1,
+      opacity: stackIsExpanded ? 1 : getOpacity(indexInStack),
     };
   }
 
