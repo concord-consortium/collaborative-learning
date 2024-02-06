@@ -19,21 +19,6 @@ import "./document-workspace.sass";
 interface IProps extends IBaseProps {
 }
 
-
-//***************************************** GUIDELINES ************************************************
-
-// Gather the same set of metrics that GA instruments on the Activity player
-// we should know the page/problem, the number of accesses, and the time it took to load.
-// we should know the version of browser, OS and IP info that GA can give
-
-//Also from last ticket:
-
-// TODO:
-// • Data structure needs a refactor, and we can refactor calls to `sessionStorage`.
-//     ↳Insertion order should be in tact, either an array of array, set
-// • Detect HTTP2 or higher? - request the javascript and requesting the curriculum files ,
-//      ↳you can look at the response and you see if it's using HTTP2.
-
 @inject("stores")
 @observer
 export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
@@ -53,7 +38,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     this.guaranteeInitialDocuments().then(() => {
       removeLoadingMessage("Building workspace");
       // ----------------------- Logging Loading & Document Measurements -------------------------
-      console.log("one change for PR");
       const { documents, problem: { sections }, teacherGuide, persistentUI } = this.stores;
       const { problemWorkspace } = persistentUI;
       const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
