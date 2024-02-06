@@ -28,7 +28,7 @@ export const useSortableCardStyles = (props: IProps) => {
     {
       "at-stack-top": atStackTop,
       "in-expanded-stack": stackIsExpanded,
-       "in-collapsed-stack": !stackIsExpanded
+      "in-collapsed-stack": !stackIsExpanded
     },
   );
 
