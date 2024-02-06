@@ -158,5 +158,12 @@ context('Data Card Tool Tile', () => {
     dc.getAttrName().eq(1).contains("animal");
     dc.getAttrValueInput().eq(0).invoke('val').should('eq', "river");
     dc.getAttrValueInput().eq(1).invoke('val').should('eq', "rhinocerotter");
+
+    cy.log("can expand and collapse the stack in sort view");
+    dc.getSortSelect().select("habitat");
+    //cy.pause();
+
+    cy.log("can progress through cards using previous and next buttons in sort view");
+    //cy.pause();
   });
 });
