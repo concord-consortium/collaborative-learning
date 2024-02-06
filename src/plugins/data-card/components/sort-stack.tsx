@@ -1,11 +1,13 @@
 import React, { useRef, useEffect, useState } from "react";
+import classNames from "classnames";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { SortCard } from "./sort-card";
-import classNames from "classnames";
 import { gImageMap } from "../../../models/image-map";
 import { useDroppable } from "@dnd-kit/core";
 import { CasesCountDisplay } from "./cases-count-display";
+import { Tooltip } from "react-tippy";
+import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 
 interface IProps {
   stackValue: string;
@@ -34,6 +36,7 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
   useEffect(() => {
     const keyFramesName = isExpanded ? "slide-down" : "slide-up";
     let maxHeight = 0;
+    // TODO: a better way than setTimeout(0) to ensuure DOM els are ready to be measured
     setTimeout(() => {
       if (!stackRef.current) return;
       const childCards = Array.from(stackRef.current?.children as HTMLCollectionOf<HTMLElement>);
@@ -47,7 +50,7 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
         }, 500);
       });
       stackRef.current.style.height = isExpanded ? `auto` : `${maxHeight}px`;
-    }, 0); // setTimeout to allow for the DOM to be updated
+    }, 0);
   }, [isExpanded]);
 
   useEffect(() => {
@@ -95,17 +98,36 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
     {"controls-disabled": stackControlsDisabled }
   );
 
+  const previousToolTipOptions = useTooltipOptions({
+    title: "previous card",
+    disabled: stackControlsDisabled
+  });
+  const nextToolTipOptions = useTooltipOptions({
+    title: "next card",
+    disabled: stackControlsDisabled
+  });
+  const toggleToolTipOptions = useTooltipOptions({
+    title: isExpanded ? "collapse" : "expand",
+    disabled: stackControlsDisabled
+  });
+
   return (
     <div className={cellStackClasses}>
       <div className="stack-heading">
         {stackValueDisplayString}
       </div>
       <div className={stackControlClasses}>
-        <button className={expandToggleClasses} onClick={toggleExpanded} disabled={stackControlsDisabled} />
+        <Tooltip {...toggleToolTipOptions}>
+          <button className={expandToggleClasses} onClick={toggleExpanded} disabled={stackControlsDisabled} />
+        </Tooltip>
         <div className="stack-nav-buttons">
-          <button className="previous" onClick={rewindStack} disabled={stackControlsDisabled} />
+          <Tooltip {...previousToolTipOptions}>
+            <button className="previous" onClick={rewindStack} disabled={stackControlsDisabled} />
+          </Tooltip>
           <CasesCountDisplay totalCases={caseIds.length} />
-          <button className="next" onClick={advanceStack} disabled={stackControlsDisabled} />
+          <Tooltip {...nextToolTipOptions}>
+            <button className="next" onClick={advanceStack} disabled={stackControlsDisabled} />
+          </Tooltip>
         </div>
       </div>
       <div className={dropZoneClasses} ref={setNodeRef}></div>
