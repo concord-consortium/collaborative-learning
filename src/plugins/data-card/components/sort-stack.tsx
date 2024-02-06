@@ -31,8 +31,17 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
   const [caseIds, setCaseIds] = useState<string[]>([]);
   const stackRef = useRef<HTMLDivElement>(null);
 
+  // const setStackHeight = () => {
+  //   console.log("| SortStack useEffect of isExpanded", isExpanded);
+  //   const childCards = Array.from(stackRef.current?.children as HTMLCollectionOf<HTMLElement>);
+  //   childCards.forEach((card, i) => {
+  //     console.log("| ... card height:", card.clientHeight);
+  //   });
+  // };
+
   useEffect(() => {
     setCaseIds(content.caseIdsFromAttributeValue(inAttributeId, stackValue));
+    //setStackHeight();
   }, [inAttributeId, stackValue, content]);
 
   const advanceStack = () => {
