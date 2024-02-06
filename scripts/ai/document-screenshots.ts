@@ -25,13 +25,14 @@ const documentLimit = false;
 // Number of files to process in parallel
 const fileBatchSize = 8;
 
+// The width of the browser window. The height is determined dynamically.
+const windowWidth = 1920 / 2;
+
 const publicRoot = "ai";
 const rootPath = `../../src/public/${publicRoot}`;
 const documentPath = `${rootPath}/${documentDirectory}`;
 const publicPath = `${publicRoot}/${documentDirectory}`;
 const tagFileName = "tags.csv";
-
-const DEFAULT_WIDTH = 1920 / 2;
 
 const startTime = Date.now();
 let checkedFiles = 0;
@@ -86,7 +87,7 @@ async function makeSnapshot(path: string, fileName: string) {
     const boundingBox = await rowElement.boundingBox();
     pageHeight += boundingBox?.height ?? 0;
   }
-  await page.setViewport({ width: DEFAULT_WIDTH, height: Math.round(pageHeight) });
+  await page.setViewport({ width: windowWidth, height: Math.round(pageHeight) });
 
   // Take a screenshot and save it to a file
   const buffer = await page.screenshot({ fullPage: true, type: 'png' });
