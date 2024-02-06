@@ -44,7 +44,7 @@ export const useSortableCardStyles = (props: IProps) => {
     dynamicStyles = {
       transform: `rotate(${getTiltAngle(indexInStack, stackIsExpanded)}deg)`,
       transition: "transform 0.5s",
-      zIndex: indexInStack * -1,
+      zIndex: 100 + (indexInStack * -1),
       opacity: stackIsExpanded ? 1 : getOpacity(indexInStack),
     };
   }
