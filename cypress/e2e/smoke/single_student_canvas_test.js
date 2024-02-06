@@ -46,7 +46,6 @@ context('single student functional test', () => {
     cy.get('.edit-button.learning-log').click();
     cy.get('.primary-workspace [data-test=learning-log-title]').should('contain', "Learning Log: My First Learning Log");
 
-
     cy.log('verify close of nav tabs');
     cy.collapseResourceTabs();
     cy.get('.nav-tab-panel').should('not.be.visible');
