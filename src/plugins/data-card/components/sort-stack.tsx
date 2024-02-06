@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { SortCard } from "./sort-card";
@@ -27,22 +27,21 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
   const content = model.content as DataCardContentModelType;
   const stackValueDisplayString = getStackValueDisplayString(stackValue);
   const stackClasses = classNames("stack-cards", inAttributeId);
-  const [isExpanded, setIsExpanded] = React.useState(false);
-  const [caseIds, setCaseIds] = React.useState<string[]>([]);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [caseIds, setCaseIds] = useState<string[]>([]);
+  const stackRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setCaseIds(content.caseIdsFromAttributeValue(inAttributeId, stackValue));
   }, [inAttributeId, stackValue, content]);
 
   const advanceStack = () => {
-    console.log("advance stack", caseIds);
     const fromFirst = caseIds.shift() as string;
     caseIds.push(fromFirst);
     setCaseIds([...caseIds]);
   };
 
   const rewindStack = () => {
-    console.log("rewind stack", caseIds);
     const fromLast = caseIds.pop() as string;
     caseIds.unshift(fromLast);
     setCaseIds([...caseIds]);
@@ -85,7 +84,7 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
         </div>
       </div>
       <div className={dropZoneClasses} ref={setNodeRef}></div>
-      <div className={stackClasses}>
+      <div className={stackClasses} ref={stackRef}>
         {
           caseIds.map((cid, i) => {
             return <SortCard
@@ -95,6 +94,7 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
               indexInStack={i}
               totalInStack={caseIds.length}
               stackIsExpanded={isExpanded}
+              parentRef={stackRef}
             />;
           })
         }
