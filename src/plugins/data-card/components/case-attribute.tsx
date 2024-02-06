@@ -75,7 +75,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [nameCandidate, setNameCandidate] = useState(() => getName());
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
   const [imageUrl, setImageUrl] = useState("");
-  const [inputItems, setInputItems] = useState([] as string[]);
+  const [inputItems, setInputItems] = useState<string[]>([]);
   const [textLinesNeeded, setTextLinesNeeded] = useState(measureTextLines(getName(), 120));
   const editingName = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
@@ -137,8 +137,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   }
 
   useEffect(()=>{
-    const attrValues = content.dataSet.attrFromID(attrKey)?.values || [];
-    const completions = validCompletions(attrValues as string[], valueCandidate);
+    const attrValues = content.dataSet.attrFromID(attrKey)?.strValues || [];
+    const completions = validCompletions(attrValues, valueCandidate);
     setInputItems(completions);
   }, [content.dataSet, attrKey, valueCandidate, validCompletions]);
 
