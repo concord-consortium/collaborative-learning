@@ -34,24 +34,31 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
   const stackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const keyFramesName = isExpanded ? "slide-down" : "slide-up";
-    let maxHeight = 0;
-    // TODO: a better way than setTimeout(0) to ensuure DOM els are ready to be measured
-    setTimeout(() => {
-      if (!stackRef.current) return;
+    if (stackRef.current) {
+      let maxHeight = 0;
+      let lowestCardBottomY = 0;
       const childCards = Array.from(stackRef.current?.children as HTMLCollectionOf<HTMLElement>);
-      childCards.forEach((card, i) => {
-        card.classList.add(keyFramesName);
-        const imgCt = card.querySelectorAll('img').length;
-        const spaceNeeded = card.clientHeight + 10 + (imgCt * 50);
-        if (card.clientHeight > maxHeight) maxHeight = spaceNeeded;
-        setTimeout(() => {
-          card.classList.remove(keyFramesName);
-        }, 500);
+      childCards.forEach(card => {
+        const imgsHeight = card.querySelectorAll('img').length * 60;
+        const spaceNeeded = card.offsetHeight + imgsHeight;
+        if (spaceNeeded > maxHeight) maxHeight = spaceNeeded;
+        const cardBottomY = card.getBoundingClientRect().bottom;
+        if (cardBottomY > lowestCardBottomY) lowestCardBottomY = cardBottomY;
       });
       stackRef.current.style.height = isExpanded ? `auto` : `${maxHeight}px`;
-    }, 0);
-  }, [isExpanded]);
+      const stackBottomY = stackRef.current.getBoundingClientRect().bottom;
+      console.log("\n|> lets actually compare and fix...");
+      console.log("|> lowestCardBottomY: ", lowestCardBottomY);
+      console.log("|> stackBottomY:      ", stackBottomY);
+      // if the difference between the lowest card and the stack bottom is more than 20px, fix it
+      const gapSpace = stackBottomY - lowestCardBottomY;
+      const fixNeeded = gapSpace > 20;
+
+      if (fixNeeded) {
+        stackRef.current.style.height = maxHeight - gapSpace + "px";
+      }
+    }
+  }, [caseIds, isExpanded]);
 
   useEffect(() => {
     setCaseIds(content.caseIdsFromAttributeValue(inAttributeId, stackValue));

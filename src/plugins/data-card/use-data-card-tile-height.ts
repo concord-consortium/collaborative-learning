@@ -35,17 +35,16 @@ export const useDataCardTileHeight = ({
     // documentId is undefined when loading in left-side content tabs
     const loadingInContent = !documentId && readOnly;
 
-    const weAreLogging = false;
+    const weAreLogging = true;
     if (weAreLogging){
       console.log("\n| figuring out if we can and will adjust tile height\n");
-      console.log("| tileElt: ", tileElt, "\n");
-      console.log("| height: ", height, "\n");
-      console.log("| currEditAttrId: ", currEditAttrId, "\n");
-      console.log("| attrCount: ", attrCount, "\n");
-      console.log("| selectedSortId: ", selectedSortId, "\n");
-      console.log("| calc: uiHeight: ", uiHeight, "\n");
-      console.log("| calc: spaceLeft: ", spaceLeft, "\n");
-      console.log("| calc: adjustForEdits: ", adjustForEdits, "\n");
+      // console.log("| tileElt: ", tileElt, "\n");
+      console.log("| height:                ", height, "\n");
+      // console.log("| currEditAttrId: ", currEditAttrId, "\n");
+      console.log("| selectedSortId:        ", selectedSortId, "\n");
+      console.log("| calc: uiHeight:        ", uiHeight, "\n");
+      console.log("| calc: spaceLeft:       ", spaceLeft, "\n");
+      console.log("| calc: adjustForEdits:  ", adjustForEdits, "\n");
     }
 
     if (loadingInContent) {

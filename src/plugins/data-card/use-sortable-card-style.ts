@@ -1,5 +1,4 @@
-import classNames
- from "classnames";
+import classNames from "classnames";
 interface IProps {
   transform?: { x: number; y: number } | null;
   indexInStack: number;
