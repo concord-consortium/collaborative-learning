@@ -103,7 +103,10 @@ const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
   /* ==[ Clear Data - Confirmation Modal ] == */
   const AlertContent = () => {
     return (
-      <p> Remove the program&#39;s recorded data and any linked displays of this data? This action is not undoable.</p>
+      <p>
+        Remove the program&#39;s recorded data and any linked displays of this data? This action is not undoable.
+        Make a copy of linked data tables to save the data in this recording.
+      </p>
     );
   };
 
