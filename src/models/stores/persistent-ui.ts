@@ -244,7 +244,6 @@ export const PersistentUIModel = types
         const snapshotStr = JSON.stringify(snapshot);
         const updateRef = db.firebase.ref(path);
         updateRef.set(snapshotStr);
-        removeLoadingMessage("Loading current activity");
       });
     }
 }));
