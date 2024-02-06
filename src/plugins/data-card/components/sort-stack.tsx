@@ -114,7 +114,6 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
               indexInStack={i}
               totalInStack={caseIds.length}
               stackIsExpanded={isExpanded}
-              parentRef={stackRef}
             />;
           })
         }

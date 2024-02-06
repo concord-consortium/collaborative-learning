@@ -42,21 +42,24 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
   });
 
   return (
-    <div className="sort-area-grid">
-      {uniqueOrderedValues.length > 0 && sortById &&
-        uniqueOrderedValues.map((value, i) => {
-          return (
-            <SortStack
-              key={`${sortById}-${value}`}
-              id={`${sortById}-${value}`}
-              model={model}
-              stackValue={value}
-              inAttributeId={sortById}
-              draggingActive={sortDragActive}
-            />
-          );
-        })
-      }
-    </div>
+    <>
+      <div className="help-text"><em>Drag a card above another stack to update</em></div>
+      <div className="sort-area-grid">
+        {uniqueOrderedValues.length > 0 && sortById &&
+          uniqueOrderedValues.map((value, i) => {
+            return (
+              <SortStack
+                key={`${sortById}-${value}`}
+                id={`${sortById}-${value}`}
+                model={model}
+                stackValue={value}
+                inAttributeId={sortById}
+                draggingActive={sortDragActive}
+              />
+            );
+          })
+        }
+      </div>
+    </>
   );
 };

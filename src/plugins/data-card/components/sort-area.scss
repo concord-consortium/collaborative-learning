@@ -11,8 +11,15 @@ $panel-height: 34px;
 .data-card-tool.display-as-sorted {
   font-size: $sort-view-font-size;
 
+  .help-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50px;
+    font-size: 12px;
+  }
+
   .sorting-cards-data-area {
-    margin-top:40px;
     padding: 2px;
 
     .sort-area-grid {
@@ -189,8 +196,6 @@ $panel-height: 34px;
 
       .content > div:not(:last-of-type) {
         background-color: white;
-        //border-left: $card-border;
-        //border-right: $card-border;
         border-bottom: $card-border;
       }
 

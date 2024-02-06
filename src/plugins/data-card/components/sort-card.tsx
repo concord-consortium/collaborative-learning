@@ -15,7 +15,6 @@ interface IProps {
   totalInStack: number;
   stackIsExpanded: boolean;
   id?: string;
-  parentRef: any;
 }
 
 export const SortCard: React.FC<IProps> = observer( function SortCard({
