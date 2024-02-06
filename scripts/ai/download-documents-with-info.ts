@@ -1,49 +1,42 @@
 #!/usr/bin/node
 
-// TODO Make sure there are at least 10 of a tag before including it
+// This script downloads documents from firebase and saves them as text files in src/public/ai
+// It will ignore documents that are undefined, fail to parse, or have no tiles in them
+// This script differs from download-documents.ts in that it saves more information than just the document content
 
 // to run this script type the following in the terminal
 // cf. https://stackoverflow.com/a/66626333/16328462
-// $ cd scripts
-// $ npx tsx count-document-tiles.ts
+// $ cd scripts/ai
+// $ npx tsx download-documents.ts
 
 import fs from "fs";
 import admin from "firebase-admin";
 import {google} from "googleapis";
+import stringify from "json-stringify-pretty-compact";
 import fetch from 'node-fetch';
+
+import { datasetPath, networkFileName } from "./script-constants";
+import { getFirebaseBasePath, prettyDuration } from "./script-utils";
 
 // Load the service account key JSON file.
 import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
 
+// The portal to get documents from. For example, "learn.concord.org".
+const portal = "learn.concord.org";
+// The demo name to use. Make falsy to not use a demo.
+// const demo = "TAGCLUE";
+const demo = false;
+
 // Make falsy to include all documents
 const documentLimit = false;
 
-// _duration should be in miliseconds
-function prettyDuration(_duration: number) {
-  const miliseconds = _duration % 1000;
-  const totalSeconds = Math.floor(_duration / 1000);
-  const seconds = totalSeconds % 60;
-  const totalMinutes = Math.floor(totalSeconds / 60);
-  const minutes = totalMinutes % 60;
-  const hours = Math.floor(totalMinutes / 60);
-  const hourPart = hours > 0 ? `${hours}:` : "";
-  const minutePart = hourPart || minutes > 0 ? `${minutes}:` : "";
-  const secondPart = minutePart || seconds > 0 ? `${seconds}.` : "";
-  return `${hourPart}${minutePart}${secondPart}${miliseconds}`;
-}
-
-console.log(`*** Starting Tile Count ***`);
-
-const targetTileTypes = ["Geometry", "Text", "Table"];
-
-console.log(`* Counting ${targetTileTypes.join(", ")} Tiles *`);
+console.log(`*** Starting to Download Documents ***`);
 
 const startTime = Date.now();
 let documentsProcessed = 0;
 let undefinedDocuments = 0;
 let failedDocuments = 0;
 let emptyDocuments = 0;
-const documentInfo = {};
 
 // Define the required scopes.
 const scopes = [
@@ -83,13 +76,7 @@ const accessTime = Date.now();
 
 const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
-function buildFirebasePath(portal?: string) {
-  return portal === "demo"
-          ? `/demo/CLUE/portals/demo/classes`
-          : `/authed/portals/${portal?.replace(/\./g, "_")}/classes`;
-}
-
-const firebaseBasePath = buildFirebasePath("learn.concord.org");
+const firebaseBasePath = getFirebaseBasePath(portal, demo);
 const fetchURL = `${databaseURL}${firebaseBasePath}.json?shallow=true`;
 console.log(`Fetching URL: ${fetchURL}`);
 
@@ -115,10 +102,10 @@ admin.initializeApp({
 const credentialTime = Date.now();
 
 const targetDir = `dataset${startTime}`;
-// const targetPath = `./${targetDir}`;
-await fs.mkdir(targetDir, error => {
+const targetPath = `${datasetPath}${targetDir}`;
+await fs.mkdir(targetPath, error => {
   if (error) {
-    console.log(`Failed to create ${targetDir}`, error);
+    console.log(`Failed to create ${targetPath}`, error);
   }
 });
 for (const key of Object.keys(classKeys)) {
@@ -149,33 +136,22 @@ for (const key of Object.keys(classKeys)) {
         break;
       }
       // console.log(`    ${docId}`);
-      const tileCounts = {};
-      targetTileTypes.forEach(tileType => tileCounts[tileType] = 0);
       const tiles = Object.values<any>(parsedContent.tileMap);
       if (tiles.length === 0) {
         // console.log(`      - no tiles`);
         emptyDocuments++;
         break;
       }
-      for (const tile of tiles) {
-        const tileType = tile.content.type;
-        if (targetTileTypes.includes(tileType)) {
-          tileCounts[tileType]++;
-        }
-      }
-      const documentId = `document${documentsProcessed}`;
-      const documentFile = `${targetDir}/${documentId}.txt`;
-      fs.writeFileSync(documentFile, content);
-      documentInfo[documentId] = {
-        fileName: documentFile,
-        tags: []
+      const documentId = `documentInfo${docId}`;
+      const documentFile = `${targetPath}/${documentId}.txt`;
+      const documentMetadata = user.documentMetadata[docId];
+      const offeringId = documentMetadata?.offeringId;
+      const documentType = documentMetadata?.type;
+      const documentTitle = ["learningLog", "personal"].includes(documentType) ? user[documentType]?.title : undefined;
+      const fileContent = {
+        classId: key, offeringId, userId, documentId: docId, documentType, documentTitle, documentContent: parsedContent
       };
-      targetTileTypes.forEach(targetTileType => {
-        const typeCount = tileCounts[targetTileType];
-        const tagNumber = typeCount >= 5 ? "5+" : `${typeCount}`;
-        documentInfo[documentId].tags.push(`${targetTileType}${tagNumber}`);
-      });
-      // console.log(`  ${tileCounts}`);
+      fs.writeFileSync(documentFile, stringify(fileContent));
       documentsProcessed++;
 
       if (documentsProcessed % 100 === 0) {
@@ -185,29 +161,21 @@ for (const key of Object.keys(classKeys)) {
   }
 }
 
-const tagFileName = `tags.csv`;
-const fileRoot = `gs://cloud-ai-platform-d76df5a1-f27c-4288-8b89-f41e345567b9/`;
-let tagFileContent = "";
-Object.values(documentInfo).forEach(info => {
-  const fileName = `${fileRoot}${info.fileName}`;
-  const tagPart = info.tags.join(",");
-  const comma = tagPart ? "," : "";
-  const line = `${fileName}${comma}${tagPart}\n`;
-  tagFileContent = `${tagFileContent}${line}`;
-});
-fs.writeFileSync(`${targetDir}/${tagFileName}`, tagFileContent);
+// Write a file that includes network information for future scripts
+const networkFile = `${targetPath}/${networkFileName}`;
+fs.writeFileSync(networkFile, stringify({ portal, demo }));
+console.log(`*** Network information written to ${networkFile} ***`);
 
 const endTime = Date.now();
 console.log(`***** End script *****`);
-console.log(`*** Final counts ***`);
-console.log(documentInfo);
 console.log(`- Time to access token: ${prettyDuration(accessTime - startTime)}`);
 console.log(`- Time to fetch documents: ${prettyDuration(fetchTime - startTime)}`);
 console.log(`- Time to get credential: ${prettyDuration(credentialTime - startTime)}`);
 console.log(`- Total Time: ${prettyDuration(endTime - startTime)}`);
-console.log(`Documents processed: ${documentsProcessed}`);
+console.log(`Documents downloaded: ${documentsProcessed}`);
 console.log(`Undefined documents: ${undefinedDocuments}`);
 console.log(`Empty documents: ${emptyDocuments}`);
 console.log(`Failed to process: ${failedDocuments}`);
+console.log(`*** Documents saved to ${targetPath} ***`);
 
 process.exit(0);

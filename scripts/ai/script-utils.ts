@@ -11,3 +11,15 @@ export function prettyDuration(_duration: number) {
   const secondPart = minutePart || seconds > 0 ? `${seconds}.` : "";
   return `${hourPart}${minutePart}${secondPart}${miliseconds}`;
 }
+
+export function getFirebaseBasePath(portal: string, demo?: string | boolean) {
+  return demo
+    ? `/demo/${demo}/portals/demo/classes`
+    : `/authed/portals/${portal?.replace(/\./g, "_")}/classes`;
+}
+
+export function getFirestoreBasePath(portal: string, demo?: string | boolean) {
+  return demo
+    ? `demo/${demo}/documents`
+    : `authed/${portal.replace(/\./g, "_")}/documents`;
+}
