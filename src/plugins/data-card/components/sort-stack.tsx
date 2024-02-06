@@ -31,18 +31,26 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
   const [caseIds, setCaseIds] = useState<string[]>([]);
   const stackRef = useRef<HTMLDivElement>(null);
 
-  // const setStackHeight = () => {
-  //   console.log("| SortStack useEffect of isExpanded", isExpanded);
-  //   const childCards = Array.from(stackRef.current?.children as HTMLCollectionOf<HTMLElement>);
-  //   childCards.forEach((card, i) => {
-  //     console.log("| ... card height:", card.clientHeight);
-  //   });
-  // };
+  useEffect(() => {
+    console.log("| SortStack useEffect of isExpanded", isExpanded);
+    let maxHeight = 0;
+    setTimeout(() => {
+      if (!stackRef.current) return;
+      const childCards = Array.from(stackRef.current?.children as HTMLCollectionOf<HTMLElement>);
+      childCards.forEach((card, i) => {
+        console.log("| ... card height:", card.clientHeight);
+        if (card.clientHeight > maxHeight) {
+          maxHeight = card.clientHeight + 10;
+        }
+      });
+      stackRef.current.style.height = isExpanded ? `auto` : `${maxHeight}px`;
+    },0);
+
+  }, [isExpanded]);
 
   useEffect(() => {
     setCaseIds(content.caseIdsFromAttributeValue(inAttributeId, stackValue));
-    //setStackHeight();
-  }, [inAttributeId, stackValue, content]);
+  }, [inAttributeId, stackValue, content, draggingActive]);
 
   const advanceStack = () => {
     const fromFirst = caseIds.shift() as string;
