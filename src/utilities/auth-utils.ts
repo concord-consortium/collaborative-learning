@@ -86,7 +86,7 @@ export const initializeAuthorization = () => {
 
   if (accessToken && state) {
     const savedParamString = sessionStorage.getItem(state);
-    window.history.pushState(null, "CLUE", savedParamString);
+    window.history.replaceState(null, "CLUE", savedParamString);
     reprocessUrlParams();
   }
   else {
@@ -111,4 +111,25 @@ export const authorizeInPortal = (portalUrl: string, oauthClientName: string, st
   });
   // Redirect
   window.location.assign(portalAuth.token.getUri());
+};
+
+/**
+ *
+ * @param urlString
+ * @param basePortalUrl
+ * @param offeringId
+ * @returns a URL instance if it is converted and undefined if the url isn't be converted
+ */
+export const convertURLToOAuth2 = (urlString: string, basePortalUrl: string, offeringId: string) => {
+  const url = new URL(urlString);
+  const searchParams = url.searchParams;
+  if (searchParams.get("token") && !searchParams.get("authDomain") && !searchParams.get("resourceLinkId")){
+    searchParams.delete("token");
+    searchParams.set("authDomain", basePortalUrl.replace(/\/$/,""));
+    searchParams.set("resourceLinkId", offeringId);
+    url.search = searchParams.toString();
+    return url;
+  } else {
+    return undefined;
+  }
 };

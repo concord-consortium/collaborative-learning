@@ -14,7 +14,7 @@ import { Logger } from "../lib/logger";
 import { LogEventName } from "../lib/logger-types";
 import { uniqueId } from "../utilities/js-utils";
 import { getUnitCodeFromUnitParam } from "../utilities/url-utils";
-import { getBearerToken } from "../utilities/auth-utils";
+import { convertURLToOAuth2, getBearerToken } from "../utilities/auth-utils";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
@@ -354,6 +354,12 @@ export const authenticate = async (appMode: AppMode, appConfig: AppConfigModelTy
 
   if (!classInfoUrl || !offeringId) {
     throw new Error("Unable to get classInfoUrl or offeringId");
+  }
+
+  // Re-Write the URL with OAuth2 parameters
+  const url = convertURLToOAuth2(window.location.href, basePortalUrl, offeringId);
+  if (url) {
+    window.history.replaceState(null, "CLUE", url.toString());
   }
 
   const classInfo = await getClassInfo({classInfoUrl, rawPortalJWT, portal, offeringId});
