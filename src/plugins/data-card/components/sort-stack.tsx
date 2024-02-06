@@ -33,23 +33,22 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
 
   useEffect(() => {
     console.log("| SortStack useEffect of isExpanded", isExpanded);
+    const keyFramesName = isExpanded ? "slide-down" : "slide-up";
     let maxHeight = 0;
     setTimeout(() => {
       if (!stackRef.current) return;
       const childCards = Array.from(stackRef.current?.children as HTMLCollectionOf<HTMLElement>);
       childCards.forEach((card, i) => {
-        console.log(" ...card: ", card, i);
+        card.classList.add(keyFramesName);
         const imgCt = card.querySelectorAll('img').length;
-        console.log(" ...imgCt: ", imgCt);
-        const spaceNeeded = card.clientHeight + 10 + (imgCt * 60);
-
-        if (card.clientHeight > maxHeight) {
-          maxHeight = spaceNeeded;
-        }
+        const spaceNeeded = card.clientHeight + 10 + (imgCt * 50);
+        if (card.clientHeight > maxHeight) maxHeight = spaceNeeded;
+        setTimeout(() => {
+          card.classList.remove(keyFramesName);
+        }, 500);
       });
       stackRef.current.style.height = isExpanded ? `auto` : `${maxHeight}px`;
-    },0);
-
+    }, 0); // setTimeout to allow for the DOM to be updated
   }, [isExpanded]);
 
   useEffect(() => {
