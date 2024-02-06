@@ -140,7 +140,7 @@ class DataCardToolTile {
     return this.getToolbarButton('.dataset-view-button', tileIndex, workspaceClass);
   }
   getDragHandle(cardIndex, workspaceClass, tileIndex = 0) {
-    const selector = ".sort-area-grid .cell.stack .drag-handle svg";
+    const selector = ".sort-area-grid .cell.stack .drag-handle";
     return this.getTile(tileIndex, workspaceClass).find(`${selector}`).eq(cardIndex);
   }
   getDropZone(cardIndex, workspaceClass, tileIndex = 0) {
