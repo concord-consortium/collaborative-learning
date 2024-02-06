@@ -38,9 +38,13 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
       if (!stackRef.current) return;
       const childCards = Array.from(stackRef.current?.children as HTMLCollectionOf<HTMLElement>);
       childCards.forEach((card, i) => {
-        console.log("| ... card height:", card.clientHeight);
+        console.log(" ...card: ", card, i);
+        const imgCt = card.querySelectorAll('img').length;
+        console.log(" ...imgCt: ", imgCt);
+        const spaceNeeded = card.clientHeight + 10 + (imgCt * 60);
+
         if (card.clientHeight > maxHeight) {
-          maxHeight = card.clientHeight + 10;
+          maxHeight = spaceNeeded;
         }
       });
       stackRef.current.style.height = isExpanded ? `auto` : `${maxHeight}px`;
