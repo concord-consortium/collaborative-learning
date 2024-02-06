@@ -88,7 +88,7 @@ $panel-height: 34px;
             display: flex;
             justify-content: center;
             align-items: center;
-            transform: translateY(1px);
+            transform: translate(-13px, 1px);
             button {
               background-color: $workspace-teal-light-8;
               width: 23px;

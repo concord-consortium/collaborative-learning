@@ -29,6 +29,9 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
   useDndMonitor({
     onDragStart: (e) => {
       e.active.data.current?.sortDrag && setSortDragActive(true);
+      if (e.active.data.current?.sortDrag) {
+        document.body.style.cursor = "grabbing";
+      }
     },
     onDragEnd: (e) => {
       if (e.active.data.current?.sortDrag) {
@@ -38,6 +41,7 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
         draggedToValue && content.setAttValue(draggingId, attrId, draggedToValue);
         setSortDragActive(false);
       }
+      document.body.style.cursor = "default";
     }
   });
 
