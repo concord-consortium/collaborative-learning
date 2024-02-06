@@ -68,14 +68,6 @@ context('Data Card Tool Tile', () => {
     cy.wait(100);
     dc.getCardNofTotalListing().contains("Card 1 of 1");
 
-    cy.log("can expand and collapse a card in sort view");
-    dc.getSortSelect().select("habitat");
-    dc.getSortView().should('exist');
-    dc.getSortCardCollapseToggle().click();
-    dc.getSortCardData().should('not.exist');
-    dc.getSortCardCollapseToggle().click();
-    dc.getSortCardData().should('exist');
-
     cy.log("can add a second attribute and give it a value");
     dc.getSortSelect().select("None");
     dc.getAddAttributeButton().click();

@@ -74,10 +74,6 @@ class DataCardToolTile {
   getSortCardHeading(tileIndex = 0, workspaceClass){
     return this.getTile(tileIndex, workspaceClass).find(`.sortable .heading`);
   }
-  getSortCardCollapseToggle(tileIndex = 0, workspaceClass){
-    const selector = ".expand-toggle-area button.expand-toggle";
-    return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
-  }
   getSortCardAttributes(card = 0, tileIndex = 0, workspaceClass){
     return this.getSortCards(tileIndex, workspaceClass).eq(card).find(`.attribute`);
   }
