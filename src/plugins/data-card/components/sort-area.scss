@@ -116,6 +116,13 @@ $panel-height: 34px;
           }
         }
 
+        .stack-controls.controls-disabled {
+          button {
+            pointer-events: none;
+            filter: opacity(0.3);
+          }
+        }
+
         .stack-cards {
           position: relative;
           padding: $card-space-factor;

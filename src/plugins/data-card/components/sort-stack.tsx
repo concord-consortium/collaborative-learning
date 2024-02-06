@@ -32,7 +32,6 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
   const stackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log("| SortStack useEffect of isExpanded", isExpanded);
     const keyFramesName = isExpanded ? "slide-down" : "slide-up";
     let maxHeight = 0;
     setTimeout(() => {
@@ -72,6 +71,8 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
     data: { stackValue, inAttributeId }
   });
 
+  const stackControlsDisabled = caseIds.length < 2;
+
   const dropZoneClasses = classNames(
    "stack-drop-zone",
    {"show-droppable": draggingActive },
@@ -87,20 +88,24 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
   );
 
   const expandToggleClasses = classNames("stack-expand-toggle",
-  {"expanded": isExpanded, "collapsed": !isExpanded}
-);
+    {"expanded": isExpanded, "collapsed": !isExpanded}
+  );
+
+  const stackControlClasses = classNames("stack-controls",
+    {"controls-disabled": stackControlsDisabled }
+  );
 
   return (
     <div className={cellStackClasses}>
       <div className="stack-heading">
         {stackValueDisplayString}
       </div>
-      <div className="stack-controls">
-        <button className={expandToggleClasses} onClick={toggleExpanded}/>
+      <div className={stackControlClasses}>
+        <button className={expandToggleClasses} onClick={toggleExpanded} disabled={stackControlsDisabled} />
         <div className="stack-nav-buttons">
-          <button className="previous" onClick={rewindStack} />
+          <button className="previous" onClick={rewindStack} disabled={stackControlsDisabled} />
           <CasesCountDisplay totalCases={caseIds.length} />
-          <button className="next" onClick={advanceStack} />
+          <button className="next" onClick={advanceStack} disabled={stackControlsDisabled} />
         </div>
       </div>
       <div className={dropZoneClasses} ref={setNodeRef}></div>
