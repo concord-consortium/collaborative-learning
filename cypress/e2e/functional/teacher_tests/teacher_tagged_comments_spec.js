@@ -17,7 +17,7 @@ function beforeTest(params) {
 context('Chat Panel Comment Tags', () => {
   it('verify chat panel comment tags', () => {
     const tags = [
-      "Select Student Strategy",
+      "Select QA Strategy",
       "Part-to-Part",
       "Part-to-Whole",
       "Unit Rate",
