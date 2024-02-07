@@ -10,23 +10,26 @@ import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
-import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
+import {
+  removeLoadingMessage, showLoadingMessage, logLoadingAndDocumentMeasurements
+} from "../../utilities/loading-utils";
 
 import "./document-workspace.sass";
 
 interface IProps extends IBaseProps {
 }
 
+
 @inject("stores")
 @observer
 export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private imageDragDrop: ImageDragDrop;
+  private primaryDocument?: DocumentModelType;
 
   constructor(props: IProps) {
     super(props);
 
     showLoadingMessage("Building workspace");
-
     this.imageDragDrop = new ImageDragDrop({
       isAcceptableImageDrag: this.isAcceptableImageDrag
     });
@@ -34,6 +37,17 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   public componentDidMount() {
     removeLoadingMessage("Building workspace");
+    // ----------------------- Logging Loading & Document Measurements -------------------------
+    const { documents, problem: { sections }, teacherGuide, persistentUI } = this.stores;
+    const { problemWorkspace } = persistentUI;
+    const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
+    // Take into account that teachers have extra "curriculum documents" in the TeacherGuide tab
+    let curriculumDocSections = [...sections]; //these are for the "Problem" tab
+    if(teacherGuide) {
+      curriculumDocSections = [...curriculumDocSections, ...teacherGuide.sections];
+    }
+
+    logLoadingAndDocumentMeasurements(documents, curriculumDocSections, primaryDocument);
     this.guaranteeInitialDocuments();
   }
 

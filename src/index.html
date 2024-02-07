@@ -27,11 +27,15 @@
       };
       // Show some informative messages to users about what is happening while the application loads.
       // Any javascript code can write a message into sessionStorage.
-      const requestStart = performance.getEntriesByType('navigation')[0].requestStart;
-      sessionStorage.setItem('loading-time-start', requestStart || performance.now());
+      window.loadingMeasurements = {};
+
+      const requestStart = performance.getEntriesByType('navigation')[0].requestStart || performance.now();
+      sessionStorage.setItem('loading-time-start', requestStart);
+      const loadingStartTime = Math.floor(performance.now()-requestStart);
       if ((localStorage.getItem("debug")||"").indexOf('loading') > -1) {
-        console.log(`Loading @${Math.floor(performance.now()-requestStart)}ms: Loading the application`);
+        console.log(`Loading @${loadingStartTime}ms: Loading the application`);
       }
+      loadingMeasurements["Loading the application Start"] = loadingStartTime;
       sessionStorage.setItem('loading-message', 'Loading the application<br/>');
       window.loadingMessageTimer = setInterval(function() {
         var elt = document.getElementById('loading-message');
