@@ -7,6 +7,7 @@ $sort-view-column-width: $sort-view-card-width + 10px;
 $sort-view-font-size:10px;
 $sort-view-width: ($sort-view-card-width * 3 ) + 3;
 $panel-height: 34px;
+$sort-heading-z-index: 200; // cards are dynamically assigned z-indices in the 100s
 
 .data-card-tool.display-as-sorted {
   font-size: $sort-view-font-size;
@@ -17,6 +18,18 @@ $panel-height: 34px;
     justify-content: center;
     height: 50px;
     font-size: 12px;
+  }
+
+  .data-card-header-row {
+    position: sticky;
+    top: 0;
+    z-index: $sort-heading-z-index;
+  }
+
+  .panel.sort {
+    position: sticky;
+    top: $panel-height;
+    z-index: $sort-heading-z-index;
   }
 
   .sorting-cards-data-area {
