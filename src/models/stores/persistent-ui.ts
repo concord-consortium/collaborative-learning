@@ -35,7 +35,7 @@ export const UITabModel = types
 export const PersistentUIModel = types
   .model("PersistentUI", {
     dividerPosition: kDividerHalf,
-    activeNavTab: ENavTab.kProblems,
+    activeNavTab: types.maybe(types.string),
     showAnnotations: true,
     showTeacherContent: true,
     showChatPanel: false,
@@ -56,7 +56,7 @@ export const PersistentUIModel = types
       return self.dividerPosition < kDividerMax;
     },
     get openSubTab () {
-      return self.tabs.get(self.activeNavTab)?.openSubTab;
+      return self.activeNavTab && self.tabs.get(self.activeNavTab)?.openSubTab;
     },
   }))
   .views((self) => ({
@@ -66,8 +66,12 @@ export const PersistentUIModel = types
         const facet = self.activeNavTab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
         return buildSectionPath(self.problemPath, self.openSubTab, facet);
       } else {
-        const activeTabState = self.tabs.get(self.activeNavTab);
-        return self.openSubTab && activeTabState?.openDocuments.get(self.openSubTab);
+        if (self.activeNavTab && self.openSubTab) {
+          const activeTabState = self.tabs.get(self.activeNavTab);
+          return activeTabState?.openDocuments.get(self.openSubTab);
+        } else {
+          return undefined;
+        }
       }
     },
     get focusSecondaryDocument () {
@@ -75,8 +79,12 @@ export const PersistentUIModel = types
         const facet = self.activeNavTab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
         return buildSectionPath(self.problemPath, self.openSubTab, facet);
       } else {
-        const activeTabState = self.tabs.get(self.activeNavTab);
-        return self.openSubTab && activeTabState?.openSecondaryDocuments.get(self.openSubTab);
+        if (self.activeNavTab && self.openSubTab) {
+          const activeTabState = self.tabs.get(self.activeNavTab);
+          return activeTabState?.openSecondaryDocuments.get(self.openSubTab);
+        } else {
+          return undefined;
+        }
       }
     },
   }))
@@ -167,9 +175,12 @@ export const PersistentUIModel = types
         tabState.openSubTab = subTab;
         tabState.openSecondaryDocuments.set(subTab, documentKey);
       },
-      closeSubTabDocument(tab: string, subTab: string) {
-        const tabState = getTabState(tab);
-        tabState.openDocuments.delete(subTab);
+      // Defaults to the current tab and subtab
+      closeSubTabDocument(tab: string|undefined=self.activeNavTab, subTab: string|undefined=self.openSubTab) {
+        if (tab && subTab) {
+          const tabState = getTabState(tab);
+          tabState.openDocuments.delete(subTab);
+        }
       },
       closeSubTabSecondaryDocument(tab: string, subTab: string) {
         const tabState = getTabState(tab);
@@ -244,7 +255,6 @@ export const PersistentUIModel = types
         const snapshotStr = JSON.stringify(snapshot);
         const updateRef = db.firebase.ref(path);
         updateRef.set(snapshotStr);
-        removeLoadingMessage("Loading current activity");
       });
     }
 }));

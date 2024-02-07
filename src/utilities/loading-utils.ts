@@ -36,6 +36,7 @@ export function showLoadingMessage(msg: string) {
     return;
   }
   if (DEBUG_LOADING) {
+    // eslint-disable-next-line no-console
     console.log(`Loading @${timeStamp}ms: ${msg}`);
   }
   const existingMessages = sessionStorage.getItem(sessionStorageMessageItem);
@@ -51,6 +52,7 @@ export function removeLoadingMessage(msg: string) {
     return;
   }
   if (DEBUG_LOADING) {
+    // eslint-disable-next-line no-console
     console.log(`Loading @${timeStamp}ms: Done with: ${msg}`);
   }
   const existingMessages = sessionStorage.getItem(sessionStorageMessageItem);
@@ -76,10 +78,10 @@ export function logLoadingAndDocumentMeasurements(documents: DocumentsModelType,
     return total + (doc.content?.tileMap.size || 0);
   }, 0);
 
-  const primaryDocTilesByType = primaryDocument?.content?.getAllTilesByType() as any;
-  const primaryDocNumTilesByType = countTileKeys(primaryDocTilesByType);
+  const primaryDocTilesByType = primaryDocument?.content?.getAllTilesByType();
+  // getAllTilesByType returns a map with the tileKeys as values, we want to convert this to the length
+  const primaryDocNumTilesByType = primaryDocTilesByType && countTileKeys(primaryDocTilesByType);
 
-  //getAllTilesByType returns a map with the tileKeys as values, we want to convert this to the length
   function countTileKeys(tilesByType: Record<string, string[]>): Record<string, number> {
     const tileCounts: Record<string, number>= {};
     for (const tileType of Object.keys(tilesByType)) {
@@ -120,6 +122,7 @@ export function logLoadingAndDocumentMeasurements(documents: DocumentsModelType,
 
   const endTime = performance.now();
   if(DEBUG_LOADING) {
+    // eslint-disable-next-line no-console
     console.log(`logLoadingAndDocumentMeasurements executed in ${endTime - startTime} milliseconds`);
   }
 
