@@ -70,8 +70,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     documentId,
     readOnly: readOnly ?? false,
     onRequestRowHeight,
-    attrCount: content.attributes.length,
-    selectedSortId: content.selectedSortAttributeId
+    attrCount: content.attributes.length
   });
 
   /* ==[ Drag and Drop ] == */

@@ -10,7 +10,6 @@ interface UseDataCardTileHeightProps {
   readOnly: boolean;
   onRequestRowHeight: (id: string, height: number) => void;
   attrCount: number;
-  selectedSortId: string | undefined;
 }
 
 export const useDataCardTileHeight = ({
@@ -22,7 +21,6 @@ export const useDataCardTileHeight = ({
   readOnly,
   onRequestRowHeight,
   attrCount,
-  selectedSortId
 }: UseDataCardTileHeightProps) => {
 
   const attrCtRef = useRef(attrCount);
@@ -35,18 +33,6 @@ export const useDataCardTileHeight = ({
     // documentId is undefined when loading in left-side content tabs
     const loadingInContent = !documentId && readOnly;
 
-    const weAreLogging = true;
-    if (weAreLogging){
-      console.log("\n| figuring out if we can and will adjust tile height\n");
-      // console.log("| tileElt: ", tileElt, "\n");
-      console.log("| height:                ", height, "\n");
-      // console.log("| currEditAttrId: ", currEditAttrId, "\n");
-      console.log("| selectedSortId:        ", selectedSortId, "\n");
-      console.log("| calc: uiHeight:        ", uiHeight, "\n");
-      console.log("| calc: spaceLeft:       ", spaceLeft, "\n");
-      console.log("| calc: adjustForEdits:  ", adjustForEdits, "\n");
-    }
-
     if (loadingInContent) {
       onRequestRowHeight(modelId, Math.max(uiHeight, kExampleDeckHeight));
     }
@@ -55,5 +41,5 @@ export const useDataCardTileHeight = ({
       onRequestRowHeight(modelId, uiHeight + kButtonSpace);
     }
 
-  }, [attrCount, currEditAttrId, height, modelId, onRequestRowHeight, readOnly, tileElt, documentId, selectedSortId]);
+  }, [attrCount, currEditAttrId, height, modelId, onRequestRowHeight, readOnly, tileElt, documentId]);
 };

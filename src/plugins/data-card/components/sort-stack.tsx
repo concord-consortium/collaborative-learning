@@ -36,13 +36,6 @@ const getChildCards = (stackRef: React.RefObject<HTMLDivElement>) => {
   return Array.from(stackRef.current?.children as HTMLCollectionOf<HTMLElement>);
 };
 
-// const applyTemporaryAnimation = (cards: HTMLElement[], keyFramesName: string) => {
-//   cards.forEach(card => {
-//     card.classList.add(keyFramesName);
-//     setTimeout(() => card.classList.remove(keyFramesName), 100);
-//   });
-// };
-
 const getMaxHeight = (cards: HTMLElement[]) => {
   let maxHeight = 0;
   cards.forEach(card => {
@@ -64,7 +57,6 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
     if (stackRef.current) {
       const childCards = getChildCards(stackRef);
       const maxHeight = getMaxHeight(childCards);
-      //applyTemporaryAnimation(childCards, isExpanded ? "slide-down" : "slide-up");
       stackRef.current.style.height = isExpanded ? `auto` : `${maxHeight + 4}px`;
     }
   }, [caseIds, isExpanded]);

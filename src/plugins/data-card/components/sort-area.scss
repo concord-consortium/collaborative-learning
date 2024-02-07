@@ -157,27 +157,6 @@ $panel-height: 34px;
         top: 6px;
       }
 
-      // &.slide-up:not(:last-of-type)  {
-      //   animation: slide-up 2s ease-in-out;
-      // }
-      // &.slide-down:not(:first-of-type)  {
-      //   animation: slide-down 2s ease-in-out;
-      // }
-
-      // @keyframes slide-up {
-      //   0% {
-      //     transform: translateY(0);
-      //   }
-      //   100% {
-      //     transform: translateY(-4px);;
-      //   }
-      // }
-
-      // @keyframes slide-down {
-      //   0% { transform: translateY(0);}
-      //   100% { transform: translateY(4px); }
-      // }
-
       .heading {
         border-bottom: $card-border;
         display: flex;
