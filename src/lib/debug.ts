@@ -11,6 +11,11 @@ const debugContains = (key: string) => debug.indexOf(key) !== -1;
  * The first argument is a boolean; no message will be printed if it is false.
  * Usually the argument should be one of the debugging constants defined in this file.
  *
+ * Note that since this is a regular function, its arguments will be evaluated before the
+ * "enabled" flag is checked. If there are any expensive computations or things that may
+ * result in errors, you should instead use an explicit
+ *     `if (flag) { ...log something... }
+ *
  * @param enabled whether the message should be output.
  * @param message object passed to console.log for printing, may contain argument placeholders.
  * @param params additional parameters to insert into message.
