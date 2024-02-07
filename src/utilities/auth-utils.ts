@@ -114,11 +114,13 @@ export const authorizeInPortal = (portalUrl: string, oauthClientName: string, st
 };
 
 /**
- *
+ * Convert a token-style launch URL to an OAuth2-friendly URL.
+ * The portal currently launches CLUE using a short-lived token. By converting it
+ * in this way we can allow reloadin the browser to work even after some time has passed.
  * @param urlString
  * @param basePortalUrl
  * @param offeringId
- * @returns a URL instance if it is converted and undefined if the url isn't be converted
+ * @returns a URL instance if the url is converted, or undefined if it isn't converted
  */
 export const convertURLToOAuth2 = (urlString: string, basePortalUrl: string, offeringId: string) => {
   const url = new URL(urlString);
