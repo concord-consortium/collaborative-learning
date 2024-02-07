@@ -125,6 +125,5 @@ export function logLoadingAndDocumentMeasurements(documents: DocumentsModelType,
     // eslint-disable-next-line no-console
     console.log(`logLoadingAndDocumentMeasurements executed in ${endTime - startTime} milliseconds`);
   }
-
   Logger.log(LogEventName.LOADING_MEASUREMENTS, finalLogObject);
 }
