@@ -9,10 +9,12 @@ import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
 import { ENavTabOrder, NavTabSectionModelType } from "../view/nav-tabs";
 import { UserModelType } from "./user";
+import { sectionIconFormatter, sectionLabelFormatter } from "./sorted-documents-utils";
 
 type SortedDocument = {
   sectionLabel: string;
   documents: DocumentModelType[];
+  icon?: React.FC<React.SVGProps<SVGSVGElement>>; //exists only in the "sort by tools" case
 }
 
 type TagWithDocs = {
@@ -239,6 +241,7 @@ export class SortedDocuments {
 
   get sortByTools(): SortedDocument[] {
     const tileTypeToDocumentsMap: Record<string, DocumentModelType[]> = {};
+
     const addDocByType = (docToAdd: DocumentModelType, type: string) => {
       if (!tileTypeToDocumentsMap[type]) {
         tileTypeToDocumentsMap[type] = [];
@@ -248,7 +251,6 @@ export class SortedDocuments {
 
     this.filteredDocsByType.forEach((doc) => {
       const tilesByTypeMap = doc.content?.getAllTilesByType();// Type is Record<string, string[]>
-
       if (tilesByTypeMap) {
         const tileTypes = Object.keys(tilesByTypeMap);
         const nonPlaceholderTiles = tileTypes.filter(type => type !== "Placeholder");
@@ -274,7 +276,8 @@ export class SortedDocuments {
     });
 
     const sortedDocuments = sortedTileTypes.map(tileType => ({
-      sectionLabel: tileType,
+      icon: sectionIconFormatter[tileType as keyof typeof sectionIconFormatter],
+      sectionLabel: sectionLabelFormatter[tileType as keyof typeof sectionLabelFormatter] || tileType,
       documents: tileTypeToDocumentsMap[tileType]
     }));
 

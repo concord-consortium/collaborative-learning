@@ -26,11 +26,15 @@ $title-margin: 2px;
       }
 
       .section-header-label{
+        svg{
+          margin-right: 8px;
+        }
         position: absolute;
         left: 10px;
         height: 26px;
         border-radius: 5px;
         background-color: $classwork-purple-light-7;
+
         font-weight: bold;
         display: flex;
         align-items: center;
