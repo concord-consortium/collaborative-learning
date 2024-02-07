@@ -357,9 +357,9 @@ export const authenticate = async (appMode: AppMode, appConfig: AppConfigModelTy
   }
 
   // Re-Write the URL with OAuth2 parameters
-  const url = convertURLToOAuth2(window.location.href, basePortalUrl, offeringId);
-  if (url) {
-    window.history.replaceState(null, "CLUE", url.toString());
+  const oAuth2Url = convertURLToOAuth2(window.location.href, basePortalUrl, offeringId);
+  if (oAuth2Url) {
+    window.history.replaceState(null, "CLUE", oAuth2Url.toString());
   }
 
   const classInfo = await getClassInfo({classInfoUrl, rawPortalJWT, portal, offeringId});
