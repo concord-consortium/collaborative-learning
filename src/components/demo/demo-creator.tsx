@@ -44,28 +44,33 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
 
   constructor(props: IProps) {
     super(props);
-
-    const { appConfig, unit, demo } = this.stores;
-    const problemTitleTemplate = appConfig.demoProblemTitle || "%investigationTitle%: %problemTitle%";
-
-    demo.setClass("1", "Class 1");
-
-    unit.investigations.forEach(investigation => {
-      investigation.problems.forEach(problem => {
-        const title = problemTitleTemplate
-                        .replace("%investigationTitle%", investigation.title)
-                        .replace("%problemTitle%", problem.fullTitle);
-        const ordinal = `${investigation.ordinal}.${problem.ordinal}`;
-        this.problemOptions.push({investigation, problem, ordinal, title});
-        if (!demo.problemOrdinal) {
-          demo.setProblemOrdinal(ordinal);
-        }
-      });
-    });
+    this.stores.demo.setClass("1", "Class 1");
   }
 
   public render() {
-    const { demo } = this.stores;
+    const { appConfig, unit, demo } = this.stores;
+    const problemTitleTemplate = appConfig.demoProblemTitle || "%investigationTitle%: %problemTitle%";
+
+    // Assemble the list of problems once unit data has been loaded.
+    if (!this.problemOptions.length) {
+      unit.investigations.forEach(investigation => {
+        investigation.problems.forEach(problem => {
+          const title = problemTitleTemplate
+                          .replace("%investigationTitle%", investigation.title)
+                          .replace("%problemTitle%", problem.fullTitle);
+          const ordinal = `${investigation.ordinal}.${problem.ordinal}`;
+          this.problemOptions.push({investigation, problem, ordinal, title});
+          if (!demo.problemOrdinal) {
+            demo.setProblemOrdinal(ordinal);
+          }
+        });
+      });
+    }
+    if (!this.problemOptions.length) {
+      // Did not find any problems in unit; probably unit info hasn't been loaded yet.
+      return (<p>Loading...</p>);
+    }
+
     const studentLinks: JSX.Element[] = [];
     const teacherLinks: JSX.Element[] = [];
     const classes: JSX.Element[] = [];
@@ -108,7 +113,7 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
             {problems}
           </select>
         </div>
-        <h2>Links for {demo.class.name}: {selectedProblem.title}</h2>
+        <h2>Links for {demo.class.name}: {selectedProblem?.title||''}</h2>
         <ul className="student-links">
           {studentLinks}
         </ul>

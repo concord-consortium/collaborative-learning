@@ -56,16 +56,22 @@ export const initializeApp = async (appMode: AppMode, authoring?: boolean): Prom
     (window as any).stores = stores;
   }
 
-  await stores.setUnitAndProblem(unitId, problemOrdinal);
+  // Start setUnitAndProblem asynchronously.
+  // The promise that it returns is saved in `stores.unitLoadedPromise` and blocks
+  // various dependent operations, but the bulk of the initialization code can continue
+  // while that unit information is loaded, including getting the persistentUI loaded as
+  // soon as possible so we only render what we need.
+  stores.unitLoadedPromise = stores.setUnitAndProblem(unitId, problemOrdinal);
+  stores.unitLoadedPromise.then(() => {
+    // The logger will only be enabled if the appMode is "authed", or DEBUG_LOGGER is true
+    Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
+  });
 
   gImageMap.initialize(stores.db);
 
   if (kEnableLivelinessChecking) {
     setLivelinessChecking("error");
   }
-
-  // The logger will only be enabled if the appMode is "authed", or DEBUG_LOGGER is true
-  Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
 
   if (authoring) {
     // Make the user a teacher and show solution tiles

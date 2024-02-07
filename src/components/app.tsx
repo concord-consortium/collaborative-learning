@@ -90,7 +90,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
   showLoadingMessage("Connecting");
 
   authenticate(appMode, appConfig, urlParams)
-    .then(async ({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
+    .then(({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
       // authentication can trigger appMode change (e.g. preview => demo)
       if (newAppMode && (newAppMode !== appMode)) {
         stores.setAppMode(newAppMode);
@@ -100,16 +100,21 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
       if (classInfo) {
         stores.class.updateFromPortal(classInfo);
       }
-      if (unitCode && problemId && isDifferentUnitAndProblem(stores, unitCode, problemId)) {
-        await stores.setUnitAndProblem(unitCode, problemId).then( () => {
-          updateProblem(stores, problemId);
-        });
-      }
-      initRollbar(stores, problemId || stores.appConfig.defaultProblemOrdinal);
+
+      stores.unitLoadedPromise.then(async () => {
+        if (unitCode && problemId && isDifferentUnitAndProblem(stores, unitCode, problemId)) {
+          // This comes into play when CLUE is launched as a teacher from the portal.
+          // In that case the unit isn't known until after CLUE has got the offering information
+          // from the portal.
+          await stores.setUnitAndProblem(unitCode, problemId).then( () => {
+            updateProblem(stores, problemId);
+          });
+        }
+        initRollbar(stores, problemId || stores.appConfig.defaultProblemOrdinal);
+      });
       return resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
     })
     .then(() => {
-      stores.persistentUI.initializePersistentUISync(user, db);
       return user.isTeacher
               ? db.firestore.getFirestoreUser(user.id)
               : undefined;

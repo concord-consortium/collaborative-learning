@@ -84,7 +84,7 @@ export const ResizePanelDivider: React.FC <IProps> = observer(function ResizePan
           <DragThumbnailIcon className="drag-thumbnail" onClick={()=>setShowExpanders(true)}
               onMouseEnter={()=>setShowExpanders(true)} />
         </div>
-        <ResourcesExpander onExpandResources={handleExpandResources} resourceType={activeNavTab}/>
+        {activeNavTab && <ResourcesExpander onExpandResources={handleExpandResources} resourceType={activeNavTab}/>}
       </div>
     );
 });

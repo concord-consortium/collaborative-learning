@@ -25,6 +25,7 @@ interface IProps extends IBaseProps {
 export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   private imageDragDrop: ImageDragDrop;
   private primaryDocument?: DocumentModelType;
+  private primaryDocumentLoaded = false;
 
   constructor(props: IProps) {
     super(props);
@@ -36,20 +37,27 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public componentDidMount() {
-    this.guaranteeInitialDocuments().then(() => {
-      removeLoadingMessage("Building workspace");
-      // ----------------------- Logging Loading & Document Measurements -------------------------
-      const { documents, problem: { sections }, teacherGuide, persistentUI } = this.stores;
+    this.guaranteeInitialDocuments();
+  }
+
+  public componentDidUpdate(): void {
+    // ----------------------- Logging Loading & Document Measurements -------------------------
+    if (!this.primaryDocumentLoaded) {
+      const { documents, teacherGuide, persistentUI } = this.stores;
       const { problemWorkspace } = persistentUI;
       const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
-      // Take into account that teachers have extra "curriculum documents" in the TeacherGuide tab
-      let curriculumDocSections = [...sections]; //these are for the "Problem" tab
-      if(teacherGuide) {
-        curriculumDocSections = [...curriculumDocSections, ...teacherGuide.sections];
+      if (primaryDocument) {
+        this.primaryDocumentLoaded = true;
+        const sections = this.stores.problem.sections;
+        // Take into account that teachers have extra "curriculum documents" in the TeacherGuide tab
+        let curriculumDocSections = [...sections]; //these are for the "Problem" tab
+        if (teacherGuide) {
+          curriculumDocSections = [...curriculumDocSections, ...teacherGuide.sections];
+        }
+        removeLoadingMessage("Building workspace");
+        logLoadingAndDocumentMeasurements(documents, curriculumDocSections, primaryDocument);
       }
-
-      logLoadingAndDocumentMeasurements(documents, curriculumDocSections, primaryDocument);
-    });
+    }
   }
 
   public render() {

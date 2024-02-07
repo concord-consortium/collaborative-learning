@@ -8,12 +8,16 @@ import { AppProvider, initializeApp } from "./initialize-app";
 
 (window as any).DISABLE_FIREBASE_SYNC = true;
 
-initializeApp(urlParams.appMode || "dev", true).then((stores) => {
-  ReactDOM.render(
-    <AppProvider stores={stores} modalAppElement="#app">
-      <DocEditorApp/>
-      <DialogComponent/>
-    </AppProvider>,
-    document.getElementById("app")
+initializeApp(urlParams.appMode || "dev", true)
+  // Need wait for the unit to be loaded to safely render the components
+  .then((stores) => stores.unitLoadedPromise
+    .then(() => {
+      ReactDOM.render(
+        <AppProvider stores={stores} modalAppElement="#app">
+          <DocEditorApp/>
+          <DialogComponent/>
+        </AppProvider>,
+        document.getElementById("app")
+      );
+    })
   );
-});

@@ -25,8 +25,9 @@ if (!redirectingToAuthDomain) {
     );
   } else {
     initializeApp(appMode).then((stores) => {
-      setPageTitle(stores);
+      stores.unitLoadedPromise.then(() => setPageTitle(stores));
       stores.ui.setShowDemoCreator(!!stores.showDemoCreator);
+      // I think supports are not used so we can get rid of this
       stores.supports.createFromUnit({
         unit: stores.unit,
         investigation: stores.investigation,
