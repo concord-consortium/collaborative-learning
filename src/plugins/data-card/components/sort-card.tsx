@@ -22,9 +22,7 @@ export const SortCard: React.FC<IProps> = observer( function SortCard({
 }){
   const content = model.content as DataCardContentModelType;
   const deckCardNumberDisplay = content.dataSet.caseIndexFromID(caseId) + 1;
-  const stackCardNumberDisplay = indexInStack + 1;
   const caseHighlighted = content.dataSet.isCaseSelected(caseId);
-  const atStackTop = stackCardNumberDisplay === totalInStack;
   const isLinked = useIsLinked();
 
   const headingClasses = classNames(
@@ -42,7 +40,7 @@ export const SortCard: React.FC<IProps> = observer( function SortCard({
   };
 
   const { dynamicClasses, dynamicStyles } = useSortableCardStyles(
-    { transform, indexInStack, atStackTop, stackIsExpanded }
+    { transform, indexInStack, stackIsExpanded }
   );
 
   return (

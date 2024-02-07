@@ -2,7 +2,6 @@ import classNames from "classnames";
 interface IProps {
   transform?: { x: number; y: number } | null;
   indexInStack: number;
-  atStackTop: boolean;
   stackIsExpanded: boolean;
 }
 
@@ -18,14 +17,13 @@ function getOpacity(index: number) {
 }
 
 export const useSortableCardStyles = (props: IProps) => {
-  const { transform, indexInStack, atStackTop, stackIsExpanded } = props;
+  const { transform, indexInStack, stackIsExpanded } = props;
 
   let dynamicStyles;
 
   const dynamicClasses = classNames(
     "drag-handle", "sortable", "card",
     {
-      "at-stack-top": atStackTop,
       "in-expanded-stack": stackIsExpanded,
       "in-collapsed-stack": !stackIsExpanded
     },
