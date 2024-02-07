@@ -19,6 +19,10 @@ class XYPlotToolTile {
       cy.get('select').select(table);
       cy.get('.modal-button').contains("Graph It!").click();
   }
+  linkProgram(program) {
+      cy.get('[data-test=link-tile-select]').select(program);
+      cy.get('.modal-button').contains("Graph It!").click();
+  }
   getGraphDot(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-dot`);
   }
