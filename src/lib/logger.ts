@@ -131,7 +131,7 @@ export class Logger {
       event,
       method,
       ...disconnects,
-      parameters
+      parameters,
     };
 
     if (loggingRemoteEndpoint) {
