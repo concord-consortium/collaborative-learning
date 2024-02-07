@@ -6,7 +6,7 @@ let dashboard = new TeacherDashboard;
 let clueCanvas = new ClueCanvas;
 let teacherNetwork = new TeacherNetwork;
 
-const queryParams = "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa";
+const queryParams = "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=qa";
 
 function beforeTest(params) {
   cy.clearQAData('all');
@@ -20,7 +20,7 @@ function beforeTest(params) {
 }
 
 function loadNetworkTest() {
-  cy.visit("/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa&network=foo");
+  cy.visit("/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=qa&network=foo");
   cy.waitForLoad();
   dashboard.switchView("Workspace & Resources");
   cy.wait(2000);

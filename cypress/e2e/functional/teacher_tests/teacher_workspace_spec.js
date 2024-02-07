@@ -15,8 +15,8 @@ let primaryWorkSpace = new PrimaryWorkspace;
 let teacherDoc = "Teacher Investigation Copy";
 
 const queryParams = {
-  teacherQueryParams: "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa",
-  studentWorkspaceQueryParams: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa"
+  teacherQueryParams: "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=qa",
+  studentWorkspaceQueryParams: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=qa"
 };
 
 function beforeTest(params) {
@@ -106,8 +106,8 @@ context('Teacher Workspace', () => {
       cy.collapseResourceTabs();
       cy.openResourceTabs();
       cy.get('.top-tab.tab-teacher-guide').should('exist').click({force:true});
-      cy.get('.prob-tab.teacher-guide').should('exist').and('have.length', 4).each(function (subTab, index, subTabList) {
-        const teacherGuideSubTabs = ["Launch", "Explore", "Summarize", "Unit Plan"];
+      cy.get('.prob-tab.teacher-guide').should('exist').and('have.length', 3).each(function (subTab, index, subTabList) {
+        const teacherGuideSubTabs = ["Launch", "Explore", "Summarize"];
         cy.wrap(subTab).text().should('contain', teacherGuideSubTabs[index]);
       });
     });
@@ -125,7 +125,7 @@ context('Teacher Workspace', () => {
         cy.get('.top-tab.tab-student-work').should('exist').click({force:true});
         cy.get('.student-group-view').should('be.visible');
         cy.get('.student-group .group-number').should('be.visible').and('have.length', groups.length);
-        cy.get('.student-group .group-number').contains('G1').click();
+        cy.get('.student-group .group-number').contains('G1').click({force:true});
         cy.get('.student-group .group-number').eq(0).should('have.class', 'active');
         cy.get('.group-title').should('contain', 'Group 1');
         cy.get('.canvas-area .four-up .member').should('have.length', 4);
