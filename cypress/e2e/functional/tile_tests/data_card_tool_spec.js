@@ -159,13 +159,27 @@ context('Data Card Tool Tile', () => {
     dc.getAttrValueInput().eq(0).invoke('val').should('eq', "river");
     dc.getAttrValueInput().eq(1).invoke('val').should('eq', "rhinocerotter");
 
-    cy.log("can expand and collapse the stack in sort view");
+    cy.log("can page through a stack of cards in the sort view");
     dc.getSortSelect().select("habitat");
-    cy.pause();
-    // cypress should find the expand handle/control on the data-card-tile
+    dc.getSortStack().contains("Card 2").should('be.visible');
+    dc.getSortStack().contains("Card 4").should('not.be.visible');
+    dc.getSortStackNextButton().click();
+    dc.getSortStack().contains("Card 2").should('not.be.visible');
+    dc.getSortStack().contains("Card 4").should('be.visible');
+    dc.getSortStackPreviousButton().click();
+    dc.getSortStack().contains("Card 2").should('be.visible');
+    dc.getSortStack().contains("Card 4").should('not.be.visible');
 
-
-    // cy.log("can progress through cards using previous and next buttons in sort view");
-    // cy.pause();
+    cy.log("can toggle stacked and unstacked state of cards in a stack");
+    dc.getSortStack().contains("Card 2").should('be.visible');
+    dc.getSortStack().find('.card').eq(0).invoke('offset').its('top').should('be.lt', 200);
+    dc.getSortStack().find('.card').eq(1).invoke('offset').its('top').should('be.lt', 200);
+    dc.getSortStack().should('not.have.class', 'expanded');
+    dc.getSortStack().should('have.class', 'collapsed');
+    dc.getSortStackToggle().click();
+    dc.getSortStack().find('.card').eq(0).invoke('offset').its('top').should('be.lt', 200);
+    dc.getSortStack().find('.card').eq(1).invoke('offset').its('top').should('be.gt', 200);
+    dc.getSortStack().should('not.have.class', 'collapsed');
+    dc.getSortStack().should('have.class', 'expanded');
   });
 });

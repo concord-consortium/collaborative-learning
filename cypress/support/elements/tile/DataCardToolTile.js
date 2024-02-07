@@ -147,6 +147,26 @@ class DataCardToolTile {
     const selector = ".sort-area-grid .cell.stack .stack-drop-zone.show-droppable";
     return this.getTile(tileIndex, workspaceClass).find(`${selector}`).eq(cardIndex);
   }
+  getSortStack(tileIndex = 0, stackIndex = 0) {
+    const selector = ".sort-area-grid .stack";
+    return this.getTile(tileIndex).find(`${selector}`).eq(stackIndex);
+  }
+  getSortStackToggle(tileIndex = 0, stackIndex = 0) {
+    const selector = ".sort-area-grid .stack-expand-toggle";
+    return this.getTile(tileIndex).find(`${selector}`).eq(stackIndex);
+  }
+  getSortStackNextButton(tileIndex = 0, stackIndex = 0) {
+    const selector = ".sort-area-grid .stack-nav-buttons .next";
+    return this.getTile(tileIndex).find(`${selector}`).eq(stackIndex);
+  }
+  getSortStackPreviousButton(tileIndex = 0, stackIndex = 0) {
+    const selector = ".sort-area-grid .stack-nav-buttons .previous";
+    return this.getTile(tileIndex).find(`${selector}`).eq(stackIndex);
+  }
+  getTileHeightHandle(tileIndex = 0, workspaceClass) {
+    const selector = ".tool-tile-resize-handle";
+    return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
+  }
   dragCardToStack(dragCard, dropStack) {
     this.getDragHandle(dragCard).click()
     .trigger("mousedown", {force:true});
