@@ -19,6 +19,7 @@ import "./document-workspace.sass";
 interface IProps extends IBaseProps {
 }
 
+
 @inject("stores")
 @observer
 export class DocumentWorkspaceComponent extends BaseComponent<IProps> {

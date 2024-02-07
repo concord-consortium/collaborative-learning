@@ -122,5 +122,7 @@ export function logLoadingAndDocumentMeasurements(documents: DocumentsModelType,
   if(DEBUG_LOADING) {
     console.log(`logLoadingAndDocumentMeasurements executed in ${endTime - startTime} milliseconds`);
   }
+
+  console.log("finalLogObject:", finalLogObject);
   Logger.log(LogEventName.LOADING_MEASUREMENTS, finalLogObject);
 }
