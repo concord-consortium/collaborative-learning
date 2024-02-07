@@ -9,6 +9,7 @@ export const kDefaultLabel = `${kDefaultLabelPrefix} 1`;
 export const kFieldWidthFactor = 120; // passed to measureTextLines
 export const kNameCharsLimit = 60;
 export const kValueCharsLimit = 80;
+export const kSortImgHeight = 60;
 
 export const looksLikeDefaultName = (label: string) => {
   return label.startsWith(kDefaultLabelPrefix);

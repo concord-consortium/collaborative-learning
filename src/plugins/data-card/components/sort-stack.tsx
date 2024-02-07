@@ -8,6 +8,7 @@ import { useDroppable } from "@dnd-kit/core";
 import { CasesCountDisplay } from "./cases-count-display";
 import { Tooltip } from "react-tippy";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
+import { kSortImgHeight } from "../data-card-types";
 
 interface IProps {
   stackValue: string;
@@ -25,6 +26,16 @@ const getStackValueDisplayString = (value: string) => {
   return value.slice(0, 13) + '... ';
 };
 
+const getSpaceNeeded = (card: HTMLElement) => {
+  const allImgs = Array.from(card.querySelectorAll('img'));
+  const notLoaded = allImgs.filter(img => img.height === 0).length;
+  return card.offsetHeight + notLoaded * kSortImgHeight;
+};
+
+const getChildCards = (stackRef: React.RefObject<HTMLDivElement>) => {
+  return Array.from(stackRef.current?.children as HTMLCollectionOf<HTMLElement>);
+};
+
 export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, draggingActive }) => {
   const content = model.content as DataCardContentModelType;
   const stackValueDisplayString = getStackValueDisplayString(stackValue);
@@ -36,27 +47,12 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
   useEffect(() => {
     if (stackRef.current) {
       let maxHeight = 0;
-      let lowestCardBottomY = 0;
-      const childCards = Array.from(stackRef.current?.children as HTMLCollectionOf<HTMLElement>);
+      const childCards = getChildCards(stackRef);
       childCards.forEach(card => {
-        const imgsHeight = card.querySelectorAll('img').length * 60;
-        const spaceNeeded = card.offsetHeight + imgsHeight;
+        const spaceNeeded = getSpaceNeeded(card);
         if (spaceNeeded > maxHeight) maxHeight = spaceNeeded;
-        const cardBottomY = card.getBoundingClientRect().bottom;
-        if (cardBottomY > lowestCardBottomY) lowestCardBottomY = cardBottomY;
       });
-      stackRef.current.style.height = isExpanded ? `auto` : `${maxHeight}px`;
-      const stackBottomY = stackRef.current.getBoundingClientRect().bottom;
-      console.log("\n|> lets actually compare and fix...");
-      console.log("|> lowestCardBottomY: ", lowestCardBottomY);
-      console.log("|> stackBottomY:      ", stackBottomY);
-      // if the difference between the lowest card and the stack bottom is more than 20px, fix it
-      const gapSpace = stackBottomY - lowestCardBottomY;
-      const fixNeeded = gapSpace > 20;
-
-      if (fixNeeded) {
-        stackRef.current.style.height = maxHeight - gapSpace + "px";
-      }
+      stackRef.current.style.height = isExpanded ? `auto` : `${maxHeight + 4}px`;
     }
   }, [caseIds, isExpanded]);
 
@@ -65,14 +61,14 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
   }, [inAttributeId, stackValue, content, draggingActive]);
 
   const advanceStack = () => {
-    const fromFirst = caseIds.shift() as string;
-    caseIds.push(fromFirst);
+    const fromFirst = caseIds.shift();
+    fromFirst && caseIds.push(fromFirst);
     setCaseIds([...caseIds]);
   };
 
   const rewindStack = () => {
-    const fromLast = caseIds.pop() as string;
-    caseIds.unshift(fromLast);
+    const fromLast = caseIds.pop();
+    fromLast && caseIds.unshift(fromLast);
     setCaseIds([...caseIds]);
   };
 
@@ -80,8 +76,6 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
     id: `droppable-sort-stack-${inAttributeId}-${stackValue}}`,
     data: { stackValue, inAttributeId }
   });
-
-  const stackControlsDisabled = caseIds.length < 2;
 
   const dropZoneClasses = classNames(
    "stack-drop-zone",
@@ -101,10 +95,11 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
     {"expanded": isExpanded, "collapsed": !isExpanded}
   );
 
+  const stackControlsDisabled = caseIds.length < 2;
+
   const stackControlClasses = classNames("stack-controls",
     {"controls-disabled": stackControlsDisabled }
   );
-
   const previousToolTipOptions = useTooltipOptions({
     title: "previous card",
     disabled: stackControlsDisabled
