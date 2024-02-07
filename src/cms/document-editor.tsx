@@ -3,9 +3,9 @@ import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { Map } from "immutable";
 
 import { defaultDocumentModelParts } from "../components/doc-editor-app-defaults";
-import { appConfig, AppProvider, initializeApp } from "../initialize-app";
+import { AppProvider, initializeApp } from "../initialize-app";
 import { IStores } from "../models/stores/stores";
-import { createDocumentModel, DocumentModelType } from "../models/document/document";
+import { createDocumentModelWithEnv, DocumentModelType } from "../models/document/document";
 import { DEBUG_CMS } from "../lib/debug";
 import { EditableDocumentContent } from "../components/document/editable-document-content";
 
@@ -33,10 +33,11 @@ export class DocumentEditor extends React.Component<IProps, IState>  {
 
     initializeAppPromise.then((stores) => {
       const { initialValue } = this.props;
+      const { appConfig } = stores;
       // Wait to construct the document until the main CLUE stuff is
       // initialized. I'm not sure if this is necessary but it seems
       // like the safest way to do things
-      const document = createDocumentModel({
+      const document = createDocumentModelWithEnv(appConfig, {
         ...defaultDocumentModelParts,
         content: initialValue
       });
@@ -102,7 +103,7 @@ export class DocumentEditor extends React.Component<IProps, IState>  {
             isPrimary={true}
             readOnly={false}
             document={document}
-            toolbar={appConfig.authorToolbar}
+            toolbar={stores.appConfig.authorToolbar}
           />
         </AppProvider>
       );

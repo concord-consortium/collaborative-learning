@@ -25,8 +25,6 @@ import "./index.scss";
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;
 
-export const appConfig = AppConfigModel.create(appConfigSnapshot);
-
 /**
  * This function is used by the 3 different entry points supported
  * by CLUE:
@@ -51,6 +49,7 @@ export const initializeApp = async (appMode: AppMode, authoring?: boolean): Prom
   const demoName = urlParams.demoName;
 
   const isPreviewing = !!(urlParams.domain && urlParams.domain_uid && !getBearerToken(urlParams));
+  const appConfig = AppConfigModel.create(appConfigSnapshot);
   const stores = createStores({ appMode, appVersion, appConfig, user, showDemoCreator, demoName, isPreviewing });
 
   if (DEBUG_STORES) {
