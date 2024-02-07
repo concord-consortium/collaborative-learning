@@ -36,6 +36,22 @@ const getChildCards = (stackRef: React.RefObject<HTMLDivElement>) => {
   return Array.from(stackRef.current?.children as HTMLCollectionOf<HTMLElement>);
 };
 
+// const applyTemporaryAnimation = (cards: HTMLElement[], keyFramesName: string) => {
+//   cards.forEach(card => {
+//     card.classList.add(keyFramesName);
+//     setTimeout(() => card.classList.remove(keyFramesName), 100);
+//   });
+// };
+
+const getMaxHeight = (cards: HTMLElement[]) => {
+  let maxHeight = 0;
+  cards.forEach(card => {
+    const spaceNeeded = getSpaceNeeded(card);
+    if (spaceNeeded > maxHeight) maxHeight = spaceNeeded;
+  });
+  return maxHeight;
+};
+
 export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, draggingActive }) => {
   const content = model.content as DataCardContentModelType;
   const stackValueDisplayString = getStackValueDisplayString(stackValue);
@@ -46,12 +62,9 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
 
   useEffect(() => {
     if (stackRef.current) {
-      let maxHeight = 0;
       const childCards = getChildCards(stackRef);
-      childCards.forEach(card => {
-        const spaceNeeded = getSpaceNeeded(card);
-        if (spaceNeeded > maxHeight) maxHeight = spaceNeeded;
-      });
+      const maxHeight = getMaxHeight(childCards);
+      //applyTemporaryAnimation(childCards, isExpanded ? "slide-down" : "slide-up");
       stackRef.current.style.height = isExpanded ? `auto` : `${maxHeight + 4}px`;
     }
   }, [caseIds, isExpanded]);

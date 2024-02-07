@@ -161,9 +161,11 @@ context('Data Card Tool Tile', () => {
 
     cy.log("can expand and collapse the stack in sort view");
     dc.getSortSelect().select("habitat");
-    //cy.pause();
+    cy.pause();
+    // cypress should find the expand handle/control on the data-card-tile
 
-    cy.log("can progress through cards using previous and next buttons in sort view");
-    //cy.pause();
+
+    // cy.log("can progress through cards using previous and next buttons in sort view");
+    // cy.pause();
   });
 });
