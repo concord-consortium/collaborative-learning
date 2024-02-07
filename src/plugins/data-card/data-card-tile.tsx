@@ -16,9 +16,9 @@ import { DataCardSortArea } from "./components/sort-area";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { mergeTwoDataSets } from "../../models/data/data-set-utils";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
-import { useDataCardTileHeight } from "./use-data-card-tile-height";
 import { DataCardToolbarContext } from "./data-card-toolbar-context";
 import { CasesCountDisplay } from "./components/cases-count-display";
+import { useDataCardTileHeight } from "./use-data-card-tile-height";
 
 import "./data-card-tile.scss";
 
@@ -70,7 +70,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     documentId,
     readOnly: readOnly ?? false,
     onRequestRowHeight,
-    attrCount: content.attributes.length
+    attrCount: content.attributes.length,
+    isSingleView: displaySingle
   });
 
   /* ==[ Drag and Drop ] == */

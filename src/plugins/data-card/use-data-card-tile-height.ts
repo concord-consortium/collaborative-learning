@@ -10,6 +10,7 @@ interface UseDataCardTileHeightProps {
   readOnly: boolean;
   onRequestRowHeight: (id: string, height: number) => void;
   attrCount: number;
+  isSingleView: boolean;
 }
 
 export const useDataCardTileHeight = ({
@@ -21,12 +22,14 @@ export const useDataCardTileHeight = ({
   readOnly,
   onRequestRowHeight,
   attrCount,
+  isSingleView
 }: UseDataCardTileHeightProps) => {
 
   const attrCtRef = useRef(attrCount);
 
   useEffect(() => {
     if (!tileElt) return;
+
     const uiHeight = tileElt.querySelector(".data-card-container")?.scrollHeight || 0;
     const spaceLeft = height ? height - uiHeight : 0;
     const adjustForEdits = !readOnly && (attrCtRef.current < attrCount || spaceLeft < kButtonSpace);
@@ -34,12 +37,14 @@ export const useDataCardTileHeight = ({
     const loadingInContent = !documentId && readOnly;
 
     if (loadingInContent) {
+      console.log("| loadingInContent...");
       onRequestRowHeight(modelId, Math.max(uiHeight, kExampleDeckHeight));
     }
 
-    else if (adjustForEdits) {
+    else if (isSingleView && adjustForEdits) {
+      console.log("| adjustForEdits...");
       onRequestRowHeight(modelId, uiHeight + kButtonSpace);
     }
 
-  }, [attrCount, currEditAttrId, height, modelId, onRequestRowHeight, readOnly, tileElt, documentId]);
+  }, [attrCount, currEditAttrId, height, modelId, onRequestRowHeight, readOnly, tileElt, documentId, isSingleView]);
 };
