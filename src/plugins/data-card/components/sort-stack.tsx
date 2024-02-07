@@ -77,6 +77,10 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
     setCaseIds([...caseIds]);
   };
 
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   const { isOver, setNodeRef } = useDroppable({
     id: `droppable-sort-stack-${inAttributeId}-${stackValue}}`,
     data: { stackValue, inAttributeId }
@@ -87,10 +91,6 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
    {"show-droppable": draggingActive },
    { "is-over" : isOver}
   );
-
-  const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
-  };
 
   const cellStackClasses = classNames("cell stack",
     {"expanded": isExpanded, "collapsed": !isExpanded}
@@ -105,14 +105,17 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
   const stackControlClasses = classNames("stack-controls",
     {"controls-disabled": stackControlsDisabled }
   );
+
   const previousToolTipOptions = useTooltipOptions({
     title: "previous card",
     disabled: stackControlsDisabled
   });
+
   const nextToolTipOptions = useTooltipOptions({
     title: "next card",
     disabled: stackControlsDisabled
   });
+
   const toggleToolTipOptions = useTooltipOptions({
     title: isExpanded ? "collapse" : "expand",
     disabled: stackControlsDisabled
