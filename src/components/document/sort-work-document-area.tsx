@@ -57,9 +57,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   };
 
   const handleCloseButtonClick = () => {
-    if (persistentUI.openSubTab) {
-      persistentUI.closeSubTabDocument(persistentUI.activeNavTab, persistentUI.openSubTab);
-    }
+    persistentUI.closeSubTabDocument();
   };
 
   const sideClasses = { secondary: false, primary: false && !false };

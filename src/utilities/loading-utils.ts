@@ -78,9 +78,10 @@ export function logLoadingAndDocumentMeasurements(documents: DocumentsModelType,
     return total + (doc.content?.tileMap.size || 0);
   }, 0);
 
-  const primaryDocTilesByType = primaryDocument?.content?.getAllTilesByType() as any;
-  const primaryDocNumTilesByType = primaryDocTilesByType ?? countTileKeys(primaryDocTilesByType);
-  //getAllTilesByType returns a map with the tileKeys as values, we want to convert this to the length
+  const primaryDocTilesByType = primaryDocument?.content?.getAllTilesByType();
+  // getAllTilesByType returns a map with the tileKeys as values, we want to convert this to the length
+  const primaryDocNumTilesByType = primaryDocTilesByType && countTileKeys(primaryDocTilesByType);
+
   function countTileKeys(tilesByType: Record<string, string[]>): Record<string, number> {
     const tileCounts: Record<string, number>= {};
     for (const tileType of Object.keys(tilesByType)) {

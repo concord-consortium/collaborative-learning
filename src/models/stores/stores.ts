@@ -38,6 +38,7 @@ export interface IStores extends IBaseStores {
   initializeStudentWorkTab: () => void;
   setUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
   sortedDocuments: SortedDocuments;
+  unitLoadedPromise: Promise<void>;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -77,6 +78,7 @@ class Stores implements IStores{
   serialDevice: SerialDevice;
   userContextProvider: UserContextProvider;
   sortedDocuments: SortedDocuments;
+  unitLoadedPromise: Promise<void>;
 
   constructor(params?: ICreateStores){
     // This will mark all properties as observable
@@ -191,7 +193,7 @@ class Stores implements IStores{
   // in MobX are slightly different than flows in MST, so there might
   // be some weird interactions with action tracking if we mix them.
   async setUnitAndProblem(unitId: string | undefined, problemOrdinal?: string) {
-    const { appConfig } = this;
+    const { appConfig, persistentUI } = this;
     showLoadingMessage("Loading curriculum content");
     let unitJson = await getUnitJson(unitId, appConfig);
     if (unitJson.status === 404) {
@@ -239,12 +241,14 @@ class Stores implements IStores{
         this.investigation = investigation;
         this.problem = problem;
       }
-      this.persistentUI.setProblemPath(this.problemPath);
+      persistentUI.setProblemPath(this.problemPath);
 
-      // Set the active tab to be the first tab
+      // Set the active tab to be the first tab (unless active tab is already set by persistent UI)
       const tabs = this.tabsToDisplay;
       if (tabs.length > 0) {
-        this.persistentUI.setActiveNavTab(tabs[0].tab);
+        if (!persistentUI.activeNavTab) {
+          persistentUI.setActiveNavTab(tabs[0].tab);
+        }
       }
       removeLoadingMessage("Setting up curriculum content");
     });
