@@ -86,7 +86,7 @@ export const initializeAuthorization = () => {
 
   if (accessToken && state) {
     const savedParamString = sessionStorage.getItem(state);
-    window.history.pushState(null, "CLUE", savedParamString);
+    window.history.replaceState(null, "CLUE", savedParamString);
     reprocessUrlParams();
   }
   else {
@@ -111,4 +111,27 @@ export const authorizeInPortal = (portalUrl: string, oauthClientName: string, st
   });
   // Redirect
   window.location.assign(portalAuth.token.getUri());
+};
+
+/**
+ * Convert a token-style launch URL to an OAuth2-friendly URL.
+ * The portal currently launches CLUE using a short-lived token. By converting it
+ * in this way we can allow reloadin the browser to work even after some time has passed.
+ * @param urlString
+ * @param basePortalUrl
+ * @param offeringId
+ * @returns a URL instance if the url is converted, or undefined if it isn't converted
+ */
+export const convertURLToOAuth2 = (urlString: string, basePortalUrl: string, offeringId: string) => {
+  const url = new URL(urlString);
+  const searchParams = url.searchParams;
+  if (searchParams.get("token") && !searchParams.get("authDomain") && !searchParams.get("resourceLinkId")){
+    searchParams.delete("token");
+    searchParams.set("authDomain", basePortalUrl.replace(/\/$/,""));
+    searchParams.set("resourceLinkId", offeringId);
+    url.search = searchParams.toString();
+    return url;
+  } else {
+    return undefined;
+  }
 };
