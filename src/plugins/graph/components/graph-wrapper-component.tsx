@@ -16,6 +16,7 @@ import { useSettingFromStores } from "../../../hooks/use-stores";
 import { IGraphModel } from "../models/graph-model";
 import { decipherDotId } from "../utilities/graph-utils";
 import { GraphComponent } from "./graph-component";
+import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
 
 import "./graph-toolbar-registration";
 
@@ -29,28 +30,31 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   const graphSettings: IGraphSettings = { ...kDefaultGraphSettings, ...graphSettingsFromStores };
   const content = model.content as IGraphModel;
 
-  const data = content.config.dataset; // TODO: this only considers layer 0
   const layout = useInitGraphLayout(content);
-  const xAttrID = content.getAttributeID("x");
-  const yAttrID = content.getAttributeID("y");
   const xAttrType = content.config.attributeType("x");
   const yAttrType = content.config.attributeType("y");
 
+  const xAxis = content.getAxis("bottom");
+  const xDomain = isNumericAxisModel(xAxis) && xAxis.domain;
+  const yAxis = content.getAxis("left");
+  const yDomain = isNumericAxisModel(yAxis) && yAxis.domain;
+
   // This is used for locating Sparrow endpoints.
-  // TODO multi-dataset update, needs to check if attribute ID is currently showing in any layer
   const getDotCenter = useCallback((dotId: string) => {
     // FIXME Currently, getScreenX and getScreenY only handle numeric axes, so just bail if they are a different type.
     if (xAttrType !== "numeric" || yAttrType !== "numeric") return;
     const idParts = decipherDotId(dotId);
     if (!idParts) return;
     const { caseId, xAttributeId, yAttributeId } = idParts;
-    if (xAttributeId !== xAttrID || yAttributeId !== yAttrID) return;
-    const dataConfig = content.config;
-    const x = getScreenX({ caseId, dataset: data, layout, dataConfig });
-    const y = getScreenY({ caseId, dataset: data, layout, dataConfig });
-    if (!isFinite(x) || !isFinite(y)) return;
-    return { x, y };
-  }, [data, content.config, layout, xAttrID, yAttrID, xAttrType, yAttrType]);
+    if (caseId && xAttributeId && yAttributeId) {
+      const layer = content.layerForAttributeId(xAttributeId);
+      if (!layer) return;
+      const x = getScreenX({ caseId, dataset: layer.config.dataset, layout, dataConfig: layer.config });
+      const y = getScreenY({ caseId, dataset: layer.config.dataset, layout, dataConfig: layer.config });
+      if (!isFinite(x) || !isFinite(y)) return;
+      return { x, y };
+    }
+  }, [xAttrType, yAttrType, content, layout]);
 
   useEffect(() => {
     onRegisterTileApi?.({
@@ -109,7 +113,8 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
         }
       }
     });
-  }, [getDotCenter, content, layout, onRegisterTileApi]);
+    // xDomain and yDomain are included to force updating the sparrow locations when they change
+  }, [getDotCenter, content, layout, onRegisterTileApi, xDomain, yDomain]);
 
   useEffect(function cleanup() {
     return () => {
