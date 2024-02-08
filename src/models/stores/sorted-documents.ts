@@ -207,36 +207,26 @@ export class SortedDocuments {
 
   async updateTagDocumentMap () {
     console.log("➡️ updateTagDocumentMap");
-
     const db = this.db.firestore;
     const filteredDocs = this.filteredDocsByType;
-
     console.log("\t🥩 filteredDocs:", filteredDocs);
     filteredDocs.forEach(async doc => {
-
       console.log("\t🥩 doc:", doc);
       const docsSnapshot = await db.collection("documents").where("key", "==", doc.key).get();
       console.log("\t docSnapshot:", docsSnapshot);
       //TODO: console.logs do not reach here, but they do reach console.log(doc) above
       // Uncaught (in promise) FirebaseError: Missing or insufficient permissions.
       //Issue is at line 218
-      //Look at this
-      //https://chat.openai.com/c/de7a180f-7f0f-4129-a730-c3bd2c5b9e2a
-
       docsSnapshot.docs.forEach(async docSnapshot => {
-
         console.log("\t docSnapshot:", docSnapshot);
         const commentsSnapshot = await docSnapshot.ref.collection("comments").get();
         runInAction(() => {
           commentsSnapshot.docs.forEach(commentDoc => {
-
             console.log("\t🥩 commentDoc:", commentDoc);
             const commentData = commentDoc.data();
             console.log("\t🥩 commentData:", commentData);
-
             if (commentData?.tags) {
               console.log("➡️ commentData?.tags:", commentData?.tags);
-
               commentData.tags.forEach((tag: string) => {
                 console.log("\ttag:", tag);
                 let docKeysSet = this.tempTagDocumentMap.get(tag);
@@ -314,11 +304,6 @@ export class SortedDocuments {
       sectionLabel: tileType,
       documents: tileTypeToDocumentsMap[tileType]
     }));
-
-
-    console.log("📁 sorted-documents.ts ------------------------");
-    console.log("sortByTools returning sortedDocuments:", sortedDocuments);
-
     return sortedDocuments;
   }
 
@@ -338,7 +323,7 @@ export class SortedDocuments {
         return !!options?.isTeacherDocument === wantsProperty;
       }
       if (property) {
-          return !!doc.getProperty(property) === wantsProperty;
+        return !!doc.getProperty(property) === wantsProperty;
       }
       // ignore empty strings, etc.
       return true;
