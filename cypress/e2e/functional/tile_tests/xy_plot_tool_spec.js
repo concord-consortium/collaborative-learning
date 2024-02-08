@@ -12,11 +12,10 @@ let diagramTile = new DiagramToolTile;
 const primaryWorkspace = new PrimaryWorkspace;
 const resourcePanel = new ResourcePanel;
 
-const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=brain";
-const queryParamsMultiDataset = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-config-subtabs";
+const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=./demo/units/example-config-subtabs/content.json";
 const queryParamsPlotVariables = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-no-group-share";
 
-const problemDoc = 'Lesson 1.1 - What is a bionic arm?';
+const problemDoc = '1.1 Unit Toolbar Configuration';
 
 // Construct and fill in a table tile with the given data (a list of lists)
 function buildTable(data) {
@@ -274,7 +273,7 @@ context('XYPlot Tool Tile', function () {
 
       cy.log("Link Table");
       xyTile.getTile().click();
-      clueCanvas.clickToolbarButton('graph', 'link-tile');
+      clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
       xyTile.linkTable("Table 1");
       xyTile.getAddSeriesButton().should('be.visible');
       xyTile.getAddSeriesButton().click();
@@ -299,7 +298,7 @@ context('XYPlot Tool Tile', function () {
     });
 
     it("Test linking two datasets", () => {
-      beforeTest(queryParamsMultiDataset);
+      beforeTest(queryParams);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();
       clueCanvas.addTile("graph");
