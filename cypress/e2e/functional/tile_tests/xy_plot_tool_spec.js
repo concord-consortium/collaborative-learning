@@ -83,7 +83,7 @@ context('XYPlot Tool Tile', function () {
       // xyTile.getEditableAxisBox("left", "max").should("not.exist");
 
       cy.log("Link Table");
-      clueCanvas.clickToolbarButton('graph', 'link-tile');
+      clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
       xyTile.linkTable("Table 1");
 
       cy.log("shows edit boxes on axes");
