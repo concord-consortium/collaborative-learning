@@ -13,7 +13,7 @@ const messageSeparator = '<br/>';
 //loadingMeasurements is a global object (declared in index.html)
 //keys are action start and end labels, values are milliseconds
 declare global {
-  interface Window { loadingMeasurements: Record<string, number> }
+  interface Window { loadingMeasurements: Record<string, number> | undefined }
 }
 const loadingMeasurements = window.loadingMeasurements;
 
@@ -30,6 +30,9 @@ export function getCurrentLoadingMessage() {
 }
 
 export function showLoadingMessage(msg: string) {
+  // If loadingMeasurements is not defined then we are probably running
+  // in the authoring system or standalone document editor
+  if (!loadingMeasurements) return;
   const timeStamp = getTimestamp();
   if(timeStamp === null) {
     console.error(`Timestamp for message "${msg}" is null.`);
@@ -46,6 +49,9 @@ export function showLoadingMessage(msg: string) {
 }
 
 export function removeLoadingMessage(msg: string) {
+  // If loadingMeasurements is not defined then we are probably running
+  // in the authoring system or standalone document editor
+  if (!loadingMeasurements) return;
   const timeStamp = getTimestamp();
   if (timeStamp === null) {
     console.error(`Timestamp for message "${msg}" is null.`);
