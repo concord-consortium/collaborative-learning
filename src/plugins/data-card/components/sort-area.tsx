@@ -38,7 +38,7 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
         const draggingId = e.active?.data?.current?.caseId;
         const attrId = e.active?.data?.current?.sortedByAttrId;
         const draggedToValue = e.over?.data?.current?.stackValue;
-        draggedToValue && content.setAttValue(draggingId, attrId, draggedToValue);
+        content.setAttValue(draggingId, attrId, draggedToValue || "");
         setSortDragActive(false);
       }
       document.body.style.cursor = "default";
@@ -47,7 +47,7 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
 
   return (
     <>
-      <div className="help-text"><em>Drag a card above another stack to update</em></div>
+      <div className="help-text">Drag a card above another stack to update</div>
       <div className="sort-area-grid">
         {uniqueOrderedValues.length > 0 && sortById &&
           uniqueOrderedValues.map((value, i) => {

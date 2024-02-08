@@ -37,12 +37,10 @@ export const useDataCardTileHeight = ({
     const loadingInContent = !documentId && readOnly;
 
     if (loadingInContent) {
-      console.log("| loadingInContent...");
       onRequestRowHeight(modelId, Math.max(uiHeight, kExampleDeckHeight));
     }
 
     else if (isSingleView && adjustForEdits) {
-      console.log("| adjustForEdits...");
       onRequestRowHeight(modelId, uiHeight + kButtonSpace);
     }
 

@@ -13,7 +13,8 @@ function getTiltAngle(index: number, stackIsExpanded: boolean) {
 
 function getOpacity(index: number) {
   const gradualFade = 1 - (index - 2) * 0.25;
-  return index > 2 ? gradualFade : 1;
+  const opacity =  index > 2 ? gradualFade : 1;
+  return opacity > .09 ? opacity : 0;
 }
 
 export const useSortableCardStyles = (props: IProps) => {
@@ -31,7 +32,7 @@ export const useSortableCardStyles = (props: IProps) => {
 
   if (transform) {
     dynamicStyles = {
-      transform: `translate3d(${transform.x}px, ${transform.y - 25}px, 0)`,
+      transform: `translate(${transform.x}px, ${transform.y - 25}px)`,
       zIndex: 1000,
       opacity: stackIsExpanded ? 1 : 0.8,
     };

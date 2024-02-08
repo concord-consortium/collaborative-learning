@@ -29,7 +29,8 @@ const getStackValueDisplayString = (value: string) => {
 const getSpaceNeeded = (card: HTMLElement) => {
   const allImgs = Array.from(card.querySelectorAll('img'));
   const notLoaded = allImgs.filter(img => img.height === 0).length;
-  return card.offsetHeight + notLoaded * kSortImgHeight;
+  const bufferHeight = 12;
+  return card.offsetHeight + notLoaded * kSortImgHeight + bufferHeight;
 };
 
 const getChildCards = (stackRef: React.RefObject<HTMLDivElement>) => {
@@ -48,7 +49,7 @@ const getMaxHeight = (cards: HTMLElement[]) => {
 export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, draggingActive }) => {
   const content = model.content as DataCardContentModelType;
   const stackValueDisplayString = getStackValueDisplayString(stackValue);
-  const stackClasses = classNames("stack-cards", inAttributeId);
+  const stackCardsClasses = classNames("stack-cards", inAttributeId);
   const [isExpanded, setIsExpanded] = useState(false);
   const [caseIds, setCaseIds] = useState<string[]>([]);
   const stackRef = useRef<HTMLDivElement>(null);
@@ -92,7 +93,7 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
    { "is-over" : isOver}
   );
 
-  const cellStackClasses = classNames("cell stack",
+  const stackWrapperClasses = classNames("stack",
     {"expanded": isExpanded, "collapsed": !isExpanded}
   );
 
@@ -122,7 +123,7 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
   });
 
   return (
-    <div className={cellStackClasses}>
+    <div className={stackWrapperClasses}>
       <div className="stack-heading">
         {stackValueDisplayString}
       </div>
@@ -141,7 +142,7 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
         </div>
       </div>
       <div className={dropZoneClasses} ref={setNodeRef}></div>
-      <div className={stackClasses} ref={stackRef}>
+      <div className={stackCardsClasses} ref={stackRef}>
         {
           caseIds.map((cid, i) => {
             return <SortCard
