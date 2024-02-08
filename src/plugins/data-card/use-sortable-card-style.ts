@@ -32,7 +32,7 @@ export const useSortableCardStyles = (props: IProps) => {
 
   if (transform) {
     dynamicStyles = {
-      transform: `translate(${transform.x}px, ${transform.y}px)`,
+      transform: `translate(${transform.x}px, ${transform.y - 5}px)`,
       zIndex: 1000,
       opacity: stackIsExpanded ? 1 : 0.8,
     };
