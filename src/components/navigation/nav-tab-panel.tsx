@@ -115,8 +115,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private renderDocuments = (tabSpec: NavTabModelType) => {
-    console.log("➡️ renderDocuments");
-
     const { persistentUI: { showChatPanel } } = this.stores;
     return (
       <SectionDocumentOrBrowser
