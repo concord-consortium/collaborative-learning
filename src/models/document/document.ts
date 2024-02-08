@@ -9,7 +9,7 @@ import { DocumentTypeEnum, IDocumentContext, ISetProperties,
 } from "./document-types";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { TileCommentsModel, TileCommentsModelType } from "../tiles/tile-comments";
-import { getSharedModelManager } from "../tiles/tile-environment";
+import { getSharedModelManager, getTileEnvironment } from "../tiles/tile-environment";
 import {
   IDocumentMetadata, IGetNetworkDocumentParams, IGetNetworkDocumentResponse, IUserContext
 } from "../../../functions/src/shared";
@@ -358,4 +358,12 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
     documentWithoutContent.setContentError(content, (e as Error)?.message);
     return documentWithoutContent;
   }
+};
+
+export const createDocumentModelWithEnv = (appConfig: AppConfigModelType, docSnapshot: DocumentModelSnapshotType) => {
+  const newDocument = createDocumentModel(docSnapshot);
+  const tileEnv = getTileEnvironment(newDocument);
+  if (!tileEnv) throw new Error("missing tile environment");
+  tileEnv.appConfig = appConfig;
+  return newDocument;
 };
