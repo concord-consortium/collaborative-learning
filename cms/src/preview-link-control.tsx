@@ -1,11 +1,12 @@
 import React from "react";
 import { CmsWidgetControlProps } from "netlify-cms-core";
 
-import { appConfig } from "../../src/initialize-app";
 import { getGuideJson, getUnitJson } from "../../src/models/curriculum/unit";
 import { DocumentModelType } from "../../src/models/document/document";
 import { stripPTNumberFromBranch } from "../../src/utilities/branch-utils";
 import { urlParams } from "../../src/utilities/url-params";
+import { AppConfigModel } from "../../src/models/stores/app-config-model";
+import { appConfigSnapshot } from "../../src/app-config";
 import { defaultCurriculumBranch } from "./cms-constants";
 
 import "./custom-control.scss";
@@ -47,6 +48,8 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
       warning = `Could not determine unit. Using default ${defaultUnit}.`;
     }
     this.unit = urlParams.unit ?? this.pathParts?.[1] ?? defaultUnit;
+
+    const appConfig = AppConfigModel.create(appConfigSnapshot);
 
     // Finish setting up the preview link after reading the unit json
     this.isTeacherGuide = this.pathParts?.[2] === "teacher-guide";
