@@ -132,11 +132,7 @@ export class SortedDocuments {
   //*************************************** Sort By Strategy **************************************
 
   get sortByStrategy(): SortedDocument[]{
-    console.log("---------------------------");
-    console.log("➡️ sortByStrategy");
     const commentTags = this.commentTags;
-
-    console.log("\t🥩 commentTags:", commentTags);
     const tagsWithDocs: Record<string, TagWithDocs> = {};
     if (commentTags) {
       for (const key of Object.keys(commentTags)) {
@@ -152,22 +148,13 @@ export class SortedDocuments {
         docKeysFoundWithTag: []
       };
     }
-    console.log("\t🥩 tagsWithDocs:", tagsWithDocs);
-
 
     // Find all unique document keys in tagsWithDocs. Compare this with all sortable documents
     // in store to find "Documents with no comments" then place those doc keys to "Not Tagged"
     const uniqueDocKeysWithComments = new Set<string>();
 
     this.tempTagDocumentMap.forEach((docKeysSet, tag) => {
-      console.log("-------tempTagDocMap forEach----------");
-      console.log("\tdocKeysSet:", docKeysSet, " tag:", tag);
-
       docKeysSet.forEach((docKey: string) =>{
-
-        console.log("-----docKeysSet forEach-------");
-        console.log("\tdocKey:", docKey);
-
         uniqueDocKeysWithComments.add(docKey);
       });
       const docKeysArray = Array.from(docKeysSet); // Convert the Set to an array
@@ -175,7 +162,6 @@ export class SortedDocuments {
         tagsWithDocs[tag].docKeysFoundWithTag = docKeysArray;
       }
     });
-    console.log("\t🥩 this.tempTagDocumentMap:", this.tempTagDocumentMap);
 
     const allSortableDocKeys = this.filteredDocsByType;
     allSortableDocKeys.forEach(doc => {
@@ -186,7 +172,6 @@ export class SortedDocuments {
         }
       }
     });
-    console.log("\t🥩 tagsWithDocs:", tagsWithDocs);
 
     const sortedDocsArr: SortedDocument[] = [];
     Object.entries(tagsWithDocs).forEach((tagKeyAndValObj) => {
@@ -199,36 +184,22 @@ export class SortedDocuments {
         documents
       });
     });
-
-    console.log("\t returning sortedDocsArr:", sortedDocsArr);
-
     return sortedDocsArr;
   }
 
   async updateTagDocumentMap () {
-    console.log("➡️ updateTagDocumentMap");
     const db = this.db.firestore;
     const filteredDocs = this.filteredDocsByType;
-    console.log("\t🥩 filteredDocs:", filteredDocs);
     filteredDocs.forEach(async doc => {
-      console.log("\t🥩 doc:", doc);
-      const docsSnapshot = await db.collection("documents").where("key", "==", doc.key).get();
-      console.log("\t docSnapshot:", docsSnapshot);
-      //TODO: console.logs do not reach here, but they do reach console.log(doc) above
-      // Uncaught (in promise) FirebaseError: Missing or insufficient permissions.
-      //Issue is at line 218
+      const docsSnapshot = await db.collection("documents").where("key", "==", doc.key)
+                           .where("context_id", "==", this.user.classHash).get();
       docsSnapshot.docs.forEach(async docSnapshot => {
-        console.log("\t docSnapshot:", docSnapshot);
         const commentsSnapshot = await docSnapshot.ref.collection("comments").get();
         runInAction(() => {
           commentsSnapshot.docs.forEach(commentDoc => {
-            console.log("\t🥩 commentDoc:", commentDoc);
             const commentData = commentDoc.data();
-            console.log("\t🥩 commentData:", commentData);
             if (commentData?.tags) {
-              console.log("➡️ commentData?.tags:", commentData?.tags);
               commentData.tags.forEach((tag: string) => {
-                console.log("\ttag:", tag);
                 let docKeysSet = this.tempTagDocumentMap.get(tag);
                 if (!docKeysSet) {
                   docKeysSet = new ObservableSet<string>();
@@ -275,7 +246,6 @@ export class SortedDocuments {
 
     this.filteredDocsByType.forEach((doc) => {
       const tilesByTypeMap = doc.content?.getAllTilesByType();// Type is Record<string, string[]>
-
       if (tilesByTypeMap) {
         const tileTypes = Object.keys(tilesByTypeMap);
         const nonPlaceholderTiles = tileTypes.filter(type => type !== "Placeholder");
