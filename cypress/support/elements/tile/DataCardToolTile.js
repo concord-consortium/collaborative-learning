@@ -140,11 +140,11 @@ class DataCardToolTile {
     return this.getToolbarButton('.dataset-view-button', tileIndex, workspaceClass);
   }
   getDragHandle(cardIndex, workspaceClass, tileIndex = 0) {
-    const selector = ".sort-area-grid .cell.stack .drag-handle";
+    const selector = ".sort-area-grid .stack .drag-handle";
     return this.getTile(tileIndex, workspaceClass).find(`${selector}`).eq(cardIndex);
   }
   getDropZone(cardIndex, workspaceClass, tileIndex = 0) {
-    const selector = ".sort-area-grid .cell.stack .stack-drop-zone.show-droppable";
+    const selector = ".sort-area-grid .stack .stack-drop-zone.show-droppable";
     return this.getTile(tileIndex, workspaceClass).find(`${selector}`).eq(cardIndex);
   }
   getSortStack(tileIndex = 0, stackIndex = 0) {
