@@ -7,7 +7,7 @@ import { AnnotationLayer } from "./annotation-layer";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
 import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
-import { createDocumentModel, ContentStatus, DocumentModelType } from "../../models/document/document";
+import { ContentStatus, DocumentModelType, createDocumentModelWithEnv } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
 import { logHistoryEvent } from "../../models/history/log-history-event";
@@ -297,7 +297,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
 
   private createHistoryDocumentCopy = () => {
     if (this.props.document) {
-      const docCopy = createDocumentModel(getSnapshot(this.props.document));
+      const docCopy = createDocumentModelWithEnv(this.stores.appConfig, getSnapshot(this.props.document));
       // Make a variable available with the current history document
       if (DEBUG_DOCUMENT) {
         (window as any).currentHistoryDocument = docCopy;
