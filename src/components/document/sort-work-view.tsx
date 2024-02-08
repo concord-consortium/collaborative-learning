@@ -14,17 +14,8 @@ import { DocListDebug } from "./doc-list-debug";
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
-//***************************************** GUIDELINES ************************************************
-// ✔️•↳
-
-// --
-// **Specs**
-// web: https://zpl.io/Dl5M5nw
-// app: zpl://screen?pid=5d62a554d64a9e02dcad80de&sid=657b2102c9efd91f75bc3f3a
-
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, persistentUI, sortedDocuments } = useStores();
-  console.log("one log change for PR");
 
   //*************************** Determine Sort Options & State  ***********************************
   const {tagPrompt} = appConfig;
