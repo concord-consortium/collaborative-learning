@@ -49,8 +49,9 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     if (caseId && xAttributeId && yAttributeId) {
       const layer = content.layerForAttributeId(xAttributeId);
       if (!layer) return;
+      const plotNum = layer.config.plotNumberForAttributeID(yAttributeId);
       const x = getScreenX({ caseId, dataset: layer.config.dataset, layout, dataConfig: layer.config });
-      const y = getScreenY({ caseId, dataset: layer.config.dataset, layout, dataConfig: layer.config });
+      const y = getScreenY({ caseId, dataset: layer.config.dataset, layout, dataConfig: layer.config, plotNum });
       if (!isFinite(x) || !isFinite(y)) return;
       return { x, y };
     }

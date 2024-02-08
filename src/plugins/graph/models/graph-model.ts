@@ -285,16 +285,17 @@ export const GraphModel = TileContentModel
       const objects: IClueObject[] = [];
       for (const layer of self.layers) {
         if (layer.config.dataset) {
-        const xAttributeID = layer.config.attributeID("x");
-        const yAttributeID = layer.config.attributeID("y");
-        for (const c of layer.config.dataset.cases) {
-            if (xAttributeID && yAttributeID) {
-              const objectId = getDotId(c.__id__, xAttributeID, yAttributeID);
-              objects.push({
-                tileId,
-                objectId,
-                objectType: "dot"
-              });
+          const xAttributeID = layer.config.attributeID("x");
+          for (const yAttributeID of layer.config.yAttributeIDs) {
+            for (const c of layer.config.dataset.cases) {
+              if (xAttributeID && yAttributeID) {
+                const objectId = getDotId(c.__id__, xAttributeID, yAttributeID);
+                objects.push({
+                  tileId,
+                  objectId,
+                  objectType: "dot"
+                });
+              }
             }
           }
         }

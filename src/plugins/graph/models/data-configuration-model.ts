@@ -91,6 +91,16 @@ export const DataConfigurationModel = types
       return this.yAttributeDescriptions.map((d: IAttributeDescriptionSnapshot) => d.attributeID);
     },
     /**
+     * Returns the sequential number of the given Y attribute ID.
+     * This includes the rightNumeric attribute if any.
+     * If the attribute ID is not found, returns undefined.
+     * @param id ID that should be one of the Y attributes.
+     */
+    plotNumberForAttributeID(id: string) {
+      const index = this.yAttributeIDs.indexOf(id);
+      return index >= 0 ? index : undefined;
+    },
+    /**
      * No attribute descriptions beyond the first for y are returned.
      * The rightNumeric attribute description is also not returned.
      */
