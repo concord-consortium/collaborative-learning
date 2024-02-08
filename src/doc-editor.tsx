@@ -4,7 +4,7 @@ import { DocEditorApp } from "./components/doc-editor-app";
 import { DialogComponent } from "./components/utilities/dialog";
 import { urlParams } from "./utilities/url-params";
 
-import { appConfig, AppProvider, initializeApp } from "./initialize-app";
+import { AppProvider, initializeApp } from "./initialize-app";
 
 (window as any).DISABLE_FIREBASE_SYNC = true;
 
@@ -14,7 +14,7 @@ initializeApp(urlParams.appMode || "dev", true)
     .then(() => {
       ReactDOM.render(
         <AppProvider stores={stores} modalAppElement="#app">
-          <DocEditorApp appConfig={appConfig}/>
+          <DocEditorApp/>
           <DialogComponent/>
         </AppProvider>,
         document.getElementById("app")

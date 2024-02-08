@@ -4,18 +4,15 @@ import { getSnapshot } from "mobx-state-tree";
 
 import { defaultDocumentModel, defaultDocumentModelParts } from "./doc-editor-app-defaults";
 import { EditableDocumentContent } from "./document/editable-document-content";
-import { createDocumentModel } from "../models/document/document";
-import { AppConfigModelType } from "../models/stores/app-config-model";
+import { createDocumentModelWithEnv } from "../models/document/document";
 import { DocumentContentSnapshotType } from "../models/document/document-content";
 import { urlParams } from "../utilities/url-params";
+import { useAppConfig } from "../hooks/use-stores";
 
-export interface IDocEditorAppProps {
-  appConfig: AppConfigModelType;
-}
-
-export const DocEditorApp = ({ appConfig }: IDocEditorAppProps) => {
+export const DocEditorApp = () => {
+  const appConfig = useAppConfig();
   const [document, setDocument] = useState(() => {
-    return createDocumentModel(defaultDocumentModel);
+    return createDocumentModelWithEnv(appConfig, defaultDocumentModel);
   });
   const [fileHandle, setFileHandle] = useState<FileSystemHandle|undefined>();
   const [sectionSnapshot, setSectionSnapshot] = useState<any>();
@@ -30,7 +27,7 @@ export const DocEditorApp = ({ appConfig }: IDocEditorAppProps) => {
     } else {
       documentContentSnapshot = _parsedText;
     }
-    setDocument(createDocumentModel({
+    setDocument(createDocumentModelWithEnv(appConfig, {
       ...defaultDocumentModelParts,
       content: documentContentSnapshot
     }));
