@@ -149,8 +149,6 @@ $sort-heading-z-index: 200; // cards are dynamically assigned z-indices in the 1
           border:3px dotted $workspace-teal-light-2;
           border-radius: 5px;
           margin:3px;
-          position: absolute;
-          width: $sort-view-card-width - 8px;
         }
         .stack-drop-zone.show-droppable.is-over {
           background-color: $workspace-teal-light-4;
