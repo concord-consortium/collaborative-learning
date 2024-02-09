@@ -254,8 +254,9 @@ export class SortedDocuments {
       if (tilesByTypeMap) {
         const tileTypes = Object.keys(tilesByTypeMap);
         const nonPlaceholderTiles = tileTypes.filter(type => type !== "Placeholder");
+        const isUnknownType = (nonPlaceholderTiles.length === 1) && nonPlaceholderTiles[0] === "Unknown";
         // If a document only has "Placeholder" tiles or no tiles, treat it as "No Tools"
-        if (nonPlaceholderTiles.length === 0) {
+        if (nonPlaceholderTiles.length === 0 || isUnknownType) {
           addDocByType(doc, "No Tools");
         } else {
           // Add the tileType as the key to the Map, and doc(s) as values
@@ -268,17 +269,27 @@ export class SortedDocuments {
       }
     });
 
-    // Sort the tile types. 'No Tools' should be at the end.
-    const sortedTileTypes = Object.keys(tileTypeToDocumentsMap).sort((a, b) => {
-      if (a === "No Tools") return 1;   //Move 'No Tools' to the end
-      if (b === "No Tools") return -1;  //Alphabetically sort all others
-      return a.localeCompare(b);
+    // Map the tile types to their display names
+    const tileTypeDisplayNames = Object.keys(tileTypeToDocumentsMap).map(tileType => {
+      return (
+        {
+          originalType: tileType,
+          displayName: sectionLabelFormatter[tileType as keyof typeof sectionLabelFormatter] || tileType
+        }
+      );
     });
 
-    const sortedDocuments = sortedTileTypes.map(tileType => ({
-      icon: sectionIconFormatter[tileType as keyof typeof sectionIconFormatter],
-      sectionLabel: sectionLabelFormatter[tileType as keyof typeof sectionLabelFormatter] || tileType,
-      documents: tileTypeToDocumentsMap[tileType]
+    // Sort the tile types. 'No Tools' should be at the end.
+    const sortedByDisplayNames = tileTypeDisplayNames.sort((a, b) => {
+      if (a.displayName === "No Tools") return 1;   // Move 'No Tools' to the end
+      if (b.displayName === "No Tools") return -1;  // Alphabetically sort all others
+      return a.displayName.localeCompare(b.displayName);
+    });
+
+    const sortedDocuments = sortedByDisplayNames.map(({ originalType }) => ({
+      icon: sectionIconFormatter[originalType as keyof typeof sectionIconFormatter],
+      sectionLabel: sectionLabelFormatter[originalType as keyof typeof sectionLabelFormatter] || originalType,
+      documents: tileTypeToDocumentsMap[originalType]
     }));
 
     return sortedDocuments;

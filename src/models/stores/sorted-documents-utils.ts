@@ -20,6 +20,7 @@ export const sectionLabelFormatter = {
   Numberline: "Number Line",
   Geometry: "Shapes Graph",
   Drawing: "Sketch",
+  Unknown: "No Tools"
 };
 
 export const sectionIconFormatter = {
