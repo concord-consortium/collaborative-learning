@@ -7,10 +7,8 @@ let chatPanel = new ChatPanel;
 let selectedChatBackground = 'rgb(247, 251, 199)';
 let expandedChatBackground = 'rgb(234, 242, 142)';
 
-const queryParams = {
-  teacher7NetworkQueryParams: "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa&network=foo",
-  teacherQueryParams: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6"
-};
+const teacher7NetworkQueryParams = `${Cypress.config("qaUnitTeacher6Network")}`;
+const teacherQueryParams = `${Cypress.config("clueTestqaUnitTeacher6")}`;
 
 const ss = [{ "section": "problems",
               "subsection": "Introduction",
@@ -56,7 +54,7 @@ function beforeTestCommentedDocumentList(params) {
 context('Chat Panel', () => {
   it('verify chat panel', () => {
     cy.log('verify chat panel is accessible if teacher is in network (via url params)');
-    beforeTest(queryParams.teacher7NetworkQueryParams);
+    beforeTest(teacher7NetworkQueryParams);
 
     cy.log('verify chat panel opens');
     chatPanel.getNotificationToggle().should('exist');
@@ -96,7 +94,7 @@ context('Chat Panel', () => {
     chatPanel.addDocumentCommentAndVerify(documentComment1);
 
     cy.log('verify teacher name and initial appear on comment correctly');
-    chatPanel.getUsernameFromCommentHeader().should('contain', "Teacher 7");
+    chatPanel.getUsernameFromCommentHeader().should('contain', "Teacher 6");
     chatPanel.getDeleteMessageButton(documentComment1).click();
     chatPanel.getDeleteConfirmModalButton().click();
 
@@ -144,7 +142,7 @@ context('Chat Panel', () => {
     chatPanel.addTileCommentAndVerify("This is the 3rd tile comment.");
 
     cy.log("verify commenting on tile only shows tile comment");
-    chatPanel.showAndVerifyTileCommentClass(3);
+    chatPanel.showAndVerifyTileCommentClass(2);
     chatPanel.verifyCommentThreadDoesNotContain("This is a document comment");
     chatPanel.verifyCommentThreadDoesNotContain("This is a tile comment for the first tile");
     chatPanel.verifyCommentThreadContains("This is the 3rd tile comment.");
@@ -185,7 +183,7 @@ context('Chat Panel', () => {
   });
 
   it('verify chat is available in various tabs and subtabs', () => {
-    beforeTest(queryParams.teacher7NetworkQueryParams);
+    beforeTest(teacher7NetworkQueryParams);
 
     ss.forEach(tab => {
       let message = `${tab.section} section - ${tab.subsection} tab`;
@@ -209,7 +207,7 @@ context('Chat Panel', () => {
 
 context('Commented Document List', () => {
   it('Comment all document list', () => {
-    beforeTestCommentedDocumentList(queryParams.teacherQueryParams);
+    beforeTestCommentedDocumentList(teacherQueryParams);
     chatPanel.openChatPanel();
     cy.wait(2000);
     chatPanel.documentCommentList();

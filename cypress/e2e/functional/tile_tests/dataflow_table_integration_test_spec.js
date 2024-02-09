@@ -16,7 +16,7 @@ const timer2 = 3;
 
 
 function beforeTest() {
-  const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe&mouseSensor";
+  const queryParams = `${Cypress.config("qaUnitStudent5")}&mouseSensor`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();

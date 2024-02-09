@@ -1,0 +1,38 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {
+        "id": "document_Text_1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>If you know the coordinate rules to create an image, how can you tell if the two figures are similar? How can you use the rule to predict the side lengths of the image? How is the effect of a coordinate rule like the effect of a rubber band stretcher or a copy machine setting?</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_2",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>For the coordinates (x, y) of the original figure, if you make the coordinate rules by multiplying each coordinate by the same number, k, then the new image with the coordinates (kx, ky) is similar to the original figure. For example, if you multiply (x, y) by 2, then you will have new coordinates (2x, 2y). It makes the side lengths of the new image 2 times longer than the side lengths of the original figure. This rule has the same effect as both a rubber band with two-band stretcher and a copy machine setting with 200%.</p><p>You can use the rule to predict what will happen to the lengths of corresponding sides. When looking at the coordinate rules, the multiplier from one coordinate to the next will tell how much the side lengths change from one figure to another. For example, if we think of Zug as the original and Bug as the image, each coordinate in the rule multiplies by 1.5. So, the lengths of Zug will grow 1.5 times to make the lengths of Bug. Zug’s nose is 2 units tall and Bug’s nose is 2 • 1.5 = 3 units tall. Zug’s forehead is 8 units long and Bug’s forehead is 8 • 1.5 = 12 units long</p><p>Zug             (2x, 2y)</p><h3>           x1.5⤸      ⤸ x1.5</h3><p>Bug              (3x, 3y)</p>"
+          ]
+        }
+      },
+      {
+        "id": "-6wzAUG20220915AM",
+        "title": "Comparing nose lengths for Zug and Bug",
+        "display": "teacher",
+        "content": {
+          "type": "Image",
+          "url": "qa/images/SS_2_2_NWDYK_Mug.jpg"
+        }
+      }
+    ]
+  },
+  "supports": []
+}

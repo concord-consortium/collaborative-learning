@@ -9,7 +9,7 @@ const imageToolTile = new ImageToolTile;
 let userCanvas = 'Uploaded Images';
 
 function beforeTest() {
-  const queryParams = `${Cypress.config("queryParams")}`;
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();

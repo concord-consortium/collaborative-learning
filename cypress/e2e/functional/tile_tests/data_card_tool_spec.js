@@ -7,7 +7,7 @@ let dc = new DataCardToolTile;
 let xyplot = new XYPlotToolTile;
 
 function beforeTest() {
-  const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=moth&mouseSensor";
+  const queryParams = `${Cypress.config("qaMothPlotUnitStudent5")}&mouseSensor`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();

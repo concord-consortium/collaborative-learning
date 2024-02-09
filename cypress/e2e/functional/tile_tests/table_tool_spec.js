@@ -8,7 +8,6 @@ let clueCanvas = new ClueCanvas,
   xyplot = new XYPlotToolTile;
 
 const canvas = new Canvas;
-const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example";
 
 let headerX = 'pluto';
 let headerY = 'mars';
@@ -19,6 +18,7 @@ let headerY2 = 'y';
 let copyTitle = 'Table Tile Workspace Copy';
 
 function beforeTest() {
+  const queryParams = `${Cypress.config("qaNoNavPanelUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();

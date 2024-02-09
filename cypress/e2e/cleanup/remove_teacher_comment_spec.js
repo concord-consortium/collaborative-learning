@@ -15,10 +15,7 @@ const clueTeacher2 = {
   username: "clueteachertest2",
   password: "password"
 };
-const queryParams = {
-  teacher7QaNetworkQueryParams: "/?unit=https://models-resources.concord.org/clue-curriculum/branch/add-test-unit-qa/qa/content.json&problem=0.1&appMode=qa&demoName=add-test-unit-qa&fakeClass=5&fakeUser=teacher:7&network=foo",
-  teacher7MsaNetworkQueryParams: "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa&network=foo"
-};
+
 const ss = [{ "section": "problems",
               "subsection": "Introduction",
               "sectionCode": "introduction" },
@@ -57,9 +54,10 @@ function beforePortalTest(url, clueTeacher, reportUrl) {
   chatPanel.openChatPanel();
 }
 
-function beforeTest(params) {
+function beforeTest() {
+  const queryParams = `${Cypress.config("qaUnitTeacher6Network")}`;
   cy.clearQAData('all');
-  cy.visit(params);
+  cy.visit(queryParams);
   cy.waitForLoad();
   cy.openTopTab("problems");
   chatPanel.openChatPanel();
@@ -98,7 +96,7 @@ describe('Delete Teacher Comments In chat panel', () => {
     });  
   });
   it('Delete chat panel comment tags', () => {
-    beforeTest(queryParams.teacher7QaNetworkQueryParams);
+    beforeTest();
 
     cy.log('Delete comment tags on document comment');
     cy.openTopTab("problems");
@@ -111,7 +109,7 @@ describe('Delete Teacher Comments In chat panel', () => {
     chatPanel.deleteTeacherComments();
   });
   it('Delete chat panel comments in subtabs', () => {
-    beforeTest(queryParams.teacher7MsaNetworkQueryParams);
+    beforeTest();
 
     ss1.forEach(tab => {
       cy.openTopTab(tab.section);

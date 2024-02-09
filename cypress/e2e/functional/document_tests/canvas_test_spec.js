@@ -20,12 +20,12 @@ let studentWorkspace = 'My Student Test Workspace';
 let copyTitle = 'Personal Workspace Copy';
 let renameTitlePencil = "Renamed Title pencil";
 
-const queryParams1 = `${Cypress.config("queryParams")}`;
-const queryParams2 = "?appMode=qa&fakeClass=5&fakeUser=student:5&fakeOffering=5&problem=3.3&qaGroup=5&unit=example-no-group-share";
-const queryParams3 = "?appMode=qa&fakeClass=5&fakeUser=student:5&fakeOffering=5&qaGroup=5&unit=example-config-subtabs";
+const queryParams1 = `${Cypress.config("qaUnitStudent5")}`;
+const queryParams2 = `${Cypress.config("qaNoGroupShareUnitStudent5")}`;
+const queryParams3 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
 const queryParams4 = "?appMode=demo&demoName=BrokenDocs&fakeClass=1&fakeUser=student:1&unit=sas&problem=0.1";
 
-const title = "SAS 2.1 Drawing Wumps";
+const title = "QA 1.1 Solving a Mystery with Proportional Reasoning";
 
 function beforeTest(params) {
   cy.clearQAData('all');
@@ -281,7 +281,7 @@ context('Test Canvas', function () {
     //star a document to verify delete
     cy.openSection("my-work", "workspaces");
     cy.get('.list.workspaces [data-test=workspaces-list-items] .footer').contains(renameTitlePencil).parents().siblings('.icon-holder').find('.icon-star').click();
-    cy.openDocumentWithTitle('my-work', 'workspaces', 'SAS 2.1 Drawing Wumps');
+    cy.openDocumentWithTitle('my-work', 'workspaces', 'QA 1.1 Solving a Mystery with Proportional Reasoning');
 
     cy.log('will delete elements from canvas');
     // Delete elements in the canvas
@@ -310,7 +310,7 @@ context('Test Canvas', function () {
     resourcesPanel.getResourcesPanelExpandedSpace().find('.image-tool').first()
       .trigger('dragend');
     imageToolTile.getImageTile().should('exist');
-    imageToolTile.getImageTile().find('.editable-tile-title-text').contains('Did You Know?: Images in computer graphics');
+    imageToolTile.getImageTile().find('.editable-tile-title-text').contains('Did You Know?: Measurement in police work');
     clueCanvas.deleteTile('image');
 
     cy.log('will maintain positioning when copying multiple tiles');
@@ -328,9 +328,9 @@ context('Test Canvas', function () {
       .trigger('drop', { force: true, dataTransfer });
 
     // Make sure the tiles were copied in the correct order
-    tableToolTile.getTableTile().first().find('.editable-header-cell').contains('Mug Wump');
-    tableToolTile.getTableTile().eq(1).find('.editable-header-cell').contains('Mug Wump Part 2');
-    tableToolTile.getTableTile().eq(2).find('.editable-header-cell').contains('Mug Wump Part 3');
+    tableToolTile.getTableTile().first().find('.editable-header-cell').contains('QA Table2');
+    tableToolTile.getTableTile().eq(1).find('.editable-header-cell').contains('QA Table1');
+    tableToolTile.getTableTile().eq(2).find('.editable-header-cell').contains('QA Table3');
 
     // Clean up
     clueCanvas.deleteTile('table');
@@ -350,7 +350,7 @@ context('Test Canvas', function () {
       .trigger('drop', { force: true, dataTransfer });
 
     // Make sure the tiles were copied in the correct order
-    tableToolTile.getTableTile().first().find('.editable-header-cell').contains('Mug Wump');
+    tableToolTile.getTableTile().first().find('.editable-header-cell').contains('QA Table2');
 
     // Clean up
     clueCanvas.deleteTile('table');
@@ -366,7 +366,7 @@ context('Test Canvas', function () {
     resourcesPanel.getCanvasItemTitle("my-work", "workspaces").contains('Investigation Copy').should('not.exist');
 
     cy.log('verify original investigation canvas still exist after copy delete');
-    resourcesPanel.getCanvasItemTitle("my-work", "workspaces").contains('Drawing Wumps').should('be.visible');
+    resourcesPanel.getCanvasItemTitle("my-work", "workspaces").contains('Proportional Reasoning').should('be.visible');
 
     cy.log('verify that original personal workspace is not deleted when copy is deleted');
     resourcesPanel.openTopTab("my-work");
@@ -396,7 +396,7 @@ context('Test Canvas', function () {
 
     cy.log("verify publish button is not visible when publish is disabled");
     cy.get(".icon-button.icon-publish").should("not.exist");
-
+    
     cy.log("Share button visible on personal docs, only when sort-work tab is visible");
     beforeTest(queryParams3);
     canvas.createNewExtraDocumentFromFileMenu(studentWorkspace, "my-work");

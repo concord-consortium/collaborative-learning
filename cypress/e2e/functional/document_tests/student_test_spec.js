@@ -10,7 +10,7 @@ let student = '5',
   group = '5';
 
 function beforeTest() {
-  const queryParams = `${Cypress.config("queryParams")}`;
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();

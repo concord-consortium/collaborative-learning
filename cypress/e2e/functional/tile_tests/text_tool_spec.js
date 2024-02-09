@@ -5,11 +5,11 @@ import TextToolTile from '../../../support/elements/tile/TextToolTile';
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
-let title = "SAS 2.1 Drawing Wumps";
+let title = "QA 1.1 Solving a Mystery with Proportional Reasoning";
 let copyTitle = 'Text Tile Workspace Copy';
 
 function beforeTest() {
-  const queryParams = `${Cypress.config("queryParams")}`;
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
