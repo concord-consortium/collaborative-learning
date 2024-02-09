@@ -1,4 +1,4 @@
-import { each } from "lodash";
+import { cloneDeep, each } from "lodash";
 import { types, getType, getEnv, SnapshotOrInstance } from "mobx-state-tree";
 import { kPlaceholderTileDefaultHeight } from "../tiles/placeholder/placeholder-constants";
 import {
@@ -15,7 +15,7 @@ import {
   IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileLayoutModelType
 } from "../document/tile-row";
 import { migrateSnapshot } from "./document-content-import";
-import { isImportDocument } from "./document-content-import-types";
+import { isImportDocument, OriginalAuthoredTileModel } from "./document-content-import-types";
 import { logTileCopyEvent } from "../tiles/log/log-tile-copy-event";
 import { logTileDocumentEvent } from "../tiles/log/log-tile-document-event";
 import { getAppConfig } from "../tiles/tile-environment";
@@ -459,6 +459,24 @@ export const BaseDocumentContentModel = types
         row.setRowHeight(o.rowHeight);
       }
       return { rowId: row.id, tileId: tile.id };
+    },
+    addImportedTileToRow(tile: OriginalAuthoredTileModel, row: TileRowModelType) {
+
+      const { layout, ...newTile } = cloneDeep(tile);
+      const tileHeight = layout?.height;
+
+      const id = newTile.id || self.getNextTileId(newTile.content.type);
+      const tileSnapshot = { id, ...newTile };
+
+      // Add the snapshot directly to the map instead of creating it
+      // independently. This way if the snapshot has references to
+      // shared model objects, those references will be valid.
+      const tileModel = self.tileMap.put(tileSnapshot);
+      row.insertTileInRow(tileModel!);
+
+      if (tileHeight) {
+        row.setRowHeight(Math.max((row.height || 0), tileHeight));
+      }
     }
   }))
   .actions(self => ({
@@ -475,10 +493,11 @@ export const BaseDocumentContentModel = types
       // the table will never use the dataset name unless it has been manually
       // configured to do so.
       const title = options?.title || self.getNewTileTitle(content.type!);
+      // FIXME: this will break if the content has references to shared models. Instead of
+      // creating the tile model independently, it needs to be created within the document tree.
+      // One option is to use self.tileMap.put(snapshot) which adds the tile to the document
+      // and returns the newly created tile.
       return self.addTileInNewRow(TileModel.create({ title, content, id: options?.tileId }), options);
-    },
-    addTileSnapshotInNewRow(snapshot: ITileModelSnapshotIn, options?: INewTileOptions): INewRowTile {
-      return self.addTileInNewRow(TileModel.create(snapshot), options);
     },
     addTileSnapshotInExistingRow(snapshot: ITileModelSnapshotIn, options: INewTileOptions): INewRowTile | undefined {
       const tile = TileModel.create(snapshot);
