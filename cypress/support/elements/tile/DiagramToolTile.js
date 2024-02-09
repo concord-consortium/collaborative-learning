@@ -45,6 +45,13 @@ class DiagramToolTile {
   getDiagramTileTitle(workspaceClass){
     return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
   }
+
+  getDialogField(field) {
+    return cy.get(`#evd-${field}`);
+  }
+  getDialogOkButton() {
+    return cy.get(".modal-button").last();
+  }
 }
 
 export default DiagramToolTile;

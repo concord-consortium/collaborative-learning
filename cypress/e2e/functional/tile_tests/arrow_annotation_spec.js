@@ -1,5 +1,6 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import ArrowAnnotation from '../../../support/elements/tile/ArrowAnnotation';
+import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
 import NumberlineToolTile from '../../../support/elements/tile/NumberlineToolTile';
@@ -13,6 +14,7 @@ const tableToolTile = new TableToolTile;
 const geometryToolTile = new GeometryToolTile;
 const numberlineToolTile = new NumberlineToolTile;
 const xyTile = new XYPlotToolTile;
+const diagramToolTile = new DiagramToolTile;
 
 const queryParams = {
   unit1:"?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example",
@@ -280,5 +282,39 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.clickArrowToolbarButton();
     xyTile.selectYAttribute("y2");
     aa.getAnnotationArrows().should("not.exist");
+
+    cy.log("Annotation buttons appear for variable values");
+    const varName = "var1";
+
+    clueCanvas.addTile("diagram");
+    diagramToolTile.getDiagramTile().should("exist").click();
+    clueCanvas.clickToolbarButton("diagram", "new-variable");
+    diagramToolTile.getDiagramDialog().should("exist");
+    diagramToolTile.getDialogField("name").should("exist").type(varName);
+    diagramToolTile.getDialogField("value").should("exist").type("3");
+    diagramToolTile.getDialogOkButton().click();
+    diagramToolTile.getVariableCard().should("exist");
+
+    // Link to diagram instead of table
+    xyTile.getTile().click();
+    clueCanvas.clickToolbarButton('graph', 'link-tile');
+    xyTile.linkTable("Diagram 1");
+    aa.clickArrowToolbarButton();
+    aa.getAnnotationButtons().should("have.length", 9); // Just table cells
+    aa.clickArrowToolbarButton();
+
+    xyTile.selectXVariable(varName);
+    xyTile.selectYVariable(varName);
+    aa.clickArrowToolbarButton();
+    aa.getAnnotationButtons().should("have.length", 10);
+    aa.clickArrowToolbarButton();
+
+    cy.log("Can add an arrow to variable dots");
+    xyTile.getTile().click();
+    aa.clickArrowToolbarButton();
+    aa.getAnnotationArrows().should("not.exist");
+    aa.getAnnotationButtons().eq(0).click();
+    aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationArrows().should("have.length", 1);
   });
 });
