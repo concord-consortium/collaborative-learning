@@ -17,6 +17,8 @@ import { IGraphModel } from "../models/graph-model";
 import { decipherDotId } from "../utilities/graph-utils";
 import { GraphComponent } from "./graph-component";
 import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
+import { Point } from "../graph-types";
+import { ScaleLinear } from "d3";
 
 import "./graph-toolbar-registration";
 
@@ -34,11 +36,6 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   const xAttrType = content.config.attributeType("x");
   const yAttrType = content.config.attributeType("y");
 
-  const xAxis = content.getAxis("bottom");
-  const xDomain = isNumericAxisModel(xAxis) && xAxis.domain;
-  const yAxis = content.getAxis("left");
-  const yDomain = isNumericAxisModel(yAxis) && yAxis.domain;
-
   // This is used for locating Sparrow endpoints.
   const getDotCenter = useCallback((dotId: string) => {
     // FIXME Currently, getScreenX and getScreenY only handle numeric axes, so just bail if they are a different type.
@@ -49,6 +46,14 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     if (caseId && xAttributeId && yAttributeId) {
       const layer = content.layerForAttributeId(xAttributeId);
       if (!layer) return;
+
+      // We don't use these values directly, but without referencing them the app
+      // doesn't realize that changes in the axis scales require redrawing the annotations.
+      const xAxis = content.getAxis("bottom");
+      const yAxis = content.getAxis("left");
+      // eslint-disable-next-line unused-imports/no-unused-vars
+      const domains = [isNumericAxisModel(xAxis) && xAxis.domain, isNumericAxisModel(yAxis) && yAxis.domain];
+
       const plotNum = layer.config.plotNumberForAttributeID(yAttributeId);
       const x = getScreenX({ caseId, dataset: layer.config.dataset, layout, dataConfig: layer.config });
       const y = getScreenY({ caseId, dataset: layer.config.dataset, layout, dataConfig: layer.config, plotNum });
@@ -57,65 +62,87 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     }
   }, [xAttrType, yAttrType, content, layout]);
 
+  const getPositionFromAdornment = useCallback((type: string, objectId: string) => {
+    // Ask each adornment in turn if it knows how to handle this object.
+    for (const adorn of content.adornments) {
+      const pos = adorn.getAnnotatableObjectPosition(type, objectId);
+      if (pos) return pos;
+    }
+  }, [content.adornments]);
+
+  const getScaledPosition = useCallback((pos: Point) => {
+    const xScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>;
+    const yScale = layout.getAxisScale('left') as ScaleLinear<number, number>;
+    return { x: xScale(pos.x), y: yScale(pos.y) };
+  }, [layout]);
+
+  const boundingBoxForPoint = useCallback((pos: Point) => {
+    const halfSide = content.getPointRadius("hover-drag");
+    return {
+      top: pos.y - halfSide,
+      left: pos.x - halfSide + layout.getComputedBounds("left").width,
+      height: 2 * halfSide,
+      width: 2 * halfSide
+    };
+  }, [content, layout]);
+
   useEffect(() => {
     onRegisterTileApi?.({
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return content.exportJson(options);
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
+        let coords;
         if (objectType === "dot") {
-          const coords = getDotCenter(objectId);
-          if (!coords) return;
-          const { x, y } = coords;
-          const halfSide = content.getPointRadius("hover-drag");
-          const boundingBox = {
-            height: 2 * halfSide,
-            left: x - halfSide + layout.getComputedBounds("left").width,
-            top: y - halfSide,
-            width: 2 * halfSide
-          };
-          return boundingBox;
+          coords = getDotCenter(objectId);
+        } else {
+          // Maybe one of our adornments knows about this object
+          const pos = objectType && getPositionFromAdornment(objectType, objectId);
+          coords = pos && getScaledPosition(pos);
+        }
+        if (coords) {
+          return boundingBoxForPoint(coords);
         }
       },
       getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
+        let coords;
         if (objectType === "dot") {
-          // Find the center point
-          const coords = getDotCenter(objectId);
-          if (!coords) return;
-          const { x, y } = coords;
-          const cx = x + layout.getComputedBounds("left").width;
-          const radius = content.getPointRadius("hover-drag");
-
-          // Return a circle at the center point
-          return (
-            <circle
-              className={classes}
-              cx={cx}
-              cy={y}
-              onClick={handleClick}
-              r={radius}
-            />
-          );
+          coords = getDotCenter(objectId);
+        } else if (objectType) {
+          const pos = getPositionFromAdornment(objectType, objectId);
+          coords = pos && getScaledPosition(pos);
         }
+        if (!coords) return;
+        const { x, y } = coords;
+        const cx = x + layout.getComputedBounds("left").width;
+        const radius = content.getPointRadius("hover-drag");
+
+        // Return a circle at the center point
+        return (
+          <circle
+            className={classes}
+            cx={cx}
+            cy={y}
+            onClick={handleClick}
+            r={radius}
+          />
+        );
       },
       getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
         const offsets = OffsetModel.create({});
-        if (objectType === "dot") {
-          offsets.setDy(-kSmallAnnotationNodeRadius);
-        }
+        offsets.setDy(-kSmallAnnotationNodeRadius);
         return offsets;
       },
       getObjectNodeRadii: (objectId: string, objectType?: string) => {
-        if (objectType === "dot") {
-          return {
-            centerRadius: kSmallAnnotationNodeRadius / 2,
-            highlightRadius: kSmallAnnotationNodeRadius
-          };
-        }
+        return {
+          centerRadius: kSmallAnnotationNodeRadius / 2,
+          highlightRadius: kSmallAnnotationNodeRadius
+        };
       }
     });
     // xDomain and yDomain are included to force updating the sparrow locations when they change
-  }, [getDotCenter, content, layout, onRegisterTileApi, xDomain, yDomain]);
+  }, [getDotCenter, content, layout, onRegisterTileApi,
+      getPositionFromAdornment, boundingBoxForPoint, getScaledPosition]);
 
   useEffect(function cleanup() {
     return () => {

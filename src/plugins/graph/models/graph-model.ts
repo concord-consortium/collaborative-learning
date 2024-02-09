@@ -300,6 +300,10 @@ export const GraphModel = TileContentModel
           }
         }
       }
+      // Include any objects contributed by adornments
+      for (const adorn of self.adornments) {
+        objects.push(...adorn.getAnnotatableObjects(tileId));
+      }
       return objects;
     }
   }))
