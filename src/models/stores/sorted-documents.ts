@@ -247,34 +247,43 @@ export class SortedDocuments {
       tileTypeToDocumentsMap[type].push(docToAdd);
     };
 
+    //Iterate through all documents, determine if they are valid,
+    //create a map of valid ones, otherwise put them into the "No Tools" section
     this.filteredDocsByType.forEach((doc) => {
-      const tilesByTypeMap = doc.content?.getAllTilesByType();// Type is Record<string, string[]>
+      const tilesByTypeMap = doc.content?.getAllTilesByType();
+      console.log("\n");
+      console.log(`-------${doc.title}--------`);
+      console.log("tilesByTypeMap:", tilesByTypeMap);
       if (tilesByTypeMap) {
         const tileTypes = Object.keys(tilesByTypeMap);
-        const nonPlaceholderTiles = tileTypes.filter(type => type !== "Placeholder");
-        const isUnknownType = (nonPlaceholderTiles.length === 1) && nonPlaceholderTiles[0] === "Unknown";
-        // If a document only has "Placeholder" tiles or no tiles, treat it as "No Tools"
-        if (nonPlaceholderTiles.length === 0 || isUnknownType) {
-          addDocByType(doc, "No Tools");
-        } else {
-          // Add the tileType as the key to the Map, and doc(s) as values
-          nonPlaceholderTiles.forEach(tileType => {
+        const docHasAnnotations = doc.content?.annotations && doc.content?.annotations.size > 0;
+        console.log("docHasAnnotations:", docHasAnnotations);
+        if(docHasAnnotations){
+          tileTypes.push("Sparrows");
+        }
+        console.log("tileTypes:", tileTypes);
+        // Filter out "Placeholder" and "Unknown" tiles
+
+        //From here we call it "Tool Types" - which is an array of all tileTypes and "Sparrow" (if annotation exist)
+        const validTileTypes = tileTypes.filter(type => type !== "Placeholder" && type !== "Unknown");
+        if (validTileTypes.length > 0) {
+          validTileTypes.forEach(tileType => {
             addDocByType(doc, tileType);
           });
+        } else { //Documents with only all Placeholder or Unknown tiles
+          addDocByType(doc, "No Tools");
         }
-      } else { // Handle documents with no tiles
-        addDocByType(doc, "No Tools");
       }
     });
+    //TODO: note that removing a sparrow in real time, won't trigger a change
 
     // Map the tile types to their display names
     const tileTypeDisplayNames = Object.keys(tileTypeToDocumentsMap).map(tileType => {
-      return (
-        {
-          originalType: tileType,
-          displayName: sectionLabelFormatter[tileType as keyof typeof sectionLabelFormatter] || tileType
-        }
-      );
+      const displayName =  sectionLabelFormatter[tileType as keyof typeof sectionLabelFormatter] || tileType;
+      return {
+        originalType: tileType,
+        displayName
+      };
     });
 
     // Sort the tile types. 'No Tools' should be at the end.
