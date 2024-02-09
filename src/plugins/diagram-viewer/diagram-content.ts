@@ -1,6 +1,7 @@
 import { getSnapshot, types, Instance, destroy, SnapshotIn,
   isValidReference, addDisposer, getType } from "mobx-state-tree";
 import { reaction } from "mobx";
+import stringify from "json-stringify-pretty-compact";
 import { DQRoot } from "@concord-consortium/diagram-view";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tiles/tile-content-info";
 import { TileContentModel } from "../../models/tiles/tile-content";
@@ -17,8 +18,8 @@ export const DiagramContentModel = TileContentModel
   })
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
-      // crude, but enough to get us started
-      return JSON.stringify(getSnapshot(self.root));
+      const snapshot = getSnapshot(self);
+      return stringify(snapshot, {maxLength: 120});
     }
   }))
   .views(self => ({
