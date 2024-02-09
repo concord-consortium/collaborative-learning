@@ -143,8 +143,18 @@ export class GraphLayout implements IAxisLayout {
    */
   @computed get computedBounds() {
     const {graphWidth, graphHeight} = this;
-    if (graphWidth<1 || graphHeight<0) {
-      // Layout functions can be called before tile size is known,
+    const
+      legendHeight = this.getDesiredExtent('legend'),
+      topAxisHeight = this.getDesiredExtent('top'),
+      leftAxisWidth = this.getDesiredExtent('left'),
+      bottomAxisHeight = this.getDesiredExtent('bottom'),
+      v2AxisWidth = this.getDesiredExtent('rightNumeric'),
+      rightAxisWidth = this.getDesiredExtent('rightCat'),
+      plotWidth = graphWidth - leftAxisWidth - v2AxisWidth - rightAxisWidth,
+      plotHeight = graphHeight - topAxisHeight - bottomAxisHeight - legendHeight;
+
+    if (plotWidth<1 || plotHeight<1) {
+      // Layout functions can be called before tile size is finalized,
       // leading to ugly errors if negative sizes are returned.
       const zeroSize = {left: 0, top: 0, width: 0, height: 0};
       return {
@@ -158,16 +168,8 @@ export class GraphLayout implements IAxisLayout {
         yPlus: zeroSize
       };
     }
-    const
-      legendHeight = this.getDesiredExtent('legend'),
-      topAxisHeight = this.getDesiredExtent('top'),
-      leftAxisWidth = this.getDesiredExtent('left'),
-      bottomAxisHeight = this.getDesiredExtent('bottom'),
-      v2AxisWidth = this.getDesiredExtent('rightNumeric'),
-      rightAxisWidth = this.getDesiredExtent('rightCat'),
-      plotWidth = graphWidth - leftAxisWidth - v2AxisWidth - rightAxisWidth,
-      plotHeight = graphHeight - topAxisHeight - bottomAxisHeight - legendHeight,
-      newBounds: Record<GraphPlace, Bounds> = {
+
+    const newBounds: Record<GraphPlace, Bounds> = {
         left: {left: 0, top: topAxisHeight, width: leftAxisWidth, height: plotHeight},
         top: {left: leftAxisWidth, top: 0, width: graphWidth - leftAxisWidth - rightAxisWidth, height: topAxisHeight},
         plot: {left: leftAxisWidth, top: topAxisHeight, width: plotWidth, height: plotHeight},
