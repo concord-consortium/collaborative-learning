@@ -1,23 +1,24 @@
 @import "../../../components/vars.sass";
 
 .total-cards-area {
-  padding:0px 12px;
   display: flex;
   align-items: center;
   position: relative;
+  margin-top:2.5px;
   .cases-count {
     position: relative;
     margin: 0px 5px;
     background-color: white;
-    padding: 1px 4px;
+    padding: 1px 6px;
     border-radius: 2px;
     border: 1px solid $charcoal-light-1;
     z-index: 1;
+    top: -2px;
   }
   .cases-count-background-card {
     position: absolute;
-    top: 3.5px;
-    right: 14px;
+    top: .5px;
+    right: 1.5px;
     height: 20px;
     background-color: white;
     padding: 1px 6px;
