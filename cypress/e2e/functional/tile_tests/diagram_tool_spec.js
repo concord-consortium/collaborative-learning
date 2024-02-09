@@ -13,7 +13,7 @@ const undoKeystroke = `{${cmdKey}}z`;
 const redoKeystroke = `{${cmdKey}}{shift}z`;
 
 function beforeTest() {
-  const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=m2s";
+  const queryParams = `${Cypress.config("qaVariablesUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();

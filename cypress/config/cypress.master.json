@@ -1,5 +1,3 @@
 {
-    "baseUrl": "https://collaborative-learning.concord.org/branch/master/",
-    "queryParams":"?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.1&qaGroup=5",
-    "teacherQueryParams":"?appMode=qa&fakeClass=5&fakeUser=teacher:6&demoOffering=5&problem=2.1"
+    "baseUrl": "https://collaborative-learning.concord.org/branch/master/"
 }

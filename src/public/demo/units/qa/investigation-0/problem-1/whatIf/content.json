@@ -1,0 +1,88 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "id": "fp7a21OoNiE-UeWm",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Sharing Work in Your Group</strong></p><p>CLUE is designed so that you can learn with others in your group and in your class. Discussing and sharing your work is an important part of the learning process.</p><p>Sharing your work with your group is controlled with the button and slider switch in the upper right corner of your workspace. The button on the left toggles your workspace view from your individual view to a group view. In the group view, your work is always in the upper left corner. You can see the initials of your group members in each window pane.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_1",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Once students get started with the mathematical activities, feel free to direct them in the use of sharing. Some teachers prefer students to work independently initially, and have students share their work with their group after their first attempts at problem-solving. For each student, sharing to the group is off by default, but it is controlled by the student. However, students who have trouble getting started often get a lift from their peers by seeing how others are tackling the problems. Think of group sharing as a tool that you can use flexibly by directing your students according to their needs.</p>"
+          ]
+        }
+      },
+      [
+        {
+          "id": "xNSvm1tfNTblOYgf",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>The Share slider makes your work visible to your group members.</p><p>Your group members cannot change your work and you can’t change theirs. However, you can drag tiles from your group members’ workspaces and they can drag tiles from your workspace.</p><p>Switch to group view and turn on sharing. Ask your group members to do the same. You can zoom into each window by placing your cursor at the center of the four windows, and dragging the window panes to see more detail.</p><p></p>"
+            ]
+          }
+        },
+        {
+          "id": "9xpInLKuRpI_mMhg",
+          "title": "Group Sharing controls",
+          "content": {
+            "type": "Image",
+            "url": "qa/images/GroupSharingControls.png"
+          }
+        }
+      ],
+      {
+        "id": "P1hcXvW95DxVMbMF",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Look at your group members’ work in the <strong>Introduction</strong>. Did they write a <em>haiku</em>? In the <strong>Initial Challenge </strong>did they do something fun with the dog graph?</p><p>If you like something from your group members’ work, copy it by dragging your neighbor’s tile and placing it in your <strong>What if...? </strong>Section, for example. Then you can edit it and expand on it. Your neighbor may want to copy it back after your changes.</p><p>Why is this useful when doing math? Imagine that you’re working on a problem and your neighbor finds a different way to solve it. You can trade your solutions. Or, maybe you are stuck on how to start a problem. Perhaps your neighbors can help you get going.</p>"
+          ]
+        }
+      },
+      [
+        {
+          "id": "DJ3fk5n11tBp0bfX",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>Publishing</strong></p><p>To share your work with others in your class, publish it by clicking the button at the top left of your workspace. Others can find the published documents by clicking the Class Work tab. You may update your work by publishing it again. Only the most recent version is visible to your class.</p><p></p>"
+            ]
+          }
+        },
+        {
+          "id": "07QJRxughLLyUbJf",
+          "title": "Publishing in CLUE",
+          "content": {
+            "type": "Image",
+            "url": "qa/images/PublishFileIcons-Labled.png"
+          }
+        }
+      ],
+      {
+        "id": "k3Nnn7IHqtKk_dmT",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Create or Edit Files</strong></p><p>To create new files for your personal use or to edit existing files, use the File dropdown menu. You might create files to try something out or take notes. Below are the things you can do. Try them out.</p><ul><li><strong>Make a copy </strong>copies your present workspace. This copy is not shared with your group (there is no share icon while you are working on it). Give it a new name. It is your private copy, although you can publish it to the class.</li><li><strong>Open</strong> allows you to create a new document by clicking the <strong>New Workspace</strong> icon. You can also access documents that are associated with the problem you are working on. The <strong>Workspaces</strong> tab shows your current problem document on top and any new documents that you may have created below the divider line. With the <strong>Learning Log </strong>tab you can create files that you can see and edit throughout the entire Unit. This is a good place to summarize your learning. The <strong>Starred</strong> tab shows documents that you may have highlighted as important from <strong>My Work </strong>or <strong>Class Work </strong>on the My Resources page.</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -7,7 +7,7 @@ let clueCanvas = new ClueCanvas,
 const imageToolTile = new ImageToolTile;
 
 function beforeTest() {
-  const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=msa";
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
   cy.clearQAData('all');
 
   cy.visit(queryParams);
@@ -464,21 +464,21 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawTileShowSortPanelCloseButton().click();
 
     cy.log("verify stamp images");
-    drawToolTile.getImageDrawing().eq(0).should("have.attr", "href").and("contain", "coin.png");
+    drawToolTile.getImageDrawing().eq(0).should("have.attr", "href").and("contain", "plus.png");
     drawToolTile.getDrawToolStampExpand().click();
     cy.get(".toolbar-palette.stamps .palette-buttons .stamp-button").eq(1).click();
     drawToolTile.getDrawTile()
       .trigger("mousedown", 250, 100)
       .trigger("mouseup");
     drawToolTile.getImageDrawing().should("exist").and("have.length", 2);
-    drawToolTile.getImageDrawing().eq(1).should("have.attr", "href").and("contain", "pouch.png");
+    drawToolTile.getImageDrawing().eq(1).should("have.attr", "href").and("contain", "equals.png");
     drawToolTile.getDrawToolStampExpand().click();
     cy.get(".toolbar-palette.stamps .palette-buttons .stamp-button").eq(2).click();
     drawToolTile.getDrawTile()
       .trigger("mousedown", 250, 150)
       .trigger("mouseup");
     drawToolTile.getImageDrawing().should("exist").and("have.length", 3);
-    drawToolTile.getImageDrawing().eq(2).should("have.attr", "href").and("contain", "plus.png");
+    drawToolTile.getImageDrawing().eq(2).should("have.attr", "href").and("contain", "lparen.png");
 
     cy.log("deletes stamp drawing");
     drawToolTile.getDrawToolSelect().click();

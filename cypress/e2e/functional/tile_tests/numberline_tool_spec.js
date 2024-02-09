@@ -5,7 +5,7 @@ let clueCanvas = new ClueCanvas;
 let numberlineToolTile = new NumberlineToolTile;
 
 function beforeTest() {
-  const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example";
+  const queryParams = `${Cypress.config("qaNoNavPanelUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();

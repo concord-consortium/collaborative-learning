@@ -1,0 +1,53 @@
+{
+  "type": "first",
+  "content": {
+    "tiles": [
+      {
+        "id": "mvnKpMGcUR_-oy6y",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Here is a test text tile.</p>"
+          ]
+        }
+      },
+      {
+        "id": "uahm7oe8UMBIX0bi",
+        "title": "Drawing 1",
+        "content": {
+          "type": "Drawing",
+          "objects": [
+            {
+              "type": "rectangle",
+              "id": "0xAlBazzgzkIF_Fd",
+              "x": 86,
+              "y": 95,
+              "stroke": "#000000",
+              "strokeDashArray": "",
+              "strokeWidth": 2,
+              "fill": "none",
+              "width": 65,
+              "height": 51
+            },
+            {
+              "type": "text",
+              "id": "FYSNZdbsuU0B74OR",
+              "x": 229,
+              "y": 90,
+              "width": 99,
+              "height": 60,
+              "stroke": "#000000",
+              "text": "it's a label in content."
+            }
+          ]
+        },
+        "layout": {
+          "height": 273
+        }
+      }
+    ]
+  },
+  "supports": []
+}

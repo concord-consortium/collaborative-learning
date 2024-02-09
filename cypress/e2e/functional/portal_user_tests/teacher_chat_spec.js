@@ -3,8 +3,8 @@ import ChatPanel from "../../../support/elements/common/ChatPanel";
 let chatPanel = new ChatPanel;
 
 const portalUrl = "https://learn.portal.staging.concord.org";
-const offeringId1 = "221";
-const offeringId2 = "226";
+const offeringId1 = "279";
+const offeringId2 = "280";
 const reportUrl1 = "https://learn.portal.staging.concord.org/portal/offerings/" + offeringId1 + "/external_report/11";
 const reportUrl2 = "https://learn.portal.staging.concord.org/portal/offerings/" + offeringId2 + "/external_report/11";
 const clueTeacher1 = {

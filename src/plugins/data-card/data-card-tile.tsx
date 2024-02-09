@@ -16,9 +16,9 @@ import { DataCardSortArea } from "./components/sort-area";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { mergeTwoDataSets } from "../../models/data/data-set-utils";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
-import { useDataCardTileHeight } from "./use-data-card-tile-height";
 import { DataCardToolbarContext } from "./data-card-toolbar-context";
 import { CasesCountDisplay } from "./components/cases-count-display";
+import { useDataCardTileHeight } from "./use-data-card-tile-height";
 
 import "./data-card-tile.scss";
 
@@ -71,6 +71,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     readOnly: readOnly ?? false,
     onRequestRowHeight,
     attrCount: content.attributes.length,
+    isSingleView: displaySingle
   });
 
   /* ==[ Drag and Drop ] == */
@@ -288,7 +289,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
                 onSortAttrChange={setSort}
                 attrIdNamePairs={attrIdsNames}
               />
-              <CasesCountDisplay label="Total" totalCases={content.totalCases} />
+              <div className="total-label">Total </div>
+              <CasesCountDisplay totalCases={content.totalCases} />
             </div>
             { displaySingle &&
               <div className="single-card-view-wrap">
@@ -297,9 +299,10 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
                   onClick={handleNavPanelClick}
                 >
                   <div className="card-number-of-listing">
+                    <span>{cardOf}</span>
                     <div className="cell-text">
                         { content.totalCases > 0 &&
-                          <CasesCountDisplay label={cardOf} totalCases={content.totalCases} />
+                          <CasesCountDisplay totalCases={content.totalCases} />
                         }
                         { (!content.totalCases || content.totalCases < 1) && <>Add a card</> }
                     </div>

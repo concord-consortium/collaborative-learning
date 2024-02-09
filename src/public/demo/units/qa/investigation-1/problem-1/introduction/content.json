@@ -1,0 +1,72 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "TILE495YR03MpwmG",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The Mystery Club at P.I. Middle School meets monthly. Members watch videos, discuss novels, play “whodunit” games, and talk about real-life mysteries. One day, a member announces that the school is having a contest. A teacher in disguise will appear for a few minutes at school each day for a week. Any student can pay $1 for a guess at the identity of the mystery teacher. The student with the first correct guess wins a prize.</p>"
+          ]
+        }
+      },
+      {
+        "id": "TILEQeeYQ5gwRVu3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The Mystery Club decides to enter the contest together. Each member brings a camera to school in hopes of getting a picture of the mystery teacher.</p>"
+          ]
+        }
+      },
+      {
+        "id": "B5k0-w4-4k9gSdFl",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>A relationship between two variables for which all points lie on a straight line is called a <strong>linear relationship</strong>. The graph of Adrian’s Rental Rates is an example of a linear relationship.</p><p><em>How can we recognize a linear relationship in a context, table, or graph?</em></p><p>Consider the following problem.</p>"
+          ]
+        }
+      },
+      {
+        "id": "KWbfgYO6Mz_KfFo-",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem 1.1 Walkathons: Using Rates</strong></p>"
+          ]
+        }
+      },
+      {
+        "id": "Mf1IN1IZrt_dKsE1",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Ms. Chang’s class decides to participate in a walkathon. Each participant must find sponsors to pledge a certain amount of money for each kilometer the participant walks. Leanne suggests that they determine their walking rates in meters per second, so they can make predictions about the number of meters walked and amount of money raised. She collects some meter sticks and her cell phone to use as a timer for her walking experiment.</p>"
+          ]
+        }
+      },
+      {
+        "id": "VocFcNFICNNBgx87",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>What do you think your walking rate is?</em></p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

@@ -1,0 +1,16 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Problem Launch</strong></p>", "<p>This Problem is intended to help both educators and students to learn how software features work in CLUE. There is no extended teacher guide. You will find teacher guides in other problems.</p>"]
+        },
+        "id": "TILEUDi164ugn5Gs"
+      }
+    ]
+  },
+  "supports": []
+}

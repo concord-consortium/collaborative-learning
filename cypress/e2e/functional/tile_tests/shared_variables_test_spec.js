@@ -7,9 +7,9 @@ const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
 const diagramToolTile = new DiagramToolTile;
-const queryParam = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-variables";
 
 function beforeTest() {
+  const queryParam = `${Cypress.config("qaVariablesUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParam);
   cy.waitForLoad();

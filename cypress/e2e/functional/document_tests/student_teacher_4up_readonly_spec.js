@@ -6,7 +6,6 @@ import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import ExpressionToolTile from '../../../support/elements/tile/ExpressionToolTile';
 import NumberlineToolTile from '../../../support/elements/tile/NumberlineToolTile';
-import ImageToolTile from '../../../support/elements/tile/ImageToolTile';
 import DataCardToolTile from '../../../support/elements/tile/DataCardToolTile';
 import DataflowToolTile from '../../../support/elements/tile/DataflowToolTile';
 import SimulatorTile from '../../../support/elements/tile/SimulatorTile';
@@ -18,16 +17,13 @@ const geometryToolTile = new GeometryToolTile;
 const drawToolTile = new DrawToolTile;
 const exp = new ExpressionToolTile;
 const numberlineToolTile = new NumberlineToolTile;
-const imageToolTile = new ImageToolTile;
 const dc = new DataCardToolTile;
 const dataflowToolTile = new DataflowToolTile;
 const simulatorTile = new SimulatorTile;
 let dashboard = new TeacherDashboard();
 let students = [15, 16];
 
-const baseUrl = `${Cypress.config("baseUrl")}`;
-const teacherUrl = baseUrl + '?appMode=qa&qaGroup=10&fakeClass=10&problem=2.3&fakeUser=teacher:1';
-const teacherUrlBrain = baseUrl + '?appMode=qa&qaGroup=10&fakeClass=10&mouseSensor&unit=brain&fakeUser=teacher:1';
+const teacherUrl = `${Cypress.config("qaUnitTeacher6")}&mouseSensor`
 
 function testTilesNotReadOnly(tab, position) {
   cy.get('.'+tab).find(position + ' .text-tool').should('not.have.class', 'read-only');
@@ -64,10 +60,7 @@ function testTilesReadOnlyBrain(tab, position) {
 }
 
 function getUrl(studentIndex) {
-  return baseUrl + '?appMode=qa&qaGroup=10&fakeClass=10&problem=2.3&fakeUser=student:' + students[studentIndex];
-}
-function getUrlBrain(studentIndex) {
-  return baseUrl + '?appMode=qa&qaGroup=10&fakeClass=10&mouseSensor&unit=brain&fakeUser=student:' + students[studentIndex];
+  return `${Cypress.config("qaUnitGroup")}&mouseSensor&fakeUser=student:${students[studentIndex]}`;
 }
 
 function setupTest(studentIndex) {
@@ -122,7 +115,7 @@ function setupTest(studentIndex) {
 }
 
 function setupTestBrain(studentIndex) {
-  const url = getUrlBrain(studentIndex);
+  const url = getUrl(studentIndex);
   cy.visit(url);
   cy.waitForLoad();
   clueCanvas.shareCanvas();//all students will share their canvas
@@ -170,14 +163,14 @@ context('Test 4-up and 1-up views tiles read only functionalities', function () 
     cy.waitForLoad();
     cy.openTopTab("student-work");
 
-    cy.get('.four-up .north-east .member').should('contain', "S15").click();
+    cy.get('.four-up .north-west .member').should('contain', "S15").click();
     testTilesReadOnly("student-group-view", "");
     cy.get('.student-group-view .restore-fourup-button').click();
     testTilesReadOnly("student-group-view", "");
-    cy.get('.four-up .south-east .member').should('contain', "S16").click();
+    cy.get('.four-up .north-east .member').should('contain', "S16").click();
     cy.get('.student-group-view .restore-fourup-button').click();
+    testTilesReadOnly("student-group-view", ".north-west");
     testTilesReadOnly("student-group-view", ".north-east");
-    testTilesReadOnly("student-group-view", ".south-east");
   });
   it('4-up and 1-up views read-only dataflow, expression, xy plot tiles', function () {
     
@@ -196,17 +189,17 @@ context('Test 4-up and 1-up views tiles read only functionalities', function () 
     testTilesNotReadOnlyBrain("primary-workspace", ".north-west");
     testTilesReadOnlyBrain("primary-workspace", ".north-east");
 
-    cy.visit(teacherUrlBrain);
+    cy.visit(teacherUrl);
     cy.waitForLoad();
     cy.openTopTab("student-work");
 
-    cy.get('.four-up .north-east .member').should('contain', "S15").click();
+    cy.get('.four-up .north-west .member').should('contain', "S15").click();
     testTilesReadOnlyBrain("student-group-view", "");
     cy.get('.student-group-view .restore-fourup-button').click();
     testTilesReadOnlyBrain("student-group-view", "");
-    cy.get('.four-up .south-east .member').should('contain', "S16").click();
+    cy.get('.four-up .north-east .member').should('contain', "S16").click();
     cy.get('.student-group-view .restore-fourup-button').click();
+    testTilesReadOnlyBrain("student-group-view", ".north-west");
     testTilesReadOnlyBrain("student-group-view", ".north-east");
-    testTilesReadOnlyBrain("student-group-view", ".south-east");
   });
 });

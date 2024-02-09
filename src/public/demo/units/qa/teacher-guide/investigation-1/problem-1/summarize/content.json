@@ -1,0 +1,78 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles": [
+      {
+        "id": "TILECbgD158JqmDo",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p><p><u>Solutions and Strategies</u> </p><p>Have students share their strategies and solutions on the height of the teacher. It is helpful for students to hear others’ ideas while they are developing their own. You should expect some variation in the answers because all measurements are approximations. However, answers that are obviously unreasonable should be examined closely and efforts should be made to figure out why they are incorrect.</p><p><strong>Suggested Questions</strong></p><ul><li>What would you expect the range of possible heights for the mystery teacher to be? If an answer is over 7 ft, is that reasonable? What about an answer of under 4 ft? (The teacher is about 72.5 in. or 6 ft 1/2  in. tall.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "TILE2CKbnA-uknFu",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Making the Mathematics Explicit</u></p><p> Focus the summary conversations on the use of ratios, “for every” statements and measurement.  Listen for the use of formal and informal language to assess your students’ understanding of these ideas to help you in your instruction for the rest of the Unit.</p><p><strong>Suggested Questions</strong></p><ul><li>What measurements were important to you in finding the height of the teacher? (height of the magazine in the picture, height of the magazine in real life, height of the teacher in the picture.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "TILEvN5ttX457eD0",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Possible student explanations: (Portrayal)</p><ul><li>The magazine is 10 inches tall. The teacher is 7 magazines. They may use this and write a multiplication sentence: 7 x 10 = 70 inches tall or they might use a ratio of 1:7 and then scale up each ratio by 10.</li><li>In the picture, the height of the P. I. Monthly is 0.5 in. We know that the height of the real magazine is 10 in. So, the real magazine is 10 ÷ 0.5 = 2 times larger than in the picture. The teacher should also be 20 times larger in real life than he/she is in the picture. The teacher’s height in the picture is about 3 ⅝ in. So, the actual height is about 20 x (3 ⅝) = 72.5  in. </li><li>Students may use ratio or “for every” statements, such as “The ratio of the teacher’s height in the picture to her height in real life is about 1 to 20.” or “For every inch in height of the magazine in the picture, there are 20 inches in height for the real magazine.”</li><li>Students may also compare the magazine in the picture to the teacher in the picture. In this case, the teacher is 3⅝  ÷  ½ = 7¼  times as tall as the magazine. Students may say that the teacher is  7¼ magazines tall. This should be true in real life as well. Since the height of the magazine is 10 in., the teacher is 10 x 7¼ = 72.5 in. tall.</li><li>Some students will measure the height of both the magazine and of the mystery teacher in inches. They will then divide the height of the teacher by the height of the magazine to find how many magazines tall the teacher is. This is a more precise version of the first strategy. Make sure students are clear about the comparisons that they are making. They may compare the real magazine to the magazine in the picture or the magazine in the picture to the teacher in the picture.</li><li>If a video projector, electronic whiteboard, or document camera is available in the classroom, students might suggest projecting the image at full scale, zooming in or out until the P.I. Monthly magazine’s height is about 10 inches on the screen. This would also work if the magazine could be projected at 50% of full scale, so that its height is 5 inches on the screen.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "TILEUjCL-aZwn9xX",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Discuss students’ perception of similar figures/scaled drawings. They might say things like, “look alike,” “same shape,” “same features,” “different size,”... (Language)</p><p>When asked what the Mystery Club advisor means by “similar,” students may say that the figures in the picture look the same as the original shapes except in size. They may notice that the objects in the picture have the same shape as the actual objects.</p>"
+          ]
+        }
+      },
+      {
+        "id": "TILEsw8hpd9Uix_i",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p><ul><li>Can you think of some other times when you might want to use a photograph to estimate the size of something? (Answers will vary. Possible answers: You might want to use a photograph to estimate the size of a large item you plan to buy, such as a large bookshelf. Estimating its size can help you determine whether or not it will fit in its designated spot. You could also take a close-up shot of something small, like an insect, next to an object with a standard size, like a penny. Then you can compare features of the insect, such as its size, to pictures in a reference book.)</li><li>In the movie theater, the image of the person on screen is taller than the real person. How can you use the same techniques to estimate someone’s height from their image on a movie screen? (Answers will vary. Possible answer: If you know the actual measurement of an object in the image, you can use any of the strategies mentioned earlier to find the person’s actual height.)</li><li>Would you have been able to solve the problem had you not known the magazine was 10 inches tall? (Answers will vary. Possible answer: Yes. I could have measured the height of the actual bookshelf shown in the picture and used that height instead of the height of the magazine.)</li><li>Can someone explain Daphne’s statement: For every one magazine height, there are 10 inches in real life?(Answers will vary. Listen for their current understanding about rates and unit rates so you can expand on this throughout the Unit.)</li><li> In What If Situation A, do you agree with Daphne’s reasoning? (Yes. Guide the conversation around the reasoning that the teacher being 7 inches tall and each magazine being 10 inches in real life gives us 7 groups of 10.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "TILEJJjzWkrwd0Su",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Now What Do Students Know</u></p><p>Ask students to reflect on the discussion and answer the Now What Do You Know questions. This might be a good time to talk about how similarity used in everyday life is different than how it used in mathematics.</p>"
+          ]
+        }
+      },
+      {
+        "id": "TILEpUo6Dr7yN0mm",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning</strong></p><p>Use the following questions to assess student understanding at the end of the lesson.</p><ul><li>What evidence do I have that students understand the Now What Do You Know Question?</li></ul><ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol><ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

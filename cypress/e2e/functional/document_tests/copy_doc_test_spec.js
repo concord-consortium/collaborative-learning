@@ -30,7 +30,7 @@ let clueCanvas = new ClueCanvas;
 let canvas = new Canvas;
 
 function beforeTest() {
-  const queryParams = '?appMode=qa&fakeClass=5&fakeUser=student:5&unit=qa&qaGroup=5&curriculumBranch=add-test-unit-qa';
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();

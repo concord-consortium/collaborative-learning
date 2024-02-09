@@ -12,11 +12,10 @@ let diagramTile = new DiagramToolTile;
 const primaryWorkspace = new PrimaryWorkspace;
 const resourcePanel = new ResourcePanel;
 
-const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=brain";
-const queryParamsMultiDataset = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-config-subtabs";
-const queryParamsPlotVariables = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-no-group-share";
+const queryParamsMultiDataset = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
+const queryParamsPlotVariables = `${Cypress.config("qaNoGroupShareUnitStudent5")}`;
 
-const problemDoc = 'Lesson 1.1 - What is a bionic arm?';
+const problemDoc = '1.1 Unit Toolbar Configuration';
 
 // Construct and fill in a table tile with the given data (a list of lists)
 function buildTable(data) {
@@ -48,7 +47,7 @@ function beforeTest(params) {
 context('XYPlot Tool Tile', function () {
   describe("XYPlot Tool", () => {
     it("XYPlot tool tile", () => {
-      beforeTest(queryParams);
+      beforeTest(queryParamsMultiDataset);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();
       clueCanvas.addTile("graph");
@@ -83,7 +82,7 @@ context('XYPlot Tool Tile', function () {
       // xyTile.getEditableAxisBox("left", "max").should("not.exist");
 
       cy.log("Link Table");
-      clueCanvas.clickToolbarButton('graph', 'link-tile');
+      clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
       xyTile.linkTable("Table 1");
 
       cy.log("shows edit boxes on axes");
@@ -207,7 +206,7 @@ context('XYPlot Tool Tile', function () {
     });
 
     it("Test undo redo actions", () => {
-      beforeTest(queryParams);
+      beforeTest(queryParamsMultiDataset);
       cy.log("Undo redo  XY Plot Tile creation");
       clueCanvas.addTile('graph');
       xyTile.getTile().should('be.visible');
@@ -243,7 +242,7 @@ context('XYPlot Tool Tile', function () {
     });
 
     it("Test adding 2 Y Series", () => {
-      beforeTest(queryParams);
+      beforeTest(queryParamsMultiDataset);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();
       clueCanvas.addTile("graph");
@@ -274,7 +273,7 @@ context('XYPlot Tool Tile', function () {
 
       cy.log("Link Table");
       xyTile.getTile().click();
-      clueCanvas.clickToolbarButton('graph', 'link-tile');
+      clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
       xyTile.linkTable("Table 1");
       xyTile.getAddSeriesButton().should('be.visible');
       xyTile.getAddSeriesButton().click();

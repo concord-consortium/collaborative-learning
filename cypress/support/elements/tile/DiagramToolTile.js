@@ -7,10 +7,10 @@ class DiagramToolTile {
     return cy.get(`${canvasArea(workspaceClass)} .diagram-tool-tile`);
   }
   getTileTitleText(workspaceClass){
-    return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title-text`);
+    return cy.get(`${workspaceClass || ".primary-workspace"} .diagram-tool-tile .editable-tile-title-text`);
   }
   getTileTitleContainer(workspaceClass){
-    return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
+    return cy.get(`${workspaceClass || ".primary-workspace"} .diagram-tool-tile .editable-tile-title`);
   }
   getDraggableToolbarButton(workspaceClass){
     return cy.get(`${workspaceClass || ".primary-workspace"} .tile-toolbar.diagram-toolbar div[aria-roledescription=draggable]`);

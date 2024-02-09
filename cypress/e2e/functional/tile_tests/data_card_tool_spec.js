@@ -7,7 +7,7 @@ let dc = new DataCardToolTile;
 let xyplot = new XYPlotToolTile;
 
 function beforeTest() {
-  const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=moth&mouseSensor";
+  const queryParams = `${Cypress.config("qaMothPlotUnitStudent5")}&mouseSensor`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
@@ -67,14 +67,6 @@ context('Data Card Tool Tile', () => {
     dc.getDeleteCardButton().click();
     cy.wait(100);
     dc.getCardNofTotalListing().contains("Card 1 of 1");
-
-    cy.log("can expand and collapse a card in sort view");
-    dc.getSortSelect().select("habitat");
-    dc.getSortView().should('exist');
-    dc.getSortCardCollapseToggle().click();
-    dc.getSortCardData().should('not.exist');
-    dc.getSortCardCollapseToggle().click();
-    dc.getSortCardData().should('exist');
 
     cy.log("can add a second attribute and give it a value");
     dc.getSortSelect().select("None");
@@ -166,5 +158,28 @@ context('Data Card Tool Tile', () => {
     dc.getAttrName().eq(1).contains("animal");
     dc.getAttrValueInput().eq(0).invoke('val').should('eq', "river");
     dc.getAttrValueInput().eq(1).invoke('val').should('eq', "rhinocerotter");
+
+    cy.log("can page through a stack of cards in the sort view");
+    dc.getSortSelect().select("habitat");
+    dc.getSortStack().contains("Card 2").should('be.visible');
+    dc.getSortStack().contains("Card 4").should('not.be.visible');
+    dc.getSortStackNextButton().click();
+    dc.getSortStack().contains("Card 2").should('not.be.visible');
+    dc.getSortStack().contains("Card 4").should('be.visible');
+    dc.getSortStackPreviousButton().click();
+    dc.getSortStack().contains("Card 2").should('be.visible');
+    dc.getSortStack().contains("Card 4").should('not.be.visible');
+
+    cy.log("can toggle stacked and unstacked state of cards in a stack");
+    dc.getSortStack().contains("Card 2").should('be.visible');
+    dc.getSortStack().find('.card').eq(0).invoke('offset').its('top').should('be.lt', 200);
+    dc.getSortStack().find('.card').eq(1).invoke('offset').its('top').should('be.lt', 200);
+    dc.getSortStack().should('not.have.class', 'expanded');
+    dc.getSortStack().should('have.class', 'collapsed');
+    dc.getSortStackToggle().click();
+    dc.getSortStack().find('.card').eq(0).invoke('offset').its('top').should('be.lt', 200);
+    dc.getSortStack().find('.card').eq(1).invoke('offset').its('top').should('be.gt', 200);
+    dc.getSortStack().should('not.have.class', 'collapsed');
+    dc.getSortStack().should('have.class', 'expanded');
   });
 });

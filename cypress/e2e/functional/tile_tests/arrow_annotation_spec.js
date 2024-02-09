@@ -14,11 +14,7 @@ const geometryToolTile = new GeometryToolTile;
 const numberlineToolTile = new NumberlineToolTile;
 const xyTile = new XYPlotToolTile;
 
-const queryParams = {
-  unit1:"?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example",
-  unit2:"?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe",
-  unit3:"?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-config-subtabs"
-};
+const queryParams = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
 
 // Note copied from drawing tile test
 // NOTE: For some reason cypress+chrome thinks that the SVG elements are in a
@@ -44,7 +40,7 @@ function beforeTest(params) {
 
 context('Arrow Annotations (Sparrows)', function () {
   it("can add arrows to draw tiles", () => {
-    beforeTest(queryParams.unit1);
+    beforeTest(queryParams);
     clueCanvas.addTile("drawing");
     drawToolTile.getDrawTile().should("exist");
     drawToolTile.getTileTitle().should("exist");
@@ -152,7 +148,7 @@ context('Arrow Annotations (Sparrows)', function () {
   });
 
   it("can add arrows to table tiles", () => {
-    beforeTest(queryParams.unit1);
+    beforeTest(queryParams);
     clueCanvas.addTile("table");
 
     cy.log("Annotation buttons only appear for actual cells");
@@ -198,7 +194,7 @@ context('Arrow Annotations (Sparrows)', function () {
   });
 
   it("can add arrows to geometry tiles", () => {
-    beforeTest(queryParams.unit3);
+    beforeTest(queryParams);
     clueCanvas.addTile("geometry");
 
     cy.log("Annotation buttons appear for points, polygons, and segments");
@@ -224,7 +220,7 @@ context('Arrow Annotations (Sparrows)', function () {
   });
 
   it("can add arrows to numberline tiles", () => {
-    beforeTest(queryParams.unit1);
+    beforeTest(queryParams);
     clueCanvas.addTile("numberline");
 
     cy.log("Annotation buttons appear for points");
@@ -245,7 +241,7 @@ context('Arrow Annotations (Sparrows)', function () {
   });
 
   it("can add arrows to xy plot tiles", () => {
-    beforeTest(queryParams.unit1);
+    beforeTest(queryParams);
     clueCanvas.addTile("graph");
     clueCanvas.addTile("table");
     tableToolTile.getAddColumnButton().click();
@@ -265,7 +261,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationButtons().should("have.length", 9);
     aa.clickArrowToolbarButton();
     xyTile.getTile().click();
-    clueCanvas.clickToolbarButton('graph', 'link-tile');
+    clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
     xyTile.linkTable("Table 1");
     aa.clickArrowToolbarButton();
     aa.getAnnotationButtons().should("have.length", 12);

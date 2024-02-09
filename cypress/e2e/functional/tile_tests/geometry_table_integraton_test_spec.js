@@ -16,7 +16,7 @@ const x = ['3', '7', '6', '0'];
 const y = ['2.5', '5', '1', '0'];
 
 function beforeTest() {
-  const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.3&qaGroup=5"; //using different problem bec. 2.1 disables graph table integration
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
   cy.clearQAData('all');
 
   cy.visit(queryParams);
