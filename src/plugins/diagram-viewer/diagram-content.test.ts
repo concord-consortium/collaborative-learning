@@ -81,8 +81,8 @@ describe("DiagramContent", () => {
 
   it("can export content", () => {
     const content = createDiagramContent();
-    const expected = JSON.stringify({nodes: {}});
-    expect(content.exportJson()).toEqual(expected);
+    const expected = {type: "Diagram", version: "0.0.3", root: {nodes: {}}};
+    expect(JSON.parse(content.exportJson())).toEqual(expected);
   });
 
   it("is always user resizable", () => {

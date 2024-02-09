@@ -1,75 +1,57 @@
-import { cloneDeep } from "lodash";
-import { getSnapshot } from "mobx-state-tree";
-import { ITileModelSnapshotIn } from "../tiles/tile-model";
+import { applySnapshot, getSnapshot } from "mobx-state-tree";
 import { DocumentContentModel, DocumentContentModelType } from "./document-content";
-import { INewTileOptions } from "./document-content-types";
 import {
-  IDocumentImportSnapshot, isOriginalAuthoredTileModel, isOriginalSectionHeaderContent,
-  OriginalAuthoredTileModel, OriginalTileModel
+  IDocumentImportSnapshot, isOriginalAuthoredTileModel, isOriginalSectionHeaderContent, OriginalTileModel
 } from "./document-content-import-types";
-
-function addImportedTileInNewRow(
-          content: DocumentContentModelType,
-          tile: OriginalAuthoredTileModel,
-          options: INewTileOptions) {
-  const id = tile.id || content.getNextTileId(tile.content.type);
-  const tileSnapshot = { id, ...tile };
-  return content.addTileSnapshotInNewRow(tileSnapshot as ITileModelSnapshotIn, options);
-}
-
-function addImportedTileInExistingRow(
-          content: DocumentContentModelType,
-          tile: OriginalAuthoredTileModel,
-          options: INewTileOptions) {
-  const id = tile.id || content.getNextTileId(tile.content.type);
-  const tileSnapshot = { id, ...tile };
-  return content.addTileSnapshotInExistingRow(tileSnapshot as ITileModelSnapshotIn, options);
-}
+import { TileRowModel, TileRowModelType } from "./tile-row";
 
 function migrateTile(content: DocumentContentModelType, tile: OriginalTileModel) {
-  const { layout, ...newTile } = cloneDeep(tile);
-  const tileHeight = layout?.height;
-  if (isOriginalSectionHeaderContent(newTile.content)) {
-    const { sectionId } = newTile.content;
+  if (isOriginalSectionHeaderContent(tile.content)) {
+    const { sectionId } = tile.content;
     content.setImportContext(sectionId);
     content.addSectionHeaderRow(sectionId);
   }
-  else if (isOriginalAuthoredTileModel(newTile)) {
-    addImportedTileInNewRow(content, newTile, { rowIndex: content.rowCount, rowHeight: tileHeight });
+  else if (isOriginalAuthoredTileModel(tile)) {
+    const row = TileRowModel.create({});
+    content.insertRow(row);
+    content.addImportedTileToRow(tile, row);
   }
 }
 
 function migrateRow(content: DocumentContentModelType, tiles: OriginalTileModel[]) {
-  let insertRowIndex = content.rowCount;
-  tiles.forEach((tile, tileIndex) => {
-    const { layout, ...newTile } = cloneDeep(tile);
-    const tileHeight = layout?.height;
-    const options = { rowIndex: insertRowIndex, rowHeight: tileHeight };
-    if (isOriginalAuthoredTileModel(newTile)) {
-      if (tileIndex === 0) {
-        const newRowInfo = addImportedTileInNewRow(content, newTile, options);
-        const newRowIndex = content.getRowIndex(newRowInfo.rowId);
-        (newRowIndex >= 0) && (insertRowIndex = newRowIndex);
-      }
-      else {
-        addImportedTileInExistingRow(content, newTile, options);
-      }
+  let row: TileRowModelType | undefined;
+  tiles.forEach((tile) => {
+    // If this is a section header then skip it
+    if (!isOriginalAuthoredTileModel(tile)) return;
+
+    if (!row) {
+      row = TileRowModel.create({});
+      content.insertRow(row);
     }
+
+    content.addImportedTileToRow(tile, row);
   });
 }
 
-// FIXME: this does not handle tiles that refer to shared models correctly.
-// The tiles are created first and if they have references to the shared
-// model, then those references will be broken because the shared model
-// doesn't exist yet. Many tiles use "afterAttach" to work with their sharedModel
-// so that is also going to be run before the actual shared model is added.
-// For example the diagram-view might try to create a shared variables model when it is
-// first attached. However in practice this might not be an issue because the
-// the shared model manager might not be ready yet at this point, so the reaction
-// in after attach will wait for the shared model manager to be ready.
 export function migrateSnapshot(snapshot: IDocumentImportSnapshot): any {
   const docContent = DocumentContentModel.create();
   const { tiles: tilesOrRows, sharedModels, annotations } = snapshot;
+
+  // Add just the shared model first without its tile references
+  // When the tiles are added next they might refer to objects in
+  // the shared model, so those shared model objects need to exist first.
+  sharedModels?.forEach((entry) => {
+    const {sharedModel} = entry;
+    const id = sharedModel.id;
+    if (!id) {
+      /* istanbul ignore next */
+      console.warn("cannot import a shared model without an id", sharedModel);
+      return;
+    }
+    const newEntry = {sharedModel};
+    docContent.addSharedModelFromImport(id, newEntry);
+  });
+
   tilesOrRows.forEach(tileOrRow => {
     if (Array.isArray(tileOrRow)) {
       migrateRow(docContent, tileOrRow);
@@ -79,18 +61,31 @@ export function migrateSnapshot(snapshot: IDocumentImportSnapshot): any {
     }
   });
 
-  sharedModels?.forEach((entry) => {
-    const id = entry.sharedModel.id;
+  // Now add the tile references these references are in
+  // the `tiles` and `provider` properties. This is done with a basic
+  // applySnapshot. The content of the shared model should not have changed
+  // so this will just add the tiles and provider properties.
+  sharedModels?.forEach((originalEntry) => {
+    const id = originalEntry.sharedModel.id;
     if (!id) {
-      console.warn("cannot import a shared model without an id", entry.sharedModel);
+      /* istanbul ignore next */
+      console.warn("cannot setup a shared model without an id", originalEntry.sharedModel);
       return;
     }
-    docContent.addSharedModelFromImport(id, entry);
+
+    const importedEntry = docContent.sharedModelMap.get(id);
+    if (!importedEntry) {
+      /* istanbul ignore next */
+      console.warn("cannot find shared model on the second pass of import", originalEntry.sharedModel);
+      return;
+    }
+    applySnapshot(importedEntry, originalEntry);
   });
 
   annotations?.forEach(entry => {
     const id = entry.id;
     if (!id) {
+      /* istanbul ignore next */
       console.warn("cannot import an annotation without an id", entry);
       return;
     }

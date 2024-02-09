@@ -29,34 +29,41 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
   useDndMonitor({
     onDragStart: (e) => {
       e.active.data.current?.sortDrag && setSortDragActive(true);
+      if (e.active.data.current?.sortDrag) {
+        document.body.style.cursor = "grabbing";
+      }
     },
     onDragEnd: (e) => {
       if (e.active.data.current?.sortDrag) {
         const draggingId = e.active?.data?.current?.caseId;
         const attrId = e.active?.data?.current?.sortedByAttrId;
         const draggedToValue = e.over?.data?.current?.stackValue;
-        draggedToValue && content.setAttValue(draggingId, attrId, draggedToValue);
+        content.setAttValue(draggingId, attrId, draggedToValue || "");
         setSortDragActive(false);
       }
+      document.body.style.cursor = "default";
     }
   });
 
   return (
-    <div className="sort-area-grid">
-      {uniqueOrderedValues.length > 0 && sortById &&
-        uniqueOrderedValues.map((value, i) => {
-          return (
-            <SortStack
-              key={`${sortById}-${value}`}
-              id={`${sortById}-${value}`}
-              model={model}
-              stackValue={value}
-              inAttributeId={sortById}
-              draggingActive={sortDragActive}
-            />
-          );
-        })
-      }
-    </div>
+    <>
+      <div className="help-text">Drag a card above another stack to update</div>
+      <div className="sort-area-grid">
+        {uniqueOrderedValues.length > 0 && sortById &&
+          uniqueOrderedValues.map((value, i) => {
+            return (
+              <SortStack
+                key={`${sortById}-${value}`}
+                id={`${sortById}-${value}`}
+                model={model}
+                stackValue={value}
+                inAttributeId={sortById}
+                draggingActive={sortDragActive}
+              />
+            );
+          })
+        }
+      </div>
+    </>
   );
 };

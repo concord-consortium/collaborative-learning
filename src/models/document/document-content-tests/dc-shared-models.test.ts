@@ -130,9 +130,9 @@ describe("DocumentContentModel -- shared Models --", () => {
 Object {
   "annotations": Object {},
   "rowMap": Object {
-    "testid-13": Object {
+    "testid-12": Object {
       "height": undefined,
-      "id": "testid-13",
+      "id": "testid-12",
       "isSectionHeader": false,
       "sectionId": undefined,
       "tiles": Array [
@@ -148,7 +148,7 @@ Object {
     },
   },
   "rowOrder": Array [
-    "testid-13",
+    "testid-12",
   ],
   "sharedModelMap": Object {
     "sharedDataSet1": Object {
@@ -255,7 +255,7 @@ Object {
         "importedDataSet": Object {
           "attributes": Array [],
           "cases": Array [],
-          "id": "testid-12",
+          "id": "testid-13",
           "name": undefined,
           "sourceID": undefined,
         },
@@ -387,7 +387,7 @@ Object {
         "importedDataSet": Object {
           "attributes": Array [],
           "cases": Array [],
-          "id": "testid-20",
+          "id": "testid-21",
           "name": undefined,
           "sourceID": undefined,
         },
@@ -520,7 +520,7 @@ Object {
         "importedDataSet": Object {
           "attributes": Array [],
           "cases": Array [],
-          "id": "testid-37",
+          "id": "testid-38",
           "name": undefined,
           "sourceID": undefined,
         },
@@ -661,7 +661,7 @@ Object {
         "importedDataSet": Object {
           "attributes": Array [],
           "cases": Array [],
-          "id": "testid-55",
+          "id": "testid-56",
           "name": undefined,
           "sourceID": undefined,
         },

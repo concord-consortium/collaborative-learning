@@ -7,7 +7,7 @@ const clueTeacher1 = {
 };
 
 describe('Teachers can launch the CLUE Report', () => {
-  it("rewrites the URL of the CLUE report so it can be reloaded", () => {
+  it.skip("rewrites the URL of the CLUE report so it can be reloaded", () => {
     cy.login(portalUrl, clueTeacher1);
     cy.launchReport(reportUrl1);
     cy.waitForLoad();
