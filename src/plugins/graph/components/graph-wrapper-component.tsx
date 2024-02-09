@@ -46,6 +46,8 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     if (caseId && xAttributeId && yAttributeId) {
       const layer = content.layerForAttributeId(xAttributeId);
       if (!layer) return;
+      const plotNum = layer.config.plotNumberForAttributeID(yAttributeId);
+      if (plotNum === undefined) return;
 
       // We don't use these values directly, but without referencing them the app
       // doesn't realize that changes in the axis scales require redrawing the annotations.
@@ -54,7 +56,6 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
       // eslint-disable-next-line unused-imports/no-unused-vars
       const domains = [isNumericAxisModel(xAxis) && xAxis.domain, isNumericAxisModel(yAxis) && yAxis.domain];
 
-      const plotNum = layer.config.plotNumberForAttributeID(yAttributeId);
       const x = getScreenX({ caseId, dataset: layer.config.dataset, layout, dataConfig: layer.config });
       const y = getScreenY({ caseId, dataset: layer.config.dataset, layout, dataConfig: layer.config, plotNum });
       if (!isFinite(x) || !isFinite(y)) return;
