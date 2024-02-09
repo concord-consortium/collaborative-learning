@@ -237,6 +237,8 @@ export class SortedDocuments {
 
   //**************************************** Sort By Tools ****************************************
 
+  //TODO: note that removing a sparrow in real time, won't trigger a change
+
   get sortByTools(): SortedDocument[] {
     const tileTypeToDocumentsMap: Record<string, DocumentModelType[]> = {};
 
@@ -251,31 +253,24 @@ export class SortedDocuments {
     //create a map of valid ones, otherwise put them into the "No Tools" section
     this.filteredDocsByType.forEach((doc) => {
       const tilesByTypeMap = doc.content?.getAllTilesByType();
-      console.log("\n");
-      console.log(`-------${doc.title}--------`);
-      console.log("tilesByTypeMap:", tilesByTypeMap);
       if (tilesByTypeMap) {
         const tileTypes = Object.keys(tilesByTypeMap);
-        const docHasAnnotations = doc.content?.annotations && doc.content?.annotations.size > 0;
-        console.log("docHasAnnotations:", docHasAnnotations);
-        if(docHasAnnotations){
-          tileTypes.push("Sparrows");
-        }
-        console.log("tileTypes:", tileTypes);
-        // Filter out "Placeholder" and "Unknown" tiles
-
-        //From here we call it "Tool Types" - which is an array of all tileTypes and "Sparrow" (if annotation exist)
         const validTileTypes = tileTypes.filter(type => type !== "Placeholder" && type !== "Unknown");
         if (validTileTypes.length > 0) {
           validTileTypes.forEach(tileType => {
             addDocByType(doc, tileType);
           });
+
+          //Assuming validTileTypes, we can check if the document has "Sparrow" annotations
+          const docHasAnnotations = doc.content?.annotations && doc.content?.annotations.size > 0;
+          if(docHasAnnotations){
+            addDocByType(doc, "Sparrow");
+          }
         } else { //Documents with only all Placeholder or Unknown tiles
           addDocByType(doc, "No Tools");
         }
       }
     });
-    //TODO: note that removing a sparrow in real time, won't trigger a change
 
     // Map the tile types to their display names
     const tileTypeDisplayNames = Object.keys(tileTypeToDocumentsMap).map(tileType => {
