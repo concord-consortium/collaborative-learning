@@ -1,0 +1,38 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "TILE-3TOko1D-YcW",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Explore (Digging In)</strong></u></p><p><u>Providing for Individual Needs</u></p><p>Students can use rulers or edges of a piece of paper to make informal estimates of various measurements. Do not push for precise measurement at this time. Pay attention, though, to which students measure naturally and easily and which struggle with measurement. This will help you to plan your teaching in later Problems in the Unit where careful measurement is important. (Agency, Identity, Ownership)</p>"
+          ]
+        }
+      },
+      {
+        "id": "TILEYuL5W5YjFxDF",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Planning for the Summary</u></p><p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know Question(s)? What will you do if you do not have evidence?</p><p><em>Now What Do You Know?</em></p><p><em>The Mystery Club Advisor says that the picture is similar to the actual scene. What do you suppose the advisor means by similar? How is the photo similar to the actual scene that is photographed?</em></p>"
+          ]
+        }
+      },
+      {
+        "id": "TILEEwCOL__3z1Wo",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Look for language such as ratio, rates, fractions, percentage, more than, or less than as students express their comparisons. In the Summarize you can come back to the comparisons and ask students to describe them using terms they learned in previous grades. This is a good assessment of what understanding students bring from Grade 6 about ratios, rational numbers and proportional reasoning. (Language)</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,354 @@
+{
+  "code": "qa-moth-plot",
+  "abbrevTitle": "QA7",
+  "title": "QA Curriculum Moth Style Plot",
+  "subtitle": "Some Subtabs",
+  "placeholderText": "Type in me!",
+  "config": {
+    "placeholderText": "This is where users can type text",
+    "defaultDocumentType": "problem",
+    "settings": {
+      "table": {
+        "numFormat": ".2~f"
+      },
+      "datacard": {
+        "tools": [
+          "duplicate",
+          "merge-in",
+          [
+            "data-set-view",
+            "Table"
+          ],
+          [
+            "data-set-view",
+            "graph"
+          ],
+          "image-upload",
+          "delete-attribute"
+        ]
+      },
+      "graph": {
+        "defaultAxisLabels": {
+          "bottom": "Categories",
+          "left": "Counts"
+        },
+        "emptyPlotIsNumeric": false,
+        "scalePlotOnValueChange": true,
+        "defaultSeriesLegend": false,
+        "connectPointsByDefault": false
+      },
+      "diagram": {
+        "maxTiles": 1
+      },
+      "simulator": {
+        "defaultSimulation": "terrarium",
+        "maxTiles": 1
+      }
+    },
+    "showCommentTag": true,
+    "commentTags": {
+      "diverging": "Diverging Designs",
+      "converging": "Converging Designs",
+      "materials": "Varies Material/Surface",
+      "physical": "Varies Physical Factors",
+      "user": "Varies Human Factors",
+      "system": "Varies System Factors"
+    },
+    "tagPrompt": "Identify Design Approach",
+    "tools": ["Simulator"],
+    "navTabs": {
+      "lazyLoadTabContents": true,
+      "showNavPanel": true,
+      "tabSpecs": [
+        {
+          "tab": "problems",
+          "label": "Problems",
+          "sections": [
+            {
+              "initials": "REF",
+              "title": "Reference",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "PR",
+              "title": "Practice",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "EX",
+              "title": "Experiment",
+              "type": "problem-documents"
+            }
+          ]
+        },
+        {
+          "tab": "sort-work",
+          "label": "Sort Work",
+          "teacherOnly": false
+        },
+        {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "problem-documents",
+              "dataTestHeader": "my-work-section-investigations",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": [
+                "problem",
+                "planning"
+              ],
+              "order": "original",
+              "showStars": [
+                "student",
+                "teacher"
+              ]
+            },
+            {
+              "title": "Workspaces",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": [
+                "personal"
+              ],
+              "properties": [
+                "!isDeleted"
+              ],
+              "showStars": [
+                "student",
+                "teacher"
+              ],
+              "addDocument": true
+            },
+            {
+              "title": "Workspaces",
+              "type": "learning-logs",
+              "dataTestHeader": "learning-log-section",
+              "documentTypes": [
+                "learningLog"
+              ],
+              "properties": [
+                "!isDeleted"
+              ],
+              "showStars": [
+                "student",
+                "teacher"
+              ],
+              "addDocument": true
+            },
+            {
+              "title": "Starred",
+              "type": "starred-problem-documents",
+              "dataTestHeader": "my-work-section-starred",
+              "documentTypes": [
+                "personal",
+                "problem"
+              ],
+              "properties": [
+                "starred",
+                "!isDeleted"
+              ],
+              "showStars": [
+                "student",
+                "teacher"
+              ]
+            }
+          ]
+        },
+        {
+          "tab": "student-work",
+          "label": "Student Work",
+          "teacherOnly": true,
+          "sections": []
+        },
+        {
+          "tab": "class-work",
+          "label": "Class Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "published-problem-documents",
+              "dataTestHeader": "class-work-section-published",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": [
+                "publication"
+              ],
+              "showStars": [
+                "teacher", "student"
+              ],
+              "properties": [
+                "!isTeacherDocument"
+              ]
+            },
+            {
+              "title": "Workspaces",
+              "type": "published-personal-documents",
+              "dataTestHeader": "class-work-section-personal",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": [
+                "personalPublication"
+              ],
+              "showStars": [
+                "teacher",
+                "student"
+              ],
+              "properties": [
+                "!isTeacherDocument"
+              ]
+            },
+            {
+              "className": "section teacher published-documents",
+              "title": "Supplemental Work",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": [
+                "publication",
+                "personalPublication"
+              ],
+              "properties": [
+                "isTeacherDocument",
+                "!isDeleted"
+              ]
+            },
+            {
+              "className": "section problem starred",
+              "title": "Starred",
+              "type": "starred-problem-documents",
+              "dataTestHeader": "class-work-section-starred",
+              "documentTypes": [
+                "publication"
+              ],
+              "properties": [
+                "starred"
+              ],
+              "showStars": [
+                "teacher",
+                "student"
+              ]
+            },
+            {
+              "className": "section problem starred",
+              "title": "Starred",
+              "type": "starred-personal-documents",
+              "dataTestHeader": "class-work-section-starred",
+              "documentTypes": [
+                "publication"
+              ],
+              "properties": [
+                "starred"
+              ],
+              "showStars": [
+                "teacher",
+                "student"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "toolbar": [
+      {"id": "Text", "title": "Text", "isTileTool": true},
+      {"id": "Table", "title": "Table", "isTileTool": true},
+      {"id": "DataCard", "title": "Data Card", "isTileTool": true},
+      {"id": "Image", "title": "Image", "isTileTool": true},
+      {"id": "Drawing", "title": "Drawing", "isTileTool": true},
+      {"id": "Diagram", "title": "Diagram", "isTileTool": true},
+      {"id": "Expression", "title": "Expression", "isTileTool": true},
+      {"id": "Graph", "title": "XY Plot", "isTileTool": true},
+      {"id": "Geometry", "title": "Graph", "isTileTool": true},
+      {"id": "Numberline", "title": "Numberline", "isTileTool": true},
+      {"id": "Dataflow", "title": "Dataflow", "isTileTool": true},
+      {"id": "Simulator", "title": "Terrarium Simulator", "isTileTool": true},
+      {"id": "sparrow", "title": "Sparrow", "iconId": "icon-sparrow-tool", "isTileTool": false},
+      {"id": "hide-annotations", "title": "Hide Annotations", "iconId": "icon-hide-annotations-tool", "isTileTool": false},
+      {"id": "undo", "title": "Undo", "iconId": "icon-undo-tool", "isTileTool": false},
+      {"id": "redo", "title": "Redo", "iconId": "icon-redo-tool", "isTileTool": false},
+      {"id": "duplicate", "title": "Duplicate", "iconId": "icon-duplicate-tool", "isTileTool": false},
+      {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false}
+    ],
+    "stamps": []
+  },
+  "sections": {
+    "first": {
+      "initials": "FI",
+      "title": "First Section",
+      "placeholder": "Work area for\nFirst Section"
+    },
+    "second": {
+      "initials": "SE",
+      "title": "Second Section",
+      "placeholder": "Second Section Placeholder"
+    },
+    "third": {
+      "initials": "TH",
+      "title": "Third Section",
+      "placeholder": "Third Section content goes here"
+    }
+  },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "plan": {
+        "initials": "PL",
+        "title": "Plan",
+        "placeholder": "Plan the work; work the plan"
+      }
+    },
+    "sections": [
+      {
+        "type": "plan"
+      }
+    ]
+  },
+  "defaultStamps": [],
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "QA Investigation 1",
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "1.1 Unit Toolbar Configuration",
+          "subtitle": "Text, Table, Drawing",
+          "sections": [
+            "investigation-1/problem-1/first/content.json",
+            "investigation-1/problem-1/second/content.json",
+            "investigation-1/problem-1/third/content.json"
+          ]
+        },
+        {
+          "description": "Problem 1.2",
+          "ordinal": 2,
+          "title": "1.2 Problem Toolbar Configuration",
+          "subtitle": "Text only",
+          "config": {
+            "toolbar": [
+              {
+                "id": "Text",
+                "title": "Text",
+                "isTileTool": true
+              },
+              {
+                "id": "delete",
+                "title": "Delete",
+                "iconId": "icon-delete-tool",
+                "isTileTool": false
+              }
+            ]
+          },
+          "sections": [
+            "investigation-1/problem-2/first/content.json",
+            "investigation-1/problem-2/second/content.json",
+            "investigation-1/problem-2/third/content.json"
+          ]
+        }
+      ]
+    }
+  ]
+}

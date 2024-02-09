@@ -1,0 +1,219 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "document_Text_1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>One of Daphne’s photos looks like the picture below. Daphne has a copy of the P.I. Monthly magazine shown in the picture. The P.I. Monthly magazine is 10 inches high. She thinks the photo might be helpful in determining the height of the mystery teacher.</p>"
+          ]
+        }
+      },
+      {
+        "id": "20AUG20220932",
+        "title": "Daphne’s photo of the mystery teacher by a magazine rack",
+        "content": {
+          "type": "Image",
+          "url": "qa/images/SS_1_1_06_magazine_rack_500w.png"
+        }
+      },
+      {
+        "id": "document_Text_2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>Is Daphne&#x27;s claim correct? Is it possible to use the magazine and the picture to estimate the teacher&#x27;s height? Explain.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_3",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Daphne’s claim is correct. In her picture, we can measure both the height of the P.I. magazine and the height of the teacher and then compare two values. Knowing the P.I. magazine is 10 inches high in real life, you can estimate the teacher’s real height.</p><p> Possible student strategies:</p><ul><li>Students can use rulers or edges of a piece of paper to make informal estimates of various measurements. Do not push for precise measurement at this time. Pay attention, though, to which students measure naturally and easily and which struggle with measurement. This will help you to plan your teaching in later Problems in the Unit where careful measurement is important.</li><li>Some students will measure the height in inches on the magazine and of the mystery teacher. They will then divide the height of the teacher by the height of the magazine to find how many magazines tall the teacher is. This is a more precise version of the first strategy. Make sure students are clear about the comparisons that they are making. They may compare the real magazine to the magazine in the picture or the magazine in the picture to the teacher in the picture.</li><li>The magazine is 10 inches tall. The teacher is about 7 magazines, or 70 inches, tall.</li><li>In the picture, the height of the P.I. Monthly is 0.5 in. We know that the height of the real magazine is 10 in. So, the real magazine is 10 ÷ 0.5 = 20 times larger than in the picture. The teacher should also be 20 times larger in real life than he/she is in the picture. The teacher’s height in the picture is about 3.625 (3 ⅝) in. So, the actual height is about 20 x 3.625 = 72.5 in.</li><li>Students may use ratio or “for every” statements, such as “The ratio of the teacher’s height in the picture to her height in real life is about 1 to 20.” Or “For every inch in height of the magazine in the picture there are 20 inches in height for the real magazine.”</li><li>Students may also compare the magazine in the picture to the teacher in the picture. In this case, the teacher is 7¼ times as tall as the magazine. Students may say that the teacher is 7¼ magazines tall. This should be true in real life as well. Since the height of the magazine is 10 in., the teacher is 10 x 7¼ = 72.5 in. tall.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "41Sgd4xRSS_4h_v0",
+        "title": "QA Table2",
+        "content": {
+          "type": "Table",
+          "columnWidths": {
+            "xm2ueGoCDPYAslV6": 80,
+            "nmqHeqUBL0way-hK": 80
+          },
+          "name": "Table 1"
+        }
+      },
+      {
+        "id": "document_Text_4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>Could you find the height of the teacher if you did not know that the magazine was 10 inches tall? Explain.</li></ul>"
+          ]
+        }
+      },
+      [
+        {
+          "id": "g2wijyhSwxHh9CYp",
+          "title": "QA Table1",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "9zM6lkdj3lOas-Ee": 80,
+              "bZwfXYBfC9cyq7m2": 80
+            },
+            "name": "Table 1"
+          }
+        },
+        {
+          "id": "5hQFaXAJDb4PY0IQ",
+          "title": "QA Table3",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "Uj9TuB0wF7TN8od5": 80,
+              "7utSBWQIPLdQzscY": 80
+            },
+            "name": "Table 1"
+          }
+        }
+      ],
+      {
+        "id": "document_Text_5",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answers will vary. Possible answers:</p><ul><li>Yes. Instead of the height of the magazine, I could have measured the height of the actual bookshelf shown in the picture and used it to figure out the teacher’s height.</li><li>No. If I do not know the real height of the magazine is 10 inches, I would not be able to find the real height of the teacher. I only know the teacher is 7.25 times taller than the magazine.</li></ul><p>Students will think about the proportional relationship of heights between the picture and the reality. <strong></strong></p>"
+          ]
+        }
+      }
+    ],
+    "sharedModels": [
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "NMiR44E2PqeI4P8c",
+          "providerId": "41Sgd4xRSS_4h_v0",
+          "dataSet": {
+            "id": "2EHmD7Z07IvJTr3e",
+            "name": "Table 1",
+            "attributes": [
+              {
+                "id": "xm2ueGoCDPYAslV6",
+                "clientKey": "",
+                "name": "x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [],
+                "title": ""
+              },
+              {
+                "id": "nmqHeqUBL0way-hK",
+                "clientKey": "",
+                "name": "y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [],
+                "title": ""
+              }
+            ],
+            "cases": []
+          }
+        },
+        "tiles": [
+          "41Sgd4xRSS_4h_v0"
+        ]
+      },
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "vjaJzz0LYis3TxpP",
+          "providerId": "g2wijyhSwxHh9CYp",
+          "dataSet": {
+            "id": "YY4xvB2iZvj-2Hen",
+            "name": "Table 1",
+            "attributes": [
+              {
+                "id": "9zM6lkdj3lOas-Ee",
+                "clientKey": "",
+                "name": "x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [],
+                "title": ""
+              },
+              {
+                "id": "bZwfXYBfC9cyq7m2",
+                "clientKey": "",
+                "name": "y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [],
+                "title": ""
+              }
+            ],
+            "cases": []
+          }
+        },
+        "tiles": [
+          "g2wijyhSwxHh9CYp"
+        ]
+      },
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "qOg5CaF7DR_7WsQK",
+          "providerId": "5hQFaXAJDb4PY0IQ",
+          "dataSet": {
+            "id": "-bBIo6K0bMZAgiw4",
+            "name": "Table 1",
+            "attributes": [
+              {
+                "id": "Uj9TuB0wF7TN8od5",
+                "clientKey": "",
+                "name": "x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [],
+                "title": ""
+              },
+              {
+                "id": "7utSBWQIPLdQzscY",
+                "clientKey": "",
+                "name": "y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [],
+                "title": ""
+              }
+            ],
+            "cases": []
+          }
+        },
+        "tiles": [
+          "5hQFaXAJDb4PY0IQ"
+        ]
+      }
+    ]
+  },
+  "supports": []
+}

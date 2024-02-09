@@ -1,0 +1,630 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      [
+        {
+          "id": "IubDD3qrjJw8Uhb9",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>Using CLUE’s Tools</strong></p><p></p><p>It’s time  to try out each of CLUE’s tools. You’ll decide which tools to use to solve a problem. Knowing how the tools work will help you present your mathematical answers in a way that makes sense to you, whether that’s in words or a graph or table. To use a tool, just click it. You can then move it to a particular section or above or below another tile. Or to position it precisely, drag it from the toolbar into your workspace, moving to where you want it (the drop zone is indicated by a blue vertical bar), then let go.</p>"
+            ]
+          }
+        },
+        {
+          "id": "_acGcUoGuBg5sXvL",
+          "title": "Tool Tiles on the CLUE Toolbar",
+          "content": {
+            "type": "Image",
+            "url": "qa/images/AllToolsToolBar-labeled.png"
+          }
+        }
+      ],
+      [
+        {
+          "id": "jVu0lyX6VmWRgOhY",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>Text</strong></p><p>When you click into a text tile in your workspace, a tray with icons for editing options appears below it. Hover your mouse over the items in the tray for more information (and a keyboard shortcut) about each.</p><p></p>"
+            ]
+          }
+        },
+        {
+          "id": "kKGmMgSxgJId6zJW",
+          "title": "Text controls",
+          "content": {
+            "type": "Image",
+            "url": "qa/images/TextTray.png"
+          }
+        }
+      ],
+      [
+        {
+          "id": "I8j7wDtsSN4g6NYH",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>The text tool is like many other editors, but some options may work slightly differently.</p><ol><li>To select text, click in the text tile, then drag over the text or use the arrow keys with the Shift key to select by character or Command-Shift for larger selections. (On a PC, use the Ctrl key instead of the Command key.) Note: Dragging where there is no text moves the whole text tile.</li><li>To use an editing tool, select the text you want to format (e.g., bold, italicize, etc.), then click the tool, which will turn blue. Or click the tool first, and start typing formatted text. Be sure to click the tool again to deselect it when you’re done.</li></ol>"
+            ]
+          }
+        },
+        {
+          "id": "HBgEN4_UdhlzQST_",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Drag this tile into the Initial Challenge section in your workspace, and format the text below as described.</p><p></p><p>Bold</p><p>Italic</p><p>Underline</p><p>Subscript</p><p>Superscript</p><p></p><p>This is a</p><p>Numbered</p><p>List</p><p></p><p>This is a</p><p>Bulleted</p><p>List</p>"
+            ]
+          }
+        }
+      ],
+      {
+        "id": "T7Nf4eiuSzITUz7L",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>A few more things about text tiles:</strong></p><p>When text is selected, you can use the usual keyboard shortcuts:</p><ul><li>Cut: Command-X</li><li>Copy: Command-C</li><li>Paste: Command-V</li><li>Undo: Command-Z</li><li>Redo: Command-Shift-Z</li><li>Select all text in a tile: Command-A</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "WWbw94aRpUIoXhPw",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Table</strong></p><p>Use a table to relate two or more quantities. Tables can hold numbers or text. You can edit the table <strong>title</strong> or <strong>column labels </strong>by double-clicking. You can move from cell to cell with the <strong>tab</strong> key. Below are some example tables. Drag each one into the <strong>Initial Challenge </strong>section and make the suggested edits.</p>"
+          ]
+        }
+      },
+      [
+        {
+          "id": "a_B3E01X00sg3_kO",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Explore the table functions. See if you can add another column and label it Height (ft.), then fill the column with heights. You can make up the numbers (or research them, if you want). Also, add another dinosaur or two and fill out the columns with numbers.</p>"
+            ]
+          }
+        },
+        {
+          "id": "-ZoJoDESMoYPKL7H",
+          "title": "Dinosaur Characteristics",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "VHrBIe2ExSenF893": 110,
+              "kEz4oI4phLeH9Sp5": 106
+            },
+            "name": "Dinosaur Characteristics"
+          }
+        }
+      ],
+      {
+        "id": "FMm-bEHPbtoLSJd2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Tables can help you see patterns. Here is a table that shows the number of ways points (not on a line) can be connected with straight lines. Put this in the <strong>Initial Challenge </strong>workspace and add a row or two. Can you continue the pattern for 6 and 7 points or more? Add a text tile to describe how you solved it.</p>"
+          ]
+        }
+      },
+      {
+        "id": "JU_PfL7clLhi5YKm",
+        "title": "Connections Between Points",
+        "content": {
+          "type": "Table",
+          "columnWidths": {
+            "Ick9zjVzfkrijAbd": 120,
+            "-3FtVwbEuThWIE1m": 115
+          },
+          "name": "Connections Between Points"
+        }
+      },
+      {
+        "id": "1O2b0WS9ShaqbaHv",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Tables have other features that we’ll explore later in this activity.</p>"
+          ]
+        }
+      },
+      [
+        {
+          "id": "bsVBeX_vC7orGn2k",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>Graph</strong></p><p>The Graph tool allows you to work with both geometrical figures and number relationships on a graph. Many features are available from the graph tray that appears when a graph tile is selected.</p>"
+            ]
+          }
+        },
+        {
+          "id": "8l7oyYGXkc9uVEps",
+          "title": "Graph controls",
+          "content": {
+            "type": "Image",
+            "url": "qa/images/GraphTrayLabled.png"
+          }
+        }
+      ],
+      {
+        "id": "ig4n6NXWNFIqgugW",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Try out the geometrical features by dragging the Graph tile below into the <strong>Initial Challenge </strong>workspace. Drag this text tile in, too, and close out this panel (with the “X”) so you have more room to work. When you are done, click on My Resources and come back to the <strong>Initial Challenge</strong>.</p><ol><li>Double-click one of the points A, B, or C. Double-clicking a point connects all unconnected points together in the order they were created.</li><li>Click the middle of the triangle to select it. Now you can drag it around. When selected, there is a rotate icon. You can spin it.</li><li>You can select any part of a geometric figure, a point, an edge, or the whole thing. Try selecting these things; they turn red or are highlighted. Once they are selected, you can move them around.</li><li>Clicking on the graph creates a point. Make some points and then connect them into a shape.</li><li>If a point, line, or shape is not quite where you want it, you can select it, and move it with the arrow keys on your keyboard.</li><li>Select a shape and duplicate it. There are two ways to do so. Can you find them both?</li><li>Change the name and the maximum or minimum values of the graph axes by clicking on the “x” or the “y.” You can give the axes labels, too.</li></ol><p></p>"
+          ]
+        }
+      },
+      [
+        {
+          "id": "50dFm8k1u_26729x",
+          "title": "Graph Play",
+          "content": {
+            "type": "Geometry",
+            "board": {
+              "properties": {
+                "axisMin": [
+                  -2.186,
+                  -1.093
+                ],
+                "axisRange": [
+                  26.23,
+                  17.486
+                ]
+              }
+            },
+            "objects": [
+              {
+                "type": "point",
+                "parents": [
+                  5.009165503307461,
+                  4.9969649184597
+                ],
+                "properties": {
+                  "id": "4LBSAZbwBSIZj8oe",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  10,
+                  10.000000000000002
+                ],
+                "properties": {
+                  "id": "CwvkuSfF5kvTyumD",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  15,
+                  5.000000000000001
+                ],
+                "properties": {
+                  "id": "1t6NY4AggtTSPW_H",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "tYv03K0SXNOBRbws",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>You can try out the remaining features and some tricks with the Graph tool later in this activity.</p><p></p>"
+            ]
+          }
+        }
+      ],
+      {
+        "id": "V8HfULbj8W5hEh1x",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Image</strong></p><p>Use the image tool to add a picture or snapshot to your work. For example, you might want to do some of your work with a pencil and paper. You can take a picture of it with the computer’s camera or a cell phone camera and upload it to your workspace. Then, all your work is together and your teacher can easily see it.</p>"
+          ]
+        }
+      },
+      {
+        "id": "ldQbqn6TNXqeGSnU",
+        "title": "Snapshot of physical work loaded in CLUE",
+        "content": {
+          "type": "Image",
+          "url": "qa/images/ImageTool-StudentWork_450w.png"
+        }
+      },
+      {
+        "id": "MADDxE2jZiDIptpg",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>You can upload an image three ways: (1) Drag an image (JPG, PNG) from your computer directly into your workspace, (2) Drag and drop an image into a new image tool, or (3) Use the Upload Image option below the image tool to upload the file.</p><p>Of course, you can always drag an image from a problem into your workspace.</p>"
+          ]
+        }
+      },
+      {
+        "id": "SbbKDh_4RIFGF5Ig",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Draw</strong></p><p>This simple draw tool can help you explain your answers when nothing else will. Drag a new Draw tool into the Initial Challenge workspace, and try it out.</p>"
+          ]
+        }
+      },
+      {
+        "id": "gOJ6rVNNfONMKs3K",
+        "title": "Drawing controls",
+        "content": {
+          "type": "Image",
+          "url": "qa/images/DrawTrayLabeled_450w.png"
+        }
+      },
+      {
+        "id": "UmuJ2eGSIGvOpkwy",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>There are several features in the Draw tray.</p><ul><li><strong>Select</strong> - Every mark you make in the draw tool is a separate element. When the Select arrow is highlighted, just click on an element to select it. Then you can move it or delete it. Select multiple elements by dragging over them or clicking.</li><li><strong>Freehand</strong> - Draw with the mouse. The color can be changed.</li><li><strong>Line</strong> - Draw straight lines. The color can be changed.</li><li><strong>Rectangle</strong> - Draw a four-sided figure. To get a perfect square, hold down the shift key when dragging.</li><li><strong>Ellipse</strong> - Draw a round figure. To get a perfect circle, hold down the shift key when dragging.</li><li><strong>Line/border color </strong>- Change the color of Freehand, Line, or the outlines of Rectangles or Ellipses.</li><li><strong>Fill color </strong>- Change the color of the inside of Rectangles or Ellipses.</li><li><strong>Delete </strong>- Delete the selected elements.</li></ul><p>Note: In some activities, the Draw tool has an extra feature called <strong>Stamp</strong> with small icons you can use to solve the questions for that problem.</p>"
+          ]
+        }
+      },
+      {
+        "id": "9WCoe166uaNJlt_1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Using the Table and Graph Tool Together</strong></p><p>The Table and Graph tools can be linked together. Try this:</p><ol><li>Drag the table labeled <em>Dog</em> into your workspace.</li><li>Drag a new graph next to it.</li><li>Drag the Dog table on top of the graph.</li><li>Double-click one of the points on the graph.</li></ol>"
+          ]
+        }
+      },
+      {
+        "id": "xW3a8ImrCr37XGef",
+        "title": "Dog",
+        "content": {
+          "type": "Table",
+          "columnWidths": {
+            "Df3p2Xe--hsJyPSs": 80,
+            "Ieh72IaVTyU6HSpA": 80
+          },
+          "name": "Dog"
+        }
+      },
+      [
+        {
+          "id": "document_Text_1",
+          "display": "teacher",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>When the Dog table is linked to the Graph, and a point has been double-clicked, it will look like this. The label can be added by students. Linked graph points cannot be changed on the graph, but changed points on the table will be updated on the graph. Students will need to Select and Duplicate the dog to move it or change the shape of it.</p>"
+            ]
+          }
+        },
+        {
+          "id": "document_Image_1",
+          "title": "Graph with picture of dog",
+          "display": "teacher",
+          "content": {
+            "type": "Image",
+            "url": "qa/images/DogGraphTeacherImage_350w.png"
+          }
+        }
+      ],
+      {
+        "id": "DoQmgg9mbQ_KfaHb",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Once you can see a dog, what can you do with it? Try selecting the whole figure and then different elements of it--points and lines. Then test the different tools in the graph tray. For instance,</p><ol><li>What can you move with the mouse, and what won&#x27;t move?</li><li>Can you duplicate the figure (make a copy)?</li><li>If you can make a copy, try doing things with the copy.</li><li>Can you move it? Rotate it?  Stretch it?</li><li>Can you measure an angle using the graph tools?</li><li>Can you measure a length of one segment?</li></ol><p>See if you can <em>unlink</em> the graph. What happens?</p>"
+          ]
+        }
+      },
+      {
+        "id": "Zl70Im62cFEh239k",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Uploading an Image to a Graph</strong></p><p>The Graph tool can measure the lengths of line segments using the Segment Label feature. It also can be used to make measurements on images that can be uploaded to the graph. Start a new graph in the Initial Challenge section and find an image on your computer that you’d like to share. You can make points and shapes on top of the image. Is there anything in the image that you can measure? Add a label with a measurement.</p>"
+          ]
+        }
+      }
+    ],
+    "sharedModels": [
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "c6Rjj-dSr_ISXaCk",
+          "providerId": "-ZoJoDESMoYPKL7H",
+          "dataSet": {
+            "id": "eLyFbjSvftQWOPw2",
+            "name": "Dinosaur Characteristics",
+            "attributes": [
+              {
+                "id": "VHrBIe2ExSenF893",
+                "clientKey": "",
+                "name": "Dinosaur",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "Velociraptor",
+                  "Coelophysis",
+                  "Triceratops",
+                  "Allosaurus"
+                ],
+                "title": ""
+              },
+              {
+                "id": "kEz4oI4phLeH9Sp5",
+                "clientKey": "",
+                "name": "Length (ft.)",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "6.5",
+                  "10",
+                  "26",
+                  "32"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HCSQ6FZE7AF04P9H9K6QQBKY"
+              },
+              {
+                "__id__": "01HCSQ6FZE7AF04P9H9K6QQBKZ"
+              },
+              {
+                "__id__": "01HCSQ6FZE7AF04P9H9K6QQBM0"
+              },
+              {
+                "__id__": "01HCSQ6FZE7AF04P9H9K6QQBM1"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "-ZoJoDESMoYPKL7H"
+        ]
+      },
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "q5Ijdqm2UNcyZ49p",
+          "providerId": "JU_PfL7clLhi5YKm",
+          "dataSet": {
+            "id": "M6_nC0dZVYPzdWdn",
+            "name": "Connections Between Points",
+            "attributes": [
+              {
+                "id": "Ick9zjVzfkrijAbd",
+                "clientKey": "",
+                "name": "Points",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5"
+                ],
+                "title": ""
+              },
+              {
+                "id": "-3FtVwbEuThWIE1m",
+                "clientKey": "",
+                "name": "Connections",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "0",
+                  "1",
+                  "3",
+                  "6",
+                  "10"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HCSQ6FZGQB5Z3AWKG1X6DRS4"
+              },
+              {
+                "__id__": "01HCSQ6FZGQB5Z3AWKG1X6DRS5"
+              },
+              {
+                "__id__": "01HCSQ6FZGQB5Z3AWKG1X6DRS6"
+              },
+              {
+                "__id__": "01HCSQ6FZGQB5Z3AWKG1X6DRS7"
+              },
+              {
+                "__id__": "01HCSQ6FZGQB5Z3AWKG1X6DRS8"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "JU_PfL7clLhi5YKm"
+        ]
+      },
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "iDRD5HCEiF9m8REk",
+          "providerId": "xW3a8ImrCr37XGef",
+          "dataSet": {
+            "id": "hRH_PH2RV7FWwlck",
+            "name": "Dog",
+            "attributes": [
+              {
+                "id": "Df3p2Xe--hsJyPSs",
+                "clientKey": "",
+                "name": "x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "6",
+                  "8",
+                  "8.5",
+                  "10",
+                  "11",
+                  "15",
+                  "19",
+                  "20",
+                  "19",
+                  "18",
+                  "18",
+                  "16",
+                  "14",
+                  "12",
+                  "10",
+                  "10",
+                  "9",
+                  "9",
+                  "7"
+                ],
+                "title": ""
+              },
+              {
+                "id": "Ieh72IaVTyU6HSpA",
+                "clientKey": "",
+                "name": "y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "8.5",
+                  "10",
+                  "11",
+                  "11",
+                  "9",
+                  "9.5",
+                  "9",
+                  "11",
+                  "5",
+                  "5",
+                  "7",
+                  "6.5",
+                  "6",
+                  "6.5",
+                  "7",
+                  "5",
+                  "5",
+                  "8.5",
+                  "8"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S2X"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S2Y"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S2Z"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S30"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S31"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S32"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S33"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S34"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S35"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S36"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S37"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S38"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S39"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S3A"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S3B"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S3C"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S3D"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S3E"
+              },
+              {
+                "__id__": "01HCSQ6G04WNXM1RXB7W0G7S3F"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "xW3a8ImrCr37XGef"
+        ]
+      }
+    ]
+  },
+  "supports": []
+}

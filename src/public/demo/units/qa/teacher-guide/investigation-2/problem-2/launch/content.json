@@ -1,0 +1,78 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "B1Zbacjn7v4DweQT",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Overview</strong></p><p>In this Problem, students investigate the effects that various algebraic rules have on the shape and location of a figure on a coordinate grid. The figure is a hat for Mug. Students explore what happens to the location of the hat when numbers are added to or subtracted from each coordinate. The figures are similar but may have changed location. In addition, they will be able to distinguish rules that produce similar figures from rules that do not produce similar figures, recognizing the role that multiplication plays in scaled drawings or similarity relationships. This geometric setting will lay a foundation for students later work on proportional relationships in <em>Comparing and Scaling</em> and <em>Moving Straight Ahead</em>. </p>"
+          ]
+        }
+      },
+      {
+        "id": "e-XTKxDcEJpB8HjU",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>AoL:</strong> Analysis</p>"
+          ]
+        }
+      },
+      {
+        "id": "ieQ54ObvY0PYcXpJ",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p><p>Continue to explore enlarging, shrinking, and moving geometric figures using coordinate grids and rules that produce both similar and non-similar figures, including multipliers that are rational numbers. Expand understanding of which attributes change and which stay the same: </p><ul><li>corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.</li><li>corresponding side lengths of the similar figure increases or decreases by the multiplier used to create a new rule. </li><li>adding or subtracting numbers to a rule results in a figure moving on a grid but not in changing the shape or size of the new figure. </li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "TILEkSPaM0PzLoew",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>NWDYK</strong></p><p>If you know the coordinate rules to create an image, how can you tell if the two figures are similar? How can you use the rule to predict the side lengths of the image? How is the effect of a coordinate rule like the effect of a rubber band stretcher or a copy machine setting?</p>"
+          ]
+        }
+      },
+      {
+        "id": "66i04XHDIBPv4_Zn",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Launch (Getting Started)</strong></u></p><p><u>Connecting to Prior Knowledge</u></p><p>Tell the students that this Problem is related to drawing the Wump family and imposters. In this case they are looking at hats for the Wump family. The hat is made from a rectangle and a triangle and has 6 vertices. This makes the figure simple enough that the students can concentrate on what is happening as they manipulate the rule by adding to each coordinate and/or multiplying each coordinate by a number.</p>"
+          ]
+        }
+      },
+      {
+        "id": "HGNzJNBK1L3nxex9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p><p>Hand out <strong>Learning Aid 2.2A: Table for Mug’s Hat and Learning Aid 2.2B: Four First-Quadrant Grids</strong>. Have students look at the table and the grids that are provided. They should have little trouble drawing the figures. However, it is important that the students start the Problem knowing that the main point of the Problem is to look back over their drawings and make sense of what adding or multiplying in the rule does to the image.</p><p>After they have the hat and rules to look at, challenge students to find a way to predict what will happen to the image only by analyzing the rule and not drawing the figure.</p>"
+          ]
+        }
+      },
+      {
+        "id": "ijQrGok8lJIM1k4k",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Implementation Note</strong>:  Drawing the hats in the Initial Challenge can be time consuming but it is necessary for students to understand the effects of addition and subtraction versus multiplication on the algebraic rules.  During the What If you could have students do one of the situations and then have groups share the findings during the summary conversation.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

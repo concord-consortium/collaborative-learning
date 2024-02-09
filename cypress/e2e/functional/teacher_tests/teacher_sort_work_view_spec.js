@@ -4,7 +4,7 @@ let dashboard = new TeacherDashboard();
 const sortWorkItem = '.sort-work-view .sorted-sections .list-item';
 
 function beforeTest() {
-  const queryParams = "/?appMode=demo&demoName=CLUE-Test&fakeClass=1&fakeOffering=1&problem=1.1&fakeUser=teacher:1&unit=example-config-subtabs&curriculumBranch=sort-tab-dev-3&noPersistentUI";
+  const queryParams = `${Cypress.config("clueTestqaConfigSubtabsUnitTeacher6")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();

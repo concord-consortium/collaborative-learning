@@ -1,0 +1,135 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "y5zjsg_GUnvZhNqs",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Welcome to CLUE!</strong></p><p>CLUE is short for <em>Collaborative Learning User Environment.</em></p><p>It has been designed to help you do math <strong>together</strong> with your classmates.</p>"
+          ]
+        }
+      },
+      {
+        "id": "0JPeZra2cygU7GLQ",
+        "title": "Collaborative Classroom",
+        "content": {
+          "type": "Image",
+          "url": "qa/images/inscriptions3_450w.png"
+        }
+      },
+      {
+        "id": "D7AsUAaGeFf_Ie6y",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In CLUE, everyone works in a group with up to four people. When you start an activity, CLUE drops you into a group randomly. <strong>You can change groups by clicking on the group number in the upper right corner.</strong> Then, you can either join an existing group that has fewer than four students, or start a new group. Your teacher may ask you to join a specific group. When you change groups, your work moves with you.</p><p><strong>Groups are important in CLUE.</strong> You can learn from classmates in your group and they can learn from you. Many features of CLUE are designed to help you share information and learn from others in your group and in your class.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_1",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>This activity is designed to acquaint your students with the features of the CLUE platform. In the first two sections — <strong>Introduction</strong> and <strong>Initial Challenge </strong>— students get a chance to try out the features of their individual workspaces and the tools that are available for solving problems. The latter two sections — <strong>What If…? </strong>and <strong>Now What Do you Know? </strong>— present the collaboration tools, so students learn how to share their work with their group members and with the class.</p><p>To get the most out of this activity or any activity, seat students in groups of four, if possible, and have these students work in the same group.  As students work, encourage them to share their questions and their findings and help each other. At the end, you may want to use student-published work to pull together the major discoveries that students have made about the CLUE platform.</p><p>Finally, CLUE has been developed for use with the Chrome browser, and we recommend using it. With other browsers, certain functions may work differently than described here.</p>"
+          ]
+        }
+      },
+      {
+        "id": "_8Nu2YdbHROomEJl",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Each problem has three or four parts. The tabs above display each part. Try clicking on the tabs listed below, then click back to the Introduction.</p><ul><li>Introduction</li><li>Initial Challenge</li><li>What If…?</li><li>Now What Do You Know?</li></ul><p>(Note: Not all lessons have an Introduction.)</p>"
+          ]
+        }
+      },
+      {
+        "id": "OYfq9GEX6n-Ou1OX",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Problems are made of little chunks called <strong><em>tiles</em></strong> that contain the following:</p><ul><li>text</li><li>tables</li><li>graphs</li><li>drawings</li><li>images</li></ul><p>Try hovering your mouse over the text or other features. You’ll see a gray box around each “tile.”</p>"
+          ]
+        }
+      },
+      {
+        "id": "CDZFE7LhsHxWLbJR",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>On the right is <strong>your</strong> workspace. To edit your workspace, you must first add a <strong>tile</strong>. You get a tile in your workspace by either</p><ul><li><strong>Dragging a tile from the problem (on the left) or any other document into your workspace.</strong></li><li><strong>Dragging a new (empty) tile from the menu on the left of your workspace.</strong></li><p></p></ul><p>All tiles have a <strong>waffle</strong> (gray box with six dots) in the upper right corner if you hover over it. To drag the tile, click the waffle and hold it down as you drag it to your workspace. As you drag the tile into the workspace, a blue line shows where the tile will go when you let go.</p>"
+          ]
+        }
+      },
+      {
+        "id": "f0dyLiCTH4GL1_wC",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Your workspace has dividers for each section of the problem. Put your answers in the same section as that of the question. For instance, drag the tile below into the Introduction section and try writing your own haiku below it.</p>"
+          ]
+        }
+      },
+      {
+        "id": "SMQKjznYrvdUDvUu",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Here is an example haiku:</p><p><em>Answers, thoughtfully</em></p><p><em>Arranged, enlighten ideas,</em></p><p><em>Adding clarity.</em></p><p>(The usual haiku has three lines, a total of 17 syllables with lines of 5, 7, and 5 syllables.)</p>"
+          ]
+        }
+      },
+      {
+        "id": "ehDLW25Ta6qvOWJ9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Drag the tiles that you need to help you answer the questions from the problem into the appropriate section of your workspace. Drag them around to arrange them as you like. Once a tile is in your workspace, you can edit it, delete it, or move it around. Use the tiles from the problem and the ones you add to describe how you arrived at your answers by showing your work along with the answers.</p>"
+          ]
+        }
+      },
+      {
+        "id": "ybfm3JWN0NdL4LEp",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>You can arrange the screen to show My Resources or My Workspace or to have the screen split.</strong> Hover over the three vertical dots on the divider between your Resources and your Workspace and click the arrows to change the screen. You can also close the Resources view by clicking the “X” on the upper right corner of the Resources panel.</p>"
+          ]
+        }
+      },
+      {
+        "id": "85R9h791ebdw1NbA",
+        "title": "Open and close Workspace and Resources views",
+        "content": {
+          "type": "Image",
+          "url": "qa/images/WholeScreen-400w.png"
+        }
+      },
+      {
+        "id": "fQmDj6IwaKzYdwhP",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>When your working session is over, just close the browser window. Your workspace is saved automatically. (There is no Save button.) If you are on a shared computer, be sure to log out of the STEM Resource Finder. Now, click the Initial Challenge tab to continue.</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

@@ -1,0 +1,36 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {
+        "id": "document_Text_1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The Mystery Club advisor says that the picture is similar to the actual scene. What do you suppose the advisor means by similar? How is the photo similar to the actual scene that is photographed?</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_2",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>By similar, the advisor might mean that the figures in the picture look the same as the original shapes in the actual scene, except in size. The photo represents the actual scene in real life in a smaller version.</p><p>As the introduction to the Unit, students might have general rather than mathematically specific answers. Students should begin to informally recognize that proportional relationships between quantities can be used to estimate the relationships between the lengths.</p>"
+          ]
+        }
+      },
+      {
+        "id": "20AUG20220933",
+        "title": "Did You Know?: Measurement in police work",
+        "content": {
+          "type": "Image",
+          "url": "qa/images/SS_1_1_NW_07_did_you_know_350w.png"
+        }
+      }
+    ]
+  }
+}

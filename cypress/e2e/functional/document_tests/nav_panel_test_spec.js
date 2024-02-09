@@ -10,11 +10,11 @@ const clueCanvas = new ClueCanvas;
 const problemSubTabTitles = ['Introduction', 'Initial Challenge', 'What If', 'Now What'];
 const dialog = new Dialog;
 
-const queryParams1 = `${Cypress.config("queryParams")}`;
-const queryParams2 = "?appMode=qa&fakeClass=10&fakeUser=student:11&fakeOffering=10&qaGroup=10&unit=example";
-const queryParams3 = "?appMode=qa&fakeClass=10&fakeUser=student:11&fakeOffering=10&qaGroup=10&unit=example-show-nav-panel";
-const queryParams4 = "?appMode=qa&fakeClass=10&fakeUser=student:11&fakeOffering=10&qaGroup=10&unit=example-no-section-problem-tab";
-const queryParams5 = "?appMode=qa&fakeClass=10&fakeUser=student:11&fakeOffering=10&qaGroup=10&&unit=example-config-subtabs";
+const queryParams1 = `${Cypress.config("qaUnitStudent5")}`;
+const queryParams2 = `${Cypress.config("qaNoNavPanelUnitStudent5")}`;
+const queryParams3 = `${Cypress.config("qaShowNavPanelUnitStudent5")}`;
+const queryParams4 = `${Cypress.config("qaNoSectionProblemTabUnitStudent5")}`;
+const queryParams5 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
 
 function beforeTest(params) {
   cy.clearQAData('all');

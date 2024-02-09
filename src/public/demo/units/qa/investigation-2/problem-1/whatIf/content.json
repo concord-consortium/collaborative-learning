@@ -1,0 +1,133 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "id": "document_Text_1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation A. Student Claims</h3><p>Below are claims made by Marta and her classmates. Is each Claim true? Explain why.</p><p><strong>Marta’s Claim</strong></p><p>The rule (5x, 5y) will make a character that is similar to Mug, but the rule (5x, y) will not produce a character similar to Mug.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_2",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>True. Like the rule (2x, 2y) makes Zug similar to Mug and the rule (3x, 3y) makes Bug similar to Mug, the rule (5x, 5y) also makes it similar to Mug. It will be 5 times wider and 5 times taller than Mug.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Jacob’s Claim</strong></p><p>I can use the coordinate rule to predict how the side lengths compare between Mug and a similar Wump. Is he correct?</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_4",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Yes, this is true. With the rule (2x, 2y), Zug has double the side lengths of the corresponding side lengths of Mug’s. Also, with the rule (3x, 3y), Bug has triple the side lengths of the corresponding side lengths of Mug’s. Using the multiplier, you can predict how many times bigger (or smaller) the lengths on a similar figure are compared to the original lengths.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Zack’s Claim</strong></p><p> For similar figures, the corresponding angle measures change the same way as the corresponding side lengths.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_6",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>False. The angle measures do not change from the original to the corresponding angles on the image.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_7",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Billie’s Claim</strong></p><p> The rule (x, y) creates a figure that is exactly the same as the original.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_8",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>True. The multiplier is 1, since (x, y) = (1x, 1y). Multiplying any quantity by 1 is the multiplicative identity. The values of the coordinates will stay the same. So, the figure is like the identity; it will be the same size and shape.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation B. New Rules</h3><p><strong>1.  </strong>Make a rule that would create a figure similar to Lug.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_10",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answer will vary. Possible answers: (6x, 2y), (9x, 3y), (12x, 4y), (x, 1/3y)</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_11",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>2. </strong>Describe how the corresponding angle measures and side lengths change.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_12",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Angle measure will stay the same from one corresponding angle to another. Corresponding side lengths from the original to the image will get larger or smaller by the amount of the multiplier. For example, from Lug to the shape made with (6x, 2y), all of the lengths will double. From Lug to the shape made with (9x, 3y), all of the lengths will triple.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

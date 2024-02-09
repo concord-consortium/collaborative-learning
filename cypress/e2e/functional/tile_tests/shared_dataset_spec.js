@@ -8,7 +8,7 @@ let datacardTile = new DatacardTile;
 let tableTile = new TableTile;
 let xyTile = new XYPlotTile;
 
-const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example";
+const queryParams = `${Cypress.config("qaNoNavPanelUnitStudent5")}`;
 
 function beforeTest(params) {
   cy.clearQAData('all');
