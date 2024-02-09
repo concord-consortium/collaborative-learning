@@ -1,0 +1,89 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles": [
+      {
+        "id": "DnJVNzpwopzaQ3pw",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p><p><u>Solutions and Strategies</u> </p><p>It is very helpful to display copies of the figures for the class to view. You can use <strong>Learning Aid 2.1B: Grids, Teaching Aid 2.1B: Wump Characters, and Teaching Aid 2.1C: Wump Characters on Grids</strong>. In one set the figures are on a coordinate grid, and in the other set the figures are on a blank page. You can cut the figures out and move them around to show the comparisons that the students are describing.</p>"
+          ]
+        }
+      },
+      {
+        "id": "mObJud_Pp8Orw2gp",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p><ul><li>How would you describe to a friend the growth of the figures that you drew? (They all increased in size. Some grew taller and wider, while one just grew taller, and one just grew wider.)</li><li>Which figures seem to belong to the Wump family and which do not? (Mug, Zug, and Bug have the same shape, but Lug and Glug are distorted.)</li><li>Are Lug and Glug related? Did they grow into the same shape? (No. Lug is wide and short while Glug is narrow and tall.)</li><li>Do you have any What If questions? </li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "TILEoLBuPcj4NFrm",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Making the Mathematics Explicit </u></p><p><strong>Suggested Questions</strong></p><ul><li>Which characters are imposters? How do you know? (Glug and Lug. Flesh out how you know they are imposters by looking at side lengths, perimeters, areas, and angles as described in the following questions.)</li><li>In earlier Units in CMP, we learned that both the angles and the lengths of edges help determine the shape of the figure. How do the corresponding angles of the five figures compare? (Display the figures and compare corresponding angles. This reinforces that when you measure angles, you measure the amount of turn between the edges and not the lengths of the edges. In Mug, Zug, and Bug, the corresponding angles are equal. In Mug and Lug (or Glug), the corresponding angles (except the right angles) are not equal.)</li><li>Are the lengths related? Are some of them related and others not? How do the lengths in similar Wumps compare? (Compare some of the lengths to show that in Mug, Bug, and Zug, the corresponding lengths grow the same way. They are multiplied by the same number. Students will begin to notice that if the coefficients of both the x- and y-coordinates of the rule are the same, the figure is similar to the original. If the coefficients are different, the figure will change more in one direction than the other and will be distorted. One special case that you should help students notice is the case where we multiply the x and y by 1 to get a new figure. In this case the figures are similar. Even more, they are congruent. You get a figure of exactly the same size and shape. This case will occur in Problem 2.2.)</li><li>Are the perimeters related? Are some of them related and others not? How do the perimeters in similar Wumps compare? (Compare some of the perimeters – for example, the mouth or legs or one other part – to show that with Mug, Bug, and Zug, the corresponding perimeters grow the same way. They are multiplied by the same number. Students will begin to notice that if the coefficients of both the x- and y-coordinates of the rule are the same, the figure is similar to the original. If the coefficients are different, the figure will change more in one direction than the other and will be distorted. One special case that you should help students notice is the case where we multiply the x and y by 1 to get a new figure. In this case the figures are similar. Even more, they are congruent. You get a figure of exactly the same size and shape. This case will occur in Problem 2.2.)</li><li>Could you use ratios or “for every” statements to describe the characters that are similar to Mug? (Yes. For example, Bug is Similar to Mug. For every side length on Mug the corresponding side length on Bug is three times as long.  The ratio to represent a side length on Mug and its corresponding side length on Bug is 1:3.)</li><li>For What If Situation A, which claims are correct? Why? (Marta, Jacob, and Billie are correct. Students should be able to talk about how the numbers in front of x and y (coefficients) must be the same so that all the side lengths increase by the same multiplier. Students should also recognize that the angles stayed the same in the Wump family members.)</li><li>What are some rules you could use to create a figure similar to Lug in What If Situation B?  (Answers will vary but the rule should have x and y multiplied by the same number.  Students may not have mastered using the rules at this point. They will have time to develop this further in the rest of this Investigation.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "YTgz86fq871d7j_2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>If you have a document camera in your classroom, you can use it to compare Mug and Bug. Try to project Mug onto a picture of Bug by taping Bug to the screen or a blank wall. Then place Mug on the document camera and project Mug onto the figure of Bug. Move the projector closer or farther away to see if you can get the two to fit. The image of Mug should fit exactly onto Bug. Do the same for Mug and Glug. The image of Mug will not fit exactly onto Glug. Note: Try this on your own before doing it with the class.</p>"
+          ]
+        }
+      },
+      {
+        "id": "Aen1v-U8nOuRgQpv",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>For students who are ready for an extra challenge you could have them use the <a href=\"https://connectedmath.msu.edu/teacher-support/using-realize-dash-student-activities/\">Mugwump Activity</a> on Realize (optional CMP3 resource) and create a rule that would have Mug appear in a different quadrant.  (Agency, Identity, Ownership)</p>"
+          ]
+        }
+      },
+      {
+        "id": "B9Bf2TMSMZ4MO-AS",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p><ul><li>How many ways can you do this?</li><li>How are the new Mug Wumps the same?  </li><li>How are the new Mug Wumps different?</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "TILEYc72EM_zuxoM",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Now What Do Students Know</u></p><p><u></u>Ask students to reflect on the discussion and answer the Now What Do You Know questions. Assist students in making a connection between the coefficient of coordinate rules that produced scaled drawings and how the side lengths and perimeter change. </p>"
+          ]
+        }
+      },
+      {
+        "id": "T2nEfjNYFvLj_ud1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning</strong></p><p>Use the following questions to assess student understanding at the end of the lesson.</p><ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul><ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol><ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

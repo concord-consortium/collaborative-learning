@@ -6,8 +6,8 @@ let clueCanvas = new ClueCanvas;
 let tableToolTile = new TableToolTile;
 let drawToolTile = new DrawToolTile;
 
-const queryParams = "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=qa";
-const studentQueryParams = "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:1&unit=qa&noPersistentUI";
+const queryParams = `${Cypress.config("qaUnitTeacher6")}`;
+const studentQueryParams = `${Cypress.config("clueTestqaUnitStudent5")}`;
 
 function moveSliderTo(percent) {
   cy.get('.rc-slider-horizontal').then($slider => {

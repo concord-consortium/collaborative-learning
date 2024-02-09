@@ -8,12 +8,12 @@ let dashboard = new TeacherDashboard();
 let resourcesPanel = new ResourcesPanel();
 let clueCanvas = new ClueCanvas;
 
-const queryParams = "?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:4&noPersistentUI";
-const defaultProblemDocTitle = "SAS 2.1 Drawing Wumps";
+const defaultProblemDocTitle = "QA 1.1 Solving a Mystery with Proportional Reasoning";
 
-function beforeTest(params) {
+function beforeTest() {
+    const queryParams = `${Cypress.config("clueTestqaUnitTeacher6")}`;
     cy.clearQAData('all');
-    cy.visit(params);
+    cy.visit(queryParams);
     cy.waitForLoad();
     dashboard.switchView("Workspace & Resources");
     cy.wait(5000);
@@ -23,9 +23,9 @@ function beforeTest(params) {
 
 describe('verify document curation', function() {//adding a star to a student document
 
-    let studentDoc = "Student 5: SAS 2.1 Drawing Wumps";
+    let studentDoc = "Student 5: QA 1.1 Solving a Mystery with Proportional Reasoning";
     it('verify starring and unstar',function(){
-        beforeTest(queryParams);
+        beforeTest();
         cy.log('verify starring a student published investigation');
         cy.openTopTab('class-work');
         cy.openSection('class-work','workspaces');

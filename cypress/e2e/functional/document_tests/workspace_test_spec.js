@@ -1,11 +1,11 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import TextToolTile from '../../../support/elements/tile/TextToolTile';
 
-const queryParams = `${Cypress.config("queryParams")}`;
 let clueCanvas = new ClueCanvas,
   textToolTile = new TextToolTile;
 
 function beforeTest() {
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
@@ -59,11 +59,12 @@ context('Test the overall workspace', function () {
   // TODO: Changes in new document add feature.
   // FIXME: The test is failing looking for the selected class
   it('will verify canvases do not persist between problems', function () {
-    let problem1 = '1',
-      problem2 = '2.1';
     let tab1 = 'Introduction';
 
-    cy.visit('?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem=' + problem1);
+    let problem1 = `${Cypress.config("qaUnitStudent5")}`;
+    let problem2 = problem1.replace("problem=1.1", "problem=2.1");
+
+    cy.visit(problem1);
     cy.waitForLoad();
 
     clueCanvas.addTile('text');
@@ -72,13 +73,13 @@ context('Test the overall workspace', function () {
     // the save to firebase is debounced, so we need to wait for it to complete
     cy.wait(3000);
 
-    cy.visit('?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem=' + problem2);
+    cy.visit(problem2);
     cy.waitForLoad();
     // cy.wait(1000);
     textToolTile.getTextTile().should('not.exist');
 
     //Shows student as disconnected and will not load the introduction canvas
-    cy.visit('?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem=' + problem1);
+    cy.visit(problem1);
     cy.waitForLoad();
     // cy.wait(2000);
     textToolTile.getTextTile().click();

@@ -14,10 +14,10 @@ let drawToolTile = new DrawToolTile;
 let textToolTile = new TextToolTile;
 let tableToolTile = new TableToolTile;
 
-const title = "SAS 2.1 Drawing Wumps";
+const title = "QA 1.1 Solving a Mystery with Proportional Reasoning";
 
 function beforeTest() {
-  const queryParams = `${Cypress.config("queryParams")}`;
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();

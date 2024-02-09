@@ -12,11 +12,11 @@ const primaryWorkspace = new PrimaryWorkspace;
 const resourcePanel = new ResourcePanel;
 const textToolTile = new TextToolTile;
 
-const problemDoc = '2.1 Drawing Wumps';
+const problemDoc = 'QA 1.1 Solving a Mystery with Proportional Reasoning';
 const ptsDoc = 'Points';
 
 function beforeTest() {
-  const queryParams = `${Cypress.config("queryParams")}`;
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
