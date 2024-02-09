@@ -12,8 +12,8 @@ let diagramTile = new DiagramToolTile;
 const primaryWorkspace = new PrimaryWorkspace;
 const resourcePanel = new ResourcePanel;
 
-const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=./demo/units/example-config-subtabs/content.json";
-const queryParamsPlotVariables = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-no-group-share";
+const queryParamsMultiDataset = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
+const queryParamsPlotVariables = `${Cypress.config("qaNoGroupShareUnitStudent5")}`;
 
 const problemDoc = '1.1 Unit Toolbar Configuration';
 
@@ -47,7 +47,7 @@ function beforeTest(params) {
 context('XYPlot Tool Tile', function () {
   describe("XYPlot Tool", () => {
     it("XYPlot tool tile", () => {
-      beforeTest(queryParams);
+      beforeTest(queryParamsMultiDataset);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();
       clueCanvas.addTile("graph");
@@ -206,7 +206,7 @@ context('XYPlot Tool Tile', function () {
     });
 
     it("Test undo redo actions", () => {
-      beforeTest(queryParams);
+      beforeTest(queryParamsMultiDataset);
       cy.log("Undo redo  XY Plot Tile creation");
       clueCanvas.addTile('graph');
       xyTile.getTile().should('be.visible');
@@ -242,7 +242,7 @@ context('XYPlot Tool Tile', function () {
     });
 
     it("Test adding 2 Y Series", () => {
-      beforeTest(queryParams);
+      beforeTest(queryParamsMultiDataset);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();
       clueCanvas.addTile("graph");
@@ -298,7 +298,7 @@ context('XYPlot Tool Tile', function () {
     });
 
     it("Test linking two datasets", () => {
-      beforeTest(queryParams);
+      beforeTest(queryParamsMultiDataset);
       cy.log("Add XY Plot Tile");
       cy.collapseResourceTabs();
       clueCanvas.addTile("graph");

@@ -1,11 +1,11 @@
 {
     "teacherName": "Teacher 6",
-    "investigationTitle": "Similar Figures",
+    "investigationTitle": "Enlarging and Reducing Shapes",
     "classes": [
         {
             "classIndex": 0,
             "className": "Class Menu",
-            "problemTotal": 15,
+            "problemTotal": 4,
             "problems": [
                 {
                     "problem": 2.1,

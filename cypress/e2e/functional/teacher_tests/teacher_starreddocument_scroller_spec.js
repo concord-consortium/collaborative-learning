@@ -4,13 +4,10 @@ import TeacherDashboard from "../../../support/elements/common/TeacherDashboard"
 let dashboard = new TeacherDashboard();
 let starred = new StarredTab;
 
-const queryParams = {
-  teacherQueryParams: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6"
-};
-
-function beforeTest(params) {
+function beforeTest() {
+  const queryParams = `${Cypress.config("clueTestqaUnitTeacher6")}`;
   cy.clearQAData('all');
-  cy.visit(params);
+  cy.visit(queryParams);
   cy.waitForLoad();
   dashboard.switchView("Workspace & Resources");
 }
@@ -19,7 +16,7 @@ context('Document Flipper', () => {
   describe('teacher document flipper', function () {
 
     it.skip('verify document flipper', function () {
-      beforeTest(queryParams.teacherQueryParams);
+      beforeTest();
       cy.log('verify document flipper under my work - starred tab');
       cy.openTopTab("my-work");
       cy.wait(1000);

@@ -1,0 +1,17 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "document_Text_1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The Computer Club at P.I. Middle School also meets monthly. Zack and Marta suggested that the club design a computer game that involves several animated characters. They ask Marta’s uncle Carlos, a programmer for a video game company, about computer animation.</p><p>Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, we need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions.</p><p>Sometimes the figures in a computer game need to change size. A change in the programming code can make a figure larger or smaller. We can code a rule for finding key points from the original figure. In this Investigation, we will explore answers to these questions.</p><p><em>Do the rules create scale drawings? That is, are the two figures similar?</em></p><p>The following problems will help us answer these questions.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

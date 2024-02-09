@@ -11,7 +11,7 @@ let student1 = '20',
   student5 = '24',
   student6 = '25',
   fakeClass = '15',
-  problem = '2.2',
+  problem = '1.1',
   group1 = '20',
   group2 = '21';
 
@@ -26,7 +26,7 @@ function beforeTest() {
 
 function setup(student, opts = {}) {
   const options = { ...defaultSetupOptions, ...opts };
-  cy.visit('?appMode=qa&fakeClass=' + fakeClass + '&fakeUser=student:' + student + '&problem=' + options.problem);
+  cy.visit('/?appMode=qa&fakeClass=' + fakeClass + '&fakeUser=student:' + student + '&problem=' + options.problem + '&unit=./demo/units/qa/content.json');
   if (options.alreadyInGroup) {
     // This is looking for the version div in the header
     cy.waitForLoad();
@@ -127,7 +127,7 @@ context('Test student join a group', function () {
     clueHeader.getGroupMembers().should('contain', 'S' + student1).and('contain', 'S' + student2).and('contain', 'S' + student4).and('contain', 'S' + student6);
 
     cy.log('Student will automatically join last group number in new problem');
-    setup(student1, { alreadyInGroup: true, problem: '2.3' });
+    setup(student1, { alreadyInGroup: true, problem: '2.2' });
     clueHeader.getGroupName().should('contain', 'Group ' + group1);
     header.getUserName().should('contain', 'Student ' + student1);
     clueHeader.getGroupMembers().should('contain', 'S' + student1).and('have.length', 1);

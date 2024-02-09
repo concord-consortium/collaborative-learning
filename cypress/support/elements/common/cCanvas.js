@@ -7,6 +7,7 @@ import DataflowToolTile from '../tile/DataflowToolTile';
 import DiagramToolTile from '../tile/DiagramToolTile';
 import SimulatorToolTile from '../tile/SimulatorTile';
 import NumberlineToolTile from '../tile/NumberlineToolTile';
+import ExpressionToolTile from '../tile/ExpressionToolTile';
 import Canvas from './Canvas';
 import Dialog from './Dialog';
 import XYPlotToolTile from '../tile/XYPlotToolTile';
@@ -20,6 +21,7 @@ let graphToolTile = new GeometryToolTile,
     diagramToolTile = new DiagramToolTile,
     simulatorToolTile = new SimulatorToolTile,
     numberlineToolTile = new NumberlineToolTile,
+    expressionToolTile = new ExpressionToolTile,
     xyPlotToolTile = new XYPlotToolTile,
     canvas = new Canvas,
     dialog = new Dialog;
@@ -277,6 +279,9 @@ class ClueCanvas {
                 break;
             case 'numberline':
                 tileElement = numberlineToolTile.getNumberlineTile().last().click({ force: true });
+                break;
+            case 'expression':
+                tileElement = expressionToolTile.getExpressionTile().last().click({ force: true });
                 break;
             case 'xyplot':
                 tileElement = xyPlotToolTile.getTile().last().click({ force: true });

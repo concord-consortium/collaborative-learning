@@ -1,0 +1,72 @@
+{
+  "code": "qa",
+  "abbrevTitle": "QA",
+  "title": "QA Unit Teacher Guide",
+  "subtitle": "Understanding Similarity",
+  "placeholderText": "Enter notes here",
+  "settings": {"table": {"numFormat": ".2~f"}},
+  "sections": {
+    "overview": {"initials": "OV", "title": "Overview", "placeholder": "Work area for\nOverview section"},
+    "launch": {"initials": "LC", "title": "Launch", "placeholder": "Work area for\nLaunch section"},
+    "explore": {"initials": "EX", "title": "Explore", "placeholder": "Work area for\nExplore section"},
+    "summarize": {"initials": "SM", "title": "Summarize", "placeholder": "Work area for\nSummarize section"}
+  },
+  "defaultStamps": [
+    {"url": "curriculum/moving-straight-ahead/stamps/plus.png", "width": 25, "height": 25},
+    {"url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+    {"url": "curriculum/moving-straight-ahead/stamps/lparen.png", "width": 25, "height": 25},
+    {"url": "curriculum/moving-straight-ahead/stamps/rparen.png", "width": 25, "height": 25}
+  ],
+  "investigations": [
+    {
+      "description": "Investigation 0",
+      "ordinal": 0,
+      "title": "Introduction to CLUE",
+      "introduction": {"tiles": []},
+      "problems": [
+        {
+          "description": "Problem 0.1",
+          "ordinal": 1,
+          "title": "0.1 Intro to CLUE",
+          "subtitle": "Working in the Collaborative Learning User Environment",
+          "sections": ["investigation-0/problem-1/overview/content.json", "investigation-0/problem-1/launch/content.json", "investigation-0/problem-1/explore/content.json", "investigation-0/problem-1/summarize/content.json"]
+        }
+      ]
+    },
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "QA Investigation 1 Enlarging and Reducing Shapes",
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "QA 1.1 Solving a Mystery with Proportional Reasoning",
+          "subtitle": "",
+          "sections": ["investigation-1/problem-1/launch/content.json", "investigation-1/problem-1/explore/content.json", "investigation-1/problem-1/summarize/content.json"]
+        }
+      ]
+    },
+    {
+      "description": "Investigation 2 The Mug Wump Family: Similar Figures",
+      "ordinal": 2,
+      "title": "QA Investigation 2 The Mug Wump Family: Similar Figures",
+      "problems": [
+        {
+          "description": "Problem 2.1",
+          "ordinal": 1,
+          "title": "QA 2.1 Drawing Wumps",
+          "subtitle": "Making Similar Figures",
+          "sections": ["investigation-2/problem-1/launch/content.json", "investigation-2/problem-1/explore/content.json", "investigation-2/problem-1/summarize/content.json"]
+        },
+        {
+          "description": "QA Problem 2.2",
+          "ordinal": 2,
+          "title": "QA 2.2 Hats Off to the Wumps",
+          "subtitle": "Changing a Figure's Size and Location",
+          "sections": ["investigation-2/problem-2/launch/content.json", "investigation-2/problem-2/explore/content.json", "investigation-2/problem-2/summarize/content.json"]
+        }
+      ]
+    }
+  ]
+}

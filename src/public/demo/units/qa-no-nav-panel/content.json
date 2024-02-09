@@ -1,0 +1,90 @@
+{
+  "code": "qa-no-nav-panel",
+  "abbrevTitle": "QA4",
+  "title": "QA No Nav Panel Curriculum",
+  "subtitle": "Demonstrating Curriculum Configuration",
+  "config": {
+    "placeholderText": "This is where users can type text",
+    "defaultDocumentType": "personal",
+    "settings": {
+      "table": {
+        "numFormat": ".2~f"
+      },
+      "text": {"tools": ["bold", "subscript", "superscript", "new-variable", "insert-variable", "edit-variable"]},
+      "drawing": {"tools": ["select", "line", "vector", "rectangle", "ellipse", "stamp", "stroke-color", "fill-color", "new-variable", "insert-variable", "edit-variable", "delete"]},
+      "graph": {
+        "defaultAxisLabels": {
+          "bottom": "x",
+          "left": "y"
+        },
+        "emptyPlotIsNumeric": true,
+        "scalePlotOnValueChange": true
+      }
+    },
+    "navTabs": {
+      "showNavPanel": false,
+      "lazyLoadTabContents": true,
+      "tabSpecs": [
+        {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [{"title": "Workspaces", "type": "personal-documents", "dataTestHeader": "my-work-section-workspaces", "dataTestItem": "my-work-list-items", "documentTypes": ["personal"], "properties": ["!isDeleted"], "showStars": ["student", "teacher"], "addDocument": true}]
+        }
+      ]
+    },
+    "toolbar": [
+      {"id": "Text", "title": "Text", "isTileTool": true},
+      {"id": "Table", "title": "Table", "isTileTool": true},
+      {"id": "DataCard", "title": "Data Card", "isTileTool": true},
+      {"id": "Image", "title": "Image", "isTileTool": true},
+      {"id": "Drawing", "title": "Drawing", "isTileTool": true},
+      {"id": "Starter", "title": "Starter", "isTileTool": true},
+      {"id": "Expression", "title": "Expression", "isTileTool": true},
+      {"id": "Graph", "title": "XY Plot", "isTileTool": true},
+      {"id": "Geometry", "title": "Graph", "isTileTool": true},
+      {"id": "Dataflow", "title": "Dataflow", "isTileTool": true},
+      {"id": "Numberline", "title": "Numberline", "isTileTool": true},
+      {
+        "id": "Simulator",
+        "title": "Simulator",
+        "isTileTool": true
+      },
+      {
+        "id": "Diagram",
+        "title": "Diagram",
+        "isTileTool": true
+      },
+      {"id": "sparrow", "title": "Sparrow", "iconId": "icon-sparrow-tool", "isTileTool": false},
+      {"id": "hide-annotations", "title": "Hide Annotations", "iconId": "icon-hide-annotations-tool", "isTileTool": false},
+      {"id": "undo", "title": "Undo", "iconId": "icon-undo-tool", "isTileTool": false},
+      {"id": "redo", "title": "Redo", "iconId": "icon-redo-tool", "isTileTool": false},
+      {"id": "duplicate", "title": "Duplicate", "iconId": "icon-duplicate-tool", "isTileTool": false},
+      {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false}
+    ],
+    "stamps": []
+  },
+  "sections": {
+    "first": {"initials": "FI", "title": "First Section", "placeholder": "Work area for\nFirst Section"},
+    "second": {"initials": "SE", "title": "Second Section", "placeholder": "Second Section Placeholder"},
+    "third": {"initials": "TH", "title": "Third Section", "placeholder": "Third Section content goes here"}
+  },
+  "planningDocument": {"enable": "teacher", "default": true, "sectionInfo": {"plan": {"initials": "PL", "title": "Plan", "placeholder": "Plan the work; work the plan"}}, "sections": [{"type": "plan"}]},
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "QA Investigation 1",
+      "problems": [
+        {"description": "Problem 1.1", "ordinal": 1, "title": "1.1 Unit Toolbar Configuration", "subtitle": "Text, Table, Drawing", "sections": ["investigation-1/problem-1/first/content.json", "investigation-1/problem-1/second/content.json", "investigation-1/problem-1/third/content.json"]},
+        {
+          "description": "Problem 1.2",
+          "ordinal": 2,
+          "title": "1.2 Problem Toolbar Configuration",
+          "subtitle": "Text only",
+          "config": {"toolbar": [{"id": "Text", "title": "Text", "isTileTool": true}, {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false}]},
+          "sections": ["investigation-1/problem-2/first/content.json", "investigation-1/problem-2/second/content.json", "investigation-1/problem-2/third/content.json"]
+        }
+      ]
+    }
+  ]
+}

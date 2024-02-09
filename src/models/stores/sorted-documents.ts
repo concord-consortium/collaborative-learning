@@ -135,7 +135,6 @@ export class SortedDocuments {
 
   get sortByStrategy(): SortedDocument[]{
     const commentTags = this.commentTags;
-
     const tagsWithDocs: Record<string, TagWithDocs> = {};
     if (commentTags) {
       for (const key of Object.keys(commentTags)) {
@@ -187,16 +186,15 @@ export class SortedDocuments {
         documents
       });
     });
-
     return sortedDocsArr;
   }
 
   async updateTagDocumentMap () {
     const db = this.db.firestore;
     const filteredDocs = this.filteredDocsByType;
-
     filteredDocs.forEach(async doc => {
-      const docsSnapshot = await db.collection("documents").where("key", "==", doc.key).get();
+      const docsSnapshot = await db.collection("documents").where("key", "==", doc.key)
+                           .where("context_id", "==", this.user.classHash).get();
       docsSnapshot.docs.forEach(async docSnapshot => {
         const commentsSnapshot = await docSnapshot.ref.collection("comments").get();
         runInAction(() => {
@@ -291,7 +289,6 @@ export class SortedDocuments {
       sectionLabel: sectionLabelFormatter[originalType as keyof typeof sectionLabelFormatter] || originalType,
       documents: tileTypeToDocumentsMap[originalType]
     }));
-
     return sortedDocuments;
   }
 
@@ -311,7 +308,7 @@ export class SortedDocuments {
         return !!options?.isTeacherDocument === wantsProperty;
       }
       if (property) {
-          return !!doc.getProperty(property) === wantsProperty;
+        return !!doc.getProperty(property) === wantsProperty;
       }
       // ignore empty strings, etc.
       return true;

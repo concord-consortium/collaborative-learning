@@ -1,0 +1,79 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles": [
+      {
+        "id": "w4YABzHdY87gWB0I",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p><p><u><em>Solutions and Strategies</em></u> </p><p>Ask students what happened with each of the rules.</p><ul><li>Are the images similar to the original? Why or why not? (For (x + 2, y + 2) and (0.5x, 0.5y), the images are all similar to the original. For (x + 2, 3y) and (2x, 3y), the images do not keep the same shape.)</li></ul><p>Use student work or <strong>Teaching Aid 2.2: Wump Hats on Grids</strong> for students to prove their conjectures.  </p>"
+          ]
+        }
+      },
+      {
+        "id": "TILE-0XZX3fDaN-M",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Making the Mathematics Explicit </u><em></em></p><p><em></em><strong>Note:</strong> The corner of the hat isn’t at the origin. Some students may think a hat has enlarged versus shifting locations.  You may need to have a conversation surrounding this. You could tie it back to the other Problems. Everything they’ve done has had a fixed origin – the fixed point held down by their finger when using super stretchers; the corner of the page when using a copier and the origin of the grid when using coordinate graphs. Having a conversation about how all these methods are similar and/different can help clear this up as needed. </p>"
+          ]
+        }
+      },
+      {
+        "id": "xWpKepeVV2KfKWbF",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p><ul><li>How did adding to the coordinates change the hat? (Moved the hat to the right on the x axis and up on the y axis.)</li><li>How did subtracting to the coordinates change the hat? (Moved the hat to the left on the x axis and down on the y axis.)</li><li>Do adding and subtracting change a figure in the same way that multiplication changed Mug in Problem 2.1?  (No. Multiplication changed the size while adding and subtracting change the location.)</li><li>What rule made a hat get smaller?  Why? ((0.5 x, 0.5y) is the rule that made the hat get smaller. It multiplied the side lengths by ½ . When multiplying by a fraction you are finding a part of something so it would make the length of the new hat smaller.)</li></ul><p>The hats of the set of figures are all made from a triangle and rectangle, but they are not all similar. </p><ul><li>How can you tell if two rectangles (or triangles) are similar? What information should you collect? (Students should say something about the measures of corresponding angles—that they are equal, congruent, or the same size. They should also say something about the lengths of corresponding sides. They may suggest gathering information on perimeter and area of the hats.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "NrKZI6RAmicbzLTa",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Note:</strong> This last response is not an exact answer, but it is what students will be able to say from their experiences so far. Students will return to this question later and see that it is the coefficient, without regard to its sign, that makes the difference. If you multiply the x by -2 and the y by 2, you still get a similar figure. (Time)</p>"
+          ]
+        }
+      },
+      {
+        "id": "4h6UDa9h65VzRHju",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>What rule would make a hat with line segments  the length of Hat 1’s line segments?    (⅓x + 2, ⅓y + 3)</li><li>What happens to a figure on a coordinate grid when you add to or subtract from its coordinates? (It relocates the figure on the grid.)</li><li>What rule would make a hat the same size as Hat 1 but moved up 2 units on the grid? (x + 2, y + 5)</li><li>What rule would make a hat with line segments twice as long as Hat 1’s line segments and then move it 8 units to the right? (2x + 10, 2y + 3)</li><li>Describe a rule that moves Hat 1 and does not produce a similar figure. (Answers will vary. Possible answer: (x + 4, 3y + 3))</li><li>What are the effects of multiplying each coordinate by a number? (If the numbers are the same, then the figures are similar. If the numbers are different, then the figures are not similar.)</li><li>What effect does the rule (5x - 5, 5y + 5) have on the original hat? (The figure would be similar. Its sides will be 5 times as large, and then the stretched image will be moved to the left 5 units and up 5 units.)</li><li>What about the rule (¼x, 4y - ⅚)? (This rule would not give a similar figure. The figure is shrunk horizontally and stretched vertically. The image is also moved down ⅚ of a unit.)</li><li>Make up a rule that will shrink the figure, keep it similar, and then move it to the right and up. (Answers will vary. Possible answer: (⅔x + 3, ⅔y + 1) will make the shape ⅔ the lengths, move it 3 units to the right, and 1 unit up.)</li><li>Hat 5 is not similar to Mug’s Hat. Write a rule that transforms Hat 5 to a figure that is similar to Mug’s Hat. (Answers will vary. Possible answers: Multiply 2x by ½and 3y by ⅓. This results in Mug’s Hat. Or multiply 2x by 3 (resulting in 6x), and multiply 3y by 2 (resulting in 6y).)</li><li>Describe how to transform Hats 1–5 back to Mug’s Hat. (Students may do this either symbolically or in words. For example, for Hat 2 they might suggest adding 1 to the x-values and subtracting 4 from the y-values. For Hat 4, multiplying each coordinate by 2 results in Mug’s Hat. This question pushes students to think about undoing the process of transformation (or finding the inverse transformation); the result should be the original (x, y) pair for Mug’s Hat.)</li><li>Without drawing, predict the size and location of a hat made from the rule (0.5x - 1, 0.5y + 4). Is it similar to Mug’s Hat? Explain. (It is similar to Mug’s Hat. The image will shrink by the same factor, 0.5, both horizontally and vertically. The side lengths will all be half as long as the side lengths of Mug’s Hat. Then the image will be moved left 1 unit and up 4 units.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "TILE-DaYSPpzP0ja",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Now What Do Students Know</u></p><p>Ask students to reflect on the discussion and answer the Now What Do You Know questions. Take note of how students are talking about using addition and subtraction differently than multiplication. This is another step for students in understanding the differences in the additive and multiplicative structures of number.</p>"
+          ]
+        }
+      },
+      {
+        "id": "vWNbt3UEJLJkfrh6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning</strong></p><p>Use the following questions to assess student understanding at the end of the lesson.</p><ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul><ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol><ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

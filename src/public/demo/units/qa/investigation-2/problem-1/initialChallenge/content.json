@@ -1,0 +1,2933 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "FHv-FEPQiLjBHpgI",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Zack and Marta’s computer game involves a family called the Wumps. The members of the Wump family are various sizes, but they all have the same shape. They are similar. Mug Wump is the game’s main character. By enlarging or reducing Mug, a player can transform him into other Wump family members.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Zack and Marta experiment with enlarging and reducing figures on a coordinate grid. First, Zack draws Mug Wump on graph paper. Then he labels the key points from A to X and lists the coordinates for each point. Marta writes the rules that will change Mug’s size. Marta tries several rules for transforming Mug into different sizes. She wonders which rules will make family members that have similar shapes.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>The Mug Experiment</h3><p>Equipment</p><ul><li> Table of Coordinates for the Wump Game Characters</li><li> First Quadrant Grids to plot the Wump Characters/Digital Graph</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Instructions for Plotting the Wumps</h3><p><strong>1.</strong> Plot Mug – Use the coordinate pairs in the “Mug Wump” column to draw Mug on grid paper. For Parts 1-3 of the figure, plot the points in order. Connect them as you go along. For Part 4, plot the two points, but do not connect them.</p><p><strong>2. </strong>Find Coordinates for the other Wump characters – Use the given rules to find the new coordinates for each shape. Record the coordinates in the columns Zug, Lug, Bug, and Glug. For example, the rule for Zug is (2x, 2y). This means that you multiply each of Mug’s coordinates by 2. Point A on Mug is (0, 1), so the corresponding point A on Zug is (0, 2). Point B on Mug is (2, 1), so the corresponding point B on Zug is (4, 2).</p><p><strong>3.  </strong>Plot the other Wump characters – Plot and connect the points from A to X for each Wump character, just as you did for Mug. Put each shape on separate axes.</p>"
+          ]
+        }
+      },
+      [
+        {
+          "id": "bq9p0V6LmnYwvF",
+          "title": "Mug Wump",
+          "display": "teacher",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "-HVU3mwYw46aOoPc": 80,
+              "zxWwoo4KMM26K0iI": 80
+            },
+            "name": "Mug Wump"
+          }
+        },
+        {
+          "id": "LB20OCT20231059",
+          "title": "Zug",
+          "display": "teacher",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "ktTptxIbLx1KXgTc": 80,
+              "l4ocVVIEhY4if2vp": 80
+            },
+            "name": "Zug"
+          }
+        }
+      ],
+      [
+        {
+          "id": "LB20OCT20231157",
+          "title": "Lug",
+          "display": "teacher",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "EvU6EG06fXaQbvKw": 80,
+              "8tBO9qnrRZ3_r_qH": 80
+            },
+            "name": "Lug"
+          }
+        },
+        {
+          "id": "LB20OCT20231159",
+          "title": "Bug",
+          "display": "teacher",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "jdUpl7lwAC7kG7hS": 80,
+              "n1b-j-MlwIXpe98K": 80
+            },
+            "name": "Bug"
+          }
+        }
+      ],
+      {
+        "id": "document_Table_5",
+        "title": "Glug",
+        "display": "teacher",
+        "content": {
+          "type": "Table",
+          "columnWidths": {
+            "U6k47DZlFZKHBHW3": 80,
+            "d__bwnistM_BABGq": 80
+          },
+          "name": "Glug"
+        }
+      },
+      {
+        "id": "21AUG20220528PM",
+        "title": "Mug",
+        "display": "teacher",
+        "content": {
+          "type": "Geometry",
+          "board": {
+            "properties": {
+              "axisMin": [
+                -2.186,
+                -1.093
+              ],
+              "axisRange": [
+                26.23,
+                17.486
+              ]
+            }
+          },
+          "objects": [
+            {
+              "type": "point",
+              "parents": [
+                0,
+                1
+              ],
+              "properties": {
+                "id": "F1a7NcGqeCYYipJh",
+                "snapToGrid": false,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                2,
+                1
+              ],
+              "properties": {
+                "id": "DRmVyYMGmkanOjDS",
+                "snapToGrid": false,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                2,
+                0
+              ],
+              "properties": {
+                "id": "hZhkF5Mig3RZy02e",
+                "snapToGrid": false,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                3,
+                0
+              ],
+              "properties": {
+                "id": "H5YpWIYGtAxk53gC",
+                "snapToGrid": false,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                3,
+                1
+              ],
+              "properties": {
+                "id": "S17Q8dWqbzHA7JGK",
+                "snapToGrid": false,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                5,
+                1
+              ],
+              "properties": {
+                "id": "60lQKvtYM8h3vsKn",
+                "snapToGrid": false,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                5,
+                0
+              ],
+              "properties": {
+                "id": "cxS_PyLJWoQkC6ei",
+                "snapToGrid": false,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                0
+              ],
+              "properties": {
+                "id": "B9ZOtrRKmQla7-RF",
+                "snapToGrid": false,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                1
+              ],
+              "properties": {
+                "id": "DwjXWysfUo6Hnwr7",
+                "snapToGrid": false,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                8,
+                1
+              ],
+              "properties": {
+                "id": "OcfiORSxXP7InqCm",
+                "snapToGrid": false,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                7
+              ],
+              "properties": {
+                "id": "UElUzw_BVCP6a6qp",
+                "snapToGrid": false,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                2,
+                7
+              ],
+              "properties": {
+                "id": "PgTL9uudOfdS2i_S",
+                "snapToGrid": false,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                "F1a7NcGqeCYYipJh",
+                "DRmVyYMGmkanOjDS",
+                "hZhkF5Mig3RZy02e",
+                "H5YpWIYGtAxk53gC",
+                "S17Q8dWqbzHA7JGK",
+                "60lQKvtYM8h3vsKn",
+                "cxS_PyLJWoQkC6ei",
+                "B9ZOtrRKmQla7-RF",
+                "DwjXWysfUo6Hnwr7",
+                "OcfiORSxXP7InqCm",
+                "UElUzw_BVCP6a6qp",
+                "PgTL9uudOfdS2i_S"
+              ],
+              "properties": {
+                "id": "3DrDig0JbEcUKnNy"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                2,
+                3
+              ],
+              "properties": {
+                "id": "yXFgkhgt_4JiX0V8",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                2,
+                2
+              ],
+              "properties": {
+                "id": "N8K6It7RU7UyHa8o",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                2
+              ],
+              "properties": {
+                "id": "X7eO3KmoXtjOES4n",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                3
+              ],
+              "properties": {
+                "id": "a0tdbSaxvcPQvcSt",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                "yXFgkhgt_4JiX0V8",
+                "N8K6It7RU7UyHa8o",
+                "X7eO3KmoXtjOES4n",
+                "a0tdbSaxvcPQvcSt"
+              ],
+              "properties": {
+                "id": "cJyfTjFTygbi0IsK"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                3,
+                4
+              ],
+              "properties": {
+                "id": "xESFBOlqxY7MNsON",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                4,
+                5
+              ],
+              "properties": {
+                "id": "b1r_sm-pjVDer2Wd",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                5,
+                4
+              ],
+              "properties": {
+                "id": "5PtPxYz7glE4x8oA",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                "xESFBOlqxY7MNsON",
+                "b1r_sm-pjVDer2Wd",
+                "5PtPxYz7glE4x8oA"
+              ],
+              "properties": {
+                "id": "_sLb6l-BeRW64IfK"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                2,
+                5
+              ],
+              "properties": {
+                "id": "4_LHrV5lP6EMZ0sM",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                5
+              ],
+              "properties": {
+                "id": "0GvxPnul9g9dDeNe",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "document_Text_4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>Mug Wump: <em>(x, y)</em></li><li>Zug: <em>(2x, 2y)</em></li><li>Lug: <em>(3x, y)</em></li><li>Bug: <em>(3x, 3y)</em></li><li>Glug: <em>(x, 3y)</em></li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "21AUG20220527PM",
+        "title": "Zug",
+        "display": "teacher",
+        "content": {
+          "type": "Geometry",
+          "board": {
+            "properties": {
+              "axisMin": [
+                -2.186,
+                -1.093
+              ],
+              "axisRange": [
+                26.23,
+                17.486
+              ]
+            }
+          },
+          "objects": [
+            {
+              "type": "point",
+              "parents": [
+                0,
+                1.9672131147540983
+              ],
+              "properties": {
+                "id": "prgm_04PkwM20ZiB",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                4,
+                2
+              ],
+              "properties": {
+                "id": "Gidu_GI6cLi51YuT",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                4,
+                0
+              ],
+              "properties": {
+                "id": "vsnyFl4R7yFSqico",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                0
+              ],
+              "properties": {
+                "id": "dl_R4mXBTAs1na1s",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                2
+              ],
+              "properties": {
+                "id": "j0N-5NMf94idfW_k",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                10,
+                2
+              ],
+              "properties": {
+                "id": "rHPdb7ebg8BTEnau",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                10,
+                0
+              ],
+              "properties": {
+                "id": "r6SIbDu5RGYuEmte",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                12,
+                0
+              ],
+              "properties": {
+                "id": "ZeT9bRk8xBrIVFWv",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                12,
+                2
+              ],
+              "properties": {
+                "id": "OhnKFgV7v4ZnqsSX",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                16,
+                2
+              ],
+              "properties": {
+                "id": "7hbdKGt5fmP4COiy",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                12,
+                14
+              ],
+              "properties": {
+                "id": "HCE5ggSH-zjV2UzZ",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                4.043715846994536,
+                14.043715846994536
+              ],
+              "properties": {
+                "id": "ZWngor_99oRQpcTp",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                "prgm_04PkwM20ZiB",
+                "Gidu_GI6cLi51YuT",
+                "vsnyFl4R7yFSqico",
+                "dl_R4mXBTAs1na1s",
+                "j0N-5NMf94idfW_k",
+                "rHPdb7ebg8BTEnau",
+                "r6SIbDu5RGYuEmte",
+                "ZeT9bRk8xBrIVFWv",
+                "OhnKFgV7v4ZnqsSX",
+                "7hbdKGt5fmP4COiy",
+                "HCE5ggSH-zjV2UzZ",
+                "ZWngor_99oRQpcTp"
+              ],
+              "properties": {
+                "id": "rTecntACjfGBs4Qe"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                4,
+                4
+              ],
+              "properties": {
+                "id": "F1BW_A7MgEqyihqQ",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                12,
+                4
+              ],
+              "properties": {
+                "id": "EohbIRXKgTIPoieB",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                12,
+                6
+              ],
+              "properties": {
+                "id": "a5iwQhGjFi-UUSro",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                4,
+                6
+              ],
+              "properties": {
+                "id": "9SWSBKHflaZYVjaB",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                "F1BW_A7MgEqyihqQ",
+                "EohbIRXKgTIPoieB",
+                "a5iwQhGjFi-UUSro",
+                "9SWSBKHflaZYVjaB"
+              ],
+              "properties": {
+                "id": "O9g96dSZdBdCQ_Cw"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                8
+              ],
+              "properties": {
+                "id": "8XGWAWqnm-LmTzME",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                8,
+                10
+              ],
+              "properties": {
+                "id": "L0B6h_yJGbOvhboJ",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                10,
+                8
+              ],
+              "properties": {
+                "id": "wwJx0cMCloVenQw3",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                "8XGWAWqnm-LmTzME",
+                "L0B6h_yJGbOvhboJ",
+                "wwJx0cMCloVenQw3"
+              ],
+              "properties": {
+                "id": "ZoutCN-fiZLrGGOg"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                4,
+                10
+              ],
+              "properties": {
+                "id": "X3QYLeMmc-Blve1C",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                12,
+                10
+              ],
+              "properties": {
+                "id": "8Q9LhOGj5mzLGtS_",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "21AUG20220526PM",
+        "title": "Lug",
+        "display": "teacher",
+        "content": {
+          "type": "Geometry",
+          "board": {
+            "properties": {
+              "axisMin": [
+                -2.186,
+                -1.093
+              ],
+              "axisRange": [
+                26.23,
+                17.486
+              ]
+            }
+          },
+          "objects": [
+            {
+              "type": "point",
+              "parents": [
+                0,
+                1
+              ],
+              "properties": {
+                "id": "U45DrvU866bWD0KW",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6.0109289617486334,
+                1.0382513661202186
+              ],
+              "properties": {
+                "id": "GRkNaljOWDikvO-e",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                0
+              ],
+              "properties": {
+                "id": "5u2N3v-PoJUPjUSs",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                9,
+                0
+              ],
+              "properties": {
+                "id": "ajoKUGi9X8veVbci",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                9,
+                1
+              ],
+              "properties": {
+                "id": "rsc0OZOVaKvso_i9",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                15,
+                1
+              ],
+              "properties": {
+                "id": "aG1KA1neizwbFLvN",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                15,
+                0
+              ],
+              "properties": {
+                "id": "fbdOONrdZb_mMfiQ",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                18.0327868852459,
+                0
+              ],
+              "properties": {
+                "id": "LKbd8M3u-9KSU42B",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                18,
+                1
+              ],
+              "properties": {
+                "id": "QG9Mq8XEDD7hWqEF",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                24,
+                1
+              ],
+              "properties": {
+                "id": "MYixFHAW063q1XdG",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                18,
+                7
+              ],
+              "properties": {
+                "id": "7rvUpdnQ-gIc879J",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                5.956284153005464,
+                7.049180327868852
+              ],
+              "properties": {
+                "id": "OfVzbIXTApnltQTl",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                "U45DrvU866bWD0KW",
+                "GRkNaljOWDikvO-e",
+                "5u2N3v-PoJUPjUSs",
+                "ajoKUGi9X8veVbci",
+                "rsc0OZOVaKvso_i9",
+                "aG1KA1neizwbFLvN",
+                "fbdOONrdZb_mMfiQ",
+                "LKbd8M3u-9KSU42B",
+                "QG9Mq8XEDD7hWqEF",
+                "MYixFHAW063q1XdG",
+                "7rvUpdnQ-gIc879J",
+                "OfVzbIXTApnltQTl"
+              ],
+              "properties": {
+                "id": "5VEKeULWklws-DfL"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                2
+              ],
+              "properties": {
+                "id": "kLA16xx_oVh9S6lo",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                18,
+                2
+              ],
+              "properties": {
+                "id": "Ua9fQuD1CV0rK87V",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                18,
+                3
+              ],
+              "properties": {
+                "id": "hNNWmGDZgjnOt74Z",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                3
+              ],
+              "properties": {
+                "id": "Lbj9qfbmLmQAeWED",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                "kLA16xx_oVh9S6lo",
+                "Ua9fQuD1CV0rK87V",
+                "hNNWmGDZgjnOt74Z",
+                "Lbj9qfbmLmQAeWED"
+              ],
+              "properties": {
+                "id": "JxlfBp8ktsWMyVQR"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                9,
+                4
+              ],
+              "properties": {
+                "id": "wBD4vYdM7QFRNJj9",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                12,
+                5
+              ],
+              "properties": {
+                "id": "l2GH6F_3x4EwTFib",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                15,
+                4
+              ],
+              "properties": {
+                "id": "eOXHXB-hFYXQuvcM",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                "wBD4vYdM7QFRNJj9",
+                "l2GH6F_3x4EwTFib",
+                "eOXHXB-hFYXQuvcM"
+              ],
+              "properties": {
+                "id": "LKKc3WbSYZcAKu7Y"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                5
+              ],
+              "properties": {
+                "id": "oKettVHETLdZ_McC",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                18,
+                5
+              ],
+              "properties": {
+                "id": "fEQE4G4rscGb9fWw",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "21AUG20220525PM",
+        "title": "Bug",
+        "display": "teacher",
+        "content": {
+          "type": "Geometry",
+          "board": {
+            "properties": {
+              "axisMin": [
+                -2.186,
+                -1.093
+              ],
+              "axisRange": [
+                26.23,
+                17.486
+              ]
+            }
+          },
+          "objects": [
+            {
+              "type": "point",
+              "parents": [
+                0,
+                3
+              ],
+              "properties": {
+                "id": "94zvvX3mSwnnqJFk",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                5.956284153005464,
+                3.0054644808743167
+              ],
+              "properties": {
+                "id": "XvfjoNa0iSHr9R0M",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                0
+              ],
+              "properties": {
+                "id": "hBtc6VVkxfMYbzjE",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                9.01639344262295,
+                0
+              ],
+              "properties": {
+                "id": "2oOLdZziNHNAuFSn",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                9.01639344262295,
+                2.9508196721311473
+              ],
+              "properties": {
+                "id": "aovKKsazNwXDTwDc",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                14.972677595628415,
+                3.0054644808743167
+              ],
+              "properties": {
+                "id": "ioctEkd5nk0mbDEN",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                15,
+                0
+              ],
+              "properties": {
+                "id": "VFYQpWC_kkKs7kRd",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                18,
+                0
+              ],
+              "properties": {
+                "id": "JMTRA4_VKOtUSiZm",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                17.97814207650273,
+                3.0054644808743167
+              ],
+              "properties": {
+                "id": "1Mj1hjgx7YVgRW2j",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                24,
+                3
+              ],
+              "properties": {
+                "id": "3LOfbt5VCvGDnq6g",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                18,
+                21
+              ],
+              "properties": {
+                "id": "H5V9CQWwB2awQ5fM",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                21
+              ],
+              "properties": {
+                "id": "zQkKDVaLYSHNJ8Q7",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                "94zvvX3mSwnnqJFk",
+                "XvfjoNa0iSHr9R0M",
+                "hBtc6VVkxfMYbzjE",
+                "2oOLdZziNHNAuFSn",
+                "aovKKsazNwXDTwDc",
+                "ioctEkd5nk0mbDEN",
+                "VFYQpWC_kkKs7kRd",
+                "JMTRA4_VKOtUSiZm",
+                "1Mj1hjgx7YVgRW2j",
+                "3LOfbt5VCvGDnq6g",
+                "H5V9CQWwB2awQ5fM",
+                "zQkKDVaLYSHNJ8Q7"
+              ],
+              "properties": {
+                "id": "E3Tp7DBr9-aQ9NKh"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                6
+              ],
+              "properties": {
+                "id": "O11hPKsUHOvqpM1w",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                18,
+                6
+              ],
+              "properties": {
+                "id": "ynhlraIxLSRXztmn",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                18,
+                9
+              ],
+              "properties": {
+                "id": "GZpPgSKnrCzjtFFY",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                9
+              ],
+              "properties": {
+                "id": "Au8iCY5WS0Z1yOYb",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                "O11hPKsUHOvqpM1w",
+                "ynhlraIxLSRXztmn",
+                "GZpPgSKnrCzjtFFY",
+                "Au8iCY5WS0Z1yOYb"
+              ],
+              "properties": {
+                "id": "mawA89VafTtJo1sq"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                9,
+                12
+              ],
+              "properties": {
+                "id": "orfiJy1LZGhY6WB0",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                12.000000000000002,
+                15
+              ],
+              "properties": {
+                "id": "eMHm4UNof5i6upNJ",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                15.000000000000002,
+                12
+              ],
+              "properties": {
+                "id": "pE7p2IT9xPPJxY9z",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                "orfiJy1LZGhY6WB0",
+                "eMHm4UNof5i6upNJ",
+                "pE7p2IT9xPPJxY9z"
+              ],
+              "properties": {
+                "id": "N84D0s2mNTvzmKaW"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                15
+              ],
+              "properties": {
+                "id": "I5tc_58gnM87dAPR",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                18,
+                15
+              ],
+              "properties": {
+                "id": "GPWC83jgOpFDAxB7",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "21AUG20220524PM",
+        "title": "Glug",
+        "display": "teacher",
+        "content": {
+          "type": "Geometry",
+          "board": {
+            "properties": {
+              "axisMin": [
+                -2.186,
+                -1.093
+              ],
+              "axisRange": [
+                26.23,
+                17.486
+              ]
+            }
+          },
+          "objects": [
+            {
+              "type": "point",
+              "parents": [
+                0,
+                3
+              ],
+              "properties": {
+                "id": "qL4yPB6xXWTANPXb",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                2,
+                3
+              ],
+              "properties": {
+                "id": "hXdXlRMlMPMKd5hN",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                2,
+                0
+              ],
+              "properties": {
+                "id": "XpeLjlt0gebApaRZ",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                3,
+                0
+              ],
+              "properties": {
+                "id": "YPJvQwx-qO0GN4kF",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                3,
+                3
+              ],
+              "properties": {
+                "id": "pDNK_W9N-CC84jD-",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                5,
+                3
+              ],
+              "properties": {
+                "id": "_IafN23QsPL59dGl",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                4.972677595628415,
+                6.2123955039134425e-15
+              ],
+              "properties": {
+                "id": "M7vDxQxzxoC6s37o",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                0
+              ],
+              "properties": {
+                "id": "9QrbxWhpmz7SBCZJ",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                3
+              ],
+              "properties": {
+                "id": "tb8VxwqahhUWof3M",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                8,
+                3
+              ],
+              "properties": {
+                "id": "k_gjiU-1kCqqnnO0",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                21
+              ],
+              "properties": {
+                "id": "6nq-jhqGOSjT6llv",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                2,
+                21
+              ],
+              "properties": {
+                "id": "AduPWZtULcwGkCaz",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                "qL4yPB6xXWTANPXb",
+                "hXdXlRMlMPMKd5hN",
+                "XpeLjlt0gebApaRZ",
+                "YPJvQwx-qO0GN4kF",
+                "pDNK_W9N-CC84jD-",
+                "_IafN23QsPL59dGl",
+                "M7vDxQxzxoC6s37o",
+                "9QrbxWhpmz7SBCZJ",
+                "tb8VxwqahhUWof3M",
+                "k_gjiU-1kCqqnnO0",
+                "6nq-jhqGOSjT6llv",
+                "AduPWZtULcwGkCaz"
+              ],
+              "properties": {
+                "id": "x1s0yDh5eoWJ_6w5"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                2,
+                6
+              ],
+              "properties": {
+                "id": "eydx-20I8ufJ8-5b",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                6
+              ],
+              "properties": {
+                "id": "7VVLe6L2Y9k6PL3e",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                9
+              ],
+              "properties": {
+                "id": "d6R8Isxip2vHsTYq",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                2,
+                9
+              ],
+              "properties": {
+                "id": "xgKl3hMRqmnmA2_s",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                "eydx-20I8ufJ8-5b",
+                "7VVLe6L2Y9k6PL3e",
+                "d6R8Isxip2vHsTYq",
+                "xgKl3hMRqmnmA2_s"
+              ],
+              "properties": {
+                "id": "RGQIgT65Cp22dvGH"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                2,
+                15
+              ],
+              "properties": {
+                "id": "yOFIHJEm2BklRs6c",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                15
+              ],
+              "properties": {
+                "id": "jZt_Q1wfxzVyNUAP",
+                "snapToGrid": true,
+                "snapSizeX": 0.1,
+                "snapSizeY": 0.1
+              }
+            }
+          ]
+        },
+        "layout": {
+          "height": 400
+        }
+      },
+      [
+        {
+          "id": "document_Table_6",
+          "title": "Mug Wump",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "mzCVmpqwu_S44XqJ": 80,
+              "gatDIY-opflxFm83": 80
+            },
+            "name": "Mug Wump"
+          }
+        },
+        {
+          "id": "document_Table_7",
+          "title": "Mug Wump Part 2",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "biTtViKNdV3nQsua": 80,
+              "juASpFvyIz6mnbfH": 80
+            },
+            "name": "Mug Wump Part 2"
+          }
+        }
+      ],
+      [
+        {
+          "id": "document_Table_8",
+          "title": "Mug Wump Part 3",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "T9KUqeCO_kiiBHxj": 80,
+              "6DYOB2RWtTAMp-Bv": 80
+            },
+            "name": "Mug Wump Part 3"
+          }
+        },
+        {
+          "id": "document_Table_9",
+          "title": "Mug Wump Part 4",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "IBNXSHJ8L1tWDtEq": 80,
+              "DsjSAXQiRuD9Wk8G": 80
+            },
+            "name": "Mug Wump Part 4"
+          }
+        }
+      ],
+      {
+        "id": "document_Text_5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Look at the figures created by Marta’s rules. Which family members are similar to Mug? Which figures appear not to be similar, and thus “imposters”? How do you know?</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_6",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Zug and Bug are bigger versions of and have the same shape as Mug, so they are the other Wumps. From Mug to Zug and Bug, the angles and the general shape stayed the same. From Mug to Zug, the lengths doubled and from Mug to Bug, the lengths tripled.</p><p>On the other hand, Lug is too wide, and Glug is too tall to be the Wumps family. From Mug to Lug and Glug, corresponding lengths did not grow by the same factor. Lug is the same height as Mug but three times as wide. Lug is stretched on the x-axis values, but not the y-axis values. Glug is the same width as Mug but three times as tall. Glug is stretched on the y-axis values, but not the x-axis values. Many of Lug’s and Glug’s angles differ from Mug’s. So, Lug and Glug are impostors.</p>"
+          ]
+        }
+      }
+    ],
+    "sharedModels": [
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "XRAYRHS82wud1Fo4",
+          "providerId": "bq9p0V6LmnYwvF",
+          "dataSet": {
+            "id": "xJ5nqYenHjp_YURk",
+            "name": "Mug Wump",
+            "attributes": [
+              {
+                "id": "-HVU3mwYw46aOoPc",
+                "clientKey": "",
+                "name": "x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "0",
+                  "2",
+                  "2",
+                  "3",
+                  "3",
+                  "5",
+                  "5",
+                  "6",
+                  "6",
+                  "8",
+                  "6",
+                  "2",
+                  "0",
+                  "2",
+                  "6",
+                  "6",
+                  "2",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "3",
+                  "2",
+                  "6"
+                ],
+                "title": ""
+              },
+              {
+                "id": "zxWwoo4KMM26K0iI",
+                "clientKey": "",
+                "name": "y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "1",
+                  "1",
+                  "0",
+                  "0",
+                  "1",
+                  "1",
+                  "0",
+                  "0",
+                  "1",
+                  "1",
+                  "7",
+                  "7",
+                  "1",
+                  "2",
+                  "2",
+                  "3",
+                  "3",
+                  "2",
+                  "4",
+                  "5",
+                  "4",
+                  "4",
+                  "5",
+                  "5"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR5ZK"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR5ZM"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR5ZN"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR5ZP"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR5ZQ"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR5ZR"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR5ZS"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR5ZT"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR5ZV"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR5ZW"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR5ZX"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR5ZY"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR5ZZ"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR600"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR601"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR602"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR603"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR604"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR605"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR606"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR607"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR608"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR609"
+              },
+              {
+                "__id__": "01HCSTEEJQQKZA2AYQYQKXR60A"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "bq9p0V6LmnYwvF"
+        ]
+      },
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "im-OHG2I-rCuHQvI",
+          "providerId": "LB20OCT20231059",
+          "dataSet": {
+            "id": "cF1Gpa66sxAT0CBq",
+            "name": "Zug",
+            "attributes": [
+              {
+                "id": "ktTptxIbLx1KXgTc",
+                "clientKey": "",
+                "name": "2x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "0",
+                  "4",
+                  "4",
+                  "6",
+                  "6",
+                  "10",
+                  "10",
+                  "12",
+                  "12",
+                  "16",
+                  "12",
+                  "4",
+                  "0",
+                  "4",
+                  "12",
+                  "12",
+                  "4",
+                  "4",
+                  "6",
+                  "8",
+                  "10",
+                  "6",
+                  "4",
+                  "12"
+                ],
+                "title": ""
+              },
+              {
+                "id": "l4ocVVIEhY4if2vp",
+                "clientKey": "",
+                "name": "2y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "2",
+                  "2",
+                  "0",
+                  "0",
+                  "2",
+                  "2",
+                  "0",
+                  "0",
+                  "2",
+                  "2",
+                  "14",
+                  "14",
+                  "2",
+                  "4",
+                  "4",
+                  "6",
+                  "6",
+                  "4",
+                  "8",
+                  "10",
+                  "8",
+                  "8",
+                  "10",
+                  "10"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXT1"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXT2"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXT3"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXT4"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXT5"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXT6"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXT7"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXT8"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXT9"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXTA"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXTB"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXTC"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXTD"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXTE"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXTF"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXTG"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXTH"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXTJ"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXTK"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXTM"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXTN"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXTP"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXTQ"
+              },
+              {
+                "__id__": "01HCSTEEJT1D1KE75A04APBXTR"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "LB20OCT20231059"
+        ]
+      },
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "AAJq3iTb4JngzyM-",
+          "providerId": "LB20OCT20231157",
+          "dataSet": {
+            "id": "4dj-yWyx8Ll7KBLH",
+            "name": "Lug",
+            "attributes": [
+              {
+                "id": "EvU6EG06fXaQbvKw",
+                "clientKey": "",
+                "name": "3x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "0",
+                  "6",
+                  "6",
+                  "9",
+                  "9",
+                  "15",
+                  "15",
+                  "18",
+                  "18",
+                  "24",
+                  "18",
+                  "6",
+                  "0",
+                  "6",
+                  "18",
+                  "18",
+                  "6",
+                  "6",
+                  "9",
+                  "12",
+                  "15",
+                  "9",
+                  "6",
+                  "18"
+                ],
+                "title": ""
+              },
+              {
+                "id": "8tBO9qnrRZ3_r_qH",
+                "clientKey": "",
+                "name": "y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "1",
+                  "1",
+                  "0",
+                  "0",
+                  "1",
+                  "1",
+                  "0",
+                  "0",
+                  "1",
+                  "1",
+                  "7",
+                  "7",
+                  "1",
+                  "2",
+                  "2",
+                  "3",
+                  "3",
+                  "2",
+                  "4",
+                  "5",
+                  "4",
+                  "4",
+                  "5",
+                  "5"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0JR"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0JS"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0JT"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0JV"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0JW"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0JX"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0JY"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0JZ"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0K0"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0K1"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0K2"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0K3"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0K4"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0K5"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0K6"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0K7"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0K8"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0K9"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0KA"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0KB"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0KC"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0KD"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0KE"
+              },
+              {
+                "__id__": "01HCSTEEJXZ0ZWDNNFTYEVH0KF"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "LB20OCT20231157"
+        ]
+      },
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "7u1D6t5oxEnrsToj",
+          "providerId": "LB20OCT20231159",
+          "dataSet": {
+            "id": "dfMRpKfqRIk8dyfe",
+            "name": "Bug",
+            "attributes": [
+              {
+                "id": "jdUpl7lwAC7kG7hS",
+                "clientKey": "",
+                "name": "3x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "0",
+                  "6",
+                  "6",
+                  "9",
+                  "9",
+                  "15",
+                  "15",
+                  "18",
+                  "18",
+                  "24",
+                  "18",
+                  "6",
+                  "0",
+                  "6",
+                  "18",
+                  "18",
+                  "6",
+                  "6",
+                  "9",
+                  "12",
+                  "15",
+                  "9",
+                  "6",
+                  "18"
+                ],
+                "title": ""
+              },
+              {
+                "id": "n1b-j-MlwIXpe98K",
+                "clientKey": "",
+                "name": "3y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "3",
+                  "3",
+                  "0",
+                  "0",
+                  "3",
+                  "3",
+                  "0",
+                  "0",
+                  "3",
+                  "3",
+                  "21",
+                  "21",
+                  "3",
+                  "6",
+                  "6",
+                  "9",
+                  "9",
+                  "6",
+                  "12",
+                  "15",
+                  "12",
+                  "12",
+                  "15",
+                  "15"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG430"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG431"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG432"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG433"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG434"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG435"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG436"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG437"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG438"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG439"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG43A"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG43B"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG43C"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG43D"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG43E"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG43F"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG43G"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG43H"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG43J"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG43K"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG43M"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG43N"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG43P"
+              },
+              {
+                "__id__": "01HCSTEEK08B8ZPWQ1JGYJG43Q"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "LB20OCT20231159"
+        ]
+      },
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "XeEcuHtbjBYCpDQ7",
+          "providerId": "document_Table_5",
+          "dataSet": {
+            "id": "lqmk_kMo7D1K2TWY",
+            "name": "Glug",
+            "attributes": [
+              {
+                "id": "U6k47DZlFZKHBHW3",
+                "clientKey": "",
+                "name": "x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "0",
+                  "2",
+                  "2",
+                  "3",
+                  "3",
+                  "5",
+                  "5",
+                  "6",
+                  "6",
+                  "8",
+                  "6",
+                  "2",
+                  "0",
+                  "2",
+                  "6",
+                  "6",
+                  "2",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "3",
+                  "2",
+                  "6"
+                ],
+                "title": ""
+              },
+              {
+                "id": "d__bwnistM_BABGq",
+                "clientKey": "",
+                "name": "3y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "3",
+                  "3",
+                  "0",
+                  "0",
+                  "3",
+                  "3",
+                  "0",
+                  "0",
+                  "3",
+                  "3",
+                  "21",
+                  "21",
+                  "3",
+                  "6",
+                  "6",
+                  "9",
+                  "9",
+                  "6",
+                  "12",
+                  "15",
+                  "12",
+                  "12",
+                  "15",
+                  "15"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PFZY"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PFZZ"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG00"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG01"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG02"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG03"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG04"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG05"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG06"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG07"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG08"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG09"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG0A"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG0B"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG0C"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG0D"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG0E"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG0F"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG0G"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG0H"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG0J"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG0K"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG0M"
+              },
+              {
+                "__id__": "01HCSTEEK36HH7B4R2ERN2PG0N"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "document_Table_5"
+        ]
+      },
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "n70yfY5GaOfaFUMP",
+          "providerId": "document_Table_6",
+          "dataSet": {
+            "id": "7LWxaj-w-m1iKM5q",
+            "name": "Mug Wump",
+            "attributes": [
+              {
+                "id": "mzCVmpqwu_S44XqJ",
+                "clientKey": "",
+                "name": "Mug x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  0,
+                  2,
+                  2,
+                  3,
+                  3,
+                  5,
+                  5,
+                  6,
+                  6,
+                  8,
+                  6,
+                  2,
+                  0
+                ],
+                "title": ""
+              },
+              {
+                "id": "gatDIY-opflxFm83",
+                "clientKey": "",
+                "name": "Mug y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  1,
+                  1,
+                  0,
+                  0,
+                  1,
+                  1,
+                  0,
+                  0,
+                  1,
+                  1,
+                  7,
+                  7,
+                  1
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HCSTEEM79BQCXNJ44CJ87144"
+              },
+              {
+                "__id__": "01HCSTEEM79BQCXNJ44CJ87145"
+              },
+              {
+                "__id__": "01HCSTEEM79BQCXNJ44CJ87146"
+              },
+              {
+                "__id__": "01HCSTEEM79BQCXNJ44CJ87147"
+              },
+              {
+                "__id__": "01HCSTEEM79BQCXNJ44CJ87148"
+              },
+              {
+                "__id__": "01HCSTEEM79BQCXNJ44CJ87149"
+              },
+              {
+                "__id__": "01HCSTEEM79BQCXNJ44CJ8714A"
+              },
+              {
+                "__id__": "01HCSTEEM79BQCXNJ44CJ8714B"
+              },
+              {
+                "__id__": "01HCSTEEM79BQCXNJ44CJ8714C"
+              },
+              {
+                "__id__": "01HCSTEEM79BQCXNJ44CJ8714D"
+              },
+              {
+                "__id__": "01HCSTEEM79BQCXNJ44CJ8714E"
+              },
+              {
+                "__id__": "01HCSTEEM79BQCXNJ44CJ8714F"
+              },
+              {
+                "__id__": "01HCSTEEM79BQCXNJ44CJ8714G"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "document_Table_6"
+        ]
+      },
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "p8dfZTsm9VY7LSMK",
+          "providerId": "document_Table_7",
+          "dataSet": {
+            "id": "Nhsn1CTVdrJjB5_n",
+            "name": "Mug Wump Part 2",
+            "attributes": [
+              {
+                "id": "biTtViKNdV3nQsua",
+                "clientKey": "",
+                "name": "x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  2,
+                  6,
+                  6,
+                  2,
+                  2
+                ],
+                "title": ""
+              },
+              {
+                "id": "juASpFvyIz6mnbfH",
+                "clientKey": "",
+                "name": "y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  2,
+                  2,
+                  3,
+                  3,
+                  2
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HCSTEEMAC1BBMAAME1SC0EFJ"
+              },
+              {
+                "__id__": "01HCSTEEMAC1BBMAAME1SC0EFK"
+              },
+              {
+                "__id__": "01HCSTEEMAC1BBMAAME1SC0EFM"
+              },
+              {
+                "__id__": "01HCSTEEMAC1BBMAAME1SC0EFN"
+              },
+              {
+                "__id__": "01HCSTEEMAC1BBMAAME1SC0EFP"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "document_Table_7"
+        ]
+      },
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "SZueHCligZTvBN3K",
+          "providerId": "document_Table_8",
+          "dataSet": {
+            "id": "WUWp5ZiriE2lDMFk",
+            "name": "Mug Wump Part 3",
+            "attributes": [
+              {
+                "id": "T9KUqeCO_kiiBHxj",
+                "clientKey": "",
+                "name": "x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  3,
+                  4,
+                  5,
+                  3
+                ],
+                "title": ""
+              },
+              {
+                "id": "6DYOB2RWtTAMp-Bv",
+                "clientKey": "",
+                "name": "y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  4,
+                  5,
+                  4,
+                  4
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HCSTEEMCB5RXGBDX06A4256B"
+              },
+              {
+                "__id__": "01HCSTEEMCB5RXGBDX06A4256C"
+              },
+              {
+                "__id__": "01HCSTEEMCB5RXGBDX06A4256D"
+              },
+              {
+                "__id__": "01HCSTEEMCB5RXGBDX06A4256E"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "document_Table_8"
+        ]
+      },
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "9pdVCzczE6pZxG4T",
+          "providerId": "document_Table_9",
+          "dataSet": {
+            "id": "_buzd7Z5ZWD0au6L",
+            "name": "Mug Wump Part 4",
+            "attributes": [
+              {
+                "id": "IBNXSHJ8L1tWDtEq",
+                "clientKey": "",
+                "name": "x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  2,
+                  6
+                ],
+                "title": ""
+              },
+              {
+                "id": "DsjSAXQiRuD9Wk8G",
+                "clientKey": "",
+                "name": "y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  5,
+                  5
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HCSTEEMEPY6QNE5MGB6HX92P"
+              },
+              {
+                "__id__": "01HCSTEEMEPY6QNE5MGB6HX92Q"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "document_Table_9"
+        ]
+      }
+    ]
+  },
+  "supports": [
+    {
+      "text": "What features are the same about Mug and the others? What features are different?"
+    },
+    {
+      "text": "What features do you consider when you decide two figures are similar or not?"
+    }
+  ]
+}

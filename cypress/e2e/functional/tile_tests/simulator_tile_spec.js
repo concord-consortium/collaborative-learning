@@ -6,8 +6,8 @@ let clueCanvas = new ClueCanvas;
 const dataflowTile = new DataflowTile;
 let simulatorTile = new SimulatorTile;
 
-const queryParams1 = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=brain";
-const queryParams2 = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&mouseSensor&unit=seeit";
+const queryParams1 = `${Cypress.config("qaUnitStudent5")}`;
+const queryParams2 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
 
 function beforeTest(params) {
   cy.clearQAData('all');
@@ -128,13 +128,7 @@ context('Simulator Tile', function () {
     cy.log("links to dataflow tile");
     // Copy a simulator tile over from curriculum
     simulatorTile.getSimulatorTile().should("not.exist");
-    const dataTransfer = new DataTransfer;
-    const leftSimulatorTile = () => cy.get(".nav-tab-panel .problem-panel .simulator-tool-tile");
-    leftSimulatorTile().trigger("mouseover");
-    const draggable = () => leftSimulatorTile().find(".tool-tile-drag-handle-wrapper");
-    draggable().trigger("dragstart", { dataTransfer, force: true });
-    cy.get(".primary-workspace .document-content").trigger("drop", { dataTransfer });
-    draggable().trigger("dragend", { force: true });
+    clueCanvas.addTile("simulator");
     simulatorTile.getSimulatorTile().should("exist");
     cy.collapseResourceTabs();
 

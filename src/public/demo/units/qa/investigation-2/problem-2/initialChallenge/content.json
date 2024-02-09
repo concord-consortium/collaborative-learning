@@ -1,0 +1,1066 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "document_Text_1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Zack experiments with multiplying Mug’s coordinates by different whole numbers to make other characters. Marta asks her uncle how multiplying the coordinates by a decimal or adding numbers to or subtracting numbers from each coordinate will affect Mug’s shape. He gives her a sketch for a new shape (a hat for Mug) and some rules to investigate.</p>"
+          ]
+        }
+      },
+      {
+        "id": "-6wzAUG20220914AM",
+        "title": "Mug’s hat",
+        "content": {
+          "type": "Image",
+          "url": "qa/images/SS_2_2_In_15_mug_hat_500w.png"
+        }
+      },
+      {
+        "id": "21AUG20220518PM",
+        "title": "Mug's Hat",
+        "content": {
+          "type": "Geometry",
+          "board": {
+            "properties": {
+              "axisMin": [
+                -1,
+                -1
+              ],
+              "axisRange": [
+                15,
+                15
+              ]
+            }
+          },
+          "objects": [
+            {
+              "type": "point",
+              "parents": [
+                1,
+                1
+              ],
+              "properties": {
+                "id": "EGFc0pZVbl1W73EH",
+                "name": "A"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                9,
+                1
+              ],
+              "properties": {
+                "id": "M-rhWI9zLlH9oGlF",
+                "name": "B"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                2
+              ],
+              "properties": {
+                "id": "pgZCJYljrTuvgeRB",
+                "name": "C"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                6,
+                3
+              ],
+              "properties": {
+                "id": "ksUEna8DIUvtzF_4",
+                "name": "D"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                4,
+                3
+              ],
+              "properties": {
+                "id": "OY9DMG6Tiyu9esgS",
+                "name": "E"
+              }
+            },
+            {
+              "type": "point",
+              "parents": [
+                4,
+                2
+              ],
+              "properties": {
+                "id": "TIMhZN51s8rk9eXO",
+                "name": "F"
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                "EGFc0pZVbl1W73EH",
+                "M-rhWI9zLlH9oGlF",
+                "pgZCJYljrTuvgeRB",
+                "ksUEna8DIUvtzF_4",
+                "OY9DMG6Tiyu9esgS",
+                "TIMhZN51s8rk9eXO"
+              ],
+              "properties": {
+                "id": "gffOskuHHr36y71q"
+              }
+            }
+          ]
+        },
+        "layout": {
+          "height": 200
+        }
+      },
+      {
+        "id": "-6wzAUG20220915AM",
+        "title": "Rules for transforming Mug’s hat",
+        "content": {
+          "type": "Image",
+          "url": "qa/images/SS_2_2_In_16_rules_mug_hat_500w.png"
+        }
+      },
+      {
+        "id": "document_Text_2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li> Look at each rule and predict what will happen to the hat with each rule.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_3",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Students’ predictions will vary. At this time, many students may not have connected the stretching and shrinking to a multiplicative relationship. They may predict that adding will make a shape enlarge and subtracting will make a shape shrink. If so, students may predict that Hat 1 and Hat 5 will look the same.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li> Test each rule. How does your result compare with your prediction? </li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_5",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answers will vary. Predictions may or may not have matched what happened to the shapes.</p><ul><li> Hat 1 will move 2 units to the right and 3 units up without changing its size or shape. (congruent and similar)</li><li>  Hat 2 will move 1 unit left and 4 units up, also without changing its size or shape. (congruent and similar)</li><li>  Hat 3 will be located 2 units to the right, and it will be 3 times as high (stretched vertically and not similar)</li><li>  Hat 4 will shrink vertically and horizontally by the same factor: 0.5. It keeps the same shape. Each length will be half of the original corresponding length. (similar)</li><li> Hat 5 will be stretched vertically by the factor of 3, and horizontally by the factor of 2. (not similar)</li><li>  Hats 1, 2, and 4 are similar to Mug’s Hat. Hat 1 and Hat 2 are the same size and shape as Mug’s hat, but they move to different place on the coordinate graph. Hat 4 has the same shape, but different size from the Mug’s hat.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "bQsYeNjhqFcLo1bo",
+        "title": "Table of Coordinate Pairs",
+        "display": "teacher",
+        "content": {
+          "type": "Table",
+          "columnWidths": {
+            "g0aVyWjfTyS_UXK2": 80,
+            "JytAKm2jrL0tL-z-": 80,
+            "mJy8ALTAbLprxhLC": 80,
+            "K_bqLC6zrd6i2ANC": 80,
+            "HyKJtaI8taYnWSWw": 80,
+            "Pq_jSuXCcdda9ojo": 80,
+            "AmzCfalHX8My_6dw": 80
+          },
+          "name": "Table of Coordinate Pairs"
+        }
+      },
+      [
+        {
+          "id": "21AUG20220517PM",
+          "title": "Mug’s Hat",
+          "display": "teacher",
+          "content": {
+            "type": "Geometry",
+            "board": {
+              "properties": {
+                "axisMin": [
+                  -1,
+                  -1
+                ],
+                "axisRange": [
+                  15,
+                  15
+                ]
+              }
+            },
+            "objects": [
+              {
+                "type": "point",
+                "parents": [
+                  1,
+                  1
+                ],
+                "properties": {
+                  "id": "tsmOi1KNUt-1gb9A",
+                  "name": "A"
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  9,
+                  1
+                ],
+                "properties": {
+                  "id": "WHYVJJcYENcLeQQy",
+                  "name": "B"
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  6,
+                  2
+                ],
+                "properties": {
+                  "id": "E4Cun9QOl3GEXtn7",
+                  "name": "C"
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  6,
+                  3
+                ],
+                "properties": {
+                  "id": "iMOfGU6wdr9GhmbC",
+                  "name": "D"
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  4,
+                  3
+                ],
+                "properties": {
+                  "id": "G9RyhnI6Uzikaal7",
+                  "name": "E"
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  4,
+                  2
+                ],
+                "properties": {
+                  "id": "TCCYHM0y0_BrrPed",
+                  "name": "F"
+                }
+              },
+              {
+                "type": "polygon",
+                "parents": [
+                  "tsmOi1KNUt-1gb9A",
+                  "WHYVJJcYENcLeQQy",
+                  "E4Cun9QOl3GEXtn7",
+                  "iMOfGU6wdr9GhmbC",
+                  "G9RyhnI6Uzikaal7",
+                  "TCCYHM0y0_BrrPed"
+                ],
+                "properties": {
+                  "id": "NHw7Hg7_UUQNI07m"
+                }
+              }
+            ]
+          },
+          "layout": {
+            "height": 200
+          }
+        },
+        {
+          "id": "21AUG20220517sfaPM",
+          "title": "Hat 1",
+          "display": "teacher",
+          "content": {
+            "type": "Geometry",
+            "board": {
+              "properties": {
+                "axisMin": [
+                  -2.186,
+                  -1.093
+                ],
+                "axisRange": [
+                  26.23,
+                  17.486
+                ]
+              }
+            },
+            "objects": [
+              {
+                "type": "point",
+                "parents": [
+                  3,
+                  4.1000000000000005
+                ],
+                "properties": {
+                  "id": "CKZsETthyV76sI63",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  11,
+                  4
+                ],
+                "properties": {
+                  "id": "XVgLFUmtZZRp6XR7",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  8,
+                  5
+                ],
+                "properties": {
+                  "id": "1zt_o2C8_NO7jgdU",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  8,
+                  6
+                ],
+                "properties": {
+                  "id": "sgL9jiY3sEHLTDLw",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  6,
+                  6
+                ],
+                "properties": {
+                  "id": "CejYRi5zciQV1SsJ",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  6,
+                  5
+                ],
+                "properties": {
+                  "id": "nfCP5Vs119FDWjK0",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "polygon",
+                "parents": [
+                  "CKZsETthyV76sI63",
+                  "XVgLFUmtZZRp6XR7",
+                  "1zt_o2C8_NO7jgdU",
+                  "sgL9jiY3sEHLTDLw",
+                  "CejYRi5zciQV1SsJ",
+                  "nfCP5Vs119FDWjK0"
+                ],
+                "properties": {
+                  "id": "UWTq-bMbU0dC2ud_"
+                }
+              }
+            ]
+          },
+          "layout": {
+            "height": 200
+          }
+        }
+      ],
+      [
+        {
+          "id": "21AUG20220516PM",
+          "title": "Hat 2",
+          "display": "teacher",
+          "content": {
+            "type": "Geometry",
+            "board": {
+              "properties": {
+                "axisMin": [
+                  -2.186,
+                  -1.093
+                ],
+                "axisRange": [
+                  26.23,
+                  17.486
+                ]
+              }
+            },
+            "objects": [
+              {
+                "type": "point",
+                "parents": [
+                  0,
+                  5
+                ],
+                "properties": {
+                  "id": "EWwmGMykqI3EAfmJ",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  8,
+                  5
+                ],
+                "properties": {
+                  "id": "SA5Uo1SRsw64HI-o",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  5,
+                  6
+                ],
+                "properties": {
+                  "id": "NW3dnnZJt74VMb8_",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  5,
+                  7
+                ],
+                "properties": {
+                  "id": "nflYISZovV1bWrYC",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  3,
+                  7
+                ],
+                "properties": {
+                  "id": "7PemD2FkWhS387Sr",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  3,
+                  6
+                ],
+                "properties": {
+                  "id": "RNvBCcnVQBdah8ue",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "polygon",
+                "parents": [
+                  "EWwmGMykqI3EAfmJ",
+                  "SA5Uo1SRsw64HI-o",
+                  "NW3dnnZJt74VMb8_",
+                  "nflYISZovV1bWrYC",
+                  "7PemD2FkWhS387Sr",
+                  "RNvBCcnVQBdah8ue"
+                ],
+                "properties": {
+                  "id": "ugV7bOncUuZNn_WH"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "21AUG20220515PM",
+          "title": "Hat3",
+          "display": "teacher",
+          "content": {
+            "type": "Geometry",
+            "board": {
+              "properties": {
+                "axisMin": [
+                  -2.186,
+                  -1.093
+                ],
+                "axisRange": [
+                  26.23,
+                  17.486
+                ]
+              }
+            },
+            "objects": [
+              {
+                "type": "point",
+                "parents": [
+                  2.9508196721311473,
+                  3.0054644808743194
+                ],
+                "properties": {
+                  "id": "OEly5WN6_YCdEJgj",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  11,
+                  3
+                ],
+                "properties": {
+                  "id": "Mqye7QHgnIRpgokl",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  7.978142076502732,
+                  5.956284153005466
+                ],
+                "properties": {
+                  "id": "hqajRtfZi5G3XId9",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  8,
+                  9
+                ],
+                "properties": {
+                  "id": "kXay8UaR7h4c5vZP",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  6,
+                  9
+                ],
+                "properties": {
+                  "id": "3_sBOLAQMamD60lk",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  6,
+                  6
+                ],
+                "properties": {
+                  "id": "k4Fy8YnkcfQN9VtX",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "polygon",
+                "parents": [
+                  "OEly5WN6_YCdEJgj",
+                  "Mqye7QHgnIRpgokl",
+                  "hqajRtfZi5G3XId9",
+                  "kXay8UaR7h4c5vZP",
+                  "3_sBOLAQMamD60lk",
+                  "k4Fy8YnkcfQN9VtX"
+                ],
+                "properties": {
+                  "id": "qu3-4pPyMgaN6U_H"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      [
+        {
+          "id": "21AUG20220514PM",
+          "title": "Hat4",
+          "display": "teacher",
+          "content": {
+            "type": "Geometry",
+            "board": {
+              "properties": {
+                "axisMin": [
+                  -2.186,
+                  -1.093
+                ],
+                "axisRange": [
+                  26.23,
+                  17.486
+                ]
+              }
+            },
+            "objects": [
+              {
+                "type": "point",
+                "parents": [
+                  0.5,
+                  0.5
+                ],
+                "properties": {
+                  "id": "D3diq-xIS8sWwPgN",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  4.48087431693989,
+                  0.5464480874316969
+                ],
+                "properties": {
+                  "id": "ITD9jGE5DKQBBZ05",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  3,
+                  1
+                ],
+                "properties": {
+                  "id": "hrg0GrlvJ5B3cdFW",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  3,
+                  1.5
+                ],
+                "properties": {
+                  "id": "_rmZutpv-I_TFPsE",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  2,
+                  1.5
+                ],
+                "properties": {
+                  "id": "XLjFFqoXMQOeoXHe",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  2,
+                  1
+                ],
+                "properties": {
+                  "id": "f0qh7hBuA8pj5ksD",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "polygon",
+                "parents": [
+                  "D3diq-xIS8sWwPgN",
+                  "ITD9jGE5DKQBBZ05",
+                  "hrg0GrlvJ5B3cdFW",
+                  "_rmZutpv-I_TFPsE",
+                  "XLjFFqoXMQOeoXHe",
+                  "f0qh7hBuA8pj5ksD"
+                ],
+                "properties": {
+                  "id": "m7LQmMcwz-y2AC_J"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "21AUG20220521PM",
+          "title": "Hat 5",
+          "display": "teacher",
+          "content": {
+            "type": "Geometry",
+            "board": {
+              "properties": {
+                "axisMin": [
+                  -2.186,
+                  -1.093
+                ],
+                "axisRange": [
+                  26.23,
+                  17.486
+                ]
+              }
+            },
+            "objects": [
+              {
+                "type": "point",
+                "parents": [
+                  2,
+                  3
+                ],
+                "properties": {
+                  "id": "CxvwoD441FDOurrq",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  17.97814207650273,
+                  3.0054644808743194
+                ],
+                "properties": {
+                  "id": "l2cuZc5MkvZdbpua",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  12,
+                  6
+                ],
+                "properties": {
+                  "id": "PQ2v83foCQO-aUD6",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  12,
+                  9
+                ],
+                "properties": {
+                  "id": "HlTMZnInmez7o57i",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  7.978142076502732,
+                  9.016393442622952
+                ],
+                "properties": {
+                  "id": "1W9MKKR3tdYI9VJV",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  8,
+                  6
+                ],
+                "properties": {
+                  "id": "oiPQtV7kirzjQMD9",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "polygon",
+                "parents": [
+                  "CxvwoD441FDOurrq",
+                  "l2cuZc5MkvZdbpua",
+                  "PQ2v83foCQO-aUD6",
+                  "HlTMZnInmez7o57i",
+                  "1W9MKKR3tdYI9VJV",
+                  "oiPQtV7kirzjQMD9"
+                ],
+                "properties": {
+                  "id": "e9gzLZ1M3pJ-h_pr"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    ],
+    "sharedModels": [
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "ImRv278BWnc1zItL",
+          "providerId": "bQsYeNjhqFcLo1bo",
+          "dataSet": {
+            "id": "70xiDKbiHWf3aH-T",
+            "name": "Table of Coordinate Pairs",
+            "attributes": [
+              {
+                "id": "g0aVyWjfTyS_UXK2",
+                "clientKey": "",
+                "name": " ",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "Point",
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                  "G"
+                ],
+                "title": ""
+              },
+              {
+                "id": "JytAKm2jrL0tL-z-",
+                "clientKey": "",
+                "name": "Mug's Hat",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "(x , y)",
+                  "(1, 1)",
+                  "(9, 1)",
+                  "(6, 2)",
+                  "(6, 3)",
+                  "(4, 3)",
+                  "(4, 2)",
+                  "(1, 1)"
+                ],
+                "title": ""
+              },
+              {
+                "id": "mJy8ALTAbLprxhLC",
+                "clientKey": "",
+                "name": "Hat 1",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "(x + 2, y + 3)",
+                  "(3, 4)",
+                  "(11, 4)",
+                  "(8, 5)",
+                  " (8, 6)",
+                  "(6, 6)",
+                  "(6, 5)",
+                  "(3, 4)"
+                ],
+                "title": ""
+              },
+              {
+                "id": "K_bqLC6zrd6i2ANC",
+                "clientKey": "",
+                "name": "Hat 2",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "(x - 1, y + 4)",
+                  "(0, 5)",
+                  "(8, 5)",
+                  "(5, 6)",
+                  "(5, 7)",
+                  "(3, 7)",
+                  "(3, 6)",
+                  "(0, 5)"
+                ],
+                "title": ""
+              },
+              {
+                "id": "HyKJtaI8taYnWSWw",
+                "clientKey": "",
+                "name": "Hat 3",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "(x + 2, 3y)",
+                  "(3, 3)",
+                  "(11, 3)",
+                  "(8, 6)",
+                  "(8, 9)",
+                  "(6, 9)",
+                  "(6, 6)",
+                  "(3, 3)"
+                ],
+                "title": ""
+              },
+              {
+                "id": "Pq_jSuXCcdda9ojo",
+                "clientKey": "",
+                "name": "Hat 4",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "(0.5x, 0.5y)",
+                  "(0,5, 0.5)",
+                  "(4.5, 0.5)",
+                  "(3, 1)",
+                  "(3, 1.5)",
+                  "(2, 1.5)",
+                  "(2, 1)",
+                  "(0.5, 0.5)"
+                ],
+                "title": ""
+              },
+              {
+                "id": "AmzCfalHX8My_6dw",
+                "clientKey": "",
+                "name": "Hat 5",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "(2x, 3y)",
+                  "(2, 3)",
+                  "(18, 3)",
+                  "(12, 6)",
+                  "(12, 9)",
+                  "(8, 9)",
+                  "(8, 6)",
+                  "(2, 3)"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HBC26386VN318X7T0GQYNXG6"
+              },
+              {
+                "__id__": "01HBC26386VN318X7T0GQYNXG7"
+              },
+              {
+                "__id__": "01HBC26386VN318X7T0GQYNXG8"
+              },
+              {
+                "__id__": "01HBC26386VN318X7T0GQYNXG9"
+              },
+              {
+                "__id__": "01HBC26386VN318X7T0GQYNXGA"
+              },
+              {
+                "__id__": "01HBC26386VN318X7T0GQYNXGB"
+              },
+              {
+                "__id__": "01HBC26386VN318X7T0GQYNXGC"
+              },
+              {
+                "__id__": "01HBC26386VN318X7T0GQYNXGD"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "bQsYeNjhqFcLo1bo"
+        ]
+      }
+    ]
+  },
+  "supports": [
+    {
+      "text": "To predict what will happen to the hat with rules, recall the relationship between the rules to draw Zug, Lug, Bug, and Glug and its similarity in Problem 2.1."
+    },
+    {
+      "text": "In Problem 2.1, how is a rule with adding or subtracting a number to the x or y coordinate different from a rule with multiplying a number?"
+    }
+  ]
+}

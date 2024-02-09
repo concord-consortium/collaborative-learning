@@ -14,10 +14,8 @@ let primaryWorkSpace = new PrimaryWorkspace;
 
 let teacherDoc = "Teacher Investigation Copy";
 
-const queryParams = {
-  teacherQueryParams: "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=qa",
-  studentWorkspaceQueryParams: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=qa"
-};
+const teacherQueryParams = `${Cypress.config("qaUnitTeacher6")}`;
+const studentWorkspaceQueryParams = `${Cypress.config("clueTestqaUnitTeacher6")}`;
 
 function beforeTest(params) {
   cy.clearQAData('all');
@@ -56,7 +54,7 @@ context('Teacher Workspace', () => {
 
     it('verify teacher workspace tab', function () {
       cy.log('verify save and restore');
-      beforeTest(queryParams.teacherQueryParams);
+      beforeTest(teacherQueryParams);
       beforeAdd();
 
       cy.log('verify save and restore investigation');
@@ -115,8 +113,8 @@ context('Teacher Workspace', () => {
 
   describe('Student Workspace', () => { //flaky -- could be because it is trying to connect to firebase?
     it('verify student workspace tab', () => {
-      loadStudentWorkspace(queryParams.studentWorkspaceQueryParams);
-      cy.fixture("teacher-dash-data-msa-test.json").as("clueData");
+      loadStudentWorkspace(studentWorkspaceQueryParams);
+      cy.fixture("teacher-dash-data-CLUE-test.json").as("clueData");
       dashboard.switchView("Workspace & Resources");
       primaryWorkSpace.getResizePanelDivider().click();
       cy.wait(2000);

@@ -8,9 +8,8 @@ let canvas = new Canvas;
 let studentWorkspace = 'SAS 1.1 Solving a Mystery with Proportional Reasoning';
 const dataTransfer = new DataTransfer;
 
-
 function beforeTest() {
-  const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=sas";
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();

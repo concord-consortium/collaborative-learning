@@ -1,5 +1,5 @@
 const portalUrl = "https://learn.portal.staging.concord.org";
-const offeringId1 = "221";
+const offeringId1 = "279";
 const reportUrl1 = "https://learn.portal.staging.concord.org/portal/offerings/" + offeringId1 + "/external_report/11";
 const clueTeacher1 = {
   username: "clueteachertest1",

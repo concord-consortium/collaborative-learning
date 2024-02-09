@@ -1,0 +1,156 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "j6USDDJonxwoODAS",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Overview</strong></p><p>In this Problem students learn how to make similar and non-similar shapes using a coordinate system. Students graph members of the Wump family, plus other figures that claim to be in the Wump family. Students will notice that members of the Wump family are similar to one another (Zug and Bug are both similar to Mug). The imposters (Glug and Lug) are not similar—one is distorted vertically and one is distorted horizontally. Corresponding angles are not congruent, and corresponding side lengths are not multiplied by the same factor. Students compare the shapes, side lengths, and angles of the figures they draw as they contrast similar figures with non-similar ones.</p>"
+          ]
+        }
+      },
+      {
+        "id": "dHwdyPOlwXY1hxES",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>AoL:</strong> Exploration, Analysis</p>"
+          ]
+        }
+      },
+      {
+        "id": "acONqc2rn2yPLm0l",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p><p>Explore enlarging geometric figures using coordinate grids and rules that produce both similar and non-similar fiigures. Expand understanding about which attributes change and which stay the same. </p><ul><li>corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.</li><li>corresponding side lengths of the similar figure increases by the multiplier used to create a new rule.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "TILE7u9iC4TNWLEk",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>NWDYK</strong></p><p>How can you determine if an original figure and its image are similar by looking at the coordinate rule that produced the image? What features (attributes) stay the same for Mug and similar figures? What features change?</p>"
+          ]
+        }
+      },
+      {
+        "id": "998agLE7eQ2p-TrS",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Launch (Getting Started)</strong></u></p><p><u>Connecting to Prior Knowledge</u><em></em></p><p>Students continue their exploration of scaled drawings/similarity by investigating transformations on the coordinate plane. In Problems 1.2 and 1.3, students created similar/scaled figures by using rubber bands and considered the result of an enlarged or reduced photocopy. Students continue to develop their ideas of how to transform figures that retain the same shape. In this Problem, students will create similar and non-similar figures using a coordinate system. (Portrayal)</p>"
+          ]
+        }
+      },
+      {
+        "id": "TILEfbhK8ej9p9B6",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Optional Review of Graphing</strong> </p><p>If your students need to review graphing, you might introduce them to tic-tac-toe on a 4 × 4 board (explained below). The winner is the person who gets four in a row first (horizontally, vertically, or diagonally). The players take turns telling you two numbers that designate the location of the intersection point for their X or their O. This is different from the traditional game where the X’s and O’s are placed in the middle of each square. With little instruction, nearly every student will recall how to graph points in a hurry. This is a variation of the Four in a Row game that was introduced in the <em>Shapes and Designs</em> Unit.</p>"
+          ]
+        }
+      },
+      {
+        "id": "xVWX1Ak5vKCnCmBJ",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Display <strong>Teaching Aid 2.1A: 4-by-4 Board </strong>or draw five horizontal and five vertical lines, equally spaced.</p>"
+          ]
+        }
+      },
+      {
+        "id": "jbsxKuJ1lnKPvbYR",
+        "title": "4-by-4 board",
+        "content": {
+          "type": "Image",
+          "url": "qa/images/SASTG_2-1_Launch_1.png"
+        }
+      },
+      {
+        "id": "-s84wqLRyTAae_Fp",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>If you choose not to do this activity and students have not done graphing in a while, it is well worth a brief mention that coordinates correspond to intersections of lines, not squares (regions). Many students believe that the location corresponds to the space instead of the intersection.</p>"
+          ]
+        }
+      },
+      {
+        "id": "Kjn3iBnNY2maKZYM",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p><ul><li>How many of you know how to play tic-tac-toe?</li><li>How many do you need in a row to win? (three) </li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "V-_udexiXOXEIiXZ",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Today we will play a different version of tic-tac-toe. You will need four in a row to win.</p><p>We’ll play the left side of the class against the right side of the class. The left side can go first and tell me two numbers. </p><p>Have the first player tell you two numbers. If the numbers are between 0 and 4, they will be on the board. Otherwise, they will be off the board. For example, if a student says (5, 1), start at zero and count until you get to four and say, “Oops, they fell off the board!” Then let the other team have a turn. The students quickly learn to use the correct numbers and they quickly recognize that the order of the two numbers is important.</p><p>In future games, you can change the number scheme by moving the origin to a different place in the grid and by using negatives, fractions, etc.</p>"
+          ]
+        }
+      },
+      {
+        "id": "-6wz0rFv0G6WKAUG2022",
+        "title": "4-by-4 board centered at the origin",
+        "content": {
+          "type": "Image",
+          "url": "qa/images/TG_8.jpg"
+        }
+      },
+      {
+        "id": "TILEZGJuYc2Bc9tJ",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u><em></em></p><p><em></em>After the students know their way around a coordinate grid, introduce the story of the video game whose star characters are the Wump family. You can show the Launch Video here to pique students’ interest in applications of the coordinate grid. Students may need help in drawing Mug Wump because the points are to be used in sets that are connected in order. You could do part of Mug as a whole class to make sure they know how to locate and connect the four sets of points. In addition, the students will need help in interpreting the symbolic rules for the points.</p>"
+          ]
+        }
+      },
+      {
+        "id": "hlScAeobvqGuqwxc",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p><ul><li>The points for Zug are found from the points for Mug. The rule is (2x, 2y). What do you think this rule tells us to do to a Mug point to get a Zug point? (Multiply each coordinate by 2 or double the numbers for the coordinates.)</li><li>What do the other rules tell you to do for Lug, Bug, and Glug? (For Lug we multiply Mug’s x-coordinate by 3 and keep Mug’s y-coordinate the same. For Bug we multiply each coordinate by 3. For Glug we keep x the same and multiply the y-coordinate by 3.)</li><li>Go through your table and compute the new value of the x and y for each point. Remember that you are always starting with Mug’s x- and y-coordinates. Then locate the points and connect them in sets as you did for Mug.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "TILEl2JW9xjEjeiQ",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>When you feel your students are ready, launch the challenge of drawing all of the figures according to the rules given and comparing the final figures to see which ones look like they belong to the Wump family and which ones do not. Have students divide up the work in their groups of 3 or 4. Be sure that each student draws Mug and at least two other characters. They can share their work as a group so that collectively the group has all five figures.<strong> Learning Aid 2.1A: Coordinates of Game Characters and Learning Aid 2.1B 1-3: Grids </strong>will be helpful for students to keep track of their work. First-Quadrant Grid Learning Aid is an enlarged version of the coordinate grid, which may be useful for students who need larger print. (Agency, Identity, Ownership)</p>"
+          ]
+        }
+      }
+    ]
+  }
+}
