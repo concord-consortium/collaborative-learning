@@ -301,7 +301,7 @@ flowchart TD
 
       style loadingCurrentActivity fill:#220000
       subgraph loadingCurrentActivity [LE: Loading current activity]
-        initializePersistentUISync
+        initializePersistentUISync(Initialize PersistentUISync)
       end
       ram --> initializePersistentUISync
     end
