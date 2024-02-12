@@ -185,10 +185,10 @@ flowchart TD
 
   style buildingWorkspace fill:#220000
   subgraph buildingWorkspace [LE: Building workspace]
-    renderDocumentWorkspaceComponentContent(show the real right side content)
+    RDWCC(show the real right side content)
   end
-  renderAppContentComponent --> renderDocumentWorkspaceComponentContent
-  primaryDocumentLoaded --> renderDocumentWorkspaceComponentContent
+  renderAppContentComponent --> RDWCC
+  primaryDocumentLoaded --> RDWCC
 
 
 ```
@@ -322,9 +322,9 @@ flowchart TD
 
   style buildingWorkspace fill:#220000
   subgraph buildingWorkspace [LE: Building workspace]
-    renderDocumentWorkspaceComponentContent(show the real right side content)
+    RDWCC(show the real right side content)
   end
-  renderAppContentComponent --> renderDocumentWorkspaceComponentContent
-  primaryDocumentLoaded --> renderDocumentWorkspaceComponentContent
+  renderAppContentComponent --> RDWCC
+  primaryDocumentLoaded --> RDWCC
 
 ```
