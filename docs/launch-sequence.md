@@ -309,26 +309,4 @@ flowchart TD
     end
   end
 
-  style joiningGroup fill:#220000
-  subgraph joiningGroup [LE: Joining group]
-    renderGroupChooser
-  end
-  renderApp --> renderGroupChooser
-  finish --> renderGroupChooser
-
-  renderAppContentComponent
-  renderGroupChooser --> renderAppContentComponent
-
-  primaryDocumentLoaded
-  finish --> primaryDocumentLoaded
-
-  style buildingWorkspace fill:#220000
-  subgraph buildingWorkspace [LE: Building workspace]
-    renderDocumentWorkspaceComponentContent(show the real right side content)
-  end
-  renderAppContentComponent --> renderDocumentWorkspaceComponentContent
-  primaryDocumentLoaded --> renderDocumentWorkspaceComponentContent
-
-
 ```
-
