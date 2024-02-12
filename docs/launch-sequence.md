@@ -313,8 +313,8 @@ flowchart TD
   subgraph joiningGroup [LE: Joining group]
     renderGroupChooser(Render group chooser)
   end
-  renderApp --> renderGroupChooser
-  allListenersDone --> renderGroupChooser
+  renderApp --> joiningGroup
+  allListenersDone --> joiningGroup
 
 
 
