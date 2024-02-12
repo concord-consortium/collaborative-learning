@@ -23,6 +23,19 @@ interface IAnnotationLayerProps {
   documentScrollY?: number;
   readOnly?: boolean;
 }
+//***************************************** GUIDELINES ********************************************** ↳ ✔️
+
+// As researchers, we want to log the use of all important system features.
+// We will log sparrow use along with existing student records
+
+// •log sparrow creation and tile type used for start and endpoints
+// •log sparrow object beginning and endpoint if possible
+// •log label text
+// •log show and hide of sparrows
+// •log sparrow deletion
+// •incorporate into typical records that know student's name, id, time of creation, group and class context
+
+
 export const AnnotationLayer = observer(function AnnotationLayer({
   canvasElement, content, documentScrollX, documentScrollY, readOnly
 }: IAnnotationLayerProps) {
