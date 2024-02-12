@@ -245,7 +245,7 @@ flowchart TD
 
   component --> auth
 
-  renderApp(renderApp)
+  renderApp(Render App)
   component --> renderApp
 
   style connecting fill:#220000
