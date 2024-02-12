@@ -197,6 +197,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
+%%{init: {"flowchart": {"defaultRenderer": "elk"}} }%%
   req(Browser requests index.html)
   req --> load
 
