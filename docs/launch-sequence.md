@@ -320,11 +320,6 @@ flowchart TD
   primaryDocumentLoaded(Primary document loaded)
   finish --> primaryDocumentLoaded
 
-  style buildingWorkspace fill:#220000
-  subgraph buildingWorkspace [LE: Building workspace]
-    RDWCC(show the real right side content)
-  end
-  renderAppContentComponent --> RDWCC
-  primaryDocumentLoaded --> RDWCC
+
 
 ```
