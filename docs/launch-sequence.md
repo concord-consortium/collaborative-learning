@@ -304,9 +304,27 @@ flowchart TD
         initializePersistentUISync
       end
       ram --> initializePersistentUISync
-
-
     end
   end
+
+  style joiningGroup fill:#220000
+  subgraph joiningGroup [LE: Joining group]
+    renderGroupChooser(Render group chooser)
+  end
+  renderApp --> renderGroupChooser
+  finish --> renderGroupChooser
+
+  renderAppContentComponent(Render AppContentComponent)
+  renderGroupChooser --> renderAppContentComponent
+
+  primaryDocumentLoaded(Primary document loaded)
+  finish --> primaryDocumentLoaded
+
+  style buildingWorkspace fill:#220000
+  subgraph buildingWorkspace [LE: Building workspace]
+    renderDocumentWorkspaceComponentContent(show the real right side content)
+  end
+  renderAppContentComponent --> renderDocumentWorkspaceComponentContent
+  primaryDocumentLoaded --> renderDocumentWorkspaceComponentContent
 
 ```
