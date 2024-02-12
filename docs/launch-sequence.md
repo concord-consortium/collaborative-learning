@@ -244,6 +244,8 @@ flowchart TD
   end
 
   component --> auth
+
+  renderApp(renderApp)
   component --> renderApp
 
   style connecting fill:#220000
@@ -312,6 +314,7 @@ flowchart TD
     renderGroupChooser(Render group chooser)
   end
   renderApp --> renderGroupChooser
+  allListenersDone --> renderGroupChooser
 
 
 
