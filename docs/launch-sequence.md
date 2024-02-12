@@ -314,7 +314,6 @@ flowchart TD
     renderGroupChooser(Render group chooser)
   end
   renderApp --> joiningGroup
-  allListenersDone --> joiningGroup
 
 
 
