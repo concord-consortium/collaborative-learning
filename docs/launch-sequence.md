@@ -307,12 +307,6 @@ flowchart TD
     end
   end
 
-  style joiningGroup fill:#220000
-  subgraph joiningGroup [LE: Joining group]
-    renderGroupChooser(Render group chooser)
-  end
-  renderApp --> renderGroupChooser
-  finish --> renderGroupChooser
 
 
 
