@@ -292,8 +292,8 @@ flowchart TD
             com(Comments )
             bm(Bookmarks )
             dc(Documents content )
-            next --> com & bm & dc --> finish
-            finish(All listeners done)
+            next --> com & bm & dc --> allListenersDone
+            allListenersDone(All listeners done)
           end
         end
       end
@@ -312,6 +312,7 @@ flowchart TD
     renderGroupChooser(Render group chooser)
   end
   renderApp --> renderGroupChooser
+  allListenersDone --> renderGroupChooser
 
 
 
