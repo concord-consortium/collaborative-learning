@@ -14,10 +14,6 @@ import { DocListDebug } from "./doc-list-debug";
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
-//TODO:
-// Address sparrows - verify
-// Verify Diagram and simulator tools - create deployment branch michael can test
-
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, persistentUI, sortedDocuments } = useStores();
 

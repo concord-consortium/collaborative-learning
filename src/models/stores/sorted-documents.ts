@@ -237,8 +237,6 @@ export class SortedDocuments {
 
   //**************************************** Sort By Tools ****************************************
 
-  //TODO: note that removing a sparrow in real time, won't trigger a change
-
   get sortByTools(): SortedDocument[] {
     const tileTypeToDocumentsMap: Record<string, DocumentModelType[]> = {};
 
