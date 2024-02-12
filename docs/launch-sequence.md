@@ -314,12 +314,6 @@ flowchart TD
   renderApp --> renderGroupChooser
   finish --> renderGroupChooser
 
-  renderAppContentComponent(Render AppContentComponent)
-  renderGroupChooser --> renderAppContentComponent
-
-  primaryDocumentLoaded(Primary document loaded)
-  finish --> primaryDocumentLoaded
-
 
 
 ```
