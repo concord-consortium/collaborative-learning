@@ -5,7 +5,9 @@ import {
   kTableTileType, TableContentModel, TableMetadataModel, kTableDefaultHeight, defaultTableContent
 } from "./table-content";
 import TableToolComponent from "../../../components/tiles/table/table-tile";
-import TableToolIcon from "../../../clue/assets/icons/table-tool.svg";
+
+import Icon from "../../../clue/assets/icons/table-tool.svg";
+import HeaderIcon from "../../../assets/icons/sort-by-tools/table-tile-id.svg";
 
 export function tileSnapshotPreProcessor(tileSnap: any) {
   // Get the title from the dataSet if it's only there
@@ -16,7 +18,7 @@ export function tileSnapshotPreProcessor(tileSnap: any) {
 
 registerTileContentInfo({
   type: kTableTileType,
-  titleBase: "Table",
+  displayName: "Table",
   modelClass: TableContentModel,
   metadataClass: TableMetadataModel,
   defaultHeight: kTableDefaultHeight,
@@ -32,5 +34,6 @@ registerTileComponentInfo({
   type: kTableTileType,
   Component: TableToolComponent,
   tileEltClass: "table-tool-tile",
-  Icon: TableToolIcon
+  Icon,
+  HeaderIcon
 });

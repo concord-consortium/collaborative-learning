@@ -5,11 +5,13 @@ import { registerTileComponentInfo } from "../../models/tiles/tile-component-inf
 import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
 import { TileMetadataModel } from "../../models/tiles/tile-metadata";
 import DataflowToolComponent from "./components/dataflow-tile";
-import DataflowToolIcon from "./assets/program.svg";
+
+import Icon from "./assets/program.svg";
+import HeaderIcon from "./assets/program-tile-id.svg";
 
 registerTileContentInfo({
   type: kDataflowTileType,
-  titleBase: "Program",
+  displayName: "Program",
   modelClass: DataflowContentModel,
   metadataClass: TileMetadataModel,
   defaultHeight: kDataflowDefaultHeight,
@@ -21,5 +23,6 @@ registerTileComponentInfo({
   type: kDataflowTileType,
   Component: DataflowToolComponent,
   tileEltClass: "dataflow-tool-tile",
-  Icon: DataflowToolIcon
+  Icon,
+  HeaderIcon
 });

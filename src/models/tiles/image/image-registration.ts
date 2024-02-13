@@ -3,11 +3,13 @@ import { registerTileContentInfo } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { kImageTileType, ImageContentModel, defaultImageContent } from "./image-content";
 import ImageToolComponent from "../../../components/tiles/image/image-tile";
-import ImageToolIcon from "../../../clue/assets/icons/image-tool.svg";
+
+import Icon from "../../../clue/assets/icons/image-tool.svg";
+import HeaderIcon from "../../../assets/icons/sort-by-tools/image-tile-id.svg";
 
 registerTileContentInfo({
   type: kImageTileType,
-  titleBase: "Image",
+  displayName: "Image",
   modelClass: ImageContentModel,
   metadataClass: TileMetadataModel,
   defaultContent: defaultImageContent
@@ -18,5 +20,6 @@ registerTileComponentInfo({
   Component: ImageToolComponent,
   tileEltClass: "image-tool-tile",
   tileHandlesOwnSelection: true,
-  Icon: ImageToolIcon
+  Icon,
+  HeaderIcon
 });

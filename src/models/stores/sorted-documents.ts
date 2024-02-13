@@ -9,7 +9,10 @@ import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
 import { ENavTabOrder, NavTabSectionModelType } from "../view/nav-tabs";
 import { UserModelType } from "./user";
-import { sectionIconFormatter, sectionLabelFormatter } from "./sorted-documents-utils";
+import { getTileContentInfo } from "../tiles/tile-content-info";
+import { getTileComponentInfo } from "../tiles/tile-component-info";
+
+import SparrowHeaderIcon from "../../assets/icons/sort-by-tools/sparrow-id.svg";
 
 type SortedDocument = {
   sectionLabel: string;
@@ -271,27 +274,30 @@ export class SortedDocuments {
     });
 
     // Map the tile types to their display names
-    const tileTypeDisplayNames = Object.keys(tileTypeToDocumentsMap).map(tileType => {
-      const displayName =  sectionLabelFormatter[tileType as keyof typeof sectionLabelFormatter] || tileType;
-      return {
-        originalType: tileType,
-        displayName
+    const sectionedDocuments = Object.keys(tileTypeToDocumentsMap).map(tileType => {
+      const section: SortedDocument = {
+        sectionLabel: tileType,
+        documents: tileTypeToDocumentsMap[tileType],
       };
+      if (tileType === "Sparrow") {
+        section.icon = SparrowHeaderIcon;
+      } else {
+        const contentInfo = getTileContentInfo(tileType);
+        section.sectionLabel = contentInfo?.displayName || tileType;
+        const componentInfo = getTileComponentInfo(tileType);
+        section.icon = componentInfo?.HeaderIcon;
+      }
+      return section;
     });
 
     // Sort the tile types. 'No Tools' should be at the end.
-    const sortedByDisplayNames = tileTypeDisplayNames.sort((a, b) => {
-      if (a.displayName === "No Tools") return 1;   // Move 'No Tools' to the end
-      if (b.displayName === "No Tools") return -1;  // Alphabetically sort all others
-      return a.displayName.localeCompare(b.displayName);
+    const sortedByLabel = sectionedDocuments.sort((a, b) => {
+      if (a.sectionLabel === "No Tools") return 1;   // Move 'No Tools' to the end
+      if (b.sectionLabel === "No Tools") return -1;  // Alphabetically sort all others
+      return a.sectionLabel.localeCompare(b.sectionLabel);
     });
 
-    const sortedDocuments = sortedByDisplayNames.map(({ originalType }) => ({
-      icon: sectionIconFormatter[originalType as keyof typeof sectionIconFormatter],
-      sectionLabel: sectionLabelFormatter[originalType as keyof typeof sectionLabelFormatter] || originalType,
-      documents: tileTypeToDocumentsMap[originalType]
-    }));
-    return sortedDocuments;
+    return sortedByLabel;
   }
 
   matchProperties(doc: DocumentModelType, properties?: readonly string[], options?: IMatchPropertiesOptions) {

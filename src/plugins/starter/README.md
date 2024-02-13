@@ -13,4 +13,4 @@ Look for the `St` tool, that is how you can add this tile to the document.
 - rename all text `starter` and `Starter`
 - rename all filenames with the word `starter` in them
 - update `src/register-tile-types.ts` to import your new tile's registration module.
-- to give your new tile a very basic icon open the `*-icon.svg` and change the `St` in the text element to a short string for your tile
+- to give your new tile basic icons open both `*-icon.svg` and `*-tile-id.svg` and change the `St` in the text element to a short string for your tile
