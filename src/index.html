@@ -53,6 +53,38 @@
       }
       // End Rollbar Snippet
     </script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G4BPTMRZ4H"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      // ---------- Send problem and unit to GA -----------
+      function getUrlParam(paramName) {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(paramName);
+      }
+      const problem = getUrlParam('problem');
+      const unit = getUrlParam('unit') || "sas";
+
+      gtag('config', 'G-G4BPTMRZ4H', {
+        'problem': problem,
+        'unit': unit
+      });
+      gtag('event', 'page_view', { //these will be parameters insde of the page_view event
+        'problem': problem,
+        'unit': unit
+      });
+
+      // ---------- Send loadingStartTime to GA -----------
+      gtag('event', 'loadingStartTime', {
+        'event_category': 'Performance',
+        'event_label': 'Custom Metric - performance.now() - requestStart',
+        'value': loadingStartTime
+      });
+    </script>
   </head>
   <body>
     <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">

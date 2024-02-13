@@ -76,6 +76,11 @@ export function getLoadingMeasurements(){
 export function logLoadingAndDocumentMeasurements(documents: DocumentsModelType,
   curriculumDocSections: SectionModelType[],
   primaryDocument?: DocumentModelType ){
+    gtag("event", "loadingComplete", {
+      "event_category": "Performance",
+      "event_label": "Custom Metric - loadingComplete",
+      "value": getTimestamp()
+    });
   const startTime = performance.now();
 
   const totalNumDocumentsLoaded = documents.all.length;
