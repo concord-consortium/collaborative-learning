@@ -22,23 +22,32 @@ import { IArrowAnnotation } from "src/models/annotations/arrow-annotation";
 // 1.1 TODO: we can change the syntax to sparrowSourceType and sparrowTargetType
 //but also include the ID of the tile from source and target
 
-function processSparrowEventParams(arrow: IArrowAnnotation){
+function processSparrowEventParams(arrow: IArrowAnnotation, self: any){
+  const sourceTileId = arrow.sourceObject?.tileId;
+  const sourceTileModel = self.tileMap.get(sourceTileId);
+  const sourceTileType = sourceTileModel ? sourceTileModel.content.type : undefined;
+
+  const targetTileId = arrow.targetObject?.tileId;
+  const targetTileModel = self.tileMap.get(targetTileId);
+  const targetTileType = targetTileModel ? targetTileModel.content.type : undefined;
+
   return {
-    arrowID: arrow.id,
-    sourceObject: arrow.sourceObject,
-    targetObject: arrow.targetObject
+    arrowId: arrow.id,
+    sourceTileId,
+    sourceTileType,
+    targetTileId,
+    targetTileType
   };
 }
 
-export function logSparrowCreation(event: LogEventName, arrow: IArrowAnnotation){
-  console.log("logSparrowCreation with arrow:", arrow);
-  const params = processSparrowEventParams(arrow);
-  console.log("params:", params);
+export function logSparrowCreateOrDelete(event: LogEventName, arrow: IArrowAnnotation, self: any){
+  const params = processSparrowEventParams(arrow, self);
   Logger.log(event, params);
 }
 
 
-//Question: Should deletion and creation be the same function?
+
+
 
 export function logSparrowHideShow(){
   Logger.log(LogEventName.SPARROW_HIDE_SHOW);
