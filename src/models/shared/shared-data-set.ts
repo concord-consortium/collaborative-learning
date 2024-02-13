@@ -44,6 +44,7 @@ export function isSharedDataSetSnapshot(snapshot: any): snapshot is SharedDataSe
 export interface UpdatedSharedDataSetIds {
   attributeIdMap: Record<string, string>;
   caseIdMap: Record<string, string>;
+  origDataSetId: string|undefined;
   dataSetId: string;
   sharedModelId: string;
 }
@@ -52,6 +53,7 @@ export function getUpdatedSharedDataSetIds(sharedDataSet: SharedDataSetSnapshotT
   const updatedIds: UpdatedSharedDataSetIds = {
     attributeIdMap: {},
     caseIdMap: {},
+    origDataSetId: sharedDataSet.dataSet?.id,
     dataSetId: uniqueId(),
     sharedModelId: uniqueId()
   };

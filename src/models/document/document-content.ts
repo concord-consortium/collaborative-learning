@@ -254,6 +254,17 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
           tiles: sharedModelEntry.tiles,
           sharedModel
         });
+
+        // Add the model (but not the tile IDs yet) to the Document so that tile references to it won't break
+        // when we insert the tiles.
+        if (sharedDataSet.id) {
+          console.log("Adding copied sharedModel", sharedDataSet.id, "->", sharedModel.id);
+          console.log("  Which has dataset ids:", sharedDataSet.dataSet?.id, "->", sharedModel.dataSet.id);
+          self.addSharedModelFromImport(sharedModel.id, {sharedModel});
+        } else {
+          // FIXME can this really happen?
+          console.warn("Cannot duplicate shared model without an ID");
+        }
       }
     });
 
@@ -271,6 +282,8 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
 
       // Find the shared models for this tile
       const tileSharedModelEntries = findTileSharedModelEntries(tile.tileId);
+      console.log("tile", tile.tileId, "->", tileIdMap[tile.tileId]);
+      console.log("  has shared models: ", tileSharedModelEntries.map(x => x.sharedModel.id));
 
       // Update the tile's references to its shared models
       const updateFunction = getTileContentInfo(tile.tileType)?.updateContentWithNewSharedModelIds;
@@ -283,6 +296,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     });
 
     // Add copied tiles to document
+    console.log("calling", insertTileFunction);
     const results = insertTileFunction(updatedTiles, rowInfo);
 
     // Increment default titles when necessary

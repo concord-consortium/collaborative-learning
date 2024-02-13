@@ -21,8 +21,9 @@ import {
 } from "../../../utilities/color-utils";
 import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
-import { IGraphModel } from "../models/graph-model";
+import { GraphModel, IGraphModel } from "../models/graph-model";
 import { isFiniteNumber } from "../../../utilities/math-utils";
+import { SnapshotOut } from "@concord-consortium/mobx-state-tree";
 
 /**
  * Utility routines having to do with graph entities
@@ -562,6 +563,55 @@ export function decipherDotId(dotId: string) {
     return { caseId, xAttributeId, yAttributeId };
   }
   return {};
+}
+
+export function updateGraphContentWithNewSharedModelIds(
+  content: SnapshotOut<typeof GraphModel>,
+  sharedDataSetEntries: PartialSharedModelEntry[],
+  updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
+) {
+  console.log("updateGraphContentWithNewSharedModelIds");
+  console.log("sharedDataSetEntries", sharedDataSetEntries.map(x => x.sharedModel.id));
+  console.log("updatedSharedModelMap", updatedSharedModelMap);
+
+  function flattenedMap(updatedIds: UpdatedSharedDataSetIds) {
+    const map = {} as Record<string, string>;
+    if (updatedIds.origDataSetId) {
+      map[updatedIds.origDataSetId] = updatedIds.dataSetId;
+    }
+    for (const key of Object.keys(updatedIds.attributeIdMap)) {
+      map[key] = updatedIds.attributeIdMap[key];
+    }
+    for (const key of Object.keys(updatedIds.caseIdMap)) {
+      map[key] = updatedIds.caseIdMap[key];
+    }
+    return map;
+  }
+
+  console.log("content before", JSON.stringify(content));
+
+
+  const newLayers = [];
+  for (const layer of content.layers) {
+    const oldDatasetId = layer.config.dataset;
+    if (oldDatasetId) {
+      // Model map is indexed by SharedDataSet id, not DataSet id.
+      const map = Object.values(updatedSharedModelMap).find(x => x.origDataSetId === oldDatasetId);
+      if (map) {
+        const flatMap = flattenedMap(map);
+        const keyPattern = Object.keys(flatMap).join("|");
+        const matchRegexp = new RegExp(`\\"(${keyPattern})\\"`, "g");
+        const updated = JSON.stringify(layer).replace(matchRegexp, (match, key) => {
+          return `"${flatMap[key]}"`;
+        });
+        newLayers.push(JSON.parse(updated));
+      } else {
+        console.log("no map for datasetid", oldDatasetId, "in", updatedSharedModelMap);
+      }
+    }
+  }
+  content.layers = newLayers;
+  return content;
 }
 
 export function updateGraphObjectWithNewSharedModelIds(

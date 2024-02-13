@@ -1,5 +1,5 @@
 import { cloneDeep, each } from "lodash";
-import { types, getType, getEnv, SnapshotOrInstance } from "mobx-state-tree";
+import { types, getType, getEnv, SnapshotIn } from "mobx-state-tree";
 import { kPlaceholderTileDefaultHeight } from "../tiles/placeholder/placeholder-constants";
 import {
   getPlaceholderSectionId, isPlaceholderTile, PlaceholderContentModel
@@ -447,19 +447,6 @@ export const BaseDocumentContentModel = types
         self.addPlaceholderRowIfAppropriate(i);
       }
     },
-    addTileInNewRow(tile: ITileModel, options?: INewTileOptions): INewRowTile {
-      const o = options || {};
-      if (o.rowIndex === undefined) {
-        // by default, insert new tiles after last visible on screen
-        o.rowIndex = self.defaultInsertRow;
-      }
-      const row = self.addNewTileInNewRowAtIndex(tile, o.rowIndex);
-      self.removeNeighboringPlaceholderRows(o.rowIndex);
-      if (o.rowHeight) {
-        row.setRowHeight(o.rowHeight);
-      }
-      return { rowId: row.id, tileId: tile.id };
-    },
     addImportedTileToRow(tile: OriginalAuthoredTileModel, row: TileRowModelType) {
 
       const { layout, ...newTile } = cloneDeep(tile);
@@ -480,7 +467,7 @@ export const BaseDocumentContentModel = types
     }
   }))
   .actions(self => ({
-    addTileContentInNewRow(content: SnapshotOrInstance<typeof TileContentModel>,
+    addTileContentInNewRow(content: SnapshotIn<typeof TileContentModel>,
         options?: INewTileOptions): INewRowTile {
       // We can assume content.type is always defined. If content is an instance
       // then it has to be defined. If it is a snapshot, the type is required since
@@ -497,10 +484,26 @@ export const BaseDocumentContentModel = types
       // creating the tile model independently, it needs to be created within the document tree.
       // One option is to use self.tileMap.put(snapshot) which adds the tile to the document
       // and returns the newly created tile.
-      return self.addTileInNewRow(TileModel.create({ title, content, id: options?.tileId }), options);
+      const o = options || {};
+      if (o.rowIndex === undefined) {
+        // by default, insert new tiles after last visible on screen
+        o.rowIndex = self.defaultInsertRow;
+      }
+      const row = TileRowModel.create({});
+      self.insertRow(row, o.rowIndex);
+
+      const id = o.tileId || self.getNextTileId(content.type!);
+      const tileSnapshot = { id, title, content };
+      const tileModel = self.tileMap.put(tileSnapshot);
+      row.insertTileInRow(tileModel);
+
+      self.removeNeighboringPlaceholderRows(o.rowIndex);
+      if (o.rowHeight) {
+        row.setRowHeight(o.rowHeight);
+      }
+      return { rowId: row.id, tileId: tileModel.id };
     },
     addTileSnapshotInExistingRow(snapshot: ITileModelSnapshotIn, options: INewTileOptions): INewRowTile | undefined {
-      const tile = TileModel.create(snapshot);
       const o = options || {};
       if (o.rowIndex === undefined) {
         // by default, insert new tiles after last visible on screen
@@ -509,13 +512,14 @@ export const BaseDocumentContentModel = types
       const row = o.rowId ? self.getRow(o.rowId) : self.getRowByIndex(o.rowIndex);
       if (row) {
         const indexInRow = o.locationInRow === "left" ? 0 : undefined;
-        self.insertNewTileInRow(tile, row, indexInRow);
+        const tileModel = self.tileMap.put(snapshot);
+        row.insertTileInRow(tileModel, indexInRow);
         self.removePlaceholderTilesFromRow(o.rowIndex);
         self.removeNeighboringPlaceholderRows(o.rowIndex);
         if (o.rowHeight) {
           row.setRowHeight(Math.max((row.height || 0), o.rowHeight));
         }
-        return { rowId: row.id, tileId: tile.id };
+        return { rowId: row.id, tileId: tileModel.id };
       }
     },
     deleteRowAddingPlaceholderRowIfAppropriate(rowId: string) {
