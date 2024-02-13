@@ -21,17 +21,18 @@ function processTileBaseEventParams(params: ITileBaseLogEvent) {
 }
 
 export function logTileBaseEvent(event: LogEventName, _params: ITileBaseLogEvent) {
+  // console.log("➡️ logTileBaseEvent");
   const params = processTileBaseEventParams(_params);
   if (isDocumentLogEvent(params)) {
-    console.log("isDocumentLogEvent------------------ true");
-    console.log("events:", event);
-    console.log("params:", params);
+    // console.log("if isDocumentLogEvent");
+    // console.log("\tevents:", event);
+    // console.log("\tparams:", params);
     logDocumentEvent(event, params);
   }
   else {
-    console.log("isDocumentLogEvent false");
-    console.log("events:", event);
-    console.log("params:", params);
+    // console.log("isDocumentLogEvent false");
+    // console.log("events:", event);
+    // console.log("params:", params);
 
     Logger.log(event, params);
   }
