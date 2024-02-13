@@ -24,6 +24,7 @@ interface IAnnotationLayerProps {
   readOnly?: boolean;
 }
 
+
 export const AnnotationLayer = observer(function AnnotationLayer({
   canvasElement, content, documentScrollX, documentScrollY, readOnly
 }: IAnnotationLayerProps) {
