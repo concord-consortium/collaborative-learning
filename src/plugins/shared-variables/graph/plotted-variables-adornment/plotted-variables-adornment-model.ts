@@ -10,7 +10,8 @@ import {
 } from "../../../graph/adornments/plotted-function/plotted-function-adornment-model";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables";
 import { kPlottedVariablesType } from "./plotted-variables-adornment-types";
-import { GraphAttrRole } from "../../../graph/graph-types";
+import { GraphAttrRole, Point } from "../../../graph/graph-types";
+import { IClueObject } from "../../../../models/annotations/clue-object";
 
 function getSharedVariables(node: IAnyStateTreeNode) {
   const sharedModelManager = getSharedModelManager(node);
@@ -21,6 +22,21 @@ function getSharedVariables(node: IAnyStateTreeNode) {
       if (sharedVariables) return sharedVariables as SharedVariablesType;
     }
   }
+}
+
+function getVaribleAnnotationId(xVariableId: string, yVariableId: string) {
+  return `var:{${xVariableId}}:{${yVariableId}}`;
+}
+
+const annoIdRegEx = /^var:{(.+)}:{(.+)}$/;
+function decipherAnnotationId(id: string) {
+  const match = id.match(annoIdRegEx);
+  if (match && match.length === 3) {
+    const xVariableId = match[1];
+    const yVariableId = match[2];
+    return { xVariableId, yVariableId };
+  }
+  return {};
 }
 
 export const PlottedVariables = types.model("PlottedVariables", {})
@@ -122,6 +138,27 @@ export const PlottedVariablesAdornmentModel = PlottedFunctionAdornmentModel
         }
       }
       return lists;
+    },
+    getAnnotatableObjects(tileId: string): IClueObject[] {
+      const result = [];
+      for (const pvi of self.plottedVariables.values()) {
+        const vals = pvi.variableValues;
+        if (pvi.xVariableId && pvi.yVariableId && vals) {
+          const objectId = getVaribleAnnotationId(pvi.xVariableId, pvi.yVariableId);
+          result.push({ tileId, objectId, objectType: "variable" });
+        }
+      }
+      return result;
+    },
+    // Find a PlottedVariables matching the ID pair and return its values (if any)
+    getAnnotatableObjectPosition(type: string, objectId: string): Point|undefined {
+      if (type !== "variable") return;
+      const { xVariableId, yVariableId } = decipherAnnotationId(objectId);
+      for (const pvi of self.plottedVariables.values()) {
+        if (pvi.xVariableId === xVariableId && pvi.yVariableId === yVariableId) {
+          return pvi.variableValues;
+        }
+      }
     }
   }))
   .views(self => ({
