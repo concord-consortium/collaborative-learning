@@ -42,14 +42,6 @@ interface IProps {
   onRequestRowHeight?: (id: string, size: number) => void;
   readOnly?: boolean
 }
-//**********************✔️•↳******************* GUIDELINES ************************************************
-
-// ✔️ As a CLUE researcher, I want to be able to tell what actions a student has performed in an XY plot. We will save
-//- plot creation and deletion of the tile
-//- linking to data
-//- selection of x or y axis attributes--  (watch out for different units(msa vs moth) where
-// the axis is changed in diff locatons (axis vs bottom legend)
-//- creation/deletion of additional traces and the values selected
 
 export const Graph = observer(
     function Graph({ graphController, readOnly, graphRef, onRequestRowHeight }: IProps) {
