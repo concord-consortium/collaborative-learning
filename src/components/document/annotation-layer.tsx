@@ -2,7 +2,6 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 import useResizeObserver from "use-resize-observer";
-
 import { AnnotationButton } from "../annotations/annotation-button";
 import { getDefaultPeak } from "../annotations/annotation-utilities";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
@@ -23,7 +22,6 @@ interface IAnnotationLayerProps {
   documentScrollY?: number;
   readOnly?: boolean;
 }
-
 
 export const AnnotationLayer = observer(function AnnotationLayer({
   canvasElement, content, documentScrollX, documentScrollY, readOnly
