@@ -6,6 +6,7 @@ import {Instance, types} from "mobx-state-tree";
 import { IAxisModel } from "../imports/components/axis/models/axis-model";
 import {typedId} from "../../../utilities/js-utils";
 import {GraphAttrRole, Point} from "../graph-types";
+import { IClueObject } from "../../../models/annotations/clue-object";
 
 export const PointModel = types.model("Point", {
     x: types.optional(types.number, NaN),
@@ -67,6 +68,24 @@ export const AdornmentModel = types.model("AdornmentModel", {
      */
     numericValuesForAttrRole(role: GraphAttrRole) {
       return [] as number[];
+    },
+    /**
+     * Return a list of objects that can be used by the annotation layer.
+     * Normally an empty list, but can be overridden by subclasses.
+     * @param tileId The TileID is passed in since it is needed to create the IClueObject return values.
+     */
+    getAnnotatableObjects(tileId: string) {
+      return [] as IClueObject[];
+    },
+    /**
+     * Determine the position (in the graph's X/Y coordinate space) of the object with the given ID.
+     * May return undefined if the type is not one this adronment handles, or if no such object ID exists.
+     * @param type the annotatable object type
+     * @param objectId ID of an annotatable object
+     * @returns an {x, y} pair or undefined
+     */
+    getAnnotatableObjectPosition(type: string, objectId: string): Point|undefined {
+      return undefined;
     }
   }))
   .actions(self => ({
