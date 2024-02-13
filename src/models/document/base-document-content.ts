@@ -894,6 +894,9 @@ export const BaseDocumentContentModel = types
       const result = self.addTile(toolId, options);
       const newTile = result?.tileId && self.getTile(result.tileId);
       if (newTile) {
+
+        console.log("📁 base-document-content.ts ------------------------");
+        console.log("userAddTile:");
         logTileDocumentEvent(LogEventName.CREATE_TILE, { tile: newTile });
       }
       return result;

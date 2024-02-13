@@ -73,7 +73,11 @@ export const ArrowAnnotation = types
     }
   },
   setText(text: string) {
+    if (self.text){ //TODO: check if self.text !== text (which means its changed) then log it
+      console.log("LOG 3: text label:", self.text);
+    }
     self.text = text;
+
   },
   setTextOffset(dx: number, dy: number) {
     if (!self.textOffset) {
@@ -102,7 +106,7 @@ export const ArrowAnnotation = types
     const {
       sourceDragOffsetX, sourceDragOffsetY, targetDragOffsetX, targetDragOffsetY, textDragOffsetX, textDragOffsetY
     } = dragOffsets;
-  
+
     // Find positions for head and tail of arrow
     const [sDxOffset, sDyOffset] = self.sourceOffset ? [self.sourceOffset.dx, self.sourceOffset.dy] : [0, 0];
     const sourceX = sourceBB.left + sourceBB.width / 2 + boundDelta(sDxOffset + sourceDragOffsetX, sourceBB.width);
@@ -110,7 +114,7 @@ export const ArrowAnnotation = types
     const [tDxOffset, tDyOffset] = self.targetOffset ? [self.targetOffset.dx, self.targetOffset.dy] : [0, 0];
     const targetX = targetBB.left + targetBB.width / 2 + boundDelta(tDxOffset + targetDragOffsetX, targetBB.width);
     const targetY = targetBB.top + targetBB.height / 2 + boundDelta(tDyOffset + targetDragOffsetY, targetBB.height);
-  
+
     // Set up text location
     const [textDxOffset, textDyOffset] = self.textOffset ? [self.textOffset.dx, self.textOffset.dy] : [0, 0];
     const dx = targetX - sourceX;

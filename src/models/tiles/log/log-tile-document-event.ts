@@ -17,6 +17,10 @@ interface IContext extends Record<string, any> {
 }
 
 function processTileDocumentEventParams(params: ITileDocumentLogEvent, context: IContext) {
+  console.log("➡️ processTileDocumentEventParams");
+  console.log("\t🥩 params:", params);
+  console.log("\t🥩 context:", context);
+
   const { tile: { id: tileId, content }, ...others } = params;
   const tileType = content.type;
   const document = context.documents.findDocumentOfTile(tileId) ||
@@ -29,9 +33,18 @@ function processTileDocumentEventParams(params: ITileDocumentLogEvent, context: 
 export function logTileDocumentEvent(event: LogEventName, _params: ITileDocumentLogEvent) {
   const params = processTileDocumentEventParams(_params, Logger.stores);
   if (isTileBaseEvent(params)) {
+    console.log("base event-------------");
+    console.log("event:", event);
+    console.log("params:", params);
     logTileBaseEvent(event, params);
   }
   else {
+
+    console.log("📁 log-tile-document-event.ts ------------------------");
+    console.log("about to LOG");
+    console.log("event:", event);
+    console.log("params:", params);
+
     Logger.log(event, params);
   }
 }

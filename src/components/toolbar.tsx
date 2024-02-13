@@ -236,6 +236,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const { ui, persistentUI } = this.stores;
     ui.setAnnotationMode();
     persistentUI.setShowAnnotations(!persistentUI.showAnnotations);
+    const showOrHideAnnotations = persistentUI.showAnnotations ? "Show" : "Hide";
+    console.log("LOG 4: show/hide sparrows:", showOrHideAnnotations);
   }
 
   private handleUndo() {

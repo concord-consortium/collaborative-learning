@@ -23,9 +23,16 @@ function processTileBaseEventParams(params: ITileBaseLogEvent) {
 export function logTileBaseEvent(event: LogEventName, _params: ITileBaseLogEvent) {
   const params = processTileBaseEventParams(_params);
   if (isDocumentLogEvent(params)) {
+    console.log("isDocumentLogEvent------------------ true");
+    console.log("events:", event);
+    console.log("params:", params);
     logDocumentEvent(event, params);
   }
   else {
+    console.log("isDocumentLogEvent false");
+    console.log("events:", event);
+    console.log("params:", params);
+
     Logger.log(event, params);
   }
 }

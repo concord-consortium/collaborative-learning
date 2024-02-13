@@ -42,5 +42,9 @@ function processDocumentEventParams(params: IDocumentLogEvent, { user }: IContex
 
 export function logDocumentEvent(event: LogEventName, _params: IDocumentLogEvent, method?: LogEventMethod) {
   const params = processDocumentEventParams(_params, Logger.stores);
+  console.log("logDocumentEvent-----------");
+  console.log("event:", event);
+  console.log("params:", params);
+  console.log("method:", method);
   Logger.log(event, params, method);
 }
