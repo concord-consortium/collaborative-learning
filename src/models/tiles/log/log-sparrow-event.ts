@@ -2,27 +2,10 @@
 
 import { LogEventName } from "../../../lib/logger-types";
 import { Logger } from "../../../lib/logger";
-import { IArrowAnnotation } from "src/models/annotations/arrow-annotation";
-
-//creation
-//deletion
-//change label/title
-//show_hide
-
-// SPARROW_CREATION,
-// SPARROW_DELETION,
-// SPARROW_TITLE_CHANGE,
-// SPARROW_HIDE_SHOW,
+import { IArrowAnnotation } from "../../../../src/models/annotations/arrow-annotation";
 
 
-
-//1 log sparrow creation
-//1.1 - tile  type for start and end points
-//1 - when created log sparrow id.
-// 1.1 TODO: we can change the syntax to sparrowSourceType and sparrowTargetType
-//but also include the ID of the tile from source and target
-
-function processSparrowEventParams(arrow: IArrowAnnotation, self: any){
+function processSparrowEventParams(arrow: IArrowAnnotation, self: any) {
   const sourceTileId = arrow.sourceObject?.tileId;
   const sourceTileModel = self.tileMap.get(sourceTileId);
   const sourceTileType = sourceTileModel ? sourceTileModel.content.type : undefined;
@@ -40,15 +23,21 @@ function processSparrowEventParams(arrow: IArrowAnnotation, self: any){
   };
 }
 
-export function logSparrowCreateOrDelete(event: LogEventName, arrow: IArrowAnnotation, self: any){
+export function logSparrowCreate(event: LogEventName, arrow: IArrowAnnotation, self: any) {
   const params = processSparrowEventParams(arrow, self);
   Logger.log(event, params);
 }
 
+export function logSparrowDelete(event: LogEventName, annotationId: string) {
+  const params = { arrowId: annotationId };
+  Logger.log(event, params);
+}
 
+export function logSparrowShowHide(event: LogEventName, showOrHide: string) {
+  Logger.log(event, { showOrHide });
+}
 
-
-
-export function logSparrowHideShow(){
-  Logger.log(LogEventName.SPARROW_HIDE_SHOW);
+export function logSparrowTitleChange(event: LogEventName, arrowId: string, newTitle: string){
+  const params = { arrowId, newTitle };
+  Logger.log(event, params);
 }

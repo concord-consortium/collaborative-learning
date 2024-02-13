@@ -1,8 +1,9 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
-
 import { boundDelta } from "./annotation-utils";
 import { ClueObjectModel, ObjectBoundingBox, OffsetModel } from "./clue-object";
 import { uniqueId } from "../../utilities/js-utils";
+import { LogEventName } from "../../../src/lib/logger-types";
+import { logSparrowTitleChange } from "../tiles/log/log-sparrow-event";
 
 export const kArrowAnnotationType = "arrowAnnotation";
 
@@ -73,11 +74,10 @@ export const ArrowAnnotation = types
     }
   },
   setText(text: string) {
-    if (self.text){ //TODO: check if self.text !== text (which means its changed) then log it
-      console.log("LOG 3: text label:", self.text);
+    if ((self.text !== text) && text){
+      logSparrowTitleChange(LogEventName.SPARROW_TITLE_CHANGE, self.id, text);
     }
     self.text = text;
-
   },
   setTextOffset(dx: number, dy: number) {
     if (!self.textOffset) {
