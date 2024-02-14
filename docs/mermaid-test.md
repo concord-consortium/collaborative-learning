@@ -68,6 +68,13 @@ flowchart TD
         real2 --> real3 & real4 & real5 --> real6
         real6(Return real auth)
       end
+
+      authenticate --> sup2
+      sup2("Re-set unit and problem (if different)")
+
+      subgraph ram [Resolve app mode]
+        direction TB
+      end
     end
   end
 ```
