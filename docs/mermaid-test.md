@@ -10,4 +10,22 @@ flowchart TD
   end
   load --> init
 
+  classDef loadingEvent fill:#220000
+  class init loadingEvent
+  subgraph init [LE: Initializing]
+    direction TB
+    indextsx("Runs React (index.tsx)")
+    indextsx --> ia
+    ia("initializeAuthorization (OAuth2)")
+    ia -.-> restart{{may redirect}}
+    ia --> initapp
+    subgraph initapp [Initialize app]
+      direction TB
+      cs(Create stores)
+    end
+
+    initapp --> component("Create app component")
+
+  end
+
 ```
