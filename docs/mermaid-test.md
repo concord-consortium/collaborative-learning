@@ -122,5 +122,17 @@ flowchart TD
   renderApp --> renderGroupChooser
   finishBroken --> renderGroupChooser
 
+  renderAppContentComponent
+  renderGroupChooser --> renderAppContentComponent
+
+  primaryDocumentLoaded
+  finishBroken --> primaryDocumentLoaded
+
+  style buildingWorkspace fill:#220000
+  subgraph buildingWorkspace [LE: Building workspace]
+    RDWCC(show the real right side content)
+  end
+  renderAppContentComponent --> RDWCC
+  primaryDocumentLoaded --> RDWCC
 
 ```
