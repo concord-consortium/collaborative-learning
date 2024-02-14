@@ -120,7 +120,7 @@ flowchart TD
     renderGroupChooser
   end
   renderApp --> renderGroupChooser
-  finish --> renderGroupChooser
+  finishBroken --> renderGroupChooser
 
 
 ```
