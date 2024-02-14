@@ -293,7 +293,7 @@ context('Arrow Annotations (Sparrows)', function () {
 
     // Link to diagram instead of table
     xyTile.getTile().click();
-    clueCanvas.clickToolbarButton('graph', 'link-tile');
+    clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
     xyTile.linkTable("Diagram 1");
     aa.clickArrowToolbarButton();
     aa.getAnnotationButtons().should("have.length", 9); // Just table cells
