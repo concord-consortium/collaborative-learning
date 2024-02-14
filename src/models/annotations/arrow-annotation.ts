@@ -1,8 +1,9 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
-
 import { boundDelta } from "./annotation-utils";
 import { ClueObjectModel, ObjectBoundingBox, OffsetModel } from "./clue-object";
 import { uniqueId } from "../../utilities/js-utils";
+import { LogEventName } from "../../../src/lib/logger-types";
+import { logSparrowTitleChange } from "../tiles/log/log-sparrow-event";
 
 export const kArrowAnnotationType = "arrowAnnotation";
 
@@ -73,6 +74,9 @@ export const ArrowAnnotation = types
     }
   },
   setText(text: string) {
+    if ((self.text !== text) && text){
+      logSparrowTitleChange(LogEventName.SPARROW_TITLE_CHANGE, self.id, text);
+    }
     self.text = text;
   },
   setTextOffset(dx: number, dy: number) {
@@ -102,7 +106,7 @@ export const ArrowAnnotation = types
     const {
       sourceDragOffsetX, sourceDragOffsetY, targetDragOffsetX, targetDragOffsetY, textDragOffsetX, textDragOffsetY
     } = dragOffsets;
-  
+
     // Find positions for head and tail of arrow
     const [sDxOffset, sDyOffset] = self.sourceOffset ? [self.sourceOffset.dx, self.sourceOffset.dy] : [0, 0];
     const sourceX = sourceBB.left + sourceBB.width / 2 + boundDelta(sDxOffset + sourceDragOffsetX, sourceBB.width);
@@ -110,7 +114,7 @@ export const ArrowAnnotation = types
     const [tDxOffset, tDyOffset] = self.targetOffset ? [self.targetOffset.dx, self.targetOffset.dy] : [0, 0];
     const targetX = targetBB.left + targetBB.width / 2 + boundDelta(tDxOffset + targetDragOffsetX, targetBB.width);
     const targetY = targetBB.top + targetBB.height / 2 + boundDelta(tDyOffset + targetDragOffsetY, targetBB.height);
-  
+
     // Set up text location
     const [textDxOffset, textDyOffset] = self.textOffset ? [self.textOffset.dx, self.textOffset.dy] : [0, 0];
     const dx = targetX - sourceX;

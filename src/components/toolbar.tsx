@@ -1,6 +1,5 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
-
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType } from "../models/document/document";
 import { orderTilePositions } from "../models/document/drag-tiles";
@@ -13,6 +12,8 @@ import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
 import { kSparrowAnnotationMode } from "../models/stores/persistent-ui";
+import { logSparrowShowHide } from "../models/tiles/log/log-sparrow-event";
+import { LogEventName } from "../../src/lib/logger-types";
 
 import "./toolbar.scss";
 
@@ -236,6 +237,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const { ui, persistentUI } = this.stores;
     ui.setAnnotationMode();
     persistentUI.setShowAnnotations(!persistentUI.showAnnotations);
+    const showOrHideAnnotations = persistentUI.showAnnotations ? "Show" : "Hide";
+    logSparrowShowHide(LogEventName.SPARROW_SHOW_HIDE, showOrHideAnnotations);
   }
 
   private handleUndo() {

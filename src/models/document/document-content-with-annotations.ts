@@ -2,6 +2,8 @@ import { types } from "mobx-state-tree";
 
 import { BaseDocumentContentModel } from "./base-document-content";
 import { ArrowAnnotation, IArrowAnnotation, IArrowAnnotationSnapshot } from "../annotations/arrow-annotation";
+import { logSparrowCreate, logSparrowDelete } from "../tiles/log/log-sparrow-event";
+import { LogEventName } from "../../../src/lib/logger-types";
 
 /**
  * This is one part of the DocumentContentModel. The other parts are
@@ -11,6 +13,7 @@ import { ArrowAnnotation, IArrowAnnotation, IArrowAnnotationSnapshot } from "../
  * This file should contain the properties, views, and actions that are
  * related to adorning documents (i.e. sparrows).
  */
+
 export const DocumentContentModelWithAnnotations = BaseDocumentContentModel
   .named("DocumentContentModelWithAnnotations")
   .props({
@@ -36,9 +39,11 @@ export const DocumentContentModelWithAnnotations = BaseDocumentContentModel
   .actions(self => ({
     addArrow(arrow: IArrowAnnotation) {
       self.annotations.put(arrow);
+      logSparrowCreate(LogEventName.SPARROW_CREATION, arrow, self);
     },
     deleteAnnotation(annotationId: string) {
       self.annotations.delete(annotationId);
+      logSparrowDelete(LogEventName.SPARROW_DELETION, annotationId);
     },
     addAnnotationFromImport(id: string, annotation: IArrowAnnotationSnapshot){
       if (self.annotations) {
