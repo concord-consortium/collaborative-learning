@@ -76,7 +76,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
                   <div className="sorted-sections" key={`sortedSection-${idx}`}>
                     <div className="section-header">
                       <div className="section-header-label">
-                        {sortedSection.sectionLabel}
+                      {sortedSection.icon ? <sortedSection.icon/>: null} {sortedSection.sectionLabel}
                       </div>
                     </div>
                     <div className="list">

@@ -3,15 +3,17 @@ import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
 import { DrawingContentModel, DrawingToolMetadataModel, defaultDrawingContent } from "./model/drawing-content";
 import { kDrawingTileType, kDrawingDefaultHeight } from "./model/drawing-types";
 import DrawingToolComponent from "./components/drawing-tile";
-import DrawingToolIcon from "../../clue/assets/icons/draw-tool.svg";
 import { DrawingMigrator } from "./model/drawing-migrator";
 import { registerDrawingObjectInfo, registerDrawingToolInfo } from "./components/drawing-object-manager";
 import { GroupObjectsButton, UngroupObjectsButton } from "./components/drawing-toolbar-group-buttons";
 import { GroupComponent, GroupObject } from "./objects/group";
 
+import Icon from "./assets/draw-tool.svg";
+import HeaderIcon from "./assets/sketch-tile-id.svg";
+
 registerTileContentInfo({
   type: kDrawingTileType,
-  titleBase: "Sketch",
+  displayName: "Sketch",
   // TODO: maybe there is a better way to do this kind of casting?
   //   The issue is that modelClass prop has a type of `typeof TileContentModel`,
   //   That type is pretty restrictive and doesn't accommodate the return of
@@ -28,7 +30,8 @@ registerTileComponentInfo({
   type: kDrawingTileType,
   Component: DrawingToolComponent,
   tileEltClass: "drawing-tool-tile",
-  Icon: DrawingToolIcon,
+  Icon,
+  HeaderIcon,
   tileHandlesOwnSelection: true
 });
 

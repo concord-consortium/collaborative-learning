@@ -215,7 +215,7 @@ export const GraphModel = TileContentModel
      */
     layerForAttributeId(id: string) {
       for (const layer of self.layers) {
-        if (layer.config.rolesForAttribute(id)) {
+        if (layer.config.rolesForAttribute(id).length) {
           return layer;
         }
       }
@@ -282,18 +282,28 @@ export const GraphModel = TileContentModel
     },
     get annotatableObjects() {
       const tileId = getTileIdFromContent(self) ?? "";
-      const xAttributeID = self.getAttributeID("x");
-      const yAttributeID = self.getAttributeID("y");
-      if (!self.layers[0].config.dataset) return []; // FIXME multi dataset
       const objects: IClueObject[] = [];
-      self.layers[0].config.dataset.cases.forEach(c => {
-        const objectId = getDotId(c.__id__, xAttributeID, yAttributeID);
-        objects.push({
-          tileId,
-          objectId,
-          objectType: "dot"
-        });
-      });
+      for (const layer of self.layers) {
+        if (layer.config.dataset) {
+          const xAttributeID = layer.config.attributeID("x");
+          for (const yAttributeID of layer.config.yAttributeIDs) {
+            for (const c of layer.config.dataset.cases) {
+              if (xAttributeID && yAttributeID) {
+                const objectId = getDotId(c.__id__, xAttributeID, yAttributeID);
+                objects.push({
+                  tileId,
+                  objectId,
+                  objectType: "dot"
+                });
+              }
+            }
+          }
+        }
+      }
+      // Include any objects contributed by adornments
+      for (const adorn of self.adornments) {
+        objects.push(...adorn.getAnnotatableObjects(tileId));
+      }
       return objects;
     }
   }))

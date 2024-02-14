@@ -1,9 +1,10 @@
 import { getEnv, Instance, SnapshotOut, types } from "mobx-state-tree";
 import { getTileComponentInfo } from "./tile-component-info";
+import { getTileContentInfo } from "./tile-content-info";
 
 const BaseToolbarButtonModel = types.model("BaseToolbarButton", {
   id: types.string, // tile type in the case of tile buttons
-  title: types.string,
+  title: types.maybe(types.string),
   isDefault: false,
 })
 .volatile(self => ({
@@ -26,6 +27,7 @@ const BaseToolbarButtonModel = types.model("BaseToolbarButton", {
 const AppToolbarButtonModel = BaseToolbarButtonModel.named("AppToolbarButtonModel")
   .props({
     iconId: types.string,
+    title: types.string, // Titles are required on app toolbar buttons
     isTileTool: types.literal(false)
   })
   .actions(self => ({
@@ -49,6 +51,11 @@ const TileToolbarButtonModel = BaseToolbarButtonModel.named("TileToolbarButtonMo
       if (!self.Icon) {
         const info = getTileComponentInfo(self.id);
         info?.Icon && (self.setIcon(info.Icon));
+      }
+      if (!self.title) {
+        const info = getTileContentInfo(self.id);
+        const title = info?.displayName || info?.type;
+        title && (self.setTitle(title));
       }
     }
   }));

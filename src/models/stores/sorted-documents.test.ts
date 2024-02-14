@@ -1,34 +1,38 @@
-import { DocumentModelType, createDocumentModel } from "../document/document";
+import { DocumentModelType, createDocumentModel, DocumentModelSnapshotType } from "../document/document";
 import { GroupModel, GroupsModel, GroupsModelType, GroupUserModel } from './groups';
 import { ClassModel, ClassModelType, ClassUserModel } from './class';
 import { ProblemDocument } from '../document/document-types';
 import { ISortedDocumentsStores, SortedDocuments } from "./sorted-documents";
 import { DeepPartial } from "utility-types";
+import { DocumentContentSnapshotType } from "../document/document-content";
 
+import "../tiles/text/text-registration";
+import "../../plugins/drawing/drawing-registration";
 
 //****************************************** Documents Mock ***************************************
 
-const mockDocumentsData = [
-  {uid: "1", type: ProblemDocument, key:"Student 1 Problem Doc Group 5", groupId: "5", createdAt: 1}, //Joe
-  {uid: "2", type: ProblemDocument, key:"Student 2 Problem Doc Group 3", groupId: "3", createdAt: 2}, //Scott
-  {uid: "3", type: ProblemDocument, key:"Student 3 Problem Doc Group 9", groupId: "9", createdAt: 3}, //Dennis
-  {uid: "4", type: ProblemDocument, key:"Student 4 Problem Doc Group 3", groupId: "3", createdAt: 4}  //Kirk
+const mockDocumentsData: DocumentModelSnapshotType[] = [
+  { uid: "1", //Joe
+    type: ProblemDocument, key:"Student 1 Problem Doc Group 5", groupId: "5", createdAt: 1,
+    content: { tiles: [] } as DocumentContentSnapshotType
+  },
+  { uid: "2", //Scott
+    type: ProblemDocument, key:"Student 2 Problem Doc Group 3", groupId: "3", createdAt: 2,
+    content: { tiles: [{ id: "textTool", content: {type: "Text" }}] } as DocumentContentSnapshotType
+  },
+  { uid: "3", //Dennis
+    type: ProblemDocument, key:"Student 3 Problem Doc Group 9", groupId: "9", createdAt: 3,
+    content: { tiles: [
+      { id: "drawingTool", content: { type: "Drawing", objects: [] }}] } as DocumentContentSnapshotType
+  },
+  { uid: "4", //Kirk
+    type: ProblemDocument, key:"Student 4 Problem Doc Group 3", groupId: "3", createdAt: 4,
+    content: { tiles: [] } as DocumentContentSnapshotType
+  }
 ];
 
 const createMockDocuments = () => {
-  const mockDocuments: DocumentModelType[] = [];
-
-  mockDocumentsData.forEach(docData => {
-    const newDocument = createDocumentModel({
-      uid: docData.uid,
-      type: docData.type as typeof ProblemDocument,
-      key: docData.key,
-      groupId: docData.groupId,
-      createdAt: docData.createdAt,
-    });
-    mockDocuments.push(newDocument);
-  });
-  return mockDocuments;
+  return mockDocumentsData.map(createDocumentModel);
 };
 
 //**************************************** Class/Users Mock ***************************************
@@ -163,6 +167,28 @@ describe('Sorted Documents Model', () => {
       const sortedDocsByName = sortedDocuments.sortByName;
       const actualOrder = sortedDocsByName.map(group => group.sectionLabel);
       expect(actualOrder).toEqual(expectedOrder);
+    });
+  });
+
+  describe('sortByTools Function', () => {
+    it('should correctly sort documents by tool', () => {
+      const sortedDocsByTools = sortedDocuments.sortByTools;
+      const summaryOfResult = sortedDocsByTools.map(section => ({
+        sectionLabel: section.sectionLabel,
+        docKeys: section.documents.map(doc => doc.key)
+      }));
+      expect(summaryOfResult).toEqual([
+        { sectionLabel: "Sketch", docKeys: [
+          "Student 3 Problem Doc Group 9"
+        ]},
+        { sectionLabel: "Text", docKeys: [
+          "Student 2 Problem Doc Group 3"
+        ]},
+        { sectionLabel: "No Tools", docKeys: [
+          "Student 1 Problem Doc Group 5",
+          "Student 4 Problem Doc Group 3"
+        ]}
+      ]);
     });
   });
 });

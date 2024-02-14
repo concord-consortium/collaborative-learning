@@ -3,10 +3,13 @@ import { registerTileContentInfo } from "../tile-content-info";
 import { kTextTileType, TextContentModel, defaultTextContent } from "./text-content";
 import TextToolComponent from "../../../components/tiles/text/text-tile";
 import { registerPlugins } from "@concord-consortium/slate-editor";
-import TextToolIcon from "../../../clue/assets/icons/text-tool.svg";
+
+import Icon from "../../../clue/assets/icons/text-tool.svg";
+import HeaderIcon from "../../../assets/icons/sort-by-tools/text-tile-id.svg";
 
 registerTileContentInfo({
   type: kTextTileType,
+  displayName: "Text",
   modelClass: TextContentModel,
   defaultContent: defaultTextContent
 });
@@ -17,6 +20,7 @@ registerTileComponentInfo({
   type: kTextTileType,
   Component: TextToolComponent,
   tileEltClass: "text-tool-tile disable-tile-content-drag",
-  Icon: TextToolIcon,
+  Icon,
+  HeaderIcon,
   tileHandlesOwnSelection: true
 });
