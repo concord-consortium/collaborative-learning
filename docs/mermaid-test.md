@@ -112,6 +112,8 @@ flowchart TD
 
     end
   end
+  supBroken --> listeners
+  supBroken --> sup2
 
   style joiningGroup fill:#220000
   subgraph joiningGroup [LE: Joining group]
