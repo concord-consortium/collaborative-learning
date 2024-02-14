@@ -28,4 +28,23 @@ flowchart TD
 
   end
 
+  initapp --> sup
+  subgraph sup [Set unit and problem]
+    direction TB
+    style loadingCurriculumContent fill:#220000
+    subgraph loadingCurriculumContent [LE: Loading curriculum content]
+      unit(Get unit JSON)
+    end
+    unit --> tiles
+    style settingUpCurriculumContent fill:#220000
+    subgraph settingUpCurriculumContent [LE: Setting up curriculum content]
+      style loadingTileTypes fill:#220000
+      subgraph loadingTileTypes [LE: Loading tile types]
+        tiles(Register tile types)
+      end
+      configStores(Configure some stores)
+      loadingTileTypes --> configStores
+    end
+  end
+
 ```
