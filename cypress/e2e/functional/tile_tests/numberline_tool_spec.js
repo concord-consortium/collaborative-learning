@@ -22,7 +22,7 @@ context('Numberline Tile', function () {
 
     cy.log("edit tile title");
     const newName = "Numberline test";
-    numberlineToolTile.getNumberlineTileTitleText().should("contain", "Numberline");
+    numberlineToolTile.getNumberlineTileTitleText().should("contain", "Number Line");
     numberlineToolTile.getNumberlineTileTitle().click();
     numberlineToolTile.getNumberlineTileTitle().type(newName + '{enter}');
     numberlineToolTile.getNumberlineTileTitleText().should("contain", newName);

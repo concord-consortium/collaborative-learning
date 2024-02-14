@@ -36,6 +36,16 @@ export interface ITileContentInfo {
   type: string;
   modelClass: typeof TileContentModel;
   defaultContent: (options?: IDefaultContentOptions) => ITileContentModel;
+  /**
+   * used for the title of the toolbar button and the title of the heading in
+   * the sort work tab. If not set, the type is used.
+   */
+  displayName?: string;
+  /**
+   * used as the prefix when naming a new tile of this type, if titleBase
+   * isn't set the displayName is used. If both are not set then in most
+   * cases the type is used.
+   */
   titleBase?: string;
   metadataClass?: typeof TileMetadataModel;
   addSidecarNotes?: boolean;
@@ -54,8 +64,12 @@ export interface ITileContentInfo {
 const gTileContentInfoMap: Record<string, ITileContentInfo> = {};
 
 export function registerTileContentInfo(tileContentInfo: ITileContentInfo) {
+  const { type, displayName, titleBase } = tileContentInfo;
   // toLowerCase() for legacy support of tool names
-  gTileContentInfoMap[tileContentInfo.type.toLowerCase()] = tileContentInfo;
+  gTileContentInfoMap[type.toLowerCase()] = tileContentInfo;
+  if (displayName && !titleBase) {
+    tileContentInfo.titleBase = displayName;
+  }
 }
 
 // ToolContent type, e.g. kDrawingTileType, kGeometryTileType, etc.

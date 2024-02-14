@@ -5,13 +5,14 @@ import { GraphWrapperComponent } from "./components/graph-wrapper-component";
 import { createGraphModel, GraphModel } from "./models/graph-model";
 import { updateGraphObjectWithNewSharedModelIds } from "./utilities/graph-utils";
 
-import GraphToolIcon from "./assets/graph-icon.svg";
+import Icon from "./assets/graph-icon.svg";
+import HeaderIcon from "./assets/graph-tile-id.svg";
 
 registerTileContentInfo({
   defaultContent: (options) => createGraphModel(undefined, options?.appConfig),
   defaultHeight: kGraphDefaultHeight,
   modelClass: GraphModel,
-  titleBase: "Graph",
+  displayName: "Graph",
   type: kGraphTileType,
   isDataConsumer: true,
   updateObjectReferenceWithNewSharedModelIds: updateGraphObjectWithNewSharedModelIds
@@ -19,7 +20,8 @@ registerTileContentInfo({
 
 registerTileComponentInfo({
   Component: GraphWrapperComponent,
-  Icon: GraphToolIcon,
+  Icon,
+  HeaderIcon,
   tileEltClass: "graph-tool-tile",
   type: kGraphTileType
 });
