@@ -74,6 +74,13 @@ flowchart TD
 
       subgraph ram [Resolve app mode]
         direction TB
+
+        subgraph db [DB Connect]
+          direction TB
+          fb(Firebase sign-in)
+          fb --> nolisteners & listeners
+          nolisteners{{Don't start listeners}}
+        end
       end
     end
   end
