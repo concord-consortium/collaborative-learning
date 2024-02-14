@@ -47,4 +47,27 @@ flowchart TD
     end
   end
 
+  component --> auth
+  component --> renderApp
+
+  style connecting fill:#220000
+  subgraph connecting [LE: Connecting]
+    subgraph auth [AuthAndConnect]
+      direction TB
+
+      subgraph authenticate [Authenticate]
+        direction TB
+        type{{appMode}}
+        type -- demo/qa/dev --> demo
+        type -- auth --> real1
+        demo(Returns fake auth)
+        real1(Fetch JWT from portal) --> real2(Get class info)
+        real3(Get Firebase JWT)
+        real4(Get portal offerings)
+        real5(Get offering problem ID)
+        real2 --> real3 & real4 & real5 --> real6
+        real6(Return real auth)
+      end
+    end
+  end
 ```
