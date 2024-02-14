@@ -133,7 +133,9 @@ export const DrawingContentModel = TileContentModel
       const tileId = self.metadata?.id ?? "";
       const {name: operation, ...change} = call;
       // Ignore actions that don't need to be logged
-      if (["setDisabledFeatures", "setDragPosition", "setDragBounds", "setSelectedButton"].includes(operation)) return;
+      const ignoredActions = ["setDisabledFeatures", "setDragPosition", "setDragBounds",
+        "setSelectedButton", "afterAttach"];
+      if (ignoredActions.includes(operation)) return;
 
       logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, { operation, change, tileId });
     }
