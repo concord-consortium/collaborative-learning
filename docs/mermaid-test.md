@@ -101,6 +101,15 @@ flowchart TD
           end
         end
       end
+      sup2 --> ram
+
+      style loadingCurrentActivity fill:#220000
+      subgraph loadingCurrentActivity [LE: Loading current activity]
+        initializePersistentUISync
+      end
+      ram --> initializePersistentUISync
+
+
     end
   end
 ```
