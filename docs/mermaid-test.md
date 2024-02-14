@@ -112,4 +112,12 @@ flowchart TD
 
     end
   end
+  sup --> listeners
+  sup --> sup2
+
+  style joiningGroup fill:#220000
+  subgraph joiningGroup [LE: Joining group]
+    renderGroupChooser
+  end
+
 ```
