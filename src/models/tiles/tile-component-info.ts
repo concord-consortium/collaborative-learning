@@ -7,6 +7,14 @@ export interface ITileComponentInfo {
   tileEltClass: string;
   Icon?: React.FC<SVGProps<SVGSVGElement>>;
   /**
+   * This is used by the sort work tab along with the displayName to
+   * make a header for the group of documents with this tile
+   *
+   * TODO: it would be better if this would at least default to the main
+   * toolbar icon so in many cases we wouldn't need two icons.
+   */
+  HeaderIcon?: React.FC<SVGProps<SVGSVGElement>>;
+  /**
    * By default the tool tile wrapper TileComponent will handle the selection of the
    * the tile when it gets a mouse down or touch start.
    *

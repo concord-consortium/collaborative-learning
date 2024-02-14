@@ -9,10 +9,15 @@ import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
 import { ENavTabOrder, NavTabSectionModelType } from "../view/nav-tabs";
 import { UserModelType } from "./user";
+import { getTileContentInfo } from "../tiles/tile-content-info";
+import { getTileComponentInfo } from "../tiles/tile-component-info";
+
+import SparrowHeaderIcon from "../../assets/icons/sort-by-tools/sparrow-id.svg";
 
 type SortedDocument = {
   sectionLabel: string;
   documents: DocumentModelType[];
+  icon?: React.FC<React.SVGProps<SVGSVGElement>>; //exists only in the "sort by tools" case
 }
 
 type TagWithDocs = {
@@ -237,6 +242,7 @@ export class SortedDocuments {
 
   get sortByTools(): SortedDocument[] {
     const tileTypeToDocumentsMap: Record<string, DocumentModelType[]> = {};
+
     const addDocByType = (docToAdd: DocumentModelType, type: string) => {
       if (!tileTypeToDocumentsMap[type]) {
         tileTypeToDocumentsMap[type] = [];
@@ -244,37 +250,54 @@ export class SortedDocuments {
       tileTypeToDocumentsMap[type].push(docToAdd);
     };
 
+    //Iterate through all documents, determine if they are valid,
+    //create a map of valid ones, otherwise put them into the "No Tools" section
     this.filteredDocsByType.forEach((doc) => {
-      const tilesByTypeMap = doc.content?.getAllTilesByType();// Type is Record<string, string[]>
+      const tilesByTypeMap = doc.content?.getAllTilesByType();
       if (tilesByTypeMap) {
         const tileTypes = Object.keys(tilesByTypeMap);
-        const nonPlaceholderTiles = tileTypes.filter(type => type !== "Placeholder");
-        // If a document only has "Placeholder" tiles or no tiles, treat it as "No Tools"
-        if (nonPlaceholderTiles.length === 0) {
-          addDocByType(doc, "No Tools");
-        } else {
-          // Add the tileType as the key to the Map, and doc(s) as values
-          nonPlaceholderTiles.forEach(tileType => {
+        const validTileTypes = tileTypes.filter(type => type !== "Placeholder" && type !== "Unknown");
+        if (validTileTypes.length > 0) {
+          validTileTypes.forEach(tileType => {
             addDocByType(doc, tileType);
           });
+
+          //Assuming validTileTypes, we can check if the document has "Sparrow" annotations
+          const docHasAnnotations = doc.content?.annotations && doc.content?.annotations.size > 0;
+          if(docHasAnnotations){
+            addDocByType(doc, "Sparrow");
+          }
+        } else { //Documents with only all Placeholder or Unknown tiles
+          addDocByType(doc, "No Tools");
         }
-      } else { // Handle documents with no tiles
-        addDocByType(doc, "No Tools");
       }
     });
 
-    // Sort the tile types. 'No Tools' should be at the end.
-    const sortedTileTypes = Object.keys(tileTypeToDocumentsMap).sort((a, b) => {
-      if (a === "No Tools") return 1;   //Move 'No Tools' to the end
-      if (b === "No Tools") return -1;  //Alphabetically sort all others
-      return a.localeCompare(b);
+    // Map the tile types to their display names
+    const sectionedDocuments = Object.keys(tileTypeToDocumentsMap).map(tileType => {
+      const section: SortedDocument = {
+        sectionLabel: tileType,
+        documents: tileTypeToDocumentsMap[tileType],
+      };
+      if (tileType === "Sparrow") {
+        section.icon = SparrowHeaderIcon;
+      } else {
+        const contentInfo = getTileContentInfo(tileType);
+        section.sectionLabel = contentInfo?.displayName || tileType;
+        const componentInfo = getTileComponentInfo(tileType);
+        section.icon = componentInfo?.HeaderIcon;
+      }
+      return section;
     });
 
-    const sortedDocuments = sortedTileTypes.map(tileType => ({
-      sectionLabel: tileType,
-      documents: tileTypeToDocumentsMap[tileType]
-    }));
-    return sortedDocuments;
+    // Sort the tile types. 'No Tools' should be at the end.
+    const sortedByLabel = sectionedDocuments.sort((a, b) => {
+      if (a.sectionLabel === "No Tools") return 1;   // Move 'No Tools' to the end
+      if (b.sectionLabel === "No Tools") return -1;  // Alphabetically sort all others
+      return a.sectionLabel.localeCompare(b.sectionLabel);
+    });
+
+    return sortedByLabel;
   }
 
   matchProperties(doc: DocumentModelType, properties?: readonly string[], options?: IMatchPropertiesOptions) {
