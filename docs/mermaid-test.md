@@ -119,5 +119,21 @@ flowchart TD
   subgraph joiningGroup [LE: Joining group]
     renderGroupChooser
   end
+  renderApp --> renderGroupChooser
+  finish --> renderGroupChooser
+
+  renderAppContentComponent
+  renderGroupChooser --> renderAppContentComponent
+
+  primaryDocumentLoaded
+  finish --> primaryDocumentLoaded
+
+  style buildingWorkspace fill:#220000
+  subgraph buildingWorkspace [LE: Building workspace]
+    RDWCC(show the real right side content)
+  end
+  renderAppContentComponent --> RDWCC
+  primaryDocumentLoaded --> RDWCC
+
 
 ```
