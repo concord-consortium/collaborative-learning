@@ -1,56 +1,5 @@
 # CLUE Startup sequence
 
-## Simplified sequence
-
-This diagram is somewhat abstract, showing only things that conceptually need to be complete
-before other steps can move forward.
-
-```mermaid
-flowchart TD
-%%{init: {"flowchart": {"defaultRenderer": "elk"}} }%%
-
-  req(Load and render index.html)
-  req --> load
-  load(Load main JS, start React)
-  load --> component
-  load --> init
-  init(Authorize user, get portal info)
-  init -. if teacher .-> unit
-  load -. if student .-> unit
-  unit(Get unit JSON)
-
-  firebase(Connect Firebase)
-  component(Create app component)
-  firebase --> listeners
-  listeners[Start listeners]
-  init --> group
-  group(Join group or show group chooser)
-  component --> group
-  init --> firebase
-  unit --> tiles
-  tiles(Load tile types)
-
-  tiles --> problem
-  unit --> problem
-  ui --> problem
-  problem(Render problem)
-
-  ui --> tabs
-  tiles --> tabs
-  listeners --> tabs
-  tabs(Render other left-side content)
-
-  firebase --> ui
-  firebase --> group
-  ui(Get persistent UI)
-  listeners --> work
-  ui --> work
-  tiles --> work
-  group ---> work
-  work(Render workspace)
-
-```
-
 ## Current Loading sequence
 
 ```mermaid
