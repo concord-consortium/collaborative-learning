@@ -33,7 +33,6 @@ export function logSharedModelDocEvent(event: LogEventName, model: any, smm: any
   const tileMap = document.tileMap;
   //How to get the tileId
 
-  //SEE CHATGPT
   // const tileIdEvent =
   // const tileTypeEvent = tileMap.get(tileIdEvent).//the tile linked or unlinked
 
