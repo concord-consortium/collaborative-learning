@@ -7,6 +7,7 @@ import { FourUpComponent, getFocusedGroupUser, getUIStudentWorkTab } from "../..
 import { IconButton } from "../../../components/utilities/icon-button";
 import { Logger } from "../../../lib/logger";
 import { LogEventName } from "../../../lib/logger-types";
+import { createStickyNote } from "../../../models/curriculum/support";
 import { AudienceModel, AudienceEnum } from "../../../models/stores/supports";
 import { GroupUserModelType, GroupModelType } from "../../../models/stores/groups";
 
