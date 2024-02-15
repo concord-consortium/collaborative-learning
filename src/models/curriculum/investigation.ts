@@ -1,7 +1,6 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
 import { ProblemModel } from "./problem";
-import { SupportModel } from "./support";
 import { ProblemConfiguration } from "../stores/problem-configuration";
 import { SettingsMstType } from "../stores/settings";
 
@@ -13,7 +12,7 @@ const LegacyInvestigationModel = types
     introduction: types.maybe(DocumentContentModel),
     problems: types.array(ProblemModel),
     reflections: types.maybe(DocumentContentModel),
-    supports: types.array(SupportModel),
+    //supports: types.array(SupportModel),
     settings: types.maybe(SettingsMstType)
   });
 
@@ -24,7 +23,7 @@ const ModernInvestigationModel = types
     introduction: types.maybe(DocumentContentModel),
     problems: types.array(ProblemModel),
     reflections: types.maybe(DocumentContentModel),
-    supports: types.array(SupportModel),
+    //supports: types.array(SupportModel),
     config: types.maybe(types.frozen<Partial<ProblemConfiguration>>())
   })
   .views(self => {

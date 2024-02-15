@@ -239,9 +239,9 @@ export const SupportsModel = types
           };
         };
 
-        unit.supports.forEach(createItem(SupportTarget.unit));
-        investigation && investigation.supports.forEach(createItem(SupportTarget.investigation));
-        problem && problem.supports.forEach(createItem(SupportTarget.problem));
+        //unit.supports.forEach(createItem(SupportTarget.unit));
+        //investigation && investigation.supports.forEach(createItem(SupportTarget.investigation));
+        //problem && problem.supports.forEach(createItem(SupportTarget.problem));
         problem && problem.sections.forEach((section) => {
           section.supports.forEach(createItem(SupportTarget.section, section.type));
         });

@@ -217,10 +217,10 @@ describe("supports model", () => {
       unit: UnitModel.create({
         title: "Unit 1",
         investigations: [investigation1, investigation2],
-        supports: [
-          {type: ESupportType.text, content: "Unit 1, support #1"},
-          {type: ESupportType.text, content: "Unit 1, support #2"}
-        ]
+        // supports: [
+        //   {type: ESupportType.text, content: "Unit 1, support #1"},
+        //   {type: ESupportType.text, content: "Unit 1, support #2"}
+        // ]
       }),
       investigation: InvestigationModel.create(cloneDeep(investigation1)),
       problem: ProblemModel.create(cloneDeep(problem1))});
