@@ -291,18 +291,18 @@ context('Arrow Annotations (Sparrows)', function () {
     diagramToolTile.getDialogOkButton().click();
     diagramToolTile.getVariableCard().should("exist");
 
-    // Link to diagram instead of table
+    // Link to diagram as well as table
     xyTile.getTile().click();
-    clueCanvas.clickToolbarButton('graph', 'link-tile');
+    clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
     xyTile.linkTable("Diagram 1");
     aa.clickArrowToolbarButton();
-    aa.getAnnotationButtons().should("have.length", 9); // Just table cells
+    aa.getAnnotationButtons().should("have.length", 12);
     aa.clickArrowToolbarButton();
 
     xyTile.selectXVariable(varName);
     xyTile.selectYVariable(varName);
     aa.clickArrowToolbarButton();
-    aa.getAnnotationButtons().should("have.length", 10);
+    aa.getAnnotationButtons().should("have.length", 13);
     aa.clickArrowToolbarButton();
 
     cy.log("Can add an arrow to variable dots");
