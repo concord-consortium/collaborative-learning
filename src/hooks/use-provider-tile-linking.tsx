@@ -62,15 +62,23 @@ export const useProviderTileLinking = ({
           sharedModelManager.removeTileSharedModel(model.content, shared);
         }
       }
+
+
       //Log linking of a sharedModel's dataset, determine which tiles is connected to the dataset
       //Currently implemented for Graph Tile and Geometry Tiles since both call on useProviderTileLinking
       //Determine the tiles that are connected to tthe sharedModel's dataset then log
       sharedModelManager.addTileSharedModel(model.content, sharedModel);
-      const sharedTiles = sharedModelManager.getSharedModelProviders(sharedModel);
 
-      console.log("sharedTiles:", sharedTiles);
-      logSharedModelDocEvent(LogEventName.GRAPH_TOOL_LINK, model, sharedTiles);
-      //call on logger here in logshared-model-document
+      //TODO: change getSharedModelProviders to sharedTiles?
+      const getSharedModelProviders = sharedModelManager.getSharedModelProviders(sharedModel);
+
+      console.log("\t getSharedModelProviders:", getSharedModelProviders);
+      const getSharedModelTiles = sharedModelManager.getSharedModelTiles(sharedModel).map((m: any)=>m.id);
+      console.log("\t getSharedModelTiles:", getSharedModelTiles);
+      const getSharedModelTileIds = sharedModelManager.getSharedModelTileIds(sharedModel);
+      console.log("\tgetSharedModelTileIds:", getSharedModelTileIds);
+
+      logSharedModelDocEvent(LogEventName.GRAPH_TOOL_LINK, model, getSharedModelProviders);
 
     }
   }, [readOnly, sharedModelManager, model, allowMultipleGraphDatasets]);
@@ -78,11 +86,14 @@ export const useProviderTileLinking = ({
   const unlinkTile = useCallback((sharedModel: SharedModelType) => {
     if (!readOnly && sharedModelManager?.isReady) {
       sharedModelManager.removeTileSharedModel(model.content, sharedModel);
-      //call on getSharedModelProviders
-      //call on logger here
+      console.log("-----UNLINK-------");
+      const sharedTiles = sharedModelManager.getSharedModelProviders(sharedModel);//call on getSharedModelProviders
+      console.log("\t🔪 sharedTiles:", sharedTiles);
+
+      logSharedModelDocEvent(LogEventName.GRAPH_TOOL_UNLINK, model, sharedTiles);//call on logger here
 
     }
-  }, [readOnly, sharedModelManager, model.content]);
+  }, [readOnly, sharedModelManager, model]);
 
   const onLinkTile = handleRequestTileLink || linkTile;
   const onUnlinkTile = handleRequestTileUnlink || unlinkTile;

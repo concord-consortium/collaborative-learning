@@ -32,8 +32,6 @@ import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-da
 import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-model";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 import { multiLegendParts } from "../components/legend/legend-registration";
-// import { logSharedModelDocEvent } from "src/models/document/log.shared-model-document-event";
-
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -481,10 +479,6 @@ export const GraphModel = TileContentModel
      * @param sharedModel
      */
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-
-      // console.log("📁 graph-model.ts ------------------------");
-      // console.log("➡️ updateAfterSharedModelChanges");
-
       const smm = getSharedModelManager(self);
       if (!smm || !smm.isReady) return;
 
