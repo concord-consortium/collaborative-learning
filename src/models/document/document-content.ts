@@ -18,6 +18,7 @@ import { comma, StringBuilder } from "../../utilities/string-builder";
 // Imports related to hard coding shared model duplication
 import {
   getSharedDataSetSnapshotWithUpdatedIds, getUpdatedSharedDataSetIds, isSharedDataSetSnapshot, SharedDataSet,
+  SharedDataSetType,
   UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
 } from "../shared/shared-data-set";
 import { IClueObjectSnapshot } from "../annotations/clue-object";
@@ -238,7 +239,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
   ) {
     // Update shared models with new ids
     const updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds> = {};
-    const newSharedModelEntries: PartialSharedModelEntry[] = [];
+    let newSharedModelEntries: PartialSharedModelEntry[] = [];
     sharedModelEntries.forEach(sharedModelEntry => {
       // For now, only duplicate shared data sets
       if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
@@ -306,13 +307,18 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
 
         // If the tile title needed to be updated, we assume we should also update the data set's name
         if (newTitle && sharedModelEntries) {
-          newSharedModelEntries.forEach(sharedModelEntry => {
+          newSharedModelEntries = newSharedModelEntries.map(sharedModelEntry => {
             if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
               const sharedDataSet = sharedModelEntry.sharedModel;
               const oldName = sharedDataSet.dataSet?.name;
               if (sharedDataSet.dataSet && oldName === oldTitle) {
-                sharedDataSet.dataSet.name = newTitle;
+                const newSME = cloneDeep<PartialSharedModelEntry>(sharedModelEntry);
+                (newSME.sharedModel as SharedDataSetType).dataSet.name = newTitle;
+                return newSME;
               }
+              return sharedModelEntry;
+            } else {
+              return sharedModelEntry;
             }
           });
         }
