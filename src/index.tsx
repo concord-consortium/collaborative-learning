@@ -27,14 +27,6 @@ if (!redirectingToAuthDomain) {
     initializeApp(appMode).then((stores) => {
       stores.unitLoadedPromise.then(() => setPageTitle(stores));
       stores.ui.setShowDemoCreator(!!stores.showDemoCreator);
-      // I think supports are not used so we can get rid of this
-      // stores.supports.createFromUnit({
-      //   unit: stores.unit,
-      //   investigation: stores.investigation,
-      //   problem: stores.problem,
-      //   documents: stores.documents,
-      //   db: stores.db
-      // });
 
       ReactDOM.render(
         <AppProvider stores={stores} modalAppElement="#app">

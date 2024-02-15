@@ -9,7 +9,7 @@ import {
   registerSectionInfo, suspendSectionContentParsing, resumeSectionContentParsing
 } from "./section";
 import { ProblemModelType } from "./problem";
-import { SupportModel, resumeSupportContentParsing, suspendSupportContentParsing } from "./support";
+import { resumeSupportContentParsing, SupportModel, suspendSupportContentParsing } from "./support";
 import { StampModel } from "../../plugins/drawing/model/stamp";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { NavTabsConfigModel } from "../stores/nav-tabs";

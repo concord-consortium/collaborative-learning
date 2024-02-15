@@ -179,20 +179,11 @@ export const SupportsModel = types
     }
   }))
   .views((self) => ({
-    // standard supports (as opposed to sticky notes)
-    // get teacherSupports() {
-    //   return self.allTeacherSupports.filter((support) => support.isTeacherSupport);
-    // },
     get teacherStickyNotes() {
       return self.allTeacherSupports.filter((support) => support.isStickyNote);
     }
   }))
   .views((self) => ({
-    // getTeacherSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
-    //   return self.teacherSupports.filter(support => {
-    //     return support.showForUserProblem(target);
-    //   });
-    // },
     getStickyNotesForUserProblem(target: ISupportTarget): SupportItemModelType[] {
       return self.teacherStickyNotes.filter(support => {
         return support.showForUserProblem(target);
@@ -201,57 +192,19 @@ export const SupportsModel = types
   }))
   .views((self) => ({
     get allSupports() {
-        return (self.curricularSupports as SupportItemModelType[])
-        .concat(self.classSupports)
-        .concat(self.groupSupports)
-        .concat(self.userSupports);
-    },
-
-    // getSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
-    //     const { sectionId } = target;
-    //     const supports: SupportItemModelType[] = self.curricularSupports.filter((support) => {
-    //       return sectionId ? support.sectionId === sectionId : true;
-    //     });
-    //     return supports.concat(self.getTeacherSupportsForUserProblem(target));
-    // }
+      return (self.curricularSupports as SupportItemModelType[])
+      .concat(self.classSupports)
+      .concat(self.groupSupports)
+      .concat(self.userSupports);
+    }
   }))
   .views((self) => ({
-    // hasNewTeacherSupports(afterTimestamp?: number) {
-    //   return hasNewTeacherSupports(self.teacherSupports, afterTimestamp);
-    // },
     hasNewStickyNotes(afterTimestamp?: number) {
       return hasNewTeacherSupports(self.teacherStickyNotes, afterTimestamp);
     }
   }))
   .actions((self) => {
     return {
-      // createFromUnit(params: ICreateFromUnitParams) {
-      //   const { unit, investigation, problem, documents } = params;
-      //   const supports: CurricularSupportModelType[] = [];
-      //   const createItem = (type: SupportTarget, sectionId?: string) => {
-      //     return (support: SupportModelType) => {
-      //       supports.push(CurricularSupportModel.create({
-      //         support: cloneDeep(support),
-      //         type,
-      //         sectionId
-      //       }));
-      //     };
-      //   };
-
-      //   //unit.supports.forEach(createItem(SupportTarget.unit));
-      //   //investigation && investigation.supports.forEach(createItem(SupportTarget.investigation));
-      //   //problem && problem.supports.forEach(createItem(SupportTarget.problem));
-      //   problem && problem.sections.forEach((section) => {
-      //     section.supports.forEach(createItem(SupportTarget.section, section.type));
-      //   });
-
-      //   self.curricularSupports.replace(supports);
-
-      //   if (documents) {
-      //     addSupportDocumentsToStore({ supports, ...params });
-      //   }
-      // },
-
       addAuthoredSupports(supports: TeacherSupportModelType[], audienceType: AudienceEnum) {
         const currSupports = audienceType === AudienceEnum.class
           ? self.classSupports
