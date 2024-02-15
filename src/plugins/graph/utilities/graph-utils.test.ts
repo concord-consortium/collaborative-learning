@@ -1,9 +1,10 @@
-import {scaleLinear} from "d3";
-import {equationString, getScreenCoord, lineToAxisIntercepts, ptInRect, updateGraphContentWithNewSharedModelIds, valueLabelString} from "./graph-utils";
-import {DataSet} from "../../../models/data/data-set";
+import { SnapshotOut } from "mobx-state-tree";
+import { scaleLinear} from "d3";
+import { equationString, getScreenCoord, lineToAxisIntercepts, ptInRect,
+  updateGraphContentWithNewSharedModelIds, valueLabelString } from "./graph-utils";
+import { DataSet } from "../../../models/data/data-set";
 import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
 import { GraphModel } from "../models/graph-model";
-import { SnapshotOut } from "@concord-consortium/mobx-state-tree";
 
 describe("equationString", () => {
   it("should return a valid equation for a given slope and intercept", () => {
@@ -137,7 +138,7 @@ describe("updateGraphContentWithNewSharedModelIds", () => {
     expect(result).not.toContain("CTZ8N5wGpbsgFPDr");
     expect(result).not.toContain("t_Yigae_ENpSAaNJ");
     // eslint-disable-next-line max-len
-    expect(result).toMatchInlineSnapshot("", `"{\\"type\\":\\"Graph\\",\\"adornments\\":[{\\"id\\":\\"ADRNxHvLKiH_ntmG\\",\\"type\\":\\"Connecting Lines\\",\\"isVisible\\":true}],\\"axes\\":{\\"bottom\\":{\\"type\\":\\"numeric\\",\\"place\\":\\"bottom\\",\\"scale\\":\\"linear\\",\\"min\\":-4.5,\\"max\\":7.5},\\"left\\":{\\"type\\":\\"numeric\\",\\"place\\":\\"left\\",\\"scale\\":\\"linear\\",\\"min\\":-3.5,\\"max\\":8.5}},\\"lockAxes\\":false,\\"plotType\\":\\"scatterPlot\\",\\"layers\\":[{\\"id\\":\\"LAYRLybDWmk6IEI-\\",\\"config\\":{\\"id\\":\\"DCON3uYgNhsq_4tk\\",\\"dataset\\":\\"dset1\\",\\"metadata\\":\\"7U0DJ-WxB83noPMK\\",\\"primaryRole\\":\\"x\\",\\"_attributeDescriptions\\":{\\"x\\":{\\"type\\":\\"numeric\\",\\"attributeID\\":\\"att1\\"}},\\"_yAttributeDescriptions\\":[{\\"type\\":\\"numeric\\",\\"attributeID\\":\\"att2\\"}]}}],\\"_idColors\\":{\\"att2\\":0},\\"_pointColors\\":[\\"#E6805B\\"],\\"_pointStrokeColor\\":\\"#FFFFFF\\",\\"pointStrokeSameAsFill\\":false,\\"pointSizeMultiplier\\":1,\\"plotBackgroundColor\\":\\"#FFFFFF\\",\\"isTransparent\\":false,\\"plotBackgroundImageID\\":\\"\\",\\"showParentToggles\\":false,\\"showMeasuresForSelection\\":false,\\"xAttributeLabel\\":\\"time\\",\\"yAttributeLabel\\":\\"Signal\\"}"`);
+    expect(result).toMatchInlineSnapshot(`"{\\"type\\":\\"Graph\\",\\"adornments\\":[{\\"id\\":\\"ADRNxHvLKiH_ntmG\\",\\"type\\":\\"Connecting Lines\\",\\"isVisible\\":true}],\\"axes\\":{\\"bottom\\":{\\"type\\":\\"numeric\\",\\"place\\":\\"bottom\\",\\"scale\\":\\"linear\\",\\"min\\":-4.5,\\"max\\":7.5},\\"left\\":{\\"type\\":\\"numeric\\",\\"place\\":\\"left\\",\\"scale\\":\\"linear\\",\\"min\\":-3.5,\\"max\\":8.5}},\\"lockAxes\\":false,\\"plotType\\":\\"scatterPlot\\",\\"layers\\":[{\\"id\\":\\"LAYRLybDWmk6IEI-\\",\\"config\\":{\\"id\\":\\"DCON3uYgNhsq_4tk\\",\\"dataset\\":\\"dset1\\",\\"metadata\\":\\"7U0DJ-WxB83noPMK\\",\\"primaryRole\\":\\"x\\",\\"_attributeDescriptions\\":{\\"x\\":{\\"type\\":\\"numeric\\",\\"attributeID\\":\\"att1\\"}},\\"_yAttributeDescriptions\\":[{\\"type\\":\\"numeric\\",\\"attributeID\\":\\"att2\\"}]}}],\\"_idColors\\":{\\"att2\\":0},\\"_pointColors\\":[\\"#E6805B\\"],\\"_pointStrokeColor\\":\\"#FFFFFF\\",\\"pointStrokeSameAsFill\\":false,\\"pointSizeMultiplier\\":1,\\"plotBackgroundColor\\":\\"#FFFFFF\\",\\"isTransparent\\":false,\\"plotBackgroundImageID\\":\\"\\",\\"showParentToggles\\":false,\\"showMeasuresForSelection\\":false,\\"xAttributeLabel\\":\\"time\\",\\"yAttributeLabel\\":\\"Signal\\"}"`);
   });
 
 });
