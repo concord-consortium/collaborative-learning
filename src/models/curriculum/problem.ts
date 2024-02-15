@@ -1,10 +1,12 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { SectionModel, SectionModelSnapshot, SectionModelType } from "./section";
 import { SettingsMstType } from "../stores/settings";
+import { SupportModel } from "./support";
 import { ProblemConfiguration } from "../stores/problem-configuration";
 import { ITileEnvironment } from "../tiles/tile-content";
 import { SharedModelDocumentManager } from "../document/shared-model-document-manager";
-import { SupportModel } from "./support";
+
+
 
 const LegacyProblemModel = types
   .model("Problem", {

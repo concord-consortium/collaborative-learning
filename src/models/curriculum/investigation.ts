@@ -1,9 +1,10 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
 import { ProblemModel } from "./problem";
+import { SupportModel } from "./support";
 import { ProblemConfiguration } from "../stores/problem-configuration";
 import { SettingsMstType } from "../stores/settings";
-import { SupportModel } from "./support";
+
 
 const LegacyInvestigationModel = types
   .model("Investigation", {
