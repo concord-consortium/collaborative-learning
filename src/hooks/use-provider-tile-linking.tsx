@@ -65,10 +65,10 @@ export const useProviderTileLinking = ({
       //Log linking of a sharedModel's dataset, determine which tiles is connected to the dataset
       //Currently implemented for Graph Tile and Geometry Tiles since both call on useProviderTileLinking
       //Determine the tiles that are connected to tthe sharedModel's dataset then log
+      sharedModelManager.addTileSharedModel(model.content, sharedModel);
       const sharedTiles = sharedModelManager.getSharedModelProviders(sharedModel);
 
-      // console.log("sharedTiles:", sharedTiles);
-      sharedModelManager.addTileSharedModel(model.content, sharedModel);
+      console.log("sharedTiles:", sharedTiles);
       logSharedModelDocEvent(LogEventName.GRAPH_TOOL_LINK, model, sharedTiles);
       //call on logger here in logshared-model-document
 

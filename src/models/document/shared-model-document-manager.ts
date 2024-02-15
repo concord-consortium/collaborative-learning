@@ -154,16 +154,6 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       return;
     }
 
-    // console.log("📁 shared-model-document-manager.ts ------------------------");
-    // console.log("\t🥩 isProvider:", isProvider);
-    // console.log("\t🥩 sharedModel:", sharedModel);
-    // console.log("\t🥩 sharedModel.provider:", sharedModel.providerId);
-
-    // console.log("\t🥩 tileContentModel:", tileContentModel);
-    // console.log("----------------------------\n");
-
-
-
     sharedModelEntry.addTile(tile, isProvider);
 
     // When a shared model entry changes updateAfterSharedModelChanges is called on
