@@ -55,13 +55,6 @@ interface IProps {
 export const useConsumerTileLinking = ({
   model, shareType, hasLinkableRows, readOnly, tileType, onLinkTile, onUnlinkTile, onCreateTile
 }: IProps) => {
-
-  // console.log("📁 use-consumer-tile-linking.ts ------------------------");
-  // console.log("\t🥩 tileType:", tileType);
-  // console.log("\t🥩 model:", model);
-  // console.log("\t🥩 model.title:", model.title);
-  // console.log("\t🥩 onLinkTile:", onLinkTile);
-
   // In the future we might need to limit this search to only tiles that are consumers for 'shareType'.
   // At the moment we have no cases where it matters.
   const { consumers: linkableTilesAllTypes } = useLinkableTiles({ model });
@@ -88,7 +81,6 @@ export const useConsumerTileLinking = ({
 
   const linkTile = useCallback((tileInfo: ITileLinkMetadata) => {
     const consumerTile = getTileContentById(model.content, tileInfo.id);
-    // console.log("consumerTile:", consumerTile);
     if (!readOnly && consumerTile) {
       if (sharedModelManager?.isReady) {
         // If the consumer tile does not support multiple shared data sets, we will remove it from

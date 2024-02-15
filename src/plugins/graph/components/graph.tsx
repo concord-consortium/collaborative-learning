@@ -58,7 +58,6 @@ interface IProps {
 
 export const Graph = observer(
     function Graph({ graphController, readOnly, graphRef, onRequestRowHeight }: IProps) {
-  // console.log("------<Graph>---------");
 
   const graphModel = useGraphModelContext(),
     {autoAdjustAxes, enableAnimation} = graphController,
