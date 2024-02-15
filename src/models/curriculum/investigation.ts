@@ -5,7 +5,6 @@ import { SupportModel } from "./support";
 import { ProblemConfiguration } from "../stores/problem-configuration";
 import { SettingsMstType } from "../stores/settings";
 
-
 const LegacyInvestigationModel = types
   .model("Investigation", {
     ordinal: types.integer,

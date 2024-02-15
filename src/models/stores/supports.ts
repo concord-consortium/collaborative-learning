@@ -1,5 +1,4 @@
 import { types, Instance, getSnapshot } from "mobx-state-tree";
-import { cloneDeep } from "lodash";
 import { InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModelType } from "../curriculum/problem";
 import { getSectionInitials, getSectionTitle, kAllSectionType, SectionType } from "../curriculum/section";
@@ -226,32 +225,32 @@ export const SupportsModel = types
   }))
   .actions((self) => {
     return {
-      createFromUnit(params: ICreateFromUnitParams) {
-        const { unit, investigation, problem, documents } = params;
-        const supports: CurricularSupportModelType[] = [];
-        const createItem = (type: SupportTarget, sectionId?: string) => {
-          return (support: SupportModelType) => {
-            supports.push(CurricularSupportModel.create({
-              support: cloneDeep(support),
-              type,
-              sectionId
-            }));
-          };
-        };
+      // createFromUnit(params: ICreateFromUnitParams) {
+      //   const { unit, investigation, problem, documents } = params;
+      //   const supports: CurricularSupportModelType[] = [];
+      //   const createItem = (type: SupportTarget, sectionId?: string) => {
+      //     return (support: SupportModelType) => {
+      //       supports.push(CurricularSupportModel.create({
+      //         support: cloneDeep(support),
+      //         type,
+      //         sectionId
+      //       }));
+      //     };
+      //   };
 
-        //unit.supports.forEach(createItem(SupportTarget.unit));
-        //investigation && investigation.supports.forEach(createItem(SupportTarget.investigation));
-        //problem && problem.supports.forEach(createItem(SupportTarget.problem));
-        problem && problem.sections.forEach((section) => {
-          section.supports.forEach(createItem(SupportTarget.section, section.type));
-        });
+      //   //unit.supports.forEach(createItem(SupportTarget.unit));
+      //   //investigation && investigation.supports.forEach(createItem(SupportTarget.investigation));
+      //   //problem && problem.supports.forEach(createItem(SupportTarget.problem));
+      //   problem && problem.sections.forEach((section) => {
+      //     section.supports.forEach(createItem(SupportTarget.section, section.type));
+      //   });
 
-        self.curricularSupports.replace(supports);
+      //   self.curricularSupports.replace(supports);
 
-        if (documents) {
-          addSupportDocumentsToStore({ supports, ...params });
-        }
-      },
+      //   if (documents) {
+      //     addSupportDocumentsToStore({ supports, ...params });
+      //   }
+      // },
 
       addAuthoredSupports(supports: TeacherSupportModelType[], audienceType: AudienceEnum) {
         const currSupports = audienceType === AudienceEnum.class
@@ -344,7 +343,7 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
   let index = 0;
   let lastSection: string | undefined;
   supports && supports.forEach(async (support: UnionSupportModelType) => {
-    // skip sticky notes  // SUPPORT_Q see - we handle sticky notes as exceptions
+    // skip sticky notes
     if ((support.supportType === SupportType.teacher) && support.isStickyNote) {
       return;
     }

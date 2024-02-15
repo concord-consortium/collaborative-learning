@@ -6,8 +6,6 @@ import { ProblemConfiguration } from "../stores/problem-configuration";
 import { ITileEnvironment } from "../tiles/tile-content";
 import { SharedModelDocumentManager } from "../document/shared-model-document-manager";
 
-
-
 const LegacyProblemModel = types
   .model("Problem", {
     ordinal: types.integer,
