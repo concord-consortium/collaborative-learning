@@ -76,7 +76,7 @@ export const useProviderTileLinking = ({
       const getSharedModelTiles = sharedModelManager.getSharedModelTiles(sharedModel).map((m: any)=>m.id);
       console.log("\t getSharedModelTiles:", getSharedModelTiles);
       const getSharedModelTileIds = sharedModelManager.getSharedModelTileIds(sharedModel);
-      console.log("\tgetSharedModelTileIds:", getSharedModelTileIds);
+      console.log("\t getSharedModelTileIds:", getSharedModelTileIds);
 
       logSharedModelDocEvent(LogEventName.GRAPH_TOOL_LINK, model, getSharedModelProviders);
 
@@ -86,9 +86,9 @@ export const useProviderTileLinking = ({
   const unlinkTile = useCallback((sharedModel: SharedModelType) => {
     if (!readOnly && sharedModelManager?.isReady) {
       sharedModelManager.removeTileSharedModel(model.content, sharedModel);
-      console.log("-----UNLINK-------");
+      // console.log("-----UNLINK-------");
       const sharedTiles = sharedModelManager.getSharedModelProviders(sharedModel);//call on getSharedModelProviders
-      console.log("\t🔪 sharedTiles:", sharedTiles);
+      // console.log("\t sharedTiles:", sharedTiles);
 
       logSharedModelDocEvent(LogEventName.GRAPH_TOOL_UNLINK, model, sharedTiles);//call on logger here
 
