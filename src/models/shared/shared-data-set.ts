@@ -5,6 +5,7 @@ import { Required } from "utility-types";
 import { SharedModel, SharedModelType } from "./shared-model";
 import { DataSet, IDataSet, newCaseId } from "../data/data-set";
 import { uniqueId } from "../../utilities/js-utils";
+import escapeStringRegexp from "escape-string-regexp";
 
 export const kSharedDataSetType = "SharedDataSet";
 
@@ -98,4 +99,30 @@ export function updateSharedDataSetSnapshotWithNewTileIds(
   if (sharedDataSetSnapshot.providerId) {
     sharedDataSetSnapshot.providerId = tileIdMap[sharedDataSetSnapshot.providerId];
   }
+}
+
+function flattenedMap(sharedDatasetIds: UpdatedSharedDataSetIds[]) {
+  const map = {} as Record<string, string>;
+  for (const updatedIds of sharedDatasetIds) {
+    if (updatedIds.origDataSetId) {
+      map[updatedIds.origDataSetId] = updatedIds.dataSetId;
+    }
+    for (const [key, val] of Object.entries(updatedIds.attributeIdMap)) {
+      map[key] = val;
+    }
+    for (const [key, val] of Object.entries(updatedIds.caseIdMap)) {
+      map[key] = val;
+    }
+  }
+  return map;
+}
+
+export function replaceJsonStringsWithUpdatedIds(json: unknown, ...sharedDatasetIds: UpdatedSharedDataSetIds[]) {
+  const flatMap = flattenedMap(sharedDatasetIds);
+  const keyPattern = Object.keys(flatMap).map(key => escapeStringRegexp(key)).join("|");
+  const matchRegexp = new RegExp(`\\"(${keyPattern})\\"`, "g");
+  const updated = JSON.stringify(json).replace(matchRegexp, (match, key) => {
+    return `"${flatMap[key]}"`;
+  });
+  return JSON.parse(updated);
 }

@@ -1,10 +1,11 @@
 import {extent, format, select, timeout} from "d3";
 import React from "react";
 import { isInteger} from "lodash";
+import { SnapshotOut } from "mobx-state-tree";
 
 import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
-import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
+import { UpdatedSharedDataSetIds, replaceJsonStringsWithUpdatedIds } from "../../../models/shared/shared-data-set";
 import {
   CaseData, DotSelection, DotsElt, selectGraphDots, selectInnerCircles, selectOuterCircles
 } from "../d3-types";
@@ -23,8 +24,6 @@ import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
 import { GraphModel, IGraphModel } from "../models/graph-model";
 import { isFiniteNumber } from "../../../utilities/math-utils";
-import { SnapshotOut } from "@concord-consortium/mobx-state-tree";
-import escapeStringRegexp from "escape-string-regexp";
 
 /**
  * Utility routines having to do with graph entities
@@ -571,35 +570,7 @@ export function updateGraphContentWithNewSharedModelIds(
   sharedDataSetEntries: PartialSharedModelEntry[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) {
-  console.log("updateGraphContentWithNewSharedModelIds");
-  console.log("sharedDataSetEntries", sharedDataSetEntries.map(x => x.sharedModel.id));
-  console.log("updatedSharedModelMap", updatedSharedModelMap);
-
-  function flattenedMap(updateMaps: Record<string, UpdatedSharedDataSetIds>) {
-    const map = {} as Record<string, string>;
-    for (const updatedIds of Object.values(updateMaps)) {
-      if (updatedIds.origDataSetId) {
-        map[updatedIds.origDataSetId] = updatedIds.dataSetId;
-      }
-      for (const [key,val] of Object.entries(updatedIds.attributeIdMap)) {
-        map[key] = val;
-      }
-      for (const [key,val] of Object.entries(updatedIds.caseIdMap)) {
-        map[key] = val;
-      }
-    }
-    return map;
-  }
-
-  console.log("content before", JSON.stringify(content));
-
-  const flatMap = flattenedMap(updatedSharedModelMap);
-  const keyPattern = Object.keys(flatMap).map(key => escapeStringRegexp(key)).join("|");
-  const matchRegexp = new RegExp(`\\"(${keyPattern})\\"`, "g");
-  const updated = JSON.stringify(content).replace(matchRegexp, (match, key) => {
-    return `"${flatMap[key]}"`;
-  });
-  return JSON.parse(updated);
+  return replaceJsonStringsWithUpdatedIds(content, ...Object.values(updatedSharedModelMap));
 }
 
 export function updateGraphObjectWithNewSharedModelIds(
