@@ -376,7 +376,7 @@ describe("authed logger", () => {
   //     mockXhr.post(/.*/, (req, res) => {
   //       const request = JSON.parse(req.body());
 
-  //       expect(request.event).toBe("GRAPH_TOOL_CHANGE");
+  //       expect(request.event).toBe("GEOMETRY_TOOL_CHANGE");
   //       expect(request.parameters.toolId).toBe(tile.id);
   //       expect(request.parameters.operation).toBe("create");
   //       expect(request.parameters.target).toBe("point");
@@ -386,7 +386,7 @@ describe("authed logger", () => {
   //       return res.status(201);
   //     });
 
-  //     // Logger.logTileChange(LogEventName.GRAPH_TOOL_CHANGE, "create", change, tile.id);
+  //     // Logger.logTileChange(LogEventName.GEOMETRY_TOOL_CHANGE, "create", change, tile.id);
   //   });
   // });
 

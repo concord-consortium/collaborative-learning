@@ -33,6 +33,12 @@ interface IProps {
 export const useProviderTileLinking = ({
   actionHandlers, model, readOnly, sharedModelTypes, allowMultipleGraphDatasets
 }: IProps) => {
+
+  // console.log("📁 use-provider-tile-linking.tsx ------------------------");
+  // console.log("\t🥩 model title:", model.title);
+  // console.log("\t🥩 model:", model);
+  // console.log("\t🥩 allowMultipleGraphDatasets:", allowMultipleGraphDatasets);
+
   const {handleRequestTileLink, handleRequestTileUnlink} = actionHandlers || {};
   const sharedModelManager = getSharedModelManager(model);
   const sharedModels: SharedModelType[] = [];
@@ -48,8 +54,21 @@ export const useProviderTileLinking = ({
     }
   }
 
+  //TODO: find the handler where we hit the button and actually link the two tiles,
+  //we dont necessarily need to account for just logging for tileType = Graph,
+  //we can do it for all tiles - double check with Leslie.
+
   const isLinkEnabled = sharedModels.length > 0;
 
+  // const addTileSharedModel = useCallback((model: any, sharedModel: any, srcTileId: string) => {
+  //   sharedModelManager?.addTileSharedModel(model.content, sharedModel)
+  //   logTheStuff(...)
+  // }, [])
+
+  // const removeTileSharedModel = useCallback(...)
+
+    //TODO: add 2nd arg to 65 and 79 as "selectedTileID," then we know which tile was selected prior.
+  //logging can be moved into here
   const linkTile = useCallback((sharedModel: SharedModelType) => {
     if (!readOnly && sharedModelManager?.isReady) {
       // TODO: this is temporary while we are working on getting Graph to work with multiple datasets
@@ -72,7 +91,6 @@ export const useProviderTileLinking = ({
 
   const onLinkTile = handleRequestTileLink || linkTile;
   const onUnlinkTile = handleRequestTileUnlink || unlinkTile;
-
   const [showLinkTileDialog] =
           useLinkProviderTileDialog({
             sharedModels, model, onLinkTile, onUnlinkTile

@@ -191,6 +191,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleAddTile(tool: IToolbarButtonModel) {
+    // console.log("➡️ handleAddTile");
+    // console.log("\t🥩 tool:", tool);
+
     const { document } = this.props;
     const { ui } = this.stores;
     const tileContentInfo = getTileContentInfo(tool.id);
@@ -198,6 +201,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
     if (ui.annotationMode !== undefined) {
       // If we're currently annotating the document, switch to normal edit mode
+      console.log("annotationMode undefined!");
       ui.setAnnotationMode();
       return;
     }

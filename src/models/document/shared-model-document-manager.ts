@@ -131,7 +131,6 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       console.warn("addTileSharedModel has no document. this will have no effect");
       return;
     }
-
     // add this tile to the sharedModel entry
     const tile = getTileModel(tileContentModel);
     if (!tile) {
@@ -150,6 +149,16 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     if (sharedModelEntry.tiles.includes(tile)) {
       return;
     }
+
+    // console.log("📁 shared-model-document-manager.ts ------------------------");
+    // console.log("\t🥩 isProvider:", isProvider);
+    // console.log("\t🥩 sharedModel:", sharedModel);
+    // console.log("\t🥩 sharedModel.provider:", sharedModel.providerId);
+
+    // console.log("\t🥩 tileContentModel:", tileContentModel);
+    // console.log("----------------------------\n");
+
+
 
     sharedModelEntry.addTile(tile, isProvider);
 
@@ -217,6 +226,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
   }
 
   removeTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void {
+    //TODO UNLINK
     if (!this.document) {
       console.warn("removeTileSharedModel has no document");
       return;

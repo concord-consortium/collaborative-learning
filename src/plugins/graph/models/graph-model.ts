@@ -32,6 +32,10 @@ import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-da
 import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-model";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 import { multiLegendParts } from "../components/legend/legend-registration";
+import { LogEventName } from "../../../lib/logger-types";
+// import { logSharedModelDocEvent } from "src/models/document/log.shared-model-document-event";
+import { logSharedModelDocEvent } from "../../../models/document/log.shared-model-document-event";
+
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -479,6 +483,10 @@ export const GraphModel = TileContentModel
      * @param sharedModel
      */
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+
+      // console.log("📁 graph-model.ts ------------------------");
+      // console.log("➡️ updateAfterSharedModelChanges");
+
       const smm = getSharedModelManager(self);
       if (!smm || !smm.isReady) return;
 
@@ -504,22 +512,49 @@ export const GraphModel = TileContentModel
       // This is a little heavy-handed but does the job.
       const sharedDatasetIds = sharedDataSets.map(m => isSharedDataSet(m) ? m.dataSet.id : undefined);
       const layerDatasetIds = self.layers.map(layer => layer.config.dataset?.id);
+      // console.log("\t🔪 layerDatasetIds:", layerDatasetIds);
+      // console.log("\t🥩 sharedDatasetIds:", sharedDatasetIds);
       const attachedDatasetIds = sharedDatasetIds.filter(id => !layerDatasetIds.includes(id));
+      // console.log("\t🔪 attachedDatasetIds:", attachedDatasetIds);
       const detachedDatasetIds = layerDatasetIds.filter(id => !sharedDatasetIds.includes(id));
+      // console.log("\t🔪 detachedDatasetIds:", detachedDatasetIds);
+      // console.log("--------------------------");
+
 
       // Remove any layers for datasets that have been unlinked from this tile
       if (detachedDatasetIds.length) {
         detachedDatasetIds.forEach((id) => {
           const index = self.layers.findIndex((layer) => layer.config.dataset?.id === id);
           if (index > 0 || self.layers.length > 1) {
+            // console.log("\tat least 1 linked dataSet, then unlink  -1!");
+
             self.layers.splice(index, 1);
           } else if (index === 0) {
+            // console.log("has 1 linked dataSet, then unlink  -1!");
+
             // Unlink last remaining layer, don't remove it.
             self.layers[0].setDataset(undefined, undefined);
             self.layers[0].configureUnlinkedLayer();
             self.layers[0].updateAdornments();
           } else {
             console.warn('Failed to find layer with dataset id ', id);
+          }
+          if (detachedDatasetIds[0]){
+            // console.log("\tinside forEach with id:", id);
+
+            //TODO UNLINK
+
+            // tile id
+            // tile type
+            // shared model id
+            // shared model type
+            //
+            // console.log("----------------------------");
+            if (id){
+              logSharedModelDocEvent(LogEventName.GRAPH_TOOL_UNLINK, self, smm, id);
+            }
+            // console.log("\tLOGGER:", LogEventName.GRAPH_TOOL_UNLINK, "unlinked dataset:", id);
+            // console.log("smm:", smm);
           }
         });
       }
@@ -553,8 +588,15 @@ export const GraphModel = TileContentModel
                 self.layers[0].setDataset(dataSetModel.dataSet, metaDataModel);
                 self.layers[0].configureLinkedLayer();
                 self.layers[0].updateAdornments();
+
+                // console.log("inside a for Each where newModelId:", newModelId);
+                // console.log("start with 0 linked dataSets, then linked + 1!");
               } else {
                 const newLayer = GraphLayerModel.create();
+                // console.log("inside a for Each where newModelId:", newModelId);
+                // console.log("at least 1 linked dataSet, then linked + 1!");
+
+
                 self.layers.push(newLayer);
                 const dataConfig = DataConfigurationModel.create();
                 newLayer.setDataConfiguration(dataConfig);
@@ -563,6 +605,13 @@ export const GraphModel = TileContentModel
                 // May need these when we want to actually display the new layer:
                 // newLayer.updateAdornments(true);
                 // newLayer.setDataSetListener();
+              }
+              //TODO LINK
+              // console.log("---------------------------\n");
+              // console.log(self.type);
+              if (newModelId){
+                console.log("smm options?", smm.getSharedModelTileIds);
+                logSharedModelDocEvent(LogEventName.GRAPH_TOOL_LINK, self, smm, newModelId);
               }
             } else {
               console.warn('| Metadata not found');
@@ -615,7 +664,7 @@ export const GraphModel = TileContentModel
           const sds = sharedDataSets[0];
           if (isSharedDataSet(sds)) {
             self.layers[0].config.dataset = sds.dataSet;
-            console.log('Updated legacy document - set dataset reference');
+            // console.log('Updated legacy document - set dataset reference');
           }
         }
         const sharedMetadata = smm.getTileSharedModelsByType(self, SharedCaseMetadata);
@@ -623,7 +672,7 @@ export const GraphModel = TileContentModel
           const smd = sharedMetadata[0];
           if (isSharedCaseMetadata(smd)) {
             self.layers[0].config.metadata = smd;
-            console.log('Updated legacy document - set metadata reference');
+            // console.log('Updated legacy document - set metadata reference');
           }
         }
       } else {
