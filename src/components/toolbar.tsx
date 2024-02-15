@@ -198,7 +198,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
     if (ui.annotationMode !== undefined) {
       // If we're currently annotating the document, switch to normal edit mode
-      console.log("annotationMode undefined!");
       ui.setAnnotationMode();
       return;
     }
