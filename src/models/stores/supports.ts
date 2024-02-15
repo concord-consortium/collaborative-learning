@@ -179,11 +179,20 @@ export const SupportsModel = types
     }
   }))
   .views((self) => ({
+    // standard supports (as opposed to sticky notes)
+    get teacherSupports() {
+      return self.allTeacherSupports.filter((support) => support.isTeacherSupport);
+    },
     get teacherStickyNotes() {
       return self.allTeacherSupports.filter((support) => support.isStickyNote);
     }
   }))
   .views((self) => ({
+    getTeacherSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
+      return self.teacherSupports.filter(support => {
+        return support.showForUserProblem(target);
+      });
+    },
     getStickyNotesForUserProblem(target: ISupportTarget): SupportItemModelType[] {
       return self.teacherStickyNotes.filter(support => {
         return support.showForUserProblem(target);
@@ -196,7 +205,15 @@ export const SupportsModel = types
       .concat(self.classSupports)
       .concat(self.groupSupports)
       .concat(self.userSupports);
-    }
+    },
+
+    getSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
+      const { sectionId } = target;
+      const supports: SupportItemModelType[] = self.curricularSupports.filter((support) => {
+        return sectionId ? support.sectionId === sectionId : true;
+      });
+      return supports.concat(self.getTeacherSupportsForUserProblem(target));
+  }
   }))
   .views((self) => ({
     hasNewStickyNotes(afterTimestamp?: number) {
