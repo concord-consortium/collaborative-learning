@@ -4,6 +4,8 @@ import { useLinkProviderTileDialog } from "./use-link-provider-tile-dialog";
 import { isGraphModel } from "../plugins/graph/models/graph-model";
 import { getSharedModelManager } from "../models/tiles/tile-environment";
 import { SharedModelType } from "../models/shared/shared-model";
+import { LogEventName } from "../../src/lib/logger-types";
+import { logSharedModelDocEvent } from "../models/document/log-shared-model-document-event";
 
 interface IProps {
   actionHandlers?: any;
@@ -33,12 +35,6 @@ interface IProps {
 export const useProviderTileLinking = ({
   actionHandlers, model, readOnly, sharedModelTypes, allowMultipleGraphDatasets
 }: IProps) => {
-
-  // console.log("📁 use-provider-tile-linking.tsx ------------------------");
-  // console.log("\t🥩 model title:", model.title);
-  // console.log("\t🥩 model:", model);
-  // console.log("\t🥩 allowMultipleGraphDatasets:", allowMultipleGraphDatasets);
-
   const {handleRequestTileLink, handleRequestTileUnlink} = actionHandlers || {};
   const sharedModelManager = getSharedModelManager(model);
   const sharedModels: SharedModelType[] = [];
@@ -54,21 +50,8 @@ export const useProviderTileLinking = ({
     }
   }
 
-  //TODO: find the handler where we hit the button and actually link the two tiles,
-  //we dont necessarily need to account for just logging for tileType = Graph,
-  //we can do it for all tiles - double check with Leslie.
-
   const isLinkEnabled = sharedModels.length > 0;
 
-  // const addTileSharedModel = useCallback((model: any, sharedModel: any, srcTileId: string) => {
-  //   sharedModelManager?.addTileSharedModel(model.content, sharedModel)
-  //   logTheStuff(...)
-  // }, [])
-
-  // const removeTileSharedModel = useCallback(...)
-
-    //TODO: add 2nd arg to 65 and 79 as "selectedTileID," then we know which tile was selected prior.
-  //logging can be moved into here
   const linkTile = useCallback((sharedModel: SharedModelType) => {
     if (!readOnly && sharedModelManager?.isReady) {
       // TODO: this is temporary while we are working on getting Graph to work with multiple datasets
@@ -79,13 +62,26 @@ export const useProviderTileLinking = ({
           sharedModelManager.removeTileSharedModel(model.content, shared);
         }
       }
+      console.log("model:", model);
+      //Log linking of a sharedModel's dataset, determine which tiles is connected to the dataset
+      //Currently implemented for Graph Tile and Geometry Tiles since both call on useProviderTileLinking
+      //Determine the tiles that are connected to tthe sharedModel's dataset then log
+      const sharedTiles = sharedModelManager.getSharedModelProviders(sharedModel);
+      logSharedModelDocEvent(LogEventName.GRAPH_TOOL_LINK, model, sharedTiles);
+
+      // console.log("sharedTiles:", sharedTiles);
       sharedModelManager.addTileSharedModel(model.content, sharedModel);
+      //call on logger here in logshared-model-document
+
     }
-  }, [readOnly, sharedModelManager, model.content, allowMultipleGraphDatasets]);
+  }, [readOnly, sharedModelManager, model, allowMultipleGraphDatasets]);
 
   const unlinkTile = useCallback((sharedModel: SharedModelType) => {
     if (!readOnly && sharedModelManager?.isReady) {
       sharedModelManager.removeTileSharedModel(model.content, sharedModel);
+      //call on getSharedModelProviders
+      //call on logger here
+
     }
   }, [readOnly, sharedModelManager, model.content]);
 

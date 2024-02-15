@@ -37,6 +37,9 @@ const makeSharedModelManager = ( dataSet?: SharedDataSetType): ISharedModelManag
   let sharedDataSet = dataSet;
   return {
     isReady: true,
+    getSharedModelProviders(model: SharedModelType){
+      return [];
+    },
     findFirstSharedModelByType<IT extends IAnyType>(sharedModelType: IT): IT["Type"] | undefined {
       return sharedDataSet;
     },

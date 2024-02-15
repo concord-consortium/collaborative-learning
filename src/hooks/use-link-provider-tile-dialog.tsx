@@ -63,13 +63,21 @@ export const useLinkProviderTileDialog = ({
   const tileTitle = model.computedTitle;
   const [selectValue, setSelectValue] = useState("");
   const selectedModel = sharedModels.find(m => m.id === selectValue);
+
+  // console.log("📁 use-link-provider-tile-dialog.tsx ------------------------");
+  // console.log("\t tileTitle:", tileTitle);
+  // console.log("\t🥩 selectedModel:", selectedModel);
+
   const sharedModelManager = getSharedModelManager(model);
   const currentTileModels = (sharedModelManager?.isReady) ? sharedModelManager.getTileSharedModels(model.content) : [];
   const linkedSharedModels   = sharedModels.filter(m => currentTileModels.includes(m));
   const unlinkedSharedModels = sharedModels.filter(m => !currentTileModels.includes(m));
-
+  //send the sharedModelType to getSharedModelProviders to get the tile
+  //handle case of zero length array, 1 element, multiple elements -
   const handleClick = () => {
     const chosen = sharedModels.find(m => m.id === selectValue);
+    // console.log("chosen:", chosen);
+    //TODO: here is where you send the selectedTileId?
     if (chosen) {
       if (linkedSharedModels.includes(chosen)) {
         onUnlinkTile?.(chosen);

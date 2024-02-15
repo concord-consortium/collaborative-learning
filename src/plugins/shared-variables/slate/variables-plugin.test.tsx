@@ -31,6 +31,9 @@ const TestTextContentModelContainer = types.model("TestTileContentModelContainer
 const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelManager => {
   return {
     isReady: true,
+    getSharedModelProviders(model: SharedModelType){
+      return [];
+    },
     getSharedModelLabel(model: SharedModelType) {
       return model.id;
     },

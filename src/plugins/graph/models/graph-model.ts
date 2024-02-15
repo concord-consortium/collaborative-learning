@@ -32,9 +32,7 @@ import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-da
 import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-model";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 import { multiLegendParts } from "../components/legend/legend-registration";
-import { LogEventName } from "../../../lib/logger-types";
 // import { logSharedModelDocEvent } from "src/models/document/log.shared-model-document-event";
-import { logSharedModelDocEvent } from "../../../models/document/log.shared-model-document-event";
 
 
 export interface GraphProperties {
@@ -543,15 +541,8 @@ export const GraphModel = TileContentModel
             // console.log("\tinside forEach with id:", id);
 
             //TODO UNLINK
-
-            // tile id
-            // tile type
-            // shared model id
-            // shared model type
-            //
-            // console.log("----------------------------");
             if (id){
-              logSharedModelDocEvent(LogEventName.GRAPH_TOOL_UNLINK, self, smm, id);
+              // logSharedModelDocEvent(LogEventName.GRAPH_TOOL_UNLINK, self, smm, id);
             }
             // console.log("\tLOGGER:", LogEventName.GRAPH_TOOL_UNLINK, "unlinked dataset:", id);
             // console.log("smm:", smm);
@@ -610,8 +601,7 @@ export const GraphModel = TileContentModel
               // console.log("---------------------------\n");
               // console.log(self.type);
               if (newModelId){
-                console.log("smm options?", smm.getSharedModelTileIds);
-                logSharedModelDocEvent(LogEventName.GRAPH_TOOL_LINK, self, smm, newModelId);
+                // console.log("smm options?", smm.getSharedModelTileIds);
               }
             } else {
               console.warn('| Metadata not found');
