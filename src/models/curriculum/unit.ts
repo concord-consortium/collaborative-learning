@@ -9,7 +9,7 @@ import {
   registerSectionInfo, suspendSectionContentParsing, resumeSectionContentParsing
 } from "./section";
 import { ProblemModelType } from "./problem";
-import { resumeSupportContentParsing, suspendSupportContentParsing } from "./support";
+import { SupportModel, resumeSupportContentParsing, suspendSupportContentParsing } from "./support";
 import { StampModel } from "../../plugins/drawing/model/stamp";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { NavTabsConfigModel } from "../stores/nav-tabs";
@@ -46,7 +46,7 @@ const LegacyUnitModel = types
     planningDocument: types.maybe(PlanningDocumentConfigModel),
     lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel),
-    //supports: types.array(SupportModel),
+    supports: types.array(SupportModel),
     defaultStamps: types.array(StampModel),
     settings: types.maybe(SettingsMstType),
     navTabs: types.maybe(NavTabsConfigModel),
@@ -63,7 +63,6 @@ const ModernUnitModel = types
     planningDocument: types.maybe(PlanningDocumentConfigModel),
     lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel),
-    //supports: types.array(SupportModel),
     config: types.maybe(types.frozen<Partial<UnitConfiguration>>())
   })
   .volatile(self => ({

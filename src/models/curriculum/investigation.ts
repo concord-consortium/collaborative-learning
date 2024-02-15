@@ -3,6 +3,7 @@ import { DocumentContentModel } from "../document/document-content";
 import { ProblemModel } from "./problem";
 import { ProblemConfiguration } from "../stores/problem-configuration";
 import { SettingsMstType } from "../stores/settings";
+import { SupportModel } from "./support";
 
 const LegacyInvestigationModel = types
   .model("Investigation", {
@@ -12,7 +13,7 @@ const LegacyInvestigationModel = types
     introduction: types.maybe(DocumentContentModel),
     problems: types.array(ProblemModel),
     reflections: types.maybe(DocumentContentModel),
-    //supports: types.array(SupportModel),
+    supports: types.array(SupportModel),
     settings: types.maybe(SettingsMstType)
   });
 
@@ -23,7 +24,6 @@ const ModernInvestigationModel = types
     introduction: types.maybe(DocumentContentModel),
     problems: types.array(ProblemModel),
     reflections: types.maybe(DocumentContentModel),
-    //supports: types.array(SupportModel),
     config: types.maybe(types.frozen<Partial<ProblemConfiguration>>())
   })
   .views(self => {

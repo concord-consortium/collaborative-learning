@@ -181,19 +181,19 @@ export const SupportsModel = types
   }))
   .views((self) => ({
     // standard supports (as opposed to sticky notes)
-    get teacherSupports() {
-      return self.allTeacherSupports.filter((support) => support.isTeacherSupport);
-    },
+    // get teacherSupports() {
+    //   return self.allTeacherSupports.filter((support) => support.isTeacherSupport);
+    // },
     get teacherStickyNotes() {
       return self.allTeacherSupports.filter((support) => support.isStickyNote);
     }
   }))
   .views((self) => ({
-    getTeacherSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
-      return self.teacherSupports.filter(support => {
-        return support.showForUserProblem(target);
-      });
-    },
+    // getTeacherSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
+    //   return self.teacherSupports.filter(support => {
+    //     return support.showForUserProblem(target);
+    //   });
+    // },
     getStickyNotesForUserProblem(target: ISupportTarget): SupportItemModelType[] {
       return self.teacherStickyNotes.filter(support => {
         return support.showForUserProblem(target);
@@ -208,18 +208,18 @@ export const SupportsModel = types
         .concat(self.userSupports);
     },
 
-    getSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
-        const { sectionId } = target;
-        const supports: SupportItemModelType[] = self.curricularSupports.filter((support) => {
-          return sectionId ? support.sectionId === sectionId : true;
-        });
-        return supports.concat(self.getTeacherSupportsForUserProblem(target));
-    }
+    // getSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
+    //     const { sectionId } = target;
+    //     const supports: SupportItemModelType[] = self.curricularSupports.filter((support) => {
+    //       return sectionId ? support.sectionId === sectionId : true;
+    //     });
+    //     return supports.concat(self.getTeacherSupportsForUserProblem(target));
+    // }
   }))
   .views((self) => ({
-    hasNewTeacherSupports(afterTimestamp?: number) {
-      return hasNewTeacherSupports(self.teacherSupports, afterTimestamp);
-    },
+    // hasNewTeacherSupports(afterTimestamp?: number) {
+    //   return hasNewTeacherSupports(self.teacherSupports, afterTimestamp);
+    // },
     hasNewStickyNotes(afterTimestamp?: number) {
       return hasNewTeacherSupports(self.teacherStickyNotes, afterTimestamp);
     }
@@ -344,7 +344,7 @@ export function addSupportDocumentsToStore(params: ICreateFromUnitParams) {
   let index = 0;
   let lastSection: string | undefined;
   supports && supports.forEach(async (support: UnionSupportModelType) => {
-    // skip sticky notes
+    // skip sticky notes  // SUPPORT_Q see - we handle sticky notes as exceptions
     if ((support.supportType === SupportType.teacher) && support.isStickyNote) {
       return;
     }
