@@ -220,7 +220,6 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
   }
 
   removeTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void {
-    //TODO UNLINK
     if (!this.document) {
       console.warn("removeTileSharedModel has no document");
       return;

@@ -67,18 +67,20 @@ export const useProviderTileLinking = ({
       //Log linking of a sharedModel's dataset, determine which tiles is connected to the dataset
       //Currently implemented for Graph Tile and Geometry Tiles since both call on useProviderTileLinking
       //Determine the tiles that are connected to tthe sharedModel's dataset then log
+
+
       sharedModelManager.addTileSharedModel(model.content, sharedModel);
 
       //TODO: change getSharedModelProviders to sharedTiles?
-      const getSharedModelProviders = sharedModelManager.getSharedModelProviders(sharedModel);
+      const sharedTiles = sharedModelManager.getSharedModelProviders(sharedModel);
 
-      console.log("\t getSharedModelProviders:", getSharedModelProviders);
+      console.log("\t getSharedModelProviders:", sharedTiles);
       const getSharedModelTiles = sharedModelManager.getSharedModelTiles(sharedModel).map((m: any)=>m.id);
       console.log("\t getSharedModelTiles:", getSharedModelTiles);
       const getSharedModelTileIds = sharedModelManager.getSharedModelTileIds(sharedModel);
       console.log("\t getSharedModelTileIds:", getSharedModelTileIds);
 
-      logSharedModelDocEvent(LogEventName.GRAPH_TOOL_LINK, model, getSharedModelProviders);
+      logSharedModelDocEvent(LogEventName.GRAPH_TOOL_LINK, model, sharedTiles);
 
     }
   }, [readOnly, sharedModelManager, model, allowMultipleGraphDatasets]);
