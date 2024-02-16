@@ -29,7 +29,6 @@ const ModernProblemModel = types
      * with all of the other sections in this problem, or this problem's unit
      */
     loadedSections: types.frozen<SectionModelSnapshot[]>(),
-    supports: types.array(SupportModel),
     config: types.maybe(types.frozen<Partial<ProblemConfiguration>>())
   })
   .views(self => ({

@@ -63,7 +63,6 @@ const ModernUnitModel = types
     planningDocument: types.maybe(PlanningDocumentConfigModel),
     lookingAhead: types.maybe(DocumentContentModel),
     investigations: types.array(InvestigationModel),
-    supports: types.array(SupportModel),
     config: types.maybe(types.frozen<Partial<UnitConfiguration>>())
   })
   .volatile(self => ({
