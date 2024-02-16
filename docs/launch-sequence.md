@@ -146,7 +146,7 @@ flowchart TD
 Version without Loading Event boxes:
 
 ```mermaid
-flowchart TD
+flowchart TB
   req(Browser requests index.html)
   req --> parse
 
@@ -183,6 +183,7 @@ flowchart TD
 
   component --> auth
   component --> renderApp
+  renderApp(RenderApp)
 
   %%subgraph connecting [LE: Connecting]
     subgraph auth [AuthAndConnect]
@@ -244,7 +245,7 @@ flowchart TD
   sup --> sup2
 
 %%  subgraph joiningGroup [LE: Joining group]
-  renderGroupChooser
+  renderGroupChooser(Render group chooser)
   renderApp --> renderGroupChooser
   finish --> renderGroupChooser
 
