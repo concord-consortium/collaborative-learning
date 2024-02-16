@@ -1,11 +1,11 @@
 import { getType, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
 import { Required } from "utility-types";
+import escapeStringRegexp from "escape-string-regexp";
 
 import { SharedModel, SharedModelType } from "./shared-model";
 import { DataSet, IDataSet, newCaseId } from "../data/data-set";
 import { uniqueId } from "../../utilities/js-utils";
-import escapeStringRegexp from "escape-string-regexp";
 
 export const kSharedDataSetType = "SharedDataSet";
 
