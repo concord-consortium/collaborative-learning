@@ -251,8 +251,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="actions right" data-test="document-titlebar-actions">
             {downloadButton}
             {show4up && this.renderMode()}
-            {!isTeacher &&
-              <ShareButton isShared={isShared} onClick={this.handleToggleVisibility} />}
+            <ShareButton isShared={isShared} onClick={this.handleToggleVisibility} />
           </div>
         }
       </div>
