@@ -70,11 +70,10 @@ export function useDocumentSyncToFirebase(
     enabled: commonSyncEnabled && !readOnly && (type === ProblemDocument),
     options: {
       onSuccess: (data, visibility) => {
-        console.log("| SYNC problem visibility", visibility);
         debugLog(`DEBUG: Updated document visibility for ${type} document ${key}:`, visibility);
       },
       onError: (err, visibility) => {
-        console.warn(`| ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
+        console.warn(`ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
       }
     }
   });
@@ -85,11 +84,10 @@ export function useDocumentSyncToFirebase(
     enabled: commonSyncEnabled && !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
     options: {
       onSuccess: (data, visibility) => {
-        console.log("| SYNC personal/learning visibility", visibility);
         debugLog(`DEBUG: Updated document visibility for ${type} document ${key}:`, visibility);
       },
       onError: (err, visibility) => {
-        console.warn(`| ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
+        console.warn(`ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
       }
     }
   });
