@@ -16,8 +16,7 @@ describe("problem model", () => {
       ordinal: 1,
       title: "test",
       subtitle: "",
-      loadedSections: [],
-      supports: []
+      loadedSections: []
     });
     expect(problem.fullTitle).toBe("test");
   });
@@ -49,7 +48,6 @@ describe("problem model", () => {
           type: "initialChallenge",
         }
       ],
-      supports: [],
       config: {}
     });
     expect(problem.fullTitle).toBe("test: sub");
@@ -209,7 +207,6 @@ describe("problem model", () => {
       title: "Test",
       subtitle: "",
       loadedSections: [],
-      supports: [],
       config: {
         disabledFeatures: ["foo"],
         settings: { foo: "bar" }
@@ -231,7 +228,6 @@ describe("problem model", () => {
       title: "Test",
       subtitle: "",
       loadedSections: [],
-      supports: [],
       config: {
         disabledFeatures: ["foo"],
         settings: { foo: "bar" }
@@ -255,7 +251,6 @@ describe("problem model", () => {
       title: "Test",
       subtitle: "",
       loadedSections: [],
-      supports: [],
       config: {
         disabledFeatures: ["foo"],
         settings: { foo: "bar" }
