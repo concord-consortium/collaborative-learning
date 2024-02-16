@@ -492,7 +492,7 @@ export const BaseDocumentContentModel = types
       const row = TileRowModel.create({});
       self.insertRow(row, o.rowIndex);
 
-      const id = o.tileId || self.getNextTileId(content.type!);
+      const id = o.tileId;
       const tileSnapshot = { id, title, content };
       const tileModel = self.tileMap.put(tileSnapshot);
       row.insertTileInRow(tileModel);
