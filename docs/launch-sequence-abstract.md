@@ -17,6 +17,7 @@ flowchart TD
   load -. if student .-> unit
 
   oauth(OAuth2 redirect and restart)
+  oauth -.-> req
 
   jwts(Get JWTs for portal and firebase)
   jwts --> portal

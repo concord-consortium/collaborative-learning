@@ -28,7 +28,8 @@ flowchart TD
       cs(Create stores)
     end
 
-    initapp --> component("Create app component")
+    component("Create app component")
+    initapp --> component
 
   end
 
@@ -147,7 +148,7 @@ Version without Loading Event boxes:
 ```mermaid
 flowchart TD
   req(Browser requests index.html)
-  req --> load
+  req --> parse
 
 %%  subgraph load [LE: Loading the application]
   parse(Load and parse core Javascript)
@@ -158,12 +159,14 @@ flowchart TD
   indextsx("Runs React (index.tsx)")
   indextsx --> ia
   ia("initializeAuthorization (OAuth2)")
-  ia -.-> restart{{may redirect}}
+  restart{{may redirect}}
+  ia -.-> restart
   ia --> cs
 %%  subgraph initapp [Initialize app]
   cs(Create stores)
 
-  cs --> component("Create app component")
+  component("Create app component")
+  cs --> component
 
   cs --> sup
   subgraph sup [Set unit and problem]
@@ -173,9 +176,9 @@ flowchart TD
     unit --> tiles
 %%    subgraph settingUpCurriculumContent [LE: Setting up curriculum content]
 %%      subgraph loadingTileTypes [LE: Loading tile types]
-        tiles(Register tile types)
-      configStores(Configure some stores)
-      tiles --> configStores
+    tiles(Register tile types)
+    configStores(Configure some stores)
+    tiles --> configStores
   end
 
   component --> auth
@@ -215,17 +218,17 @@ flowchart TD
             lgroup(Latest group)
             group(Groups)
             prob(Problem docs)
-            pers(Personal docs )
-            ll(Learning logs )
-            pub(Publication )
-            spd(Student personal docs )
-            supl(Supports )
+            pers(Personal docs)
+            ll(Learning logs)
+            pub(Publication)
+            spd(Student personal docs)
+            supl(Supports)
             lgroup --> group & prob & pers & ll & pub & spd & supl --> next
             next(First batch done)
 
-            com(Comments )
-            bm(Bookmarks )
-            dc(Documents content )
+            com(Comments)
+            bm(Bookmarks)
+            dc(Documents content)
             next --> com & bm & dc --> finish
             finish(All listeners done)
           end
