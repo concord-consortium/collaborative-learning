@@ -10,7 +10,6 @@ import { DemoCreatorComponent } from "./demo/demo-creator";
 import { GroupChooserComponent } from "./group/group-chooser";
 import { IStores } from "../models/stores/stores";
 import { isDifferentUnitAndProblem } from "../models/curriculum/unit";
-import { updateProblem } from "../lib/misc";
 import ErrorAlert from "./utilities/error-alert";
 import { getCurrentLoadingMessage, removeLoadingMessage, showLoadingMessage } from "../utilities/loading-utils";
 
@@ -22,26 +21,6 @@ interface IProps extends IBaseProps {}
 interface IState {
   qaCleared: boolean;
   qaClearError?: string;
-}
-
-function initRollbar(stores: IStores, problemId: string) {
-  const {user, unit, appVersion} = stores;
-  if (typeof (window as any).Rollbar !== "undefined") {
-    const _Rollbar = (window as any).Rollbar;
-    if (_Rollbar.configure) {
-      const config = { payload: {
-              class: user.classHash,
-              offering: user.offeringId,
-              person: { id: user.id },
-              problemId: problemId || "",
-              problem: stores.problem.title,
-              role: user.type,
-              unit: unit.title,
-              version: appVersion
-            }};
-      _Rollbar.configure(config);
-    }
-  }
 }
 
 function resolveAppMode(
@@ -101,17 +80,14 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
         stores.class.updateFromPortal(classInfo);
       }
 
-      stores.unitLoadedPromise.then(async () => {
-        if (unitCode && problemId && isDifferentUnitAndProblem(stores, unitCode, problemId)) {
-          // This comes into play when CLUE is launched as a teacher from the portal.
-          // In that case the unit isn't known until after CLUE has got the offering information
-          // from the portal.
-          await stores.setUnitAndProblem(unitCode, problemId).then( () => {
-            updateProblem(stores, problemId);
-          });
-        }
-        initRollbar(stores, problemId || stores.appConfig.defaultProblemOrdinal);
-      });
+      if (unitCode && problemId && isDifferentUnitAndProblem(stores, unitCode, problemId)) {
+        // This comes into play when CLUE is launched as a teacher from the portal.
+        // In that case the unit isn't known until after CLUE has got the offering information
+        // from the portal.
+        // loadUnitAndProblem is asynchronous.
+        // Code that requires the unit and problem to be loaded should wait on `stores.problemLoadedPromise`
+        stores.loadUnitAndProblem(unitCode, problemId);
+      }
       return resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
     })
     .then(() => {
@@ -184,6 +160,11 @@ export class AppComponent extends BaseComponent<IProps, IState> {
       return this.renderApp(this.renderError(ui.error));
     }
 
+    // The slowest part is the !db.listeners.isListening
+    // That can't happen until the curriculum is loaded
+    // This could be optimized by rendering a shell of the app that has
+    // "loading" scattered around. For example the problem menu could say loading
+    // just waiting for the user authentication
     if (!user.authenticated || !db.listeners.isListening) {
       return this.renderApp(this.renderLoading());
     }

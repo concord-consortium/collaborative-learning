@@ -8,7 +8,6 @@ import { ModalProvider } from "@concord-consortium/react-modal-hook";
 import { QueryClient, QueryClientProvider } from "react-query";
 
 import { AppMode } from "./models/stores/store-types";
-import { Logger } from "./lib/logger";
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";
 import { AppConfigContext } from "./app-config-context";
 import { AppConfigModel } from "./models/stores/app-config-model";
@@ -43,8 +42,6 @@ export const initializeApp = async (appMode: AppMode, authoring?: boolean): Prom
 
   const user = UserModel.create();
 
-  const unitId = urlParams.unit || appConfigSnapshot.defaultUnit;
-  const problemOrdinal = urlParams.problem || appConfigSnapshot.config.defaultProblemOrdinal;
   const showDemoCreator = urlParams.demo;
   const demoName = urlParams.demoName;
 
@@ -56,16 +53,27 @@ export const initializeApp = async (appMode: AppMode, authoring?: boolean): Prom
     (window as any).stores = stores;
   }
 
-  // Start setUnitAndProblem asynchronously.
-  // The promise that it returns is saved in `stores.unitLoadedPromise` and blocks
-  // various dependent operations, but the bulk of the initialization code can continue
-  // while that unit information is loaded, including getting the persistentUI loaded as
-  // soon as possible so we only render what we need.
-  stores.unitLoadedPromise = stores.setUnitAndProblem(unitId, problemOrdinal);
-  stores.unitLoadedPromise.then(() => {
-    // The logger will only be enabled if the appMode is "authed", or DEBUG_LOGGER is true
-    Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
-  });
+
+  // Only load the unit here if we have a unit param or we are not launched from the portal.
+  // If we are launched from the portal and we don't have a unit param, then the unit
+  // will be figured out later on.
+
+  // FIXME: since we are now only using the default unit if we are not launched from the portal.
+  // It is possible there are some portal links for students that don't include a unit
+  // so this change would break these resources.
+  // TODO: A better approach than this would be to never use a default unit
+  // Then this check would just look at the unit param.
+  if (urlParams.unit || appMode !== "authed") {
+    const unitId = urlParams.unit || appConfigSnapshot.defaultUnit;
+    const problemOrdinal = urlParams.problem || appConfigSnapshot.config.defaultProblemOrdinal;
+
+    // Start setUnitAndProblem asynchronously. The bulk of the initialization code can continue
+    // while that unit information is loaded, including getting the persistentUI loaded as
+    // soon as possible so we only render what we need.
+    // Code that requires the unit and problem to be loaded should wait on `stores.problemLoadedPromise`
+    // This promise will resolve when the problem has been loaded.
+    stores.loadUnitAndProblem(unitId, problemOrdinal);
+  }
 
   gImageMap.initialize(stores.db);
 

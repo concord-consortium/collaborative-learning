@@ -32,7 +32,7 @@ export class DocumentEditor extends React.Component<IProps, IState>  {
     this.state = {};
 
     // Need wait for the unit to be loaded to safely render the components
-    initializeAppPromise.then((stores) => stores.unitLoadedPromise
+    initializeAppPromise.then((stores) => stores.problemLoadedPromise
       .then(() => {
         const { initialValue } = this.props;
         const { appConfig } = stores;

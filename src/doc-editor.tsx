@@ -10,7 +10,7 @@ import { AppProvider, initializeApp } from "./initialize-app";
 
 initializeApp(urlParams.appMode || "dev", true)
   // Need wait for the unit to be loaded to safely render the components
-  .then((stores) => stores.unitLoadedPromise
+  .then((stores) => stores.problemLoadedPromise
     .then(() => {
       ReactDOM.render(
         <AppProvider stores={stores} modalAppElement="#app">
