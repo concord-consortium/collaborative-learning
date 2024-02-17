@@ -23,16 +23,15 @@ if (!redirectingToAuthDomain) {
       document.getElementById("app")
     );
   } else {
-    initializeApp(appMode).then((stores) => {
-      stores.ui.setShowDemoCreator(!!stores.showDemoCreator);
+    const stores = initializeApp(appMode);
+    stores.ui.setShowDemoCreator(!!stores.showDemoCreator);
 
-      ReactDOM.render(
-        <AppProvider stores={stores} modalAppElement="#app">
-          <AppComponent />
-        </AppProvider>,
-        document.getElementById("app")
-      );
-      removeLoadingMessage("Initializing");
-    });
+    ReactDOM.render(
+      <AppProvider stores={stores} modalAppElement="#app">
+        <AppComponent />
+      </AppProvider>,
+      document.getElementById("app")
+    );
+    removeLoadingMessage("Initializing");
   }
 }

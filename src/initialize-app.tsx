@@ -37,7 +37,7 @@ const kEnableLivelinessChecking = false;
  * @param appMode
  * @returns
  */
-export const initializeApp = async (appMode: AppMode, authoring?: boolean): Promise<IStores> => {
+export const initializeApp = (appMode: AppMode, authoring?: boolean): IStores => {
   const appVersion = PackageJson.version;
 
   const user = UserModel.create();
@@ -67,10 +67,10 @@ export const initializeApp = async (appMode: AppMode, authoring?: boolean): Prom
     const unitId = urlParams.unit || appConfigSnapshot.defaultUnit;
     const problemOrdinal = urlParams.problem || appConfigSnapshot.config.defaultProblemOrdinal;
 
-    // Start setUnitAndProblem asynchronously. The bulk of the initialization code can continue
+    // Run loadUnitAndProblem asynchronously. The bulk of the initialization code can continue
     // while that unit information is loaded, including getting the persistentUI loaded as
     // soon as possible so we only render what we need.
-    // Code that requires the unit and problem to be loaded should wait on `stores.problemLoadedPromise`
+    // Code that requires the unit and problem to be loaded should wait on `stores.unitLoadedPromise`
     // This promise will resolve when the problem has been loaded.
     stores.loadUnitAndProblem(unitId, problemOrdinal);
   }

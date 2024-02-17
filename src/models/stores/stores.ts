@@ -39,7 +39,7 @@ export interface IStores extends IBaseStores {
   initializeStudentWorkTab: () => void;
   loadUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
   sortedDocuments: SortedDocuments;
-  problemLoadedPromise: Promise<void>;
+  unitLoadedPromise: Promise<void>;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -79,7 +79,7 @@ class Stores implements IStores{
   serialDevice: SerialDevice;
   userContextProvider: UserContextProvider;
   sortedDocuments: SortedDocuments;
-  problemLoadedPromise: Promise<void>;
+  unitLoadedPromise: Promise<void>;
 
   constructor(params?: ICreateStores){
     // This will mark all properties as observable
@@ -95,15 +95,14 @@ class Stores implements IStores{
     this.appConfig = params?.appConfig || AppConfigModel.create();
 
     // To keep the code simple, we create a null unit, investigation, and problem if they aren't provided.
-    // Code that needs the real unit, investigation, or problem should wait on
-    // the `problemLoadedPromise`.
-    this.unit = params?.unit || UnitModel.create({code: "NULL", title: "Null Unit"});
+    // Code that needs the real unit should wait on the `unitLoadedPromise`.
+    // CHECKME: do we ever pass the unit?
+    // If we do, then the unitLoadedPromise will resolve immediately
+    const defaultUnit = UnitModel.create({code: "NULL", title: "Null Unit"});
+    this.unit = params?.unit || defaultUnit;
     this.investigation = params?.investigation ||
       InvestigationModel.create({ ordinal: 0, title: "Null Investigation" });
-    const defaultProblem = ProblemModel.create({ ordinal: 0, title: "Null Problem" });
-    // CHECKME: do we ever pass the problem?
-    // If we do, then the problemLoadedPromise will resolve immediately
-    this.problem = params?.problem || defaultProblem;
+    this.problem = params?.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" });
 
     this.user = params?.user || UserModel.create({ id: "0" });
     this.groups = params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing });
@@ -140,7 +139,7 @@ class Stores implements IStores{
     // until it was loaded for real. However there are lots of components that expect the
     // problem to be defined. By using a default problem these components can render with
     // the default problem and then update when it is set for real.
-    this.problemLoadedPromise = when(() => this.problem !== defaultProblem);
+    this.unitLoadedPromise = when(() => this.unit !== defaultUnit);
   }
 
   get tabsToDisplay() {

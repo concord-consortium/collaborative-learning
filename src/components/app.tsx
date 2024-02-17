@@ -85,7 +85,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
         // In that case the unit isn't known until after CLUE has got the offering information
         // from the portal.
         // loadUnitAndProblem is asynchronous.
-        // Code that requires the unit and problem to be loaded should wait on `stores.problemLoadedPromise`
+        // Code that requires the unit to be loaded should wait on `stores.unitLoadedPromise`
         stores.loadUnitAndProblem(unitCode, problemId);
       }
       return resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
