@@ -14,7 +14,6 @@ import { StampModel } from "../../plugins/drawing/model/stamp";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { NavTabsConfigModel } from "../stores/nav-tabs";
 import { SettingsMstType } from "../stores/settings";
-import { IBaseStores } from "../stores/base-stores-types";
 import { UnitConfiguration } from "../stores/unit-configuration";
 
 const PlanningDocumentConfigModel = types
@@ -256,13 +255,6 @@ export function createUnitWithoutContent(unitJson: any) {
     resumeSupportContentParsing();
     resumeSectionContentParsing();
   }
-}
-
-export function isDifferentUnitAndProblem(stores: IBaseStores, unitId?: string | undefined, problemOrdinal?: string) {
-  if (!unitId || !problemOrdinal) return false;
-  const { unit, investigation, problem } = stores;
-  const combinedOrdinal = `${investigation.ordinal}.${problem.ordinal}`;
-  return (unit.code !== unitId) || (combinedOrdinal !== problemOrdinal);
 }
 
 export function getSectionPath(section: SectionModelType) {

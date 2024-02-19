@@ -40,6 +40,7 @@ export interface IStores extends IBaseStores {
   loadUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
   sortedDocuments: SortedDocuments;
   unitLoadedPromise: Promise<void>;
+  startedLoadingUnitAndProblem: boolean;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -80,6 +81,7 @@ class Stores implements IStores{
   userContextProvider: UserContextProvider;
   sortedDocuments: SortedDocuments;
   unitLoadedPromise: Promise<void>;
+  startedLoadingUnitAndProblem: boolean;
 
   constructor(params?: ICreateStores){
     // This will mark all properties as observable
@@ -207,6 +209,7 @@ class Stores implements IStores{
   // be some weird interactions with action tracking if we mix them.
   async loadUnitAndProblem(unitId: string | undefined, problemOrdinal?: string) {
     const { appConfig, persistentUI } = this;
+    this.startedLoadingUnitAndProblem = true;
     showLoadingMessage("Loading curriculum content");
     let unitJson = await getUnitJson(unitId, appConfig);
     if (unitJson.status === 404) {

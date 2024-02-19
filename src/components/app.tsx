@@ -9,7 +9,6 @@ import { DemoCreatorComponent } from "./demo/demo-creator";
 
 import { GroupChooserComponent } from "./group/group-chooser";
 import { IStores } from "../models/stores/stores";
-import { isDifferentUnitAndProblem } from "../models/curriculum/unit";
 import ErrorAlert from "./utilities/error-alert";
 import { getCurrentLoadingMessage, removeLoadingMessage, showLoadingMessage } from "../utilities/loading-utils";
 
@@ -80,13 +79,45 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
         stores.class.updateFromPortal(classInfo);
       }
 
-      if (unitCode && problemId && isDifferentUnitAndProblem(stores, unitCode, problemId)) {
-        // This comes into play when CLUE is launched as a teacher from the portal.
-        // In that case the unit isn't known until after CLUE has got the offering information
-        // from the portal.
-        // loadUnitAndProblem is asynchronous.
-        // Code that requires the unit to be loaded should wait on `stores.unitLoadedPromise`
-        stores.loadUnitAndProblem(unitCode, problemId);
+      // If the URL has a unit param, then stores.loadUnitAndProblem would have
+      // been called in initializeApp, and startedLoadingUnitAndProblem will be
+      // true.
+      // In the case of a teacher launch from the portal the URL should not have
+      // a unit param. Instead we figure out the unit and problem from the
+      // portal's offering information.
+      // Note: If the external report in the portal is misconfigured and includes
+      // a unit parameter, then the offering information will be ignored.
+      if (!stores.startedLoadingUnitAndProblem) {
+        // TODO: It'd be better if we automatically computed the problemId as the first
+        // problem of the unit. This way even without a problemId we wouldn't
+        // error out here. This same logic could be used for both the problemId here and
+        // the problemId passed at the beginning.  If we move the logic into
+        // loadUnitAndProblem then we can just have problemId be undefined in that
+        // case. However there are several places where `defaultProblemOrdinal` is used.
+        // To make the code consistently handle URLs without a problem param we need to
+        // update all of those places too.
+        if (!unitCode || !problemId) {
+          // To test this you can make a CLUE resource in the portal that does not have
+          // a unit param. And then launch it
+
+          // TODO: we should have a way to test this without actually launching from
+          // the portal. This currently isn't easy to do without adding a lot of
+          // complexity to the code.
+
+          // If we get here, CLUE will hang because unitLoadedPromise will never
+          // resolve so the listeners won't start and there will be no content
+          // for CLUE to render. The error message below indicates the most likely
+          // cause of this.
+          stores.ui.setError(
+            "This CLUE resource is incorrectly configured. The URL of the resource " +
+            "requires a unit and problem parameter. " +
+            "Contact the author of the resource to fix it. " +
+            `unitCode: ${unitCode}, problemId: ${problemId}`);
+        } else {
+          // loadUnitAndProblem is asynchronous.
+          // Code that requires the unit to be loaded should wait on `stores.unitLoadedPromise`
+          stores.loadUnitAndProblem(unitCode, problemId);
+        }
       }
       return resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
     })
@@ -108,12 +139,14 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
       removeLoadingMessage("Connecting");
     })
     .catch((error) => {
-      let errorMessage = error.toString();
+      let customMessage = undefined;
+      const errorMessage = error.toString();
       if ((errorMessage.indexOf("Cannot find AccessGrant") !== -1) ||
           (errorMessage.indexOf("AccessGrant has expired") !== -1)) {
-        errorMessage = "Your authorization has expired. Please return to the Concord site to re-run the activity.";
+        customMessage = "Your authorization has expired. Please return to the Concord site to re-run the activity.";
       }
-      ui.setError(errorMessage);
+
+      ui.setError(error, customMessage);
     });
 };
 

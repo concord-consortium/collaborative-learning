@@ -54,16 +54,17 @@ export const initializeApp = (appMode: AppMode, authoring?: boolean): IStores =>
   }
 
 
-  // Only load the unit here if we have a unit param or we are not launched from the portal.
-  // If we are launched from the portal and we don't have a unit param, then the unit
-  // will be figured out later on.
-
-  // FIXME: since we are now only using the default unit if we are not launched from the portal.
-  // It is possible there are some portal links for students that don't include a unit
-  // so this change would break these resources.
+  // Only load the unit here if we are not authed, or we are authed and have a unit param.
+  // If we are authed with a unit param we can go ahead and start the process of loading
+  // unit. If we are authed without a unit param, the unit will be figured out later
+  // from the information returned by the portal.
+  //
   // TODO: A better approach than this would be to never use a default unit
-  // Then this check would just look at the unit param.
-  if (urlParams.unit || appMode !== "authed") {
+  // Then this check would just look at the unit param. This approach isn't implemented
+  // because it is still convenient for developers and demo'ers to use simple URLs.
+  // Those cases can be handled by having the code automatically add the default
+  // unit to the URL before this point.
+  if (appMode !== "authed" || urlParams.unit) {
     const unitId = urlParams.unit || appConfigSnapshot.defaultUnit;
     const problemOrdinal = urlParams.problem || appConfigSnapshot.config.defaultProblemOrdinal;
 
