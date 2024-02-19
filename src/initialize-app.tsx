@@ -54,17 +54,17 @@ export const initializeApp = (appMode: AppMode, authoring?: boolean): IStores =>
   }
 
 
-  // Only load the unit here if we are not authed, or we are authed and have a unit param.
-  // If we are authed with a unit param we can go ahead and start the process of loading
-  // unit. If we are authed without a unit param, the unit will be figured out later
+  // Only load the unit here if we are not authed, or we are authed and have a unit and problem param.
+  // If we are authed with a unit and problem param we can go ahead and start the process of loading
+  // the unit. If we are authed without a unit and problem params, the unit will be figured out later
   // from the information returned by the portal.
   //
-  // TODO: A better approach than this would be to never use a default unit
-  // Then this check would just look at the unit param. This approach isn't implemented
+  // TODO: A better approach would be to never use a default unit or problems.
+  // Then this check could ignore the appMode. This approach isn't implemented
   // because it is still convenient for developers and demo'ers to use simple URLs.
-  // Those cases can be handled by having the code automatically add the default
-  // unit to the URL before this point.
-  if (appMode !== "authed" || urlParams.unit) {
+  // Those cases can be handled by having the code automatically add the defaults
+  // to the URL before this point.
+  if (appMode !== "authed" || (urlParams.unit && urlParams.problem)) {
     const unitId = urlParams.unit || appConfigSnapshot.defaultUnit;
     const problemOrdinal = urlParams.problem || appConfigSnapshot.config.defaultProblemOrdinal;
 

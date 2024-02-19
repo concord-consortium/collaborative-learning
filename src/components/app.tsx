@@ -79,31 +79,30 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
         stores.class.updateFromPortal(classInfo);
       }
 
-      // If the URL has a unit param, then stores.loadUnitAndProblem would have
-      // been called in initializeApp, and startedLoadingUnitAndProblem will be
-      // true.
-      // In the case of a teacher launch from the portal the URL should not have
-      // a unit param. Instead we figure out the unit and problem from the
-      // portal's offering information.
-      // Note: If the external report in the portal is misconfigured and includes
-      // a unit parameter, then the offering information will be ignored.
+      // If the URL has a unit param or if the appMode is not "authed", then
+      // `stores.loadUnitAndProblem` would have been called in initializeApp,
+      // and startedLoadingUnitAndProblem will be true.
+      //
+      // In the case of a teacher launch from the portal, the window.location should
+      // not have a unit param. Instead the unit and problem is figured out by
+      // `authenticate` from the portal's resource information.
+      //
+      // Note: If the external report in the portal is misconfigured with a unit
+      // parameter, then window.location will have a unit param and the resource
+      // information will be incorrectly ignored here.
       if (!stores.startedLoadingUnitAndProblem) {
-        // TODO: It'd be better if we automatically computed the problemId as the first
-        // problem of the unit. This way even without a problemId we wouldn't
-        // error out here. This same logic could be used for both the problemId here and
-        // the problemId passed at the beginning.  If we move the logic into
-        // loadUnitAndProblem then we can just have problemId be undefined in that
-        // case. However there are several places where `defaultProblemOrdinal` is used.
-        // To make the code consistently handle URLs without a problem param we need to
-        // update all of those places too.
+        // The unit and problem are required for portal resources so the behavior
+        // is more clear:
+        // - If the unit is optional for portal resources, then a student launch
+        // without a unit would not start loading the unit in initializeApp.
+        // - If the problem is optional, then the defaultProblemOrdinal might not
+        // exist in the specified unit.
+        // We don't enforce this requirement in initializeApp because during a
+        // teacher launch, we don't know the resource info.
+        //
+        // To test this you can make a CLUE resource in the portal that does not have
+        // a unit param. And then launch it
         if (!unitCode || !problemId) {
-          // To test this you can make a CLUE resource in the portal that does not have
-          // a unit param. And then launch it
-
-          // TODO: we should have a way to test this without actually launching from
-          // the portal. This currently isn't easy to do without adding a lot of
-          // complexity to the code.
-
           // If we get here, CLUE will hang because unitLoadedPromise will never
           // resolve so the listeners won't start and there will be no content
           // for CLUE to render. The error message below indicates the most likely
