@@ -193,11 +193,10 @@ export class AppComponent extends BaseComponent<IProps, IState> {
       return this.renderApp(this.renderError(ui.error));
     }
 
-    // The slowest part is the !db.listeners.isListening
-    // That can't happen until the curriculum is loaded
-    // This could be optimized by rendering a shell of the app that has
-    // "loading" scattered around. For example the problem menu could say loading
-    // just waiting for the user authentication
+    // `db.listeners.isListening` is often the slowest requirement to be true.
+    // This requirement could be dropped, but several components would
+    // have to be checked to make sure they render something reasonable
+    // in this case.
     if (!user.authenticated || !db.listeners.isListening) {
       return this.renderApp(this.renderLoading());
     }

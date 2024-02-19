@@ -153,7 +153,7 @@ export class DB {
           this.firebase.setFirebaseUser(firebaseUser);
           this.firestore.setFirebaseUser(firebaseUser);
           if (!options.dontStartListeners) {
-            const { persistentUI, user, db, unitLoadedPromise } = this.stores;
+            const { persistentUI, user, db, unitLoadedPromise} = this.stores;
             // Start fetching the persistent UI. We want this to happen as early as possible.
             persistentUI.initializePersistentUISync(user, db);
 

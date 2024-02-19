@@ -96,10 +96,11 @@ class Stores implements IStores{
     this.appVersion = params?.appVersion || "unknown";
     this.appConfig = params?.appConfig || AppConfigModel.create();
 
-    // To keep the code simple, we create a null unit, investigation, and problem if they aren't provided.
+    // To keep the code simple, we create a null unit, investigation, and problem if
+    // they aren't provided.
     // Code that needs the real unit should wait on the `unitLoadedPromise`.
-    // CHECKME: do we ever pass the unit?
-    // If we do, then the unitLoadedPromise will resolve immediately
+    // If the unit is passed in, then the unitLoadedPromise will resolve immediately,
+    // this only happens in tests.
     const defaultUnit = UnitModel.create({code: "NULL", title: "Null Unit"});
     this.unit = params?.unit || defaultUnit;
     this.investigation = params?.investigation ||
@@ -137,10 +138,6 @@ class Stores implements IStores{
     this.bookmarks = new Bookmarks({db: this.db});
     this.sortedDocuments = new SortedDocuments(this);
 
-    // It would be cleaner if we could just leave the problem undefined
-    // until it was loaded for real. However there are lots of components that expect the
-    // problem to be defined. By using a default problem these components can render with
-    // the default problem and then update when it is set for real.
     this.unitLoadedPromise = when(() => this.unit !== defaultUnit);
   }
 
