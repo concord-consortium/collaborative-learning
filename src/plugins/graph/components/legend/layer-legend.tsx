@@ -137,7 +137,7 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
         return isSharedDataSet(sharedModel) && sharedModel.dataSet.id === datasetId;
       });
       const foundProviderId = (foundSharedModel as SharedDataSetType)?.providerId;
-      const foundTile = smm.getSharedModelTiles(foundSharedModel)?.find(tile => tile.id === foundProviderId);
+      const foundTile = smm.getSharedModelTiles(foundSharedModel)?.find(_tile => _tile.id === foundProviderId);
       return foundTile?.title ?? tempUnknownString;
     }
     return tempUnknownString;
