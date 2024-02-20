@@ -38,7 +38,9 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
         const draggingId = e.active?.data?.current?.caseId;
         const attrId = e.active?.data?.current?.sortedByAttrId;
         const draggedToValue = e.over?.data?.current?.stackValue;
-        content.setAttValue(draggingId, attrId, draggedToValue || "");
+        if (draggedToValue !== undefined) {
+          content.setAttValue(draggingId, attrId, draggedToValue);
+        }
         setSortDragActive(false);
       }
       document.body.style.cursor = "default";
