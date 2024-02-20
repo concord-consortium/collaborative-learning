@@ -16,7 +16,7 @@ import { ITileModel } from "../tiles/tile-model";
 
 
 export function logSharedModelDocEvent(event: LogEventName, modelSource: ITileModel, modelLinkedArr: ITileModel[]) {
-  //Create sourceTile
+  //Create sourceTile obj
   const tileSourceId = modelSource.id;
   const tileSourceType = modelSource.content.type;
 
@@ -25,25 +25,16 @@ export function logSharedModelDocEvent(event: LogEventName, modelSource: ITileMo
     id: tileSourceId,
   };
 
-
-  //Create sharedTiles paramete, iterate through linked models and extract type and id
-  const sharedTiles = [];
-
-  for (const modelLinked of modelLinkedArr) {
-    sharedTiles.push({
-      type: modelLinked.content.type,
-      id: modelLinked.id,
-    });
-  }
-
-
+  //Create sharedTile obj
+  const sharedTile = {
+    type: modelLinkedArr[0].content.type,
+    id: modelLinkedArr[0].id,
+  };
 
   const params = {
     sourceTile,
-    sharedTiles
+    sharedTile
   };
 
   Logger.log(event, params);
-
-  console.log("--------------------------------\n");
 }
