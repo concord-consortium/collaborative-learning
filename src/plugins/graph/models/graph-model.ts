@@ -514,6 +514,7 @@ export const GraphModel = TileContentModel
           if (index > 0 || self.layers.length > 1) {
             self.layers.splice(index, 1);
           } else if (index === 0) {
+            // Unlink last remaining layer, don't remove it.
             self.layers[0].setDataset(undefined, undefined);
             self.layers[0].configureUnlinkedLayer();
             self.layers[0].updateAdornments();
@@ -614,6 +615,7 @@ export const GraphModel = TileContentModel
           const sds = sharedDataSets[0];
           if (isSharedDataSet(sds)) {
             self.layers[0].config.dataset = sds.dataSet;
+            console.log('Updated legacy document - set dataset reference');
           }
         }
         const sharedMetadata = smm.getTileSharedModelsByType(self, SharedCaseMetadata);
@@ -621,6 +623,7 @@ export const GraphModel = TileContentModel
           const smd = sharedMetadata[0];
           if (isSharedCaseMetadata(smd)) {
             self.layers[0].config.metadata = smd;
+            console.log('Updated legacy document - set metadata reference');
           }
         }
       } else {
