@@ -4,6 +4,7 @@ Look at the diagram source to see the loading events
 
 ```mermaid
 flowchart TB
+
   req(Browser requests index.html)
   req --> parse
 
@@ -25,8 +26,8 @@ flowchart TB
   component("Create app component")
   cs --> component
 
-  cs --> sup
-  subgraph sup [Set unit and problem]
+  cs -- if != auth or unit param --> loadUnitProblem
+  subgraph loadUnitProblem [Load unit and problem]
     direction TB
 
     %% LE.start: Loading curriculum content
@@ -40,6 +41,9 @@ flowchart TB
     tiles(Register tile types)
     %% LE.end: Loading tile types
 
+    resolveUnitLoadedPromise([resolve unitLoadedPromise])
+    tiles --> resolveUnitLoadedPromise
+
     configStores(Configure some stores)
     tiles --> configStores
     %% LE.end: Setting up curriculum content
@@ -52,6 +56,8 @@ flowchart TB
   %% LE.start: Connecting
   subgraph auth [AuthAndConnect]
     direction TB
+
+    unitLoadedPromise([unitLoadedPromise])
 
     subgraph authenticate [Authenticate]
       direction TB
@@ -67,13 +73,15 @@ flowchart TB
       real6(Return real auth)
     end
 
-    subgraph initialUnitProblem [Set unit and problem from above]
-      label{{added to fix diagram bug}}
+    subgraph loadUnitProblemRef [Load unit and problem]
+      direction TB
+      label{{same as other}}
     end
 
-    sup2("Re-set unit and problem (if different)")
-    authenticate --> sup2
-    initialUnitProblem --> sup2
+    authenticate -- if not started loading --> loadUnitProblemRef
+
+    loadUnitProblemRef ~~~ unitLoadedPromise
+    %%authenticate ~~~ unitLoadedPromise
 
     subgraph ram [Resolve app mode]
       direction TB
@@ -104,16 +112,17 @@ flowchart TB
         end
       end
     end
-    sup2 --> ram
+    authenticate --> ram
 
     %% LE.start: Loading current activity
     initializePersistentUISync
     %% LE.end: Loading current activity
 
     ram --> initializePersistentUISync
-    initialUnitProblem --> listeners
+    unitLoadedPromise --> listeners
   end
   %% LE.end: Connecting
+
 
 
   %% LE.start: Joining group
