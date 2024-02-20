@@ -5,9 +5,12 @@ flowchart TB
   req(Browser requests index.html)
   req --> parse
 
+  %% LE.start: Loading the application
   parse(Load and parse core Javascript)
   parse --> indextsx
+  %% LE.end: Loading the application
 
+  %% LE.start: Initializing
   indextsx("Runs React (index.tsx)")
   indextsx --> ia
   ia("initializeAuthorization (OAuth2)")
@@ -15,6 +18,7 @@ flowchart TB
   ia -.-> restart
   ia --> cs
   cs(Create stores)
+  %% LE.end: Initializing
 
   component("Create app component")
   cs --> component
@@ -22,17 +26,28 @@ flowchart TB
   cs --> sup
   subgraph sup [Set unit and problem]
     direction TB
+
+    %% LE.start: Loading curriculum content
     unit(Get unit JSON)
+    %% LE.end: Loading curriculum content
+
     unit --> tiles
+
+    %% LE.start: Setting up curriculum content
+    %% LE.start: Loading tile types
     tiles(Register tile types)
+    %% LE.end: Loading tile types
+
     configStores(Configure some stores)
     tiles --> configStores
+    %% LE.end: Setting up curriculum content
   end
 
   component --> auth
   component --> renderApp
   renderApp(RenderApp)
 
+  %% LE.start: Connecting
   subgraph auth [AuthAndConnect]
     direction TB
 
@@ -55,7 +70,6 @@ flowchart TB
     end
 
     sup2("Re-set unit and problem (if different)")
-%%    initialUnitProblem(Set unit and problem)
     authenticate --> sup2
     initialUnitProblem --> sup2
 
@@ -90,12 +104,20 @@ flowchart TB
     end
     sup2 --> ram
 
+    %% LE.start: Loading current activity
     initializePersistentUISync
+    %% LE.end: Loading current activity
+
     ram --> initializePersistentUISync
     initialUnitProblem --> listeners
   end
+  %% LE.end: Connecting
 
+
+  %% LE.start: Joining group
   renderGroupChooser(Render group chooser)
+  %% LE.end: Joining group
+
   renderApp --> renderGroupChooser
   auth --> renderGroupChooser
 
@@ -105,7 +127,10 @@ flowchart TB
   primaryDocumentLoaded
   auth --> primaryDocumentLoaded
 
+  %% LE.start: Building workspace
   renderDocumentWorkspaceComponentContent(show the real right side content)
+  %% LE.end: Building workspace
+
   renderAppContentComponent --> renderDocumentWorkspaceComponentContent
   primaryDocumentLoaded --> renderDocumentWorkspaceComponentContent
 
