@@ -17,14 +17,51 @@ The code for this function is located here: https://github.com/Herohtar/netlify-
 
 It was configured with the client ID and client secret from the GitHub OAuth app.
 
-# Notes on calls:
-After publishing a CMS page, the component on the page is not reconstructed. The existing component is reused. Because we are holding onto the document this works fine.
+# Architecture
+The CMS has two parts in CLUE. One is the CMS itself. The other is the document editor that is embedded inside of iframes inside of the CMS.
 
+## The CMS itself
+This is the code from Decap configured by us to render two custom components. This configuration is in `init-cms.ts`. This is not the typical configuration of the CMS. If you look at the docs, the common pattern is to have a yaml configuration file located in the repository with files being edited. And then a static html page loads in decap js from a CDN. This decap js then finds the configuration and then lets you start editing the files in the repository.
+
+This approach was not flexible enough for us, so instead we configure Decap using the code in `init-cms.ts`. This file includes an embedded configuration which is dynamically changed depending on the url parameters. It also registers 3 custom widgets. We are only using 2 of these components: `clue` and `preview-link`.
+
+These files are built using a build system separate from the main CLUE build system. This was done so that dependencies of CLUE and the CMS would not be tied together. This is all located in the `/cms/` folder.
+
+### `preview-link`
+Is a widget that just display a link so authors can easily open CLUE and see the section they are currently editing. It has to load the Unit json to figure out where in the unit this current section is located. This location is needed to construct the problemOrdinal which is what is needed when launching CLUE.
+
+### `clue`
+This is an iframe-control. It isn't really specific to CLUE. The iframe src it shows is:
+`./cms-editor.html?curriculumBranch=${curriculumBranch}`. Then it sends the content from the CMS to this iframe using postMessage. And it gets the updated content from the iframe by listening to "message" events. This approach was used because there were conflicts between the CLUE libraries and the CMS libraries. By putting CLUE in an iframe we avoid these problems.
+
+## The document editor (cms-editor.html)
+This is an additional entry point built by the main CLUE build system. It is very similar to the standalone document editor. The difference is that it listens for the "message" events sent by the iframe widget above, and sends content changes via postMessage to the iframe widget.
+
+This document editor is located in `/src/cms/`
+
+# Building and Deployment
+
+## Local development
+To work on the CMS locally you'll need to start both CLUE and the CMS:
+- start CLUE by running `npm run start` in the top level folder
+- start the CMS by running `npm run start` in the `/cms` folder
+
+TODO: Then you'll need to configure the CMS so it can find your the local `cms-editor.html` from the running CLUE. This can be done using a parameter to the CMS url. Without this parameter it will try to look in `./cms-editor.html` which will not work.
+
+## Remote build
+In the CI (github actions), the toplevel `npm run build` is used. This will build both CLUE and the CMS. And then it will copy the files from `/cms/dist` to `/dist/cms`. Additional it copyes the file `/cms/dist/admin.html` to `/dist/admin.html`. This admin.html file refers to its resources in the cms folder like `cms/admin.js` and `cms/admin.css`. This file is called `admin.html` because that was its original name, and now various authors have direct links to it. So we don't want to change that name.
+
+Currently the CMS build environment is not designed to be used with the release system that we use for the main part of CLUE. So authors cannot go to `https://collaborative-learning.concord.org/admin.html`. Instead most of these authors are using master for their authoring so they go to: `https://collaborative-learning.concord.org/branch/master/admin.html`. **We should fix this so we don't have to worry about breaking authoring when merging to master.**
+
+# Notes on CMS page components
+Sometimes the components on the CMS page are reused and sometimes they reconstructed. This behavior has not effect on our current components, but it should be kept in mind if creating a custom component.
+
+- After publishing a CMS page, the component on the page is not reconstructed instead it is reused. The existing component is reused.
 - When leaving (using the CMS ui) and coming back to the same page the component is reconstructed.
 - When leaving (using the CMS ui) with unsaved changes, a message is shown, and the control is reconstructed when returning to the page.
 - When leaving with unsaved changes by reloading the page in the browser:
-- A message is shown before reload confirming you want to lose your changes
-- A message is shown when the page is loaded again about an unsaved draft Choosing the draft doesn't always work. See the "Known Issues" section of cms.md
+  - A message is shown before reload confirming you want to lose your changes
+  - A message is shown when the page is loaded again about an unsaved draft Choosing the draft doesn't always work. See the "Known Issues" section of cms.md
 
 # TODO
 
