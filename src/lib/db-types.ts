@@ -127,6 +127,7 @@ export interface DBOtherDocument {
   title: string;
   // legacy properties; in DBBaseDocumentMetadata since ~2.2
   properties?: IDocumentProperties;
+  visibility?: "public" | "private";
 }
 
 // metadata written to {classHash}/offerings/{offeringId}/publications
