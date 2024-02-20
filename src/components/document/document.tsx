@@ -225,7 +225,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const problemTitle = problem.title;
     const { document, workspace } = this.props;
     const isShared = document.visibility === "public";
-    const showShareButton = type !== "planning"; // TODO: or use this.showPublishButton(document)?
+    const showShareButton = type !== "planning";
     const showFileMenu = this.showFileMenu();
     const show4up = !workspace.comparisonVisible && !isTeacher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
@@ -252,9 +252,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="actions right" data-test="document-titlebar-actions">
             {downloadButton}
             {show4up && this.renderMode()}
-            { showShareButton &&
-              <ShareButton isShared={isShared} onClick={this.handleToggleVisibility} />
-            }
+            {showShareButton &&
+              <ShareButton isShared={isShared} onClick={this.handleToggleVisibility} />}
           </div>
         }
       </div>
