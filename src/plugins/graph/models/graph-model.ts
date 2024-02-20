@@ -629,6 +629,7 @@ export const GraphModel = TileContentModel
       } else {
         console.warn('Could not update missing dataset/metadata - SharedModelManager not ready');
       }
+
     },
 
     afterAttachToDocument() {
