@@ -50,8 +50,14 @@ flowchart TB
       real6(Return real auth)
     end
 
-    authenticate --> sup2
+    subgraph initialUnitProblem [Set unit and problem from above]
+      label{{added to fix diagram bug}}
+    end
+
     sup2("Re-set unit and problem (if different)")
+%%    initialUnitProblem(Set unit and problem)
+    authenticate --> sup2
+    initialUnitProblem --> sup2
 
     subgraph ram [Resolve app mode]
       direction TB
@@ -87,7 +93,6 @@ flowchart TB
     initializePersistentUISync
     ram --> initializePersistentUISync
     initialUnitProblem --> listeners
-    initialUnitProblem --> sup2
   end
 
   renderGroupChooser(Render group chooser)
