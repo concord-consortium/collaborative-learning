@@ -1,10 +1,11 @@
 import {extent, format, select, timeout} from "d3";
 import React from "react";
 import { isInteger} from "lodash";
+import { SnapshotOut } from "mobx-state-tree";
 
 import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
-import { UpdatedSharedDataSetIds } from "../../../models/shared/shared-data-set";
+import { UpdatedSharedDataSetIds, replaceJsonStringsWithUpdatedIds } from "../../../models/shared/shared-data-set";
 import {
   CaseData, DotSelection, DotsElt, selectGraphDots, selectInnerCircles, selectOuterCircles
 } from "../d3-types";
@@ -21,7 +22,7 @@ import {
 } from "../../../utilities/color-utils";
 import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
-import { IGraphModel } from "../models/graph-model";
+import { GraphModel, IGraphModel } from "../models/graph-model";
 import { isFiniteNumber } from "../../../utilities/math-utils";
 
 /**
@@ -562,6 +563,14 @@ export function decipherDotId(dotId: string) {
     return { caseId, xAttributeId, yAttributeId };
   }
   return {};
+}
+
+export function updateGraphContentWithNewSharedModelIds(
+  content: SnapshotOut<typeof GraphModel>,
+  sharedDataSetEntries: PartialSharedModelEntry[],
+  updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
+) {
+  return replaceJsonStringsWithUpdatedIds(content, ...Object.values(updatedSharedModelMap));
 }
 
 export function updateGraphObjectWithNewSharedModelIds(

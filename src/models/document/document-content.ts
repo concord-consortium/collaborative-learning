@@ -1,5 +1,5 @@
 import stringify from "json-stringify-pretty-compact";
-import { getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
+import { applySnapshot, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
 import { cloneDeep, each } from "lodash";
 import { IDragTilesData, NewRowTileArray, PartialSharedModelEntry, PartialTile,
          IDocumentContentAddTileOptions } from "./document-content-types";
@@ -17,7 +17,8 @@ import { comma, StringBuilder } from "../../utilities/string-builder";
 
 // Imports related to hard coding shared model duplication
 import {
-  getSharedDataSetSnapshotWithUpdatedIds, getUpdatedSharedDataSetIds, isSharedDataSetSnapshot, SharedDataSet,
+  getSharedDataSetSnapshotWithUpdatedIds, getUpdatedSharedDataSetIds, isSharedDataSetSnapshot,
+  SharedDataSetType,
   UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
 } from "../shared/shared-data-set";
 import { IClueObjectSnapshot } from "../annotations/clue-object";
@@ -238,7 +239,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
   ) {
     // Update shared models with new ids
     const updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds> = {};
-    const newSharedModelEntries: PartialSharedModelEntry[] = [];
+    let newSharedModelEntries: PartialSharedModelEntry[] = [];
     sharedModelEntries.forEach(sharedModelEntry => {
       // For now, only duplicate shared data sets
       if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
@@ -254,6 +255,15 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
           tiles: sharedModelEntry.tiles,
           sharedModel
         });
+
+        // Add the model (but not the tile IDs yet) to the Document so that tile references to it won't break
+        // when we insert the tiles.
+        if (sharedDataSet.id) {
+          self.addSharedModelFromImport(sharedModel.id, {sharedModel});
+        } else {
+          // Not sure why this would happen?
+          console.warn("Cannot duplicate shared model without an ID");
+        }
       }
     });
 
@@ -292,29 +302,45 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
 
         // If the tile title needed to be updated, we assume we should also update the data set's name
         if (newTitle && sharedModelEntries) {
-          newSharedModelEntries.forEach(sharedModelEntry => {
+          newSharedModelEntries = newSharedModelEntries.map(sharedModelEntry => {
             if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
               const sharedDataSet = sharedModelEntry.sharedModel;
               const oldName = sharedDataSet.dataSet?.name;
               if (sharedDataSet.dataSet && oldName === oldTitle) {
-                sharedDataSet.dataSet.name = newTitle;
+                const newSME = cloneDeep<PartialSharedModelEntry>(sharedModelEntry);
+                (newSME.sharedModel as SharedDataSetType).dataSet.name = newTitle;
+                return newSME;
               }
+              return sharedModelEntry;
+            } else {
+              return sharedModelEntry;
             }
           });
         }
       }
     });
 
-    // Update tile ids for shared models and add copies to document
+    // Update tile ids for shared models and add those references to document.
+    // The shared datasets have already been added above.
     newSharedModelEntries.forEach(sharedModelEntry => {
       const updatedTileIds: string[] = sharedModelEntry.tiles.map((oldTile: PartialTile) => tileIdMap[oldTile.id])
         .filter((tileId: string | undefined) => tileId !== undefined);
       if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
-        const updatedSharedModel = { ...sharedModelEntry.sharedModel };
-        updateSharedDataSetSnapshotWithNewTileIds(updatedSharedModel, tileIdMap);
-        const newSharedModelEntry =
-          self.addSharedModel(SharedDataSet.create(updatedSharedModel));
-        updatedTileIds.forEach(tileId => newSharedModelEntry.tiles.push(tileId));
+        const oldProvider = sharedModelEntry.sharedModel.providerId;
+        const updatedProvider = oldProvider && tileIdMap[oldProvider];
+        const updatedSharedModel = {
+          sharedModel: updateSharedDataSetSnapshotWithNewTileIds(sharedModelEntry.sharedModel, tileIdMap),
+          tiles: updatedTileIds,
+          provider: updatedProvider };
+        const id = sharedModelEntry.sharedModel.id;
+        if (id) {
+          const existingEntry = self.sharedModelMap.get(id);
+          if (existingEntry) {
+            applySnapshot(existingEntry, updatedSharedModel);
+          } else {
+            console.warn("SharedModel we created somehow disappeared");
+          }
+        }
       }
     });
 
