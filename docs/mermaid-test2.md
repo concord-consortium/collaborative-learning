@@ -86,9 +86,9 @@ flowchart TB
 
     initializePersistentUISync
     ram --> initializePersistentUISync
+    initialUnitProblem --> listeners
+    initialUnitProblem --> sup2
   end
-  sup --> listenersBroken
-  sup --> sup2Broken
 
   renderGroupChooser(Render group chooser)
   renderApp --> renderGroupChooser
