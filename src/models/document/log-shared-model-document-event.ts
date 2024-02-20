@@ -1,5 +1,3 @@
-
-
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { ITileModel } from "../tiles/tile-model";
