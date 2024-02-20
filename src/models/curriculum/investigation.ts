@@ -24,7 +24,6 @@ const ModernInvestigationModel = types
     introduction: types.maybe(DocumentContentModel),
     problems: types.array(ProblemModel),
     reflections: types.maybe(DocumentContentModel),
-    supports: types.array(SupportModel),
     config: types.maybe(types.frozen<Partial<ProblemConfiguration>>())
   })
   .views(self => {

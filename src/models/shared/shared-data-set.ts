@@ -1,6 +1,7 @@
 import { getType, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
 import { Required } from "utility-types";
+import escapeStringRegexp from "escape-string-regexp";
 
 import { SharedModel, SharedModelType } from "./shared-model";
 import { DataSet, IDataSet, newCaseId } from "../data/data-set";
@@ -44,6 +45,7 @@ export function isSharedDataSetSnapshot(snapshot: any): snapshot is SharedDataSe
 export interface UpdatedSharedDataSetIds {
   attributeIdMap: Record<string, string>;
   caseIdMap: Record<string, string>;
+  origDataSetId: string|undefined;
   dataSetId: string;
   sharedModelId: string;
 }
@@ -52,6 +54,7 @@ export function getUpdatedSharedDataSetIds(sharedDataSet: SharedDataSetSnapshotT
   const updatedIds: UpdatedSharedDataSetIds = {
     attributeIdMap: {},
     caseIdMap: {},
+    origDataSetId: sharedDataSet.dataSet?.id,
     dataSetId: uniqueId(),
     sharedModelId: uniqueId()
   };
@@ -94,6 +97,38 @@ export function updateSharedDataSetSnapshotWithNewTileIds(
   sharedDataSetSnapshot: SharedDataSetSnapshotType, tileIdMap: Record<string, string>
 ) {
   if (sharedDataSetSnapshot.providerId) {
-    sharedDataSetSnapshot.providerId = tileIdMap[sharedDataSetSnapshot.providerId];
+    // Make a copy and override providerId, since snapshots can be read-only
+    return {
+      ...sharedDataSetSnapshot,
+      providerId: tileIdMap[sharedDataSetSnapshot.providerId]
+    };
+  } else {
+    return sharedDataSetSnapshot;
   }
+}
+
+function flattenedMap(sharedDatasetIds: UpdatedSharedDataSetIds[]) {
+  const map = {} as Record<string, string>;
+  for (const updatedIds of sharedDatasetIds) {
+    if (updatedIds.origDataSetId) {
+      map[updatedIds.origDataSetId] = updatedIds.dataSetId;
+    }
+    for (const [key, val] of Object.entries(updatedIds.attributeIdMap)) {
+      map[key] = val;
+    }
+    for (const [key, val] of Object.entries(updatedIds.caseIdMap)) {
+      map[key] = val;
+    }
+  }
+  return map;
+}
+
+export function replaceJsonStringsWithUpdatedIds(json: unknown, ...sharedDatasetIds: UpdatedSharedDataSetIds[]) {
+  const flatMap = flattenedMap(sharedDatasetIds);
+  const keyPattern = Object.keys(flatMap).map(key => escapeStringRegexp(key)).join("|");
+  const matchRegexp = new RegExp(`\\"(${keyPattern})\\"`, "g");
+  const updated = JSON.stringify(json).replace(matchRegexp, (match, key) => {
+    return `"${flatMap[key]}"`;
+  });
+  return JSON.parse(updated);
 }
