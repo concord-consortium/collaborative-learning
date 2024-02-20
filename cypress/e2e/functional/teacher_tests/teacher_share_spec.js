@@ -15,31 +15,52 @@ function beforeTest(params) {
   cy.wait(2000);
 }
 
-context('Teacher Share', function() {
-  describe('verify share functionality', function() {
-    it('test share functionality',function(){
-      cy.log('will share and unshare a teacher document');
-      beforeTest(teacherQueryParams);
-      clueCanvas.getShareButton().should('be.visible');
-      clueCanvas.getShareButton().should('have.class', 'private');
-      clueCanvas.shareCanvas();
-      cy.pause();
+function verifySwitch(publicOrPrivate) {
+  clueCanvas.getShareButton().should('be.visible');
+  clueCanvas.getShareButton().should('have.class', publicOrPrivate);
+}
 
-      cy.log('will SHOW STUDENT VIEW');
+function verifyStudentSeesAsPrivate() {
+  cy.get('.tab-sort-work').click();
+  cy.get('.thumbnail-private').should('exist');
+}
+
+function verifyStudentSeesAsPublic() {
+  cy.get('.tab-sort-work').click();
+  cy.get('.thumbnail-public').should('not.exist');
+}
+
+context('Teacher Sharing', function() {
+  describe('verify share functionality', function() {
+    it('loads teacher document as private', function() {
+      beforeTest(teacherQueryParams);
+      verifySwitch('private');
+    });
+
+    it('does not allow student to access private teacher document', function() {
       cy.visit(studentQueryParams);
       cy.waitForLoad();
-      cy.pause();
+      verifyStudentSeesAsPrivate();
+    });
 
-      cy.log('will GO BACK TO TEACHER VIEW');
+    it('allows teacher to share a document', function() {
       cy.visit(teacherQueryParams);
       cy.waitForLoad();
-      cy.pause();
+      clueCanvas.shareCanvas();
+      verifySwitch('public');
+    });
 
-      clueCanvas.getShareButton().should('be.visible');
-      clueCanvas.getShareButton().should('have.class', 'public');
+    it('allows student to access public teacher document', function() {
+      cy.visit(studentQueryParams);
+      cy.waitForLoad();
+      verifyStudentSeesAsPublic();
+    });
+
+    it('allows teacher to unshare a document', function() {
+      cy.visit(teacherQueryParams);
+      cy.waitForLoad();
       clueCanvas.unshareCanvas();
-      clueCanvas.getShareButton().should('be.visible');
-      clueCanvas.getShareButton().should('have.class', 'private');
+      verifySwitch('private');
     });
   });
 });
