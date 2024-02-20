@@ -75,12 +75,6 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().click();
       xyTile.getXYPlotTitle().should('contain', title);
 
-      // cy.log("does not show edit boxes on axes");
-      // xyTile.getEditableAxisBox("bottom", "min").should("not.exist");
-      // xyTile.getEditableAxisBox("bottom", "max").should("not.exist");
-      // xyTile.getEditableAxisBox("left", "min").should("not.exist");
-      // xyTile.getEditableAxisBox("left", "max").should("not.exist");
-
       cy.log("Link Table");
       clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
       xyTile.linkTable("Table 1");
@@ -203,6 +197,24 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().click();
       clueCanvas.deleteTile('xyplot');
       xyTile.getTile().should('not.exist');
+    });
+
+    it("Test duplicating graph", () => {
+      beforeTest(queryParamsMultiDataset);
+      cy.collapseResourceTabs();
+
+      buildTable([[1, 2], [2, 4], [3, 9], [4, 16]]);
+
+      clueCanvas.addTile("graph");
+      xyTile.getTile().should("have.length", 1).should('be.visible');
+      xyTile.getTile().click();
+      clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
+      xyTile.linkTable("Table 1");
+      xyTile.getGraphDot().should('have.length', 4);
+
+      clueCanvas.getDuplicateTool().click();
+      xyTile.getTile().should("have.length", 2).should('be.visible');
+      xyTile.getGraphDot().should('have.length', 8);
     });
 
     it("Test undo redo actions", () => {
