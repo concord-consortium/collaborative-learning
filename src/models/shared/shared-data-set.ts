@@ -97,7 +97,13 @@ export function updateSharedDataSetSnapshotWithNewTileIds(
   sharedDataSetSnapshot: SharedDataSetSnapshotType, tileIdMap: Record<string, string>
 ) {
   if (sharedDataSetSnapshot.providerId) {
-    sharedDataSetSnapshot.providerId = tileIdMap[sharedDataSetSnapshot.providerId];
+    // Make a copy and override providerId, since snapshots can be read-only
+    return {
+      ...sharedDataSetSnapshot,
+      providerId: tileIdMap[sharedDataSetSnapshot.providerId]
+    };
+  } else {
+    return sharedDataSetSnapshot;
   }
 }
 

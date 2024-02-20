@@ -480,10 +480,6 @@ export const BaseDocumentContentModel = types
       // the table will never use the dataset name unless it has been manually
       // configured to do so.
       const title = options?.title || self.getNewTileTitle(content.type!);
-      // FIXME: this will break if the content has references to shared models. Instead of
-      // creating the tile model independently, it needs to be created within the document tree.
-      // One option is to use self.tileMap.put(snapshot) which adds the tile to the document
-      // and returns the newly created tile.
       const o = options || {};
       if (o.rowIndex === undefined) {
         // by default, insert new tiles after last visible on screen
