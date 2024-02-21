@@ -26,6 +26,7 @@ import { NavTabModelType } from "../view/nav-tabs";
 import { Bookmarks } from "./bookmarks";
 import { SortedDocuments } from "./sorted-documents";
 import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
+import { problemLoaded } from "../../lib/misc";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -36,9 +37,10 @@ export interface IStores extends IBaseStores {
   studentWorkTabSelectedGroupId: string | undefined;
   setAppMode: (appMode: AppMode) => void;
   initializeStudentWorkTab: () => void;
-  setUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
+  loadUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
   sortedDocuments: SortedDocuments;
   unitLoadedPromise: Promise<void>;
+  startedLoadingUnitAndProblem: boolean;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -79,6 +81,7 @@ class Stores implements IStores{
   userContextProvider: UserContextProvider;
   sortedDocuments: SortedDocuments;
   unitLoadedPromise: Promise<void>;
+  startedLoadingUnitAndProblem: boolean;
 
   constructor(params?: ICreateStores){
     // This will mark all properties as observable
@@ -92,10 +95,18 @@ class Stores implements IStores{
     this.isPreviewing = params?.isPreviewing || false;
     this.appVersion = params?.appVersion || "unknown";
     this.appConfig = params?.appConfig || AppConfigModel.create();
-    // for testing, we create a null problem or investigation if none is provided
+
+    // To keep the code simple, we create a null unit, investigation, and problem if
+    // they aren't provided.
+    // Code that needs the real unit should wait on the `unitLoadedPromise`.
+    // If the unit is passed in, then the unitLoadedPromise will resolve immediately,
+    // this only happens in tests.
+    const defaultUnit = UnitModel.create({code: "NULL", title: "Null Unit"});
+    this.unit = params?.unit || defaultUnit;
     this.investigation = params?.investigation ||
       InvestigationModel.create({ ordinal: 0, title: "Null Investigation" });
     this.problem = params?.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" });
+
     this.user = params?.user || UserModel.create({ id: "0" });
     this.groups = params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing });
     this.groups.setEnvironment(this);
@@ -103,7 +114,6 @@ class Stores implements IStores{
     this.db = params?.db || new DB();
     this.documents = params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes);
     this.networkDocuments = params?.networkDocuments || DocumentsModel.create({});
-    this.unit = params?.unit || UnitModel.create({code: "NULL", title: "Null Unit"});
     const demoName = params?.demoName || this.appConfig.appName;
     this.demo = params?.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}});
     this.showDemoCreator = params?.showDemoCreator || false;
@@ -127,6 +137,8 @@ class Stores implements IStores{
     this.userContextProvider = new UserContextProvider(this);
     this.bookmarks = new Bookmarks({db: this.db});
     this.sortedDocuments = new SortedDocuments(this);
+
+    this.unitLoadedPromise = when(() => this.unit !== defaultUnit);
   }
 
   get tabsToDisplay() {
@@ -192,8 +204,9 @@ class Stores implements IStores{
   // However typing the yield statements is difficult. Also flows
   // in MobX are slightly different than flows in MST, so there might
   // be some weird interactions with action tracking if we mix them.
-  async setUnitAndProblem(unitId: string | undefined, problemOrdinal?: string) {
+  async loadUnitAndProblem(unitId: string | undefined, problemOrdinal?: string) {
     const { appConfig, persistentUI } = this;
+    this.startedLoadingUnitAndProblem = true;
     showLoadingMessage("Loading curriculum content");
     let unitJson = await getUnitJson(unitId, appConfig);
     if (unitJson.status === 404) {
@@ -241,6 +254,9 @@ class Stores implements IStores{
         this.investigation = investigation;
         this.problem = problem;
       }
+
+      problemLoaded(this, _problemOrdinal);
+
       persistentUI.setProblemPath(this.problemPath);
 
       // Set the active tab to be the first tab (unless active tab is already set by persistent UI)

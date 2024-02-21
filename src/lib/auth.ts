@@ -291,6 +291,7 @@ export const authenticate = async (appMode: AppMode, appConfig: AppConfigModelTy
     const networkProps = urlParams.network
                           ? { network: urlParams.network, networks: [urlParams.network] }
                           : undefined;
+    const fakeOfferingId = createFakeOfferingIdFromProblem(unitCode, problemOrdinal);
     return {
       appMode,
       ...createFakeAuthentication({
@@ -298,8 +299,7 @@ export const authenticate = async (appMode: AppMode, appConfig: AppConfigModelTy
           classId: fakeClass,
           userType, userId,
           ...networkProps,
-          unitCode,
-          problemOrdinal
+          offeringId: fakeOfferingId
         })
     };
   }
@@ -403,7 +403,7 @@ export const authenticate = async (appMode: AppMode, appConfig: AppConfigModelTy
 };
 
 export const generateDevAuthentication = (unitCode: string, problemOrdinal: string) => {
-  const offeringId = createOfferingIdFromProblem(unitCode, problemOrdinal);
+  const offeringId = createFakeOfferingIdFromProblem(unitCode, problemOrdinal);
   DEV_STUDENT.offeringId = offeringId;
   DEV_CLASS_INFO.students.forEach((student) => student.offeringId = offeringId);
   DEV_CLASS_INFO.teachers.forEach((teacher) => teacher.offeringId = offeringId);
@@ -431,11 +431,12 @@ export const generateDevAuthentication = (unitCode: string, problemOrdinal: stri
   return {authenticatedUser, classInfo: DEV_CLASS_INFO};
 };
 
-const createOfferingIdFromProblem = (unitParam: string, problemOrdinal: string) => {
+export const createFakeOfferingIdFromProblem = (unitParam: string, problemOrdinal: string) => {
   // create fake offeringIds per problem so we keep section documents separate
   const [major, minor] = problemOrdinal.split(".");
   const toNumber = (s: string, fallback: number) => isNaN(parseInt(s, 10)) ? fallback : parseInt(s, 10);
-  // TODO: Get the unit code from the loaded unit data?
+  // Ideally we'd get the unit code from the loaded unit data, but we don't have the unit data
+  // yet, and it would complicate things to wait for it to load.
   const offeringPrefix = getUnitCodeFromUnitParam(unitParam);
   return `${offeringPrefix}${(toNumber(major, 1) * 100) + toNumber(minor, 0)}`;
 };
@@ -517,16 +518,14 @@ export interface CreateFakeAuthenticationOptions {
   userType: UserType;
   userId: string;
   network?: string;
-  unitCode: string;
-  problemOrdinal: string;
+  offeringId: string;
 }
 
 export const createFakeAuthentication = (options: CreateFakeAuthenticationOptions) => {
-  const {appMode, classId, userType, userId, network: _network, unitCode, problemOrdinal} = options;
+  const {appMode, classId, userType, userId, network: _network, offeringId} = options;
   const network = userType === "teacher"
                     ? _network || (parseInt(userId, 10) > 1 ? "demo-network" : undefined) || undefined
                     : undefined;
-  const offeringId = createOfferingIdFromProblem(unitCode, problemOrdinal);
   const authenticatedUser = createFakeUser({appMode, classId, userType, network, userId, offeringId});
   const classInfo: ClassInfo = {
     name: authenticatedUser.className,

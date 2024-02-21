@@ -89,8 +89,8 @@ export const getPortalOfferings = (
 };
 
 interface IUnitAndProblem {
-  unitCode: string;
-  problemOrdinal: string;
+  unitCode?: string;
+  problemOrdinal?: string;
 }
 export const getProblemIdForAuthenticatedUser =
               (rawPortalJWT: string, appConfig: AppConfigModelType, urlParams?: QueryParams) => {
@@ -105,16 +105,16 @@ export const getProblemIdForAuthenticatedUser =
         } else {
           const activityUrl = ((res.body || {}).activity_url) || "";
           resolve({
-            unitCode: getUnitCode(activityUrl, appConfig) || appConfig.defaultUnit,
-            problemOrdinal: getProblemOrdinal(activityUrl) || appConfig.defaultProblemOrdinal
+            unitCode: getUnitCode(activityUrl, appConfig),
+            problemOrdinal: getProblemOrdinal(activityUrl)
           });
         }
       });
     }
     else {
       resolve({
-        unitCode: urlParams && urlParams.unit || appConfig.defaultUnit,
-        problemOrdinal: urlParams && urlParams.problem || appConfig.defaultProblemOrdinal
+        unitCode: urlParams && urlParams.unit,
+        problemOrdinal: urlParams && urlParams.problem
       });
     }
   });
