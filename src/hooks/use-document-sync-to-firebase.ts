@@ -70,7 +70,6 @@ export function useDocumentSyncToFirebase(
     enabled: commonSyncEnabled && !readOnly && (type === ProblemDocument),
     options: {
       onSuccess: (data, visibility) => {
-        console.log(`| PROB SYNC saw change to typedMetaData ${typedMetadata} \n    ...so updated  ${type} document ${key} visibility:`, visibility);
         debugLog(`DEBUG: Updated document visibility for ${type} document ${key}:`, visibility);
       },
       onError: (err, visibility) => {
@@ -85,7 +84,6 @@ export function useDocumentSyncToFirebase(
     enabled: commonSyncEnabled && !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
     options: {
       onSuccess: (data, visibility) => {
-        console.log(`| PERSONAL SYNC saw change to metadata ${metadata} \n    ...so updated ${type} document ${key} visibility:`, visibility);
         debugLog(`DEBUG: Updated document visibility for ${type} document ${key}:`, visibility);
       },
       onError: (err, visibility) => {

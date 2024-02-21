@@ -753,7 +753,6 @@ export class DB {
 
   public updateDocumentFromProblemDocument(document: DocumentModelType,
                                            problemDocument: DBOfferingUserProblemDocument) {
-    console.log("| PROB 3: ...essentially calling existingDoc.setVisibility(document.visibility)");
     document.setVisibility(problemDocument.visibility);
   }
   // handles personal documents and learning logs

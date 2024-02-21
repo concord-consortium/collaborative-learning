@@ -15,8 +15,6 @@ export class DBOtherDocumentsListener extends BaseListener {
   private publicationsPath: string;
   private documentsRef: firebase.database.Reference | null  = null;
   private publicationsRef: firebase.database.Reference | null  = null;
-  private doccumentMetadataPath: string;
-  private documentMetadataRef: firebase.database.Reference | null = null;
 
   constructor(db: DB, documentType: OtherDocumentType) {
     super("DBOtherDocumentsListener");
@@ -29,8 +27,6 @@ export class DBOtherDocumentsListener extends BaseListener {
       this.publicationType = PersonalPublication;
       this.documentsPath = this.db.firebase.getUserPersonalDocPath(this.db.stores.user);
       this.publicationsPath = this.db.firebase.getPersonalPublicationsPath(this.db.stores.user);
-      // TRY: 1
-      this.doccumentMetadataPath = this.db.firebase.getUserDocumentMetadataPath(this.db.stores.user);
     }
     else {
       this.publicationType = LearningLogPublication;
@@ -53,22 +49,6 @@ export class DBOtherDocumentsListener extends BaseListener {
     this.publicationsRef = this.db.firebase.ref(this.publicationsPath);
     this.debugLogHandler("#start", "adding", "child_added", this.publicationsRef);
     this.publicationsRef.on("child_added", this.handlePublicationAdded);
-
-    this.documentMetadataRef = this.db.firebase.ref(this.doccumentMetadataPath);
-    this.documentMetadataRef.once("child_changed", snapshot => {
-      // TRY: 2 - temp hack to get correct change
-      if (snapshot.key !== "classes" && snapshot.key !== null){
-        console.log("| PERSONAL Document metadata changed", snapshot.val());
-        const { visibility } = snapshot.val();
-        const documentModel = this.db.stores.documents.getDocument(snapshot.key);
-        if (documentModel) {
-          console.log("| PERSONAL about to set documentModel...", documentModel, "to: ", visibility);
-          documentModel.setVisibility(visibility);
-          console.log("| PERSONAL did it work?", documentModel.visibility);
-          console.log("| it did, so now why is component not re-rendering?");
-        }
-      }
-    });
   }
 
   public stop() {
