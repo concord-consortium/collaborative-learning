@@ -28,3 +28,17 @@ flowchart TB
 
   callLoadUnitProblem1{{"call loadUnitProblem"}}
   cs --"if != auth or unit param"--> callLoadUnitProblem1
+
+  component --> authAndConnect
+  component --> renderApp
+  renderApp(RenderApp)
+
+  %% LE.start: Connecting
+  subgraph authAndConnect [AuthAndConnect]
+    direction TB
+
+    callAuthenticate{{"call authenticate"}}
+
+    callLoadUnitProblem2{{"call loadUnitProblem"}}
+    callAuthenticate --"if not started loading"--> callLoadUnitProblem2
+  end
