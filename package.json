@@ -84,7 +84,7 @@
     "migrate": "node ./migrations/migrate",
     "migrate:debug": "node --inspect-brk ./migrations/migrate",
     "postinstall": "patch-package",
-    "serve": "npx serve -l 8080 dist",
+    "serve": "npx serve -c ../serve.json -l 8080 dist",
     "serve:top-test": "npx http-server top-test",
     "start": "webpack-dev-server --hot",
     "start:secure": "webpack-dev-server --https --hot --cert ~/.localhost-ssl/localhost.pem --key ~/.localhost-ssl/localhost.key",

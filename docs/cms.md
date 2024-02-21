@@ -1,6 +1,9 @@
-CLUE includes a CMS which can be accessed at `/admin.html`. It uses [Decap CMS](https://decapcms.org/). It is configured to edit the content in the `clue-curriculum` repository. It can be configured with the following URL params:
+CLUE includes a CMS which can be accessed at `/admin.html` in a production build. It uses [Decap CMS](https://decapcms.org/). It is configured to edit the content in the `clue-curriculum` repository. It is best to always pass the CMS a `unit` url parameter. Otherwise it will download pretty much all of the files in `clue-curriculum`. With a `unit` parameter it will only download the files for that unit.
+
+# URL Parameters
 - **`curriculumBranch`** By default the CMS edits the `author` branch. You can change the branch by passing a different branch name to this parameter. The CMS will not create this branch for you. You'll need to create it yourself.
 - **`unit`** By default the CMS displays all of the units at the same time. It is better to work with a single unit at a time by using the `unit` param. It should be passed the unit code. This limits what is displayed in the CMS and it also configures the media library to show the images from that unit.
+- **`cmsEditorBase`** By default the CMS will use an iframe pointed at `./cms-editor.html` to edit the CLUE documents. You can use this param to replace `.` with something else. This is useful for local testing (see below)
 - **`localCMSBackend`** By default the CMS works with the `github` backend. This means even when doing local CLUE development the CMS will update the `clue-curriculum` repository directly. If you add the `localCMSBackend` parameter the CMS will attempt to work with a local git proxy running at localhost:8081. You can start this proxy with:
 
   `cd ../clue-curriculum; npx netlify-cms-proxy-server`
@@ -44,9 +47,16 @@ This document editor is located in `/src/cms/`
 ## Local development
 To work on the CMS locally you'll need to start both CLUE and the CMS:
 - start CLUE by running `npm run start` in the top level folder
-- start the CMS by running `npm run start` in the `/cms` folder
+- in a new terminal, open the `/cms` folder
+- make sure its dependencies are installed: `npm i`
+- start the CMS by running `npm run start`
+- open the CMS with `http://localhost:[cms_port]/?cmsEditorBase=http://localhost:[clue_port]&unit=[clue_unit_code]&curriculumBranch=[your own branch]`
 
-TODO: Then you'll need to configure the CMS so it can find your the local `cms-editor.html` from the running CLUE. This can be done using a parameter to the CMS url. Without this parameter it will try to look in `./cms-editor.html` which will not work.
+Typically CLUE will be running on portal 8080 and the CMS will be running on 8081. In this case the url above would be `http://localhost:8081/?cmsEditorBase=http://localhost:8080&unit=[clue_unit_code]&curriculumBranch=[your own branch]`
+
+With this approach you'll be editing the content in the `clue-curriculum` repository directly. By default this will use the `author` branch in the `clue-curriculum` repository. So you aren't making changes to the same branch as other people, you should make your own branch in that repository and pass it to the `curriculumBranch` parameter. You have to make this branch using your own git tools, the CMS cannot create branches itself.
+
+If you want to have more local access to the curriculum you are editing, and you don't want to be updating the `clue-curriculum` repository, you can use the `localCMSBackend` parameter. See above for details on how to use this. Note the proxy needs to be on its own port. If it can't start on 8081 (because the cms is running there) then you'll need to configure it. See the "Configure the Decap CMS proxy server port number" section of this page: https://decapcms.org/docs/working-with-a-local-git-repository
 
 ## Remote build
 In the CI (github actions), the toplevel `npm run build` is used. This will build both CLUE and the CMS. And then it will copy the files from `/cms/dist` to `/dist/cms`. Additional it copyes the file `/cms/dist/admin.html` to `/dist/admin.html`. This admin.html file refers to its resources in the cms folder like `cms/admin.js` and `cms/admin.css`. This file is called `admin.html` because that was its original name, and now various authors have direct links to it. So we don't want to change that name.
