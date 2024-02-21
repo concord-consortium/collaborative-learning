@@ -74,4 +74,14 @@ flowchart TB
         end
       end
     end
+    callAuthenticate --> ram
+
+    %% LE.start: Loading current activity
+    initializePersistentUISync
+    %% LE.end: Loading current activity
+
+    ram --> initializePersistentUISync
+    unitLoadedPromise --> listeners
   end
+  %% LE.end: Connecting
+
