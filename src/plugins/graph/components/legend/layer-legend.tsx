@@ -65,7 +65,7 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
           smm.removeTileSharedModel(graphModel, layerSharedDataSet);
           const sharedTiles = smm.getSharedModelProviders(layerSharedDataSet);
           if (tile){
-            logSharedModelDocEvent(LogEventName.GRAPH_TOOL_UNLINK, tile , sharedTiles);
+            logSharedModelDocEvent(LogEventName.TILE_UNLINK, tile , sharedTiles, layerSharedDataSet);
           }
         }
       }

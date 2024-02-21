@@ -63,9 +63,9 @@ export const useProviderTileLinking = ({
           sharedModelManager.removeTileSharedModel(model.content, shared);
         }
       }
-      sharedModelManager.addTileSharedModel(model.content, sharedModel);
       const sharedTiles = sharedModelManager.getSharedModelProviders(sharedModel);
-      logSharedModelDocEvent(LogEventName.GRAPH_TOOL_LINK, model, sharedTiles);
+      sharedModelManager.addTileSharedModel(model.content, sharedModel);
+      logSharedModelDocEvent(LogEventName.TILE_LINK, model, sharedTiles, sharedModel);
 
     }
   }, [readOnly, sharedModelManager, model, allowMultipleGraphDatasets]);
@@ -74,7 +74,7 @@ export const useProviderTileLinking = ({
     if (!readOnly && sharedModelManager?.isReady) {
       sharedModelManager.removeTileSharedModel(model.content, sharedModel);
       const sharedTiles = sharedModelManager.getSharedModelProviders(sharedModel);
-      logSharedModelDocEvent(LogEventName.GRAPH_TOOL_UNLINK, model, sharedTiles);
+      logSharedModelDocEvent(LogEventName.TILE_UNLINK, model, sharedTiles, sharedModel);
     }
   }, [readOnly, sharedModelManager, model]);
 
