@@ -949,7 +949,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
       const tileId = self.metadata?.id || "";
       const { operation, ...change } = loggedChange;
-      logTileChangeEvent(LogEventName.GRAPH_TOOL_CHANGE, { tileId, operation, change });
+      logTileChangeEvent(LogEventName.GEOMETRY_TOOL_CHANGE, { tileId, operation, change });
 
       return result;
     }
