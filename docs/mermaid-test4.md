@@ -27,7 +27,7 @@ flowchart TB
   cs --> component
 
   callLoadUnitProblem1{{call loadUnitProblem}}
-  cs --"if != auth or unit param"--> callLoadUnitProblem1
+  cs --"if not auth or unit param"--> callLoadUnitProblem1
 
   component --> authAndConnect
   component --> renderApp
