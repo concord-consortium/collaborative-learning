@@ -4,6 +4,7 @@ Look at the diagram source to see the loading events
 
 ```mermaid
 flowchart TB
+
   req(Browser requests index.html)
   req --> parse
 
@@ -25,8 +26,14 @@ flowchart TB
   component("Create app component")
   cs --> component
 
-  cs --> sup
-  subgraph sup [Set unit and problem]
+  callLoadUnitProblem1{{"call loadUnitProblem"}}
+  cs --"if != auth or unit param"--> callLoadUnitProblem1
+
+  component --> authAndConnect
+  component --> renderApp
+  renderApp(RenderApp)
+
+  subgraph loadUnitProblem [Load unit and problem]
     direction TB
 
     %% LE.start: Loading curriculum content
@@ -40,46 +47,50 @@ flowchart TB
     tiles(Register tile types)
     %% LE.end: Loading tile types
 
+    resolveUnitLoadedPromise([resolve unitLoadedPromise])
+    tiles --> resolveUnitLoadedPromise
+
     configStores(Configure some stores)
     tiles --> configStores
     %% LE.end: Setting up curriculum content
   end
 
-  component --> auth
-  component --> renderApp
-  renderApp(RenderApp)
+  %% some invisible links to get the layout to be more compact
+  req ~~~ loadUnitProblem
+  loadUnitProblem ~~~ authenticate
+
+  subgraph authenticate [Authenticate]
+    direction TB
+    type{{appMode}}
+    type -- demo/qa/dev --> demo
+    type -- auth --> real1
+    demo(Returns fake auth)
+    real1(Fetch JWT from portal) --> real2(Get class info)
+    real3(Get Firebase JWT)
+    real4(Get portal offerings)
+    real5(Get offering problem ID)
+    real2 --> real3 & real4 & real5 --> real6
+    real6(Return real auth)
+  end
 
   %% LE.start: Connecting
-  subgraph auth [AuthAndConnect]
+  subgraph authAndConnect [AuthAndConnect]
     direction TB
 
-    subgraph authenticate [Authenticate]
-      direction TB
-      type{{appMode}}
-      type -- demo/qa/dev --> demo
-      type -- auth --> real1
-      demo(Returns fake auth)
-      real1(Fetch JWT from portal) --> real2(Get class info)
-      real3(Get Firebase JWT)
-      real4(Get portal offerings)
-      real5(Get offering problem ID)
-      real2 --> real3 & real4 & real5 --> real6
-      real6(Return real auth)
-    end
+    callAuthenticate{{"call authenticate"}}
 
-    subgraph initialUnitProblem [Set unit and problem from above]
-      label{{added to fix diagram bug}}
-    end
-
-    sup2("Re-set unit and problem (if different)")
-    authenticate --> sup2
-    initialUnitProblem --> sup2
+    callLoadUnitProblem2{{"call loadUnitProblem"}}
+    callAuthenticate --"if not started loading"--> callLoadUnitProblem2
+    callLoadUnitProblem2 ~~~ ram
 
     subgraph ram [Resolve app mode]
       direction TB
 
       subgraph db [DB Connect]
         direction TB
+
+        unitLoadedPromise([unitLoadedPromise])
+
         fb(Firebase sign-in)
         fb --> nolisteners & listeners
         nolisteners{{Don't start listeners}}
@@ -104,30 +115,29 @@ flowchart TB
         end
       end
     end
-    sup2 --> ram
+    callAuthenticate --> ram
 
     %% LE.start: Loading current activity
     initializePersistentUISync
     %% LE.end: Loading current activity
 
     ram --> initializePersistentUISync
-    initialUnitProblem --> listeners
+    unitLoadedPromise --> listeners
   end
   %% LE.end: Connecting
-
 
   %% LE.start: Joining group
   renderGroupChooser(Render group chooser)
   %% LE.end: Joining group
 
   renderApp --> renderGroupChooser
-  auth --> renderGroupChooser
+  authAndConnect --> renderGroupChooser
 
   renderAppContentComponent
   renderGroupChooser --> renderAppContentComponent
 
   primaryDocumentLoaded
-  auth --> primaryDocumentLoaded
+  authAndConnect --> primaryDocumentLoaded
 
   %% LE.start: Building workspace
   renderDocumentWorkspaceComponentContent(show the real right side content)

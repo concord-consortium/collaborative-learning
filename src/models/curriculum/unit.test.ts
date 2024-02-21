@@ -1,6 +1,5 @@
 import { destroy, getSnapshot } from "mobx-state-tree";
-import { UnitModel, isDifferentUnitAndProblem } from "./unit";
-import { IStores } from "../stores/stores";
+import { UnitModel } from "./unit";
 
 describe("UnitModel", () => {
 
@@ -57,20 +56,6 @@ describe("UnitModel", () => {
     const result21 = unit.getProblem("2.1");
     expect(result21.problem && result21.problem.title).toBe(problemTitle);
     expect(result21.investigation && result21.investigation.title).toBe(investigation2Title);
-  });
-
-  it("isDifferentUnitAndProblem() should work as expected", () => {
-    const stores: IStores = {
-            unit,
-            investigation: unit.getInvestigation(1),
-            problem: unit.getInvestigation(1)!.getProblem(1)
-          } as IStores;
-    expect(isDifferentUnitAndProblem(stores, "u1", undefined)).toBe(false);
-    expect(isDifferentUnitAndProblem(stores, undefined, "1.1")).toBe(false);
-    expect(isDifferentUnitAndProblem(stores, "u1", "1.1")).toBe(false);
-    expect(isDifferentUnitAndProblem(stores, "u1", "1.2")).toBe(true);
-    expect(isDifferentUnitAndProblem(stores, "u2", "1.1")).toBe(true);
-    expect(isDifferentUnitAndProblem(stores, "u2", "2.2")).toBe(true);
   });
 
   it("can import legacy snapshots", () => {
