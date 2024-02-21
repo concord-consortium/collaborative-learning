@@ -26,8 +26,8 @@ flowchart TB
   component("Create app component")
   cs --> component
 
-  callLoadUnitProblem1{{call loadUnitProblem}}
-  cs -- if != auth or unit param --> callLoadUnitProblem1
+  callLoadUnitProblem1{{"call loadUnitProblem"}}
+  cs --"if != auth or unit param"--> callLoadUnitProblem1
 
   component --> authAndConnect
   component --> renderApp
@@ -77,10 +77,10 @@ flowchart TB
   subgraph authAndConnect [AuthAndConnect]
     direction TB
 
-    callAuthenticate{{call authenticate}}
+    callAuthenticate{{"call authenticate"}}
 
-    callLoadUnitProblem2{{call loadUnitProblem}}
-    callAuthenticate -- if not started loading --> callLoadUnitProblem2
+    callLoadUnitProblem2{{"call loadUnitProblem"}}
+    callAuthenticate --"if not started loading"--> callLoadUnitProblem2
     callLoadUnitProblem2 ~~~ ram
 
     subgraph ram [Resolve app mode]
@@ -125,8 +125,6 @@ flowchart TB
     unitLoadedPromise --> listeners
   end
   %% LE.end: Connecting
-
-
 
   %% LE.start: Joining group
   renderGroupChooser(Render group chooser)
