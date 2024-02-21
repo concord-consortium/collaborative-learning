@@ -1,392 +1,151 @@
 # CLUE Startup sequence
 
-## Current Loading sequence
-
-```mermaid
-flowchart TD
-  req(Browser requests index.html)
-  req --> load
-
-  style load fill:#220000
-  subgraph load [LE: Loading the application]
-    direction TB
-    parse(Load and parse core Javascript)
-  end
-  load --> init
-
-  classDef loadingEvent fill:#220000
-  class init loadingEvent
-  subgraph init [LE: Initializing]
-    direction TB
-    indextsx("Runs React (index.tsx)")
-    indextsx --> ia
-    ia("initializeAuthorization (OAuth2)")
-    ia -.-> restart{{may redirect}}
-    ia --> initapp
-    subgraph initapp [Initialize app]
-      direction TB
-      cs(Create stores)
-    end
-
-    component("Create app component")
-    initapp --> component
-
-  end
-
-  initapp --> sup
-  subgraph sup [Set unit and problem]
-    direction TB
-    style loadingCurriculumContent fill:#220000
-    subgraph loadingCurriculumContent [LE: Loading curriculum content]
-      unit(Get unit JSON)
-    end
-    unit --> tiles
-    style settingUpCurriculumContent fill:#220000
-    subgraph settingUpCurriculumContent [LE: Setting up curriculum content]
-      style loadingTileTypes fill:#220000
-      subgraph loadingTileTypes [LE: Loading tile types]
-        tiles(Register tile types)
-      end
-      configStores(Configure some stores)
-      loadingTileTypes --> configStores
-    end
-  end
-
-  component --> auth
-  component --> renderApp
-
-  style connecting fill:#220000
-  subgraph connecting [LE: Connecting]
-    subgraph auth [AuthAndConnect]
-      direction TB
-
-      subgraph authenticate [Authenticate]
-        direction TB
-        type{{appMode}}
-        type -- demo/qa/dev --> demo
-        type -- auth --> real1
-        demo(Returns fake auth)
-        real1(Fetch JWT from portal) --> real2(Get class info)
-        real3(Get Firebase JWT)
-        real4(Get portal offerings)
-        real5(Get offering problem ID)
-        real2 --> real3 & real4 & real5 --> real6
-        real6(Return real auth)
-      end
-
-      authenticate --> sup2
-      sup2("Re-set unit and problem (if different)")
-
-      subgraph ram [Resolve app mode]
-        direction TB
-
-        subgraph db [DB Connect]
-          direction TB
-          fb(Firebase sign-in)
-          fb --> nolisteners & listeners
-          nolisteners{{Don't start listeners}}
-          subgraph listeners [Start listeners]
-            direction TB
-            lgroup(Latest group)
-            group(Groups)
-            prob(Problem docs)
-            pers(Personal docs )
-            ll(Learning logs )
-            pub(Publication )
-            spd(Student personal docs )
-            supl(Supports )
-            lgroup --> group & prob & pers & ll & pub & spd & supl --> next
-            next(First batch done)
-
-            com(Comments )
-            bm(Bookmarks )
-            dc(Documents content )
-            next --> com & bm & dc --> finish
-            finish(All listeners done)
-          end
-        end
-      end
-      sup2 --> ram
-
-      style loadingCurrentActivity fill:#220000
-      subgraph loadingCurrentActivity [LE: Loading current activity]
-        initializePersistentUISync
-      end
-      ram --> initializePersistentUISync
-
-
-    end
-  end
-  sup --> listeners
-  sup --> sup2
-
-  style joiningGroup fill:#220000
-  subgraph joiningGroup [LE: Joining group]
-    renderGroupChooser
-  end
-  renderApp --> renderGroupChooser
-  finish --> renderGroupChooser
-
-  renderAppContentComponent
-  renderGroupChooser --> renderAppContentComponent
-
-  primaryDocumentLoaded
-  finish --> primaryDocumentLoaded
-
-  style buildingWorkspace fill:#220000
-  subgraph buildingWorkspace [LE: Building workspace]
-    RDWCC(show the real right side content)
-  end
-  renderAppContentComponent --> RDWCC
-  primaryDocumentLoaded --> RDWCC
-
-
-```
-
-Version without Loading Event boxes:
+Look at the diagram source to see the loading events
 
 ```mermaid
 flowchart TB
+
   req(Browser requests index.html)
   req --> parse
 
-%%  subgraph load [LE: Loading the application]
+  %% LE.start: Loading the application
   parse(Load and parse core Javascript)
   parse --> indextsx
+  %% LE.end: Loading the application
 
-%%  subgraph init [LE: Initializing]
-
+  %% LE.start: Initializing
   indextsx("Runs React (index.tsx)")
   indextsx --> ia
   ia("initializeAuthorization (OAuth2)")
   restart{{may redirect}}
   ia -.-> restart
   ia --> cs
-%%  subgraph initapp [Initialize app]
   cs(Create stores)
+  %% LE.end: Initializing
 
   component("Create app component")
   cs --> component
 
-  cs --> sup
-  subgraph sup [Set unit and problem]
-    direction TB
-%%    subgraph loadingCurriculumContent [LE: Loading curriculum content]
-    unit(Get unit JSON)
-    unit --> tiles
-%%    subgraph settingUpCurriculumContent [LE: Setting up curriculum content]
-%%      subgraph loadingTileTypes [LE: Loading tile types]
-    tiles(Register tile types)
-    configStores(Configure some stores)
-    tiles --> configStores
-  end
+  callLoadUnitProblem1{{call loadUnitProblem}}
+  cs -- if != auth or unit param --> callLoadUnitProblem1
 
-  component --> auth
+  component --> authAndConnect
   component --> renderApp
   renderApp(RenderApp)
 
-  %%subgraph connecting [LE: Connecting]
-    subgraph auth [AuthAndConnect]
+  subgraph loadUnitProblem [Load unit and problem]
+    direction TB
+
+    %% LE.start: Loading curriculum content
+    unit(Get unit JSON)
+    %% LE.end: Loading curriculum content
+
+    unit --> tiles
+
+    %% LE.start: Setting up curriculum content
+    %% LE.start: Loading tile types
+    tiles(Register tile types)
+    %% LE.end: Loading tile types
+
+    resolveUnitLoadedPromise([resolve unitLoadedPromise])
+    tiles --> resolveUnitLoadedPromise
+
+    configStores(Configure some stores)
+    tiles --> configStores
+    %% LE.end: Setting up curriculum content
+  end
+
+  %% some invisible links to get the layout to be more compact
+  req ~~~ loadUnitProblem
+  loadUnitProblem ~~~ authenticate
+
+  subgraph authenticate [Authenticate]
+    direction TB
+    type{{appMode}}
+    type -- demo/qa/dev --> demo
+    type -- auth --> real1
+    demo(Returns fake auth)
+    real1(Fetch JWT from portal) --> real2(Get class info)
+    real3(Get Firebase JWT)
+    real4(Get portal offerings)
+    real5(Get offering problem ID)
+    real2 --> real3 & real4 & real5 --> real6
+    real6(Return real auth)
+  end
+
+  %% LE.start: Connecting
+  subgraph authAndConnect [AuthAndConnect]
+    direction TB
+
+    callAuthenticate{{call authenticate}}
+
+    callLoadUnitProblem2{{call loadUnitProblem}}
+    callAuthenticate -- if not started loading --> callLoadUnitProblem2
+    callLoadUnitProblem2 ~~~ ram
+
+    subgraph ram [Resolve app mode]
       direction TB
 
-      subgraph authenticate [Authenticate]
-        direction TB
-        type{{appMode}}
-        type -- demo/qa/dev --> demo
-        type -- auth --> real1
-        demo(Returns fake auth)
-        real1(Fetch JWT from portal) --> real2(Get class info)
-        real3(Get Firebase JWT)
-        real4(Get portal offerings)
-        real5(Get offering problem ID)
-        real2 --> real3 & real4 & real5 --> real6
-        real6(Return real auth)
-      end
-
-      authenticate --> sup2
-      sup2("Re-set unit and problem (if different)")
-
-      subgraph ram [Resolve app mode]
+      subgraph db [DB Connect]
         direction TB
 
-        subgraph db [DB Connect]
+        unitLoadedPromise([unitLoadedPromise])
+
+        fb(Firebase sign-in)
+        fb --> nolisteners & listeners
+        nolisteners{{Don't start listeners}}
+        subgraph listeners [Start listeners]
           direction TB
-          fb(Firebase sign-in)
-          fb --> nolisteners & listeners
-          nolisteners{{Don't start listeners}}
-          subgraph listeners [Start listeners]
-            direction TB
-            lgroup(Latest group)
-            group(Groups)
-            prob(Problem docs)
-            pers(Personal docs)
-            ll(Learning logs)
-            pub(Publication)
-            spd(Student personal docs)
-            supl(Supports)
-            lgroup --> group & prob & pers & ll & pub & spd & supl --> next
-            next(First batch done)
+          lgroup(Latest group)
+          group(Groups)
+          prob(Problem docs)
+          pers(Personal docs)
+          ll(Learning logs)
+          pub(Publication)
+          spd(Student personal docs)
+          supl(Supports)
+          lgroup --> group & prob & pers & ll & pub & spd & supl --> next
+          next(First batch done)
 
-            com(Comments)
-            bm(Bookmarks)
-            dc(Documents content)
-            next --> com & bm & dc --> finish
-            finish(All listeners done)
-          end
+          com(Comments)
+          bm(Bookmarks)
+          dc(Documents content)
+          next --> com & bm & dc --> finish
+          finish(All listeners done)
         end
       end
-      sup2 --> ram
-
-%%      subgraph loadingCurrentActivity [LE: Loading current activity]
-      initializePersistentUISync
-      ram --> initializePersistentUISync
     end
-  sup --> listeners
-  sup --> sup2
+    callAuthenticate --> ram
 
-%%  subgraph joiningGroup [LE: Joining group]
+    %% LE.start: Loading current activity
+    initializePersistentUISync
+    %% LE.end: Loading current activity
+
+    ram --> initializePersistentUISync
+    unitLoadedPromise --> listeners
+  end
+  %% LE.end: Connecting
+
+
+
+  %% LE.start: Joining group
   renderGroupChooser(Render group chooser)
+  %% LE.end: Joining group
+
   renderApp --> renderGroupChooser
-  finish --> renderGroupChooser
+  authAndConnect --> renderGroupChooser
 
   renderAppContentComponent
   renderGroupChooser --> renderAppContentComponent
 
   primaryDocumentLoaded
-  finish --> primaryDocumentLoaded
+  authAndConnect --> primaryDocumentLoaded
 
-%%  subgraph buildingWorkspace [LE: Building workspace]
+  %% LE.start: Building workspace
   renderDocumentWorkspaceComponentContent(show the real right side content)
+  %% LE.end: Building workspace
+
   renderAppContentComponent --> renderDocumentWorkspaceComponentContent
   primaryDocumentLoaded --> renderDocumentWorkspaceComponentContent
-
-
-```
-
-## Previous Loading sequence
-
-```mermaid
-flowchart TD
-%%{init: {"flowchart": {"defaultRenderer": "elk"}} }%%
-  req(Browser requests index.html)
-  req --> load
-
-  style load fill:#220000
-  subgraph load [LE: Loading the application]
-    direction TB
-    parse(Load and parse core Javascript)
-  end
-  load --> init
-
-  classDef loadingEvent fill:#220000
-  class init loadingEvent
-  subgraph init [LE: Initializing]
-    direction TB
-    indextsx("Runs React (index.tsx)")
-    indextsx --> ia
-    ia("initializeAuthorization (OAuth2)")
-    ia -.-> restart{{may redirect}}
-    ia --> initapp
-    subgraph initapp [Initialize app]
-      direction TB
-      cs(Create stores)
-      cs --> sup
-      subgraph sup [Set unit and problem]
-        direction TB
-        style loadingCurriculumContent fill:#220000
-        subgraph loadingCurriculumContent [LE: Loading curriculum content]
-          unit(Get unit JSON)
-        end
-        unit --> tiles
-        style settingUpCurriculumContent fill:#220000
-        subgraph settingUpCurriculumContent [LE: Setting up curriculum content]
-          style loadingTileTypes fill:#220000
-          subgraph loadingTileTypes [LE: Loading tile types]
-            tiles(Register tile types)
-          end
-          configStores(Configure some stores)
-          loadingTileTypes --> configStores
-        end
-      end
-    end
-
-    initapp --> component("Create app component")
-
-  end
-
-  component --> auth
-
-  renderApp(Render App)
-  component --> renderApp
-
-  style connecting fill:#220000
-  subgraph connecting [LE: Connecting]
-    subgraph auth [AuthAndConnect]
-      direction TB
-
-      subgraph authenticate [Authenticate]
-        direction TB
-        type{{appMode}}
-        type -- demo/qa/dev --> demo
-        type -- auth --> real1
-        demo(Returns fake auth)
-        real1(Fetch JWT from portal) --> real2(Get class info)
-        real3(Get Firebase JWT)
-        real4(Get portal offerings)
-        real5(Get offering problem ID)
-        real2 --> real3 & real4 & real5 --> real6
-        real6(Return real auth)
-      end
-
-      authenticate --> sup2
-      sup2("Re-set unit and problem (if different)")
-
-      subgraph ram [Resolve app mode]
-        direction TB
-
-        subgraph db [DB Connect]
-          direction TB
-          fb(Firebase sign-in)
-          fb --> nolisteners & listeners
-          nolisteners{{Don't start listeners}}
-          subgraph listeners [Start listeners]
-            direction TB
-            lgroup(Latest group)
-            group(Groups)
-            prob(Problem docs)
-            pers(Personal docs )
-            ll(Learning logs )
-            pub(Publication )
-            spd(Student personal docs )
-            supl(Supports )
-            lgroup --> group & prob & pers & ll & pub & spd & supl --> next
-            next(First batch done)
-
-            com(Comments )
-            bm(Bookmarks )
-            dc(Documents content )
-            next --> com & bm & dc --> allListenersDone
-            allListenersDone(All listeners done)
-          end
-        end
-      end
-      sup2 --> ram
-
-      style loadingCurrentActivity fill:#220000
-      subgraph loadingCurrentActivity [LE: Loading current activity]
-        initializePersistentUISync(Initialize PersistentUISync)
-      end
-      ram --> initializePersistentUISync
-    end
-  end
-
-  style joiningGroup fill:#220000
-  subgraph joiningGroup [LE: Joining group]
-    renderGroupChooser(Render group chooser)
-  end
-  renderApp --> joiningGroup
-  listeners --> joiningGroup
-
-
 
 ```
