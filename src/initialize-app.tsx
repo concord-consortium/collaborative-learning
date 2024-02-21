@@ -43,6 +43,15 @@ export const initializeApp = (appMode: AppMode, authoring?: boolean): IStores =>
   const user = UserModel.create();
 
   const showDemoCreator = urlParams.demo;
+  if (showDemoCreator) {
+    // Override the app mode when the demo creator is being used.
+    // `authenticate` is still called when the demo creator is shown
+    // and with an undefined appMode then it will default to `authed` on
+    // a remote host. This will cause an error as it looks for a token.
+    // This error was always happening but for some reason before the app
+    // was still rendering, and now it doesn't.
+    appMode = "demo";
+  }
   const demoName = urlParams.demoName;
 
   const isPreviewing = !!(urlParams.domain && urlParams.domain_uid && !getBearerToken(urlParams));
