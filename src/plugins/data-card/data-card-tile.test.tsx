@@ -36,9 +36,6 @@ describe("DataCardToolComponent", () => {
     onSetCanAcceptDrop: (tileId?: string): void => {
       throw new Error("Function not implemented.");
     },
-    onRequestUniqueTitle: (tileId: string): string | undefined => {
-      return "Data Card Collection 1";
-    },
     onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number): void => {
       // throw new Error("Function not implemented.");
     },

@@ -15,6 +15,7 @@ registerTileContentInfo({
   modelClass: DataCardContentModel,
   titleBase: "Data Card Collection",
   displayName: "Data Cards",
+  useDataSetTitle: true,
   metadataClass: TileMetadataModel,
   defaultContent: defaultDataCardContent,
   defaultHeight: kDataCardDefaultHeight,

@@ -1,6 +1,6 @@
 import { Expression, Parser } from "expr-eval";
 import { reaction } from "mobx";
-import { addDisposer, Instance, SnapshotIn, types, getType, getSnapshot } from "mobx-state-tree";
+import { addDisposer, Instance, SnapshotIn, types, getType, getSnapshot, getParentOfType } from "mobx-state-tree";
 import { ITableChange } from "./table-change";
 import { exportTableContentAsJson } from "./table-export";
 import {
@@ -10,7 +10,7 @@ import { getCellId } from "./table-utils";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileContentAPIActions, tileContentAPIViews } from "../tile-model-hooks";
-import { getTileIdFromContent, getTileModel } from "../tile-model";
+import { getTileIdFromContent, getTileModel, TileModel } from "../tile-model";
 import { TileContentModel } from "../tile-content";
 import { IClueObject } from "../../annotations/clue-object";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
@@ -264,6 +264,10 @@ export const TableContentModel = TileContentModel
   .actions(self => tileContentAPIActions({
     doPostCreate(metadata) {
       self.metadata = metadata as TableMetadataModelType;
+    },
+    setContentTitle(title: string) {
+      self.dataSet.setName(title);
+      console.log("table.setContentTitle set DataSet name");
     }
   }))
   .actions(self => ({
@@ -358,6 +362,9 @@ export const TableContentModel = TileContentModel
               ? getSnapshot(self.importedDataSet) : createDefaultDataSet(model?.computedTitle));
             self.clearImportedDataSet();
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
+            // Unset title of the tile so that the name of the dataset will be displayed.
+            console.log('Created new dataset for new table');
+            getParentOfType(self, TileModel).setTitleField(undefined);
           }
 
           // Add the shared model to both the document and the tile

@@ -42,7 +42,7 @@ function replaceLatex(mfLatex: string) {
 const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
-  const { onRegisterTileApi, onRequestUniqueTitle, onUnregisterTileApi,
+  const { onRegisterTileApi, onUnregisterTileApi,
     model, readOnly, documentContent, tileElt, scale } = props;
   const content = model.content as ExpressionContentModelType;
   const mf = useRef<MathfieldElement>(null);
@@ -144,7 +144,6 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       <div className="expression-title-area">
         <CustomEditableTileTitle
           model={model}
-          onRequestUniqueTitle={onRequestUniqueTitle}
           readOnly={readOnly}
         />
       </div>

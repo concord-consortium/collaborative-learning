@@ -24,7 +24,7 @@ import "./data-card-tile.scss";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer(function DataCardToolComponent(props) {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
-            scale, onRequestUniqueTitle, onUnregisterTileApi,
+            scale, onUnregisterTileApi,
             height, onRequestRowHeight } = props;
   const backgroundRef = useRef<HTMLDivElement | null>(null);
 
@@ -54,13 +54,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
       content.setCaseIndex(dataSet.caseIndexFromID(selectedCaseId));
     }
   }, [content, dataSet, selectedCaseId]);
-
-  useEffect(() => {
-    if (!model.computedTitle) {
-      const title = onRequestUniqueTitle(model.id);
-      title && model.setTitle(title);
-    }
-  }, [model, onRequestUniqueTitle]);
 
   useDataCardTileHeight({
     tileElt,
@@ -277,7 +270,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
               <div className="panel title">
                 <CustomEditableTileTitle
                   model={props.model}
-                  onRequestUniqueTitle={props.onRequestUniqueTitle}
                   readOnly={props.readOnly}
                 />
               </div>

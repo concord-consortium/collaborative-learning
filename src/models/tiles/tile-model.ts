@@ -121,15 +121,56 @@ export const TileModel = types
     }
   }))
   .actions(self => ({
-    setTitle(title: string) {
+    /**
+     * Low-level method to set the "title" field of this model.
+     * Most callers should use `setTitle` instead.
+     * TODO: unneeded
+     * @param title
+     */
+    setTitleField(title: string|undefined) {
       self.title = title;
-      logTileDocumentEvent(LogEventName.RENAME_TILE,{ tile: self as ITileModel });
+    },
+    setTitle(title: string, skipLogging: boolean = false) {
+      if (!skipLogging) {
+        logTileDocumentEvent(LogEventName.RENAME_TILE,{ tile: self as ITileModel });
+      }
+      // TODO: this method should be able to go back to being simple.
+      if (getTileContentInfo(self.content.type)?.useDataSetTitle) {
+        console.log("TODO: set title on DataSet");
+        // const smm = getSharedModelManager(self);
+        // if (smm?.isReady) {
+        //   const dataSet = smm.getTileSharedModelsByType(self.content, SharedDataSet);
+        //   if (dataSet.length && isSharedDataSet(dataSet[0])) {
+        //     dataSet[0].dataSet.setName(title);
+        //     console.log("SetTitle set DataSet name");
+        //     return;
+        //   }
+        // }
+      } else {
+        self.title = title;
+        return;
+      }
+      console.log("Unable to set title");
     },
     setDisplay(display: DisplayUserType) {
       self.display = display;
     }
   }))
   .actions(self => ({
+    /**
+     * Set the title in the appropriate way for this tile.
+     * For tables and data cards, this will set the name of the DataSet;
+     * for other tiles, it is set in the Tile model.
+     * @param title
+     */
+    setTitleOrContentTitle(title: string) {
+      logTileDocumentEvent(LogEventName.RENAME_TILE,{ tile: self as ITileModel });
+      if (getTileContentInfo(self.content.type)?.useDataSetTitle) {
+        self.content.setContentTitle(title);
+      } else {
+        self.setTitle(title, true);
+      }
+    },
     afterCreate() {
       const metadata = findMetadata(self.content.type, self.id);
       const content = self.content;
@@ -145,6 +186,19 @@ export const TileModel = types
       if ("afterAttachToDocument" in self.content && typeof self.content.afterAttachToDocument === "function") {
         self.content.afterAttachToDocument();
       }
+      // Check that the tile has a valid name; set default if not.
+      // TODO: is this actually needed?  If so, need to deal with the fact that the shared model manager
+      // is not available as the document is being initially constructed.
+      // if (!self.computedTitle) {
+      //   const doc = getParentOfType(self, DocumentContentModel);
+      //   const title = doc.getNewTileTitle(self.content.type);
+      //   if (title) {
+      //     self.setTitle(title);
+      //     console.log("Set default title for tile", self.id, title);
+      //   } else {
+      //     console.warn("Can't set default title for tile type", self.content.type);
+      //   }
+      // }
     },
     onTileAction(call: ISerializedActionCall) {
       self.content.onTileAction?.(call);
