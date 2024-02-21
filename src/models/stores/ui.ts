@@ -131,10 +131,23 @@ export const UIModel = types
       },
 
 
-      setError(error: string) {
-        self.error = error ? error.toString() : error;
+      setError(error: string | Error, customMessage?: string) {
+        self.error = customMessage ?? error?.toString();
         Logger.log(LogEventName.INTERNAL_ERROR_ENCOUNTERED, { message: self.error });
-        console.error(self.error);
+        if (error instanceof Error) {
+          // In Chrome, passing an error instance to console.error() will print the
+          // message and the stack. This is useful to find the original error. It
+          // does not show async chaining like Chrome does when it shows the stack
+          // trace directly from an uncaught error or the trace of the console.error
+          // itself. Even without the extra detail, this trace is useful for debugging.
+          if (customMessage) {
+            console.error(customMessage, error);
+          } else {
+            console.error(error);
+          }
+        } else {
+          console.error(self.error);
+        }
       },
       clearError() {
         self.error = null;
