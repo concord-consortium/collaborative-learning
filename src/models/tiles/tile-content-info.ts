@@ -47,6 +47,12 @@ export interface ITileContentInfo {
    * cases the type is used.
    */
   titleBase?: string;
+  /**
+   * If true, the title of a linked DataSet will be used, rather than storing
+   * a title on the tile itself.
+   * TODO: poorly named.  Should this be in Tile API instead?
+   */
+  useDataSetTitle?: boolean;
   metadataClass?: typeof TileMetadataModel;
   addSidecarNotes?: boolean;
   defaultHeight?: number;

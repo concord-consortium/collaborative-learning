@@ -368,6 +368,29 @@ export const BaseDocumentContentModel = types
       const section = self.importContextCurrentSection || "document";
       return `${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
     },
+    // TODO: may not be needed any more
+    addToTileMap(snapshot: SnapshotIn<typeof TileModel>) {
+      const tile = self.tileMap.put(snapshot);
+      // // Use the tile's setTitle method rather than inserting it directly in the snapshot,
+      // // since some tiles store their titles in their DataSets.
+      // if (snapshot.title) {
+      //   tile.setTitle(snapshot.title);
+      // }
+      return tile;
+    },
+    // TODO unfinished
+    migrateDataSetTitles() {
+      // Iterate through all tiles in order.
+      // If a tile that should not have a title has one, and its dataset doesn't, move the title there.
+      for (const id in self.getTilesInDocumentOrder) {
+        const tile = self.tileMap.get(id);
+        if (tile && tile.title && getTileContentInfo(tile.content.type)?.useDataSetTitle) {
+          console.log("Tile has a title and it shouldn't:", tile.content.type, tile.id, tile.title);
+          tile.setTitle(tile.title, true);
+          tile.setTitleField(undefined);
+        }
+      }
+    },
     insertRow(row: TileRowModelType, index?: number) {
       self.rowMap.put(row);
       if ((index != null) && (index < self.rowOrder.length)) {
@@ -382,8 +405,8 @@ export const BaseDocumentContentModel = types
       self.rowMap.delete(rowId);
     },
     insertNewTileInRow(tile: ITileModel, row: TileRowModelType, tileIndexInRow?: number) {
-      row.insertTileInRow(tile, tileIndexInRow);
-      self.tileMap.put(tile);
+      const insertedTile = this.addToTileMap(tile);
+      row.insertTileInRow(insertedTile, tileIndexInRow);
     },
     deleteTilesFromRow(row: TileRowModelType) {
       row.tiles
@@ -458,7 +481,7 @@ export const BaseDocumentContentModel = types
       // Add the snapshot directly to the map instead of creating it
       // independently. This way if the snapshot has references to
       // shared model objects, those references will be valid.
-      const tileModel = self.tileMap.put(tileSnapshot);
+      const tileModel = self.addToTileMap(tileSnapshot);
       row.insertTileInRow(tileModel!);
 
       if (tileHeight) {
@@ -475,10 +498,6 @@ export const BaseDocumentContentModel = types
       if (!content.type) {
         console.warn("addTileContentInNewRow requires the content to have a type");
       }
-      // In the case of the table tile, it sets the name of the dataSet after a new one
-      // has been created. However because getNewTileTitle always returns a string
-      // the table will never use the dataset name unless it has been manually
-      // configured to do so.
       const title = options?.title || self.getNewTileTitle(content.type!);
       const o = options || {};
       if (o.rowIndex === undefined) {
@@ -489,8 +508,7 @@ export const BaseDocumentContentModel = types
       self.insertRow(row, o.rowIndex);
 
       const id = o.tileId;
-      const tileSnapshot = { id, title, content };
-      const tileModel = self.tileMap.put(tileSnapshot);
+      const tileModel = self.addToTileMap({id, content, title});
       row.insertTileInRow(tileModel);
 
       self.removeNeighboringPlaceholderRows(o.rowIndex);
@@ -508,7 +526,7 @@ export const BaseDocumentContentModel = types
       const row = o.rowId ? self.getRow(o.rowId) : self.getRowByIndex(o.rowIndex);
       if (row) {
         const indexInRow = o.locationInRow === "left" ? 0 : undefined;
-        const tileModel = self.tileMap.put(snapshot);
+        const tileModel = self.addToTileMap(snapshot);
         row.insertTileInRow(tileModel, indexInRow);
         self.removePlaceholderTilesFromRow(o.rowIndex);
         self.removeNeighboringPlaceholderRows(o.rowIndex);
@@ -724,11 +742,20 @@ export const BaseDocumentContentModel = types
           }
         }
       },
+      /**
+       * Create and insert a new tile of the given type, with default content.
+       * @param toolId the type of tile to create.
+       * @param options an options object, which can include:
+       * @param options.title title for the new tile
+       * @param options.addSidecarNotes if true, creates an additional text tile alongside
+       * @param options.url passed to the default content creation method
+       * @param options.insertRowInfo specifies where the tile should be placed
+       * @returns an object containing information about the results: rowId, tileId, additionalTileIds
+       */
       addTile(toolId: string, options?: IDocumentContentAddTileOptions) {
         const { title, addSidecarNotes, url, insertRowInfo } = options || {};
         // for historical reasons, this function initially places new rows at
         // the end of the content and then moves them to the desired location.
-        const addTileOptions = { rowIndex: self.rowCount };
         const contentInfo = getTileContentInfo(toolId);
         if (!contentInfo) return;
 
@@ -739,9 +766,10 @@ export const BaseDocumentContentModel = types
         // the table's defaultContent. We should find a way for the table tile
         // to work without needing this title.
         const newContent = contentInfo?.defaultContent({ title, url, appConfig });
+        const addTileOptions = { rowHeight: contentInfo.defaultHeight, rowIndex: self.rowCount, title: options?.title };
         const tileInfo = self.addTileContentInNewRow(
                               newContent,
-                              { rowHeight: contentInfo.defaultHeight, ...addTileOptions,  title: options?.title });
+                              addTileOptions);
         if (addSidecarNotes) {
           const { rowId } = tileInfo;
           const row = self.rowMap.get(rowId);

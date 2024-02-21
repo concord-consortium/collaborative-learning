@@ -234,7 +234,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                                   documentContent={this.domElement}
                                   rowIndex={index} height={rowHeight} tileMap={tileMap}
                                   dropHighlight={dropHighlight}
-                                  onRequestUniqueTitle={this.handleRequestUniqueTitle}
                                   ref={(elt) => this.rowRefs.push(elt)} {...others} />
               : null;
     });

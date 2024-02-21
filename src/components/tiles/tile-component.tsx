@@ -67,9 +67,6 @@ interface ITileBaseProps {
   readOnly?: boolean;
   onResizeRow: (e: React.DragEvent<HTMLDivElement>) => void;
   onSetCanAcceptDrop: (tileId?: string) => void;
-  // TODO: this isn't really necessary to be in component API anymore, it is
-  // implemented in the model layer.
-  onRequestUniqueTitle: (tileId: string) => string | undefined;
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
 }
 

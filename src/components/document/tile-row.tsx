@@ -67,7 +67,6 @@ interface IProps {
   tileMap: any;
   readOnly?: boolean;
   dropHighlight?: string;
-  onRequestUniqueTitle: (tileId: string) => string | undefined;
 }
 
 interface IState {
