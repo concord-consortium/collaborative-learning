@@ -22,3 +22,14 @@ flowchart TB
   ia --> cs
   cs(Create stores)
   %% LE.end: Initializing
+
+  component("Create app component")
+  cs --> component
+
+  callLoadUnitProblem1{{call loadUnitProblem}}
+  cs --"if != auth or unit param"--> callLoadUnitProblem1
+
+  component --> authAndConnect
+  component --> renderApp
+  renderApp(RenderApp)
+
