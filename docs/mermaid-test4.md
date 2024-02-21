@@ -53,6 +53,25 @@ flowchart TB
         fb(Firebase sign-in)
         fb --> nolisteners & listeners
         nolisteners{{Don't start listeners}}
+        subgraph listeners [Start listeners]
+          direction TB
+          lgroup(Latest group)
+          group(Groups)
+          prob(Problem docs)
+          pers(Personal docs)
+          ll(Learning logs)
+          pub(Publication)
+          spd(Student personal docs)
+          supl(Supports)
+          lgroup --> group & prob & pers & ll & pub & spd & supl --> next
+          next(First batch done)
+
+          com(Comments)
+          bm(Bookmarks)
+          dc(Documents content)
+          next --> com & bm & dc --> finish
+          finish(All listeners done)
+        end
       end
     end
   end
