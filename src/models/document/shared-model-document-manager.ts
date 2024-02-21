@@ -52,7 +52,6 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     // If no tiles are linked, default to something based on the ID.
     // Longer term, would be better to update things so that appropriate titles are stored as part of
     // the shared models.
-
     const tiles = this.getSharedModelProviders(model);
     const titles = uniq(tiles.map(t => t.computedTitle));
     return titles.length > 0 ? titles.join(", ") : `${model.type} ${model.id}`;
@@ -60,7 +59,6 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
 
   setDocument(document: DocumentContentModelType) {
     this.document = document;
-
     // assign shared model indices by type when document is specified
     for(const sharedModelEntry of this.document.sharedModelMap.values()) {
       this.assignIndexOfType(sharedModelEntry.sharedModel);

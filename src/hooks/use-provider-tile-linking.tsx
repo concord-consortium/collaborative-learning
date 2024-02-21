@@ -4,7 +4,8 @@ import { useLinkProviderTileDialog } from "./use-link-provider-tile-dialog";
 import { isGraphModel } from "../plugins/graph/models/graph-model";
 import { getSharedModelManager } from "../models/tiles/tile-environment";
 import { SharedModelType } from "../models/shared/shared-model";
-import { LogEventName } from "../../src/lib/logger-types";
+import { LogEventName } from "../lib/logger-types";
+
 import { logSharedModelDocEvent } from "../models/document/log-shared-model-document-event";
 
 interface IProps {
@@ -64,7 +65,6 @@ export const useProviderTileLinking = ({
       }
       sharedModelManager.addTileSharedModel(model.content, sharedModel);
       const sharedTiles = sharedModelManager.getSharedModelProviders(sharedModel);
-
       logSharedModelDocEvent(LogEventName.GRAPH_TOOL_LINK, model, sharedTiles);
 
     }
