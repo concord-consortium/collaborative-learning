@@ -33,46 +33,6 @@ flowchart TB
   component --> renderApp
   renderApp(RenderApp)
 
-  subgraph loadUnitProblem [Load unit and problem]
-    direction TB
-
-    %% LE.start: Loading curriculum content
-    unit(Get unit JSON)
-    %% LE.end: Loading curriculum content
-
-    unit --> tiles
-
-    %% LE.start: Setting up curriculum content
-    %% LE.start: Loading tile types
-    tiles(Register tile types)
-    %% LE.end: Loading tile types
-
-    resolveUnitLoadedPromise([resolve unitLoadedPromise])
-    tiles --> resolveUnitLoadedPromise
-
-    configStores(Configure some stores)
-    tiles --> configStores
-    %% LE.end: Setting up curriculum content
-  end
-
-  %% some invisible links to get the layout to be more compact
-  req ~~~ loadUnitProblem
-  loadUnitProblem ~~~ authenticate
-
-  subgraph authenticate [Authenticate]
-    direction TB
-    type{{appMode}}
-    type -- demo/qa/dev --> demo
-    type -- auth --> real1
-    demo(Returns fake auth)
-    real1(Fetch JWT from portal) --> real2(Get class info)
-    real3(Get Firebase JWT)
-    real4(Get portal offerings)
-    real5(Get offering problem ID)
-    real2 --> real3 & real4 & real5 --> real6
-    real6(Return real auth)
-  end
-
   %% LE.start: Connecting
   subgraph authAndConnect [AuthAndConnect]
     direction TB
