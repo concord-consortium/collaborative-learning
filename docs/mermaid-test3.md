@@ -41,7 +41,6 @@ flowchart TB
 
     callLoadUnitProblem2{{call loadUnitProblem}}
     callAuthenticate -- if not started loading --> callLoadUnitProblem2
-    callLoadUnitProblem2 ~~~ ram
 
     subgraph ram [Resolve app mode]
       direction TB
