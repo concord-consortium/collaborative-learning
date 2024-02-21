@@ -41,4 +41,18 @@ flowchart TB
 
     callLoadUnitProblem2{{"call loadUnitProblem"}}
     callAuthenticate --"if not started loading"--> callLoadUnitProblem2
+
+    subgraph ram [Resolve app mode]
+      direction TB
+
+      subgraph db [DB Connect]
+        direction TB
+
+        unitLoadedPromise([unitLoadedPromise])
+
+        fb(Firebase sign-in)
+        fb --> nolisteners & listeners
+        nolisteners{{Don't start listeners}}
+      end
+    end
   end
