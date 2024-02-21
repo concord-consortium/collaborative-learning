@@ -38,6 +38,7 @@ export function SharedVariablesLinkButton({name, args, disabled}: IProps) {
   const handleClick = (e: React.MouseEvent) => {
     showLinkTileDialog && showLinkTileDialog();
     e.stopPropagation();
+    console.log("shared-variables-link-button > handleClick", e);
   };
 
   return (

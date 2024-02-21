@@ -6,11 +6,15 @@ import { ITileModel } from "../models/tiles/tile-model";
 import { SharedModelType } from "../models/shared/shared-model";
 import { getTileComponentInfo } from "../models/tiles/tile-component-info";
 import { BadgedIcon } from "../components/toolbar/badged-icon";
+// import { logSharedModelDocEvent } from "../models/document/log-shared-model-document-event";
+// import { LogEventName } from "../lib/logger-types";
+
 
 import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
 import ViewBadgeIcon from "../assets/icons/view/view-badge.svg";
 
 import "./link-tile-dialog.scss";
+
 
 // Defines a modal window that allows the user to select a tile
 // to link with or unlink from the current tile's dataset.
@@ -25,6 +29,12 @@ interface IContentProps {
   setSelectValue: React.Dispatch<React.SetStateAction<string>>;
   tileType?: string;
 }
+
+
+  //**************************************** GUIDELINES ************************************************
+  // LinkTable button
+  // Graph iT! Button
+
 const Content: React.FC<IContentProps>
               = ({ linkedTiles, selectValue, tileTitle, unlinkedTiles, setSelectValue, tileType })=> {
   /**
@@ -93,6 +103,9 @@ interface IProps {
 export const useLinkConsumerTileDialog =
     ({ linkableTiles, model, modelToShare, tileType, onLinkTile, onUnlinkTile, onCreateTile }: IProps) => {
   const tileTitle = model.computedTitle;
+  console.log("useLinkConsumerTileDialog tileTitle", tileTitle);
+  console.log("\tmodel:", model);
+  console.log("\tlinkableTiles:", linkableTiles);
   const [selectValue, setSelectValue] = useState("");
 
   const handleClick = () => {
@@ -100,9 +113,14 @@ export const useLinkConsumerTileDialog =
       onCreateTile();
     } else {
       const tileInfo = linkableTiles.find(tile => tile.id === selectValue);
+      console.log("tileInfo:", tileInfo);
       if (tileInfo && modelToShare) {
+        console.log("handleClick tileInfo:", tileInfo);
+        console.log("handleClick modelToShare:", modelToShare);
         if (isLinkedToTile(modelToShare, tileInfo.id)) {
           onUnlinkTile(tileInfo);
+          // logSharedModelDocEvent(LogEventName.TILE_UNLINK, model, [tileInfo], modelToShare); // Simplified example
+
         } else {
           onLinkTile(tileInfo);
         }
