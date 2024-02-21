@@ -26,4 +26,4 @@ flowchart TB
   component("Create app component")
   cs --> component
 
-  callLoadUnitProblemA{{call loadUnitProblem}}
+  callLoadUnitProblemA
