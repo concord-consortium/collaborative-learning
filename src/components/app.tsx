@@ -9,8 +9,6 @@ import { DemoCreatorComponent } from "./demo/demo-creator";
 
 import { GroupChooserComponent } from "./group/group-chooser";
 import { IStores } from "../models/stores/stores";
-import { isDifferentUnitAndProblem } from "../models/curriculum/unit";
-import { updateProblem } from "../lib/misc";
 import ErrorAlert from "./utilities/error-alert";
 import { getCurrentLoadingMessage, removeLoadingMessage, showLoadingMessage } from "../utilities/loading-utils";
 
@@ -22,26 +20,6 @@ interface IProps extends IBaseProps {}
 interface IState {
   qaCleared: boolean;
   qaClearError?: string;
-}
-
-function initRollbar(stores: IStores, problemId: string) {
-  const {user, unit, appVersion} = stores;
-  if (typeof (window as any).Rollbar !== "undefined") {
-    const _Rollbar = (window as any).Rollbar;
-    if (_Rollbar.configure) {
-      const config = { payload: {
-              class: user.classHash,
-              offering: user.offeringId,
-              person: { id: user.id },
-              problemId: problemId || "",
-              problem: stores.problem.title,
-              role: user.type,
-              unit: unit.title,
-              version: appVersion
-            }};
-      _Rollbar.configure(config);
-    }
-  }
 }
 
 function resolveAppMode(
@@ -101,17 +79,45 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
         stores.class.updateFromPortal(classInfo);
       }
 
-      stores.unitLoadedPromise.then(async () => {
-        if (unitCode && problemId && isDifferentUnitAndProblem(stores, unitCode, problemId)) {
-          // This comes into play when CLUE is launched as a teacher from the portal.
-          // In that case the unit isn't known until after CLUE has got the offering information
-          // from the portal.
-          await stores.setUnitAndProblem(unitCode, problemId).then( () => {
-            updateProblem(stores, problemId);
-          });
+      // If the URL has a unit param or if the appMode is not "authed", then
+      // `stores.loadUnitAndProblem` would have been called in initializeApp,
+      // and startedLoadingUnitAndProblem will be true.
+      //
+      // In the case of a teacher launch from the portal, the window.location should
+      // not have a unit param. Instead the unit and problem is figured out by
+      // `authenticate` from the portal's resource information.
+      //
+      // Note: If the external report in the portal is misconfigured with a unit
+      // parameter, then window.location will have a unit param and the resource
+      // information will be incorrectly ignored here.
+      if (!stores.startedLoadingUnitAndProblem) {
+        // The unit and problem are required for portal resources so the behavior
+        // is more clear:
+        // - If the unit is optional for portal resources, then a student launch
+        // without a unit would not start loading the unit in initializeApp.
+        // - If the problem is optional, then the defaultProblemOrdinal might not
+        // exist in the specified unit.
+        // We don't enforce this requirement in initializeApp because during a
+        // teacher launch, we don't know the resource info.
+        //
+        // To test this you can make a CLUE resource in the portal that does not have
+        // a unit param. And then launch it
+        if (!unitCode || !problemId) {
+          // If we get here, CLUE will hang because unitLoadedPromise will never
+          // resolve so the listeners won't start and there will be no content
+          // for CLUE to render. The error message below indicates the most likely
+          // cause of this.
+          stores.ui.setError(
+            "This CLUE resource is incorrectly configured. The URL of the resource " +
+            "requires a unit and problem parameter. " +
+            "Contact the author of the resource to fix it. " +
+            `unitCode: ${unitCode}, problemId: ${problemId}`);
+        } else {
+          // loadUnitAndProblem is asynchronous.
+          // Code that requires the unit to be loaded should wait on `stores.unitLoadedPromise`
+          stores.loadUnitAndProblem(unitCode, problemId);
         }
-        initRollbar(stores, problemId || stores.appConfig.defaultProblemOrdinal);
-      });
+      }
       return resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
     })
     .then(() => {
@@ -132,12 +138,14 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
       removeLoadingMessage("Connecting");
     })
     .catch((error) => {
-      let errorMessage = error.toString();
+      let customMessage = undefined;
+      const errorMessage = error.toString();
       if ((errorMessage.indexOf("Cannot find AccessGrant") !== -1) ||
           (errorMessage.indexOf("AccessGrant has expired") !== -1)) {
-        errorMessage = "Your authorization has expired. Please return to the Concord site to re-run the activity.";
+        customMessage = "Your authorization has expired. Please return to the Concord site to re-run the activity.";
       }
-      ui.setError(errorMessage);
+
+      ui.setError(error, customMessage);
     });
 };
 
@@ -184,6 +192,10 @@ export class AppComponent extends BaseComponent<IProps, IState> {
       return this.renderApp(this.renderError(ui.error));
     }
 
+    // `db.listeners.isListening` is often the slowest requirement to be true.
+    // This requirement could be dropped, but several components would
+    // have to be checked to make sure they render something reasonable
+    // in this case.
     if (!user.authenticated || !db.listeners.isListening) {
       return this.renderApp(this.renderLoading());
     }
