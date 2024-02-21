@@ -71,6 +71,7 @@ export class DBProblemDocumentsListener extends BaseListener {
     const user: DBOfferingUser = snapshot.val();
     this.debugLogSnapshot(`#handleLoadOfferingUserAddedOrChanged (${eventType})`, snapshot);
     if (user) {
+      console.log("\n\n| PROB 1: ", eventType, "so we handleOfferingUser(user)");
       this.handleOfferingUser(user);
     }
   };
@@ -89,6 +90,10 @@ export class DBProblemDocumentsListener extends BaseListener {
       if (!document?.documentKey || !document?.self?.uid) return;
       const existingDoc = documents.getDocument(document.documentKey);
       if (existingDoc) {
+        console.log("| PROB 2: One of the user.documents: vs the existing document",
+          "\n        document (to read):       ", document,
+          "\n        existingDoc (to update):  ", JSON.parse(JSON.stringify(existingDoc))
+        );
         this.db.updateDocumentFromProblemDocument(existingDoc, document);
       } else {
         // TODO: handle rejections of this promise, see the note in
