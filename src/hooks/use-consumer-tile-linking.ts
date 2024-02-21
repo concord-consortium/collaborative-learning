@@ -91,6 +91,7 @@ export const useConsumerTileLinking = ({
         if (shareType === SharedDataSet && !getTileContentInfo(consumerTile.type)?.consumesMultipleDataSets) {
           dataSetsToRemove = sharedModelManager.getTileSharedModelsByType(consumerTile, SharedDataSet);
         }
+        console.log("one change for PR");
         modelToShare && sharedModelManager.addTileSharedModel(consumerTile, modelToShare);
         dataSetsToRemove.forEach(sharedDataSet => {
           sharedModelManager.removeTileSharedModel(consumerTile, sharedDataSet);
