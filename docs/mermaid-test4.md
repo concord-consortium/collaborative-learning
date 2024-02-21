@@ -33,6 +33,28 @@ flowchart TB
   component --> renderApp
   renderApp(RenderApp)
 
+  subgraph loadUnitProblem [Load unit and problem]
+    direction TB
+
+    %% LE.start: Loading curriculum content
+    unit(Get unit JSON)
+    %% LE.end: Loading curriculum content
+
+    unit --> tiles
+
+    %% LE.start: Setting up curriculum content
+    %% LE.start: Loading tile types
+    tiles(Register tile types)
+    %% LE.end: Loading tile types
+
+    resolveUnitLoadedPromise([resolve unitLoadedPromise])
+    tiles --> resolveUnitLoadedPromise
+
+    configStores(Configure some stores)
+    tiles --> configStores
+    %% LE.end: Setting up curriculum content
+  end
+
   %% LE.start: Connecting
   subgraph authAndConnect [AuthAndConnect]
     direction TB
