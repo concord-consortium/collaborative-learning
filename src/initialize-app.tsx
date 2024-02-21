@@ -46,8 +46,8 @@ export const initializeApp = (appMode: AppMode, authoring?: boolean): IStores =>
   if (showDemoCreator) {
     // Override the app mode when the demo creator is being used.
     // `authenticate` is still called when the demo creator is shown
-    // and with a undefined appMode then it will default to `authed` on
-    // a remote host. This will cause a error as it looks for a token.
+    // and with an undefined appMode then it will default to `authed` on
+    // a remote host. This will cause an error as it looks for a token.
     // This error was always happening but for some reason before the app
     // was still rendering, and now it doesn't.
     appMode = "demo";
