@@ -85,3 +85,22 @@ flowchart TB
   end
   %% LE.end: Connecting
 
+  %% LE.start: Joining group
+  renderGroupChooser(Render group chooser)
+  %% LE.end: Joining group
+
+  renderApp --> renderGroupChooser
+  authAndConnect --> renderGroupChooser
+
+  renderAppContentComponent
+  renderGroupChooser --> renderAppContentComponent
+
+  primaryDocumentLoaded
+  authAndConnect --> primaryDocumentLoaded
+
+  %% LE.start: Building workspace
+  renderDocumentWorkspaceComponentContent(show the real right side content)
+  %% LE.end: Building workspace
+
+  renderAppContentComponent --> renderDocumentWorkspaceComponentContent
+  primaryDocumentLoaded --> renderDocumentWorkspaceComponentContent
