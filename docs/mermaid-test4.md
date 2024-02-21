@@ -26,5 +26,5 @@ flowchart TB
   component("Create app component")
   cs --> component
 
-  callLoadUnitProblemA{{"call loadUnitProblem"}}
+  callLoadUnitProblem1{{"call loadUnitProblem"}}
   cs --"if != auth or unit param"--> callLoadUnitProblem1
