@@ -55,6 +55,24 @@ flowchart TB
     %% LE.end: Setting up curriculum content
   end
 
+  %% some invisible links to get the layout to be more compact
+  req ~~~ loadUnitProblem
+  loadUnitProblem ~~~ authenticate
+
+  subgraph authenticate [Authenticate]
+    direction TB
+    type{{appMode}}
+    type -- demo/qa/dev --> demo
+    type -- auth --> real1
+    demo(Returns fake auth)
+    real1(Fetch JWT from portal) --> real2(Get class info)
+    real3(Get Firebase JWT)
+    real4(Get portal offerings)
+    real5(Get offering problem ID)
+    real2 --> real3 & real4 & real5 --> real6
+    real6(Return real auth)
+  end
+
   %% LE.start: Connecting
   subgraph authAndConnect [AuthAndConnect]
     direction TB
