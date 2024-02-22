@@ -110,7 +110,6 @@ export const useLinkConsumerTileDialog =
       onCreateTile();
     } else {
       const tileInfo = linkableTiles.find(tile => tile.id === selectValue);
-      // console.log("tileInfo:", tileInfo);
       if (tileInfo && modelToShare) {
         if (isLinkedToTile(modelToShare, tileInfo.id)) {
           onUnlinkTile(tileInfo);

@@ -10,13 +10,8 @@ import { AddTilesContext } from "../components/tiles/tile-api";
 import { getSharedModelManager } from "../models/tiles/tile-environment";
 import { SharedModelUnion } from "../models/shared/shared-model-manager";
 import { SharedModelType } from "../models/shared/shared-model";
-
-// import { logSharedModelDocEvent } from "../models/document/log-shared-model-document-event";
-// import { LogEventName } from "../lib/logger-types";
 import { logSharedModelDocEvent } from "../models/document/log-shared-model-document-event";
 import { LogEventName } from "../lib/logger-types";
-
-
 
 interface IProps {
   // TODO: This should be replaced with a generic disabled
@@ -86,9 +81,6 @@ export const useConsumerTileLinking = ({
   });
 
   const linkTile = useCallback((tileInfo: ITileLinkMetadata) => {
-    console.log("-----------linkTile-------");
-    console.log("tileInfo:", tileInfo);
-    //todo put the tileInfo.id into here?
     const consumerTile = getTileContentById(model.content, tileInfo.id);
     if (!readOnly && consumerTile) {
       if (sharedModelManager?.isReady) {
@@ -111,7 +103,6 @@ export const useConsumerTileLinking = ({
         }
         dataSetsToRemove.forEach(sharedDataSet => {
           sharedModelManager.removeTileSharedModel(consumerTile, sharedDataSet);
-          console.log("Link, removing sharedDataSet");
         });
       }
     }
@@ -126,18 +117,14 @@ export const useConsumerTileLinking = ({
         // we leave it attached and unlink ourselves.
         if (modelToShare && isSharedDataSet(modelToShare) && modelToShare.providerId === tileInfo.id) {
           sharedModelManager.removeTileSharedModel(model.content, modelToShare);  // unlink us
-          console.log("Link Table button > UNLINK > with model.content:", model.content,
-           "modelToShare:", modelToShare);
-
         } else if (modelToShare) {
           sharedModelManager.removeTileSharedModel(linkedTile, modelToShare); // unlink them
           const sharedTiles = modelToShare && sharedModelManager.getSharedModelProviders(modelToShare);
-          console.log("unlink them:", linkedTile, modelToShare);
           logSharedModelDocEvent(LogEventName.TILE_UNLINK, model, sharedTiles, modelToShare);
         }
       }
     }
-  }, [model.content, modelToShare, readOnly, sharedModelManager]);
+  }, [model, modelToShare, readOnly, sharedModelManager]);
 
   const addTilesContext = useContext(AddTilesContext);
 
