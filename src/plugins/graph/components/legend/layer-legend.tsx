@@ -12,10 +12,13 @@ import { DataConfigurationContext, useDataConfigurationContext } from "../../hoo
 import { IGraphLayerModel } from "../../models/graph-layer-model";
 import { LegendDropdown } from "./legend-dropdown";
 import { LegendIdListFunction, ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
-
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import XAxisIcon from "../../assets/x-axis-icon.svg";
 import YAxisIcon from "../../assets/y-axis-icon.svg";
+import { logSharedModelDocEvent } from "../../../../models/document/log-shared-model-document-event";
+import { LogEventName } from "../../../../lib/logger-types";
+import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
+
 
 export const layerLegendType = "layer-legend";
 
@@ -45,6 +48,7 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
   const graphModel = useGraphModelContext();
   const dataConfiguration = useDataConfigurationContext();
   const readOnly = useReadOnlyContext();
+  const { tile } = useTileModelContext();
   const xAttrId = dataConfiguration?.attributeID(axisPlaceToAttrRole.bottom);
   const { onChangeAttribute, onRemoveAttribute, onTreatAttributeAs } = props;
   if (!onChangeAttribute || !onRemoveAttribute || !onTreatAttributeAs) return null;
@@ -59,6 +63,10 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
           return isSharedDataSet(sds) && sds.dataSet.id === removeId; });
         if (layerSharedDataSet) {
           smm.removeTileSharedModel(graphModel, layerSharedDataSet);
+          const sharedTiles = smm.getSharedModelProviders(layerSharedDataSet);
+          if (tile){
+            logSharedModelDocEvent(LogEventName.TILE_UNLINK, tile , sharedTiles, layerSharedDataSet);
+          }
         }
       }
     }
@@ -129,7 +137,7 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
         return isSharedDataSet(sharedModel) && sharedModel.dataSet.id === datasetId;
       });
       const foundProviderId = (foundSharedModel as SharedDataSetType)?.providerId;
-      const foundTile = smm.getSharedModelTiles(foundSharedModel)?.find(tile => tile.id === foundProviderId);
+      const foundTile = smm.getSharedModelTiles(foundSharedModel)?.find(_tile => _tile.id === foundProviderId);
       return foundTile?.title ?? tempUnknownString;
     }
     return tempUnknownString;

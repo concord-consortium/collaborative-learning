@@ -2,6 +2,7 @@
 import { IAnyStateTreeNode, types } from "mobx-state-tree";
 import { kUnknownSharedModel, SharedModel, SharedModelType } from "./shared-model";
 import { getSharedModelClasses, getSharedModelInfoByType } from "./shared-model-registry";
+import { ITileModel } from "../tiles/tile-model";
 
 export function sharedModelFactory(snapshot: any) {
   const sharedModelType: string | undefined = snapshot?.type;
@@ -60,6 +61,15 @@ export interface ISharedModelManager {
    * The manager might be available, but is not ready to be used yet.
    */
   get isReady(): boolean;
+
+
+  /**
+   * Returns the connected tiles to a shared model
+   * @param model the sharedModel to be named.
+   * @returns ITileModel[]
+   */
+  getSharedModelProviders(model: SharedModelType): ITileModel[];
+
 
   /**
    * Return a user-friendly name for the shared model.

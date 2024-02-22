@@ -6,7 +6,8 @@ import { authenticate,
         getAppMode,
         createFakeUser,
         getFirebaseJWTParams,
-        generateDevAuthentication} from "./auth";
+        generateDevAuthentication,
+        createFakeOfferingIdFromProblem} from "./auth";
 import { IPortalClassInfo, IPortalClassUser, PortalStudentJWT, PortalTeacherJWT } from "./portal-types";
 import nock from "nock";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
@@ -389,8 +390,7 @@ describe("student authentication", () => {
       classId: "1",
       userType: "student",
       userId: "2",
-      unitCode: "",
-      problemOrdinal: "3.1"
+      offeringId: "301",
     });
     expect(demoInfo.authenticatedUser).toEqual({
       type: "student",
@@ -416,8 +416,7 @@ describe("student authentication", () => {
       userType: "teacher",
       userId: "2",
       network: "demo-network",
-      unitCode: "",
-      problemOrdinal: "3.1"
+      offeringId: "301",
     });
     expect(demoInfo.authenticatedUser).toEqual({
       type: "teacher",
@@ -440,6 +439,37 @@ describe("student authentication", () => {
     expect(demoTeachers.length).toEqual(NUM_FAKE_TEACHERS);
     expect(demoTeachers[0].network).toBeUndefined();
     expect(demoTeachers[1].network).toBe("demo-network");
+  });
+
+});
+
+describe("fake offering ids", () => {
+  test("normal unitCode and problemOrdinal", () => {
+    expect(createFakeOfferingIdFromProblem("sas", "3.1")).toBe("sas301");
+  });
+
+  test("empty unitCode and normal problemId", () => {
+    expect(createFakeOfferingIdFromProblem("", "3.1")).toBe("301");
+  });
+
+  test("empty unitCode and partial problemId", () => {
+    expect(createFakeOfferingIdFromProblem("", "3")).toBe("300");
+  });
+
+  test("empty unitCode and decimal problemId", () => {
+    expect(createFakeOfferingIdFromProblem("", "0.3")).toBe("3");
+  });
+
+  test("normal url unitCode and normal problemId", () => {
+    const url = "https://example.com/my_unit/content.json";
+    expect(createFakeOfferingIdFromProblem(url, "3.3")).toBe("my_unit303");
+  });
+
+  // FIXME: this will likely cause a problem when this is used as a key
+  // in firebase
+  test("local url unitCode and normal problemId", () => {
+    const url = "https://localhost:8080/my_unit.json";
+    expect(createFakeOfferingIdFromProblem(url, "3.3")).toBe("localhost:8080303");
   });
 });
 

@@ -311,7 +311,7 @@ Object {
   ],
   "sharedModelMap": Object {
     "testid-28": Object {
-      "provider": undefined,
+      "provider": "testid-31",
       "sharedModel": Object {
         "dataSet": Object {
           "attributes": Array [
@@ -444,7 +444,7 @@ Object {
   ],
   "sharedModelMap": Object {
     "testid-47": Object {
-      "provider": undefined,
+      "provider": "testid-50",
       "sharedModel": Object {
         "dataSet": Object {
           "attributes": Array [
@@ -584,7 +584,7 @@ Object {
   ],
   "sharedModelMap": Object {
     "testid-64": Object {
-      "provider": undefined,
+      "provider": "testid-67",
       "sharedModel": Object {
         "dataSet": Object {
           "attributes": Array [

@@ -8,7 +8,6 @@ import { ModalProvider } from "@concord-consortium/react-modal-hook";
 import { QueryClient, QueryClientProvider } from "react-query";
 
 import { AppMode } from "./models/stores/store-types";
-import { Logger } from "./lib/logger";
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";
 import { AppConfigContext } from "./app-config-context";
 import { AppConfigModel } from "./models/stores/app-config-model";
@@ -38,14 +37,21 @@ const kEnableLivelinessChecking = false;
  * @param appMode
  * @returns
  */
-export const initializeApp = async (appMode: AppMode, authoring?: boolean): Promise<IStores> => {
+export const initializeApp = (appMode: AppMode, authoring?: boolean): IStores => {
   const appVersion = PackageJson.version;
 
   const user = UserModel.create();
 
-  const unitId = urlParams.unit || appConfigSnapshot.defaultUnit;
-  const problemOrdinal = urlParams.problem || appConfigSnapshot.config.defaultProblemOrdinal;
   const showDemoCreator = urlParams.demo;
+  if (showDemoCreator) {
+    // Override the app mode when the demo creator is being used.
+    // `authenticate` is still called when the demo creator is shown
+    // and with an undefined appMode then it will default to `authed` on
+    // a remote host. This will cause an error as it looks for a token.
+    // This error was always happening but for some reason before the app
+    // was still rendering, and now it doesn't.
+    appMode = "demo";
+  }
   const demoName = urlParams.demoName;
 
   const isPreviewing = !!(urlParams.domain && urlParams.domain_uid && !getBearerToken(urlParams));
@@ -56,16 +62,28 @@ export const initializeApp = async (appMode: AppMode, authoring?: boolean): Prom
     (window as any).stores = stores;
   }
 
-  // Start setUnitAndProblem asynchronously.
-  // The promise that it returns is saved in `stores.unitLoadedPromise` and blocks
-  // various dependent operations, but the bulk of the initialization code can continue
-  // while that unit information is loaded, including getting the persistentUI loaded as
-  // soon as possible so we only render what we need.
-  stores.unitLoadedPromise = stores.setUnitAndProblem(unitId, problemOrdinal);
-  stores.unitLoadedPromise.then(() => {
-    // The logger will only be enabled if the appMode is "authed", or DEBUG_LOGGER is true
-    Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
-  });
+
+  // Only load the unit here if we are not authed, or we are authed and have a unit and problem param.
+  // If we are authed with a unit and problem param we can go ahead and start the process of loading
+  // the unit. If we are authed without a unit and problem params, the unit will be figured out later
+  // from the information returned by the portal.
+  //
+  // TODO: A better approach would be to never use a default unit or problems.
+  // Then this check could ignore the appMode. This approach isn't implemented
+  // because it is still convenient for developers and demo'ers to use simple URLs.
+  // Those cases can be handled by having the code automatically add the defaults
+  // to the URL before this point.
+  if (appMode !== "authed" || (urlParams.unit && urlParams.problem)) {
+    const unitId = urlParams.unit || appConfigSnapshot.defaultUnit;
+    const problemOrdinal = urlParams.problem || appConfigSnapshot.config.defaultProblemOrdinal;
+
+    // Run loadUnitAndProblem asynchronously. The bulk of the initialization code can continue
+    // while that unit information is loaded, including getting the persistentUI loaded as
+    // soon as possible so we only render what we need.
+    // Code that requires the unit and problem to be loaded should wait on `stores.unitLoadedPromise`
+    // This promise will resolve when the problem has been loaded.
+    stores.loadUnitAndProblem(unitId, problemOrdinal);
+  }
 
   gImageMap.initialize(stores.db);
 

@@ -6,7 +6,6 @@ import { AppComponent } from "./components/app";
 import { getAppMode } from "./lib/auth";
 import { urlParams } from "./utilities/url-params";
 import { QAClear } from "./components/qa-clear";
-import { setPageTitle } from "./lib/misc";
 import { getBearerToken, initializeAuthorization } from "./utilities/auth-utils";
 import { removeLoadingMessage, showLoadingMessage } from "./utilities/loading-utils";
 
@@ -24,17 +23,15 @@ if (!redirectingToAuthDomain) {
       document.getElementById("app")
     );
   } else {
-    initializeApp(appMode).then((stores) => {
-      stores.unitLoadedPromise.then(() => setPageTitle(stores));
-      stores.ui.setShowDemoCreator(!!stores.showDemoCreator);
+    const stores = initializeApp(appMode);
+    stores.ui.setShowDemoCreator(!!stores.showDemoCreator);
 
-      ReactDOM.render(
-        <AppProvider stores={stores} modalAppElement="#app">
-          <AppComponent />
-        </AppProvider>,
-        document.getElementById("app")
-      );
-      removeLoadingMessage("Initializing");
-    });
+    ReactDOM.render(
+      <AppProvider stores={stores} modalAppElement="#app">
+        <AppComponent />
+      </AppProvider>,
+      document.getElementById("app")
+    );
+    removeLoadingMessage("Initializing");
   }
 }
