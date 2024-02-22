@@ -92,12 +92,11 @@ export const useConsumerTileLinking = ({
         if (shareType === SharedDataSet && !getTileContentInfo(consumerTile.type)?.consumesMultipleDataSets) {
           dataSetsToRemove = sharedModelManager.getTileSharedModelsByType(consumerTile, SharedDataSet);
         }
-        modelToShare && sharedModelManager.addTileSharedModel(consumerTile, modelToShare);
-
-        const sharedTiles = modelToShare && sharedModelManager.getSharedModelProviders(modelToShare);
-        if (sharedTiles){
+        if (modelToShare){
+          const sharedTiles = sharedModelManager.getSharedModelProviders(modelToShare);
+          sharedModelManager.addTileSharedModel(consumerTile, modelToShare);
           const consumerModel = consumerTile && getTileModel(consumerTile);
-          if(consumerModel){
+          if (consumerModel){
             logSharedModelDocEvent(LogEventName.TILE_LINK, consumerModel, sharedTiles, modelToShare);
           }
         }

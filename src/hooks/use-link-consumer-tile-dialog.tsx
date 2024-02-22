@@ -6,21 +6,15 @@ import { ITileModel } from "../models/tiles/tile-model";
 import { SharedModelType } from "../models/shared/shared-model";
 import { getTileComponentInfo } from "../models/tiles/tile-component-info";
 import { BadgedIcon } from "../components/toolbar/badged-icon";
-// import { logSharedModelDocEvent } from "../models/document/log-shared-model-document-event";
-// import { LogEventName } from "../lib/logger-types";
-
-
 import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
 import ViewBadgeIcon from "../assets/icons/view/view-badge.svg";
 
 import "./link-tile-dialog.scss";
 
-
 // Defines a modal window that allows the user to select a tile
 // to link with or unlink from the current tile's dataset.
 // If a single tile type is supplied as an argument, an option to
 // create a new tile of that type will be offered as well.
-
 interface IContentProps {
   linkedTiles: ITileLinkMetadata[];
   selectValue: string;
@@ -29,12 +23,6 @@ interface IContentProps {
   setSelectValue: React.Dispatch<React.SetStateAction<string>>;
   tileType?: string;
 }
-
-
-  //**************************************** GUIDELINES ************************************************
-  // LinkTable button
-  // Graph iT! Button
-
 const Content: React.FC<IContentProps>
               = ({ linkedTiles, selectValue, tileTitle, unlinkedTiles, setSelectValue, tileType })=> {
   /**
