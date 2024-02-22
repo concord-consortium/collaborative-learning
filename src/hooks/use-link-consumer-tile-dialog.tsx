@@ -103,9 +103,6 @@ interface IProps {
 export const useLinkConsumerTileDialog =
     ({ linkableTiles, model, modelToShare, tileType, onLinkTile, onUnlinkTile, onCreateTile }: IProps) => {
   const tileTitle = model.computedTitle;
-  console.log("useLinkConsumerTileDialog tileTitle", tileTitle);
-  console.log("\tmodel:", model);
-  console.log("\tlinkableTiles:", linkableTiles);
   const [selectValue, setSelectValue] = useState("");
 
   const handleClick = () => {
@@ -113,14 +110,10 @@ export const useLinkConsumerTileDialog =
       onCreateTile();
     } else {
       const tileInfo = linkableTiles.find(tile => tile.id === selectValue);
-      console.log("tileInfo:", tileInfo);
+      // console.log("tileInfo:", tileInfo);
       if (tileInfo && modelToShare) {
-        console.log("handleClick tileInfo:", tileInfo);
-        console.log("handleClick modelToShare:", modelToShare);
         if (isLinkedToTile(modelToShare, tileInfo.id)) {
           onUnlinkTile(tileInfo);
-          // logSharedModelDocEvent(LogEventName.TILE_UNLINK, model, [tileInfo], modelToShare); // Simplified example
-
         } else {
           onLinkTile(tileInfo);
         }

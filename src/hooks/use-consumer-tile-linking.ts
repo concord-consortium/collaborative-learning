@@ -1,7 +1,6 @@
 import { useCallback, useContext } from "react";
-
 import { ITileLinkMetadata} from "../models/tiles/tile-link-types";
-import { ITileModel } from "../models/tiles/tile-model";
+import { ITileModel, getTileModel } from "../models/tiles/tile-model";
 import { useLinkConsumerTileDialog } from "./use-link-consumer-tile-dialog";
 import { getTileContentById } from "../utilities/mst-utils";
 import { isSharedDataSet, SharedDataSet } from "../models/shared/shared-data-set";
@@ -11,6 +10,13 @@ import { AddTilesContext } from "../components/tiles/tile-api";
 import { getSharedModelManager } from "../models/tiles/tile-environment";
 import { SharedModelUnion } from "../models/shared/shared-model-manager";
 import { SharedModelType } from "../models/shared/shared-model";
+
+// import { logSharedModelDocEvent } from "../models/document/log-shared-model-document-event";
+// import { LogEventName } from "../lib/logger-types";
+import { logSharedModelDocEvent } from "../models/document/log-shared-model-document-event";
+import { LogEventName } from "../lib/logger-types";
+
+
 
 interface IProps {
   // TODO: This should be replaced with a generic disabled
@@ -61,7 +67,7 @@ export const useConsumerTileLinking = ({
   let linkableTiles = tileType ? linkableTilesAllTypes.filter(t=>t.type===tileType) : linkableTilesAllTypes;
   const sharedModelManager = getSharedModelManager(model);
   const modelToShare = sharedModelManager?.isReady ?
-    sharedModelManager.findFirstSharedModelByType(shareType, model.id) : undefined;
+                       sharedModelManager.findFirstSharedModelByType(shareType, model.id) : undefined;
 
   // Can't link to self
   linkableTiles = linkableTiles.filter(t => t.id!==model.id);
@@ -80,6 +86,9 @@ export const useConsumerTileLinking = ({
   });
 
   const linkTile = useCallback((tileInfo: ITileLinkMetadata) => {
+    console.log("-----------linkTile-------");
+    console.log("tileInfo:", tileInfo);
+    //todo put the tileInfo.id into here?
     const consumerTile = getTileContentById(model.content, tileInfo.id);
     if (!readOnly && consumerTile) {
       if (sharedModelManager?.isReady) {
@@ -91,10 +100,18 @@ export const useConsumerTileLinking = ({
         if (shareType === SharedDataSet && !getTileContentInfo(consumerTile.type)?.consumesMultipleDataSets) {
           dataSetsToRemove = sharedModelManager.getTileSharedModelsByType(consumerTile, SharedDataSet);
         }
-        console.log("one change for PR");
         modelToShare && sharedModelManager.addTileSharedModel(consumerTile, modelToShare);
+
+        const sharedTiles = modelToShare && sharedModelManager.getSharedModelProviders(modelToShare);
+        if (sharedTiles){
+          const consumerModel = consumerTile && getTileModel(consumerTile);
+          if(consumerModel){
+            logSharedModelDocEvent(LogEventName.TILE_LINK, consumerModel, sharedTiles, modelToShare);
+          }
+        }
         dataSetsToRemove.forEach(sharedDataSet => {
           sharedModelManager.removeTileSharedModel(consumerTile, sharedDataSet);
+          console.log("Link, removing sharedDataSet");
         });
       }
     }
@@ -109,8 +126,14 @@ export const useConsumerTileLinking = ({
         // we leave it attached and unlink ourselves.
         if (modelToShare && isSharedDataSet(modelToShare) && modelToShare.providerId === tileInfo.id) {
           sharedModelManager.removeTileSharedModel(model.content, modelToShare);  // unlink us
+          console.log("Link Table button > UNLINK > with model.content:", model.content,
+           "modelToShare:", modelToShare);
+
         } else if (modelToShare) {
           sharedModelManager.removeTileSharedModel(linkedTile, modelToShare); // unlink them
+          const sharedTiles = modelToShare && sharedModelManager.getSharedModelProviders(modelToShare);
+          console.log("unlink them:", linkedTile, modelToShare);
+          logSharedModelDocEvent(LogEventName.TILE_UNLINK, model, sharedTiles, modelToShare);
         }
       }
     }
