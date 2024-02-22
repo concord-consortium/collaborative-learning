@@ -106,7 +106,7 @@ export class SortedDocuments {
     const documentMap = new Map();
     this.filteredDocsByType.forEach((doc) => {
       const user = this.class.getUserById(doc.uid);
-      const sectionLabel = (user && user.type === "student") ? `${user.lastName}, ${user.firstName}` : "Teacher";
+      const sectionLabel = user && `${user.lastName}, ${user.firstName}`;
       if (!documentMap.has(sectionLabel)) {
         documentMap.set(sectionLabel, {
           sectionLabel,
