@@ -3,7 +3,7 @@ import { getSnapshot, applySnapshot, types,
 } from "mobx-state-tree";
 import { AppConfigModelType } from "./app-config-model";
 import { kDividerHalf, kDividerMax, kDividerMin } from "./ui-types";
-import { WorkspaceModel } from "./workspace";
+import { isWorkspaceModelSnapshot, WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ENavTab } from "../view/nav-tabs";
 import { buildSectionPath, getCurriculumMetadata } from "../../../functions/src/shared";
@@ -247,6 +247,16 @@ export const PersistentUIModel = types
       const theData: string | undefined = (await getRef.once("value"))?.val();
       const asObj = safeJsonParse(theData);
       if (asObj) {
+        // As of CLUE 5.3, comparison mode should only be available in the bookmarks tab.
+        // Due to a yet-to-be-determined bug, it can be saved in the PersistentUI in other situations in which it
+        // results in wonky bug situations, e.g. https://www.pivotaltracker.com/n/projects/2441242/stories/187087979.
+        // For now, we always clear comparison mode on load.
+        // TODO: Track down the ultimate cause and then only clear the comparison mode when necessary/appropriate.
+        const { problemWorkspace } = asObj;
+        if (isWorkspaceModelSnapshot(problemWorkspace)) {
+          problemWorkspace.comparisonDocumentKey = undefined;
+          problemWorkspace.comparisonVisible = false;
+        }
         applySnapshot(self, asObj);
       }
       removeLoadingMessage("Loading current activity");
@@ -297,4 +307,3 @@ export function getNavTabOfDocument(doc: DocumentModelType, user?: UserModelType
       return docTypeToNavTab[doc.type];
     }
 }
-
