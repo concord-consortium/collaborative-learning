@@ -14,9 +14,14 @@ import { DocListDebug } from "./doc-list-debug";
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
+//**************************************** GUIDELINES ************************************************
+// As a teacher I want to be able to share my documents with my class
+// (make them viewable in the Sort view). This works on personal docs today
+// but not on problem docs. Problem docs should also allow teacher sharing.
+
+
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, persistentUI, sortedDocuments } = useStores();
-
   //*************************** Determine Sort Options & State  ***********************************
   const {tagPrompt} = appConfig;
   const sortTagPrompt = tagPrompt || ""; //first dropdown choice for comment tags
