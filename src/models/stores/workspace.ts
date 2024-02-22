@@ -1,4 +1,4 @@
-import { types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { DocumentModelType } from "../document/document";
 import { GroupVirtualDocument } from "../document/group-virtual-document";
 import { logDocumentEvent } from "../document/log-document-event";
@@ -8,10 +8,12 @@ import { LogEventName } from "../../lib/logger-types";
 export const ProblemWorkspace = "problem";
 export const LearningLogWorkspace = "learningLog";
 
-export const WorkspaceTypeEnum = types.enumeration("type", [ProblemWorkspace, LearningLogWorkspace]);
+export const WorkspaceTypes = [ProblemWorkspace, LearningLogWorkspace] as const;
+export const WorkspaceTypeEnum = types.enumeration("type", [...WorkspaceTypes]);
 export type WorkspaceType = typeof WorkspaceTypeEnum.Type;
 
-export const WorkspaceModeEnum = types.enumeration("mode", ["1-up", "4-up"]);
+export const WorkspaceModes = ["1-up", "4-up"] as const;
+export const WorkspaceModeEnum = types.enumeration("mode", [...WorkspaceModes]);
 export type WorkspaceMode = typeof WorkspaceModeEnum.Type;
 
 export const WorkspaceModel = types
@@ -89,4 +91,11 @@ export const WorkspaceModel = types
     }
   }));
 
-export type WorkspaceModelType = typeof WorkspaceModel.Type;
+export interface WorkspaceModelType extends Instance<typeof WorkspaceModel> {}
+export interface WorkspaceModelSnapshot extends SnapshotIn<typeof WorkspaceModel> {}
+
+export function isWorkspaceModelSnapshot(snap?: any): snap is WorkspaceModelSnapshot {
+  return snap && typeof snap === "object" &&
+          WorkspaceTypes.includes(snap.type) &&
+          WorkspaceModes.includes(snap.mode);
+}
