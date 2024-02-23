@@ -24,7 +24,7 @@ import {
 import { IClueObjectSnapshot } from "../annotations/clue-object";
 
 /**
- * The DocumentContentModel is the combination of 3 parts:
+ * The DocumentContentModel builds on the combination of 3 other parts:
  * - BaseDocumentContentModel
  * - DocumentContentModelWithTileDragging
  * - DocumentContentModelWithAnnotations
@@ -301,6 +301,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         const { oldTitle, newTitle } = self.updateDefaultTileTitle(result.tileId);
 
         // If the tile title needed to be updated, we assume we should also update the data set's name
+        // TODO streamline this
         if (newTitle && sharedModelEntries) {
           newSharedModelEntries = newSharedModelEntries.map(sharedModelEntry => {
             if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
@@ -367,9 +368,6 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         self.addArrow(ArrowAnnotation.create(newAnnotationSnapshot));
       }
     });
-
-    // TODO: Make sure logging is correct
-    self.logCopyTileResults(tiles, results);
   }
 }))
 .actions(self => ({
@@ -397,7 +395,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     self.copyTiles(tiles, sharedModelEntries, annotations, rowInfo, self.userCopyTiles);
   },
   duplicateTiles(tiles: IDragTileItem[]) {
-    // Determine the row to add the duplicated tiles into
+    // New tiles go into a row after the last copied tile
     const rowIndex = self.getRowAfterTiles(tiles);
 
     // Find shared models used by tiles being duplicated
@@ -413,6 +411,13 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       (t: IDropTileItem[], rowInfo: IDropRowInfo) => self.copyTilesIntoNewRows(t, rowInfo.rowInsertIndex)
     );
   },
+  /**
+   * Create a new tile and insert it as a new row after the given tile's row.
+   * @param tileType type of tile to create
+   * @param target existing tile that determines the position
+   * @param sharedModels shared models to connect to new tile
+   * @param options IDocumentContentAddTileOptions object
+   */
   addTileAfter(tileType: string, target: ITileModel, sharedModels?: SharedModelType[],
     options?: IDocumentContentAddTileOptions) {
     const targetRowId = self.findRowContainingTile(target.id);
@@ -422,19 +427,25 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     }
     const rowInsertIndex = self.getRowIndex(targetRowId) + 1;
     const newOptions = {...options, insertRowInfo:{rowInsertIndex}};
+    // If no title is provided, and this tile should have one, then set the default
+    if (!newOptions.title && !(getTileContentInfo(tileType)?.useDataSetTitle && sharedModels)) {
+      if (!getTileContentInfo(tileType)?.useDataSetTitle) {
+        newOptions.title = self.getNewTileTitle(tileType);
+      }
+    }
     // This addTile function happens to add the tile content to a tile model before
     // adding it to the document. This ordering is one part of a complex series
     // that means the reaction in tile content's afterAttach will be delayed until
     // after this action is complete. See the comment in IAddTilesContext for a
     // little more info
-    const newRowTile = self.addTile(tileType, newOptions);
+    const newRowTile = self.userAddTile(tileType, newOptions);
     const newTileId = newRowTile?.tileId;
     if (!newTileId) {
       console.warn("New tile couldn't be added");
       return;
     }
     if (!sharedModels) {
-      // Nothing to do
+      // Nothing more to do
       return;
     }
     sharedModels.forEach(sharedModel => {
