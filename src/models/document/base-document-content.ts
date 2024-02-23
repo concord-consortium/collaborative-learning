@@ -31,12 +31,13 @@ import {
 } from "./shared-model-entry";
 
 /**
- * This is one part of the DocumentContentModel. The other part is
- * DocumentContentModelWithTileDragging. It was split out to reduce the size of the
- * DocumentContentModel.
+ * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
+ * - BaseDocumentContentModel
+ * - DocumentContentModelWithAnnotations
+ * - DocumentContentModelWithTileDragging
+ * - DocumentContentModel
  *
- * This file should contain the any properties, views, and actions that are
- * not related to dragging and dropping tiles.
+ * This file contains the most fundamental views and actions.
  */
 export const BaseDocumentContentModel = types
   .model("BaseDocumentContent", {
@@ -368,16 +369,6 @@ export const BaseDocumentContentModel = types
       const section = self.importContextCurrentSection || "document";
       return `${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
     },
-    // TODO: may not be needed any more
-    addToTileMap(snapshot: SnapshotIn<typeof TileModel>) {
-      const tile = self.tileMap.put(snapshot);
-      // // Use the tile's setTitle method rather than inserting it directly in the snapshot,
-      // // since some tiles store their titles in their DataSets.
-      // if (snapshot.title) {
-      //   tile.setTitle(snapshot.title);
-      // }
-      return tile;
-    },
     // TODO unfinished
     migrateDataSetTitles() {
       // Iterate through all tiles in order.
@@ -405,7 +396,7 @@ export const BaseDocumentContentModel = types
       self.rowMap.delete(rowId);
     },
     insertNewTileInRow(tile: ITileModel, row: TileRowModelType, tileIndexInRow?: number) {
-      const insertedTile = this.addToTileMap(tile);
+      const insertedTile = self.tileMap.put(tile);
       row.insertTileInRow(insertedTile, tileIndexInRow);
     },
     deleteTilesFromRow(row: TileRowModelType) {
@@ -481,7 +472,7 @@ export const BaseDocumentContentModel = types
       // Add the snapshot directly to the map instead of creating it
       // independently. This way if the snapshot has references to
       // shared model objects, those references will be valid.
-      const tileModel = self.addToTileMap(tileSnapshot);
+      const tileModel = self.tileMap.put(tileSnapshot);
       row.insertTileInRow(tileModel!);
 
       if (tileHeight) {
@@ -498,7 +489,6 @@ export const BaseDocumentContentModel = types
       if (!content.type) {
         console.warn("addTileContentInNewRow requires the content to have a type");
       }
-      const title = options?.title || self.getNewTileTitle(content.type!);
       const o = options || {};
       if (o.rowIndex === undefined) {
         // by default, insert new tiles after last visible on screen
@@ -508,7 +498,7 @@ export const BaseDocumentContentModel = types
       self.insertRow(row, o.rowIndex);
 
       const id = o.tileId;
-      const tileModel = self.addToTileMap({id, content, title});
+      const tileModel = self.tileMap.put({id, content, title: o.title});
       row.insertTileInRow(tileModel);
 
       self.removeNeighboringPlaceholderRows(o.rowIndex);
@@ -526,7 +516,7 @@ export const BaseDocumentContentModel = types
       const row = o.rowId ? self.getRow(o.rowId) : self.getRowByIndex(o.rowIndex);
       if (row) {
         const indexInRow = o.locationInRow === "left" ? 0 : undefined;
-        const tileModel = self.addToTileMap(snapshot);
+        const tileModel = self.tileMap.put(snapshot);
         row.insertTileInRow(tileModel, indexInRow);
         self.removePlaceholderTilesFromRow(o.rowIndex);
         self.removeNeighboringPlaceholderRows(o.rowIndex);
@@ -945,9 +935,11 @@ export const BaseDocumentContentModel = types
       const results = dropRow?.acceptTileDrop(rowInfo)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
                       : self.copyTilesIntoNewRows(tiles, rowInfo.rowInsertIndex);
+      console.log('userCopyTiles log');
       self.logCopyTileResults(tiles, results);
       return results;
     },
+
     // If the tile with the given id has a default title (like "Table 1"), give it a new default title
     // Note that this will update the tile's title, even if there are no other tiles with the same title
     // Returns { oldTitle, newTitle }, which are undefined if the title wasn't changed

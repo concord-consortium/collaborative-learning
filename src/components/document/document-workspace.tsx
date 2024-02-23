@@ -13,6 +13,7 @@ import { ImageDragDrop } from "../utilities/image-drag-drop";
 import {
   removeLoadingMessage, showLoadingMessage, logLoadingAndDocumentMeasurements
 } from "../../utilities/loading-utils";
+import { kImageTileType } from "../../models/tiles/image/image-content";
 
 import "./document-workspace.sass";
 
@@ -237,8 +238,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           // insert the tile after the row it was dropped on otherwise add to end of document
           const rowIndex = rowId ? primaryDocument.content?.getRowIndex(rowId) : undefined;
           const rowInsertIndex = (rowIndex !== undefined ? rowIndex + 1 : primaryDocument.content?.rowOrder.length);
-          primaryDocument.content.userAddTile("image", {
+          primaryDocument.content.userAddTile(kImageTileType, {
             url,
+            title: primaryDocument.content.getNewTileTitle(kImageTileType),
             insertRowInfo: {
               rowInsertIndex
             }
