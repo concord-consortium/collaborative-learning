@@ -27,20 +27,20 @@ toolbarDrag --> ThandleDragNewTile -- (dragging) --> DChandleDrop --> DChandleIn
 
 toolbarDuplicate{{Toolbar duplicate button}}
 ThandleDuplicate("handleDuplicate\n(toolbar.tsx)")
-DCduplicateTiles("duplicateTiles\n(document-content.ts)**")
-DCcopyTiles("copyTiles\n(document-content.ts)*")
+DCduplicateTiles("duplicateTiles\n(document-content.ts)")
+DCcopyTiles("copyTiles\n(document-content.ts)")
 updateDefaultTileTitle("updateDefaultTileTitle\n(document-content.ts)")
 BDCcopyTilesIntoNewRows("copyTilesIntoNewRows\n(base-document-content.ts)\ncopies titles")
 
-toolbarDuplicate --> ThandleDuplicate --> DCduplicateTiles -- (param) --> BDCcopyTilesIntoNewRows
-DCduplicateTiles --> DCcopyTiles --> BDCcopyTilesIntoNewRows --> BDCaddTileContentInNewRow & BDCaddTileSnapshotInExistingRow
+toolbarDuplicate --> ThandleDuplicate --> DCduplicateTiles --> DCcopyTiles
+BDCcopyTilesIntoNewRows --> BDCaddTileContentInNewRow
 DCcopyTiles --> updateDefaultTileTitle
 
 tableIt{{"Table It! and other\nview-as buttons"}}
 useConsumerTileLinking("useConsumerTileLinking")
 DCaddTileAfter("addTileAfter\n(document-content.ts)")
 
-tableIt --> useConsumerTileLinking --> DCaddTileAfter --> BDCaddTile
+tableIt --> useConsumerTileLinking --> DCaddTileAfter --> BDCuserAddTile
 
 placeholder{{"Create placeholder tile"}}
 BDCaddPlaceholderTile("addPlaceholderTile\n(base-document-content.ts)")
@@ -57,8 +57,7 @@ DChandleDragCopyTiles("handleDragCopyTiles\n(document-content.ts)")
 BDCuserCopyTiles("userCopyTiles\n(base-document-content.ts)***")
 BDCcopyTilesIntoExistingRow("copyTilesIntoExistingRow\n(base-document-content.ts)")
 
-dragTile --> DChandleDrop --> DChandleCopyTilesDrop --> DChandleDragCopyTiles --> DCcopyTiles --> BDCuserCopyTiles --> BDCcopyTilesIntoNewRows & BDCcopyTilesIntoExistingRow
-DChandleDragCopyTiles -- (param) --> BDCuserCopyTiles
+dragTile --> DChandleDrop --> DChandleCopyTilesDrop --> DChandleDragCopyTiles --> DCcopyTiles --> BDCuserCopyTiles --> BDCcopyTilesIntoNewRows & BDCcopyTilesIntoExistingRow --> BDCaddTileSnapshotInExistingRow
 
 style toolbarClick fill:#888
 style toolbarDrag fill:#888

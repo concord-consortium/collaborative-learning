@@ -1,7 +1,7 @@
 import stringify from "json-stringify-pretty-compact";
 import { applySnapshot, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
 import { cloneDeep, each } from "lodash";
-import { IDragTilesData, NewRowTileArray, PartialSharedModelEntry, PartialTile,
+import { IDragTilesData, PartialSharedModelEntry, PartialTile,
          IDocumentContentAddTileOptions } from "./document-content-types";
 import { DocumentContentModelWithTileDragging } from "./drag-tiles";
 import { IDropRowInfo, TileRowModelType, TileRowSnapshotOutType } from "./tile-row";
@@ -234,8 +234,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     tiles: IDragTileItem[],
     sharedModelEntries: PartialSharedModelEntry[],
     annotations: IArrowAnnotationSnapshot[],
-    rowInfo: IDropRowInfo,
-    insertTileFunction: (updatedTiles: IDropTileItem[], rowInfo: IDropRowInfo) => NewRowTileArray
+    rowInfo: IDropRowInfo
   ) {
     // Update shared models with new ids
     const updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds> = {};
@@ -293,7 +292,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     });
 
     // Add copied tiles to document
-    const results = insertTileFunction(updatedTiles, rowInfo);
+    const results = self.userCopyTiles(updatedTiles, rowInfo);
 
     // Increment default titles when necessary
     results.forEach((result, i) => {
@@ -392,7 +391,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       }
     });
 
-    self.copyTiles(tiles, sharedModelEntries, annotations, rowInfo, self.userCopyTiles);
+    self.copyTiles(tiles, sharedModelEntries, annotations, rowInfo);
   },
   duplicateTiles(tiles: IDragTileItem[]) {
     // New tiles go into a row after the last copied tile
@@ -407,8 +406,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       tiles,
       sharedModelEntries,
       annotations,
-      { rowInsertIndex: rowIndex },
-      (t: IDropTileItem[], rowInfo: IDropRowInfo) => self.copyTilesIntoNewRows(t, rowInfo.rowInsertIndex)
+      { rowInsertIndex: rowIndex }
     );
   },
   /**
