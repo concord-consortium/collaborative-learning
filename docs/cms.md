@@ -31,7 +31,7 @@ This approach was not flexible enough for us, so instead we configure Decap usin
 These files are built using a build system separate from the main CLUE build system. This was done so that dependencies of CLUE and the CMS would not be tied together. This is all located in the `/cms/` folder.
 
 ### `preview-link`
-Is a widget that just display a link so authors can easily open CLUE and see the section they are currently editing. It has to load the Unit json to figure out where in the unit this current section is located. This location is needed to construct the problemOrdinal which is what is needed when launching CLUE.
+Is a widget that displays a link so authors can easily open CLUE and see the section they are currently editing. It has to load the Unit json to figure out where in the unit this current section is located. This location is needed to construct the `problemOrdinal` which is what is needed when launching CLUE.
 
 ### `clue`
 This is an iframe-control. It isn't really specific to CLUE. The iframe src it shows is:
@@ -64,7 +64,7 @@ In the CI (github actions), the toplevel `npm run build` is used. This will buil
 Currently the CMS build environment is not designed to be used with the release system that we use for the main part of CLUE. So authors cannot go to `https://collaborative-learning.concord.org/admin.html`. Instead most of these authors are using master for their authoring so they go to: `https://collaborative-learning.concord.org/branch/master/admin.html`. **We should fix this so we don't have to worry about breaking authoring when merging to master.**
 
 # Notes on CMS page components
-Sometimes the components on the CMS page are reused and sometimes they reconstructed. This behavior has not effect on our current components, but it should be kept in mind if creating a custom component.
+Sometimes the components on the CMS page are reused and sometimes they are reconstructed. This behavior has no effect on our current components, but it should be kept in mind if creating a custom component.
 
 - After publishing a CMS page, the component on the page is not reconstructed instead it is reused. The existing component is reused.
 - When leaving (using the CMS ui) and coming back to the same page the component is reconstructed.
