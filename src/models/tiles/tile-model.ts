@@ -76,8 +76,8 @@ export const TileModel = types
      * can provide a title. The empty string is considered an "unset" title.
      */
     get computedTitle() {
-      if (getTileContentInfo(self.content.type)?.useDataSetTitle && self.title) {
-        console.warn("Shouldn't have a title but it does", self.id, self.title);
+      if (getTileContentInfo(self.content.type)?.useContentTitle && self.title) {
+        console.log("Shouldn't have a title but it does", self.id, self.title);
       }
       return self.title || self.content.contentTitle || "";
     },
@@ -130,7 +130,7 @@ export const TileModel = types
      * @param title
      */
     setTitle(title: string|undefined) {
-      if (title && getTileContentInfo(self.content.type)?.useDataSetTitle) {
+      if (title && getTileContentInfo(self.content.type)?.useContentTitle) {
         console.log("possibly bad call to setTitle, setting", title);
         console.trace();
       }
@@ -149,7 +149,7 @@ export const TileModel = types
      */
     setTitleOrContentTitle(title: string) {
       logTileDocumentEvent(LogEventName.RENAME_TILE,{ tile: self as ITileModel });
-      if (getTileContentInfo(self.content.type)?.useDataSetTitle) {
+      if (getTileContentInfo(self.content.type)?.useContentTitle) {
         self.content.setContentTitle(title);
       } else {
         self.setTitle(title);
@@ -170,19 +170,6 @@ export const TileModel = types
       if ("afterAttachToDocument" in self.content && typeof self.content.afterAttachToDocument === "function") {
         self.content.afterAttachToDocument();
       }
-      // Check that the tile has a valid name; set default if not.
-      // TODO: is this actually needed?  If so, need to deal with the fact that the shared model manager
-      // is not available as the document is being initially constructed.
-      // if (!self.computedTitle) {
-      //   const doc = getParentOfType(self, DocumentContentModel);
-      //   const title = doc.getNewTileTitle(self.content.type);
-      //   if (title) {
-      //     self.setTitle(title);
-      //     console.log("Set default title for tile", self.id, title);
-      //   } else {
-      //     console.warn("Can't set default title for tile type", self.content.type);
-      //   }
-      // }
     },
     onTileAction(call: ISerializedActionCall) {
       self.content.onTileAction?.(call);

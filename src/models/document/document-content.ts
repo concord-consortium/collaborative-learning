@@ -235,7 +235,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     annotations: IArrowAnnotationSnapshot[],
     rowInfo: IDropRowInfo
   ) {
-    // Update shared models with new ids
+    // Update shared models with new names and ids
     const updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds> = {};
     const newSharedModelEntries: PartialSharedModelEntry[] = [];
     sharedModelEntries.forEach(sharedModelEntry => {
@@ -285,11 +285,18 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       const tileContent = cloneDeep(oldContent);
       tileIdMap[tile.tileId] = uniqueId();
 
+      // Remove any title that shouldn't be there (eg, copying from legacy curriculum)
+      const typeInfo = getTileContentInfo(tile.tileType);
+      if (tileContent.title && typeInfo?.useContentTitle) {
+        console.log("Removing title while copying");
+        tileContent.title = undefined;
+      }
+
       // Find the shared models for this tile
       const tileSharedModelEntries = findTileSharedModelEntries(tile.tileId);
 
       // Update the tile's references to its shared models
-      const updateFunction = getTileContentInfo(tile.tileType)?.updateContentWithNewSharedModelIds;
+      const updateFunction = typeInfo?.updateContentWithNewSharedModelIds;
       if (updateFunction) {
         tileContent.content = updateFunction(oldContent.content, tileSharedModelEntries, updatedSharedModelMap);
       }
@@ -300,30 +307,6 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
 
     // Add copied tiles to document
     self.userCopyTiles(updatedTiles, rowInfo);
-
-    // Increment default titles when necessary
-    // results.forEach((result, i) => {
-    //   if (result?.tileId) {
-    //     const { oldTitle, newTitle } = self.makeTileTitleUnique(result.tileId);
-
-    // If the tile title needed to be updated, we assume we should also update the data set's name
-    // TODO streamline this
-    // if (newTitle && sharedModelEntries) {
-    //   newSharedModelEntries = newSharedModelEntries.map(sharedModelEntry => {
-    //     if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
-    //       const sharedDataSet = sharedModelEntry.sharedModel;
-    //       const oldName = sharedDataSet.dataSet?.name;
-    //       if (sharedDataSet.dataSet && oldName === oldTitle) {
-    //         const newSME = cloneDeep<PartialSharedModelEntry>(sharedModelEntry);
-    //         (newSME.sharedModel as SharedDataSetType).dataSet.name = newTitle;
-    //         return newSME;
-    //       }
-    //       return sharedModelEntry;
-    //     } else {
-    //       return sharedModelEntry;
-    //     }
-    //   });
-    // }
 
     // Update tile ids for shared models and add those references to document.
     // The shared datasets have already been added above.
@@ -431,8 +414,8 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     const rowInsertIndex = self.getRowIndex(targetRowId) + 1;
     const newOptions = {...options, insertRowInfo:{rowInsertIndex}};
     // If no title is provided, and this tile should have one, then set the default
-    if (!newOptions.title && !(getTileContentInfo(tileType)?.useDataSetTitle && sharedModels)) {
-      if (!getTileContentInfo(tileType)?.useDataSetTitle) {
+    if (!newOptions.title && !(getTileContentInfo(tileType)?.useContentTitle && sharedModels)) {
+      if (!getTileContentInfo(tileType)?.useContentTitle) {
         newOptions.title = self.getNewTileTitle(tileType);
       }
     }

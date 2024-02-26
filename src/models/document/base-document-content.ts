@@ -434,16 +434,20 @@ export const BaseDocumentContentModel = types
       const section = self.importContextCurrentSection || "document";
       return `${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
     },
-    // TODO unfinished
     migrateDataSetTitles() {
       // Iterate through all tiles in order.
       // If a tile that should not have a title has one, and its dataset doesn't, move the title there.
       for (const id in self.getTilesInDocumentOrder) {
         const tile = self.tileMap.get(id);
-        if (tile && tile.title && getTileContentInfo(tile.content.type)?.useDataSetTitle) {
-          console.log("Tile has a title and it shouldn't:", tile.content.type, tile.id, tile.title);
-          // tile.setTitle(tile.title, true);
-          // tile.setTitleField(undefined);
+        if (tile && tile.title && getTileContentInfo(tile.content.type)?.useContentTitle) {
+          if (!tile.content.contentTitle) {
+            console.log("Migrating tile title to dataset:", tile.content.type, tile.id, tile.title);
+            tile.content.setContentTitle(tile.title);
+          } else {
+            console.log("Tile title", tile.title, "does not match content title", tile.content.contentTitle,
+            "for", tile.content.type, tile.id, ". Removing title");
+          }
+          tile.setTitle(undefined);
         }
       }
     },

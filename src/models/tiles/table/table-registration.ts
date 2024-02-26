@@ -19,7 +19,7 @@ export function tileSnapshotPreProcessor(tileSnap: any) {
 registerTileContentInfo({
   type: kTableTileType,
   displayName: "Table",
-  useDataSetTitle: true,
+  useContentTitle: true,
   modelClass: TableContentModel,
   metadataClass: TableMetadataModel,
   defaultHeight: kTableDefaultHeight,
