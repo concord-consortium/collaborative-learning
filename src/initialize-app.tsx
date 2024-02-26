@@ -56,7 +56,8 @@ export const initializeApp = (appMode: AppMode, authoring?: boolean): IStores =>
 
   const isPreviewing = !!(urlParams.domain && urlParams.domain_uid && !getBearerToken(urlParams));
   const appConfig = AppConfigModel.create(appConfigSnapshot);
-  const stores = createStores({ appMode, appVersion, appConfig, user, showDemoCreator, demoName, isPreviewing });
+  const stores = createStores(
+    { appMode, appVersion, appConfig, user, showDemoCreator, demoName, isPreviewing });
 
   if (DEBUG_STORES) {
     (window as any).stores = stores;
@@ -74,7 +75,7 @@ export const initializeApp = (appMode: AppMode, authoring?: boolean): IStores =>
   // Those cases can be handled by having the code automatically add the defaults
   // to the URL before this point.
   if (appMode !== "authed" || (urlParams.unit && urlParams.problem)) {
-    const unitId = urlParams.unit || appConfigSnapshot.defaultUnit;
+    const unitId = urlParams.unit || stores.curriculumConfig.defaultUnit;
     const problemOrdinal = urlParams.problem || appConfigSnapshot.config.defaultProblemOrdinal;
 
     // Run loadUnitAndProblem asynchronously. The bulk of the initialization code can continue

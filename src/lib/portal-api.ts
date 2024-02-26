@@ -1,5 +1,4 @@
 import { sortBy } from "lodash";
-import { parseUrl } from "query-string";
 import superagent from "superagent";
 import { safeDecodeURI } from "../utilities/js-utils";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
@@ -8,6 +7,7 @@ import { AppConfigModelType } from "../models/stores/app-config-model";
 import { IUserPortalOffering, UserPortalOffering } from "../models/stores/user";
 import { IPortalOffering } from "./portal-types";
 import { getAuthParams } from "../utilities/auth-utils";
+import { ICurriculumConfig, getProblemOrdinal } from "../models/stores/curriculum-config";
 
 const isClueAssignment = (offering: IPortalOffering) => {
   const clueActivityUrlRegex = /collaborative-learning/;
@@ -93,7 +93,7 @@ interface IUnitAndProblem {
   problemOrdinal?: string;
 }
 export const getProblemIdForAuthenticatedUser =
-              (rawPortalJWT: string, appConfig: AppConfigModelType, urlParams?: QueryParams) => {
+              (rawPortalJWT: string, curriculumConfig?: ICurriculumConfig, urlParams?: QueryParams) => {
   return new Promise<IUnitAndProblem>((resolve, reject) => {
     if (urlParams && urlParams.offering) {
       superagent
@@ -105,7 +105,7 @@ export const getProblemIdForAuthenticatedUser =
         } else {
           const activityUrl = ((res.body || {}).activity_url) || "";
           resolve({
-            unitCode: getUnitCode(activityUrl, appConfig),
+            unitCode: curriculumConfig?.getUnitCode(activityUrl),
             problemOrdinal: getProblemOrdinal(activityUrl)
           });
         }
@@ -131,33 +131,9 @@ interface IMineClasses {
   classes: IMineClass[];
 }
 
-// Extracts the problem ordinal from the activity_url. An activity_url is part
-// of what the portal returns as an offering and has the problem ordinal at the
-// end.
-
-// For problems... e.g. "https://collaborative-learning.concord.org/branch/master/index.html?problem=3.1"
-function getProblemOrdinal(url: string) {
-  const queryParams = parseUrl(url);
-  return queryParams.query.problem
-          ? queryParams.query.problem as string
-          : undefined;
-}
-
-// For units... e.g. "https://collaborative-learning.concord.org/branch/master/index.html?unit=s%2Bs
-// for the "Stretching and Shrinking" unit.
-function getUnitCode(url: string, appConfig: AppConfigModelType) {
-  const queryParams = parseUrl(url);
-  const unitCode = queryParams.query.unit
-                    ? queryParams.query.unit as string
-                    : undefined;
-  const mappedUnitCode = unitCode
-                          ? appConfig.unitCodeMap.get(unitCode)
-                          : undefined;
-  return mappedUnitCode || unitCode;
-}
-
 export function getPortalClassOfferings(portalOfferings: IPortalOffering[],
                                         appConfig: AppConfigModelType,
+                                        curriculumConfig: ICurriculumConfig,
                                         urlParams?: QueryParams) {
   const result: IUserPortalOffering[] = [];
   const addOffering = (offering: IPortalOffering) => {
@@ -182,7 +158,9 @@ export function getPortalClassOfferings(portalOfferings: IPortalOffering[],
         activityTitle: offering.activity,
         activityUrl: safeDecodeURI(offering.activity_url),
         problemOrdinal: getProblemOrdinal(offering.activity_url) || appConfig.defaultProblemOrdinal,
-        unitCode: getUnitCode(offering.activity_url, appConfig) || appConfig.defaultUnit,
+        // TODO: cleanup this comment:
+        // The defaultUnit was removed here because we now require a unit param for portal offerings
+        unitCode: curriculumConfig?.getUnitCode(offering.activity_url),
         offeringId: `${offering.id}`,
         location: newLocationUrl
       }));
@@ -208,9 +186,3 @@ function numericOrdinal(offering: IUserPortalOffering) {
   const ord = offering.problemOrdinal.split(".");
   return parseInt(ord[0], 10) * 1000 + parseInt(ord[1], 10);
 }
-
-export const PortalOfferingParser = {
-  getProblemOrdinal,
-  getUnitCode,
-  getPortalClassOfferings
-};

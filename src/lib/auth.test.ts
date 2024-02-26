@@ -12,6 +12,7 @@ import { IPortalClassInfo, IPortalClassUser, PortalStudentJWT, PortalTeacherJWT 
 import nock from "nock";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
 import { specAppConfig } from "../models/stores/spec-app-config";
+import { CurriculumConfig } from "../models/stores/curriculum-config";
 import * as UrlParams from "../utilities/url-params";
 type QueryParams = UrlParams.QueryParams;
 
@@ -104,6 +105,8 @@ const PARTIAL_RAW_OFFERING_INFO = {
   activity_url: "https://foo.bar/?problem=3.2"
 };
 
+const curriculumConfig = CurriculumConfig.create({curriculumBaseUrl: ""});
+
 describe("dev mode", () => {
   const originalUrlParams = UrlParams.urlParams;
 
@@ -190,7 +193,7 @@ describe("demo mode", () => {
   });
 
   it("should authenticate demo students", (done) => {
-    authenticate("demo", appConfig, urlParams).then(({authenticatedUser}) => {
+    authenticate("demo", appConfig, curriculumConfig, urlParams).then(({authenticatedUser}) => {
       const demoUser = createFakeUser({
         appMode: "demo",
         classId: "1",
@@ -206,7 +209,7 @@ describe("demo mode", () => {
   it("should handle preview launch from portal", (done) => {
     urlParams.domain = "preview";
     urlParams.domain_uid = "2222";
-    authenticate("demo", appConfig, urlParams).then(({authenticatedUser}) => {
+    authenticate("demo", appConfig, curriculumConfig, urlParams).then(({authenticatedUser}) => {
       expect(authenticatedUser.className).toBe("Demo Class preview-2222");
       expect(authenticatedUser.type).toBe("student");
       expect(authenticatedUser.id).toBe("2222");
@@ -216,7 +219,7 @@ describe("demo mode", () => {
 
   it("should fail without a demo class", (done) => {
     urlParams.fakeClass = undefined;
-    authenticate("demo", appConfig, urlParams)
+    authenticate("demo", appConfig, curriculumConfig, urlParams)
       .then(() => {
         done.fail();
       })
@@ -225,7 +228,7 @@ describe("demo mode", () => {
 
   it("should fail without a demo user", (done) => {
     urlParams.fakeUser = undefined;
-    authenticate("demo", appConfig, urlParams)
+    authenticate("demo", appConfig, curriculumConfig, urlParams)
       .then(() => {
         done.fail();
       })
@@ -234,7 +237,7 @@ describe("demo mode", () => {
 
   it("should fail with an invalid demo user", (done) => {
     urlParams.fakeUser = "invalid";
-    authenticate("demo", appConfig, urlParams)
+    authenticate("demo", appConfig, curriculumConfig, urlParams)
       .then(() => {
         done.fail();
       })
@@ -262,7 +265,7 @@ describe("student authentication", () => {
   });
 
   it("works in dev mode", (done) => {
-    authenticate("dev", appConfig).then(({authenticatedUser}) => {
+    authenticate("dev", appConfig, curriculumConfig).then(({authenticatedUser}) => {
       expect(authenticatedUser).toEqual(DEV_STUDENT);
       done();
     });
@@ -289,7 +292,7 @@ describe("student authentication", () => {
       token: RAW_STUDENT_FIREBASE_JWT,
     });
 
-    authenticate("authed", appConfig, {token: GOOD_STUDENT_TOKEN, domain: BASE_PORTAL_URL})
+    authenticate("authed", appConfig, curriculumConfig, {token: GOOD_STUDENT_TOKEN, domain: BASE_PORTAL_URL})
     .then(({authenticatedUser}) => {
       expect(authenticatedUser).toEqual({
         type: "student",
@@ -361,7 +364,7 @@ describe("student authentication", () => {
     .get(FIREBASE_JWT_PATH + getFirebaseJWTParams())
     .reply(400);
 
-    authenticate("authed", appConfig, {token: BAD_STUDENT_TOKEN, domain: BASE_PORTAL_URL})
+    authenticate("authed", appConfig, curriculumConfig, {token: BAD_STUDENT_TOKEN, domain: BASE_PORTAL_URL})
       .then(() => {
         done.fail();
       })
@@ -369,7 +372,7 @@ describe("student authentication", () => {
   });
 
   it("fails with no token", (done) => {
-    authenticate("authed", appConfig, {token: undefined, domain: BASE_PORTAL_URL})
+    authenticate("authed", appConfig, curriculumConfig, {token: undefined, domain: BASE_PORTAL_URL})
       .then(() => {
         done.fail();
       })
@@ -377,7 +380,7 @@ describe("student authentication", () => {
   });
 
   it("fails with no domain", (done) => {
-    authenticate("authed", appConfig, {token: BAD_STUDENT_TOKEN, domain: undefined})
+    authenticate("authed", appConfig, curriculumConfig, {token: BAD_STUDENT_TOKEN, domain: undefined})
       .then(() => {
         done.fail();
       })
@@ -540,7 +543,7 @@ describe("teacher authentication", () => {
     .get(CLASSES_MINE_PATH)
     .reply(200, {classes: []});
 
-    authenticate("authed", appConfig, urlParams).then(({authenticatedUser, problemId}) => {
+    authenticate("authed", appConfig, curriculumConfig, urlParams).then(({authenticatedUser, problemId}) => {
       expect(authenticatedUser).toEqual({
         type: "teacher",
         id: `${TEACHER_PORTAL_JWT.uid}`,
@@ -606,7 +609,7 @@ describe("teacher authentication", () => {
     .reply(400);
 
     urlParams.token = BAD_TEACHER_TOKEN;
-    authenticate("authed", appConfig, urlParams)
+    authenticate("authed", appConfig, curriculumConfig, urlParams)
       .then(() => {
         done.fail();
       })
@@ -615,7 +618,7 @@ describe("teacher authentication", () => {
 
   it("fails with no token", (done) => {
     urlParams.token = undefined;
-    authenticate("authed", appConfig, urlParams)
+    authenticate("authed", appConfig, curriculumConfig, urlParams)
       .then(() => {
         done.fail();
       })
@@ -624,7 +627,7 @@ describe("teacher authentication", () => {
 
   it("fails with a bad report type", (done) => {
     urlParams.reportType = "unknown";
-    authenticate("authed", appConfig, urlParams)
+    authenticate("authed", appConfig, curriculumConfig, urlParams)
       .then(() => {
         done.fail();
       })
@@ -633,7 +636,7 @@ describe("teacher authentication", () => {
 
   it("fails with no class", (done) => {
     urlParams.class = undefined;
-    authenticate("authed", appConfig, urlParams)
+    authenticate("authed", appConfig, curriculumConfig, urlParams)
       .then(() => {
         done.fail();
       })
@@ -642,7 +645,7 @@ describe("teacher authentication", () => {
 
   it("fails with no offering", (done) => {
     urlParams.offering = undefined;
-    authenticate("authed", appConfig, urlParams)
+    authenticate("authed", appConfig, curriculumConfig, urlParams)
       .then(() => {
         done.fail();
       })

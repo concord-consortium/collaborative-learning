@@ -1,3 +1,5 @@
+import { parse } from "query-string";
+
 // Adapted from https://stackoverflow.com/a/43467144
 export function isValidHttpUrl(possibleUrl: string | undefined) {
   try {
@@ -32,4 +34,21 @@ export function getUnitCodeFromUrl(url: string) {
 
 export function getUnitCodeFromUnitParam(param: string) {
   return getUrlFromRelativeOrFullString(param) ? getUnitCodeFromUrl(param) : param;
+}
+
+/**
+ * Simplifies query-string library by only returning `string | undefined`, instead
+ * of `string | string[] | null | undefined`.
+ * @param prop
+ */
+export function hashValue(prop: string): string | undefined {
+  const query = parse(window.location.hash);
+  const val = query[prop];
+  if (!val) {
+    return undefined;
+  }
+  if (Array.isArray(val)) {
+    throw `May only have one hash parameter for ${prop}. Found: ${val}`;
+  }
+  return val;
 }

@@ -78,7 +78,7 @@ jest.mock("../../hooks/use-stores", () => ({
     selectedTileIds: []
   }),
   useStores: () => ({
-    appConfig: AppConfigModel.create({ curriculumBaseUrl: "https://curriculum.example.com", config: unitConfigDefaults })
+    appConfig: AppConfigModel.create({ config: unitConfigDefaults })
   })
 }));
 
