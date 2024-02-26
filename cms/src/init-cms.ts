@@ -35,6 +35,7 @@ function cmsBackend() {
   }
 }
 
+
 // Config for Decap CMS
 const cmsConfig: CmsConfig = {
   load_config_file: false,
