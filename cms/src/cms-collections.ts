@@ -8,13 +8,43 @@ const appConfig = AppConfigModel.create(appConfigJson as AppConfigModelSnapshot)
 const unit = urlParams.unit ?? "sas";
 
 // 0 predefined content types
-const curriculumSections = {
+const legacyCurriculumSections = {
   name: "sections",
   label: "Curriculum Sections",
   label_singular: "Curriculum Section",
   identifier_field: "type",
   format: "json",
   folder: urlParams.unit ? `curriculum/${urlParams.unit}` : `curriculum`,
+  nested: {
+    depth: 6,
+  },
+  fields: [
+    {
+      label: "Type",
+      name: "type",
+      widget: "string"
+    },
+    {
+      label: "Preview Link",
+      name: "preview-link",
+      required: false,
+      widget: "preview-link"
+    } as CmsField,
+    {
+      label: "Content",
+      name: "content",
+      widget: "clue" as any
+    }
+  ],
+};
+
+const curriculumSections = {
+  name: "sections",
+  label: "Curriculum Sections",
+  label_singular: "Curriculum Section",
+  identifier_field: "type",
+  format: "json",
+  folder: urlParams.unit ? `curriculum/${urlParams.unit}/investigations` : `curriculum/investigations`,
   nested: {
     depth: 6,
   },
@@ -68,6 +98,36 @@ const teacherGuides = {
   ],
 };
 
+const exemplars = {
+  name: "exemplars",
+  label: "Exemplars",
+  label_singular: "Exemplar",
+  identifier_field: "type",
+  format: "json",
+  folder: urlParams.unit ? `curriculum/${urlParams.unit}/exemplars` : `curriculum/exemplars`,
+  nested: {
+    depth: 6,
+  },
+  fields: [
+    {
+      label: "Type",
+      name: "type",
+      widget: "string"
+    },
+    {
+      label: "Preview Link",
+      name: "preview-link",
+      required: false,
+      widget: "preview-link"
+    } as CmsField,
+    {
+      label: "Content",
+      name: "content",
+      widget: "clue" as any
+    }
+  ],
+};
+
 // 1 before we will ask for config we need to have gotten unit json
 let unitJson: any;
 getUnitJson(unit, appConfig).then((json) => {
@@ -80,16 +140,21 @@ getUnitJson(unit, appConfig).then((json) => {
 export function getCmsCollections(): CmsConfig["collections"] {
   return [
     teacherGuides,
-    curriculumSections
+    curriculumSections,
+    exemplars
   ] as CmsConfig["collections"];
   // TODO: code commented out below does not raise errors, but
   // because of async-ness the default configuration is returned the first time
   // and that seems to set the configuration for the rest of the session
   if (unitJson && unitJson.code === "moth") {
     console.log("| Returning new configuration");
-    return [teacherGuides] as CmsConfig["collections"];
+    return [
+      teacherGuides,
+      curriculumSections,
+      exemplars
+    ] as CmsConfig["collections"];
   } else {
     console.log("| Returning default configuration");
-    return [curriculumSections] as CmsConfig["collections"];
+    return [legacyCurriculumSections] as CmsConfig["collections"];
   }
 }
