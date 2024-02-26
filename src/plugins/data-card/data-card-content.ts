@@ -190,13 +190,13 @@ export const DataCardContentModel = TileContentModel
         }
         else {
           if (!sharedDataSet) {
-            // The document doesn't have a shared model yet
+            // The document doesn't have a shared model yet; create one.
             const tile = getTileModel(self);
             const dataSet = defaultDataSet(tile!.title);
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
             // Unset title of the tile so that the name of the dataset will be displayed.
             console.log('Created new dataset for new data cards');
-            tile!.setTitleField(undefined);
+            tile!.setTitle(undefined);
           }
 
           // Add the shared model to both the document and the tile

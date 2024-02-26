@@ -21,7 +21,7 @@ import { logTileDocumentEvent } from "../tiles/log/log-tile-document-event";
 import { getAppConfig } from "../tiles/tile-environment";
 import { LogEventName } from "../../lib/logger-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
-import { defaultTitle, titleMatchesDefault } from "../../utilities/title-utils";
+import { defaultTitle, extractTitleBase, titleMatchesDefault } from "../../utilities/title-utils";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { kSectionHeaderHeight } from "./document-constants";
 import { IDocumentContentAddTileOptions, INewRowTile, INewTileOptions,
@@ -29,6 +29,7 @@ import { IDocumentContentAddTileOptions, INewRowTile, INewTileOptions,
 import {
   SharedModelEntry, SharedModelEntrySnapshotType, SharedModelEntryType, SharedModelMap
 } from "./shared-model-entry";
+import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../shared/shared-data-set";
 
 /**
  * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
@@ -180,6 +181,15 @@ export const BaseDocumentContentModel = types
         const sharedModelEntries = Array.from(self.sharedModelMap.values());
         return sharedModelEntries.map(entry => entry.sharedModel).filter(model => model.type === type);
       },
+      getSharedModelsInUseByAnyTiles<IT extends typeof SharedModel>(type: string): IT["Type"][] {
+        const sharedModelEntries = Array.from(self.sharedModelMap.values());
+        return sharedModelEntries
+          .filter(entry => {
+            console.log("Shared model", entry.sharedModel.type, entry.sharedModel.id, entry.tiles.length,
+             entry.sharedModel.type === type && entry.tiles.length > 0);
+            return entry.sharedModel.type === type && entry.tiles.length > 0; })
+          .map(entry => entry.sharedModel);
+      },
       getSharedModelsUsedByTiles(tileIds: string[]) {
         const sharedModels: Record<string, SharedModelEntryType> = {};
         Array.from(self.sharedModelMap.values()).forEach(sharedModel => {
@@ -321,20 +331,75 @@ export const BaseDocumentContentModel = types
       // we only export heights when they differ from the default height for the tile
       const defaultHeight = tileContentInfo.defaultHeight;
       return defaultHeight && (row.height !== defaultHeight) ? row.height : undefined;
+    },
+    /**
+     * Find the largest title suffix number matching the given title base.
+     * If tiles are found that match the given base, the largest suffix number
+     * will be returned. This may be zero if there's a match without a suffix number.
+     * If no matching tile titles are found, returns -1.
+     * @param titleBase
+     * @param tiles list of tile IDs
+     * @returns max number so far; 0 if no numbers; -1 if no tiles match.
+     */
+    getMaxNumberFromTileTiles(titleBase: string, tiles: string[]) {
+      return tiles.reduce((maxIndex, tileId) => {
+        const tile = self.getTile(tileId);
+        const title = tile?.computedTitle;
+        const match = titleMatchesDefault(title, titleBase);
+        return match
+                ? Math.max(maxIndex, +match[1])
+                : maxIndex;
+      }, -1);
+    },
+    getMaxNumberFromDataSetNames(nameBase: string, sharedDataSets: SharedDataSetType[]) {
+      return sharedDataSets.reduce((maxIndex, sharedDataSet) => {
+        const match = titleMatchesDefault(sharedDataSet.dataSet.name, nameBase);
+        return match
+                ? Math.max(maxIndex, +match[1])
+                : maxIndex;
+      }, -1);
     }
   }))
   .views(self => ({
-    getUniqueTitle(tileType: string, titleBase: string) {
+    /**
+     * Make the given title unique in this document by incrementing or appending
+     * a numeric suffix. Will return the title unchanged if it's unique. If
+     * another tile is already using this title, this will add a numeric suffix,
+     * or increment an existing numeric suffix, in order to make it unique.
+     * @param title
+     * @returns possibly modified title
+     */
+    getUniqueTitle(title: string) {
+      const titleBase = extractTitleBase(title);
+      const maxSoFar = self.getMaxNumberFromTileTiles(titleBase, self.getTilesInDocumentOrder());
+      return (maxSoFar >= 0) ? defaultTitle(titleBase, maxSoFar+1) : title;
+    },
+    /**
+     * Make the given dataset name unique in this document by incrementing or
+     * appending a numeric suffix. Will return the name unchanged if it's
+     * unique. If another dataset (which is actually in use by a tile) is
+     * already using this name, this Will add a numeric suffix, or increment an
+     * existing numeric suffix, in order to make it unique.
+     * @param title
+     * @returns possibly modified name
+     */
+    getUniqueDataSetName(name: string) {
+      const titleBase = extractTitleBase(name);
+      const maxSoFar = self.getMaxNumberFromDataSetNames(titleBase,
+        self.getSharedModelsInUseByAnyTiles<typeof SharedDataSet>(kSharedDataSetType));
+      return (maxSoFar >= 0) ? defaultTitle(titleBase, maxSoFar+1) : name;
+    },
+    /**
+     * Create a unique title in the standard form for the given type.
+     * The title will always have a numeric suffix, starting with "1".
+     * @param tileType
+     * @param titleBase
+     * @returns a title with the titleBase and a number.
+     */
+    getUniqueTitleForType(tileType: string, titleBase: string) {
       const tileIds = self.getTilesOfType(tileType);
-      const tiles = tileIds.map(tileId => self.getTile(tileId));
-      const maxDefaultTitleIndex = tiles.reduce((maxIndex, tile) => {
-        const title = tile?.computedTitle;
-        const match = titleMatchesDefault(title, titleBase);
-        return match?.[1]
-                ? Math.max(maxIndex, +match[1])
-                : maxIndex;
-      }, 0);
-      return defaultTitle(titleBase, maxDefaultTitleIndex + 1);
+      const maxSoFar = self.getMaxNumberFromTileTiles(titleBase, tileIds);
+      return defaultTitle(titleBase, maxSoFar >=0 ? maxSoFar + 1 : 1);
     },
     getTileCountsPerSection(sectionIds: string[]): ITileCountsPerSection {
       const counts: ITileCountsPerSection = {};
@@ -347,7 +412,7 @@ export const BaseDocumentContentModel = types
   .views(self => ({
     getNewTileTitle(tileType: string) {
       const titleBase = getTileContentInfo(tileType)?.titleBase || tileType;
-      const newTitle = self.getUniqueTitle(tileType, titleBase);
+      const newTitle = self.getUniqueTitleForType(tileType, titleBase);
       return newTitle;
     }
   }))
@@ -377,8 +442,8 @@ export const BaseDocumentContentModel = types
         const tile = self.tileMap.get(id);
         if (tile && tile.title && getTileContentInfo(tile.content.type)?.useDataSetTitle) {
           console.log("Tile has a title and it shouldn't:", tile.content.type, tile.id, tile.title);
-          tile.setTitle(tile.title, true);
-          tile.setTitleField(undefined);
+          // tile.setTitle(tile.title, true);
+          // tile.setTitleField(undefined);
         }
       }
     },
@@ -546,6 +611,11 @@ export const BaseDocumentContentModel = types
         tiles.forEach(tile => {
           let result: INewRowTile | undefined;
           const parsedContent = safeJsonParse<ITileModelSnapshotIn>(tile.tileContent);
+          const title = parsedContent?.title;
+          const uniqueTitle = title && self.getUniqueTitle(title);
+          if (title) {
+            console.log("CTIER Inserting tile with title", title, " -> ", uniqueTitle);
+          }
           if (parsedContent?.content) {
             const rowOptions: INewTileOptions = {
               rowIndex: rowInfo.rowDropIndex,
@@ -554,7 +624,12 @@ export const BaseDocumentContentModel = types
             if (tile.rowHeight) {
               rowOptions.rowHeight = tile.rowHeight;
             }
-            result = self.addTileSnapshotInExistingRow({ ...parsedContent, id: tile.newTileId }, rowOptions);
+            const adjustedSnapshot = {
+              ...parsedContent,
+              id: tile.newTileId,
+              title: uniqueTitle
+            };
+            result = self.addTileSnapshotInExistingRow(adjustedSnapshot, rowOptions);
           }
           results.push(result);
         });
@@ -569,8 +644,13 @@ export const BaseDocumentContentModel = types
         let lastRowId = "";
         tiles.forEach(tile => {
           let result: INewRowTile | undefined;
-          const parsedTile = safeJsonParse<ITileModelSnapshotIn>(tile.tileContent);
-          const content = parsedTile?.content;
+          const parsedContent = safeJsonParse<ITileModelSnapshotIn>(tile.tileContent);
+          const title = parsedContent?.title;
+          const uniqueTitle = title && self.getUniqueTitle(title);
+          if (title) {
+            console.log("CTINR Inserting tile with title", title, " -> ", uniqueTitle);
+          }
+          const content = parsedContent?.content;
           if (content) {
             if (tile.rowIndex !== lastRowIndex) {
               rowDelta++;
@@ -579,7 +659,7 @@ export const BaseDocumentContentModel = types
               rowId: lastRowId,
               rowIndex: rowIndex + rowDelta,
               tileId: tile.newTileId,
-              title: parsedTile.title
+              title: uniqueTitle
             };
             if (tile.rowHeight) {
               tileOptions.rowHeight = tile.rowHeight;
@@ -594,7 +674,7 @@ export const BaseDocumentContentModel = types
               // were in the same row in the source document. `tile.rowIndex` is
               // the rowIndex of the tile in the source document. `lastRowIndex`
               // is the source row index of the last tile.
-              const tileSnapshot: ITileModelSnapshotIn = { id: tile.newTileId, title: parsedTile.title, content };
+              const tileSnapshot: ITileModelSnapshotIn = { id: tile.newTileId, title: parsedContent.title, content };
               result = self.addTileSnapshotInExistingRow(tileSnapshot, tileOptions);
             }
           }
@@ -935,28 +1015,7 @@ export const BaseDocumentContentModel = types
       const results = dropRow?.acceptTileDrop(rowInfo)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
                       : self.copyTilesIntoNewRows(tiles, rowInfo.rowInsertIndex);
-      console.log('userCopyTiles log');
       self.logCopyTileResults(tiles, results);
       return results;
-    },
-
-    // If the tile with the given id has a default title (like "Table 1"), give it a new default title
-    // Note that this will update the tile's title, even if there are no other tiles with the same title
-    // Returns { oldTitle, newTitle }, which are undefined if the title wasn't changed
-    updateDefaultTileTitle(tileId: string) {
-      const tile = self.getTile(tileId);
-      if (tile) {
-        const tileContentInfo = getTileContentInfo(tile.content.type);
-        if (tileContentInfo) {
-          const oldTitle = tile.computedTitle;
-          const match = titleMatchesDefault(oldTitle, tileContentInfo.titleBase);
-          if (match) {
-            const newTitle = self.getNewTileTitle(tile.content.type);
-            tile.setTitle(newTitle);
-            return { oldTitle, newTitle };
-          }
-        }
-      }
-      return { oldTitle: undefined, newTitle: undefined };
     }
   }));

@@ -18,7 +18,6 @@ import { comma, StringBuilder } from "../../utilities/string-builder";
 // Imports related to hard coding shared model duplication
 import {
   getSharedDataSetSnapshotWithUpdatedIds, getUpdatedSharedDataSetIds, isSharedDataSetSnapshot,
-  SharedDataSetType,
   UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
 } from "../shared/shared-data-set";
 import { IClueObjectSnapshot } from "../annotations/clue-object";
@@ -238,7 +237,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
   ) {
     // Update shared models with new ids
     const updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds> = {};
-    let newSharedModelEntries: PartialSharedModelEntry[] = [];
+    const newSharedModelEntries: PartialSharedModelEntry[] = [];
     sharedModelEntries.forEach(sharedModelEntry => {
       // For now, only duplicate shared data sets
       if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
@@ -254,6 +253,14 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
           tiles: sharedModelEntry.tiles,
           sharedModel
         });
+
+        // Make dataset name unique
+        const name = sharedModel?.dataSet?.name;
+        const uniqueName = name && self.getUniqueDataSetName(name);
+        if (sharedModel.dataSet?.name && uniqueName) {
+          sharedModel.dataSet.name = uniqueName;
+          console.log("Updating name of copy of dataset to", uniqueName);
+        }
 
         // Add the model (but not the tile IDs yet) to the Document so that tile references to it won't break
         // when we insert the tiles.
@@ -292,33 +299,31 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     });
 
     // Add copied tiles to document
-    const results = self.userCopyTiles(updatedTiles, rowInfo);
+    self.userCopyTiles(updatedTiles, rowInfo);
 
     // Increment default titles when necessary
-    results.forEach((result, i) => {
-      if (result?.tileId) {
-        const { oldTitle, newTitle } = self.updateDefaultTileTitle(result.tileId);
+    // results.forEach((result, i) => {
+    //   if (result?.tileId) {
+    //     const { oldTitle, newTitle } = self.makeTileTitleUnique(result.tileId);
 
-        // If the tile title needed to be updated, we assume we should also update the data set's name
-        // TODO streamline this
-        if (newTitle && sharedModelEntries) {
-          newSharedModelEntries = newSharedModelEntries.map(sharedModelEntry => {
-            if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
-              const sharedDataSet = sharedModelEntry.sharedModel;
-              const oldName = sharedDataSet.dataSet?.name;
-              if (sharedDataSet.dataSet && oldName === oldTitle) {
-                const newSME = cloneDeep<PartialSharedModelEntry>(sharedModelEntry);
-                (newSME.sharedModel as SharedDataSetType).dataSet.name = newTitle;
-                return newSME;
-              }
-              return sharedModelEntry;
-            } else {
-              return sharedModelEntry;
-            }
-          });
-        }
-      }
-    });
+    // If the tile title needed to be updated, we assume we should also update the data set's name
+    // TODO streamline this
+    // if (newTitle && sharedModelEntries) {
+    //   newSharedModelEntries = newSharedModelEntries.map(sharedModelEntry => {
+    //     if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
+    //       const sharedDataSet = sharedModelEntry.sharedModel;
+    //       const oldName = sharedDataSet.dataSet?.name;
+    //       if (sharedDataSet.dataSet && oldName === oldTitle) {
+    //         const newSME = cloneDeep<PartialSharedModelEntry>(sharedModelEntry);
+    //         (newSME.sharedModel as SharedDataSetType).dataSet.name = newTitle;
+    //         return newSME;
+    //       }
+    //       return sharedModelEntry;
+    //     } else {
+    //       return sharedModelEntry;
+    //     }
+    //   });
+    // }
 
     // Update tile ids for shared models and add those references to document.
     // The shared datasets have already been added above.

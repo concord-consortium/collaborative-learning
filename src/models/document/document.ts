@@ -142,8 +142,8 @@ export const DocumentModel = Tree.named("Document")
       if (docDisplayIdPropertyName === "key") return self.key;
       return self.getProperty(docDisplayIdPropertyName);
     },
-    getUniqueTitle(tileType: string, titleBase: string) {
-      return self.content?.getUniqueTitle(tileType, titleBase);
+    getUniqueTitleForType(tileType: string, titleBase: string) {
+      return self.content?.getUniqueTitleForType(tileType, titleBase);
     },
     isAccessibleToUser(user: UserModelType) {
       const ownDocument = self.uid === user.id;

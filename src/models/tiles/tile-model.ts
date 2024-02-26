@@ -76,6 +76,9 @@ export const TileModel = types
      * can provide a title. The empty string is considered an "unset" title.
      */
     get computedTitle() {
+      if (getTileContentInfo(self.content.type)?.useDataSetTitle && self.title) {
+        console.warn("Shouldn't have a title but it does", self.id, self.title);
+      }
       return self.title || self.content.contentTitle || "";
     },
     // generally negotiated with tile, e.g. single column width for table
@@ -123,34 +126,15 @@ export const TileModel = types
   .actions(self => ({
     /**
      * Low-level method to set the "title" field of this model.
-     * Most callers should use `setTitle` instead.
-     * TODO: unneeded
+     * Most callers should use `setTitleOrContentTitle` instead.
      * @param title
      */
-    setTitleField(title: string|undefined) {
+    setTitle(title: string|undefined) {
+      if (title && getTileContentInfo(self.content.type)?.useDataSetTitle) {
+        console.log("possibly bad call to setTitle, setting", title);
+        console.trace();
+      }
       self.title = title;
-    },
-    setTitle(title: string, skipLogging: boolean = false) {
-      if (!skipLogging) {
-        logTileDocumentEvent(LogEventName.RENAME_TILE,{ tile: self as ITileModel });
-      }
-      // TODO: this method should be able to go back to being simple.
-      if (getTileContentInfo(self.content.type)?.useDataSetTitle) {
-        console.log("TODO: set title on DataSet");
-        // const smm = getSharedModelManager(self);
-        // if (smm?.isReady) {
-        //   const dataSet = smm.getTileSharedModelsByType(self.content, SharedDataSet);
-        //   if (dataSet.length && isSharedDataSet(dataSet[0])) {
-        //     dataSet[0].dataSet.setName(title);
-        //     console.log("SetTitle set DataSet name");
-        //     return;
-        //   }
-        // }
-      } else {
-        self.title = title;
-        return;
-      }
-      console.log("Unable to set title");
     },
     setDisplay(display: DisplayUserType) {
       self.display = display;
@@ -168,7 +152,7 @@ export const TileModel = types
       if (getTileContentInfo(self.content.type)?.useDataSetTitle) {
         self.content.setContentTitle(title);
       } else {
-        self.setTitle(title, true);
+        self.setTitle(title);
       }
     },
     afterCreate() {

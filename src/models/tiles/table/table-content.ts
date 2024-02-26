@@ -1,6 +1,6 @@
 import { Expression, Parser } from "expr-eval";
 import { reaction } from "mobx";
-import { addDisposer, Instance, SnapshotIn, types, getType, getSnapshot, getParentOfType } from "mobx-state-tree";
+import { addDisposer, Instance, SnapshotIn, types, getType, getSnapshot } from "mobx-state-tree";
 import { ITableChange } from "./table-change";
 import { exportTableContentAsJson } from "./table-export";
 import {
@@ -10,7 +10,7 @@ import { getCellId } from "./table-utils";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileContentAPIActions, tileContentAPIViews } from "../tile-model-hooks";
-import { getTileIdFromContent, getTileModel, TileModel } from "../tile-model";
+import { getTileIdFromContent, getTileModel } from "../tile-model";
 import { TileContentModel } from "../tile-content";
 import { IClueObject } from "../../annotations/clue-object";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
@@ -354,17 +354,15 @@ export const TableContentModel = TileContentModel
             // The table doesn't have a shared model. This could happen because it
             // was just added to the document or because the table was unlinked from its
             // dataset. This unlinking can happen if the DataFlow tile unlinks the table.
-            // Also if there is no title on the table, the dataset name will be set to
-            // undefined. Then when the component is rendered there is some code in
-            // useTableTitle which updates it to a unique title
+            // In this case a new dataset will be created and linked.
             const model = getTileModel(self);
             const dataSet = DataSet.create(!self.importedDataSet.isEmpty
-              ? getSnapshot(self.importedDataSet) : createDefaultDataSet(model?.computedTitle));
+              ? getSnapshot(self.importedDataSet) : createDefaultDataSet(model?.title));
             self.clearImportedDataSet();
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
             // Unset title of the tile so that the name of the dataset will be displayed.
             console.log('Created new dataset for new table');
-            getParentOfType(self, TileModel).setTitleField(undefined);
+            getTileModel(self)!.setTitle(undefined);
           }
 
           // Add the shared model to both the document and the tile
