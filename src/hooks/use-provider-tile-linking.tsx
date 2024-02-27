@@ -4,6 +4,9 @@ import { useLinkProviderTileDialog } from "./use-link-provider-tile-dialog";
 import { isGraphModel } from "../plugins/graph/models/graph-model";
 import { getSharedModelManager } from "../models/tiles/tile-environment";
 import { SharedModelType } from "../models/shared/shared-model";
+import { LogEventName } from "../lib/logger-types";
+
+import { logSharedModelDocEvent } from "../models/document/log-shared-model-document-event";
 
 interface IProps {
   actionHandlers?: any;
@@ -60,19 +63,23 @@ export const useProviderTileLinking = ({
           sharedModelManager.removeTileSharedModel(model.content, shared);
         }
       }
+      const sharedTiles = sharedModelManager.getSharedModelProviders(sharedModel);
       sharedModelManager.addTileSharedModel(model.content, sharedModel);
+      logSharedModelDocEvent(LogEventName.TILE_LINK, model, sharedTiles, sharedModel);
+
     }
-  }, [readOnly, sharedModelManager, model.content, allowMultipleGraphDatasets]);
+  }, [readOnly, sharedModelManager, model, allowMultipleGraphDatasets]);
 
   const unlinkTile = useCallback((sharedModel: SharedModelType) => {
     if (!readOnly && sharedModelManager?.isReady) {
       sharedModelManager.removeTileSharedModel(model.content, sharedModel);
+      const sharedTiles = sharedModelManager.getSharedModelProviders(sharedModel);
+      logSharedModelDocEvent(LogEventName.TILE_UNLINK, model, sharedTiles, sharedModel);
     }
-  }, [readOnly, sharedModelManager, model.content]);
+  }, [readOnly, sharedModelManager, model]);
 
   const onLinkTile = handleRequestTileLink || linkTile;
   const onUnlinkTile = handleRequestTileUnlink || unlinkTile;
-
   const [showLinkTileDialog] =
           useLinkProviderTileDialog({
             sharedModels, model, onLinkTile, onUnlinkTile

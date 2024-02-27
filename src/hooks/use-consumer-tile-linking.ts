@@ -1,7 +1,6 @@
 import { useCallback, useContext } from "react";
-
 import { ITileLinkMetadata} from "../models/tiles/tile-link-types";
-import { ITileModel } from "../models/tiles/tile-model";
+import { ITileModel, getTileModel } from "../models/tiles/tile-model";
 import { useLinkConsumerTileDialog } from "./use-link-consumer-tile-dialog";
 import { getTileContentById } from "../utilities/mst-utils";
 import { isSharedDataSet, SharedDataSet } from "../models/shared/shared-data-set";
@@ -11,6 +10,8 @@ import { AddTilesContext } from "../components/tiles/tile-api";
 import { getSharedModelManager } from "../models/tiles/tile-environment";
 import { SharedModelUnion } from "../models/shared/shared-model-manager";
 import { SharedModelType } from "../models/shared/shared-model";
+import { logSharedModelDocEvent } from "../models/document/log-shared-model-document-event";
+import { LogEventName } from "../lib/logger-types";
 
 interface IProps {
   // TODO: This should be replaced with a generic disabled
@@ -61,7 +62,7 @@ export const useConsumerTileLinking = ({
   let linkableTiles = tileType ? linkableTilesAllTypes.filter(t=>t.type===tileType) : linkableTilesAllTypes;
   const sharedModelManager = getSharedModelManager(model);
   const modelToShare = sharedModelManager?.isReady ?
-    sharedModelManager.findFirstSharedModelByType(shareType, model.id) : undefined;
+                       sharedModelManager.findFirstSharedModelByType(shareType, model.id) : undefined;
 
   // Can't link to self
   linkableTiles = linkableTiles.filter(t => t.id!==model.id);
@@ -91,7 +92,14 @@ export const useConsumerTileLinking = ({
         if (shareType === SharedDataSet && !getTileContentInfo(consumerTile.type)?.consumesMultipleDataSets) {
           dataSetsToRemove = sharedModelManager.getTileSharedModelsByType(consumerTile, SharedDataSet);
         }
-        modelToShare && sharedModelManager.addTileSharedModel(consumerTile, modelToShare);
+        if (modelToShare){
+          const sharedTiles = sharedModelManager.getSharedModelProviders(modelToShare);
+          sharedModelManager.addTileSharedModel(consumerTile, modelToShare);
+          const consumerModel = consumerTile && getTileModel(consumerTile);
+          if (consumerModel){
+            logSharedModelDocEvent(LogEventName.TILE_LINK, consumerModel, sharedTiles, modelToShare);
+          }
+        }
         dataSetsToRemove.forEach(sharedDataSet => {
           sharedModelManager.removeTileSharedModel(consumerTile, sharedDataSet);
         });
@@ -110,10 +118,12 @@ export const useConsumerTileLinking = ({
           sharedModelManager.removeTileSharedModel(model.content, modelToShare);  // unlink us
         } else if (modelToShare) {
           sharedModelManager.removeTileSharedModel(linkedTile, modelToShare); // unlink them
+          const sharedTiles = modelToShare && sharedModelManager.getSharedModelProviders(modelToShare);
+          logSharedModelDocEvent(LogEventName.TILE_UNLINK, model, sharedTiles, modelToShare);
         }
       }
     }
-  }, [model.content, modelToShare, readOnly, sharedModelManager]);
+  }, [model, modelToShare, readOnly, sharedModelManager]);
 
   const addTilesContext = useContext(AddTilesContext);
 

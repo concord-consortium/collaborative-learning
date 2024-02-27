@@ -97,6 +97,7 @@ export class DBOtherDocumentsListener extends BaseListener {
       const documentModel = documents.getDocument(dbDoc.self.documentKey);
       if (documentModel) {
         documentModel.setTitle(dbDoc.title);
+        if (dbDoc.visibility) documentModel.setVisibility(dbDoc.visibility);
       }
     }
   };

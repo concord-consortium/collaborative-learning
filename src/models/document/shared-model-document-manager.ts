@@ -37,6 +37,16 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
   get isReady() {
     return !!this.document;
   }
+  getSharedModelProviders(model: SharedModelType) {
+    function canProvide(tile: ITileModel) {
+      // Will need an update when XY Plots can provide a dataset - they will only be providers
+      // for some of the shared models they are linked to.
+      const info = getTileContentInfo(tile.content.type);
+      return info?.isDataProvider || info?.isVariableProvider;
+    }
+
+    return this.getSharedModelTiles(model).filter(tile => canProvide(tile));
+  }
 
   /**
    * Return a user-friendly name for the shared model.
@@ -51,21 +61,13 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     }
     // Fallback: list the titles of all the provider-type tiles that are linked to the model.
     // If no tiles are linked, default to something based on the ID.
-    function canProvide(tile: ITileModel) {
-      // Will need an update when XY Plots can provide a dataset - they will only be providers
-      // for some of the shared models they are linked to.
-      const info = getTileContentInfo(tile.content.type);
-      return info?.isDataProvider || info?.isVariableProvider;
-    }
-
-    const tiles = this.getSharedModelTiles(model).filter(tile => canProvide(tile));
+    const tiles = this.getSharedModelProviders(model);
     const titles = uniq(tiles.map(t => t.computedTitle));
     return titles.length > 0 ? titles.join(", ") : `${model.type} ${model.id}`;
   }
 
   setDocument(document: DocumentContentModelType) {
     this.document = document;
-
     // assign shared model indices by type when document is specified
     for(const sharedModelEntry of this.document.sharedModelMap.values()) {
       this.assignIndexOfType(sharedModelEntry.sharedModel);
@@ -140,7 +142,6 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       console.warn("addTileSharedModel has no document. this will have no effect");
       return;
     }
-
     // add this tile to the sharedModel entry
     const tile = getTileModel(tileContentModel);
     if (!tile) {
