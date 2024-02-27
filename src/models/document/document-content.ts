@@ -254,14 +254,6 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
           sharedModel
         });
 
-        // Make dataset name unique
-        const name = sharedModel?.dataSet?.name;
-        const uniqueName = name && self.getUniqueDataSetName(name);
-        if (sharedModel.dataSet?.name && uniqueName) {
-          sharedModel.dataSet.name = uniqueName;
-          console.log("Updating name of copy of dataset to", uniqueName);
-        }
-
         // Add the model (but not the tile IDs yet) to the Document so that tile references to it won't break
         // when we insert the tiles.
         if (sharedDataSet.id) {
@@ -320,6 +312,15 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
           sharedModel: updateSharedDataSetSnapshotWithNewTileIds(sharedModelEntry.sharedModel, tileIdMap),
           tiles: updatedTileIds,
           provider: updatedProvider };
+        // Make dataset name unique.
+        // We can't do this earlier since getUniqueDataSetName only considers datasets that are linked to tiles.
+        const name = updatedSharedModel.sharedModel.dataSet?.name;
+        const uniqueName = name && self.getUniqueDataSetName(name);
+        if (updatedSharedModel.sharedModel.dataSet?.name && uniqueName) {
+          updatedSharedModel.sharedModel.dataSet.name = uniqueName;
+          console.log("Updating name of copy of dataset to", uniqueName);
+        }
+
         const id = sharedModelEntry.sharedModel.id;
         if (id) {
           const existingEntry = self.sharedModelMap.get(id);

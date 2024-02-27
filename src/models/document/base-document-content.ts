@@ -384,10 +384,15 @@ export const BaseDocumentContentModel = types
      * @returns possibly modified name
      */
     getUniqueDataSetName(name: string) {
-      const titleBase = extractTitleBase(name);
-      const maxSoFar = self.getMaxNumberFromDataSetNames(titleBase,
-        self.getSharedModelsInUseByAnyTiles<typeof SharedDataSet>(kSharedDataSetType));
-      return (maxSoFar >= 0) ? defaultTitle(titleBase, maxSoFar+1) : name;
+      const existingSharedModels = self.getSharedModelsInUseByAnyTiles<typeof SharedDataSet>(kSharedDataSetType);
+      if (existingSharedModels.find((sm) => sm.dataSet.name === name)) {
+        const titleBase = extractTitleBase(name);
+        const maxSoFar = self.getMaxNumberFromDataSetNames(titleBase, existingSharedModels);
+        return (maxSoFar >= 0) ? defaultTitle(titleBase, maxSoFar+1) : name;
+      } else {
+        // No conflict
+        return name;
+      }
     },
     /**
      * Create a unique title in the standard form for the given type.

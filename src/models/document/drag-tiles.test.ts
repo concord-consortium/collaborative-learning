@@ -180,7 +180,7 @@ Array [
   Object {
     "rowHeight": undefined,
     "rowIndex": 2,
-    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 3\\",\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-9\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
+    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-9\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
     "tileId": "tile3",
     "tileIndex": 0,
     "tileType": "Table",
@@ -261,7 +261,7 @@ Object {
   "annotations": Array [],
   "sharedModels": Array [
     Object {
-      "content": "{\\"type\\":\\"SharedDataSet\\",\\"id\\":\\"shared-data-set-1\\",\\"providerId\\":\\"tile3\\",\\"dataSet\\":{\\"id\\":\\"data-set-1\\",\\"name\\":\\"Table 1\\",\\"attributes\\":[{\\"id\\":\\"attribute-1\\",\\"clientKey\\":\\"\\",\\"name\\":\\"x\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"0\\"],\\"title\\":\\"\\"},{\\"id\\":\\"attribute-2\\",\\"clientKey\\":\\"\\",\\"name\\":\\"y\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"1\\"],\\"title\\":\\"\\"}],\\"cases\\":[{\\"__id__\\":\\"case-1\\"}]}}",
+      "content": "{\\"type\\":\\"SharedDataSet\\",\\"id\\":\\"shared-data-set-1\\",\\"providerId\\":\\"tile3\\",\\"dataSet\\":{\\"id\\":\\"data-set-1\\",\\"name\\":\\"tile 3\\",\\"attributes\\":[{\\"id\\":\\"attribute-1\\",\\"clientKey\\":\\"\\",\\"name\\":\\"x\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"0\\"],\\"title\\":\\"\\"},{\\"id\\":\\"attribute-2\\",\\"clientKey\\":\\"\\",\\"name\\":\\"y\\",\\"hidden\\":false,\\"units\\":\\"\\",\\"formula\\":{},\\"values\\":[\\"1\\"],\\"title\\":\\"\\"}],\\"cases\\":[{\\"__id__\\":\\"case-1\\"}]}}",
       "modelId": "shared-data-set-1",
       "providerId": "tile3",
       "tileIds": Array [
@@ -274,7 +274,7 @@ Object {
     Object {
       "rowHeight": undefined,
       "rowIndex": 2,
-      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 3\\",\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-9\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
+      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-9\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
       "tileId": "tile3",
       "tileIndex": 0,
       "tileType": "Table",

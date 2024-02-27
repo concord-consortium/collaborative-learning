@@ -96,14 +96,14 @@ export function getSharedDataSetSnapshotWithUpdatedIds(
 export function updateSharedDataSetSnapshotWithNewTileIds(
   sharedDataSetSnapshot: SharedDataSetSnapshotType, tileIdMap: Record<string, string>
 ) {
-  if (sharedDataSetSnapshot.providerId) {
-    // Make a copy and override providerId, since snapshots can be read-only
-    return {
+    // Always makes a copy, so that returned object is not read-only
+    if (sharedDataSetSnapshot.providerId) {
+    return cloneDeep({
       ...sharedDataSetSnapshot,
       providerId: tileIdMap[sharedDataSetSnapshot.providerId]
-    };
+    });
   } else {
-    return sharedDataSetSnapshot;
+    return cloneDeep(sharedDataSetSnapshot);
   }
 }
 
