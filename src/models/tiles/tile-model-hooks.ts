@@ -27,7 +27,7 @@ export interface ITileContentAPIActions {
 
   /**
    * Sets the title if it is stored in the tile's content.
-   * This is currently used for using the DataSet name as a title, by the Table and DataCard tiles.
+   * This is currently implemented by tiles that use their DataSet name as a title.
    * @param title
    */
   setContentTitle(title: string): void;

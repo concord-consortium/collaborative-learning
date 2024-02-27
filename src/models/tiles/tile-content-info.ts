@@ -48,8 +48,8 @@ export interface ITileContentInfo {
    */
   titleBase?: string;
   /**
-   * If true, the title of a linked DataSet will be used, rather than storing
-   * a title on the tile itself.
+   * If true, the tile uses a title specified by its content rather than in the tile model itself.
+   * Currently the tiles that specify this all use the name of a linked DataSet as the title.
    */
   useContentTitle?: boolean;
   metadataClass?: typeof TileMetadataModel;

@@ -185,8 +185,6 @@ export const BaseDocumentContentModel = types
         const sharedModelEntries = Array.from(self.sharedModelMap.values());
         return sharedModelEntries
           .filter(entry => {
-            console.log("Shared model", entry.sharedModel.type, entry.sharedModel.id, entry.tiles.length,
-             entry.sharedModel.type === type && entry.tiles.length > 0);
             return entry.sharedModel.type === type && entry.tiles.length > 0; })
           .map(entry => entry.sharedModel);
       },
@@ -333,13 +331,14 @@ export const BaseDocumentContentModel = types
       return defaultHeight && (row.height !== defaultHeight) ? row.height : undefined;
     },
     /**
-     * Find the largest title suffix number matching the given title base.
+     * Find the largest title suffix number matching the given title base
+     * in the list of tiles provided.
      * If tiles are found that match the given base, the largest suffix number
      * will be returned. This may be zero if there's a match without a suffix number.
      * If no matching tile titles are found, returns -1.
      * @param titleBase
      * @param tiles list of tile IDs
-     * @returns max number so far; 0 if no numbers; -1 if no tiles match.
+     * @returns max number found; 0 if no numbers; -1 if no tiles match.
      */
     getMaxNumberFromTileTiles(titleBase: string, tiles: string[]) {
       return tiles.reduce((maxIndex, tileId) => {
@@ -351,6 +350,16 @@ export const BaseDocumentContentModel = types
                 : maxIndex;
       }, -1);
     },
+    /**
+     * Find the largest name suffix number matching the given name base
+     * from the list of sharedDataSets provided.
+     * If names are found that match the given base, the largest suffix number
+     * will be returned. This may be zero if there's a match without a suffix number.
+     * If no matching tile titles are found, returns -1.
+     * @param nameBase
+     * @param sharedDataSets
+     * @returns max number found; 0 if no numbers; -1 if no tiles match.
+     */
     getMaxNumberFromDataSetNames(nameBase: string, sharedDataSets: SharedDataSetType[]) {
       return sharedDataSets.reduce((maxIndex, sharedDataSet) => {
         const match = titleMatchesDefault(sharedDataSet.dataSet.name, nameBase);
@@ -440,7 +449,7 @@ export const BaseDocumentContentModel = types
       return `${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
     },
     migrateDataSetTitles() {
-      // Find any legacy table or datacard tiles that have a title set on the tile, rather than on the dataset,
+      // Find any tiles that have a title incorrectly set on the tile, rather than on the dataset,
       // and move those titles to the datasets.
       // We iterate through the tiles in reverse order, so that if there is more than one tile
       // linked to the same dataset, the first tile's name is the one that ends up being used.

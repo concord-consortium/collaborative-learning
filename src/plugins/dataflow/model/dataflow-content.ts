@@ -217,7 +217,6 @@ export const DataflowContentModel = TileContentModel
           const dataSet = defaultDataSet(tileModel?.title);
           sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
           tileModel?.setTitle(undefined);
-          console.log("Moved dataflow title to dataset", tileModel?.title);
         }
 
         if (!tileSharedModels?.includes(sharedDataSet)) {

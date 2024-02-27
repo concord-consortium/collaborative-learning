@@ -68,7 +68,7 @@ export const useContentChangeHandlers = ({
    */
   const setTableTitle = useCallback((title: string) => {
     if (readOnly) return;
-    (title != null) && model.setTitleOrContentTitle(title); // model.setTitle(title);
+    (title != null) && model.setTitleOrContentTitle(title);
     triggerColumnChange();
   }, [model, readOnly, triggerColumnChange]);
 

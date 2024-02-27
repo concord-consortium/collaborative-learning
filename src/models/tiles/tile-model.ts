@@ -76,9 +76,6 @@ export const TileModel = types
      * can provide a title. The empty string is considered an "unset" title.
      */
     get computedTitle() {
-      if (getTileContentInfo(self.content.type)?.useContentTitle && self.title) {
-        console.log("Shouldn't have a title but it does", self.id, self.title);
-      }
       return self.title || self.content.contentTitle || "";
     },
     // generally negotiated with tile, e.g. single column width for table
@@ -126,14 +123,13 @@ export const TileModel = types
   .actions(self => ({
     /**
      * Low-level method to set the "title" field of this model.
-     * Most callers should use `setTitleOrContentTitle` instead.
+     * In most cases you should use `setTitleOrContentTitle` instead.
      * @param title
      */
     setTitle(title: string|undefined) {
-      if (title && getTileContentInfo(self.content.type)?.useContentTitle) {
-        console.log("possibly bad call to setTitle, setting", title);
-        console.trace();
-      }
+      // if (title && getTileContentInfo(self.content.type)?.useContentTitle) {
+      //   console.warn("possibly bad call to setTitle, setting", title, "on", self.id);
+      // }
       self.title = title;
     },
     setDisplay(display: DisplayUserType) {

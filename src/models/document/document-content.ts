@@ -280,7 +280,6 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       // Remove any title that shouldn't be there (eg, copying from legacy curriculum)
       const typeInfo = getTileContentInfo(tile.tileType);
       if (tileContent.title && typeInfo?.useContentTitle) {
-        console.log("Removing title while copying");
         tileContent.title = undefined;
       }
 
@@ -318,7 +317,6 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         const uniqueName = name && self.getUniqueDataSetName(name);
         if (updatedSharedModel.sharedModel.dataSet?.name && uniqueName) {
           updatedSharedModel.sharedModel.dataSet.name = uniqueName;
-          console.log("Updating name of copy of dataset to", uniqueName);
         }
 
         const id = sharedModelEntry.sharedModel.id;

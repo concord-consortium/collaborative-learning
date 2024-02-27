@@ -195,7 +195,6 @@ export const DataCardContentModel = TileContentModel
             const dataSet = defaultDataSet(tile!.title);
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
             // Unset title of the tile so that the name of the dataset will be displayed.
-            console.log('Created new dataset for new data cards');
             tile!.setTitle(undefined);
           }
 
