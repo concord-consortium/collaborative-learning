@@ -53,7 +53,7 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
 
   public render() {
     const { className, isDisabled, items } = this.props;
-     return (
+    return (
       <div className={`custom-select ${className || ""}`}
           data-test={this.getDataTest()} ref={this.divRef}>
         { this.renderHeader() }
