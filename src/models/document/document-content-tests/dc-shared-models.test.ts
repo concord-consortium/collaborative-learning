@@ -396,7 +396,7 @@ Object {
       },
       "display": undefined,
       "id": "testid-31",
-      "title": "Table 2",
+      "title": undefined,
     },
   },
 }
@@ -670,7 +670,7 @@ Object {
       },
       "display": undefined,
       "id": "testid-67",
-      "title": "Table 2",
+      "title": undefined,
     },
     "testid-68": Object {
       "content": Object {

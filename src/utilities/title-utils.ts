@@ -26,6 +26,10 @@ export function extractTitleBase(title: string) {
  * @returns a RegExp match object or null; the first group of the match is the number suffix (if any).
  */
 export function titleMatchesDefault(title?: string, titleBase?: string) {
-  return title?.match(new RegExp(`^${titleBase} *(\\d*)$`));
+  if (title) {
+    return title.match(new RegExp(`^${titleBase} *(\\d*)$`));
+  } else {
+    return null;
+  }
 }
 

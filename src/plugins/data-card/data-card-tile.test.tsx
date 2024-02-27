@@ -21,7 +21,7 @@ jest.mock("../../models/tiles/log/log-tile-document-event", () => ({
 describe("DataCardToolComponent", () => {
   const stores = specStores();
   const content = defaultDataCardContent();
-  const model = TileModel.create({content});
+  const model = TileModel.create({ content, title: "Data Card Collection 1"});
 
   const defaultProps = {
     tileElt: null,

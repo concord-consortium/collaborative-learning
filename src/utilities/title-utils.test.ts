@@ -76,11 +76,12 @@ describe('titleMatchesDefault', () => {
     expect(match).toBeNull();
   });
 
-  it('returns null for a title missing the numeric suffix', () => {
+  it('returns empty if title is has no numeric suffix', () => {
     const title = 'ExampleTitle';
     const titleBase = 'ExampleTitle';
     const match = titleMatchesDefault(title, titleBase);
-    expect(match).toBeNull();
+    expect(match).not.toBeNull();
+    expect(match?.[1]).toBe('');
   });
 
   it('correctly captures the numeric suffix when there are leading zeros', () => {

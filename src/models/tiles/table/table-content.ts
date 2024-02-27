@@ -361,8 +361,7 @@ export const TableContentModel = TileContentModel
             self.clearImportedDataSet();
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
             // Unset title of the tile so that the name of the dataset will be displayed.
-            console.log('Created new dataset for new table');
-            getTileModel(self)!.setTitle(undefined);
+            getTileModel(self)?.setTitle(undefined);
           }
 
           // Add the shared model to both the document and the tile
