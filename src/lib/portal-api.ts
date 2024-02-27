@@ -158,8 +158,7 @@ export function getPortalClassOfferings(portalOfferings: IPortalOffering[],
         activityTitle: offering.activity,
         activityUrl: safeDecodeURI(offering.activity_url),
         problemOrdinal: getProblemOrdinal(offering.activity_url) || appConfig.defaultProblemOrdinal,
-        // TODO: cleanup this comment:
-        // The defaultUnit was removed here because we now require a unit param for portal offerings
+        // We require a unit param for portal offerings, so we don't fallback to the default unit here
         unitCode: curriculumConfig?.getUnitCode(offering.activity_url),
         offeringId: `${offering.id}`,
         location: newLocationUrl

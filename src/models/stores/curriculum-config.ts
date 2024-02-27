@@ -41,6 +41,7 @@ export const CurriculumConfig = types
     }
   }))
   .views(self => ({
+    // TODO: figure out why this logic is needed.
     getUnitBasePath(unitId: string) {
       const unitSpec = self.getUnit(unitId);
       if (!unitSpec) return "";

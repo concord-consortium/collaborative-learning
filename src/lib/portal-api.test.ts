@@ -38,20 +38,18 @@ describe("Portal Offerings", () => {
     });
   });
 
-  describe("PortalOfferingParserWithDefaults", () => {
+  describe("getPortalClassOfferings", () => {
     const curriculumConfig = CurriculumConfig.create({curriculumBaseUrl: ""});
-
-    describe("getPortalClassOfferings", () => {
-      // FIXME: I'd guess this is broken
-      const mockAppConfig = {
-        config: { defaultProblemOrdinal: "1.1" }
-      } as AppConfigModelType;
-      const mockUrlParams = {
-              class: "https://learn.staging.concord.org/api/v1/classes/242",
-              offering: "https://collaborative-learning.concord.org/branch/master/?problem=1.2",
-              reportType: "report-type",
-              token: "token"
-            };
+    const mockAppConfig = {
+      config: { defaultProblemOrdinal: "1.1" }
+    } as AppConfigModelType;
+    const mockUrlParams = {
+            class: "https://learn.staging.concord.org/api/v1/classes/242",
+            offering: "https://collaborative-learning.concord.org/branch/master/?problem=1.2",
+            reportType: "report-type",
+            token: "token"
+          };
+    it("only includes CLUE activities", () => {
       const offerings = getPortalClassOfferings(TeacherOfferings, mockAppConfig, curriculumConfig, mockUrlParams);
       // TeacherOfferings has one non-CLUE activity
       expect(offerings.length).toBe(TeacherOfferings.length - 1);
