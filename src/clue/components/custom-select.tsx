@@ -53,12 +53,6 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
 
   public render() {
     const { className, isDisabled, items } = this.props;
-    console.log("📁 custom-select.tsx ------------------------");
-    console.log("\t🥩 isDisabled:", isDisabled);
-    console.log("\t🥩 className:", className);
-    console.log("\t🥩 items:", items);
-
-
      return (
       <div className={`custom-select ${className || ""}`}
           data-test={this.getDataTest()} ref={this.divRef}>
@@ -133,30 +127,18 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
   };
 
   private handleDown = (e: MouseEvent | TouchEvent) => {
-    console.log("-------------------------");
-    console.log("handleDown with e:", e);
     if (this.divRef.current && e.target && !this.divRef.current.contains(e.target as Node)) {
       this.setState({
         showList: false
       });
-      console.log("handleDown if true, showList = ", this.state.showList);
-
     }
   };
 
   private handleHeaderClick = () => {
-    console.log("-------------------------");
-
-    console.log("➡️ handleHeaderClick");
-    console.log("\t🔪 state.showList:", this.state.showList);
     this.setState(state => ({ showList: !state.showList }));
-    console.log("\t🔪 state.showList:", this.state.showList);
-
   };
 
   private handleListClick = (item: IDropdownItem) => () => {
-    console.log("-------------------------");
-    console.log("➡️ handleListClick");
     const { onClick } = item;
     onClick && onClick(item);
     this.setState({
