@@ -1,18 +1,30 @@
 import { CmsConfig, CmsField } from "netlify-cms-core";
 import { urlParams } from "../../src/utilities/url-params";
-import { AppConfigModel, AppConfigModelSnapshot } from "../../src/models/stores/app-config-model";
-import appConfigJson from "../../src/clue/app-config.json";
-import { defaultCurriculumUnit } from "./cms-constants";
-
-const appConfig = AppConfigModel.create(appConfigJson as AppConfigModelSnapshot);
-const unit = urlParams.unit ?? defaultCurriculumUnit;
-
-// 0 predefined content types
 
 const basicFields = [
   {
     label: "Type",
     name: "type",
+    widget: "string"
+  },
+  {
+    label: "Preview Link",
+    name: "preview-link",
+    required: false,
+    widget: "preview-link"
+  } as CmsField,
+  {
+    label: "Content",
+    name: "content",
+    widget: "clue" as any
+  }
+] as CmsField[];
+
+
+const exemplarFields = [
+  {
+    label: "Tag",
+    name: "tag",
     widget: "string"
   },
   {
@@ -71,7 +83,7 @@ const exemplars = {
   format: "json",
   folder: urlParams.unit ? `curriculum/${urlParams.unit}/exemplars` : `curriculum/exemplars`,
   nested: { depth: 6 },
-  fields: basicFields
+  fields: exemplarFields
 };
 
 function isNewUnitType(myJson: any) {
