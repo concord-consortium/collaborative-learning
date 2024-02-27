@@ -293,7 +293,7 @@ export const BaseDocumentContentModel = types
           if (tileType) {
             const tile = self.getTile(tileEntry.tileId);
             const typedTileLinkMetadata: ITypedTileLinkMetadata = {
-              id: tileEntry.tileId, type: tileType, title: tile?.title, titleBase
+              id: tileEntry.tileId, type: tileType, title: tile?.computedTitle, titleBase
             };
             if (getTileContentInfo(tileType)?.isDataProvider) {
               providers.push(typedTileLinkMetadata);
@@ -614,9 +614,6 @@ export const BaseDocumentContentModel = types
           const parsedContent = safeJsonParse<ITileModelSnapshotIn>(tile.tileContent);
           const title = parsedContent?.title;
           const uniqueTitle = title && self.getUniqueTitle(title);
-          if (title) {
-            console.log("CTIER Inserting tile with title", title, " -> ", uniqueTitle);
-          }
           if (parsedContent?.content) {
             const rowOptions: INewTileOptions = {
               rowIndex: rowInfo.rowDropIndex,
@@ -648,9 +645,6 @@ export const BaseDocumentContentModel = types
           const parsedContent = safeJsonParse<ITileModelSnapshotIn>(tile.tileContent);
           const title = parsedContent?.title;
           const uniqueTitle = title && self.getUniqueTitle(title);
-          if (title) {
-            console.log("CTINR Inserting tile with title", title, " -> ", uniqueTitle);
-          }
           const content = parsedContent?.content;
           if (content) {
             if (tile.rowIndex !== lastRowIndex) {

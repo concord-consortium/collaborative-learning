@@ -267,7 +267,6 @@ export const TableContentModel = TileContentModel
     },
     setContentTitle(title: string) {
       self.dataSet.setName(title);
-      console.log("table.setContentTitle set DataSet name");
     }
   }))
   .actions(self => ({
@@ -355,13 +354,13 @@ export const TableContentModel = TileContentModel
             // was just added to the document or because the table was unlinked from its
             // dataset. This unlinking can happen if the DataFlow tile unlinks the table.
             // In this case a new dataset will be created and linked.
-            const model = getTileModel(self);
+            const tileModel = getTileModel(self);
             const dataSet = DataSet.create(!self.importedDataSet.isEmpty
-              ? getSnapshot(self.importedDataSet) : createDefaultDataSet(model?.title));
+              ? getSnapshot(self.importedDataSet) : createDefaultDataSet(tileModel?.title));
             self.clearImportedDataSet();
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
             // Unset title of the tile so that the name of the dataset will be displayed.
-            getTileModel(self)?.setTitle(undefined);
+            tileModel?.setTitle(undefined);
           }
 
           // Add the shared model to both the document and the tile
