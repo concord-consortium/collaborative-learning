@@ -6,6 +6,7 @@ import { SharedModelType } from "../shared/shared-model";
 import { IDragSharedModelItem, ISharedModelManager, SharedModelUnion } from "../shared/shared-model-manager";
 import { ITileModel, TileModel } from "../tiles/tile-model";
 import { getTileContentInfo } from "../tiles/tile-content-info";
+import { isSharedDataSet } from "../shared/shared-data-set";
 
 export function getTileModel(tileContentModel: IAnyStateTreeNode) {
   if (!hasParentOfType(tileContentModel, TileModel)) {
@@ -37,11 +38,19 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     return !!this.document;
   }
 
+  /**
+   * Return a user-friendly name for the shared model.
+   * For datasets, the name is stored in the dataset.
+   * For other shared models, we list connected tiles' titles.
+   * @param model
+   * @returns user-visible name
+   */
   getSharedModelLabel(model: SharedModelType) {
-    // To label a model, list the titles of all the provider-type tiles that are linked to it.
+    if (isSharedDataSet(model) && model.dataSet.name) {
+      return model.dataSet.name;
+    }
+    // Fallback: list the titles of all the provider-type tiles that are linked to the model.
     // If no tiles are linked, default to something based on the ID.
-    // Longer term, would be better to update things so that appropriate titles are stored as part of
-    // the shared models.
     function canProvide(tile: ITileModel) {
       // Will need an update when XY Plots can provide a dataset - they will only be providers
       // for some of the shared models they are linked to.
