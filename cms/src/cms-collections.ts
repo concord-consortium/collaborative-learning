@@ -10,7 +10,8 @@ const typeField = {
 const tagField = {
   label: "Tag",
   name: "tag",
-  widget: "string"
+  widget: "select",
+  options: ["hardcoded", "but-should-be-dynamic", "look-at-commentTags-key", "in-unit-json"]
 } as CmsField;
 
 const previewLinkField = {
@@ -97,7 +98,7 @@ function hasSectionsFolder(myJson: any) {
 export function getCmsCollections(unitJson: any): CmsConfig["collections"] {
   if (unitJson && hasSectionsFolder(unitJson)) {
     return [
-      teacherGuides,
+      teacherGuides,     // HEY: make these functions that accept unitJson, that way you can get commentTags in (and make it more DRY, too)
       curriculumSections,
       exemplars
     ] as CmsConfig["collections"];
