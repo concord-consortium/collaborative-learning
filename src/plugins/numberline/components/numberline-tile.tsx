@@ -24,8 +24,17 @@ import { EditableNumberlineValue } from './editable-numberline-value';
 
 import "./numberline-tile.scss";
 
+// As students, we want to express both closed form counting and inequalities which end with an open circle point.
+// - add an open circle point to the toolbar
+// - revise other toolbar buttons to the latest versions
+// - when the open circle point is used, create an open circle point
+// - point types are saved and restored and can be used in curriculum.
+
+
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { documentContent, model, readOnly, scale, tileElt, onRegisterTileApi, onUnregisterTileApi } = props;
+
+  console.log("numberlineTile for PR change");
 
   const content = model.content as NumberlineContentModelType;
   const [hoverPointId, setHoverPointId] = useState("");
