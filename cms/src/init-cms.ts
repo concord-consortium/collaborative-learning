@@ -7,9 +7,14 @@ import { urlParams } from "../../src/utilities/url-params";
 import { IframeControl } from "./iframe-control";
 import { JsonControl } from "./json-control";
 import { PreviewLinkControl } from "./preview-link-control";
-import { defaultCurriculumBranch } from "./cms-constants";
+import { defaultCurriculumBranch, defaultCurriculumUnit } from "./cms-constants";
 import { getCmsCollections } from "./cms-collections";
+import { getUnitJson } from "../../src/models/curriculum/unit";
+import appConfigJson from "../../src/clue/app-config.json";
+import { AppConfigModel, AppConfigModelSnapshot } from "../../src/models/stores/app-config-model";
 
+const appConfig = AppConfigModel.create(appConfigJson as AppConfigModelSnapshot);
+const unit = urlParams.unit ?? defaultCurriculumUnit;
 
 // Local testing of the CMS without working with github directly:
 // - Add the localCMSBacked parameter to the URL
@@ -37,22 +42,25 @@ function cmsBackend() {
 }
 
 // Config for Decap CMS
-const cmsConfig: CmsConfig = {
-  load_config_file: false,
-  ...cmsBackend(),
-  media_folder: urlParams.unit ? `curriculum/${urlParams.unit}/images` : `curriculum/images`,
-  // The public_folder setting doesn't apply to the top level "Media" dialog.
-  // It is configured here for documentation, and in case we start using
-  // the media api within out CLUE editor
-  public_folder: urlParams.unit ? `${urlParams.unit}/images` : `images`,
-  collections: getCmsCollections()
-};
+function cmsConfig(unitJson: any): CmsConfig {
+  return {
+    load_config_file: false,
+    ...cmsBackend(),
+    media_folder: urlParams.unit ? `curriculum/${urlParams.unit}/images` : `curriculum/images`,
+    // The public_folder setting doesn't apply to the top level "Media" dialog.
+    // It is configured here for documentation, and in case we start using
+    // the media api within out CLUE editor
+    public_folder: urlParams.unit ? `${urlParams.unit}/images` : `images`,
+    collections: getCmsCollections(unitJson)
+  };
+}
 
-export function initCMS() {
+export async function initCMS() {
   CMS.registerWidget("clue", IframeControl);
   CMS.registerWidget("json", JsonControl);
   CMS.registerWidget("preview-link", PreviewLinkControl);
-  CMS.init({config: cmsConfig});
+  const unitJson = await getUnitJson(unit, appConfig);
+  CMS.init({config: cmsConfig(unitJson)});
 }
 
 
