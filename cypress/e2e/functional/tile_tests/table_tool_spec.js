@@ -290,11 +290,11 @@ context('Table Tool Tile', function () {
     cy.log('can unlink and link data from a table using the "Link Table" button');
     // Unlink
     clueCanvas.clickToolbarButton('table', 'link-tile');
-    tableToolTile.getLinkGraphModalTileMenu().select('Table 1');
+    tableToolTile.getLinkGraphModalTileMenu().select('Graph 1');
     tableToolTile.getLinkGraphModalLinkButton().should("contain", "Clear It!").click();
     // Re-link
     clueCanvas.clickToolbarButton('table', 'link-tile');
-    tableToolTile.getLinkGraphModalTileMenu().select('Table 1');
+    tableToolTile.getLinkGraphModalTileMenu().select('Graph 1');
     tableToolTile.getLinkGraphModalLinkButton().should("contain", "Link").click();
   });
 });
