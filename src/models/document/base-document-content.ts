@@ -435,18 +435,15 @@ export const BaseDocumentContentModel = types
       return `${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
     },
     migrateDataSetTitles() {
-      // Iterate through all tiles in order.
-      // If a tile that should not have a title has one, and its dataset doesn't, move the title there.
-      for (const id in self.getTilesInDocumentOrder) {
+      // Find any legacy table or datacard tiles that have a title set on the tile, rather than on the dataset,
+      // and move those titles to the datasets.
+      // We iterate through the tiles in reverse order, so that if there is more than one tile
+      // linked to the same dataset, the first tile's name is the one that ends up being used.
+      const tiles = self.getTilesInDocumentOrder().reverse();
+      for (const id of tiles) {
         const tile = self.tileMap.get(id);
         if (tile && tile.title && getTileContentInfo(tile.content.type)?.useContentTitle) {
-          if (!tile.content.contentTitle) {
-            console.log("Migrating tile title to dataset:", tile.content.type, tile.id, tile.title);
-            tile.content.setContentTitle(tile.title);
-          } else {
-            console.log("Tile title", tile.title, "does not match content title", tile.content.contentTitle,
-            "for", tile.content.type, tile.id, ". Removing title");
-          }
+          tile.content.setContentTitle(tile.title);
           tile.setTitle(undefined);
         }
       }
