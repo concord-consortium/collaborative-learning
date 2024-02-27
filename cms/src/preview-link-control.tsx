@@ -6,7 +6,7 @@ import { stripPTNumberFromBranch } from "../../src/utilities/branch-utils";
 import { urlParams } from "../../src/utilities/url-params";
 import { AppConfigModel, AppConfigModelSnapshot } from "../../src/models/stores/app-config-model";
 import appConfigJson from "../../src/clue/app-config.json";
-import { defaultCurriculumBranch } from "./cms-constants";
+import { defaultCurriculumBranch, defaultCurriculumUnit } from "./cms-constants";
 
 import "./custom-control.scss";
 import "./preview-link-control.scss";
@@ -42,11 +42,10 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
     this.pathParts = entry.path.split("/");
 
     // If there's a unit url parameter, use that. Otherwise try to find the unit from the entry path.
-    const defaultUnit = "sas";
     if (!urlParams.unit && !this.pathParts?.[1]) {
-      warning = `Could not determine unit. Using default ${defaultUnit}.`;
+      warning = `Could not determine unit. Using default ${defaultCurriculumUnit}.`;
     }
-    this.unit = urlParams.unit ?? this.pathParts?.[1] ?? defaultUnit;
+    this.unit = urlParams.unit ?? this.pathParts?.[1] ?? defaultCurriculumUnit;
 
     const appConfig = AppConfigModel.create(appConfigJson as AppConfigModelSnapshot);
 
