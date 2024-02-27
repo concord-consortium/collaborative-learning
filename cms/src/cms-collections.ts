@@ -1,44 +1,42 @@
 import { CmsConfig, CmsField } from "netlify-cms-core";
 import { urlParams } from "../../src/utilities/url-params";
 
-const basicFields = [
-  {
-    label: "Type",
-    name: "type",
-    widget: "string"
-  },
-  {
-    label: "Preview Link",
-    name: "preview-link",
-    required: false,
-    widget: "preview-link"
-  } as CmsField,
-  {
-    label: "Content",
-    name: "content",
-    widget: "clue" as any
-  }
-] as CmsField[];
+const typeField = {
+  label: "Type",
+  name: "type",
+  widget: "string"
+} as CmsField;
+
+const tagField = {
+  label: "Tag",
+  name: "tag",
+  widget: "string"
+} as CmsField;
+
+const previewLinkField = {
+  label: "Preview Link",
+  name: "preview-link",
+  required: false,
+  widget: "preview-link"
+} as CmsField;
+
+const contentField = {
+  label: "Content",
+  name: "content",
+  widget: "clue" as any
+} as CmsField;
 
 
-const exemplarFields = [
-  {
-    label: "Tag",
-    name: "tag",
-    widget: "string"
-  },
-  {
-    label: "Preview Link",
-    name: "preview-link",
-    required: false,
-    widget: "preview-link"
-  } as CmsField,
-  {
-    label: "Content",
-    name: "content",
-    widget: "clue" as any
-  }
-] as CmsField[];
+const basicFields: CmsField[] = [
+  typeField,
+  previewLinkField,
+  contentField
+];
+
+const exemplarFields: CmsField[] = [
+  tagField,
+  contentField
+];
 
 const legacyCurriculumSections = {
   name: "sections",
@@ -47,9 +45,7 @@ const legacyCurriculumSections = {
   identifier_field: "type",
   format: "json",
   folder: urlParams.unit ? `curriculum/${urlParams.unit}` : `curriculum`,
-  nested: {
-    depth: 6,
-  },
+  nested: { depth: 6 },
   fields: basicFields
 };
 
@@ -86,18 +82,28 @@ const exemplars = {
   fields: exemplarFields
 };
 
-function isNewUnitType(myJson: any) {
-  return myJson.code === "moth";
+function hasSectionsFolder(myJson: any) {
+  // TODO: figure out types for these parameters
+  // None of the below were accepted, (even though they appear correct) so I must be misunderstanding something:
+  // InvestigationModelType, ModernInvestigationSnapshot, LegacyInvestigationSnapshot
+  // ProblemModelType, LegacyProblemSnapshot, ModernProblemSnapshot
+  // SectionModelType, SectionModelSnapshot
+  const unitProblems = myJson.investigations.map((inv: any) => inv.problems).flat();
+  const allSections = unitProblems.map((prob: any ) => prob.sections).flat();
+  const sectionStrInPath = allSections.some((section: any) => section.sectionPath.includes("sections/"));
+  return sectionStrInPath;
 }
 
 export function getCmsCollections(unitJson: any): CmsConfig["collections"] {
-  if (unitJson && isNewUnitType(unitJson)) {
+  if (unitJson && hasSectionsFolder(unitJson)) {
     return [
       teacherGuides,
       curriculumSections,
       exemplars
     ] as CmsConfig["collections"];
   } else {
-    return [legacyCurriculumSections] as CmsConfig["collections"];
+    return [
+      legacyCurriculumSections
+    ] as CmsConfig["collections"];
   }
 }
