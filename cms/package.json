@@ -9,8 +9,11 @@
     "rollbarAccessToken": "fb9dd070b7344cc7a5e529d8fa25e765"
   },
   "scripts": {
+    "build": "npm-run-all lint build:webpack",
+    "build:webpack": "webpack --mode production",
     "lint": "eslint -c \"../.eslintrc.js\" \"./src/**/*.{js,jsx,ts,tsx}\"",
     "lint:fix": "eslint --fix \"./src/**/*.{js,jsx,ts,tsx}\"",
+    "start": "webpack-dev-server --hot",
     "test": "jest"
   },
   "author": "Concord Consortium <> (https://concord.org)",

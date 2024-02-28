@@ -1,6 +1,9 @@
-CLUE includes a CMS which can be accessed at `/admin.html`. It uses [Decap CMS](https://decapcms.org/). It is configured to edit the content in the `clue-curriculum` repository. It can be configured with the following URL params:
+CLUE includes a CMS which can be accessed at `/admin.html` in a production build. It uses [Decap CMS](https://decapcms.org/). It is configured to edit the content in the `clue-curriculum` repository. It is best to always pass the CMS a `unit` url parameter. Otherwise it will download pretty much all of the files in `clue-curriculum`. With a `unit` parameter it will only download the files for that unit.
+
+# URL Parameters
 - **`curriculumBranch`** By default the CMS edits the `author` branch. You can change the branch by passing a different branch name to this parameter. The CMS will not create this branch for you. You'll need to create it yourself.
 - **`unit`** By default the CMS displays all of the units at the same time. It is better to work with a single unit at a time by using the `unit` param. It should be passed the unit code. This limits what is displayed in the CMS and it also configures the media library to show the images from that unit.
+- **`cmsEditorBase`** By default the CMS will use an iframe pointed at `./cms-editor.html` to edit the CLUE documents. You can use this param to replace `.` with something else. This is useful for local testing (see below)
 - **`localCMSBackend`** By default the CMS works with the `github` backend. This means even when doing local CLUE development the CMS will update the `clue-curriculum` repository directly. If you add the `localCMSBackend` parameter the CMS will attempt to work with a local git proxy running at localhost:8081. You can start this proxy with:
 
   `cd ../clue-curriculum; npx netlify-cms-proxy-server`
@@ -17,14 +20,58 @@ The code for this function is located here: https://github.com/Herohtar/netlify-
 
 It was configured with the client ID and client secret from the GitHub OAuth app.
 
-# Notes on calls:
-After publishing a CMS page, the component on the page is not reconstructed. The existing component is reused. Because we are holding onto the document this works fine.
+# Architecture
+The CMS has two parts in CLUE. One is the CMS itself. The other is the document editor that is embedded inside of iframes inside of the CMS.
 
+## The CMS itself
+This is the code from Decap configured by us to render two custom components. This configuration is in `init-cms.ts`. This is not the typical configuration of the CMS. If you look at the docs, the common pattern is to have a yaml configuration file located in the repository with files being edited. And then a static html page loads in decap js from a CDN. This decap js then finds the configuration and then lets you start editing the files in the repository.
+
+This approach was not flexible enough for us, so instead we configure Decap using the code in `init-cms.ts`. This file includes an embedded configuration which is dynamically changed depending on the url parameters. It also registers 3 custom widgets. We are only using 2 of these components: `clue` and `preview-link`.
+
+These files are built using a build system separate from the main CLUE build system. This was done so that dependencies of CLUE and the CMS would not be tied together. This is all located in the `/cms/` folder.
+
+### `preview-link`
+Is a widget that displays a link so authors can easily open CLUE and see the section they are currently editing. It has to load the Unit json to figure out where in the unit this current section is located. This location is needed to construct the `problemOrdinal` which is what is needed when launching CLUE.
+
+### `clue`
+This is an iframe-control. It isn't really specific to CLUE. The iframe src it shows is:
+`./cms-editor.html?curriculumBranch=${curriculumBranch}`. Then it sends the content from the CMS to this iframe using postMessage. And it gets the updated content from the iframe by listening to "message" events. This approach was used because there were conflicts between the CLUE libraries and the CMS libraries. By putting CLUE in an iframe we avoid these problems.
+
+## The document editor (cms-editor.html)
+This is an additional entry point built by the main CLUE build system. It is very similar to the standalone document editor. The difference is that it listens for the "message" events sent by the iframe widget above, and sends content changes via postMessage to the iframe widget.
+
+This document editor is located in `/src/cms/`
+
+# Building and Deployment
+
+## Local development
+To work on the CMS locally you'll need to start both CLUE and the CMS:
+- start CLUE by running `npm run start` in the top level folder
+- in a new terminal, open the `/cms` folder
+- make sure its dependencies are installed: `npm i`
+- start the CMS by running `npm run start`
+- open the CMS with `http://localhost:[cms_port]/?cmsEditorBase=http://localhost:[clue_port]&unit=[clue_unit_code]&curriculumBranch=[your own branch]`
+
+Typically CLUE will be running on portal 8080 and the CMS will be running on 8081. In this case the url above would be `http://localhost:8081/?cmsEditorBase=http://localhost:8080&unit=[clue_unit_code]&curriculumBranch=[your own branch]`
+
+With this approach you'll be editing the content in the `clue-curriculum` repository directly. By default this will use the `author` branch in the `clue-curriculum` repository. So you aren't making changes to the same branch as other people, you should make your own branch in that repository and pass it to the `curriculumBranch` parameter. You have to make this branch using your own git tools, the CMS cannot create branches itself.
+
+If you want to have more local access to the curriculum you are editing, and you don't want to be updating the `clue-curriculum` repository, you can use the `localCMSBackend` parameter. See above for details on how to use this. Note the proxy needs to be on its own port. If it can't start on 8081 (because the cms is running there) then you'll need to configure it. See the "Configure the Decap CMS proxy server port number" section of this page: https://decapcms.org/docs/working-with-a-local-git-repository
+
+## Remote build
+In the CI (github actions), the toplevel `npm run build` is used. This will build both CLUE and the CMS. And then it will copy the files from `/cms/dist` to `/dist/cms`. Additional it copyes the file `/cms/dist/admin.html` to `/dist/admin.html`. This admin.html file refers to its resources in the cms folder like `cms/admin.js` and `cms/admin.css`. This file is called `admin.html` because that was its original name, and now various authors have direct links to it. So we don't want to change that name.
+
+Currently the CMS build environment is not designed to be used with the release system that we use for the main part of CLUE. So authors cannot go to `https://collaborative-learning.concord.org/admin.html`. Instead most of these authors are using master for their authoring so they go to: `https://collaborative-learning.concord.org/branch/master/admin.html`. **We should fix this so we don't have to worry about breaking authoring when merging to master.**
+
+# Notes on CMS page components
+Sometimes the components on the CMS page are reused and sometimes they are reconstructed. This behavior has no effect on our current components, but it should be kept in mind if creating a custom component.
+
+- After publishing a CMS page, the component on the page is not reconstructed instead it is reused. The existing component is reused.
 - When leaving (using the CMS ui) and coming back to the same page the component is reconstructed.
 - When leaving (using the CMS ui) with unsaved changes, a message is shown, and the control is reconstructed when returning to the page.
 - When leaving with unsaved changes by reloading the page in the browser:
-- A message is shown before reload confirming you want to lose your changes
-- A message is shown when the page is loaded again about an unsaved draft Choosing the draft doesn't always work. See the "Known Issues" section of cms.md
+  - A message is shown before reload confirming you want to lose your changes
+  - A message is shown when the page is loaded again about an unsaved draft Choosing the draft doesn't always work. See the "Known Issues" section of cms.md
 
 # TODO
 

@@ -47,6 +47,9 @@ export class DocumentEditor extends React.Component<IProps, IState>  {
 
       // Update the widget's value whenever a change is made to the document's content
       this.disposer = onSnapshot(document, snapshot => {
+        // FIXME: If the document has tiles at the end of it which aren't setup by the unit json,
+        // then exportAsJson creates an invalid JSON file. It leaves a trailing comma after the
+        // last known tile.
         const json = document.content?.exportAsJson({ includeTileIds: true });
         if (json) {
           const parsedJson = JSON.parse(json);
