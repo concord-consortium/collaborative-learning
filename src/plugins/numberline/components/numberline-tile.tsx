@@ -24,6 +24,7 @@ import { EditableNumberlineValue } from './editable-numberline-value';
 
 import "./numberline-tile.scss";
 
+
 // As students, we want to express both closed form counting and inequalities which end with an open circle point.
 // - add an open circle point to the toolbar
 // - revise other toolbar buttons to the latest versions
