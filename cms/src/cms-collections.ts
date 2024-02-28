@@ -39,7 +39,7 @@ const legacyCurriculumSections = {
   label_singular: "Curriculum Section",
   identifier_field: "type",
   format: "json",
-  folder: urlParams.unit ? `curriculum/${urlParams.unit}` : `curriculum`,
+  folder: urlParams.unit ? `curriculum/${urlParams.unit}` : `not-supported`,
   nested: { depth: 6 },
   fields: [typeField, previewLinkField, contentField]
 };
@@ -50,7 +50,7 @@ const curriculumSections = {
   label_singular: "Curriculum Section",
   identifier_field: "type",
   format: "json",
-  folder: urlParams.unit ? `curriculum/${urlParams.unit}/sections` : `curriculum/sections`,
+  folder: urlParams.unit ? `curriculum/${urlParams.unit}/sections` : `not-supported`,
   nested: { depth: 6 },
   fields: [typeField, previewLinkField, contentField]
 };
@@ -61,7 +61,7 @@ const teacherGuides = {
   label_singular: "Teacher Guide",
   identifier_field: "type",
   format: "json",
-  folder: urlParams.unit ? `curriculum/${urlParams.unit}/teacher-guide` : `curriculum/teacher-guide`,
+  folder: urlParams.unit ? `curriculum/${urlParams.unit}/teacher-guide/sections` : `not-supported`,
   nested: { depth: 6 },
   fields: [typeField, previewLinkField, contentField]
 };
@@ -72,7 +72,7 @@ const exemplars = {
   label_singular: "Exemplar",
   identifier_field: "type",
   format: "json",
-  folder: urlParams.unit ? `curriculum/${urlParams.unit}/exemplars` : `curriculum/exemplars`,
+  folder: urlParams.unit ? `curriculum/${urlParams.unit}/exemplars` : `not-supported`,
   nested: { depth: 6 },
   fields: [titleField, tagField, contentField]
 };
