@@ -29,7 +29,7 @@ class NumberlineToolTile {
     this.getClearButton().click();
   }
   getClearButton(){
-    return cy.get(`.clear-points`);
+    return cy.get(`.clear-points`); //TODO: fix this
   }
   setMaxValue(max){
     this.getMaxBox().dblclick().clear().type(`${max}{enter}`);

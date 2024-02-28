@@ -3,8 +3,10 @@ import classNames from "classnames";
 import { Tooltip, TooltipProps } from "react-tippy";
 
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
-import PlacePointIcon from "../assets/numberline-toolbar-point-icon.svg";
-import ClearPointsIcon from "../assets/numberline-toolbar-clear-icon.svg"; //undo icon for now
+import SelectIcon from "../assets/numberline-toolbar-select-tool.svg";
+import PointIcon from "../assets/numberline-toolbar-point-icon.svg";
+import PointOpenIcon from "../assets/numberline-toolbar-point-open-icon.svg";
+import ResetIcon from "../assets/numberline-toolbar-reset-icon.svg";
 import DeletePointsIcon from "../assets/numberline-toolbar-delete-icon.svg";
 
 import "./numberline-toolbar.scss";
@@ -32,27 +34,54 @@ interface ISetNumberlineHandler {
   onClick?: () => void;
 }
 
-export const PlacePointButton = ({ onClick }: ISetNumberlineHandler) => (
+// export const
+
+//Select
+//Point
+//Point-Open
+//Reset
+//Delete
+
+export const SelectButton = ({ onClick }: ISetNumberlineHandler) => (
   <NumberlineButton
-    className="place-point"
-    icon={<PlacePointIcon/>}
+    className="select-numberline-toolbar"
+    icon={<SelectIcon/>}
+    onClick={onClick}
+    tooltipOptions={{ title: "Select Point"}}
+  />
+);
+
+export const PointButton = ({ onClick }: ISetNumberlineHandler) => (
+  <NumberlineButton
+    className="point-numberline-toolbar"
+    icon={<PointIcon/>}
     onClick={onClick}
     tooltipOptions={{ title: "Place Point"}}
   />
 );
 
-export const ClearPointsButton = ({ onClick }: ISetNumberlineHandler) => (
+export const PointOpenButton = ({ onClick }: ISetNumberlineHandler) => (
   <NumberlineButton
-    className="clear-points"
-    icon={<ClearPointsIcon/>}
+    className="point-open-numberline-toolbar"
+    icon={<PointOpenIcon/>}
     onClick={onClick}
-    tooltipOptions={{ title: "Clear Points"}}
+    tooltipOptions={{ title: "Place Open Point"}}
   />
 );
 
-export const DeletePointButton = ({ onClick }: ISetNumberlineHandler) => (
+export const ResetButton = ({ onClick }: ISetNumberlineHandler) => (
   <NumberlineButton
-    className="delete-points"
+    className="reset-numberline-toolbar"
+    icon={<ResetIcon/>}
+    onClick={onClick}
+    tooltipOptions={{ title: "Reset"}}
+  />
+);
+
+
+export const DeleteButton = ({ onClick }: ISetNumberlineHandler) => (
+  <NumberlineButton
+    className="delete-numberline-toolbar"
     icon={<DeletePointsIcon/>}
     onClick={onClick}
     tooltipOptions={{ title: "Delete Point(s)"}}

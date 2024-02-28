@@ -6,11 +6,11 @@ import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../../components/tiles/hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../../hooks/use-stores";
-import { PlacePointButton, ClearPointsButton, DeletePointButton } from "./numberline-toolbar-buttons";
+import { SelectButton, PointButton, PointOpenButton, ResetButton, DeleteButton } from "./numberline-toolbar-buttons";
 
 import "./numberline-toolbar.scss";
 
-const defaultButtons = ["place-point", "clear-points", "delete-points"];
+const defaultButtons = ["select", "point", "point-open", "reset", "delete"];
 
 interface INumberlineToolbarProps extends IFloatingToolbarProps {
   handleClearPoints: () => void;
@@ -20,6 +20,8 @@ interface INumberlineToolbarProps extends IFloatingToolbarProps {
 export const NumberlineToolbar: React.FC<INumberlineToolbarProps> = observer((props) => {
   const { documentContent,  tileElt, onIsEnabled,
           handleClearPoints, handleDeletePoint, ...others } = props;
+
+  console.log("-------< NumberlineToolbar >-----------");
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
                     documentContent,
@@ -31,16 +33,22 @@ export const NumberlineToolbar: React.FC<INumberlineToolbarProps> = observer((pr
                   });
 
   const buttonSettings = useSettingFromStores("tools", "numberline") as unknown as string[] | undefined;
+  console.log("buttonSettings:", buttonSettings);
   const buttons = buttonSettings || defaultButtons;
+  console.log("buttons:", buttons);
 
   const getToolbarButton = (toolName: string) => {
     switch (toolName) {
-      case "place-point":
-        return <PlacePointButton key={toolName} />;
-      case "clear-points":
-        return <ClearPointsButton key={toolName} onClick={handleClearPoints} />;
-      case "delete-points":
-        return <DeletePointButton key={toolName} onClick={handleDeletePoint} />;
+      case "select":
+        return <SelectButton key={toolName} />;
+      case "point":
+        return <PointButton key={toolName} onClick={handleClearPoints} />;
+      case "point-open":
+        return <PointOpenButton key={toolName} onClick={handleDeletePoint} />;
+      case "reset":
+        return <ResetButton key={toolName} onClick={handleClearPoints} />;
+      case "delete":
+        return <DeleteButton key={toolName} onClick={handleDeletePoint} />;
     }
   };
 
