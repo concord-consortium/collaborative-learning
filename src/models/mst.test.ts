@@ -866,7 +866,7 @@ describe("mst", () => {
     ]);
   });
 
-  test("empty create with required props throws exception", () => {
+  test("empty create without required props throws exception", () => {
     const TestObject = types.
       model("TestObject", {
         propValue: types.string

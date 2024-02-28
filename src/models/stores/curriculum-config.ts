@@ -4,7 +4,7 @@ import { stripPTNumberFromBranch } from "../../utilities/branch-utils";
 import { parseUrl } from "query-string";
 
 interface ICurriculumConfigEnv {
-  urlParams: { curriculumBranch?: string};
+  urlParams: { curriculumBranch?: string };
 }
 
 export const CurriculumConfig = types
