@@ -13,12 +13,7 @@ export function useDocumentCaption(document: DocumentModelType, isStudentWorkspa
   const pubVersion = document.pubVersion;
   const teacher = useFirestoreTeacher(uid, user.network || "");
   const userName = classStore.getUserById(uid)?.displayName || teacher?.name ||
-  (document.isRemote ? teacher?.name : "") || "Unknown User";
-
-  // if (type === SupportPublication) {
-  //   const caption = document.getProperty("caption") || "Support";
-  //   return pubVersion ? `${caption} v${pubVersion}` : `${caption}`;
-  // }
+                  (document.isRemote ? teacher?.name : "") || "Unknown User";
 
   const hasNamePrefix =  document.isRemote || isPublishedType(type) || isUnpublishedType(type) || isStudentWorkspaceDoc;
   const namePrefix = hasNamePrefix ? `${userName}: ` : "";
@@ -28,5 +23,6 @@ export function useDocumentCaption(document: DocumentModelType, isStudentWorkspa
                           ? ` v${pubVersion}`
                           : "";
   const title = getDocumentDisplayTitle(document, appConfig, problem);
+
   return `${namePrefix}${title}${dateSuffix}`;
 }
