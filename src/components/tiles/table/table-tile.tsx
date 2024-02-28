@@ -24,7 +24,7 @@ import { useRowHeight } from "./use-row-height";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { verifyAlive } from "../../../utilities/mst-utils";
-import { gImageMap } from "../../../models/image-map";
+import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { TableToolbarContext } from "./table-toolbar-context";
 
@@ -40,6 +40,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
   const content = useMemo(() => getContent(), [getContent]);
+  const imagePromises = useMemo(() => new Map<string, Promise<ImageMapEntry>>(), []);
   const [imageUrls, setImageUrls] = useState(new Map<string,string>());
   verifyAlive(content, "TableToolComponent");
   const metadata = getContent().metadata;
@@ -94,19 +95,20 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // and then looks it up in the background, adds to cache, and updates state to force a refresh.
   const lookupImage = useCallback((value: string) => {
     if (gImageMap.isImageUrl(value)) {
-      const cached = imageUrls.get(value);
-      if (cached) {
-        return cached;
+      let imagePromise = imagePromises.get(value);
+      if (!imagePromise) {
+        imagePromise = gImageMap.getImage(value);
+        imagePromises.set(value, imagePromise);
+        imagePromise.then((image) => {
+          if (image && image.displayUrl) {
+            // This state changes triggers a re-render
+            setImageUrls(urls => new Map(urls).set(value, image.displayUrl));
+          }
+        });
       }
-      gImageMap.getImage(value).then((image) => {
-        if (image && image.displayUrl) {
-          // This state changes forces a re-render - is that good?
-          setImageUrls(new Map(imageUrls).set(value, image.displayUrl));
-        }
-      });
-      return undefined;
+      return imageUrls.get(value);
     }
-  }, [imageUrls]);
+  }, [imagePromises, imageUrls]);
 
   // React components used for the index (left most) column
   const rowLabelProps = useRowLabelColumn({

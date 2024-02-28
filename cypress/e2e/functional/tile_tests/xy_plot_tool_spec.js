@@ -4,9 +4,11 @@ import ResourcePanel from '../../../support/elements/common/ResourcesPanel';
 import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
+import DataCardToolTile from '../../../support/elements/tile/DataCardToolTile';
 
 let clueCanvas = new ClueCanvas;
 let xyTile = new XYPlotToolTile;
+let dataCard = new DataCardToolTile;
 let tableToolTile = new TableToolTile;
 let diagramTile = new DiagramToolTile;
 const primaryWorkspace = new PrimaryWorkspace;
@@ -199,7 +201,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().should('not.exist');
     });
 
-    it("Test duplicating graph", () => {
+    it("Test duplicating graph with an xy-plot (a.k.a. graph)", () => {
       beforeTest(queryParamsMultiDataset);
       cy.collapseResourceTabs();
 
@@ -210,6 +212,40 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().click();
       clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
       xyTile.linkTable("Table 1");
+      xyTile.getGraphDot().should('have.length', 4);
+
+      clueCanvas.getDuplicateTool().click();
+      xyTile.getTile().should("have.length", 2).should('be.visible');
+      xyTile.getGraphDot().should('have.length', 8);
+    });
+
+    it("Test duplicating graph with a data-card", () => {
+      beforeTest(queryParamsMultiDataset);
+      cy.collapseResourceTabs();
+
+      let data = [[1, 2], [2, 4], [3, 9], [4, 16]];
+      const rows = Math.max(2, ...data.map(row => row.length));
+
+      cy.log("renders Data Card tool tile");
+      clueCanvas.addTile("datacard");
+      dataCard.getTile().should("exist");
+  
+      for (let i=1; i<rows; i++) {
+        dataCard.getAddAttributeButton().click();
+      }
+      for (let i=0; i<data.length; i++) {
+        for (let j=0; j<data[i].length; j++) {
+          let value = data[i][j]
+          dataCard.getAttrValue().eq(j).click().type(`${value}{enter}`);
+        }
+        dataCard.getAddCardButton().click();
+      }
+
+      clueCanvas.addTile("graph");
+      xyTile.getTile().should("have.length", 1).should('be.visible');
+      xyTile.getTile().click();
+      clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
+      xyTile.linkDataCard("Data Card Collection 1");
       xyTile.getGraphDot().should('have.length', 4);
 
       clueCanvas.getDuplicateTool().click();
