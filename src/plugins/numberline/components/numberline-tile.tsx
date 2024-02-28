@@ -24,17 +24,21 @@ import { EditableNumberlineValue } from './editable-numberline-value';
 
 import "./numberline-tile.scss";
 
-// - Guidelines -
+//**********************✔️•↳******************* GUIDELINES ************************************************
 // - As students, we want to express both closed form counting and inequalities which end with an open circle point.
-// - add an open circle point to the toolbar
-// - revise other toolbar buttons to the latest versions
-// - when the open circle point is used, create an open circle point
-// - point types are saved and restored and can be used in curriculum.
+
+// ✔️ add an open circle point to the toolbar
+// ✔️ add a select point arrow to the toolbar
+// ✔️ revise solid point button to the latest versions
+// ✔️ when the open circle point is used, create an open circle point
+// when the solid circle point is used, create a solid point like before
+// when the selection button is used, points can be moved or selected for deletion
+// point types are saved and restored and can be used in curriculum.
+
 
 
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { documentContent, model, readOnly, scale, tileElt, onRegisterTileApi, onUnregisterTileApi } = props;
-  console.log("-------< Numberline >-----------");
 
   const content = model.content as NumberlineContentModelType;
   const [hoverPointId, setHoverPointId] = useState("");
@@ -43,9 +47,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const isTileSelected = ui.isSelectedTile(model);
 
   //---------------- Model Manipulation Functions -------------------------------------------------
-  const deleteSelectedPoints = useCallback(() => {
-    content.deleteSelectedPoints();
-  }, [content]);
 
   const createPoint = (xValue: number) => {
     if (!readOnly) {
@@ -62,6 +63,10 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
   };
 
+  const deleteSelectedPoints = useCallback(() => {
+    content.deleteSelectedPoints();
+  }, [content]);
+
   // Set up key handling
   const hotKeys = useRef(new HotKeys());
   useEffect(()=>{
@@ -72,6 +77,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       });
     }
   }, [deleteSelectedPoints, readOnly]);
+
 
   //---------------- Calculate Width Of Tile / Scale ----------------------------------------------
   const documentScrollerRef = useRef<HTMLDivElement>(null);
@@ -107,9 +113,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
     return () => obs?.disconnect();
   }, []);
-
-
-
 
   //----------------- Register Tile API functions -------------------------------------------------
   const annotationPointCenter = useCallback((pointId: string) => {
@@ -382,6 +385,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         scale={scale}
         handleClearPoints={() => content.deleteAllPoints()}
         handleDeletePoint={deleteSelectedPoints}
+
+
       />
       <div
         className="numberline-tool"

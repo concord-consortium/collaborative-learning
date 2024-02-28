@@ -118,7 +118,7 @@ export const NumberlineContentModel = TileContentModel
       }
       self.clearSelectedPoints();
     },
-    deleteAllPoints() {
+    deleteAllPoints() { //TODO: This is not being used we may need to get rid of it
       self.points.clear();
     },
   }))

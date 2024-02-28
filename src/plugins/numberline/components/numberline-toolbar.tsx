@@ -1,7 +1,6 @@
 import { observer } from "mobx-react";
-import React from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom";
-
 import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../../components/tiles/hooks/use-floating-toolbar-location";
@@ -21,6 +20,13 @@ export const NumberlineToolbar: React.FC<INumberlineToolbarProps> = observer((pr
   const { documentContent,  tileElt, onIsEnabled,
           handleClearPoints, handleDeletePoint, ...others } = props;
 
+  //---------------- Determine Selected Point Type ------------------------
+  const [selPointType, setSelPointType] = useState('filled'); // 'filled' or 'open'
+  const handleSelectPointType = (type: 'filled' | 'open') => {
+    setSelPointType(type);
+
+  };
+
   console.log("-------< NumberlineToolbar >-----------");
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
@@ -32,21 +38,29 @@ export const NumberlineToolbar: React.FC<INumberlineToolbarProps> = observer((pr
                     ...others
                   });
 
+
   const buttonSettings = useSettingFromStores("tools", "numberline") as unknown as string[] | undefined;
-  console.log("buttonSettings:", buttonSettings);
   const buttons = buttonSettings || defaultButtons;
-  console.log("buttons:", buttons);
+
 
   const getToolbarButton = (toolName: string) => {
     switch (toolName) {
       case "select":
         return <SelectButton key={toolName} />;
       case "point":
-        return <PointButton key={toolName} onClick={handleClearPoints} />;
+        return <PointButton
+                  key={toolName}
+                  onClick={() => handleSelectPointType('filled')}
+                  selected={selPointType === 'filled'}
+                />;
       case "point-open":
-        return <PointOpenButton key={toolName} onClick={handleDeletePoint} />;
+        return <PointOpenButton
+                  key={toolName}
+                  onClick={() => handleSelectPointType('open')}
+                  selected={selPointType === 'open'}
+                />;
       case "reset":
-        return <ResetButton key={toolName} onClick={handleClearPoints} />;
+        return <ResetButton key={toolName}  />;
       case "delete":
         return <DeleteButton key={toolName} onClick={handleDeletePoint} />;
     }

@@ -39,5 +39,12 @@
       opacity: 35%;
       pointer-events: none;
     }
+
+    &.point-open-button {
+      &.selected {
+        background-color: $workspace-teal-light-4;
+      }
+    }
+
   }
  }
