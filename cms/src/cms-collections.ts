@@ -1,4 +1,4 @@
-import { CmsConfig, CmsField } from "netlify-cms-core";
+import { CmsConfig, CmsField, CmsFieldSelect, CmsSelectWidgetOptionObject } from "netlify-cms-core";
 import { urlParams } from "../../src/utilities/url-params";
 
 const typeField = {
@@ -11,8 +11,8 @@ const tagField = {
   label: "Tag",
   name: "tag",
   widget: "select",
-  options: ["hardcoded", "but-should-be-dynamic", "look-at-commentTags-key", "in-unit-json"]
-} as CmsField;
+  options: []
+} as CmsFieldSelect;
 
 const previewLinkField = {
   label: "Preview Link",
@@ -27,18 +27,6 @@ const contentField = {
   widget: "clue" as any
 } as CmsField;
 
-
-const basicFields: CmsField[] = [
-  typeField,
-  previewLinkField,
-  contentField
-];
-
-const exemplarFields: CmsField[] = [
-  tagField,
-  contentField
-];
-
 const legacyCurriculumSections = {
   name: "sections",
   label: "Curriculum Sections",
@@ -47,7 +35,7 @@ const legacyCurriculumSections = {
   format: "json",
   folder: urlParams.unit ? `curriculum/${urlParams.unit}` : `curriculum`,
   nested: { depth: 6 },
-  fields: basicFields
+  fields: [typeField, previewLinkField, contentField]
 };
 
 const curriculumSections = {
@@ -58,7 +46,7 @@ const curriculumSections = {
   format: "json",
   folder: urlParams.unit ? `curriculum/${urlParams.unit}/sections` : `curriculum/sections`,
   nested: { depth: 6 },
-  fields: basicFields
+  fields: [typeField, previewLinkField, contentField]
 };
 
 const teacherGuides = {
@@ -69,7 +57,7 @@ const teacherGuides = {
   format: "json",
   folder: urlParams.unit ? `curriculum/${urlParams.unit}/teacher-guide` : `curriculum/teacher-guide`,
   nested: { depth: 6 },
-  fields: basicFields
+  fields: [typeField, previewLinkField, contentField]
 };
 
 const exemplars = {
@@ -80,7 +68,7 @@ const exemplars = {
   format: "json",
   folder: urlParams.unit ? `curriculum/${urlParams.unit}/exemplars` : `curriculum/exemplars`,
   nested: { depth: 6 },
-  fields: exemplarFields
+  fields: [tagField, contentField]
 };
 
 function hasSectionsFolder(myJson: any) {
@@ -96,9 +84,16 @@ function hasSectionsFolder(myJson: any) {
 }
 
 export function getCmsCollections(unitJson: any): CmsConfig["collections"] {
+  // any tag field options should be sourced from unitJson
+  if (unitJson.config.commentTags) {
+    const tags = unitJson.config.commentTags;
+    const options = Object.entries(tags).map(([value, label]) => ({ label, value }));
+    tagField.options = options as Array<CmsSelectWidgetOptionObject>;
+  }
+
   if (unitJson && hasSectionsFolder(unitJson)) {
     return [
-      teacherGuides,     // HEY: make these functions that accept unitJson, that way you can get commentTags in (and make it more DRY, too)
+      teacherGuides,
       curriculumSections,
       exemplars
     ] as CmsConfig["collections"];
