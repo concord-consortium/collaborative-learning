@@ -15,7 +15,9 @@ export const GraphLayerModel = types
   .model('GraphLayerModel')
   .props({
     id: types.optional(types.identifier, () => typedId("LAYR")),
-    config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create())
+    config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create()),
+    // Whether this layer contains "points by hand" that can be edited in the graph
+    editable: false
   })
   .volatile(self => ({
     autoAssignedAttributes: [] as Array<{ place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string }>,

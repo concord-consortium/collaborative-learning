@@ -269,6 +269,7 @@
         "disableAttributeDnD": true,
         "tools": [
           "link-tile",
+          "add-points-by-hand",
           "|",
           "fit-all",
           "toggle-lock"

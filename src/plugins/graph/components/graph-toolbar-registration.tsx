@@ -13,6 +13,7 @@ import AddIcon from "../../../assets/icons/add-data-graph-icon.svg";
 import FitAllIcon from "../assets/fit-all-icon.svg";
 import LockAxesIcon from "../assets/lock-axes-icon.svg";
 import UnlockAxesIcon from "../assets/unlock-axes-icon.svg";
+import AddPointsByHandIcon from "../assets/add-points-by-hand-icon.svg";
 
 function LinkTileButton(name: string, title: string, allowMultiple: boolean) {
 
@@ -88,6 +89,35 @@ const ToggleLockAxesButton = observer(function ToggleLockAxesButton({name}: IToo
   );
 });
 
+const AddPointsByHandButton = observer(function AddPointsByHandButton({name}: IToolbarButtonComponentProps) {
+  const graph = useGraphModelContext();
+
+  // const hasEditableLayers = graph.getEditableLayers().length > 0;
+
+  // Enable button if axes are numeric or undefined.
+  const isNumeric = (graph.attributeType("x")||"numeric") === "numeric"
+    && (graph.attributeType("y")||"numeric") === "numeric";
+  if (!isNumeric) {
+    console.log("Attribute types:", graph.attributeType("x"), graph.attributeType("y"));
+  }
+
+  function handleClick() {
+    graph.createEditableLayer();
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Add points by hand"
+      onClick={handleClick}
+      disabled={!isNumeric}
+    >
+      <AddPointsByHandIcon/>
+    </TileToolbarButton>
+  );
+
+});
+
 registerTileToolbarButtons("graph",
 [
   {
@@ -105,5 +135,9 @@ registerTileToolbarButtons("graph",
   {
     name: 'toggle-lock',
     component: ToggleLockAxesButton
+  },
+  {
+    name: 'add-points-by-hand',
+    component: AddPointsByHandButton
   }
 ]);

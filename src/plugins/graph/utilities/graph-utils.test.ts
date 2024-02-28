@@ -105,6 +105,7 @@ describe("updateGraphContentWithNewSharedModelIds", () => {
       "lockAxes": false,
       "plotType": "scatterPlot", "layers": [{
         "id": "LAYRLybDWmk6IEI-",
+        "editable": false,
         "config": {
           "id": "DCON3uYgNhsq_4tk", "dataset": "UL53mvolYBJ5hIVr",
           "metadata": "7U0DJ-WxB83noPMK", "primaryRole": "x",
