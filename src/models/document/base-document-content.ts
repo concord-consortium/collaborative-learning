@@ -405,12 +405,12 @@ export const BaseDocumentContentModel = types
     },
     /**
      * Create a unique title in the standard form for the given type.
-     * The title will always have a numeric suffix, starting with "1".
+     * The title will have a base defined by the type, and a numeric suffix, starting with "1".
      * @param tileType
-     * @param titleBase
-     * @returns a title with the titleBase and a number.
+     * @returns a unique title.
      */
-    getUniqueTitleForType(tileType: string, titleBase: string) {
+    getUniqueTitleForType(tileType: string) {
+      const titleBase = getTileContentInfo(tileType)?.titleBase || tileType;
       const tileIds = self.getTilesOfType(tileType);
       const maxSoFar = self.getMaxNumberFromTileTiles(titleBase, tileIds);
       return defaultTitle(titleBase, maxSoFar >=0 ? maxSoFar + 1 : 1);
@@ -422,13 +422,6 @@ export const BaseDocumentContentModel = types
       });
       return counts;
     },
-  }))
-  .views(self => ({
-    getNewTileTitle(tileType: string) {
-      const titleBase = getTileContentInfo(tileType)?.titleBase || tileType;
-      const newTitle = self.getUniqueTitleForType(tileType, titleBase);
-      return newTitle;
-    }
   }))
   .actions(self => ({
     setImportContext(section: string) {

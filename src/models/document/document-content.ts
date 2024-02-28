@@ -413,9 +413,12 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     const rowInsertIndex = self.getRowIndex(targetRowId) + 1;
     const newOptions = {...options, insertRowInfo:{rowInsertIndex}};
     // If no title is provided, and this tile should have one, then set the default
-    if (!newOptions.title && !(getTileContentInfo(tileType)?.useContentTitle && sharedModels)) {
-      if (!getTileContentInfo(tileType)?.useContentTitle) {
-        newOptions.title = self.getNewTileTitle(tileType);
+    if (!newOptions.title) {
+      // No tile title is provided. Will the tile inherit one?
+      const willGetTitleFromDataSet = getTileContentInfo(tileType)?.useContentTitle && sharedModels;
+      if (!willGetTitleFromDataSet) {
+        // Nope. Need to construct a title.
+        newOptions.title = self.getUniqueTitleForType(tileType);
       }
     }
     // This addTile function happens to add the tile content to a tile model before
