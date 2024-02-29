@@ -40,6 +40,12 @@
       pointer-events: none;
     }
 
+    &.point-button{
+      &.selected {
+        background-color: $workspace-teal-light-4;
+      }
+    }
+
     &.point-open-button {
       &.selected {
         background-color: $workspace-teal-light-4;

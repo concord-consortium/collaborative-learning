@@ -14,6 +14,7 @@ export const PointObjectModel = types
   .model("PointObject", {
     id: types.identifier,
     xValue: 0,
+    isOpen: false
   })
   .volatile(self => ({
     dragXValue: undefined as undefined | number,
@@ -32,7 +33,7 @@ export const PointObjectModel = types
         self.xValue = self.dragXValue;
         self.dragXValue = undefined;
       }
-    }
+    },
   }));
 
 export interface PointObjectModelType extends Instance<typeof PointObjectModel> {}
@@ -99,9 +100,9 @@ export const NumberlineContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    createNewPoint(xValue: number) {
+    createNewPoint(xValue: number, isOpen = false) {
       const id = uniqueId();
-      const pointModel = PointObjectModel.create({ id, xValue });
+      const pointModel = PointObjectModel.create({ id, xValue, isOpen });
       self.points.set(id, pointModel);
       return pointModel;
     },
@@ -118,13 +119,13 @@ export const NumberlineContentModel = TileContentModel
       }
       self.clearSelectedPoints();
     },
-    deleteAllPoints() { //TODO: This is not being used we may need to get rid of it
+    deleteAllPoints() {
       self.points.clear();
     },
   }))
   .actions(self => ({
-    createAndSelectPoint(xValue: number) {
-      const newPoint = self.createNewPoint(xValue);
+    createAndSelectPoint(xValue: number, isOpen = false) { //TODO: we need to pass the "filled" or "open"
+      const newPoint = self.createNewPoint(xValue, isOpen);
       self.setSelectedPoint(newPoint);
       return newPoint;
     }

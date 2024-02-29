@@ -36,7 +36,7 @@ const NumberlineButton = ({ className, icon, onClick, tooltipOptions, selected}:
 
 interface ISetNumberlineHandler {
   onClick?: () => void;
-  selected?: boolean;
+  pointTypeIsOpen?: boolean;
 }
 
 export const SelectButton = ({ onClick }: ISetNumberlineHandler) => (
@@ -45,14 +45,14 @@ export const SelectButton = ({ onClick }: ISetNumberlineHandler) => (
     icon={<SelectIcon/>}
     onClick={onClick}
     tooltipOptions={{ title: "Select Point"}}
-
   />
 );
 
-export const PointButton = ({ onClick }: ISetNumberlineHandler) => {
+export const PointButton = ({ onClick, pointTypeIsOpen }: ISetNumberlineHandler) => {
+  const pointTypeIsFilled = !pointTypeIsOpen;
   return (
     <NumberlineButton
-      className="point-button"
+      className={classNames('point-open-button', {selected: pointTypeIsFilled})}
       icon={<PointIcon/>}
       onClick={onClick}
       tooltipOptions={{ title: "Place Point"}}
@@ -60,13 +60,10 @@ export const PointButton = ({ onClick }: ISetNumberlineHandler) => {
   );
 };
 
-
-
-export const PointOpenButton = ({ onClick, selected }: ISetNumberlineHandler) => {
-  console.log("point open button with selected:", selected);
+export const PointOpenButton = ({ onClick, pointTypeIsOpen }: ISetNumberlineHandler) => {
   return (
     <NumberlineButton
-      className={classNames('point-open-button', {selected})}
+      className={classNames('point-open-button', {selected: pointTypeIsOpen})}
       icon={<PointOpenIcon/>}
       onClick={onClick}
       tooltipOptions={{ title: "Place Open Point"}}

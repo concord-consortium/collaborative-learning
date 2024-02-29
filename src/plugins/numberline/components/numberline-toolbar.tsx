@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { useState } from "react";
+import React from "react";
 import ReactDOM from "react-dom";
 import {
   IFloatingToolbarProps, useFloatingToolbarLocation
@@ -14,18 +14,13 @@ const defaultButtons = ["select", "point", "point-open", "reset", "delete"];
 interface INumberlineToolbarProps extends IFloatingToolbarProps {
   handleClearPoints: () => void;
   handleDeletePoint: () => void;
+  handleCreatePointType: (isOpen: boolean) => void;
+  pointTypeIsOpen: boolean
 }
 
 export const NumberlineToolbar: React.FC<INumberlineToolbarProps> = observer((props) => {
   const { documentContent,  tileElt, onIsEnabled,
-          handleClearPoints, handleDeletePoint, ...others } = props;
-
-  //---------------- Determine Selected Point Type ------------------------
-  const [selPointType, setSelPointType] = useState('filled'); // 'filled' or 'open'
-  const handleSelectPointType = (type: 'filled' | 'open') => {
-    setSelPointType(type);
-
-  };
+          handleDeletePoint, handleCreatePointType, pointTypeIsOpen, ...others } = props;
 
   console.log("-------< NumberlineToolbar >-----------");
   const enabled = onIsEnabled();
@@ -38,26 +33,24 @@ export const NumberlineToolbar: React.FC<INumberlineToolbarProps> = observer((pr
                     ...others
                   });
 
-
   const buttonSettings = useSettingFromStores("tools", "numberline") as unknown as string[] | undefined;
   const buttons = buttonSettings || defaultButtons;
-
 
   const getToolbarButton = (toolName: string) => {
     switch (toolName) {
       case "select":
         return <SelectButton key={toolName} />;
       case "point":
-        return <PointButton
+        return  <PointButton
                   key={toolName}
-                  onClick={() => handleSelectPointType('filled')}
-                  selected={selPointType === 'filled'}
+                  onClick={() => handleCreatePointType(false)}
+                  pointTypeIsOpen={pointTypeIsOpen}
                 />;
       case "point-open":
-        return <PointOpenButton
+        return  <PointOpenButton
                   key={toolName}
-                  onClick={() => handleSelectPointType('open')}
-                  selected={selPointType === 'open'}
+                  onClick={() => handleCreatePointType(true)}
+                  pointTypeIsOpen={pointTypeIsOpen}
                 />;
       case "reset":
         return <ResetButton key={toolName}  />;

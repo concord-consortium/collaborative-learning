@@ -35,20 +35,33 @@ import "./numberline-tile.scss";
 // when the selection button is used, points can be moved or selected for deletion
 // point types are saved and restored and can be used in curriculum.
 
-
-
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { documentContent, model, readOnly, scale, tileElt, onRegisterTileApi, onUnregisterTileApi } = props;
-
+  // console.log("--------<NumberlineTile>-----------");
   const content = model.content as NumberlineContentModelType;
+  // console.log("content:", content);
   const [hoverPointId, setHoverPointId] = useState("");
   const [_selectedPointId, setSelectedPointId] = useState(""); // Just used to rerender when a point is selected
   const ui = useUIStore();
   const isTileSelected = ui.isSelectedTile(model);
 
-  //---------------- Model Manipulation Functions -------------------------------------------------
+  /* ========================== [ Determine Point is Open or Filled ]  ========================= */
+  const [pointTypeIsOpen, setPointTypeIsOpen] = useState(false); //default start with filled in point
 
-  const createPoint = (xValue: number) => {
+  const handleCreatePointType = (_isOpen: boolean) => {
+    console.log("--------------------------------------");
+    console.log("initial STATE:", pointTypeIsOpen);
+    setPointTypeIsOpen(_isOpen);
+  };
+
+  useEffect(() => {
+    console.log("Updated STATE:", pointTypeIsOpen);
+  }, [pointTypeIsOpen]);
+
+  /* ============================ [ Model Manipulation Functions ]  ============================ */
+  const createPoint = (xValue: number, _pointTypeIsOpen: boolean) => {
+    const pointType = (_pointTypeIsOpen) ? "OPEN" : "FILLED";
+    console.log("createPoint with xValue", xValue, "pointTypeisOpen:", pointType);
     if (!readOnly) {
       const point = content.createAndSelectPoint(xValue);
       setHoverPointId(point.id);
@@ -78,8 +91,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
   }, [deleteSelectedPoints, readOnly]);
 
-
-  //---------------- Calculate Width Of Tile / Scale ----------------------------------------------
+  /* ============================ [ Calculate Width of Tile / Scale ]  ========================= */
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const [tileWidth, setTileWidth] = useState(0);
   const containerWidth = tileWidth * kContainerWidth;
@@ -114,7 +126,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     return () => obs?.disconnect();
   }, []);
 
-  //----------------- Register Tile API functions -------------------------------------------------
+  /* ============================ [ Register Tile API Functions ]  ============================= */
   const annotationPointCenter = useCallback((pointId: string) => {
     const point = content.getPoint(pointId);
     if (!point) return undefined;
@@ -177,7 +189,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     });
   }, [annotationPointCenter, content, getObjectBoundingBox, onRegisterTileApi]);
 
-  //-------------------  SVG Ref to Numberline & SVG ----------------------------------------------
+  /* ============================ [ SVG Ref to Numberline & SVG ]  ============================= */
   const svgRef = useRef<SVGSVGElement | null>(null);
   const svg = select(svgRef.current);
   const svgNode = svg.node();
@@ -195,7 +207,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     return isBetweenYBounds && isBetweenXBounds;
   };
 
-  const handleMouseClick = (e: Event) => {
+  const handleMouseClick = (e: Event, _pointTypeIsOpen: boolean) => {
     if (!readOnly){
       if (hoverPointId) {
         const hoverPoint = content.getPoint(hoverPointId);
@@ -207,7 +219,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         // only create point if we are not hovering over a point and within bounding box
         const [mouseX, mouseY] = mousePos(e);
         if (mouseInBoundingBox(mouseX, mouseY)) {
-          createPoint(xScale.invert(mouseX));
+          createPoint(xScale.invert(mouseX), _pointTypeIsOpen);
         }
       }
     }
@@ -251,7 +263,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
   };
 
-  svg.on("click", (e) => handleMouseClick(e));
+  svg.on("click", (e) => handleMouseClick(e, pointTypeIsOpen));
   svg.on("mousemove", (e) => handleMouseMove(e));
 
   // * ================================ [ Construct Numberline ] =============================== */
@@ -385,7 +397,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         scale={scale}
         handleClearPoints={() => content.deleteAllPoints()}
         handleDeletePoint={deleteSelectedPoints}
-
+        handleCreatePointType={handleCreatePointType}
+        pointTypeIsOpen={pointTypeIsOpen}
 
       />
       <div
