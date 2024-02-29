@@ -201,7 +201,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     }
 
     const newTileOptions: IDocumentContentAddTileOptions = {
-            title: this.getUniqueTitle(tileContentInfo),
             addSidecarNotes: !!tileContentInfo?.addSidecarNotes,
             insertRowInfo: { rowInsertIndex: document.content?.defaultInsertRow ?? 0 }
           };

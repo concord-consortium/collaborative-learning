@@ -202,7 +202,11 @@ export const DocumentModel = Tree.named("Document")
     },
 
     addTile(toolId: string, options?: IDocumentAddTileOptions) {
-      return self.content?.userAddTile(toolId, options);
+      const optionsWithTitle = {
+        title: self.getUniqueTitleForType(toolId),
+        ...options
+      };
+      return self.content?.userAddTile(toolId, optionsWithTitle);
     },
 
     deleteTile(tileId: string) {

@@ -264,10 +264,11 @@ export const BaseDocumentContentModel = types
     },
     getTilesOfType(type: string) {
       const tiles: string[] = [];
+      const lcType = type.toLowerCase();
       self.rowOrder.forEach(rowId => {
         const row = self.getRow(rowId);
         each(row?.tiles, tileEntry => {
-          if (self.getTileType(tileEntry.tileId) === type) {
+          if (self.getTileType(tileEntry.tileId)?.toLowerCase() === lcType) {
             tiles.push(tileEntry.tileId);
           }
         });
