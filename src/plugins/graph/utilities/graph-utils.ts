@@ -498,7 +498,10 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         .end()
         .then(() => {
           dotsRef.current?.setAttribute('x', '0');
-        });
+        })
+        // We were seeing rollbars errors from this. From the docs on `end()` it looks like it is
+        // legitimate to be rejected if the transition is canceled or interrupted.
+        .catch(rejectedObject => console.warn("setPositions was rejected", rejectedObject));
     }
   };
 
