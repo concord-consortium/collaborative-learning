@@ -37,20 +37,19 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
 
     let warning = "";
 
+    const curriculumConfig = CurriculumConfig.create(curriculumConfigJson, { urlParams });
+
     // entry is not included in CmsWidgetControlProps, but it is included in the props.
     const entry = (this.props as any).entry.toJS();
     // path is of the form
-    // curriculum/[unit]/teacher-guide?/investigation-[ordinal]/problem-[ordinal]/[sectionType]/content.json
+    // curriculum/[unit]/teacher-guide?/sections?/investigation-[ordinal]/problem-[ordinal]/[sectionType]/content.json
     this.pathParts = entry.path.split("/");
-
     // If there's a unit url parameter, use that. Otherwise try to find the unit from the entry path.
-    const defaultUnit = "sas";
     if (!urlParams.unit && !this.pathParts?.[1]) {
-      warning = `Could not determine unit. Using default ${defaultUnit}.`;
+      warning = `Could not determine unit. Using default ${curriculumConfig.defaultUnit}.`;
     }
-    this.unit = urlParams.unit ?? this.pathParts?.[1] ?? defaultUnit;
+    this.unit = urlParams.unit ?? this.pathParts?.[1] ?? curriculumConfig.defaultUnit;
 
-    const curriculumConfig = CurriculumConfig.create(curriculumConfigJson, urlParams);
 
     // Finish setting up the preview link after reading the unit json
     this.isTeacherGuide = this.pathParts?.[2] === "teacher-guide";
@@ -73,7 +72,7 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
 
     // Determine the problem parameter
     // path is of the form
-    // curriculum/[unit]/teacher-guide?/investigation-[ordinal]/problem-[ordinal]/[sectionType]/content.json
+    // curriculum/[unit]/teacher-guide?/sections?/investigation-[ordinal]/problem-[ordinal]/[sectionType]/content.json
     const sectionPath = this.pathParts?.slice(-4).join("/");
     let problemParam = "";
     if (unitJson.investigations) {
@@ -82,7 +81,7 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
           investigation.problems.forEach((problem: any) => {
             if (problem.sections) {
               problem.sections.forEach((section: any) => {
-                if (section.sectionPath === sectionPath) {
+                if (section.sectionPath === sectionPath || section.sectionPath === `sections/${sectionPath}`) {
                   problemParam = `${investigation.ordinal}.${problem.ordinal}`;
                 }
               });
