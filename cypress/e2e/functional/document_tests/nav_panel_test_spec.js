@@ -191,8 +191,8 @@ context('Nav Panel', function () {
     cy.log('Customized tabs');
     const exampleProblemSubTabTitles = ["First Section", "Second Section", "Third Section"];
     //TODO: Need to change the syntax to "Bookmarks"
-    const exampleMyWorkSubTabTitles = ["Workspaces", "Starred"];
-    const exampleClassWorkSubTabTitles = ["Workspaces", "Supplemental Work", "Starred"];
+    const exampleMyWorkSubTabTitles = ["Workspaces", "Bookmarks"];
+    const exampleClassWorkSubTabTitles = ["Workspaces", "Supplemental Work", "Bookmarks"];
 
     beforeTest(queryParams5);
     cy.openTopTab("problems");
