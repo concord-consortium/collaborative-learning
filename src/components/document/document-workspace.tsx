@@ -240,7 +240,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
           const rowInsertIndex = (rowIndex !== undefined ? rowIndex + 1 : primaryDocument.content?.rowOrder.length);
           primaryDocument.content.userAddTile(kImageTileType, {
             url,
-            title: primaryDocument.content.getNewTileTitle(kImageTileType),
+            title: primaryDocument.content.getUniqueTitleForType(kImageTileType),
             insertRowInfo: {
               rowInsertIndex
             }

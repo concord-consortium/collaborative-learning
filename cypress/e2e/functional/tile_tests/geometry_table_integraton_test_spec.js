@@ -64,7 +64,7 @@ context('Geometry Table Integration', function () {
     cy.log("connect and disconnect table and geometry after coordinates have been added");
     cy.log('verify link icon appears when table and geometry are connected');
     cy.get(clueCanvas.linkIconEl()).should('not.exist');
-    cy.linkTableToTile('Table 1', "Shapes Graph 1");
+    cy.linkTableToTile('Table Data 1', "Shapes Graph 1");
     tableToolTile.getTableTile().scrollIntoView();
     geometryToolTile.getGeometryTile().siblings(clueCanvas.linkIconEl()).should('exist');
     // verifies that values exported from .scss file were successfully imported
@@ -81,11 +81,11 @@ context('Geometry Table Integration', function () {
 
     cy.log('verify table can be linked to two geometry tiles');
     clueCanvas.addTile('geometry');
-    cy.linkTableToTile('Table 1', "Shapes Graph 2");
+    cy.linkTableToTile('Table Data 1', "Shapes Graph 2");
     geometryToolTile.getGeometryTile().siblings(clueCanvas.linkIconEl()).should('have.length', 2);
 
     cy.log('verify unlink of geometry and table');
-    cy.unlinkTableToTile('Table 1', "Shapes Graph 2");
+    cy.unlinkTableToTile('Table Data 1', "Shapes Graph 2");
     geometryToolTile.getGeometryTile().siblings(clueCanvas.linkIconEl()).should('have.length', 1);
     geometryToolTile.getGraph().last().should('not.have.class', 'is-linked');
 
@@ -203,7 +203,7 @@ context('Geometry Table Integration', function () {
     });
     clueCanvas.addTile('geometry');
     textToolTile.deleteTextTile();
-    cy.linkTableToTile('Table 1', "Shapes Graph 1");
+    cy.linkTableToTile('Table Data 1', "Shapes Graph 1");
 
     // Open the document on the left, then create a new document on the right
     resourcesPanel.openPrimaryWorkspaceTab("my-work");

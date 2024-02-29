@@ -154,7 +154,6 @@ export const DataCardContentModel = TileContentModel
     },
     setContentTitle(title: string) {
       self.dataSet.setName(title);
-      console.log("datacard.setContentTitle set DataSet name");
     }
   }))
   .actions(self => ({

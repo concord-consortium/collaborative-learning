@@ -10,7 +10,6 @@ import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDrag
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { IDragToolCreateInfo, IDragTilesData } from "../../models/document/document-content-types";
-import { getTileContentInfo } from "../../models/tiles/tile-content-info";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
 import { IDropRowInfo } from "../../models/document/tile-row";
 import { logDataTransfer } from "../../models/document/drag-tiles";
@@ -260,8 +259,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private handleRequestUniqueTitle = (tileId: string) => {
     const { content } = this.props;
     const tileType = content?.getTile(tileId)?.content.type;
-    const titleBase = getTileContentInfo(tileType)?.titleBase;
-    return tileType && titleBase && content?.getUniqueTitleForType(tileType, titleBase);
+    return tileType && content?.getUniqueTitleForType(tileType);
   };
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {

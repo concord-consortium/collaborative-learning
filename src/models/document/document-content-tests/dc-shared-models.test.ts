@@ -67,7 +67,7 @@ describe("DocumentContentModel -- shared Models --", () => {
     expect(parsedExport(documentContent)).toEqual({
       tiles: [
         [
-          { content: { type: "Table", name: "Demo Dataset", columnWidths } },
+          { content: { type: "Table", columnWidths } },
           { content: { type: "Geometry", objects: [] } }
         ]
       ],

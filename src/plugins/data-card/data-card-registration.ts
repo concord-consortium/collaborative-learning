@@ -13,7 +13,7 @@ import HeaderIcon from "./assets/data-cards-tile-id.svg";
 registerTileContentInfo({
   type: kDataCardTileType,
   modelClass: DataCardContentModel,
-  titleBase: "Data Card Collection",
+  titleBase: "Card Deck Data",
   displayName: "Data Cards",
   useContentTitle: true,
   metadataClass: TileMetadataModel,

@@ -172,10 +172,15 @@ export const BaseDocumentContentModel = types
         const sharedModelEntries = Array.from(self.sharedModelMap.values());
         // Even if we use a snapshotProcessor generated type, getType will return the original
         // type. This is documented: src/models/mst.test.ts
-        const firstEntry = sharedModelEntries.find(entry =>
-          (getType(entry.sharedModel) === modelType) &&
-          (!tileId || !!entry.tiles.find(tile => tileId === tile.id)));
-        return firstEntry?.sharedModel;
+        try {
+          const firstEntry = sharedModelEntries.find(entry =>
+            (getType(entry.sharedModel) === modelType) &&
+            (!tileId || !!entry.tiles.find(tile => tileId === tile.id)));
+          return firstEntry?.sharedModel;
+        } catch (e) {
+          console.warn("Problem finding shared models:", e);
+          return undefined;
+        }
       },
       getSharedModelsByType<IT extends typeof SharedModel>(type: string): IT["Type"][] {
         const sharedModelEntries = Array.from(self.sharedModelMap.values());
@@ -259,10 +264,11 @@ export const BaseDocumentContentModel = types
     },
     getTilesOfType(type: string) {
       const tiles: string[] = [];
+      const lcType = type.toLowerCase();
       self.rowOrder.forEach(rowId => {
         const row = self.getRow(rowId);
         each(row?.tiles, tileEntry => {
-          if (self.getTileType(tileEntry.tileId) === type) {
+          if (self.getTileType(tileEntry.tileId)?.toLowerCase() === lcType) {
             tiles.push(tileEntry.tileId);
           }
         });
@@ -405,12 +411,12 @@ export const BaseDocumentContentModel = types
     },
     /**
      * Create a unique title in the standard form for the given type.
-     * The title will always have a numeric suffix, starting with "1".
+     * The title will have a base defined by the type, and a numeric suffix, starting with "1".
      * @param tileType
-     * @param titleBase
-     * @returns a title with the titleBase and a number.
+     * @returns a unique title.
      */
-    getUniqueTitleForType(tileType: string, titleBase: string) {
+    getUniqueTitleForType(tileType: string) {
+      const titleBase = getTileContentInfo(tileType)?.titleBase || tileType;
       const tileIds = self.getTilesOfType(tileType);
       const maxSoFar = self.getMaxNumberFromTileTiles(titleBase, tileIds);
       return defaultTitle(titleBase, maxSoFar >=0 ? maxSoFar + 1 : 1);
@@ -422,13 +428,6 @@ export const BaseDocumentContentModel = types
       });
       return counts;
     },
-  }))
-  .views(self => ({
-    getNewTileTitle(tileType: string) {
-      const titleBase = getTileContentInfo(tileType)?.titleBase || tileType;
-      const newTitle = self.getUniqueTitleForType(tileType, titleBase);
-      return newTitle;
-    }
   }))
   .actions(self => ({
     setImportContext(section: string) {

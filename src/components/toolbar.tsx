@@ -149,11 +149,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   };
 
   private getUniqueTitle(tileContentInfo: ITileContentInfo) {
-    const tileApiInterface = this.context?.current;
-    if (!tileApiInterface) return;
     const { document } = this.props;
-    const { type, titleBase } = tileContentInfo;
-    return titleBase && document.getUniqueTitleForType(type, titleBase);
+    const { type } = tileContentInfo;
+    return document.getUniqueTitleForType(type);
   }
 
   private isButtonActive(toolButton: IToolbarButtonModel) {
@@ -203,7 +201,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     }
 
     const newTileOptions: IDocumentContentAddTileOptions = {
-            title: this.getUniqueTitle(tileContentInfo),
             addSidecarNotes: !!tileContentInfo?.addSidecarNotes,
             insertRowInfo: { rowInsertIndex: document.content?.defaultInsertRow ?? 0 }
           };
