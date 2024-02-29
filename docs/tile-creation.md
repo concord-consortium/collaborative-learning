@@ -7,8 +7,8 @@ flowchart TD
 %%{init: {"flowchart": {"defaultRenderer": "elk"}} }%%
 
 toolbarClick{{"Toolbar button clicked"}}
-TBhandleAddTile("handleAddTile\n(toolbar.tsx)\nsets unique title")
-DaddTile("addTile\n(document.ts)")
+TBhandleAddTile("handleAddTile\n(toolbar.tsx)")
+DaddTile("addTile\n(document.ts)\nsets unique title")
 BDCuserAddTile[["userAddTile\n(base-document-content.ts)\nLogs CREATE_TILE event"]]
 BDCaddTile("addTile\n(base-document-content.ts)")
 
