@@ -37,7 +37,6 @@ module.exports = (env, argv) => {
     // on the devServer start up time
     entry: {
       index: './src/index.tsx',
-      admin: './cms/src/admin.tsx',
       'cms-editor': './src/cms/cms-editor.tsx',
       'doc-editor': './src/doc-editor.tsx'
     },
@@ -236,13 +235,6 @@ module.exports = (env, argv) => {
         chunks: ['index'],
         filename: 'index.html',
         publicPath: '.',
-      }),
-      new HtmlWebpackPlugin({
-        ...baseHtmlPluginConfig,
-        chunks: ['admin'],
-        filename: 'admin.html',
-        publicPath: '.',
-        template: 'cms/src/admin.html'
       }),
       new HtmlWebpackPlugin({
         ...baseHtmlPluginConfig,
