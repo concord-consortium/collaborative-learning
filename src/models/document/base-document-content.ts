@@ -172,10 +172,15 @@ export const BaseDocumentContentModel = types
         const sharedModelEntries = Array.from(self.sharedModelMap.values());
         // Even if we use a snapshotProcessor generated type, getType will return the original
         // type. This is documented: src/models/mst.test.ts
-        const firstEntry = sharedModelEntries.find(entry =>
-          (getType(entry.sharedModel) === modelType) &&
-          (!tileId || !!entry.tiles.find(tile => tileId === tile.id)));
-        return firstEntry?.sharedModel;
+        try {
+          const firstEntry = sharedModelEntries.find(entry =>
+            (getType(entry.sharedModel) === modelType) &&
+            (!tileId || !!entry.tiles.find(tile => tileId === tile.id)));
+          return firstEntry?.sharedModel;
+        } catch (e) {
+          console.warn("Problem finding shared models:", e);
+          return undefined;
+        }
       },
       getSharedModelsByType<IT extends typeof SharedModel>(type: string): IT["Type"][] {
         const sharedModelEntries = Array.from(self.sharedModelMap.values());

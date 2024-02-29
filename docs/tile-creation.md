@@ -71,3 +71,8 @@ style tableIt fill:#88F
 style placeholder fill:#88F
 
 ```
+
+This should display version of mermaid:
+```mermaid
+info
+```
