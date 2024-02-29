@@ -274,6 +274,15 @@
           "toggle-lock"
         ]
       },
+      "numberline": {
+        "tools": [
+          "select",
+          "point",
+          "point-open",
+          "reset",
+          "delete"
+        ]
+      },
       "simulator": {
         "defaultSimulation": "EMG_and_claw"
       },

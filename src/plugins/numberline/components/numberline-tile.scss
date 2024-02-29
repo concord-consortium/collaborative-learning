@@ -61,15 +61,17 @@
       }
 
       .point-inner-circle {
-        fill: #ccc;
+        fill: #0069ff;
+        // fill: red;
         opacity: 1;
-        stroke: #888;
+        stroke: black;
         stroke-width: 1.5px;
 
         &.selected {
           fill: $highlight-blue;
-          stroke: $highlight-blue;
+          // stroke: $
         }
+
       }
     } //end svg container
 

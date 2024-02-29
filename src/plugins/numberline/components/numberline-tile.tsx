@@ -5,7 +5,6 @@ import { observer } from 'mobx-react';
 import { useUIStore } from '../../../hooks/use-stores';
 import { kSmallAnnotationNodeRadius } from '../../../components/annotations/annotation-utilities';
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
-import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { OffsetModel } from '../../../models/annotations/clue-object';
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -17,12 +16,16 @@ import {
   innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kArrowheadTop,
   kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax
 } from '../numberline-tile-constants';
-import { NumberlineToolbar } from "./numberline-toolbar";
 import NumberlineArrowLeft from "../../../assets/numberline-arrow-left.svg";
 import NumberlineArrowRight from "../../../assets/numberline-arrow-right.svg";
 import { EditableNumberlineValue } from './editable-numberline-value';
+// import { TileToolbar } from 'src/components/toolbar/tile-toolbar';
+import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 
+
+import "./numberline-toolbar-registration";
 import "./numberline-tile.scss";
+import { INumberlineToolbarContext, NumberlineToolbarContext } from './numberline-toolbar-context';
 
 //**********************✔️•↳******************* GUIDELINES ************************************************
 // - As students, we want to express both closed form counting and inequalities which end with an open circle point.
@@ -365,13 +368,18 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         .append("circle")
         .attr("class", "inner-point")
         .attr('cx', (p) => xScale(p.currentXValue)) //mapped to axis width
-        .attr('cy', yMidPoint).attr('r', innerPointRadius).attr('id', p => p.id)
+        .attr('cy', yMidPoint)
+        .attr('r', innerPointRadius)
+        .attr('id', p => p.id)
         .classed("point-inner-circle", true)
         .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
 
       // --- Update functions inner circles
       innerPoints
         .attr('cx', (p, idx) => xScale(p.currentXValue))
+        // .attr('fill', pointTypeIsOpen ? '#ffffff' : "#0069ff") // added
+        // .attr('stroke', pointTypeIsOpen ? "#0069ff" : 'none') // added
+        // .attr('stroke-width', pointTypeIsOpen ? 2 : 0) // added
         .classed("selected", (p)=> p.id in content.selectedPoints)
         .call((e) => handleDrag(e)); // pass again in case axisWidth changes
 
@@ -379,8 +387,16 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     };
     updateCircles();
   }
-  // Set up toolbar props
-  const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
+
+  // * ================================= [ Register Toolbar ] ================================== */
+
+  const toolbarFunctions: INumberlineToolbarContext = {
+    handleClearPoints: () => content.deleteAllPoints(),
+    handleDeletePoint: deleteSelectedPoints,
+    handleCreatePointType,
+    pointTypeIsOpen
+  };
+
   return (
     <div
       className={classNames("numberline-wrapper", { "read-only": readOnly })}
@@ -390,53 +406,49 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       <div className={"numberline-title"}>
         <BasicEditableTileTitle />
       </div>
-      <NumberlineToolbar
-        documentContent={documentContent}
-        tileElt={tileElt}
-        {...toolbarProps}
-        scale={scale}
-        handleClearPoints={() => content.deleteAllPoints()}
-        handleDeletePoint={deleteSelectedPoints}
-        handleCreatePointType={handleCreatePointType}
-        pointTypeIsOpen={pointTypeIsOpen}
-
-      />
-      <div
-        className="numberline-tool"
-        ref={documentScrollerRef}
-        data-testid="numberline-tool"
-        style={{"height": `${kNumberLineContainerHeight}`}}
-      >
-        <div className="numberline-tool-container" >
-          <svg ref={svgRef} width={axisWidth}>
-            <g ref={axisRef}></g>
-          </svg>
-          <NumberlineArrowLeft
-            className="arrow"
-            style={{ left: arrowOffset, top: kArrowheadTop }}
-          />
-          <NumberlineArrowRight
-            className="arrow"
-            style={{ right: arrowOffset, top: kArrowheadTop }}
-          />
-          <EditableNumberlineValue
-            value={content.min}
-            minOrMax={"min"}
-            offset={arrowOffset}
-            readOnly={readOnly}
-            isTileSelected={isTileSelected}
-            onValueChange={(newValue) => handleMinMaxChange("min", newValue)}
-          />
-          <EditableNumberlineValue
-            value= {content.max}
-            minOrMax={"max"}
-            offset={arrowOffset}
-            readOnly={readOnly}
-            isTileSelected={isTileSelected}
-            onValueChange={(newValue) => handleMinMaxChange("max", newValue)}
-          />
+      <NumberlineToolbarContext.Provider value={toolbarFunctions}>
+        <TileToolbar
+          tileType="numberline"
+          tileElement={tileElt}
+          readOnly={!!readOnly}
+        />
+        <div
+          className="numberline-tool"
+          ref={documentScrollerRef}
+          data-testid="numberline-tool"
+          style={{"height": `${kNumberLineContainerHeight}`}}
+        >
+          <div className="numberline-tool-container" >
+            <svg ref={svgRef} width={axisWidth}>
+              <g ref={axisRef}></g>
+            </svg>
+            <NumberlineArrowLeft
+              className="arrow"
+              style={{ left: arrowOffset, top: kArrowheadTop }}
+            />
+            <NumberlineArrowRight
+              className="arrow"
+              style={{ right: arrowOffset, top: kArrowheadTop }}
+            />
+            <EditableNumberlineValue
+              value={content.min}
+              minOrMax={"min"}
+              offset={arrowOffset}
+              readOnly={readOnly}
+              isTileSelected={isTileSelected}
+              onValueChange={(newValue) => handleMinMaxChange("min", newValue)}
+            />
+            <EditableNumberlineValue
+              value= {content.max}
+              minOrMax={"max"}
+              offset={arrowOffset}
+              readOnly={readOnly}
+              isTileSelected={isTileSelected}
+              onValueChange={(newValue) => handleMinMaxChange("max", newValue)}
+            />
+          </div>
         </div>
-      </div>
+      </NumberlineToolbarContext.Provider>
     </div>
   );
 });

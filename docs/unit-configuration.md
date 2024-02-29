@@ -181,7 +181,9 @@ Not updated to common toolbar framework and does not support toolbar configurati
 
 #### Numberline
 
-Not updated to common toolbar framework. However, supports toolbar configuration in a similar manner. Default buttons: `["place-point", "clear-points", "delete-points"]`
+Uses common toolbar framework.
+Default buttons:
+ - "place-point", "clear-points", "delete-points"
 
 #### Simulation
 
