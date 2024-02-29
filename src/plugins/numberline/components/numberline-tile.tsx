@@ -33,10 +33,23 @@ import { INumberlineToolbarContext, NumberlineToolbarContext } from './numberlin
 // ✔️ add an open circle point to the toolbar
 // ✔️ add a select point arrow to the toolbar
 // ✔️ revise solid point button to the latest versions
+// ↳ this is also on by default
 // ✔️ when the open circle point is used, create an open circle point
 // when the solid circle point is used, create a solid point like before
 // when the selection button is used, points can be moved or selected for deletion
 // point types are saved and restored and can be used in curriculum.
+
+
+//TODO: hover circle would be at drawMouseFollowPoint
+
+//TODO: delete numberline-toolbar, and numberline-toolbar-buttons.tsx
+//TODO: update line 184 of unit-configuration.md
+
+
+//**********************✔️•↳******************* END  ************************************************
+
+
+
 
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { documentContent, model, readOnly, scale, tileElt, onRegisterTileApi, onUnregisterTileApi } = props;
@@ -228,6 +241,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
   };
 
+  //PIN 1: HOVER AREA
+
   function findHoverPoint(e: MouseEvent) {
     const [mouseX, mouseY] = mousePos(e);
     let hoverPoint: PointObjectModelType | undefined;
@@ -363,6 +378,9 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
         .data(content.pointsArr);
 
+      const blue = "#0069ff";
+      const white = "#ffffff";
+
       // Initialize Attributes
       innerPoints.enter()
         .append("circle")
@@ -377,10 +395,11 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       // --- Update functions inner circles
       innerPoints
         .attr('cx', (p, idx) => xScale(p.currentXValue))
-        // .attr('fill', pointTypeIsOpen ? '#ffffff' : "#0069ff") // added
-        // .attr('stroke', pointTypeIsOpen ? "#0069ff" : 'none') // added
-        // .attr('stroke-width', pointTypeIsOpen ? 2 : 0) // added
-        .classed("selected", (p)=> p.id in content.selectedPoints)
+
+        .attr('fill', pointTypeIsOpen ? white : blue) // added
+        .attr('stroke', pointTypeIsOpen ? blue : 'none') // added
+        .attr('stroke-width', pointTypeIsOpen ? 2 : 0) // added
+        // .classed("selected", (p)=> p.id in content.selectedPoints) //TODO:may need to get rid of since not used
         .call((e) => handleDrag(e)); // pass again in case axisWidth changes
 
       innerPoints.exit().remove(); //cleanup

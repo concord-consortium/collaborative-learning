@@ -9,8 +9,6 @@ import PointOpenIcon from "../assets/numberline-toolbar-point-open-icon.svg";
 import ResetIcon from "../assets/numberline-toolbar-reset-icon.svg";
 import DeleteIcon from "../assets/numberline-toolbar-delete-icon.svg";
 
-//TODO: delete numberline-toolbar, and numberline-toolbar-buttons.tsx
-//TODO: update line 184 of unit-configuration.md
 
 const SelectButton = ({name}: IToolbarButtonComponentProps) => {
 

@@ -68,8 +68,8 @@
         stroke-width: 1.5px;
 
         &.selected {
-          fill: $highlight-blue;
-          // stroke: $
+          fill: $highlight-blue; //0081ff
+          // fill: yellow;
         }
 
       }
