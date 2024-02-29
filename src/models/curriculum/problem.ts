@@ -54,23 +54,23 @@ const ModernProblemModel = types
     // have its own MST environment to hold its document's sharedModelManager.
     // So each section has to be its own tree and cannot be a child of the
     // problem.
-    addSection(sectionsSnap: SectionModelSnapshot){
-      const sharedModelManager = new SharedModelDocumentManager();
-      const environment: ITileEnvironment = {
-        sharedModelManager
-      };
-      const section = SectionModel.create(sectionsSnap, environment);
-      section.setRealParent(self);
-      if (section.content) {
-        sharedModelManager.setDocument(section.content);
+    addSections(sectionsSnap: SectionModelSnapshot[]){
+      for (const sectionSnap of sectionsSnap) {
+        const sharedModelManager = new SharedModelDocumentManager();
+        const environment: ITileEnvironment = {
+          sharedModelManager
+        };
+        const section = SectionModel.create(sectionSnap, environment);
+        section.setRealParent(self);
+        if (section.content) {
+          sharedModelManager.setDocument(section.content);
+        }
+        self.sections.push(section);
       }
-      self.sections.push(section);
     }
   }))
   .actions(self => ({
     async loadSections(unitUrl: string){
-      await new Promise(resolve => setTimeout(resolve, 6000));
-
       const sectionPromises = [];
       for (let sectIdx = 0; sectIdx < self.sectionsFromSnapshot.length; sectIdx++) {
         // Currently, curriculum files can either contain their problem section data inline
@@ -92,11 +92,8 @@ const ModernProblemModel = types
         }
       }
       if (sectionPromises.length > 0) {
-        await Promise.all(sectionPromises).then((sections: any) => {
-          for (const section of sections) {
-            self.addSection(section);
-          }
-        });
+        const sections = await Promise.all(sectionPromises);
+        self.addSections(sections);
       }
     }
   }));
