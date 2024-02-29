@@ -126,6 +126,23 @@ describe('GraphModel', () => {
       expect(graphModel.layers[1].config.dataset).toEqual(sharedDataSet2.dataSet);
     });
 
+    it('supports adding an editable layer', () => {
+      document = createDefaultDocument();
+      const { tileId } = document.content?.addTileContentInNewRow(getSnapshot(GraphModel.create())) || {};
+      graphModel = document.content?.getTile(tileId!)?.content as IGraphModel;
+
+      expect(graphModel.layers.length).toBe(1);
+      expect(graphModel.layers[0].editable).toBe(false);
+      graphModel.createEditableLayer();
+      expect(graphModel.layers.length).toBe(1);
+      const layer = graphModel.layers[0];
+      expect(layer.editable).toBe(true);
+      expect(layer.config.attributeDescriptions.x.type).toEqual("numeric");
+      expect(layer.config.attributeDescriptions.y.type).toEqual("numeric");
+      expect(layer.config.dataset?.name).toEqual("Added by hand");
+      expect(layer.config.dataset?.attributes.map(a => a.name)).toEqual(["X Variable", "Y Variable 1"]);
+    });
+
     it('supports removing layers', () => {
       if (!graphModel) fail('No graph model');
       const smm = getSharedModelManager(graphModel);

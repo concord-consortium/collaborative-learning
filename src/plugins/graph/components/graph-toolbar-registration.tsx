@@ -92,14 +92,13 @@ const ToggleLockAxesButton = observer(function ToggleLockAxesButton({name}: IToo
 const AddPointsByHandButton = observer(function AddPointsByHandButton({name}: IToolbarButtonComponentProps) {
   const graph = useGraphModelContext();
 
-  // const hasEditableLayers = graph.getEditableLayers().length > 0;
+  const hasEditableLayers = graph.getEditableLayers().length > 0;
 
   // Enable button if axes are numeric or undefined.
   const isNumeric = (graph.attributeType("x")||"numeric") === "numeric"
     && (graph.attributeType("y")||"numeric") === "numeric";
-  if (!isNumeric) {
-    console.log("Attribute types:", graph.attributeType("x"), graph.attributeType("y"));
-  }
+
+  const enabled = isNumeric && !hasEditableLayers;
 
   function handleClick() {
     graph.createEditableLayer();
@@ -110,7 +109,7 @@ const AddPointsByHandButton = observer(function AddPointsByHandButton({name}: IT
       name={name}
       title="Add points by hand"
       onClick={handleClick}
-      disabled={!isNumeric}
+      disabled={!enabled}
     >
       <AddPointsByHandIcon/>
     </TileToolbarButton>

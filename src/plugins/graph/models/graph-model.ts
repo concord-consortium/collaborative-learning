@@ -329,6 +329,10 @@ export const GraphModel = TileContentModel
         initialLayer.configureUnlinkedLayer();
       }
     },
+    /**
+     * Creates an "added by hand" dataset and attaches it as a layer to the graph.
+     * The layer is marked as editable so that the user can add and edit points.
+     */
     createEditableLayer() {
       const smm = getSharedModelManager(self);
       const doc = getDocumentContentFromNode(self);

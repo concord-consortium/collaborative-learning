@@ -92,6 +92,7 @@ export const GraphLayerModel = types
     configureUnlinkedLayer() {
       if (!self.config.isEmpty) {
         self.config.clearAttributes();
+        self.editable = false;
       }
     },
     setDataSetListener() {
