@@ -12,8 +12,10 @@ export function useDocumentCaption(document: DocumentModelType, isStudentWorkspa
   const { type, uid } = document;
   const pubVersion = document.pubVersion;
   const teacher = useFirestoreTeacher(uid, user.network || "");
-  const userName = classStore.getUserById(uid)?.displayName || teacher?.name ||
-                  (document.isRemote ? teacher?.name : "") || "Unknown User";
+  const userName = classStore.getUserById(uid)?.displayName
+    || teacher?.name
+    || (document.isRemote ? teacher?.name : "")
+    || "Unknown User";
 
   const hasNamePrefix =  document.isRemote || isPublishedType(type) || isUnpublishedType(type) || isStudentWorkspaceDoc;
   const namePrefix = hasNamePrefix ? `${userName}: ` : "";
