@@ -45,6 +45,7 @@ export interface IStores extends IBaseStores {
   loadUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
   sortedDocuments: SortedDocuments;
   unitLoadedPromise: Promise<void>;
+  sectionsLoadedPromise: Promise<void>;
   startedLoadingUnitAndProblem: boolean;
 }
 
@@ -87,6 +88,7 @@ class Stores implements IStores{
   userContextProvider: UserContextProvider;
   sortedDocuments: SortedDocuments;
   unitLoadedPromise: Promise<void>;
+  sectionsLoadedPromise: Promise<void>;
   startedLoadingUnitAndProblem: boolean;
 
   constructor(params?: ICreateStores){
@@ -146,6 +148,7 @@ class Stores implements IStores{
     this.sortedDocuments = new SortedDocuments(this);
 
     this.unitLoadedPromise = when(() => this.unit !== defaultUnit);
+    this.sectionsLoadedPromise = when(() => this.problem.sections.length > 0);
   }
 
   get tabsToDisplay() {
@@ -232,12 +235,12 @@ class Stores implements IStores{
     gImageMap.setUnitCodeMap(getSnapshot(curriculumConfig.unitCodeMap));
 
     // read in the unit content (which does not instantiate the sections' contents)
-    this.setUnit(UnitModel.create(unitJson));
+    const unit = UnitModel.create(unitJson);
 
     const _problemOrdinal = problemOrdinal || appConfig.defaultProblemOrdinal;
-    const { investigation, problem } = this.unit.getProblem(_problemOrdinal);
+    const { investigation, problem } = unit.getProblem(_problemOrdinal);
 
-    appConfig.setConfigs([this.unit.config || {}, investigation?.config || {}, problem?.config || {}]);
+    appConfig.setConfigs([unit.config || {}, investigation?.config || {}, problem?.config || {}]);
 
     // load/initialize the necessary tools
     showLoadingMessage("Loading tile types");
@@ -246,6 +249,12 @@ class Stores implements IStores{
       [...toolbar.map(button => button.id), ...authorTools.map(button => button.id), ...tileTypes]);
     await registerTileTypes([...unitTileTypes]);
     removeLoadingMessage("Loading tile types");
+
+    this.setUnit(unit);
+
+    if (problem && unitUrls) {
+      problem.loadSections(unitUrls.content);
+    }
 
     // We are changing our observable state here so we need to be in an action.
     // Because this is an async function, we'd have to switch it to a flow to
@@ -297,6 +306,7 @@ class Stores implements IStores{
           // Not sure if this should be "guide" or "teacher-guide", either ought to work
           unitGuide?.setFacet("teacher-guide");
           const teacherGuide = unitGuide?.getProblem(problemOrdinal || appConfig.defaultProblemOrdinal)?.problem;
+          unitUrls?.guide && teacherGuide.loadSections(unitUrls.guide);
           this.setTeacherGuide(teacherGuide);
         }
       }

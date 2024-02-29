@@ -1,3 +1,4 @@
+import { observable } from "mobx";
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { SectionModel, SectionModelSnapshot, SectionModelType } from "./section";
 import { SettingsMstType } from "../stores/settings";
@@ -28,31 +29,15 @@ const ModernProblemModel = types
      * A frozen type is used here so MST doesn't validate the id references of the section
      * with all of the other sections in this problem, or this problem's unit
      */
-    loadedSections: types.frozen<SectionModelSnapshot[]>(),
+    sectionsFromSnapshot: types.frozen<SectionModelSnapshot[]>(),
     config: types.maybe(types.frozen<Partial<ProblemConfiguration>>())
   })
+  .volatile(self => ({
+    sections: observable.array() as SectionModelType[]
+  }))
   .views(self => ({
     get fullTitle() {
       return `${self.title}${self.subtitle ? `: ${self.subtitle}` : ""}`;
-    },
-
-    // In order to support shared models in the sections. Each section has to
-    // have its own MST environment to hold its document's sharedModelManager.
-    // So each section has to be its own tree and cannot be a child of the
-    // problem.
-    get sections() {
-      return self.loadedSections.map(section => {
-        const sharedModelManager = new SharedModelDocumentManager();
-        const environment: ITileEnvironment = {
-          sharedModelManager
-        };
-        const sectionCopy = SectionModel.create(section, environment);
-        sectionCopy.setRealParent(self);
-        if (sectionCopy.content) {
-          sharedModelManager.setDocument(sectionCopy.content);
-        }
-        return sectionCopy;
-      });
     }
   }))
   .views(self => ({
@@ -63,7 +48,67 @@ const ModernProblemModel = types
     getSectionById(sectionId: string): SectionModelType|undefined {
       return self.sections.find((section) => section.type === sectionId);
     }
+  }))
+  .actions(self => ({
+    // In order to support shared models in the sections. Each section has to
+    // have its own MST environment to hold its document's sharedModelManager.
+    // So each section has to be its own tree and cannot be a child of the
+    // problem.
+    addSection(sectionsSnap: SectionModelSnapshot){
+      const sharedModelManager = new SharedModelDocumentManager();
+      const environment: ITileEnvironment = {
+        sharedModelManager
+      };
+      const section = SectionModel.create(sectionsSnap, environment);
+      section.setRealParent(self);
+      if (section.content) {
+        sharedModelManager.setDocument(section.content);
+      }
+      self.sections.push(section);
+    }
+  }))
+  .actions(self => ({
+    async loadSections(unitUrl: string){
+      await new Promise(resolve => setTimeout(resolve, 6000));
+
+      const sectionPromises = [];
+      for (let sectIdx = 0; sectIdx < self.sectionsFromSnapshot.length; sectIdx++) {
+        // Currently, curriculum files can either contain their problem section data inline
+        // or in external JSON files. In the latter case, the problem sections arrays will
+        // be made up of strings that are paths to the external files. We fetch the data from
+        // those files and populate the section with it. Otherwise, we leave the section as
+        // is. Eventually, all curriculum files will be updated so their problem section data
+        // is in external files.
+        const section = self.sectionsFromSnapshot[sectIdx];
+        if (typeof section === "string") {
+          const sectionDataFile = section;
+          const sectionDataUrl = new URL(sectionDataFile, unitUrl).href;
+          sectionPromises.push(
+            getExternalProblemSectionData(sectionDataUrl)
+          );
+        } else {
+          // handle any remaining units with inline sections
+          sectionPromises.push(Promise.resolve(section));
+        }
+      }
+      if (sectionPromises.length > 0) {
+        await Promise.all(sectionPromises).then((sections: any) => {
+          for (const section of sections) {
+            self.addSection(section);
+          }
+        });
+      }
+    }
   }));
+
+  function getExternalProblemSectionData(dataUrl: string){
+    try {
+      return fetch(dataUrl).then(res => res.json());
+    } catch (error) {
+      throw new Error(`Failed to load problem-section ${dataUrl} cause:\n ${error}`);
+    }
+  }
+
 export interface LegacyProblemSnapshot extends SnapshotIn<typeof LegacyProblemModel> {}
 export interface ModernProblemSnapshot extends SnapshotIn<typeof ModernProblemModel> {}
 
@@ -81,16 +126,20 @@ export const ProblemModel = types.snapshotProcessor(ModernProblemModel, {
   preProcessor(sn: ModernProblemSnapshot | LegacyProblemSnapshot) {
     const { sections, ...nonSectionProps } = sn as any;
     // Move sections to loadedSections so we can have a view called `sections`
-    const loadedSections = sections || [];
+    const sectionsFromSnapshot = sections || [];
     if (isLegacySnapshot(sn)) {
       const { disabled: disabledFeatures, settings, ...others } = sn;
-      return { ...others, loadedSections, config: { disabledFeatures, settings } } as ModernProblemSnapshot;
+      return { ...others, sectionsFromSnapshot, config: { disabledFeatures, settings } } as ModernProblemSnapshot;
     }
     if (isAmbiguousSnapshot(sn)) {
       const { disabled: disabledFeatures, settings, config, ...others } = sn as any;
-      return { ...others, loadedSections, config: { disabledFeatures, settings, ...config } } as ModernProblemSnapshot;
+      return {
+        ...others,
+        sectionsFromSnapshot,
+        config: { disabledFeatures, settings, ...config }
+      } as ModernProblemSnapshot;
     }
-    return { ...nonSectionProps, loadedSections };
+    return { ...nonSectionProps, sectionsFromSnapshot };
   }
 });
 export interface ProblemModelType extends Instance<typeof ModernProblemModel> {}
