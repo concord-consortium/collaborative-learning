@@ -9,7 +9,7 @@ import {
   registerSectionInfo, suspendSectionContentParsing, resumeSectionContentParsing
 } from "./section";
 import { ProblemModelType } from "./problem";
-import { resumeSupportContentParsing, SupportModel, suspendSupportContentParsing } from "./support";
+import { SupportModel } from "./support";
 import { StampModel } from "../../plugins/drawing/model/stamp";
 import { NavTabsConfigModel } from "../stores/nav-tabs";
 import { SettingsMstType } from "../stores/settings";
@@ -145,11 +145,9 @@ export function createUnitWithoutContent(unitJson: any) {
   // read the unit content, but don't instantiate section contents (DocumentModels)
   try {
     suspendSectionContentParsing();
-    suspendSupportContentParsing();
     return UnitModel.create(unitJson);
   }
   finally {
-    resumeSupportContentParsing();
     resumeSectionContentParsing();
   }
 }
