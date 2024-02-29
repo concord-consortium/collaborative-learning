@@ -4,11 +4,13 @@ $title-margin: 2px;
 .sort-work-view {
   height: 100%;
   width: 100%;
-  overflow-y: auto;
+  // overflow-y: auto;
+  display: flex; //added
+  flex-direction: column; //added
 
   .sorted-sections{
     width: 100%;
-    height: 100%;
+    // height: 100%;
 
     .section-header{
       height: 30px;
