@@ -1,7 +1,7 @@
 import { addDisposer, getSnapshot } from "mobx-state-tree";
 import { makeAutoObservable, runInAction, when } from "mobx";
 import { AppConfigModel, AppConfigModelType } from "./app-config-model";
-import { createUnitWithoutContent, UnitModel, UnitModelType } from "../curriculum/unit";
+import { UnitModel, UnitModelType } from "../curriculum/unit";
 import { getGuideJson, getUnitJson } from "../curriculum/unit-utils";
 import { InvestigationModel, InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
@@ -206,6 +206,10 @@ class Stores implements IStores{
     this.appMode = mode;
   }
 
+  setUnit(unit: UnitModelType) {
+    this.unit = unit;
+  }
+
   // If we need to batch up the changes even more than currently,
   // we could try changing this to a MobX flow.
   // However typing the yield statements is difficult. Also flows
@@ -227,13 +231,13 @@ class Stores implements IStores{
     unitUrls && gImageMap.setUnitUrl(unitUrls.content);
     gImageMap.setUnitCodeMap(getSnapshot(curriculumConfig.unitCodeMap));
 
-    // read the unit content, but don't instantiate section contents (DocumentModels) yet
-    const unit = createUnitWithoutContent(unitJson);
+    // read in the unit content (which does not instantiate the sections' contents)
+    this.setUnit(UnitModel.create(unitJson));
 
     const _problemOrdinal = problemOrdinal || appConfig.defaultProblemOrdinal;
-    const { investigation: _investigation, problem: _problem } = unit.getProblem(_problemOrdinal);
+    const { investigation, problem } = this.unit.getProblem(_problemOrdinal);
 
-    appConfig.setConfigs([unit.config || {}, _investigation?.config || {}, _problem?.config || {}]);
+    appConfig.setConfigs([this.unit.config || {}, investigation?.config || {}, problem?.config || {}]);
 
     // load/initialize the necessary tools
     showLoadingMessage("Loading tile types");
@@ -251,10 +255,6 @@ class Stores implements IStores{
     // not be batched with the rest of these updates. Having it not batched
     // should be fine and keeps things less complicated.
     runInAction(() => {
-      // read the unit content with full contents now that we have tools
-      this.unit = UnitModel.create(unitJson);
-      const {investigation, problem} = this.unit.getProblem(_problemOrdinal);
-
       // TODO: make this dynamic like the way the components work. The components
       // access these values from the stores when they need them. This way the values
       // can be changed on the fly without having to track down each object that is
@@ -282,7 +282,7 @@ class Stores implements IStores{
       removeLoadingMessage("Setting up curriculum content");
     });
 
-    addDisposer(unit, when(() => {
+    addDisposer(this.unit, when(() => {
         return this.user.isTeacher;
       },
       async () => {

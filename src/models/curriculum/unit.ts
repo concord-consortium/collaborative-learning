@@ -4,10 +4,7 @@ import { getParent, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { buildProblemPath, buildSectionPath } from "../../../functions/src/shared";
 import { DocumentContentModel } from "../document/document-content";
 import { InvestigationModel, InvestigationModelType } from "./investigation";
-import {
-  ISectionInfoMap, SectionModel, SectionModelType,
-  registerSectionInfo, suspendSectionContentParsing, resumeSectionContentParsing
-} from "./section";
+import { ISectionInfoMap, SectionModel, SectionModelType,registerSectionInfo } from "./section";
 import { ProblemModelType } from "./problem";
 import { SupportModel } from "./support";
 import { StampModel } from "../../plugins/drawing/model/stamp";
@@ -140,17 +137,6 @@ export const UnitModel = types.snapshotProcessor(ModernUnitModel, {
   }
 });
 export interface UnitModelType extends Instance<typeof UnitModel> {}
-
-export function createUnitWithoutContent(unitJson: any) {
-  // read the unit content, but don't instantiate section contents (DocumentModels)
-  try {
-    suspendSectionContentParsing();
-    return UnitModel.create(unitJson);
-  }
-  finally {
-    resumeSectionContentParsing();
-  }
-}
 
 export function getSectionPath(section: SectionModelType) {
   // The sections we work with at runtime are not MST children of their problem

@@ -14,16 +14,6 @@ export interface ISectionInfo {
   tiles?: IAuthoredTileContent[];
 }
 
-let gSuspendSectionContentParsing = 0;
-
-export function suspendSectionContentParsing() {
-  ++gSuspendSectionContentParsing;
-}
-
-export function resumeSectionContentParsing() {
-  --gSuspendSectionContentParsing;
-}
-
 export const kAllSectionType = "all";
 const kAllSectionInfo = { initials: "*", title: "All" };
 export const kUnknownSectionType = "unknown";
@@ -90,11 +80,6 @@ export const SectionModel = types
   .volatile(self => ({
     realParent: undefined as IAnyStateTreeNode | undefined
   }))
-  .preProcessSnapshot(snap => {
-    return gSuspendSectionContentParsing
-            ? { ...snap, content: undefined }
-            : snap;
-  })
   .views(self => {
     return {
       get initials() {
