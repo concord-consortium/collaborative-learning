@@ -24,7 +24,7 @@ const ModernProblemModel = types
     title: types.string,
     subtitle: "",
     /**
-     * loadedSections are populated from the "sections" property of the serialized problem
+     * sectionsFromSnapshot are populated from the "sections" property of the serialized problem
      * clients should use the `sections` view instead.
      * A frozen type is used here so MST doesn't validate the id references of the section
      * with all of the other sections in this problem, or this problem's unit
@@ -122,7 +122,7 @@ const isAmbiguousSnapshot = (sn: ModernProblemSnapshot | LegacyProblemSnapshot) 
 export const ProblemModel = types.snapshotProcessor(ModernProblemModel, {
   preProcessor(sn: ModernProblemSnapshot | LegacyProblemSnapshot) {
     const { sections, ...nonSectionProps } = sn as any;
-    // Move sections to loadedSections so we can have a view called `sections`
+    // Move sections to sectionsFromSnapshot so we load them into a volatile property `sections`
     const sectionsFromSnapshot = sections || [];
     if (isLegacySnapshot(sn)) {
       const { disabled: disabledFeatures, settings, ...others } = sn;
