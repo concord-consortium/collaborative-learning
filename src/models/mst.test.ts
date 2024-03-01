@@ -865,4 +865,15 @@ describe("mst", () => {
       {propValue: "6"}
     ]);
   });
+
+  test("empty create without required props throws exception", () => {
+    const TestObject = types.
+      model("TestObject", {
+        propValue: types.string
+      });
+
+    expect(() => {
+      TestObject.create();
+    }).toThrow();
+  });
 });

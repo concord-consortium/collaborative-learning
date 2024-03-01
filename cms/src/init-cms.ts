@@ -7,14 +7,15 @@ import { urlParams } from "../../src/utilities/url-params";
 import { IframeControl } from "./iframe-control";
 import { JsonControl } from "./json-control";
 import { PreviewLinkControl } from "./preview-link-control";
-import { defaultCurriculumBranch, defaultCurriculumUnit } from "./cms-constants";
+import { defaultCurriculumBranch } from "./cms-constants";
 import { getCmsCollections } from "./cms-collections";
-import { getUnitJson } from "../../src/models/curriculum/unit";
-import appConfigJson from "../../src/clue/app-config.json";
-import { AppConfigModel, AppConfigModelSnapshot } from "../../src/models/stores/app-config-model";
+import { getUnitJson } from "../../src/models/curriculum/unit-utils";
+import { CurriculumConfig } from "../../src/models/stores/curriculum-config";
 
-const appConfig = AppConfigModel.create(appConfigJson as AppConfigModelSnapshot);
-const unit = urlParams.unit ?? defaultCurriculumUnit;
+import curriculumConfigJson from "../../src/clue/curriculum-config.json";
+
+const curriculumConfig = CurriculumConfig.create(curriculumConfigJson, { urlParams });
+const unit = urlParams.unit ?? curriculumConfig.defaultUnit;
 
 // Local testing of the CMS without working with github directly:
 // - Add the localCMSBacked parameter to the URL
@@ -59,7 +60,7 @@ export async function initCMS() {
   CMS.registerWidget("clue", IframeControl);
   CMS.registerWidget("json", JsonControl);
   CMS.registerWidget("preview-link", PreviewLinkControl);
-  const unitJson = await getUnitJson(unit, appConfig);
+  const unitJson = await getUnitJson(unit, curriculumConfig);
   CMS.init({config: cmsConfig(unitJson)});
 }
 
