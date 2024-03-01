@@ -12,13 +12,14 @@ import { DataConfigurationContext, useDataConfigurationContext } from "../../hoo
 import { IGraphLayerModel } from "../../models/graph-layer-model";
 import { LegendDropdown } from "./legend-dropdown";
 import { LegendIdListFunction, ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
-import RemoveDataIcon from "../../assets/remove-data-icon.svg";
-import XAxisIcon from "../../assets/x-axis-icon.svg";
-import YAxisIcon from "../../assets/y-axis-icon.svg";
 import { logSharedModelDocEvent } from "../../../../models/document/log-shared-model-document-event";
 import { LogEventName } from "../../../../lib/logger-types";
 import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
+import { EditableDataSetName } from "./editable-dataset-name";
 
+import RemoveDataIcon from "../../assets/remove-data-icon.svg";
+import XAxisIcon from "../../assets/x-axis-icon.svg";
+import YAxisIcon from "../../assets/y-axis-icon.svg";
 
 export const layerLegendType = "layer-legend";
 
@@ -136,7 +137,8 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
               </div>
             }
             <div className="legend-title">
-              Data from: <strong>{dataConfiguration.dataset.name || "Unknown"}</strong>&nbsp;
+              Data from:
+              <EditableDataSetName dataConfiguration={dataConfiguration}/>
             </div>
           </div>
           <div className="legend-cell-2">
