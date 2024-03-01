@@ -14,6 +14,8 @@ import FitAllIcon from "../assets/fit-all-icon.svg";
 import LockAxesIcon from "../assets/lock-axes-icon.svg";
 import UnlockAxesIcon from "../assets/unlock-axes-icon.svg";
 import AddPointsByHandIcon from "../assets/add-points-by-hand-icon.svg";
+import SelectToolIcon from "../assets/select-tool-icon.svg";
+import AddPointsIcon from "../assets/add-points-icon.svg";
 
 function LinkTileButton(name: string, title: string, allowMultiple: boolean) {
 
@@ -91,7 +93,6 @@ const ToggleLockAxesButton = observer(function ToggleLockAxesButton({name}: IToo
 
 const AddPointsByHandButton = observer(function AddPointsByHandButton({name}: IToolbarButtonComponentProps) {
   const graph = useGraphModelContext();
-
   const hasEditableLayers = graph.getEditableLayers().length > 0;
 
   // Enable button if axes are numeric or undefined.
@@ -112,6 +113,60 @@ const AddPointsByHandButton = observer(function AddPointsByHandButton({name}: IT
       disabled={!enabled}
     >
       <AddPointsByHandIcon/>
+    </TileToolbarButton>
+  );
+
+});
+
+const SelectPointsButton = observer(function({name}: IToolbarButtonComponentProps) {
+  const graph = useGraphModelContext();
+  const editableLayers = graph.getEditableLayers();
+  const hasEditableLayers = editableLayers.length > 0;
+
+  function handleClick() {
+    // no action
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Select/Move point"
+      onClick={handleClick}
+      disabled={!hasEditableLayers}
+    >
+      <SelectToolIcon/>
+    </TileToolbarButton>
+  );
+});
+
+const AddPointsButton = observer(function({name}: IToolbarButtonComponentProps) {
+  const graph = useGraphModelContext();
+  const editableLayers = graph.getEditableLayers();
+  const hasEditableLayers = editableLayers.length > 0;
+
+  // Determine color of the editable dots
+  let color = "#000000";
+  if (editableLayers.length > 0) {
+    const yAttributes = editableLayers[0].config.yAttributeIDs;
+    if (yAttributes.length > 0) {
+      color = graph.getColorForId(yAttributes[0]);
+    }
+  }
+
+  const iconStyle = { fill: color };
+
+  function handleClick() {
+    // no action
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Add point"
+      onClick={handleClick}
+      disabled={!hasEditableLayers}
+    >
+      <AddPointsIcon style={iconStyle} />
     </TileToolbarButton>
   );
 
@@ -138,5 +193,14 @@ registerTileToolbarButtons("graph",
   {
     name: 'add-points-by-hand',
     component: AddPointsByHandButton
+  },
+  {
+    name: 'add-points',
+    component: AddPointsButton
+  },
+  {
+    name: 'select-points',
+    component: SelectPointsButton
   }
+
 ]);
