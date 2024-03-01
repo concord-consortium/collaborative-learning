@@ -1,5 +1,5 @@
 import { applySnapshot, getSnapshot } from "mobx-state-tree";
-import { isSharedDataSet, SharedDataSet } from "../shared/shared-data-set";
+import { getSharedModelInfoByType } from "../shared/shared-model-registry";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { DocumentContentModel, DocumentContentModelType } from "./document-content";
 import {
@@ -91,10 +91,14 @@ export function migrateSnapshot(snapshot: IDocumentImportSnapshot): any {
   for (const id of tiles) {
     const tile = docContent.tileMap.get(id);
     if (tile && tile.title && getTileContentInfo(tile.content.type)?.useContentTitle) {
-      const sharedModel = docContent.getFirstSharedModelByType(SharedDataSet, tile.id);
-      if (sharedModel && isSharedDataSet(sharedModel)) {
-        sharedModel.dataSet.setName(tile.title);
-        tile.setTitle(undefined);
+      // Look for a SharedModel that can hold the title
+      for (const sm of Object.values(docContent.getSharedModelsUsedByTiles([id]))) {
+        if (getSharedModelInfoByType(sm.sharedModel.type)?.hasName) {
+          sm.sharedModel.setName(tile.title);
+          tile.setTitle(undefined);
+          console.log("Set title onto", sm.sharedModel);
+          break;
+        }
       }
     }
   }

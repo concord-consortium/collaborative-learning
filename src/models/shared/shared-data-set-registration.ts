@@ -3,5 +3,6 @@ import { registerSharedModelInfo } from "./shared-model-registry";
 
 registerSharedModelInfo({
   type: kSharedDataSetType,
-  modelClass: SharedDataSet
+  modelClass: SharedDataSet,
+  hasName: true
 });

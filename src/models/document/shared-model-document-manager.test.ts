@@ -51,7 +51,8 @@ interface TestSharedModelType extends Instance<typeof TestSharedModel> {}
 
 registerSharedModelInfo({
   type: "TestSharedModel",
-  modelClass: TestSharedModel
+  modelClass: TestSharedModel,
+  hasName: false
 });
 
 const TestSharedModel2 = SharedModel
@@ -60,7 +61,8 @@ const TestSharedModel2 = SharedModel
 
 registerSharedModelInfo({
   type: "TestSharedModel2",
-  modelClass: TestSharedModel2
+  modelClass: TestSharedModel2,
+  hasName: false
 });
 
 // Snapshot processor type
@@ -80,7 +82,8 @@ const TestSharedModel3 = types.snapshotProcessor(_TestSharedModel3, {
 registerSharedModelInfo({
   type: "TestSharedModel3",
   // modelClass prop is restrictive, but the snapshotProcessor type should work fine
-  modelClass: TestSharedModel3 as typeof _TestSharedModel3
+  modelClass: TestSharedModel3 as typeof _TestSharedModel3,
+  hasName: false
 });
 
 

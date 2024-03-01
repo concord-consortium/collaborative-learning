@@ -29,7 +29,6 @@ import { IDocumentContentAddTileOptions, INewRowTile, INewTileOptions,
 import {
   SharedModelEntry, SharedModelEntrySnapshotType, SharedModelEntryType, SharedModelMap
 } from "./shared-model-entry";
-import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../shared/shared-data-set";
 
 /**
  * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
@@ -186,11 +185,10 @@ export const BaseDocumentContentModel = types
         const sharedModelEntries = Array.from(self.sharedModelMap.values());
         return sharedModelEntries.map(entry => entry.sharedModel).filter(model => model.type === type);
       },
-      getSharedModelsInUseByAnyTiles<IT extends typeof SharedModel>(type: string): IT["Type"][] {
+      getSharedModelsInUseByAnyTiles(): SharedModelType[] {
         const sharedModelEntries = Array.from(self.sharedModelMap.values());
         return sharedModelEntries
-          .filter(entry => {
-            return entry.sharedModel.type === type && entry.tiles.length > 0; })
+          .filter(entry => { return entry.tiles.length > 0; })
           .map(entry => entry.sharedModel);
       },
       getSharedModelsUsedByTiles(tileIds: string[]) {
@@ -358,17 +356,17 @@ export const BaseDocumentContentModel = types
     },
     /**
      * Find the largest name suffix number matching the given name base
-     * from the list of sharedDataSets provided.
+     * from the list of SharedModels provided.
      * If names are found that match the given base, the largest suffix number
      * will be returned. This may be zero if there's a match without a suffix number.
      * If no matching tile titles are found, returns -1.
      * @param nameBase
-     * @param sharedDataSets
+     * @param sharedModels
      * @returns max number found; 0 if no numbers; -1 if no tiles match.
      */
-    getMaxNumberFromDataSetNames(nameBase: string, sharedDataSets: SharedDataSetType[]) {
-      return sharedDataSets.reduce((maxIndex, sharedDataSet) => {
-        const match = titleMatchesDefault(sharedDataSet.dataSet.name, nameBase);
+    getMaxNumberFromSharedModelNames(nameBase: string, sharedModels: SharedModelType[]) {
+      return sharedModels.reduce((maxIndex, sharedModel) => {
+        const match = titleMatchesDefault(sharedModel.name, nameBase);
         return match
                 ? Math.max(maxIndex, +match[1])
                 : maxIndex;
@@ -390,19 +388,19 @@ export const BaseDocumentContentModel = types
       return (maxSoFar >= 0) ? defaultTitle(titleBase, maxSoFar+1) : title;
     },
     /**
-     * Make the given dataset name unique in this document by incrementing or
-     * appending a numeric suffix. Will return the name unchanged if it's
-     * unique. If another dataset (which is actually in use by a tile) is
+     * Make the given SharedModel name unique in this document by incrementing or
+     * appending a numeric suffix. Will return the name unchanged if it is already
+     * unique. If another shared model (which is actually in use by a tile) is
      * already using this name, this Will add a numeric suffix, or increment an
      * existing numeric suffix, in order to make it unique.
      * @param title
      * @returns possibly modified name
      */
-    getUniqueDataSetName(name: string) {
-      const existingSharedModels = self.getSharedModelsInUseByAnyTiles<typeof SharedDataSet>(kSharedDataSetType);
-      if (existingSharedModels.find((sm) => sm.dataSet.name === name)) {
+    getUniqueSharedModelName(name: string) {
+      const existingSharedModels = self.getSharedModelsInUseByAnyTiles();
+      if (existingSharedModels.find((sm) => sm.name === name)) {
         const titleBase = extractTitleBase(name);
-        const maxSoFar = self.getMaxNumberFromDataSetNames(titleBase, existingSharedModels);
+        const maxSoFar = self.getMaxNumberFromSharedModelNames(titleBase, existingSharedModels);
         return (maxSoFar >= 0) ? defaultTitle(titleBase, maxSoFar+1) : name;
       } else {
         // No conflict
@@ -447,11 +445,10 @@ export const BaseDocumentContentModel = types
       const section = self.importContextCurrentSection || "document";
       return `${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
     },
-    migrateDataSetTitles() {
-      // Find any tiles that have a title incorrectly set on the tile, rather than on the dataset,
-      // and move those titles to the datasets.
+    migrateContentTitles() {
+      // Find and fix any tiles that have a title incorrectly set on the tile, rather than on the content.
       // We iterate through the tiles in reverse order, so that if there is more than one tile
-      // linked to the same dataset, the first tile's name is the one that ends up being used.
+      // linked to the same shared title, the first tile's name is the one that ends up being used.
       const tiles = self.getTilesInDocumentOrder().reverse();
       for (const id of tiles) {
         const tile = self.tileMap.get(id);

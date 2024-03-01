@@ -33,9 +33,20 @@ export const SharedModel = types.model("SharedModel", {
 .volatile(self => ({
   indexOfType: -1
 }))
+.views(self => ({
+  get name(): string|undefined {
+    // Overridden by subclasses that support storing a name.
+    // If unsupported, should always return undefined.
+    return undefined;
+  }
+}))
 .actions(self => ({
   setIndexOfType(index: number) {
     self.indexOfType = index;
+  },
+  setName(name: string) {
+    // Overridden by subclasses that support storing a name.
+    throw "This SharedModel type does not implement setName";
   }
 }));
 
