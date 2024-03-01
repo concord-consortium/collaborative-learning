@@ -11,7 +11,7 @@ export const useModelDataSet = (model: ITileModel, content: TableContentModelTyp
   const triggerRowChange = useCallback(() => setRowChanges(state => ++state), []);
 
   const setTableTitle = useCallback((title: string) => {
-    (title != null) && model.setTitle(title);
+    (title != null) && model.setTitleOrContentTitle(title);
     triggerColumnChange();
   }, [model, triggerColumnChange]);
 

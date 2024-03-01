@@ -285,16 +285,16 @@ context('Table Tool Tile', function () {
     clueCanvas.clickToolbarButton('table', 'link-graph');
     tableToolTile.getLinkGraphModalTileMenu().select('New Graph');
     tableToolTile.getLinkGraphModalLinkButton().should("contain", "Graph It!").click();
-    xyplot.getTile().should("exist").contains("Table 1");
+    xyplot.getTile().should("exist").contains("Table Data 1");
 
     cy.log('can unlink and link data from a table using the "Link Table" button');
     // Unlink
     clueCanvas.clickToolbarButton('table', 'link-tile');
-    tableToolTile.getLinkGraphModalTileMenu().select('Table 1');
+    tableToolTile.getLinkGraphModalTileMenu().select('Graph 1');
     tableToolTile.getLinkGraphModalLinkButton().should("contain", "Clear It!").click();
     // Re-link
     clueCanvas.clickToolbarButton('table', 'link-tile');
-    tableToolTile.getLinkGraphModalTileMenu().select('Table 1');
+    tableToolTile.getLinkGraphModalTileMenu().select('Graph 1');
     tableToolTile.getLinkGraphModalLinkButton().should("contain", "Link").click();
   });
 });

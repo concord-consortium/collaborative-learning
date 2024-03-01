@@ -1,29 +1,22 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ExpressionContentModelType } from "../../plugins/expression/expression-content";
 import { DataCardContentModelType } from "../../plugins/data-card/data-card-content";
+import { ITileModel } from "../../models/tiles/tile-model";
 
 type SimpleTitleTileTypes = DataCardContentModelType | ExpressionContentModelType;
 
 interface IProps {
-  model: any;
-  onRequestUniqueTitle: any;
+  model: ITileModel;
   readOnly: boolean | undefined;
 }
 
 export const CustomEditableTileTitle: React.FC<IProps> = observer((props) => {
-  const { model, onRequestUniqueTitle, readOnly } = props;
+  const { model, readOnly } = props;
   const content = model.content as SimpleTitleTileTypes;
-  const [titleValue, setTitleValue] = useState(model.title);
+  const [titleValue, setTitleValue] = useState(model.computedTitle);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-
-  useEffect(() => {
-    if (!model.title) {
-      const title = onRequestUniqueTitle(model.id);
-      title && model.setTitle(title);
-    }
-  }, [content, model, onRequestUniqueTitle]);
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTitleValue(event.target.value);
@@ -55,7 +48,7 @@ export const CustomEditableTileTitle: React.FC<IProps> = observer((props) => {
         setIsEditingTitle(false);
         break;
       case "Escape":
-        setTitleValue(model.title);
+        setTitleValue(model.computedTitle);
         setIsEditingTitle(false);
         break;
     }
@@ -63,7 +56,7 @@ export const CustomEditableTileTitle: React.FC<IProps> = observer((props) => {
 
   const handleCompleteTitle = () => {
     if (titleValue){
-      model.setTitle(titleValue);
+      model.setTitleOrContentTitle(titleValue);
     }
     setIsEditingTitle(false);
   };
@@ -73,7 +66,7 @@ export const CustomEditableTileTitle: React.FC<IProps> = observer((props) => {
   );
 
   const titleString = content.type === "Expression"
-    ? `(${model.title})` : model.title;
+    ? `(${model.title})` : model.computedTitle;
 
   return (
     <div className={elementClasses}>

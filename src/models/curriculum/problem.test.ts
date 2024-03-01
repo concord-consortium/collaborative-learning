@@ -104,7 +104,8 @@ describe("problem model", () => {
 
     registerSharedModelInfo({
       type: "TestSharedModel",
-      modelClass: TestSharedModel
+      modelClass: TestSharedModel,
+      hasName: false
     });
 
     const duplicatedSection = {

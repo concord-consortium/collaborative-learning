@@ -271,4 +271,16 @@ describe("document model", () => {
     expect(document.content!.tileMap.size).toBe(2);
     expect(document.content?.rowCount).toBe(2);
   });
+
+  it("Sets default tile titles", () => {
+    document.addTile("text");
+    document.addTile("geometry");
+    document.addTile("text");
+
+    const tiles = document.content?.getTilesInDocumentOrder();
+    expect(tiles?.length).toBe(3);
+
+    expect(tiles?.map(t => document.content?.getTile(t)?.title)).toEqual([
+      "Text 1", "Shapes Graph 1", "Text 2"]);
+  });
 });

@@ -1,7 +1,7 @@
 import stringify from "json-stringify-pretty-compact";
 import { applySnapshot, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
 import { cloneDeep, each } from "lodash";
-import { IDragTilesData, NewRowTileArray, PartialSharedModelEntry, PartialTile,
+import { IDragTilesData, PartialSharedModelEntry, PartialTile,
          IDocumentContentAddTileOptions } from "./document-content-types";
 import { DocumentContentModelWithTileDragging } from "./drag-tiles";
 import { IDropRowInfo, TileRowModelType, TileRowSnapshotOutType } from "./tile-row";
@@ -18,13 +18,12 @@ import { comma, StringBuilder } from "../../utilities/string-builder";
 // Imports related to hard coding shared model duplication
 import {
   getSharedDataSetSnapshotWithUpdatedIds, getUpdatedSharedDataSetIds, isSharedDataSetSnapshot,
-  SharedDataSetType,
   UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
 } from "../shared/shared-data-set";
 import { IClueObjectSnapshot } from "../annotations/clue-object";
 
 /**
- * The DocumentContentModel is the combination of 3 parts:
+ * The DocumentContentModel builds on the combination of 3 other parts:
  * - BaseDocumentContentModel
  * - DocumentContentModelWithTileDragging
  * - DocumentContentModelWithAnnotations
@@ -234,12 +233,11 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     tiles: IDragTileItem[],
     sharedModelEntries: PartialSharedModelEntry[],
     annotations: IArrowAnnotationSnapshot[],
-    rowInfo: IDropRowInfo,
-    insertTileFunction: (updatedTiles: IDropTileItem[], rowInfo: IDropRowInfo) => NewRowTileArray
+    rowInfo: IDropRowInfo
   ) {
-    // Update shared models with new ids
+    // Update shared models with new names and ids
     const updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds> = {};
-    let newSharedModelEntries: PartialSharedModelEntry[] = [];
+    const newSharedModelEntries: PartialSharedModelEntry[] = [];
     sharedModelEntries.forEach(sharedModelEntry => {
       // For now, only duplicate shared data sets
       if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
@@ -279,11 +277,17 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       const tileContent = cloneDeep(oldContent);
       tileIdMap[tile.tileId] = uniqueId();
 
+      // Remove any title that shouldn't be there (eg, copying from legacy curriculum)
+      const typeInfo = getTileContentInfo(tile.tileType);
+      if (tileContent.title && typeInfo?.useContentTitle) {
+        tileContent.title = undefined;
+      }
+
       // Find the shared models for this tile
       const tileSharedModelEntries = findTileSharedModelEntries(tile.tileId);
 
       // Update the tile's references to its shared models
-      const updateFunction = getTileContentInfo(tile.tileType)?.updateContentWithNewSharedModelIds;
+      const updateFunction = typeInfo?.updateContentWithNewSharedModelIds;
       if (updateFunction) {
         tileContent.content = updateFunction(oldContent.content, tileSharedModelEntries, updatedSharedModelMap);
       }
@@ -293,32 +297,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     });
 
     // Add copied tiles to document
-    const results = insertTileFunction(updatedTiles, rowInfo);
-
-    // Increment default titles when necessary
-    results.forEach((result, i) => {
-      if (result?.tileId) {
-        const { oldTitle, newTitle } = self.updateDefaultTileTitle(result.tileId);
-
-        // If the tile title needed to be updated, we assume we should also update the data set's name
-        if (newTitle && sharedModelEntries) {
-          newSharedModelEntries = newSharedModelEntries.map(sharedModelEntry => {
-            if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
-              const sharedDataSet = sharedModelEntry.sharedModel;
-              const oldName = sharedDataSet.dataSet?.name;
-              if (sharedDataSet.dataSet && oldName === oldTitle) {
-                const newSME = cloneDeep<PartialSharedModelEntry>(sharedModelEntry);
-                (newSME.sharedModel as SharedDataSetType).dataSet.name = newTitle;
-                return newSME;
-              }
-              return sharedModelEntry;
-            } else {
-              return sharedModelEntry;
-            }
-          });
-        }
-      }
-    });
+    self.userCopyTiles(updatedTiles, rowInfo);
 
     // Update tile ids for shared models and add those references to document.
     // The shared datasets have already been added above.
@@ -332,6 +311,14 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
           sharedModel: updateSharedDataSetSnapshotWithNewTileIds(sharedModelEntry.sharedModel, tileIdMap),
           tiles: updatedTileIds,
           provider: updatedProvider };
+        // Make dataset name unique.
+        // We can't do this earlier since getUniqueDataSetName only considers datasets that are linked to tiles.
+        const name = updatedSharedModel.sharedModel.dataSet?.name;
+        const uniqueName = name && self.getUniqueSharedModelName(name);
+        if (updatedSharedModel.sharedModel.dataSet?.name && uniqueName) {
+          updatedSharedModel.sharedModel.dataSet.name = uniqueName;
+        }
+
         const id = sharedModelEntry.sharedModel.id;
         if (id) {
           const existingEntry = self.sharedModelMap.get(id);
@@ -367,9 +354,6 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         self.addArrow(ArrowAnnotation.create(newAnnotationSnapshot));
       }
     });
-
-    // TODO: Make sure logging is correct
-    self.logCopyTileResults(tiles, results);
   }
 }))
 .actions(self => ({
@@ -394,10 +378,10 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       }
     });
 
-    self.copyTiles(tiles, sharedModelEntries, annotations, rowInfo, self.userCopyTiles);
+    self.copyTiles(tiles, sharedModelEntries, annotations, rowInfo);
   },
   duplicateTiles(tiles: IDragTileItem[]) {
-    // Determine the row to add the duplicated tiles into
+    // New tiles go into a row after the last copied tile
     const rowIndex = self.getRowAfterTiles(tiles);
 
     // Find shared models used by tiles being duplicated
@@ -409,10 +393,16 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       tiles,
       sharedModelEntries,
       annotations,
-      { rowInsertIndex: rowIndex },
-      (t: IDropTileItem[], rowInfo: IDropRowInfo) => self.copyTilesIntoNewRows(t, rowInfo.rowInsertIndex)
+      { rowInsertIndex: rowIndex }
     );
   },
+  /**
+   * Create a new tile and insert it as a new row after the given tile's row.
+   * @param tileType type of tile to create
+   * @param target existing tile that determines the position
+   * @param sharedModels shared models to connect to new tile
+   * @param options IDocumentContentAddTileOptions object
+   */
   addTileAfter(tileType: string, target: ITileModel, sharedModels?: SharedModelType[],
     options?: IDocumentContentAddTileOptions) {
     const targetRowId = self.findRowContainingTile(target.id);
@@ -422,19 +412,28 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     }
     const rowInsertIndex = self.getRowIndex(targetRowId) + 1;
     const newOptions = {...options, insertRowInfo:{rowInsertIndex}};
+    // If no title is provided, and this tile should have one, then set the default
+    if (!newOptions.title) {
+      // No tile title is provided. Will the tile inherit one?
+      const willGetTitleFromDataSet = getTileContentInfo(tileType)?.useContentTitle && sharedModels;
+      if (!willGetTitleFromDataSet) {
+        // Nope. Need to construct a title.
+        newOptions.title = self.getUniqueTitleForType(tileType);
+      }
+    }
     // This addTile function happens to add the tile content to a tile model before
     // adding it to the document. This ordering is one part of a complex series
     // that means the reaction in tile content's afterAttach will be delayed until
     // after this action is complete. See the comment in IAddTilesContext for a
     // little more info
-    const newRowTile = self.addTile(tileType, newOptions);
+    const newRowTile = self.userAddTile(tileType, newOptions);
     const newTileId = newRowTile?.tileId;
     if (!newTileId) {
       console.warn("New tile couldn't be added");
       return;
     }
     if (!sharedModels) {
-      // Nothing to do
+      // Nothing more to do
       return;
     }
     sharedModels.forEach(sharedModel => {

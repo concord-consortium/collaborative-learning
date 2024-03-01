@@ -22,7 +22,7 @@ context('Data Card Tool Tile', () => {
     dc.getTile().should("exist");
 
     cy.log("has a default title");
-    dc.getTile().contains("Data Card Collection");
+    dc.getTile().contains("Card Deck Data");
 
     cy.log("can create a new attribute");
     dc.getAttrName().dblclick().type("Attr1 Name{enter}");

@@ -19,7 +19,7 @@ export const useLinkableTiles = ({ model }: IUseLinkableTilesProps) => {
     } else {
       countsOfType[type]++;
     }
-    return { id, type, title: title || `${titleBase || type} ${countsOfType[type]}` };
+    return { id, type, title: title || `Untitled ${titleBase || type} ${countsOfType[type]}` };
   }
 
   return {

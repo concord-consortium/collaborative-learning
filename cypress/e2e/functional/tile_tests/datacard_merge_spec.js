@@ -28,7 +28,7 @@ context('Merge Data Card Tool Tile', function () {
     beforeTest();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
-    dc.getTileTitle(0).should("have.text", "Data Card Collection 1");
+    dc.getTileTitle(0).should("have.text", "Card Deck Data 1");
 
     dc.getAttrName(0).dblclick().type("animal{enter}");
     dc.getAttrName(0).contains("animal");
@@ -36,7 +36,7 @@ context('Merge Data Card Tool Tile', function () {
 
     clueCanvas.addTile("datacard");
     dc.getTile(1).should("exist");
-    dc.getTileTitle(1).should("have.text", "Data Card Collection 2");
+    dc.getTileTitle(1).should("have.text", "Card Deck Data 2");
 
     dc.getAttrName(1).dblclick().type("vegetable{enter}");
     dc.getAttrName(1).contains("vegetable");
@@ -44,7 +44,7 @@ context('Merge Data Card Tool Tile', function () {
 
     dc.getAttrValue(1).click();
     dc.getMergeDataButton(1).click();
-    dc.getMergeDataModalSelect().select("Data Card Collection 1");
+    dc.getMergeDataModalSelect().select("Card Deck Data 1");
     dc.getMergeDataModalAddDataButton().click();
 
     dc.getAttrs(1).should("have.length", 2);
@@ -58,11 +58,11 @@ context('Merge Data Card Tool Tile', function () {
     beforeTest();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
-    dc.getTileTitle(0).should("have.text", "Data Card Collection 1");
+    dc.getTileTitle(0).should("have.text", "Card Deck Data 1");
 
     clueCanvas.addTile("datacard");
     dc.getTile(1).should("exist");
-    dc.getTileTitle(1).should("have.text", "Data Card Collection 2");
+    dc.getTileTitle(1).should("have.text", "Card Deck Data 2");
 
     dc.getTile(0).find(".data-card-tool")
       .trigger('dragstart', { dataTransfer }).then(() => {
@@ -88,7 +88,7 @@ context('Merge Data Card Tool Tile', function () {
     beforeTest();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
-    dc.getTileTitle(0).should("have.text", "Data Card Collection 1");
+    dc.getTileTitle(0).should("have.text", "Card Deck Data 1");
 
     dc.getAttrName().dblclick().type("Attr1 Name{enter}");
     dc.getAttrName().should("have.text", "Attr1 Name");
@@ -96,7 +96,7 @@ context('Merge Data Card Tool Tile', function () {
 
     clueCanvas.addTile("datacard");
     dc.getTile(1).should("exist");
-    dc.getTileTitle(1).should("have.text", "Data Card Collection 2");
+    dc.getTileTitle(1).should("have.text", "Card Deck Data 2");
 
     dc.getTile(0).find(".data-card-tool")
       .trigger('dragstart', { dataTransfer }).then(() => {
@@ -130,11 +130,11 @@ context('Merge Data Card Tool Tile', function () {
     beforeTest();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
-    dc.getTileTitle(0).should("have.text", "Data Card Collection 1");
+    dc.getTileTitle(0).should("have.text", "Card Deck Data 1");
 
     clueCanvas.addTile("datacard");
     dc.getTile(1).should("exist");
-    dc.getTileTitle(1).should("have.text", "Data Card Collection 2");
+    dc.getTileTitle(1).should("have.text", "Card Deck Data 2");
 
     dc.getAttrName(1).dblclick().type("Attr1 Name{enter}");
     dc.getAttrName(1).contains("Attr1 Name");
@@ -172,7 +172,7 @@ context('Merge Data Card Tool Tile', function () {
     beforeTest();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
-    dc.getTileTitle(0).should("have.text", "Data Card Collection 1");
+    dc.getTileTitle(0).should("have.text", "Card Deck Data 1");
 
     dc.getAttrName(0).dblclick().type("Attr1 Name{enter}");
     dc.getAttrName(0).contains("Attr1 Name");
@@ -180,7 +180,7 @@ context('Merge Data Card Tool Tile', function () {
 
     clueCanvas.addTile("datacard");
     dc.getTile(1).should("exist");
-    dc.getTileTitle(1).should("have.text", "Data Card Collection 2");
+    dc.getTileTitle(1).should("have.text", "Card Deck Data 2");
 
     dc.getAttrName(1).dblclick().type("Attr2 Name{enter}");
     dc.getAttrName(1).contains("Attr2 Name");
@@ -218,7 +218,7 @@ context('Merge Data Card Tool Tile', function () {
     beforeTest();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
-    dc.getTileTitle(0).should("have.text", "Data Card Collection 1");
+    dc.getTileTitle(0).should("have.text", "Card Deck Data 1");
 
     dc.getAttrName(0).dblclick().type("Attr1 Name{enter}");
     dc.getAttrName(0).contains("Attr1 Name");
@@ -226,7 +226,7 @@ context('Merge Data Card Tool Tile', function () {
 
     clueCanvas.addTile("datacard");
     dc.getTile(1).should("exist");
-    dc.getTileTitle(1).should("have.text", "Data Card Collection 2");
+    dc.getTileTitle(1).should("have.text", "Card Deck Data 2");
 
     dc.getAttrName(1).dblclick().type("Attr1 Name{enter}");
     dc.getAttrName(1).contains("Attr1 Name");
@@ -255,7 +255,7 @@ context('Merge Data Card Tool Tile', function () {
     beforeTest();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
-    dc.getTileTitle(0).should("have.text", "Data Card Collection 1");
+    dc.getTileTitle(0).should("have.text", "Card Deck Data 1");
 
     dc.getAttrName(0).dblclick().type("Attr1 Name{enter}");
     dc.getAttrName(0).contains("Attr1 Name");
@@ -266,7 +266,7 @@ context('Merge Data Card Tool Tile', function () {
 
     clueCanvas.addTile("datacard");
     dc.getTile(1).should("exist");
-    dc.getTileTitle(1).should("have.text", "Data Card Collection 2");
+    dc.getTileTitle(1).should("have.text", "Card Deck Data 2");
 
     dc.getAttrName(1).dblclick().type("Attr2 Name{enter}");
     dc.getAttrName(1).contains("Attr2 Name");
@@ -307,7 +307,7 @@ context('Merge Data Card Tool Tile', function () {
     openMyWork();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
-    dc.getTileTitle(0).should("have.text", "Data Card Collection 1");
+    dc.getTileTitle(0).should("have.text", "Card Deck Data 1");
 
     dc.getAttrName(0).dblclick().type("Attr1 Name{enter}");
     dc.getAttrName(0).contains("Attr1 Name");
@@ -319,7 +319,7 @@ context('Merge Data Card Tool Tile', function () {
     cy.log("creates a Data Card tool tile in new personal workspace");
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
-    dc.getTileTitle(0).should("have.text", "Data Card Collection 1");
+    dc.getTileTitle(0).should("have.text", "Card Deck Data 1");
 
     dc.getAttrName(0).dblclick().type("Attr2 Name{enter}");
     dc.getAttrName(0).contains("Attr2 Name");
