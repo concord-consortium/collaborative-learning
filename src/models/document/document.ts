@@ -341,7 +341,7 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
     }));
     if (document.content) {
       sharedModelManager.setDocument(document.content);
-      document.content.migrateDataSetTitles();
+      document.content.migrateContentTitles();
     }
     return document;
   } catch (e) {

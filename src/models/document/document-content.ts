@@ -314,7 +314,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         // Make dataset name unique.
         // We can't do this earlier since getUniqueDataSetName only considers datasets that are linked to tiles.
         const name = updatedSharedModel.sharedModel.dataSet?.name;
-        const uniqueName = name && self.getUniqueDataSetName(name);
+        const uniqueName = name && self.getUniqueSharedModelName(name);
         if (updatedSharedModel.sharedModel.dataSet?.name && uniqueName) {
           updatedSharedModel.sharedModel.dataSet.name = uniqueName;
         }
