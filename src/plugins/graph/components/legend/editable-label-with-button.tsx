@@ -1,15 +1,15 @@
 import React from "react";
-import { Editable, EditableInput, EditablePreview, useEditableControls } from "@chakra-ui/react";
 import { observer } from "mobx-react";
-import { IDataConfigurationModel } from "../../models/data-configuration-model";
+import { Editable, EditableInput, EditablePreview, useEditableControls } from "@chakra-ui/react";
 
 import EditIcon from "../../assets/edit-legend-name-icon.svg";
 
 interface IProps {
-  dataConfiguration: IDataConfigurationModel;
+  defaultValue: string|undefined;
+  onSubmit: (value:string) => void;
 }
 
-export const EditableDataSetName = observer(function EditableDataSetName({dataConfiguration}: IProps) {
+export const EditableLabelWithButton = observer(function EditableDataSetName({defaultValue, onSubmit}: IProps) {
 
   function EditButton() {
     const { isEditing, getEditButtonProps } = useEditableControls();
@@ -24,17 +24,11 @@ export const EditableDataSetName = observer(function EditableDataSetName({dataCo
     }
   }
 
-  function handleOnSubmit(val: string) {
-    if (val) {
-      dataConfiguration.dataset?.setName(val);
-    }
-  }
-
   return (
     <Editable
-      defaultValue={dataConfiguration.dataset?.name || "Unknown"}
+      defaultValue={defaultValue}
       isPreviewFocusable={false}
-      onSubmit={handleOnSubmit}
+      onSubmit={onSubmit}
     >
       <EditablePreview />
       <EditableInput />

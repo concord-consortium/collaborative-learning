@@ -15,7 +15,7 @@ import { LegendIdListFunction, ILegendHeightFunctionProps, ILegendPartProps } fr
 import { logSharedModelDocEvent } from "../../../../models/document/log-shared-model-document-event";
 import { LogEventName } from "../../../../lib/logger-types";
 import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
-import { EditableDataSetName } from "./editable-dataset-name";
+import { EditableLabelWithButton } from "./editable-label-with-button";
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import XAxisIcon from "../../assets/x-axis-icon.svg";
@@ -70,6 +70,15 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
           }
         }
       }
+    }
+  }
+
+
+  const dataSetName = dataConfiguration?.dataset?.name || "Unknown";
+
+  function handleSetDataSetName (value: string) {
+    if (value) {
+      dataConfiguration?.dataset?.setName(value);
     }
   }
 
@@ -138,7 +147,7 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
             }
             <div className="legend-title">
               Data from:
-              <EditableDataSetName dataConfiguration={dataConfiguration}/>
+              <EditableLabelWithButton defaultValue={dataSetName} onSubmit={handleSetDataSetName}/>
             </div>
           </div>
           <div className="legend-cell-2">
