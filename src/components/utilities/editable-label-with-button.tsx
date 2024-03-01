@@ -2,7 +2,9 @@ import React from "react";
 import { observer } from "mobx-react";
 import { Editable, EditableInput, EditablePreview, useEditableControls } from "@chakra-ui/react";
 
-import EditIcon from "../../assets/edit-legend-name-icon.svg";
+import EditIcon from "../../assets/edit.svg";
+
+import "./editable-label-with-button.scss";
 
 interface IProps {
   defaultValue: string|undefined;

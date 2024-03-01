@@ -1,0 +1,22 @@
+@import "../vars.sass";
+
+
+.chakra-editable__preview[hidden] {
+  display: none;
+}
+
+button {
+  background: inherit;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $workspace-teal-light-6;
+  }
+
+  svg {
+    height: 1em;
+    width: 1em;
+    vertical-align: baseline;
+  }
+}

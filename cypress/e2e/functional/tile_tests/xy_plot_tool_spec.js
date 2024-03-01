@@ -447,7 +447,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getLayerNameInput().should('not.be.visible');
 
       xyTile.getLayerNameEditButton().click();
-      xyTile.getLayerNameEditButton().should('not.be.visible');
+      xyTile.getLayerNameEditButton().should('have.length', 0);
       xyTile.getLayerNameInput().should('be.visible').type('Renamed{enter}');
       xyTile.getLayerNameInput().should('not.be.visible');
       xyTile.getLayerName().should('have.length', 1).should("contain.text", "Renamed");

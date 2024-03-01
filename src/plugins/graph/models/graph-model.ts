@@ -337,7 +337,7 @@ export const GraphModel = TileContentModel
       const smm = getSharedModelManager(self);
       const doc = getDocumentContentFromNode(self);
       if (doc && smm && smm.isReady) {
-        const datasetName = doc.getUniqueDataSetName("Added by hand");
+        const datasetName = doc.getUniqueSharedModelName("Added by hand");
         const
           xName = "X Variable",
           yName = "Y Variable 1";

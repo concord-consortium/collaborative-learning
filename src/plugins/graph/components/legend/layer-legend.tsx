@@ -15,7 +15,8 @@ import { LegendIdListFunction, ILegendHeightFunctionProps, ILegendPartProps } fr
 import { logSharedModelDocEvent } from "../../../../models/document/log-shared-model-document-event";
 import { LogEventName } from "../../../../lib/logger-types";
 import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
-import { EditableLabelWithButton } from "./editable-label-with-button";
+import { EditableLabelWithButton } from "../../../../components/utilities/editable-label-with-button";
+import { GraphLayerContext, useGraphLayerContext } from "../../hooks/use-graph-layer-context";
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import XAxisIcon from "../../assets/x-axis-icon.svg";
@@ -47,6 +48,7 @@ function ColorKey({ color }: IColorKeyProps) {
 const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPartProps) {
   let legendItems = [] as React.ReactNode[];
   const graphModel = useGraphModelContext();
+  const layer = useGraphLayerContext();
   const dataConfiguration = useDataConfigurationContext();
   const readOnly = useReadOnlyContext();
   const { tile } = useTileModelContext();
@@ -81,6 +83,14 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
       dataConfiguration?.dataset?.setName(value);
     }
   }
+
+  const layerName =
+  <span className="layer-name">
+    {layer.editable
+      ? <EditableLabelWithButton defaultValue={dataSetName} onSubmit={handleSetDataSetName}/>
+      : dataSetName
+    }
+  </span>;
 
   if (dataConfiguration) {
     const yAttributes = dataConfiguration.yAttributeDescriptions;
@@ -146,8 +156,7 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
               </div>
             }
             <div className="legend-title">
-              Data from:
-              <EditableLabelWithButton defaultValue={dataSetName} onSubmit={handleSetDataSetName}/>
+              Data from: {layerName}
             </div>
           </div>
           <div className="legend-cell-2">
@@ -181,11 +190,13 @@ export const LayerLegend = observer(function LayerLegend(props: ILegendPartProps
       {
         graphModel.layers.map((layer) => {
           return (
-            <DataConfigurationContext.Provider key={layer.id} value={layer.config}>
-              <SingleLayerLegend {...props} />
-            </DataConfigurationContext.Provider>);
-          }
-        )
+            <GraphLayerContext.Provider key={layer.id} value={layer}>
+              <DataConfigurationContext.Provider value={layer.config}>
+                <SingleLayerLegend {...props} />
+              </DataConfigurationContext.Provider>
+            </GraphLayerContext.Provider>
+          );
+        })
       }
     </>
   );

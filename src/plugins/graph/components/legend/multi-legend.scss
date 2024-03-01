@@ -26,34 +26,19 @@
     .legend-title {
       padding-left: 6px;
 
-      .chakra-editable {
-        display: inline-block;
-        margin-left: 6px;
-      }
-
-      .chakra-editable__preview {
+      .layer-name {
         font-weight: bold;
       }
 
-      .chakra-editable__preview[hidden] {
-        display: none;
-      }
+      .chakra-editable {
+        display: inline-block;
+        margin-left: 6px;
 
-      button {
-        background: inherit;
-        border: none;
-        cursor: pointer;
-
-        &:hover {
-          background-color: $workspace-teal-light-6;
-        }
-
-        svg {
-          height: 14px;
-          width: 14px;
-          vertical-align: baseline;
+        input {
+          font-weight: normal;
         }
       }
+
     }
   }
 
