@@ -47,6 +47,15 @@ class XYPlotToolTile {
   getYAxisInput(workspaceClass) {
     return this.getAxisInput("left", workspaceClass);
   }
+  getLayerName(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .layer-name`);
+  }
+  getLayerNameEditButton(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .layer-name button`);
+  }
+  getLayerNameInput(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .layer-name input`);
+  }
   getXAttributesLabel(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .bottom .simple-attribute-label`);
   }
