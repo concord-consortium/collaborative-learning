@@ -17,6 +17,9 @@ export const SharedDataSet = SharedModel
   dataSet: types.optional(DataSet, () => DataSet.create())
 })
 .views(self => ({
+  get name() {
+    return self.dataSet.name;
+  },
   get xLabel() {
     return self.dataSet.attributes[0]?.name;
   },
@@ -27,6 +30,9 @@ export const SharedDataSet = SharedModel
 .actions(self => ({
   setDataSet(data: IDataSet) {
     self.dataSet = data;
+  },
+  setName(name: string) {
+    self.dataSet.setName(name);
   }
 }));
 // all instances have a dataSet, but types.optional() leads to a TypeScript type that doesn't reflect that

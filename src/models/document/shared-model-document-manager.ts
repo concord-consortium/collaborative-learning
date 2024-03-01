@@ -6,7 +6,6 @@ import { SharedModelType } from "../shared/shared-model";
 import { IDragSharedModelItem, ISharedModelManager, SharedModelUnion } from "../shared/shared-model-manager";
 import { ITileModel, TileModel } from "../tiles/tile-model";
 import { getTileContentInfo } from "../tiles/tile-content-info";
-import { isSharedDataSet } from "../shared/shared-data-set";
 
 export function getTileModel(tileContentModel: IAnyStateTreeNode) {
   if (!hasParentOfType(tileContentModel, TileModel)) {
@@ -50,14 +49,14 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
 
   /**
    * Return a user-friendly name for the shared model.
-   * For datasets, the name is stored in the dataset.
+   * Some shared models store a name.
    * For other shared models, we list connected tiles' titles.
    * @param model
    * @returns user-visible name
    */
   getSharedModelLabel(model: SharedModelType) {
-    if (isSharedDataSet(model) && model.dataSet.name) {
-      return model.dataSet.name;
+    if (model.name) {
+      return model.name;
     }
     // Fallback: list the titles of all the provider-type tiles that are linked to the model.
     // If no tiles are linked, default to something based on the ID.
