@@ -30,10 +30,12 @@ const ModernProblemModel = types
      * with all of the other sections in this problem, or this problem's unit
      */
     sectionsFromSnapshot: types.frozen<SectionModelSnapshot[]>(),
+    exemplarsFromSnapshot: types.frozen<SectionModelSnapshot[]>(),
     config: types.maybe(types.frozen<Partial<ProblemConfiguration>>())
   })
   .volatile(self => ({
-    sections: observable.array() as SectionModelType[]
+    sections: observable.array() as SectionModelType[],
+    // exemplars: observable.array() as any[] // HMM: I may need this later?
   }))
   .views(self => ({
     get fullTitle() {
@@ -121,22 +123,30 @@ const isAmbiguousSnapshot = (sn: ModernProblemSnapshot | LegacyProblemSnapshot) 
 
 export const ProblemModel = types.snapshotProcessor(ModernProblemModel, {
   preProcessor(sn: ModernProblemSnapshot | LegacyProblemSnapshot) {
-    const { sections, ...nonSectionProps } = sn as any;
+    const { sections, exemplars, ...nonSectionProps } = sn as any;
     // Move sections to sectionsFromSnapshot so we load them into a volatile property `sections`
+    // creating a exemplarsFromSnapshot that will be passed in similar way,
+    // but no volatile property yet
     const sectionsFromSnapshot = sections || [];
+    const exemplarsFromSnapshot = exemplars || [];
     if (isLegacySnapshot(sn)) {
       const { disabled: disabledFeatures, settings, ...others } = sn;
-      return { ...others, sectionsFromSnapshot, config: { disabledFeatures, settings } } as ModernProblemSnapshot;
+      return { ...others,
+        sectionsFromSnapshot,
+        exemplarsFromSnapshot, // HMM: I don't think this ever will exist
+        config: { disabledFeatures, settings }
+      } as ModernProblemSnapshot;
     }
     if (isAmbiguousSnapshot(sn)) {
       const { disabled: disabledFeatures, settings, config, ...others } = sn as any;
       return {
         ...others,
         sectionsFromSnapshot,
+        exemplarsFromSnapshot,
         config: { disabledFeatures, settings, ...config }
       } as ModernProblemSnapshot;
     }
-    return { ...nonSectionProps, sectionsFromSnapshot };
+    return { ...nonSectionProps, sectionsFromSnapshot, exemplarsFromSnapshot };
   }
 });
 export interface ProblemModelType extends Instance<typeof ModernProblemModel> {}

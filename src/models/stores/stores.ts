@@ -32,6 +32,7 @@ import { CurriculumConfig, ICurriculumConfig } from "./curriculum-config";
 import { urlParams } from "../../utilities/url-params";
 import curriculumConfigJson from "../../clue/curriculum-config.json";
 import { gImageMap } from "../image-map";
+import { createExemplarDocs } from "./create-exemplar-docs";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -254,6 +255,7 @@ class Stores implements IStores{
 
     if (problem && unitUrls) {
       problem.loadSections(unitUrls.content);
+      createExemplarDocs(problem, this.documents);
     }
 
     // We are changing our observable state here so we need to be in an action.
