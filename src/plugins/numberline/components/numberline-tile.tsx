@@ -65,21 +65,22 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const [pointTypeIsOpen, setPointTypeIsOpen] = useState(false); //default start with filled in point
 
   const handleCreatePointType = (_isOpen: boolean) => {
-    console.log("--------------------------------------");
-    console.log("initial STATE:", pointTypeIsOpen);
+    // console.log("--------------------------------------");
+    // console.log("initial STATE:", pointTypeIsOpen);
     setPointTypeIsOpen(_isOpen);
   };
 
   useEffect(() => {
-    console.log("Updated STATE:", pointTypeIsOpen);
+    // console.log("Updated STATE:", pointTypeIsOpen);
   }, [pointTypeIsOpen]);
 
   /* ============================ [ Model Manipulation Functions ]  ============================ */
   const createPoint = (xValue: number, _pointTypeIsOpen: boolean) => {
     const pointType = (_pointTypeIsOpen) ? "OPEN" : "FILLED";
-    console.log("createPoint with xValue", xValue, "pointTypeisOpen:", pointType);
+    // console.log("createPoint with xValue", xValue, "pointTypeisOpen:", pointType);
     if (!readOnly) {
-      const point = content.createAndSelectPoint(xValue);
+      const point = content.createAndSelectPoint(xValue, _pointTypeIsOpen);
+      console.log("pointCreated:", point.id, "-----", pointType);
       setHoverPointId(point.id);
     }
   };
@@ -241,8 +242,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
   };
 
-  //PIN 1: HOVER AREA
-
   function findHoverPoint(e: MouseEvent) {
     const [mouseX, mouseY] = mousePos(e);
     let hoverPoint: PointObjectModelType | undefined;
@@ -259,12 +258,31 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   }
 
   const drawMouseFollowPoint = (mouseX: number) => {
-    svg.append("circle") //create a circle that follows the mouse
+    //when user's mouse hovers over numberline, create a circle that follows the mouse
+    const followPoint = svg.append("circle")
       .attr("cx", mouseX)
       .attr("cy", yMidPoint)
       .attr("r", innerPointRadius)
       .classed("mouse-follow-point", true)
-      .classed("point-inner-circle", true);
+      .classed("point-inner-circle", !pointTypeIsOpen); //filled
+
+      /* =========================== [ Blue / White Circles ] ============================= */
+      if(pointTypeIsOpen) {
+        followPoint //recreate outer blue circle
+          .attr("fill", "#0069ff")
+          .attr("stroke", "black")
+          .attr("opacity", 1)
+          .attr("stroke-width", 1.5);
+        //create
+        svg.append("circle")
+          .attr("fill", "white")
+          .attr("cx", mouseX)
+          .attr("cy", yMidPoint)
+          .attr("r", innerPointRadius * 0.5)
+          .attr("opacity", 1)
+          .classed("mouse-follow-point", true);
+
+      }
   };
 
   const clearMouseFollowPoint = () => svg.selectAll(".mouse-follow-point").remove();
@@ -354,13 +372,17 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
     const updateCircles = () => {
       /* =========================== [ Outer Hover Circles ] ======================= */
+
       //---- Initialize outer hover circles
       const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
         .data(content.pointsArr);
 
       outerPoints.enter()
         .append("circle").attr("class", "outer-point")
-        .attr('cx', (p) => xScale(p.currentXValue)) //mapped to axis width
+        .attr('cx', (p) => {
+          // console.log("line 364:", p);
+          return xScale(p.currentXValue);
+        }) //mapped to axis width
         .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
         .classed("point-outer-circle", true)
         .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
@@ -373,13 +395,12 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
       outerPoints.exit().remove(); //cleanup
 
+      //TODO: Revise inner circles back to original
+      // create an innerPointsOpen that is white and append it to svg
+
       /* =========================== [ Inner Circles ] ============================= */
-      //---- Initialize inner hover circles
       const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
         .data(content.pointsArr);
-
-      const blue = "#0069ff";
-      const white = "#ffffff";
 
       // Initialize Attributes
       innerPoints.enter()
@@ -389,21 +410,34 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         .attr('cy', yMidPoint)
         .attr('r', innerPointRadius)
         .attr('id', p => p.id)
-        .classed("point-inner-circle", true)
+        .classed("point-inner-circle", true) //may change
         .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
 
       // --- Update functions inner circles
       innerPoints
-        .attr('cx', (p, idx) => xScale(p.currentXValue))
+      .attr('cx', (p, idx) => xScale(p.currentXValue))
+      .classed("selected", (p)=> p.id in content.selectedPoints)
+      .call((e) => handleDrag(e)); // pass again in case axisWidth changes
 
-        .attr('fill', pointTypeIsOpen ? white : blue) // added
-        .attr('stroke', pointTypeIsOpen ? blue : 'none') // added
-        .attr('stroke-width', pointTypeIsOpen ? 2 : 0) // added
-        // .classed("selected", (p)=> p.id in content.selectedPoints) //TODO:may need to get rid of since not used
-        .call((e) => handleDrag(e)); // pass again in case axisWidth changes
+      innerPoints.exit().remove();
 
-      innerPoints.exit().remove(); //cleanup
+
+      /* =========================== [ Blue White Circles] ============================= */
+      content.pointsArr.forEach(p => {
+        if(p.isOpen) {
+          svg.append("circle")
+            .attr("class", "inner-white-point")
+            .attr("cx", xScale(p.currentXValue))
+            .attr("cy", yMidPoint)
+            .attr("r", innerPointRadius * 0.5)
+            .attr("fill", "white")
+            .attr('id', `inner-white-${p.id}`);
+        }
+      });
+
+
     };
+
     updateCircles();
   }
 

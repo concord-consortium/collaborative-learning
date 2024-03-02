@@ -100,7 +100,7 @@ export const NumberlineContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    createNewPoint(xValue: number, isOpen = false) {
+    createNewPoint(xValue: number, isOpen: boolean) {
       const id = uniqueId();
       const pointModel = PointObjectModel.create({ id, xValue, isOpen });
       self.points.set(id, pointModel);
@@ -124,7 +124,7 @@ export const NumberlineContentModel = TileContentModel
     },
   }))
   .actions(self => ({
-    createAndSelectPoint(xValue: number, isOpen = false) { //TODO: we need to pass the "filled" or "open"
+    createAndSelectPoint(xValue: number, isOpen: boolean) { //TODO: we need to pass the "filled" or "open"
       const newPoint = self.createNewPoint(xValue, isOpen);
       self.setSelectedPoint(newPoint);
       return newPoint;

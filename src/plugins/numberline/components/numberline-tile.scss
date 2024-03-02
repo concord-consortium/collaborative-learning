@@ -62,17 +62,19 @@
 
       .point-inner-circle {
         fill: #0069ff;
-        // fill: red;
+        opacity: 1;
+        stroke: black;
+        stroke-width: 1.5px;
+      }
+
+      .point-inner-circle-open {
+        fill: black;
         opacity: 1;
         stroke: black;
         stroke-width: 1.5px;
 
-        &.selected {
-          fill: $highlight-blue; //0081ff
-          // fill: yellow;
-        }
-
       }
+
     } //end svg container
 
     .arrow {
