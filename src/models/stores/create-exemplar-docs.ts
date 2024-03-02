@@ -1,15 +1,25 @@
-/*
-  Parameters for development:
+import { ProblemModelType } from "../curriculum/problem";
+import { DocumentsModelType } from "./documents";
 
-  &demoName=Joe2
-  &fakeClass=1
-  &fakeUser=student:3
-  &problem=1.1
-  &unit=mothed
-  &curriculumBranch=exemplar-3
-*/
-
-export function createExemplarDocs(problem: any, documentStore: any){
-  const { exemplarsFromSnapshot: exemplarUrls } = problem;
-  console.log("| exemplar urls to load and turn into documents in store | ", exemplarUrls);
+interface ICreateExemplarDocsParams {
+  unitContentUrl: string;
+  problem: ProblemModelType;
+  docsStore: DocumentsModelType;
 }
+
+export async function createExemplarDocs({ unitContentUrl, problem, docsStore }: ICreateExemplarDocsParams) {
+  const { exemplarPaths } = problem;
+  const exemplarsData = await fetchExemplars(unitContentUrl, exemplarPaths);
+  console.log("| create and load in exemplar docs from this data: ", exemplarsData);
+}
+
+export async function fetchExemplars(unitContentUrl: string, exemplarUrls: string[]){
+  return await Promise.all(
+    exemplarUrls.map(async (url: string) => {
+      const fetchUrl = new URL(url, unitContentUrl).href;
+      const response = await fetch(fetchUrl);
+      return await response.json();
+    })
+  );
+}
+

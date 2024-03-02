@@ -30,7 +30,7 @@ const ModernProblemModel = types
      * with all of the other sections in this problem, or this problem's unit
      */
     sectionsFromSnapshot: types.frozen<SectionModelSnapshot[]>(),
-    exemplarsFromSnapshot: types.frozen<SectionModelSnapshot[]>(),
+    exemplarPaths: types.array(types.string), // HMM: is above ever not string[]?
     config: types.maybe(types.frozen<Partial<ProblemConfiguration>>())
   })
   .volatile(self => ({
@@ -128,12 +128,12 @@ export const ProblemModel = types.snapshotProcessor(ModernProblemModel, {
     // creating a exemplarsFromSnapshot that will be passed in similar way,
     // but no volatile property yet
     const sectionsFromSnapshot = sections || [];
-    const exemplarsFromSnapshot = exemplars || [];
+    const exemplarPaths = exemplars || [];
     if (isLegacySnapshot(sn)) {
       const { disabled: disabledFeatures, settings, ...others } = sn;
       return { ...others,
         sectionsFromSnapshot,
-        exemplarsFromSnapshot, // HMM: I don't think this ever will exist
+        exemplarPaths,
         config: { disabledFeatures, settings }
       } as ModernProblemSnapshot;
     }
@@ -142,11 +142,11 @@ export const ProblemModel = types.snapshotProcessor(ModernProblemModel, {
       return {
         ...others,
         sectionsFromSnapshot,
-        exemplarsFromSnapshot,
+        exemplarPaths,
         config: { disabledFeatures, settings, ...config }
       } as ModernProblemSnapshot;
     }
-    return { ...nonSectionProps, sectionsFromSnapshot, exemplarsFromSnapshot };
+    return { ...nonSectionProps, sectionsFromSnapshot, exemplarPaths };
   }
 });
 export interface ProblemModelType extends Instance<typeof ModernProblemModel> {}

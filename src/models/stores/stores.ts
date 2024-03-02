@@ -255,7 +255,11 @@ class Stores implements IStores{
 
     if (problem && unitUrls) {
       problem.loadSections(unitUrls.content);
-      createExemplarDocs(problem, this.documents);
+      createExemplarDocs({
+        unitContentUrl: unitUrls.content,
+        problem,
+        docsStore: this.documents
+      });
     }
 
     // We are changing our observable state here so we need to be in an action.
