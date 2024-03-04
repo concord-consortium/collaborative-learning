@@ -19,7 +19,7 @@ import { GraphComponent } from "./graph-component";
 import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
 import { Point } from "../graph-types";
 import { ScaleLinear } from "d3";
-import { GraphEditingContext, IGraphEditMode } from "../hooks/use-graph-editing-context";
+import { GraphEditingContext, IGraphEditMode, IGraphEditModeContext } from "../hooks/use-graph-editing-context";
 import { ICaseCreation } from "../../../models/data/data-set-types";
 import { addCanonicalCasesToDataSet } from "../../../models/data/data-set";
 
@@ -57,7 +57,15 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     console.log("Failed to add point");
   }
   const [addPointsMode, setAddPointsMode] = useState<boolean>(false);
-  const graphEditMode: IGraphEditMode = { addPointsMode, setAddPointsMode, addPoint };
+  const [editPointsMode, setEditPointsMode] = useState<boolean>(false);
+
+  function setEditMode(string: IGraphEditMode) {
+    setEditPointsMode(string === "edit");
+    setAddPointsMode(string === "add");
+  }
+
+  const graphEditMode: IGraphEditModeContext =
+    { editPointsMode, addPointsMode, setEditMode, addPoint };
 
   // This is used for locating Sparrow endpoints.
   const getDotCenter = useCallback((dotId: string) => {

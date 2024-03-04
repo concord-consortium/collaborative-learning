@@ -94,6 +94,7 @@ const ToggleLockAxesButton = observer(function ToggleLockAxesButton({name}: IToo
 
 const AddPointsByHandButton = observer(function AddPointsByHandButton({name}: IToolbarButtonComponentProps) {
   const graph = useGraphModelContext();
+  const graphEditMode = useGraphEditingContext();
   const hasEditableLayers = graph.getEditableLayers().length > 0;
 
   // Enable button if axes are numeric or undefined.
@@ -104,6 +105,7 @@ const AddPointsByHandButton = observer(function AddPointsByHandButton({name}: IT
 
   function handleClick() {
     graph.createEditableLayer();
+    graphEditMode.setEditMode("add");
   }
 
   return (
@@ -121,11 +123,13 @@ const AddPointsByHandButton = observer(function AddPointsByHandButton({name}: IT
 
 const SelectPointsButton = observer(function({name}: IToolbarButtonComponentProps) {
   const graph = useGraphModelContext();
+  const graphEditModeContext = useGraphEditingContext();
+
   const editableLayers = graph.getEditableLayers();
   const hasEditableLayers = editableLayers.length > 0;
 
   function handleClick() {
-    // no action
+    graphEditModeContext.setEditMode(graphEditModeContext.editPointsMode ? "none" : "edit");
   }
 
   return (
@@ -133,6 +137,7 @@ const SelectPointsButton = observer(function({name}: IToolbarButtonComponentProp
       name={name}
       title="Select/Move point"
       onClick={handleClick}
+      selected={graphEditModeContext.editPointsMode}
       disabled={!hasEditableLayers}
     >
       <SelectToolIcon/>
@@ -142,10 +147,11 @@ const SelectPointsButton = observer(function({name}: IToolbarButtonComponentProp
 
 const AddPointsButton = observer(function({name}: IToolbarButtonComponentProps) {
   const graph = useGraphModelContext();
+  const graphEditModeContext = useGraphEditingContext();
+
   const editableLayers = graph.getEditableLayers();
   const hasEditableLayers = editableLayers.length > 0;
 
-  const graphEditMode = useGraphEditingContext();
 
   // Determine color of the editable dots
   let color = "#000000";
@@ -159,7 +165,8 @@ const AddPointsButton = observer(function({name}: IToolbarButtonComponentProps) 
   const iconStyle = { fill: color };
 
   function handleClick() {
-    graphEditMode.setAddPointsMode(!graphEditMode.addPointsMode);
+    // Toggle the mode
+    graphEditModeContext.setEditMode(graphEditModeContext.addPointsMode ? "none" : "add");
   }
 
   return (
@@ -167,7 +174,7 @@ const AddPointsButton = observer(function({name}: IToolbarButtonComponentProps) 
       name={name}
       title="Add point"
       onClick={handleClick}
-      selected={graphEditMode.addPointsMode}
+      selected={graphEditModeContext.addPointsMode}
       disabled={!hasEditableLayers}
     >
       <AddPointsIcon style={iconStyle} />

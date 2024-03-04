@@ -4,18 +4,21 @@ import { createContext, useContext } from "react";
  * This context holds state relevant to editing points on the Graph tile.
  */
 
-export interface IGraphEditMode {
+export type IGraphEditMode = "none"|"edit"|"add";
+export interface IGraphEditModeContext {
+  editPointsMode: boolean;
   addPointsMode: boolean;
-  setAddPointsMode: (val: boolean) => void;
+  setEditMode: (mode: IGraphEditMode) => void;
   addPoint: (x: number, y: number) => void;
 }
 
-const kDefaultGraphEditMode: IGraphEditMode = {
+const kDefaultGraphEditModeContext: IGraphEditModeContext = {
+  editPointsMode: false,
   addPointsMode: false,
-  setAddPointsMode: val => { },
+  setEditMode: mode => { },
   addPoint: (x, y) => { }
 };
 
-export const GraphEditingContext = createContext<IGraphEditMode>(kDefaultGraphEditMode);
+export const GraphEditingContext = createContext<IGraphEditModeContext>(kDefaultGraphEditModeContext);
 
 export const useGraphEditingContext = () => useContext(GraphEditingContext);
