@@ -25,7 +25,7 @@ context('Duplicate Tiles', function () {
 
     const toolButton = toolType => cy.get(`.tool.${toolType}`);
     const duplicateTool = () => toolButton("duplicate");
-    
+
     cy.log("duplicate tool is enabled properly");
     duplicateTool().should("have.class", "disabled");
     clueCanvas.addTile("image");
@@ -58,7 +58,7 @@ context('Duplicate Tiles', function () {
     tableToolTile.getTableTile().click();
     duplicateTool().click();
     tableToolTile.getTableTile().should("have.length", 2);
-    tableToolTile.getTableTitle().last().should("contain.text", "Table 2");
+    tableToolTile.getTableTitle().last().should("contain.text", "Table Data 2");
     tableToolTile.typeInTableCell(1, "x");
     tableToolTile.getTableCell().eq(1).should("contain.text", "x");
     tableToolTile.getTableCell().eq(5).should("not.contain.text", "x");

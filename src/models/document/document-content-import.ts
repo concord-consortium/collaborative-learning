@@ -1,4 +1,6 @@
 import { applySnapshot, getSnapshot } from "mobx-state-tree";
+import { getSharedModelInfoByType } from "../shared/shared-model-registry";
+import { getTileContentInfo } from "../tiles/tile-content-info";
 import { DocumentContentModel, DocumentContentModelType } from "./document-content";
 import {
   IDocumentImportSnapshot, isOriginalAuthoredTileModel, isOriginalSectionHeaderContent, OriginalTileModel
@@ -61,7 +63,7 @@ export function migrateSnapshot(snapshot: IDocumentImportSnapshot): any {
     }
   });
 
-  // Now add the tile references these references are in
+  // Now add the tile references for the shared models. These references are in
   // the `tiles` and `provider` properties. This is done with a basic
   // applySnapshot. The content of the shared model should not have changed
   // so this will just add the tiles and provider properties.
@@ -81,6 +83,24 @@ export function migrateSnapshot(snapshot: IDocumentImportSnapshot): any {
     }
     applySnapshot(importedEntry, originalEntry);
   });
+
+  // Migrate legacy tile titles.
+  // This is essentially the same thing that base-document-content's migrateDataSetTiles does,
+  // but here we have to do it without sharedModelManager's help.
+  const tiles = docContent.getTilesInDocumentOrder().reverse();
+  for (const id of tiles) {
+    const tile = docContent.tileMap.get(id);
+    if (tile && tile.title && getTileContentInfo(tile.content.type)?.useContentTitle) {
+      // Look for a SharedModel that can hold the title
+      for (const sm of Object.values(docContent.getSharedModelsUsedByTiles([id]))) {
+        if (getSharedModelInfoByType(sm.sharedModel.type)?.hasName) {
+          sm.sharedModel.setName(tile.title);
+          tile.setTitle(undefined);
+          break;
+        }
+      }
+    }
+  }
 
   annotations?.forEach(entry => {
     const id = entry.id;

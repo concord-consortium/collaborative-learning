@@ -37,9 +37,6 @@ describe("ExpressionToolComponent", () => {
     onSetCanAcceptDrop: (tileId?: string): void => {
       throw new Error("Function not implemented.");
     },
-    onRequestUniqueTitle: (tileId: string): string | undefined => {
-      return tileId;
-    },
     onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number): void => {
       throw new Error("Function not implemented.");
     },

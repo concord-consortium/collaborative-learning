@@ -264,6 +264,9 @@ export const TableContentModel = TileContentModel
   .actions(self => tileContentAPIActions({
     doPostCreate(metadata) {
       self.metadata = metadata as TableMetadataModelType;
+    },
+    setContentTitle(title: string) {
+      self.dataSet.setName(title);
     }
   }))
   .actions(self => ({
@@ -350,14 +353,14 @@ export const TableContentModel = TileContentModel
             // The table doesn't have a shared model. This could happen because it
             // was just added to the document or because the table was unlinked from its
             // dataset. This unlinking can happen if the DataFlow tile unlinks the table.
-            // Also if there is no title on the table, the dataset name will be set to
-            // undefined. Then when the component is rendered there is some code in
-            // useTableTitle which updates it to a unique title
-            const model = getTileModel(self);
+            // In this case a new dataset will be created and linked.
+            const tileModel = getTileModel(self);
             const dataSet = DataSet.create(!self.importedDataSet.isEmpty
-              ? getSnapshot(self.importedDataSet) : createDefaultDataSet(model?.computedTitle));
+              ? getSnapshot(self.importedDataSet) : createDefaultDataSet(tileModel?.title));
             self.clearImportedDataSet();
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
+            // Unset title of the tile so that the name of the dataset will be displayed.
+            tileModel?.setTitle(undefined);
           }
 
           // Add the shared model to both the document and the tile

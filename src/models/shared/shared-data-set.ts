@@ -17,6 +17,9 @@ export const SharedDataSet = SharedModel
   dataSet: types.optional(DataSet, () => DataSet.create())
 })
 .views(self => ({
+  get name() {
+    return self.dataSet.name;
+  },
   get xLabel() {
     return self.dataSet.attributes[0]?.name;
   },
@@ -27,6 +30,9 @@ export const SharedDataSet = SharedModel
 .actions(self => ({
   setDataSet(data: IDataSet) {
     self.dataSet = data;
+  },
+  setName(name: string) {
+    self.dataSet.setName(name);
   }
 }));
 // all instances have a dataSet, but types.optional() leads to a TypeScript type that doesn't reflect that
@@ -94,16 +100,15 @@ export function getSharedDataSetSnapshotWithUpdatedIds(
 }
 
 export function updateSharedDataSetSnapshotWithNewTileIds(
-  sharedDataSetSnapshot: SharedDataSetSnapshotType, tileIdMap: Record<string, string>
-) {
+  sharedDataSetSnapshot: SharedDataSetSnapshotType, tileIdMap: Record<string, string>) {
+  // Always makes a copy, so that returned object is not read-only
   if (sharedDataSetSnapshot.providerId) {
-    // Make a copy and override providerId, since snapshots can be read-only
-    return {
+    return cloneDeep({
       ...sharedDataSetSnapshot,
       providerId: tileIdMap[sharedDataSetSnapshot.providerId]
-    };
+    });
   } else {
-    return sharedDataSetSnapshot;
+    return cloneDeep(sharedDataSetSnapshot);
   }
 }
 

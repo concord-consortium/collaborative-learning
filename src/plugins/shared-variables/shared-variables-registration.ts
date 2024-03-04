@@ -21,7 +21,8 @@ import { kVariableTextPluginName, VariablesPlugin } from "./slate/variables-plug
 
 registerSharedModelInfo({
   type: kSharedVariablesID,
-  modelClass: SharedVariables
+  modelClass: SharedVariables,
+  hasName: false
 });
 
 registerTextPluginInfo({

@@ -12,6 +12,7 @@ import HeaderIcon from "./assets/program-tile-id.svg";
 registerTileContentInfo({
   type: kDataflowTileType,
   displayName: "Program",
+  useContentTitle: true,
   modelClass: DataflowContentModel,
   metadataClass: TileMetadataModel,
   defaultHeight: kDataflowDefaultHeight,
