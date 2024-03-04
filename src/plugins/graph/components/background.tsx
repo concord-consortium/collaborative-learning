@@ -11,6 +11,7 @@ import {MarqueeState} from "../models/marquee-state";
 import {IGraphModel} from "../models/graph-model";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import { useGraphModelContext } from "../hooks/use-graph-model-context";
+import { useGraphEditingContext } from "../hooks/use-graph-editing-context";
 
 interface IProps {
   marqueeState: MarqueeState
@@ -58,6 +59,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
     instanceId = useInstanceIdContext() || 'background',
     layout = useGraphLayoutContext(),
     graphModel = useGraphModelContext(),
+    graphEditMode = useGraphEditingContext(),
     bgRef = ref as MutableRefObject<SVGGElement | null>,
     startX = useRef(0),
     startY = useRef(0),
@@ -65,6 +67,21 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
     height = useRef(0),
     selectionTree = useRef<RTree | null>(null),
     previousMarqueeRect = useRef<rTreeRect>();
+
+  const onClick = useCallback((event: { offsetX: number, offsetY: number, shiftKey: boolean }) => {
+    if (!graphEditMode.addPointsMode) {
+        if (!event.shiftKey) {
+          graphModel.clearAllSelectedCases();
+        }
+      return;
+    }
+    const plotBounds = layout.computedBounds.plot;
+    const relX = event.offsetX - plotBounds.left;
+    const relY = event.offsetY - plotBounds.top;
+    const { data: xVal } = layout.getAxisMultiScale("bottom").getDataCoordinate(relX);
+    const { data: yVal } = layout.getAxisMultiScale("left").getDataCoordinate(relY);
+    graphEditMode.addPoint(xVal, yVal);
+  }, [graphEditMode, graphModel, layout]);
 
   const onDragStart = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
       const {computedBounds} = layout,
@@ -126,11 +143,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
         groupElement = bgRef.current;
       select(groupElement)
         // clicking on the background deselects all cases
-        .on('click', (event) => {
-          if (!event.shiftKey) {
-            graphModel.clearAllSelectedCases();
-          }
-        })
+        .on('click', onClick)
         .selectAll<SVGRectElement, number>('rect')
         .data(range(numRows * numCols))
         .join('rect')
@@ -144,7 +157,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
         .style('fill-opacity', isTransparent ? 0 : 1)
         .call(dragBehavior);
     });
-  }, [bgRef, dragBehavior, graphModel, layout]);
+  }, [bgRef, dragBehavior, graphModel, layout, onClick]);
 
   return (
     <g ref={bgRef}/>

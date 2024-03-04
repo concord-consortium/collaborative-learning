@@ -7,6 +7,7 @@ import { IToolbarButtonComponentProps, registerTileToolbarButtons }
   from "../../../components/toolbar/toolbar-button-manager";
 import { GraphControllerContext } from "../models/graph-controller";
 import { useGraphModelContext } from "../hooks/use-graph-model-context";
+import { useGraphEditingContext } from "../hooks/use-graph-editing-context";
 
 import LinkTableIcon from "../../../clue/assets/icons/geometry/link-table-icon.svg";
 import AddIcon from "../../../assets/icons/add-data-graph-icon.svg";
@@ -144,6 +145,8 @@ const AddPointsButton = observer(function({name}: IToolbarButtonComponentProps) 
   const editableLayers = graph.getEditableLayers();
   const hasEditableLayers = editableLayers.length > 0;
 
+  const graphEditMode = useGraphEditingContext();
+
   // Determine color of the editable dots
   let color = "#000000";
   if (editableLayers.length > 0) {
@@ -156,7 +159,7 @@ const AddPointsButton = observer(function({name}: IToolbarButtonComponentProps) 
   const iconStyle = { fill: color };
 
   function handleClick() {
-    // no action
+    graphEditMode.setAddPointsMode(!graphEditMode.addPointsMode);
   }
 
   return (
@@ -164,6 +167,7 @@ const AddPointsButton = observer(function({name}: IToolbarButtonComponentProps) 
       name={name}
       title="Add point"
       onClick={handleClick}
+      selected={graphEditMode.addPointsMode}
       disabled={!hasEditableLayers}
     >
       <AddPointsIcon style={iconStyle} />

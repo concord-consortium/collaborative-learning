@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 
@@ -19,6 +19,9 @@ import { GraphComponent } from "./graph-component";
 import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
 import { Point } from "../graph-types";
 import { ScaleLinear } from "d3";
+import { GraphEditingContext, IGraphEditMode } from "../hooks/use-graph-editing-context";
+import { ICaseCreation } from "../../../models/data/data-set-types";
+import { addCanonicalCasesToDataSet } from "../../../models/data/data-set";
 
 import "./graph-toolbar-registration";
 
@@ -35,6 +38,26 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   const layout = useInitGraphLayout(content);
   const xAttrType = content.config.attributeType("x");
   const yAttrType = content.config.attributeType("y");
+
+  function addPoint(x: number, y: number) {
+    const layers = content.getEditableLayers();
+    if (layers.length > 0) {
+      const dataConfig = layers[0].config;
+      const dataset = dataConfig.dataset;
+      const xAttr = dataConfig.attributeID("x");
+      const yAttr = dataConfig.attributeID("y");
+      if (dataset && xAttr && yAttr) {
+        const newCase: ICaseCreation = {};
+        newCase[xAttr] = x;
+        newCase[yAttr] = y;
+        addCanonicalCasesToDataSet(dataset, [newCase]);
+        return;
+      }
+    }
+    console.log("Failed to add point");
+  }
+  const [addPointsMode, setAddPointsMode] = useState<boolean>(false);
+  const graphEditMode: IGraphEditMode = { addPointsMode, setAddPointsMode, addPoint };
 
   // This is used for locating Sparrow endpoints.
   const getDotCenter = useCallback((dotId: string) => {
@@ -153,16 +176,18 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
 
   return (
     <GraphSettingsContext.Provider value={graphSettings}>
-      <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
-        <BasicEditableTileTitle />
-        <GraphComponent
-          layout={layout}
-          tile={model}
-          tileElt={tileElt}
-          onRequestRowHeight={onRequestRowHeight}
-          readOnly={readOnly}
-        />
-      </div>
+      <GraphEditingContext.Provider value={graphEditMode}>
+        <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
+          <BasicEditableTileTitle />
+          <GraphComponent
+            layout={layout}
+            tile={model}
+            tileElt={tileElt}
+            onRequestRowHeight={onRequestRowHeight}
+            readOnly={readOnly}
+          />
+        </div>
+      </GraphEditingContext.Provider>
     </GraphSettingsContext.Provider>
   );
 });
