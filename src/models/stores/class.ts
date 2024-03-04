@@ -44,7 +44,7 @@ export const ClassModel = types
           }));
         });
       },
-      addSingleUser(user: any) {
+      addUser(user: any) {
         self.users.put(user);
       }
     };

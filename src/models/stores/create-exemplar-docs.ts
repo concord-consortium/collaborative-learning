@@ -1,9 +1,11 @@
 import { ProblemModelType } from "../curriculum/problem";
 import { DocumentsModelType } from "./documents";
-import { DocumentModel } from "../document/document";
+import { DocumentModel, DocumentModelSnapshotType } from "../document/document";
 import { UserModelType } from "./user";
 import { ClassModelType, ClassUserModel } from "./class";
 import { kExemplarUserParams } from "./user-types";
+import { ICurriculumConfig } from "./curriculum-config";
+import { ExemplarDocument } from "../document/document-types";
 
 interface ICreateExemplarDocsParams {
   unitUrl: string;
@@ -11,75 +13,76 @@ interface ICreateExemplarDocsParams {
   documents: DocumentsModelType;
   classStore: ClassModelType;
   user: UserModelType;
+  curriculumConfig: ICurriculumConfig;
 }
 
+interface IExemplarData {
+  content: DocumentModelSnapshotType;
+  tag: string;
+  title: string;
+  url: string;
+}
+
+// TODO: pass the stores as a parameter, but use a simplified interface
+// plus a second paramter for the unitUrl
+// function would only require the properties it needs
 export async function createAndLoadExemplarDocs({
   unitUrl,
   problem,
   documents,
   classStore,
-  user
+  curriculumConfig
 }: ICreateExemplarDocsParams) {
   const { exemplarPaths } = problem;
   const exemplarsData = await getExemplarsData(unitUrl, exemplarPaths);
-  classStore.addSingleUser(ClassUserModel.create(kExemplarUserParams));
-  createExemplarDocs(documents, user, exemplarsData);
+  classStore.addUser(ClassUserModel.create(kExemplarUserParams));
+  createExemplarDocs(documents, exemplarsData, curriculumConfig);
 }
 
 export async function getExemplarsData(unitUrl: string, exemplarUrls: string[]){
-  return await Promise.all(
+  return Promise.all(
     exemplarUrls.map(async (url: string) => {
       const fetchUrl = new URL(url, unitUrl).href;
       const response = await fetch(fetchUrl);
       const data = await response.json();
-      const urlSegments = fetchUrl.split("/");
-      return {
+      // TODO: validate shape of `data`?
+      const result: IExemplarData = {
         ...data,
-        url: fetchUrl,
-        curriculumBranch: urlSegments[5],
-        unit: urlSegments[6],
-        dirName: urlSegments[7],
-        investigationSlug: urlSegments[8],
-        problemSlug: urlSegments[9],
-        exemplarSlug: urlSegments[10],
+        url: fetchUrl
       };
+      return result;
     })
   );
 }
 
-function createExemplarDocId(exemplarData: any) {
-  // QUESTION: I have yet to understand how this is going to be used so this is dummy function
-  const {
-    curriculumBranch,
-    unit,
-    dirName,
-    investigationSlug,
-    problemSlug,
-    exemplarSlug
-  } = exemplarData;
-  return `${curriculumBranch}-${unit}-${dirName}-${investigationSlug}-${problemSlug}-${exemplarSlug}`;
+export function createExemplarDocId(exemplarDataUrl: string, curriculumBaseUrl: string) {
+  let identifier = exemplarDataUrl;
+  if (exemplarDataUrl.startsWith(curriculumBaseUrl)) {
+    identifier = exemplarDataUrl.slice(curriculumBaseUrl.length);
+  }
+  return "curriculum:" + encodeURIComponent(identifier).replace(/\./g, "%2E");
 }
 
-function createExemplarDocs(documents: DocumentsModelType, user: UserModelType, exemplarsData: any) {
+function createExemplarDocs(
+  documents: DocumentsModelType,
+  exemplarsData: IExemplarData[],
+  curriculumConfig: ICurriculumConfig
+) {
   exemplarsData.forEach((exemplarData: any) => {
-    const exemplarDocId = createExemplarDocId(exemplarData);
-    // QUESTION: I see "title" some places? And properties.caption others? Using both for now.
-    const newDocParams = {
+    const exemplarDocId = createExemplarDocId(exemplarData.url, curriculumConfig.curriculumBaseUrl);
+    const newDocParams: DocumentModelSnapshotType = {
       title: exemplarData.title,
       uid: 'ivan_idea_1',
-      type: "personal",
+      type: ExemplarDocument,
       visibility: "public",
       content: exemplarData.content,
-      key: exemplarDocId,
-      properties: {
-        caption: exemplarData.title
-      }
+      key: exemplarDocId
     };
     makeDocFromData(newDocParams, documents);
   });
 }
 
-function makeDocFromData(newDocParams: any, documents: DocumentsModelType) {
+function makeDocFromData(newDocParams: DocumentModelSnapshotType, documents: DocumentsModelType) {
   const newDoc = DocumentModel.create(newDocParams);
   documents.add(newDoc);
 }
