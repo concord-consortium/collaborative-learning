@@ -71,30 +71,25 @@ const ModernProblemModel = types
   }))
   .actions(self => ({
     async loadSections(unitUrl: string){
-      const sectionPromises = [];
-      for (let sectIdx = 0; sectIdx < self.sectionsFromSnapshot.length; sectIdx++) {
+      const sectionPromises = self.sectionsFromSnapshot.map(section => {
         // Currently, curriculum files can either contain their problem section data inline
         // or in external JSON files. In the latter case, the problem sections arrays will
-        // be made up of strings that are paths to the external files. We fetch the data from
-        // those files and populate the section with it. Otherwise, we leave the section as
-        // is. Eventually, all curriculum files will be updated so their problem section data
-        // is in external files.
-        const section = self.sectionsFromSnapshot[sectIdx];
+        // be made up of strings that are paths to the external files. Eventually, all
+        // curriculum files will be updated so their problem section data is in external
+        // files.
         if (typeof section === "string") {
           const sectionDataFile = section;
           const sectionDataUrl = new URL(sectionDataFile, unitUrl).href;
-          sectionPromises.push(
-            getExternalProblemSectionData(sectionDataUrl)
-          );
+          return getExternalProblemSectionData(sectionDataUrl);
         } else {
           // handle any remaining units with inline sections
-          sectionPromises.push(Promise.resolve(section));
+          return Promise.resolve(section);
         }
-      }
-      if (sectionPromises.length > 0) {
-        const sections = await Promise.all(sectionPromises);
-        self.addSections(sections);
-      }
+      });
+
+      // Wait for all of the external sections to be downloaded
+      const sections = await Promise.all(sectionPromises);
+      self.addSections(sections);
     }
   }));
 
