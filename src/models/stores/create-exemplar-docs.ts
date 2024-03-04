@@ -1,11 +1,12 @@
 import { ProblemModelType } from "../curriculum/problem";
 import { DocumentsModelType } from "./documents";
-import { DocumentModel, DocumentModelSnapshotType } from "../document/document";
+import { DocumentModelSnapshotType, createDocumentModelWithEnv } from "../document/document";
 import { UserModelType } from "./user";
 import { ClassModelType, ClassUserModel } from "./class";
 import { kExemplarUserParams } from "./user-types";
 import { ICurriculumConfig } from "./curriculum-config";
 import { ExemplarDocument } from "../document/document-types";
+import { AppConfigModelType } from "./app-config-model";
 
 interface ICreateExemplarDocsParams {
   unitUrl: string;
@@ -14,6 +15,7 @@ interface ICreateExemplarDocsParams {
   classStore: ClassModelType;
   user: UserModelType;
   curriculumConfig: ICurriculumConfig;
+  appConfig: AppConfigModelType;
 }
 
 interface IExemplarData {
@@ -31,12 +33,13 @@ export async function createAndLoadExemplarDocs({
   problem,
   documents,
   classStore,
-  curriculumConfig
+  curriculumConfig,
+  appConfig
 }: ICreateExemplarDocsParams) {
   const { exemplarPaths } = problem;
   const exemplarsData = await getExemplarsData(unitUrl, exemplarPaths);
   classStore.addUser(ClassUserModel.create(kExemplarUserParams));
-  createExemplarDocs(documents, exemplarsData, curriculumConfig);
+  createExemplarDocs(documents, exemplarsData, curriculumConfig, appConfig);
 }
 
 export async function getExemplarsData(unitUrl: string, exemplarUrls: string[]){
@@ -66,7 +69,8 @@ export function createExemplarDocId(exemplarDataUrl: string, curriculumBaseUrl: 
 function createExemplarDocs(
   documents: DocumentsModelType,
   exemplarsData: IExemplarData[],
-  curriculumConfig: ICurriculumConfig
+  curriculumConfig: ICurriculumConfig,
+  appConfig: AppConfigModelType
 ) {
   exemplarsData.forEach((exemplarData: any) => {
     const exemplarDocId = createExemplarDocId(exemplarData.url, curriculumConfig.curriculumBaseUrl);
@@ -78,11 +82,15 @@ function createExemplarDocs(
       content: exemplarData.content,
       key: exemplarDocId
     };
-    makeDocFromData(newDocParams, documents);
+    makeDocFromData(newDocParams, documents, appConfig);
   });
 }
 
-function makeDocFromData(newDocParams: DocumentModelSnapshotType, documents: DocumentsModelType) {
-  const newDoc = DocumentModel.create(newDocParams);
+function makeDocFromData(
+  newDocParams: DocumentModelSnapshotType,
+  documents: DocumentsModelType,
+  appConfig: AppConfigModelType
+) {
+  const newDoc = createDocumentModelWithEnv(appConfig, newDocParams);
   documents.add(newDoc);
 }

@@ -262,7 +262,8 @@ class Stores implements IStores{
         documents: this.documents,
         user: this.user,
         classStore: this.class,
-        curriculumConfig
+        curriculumConfig,
+        appConfig
       });
     }
 
