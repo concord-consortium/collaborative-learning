@@ -2,17 +2,27 @@ import { ProblemModelType } from "../curriculum/problem";
 import { DocumentsModelType } from "./documents";
 import { DocumentModel } from "../document/document";
 import { UserModelType } from "./user";
+import { ClassModelType, ClassUserModel } from "./class";
+import { kExemplarUserParams } from "./user-types";
 
 interface ICreateExemplarDocsParams {
   unitUrl: string;
   problem: ProblemModelType;
   documents: DocumentsModelType;
+  classStore: ClassModelType;
   user: UserModelType;
 }
 
-export async function createAndLoadExemplarDocs({ unitUrl, problem, documents, user }: ICreateExemplarDocsParams) {
+export async function createAndLoadExemplarDocs({
+  unitUrl,
+  problem,
+  documents,
+  classStore,
+  user
+}: ICreateExemplarDocsParams) {
   const { exemplarPaths } = problem;
   const exemplarsData = await getExemplarsData(unitUrl, exemplarPaths);
+  classStore.addSingleUser(ClassUserModel.create(kExemplarUserParams));
   createExemplarDocs(documents, user, exemplarsData);
 }
 

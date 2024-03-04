@@ -43,6 +43,9 @@ export const ClassModel = types
             initials: user.initials,
           }));
         });
+      },
+      addSingleUser(user: any) {
+        self.users.put(user);
       }
     };
   })
