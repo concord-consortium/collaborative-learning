@@ -1,5 +1,6 @@
 import { ProblemModelType } from "../curriculum/problem";
 import { DocumentsModelType } from "./documents";
+import { DocumentModel } from "../document/document";
 import { UserModelType } from "./user";
 
 interface ICreateExemplarDocsParams {
@@ -36,22 +37,6 @@ export async function getExemplarsData(unitUrl: string, exemplarUrls: string[]){
   );
 }
 
-function createExemplarDocs(documents: DocumentsModelType, user: UserModelType, exemplarsData: any) {
-  exemplarsData.forEach((exemplarData: any) => {
-    const exemplarDocId = createExemplarDocId(exemplarData);
-    const newDocParams = {
-      title: exemplarData.title,
-      uid: 'ivan_idea_1',
-      type: "personal",
-      visibility: "public",
-      content: exemplarData.content,
-      docId: exemplarDocId,
-    };
-    console.log("| make a doc from the data |", newDocParams);
-    // NEXT: try one of the many apparent ways to make the doc
-  });
-}
-
 function createExemplarDocId(exemplarData: any) {
   // QUESTION: I have yet to understand how this is going to be used so this is dummy function
   const {
@@ -63,4 +48,28 @@ function createExemplarDocId(exemplarData: any) {
     exemplarSlug
   } = exemplarData;
   return `${curriculumBranch}-${unit}-${dirName}-${investigationSlug}-${problemSlug}-${exemplarSlug}`;
+}
+
+function createExemplarDocs(documents: DocumentsModelType, user: UserModelType, exemplarsData: any) {
+  exemplarsData.forEach((exemplarData: any) => {
+    const exemplarDocId = createExemplarDocId(exemplarData);
+    // QUESTION: I see "title" some places? And properties.caption others? Using both for now.
+    const newDocParams = {
+      title: exemplarData.title,
+      uid: 'ivan_idea_1',
+      type: "personal",
+      visibility: "public",
+      content: exemplarData.content,
+      key: exemplarDocId,
+      properties: {
+        caption: exemplarData.title
+      }
+    };
+    makeDocFromData(newDocParams, documents);
+  });
+}
+
+function makeDocFromData(newDocParams: any, documents: DocumentsModelType) {
+  const newDoc = DocumentModel.create(newDocParams);
+  documents.add(newDoc);
 }
