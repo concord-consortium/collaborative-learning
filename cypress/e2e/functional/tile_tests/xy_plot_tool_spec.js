@@ -229,13 +229,13 @@ context('XYPlot Tool Tile', function () {
       cy.log("renders Data Card tool tile");
       clueCanvas.addTile("datacard");
       dataCard.getTile().should("exist");
-  
+
       for (let i=1; i<rows; i++) {
         dataCard.getAddAttributeButton().click();
       }
       for (let i=0; i<data.length; i++) {
         for (let j=0; j<data[i].length; j++) {
-          let value = data[i][j]
+          let value = data[i][j];
           dataCard.getAttrValue().eq(j).click().type(`${value}{enter}`);
         }
         dataCard.getAddCardButton().click();
@@ -245,7 +245,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().should("have.length", 1).should('be.visible');
       xyTile.getTile().click();
       clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
-      xyTile.linkDataCard("Data Card Collection 1");
+      xyTile.linkDataCard("Card Deck Data 1");
       xyTile.getGraphDot().should('have.length', 4);
 
       clueCanvas.getDuplicateTool().click();
