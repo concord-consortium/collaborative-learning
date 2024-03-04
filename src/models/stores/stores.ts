@@ -222,9 +222,10 @@ class Stores implements IStores{
     const { appConfig, curriculumConfig, persistentUI } = this;
     this.startedLoadingUnitAndProblem = true;
     showLoadingMessage("Loading curriculum content");
-    let unitJson = await getUnitJson(unitId, curriculumConfig);
+    const unitJson = await getUnitJson(unitId, curriculumConfig);
     if (unitJson.status === 404) {
-      unitJson = await getUnitJson(curriculumConfig.defaultUnit, curriculumConfig);
+      this.ui.setError(`Cannot load the curriculum unit: ${unitId}`);
+      return;
     }
     removeLoadingMessage("Loading curriculum content");
     showLoadingMessage("Setting up curriculum content");
