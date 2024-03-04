@@ -29,7 +29,6 @@ describe("TileComponent", () => {
 
     const onResizeRow = jest.fn();
     const onSetCanAcceptDrop = jest.fn();
-    const onRequestUniqueTitle = jest.fn();
     const onRequestRowHeight = jest.fn();
 
     render(
@@ -43,7 +42,6 @@ describe("TileComponent", () => {
             model={toolTileModel}
             onResizeRow={onResizeRow}
             onSetCanAcceptDrop={onSetCanAcceptDrop}
-            onRequestUniqueTitle={onRequestUniqueTitle}
             onRequestRowHeight={onRequestRowHeight}
             />
         </TileApiInterfaceContext.Provider>

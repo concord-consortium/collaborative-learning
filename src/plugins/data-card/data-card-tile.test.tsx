@@ -21,7 +21,7 @@ jest.mock("../../models/tiles/log/log-tile-document-event", () => ({
 describe("DataCardToolComponent", () => {
   const stores = specStores();
   const content = defaultDataCardContent();
-  const model = TileModel.create({content});
+  const model = TileModel.create({ content, title: "Data Card Collection 1"});
 
   const defaultProps = {
     tileElt: null,
@@ -35,9 +35,6 @@ describe("DataCardToolComponent", () => {
     },
     onSetCanAcceptDrop: (tileId?: string): void => {
       throw new Error("Function not implemented.");
-    },
-    onRequestUniqueTitle: (tileId: string): string | undefined => {
-      return "Data Card Collection 1";
     },
     onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number): void => {
       // throw new Error("Function not implemented.");

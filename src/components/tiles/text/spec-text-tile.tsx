@@ -55,9 +55,6 @@ export function specTextTile(options: ISpecTextTileOptions) {
     onSetCanAcceptDrop: (tileId) => {
       throw new Error("Function not implemented.");
     },
-    onRequestUniqueTitle: (tileId) => {
-      throw new Error("Function not implemented.");
-    },
     onRequestRowHeight: (tileId, height, deltaHeight) => {
       throw new Error("Function not implemented.");
     },

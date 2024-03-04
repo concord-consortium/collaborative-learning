@@ -130,7 +130,7 @@ export const useConsumerTileLinking = ({
   const createTile = useCallback(() => {
     if (tileType && !readOnly) {
       if (modelToShare) {
-        addTilesContext?.addTileAfter(tileType, model, [modelToShare], {title: model.title});
+        addTilesContext?.addTileAfter(tileType, model, [modelToShare]);
       }
     }
   }, [tileType, readOnly, modelToShare, addTilesContext, model]);

@@ -3,6 +3,8 @@ import { SharedModel } from "./shared-model";
 export interface ISharedModelInfo {
   type: string;
   modelClass: typeof SharedModel;
+  // Set to true if model supports `name` and `setName` methods.
+  hasName: boolean;
 }
 
 const gSharedModelInfoMap: Record<string, ISharedModelInfo> = {};

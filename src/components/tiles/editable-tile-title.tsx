@@ -53,7 +53,7 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
   const handleClose = (accept: boolean) => {
     const trimTitle = editingTitle?.trim();
     // This automatically logs the change
-    trimTitle && model?.setTitle(trimTitle);
+    trimTitle && model?.setTitleOrContentTitle(trimTitle);
     onEndEdit?.(accept && trimTitle ? trimTitle : undefined);
     setIsEditing(false);
   };
