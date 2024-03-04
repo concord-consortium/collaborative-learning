@@ -1,6 +1,6 @@
 # Simplified sequence
 
-This diagram is somewhat abstract, showing only things that conceptually need to be complete before other steps can move forward.  Some boxes are represent multiple concurrent events. Examples are "JWTs for portal and firebase" and "Start listeners".
+This diagram is somewhat abstract, showing only things that conceptually need to be complete before other steps can move forward.  Some boxes represent multiple concurrent events. Examples are "JWTs for portal and firebase" and "Start listeners".
 
 
 ```mermaid
@@ -35,6 +35,11 @@ flowchart TD
   unit(Get unit JSON)
   unit --> tiles
   unit --> problem
+  unit --> sections
+
+  sections(Get active sections JSON)
+  sections --> problem
+  sections --> work
 
   component(Create app component)
   component --> group

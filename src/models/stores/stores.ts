@@ -221,13 +221,13 @@ class Stores implements IStores{
   async loadUnitAndProblem(unitId: string | undefined, problemOrdinal?: string) {
     const { appConfig, curriculumConfig, persistentUI } = this;
     this.startedLoadingUnitAndProblem = true;
-    showLoadingMessage("Loading curriculum content");
+    showLoadingMessage("Loading curriculum unit");
     const unitJson = await getUnitJson(unitId, curriculumConfig);
     if (unitJson.status === 404) {
       this.ui.setError(`Cannot load the curriculum unit: ${unitId}`);
       return;
     }
-    removeLoadingMessage("Loading curriculum content");
+    removeLoadingMessage("Loading curriculum unit");
     showLoadingMessage("Setting up curriculum content");
 
     // Initialize the imageMap
@@ -254,7 +254,10 @@ class Stores implements IStores{
     this.setUnit(unit);
 
     if (problem && unitUrls) {
-      problem.loadSections(unitUrls.content);
+      showLoadingMessage("Loading curriculum sections");
+      problem.loadSections(unitUrls.content).then(() => {
+        removeLoadingMessage("Loading curriculum sections");
+      });
     }
 
     // We are changing our observable state here so we need to be in an action.
