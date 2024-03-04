@@ -152,17 +152,7 @@ const AddPointsButton = observer(function({name}: IToolbarButtonComponentProps) 
   const editableLayers = graph.getEditableLayers();
   const hasEditableLayers = editableLayers.length > 0;
 
-
-  // Determine color of the editable dots
-  let color = "#000000";
-  if (editableLayers.length > 0) {
-    const yAttributes = editableLayers[0].config.yAttributeIDs;
-    if (yAttributes.length > 0) {
-      color = graph.getColorForId(yAttributes[0]);
-    }
-  }
-
-  const iconStyle = { fill: color };
+  const iconStyle = { fill: graphEditModeContext.getEditablePointsColor() };
 
   function handleClick() {
     // Toggle the mode

@@ -10,13 +10,15 @@ export interface IGraphEditModeContext {
   addPointsMode: boolean;
   setEditMode: (mode: IGraphEditMode) => void;
   addPoint: (x: number, y: number) => void;
+  getEditablePointsColor: () => string;
 }
 
 const kDefaultGraphEditModeContext: IGraphEditModeContext = {
   editPointsMode: false,
   addPointsMode: false,
   setEditMode: mode => { },
-  addPoint: (x, y) => { }
+  addPoint: (x, y) => { },
+  getEditablePointsColor: () => "#000000"
 };
 
 export const GraphEditingContext = createContext<IGraphEditModeContext>(kDefaultGraphEditModeContext);

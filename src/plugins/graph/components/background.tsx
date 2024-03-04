@@ -1,10 +1,10 @@
 import {autorun} from "mobx";
-import React, {forwardRef, MutableRefObject, useCallback, useEffect, useMemo, useRef} from "react";
+import React, {forwardRef, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {drag, select, color, range} from "d3";
 import RTreeLib from 'rtree';
 type RTree = ReturnType<typeof RTreeLib>;
 import {CaseData} from "../d3-types";
-import {InternalizedData, rTreeRect} from "../graph-types";
+import {InternalizedData, Point, rTreeRect} from "../graph-types";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {rectangleSubtract, rectNormalize} from "../utilities/graph-utils";
 import {MarqueeState} from "../models/marquee-state";
@@ -66,24 +66,31 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
     width = useRef(0),
     height = useRef(0),
     selectionTree = useRef<RTree | null>(null),
-    previousMarqueeRect = useRef<rTreeRect>();
+    previousMarqueeRect = useRef<rTreeRect>(),
+    [potentialPoint, setPotentialPoint] = useState<Point|undefined>(undefined);
+
+  const pointCoordinates = useCallback((offsetX: number, offsetY: number) => {
+    const plotBounds = layout.computedBounds.plot;
+    const relX = offsetX - plotBounds.left;
+    const relY = offsetY - plotBounds.top;
+    const { data: x } = layout.getAxisMultiScale("bottom").getDataCoordinate(relX);
+    const { data: y } = layout.getAxisMultiScale("left").getDataCoordinate(relY);
+    return { x, y };
+  }, [layout]);
 
   const onClick = useCallback((event: { offsetX: number, offsetY: number, shiftKey: boolean }) => {
     if (!graphEditMode.addPointsMode) {
         if (!event.shiftKey) {
+          // Clicking on background deselects all cases
           graphModel.clearAllSelectedCases();
         }
       return;
     }
-    const plotBounds = layout.computedBounds.plot;
-    const relX = event.offsetX - plotBounds.left;
-    const relY = event.offsetY - plotBounds.top;
-    const { data: xVal } = layout.getAxisMultiScale("bottom").getDataCoordinate(relX);
-    const { data: yVal } = layout.getAxisMultiScale("left").getDataCoordinate(relY);
-    graphEditMode.addPoint(xVal, yVal);
-  }, [graphEditMode, graphModel, layout]);
+    const {x, y} = pointCoordinates(event.offsetX, event.offsetY);
+    graphEditMode.addPoint(x, y);
+  }, [graphEditMode, graphModel, pointCoordinates]);
 
-  const onDragStart = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
+  const selectModeDragStart = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
       const {computedBounds} = layout,
         plotBounds = computedBounds.plot;
       selectionTree.current = prepareTree(`.${instanceId}`, 'circle');
@@ -97,7 +104,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
       marqueeState.setMarqueeRect({x: startX.current, y: startY.current, width: 0, height: 0});
     }, [graphModel, instanceId, layout, marqueeState]),
 
-    onDrag = useCallback((event: { dx: number; dy: number }) => {
+    selectModeDrag = useCallback((event: { dx: number; dy: number }) => {
       if (event.dx !== 0 || event.dy !== 0) {
         previousMarqueeRect.current = rectNormalize(
           {x: startX.current, y: startY.current, w: width.current, h: height.current});
@@ -118,14 +125,41 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
       }
     }, [graphModel, marqueeState]),
 
-    onDragEnd = useCallback(() => {
+    selectModeDragEnd = useCallback(() => {
       marqueeState.setMarqueeRect({x: 0, y: 0, width: 0, height: 0});
       selectionTree.current = null;
-    }, [marqueeState]),
-    dragBehavior = useMemo(() => drag<SVGRectElement, number>()
-      .on("start", onDragStart)
-      .on("drag", onDrag)
-      .on("end", onDragEnd), [onDrag, onDragEnd, onDragStart]);
+    }, [marqueeState]);
+
+  const
+    createModeDragStart = useCallback((event: { x: number; y: number; }) => {
+      setPotentialPoint(event);
+    }, []),
+
+    createModeDrag = useCallback((event: { x: number; y: number; }) => {
+      setPotentialPoint(event);
+    }, []),
+
+    createModeDragEnd = useCallback((event: { x: number; y: number; }) => {
+      const point = pointCoordinates(event.x, event.y);
+      graphEditMode.addPoint(point.x, point.y);
+      setPotentialPoint(undefined);
+    }, [graphEditMode, pointCoordinates]);
+
+
+  const dragBehavior = useMemo(() => {
+    if (graphEditMode.addPointsMode) {
+      return drag<SVGRectElement, number>()
+      .on("start", createModeDragStart)
+      .on("drag", createModeDrag)
+      .on("end", createModeDragEnd);
+    } else {
+    return drag<SVGRectElement, number>()
+      .on("start", selectModeDragStart)
+      .on("drag", selectModeDrag)
+      .on("end", selectModeDragEnd);
+    }
+  }, [createModeDrag, createModeDragEnd, createModeDragStart, graphEditMode.addPointsMode,
+    selectModeDrag, selectModeDragEnd, selectModeDragStart]);
 
   useEffect(() => {
     return autorun(() => {
@@ -142,7 +176,6 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
         col = (index: number) => index % numCols,
         groupElement = bgRef.current;
       select(groupElement)
-        // clicking on the background deselects all cases
         .on('click', onClick)
         .selectAll<SVGRectElement, number>('rect')
         .data(range(numRows * numCols))
@@ -160,7 +193,12 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
   }, [bgRef, dragBehavior, graphModel, layout, onClick]);
 
   return (
-    <g ref={bgRef}/>
+    <g>
+      <g ref={bgRef}/>
+      {potentialPoint &&
+        <circle className="potential" cx={potentialPoint.x} cy={potentialPoint.y}
+          r={graphModel.getPointRadius('hover-drag')} fill={graphEditMode.getEditablePointsColor()}/> }
+    </g>
   );
 });
 Background.displayName = "Background";

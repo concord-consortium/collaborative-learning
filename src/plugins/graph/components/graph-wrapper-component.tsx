@@ -64,8 +64,20 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     setAddPointsMode(string === "add");
   }
 
+  function getEditablePointsColor() {
+    let color = "#000000";
+    const editableLayers = content.getEditableLayers();
+    if (editableLayers.length > 0) {
+      const yAttributes = editableLayers[0].config.yAttributeIDs;
+      if (yAttributes.length > 0) {
+        color = content.getColorForId(yAttributes[0]);
+      }
+    }
+    return color;
+  }
+
   const graphEditMode: IGraphEditModeContext =
-    { editPointsMode, addPointsMode, setEditMode, addPoint };
+    { editPointsMode, addPointsMode, setEditMode, addPoint, getEditablePointsColor };
 
   // This is used for locating Sparrow endpoints.
   const getDotCenter = useCallback((dotId: string) => {
