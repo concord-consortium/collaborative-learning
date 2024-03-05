@@ -38,3 +38,29 @@ export function selectInnerCircles(svg: DotsElt): DotSelection | null {
           ? select(svg).selectAll("g.graph-dot .inner-circle")
           : null;
 }
+
+/**
+ * Returns true if node is a graph dot.
+ * @param node
+ * @returns boolean
+ */
+export function isGraphDot(node: Node) {
+  return (node.nodeName === "g"
+      && node instanceof SVGElement
+      && node.classList.contains("graph-dot"));
+}
+
+/**
+ * Returns true if node is a graph dot, or part of a graph dot.
+ * @param node
+ * @returns the graph dot element, or undefined
+ */
+export function inGraphDot(node: Node): SVGElement | undefined {
+  if (isGraphDot(node)) return node as SVGElement;
+  const parent = node.parentNode;
+  if (parent && parent instanceof SVGElement) {
+    return inGraphDot(parent);
+  } else {
+    return undefined;
+  }
+}

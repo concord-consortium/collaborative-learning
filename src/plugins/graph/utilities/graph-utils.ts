@@ -130,6 +130,7 @@ export function getPointTipText(caseID: string, attributeIDs: (string|undefined)
 
 export function handleClickOnDot(event: MouseEvent, caseData: CaseData, dataConfiguration?: IDataConfigurationModel) {
   if (!dataConfiguration) return;
+  event.stopPropagation();
   const dataset = dataConfiguration.dataset;
   const yAttributeId = dataConfiguration.yAttributeID(caseData.plotNum);
   const yCell = { attributeId: yAttributeId, caseId: caseData.caseID };
@@ -144,6 +145,7 @@ export function handleClickOnDot(event: MouseEvent, caseData: CaseData, dataConf
   } else if (extendSelection) { // y cell is selected and Shift key is down => deselect cell
     dataset?.selectCells([yCell], false);
   }
+  console.log("Selected:", dataset?.selectedCells, "among", dataset?.caseIDMap);
 }
 
 export interface IMatchAllCirclesProps {
@@ -180,7 +182,7 @@ export interface IMatchCirclesProps {
 export function matchCirclesToData(props: IMatchCirclesProps) {
   const { dataConfiguration, enableAnimation, instanceId, dotsElement } = props;
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
-  const caseDataKeyFunc = (d: CaseData) => `${d.dataConfigID}-${d.plotNum}-${d.caseID}`;
+  const caseDataKeyFunc = (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.plotNum}_${d.caseID}`;
 
   // Create the circles
   const allCircles = selectGraphDots(dotsElement);
@@ -193,7 +195,7 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
       enter => {
         const g = enter.append('g')
           .attr('class', `graph-dot`)
-          .property('id', (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.caseID}`);
+          .property('id', (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.plotNum}_${d.caseID}`);
         g.append('circle')
           .attr('class', 'outer-circle');
         g.append('circle')

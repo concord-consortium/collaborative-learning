@@ -81,7 +81,7 @@ export const GraphModel = TileContentModel
     yAttributeLabel: types.optional(types.string, kDefaultAxisLabel)
   })
   .volatile(self => ({
-    // prevDataSetId: "",
+    interactionInProgress: false,
   }))
   .preProcessSnapshot((snapshot: any) => {
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
@@ -370,6 +370,9 @@ export const GraphModel = TileContentModel
     },
     setYAttributeLabel(label: string) {
       self.yAttributeLabel = label;
+    },
+    setInteractionInProgress(value: boolean) {
+      self.interactionInProgress = value;
     }
   }))
   .actions(self => ({
