@@ -1,7 +1,8 @@
-import { addDisposer } from "mobx-state-tree";
+import { addDisposer, getSnapshot } from "mobx-state-tree";
 import { makeAutoObservable, runInAction, when } from "mobx";
 import { AppConfigModel, AppConfigModelType } from "./app-config-model";
-import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
+import { createUnitWithoutContent, UnitModel, UnitModelType } from "../curriculum/unit";
+import { getGuideJson, getUnitJson } from "../curriculum/unit-utils";
 import { InvestigationModel, InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
 import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui";
@@ -27,6 +28,10 @@ import { Bookmarks } from "./bookmarks";
 import { SortedDocuments } from "./sorted-documents";
 import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
 import { problemLoaded } from "../../lib/misc";
+import { CurriculumConfig, ICurriculumConfig } from "./curriculum-config";
+import { urlParams } from "../../utilities/url-params";
+import curriculumConfigJson from "../../clue/curriculum-config.json";
+import { gImageMap } from "../image-map";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -59,6 +64,7 @@ class Stores implements IStores{
   isPreviewing?: boolean;
   appVersion: string;
   appConfig: AppConfigModelType;
+  curriculumConfig: ICurriculumConfig;
   unit: UnitModelType;
   investigation: InvestigationModelType;
   problem: ProblemModelType;
@@ -94,6 +100,7 @@ class Stores implements IStores{
     this.appMode = params?.appMode || "dev";
     this.isPreviewing = params?.isPreviewing || false;
     this.appVersion = params?.appVersion || "unknown";
+    this.curriculumConfig = params?.curriculumConfig || CurriculumConfig.create(curriculumConfigJson, {urlParams});
     this.appConfig = params?.appConfig || AppConfigModel.create();
 
     // To keep the code simple, we create a null unit, investigation, and problem if
@@ -205,15 +212,21 @@ class Stores implements IStores{
   // in MobX are slightly different than flows in MST, so there might
   // be some weird interactions with action tracking if we mix them.
   async loadUnitAndProblem(unitId: string | undefined, problemOrdinal?: string) {
-    const { appConfig, persistentUI } = this;
+    const { appConfig, curriculumConfig, persistentUI } = this;
     this.startedLoadingUnitAndProblem = true;
     showLoadingMessage("Loading curriculum content");
-    let unitJson = await getUnitJson(unitId, appConfig);
+    let unitJson = await getUnitJson(unitId, curriculumConfig);
     if (unitJson.status === 404) {
-      unitJson = await getUnitJson(appConfig.defaultUnit, appConfig);
+      unitJson = await getUnitJson(curriculumConfig.defaultUnit, curriculumConfig);
     }
     removeLoadingMessage("Loading curriculum content");
     showLoadingMessage("Setting up curriculum content");
+
+    // Initialize the imageMap
+    const unitUrls = curriculumConfig.getUnitSpec(unitId);
+    unitUrls && gImageMap.setUnitUrl(unitUrls.content);
+    gImageMap.setUnitCodeMap(getSnapshot(curriculumConfig.unitCodeMap));
+
     // read the unit content, but don't instantiate section contents (DocumentModels) yet
     const unit = createUnitWithoutContent(unitJson);
 
@@ -278,7 +291,7 @@ class Stores implements IStores{
         // await new Promise((resolve) => setTimeout(resolve, 5000));
 
         // only load the teacher guide content for teachers
-        const guideJson = await getGuideJson(unitId, appConfig);
+        const guideJson = await getGuideJson(unitId, curriculumConfig);
         if (guideJson.status !== 404) {
           const unitGuide = guideJson && UnitModel.create(guideJson);
           // Not sure if this should be "guide" or "teacher-guide", either ought to work

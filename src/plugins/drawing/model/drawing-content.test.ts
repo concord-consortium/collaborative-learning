@@ -46,7 +46,6 @@ describe('defaultDrawingContent', () => {
     const stamps = [{ url: "my/stamp/url", width: 10, height: 10 }];
     const appConfig = AppConfigModel.create({
       config: { stamps } as any,
-      "curriculumBaseUrl": "https://curriculum.example.com",
     });
     const content = defaultDrawingContent({ appConfig });
     expect(content.type).toBe(kDrawingTileType);
@@ -381,7 +380,7 @@ describe("DrawingContentModel", () => {
       },
       "tileId": "drawing-1"
     });
-        
+
     expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(3);
   });
 
@@ -437,7 +436,7 @@ describe("DrawingContentModel", () => {
     expect(obj).toHaveProperty('x', 10);
     expect(obj).toHaveProperty('y', 10);
     expect(obj).toHaveProperty('width', 100);
-    expect(obj).toHaveProperty('height', 100);    
+    expect(obj).toHaveProperty('height', 100);
   });
 
   it("can resize image", () => {
@@ -493,7 +492,7 @@ describe("DrawingContentModel", () => {
 
   it("can resize line", () => {
     const obj = LineObject.create({
-      x: 0, y: 0, 
+      x: 0, y: 0,
       ...mockSettings
     });
     obj.addPoint(DeltaPoint.create({dx: 10, dy: 10})); // FIXME this point is not actually getting added.
@@ -769,7 +768,7 @@ describe("DrawingContentModel", () => {
     mockLogTileChangeEvent.mockReset();
     // Make a group with one of every type of object.
     const line = LineObject.create({
-      x: 0, y: 0, 
+      x: 0, y: 0,
       deltaPoints: [{dx: 10, dy: 10}],
       ...mockSettings
     });

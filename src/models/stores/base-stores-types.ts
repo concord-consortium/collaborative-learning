@@ -16,6 +16,7 @@ import { SelectionStoreModelType } from "./selection";
 import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
 import { Bookmarks } from "./bookmarks";
+import { ICurriculumConfig } from "./curriculum-config";
 
 
 export interface IBaseStores {
@@ -23,6 +24,7 @@ export interface IBaseStores {
   isPreviewing?: boolean;
   appVersion: string;
   appConfig: AppConfigModelType;
+  curriculumConfig: ICurriculumConfig;
   unit: UnitModelType;
   investigation: InvestigationModelType;
   problem: ProblemModelType;

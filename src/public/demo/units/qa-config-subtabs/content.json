@@ -145,7 +145,7 @@
               "addDocument": true
             },
             {
-              "title": "Starred",
+              "title": "Bookmarks",
               "type": "starred-problem-documents",
               "dataTestHeader": "my-work-section-starred",
               "documentTypes": [
@@ -185,7 +185,8 @@
                 "teacher", "student"
               ],
               "properties": [
-                "!isTeacherDocument"
+                "!isTeacherDocument",
+                "!isDeleted"
               ]
             },
             {
@@ -201,7 +202,8 @@
                 "student"
               ],
               "properties": [
-                "!isTeacherDocument"
+                "!isTeacherDocument",
+                "!isDeleted"
               ]
             },
             {
@@ -221,30 +223,16 @@
             },
             {
               "className": "section problem starred",
-              "title": "Starred",
+              "title": "Bookmarks",
               "type": "starred-problem-documents",
               "dataTestHeader": "class-work-section-starred",
               "documentTypes": [
-                "publication"
+                "publication",
+                "personalPublication"
               ],
               "properties": [
-                "starred"
-              ],
-              "showStars": [
-                "teacher",
-                "student"
-              ]
-            },
-            {
-              "className": "section problem starred",
-              "title": "Starred",
-              "type": "starred-personal-documents",
-              "dataTestHeader": "class-work-section-starred",
-              "documentTypes": [
-                "publication"
-              ],
-              "properties": [
-                "starred"
+                "starred",
+                "!isDeleted"
               ],
               "showStars": [
                 "teacher",
