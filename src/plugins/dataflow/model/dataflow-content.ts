@@ -9,7 +9,7 @@ import { SharedVariables, SharedVariablesType } from "../../shared-variables/sha
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
-import { tileContentAPIActions } from "../../../models/tiles/tile-model-hooks";
+import { tileContentAPIActions, tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import {
   SharedDataSet, kSharedDataSetType, SharedDataSetType,
@@ -20,6 +20,7 @@ import { DataSet, addAttributeToDataSet } from "../../../models/data/data-set";
 
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
+import { getTileModel } from "../../../models/tiles/tile-model";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -35,8 +36,8 @@ export const kDefaultLabel = "Dataflow Node";
 // A case has one value for time and one value for each node
 const kMaxRecordedValues = 10000;
 
-export function defaultDataSet() {
-  const dataSet = DataSet.create();
+export function defaultDataSet(title: string|undefined) {
+  const dataSet = DataSet.create({ name: title });
   return dataSet;
 }
 
@@ -175,9 +176,17 @@ export const DataflowContentModel = TileContentModel
       return formatTime(self.durationOfRecording);
     }
   }))
+  .views(self => tileContentAPIViews({
+    get contentTitle() {
+      return self.dataSet.name;
+    }
+  }))
   .actions(self => tileContentAPIActions({
     doPostCreate(metadata: ITileMetadataModel) {
       self.metadata = metadata;
+    },
+    setContentTitle(title: string) {
+      self.dataSet.setName(title);
     }
   }))
   .actions(self => ({
@@ -204,8 +213,10 @@ export const DataflowContentModel = TileContentModel
         }
 
         if (!sharedDataSet) {
-          const dataSet = defaultDataSet();
+          const tileModel = getTileModel(self);
+          const dataSet = defaultDataSet(tileModel?.title);
           sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
+          tileModel?.setTitle(undefined);
         }
 
         if (!tileSharedModels?.includes(sharedDataSet)) {

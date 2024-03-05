@@ -6,9 +6,11 @@ import { logSparrowCreate, logSparrowDelete } from "../tiles/log/log-sparrow-eve
 import { LogEventName } from "../../../src/lib/logger-types";
 
 /**
- * This is one part of the DocumentContentModel. The other parts are
- * DocumentContentModelWidthTileDragging and BaseDocumentContentModel.
- * It was split out to reduce the size of the DocumentContentModel.
+ * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
+ * - BaseDocumentContentModel
+ * - DocumentContentModelWithAnnotations
+ * - DocumentContentModelWithTileDragging
+ * - DocumentContentModel
  *
  * This file should contain the properties, views, and actions that are
  * related to adorning documents (i.e. sparrows).

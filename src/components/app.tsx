@@ -62,12 +62,12 @@ function resolveAppMode(
 }
 
 export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, err?: string) => void) => {
-  const {appConfig, appMode, db, user, ui} = stores;
+  const {appConfig, curriculumConfig, appMode, db, user, ui} = stores;
   let rawPortalJWT: string | undefined;
 
   showLoadingMessage("Connecting");
 
-  authenticate(appMode, appConfig, urlParams)
+  authenticate(appMode, appConfig, curriculumConfig, urlParams)
     .then(({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
       // authentication can trigger appMode change (e.g. preview => demo)
       if (newAppMode && (newAppMode !== appMode)) {

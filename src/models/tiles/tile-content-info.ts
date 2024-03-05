@@ -47,6 +47,11 @@ export interface ITileContentInfo {
    * cases the type is used.
    */
   titleBase?: string;
+  /**
+   * If true, the tile uses a title specified by its content rather than in the tile model itself.
+   * Currently the tiles that specify this all use the name of a linked DataSet as the title.
+   */
+  useContentTitle?: boolean;
   metadataClass?: typeof TileMetadataModel;
   addSidecarNotes?: boolean;
   defaultHeight?: number;

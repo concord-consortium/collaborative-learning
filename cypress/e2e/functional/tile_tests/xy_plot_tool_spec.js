@@ -79,7 +79,7 @@ context('XYPlot Tool Tile', function () {
 
       cy.log("Link Table");
       clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
-      xyTile.linkTable("Table 1");
+      xyTile.linkTable("Table Data 1");
 
       cy.log("shows edit boxes on axes");
       xyTile.getEditableAxisBox("bottom", "min").should("exist");
@@ -211,7 +211,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().should("have.length", 1).should('be.visible');
       xyTile.getTile().click();
       clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
-      xyTile.linkTable("Table 1");
+      xyTile.linkTable("Table Data 1");
       xyTile.getGraphDot().should('have.length', 4);
 
       clueCanvas.getDuplicateTool().click();
@@ -229,13 +229,13 @@ context('XYPlot Tool Tile', function () {
       cy.log("renders Data Card tool tile");
       clueCanvas.addTile("datacard");
       dataCard.getTile().should("exist");
-  
+
       for (let i=1; i<rows; i++) {
         dataCard.getAddAttributeButton().click();
       }
       for (let i=0; i<data.length; i++) {
         for (let j=0; j<data[i].length; j++) {
-          let value = data[i][j]
+          let value = data[i][j];
           dataCard.getAttrValue().eq(j).click().type(`${value}{enter}`);
         }
         dataCard.getAddCardButton().click();
@@ -245,7 +245,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().should("have.length", 1).should('be.visible');
       xyTile.getTile().click();
       clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
-      xyTile.linkDataCard("Data Card Collection 1");
+      xyTile.linkDataCard("Card Deck Data 1");
       xyTile.getGraphDot().should('have.length', 4);
 
       clueCanvas.getDuplicateTool().click();
@@ -322,7 +322,7 @@ context('XYPlot Tool Tile', function () {
       cy.log("Link Table");
       xyTile.getTile().click();
       clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
-      xyTile.linkTable("Table 1");
+      xyTile.linkTable("Table Data 1");
       xyTile.getAddSeriesButton().should('be.visible');
       xyTile.getAddSeriesButton().click();
       xyTile.getXAttributesLabel().should('have.length', 1);
@@ -360,14 +360,14 @@ context('XYPlot Tool Tile', function () {
       cy.log("Link First Table");
       xyTile.getTile().click();
       clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
-      xyTile.linkTable("Table 1");
+      xyTile.linkTable("Table Data 1");
       xyTile.getXAttributesLabel().should('have.length', 1);
       xyTile.getYAttributesLabel().should('have.length', 1);
 
       cy.log("Link Second Table");
       xyTile.getTile().click();
       clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
-      xyTile.linkTable("Table 2");
+      xyTile.linkTable("Table Data 2");
 
       xyTile.getXAttributesLabel().should('have.length', 2);
       xyTile.getYAttributesLabel().should('have.length', 2);

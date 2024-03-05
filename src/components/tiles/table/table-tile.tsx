@@ -34,7 +34,7 @@ import "./table-toolbar-registration";
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
   documentContent, tileElt, model, readOnly, height, scale,
-  onRequestRowHeight, onRequestUniqueTitle, onRegisterTileApi, onUnregisterTileApi
+  onRequestRowHeight, onRegisterTileApi, onUnregisterTileApi
 }) {
   // Gather data from the model
   const modelRef = useCurrent(model);
@@ -65,12 +65,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // These require knowledge of the column widths
   const { rowHeight, headerHeight, headerRowHeight } = useRowHeight({
     dataSet, measureColumnWidth, model });
-
-  // A function to generate a unique title for the tile
-  // TODO The table tile should switch to the new CLUE wide method of determining titles, and this should be removed
-  const handleRequestUniqueTitle = useCallback(() => {
-    return onRequestUniqueTitle(modelRef.current.id);
-  }, [modelRef, onRequestUniqueTitle]);
 
   // Functions and variables to handle selecting and navigating the grid
   const [showRowLabels, setShowRowLabels] = useState(false);
@@ -159,7 +153,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // Functions for getting and modifying the title
   const { onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
     gridContext, model, content, readOnly,
-    onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle, requestRowHeight
+    onSetTableTitle, requestRowHeight
   });
 
   // Functions for setting and displaying expressions

@@ -6,7 +6,7 @@ import { kDataCardTileType, kDefaultLabel, kDefaultLabelPrefix } from "./data-ca
 import { withoutUndo } from "../../models/history/without-undo";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../models/tiles/tile-metadata";
-import { tileContentAPIActions } from "../../models/tiles/tile-model-hooks";
+import { tileContentAPIActions, tileContentAPIViews } from "../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../models/tiles/tile-content";
 import {
   addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet, DataSet
@@ -18,10 +18,11 @@ import { updateSharedDataSetColors } from "../../models/shared/shared-data-set-c
 import { SharedModelType } from "../../models/shared/shared-model";
 import { uniqueId, uniqueTitle } from "../../utilities/js-utils";
 import { PartialSharedModelEntry } from "../../models/document/document-content-types";
+import { getTileModel } from "../../models/tiles/tile-model";
 
-export function defaultDataSet() {
-  // as per slack discussion, default attribute is added automatically
-  const dataSet = DataSet.create();
+export function defaultDataSet(name?: string) {
+  const dataSet = DataSet.create({name});
+  // A default attribute and a single case is added automatically
   addAttributeToDataSet(dataSet, { name: kDefaultLabel });
   addCasesToDataSet(dataSet, [{ [kDefaultLabel]: "" }]);
   return dataSet;
@@ -142,9 +143,17 @@ export const DataCardContentModel = TileContentModel
       return false;
     }
   }))
+  .views(self => tileContentAPIViews({
+    get contentTitle() {
+      return self.dataSet.name;
+    }
+  }))
   .actions(self => tileContentAPIActions({
     doPostCreate(metadata: ITileMetadataModel){
       self.metadata = metadata;
+    },
+    setContentTitle(title: string) {
+      self.dataSet.setName(title);
     }
   }))
   .actions(self => ({
@@ -180,9 +189,12 @@ export const DataCardContentModel = TileContentModel
         }
         else {
           if (!sharedDataSet) {
-            // The document doesn't have a shared model yet
-            const dataSet = defaultDataSet();
+            // The document doesn't have a shared model yet; create one.
+            const tile = getTileModel(self);
+            const dataSet = defaultDataSet(tile!.title);
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
+            // Unset title of the tile so that the name of the dataset will be displayed.
+            tile!.setTitle(undefined);
           }
 
           // Add the shared model to both the document and the tile

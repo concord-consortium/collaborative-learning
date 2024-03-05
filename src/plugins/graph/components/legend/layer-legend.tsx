@@ -6,7 +6,7 @@ import { AddSeriesButton } from "./add-series-button";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
-import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../../../models/shared/shared-data-set";
+import { isSharedDataSet, SharedDataSet } from "../../../../models/shared/shared-data-set";
 import { clueGraphColors } from "../../../../utilities/color-utils";
 import { DataConfigurationContext, useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { IGraphLayerModel } from "../../models/graph-layer-model";
@@ -123,26 +123,6 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
     );
   }
 
-  // FIXME: down the road we will use persistent human-readable dataset names: PT-186549943
-  // At the moment, however, we look for the name of the tile that originally spawned the dataset
-  // In the case that the original tile was deleted we show "unknown data source"
-  function getOriginString() {
-    const tempUnknownString = "unknown data source";
-    const datasetId = dataConfiguration?.dataset?.id;
-    const smm = getSharedModelManager(graphModel);
-
-    if (datasetId && smm?.isReady) {
-      const sharedModels = smm.getTileSharedModels(graphModel);
-      const foundSharedModel = sharedModels?.find((sharedModel) => {
-        return isSharedDataSet(sharedModel) && sharedModel.dataSet.id === datasetId;
-      });
-      const foundProviderId = (foundSharedModel as SharedDataSetType)?.providerId;
-      const foundTile = smm.getSharedModelTiles(foundSharedModel)?.find(_tile => _tile.id === foundProviderId);
-      return foundTile?.title ?? tempUnknownString;
-    }
-    return tempUnknownString;
-  }
-
   return (
     <>
       { dataConfiguration?.dataset !== undefined &&
@@ -156,7 +136,7 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
               </div>
             }
             <div className="legend-title">
-              Data from: <strong>{getOriginString()}</strong>&nbsp;
+              Data from: <strong>{dataConfiguration.dataset.name || "Unknown"}</strong>&nbsp;
             </div>
           </div>
           <div className="legend-cell-2">

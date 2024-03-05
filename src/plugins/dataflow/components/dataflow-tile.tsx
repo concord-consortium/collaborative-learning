@@ -107,13 +107,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         return this.getContent().exportJson(options);
       }
     });
-
-    const { model } = this.props;
-    if (model.computedTitle === '') {
-      const { model: { id }, onRequestUniqueTitle } = this.props;
-      const title = onRequestUniqueTitle(id);
-      title && this.props.model.setTitle(title);
-    }
   }
 
   private getDocument() {

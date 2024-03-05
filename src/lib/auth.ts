@@ -15,6 +15,7 @@ import { LogEventName } from "../lib/logger-types";
 import { uniqueId } from "../utilities/js-utils";
 import { getUnitCodeFromUnitParam } from "../utilities/url-utils";
 import { convertURLToOAuth2, getBearerToken } from "../utilities/auth-utils";
+import { ICurriculumConfig } from "src/models/stores/curriculum-config";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
@@ -247,8 +248,11 @@ interface IAuthenticateResponse {
   unitCode?: string;
 }
 
-export const authenticate = async (appMode: AppMode, appConfig: AppConfigModelType, urlParams?: QueryParams):
-    Promise<IAuthenticateResponse> => {
+export const authenticate = async (
+    appMode: AppMode,
+    appConfig: AppConfigModelType,
+    curriculumConfig: ICurriculumConfig,
+    urlParams?: QueryParams): Promise<IAuthenticateResponse> => {
   urlParams = urlParams || pageUrlParams;
   // TODO: we should be defaulting to appConfig.defaultUnit here rather than the empty string,
   // but some cypress tests rely on the fact that in demo mode the offeringId is prefixed with
@@ -305,7 +309,7 @@ export const authenticate = async (appMode: AppMode, appConfig: AppConfigModelTy
   }
 
   if (appMode !== "authed") {
-    return generateDevAuthentication(unitCode || appConfig.defaultUnit, problemOrdinal);
+    return generateDevAuthentication(unitCode || curriculumConfig.defaultUnit || "", problemOrdinal);
   }
 
   if (!bearerToken) {
@@ -368,7 +372,7 @@ export const authenticate = async (appMode: AppMode, appConfig: AppConfigModelTy
   const uidAsString = `${portalJWT.uid}`;
   const firebaseJWTPromise = getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classHash);
   const portalOfferingsPromise = getPortalOfferings(user_type, uid, domain, rawPortalJWT);
-  const problemIdPromise = getProblemIdForAuthenticatedUser(rawPortalJWT, appConfig, urlParams);
+  const problemIdPromise = getProblemIdForAuthenticatedUser(rawPortalJWT, curriculumConfig, urlParams);
 
   const [firebaseJWTResult, portalOfferingsResult, problemIdResult] =
     await Promise.all([firebaseJWTPromise, portalOfferingsPromise, problemIdPromise]);
@@ -390,7 +394,7 @@ export const authenticate = async (appMode: AppMode, appConfig: AppConfigModelTy
   authenticatedUser.id = uidAsString;
   authenticatedUser.portal = portal;
   authenticatedUser.portalClassOfferings =
-    getPortalClassOfferings(portalOfferingsResult, appConfig, urlParams);
+    getPortalClassOfferings(portalOfferingsResult, appConfig, curriculumConfig, urlParams);
 
   Logger.log(LogEventName.INTERNAL_AUTHENTICATED, {id: authenticatedUser.id, portal});
 

@@ -47,11 +47,19 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     return this.getSharedModelTiles(model).filter(tile => canProvide(tile));
   }
 
+  /**
+   * Return a user-friendly name for the shared model.
+   * Some shared models store a name.
+   * For other shared models, we list connected tiles' titles.
+   * @param model
+   * @returns user-visible name
+   */
   getSharedModelLabel(model: SharedModelType) {
-    // To label a model, list the titles of all the provider-type tiles that are linked to it.
+    if (model.name) {
+      return model.name;
+    }
+    // Fallback: list the titles of all the provider-type tiles that are linked to the model.
     // If no tiles are linked, default to something based on the ID.
-    // Longer term, would be better to update things so that appropriate titles are stored as part of
-    // the shared models.
     const tiles = this.getSharedModelProviders(model);
     const titles = uniq(tiles.map(t => t.computedTitle));
     return titles.length > 0 ? titles.join(", ") : `${model.type} ${model.id}`;

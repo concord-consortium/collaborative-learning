@@ -3,5 +3,6 @@ import { registerSharedModelInfo } from "./shared-model-registry";
 
 registerSharedModelInfo({
   type: kSharedCaseMetadataType,
-  modelClass: SharedCaseMetadata
+  modelClass: SharedCaseMetadata,
+  hasName: false
 });

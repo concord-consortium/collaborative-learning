@@ -140,19 +140,3 @@ export const reprocessUrlParams = () => {
   Object.assign(urlParams, newParams);
 };
 
-/**
- * Simplifies query-string library by only returning `string | undefined`, instead
- * of `string | string[] | null | undefined`.
- * @param prop
- */
-export function hashValue(prop: string): string | undefined {
-  const query = parse(window.location.hash);
-  const val = query[prop];
-  if (!val) {
-    return undefined;
-  }
-  if (Array.isArray(val)) {
-    throw `May only have one hash parameter for ${prop}. Found: ${val}`;
-  }
-  return val;
-}
