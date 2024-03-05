@@ -43,7 +43,14 @@ export const MultiLegend = observer(function MultiLegend(props: IMultiLegendProp
 
   useEffect(function RespondToLayoutChange() {
     layout.setDesiredExtent("legend", totalHeight);
-    onRequestRowHeight?.(instanceId, kGraphDefaultHeight + totalHeight);
+    // This setTimeout makes sure that this model change does not happen in the
+    // context of an "undo" operation. Without it, undoing an operation that
+    // changed the legend height caused an extra height change to be added to the
+    // undo stack, so from the user's point of view undo would work but then
+    // redo was not available.
+    setTimeout(() => {
+      onRequestRowHeight?.(instanceId, kGraphDefaultHeight + totalHeight);
+    }, 1);
   }, [instanceId, layout, onRequestRowHeight, totalHeight]);
 
   return (

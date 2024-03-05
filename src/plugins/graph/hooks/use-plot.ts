@@ -10,6 +10,7 @@ import {useCurrent} from "../../../hooks/use-current";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { IGraphLayerModel } from "../models/graph-layer-model";
+import { mstReaction } from "../../../utilities/mst-reaction";
 
 interface IDragHandlers {
   start: (event: MouseEvent) => void
@@ -129,12 +130,14 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
 
   // respond to attribute assignment changes
   useEffect(() => {
-    const disposer = reaction(
+    const disposer = mstReaction(
       () => GraphAttrRoles.map((aRole) => dataConfiguration?.attributeID(aRole)),
       () => {
         startAnimation(enableAnimation);
         callRefreshPointPositions(false);
-      }
+      },
+      { name: "usePlot.attribute assignment reaction" },
+      dataConfiguration
     );
     return () => disposer();
   }, [callRefreshPointPositions, dataConfiguration, enableAnimation]);
