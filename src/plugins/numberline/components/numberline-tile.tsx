@@ -19,37 +19,14 @@ import {
 import NumberlineArrowLeft from "../../../assets/numberline-arrow-left.svg";
 import NumberlineArrowRight from "../../../assets/numberline-arrow-right.svg";
 import { EditableNumberlineValue } from './editable-numberline-value';
-// import { TileToolbar } from 'src/components/toolbar/tile-toolbar';
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
-
-
-import "./numberline-toolbar-registration";
-import "./numberline-tile.scss";
 import { INumberlineToolbarContext, NumberlineToolbarContext } from './numberline-toolbar-context';
+import "./numberline-toolbar-registration";
 
-//**********************✔️•↳******************* GUIDELINES ************************************************
-// - As students, we want to express both closed form counting and inequalities which end with an open circle point.
-
-// ✔️ add an open circle point to the toolbar
-// ✔️ add a select point arrow to the toolbar
-// ✔️ revise solid point button to the latest versions
-// ↳ this is also on by default
-// ✔️ when the open circle point is used, create an open circle point
-// when the solid circle point is used, create a solid point like before
-// when the selection button is used, points can be moved or selected for deletion
-// point types are saved and restored and can be used in curriculum.
-
-
-//TODO: hover circle would be at drawMouseFollowPoint
+import "./numberline-tile.scss";
 
 //TODO: delete numberline-toolbar, and numberline-toolbar-buttons.tsx
 //TODO: update line 184 of unit-configuration.md
-
-
-//**********************✔️•↳******************* END  ************************************************
-
-
-
 
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { documentContent, model, readOnly, scale, tileElt, onRegisterTileApi, onUnregisterTileApi } = props;
@@ -281,7 +258,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           .attr("r", innerPointRadius * 0.5)
           .attr("opacity", 1)
           .classed("mouse-follow-point", true);
-
       }
   };
 
