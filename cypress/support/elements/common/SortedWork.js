@@ -6,7 +6,7 @@ class SortedWork {
     return cy.get('[data-test="list-item-name"]');
   }
   getListItemByGroup() {
-    return cy.get('[data-test="list-item-group"]')
+    return cy.get('[data-test="list-item-group"]');
   }
   getSortWorkItem() {
     return cy.get(".sort-work-view .sorted-sections .list-item .footer .info");
@@ -19,6 +19,11 @@ class SortedWork {
   }
   checkGroupDoesNotExist(group) {
     cy.get(".sort-work-view .sorted-sections .section-header-label").should("not.contain", group);
+  }
+  checkSectionHeaderLabelsExist(labels){
+    labels.forEach(label => {
+      cy.get(".sort-work-view .sorted-sections .section-header-label").should("contain", label);
+    });
   }
 }
 
