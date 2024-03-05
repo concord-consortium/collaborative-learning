@@ -16,7 +16,8 @@ describe("problem model", () => {
       ordinal: 1,
       title: "test",
       subtitle: "",
-      sectionsFromSnapshot: []
+      sectionsFromSnapshot: [],
+      exemplarPaths: [],
     });
     expect(problem.fullTitle).toBe("test");
   });
@@ -48,7 +49,8 @@ describe("problem model", () => {
           type: "initialChallenge",
         }
       ],
-      config: {}
+      config: {},
+      exemplarPaths: []
     });
     expect(problem.fullTitle).toBe("test: sub");
   });
@@ -216,7 +218,8 @@ describe("problem model", () => {
       config: {
         disabledFeatures: ["foo"],
         settings: { foo: "bar" }
-      }
+      },
+      exemplarPaths: []
     });
   });
 
@@ -238,7 +241,8 @@ describe("problem model", () => {
       config: {
         disabledFeatures: ["foo"],
         settings: { foo: "bar" }
-      }
+      },
+      exemplarPaths: []
     });
   });
 
@@ -262,7 +266,8 @@ describe("problem model", () => {
       config: {
         disabledFeatures: ["foo"],
         settings: { foo: "bar" }
-      }
+      },
+      exemplarPaths: []
     });
   });
 });
