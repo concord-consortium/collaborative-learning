@@ -90,6 +90,9 @@ export const DataConfigurationModel = types
     get yAttributeIDs() {
       return this.yAttributeDescriptions.map((d: IAttributeDescriptionSnapshot) => d.attributeID);
     },
+    attributeIdforPlotNumber(plotNum: number) {
+      return this.yAttributeIDs[plotNum];
+    },
     /**
      * Returns the sequential number of the given Y attribute ID.
      * This includes the rightNumeric attribute if any.

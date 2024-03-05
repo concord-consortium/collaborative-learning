@@ -3,8 +3,8 @@ import React, {forwardRef, MutableRefObject, useCallback, useEffect, useMemo, us
 import {drag, select, color, range} from "d3";
 import RTreeLib from 'rtree';
 type RTree = ReturnType<typeof RTreeLib>;
-import {CaseData} from "../d3-types";
-import {InternalizedData, Point, rTreeRect} from "../graph-types";
+import {CaseData, graphDotSelector} from "../d3-types";
+import { Point, rTreeRect} from "../graph-types";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {rectangleSubtract, rectNormalize} from "../utilities/graph-utils";
 import {MarqueeState} from "../models/marquee-state";
@@ -12,46 +12,102 @@ import {IGraphModel} from "../models/graph-model";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import { useGraphEditingContext } from "../hooks/use-graph-editing-context";
+import { ICell } from "../../../models/data/data-types";
 
 interface IProps {
   marqueeState: MarqueeState
 }
 
+function getTransformToElement(source: SVGGraphicsElement, elem: SVGGraphicsElement)    {
+  const elemCTM = elem.getScreenCTM();
+  const sourceCTM = source.getScreenCTM();
+  if (elemCTM && sourceCTM) {
+    return elemCTM.inverse().multiply(sourceCTM);
+  } else {
+    console.warn("Can't get CTM on element");
+  }
+}
+
+// Get bounding box INCLUDING any transform="..." on the element itself.
+// From https://stackoverflow.com/a/64909822
+function boundingBoxRelativeToElement(fromSpace: SVGGraphicsElement, toSpace: SVGGraphicsElement) {
+  const bbox = fromSpace.getBBox();
+  const m = getTransformToElement(fromSpace, toSpace);
+  let bbC = new DOMPoint(); bbC.x = bbox.x; bbC.y = bbox.y;
+  let bbD = new DOMPoint(); bbD.x = bbox.x + bbox.width; bbD.y = bbox.y + bbox.height;
+  bbC = bbC.matrixTransform(m);
+  bbD = bbD.matrixTransform(m);
+  return { x: bbC.x, y: bbC.y, width: Math.abs(bbD.x - bbC.x), height: Math.abs(bbD.y - bbC.y)};
+}
+
 const prepareTree = (areaSelector: string, circleSelector: string): RTree => {
     const selectionTree = RTreeLib(10);
-    select<HTMLDivElement, unknown>(areaSelector).selectAll<SVGCircleElement, InternalizedData>(circleSelector)
-      .each((datum: InternalizedData, index, groups) => {
-        const element: any = groups[index],
+    select<HTMLDivElement, unknown>(areaSelector).selectAll<SVGSVGElement, CaseData>(circleSelector)
+      .each((datum: CaseData, index, groups) => {
+        const
+          element: any = groups[index],
+          bbox = boundingBoxRelativeToElement(element, element.parentElement),
           rect = {
-            x: Number(element.cx.baseVal.value),
-            y: Number(element.cy.baseVal.value),
-            w: 1, h: 1
+            x: bbox.x,
+            y: bbox.y,
+            w: bbox.width,
+            h: bbox.height
           };
-        selectionTree.insert(rect, (element.__data__ as CaseData).caseID);
+        selectionTree.insert(rect, (element.__data__ as CaseData));
       });
     return selectionTree;
   },
 
+  /**
+   * Searches the new area, and returns cases found in it.
+   */
   getCasesForDelta = (tree: any, newRect: rTreeRect, prevRect: rTreeRect) => {
     const diffRects = rectangleSubtract(newRect, prevRect);
-    let caseIDs: string[] = [];
+    let allCases: CaseData[] = [];
     diffRects.forEach(aRect => {
-      const newlyFoundIDs = tree.search(aRect);
-      caseIDs = caseIDs.concat(newlyFoundIDs);
+      const newlyFoundCases = tree.search(aRect);
+      allCases = allCases.concat(newlyFoundCases);
     });
-    return caseIDs;
+    return allCases;
+  },
+
+  /**
+   * Take list of CaseData objects, return map from data configuration id to cell info.
+   */
+  sortByDataConfiguration = (graphModel: IGraphModel, cases: CaseData[]) => {
+    const caseDatas = new Map<string,ICell[]>();
+    for (const c of cases) {
+      if (!caseDatas.has(c.dataConfigID)) {
+        caseDatas.set(c.dataConfigID, []);
+      }
+      const dataConfiguration = graphModel.layerForDataConfigurationId(c.dataConfigID)?.config;
+      if (dataConfiguration) {
+        const attributeId = dataConfiguration.attributeIdforPlotNumber(c.plotNum);
+        caseDatas.get(c.dataConfigID)?.push({caseId: c.caseID, attributeId});
+      }
+    }
+    return caseDatas;
   },
 
   updateSelections = (graphModel: IGraphModel, tree: any, newRect: rTreeRect, prevRect: rTreeRect) => {
     const newSelection = getCasesForDelta(tree, newRect, prevRect);
     const newDeselection = getCasesForDelta(tree, prevRect, newRect);
     if (newSelection.length) {
-      graphModel.layers[0].config.dataset?.selectCases(newSelection, true); // FIXME multi dataset
+      for (const [dataConfId, cells] of sortByDataConfiguration(graphModel, newSelection).entries()) {
+        const dataConfiguration = graphModel.layerForDataConfigurationId(dataConfId);
+        if (dataConfiguration) {
+          dataConfiguration.config.dataset?.selectCells(cells, true);
+        }
+      }
     }
     if (newDeselection.length) {
-      graphModel.layers[0].config.dataset?.selectCases(newDeselection, false);
+      for (const [dataConfId, cells] of sortByDataConfiguration(graphModel, newDeselection).entries()) {
+        const dataConfiguration = graphModel.layerForDataConfigurationId(dataConfId);
+        if (dataConfiguration) {
+          dataConfiguration.config.dataset?.selectCells(cells, false);
+        }
+      }
     }
-
   };
 
 export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
@@ -93,7 +149,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
   const selectModeDragStart = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
       const {computedBounds} = layout,
         plotBounds = computedBounds.plot;
-      selectionTree.current = prepareTree(`.${instanceId}`, 'circle');
+      selectionTree.current = prepareTree(`.${instanceId}`, graphDotSelector);
       startX.current = event.x - plotBounds.left;
       startY.current = event.y - plotBounds.top;
       width.current = 0;

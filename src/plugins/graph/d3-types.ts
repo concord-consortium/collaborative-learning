@@ -14,10 +14,12 @@ export type DotsElt = SVGSVGElement | null;
 //  unknown: type of data attached to parent element (none in this case)
 export type DotSelection = Selection<SVGCircleElement, CaseData, SVGSVGElement, unknown>;
 
+export const graphDotSelector = "g.graph-dot";
+
 // selects all all g elements, which contain inner and outer circles
 export function selectGraphDots(svg: DotsElt): DotSelection | null {
   return svg
-          ? select(svg).selectAll("g.graph-dot")
+          ? select(svg).selectAll(graphDotSelector)
           : null;
 }
 
