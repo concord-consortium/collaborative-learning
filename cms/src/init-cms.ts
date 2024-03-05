@@ -1,9 +1,9 @@
 (window as any).CMS_MANUAL_INIT = true;
 
-import CMS from "netlify-cms-app";
-import { CmsBackendType, CmsConfig } from "netlify-cms-core";
+import CMS from "decap-cms-app";
+import { CmsBackendType, CmsConfig } from "decap-cms-core";
 
-import { urlParams } from "../../src/utilities/url-params";
+import { urlParams } from "./cms-url-params";
 import { IframeControl } from "./iframe-control";
 import { JsonControl } from "./json-control";
 import { PreviewLinkControl } from "./preview-link-control";
