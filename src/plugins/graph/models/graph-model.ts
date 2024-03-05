@@ -500,7 +500,7 @@ export const GraphModel = TileContentModel
       }
     },
     setColorForIdWithoutUndo(id: string, colorIndex: number) {
-      withoutUndo();
+      withoutUndo({unlessChildAction: true});
       self.setColorForId(id, colorIndex);
     }
   }))
@@ -642,7 +642,7 @@ export const GraphModel = TileContentModel
         (ids) => {
           ids.forEach(id => {
             if (!self._idColors.has(id)) {
-              self.setColorForId(id, self.nextColor);
+              self.setColorForIdWithoutUndo(id, self.nextColor);
             }
           });
         }
