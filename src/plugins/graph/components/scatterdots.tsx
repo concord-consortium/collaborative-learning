@@ -69,7 +69,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   }, [dataConfiguration, dataset, enableAnimation, graphEditingContext.addPointsMode,
     graphEditingContext.editPointsMode, graphModel]),
 
-    updatePositions = useCallback((event: MouseEvent) => {
+    updatePositions = useCallback((event: MouseEvent, forceUpdate: boolean) => {
       if (dragID !== '') {
         const xAxisScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>,
           xAttrID = dataConfiguration?.attributeID('x') ?? '';
@@ -77,7 +77,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
           dx = newPos.x - currPos.current.x,
           dy = newPos.y - currPos.current.y;
         currPos.current = newPos;
-        if (dx !== 0 || dy !== 0) {
+        if (forceUpdate || dx !== 0 || dy !== 0) {
           const deltaX = Number(xAxisScale.invert(dx)) - Number(xAxisScale.invert(0)),
             deltaY = Number(yScaleRef.current?.invert(dy)) - Number(yScaleRef.current?.invert(0)),
             caseValues: ICase[] = [];
@@ -102,13 +102,13 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     onDrag = useCallback((event: MouseEvent) => {
       event.stopPropagation();
       event.preventDefault();
-      updatePositions(event);
+      updatePositions(event, false);
     }, [updatePositions]),
 
     onDragEnd = useCallback((event: MouseEvent) => {
       graphModel.setInteractionInProgress(false);
       // Final update does a rescale if appropriate
-      updatePositions(event);
+      updatePositions(event, true);
       if (dragID !== '') {
         // TODO the radius transition doesn't actually do anything
         target.current

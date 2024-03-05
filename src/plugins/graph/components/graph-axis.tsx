@@ -35,7 +35,7 @@ interface IProps {
 export const GraphAxis = observer(function GraphAxis({
   place, enableAnimation, autoAdjust, controller, onDropAttribute, onRemoveAttribute, onTreatAttributeAs
 }: IProps) {
-  const dataConfig = useDataConfigurationContext(),
+  const dataConfig = useDataConfigurationContext(), // FIXME mult-dataset.
     isDropAllowed = dataConfig?.graphPlaceCanAcceptAttributeIDDrop ?? (() => true),
     graphModel = useGraphModelContext(),
     instanceId = useInstanceIdContext(),
@@ -89,14 +89,17 @@ export const GraphAxis = observer(function GraphAxis({
 
   useEffect(() => {
     if (autoAdjust?.current) {
-      dataConfig?.onAction(action => {
-        if (isAlive(graphModel) &&
-          !graphModel.lockAxes &&
-          !graphModel.interactionInProgress &&
-          (isAddCasesAction(action) || isSetCaseValuesAction(action))) {
+      // Set up listener on each layer for changes that require a rescale
+      for (const layer of graphModel.layers) {
+        layer.config?.onAction(action => {
+          if (isAlive(graphModel) &&
+            !graphModel.lockAxes &&
+            !graphModel.interactionInProgress &&
+            (isAddCasesAction(action) || isSetCaseValuesAction(action))) {
             controller.autoscaleAllAxes();
-        }
-      });
+          }
+        });
+      }
     }
   // we just want this to run once to set up the handlers, not every time something changes.
   // eslint-disable-next-line react-hooks/exhaustive-deps
