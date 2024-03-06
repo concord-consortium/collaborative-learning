@@ -145,7 +145,6 @@ export function handleClickOnDot(event: MouseEvent, caseData: CaseData, dataConf
   } else if (extendSelection) { // y cell is selected and Shift key is down => deselect cell
     dataset?.selectCells([yCell], false);
   }
-  console.log("Selected:", dataset?.selectedCells, "among", dataset?.caseIDMap);
 }
 
 export interface IMatchAllCirclesProps {
@@ -180,13 +179,14 @@ export interface IMatchCirclesProps {
 }
 
 export function matchCirclesToData(props: IMatchCirclesProps) {
-  const { dataConfiguration, instanceId, dotsElement } = props;
+  const { dataConfiguration, enableAnimation, instanceId, dotsElement } = props;
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
   const caseDataKeyFunc = (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.plotNum}_${d.caseID}`;
 
   // Create the circles
   const allCircles = selectGraphDots(dotsElement);
   if (!allCircles) return;
+  startAnimation(enableAnimation);
 
   allCircles
     .data(allCaseData, caseDataKeyFunc)
@@ -488,9 +488,14 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
 
   const setPositions = (dots: DotSelection | null) => {
     if (dots !== null) {
+      // This utilizes a transition() to move the dots smoothly to new positions.
+      // However, any dots that don't have a position already should just move
+      // immediately; otherwise they enter from the top left for no reason.
       dots
         .transition()
-        .duration(duration)
+        .duration((d, i, nodes) => {
+          return nodes[i].getAttribute('transform') ? duration : 0;
+        })
         .attr('transform', transformForCase)
         // The rest of this should not be necessary, but works around an apparent Chrome bug.
         // At least in Chrome v120 on MacOS, if the points are animated from a position far off-screen,
