@@ -137,6 +137,17 @@ export class SortedDocuments {
   //*************************************** Sort By Strategy **************************************
 
   get sortByStrategy(): SortedDocument[]{
+    const docKeysWithAuthoredTags: any = [];
+    this.documents.all.forEach(doc => {
+      if (doc.getProperty("authoredCommentTag")) {
+        docKeysWithAuthoredTags.push({
+          tag: doc.getProperty("authoredCommentTag"),
+          keys: [doc.key]
+        });
+      }
+    });
+    console.log("| docKeysWithAuthoredTags: ", docKeysWithAuthoredTags);
+
     const commentTags = this.commentTags;
     const tagsWithDocs: Record<string, TagWithDocs> = {};
     if (commentTags) {
