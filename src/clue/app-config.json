@@ -274,7 +274,7 @@
           "fit-all",
           "toggle-lock",
           "|",
-          "select-points",
+          "move-points",
           "add-points"
         ]
       },

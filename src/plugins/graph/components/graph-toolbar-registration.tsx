@@ -200,7 +200,7 @@ registerTileToolbarButtons("graph",
     component: AddPointsButton
   },
   {
-    name: 'select-points',
+    name: 'move-points',
     component: SelectPointsButton
   }
 
