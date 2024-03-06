@@ -13,10 +13,12 @@ function beforeTest() {
   //cy.collapseResourceTabs();
 }
 
+const defaultValue = "a=\\pi r^2";
+
 context('Expression Tool Tile', function () {
   it("Expression Tool", () => {
     beforeTest();
-    
+
     cy.log("renders expression tool tile");
     clueCanvas.addTile("expression");
     exp.getExpressionTile().should("exist");
@@ -27,8 +29,8 @@ context('Expression Tool Tile', function () {
 
     cy.log("should contain a default value as latex string");
     exp.getMathArea().should("exist");
-    exp.getMathField().should("have.value", "a=\\pi r^2");
-    exp.getMathFieldLatex().should("eq", "a=\\pi r^2");
+    exp.getMathField().should("have.value", defaultValue);
+    exp.getMathFieldLatex().should("eq", defaultValue);
 
     cy.log("should render latex string as math characters");
     exp.getMathFieldMath().should("exist");
@@ -108,7 +110,7 @@ context('Expression Tool Tile', function () {
     exp.getMathField().eq(0).click({ force: true });
     exp.getDeleteExpressionButton().eq(0).click();
     exp.getMathFieldMath().eq(0).should("not.contain.text");
-    exp.getMathField().should("not.have.value", "a=\\pi r^2");
+    exp.getMathField().should("not.have.value", defaultValue);
 
     cy.log("adds placeholder to negative sign");
     exp.getDeleteExpressionButton().eq(0).click();
