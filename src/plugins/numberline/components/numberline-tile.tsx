@@ -25,31 +25,52 @@ import "./numberline-toolbar-registration";
 
 import "./numberline-tile.scss";
 
-//TODO: delete numberline-toolbar, and numberline-toolbar-buttons.tsx
-//TODO: update line 184 of unit-configuration.md
+export enum ToolbarOption {
+  Selection = "selection",
+  Filled = "filled",
+  Open = "open"
+}
+
+
+//**********************✔️•↳******************* GUIDELINES ************************************************
+
+// Numberline ticket
+
+//✔️ selection tool selected upon initialization
+//✔️ first three are mutually exclusive - ie only one can be selected, and it deselects the others
+//• HOVER BUG: in "select" & "filled" - the hover circle is "open",
+//       ↳ in "select" it should be no circle
+//       ↳ in filled it should be filled circled
+
+//• increase Active area for point placement
+//• bug for scrolling the open point
+//• examine any points disappearing when switching between filled/open(?) - make a new tile.
+
+
+//Select tool - should have no hovering circle - but you can move
 
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
-  const { documentContent, model, readOnly, scale, tileElt, onRegisterTileApi, onUnregisterTileApi } = props;
-  // console.log("--------<NumberlineTile>-----------");
+  const { model, readOnly, tileElt, onRegisterTileApi } = props;
+
   const content = model.content as NumberlineContentModelType;
-  // console.log("content:", content);
   const [hoverPointId, setHoverPointId] = useState("");
   const [_selectedPointId, setSelectedPointId] = useState(""); // Just used to rerender when a point is selected
   const ui = useUIStore();
   const isTileSelected = ui.isSelectedTile(model);
 
   /* ========================== [ Determine Point is Open or Filled ]  ========================= */
-  const [pointTypeIsOpen, setPointTypeIsOpen] = useState(false); //default start with filled in point
 
-  const handleCreatePointType = (_isOpen: boolean) => {
-    // console.log("--------------------------------------");
-    // console.log("initial STATE:", pointTypeIsOpen);
-    setPointTypeIsOpen(_isOpen);
+  const [toolbarOption, setToolbarOption] = useState<ToolbarOption>(ToolbarOption.Selection); //"selection"
+
+  const handleCreatePointType = (_isOpen: ToolbarOption) => {
+    console.log("--------------------------------------");
+    console.log("initial STATE:", toolbarOption);
+    setToolbarOption(_isOpen);
   };
 
   useEffect(() => {
-    // console.log("Updated STATE:", pointTypeIsOpen);
-  }, [pointTypeIsOpen]);
+    console.log("Updated STATE:", toolbarOption);
+  }, [toolbarOption]);
 
   /* ============================ [ Model Manipulation Functions ]  ============================ */
   const createPoint = (xValue: number, _pointTypeIsOpen: boolean) => {
@@ -201,7 +222,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     return isBetweenYBounds && isBetweenXBounds;
   };
 
-  const handleMouseClick = (e: Event, _pointTypeIsOpen: boolean) => {
+  const handleMouseClick = (e: Event, _toolbarOption: ToolbarOption) => {
     if (!readOnly){
       if (hoverPointId) {
         const hoverPoint = content.getPoint(hoverPointId);
@@ -210,10 +231,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           setSelectedPointId(hoverPoint.id);
         }
       } else {
-        // only create point if we are not hovering over a point and within bounding box
+        // Create point if we are not hovering over a point and within bounding box
+        // and toolbarOption is either filled or open
         const [mouseX, mouseY] = mousePos(e);
         if (mouseInBoundingBox(mouseX, mouseY)) {
-          createPoint(xScale.invert(mouseX), _pointTypeIsOpen);
+          if(_toolbarOption !== ToolbarOption.Selection){
+            const isPointOpen = _toolbarOption === ToolbarOption.Open;
+            createPoint(xScale.invert(mouseX), isPointOpen);
+          }
         }
       }
     }
@@ -235,31 +260,32 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   }
 
   const drawMouseFollowPoint = (mouseX: number) => {
-    //when user's mouse hovers over numberline, create a circle that follows the mouse
-    const followPoint = svg.append("circle")
+    // When in selection mode - do not draw any hover circle
+    if (toolbarOption === ToolbarOption.Selection) {
+      clearMouseFollowPoint();
+      return;
+    }
+    // For either open or filled mode, draw outer circle
+    svg.append("circle")
       .attr("cx", mouseX)
       .attr("cy", yMidPoint)
       .attr("r", innerPointRadius)
       .classed("mouse-follow-point", true)
-      .classed("point-inner-circle", !pointTypeIsOpen); //filled
+      .classed("point-inner-circle", true);
 
-      /* =========================== [ Blue / White Circles ] ============================= */
-      if(pointTypeIsOpen) {
-        followPoint //recreate outer blue circle
-          .attr("fill", "#0069ff")
-          .attr("stroke", "black")
-          .attr("opacity", 1)
-          .attr("stroke-width", 1.5);
-        //create
-        svg.append("circle")
-          .attr("fill", "white")
-          .attr("cx", mouseX)
-          .attr("cy", yMidPoint)
-          .attr("r", innerPointRadius * 0.5)
-          .attr("opacity", 1)
-          .classed("mouse-follow-point", true);
-      }
+    //For open mode - draw inner white circle
+    if (toolbarOption === ToolbarOption.Open) {
+      svg.append("circle")
+        .attr("fill", "white")
+        .attr("cx", mouseX)
+        .attr("cy", yMidPoint)
+        .attr("r", innerPointRadius * 0.5)
+        .attr("opacity", 1)
+        .classed("mouse-follow-point", true);
+    }
   };
+
+
 
   const clearMouseFollowPoint = () => svg.selectAll(".mouse-follow-point").remove();
 
@@ -275,7 +301,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
   };
 
-  svg.on("click", (e) => handleMouseClick(e, pointTypeIsOpen));
+  svg.on("click", (e) => handleMouseClick(e, toolbarOption));
   svg.on("mousemove", (e) => handleMouseMove(e));
 
   // * ================================ [ Construct Numberline ] =============================== */
@@ -410,8 +436,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
             .attr('id', `inner-white-${p.id}`);
         }
       });
-
-
     };
 
     updateCircles();
@@ -423,7 +447,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     handleClearPoints: () => content.deleteAllPoints(),
     handleDeletePoint: deleteSelectedPoints,
     handleCreatePointType,
-    pointTypeIsOpen
+    toolbarOption
   };
 
   return (

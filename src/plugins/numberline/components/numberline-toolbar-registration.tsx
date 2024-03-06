@@ -8,12 +8,18 @@ import PointIcon from "../assets/numberline-toolbar-point-icon.svg";
 import PointOpenIcon from "../assets/numberline-toolbar-point-open-icon.svg";
 import ResetIcon from "../assets/numberline-toolbar-reset-icon.svg";
 import DeleteIcon from "../assets/numberline-toolbar-delete-icon.svg";
+import { ToolbarOption } from "./numberline-tile";
 
 
 const SelectButton = ({name}: IToolbarButtonComponentProps) => {
+  const context = useContext(NumberlineToolbarContext);
+  const selected = context?.toolbarOption === ToolbarOption.Selection;
 
   function handleClick() {
     console.log("select clicked");
+    if (context) {
+      context.handleCreatePointType(ToolbarOption.Selection);
+    }
   }
 
   return (
@@ -21,6 +27,8 @@ const SelectButton = ({name}: IToolbarButtonComponentProps) => {
       name={name}
       title="Select Point"
       onClick={handleClick}
+      selected={selected}
+
     >
       <SelectIcon />
     </TileToolbarButton>
@@ -30,11 +38,11 @@ const SelectButton = ({name}: IToolbarButtonComponentProps) => {
 const PointButton = ({name}: IToolbarButtonComponentProps) => {
 
   const context = useContext(NumberlineToolbarContext);
-  const selected = !context?.pointTypeIsOpen;
+  const selected = context?.toolbarOption === ToolbarOption.Filled;
 
   function handleClick() {
     if (context) {
-      context.handleCreatePointType(false);
+      context.handleCreatePointType(ToolbarOption.Filled);
     }
   }
 
@@ -54,11 +62,11 @@ const PointButton = ({name}: IToolbarButtonComponentProps) => {
 const PointOpenButton = ({name}: IToolbarButtonComponentProps) => {
 
   const context = useContext(NumberlineToolbarContext);
-  const selected = context?.pointTypeIsOpen;
+  const selected = context?.toolbarOption === ToolbarOption.Open;
 
   function handleClick() {
     if (context) {
-      context.handleCreatePointType(true);
+      context.handleCreatePointType(ToolbarOption.Open);
     }
   }
 
