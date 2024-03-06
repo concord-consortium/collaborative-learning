@@ -31,24 +31,6 @@ export enum ToolbarOption {
   Open = "open"
 }
 
-
-//**********************✔️•↳******************* GUIDELINES ************************************************
-
-// Numberline ticket
-
-//✔️ selection tool selected upon initialization
-//✔️ first three are mutually exclusive - ie only one can be selected, and it deselects the others
-//• HOVER BUG: in "select" & "filled" - the hover circle is "open",
-//       ↳ in "select" it should be no circle
-//       ↳ in filled it should be filled circled
-
-//• increase Active area for point placement
-//• bug for scrolling the open point
-//• examine any points disappearing when switching between filled/open(?) - make a new tile.
-
-
-//Select tool - should have no hovering circle - but you can move
-
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { model, readOnly, tileElt, onRegisterTileApi } = props;
 
@@ -160,6 +142,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         top: y - outerPointRadius,
         width: 2 * outerPointRadius
       };
+      console.log("boundingBox:", boundingBox);
       return boundingBox;
     }
   }, [annotationPointCenter]);
@@ -235,6 +218,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         // and toolbarOption is either filled or open
         const [mouseX, mouseY] = mousePos(e);
         if (mouseInBoundingBox(mouseX, mouseY)) {
+          console.log("inside bounding box!!!");
           if(_toolbarOption !== ToolbarOption.Selection){
             const isPointOpen = _toolbarOption === ToolbarOption.Open;
             createPoint(xScale.invert(mouseX), isPointOpen);
@@ -284,8 +268,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         .classed("mouse-follow-point", true);
     }
   };
-
-
 
   const clearMouseFollowPoint = () => svg.selectAll(".mouse-follow-point").remove();
 
@@ -425,18 +407,44 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
 
       /* =========================== [ Blue White Circles] ============================= */
-      content.pointsArr.forEach(p => {
-        if(p.isOpen) {
-          svg.append("circle")
-            .attr("class", "inner-white-point")
-            .attr("cx", xScale(p.currentXValue))
-            .attr("cy", yMidPoint)
-            .attr("r", innerPointRadius * 0.5)
-            .attr("fill", "white")
-            .attr('id', `inner-white-${p.id}`);
-        }
-      });
-    };
+      // Filter the points that should have an inner white circle
+
+
+      const openPoints = content.pointsArr.filter(p => p.isOpen);
+      const innerWhitePoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-white-point')
+      .data(openPoints);
+
+      // content.pointsArr.forEach(p => {
+      //   if(p.isOpen) {
+      //     svg.append("circle")
+      //       .attr("class", "inner-white-point")
+      //       .attr("cx", xScale(p.currentXValue))
+      //       .attr("cy", yMidPoint)
+      //       .attr("r", innerPointRadius * 0.5)
+      //       .attr("fill", "white")
+      //       .attr('id', `inner-white-${p.id}`);
+      //   }
+      // });
+
+      innerWhitePoints.enter()
+        .append("circle")
+          .attr("class", "inner-white-point")
+          .attr("cx", (p) => xScale(p.currentXValue))
+          .attr("cy", yMidPoint)
+          .attr("r", innerPointRadius * 0.5)
+          .attr("fill", "white")
+          .attr('id', (p) => `inner-white-${p.id}`);
+
+      // Update selection: Update circles' position if necessary
+      innerWhitePoints
+      .attr("cx", (p) => xScale(p.currentXValue))
+      .attr("cy", yMidPoint);
+
+      // Exit selection: Remove circles for data that's no longer present
+      innerWhitePoints.exit().remove();
+
+
+    }; //end of updateCircles()
 
     updateCircles();
   }
