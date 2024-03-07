@@ -185,8 +185,6 @@ context('Test copy tiles from one document to other document', function () {
     canvas.createNewExtraDocumentFromFileMenu(studentWorkspaceCopyTiles, "my-work");
     cy.wait(5000);
 
-    const leftTile = type => cy.get(`.nav-tab-panel .class-work .${type}-tool-tile`);
-
     tiles1.forEach(tool => {
       cy.get(`.nav-tab-panel .my-work .${tool.name}-tool-tile`)
         .first().within(dragTile);
