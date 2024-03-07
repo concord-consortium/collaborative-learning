@@ -182,7 +182,7 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   const { dataConfiguration, enableAnimation, instanceId, dotsElement } = props;
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
   const caseDataKeyFunc = (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.plotNum}_${d.caseID}`;
-
+  console.warn("matchCircles", allCaseData);
   // Create the circles
   const allCircles = selectGraphDots(dotsElement);
   if (!allCircles) return;
@@ -494,7 +494,7 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
       dots
         .transition()
         .duration((d, i, nodes) => {
-          return nodes[i].getAttribute('transform') ? duration : 0;
+          return nodes[i].getAttribute('transform') ? duration : 1;
         })
         .attr('transform', transformForCase)
         // The rest of this should not be necessary, but works around an apparent Chrome bug.

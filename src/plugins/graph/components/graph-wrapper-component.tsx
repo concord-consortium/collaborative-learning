@@ -50,7 +50,10 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
         const newCase: ICaseCreation = {};
         newCase[xAttr] = x;
         newCase[yAttr] = y;
-        addCanonicalCasesToDataSet(dataset, [newCase]);
+        const caseAdded = addCanonicalCasesToDataSet(dataset, [newCase]);
+        // The values are already correct, but various reactions in the graph code
+        // expect there to be a value setting action after case creation.
+        dataset.setCanonicalCaseValues(caseAdded);
         return;
       }
     }
