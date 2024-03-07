@@ -175,11 +175,11 @@ export class SortedDocuments {
         if (tagsWithDocs[""]) {
           tagsWithDocs[""].docKeysFoundWithTag.push(doc.key);
         }
-        const foundTagKey = doc.getProperty("authoredCommentTag");
-        if (foundTagKey !== undefined && foundTagKey !== "") {
-          if (tagsWithDocs[foundTagKey]) {
-            tagsWithDocs[foundTagKey].docKeysFoundWithTag.push(doc.key);
-          }
+      }
+      const foundTagKey = doc.getProperty("authoredCommentTag");
+      if (foundTagKey !== undefined && foundTagKey !== "") {
+        if (tagsWithDocs[foundTagKey]) {
+          tagsWithDocs[foundTagKey].docKeysFoundWithTag.push(doc.key);
         }
       }
     });
