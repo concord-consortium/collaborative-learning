@@ -81,7 +81,7 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
           investigation.problems.forEach((problem: any) => {
             if (problem.sections) {
               problem.sections.forEach((section: any) => {
-                if (section.sectionPath === sectionPath || section.sectionPath === `sections/${sectionPath}`) {
+                if (section === sectionPath || section === `sections/${sectionPath}`) {
                   problemParam = `${investigation.ordinal}.${problem.ordinal}`;
                 }
               });
