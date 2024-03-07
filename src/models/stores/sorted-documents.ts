@@ -188,10 +188,10 @@ export class SortedDocuments {
         }
         // HEY: I think you can do everything right here
         if (doc.getProperty("authoredCommentTag")) {
-          const labelStr = doc.getProperty("authoredCommentTag");
-          if (tagsWithDocs[labelStr]) {
-            tagsWithDocs[labelStr].docKeysFoundWithTag.push(doc.key);
-          }
+          // const labelStr = doc.getProperty("authoredCommentTag");
+          // if (tagsWithDocs[labelStr]) {
+          //   tagsWithDocs[labelStr].docKeysFoundWithTag.push(doc.key);
+          // }
         }
       }
     });
