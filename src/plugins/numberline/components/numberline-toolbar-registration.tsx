@@ -16,7 +16,6 @@ const SelectButton = ({name}: IToolbarButtonComponentProps) => {
   const selected = context?.toolbarOption === ToolbarOption.Selection;
 
   function handleClick() {
-    console.log("select clicked");
     if (context) {
       context.handleCreatePointType(ToolbarOption.Selection);
     }
