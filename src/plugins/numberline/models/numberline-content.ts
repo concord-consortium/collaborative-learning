@@ -124,7 +124,7 @@ export const NumberlineContentModel = TileContentModel
     },
   }))
   .actions(self => ({
-    createAndSelectPoint(xValue: number, isOpen: boolean) { //TODO: we need to pass the "filled" or "open"
+    createAndSelectPoint(xValue: number, isOpen: boolean) {
       const newPoint = self.createNewPoint(xValue, isOpen);
       self.setSelectedPoint(newPoint);
       return newPoint;
