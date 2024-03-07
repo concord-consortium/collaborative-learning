@@ -50,31 +50,9 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const ui = useUIStore();
   const mathLiveContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleFocus = () => ui.setSelectedTileId(model.id);
-    // Save the math field so we can remove the listener from the same instance
-    // even if the instance is changed for some reason
-    const currentMathField = mf.current;
-    currentMathField?.addEventListener("focus", handleFocus);
-    undoKeys.forEach((key: string) => {
-      mf.current?.keybindings && replaceKeyBinding(mf.current.keybindings, key, "");
-    });
-    if (mf.current) {
-      // Uncomment this line to see all of the available shortcuts
-      // console.log("mf.current.inlineShortcuts", mf.current.inlineShortcuts);
-
-      // Only pick some of the default mathlive shortcuts
-      const defaultShortcuts = pick(mf.current.inlineShortcuts, [
-        "%"
-      ]);
-      // Combine those defaults with some custom shortcuts
-      mf.current.inlineShortcuts = {
-        ...defaultShortcuts,
-        "*": "\\times"
-      };
-    }
-    return () => currentMathField?.removeEventListener("focus", handleFocus);
-  }, [model.id, ui]);
+  const handleFocus = useCallback(
+    () => ui.setSelectedTileId(model.id),
+    [ui, model.id]);
 
   useEffect(() => {
     // model has changed beneath UI - update mathfield, yet restore cursor position
@@ -130,14 +108,37 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     if (readOnly) {
       mfEl.readOnly = true;
     } else {
-      mfEl.oninput = (handleMathfieldInput as any);
+      // hack the types for now
+      mfEl.addEventListener("input", handleMathfieldInput as any);
     }
+
+    // Save the math field so we can remove the listener from the same instance
+    // even if the instance is changed for some reason
+    mfEl.addEventListener("focus", handleFocus);
+    undoKeys.forEach((key: string) => {
+      mfEl.keybindings && replaceKeyBinding(mfEl.keybindings, key, "");
+    });
+
+    // Uncomment this line to see all of the available shortcuts
+    // console.log("mfEl.inlineShortcuts", mfEl.inlineShortcuts);
+
+    // Only pick some of the default mathlive shortcuts
+    const defaultShortcuts = pick(mfEl.inlineShortcuts, [
+      "%"
+    ]);
+    // Combine those defaults with some custom shortcuts
+    mfEl.inlineShortcuts = {
+      ...defaultShortcuts,
+      "*": "\\times"
+    };
+
     const mathLiveContainer = mathLiveContainerRef.current;
     mathLiveContainer?.appendChild(mfEl);
     return () => {
       mathLiveContainer?.removeChild(mfEl);
+      mfEl.removeEventListener("focus", handleFocus);
     };
-  }, [mf, mathLiveContainerRef, handleMathfieldInput, content, readOnly]);
+  }, [mf, mathLiveContainerRef, handleMathfieldInput, content, readOnly, handleFocus]);
 
   return (
     <div className="expression-tool">
