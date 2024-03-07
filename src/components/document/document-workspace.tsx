@@ -144,9 +144,11 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private async guaranteeInitialDocuments() {
     const { appConfig: { defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
-            db, persistentUI: { problemWorkspace }, unit: { planningDocument }, user: { type: role } } = this.stores;
+            db, persistentUI: { problemWorkspace }, sectionsLoadedPromise,
+            unit: { planningDocument }, user: { type: role } } = this.stores;
     if (!problemWorkspace.primaryDocumentKey) {
       const { type, content } = this.getDefaultDocumentContentSpec();
+      await sectionsLoadedPromise;
       const documentContent = this.getDefaultSectionedDocumentContent(type, content);
       const defaultDocument = await db.guaranteeOpenDefaultDocument(type, documentContent);
       if (defaultDocument) {

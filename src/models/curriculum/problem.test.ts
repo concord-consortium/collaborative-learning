@@ -16,12 +16,12 @@ describe("problem model", () => {
       ordinal: 1,
       title: "test",
       subtitle: "",
-      loadedSections: []
+      sectionsFromSnapshot: []
     });
     expect(problem.fullTitle).toBe("test");
   });
 
-  it("uses override values and renames sections to loadedSections", () => {
+  it("uses override values and renames sections to sectionsFromSnapshot", () => {
     const problem = ProblemModel.create({
       ordinal: 1,
       title: "test",
@@ -40,7 +40,7 @@ describe("problem model", () => {
       ordinal: 1,
       title: "test",
       subtitle: "sub",
-      loadedSections: [
+      sectionsFromSnapshot: [
         {
           type: "introduction",
         },
@@ -73,7 +73,7 @@ describe("problem model", () => {
     });
   });
 
-  test("sections with content have a unique sharedModelManager in their environment", () => {
+  test("sections with content have a unique sharedModelManager in their environment", async () => {
     const problem = ProblemModel.create({
       ordinal: 1,
       title: "test",
@@ -87,6 +87,7 @@ describe("problem model", () => {
       ]
     });
 
+    await problem.loadSections("");
     const sharedModelManagers = problem.sections.map(section =>
       getEnv(section)?.sharedModelManager
     );
@@ -94,7 +95,7 @@ describe("problem model", () => {
     expect(uniqueManagers).toHaveLength(2);
   });
 
-  test("sections can use the same ids as other sections", () => {
+  test("sections can use the same ids as other sections", async () => {
     // Make a test shared model to demonstrate duplicate id problems
     const TestSharedModel = SharedModel
       .named("TestSharedModel")
@@ -141,6 +142,7 @@ describe("problem model", () => {
         duplicatedSection
       ]
     });
+    await problem.loadSections("");
     expect(problem.sections.length).toBe(2);
     const firstTileContent = problem.sections[0].content?.getTile("duplicate-tile-id")?.content as any;
     expect(firstTileContent).toBeDefined();
@@ -148,7 +150,7 @@ describe("problem model", () => {
     expect(firstTileContent).not.toBe(secondTileContent);
   });
 
-  it("can get sections by index", () => {
+  it("can get sections by index", async () => {
     const problem = ProblemModel.create({
       ordinal: 1,
       title: "test",
@@ -162,6 +164,7 @@ describe("problem model", () => {
         }
       ]
     });
+    await problem.loadSections("");
     const firstSection = problem.getSectionByIndex(0) as SectionModelType;
     expect(firstSection.type).toBe("introduction");
     const lastSection = problem.getSectionByIndex(1) as SectionModelType;
@@ -175,7 +178,7 @@ describe("problem model", () => {
     expect(overflowSection.type).toBe("initialChallenge");
   });
 
-  it("can get sections by id", () => {
+  it("can get sections by id", async () => {
     const problem = ProblemModel.create({
       ordinal: 1,
       title: "test",
@@ -189,6 +192,7 @@ describe("problem model", () => {
         }
       ]
     });
+    await problem.loadSections("");
     const firstSection = problem.getSectionById("introduction") as SectionModelType;
     expect(firstSection.type).toBe("introduction");
     const lastSection = problem.getSectionById("initialChallenge") as SectionModelType;
@@ -207,7 +211,8 @@ describe("problem model", () => {
       ordinal: 1,
       title: "Test",
       subtitle: "",
-      loadedSections: [],
+      sections: [],
+      sectionsFromSnapshot: [],
       config: {
         disabledFeatures: ["foo"],
         settings: { foo: "bar" }
@@ -228,7 +233,8 @@ describe("problem model", () => {
       ordinal: 1,
       title: "Test",
       subtitle: "",
-      loadedSections: [],
+      sections: [],
+      sectionsFromSnapshot: [],
       config: {
         disabledFeatures: ["foo"],
         settings: { foo: "bar" }
@@ -251,7 +257,8 @@ describe("problem model", () => {
       ordinal: 1,
       title: "Test",
       subtitle: "",
-      loadedSections: [],
+      sections: [],
+      sectionsFromSnapshot: [],
       config: {
         disabledFeatures: ["foo"],
         settings: { foo: "bar" }
