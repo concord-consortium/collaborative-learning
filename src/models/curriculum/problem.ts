@@ -25,7 +25,7 @@ const ModernProblemModel = types
     subtitle: "",
     /**
      * sectionsFromSnapshot are populated from the "sections" property of the serialized problem
-     * clients should use the `sections` view instead.
+     * clients should use the `sections` volatile property instead.
      * A frozen type is used here so MST doesn't validate the id references of the section
      * with all of the other sections in this problem, or this problem's unit
      */
