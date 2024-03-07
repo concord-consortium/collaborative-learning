@@ -187,10 +187,11 @@ describe('SortWorkView Tests', () => {
     cy.waitForLoad();
     cy.openTopTab('sort-work');
 
-    cy.log("check that exemplar document is still displayed in strategy tag sourced from CMS");
+    cy.log("check that exemplar document is still displayed in strategy tag sourced from CMS but not in teacher added tag");
     sortWork.getSortByMenu().click();
     sortWork.getSortByTagOption().click();
     sortWork.checkDocumentInGroup("Unit Rate", exemplarDocs[0]);
+    sortWork.checkGroupIsEmpty("Diverging Designs");
 
     cy.log("run CLUE as a student:1 and join group 6");
     runClueAsStudent(students[0], 6);

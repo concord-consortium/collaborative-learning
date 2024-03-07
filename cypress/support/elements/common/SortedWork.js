@@ -20,6 +20,10 @@ class SortedWork {
   checkDocumentNotInGroup(groupName, doc) {
     cy.get(".sort-work-view .sorted-sections .section-header-label").contains(groupName).parent().parent().find(".list .list-item .footer .info").should("not.contain", doc);
   }
+  checkGroupIsEmpty(groupName){
+    cy.get(".sort-work-view .sorted-sections .section-header-label")
+      .contains(groupName).parent().parent().find(".list").should('be.empty');
+  }
   checkGroupDoesNotExist(group) {
     cy.get(".sort-work-view .sorted-sections .section-header-label").should("not.contain", group);
   }
