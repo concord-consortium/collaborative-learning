@@ -1,7 +1,8 @@
-import { addDisposer } from "mobx-state-tree";
+import { addDisposer, getSnapshot } from "mobx-state-tree";
 import { makeAutoObservable, runInAction, when } from "mobx";
 import { AppConfigModel, AppConfigModelType } from "./app-config-model";
-import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
+import { UnitModel, UnitModelType } from "../curriculum/unit";
+import { getGuideJson, getUnitJson } from "../curriculum/unit-utils";
 import { InvestigationModel, InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
 import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui";
@@ -27,6 +28,10 @@ import { Bookmarks } from "./bookmarks";
 import { SortedDocuments } from "./sorted-documents";
 import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
 import { problemLoaded } from "../../lib/misc";
+import { CurriculumConfig, ICurriculumConfig } from "./curriculum-config";
+import { urlParams } from "../../utilities/url-params";
+import curriculumConfigJson from "../../clue/curriculum-config.json";
+import { gImageMap } from "../image-map";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -40,6 +45,7 @@ export interface IStores extends IBaseStores {
   loadUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
   sortedDocuments: SortedDocuments;
   unitLoadedPromise: Promise<void>;
+  sectionsLoadedPromise: Promise<void>;
   startedLoadingUnitAndProblem: boolean;
 }
 
@@ -59,6 +65,7 @@ class Stores implements IStores{
   isPreviewing?: boolean;
   appVersion: string;
   appConfig: AppConfigModelType;
+  curriculumConfig: ICurriculumConfig;
   unit: UnitModelType;
   investigation: InvestigationModelType;
   problem: ProblemModelType;
@@ -81,6 +88,7 @@ class Stores implements IStores{
   userContextProvider: UserContextProvider;
   sortedDocuments: SortedDocuments;
   unitLoadedPromise: Promise<void>;
+  sectionsLoadedPromise: Promise<void>;
   startedLoadingUnitAndProblem: boolean;
 
   constructor(params?: ICreateStores){
@@ -94,6 +102,7 @@ class Stores implements IStores{
     this.appMode = params?.appMode || "dev";
     this.isPreviewing = params?.isPreviewing || false;
     this.appVersion = params?.appVersion || "unknown";
+    this.curriculumConfig = params?.curriculumConfig || CurriculumConfig.create(curriculumConfigJson, {urlParams});
     this.appConfig = params?.appConfig || AppConfigModel.create();
 
     // To keep the code simple, we create a null unit, investigation, and problem if
@@ -139,6 +148,7 @@ class Stores implements IStores{
     this.sortedDocuments = new SortedDocuments(this);
 
     this.unitLoadedPromise = when(() => this.unit !== defaultUnit);
+    this.sectionsLoadedPromise = when(() => this.problem.sections.length > 0);
   }
 
   get tabsToDisplay() {
@@ -199,28 +209,39 @@ class Stores implements IStores{
     this.appMode = mode;
   }
 
+  setUnit(unit: UnitModelType) {
+    this.unit = unit;
+  }
+
   // If we need to batch up the changes even more than currently,
   // we could try changing this to a MobX flow.
   // However typing the yield statements is difficult. Also flows
   // in MobX are slightly different than flows in MST, so there might
   // be some weird interactions with action tracking if we mix them.
   async loadUnitAndProblem(unitId: string | undefined, problemOrdinal?: string) {
-    const { appConfig, persistentUI } = this;
+    const { appConfig, curriculumConfig, persistentUI } = this;
     this.startedLoadingUnitAndProblem = true;
-    showLoadingMessage("Loading curriculum content");
-    let unitJson = await getUnitJson(unitId, appConfig);
+    showLoadingMessage("Loading curriculum unit");
+    const unitJson = await getUnitJson(unitId, curriculumConfig);
     if (unitJson.status === 404) {
-      unitJson = await getUnitJson(appConfig.defaultUnit, appConfig);
+      this.ui.setError(`Cannot load the curriculum unit: ${unitId}`);
+      return;
     }
-    removeLoadingMessage("Loading curriculum content");
+    removeLoadingMessage("Loading curriculum unit");
     showLoadingMessage("Setting up curriculum content");
-    // read the unit content, but don't instantiate section contents (DocumentModels) yet
-    const unit = createUnitWithoutContent(unitJson);
+
+    // Initialize the imageMap
+    const unitUrls = curriculumConfig.getUnitSpec(unitId);
+    unitUrls && gImageMap.setUnitUrl(unitUrls.content);
+    gImageMap.setUnitCodeMap(getSnapshot(curriculumConfig.unitCodeMap));
+
+    // read in the unit content (which does not instantiate the sections' contents)
+    const unit = UnitModel.create(unitJson);
 
     const _problemOrdinal = problemOrdinal || appConfig.defaultProblemOrdinal;
-    const { investigation: _investigation, problem: _problem } = unit.getProblem(_problemOrdinal);
+    const { investigation, problem } = unit.getProblem(_problemOrdinal);
 
-    appConfig.setConfigs([unit.config || {}, _investigation?.config || {}, _problem?.config || {}]);
+    appConfig.setConfigs([unit.config || {}, investigation?.config || {}, problem?.config || {}]);
 
     // load/initialize the necessary tools
     showLoadingMessage("Loading tile types");
@@ -230,6 +251,15 @@ class Stores implements IStores{
     await registerTileTypes([...unitTileTypes]);
     removeLoadingMessage("Loading tile types");
 
+    this.setUnit(unit);
+
+    if (problem && unitUrls) {
+      showLoadingMessage("Loading curriculum sections");
+      problem.loadSections(unitUrls.content).then(() => {
+        removeLoadingMessage("Loading curriculum sections");
+      });
+    }
+
     // We are changing our observable state here so we need to be in an action.
     // Because this is an async function, we'd have to switch it to a flow to
     // make the whole thing an action. However typing the yields in flows is
@@ -238,10 +268,6 @@ class Stores implements IStores{
     // not be batched with the rest of these updates. Having it not batched
     // should be fine and keeps things less complicated.
     runInAction(() => {
-      // read the unit content with full contents now that we have tools
-      this.unit = UnitModel.create(unitJson);
-      const {investigation, problem} = this.unit.getProblem(_problemOrdinal);
-
       // TODO: make this dynamic like the way the components work. The components
       // access these values from the stores when they need them. This way the values
       // can be changed on the fly without having to track down each object that is
@@ -269,7 +295,7 @@ class Stores implements IStores{
       removeLoadingMessage("Setting up curriculum content");
     });
 
-    addDisposer(unit, when(() => {
+    addDisposer(this.unit, when(() => {
         return this.user.isTeacher;
       },
       async () => {
@@ -278,12 +304,13 @@ class Stores implements IStores{
         // await new Promise((resolve) => setTimeout(resolve, 5000));
 
         // only load the teacher guide content for teachers
-        const guideJson = await getGuideJson(unitId, appConfig);
+        const guideJson = await getGuideJson(unitId, curriculumConfig);
         if (guideJson.status !== 404) {
           const unitGuide = guideJson && UnitModel.create(guideJson);
           // Not sure if this should be "guide" or "teacher-guide", either ought to work
           unitGuide?.setFacet("teacher-guide");
           const teacherGuide = unitGuide?.getProblem(problemOrdinal || appConfig.defaultProblemOrdinal)?.problem;
+          unitUrls?.guide && teacherGuide.loadSections(unitUrls.guide);
           this.setTeacherGuide(teacherGuide);
         }
       }

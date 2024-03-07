@@ -1,13 +1,14 @@
 import React from "react";
 import { CmsWidgetControlProps } from "netlify-cms-core";
 
-import { getGuideJson, getUnitJson } from "../../src/models/curriculum/unit";
+import { getGuideJson, getUnitJson } from "../../src/models/curriculum/unit-utils";
 import { DocumentModelType } from "../../src/models/document/document";
 import { stripPTNumberFromBranch } from "../../src/utilities/branch-utils";
 import { urlParams } from "../../src/utilities/url-params";
-import { AppConfigModel } from "../../src/models/stores/app-config-model";
-import { appConfigSnapshot } from "../../src/app-config";
 import { defaultCurriculumBranch } from "./cms-constants";
+import { CurriculumConfig } from "../../src/models/stores/curriculum-config";
+
+import curriculumConfigJson from "../../src/clue/curriculum-config.json";
 
 import "./custom-control.scss";
 import "./preview-link-control.scss";
@@ -36,27 +37,26 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
 
     let warning = "";
 
+    const curriculumConfig = CurriculumConfig.create(curriculumConfigJson, { urlParams });
+
     // entry is not included in CmsWidgetControlProps, but it is included in the props.
     const entry = (this.props as any).entry.toJS();
     // path is of the form
-    // curriculum/[unit]/teacher-guide?/investigation-[ordinal]/problem-[ordinal]/[sectionType]/content.json
+    // curriculum/[unit]/teacher-guide?/sections?/investigation-[ordinal]/problem-[ordinal]/[sectionType]/content.json
     this.pathParts = entry.path.split("/");
-
     // If there's a unit url parameter, use that. Otherwise try to find the unit from the entry path.
-    const defaultUnit = "sas";
     if (!urlParams.unit && !this.pathParts?.[1]) {
-      warning = `Could not determine unit. Using default ${defaultUnit}.`;
+      warning = `Could not determine unit. Using default ${curriculumConfig.defaultUnit}.`;
     }
-    this.unit = urlParams.unit ?? this.pathParts?.[1] ?? defaultUnit;
+    this.unit = urlParams.unit ?? this.pathParts?.[1] ?? curriculumConfig.defaultUnit;
 
-    const appConfig = AppConfigModel.create(appConfigSnapshot);
 
     // Finish setting up the preview link after reading the unit json
     this.isTeacherGuide = this.pathParts?.[2] === "teacher-guide";
     if (this.isTeacherGuide) {
-      getGuideJson(this.unit, appConfig).then((unitJson: DocumentModelType) => this.setPreviewLink(unitJson));
+      getGuideJson(this.unit, curriculumConfig).then((unitJson: DocumentModelType) => this.setPreviewLink(unitJson));
     } else {
-      getUnitJson(this.unit, appConfig).then((unitJson: DocumentModelType) => this.setPreviewLink(unitJson));
+      getUnitJson(this.unit, curriculumConfig).then((unitJson: DocumentModelType) => this.setPreviewLink(unitJson));
     }
 
     this.state = {
@@ -72,7 +72,7 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
 
     // Determine the problem parameter
     // path is of the form
-    // curriculum/[unit]/teacher-guide?/investigation-[ordinal]/problem-[ordinal]/[sectionType]/content.json
+    // curriculum/[unit]/teacher-guide?/sections?/investigation-[ordinal]/problem-[ordinal]/[sectionType]/content.json
     const sectionPath = this.pathParts?.slice(-4).join("/");
     let problemParam = "";
     if (unitJson.investigations) {
@@ -81,7 +81,7 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
           investigation.problems.forEach((problem: any) => {
             if (problem.sections) {
               problem.sections.forEach((section: any) => {
-                if (section.sectionPath === sectionPath) {
+                if (section === sectionPath || section === `sections/${sectionPath}`) {
                   problemParam = `${investigation.ordinal}.${problem.ordinal}`;
                 }
               });

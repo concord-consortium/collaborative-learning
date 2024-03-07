@@ -69,7 +69,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
         <SortWorkDocumentArea openDocumentKey={openDocumentKey}/> :
         <>
           <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
-          <div className="tab-panel-documents-section">
+          <div key={sortBy} className="tab-panel-documents-section">
             { renderedSortedDocuments &&
               renderedSortedDocuments.map((sortedSection, idx) => {
                 return (

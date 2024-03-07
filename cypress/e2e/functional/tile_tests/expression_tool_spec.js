@@ -16,7 +16,7 @@ function beforeTest() {
 context('Expression Tool Tile', function () {
   it("Expression Tool", () => {
     beforeTest();
-    
+
     cy.log("renders expression tool tile");
     clueCanvas.addTile("expression");
     exp.getExpressionTile().should("exist");
@@ -28,7 +28,6 @@ context('Expression Tool Tile', function () {
     cy.log("should contain a default value as latex string");
     exp.getMathArea().should("exist");
     exp.getMathField().should("have.value", "a=\\pi r^2");
-    exp.getMathFieldLatex().should("eq", "a=\\pi r^2");
 
     cy.log("should render latex string as math characters");
     exp.getMathFieldMath().should("exist");
@@ -47,7 +46,7 @@ context('Expression Tool Tile', function () {
     // but thus far cannot get sequences like {del} to work in test
     exp.getMathField().eq(0).dblclick({ force: true });
     exp.getMathField().eq(0).type("hi", { force: true });
-    exp.getMathField().eq(0).should("have.value", "hia=\\pi r^2");
+    exp.getMathField().eq(0).should("have.value", "hi");
     cy.wait(2000);
 
     //Expression tile restore upon page reload
@@ -55,7 +54,7 @@ context('Expression Tool Tile', function () {
     cy.reload();
     cy.waitForLoad();
     exp.getTileTitle().should("contain", "(new title)");
-    exp.getMathField().eq(0).should("have.value", "hia=\\pi r^2");
+    exp.getMathField().eq(0).should("have.value", "hi");
 
     cy.log("expression can be changed and re-renders");
     //  The below tests a change, but does not follow a genuine user path

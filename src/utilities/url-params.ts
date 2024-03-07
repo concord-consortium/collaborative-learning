@@ -90,6 +90,8 @@ export interface QueryParams {
   functions?: string; // "emulator" or host:port url
   // do not use persistentUI in some cy tests that rely on demo
   noPersistentUI?: boolean;
+  // mouse sensor can be enabled for cypress drag and drop tests for dnd-kit
+  mouseSensor?: boolean;
 
   //
   // CMS options (admin.html)
@@ -99,8 +101,9 @@ export interface QueryParams {
   curriculumBranch?: string;
   // work with a local checkout of the curriculum instead of github
   localCMSBackend?: boolean;
-  // mouse sensor can be enabled for cypress drag and drop tests for dnd-kit
-  mouseSensor?: boolean;
+  // change the location of the cms-editor.html used by iframe widget to edit
+  // CLUE documents.
+  cmsEditorBase?: string;
 
   //
   // Standalone document editor options (doc-editor.html)
@@ -137,19 +140,3 @@ export const reprocessUrlParams = () => {
   Object.assign(urlParams, newParams);
 };
 
-/**
- * Simplifies query-string library by only returning `string | undefined`, instead
- * of `string | string[] | null | undefined`.
- * @param prop
- */
-export function hashValue(prop: string): string | undefined {
-  const query = parse(window.location.hash);
-  const val = query[prop];
-  if (!val) {
-    return undefined;
-  }
-  if (Array.isArray(val)) {
-    throw `May only have one hash parameter for ${prop}. Found: ${val}`;
-  }
-  return val;
-}

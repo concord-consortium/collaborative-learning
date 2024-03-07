@@ -1,5 +1,6 @@
 import ClientOAuth2 from "client-oauth2";
-import { hashValue, QueryParams, reprocessUrlParams, urlParams } from "./url-params";
+import { QueryParams, reprocessUrlParams, urlParams } from "./url-params";
+import { hashValue } from "./url-utils";
 
 // Portal has to have AuthClient configured with this clientId.
 // The AuthClient has to have:

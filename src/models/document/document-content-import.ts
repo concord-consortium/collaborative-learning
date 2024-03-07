@@ -96,7 +96,6 @@ export function migrateSnapshot(snapshot: IDocumentImportSnapshot): any {
         if (getSharedModelInfoByType(sm.sharedModel.type)?.hasName) {
           sm.sharedModel.setName(tile.title);
           tile.setTitle(undefined);
-          console.log("Set title onto", sm.sharedModel);
           break;
         }
       }

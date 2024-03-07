@@ -201,8 +201,8 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   };
 
   private getTransformImageUrl = () => {
-    const { appConfig, unit } = this.stores;
-    const unitBasePath = appConfig.getUnitBasePath(unit.code);
+    const { curriculumConfig, unit } = this.stores;
+    const unitBasePath = curriculumConfig.getUnitBasePath(unit.code);
     return (url?: string, filename?: string) => {
       return transformCurriculumImageUrl(url, unitBasePath, filename);
     };

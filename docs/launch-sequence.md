@@ -36,23 +36,28 @@ flowchart TB
   subgraph loadUnitProblem [Load unit and problem]
     direction TB
 
-    %% LE.start: Loading curriculum content
+    %% LE.start: Loading curriculum unit
     unit(Get unit JSON)
-    %% LE.end: Loading curriculum content
-
     unit --> tiles
+    unit --> sections
+    %% LE.end: Loading curriculum uit
 
     %% LE.start: Setting up curriculum content
     %% LE.start: Loading tile types
-    tiles(Register tile types)
+    tiles("Register tile types")
+    tiles --> resolveUnitLoadedPromise
+    tiles --> configStores
     %% LE.end: Loading tile types
 
+    %% LE.start: Loading curriculum sections
+    sections("Load active sections JSON")
+    sections --> resolveSectionsLoadedPromise([resolve sectionsLoadedPromise])
+    %% LE.end: Loading curriculum sections
+
     resolveUnitLoadedPromise([resolve unitLoadedPromise])
-    tiles --> resolveUnitLoadedPromise
 
     configStores(Configure some stores)
-    tiles --> configStores
-    %% LE.end: Setting up curriculum content
+    %% LE.end: Setting up curriculum content (this does not wait for sections)
   end
 
   %% some invisible links to get the layout to be more compact
@@ -136,8 +141,16 @@ flowchart TB
   renderAppContentComponent
   renderGroupChooser --> renderAppContentComponent
 
+  sectionsLoadedPromise([sectionsLoadedPromise])
+  %% fake link just to improve the layout
+  authAndConnect ~~~ sectionsLoadedPromise
+
+  sectionsLoadedPromise --> guaranteeInitialDocuments
+  guaranteeInitialDocuments("if necessary create problem, learningLog, and planning docs")
+
   primaryDocumentLoaded
   authAndConnect --> primaryDocumentLoaded
+  guaranteeInitialDocuments --> primaryDocumentLoaded
 
   %% LE.start: Building workspace
   renderDocumentWorkspaceComponentContent(show the real right side content)

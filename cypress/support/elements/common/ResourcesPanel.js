@@ -43,6 +43,18 @@ class ResourcesPanel{
         return this.getCanvasItemTitle(tab, section).contains(title).parent().parent().siblings('.icon-holder').find('.icon-star');
     }
 
+    getDocumentCloseButton() {
+      return cy.get('.document-buttons .close-doc-button')
+    }
+
+    getDocumentEditButton() {
+      return cy.get('.document-buttons .edit-button')
+    }
+
+    getEditableDocumentContent() {
+      return cy.get('.resource-and-chat-panel .editable-document-content .document-content');
+    }
+
     closePrimaryWorkspaceTab(tab){
         cy.get('#primaryWorkspaceTab-'+tab+'.tab').click();
         cy.wait(2000);

@@ -1,9 +1,5 @@
 import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
-import { stripPTNumberFromBranch } from "../../utilities/branch-utils";
-import { urlParams } from "../../utilities/url-params";
-import { getUrlFromRelativeOrFullString } from "../../utilities/url-utils";
 import { SectionModelType } from "../curriculum/section";
-import { gImageMap } from "../image-map";
 import { ToolbarButtonModel } from "../tiles/toolbar-button";
 import { ConfigurationManager, mergeDisabledFeatures } from "./configuration-manager";
 import { NavTabsConfigModel } from "./nav-tabs";
@@ -19,12 +15,6 @@ export const UnitSpecModel = types
 
 export const AppConfigModel = types
   .model("AppConfig", {
-    // base URL of external curriculum unit repository
-    curriculumBaseUrl: types.string,
-    // unit code overrides (legacy unit code support)
-    unitCodeMap: types.map(types.string),
-    // default problem to load if none specified
-    defaultUnit: "",
     // default unit configuration
     config: types.frozen<UnitConfiguration>()
   })
@@ -34,7 +24,7 @@ export const AppConfigModel = types
     disabledFeatures: self.config?.disabledFeatures || [],
     toolbar: ToolbarModel.create(self.config?.toolbar || []),
     authorTools: ToolbarModel.create(self.config?.authorTools || []),
-    settings: self.config?.settings
+    settings: self.config?.settings,
   }))
   .actions(self => ({
     setConfigs(configs: Partial<UnitConfiguration>[]) {
@@ -43,33 +33,6 @@ export const AppConfigModel = types
       self.disabledFeatures = self.configMgr.disabledFeatures;
       self.toolbar = ToolbarModel.create(self.configMgr.toolbar);
       self.settings = self.configMgr.settings;
-    }
-  }))
-  .views(self => ({
-    getUnitUrl(unitParam: string) {
-      const unitParamUrl = getUrlFromRelativeOrFullString(unitParam);
-      if (unitParamUrl) {
-        return unitParamUrl.href;
-      }
-      const unitCode = self.unitCodeMap.get(unitParam) || unitParam;
-      const branchName = stripPTNumberFromBranch(urlParams.curriculumBranch ?? "main");
-      return `${self.curriculumBaseUrl}/branch/${branchName}/${unitCode}/content.json`;
-    }
-  }))
-  .views(self => ({
-    getUnit(unitParam: string) {
-      const unitUrl = self.getUnitUrl(unitParam);
-      const teacherGuideUrl = unitUrl.replace(/content\.json$/, "teacher-guide/content.json");
-      gImageMap.setUnitUrl(unitUrl);
-      gImageMap.setUnitCodeMap(getSnapshot(self.unitCodeMap));
-      return {"content": unitUrl, "guide": teacherGuideUrl};
-    }
-  }))
-  .views(self => ({
-    getUnitBasePath(unitId: string) {
-      const unitSpec = self.getUnit(unitId);
-      if (!unitSpec) return "";
-      return `${unitId}`;
     }
   }))
   .views(self => ({

@@ -24,10 +24,6 @@ class ExpressionToolTile {
     const mathFieldSelector = `${tileSelector} .expression-math-area math-field`;
     return cy.get(mathFieldSelector);
   };
-  getMathFieldLatex = () => {
-    const mathFieldSelector = `${tileSelector} .expression-math-area math-field`;
-    return cy.get(mathFieldSelector).attribute("value");
-  };
   getMathFieldMath = () => {
     const mathFieldSelector = `${tileSelector} .expression-math-area math-field`;
     return cy.get(mathFieldSelector).shadow().find("span");
