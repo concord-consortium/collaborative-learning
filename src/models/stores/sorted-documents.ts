@@ -195,7 +195,6 @@ export class SortedDocuments {
         documents
       });
     });
-
     return sortedDocsArr;
   }
 
