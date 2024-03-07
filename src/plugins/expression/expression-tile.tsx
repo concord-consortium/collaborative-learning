@@ -1,11 +1,11 @@
 import { observer } from "mobx-react";
-import React, { DOMAttributes, useRef, useEffect, FormEvent } from "react";
+import React, { DOMAttributes, useRef, useEffect, FormEvent, useCallback } from "react";
 import { onSnapshot } from "mobx-state-tree";
 import { pick } from "lodash";
 
-import "mathlive"; // separate static import of library for initialization to run
+import { MathfieldElement } from "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
-import type { MathfieldElementAttributes, MathfieldElement } from "mathlive";
+import type { MathfieldElementAttributes  } from "mathlive";
 import { ComputeEngine, version } from "@concord-consortium/compute-engine";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
@@ -45,9 +45,10 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
   const { onRegisterTileApi, onUnregisterTileApi,
     model, readOnly, documentContent, tileElt, scale } = props;
   const content = model.content as ExpressionContentModelType;
-  const mf = useRef<MathfieldElement>(null);
+  const mf = useRef<MathfieldElement|null>(null);
   const trackedCursorPos = useRef<number>(0);
   const ui = useUIStore();
+  const mathLiveContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleFocus = () => ui.setSelectedTileId(model.id);
@@ -85,7 +86,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     return () => disposer();
   }, [content, readOnly]);
 
-  const handleMathfieldInput = (e: FormEvent<MathfieldElementAttributes>) => {
+  const handleMathfieldInput = useCallback((e: FormEvent<MathfieldElementAttributes>) => {
     const mathLiveEvent = e.nativeEvent as any;
     const mathField = e.target as MathfieldElement;
 
@@ -113,7 +114,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       mf.current.position = trackedCursorPos?.current; //restore cursor position
     }
     content.setLatexStr(replacedLatex);
-  };
+  },[content]);
 
   const toolbarProps = useToolbarTileApi({
     id: model.id,
@@ -122,12 +123,21 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     onUnregisterTileApi
   });
 
-  const mathfieldAttributes = {
-    ref: mf,
-    value: content.latexStr,
-    onInput: !readOnly ? handleMathfieldInput : undefined,
-    readOnly: readOnly ? "true" : undefined,
-  };
+  useEffect(() => {
+    const mfEl = new MathfieldElement();
+    mf.current = mfEl;
+    mfEl.value = content.latexStr;
+    if (readOnly) {
+      mfEl.readOnly = true;
+    } else {
+      mfEl.oninput = (handleMathfieldInput as any);
+    }
+    const mathLiveContainer = mathLiveContainerRef.current;
+    mathLiveContainer?.appendChild(mfEl);
+    return () => {
+      mathLiveContainer?.removeChild(mfEl);
+    };
+  }, [mf, mathLiveContainerRef, handleMathfieldInput, content, readOnly]);
 
   return (
     <div className="expression-tool">
@@ -147,9 +157,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
           readOnly={readOnly}
         />
       </div>
-      <div className="expression-math-area">
-        <math-field {...mathfieldAttributes} />
-      </div>
+      <div ref={mathLiveContainerRef} className="expression-math-area" />
     </div>
   );
 });
