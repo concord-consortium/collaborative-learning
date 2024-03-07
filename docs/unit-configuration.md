@@ -181,9 +181,13 @@ Not updated to common toolbar framework and does not support toolbar configurati
 
 #### Numberline
 
-Uses common toolbar framework.
-Default buttons:
- - "place-point", "clear-points", "delete-points"
+Common toolbar framework; default toolbar buttons:
+
+- `select` - selected by default - can't create points, only move filled or open points.
+- `point` - create a filled point by clicking on the numberline.
+- `point-open` - create an open point by clicking on the numberline. `select`, `point`, `point-open` are mutually exclusive
+- `reset` - clear all points from the numberline
+- `delete` - delete selected point(s) from the numberline
 
 #### Simulation
 

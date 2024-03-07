@@ -2,7 +2,7 @@ import { createContext } from "react";
 import { ToolbarOption } from "./numberline-tile";
 
 export interface INumberlineToolbarContext {
-  handleClearPoints: () => void;
+  handleResetPoints: () => void;
   handleDeletePoint: () => void;
   handleCreatePointType: (isOpen: ToolbarOption) => void;
   toolbarOption: ToolbarOption;

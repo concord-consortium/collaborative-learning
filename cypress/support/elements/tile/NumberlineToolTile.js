@@ -26,10 +26,10 @@ class NumberlineToolTile {
     return cy.get(".numberline-tool-container .point-inner-circle").not(".mouse-follow-point");
   }
   deleteAllPointsOnNumberline(){
-    this.getClearButton().click();
+    this.getResetButton().click();
   }
-  getClearButton(){
-    return cy.get(`.clear-points`); //TODO: fix this
+  getResetButton(){
+    return cy.get(".reset");
   }
   setMaxValue(max){
     this.getMaxBox().dblclick().clear().type(`${max}{enter}`);

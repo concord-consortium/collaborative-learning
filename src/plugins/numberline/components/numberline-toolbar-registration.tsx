@@ -83,21 +83,13 @@ const PointOpenButton = ({name}: IToolbarButtonComponentProps) => {
 };
 
 
-// export interface INumberlineToolbarContext {
-//   handleClearPoints: () => void;
-//   handleDeletePoint: () => void;
-//   handleCreatePointType: (isOpen: boolean) => void;
-//   pointTypeIsOpen: boolean;
-// }
-
 const ResetButton = ({name}: IToolbarButtonComponentProps) => {
-
   const context = useContext(NumberlineToolbarContext);
-  const handleClearPoints = context?.handleClearPoints;
+  const handleResetPoints = context?.handleResetPoints;
 
   function handleClick() {
-    if (handleClearPoints) {
-      handleClearPoints();
+    if (handleResetPoints) {
+      handleResetPoints();
     }
   }
 
@@ -106,7 +98,6 @@ const ResetButton = ({name}: IToolbarButtonComponentProps) => {
       name={name}
       title="Reset"
       onClick={handleClick}
-      // selected={selected}
     >
       <ResetIcon/>
     </TileToolbarButton>
@@ -129,36 +120,11 @@ const DeleteButton = ({name}: IToolbarButtonComponentProps) => {
       name={name}
       title="Delete Point(s)"
       onClick={handleClick}
-      // selected={selected}
     >
       <DeleteIcon/>
     </TileToolbarButton>
   );
 };
-
-
-
-
-// export const ResetButton = ({ onClick }: ISetNumberlineHandler) => (
-//   <NumberlineButton
-//     className="reset-button"
-//     icon={<ResetIcon/>}
-//     onClick={onClick}
-//     tooltipOptions={{ title: "Reset"}}
-//   />
-// );
-
-
-// export const DeleteButton = ({ onClick }: ISetNumberlineHandler) => (
-//   <NumberlineButton
-//     className="delete-button"
-//     icon={<DeleteIcon/>}
-//     onClick={onClick}
-//     tooltipOptions={{ title: "Delete Point(s)"}}
-//   />
-// );
-
-
 
 
 registerTileToolbarButtons("numberline",

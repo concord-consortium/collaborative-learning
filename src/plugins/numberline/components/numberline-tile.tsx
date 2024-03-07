@@ -452,7 +452,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   // * ================================= [ Register Toolbar ] ================================== */
 
   const toolbarFunctions: INumberlineToolbarContext = {
-    handleClearPoints: () => content.deleteAllPoints(),
+    handleResetPoints: () => content.deleteAllPoints(),
     handleDeletePoint: deleteSelectedPoints,
     handleCreatePointType,
     toolbarOption
