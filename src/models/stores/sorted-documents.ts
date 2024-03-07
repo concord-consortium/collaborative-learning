@@ -137,16 +137,16 @@ export class SortedDocuments {
   //*************************************** Sort By Strategy **************************************
 
   get sortByStrategy(): SortedDocument[]{
-    const docKeysWithAuthoredTags: any = [];
-    this.documents.all.forEach(doc => {
-      if (doc.getProperty("authoredCommentTag")) {
-        docKeysWithAuthoredTags.push({
-          tag: doc.getProperty("authoredCommentTag"),
-          keys: [doc.key]
-        });
-      }
-    });
-    console.log("| docKeysWithAuthoredTags: ", docKeysWithAuthoredTags);
+    // const docsWithAuthoredTags: any = [];
+    // this.documents.all.forEach(doc => {
+    //   if (doc.getProperty("authoredCommentTag")) {
+    //     // NOTE: we are assuming only one tag from CMS per document?
+    //     docsWithAuthoredTags.push({
+    //       tag: doc.getProperty("authoredCommentTag"),
+    //       doc
+    //     });
+    //   }
+    // });
 
     const commentTags = this.commentTags;
     const tagsWithDocs: Record<string, TagWithDocs> = {};
@@ -186,6 +186,13 @@ export class SortedDocuments {
         if (tagsWithDocs[""]) {
           tagsWithDocs[""].docKeysFoundWithTag.push(doc.key);
         }
+        // HEY: I think you can do everything right here
+        if (doc.getProperty("authoredCommentTag")) {
+          const labelStr = doc.getProperty("authoredCommentTag");
+          if (tagsWithDocs[labelStr]) {
+            tagsWithDocs[labelStr].docKeysFoundWithTag.push(doc.key);
+          }
+        }
       }
     });
 
@@ -200,6 +207,22 @@ export class SortedDocuments {
         documents
       });
     });
+    // console.log("\n\n| docsWithAuthoredTags: ", docsWithAuthoredTags);
+    // console.log("| tagsWithDocs: ", tagsWithDocs);
+    // console.log("| sortedDocsArr: ", sortedDocsArr);
+
+    // this.documents.all.forEach(doc => {
+    //   if (doc.getProperty("authoredCommentTag")) {
+    //     const labelStr = doc.getProperty("authoredCommentTag");
+    //     sortedDocsArr.forEach((section: SortedDocument) => {
+    //       console.log("section.sectionLabel: ", section.sectionLabel, "vs labelStr: ", labelStr);
+    //       if (section.sectionLabel === labelStr) {
+    //         section.documents.push(doc);
+    //       }
+    //     });
+    //   }
+    // });
+
     return sortedDocsArr;
   }
 
