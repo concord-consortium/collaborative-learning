@@ -57,7 +57,8 @@
       "materials": "Varies Material/Surface",
       "physical": "Varies Physical Factors",
       "user": "Varies Human Factors",
-      "system": "Varies System Factors"
+      "system": "Varies System Factors",
+      "unit-rate": "Unit Rate"
     },
     "tagPrompt": "Identify Design Approach",
     "tools": ["Simulator"],

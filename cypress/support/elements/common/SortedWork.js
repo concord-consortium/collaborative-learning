@@ -2,11 +2,14 @@ class SortedWork {
   getSortByMenu() {
     return cy.get('.custom-select.sort-work-sort-menu');
   }
-  getListItemByName() {
+  getSortByNameOption() {
     return cy.get('[data-test="list-item-name"]');
   }
-  getListItemByGroup() {
+  getSortByGroupOption() {
     return cy.get('[data-test="list-item-group"]');
+  }
+  getSortByTagOption(){
+    return cy.get('[data-test="list-item-identify-design approach"]');
   }
   getSortWorkItem() {
     return cy.get(".sort-work-view .sorted-sections .list-item .footer .info");
