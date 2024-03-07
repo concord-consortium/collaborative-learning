@@ -180,6 +180,9 @@ export class SortedDocuments {
       if (foundTagKey !== undefined && foundTagKey !== "") {
         if (tagsWithDocs[foundTagKey]) {
           tagsWithDocs[foundTagKey].docKeysFoundWithTag.push(doc.key);
+          // if tagsWithDocs[""] has this doc.key, remove it
+          const index = tagsWithDocs[""].docKeysFoundWithTag.indexOf(doc.key);
+          if (index > -1) tagsWithDocs[""].docKeysFoundWithTag.splice(index, 1);
         }
       }
     });
