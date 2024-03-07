@@ -25,11 +25,17 @@ class NumberlineToolTile {
     //exclude the hovering circle that follows the mouse on the numberline
     return cy.get(".numberline-tool-container .point-inner-circle").not(".mouse-follow-point");
   }
-  deleteAllPointsOnNumberline(){
+  setToolbarReset(){
     this.getResetButton().click();
+  }
+  setToolbarPoint(){
+    this.getPointButton().click();
   }
   getResetButton(){
     return cy.get(".reset");
+  }
+  getPointButton(){
+    return cy.get(".point");
   }
   setMaxValue(max){
     this.getMaxBox().dblclick().clear().type(`${max}{enter}`);

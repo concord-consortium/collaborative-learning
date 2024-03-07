@@ -28,6 +28,7 @@ context('Numberline Tile', function () {
     numberlineToolTile.getNumberlineTileTitleText().should("contain", newName);
 
     cy.log('will test adding points to a numberline');
+    numberlineToolTile.setToolbarPoint(); //click Point in order to add points to numberline
     numberlineToolTile.addPointOnNumberlineTick(-4.0);
     numberlineToolTile.addPointOnNumberlineTick(2.0);
     numberlineToolTile.getPointsOnGraph().should('have.length', 2);
@@ -40,7 +41,7 @@ context('Numberline Tile', function () {
 
     cy.log("will delete all points");
     cy.log("delete all points in the numberline");
-    numberlineToolTile.deleteAllPointsOnNumberline();
+    numberlineToolTile.setToolbarReset();
     numberlineToolTile.getPointsOnGraph().should('have.length', 0);
 
     //Numberline tile restore upon page reload
