@@ -1,14 +1,14 @@
 import { createContext, useContext } from "react";
+import { GraphEditMode } from "../graph-types";
 
 /**
  * This context holds state relevant to editing points on the Graph tile.
  */
 
-export type IGraphEditMode = "none"|"edit"|"add";
 export interface IGraphEditModeContext {
   editPointsMode: boolean;
   addPointsMode: boolean;
-  setEditMode: (mode: IGraphEditMode) => void;
+  setEditMode: (mode: GraphEditMode) => void;
   addPoint: (x: number, y: number) => void;
   getEditablePointsColor: () => string;
 }

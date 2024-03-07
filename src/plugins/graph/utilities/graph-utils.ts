@@ -1,7 +1,7 @@
 import {extent, format, select, timeout} from "d3";
 import React from "react";
 import { isInteger} from "lodash";
-import { SnapshotOut } from "mobx-state-tree";
+import { SnapshotOut, getParentOfType } from "mobx-state-tree";
 
 import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
@@ -131,19 +131,35 @@ export function getPointTipText(caseID: string, attributeIDs: (string|undefined)
 export function handleClickOnDot(event: MouseEvent, caseData: CaseData, dataConfiguration?: IDataConfigurationModel) {
   if (!dataConfiguration) return;
   event.stopPropagation();
+  const graphModel = getParentOfType(dataConfiguration, GraphModel);
   const dataset = dataConfiguration.dataset;
   const yAttributeId = dataConfiguration.yAttributeID(caseData.plotNum);
   const yCell = { attributeId: yAttributeId, caseId: caseData.caseID };
-  const extendSelection = event.shiftKey,
-    cellIsSelected = dataset?.isCellSelected(yCell);
-  if (!cellIsSelected) {
-    if (extendSelection) { // y cell is not selected and Shift key is down => add y cell to selection
-      dataset?.selectCells([yCell]);
-    } else { // y cell is not selected and Shift key is up => only this y cell should be selected
-      dataset?.setSelectedCells([yCell]);
+
+  if (graphModel.editingMode==="add"
+      && graphModel.editingLayer && graphModel.editingLayer.config !== dataConfiguration) {
+    // We add a case to the editable dataset at the same values as the existing case clicked on.
+    const existingCase = dataset?.getCanonicalCase(caseData.caseID);
+    if (existingCase) {
+      const xAttributeId = dataConfiguration.xAttributeID;
+      const x = dataset?.getNumeric(caseData.caseID, xAttributeId);
+      const y = dataset?.getNumeric(caseData.caseID, yAttributeId);
+      if (x !== undefined && y !== undefined) {
+        graphModel.editingLayer.config.addPoint(0, x, y);
+      }
     }
-  } else if (extendSelection) { // y cell is selected and Shift key is down => deselect cell
-    dataset?.selectCells([yCell], false);
+  } else {
+    const extendSelection = event.shiftKey,
+      cellIsSelected = dataset?.isCellSelected(yCell);
+    if (!cellIsSelected) {
+      if (extendSelection) { // y cell is not selected and Shift key is down => add y cell to selection
+        dataset?.selectCells([yCell]);
+      } else { // y cell is not selected and Shift key is up => only this y cell should be selected
+        dataset?.setSelectedCells([yCell]);
+      }
+    } else if (extendSelection) { // y cell is selected and Shift key is down => deselect cell
+      dataset?.selectCells([yCell], false);
+    }
   }
 }
 
@@ -204,7 +220,6 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
     );
 
   dotsElement && select(dotsElement).on('click', (event: MouseEvent) => {
-    event.stopPropagation();
     const target = select(event.target as SVGSVGElement);
     if (target.node()?.nodeName === 'circle') {
       handleClickOnDot(event, target.datum() as CaseData, dataConfiguration);

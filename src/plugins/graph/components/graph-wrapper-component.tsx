@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react-lite";
+import { ScaleLinear } from "d3";
 
 import { kSmallAnnotationNodeRadius } from "../../../components/annotations/annotation-utilities";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
@@ -17,11 +18,8 @@ import { IGraphModel } from "../models/graph-model";
 import { decipherDotId } from "../utilities/graph-utils";
 import { GraphComponent } from "./graph-component";
 import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
-import { Point } from "../graph-types";
-import { ScaleLinear } from "d3";
-import { GraphEditingContext, IGraphEditMode, IGraphEditModeContext } from "../hooks/use-graph-editing-context";
-import { ICaseCreation } from "../../../models/data/data-set-types";
-import { addCanonicalCasesToDataSet } from "../../../models/data/data-set";
+import { GraphEditMode, Point } from "../graph-types";
+import { GraphEditingContext, IGraphEditModeContext } from "../hooks/use-graph-editing-context";
 
 import "./graph-toolbar-registration";
 
@@ -40,31 +38,14 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   const yAttrType = content.config.attributeType("y");
 
   function addPoint(x: number, y: number) {
-    const layers = content.getEditableLayers();
-    if (layers.length > 0) {
-      const dataConfig = layers[0].config;
-      const dataset = dataConfig.dataset;
-      const xAttr = dataConfig.attributeID("x");
-      const yAttr = dataConfig.attributeID("y");
-      if (dataset && xAttr && yAttr) {
-        const newCase: ICaseCreation = {};
-        newCase[xAttr] = x;
-        newCase[yAttr] = y;
-        const caseAdded = addCanonicalCasesToDataSet(dataset, [newCase]);
-        // The values are already correct, but various reactions in the graph code
-        // expect there to be a value setting action after case creation.
-        dataset.setCanonicalCaseValues(caseAdded);
-        return;
-      }
+    const layer = content.editingLayer;
+    if (layer) {
+      const dataConfig = layer.config;
+      dataConfig.addPoint(0, x, y); // Point is added in layer 0 -- we only support editing one trace so far.
     }
-    console.log("Failed to add point");
   }
-  const [addPointsMode, setAddPointsMode] = useState<boolean>(false);
-  const [editPointsMode, setEditPointsMode] = useState<boolean>(false);
-
-  function setEditMode(string: IGraphEditMode) {
-    setEditPointsMode(string === "edit");
-    setAddPointsMode(string === "add");
+  function setEditMode(string: GraphEditMode) {
+    content.setEditingMode(string);
   }
 
   function getEditablePointsColor() {
@@ -79,8 +60,13 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     return color;
   }
 
-  const graphEditMode: IGraphEditModeContext =
-    { editPointsMode, addPointsMode, setEditMode, addPoint, getEditablePointsColor };
+  const graphEditMode: IGraphEditModeContext = {
+    addPointsMode: content.editingMode==="add",
+    editPointsMode: content.editingMode==="edit",
+    setEditMode,
+    addPoint,
+    getEditablePointsColor
+  };
 
   // This is used for locating Sparrow endpoints.
   const getDotCenter = useCallback((dotId: string) => {

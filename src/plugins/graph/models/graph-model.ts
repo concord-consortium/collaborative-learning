@@ -10,7 +10,7 @@ import {
 } from "../imports/components/axis/models/axis-model";
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
-  GraphAttrRole, hoverRadiusFactor, kDefaultAxisLabel, kDefaultNumericAxisBounds, kGraphTileType,
+  GraphAttrRole, GraphEditMode, hoverRadiusFactor, kDefaultAxisLabel, kDefaultNumericAxisBounds, kGraphTileType,
   PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
 } from "../graph-types";
 import { withoutUndo } from "../../../models/history/without-undo";
@@ -81,7 +81,10 @@ export const GraphModel = TileContentModel
     yAttributeLabel: types.optional(types.string, kDefaultAxisLabel)
   })
   .volatile(self => ({
+    // True if a dragging operation is ongoing - automatic rescaling is deferred until drag is done.
     interactionInProgress: false,
+    editingMode: "none" as GraphEditMode,
+    editingLayerId: undefined as string|undefined
   }))
   .preProcessSnapshot((snapshot: any) => {
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
@@ -204,6 +207,9 @@ export const GraphModel = TileContentModel
     attributeType(role: GraphAttrRole) {
       return self.layers[0].config.attributeType(role);
     },
+    getLayerById(layerId: string) {
+      return self.layers.find(layer => layer.id === layerId);
+    },
     layerForDataConfigurationId(dataConfID: string) {
       return self.layers.find(layer => layer.config.id === dataConfID);
     },
@@ -228,6 +234,12 @@ export const GraphModel = TileContentModel
      */
     getEditableLayers() {
       return self.layers.filter(l => l.editable);
+    },
+    /**
+     * Return the layer currently being edited, or undefined if none.
+     */
+    get editingLayer() {
+      return self.editingLayerId && this.getLayerById(self.editingLayerId);
     },
     /**
      * Find all tooltip-related attributes from all layers.
@@ -370,6 +382,19 @@ export const GraphModel = TileContentModel
     },
     setYAttributeLabel(label: string) {
       self.yAttributeLabel = label;
+    },
+    setEditingMode(mode: GraphEditMode, layer?: IGraphLayerModel) {
+      self.editingMode = mode;
+      if (mode === "none") {
+        self.editingLayerId = undefined;
+      } else {
+        if (layer) {
+          self.editingLayerId = layer && layer.id;
+        } else {
+          const editables = self.getEditableLayers();
+          self.editingLayerId = editables.length>0 ? editables[0].id : undefined;
+        }
+      }
     },
     setInteractionInProgress(value: boolean) {
       self.interactionInProgress = value;
