@@ -1,5 +1,10 @@
 import { parse } from "query-string";
 
+/**
+ * This is related to [url-params.ts](../../src/utilities/url-params.ts).
+ * It is a subset of the parameters in that module so the CMS doesn't need to import
+ * all of the dependencies used by `url-params.ts`
+ */
 export interface QueryParams {
   // string, e.g. "sas" for Stretching and Shrinking or "msa" for Moving Straight Ahead
   unit?: string;
