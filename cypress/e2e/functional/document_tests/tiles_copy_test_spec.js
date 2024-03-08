@@ -40,11 +40,13 @@ const tiles1 = [{ "name": "table" },
 { "name": "expression" },
 { "name": "numberline" },
 { "name": "image" }];
-const tiles2 = [{ "name": "data-card" },
-{ "name": "dataflow" },
-{ "name": "simulator" },
-{ "name": "graph" },
-{ "name": "diagram" }];
+const tiles2 = [
+  { "name": "data-card" },
+  { "name": "dataflow" },
+  { "name": "simulator" },
+  { "name": "graph" },
+  { "name": "diagram" }
+];
 
 function beforeTest(queryParams) {
   cy.clearQAData('all');
@@ -84,6 +86,42 @@ function testPrimaryWorkspace2() {
   diagramTile.getTileTitleText().should("contain", diagramName);
 
   canvas.deleteDocument();
+}
+
+function dragTile() {
+  cy.root().click();
+  let dataTransfer = new DataTransfer();
+  // The dragstart event is only sent to elements with the "draggable" attribute.
+  // There is a mouse down event that is sent first to the actual element.
+  // TODO: we could make a general dragging utility
+  cy.get(".tool-tile-drag-handle").then($handle => {
+    const rect = $handle[0].getBoundingClientRect();
+    const clientX = rect.left + rect.width/2;
+    const clientY = rect.top + rect.height/2;
+
+    // A real user event will have a mouseup around the dragstart
+    cy.wrap($handle).trigger('mousedown', {
+      // We pass clientX and clientY so we are consistent with the next trigger
+      clientX, clientY,
+
+      // The scrollbar covers the handle if cypress scrolls to it
+      // The component should be visible because the click above scrolled the tile the top
+      // and the handle is at the top
+      scrollBehavior: false });
+
+    // We send the dragstart to the tile(root) since that is the parent component with
+    // `draggable= true`. In a general utility we'd want to search for the closest parent
+    // with `draggable= true`
+    cy.root().trigger('dragstart', { dataTransfer,
+      // We have to explicity set the clientX and clientY because cypress will just use
+      // the center of the target instead of the location of the previous trigger
+      clientX, clientY,
+      // The scrollbar can cover the handle if cypress scrolls
+      scrollBehavior: false });
+  });
+  cy.document().find('.single-workspace .canvas .document-content').first()
+    .trigger('drop', { force: true, dataTransfer });
+  cy.get(".tool-tile-drag-handle").trigger('mouseup', { force: true });
 }
 
 context('Test copy tiles from one document to other document', function () {
@@ -147,16 +185,9 @@ context('Test copy tiles from one document to other document', function () {
     canvas.createNewExtraDocumentFromFileMenu(studentWorkspaceCopyTiles, "my-work");
     cy.wait(5000);
 
-    const dataTransfer = new DataTransfer;
-    const leftTile = type => cy.get(`.nav-tab-panel .my-work .${type}-tool-tile`);
-
     tiles1.forEach(tool => {
-      leftTile(tool.name).first().click().then(() => {
-        leftTile(tool.name).first().find(".tool-tile-drag-handle").trigger('dragstart', { dataTransfer, force:true });
-        cy.get('.single-workspace .canvas .document-content').first()
-          .trigger('drop', { force: true, dataTransfer });
-        cy.wait(2000);
-      });
+      cy.get(`.nav-tab-panel .my-work .${tool.name}-tool-tile`)
+        .first().within(dragTile);
     });
 
     //Verify my work document tiles are copied correctly
@@ -176,15 +207,9 @@ context('Test copy tiles from one document to other document', function () {
     canvas.createNewExtraDocumentFromFileMenu(studentClassWorkCopyTiles, "my-work");
     cy.wait(5000);
 
-    const leftTile1 = type => cy.get(`.nav-tab-panel .class-work .${type}-tool-tile`);
-
     tiles1.forEach(tool => {
-      leftTile1(tool.name).first().click().then(() => {
-        leftTile1(tool.name).first().find(".tool-tile-drag-handle").trigger('dragstart', { dataTransfer, force:true });
-        cy.get('.single-workspace .canvas .document-content').first()
-          .trigger('drop', { force: true, dataTransfer });
-        cy.wait(2000);
-      });
+      cy.get(`.nav-tab-panel .class-work .${tool.name}-tool-tile`)
+        .first().within(dragTile);
     });
 
     //Verify class work document tiles are copied correctly
@@ -244,16 +269,9 @@ context('Test copy tiles from one document to other document', function () {
     canvas.createNewExtraDocumentFromFileMenu(studentWorkspaceCopyTiles, "my-work");
     cy.wait(5000);
 
-    const dataTransfer = new DataTransfer;
-    const leftTile = type => cy.get(`.nav-tab-panel .my-work .${type}-tool-tile`);
-
     tiles2.forEach(tool => {
-      leftTile(tool.name).first().click().then(() => {
-        leftTile(tool.name).first().find(".tool-tile-drag-handle").trigger('dragstart', { dataTransfer, force:true });
-        cy.get('.single-workspace .canvas .document-content').first()
-          .trigger('drop', { force: true, dataTransfer });
-        cy.wait(2000);
-      });
+      cy.get(`.nav-tab-panel .my-work .${tool.name}-tool-tile`)
+        .first().within(dragTile);
     });
 
     //Verify my work document tiles are copied correctly
@@ -273,15 +291,9 @@ context('Test copy tiles from one document to other document', function () {
     canvas.createNewExtraDocumentFromFileMenu(studentClassWorkCopyTiles, "my-work");
     cy.wait(5000);
 
-    const leftTile1 = type => cy.get(`.nav-tab-panel .class-work .${type}-tool-tile`);
-
     tiles2.forEach(tool => {
-      leftTile1(tool.name).first().click().then(() => {
-        leftTile1(tool.name).first().find(".tool-tile-drag-handle").trigger('dragstart', { dataTransfer, force:true });
-        cy.get('.single-workspace .canvas .document-content').first()
-          .trigger('drop', { force: true, dataTransfer });
-        cy.wait(2000);
-      });
+      cy.get(`.nav-tab-panel .class-work .${tool.name}-tool-tile`)
+        .first().within(dragTile);
     });
 
     //Verify class work document tiles are copied correctly

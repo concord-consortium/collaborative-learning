@@ -56,7 +56,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
   cypress:
     runs-on: ubuntu-latest
-    container: cypress/browsers:node16.14.2-slim-chrome103-ff102
+    container: cypress/browsers:node-20.11.0-chrome-121.0.6167.184-1-ff-123.0-edge-121.0.2277.128-1
     strategy:
       # when one test fails, DO NOT cancel the other
       # containers, because this will kill Cypress processes
@@ -113,6 +113,9 @@ jobs:
       - jest
       - cypress
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref_type == 'branch' && 'branches' || 'versions' }}
+      url: https://collaborative-learning.concord.org/${{ steps.s3-deploy.outputs.deployPath }}/?demo
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v2
@@ -136,6 +139,7 @@ jobs:
           # This decreases the deploy time quite a bit
           CYPRESS_INSTALL_BINARY: 0
       - uses: concord-consortium/s3-deploy-action@v1
+        id: s3-deploy
         with:
           bucket: models-resources
           prefix: collaborative-learning
