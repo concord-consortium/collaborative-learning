@@ -82,7 +82,7 @@ function hasSectionsFolder(myJson: any) {
   // (some issue with importing them from the models file, so we use any for now)
   const unitProblems = myJson.investigations.map((inv: any) => inv.problems).flat();
   const allSections = unitProblems.map((prob: any ) => prob.sections).flat();
-  const sectionStrInPath = allSections.some((section: any) => section.sectionPath.includes("sections/"));
+  const sectionStrInPath = allSections.some((section: any) => section.includes("sections/"));
   return sectionStrInPath;
 }
 

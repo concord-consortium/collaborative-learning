@@ -53,16 +53,15 @@ export const CurriculumConfig = types
       return requestedUnit || (self.defaultUnit ? self.getUnit(self.defaultUnit) : undefined);
     },
 
-
-  /**
-   * Find the unit code from the passed in URL.
-   * So "https://collaborative-learning.concord.org/branch/master/index.html?unit=s%2Bs
-   * will return sas
-   *
-   * @param url
-   * @returns
-   */
-  getUnitCode(url: string) {
+    /**
+     * Find the unit code from the passed in URL.
+     * So "https://collaborative-learning.concord.org/branch/master/index.html?unit=s%2Bs
+     * will return sas
+     *
+     * @param url
+     * @returns
+     */
+    getUnitCode(url: string) {
       const queryParams = parseUrl(url);
       const unitCode = queryParams.query.unit
                         ? queryParams.query.unit as string
@@ -72,8 +71,6 @@ export const CurriculumConfig = types
                               : undefined;
       return mappedUnitCode || unitCode;
     }
-
-
   }));
 
 export interface ICurriculumConfig extends Instance<typeof CurriculumConfig> {}
