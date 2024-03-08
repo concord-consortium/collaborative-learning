@@ -31,8 +31,22 @@ export enum ToolbarOption {
   Open = "open"
 }
 
+//**********************✔️•↳******************* GUIDELINES ************************************************
+
+
+//•points are given a descender line and a label with their numerical value to two dec places
+//•as the user slides the point around, the value updates
+//•when no point is selected, the last label is on top
+//•when a point is selected, it's label is on top
+//•when points are deleted the indicator disappears
+//•indicators save, synchronize, and are authorable
+
+
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { model, readOnly, tileElt, onRegisterTileApi } = props;
+
+  console.log("<------Numberline----->");
+
 
   const content = model.content as NumberlineContentModelType;
   const [hoverPointId, setHoverPointId] = useState("");
