@@ -1,7 +1,6 @@
 import {MutableRefObject, useCallback, useEffect} from "react";
-import {isAddCasesAction, isRemoveCasesAction} from "../../../models/data/data-set-actions";
 import {IGraphModel, isGraphVisualPropsAction} from "../models/graph-model";
-import {matchAllCirclesToData, matchCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
+import {matchAllCirclesToData, setNiceDomain, startAnimation} from "../utilities/graph-utils";
 import {onAnyAction} from "../../../utilities/mst-utils";
 
 interface IProps {
@@ -13,16 +12,16 @@ interface IProps {
 export function useGraphModel(props: IProps) {
   const { graphModel, enableAnimation, instanceId } = props;
 
-  const callMatchCirclesToData = useCallback((layer) => {
-    matchCirclesToData({
-      dataConfiguration: layer.config,
-      pointRadius: graphModel.getPointRadius(),
-      pointColor: graphModel.pointColor,
-      pointStrokeColor: graphModel.pointStrokeColor,
-      dotsElement: layer.dotsElt,
-      enableAnimation, instanceId
-    });
-  }, [graphModel, enableAnimation, instanceId]);
+  // const callMatchCirclesToData = useCallback((layer) => {
+  //   matchCirclesToData({
+  //     dataConfiguration: layer.config,
+  //     pointRadius: graphModel.getPointRadius(),
+  //     pointColor: graphModel.pointColor,
+  //     pointStrokeColor: graphModel.pointStrokeColor,
+  //     dotsElement: layer.dotsElt,
+  //     enableAnimation, instanceId
+  //   });
+  // }, [graphModel, enableAnimation, instanceId]);
 
   const callMatchAllCirclesToData = useCallback(() => {
     matchAllCirclesToData({
@@ -31,17 +30,20 @@ export function useGraphModel(props: IProps) {
   }, [graphModel, enableAnimation, instanceId]);
 
   // respond to added/removed cases
-  useEffect(function installAddRemoveCaseHandler() {
-    const disposers: (()=>void)[] = [];
-    for (const layer of graphModel.layers) {
-      disposers.push(layer.config.onAction(action => {
-        if (isAddCasesAction(action) || isRemoveCasesAction(action)) {
-          callMatchCirclesToData(layer);
-        }
-      }));
-    }
-    return () => { disposers.forEach((d) => { d(); }); };
-  }, [graphModel.layers, callMatchCirclesToData]);
+  // TODO seems redundant with use-plot.ts handleAddRemoveCases
+  // useEffect(function installAddRemoveCaseHandler() {
+  //   const disposers: (()=>void)[] = [];
+  //   for (const layer of graphModel.layers) {
+  //     console.log("registering layer responder");
+  //     disposers.push(layer.config.onAction(action => {
+  //       console.log('layer responder examining', action);
+  //       if (isAddCasesAction(action) || isRemoveCasesAction(action)) {
+  //         callMatchCirclesToData(layer);
+  //       }
+  //     }));
+  //   }
+  //   return () => { disposers.forEach((d) => { d(); }); };
+  // }, [graphModel.layers, callMatchCirclesToData]);
 
   // respond to change in plotType
   useEffect(function installPlotTypeAction() {

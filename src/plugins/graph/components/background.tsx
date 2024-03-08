@@ -135,15 +135,15 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
   }, [layout]);
 
   const onClick = useCallback((event: { offsetX: number, offsetY: number, shiftKey: boolean }) => {
-    if (!graphEditMode.addPointsMode) {
-        if (!event.shiftKey) {
-          // Clicking on background deselects all cases
-          graphModel.clearAllSelectedCases();
-        }
-      return;
+    if (graphEditMode.addPointsMode) {
+      const {x, y} = pointCoordinates(event.offsetX, event.offsetY);
+      graphEditMode.addPoint(x, y);
+    } else {
+      // If not in add mode or shifted, clicking on background deselects everything
+      if (!event.shiftKey) {
+        graphModel.clearAllSelectedCases();
+      }
     }
-    const {x, y} = pointCoordinates(event.offsetX, event.offsetY);
-    graphEditMode.addPoint(x, y);
   }, [graphEditMode, graphModel, pointCoordinates]);
 
   const selectModeDragStart = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
@@ -249,7 +249,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
   }, [bgRef, dragBehavior, graphModel, layout, onClick]);
 
   return (
-    <g>
+    <g data-testid="graph-background">
       <g ref={bgRef}/>
       {potentialPoint &&
         <circle className="potential" cx={potentialPoint.x} cy={potentialPoint.y}

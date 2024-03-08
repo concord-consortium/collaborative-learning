@@ -40,8 +40,7 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   function addPoint(x: number, y: number) {
     const layer = content.editingLayer;
     if (layer) {
-      const dataConfig = layer.config;
-      dataConfig.addPoint(0, x, y); // Point is added in layer 0 -- we only support editing one trace so far.
+      layer.addPoint(0, x, y); // Point is added in layer 0 -- we only support editing one trace so far.
     }
   }
   function setEditMode(string: GraphEditMode) {

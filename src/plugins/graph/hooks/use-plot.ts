@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useRef} from "react";
 import {autorun, reaction} from "mobx";
-import { isSetCaseValuesAction } from "../../../models/data/data-set-actions";
+import { isAddCasesAction, isRemoveAttributeAction, isRemoveCasesAction, isSetCaseValuesAction }
+  from "../../../models/data/data-set-actions";
 import {IDotsRef, GraphAttrRoles} from "../graph-types";
 import {INumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {useGraphLayoutContext} from "../models/graph-layout";
@@ -194,7 +195,11 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
   // respond to added or removed cases and change in attribute type
   useEffect(function handleAddRemoveCases() {
     const disposer = dataConfiguration?.onAction(action => {
-      if (['addCases', 'removeCases', 'setAttributeType'].includes(action.name)) {
+      if (isAddCasesAction(action)
+          || isRemoveCasesAction(action)
+          || isRemoveAttributeAction(action)
+          || ['addCases', 'removeCases', 'setAttributeType'].includes(action.name)) {
+
         matchCirclesToData({
           dataConfiguration,
           pointRadius: graphModel.getPointRadius(),

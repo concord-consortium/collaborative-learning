@@ -2,8 +2,8 @@ import { observable } from "mobx";
 import {scaleQuantile, ScaleQuantile, schemeBlues} from "d3";
 import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {AttributeType, attributeTypes} from "../../../models/data/attribute";
-import { ICase, ICaseCreation } from "../../../models/data/data-set-types";
-import { DataSet, IDataSet, addCanonicalCasesToDataSet } from "../../../models/data/data-set";
+import { ICase } from "../../../models/data/data-set-types";
+import { DataSet, IDataSet } from "../../../models/data/data-set";
 import {getCategorySet, ISharedCaseMetadata, SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
 import {isRemoveAttributeAction, isSetCaseValuesAction} from "../../../models/data/data-set-actions";
 import {FilteredCases, IFilteredChangedCases} from "../../../models/data/filtered-cases";
@@ -239,26 +239,6 @@ export const DataConfigurationModel = types
         self._attributeDescriptions.set(iRole, iDesc);
       } else {
         self._attributeDescriptions.delete(iRole);
-      }
-    },
-    /**
-     * Add a point in the given plotNum with the given x and y values.
-     * @param plotNum
-     * @param x
-     * @param y
-     */
-    addPoint(plotNum: number, x: number, y: number) {
-      const dataset = self.dataset;
-      const xAttr = self.attributeID("x");
-      const yAttr = self.yAttributeIDs[plotNum];
-      if (dataset && xAttr && yAttr) {
-        const newCase: ICaseCreation = {};
-        newCase[xAttr] = x;
-        newCase[yAttr] = y;
-        const caseAdded = addCanonicalCasesToDataSet(dataset, [newCase]);
-        // The values are already correct, but various reactions in the graph code
-        // expect there to be a value setting action after case creation.
-        dataset.setCanonicalCaseValues(caseAdded);
       }
     }
   }))

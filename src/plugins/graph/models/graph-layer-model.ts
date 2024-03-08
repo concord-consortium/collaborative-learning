@@ -1,4 +1,4 @@
-import { getParentOfType, Instance, SnapshotIn, types } from "@concord-consortium/mobx-state-tree";
+import { getParentOfType, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { typedId } from "../../../utilities/js-utils";
 import { onAnyAction } from "../../../utilities/mst-utils";
 import { DataConfigurationModel, IDataConfigurationModel } from "./data-configuration-model";
@@ -7,9 +7,10 @@ import { GraphPlace } from "../imports/components/axis-graph-shared";
 import { GraphAttrRole } from "../graph-types";
 import { IUpdateCategoriesOptions } from "../adornments/adornment-models";
 import { GraphModel } from "./graph-model";
-import { IDataSet } from "../../../models/data/data-set";
+import { IDataSet, addCanonicalCasesToDataSet } from "../../../models/data/data-set";
 import { ISharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { DotsElt } from "../d3-types";
+import { ICaseCreation } from "../../../models/data/data-set-types";
 
 export const GraphLayerModel = types
   .model('GraphLayerModel')
@@ -62,6 +63,26 @@ export const GraphLayerModel = types
     },
     clearAutoAssignedAttributes() {
       self.autoAssignedAttributes = [];
+    },
+    /**
+     * Add a point in the given plotNum with the given x and y values.
+     * @param plotNum
+     * @param x
+     * @param y
+     */
+    addPoint(plotNum: number, x: number, y: number) {
+      const dataset = self.config.dataset;
+      const xAttr = self.config.attributeID("x");
+      const yAttr = self.config.yAttributeIDs[plotNum];
+      if (dataset && xAttr && yAttr) {
+        const newCase: ICaseCreation = {};
+        newCase[xAttr] = x;
+        newCase[yAttr] = y;
+        const caseAdded = addCanonicalCasesToDataSet(dataset, [newCase]);
+        // The values are already correct, but various reactions in the graph code
+        // expect there to be a value setting action after case creation.
+        dataset.setCanonicalCaseValues(caseAdded);
+      }
     },
     configureLinkedLayer() {
       if (!self.config) {
