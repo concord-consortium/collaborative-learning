@@ -4,7 +4,6 @@ import { isInteger} from "lodash";
 import { SnapshotOut, getParentOfType } from "mobx-state-tree";
 
 import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
-import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds, replaceJsonStringsWithUpdatedIds } from "../../../models/shared/shared-data-set";
 import {
   CaseData, DotSelection, DotsElt, selectGraphDots, selectInnerCircles, selectOuterCircles
@@ -24,6 +23,7 @@ import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
 import { GraphModel, IGraphModel } from "../models/graph-model";
 import { isFiniteNumber } from "../../../utilities/math-utils";
+import { SharedModelEntrySnapshotType } from "../../../models/document/shared-model-entry";
 
 /**
  * Utility routines having to do with graph entities
@@ -590,7 +590,7 @@ export function decipherDotId(dotId: string) {
 
 export function updateGraphContentWithNewSharedModelIds(
   content: SnapshotOut<typeof GraphModel>,
-  sharedDataSetEntries: PartialSharedModelEntry[],
+  sharedDataSetEntries: SharedModelEntrySnapshotType[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) {
   return replaceJsonStringsWithUpdatedIds(content, ...Object.values(updatedSharedModelMap));
@@ -598,7 +598,7 @@ export function updateGraphContentWithNewSharedModelIds(
 
 export function updateGraphObjectWithNewSharedModelIds(
   object: IClueObjectSnapshot,
-  sharedDataSetEntries: PartialSharedModelEntry[],
+  sharedDataSetEntries: SharedModelEntrySnapshotType[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) {
   if (object.objectType === "dot") {

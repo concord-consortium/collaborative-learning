@@ -1,7 +1,7 @@
 import stringify from "json-stringify-pretty-compact";
 import { applySnapshot, getSnapshot, Instance, SnapshotIn } from "mobx-state-tree";
 import { cloneDeep, each } from "lodash";
-import { IDragTilesData, PartialSharedModelEntry, PartialTile,
+import { IDragTilesData,
          IDocumentContentAddTileOptions } from "./document-content-types";
 import { DocumentContentModelWithTileDragging } from "./drag-tiles";
 import { IDropRowInfo, TileRowModelType, TileRowSnapshotOutType } from "./tile-row";
@@ -14,6 +14,7 @@ import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-conten
 import { IDragTileItem, IDropTileItem, ITileModel, ITileModelSnapshotOut } from "../tiles/tile-model";
 import { uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
+import { SharedModelEntrySnapshotType } from "./shared-model-entry";
 
 // Imports related to hard coding shared model duplication
 import {
@@ -231,13 +232,13 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
   // Copies tiles and shared models into the specified row, giving them all new ids
   copyTiles(
     tiles: IDragTileItem[],
-    sharedModelEntries: PartialSharedModelEntry[],
+    sharedModelEntries: SharedModelEntrySnapshotType[],
     annotations: IArrowAnnotationSnapshot[],
     rowInfo: IDropRowInfo
   ) {
     // Update shared models with new names and ids
     const updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds> = {};
-    const newSharedModelEntries: PartialSharedModelEntry[] = [];
+    const newSharedModelEntries: SharedModelEntrySnapshotType[] = [];
     sharedModelEntries.forEach(sharedModelEntry => {
       // For now, only duplicate shared data sets
       if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
@@ -266,7 +267,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     });
 
     const findTileSharedModelEntries = (tileId: string) => {
-      return sharedModelEntries.filter(entry => entry.tiles?.map(t => t.id).includes(tileId));
+      return sharedModelEntries.filter(entry => entry.tiles?.includes(tileId));
     };
 
     // Update tile content with new shared model ids
@@ -302,7 +303,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     // Update tile ids for shared models and add those references to document.
     // The shared datasets have already been added above.
     newSharedModelEntries.forEach(sharedModelEntry => {
-      const updatedTileIds: string[] = sharedModelEntry.tiles.map((oldTile: PartialTile) => tileIdMap[oldTile.id])
+      const updatedTileIds: string[] = (sharedModelEntry.tiles||[]).map((oldTile) => tileIdMap[oldTile])
         .filter((tileId: string | undefined) => tileId !== undefined);
       if (isSharedDataSetSnapshot(sharedModelEntry.sharedModel)) {
         const oldProvider = sharedModelEntry.sharedModel.providerId;
@@ -332,7 +333,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     });
 
     // Update tile and object ids for annotations and add copies to document
-    const updateObject = (object?: IClueObjectSnapshot) => {
+    const updateAnnotationObject = (object?: IClueObjectSnapshot) => {
       if (object) {
         const tile = tiles.find(t => t.tileId === object?.tileId);
         if (tile) {
@@ -344,11 +345,12 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         }
       }
     };
+
     annotations.forEach(annotation => {
       if (isArrowAnnotationSnapshot(annotation)) {
         const newAnnotationSnapshot = cloneDeep(annotation);
-        updateObject(newAnnotationSnapshot.sourceObject);
-        updateObject(newAnnotationSnapshot.targetObject);
+        updateAnnotationObject(newAnnotationSnapshot.sourceObject);
+        updateAnnotationObject(newAnnotationSnapshot.targetObject);
         updateArrowAnnotationTileIds(newAnnotationSnapshot, tileIdMap);
         newAnnotationSnapshot.id = uniqueId();
         self.addArrow(ArrowAnnotation.create(newAnnotationSnapshot));
@@ -361,7 +363,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     const { tiles, sharedModels, annotations } = dragTiles;
 
     // Convert IDragSharedModelItems to partial SharedModelEnries
-    const sharedModelEntries: PartialSharedModelEntry[] = [];
+    const sharedModelEntries: SharedModelEntrySnapshotType[] = [];
     sharedModels.forEach(dragSharedModel => {
       try {
         const content = JSON.parse(dragSharedModel.content);
@@ -370,7 +372,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         if (sharedModel) {
           sharedModelEntries.push({
             sharedModel,
-            tiles: dragSharedModel.tileIds.map(tileId => ({ id: tileId }))
+            tiles: dragSharedModel.tileIds
           });
         }
       } catch (e) {
@@ -389,9 +391,14 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     const sharedModelEntries = Object.values(self.getSharedModelsUsedByTiles(tileIds));
     const annotations = Object.values(self.getAnnotationsUsedByTiles(tileIds, true));
 
+    // Make sure we are only passing snapshots to copyTiles, since they need to be cloned & modified.
+    const snapshots = sharedModelEntries.map(sme => {
+      return getSnapshot(sme);
+    });
+
     self.copyTiles(
       tiles,
-      sharedModelEntries,
+      snapshots,
       annotations,
       { rowInsertIndex: rowIndex }
     );
