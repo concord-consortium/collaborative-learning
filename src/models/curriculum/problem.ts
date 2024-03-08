@@ -30,12 +30,11 @@ const ModernProblemModel = types
      * with all of the other sections in this problem, or this problem's unit
      */
     sectionsFromSnapshot: types.frozen<SectionModelSnapshot[]>(),
-    exemplarPaths: types.array(types.string), // HMM: is above ever not string[]?
+    exemplarPaths: types.array(types.string),
     config: types.maybe(types.frozen<Partial<ProblemConfiguration>>())
   })
   .volatile(self => ({
-    sections: observable.array() as SectionModelType[],
-    // exemplars: observable.array() as any[] // HMM: I may need this later?
+    sections: observable.array() as SectionModelType[]
   }))
   .views(self => ({
     get fullTitle() {
