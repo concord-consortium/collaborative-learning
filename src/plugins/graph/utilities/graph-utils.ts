@@ -198,7 +198,6 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
   const { dataConfiguration, enableAnimation, instanceId, dotsElement } = props;
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
   const caseDataKeyFunc = (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.plotNum}_${d.caseID}`;
-  console.warn("matchCircles", allCaseData);
   // Create the circles
   const allCircles = selectGraphDots(dotsElement);
   if (!allCircles) return;
