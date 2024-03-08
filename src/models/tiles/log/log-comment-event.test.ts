@@ -28,7 +28,7 @@ const problem = investigation.getProblem(1);
 describe("authed logger", () => {
   let stores: IStores;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockXhr.setup();
 
     const content = DocumentContentModel.create(createSingleTileContent({
@@ -52,6 +52,8 @@ describe("authed logger", () => {
         }]
       })
     });
+
+    await stores.problem.loadSections("");
 
     Logger.initializeLogger(stores, { investigation: investigation.title, problem: problem?.title });
   });

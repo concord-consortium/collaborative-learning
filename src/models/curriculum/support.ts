@@ -2,16 +2,6 @@ import { types, getSnapshot } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
 import { IAuthoredDocumentContent } from "../document/document-content-import-types";
 
-let gSuspendSupportContentParsing = 0;
-
-export function suspendSupportContentParsing() {
-  ++gSuspendSupportContentParsing;
-}
-
-export function resumeSupportContentParsing() {
-  --gSuspendSupportContentParsing;
-}
-
 export enum ESupportType {
   // simple text supports (e.g. legacy supports); content is simple text
   text = "text",
@@ -54,8 +44,6 @@ export const SupportModel = types
     content: types.string
   })
   .preProcessSnapshot(snapshot => {
-    if (gSuspendSupportContentParsing) return { type: ESupportType.text, content: "" };
-
     const legacySupport = snapshot as any as LegacySupportSnapshot;
     if (legacySupport.text) return { type: ESupportType.text, content: legacySupport.text };
 
