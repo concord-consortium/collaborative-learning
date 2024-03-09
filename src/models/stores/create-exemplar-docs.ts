@@ -36,8 +36,8 @@ export async function createAndLoadExemplarDocs({
   curriculumConfig,
   appConfig
 }: ICreateExemplarDocsParams) {
-  const { exemplarPaths } = problem;
-  const exemplarsData = await getExemplarsData(unitUrl, exemplarPaths);
+  const { exemplars } = problem;
+  const exemplarsData = await getExemplarsData(unitUrl, exemplars);
   classStore.addUser(ClassUserModel.create(kExemplarUserParams));
   createExemplarDocs(documents, exemplarsData, curriculumConfig, appConfig);
 }
