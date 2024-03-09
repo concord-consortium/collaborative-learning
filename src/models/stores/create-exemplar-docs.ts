@@ -82,15 +82,7 @@ function createExemplarDocs(
       content: exemplarData.content,
       key: exemplarDocId
     };
-    makeDocFromData(newDocParams, documents, appConfig);
+    const newDoc = createDocumentModelWithEnv(appConfig, newDocParams);
+    documents.add(newDoc);
   });
-}
-
-function makeDocFromData(
-  newDocParams: DocumentModelSnapshotType,
-  documents: DocumentsModelType,
-  appConfig: AppConfigModelType
-) {
-  const newDoc = createDocumentModelWithEnv(appConfig, newDocParams);
-  documents.add(newDoc);
 }
