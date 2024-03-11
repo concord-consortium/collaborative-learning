@@ -18,6 +18,15 @@ interface IProps {
   marqueeState: MarqueeState
 }
 
+/**
+ * Gets the transformation matrix that transforms from the user coordinate
+ * system on the source element to the user coordinate system on the
+ * target element.
+ * Replaces deprecated SVG method of the same name.
+ * @param source
+ * @param elem
+ * @returns
+ */
 function getTransformToElement(source: SVGGraphicsElement, elem: SVGGraphicsElement)    {
   const elemCTM = elem.getScreenCTM();
   const sourceCTM = source.getScreenCTM();
@@ -29,7 +38,7 @@ function getTransformToElement(source: SVGGraphicsElement, elem: SVGGraphicsElem
 }
 
 // Get bounding box INCLUDING any transform="..." on the element itself.
-// From https://stackoverflow.com/a/64909822
+// Adapted from https://stackoverflow.com/a/64909822
 function boundingBoxRelativeToElement(fromSpace: SVGGraphicsElement, toSpace: SVGGraphicsElement) {
   const bbox = fromSpace.getBBox();
   const m = getTransformToElement(fromSpace, toSpace);

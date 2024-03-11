@@ -11,6 +11,12 @@ interface IProps {
   onSubmit: (value:string) => void;
 }
 
+/**
+ * Generic component for an in-place editable label.
+ *
+ * Differs from stock <Editable> in that there's an explicit edit button rather
+ * than invoking edit mode by clicking on the label text itself.
+ */
 export const EditableLabelWithButton = observer(function EditableDataSetName({defaultValue, onSubmit}: IProps) {
 
   function EditButton() {

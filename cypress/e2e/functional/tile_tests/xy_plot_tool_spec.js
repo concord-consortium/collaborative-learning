@@ -532,6 +532,7 @@ context('XYPlot Tool Tile', function () {
       // Drag a point to reposition.  Should start out where we initially clicked
       xAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 150, 10);
       yAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 50, 10);
+      // {force: true} seems to be necessary, not sure why
       xyTile.getGraphDot().eq(0).children('circle').eq(1)
         .trigger("mousedown", 150, 50, { force: true })
         .trigger("drag", 175, 75, { force: true })

@@ -138,7 +138,8 @@ export function handleClickOnDot(event: MouseEvent, caseData: CaseData, dataConf
 
   if (graphModel.editingMode==="add"
       && graphModel.editingLayer && graphModel.editingLayer.config !== dataConfiguration) {
-    // We add a case to the editable dataset at the same values as the existing case clicked on.
+    // We're in "Add points" mode, and clicked on a case that is not in the editable dataset:
+    // add a case to the editable dataset at the same values as the existing case clicked on.
     const existingCase = dataset?.getCanonicalCase(caseData.caseID);
     if (existingCase) {
       const xAttributeId = dataConfiguration.xAttributeID;
@@ -149,15 +150,16 @@ export function handleClickOnDot(event: MouseEvent, caseData: CaseData, dataConf
       }
     }
   } else {
+    // Otherwise, clicking on a dot means updating the selection.
     const extendSelection = event.shiftKey,
       cellIsSelected = dataset?.isCellSelected(yCell);
     if (!cellIsSelected) {
-      if (extendSelection) { // y cell is not selected and Shift key is down => add y cell to selection
+      if (extendSelection) { // Dot is not selected and Shift key is down => add to selection
         dataset?.selectCells([yCell]);
-      } else { // y cell is not selected and Shift key is up => only this y cell should be selected
+      } else { // Dot is not selected and Shift key is up => only this dot should be selected
         dataset?.setSelectedCells([yCell]);
       }
-    } else if (extendSelection) { // y cell is selected and Shift key is down => deselect cell
+    } else if (extendSelection) { // Dot is selected and Shift key is down => deselect
       dataset?.selectCells([yCell], false);
     }
   }
