@@ -25,7 +25,7 @@ import "./numberline-toolbar-registration";
 
 import "./numberline-tile.scss";
 
-export enum ToolbarOption {
+export enum CreatePointType {
   Selection = "selection",
   Filled = "filled",
   Open = "open"
@@ -42,25 +42,16 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   /* ========================== [ Determine Point is Open or Filled ]  ========================= */
 
-  const [toolbarOption, setToolbarOption] = useState<ToolbarOption>(ToolbarOption.Selection); //"selection"
+  const toolbarOptionRef = useRef<CreatePointType>(CreatePointType.Selection); //"selection"
 
-  const handleCreatePointType = (_isOpen: ToolbarOption) => {
-    console.log("--------------------------------------");
-    console.log("initial STATE:", toolbarOption);
-    setToolbarOption(_isOpen);
+  const handleCreatePointType = (pointType: CreatePointType) => {
+    toolbarOptionRef.current = pointType;
   };
-
-  useEffect(() => {
-    console.log("Updated STATE:", toolbarOption);
-  }, [toolbarOption]);
 
   /* ============================ [ Model Manipulation Functions ]  ============================ */
   const createPoint = (xValue: number, _pointTypeIsOpen: boolean) => {
-    const pointType = (_pointTypeIsOpen) ? "OPEN" : "FILLED";
-    // console.log("createPoint with xValue", xValue, "pointTypeisOpen:", pointType);
     if (!readOnly) {
       const point = content.createAndSelectPoint(xValue, _pointTypeIsOpen);
-      console.log("pointCreated:", point.id, "-----", pointType);
       setHoverPointId(point.id);
     }
   };
@@ -142,7 +133,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         top: y - outerPointRadius,
         width: 2 * outerPointRadius
       };
-      console.log("boundingBox:", boundingBox);
       return boundingBox;
     }
   }, [annotationPointCenter]);
@@ -205,7 +195,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     return isBetweenYBounds && isBetweenXBounds;
   };
 
-  const handleMouseClick = (e: Event, _toolbarOption: ToolbarOption) => {
+  const handleMouseClick = (e: Event, _toolbarOption: CreatePointType) => {
     if (!readOnly){
       if (hoverPointId) {
         const hoverPoint = content.getPoint(hoverPointId);
@@ -218,9 +208,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         // and toolbarOption is either filled or open
         const [mouseX, mouseY] = mousePos(e);
         if (mouseInBoundingBox(mouseX, mouseY)) {
-          console.log("inside bounding box!!!");
-          if(_toolbarOption !== ToolbarOption.Selection){
-            const isPointOpen = _toolbarOption === ToolbarOption.Open;
+          if(_toolbarOption !== CreatePointType.Selection){
+            const isPointOpen = _toolbarOption === CreatePointType.Open;
             createPoint(xScale.invert(mouseX), isPointOpen);
           }
         }
@@ -245,7 +234,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
   const drawMouseFollowPoint = (mouseX: number) => {
     // When in selection mode - do not draw any hover circle
-    if (toolbarOption === ToolbarOption.Selection) {
+    if (toolbarOptionRef.current === CreatePointType.Selection) {
       clearMouseFollowPoint();
       return;
     }
@@ -258,7 +247,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       .classed("point-inner-circle", true);
 
     //For open mode - draw inner white circle
-    if (toolbarOption === ToolbarOption.Open) {
+    if (toolbarOptionRef.current === CreatePointType.Open) {
       svg.append("circle")
         .attr("fill", "white")
         .attr("cx", mouseX)
@@ -283,7 +272,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
   };
 
-  svg.on("click", (e) => handleMouseClick(e, toolbarOption));
+  svg.on("click", (e) => handleMouseClick(e, toolbarOptionRef.current));
   svg.on("mousemove", (e) => handleMouseMove(e));
 
   // * ================================ [ Construct Numberline ] =============================== */
@@ -364,7 +353,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       outerPoints.enter()
         .append("circle").attr("class", "outer-point")
         .attr('cx', (p) => {
-          // console.log("line 364:", p);
           return xScale(p.currentXValue);
         }) //mapped to axis width
         .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
@@ -414,18 +402,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       const innerWhitePoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-white-point')
       .data(openPoints);
 
-      // content.pointsArr.forEach(p => {
-      //   if(p.isOpen) {
-      //     svg.append("circle")
-      //       .attr("class", "inner-white-point")
-      //       .attr("cx", xScale(p.currentXValue))
-      //       .attr("cy", yMidPoint)
-      //       .attr("r", innerPointRadius * 0.5)
-      //       .attr("fill", "white")
-      //       .attr('id', `inner-white-${p.id}`);
-      //   }
-      // });
-
       innerWhitePoints.enter()
         .append("circle")
           .attr("class", "inner-white-point")
@@ -435,15 +411,12 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           .attr("fill", "white")
           .attr('id', (p) => `inner-white-${p.id}`);
 
-      // Update selection: Update circles' position if necessary
+      // Update circle positions
       innerWhitePoints
       .attr("cx", (p) => xScale(p.currentXValue))
       .attr("cy", yMidPoint);
 
-      // Exit selection: Remove circles for data that's no longer present
       innerWhitePoints.exit().remove();
-
-
     }; //end of updateCircles()
 
     updateCircles();
@@ -455,7 +428,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     handleResetPoints: () => content.deleteAllPoints(),
     handleDeletePoint: deleteSelectedPoints,
     handleCreatePointType,
-    toolbarOption
+    toolbarOption: toolbarOptionRef.current
   };
 
   return (

@@ -8,16 +8,16 @@ import PointIcon from "../assets/numberline-toolbar-point-icon.svg";
 import PointOpenIcon from "../assets/numberline-toolbar-point-open-icon.svg";
 import ResetIcon from "../assets/numberline-toolbar-reset-icon.svg";
 import DeleteIcon from "../assets/numberline-toolbar-delete-icon.svg";
-import { ToolbarOption } from "./numberline-tile";
+import { CreatePointType } from "./numberline-tile";
 
 
 const SelectButton = ({name}: IToolbarButtonComponentProps) => {
   const context = useContext(NumberlineToolbarContext);
-  const selected = context?.toolbarOption === ToolbarOption.Selection;
+  const selected = context?.toolbarOption === CreatePointType.Selection;
 
   function handleClick() {
     if (context) {
-      context.handleCreatePointType(ToolbarOption.Selection);
+      context.handleCreatePointType(CreatePointType.Selection);
     }
   }
 
@@ -37,11 +37,11 @@ const SelectButton = ({name}: IToolbarButtonComponentProps) => {
 const PointButton = ({name}: IToolbarButtonComponentProps) => {
 
   const context = useContext(NumberlineToolbarContext);
-  const selected = context?.toolbarOption === ToolbarOption.Filled;
+  const selected = context?.toolbarOption === CreatePointType.Filled;
 
   function handleClick() {
     if (context) {
-      context.handleCreatePointType(ToolbarOption.Filled);
+      context.handleCreatePointType(CreatePointType.Filled);
     }
   }
 
@@ -61,11 +61,11 @@ const PointButton = ({name}: IToolbarButtonComponentProps) => {
 const PointOpenButton = ({name}: IToolbarButtonComponentProps) => {
 
   const context = useContext(NumberlineToolbarContext);
-  const selected = context?.toolbarOption === ToolbarOption.Open;
+  const selected = context?.toolbarOption === CreatePointType.Open;
 
   function handleClick() {
     if (context) {
-      context.handleCreatePointType(ToolbarOption.Open);
+      context.handleCreatePointType(CreatePointType.Open);
     }
   }
 
