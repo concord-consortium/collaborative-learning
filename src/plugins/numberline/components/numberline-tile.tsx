@@ -14,11 +14,12 @@ import {
   kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
   tickHeightDefault, tickStyleDefault, tickWidthDefault, tickWidthZero,
   innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kArrowheadTop,
-  kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax
+  kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax,
+  kPointValueLineLength, kPointValueLabelWidth, kPointValuelabelPadding, kPointValuelabelHeight
 } from '../numberline-tile-constants';
 import NumberlineArrowLeft from "../../../assets/numberline-arrow-left.svg";
 import NumberlineArrowRight from "../../../assets/numberline-arrow-right.svg";
-import { EditableNumberlineValue } from './editable-numberline-value';
+import { EditableNumberlineMinOrMax } from './editable-numberline-min-or-max';
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 import { INumberlineToolbarContext, NumberlineToolbarContext } from './numberline-toolbar-context';
 import "./numberline-toolbar-registration";
@@ -33,7 +34,6 @@ export enum CreatePointType {
 
 //**********************✔️•↳******************* GUIDELINES ************************************************
 
-
 //•points are given a descender line and a label with their numerical value to two dec places
 //•as the user slides the point around, the value updates
 //•when no point is selected, the last label is on top
@@ -45,7 +45,6 @@ export enum CreatePointType {
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { model, readOnly, tileElt, onRegisterTileApi } = props;
 
-  console.log("<------Numberline----->");
 
 
   const content = model.content as NumberlineContentModelType;
@@ -339,7 +338,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       });
   }
 
-  /* ========================== [ Construct/Update Circles ] =================================== */
   if (axisWidth !== 0){
     const handleDrag = drag<SVGCircleElement, PointObjectModelType>()
       .on('drag', (e, p) => {
@@ -349,6 +347,11 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           if (hoverPoint) content.setSelectedPoint(hoverPoint);
           const newXValue = xScale.invert(mouseX);
           p.setDragXValue(newXValue);
+          //Update vertical line + value label
+          svg.selectAll(".point-line")
+          .filter((d: any): d is PointObjectModelType => d.id === p.id)
+          .attr("x1", xScale(newXValue))
+          .attr('x2', xScale(newXValue));
         }
       })
       .on("end", (e, p) => {
@@ -357,9 +360,10 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         }
       });
 
+    /* ========================== [ Construct/Update Circles ] =================================== */
+
     const updateCircles = () => {
       /* =========================== [ Outer Hover Circles ] ======================= */
-
       //---- Initialize outer hover circles
       const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
         .data(content.pointsArr);
@@ -392,7 +396,13 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       innerPoints.enter()
         .append("circle")
         .attr("class", "inner-point")
-        .attr('cx', (p) => xScale(p.currentXValue)) //mapped to axis width
+        .attr('cx', (p) => {
+          console.log("----------------");
+          console.log("p where currXVal:", p.currentXValue);
+          console.log("p where val:", p.xValue);
+
+          return xScale(p.currentXValue);
+        }) //mapped to axis width
         .attr('cy', yMidPoint)
         .attr('r', innerPointRadius)
         .attr('id', p => p.id)
@@ -408,11 +418,9 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       innerPoints.exit().remove();
 
 
-      /* =========================== [ Blue White Circles] ============================= */
-      // Filter the points that should have an inner white circle
+      /* =========================== [ Blue White Circles] ===================================== */
 
-
-      const openPoints = content.pointsArr.filter(p => p.isOpen);
+      const openPoints = content.pointsArr.filter(p => p.isOpen); // Look for open points for inner white circle
       const innerWhitePoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-white-point')
       .data(openPoints);
 
@@ -431,10 +439,87 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       .attr("cy", yMidPoint);
 
       innerWhitePoints.exit().remove();
+
+      /* ======================== [ Vertical Line + Point Values] ============================== */
+
+      // ----- Draw vertical lines under each point
+      const pointLines = svg.selectAll('.point-line')
+      .data(content.pointsArr);
+
+      pointLines.enter()
+      .append("line")
+      .attr("class", "point-line")
+      .attr("x1", p => xScale(p.currentXValue))
+      .attr("y1", yMidPoint + outerPointRadius - 5)  // y start just below the point
+      .attr("x2", p => xScale(p.currentXValue))  // x position is same as point"s x
+      .attr("y2", yMidPoint + outerPointRadius + kPointValueLineLength) // y end is lineLength below the start
+      .style("stroke", "#949494") // Set the color of the line
+      .style("stroke-width", 2); // Set the width of the line
+
+      //Update line positions
+      pointLines
+      .attr("x1", (p) => xScale(p.currentXValue))
+      .attr("x2", (p) => xScale(p.currentXValue));
+
+      pointLines.exit().remove();
+
+      // ----- Draw point labels under vertical lines
+      const pointLabels = svg.selectAll(".point-label")
+      .data(content.pointsArr);
+
+      // Enter selection for the label groups
+      const pointLabelEnter = pointLabels.enter().append("g")
+      .attr("class", "point-label")
+      .attr("transform", d => `translate(${xScale(d.currentXValue)},
+      ${yMidPoint + outerPointRadius + kPointValueLineLength})`);
+
+
+      // Append rect for each label as an oval background
+      pointLabelEnter.append("rect")
+      .attr("x", -kPointValueLabelWidth / 2) // Center the rect around the point
+      .attr("y", kPointValuelabelPadding)
+      .attr("rx", kPointValuelabelHeight / 2) // rx and ry give the rect rounded corners, creating an oval effect
+      .attr("ry", kPointValuelabelHeight / 2)
+      .attr("width", kPointValueLabelWidth)
+      .attr("height", kPointValuelabelHeight)
+      .attr("fill", "#949494"); // Set the fill or style as needed
+
+      // Append text for each label
+      pointLabelEnter.append("text")
+      .attr("x", 0) // Center the text on the point
+      .attr("y", kPointValuelabelHeight / 2 + kPointValuelabelPadding * 1.5) // Vertically center the text in the rect
+      .attr("text-anchor", "middle") // Ensure the text is centered
+      .attr("alignment-baseline", "middle") // Ensure the text is vertically centered
+      .text(d => d.currentXValue); // Set the text to be the point"s value
+
+      // Update selection for the label groups
+      pointLabels.select("rect")
+      .attr("x", d => xScale(d.currentXValue) - kPointValueLabelWidth / 2)
+      .attr("y", d => yMidPoint + outerPointRadius + kPointValueLineLength + kPointValuelabelPadding);
+
+      pointLabels.select("text")
+      .attr("x", d => xScale(d.currentXValue))
+      .attr("y", d => {
+        return (
+       yMidPoint + outerPointRadius + kPointValueLineLength + kPointValuelabelHeight / 2 + kPointValuelabelPadding * 1.5
+        );
+      })
+      .text(d => d.currentXValue);
+
+      // Exit selection for the label groups
+      pointLabels.exit().remove();
+
+
+
+
+
+
     }; //end of updateCircles()
 
     updateCircles();
   }
+
+
 
   // * ================================= [ Register Toolbar ] ================================== */
 
@@ -478,7 +563,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
               className="arrow"
               style={{ right: arrowOffset, top: kArrowheadTop }}
             />
-            <EditableNumberlineValue
+            <EditableNumberlineMinOrMax
               value={content.min}
               minOrMax={"min"}
               offset={arrowOffset}
@@ -486,7 +571,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
               isTileSelected={isTileSelected}
               onValueChange={(newValue) => handleMinMaxChange("min", newValue)}
             />
-            <EditableNumberlineValue
+            <EditableNumberlineMinOrMax
               value= {content.max}
               minOrMax={"max"}
               offset={arrowOffset}

@@ -9,7 +9,7 @@ export const kContainerWidth = 0.93; // - container should take up 93% of tileWi
                                      // - this number should match the "width" attribute in numberline-tile.scss for
                                      // the class .numberline-tool-container
 
-//--------- Numberline Axis constants -----------------------------------------------------------------
+//--------- Numberline Axis Constants -----------------------------------------------------------------
 export const kAxisWidth = 0.9;
 export const kAxisStyle = "transform: translate(0px, 60px)";
 
@@ -28,7 +28,16 @@ export const maxNumSelectedPoints = 1; //this may change
 export const kArrowheadOffset = -17;
 export const kArrowheadTop = 53;
 
-//--------- Numberline Circle constants ---------------------------------------------------------------
+//--------- Numberline Point Constants ---------------------------------------------------------------
 export const innerPointRadius = 5;
 export const outerPointRadius = 9;
 export const kPointButtonRadius = 11;
+
+//--------- Numberline Point Value Constants ---------------------------------------------------------
+export const kPointValueLineLength = 30;
+export const kPointValueLabelWidth = 42;
+export const kPointValuelabelHeight = 20;
+export const kPointValuelabelPadding = 5;
+
+
+
