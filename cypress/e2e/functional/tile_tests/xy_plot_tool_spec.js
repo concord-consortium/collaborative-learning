@@ -97,7 +97,8 @@ context('XYPlot Tool Tile', function () {
       cy.log("Link Table");
       clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
       xyTile.linkTable("Table Data 1");
-      cy.wait(2000);
+      cy.wait(1000); // Needs a little extra time, probably due to legend resizing.
+      // Otherwise the upcoming typeInTableCell fails.
 
       cy.log("shows edit boxes on axes");
       xyTile.getEditableAxisBox("bottom", "min").should("exist");
@@ -110,7 +111,7 @@ context('XYPlot Tool Tile', function () {
 
       cy.log("Add Second Row Table Cell");
       cy.get(".primary-workspace").within((workspace) => {
-        tableToolTile.typeInTableCell(5, '7'); // Failing
+        tableToolTile.typeInTableCell(5, '7');
         tableToolTile.getTableCell().eq(5).should('contain', '7');
         tableToolTile.typeInTableCell(6, '6');
         tableToolTile.getTableCell().eq(6).should('contain', '6');

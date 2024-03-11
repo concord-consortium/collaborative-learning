@@ -15,14 +15,12 @@ import {
   setPointSelection
 } from "../utilities/graph-utils";
 import { useGraphLayerContext } from "../hooks/use-graph-layer-context";
-import { useGraphEditingContext } from "../hooks/use-graph-editing-context";
 
 export const ScatterDots = function ScatterDots(props: PlotProps) {
   const {dotsRef, enableAnimation} = props,
     graphModel = useGraphModelContext(),
     layer = useGraphLayerContext(),
     dataConfiguration = useDataConfigurationContext(),
-    graphEditingContext = useGraphEditingContext(),
     dataset = dataConfiguration?.dataset,
     secondaryAttrIDsRef = useRef<string[]>([]),
     pointRadiusRef = useRef(0),
@@ -43,7 +41,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   yScaleRef.current = layout.getAxisScale("left") as ScaleNumericBaseType;
 
   const onDragStart = useCallback((event: MouseEvent) => {
-    if (graphEditingContext.editPointsMode || graphEditingContext.addPointsMode) {
+    if (graphModel.editingMode !== "none") {
       const targetDot = event.target && inGraphDot(event.target as SVGSVGElement);
       if (!targetDot) return;
       target.current = select(targetDot as SVGSVGElement);
@@ -66,8 +64,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
 
       handleClickOnDot(event, aCaseData, dataConfiguration);
     }
-  }, [dataConfiguration, dataset, enableAnimation, graphEditingContext.addPointsMode,
-    graphEditingContext.editPointsMode, graphModel]),
+  }, [dataConfiguration, dataset, enableAnimation, graphModel]),
 
     updatePositions = useCallback((event: MouseEvent, forceUpdate: boolean) => {
       if (dragID !== '') {

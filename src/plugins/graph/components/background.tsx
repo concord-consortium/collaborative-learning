@@ -11,7 +11,6 @@ import {MarqueeState} from "../models/marquee-state";
 import {IGraphModel} from "../models/graph-model";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import { useGraphModelContext } from "../hooks/use-graph-model-context";
-import { useGraphEditingContext } from "../hooks/use-graph-editing-context";
 import { ICell } from "../../../models/data/data-types";
 
 interface IProps {
@@ -124,7 +123,6 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
     instanceId = useInstanceIdContext() || 'background',
     layout = useGraphLayoutContext(),
     graphModel = useGraphModelContext(),
-    graphEditMode = useGraphEditingContext(),
     bgRef = ref as MutableRefObject<SVGGElement | null>,
     startX = useRef(0),
     startY = useRef(0),
@@ -144,16 +142,16 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
   }, [layout]);
 
   const onClick = useCallback((event: { offsetX: number, offsetY: number, shiftKey: boolean }) => {
-    if (graphEditMode.addPointsMode) {
+    if (graphModel.editingMode==="add") {
       const {x, y} = pointCoordinates(event.offsetX, event.offsetY);
-      graphEditMode.addPoint(x, y);
+      graphModel.editingLayer?.addPoint(x, y);
     } else {
       // If not in add mode or shifted, clicking on background deselects everything
       if (!event.shiftKey) {
         graphModel.clearAllSelectedCases();
       }
     }
-  }, [graphEditMode, graphModel, pointCoordinates]);
+  }, [graphModel, pointCoordinates]);
 
   const selectModeDragStart = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
       const {computedBounds} = layout,
@@ -206,13 +204,13 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
 
     createModeDragEnd = useCallback((event: { x: number; y: number; }) => {
       const point = pointCoordinates(event.x, event.y);
-      graphEditMode.addPoint(point.x, point.y);
+      graphModel.editingLayer?.addPoint(point.x, point.y);
       setPotentialPoint(undefined);
-    }, [graphEditMode, pointCoordinates]);
+    }, [graphModel.editingLayer, pointCoordinates]);
 
 
   const dragBehavior = useMemo(() => {
-    if (graphEditMode.addPointsMode) {
+    if (graphModel.editingMode==="add") {
       return drag<SVGRectElement, number>()
       .on("start", createModeDragStart)
       .on("drag", createModeDrag)
@@ -223,7 +221,8 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
       .on("drag", selectModeDrag)
       .on("end", selectModeDragEnd);
     }
-  }, [createModeDrag, createModeDragEnd, createModeDragStart, graphEditMode.addPointsMode,
+  }, [createModeDrag, createModeDragEnd, createModeDragStart,
+    graphModel.editingMode,
     selectModeDrag, selectModeDragEnd, selectModeDragStart]);
 
   useEffect(() => {
@@ -262,7 +261,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
       <g ref={bgRef}/>
       {potentialPoint &&
         <circle className="potential" cx={potentialPoint.x} cy={potentialPoint.y}
-          r={graphModel.getPointRadius('hover-drag')} fill={graphEditMode.getEditablePointsColor()}/> }
+          r={graphModel.getPointRadius('hover-drag')} fill={graphModel.getEditablePointsColor()}/> }
     </g>
   );
 });

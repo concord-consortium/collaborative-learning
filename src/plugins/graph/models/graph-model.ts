@@ -207,7 +207,8 @@ export const GraphModel = TileContentModel
     attributeType(role: GraphAttrRole) {
       return self.layers[0].config.attributeType(role);
     },
-    getLayerById(layerId: string) {
+    getLayerById(layerId: string): IGraphLayerModel|undefined {
+      if (!layerId) return undefined;
       return self.layers.find(layer => layer.id === layerId);
     },
     layerForDataConfigurationId(dataConfID: string) {
@@ -238,8 +239,9 @@ export const GraphModel = TileContentModel
     /**
      * Return the layer currently being edited, or undefined if none.
      */
-    get editingLayer() {
-      return self.editingLayerId && this.getLayerById(self.editingLayerId);
+    get editingLayer(): IGraphLayerModel|undefined {
+      if (!self.editingLayerId) return undefined;
+      return this.getLayerById(self.editingLayerId);
     },
     /**
      * Find all tooltip-related attributes from all layers.
@@ -542,6 +544,17 @@ export const GraphModel = TileContentModel
       const colorIndex = self._idColors.get(id);
       if (colorIndex === undefined) return "black";
       return clueGraphColors[colorIndex % clueGraphColors.length].name;
+    },
+    getEditablePointsColor() {
+      let color = "#000000";
+      const layer = self.editingLayer;
+      if (layer) {
+        const yAttributes = layer.config.yAttributeIDs;
+        if (yAttributes.length > 0) {
+          color = this.getColorForId(yAttributes[0]);
+        }
+      }
+      return color;
     }
   }))
   .actions(self => ({

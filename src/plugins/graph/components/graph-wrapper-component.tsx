@@ -18,8 +18,7 @@ import { IGraphModel } from "../models/graph-model";
 import { decipherDotId } from "../utilities/graph-utils";
 import { GraphComponent } from "./graph-component";
 import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
-import { GraphEditMode, Point } from "../graph-types";
-import { GraphEditingContext, IGraphEditModeContext } from "../hooks/use-graph-editing-context";
+import { Point } from "../graph-types";
 
 import "./graph-toolbar-registration";
 
@@ -36,36 +35,6 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   const layout = useInitGraphLayout(content);
   const xAttrType = content.config.attributeType("x");
   const yAttrType = content.config.attributeType("y");
-
-  function addPoint(x: number, y: number) {
-    const layer = content.editingLayer;
-    if (layer) {
-      layer.addPoint(0, x, y); // Point is added in layer 0 -- we only support editing one trace so far.
-    }
-  }
-  function setEditMode(string: GraphEditMode) {
-    content.setEditingMode(string);
-  }
-
-  function getEditablePointsColor() {
-    let color = "#000000";
-    const editableLayers = content.getEditableLayers();
-    if (editableLayers.length > 0) {
-      const yAttributes = editableLayers[0].config.yAttributeIDs;
-      if (yAttributes.length > 0) {
-        color = content.getColorForId(yAttributes[0]);
-      }
-    }
-    return color;
-  }
-
-  const graphEditMode: IGraphEditModeContext = {
-    addPointsMode: content.editingMode==="add",
-    editPointsMode: content.editingMode==="edit",
-    setEditMode,
-    addPoint,
-    getEditablePointsColor
-  };
 
   // This is used for locating Sparrow endpoints.
   const getDotCenter = useCallback((dotId: string) => {
@@ -184,18 +153,16 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
 
   return (
     <GraphSettingsContext.Provider value={graphSettings}>
-      <GraphEditingContext.Provider value={graphEditMode}>
-        <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
-          <BasicEditableTileTitle />
-          <GraphComponent
-            layout={layout}
-            tile={model}
-            tileElt={tileElt}
-            onRequestRowHeight={onRequestRowHeight}
-            readOnly={readOnly}
-          />
-        </div>
-      </GraphEditingContext.Provider>
+      <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
+        <BasicEditableTileTitle />
+        <GraphComponent
+          layout={layout}
+          tile={model}
+          tileElt={tileElt}
+          onRequestRowHeight={onRequestRowHeight}
+          readOnly={readOnly}
+        />
+      </div>
     </GraphSettingsContext.Provider>
   );
 });

@@ -65,12 +65,14 @@ export const GraphLayerModel = types
       self.autoAssignedAttributes = [];
     },
     /**
-     * Add a point in the given plotNum with the given x and y values.
-     * @param plotNum
+     * Add a point to this layer with the given x and y values.
+     * A plot number can be provided; it defaults to 0 since currently
+     * only a single trace of manually created points can be created in the graph.
      * @param x
      * @param y
+     * @param plotNum optional, default 0
      */
-    addPoint(plotNum: number, x: number, y: number) {
+    addPoint(x: number, y: number, plotNum: number=0) {
       const dataset = self.config.dataset;
       const xAttr = self.config.attributeID("x");
       const yAttr = self.config.yAttributeIDs[plotNum];

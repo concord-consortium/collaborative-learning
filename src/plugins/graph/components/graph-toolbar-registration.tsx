@@ -7,7 +7,6 @@ import { IToolbarButtonComponentProps, registerTileToolbarButtons }
   from "../../../components/toolbar/toolbar-button-manager";
 import { GraphControllerContext } from "../models/graph-controller";
 import { useGraphModelContext } from "../hooks/use-graph-model-context";
-import { useGraphEditingContext } from "../hooks/use-graph-editing-context";
 
 import LinkTableIcon from "../../../clue/assets/icons/geometry/link-table-icon.svg";
 import AddIcon from "../../../assets/icons/add-data-graph-icon.svg";
@@ -94,7 +93,6 @@ const ToggleLockAxesButton = observer(function ToggleLockAxesButton({name}: IToo
 
 const AddPointsByHandButton = observer(function AddPointsByHandButton({name}: IToolbarButtonComponentProps) {
   const graph = useGraphModelContext();
-  const graphEditMode = useGraphEditingContext();
   const hasEditableLayers = graph.getEditableLayers().length > 0;
 
   // Enable button if axes are numeric or undefined.
@@ -105,7 +103,7 @@ const AddPointsByHandButton = observer(function AddPointsByHandButton({name}: IT
 
   function handleClick() {
     graph.createEditableLayer();
-    graphEditMode.setEditMode("add");
+    graph.setEditingMode("add");
   }
 
   return (
@@ -123,13 +121,13 @@ const AddPointsByHandButton = observer(function AddPointsByHandButton({name}: IT
 
 const SelectPointsButton = observer(function({name}: IToolbarButtonComponentProps) {
   const graph = useGraphModelContext();
-  const graphEditModeContext = useGraphEditingContext();
+  const currentMode = graph.editingMode;
 
   const editableLayers = graph.getEditableLayers();
   const hasEditableLayers = editableLayers.length > 0;
 
   function handleClick() {
-    graphEditModeContext.setEditMode(graphEditModeContext.editPointsMode ? "none" : "edit");
+    graph.setEditingMode(currentMode==="edit" ? "none" : "edit");
   }
 
   return (
@@ -137,7 +135,7 @@ const SelectPointsButton = observer(function({name}: IToolbarButtonComponentProp
       name={name}
       title="Select/Move point"
       onClick={handleClick}
-      selected={graphEditModeContext.editPointsMode}
+      selected={currentMode === "edit"}
       disabled={!hasEditableLayers}
     >
       <SelectToolIcon/>
@@ -147,16 +145,15 @@ const SelectPointsButton = observer(function({name}: IToolbarButtonComponentProp
 
 const AddPointsButton = observer(function({name}: IToolbarButtonComponentProps) {
   const graph = useGraphModelContext();
-  const graphEditModeContext = useGraphEditingContext();
+  const currentMode = graph.editingMode;
 
   const editableLayers = graph.getEditableLayers();
   const hasEditableLayers = editableLayers.length > 0;
 
-  const iconStyle = { fill: graphEditModeContext.getEditablePointsColor() };
+  const iconStyle = { fill: graph.getEditablePointsColor() };
 
   function handleClick() {
-    // Toggle the mode
-    graphEditModeContext.setEditMode(graphEditModeContext.addPointsMode ? "none" : "add");
+    graph.setEditingMode(currentMode==="add" ? "none" : "add");
   }
 
   return (
@@ -164,7 +161,7 @@ const AddPointsButton = observer(function({name}: IToolbarButtonComponentProps) 
       name={name}
       title="Add point"
       onClick={handleClick}
-      selected={graphEditModeContext.addPointsMode}
+      selected={currentMode==="add"}
       disabled={!hasEditableLayers}
     >
       <AddPointsIcon style={iconStyle} />

@@ -146,7 +146,7 @@ export function handleClickOnDot(event: MouseEvent, caseData: CaseData, dataConf
       const x = dataset?.getNumeric(caseData.caseID, xAttributeId);
       const y = dataset?.getNumeric(caseData.caseID, yAttributeId);
       if (x !== undefined && y !== undefined) {
-        graphModel.editingLayer.addPoint(0, x, y);
+        graphModel.editingLayer.addPoint(x, y);
       }
     }
   } else {
