@@ -153,7 +153,9 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
     }
   }, [graphModel, pointCoordinates]);
 
-  const selectModeDragStart = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
+  // Define the dragging behaviors for "edit" mode and for "add" mode, then assemble into one "drag" object.
+  const
+    dragStartEditMode = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
       const {computedBounds} = layout,
         plotBounds = computedBounds.plot;
       selectionTree.current = prepareTree(`.${instanceId}`, graphDotSelector);
@@ -167,7 +169,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
       marqueeState.setMarqueeRect({x: startX.current, y: startY.current, width: 0, height: 0});
     }, [graphModel, instanceId, layout, marqueeState]),
 
-    selectModeDrag = useCallback((event: { dx: number; dy: number }) => {
+    dragMoveEditMode = useCallback((event: { dx: number; dy: number }) => {
       if (event.dx !== 0 || event.dy !== 0) {
         previousMarqueeRect.current = rectNormalize(
           {x: startX.current, y: startY.current, w: width.current, h: height.current});
@@ -188,42 +190,55 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
       }
     }, [graphModel, marqueeState]),
 
-    selectModeDragEnd = useCallback(() => {
+    dragEndEditMode = useCallback((event: { x: number; y: number; }) => {
       marqueeState.setMarqueeRect({x: 0, y: 0, width: 0, height: 0});
       selectionTree.current = null;
-    }, [marqueeState]);
+    }, [marqueeState]),
 
-  const
-    createModeDragStart = useCallback((event: { x: number; y: number; }) => {
+    dragStartAddMode = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
       setPotentialPoint(event);
     }, []),
 
-    createModeDrag = useCallback((event: { x: number; y: number; }) => {
+    dragMoveAddMode = useCallback((event: { x: number; y: number; dx: number; dy: number }) => {
       setPotentialPoint(event);
     }, []),
 
-    createModeDragEnd = useCallback((event: { x: number; y: number; }) => {
+    dragEndAddMode = useCallback((event: { x: number; y: number; }) => {
       const point = pointCoordinates(event.x, event.y);
       graphModel.editingLayer?.addPoint(point.x, point.y);
       setPotentialPoint(undefined);
-    }, [graphModel.editingLayer, pointCoordinates]);
+    }, [graphModel.editingLayer, pointCoordinates]),
 
+    dragStart = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
+      if (graphModel.editingMode === "add") {
+        dragStartAddMode(event);
+      } else {
+        dragStartEditMode(event);
+      }
+    }, [dragStartAddMode, graphModel.editingMode, dragStartEditMode]),
+
+    dragMove = useCallback((event: { x: number; y: number; dx: number; dy: number }) => {
+      if (graphModel.editingMode === "add") {
+        dragMoveAddMode(event);
+      } else {
+        dragMoveEditMode(event);
+      }
+    }, [dragMoveAddMode, graphModel.editingMode, dragMoveEditMode]),
+
+    dragEnd = useCallback((event: { x: number; y: number; }) => {
+      if (graphModel.editingMode === "add") {
+        dragEndAddMode(event);
+      } else {
+        dragEndEditMode(event);
+      }
+    }, [dragEndAddMode, graphModel.editingMode, dragEndEditMode]);
 
   const dragBehavior = useMemo(() => {
-    if (graphModel.editingMode==="add") {
-      return drag<SVGRectElement, number>()
-      .on("start", createModeDragStart)
-      .on("drag", createModeDrag)
-      .on("end", createModeDragEnd);
-    } else {
-    return drag<SVGRectElement, number>()
-      .on("start", selectModeDragStart)
-      .on("drag", selectModeDrag)
-      .on("end", selectModeDragEnd);
-    }
-  }, [createModeDrag, createModeDragEnd, createModeDragStart,
-    graphModel.editingMode,
-    selectModeDrag, selectModeDragEnd, selectModeDragStart]);
+    return drag<any, any>()
+      .on("start", dragStart)
+      .on("drag", dragMove)
+      .on("end", dragEnd);
+  }, [dragMove, dragEnd, dragStart]);
 
   useEffect(() => {
     return autorun(() => {

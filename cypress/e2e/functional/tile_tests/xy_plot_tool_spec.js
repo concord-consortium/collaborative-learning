@@ -501,10 +501,10 @@ context('XYPlot Tool Tile', function () {
 
       // Create manual layer
       clueCanvas.clickToolbarButton('graph', 'add-points-by-hand');
-      clueCanvas.toolbarButtonIsDisabled('graph', 'add-points-by-hand'); // only one manual set
+      clueCanvas.toolbarButtonIsDisabled('graph', 'add-points-by-hand'); // only one manual set allowed
       clueCanvas.toolbarButtonIsEnabled('graph', 'move-points');
       clueCanvas.toolbarButtonIsEnabled('graph', 'add-points');
-      clueCanvas.toolbarButtonIsSelected('graph', 'add-points'); // automatically turns on add mode
+      clueCanvas.toolbarButtonIsSelected('graph', 'add-points'); // automatically turns on "add" mode
       xyTile.getXAttributesLabel().should('have.length', 1).should('contain.text', 'X Variable');
       xyTile.getYAttributesLabel().should('have.length', 1).should('contain.text', 'Y Variable 1');
       xyTile.getLayerName().should('have.length', 1).should('contain.text', 'Added by hand');
