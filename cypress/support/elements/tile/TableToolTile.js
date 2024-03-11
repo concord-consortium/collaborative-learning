@@ -68,7 +68,7 @@ class TableToolTile{
       this.getTableCellEdit().type(`${text}{enter}`);
     }
     typeInTableCell(i, text) {
-      this.getTableCell().eq(i).dblclick();
+      this.getTableCell().eq(i).scrollIntoView().dblclick();
       this.getTableCellEdit().type(`${text}{enter}`);
     }
     getTableCellWithColIndex(colIndex, colValue){
