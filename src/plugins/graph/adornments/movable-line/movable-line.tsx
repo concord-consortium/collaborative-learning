@@ -7,9 +7,9 @@ import {ScaleNumericBaseType} from "../../imports/components/axis/axis-types";
 import {INumericAxisModel} from "../../imports/components/axis/models/axis-model";
 import {computeSlopeAndIntercept, equationString, IAxisIntercepts,
         lineToAxisIntercepts} from "../../utilities/graph-utils";
-import {useDataConfigurationContext} from "../../hooks/use-data-configuration-context";
 import {useInstanceIdContext} from "../../imports/hooks/use-instance-id-context";
 import { IMovableLineModel } from "./movable-line-model";
+import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 
 import "./movable-line.scss";
 
@@ -32,7 +32,7 @@ interface IProps {
 
 export const MovableLine = observer(function MovableLine(props: IProps) {
   const {containerId, model, plotHeight, plotWidth, subPlotKey={}, xAxis, yAxis} = props,
-    dataConfig = useDataConfigurationContext(),
+    graphModel = useGraphModelContext(),
     layout = useAxisLayoutContext(),
     instanceId = useInstanceIdContext(),
     xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType,
@@ -58,13 +58,9 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     yScaleCopy.range([plotHeight, 0]);
 
   // get attributes for use in equation
-  const allAttributes = dataConfig?.dataset?.attributes,
-    xAttrId = dataConfig?.attributeID('x') || '',
-    yAttrId = dataConfig?.attributeID('y') || '',
-    xAttr = allAttributes?.find(attr => attr.id === xAttrId),
-    yAttr = allAttributes?.find(attr => attr.id === yAttrId),
-    xAttrName = xAttr?.name ?? '',
-    yAttrName = yAttr?.name ?? '',
+  const
+    xAttrName = graphModel.xAttributeLabel,
+    yAttrName = graphModel.yAttributeLabel,
     xSubAxesCount = layout.getAxisMultiScale('bottom')?.repetitions ?? 1,
     ySubAxesCount = layout.getAxisMultiScale('left')?.repetitions ?? 1;
 

@@ -32,6 +32,7 @@ import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-da
 import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-model";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 import { multiLegendParts } from "../components/legend/legend-registration";
+import { MovableLineModel } from "../adornments/movable-line/movable-line-model";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -669,6 +670,9 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
   if (connectByDefault) {
     const cLines = ConnectingLinesModel.create();
     createdGraphModel.showAdornment(cLines);
+    const mLine = MovableLineModel.create();
+    mLine.setInitialLine(createdGraphModel.axes.get("bottom"), createdGraphModel.axes.get("left"), "{}");
+    createdGraphModel.showAdornment(mLine);
   }
 
   return createdGraphModel;
