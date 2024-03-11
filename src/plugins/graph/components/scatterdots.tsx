@@ -71,6 +71,8 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
 
     updatePositions = useCallback((event: MouseEvent, forceUpdate: boolean) => {
       if (dragID !== '') {
+        event.stopPropagation();
+        event.preventDefault();
         const xAxisScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>,
           xAttrID = dataConfiguration?.attributeID('x') ?? '';
         const newPos = {x: event.clientX, y: event.clientY},
@@ -100,16 +102,14 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     }, [layout, dataConfiguration, dataset, dragID]),
 
     onDrag = useCallback((event: MouseEvent) => {
-      event.stopPropagation();
-      event.preventDefault();
       updatePositions(event, false);
     }, [updatePositions]),
 
     onDragEnd = useCallback((event: MouseEvent) => {
-      graphModel.setInteractionInProgress(false);
-      // Final update does a rescale if appropriate
-      updatePositions(event, true);
       if (dragID !== '') {
+        graphModel.setInteractionInProgress(false);
+        // Final update does a rescale if appropriate
+        updatePositions(event, true);
         // TODO the radius transition doesn't actually do anything
         target.current
           .classed('dragging', false)

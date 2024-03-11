@@ -12,6 +12,7 @@ import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { IGraphLayerModel } from "../models/graph-layer-model";
 import { mstReaction } from "../../../utilities/mst-reaction";
+import { useReadOnlyContext } from "../../../components/document/read-only-context";
 
 interface IDragHandlers {
   start: (event: MouseEvent) => void
@@ -20,8 +21,9 @@ interface IDragHandlers {
 }
 
 export const useDragHandlers = (target: any, {start, drag, end}: IDragHandlers) => {
+  const readOnly = useReadOnlyContext();
   useEffect(() => {
-    if (target) {
+    if (target && !readOnly) {
       target.addEventListener('mousedown', start);
       target.addEventListener('mousemove', drag);
       target.addEventListener('mouseup', end);
@@ -32,7 +34,7 @@ export const useDragHandlers = (target: any, {start, drag, end}: IDragHandlers) 
         target.removeEventListener('mouseup', end);
       };
     }
-  }, [target, start, drag, end]);
+  }, [target, start, drag, end, readOnly]);
 };
 
 export interface IPlotResponderProps {
