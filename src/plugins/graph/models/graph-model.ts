@@ -33,6 +33,7 @@ import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-mod
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 import { multiLegendParts } from "../components/legend/legend-registration";
 import { MovableLineModel } from "../adornments/movable-line/movable-line-model";
+import { kMovableLineType } from "../adornments/movable-line/movable-line-types";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -471,9 +472,27 @@ export const GraphModel = TileContentModel
       const colorIndex = self._idColors.get(id);
       if (colorIndex === undefined) return "black";
       return clueGraphColors[colorIndex % clueGraphColors.length].name;
+    },
+    get isShowingMovableLine() {
+      return self.adornments.find(a => a.type === kMovableLineType)?.isVisible;
     }
   }))
   .actions(self => ({
+    showMovableLine() {
+      const mLine = MovableLineModel.create();
+      mLine.setInitialLine(self.axes.get("bottom"), self.axes.get("left"), "{}");
+      self.showAdornment(mLine);
+    },
+    hideMovableLine() {
+      self.hideAdornment(kMovableLineType);
+    },
+    toggleMovableLine() {
+      if (self.isShowingMovableLine) {
+        this.hideMovableLine();
+      } else {
+        this.showMovableLine();
+      }
+    },
     /**
      * Update layers as needed when shared models are attached or detached.
      * Called by the shared model manager.
@@ -670,9 +689,6 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
   if (connectByDefault) {
     const cLines = ConnectingLinesModel.create();
     createdGraphModel.showAdornment(cLines);
-    const mLine = MovableLineModel.create();
-    mLine.setInitialLine(createdGraphModel.axes.get("bottom"), createdGraphModel.axes.get("left"), "{}");
-    createdGraphModel.showAdornment(mLine);
   }
 
   return createdGraphModel;

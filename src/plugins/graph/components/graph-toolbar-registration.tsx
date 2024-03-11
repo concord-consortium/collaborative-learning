@@ -13,6 +13,7 @@ import AddIcon from "../../../assets/icons/add-data-graph-icon.svg";
 import FitAllIcon from "../assets/fit-all-icon.svg";
 import LockAxesIcon from "../assets/lock-axes-icon.svg";
 import UnlockAxesIcon from "../assets/unlock-axes-icon.svg";
+import MovableLineIcon from "../assets/movable-line-icon.svg";
 
 function LinkTileButton(name: string, title: string, allowMultiple: boolean) {
 
@@ -88,6 +89,25 @@ const ToggleLockAxesButton = observer(function ToggleLockAxesButton({name}: IToo
   );
 });
 
+const MovableLineButton = observer(function MovableLineButton({name}: IToolbarButtonComponentProps) {
+  const graph = useGraphModelContext();
+  const selected = graph.isShowingMovableLine;
+
+  function handleClick() {
+    graph.toggleMovableLine();
+  }
+
+  return (
+    <TileToolbarButton
+    name={name}
+    title="Movable line"
+    selected={selected}
+    onClick={handleClick}>
+      <MovableLineIcon/>
+    </TileToolbarButton>
+  );
+});
+
 registerTileToolbarButtons("graph",
 [
   {
@@ -105,5 +125,9 @@ registerTileToolbarButtons("graph",
   {
     name: 'toggle-lock',
     component: ToggleLockAxesButton
+  },
+  {
+    name: 'movable-line',
+    component: MovableLineButton
   }
 ]);

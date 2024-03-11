@@ -271,7 +271,8 @@
           "link-tile",
           "|",
           "fit-all",
-          "toggle-lock"
+          "toggle-lock",
+          "movable-line"
         ]
       },
       "simulator": {
