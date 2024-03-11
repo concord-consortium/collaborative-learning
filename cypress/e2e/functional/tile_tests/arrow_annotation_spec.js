@@ -230,6 +230,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationLayer().should("have.class", "editing");
     aa.getAnnotationButtons().should("not.exist");
     aa.clickArrowToolbarButton();
+    numberlineToolTile.setToolbarPoint(); //click Point in order to add points to numberline
     numberlineToolTile.addPointOnNumberlineTick(-4);
     numberlineToolTile.addPointOnNumberlineTick(2);
     aa.clickArrowToolbarButton();
