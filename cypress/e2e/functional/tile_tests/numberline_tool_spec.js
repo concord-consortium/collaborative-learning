@@ -27,11 +27,17 @@ context('Numberline Tile', function () {
     numberlineToolTile.getNumberlineTileTitle().type(newName + '{enter}');
     numberlineToolTile.getNumberlineTileTitleText().should("contain", newName);
 
-    cy.log('will test adding points to a numberline');
+    cy.log('will add closed points to a numberline');
     numberlineToolTile.setToolbarPoint(); //click Point in order to add points to numberline
     numberlineToolTile.addPointOnNumberlineTick(-4.0);
     numberlineToolTile.addPointOnNumberlineTick(2.0);
     numberlineToolTile.getPointsOnGraph().should('have.length', 2);
+
+    cy.log('will add open points to a numberline');
+    numberlineToolTile.setToolbarOpenPoint();
+    numberlineToolTile.addPointOnNumberlineTick(-3.0);
+    numberlineToolTile.addPointOnNumberlineTick(1.0);
+    numberlineToolTile.getPointsOnGraph().should('have.length', 4);
 
     cy.log('will change min and max value of numberline and recalculate ticks');
     numberlineToolTile.setMaxValue(10);
@@ -39,10 +45,16 @@ context('Numberline Tile', function () {
     numberlineToolTile.setMinValue(-10);
     numberlineToolTile.getAllNumberlineTicks().should('contain', 6.0);
 
+    cy.log("will delete a single point");
+    numberlineToolTile.setToolbarSelect();
+    // Just to select it
+    numberlineToolTile.addPointOnNumberlineTick(2.0);
+    numberlineToolTile.setToolbarDelete();
+    numberlineToolTile.getPointsOnGraph().should('have.length', 3);
+
     cy.log("will delete all points");
-    cy.log("delete all points in the numberline");
     numberlineToolTile.setToolbarReset();
-    numberlineToolTile.getPointsOnGraph().should('have.length', 0);
+    numberlineToolTile.hasNoPoints();
 
     //Numberline tile restore upon page reload
     cy.wait(2000);
