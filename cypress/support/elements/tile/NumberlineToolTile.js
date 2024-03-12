@@ -12,7 +12,7 @@ class NumberlineToolTile {
     return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
   }
   addPointOnNumberlineTick(num){
-    this.getNumberlineTick(num).parent().click(); //we need to click the <g> element that is the parent of the text element
+    this.getNumberlineTick(num).parent().click({force: true}); //we need to click the <g> element that is the parent of the text element
   }
   getNumberlineTick(num){
     const tickIndex = numberlineVals.indexOf(num);
@@ -25,26 +25,34 @@ class NumberlineToolTile {
     //exclude the hovering circle that follows the mouse on the numberline
     return cy.get(".numberline-tool-container .point-inner-circle").not(".mouse-follow-point");
   }
-  setToolbarReset(){
-    this.getResetButton().click();
+  hasNoPoints(){
+    return cy.get(".numberline-tool-container").should("not.have.descendants", ".point-inner-circle:not(.mouse-follow-point)");
+  }
+  setToolbarSelect(){
+    cy.get(".numberline-toolbar .select").click();
   }
   setToolbarPoint(){
-    this.getPointButton().click();
+    cy.get(".numberline-toolbar .point").click();
   }
-  getResetButton(){
-    return cy.get(".reset");
+  setToolbarOpenPoint(){
+    cy.get(".numberline-toolbar .point-open").click();
   }
-  getPointButton(){
-    return cy.get(".point");
+  setToolbarReset(){
+    cy.get(".numberline-toolbar .reset").click();
+  }
+  setToolbarDelete(){
+    cy.get(".numberline-toolbar .delete").click();
   }
   setMaxValue(max){
-    this.getMaxBox().dblclick().clear().type(`${max}{enter}`);
+    this.getMaxBox().dblclick();
+    this.getMaxBox().clear().type(`${max}{enter}`);
   }
   getMaxBox(){
     return cy.get(".numberline-tool-container .border-box").eq(1); //second element is max
   }
   setMinValue(min){
-    this.getMinBox().dblclick().clear().type(`${min}{enter}`);
+    this.getMinBox().dblclick();
+    this.getMinBox().clear().type(`${min}{enter}`);
   }
   getMinBox(){
     return cy.get(".numberline-tool-container .border-box").eq(0); //first element is min
