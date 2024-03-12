@@ -15,7 +15,7 @@ import {
   tickHeightDefault, tickStyleDefault, tickWidthDefault, tickWidthZero,
   innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kArrowheadTop,
   kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax,
-  kPointValueLineLength, kPointValueLabelWidth, kPointValuelabelPadding, kPointValuelabelHeight
+  kPointValueLineLength, kPointValuelabelHeight
 } from '../numberline-tile-constants';
 import NumberlineArrowLeft from "../../../assets/numberline-arrow-left.svg";
 import NumberlineArrowRight from "../../../assets/numberline-arrow-right.svg";
@@ -34,9 +34,9 @@ export enum CreatePointType {
 
 //**********************✔️•↳******************* GUIDELINES ************************************************
 
-//•points are given a descender line and a label with their numerical value to two dec places
-//•as the user slides the point around, the value updates
-//•when no point is selected, the last label is on top
+//✔️•points are given a descender line and a label with their numerical value to two dec places
+//✔️•as the user slides the point around, the value updates
+//✔️•when no point is selected, the last label is on top
 //•when a point is selected, it's label is on top
 //•when points are deleted the indicator disappears
 //•indicators save, synchronize, and are authorable
@@ -352,6 +352,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           .filter((d: any): d is PointObjectModelType => d.id === p.id)
           .attr("x1", xScale(newXValue))
           .attr('x2', xScale(newXValue));
+          //When dragging raise the currently dragged label above the others
+          select(`#label-${p.id}`).raise();
         }
       })
       .on("end", (e, p) => {
@@ -363,51 +365,39 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     /* ========================== [ Construct/Update Circles ] =================================== */
 
     const updateCircles = () => {
-      /* =========================== [ Outer Hover Circles ] ======================= */
+      /* =============================== [ Outer Hover Circles ] =============================== */
       //---- Initialize outer hover circles
       const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
-        .data(content.pointsArr);
+      .data(content.pointsArr);
 
       outerPoints.enter()
-        .append("circle").attr("class", "outer-point")
-        .attr('cx', (p) => {
-          return xScale(p.currentXValue);
-        }) //mapped to axis width
-        .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
-        .classed("point-outer-circle", true)
-        .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
+      .append("circle").attr("class", "outer-point")
+      .attr('cx', (p) => xScale(p.currentXValue))
+      .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
+      .classed("point-outer-circle", true)
+      .call((e) => handleDrag(e));
 
-      // --- Update functions outer hover circles
+      // --- Update outer hover circles
       outerPoints
-        .attr('cx', (p) => xScale(p.currentXValue)) //mapped to axis width
-        .classed("hovered", (p, idx) => (hoverPointId === p.id))
-        .call((e) => handleDrag(e)); // pass again in case axisWidth changes
+      .attr('cx', (p) => xScale(p.currentXValue))
+      .classed("hovered", (p, idx) => (hoverPointId === p.id))
+      .call((e) => handleDrag(e));
 
-      outerPoints.exit().remove(); //cleanup
+      outerPoints.exit().remove();
 
-      //TODO: Revise inner circles back to original
-      // create an innerPointsOpen that is white and append it to svg
-
-      /* =========================== [ Inner Circles ] ============================= */
+      /* ============================= [ Filled Blue Circles ] ================================= */
       const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
-        .data(content.pointsArr);
+      .data(content.pointsArr);
 
-      // Initialize Attributes
       innerPoints.enter()
-        .append("circle")
-        .attr("class", "inner-point")
-        .attr('cx', (p) => {
-          console.log("----------------");
-          console.log("p where currXVal:", p.currentXValue);
-          console.log("p where val:", p.xValue);
-
-          return xScale(p.currentXValue);
-        }) //mapped to axis width
-        .attr('cy', yMidPoint)
-        .attr('r', innerPointRadius)
-        .attr('id', p => p.id)
-        .classed("point-inner-circle", true) //may change
-        .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
+      .append("circle")
+      .attr("class", "inner-point")
+      .attr('cx', (p) => xScale(p.currentXValue))
+      .attr('cy', yMidPoint)
+      .attr('r', innerPointRadius)
+      .attr('id', p => p.id)
+      .classed("point-inner-circle", true)
+      .call((e) => handleDrag(e));
 
       // --- Update functions inner circles
       innerPoints
@@ -417,21 +407,20 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
       innerPoints.exit().remove();
 
-
-      /* =========================== [ Blue White Circles] ===================================== */
+      /* =========================== [ Open Inner White Circles] ===================================== */
 
       const openPoints = content.pointsArr.filter(p => p.isOpen); // Look for open points for inner white circle
       const innerWhitePoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-white-point')
       .data(openPoints);
 
       innerWhitePoints.enter()
-        .append("circle")
-          .attr("class", "inner-white-point")
-          .attr("cx", (p) => xScale(p.currentXValue))
-          .attr("cy", yMidPoint)
-          .attr("r", innerPointRadius * 0.5)
-          .attr("fill", "white")
-          .attr('id', (p) => `inner-white-${p.id}`);
+      .append("circle")
+      .attr("class", "inner-white-point")
+      .attr("cx", (p) => xScale(p.currentXValue))
+      .attr("cy", yMidPoint)
+      .attr("r", innerPointRadius * 0.5)
+      .attr("fill", "white")
+      .attr('id', (p) => `inner-white-${p.id}`);
 
       // Update circle positions
       innerWhitePoints
@@ -442,7 +431,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
       /* ======================== [ Vertical Line + Point Values] ============================== */
 
-      // ----- Draw vertical lines under each point
+      // --------------- Draw vertical lines under each point ----------
       const pointLines = svg.selectAll('.point-line')
       .data(content.pointsArr);
 
@@ -453,8 +442,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       .attr("y1", yMidPoint + outerPointRadius - 5)  // y start just below the point
       .attr("x2", p => xScale(p.currentXValue))  // x position is same as point"s x
       .attr("y2", yMidPoint + outerPointRadius + kPointValueLineLength) // y end is lineLength below the start
-      .style("stroke", "#949494") // Set the color of the line
-      .style("stroke-width", 2); // Set the width of the line
+      .style("stroke", "#949494")
+      .style("stroke-width", 2);
 
       //Update line positions
       pointLines
@@ -463,56 +452,56 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
       pointLines.exit().remove();
 
-      // ----- Draw point labels under vertical lines
-      const pointLabels = svg.selectAll(".point-label")
-      .data(content.pointsArr);
+      /* =========================== [ Oval Point Value Labels ] ===================================== */
+      // Initialize
+      const pointLabels = svg.selectAll<SVGGElement, PointObjectModelType>(".point-label")
+      .data<PointObjectModelType>(content.pointsArr, d => d.id);
 
-      // Enter selection for the label groups
-      const pointLabelEnter = pointLabels.enter().append("g")
+      const pointLabelEnter = pointLabels.enter()
+      .append("g")
       .attr("class", "point-label")
-      .attr("transform", d => `translate(${xScale(d.currentXValue)},
-      ${yMidPoint + outerPointRadius + kPointValueLineLength})`);
+      .attr("id", d => `label-${d.id}`); //referenced in handleDrag to raise the label as last child in the SVG
 
 
-      // Append rect for each label as an oval background
+      // Initialize ovals
       pointLabelEnter.append("rect")
-      .attr("x", -kPointValueLabelWidth / 2) // Center the rect around the point
-      .attr("y", kPointValuelabelPadding)
-      .attr("rx", kPointValuelabelHeight / 2) // rx and ry give the rect rounded corners, creating an oval effect
-      .attr("ry", kPointValuelabelHeight / 2)
-      .attr("width", kPointValueLabelWidth)
-      .attr("height", kPointValuelabelHeight)
-      .attr("fill", "#949494"); // Set the fill or style as needed
+      .attr("fill", "#FFFFFF")
+      .attr("stroke", "#949494")
+      .attr("stroke-width", "1.5px")
+      .attr("rx", "10")
+      .attr("ry", "10");
 
-      // Append text for each label
+      // Initialize label text
       pointLabelEnter.append("text")
-      .attr("x", 0) // Center the text on the point
-      .attr("y", kPointValuelabelHeight / 2 + kPointValuelabelPadding * 1.5) // Vertically center the text in the rect
-      .attr("text-anchor", "middle") // Ensure the text is centered
-      .attr("alignment-baseline", "middle") // Ensure the text is vertically centered
-      .text(d => d.currentXValue); // Set the text to be the point"s value
+      .attr("text-anchor", "middle")
+      .attr("alignment-baseline", "middle");
 
-      // Update selection for the label groups
-      pointLabels.select("rect")
-      .attr("x", d => xScale(d.currentXValue) - kPointValueLabelWidth / 2)
-      .attr("y", d => yMidPoint + outerPointRadius + kPointValueLineLength + kPointValuelabelPadding);
+      // Update rect and label
+      const pointLabelUpdate = pointLabelEnter.merge(pointLabels);
 
-      pointLabels.select("text")
-      .attr("x", d => xScale(d.currentXValue))
-      .attr("y", d => {
-        return (
-       yMidPoint + outerPointRadius + kPointValueLineLength + kPointValuelabelHeight / 2 + kPointValuelabelPadding * 1.5
-        );
-      })
-      .text(d => d.currentXValue);
+      const getTextWidth = (str: string) => 7 * str.length;
 
-      // Exit selection for the label groups
+      pointLabelUpdate.each(function(d) {
+        const textContent = d.currentXValue.toFixed(2);
+        const ovalWidth = getTextWidth(textContent) + 10; // 5px padding on each side
+        const yOffsetOval = yMidPoint + outerPointRadius + kPointValueLineLength;
+        const yOffsetNum = yOffsetOval + (kPointValuelabelHeight / 2) + 1;
+        const xOffsetNum =  xScale(d.currentXValue);
+        const xOffsetOval = xOffsetNum - (ovalWidth / 2);
+
+        select(this).select("rect")
+        .attr("width", ovalWidth)
+        .attr("height", kPointValuelabelHeight)
+        .attr("x", xOffsetOval)
+        .attr("y", yOffsetOval);
+
+        select(this).select("text")
+        .attr("x", xOffsetNum)
+        .attr("y", yOffsetNum)
+        .text(textContent);
+      });
+
       pointLabels.exit().remove();
-
-
-
-
-
 
     }; //end of updateCircles()
 
