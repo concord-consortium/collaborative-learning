@@ -10,9 +10,9 @@ import {computeSlopeAndIntercept, equationString, IAxisIntercepts,
 import {useInstanceIdContext} from "../../imports/hooks/use-instance-id-context";
 import { IMovableLineModel } from "./movable-line-model";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 
 import "./movable-line.scss";
-import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 
 function equationContainer(model: IMovableLineModel, subPlotKey: Record<string, string>, containerId: string) {
   const classFromKey = model.classNameFromKey(subPlotKey),
