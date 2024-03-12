@@ -12,6 +12,7 @@ import { IMovableLineModel } from "./movable-line-model";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 
 import "./movable-line.scss";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 
 function equationContainer(model: IMovableLineModel, subPlotKey: Record<string, string>, containerId: string) {
   const classFromKey = model.classNameFromKey(subPlotKey),
@@ -35,6 +36,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     graphModel = useGraphModelContext(),
     layout = useAxisLayoutContext(),
     instanceId = useInstanceIdContext(),
+    readOnly = useReadOnlyContext(),
     xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType,
     xRange = xScale.range(),
     xScaleCopy = xScale.copy(),
@@ -262,6 +264,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
 
   // Add the behaviors to the line segments
   useEffect(function addBehaviors() {
+    if (readOnly) return;
     const behaviors: { [index: string]: any } = {
       lower: drag()
         .on("drag", (e) => continueRotation(e, "lower")),
@@ -277,7 +280,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     lineObject.middle?.call(behaviors.middle);
     lineObject.upper?.call(behaviors.upper);
     lineObject.equation?.call(behaviors.equation);
-  }, [lineObject, continueTranslate, continueRotation, moveEquation]);
+  }, [lineObject, continueTranslate, continueRotation, moveEquation, readOnly]);
 
   // Build the line and its cover segments and handles just once
   useEffect(function createElements() {
