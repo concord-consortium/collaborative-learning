@@ -39,7 +39,8 @@
         "tools": [
           "link-tile-multiple",
           "fit-all",
-          "toggle-lock"
+          "toggle-lock",
+          "movable-line"
         ]
       },
       "diagram": {
