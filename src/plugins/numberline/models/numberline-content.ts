@@ -21,11 +21,6 @@ export const PointObjectModel = types
   }))
   .views(self =>({
     get currentXValue() {
-      // console.log("➡️ currentXValue");
-      // console.log("\t🥩 self.xValue:", self.xValue);
-      // console.log("\t🥩 self.dragXValue:", self.dragXValue);
-
-
       return self.dragXValue ?? self.xValue;
     }
   }))

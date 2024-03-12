@@ -21,7 +21,6 @@ export const tickStyleDefault = "transform: translateY(-7px)";
 export const tickTextTopOffsetDefault = "15px";
 export const tickTextTopOffsetMinAndMax = "0px";
 
-
 export const numberlineYBound = 15;  //# of pixels above and below numberline to determine if mouse is inBoundingBox
 export const maxNumSelectedPoints = 1; //this may change
 
@@ -33,11 +32,7 @@ export const innerPointRadius = 5;
 export const outerPointRadius = 9;
 export const kPointButtonRadius = 11;
 
-//--------- Numberline Point Value Constants ---------------------------------------------------------
+//--------- Point Vertical Line and Value Label Constants ---------------------------------------------------------
 export const kPointValueLineLength = 30;
-export const kPointValueLabelWidth = 42;
-export const kPointValuelabelHeight = 20;
+export const kPointValuelabelHeight = 20; //valueLabelWidth dynamically calculated in numberline-tile.tsx
 export const kPointValuelabelPadding = 5;
-
-
-

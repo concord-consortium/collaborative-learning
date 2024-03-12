@@ -32,21 +32,8 @@ export enum CreatePointType {
   Open = "open"
 }
 
-//**********************✔️•↳******************* GUIDELINES ************************************************
-
-//✔️•points are given a descender line and a label with their numerical value to two dec places
-//✔️•as the user slides the point around, the value updates
-//✔️•when no point is selected, the last label is on top
-//•when a point is selected, it's label is on top
-//•when points are deleted the indicator disappears
-//•indicators save, synchronize, and are authorable
-
-
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { model, readOnly, tileElt, onRegisterTileApi } = props;
-
-
-
   const content = model.content as NumberlineContentModelType;
   const [hoverPointId, setHoverPointId] = useState("");
   const [_selectedPointId, setSelectedPointId] = useState(""); // Just used to rerender when a point is selected
@@ -54,7 +41,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const isTileSelected = ui.isSelectedTile(model);
 
   /* ========================== [ Determine Point is Open or Filled ]  ========================= */
-
   const [toolbarOption, settoolbarOption] = useState<CreatePointType>(CreatePointType.Selection); //"selection"
 
   const handleCreatePointType = (pointType: CreatePointType) => {
@@ -319,23 +305,23 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     const tickValues = generateTickValues(content.min, content.max);
 
     axis
-      .attr("class", `${axisClass} num-line`)
-      .attr("style", `${kAxisStyle}`)
-      .call(axisBottom(xScale)
-      .tickValues(tickValues)
-      .tickFormat(tickFormatter))
+    .attr("class", `${axisClass} num-line`)
+    .attr("style", `${kAxisStyle}`)
+    .call(axisBottom(xScale)
+    .tickValues(tickValues)
+    .tickFormat(tickFormatter))
 
-      .selectAll("g.tick line") // Customize tick marks
-      .attr("class", (value)=> (value === 0) ? "zero-tick" : "default-tick")
-      .attr("y2", tickHeightDefault)
-      .attr("stroke-width", (value) => (value === 0) ? tickWidthZero : tickWidthDefault)
-      .attr("style", tickStyleDefault);
+    .selectAll("g.tick line") // Customize tick marks
+    .attr("class", (value)=> (value === 0) ? "zero-tick" : "default-tick")
+    .attr("y2", tickHeightDefault)
+    .attr("stroke-width", (value) => (value === 0) ? tickWidthZero : tickWidthDefault)
+    .attr("style", tickStyleDefault);
 
     axis
-      .selectAll("g.tick text") // Customize tick labels
-      .attr("dy", (dy) => {
-        return (dy === content.min || dy === content.max) ? tickTextTopOffsetMinAndMax : tickTextTopOffsetDefault;
-      });
+    .selectAll("g.tick text") // Customize tick labels
+    .attr("dy", (dy) => {
+      return (dy === content.min || dy === content.max) ? tickTextTopOffsetMinAndMax : tickTextTopOffsetDefault;
+    });
   }
 
   if (axisWidth !== 0){
@@ -352,7 +338,8 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           .filter((d: any): d is PointObjectModelType => d.id === p.id)
           .attr("x1", xScale(newXValue))
           .attr('x2', xScale(newXValue));
-          //When dragging raise the currently dragged label above the others
+          //Raise both the circle and label above the others
+          select(`${p.id}`).raise();
           select(`#label-${p.id}`).raise();
         }
       })
