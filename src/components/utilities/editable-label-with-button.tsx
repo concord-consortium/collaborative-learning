@@ -19,19 +19,6 @@ interface IProps {
  */
 export const EditableLabelWithButton = observer(function EditableDataSetName({defaultValue, onSubmit}: IProps) {
 
-  function EditButton() {
-    const { isEditing, getEditButtonProps } = useEditableControls();
-    if (!isEditing) {
-      return (
-        <button aria-label="Edit name" {...getEditButtonProps()}>
-          <EditIcon/>
-        </button>
-      );
-    } else {
-      return null;
-    }
-  }
-
   return (
     <Editable
       defaultValue={defaultValue}
@@ -44,3 +31,16 @@ export const EditableLabelWithButton = observer(function EditableDataSetName({de
     </Editable>
   );
 });
+
+function EditButton() {
+  const { isEditing, getEditButtonProps } = useEditableControls();
+  if (!isEditing) {
+    return (
+      <button aria-label="Edit name" {...getEditButtonProps()}>
+        <EditIcon/>
+      </button>
+    );
+  } else {
+    return null;
+  }
+}

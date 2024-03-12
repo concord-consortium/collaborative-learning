@@ -382,8 +382,8 @@ export const GraphModel = TileContentModel
         const dataConfiguration = DataConfigurationModel.create();
         layer.setDataConfiguration(dataConfiguration);
         dataConfiguration.setDataset(dataset, metadata);
-        dataConfiguration.setAttributeForRole("x", { attributeID: xAttr.id, type: "numeric" });
-        dataConfiguration.setAttributeForRole("y", { attributeID: yAttr.id, type: "numeric" });
+        dataConfiguration.setAttributeForRole("x", { attributeID: xAttr.id, type: "numeric" }, false);
+        dataConfiguration.setAttributeForRole("y", { attributeID: yAttr.id, type: "numeric" }, false);
       }
     },
     setXAttributeLabel(label: string) {
