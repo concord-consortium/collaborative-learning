@@ -502,6 +502,7 @@ export const GraphModel = TileContentModel
               newValues.push(newCaseValue);
             }
             dataset.setCanonicalCaseValues(newValues);
+            dataset.setSelectedCells([]);
           }
         }
       }

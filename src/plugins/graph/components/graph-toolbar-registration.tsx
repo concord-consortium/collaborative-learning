@@ -182,7 +182,7 @@ const DeleteButton = observer(function({name}: IToolbarButtonComponentProps) {
   return (
     <TileToolbarButton
       name={name}
-      title="Add point"
+      title="Delete"
       onClick={handleClick}
       disabled={disabled}
     >
