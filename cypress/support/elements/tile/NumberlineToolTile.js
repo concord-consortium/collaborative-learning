@@ -12,7 +12,7 @@ class NumberlineToolTile {
     return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
   }
   addPointOnNumberlineTick(num){
-    this.getNumberlineTick(num).parent().click(); //we need to click the <g> element that is the parent of the text element
+    this.getNumberlineTick(num).parent().click({force: true}); //we need to click the <g> element that is the parent of the text element
   }
   getNumberlineTick(num){
     const tickIndex = numberlineVals.indexOf(num);
