@@ -716,7 +716,14 @@ export const DataConfigurationModel = types
     removeAttributeFromRole(role: GraphAttrRole) {
       self._setAttributeDescription(role);
     },
-    setAttributeForRole(role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot) {
+    /**
+     * Assign the Attribute to the given graph role.
+     * By default will also select the attribute.
+     * @param role graph role.
+     * @param desc attribute description, including the attribute ID and optionally a type.
+     * @param select boolean default true to select the attribute.
+     */
+    setAttributeForRole(role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot, select: boolean=true) {
       if (role === 'y') {
         // Setting "Y" role implies that user only wants one, or no Y attributes.
         while (self._yAttributeDescriptions.length) {
@@ -724,20 +731,16 @@ export const DataConfigurationModel = types
         }
         if (desc && desc.attributeID !== '') {
           self._yAttributeDescriptions.push(desc);
-          self.dataset?.setSelectedAttributes([desc.attributeID]);
         }
       } else if (role === 'yPlus' && desc && desc.attributeID !== '') {
         self._yAttributeDescriptions.push(desc);
       } else if (role === 'rightNumeric') {
         this.setY2Attribute(desc);
-        if (desc) {
-          self.dataset?.setSelectedAttributes([desc.attributeID]);
-        }
       } else {
         self._setAttributeDescription(role, desc);
-        if (desc) {
-          self.dataset?.setSelectedAttributes([desc.attributeID]);
-        }
+      }
+      if (desc && select) {
+        self.dataset?.setSelectedAttributes([desc.attributeID]);
       }
       this.syncFilteredCasesCount(true);
       if (role === 'legend') {
