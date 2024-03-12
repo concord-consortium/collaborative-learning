@@ -493,10 +493,12 @@ export const localAssetsImagesHandler: IImageHandler = {
     return !/:/.test(url) &&
            // or legacy firebase storage references
            !/^\/.+\/portals\/.+$/.test(url) &&
+           // spaces are not allowed
+           !/ /.test(url) &&
            // make sure there's at least one slash
            /\//.test(url) &&
            // make sure value ends with a file extension
-           /\.[a-z0-9]+$/i.test(url);
+           /\.[a-z]{3,}$/i.test(url);
   },
 
   async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
