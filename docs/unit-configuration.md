@@ -170,6 +170,7 @@ Common toolbar framework; default toolbar buttons:
 - `link-tile` (opens dialog to replace dataset with a new one)
 - `fit-all` (rescale axes to fit all points in view)
 - `toggle-lock` (lock axes so they won't automatically rescale)
+- `movable-line` (show/hide the movable line)
 
 Also available:
 
