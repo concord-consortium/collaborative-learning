@@ -32,9 +32,6 @@ export enum CreatePointType {
   Open = "open"
 }
 
-//Guidelines TODO:
-//replace one more X With Trashcan - small version for graph red circled one
-
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { model, readOnly, tileElt, onRegisterTileApi } = props;
   const content = model.content as NumberlineContentModelType;
