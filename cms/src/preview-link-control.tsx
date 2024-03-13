@@ -1,12 +1,11 @@
 import React from "react";
-import { CmsWidgetControlProps } from "netlify-cms-core";
+import { CmsWidgetControlProps } from "decap-cms-core";
 
 import { getGuideJson, getUnitJson } from "../../src/models/curriculum/unit-utils";
-import { DocumentModelType } from "../../src/models/document/document";
 import { stripPTNumberFromBranch } from "../../src/utilities/branch-utils";
-import { urlParams } from "../../src/utilities/url-params";
-import { defaultCurriculumBranch } from "./cms-constants";
+import { urlParams } from "./cms-url-params";
 import { CurriculumConfig } from "../../src/models/stores/curriculum-config";
+import { defaultCurriculumBranch } from "./cms-constants";
 
 import curriculumConfigJson from "../../src/clue/curriculum-config.json";
 
@@ -54,9 +53,9 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
     // Finish setting up the preview link after reading the unit json
     this.isTeacherGuide = this.pathParts?.[2] === "teacher-guide";
     if (this.isTeacherGuide) {
-      getGuideJson(this.unit, curriculumConfig).then((unitJson: DocumentModelType) => this.setPreviewLink(unitJson));
+      getGuideJson(this.unit, curriculumConfig).then((unitJson) => this.setPreviewLink(unitJson));
     } else {
-      getUnitJson(this.unit, curriculumConfig).then((unitJson: DocumentModelType) => this.setPreviewLink(unitJson));
+      getUnitJson(this.unit, curriculumConfig).then((unitJson) => this.setPreviewLink(unitJson));
     }
 
     this.state = {
