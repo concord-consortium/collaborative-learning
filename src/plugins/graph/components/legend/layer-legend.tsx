@@ -19,7 +19,6 @@ import { logSharedModelDocEvent } from "../../../../models/document/log-shared-m
 import { LogEventName } from "../../../../lib/logger-types";
 import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
 
-
 export const layerLegendType = "layer-legend";
 
 const kLayerLegendHeaderHeight = 58;
