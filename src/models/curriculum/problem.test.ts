@@ -17,7 +17,7 @@ describe("problem model", () => {
       title: "test",
       subtitle: "",
       sectionsFromSnapshot: [],
-      exemplarPaths: [],
+      exemplars: [],
     });
     expect(problem.fullTitle).toBe("test");
   });
@@ -50,7 +50,7 @@ describe("problem model", () => {
         }
       ],
       config: {},
-      exemplarPaths: []
+      exemplars: []
     });
     expect(problem.fullTitle).toBe("test: sub");
   });
@@ -219,7 +219,7 @@ describe("problem model", () => {
         disabledFeatures: ["foo"],
         settings: { foo: "bar" }
       },
-      exemplarPaths: []
+      exemplars: []
     });
   });
 
@@ -242,7 +242,7 @@ describe("problem model", () => {
         disabledFeatures: ["foo"],
         settings: { foo: "bar" }
       },
-      exemplarPaths: []
+      exemplars: []
     });
   });
 
@@ -267,7 +267,7 @@ describe("problem model", () => {
         disabledFeatures: ["foo"],
         settings: { foo: "bar" }
       },
-      exemplarPaths: []
+      exemplars: []
     });
   });
 });

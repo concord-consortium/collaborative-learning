@@ -36,8 +36,8 @@ export async function createAndLoadExemplarDocs({
   curriculumConfig,
   appConfig
 }: ICreateExemplarDocsParams) {
-  const { exemplarPaths } = problem;
-  const exemplarsData = await getExemplarsData(unitUrl, exemplarPaths);
+  const { exemplars } = problem;
+  const exemplarsData = await getExemplarsData(unitUrl, exemplars);
   classStore.addUser(ClassUserModel.create(kExemplarUserParams));
   createExemplarDocs(documents, exemplarsData, curriculumConfig, appConfig);
 }
@@ -85,15 +85,7 @@ function createExemplarDocs(
         authoredCommentTag: exemplarData.tag
       }
     };
-    makeDocFromData(newDocParams, documents, appConfig);
+    const newDoc = createDocumentModelWithEnv(appConfig, newDocParams);
+    documents.add(newDoc);
   });
-}
-
-function makeDocFromData(
-  newDocParams: DocumentModelSnapshotType,
-  documents: DocumentsModelType,
-  appConfig: AppConfigModelType
-) {
-  const newDoc = createDocumentModelWithEnv(appConfig, newDocParams);
-  documents.add(newDoc);
 }
