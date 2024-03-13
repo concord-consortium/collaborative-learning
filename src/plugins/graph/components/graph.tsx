@@ -88,6 +88,7 @@ export const Graph = observer(
    * This is called by 'Remove...' menu options.
    */
   const handleRemoveAttribute = (place: GraphPlace, idOfAttributeToRemove: string) => {
+    console.log("removeAttribute:", place, idOfAttributeToRemove);
     if (place === 'left') {
       graphModel.removeYAttributeID(idOfAttributeToRemove);
       const yAxisModel = graphModel.getAxis('left') as IAxisModel;

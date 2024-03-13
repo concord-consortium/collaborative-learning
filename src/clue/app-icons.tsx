@@ -20,7 +20,7 @@ export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>
   "icon-delete-workspace": DeleteWorkspaceIcon,
   "icon-new-workspace": OpenWorkspaceIcon,
   "icon-open-workspace": OpenWorkspaceIcon,
-  
+
   // built in tool action icons
   "icon-delete-tool": DeleteToolIcon,
   "icon-duplicate-tool": DuplicateToolIcon,
