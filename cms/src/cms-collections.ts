@@ -1,39 +1,39 @@
-import { CmsConfig, CmsField, CmsFieldSelect, CmsSelectWidgetOptionObject } from "netlify-cms-core";
-import { urlParams } from "../../src/utilities/url-params";
+import { CmsCollection, CmsConfig, CmsField } from "decap-cms-core";
+import { urlParams } from "./cms-url-params";
 
-const typeField = {
+const typeField: CmsField = {
   label: "Type",
   name: "type",
   widget: "string"
-} as CmsField;
+};
 
-const titleField = {
+const titleField: CmsField = {
   label: "Title",
   name: "title",
   widget: "string"
-} as CmsField;
+};
 
-const tagField = {
+const tagField: Extract<CmsField, {widget: "select"}> = {
   label: "Tag",
   name: "tag",
   widget: "select",
   options: []
-} as CmsFieldSelect;
+};
 
-const previewLinkField = {
+const previewLinkField: CmsField = {
   label: "Preview Link",
   name: "preview-link",
   required: false,
-  widget: "preview-link"
-} as CmsField;
+  widget: "preview-link" as any
+};
 
-const contentField = {
+const contentField: CmsField = {
   label: "Content",
   name: "content",
   widget: "clue" as any
-} as CmsField;
+};
 
-const legacyCurriculumSections = {
+const legacyCurriculumSections: CmsCollection = {
   name: "sections",
   label: "Curriculum Sections",
   label_singular: "Curriculum Section",
@@ -44,7 +44,7 @@ const legacyCurriculumSections = {
   fields: [typeField, previewLinkField, contentField]
 };
 
-const curriculumSections = {
+const curriculumSections: CmsCollection = {
   name: "sections",
   label: "Curriculum Sections",
   label_singular: "Curriculum Section",
@@ -55,7 +55,7 @@ const curriculumSections = {
   fields: [typeField, previewLinkField, contentField]
 };
 
-const teacherGuides = {
+const teacherGuides: CmsCollection = {
   name: "teacherGuides",
   label: "Teacher Guides",
   label_singular: "Teacher Guide",
@@ -66,7 +66,7 @@ const teacherGuides = {
   fields: [typeField, previewLinkField, contentField]
 };
 
-const exemplars = {
+const exemplars: CmsCollection = {
   name: "exemplars",
   label: "Exemplars",
   label_singular: "Exemplar",
@@ -88,9 +88,9 @@ function hasSectionsFolder(myJson: any) {
 
 export function getCmsCollections(unitJson: any): CmsConfig["collections"] {
   if (unitJson.config.commentTags) {
-    const tags = unitJson.config.commentTags;
+    const tags: Record<string, string> = unitJson.config.commentTags;
     const options = Object.entries(tags).map(([value, label]) => ({ label, value }));
-    tagField.options = options as Array<CmsSelectWidgetOptionObject>;
+    tagField.options = options;
   }
 
   if (unitJson && hasSectionsFolder(unitJson)) {
@@ -98,10 +98,10 @@ export function getCmsCollections(unitJson: any): CmsConfig["collections"] {
       teacherGuides,
       curriculumSections,
       exemplars
-    ] as CmsConfig["collections"];
+    ];
   } else {
     return [
       legacyCurriculumSections
-    ] as CmsConfig["collections"];
+    ];
   }
 }
