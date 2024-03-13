@@ -93,6 +93,7 @@ const ToggleLockAxesButton = observer(function ToggleLockAxesButton({name}: IToo
 
 const MovableLineButton = observer(function MovableLineButton({name}: IToolbarButtonComponentProps) {
   const graph = useGraphModelContext();
+  const disabled = graph.plotType !== "scatterPlot";
   const adornment = graph.getAdornmentOfType(kMovableLineType);
   const showing = adornment?.isVisible;
 
@@ -113,7 +114,8 @@ const MovableLineButton = observer(function MovableLineButton({name}: IToolbarBu
     <TileToolbarButton
       name={name}
       title="Movable line"
-      selected={showing}
+      disabled={disabled}
+      selected={showing && !disabled}
       onClick={handleClick}>
       <MovableLineIcon />
     </TileToolbarButton>
