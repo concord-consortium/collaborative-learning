@@ -44,6 +44,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     yRange = yScale.range(),
     yScaleCopy = yScale.copy(),
     kTolerance = 4, // pixels to snap to horizontal or vertical
+    displayHandles = false, // Not showing handles right now. We will probably bring them back later, restyled.
     kHandleSize = 12,
     instanceKey = model.instanceKey(subPlotKey),
     classFromKey = model.classNameFromKey(subPlotKey),
@@ -145,15 +146,17 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         fixEndPoints(lineObject.lower, 1);
         fixEndPoints(lineObject.middle, 2);
         fixEndPoints(lineObject.upper, 3);
-        fixHandles(lineObject.handleLower, 1);
-        fixHandles(lineObject.handleMiddle, 2);
-        fixHandles(lineObject.handleUpper, 3);
+        if (displayHandles) {
+          fixHandles(lineObject.handleLower, 1);
+          fixHandles(lineObject.handleMiddle, 2);
+          fixHandles(lineObject.handleUpper, 3);
+        }
         refreshEquation();
       });
       return () => disposer();
     }, [instanceId, pointsOnAxes, lineObject, plotHeight, plotWidth, xScale, yScale, model, model.lines,
         xAttrName, xSubAxesCount, xAxis, yAttrName, ySubAxesCount, yAxis, xRange, yRange,
-        equationContainerSelector, subPlotKey, instanceKey]
+        equationContainerSelector, subPlotKey, instanceKey, displayHandles]
   );
 
   const
@@ -297,12 +300,14 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       .attr('class', 'movable-line-cover movable-line-middle-cover');
     newLineObject.upper = selection.append('line')
       .attr('class', 'movable-line-cover movable-line-upper-cover');
-    newLineObject.handleLower = selection.append('rect')
-        .attr('class', 'movable-line-handle movable-line-lower-handle show-on-tile-selected');
-    newLineObject.handleMiddle = selection.append('rect')
-        .attr('class', 'movable-line-handle movable-line-middle-handle show-on-tile-selected');
-    newLineObject.handleUpper = selection.append('rect')
-        .attr('class', 'movable-line-handle movable-line-upper-handle show-on-tile-selected');
+    if (displayHandles) {
+      newLineObject.handleLower = selection.append('rect')
+          .attr('class', 'movable-line-handle movable-line-lower-handle show-on-tile-selected');
+      newLineObject.handleMiddle = selection.append('rect')
+          .attr('class', 'movable-line-handle movable-line-middle-handle show-on-tile-selected');
+      newLineObject.handleUpper = selection.append('rect')
+          .attr('class', 'movable-line-handle movable-line-upper-handle show-on-tile-selected');
+    }
 
     // Set up the corresponding equation box
     // Define the selector that corresponds with this specific movable line's adornment container
