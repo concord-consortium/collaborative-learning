@@ -27,6 +27,7 @@
     justify-content: center;
     flex-direction: column;
     position: relative;
+    margin-top: -20px;
 
     svg {
       overflow: visible;
@@ -34,7 +35,6 @@
       .num-line {
         stroke-width: 2px;
         color: $charcoal;
-        min-height: 40px;
 
         text {
           font-size: 14px;
