@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { clsx } from "clsx";
 import { observer } from "mobx-react-lite";
 import { IAdornmentModel } from "./adornment-models";
@@ -8,6 +8,7 @@ import { INumericAxisModel } from "../imports/components/axis/models/axis-model"
 import { getAdornmentComponentInfo } from "./adornment-component-info";
 import { IDotsRef, transitionDuration } from "../graph-types";
 import { uniqueId } from "../../../utilities/js-utils";
+import { useMemoOne } from "use-memo-one";
 
 import "./adornment.scss";
 
@@ -43,7 +44,10 @@ export const Adornment = observer(function Adornment(
   // We can't use the subPlotKey because that value may be duplicated if there are multiple types of
   // adornments active on the graph.
   const adornmentKey = `${adornment.id}${classFromSubPlotKey ? `-${classFromSubPlotKey}` : ''}`;
-  const [id] = useState(adornmentKey + uniqueId()); // Construct a globally unique ID for this component
+
+  // Construct a globally unique ID for this component
+  const id = useMemoOne(() => { return adornmentKey + uniqueId(); }, []);
+
   const componentInfo = getAdornmentComponentInfo(adornment.type);
   if (!componentInfo) return null;
   const { Component } = componentInfo;

@@ -5,6 +5,7 @@ import { Point } from "../../graph-types";
 import { IAxisModel } from "../../imports/components/axis/models/axis-model";
 import { computeSlopeAndIntercept } from "../../utilities/graph-utils";
 import { kMovableLineType } from "./movable-line-types";
+import { IGraphModel } from "../../models/graph-model";
 
 export const MovableLineInstance = types.model("MovableLineInstance", {
   equationCoords: types.maybe(PointModel),
@@ -67,4 +68,10 @@ export const MovableLineModel = AdornmentModel
 export interface IMovableLineModel extends Instance<typeof MovableLineModel> {}
 export function isMovableLine(adornment: IAdornmentModel): adornment is IMovableLineModel {
   return adornment.type === kMovableLineType;
+}
+
+export function defaultMovableLineAdornment(graph: IGraphModel) {
+  const mLine = MovableLineModel.create();
+  mLine.setInitialLine(graph.axes.get("bottom"), graph.axes.get("left"), "{}");
+  return mLine;
 }

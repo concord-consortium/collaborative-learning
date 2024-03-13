@@ -32,8 +32,6 @@ import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-da
 import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-model";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 import { multiLegendParts } from "../components/legend/legend-registration";
-import { MovableLineModel } from "../adornments/movable-line/movable-line-model";
-import { kMovableLineType } from "../adornments/movable-line/movable-line-types";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -131,6 +129,9 @@ export const GraphModel = TileContentModel
         const minCount = Math.min(...counts);
         return usedColorIndices.find(index => colorCounts[index] === minCount) ?? 0;
       }
+    },
+    getAdornmentOfType(type: string) {
+      return self.adornments.find(a => a.type === type);
     }
   }))
   .views(self => ({
@@ -438,12 +439,20 @@ export const GraphModel = TileContentModel
     setShowMeasuresForSelection(show: boolean) {
       self.showMeasuresForSelection = show;
     },
-    showAdornment(adornment: IAdornmentModel) {
-      const adornmentExists = self.adornments.find(a => a.type === adornment.type);
+    addAdornment(adornment: IAdornmentModel) {
+      const adornmentExists = self.getAdornmentOfType(adornment.type);
       if (adornmentExists) {
-        adornmentExists.setVisibility(true);
+        console.error("Currently only one adornment of a type is supported");
       } else {
         self.adornments.push(adornment);
+      }
+    },
+    showAdornment(type: string) {
+      const adornment = self.getAdornmentOfType(type);
+      if (adornment) {
+        adornment.setVisibility(true);
+      } else {
+        console.error("Adornment type not found:", type);
       }
     },
     hideAdornment(type: string) {
@@ -472,27 +481,9 @@ export const GraphModel = TileContentModel
       const colorIndex = self._idColors.get(id);
       if (colorIndex === undefined) return "black";
       return clueGraphColors[colorIndex % clueGraphColors.length].name;
-    },
-    get isShowingMovableLine() {
-      return self.adornments.find(a => a.type === kMovableLineType)?.isVisible;
     }
   }))
   .actions(self => ({
-    showMovableLine() {
-      const mLine = MovableLineModel.create();
-      mLine.setInitialLine(self.axes.get("bottom"), self.axes.get("left"), "{}");
-      self.showAdornment(mLine);
-    },
-    hideMovableLine() {
-      self.hideAdornment(kMovableLineType);
-    },
-    toggleMovableLine() {
-      if (self.isShowingMovableLine) {
-        this.hideMovableLine();
-      } else {
-        this.showMovableLine();
-      }
-    },
     /**
      * Update layers as needed when shared models are attached or detached.
      * Called by the shared model manager.
@@ -688,7 +679,7 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
   const connectByDefault = appConfig?.getSetting("defaultSeriesLegend", "graph");
   if (connectByDefault) {
     const cLines = ConnectingLinesModel.create();
-    createdGraphModel.showAdornment(cLines);
+    createdGraphModel.addAdornment(cLines);
   }
 
   return createdGraphModel;
