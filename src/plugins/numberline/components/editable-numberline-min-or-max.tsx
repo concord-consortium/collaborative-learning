@@ -8,13 +8,13 @@ interface IEditableMinMaxProps {
   readOnly?: boolean;
   isTileSelected: boolean;
   value: number;
-  offset: number;
+  arrowOffset: number;
   minOrMax: "min" | "max";
   onValueChange: (newValue: number) => void;
 }
 
 export const EditableNumberlineMinOrMax: React.FC<IEditableMinMaxProps> = observer(function NumberlineTile(props) {
-  const { readOnly, isTileSelected, value, offset, minOrMax, onValueChange } = props;
+  const { readOnly, isTileSelected, value, arrowOffset, minOrMax, onValueChange } = props;
 
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -58,7 +58,8 @@ export const EditableNumberlineMinOrMax: React.FC<IEditableMinMaxProps> = observ
   };
 
   //----------------------- Determine Styling for Border Box -----------------------
-  const borderBoxOffset = `${offset + 4}px`;
+  const numCharToOffset = -3 * value.toString().length + 7; //additional offset to center value with tick
+  const borderBoxOffset = `${arrowOffset + numCharToOffset}px`;
   const borderBoxStyle = (minOrMax === "min") ? { left: borderBoxOffset } : { right: borderBoxOffset };
   const borderClasses = classNames("border-box", {hide: !isTileSelected});
 
