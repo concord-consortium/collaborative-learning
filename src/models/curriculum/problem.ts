@@ -117,16 +117,13 @@ const isAmbiguousSnapshot = (sn: ModernProblemSnapshot | LegacyProblemSnapshot) 
 
 export const ProblemModel = types.snapshotProcessor(ModernProblemModel, {
   preProcessor(sn: ModernProblemSnapshot | LegacyProblemSnapshot) {
-    const { sections, exemplars, ...nonSectionProps } = sn as any;
+    const { sections, ...nonSectionProps } = sn as any;
     // Move sections to sectionsFromSnapshot so we load them into a volatile property `sections`
-    // creating a exemplarsFromSnapshot that will be passed in similar way,
-    // but no volatile property yet
     const sectionsFromSnapshot = sections || [];
     if (isLegacySnapshot(sn)) {
       const { disabled: disabledFeatures, settings, ...others } = sn;
       return { ...others,
         sectionsFromSnapshot,
-        exemplars,
         config: { disabledFeatures, settings }
       } as ModernProblemSnapshot;
     }
@@ -135,11 +132,10 @@ export const ProblemModel = types.snapshotProcessor(ModernProblemModel, {
       return {
         ...others,
         sectionsFromSnapshot,
-        exemplars,
         config: { disabledFeatures, settings, ...config }
       } as ModernProblemSnapshot;
     }
-    return { ...nonSectionProps, sectionsFromSnapshot, exemplars };
+    return { ...nonSectionProps, sectionsFromSnapshot };
   }
 });
 export interface ProblemModelType extends Instance<typeof ModernProblemModel> {}
