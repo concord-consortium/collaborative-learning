@@ -149,7 +149,6 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
         caseId: point.__id__,
         attributeId: yAttribute
       };
-      console.log(cellToSelect);
       graphModel.editingLayer?.config.dataset?.selectCells([cellToSelect], true);
     }
   }, [graphModel.editingLayer]);
