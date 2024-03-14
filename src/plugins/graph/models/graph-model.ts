@@ -574,7 +574,11 @@ export const GraphModel = TileContentModel
     },
     getEditablePointsColor() {
       let color = "#000000";
-      const layer = self.editingLayer;
+      let layer = self.editingLayer;
+      if (!layer) {
+        // Even if no layer is currently being edited, show the color of the one that would be.
+        layer = self.getEditableLayers()?.[0];
+      }
       if (layer) {
         const yAttributes = layer.config.yAttributeIDs;
         if (yAttributes.length > 0) {

@@ -1,8 +1,8 @@
 import React from "react";
 import { Map } from "immutable";
-import { CmsWidgetControlProps } from "netlify-cms-core";
+import { CmsWidgetControlProps } from "decap-cms-core";
 
-import { urlParams } from "../../src/utilities/url-params";
+import { urlParams } from "./cms-url-params";
 import { DEBUG_CMS } from "../../src/lib/debug";
 import { defaultCurriculumBranch } from "./cms-constants";
 

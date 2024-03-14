@@ -124,8 +124,7 @@ const SelectPointsButton = observer(function({name}: IToolbarButtonComponentProp
   const graph = useGraphModelContext();
   const currentMode = graph.editingMode;
 
-  const editableLayers = graph.getEditableLayers();
-  const hasEditableLayers = editableLayers.length > 0;
+  const linked = graph.isLinkedToDataSet;
 
   function handleClick() {
     graph.setEditingMode(currentMode==="edit" ? "none" : "edit");
@@ -137,7 +136,7 @@ const SelectPointsButton = observer(function({name}: IToolbarButtonComponentProp
       title="Select/Move point"
       onClick={handleClick}
       selected={currentMode === "edit"}
-      disabled={!hasEditableLayers}
+      disabled={!linked}
     >
       <SelectToolIcon/>
     </TileToolbarButton>
