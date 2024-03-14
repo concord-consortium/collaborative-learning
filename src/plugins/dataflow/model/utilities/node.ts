@@ -288,6 +288,24 @@ export const HoldFunctionOptions = [
     displayName: "Hold 0",
     type: "control",
     icon: HoldZeroArrowIcon
+  },
+  {
+    name: "Hold Current Wait",
+    displayName: "Hold this, wait",
+    type: "control",
+    icon: HoldCurrentArrowIcon
+  },
+  {
+    name: "Hold Prior Wait",
+    displayName: "Hold previous, wait",
+    type: "control",
+    icon: HoldPreviousArrowIcon
+  },
+  {
+    name: "Output Zero Wait",
+    displayName: "Hold 0, wait",
+    type: "control",
+    icon: HoldZeroArrowIcon
   }
 ];
 

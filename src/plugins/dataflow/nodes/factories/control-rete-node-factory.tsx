@@ -3,6 +3,7 @@ import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { ValueControl } from "../controls/value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
+import { NumControl } from "../controls/num-control";
 import { HoldFunctionOptions } from "../../model/utilities/node";
 import { PlotButtonControl } from "../controls/plot-button-control";
 import { getNumDisplayStr } from "../utilities/view-utilities";
@@ -13,6 +14,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private heldValue: number | null = null;
+  private timerRunning: boolean = false;
 
   public builder(node: Node) {
     super.defaultBuilder(node);
@@ -31,6 +33,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
         .addInput(valueInput)
         .addInput(binaryInput)
         .addControl(new DropdownListControl(this.editor, "controlOperator", node, dropdownOptions, true))
+        .addControl(new NumControl(this.editor, "wait_ms", node, true, "wait", 10, 1, ["ms"], "wait"))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addControl(new ValueControl(this.editor, "nodeValue", node))
         .addOutput(out) as any;
@@ -39,9 +42,11 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
 
   public worker(node: NodeData, inputs: any, outputs: any) {
     const funcName = node.data.controlOperator as string;
+    const hasWait = funcName.includes("Wait");
     const recents: number[] | undefined = (node.data.recentValues as any)?.nodeValue;
     const lastRecentValue = recents?.[recents.length - 1];
     const priorValue = lastRecentValue == null ? null : lastRecentValue;
+    const waitTimeDuration = node.data.wait_ms;
     const n1 :number = inputs.num1.length ? inputs.num1[0] : node.data.num1;
     const n2 :number = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
 
@@ -50,6 +55,8 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
 
     // for setting classes on node
     node.data.gateActive = n1 === 1;
+    node.data.hasWait = hasWait;
+    node.data.waitActive = hasWait && this.timerRunning;
 
     // requires value in n2 (except for case of Output Zero)
     if (isNaN(n2)) {

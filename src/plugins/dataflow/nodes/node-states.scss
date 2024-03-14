@@ -33,6 +33,10 @@
     transition: all .2s ease-in-out;
     transform: rotate(0deg);
   }
+
+  div[title="wait_ms"] {
+    display: none;
+  }
 }
 
 .node.control.gate-active .binary .socket {
@@ -55,8 +59,26 @@
   }
 }
 
+.node.control.has-flow-in.wait-option-selected .inputs {
+  .number2 .socket::before {
+    top: 93px;
+  }
+}
+
+.node.control.wait-option-selected {
+  div[title="wait_ms"] {
+    display: block;
+  }
+}
+
 .node.control.has-flow-in.gate-active .inputs {
   .number2 .socket::before {
     animation: none;
   }
 }
+
+// temporary for dev
+.wait-active {
+  border:5px dotted red !important;
+}
+
