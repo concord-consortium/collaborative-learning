@@ -15,6 +15,7 @@ interface IEditableMinMaxProps {
 
 export const EditableNumberlineMinOrMax: React.FC<IEditableMinMaxProps> = observer(function NumberlineTile(props) {
   const { readOnly, isTileSelected, value, arrowOffset, minOrMax, onValueChange } = props;
+
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
