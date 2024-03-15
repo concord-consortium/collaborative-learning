@@ -1,7 +1,7 @@
 import {extent, format, select, timeout} from "d3";
 import React from "react";
 import { isInteger} from "lodash";
-import { SnapshotOut } from "mobx-state-tree";
+import { SnapshotOut, getParentOfType } from "mobx-state-tree";
 
 import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
 import { UpdatedSharedDataSetIds, replaceJsonStringsWithUpdatedIds } from "../../../models/shared/shared-data-set";
@@ -130,19 +130,38 @@ export function getPointTipText(caseID: string, attributeIDs: (string|undefined)
 
 export function handleClickOnDot(event: MouseEvent, caseData: CaseData, dataConfiguration?: IDataConfigurationModel) {
   if (!dataConfiguration) return;
+  event.stopPropagation();
+  const graphModel = getParentOfType(dataConfiguration, GraphModel);
   const dataset = dataConfiguration.dataset;
   const yAttributeId = dataConfiguration.yAttributeID(caseData.plotNum);
   const yCell = { attributeId: yAttributeId, caseId: caseData.caseID };
-  const extendSelection = event.shiftKey,
-    cellIsSelected = dataset?.isCellSelected(yCell);
-  if (!cellIsSelected) {
-    if (extendSelection) { // y cell is not selected and Shift key is down => add y cell to selection
-      dataset?.selectCells([yCell]);
-    } else { // y cell is not selected and Shift key is up => only this y cell should be selected
-      dataset?.setSelectedCells([yCell]);
+
+  if (graphModel.editingMode==="add"
+      && graphModel.editingLayer && graphModel.editingLayer.config !== dataConfiguration) {
+    // We're in "Add points" mode, and clicked on a case that is not in the editable dataset:
+    // add a case to the editable dataset at the same values as the existing case clicked on.
+    const existingCase = dataset?.getCanonicalCase(caseData.caseID);
+    if (existingCase) {
+      const xAttributeId = dataConfiguration.xAttributeID;
+      const x = dataset?.getNumeric(caseData.caseID, xAttributeId);
+      const y = dataset?.getNumeric(caseData.caseID, yAttributeId);
+      if (x !== undefined && y !== undefined) {
+        graphModel.editingLayer.addPoint(x, y);
+      }
     }
-  } else if (extendSelection) { // y cell is selected and Shift key is down => deselect cell
-    dataset?.selectCells([yCell], false);
+  } else {
+    // Otherwise, clicking on a dot means updating the selection.
+    const extendSelection = event.shiftKey,
+      cellIsSelected = dataset?.isCellSelected(yCell);
+    if (!cellIsSelected) {
+      if (extendSelection) { // Dot is not selected and Shift key is down => add to selection
+        dataset?.selectCells([yCell]);
+      } else { // Dot is not selected and Shift key is up => only this dot should be selected
+        dataset?.setSelectedCells([yCell]);
+      }
+    } else if (extendSelection) { // Dot is selected and Shift key is down => deselect
+      dataset?.selectCells([yCell], false);
+    }
   }
 }
 
@@ -180,8 +199,7 @@ export interface IMatchCirclesProps {
 export function matchCirclesToData(props: IMatchCirclesProps) {
   const { dataConfiguration, enableAnimation, instanceId, dotsElement } = props;
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
-  const caseDataKeyFunc = (d: CaseData) => `${d.dataConfigID}-${d.plotNum}-${d.caseID}`;
-
+  const caseDataKeyFunc = (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.plotNum}_${d.caseID}`;
   // Create the circles
   const allCircles = selectGraphDots(dotsElement);
   if (!allCircles) return;
@@ -193,7 +211,7 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
       enter => {
         const g = enter.append('g')
           .attr('class', `graph-dot`)
-          .property('id', (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.caseID}`);
+          .property('id', (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.plotNum}_${d.caseID}`);
         g.append('circle')
           .attr('class', 'outer-circle');
         g.append('circle')
@@ -203,7 +221,6 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
     );
 
   dotsElement && select(dotsElement).on('click', (event: MouseEvent) => {
-    event.stopPropagation();
     const target = select(event.target as SVGSVGElement);
     if (target.node()?.nodeName === 'circle') {
       handleClickOnDot(event, target.datum() as CaseData, dataConfiguration);
@@ -487,9 +504,14 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
 
   const setPositions = (dots: DotSelection | null) => {
     if (dots !== null) {
+      // This utilizes a transition() to move the dots smoothly to new positions.
+      // However, any dots that don't have a position already should just move
+      // immediately; otherwise they enter from the top left for no reason.
       dots
         .transition()
-        .duration(duration)
+        .duration((d, i, nodes) => {
+          return nodes[i].getAttribute('transform') ? duration : 1;
+        })
         .attr('transform', transformForCase)
         // The rest of this should not be necessary, but works around an apparent Chrome bug.
         // At least in Chrome v120 on MacOS, if the points are animated from a position far off-screen,

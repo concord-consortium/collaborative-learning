@@ -40,6 +40,23 @@ function buildTable(data) {
   });
 }
 
+// Parse `transform` attributes (used for point positioning)
+function xAttributeOfTransform(matcher) {
+  return attributeOfTransform(matcher, 1);
+}
+function yAttributeOfTransform(matcher) {
+  return attributeOfTransform(matcher, 2);
+}
+function attributeOfTransform(matcher, n) {
+  return matcher
+    .invoke('attr', 'transform')
+    .then(transform => {
+      return transform.match(/translate\((-?[0-9.]+), *(-?[0-9.]+)\)/)[n];
+    })
+    .then(parseFloat);
+}
+
+
 function beforeTest(params) {
   cy.clearQAData('all');
   cy.visit(params);
@@ -80,6 +97,8 @@ context('XYPlot Tool Tile', function () {
       cy.log("Link Table");
       clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
       xyTile.linkTable("Table Data 1");
+      cy.wait(1000); // Needs a little extra time, probably due to legend resizing.
+      // Otherwise the upcoming typeInTableCell fails.
 
       cy.log("shows edit boxes on axes");
       xyTile.getEditableAxisBox("bottom", "min").should("exist");
@@ -467,6 +486,67 @@ context('XYPlot Tool Tile', function () {
       xyTile.getPlottedVariablesGroup().should("have.length", 1);
       // Only the unlink remove button should remain
       xyTile.getRemoveVariablesButtons().should("have.length", 1);
+    });
+
+    it('Test points by hand', () => {
+      beforeTest(queryParamsMultiDataset);
+      cy.log('Add XY Plot Tile');
+      cy.collapseResourceTabs();
+      clueCanvas.addTile('graph');
+      xyTile.getTile('.primary-workspace').should('be.visible');
+      clueCanvas.toolbarButtonIsDisabled('graph', 'move-points');
+      clueCanvas.toolbarButtonIsNotSelected('graph', 'move-points');
+      clueCanvas.toolbarButtonIsDisabled('graph', 'add-points');
+      clueCanvas.toolbarButtonIsNotSelected('graph', 'add-points');
+
+      // Create manual layer
+      clueCanvas.clickToolbarButton('graph', 'add-points-by-hand');
+      clueCanvas.toolbarButtonIsDisabled('graph', 'add-points-by-hand'); // only one manual set allowed
+      clueCanvas.toolbarButtonIsEnabled('graph', 'move-points');
+      clueCanvas.toolbarButtonIsEnabled('graph', 'add-points');
+      clueCanvas.toolbarButtonIsSelected('graph', 'add-points'); // automatically turns on "add" mode
+      xyTile.getXAttributesLabel().should('have.length', 1).should('contain.text', 'X Variable');
+      xyTile.getYAttributesLabel().should('have.length', 1).should('contain.text', 'Y Variable 1');
+      xyTile.getLayerName().should('have.length', 1).should('contain.text', 'Added by hand');
+      xyTile.getLayerNameInput().should('not.be.visible');
+
+      // Rename manual layer
+      xyTile.getLayerNameEditButton().click();
+      xyTile.getLayerNameEditButton().should('have.length', 0);
+      xyTile.getLayerNameInput().should('be.visible').type('Renamed{enter}');
+      xyTile.getLayerNameInput().should('not.be.visible');
+      xyTile.getLayerName().should('have.length', 1).should('contain.text', 'Renamed');
+
+      // Add points
+      xyTile.getGraphDot().should('have.length', 0);
+      xyTile.getTile('.primary-workspace').should('have.length', 1);
+      xyTile.getGraphBackground().should('have.length', 1).click(150, 50);
+      xyTile.getGraphBackground().click(200, 100);
+      xyTile.getGraphDot().should('have.length', 2);
+
+      // Switch to 'select/move' mode
+      clueCanvas.clickToolbarButton('graph', 'move-points');
+      clueCanvas.toolbarButtonIsSelected('graph', 'move-points');
+      clueCanvas.toolbarButtonIsNotSelected('graph', 'add-points');
+      xyTile.getGraphBackground().click(250, 100); // should not add a point
+      xyTile.getGraphDot().should('have.length', 2);
+
+      // Drag a point to reposition.  Should start out where we initially clicked
+      xAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 150, 10);
+      yAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 50, 10);
+      // {force: true} seems to be necessary, not sure why
+      xyTile.getGraphDot().eq(0).children('circle').eq(1)
+        .trigger("mousedown", 150, 50, { force: true })
+        .trigger("drag", 175, 75, { force: true })
+        .trigger("mouseup", 175, 75, { force: true });
+      cy.wait(1000);
+      xAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 175, 10);
+      yAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 75, 10);
+
+      // Click toolbar button again to leave edit mode
+      clueCanvas.clickToolbarButton('graph', 'move-points');
+      clueCanvas.toolbarButtonIsNotSelected('graph', 'move-points');
+      clueCanvas.toolbarButtonIsNotSelected('graph', 'add-points');
     });
   });
 });

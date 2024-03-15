@@ -6,6 +6,9 @@ class XYPlotToolTile {
   getTile(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-tool-tile`);
   }
+  getGraphBackground(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} svg [data-testid=graph-background]`);
+  }
   getXYPlotTitle(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .editable-tile-title`);
   }
@@ -53,6 +56,15 @@ class XYPlotToolTile {
   }
   getLegendTitle(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .legend-title`);
+  }
+  getLayerName(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .layer-name`);
+  }
+  getLayerNameEditButton(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .layer-name button`);
+  }
+  getLayerNameInput(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .layer-name input`);
   }
   getXAttributesLabel(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .bottom .simple-attribute-label`);

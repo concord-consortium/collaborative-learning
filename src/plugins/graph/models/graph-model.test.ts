@@ -126,34 +126,50 @@ describe('GraphModel', () => {
       expect(graphModel.layers[1].config.dataset).toEqual(sharedDataSet2.dataSet);
     });
 
+    it('supports adding an editable layer', () => {
+      if (!graphModel) fail('No graph model'); // reuses data from previous test
+      expect(graphModel.layers.length).toBe(2);
+      expect(graphModel.layers[0].editable).toBe(false);
+      graphModel.createEditableLayer();
+      expect(graphModel.layers.length).toBe(3);
+      const layer = graphModel.layers[2];
+      expect(layer.editable).toBe(true);
+      expect(layer.config.attributeDescriptions.x.type).toEqual("numeric");
+      expect(layer.config.attributeDescriptions.y.type).toEqual("numeric");
+      expect(layer.config.dataset?.name).toEqual("Added by hand");
+      expect(layer.config.dataset?.attributes.map(a => a.name)).toEqual(["X Variable", "Y Variable 1"]);
+    });
+
     it('supports removing layers', () => {
-      if (!graphModel) fail('No graph model');
+      if (!graphModel) fail('No graph model'); // reuses data from previous test
       const smm = getSharedModelManager(graphModel);
       smm?.removeTileSharedModel(graphModel, sharedDataSet2);
       graphModel.updateAfterSharedModelChanges(sharedDataSet);
       // Currently Metadata remains attached - doesn't seem like correct behavior longer term though
-      expect(getTileSharedModels(graphModel)).toHaveLength(3);
-      expect(graphModel.layers.length).toBe(1);
+      expect(getTileSharedModels(graphModel)).toHaveLength(5);
+      expect(graphModel.layers.length).toBe(2);
       expect(graphModel.layers[0].isLinked).toBe(true);
       expect(graphModel.layers[0].config.dataset).toEqual(sharedDataSet.dataSet);
     });
 
     it("re-uses existing metadata if present", () => {
-      if (!graphModel) fail('No graph model');
+      if (!graphModel) fail('No graph model'); // reuses data from previous test
       const smm = getSharedModelManager(graphModel);
       smm?.addSharedModel(sharedDataSet2);
       smm?.addTileSharedModel(graphModel, sharedDataSet2);
       graphModel.updateAfterSharedModelChanges(sharedDataSet2);
-      expect(getTileSharedModels(graphModel)).toHaveLength(4);
-      expect(graphModel.layers.length).toBe(2);
+      expect(getTileSharedModels(graphModel)).toHaveLength(6);
+      expect(graphModel.layers.length).toBe(3);
       expect(graphModel.layers[0].isLinked).toBe(true);
       expect(graphModel.layers[0].config.dataset).toEqual(sharedDataSet.dataSet);
       expect(graphModel.layers[1].isLinked).toBe(true);
-      expect(graphModel.layers[1].config.dataset).toEqual(sharedDataSet2.dataSet);
+      expect(graphModel.layers[1].editable).toEqual(true);
+      expect(graphModel.layers[2].isLinked).toBe(true);
+      expect(graphModel.layers[2].config.dataset).toEqual(sharedDataSet2.dataSet);
     });
 
     it("cycles through colors properly", () => {
-      if (!graphModel) fail("No graph model");
+      if (!graphModel) fail("No graph model"); // reuses data from previous test
       function getUniqueColorIndices() {
         const uniqueColorIndices: number[] = [];
         graphModel._idColors.forEach(colorIndex => {
