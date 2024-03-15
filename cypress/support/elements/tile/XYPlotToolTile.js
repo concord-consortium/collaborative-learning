@@ -36,6 +36,30 @@ class XYPlotToolTile {
   getHighlightedDot(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-dot .outer-circle.selected`);
   }
+  getMovableLine(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area [data-testid=movable-line]`);
+  }
+  getMovableLineEquationContainer(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area [data-testid=movable-line-equation-container-]`);
+  }
+  getMovableLineEquationSlope(workspaceClass) {
+    return this.getMovableLineEquationContainer()
+      .invoke('text')
+      .then(text => text.match(/= *(\u2212?[0-9.]+)/)[1]) // unicode char is negative sign
+      .then(str => parseFloat(str.replace('\u2212', '-')));
+  }
+  // Specify which of the 3 covers you want with argument: lower, middle, upper
+  // Or falsy arg to get all of them.
+  getMovableLineCover(position, workspaceClass) {
+    if (position) {
+      return cy.get(`${wsClass(workspaceClass)} .canvas-area .movable-line-${position}-cover`);
+    } else {
+      return cy.get(`${wsClass(workspaceClass)} .canvas-area .movable-line-cover`);
+    }
+  }
+  getMovableLineWrapper(workspaceClass) {
+    return this.getMovableLine(workspaceClass).parents('.adornment-wrapper');
+  }
   getAxisLabel(place, workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .axis-label.${place}`);
   }

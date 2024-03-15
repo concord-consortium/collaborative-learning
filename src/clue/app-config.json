@@ -273,6 +273,7 @@
           "|",
           "fit-all",
           "toggle-lock",
+          "movable-line",
           "|",
           "move-points",
           "add-points",

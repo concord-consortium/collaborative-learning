@@ -135,6 +135,9 @@ export const GraphModel = TileContentModel
         const minCount = Math.min(...counts);
         return usedColorIndices.find(index => colorCounts[index] === minCount) ?? 0;
       }
+    },
+    getAdornmentOfType(type: string) {
+      return self.adornments.find(a => a.type === type);
     }
   }))
   .views(self => ({
@@ -537,12 +540,20 @@ export const GraphModel = TileContentModel
     setShowMeasuresForSelection(show: boolean) {
       self.showMeasuresForSelection = show;
     },
-    showAdornment(adornment: IAdornmentModel) {
-      const adornmentExists = self.adornments.find(a => a.type === adornment.type);
+    addAdornment(adornment: IAdornmentModel) {
+      const adornmentExists = self.getAdornmentOfType(adornment.type);
       if (adornmentExists) {
-        adornmentExists.setVisibility(true);
+        console.error("Currently only one adornment of a type is supported");
       } else {
         self.adornments.push(adornment);
+      }
+    },
+    showAdornment(type: string) {
+      const adornment = self.getAdornmentOfType(type);
+      if (adornment) {
+        adornment.setVisibility(true);
+      } else {
+        console.error("Adornment type not found:", type);
       }
     },
     hideAdornment(type: string) {
@@ -784,7 +795,7 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
   const connectByDefault = appConfig?.getSetting("defaultSeriesLegend", "graph");
   if (connectByDefault) {
     const cLines = ConnectingLinesModel.create();
-    createdGraphModel.showAdornment(cLines);
+    createdGraphModel.addAdornment(cLines);
   }
 
   return createdGraphModel;

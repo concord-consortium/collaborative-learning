@@ -159,7 +159,7 @@ export const Graph = observer(
     const connectingLines = graphModel.adornments.find(a => a.type === kConnectingLinesType);
     if (connectingLines && place === "left") {
       treatAs === 'categorical' && graphModel.hideAdornment(kConnectingLinesType);
-      treatAs === 'numeric' && graphModel.showAdornment(connectingLines);
+      treatAs === 'numeric' && graphModel.showAdornment(kConnectingLinesType);
     }
   };
 
