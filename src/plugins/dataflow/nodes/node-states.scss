@@ -79,6 +79,7 @@
 
 // temporary for dev
 .wait-active {
-  border:5px dotted red !important;
+  // make all colors faded and increase opacity
+  filter: opacity(0.5);
 }
 
