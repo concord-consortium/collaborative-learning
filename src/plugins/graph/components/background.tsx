@@ -141,17 +141,28 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
     return { x, y };
   }, [layout]);
 
-  const onClick = useCallback((event: { offsetX: number, offsetY: number, shiftKey: boolean }) => {
-    if (graphModel.editingMode==="add") {
-      const {x, y} = pointCoordinates(event.offsetX, event.offsetY);
-      graphModel.editingLayer?.addPoint(x, y);
-    } else {
-      // If not in add mode or shifted, clicking on background deselects everything
-      if (!event.shiftKey) {
-        graphModel.clearAllSelectedCases();
-      }
+  const addAndSelectPoint = useCallback((coords: Point) => {
+    const point = graphModel.editingLayer?.addPoint(coords.x, coords.y);
+    const yAttribute = point && Object.keys(point).find(p=>p!=='__id__');
+    if (point && yAttribute) {
+      const cellToSelect: ICell = {
+        caseId: point.__id__,
+        attributeId: yAttribute
+      };
+      graphModel.editingLayer?.config.dataset?.selectCells([cellToSelect], true);
     }
-  }, [graphModel, pointCoordinates]);
+  }, [graphModel.editingLayer]);
+
+  const onClick = useCallback((event: { offsetX: number, offsetY: number, shiftKey: boolean }) => {
+    // If not shifted, clicking on background deselects everything
+    if (!event.shiftKey) {
+      graphModel.clearAllSelectedCases();
+    }
+    if (graphModel.editingMode==="add") {
+      const coords = pointCoordinates(event.offsetX, event.offsetY);
+      addAndSelectPoint(coords);
+    }
+  }, [addAndSelectPoint, graphModel, pointCoordinates]);
 
   // Define the dragging behaviors for "edit" mode and for "add" mode, then assemble into one "drag" object.
   const
@@ -195,26 +206,30 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
       selectionTree.current = null;
     }, [marqueeState]),
 
-    dragStartAddMode = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
+    dragStartAddMode = useCallback((event: { x: number; y: number; sourceEvent: MouseEvent }) => {
+      if (!event.sourceEvent.shiftKey) {
+        graphModel.clearAllSelectedCases();
+      }
       setPotentialPoint(event);
-    }, []),
+    }, [graphModel]),
 
     dragMoveAddMode = useCallback((event: { x: number; y: number; dx: number; dy: number }) => {
       setPotentialPoint(event);
     }, []),
 
     dragEndAddMode = useCallback((event: { x: number; y: number; }) => {
-      const point = pointCoordinates(event.x, event.y);
-      graphModel.editingLayer?.addPoint(point.x, point.y);
       setPotentialPoint(undefined);
-    }, [graphModel.editingLayer, pointCoordinates]),
+      const coords = pointCoordinates(event.x, event.y);
+      addAndSelectPoint(coords);
+    }, [addAndSelectPoint, pointCoordinates]),
 
-    dragStart = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
+    dragStart = useCallback((event: { x: number; y: number; sourceEvent: MouseEvent }) => {
       if (graphModel.editingMode === "add") {
         dragStartAddMode(event);
       } else {
         dragStartEditMode(event);
       }
+      event.sourceEvent.stopPropagation();
     }, [dragStartAddMode, graphModel.editingMode, dragStartEditMode]),
 
     dragMove = useCallback((event: { x: number; y: number; dx: number; dy: number }) => {

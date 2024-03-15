@@ -699,7 +699,6 @@ export const DataSet = types.model("DataSet", {
           });
           newCases.push(insertCaseIDAtIndex(aCase.__id__, beforeIndex));
         });
-        return newCases;
       },
 
       setCaseValues(cases: ICase[], affectedAttributes?: string[]) {
@@ -907,7 +906,8 @@ export function addCanonicalCasesToDataSet(dataset: IDataSet, cases: ICaseCreati
       aCase.__id__ = newCaseId();
     }
   });
-  return dataset.addCanonicalCasesWithIDs(newCases, beforeID);
+  dataset.addCanonicalCasesWithIDs(newCases, beforeID);
+  return newCases;
 }
 
 export function getDataSetBounds(dataSet: IDataSet) {

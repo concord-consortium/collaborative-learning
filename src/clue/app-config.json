@@ -275,7 +275,8 @@
           "toggle-lock",
           "|",
           "move-points",
-          "add-points"
+          "add-points",
+          "delete"
         ]
       },
       "simulator": {

@@ -84,6 +84,7 @@ export const GraphLayerModel = types
         // The values are already correct, but various reactions in the graph code
         // expect there to be a value setting action after case creation.
         dataset.setCanonicalCaseValues(caseAdded);
+        return caseAdded[0];
       }
     },
     configureLinkedLayer() {

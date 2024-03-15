@@ -34,6 +34,7 @@ import { ISharedModelManager } from "../../../models/shared/shared-model-manager
 import { multiLegendParts } from "../components/legend/legend-registration";
 import { addAttributeToDataSet, DataSet } from "../../../models/data/data-set";
 import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
+import { ICase } from "../../../models/data/data-set-types";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -296,6 +297,12 @@ export const GraphModel = TileContentModel
     get isLinkedToDataSet() {
       return self.layers[0].isLinked;
     },
+    get isAnyCellSelected() {
+      for (const layer of self.layers) {
+        if (layer.config.dataset?.isAnyCellSelected) return true;
+      }
+      return false;
+    },
     /**
      * Return true if no attribute has been assigned to any graph role in any layer.
      */
@@ -475,9 +482,29 @@ export const GraphModel = TileContentModel
     setPlotType(type: PlotType) {
       self.plotType = type;
     },
+    /**
+     * Clears selections of all types - cases, cells, and attributes.
+     */
     clearAllSelectedCases() {
       for (const layer of self.layers) {
         layer.config.dataset?.setSelectedCases([]);
+      }
+    },
+    clearSelectedCellValues() {
+      for (const layer of self.layers) {
+        const dataset = layer.config.dataset;
+        if (dataset) {
+          const newValues: ICase[] = [];
+          for (const cell of dataset.selectedCells) {
+            if (cell && cell.attributeId) {
+              const newCaseValue: ICase = { __id__: cell.caseId };
+              newCaseValue[cell.attributeId] = ""; // clear cell
+              newValues.push(newCaseValue);
+            }
+            dataset.setCanonicalCaseValues(newValues);
+            dataset.setSelectedCells([]);
+          }
+        }
       }
     },
     setGraphProperties(props: GraphProperties) {

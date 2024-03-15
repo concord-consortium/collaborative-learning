@@ -16,6 +16,7 @@ import UnlockAxesIcon from "../assets/unlock-axes-icon.svg";
 import AddPointsByHandIcon from "../assets/add-points-by-hand-icon.svg";
 import SelectToolIcon from "../assets/select-tool-icon.svg";
 import AddPointsIcon from "../assets/add-points-icon.svg";
+import DeleteSelectionIcon from "../assets/delete-selection-icon.svg";
 
 function LinkTileButton(name: string, title: string, allowMultiple: boolean) {
 
@@ -169,6 +170,27 @@ const AddPointsButton = observer(function({name}: IToolbarButtonComponentProps) 
 
 });
 
+const DeleteButton = observer(function({name}: IToolbarButtonComponentProps) {
+  const graph = useGraphModelContext();
+  const disabled = !graph.isAnyCellSelected;
+
+  function handleClick() {
+    graph.clearSelectedCellValues();
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Delete"
+      onClick={handleClick}
+      disabled={disabled}
+    >
+      <DeleteSelectionIcon />
+    </TileToolbarButton>
+  );
+
+});
+
 registerTileToolbarButtons("graph",
 [
   {
@@ -198,6 +220,10 @@ registerTileToolbarButtons("graph",
   {
     name: 'move-points',
     component: SelectPointsButton
+  },
+  {
+    name: 'delete',
+    component: DeleteButton
   }
 
 ]);

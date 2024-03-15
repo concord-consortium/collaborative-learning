@@ -547,6 +547,18 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.clickToolbarButton('graph', 'move-points');
       clueCanvas.toolbarButtonIsNotSelected('graph', 'move-points');
       clueCanvas.toolbarButtonIsNotSelected('graph', 'add-points');
+
+      // Delete point with toolbar button
+      xyTile.getGraphDot().eq(0).click();
+      xyTile.getGraphDot().eq(0).children('circle.outer-circle').should("have.class", "selected");
+      clueCanvas.clickToolbarButton('graph', 'delete');
+      xyTile.getGraphDot().should('have.length', 1);
+
+      // Delete point with keyboard shortcut
+      xyTile.getGraphDot().eq(0).click();
+      xyTile.getGraphDot().eq(0).children('circle.outer-circle').should("have.class", "selected");
+      xyTile.getGraphDot().eq(0).type("{backspace}");
+      xyTile.getGraphDot().should('have.length', 0);
     });
   });
 });
