@@ -39,6 +39,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const [_selectedPointId, setSelectedPointId] = useState(""); // Just used to rerender when a point is selected
   const ui = useUIStore();
   const isTileSelected = ui.isSelectedTile(model);
+  if (!readOnly){
+    console.log("---<NumberlineTile>-----");
+    content.pointsArr.forEach((point) => {
+      console.log("\tpoint xValue:", point.xValue);
+    });
+    console.log("\tmin:", content.min);
+
+  }
 
   /* ========================== [ Determine Point is Open or Filled ]  ========================= */
   const [toolbarOption, settoolbarOption] = useState<CreatePointType>(CreatePointType.Selection); //"selection"
@@ -87,6 +95,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const arrowOffset = xShiftNum + kArrowheadOffset;
 
   const xScale = useMemo(() => {
+    console.log("\txScale triggered");
     return scaleLinear()
       .domain([content.min, content.max])
       .range([0, axisWidth]);
