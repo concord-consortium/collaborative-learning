@@ -24,12 +24,11 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
    */
   private handleTimer(incomingSwitchVal: number, isCurrentOnSignal: boolean, duration: number){
     if (this.waitTimerOn) return null;
-    if (isCurrentOnSignal) return null;
+    //if (isCurrentOnSignal) return null;
     if (incomingSwitchVal === 0) return null;
 
     this.waitTimerOn = true;
     setTimeout(() => {
-      console.log("| timer done");
       this.waitTimerOn = false;
     }, duration);
   }
@@ -75,6 +74,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     // for setting classes on node
     node.data.hasWait = isWaitFunc;
     node.data.gateActive = determineGateActive(n1, isWaitFunc, this.waitTimerOn);
+    // calculate waitActive state and give it to node in case they want opactity or something
 
     // requires value in n2 (except for case of Output Zero)
     if (isNaN(n2)) {
@@ -82,6 +82,8 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
       result = NaN;
       cResult = NaN;
     }
+
+    // TODO - see if you can get rid of cResult and just use result
 
     // For each function, evaluate given inputs and node state
     // TODO - check and see if this gets serialized, and if so, how to handle legacy funcNames on load
