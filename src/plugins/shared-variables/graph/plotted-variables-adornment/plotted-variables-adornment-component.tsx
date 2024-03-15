@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import { drag, select, Selection } from "d3";
 import { observer } from "mobx-react-lite";
 import { VariableType } from "@concord-consortium/diagram-view";
@@ -7,17 +7,18 @@ import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
 import { mstAutorun } from "../../../../utilities/mst-autorun";
 import { mstReaction } from "../../../../utilities/mst-reaction";
-import { useDataConfigurationContext } from "../../../graph/hooks/use-data-configuration-context";
 import { useGraphModelContext } from "../../../graph/hooks/use-graph-model-context";
 import { ScaleNumericBaseType } from "../../../graph/imports/components/axis/axis-types";
 import { useAxisLayoutContext } from "../../../graph/imports/components/axis/models/axis-layout-context";
-import { IAxisModel, INumericAxisModel } from "../../../graph/imports/components/axis/models/axis-model";
-import { curveBasis, setNiceDomain } from "../../../graph/utilities/graph-utils";
+import { INumericAxisModel } from "../../../graph/imports/components/axis/models/axis-model";
+import { curveBasis } from "../../../graph/utilities/graph-utils";
 import { SharedVariables } from "../../shared-variables";
 import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { isFiniteNumber } from "../../../../utilities/math-utils";
 import { useUIStore } from "../../../../hooks/use-stores";
+import { useGraphSettingsContext } from "../../../graph/hooks/use-graph-settings-context";
+import { GraphControllerContext } from "../../../graph/models/graph-controller";
 
 import "../../../graph/adornments/plotted-function/plotted-function-adornment-component.scss";
 import "./plotted-variables.scss";
@@ -36,23 +37,17 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   const {model, cellKey = {}, plotWidth, plotHeight, xAxis, yAxis} = props;
   const { tile } = useTileModelContext();
   const graphModel = useGraphModelContext();
-  const dataConfig = useDataConfigurationContext();
   const readOnly = useReadOnlyContext();
   const layout = useAxisLayoutContext();
   const ui = useUIStore();
-  const isTileSelected = !!tile && ui.isSelectedTile(tile);
+  const settings = useGraphSettingsContext();
+  const controller = useContext(GraphControllerContext);
   const xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType;
   const yScale = layout.getAxisScale("left") as ScaleNumericBaseType;
-  const xAttrType = dataConfig?.attributeType("x");
-  const yAttrType = dataConfig?.attributeType("y");
   const xSubAxesCount = layout.getAxisMultiScale("bottom")?.repetitions ?? 1;
   const ySubAxesCount = layout.getAxisMultiScale("left")?.repetitions ?? 1;
-  const xCatSet = layout.getAxisMultiScale("bottom")?.categorySet;
-  const xCats = xAttrType === "categorical" && xCatSet ? Array.from(xCatSet.values) : [""];
-  const yCatSet = layout.getAxisMultiScale("left")?.categorySet;
-  const yCats = yAttrType === "categorical" && yCatSet ? Array.from(yCatSet.values) : [""];
-  const xCellCount = xCats.length * xSubAxesCount;
-  const yCellCount = yCats.length * ySubAxesCount;
+  const xCellCount = xSubAxesCount;
+  const yCellCount = ySubAxesCount;
   const classFromKey = model.classNameFromKey(cellKey);
   const plottedFunctionRef = useRef<SVGGElement>(null);
   const smm = getSharedModelManager(graphModel);
@@ -62,7 +57,8 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   const offsetFromPoint = 14;
   const highlightStrokeWidth = 5;
   const labelRectHeight = textHeight + 2 * padding;
-  const numberFormatter = Intl.NumberFormat(undefined, { maximumFractionDigits: 4, useGrouping: false});
+  const numberFormatter
+    = useMemo(() => Intl.NumberFormat(undefined, { maximumFractionDigits: 4, useGrouping: false}), []);
 
   // Set the positions of the point-related SVG objects and the contents of the label when the variable value changes.
   const positionPointMarkers = useCallback((xValue: number, yValue: number,
@@ -105,6 +101,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
     const tPixelMin = xScale(xMin);
     const tPixelMax = xScale(xMax);
     const kPixelGap = 1;
+    const isTileSelected = !!tile && ui.isSelectedTile(tile);
     for (const instanceKey of model.plottedVariables.keys()) {
       const plottedVar = model.plottedVariables.get(instanceKey);
       const variable = plottedVar && plottedVar.xVariableId && sharedVariables?.getVariableById(plottedVar.xVariableId);
@@ -194,8 +191,8 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         }
       }
     }
-  }, [xScale, model, xCellCount, yCellCount, yScale, graphModel,
-      labelRectHeight, positionPointMarkers, readOnly, sharedVariables, isTileSelected, setVariableValue]);
+  }, [tile, ui, model, graphModel, xScale, xCellCount, yScale, yCellCount,
+      labelRectHeight, positionPointMarkers, readOnly, sharedVariables, setVariableValue]);
 
   // Add the lines and their associated covers and labels
   const refreshValues = useCallback(() => {
@@ -217,24 +214,46 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
     }, { name: "PlottedVariablesAdornmentComponent.refreshExpressionChange" }, model);
   }, [graphModel, model, xScale, xSubAxesCount, yScale]);
 
-  // Refresh values on axis or expression change
+  // Refresh display when axis domains change
   useEffect(function refreshAxisChange() {
-    return mstAutorun(() => {
-      // We observe changes to the axis domains within the autorun by extracting them from the axes below.
-      // We do this instead of including domains in the useEffect dependency array to prevent domain changes
-      // from triggering a reinstall of the autorun.
-      if (xAxis && yAxis) {
-        const { domain: xDomain } = xAxis; // eslint-disable-line unused-imports/no-unused-vars
-        const { domain: yDomain } = yAxis; // eslint-disable-line unused-imports/no-unused-vars
-      }
-      // Trigger an autorun if any inputs or the expression of y change, or if the x variable changes
-      Array.from(model.plottedVariables.values()).forEach(plottedVariables => {
-        plottedVariables.yVariable?.computedValueIncludingMessageAndError; // eslint-disable-line no-unused-expressions
-        plottedVariables.xVariable; // eslint-disable-line no-unused-expressions
-      });
-      refreshValues();
-    }, { name: "PlottedVariablesAdornmentComponent.refreshAxisChange" }, model);
-  }, [dataConfig, model, plotWidth, plotHeight, sharedVariables, xAxis, yAxis, refreshValues]);
+    return mstReaction<string,boolean>(
+      () => {
+        if (xAxis && yAxis) {
+          const { domain: xDomain } = xAxis;
+          const { domain: yDomain } = yAxis;
+          // Return a primitive value (string, not array) so that equality will work
+          // and effect will only be called when these numbers actually change.
+          return `${xDomain[0]}, ${xDomain[1]}, ${yDomain[0]}, ${yDomain[1]}`;
+        }
+        return '';
+      },
+      (limits) => {
+        refreshValues();
+      },
+      { fireImmediately: true, name: "PlottedVariablesAdornmentComponent.refreshAxisChange" },
+      model);
+  }, [model, plotWidth, plotHeight, xAxis, yAxis, refreshValues, controller]);
+
+  // If desired, rescale graph when variable values change
+  useEffect(function rescaleOnValuesChange() {
+    return mstReaction(
+      () => {
+        return Array.from(model.plottedVariables.values()).map(plottedVariables => {
+          return [
+            plottedVariables.xVariable,
+            plottedVariables.yVariable?.computedValueIncludingMessageAndError
+          ];
+        });
+      },
+      (any) => {
+        if (settings.scalePlotOnValueChange && !graphModel.lockAxes) {
+          controller?.autoscaleAllAxes();
+        }
+      },
+      { name: "PlottedVariablesAdornmentComponent.rescaleOnValuesChange" },
+      model);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [controller, model]);
 
   // Scale graph when a new X or Y variable is selected
   useEffect(function scaleOnVariableChange() {
@@ -242,23 +261,13 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
       return Array.from(model.plottedVariables.values()).map((pvi) => [pvi.xVariableId, pvi.yVariableId]);
     },
       (varlist) => {
-        if (graphModel.lockAxes) return;
-        // Set a range that includes 0 to 2x for all the given values.
-        function fitValues(values: number[], axis: IAxisModel) {
-          if (values.length) {
-            setNiceDomain([0, ...values.map(x => 2 * x)], axis);
-          }
-        }
-
-        const variableValues = model.variableValues;
-        if (xAxis && yAxis) {
-          fitValues(variableValues.x, xAxis);
-          fitValues(variableValues.y, yAxis);
+        if (!graphModel.lockAxes) {
+          controller?.autoscaleAllAxes();
         }
       },
       { name: "PlottedVariablesAdornmentComponent.scaleOnVariableChange" },
       model);
-  }, [graphModel.lockAxes, model, xAxis, yAxis]);
+  }, [graphModel.lockAxes, model, xAxis, yAxis, controller]);
 
   return (
     <svg className={`plotted-function-${classFromKey}`}>
