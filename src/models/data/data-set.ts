@@ -639,6 +639,7 @@ export const DataSet = types.model("DataSet", {
         for (let i = attribute.values.length; i < self.cases.length; ++i) {
           attribute.values.push("");
         }
+        return attribute;
       },
 
       setAttributeName(attributeID: string, name: string) {
@@ -882,7 +883,7 @@ export function addAttributeToDataSet(dataset: IDataSet, snapshot: IAttributeSna
   if (!snapshot.id) {
     snapshot.id = uniqueId();
   }
-  dataset.addAttributeWithID(snapshot, beforeID);
+  return dataset.addAttributeWithID(snapshot, beforeID);
 }
 
 export function addCasesToDataSet(dataset: IDataSet, cases: ICaseCreation[], beforeID?: string | string[]) {

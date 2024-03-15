@@ -12,13 +12,15 @@ import { DataConfigurationContext, useDataConfigurationContext } from "../../hoo
 import { IGraphLayerModel } from "../../models/graph-layer-model";
 import { LegendDropdown } from "./legend-dropdown";
 import { LegendIdListFunction, ILegendHeightFunctionProps, ILegendPartProps } from "./legend-types";
-import RemoveDataIcon from "../../assets/remove-data-icon.svg";
-import XAxisIcon from "../../assets/x-axis-icon.svg";
-import YAxisIcon from "../../assets/y-axis-icon.svg";
 import { logSharedModelDocEvent } from "../../../../models/document/log-shared-model-document-event";
 import { LogEventName } from "../../../../lib/logger-types";
 import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
+import { EditableLabelWithButton } from "../../../../components/utilities/editable-label-with-button";
+import { GraphLayerContext, useGraphLayerContext } from "../../hooks/use-graph-layer-context";
 
+import RemoveDataIcon from "../../assets/remove-data-icon.svg";
+import XAxisIcon from "../../assets/x-axis-icon.svg";
+import YAxisIcon from "../../assets/y-axis-icon.svg";
 
 export const layerLegendType = "layer-legend";
 
@@ -46,6 +48,7 @@ function ColorKey({ color }: IColorKeyProps) {
 const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPartProps) {
   let legendItems = [] as React.ReactNode[];
   const graphModel = useGraphModelContext();
+  const layer = useGraphLayerContext();
   const dataConfiguration = useDataConfigurationContext();
   const readOnly = useReadOnlyContext();
   const { tile } = useTileModelContext();
@@ -71,6 +74,23 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
       }
     }
   }
+
+
+  const dataSetName = dataConfiguration?.dataset?.name || "Unknown";
+
+  function handleSetDataSetName (value: string) {
+    if (value) {
+      dataConfiguration?.dataset?.setName(value);
+    }
+  }
+
+  const layerName =
+  <span className="layer-name">
+    {layer.editable
+      ? <EditableLabelWithButton defaultValue={dataSetName} onSubmit={handleSetDataSetName}/>
+      : dataSetName
+    }
+  </span>;
 
   if (dataConfiguration) {
     const yAttributes = dataConfiguration.yAttributeDescriptions;
@@ -136,7 +156,7 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
               </div>
             }
             <div className="legend-title">
-              Data from: <strong>{dataConfiguration.dataset.name || "Unknown"}</strong>&nbsp;
+              Data from: {layerName}
             </div>
           </div>
           <div className="legend-cell-2">
@@ -170,11 +190,13 @@ export const LayerLegend = observer(function LayerLegend(props: ILegendPartProps
       {
         graphModel.layers.map((layer) => {
           return (
-            <DataConfigurationContext.Provider key={layer.id} value={layer.config}>
-              <SingleLayerLegend {...props} />
-            </DataConfigurationContext.Provider>);
-          }
-        )
+            <GraphLayerContext.Provider key={layer.id} value={layer}>
+              <DataConfigurationContext.Provider value={layer.config}>
+                <SingleLayerLegend {...props} />
+              </DataConfigurationContext.Provider>
+            </GraphLayerContext.Provider>
+          );
+        })
       }
     </>
   );

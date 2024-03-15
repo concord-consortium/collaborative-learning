@@ -32,6 +32,8 @@ import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-da
 import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-model";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 import { multiLegendParts } from "../components/legend/legend-registration";
+import { addAttributeToDataSet, DataSet } from "../../../models/data/data-set";
+import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -222,6 +224,12 @@ export const GraphModel = TileContentModel
       return undefined;
     },
     /**
+     * Return a list of layers that can be edited.
+     */
+    getEditableLayers() {
+      return self.layers.filter(l => l.editable);
+    },
+    /**
      * Find all tooltip-related attributes from all layers.
      * Returned as a list of { role, attribute } pairs.
      */
@@ -319,6 +327,42 @@ export const GraphModel = TileContentModel
         const initialLayer = GraphLayerModel.create();
         self.layers.push(initialLayer);
         initialLayer.configureUnlinkedLayer();
+      }
+    },
+    /**
+     * Creates an "added by hand" dataset and attaches it as a layer to the graph.
+     * The layer is marked as editable so that the user can add and edit points.
+     */
+    createEditableLayer() {
+      const smm = getSharedModelManager(self);
+      const doc = getDocumentContentFromNode(self);
+      if (doc && smm && smm.isReady) {
+        const datasetName = doc.getUniqueSharedModelName("Added by hand");
+        const
+          xName = "X Variable",
+          yName = "Y Variable 1";
+        const dataset = DataSet.create({ name: datasetName });
+        const xAttr = addAttributeToDataSet(dataset, { name: xName });
+        const yAttr = addAttributeToDataSet(dataset, { name: yName });
+        const sharedDataSet = SharedDataSet.create({ dataSet: dataset });
+        smm.addTileSharedModel(self, sharedDataSet, true);
+
+        const metadata = SharedCaseMetadata.create();
+        metadata.setData(dataset);
+        smm.addTileSharedModel(self, metadata);
+
+        const layer = GraphLayerModel.create({ editable: true });
+        self.layers.push(layer);
+        // Remove default layer if there was one
+        if (!self.layers[0].isLinked) {
+          self.layers.splice(0, 1);
+        }
+
+        const dataConfiguration = DataConfigurationModel.create();
+        layer.setDataConfiguration(dataConfiguration);
+        dataConfiguration.setDataset(dataset, metadata);
+        dataConfiguration.setAttributeForRole("x", { attributeID: xAttr.id, type: "numeric" });
+        dataConfiguration.setAttributeForRole("y", { attributeID: yAttr.id, type: "numeric" });
       }
     },
     setXAttributeLabel(label: string) {
@@ -456,7 +500,7 @@ export const GraphModel = TileContentModel
       }
     },
     setColorForIdWithoutUndo(id: string, colorIndex: number) {
-      withoutUndo();
+      withoutUndo({unlessChildAction: true});
       self.setColorForId(id, colorIndex);
     }
   }))

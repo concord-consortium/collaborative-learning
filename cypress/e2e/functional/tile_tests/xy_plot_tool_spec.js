@@ -468,5 +468,28 @@ context('XYPlot Tool Tile', function () {
       // Only the unlink remove button should remain
       xyTile.getRemoveVariablesButtons().should("have.length", 1);
     });
+
+    it("Test points by hand", () => {
+      beforeTest(queryParamsMultiDataset);
+      cy.log("Add XY Plot Tile");
+      cy.collapseResourceTabs();
+      clueCanvas.addTile("graph");
+      xyTile.getTile().should('be.visible');
+
+      clueCanvas.clickToolbarButton("graph", "add-points-by-hand");
+      xyTile.getXAttributesLabel().should('have.length', 1).should("contain.text", "X Variable");
+      xyTile.getYAttributesLabel().should('have.length', 1).should("contain.text", "Y Variable 1");
+      xyTile.getLayerName().should('have.length', 1).should("contain.text", "Added by hand");
+      xyTile.getLayerNameInput().should('not.be.visible');
+
+      xyTile.getLayerNameEditButton().click();
+      xyTile.getLayerNameEditButton().should('have.length', 0);
+      xyTile.getLayerNameInput().should('be.visible').type('Renamed{enter}');
+      xyTile.getLayerNameInput().should('not.be.visible');
+      xyTile.getLayerName().should('have.length', 1).should("contain.text", "Renamed");
+    });
+
   });
+
+
 });
