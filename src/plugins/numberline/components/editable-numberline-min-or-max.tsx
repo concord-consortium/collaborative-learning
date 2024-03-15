@@ -12,26 +12,9 @@ interface IEditableMinMaxProps {
   minOrMax: "min" | "max";
   onValueChange: (newValue: number) => void;
 }
-//Guidelines
-// Bug exists where you create a point then set the min greater than that point,
-// or max less than that point and the point still floats but should disappear.
-
-// Steps to recreate min bug -
-// 1) Create brand new numberline where min/max bounds are -5 and 5
-// 2) create a point at let's say -4 (Arbitrary)
-// 3) edit the min bound to be greater than the minimum point (-4), so let's say -3.8. Point floats but should disappear
-
-// Same thing for max bug
-// Create a point lets say at 4.5, edit max bound to be 4, point floats but should disappear.
 
 export const EditableNumberlineMinOrMax: React.FC<IEditableMinMaxProps> = observer(function NumberlineTile(props) {
   const { readOnly, isTileSelected, value, arrowOffset, minOrMax, onValueChange } = props;
-  if (!readOnly){ //right side only
-    console.log(`\t<EditableNumberline: ${minOrMax}>----`);
-    console.log("\tvalue:", value);
-
-  }
-
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 

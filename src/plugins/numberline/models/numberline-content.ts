@@ -88,7 +88,6 @@ export const NumberlineContentModel = TileContentModel
   }))
   .actions(self =>({
     clearSelectedPoints() {
-      console.log("➡️ clearSelectedPoints");
       for (const id in self.selectedPoints){
         delete self.selectedPoints[id];
       }
@@ -126,7 +125,6 @@ export const NumberlineContentModel = TileContentModel
       self.selectedPoints[point.id] = point;
     },
     deleteSelectedPoints() {
-      console.log("➡️ deleteSelectedPoints");
       //For now - only one point can be selected
       for (const selectedPointId in self.selectedPoints){
         self.points.delete(selectedPointId); //delete all selectedIds from the points map
