@@ -38,8 +38,13 @@
         "connectPointsByDefault": true,
         "tools": [
           "link-tile-multiple",
+          "add-points-by-hand",
+          "|",
           "fit-all",
-          "toggle-lock"
+          "toggle-lock",
+          "|",
+          "move-points",
+          "add-points"
         ]
       },
       "diagram": {

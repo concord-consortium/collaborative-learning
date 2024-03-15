@@ -183,6 +183,7 @@ export const Graph = observer(
     return axes.map((place: AxisPlace) => {
       return <GraphAxis key={place}
                         place={place}
+                        controller={graphController}
                         enableAnimation={enableAnimation}
                         autoAdjust={autoAdjustAxes}
                         onDropAttribute={handleChangeAttribute}
