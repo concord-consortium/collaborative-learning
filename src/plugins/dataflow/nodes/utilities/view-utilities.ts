@@ -75,3 +75,20 @@ export function getInsertionOrder(editor: NodeEditor, id: number) {
   return index + 1;
 }
 
+export function getHoldNodeResultString(nodeData: any, result: number, calcResult: number){
+  const resultString = getNumDisplayStr(result);
+  const cResultString = getNumDisplayStr(calcResult);
+  const waitString = `waiting → ${cResultString}`;
+  const onString = `on → ${cResultString}`;
+  const offString = `off → ${resultString}`;
+
+  if (nodeData.gateActive) return nodeData.hasWait ? waitString : onString;
+  else return offString;
+}
+
+export function determineGateActive(switchVal: number, isWaitFunc: boolean, timerOn: boolean){
+  if (!isWaitFunc) return switchVal === 1;
+  if (isWaitFunc && timerOn) return true;
+  return false;
+}
+

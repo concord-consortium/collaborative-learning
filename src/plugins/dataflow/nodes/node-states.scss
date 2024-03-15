@@ -34,7 +34,7 @@
     transform: rotate(0deg);
   }
 
-  div[title="wait_ms"] {
+  div[title="waitDuration"] {
     display: none;
   }
 }
@@ -66,7 +66,7 @@
 }
 
 .node.control.wait-option-selected {
-  div[title="wait_ms"] {
+  div[title="waitDuration"] {
     display: block;
   }
 }
