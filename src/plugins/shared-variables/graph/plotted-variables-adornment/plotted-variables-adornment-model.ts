@@ -1,4 +1,4 @@
-import { destroy, getSnapshot, IAnyStateTreeNode, Instance, types } from "mobx-state-tree";
+import { destroy, getParentOfType, getSnapshot, IAnyStateTreeNode, Instance, types } from "mobx-state-tree";
 import { Variable, VariableType } from "@concord-consortium/diagram-view";
 
 import { getTileModel } from "../../../../models/document/shared-model-document-manager";
@@ -10,8 +10,10 @@ import {
 } from "../../../graph/adornments/plotted-function/plotted-function-adornment-model";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables";
 import { kPlottedVariablesType } from "./plotted-variables-adornment-types";
-import { GraphAttrRole, Point } from "../../../graph/graph-types";
+import { GraphAttrRole, Point, PrimaryAttrRole } from "../../../graph/graph-types";
 import { IClueObject } from "../../../../models/annotations/clue-object";
+import { GraphModel } from "../../../graph/models/graph-model";
+import { isNumericAxisModel } from "../../../graph/imports/components/axis/models/axis-model";
 
 function getSharedVariables(node: IAnyStateTreeNode) {
   const sharedModelManager = getSharedModelManager(node);
@@ -39,6 +41,9 @@ function decipherAnnotationId(id: string) {
   return {};
 }
 
+/**
+ * A single X,Y pair of variables to be plotted on the graph.
+ */
 export const PlottedVariables = types.model("PlottedVariables", {})
   .props({
     xVariableId: types.maybe(types.string),
@@ -108,6 +113,9 @@ export const PlottedVariables = types.model("PlottedVariables", {})
     }
   }));
 
+/**
+ * An Adornment that holds one or more PlottedVariables to be shown on the graph.
+ */
 export const PlottedVariablesAdornmentModel = PlottedFunctionAdornmentModel
   .named("PlottedVariablesAdornmentModel")
   .props({
@@ -162,16 +170,40 @@ export const PlottedVariablesAdornmentModel = PlottedFunctionAdornmentModel
     }
   }))
   .views(self => ({
-    numericValuesForAttrRole(role: GraphAttrRole) {
-      const values = self.variableValues;
-      if (role in values) {
-        // We don't return the actual variable values, but rather 0 and 2 times each value.
-        // This is because of how autoscale is defined for variables - not just the current-value point
-        // has to fit in the graph, but a range of values around it so the function line can be seen.
-        return [0, ...values[role as 'x'|'y'].map(x => 2*x)];
-      } else {
-        return [] as number[];
+    numericValuesForAttrRole(_role: GraphAttrRole) {
+      // We only have any values for X and Y
+      if (!['x','y'].includes(_role)) return [];
+
+      const role = _role as PrimaryAttrRole;
+      const result = [] as number[];
+      for (const pvi of self.plottedVariables.values()) {
+        const vals = pvi.variableValues;
+        if (vals && role in vals) {
+          // We return 2 times each value because of how autoscale is defined for
+          // variables. Not just the current-value point has to fit in the graph,
+          // but a range of values around it so the function line can be seen clearly.
+          result.push(2*vals[role]);
+        } else {
+          // If the variable does not have a value, we pretend that the 'X' value is in the middle of the graph's
+          // X axis, and return a 'Y' range that will bring that part of the variable trace into view.
+          if (role === 'y') {
+            const graph = getParentOfType(self, GraphModel);
+            const bottomAxis = graph.getAxis("bottom");
+            const fakeX = isNumericAxisModel(bottomAxis) ? (bottomAxis.min + bottomAxis.max) / 2 : undefined;
+            if (fakeX) {
+              const { computeY, dispose } = pvi.setupCompute();
+              const fakeY = computeY(fakeX);
+              result.push(2*fakeY);
+              dispose();
+            }
+          }
+        }
       }
+      // The region we want to be visible is from 0 to twice the value(s)
+      if (result.length > 0) {
+        result.push(0);
+      }
+      return result;
     }
   }))
   .actions(self => ({
