@@ -1,7 +1,7 @@
 import { TableContentSnapshotType } from "./table-content";
 import { IClueObjectSnapshot } from "../../annotations/clue-object";
-import { PartialSharedModelEntry } from "../../document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../../shared/shared-data-set";
+import { SharedModelEntrySnapshotType } from "../../document/shared-model-entry";
 
 const cellIdRegEx = /^cell:{(.+)}:{(.+)}$/;
 
@@ -21,7 +21,7 @@ export function decipherCellId(cellId: string) {
 
 export function updateTableContentWithNewSharedModelIds(
   content: TableContentSnapshotType,
-  sharedDataSetEntries: PartialSharedModelEntry[],
+  sharedDataSetEntries: SharedModelEntrySnapshotType[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) {
   // Column widths uses attribute ids, so we have to update them when updating shared dataset ids
@@ -44,7 +44,7 @@ export function updateTableContentWithNewSharedModelIds(
 
 export function updateTableObjectWithNewSharedModelIds(
   object: IClueObjectSnapshot,
-  sharedDataSetEntries: PartialSharedModelEntry[],
+  sharedDataSetEntries: SharedModelEntrySnapshotType[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) {
   if (object.objectType === "cell") {

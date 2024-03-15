@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useRef} from "react";
 import {autorun, reaction} from "mobx";
-import { isSetCaseValuesAction } from "../../../models/data/data-set-actions";
+import { isAddCasesAction, isRemoveAttributeAction, isRemoveCasesAction, isSetCaseValuesAction }
+  from "../../../models/data/data-set-actions";
 import {IDotsRef, GraphAttrRoles} from "../graph-types";
 import {INumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {useGraphLayoutContext} from "../models/graph-layout";
@@ -10,6 +11,8 @@ import {useCurrent} from "../../../hooks/use-current";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { IGraphLayerModel } from "../models/graph-layer-model";
+import { mstReaction } from "../../../utilities/mst-reaction";
+import { useReadOnlyContext } from "../../../components/document/read-only-context";
 
 interface IDragHandlers {
   start: (event: MouseEvent) => void
@@ -18,8 +21,9 @@ interface IDragHandlers {
 }
 
 export const useDragHandlers = (target: any, {start, drag, end}: IDragHandlers) => {
+  const readOnly = useReadOnlyContext();
   useEffect(() => {
-    if (target) {
+    if (target && !readOnly) {
       target.addEventListener('mousedown', start);
       target.addEventListener('mousemove', drag);
       target.addEventListener('mouseup', end);
@@ -30,7 +34,7 @@ export const useDragHandlers = (target: any, {start, drag, end}: IDragHandlers) 
         target.removeEventListener('mouseup', end);
       };
     }
-  }, [target, start, drag, end]);
+  }, [target, start, drag, end, readOnly]);
 };
 
 export interface IPlotResponderProps {
@@ -129,12 +133,14 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
 
   // respond to attribute assignment changes
   useEffect(() => {
-    const disposer = reaction(
+    const disposer = mstReaction(
       () => GraphAttrRoles.map((aRole) => dataConfiguration?.attributeID(aRole)),
       () => {
         startAnimation(enableAnimation);
         callRefreshPointPositions(false);
-      }
+      },
+      { name: "usePlot.attribute assignment reaction" },
+      dataConfiguration
     );
     return () => disposer();
   }, [callRefreshPointPositions, dataConfiguration, enableAnimation]);
@@ -191,7 +197,11 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
   // respond to added or removed cases and change in attribute type
   useEffect(function handleAddRemoveCases() {
     const disposer = dataConfiguration?.onAction(action => {
-      if (['addCases', 'removeCases', 'setAttributeType'].includes(action.name)) {
+      if (isAddCasesAction(action)
+          || isRemoveCasesAction(action)
+          || isRemoveAttributeAction(action)
+          || ['addCases', 'removeCases', 'setAttributeType'].includes(action.name)) {
+
         matchCirclesToData({
           dataConfiguration,
           pointRadius: graphModel.getPointRadius(),

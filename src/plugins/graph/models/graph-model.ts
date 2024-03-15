@@ -10,7 +10,7 @@ import {
 } from "../imports/components/axis/models/axis-model";
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
-  GraphAttrRole, hoverRadiusFactor, kDefaultAxisLabel, kDefaultNumericAxisBounds, kGraphTileType,
+  GraphAttrRole, GraphEditMode, hoverRadiusFactor, kDefaultAxisLabel, kDefaultNumericAxisBounds, kGraphTileType,
   PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
 } from "../graph-types";
 import { withoutUndo } from "../../../models/history/without-undo";
@@ -81,7 +81,10 @@ export const GraphModel = TileContentModel
     yAttributeLabel: types.optional(types.string, kDefaultAxisLabel)
   })
   .volatile(self => ({
-    // prevDataSetId: "",
+    // True if a dragging operation is ongoing - automatic rescaling is deferred until drag is done.
+    interactionInProgress: false,
+    editingMode: "none" as GraphEditMode,
+    editingLayerId: undefined as string|undefined
   }))
   .preProcessSnapshot((snapshot: any) => {
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
@@ -204,6 +207,10 @@ export const GraphModel = TileContentModel
     attributeType(role: GraphAttrRole) {
       return self.layers[0].config.attributeType(role);
     },
+    getLayerById(layerId: string): IGraphLayerModel|undefined {
+      if (!layerId) return undefined;
+      return self.layers.find(layer => layer.id === layerId);
+    },
     layerForDataConfigurationId(dataConfID: string) {
       return self.layers.find(layer => layer.config.id === dataConfID);
     },
@@ -228,6 +235,13 @@ export const GraphModel = TileContentModel
      */
     getEditableLayers() {
       return self.layers.filter(l => l.editable);
+    },
+    /**
+     * Return the layer currently being edited, or undefined if none.
+     */
+    get editingLayer(): IGraphLayerModel|undefined {
+      if (!self.editingLayerId) return undefined;
+      return this.getLayerById(self.editingLayerId);
     },
     /**
      * Find all tooltip-related attributes from all layers.
@@ -361,8 +375,8 @@ export const GraphModel = TileContentModel
         const dataConfiguration = DataConfigurationModel.create();
         layer.setDataConfiguration(dataConfiguration);
         dataConfiguration.setDataset(dataset, metadata);
-        dataConfiguration.setAttributeForRole("x", { attributeID: xAttr.id, type: "numeric" });
-        dataConfiguration.setAttributeForRole("y", { attributeID: yAttr.id, type: "numeric" });
+        dataConfiguration.setAttributeForRole("x", { attributeID: xAttr.id, type: "numeric" }, false);
+        dataConfiguration.setAttributeForRole("y", { attributeID: yAttr.id, type: "numeric" }, false);
       }
     },
     setXAttributeLabel(label: string) {
@@ -370,6 +384,22 @@ export const GraphModel = TileContentModel
     },
     setYAttributeLabel(label: string) {
       self.yAttributeLabel = label;
+    },
+    setEditingMode(mode: GraphEditMode, layer?: IGraphLayerModel) {
+      self.editingMode = mode;
+      if (mode === "none") {
+        self.editingLayerId = undefined;
+      } else {
+        if (layer) {
+          self.editingLayerId = layer && layer.id;
+        } else {
+          const editables = self.getEditableLayers();
+          self.editingLayerId = editables.length>0 ? editables[0].id : undefined;
+        }
+      }
+    },
+    setInteractionInProgress(value: boolean) {
+      self.interactionInProgress = value;
     }
   }))
   .actions(self => ({
@@ -514,6 +544,21 @@ export const GraphModel = TileContentModel
       const colorIndex = self._idColors.get(id);
       if (colorIndex === undefined) return "black";
       return clueGraphColors[colorIndex % clueGraphColors.length].name;
+    },
+    getEditablePointsColor() {
+      let color = "#000000";
+      let layer = self.editingLayer;
+      if (!layer) {
+        // Even if no layer is currently being edited, show the color of the one that would be.
+        layer = self.getEditableLayers()?.[0];
+      }
+      if (layer) {
+        const yAttributes = layer.config.yAttributeIDs;
+        if (yAttributes.length > 0) {
+          color = this.getColorForId(yAttributes[0]);
+        }
+      }
+      return color;
     }
   }))
   .actions(self => ({

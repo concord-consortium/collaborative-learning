@@ -1,56 +1,121 @@
 import {autorun} from "mobx";
-import React, {forwardRef, MutableRefObject, useCallback, useEffect, useMemo, useRef} from "react";
+import React, {forwardRef, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {drag, select, color, range} from "d3";
 import RTreeLib from 'rtree';
 type RTree = ReturnType<typeof RTreeLib>;
-import {CaseData} from "../d3-types";
-import {InternalizedData, rTreeRect} from "../graph-types";
+import {CaseData, graphDotSelector} from "../d3-types";
+import { Point, rTreeRect} from "../graph-types";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {rectangleSubtract, rectNormalize} from "../utilities/graph-utils";
 import {MarqueeState} from "../models/marquee-state";
 import {IGraphModel} from "../models/graph-model";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import { useGraphModelContext } from "../hooks/use-graph-model-context";
+import { ICell } from "../../../models/data/data-types";
 
 interface IProps {
   marqueeState: MarqueeState
 }
 
+/**
+ * Gets the transformation matrix that transforms from the user coordinate
+ * system on the source element to the user coordinate system on the
+ * target element.
+ * Replaces deprecated SVG method of the same name.
+ * @param source
+ * @param elem
+ * @returns
+ */
+function getTransformToElement(source: SVGGraphicsElement, elem: SVGGraphicsElement)    {
+  const elemCTM = elem.getScreenCTM();
+  const sourceCTM = source.getScreenCTM();
+  if (elemCTM && sourceCTM) {
+    return elemCTM.inverse().multiply(sourceCTM);
+  } else {
+    console.warn("Can't get CTM on element");
+  }
+}
+
+// Get bounding box INCLUDING any transform="..." on the element itself.
+// Adapted from https://stackoverflow.com/a/64909822
+function boundingBoxRelativeToElement(fromSpace: SVGGraphicsElement, toSpace: SVGGraphicsElement) {
+  const bbox = fromSpace.getBBox();
+  const m = getTransformToElement(fromSpace, toSpace);
+  let bbC = new DOMPoint(); bbC.x = bbox.x; bbC.y = bbox.y;
+  let bbD = new DOMPoint(); bbD.x = bbox.x + bbox.width; bbD.y = bbox.y + bbox.height;
+  bbC = bbC.matrixTransform(m);
+  bbD = bbD.matrixTransform(m);
+  return { x: bbC.x, y: bbC.y, width: Math.abs(bbD.x - bbC.x), height: Math.abs(bbD.y - bbC.y)};
+}
+
 const prepareTree = (areaSelector: string, circleSelector: string): RTree => {
     const selectionTree = RTreeLib(10);
-    select<HTMLDivElement, unknown>(areaSelector).selectAll<SVGCircleElement, InternalizedData>(circleSelector)
-      .each((datum: InternalizedData, index, groups) => {
-        const element: any = groups[index],
+    select<HTMLDivElement, unknown>(areaSelector).selectAll<SVGSVGElement, CaseData>(circleSelector)
+      .each((datum: CaseData, index, groups) => {
+        const
+          element: any = groups[index],
+          bbox = boundingBoxRelativeToElement(element, element.parentElement),
           rect = {
-            x: Number(element.cx.baseVal.value),
-            y: Number(element.cy.baseVal.value),
-            w: 1, h: 1
+            x: bbox.x,
+            y: bbox.y,
+            w: bbox.width,
+            h: bbox.height
           };
-        selectionTree.insert(rect, (element.__data__ as CaseData).caseID);
+        selectionTree.insert(rect, (element.__data__ as CaseData));
       });
     return selectionTree;
   },
 
+  /**
+   * Searches the new area, and returns cases found in it.
+   */
   getCasesForDelta = (tree: any, newRect: rTreeRect, prevRect: rTreeRect) => {
     const diffRects = rectangleSubtract(newRect, prevRect);
-    let caseIDs: string[] = [];
+    let allCases: CaseData[] = [];
     diffRects.forEach(aRect => {
-      const newlyFoundIDs = tree.search(aRect);
-      caseIDs = caseIDs.concat(newlyFoundIDs);
+      const newlyFoundCases = tree.search(aRect);
+      allCases = allCases.concat(newlyFoundCases);
     });
-    return caseIDs;
+    return allCases;
+  },
+
+  /**
+   * Take list of CaseData objects, return map from data configuration id to cell info.
+   */
+  sortByDataConfiguration = (graphModel: IGraphModel, cases: CaseData[]) => {
+    const caseDatas = new Map<string,ICell[]>();
+    for (const c of cases) {
+      if (!caseDatas.has(c.dataConfigID)) {
+        caseDatas.set(c.dataConfigID, []);
+      }
+      const dataConfiguration = graphModel.layerForDataConfigurationId(c.dataConfigID)?.config;
+      if (dataConfiguration) {
+        const attributeId = dataConfiguration.attributeIdforPlotNumber(c.plotNum);
+        caseDatas.get(c.dataConfigID)?.push({caseId: c.caseID, attributeId});
+      }
+    }
+    return caseDatas;
   },
 
   updateSelections = (graphModel: IGraphModel, tree: any, newRect: rTreeRect, prevRect: rTreeRect) => {
     const newSelection = getCasesForDelta(tree, newRect, prevRect);
     const newDeselection = getCasesForDelta(tree, prevRect, newRect);
     if (newSelection.length) {
-      graphModel.layers[0].config.dataset?.selectCases(newSelection, true); // FIXME multi dataset
+      for (const [dataConfId, cells] of sortByDataConfiguration(graphModel, newSelection).entries()) {
+        const dataConfiguration = graphModel.layerForDataConfigurationId(dataConfId);
+        if (dataConfiguration) {
+          dataConfiguration.config.dataset?.selectCells(cells, true);
+        }
+      }
     }
     if (newDeselection.length) {
-      graphModel.layers[0].config.dataset?.selectCases(newDeselection, false);
+      for (const [dataConfId, cells] of sortByDataConfiguration(graphModel, newDeselection).entries()) {
+        const dataConfiguration = graphModel.layerForDataConfigurationId(dataConfId);
+        if (dataConfiguration) {
+          dataConfiguration.config.dataset?.selectCells(cells, false);
+        }
+      }
     }
-
   };
 
 export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
@@ -64,12 +129,36 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
     width = useRef(0),
     height = useRef(0),
     selectionTree = useRef<RTree | null>(null),
-    previousMarqueeRect = useRef<rTreeRect>();
+    previousMarqueeRect = useRef<rTreeRect>(),
+    [potentialPoint, setPotentialPoint] = useState<Point|undefined>(undefined);
 
-  const onDragStart = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
+  const pointCoordinates = useCallback((offsetX: number, offsetY: number) => {
+    const plotBounds = layout.computedBounds.plot;
+    const relX = offsetX - plotBounds.left;
+    const relY = offsetY - plotBounds.top;
+    const { data: x } = layout.getAxisMultiScale("bottom").getDataCoordinate(relX);
+    const { data: y } = layout.getAxisMultiScale("left").getDataCoordinate(relY);
+    return { x, y };
+  }, [layout]);
+
+  const onClick = useCallback((event: { offsetX: number, offsetY: number, shiftKey: boolean }) => {
+    if (graphModel.editingMode==="add") {
+      const {x, y} = pointCoordinates(event.offsetX, event.offsetY);
+      graphModel.editingLayer?.addPoint(x, y);
+    } else {
+      // If not in add mode or shifted, clicking on background deselects everything
+      if (!event.shiftKey) {
+        graphModel.clearAllSelectedCases();
+      }
+    }
+  }, [graphModel, pointCoordinates]);
+
+  // Define the dragging behaviors for "edit" mode and for "add" mode, then assemble into one "drag" object.
+  const
+    dragStartEditMode = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
       const {computedBounds} = layout,
         plotBounds = computedBounds.plot;
-      selectionTree.current = prepareTree(`.${instanceId}`, 'circle');
+      selectionTree.current = prepareTree(`.${instanceId}`, graphDotSelector);
       startX.current = event.x - plotBounds.left;
       startY.current = event.y - plotBounds.top;
       width.current = 0;
@@ -80,7 +169,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
       marqueeState.setMarqueeRect({x: startX.current, y: startY.current, width: 0, height: 0});
     }, [graphModel, instanceId, layout, marqueeState]),
 
-    onDrag = useCallback((event: { dx: number; dy: number }) => {
+    dragMoveEditMode = useCallback((event: { dx: number; dy: number }) => {
       if (event.dx !== 0 || event.dy !== 0) {
         previousMarqueeRect.current = rectNormalize(
           {x: startX.current, y: startY.current, w: width.current, h: height.current});
@@ -101,14 +190,55 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
       }
     }, [graphModel, marqueeState]),
 
-    onDragEnd = useCallback(() => {
+    dragEndEditMode = useCallback((event: { x: number; y: number; }) => {
       marqueeState.setMarqueeRect({x: 0, y: 0, width: 0, height: 0});
       selectionTree.current = null;
     }, [marqueeState]),
-    dragBehavior = useMemo(() => drag<SVGRectElement, number>()
-      .on("start", onDragStart)
-      .on("drag", onDrag)
-      .on("end", onDragEnd), [onDrag, onDragEnd, onDragStart]);
+
+    dragStartAddMode = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
+      setPotentialPoint(event);
+    }, []),
+
+    dragMoveAddMode = useCallback((event: { x: number; y: number; dx: number; dy: number }) => {
+      setPotentialPoint(event);
+    }, []),
+
+    dragEndAddMode = useCallback((event: { x: number; y: number; }) => {
+      const point = pointCoordinates(event.x, event.y);
+      graphModel.editingLayer?.addPoint(point.x, point.y);
+      setPotentialPoint(undefined);
+    }, [graphModel.editingLayer, pointCoordinates]),
+
+    dragStart = useCallback((event: { x: number; y: number; sourceEvent: { shiftKey: boolean } }) => {
+      if (graphModel.editingMode === "add") {
+        dragStartAddMode(event);
+      } else {
+        dragStartEditMode(event);
+      }
+    }, [dragStartAddMode, graphModel.editingMode, dragStartEditMode]),
+
+    dragMove = useCallback((event: { x: number; y: number; dx: number; dy: number }) => {
+      if (graphModel.editingMode === "add") {
+        dragMoveAddMode(event);
+      } else {
+        dragMoveEditMode(event);
+      }
+    }, [dragMoveAddMode, graphModel.editingMode, dragMoveEditMode]),
+
+    dragEnd = useCallback((event: { x: number; y: number; }) => {
+      if (graphModel.editingMode === "add") {
+        dragEndAddMode(event);
+      } else {
+        dragEndEditMode(event);
+      }
+    }, [dragEndAddMode, graphModel.editingMode, dragEndEditMode]);
+
+  const dragBehavior = useMemo(() => {
+    return drag<any, any>()
+      .on("start", dragStart)
+      .on("drag", dragMove)
+      .on("end", dragEnd);
+  }, [dragMove, dragEnd, dragStart]);
 
   useEffect(() => {
     return autorun(() => {
@@ -125,12 +255,7 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
         col = (index: number) => index % numCols,
         groupElement = bgRef.current;
       select(groupElement)
-        // clicking on the background deselects all cases
-        .on('click', (event) => {
-          if (!event.shiftKey) {
-            graphModel.clearAllSelectedCases();
-          }
-        })
+        .on('click', onClick)
         .selectAll<SVGRectElement, number>('rect')
         .data(range(numRows * numCols))
         .join('rect')
@@ -144,10 +269,15 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
         .style('fill-opacity', isTransparent ? 0 : 1)
         .call(dragBehavior);
     });
-  }, [bgRef, dragBehavior, graphModel, layout]);
+  }, [bgRef, dragBehavior, graphModel, layout, onClick]);
 
   return (
-    <g ref={bgRef}/>
+    <g data-testid="graph-background">
+      <g ref={bgRef}/>
+      {potentialPoint &&
+        <circle className="potential" cx={potentialPoint.x} cy={potentialPoint.y}
+          r={graphModel.getPointRadius('hover-drag')} fill={graphModel.getEditablePointsColor()}/> }
+    </g>
   );
 });
 Background.displayName = "Background";

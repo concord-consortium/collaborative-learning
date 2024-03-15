@@ -108,3 +108,6 @@ export const kGraphAdornmentsClassSelector = `.${kGraphAdornmentsClass}`;
 export const kDefaultNumericAxisBounds = [0, 10] as const;
 
 export const kGraphPortalClass = ".canvas-area";
+
+export const GraphEditModes = ["none", "edit", "add"];
+export type GraphEditMode = typeof GraphEditModes[number];

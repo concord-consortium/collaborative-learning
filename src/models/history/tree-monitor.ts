@@ -1,6 +1,6 @@
 import {
   addDisposer, addMiddleware, getSnapshot, IJsonPatch, Instance, IPatchRecorder,
-  isActionContextThisOrChildOf, isAlive, recordPatches
+  isActionContextThisOrChildOf, isAlive, recordPatches, tryResolve
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { TreeManagerAPI } from "./tree-manager-api";
@@ -222,6 +222,14 @@ export class TreeMonitor {
     // inform the tiles of all changes at the same time.
     for (const [sharedModelPath, numModifications] of Object.entries(sharedModelModifications)) {
       if (numModifications > 0) {
+        // If a shared model has been deleted, we can't run these callbacks without errors,
+        // so we bail out now.  May need improvement if tiles need to be notified about
+        // deleted shared models.
+        try {
+          tryResolve(this.tree, `${sharedModelPath}/sharedModel`);
+        } catch {
+          continue;
+        }
         // Run the callbacks tracking changes to the shared model.
         // We need to wait for these to complete because the manager
         // needs to know when this history entry is complete. If it

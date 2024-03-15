@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react-lite";
+import { ScaleLinear } from "d3";
 
 import { kSmallAnnotationNodeRadius } from "../../../components/annotations/annotation-utilities";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
@@ -18,7 +19,6 @@ import { decipherDotId } from "../utilities/graph-utils";
 import { GraphComponent } from "./graph-component";
 import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
 import { Point } from "../graph-types";
-import { ScaleLinear } from "d3";
 
 import "./graph-toolbar-registration";
 

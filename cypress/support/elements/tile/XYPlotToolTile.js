@@ -6,6 +6,9 @@ class XYPlotToolTile {
   getTile(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .graph-tool-tile`);
   }
+  getGraphBackground(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} svg [data-testid=graph-background]`);
+  }
   getXYPlotTitle(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .editable-tile-title`);
   }

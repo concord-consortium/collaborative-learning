@@ -17,8 +17,8 @@ import {
 import { updateSharedDataSetColors } from "../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../models/shared/shared-model";
 import { uniqueId, uniqueTitle } from "../../utilities/js-utils";
-import { PartialSharedModelEntry } from "../../models/document/document-content-types";
 import { getTileModel } from "../../models/tiles/tile-model";
+import { SharedModelEntrySnapshotType } from "../../models/document/shared-model-entry";
 
 export function defaultDataSet(name?: string) {
   const dataSet = DataSet.create({name});
@@ -278,7 +278,7 @@ export type DataCardContentSnapshotType = SnapshotIn<typeof DataCardContentModel
 
 export function updateDataCardContentWithNewSharedModelIds(
   content: DataCardContentSnapshotType,
-  sharedDataSetEntries: PartialSharedModelEntry[],
+  sharedDataSetEntries: SharedModelEntrySnapshotType[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) {
   const updatedContent = cloneDeep(content);

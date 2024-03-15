@@ -11,20 +11,13 @@ interface IProps {
   onSubmit: (value:string) => void;
 }
 
+/**
+ * Generic component for an in-place editable label.
+ *
+ * Differs from stock <Editable> in that there's an explicit edit button rather
+ * than invoking edit mode by clicking on the label text itself.
+ */
 export const EditableLabelWithButton = observer(function EditableDataSetName({defaultValue, onSubmit}: IProps) {
-
-  function EditButton() {
-    const { isEditing, getEditButtonProps } = useEditableControls();
-    if (!isEditing) {
-      return (
-        <button aria-label="Edit name" {...getEditButtonProps()}>
-          <EditIcon/>
-        </button>
-      );
-    } else {
-      return null;
-    }
-  }
 
   return (
     <Editable
@@ -38,3 +31,16 @@ export const EditableLabelWithButton = observer(function EditableDataSetName({de
     </Editable>
   );
 });
+
+function EditButton() {
+  const { isEditing, getEditButtonProps } = useEditableControls();
+  if (!isEditing) {
+    return (
+      <button aria-label="Edit name" {...getEditButtonProps()}>
+        <EditIcon/>
+      </button>
+    );
+  } else {
+    return null;
+  }
+}

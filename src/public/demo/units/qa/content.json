@@ -57,7 +57,6 @@
         "connectPointsByDefault": true,
         "tools": [
           "link-tile-multiple",
-          "add-points-by-hand",
           "fit-all",
           "toggle-lock"
         ]

@@ -12,7 +12,7 @@ Below is a strategy for tracking down the cause and a solution for one particula
 
 Hopefully from the message you can figure out the rough area of the code where the problem is happening. If you can pin point the UI action that causes the warning to be printed then you can use the following approach.
 
-In your local code find `kEnableLivelinessChecking` located in `index.tsx` and set to be `true`. This will cause these console warnings to actually be thrown errors instead. In many cases these thrown errors will be caught and ignored so after you set this to true you probably won't see any messages in the console if you try to duplicate the problem again.
+In your local code find `kEnableLivelinessChecking` located in `initialize-app.tsx` and set to be `true`. This will cause these console warnings to actually be thrown errors instead. In many cases these thrown errors will be caught and ignored so after you set this to true you probably won't see any messages in the console if you try to duplicate the problem again.
 
 Instead of looking in the console, what you should do is use the dev tools debugger to track it down. Setup the app to just before the error would normally be printed to the console. Then in the debug panel turn on "pause on exceptions" and check the box "pause on caught exceptions". Now trigger the error. The app should pause and you should be in the debugger.
 
