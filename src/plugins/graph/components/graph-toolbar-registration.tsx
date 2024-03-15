@@ -16,6 +16,10 @@ import FitAllIcon from "../assets/fit-all-icon.svg";
 import LockAxesIcon from "../assets/lock-axes-icon.svg";
 import UnlockAxesIcon from "../assets/unlock-axes-icon.svg";
 import MovableLineIcon from "../assets/movable-line-icon.svg";
+import AddPointsByHandIcon from "../assets/add-points-by-hand-icon.svg";
+import SelectToolIcon from "../assets/select-tool-icon.svg";
+import AddPointsIcon from "../assets/add-points-icon.svg";
+import DeleteSelectionIcon from "../assets/delete-selection-icon.svg";
 
 function LinkTileButton(name: string, title: string, allowMultiple: boolean) {
 
@@ -122,6 +126,105 @@ const MovableLineButton = observer(function MovableLineButton({name}: IToolbarBu
   );
 });
 
+const AddPointsByHandButton = observer(function AddPointsByHandButton({name}: IToolbarButtonComponentProps) {
+  const graph = useGraphModelContext();
+  const hasEditableLayers = graph.getEditableLayers().length > 0;
+
+  // Enable button if axes are numeric or undefined.
+  const isNumeric = (graph.attributeType("x")||"numeric") === "numeric"
+    && (graph.attributeType("y")||"numeric") === "numeric";
+
+  const enabled = isNumeric && !hasEditableLayers;
+
+  function handleClick() {
+    graph.createEditableLayer();
+    graph.setEditingMode("add");
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Add points by hand"
+      onClick={handleClick}
+      disabled={!enabled}
+    >
+      <AddPointsByHandIcon/>
+    </TileToolbarButton>
+  );
+
+});
+
+const SelectPointsButton = observer(function({name}: IToolbarButtonComponentProps) {
+  const graph = useGraphModelContext();
+  const currentMode = graph.editingMode;
+
+  const linked = graph.isLinkedToDataSet;
+
+  function handleClick() {
+    graph.setEditingMode(currentMode==="edit" ? "none" : "edit");
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Select/Move point"
+      onClick={handleClick}
+      selected={currentMode === "edit"}
+      disabled={!linked}
+    >
+      <SelectToolIcon/>
+    </TileToolbarButton>
+  );
+});
+
+const AddPointsButton = observer(function({name}: IToolbarButtonComponentProps) {
+  const graph = useGraphModelContext();
+  const currentMode = graph.editingMode;
+
+  const editableLayers = graph.getEditableLayers();
+  const hasEditableLayers = editableLayers.length > 0;
+
+  const iconStyle = { fill: graph.getEditablePointsColor() };
+
+  function handleClick() {
+    graph.setEditingMode(currentMode==="add" ? "none" : "add");
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Add point"
+      onClick={handleClick}
+      selected={currentMode==="add"}
+      disabled={!hasEditableLayers}
+    >
+      <AddPointsIcon style={iconStyle} />
+    </TileToolbarButton>
+  );
+
+});
+
+const DeleteButton = observer(function({name}: IToolbarButtonComponentProps) {
+  const graph = useGraphModelContext();
+  const disabled = !graph.isAnyCellSelected;
+
+  function handleClick() {
+    graph.clearSelectedCellValues();
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Delete"
+      onClick={handleClick}
+      disabled={disabled}
+    >
+      <DeleteSelectionIcon />
+    </TileToolbarButton>
+  );
+
+});
+
 registerTileToolbarButtons("graph",
 [
   {
@@ -143,5 +246,22 @@ registerTileToolbarButtons("graph",
   {
     name: 'movable-line',
     component: MovableLineButton
+  },
+  {
+    name: 'add-points-by-hand',
+    component: AddPointsByHandButton
+  },
+  {
+    name: 'add-points',
+    component: AddPointsButton
+  },
+  {
+    name: 'move-points',
+    component: SelectPointsButton
+  },
+  {
+    name: 'delete',
+    component: DeleteButton
   }
+
 ]);

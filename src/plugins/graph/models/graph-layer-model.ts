@@ -1,4 +1,4 @@
-import { getParentOfType, Instance, SnapshotIn, types } from "@concord-consortium/mobx-state-tree";
+import { getParentOfType, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { typedId } from "../../../utilities/js-utils";
 import { onAnyAction } from "../../../utilities/mst-utils";
 import { DataConfigurationModel, IDataConfigurationModel } from "./data-configuration-model";
@@ -7,15 +7,18 @@ import { GraphPlace } from "../imports/components/axis-graph-shared";
 import { GraphAttrRole } from "../graph-types";
 import { IUpdateCategoriesOptions } from "../adornments/adornment-models";
 import { GraphModel } from "./graph-model";
-import { IDataSet } from "../../../models/data/data-set";
+import { IDataSet, addCanonicalCasesToDataSet } from "../../../models/data/data-set";
 import { ISharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { DotsElt } from "../d3-types";
+import { ICaseCreation } from "../../../models/data/data-set-types";
 
 export const GraphLayerModel = types
   .model('GraphLayerModel')
   .props({
     id: types.optional(types.identifier, () => typedId("LAYR")),
-    config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create())
+    config: types.optional(DataConfigurationModel, () => DataConfigurationModel.create()),
+    // Whether this layer contains "points by hand" that can be edited in the graph
+    editable: false
   })
   .volatile(self => ({
     autoAssignedAttributes: [] as Array<{ place: GraphPlace, role: GraphAttrRole, dataSetID: string, attrID: string }>,
@@ -61,6 +64,29 @@ export const GraphLayerModel = types
     clearAutoAssignedAttributes() {
       self.autoAssignedAttributes = [];
     },
+    /**
+     * Add a point to this layer with the given x and y values.
+     * A plot number can be provided; it defaults to 0 since currently
+     * only a single trace of manually created points can be created in the graph.
+     * @param x
+     * @param y
+     * @param plotNum optional, default 0
+     */
+    addPoint(x: number, y: number, plotNum: number=0) {
+      const dataset = self.config.dataset;
+      const xAttr = self.config.attributeID("x");
+      const yAttr = self.config.yAttributeIDs[plotNum];
+      if (dataset && xAttr && yAttr) {
+        const newCase: ICaseCreation = {};
+        newCase[xAttr] = x;
+        newCase[yAttr] = y;
+        const caseAdded = addCanonicalCasesToDataSet(dataset, [newCase]);
+        // The values are already correct, but various reactions in the graph code
+        // expect there to be a value setting action after case creation.
+        dataset.setCanonicalCaseValues(caseAdded);
+        return caseAdded[0];
+      }
+    },
     configureLinkedLayer() {
       if (!self.config) {
         console.warn("GraphLayerModel.configureLinkedLayer requires a dataset");
@@ -90,6 +116,7 @@ export const GraphLayerModel = types
     configureUnlinkedLayer() {
       if (!self.config.isEmpty) {
         self.config.clearAttributes();
+        self.editable = false;
       }
     },
     setDataSetListener() {

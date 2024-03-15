@@ -64,14 +64,12 @@ class TableToolTile{
       return cy.get('.rdg-row .rdg-cell .rdg-text-editor');
     }
     typeInTableCellXY(row, col, text) {
-      this.getTableCellXY(row, col).dblclick().then(() => {
-        this.getTableCellEdit().type(`${text}{enter}`);
-      });
+      this.getTableCellXY(row, col).dblclick();
+      this.getTableCellEdit().type(`${text}{enter}`);
     }
     typeInTableCell(i, text) {
-      this.getTableCell().eq(i).dblclick().then(() => {
-        this.getTableCellEdit().type(`${text}{enter}`);
-      });
+      this.getTableCell().eq(i).dblclick();
+      this.getTableCellEdit().type(`${text}{enter}`);
     }
     getTableCellWithColIndex(colIndex, colValue){
         return cy.get('.rdg-row').contains('.rdg-cell[aria-colindex="' + colIndex + '"]', colValue);

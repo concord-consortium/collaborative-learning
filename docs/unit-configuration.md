@@ -165,14 +165,17 @@ Not updated to common toolbar framework and does not support toolbar configurati
 - `emptyPlotIsNumeric`: boolean, default true
 - `scalePlotOnValueChange`: boolean, default true
 
-Common toolbar framework; default toolbar buttons:
+Uses the common toolbar framework. Default toolbar buttons:
 
 - `link-tile` (opens dialog to replace dataset with a new one)
+- `add-points-by-hand` (creates a dataset owned by the graph)
 - `fit-all` (rescale axes to fit all points in view)
 - `toggle-lock` (lock axes so they won't automatically rescale)
 - `movable-line` (show/hide the movable line)
+- `move-points` (mode where points can be moved)
+- `add-points` (mode where points can be added)
 
-Also available:
+Additional buttons available not in default set:
 
 - `link-tile-multiple` (opens dialog to add an additional dataset or link variables)
 

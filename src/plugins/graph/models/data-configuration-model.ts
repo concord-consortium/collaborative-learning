@@ -2,8 +2,8 @@ import { observable } from "mobx";
 import {scaleQuantile, ScaleQuantile, schemeBlues} from "d3";
 import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {AttributeType, attributeTypes} from "../../../models/data/attribute";
-import {ICase} from "../../../models/data/data-set-types";
-import {DataSet, IDataSet } from "../../../models/data/data-set";
+import { ICase } from "../../../models/data/data-set-types";
+import { DataSet, IDataSet } from "../../../models/data/data-set";
 import {getCategorySet, ISharedCaseMetadata, SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
 import {isRemoveAttributeAction, isSetCaseValuesAction} from "../../../models/data/data-set-actions";
 import {FilteredCases, IFilteredChangedCases} from "../../../models/data/filtered-cases";
@@ -89,6 +89,9 @@ export const DataConfigurationModel = types
     // Includes rightNumeric if present
     get yAttributeIDs() {
       return this.yAttributeDescriptions.map((d: IAttributeDescriptionSnapshot) => d.attributeID);
+    },
+    attributeIdforPlotNumber(plotNum: number) {
+      return this.yAttributeIDs[plotNum];
     },
     /**
      * Returns the sequential number of the given Y attribute ID.
@@ -713,7 +716,14 @@ export const DataConfigurationModel = types
     removeAttributeFromRole(role: GraphAttrRole) {
       self._setAttributeDescription(role);
     },
-    setAttributeForRole(role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot) {
+    /**
+     * Assign the Attribute to the given graph role.
+     * By default will also select the attribute.
+     * @param role graph role.
+     * @param desc attribute description, including the attribute ID and optionally a type.
+     * @param select boolean default true to select the attribute.
+     */
+    setAttributeForRole(role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot, select: boolean=true) {
       if (role === 'y') {
         // Setting "Y" role implies that user only wants one, or no Y attributes.
         while (self._yAttributeDescriptions.length) {
@@ -721,20 +731,16 @@ export const DataConfigurationModel = types
         }
         if (desc && desc.attributeID !== '') {
           self._yAttributeDescriptions.push(desc);
-          self.dataset?.setSelectedAttributes([desc.attributeID]);
         }
       } else if (role === 'yPlus' && desc && desc.attributeID !== '') {
         self._yAttributeDescriptions.push(desc);
       } else if (role === 'rightNumeric') {
         this.setY2Attribute(desc);
-        if (desc) {
-          self.dataset?.setSelectedAttributes([desc.attributeID]);
-        }
       } else {
         self._setAttributeDescription(role, desc);
-        if (desc) {
-          self.dataset?.setSelectedAttributes([desc.attributeID]);
-        }
+      }
+      if (desc && select) {
+        self.dataset?.setSelectedAttributes([desc.attributeID]);
       }
       this.syncFilteredCasesCount(true);
       if (role === 'legend') {

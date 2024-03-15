@@ -38,9 +38,15 @@
         "connectPointsByDefault": true,
         "tools": [
           "link-tile-multiple",
+          "add-points-by-hand",
+          "|",
           "fit-all",
           "toggle-lock",
-          "movable-line"
+          "movable-line",
+          "|",
+          "move-points",
+          "add-points",
+          "delete"
         ]
       },
       "diagram": {
