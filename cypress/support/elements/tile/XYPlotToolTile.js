@@ -54,6 +54,9 @@ class XYPlotToolTile {
   getYAxisInput(workspaceClass) {
     return this.getAxisInput("left", workspaceClass);
   }
+  getLegendTitle(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .legend-title`);
+  }
   getLayerName(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .layer-name`);
   }
