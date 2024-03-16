@@ -16,15 +16,8 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   private heldValue: number | null = null;
   private waitTimerOn: boolean = false;
 
-  /**
-   *  incoming ON  -> exsiting OFF : start timer  (this is a new on signal)
-   *  incoming ON  -> existing ON  : do nothing   (gate already on)
-   *  incoming OFF -> existing OFF : do nothing   (gate is already off)
-   *  incoming OFF -> existing ON  : do nothing   (ignore gate open while timer is running)
-   */
   private handleTimer(incomingSwitchVal: number, isCurrentOnSignal: boolean, duration: number){
     if (this.waitTimerOn) return null;
-    //if (isCurrentOnSignal) return null;
     if (incomingSwitchVal === 0) return null;
 
     this.waitTimerOn = true;
