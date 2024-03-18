@@ -16,7 +16,6 @@ import { SharedVariables } from "../../shared-variables";
 import { IPlottedVariablesAdornmentModel } from "./plotted-variables-adornment-model";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { isFiniteNumber } from "../../../../utilities/math-utils";
-import { useUIStore } from "../../../../hooks/use-stores";
 import { useGraphSettingsContext } from "../../../graph/hooks/use-graph-settings-context";
 import { GraphControllerContext } from "../../../graph/models/graph-controller";
 
@@ -39,15 +38,8 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
   const graphModel = useGraphModelContext();
   const readOnly = useReadOnlyContext();
   const layout = useAxisLayoutContext();
-  const ui = useUIStore();
   const settings = useGraphSettingsContext();
   const controller = useContext(GraphControllerContext);
-  const xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType;
-  const yScale = layout.getAxisScale("left") as ScaleNumericBaseType;
-  const xSubAxesCount = layout.getAxisMultiScale("bottom")?.repetitions ?? 1;
-  const ySubAxesCount = layout.getAxisMultiScale("left")?.repetitions ?? 1;
-  const xCellCount = xSubAxesCount;
-  const yCellCount = ySubAxesCount;
   const classFromKey = model.classNameFromKey(cellKey);
   const plottedFunctionRef = useRef<SVGGElement>(null);
   const smm = getSharedModelManager(graphModel);
@@ -87,15 +79,21 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
 
   // Assign a new value to the Variable based on the given pixel position
   const setVariableValue = useCallback((variable: VariableType, position: number) => {
+    const xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType;
+    const xCellCount = layout.getAxisMultiScale("bottom")?.repetitions ?? 1;
     const newValue = model.valueForPosition(position, xScale, xCellCount);
     if (isFiniteNumber(newValue)) {
       // Truncate extra decimals to match the value that is displayed.
       variable.setValue(+numberFormatter.format(newValue));
     }
-  }, [model, numberFormatter, xCellCount, xScale]);
+  }, [layout, model, numberFormatter]);
 
   // Draw the variable traces
   const addPath = useCallback(() => {
+    const xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType;
+    const xCellCount = layout.getAxisMultiScale("bottom")?.repetitions ?? 1;
+    const yScale = layout.getAxisScale("left") as ScaleNumericBaseType;
+    const yCellCount = layout.getAxisMultiScale("left")?.repetitions ?? 1;
     const xMin = xScale.domain()[0];
     const xMax = xScale.domain()[1];
     const tPixelMin = xScale(xMin);
@@ -190,8 +188,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
         }
       }
     }
-  }, [tile, ui, model, graphModel, xScale, xCellCount, yScale, yCellCount,
-      labelRectHeight, positionPointMarkers, readOnly, sharedVariables, setVariableValue]);
+  }, [layout, model, sharedVariables, readOnly, graphModel, setVariableValue, labelRectHeight, positionPointMarkers]);
 
   // Add the lines and their associated covers and labels
   const refreshValues = useCallback(() => {
@@ -211,7 +208,20 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
     return mstAutorun(() => {
       model.updateCategories(graphModel.layers[0].getUpdateCategoriesOptions(false));
     }, { name: "PlottedVariablesAdornmentComponent.refreshExpressionChange" }, model);
-  }, [graphModel, model, xScale, xSubAxesCount, yScale]);
+  }, [graphModel, model]);
+
+  // Draw when becoming visible
+  useEffect(function refreshOnVisibility() {
+    return mstReaction(
+      () => { return model.isVisible; },
+      (visible) => {
+        if (visible) {
+          refreshValues();
+        }
+      },
+      { name: "PlottedVariablesAdornment.refreshOnVisibility" },
+      model);
+  }, [model, refreshValues]);
 
   // Refresh display when axis domains change
   useEffect(function refreshAxisChange() {
@@ -233,20 +243,28 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
       model);
   }, [model, plotWidth, plotHeight, xAxis, yAxis, refreshValues, controller]);
 
-  // If desired, rescale graph when variable values change
-  useEffect(function rescaleOnValuesChange() {
+  // Refresh display when variable values change
+  useEffect(function udpateOnValuesChange() {
     return mstReaction(
       () => {
-        return Array.from(model.plottedVariables.values()).map(plottedVariables => {
-          return [
-            plottedVariables.xVariable,
-            plottedVariables.yVariable?.computedValueIncludingMessageAndError
-          ];
+        let hasAnyVars = false;
+        const varValues = Array.from(model.plottedVariables.values()).map(plottedVariables => {
+          if (plottedVariables.xVariable || plottedVariables.yVariable) {
+            hasAnyVars = true;
+          }
+          return {
+            x: plottedVariables.xVariable,
+            y: plottedVariables.yVariable?.computedValueIncludingMessageAndError
+          };
         });
+        return {hasAnyVars, varValues};
       },
-      (any) => {
-        if (settings.scalePlotOnValueChange && !graphModel.lockAxes) {
-          controller?.autoscaleAllAxes();
+      (args: {hasAnyVars: boolean, varValues: any}) => {
+        if (args.hasAnyVars) {
+          if (settings.scalePlotOnValueChange && !graphModel.lockAxes) {
+            controller?.autoscaleAllAxes();
+          }
+          refreshValues();
         }
       },
       { name: "PlottedVariablesAdornmentComponent.rescaleOnValuesChange" },
