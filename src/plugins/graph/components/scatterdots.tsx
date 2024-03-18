@@ -1,15 +1,14 @@
-import {ScaleBand, ScaleLinear, select} from "d3";
-import React, {useCallback, useRef, useState} from "react";
+import {D3DragEvent, drag, ScaleBand, ScaleLinear, select} from "d3";
+import React, {useCallback, useRef} from "react";
 import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
-import {CaseData, inGraphDot} from "../d3-types";
-import {PlotProps} from "../graph-types";
-import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
+import {CaseData, inGraphDot, selectGraphDots} from "../d3-types";
+import {PlotProps, Point} from "../graph-types";
+import { usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
 import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import {
-  // getScreenCoord,
   handleClickOnDot,
   setPointCoordinates,
   setPointSelection
@@ -29,8 +28,6 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     layout = useGraphLayoutContext(),
     legendAttrID = dataConfiguration?.attributeID('legend') as string,
     yScaleRef = useRef<ScaleNumericBaseType>(),
-    [dragID, setDragID] = useState(''),
-    currPos = useRef({x: 0, y: 0}),
     target = useRef<any>(),
     plotNumRef = useRef(0);
 
@@ -40,85 +37,65 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   dragPointRadiusRef.current = graphModel.getPointRadius('hover-drag');
   yScaleRef.current = layout.getAxisScale("left") as ScaleNumericBaseType;
 
-  const onDragStart = useCallback((event: MouseEvent) => {
-    if (graphModel.editingMode !== "none") {
-      const targetDot = event.target && inGraphDot(event.target as SVGSVGElement);
+  const
+    onDragStart = useCallback((event: D3DragEvent<SVGGElement,CaseData,Point>, datum) => {
+      const targetDot = event.sourceEvent.target && inGraphDot(event.sourceEvent.target as SVGSVGElement);
       if (!targetDot) return;
       target.current = select(targetDot as SVGSVGElement);
-      const aCaseData: CaseData = target.current.node().__data__;
-      if (!aCaseData || !dataConfiguration || aCaseData.dataConfigID !== dataConfiguration.id) return;
-      event.stopPropagation();
+      if (!datum || !dataConfiguration || datum.dataConfigID !== dataConfiguration.id) return;
+      handleClickOnDot(event.sourceEvent, datum, dataConfiguration);
       graphModel.setInteractionInProgress(true);
       dataset?.beginCaching();
       secondaryAttrIDsRef.current = dataConfiguration.yAttributeIDs || [];
       enableAnimation.current = false; // We don't want to animate points until end of drag
-      const tItsID = aCaseData.caseID;
-      plotNumRef.current = target.current.datum()?.plotNum ?? 0;
-      // TODO the radius transition doesn't actually do anything
-      target.current
-        .property('isDragging', true)
-        .transition()
-        .attr('r', dragPointRadiusRef.current);
-      setDragID(tItsID);
-      currPos.current = { x: event.clientX, y: event.clientY };
+      plotNumRef.current = datum.plotNum ?? 0;
+    }, [dataConfiguration, dataset, enableAnimation, graphModel]),
 
-      handleClickOnDot(event, aCaseData, dataConfiguration);
-    }
-  }, [dataConfiguration, dataset, enableAnimation, graphModel]),
-
-    updatePositions = useCallback((event: MouseEvent, forceUpdate: boolean) => {
-      if (dragID !== '') {
-        event.stopPropagation();
-        event.preventDefault();
-        const xAxisScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>,
-          xAttrID = dataConfiguration?.attributeID('x') ?? '';
-        const newPos = {x: event.clientX, y: event.clientY},
-          dx = newPos.x - currPos.current.x,
-          dy = newPos.y - currPos.current.y;
-        currPos.current = newPos;
-        if (forceUpdate || dx !== 0 || dy !== 0) {
-          const deltaX = Number(xAxisScale.invert(dx)) - Number(xAxisScale.invert(0)),
-            deltaY = Number(yScaleRef.current?.invert(dy)) - Number(yScaleRef.current?.invert(0)),
-            caseValues: ICase[] = [];
-            const cellSelection = dataConfiguration?.dataset?.selectedCells;
-            cellSelection?.forEach(cell => {
-            const currX = Number(dataset?.getNumeric(cell.caseId, xAttrID)),
-              currY = Number(dataset?.getNumeric(cell.caseId, cell.attributeId));
-            if (isFinite(currX) && isFinite(currY)) {
-              caseValues.push({
-                __id__: cell.caseId,
-                [xAttrID]: currX + deltaX,
-                [cell.attributeId]: currY + deltaY
-              });
-            }
+    updatePositions = useCallback((dx: number, dy: number) => {
+      const
+        xAxisScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>,
+        xAttrID = dataConfiguration?.attributeID('x') ?? '',
+        deltaX = Number(xAxisScale.invert(dx)) - Number(xAxisScale.invert(0)),
+        deltaY = Number(yScaleRef.current?.invert(dy)) - Number(yScaleRef.current?.invert(0)),
+        caseValues: ICase[] = [],
+        cellSelection = dataConfiguration?.dataset?.selectedCells;
+      cellSelection?.forEach(cell => {
+        const
+          currX = Number(dataset?.getNumeric(cell.caseId, xAttrID)),
+          currY = Number(dataset?.getNumeric(cell.caseId, cell.attributeId));
+        if (isFinite(currX) && isFinite(currY)) {
+          caseValues.push({
+            __id__: cell.caseId,
+            [xAttrID]: currX + deltaX,
+            [cell.attributeId]: currY + deltaY
           });
-          caseValues.length &&
-            dataset?.setCanonicalCaseValues(caseValues);
         }
-      }
-    }, [layout, dataConfiguration, dataset, dragID]),
+      });
+      caseValues.length &&
+        dataset?.setCanonicalCaseValues(caseValues);
+    }, [layout, dataConfiguration, dataset]),
 
-    onDrag = useCallback((event: MouseEvent) => {
-      updatePositions(event, false);
+    onDrag = useCallback((event: D3DragEvent<SVGGElement,CaseData,Point>) => {
+      if (event.dx!==0 || event.dy!==0) {
+        updatePositions(event.dx, event.dy);
+      }
     }, [updatePositions]),
 
-    onDragEnd = useCallback((event: MouseEvent) => {
-      if (dragID !== '') {
+    onDragEnd = useCallback((event: D3DragEvent<SVGGElement,CaseData,Point>) => {
         graphModel.setInteractionInProgress(false);
         // Final update does a rescale if appropriate
-        updatePositions(event, true);
-        // TODO the radius transition doesn't actually do anything
-        target.current
-          .classed('dragging', false)
-          .property('isDragging', false)
-          .transition()
-          .attr('r', selectedPointRadiusRef.current);
-        setDragID(() => '');
+        updatePositions(event.dx, event.dy);
         target.current = null;
-      }
-    }, [dragID, graphModel, updatePositions]);
+    }, [graphModel, updatePositions]);
 
-  useDragHandlers(window, {start: onDragStart, drag: onDrag, end: onDragEnd});
+  selectGraphDots(dotsRef.current)
+    ?.call(drag<SVGGElement,CaseData,Point>()
+      .filter(() => { return graphModel.editingMode !== "none"; })
+      .subject((event) => { return { x: event.x, y: event.y }; })
+      .on('start', onDragStart)
+      .on('drag', onDrag)
+      .on('end', onDragEnd)
+    );
 
   const refreshPointSelection = useCallback(() => {
     const { pointColor, pointStrokeColor } = graphModel;

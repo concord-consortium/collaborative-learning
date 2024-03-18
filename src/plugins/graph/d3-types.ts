@@ -12,7 +12,7 @@ export type DotsElt = SVGSVGElement | null;
 //  CaseData: type of data attached to selected element
 //  SVGSVGElement: type of parent element selected by initial/global select
 //  unknown: type of data attached to parent element (none in this case)
-export type DotSelection = Selection<SVGCircleElement, CaseData, SVGSVGElement, unknown>;
+export type DotSelection = Selection<SVGGElement, CaseData, SVGSVGElement, unknown>;
 
 export const graphDotSelector = "g.graph-dot";
 
