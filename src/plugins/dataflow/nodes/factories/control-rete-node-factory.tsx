@@ -23,7 +23,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     this.waitTimerOn = true;
     setTimeout(() => {
       this.waitTimerOn = false;
-    }, duration);
+    }, duration * 1000);
   }
 
   public builder(node: Node) {
@@ -43,7 +43,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
         .addInput(valueInput)
         .addInput(binaryInput)
         .addControl(new DropdownListControl(this.editor, "controlOperator", node, dropdownOptions, true))
-        .addControl(new NumControl(this.editor, "waitDuration", node, true, "wait", 2000, 1, ["ms"], "wait"))
+        .addControl(new NumControl(this.editor, "waitDuration", node, true, "wait", 1, 0, ["sec"], "wait"))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addControl(new ValueControl(this.editor, "nodeValue", node))
         .addOutput(out) as any;
