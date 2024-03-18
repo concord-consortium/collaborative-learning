@@ -310,8 +310,10 @@ describe("ImageMap", () => {
       }));
     });
     it("returns false for an invalid image URL or path", () => {
-      const invalidImageUrl = "hi";
-      expect(sImageMap.isImageUrl(invalidImageUrl)).toBe(false);
+      expect(sImageMap.isImageUrl("hi")).toBe(false);
+      expect(sImageMap.isImageUrl("4/5 + 3.4")).toBe(false);
+      expect(sImageMap.isImageUrl("4/5 + 3.456")).toBe(false);
+      expect(sImageMap.isImageUrl("4/5+3.456")).toBe(false);
     });
   });
 
