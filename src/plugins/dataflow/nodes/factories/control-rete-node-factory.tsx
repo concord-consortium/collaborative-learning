@@ -67,8 +67,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     // for setting classes on node
     node.data.hasWait = isWaitFunc;
     node.data.gateActive = determineGateActive(n1, isWaitFunc, this.waitTimerOn);
-    // calculate waitActive state and give it to node in case they want opactity or something
-
+    node.data.waitActive = node.data.gateActive && isWaitFunc;
     // requires value in n2 (except for case of Output Zero)
     if (isNaN(n2)) {
       this.heldValue = null;
@@ -114,7 +113,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
       }
     }
 
-    const resultSentence = getHoldNodeResultString(node.data, result, cResult) || "";
+    const resultSentence = getHoldNodeResultString(node, result, cResult) || "";
 
     // operate rete
     if (this.editor) {

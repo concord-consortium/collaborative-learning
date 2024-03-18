@@ -77,9 +77,21 @@
   }
 }
 
-// temporary for dev
-.wait-active {
-  // make all colors faded and increase opacity
-  filter: opacity(0.5);
+.node.control.wait-option-selected.wait-active {
+  opacity: .5;
+}
+
+.node.control.wait-option-selected.wait-active:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("../assets/Spinner-1s-200px.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 9999;
+  opacity: 0.7;
 }
 

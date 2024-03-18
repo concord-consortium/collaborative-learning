@@ -1,6 +1,7 @@
 import { NodeEditor, Node, Input } from "rete";
 import { Rect, scaleRect, unionRect } from "../../utilities/rect";
 import { kEmptyValueString } from "../factories/dataflow-rete-node-factory";
+import { NodeData } from "rete/types/core/data";
 
 function getBoundingRectOfNode(n: Node, editor: NodeEditor): Rect | undefined {
   const { k } = editor.view.area.transform;
@@ -75,14 +76,14 @@ export function getInsertionOrder(editor: NodeEditor, id: number) {
   return index + 1;
 }
 
-export function getHoldNodeResultString(nodeData: any, result: number, calcResult: number){
+export function getHoldNodeResultString(node: NodeData, result: number, calcResult: number){
   const resultString = getNumDisplayStr(result);
   const cResultString = getNumDisplayStr(calcResult);
   const waitString = `waiting → ${cResultString}`;
   const onString = `on → ${cResultString}`;
   const offString = `off → ${resultString}`;
 
-  if (nodeData.gateActive) return nodeData.hasWait ? waitString : onString;
+  if (node.data.gateActive) return node.data.hasWait ? waitString : onString;
   else return offString;
 }
 
