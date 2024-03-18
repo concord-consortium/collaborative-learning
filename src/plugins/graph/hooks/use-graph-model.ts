@@ -12,38 +12,11 @@ interface IProps {
 export function useGraphModel(props: IProps) {
   const { graphModel, enableAnimation, instanceId } = props;
 
-  // const callMatchCirclesToData = useCallback((layer) => {
-  //   matchCirclesToData({
-  //     dataConfiguration: layer.config,
-  //     pointRadius: graphModel.getPointRadius(),
-  //     pointColor: graphModel.pointColor,
-  //     pointStrokeColor: graphModel.pointStrokeColor,
-  //     dotsElement: layer.dotsElt,
-  //     enableAnimation, instanceId
-  //   });
-  // }, [graphModel, enableAnimation, instanceId]);
-
   const callMatchAllCirclesToData = useCallback(() => {
     matchAllCirclesToData({
       graphModel, enableAnimation, instanceId
     });
   }, [graphModel, enableAnimation, instanceId]);
-
-  // respond to added/removed cases
-  // TODO seems redundant with use-plot.ts handleAddRemoveCases
-  // useEffect(function installAddRemoveCaseHandler() {
-  //   const disposers: (()=>void)[] = [];
-  //   for (const layer of graphModel.layers) {
-  //     console.log("registering layer responder");
-  //     disposers.push(layer.config.onAction(action => {
-  //       console.log('layer responder examining', action);
-  //       if (isAddCasesAction(action) || isRemoveCasesAction(action)) {
-  //         callMatchCirclesToData(layer);
-  //       }
-  //     }));
-  //   }
-  //   return () => { disposers.forEach((d) => { d(); }); };
-  // }, [graphModel.layers, callMatchCirclesToData]);
 
   // respond to change in plotType
   useEffect(function installPlotTypeAction() {

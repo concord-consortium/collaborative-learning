@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef} from "react";
+import React, {useCallback, useContext, useEffect, useRef} from "react";
 import {autorun, reaction} from "mobx";
 import { isAddCasesAction, isRemoveAttributeAction, isRemoveCasesAction, isSetCaseValuesAction }
   from "../../../models/data/data-set-actions";
@@ -13,6 +13,7 @@ import {onAnyAction} from "../../../utilities/mst-utils";
 import { IGraphLayerModel } from "../models/graph-layer-model";
 import { mstReaction } from "../../../utilities/mst-reaction";
 import { useReadOnlyContext } from "../../../components/document/read-only-context";
+import { GraphControllerContext } from "../models/graph-controller";
 
 interface IDragHandlers {
   start: (event: MouseEvent) => void
@@ -52,6 +53,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     graphModel = useGraphModelContext(),
     layout = useGraphLayoutContext(),
     instanceId = useInstanceIdContext(),
+    controller = useContext(GraphControllerContext),
     refreshPointPositionsRef = useCurrent(refreshPointPositions);
 
   useEffect(function respondToLayerDotsEltCreation() {
@@ -104,6 +106,14 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     };
   }, []);
 
+  const callRescaleIfPermitted = useCallback(() => {
+    if (controller!.autoAdjustAxes &&
+        !graphModel.lockAxes &&
+        !graphModel.interactionInProgress) {
+      controller!.autoscaleAllAxes();
+    }
+  }, [controller, graphModel]);
+
   // respond to numeric axis domain changes (e.g. axis dragging)
   useEffect(() => {
     const disposer = reaction(
@@ -143,7 +153,8 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
       dataConfiguration
     );
     return () => disposer();
-  }, [callRefreshPointPositions, dataConfiguration, enableAnimation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [callRefreshPointPositions, dataConfiguration]);
 
   // respond to axis range changes (e.g. component resizing)
   useEffect(() => {
@@ -162,6 +173,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
       const disposer = onAnyAction(dataset, action => {
         if (isSetCaseValuesAction(action)) {
           // assumes that if we're caching then only selected cases are being updated
+          callRescaleIfPermitted();
           callRefreshPointPositions(dataset.isCaching);
           // TODO: handling of add/remove cases was added specifically for the case plot.
           // Bill has expressed a desire to refactor the case plot to behave more like the
@@ -173,7 +185,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
       });
       return () => disposer();
     }
-  }, [dataset, callRefreshPointPositions]);
+  }, [dataset, callRefreshPointPositions, callRescaleIfPermitted]);
 
   // respond to color changes
   useEffect(() => {
@@ -210,11 +222,13 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
           dotsElement: dotsRef.current,
           enableAnimation, instanceId
         });
+        callRescaleIfPermitted();
         callRefreshPointPositions(false);
       }
     }) || (() => true);
     return () => disposer();
-  }, [dataset, dataConfiguration, enableAnimation, graphModel, callRefreshPointPositions, dotsRef, instanceId]);
+  }, [controller, dataset, dataConfiguration, enableAnimation, graphModel,
+    callRefreshPointPositions, dotsRef, instanceId, callRescaleIfPermitted]);
 
   // respond to pointsNeedUpdating becoming false; that is when the points have been updated
   // Happens when the number of plots has changed for now. Possibly other situations in the future.
