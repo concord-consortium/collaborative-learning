@@ -172,29 +172,32 @@ export const PlottedVariablesAdornmentModel = PlottedFunctionAdornmentModel
   .views(self => ({
     numericValuesForAttrRole(_role: GraphAttrRole) {
       // We only have any values for X and Y
-      if (!['x','y'].includes(_role)) return [];
+      if (!['x', 'y'].includes(_role)) return [];
 
       const role = _role as PrimaryAttrRole;
       const result = [] as number[];
       for (const pvi of self.plottedVariables.values()) {
-        const vals = pvi.variableValues;
-        if (vals && role in vals) {
-          // We return 2 times each value because of how autoscale is defined for
-          // variables. Not just the current-value point has to fit in the graph,
-          // but a range of values around it so the function line can be seen clearly.
-          result.push(2*vals[role]);
-        } else {
-          // If the variable does not have a value, we pretend that the 'X' value is in the middle of the graph's
-          // X axis, and return a 'Y' range that will bring that part of the variable trace into view.
-          if (role === 'y') {
-            const graph = getParentOfType(self, GraphModel);
-            const bottomAxis = graph.getAxis("bottom");
-            const fakeX = isNumericAxisModel(bottomAxis) ? (bottomAxis.min + bottomAxis.max) / 2 : undefined;
-            if (fakeX) {
-              const { computeY, dispose } = pvi.setupCompute();
-              const fakeY = computeY(fakeX);
-              result.push(2*fakeY);
-              dispose();
+        if (pvi.xVariableId && pvi.yVariableId) {
+          const vals = pvi.variableValues;
+          if (vals && role in vals) {
+            // We return 2 times each value because of how autoscale is defined for
+            // variables. Not just the current-value point has to fit in the graph,
+            // but a range of values around it so the function line can be seen clearly.
+            result.push(2 * vals[role]);
+          } else {
+            // If the variable exists but does not have a value, we pretend that
+            // the 'X' value is in the middle of the graph's X axis, and return
+            // a 'Y' range that will bring that part of the variable trace into view.
+            if (role === 'y') {
+              const graph = getParentOfType(self, GraphModel);
+              const bottomAxis = graph.getAxis("bottom");
+              const fakeX = isNumericAxisModel(bottomAxis) ? (bottomAxis.min + bottomAxis.max) / 2 : undefined;
+              if (fakeX) {
+                const { computeY, dispose } = pvi.setupCompute();
+                const fakeY = computeY(fakeX);
+                result.push(2 * fakeY);
+                dispose();
+              }
             }
           }
         }
@@ -215,6 +218,9 @@ export const PlottedVariablesAdornmentModel = PlottedFunctionAdornmentModel
     },
     removePlottedVariables(key: string) {
       self.plottedVariables.delete(key);
+    },
+    clearPlottedVariables() {
+      self.plottedVariables.clear();
     },
     setupCompute(instanceKey: string) {
       return self.plottedVariables.get(instanceKey)?.setupCompute();
