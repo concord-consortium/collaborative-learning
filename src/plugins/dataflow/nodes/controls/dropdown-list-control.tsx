@@ -165,6 +165,7 @@ export class DropdownListControl extends Rete.Control {
   }
 
   public setValue = (val: any) => {
+    console.log("| S | DropdownListControl setValue: ", val);
     this.props.value = val;
     this.putData(this.key, val);
     (this as any).update();

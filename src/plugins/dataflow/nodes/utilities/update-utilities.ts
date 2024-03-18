@@ -14,19 +14,24 @@ function passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo) {
   if (sd.hasPort()){
     channel.serialConnected = true;
     const deviceMismatch = sd.deviceFamily !== channel.deviceFamily;
+    console.log("| S | deviceMismatch? ", deviceMismatch );
     const timeSinceActive = channel.usesSerial && channel.lastMessageRecievedAt
       ? Date.now() - channel.lastMessageRecievedAt: 0;
+    console.log("| S | timeSinceActive: ", timeSinceActive);
     channel.missing = deviceMismatch || timeSinceActive > 7000;
   } else {
     channel.serialConnected = false;
     channel.missing = true;
   }
+  console.log("| S | passSerialStateToChannel: ", channel);
 }
 
 export function sendDataToSerialDevice(n: Node, serialDevice: SerialDevice) {
   const { val, outType } = getNodeValueWithType(n);
   const isNumberOutput = isFinite(val);
   const { deviceFamily } = serialDevice;
+
+  console.log("| S | sendDataToSerialDevice: ", val, outType, isNumberOutput, deviceFamily, serialDevice);
 
   if (deviceFamily === "arduino" && isNumberOutput){
     serialDevice.writeToOutForBBGripper(val, outType);
@@ -44,6 +49,7 @@ export function sendDataToSimulatedOutput(n: Node, outputVariables?: VariableTyp
   const outputVariable = findOutputVariable(n, outputVariables);
   if (outputVariable && getHubSelect(n).getValue() === simulatedHubName(outputVariable)) {
     const { val } = getNodeValueWithType(n);
+
     // NOTE: this is where we historically saw NaN values with origins in the Sensor node
     if (isFinite(val)) outputVariable.setValue(val);
     // TODO: Should we also set the unit?

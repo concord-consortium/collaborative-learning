@@ -23,6 +23,7 @@ export function getOutputType(node: Node) {
 export function getNodeValueWithType(node: Node): NodeOutputValue {
   const val = node.data.nodeValue as number;
   const outType = getOutputType(node);
+  console.log("| S | getNodeValueWithType (look for NaN?): ", val, outType);
   return { val, outType };
 }
 
@@ -60,6 +61,7 @@ export function getLiveOptions(node: Node, deviceFamily: string, sharedVar?: Var
 
   if (!anyOuputFound && !options.includes(warningOption)) options.push(warningOption);
 
+  console.log("| S | getLiveOptions returning: ", options);
   return options;
 }
 

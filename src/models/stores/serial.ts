@@ -34,6 +34,7 @@ export class SerialDevice {
     this.connectChangeStamp = timeStamp;
     this.lastConnectMessage = status;
     localStorage.setItem("last-connect-message", status);
+    console.log("| S | updateConnectionInfo", status);
   }
 
   public determineDeviceFamily(info: SerialPortInfo){
@@ -51,6 +52,7 @@ export class SerialDevice {
       this.port = await navigator.serial.requestPort();
       this.deviceInfo = await this.port.getInfo();
       this.deviceFamily = this.determineDeviceFamily(this.deviceInfo);
+      console.log("| S | requestAndSetPort successful: ", this);
     }
     catch (error) {
       console.error("error requesting port: ", error);
@@ -78,6 +80,7 @@ export class SerialDevice {
             break;
           }
           if (this.deviceFamily === "arduino"){
+            console.log("| S | 1 | about to handleStream value: ", value, channels);
             this.handleArduinoStreamObj(value, channels);
           }
           if (this.deviceFamily === "microbit"){
@@ -140,7 +143,12 @@ export class SerialDevice {
 
     do {
       match = pattern.exec(this.localBuffer);
-      if (!match) break;
+      if (!match){
+        console.log("| S | NO match!: ", this.localBuffer);
+        break;
+      } else {
+        console.log("| S | YES match: ", match, this.localBuffer);
+      }
 
       const [fullMatch, channel, numStr] = match;
       this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
@@ -150,6 +158,7 @@ export class SerialDevice {
       });
 
       if (targetChannel){
+        console.log("| S | YES found targetChannel: ", targetChannel, channel, numStr);
         targetChannel.value = Math.round(Number(numStr));
       }
     } while (match);
@@ -162,11 +171,25 @@ export class SerialDevice {
   }
 
   public writeToOutForBBGripper(n:number, liveOutputType: string){
+    console.log("| S | >> writeToOutForBBGripper: ", n, liveOutputType);
+
     const gripperVer = NodeLiveOutputTypes.find(o => o.name === liveOutputType);
-    if (this.hasPort() && gripperVer?.angleBase){
+    console.log("| S | >> gripperVer: ", gripperVer);
+
+    const hasPort = this.hasPort();
+    console.log("| S | >> hasPort: ", hasPort);
+
+    if (hasPort && gripperVer?.angleBase){
       const percent = n / 100;
+      console.log("| S | >> percent: ", percent);
+
       const openTo = Math.round(gripperVer.angleBase - (percent * gripperVer.sweep));
-      this.writer.write(`${openTo.toString()}\n`);
+      console.log("| S | >> openTo: ", openTo);
+
+      const openToString = openTo.toString();
+      console.log("| S | >> openToString: ", openToString);
+
+      this.writer.write(`${openToString}\n`);
     }
   }
 }
