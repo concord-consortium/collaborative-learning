@@ -27,7 +27,6 @@ interface IGraphControllerConstructorProps {
   layout: GraphLayout
   enableAnimation: React.MutableRefObject<boolean>
   instanceId: string
-  autoAdjustAxes: React.MutableRefObject<boolean>
 }
 
 interface IGraphControllerProps {
@@ -39,13 +38,11 @@ export class GraphController {
   layout: GraphLayout;
   enableAnimation: React.MutableRefObject<boolean>;
   instanceId: string;
-  autoAdjustAxes: React.MutableRefObject<boolean>;
 
-  constructor({layout, enableAnimation, instanceId, autoAdjustAxes}: IGraphControllerConstructorProps) {
+  constructor({layout, enableAnimation, instanceId}: IGraphControllerConstructorProps) {
     this.layout = layout;
     this.instanceId = instanceId;
     this.enableAnimation = enableAnimation;
-    this.autoAdjustAxes = autoAdjustAxes;
   }
 
   setProperties(props: IGraphControllerProps) {

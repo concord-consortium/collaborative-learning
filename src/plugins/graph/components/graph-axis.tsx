@@ -24,7 +24,6 @@ import { GraphController } from "../models/graph-controller";
 interface IProps {
   place: AxisPlace;
   enableAnimation: MutableRefObject<boolean>;
-  autoAdjust?: React.MutableRefObject<boolean>;
   controller: GraphController;
   onDropAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void;
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void;
@@ -32,7 +31,7 @@ interface IProps {
 }
 
 export const GraphAxis = observer(function GraphAxis({
-  place, enableAnimation, autoAdjust, controller, onDropAttribute, onRemoveAttribute, onTreatAttributeAs
+  place, enableAnimation, controller, onDropAttribute, onRemoveAttribute, onTreatAttributeAs
 }: IProps) {
   const dataConfig = useDataConfigurationContext(), // FIXME mult-dataset.
     isDropAllowed = dataConfig?.graphPlaceCanAcceptAttributeIDDrop ?? (() => true),

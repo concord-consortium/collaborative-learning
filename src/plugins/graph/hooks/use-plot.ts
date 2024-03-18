@@ -14,6 +14,7 @@ import { IGraphLayerModel } from "../models/graph-layer-model";
 import { mstReaction } from "../../../utilities/mst-reaction";
 import { useReadOnlyContext } from "../../../components/document/read-only-context";
 import { GraphControllerContext } from "../models/graph-controller";
+import { useGraphSettingsContext } from "./use-graph-settings-context";
 
 interface IDragHandlers {
   start: (event: MouseEvent) => void
@@ -54,6 +55,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     layout = useGraphLayoutContext(),
     instanceId = useInstanceIdContext(),
     controller = useContext(GraphControllerContext),
+    graphSettings = useGraphSettingsContext(),
     refreshPointPositionsRef = useCurrent(refreshPointPositions);
 
   useEffect(function respondToLayerDotsEltCreation() {
@@ -107,12 +109,12 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
   }, []);
 
   const callRescaleIfPermitted = useCallback(() => {
-    if (controller!.autoAdjustAxes &&
+    if (graphSettings.scalePlotOnValueChange &&
         !graphModel.lockAxes &&
         !graphModel.interactionInProgress) {
       controller!.autoscaleAllAxes();
     }
-  }, [controller, graphModel]);
+  }, [controller, graphModel, graphSettings]);
 
   // respond to numeric axis domain changes (e.g. axis dragging)
   useEffect(() => {
