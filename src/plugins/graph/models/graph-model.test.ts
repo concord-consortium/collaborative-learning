@@ -73,12 +73,12 @@ describe('GraphModel', () => {
     const graphModel = GraphModel.create();
     expect(graphModel.adornments.length).toBe(0);
     const testAdornment = MovablePointModel.create({id: 'test', type: 'Movable Point', isVisible: true});
-    graphModel.showAdornment(testAdornment);
+    graphModel.addAdornment(testAdornment);
     expect(graphModel.adornments.length).toBe(1);
     expect(graphModel.adornments[0]).toBe(testAdornment);
     graphModel.hideAdornment('Movable Point');
     expect(graphModel.adornments[0].isVisible).toBe(false);
-    graphModel.showAdornment(testAdornment);
+    graphModel.showAdornment('Movable Point');
     expect(graphModel.adornments[0].isVisible).toBe(true);
   });
 

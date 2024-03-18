@@ -547,6 +547,57 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.clickToolbarButton('graph', 'move-points');
       clueCanvas.toolbarButtonIsNotSelected('graph', 'move-points');
       clueCanvas.toolbarButtonIsNotSelected('graph', 'add-points');
+
+      // Delete point with toolbar button
+      xyTile.getGraphDot().eq(0).click();
+      xyTile.getGraphDot().eq(0).children('circle.outer-circle').should("have.class", "selected");
+      clueCanvas.clickToolbarButton('graph', 'delete');
+      xyTile.getGraphDot().should('have.length', 1);
+
+      // Delete point with keyboard shortcut
+      xyTile.getGraphDot().eq(0).click();
+      xyTile.getGraphDot().eq(0).children('circle.outer-circle').should("have.class", "selected");
+      xyTile.getGraphDot().eq(0).type("{backspace}");
+      xyTile.getGraphDot().should('have.length', 0);
+    });
+
+    it("Test movable line", () => {
+      beforeTest(queryParamsMultiDataset);
+      clueCanvas.addTile("graph");
+      clueCanvas.toolbarButtonIsEnabled("graph", "movable-line");
+      clueCanvas.toolbarButtonIsNotSelected("graph", "movable-line");
+      xyTile.getMovableLine().should("have.length", 0);
+      xyTile.getMovableLineEquationContainer().should("have.length", 0);
+
+      // Add movable line
+      clueCanvas.clickToolbarButton("graph", "movable-line");
+      clueCanvas.toolbarButtonIsEnabled("graph", "movable-line");
+      clueCanvas.toolbarButtonIsSelected("graph", "movable-line");
+      xyTile.getMovableLine().should("have.length", 1);
+      xyTile.getMovableLineCover().should("have.length", 3);
+      xyTile.getMovableLineEquationContainer()
+        .should("have.length", 1)
+        // .and("be.visible") -- fails, since there's a (transparent) element covering it
+        .and("contain.html", "<em>time</em>")  // from default axis labels of the unit
+        .and("contain.html", "<em>dist</em>");
+      // this is how visibility is actually accomplished:
+      xyTile.getMovableLineWrapper().should("have.class", "fadeIn").and("not.have.class", "fadeOut");
+      xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
+
+      // Drag movable line
+      // We drag the bottom part to the right enough to make the slope negative
+      xyTile.getMovableLineCover('lower')
+        .trigger("mousedown", { eventConstructor: 'MouseEvent' })
+        .trigger("mousemove", 400, 200, { force: true, eventConstructor: 'MouseEvent' })
+        .trigger("mouseup", { eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineEquationSlope().should("be.lessThan", 0);
+
+      // Hide movable line (it still exists, just hidden)
+      clueCanvas.clickToolbarButton("graph", "movable-line");
+      clueCanvas.toolbarButtonIsEnabled("graph", "movable-line");
+      clueCanvas.toolbarButtonIsNotSelected("graph", "movable-line");
+      xyTile.getMovableLine().should("have.length", 1);
+      xyTile.getMovableLineWrapper().should("have.class", "fadeOut").and("not.have.class", "fadeIn");
     });
   });
 });

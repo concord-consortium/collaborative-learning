@@ -7,15 +7,19 @@ import { IToolbarButtonComponentProps, registerTileToolbarButtons }
   from "../../../components/toolbar/toolbar-button-manager";
 import { GraphControllerContext } from "../models/graph-controller";
 import { useGraphModelContext } from "../hooks/use-graph-model-context";
+import { kMovableLineType } from "../adornments/movable-line/movable-line-types";
+import { defaultMovableLineAdornment } from "../adornments/movable-line/movable-line-model";
 
 import LinkTableIcon from "../../../clue/assets/icons/geometry/link-table-icon.svg";
 import AddIcon from "../../../assets/icons/add-data-graph-icon.svg";
 import FitAllIcon from "../assets/fit-all-icon.svg";
 import LockAxesIcon from "../assets/lock-axes-icon.svg";
 import UnlockAxesIcon from "../assets/unlock-axes-icon.svg";
+import MovableLineIcon from "../assets/movable-line-icon.svg";
 import AddPointsByHandIcon from "../assets/add-points-by-hand-icon.svg";
 import SelectToolIcon from "../assets/select-tool-icon.svg";
 import AddPointsIcon from "../assets/add-points-icon.svg";
+import DeleteSelectionIcon from "../assets/delete-selection-icon.svg";
 
 function LinkTileButton(name: string, title: string, allowMultiple: boolean) {
 
@@ -87,6 +91,37 @@ const ToggleLockAxesButton = observer(function ToggleLockAxesButton({name}: IToo
       selected={locked}
       >
         { locked ? <UnlockAxesIcon/> : <LockAxesIcon/> }
+    </TileToolbarButton>
+  );
+});
+
+const MovableLineButton = observer(function MovableLineButton({name}: IToolbarButtonComponentProps) {
+  const graph = useGraphModelContext();
+  const disabled = graph.plotType !== "scatterPlot";
+  const adornment = graph.getAdornmentOfType(kMovableLineType);
+  const showing = adornment?.isVisible;
+
+  function handleClick() {
+    // Toggle whether movable line is showing
+    if (showing) {
+      graph.hideAdornment(kMovableLineType);
+    } else {
+      if (adornment) {
+        graph.showAdornment(kMovableLineType);
+      } else {
+        graph.addAdornment(defaultMovableLineAdornment(graph));
+      }
+    }
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Movable line"
+      disabled={disabled}
+      selected={showing && !disabled}
+      onClick={handleClick}>
+      <MovableLineIcon />
     </TileToolbarButton>
   );
 });
@@ -169,6 +204,27 @@ const AddPointsButton = observer(function({name}: IToolbarButtonComponentProps) 
 
 });
 
+const DeleteButton = observer(function({name}: IToolbarButtonComponentProps) {
+  const graph = useGraphModelContext();
+  const disabled = !graph.isAnyCellSelected;
+
+  function handleClick() {
+    graph.clearSelectedCellValues();
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Delete"
+      onClick={handleClick}
+      disabled={disabled}
+    >
+      <DeleteSelectionIcon />
+    </TileToolbarButton>
+  );
+
+});
+
 registerTileToolbarButtons("graph",
 [
   {
@@ -188,6 +244,10 @@ registerTileToolbarButtons("graph",
     component: ToggleLockAxesButton
   },
   {
+    name: 'movable-line',
+    component: MovableLineButton
+  },
+  {
     name: 'add-points-by-hand',
     component: AddPointsByHandButton
   },
@@ -198,6 +258,10 @@ registerTileToolbarButtons("graph",
   {
     name: 'move-points',
     component: SelectPointsButton
+  },
+  {
+    name: 'delete',
+    component: DeleteButton
   }
 
 ]);

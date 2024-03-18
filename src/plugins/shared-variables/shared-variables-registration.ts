@@ -7,8 +7,7 @@ import { IGraphModel, registerGraphSharedModelUpdateFunction } from "../graph/mo
 import {
   EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject
 } from "./drawing/variable-object";
-import {
-  IPlottedVariablesAdornmentModel, isPlottedVariablesAdornment, PlottedVariablesAdornmentModel
+import { PlottedVariablesAdornmentModel
 } from "./graph/plotted-variables-adornment/plotted-variables-adornment-model";
 import "./graph/plotted-variables-adornment/plotted-variables-adornment-registration";
 import {
@@ -75,15 +74,16 @@ registerGraphSharedModelUpdateFunction(
     // Display a plotted variables adornment when this is linked to a shared variables model
     const sharedVariableModels = smm.getTileSharedModelsByType(graphModel, SharedVariables);
     if (sharedVariableModels && sharedVariableModels.length > 0) {
-      let plottedVariablesAdornment: IPlottedVariablesAdornmentModel | undefined =
-      graphModel.adornments.find(
-        adornment => isPlottedVariablesAdornment(adornment)) as IPlottedVariablesAdornmentModel;
-      if (!plottedVariablesAdornment) {
-        plottedVariablesAdornment = PlottedVariablesAdornmentModel.create();
+      // We're connected to variables; show adornment or create if not there already.
+      if (graphModel.getAdornmentOfType(kPlottedVariablesType)) {
+        graphModel.showAdornment(kPlottedVariablesType);
+      } else {
+        const plottedVariablesAdornment = PlottedVariablesAdornmentModel.create();
         plottedVariablesAdornment.addPlottedVariables();
+        graphModel.addAdornment(plottedVariablesAdornment);
       }
-      graphModel.showAdornment(plottedVariablesAdornment);
     } else {
+      // Disconnected
       graphModel.hideAdornment(kPlottedVariablesType);
     }
   }

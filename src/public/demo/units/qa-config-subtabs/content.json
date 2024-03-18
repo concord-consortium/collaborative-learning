@@ -42,9 +42,11 @@
           "|",
           "fit-all",
           "toggle-lock",
+          "movable-line",
           "|",
           "move-points",
-          "add-points"
+          "add-points",
+          "delete"
         ]
       },
       "diagram": {

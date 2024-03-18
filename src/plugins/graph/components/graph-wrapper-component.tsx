@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import { ScaleLinear } from "d3";
@@ -19,6 +19,7 @@ import { decipherDotId } from "../utilities/graph-utils";
 import { GraphComponent } from "./graph-component";
 import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
 import { Point } from "../graph-types";
+import { HotKeys } from "../../../utilities/hot-keys";
 
 import "./graph-toolbar-registration";
 
@@ -31,10 +32,25 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   const graphSettingsFromStores = useSettingFromStores("graph") as IGraphSettingsFromStores;
   const graphSettings: IGraphSettings = { ...kDefaultGraphSettings, ...graphSettingsFromStores };
   const content = model.content as IGraphModel;
+  const hotKeys = useRef(new HotKeys());
 
   const layout = useInitGraphLayout(content);
   const xAttrType = content.config.attributeType("x");
   const yAttrType = content.config.attributeType("y");
+
+  const handleDelete = useCallback(() => {
+    content.clearSelectedCellValues();
+  }, [content]);
+
+  // One-time setup
+  useEffect(() => {
+    if (!readOnly) {
+      hotKeys.current.register({
+        "delete": handleDelete,
+        "backspace": handleDelete
+      });
+    }
+  }, [handleDelete, readOnly]);
 
   // This is used for locating Sparrow endpoints.
   const getDotCenter = useCallback((dotId: string) => {
@@ -153,7 +169,11 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
 
   return (
     <GraphSettingsContext.Provider value={graphSettings}>
-      <div className={classNames("graph-wrapper", { "read-only": readOnly })}>
+      <div
+        className={classNames("graph-wrapper", { "read-only": readOnly })}
+        onKeyDown={(e) => hotKeys.current.dispatch(e)}
+        tabIndex={0} // must be able to take focus so that it can receive keyDown events
+      >
         <BasicEditableTileTitle />
         <GraphComponent
           layout={layout}

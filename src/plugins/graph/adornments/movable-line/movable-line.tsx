@@ -7,9 +7,10 @@ import {ScaleNumericBaseType} from "../../imports/components/axis/axis-types";
 import {INumericAxisModel} from "../../imports/components/axis/models/axis-model";
 import {computeSlopeAndIntercept, equationString, IAxisIntercepts,
         lineToAxisIntercepts} from "../../utilities/graph-utils";
-import {useDataConfigurationContext} from "../../hooks/use-data-configuration-context";
 import {useInstanceIdContext} from "../../imports/hooks/use-instance-id-context";
 import { IMovableLineModel } from "./movable-line-model";
+import { useGraphModelContext } from "../../hooks/use-graph-model-context";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 
 import "./movable-line.scss";
 
@@ -32,9 +33,10 @@ interface IProps {
 
 export const MovableLine = observer(function MovableLine(props: IProps) {
   const {containerId, model, plotHeight, plotWidth, subPlotKey={}, xAxis, yAxis} = props,
-    dataConfig = useDataConfigurationContext(),
+    graphModel = useGraphModelContext(),
     layout = useAxisLayoutContext(),
     instanceId = useInstanceIdContext(),
+    readOnly = useReadOnlyContext(),
     xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType,
     xRange = xScale.range(),
     xScaleCopy = xScale.copy(),
@@ -42,6 +44,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     yRange = yScale.range(),
     yScaleCopy = yScale.copy(),
     kTolerance = 4, // pixels to snap to horizontal or vertical
+    displayHandles = false, // Not showing handles right now. We will probably bring them back later, restyled.
     kHandleSize = 12,
     instanceKey = model.instanceKey(subPlotKey),
     classFromKey = model.classNameFromKey(subPlotKey),
@@ -58,13 +61,9 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     yScaleCopy.range([plotHeight, 0]);
 
   // get attributes for use in equation
-  const allAttributes = dataConfig?.dataset?.attributes,
-    xAttrId = dataConfig?.attributeID('x') || '',
-    yAttrId = dataConfig?.attributeID('y') || '',
-    xAttr = allAttributes?.find(attr => attr.id === xAttrId),
-    yAttr = allAttributes?.find(attr => attr.id === yAttrId),
-    xAttrName = xAttr?.name ?? '',
-    yAttrName = yAttr?.name ?? '',
+  const
+    xAttrName = graphModel.xAttributeLabel,
+    yAttrName = graphModel.yAttributeLabel,
     xSubAxesCount = layout.getAxisMultiScale('bottom')?.repetitions ?? 1,
     ySubAxesCount = layout.getAxisMultiScale('left')?.repetitions ?? 1;
 
@@ -147,15 +146,17 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         fixEndPoints(lineObject.lower, 1);
         fixEndPoints(lineObject.middle, 2);
         fixEndPoints(lineObject.upper, 3);
-        fixHandles(lineObject.handleLower, 1);
-        fixHandles(lineObject.handleMiddle, 2);
-        fixHandles(lineObject.handleUpper, 3);
+        if (displayHandles) {
+          fixHandles(lineObject.handleLower, 1);
+          fixHandles(lineObject.handleMiddle, 2);
+          fixHandles(lineObject.handleUpper, 3);
+        }
         refreshEquation();
       });
       return () => disposer();
     }, [instanceId, pointsOnAxes, lineObject, plotHeight, plotWidth, xScale, yScale, model, model.lines,
         xAttrName, xSubAxesCount, xAxis, yAttrName, ySubAxesCount, yAxis, xRange, yRange,
-        equationContainerSelector, subPlotKey, instanceKey]
+        equationContainerSelector, subPlotKey, instanceKey, displayHandles]
   );
 
   const
@@ -266,6 +267,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
 
   // Add the behaviors to the line segments
   useEffect(function addBehaviors() {
+    if (readOnly) return;
     const behaviors: { [index: string]: any } = {
       lower: drag()
         .on("drag", (e) => continueRotation(e, "lower")),
@@ -281,7 +283,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     lineObject.middle?.call(behaviors.middle);
     lineObject.upper?.call(behaviors.upper);
     lineObject.equation?.call(behaviors.equation);
-  }, [lineObject, continueTranslate, continueRotation, moveEquation]);
+  }, [lineObject, continueTranslate, continueRotation, moveEquation, readOnly]);
 
   // Build the line and its cover segments and handles just once
   useEffect(function createElements() {
@@ -298,12 +300,14 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       .attr('class', 'movable-line-cover movable-line-middle-cover');
     newLineObject.upper = selection.append('line')
       .attr('class', 'movable-line-cover movable-line-upper-cover');
-    newLineObject.handleLower = selection.append('rect')
-        .attr('class', 'movable-line-handle movable-line-lower-handle show-on-tile-selected');
-    newLineObject.handleMiddle = selection.append('rect')
-        .attr('class', 'movable-line-handle movable-line-middle-handle show-on-tile-selected');
-    newLineObject.handleUpper = selection.append('rect')
-        .attr('class', 'movable-line-handle movable-line-upper-handle show-on-tile-selected');
+    if (displayHandles) {
+      newLineObject.handleLower = selection.append('rect')
+          .attr('class', 'movable-line-handle movable-line-lower-handle show-on-tile-selected');
+      newLineObject.handleMiddle = selection.append('rect')
+          .attr('class', 'movable-line-handle movable-line-middle-handle show-on-tile-selected');
+      newLineObject.handleUpper = selection.append('rect')
+          .attr('class', 'movable-line-handle movable-line-upper-handle show-on-tile-selected');
+    }
 
     // Set up the corresponding equation box
     // Define the selector that corresponds with this specific movable line's adornment container

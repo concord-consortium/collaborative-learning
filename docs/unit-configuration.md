@@ -171,6 +171,7 @@ Uses the common toolbar framework. Default toolbar buttons:
 - `add-points-by-hand` (creates a dataset owned by the graph)
 - `fit-all` (rescale axes to fit all points in view)
 - `toggle-lock` (lock axes so they won't automatically rescale)
+- `movable-line` (show/hide the movable line)
 - `move-points` (mode where points can be moved)
 - `add-points` (mode where points can be added)
 

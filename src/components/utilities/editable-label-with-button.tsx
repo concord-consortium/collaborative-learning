@@ -26,11 +26,18 @@ export const EditableLabelWithButton = observer(function EditableDataSetName({de
       onSubmit={onSubmit}
     >
       <EditablePreview />
-      <EditableInput />
+      <EditableInput onKeyDown={handleKeyDown}/>
       <EditButton />
     </Editable>
   );
 });
+
+// By default Chakra <EditableInput> lets keyboard events propagate.
+// This can lead to keyboard shortcuts being fired on the tile when user is typing in the input.
+// Adding a stopPropagation prevents this.
+function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+  e.stopPropagation();
+}
 
 function EditButton() {
   const { isEditing, getEditButtonProps } = useEditableControls();
