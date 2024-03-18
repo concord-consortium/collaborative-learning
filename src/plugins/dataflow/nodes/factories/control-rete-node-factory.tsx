@@ -75,8 +75,6 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
       cResult = NaN;
     }
 
-    // TODO - see if you can get rid of cResult and just use result
-
     // For each function, evaluate given inputs and node state
     // TODO - check and see if this gets serialized, and if so, how to handle legacy funcNames on load
     if (funcName === "Hold 0" || funcName.includes("Output Zero")){
