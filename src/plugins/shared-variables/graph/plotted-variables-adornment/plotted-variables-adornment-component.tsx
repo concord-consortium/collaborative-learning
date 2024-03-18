@@ -101,7 +101,6 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
     const tPixelMin = xScale(xMin);
     const tPixelMax = xScale(xMax);
     const kPixelGap = 1;
-    const isTileSelected = !!tile && ui.isSelectedTile(tile);
     for (const instanceKey of model.plottedVariables.keys()) {
       const plottedVar = model.plottedVariables.get(instanceKey);
       const variable = plottedVar && plottedVar.xVariableId && sharedVariables?.getVariableById(plottedVar.xVariableId);
@@ -169,7 +168,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
             pointHighlight
               .call(drag<SVGCircleElement, unknown>()
                 .container(() => { return plottedFunctionRef.current!; })
-                .filter((e) => { return !e.ctrlKey && !e.button && isTileSelected; })
+                .filter((e) => { return !e.ctrlKey && !e.button; })
                 .on('start', (e) => traceGroup.classed('dragging', true))
                 .on('drag', (e) => {
                   const newX = Math.round(e.x);
