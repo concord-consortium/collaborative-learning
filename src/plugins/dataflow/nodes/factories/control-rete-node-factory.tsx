@@ -51,13 +51,13 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
+    const n1 :number = inputs.num1.length ? inputs.num1[0] : node.data.num1;
+    const n2 :number = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
     const funcName = node.data.controlOperator as string;
     const recents: number[] | undefined = (node.data.recentValues as any)?.nodeValue;
     const lastRecentValue = recents?.[recents.length - 1];
     const priorValue = lastRecentValue == null ? null : lastRecentValue;
     const isWaitFunc = funcName.includes("Wait");
-    const n1 :number = inputs.num1.length ? inputs.num1[0] : node.data.num1;
-    const n2 :number = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
 
     let result = 0;
     let cResult = 0;
