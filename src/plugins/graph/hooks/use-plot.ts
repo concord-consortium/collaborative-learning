@@ -108,11 +108,11 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     };
   }, []);
 
-  const callRescaleIfPermitted = useCallback(() => {
+  const callRescaleIfNeeded = useCallback((growOnly: boolean = false) => {
     if (graphSettings.scalePlotOnValueChange &&
         !graphModel.lockAxes &&
         !graphModel.interactionInProgress) {
-      controller!.autoscaleAllAxes();
+      controller!.autoscaleAllAxes(growOnly);
     }
   }, [controller, graphModel, graphSettings]);
 
@@ -174,8 +174,8 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     if (dataset) {
       const disposer = onAnyAction(dataset, action => {
         if (isSetCaseValuesAction(action)) {
+          callRescaleIfNeeded();
           // assumes that if we're caching then only selected cases are being updated
-          callRescaleIfPermitted();
           callRefreshPointPositions(dataset.isCaching);
           // TODO: handling of add/remove cases was added specifically for the case plot.
           // Bill has expressed a desire to refactor the case plot to behave more like the
@@ -187,7 +187,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
       });
       return () => disposer();
     }
-  }, [dataset, callRefreshPointPositions, callRescaleIfPermitted]);
+  }, [dataset, callRefreshPointPositions, callRescaleIfNeeded]);
 
   // respond to color changes
   useEffect(() => {
@@ -224,13 +224,14 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
           dotsElement: dotsRef.current,
           enableAnimation, instanceId
         });
-        callRescaleIfPermitted();
+        const growOnly = isAddCasesAction(action);
+        callRescaleIfNeeded(growOnly);
         callRefreshPointPositions(false);
       }
     }) || (() => true);
     return () => disposer();
   }, [controller, dataset, dataConfiguration, enableAnimation, graphModel,
-    callRefreshPointPositions, dotsRef, instanceId, callRescaleIfPermitted]);
+    callRefreshPointPositions, dotsRef, instanceId, callRescaleIfNeeded]);
 
   // respond to pointsNeedUpdating becoming false; that is when the points have been updated
   // Happens when the number of plots has changed for now. Possibly other situations in the future.

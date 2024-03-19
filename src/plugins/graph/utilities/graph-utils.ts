@@ -10,7 +10,7 @@ import {
 } from "../d3-types";
 import {
   IDotsRef, kGraphFont, Point, outerCircleSelectedRadius, outerCircleUnselectedRadius,
-  Rect,rTreeRect, transitionDuration
+  Rect,rTreeRect, transitionDuration, kDefaultNumericAxisBounds
 } from "../graph-types";
 import {between} from "./math-utils";
 import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
@@ -51,7 +51,8 @@ export function ptInRect(pt: Point, iRect: Rect) {
 /**
  * This function closely follows V2's CellLinearAxisModel:_computeBoundsAndTickGap
  */
-export function computeNiceNumericBounds(min: number, max: number): { min: number, max: number } {
+export function computeNiceNumericBounds(
+  min: number|undefined, max: number|undefined): { min: number, max: number } {
 
   function computeTickGap(iMin: number, iMax: number) {
     const range = (iMin >= iMax) ? Math.abs(iMin) : iMax - iMin,
@@ -74,13 +75,15 @@ export function computeNiceNumericBounds(min: number, max: number): { min: numbe
     return Math.max(power * base, Number.MIN_VALUE);
   }
 
+  if (min === undefined || max === undefined || (min === max && min === 0)) {
+    return { min: kDefaultNumericAxisBounds[0], max: kDefaultNumericAxisBounds[1] };
+  }
+
   const kAddend = 5,  // amount to extend scale
     kFactor = 2.5,
     bounds = {min, max};
-  if (min === max && min === 0) {
-    bounds.min = -10;
-    bounds.max = 10;
-  } else if (min === max && isInteger(min)) {
+
+  if (min === max && isInteger(min)) {
     bounds.min -= kAddend;
     bounds.max += kAddend;
   } else if (min === max) {
@@ -110,9 +113,26 @@ export function computeNiceNumericBounds(min: number, max: number): { min: numbe
   return bounds;
 }
 
-export function setNiceDomain(values: number[], axisModel: IAxisModel) {
+/**
+ * Set the domain of the axis so that it fits all the given data points in a
+ * nice way. The values can be any numbers in any order; only the min and max in
+ * the array matter. The actual min and max set on the axis are derived from
+ * this considering factors such as making sure there is a non-zero range,
+ * starting and ending on tick marks, and snapping an end to 0 if it is close to 0.
+ *
+ * @param values data points to be fit.
+ * @param axisModel axis to update.
+ * @param growOnly if true, the range will not be reduced from its current limits, only expanded if necessary.
+ */
+export function setNiceDomain(values: number[], axisModel: IAxisModel, growOnly: boolean = false) {
   if (isNumericAxisModel(axisModel)) {
     const [minValue, maxValue] = extent(values, d => d) as [number, number];
+    if (growOnly) {
+      const [currentMin, currentMax] = axisModel.domain;
+      if (minValue >= currentMin && maxValue <= currentMax) {
+        return;
+      }
+    }
     const {min: niceMin, max: niceMax} = computeNiceNumericBounds(minValue, maxValue);
     axisModel.setDomain(niceMin, niceMax);
   }
