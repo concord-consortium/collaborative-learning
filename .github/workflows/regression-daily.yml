@@ -102,3 +102,19 @@ jobs:
           CYPRESS_coverage: true
           # Increase memory allocation
           NODE_OPTIONS: "--max_old_space_size=4096"
+  notify-slack:
+    if: ${{ failure() }}
+    needs: [all-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send custom JSON data to Slack workflow
+        id: slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          # This data can be any valid JSON from a previous step in the GitHub Action
+          payload: |
+            {
+              "build_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
