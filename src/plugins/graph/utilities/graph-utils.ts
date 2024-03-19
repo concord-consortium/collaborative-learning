@@ -84,20 +84,28 @@ export function computeNiceNumericBounds(min: number, max: number): { min: numbe
     bounds.min -= kAddend;
     bounds.max += kAddend;
   } else if (min === max) {
-    bounds.min = bounds.min + 0.1 * Math.abs(bounds.min);
-    bounds.max = bounds.max - 0.1 * Math.abs(bounds.max);
-  } else if (min > 0 && max > 0 && min <= max / kFactor) {  // Snap to zero
-    bounds.min = 0;
-  } else if (min < 0 && max < 0 && max >= min / kFactor) {  // Snap to zero
-    bounds.max = 0;
+    // Make a range around a single point by moving limits 10% in each direction
+    bounds.min = bounds.min - 0.1 * Math.abs(bounds.min);
+    bounds.max = bounds.max + 0.1 * Math.abs(bounds.max);
   }
+
+  // Find location of tick marks, move limits to a tick mark
+  // making sure there is at least 1/2 of a tick mark space beyond the last data point
   const tickGap = computeTickGap(bounds.min, bounds.max);
+
   if (tickGap !== 0) {
-    bounds.min = (Math.floor(bounds.min / tickGap) - 0.5) * tickGap;
-    bounds.max = (Math.floor(bounds.max / tickGap) + 1.5) * tickGap;
+    bounds.min = Math.floor(bounds.min / tickGap - 0.5) * tickGap;
+    bounds.max = Math.ceil(bounds.max / tickGap + 0.5) * tickGap;
   } else {
     bounds.min -= 1;
     bounds.max += 1;
+  }
+
+  // Snap to zero if close to 0.
+  if (min > 0 && max > 0 && min <= max / kFactor) {
+    bounds.min = 0;
+  } else if (min < 0 && max < 0 && max >= min / kFactor) {
+    bounds.max = 0;
   }
   return bounds;
 }
