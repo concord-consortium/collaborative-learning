@@ -27,6 +27,10 @@ context('Diagram Tool Tile', function () {
   it("Shared Variable Tiles (Diagram, Drawing)", () => {
 
     beforeTest();
+
+    // Intentionally Fail to test notification system
+    diagramTile.getDiagramTile().should("exist");
+
     clueCanvas.addTile("diagram");
 
     // Tile, toolbar, and buttons render

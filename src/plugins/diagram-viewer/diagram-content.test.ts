@@ -78,6 +78,8 @@ const setupContainer = (content: DiagramContentModelType, variables?: SharedVari
 
 describe("DiagramContent", () => {
   it("has default content", () => {
+    // Intentionally fail to test the slack notification
+    expect(false).toBeTruthy();
     const content = defaultDiagramContent();
     expect(content.root).toBeDefined();
   });

@@ -99,3 +99,25 @@ jobs:
         with:
           flags: cypress-regression
           token: ${{ secrets.CODECOV_TOKEN }}
+  notify-slack:
+    # TODO: Change this so it only runs when the branch is master.
+    # this ought then run when a PR is merged master which then causes the tests to fail
+    # This is intentally left off for the time being so we can test this job on the PR
+    # Branch
+    if: ${{ failure() }}
+    needs: [regression]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack the tests failed
+        id: slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          # This data can be any valid JSON from a previous step in the GitHub Action
+          payload: |
+            {
+              "ref_name": "${{ github.ref_name }}"
+              "workflow": "${{ github.workflow }}"
+              "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
