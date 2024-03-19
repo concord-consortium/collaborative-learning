@@ -100,11 +100,7 @@ jobs:
           flags: cypress-regression
           token: ${{ secrets.CODECOV_TOKEN }}
   notify-slack:
-    # TODO: Change this so it only runs when the branch is master.
-    # this ought then run when a PR is merged master which then causes the tests to fail
-    # This is intentally left off for the time being so we can test this job on the PR
-    # Branch
-    if: ${{ failure() }}
+    if: ${{ failure() && github.ref_name == 'master' }}
     needs: [regression]
     runs-on: ubuntu-latest
     steps:

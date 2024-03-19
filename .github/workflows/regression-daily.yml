@@ -107,7 +107,7 @@ jobs:
     needs: [all-tests]
     runs-on: ubuntu-latest
     steps:
-      - name: Send custom JSON data to Slack workflow
+      - name: Notify Slack the tests failed
         id: slack
         uses: slackapi/slack-github-action@v1.25.0
         with:
