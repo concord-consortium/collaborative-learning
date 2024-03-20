@@ -87,10 +87,4 @@ export function getHoldNodeResultString(node: NodeData, result: number, calcResu
   else return offString;
 }
 
-export function determineGateActive(switchVal: number, isWaitFunc: boolean, timerOn: boolean){
-  if (switchVal === undefined) return false;
-  if (!isWaitFunc) return switchVal === 1;
-  if (isWaitFunc && timerOn) return true;
-  return false;
-}
 

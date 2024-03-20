@@ -6,7 +6,7 @@ import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NumControl } from "../controls/num-control";
 import { HoldFunctionOptions } from "../../model/utilities/node";
 import { PlotButtonControl } from "../controls/plot-button-control";
-import { determineGateActive, getHoldNodeResultString } from "../utilities/view-utilities";
+import { getHoldNodeResultString } from "../utilities/view-utilities";
 
 export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -14,15 +14,13 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private heldValue: number | null = null;
-  private waitTimerOn: boolean = false;
+  private timerRunning: boolean = false;
 
-  private handleTimer(incomingSwitchVal: number, isCurrentOnSignal: boolean, duration: number){
-    if (this.waitTimerOn) return null;
-    if (incomingSwitchVal === 0) return null;
-
-    this.waitTimerOn = true;
+  private startTimer(node: Node, duration: number) {
+    if (this.timerRunning) return;
+    this.timerRunning = true;
     setTimeout(() => {
-      this.waitTimerOn = false;
+      this.timerRunning = false;
     }, duration * 1000);
   }
 
@@ -43,7 +41,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
         .addInput(valueInput)
         .addInput(binaryInput)
         .addControl(new DropdownListControl(this.editor, "controlOperator", node, dropdownOptions, true))
-        .addControl(new NumControl(this.editor, "waitDuration", node, true, "wait", 1, 0, ["sec"], "wait"))
+        .addControl(new NumControl(this.editor, "waitDuration", node, true, "wait", 0, 0, ["sec"], "wait"))
         .addControl(new PlotButtonControl(this.editor, "plot", node))
         .addControl(new ValueControl(this.editor, "nodeValue", node))
         .addOutput(out) as any;
@@ -57,17 +55,16 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     const recents: number[] | undefined = (node.data.recentValues as any)?.nodeValue;
     const lastRecentValue = recents?.[recents.length - 1];
     const priorValue = lastRecentValue == null ? null : lastRecentValue;
-    const isWaitFunc = funcName.includes("Wait");
+    const incomingSwitchVal = inputs.num1[0];
+
+    console.log("| incomingSwitchVal", incomingSwitchVal, " gateActive: ", node.data.gateActive);
 
     let result = 0;
     let cResult = 0;
 
-    isWaitFunc && this.handleTimer(inputs.num1[0], node.data.gateActive as boolean, node.data.waitDuration as number);
-
     // for setting classes on node
-    node.data.hasWait = isWaitFunc;
-    node.data.gateActive = determineGateActive(n1, isWaitFunc, this.waitTimerOn);
-    node.data.waitActive = node.data.gateActive && isWaitFunc;
+    node.data.gateActive = n1 === 1;
+
     // requires value in n2 (except for case of Output Zero)
     if (isNaN(n2)) {
       this.heldValue = null;
