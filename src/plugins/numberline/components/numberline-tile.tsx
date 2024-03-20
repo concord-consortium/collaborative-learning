@@ -466,7 +466,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
             <EditableNumberlineValue
               value={content.min}
               minOrMax={"min"}
-              offset={arrowOffset}
+              arrowOffset={arrowOffset}
               readOnly={readOnly}
               isTileSelected={isTileSelected}
               onValueChange={(newValue) => handleMinMaxChange("min", newValue)}
@@ -474,7 +474,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
             <EditableNumberlineValue
               value= {content.max}
               minOrMax={"max"}
-              offset={arrowOffset}
+              arrowOffset={arrowOffset}
               readOnly={readOnly}
               isTileSelected={isTileSelected}
               onValueChange={(newValue) => handleMinMaxChange("max", newValue)}
