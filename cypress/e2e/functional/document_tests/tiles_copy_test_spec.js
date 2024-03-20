@@ -161,6 +161,7 @@ context('Test copy tiles from one document to other document', function () {
 
     cy.log("Add number line tile");
     clueCanvas.addTile("numberline");
+    numberlineToolTile.setToolbarPoint(); //click Point in order to add points to numberline
     numberlineToolTile.addPointOnNumberlineTick(-4.0);
     numberlineToolTile.addPointOnNumberlineTick(2.0);
     numberlineToolTile.getPointsOnGraph().should('have.length', 2);
