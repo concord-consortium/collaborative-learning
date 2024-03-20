@@ -6,7 +6,7 @@ import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NumControl } from "../controls/num-control";
 import { HoldFunctionOptions } from "../../model/utilities/node";
 import { PlotButtonControl } from "../controls/plot-button-control";
-import { getHoldNodeResultString } from "../utilities/view-utilities";
+import { determinGateIsOn, getHoldNodeResultString } from "../utilities/view-utilities";
 
 export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -16,7 +16,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   private heldValue: number | null = null;
   private timerRunning: boolean = false;
 
-  private startTimer(node: Node, duration: number) {
+  private startTimer(duration: number) {
     if (this.timerRunning) return;
     this.timerRunning = true;
     setTimeout(() => {
@@ -55,15 +55,31 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     const recents: number[] | undefined = (node.data.recentValues as any)?.nodeValue;
     const lastRecentValue = recents?.[recents.length - 1];
     const priorValue = lastRecentValue == null ? null : lastRecentValue;
-    const incomingSwitchVal = inputs.num1[0];
 
-    console.log("| incomingSwitchVal", incomingSwitchVal, " gateActive: ", node.data.gateActive);
+    // moar vars
+    const incomingSwitchVal = inputs.num1[0];
+    const waitDuration = node.data.waitDuration as number;
+    const timerIsOption = waitDuration > 0;
+    const isNewOnSignal = incomingSwitchVal === 1 && !node.data.gateActive;
+    const timerIsRunning = this.timerRunning;
+    const timerShouldStart = timerIsOption && isNewOnSignal && !timerIsRunning;
+    const gateActive = node.data.gateActive as boolean;
+
+    console.log("| manageGateAndTimer |",
+      "\n  timerIsOption:       ", timerIsOption,
+      "\n  gateActive:          ", gateActive,
+      "\n  incomingSwitchVal:   ", incomingSwitchVal,
+      //"\n  waitDuration:        ", waitDuration,
+      "\n  isNewOnSignal:       ", isNewOnSignal,
+      "\n  timerIsRunning:      ", timerIsRunning,
+      "\n  timerShouldStart:        ", timerShouldStart,
+    );
 
     let result = 0;
     let cResult = 0;
 
-    // for setting classes on node
-    node.data.gateActive = n1 === 1;
+
+    node.data.gateActive = determinGateIsOn(timerIsOption, gateActive, timerShouldStart);
 
     // requires value in n2 (except for case of Output Zero)
     if (isNaN(n2)) {
