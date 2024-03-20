@@ -23,7 +23,7 @@ const simulatorTile = new SimulatorTile;
 let dashboard = new TeacherDashboard();
 let students = [15, 16];
 
-const teacherUrl = `${Cypress.config("qaUnitTeacher6")}&mouseSensor`
+const teacherUrl = `${Cypress.config("qaUnitTeacher6")}&mouseSensor`;
 
 function testTilesNotReadOnly(tab, position) {
   cy.get('.'+tab).find(position + ' .text-tool').should('not.have.class', 'read-only');
@@ -96,10 +96,13 @@ function setupTest(studentIndex) {
   drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
   clueCanvas.addTile("expression");
   exp.getMathField().should("have.value", "a=\\pi r^2");
+
   clueCanvas.addTile("numberline");
+  numberlineToolTile.setToolbarPoint(); //click Point in order to add points to numberline
   numberlineToolTile.addPointOnNumberlineTick(-4.0);
   numberlineToolTile.addPointOnNumberlineTick(2.0);
   numberlineToolTile.getPointsOnGraph().should('have.length', 2);
+
   const newName = "Image Tile";
   clueCanvas.addTile('image');
   cy.get('.primary-workspace .image-tool .editable-tile-title-text').first().should("contain", "Image 1");
@@ -143,7 +146,7 @@ function setupTestBrain(studentIndex) {
 
 context('Test 4-up and 1-up views tiles read only functionalities', function () {
   it('4-up and 1-up views read-only text, table, geometry, drawing, expression, numberline, image, datacard tiles', function () {
-    
+
     cy.clearQAData('all');
 
     setupTest(0);
@@ -173,7 +176,7 @@ context('Test 4-up and 1-up views tiles read only functionalities', function () 
     testTilesReadOnly("student-group-view", ".north-east");
   });
   it('4-up and 1-up views read-only dataflow, expression, xy plot tiles', function () {
-    
+
     cy.clearQAData('all');
 
     setupTestBrain(0);
