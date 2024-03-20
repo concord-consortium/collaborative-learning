@@ -76,6 +76,7 @@ context('Copy Document', () => {
 
     cy.log("Add number line tile");
     clueCanvas.addTile("numberline");
+    numberlineTile.setToolbarPoint(); //click Point in order to add points to numberline
     numberlineTile.addPointOnNumberlineTick(-4.0);
     numberlineTile.addPointOnNumberlineTick(2.0);
     numberlineTile.getPointsOnGraph().should('have.length', 2);
@@ -124,7 +125,7 @@ context('Copy Document', () => {
     simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor");
     simulatorTile.getSimulatorTile().should("contain.text", "Temperature Sensor");
     simulatorTile.getSimulatorTile().should("contain.text", "Gripper Output");
-  
+
     cy.log("Add Graph tool tile");
     clueCanvas.addTile("graph");
     xyTile.getTile().should('be.visible');
@@ -156,7 +157,7 @@ context('Copy Document', () => {
 
     numberlineTile.getNumberlineTile().scrollIntoView().should('be.visible');
     numberlineTile.getPointsOnGraph().should('have.length', 2);
-    
+
     imageTile.getImageTile().scrollIntoView().should('be.visible');
 
     datacardTile.getTile().scrollIntoView().should('be.visible');
@@ -180,4 +181,4 @@ context('Copy Document', () => {
     xyTile.getGraphDot().should('have.length.greaterThan', 3);
   });
 });
-    
+
