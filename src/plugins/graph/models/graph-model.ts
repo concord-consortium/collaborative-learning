@@ -790,9 +790,7 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
     yAttributeLabel: axisLabels && axisLabels.left,
     ...snap
   });
-  // TODO: make a dedicated setting for this rather than using defaultSeriesLegend as a proxy:
-  // const connectLinesByDefault = appConfig?.getSetting("defaultConnectedLines", "graph");
-  const connectByDefault = appConfig?.getSetting("defaultSeriesLegend", "graph");
+  const connectByDefault = appConfig?.getSetting("connectPointsByDefault", "graph");
   if (connectByDefault) {
     const cLines = ConnectingLinesModel.create();
     createdGraphModel.addAdornment(cLines);
