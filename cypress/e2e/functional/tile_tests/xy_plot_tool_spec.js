@@ -220,6 +220,32 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().should('not.exist');
     });
 
+    it("Graph can be linked to table with expression", () => {
+      beforeTest(queryParamsMultiDataset);
+      cy.collapseResourceTabs();
+      clueCanvas.addTile("graph");
+      xyTile.getTile().should('be.visible');
+
+      clueCanvas.addTile('table');
+      tableToolTile.getTableTile().should('be.visible');
+      clueCanvas.clickToolbarButton('table', 'set-expression');
+      cy.get('#expression-input').click().type('x*x{enter}');
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.typeInTableCellXY(0, 0, '5');
+        tableToolTile.getTableCellXY(0, 0).should('contain', '5');
+        tableToolTile.getTableCellXY(0, 1).should('contain', '25');
+        tableToolTile.typeInTableCellXY(1, 0, '10');
+        tableToolTile.getTableCellXY(1, 0).should('contain', '10');
+        tableToolTile.getTableCellXY(1, 1).should('contain', '100');
+      });
+
+      cy.log("Link Table");
+      xyTile.getTile().click();
+      clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
+      xyTile.linkTable("Table Data 1");
+      xyTile.getGraphDot().should('have.length', 2);
+    });
+
     it("Test duplicating graph with an xy-plot (a.k.a. graph)", () => {
       beforeTest(queryParamsMultiDataset);
       cy.collapseResourceTabs();
