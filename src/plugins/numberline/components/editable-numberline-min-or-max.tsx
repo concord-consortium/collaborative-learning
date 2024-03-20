@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 import "./numberline-tile.scss";
 
-interface IEditableValueProps {
+interface IEditableMinMaxProps {
   readOnly?: boolean;
   isTileSelected: boolean;
   value: number;
@@ -13,7 +13,7 @@ interface IEditableValueProps {
   onValueChange: (newValue: number) => void;
 }
 
-export const EditableNumberlineValue: React.FC<IEditableValueProps> = observer(function NumberlineTile(props) {
+export const EditableNumberlineMinOrMax: React.FC<IEditableMinMaxProps> = observer(function NumberlineTile(props) {
   const { readOnly, isTileSelected, value, offset, minOrMax, onValueChange } = props;
 
   const [isEditing, setIsEditing] = useState(false);

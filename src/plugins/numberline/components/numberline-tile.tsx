@@ -14,11 +14,12 @@ import {
   kAxisStyle, kAxisWidth, kContainerWidth, kNumberLineContainerHeight,
   tickHeightDefault, tickStyleDefault, tickWidthDefault, tickWidthZero,
   innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kArrowheadTop,
-  kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax
+  kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax,
+  kPointValueLineLength, kPointValuelabelHeight
 } from '../numberline-tile-constants';
 import NumberlineArrowLeft from "../../../assets/numberline-arrow-left.svg";
 import NumberlineArrowRight from "../../../assets/numberline-arrow-right.svg";
-import { EditableNumberlineValue } from './editable-numberline-value';
+import { EditableNumberlineMinOrMax } from './editable-numberline-min-or-max';
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 import { INumberlineToolbarContext, NumberlineToolbarContext } from './numberline-toolbar-context';
 import "./numberline-toolbar-registration";
@@ -33,7 +34,6 @@ export enum CreatePointType {
 
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
   const { model, readOnly, tileElt, onRegisterTileApi } = props;
-
   const content = model.content as NumberlineContentModelType;
   const [hoverPointId, setHoverPointId] = useState("");
   const [_selectedPointId, setSelectedPointId] = useState(""); // Just used to rerender when a point is selected
@@ -41,7 +41,6 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const isTileSelected = ui.isSelectedTile(model);
 
   /* ========================== [ Determine Point is Open or Filled ]  ========================= */
-
   const [toolbarOption, settoolbarOption] = useState<CreatePointType>(CreatePointType.Selection); //"selection"
 
   const handleCreatePointType = (pointType: CreatePointType) => {
@@ -306,26 +305,25 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     const tickValues = generateTickValues(content.min, content.max);
 
     axis
-      .attr("class", `${axisClass} num-line`)
-      .attr("style", `${kAxisStyle}`)
-      .call(axisBottom(xScale)
-      .tickValues(tickValues)
-      .tickFormat(tickFormatter))
+    .attr("class", `${axisClass} num-line`)
+    .attr("style", `${kAxisStyle}`)
+    .call(axisBottom(xScale)
+    .tickValues(tickValues)
+    .tickFormat(tickFormatter))
 
-      .selectAll("g.tick line") // Customize tick marks
-      .attr("class", (value)=> (value === 0) ? "zero-tick" : "default-tick")
-      .attr("y2", tickHeightDefault)
-      .attr("stroke-width", (value) => (value === 0) ? tickWidthZero : tickWidthDefault)
-      .attr("style", tickStyleDefault);
+    .selectAll("g.tick line") // Customize tick marks
+    .attr("class", (value)=> (value === 0) ? "zero-tick" : "default-tick")
+    .attr("y2", tickHeightDefault)
+    .attr("stroke-width", (value) => (value === 0) ? tickWidthZero : tickWidthDefault)
+    .attr("style", tickStyleDefault);
 
     axis
-      .selectAll("g.tick text") // Customize tick labels
-      .attr("dy", (dy) => {
-        return (dy === content.min || dy === content.max) ? tickTextTopOffsetMinAndMax : tickTextTopOffsetDefault;
-      });
+    .selectAll("g.tick text") // Customize tick labels
+    .attr("dy", (dy) => {
+      return (dy === content.min || dy === content.max) ? tickTextTopOffsetMinAndMax : tickTextTopOffsetDefault;
+    });
   }
 
-  /* ========================== [ Construct/Update Circles ] =================================== */
   if (axisWidth !== 0){
     const handleDrag = drag<SVGCircleElement, PointObjectModelType>()
       .on('drag', (e, p) => {
@@ -335,6 +333,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           if (hoverPoint) content.setSelectedPoint(hoverPoint);
           const newXValue = xScale.invert(mouseX);
           p.setDragXValue(newXValue);
+          //Update vertical line + value label
+          svg.selectAll(".point-line")
+          .filter((d: any): d is PointObjectModelType => d.id === p.id)
+          .attr("x1", xScale(newXValue))
+          .attr('x2', xScale(newXValue));
+          //Raise both the circle and label above the others
+          select(`${p.id}`).raise();
+          select(`#label-${p.id}`).raise();
         }
       })
       .on("end", (e, p) => {
@@ -343,47 +349,42 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         }
       });
 
-    const updateCircles = () => {
-      /* =========================== [ Outer Hover Circles ] ======================= */
+    /* ========================== [ Construct/Update Circles ] =================================== */
 
+    const updateCircles = () => {
+      /* =============================== [ Outer Hover Circles ] =============================== */
       //---- Initialize outer hover circles
       const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
-        .data(content.pointsArr);
+      .data(content.pointsArr);
 
       outerPoints.enter()
-        .append("circle").attr("class", "outer-point")
-        .attr('cx', (p) => {
-          return xScale(p.currentXValue);
-        }) //mapped to axis width
-        .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
-        .classed("point-outer-circle", true)
-        .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
+      .append("circle").attr("class", "outer-point")
+      .attr('cx', (p) => xScale(p.currentXValue))
+      .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
+      .classed("point-outer-circle", true)
+      .call((e) => handleDrag(e));
 
-      // --- Update functions outer hover circles
+      // --- Update outer hover circles
       outerPoints
-        .attr('cx', (p) => xScale(p.currentXValue)) //mapped to axis width
-        .classed("hovered", (p, idx) => (hoverPointId === p.id))
-        .call((e) => handleDrag(e)); // pass again in case axisWidth changes
+      .attr('cx', (p) => xScale(p.currentXValue))
+      .classed("hovered", (p, idx) => (hoverPointId === p.id))
+      .call((e) => handleDrag(e));
 
-      outerPoints.exit().remove(); //cleanup
+      outerPoints.exit().remove();
 
-      //TODO: Revise inner circles back to original
-      // create an innerPointsOpen that is white and append it to svg
-
-      /* =========================== [ Inner Circles ] ============================= */
+      /* ============================= [ Filled Blue Circles ] ================================= */
       const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
-        .data(content.pointsArr);
+      .data(content.pointsArr);
 
-      // Initialize Attributes
       innerPoints.enter()
-        .append("circle")
-        .attr("class", "inner-point")
-        .attr('cx', (p) => xScale(p.currentXValue)) //mapped to axis width
-        .attr('cy', yMidPoint)
-        .attr('r', innerPointRadius)
-        .attr('id', p => p.id)
-        .classed("point-inner-circle", true) //may change
-        .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
+      .append("circle")
+      .attr("class", "inner-point")
+      .attr('cx', (p) => xScale(p.currentXValue))
+      .attr('cy', yMidPoint)
+      .attr('r', innerPointRadius)
+      .attr('id', p => p.id)
+      .classed("point-inner-circle", true)
+      .call((e) => handleDrag(e));
 
       // --- Update functions inner circles
       innerPoints
@@ -393,23 +394,20 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
       innerPoints.exit().remove();
 
+      /* =========================== [ Open Inner White Circles] ===================================== */
 
-      /* =========================== [ Blue White Circles] ============================= */
-      // Filter the points that should have an inner white circle
-
-
-      const openPoints = content.pointsArr.filter(p => p.isOpen);
+      const openPoints = content.pointsArr.filter(p => p.isOpen); // Look for open points for inner white circle
       const innerWhitePoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-white-point')
       .data(openPoints);
 
       innerWhitePoints.enter()
-        .append("circle")
-          .attr("class", "inner-white-point")
-          .attr("cx", (p) => xScale(p.currentXValue))
-          .attr("cy", yMidPoint)
-          .attr("r", innerPointRadius * 0.5)
-          .attr("fill", "white")
-          .attr('id', (p) => `inner-white-${p.id}`);
+      .append("circle")
+      .attr("class", "inner-white-point")
+      .attr("cx", (p) => xScale(p.currentXValue))
+      .attr("cy", yMidPoint)
+      .attr("r", innerPointRadius * 0.5)
+      .attr("fill", "white")
+      .attr('id', (p) => `inner-white-${p.id}`);
 
       // Update circle positions
       innerWhitePoints
@@ -417,11 +415,87 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       .attr("cy", yMidPoint);
 
       innerWhitePoints.exit().remove();
+
+      /* ======================== [ Vertical Line + Point Values] ============================== */
+
+      // --------------- Draw vertical lines under each point ----------
+      const pointLines = svg.selectAll('.point-line')
+      .data(content.pointsArr);
+
+      pointLines.enter()
+      .append("line")
+      .attr("class", "point-line")
+      .attr("x1", p => xScale(p.currentXValue))
+      .attr("y1", yMidPoint + outerPointRadius - 5)  // y start just below the point
+      .attr("x2", p => xScale(p.currentXValue))  // x position is same as point"s x
+      .attr("y2", yMidPoint + outerPointRadius + kPointValueLineLength) // y end is lineLength below the start
+      .style("stroke", "#949494")
+      .style("stroke-width", 2);
+
+      //Update line positions
+      pointLines
+      .attr("x1", (p) => xScale(p.currentXValue))
+      .attr("x2", (p) => xScale(p.currentXValue));
+
+      pointLines.exit().remove();
+
+      /* =========================== [ Oval Point Value Labels ] ===================================== */
+      // Initialize
+      const pointLabels = svg.selectAll<SVGGElement, PointObjectModelType>(".point-label")
+      .data<PointObjectModelType>(content.pointsArr, d => d.id);
+
+      const pointLabelEnter = pointLabels.enter()
+      .append("g")
+      .attr("class", "point-label")
+      .attr("id", d => `label-${d.id}`); //referenced in handleDrag to raise the label as last child in the SVG
+
+
+      // Initialize ovals
+      pointLabelEnter.append("rect")
+      .attr("fill", "#FFFFFF")
+      .attr("stroke", "#949494")
+      .attr("stroke-width", "1.5px")
+      .attr("rx", "10")
+      .attr("ry", "10");
+
+      // Initialize label text
+      pointLabelEnter.append("text")
+      .attr("text-anchor", "middle")
+      .attr("alignment-baseline", "middle");
+
+      // Update rect and label
+      const pointLabelUpdate = pointLabelEnter.merge(pointLabels);
+
+      const getTextWidth = (str: string) => 7 * str.length;
+
+      pointLabelUpdate.each(function(d) {
+        const textContent = d.currentXValue.toFixed(2);
+        const ovalWidth = getTextWidth(textContent) + 10; // 5px padding on each side
+        const yOffsetOval = yMidPoint + outerPointRadius + kPointValueLineLength;
+        const yOffsetNum = yOffsetOval + (kPointValuelabelHeight / 2) + 1;
+        const xOffsetNum =  xScale(d.currentXValue);
+        const xOffsetOval = xOffsetNum - (ovalWidth / 2);
+
+        select(this).select("rect")
+        .attr("width", ovalWidth)
+        .attr("height", kPointValuelabelHeight)
+        .attr("x", xOffsetOval)
+        .attr("y", yOffsetOval);
+
+        select(this).select("text")
+        .attr("x", xOffsetNum)
+        .attr("y", yOffsetNum)
+        .text(textContent);
+      });
+
+      pointLabels.exit().remove();
+
     }; //end of updateCircles()
 
     updateCircles();
   }
 
+  // * ================================= [ Register Toolbar ] ================================== */
 
   const toolbarFunctions: INumberlineToolbarContext = {
     handleResetPoints: () => content.deleteAllPoints(),
@@ -463,7 +537,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
               className="arrow"
               style={{ right: arrowOffset, top: kArrowheadTop }}
             />
-            <EditableNumberlineValue
+            <EditableNumberlineMinOrMax
               value={content.min}
               minOrMax={"min"}
               offset={arrowOffset}
@@ -471,7 +545,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
               isTileSelected={isTileSelected}
               onValueChange={(newValue) => handleMinMaxChange("min", newValue)}
             />
-            <EditableNumberlineValue
+            <EditableNumberlineMinOrMax
               value= {content.max}
               minOrMax={"max"}
               offset={arrowOffset}
