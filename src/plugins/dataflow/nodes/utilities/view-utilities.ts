@@ -87,4 +87,13 @@ export function getHoldNodeResultString(node: NodeData, result: number, calcResu
   else return offString;
 }
 
+export function determineGateAndTimerStates(node: NodeData, inputs: any, timerRunning: boolean){
+  const timerIsOption =  node.data.waitDuration as number > 0;
+  const switchIn = inputs.num1[0];
+  const isNewOnSignal = switchIn === 1 && !node.data.gateActive;
 
+  const startTimer = timerIsOption && isNewOnSignal && !timerRunning;
+  const activateGate = timerRunning ? true : switchIn === 1;
+  return { activateGate, startTimer };
+
+}
