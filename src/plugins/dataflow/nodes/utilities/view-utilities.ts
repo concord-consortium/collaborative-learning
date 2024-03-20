@@ -76,14 +76,14 @@ export function getInsertionOrder(editor: NodeEditor, id: number) {
   return index + 1;
 }
 
-export function getHoldNodeResultString(node: NodeData, result: number, calcResult: number){
+export function getHoldNodeResultString(node: NodeData, result: number, calcResult: number, timerRunning: boolean){
   const resultString = getNumDisplayStr(result);
   const cResultString = getNumDisplayStr(calcResult);
   const waitString = `waiting → ${cResultString}`;
   const onString = `on → ${cResultString}`;
   const offString = `off → ${resultString}`;
 
-  if (node.data.gateActive) return node.data.hasWait ? waitString : onString;
+  if (node.data.gateActive) return timerRunning ? waitString : onString;
   else return offString;
 }
 
@@ -95,5 +95,4 @@ export function determineGateAndTimerStates(node: NodeData, inputs: any, timerRu
   const startTimer = timerIsOption && isNewOnSignal && !timerRunning;
   const activateGate = timerRunning ? true : switchIn === 1;
   return { activateGate, startTimer };
-
 }

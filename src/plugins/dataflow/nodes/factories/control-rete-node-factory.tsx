@@ -19,12 +19,8 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   private startTimer(duration: number) {
     if (this.timerRunning) return;
     this.timerRunning = true;
-    const startTime = Date.now();
     setTimeout(() => {
       this.timerRunning = false;
-      const endTime = Date.now();
-      const actualDuration = endTime - startTime;
-      console.log("| Timer ended after", actualDuration, "ms. Expected", duration * 1000, "ms.");
     }, duration * 1000);
   }
 
@@ -53,8 +49,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
-    const n1 :number = inputs.num1.length ? inputs.num1[0] : node.data.num1;
-    const n2 :number = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
+    const signalValue :number = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
     const funcName = node.data.controlOperator as string;
     const recents: number[] | undefined = (node.data.recentValues as any)?.nodeValue;
     const lastRecentValue = recents?.[recents.length - 1];
@@ -67,8 +62,8 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     node.data.gateActive = activateGate;
     startTimer && this.startTimer(node.data.waitDuration as number);
 
-    // requires value in n2 (except for case of Output Zero)
-    if (isNaN(n2)) {
+    // requires value in signalValue (except for case of Output Zero)
+    if (isNaN(signalValue)) {
       this.heldValue = null;
       result = NaN;
       cResult = NaN;
@@ -76,27 +71,27 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
 
     // For each function, evaluate given inputs and node state
     // TODO - check and see if this gets serialized, and if so, how to handle legacy funcNames on load
-    if (funcName === "Hold 0" || funcName.includes("Output Zero")){
+    if (funcName === "Hold 0" || funcName === "Output Zero"){
       this.heldValue = null;
-      result = node.data.gateActive ? 0 : n2;
+      result = node.data.gateActive ? 0 : signalValue;
       cResult = 0;
     }
 
-    else if (funcName.includes("Hold Current")){
+    else if (funcName === "Hold Current"){
       if (node.data.gateActive){
         // Already a number here? Maintain. Otherwise set the new held value;
-        this.heldValue = typeof this.heldValue === "number" ? this.heldValue : n2;
+        this.heldValue = typeof this.heldValue === "number" ? this.heldValue : signalValue;
         result = this.heldValue;
         cResult = this.heldValue;
       }
       else {
         this.heldValue = null;
-        result = n2;
-        cResult = n2; // still n2, since the value to be held would be the current
+        result = signalValue;
+        cResult = signalValue; // still signalValue, since the value to be held would be the current
       }
     }
 
-    else if (funcName.includes("Hold Prior")){
+    else if (funcName === "Hold Prior"){
       if (node.data.gateActive){
         // Already a number here? Maintain. Otherwise set the new held value;
         this.heldValue = typeof this.heldValue === "number" ? this.heldValue : priorValue;
@@ -105,12 +100,12 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
       }
       else {
         this.heldValue = null;
-        result = n2;
+        result = signalValue;
         cResult = priorValue || 0;
       }
     }
 
-    const resultSentence = getHoldNodeResultString(node, result, cResult) || "";
+    const resultSentence = getHoldNodeResultString(node, result, cResult, this.timerRunning) || "";
 
     // operate rete
     if (this.editor) {
