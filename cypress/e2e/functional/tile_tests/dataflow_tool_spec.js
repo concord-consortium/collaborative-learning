@@ -337,11 +337,9 @@ context('Dataflow Tool Tile', function () {
 
     cy.log("verify control operator types");
     const controlOperator = "controlOperator";
-    const controlOperatorDisplayNames = [
-      "Hold this", "Hold previous", "Hold 0", "Hold this, wait", "Hold previous, wait", "Hold 0, wait"
-    ];
+    const controlOperatorDisplayNames = ["Hold this", "Hold previous", "Hold 0"];
     dataflowToolTile.getDropdown(controlNode, controlOperator).click();
-    dataflowToolTile.getDropdownOptions(controlNode, controlOperator).should("have.length", 6);
+    dataflowToolTile.getDropdownOptions(controlNode, controlOperator).should("have.length", 3);
     dataflowToolTile.getDropdownOptions(controlNode, controlOperator).each(($tab, index, $typeList) => {
       expect($tab.text()).to.contain(controlOperatorDisplayNames[index]);
     });
