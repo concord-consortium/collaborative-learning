@@ -1,5 +1,6 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import { drag, select, Selection } from "d3";
+import { comparer } from "mobx";
 import { observer } from "mobx-react-lite";
 import { VariableType } from "@concord-consortium/diagram-view";
 
@@ -243,8 +244,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
       model);
   }, [model, plotWidth, plotHeight, xAxis, yAxis, refreshValues, controller]);
 
-  // Refresh display when variable values change
-  useEffect(function udpateOnValuesChange() {
+  useEffect(function updateOnValuesChange() {
     return mstReaction(
       () => {
         let hasAnyVars = false;
@@ -267,10 +267,10 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
           refreshValues();
         }
       },
-      { name: "PlottedVariablesAdornmentComponent.rescaleOnValuesChange" },
+      { name: "PlottedVariablesAdornmentComponent.rescaleOnValuesChange",
+        equals: comparer.structural },
       model);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [controller, model]);
+  }, [controller, graphModel, model, refreshValues, settings]);
 
   // Scale graph when a new X or Y variable is selected
   useEffect(function scaleOnVariableChange() {
@@ -284,7 +284,7 @@ export const PlottedVariablesAdornmentComponent = observer(function PlottedVaria
       },
       { name: "PlottedVariablesAdornmentComponent.scaleOnVariableChange" },
       model);
-  }, [graphModel.lockAxes, model, xAxis, yAxis, controller]);
+  }, [graphModel, model, xAxis, yAxis, controller]);
 
   return (
     <svg className={`plotted-function-${classFromKey}`}>

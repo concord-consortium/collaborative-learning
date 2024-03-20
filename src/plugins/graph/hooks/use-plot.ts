@@ -155,8 +155,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
       dataConfiguration
     );
     return () => disposer();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [callRefreshPointPositions, dataConfiguration]);
+  }, [callRefreshPointPositions, dataConfiguration, enableAnimation]);
 
   // respond to axis range changes (e.g. component resizing)
   useEffect(() => {

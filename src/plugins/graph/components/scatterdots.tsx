@@ -76,7 +76,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     }, [layout, dataConfiguration, dataset]),
 
     onDrag = useCallback((event: D3DragEvent<SVGGElement,CaseData,Point>) => {
-      if (event.dx!==0 || event.dy!==0) {
+      if (event.dx !== 0 || event.dy !== 0) {
         updatePositions(event.dx, event.dy);
       }
     }, [updatePositions]),
@@ -90,8 +90,8 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
 
   selectGraphDots(dotsRef.current)
     ?.call(drag<SVGGElement,CaseData,Point>()
-      .filter(() => { return graphModel.editingMode !== "none"; })
-      .subject((event) => { return { x: event.x, y: event.y }; })
+      .filter(() => graphModel.editingMode !== "none")
+      .subject((event) => ({ x: event.x, y: event.y }))
       .on('start', onDragStart)
       .on('drag', onDrag)
       .on('end', onDragEnd)
