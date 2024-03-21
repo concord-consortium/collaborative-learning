@@ -39,6 +39,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
 
   const
     onDragStart = useCallback((event: D3DragEvent<SVGGElement,CaseData,Point>, datum) => {
+      console.log('onDragStart');
       const targetDot = event.sourceEvent.target && inGraphDot(event.sourceEvent.target as SVGSVGElement);
       if (!targetDot) return;
       target.current = select(targetDot as SVGSVGElement);
@@ -86,16 +87,19 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
         // Final update does a rescale if appropriate
         updatePositions(event.dx, event.dy);
         target.current = null;
-    }, [graphModel, updatePositions]);
+    }, [graphModel, updatePositions]),
 
-  selectGraphDots(dotsRef.current)
-    ?.call(drag<SVGGElement,CaseData,Point>()
-      .filter(() => graphModel.editingMode !== "none")
-      .subject((event) => ({ x: event.x, y: event.y }))
-      .on('start', onDragStart)
-      .on('drag', onDrag)
-      .on('end', onDragEnd)
-    );
+    updateDragHandler = useCallback(() => {
+      console.log('updateDragHandlers', dotsRef);
+      selectGraphDots(dotsRef.current)
+        ?.call(drag<SVGGElement,CaseData,Point>()
+          .filter(() => graphModel.editingMode !== "none")
+          .subject((event) => ({ x: event.x, y: event.y }))
+          .on('start', onDragStart)
+          .on('drag', onDrag)
+          .on('end', onDragEnd)
+        );
+    }, [dotsRef, graphModel, onDrag, onDragEnd, onDragStart]);
 
   const refreshPointSelection = useCallback(() => {
     const { pointColor, pointStrokeColor } = graphModel;
@@ -108,6 +112,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   }, [dataConfiguration, dotsRef, graphModel]);
 
   const refreshPointPositionsD3 = useCallback((selectedOnly: boolean) => {
+    console.log("refreshPointPos");
     if (!dataConfiguration) return;
     const getScreenX = (anID: string) => {
       const xAttrID = dataConfiguration?.attributeID('x') ?? '',
@@ -146,8 +151,9 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       selectedOnly, getScreenX, getScreenY, getLegendColor,
       getColorForId: graphModel.getColorForId, enableAnimation, pointColor, pointStrokeColor
     });
+    updateDragHandler();
   }, [dataConfiguration, dataset, dotsRef, layout, legendAttrID,
-    enableAnimation, graphModel, yScaleRef]);
+    enableAnimation, graphModel, yScaleRef, updateDragHandler]);
 
   // const refreshPointPositionsSVG = useCallback((selectedOnly: boolean) => {
   //   const xAttrID = dataConfiguration?.attributeID('x') ?? '',

@@ -567,19 +567,18 @@ context('XYPlot Tool Tile', function () {
       // Drag a point to reposition.  Should start out where we initially clicked
       xAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 150, 10);
       yAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 50, 10);
+      clueCanvas.clickToolbarButton('graph', 'toggle-lock'); // so that we can test position without rescale happening
 
-      // FIXME: I cannot make this test work.  It used to work before switching to d3-drag for the points.
-      // cy.window().then(win => {
-      //   xyTile.getGraphDot().eq(0)
-      //   .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent', button: 0, view: win, clientX: 150, clientY: 50 })
-      //   .trigger("dragstart", { force: true, eventConstructor: 'DragEvent' })
-      //   .trigger("drag")
-      //   .trigger("mousemove", { force: true, eventConstructor: 'MouseEvent', clientX: 175, clientY: 75 })
-      //   .trigger("mouseup", 175, 75, { force: true, eventConstructor: 'MouseEvent', clientX: 175, clientY: 75, view: win });
-      // });
-      // cy.wait(1000);
-      // xAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 175, 10);
-      // yAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 75, 10);
+      cy.window().then(win => {
+        xyTile.getGraphDot().eq(0).children('circle').eq(1)
+          .trigger("mousedown", 150, 50, { force: true, view: win })
+          .trigger("mousemove", 175, 75, { force: true, view: win })
+          .trigger("mouseup", 175, 75, { force: true, view: win });
+      });
+
+      xAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 175, 10);
+      yAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 75, 10);
+      clueCanvas.clickToolbarButton('graph', 'toggle-lock'); // unlock
 
       // Click toolbar button again to leave edit mode
       clueCanvas.clickToolbarButton('graph', 'move-points');
