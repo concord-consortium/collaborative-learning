@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>39463039-6210-40DC-BAAF-6AC0CCF4C991</title>
+    <g id="Dataflow---Arduino-Interface-Assets" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Arduino-Interface-Assets" transform="translate(-93, -951)">
+            <g id="Icons-14" transform="translate(67, 55)">
+                <g transform="translate(26.9997, 50)" id="Group-12">
+                    <g transform="translate(0.0003, 788)">
+                        <g id="Demo-Output-Servo-Motor-ICON" transform="translate(-0.7782, 58.2218)">
+                            <g id="Group-2" transform="translate(7.7782, 7.7782) rotate(-45) translate(-7.7782, -7.7782)translate(0.7782, 3.7782)">
+                                <g id="Group" transform="translate(2, 2)" fill="#000000">
+                                    <path d="M10,-2.3961962e-14 C11.1045695,-2.41648681e-14 12,0.8954305 12,2 C12,3.1045695 11.1045695,4 10,4 L2,4 C0.8954305,4 -9.15260184e-15,3.1045695 -9.22023722e-15,2 C-9.35550797e-15,0.8954305 0.8954305,-2.38266912e-14 2,-2.3961962e-14 L10,-2.3961962e-14 Z M2.09349593,1 L1.76829268,1 L1.76829268,1.83739837 L1,1.83739837 L1,2.15853659 L1.76829268,2.15853659 L1.76829268,3 L2.09349593,3 L2.09349593,2.15853659 L2.86178862,2.15853659 L2.86178862,1.83739837 L2.09349593,1.83739837 L2.09349593,1 Z M9.5,1.5 C9.22385763,1.5 9,1.72385763 9,2 C9,2.27614237 9.22385763,2.5 9.5,2.5 C9.77614237,2.5 10,2.27614237 10,2 C10,1.72385763 9.77614237,1.5 9.5,1.5 Z" id="Combined-Shape"></path>
+                                </g>
+                                <circle id="Oval" stroke="#000000" cx="4" cy="4" r="3.5"></circle>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
