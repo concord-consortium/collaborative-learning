@@ -569,16 +569,19 @@ context('XYPlot Tool Tile', function () {
       yAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 50, 10);
       clueCanvas.clickToolbarButton('graph', 'toggle-lock'); // so that we can test position without rescale happening
 
-      cy.window().then(win => {
-        xyTile.getGraphDot().eq(0).children('circle').eq(1)
-          .trigger("mousedown", 150, 50, { force: true, view: win })
-          .trigger("mousemove", 175, 75, { force: true, view: win })
-          .trigger("mouseup", 175, 75, { force: true, view: win });
+      xyTile.getGraphDot().eq(0).then(elt => {
+        const currentPos = elt[0].getBoundingClientRect();
+        cy.window().then(win => {
+          xyTile.getGraphDot().eq(0).children('circle').eq(1)
+            .trigger("mousedown", { force: true, view: win })
+            .trigger("mousemove", { force: true, view: win, clientX: currentPos.x+25, clientY: currentPos.y+25 })
+            .trigger("mouseup", { force: true, view: win, clientX: currentPos.x+25, clientY: currentPos.y+25 });
+        });
+        cy.wait(500); // animation
+        xAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 175, 10);
+        yAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 75, 10);
+        clueCanvas.clickToolbarButton('graph', 'toggle-lock'); // unlock
       });
-
-      xAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 175, 10);
-      yAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 75, 10);
-      clueCanvas.clickToolbarButton('graph', 'toggle-lock'); // unlock
 
       // Click toolbar button again to leave edit mode
       clueCanvas.clickToolbarButton('graph', 'move-points');
