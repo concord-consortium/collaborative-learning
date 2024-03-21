@@ -1,3 +1,5 @@
+@import "../../../../components/vars";
+
 svg[class^="line-"] {
   left: 0;
   overflow: hidden;
@@ -12,8 +14,9 @@ svg[class^="line-"] {
 
 .movable-line-cover {
   pointer-events: all;
-  stroke: rgba(210, 105, 30, 0.01);
+  stroke: transparent;
   stroke-width: 8px;
+  cursor: move;
 }
 
 .movable-line-handle {
@@ -28,10 +31,6 @@ svg[class^="line-"] {
   &.negative-slope {
     cursor: url("../assets/pivot-top-left-cursor.png") 8 8, grab;
   }
-}
-
-.movable-line-middle-cover {
-  cursor: move;
 }
 
 .movable-line-upper-handle {
@@ -50,10 +49,8 @@ svg[class^="line-"] {
   top: 0;
 
   p {
-    background-color: rgba(255, 255, 0, 0.6);
     color: #4782b4;
     cursor: grab;
-    font-family: "Montserrat-Bold", sans-serif;
     font-size: 12px;
     padding: 2px 5px;
     pointer-events: all;
@@ -63,7 +60,7 @@ svg[class^="line-"] {
       cursor: grabbing;
     }
     &:hover {
-      background-color: rgba(255, 255, 0, 1)
+      background-color: $workspace-teal-light-6;
     }
 
     em {

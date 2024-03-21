@@ -54,7 +54,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     {equationContainerClass, equationContainerSelector} = equationContainer(model, subPlotKey, containerId),
     lineRef = useRef() as React.RefObject<SVGSVGElement>,
     [lineObject, setLineObject] = useState<{ [index: string]: any }>({
-      line: null, lower: null, middle: null, upper: null, equation: null
+      line: null, cover: null, handleLower: null, handleUpper: null, equation: null
     }),
     pointsOnAxes = useRef<IAxisIntercepts>();
 
@@ -155,7 +155,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
             }
           };
         fixEndPoints(lineObject.line);
-        fixEndPoints(lineObject.middle);
+        fixEndPoints(lineObject.cover);
         fixHandles(lineObject.handleLower, 1);
         fixHandles(lineObject.handleUpper, 2);
         refreshEquation();
@@ -296,7 +296,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         .on("start", (e) => startRotation(e, "lower"))
         .on("drag", (e) => continueRotation(e, "lower"))
         .on("end", (e) => endRotation()),
-      middle: drag()
+      cover: drag()
         .on("drag", continueTranslate),
       upper: drag()
         .on("start", (e) => startRotation(e, "upper"))
@@ -307,7 +307,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     };
 
     lineObject.handleLower?.call(behaviors.lower);
-    lineObject.middle?.call(behaviors.middle);
+    lineObject.cover?.call(behaviors.cover);
     lineObject.handleUpper?.call(behaviors.upper);
     lineObject.equation?.call(behaviors.equation);
   }, [lineObject, continueTranslate, startRotation, continueRotation, endRotation, moveEquation, readOnly]);
@@ -321,8 +321,8 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     newLineObject.line = selection.append('line')
       .attr('class', 'movable-line movable-line-${classFromSubPlotKey}')
       .attr('data-testid', `movable-line${classFromKey ? `-${classFromKey}` : ""}`);
-    newLineObject.middle = selection.append('line')
-      .attr('class', 'movable-line-cover movable-line-middle-cover');
+    newLineObject.cover = selection.append('line')
+      .attr('class', 'movable-line-cover');
     newLineObject.handleLower = selection.append('circle')
       .attr('r', kHandleSize/2)
       .attr('class', 'movable-line-handle movable-line-lower-handle show-on-tile-selected');
@@ -341,9 +341,10 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     const equationP = equationDiv
       .append('p')
       .attr('class', 'movable-line-equation')
-      .attr('data-testid', `movable-line-equation-${model.classNameFromKey(subPlotKey)}`)
-      .on('mouseover', () => { newLineObject.line.style('stroke-width', 2); })
-      .on('mouseout', () => { newLineObject.line.style('stroke-width', 1); });
+      .attr('data-testid', `movable-line-equation-${model.classNameFromKey(subPlotKey)}`);
+      // Not in current design, but highlighting the line somehow when the equation is hovered might be desired.
+      // .on('mouseover', () => { newLineObject.line.style('stroke-width', 2); })
+      // .on('mouseout', () => { newLineObject.line.style('stroke-width', 1); });
 
     // If the equation is not pinned to the line, set its initial coordinates to
     // the values specified in the model.
