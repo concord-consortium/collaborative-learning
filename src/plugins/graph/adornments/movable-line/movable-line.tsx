@@ -102,6 +102,18 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
             .attr('y2', pixelPtsOnAxes.pt2.y);
         }
 
+        function fixArrow(elt: any, index: number) {
+          const
+            end   = index===1 ? pixelPtsOnAxes.pt1 : pixelPtsOnAxes.pt2,
+            start = index===1 ? pixelPtsOnAxes.pt2 : pixelPtsOnAxes.pt1,
+            offset = `${end.x},${end.y}`,
+            dx = end.x - start.x,
+            dy = end.y - start.y,
+            angle = 90-Math.atan2(dy, -dx)*180/Math.PI;
+          elt
+            .attr('transform', `translate(${offset}) rotate(${angle})`);
+        }
+
         // Position handle {index} at appropriate position.
         // This is the stored pivot location if there is one, otherwise calculated.
         function fixHandles(elt: any, index: number) {
@@ -156,6 +168,8 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           };
         fixEndPoints(lineObject.line);
         fixEndPoints(lineObject.cover);
+        fixArrow(lineObject.arrowLower, 1);
+        fixArrow(lineObject.arrowUpper, 2);
         fixHandles(lineObject.handleLower, 1);
         fixHandles(lineObject.handleUpper, 2);
         refreshEquation();
@@ -321,6 +335,12 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     newLineObject.line = selection.append('line')
       .attr('class', 'movable-line movable-line-${classFromSubPlotKey}')
       .attr('data-testid', `movable-line${classFromKey ? `-${classFromKey}` : ""}`);
+    newLineObject.arrowLower = selection.append('polygon')
+      .attr('class', 'movable-line-arrow')
+      .attr('points', '0 0 -7 -14 7 -14 0 0');
+    newLineObject.arrowUpper = selection.append('polygon')
+      .attr('class', 'movable-line-arrow')
+      .attr('points', '0 0 -7 -14 7 -14 0 0');
     newLineObject.cover = selection.append('line')
       .attr('class', 'movable-line-cover');
     newLineObject.handleLower = selection.append('circle')

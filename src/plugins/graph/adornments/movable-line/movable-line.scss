@@ -1,5 +1,7 @@
 @import "../../../../components/vars";
 
+$movable-line-color: #4782B4;
+
 svg[class^="line-"] {
   left: 0;
   overflow: hidden;
@@ -8,8 +10,12 @@ svg[class^="line-"] {
 }
 
 .movable-line {
-  stroke: #4782B4;
+  stroke: $movable-line-color;
   stroke-width: 2px;
+}
+
+.movable-line-arrow {
+  fill: $movable-line-color;
 }
 
 .movable-line-cover {
@@ -21,8 +27,8 @@ svg[class^="line-"] {
 
 .movable-line-handle {
   pointer-events: all;
-  fill: #4782B4;
-  stroke: #4782B4;
+  fill: $movable-line-color;
+  stroke: $movable-line-color;
 }
 
 .movable-line-lower-handle {
@@ -49,7 +55,7 @@ svg[class^="line-"] {
   top: 0;
 
   p {
-    color: #4782b4;
+    color: $movable-line-color;
     cursor: grab;
     font-size: 12px;
     padding: 2px 5px;
