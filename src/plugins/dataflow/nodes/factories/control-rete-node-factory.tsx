@@ -59,8 +59,8 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     let cResult = 0;
 
     const { activateGate, startTimer } = determineGateAndTimerStates(node, inputs, this.timerRunning);
-    node.data.gateActive = activateGate;
     startTimer && this.startTimer(node.data.waitDuration as number);
+    node.data.gateActive = activateGate;
 
     // requires value in signalValue (except for case of Output Zero)
     if (isNaN(signalValue)) {
