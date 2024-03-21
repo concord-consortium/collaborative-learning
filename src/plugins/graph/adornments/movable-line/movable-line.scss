@@ -7,7 +7,7 @@ svg[class^="line-"] {
 
 .movable-line {
   stroke: #4782B4;
-  stroke-width: 1px;
+  stroke-width: 2px;
 }
 
 .movable-line-cover {
@@ -17,15 +17,12 @@ svg[class^="line-"] {
 }
 
 .movable-line-handle {
-  display: none;
-  fill: #fff;
-  height: 12px;
-  pointer-events: none;
-  stroke: #000;
-  width: 12px;
+  pointer-events: all;
+  fill: #4782B4;
+  stroke: #4782B4;
 }
 
-.movable-line-lower-cover {
+.movable-line-lower-handle {
   cursor: url("../assets/pivot-bot-left-cursor.png") 8 8, grab;
 
   &.negative-slope {
@@ -34,10 +31,10 @@ svg[class^="line-"] {
 }
 
 .movable-line-middle-cover {
-  cursor: url("../assets/up-down-cursor.png") 8 8, grab;
+  cursor: move;
 }
 
-.movable-line-upper-cover {
+.movable-line-upper-handle {
   cursor: url("../assets/pivot-top-right-cursor.png") 8 8, grab;
 
   &.negative-slope {
