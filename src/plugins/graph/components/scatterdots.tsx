@@ -39,7 +39,6 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
 
   const
     onDragStart = useCallback((event: D3DragEvent<SVGGElement,CaseData,Point>, datum) => {
-      console.log('onDragStart');
       const targetDot = event.sourceEvent.target && inGraphDot(event.sourceEvent.target as SVGSVGElement);
       if (!targetDot) return;
       target.current = select(targetDot as SVGSVGElement);
@@ -90,7 +89,6 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     }, [graphModel, updatePositions]),
 
     updateDragHandler = useCallback(() => {
-      console.log('updateDragHandlers', dotsRef);
       selectGraphDots(dotsRef.current)
         ?.call(drag<SVGGElement,CaseData,Point>()
           .filter(() => graphModel.editingMode !== "none")
@@ -112,7 +110,6 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   }, [dataConfiguration, dotsRef, graphModel]);
 
   const refreshPointPositionsD3 = useCallback((selectedOnly: boolean) => {
-    console.log("refreshPointPos");
     if (!dataConfiguration) return;
     const getScreenX = (anID: string) => {
       const xAttrID = dataConfiguration?.attributeID('x') ?? '',
