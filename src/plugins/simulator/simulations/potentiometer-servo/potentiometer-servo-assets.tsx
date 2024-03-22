@@ -1,19 +1,17 @@
-import boardBackExpanded from "./assets/arduino-back-expanded.svg";
+import boardBackExpanded from "./assets/arduino-back-expanded.png";
 //import boardBackSmall from "./assets/arduino-back-small.svg"; // TODO ask Ryan for exportable version of this
 
+import potBaseExpanded from "./assets/potentiometer-base-expanded.png";
+import potBaseSmall from "./assets/potentiometer-base-minimized.png";
+import potDial from "./assets/pot-top.png";
 
-
-import potBaseExpanded from "./assets/potentiometer-base-expanded.svg";
-import potBaseSmall from "./assets/potentiometer-base-minimized.svg";
-import potDial from "./assets/pot-top.svg";
-
-import servoBaseExpanded from "./assets/servo-base-expanded.svg";
-import servoBaseSmall from "./assets/servo-base-minimized.svg";
-import servoArm from "./assets/servo-arm.svg";
+import servoBaseExpanded from "./assets/servo-base-expanded.png";
+// import servoBaseSmall from "./assets/servo-base-minimized.png";
+import servoArm from "./assets/servo-arm.png";
 
 export const servoImages = {
   baseExpanded: servoBaseExpanded,
-  baseSmall: servoBaseSmall,
+  //baseSmall: servoBaseSmall,
   arm: servoArm
 };
 

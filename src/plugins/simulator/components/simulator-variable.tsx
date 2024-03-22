@@ -30,7 +30,9 @@ export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
   if (!variable) return null;
 
   const inputVariable = isInputVariable(variable); // We're assuming the variable is either input or output
-  const suffix = inputVariable ? "Sensor" : "Output";
+  //NOTA: restore this for other sims or make config:
+  //const suffix = inputVariable ? "Sensor" : "Output";
+  const suffix =  "";
   const displayName = variable?.displayName ? `${variable.displayName} ${suffix}` : "";
 
   // Limit the value to two decimal places

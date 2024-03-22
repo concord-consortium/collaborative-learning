@@ -1,0 +1,96 @@
+.potentiometer-servo-component {
+  height: 320px;
+  display: flex;
+  width: 600px;
+  flex-direction: column;
+
+  .hardware {
+    width: 100%;
+    height: 80%;
+    display: flex;
+    flex-direction: row;
+    max-height: 600px;
+
+    .potentiometer-area {
+      //border:2px dotted blue;
+      width: 20%;
+      height: 100%;
+      position: relative;
+      .pot-base {
+        position: absolute;
+        top: 100px;
+        left: 0px;
+      }
+      .pot-dial {
+        position: absolute;
+        top: 105px;
+        left: 14px;
+      }
+    }
+
+    .board-area {
+      //border: 2px dotted gray;
+      width: 60%;
+      height: 100%;
+      position: relative;
+      .board {
+        position: absolute;
+        top: 0;
+        left: 40px;
+      }
+    }
+
+    .servo-area {
+      //border:2px dotted orange;
+      width: 20%;
+      height: 100%;
+      position: relative;
+      position: relative;
+      .servo-base {
+        position: absolute;
+        top: 100px;
+        right: 30px;
+      }
+    }
+  }
+
+  .controls {
+    display: flex;
+    height: 20%;
+    width: 100%;
+    .slider-wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      width: 25%;
+      .slider-labels {
+        position: relative;
+        width:100%;
+        div {
+          position: absolute;
+          &.low {
+            left: 0;
+          }
+          &.high {
+            right: 0;
+          }
+        }
+      }
+    }
+    .center-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 50%;
+    }
+    .right-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      width: 25%;
+    }
+  }
+}

@@ -8,6 +8,8 @@ import HeatLampIcon from "./dataflow/output/light-bulb.svg";
 import HumidityIcon from "./dataflow/sensor/humidity.svg";
 import PressureIcon from "./dataflow/sensor/pressure.svg";
 import TemperatureIcon from "./dataflow/sensor/temperature.svg";
+import PotentiometerIcon from "./dataflow/sensor/potentiometer.svg";
+import ServoIcon from "./dataflow/output/servo.svg";
 
 const kIconPrefix = "ccicon";
 
@@ -23,6 +25,10 @@ export const kHumidifierKey = "humidifier_key";
 export const kHumidityKey = "humidity_key";
 export const kTemperatureKey = "temperature_key";
 
+// Potentiometer & Servo simulation
+export const kPotentiometerKey = "potentiometer_key";
+export const kServoKey = "servo_key";
+
 const icons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>> = {
   [kEMGKey]: EMGIcon,
   [kFanKey]: FanIcon,
@@ -31,7 +37,9 @@ const icons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>> = {
   [kHumidifierKey]: HumidifierIcon,
   [kHumidityKey]: HumidityIcon,
   [kPressureKey]: PressureIcon,
-  [kTemperatureKey]: TemperatureIcon
+  [kTemperatureKey]: TemperatureIcon,
+  [kPotentiometerKey]: PotentiometerIcon,
+  [kServoKey]: ServoIcon,
 };
 
 export function iconUrl(id: string) {
