@@ -88,7 +88,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
         target.current = null;
     }, [graphModel, updatePositions]),
 
-    updateDragHandler = useCallback(() => {
+    refreshDragHandlers = useCallback(() => {
       selectGraphDots(dotsRef.current)
         ?.call(drag<SVGGElement,CaseData,Point>()
           .filter(() => graphModel.editingMode !== "none")
@@ -148,9 +148,9 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       selectedOnly, getScreenX, getScreenY, getLegendColor,
       getColorForId: graphModel.getColorForId, enableAnimation, pointColor, pointStrokeColor
     });
-    updateDragHandler();
+    refreshDragHandlers();
   }, [dataConfiguration, dataset, dotsRef, layout, legendAttrID,
-    enableAnimation, graphModel, yScaleRef, updateDragHandler]);
+    enableAnimation, graphModel, yScaleRef, refreshDragHandlers]);
 
   // const refreshPointPositionsSVG = useCallback((selectedOnly: boolean) => {
   //   const xAttrID = dataConfiguration?.attributeID('x') ?? '',
