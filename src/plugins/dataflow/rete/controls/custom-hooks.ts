@@ -13,6 +13,7 @@ export function useStopEventPropagation<T extends HTMLElement, K extends keyof H
   }, [domRef, event]);
 }
 
+// TODO: is this used anymore?
 export function useCloseDropdownOnOutsideEvent<T extends HTMLElement>(
                   domRef: RefObject<T>, isOpen: () => boolean, close: () => void) {
   useEffect(() => {

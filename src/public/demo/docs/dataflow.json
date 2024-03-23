@@ -1,0 +1,39 @@
+{
+  "rowMap": {
+    "row1": {"id": "row1", "isSectionHeader": false, "tiles": [{"tileId": "tile1"}]},
+    "yUzMp-B9lYZuGNbO": {
+      "id": "yUzMp-B9lYZuGNbO",
+      "height": 480,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "0t1QtT_eLj0cUXXG"}]
+    }
+  },
+  "rowOrder": ["row1", "yUzMp-B9lYZuGNbO"],
+  "tileMap": {
+    "tile1": {
+      "id": "tile1",
+      "content": {"type": "Text", "text": "Welcome to the standalone document editor"}
+    },
+    "0t1QtT_eLj0cUXXG": {
+      "id": "0t1QtT_eLj0cUXXG",
+      "content": {
+        "type": "Dataflow",
+        "program": {"nodes": {}, "values": {}},
+        "programDataRate": 1000,
+        "programZoom": {"dx": 0, "dy": 0, "scale": 1}
+      }
+    }
+  },
+  "sharedModelMap": {
+    "De3y2bxh79j4t_-F": {
+      "sharedModel": {
+        "type": "SharedDataSet",
+        "id": "De3y2bxh79j4t_-F",
+        "providerId": "0t1QtT_eLj0cUXXG",
+        "dataSet": {"id": "G0hg5CZMMOxF8xva", "name": "Program 1", "attributes": [], "cases": []}
+      },
+      "tiles": ["0t1QtT_eLj0cUXXG"]
+    }
+  },
+  "annotations": {}
+}

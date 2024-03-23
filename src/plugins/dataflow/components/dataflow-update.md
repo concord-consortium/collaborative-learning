@@ -1,0 +1,73 @@
+# Tasks
+
+- figure out how to commit this stuff
+- try adding delete button directly to custom component
+- try to get our custom styling and elements from v1 into the custom node
+- get the styles working for the nodes that we've created
+- demo serialization
+- get node creation working
+- get drop down control working
+- get mini plot control working
+- fix double click causing a zoom (I remember it being disabled in some of the examples)
+- refactor/cleanup dataflow-program
+- get tick based calculation working
+- figure out how to serialize connections: we could switch to using MST connections, we at least need stable node ids. In the current setup the node ids are updated on each load. This might be an argument to replace the official Node with our own custom MST node.
+
+# Rete v2
+
+## Positions
+In v2 the position is stored in the NodeView instance stored in the area.
+
+```javascript
+const view = area.nodeViews.get(nodeId)
+
+  if (view) {
+    view.position // { x, y }
+  }
+```
+
+The API for the area plugin doesn't mention this at all!!!
+https://retejs.org/docs/api/rete-area-plugin
+
+Looking at the TS types the nodeViews is a just a map of nodeId to a NodeView, the NodeView has actions on it which I assume will trigger updates if they are called directly. Also the demo code calls translate after waiting for the `addNode` to resolve. So if we are deserializing we probably need to add all of the nodes then wait for that to resolve and then translate them all into position.
+
+### TODO
+Why do we have to wait after adding them? This might mean a render will happen before they are positioned.
+
+## Parts to migrate
+
+### Controls
+This example seems like the best way to see how controls are supposed to be implemented in v2:
+https://retejs.org/examples/controls/react
+
+To follow these examples, we have to give up on "plug-ability". And we just need to make a general `Node` class that refers to all possible controls.
+
+The control in this example is just a holder for the data the control represents.
+
+Javascript runtime `instanceof` is used to identify control in the `customize.control(data)` method and then return the appropriate component.
+
+When a control needs to modify other control values, it needs a callback method that is passed through the control into the component. When the user does the action, this callback is called. The callback is created when the controls of the node are created, so it can access the controls created before it was created.
+
+If a control needs to be updated the `area.update("control", targetControl.id)` needs to be called. The ids of controls seem to be opaque. They are not set in the example. My guess is that they are set when the control is created. They do not seem to be in the dom, so that is good.
+
+### Nodes
+It seems like we need to replace the current `Component` factory pattern with separate Node classes for each type of node. The constructor of the node type replaces the `builder` function in our existing components. The `data` method replaces the `worker` method in the existing components. This is a good example of this pattern: https://retejs.org/docs/guides/processing/dataflow
+
+There will be a question of wether controls should be stored as instance variables in the node. They might need to be referred to by other control callbacks, however they could just referred to via closures around the variables in the constructor method.
+
+#### Questions:
+- Where does the node color come from? Our nodes have different colors, so I guess we still need our custom react component for rendering nodes, and it will have to get the color out of a property stored in a common superclass of all of our nodes.
+
+## Using just the data processing
+The engine can be used server side. So we could use this along with react-flow to continuing using its data flow engine. We'd have to take all of the objects from MST create nodes and connections inside of the NodeEditor and then run the fetch call on all of the nodes. And then go back and update all of the models being displayed by react-flow.
+
+## Our previous implementation
+
+### Serialization
+We deserialized using a function on the MST objects which generated a JSON format that was accepted by Rete v1's `fromJSON`. This method seems to have been removed.
+
+We serialized the state back to MST by calling Rete's `toJSON` function. And then just applied that directly with `applySnapshot`. Then we have snapshot preprocessors to convert the Rete data into our MST form. The format is very close. It would have been nice to have documentation of how the format is converted.
+
+Additionally, this applySnapshot effectively filters out any data from the Rete state that we don't want to save. For example I think every node has a `nodeValue` in its state. This is a not a property that we save in the node configuration.
+
+I'm not sure if the `nodeValues` are saved at all.
