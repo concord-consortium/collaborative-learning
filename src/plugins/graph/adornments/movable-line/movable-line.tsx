@@ -71,12 +71,12 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     ySubAxesCount = layout.getAxisMultiScale('left')?.repetitions ?? 1;
 
   // Calculate where the drag handles go, given the line endpoints
-  const handlePosition = useCallback((index: number, pt1: Point, pt2: Point) => {
+  const calculateHandlePosition = useCallback((index: number, pt1: Point, pt2: Point) => {
     if (pt1 && pt2) {
-      const loc = (index === 1) ? kHandle1Loc : kHandle2Loc;
+      const fraction = (index === 1) ? kHandle1Loc : kHandle2Loc;
       return {
-        x: pt1.x + loc * (pt2.x - pt1.x),
-        y: pt1.y + loc * (pt2.y - pt1.y)
+        x: pt1.x + fraction * (pt2.x - pt1.x),
+        y: pt1.y + fraction * (pt2.y - pt1.y)
       };
     } else {
       return kInfinitePoint;
@@ -125,7 +125,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
             x = layout.getAxisMultiScale("bottom")?.getScreenCoordinate({ data: pivot.x, cell: 0 });
             y = layout.getAxisMultiScale("left")?.getScreenCoordinate({ data: pivot.y, cell: 0 });
           } else {
-            const point = handlePosition(index, pixelPtsOnAxes.pt1, pixelPtsOnAxes.pt2);
+            const point = calculateHandlePosition(index, pixelPtsOnAxes.pt1, pixelPtsOnAxes.pt2);
             x = point.x;
             y = point.y;
           }
@@ -179,7 +179,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       return () => disposer();
     }, [instanceId, layout, pointsOnAxes, lineObject, plotHeight, plotWidth, xScale, yScale, model, model.lines,
         xAttrName, xSubAxesCount, xAxis, yAttrName, ySubAxesCount, yAxis, xRange, yRange,
-        equationContainerSelector, subPlotKey, instanceKey, handlePosition]
+        equationContainerSelector, subPlotKey, instanceKey, calculateHandlePosition]
   );
 
   const
@@ -216,7 +216,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       // Fix the pivot position of the handle not being dragged for the duration of the drag.
       const lineParams = model.lines?.get(instanceKey);
       if (lineParams && pointsOnAxes.current) {
-        const pivot = handlePosition(lineSection === "lower" ? 2 : 1,
+        const pivot = calculateHandlePosition(lineSection === "lower" ? 2 : 1,
           pointsOnAxes.current.pt1, pointsOnAxes.current.pt2);
         if (lineSection === "lower") {
           lineParams.setPivot2(pivot);
@@ -224,7 +224,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           lineParams.setPivot1(pivot);
         }
       }
-    }, [handlePosition, instanceKey, model]),
+    }, [calculateHandlePosition, instanceKey, model]),
 
     continueRotation = useCallback((
       event: { x: number, y: number, dx: number, dy: number },
@@ -309,13 +309,13 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
   useEffect(function addBehaviors() {
     if (readOnly) return;
     const behaviors: { [index: string]: any } = {
+      cover: drag()
+        .on("drag", continueTranslate)
+        .on("end", endTranslate),
       lower: drag()
         .on("start", (e) => startRotation(e, "lower"))
         .on("drag", (e) => continueRotation(e, "lower"))
         .on("end", (e) => endRotation()),
-      cover: drag()
-        .on("drag", continueTranslate)
-        .on("end", endTranslate),
       upper: drag()
         .on("start", (e) => startRotation(e, "upper"))
         .on("drag", (e) => continueRotation(e, "upper"))
@@ -325,8 +325,8 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         .on("end", endMoveEquation)
     };
 
-    lineObject.handleLower?.call(behaviors.lower);
     lineObject.cover?.call(behaviors.cover);
+    lineObject.handleLower?.call(behaviors.lower);
     lineObject.handleUpper?.call(behaviors.upper);
     lineObject.equation?.call(behaviors.equation);
   }, [lineObject, readOnly, continueTranslate, endTranslate,
@@ -351,10 +351,10 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       .attr('class', 'movable-line-cover');
     newLineObject.handleLower = selection.append('circle')
       .attr('r', kHandleSize/2)
-      .attr('class', 'movable-line-handle movable-line-lower-handle show-on-tile-selected');
+      .attr('class', 'movable-line-handle movable-line-lower-handle');
     newLineObject.handleUpper = selection.append('circle')
       .attr('r', kHandleSize/2)
-      .attr('class', 'movable-line-handle movable-line-upper-handle show-on-tile-selected');
+      .attr('class', 'movable-line-handle movable-line-upper-handle');
 
     // Set up the corresponding equation box
     // Define the selector that corresponds with this specific movable line's adornment container
@@ -368,9 +368,6 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       .append('p')
       .attr('class', 'movable-line-equation')
       .attr('data-testid', `movable-line-equation-${model.classNameFromKey(subPlotKey)}`);
-      // Not in current design, but highlighting the line somehow when the equation is hovered might be desired.
-      // .on('mouseover', () => { newLineObject.line.style('stroke-width', 2); })
-      // .on('mouseout', () => { newLineObject.line.style('stroke-width', 1); });
 
     // If the equation is not pinned to the line, set its initial coordinates to
     // the values specified in the model.

@@ -619,7 +619,6 @@ context('XYPlot Tool Tile', function () {
         .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
       xyTile.getMovableLineEquationSlope().should("be.lessThan", 0);
       // Then drag the upper handle up and make slope positive again
-      cy.wait(1000);
       xyTile.getMovableLineHandle('upper')
         .trigger("mousedown", { eventConstructor: 'MouseEvent' })
         .trigger("mousemove", 0, -100, { force: true, eventConstructor: 'MouseEvent' })
