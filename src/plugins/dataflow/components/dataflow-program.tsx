@@ -131,7 +131,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private intervalHandle: ReturnType<typeof setTimeout>;
   private lastIntervalTime: number;
   private programEditor: NodeEditor<Schemes>;
-  private programEngine = undefined;
+  private programEngine: DataflowEngine<Schemes>;
   private editorDomElement: HTMLElement | null;
   private disposers: IDisposer[] = [];
   private onSnapshotSetup = false;
@@ -275,6 +275,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private initProgramEngine = () => {
   };
 
+  private process = () => {
+    this.programEngine.reset();
+
+    const graph = structures(this.programEditor);
+
+    // Because rete engine caches values even if the same node is the
+    // parent of two leaves the data function of that common parent
+    // will only be called once.
+    graph.leaves().nodes().forEach(n => this.programEngine.fetch(n.id));
+  };
+
   private initProgramEditor = (clearHistory = false) => {
     (async () => {
       if (!this.toolDiv) return;
@@ -284,18 +295,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const area = new AreaPlugin<Schemes, AreaExtra>(this.toolDiv);
       const connection = new ConnectionPlugin<Schemes, AreaExtra>();
       const render = new ReactPlugin<Schemes, AreaExtra>();
-      const engine = new DataflowEngine<Schemes>();
-
-      function process() {
-        engine.reset();
-
-        const graph = structures(editor);
-
-        // Because rete engine caches values even if the same node is the
-        // parent of two leaves the data function of that common parent
-        // will only be called once.
-        graph.leaves().nodes().forEach(n => engine.fetch(n.id));
-      }
+      this.programEngine = new DataflowEngine<Schemes>();
 
       AreaExtensions.selectableNodes(area, AreaExtensions.selector(), {
         accumulating: AreaExtensions.accumulateOnCtrl()
@@ -353,58 +353,34 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       connection.addPreset(ConnectionPresets.classic.setup());
 
-      editor.use(engine);
+      editor.use(this.programEngine);
       editor.use(area);
       area.use(connection);
       area.use(render);
 
       AreaExtensions.simpleNodesOrder(area);
 
-      // Add some fake nodes to get started
-      // const a = new Node("A");
-      // a.addControl("a", new ClassicPreset.InputControl("text", { initial: "a" }));
-      // a.addOutput("a", new ClassicPreset.Output(numSocket));
-      // await editor.addNode(a);
-
-      // const b = new Node("B");
-      // b.addControl("b", new ClassicPreset.InputControl("text", { initial: "b" }));
-      // b.addInput("b", new ClassicPreset.Input(numSocket));
-      // await editor.addNode(b);
-
-      // await editor.addConnection(new ClassicPreset.Connection(a, "a", b, "b"));
-
       // Reprocess when connections are changed
       editor.addPipe((context) => {
         if (["connectioncreated", "connectionremoved"].includes(context.type)) {
-          process();
+          this.process();
         }
         return context;
       });
 
-
-      const numModel = NumberNodeModel.create();
-      const c = new NumberNode(numModel, process);
-      await editor.addNode(c);
+      const counterModel = CounterNodeModel.create();
+      const a = new CounterNode(counterModel);
+      await editor.addNode(a);
 
       const mathModel1 = MathNodeModel.create();
-      const d = new MathNode(mathModel1, process);
-      await editor.addNode(d);
+      const b = new MathNode(mathModel1, this.process);
+      await editor.addNode(b);
 
-      const counterModel = CounterNodeModel.create();
-      const e = new CounterNode(counterModel);
-      await editor.addNode(e);
-
-      const mathModel2 = MathNodeModel.create();
-      const f = new MathNode(mathModel2, process);
-      await editor.addNode(f);
-
-      await area.translate(c.id, { x: 0, y: 0 });
-      await area.translate(d.id, { x: 270, y: 0 });
-      await area.translate(e.id, { x: 0, y: 150 });
-      await area.translate(f.id, { x: 270, y: 150 });
+      await area.translate(a.id, { x: 0, y: 0 });
+      await area.translate(b.id, { x: 270, y: 0 });
 
       // This is needed to initialize things like the value control's sentence
-      process();
+      this.process();
 
       setTimeout(() => {
         // wait until nodes rendered because they dont have predefined width and height
@@ -502,6 +478,25 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private addNode = async (nodeType: string, position?: [number, number]) => {
+
+    let node;
+    switch(nodeType) {
+      case "Math": {
+        const mathModel = MathNodeModel.create();
+        node = new MathNode(mathModel, this.process);
+        break;
+      }
+      case "Number": {
+        const numModel = NumberNodeModel.create();
+        node = new NumberNode(numModel, this.process);
+        break;
+      }
+      default:
+        break;
+    }
+    if (!node) return;
+
+    this.programEditor.addNode(node);
   };
 
   private serialDeviceRefresh = () => {
