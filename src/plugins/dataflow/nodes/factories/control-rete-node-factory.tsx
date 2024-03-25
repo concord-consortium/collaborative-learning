@@ -8,19 +8,21 @@ import { HoldFunctionOptions } from "../../model/utilities/node";
 import { PlotButtonControl } from "../controls/plot-button-control";
 import { determineGateAndTimerStates, getHoldNodeResultString } from "../utilities/view-utilities";
 
+interface HoldNodeData {
+  gateActive: boolean;
+  heldValue: number | null;
+  timerRunning: boolean;
+}
 export class ControlReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
     super("Control", numSocket);
   }
 
-  private heldValue: number | null = null;
-  private timerRunning: boolean = false;
-
-  private startTimer(duration: number) {
-    if (this.timerRunning) return;
-    this.timerRunning = true;
+  private startTimer(node: NodeData, duration: number) {
+    if (node.data.timerRunning) return;
+    node.data.timerRunning = true;
     setTimeout(() => {
-      this.timerRunning = false;
+      node.data.timerRunning = false;
     }, duration * 1000);
   }
 
@@ -31,7 +33,12 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
       const valueInput = new Rete.Input("num2", "Number2", this.numSocket);
       const out = new Rete.Output("num", "Number", this.numSocket);
 
-      node.data.gateActive = false;
+      node.data = {
+        ...node.data,
+        gateActive: false,
+        heldValue: null,
+        timerRunning: false,
+      } as NodeData['data'] & HoldNodeData;
 
       const dropdownOptions = HoldFunctionOptions
         .map((nodeOp) => {
@@ -54,17 +61,18 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     const recents: number[] | undefined = (node.data.recentValues as any)?.nodeValue;
     const lastRecentValue = recents?.[recents.length - 1];
     const priorValue = lastRecentValue == null ? null : lastRecentValue;
+    const isTimerRunning = node.data.timerRunning as boolean;
 
     let result = 0;
     let cResult = 0;
 
-    const { activateGate, startTimer } = determineGateAndTimerStates(node, inputs, this.timerRunning);
-    startTimer && this.startTimer(node.data.waitDuration as number);
+    const { activateGate, startTimer } = determineGateAndTimerStates(node, inputs, isTimerRunning);
+    startTimer && this.startTimer(node, node.data.waitDuration as number);
     node.data.gateActive = activateGate;
 
     // requires value in signalValue (except for case of Output Zero)
     if (isNaN(signalValue)) {
-      this.heldValue = null;
+      node.data.heldValue = null;
       result = NaN;
       cResult = NaN;
     }
@@ -72,7 +80,7 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     // For each function, evaluate given inputs and node state
     // TODO - check and see if this gets serialized, and if so, how to handle legacy funcNames on load
     if (funcName === "Hold 0" || funcName === "Output Zero"){
-      this.heldValue = null;
+      node.data.heldValue = null;
       result = node.data.gateActive ? 0 : signalValue;
       cResult = 0;
     }
@@ -80,12 +88,12 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     else if (funcName === "Hold Current"){
       if (node.data.gateActive){
         // Already a number here? Maintain. Otherwise set the new held value;
-        this.heldValue = typeof this.heldValue === "number" ? this.heldValue : signalValue;
-        result = this.heldValue;
-        cResult = this.heldValue;
+        node.data.heldValue = typeof node.data.heldValue === "number" ? node.data.heldValue : signalValue;
+        result = node.data.heldValue as number;
+        cResult = node.data.heldValue as number;
       }
       else {
-        this.heldValue = null;
+        node.data.heldValue = null;
         result = signalValue;
         cResult = signalValue; // still signalValue, since the value to be held would be the current
       }
@@ -94,18 +102,18 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
     else if (funcName === "Hold Prior"){
       if (node.data.gateActive){
         // Already a number here? Maintain. Otherwise set the new held value;
-        this.heldValue = typeof this.heldValue === "number" ? this.heldValue : priorValue;
-        result = this.heldValue || 0;
-        cResult = this.heldValue || 0;
+        node.data.heldValue = typeof node.data.heldValue === "number" ? node.data.heldValue : priorValue;
+        result = node.data.heldValue as number || 0;
+        cResult = node.data.heldValue as number || 0;
       }
       else {
-        this.heldValue = null;
+        node.data.heldValue = null;
         result = signalValue;
         cResult = priorValue || 0;
       }
     }
 
-    const resultSentence = getHoldNodeResultString(node, result, cResult, this.timerRunning) || "";
+    const resultSentence = getHoldNodeResultString(node, result, cResult, isTimerRunning) || "";
 
     // operate rete
     if (this.editor) {
