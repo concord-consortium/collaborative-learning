@@ -10,7 +10,7 @@ interface ICurriculumConfigEnv {
 export const CurriculumConfig = types
   .model("CurriculumConfig", {
     // base URL of external curriculum unit repository
-    curriculumBaseUrl: types.string,
+    curriculumSiteUrl: types.string,
     // unit code overrides (legacy unit code support)
     unitCodeMap: types.map(types.string),
     // default problem to load if none specified
@@ -22,15 +22,20 @@ export const CurriculumConfig = types
     }
   }))
   .views(self => ({
+    get curriculumBaseUrl() {
+      const { curriculumBranch } = self.env?.urlParams || {};
+      const branchName = stripPTNumberFromBranch(curriculumBranch ?? "main");
+      return `${self.curriculumSiteUrl}/branch/${branchName}`;
+    }
+  }))
+  .views(self => ({
     getUnitUrl(unitParam: string) {
       const unitParamUrl = getUrlFromRelativeOrFullString(unitParam);
       if (unitParamUrl) {
         return unitParamUrl.href;
       }
       const unitCode = self.unitCodeMap.get(unitParam) || unitParam;
-      const { curriculumBranch } = self.env?.urlParams || {};
-      const branchName = stripPTNumberFromBranch(curriculumBranch ?? "main");
-      return `${self.curriculumBaseUrl}/branch/${branchName}/${unitCode}/content.json`;
+      return `${self.curriculumBaseUrl}/${unitCode}/content.json`;
     }
   }))
   .views(self => ({

@@ -39,7 +39,7 @@ describe("Portal Offerings", () => {
   });
 
   describe("getPortalClassOfferings", () => {
-    const curriculumConfig = CurriculumConfig.create({curriculumBaseUrl: ""});
+    const curriculumConfig = CurriculumConfig.create({curriculumSiteUrl: ""});
     const mockAppConfig = {
       config: { defaultProblemOrdinal: "1.1" }
     } as AppConfigModelType;
