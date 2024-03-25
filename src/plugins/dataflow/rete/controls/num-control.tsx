@@ -103,6 +103,7 @@ export const NumberControlComponent: React.FC<{ data: INumberControl }> = (props
 
   const inputRef = useRef<HTMLInputElement>(null);
   useStopEventPropagation(inputRef, "pointerdown");
+  useStopEventPropagation(inputRef, "dblclick");
   return (
     <div className="number-container" title={control.tooltip}>
       { control.label

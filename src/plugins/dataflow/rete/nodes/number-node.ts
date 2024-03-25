@@ -43,7 +43,7 @@ export class NumberNode extends ClassicPreset.Node<
 
     this.addOutput("value", new ClassicPreset.Output(numSocket, "Number"));
 
-    const valueControl = new NumberControl(model, "value", process, "value", 2);
+    const valueControl = new NumberControl(model, "value", process, "value");
     this.addControl("value", valueControl);
 
     // TODO: need to add the plot control
