@@ -35,8 +35,16 @@
       position: relative;
       .board {
         position: absolute;
-        top: 0;
-        left: 40px;
+        &.expanded {
+          top: 0;
+          left: 40px;
+        }
+        &.small {
+          top: 0;
+          left: 80px;
+          transform: scale(0.75);
+
+        }
       }
     }
 

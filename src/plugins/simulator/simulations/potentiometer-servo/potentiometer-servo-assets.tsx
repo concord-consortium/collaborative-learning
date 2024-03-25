@@ -1,5 +1,5 @@
 import boardBackExpanded from "./assets/arduino-back-expanded.png";
-//import boardBackSmall from "./assets/arduino-back-small.svg"; // TODO ask Ryan for exportable version of this
+import boardBackSmall from "./assets/arduino-back-small.png"; // TODO ask Ryan for exportable version of this
 
 import potBaseExpanded from "./assets/potentiometer-base-expanded.png";
 import potBaseSmall from "./assets/potentiometer-base-minimized.png";
@@ -22,6 +22,7 @@ export const potentiometerImages = {
 };
 
 export const boardImages = {
-  backExpanded: boardBackExpanded
+  backExpanded: boardBackExpanded,
+  backSmall: boardBackSmall
 };
 

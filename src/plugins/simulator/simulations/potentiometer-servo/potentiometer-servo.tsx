@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 
 import "./potentiometer-servo.scss";
@@ -21,6 +21,7 @@ const kResistReadingKey = "resist_reading_key";
 const kServoAngleKey = "servo_angle_key";
 
 function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) {
+  const [minimized, setMinimized] = useState(false);
 
   const potAngleVar = findVariable(kPotAngleKey, variables);
   const potAngleBaseValue = potAngleVar?.currentValue ?? 0;
@@ -36,7 +37,10 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
     <div className="potentiometer-servo-component">
       <div className="hardware">
         <div className="potentiometer-area">
-          <img className="pot-base" src={potentiometerImages.baseExpanded} alt="Potentiometer" />
+          <img
+            className="pot-base"
+            src={potentiometerImages.baseExpanded} alt="Potentiometer"
+          />
           <img
             className="pot-dial"
             src={potentiometerImages.dial}
@@ -45,7 +49,11 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
           />
         </div>
         <div className="board-area">
-          <img className="board" src={boardImages.backExpanded} alt="Board" />
+          <img
+            className={`board ${minimized ? "small" : "expanded"}`}
+            src={minimized ? boardImages.backSmall : boardImages.backExpanded}
+            alt="Board"
+          />
         </div>
         <div className="servo-area">
           <img className="servo-base" src={servoImages.baseExpanded} alt="Servo" />
@@ -72,7 +80,12 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
           </div>
         </div>
         <div className="center-controls">
-          <button className="expand-toggle">Expand</button>
+          <button
+            className="expand-toggle"
+            onClick={() => setMinimized(!minimized)}
+          >
+            { minimized ? "Expand" : "Minimize" }
+          </button>
         </div>
         <div className="right-controls">
 
