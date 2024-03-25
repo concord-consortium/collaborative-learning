@@ -89,7 +89,9 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         const lineModel = model.lines.get(instanceKey);
         if (!lineObject.line || !lineModel) return;
 
-        const { slope, intercept } = lineModel,
+        const
+          slope = lineModel.currentSlope,
+          intercept = lineModel.currentIntercept,
           {domain: xDomain} = xAxis,
           {domain: yDomain} = yAxis;
         pointsOnAxes.current = lineToAxisIntercepts(slope, intercept, xDomain, yDomain);
@@ -148,7 +150,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           // The equation may have been unpinned from the line if the user
           // dragged it away from the line. Only move the equation if it
           // is still pinned.
-          if (!lineModel?.equationCoords?.isValid()) {
+          if (!lineModel?.currentEquationCoords) {
             equation.style('left', `${screenX}px`)
               .style('top', `${screenY}px`);
           }
@@ -184,8 +186,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     // Line drag handler
     continueTranslate = useCallback((event: MouseEvent) => {
       const lineParams = model.lines?.get(instanceKey),
-        slope = lineParams?.slope || 0,
-        equationCoords = lineParams?.equationCoords,
+        slope = lineParams?.currentSlope || 0,
         tWorldX = xScaleCopy.invert(event.x),
         tWorldY = yScaleCopy.invert(event.y);
 
@@ -197,13 +198,17 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           tWorldY > yScaleCopy.domain()[1]
       ) {
         const { intercept, slope: initSlope } = computeSlopeAndIntercept(xAxis, yAxis);
-        model.setLine({slope: initSlope, intercept}, instanceKey);
+        model.dragLine(intercept, initSlope, instanceKey);
         return;
       }
 
       const newIntercept = isFinite(slope) ? tWorldY - slope * tWorldX : tWorldX;
-      model.setLine({slope, intercept: newIntercept, equationCoords}, instanceKey);
+      model.dragLine(newIntercept, slope, instanceKey);
     }, [instanceKey, model, xAxis, xScaleCopy, yAxis, yScaleCopy]),
+
+    endTranslate = useCallback(() => {
+      model.saveLine(instanceKey);
+    }, [instanceKey, model]),
 
     startRotation = useCallback((
       event: { x: number, y: number },
@@ -227,23 +232,23 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     ) => {
       if (!pointsOnAxes.current) return;
       const lineParams = model.lines?.get(instanceKey);
+      // This is the point we rotate around: it will not move.
       const pivot = lineSection === "lower" ? lineParams?.pivot2 : lineParams?.pivot1;
       if (!pivot) return;
-      const equationCoords = lineParams?.equationCoords;
 
       if (event.dx !== 0 || event.dy !== 0) {
         let isVertical = false;
-        // The new pivot will be the point on the line section where it is being dragged.
-        const newPivot = { x: xScaleCopy.invert(event.x), y: yScaleCopy.invert(event.y) };
+        // The dragPivot will be the point on the line section where it is being dragged.
+        const dragPivot = { x: xScaleCopy.invert(event.x), y: yScaleCopy.invert(event.y) };
 
-        // If the line is perfectly vertical, set the new pivot's x coordinate to the x coordinate of the
-        // original pivot. If the line is perfectly horizontal, set the new pivot's y coordinate to the y
+        // If the line is perfectly vertical, set the dragPivot's x coordinate to the x coordinate of the
+        // original pivot. If the line is perfectly horizontal, set the dragPivot's y coordinate to the y
         // coordinate of the original pivot.
-        if (Math.abs(xScaleCopy(newPivot.x) - xScaleCopy(pivot.x)) < kTolerance) { // vertical
-          newPivot.x = pivot.x;
+        if (Math.abs(xScaleCopy(dragPivot.x) - xScaleCopy(pivot.x)) < kTolerance) { // vertical
+          dragPivot.x = pivot.x;
           isVertical = true;
-        } else if (Math.abs(yScaleCopy(newPivot.y) - yScaleCopy(pivot.y)) < kTolerance) { // horizontal
-          newPivot.y = pivot.y;
+        } else if (Math.abs(yScaleCopy(dragPivot.y) - yScaleCopy(pivot.y)) < kTolerance) { // horizontal
+          dragPivot.y = pivot.y;
         }
 
         let newSlope, newIntercept;
@@ -252,32 +257,27 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           newIntercept = pivot.x;
         } else {
           newSlope = lineSection === "lower"
-            ? (pivot.y - newPivot.y) / (pivot.x - newPivot.x)
-            : (newPivot.y - pivot.y) / (newPivot.x - pivot.x);
-          newIntercept = newPivot.y - newSlope * newPivot.x;
+            ? (pivot.y - dragPivot.y) / (pivot.x - dragPivot.x)
+            : (dragPivot.y - pivot.y) / (dragPivot.x - pivot.x);
+          newIntercept = dragPivot.y - newSlope * dragPivot.x;
         }
 
         lineObject.handleLower.classed('negative-slope', newSlope < 0);
         lineObject.handleUpper.classed('negative-slope', newSlope < 0);
 
-        const pivot1 = lineSection === "lower" ? newPivot : pivot;
-        const pivot2 = lineSection === "lower" ? pivot : newPivot;
-
-        model.setLine(
-          {
-            slope: newSlope,
-            intercept: newIntercept,
-            pivot1,
-            pivot2,
-            equationCoords,
-          },
-          instanceKey
-        );
+        model.dragLine(newIntercept, newSlope, instanceKey);
+        const lineModel = model.lines?.get(instanceKey);
+        if (lineSection === "lower") {
+          lineModel!.setPivot1(dragPivot);
+        } else {
+          lineModel!.setPivot2(dragPivot);
+        }
       }
     }, [instanceKey, lineObject.handleLower, lineObject.handleUpper, model, xScaleCopy, yScaleCopy]),
 
     endRotation = useCallback(() => {
       const lineParams = model.lines?.get(instanceKey);
+      model.saveLine(instanceKey);
       lineParams?.setPivot1(kInfinitePoint);
       lineParams?.setPivot2(kInfinitePoint);
     }, [instanceKey, model]),
@@ -290,17 +290,20 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           equationHeight = equationNode?.getBoundingClientRect().height || 0,
           left = event.x - equationWidth / 2,
           top = event.y - equationHeight / 2,
-          lineModel = model.lines.get(instanceKey),
           // Get the percentage of plotWidth of the equation box's coordinates
           // for a more accurate placement of the equation box.
           x = left / plotWidth,
           y = top / plotHeight;
 
-        lineModel?.setEquationCoords({x, y});
+        model.dragEquation({x, y}, instanceKey);
         equation.style('left', `${left}px`)
           .style('top', `${top}px`);
       }
-    }, [equationContainerSelector, instanceKey, model.lines, plotWidth, plotHeight]);
+    }, [equationContainerSelector, instanceKey, model, plotWidth, plotHeight]),
+
+    endMoveEquation = useCallback(() => {
+      model.saveEquationCoords(instanceKey);
+    }, [instanceKey, model]);
 
   // Add the behaviors to the line segments
   useEffect(function addBehaviors() {
@@ -311,20 +314,23 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         .on("drag", (e) => continueRotation(e, "lower"))
         .on("end", (e) => endRotation()),
       cover: drag()
-        .on("drag", continueTranslate),
+        .on("drag", continueTranslate)
+        .on("end", endTranslate),
       upper: drag()
         .on("start", (e) => startRotation(e, "upper"))
         .on("drag", (e) => continueRotation(e, "upper"))
         .on("end", (e) => endRotation()),
       equation: drag()
         .on("drag", moveEquation)
+        .on("end", endMoveEquation)
     };
 
     lineObject.handleLower?.call(behaviors.lower);
     lineObject.cover?.call(behaviors.cover);
     lineObject.handleUpper?.call(behaviors.upper);
     lineObject.equation?.call(behaviors.equation);
-  }, [lineObject, continueTranslate, startRotation, continueRotation, endRotation, moveEquation, readOnly]);
+  }, [lineObject, readOnly, continueTranslate, endTranslate,
+    startRotation, continueRotation, endRotation, moveEquation, endMoveEquation]);
 
   // Build the line and its cover segments and handles just once
   useEffect(function createElements() {
@@ -368,8 +374,8 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
 
     // If the equation is not pinned to the line, set its initial coordinates to
     // the values specified in the model.
-    const equationCoords = model.lines?.get(instanceKey)?.equationCoords;
-    if (equationCoords?.isValid()) {
+    const equationCoords = model.lines?.get(instanceKey)?.currentEquationCoords;
+    if (equationCoords) {
       const left = equationCoords.x * 100,
         top = equationCoords.y * 100;
       equationP.style('left', `${left}%`)
