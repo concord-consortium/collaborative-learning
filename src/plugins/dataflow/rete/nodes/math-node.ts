@@ -1,11 +1,21 @@
 import { ClassicPreset } from "rete";
-import { Instance, types } from "mobx-state-tree";
+import { Instance } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
 import { ValueControl } from "../controls/value-control";
 import { getNumDisplayStr } from "../../nodes/utilities/view-utilities";
 import { NodeOperationTypes } from "../../model/utilities/node";
+import { BaseNodeModel } from "./base-node";
+import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-list-control";
 
-export const MathNodeModel = types.model("MathNodeModel");
+export const MathNodeModel = BaseNodeModel.named("MathNodeModel")
+.props({
+  mathOperator: "Add"
+})
+.actions(self => ({
+  setMathOperator(val: string) {
+    self.mathOperator = val;
+  }
+}));
 export interface IMathNodeModel extends Instance<typeof MathNodeModel> {}
 
 export class MathNode extends ClassicPreset.Node<
@@ -17,13 +27,15 @@ export class MathNode extends ClassicPreset.Node<
     value: ClassicPreset.Socket
   },
   {
-    value: ValueControl
+    value: ValueControl,
+    mathOperator: IDropdownListControl
   }
 > {
   valueControl: ValueControl;
 
   constructor(
-    public model: IMathNodeModel
+    public model: IMathNodeModel,
+    process: () => void
   ) {
     super("Math");
 
@@ -32,17 +44,22 @@ export class MathNode extends ClassicPreset.Node<
 
     this.addOutput("value", new ClassicPreset.Output(numSocket, "Number"));
 
+    const dropdownOptions = NodeOperationTypes
+    .filter((nodeOp) => {
+      return nodeOp.type === "math";
+    }).map((nodeOp) => {
+      return { name: nodeOp.name, icon: nodeOp.icon };
+    });
+    const dropdownControl = new DropdownListControl(model,"mathOperator", "Math", process,
+      dropdownOptions);
+    this.addControl("mathOperator", dropdownControl);
+
     this.valueControl = new ValueControl("Math");
     this.addControl("value", this.valueControl);
-
-    // This is new. We are setting the default sentence based on our operator
-    // In v1 this was only done once the data function was run
-    this.valueControl.setSentence(this.getSentence(NaN, NaN, NaN));
   }
 
   getSentence(num1: number, num2: number, result: number) {
-    const mathOperator = "Add";
-    const nodeOperationTypes = NodeOperationTypes.find(op => op.name === mathOperator);
+    const nodeOperationTypes = NodeOperationTypes.find(op => op.name === this.model.mathOperator);
     if (nodeOperationTypes) {
       const n1Str = getNumDisplayStr(num1);
       const n2Str = getNumDisplayStr(num2);
@@ -70,8 +87,7 @@ export class MathNode extends ClassicPreset.Node<
     // The plot block could record these values internally also, so it seems like we
     // can keep it simple and just pass single values.
 
-    const mathOperator = "Add";
-    const nodeOperationTypes = NodeOperationTypes.find(op => op.name === mathOperator);
+    const nodeOperationTypes = NodeOperationTypes.find(op => op.name === this.model.mathOperator);
 
     if (nodeOperationTypes) {
       if (isNaN(n1) || isNaN(n2)) {
@@ -85,7 +101,8 @@ export class MathNode extends ClassicPreset.Node<
       resultSentence = this.getSentence(n1, n2, result);
     }
 
-    this.valueControl.setValue(result);
+    // This nodeValue is used to record the recent values of the node
+    this.model.setNodeValue(result);
     this.valueControl.setSentence(resultSentence);
 
     return { value: result };

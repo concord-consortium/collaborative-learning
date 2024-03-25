@@ -1,23 +1,23 @@
 import { ClassicPreset } from "rete";
-import { Instance, types } from "mobx-state-tree";
+import { Instance } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
-import { NumberControl } from "../controls/num-control";
+import { INumberControl, NumberControl } from "../controls/num-control";
+import { BaseNodeModel } from "./base-node";
 
 // There is some weirdness with the Number node and how its "value" is stored
 // The value is an entered input like selecting the units or a math function
 // But this value is not stored in the node state
 // This particular node reads this value out of it is nodeValue which all nodes
 // have. And is currently serialized in a separate "values" section.
-export const NumberNodeModel = types.model("NumberNodeModel", {
+export const NumberNodeModel = BaseNodeModel.named("NumberNodeModel")
+.props({
   // Our v1 models support this nodeValueUnits, but it isn't actually supported
   // in the UI. The number control which displays the nodeValue is not configured
   // to edit the units.
   // nodeValueUnits: types.maybe(types.string)
 
-  // The old Number node didn't store its number in its state. I think storing it
-  // makes the most sense. It will make it easier to implement a first version
-  // without having to figure out about mapping the old "values" and "nodeValue"
-  // stuff into the new system.
+  // The old Number node didn't store its number in its state. It really should
+  // since this number is not computed it is something the user must enter in.
   value: 0
 })
 .actions(self => ({
@@ -33,7 +33,7 @@ export interface INumberNodeModel extends Instance<typeof NumberNodeModel> {}
 export class NumberNode extends ClassicPreset.Node<
   Record<string, never>,
   { value: ClassicPreset.Socket },
-  { value: NumberControl }
+  { value: INumberControl }
 > {
   constructor(
     public model: INumberNodeModel,
@@ -43,9 +43,6 @@ export class NumberNode extends ClassicPreset.Node<
 
     this.addOutput("value", new ClassicPreset.Output(numSocket, "Number"));
 
-    // TODO: The example of this includes a "change" listener added to the InputControl
-    // https://retejs.org/examples/processing/dataflow
-
     const valueControl = new NumberControl(model, "value", process, "value", 2);
     this.addControl("value", valueControl);
 
@@ -53,6 +50,8 @@ export class NumberNode extends ClassicPreset.Node<
   }
 
   data(): { value: number } {
+    // Save the updated value so it can be recorded in recent values on each tick
+    this.model.setNodeValue(this.model.value);
     return { value: this.model.value };
   }
 }

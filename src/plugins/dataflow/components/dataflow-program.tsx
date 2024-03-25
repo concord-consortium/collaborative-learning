@@ -28,13 +28,16 @@ import { Presets, ReactArea2D, ReactPlugin } from "rete-react-plugin";
 import { AreaExtensions, AreaPlugin, BaseAreaPlugin } from "rete-area-plugin";
 import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
 import { NumberNode, NumberNodeModel } from "../rete/nodes/number-node";
-import { NumberControl, NumberControlComponent } from "../rete/controls/num-control";
+import { INumberControl, NumberControl, NumberControlComponent } from "../rete/controls/num-control";
 import { MathNode, MathNodeModel } from "../rete/nodes/math-node";
 import { ValueControl, ValueControlComponent } from "../rete/controls/value-control";
 import { DataflowEngine, DataflowNode } from "rete-engine";
 import { structures } from "rete-structures";
 import { CounterNode, CounterNodeModel } from "../rete/nodes/counter-node";
 import { CustomDataflowNode } from "../nodes/dataflow-node";
+import {
+  DropdownListControl, DropdownListControlComponent, IDropdownListControl
+} from "../rete/controls/dropdown-list-control";
 
 
 export interface IStartProgramParams {
@@ -81,8 +84,9 @@ class NodeWithControls extends ClassicPreset.Node<
   { [key in string]: ClassicPreset.Socket },
   {
     [key in string]:
-      | NumberControl
+      | INumberControl
       | ValueControl
+      | IDropdownListControl
       | ClassicPreset.Control
       | ClassicPreset.InputControl<"number">
       | ClassicPreset.InputControl<"text">;
@@ -339,6 +343,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             if (data.payload instanceof NumberControl) {
               return NumberControlComponent;
             }
+            if (data.payload instanceof DropdownListControl) {
+              return DropdownListControlComponent;
+            }
             return null;
           }
         }
@@ -380,7 +387,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       await editor.addNode(c);
 
       const mathModel1 = MathNodeModel.create();
-      const d = new MathNode(mathModel1);
+      const d = new MathNode(mathModel1, process);
       await editor.addNode(d);
 
       const counterModel = CounterNodeModel.create();
@@ -388,13 +395,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       await editor.addNode(e);
 
       const mathModel2 = MathNodeModel.create();
-      const f = new MathNode(mathModel2);
+      const f = new MathNode(mathModel2, process);
       await editor.addNode(f);
 
       await area.translate(c.id, { x: 0, y: 0 });
       await area.translate(d.id, { x: 270, y: 0 });
       await area.translate(e.id, { x: 0, y: 150 });
       await area.translate(f.id, { x: 270, y: 150 });
+
+      // This is needed to initialize things like the value control's sentence
+      process();
 
       setTimeout(() => {
         // wait until nodes rendered because they dont have predefined width and height

@@ -1,11 +1,14 @@
 import { ClassicPreset } from "rete";
-import { Instance, types } from "mobx-state-tree";
+import { Instance } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
 import { ValueControl } from "../controls/value-control";
+import { BaseNodeModel } from "./base-node";
 
-export const CounterNodeModel = types.model("CounterNodeModel");
+export const CounterNodeModel = BaseNodeModel.named("CounterNodeModel");
 export interface ICounterNodeModel extends Instance<typeof CounterNodeModel> {}
 
+// This node was added to verify how many times the data function of nodes is
+// being called.
 export class CounterNode extends ClassicPreset.Node<
   Record<string, never>,
   {
@@ -31,7 +34,8 @@ export class CounterNode extends ClassicPreset.Node<
 
   data() {
     const result = this.counter++;
-    this.valueControl.setValue(result);
+    this.valueControl.setSentence(`${result}`);
+
 
     return { value: result};
   }
