@@ -3,11 +3,14 @@ import SortedWork from "../../../support/elements/common/SortedWork";
 import ResourcesPanel from "../../../support/elements/common/ResourcesPanel";
 import Canvas from '../../../support/elements/common/Canvas';
 import ClueHeader from '../../../support/elements/common/cHeader';
+import ChatPanel from "../../../support/elements/common/ChatPanel";
 
 let sortWork = new SortedWork;
 let resourcesPanel = new ResourcesPanel;
 let dashboard = new TeacherDashboard;
 let header = new ClueHeader;
+let chatPanel = new ChatPanel;
+
 const canvas = new Canvas;
 const title = "1.1 Unit Toolbar Configuration";
 const copyTitle = "Personal Workspace";
@@ -45,13 +48,13 @@ describe('SortWorkView Tests', () => {
     sortWork.getSortByMenu().click(); // Open the sort menu
     cy.wait(1000);
 
-    sortWork.getListItemByName().click(); //Select 'Name' sort type
+    sortWork.getSortByNameOption().click(); //Select 'Name' sort type
     cy.wait(1000);
 
     sortWork.getSortByMenu().click(); // Open the sort menu again
     cy.wait(1000);
 
-    sortWork.getListItemByGroup().click(); // Select 'Group' sort type
+    sortWork.getSortByGroupOption().click(); // Select 'Group' sort type
     cy.wait(1000);
 
     cy.log('verify opening and closing a document from the sort work view');
@@ -147,12 +150,48 @@ describe('SortWorkView Tests', () => {
     cy.log("check that problem and exemplar documents can be sorted by name");
     sortWork.getSortByMenu().click();
     cy.wait(1000);
-    sortWork.getListItemByName().click();
+    sortWork.getSortByNameOption().click();
     sortWork.checkSectionHeaderLabelsExist([
       "1, Student", "1, Teacher", "2, Student", "3, Student", "4, Student", "Idea, Ivan"
     ]);
     sortWork.checkDocumentInGroup("Idea, Ivan", exemplarDocs[0]);
     sortWork.checkDocumentInGroup("1, Student", studentProblemDocs[0]);
+
+    cy.log("check that exemplar document is displayed in strategy tag sourced from CMS");
+    sortWork.getSortByMenu().click();
+    cy.wait(1000);
+    sortWork.getSortByTagOption().click();
+    sortWork.checkDocumentInGroup("Unit Rate", exemplarDocs[0]);
+
+    cy.log("check that exemplar document can also be assigned tag by teacher");
+    sortWork.getSortWorkItem().contains(exemplarDocs[0]).click();
+    chatPanel.getChatPanelToggle().click();
+    chatPanel.addCommentTagAndVerify("Diverging Designs");
+
+    cy.log("check that exemplar document is displayed in new tag");
+    chatPanel.getChatCloseButton().click();
+    cy.openTopTab('sort-work');
+    // at the moment this is required to refresh the sort
+    sortWork.getSortByMenu().click();
+    sortWork.getSortByNameOption().click();
+    sortWork.getSortByMenu().click();
+    sortWork.getSortByTagOption().click();
+    sortWork.checkDocumentInGroup("Diverging Designs", exemplarDocs[0]);
+
+    cy.log("remove the teacher added tag and reload");
+    sortWork.getSortWorkItem().contains(exemplarDocs[0]).click();
+    chatPanel.getChatPanelToggle().click();
+    chatPanel.deleteTeacherComments();
+    cy.wait(1000);
+    cy.visit(queryParams2);
+    cy.waitForLoad();
+    cy.openTopTab('sort-work');
+
+    cy.log("check that exemplar document is still displayed in strategy tag sourced from CMS but not in teacher added tag");
+    sortWork.getSortByMenu().click();
+    sortWork.getSortByTagOption().click();
+    sortWork.checkDocumentInGroup("Unit Rate", exemplarDocs[0]);
+    sortWork.checkGroupIsEmpty("Diverging Designs");
 
     cy.log("run CLUE as a student:1 and join group 6");
     runClueAsStudent(students[0], 6);

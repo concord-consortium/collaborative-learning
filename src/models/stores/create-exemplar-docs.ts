@@ -80,7 +80,10 @@ function createExemplarDocs(
       type: ExemplarDocument,
       visibility: "public",
       content: exemplarData.content,
-      key: exemplarDocId
+      key: exemplarDocId,
+      properties: {
+        authoredCommentTag: exemplarData.tag
+      }
     };
     const newDoc = createDocumentModelWithEnv(appConfig, newDocParams);
     documents.add(newDoc);
