@@ -48,6 +48,12 @@ class XYPlotToolTile {
       .then(text => text.match(/= *(\u2212?[0-9.]+)/)[1]) // unicode char is negative sign
       .then(str => parseFloat(str.replace('\u2212', '-')));
   }
+  getMovableLineEquationIntercept(workspaceClass) {
+    return this.getMovableLineEquationContainer()
+      .invoke('text')
+      .then(text => text.match(/\+ *(\u2212?[0-9.]+)/)[1]) // unicode char is negative sign
+      .then(str => parseFloat(str.replace('\u2212', '-')));
+  }
   getMovableLineCover(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .movable-line-cover`);
   }

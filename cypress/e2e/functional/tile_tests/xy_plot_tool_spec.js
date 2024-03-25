@@ -587,7 +587,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getGraphDot().should('have.length', 0);
     });
 
-    it("Test movable line", () => {
+    it.only("Test movable line", () => {
       beforeTest(queryParamsMultiDataset);
       clueCanvas.addTile("graph");
       clueCanvas.toolbarButtonIsEnabled("graph", "movable-line");
@@ -611,7 +611,18 @@ context('XYPlot Tool Tile', function () {
       xyTile.getMovableLineWrapper().should("have.class", "fadeIn").and("not.have.class", "fadeOut");
 
       // Drag movable line
-      // We drag the bottom handle up enough to make the slope negative
+      xyTile.getMovableLineEquationSlope().then(origSlope => {
+        xyTile.getMovableLineEquationIntercept().then(origIntercept => {
+          xyTile.getMovableLineCover()
+            .trigger("mousedown", { eventConstructor: 'MouseEvent' })
+            .trigger("mousemove", 50, 0, { force: true, eventConstructor: 'MouseEvent' })
+            .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
+          xyTile.getMovableLineEquationSlope().should("equal", origSlope);
+          xyTile.getMovableLineEquationIntercept().should("be.greaterThan", origIntercept);
+        });
+      });
+
+      // Now drag the bottom handle up enough to make the slope negative
       xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
       xyTile.getMovableLineHandle('lower')
         .trigger("mousedown", { eventConstructor: 'MouseEvent' })
