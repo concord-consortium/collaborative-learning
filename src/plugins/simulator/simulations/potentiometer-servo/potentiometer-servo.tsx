@@ -72,7 +72,11 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
 }
 
 function step({ frame, variables }: ISimulationProps) {
-
+  const potAngleVar = findVariable(kPotAngleKey, variables);
+  const potAngle = potAngleVar?.currentValue || 0;
+  const resistance = Math.round((potAngle / maxPotAngle) * maxResistReading);
+  const resistanceVar = findVariable(kResistReadingKey, variables);
+  resistanceVar?.setValue(resistance);
 }
 
 export const potentiometerAndServoSimulation: ISimulation = {
