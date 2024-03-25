@@ -95,6 +95,7 @@ export const DataflowContentModel = TileContentModel
   .views(self => ({
     get inputVariables() {
       const variables = self.sharedVariables?.variables;
+      console.log("| a view finds the variables: ", variables);
       return variables?.filter(variable => isInputVariable(variable));
     },
     get outputVariables() {

@@ -479,6 +479,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private get simulatedChannels() {
+    console.log("| finding input variables in model?", this.props.tileContent);
     return this.props.tileContent
       ? this.props.tileContent.inputVariables?.map(variable => simulatedChannel(variable)) ?? []
       : [];
