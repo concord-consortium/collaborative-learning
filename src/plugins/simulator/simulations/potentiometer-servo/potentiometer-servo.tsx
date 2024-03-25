@@ -24,8 +24,13 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
 
   const potAngleVar = findVariable(kPotAngleKey, variables);
   const potAngleBaseValue = potAngleVar?.currentValue ?? 0;
-  const visibleAngle = potAngleBaseValue - 135; // We use 0 - 270 degrees, but we want to display -135 - 135
-  const rotationString = `rotate(${visibleAngle ?? 0}deg)`;
+  const visiblePotAngle = potAngleBaseValue - 135; // We use 0 - 270 degrees, but we want to display -135 - 135
+  const potRotationString = `rotate(${visiblePotAngle ?? 0}deg)`;
+
+  const servoAngleVar = findVariable(kServoAngleKey, variables);
+  const servoAngleBaseValue = servoAngleVar?.currentValue ?? 0;
+  const visibleServoAngle = servoAngleBaseValue - 90; // We use 0 - 180 degrees, but we want to display -90 - 90
+  const servoRotationString = `rotate(${visibleServoAngle}deg)`;
 
   return (
     <div className="potentiometer-servo-component">
@@ -33,9 +38,9 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
         <div className="potentiometer-area">
           <img className="pot-base" src={potentiometerImages.baseExpanded} alt="Potentiometer" />
           <img
-            className="pot-dial foo"
+            className="pot-dial"
             src={potentiometerImages.dial}
-            style={{ transform: rotationString }}
+            style={{ transform: potRotationString }}
             alt="Potentiometer Dial"
           />
         </div>
@@ -44,6 +49,12 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
         </div>
         <div className="servo-area">
           <img className="servo-base" src={servoImages.baseExpanded} alt="Servo" />
+          <img
+            className="servo-arm"
+            src={servoImages.arm}
+            style={{ transform: servoRotationString }}
+            alt="Potentiometer Dial"
+          />
         </div>
       </div>
       <div className="controls">
@@ -77,6 +88,17 @@ function step({ frame, variables }: ISimulationProps) {
   const resistance = Math.round((potAngle / maxPotAngle) * maxResistReading);
   const resistanceVar = findVariable(kResistReadingKey, variables);
   resistanceVar?.setValue(resistance);
+
+  const servoAngleVar = findVariable(kServoAngleKey, variables);
+  const currentAngle = servoAngleVar?.currentValue || 0;
+
+  // DELETEME: this is just to show servo can move
+  const newAngle = currentAngle + 1;
+  if (newAngle > maxServoAngle) {
+    servoAngleVar?.setValue(minServoAngle);
+  } else {
+    servoAngleVar?.setValue(newAngle);
+  }
 }
 
 export const potentiometerAndServoSimulation: ISimulation = {
