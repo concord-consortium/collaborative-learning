@@ -587,7 +587,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getGraphDot().should('have.length', 0);
     });
 
-    it.only("Test movable line", () => {
+    it("Test movable line", () => {
       beforeTest(queryParamsMultiDataset);
       clueCanvas.addTile("graph");
       clueCanvas.toolbarButtonIsEnabled("graph", "movable-line");
@@ -614,7 +614,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getMovableLineEquationSlope().then(origSlope => {
         xyTile.getMovableLineEquationIntercept().then(origIntercept => {
           xyTile.getMovableLineCover()
-            .trigger("mousedown", { eventConstructor: 'MouseEvent' })
+            .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' })
             .trigger("mousemove", 50, 0, { force: true, eventConstructor: 'MouseEvent' })
             .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
           xyTile.getMovableLineEquationSlope().should("equal", origSlope);
@@ -625,13 +625,13 @@ context('XYPlot Tool Tile', function () {
       // Now drag the bottom handle up enough to make the slope negative
       xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
       xyTile.getMovableLineHandle('lower')
-        .trigger("mousedown", { eventConstructor: 'MouseEvent' })
+        .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' })
         .trigger("mousemove", 0, -100, { force: true, eventConstructor: 'MouseEvent' })
         .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
       xyTile.getMovableLineEquationSlope().should("be.lessThan", 0);
       // Then drag the upper handle up and make slope positive again
       xyTile.getMovableLineHandle('upper')
-        .trigger("mousedown", { eventConstructor: 'MouseEvent' })
+        .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' })
         .trigger("mousemove", 0, -100, { force: true, eventConstructor: 'MouseEvent' })
         .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
       xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
