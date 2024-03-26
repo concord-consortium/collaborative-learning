@@ -157,13 +157,13 @@ Not updated to common toolbar framework and does not support toolbar configurati
 
 #### Graph
 
-- `autoAssignAttributes`: boolean, default true
-- `connectPointsByDefault`: boolean, default true
-- `defaultSeriesLegend`: boolean, default true
+- `autoAssignAttributes`: boolean, default true. When true, when a dataset is connected to the graph, its first two columns will be immediately assigned to the "x" and "y" axes of the graph.
+- `connectPointsByDefault`: boolean, default true. When true connecting lines between data points are drawn.
 - `defaultAxisLabels`: { "bottom": "x", "left": "y" }, default none
-- `disableAttributeDnD`: boolean, default true
-- `emptyPlotIsNumeric`: boolean, default true
-- `scalePlotOnValueChange`: boolean, default true
+- `defaultSeriesLegend`: boolean, default true. When true, the graph can connect to and display multiple datasets, and includes a legend area which allows adding, modifying, and removing these layers.
+- `disableAttributeDnD`: boolean, default true. When true, you cannot drop attributes onto the axes to change the graph.  "false" setting not currently tested.
+- `emptyPlotIsNumeric`: boolean, default true. When true graph defaults to numeric axes. "false" setting not currently tested.
+- `scalePlotOnValueChange`: boolean, default true. When true, adding/deleting/modifying value of any data causes the graph to be rescaled to fit the data.
 
 Uses the common toolbar framework. Default toolbar buttons:
 
