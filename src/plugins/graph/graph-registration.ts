@@ -8,6 +8,11 @@ import { updateGraphContentWithNewSharedModelIds, updateGraphObjectWithNewShared
 
 import Icon from "./assets/graph-icon.svg";
 import HeaderIcon from "./assets/graph-tile-id.svg";
+import { AppConfigModelType } from "../../models/stores/app-config-model";
+
+function graphAllowsMultipleDataSets(appConfig: AppConfigModelType) {
+  return !!appConfig.getSetting("defaultSeriesLegend", "graph");
+}
 
 registerTileContentInfo({
   defaultContent: (options) => createGraphModel(undefined, options?.appConfig),
@@ -16,6 +21,7 @@ registerTileContentInfo({
   displayName: "Graph",
   type: kGraphTileType,
   isDataConsumer: true,
+  consumesMultipleDataSets: graphAllowsMultipleDataSets,
   updateContentWithNewSharedModelIds: updateGraphContentWithNewSharedModelIds,
   updateObjectReferenceWithNewSharedModelIds: updateGraphObjectWithNewSharedModelIds
 });

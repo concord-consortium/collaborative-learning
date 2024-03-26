@@ -64,7 +64,8 @@
       "materials": "Varies Material/Surface",
       "physical": "Varies Physical Factors",
       "user": "Varies Human Factors",
-      "system": "Varies System Factors"
+      "system": "Varies System Factors",
+      "unit-rate": "Unit Rate"
     },
     "tagPrompt": "Identify Design Approach",
     "tools": ["Simulator"],
@@ -317,9 +318,12 @@
           "title": "1.1 Unit Toolbar Configuration",
           "subtitle": "Text, Table, Drawing",
           "sections": [
-            "investigation-1/problem-1/first/content.json",
-            "investigation-1/problem-1/second/content.json",
-            "investigation-1/problem-1/third/content.json"
+            "sections/investigation-1/problem-1/first/content.json",
+            "sections/investigation-1/problem-1/second/content.json",
+            "sections/investigation-1/problem-1/third/content.json"
+          ],
+          "exemplars": [
+            "exemplars/investigation-1/problem-1/exemplar-1/content.json"
           ]
         },
         {
@@ -343,9 +347,9 @@
             ]
           },
           "sections": [
-            "investigation-1/problem-2/first/content.json",
-            "investigation-1/problem-2/second/content.json",
-            "investigation-1/problem-2/third/content.json"
+            "sections/investigation-1/problem-2/first/content.json",
+            "sections/investigation-1/problem-2/second/content.json",
+            "sections/investigation-1/problem-2/third/content.json"
           ]
         }
       ]

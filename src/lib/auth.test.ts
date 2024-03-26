@@ -105,7 +105,7 @@ const PARTIAL_RAW_OFFERING_INFO = {
   activity_url: "https://foo.bar/?problem=3.2"
 };
 
-const curriculumConfig = CurriculumConfig.create({curriculumBaseUrl: ""});
+const curriculumConfig = CurriculumConfig.create({curriculumSiteUrl: ""});
 
 describe("dev mode", () => {
   const originalUrlParams = UrlParams.urlParams;

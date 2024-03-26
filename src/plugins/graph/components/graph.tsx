@@ -47,7 +47,7 @@ export const Graph = observer(
     function Graph({ graphController, readOnly, graphRef, onRequestRowHeight }: IProps) {
 
   const graphModel = useGraphModelContext(),
-    {autoAdjustAxes, enableAnimation} = graphController,
+    {enableAnimation} = graphController,
     {plotType} = graphModel,
     instanceId = useInstanceIdContext(),
     marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []),
@@ -185,7 +185,6 @@ export const Graph = observer(
                         place={place}
                         controller={graphController}
                         enableAnimation={enableAnimation}
-                        autoAdjust={autoAdjustAxes}
                         onDropAttribute={handleChangeAttribute}
                         onRemoveAttribute={handleRemoveAttribute}
                         onTreatAttributeAs={handleTreatAttrAs}

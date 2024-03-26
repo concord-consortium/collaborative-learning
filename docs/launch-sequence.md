@@ -39,6 +39,7 @@ flowchart TB
     %% LE.start: Loading curriculum unit
     unit(Get unit JSON)
     unit --> tiles
+    unit --> exemplars
     unit --> sections
     %% LE.end: Loading curriculum uit
 
@@ -53,6 +54,10 @@ flowchart TB
     sections("Load active sections JSON")
     sections --> resolveSectionsLoadedPromise([resolve sectionsLoadedPromise])
     %% LE.end: Loading curriculum sections
+
+    %% LE.start: Loading exemplar documents
+    exemplars("createAndLoadExemplarDocs")
+    %% LE.end: Loading exemplar documents
 
     resolveUnitLoadedPromise([resolve unitLoadedPromise])
 
