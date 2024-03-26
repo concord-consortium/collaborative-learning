@@ -81,9 +81,6 @@ export const GraphLayerModel = types
         newCase[xAttr] = x;
         newCase[yAttr] = y;
         const caseAdded = addCanonicalCasesToDataSet(dataset, [newCase]);
-        // The values are already correct, but various reactions in the graph code
-        // expect there to be a value setting action after case creation.
-        dataset.setCanonicalCaseValues(caseAdded);
         return caseAdded[0];
       }
     },

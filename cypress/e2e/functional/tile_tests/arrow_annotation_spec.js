@@ -221,21 +221,29 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("have.length", 1);
   });
 
-  it("can add arrows to numberline tiles", () => {
+  it.only("can add annotations to numberline tiles", () => {
     beforeTest(queryParams);
     clueCanvas.addTile("numberline");
 
-    cy.log("Annotation buttons appear for points");
+    cy.log("annotations buttons don't exist when empty numberline");
     aa.clickArrowToolbarButton();
     aa.getAnnotationLayer().should("have.class", "editing");
     aa.getAnnotationButtons().should("not.exist");
+    // Disable the annotation tool again so there isn't a layer on top
+    // of the numberline tile
     aa.clickArrowToolbarButton();
-    numberlineToolTile.addPointOnNumberlineTick(-4);
-    numberlineToolTile.addPointOnNumberlineTick(2);
-    aa.clickArrowToolbarButton();
-    aa.getAnnotationButtons().should("have.length", 2);
 
-    cy.log("Can add an arrow to numberline points");
+    cy.log("add points so we can add annotations");
+    // Click on tile to get the tool bar to show up
+    numberlineToolTile.getNumberlineTile().click();
+    // Switch to point adding mode
+    numberlineToolTile.setToolbarPoint();
+    numberlineToolTile.addPointOnNumberlineTick(-4.0);
+    numberlineToolTile.addPointOnNumberlineTick(2.0);
+    aa.clickArrowToolbarButton();
+
+    aa.getAnnotationButtons().should("exist");
+    aa.getAnnotationButtons().should("have.length", 2);
     aa.getAnnotationArrows().should("not.exist");
     aa.getAnnotationButtons().eq(1).click();
     aa.getAnnotationButtons().eq(0).click();

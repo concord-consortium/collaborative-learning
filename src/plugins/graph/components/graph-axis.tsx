@@ -17,7 +17,6 @@ import {axisPlaceToAttrRole, kGraphClassSelector} from "../graph-types";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {AttributeLabel} from "./attribute-label";
 import {useDropHintString} from "../imports/hooks/use-drop-hint-string";
-import { isAddCasesAction, isSetCaseValuesAction } from "../../../models/data/data-set-actions";
 import { DroppableAxis } from "./droppable-axis";
 import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
 import { GraphController } from "../models/graph-controller";
@@ -25,7 +24,6 @@ import { GraphController } from "../models/graph-controller";
 interface IProps {
   place: AxisPlace;
   enableAnimation: MutableRefObject<boolean>;
-  autoAdjust?: React.MutableRefObject<boolean>;
   controller: GraphController;
   onDropAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void;
   onRemoveAttribute?: (place: GraphPlace, attrId: string) => void;
@@ -33,7 +31,7 @@ interface IProps {
 }
 
 export const GraphAxis = observer(function GraphAxis({
-  place, enableAnimation, autoAdjust, controller, onDropAttribute, onRemoveAttribute, onTreatAttributeAs
+  place, enableAnimation, controller, onDropAttribute, onRemoveAttribute, onTreatAttributeAs
 }: IProps) {
   const dataConfig = useDataConfigurationContext(), // FIXME mult-dataset.
     isDropAllowed = dataConfig?.graphPlaceCanAcceptAttributeIDDrop ?? (() => true),
@@ -86,24 +84,6 @@ export const GraphAxis = observer(function GraphAxis({
       }
     });
   }, [layout, place, wrapperElt]);
-
-  useEffect(() => {
-    if (autoAdjust?.current) {
-      // Set up listener on each layer for changes that require a rescale
-      for (const layer of graphModel.layers) {
-        layer.config?.onAction(action => {
-          if (isAlive(graphModel) &&
-            !graphModel.lockAxes &&
-            !graphModel.interactionInProgress &&
-            (isAddCasesAction(action) || isSetCaseValuesAction(action))) {
-            controller.autoscaleAllAxes();
-          }
-        });
-      }
-    }
-  // we just want this to run once to set up the handlers, not every time something changes.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoAdjust]);
 
   useEffect(function cleanup () {
     return () => {

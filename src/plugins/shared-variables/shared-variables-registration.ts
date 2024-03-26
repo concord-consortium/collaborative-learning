@@ -7,7 +7,7 @@ import { IGraphModel, registerGraphSharedModelUpdateFunction } from "../graph/mo
 import {
   EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject
 } from "./drawing/variable-object";
-import { PlottedVariablesAdornmentModel
+import { isPlottedVariablesAdornment, PlottedVariablesAdornmentModel
 } from "./graph/plotted-variables-adornment/plotted-variables-adornment-model";
 import "./graph/plotted-variables-adornment/plotted-variables-adornment-registration";
 import {
@@ -74,16 +74,26 @@ registerGraphSharedModelUpdateFunction(
     // Display a plotted variables adornment when this is linked to a shared variables model
     const sharedVariableModels = smm.getTileSharedModelsByType(graphModel, SharedVariables);
     if (sharedVariableModels && sharedVariableModels.length > 0) {
-      // We're connected to variables; show adornment or create if not there already.
-      if (graphModel.getAdornmentOfType(kPlottedVariablesType)) {
+      // We're connected to variables; make sure adornment is showing, or create if not there already.
+      let adornment = graphModel.getAdornmentOfType(kPlottedVariablesType);
+      if (adornment) {
         graphModel.showAdornment(kPlottedVariablesType);
       } else {
-        const plottedVariablesAdornment = PlottedVariablesAdornmentModel.create();
-        plottedVariablesAdornment.addPlottedVariables();
-        graphModel.addAdornment(plottedVariablesAdornment);
+        adornment = PlottedVariablesAdornmentModel.create();
+        graphModel.addAdornment(adornment);
+      }
+      // Make sure there's at least one PlottedVariables in it.
+      if (adornment && isPlottedVariablesAdornment(adornment)) {
+        if (adornment.plottedVariables.size === 0) {
+          adornment.addPlottedVariables();
+        }
       }
     } else {
       // Disconnected
+      const adornment = graphModel.getAdornmentOfType(kPlottedVariablesType);
+      if (adornment && isPlottedVariablesAdornment(adornment)) {
+        adornment.clearPlottedVariables();
+      }
       graphModel.hideAdornment(kPlottedVariablesType);
     }
   }
