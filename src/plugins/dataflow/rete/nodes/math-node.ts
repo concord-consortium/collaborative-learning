@@ -4,7 +4,7 @@ import { numSocket } from "../num-socket";
 import { ValueControl } from "../controls/value-control";
 import { getNumDisplayStr } from "../../nodes/utilities/view-utilities";
 import { NodeOperationTypes } from "../../model/utilities/node";
-import { BaseNodeModel } from "./base-node";
+import { BaseNode, BaseNodeModel } from "./base-node";
 import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-list-control";
 
 export const MathNodeModel = BaseNodeModel.named("MathNodeModel")
@@ -19,7 +19,7 @@ export const MathNodeModel = BaseNodeModel.named("MathNodeModel")
 }));
 export interface IMathNodeModel extends Instance<typeof MathNodeModel> {}
 
-export class MathNode extends ClassicPreset.Node<
+export class MathNode extends BaseNode<
   {
     num1: ClassicPreset.Socket,
     num2: ClassicPreset.Socket
@@ -30,19 +30,17 @@ export class MathNode extends ClassicPreset.Node<
   {
     value: ValueControl,
     mathOperator: IDropdownListControl
-  }
+  },
+  IMathNodeModel
 > {
   valueControl: ValueControl;
 
   constructor(
     id: string | undefined,
-    public model: IMathNodeModel,
+    model: IMathNodeModel,
     process: () => void
   ) {
-    super("Math");
-    if (id) {
-      this.id = id;
-    }
+    super("Math", id, model);
 
     this.addInput("num1", new ClassicPreset.Input(numSocket, "Number1"));
     this.addInput("num2", new ClassicPreset.Input(numSocket, "Number2"));

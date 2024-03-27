@@ -39,6 +39,8 @@ import {
 import { AreaExtra, Schemes } from "../rete/rete-scheme";
 import { NodeEditorMST } from "../rete/node-editor-mst";
 import { LogicNode, LogicNodeModel } from "../rete/nodes/logic-node";
+import { IBaseNode } from "../rete/nodes/base-node";
+import { GeneratorNode, GeneratorNodeModel } from "../rete/nodes/generator-node";
 
 
 export interface IStartProgramParams {
@@ -438,6 +440,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     let node;
     switch(nodeType) {
+      case "Generator": {
+        const genModel = GeneratorNodeModel.create();
+        node = new GeneratorNode(undefined, genModel, this.programEditor.process);
+        break;
+      }
       case "Logic": {
         const logicModel = LogicNodeModel.create();
         node = new LogicNode(undefined, logicModel, this.programEditor.process);
@@ -486,14 +493,25 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodes = () => {
-    const nodeProcessMap: { [name: string]: (n: Node) => void } = {
-    };
-    // eslint-disable-next-line prefer-const
     let processNeeded = false;
+
+    // This has to be hacked until we figure out the way to specify the Rete Schemes
+    // so its node type is our node specific node types
+    const nodes = this.programEditor.getNodes() as unknown as IBaseNode[];
+    nodes.forEach(node => {
+      // If tick returns true then it means something was updated
+      // and we need to reprocess the diagram
+      if(node.tick()) {
+        processNeeded = true;
+      }
+      // Perhaps move this to the model since it should just be working on
+      // stuff in the model
+      node.model.updateRecentValues();
+    });
     if (processNeeded) {
         // if we've updated values on 1 or more nodes (such as a generator),
-        // we need to abort any current processing and reprocess all
-        // nodes so current values are up to date
+        // reprocess all nodes so current values are up to date
+        this.programEditor.process();
     }
   };
 

@@ -2,7 +2,7 @@ import { ClassicPreset } from "rete";
 import { Instance, types } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
 import { INumberControl, NumberControl } from "../controls/num-control";
-import { BaseNodeModel } from "./base-node";
+import { BaseNode, BaseNodeModel } from "./base-node";
 
 // There is some weirdness with the Number node and how its "value" is stored
 // The value is an entered input like selecting the units or a math function
@@ -31,20 +31,18 @@ export interface INumberNodeModel extends Instance<typeof NumberNodeModel> {}
 // TODO: The Record<string, never> type indicates that there are no
 // inputs to this node. We should probably make a helper type for this
 // if Rete doesn't have one
-export class NumberNode extends ClassicPreset.Node<
+export class NumberNode extends BaseNode<
   Record<string, never>,
   { value: ClassicPreset.Socket },
-  { value: INumberControl }
+  { value: INumberControl },
+  INumberNodeModel
 > {
   constructor(
     id: string | undefined,
-    public model: INumberNodeModel,
+    model: INumberNodeModel,
     process: () => void
   ) {
-    super("Number");
-    if (id) {
-      this.id = id;
-    }
+    super("Number", id, model);
 
     this.addOutput("value", new ClassicPreset.Output(numSocket, "Number"));
 

@@ -1,4 +1,7 @@
 import { NodeEditor } from "rete";
+import { DataflowEngine } from "rete-engine";
+import { structures } from "rete-structures";
+import { onPatch } from "mobx-state-tree";
 import { Schemes } from "./rete-scheme";
 import {
   DataflowNodeModel, IDataflowNodeModel, DataflowProgramModelType, ConnectionModel
@@ -6,10 +9,8 @@ import {
 import { INumberNodeModel, NumberNode } from "./nodes/number-node";
 import { IMathNodeModel, MathNode } from "./nodes/math-node";
 import { CounterNode, ICounterNodeModel } from "./nodes/counter-node";
-import { DataflowEngine } from "rete-engine";
-import { structures } from "rete-structures";
-import { onPatch } from "@concord-consortium/mobx-state-tree";
 import { ILogicNodeModel, LogicNode } from "./nodes/logic-node";
+import { GeneratorNode, IGeneratorNodeModel } from "./nodes/generator-node";
 
 export class NodeEditorMST extends NodeEditor<Schemes> {
   private reteNodesMap: Record<string, Schemes['Node']> = {};
@@ -95,6 +96,9 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
     switch(type) {
       case "Counter": {
         return new CounterNode(id, model as ICounterNodeModel);
+      }
+      case "Generator": {
+        return new GeneratorNode(id, model as IGeneratorNodeModel, this.process);
       }
       case "Logic": {
         return new LogicNode(id, model as ILogicNodeModel, this.process);
@@ -211,6 +215,10 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
 
     // Temporarily emit like normal so we can get things back to working.
     await this.emit({ type: 'nodecreated', data: node });
+
+    // run the process command so this newly added node can update any controls like the
+    // value control.
+    this.process();
 
     return true;
   }
