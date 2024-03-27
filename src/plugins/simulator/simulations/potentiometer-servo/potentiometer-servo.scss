@@ -33,15 +33,17 @@
       }
       &.size-toggle {
         justify-content: right;
-      }
-
-      &.size-toggle {
+        svg {
+          position: absolute;
+          left: 2px;
+          top: 1px;
+        }
         button {
           transform: translateX(3px);
           background: white;
           border: 2px solid #ccc;
           border-radius: 12px;
-          padding: 4px 8px;
+          padding: 4px 8px 4px 22px;
           font-size: 12px;
           color: #333;
           cursor: pointer;

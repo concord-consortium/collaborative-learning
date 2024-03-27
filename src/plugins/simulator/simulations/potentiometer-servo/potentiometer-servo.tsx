@@ -9,6 +9,8 @@ import potDial from "./assets/pot-top.png";
 import servoArm from "./assets/servo-arm.png";
 import assemblyExpanded from "./assets/assembly-expanded.png";
 import assemblyCollapsed from "./assets/assembly-collapsed.png";
+import ExpandIcon from "./assets/expand-arduino.svg";
+import MinimizeIcon from "./assets/minimize-arduino.svg";
 
 import "./potentiometer-servo.scss";
 
@@ -86,9 +88,11 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
           >
             { collapsed
               ? <div>
+                  <ExpandIcon />
                   <span>Expand</span>
                 </div>
               : <div>
+                  <MinimizeIcon />
                   <span>Minimize</span>
                 </div>
             }
