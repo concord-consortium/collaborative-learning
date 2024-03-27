@@ -104,23 +104,18 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
 }
 
 function step({ frame, variables }: ISimulationProps) {
+  // calculate resistance based on potentiometer angle
   const potAngleVar = findVariable(kPotAngleKey, variables);
   const potAngle = potAngleVar?.currentValue || 0;
   const resistance = Math.round((potAngle / maxPotAngle) * maxResistReading);
   const resistanceVar = findVariable(kResistReadingKey, variables);
   resistanceVar?.setValue(resistance);
 
+  // set servo angle to value of servo angle variable
   const servoAngleVar = findVariable(kServoAngleKey, variables);
   const currentAngle = servoAngleVar?.currentValue || 0;
-
-  // DELETEME: this is just to show servo can move
-  const newAngle = currentAngle + 1;
-  if (newAngle > maxServoAngle) {
-    servoAngleVar?.setValue(minServoAngle);
-  } else {
-    servoAngleVar?.setValue(newAngle);
-  }
-  // END DELETEME
+  const isValid = (currentAngle <= maxServoAngle) && (currentAngle >= minServoAngle);
+  if (isValid) servoAngleVar?.setValue(currentAngle);
 }
 
 export const potentiometerAndServoSimulation: ISimulation = {
