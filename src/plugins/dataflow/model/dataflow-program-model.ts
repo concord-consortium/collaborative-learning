@@ -2,6 +2,7 @@ import { types, Instance, SnapshotOut, detach } from "mobx-state-tree";
 import { NumberNodeModel } from "../rete/nodes/number-node";
 import { MathNodeModel } from "../rete/nodes/math-node";
 import { CounterNodeModel } from "../rete/nodes/counter-node";
+import { LogicNodeModel } from "../rete/nodes/logic-node";
 
 export const ConnectionModel = types
   .model("Connection", {
@@ -19,7 +20,7 @@ export const DataflowNodeModel = types.
     name: types.string,
     x: types.number,
     y: types.number,
-    data: types.union(NumberNodeModel, MathNodeModel, CounterNodeModel)
+    data: types.union(CounterNodeModel, LogicNodeModel, MathNodeModel, NumberNodeModel)
   })
   .preProcessSnapshot((snapshot: any) => {
     // Turn position into x and y because MST has weird issues with arrays

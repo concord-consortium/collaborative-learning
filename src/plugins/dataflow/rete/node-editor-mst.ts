@@ -9,6 +9,7 @@ import { CounterNode, ICounterNodeModel } from "./nodes/counter-node";
 import { DataflowEngine } from "rete-engine";
 import { structures } from "rete-structures";
 import { onPatch } from "@concord-consortium/mobx-state-tree";
+import { ILogicNodeModel, LogicNode } from "./nodes/logic-node";
 
 export class NodeEditorMST extends NodeEditor<Schemes> {
   private reteNodesMap: Record<string, Schemes['Node']> = {};
@@ -92,14 +93,17 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
 
   private createReteNode(id: string, type: string, model: IDataflowNodeModel['data']) {
     switch(type) {
-      case "Number": {
-        return new NumberNode(id, model as INumberNodeModel, this.process);
+      case "Counter": {
+        return new CounterNode(id, model as ICounterNodeModel);
+      }
+      case "Logic": {
+        return new LogicNode(id, model as ILogicNodeModel, this.process);
       }
       case "Math": {
         return new MathNode(id, model as IMathNodeModel, this.process);
       }
-      case "Counter": {
-        return new CounterNode(id, model as ICounterNodeModel);
+      case "Number": {
+        return new NumberNode(id, model as INumberNodeModel, this.process);
       }
     }
   }

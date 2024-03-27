@@ -38,6 +38,7 @@ import {
 } from "../rete/controls/dropdown-list-control";
 import { AreaExtra, Schemes } from "../rete/rete-scheme";
 import { NodeEditorMST } from "../rete/node-editor-mst";
+import { LogicNode, LogicNodeModel } from "../rete/nodes/logic-node";
 
 
 export interface IStartProgramParams {
@@ -437,6 +438,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     let node;
     switch(nodeType) {
+      case "Logic": {
+        const logicModel = LogicNodeModel.create();
+        node = new LogicNode(undefined, logicModel, this.programEditor.process);
+        break;
+      }
       case "Math": {
         const mathModel = MathNodeModel.create();
         node = new MathNode(undefined, mathModel, this.programEditor.process);
