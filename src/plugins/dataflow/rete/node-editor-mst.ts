@@ -1,0 +1,314 @@
+import { NodeEditor } from "rete";
+import { Schemes } from "./rete-scheme";
+import {
+  DataflowNodeModel, IDataflowNodeModel, DataflowProgramModelType, ConnectionModel
+} from "../model/dataflow-program-model";
+import { INumberNodeModel, NumberNode } from "./nodes/number-node";
+import { IMathNodeModel, MathNode } from "./nodes/math-node";
+import { CounterNode, ICounterNodeModel } from "./nodes/counter-node";
+import { DataflowEngine } from "rete-engine";
+import { structures } from "rete-structures";
+import { onPatch } from "@concord-consortium/mobx-state-tree";
+
+export class NodeEditorMST extends NodeEditor<Schemes> {
+  private reteNodesMap: Record<string, Schemes['Node']> = {};
+
+  public engine = new DataflowEngine<Schemes>();
+
+  constructor(
+    private mstProgram: DataflowProgramModelType
+  ) {
+    super();
+
+    this.use(this.engine);
+
+    // onPatch(mstProgram.nodes, (patch, reversePatch) => {
+    //   console.log("nodes patch", patch);
+    //   if (patch.op === "replace") {
+    //     // don't do anything with this yet, but it might be needed
+    //     // to support applySnapshot
+    //     return;
+    //   }
+    //   // Using a method to parse the path would be better here
+    //   const pattern = /^\/([^/[]*)$/;
+    //   const result = patch.path.match(pattern);
+    //   if (!result) {
+    //     return;
+    //   }
+    //   const id = result[1];
+    //   if (patch.op === "add") {
+    //     const node = this.getNode(id);
+    //     if (!node) return;
+    //     this.emit({ type: 'nodecreated', data: node });
+    //   }
+
+    //   if (patch.op === "remove") {
+    //     // I'm not sure what the value of patch will be here. And it is going to be tricky
+    //     // to instantiate a real node back from the patch information. I'm hoping that
+    //     // stuff that pays attention to this just looks at the id, but we'll see.
+    //     this.emit({ type: 'noderemoved', data: { id } as any});
+    //   }
+    // });
+
+    onPatch(mstProgram.connections, patch => {
+      console.log("connections patch", patch);
+
+      // If this is a connection being added:
+      // we need to send the connection instance not data
+      // this.emit({ type: 'connectioncreated', data })
+
+      // If this ia connection being removed
+      // we will no longer have the real connection instance to pass
+      // but we can probably send previous snapshot somehow
+      // this.emit({ type: 'connectionremoved', data: connection })
+    });
+  }
+
+  public notifyAboutExistingObjects() {
+    this.getNodes().forEach(node => this.emit({ type: 'nodecreated', data: node }));
+    this.getConnections().forEach(connection => this.emit({ type: 'connectioncreated', data: connection}));
+  }
+
+  public process = () => {
+    console.warn("NodeEditorMST.process");
+    this.engine.reset();
+
+    console.log("NodeEditorMST.process getNodes", this.getNodes());
+
+    // It seems like structures should correctly handle our setup, but from what
+    // I can tell it is reading the empty private nodes and connections from
+    // from our parent. So we make this explicit
+    const graph = structures({nodes: this.getNodes(), connections: this.getConnections()});
+
+    // Because rete engine caches values even if the same node is the
+    // parent of two leaves the data function of that common parent
+    // will only be called once.
+    // debugger;
+    const leafNodes = graph.leaves().nodes();
+    console.log("NodeEditorMST.process leafNodes", leafNodes);
+    leafNodes.forEach(n => this.engine.fetch(n.id));
+  };
+
+
+  private createReteNode(id: string, type: string, model: IDataflowNodeModel['data']) {
+    switch(type) {
+      case "Number": {
+        return new NumberNode(id, model as INumberNodeModel, this.process);
+      }
+      case "Math": {
+        return new MathNode(id, model as IMathNodeModel, this.process);
+      }
+      case "Counter": {
+        return new CounterNode(id, model as ICounterNodeModel);
+      }
+    }
+  }
+
+  /**
+   * Get a node by id
+   * @param id - The node id
+   * @returns The node or undefined
+   */
+  public getNode(id: Schemes['Node']['id']) {
+    const mstNode = this.mstProgram.nodes.get(id);
+    if (!mstNode) {
+      const _reteNode = this.reteNodesMap[id];
+      if (_reteNode) {
+        delete this.reteNodesMap[id];
+      }
+      // We have to hack this to make the types happy, this is a bug
+      // in the Rete type system
+      return undefined as unknown as Schemes['Node'];
+    }
+
+    const existingReteNode = this.reteNodesMap[id];
+    if (existingReteNode) {
+      return existingReteNode;
+    } else {
+      const reteNode = this.createReteNode(id, mstNode.name, mstNode.data);
+      if (reteNode) {
+        this.reteNodesMap[id] = reteNode;
+      }
+      // We have to hack this to make the types happy, this is a bug
+      // in the Rete type system
+      return reteNode as unknown as Schemes['Node'];
+    }
+  }
+
+  /**
+   * Get all nodes
+   * @returns Copy of array with nodes
+   */
+  public getNodes() {
+    // We'll do this inefficiently for now:
+    const reteNodeArray: Schemes['Node'][] = [];
+    for(const mstNode of this.mstProgram.nodes.values()) {
+      reteNodeArray.push(this.getNode(mstNode.id));
+    }
+    return reteNodeArray;
+
+    // It is possible we are leaving some dead nodes in reteNodeMap
+  }
+
+  /**
+   * Get all connections
+   * @returns Copy of array with connections
+   */
+  public getConnections() {
+    return [...this.mstProgram.connections.values()];
+  }
+
+  /**
+   * Get a connection by id
+   * @param id - The connection id
+   * @returns The connection or undefined
+   */
+  public getConnection(id: Schemes['Connection']['id']) {
+    // Again we have to hack the types due to an issue with the Rete types
+    return this.mstProgram.connections.get(id) as unknown as Schemes['Connection'];
+  }
+
+  /**
+   * Add a node
+   * @param data - The node data
+   * @returns Whether the node was added
+   * @throws If the node has already been added
+   * @emits nodecreate
+   * @emits nodecreated
+   */
+  async addNode(data: Schemes['Node']) {
+    if (this.getNode(data.id)) throw new Error('node has already been added');
+
+    // We do not handle this 'nodecreate' event in all cases so be careful if
+    // you are using it. If a node is created externally, this event will not
+    // be sent.
+    if (!await this.emit({ type: 'nodecreate', data })) return false;
+
+    // Hack for now
+    const node = data as any;
+
+    // Assume any code that adds a node will also create the MST model for the node
+    const model = node.model as IDataflowNodeModel['data'];
+
+    this.mstProgram.addNode(DataflowNodeModel.create({
+      id: data.id,
+      name: model.type,
+      // FIXME: we have to figure out how to handle this positioning
+      x: 0,
+      y: 0,
+      data: model
+    }));
+
+    // Note: we are changing the behavior of Rete here. In the default Rete editor
+    // this function doesn't return until the 'nodecreated' event has been sent and
+    // waited for. In our case the event should be sent when the 'put' happens above
+    // but we are not waiting for this event. We could improve this code if waiting
+    // for the event become important
+
+    // Temporarily emit like normal so we can get things back to working.
+    await this.emit({ type: 'nodecreated', data: node });
+
+    return true;
+  }
+
+  /**
+   * Add a connection
+   * @param data - The connection data
+   * @returns Whether the connection was added
+   * @throws If the connection has already been added
+   * @emits connectioncreate
+   * @emits connectioncreated
+   */
+  async addConnection(data: Schemes['Connection']) {
+    if (this.getConnection(data.id)) throw new Error('connection has already been added');
+
+    // We do not handle this event in all cases so be careful if you use it
+    if (!await this.emit({ type: 'connectioncreate', data })) return false;
+
+    // From what I can tell code that creates the connections also creates
+    // a unique id for the connection
+    const connection = ConnectionModel.create(data);
+    this.mstProgram.addConnection(connection);
+
+    // Note: we are changing the behavior of Rete here. In the default Rete editor
+    // this function doesn't return until the 'connectioncreated' event has been sent and
+    // waited for. In our case the event should be sent when the 'put' happens above
+    // but we are not waiting for this event. We could improve this code if waiting
+    // for the event become important
+
+
+    // Temporary use this approach to get things working
+    await this.emit({ type: 'connectioncreated', data: connection });
+
+    return true;
+  }
+
+  /**
+   * Remove a node
+   * @param id - The node id
+   * @returns Whether the node was removed
+   * @throws If the node cannot be found
+   * @emits noderemove
+   * @emits noderemoved
+   */
+  async removeNode(id: Schemes['Node']['id']) {
+    if (!this.mstProgram.nodes.has(id)) throw new Error('cannot find node');
+
+    const node = this.getNode(id);
+
+    if (!await this.emit({ type: 'noderemove', data: node })) return false;
+
+    this.mstProgram.removeNode(id);
+
+    // Temporary use this approach to get things working
+    await this.emit({ type: 'noderemoved', data: node });
+
+    return true;
+  }
+
+  /**
+   * Remove a connection
+   * @param id - The connection id
+   * @returns Whether the connection was removed
+   * @throws If the connection cannot be found
+   * @emits connectionremove
+   * @emits connectionremoved
+   */
+  async removeConnection(id: Schemes['Connection']['id']) {
+    if (!this.mstProgram.connections.has(id)) throw new Error('cannot find connection');
+
+    const connection = this.getConnection(id);
+
+    if (!await this.emit({ type: 'connectionremove', data: connection })) return false;
+
+    this.mstProgram.removeConnection(id);
+
+    // Temporary use this approach to get things working
+    await this.emit({ type: 'connectionremoved', data: connection });
+
+    return true;
+  }
+
+  /**
+   * Clear all nodes and connections
+   * @returns Whether the editor was cleared
+   * @emits clear
+   * @emits clearcancelled
+   * @emits cleared
+   */
+  async clear() {
+    if (!await this.emit({ type: 'clear' })) {
+      await this.emit({ type: 'clearcancelled' });
+      return false;
+    }
+
+    for (const connectionId of this.mstProgram.connections.keys()) await this.removeConnection(connectionId);
+    for (const nodeId of this.mstProgram.nodes.keys()) await this.removeNode(nodeId);
+
+    // In this case we sent the event here
+    // We don't have an easy way to send this event in response to snapshot changes or patches
+    // We wouldn't know if the cause of the change was an official clear or something else.
+    await this.emit({ type: 'cleared' });
+    return true;
+  }
+}

@@ -23,6 +23,35 @@ The default Editor class sends events before a node is created, removed and a co
 
 Without these events we should be able to "unify" our implementation to always be based on the MST model state changing. This way if an undo event happens or a remote user changes the MST state the same post events will be called. The biggest problem with this unified approach is the async nature of the Rete add and remove methods. These methods wait for the events to be emitted before returning. If we are sending the events in response to model state changes we can't block the add and remove calls. We can drop that support as well. The two places that uses  these events are the engine and area plugins. In both cases they handle the event synchronously. The probably we might have is if the events are sent out of order. If a connection is made to a node which doesn't exist yet, that might break engine or it might break the connection drawing code. But this seems easy enough to deal with. We can just update all nodes first and then all connections. There might be some issue with deleting a node which is connected too. But this seems like it would be a problem without our new approach anyhow, so we should look into what happens currently.
 
+## Firing events from a single place
+There are at least 3 times we need to fire the Rete events for things like the nodes, connections, and positions:
+  - explicit UI Events
+  - snapshots being applied after the initial load
+  - the initial load
+
+If we had code that compared a snapshot with a previous snapshot, and then figured out which events to fire this might work for all cases. For the initial load the previous snapshot wouldn't exist so all "new" elements would have their `*created` events fired for.
+
+This handling cannot be started from a single place though. We can't add an onSnapshot handler which is called when the tile is first loaded. But we could have the code which adds this onSnapshot handler initialize it self when it is added. And this would look at the non existing previous snapshot and send all of the appropriate events.
+
+## Location of nodes
+
+- after loading we need to update the nodeViews of the area plugin
+- after dragging we need to update the nodeView that was dragged
+- when a new node is added we need to store its location
+
+### MST all the way down
+If we can replace the node view implementation then we can get these updates for free. But it seems hard to do that:
+- we have to override AreaPlugin#addNodeView to create our own node view class
+- the NodeView class has to implement translate, resize, and destroy and provide a element, position, and dragHandler, it also has to manage several things that are passed into it: events and guards.
+- when our NodeView instances are modified by something outside of the owning DataFlow tile, we have to send the appropriate events: translate, resize,
+
+### Sync Rete with MST
+Without that approach we can:
+- call translate after the nodes are loaded and the area plugin is initialized
+- listen for the translated events using something downstream from the area plugin and update the MST objects
+- this could all be encapsulated in an object that gets both the mst program and the area plugin
+- the downside is that it would also have to watch for snapshots being applied and then update all of the translations each time that happens
+
 # Rete v2
 
 ## Positions

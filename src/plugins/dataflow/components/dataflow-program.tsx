@@ -23,21 +23,21 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 import { IDataSet } from "../../../models/data/data-set";
 
 import "./dataflow-program.sass";
-import { ClassicPreset, GetSchemes, NodeEditor } from "rete";
-import { Presets, ReactArea2D, ReactPlugin } from "rete-react-plugin";
+import { ClassicPreset, NodeEditor } from "rete";
+import { Presets, ReactPlugin } from "rete-react-plugin";
 import { AreaExtensions, AreaPlugin, BaseAreaPlugin } from "rete-area-plugin";
 import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
 import { NumberNode, NumberNodeModel } from "../rete/nodes/number-node";
-import { INumberControl, NumberControl, NumberControlComponent } from "../rete/controls/num-control";
+import { NumberControl, NumberControlComponent } from "../rete/controls/num-control";
 import { MathNode, MathNodeModel } from "../rete/nodes/math-node";
 import { ValueControl, ValueControlComponent } from "../rete/controls/value-control";
-import { DataflowEngine, DataflowNode } from "rete-engine";
-import { structures } from "rete-structures";
-import { CounterNode, CounterNodeModel } from "../rete/nodes/counter-node";
+import { DataflowEngine } from "rete-engine";
 import { CustomDataflowNode } from "../nodes/dataflow-node";
 import {
-  DropdownListControl, DropdownListControlComponent, IDropdownListControl
+  DropdownListControl, DropdownListControlComponent
 } from "../rete/controls/dropdown-list-control";
+import { AreaExtra, Schemes } from "../rete/rete-scheme";
+import { NodeEditorMST } from "../rete/node-editor-mst";
 
 
 export interface IStartProgramParams {
@@ -78,42 +78,6 @@ interface IState {
   lastIntervalDuration: number;
 }
 
-// Crazy Rete typing...
-class NodeWithControls extends ClassicPreset.Node<
-  { [key in string]: ClassicPreset.Socket },
-  { [key in string]: ClassicPreset.Socket },
-  {
-    [key in string]:
-      | INumberControl
-      | ValueControl
-      | IDropdownListControl
-      | ClassicPreset.Control
-      | ClassicPreset.InputControl<"number">
-      | ClassicPreset.InputControl<"text">;
-  }
-> {}
-
-type Node = NodeWithControls & DataflowNode;
-
-// We might be better off using a pattern like this:
-// type Node = NumberNode | MathNode;
-// However that then breaks the look up the controls using
-// instanceof because each control value gets the intersection
-// of all of the control types, so then typescript thinks the first instanceof
-// will match everything
-class Connection<
-  A extends Node,
-  B extends Node
-> extends ClassicPreset.Connection<A, B> {}
-
-type Schemes = GetSchemes<
-  Node,
-  Connection<Node, Node>
->;
-// End of Crazy Rete typing....
-
-type AreaExtra = ReactArea2D<Schemes>;
-
 const numSocket = new ClassicPreset.Socket("Number value");
 
 const RETE_APP_IDENTIFIER = "dataflow@0.1.0";
@@ -130,7 +94,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private previousChannelIds = "";
   private intervalHandle: ReturnType<typeof setTimeout>;
   private lastIntervalTime: number;
-  private programEditor: NodeEditor<Schemes>;
+  private programEditor: NodeEditorMST;
   private programEngine: DataflowEngine<Schemes>;
   private editorDomElement: HTMLElement | null;
   private disposers: IDisposer[] = [];
@@ -275,27 +239,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private initProgramEngine = () => {
   };
 
-  private process = () => {
-    this.programEngine.reset();
-
-    const graph = structures(this.programEditor);
-
-    // Because rete engine caches values even if the same node is the
-    // parent of two leaves the data function of that common parent
-    // will only be called once.
-    graph.leaves().nodes().forEach(n => this.programEngine.fetch(n.id));
-  };
-
   private initProgramEditor = (clearHistory = false) => {
     (async () => {
-      if (!this.toolDiv) return;
+      if (!this.toolDiv || !this.props.program) return;
 
-      const editor = new NodeEditor<Schemes>();
+      const editor = new NodeEditorMST(this.props.program);
       this.programEditor = editor;
+
+      editor.addPipe((context) => {
+        console.warn("editor event", context);
+        return context;
+      });
+
       const area = new AreaPlugin<Schemes, AreaExtra>(this.toolDiv);
       const connection = new ConnectionPlugin<Schemes, AreaExtra>();
       const render = new ReactPlugin<Schemes, AreaExtra>();
-      this.programEngine = new DataflowEngine<Schemes>();
+      this.programEngine = editor.engine;
 
       AreaExtensions.selectableNodes(area, AreaExtensions.selector(), {
         accumulating: AreaExtensions.accumulateOnCtrl()
@@ -353,38 +312,35 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       connection.addPreset(ConnectionPresets.classic.setup());
 
-      editor.use(this.programEngine);
       editor.use(area);
       area.use(connection);
       area.use(render);
 
       AreaExtensions.simpleNodesOrder(area);
 
+      // Notify after the area, connection, and render plugins have been configured
+      editor.notifyAboutExistingObjects();
+
       // Reprocess when connections are changed
       editor.addPipe((context) => {
         if (["connectioncreated", "connectionremoved"].includes(context.type)) {
-          this.process();
+          this.programEditor.process();
         }
         return context;
       });
 
-      const counterModel = CounterNodeModel.create();
-      const a = new CounterNode(counterModel);
-      await editor.addNode(a);
+      // area.nodeViews
+      // await area.translate(a.id, { x: 0, y: 0 });
+      // await area.translate(b.id, { x: 270, y: 0 });
 
-      const mathModel1 = MathNodeModel.create();
-      const b = new MathNode(mathModel1, this.process);
-      await editor.addNode(b);
-
-      await area.translate(a.id, { x: 0, y: 0 });
-      await area.translate(b.id, { x: 270, y: 0 });
-
-      // This is needed to initialize things like the value control's sentence
-      this.process();
 
       setTimeout(() => {
         // wait until nodes rendered because they dont have predefined width and height
         AreaExtensions.zoomAt(area, editor.getNodes());
+
+        // This is needed to initialize things like the value control's sentence
+        // It was having problems when called earlier
+        this.programEditor.process();
       }, 10);
     })();
   };
@@ -483,12 +439,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     switch(nodeType) {
       case "Math": {
         const mathModel = MathNodeModel.create();
-        node = new MathNode(mathModel, this.process);
+        node = new MathNode(undefined, mathModel, this.programEditor.process);
         break;
       }
       case "Number": {
         const numModel = NumberNodeModel.create();
-        node = new NumberNode(numModel, this.process);
+        node = new NumberNode(undefined, numModel, this.programEditor.process);
         break;
       }
       default:

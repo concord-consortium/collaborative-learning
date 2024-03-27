@@ -1,5 +1,5 @@
 import { ClassicPreset } from "rete";
-import { Instance } from "mobx-state-tree";
+import { Instance, types } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
 import { INumberControl, NumberControl } from "../controls/num-control";
 import { BaseNodeModel } from "./base-node";
@@ -11,6 +11,7 @@ import { BaseNodeModel } from "./base-node";
 // have. And is currently serialized in a separate "values" section.
 export const NumberNodeModel = BaseNodeModel.named("NumberNodeModel")
 .props({
+  type: types.optional(types.literal("Number"), "Number"),
   // Our v1 models support this nodeValueUnits, but it isn't actually supported
   // in the UI. The number control which displays the nodeValue is not configured
   // to edit the units.
@@ -36,10 +37,14 @@ export class NumberNode extends ClassicPreset.Node<
   { value: INumberControl }
 > {
   constructor(
+    id: string | undefined,
     public model: INumberNodeModel,
     process: () => void
   ) {
     super("Number");
+    if (id) {
+      this.id = id;
+    }
 
     this.addOutput("value", new ClassicPreset.Output(numSocket, "Number"));
 

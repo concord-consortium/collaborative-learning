@@ -75,16 +75,18 @@ export const DataflowContentModel = TileContentModel
       return firstSharedVariables as SharedVariablesType;
     },
     programWithoutRecentValues() {
-      const { values, ...rest } = getSnapshot(self.program);
-      const castedValues = values as Record<string, any>;
-      const newValues: Record<string, any> = {};
-      if (values) {
-        Object.keys(castedValues).forEach((key: string) => {
-          const { recentValues, ...other } = castedValues[key];
-          newValues[key] = { ...other };
-        });
-      }
-      return { values: newValues, ...rest };
+      // FIXME: remove recent values from the nodes
+      // const { values, ...rest } = getSnapshot(self.program);
+      // const castedValues = values as Record<string, any>;
+      // const newValues: Record<string, any> = {};
+      // if (values) {
+      //   Object.keys(castedValues).forEach((key: string) => {
+      //     const { recentValues, ...other } = castedValues[key];
+      //     newValues[key] = { ...other };
+      //   });
+      // }
+      // return { values: newValues, ...rest };
+      return {};
     },
     get maxRecordableCases() {
       const numNodes = self.program.nodes.size;
@@ -250,7 +252,7 @@ export const DataflowContentModel = TileContentModel
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing
     },
-    addNewAttrFromNode(nodeId: number, nodeName: string){
+    addNewAttrFromNode(nodeId: string, nodeName: string){
       const newAttributeId = uniqueId() + "*" + nodeId;
       self.dataSet.addAttributeWithID({
         id: newAttributeId,

@@ -14,7 +14,10 @@ export const BaseNodeModel = types.model("BaseNodeModel",
   // the generator would start generating at time 0 even though the
   // recentValues ended at some other time.
   nodeValue: types.maybe(types.number),
-  recentValues: types.map(types.array(types.number))
+  recentValues: types.map(types.array(types.number)),
+
+  // This is the name assigned by DataFlow, it probably should be renamed
+  orderedDisplayName: types.maybe(types.string)
 })
 .volatile(self => ({
   watchedValues: {

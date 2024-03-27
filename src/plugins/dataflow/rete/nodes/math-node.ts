@@ -1,5 +1,5 @@
 import { ClassicPreset } from "rete";
-import { Instance } from "mobx-state-tree";
+import { Instance, types } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
 import { ValueControl } from "../controls/value-control";
 import { getNumDisplayStr } from "../../nodes/utilities/view-utilities";
@@ -9,6 +9,7 @@ import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-
 
 export const MathNodeModel = BaseNodeModel.named("MathNodeModel")
 .props({
+  type: types.optional(types.literal("Math"), "Math"),
   mathOperator: "Add"
 })
 .actions(self => ({
@@ -34,10 +35,14 @@ export class MathNode extends ClassicPreset.Node<
   valueControl: ValueControl;
 
   constructor(
+    id: string | undefined,
     public model: IMathNodeModel,
     process: () => void
   ) {
     super("Math");
+    if (id) {
+      this.id = id;
+    }
 
     this.addInput("num1", new ClassicPreset.Input(numSocket, "Number1"));
     this.addInput("num2", new ClassicPreset.Input(numSocket, "Number2"));
