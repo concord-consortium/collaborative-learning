@@ -11,7 +11,7 @@ import {
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
   GraphAttrRole, GraphEditMode, hoverRadiusFactor, kDefaultAxisLabel, kDefaultNumericAxisBounds, kGraphTileType,
-  PlotType, PlotTypes, Point, pointRadiusMax, pointRadiusSelectionAddend
+  PlotType, PlotTypes, Point, pointRadiusMax, pointRadiusSelectionAddend, RectSize
 } from "../graph-types";
 import { withoutUndo } from "../../../models/history/without-undo";
 import { SharedModelType } from "../../../models/shared/shared-model";
@@ -88,7 +88,8 @@ export const GraphModel = TileContentModel
     editingLayerId: undefined as string|undefined,
     // Map from annotation IDs to their current locations.
     // This allows adornments to flexibly give us these locations.
-    annotationLocationCache: new ObservableMap<string,Point>()
+    annotationLocationCache: new ObservableMap<string,Point>(),
+    annotationSizesCache: new ObservableMap<string,RectSize>()
   }))
   .preProcessSnapshot((snapshot: any) => {
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
@@ -414,11 +415,17 @@ export const GraphModel = TileContentModel
     setInteractionInProgress(value: boolean) {
       self.interactionInProgress = value;
     },
-    setAnnotationLocation(id: string, location: Point|undefined) {
+    setAnnotationLocation(id: string, location: Point|undefined, size: RectSize|undefined) {
       if (location) {
         self.annotationLocationCache.set(id, location);
       } else {
         self.annotationLocationCache.delete(id);
+      }
+
+      if (size) {
+        self.annotationSizesCache.set(id, size);
+      } else {
+        self.annotationSizesCache.delete(id);
       }
     }
   }))

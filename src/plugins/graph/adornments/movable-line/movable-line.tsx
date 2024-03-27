@@ -15,6 +15,7 @@ import { kInfinitePoint } from "../adornment-models";
 import { LocationSetterContext, Point } from "../../graph-types";
 
 import "./movable-line.scss";
+import { kAnnotationNodeDefaultRadius } from "../../../../components/annotations/annotation-utilities";
 
 function equationContainer(model: IMovableLineModel, subPlotKey: Record<string, string>, containerId: string) {
   const classFromKey = model.classNameFromKey(subPlotKey),
@@ -84,11 +85,18 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     }
   }, [kHandle1Loc, kHandle2Loc]);
 
-  const positionEquation = useCallback((elt: Selection<HTMLElement, unknown, HTMLElement, any>, point: Point) => {
-    elt.style('left', `${point.x}px`)
+  const positionEquation = useCallback((equation: Selection<HTMLElement, unknown, HTMLElement, any>, point: Point) => {
+    const annotationId = getAnnotationId(instanceKey, "equation");
+    equation.style('left', `${point.x}px`)
         .style('top', `${point.y}px`);
     if (model.isVisible) {
-      annotationLocationSetter?.set(getAnnotationId(instanceKey, "equation"), point);
+      const equationNode = equation.node() as Element,
+        rect = equationNode?.getBoundingClientRect(),
+        width = rect.width || kAnnotationNodeDefaultRadius,
+        height = rect.height || kAnnotationNodeDefaultRadius;
+      annotationLocationSetter?.set(annotationId, point, { width, height });
+    } else {
+      annotationLocationSetter?.set(annotationId, undefined, undefined);
     }
   }, [annotationLocationSetter, instanceKey, model]);
 
@@ -144,9 +152,9 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
               .attr('cy', y);
             const annotationId = getAnnotationId(instanceKey, "handle", index===1 ? "lower" : "upper");
             if (model.isVisible) {
-              annotationLocationSetter?.set(annotationId, { x, y });
+              annotationLocationSetter?.set(annotationId, { x, y }, undefined);
             } else {
-              annotationLocationSetter?.set(annotationId, undefined);
+              annotationLocationSetter?.set(annotationId, undefined, undefined);
             }
           }
         }

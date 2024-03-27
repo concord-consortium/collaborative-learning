@@ -112,10 +112,19 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
         let coords;
         if (objectType === "dot") {
           coords = getDotCenter(objectId);
+        // Check location cache
         } else if (content.annotationLocationCache.has(objectId)){
-          // Check location cache
           const location = content.annotationLocationCache.get(objectId);
           if (location) {
+            const size = content.annotationSizesCache.get(objectId);
+            if (size) { // This is a rectangle of defined width & height
+              const bbox = {
+                left: location.x + layout.getComputedBounds("plot").left,
+                top: location.y + layout.getComputedBounds("plot").top,
+                ...size };
+              console.log('bbox', bbox);
+              return bbox;
+            }
             return boundingBoxForPoint(location);
           }
         } else {
@@ -130,8 +139,13 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
       getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
         let coords;
         if (objectType === "dot") {
+          // Native graph object
           coords = getDotCenter(objectId);
+        } else if (content.annotationSizesCache.has(objectId)) {
+          // Adornment object with rectangle shape; do not return SVG
+          return undefined;
         } else if (content.annotationLocationCache.has(objectId)){
+          // Adornment object with dot shape
           coords = content.annotationLocationCache.get(objectId);
         } else if (objectType) {
           const pos = getPositionFromAdornment(objectType, objectId);

@@ -62,6 +62,8 @@ export type Point = { x: number, y: number };
 export type CPLine = { slope: number, intercept: number, pivot1?: Point, pivot2?: Point };
 export const kNullPoint = {x: -999, y: -999};
 
+export interface RectSize { width: number, height: number }
+
 export interface Rect {
   x: number, y: number, width: number, height: number
 }
@@ -113,7 +115,7 @@ export const GraphEditModes = ["none", "edit", "add"];
 export type GraphEditMode = typeof GraphEditModes[number];
 
 export interface ILocationSetterContext {
-  set: (id: string, location: Point|undefined) => void;
+  set: (id: string, location: Point|undefined, size: RectSize|undefined) => void;
 }
 
 export const LocationSetterContext = createContext<ILocationSetterContext|undefined>(undefined);
