@@ -184,7 +184,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       return () => disposer();
     }, [instanceId, layout, pointsOnAxes, lineObject, plotHeight, plotWidth, xScale, yScale, model, model.lines,
         xAttrName, xSubAxesCount, xAxis, yAttrName, ySubAxesCount, yAxis, xRange, yRange,
-        equationContainerSelector, subPlotKey, instanceKey, calculateHandlePosition]
+        equationContainerSelector, subPlotKey, instanceKey, calculateHandlePosition, annotationLocationSetter]
   );
 
   const
