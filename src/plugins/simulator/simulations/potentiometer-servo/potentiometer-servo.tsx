@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import classNames from "classnames";
 import { ISimulation, ISimulationProps } from "../simulation-types";
-import { iconUrl, kPotentiometerKey, kPressureKey, kServoKey
+import { iconUrl, kPotentiometerKey, kServoKey, kSignalKey
 } from "../../../shared-assets/icons/icon-utilities";
 import { VariableSlider } from "@concord-consortium/diagram-view";
 import { findVariable } from "../simulation-utilities";
@@ -27,6 +27,7 @@ const maxResistReading = 1023;
 const kPotAngleKey = "pot_angle_key";
 const kResistReadingKey = "resist_reading_key";
 const kServoAngleKey = "servo_angle_key";
+
 
 function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) {
   const [collapsed, setMinimized] = useState(false);
@@ -128,21 +129,21 @@ export const potentiometerAndServoSimulation: ISimulation = {
       labels: ["input", "decimalPlaces:0"],
       icon: iconUrl(kPotentiometerKey),
       name: kPotAngleKey,
-      value: minPotAngle,
+      value: minPotAngle
     },
     {
       displayName: "Resistance Reading",
       labels: ["input", "decimalPlaces:0"],
-      icon: iconUrl(kPressureKey),
+      icon: iconUrl(kSignalKey),
       name: kResistReadingKey,
-      value: minResistReading,
+      value: minResistReading
     },
     {
       displayName: "Servo Angle",
       labels: ["output", "decimalPlaces:0"],
       icon: iconUrl(kServoKey),
       name: kServoAngleKey,
-      value: minServoAngle,
+      value: minServoAngle
     }
   ],
   values: {}

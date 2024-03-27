@@ -28,6 +28,7 @@ export const kTemperatureKey = "temperature_key";
 // Potentiometer & Servo simulation
 export const kPotentiometerKey = "potentiometer_key";
 export const kServoKey = "servo_key";
+export const kSignalKey = "signal_key";
 
 const icons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>> = {
   [kEMGKey]: EMGIcon,
@@ -40,6 +41,7 @@ const icons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>> = {
   [kTemperatureKey]: TemperatureIcon,
   [kPotentiometerKey]: PotentiometerIcon,
   [kServoKey]: ServoIcon,
+  [kSignalKey]: EMGIcon
 };
 
 export function iconUrl(id: string) {
