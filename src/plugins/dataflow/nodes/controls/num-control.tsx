@@ -1,6 +1,7 @@
 // FIXME: ESLint is unhappy with these control components
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useRef } from "react";
+import classNames from "classnames";
 import Rete, { NodeEditor, Node, Control } from "rete";
 import { useStopEventPropagation } from "./custom-hooks";
 import { NodePeriodUnits } from "../../model/utilities/node";
@@ -59,13 +60,45 @@ export class NumControl extends Rete.Control {
                                    tooltip: string}) => {
       const inputRef = useRef<HTMLInputElement>(null);
       useStopEventPropagation(inputRef, "pointerdown");
+
+      const unitsClasses = classNames({
+        "units one": compProps.units && compProps.units.length === 1,
+        "units multiple": compProps.units && compProps.units.length > 1
+      });
+
+      const renderUnits = () => {
+        if (!compProps.units || compProps.units.length === 0) {
+          return null;
+        }
+
+        if (compProps.units.length === 1) {
+          return (
+            <div className="single-unit">
+              {compProps.units[0]}
+            </div>
+          );
+        }
+
+        return (
+          <div className="type-options-back">
+            <div className="type-options">
+              <select onChange={handleSelectChange} value={compProps.currentUnits}>
+                {compProps.units.map((unit, index) => (
+                  <option key={index} value={unit}>{unit}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        );
+      };
+
       return (
-        <div className="number-container" title={compProps.tooltip}>
+        <div className={`number-container ${unitsClasses}`} title={compProps.tooltip}>
           { label
             ? <label className="number-label">{compProps.label}</label>
             : null
           }
-          <input className={`number-input ${compProps.units && compProps.units.length ? "units" : ""}`}
+          <input className={`number-input ${unitsClasses}`}
             ref={inputRef}
             type={"text"}
             value={compProps.inputValue}
@@ -73,21 +106,7 @@ export class NumControl extends Rete.Control {
             onChange={handleChange(compProps.onChange)}
             onBlur={handleBlur(compProps.onBlur)}
           />
-          { compProps.units?.length
-            ? <div className="type-options-back">
-                <div className="type-options">
-                  <select onChange={handleSelectChange}
-                    value={compProps.currentUnits}
-                  >
-                    { compProps.units.map((unit, index) => (
-                        <option key={index} value={unit}>{unit}</option>
-                      ))
-                    }
-                  </select>
-                </div>
-              </div>
-            : null
-          }
+          {renderUnits()}
         </div>
       );
     };

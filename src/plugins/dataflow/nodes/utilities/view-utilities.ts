@@ -1,6 +1,7 @@
 import { NodeEditor, Node, Input } from "rete";
 import { Rect, scaleRect, unionRect } from "../../utilities/rect";
 import { kEmptyValueString } from "../factories/dataflow-rete-node-factory";
+import { NodeData } from "rete/types/core/data";
 
 function getBoundingRectOfNode(n: Node, editor: NodeEditor): Rect | undefined {
   const { k } = editor.view.area.transform;
@@ -75,3 +76,21 @@ export function getInsertionOrder(editor: NodeEditor, id: number) {
   return index + 1;
 }
 
+export function getHoldNodeResultString(node: NodeData, result: number, calcResult: number, timerRunning: boolean){
+  const resultString = getNumDisplayStr(result);
+  const cResultString = getNumDisplayStr(calcResult);
+  const waitString = `waiting → ${cResultString}`;
+  const onString = `on → ${cResultString}`;
+  const offString = `off → ${resultString}`;
+
+  if (node.data.gateActive) return timerRunning ? waitString : onString;
+  else return offString;
+}
+
+export function determineGateAndTimerStates(node: NodeData, inputs: any, timerRunning: boolean){
+  const timerIsOption =  node.data.waitDuration as number > 0;
+  const switchIn = inputs.num1[0];
+  const startTimer = timerIsOption && switchIn === 1 && !timerRunning;
+  const activateGate = timerRunning ? true : switchIn === 1;
+  return { activateGate, startTimer };
+}
