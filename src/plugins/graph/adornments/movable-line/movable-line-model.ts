@@ -8,8 +8,12 @@ import { kMovableLineType } from "./movable-line-types";
 import { IGraphModel } from "../../models/graph-model";
 import { IClueObject } from "../../../../models/annotations/clue-object";
 
-export function getAnnotationId(lineKey: string, position: string) {
-  return `movable_line_handle:${lineKey}:${position}`;
+export function getAnnotationId(lineKey: string, type: "handle"|"equation", position?: "lower"|"upper") {
+  if (position) {
+    return `movable_line_${type}:${lineKey}:${position}`;
+  } else {
+    return `movable_line_${type}:${lineKey}`;
+  }
 }
 
 export const MovableLineInstance = types.model("MovableLineInstance", {
@@ -123,8 +127,9 @@ export const MovableLineModel = AdornmentModel
     const objects: IClueObject[] = [];
     if (self.isVisible) {
       for (const key of self.lines.keys()) {
-        objects.push({ tileId, objectType: "movable-line-handle", objectId: getAnnotationId(key, "lower") });
-        objects.push({ tileId, objectType: "movable-line-handle", objectId: getAnnotationId(key, "upper") });
+        objects.push({ tileId, objectType: "movable-line-handle", objectId: getAnnotationId(key, "handle", "lower") });
+        objects.push({ tileId, objectType: "movable-line-handle", objectId: getAnnotationId(key, "handle", "upper") });
+        objects.push({ tileId, objectType: "movable-line-equation", objectId: getAnnotationId(key, "equation") });
       }
     }
     return objects;
