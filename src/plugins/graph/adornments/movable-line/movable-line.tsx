@@ -135,7 +135,11 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
               .attr('cx', x)
               .attr('cy', y);
             const annotationId = getAnnotationId(instanceKey, index===1 ? "lower" : "upper");
-            annotationLocationSetter?.set(annotationId, { x, y });
+            if (model.isVisible) {
+              annotationLocationSetter?.set(annotationId, { x, y });
+            } else {
+              annotationLocationSetter?.set(annotationId, undefined);
+            }
           }
         }
 
@@ -387,6 +391,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     newLineObject.equation = equationDiv;
     setLineObject(newLineObject);
 
+    // disposer
     return () => {
       equationDiv.remove();
     };

@@ -121,9 +121,11 @@ export const MovableLineModel = AdornmentModel
 .views(self => ({
   getAnnotatableObjects(tileId: string) {
     const objects: IClueObject[] = [];
-    for (const key of self.lines.keys()) {
-      objects.push({ tileId, objectType: "movable-line-handle", objectId: getAnnotationId(key, "lower") });
-      objects.push({ tileId, objectType: "movable-line-handle", objectId: getAnnotationId(key, "upper") });
+    if (self.isVisible) {
+      for (const key of self.lines.keys()) {
+        objects.push({ tileId, objectType: "movable-line-handle", objectId: getAnnotationId(key, "lower") });
+        objects.push({ tileId, objectType: "movable-line-handle", objectId: getAnnotationId(key, "upper") });
+      }
     }
     return objects;
   }

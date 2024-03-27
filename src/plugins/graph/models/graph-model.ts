@@ -414,8 +414,12 @@ export const GraphModel = TileContentModel
     setInteractionInProgress(value: boolean) {
       self.interactionInProgress = value;
     },
-    setAnnotationLocation(id: string, location: Point) {
-      self.annotationLocationCache.set(id, location);
+    setAnnotationLocation(id: string, location: Point|undefined) {
+      if (location) {
+        self.annotationLocationCache.set(id, location);
+      } else {
+        self.annotationLocationCache.delete(id);
+      }
     }
   }))
   .actions(self => ({

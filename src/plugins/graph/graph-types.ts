@@ -113,7 +113,7 @@ export const GraphEditModes = ["none", "edit", "add"];
 export type GraphEditMode = typeof GraphEditModes[number];
 
 export interface ILocationSetterContext {
-  set: (id: string, location: Point) => void;
+  set: (id: string, location: Point|undefined) => void;
 }
 
 export const LocationSetterContext = createContext<ILocationSetterContext|undefined>(undefined);
