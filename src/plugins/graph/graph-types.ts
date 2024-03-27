@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createContext } from "react";
 import { AxisPlace } from "./imports/components/axis/axis-types";
 import {GraphPlace} from "./imports/components/axis-graph-shared";
 import {DotsElt} from "./d3-types";
@@ -111,3 +111,9 @@ export const kGraphPortalClass = ".canvas-area";
 
 export const GraphEditModes = ["none", "edit", "add"];
 export type GraphEditMode = typeof GraphEditModes[number];
+
+export interface ILocationSetterContext {
+  set: (id: string, location: Point) => void;
+}
+
+export const LocationSetterContext = createContext<ILocationSetterContext|undefined>(undefined);

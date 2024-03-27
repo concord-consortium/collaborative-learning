@@ -6,6 +6,11 @@ import { IAxisModel } from "../../imports/components/axis/models/axis-model";
 import { computeSlopeAndIntercept } from "../../utilities/graph-utils";
 import { kMovableLineType } from "./movable-line-types";
 import { IGraphModel } from "../../models/graph-model";
+import { IClueObject } from "../../../../models/annotations/clue-object";
+
+export function getAnnotationId(lineKey: string, position: string) {
+  return `movable_line_handle:${lineKey}:${position}`;
+}
 
 export const MovableLineInstance = types.model("MovableLineInstance", {
   equationCoords: types.maybe(PointModel),
@@ -112,7 +117,18 @@ export const MovableLineModel = AdornmentModel
       }
     }
   }
+}))
+.views(self => ({
+  getAnnotatableObjects(tileId: string) {
+    const objects: IClueObject[] = [];
+    for (const key of self.lines.keys()) {
+      objects.push({ tileId, objectType: "movable-line-handle", objectId: getAnnotationId(key, "lower") });
+      objects.push({ tileId, objectType: "movable-line-handle", objectId: getAnnotationId(key, "upper") });
+    }
+    return objects;
+  }
 }));
+
 export interface IMovableLineModel extends Instance<typeof MovableLineModel> {}
 export function isMovableLine(adornment: IAdornmentModel): adornment is IMovableLineModel {
   return adornment.type === kMovableLineType;

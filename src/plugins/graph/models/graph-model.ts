@@ -1,4 +1,4 @@
-import { reaction } from "mobx";
+import { ObservableMap, reaction } from "mobx";
 import stringify from "json-stringify-pretty-compact";
 import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import { IClueObject } from "../../../models/annotations/clue-object";
@@ -11,7 +11,7 @@ import {
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
   GraphAttrRole, GraphEditMode, hoverRadiusFactor, kDefaultAxisLabel, kDefaultNumericAxisBounds, kGraphTileType,
-  PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
+  PlotType, PlotTypes, Point, pointRadiusMax, pointRadiusSelectionAddend
 } from "../graph-types";
 import { withoutUndo } from "../../../models/history/without-undo";
 import { SharedModelType } from "../../../models/shared/shared-model";
@@ -85,7 +85,10 @@ export const GraphModel = TileContentModel
     // True if a dragging operation is ongoing - automatic rescaling is deferred until drag is done.
     interactionInProgress: false,
     editingMode: "none" as GraphEditMode,
-    editingLayerId: undefined as string|undefined
+    editingLayerId: undefined as string|undefined,
+    // Map from annotation IDs to their current locations.
+    // This allows adornments to flexibly give us these locations.
+    annotationLocationCache: new ObservableMap<string,Point>()
   }))
   .preProcessSnapshot((snapshot: any) => {
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
@@ -410,6 +413,9 @@ export const GraphModel = TileContentModel
     },
     setInteractionInProgress(value: boolean) {
       self.interactionInProgress = value;
+    },
+    setAnnotationLocation(id: string, location: Point) {
+      self.annotationLocationCache.set(id, location);
     }
   }))
   .actions(self => ({

@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from "react";
+import React, {useCallback, useContext, useEffect, useRef, useState} from "react";
 import {autorun} from "mobx";
 import { observer } from "mobx-react-lite";
 import {drag, select} from "d3";
@@ -8,11 +8,11 @@ import {INumericAxisModel} from "../../imports/components/axis/models/axis-model
 import {computeSlopeAndIntercept, equationString, IAxisIntercepts,
         lineToAxisIntercepts} from "../../utilities/graph-utils";
 import {useInstanceIdContext} from "../../imports/hooks/use-instance-id-context";
-import { IMovableLineModel } from "./movable-line-model";
+import { getAnnotationId, IMovableLineModel } from "./movable-line-model";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { kInfinitePoint } from "../adornment-models";
-import { Point } from "../../graph-types";
+import { LocationSetterContext, Point } from "../../graph-types";
 
 import "./movable-line.scss";
 
@@ -39,6 +39,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     layout = useAxisLayoutContext(),
     instanceId = useInstanceIdContext(),
     readOnly = useReadOnlyContext(),
+    annotationLocationSetter = useContext(LocationSetterContext),
     xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType,
     xRange = xScale.range(),
     xScaleCopy = xScale.copy(),
@@ -129,9 +130,13 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
             x = point.x;
             y = point.y;
           }
-          elt
-            .attr('cx', x)
-            .attr('cy', y);
+          if (x && y) {
+            elt
+              .attr('cx', x)
+              .attr('cy', y);
+            const annotationId = getAnnotationId(instanceKey, index===1 ? "lower" : "upper");
+            annotationLocationSetter?.set(annotationId, { x, y });
+          }
         }
 
         function refreshEquation() {
