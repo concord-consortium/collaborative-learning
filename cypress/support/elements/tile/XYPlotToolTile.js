@@ -99,6 +99,9 @@ class XYPlotToolTile {
   getLayerNameInput(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .layer-name input`);
   }
+  getLayerDeleteButton(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .remove-button`);
+  }
   getXAttributesLabel(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .bottom .simple-attribute-label`);
   }
