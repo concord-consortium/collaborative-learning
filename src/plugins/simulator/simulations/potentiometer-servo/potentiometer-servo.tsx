@@ -125,25 +125,27 @@ export const potentiometerAndServoSimulation: ISimulation = {
   step,
   variables: [
     {
-      displayName: "Potentiometer Position",
-      labels: ["input", "decimalPlaces:0"],
+      displayName: "Potentiometer",
+      labels: ["input", "physical", "decimalPlaces:0"],
       icon: iconUrl(kPotentiometerKey),
       name: kPotAngleKey,
-      value: minPotAngle
+      value: minPotAngle,
+      unit: "deg"
     },
     {
-      displayName: "Resistance Reading",
-      labels: ["input", "decimalPlaces:0"],
+      displayName: "Resistance",
+      labels: ["input", "reading", "decimalPlaces:0"],
       icon: iconUrl(kSignalKey),
       name: kResistReadingKey,
       value: minResistReading
     },
     {
-      displayName: "Servo Angle",
-      labels: ["output", "decimalPlaces:0"],
+      displayName: "Servo",
+      labels: ["output", "physical", "decimalPlaces:0"],
       icon: iconUrl(kServoKey),
       name: kServoAngleKey,
-      value: minServoAngle
+      value: minServoAngle,
+      unit: "deg"
     }
   ],
   values: {}
