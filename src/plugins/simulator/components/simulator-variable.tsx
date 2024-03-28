@@ -1,9 +1,9 @@
 import classNames from "classnames";
 import React from "react";
 import { VariableType } from "@concord-consortium/diagram-view";
-
 import { getIcon } from "../../shared-assets/icons/icon-utilities";
 import { getVariableDecimalPlaces, isInputVariable } from "../../shared-variables/simulations/simulation-utilities";
+import { getVariableSuffix } from "../simulations/simulation-utilities";
 
 import "./simulator-variable.scss";
 
@@ -29,8 +29,7 @@ interface ISimulatorVariableProps {
 export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
   if (!variable) return null;
 
-  const inputVariable = isInputVariable(variable); // We're assuming the variable is either input or output
-  const suffix = inputVariable ? "Sensor" : "Output";
+  const suffix = getVariableSuffix(variable);
   const displayName = variable?.displayName ? `${variable.displayName} ${suffix}` : "";
 
   // Limit the value to two decimal places
@@ -44,7 +43,7 @@ export function SimulatorVariable({ variable }: ISimulatorVariableProps) {
   };
   const displayValueText = `${displayValue()}${variable?.unit ? " " + variable.unit : ""}`;
 
-  const className = inputVariable ? "input" : "output";
+  const className = isInputVariable(variable) ? "input" : "output";
   const variableClassNames = variable.getAllOfType("className");
   const classes = classNames("simulator-variable", className, variableClassNames);
   return (
