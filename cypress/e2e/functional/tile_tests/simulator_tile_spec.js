@@ -249,5 +249,26 @@ context('Simulator Tile', function () {
     simulatorTile.getBoard().should("have.have.class", "collapsed");
     simulatorTile.getExpandToggle().click();
     simulatorTile.getBoard().should("not.have.class", "collapsed");
+
+    cy.log("dataflow can drive servo position");
+    // collect initial position of servo arm
+    const initialPos = simulatorTile.getServoArm().invoke('offset').its('top');
+    simulatorTile.getVariableDisplayedValue().eq(2).should("contain.text", "0 deg");
+    dataflowTile.getCreateNodeButton("number").click();
+    dataflowTile.getNumberField().type("90{enter}");
+    dataflowTile.getCreateNodeButton("live-output").click();
+    // Need to move it out of the way
+    dataflowTile.getNode("live-output").click(50, 10)
+      .trigger("pointerdown", 50, 10)
+      .trigger("pointermove", 300, 10, { force: true })
+      .trigger("pointerup", 300, 10, { force: true });
+
+    dataflowTile.getDropdown("live-output", "liveOutputType").eq(0).click();
+    dataflowTile.getDropdownOptions("live-output", "liveOutputType").eq(5).click(); // Servo
+    dataflowTile.getNode("number").find(".output-socket").click();
+    dataflowTile.getNode("live-output").find(".input-socket").click({ force: true });
+    simulatorTile.getVariableDisplayedValue().eq(2).should("contain.text", "90 deg");
+    cy.wait(500); // wait for servo animation to move, then assert position has changed
+    simulatorTile.getServoArm().invoke('offset').its('top').should('not.eq', initialPos);
   });
 });

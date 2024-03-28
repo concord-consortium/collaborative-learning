@@ -448,13 +448,13 @@ context('Dataflow Tool Tile', function () {
 
     cy.log("verify live output types");
     const liveOutputType = "liveOutputType";
-    const liveOutputTypes = ["Gripper 2.0", "Gripper", "Humidifier", "Fan", "Heat Lamp"];
+    const liveOutputTypes = ["Gripper 2.0", "Gripper", "Humidifier", "Fan", "Heat Lamp", "Servo"];
     dataflowToolTile.getDropdown(liveOutputNode, liveOutputType).click();
-    dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).should("have.length", 5);
+    dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).should("have.length", 6);
     dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).each(($tab, index, $typeList) => {
       expect($tab.text()).to.contain(liveOutputTypes[index]);
     });
-    dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).last().click();
+    dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).eq(4).click();
     dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).should("have.length", 0);
     dataflowToolTile.getDropdown(liveOutputNode, liveOutputType).contains("Heat Lamp").should("exist");
     dataflowToolTile.getOutputNodeValueText().should("contain", "off");

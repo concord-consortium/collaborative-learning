@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import classNames from "classnames";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { iconUrl, kPotentiometerKey, kServoKey, kSignalKey
@@ -14,13 +14,13 @@ import MinimizeIcon from "./assets/minimize-arduino.svg";
 
 import "./potentiometer-servo.scss";
 
-
 export const kPotentiometerServoKey = "potentiometer_chip_servo";
 
+const potVisibleOffset = 135;
+const servoVisibleOffset = 90;
 const minPotAngle = 0;
 const maxPotAngle = 270;
 const minServoAngle = 0;
-const maxServoAngle = 180;
 const minResistReading = 0;
 const maxResistReading = 1023;
 
@@ -28,19 +28,31 @@ const kPotAngleKey = "pot_angle_key";
 const kResistReadingKey = "resist_reading_key";
 const kServoAngleKey = "servo_angle_key";
 
+function getTweenedServoAngle(realValue: number, lastVisibleValue: number) {
+  const delta = realValue - lastVisibleValue;
+  const steps = 5;
+  const maxDelta = 40;
+  if (Math.abs(delta) > maxDelta) {
+    return (lastVisibleValue + Math.sign(delta) * steps);
+  }
+  return realValue;
+}
 
 function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) {
   const [collapsed, setMinimized] = useState(false);
+  const tweenedServoAngle = useRef(0);
+  const lastTweenedAngle = tweenedServoAngle.current;
 
   const potAngleVar = findVariable(kPotAngleKey, variables);
   const potAngleBaseValue = potAngleVar?.currentValue ?? 0;
-  const visiblePotAngle = potAngleBaseValue - 135; // We use 0 - 270 degrees, but we want to render visible -135 - 135
+  const visiblePotAngle = potAngleBaseValue - potVisibleOffset;
   const potRotationString = `rotate(${visiblePotAngle ?? 0}deg)`;
 
   const servoAngleVar = findVariable(kServoAngleKey, variables);
   const servoAngleBaseValue = servoAngleVar?.currentValue ?? 0;
-  const visibleServoAngle = servoAngleBaseValue - 90; // We use 0 - 180 degrees, but we want to render visible -90 - 90
-  const servoRotationString = `rotate(${visibleServoAngle}deg)`;
+  tweenedServoAngle.current = getTweenedServoAngle(servoAngleBaseValue, lastTweenedAngle);
+  const valueForRotation = 180 - (tweenedServoAngle.current - servoVisibleOffset);
+  const servoRotationString = `rotate(${valueForRotation}deg)`;
 
   const potServoClasses = classNames('pot-servo-component', { collapsed, "expanded": !collapsed });
   const boardClasses = classNames('board', { collapsed, "expanded": !collapsed });
@@ -65,7 +77,7 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
             className="servo-arm"
             src={servoArm}
             style={{ transform: servoRotationString }}
-            alt="Potentiometer Dial"
+            alt="Servo Arm"
           />
       </div>
       <div className="controls">
@@ -113,12 +125,6 @@ function step({ frame, variables }: ISimulationProps) {
   const resistance = Math.round((potAngle / maxPotAngle) * maxResistReading);
   const resistanceVar = findVariable(kResistReadingKey, variables);
   resistanceVar?.setValue(resistance);
-
-  // set servo angle to value of servo angle variable
-  const servoAngleVar = findVariable(kServoAngleKey, variables);
-  const currentAngle = servoAngleVar?.currentValue || 0;
-  const isValid = (currentAngle <= maxServoAngle) && (currentAngle >= minServoAngle);
-  if (isValid) servoAngleVar?.setValue(currentAngle);
 }
 
 export const potentiometerAndServoSimulation: ISimulation = {
@@ -128,7 +134,7 @@ export const potentiometerAndServoSimulation: ISimulation = {
   variables: [
     {
       displayName: "Potentiometer",
-      labels: ["input", "physical", "decimalPlaces:0"],
+      labels: ["input", "position", "decimalPlaces:0"],
       icon: iconUrl(kPotentiometerKey),
       name: kPotAngleKey,
       value: minPotAngle,
@@ -143,7 +149,7 @@ export const potentiometerAndServoSimulation: ISimulation = {
     },
     {
       displayName: "Servo",
-      labels: ["output", "physical", "decimalPlaces:0"],
+      labels: ["output", "position", "live-output:Servo", "decimalPlaces:0"],
       icon: iconUrl(kServoKey),
       name: kServoAngleKey,
       value: minServoAngle,

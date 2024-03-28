@@ -7,7 +7,8 @@ import { INodeServices } from "./service-types";
 import { numSocket } from "./num-socket";
 import { NodeLiveOutputTypes, NodeMicroBitHubs, baseLiveOutputOptions,
   kBinaryOutputTypes,
-  kGripperOutputTypes, kMicroBitHubRelaysIndexed } from "../model/utilities/node";
+  kGripperOutputTypes, kMicroBitHubRelaysIndexed,
+  kServoOutputTypes} from "../model/utilities/node";
 import { IInputValueControl, InputValueControl } from "./controls/input-value-control";
 import { SerialDevice } from "../../../models/stores/serial";
 import { VariableType } from "@concord-consortium/diagram-view";
@@ -90,7 +91,12 @@ export class LiveOutputNode extends BaseNode<
     const { deviceFamily } = serialDevice;
 
     if (deviceFamily === "arduino" && isNumberOutput){
-      serialDevice.writeToOutForBBGripper(val, outType);
+      if (kGripperOutputTypes.includes(outType)){
+        serialDevice.writeToOutForBBGripper(val, outType);
+      }
+      if (kServoOutputTypes.includes(outType)){
+        serialDevice.writeToOutForServo(val, outType);
+      }
     }
     if (deviceFamily === "microbit"){
       // It is not clear when the channels would be falsey but that is how this
@@ -111,6 +117,16 @@ export class LiveOutputNode extends BaseNode<
     }
   }
 
+  // TODO: only keep this if we find it matches live servo behavior
+  getLastValidServoValue() {
+    const recentValues = this.model.recentValues.get("nodeValue");
+    if (!recentValues) return 0;
+
+    const reversedCopy = recentValues.slice().reverse();
+    const foundValid = reversedCopy.find(v => v != null && v >= 0 && v <= 180);
+    return foundValid || 0;
+  }
+
   outputsToAnyRelay() {
     return kMicroBitHubRelaysIndexed.includes(this.model.liveOutputType);
   }
@@ -119,11 +135,15 @@ export class LiveOutputNode extends BaseNode<
     return kGripperOutputTypes.includes(this.model.liveOutputType);
   }
 
+  outputsToAnyServo() {
+    return this.model.liveOutputType === "Servo";
+  }
+
   getLiveOptions(deviceFamily: string, sharedVar?: VariableType ) {
     const options: ListOption[] = [];
     const simOption = sharedVar && simulatedHub(sharedVar);
     const anyOuputFound = simOption || deviceFamily === "arduino" || deviceFamily === "microbit";
-    const { liveGripperOption, warningOption } = baseLiveOutputOptions;
+    const { liveGripperOption, liveServoOption, warningOption } = baseLiveOutputOptions;
 
     if (sharedVar && simOption) {
       options.push(simOption);
@@ -138,6 +158,16 @@ export class LiveOutputNode extends BaseNode<
     }
 
     if (this.outputsToAnyGripper() && deviceFamily !== "arduino") {
+      if (!options.includes(warningOption)) {
+        options.push(warningOption);
+      }
+    }
+
+    if (this.outputsToAnyServo() && deviceFamily === "arduino") {
+      options.push(liveServoOption);
+    }
+
+    if (this.outputsToAnyServo() && deviceFamily !== "arduino") {
       if (!options.includes(warningOption)) {
         options.push(warningOption);
       }
@@ -245,6 +275,15 @@ export class LiveOutputNode extends BaseNode<
       this.model.setNodeValue(newValue);
       const roundedDisplayValue = Math.round((newValue / 10) * 10);
       this.inputValueControl.setDisplayMessage(`${roundedDisplayValue}% closed`);
+    } else if (kServoOutputTypes.includes(outputType)) {
+      // out of range value will not move sim servo
+      const isValidServoValue = value >= 0 && value <= 180;
+      const newValue = isValidServoValue ? value : this.getLastValidServoValue();
+
+      // alternative: angles out of range move servo to nearest valid angle
+      // newValue = Math.min(Math.max(newValue, 0), 180);
+      this.model.setNodeValue(newValue);
+      this.inputValueControl.setDisplayMessage(`${newValue}°`);
     } else {
       // We shouldn't hit this case but if we do then just pass the value through
       this.model.setNodeValue(value);
