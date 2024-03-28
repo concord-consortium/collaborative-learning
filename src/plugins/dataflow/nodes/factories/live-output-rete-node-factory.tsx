@@ -3,9 +3,9 @@ import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { getHubSelect, getOutputType } from "../utilities/live-output-utilities";
+import { getHubSelect, getLastValidServoValue, getOutputType } from "../utilities/live-output-utilities";
 import { NodeLiveOutputTypes, NodeMicroBitHubs,
-  kMicroBitHubRelaysIndexed, kBinaryOutputTypes, kGripperOutputTypes
+  kMicroBitHubRelaysIndexed, kBinaryOutputTypes, kGripperOutputTypes, kServoOutputTypes
 } from "../../model/utilities/node";
 import { dataflowLogEvent } from "../../dataflow-logger";
 import { NodeChannelInfo } from "../../model/utilities/channel";
@@ -58,6 +58,17 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
           newValue = this.getPercentageAsInt(n1);
           const roundedDisplayValue = Math.round((newValue / 10) * 10);
           nodeValue?.setDisplayMessage(`${roundedDisplayValue}% closed`);
+        }
+
+        if(kServoOutputTypes.includes(outputType)){
+          // TODO: test with real servo and invalid value, does it go to 0 or 180, or not move at all?
+          // if goes from zero to 180, then we can just constrain, like this:
+          //newValue = Math.min(Math.max(newValue, 0), 180);
+
+          // otherwise, we need to check if the value is valid,
+          // and if not, we need to set it to the last valid value
+          const isValidServoValue = newValue >= 0 && newValue <= 180;
+          if (!isValidServoValue) newValue = getLastValidServoValue(_node);
         }
 
         nodeValue?.setValue(newValue);

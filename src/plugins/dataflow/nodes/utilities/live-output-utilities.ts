@@ -26,6 +26,14 @@ export function getNodeValueWithType(node: Node): NodeOutputValue {
   return { val, outType };
 }
 
+// TODO: only keep this if we find it matches live servo behavior
+export function getLastValidServoValue(node: Node) {
+  const recentValues = node.data.recentValues as Record<string, any>;
+  const reversedCopy = recentValues.nodeValue.slice().reverse();
+  const foundValid = reversedCopy.find((v: number) => v >= 0 && v <= 180);
+  return foundValid || 0;
+}
+
 export function outputsToAnyRelay(node: Node) {
   return kMicroBitHubRelaysIndexed.includes(getOutputType(node));
 }

@@ -544,3 +544,4 @@ export const kAnimatedBinaryTypes = ["Fan", "Humidifier"];
 export const kMicroBitHubRelaysIndexed =  ["Heat Lamp", "Fan", "Humidifier"];
 export const kBinaryOutputTypes = [...kMicroBitHubRelaysIndexed, "Light Bulb"];
 export const kGripperOutputTypes = ["Grabber", "Gripper", "Gripper 2.0"];
+export const kServoOutputTypes = ["Servo"];
