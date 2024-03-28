@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import classNames from "classnames";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { iconUrl, kPotentiometerKey, kServoKey, kSignalKey
@@ -14,13 +14,13 @@ import MinimizeIcon from "./assets/minimize-arduino.svg";
 
 import "./potentiometer-servo.scss";
 
-
 export const kPotentiometerServoKey = "potentiometer_chip_servo";
 
+const potVisibleOffset = 135;
+const servoVisibleOffset = 90;
 const minPotAngle = 0;
 const maxPotAngle = 270;
 const minServoAngle = 0;
-const maxServoAngle = 180;
 const minResistReading = 0;
 const maxResistReading = 1023;
 
@@ -28,19 +28,30 @@ const kPotAngleKey = "pot_angle_key";
 const kResistReadingKey = "resist_reading_key";
 const kServoAngleKey = "servo_angle_key";
 
+function getTweenedServoAngle(realValue: number, lastVisibleValue: number) {
+  const delta = realValue - lastVisibleValue;
+  const steps = 5;
+  const maxDelta = 40;
+  if (Math.abs(delta) > maxDelta) {
+    return (lastVisibleValue + Math.sign(delta) * steps);
+  }
+  return realValue;
+}
 
 function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) {
   const [collapsed, setMinimized] = useState(false);
+  const tweenedServoAngle = useRef(0);
+  const lastTweenedAngle = tweenedServoAngle.current;
 
   const potAngleVar = findVariable(kPotAngleKey, variables);
   const potAngleBaseValue = potAngleVar?.currentValue ?? 0;
-  const visiblePotAngle = potAngleBaseValue - 135; // We use 0 - 270 degrees, but we want to render visible -135 - 135
+  const visiblePotAngle = potAngleBaseValue - potVisibleOffset;
   const potRotationString = `rotate(${visiblePotAngle ?? 0}deg)`;
 
   const servoAngleVar = findVariable(kServoAngleKey, variables);
   const servoAngleBaseValue = servoAngleVar?.currentValue ?? 0;
-  const visibleServoAngle = servoAngleBaseValue - 90; // We use 0 - 180 degrees, but we want to render visible -90 - 90
-  const servoRotationString = `rotate(${visibleServoAngle}deg)`;
+  tweenedServoAngle.current = getTweenedServoAngle(servoAngleBaseValue, lastTweenedAngle);
+  const servoRotationString = `rotate(${tweenedServoAngle.current - servoVisibleOffset}deg)`;
 
   const potServoClasses = classNames('pot-servo-component', { collapsed, "expanded": !collapsed });
 
