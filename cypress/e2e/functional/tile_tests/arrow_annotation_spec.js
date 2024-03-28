@@ -221,7 +221,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("have.length", 1);
   });
 
-  it.only("can add annotations to numberline tiles", () => {
+  it("can add annotations to numberline tiles", () => {
     beforeTest(queryParams);
     clueCanvas.addTile("numberline");
 
@@ -319,6 +319,25 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("not.exist");
     aa.getAnnotationButtons().eq(0).click();
     aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationArrows().should("have.length", 1);
+    aa.getAnnotationDeleteButtons().eq(0).click(); // Remove arrow
+    aa.getAnnotationArrows().should("have.length", 0);
+    aa.clickArrowToolbarButton(); // exit sparrow mode
+    xyTile.getLayerDeleteButton().eq(1).click(); // Clean up graph
+    xyTile.getLayerDeleteButton().eq(0).click();
+
+    cy.log("Annotation buttons for movable line");
+    xyTile.getTile().click();
+    clueCanvas.clickToolbarButton('graph', 'movable-line');
+    aa.clickArrowToolbarButton(); // sparrow mode
+    aa.getAnnotationButtons().should("have.length", 12); // 9 for the table + 3 for movable line
+    aa.getAnnotationButtons().eq(0).click(); // Connect handles
+    aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationArrows().should("have.length", 1);
+
+    aa.getAnnotationDeleteButtons().eq(0).click(); // Remove arrow
+    aa.getAnnotationButtons().eq(2).click(); // Connect equation to table
+    aa.getAnnotationButtons().eq(3).click();
     aa.getAnnotationArrows().should("have.length", 1);
   });
 });
