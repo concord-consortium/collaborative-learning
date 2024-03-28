@@ -326,18 +326,18 @@ context('Arrow Annotations (Sparrows)', function () {
     xyTile.getLayerDeleteButton().eq(1).click(); // Clean up graph
     xyTile.getLayerDeleteButton().eq(0).click();
 
-    cy.log("Annotation buttons on movable line handles");
+    cy.log("Annotation buttons for movable line");
     xyTile.getTile().click();
     clueCanvas.clickToolbarButton('graph', 'movable-line');
     aa.clickArrowToolbarButton(); // sparrow mode
-    aa.getAnnotationButtons().should("have.length", 11); // 9 for the table + 2 for movable line
+    aa.getAnnotationButtons().should("have.length", 12); // 9 for the table + 3 for movable line
     aa.getAnnotationButtons().eq(0).click(); // Connect handles
     aa.getAnnotationButtons().eq(1).click();
     aa.getAnnotationArrows().should("have.length", 1);
 
     aa.getAnnotationDeleteButtons().eq(0).click(); // Remove arrow
-    aa.getAnnotationButtons().eq(2).click(); // Connect from table
-    aa.getAnnotationButtons().eq(0).click();
+    aa.getAnnotationButtons().eq(2).click(); // Connect equation to table
+    aa.getAnnotationButtons().eq(3).click();
     aa.getAnnotationArrows().should("have.length", 1);
   });
 });
