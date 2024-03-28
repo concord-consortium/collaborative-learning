@@ -33,6 +33,7 @@ import ParticulatesIcon from "../../assets/icons/sensor/particulates.svg";
 import MoistureIcon from "../../assets/icons/sensor/moisture.svg";
 import EmgIcon from "../../../shared-assets/icons/dataflow/control/signal.svg";
 import PressureIcon from "../../../shared-assets/icons/dataflow/sensor/pressure.svg";
+import ServoIcon from "../../../shared-assets/icons/dataflow/output/servo.svg";
 
 import AbsoluteValueIcon from "../../assets/icons/transform/absolute-value.svg";
 import NegationIcon from "../../assets/icons/transform/negation.svg";
@@ -421,6 +422,12 @@ export const NodeLiveOutputTypes = [
     name: "Heat Lamp",
     icon: LightBulbIcon,
     relayIndex: 0
+  },
+  {
+    name: "Servo",
+    icon: ServoIcon,
+    angleBase: 0,
+    sweep: 180
   }
 ];
 
