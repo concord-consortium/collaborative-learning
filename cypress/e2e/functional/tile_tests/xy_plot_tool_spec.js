@@ -614,7 +614,8 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.toolbarButtonIsEnabled("graph", "movable-line");
       clueCanvas.toolbarButtonIsSelected("graph", "movable-line");
       xyTile.getMovableLine().should("have.length", 1);
-      xyTile.getMovableLineCover().should("have.length", 3);
+      xyTile.getMovableLineCover().should("have.length", 1);
+      xyTile.getMovableLineHandle().should("have.length", 2);
       xyTile.getMovableLineEquationContainer()
         .should("have.length", 1)
         // .and("be.visible") -- fails, since there's a (transparent) element covering it
@@ -622,15 +623,32 @@ context('XYPlot Tool Tile', function () {
         .and("contain.html", "<em>dist</em>");
       // this is how visibility is actually accomplished:
       xyTile.getMovableLineWrapper().should("have.class", "fadeIn").and("not.have.class", "fadeOut");
-      xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
 
       // Drag movable line
-      // We drag the bottom part to the right enough to make the slope negative
-      xyTile.getMovableLineCover('lower')
-        .trigger("mousedown", { eventConstructor: 'MouseEvent' })
-        .trigger("mousemove", 400, 200, { force: true, eventConstructor: 'MouseEvent' })
-        .trigger("mouseup", { eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineEquationSlope().then(origSlope => {
+        xyTile.getMovableLineEquationIntercept().then(origIntercept => {
+          xyTile.getMovableLineCover()
+            .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' })
+            .trigger("mousemove", 50, 0, { force: true, eventConstructor: 'MouseEvent' })
+            .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
+          xyTile.getMovableLineEquationSlope().should("equal", origSlope);
+          xyTile.getMovableLineEquationIntercept().should("be.greaterThan", origIntercept);
+        });
+      });
+
+      // Now drag the bottom handle up enough to make the slope negative
+      xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
+      xyTile.getMovableLineHandle('lower')
+        .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' })
+        .trigger("mousemove", 0, -100, { force: true, eventConstructor: 'MouseEvent' })
+        .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
       xyTile.getMovableLineEquationSlope().should("be.lessThan", 0);
+      // Then drag the upper handle up and make slope positive again
+      xyTile.getMovableLineHandle('upper')
+        .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' })
+        .trigger("mousemove", 0, -100, { force: true, eventConstructor: 'MouseEvent' })
+        .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
 
       // Hide movable line (it still exists, just hidden)
       clueCanvas.clickToolbarButton("graph", "movable-line");
