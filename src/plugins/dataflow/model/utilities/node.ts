@@ -427,6 +427,8 @@ export const NodeLiveOutputTypes = [
     name: "Servo",
     icon: ServoIcon,
     angleBase: 0,
+    angleOffset: 30,
+    angleScale: 2 / 3,
     sweep: 180
   }
 ];

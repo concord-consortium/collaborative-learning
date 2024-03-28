@@ -172,9 +172,11 @@ export class SerialDevice {
 
   public writeToOutForServo(n:number, liveOutputType: string){
     const outputConfig = NodeLiveOutputTypes.find(o => o.name === liveOutputType);
-    if (this.hasPort() && outputConfig?.angleBase !== undefined){
-      const constrainedAngle = Math.min(180, Math.max(0, n));
-      this.writer.write(`${constrainedAngle.toString()}\n`);
+    if (this.hasPort() && outputConfig?.angleOffset !== undefined){
+      const scaledAngle = (outputConfig.angleScale * n) + outputConfig.angleOffset;
+      const roundedScaled = Math.round(scaledAngle);
+       //console.log("| GOT:", n, "| SENDING :", roundedScaled);
+      this.writer.write(`${roundedScaled.toString()}\n`);
     }
   }
 }

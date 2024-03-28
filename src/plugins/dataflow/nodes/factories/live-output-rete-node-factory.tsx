@@ -61,13 +61,12 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         }
 
         if(kServoOutputTypes.includes(outputType)){
-          // TODO: test with real servo and invalid value, does it go to 0 or 180, or not move at all?
-          // if goes from zero to 180, then we can just constrain, like this:
+          // angles out of range are set to the nearest valid value
           newValue = Math.min(Math.max(newValue, 0), 180);
           nodeValue?.setDisplayMessage(`${newValue}°`);
 
-          // otherwise, we need to check if the value is valid,
-          // and if not, we need to set it to the last valid value
+          // leaving the alternative approach in place if needed
+          // this just will not move if given an invalid value
           // const isValidServoValue = newValue >= 0 && newValue <= 180;
           // if (!isValidServoValue) newValue = getLastValidServoValue(_node);
         }
