@@ -13,8 +13,8 @@ export function getFrame(percent: number, numFrames: number) {
 
 export function getVariableSuffix(variable: VariableType) {
   if (variable.hasLabel("input")){
-    if (variable.hasLabel("physical")) return "Position";
-    if (variable.hasLabel("reading")) return "Reading";
+    if (variable.hasLabel("position")) return "Position";
+    if (variable.hasLabel("position")) return "Reading";
     else return "Sensor";
   }
   if (variable.hasLabel("output")){

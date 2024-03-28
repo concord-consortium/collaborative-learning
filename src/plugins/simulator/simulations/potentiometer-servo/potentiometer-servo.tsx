@@ -131,7 +131,7 @@ export const potentiometerAndServoSimulation: ISimulation = {
   variables: [
     {
       displayName: "Potentiometer",
-      labels: ["input", "physical", "decimalPlaces:0"],
+      labels: ["input", "position", "decimalPlaces:0"],
       icon: iconUrl(kPotentiometerKey),
       name: kPotAngleKey,
       value: minPotAngle,
@@ -146,7 +146,7 @@ export const potentiometerAndServoSimulation: ISimulation = {
     },
     {
       displayName: "Servo",
-      labels: ["output", "physical", "live-output:Servo", "decimalPlaces:0"],
+      labels: ["output", "position", "live-output:Servo", "decimalPlaces:0"],
       icon: iconUrl(kServoKey),
       name: kServoAngleKey,
       value: minServoAngle,

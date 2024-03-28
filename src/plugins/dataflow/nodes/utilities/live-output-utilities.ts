@@ -42,11 +42,15 @@ export function outputsToAnyGripper(node: Node) {
   return kGripperOutputTypes.includes(getOutputType(node));
 }
 
+export function outputsToAnyServo(node: Node) {
+  return getOutputType(node) === "Servo";
+}
+
 export function getLiveOptions(node: Node, deviceFamily: string, sharedVar?: VariableType ) {
   const options: ListOption[] = [];
   const simOption = sharedVar && simulatedHub(sharedVar);
   const anyOuputFound = simOption || deviceFamily === "arduino" || deviceFamily === "microbit";
-  const { liveGripperOption, warningOption } = baseLiveOutputOptions;
+  const { liveGripperOption, liveServoOption, warningOption } = baseLiveOutputOptions;
 
   if (sharedVar && simOption) {
     options.push(simOption);
@@ -61,6 +65,16 @@ export function getLiveOptions(node: Node, deviceFamily: string, sharedVar?: Var
   }
 
   if (outputsToAnyGripper(node) && deviceFamily !== "arduino") {
+    if (!options.includes(warningOption)) {
+      options.push(warningOption);
+    }
+  }
+
+  if (outputsToAnyServo(node) && deviceFamily === "arduino") {
+    options.push(liveServoOption);
+  }
+
+  if (outputsToAnyServo(node) && deviceFamily !== "arduino") {
     if (!options.includes(warningOption)) {
       options.push(warningOption);
     }

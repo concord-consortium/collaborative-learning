@@ -468,6 +468,12 @@ export const baseLiveOutputOptions = {
     id: "bb-gripper",
     name: "Physical Gripper"
   },
+  liveServoOption: {
+    active: true,
+    icon: ServoIcon,
+    id: "bb-servo",
+    name: "Physical Servo"
+  },
   warningOption: {
     active: true,
     id: "no-outputs-found",
