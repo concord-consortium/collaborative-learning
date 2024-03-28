@@ -6,7 +6,7 @@ import { getHubSelect, getNodeValueWithType } from "./live-output-utilities";
 import { NumControl } from "../controls/num-control";
 import { SensorSelectControl } from "../controls/sensor-select-control";
 import { NodeChannelInfo } from "../../model/utilities/channel";
-import { kMaxNodeValues, NodeGeneratorTypes, NodeTimerInfo, NodeValue } from "../../model/utilities/node";
+import { kGripperOutputTypes, kMaxNodeValues, kServoOutputTypes, NodeGeneratorTypes, NodeTimerInfo, NodeValue } from "../../model/utilities/node";
 import { findOutputVariable, simulatedHubName } from "../../model/utilities/simulated-output";
 import { SerialDevice } from "../../../../models/stores/serial";
 
@@ -29,8 +29,14 @@ export function sendDataToSerialDevice(n: Node, serialDevice: SerialDevice) {
   const { deviceFamily } = serialDevice;
 
   if (deviceFamily === "arduino" && isNumberOutput){
-    serialDevice.writeToOutForBBGripper(val, outType);
+    if (kGripperOutputTypes.includes(outType)){
+      serialDevice.writeToOutForBBGripper(val, outType);
+    }
+    if (kServoOutputTypes.includes(outType)){
+      serialDevice.writeToOutForServo(val, outType);
+    }
   }
+
   if (deviceFamily === "microbit"){
     const hubSelect = getHubSelect(n);
     if (hubSelect.getChannels()){

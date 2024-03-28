@@ -162,11 +162,19 @@ export class SerialDevice {
   }
 
   public writeToOutForBBGripper(n:number, liveOutputType: string){
-    const gripperVer = NodeLiveOutputTypes.find(o => o.name === liveOutputType);
-    if (this.hasPort() && gripperVer?.angleBase){
+    const outputConfig = NodeLiveOutputTypes.find(o => o.name === liveOutputType);
+    if (this.hasPort() && outputConfig?.angleBase !== undefined){
       const percent = n / 100;
-      const openTo = Math.round(gripperVer.angleBase - (percent * gripperVer.sweep));
+      const openTo = Math.round(outputConfig.angleBase - (percent * outputConfig.sweep));
       this.writer.write(`${openTo.toString()}\n`);
+    }
+  }
+
+  public writeToOutForServo(n:number, liveOutputType: string){
+    const outputConfig = NodeLiveOutputTypes.find(o => o.name === liveOutputType);
+    if (this.hasPort() && outputConfig?.angleBase !== undefined){
+      const constrainedAngle = Math.min(180, Math.max(0, n));
+      this.writer.write(`${constrainedAngle.toString()}\n`);
     }
   }
 }
