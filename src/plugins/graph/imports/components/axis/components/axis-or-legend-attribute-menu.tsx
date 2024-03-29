@@ -59,7 +59,7 @@ export const AxisOrLegendAttributeMenu = ({
   const attribute = attrId ? data?.attrFromID(attrId) : null;
   const [labelText, setLabelText] = useState(attribute?.name);
   const removeAttrItemLabel = t(removeAttrItemLabelKeys[role], {vars: [attribute?.name]});
-  const treatAs = dataConfig?.attributeType(role) === "numeric" ? "categorical" : "numeric";
+  const treatAs = dataConfig?.attributeTypeForID(attrId) === "numeric" ? "categorical" : "numeric";
   const parentRef = useRef(parent);
   parentRef.current = parent;
   const portalRef = useRef(portal);

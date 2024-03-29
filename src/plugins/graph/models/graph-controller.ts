@@ -107,7 +107,6 @@ export class GraphController {
     if (!(graphModel && layout)) {
       return;
     }
-    this.callMatchCirclesToData();
     if (['plot', 'legend'].includes(graphPlace)) {
       // Since there is no axis associated with the legend and the plotType will not change, we bail
       return;
@@ -117,6 +116,7 @@ export class GraphController {
       if (!graphModel.lockAxes) {
         yAxisModel && setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
       }
+      this.callMatchCirclesToData();
       return;
     }
 
@@ -189,6 +189,7 @@ export class GraphController {
 
     setPrimaryRoleAndPlotType();
     AxisPlaces.forEach(setupAxis);
+    this.callMatchCirclesToData();
   }
 
   /**
