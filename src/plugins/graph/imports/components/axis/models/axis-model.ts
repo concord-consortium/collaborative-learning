@@ -100,8 +100,9 @@ export const NumericAxisModel = AxisModel
       } else if ((min < 0) && (Math.abs(max) < Math.abs(min / snapFactor))) {
         max = 0;
       }
-      self.min = parseFloat(min.toFixed(2));
-      self.max = parseFloat(max.toFixed(2));
+      // Truncate to 2 decimal digits, but without making the range smaller
+      self.min = Math.floor(min*100)/100;
+      self.max = Math.ceil(max*100)/100;
     }
   }));
 export interface INumericAxisModel extends Instance<typeof NumericAxisModel> {}

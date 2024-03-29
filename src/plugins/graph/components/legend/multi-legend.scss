@@ -25,6 +25,20 @@
 
     .legend-title {
       padding-left: 6px;
+
+      .layer-name {
+        font-weight: bold;
+      }
+
+      .chakra-editable {
+        display: inline-block;
+        margin-left: 6px;
+
+        input {
+          font-weight: normal;
+        }
+      }
+
     }
   }
 

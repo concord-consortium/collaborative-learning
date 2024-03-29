@@ -3,12 +3,14 @@ import DrawToolTile from "../../../support/elements/tile/DrawToolTile";
 import ImageToolTile from '../../../support/elements/tile/ImageToolTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
 import DataCardToolTile from '../../../support/elements/tile/DataCardToolTile';
+import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
 
 let clueCanvas = new ClueCanvas,
   drawToolTile = new DrawToolTile,
   imageToolTile = new ImageToolTile,
   tableToolTile = new TableToolTile,
-  dataCardToolTile = new DataCardToolTile;
+  dataCardToolTile = new DataCardToolTile,
+  graphTile = new XYPlotToolTile;
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaUnitStudent5")}`;
@@ -72,5 +74,19 @@ context('Duplicate Tiles', function () {
     dataCardToolTile.getSortSelect(1).should("contain.text", "Label 1");
     dataCardToolTile.getSortSelect(1).select("None");
     dataCardToolTile.getSortSelect(0).should("contain.text", "Label 1");
+
+    cy.log("duplicates graphs");
+    clueCanvas.addTile("graph");
+    clueCanvas.clickToolbarButton("graph", "link-tile-multiple");
+    graphTile.linkDataCard("Card Deck Data 2");
+    duplicateTool().click();
+    graphTile.getTile().should("have.length", 2);
+    graphTile.getXYPlotTitle()
+      .should("contain.text", "Graph 1")
+      .and("contain.text", "Graph 2");
+    graphTile.getLegendTitle()
+      .should("contain.text", "Card Deck Data 2")
+      .and("contain.text", "Card Deck Data 3");
+    graphTile.getXAttributesLabel().should("contain.text", "Label 1");
   });
 });

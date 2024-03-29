@@ -1,6 +1,7 @@
-import React, {useCallback, useEffect, useRef} from "react";
+import React, {useCallback, useContext, useEffect, useRef} from "react";
 import {autorun, reaction} from "mobx";
-import { isSetCaseValuesAction } from "../../../models/data/data-set-actions";
+import { isAddCasesAction, isRemoveAttributeAction, isRemoveCasesAction, isSetCaseValuesAction }
+  from "../../../models/data/data-set-actions";
 import {IDotsRef, GraphAttrRoles} from "../graph-types";
 import {INumericAxisModel} from "../imports/components/axis/models/axis-model";
 import {useGraphLayoutContext} from "../models/graph-layout";
@@ -10,6 +11,10 @@ import {useCurrent} from "../../../hooks/use-current";
 import {useInstanceIdContext} from "../imports/hooks/use-instance-id-context";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { IGraphLayerModel } from "../models/graph-layer-model";
+import { mstReaction } from "../../../utilities/mst-reaction";
+import { useReadOnlyContext } from "../../../components/document/read-only-context";
+import { GraphControllerContext } from "../models/graph-controller";
+import { useGraphSettingsContext } from "./use-graph-settings-context";
 
 interface IDragHandlers {
   start: (event: MouseEvent) => void
@@ -18,8 +23,9 @@ interface IDragHandlers {
 }
 
 export const useDragHandlers = (target: any, {start, drag, end}: IDragHandlers) => {
+  const readOnly = useReadOnlyContext();
   useEffect(() => {
-    if (target) {
+    if (target && !readOnly) {
       target.addEventListener('mousedown', start);
       target.addEventListener('mousemove', drag);
       target.addEventListener('mouseup', end);
@@ -30,7 +36,7 @@ export const useDragHandlers = (target: any, {start, drag, end}: IDragHandlers) 
         target.removeEventListener('mouseup', end);
       };
     }
-  }, [target, start, drag, end]);
+  }, [target, start, drag, end, readOnly]);
 };
 
 export interface IPlotResponderProps {
@@ -48,6 +54,8 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     graphModel = useGraphModelContext(),
     layout = useGraphLayoutContext(),
     instanceId = useInstanceIdContext(),
+    controller = useContext(GraphControllerContext),
+    graphSettings = useGraphSettingsContext(),
     refreshPointPositionsRef = useCurrent(refreshPointPositions);
 
   useEffect(function respondToLayerDotsEltCreation() {
@@ -100,6 +108,14 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     };
   }, []);
 
+  const callRescaleIfNeeded = useCallback((growOnly: boolean = false) => {
+    if (graphSettings.scalePlotOnValueChange &&
+        !graphModel.lockAxes &&
+        !graphModel.interactionInProgress) {
+      controller!.autoscaleAllAxes(growOnly);
+    }
+  }, [controller, graphModel, graphSettings]);
+
   // respond to numeric axis domain changes (e.g. axis dragging)
   useEffect(() => {
     const disposer = reaction(
@@ -129,12 +145,14 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
 
   // respond to attribute assignment changes
   useEffect(() => {
-    const disposer = reaction(
+    const disposer = mstReaction(
       () => GraphAttrRoles.map((aRole) => dataConfiguration?.attributeID(aRole)),
       () => {
         startAnimation(enableAnimation);
         callRefreshPointPositions(false);
-      }
+      },
+      { name: "usePlot.attribute assignment reaction" },
+      dataConfiguration
     );
     return () => disposer();
   }, [callRefreshPointPositions, dataConfiguration, enableAnimation]);
@@ -155,6 +173,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
     if (dataset) {
       const disposer = onAnyAction(dataset, action => {
         if (isSetCaseValuesAction(action)) {
+          callRescaleIfNeeded();
           // assumes that if we're caching then only selected cases are being updated
           callRefreshPointPositions(dataset.isCaching);
           // TODO: handling of add/remove cases was added specifically for the case plot.
@@ -167,7 +186,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
       });
       return () => disposer();
     }
-  }, [dataset, callRefreshPointPositions]);
+  }, [dataset, callRefreshPointPositions, callRescaleIfNeeded]);
 
   // respond to color changes
   useEffect(() => {
@@ -191,7 +210,11 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
   // respond to added or removed cases and change in attribute type
   useEffect(function handleAddRemoveCases() {
     const disposer = dataConfiguration?.onAction(action => {
-      if (['addCases', 'removeCases', 'setAttributeType'].includes(action.name)) {
+      if (isAddCasesAction(action)
+          || isRemoveCasesAction(action)
+          || isRemoveAttributeAction(action)
+          || ['addCases', 'removeCases', 'setAttributeType'].includes(action.name)) {
+
         matchCirclesToData({
           dataConfiguration,
           pointRadius: graphModel.getPointRadius(),
@@ -200,11 +223,14 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
           dotsElement: dotsRef.current,
           enableAnimation, instanceId
         });
+        const growOnly = isAddCasesAction(action);
+        callRescaleIfNeeded(growOnly);
         callRefreshPointPositions(false);
       }
     }) || (() => true);
     return () => disposer();
-  }, [dataset, dataConfiguration, enableAnimation, graphModel, callRefreshPointPositions, dotsRef, instanceId]);
+  }, [controller, dataset, dataConfiguration, enableAnimation, graphModel,
+    callRefreshPointPositions, dotsRef, instanceId, callRescaleIfNeeded]);
 
   // respond to pointsNeedUpdating becoming false; that is when the points have been updated
   // Happens when the number of plots has changed for now. Possibly other situations in the future.

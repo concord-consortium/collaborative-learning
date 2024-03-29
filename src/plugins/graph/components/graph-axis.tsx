@@ -17,25 +17,23 @@ import {axisPlaceToAttrRole, kGraphClassSelector} from "../graph-types";
 import {GraphPlace} from "../imports/components/axis-graph-shared";
 import {AttributeLabel} from "./attribute-label";
 import {useDropHintString} from "../imports/hooks/use-drop-hint-string";
-import { isAddCasesAction, isSetCaseValuesAction } from "../../../models/data/data-set-actions";
-import { computeNiceNumericBounds } from "../utilities/graph-utils";
-import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
 import { DroppableAxis } from "./droppable-axis";
 import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
+import { GraphController } from "../models/graph-controller";
 
 interface IProps {
-  place: AxisPlace
-  enableAnimation: MutableRefObject<boolean>
-  autoAdjust?: React.MutableRefObject<boolean>
-  onDropAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void
-  onRemoveAttribute?: (place: GraphPlace, attrId: string) => void
-  onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void
+  place: AxisPlace;
+  enableAnimation: MutableRefObject<boolean>;
+  controller: GraphController;
+  onDropAttribute?: (place: GraphPlace, dataSet: IDataSet, attrId: string) => void;
+  onRemoveAttribute?: (place: GraphPlace, attrId: string) => void;
+  onTreatAttributeAs?: (place: GraphPlace, attrId: string, treatAs: AttributeType) => void;
 }
 
 export const GraphAxis = observer(function GraphAxis({
-  place, enableAnimation, autoAdjust, onDropAttribute, onRemoveAttribute, onTreatAttributeAs
+  place, enableAnimation, controller, onDropAttribute, onRemoveAttribute, onTreatAttributeAs
 }: IProps) {
-  const dataConfig = useDataConfigurationContext(),
+  const dataConfig = useDataConfigurationContext(), // FIXME mult-dataset.
     isDropAllowed = dataConfig?.graphPlaceCanAcceptAttributeIDDrop ?? (() => true),
     graphModel = useGraphModelContext(),
     instanceId = useInstanceIdContext(),
@@ -86,40 +84,6 @@ export const GraphAxis = observer(function GraphAxis({
       }
     });
   }, [layout, place, wrapperElt]);
-
-  useEffect(() => {
-    if (autoAdjust?.current) {
-      // TODO multi dataset - this should consider all layers
-      dataConfig?.onAction(action => {
-        if (
-            isAlive(graphModel) &&
-            !graphModel.lockAxes &&
-            (isAddCasesAction(action) || isSetCaseValuesAction(action))
-           )
-        {
-          const _axisModel = graphModel?.getAxis(place);
-          const xValues = dataConfig.numericValuesForAttrRole("x");
-          const yValues = dataConfig.numericValuesForAttrRole("y");
-
-          if (_axisModel && isNumericAxisModel(_axisModel)) {
-            if (xValues.length > 0 && place === "bottom") {
-              const minX = Math.min(...xValues);
-              const maxX = Math.max(...xValues);
-              const newXBounds = computeNiceNumericBounds(minX, maxX);
-              _axisModel.setDomain(newXBounds.min, newXBounds.max);
-            }
-
-            if (yValues.length > 0 && place === "left") {
-              const minY = Math.min(...yValues);
-              const maxY = Math.max(...yValues);
-              const newYBounds = computeNiceNumericBounds(minY, maxY);
-              _axisModel.setDomain(newYBounds.min, newYBounds.max);
-            }
-          }
-        }
-      });
-    }
-  }, [autoAdjust, dataConfig, graphModel, layout, place]);
 
   useEffect(function cleanup () {
     return () => {

@@ -10,7 +10,7 @@ import {
 } from "../imports/components/axis/models/axis-model";
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
-  GraphAttrRole, hoverRadiusFactor, kDefaultAxisLabel, kDefaultNumericAxisBounds, kGraphTileType,
+  GraphAttrRole, GraphEditMode, hoverRadiusFactor, kDefaultAxisLabel, kDefaultNumericAxisBounds, kGraphTileType,
   PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
 } from "../graph-types";
 import { withoutUndo } from "../../../models/history/without-undo";
@@ -32,6 +32,9 @@ import { isSharedDataSet, SharedDataSet } from "../../../models/shared/shared-da
 import { DataConfigurationModel, RoleAttrIDPair } from "./data-configuration-model";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 import { multiLegendParts } from "../components/legend/legend-registration";
+import { addAttributeToDataSet, DataSet } from "../../../models/data/data-set";
+import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
+import { ICase } from "../../../models/data/data-set-types";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -79,7 +82,10 @@ export const GraphModel = TileContentModel
     yAttributeLabel: types.optional(types.string, kDefaultAxisLabel)
   })
   .volatile(self => ({
-    // prevDataSetId: "",
+    // True if a dragging operation is ongoing - automatic rescaling is deferred until drag is done.
+    interactionInProgress: false,
+    editingMode: "none" as GraphEditMode,
+    editingLayerId: undefined as string|undefined
   }))
   .preProcessSnapshot((snapshot: any) => {
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
@@ -129,6 +135,9 @@ export const GraphModel = TileContentModel
         const minCount = Math.min(...counts);
         return usedColorIndices.find(index => colorCounts[index] === minCount) ?? 0;
       }
+    },
+    getAdornmentOfType(type: string) {
+      return self.adornments.find(a => a.type === type);
     }
   }))
   .views(self => ({
@@ -202,6 +211,10 @@ export const GraphModel = TileContentModel
     attributeType(role: GraphAttrRole) {
       return self.layers[0].config.attributeType(role);
     },
+    getLayerById(layerId: string): IGraphLayerModel|undefined {
+      if (!layerId) return undefined;
+      return self.layers.find(layer => layer.id === layerId);
+    },
     layerForDataConfigurationId(dataConfID: string) {
       return self.layers.find(layer => layer.config.id === dataConfID);
     },
@@ -220,6 +233,19 @@ export const GraphModel = TileContentModel
         }
       }
       return undefined;
+    },
+    /**
+     * Return a list of layers that can be edited.
+     */
+    getEditableLayers() {
+      return self.layers.filter(l => l.editable);
+    },
+    /**
+     * Return the layer currently being edited, or undefined if none.
+     */
+    get editingLayer(): IGraphLayerModel|undefined {
+      if (!self.editingLayerId) return undefined;
+      return this.getLayerById(self.editingLayerId);
     },
     /**
      * Find all tooltip-related attributes from all layers.
@@ -274,6 +300,12 @@ export const GraphModel = TileContentModel
     get isLinkedToDataSet() {
       return self.layers[0].isLinked;
     },
+    get isAnyCellSelected() {
+      for (const layer of self.layers) {
+        if (layer.config.dataset?.isAnyCellSelected) return true;
+      }
+      return false;
+    },
     /**
      * Return true if no attribute has been assigned to any graph role in any layer.
      */
@@ -321,11 +353,63 @@ export const GraphModel = TileContentModel
         initialLayer.configureUnlinkedLayer();
       }
     },
+    /**
+     * Creates an "added by hand" dataset and attaches it as a layer to the graph.
+     * The layer is marked as editable so that the user can add and edit points.
+     */
+    createEditableLayer() {
+      const smm = getSharedModelManager(self);
+      const doc = getDocumentContentFromNode(self);
+      if (doc && smm && smm.isReady) {
+        const datasetName = doc.getUniqueSharedModelName("Added by hand");
+        const
+          xName = "X Variable",
+          yName = "Y Variable 1";
+        const dataset = DataSet.create({ name: datasetName });
+        const xAttr = addAttributeToDataSet(dataset, { name: xName });
+        const yAttr = addAttributeToDataSet(dataset, { name: yName });
+        const sharedDataSet = SharedDataSet.create({ dataSet: dataset });
+        smm.addTileSharedModel(self, sharedDataSet, true);
+
+        const metadata = SharedCaseMetadata.create();
+        metadata.setData(dataset);
+        smm.addTileSharedModel(self, metadata);
+
+        const layer = GraphLayerModel.create({ editable: true });
+        self.layers.push(layer);
+        // Remove default layer if there was one
+        if (!self.layers[0].isLinked) {
+          self.layers.splice(0, 1);
+        }
+
+        const dataConfiguration = DataConfigurationModel.create();
+        layer.setDataConfiguration(dataConfiguration);
+        dataConfiguration.setDataset(dataset, metadata);
+        dataConfiguration.setAttributeForRole("x", { attributeID: xAttr.id, type: "numeric" }, false);
+        dataConfiguration.setAttributeForRole("y", { attributeID: yAttr.id, type: "numeric" }, false);
+      }
+    },
     setXAttributeLabel(label: string) {
       self.xAttributeLabel = label;
     },
     setYAttributeLabel(label: string) {
       self.yAttributeLabel = label;
+    },
+    setEditingMode(mode: GraphEditMode, layer?: IGraphLayerModel) {
+      self.editingMode = mode;
+      if (mode === "none") {
+        self.editingLayerId = undefined;
+      } else {
+        if (layer) {
+          self.editingLayerId = layer && layer.id;
+        } else {
+          const editables = self.getEditableLayers();
+          self.editingLayerId = editables.length>0 ? editables[0].id : undefined;
+        }
+      }
+    },
+    setInteractionInProgress(value: boolean) {
+      self.interactionInProgress = value;
     }
   }))
   .actions(self => ({
@@ -401,9 +485,29 @@ export const GraphModel = TileContentModel
     setPlotType(type: PlotType) {
       self.plotType = type;
     },
+    /**
+     * Clears selections of all types - cases, cells, and attributes.
+     */
     clearAllSelectedCases() {
       for (const layer of self.layers) {
         layer.config.dataset?.setSelectedCases([]);
+      }
+    },
+    clearSelectedCellValues() {
+      for (const layer of self.layers) {
+        const dataset = layer.config.dataset;
+        if (dataset) {
+          const newValues: ICase[] = [];
+          for (const cell of dataset.selectedCells) {
+            if (cell && cell.attributeId) {
+              const newCaseValue: ICase = { __id__: cell.caseId };
+              newCaseValue[cell.attributeId] = ""; // clear cell
+              newValues.push(newCaseValue);
+            }
+            dataset.setCanonicalCaseValues(newValues);
+            dataset.setSelectedCells([]);
+          }
+        }
       }
     },
     setGraphProperties(props: GraphProperties) {
@@ -436,12 +540,20 @@ export const GraphModel = TileContentModel
     setShowMeasuresForSelection(show: boolean) {
       self.showMeasuresForSelection = show;
     },
-    showAdornment(adornment: IAdornmentModel) {
-      const adornmentExists = self.adornments.find(a => a.type === adornment.type);
+    addAdornment(adornment: IAdornmentModel) {
+      const adornmentExists = self.getAdornmentOfType(adornment.type);
       if (adornmentExists) {
-        adornmentExists.setVisibility(true);
+        console.error("Currently only one adornment of a type is supported");
       } else {
         self.adornments.push(adornment);
+      }
+    },
+    showAdornment(type: string) {
+      const adornment = self.getAdornmentOfType(type);
+      if (adornment) {
+        adornment.setVisibility(true);
+      } else {
+        console.error("Adornment type not found:", type);
       }
     },
     hideAdornment(type: string) {
@@ -456,7 +568,7 @@ export const GraphModel = TileContentModel
       }
     },
     setColorForIdWithoutUndo(id: string, colorIndex: number) {
-      withoutUndo();
+      withoutUndo({unlessChildAction: true});
       self.setColorForId(id, colorIndex);
     }
   }))
@@ -470,6 +582,21 @@ export const GraphModel = TileContentModel
       const colorIndex = self._idColors.get(id);
       if (colorIndex === undefined) return "black";
       return clueGraphColors[colorIndex % clueGraphColors.length].name;
+    },
+    getEditablePointsColor() {
+      let color = "#000000";
+      let layer = self.editingLayer;
+      if (!layer) {
+        // Even if no layer is currently being edited, show the color of the one that would be.
+        layer = self.getEditableLayers()?.[0];
+      }
+      if (layer) {
+        const yAttributes = layer.config.yAttributeIDs;
+        if (yAttributes.length > 0) {
+          color = this.getColorForId(yAttributes[0]);
+        }
+      }
+      return color;
     }
   }))
   .actions(self => ({
@@ -663,12 +790,10 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
     yAttributeLabel: axisLabels && axisLabels.left,
     ...snap
   });
-  // TODO: make a dedicated setting for this rather than using defaultSeriesLegend as a proxy:
-  // const connectLinesByDefault = appConfig?.getSetting("defaultConnectedLines", "graph");
-  const connectByDefault = appConfig?.getSetting("defaultSeriesLegend", "graph");
+  const connectByDefault = appConfig?.getSetting("connectPointsByDefault", "graph");
   if (connectByDefault) {
     const cLines = ConnectingLinesModel.create();
-    createdGraphModel.showAdornment(cLines);
+    createdGraphModel.addAdornment(cLines);
   }
 
   return createdGraphModel;

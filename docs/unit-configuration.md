@@ -157,21 +157,25 @@ Not updated to common toolbar framework and does not support toolbar configurati
 
 #### Graph
 
-- `autoAssignAttributes`: boolean, default true
-- `connectPointsByDefault`: boolean, default true
-- `defaultSeriesLegend`: boolean, default true
+- `autoAssignAttributes`: boolean, default true. When true, when a dataset is connected to the graph, its first two columns will be immediately assigned to the "x" and "y" axes of the graph.
+- `connectPointsByDefault`: boolean, default true. When true connecting lines between data points are drawn.
 - `defaultAxisLabels`: { "bottom": "x", "left": "y" }, default none
-- `disableAttributeDnD`: boolean, default true
-- `emptyPlotIsNumeric`: boolean, default true
-- `scalePlotOnValueChange`: boolean, default true
+- `defaultSeriesLegend`: boolean, default true. When true, the graph can connect to and display multiple datasets, and includes a legend area which allows adding, modifying, and removing these layers.
+- `disableAttributeDnD`: boolean, default true. When true, you cannot drop attributes onto the axes to change the graph.  "false" setting not currently tested.
+- `emptyPlotIsNumeric`: boolean, default true. When true graph defaults to numeric axes. "false" setting not currently tested.
+- `scalePlotOnValueChange`: boolean, default true. When true, adding/deleting/modifying value of any data causes the graph to be rescaled to fit the data.
 
-Common toolbar framework; default toolbar buttons:
+Uses the common toolbar framework. Default toolbar buttons:
 
 - `link-tile` (opens dialog to replace dataset with a new one)
+- `add-points-by-hand` (creates a dataset owned by the graph)
 - `fit-all` (rescale axes to fit all points in view)
 - `toggle-lock` (lock axes so they won't automatically rescale)
+- `movable-line` (show/hide the movable line)
+- `move-points` (mode where points can be moved)
+- `add-points` (mode where points can be added)
 
-Also available:
+Additional buttons available not in default set:
 
 - `link-tile-multiple` (opens dialog to add an additional dataset or link variables)
 
@@ -181,7 +185,13 @@ Not updated to common toolbar framework and does not support toolbar configurati
 
 #### Numberline
 
-Not updated to common toolbar framework. However, supports toolbar configuration in a similar manner. Default buttons: `["place-point", "clear-points", "delete-points"]`
+Common toolbar framework; default toolbar buttons:
+
+- `select` - selected by default - can't create points, only move filled or open points.
+- `point` - create a filled point by clicking on the numberline.
+- `point-open` - create an open point by clicking on the numberline. `select`, `point`, `point-open` are mutually exclusive
+- `reset` - clear all points from the numberline
+- `delete` - delete selected point(s) from the numberline
 
 #### Simulation
 

@@ -9,10 +9,10 @@
   }
 
   button {
-    height: 100%;
     width: 37px;
     background-color: white;
     border: none;
+    vertical-align: top;
     cursor: pointer;
     padding:4px;
     &:hover {
@@ -28,6 +28,7 @@
 
   .delete-expression svg {
     transform: translate(-3px, -2px);
+    overflow: visible;
   }
   .mixed-fraction svg {
     transform: scale(0.9) translate(-2px, 2px);

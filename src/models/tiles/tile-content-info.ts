@@ -2,8 +2,8 @@ import { ITileMetadataModel, TileMetadataModel } from "./tile-metadata";
 import { TileContentModel, ITileContentModel } from "./tile-content";
 import { IClueObjectSnapshot } from "../annotations/clue-object";
 import { AppConfigModelType } from "../stores/app-config-model";
-import { PartialSharedModelEntry } from "../document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../shared/shared-data-set";
+import { SharedModelEntrySnapshotType } from "../document/shared-model-entry";
 
 export interface IDefaultContentOptions {
   // title is only currently used by the Geometry and Table tiles
@@ -22,13 +22,13 @@ type TileContentSnapshotPostProcessor =
 
 type TileContentNewSharedModelIdUpdater = (
   content: any,
-  sharedModelEntries: PartialSharedModelEntry[],
+  sharedModelEntries: SharedModelEntrySnapshotType[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) => any;
 
 type ClueObjectNewSharedModelIdUpdater = (
   clueObject: IClueObjectSnapshot,
-  sharedModelEntries: PartialSharedModelEntry[],
+  sharedModelEntries: SharedModelEntrySnapshotType[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) => any;
 
@@ -59,7 +59,7 @@ export interface ITileContentInfo {
   isDataConsumer?: boolean;
   isDataProvider?: boolean;
   isVariableProvider?: boolean;
-  consumesMultipleDataSets?: boolean;
+  consumesMultipleDataSets?: (appConfig: AppConfigModelType) => boolean;
   tileSnapshotPreProcessor?: TileModelSnapshotPreProcessor;
   contentSnapshotPostProcessor?: TileContentSnapshotPostProcessor;
   updateContentWithNewSharedModelIds?: TileContentNewSharedModelIdUpdater;

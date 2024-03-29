@@ -1,19 +1,17 @@
-import {ScaleBand, ScaleLinear, select} from "d3";
-import React, {useCallback, useRef, useState} from "react";
+import {D3DragEvent, drag, ScaleBand, ScaleLinear, select} from "d3";
+import React, {useCallback, useRef} from "react";
 import {ScaleNumericBaseType} from "../imports/components/axis/axis-types";
-import {CaseData} from "../d3-types";
-import {PlotProps} from "../graph-types";
-import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
+import {CaseData, inGraphDot, selectGraphDots} from "../d3-types";
+import {PlotProps, Point} from "../graph-types";
+import { usePlotResponders} from "../hooks/use-plot";
 import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
 import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import {
-  // getScreenCoord,
   handleClickOnDot,
   setPointCoordinates,
-  setPointSelection,
-  startAnimation
+  setPointSelection
 } from "../utilities/graph-utils";
 import { useGraphLayerContext } from "../hooks/use-graph-layer-context";
 
@@ -30,11 +28,7 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
     layout = useGraphLayoutContext(),
     legendAttrID = dataConfiguration?.attributeID('legend') as string,
     yScaleRef = useRef<ScaleNumericBaseType>(),
-    [dragID, setDragID] = useState(''),
-    currPos = useRef({x: 0, y: 0}),
-    didDrag = useRef(false),
     target = useRef<any>(),
-    selectedDataObjects = useRef<Record<string, { x: number, y: number }>>({}),
     plotNumRef = useRef(0);
 
   secondaryAttrIDsRef.current = dataConfiguration?.yAttributeIDs || [];
@@ -43,99 +37,67 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
   dragPointRadiusRef.current = graphModel.getPointRadius('hover-drag');
   yScaleRef.current = layout.getAxisScale("left") as ScaleNumericBaseType;
 
-  const onDragStart = useCallback((event: MouseEvent) => {
-      target.current = select(event.target as SVGSVGElement);
-      const aCaseData: CaseData = target.current.node().__data__;
-      if (!aCaseData) return;
+  const
+    onDragStart = useCallback((event: D3DragEvent<SVGGElement,CaseData,Point>, datum) => {
+      const targetDot = event.sourceEvent.target && inGraphDot(event.sourceEvent.target as SVGSVGElement);
+      if (!targetDot) return;
+      target.current = select(targetDot as SVGSVGElement);
+      if (!datum || !dataConfiguration || datum.dataConfigID !== dataConfiguration.id) return;
+      handleClickOnDot(event.sourceEvent, datum, dataConfiguration);
+      graphModel.setInteractionInProgress(true);
       dataset?.beginCaching();
-      secondaryAttrIDsRef.current = dataConfiguration?.yAttributeIDs || [];
+      secondaryAttrIDsRef.current = dataConfiguration.yAttributeIDs || [];
       enableAnimation.current = false; // We don't want to animate points until end of drag
-      didDrag.current = false;
-      const tItsID = aCaseData.caseID;
-      plotNumRef.current = target.current.datum()?.plotNum ?? 0;
-      if (target.current.node()?.nodeName === 'circle') {
-        target.current
-          .property('isDragging', true)
-          .transition()
-          .attr('r', dragPointRadiusRef.current);
-        setDragID(tItsID);
-        currPos.current = {x: event.clientX, y: event.clientY};
+      plotNumRef.current = datum.plotNum ?? 0;
+    }, [dataConfiguration, dataset, enableAnimation, graphModel]),
 
-        handleClickOnDot(event, aCaseData, dataConfiguration);
-        // Record the current values, so we can change them during the drag and restore them when done
-        const { caseSelection } = dataConfiguration || {},
-          xAttrID = dataConfiguration?.attributeID('x') ?? '';
-          caseSelection?.forEach(anID => {
-          selectedDataObjects.current[anID] = {
-            x: dataset?.getNumeric(anID, xAttrID) ?? 0,
-            y: dataset?.getNumeric(anID, secondaryAttrIDsRef.current[plotNumRef.current]) ?? 0
-          };
-        });
-      }
-    }, [dataConfiguration, dataset, enableAnimation]),
-
-    onDrag = useCallback((event: MouseEvent) => {
-      const xAxisScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>,
-        xAttrID = dataConfiguration?.attributeID('x') ?? '';
-      if (dragID !== '') {
-        const newPos = {x: event.clientX, y: event.clientY},
-          dx = newPos.x - currPos.current.x,
-          dy = newPos.y - currPos.current.y;
-        currPos.current = newPos;
-        if (dx !== 0 || dy !== 0) {
-          didDrag.current = true;
-          const deltaX = Number(xAxisScale.invert(dx)) - Number(xAxisScale.invert(0)),
-            deltaY = Number(yScaleRef.current?.invert(dy)) - Number(yScaleRef.current?.invert(0)),
-            caseValues: ICase[] = [],
-            { caseSelection } = dataConfiguration || {};
-            caseSelection?.forEach(anID => {
-            const currX = Number(dataset?.getNumeric(anID, xAttrID)),
-              currY = Number(dataset?.getNumeric(anID, secondaryAttrIDsRef.current[plotNumRef.current]));
-            if (isFinite(currX) && isFinite(currY)) {
-              caseValues.push({
-                __id__: anID,
-                [xAttrID]: currX + deltaX,
-                [secondaryAttrIDsRef.current[plotNumRef.current]]: currY + deltaY
-              });
-            }
+    updatePositions = useCallback((dx: number, dy: number) => {
+      const
+        xAxisScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>,
+        xAttrID = dataConfiguration?.attributeID('x') ?? '',
+        deltaX = Number(xAxisScale.invert(dx)) - Number(xAxisScale.invert(0)),
+        deltaY = Number(yScaleRef.current?.invert(dy)) - Number(yScaleRef.current?.invert(0)),
+        caseValues: ICase[] = [],
+        cellSelection = dataConfiguration?.dataset?.selectedCells;
+      cellSelection?.forEach(cell => {
+        const
+          currX = Number(dataset?.getNumeric(cell.caseId, xAttrID)),
+          currY = Number(dataset?.getNumeric(cell.caseId, cell.attributeId));
+        if (isFinite(currX) && isFinite(currY)) {
+          caseValues.push({
+            __id__: cell.caseId,
+            [xAttrID]: currX + deltaX,
+            [cell.attributeId]: currY + deltaY
           });
-          caseValues.length &&
-          dataset?.setCaseValues(caseValues,
-            [xAttrID, secondaryAttrIDsRef.current[plotNumRef.current]]);
         }
-      }
-    }, [layout, dataConfiguration, dataset, dragID]),
+      });
+      caseValues.length &&
+        dataset?.setCanonicalCaseValues(caseValues);
+    }, [layout, dataConfiguration, dataset]),
 
-    onDragEnd = useCallback(() => {
-      if (dragID !== '') {
-        target.current
-          .classed('dragging', false)
-          .property('isDragging', false)
-          .transition()
-          .attr('r', selectedPointRadiusRef.current);
-        setDragID(() => '');
+    onDrag = useCallback((event: D3DragEvent<SVGGElement,CaseData,Point>) => {
+      if (event.dx !== 0 || event.dy !== 0) {
+        updatePositions(event.dx, event.dy);
+      }
+    }, [updatePositions]),
+
+    onDragEnd = useCallback((event: D3DragEvent<SVGGElement,CaseData,Point>) => {
+        graphModel.setInteractionInProgress(false);
+        // Final update does a rescale if appropriate
+        updatePositions(event.dx, event.dy);
         target.current = null;
+    }, [graphModel, updatePositions]),
 
-        if (didDrag.current) {
-          const caseValues: ICase[] = [],
-            { caseSelection } = dataConfiguration || {},
-            xAttrID = dataConfiguration?.attributeID('x') ?? '';
-            caseSelection?.forEach(anID => {
-            caseValues.push({
-              __id__: anID,
-              [xAttrID]: selectedDataObjects.current[anID].x,
-              [secondaryAttrIDsRef.current[plotNumRef.current]]: selectedDataObjects.current[anID].y
-            });
-          });
-          startAnimation(enableAnimation); // So points will animate back to original positions
-          caseValues.length && dataset?.setCaseValues(caseValues,
-            [xAttrID, secondaryAttrIDsRef.current[plotNumRef.current]]);
-          didDrag.current = false;
-        }
-      }
-    }, [dataConfiguration, dataset, dragID, enableAnimation,]);
-
-  useDragHandlers(window, {start: onDragStart, drag: onDrag, end: onDragEnd});
+    refreshDragHandlers = useCallback(() => {
+      selectGraphDots(dotsRef.current)
+        ?.call(drag<SVGGElement,CaseData,Point>()
+          .filter(() => graphModel.editingMode !== "none")
+          .subject((event) => ({ x: event.x, y: event.y }))
+          .on('start', onDragStart)
+          .on('drag', onDrag)
+          .on('end', onDragEnd)
+        );
+    }, [dotsRef, graphModel, onDrag, onDragEnd, onDragStart]);
 
   const refreshPointSelection = useCallback(() => {
     const { pointColor, pointStrokeColor } = graphModel;
@@ -186,8 +148,9 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       selectedOnly, getScreenX, getScreenY, getLegendColor,
       getColorForId: graphModel.getColorForId, enableAnimation, pointColor, pointStrokeColor
     });
+    refreshDragHandlers();
   }, [dataConfiguration, dataset, dotsRef, layout, legendAttrID,
-    enableAnimation, graphModel, yScaleRef]);
+    enableAnimation, graphModel, yScaleRef, refreshDragHandlers]);
 
   // const refreshPointPositionsSVG = useCallback((selectedOnly: boolean) => {
   //   const xAttrID = dataConfiguration?.attributeID('x') ?? '',

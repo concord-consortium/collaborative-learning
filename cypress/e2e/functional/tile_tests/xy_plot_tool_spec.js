@@ -40,6 +40,23 @@ function buildTable(data) {
   });
 }
 
+// Parse `transform` attributes (used for point positioning)
+function xAttributeOfTransform(matcher) {
+  return attributeOfTransform(matcher, 1);
+}
+function yAttributeOfTransform(matcher) {
+  return attributeOfTransform(matcher, 2);
+}
+function attributeOfTransform(matcher, n) {
+  return matcher
+    .invoke('attr', 'transform')
+    .then(transform => {
+      return transform.match(/translate\((-?[0-9.]+), *(-?[0-9.]+)\)/)[n];
+    })
+    .then(parseFloat);
+}
+
+
 function beforeTest(params) {
   cy.clearQAData('all');
   cy.visit(params);
@@ -80,6 +97,8 @@ context('XYPlot Tool Tile', function () {
       cy.log("Link Table");
       clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
       xyTile.linkTable("Table Data 1");
+      cy.wait(1000); // Needs a little extra time, probably due to legend resizing.
+      // Otherwise the upcoming typeInTableCell fails.
 
       cy.log("shows edit boxes on axes");
       xyTile.getEditableAxisBox("bottom", "min").should("exist");
@@ -98,14 +117,17 @@ context('XYPlot Tool Tile', function () {
         tableToolTile.getTableCell().eq(6).should('contain', '6');
       });
 
-      cy.log("verify graph dot is updated");
+      cy.log("verify graph dot is added");
       xyTile.getGraphDot().should('have.length', 2);
 
       // X axis should have scaled to fit 5 and 7.
       xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
       xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 7, 12);
 
-      cy.log("add another data point");
+      cy.log("add another data point with axes locked");
+      xyTile.getTile().click();
+      clueCanvas.clickToolbarButton("graph", "toggle-lock");
+      clueCanvas.toolbarButtonIsSelected("graph", "toggle-lock");
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.typeInTableCell(9, '15');
         tableToolTile.getTableCell(8).should('contain', '15');
@@ -130,6 +152,10 @@ context('XYPlot Tool Tile', function () {
       xyTile.getGraphDot().eq(2).should('be.visible');
       xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
       xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 15, 20);
+
+      // Turn Lock axes off
+      clueCanvas.clickToolbarButton("graph", "toggle-lock");
+      clueCanvas.toolbarButtonIsNotSelected("graph", "toggle-lock");
 
       cy.log("add y2 column to table and show it");
       tableToolTile.getTableTile().click();
@@ -199,6 +225,32 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().click();
       clueCanvas.deleteTile('xyplot');
       xyTile.getTile().should('not.exist');
+    });
+
+    it("Graph can be linked to table with expression", () => {
+      beforeTest(queryParamsMultiDataset);
+      cy.collapseResourceTabs();
+      clueCanvas.addTile("graph");
+      xyTile.getTile().should('be.visible');
+
+      clueCanvas.addTile('table');
+      tableToolTile.getTableTile().should('be.visible');
+      clueCanvas.clickToolbarButton('table', 'set-expression');
+      cy.get('#expression-input').click().type('x*x{enter}');
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.typeInTableCellXY(0, 0, '5');
+        tableToolTile.getTableCellXY(0, 0).should('contain', '5');
+        tableToolTile.getTableCellXY(0, 1).should('contain', '25');
+        tableToolTile.typeInTableCellXY(1, 0, '10');
+        tableToolTile.getTableCellXY(1, 0).should('contain', '10');
+        tableToolTile.getTableCellXY(1, 1).should('contain', '100');
+      });
+
+      cy.log("Link Table");
+      xyTile.getTile().click();
+      clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
+      xyTile.linkTable("Table Data 1");
+      xyTile.getGraphDot().should('have.length', 2);
     });
 
     it("Test duplicating graph with an xy-plot (a.k.a. graph)", () => {
@@ -467,6 +519,125 @@ context('XYPlot Tool Tile', function () {
       xyTile.getPlottedVariablesGroup().should("have.length", 1);
       // Only the unlink remove button should remain
       xyTile.getRemoveVariablesButtons().should("have.length", 1);
+    });
+
+    it('Test points by hand', () => {
+      beforeTest(queryParamsMultiDataset);
+      cy.log('Add XY Plot Tile');
+      cy.collapseResourceTabs();
+      clueCanvas.addTile('graph');
+      xyTile.getTile('.primary-workspace').should('be.visible');
+      clueCanvas.toolbarButtonIsDisabled('graph', 'move-points');
+      clueCanvas.toolbarButtonIsNotSelected('graph', 'move-points');
+      clueCanvas.toolbarButtonIsDisabled('graph', 'add-points');
+      clueCanvas.toolbarButtonIsNotSelected('graph', 'add-points');
+
+      // Create manual layer
+      clueCanvas.clickToolbarButton('graph', 'add-points-by-hand');
+      clueCanvas.toolbarButtonIsDisabled('graph', 'add-points-by-hand'); // only one manual set allowed
+      clueCanvas.toolbarButtonIsEnabled('graph', 'move-points');
+      clueCanvas.toolbarButtonIsEnabled('graph', 'add-points');
+      clueCanvas.toolbarButtonIsSelected('graph', 'add-points'); // automatically turns on "add" mode
+      xyTile.getXAttributesLabel().should('have.length', 1).should('contain.text', 'X Variable');
+      xyTile.getYAttributesLabel().should('have.length', 1).should('contain.text', 'Y Variable 1');
+      xyTile.getLayerName().should('have.length', 1).should('contain.text', 'Added by hand');
+      xyTile.getLayerNameInput().should('not.be.visible');
+
+      // Rename manual layer
+      xyTile.getLayerNameEditButton().click();
+      xyTile.getLayerNameEditButton().should('have.length', 0);
+      xyTile.getLayerNameInput().should('be.visible').type('Renamed{enter}');
+      xyTile.getLayerNameInput().should('not.be.visible');
+      xyTile.getLayerName().should('have.length', 1).should('contain.text', 'Renamed');
+
+      // Add points
+      xyTile.getGraphDot().should('have.length', 0);
+      xyTile.getTile('.primary-workspace').should('have.length', 1);
+      xyTile.getGraphBackground().should('have.length', 1).click(150, 50);
+      xyTile.getGraphBackground().click(200, 100);
+      xyTile.getGraphDot().should('have.length', 2);
+
+      // Switch to 'select/move' mode
+      clueCanvas.clickToolbarButton('graph', 'move-points');
+      clueCanvas.toolbarButtonIsSelected('graph', 'move-points');
+      clueCanvas.toolbarButtonIsNotSelected('graph', 'add-points');
+      xyTile.getGraphBackground().click(250, 100); // should not add a point
+      xyTile.getGraphDot().should('have.length', 2);
+
+      // Drag a point to reposition.  Should start out where we initially clicked
+      xAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 150, 10);
+      yAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 50, 10);
+      clueCanvas.clickToolbarButton('graph', 'toggle-lock'); // so that we can test position without rescale happening
+
+      xyTile.getGraphDot().eq(0).then(elt => {
+        const currentPos = elt[0].getBoundingClientRect();
+        cy.window().then(win => {
+          xyTile.getGraphDot().eq(0).children('circle').eq(1)
+            .trigger("mousedown", { force: true, view: win })
+            .trigger("mousemove", { force: true, view: win, clientX: currentPos.x+25, clientY: currentPos.y+25 })
+            .trigger("mouseup", { force: true, view: win, clientX: currentPos.x+25, clientY: currentPos.y+25 });
+        });
+        cy.wait(500); // animation
+        xAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 175, 10);
+        yAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 75, 10);
+        clueCanvas.clickToolbarButton('graph', 'toggle-lock'); // unlock
+      });
+
+      // Click toolbar button again to leave edit mode
+      clueCanvas.clickToolbarButton('graph', 'move-points');
+      clueCanvas.toolbarButtonIsNotSelected('graph', 'move-points');
+      clueCanvas.toolbarButtonIsNotSelected('graph', 'add-points');
+
+      // Delete point with toolbar button
+      xyTile.getGraphDot().eq(0).click();
+      xyTile.getGraphDot().eq(0).children('circle.outer-circle').should("have.class", "selected");
+      clueCanvas.clickToolbarButton('graph', 'delete');
+      xyTile.getGraphDot().should('have.length', 1);
+
+      // Delete point with keyboard shortcut
+      xyTile.getGraphDot().eq(0).click();
+      xyTile.getGraphDot().eq(0).children('circle.outer-circle').should("have.class", "selected");
+      xyTile.getGraphDot().eq(0).type("{backspace}");
+      xyTile.getGraphDot().should('have.length', 0);
+    });
+
+    it("Test movable line", () => {
+      beforeTest(queryParamsMultiDataset);
+      clueCanvas.addTile("graph");
+      clueCanvas.toolbarButtonIsEnabled("graph", "movable-line");
+      clueCanvas.toolbarButtonIsNotSelected("graph", "movable-line");
+      xyTile.getMovableLine().should("have.length", 0);
+      xyTile.getMovableLineEquationContainer().should("have.length", 0);
+
+      // Add movable line
+      clueCanvas.clickToolbarButton("graph", "movable-line");
+      clueCanvas.toolbarButtonIsEnabled("graph", "movable-line");
+      clueCanvas.toolbarButtonIsSelected("graph", "movable-line");
+      xyTile.getMovableLine().should("have.length", 1);
+      xyTile.getMovableLineCover().should("have.length", 3);
+      xyTile.getMovableLineEquationContainer()
+        .should("have.length", 1)
+        // .and("be.visible") -- fails, since there's a (transparent) element covering it
+        .and("contain.html", "<em>time</em>")  // from default axis labels of the unit
+        .and("contain.html", "<em>dist</em>");
+      // this is how visibility is actually accomplished:
+      xyTile.getMovableLineWrapper().should("have.class", "fadeIn").and("not.have.class", "fadeOut");
+      xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
+
+      // Drag movable line
+      // We drag the bottom part to the right enough to make the slope negative
+      xyTile.getMovableLineCover('lower')
+        .trigger("mousedown", { eventConstructor: 'MouseEvent' })
+        .trigger("mousemove", 400, 200, { force: true, eventConstructor: 'MouseEvent' })
+        .trigger("mouseup", { eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineEquationSlope().should("be.lessThan", 0);
+
+      // Hide movable line (it still exists, just hidden)
+      clueCanvas.clickToolbarButton("graph", "movable-line");
+      clueCanvas.toolbarButtonIsEnabled("graph", "movable-line");
+      clueCanvas.toolbarButtonIsNotSelected("graph", "movable-line");
+      xyTile.getMovableLine().should("have.length", 1);
+      xyTile.getMovableLineWrapper().should("have.class", "fadeOut").and("not.have.class", "fadeIn");
     });
   });
 });

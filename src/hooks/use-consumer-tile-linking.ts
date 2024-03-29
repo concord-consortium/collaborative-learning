@@ -12,6 +12,7 @@ import { SharedModelUnion } from "../models/shared/shared-model-manager";
 import { SharedModelType } from "../models/shared/shared-model";
 import { logSharedModelDocEvent } from "../models/document/log-shared-model-document-event";
 import { LogEventName } from "../lib/logger-types";
+import { useAppConfig } from "./use-stores";
 
 interface IProps {
   // TODO: This should be replaced with a generic disabled
@@ -56,6 +57,7 @@ interface IProps {
 export const useConsumerTileLinking = ({
   model, shareType, hasLinkableRows, readOnly, tileType, onLinkTile, onUnlinkTile, onCreateTile
 }: IProps) => {
+  const appConfig = useAppConfig();
   // In the future we might need to limit this search to only tiles that are consumers for 'shareType'.
   // At the moment we have no cases where it matters.
   const { consumers: linkableTilesAllTypes } = useLinkableTiles({ model });
@@ -89,7 +91,8 @@ export const useConsumerTileLinking = ({
         // Don't remove old links before adding the new one, since some models (eg, table) take action
         // if they see they have no linked data.
         let dataSetsToRemove = [] as SharedModelType[];
-        if (shareType === SharedDataSet && !getTileContentInfo(consumerTile.type)?.consumesMultipleDataSets) {
+        const allowsMultiple = getTileContentInfo(consumerTile.type)?.consumesMultipleDataSets?.(appConfig);
+        if (shareType === SharedDataSet && !allowsMultiple) {
           dataSetsToRemove = sharedModelManager.getTileSharedModelsByType(consumerTile, SharedDataSet);
         }
         if (modelToShare){
@@ -105,7 +108,7 @@ export const useConsumerTileLinking = ({
         });
       }
     }
-  }, [model.content, modelToShare, readOnly, shareType, sharedModelManager]);
+  }, [appConfig, model.content, modelToShare, readOnly, shareType, sharedModelManager]);
 
   const unlinkTile = useCallback((tileInfo: ITileLinkMetadata) => {
     const linkedTile = getTileContentById(model.content, tileInfo.id);

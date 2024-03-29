@@ -30,6 +30,7 @@ export function InputTextbox({ defaultValue, finishEditing, inputRef, setWidth, 
         finishEditing();
         break;
     }
+    e.stopPropagation();
   };
 
   const handleBlur: React.FocusEventHandler<HTMLInputElement> = e => {

@@ -12,12 +12,14 @@ export type DotsElt = SVGSVGElement | null;
 //  CaseData: type of data attached to selected element
 //  SVGSVGElement: type of parent element selected by initial/global select
 //  unknown: type of data attached to parent element (none in this case)
-export type DotSelection = Selection<SVGCircleElement, CaseData, SVGSVGElement, unknown>;
+export type DotSelection = Selection<SVGGElement, CaseData, SVGSVGElement, unknown>;
+
+export const graphDotSelector = "g.graph-dot";
 
 // selects all all g elements, which contain inner and outer circles
 export function selectGraphDots(svg: DotsElt): DotSelection | null {
   return svg
-          ? select(svg).selectAll("g.graph-dot")
+          ? select(svg).selectAll(graphDotSelector)
           : null;
 }
 
@@ -37,4 +39,30 @@ export function selectInnerCircles(svg: DotsElt): DotSelection | null {
   return svg
           ? select(svg).selectAll("g.graph-dot .inner-circle")
           : null;
+}
+
+/**
+ * Returns true if node is a graph dot.
+ * @param node
+ * @returns boolean
+ */
+export function isGraphDot(node: Node) {
+  return (node.nodeName === "g"
+      && node instanceof SVGElement
+      && node.classList.contains("graph-dot"));
+}
+
+/**
+ * Returns true if node is a graph dot, or part of a graph dot.
+ * @param node
+ * @returns the graph dot element, or undefined
+ */
+export function inGraphDot(node: Node): SVGElement | undefined {
+  if (isGraphDot(node)) return node as SVGElement;
+  const parent = node.parentNode;
+  if (parent && parent instanceof SVGElement) {
+    return inGraphDot(parent);
+  } else {
+    return undefined;
+  }
 }

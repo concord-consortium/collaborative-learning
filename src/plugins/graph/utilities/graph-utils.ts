@@ -1,17 +1,16 @@
 import {extent, format, select, timeout} from "d3";
 import React from "react";
 import { isInteger} from "lodash";
-import { SnapshotOut } from "mobx-state-tree";
+import { SnapshotOut, getParentOfType } from "mobx-state-tree";
 
 import { IClueObjectSnapshot } from "../../../models/annotations/clue-object";
-import { PartialSharedModelEntry } from "../../../models/document/document-content-types";
 import { UpdatedSharedDataSetIds, replaceJsonStringsWithUpdatedIds } from "../../../models/shared/shared-data-set";
 import {
   CaseData, DotSelection, DotsElt, selectGraphDots, selectInnerCircles, selectOuterCircles
 } from "../d3-types";
 import {
   IDotsRef, kGraphFont, Point, outerCircleSelectedRadius, outerCircleUnselectedRadius,
-  Rect,rTreeRect, transitionDuration
+  Rect,rTreeRect, transitionDuration, kDefaultNumericAxisBounds
 } from "../graph-types";
 import {between} from "./math-utils";
 import {IAxisModel, isNumericAxisModel} from "../imports/components/axis/models/axis-model";
@@ -24,6 +23,7 @@ import {IDataConfigurationModel} from "../models/data-configuration-model";
 import {measureText} from "../../../components/tiles/hooks/use-measure-text";
 import { GraphModel, IGraphModel } from "../models/graph-model";
 import { isFiniteNumber } from "../../../utilities/math-utils";
+import { SharedModelEntrySnapshotType } from "../../../models/document/shared-model-entry";
 
 /**
  * Utility routines having to do with graph entities
@@ -51,7 +51,8 @@ export function ptInRect(pt: Point, iRect: Rect) {
 /**
  * This function closely follows V2's CellLinearAxisModel:_computeBoundsAndTickGap
  */
-export function computeNiceNumericBounds(min: number, max: number): { min: number, max: number } {
+export function computeNiceNumericBounds(
+  min: number|undefined, max: number|undefined): { min: number, max: number } {
 
   function computeTickGap(iMin: number, iMax: number) {
     const range = (iMin >= iMax) ? Math.abs(iMin) : iMax - iMin,
@@ -74,37 +75,64 @@ export function computeNiceNumericBounds(min: number, max: number): { min: numbe
     return Math.max(power * base, Number.MIN_VALUE);
   }
 
+  if (min === undefined || max === undefined || (min === max && min === 0)) {
+    return { min: kDefaultNumericAxisBounds[0], max: kDefaultNumericAxisBounds[1] };
+  }
+
   const kAddend = 5,  // amount to extend scale
     kFactor = 2.5,
     bounds = {min, max};
-  if (min === max && min === 0) {
-    bounds.min = -10;
-    bounds.max = 10;
-  } else if (min === max && isInteger(min)) {
+
+  if (min === max && isInteger(min)) {
     bounds.min -= kAddend;
     bounds.max += kAddend;
   } else if (min === max) {
-    bounds.min = bounds.min + 0.1 * Math.abs(bounds.min);
-    bounds.max = bounds.max - 0.1 * Math.abs(bounds.max);
-  } else if (min > 0 && max > 0 && min <= max / kFactor) {  // Snap to zero
-    bounds.min = 0;
-  } else if (min < 0 && max < 0 && max >= min / kFactor) {  // Snap to zero
-    bounds.max = 0;
+    // Make a range around a single point by moving limits 10% in each direction
+    bounds.min = bounds.min - 0.1 * Math.abs(bounds.min);
+    bounds.max = bounds.max + 0.1 * Math.abs(bounds.max);
   }
+
+  // Find location of tick marks, move limits to a tick mark
+  // making sure there is at least 1/2 of a tick mark space beyond the last data point
   const tickGap = computeTickGap(bounds.min, bounds.max);
+
   if (tickGap !== 0) {
-    bounds.min = (Math.floor(bounds.min / tickGap) - 0.5) * tickGap;
-    bounds.max = (Math.floor(bounds.max / tickGap) + 1.5) * tickGap;
+    bounds.min = Math.floor(bounds.min / tickGap - 0.5) * tickGap;
+    bounds.max = Math.ceil(bounds.max / tickGap + 0.5) * tickGap;
   } else {
     bounds.min -= 1;
     bounds.max += 1;
   }
+
+  // Snap to zero if close to 0.
+  if (min > 0 && max > 0 && min <= max / kFactor) {
+    bounds.min = 0;
+  } else if (min < 0 && max < 0 && max >= min / kFactor) {
+    bounds.max = 0;
+  }
   return bounds;
 }
 
-export function setNiceDomain(values: number[], axisModel: IAxisModel) {
+/**
+ * Set the domain of the axis so that it fits all the given data points in a
+ * nice way. The values can be any numbers in any order; only the min and max in
+ * the array matter. The actual min and max set on the axis are derived from
+ * this considering factors such as making sure there is a non-zero range,
+ * starting and ending on tick marks, and snapping an end to 0 if it is close to 0.
+ *
+ * @param values data points to be fit.
+ * @param axisModel axis to update.
+ * @param growOnly if true, the range will not be reduced from its current limits, only expanded if necessary.
+ */
+export function setNiceDomain(values: number[], axisModel: IAxisModel, growOnly: boolean = false) {
   if (isNumericAxisModel(axisModel)) {
     const [minValue, maxValue] = extent(values, d => d) as [number, number];
+    if (growOnly) {
+      const [currentMin, currentMax] = axisModel.domain;
+      if (minValue >= currentMin && maxValue <= currentMax) {
+        return;
+      }
+    }
     const {min: niceMin, max: niceMax} = computeNiceNumericBounds(minValue, maxValue);
     axisModel.setDomain(niceMin, niceMax);
   }
@@ -130,19 +158,38 @@ export function getPointTipText(caseID: string, attributeIDs: (string|undefined)
 
 export function handleClickOnDot(event: MouseEvent, caseData: CaseData, dataConfiguration?: IDataConfigurationModel) {
   if (!dataConfiguration) return;
+  event.stopPropagation();
+  const graphModel = getParentOfType(dataConfiguration, GraphModel);
   const dataset = dataConfiguration.dataset;
   const yAttributeId = dataConfiguration.yAttributeID(caseData.plotNum);
   const yCell = { attributeId: yAttributeId, caseId: caseData.caseID };
-  const extendSelection = event.shiftKey,
-    cellIsSelected = dataset?.isCellSelected(yCell);
-  if (!cellIsSelected) {
-    if (extendSelection) { // y cell is not selected and Shift key is down => add y cell to selection
-      dataset?.selectCells([yCell]);
-    } else { // y cell is not selected and Shift key is up => only this y cell should be selected
-      dataset?.setSelectedCells([yCell]);
+
+  if (graphModel.editingMode==="add"
+      && graphModel.editingLayer && graphModel.editingLayer.config !== dataConfiguration) {
+    // We're in "Add points" mode, and clicked on a case that is not in the editable dataset:
+    // add a case to the editable dataset at the same values as the existing case clicked on.
+    const existingCase = dataset?.getCanonicalCase(caseData.caseID);
+    if (existingCase) {
+      const xAttributeId = dataConfiguration.xAttributeID;
+      const x = dataset?.getNumeric(caseData.caseID, xAttributeId);
+      const y = dataset?.getNumeric(caseData.caseID, yAttributeId);
+      if (x !== undefined && y !== undefined) {
+        graphModel.editingLayer.addPoint(x, y);
+      }
     }
-  } else if (extendSelection) { // y cell is selected and Shift key is down => deselect cell
-    dataset?.selectCells([yCell], false);
+  } else {
+    // Otherwise, clicking on a dot means updating the selection.
+    const extendSelection = event.shiftKey,
+      cellIsSelected = dataset?.isCellSelected(yCell);
+    if (!cellIsSelected) {
+      if (extendSelection) { // Dot is not selected and Shift key is down => add to selection
+        dataset?.selectCells([yCell]);
+      } else { // Dot is not selected and Shift key is up => only this dot should be selected
+        dataset?.setSelectedCells([yCell]);
+      }
+    } else if (extendSelection) { // Dot is selected and Shift key is down => deselect
+      dataset?.selectCells([yCell], false);
+    }
   }
 }
 
@@ -180,8 +227,7 @@ export interface IMatchCirclesProps {
 export function matchCirclesToData(props: IMatchCirclesProps) {
   const { dataConfiguration, enableAnimation, instanceId, dotsElement } = props;
   const allCaseData = dataConfiguration.joinedCaseDataArrays;
-  const caseDataKeyFunc = (d: CaseData) => `${d.dataConfigID}-${d.plotNum}-${d.caseID}`;
-
+  const caseDataKeyFunc = (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.plotNum}_${d.caseID}`;
   // Create the circles
   const allCircles = selectGraphDots(dotsElement);
   if (!allCircles) return;
@@ -193,7 +239,7 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
       enter => {
         const g = enter.append('g')
           .attr('class', `graph-dot`)
-          .property('id', (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.caseID}`);
+          .property('id', (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.plotNum}_${d.caseID}`);
         g.append('circle')
           .attr('class', 'outer-circle');
         g.append('circle')
@@ -203,7 +249,6 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
     );
 
   dotsElement && select(dotsElement).on('click', (event: MouseEvent) => {
-    event.stopPropagation();
     const target = select(event.target as SVGSVGElement);
     if (target.node()?.nodeName === 'circle') {
       handleClickOnDot(event, target.datum() as CaseData, dataConfiguration);
@@ -487,9 +532,14 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
 
   const setPositions = (dots: DotSelection | null) => {
     if (dots !== null) {
+      // This utilizes a transition() to move the dots smoothly to new positions.
+      // However, any dots that don't have a position already should just move
+      // immediately; otherwise they enter from the top left for no reason.
       dots
         .transition()
-        .duration(duration)
+        .duration((d, i, nodes) => {
+          return nodes[i].getAttribute('transform') ? duration : 1;
+        })
         .attr('transform', transformForCase)
         // The rest of this should not be necessary, but works around an apparent Chrome bug.
         // At least in Chrome v120 on MacOS, if the points are animated from a position far off-screen,
@@ -570,7 +620,7 @@ export function decipherDotId(dotId: string) {
 
 export function updateGraphContentWithNewSharedModelIds(
   content: SnapshotOut<typeof GraphModel>,
-  sharedDataSetEntries: PartialSharedModelEntry[],
+  sharedDataSetEntries: SharedModelEntrySnapshotType[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) {
   return replaceJsonStringsWithUpdatedIds(content, ...Object.values(updatedSharedModelMap));
@@ -578,7 +628,7 @@ export function updateGraphContentWithNewSharedModelIds(
 
 export function updateGraphObjectWithNewSharedModelIds(
   object: IClueObjectSnapshot,
-  sharedDataSetEntries: PartialSharedModelEntry[],
+  sharedDataSetEntries: SharedModelEntrySnapshotType[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) {
   if (object.objectType === "dot") {

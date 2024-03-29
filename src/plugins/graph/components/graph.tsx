@@ -47,7 +47,7 @@ export const Graph = observer(
     function Graph({ graphController, readOnly, graphRef, onRequestRowHeight }: IProps) {
 
   const graphModel = useGraphModelContext(),
-    {autoAdjustAxes, enableAnimation} = graphController,
+    {enableAnimation} = graphController,
     {plotType} = graphModel,
     instanceId = useInstanceIdContext(),
     marqueeState = useMemo<MarqueeState>(() => new MarqueeState(), []),
@@ -159,7 +159,7 @@ export const Graph = observer(
     const connectingLines = graphModel.adornments.find(a => a.type === kConnectingLinesType);
     if (connectingLines && place === "left") {
       treatAs === 'categorical' && graphModel.hideAdornment(kConnectingLinesType);
-      treatAs === 'numeric' && graphModel.showAdornment(connectingLines);
+      treatAs === 'numeric' && graphModel.showAdornment(kConnectingLinesType);
     }
   };
 
@@ -183,8 +183,8 @@ export const Graph = observer(
     return axes.map((place: AxisPlace) => {
       return <GraphAxis key={place}
                         place={place}
+                        controller={graphController}
                         enableAnimation={enableAnimation}
-                        autoAdjust={autoAdjustAxes}
                         onDropAttribute={handleChangeAttribute}
                         onRemoveAttribute={handleRemoveAttribute}
                         onTreatAttributeAs={handleTreatAttrAs}
