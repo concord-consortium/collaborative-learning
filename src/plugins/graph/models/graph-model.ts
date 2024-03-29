@@ -312,6 +312,10 @@ export const GraphModel = TileContentModel
     get noAttributesAssigned() {
       return !self.layers.some(layer => !layer.config.noAttributesAssigned);
     },
+    // PrimaryRole should be in agreement on all layers, so just return the first.
+    get primaryRole() {
+      return self.layers[0].config?.primaryRole;
+    },
     get annotatableObjects() {
       const tileId = getTileIdFromContent(self) ?? "";
       const objects: IClueObject[] = [];

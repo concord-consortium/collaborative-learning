@@ -167,6 +167,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().click();
       xyTile.getYAttributesLabel().should("contain.text", "y");
       xyTile.selectYAttribute("y2");
+      cy.wait(1000); // animation
       // Should have rescaled to the new Y range, approx 30-32
       xyTile.getEditableAxisBox("left", "min").invoke('text').then(parseFloat).should("be.within", 29, 30);
       xyTile.getEditableAxisBox("left", "max").invoke('text').then(parseFloat).should("be.within", 32, 33);
@@ -176,6 +177,7 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.toolbarButtonIsSelected("graph", "toggle-lock");
 
       xyTile.selectYAttribute("y");
+      cy.wait(1000); // animation
       // Should NOT have rescaled this time.
       xyTile.getEditableAxisBox("left", "min").invoke('text').then(parseFloat).should("be.within", 29, 30);
       xyTile.getEditableAxisBox("left", "max").invoke('text').then(parseFloat).should("be.within", 32, 33);
