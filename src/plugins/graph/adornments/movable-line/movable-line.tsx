@@ -1,7 +1,7 @@
-import React, {useCallback, useContext, useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {autorun} from "mobx";
 import { observer } from "mobx-react-lite";
-import { drag, select, Selection} from "d3";
+import {drag, select, Selection} from "d3";
 import {useAxisLayoutContext} from "../../imports/components/axis/models/axis-layout-context";
 import {ScaleNumericBaseType} from "../../imports/components/axis/axis-types";
 import {INumericAxisModel} from "../../imports/components/axis/models/axis-model";
@@ -12,10 +12,11 @@ import { getAnnotationId, IMovableLineModel } from "./movable-line-model";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { kInfinitePoint } from "../adornment-models";
-import { LocationSetterContext, Point } from "../../graph-types";
+import { Point } from "../../graph-types";
+import { kAnnotationNodeDefaultRadius } from "../../../../components/annotations/annotation-utilities";
 
 import "./movable-line.scss";
-import { kAnnotationNodeDefaultRadius } from "../../../../components/annotations/annotation-utilities";
+import { useLocationSetterContext } from "../../hooks/use-location-setter-context";
 
 function equationContainer(model: IMovableLineModel, subPlotKey: Record<string, string>, containerId: string) {
   const classFromKey = model.classNameFromKey(subPlotKey),
@@ -40,7 +41,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     layout = useAxisLayoutContext(),
     instanceId = useInstanceIdContext(),
     readOnly = useReadOnlyContext(),
-    annotationLocationSetter = useContext(LocationSetterContext),
+    annotationLocationSetter = useLocationSetterContext(),
     xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType,
     xRange = xScale.range(),
     xScaleCopy = xScale.copy(),
@@ -146,7 +147,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
             x = point.x;
             y = point.y;
           }
-          if (x && y) {
+          if (x !== undefined && x !== null && y !== undefined && y !== null) {
             elt
               .attr('cx', x)
               .attr('cy', y);

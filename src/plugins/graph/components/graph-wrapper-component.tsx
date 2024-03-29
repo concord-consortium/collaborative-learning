@@ -18,8 +18,9 @@ import { IGraphModel } from "../models/graph-model";
 import { decipherDotId } from "../utilities/graph-utils";
 import { GraphComponent } from "./graph-component";
 import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
-import { LocationSetterContext, Point } from "../graph-types";
+import { Point } from "../graph-types";
 import { HotKeys } from "../../../utilities/hot-keys";
+import { LocationSetterContext } from "../hooks/use-location-setter-context";
 
 import "./graph-toolbar-registration";
 
@@ -122,7 +123,6 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
                 left: location.x + layout.getComputedBounds("plot").left,
                 top: location.y + layout.getComputedBounds("plot").top,
                 ...size };
-              console.log('bbox', bbox);
               return bbox;
             }
             return boundingBoxForPoint(location);
