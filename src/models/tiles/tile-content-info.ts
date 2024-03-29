@@ -59,7 +59,7 @@ export interface ITileContentInfo {
   isDataConsumer?: boolean;
   isDataProvider?: boolean;
   isVariableProvider?: boolean;
-  consumesMultipleDataSets?: boolean;
+  consumesMultipleDataSets?: (appConfig: AppConfigModelType) => boolean;
   tileSnapshotPreProcessor?: TileModelSnapshotPreProcessor;
   contentSnapshotPostProcessor?: TileContentSnapshotPostProcessor;
   updateContentWithNewSharedModelIds?: TileContentNewSharedModelIdUpdater;

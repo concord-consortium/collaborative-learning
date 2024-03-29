@@ -80,6 +80,7 @@ const DataflowNodeDataModel = types.
 
     // Control
     controlOperator: types.maybe(types.string),
+    waitDuration: types.maybe(types.number),
 
     // Demo Output
     outputType: types.maybe(types.string),

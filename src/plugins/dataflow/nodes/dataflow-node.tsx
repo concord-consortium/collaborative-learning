@@ -25,6 +25,8 @@ export class DataflowNode extends Node {
 
     const dynamicClasses = classNames({
       "gate-active": node.data.gateActive,
+      "wait-option-selected": node.data.hasWait,
+      "wait-active": node.data.waitActive,
       "has-flow-in": hasFlowIn(node),
       "uses-relays": outputsToAnyRelay(node),
       "uses-gripper": outputsToAnyGripper(node),

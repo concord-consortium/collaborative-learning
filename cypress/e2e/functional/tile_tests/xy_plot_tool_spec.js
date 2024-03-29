@@ -117,14 +117,17 @@ context('XYPlot Tool Tile', function () {
         tableToolTile.getTableCell().eq(6).should('contain', '6');
       });
 
-      cy.log("verify graph dot is updated");
+      cy.log("verify graph dot is added");
       xyTile.getGraphDot().should('have.length', 2);
 
       // X axis should have scaled to fit 5 and 7.
       xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
       xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 7, 12);
 
-      cy.log("add another data point");
+      cy.log("add another data point with axes locked");
+      xyTile.getTile().click();
+      clueCanvas.clickToolbarButton("graph", "toggle-lock");
+      clueCanvas.toolbarButtonIsSelected("graph", "toggle-lock");
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.typeInTableCell(9, '15');
         tableToolTile.getTableCell(8).should('contain', '15');
@@ -149,6 +152,10 @@ context('XYPlot Tool Tile', function () {
       xyTile.getGraphDot().eq(2).should('be.visible');
       xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
       xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 15, 20);
+
+      // Turn Lock axes off
+      clueCanvas.clickToolbarButton("graph", "toggle-lock");
+      clueCanvas.toolbarButtonIsNotSelected("graph", "toggle-lock");
 
       cy.log("add y2 column to table and show it");
       tableToolTile.getTableTile().click();
@@ -560,14 +567,21 @@ context('XYPlot Tool Tile', function () {
       // Drag a point to reposition.  Should start out where we initially clicked
       xAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 150, 10);
       yAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 50, 10);
-      // {force: true} seems to be necessary, not sure why
-      xyTile.getGraphDot().eq(0).children('circle').eq(1)
-        .trigger("mousedown", 150, 50, { force: true })
-        .trigger("drag", 175, 75, { force: true })
-        .trigger("mouseup", 175, 75, { force: true });
-      cy.wait(1000);
-      xAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 175, 10);
-      yAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 75, 10);
+      clueCanvas.clickToolbarButton('graph', 'toggle-lock'); // so that we can test position without rescale happening
+
+      xyTile.getGraphDot().eq(0).then(elt => {
+        const currentPos = elt[0].getBoundingClientRect();
+        cy.window().then(win => {
+          xyTile.getGraphDot().eq(0).children('circle').eq(1)
+            .trigger("mousedown", { force: true, view: win })
+            .trigger("mousemove", { force: true, view: win, clientX: currentPos.x+25, clientY: currentPos.y+25 })
+            .trigger("mouseup", { force: true, view: win, clientX: currentPos.x+25, clientY: currentPos.y+25 });
+        });
+        cy.wait(500); // animation
+        xAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 175, 10);
+        yAttributeOfTransform(xyTile.getGraphDot().eq(0)).should("be.closeTo", 75, 10);
+        clueCanvas.clickToolbarButton('graph', 'toggle-lock'); // unlock
+      });
 
       // Click toolbar button again to leave edit mode
       clueCanvas.clickToolbarButton('graph', 'move-points');

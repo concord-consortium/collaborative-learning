@@ -30,6 +30,7 @@ const ModernProblemModel = types
      * with all of the other sections in this problem, or this problem's unit
      */
     sectionsFromSnapshot: types.frozen<SectionModelSnapshot[]>(),
+    exemplars: types.array(types.string),
     config: types.maybe(types.frozen<Partial<ProblemConfiguration>>())
   })
   .volatile(self => ({
@@ -121,7 +122,10 @@ export const ProblemModel = types.snapshotProcessor(ModernProblemModel, {
     const sectionsFromSnapshot = sections || [];
     if (isLegacySnapshot(sn)) {
       const { disabled: disabledFeatures, settings, ...others } = sn;
-      return { ...others, sectionsFromSnapshot, config: { disabledFeatures, settings } } as ModernProblemSnapshot;
+      return { ...others,
+        sectionsFromSnapshot,
+        config: { disabledFeatures, settings }
+      } as ModernProblemSnapshot;
     }
     if (isAmbiguousSnapshot(sn)) {
       const { disabled: disabledFeatures, settings, config, ...others } = sn as any;

@@ -29,9 +29,8 @@ export const GraphComponent = observer(
   const graphRef = useRef<HTMLDivElement | null>(null);
   const {width, height} = useResizeDetector<HTMLDivElement>({ targetRef: graphRef });
   const enableAnimation = useRef(true);
-  const autoAdjustAxes = useRef(true);
   const graphController = useMemo(
-    () => new GraphController({layout, enableAnimation, instanceId, autoAdjustAxes}),
+    () => new GraphController({layout, enableAnimation, instanceId}),
     [layout, instanceId]
   );
 

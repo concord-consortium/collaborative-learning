@@ -2,7 +2,7 @@ import { CurriculumConfig, ICurriculumConfigSnapshot, getProblemOrdinal } from "
 
 function getConfig(overrides?: Partial<ICurriculumConfigSnapshot>) {
   return CurriculumConfig.create({
-    curriculumBaseUrl: "https://curriculum.example.com",
+    curriculumSiteUrl: "https://curriculum.example.com",
     ...overrides
   });
 }
