@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotOut, detach } from "mobx-state-tree";
+import { types, Instance, SnapshotOut, detach, SnapshotIn } from "mobx-state-tree";
 import { NumberNodeModel } from "../rete/nodes/number-node";
 import { MathNodeModel } from "../rete/nodes/math-node";
 import { CounterNodeModel } from "../rete/nodes/counter-node";
@@ -36,6 +36,7 @@ export const DataflowNodeModel = types.
     }
     return snapshot;
   });
+export interface DataflowNodeSnapshotIn extends SnapshotIn<typeof DataflowNodeModel> {}
 export interface DataflowNodeSnapshotOut extends SnapshotOut<typeof DataflowNodeModel> {}
 export interface IDataflowNodeModel extends Instance<typeof DataflowNodeModel> {}
 
@@ -47,6 +48,9 @@ export const DataflowProgramModel = types.
   })
   .actions(self => ({
     addNode(node: IDataflowNodeModel) {
+      self.nodes.put(node);
+    },
+    addNodeSnapshot(node: DataflowNodeSnapshotIn) {
       self.nodes.put(node);
     },
     removeNode(id: IDataflowNodeModel["id"]) {

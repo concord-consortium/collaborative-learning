@@ -27,9 +27,7 @@ import { ClassicPreset, NodeEditor } from "rete";
 import { Presets, ReactPlugin } from "rete-react-plugin";
 import { AreaExtensions, AreaPlugin, BaseAreaPlugin } from "rete-area-plugin";
 import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
-import { NumberNode, NumberNodeModel } from "../rete/nodes/number-node";
 import { NumberControl, NumberControlComponent } from "../rete/controls/num-control";
-import { MathNode, MathNodeModel } from "../rete/nodes/math-node";
 import { ValueControl, ValueControlComponent } from "../rete/controls/value-control";
 import { DataflowEngine } from "rete-engine";
 import { CustomDataflowNode } from "../nodes/dataflow-node";
@@ -38,9 +36,7 @@ import {
 } from "../rete/controls/dropdown-list-control";
 import { AreaExtra, Schemes } from "../rete/rete-scheme";
 import { NodeEditorMST } from "../rete/node-editor-mst";
-import { LogicNode, LogicNodeModel } from "../rete/nodes/logic-node";
 import { IBaseNode } from "../rete/nodes/base-node";
-import { GeneratorNode, GeneratorNodeModel } from "../rete/nodes/generator-node";
 import { PlotButtonControl, PlotButtonControlComponent } from "../rete/controls/plot-button-control";
 
 
@@ -460,36 +456,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const margin = 5;
   };
 
-  private addNode = async (nodeType: string, position?: [number, number]) => {
-
-    let node;
-    switch(nodeType) {
-      case "Generator": {
-        const genModel = GeneratorNodeModel.create();
-        node = new GeneratorNode(undefined, genModel, this.programEditor.process);
-        break;
-      }
-      case "Logic": {
-        const logicModel = LogicNodeModel.create();
-        node = new LogicNode(undefined, logicModel, this.programEditor.process);
-        break;
-      }
-      case "Math": {
-        const mathModel = MathNodeModel.create();
-        node = new MathNode(undefined, mathModel, this.programEditor.process);
-        break;
-      }
-      case "Number": {
-        const numModel = NumberNodeModel.create();
-        node = new NumberNode(undefined, numModel, this.programEditor.process);
-        break;
-      }
-      default:
-        break;
-    }
-    if (!node) return;
-
-    this.programEditor.addNode(node);
+  private addNode = (nodeType: string, position?: [number, number]) => {
+    this.programEditor.createAndAddNode(nodeType, position);
   };
 
   private serialDeviceRefresh = () => {

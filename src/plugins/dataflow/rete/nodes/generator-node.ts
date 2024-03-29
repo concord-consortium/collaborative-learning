@@ -2,15 +2,16 @@ import { ClassicPreset } from "rete";
 import { Instance } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
 import { INumberControl, NumberControl } from "../controls/num-control";
-import { BaseNode, BaseNodeModel, NoInputs, nodeType } from "./base-node";
+import { BaseNode, BaseNodeModel, NoInputs } from "./base-node";
 import { NodeGeneratorTypes } from "../../model/utilities/node";
 import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-list-control";
 import { ValueControl } from "../controls/value-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
+import { typeField } from "../../../../utilities/mst-utils";
 
 export const GeneratorNodeModel = BaseNodeModel.named("GeneratorNodeModel")
 .props({
-  type: nodeType("Generator"),
+  type: typeField("Generator"),
   generatorType: "Sine",
   amplitude: 1,
   period: 10

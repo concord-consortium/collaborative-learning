@@ -2,11 +2,12 @@ import { ClassicPreset } from "rete";
 import { Instance } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
 import { ValueControl } from "../controls/value-control";
-import { BaseNode, BaseNodeModel, NoInputs, nodeType } from "./base-node";
+import { BaseNode, BaseNodeModel, NoInputs } from "./base-node";
+import { typeField } from "../../../../utilities/mst-utils";
 
 export const CounterNodeModel = BaseNodeModel.named("CounterNodeModel")
 .props(({
-  type: nodeType("Counter")
+  type: typeField("Counter")
 }));
 export interface ICounterNodeModel extends Instance<typeof CounterNodeModel> {}
 

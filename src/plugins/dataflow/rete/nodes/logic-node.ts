@@ -4,13 +4,14 @@ import { numSocket } from "../num-socket";
 import { ValueControl } from "../controls/value-control";
 import { getNumDisplayStr } from "../../nodes/utilities/view-utilities";
 import { NodeOperationTypes } from "../../model/utilities/node";
-import { BaseNode, BaseNodeModel, nodeType } from "./base-node";
+import { BaseNode, BaseNodeModel } from "./base-node";
 import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-list-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
+import { typeField } from "../../../../utilities/mst-utils";
 
 export const LogicNodeModel = BaseNodeModel.named("LogicNodeModel")
 .props({
-  type: nodeType("Logic"),
+  type: typeField("Logic"),
   logicOperator: "Greater Than"
 })
 .actions(self => ({

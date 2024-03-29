@@ -4,13 +4,14 @@ import { numSocket } from "../num-socket";
 import { ValueControl } from "../controls/value-control";
 import { getNumDisplayStr } from "../../nodes/utilities/view-utilities";
 import { NodeOperationTypes } from "../../model/utilities/node";
-import { BaseNode, BaseNodeModel, nodeType } from "./base-node";
+import { BaseNode, BaseNodeModel } from "./base-node";
 import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-list-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
+import { typeField } from "../../../../utilities/mst-utils";
 
 export const MathNodeModel = BaseNodeModel.named("MathNodeModel")
 .props({
-  type: nodeType("Math"),
+  type: typeField("Math"),
   mathOperator: "Add"
 })
 .actions(self => ({

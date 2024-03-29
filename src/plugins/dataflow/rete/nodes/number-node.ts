@@ -2,8 +2,9 @@ import { ClassicPreset } from "rete";
 import { Instance } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
 import { INumberControl, NumberControl } from "../controls/num-control";
-import { BaseNode, BaseNodeModel, NoInputs, nodeType } from "./base-node";
+import { BaseNode, BaseNodeModel, NoInputs } from "./base-node";
 import { PlotButtonControl } from "../controls/plot-button-control";
+import { typeField } from "../../../../utilities/mst-utils";
 
 // There is some weirdness with the Number node and how its "value" is stored
 // The value is an entered input like selecting the units or a math function
@@ -12,7 +13,7 @@ import { PlotButtonControl } from "../controls/plot-button-control";
 // have. And is currently serialized in a separate "values" section.
 export const NumberNodeModel = BaseNodeModel.named("NumberNodeModel")
 .props({
-  type: nodeType("Number"),
+  type: typeField("Number"),
   // Our v1 models support this nodeValueUnits, but it isn't actually supported
   // in the UI. The number control which displays the nodeValue is not configured
   // to edit the units.

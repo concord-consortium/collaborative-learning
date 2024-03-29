@@ -7,10 +7,6 @@ import { Control, Socket } from "rete/_types/presets/classic";
 export type NoInputs = Record<string, never>;
 export type NoOutputs = Record<string, never>;
 
-export function nodeType(type: string) {
-  return types.optional(types.literal(type), type);
-}
-
 export const BaseNodeModel = types.model("BaseNodeModel",
 {
   // This should be overridden by the "subclasses"

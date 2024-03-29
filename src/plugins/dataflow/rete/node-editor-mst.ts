@@ -11,6 +11,8 @@ import { IMathNodeModel, MathNode } from "./nodes/math-node";
 import { CounterNode, ICounterNodeModel } from "./nodes/counter-node";
 import { ILogicNodeModel, LogicNode } from "./nodes/logic-node";
 import { GeneratorNode, IGeneratorNodeModel } from "./nodes/generator-node";
+import { IBaseNodeModel } from "./nodes/base-node";
+import { uniqueId } from "../../../utilities/js-utils";
 
 export class NodeEditorMST extends NodeEditor<Schemes> {
   private reteNodesMap: Record<string, Schemes['Node']> = {};
@@ -91,9 +93,8 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
     leafNodes.forEach(n => this.engine.fetch(n.id));
   };
 
-
-  private createReteNode(id: string, type: string, model: IDataflowNodeModel['data']) {
-    switch(type) {
+  private createReteNodeFromNodeModel(id: string, model: IBaseNodeModel) {
+    switch(model.type) {
       case "Counter": {
         return new CounterNode(id, model as ICounterNodeModel);
       }
@@ -111,6 +112,32 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
       }
     }
   }
+
+  public createAndAddNode(nodeType: string, position?: [number, number]) {
+    const id = uniqueId();
+    this.mstProgram.addNodeSnapshot({
+      id,
+      name: nodeType,
+      x: position?.[0] || 0,
+      y: position?.[1] || 0,
+      data: { type: nodeType }
+    });
+
+    const node = this.getNode(id);
+
+    // Temporarily emit like normal things are more simple
+    // this is not waiting for the emit before calling the process.
+    // we might need to add it
+    this.emit({ type: 'nodecreated', data: node });
+
+    // run the process command so this newly added node can update any controls like the
+    // value control.
+    this.process();
+  }
+
+  //
+  // Methods implementing the Rete `Editor` interface
+  //
 
   /**
    * Get a node by id
@@ -133,7 +160,7 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
     if (existingReteNode) {
       return existingReteNode;
     } else {
-      const reteNode = this.createReteNode(id, mstNode.name, mstNode.data);
+      const reteNode = this.createReteNodeFromNodeModel(id, mstNode.data);
       if (reteNode) {
         this.reteNodesMap[id] = reteNode;
       }
