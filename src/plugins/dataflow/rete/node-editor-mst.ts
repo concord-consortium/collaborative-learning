@@ -195,6 +195,11 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
     // Hack for now
     const node = data as any;
 
+    // Add this new node to the map, some rete plugins hold onto
+    // the node they receive. So we need to make sure to return the same node
+    // instance when getNode is called
+    this.reteNodesMap[node.id] = node;
+
     // Assume any code that adds a node will also create the MST model for the node
     const model = node.model as IDataflowNodeModel['data'];
 

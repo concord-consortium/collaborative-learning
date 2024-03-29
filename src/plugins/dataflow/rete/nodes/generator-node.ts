@@ -6,6 +6,7 @@ import { BaseNode, BaseNodeModel } from "./base-node";
 import { NodeGeneratorTypes } from "../../model/utilities/node";
 import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-list-control";
 import { ValueControl } from "../controls/value-control";
+import { PlotButtonControl } from "../controls/plot-button-control";
 
 export const GeneratorNodeModel = BaseNodeModel.named("GeneratorNodeModel")
 .props({
@@ -39,6 +40,7 @@ export class GeneratorNode extends BaseNode<
     amplitude: INumberControl,
     period: INumberControl,
     value: ValueControl,
+    plotButton: PlotButtonControl
   },
   IGeneratorNodeModel
 > {
@@ -67,7 +69,8 @@ export class GeneratorNode extends BaseNode<
 
     this.valueControl = new ValueControl("Generator");
     this.addControl("value", this.valueControl);
-    // TODO: need to add the plot control
+
+    this.addControl("plotButton", new PlotButtonControl(model));
   }
 
   data(): { value: number } {

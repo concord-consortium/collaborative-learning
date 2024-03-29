@@ -1,10 +1,13 @@
 import * as React from "react";
+import { observer } from "mobx-react";
 import styled, { css } from "styled-components";
-
-import { ClassicScheme, RenderEmit, Presets } from "rete-react-plugin";
-import { $nodecolor, $nodecolorselected, $nodewidth, $socketmargin, $socketsize } from "./vars";
-import { BaseAreaPlugin } from "rete-area-plugin";
 import { NodeEditor } from "rete";
+import { ClassicScheme, RenderEmit, Presets } from "rete-react-plugin";
+import { BaseAreaPlugin } from "rete-area-plugin";
+
+import { $nodecolor, $nodecolorselected, $nodewidth, $socketmargin, $socketsize } from "./vars";
+import { DataflowNodePlot } from "./dataflow-node-plot";
+import { IBaseNode } from "../rete/nodes/base-node";
 
 const { RefSocket, RefControl } = Presets.classic;
 
@@ -113,12 +116,19 @@ type Props<S extends ClassicScheme> = {
 export type DataflowNodeComponent<Scheme extends ClassicScheme> = (props: Props<Scheme>) => JSX.Element
 
 // eslint-disable-next-line max-statements
-export function CustomDataflowNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
+export const CustomDataflowNode = observer(
+  function CustomDataflowNode<Scheme extends ClassicScheme>(props: Props<Scheme>)
+{
   const inputs = Object.entries(props.data.inputs);
   const outputs = Object.entries(props.data.outputs);
   const controls = Object.entries(props.data.controls);
   const selected = props.data.selected || false;
   const { id, label, width, height } = props.data;
+
+  // FIXME: update 'Scheme' so we don't have to typecast here
+  const model = (props.data as unknown as IBaseNode).model;
+
+  const showPlot = model.plot;
 
   sortByIndex(inputs);
   sortByIndex(outputs);
@@ -126,6 +136,7 @@ export function CustomDataflowNode<Scheme extends ClassicScheme>(props: Props<Sc
 
   return (
     <DataflowNodeStyles
+      className="node"
       selected={selected}
       width={width}
       height={height}
@@ -135,18 +146,19 @@ export function CustomDataflowNode<Scheme extends ClassicScheme>(props: Props<Sc
       <div className="title" data-testid="title">{label}</div>
       {/* Outputs */}
       {outputs.map(([key, output]) => (
-        output && <div className="output" key={key} data-testid={`output-${key}`}>
-          <div className="output-title" data-testid="output-title">{output?.label}</div>
-          <RefSocket
-            name="output-socket"
-            side="output"
-            socketKey={key}
-            nodeId={id}
-            emit={props.emit}
-            payload={output.socket}
-            data-testid="output-socket"
-          />
-                  </div>
+        output &&
+          <div className="output" key={key} data-testid={`output-${key}`}>
+            <div className="output-title" data-testid="output-title">{output?.label}</div>
+            <RefSocket
+              name="output-socket"
+              side="output"
+              socketKey={key}
+              nodeId={id}
+              emit={props.emit}
+              payload={output.socket}
+              data-testid="output-socket"
+            />
+          </div>
       ))}
       {/* Controls */}
       {controls.map(([key, control]) => {
@@ -160,31 +172,37 @@ export function CustomDataflowNode<Scheme extends ClassicScheme>(props: Props<Sc
       })}
       {/* Inputs */}
       {inputs.map(([key, input]) => (
-        input && <div className="input" key={key} data-testid={`input-${key}`}>
-          <RefSocket
-            name="input-socket"
-            side="input"
-            socketKey={key}
-            nodeId={id}
-            emit={props.emit}
-            payload={input.socket}
-            data-testid="input-socket"
-          />
-          {input && (!input.control || !input.showControl) && (
-            <div className="input-title" data-testid="input-title">{input?.label}</div>
-          )}
-          {input?.control && input?.showControl && (
-            <RefControl
-              key={key}
-              name="input-control"
+        input &&
+          <div className="input" key={key} data-testid={`input-${key}`}>
+            <RefSocket
+              name="input-socket"
+              side="input"
+              socketKey={key}
+              nodeId={id}
               emit={props.emit}
-              payload={input.control}
-              data-testid="input-control"
+              payload={input.socket}
+              data-testid="input-socket"
             />
-          )
-          }
-                 </div>
+            {input && (!input.control || !input.showControl) && (
+              <div className="input-title" data-testid="input-title">{input?.label}</div>
+            )}
+            {input?.control && input?.showControl && (
+              <RefControl
+                key={key}
+                name="input-control"
+                emit={props.emit}
+                payload={input.control}
+                data-testid="input-control"
+              />
+            )
+            }
+          </div>
       ))}
+      <DataflowNodePlot
+        display={showPlot}
+        model={model}
+      />
+
     </DataflowNodeStyles>
   );
-}
+});

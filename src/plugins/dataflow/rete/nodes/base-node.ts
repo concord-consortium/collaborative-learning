@@ -6,6 +6,11 @@ import { Control, Socket } from "rete/_types/presets/classic";
 
 export const BaseNodeModel = types.model("BaseNodeModel",
 {
+  // This should be overridden by the "subclasses"
+  type: types.string,
+
+  plot: false,
+
   // It isn't entirely clear this is the right way to model this.
   // In dataflow v1 these nodeValues and recentValues were basically
   // stored in state.
@@ -27,9 +32,24 @@ export const BaseNodeModel = types.model("BaseNodeModel",
 .volatile(self => ({
   watchedValues: {
     "nodeValue": defaultMinigraphOptions
-  } as Record<string, any>
+  } as Record<string, any>,
+
+  // Plot properties: it might make sense to move these out of this model
+
+  // Dataset range based on all of the recentValue data, there might be multiple
+  // properties being watched
+  dsMax: -Infinity,
+  dsMin: Infinity,
+
+  // user defined range set by clicking on the graph
+  tickMax: undefined as number | undefined,
+  tickMin: undefined as number | undefined
 }))
 .actions(self => ({
+  setPlot(val: boolean) {
+    self.plot = val;
+  },
+
   setNodeValue(val: number) {
     self.nodeValue = val;
   },
@@ -68,7 +88,12 @@ export const BaseNodeModel = types.model("BaseNodeModel",
         recentValues.set(valueKey, [value]);
       }
     });
-  }
+  },
+
+  setTickMax(max: number) { self.tickMax = max; },
+  setTickMin(min: number) { self.tickMin = min; },
+  setDsMax(max: number) { self.dsMax = max; },
+  setDsMin(min: number) { self.dsMin = min; }
 }));
 export interface IBaseNodeModel extends Instance<typeof BaseNodeModel> {}
 

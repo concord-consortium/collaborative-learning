@@ -41,6 +41,7 @@ import { NodeEditorMST } from "../rete/node-editor-mst";
 import { LogicNode, LogicNodeModel } from "../rete/nodes/logic-node";
 import { IBaseNode } from "../rete/nodes/base-node";
 import { GeneratorNode, GeneratorNodeModel } from "../rete/nodes/generator-node";
+import { PlotButtonControl, PlotButtonControlComponent } from "../rete/controls/plot-button-control";
 
 
 export interface IStartProgramParams {
@@ -249,14 +250,30 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const editor = new NodeEditorMST(this.props.program);
       this.programEditor = editor;
 
-      editor.addPipe((context) => {
-        console.warn("editor event", context);
-        return context;
-      });
+      // editor.addPipe((context) => {
+      //   console.log("editor event", context);
+      //   return context;
+      // });
 
       const area = new AreaPlugin<Schemes, AreaExtra>(this.toolDiv);
+
+      // area.addPipe((context) => {
+      //   if (!["pointermove", "nodetranslate", "nodetranslated"].includes(context?.type as any)) {
+      //     console.log("area event", context);
+      //   }
+      //   return context;
+      // });
+
       const connection = new ConnectionPlugin<Schemes, AreaExtra>();
       const render = new ReactPlugin<Schemes, AreaExtra>();
+
+      // render.addPipe((context) => {
+      //   if (!["pointermove", "nodetranslate", "nodetranslated"].includes(context?.type as any)) {
+      //     console.log("render event", context);
+      //   }
+      //   return context;
+      // });
+
       this.programEngine = editor.engine;
 
       AreaExtensions.selectableNodes(area, AreaExtensions.selector(), {
@@ -298,6 +315,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       render.addPreset(Presets.classic.setup({
         customize: {
+          node(data) {
+            console.warn("unexpected node customizer called");
+            return null;
+          },
           control(data) {
             if (data.payload instanceof ValueControl) {
               return ValueControlComponent;
@@ -307,6 +328,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             }
             if (data.payload instanceof DropdownListControl) {
               return DropdownListControlComponent;
+            }
+            if (data.payload instanceof PlotButtonControl) {
+              return PlotButtonControlComponent;
             }
             return null;
           }

@@ -4,6 +4,7 @@ import { INumberControl } from "./controls/num-control";
 import { ValueControl } from "./controls/value-control";
 import { IDropdownListControl } from "./controls/dropdown-list-control";
 import { ReactArea2D } from "rete-react-plugin";
+import { PlotButtonControl } from "./controls/plot-button-control";
 
 // Crazy Rete typing...
 class NodeWithControls extends ClassicPreset.Node<
@@ -14,6 +15,7 @@ class NodeWithControls extends ClassicPreset.Node<
       | INumberControl
       | ValueControl
       | IDropdownListControl
+      | PlotButtonControl
       | ClassicPreset.Control
       | ClassicPreset.InputControl<"number">
       | ClassicPreset.InputControl<"text">;
