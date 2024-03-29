@@ -6,6 +6,7 @@ import { getNumDisplayStr } from "../../nodes/utilities/view-utilities";
 import { NodeOperationTypes } from "../../model/utilities/node";
 import { BaseNode, BaseNodeModel } from "./base-node";
 import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-list-control";
+import { PlotButtonControl } from "../controls/plot-button-control";
 
 export const LogicNodeModel = BaseNodeModel.named("LogicNodeModel")
 .props({
@@ -29,7 +30,8 @@ export class LogicNode extends BaseNode<
   },
   {
     value: ValueControl,
-    logicOperator: IDropdownListControl
+    logicOperator: IDropdownListControl,
+    plotButton: PlotButtonControl
   },
   ILogicNodeModel
 > {
@@ -59,6 +61,8 @@ export class LogicNode extends BaseNode<
 
     this.valueControl = new ValueControl("Logic");
     this.addControl("value", this.valueControl);
+
+    this.addControl("plotButton", new PlotButtonControl(model));
   }
 
   getSentence(num1: number, num2: number, result: number) {

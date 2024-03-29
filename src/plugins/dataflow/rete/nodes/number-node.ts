@@ -3,6 +3,7 @@ import { Instance, types } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
 import { INumberControl, NumberControl } from "../controls/num-control";
 import { BaseNode, BaseNodeModel } from "./base-node";
+import { PlotButtonControl } from "../controls/plot-button-control";
 
 // There is some weirdness with the Number node and how its "value" is stored
 // The value is an entered input like selecting the units or a math function
@@ -34,7 +35,10 @@ export interface INumberNodeModel extends Instance<typeof NumberNodeModel> {}
 export class NumberNode extends BaseNode<
   Record<string, never>,
   { value: ClassicPreset.Socket },
-  { value: INumberControl },
+  {
+    value: INumberControl,
+    plotButton: PlotButtonControl
+  },
   INumberNodeModel
 > {
   constructor(
@@ -48,8 +52,8 @@ export class NumberNode extends BaseNode<
 
     const valueControl = new NumberControl(model, "value", process, "value");
     this.addControl("value", valueControl);
+    this.addControl("plotButton", new PlotButtonControl(model));
 
-    // TODO: need to add the plot control
   }
 
   data(): { value: number } {
