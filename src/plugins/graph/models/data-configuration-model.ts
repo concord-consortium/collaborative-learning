@@ -447,7 +447,7 @@ export const DataConfigurationModel = types
 
       self.filteredCases.forEach((aFilteredCases, index) => {
         // If Y attribute of the attribute in question here doesn't match, skip this attribute.
-        const relatedAttribute = self.yAttributeDescriptions[index].attributeID;
+        const relatedAttribute = self.yAttributeDescriptions[index]?.attributeID;
         if (self.attributeTypeForID(relatedAttribute) === yType) {
           aFilteredCases.caseIds.forEach(
             (id) => joinedCaseData.push({
