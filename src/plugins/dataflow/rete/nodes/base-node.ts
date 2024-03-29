@@ -4,6 +4,13 @@ import { kMaxNodeValues } from "../../model/utilities/node";
 import { ClassicPreset } from "rete";
 import { Control, Socket } from "rete/_types/presets/classic";
 
+export type NoInputs = Record<string, never>;
+export type NoOutputs = Record<string, never>;
+
+export function nodeType(type: string) {
+  return types.optional(types.literal(type), type);
+}
+
 export const BaseNodeModel = types.model("BaseNodeModel",
 {
   // This should be overridden by the "subclasses"
@@ -113,11 +120,10 @@ export class BaseNode<
   implements IBaseNode
 {
   constructor(
-    name: string,
     id: string | undefined,
     public model: ModelType
   ) {
-    super(name);
+    super(model.type);
     if (id) {
       this.id = id;
     }

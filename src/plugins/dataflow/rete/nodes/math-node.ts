@@ -1,16 +1,16 @@
 import { ClassicPreset } from "rete";
-import { Instance, types } from "mobx-state-tree";
+import { Instance } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
 import { ValueControl } from "../controls/value-control";
 import { getNumDisplayStr } from "../../nodes/utilities/view-utilities";
 import { NodeOperationTypes } from "../../model/utilities/node";
-import { BaseNode, BaseNodeModel } from "./base-node";
+import { BaseNode, BaseNodeModel, nodeType } from "./base-node";
 import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-list-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
 
 export const MathNodeModel = BaseNodeModel.named("MathNodeModel")
 .props({
-  type: types.optional(types.literal("Math"), "Math"),
+  type: nodeType("Math"),
   mathOperator: "Add"
 })
 .actions(self => ({
@@ -42,7 +42,7 @@ export class MathNode extends BaseNode<
     model: IMathNodeModel,
     process: () => void
   ) {
-    super("Math", id, model);
+    super(id, model);
 
     this.addInput("num1", new ClassicPreset.Input(numSocket, "Number1"));
     this.addInput("num2", new ClassicPreset.Input(numSocket, "Number2"));
@@ -55,8 +55,7 @@ export class MathNode extends BaseNode<
     }).map((nodeOp) => {
       return { name: nodeOp.name, icon: nodeOp.icon };
     });
-    const dropdownControl = new DropdownListControl(model,"mathOperator", "Math", process,
-      dropdownOptions);
+    const dropdownControl = new DropdownListControl(model,"mathOperator", process, dropdownOptions);
     this.addControl("mathOperator", dropdownControl);
 
     this.valueControl = new ValueControl("Math");

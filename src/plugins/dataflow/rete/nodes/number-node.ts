@@ -1,8 +1,8 @@
 import { ClassicPreset } from "rete";
-import { Instance, types } from "mobx-state-tree";
+import { Instance } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
 import { INumberControl, NumberControl } from "../controls/num-control";
-import { BaseNode, BaseNodeModel } from "./base-node";
+import { BaseNode, BaseNodeModel, NoInputs, nodeType } from "./base-node";
 import { PlotButtonControl } from "../controls/plot-button-control";
 
 // There is some weirdness with the Number node and how its "value" is stored
@@ -12,7 +12,7 @@ import { PlotButtonControl } from "../controls/plot-button-control";
 // have. And is currently serialized in a separate "values" section.
 export const NumberNodeModel = BaseNodeModel.named("NumberNodeModel")
 .props({
-  type: types.optional(types.literal("Number"), "Number"),
+  type: nodeType("Number"),
   // Our v1 models support this nodeValueUnits, but it isn't actually supported
   // in the UI. The number control which displays the nodeValue is not configured
   // to edit the units.
@@ -29,11 +29,8 @@ export const NumberNodeModel = BaseNodeModel.named("NumberNodeModel")
 }));
 export interface INumberNodeModel extends Instance<typeof NumberNodeModel> {}
 
-// TODO: The Record<string, never> type indicates that there are no
-// inputs to this node. We should probably make a helper type for this
-// if Rete doesn't have one
 export class NumberNode extends BaseNode<
-  Record<string, never>,
+  NoInputs,
   { value: ClassicPreset.Socket },
   {
     value: INumberControl,
@@ -46,7 +43,7 @@ export class NumberNode extends BaseNode<
     model: INumberNodeModel,
     process: () => void
   ) {
-    super("Number", id, model);
+    super(id, model);
 
     this.addOutput("value", new ClassicPreset.Output(numSocket, "Number"));
 

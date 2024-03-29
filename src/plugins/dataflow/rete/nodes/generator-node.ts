@@ -1,8 +1,8 @@
 import { ClassicPreset } from "rete";
-import { Instance, types } from "mobx-state-tree";
+import { Instance } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
 import { INumberControl, NumberControl } from "../controls/num-control";
-import { BaseNode, BaseNodeModel } from "./base-node";
+import { BaseNode, BaseNodeModel, NoInputs, nodeType } from "./base-node";
 import { NodeGeneratorTypes } from "../../model/utilities/node";
 import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-list-control";
 import { ValueControl } from "../controls/value-control";
@@ -10,7 +10,7 @@ import { PlotButtonControl } from "../controls/plot-button-control";
 
 export const GeneratorNodeModel = BaseNodeModel.named("GeneratorNodeModel")
 .props({
-  type: types.optional(types.literal("Generator"), "Generator"),
+  type: nodeType("Generator"),
   generatorType: "Sine",
   amplitude: 1,
   period: 10
@@ -29,11 +29,8 @@ export const GeneratorNodeModel = BaseNodeModel.named("GeneratorNodeModel")
 }));
 export interface IGeneratorNodeModel extends Instance<typeof GeneratorNodeModel> {}
 
-// TODO: The Record<string, never> type indicates that there are no
-// inputs to this node. We should probably make a helper type for this
-// if Rete doesn't have one
 export class GeneratorNode extends BaseNode<
-  Record<string, never>,
+  NoInputs,
   { value: ClassicPreset.Socket },
   {
     generatorType: IDropdownListControl,
@@ -51,15 +48,14 @@ export class GeneratorNode extends BaseNode<
     model: IGeneratorNodeModel,
     process: () => void
   ) {
-    super("Generator", id, model);
+    super(id, model);
 
     this.addOutput("value", new ClassicPreset.Output(numSocket, "Number"));
 
     const dropdownOptions = NodeGeneratorTypes.map((nodeOp) => {
       return { name: nodeOp.name, icon: nodeOp.icon };
     });
-    const dropdownControl = new DropdownListControl(model,"generatorType", "Generator", process,
-      dropdownOptions);
+    const dropdownControl = new DropdownListControl(model,"generatorType", process, dropdownOptions);
     this.addControl("generatorType", dropdownControl);
 
     const ampControl = new NumberControl(model, "amplitude", process, "amplitude");

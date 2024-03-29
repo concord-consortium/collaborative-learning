@@ -5,6 +5,7 @@ import { ClassicPreset } from "rete";
 import classNames from "classnames";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import { kGripperOutputTypes } from "../../model/utilities/node";
+import { IBaseNodeModel } from "../nodes/base-node";
 
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 
@@ -30,7 +31,10 @@ const optionLabelClass = (str?: string) => {
 };
 
 export class DropdownListControl<
-  ModelType extends Record<Key, string> & Record<`set${Capitalize<Key>}`, (val: string) => void>,
+  ModelType extends
+    Record<Key, string> &
+    Record<`set${Capitalize<Key>}`, (val: string) => void> &
+    IBaseNodeModel,
   Key extends keyof ModelType & string
 >
   extends ClassicPreset.Control
@@ -46,7 +50,6 @@ export class DropdownListControl<
   constructor(
     public model: ModelType,
     public key: Key,
-    public nodeName: string,
 
     private process: () => void,
 
@@ -166,8 +169,8 @@ export class DropdownListControl<
 
 export interface IDropdownListControl {
   id: string;
+  model: IBaseNodeModel;
   key: string;
-  nodeName: string;
   optionArray: ListOption[];
   label: string;
   tooltip: string;
@@ -202,7 +205,7 @@ const DropdownList: React.FC<{
   const displayName = option?.displayName ?? name;
   const icon = option?.icon?.({}) || null;
   const activeHub = option?.active !== false;
-  const liveNode = control.nodeName.substring(0,4) === "Live";
+  const liveNode = control.model.type.substring(0,4) === "Live";
   const disableSelected = control.key === "hubSelect" && liveNode && !activeHub;
   const labelClasses = classNames("item top", { disabled: disableSelected });
 
