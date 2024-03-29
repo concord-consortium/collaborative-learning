@@ -51,7 +51,8 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
   const servoAngleVar = findVariable(kServoAngleKey, variables);
   const servoAngleBaseValue = servoAngleVar?.currentValue ?? 0;
   tweenedServoAngle.current = getTweenedServoAngle(servoAngleBaseValue, lastTweenedAngle);
-  const servoRotationString = `rotate(${tweenedServoAngle.current - servoVisibleOffset}deg)`;
+  const valueForRotation = 180 - (tweenedServoAngle.current - servoVisibleOffset);
+  const servoRotationString = `rotate(${valueForRotation}deg)`;
 
   const potServoClasses = classNames('pot-servo-component', { collapsed, "expanded": !collapsed });
 
@@ -74,7 +75,7 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
             className="servo-arm"
             src={servoArm}
             style={{ transform: servoRotationString }}
-            alt="Potentiometer Dial"
+            alt="Servo Arm"
           />
       </div>
       <div className="controls">
