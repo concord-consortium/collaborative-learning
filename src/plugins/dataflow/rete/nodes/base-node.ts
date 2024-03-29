@@ -2,7 +2,9 @@ import { Instance, types } from "mobx-state-tree";
 import { defaultMinigraphOptions } from "../../nodes/dataflow-node-plot";
 import { kMaxNodeValues } from "../../model/utilities/node";
 import { ClassicPreset } from "rete";
-import { Control, Socket } from "rete/_types/presets/classic";
+import { Socket } from "rete/_types/presets/classic";
+import { INodeServices } from "../node-services";
+import { Schemes } from "../rete-scheme";
 
 export type NoInputs = Record<string, never>;
 export type NoOutputs = Record<string, never>;
@@ -100,8 +102,9 @@ export const BaseNodeModel = types.model("BaseNodeModel",
 }));
 export interface IBaseNodeModel extends Instance<typeof BaseNodeModel> {}
 
-export interface IBaseNode {
-  id: string;
+export type NodeClass = new (id: string | undefined, model: any, services: INodeServices) => IBaseNode;
+
+export type IBaseNode = Schemes['Node'] & {
   model: IBaseNodeModel;
   tick(): boolean;
 }
@@ -109,7 +112,7 @@ export interface IBaseNode {
 export class BaseNode<
   Inputs extends { [key in string]?: Socket; },
   Outputs extends { [key in string]?: Socket; },
-  Controls extends { [key in string]?: Control; },
+  Controls extends Schemes['Node']['controls'],
   ModelType extends IBaseNodeModel
 >
   extends ClassicPreset.Node<Inputs, Outputs, Controls>
@@ -117,12 +120,20 @@ export class BaseNode<
 {
   constructor(
     id: string | undefined,
-    public model: ModelType
+    public model: ModelType,
+    public services: INodeServices
   ) {
     super(model.type);
     if (id) {
       this.id = id;
     }
+  }
+
+  /**
+   * Default data function, nodes need to override this
+   */
+  data(inputs: Record<string, any>): Record<string, any> | Promise<Record<string, any>> {
+    return {};
   }
 
   /**

@@ -6,21 +6,25 @@ import { Schemes } from "./rete-scheme";
 import {
   DataflowNodeModel, IDataflowNodeModel, DataflowProgramModelType, ConnectionModel
 } from "../model/dataflow-program-model";
-import { INumberNodeModel, NumberNode } from "./nodes/number-node";
-import { IMathNodeModel, MathNode } from "./nodes/math-node";
-import { CounterNode, ICounterNodeModel } from "./nodes/counter-node";
-import { ILogicNodeModel, LogicNode } from "./nodes/logic-node";
-import { GeneratorNode, IGeneratorNodeModel } from "./nodes/generator-node";
-import { IBaseNodeModel } from "./nodes/base-node";
+import { NumberNode } from "./nodes/number-node";
+import { MathNode } from "./nodes/math-node";
+import { CounterNode } from "./nodes/counter-node";
+import { LogicNode } from "./nodes/logic-node";
+import { GeneratorNode } from "./nodes/generator-node";
+import { IBaseNodeModel, NodeClass } from "./nodes/base-node";
 import { uniqueId } from "../../../utilities/js-utils";
+import { INodeServices } from "./node-services";
+import { LogEventName } from "../../../lib/logger-types";
+import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 
-export class NodeEditorMST extends NodeEditor<Schemes> {
+export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices {
   private reteNodesMap: Record<string, Schemes['Node']> = {};
 
   public engine = new DataflowEngine<Schemes>();
 
   constructor(
-    private mstProgram: DataflowProgramModelType
+    private mstProgram: DataflowProgramModelType,
+    private tileId: string
   ) {
     super();
 
@@ -93,24 +97,30 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
     leafNodes.forEach(n => this.engine.fetch(n.id));
   };
 
+  public logTileChangeEvent = (
+    {operation, change}: Parameters<INodeServices['logTileChangeEvent']>[0]
+  ) => {
+    const logEventName = LogEventName.DATAFLOW_TOOL_CHANGE;
+    logTileChangeEvent(logEventName, { operation, change, tileId: this.tileId });
+  };
+
   private createReteNodeFromNodeModel(id: string, model: IBaseNodeModel) {
-    switch(model.type) {
-      case "Counter": {
-        return new CounterNode(id, model as ICounterNodeModel);
-      }
-      case "Generator": {
-        return new GeneratorNode(id, model as IGeneratorNodeModel, this.process);
-      }
-      case "Logic": {
-        return new LogicNode(id, model as ILogicNodeModel, this.process);
-      }
-      case "Math": {
-        return new MathNode(id, model as IMathNodeModel, this.process);
-      }
-      case "Number": {
-        return new NumberNode(id, model as INumberNodeModel, this.process);
-      }
+    const nodeTypes: Record<string, NodeClass> =
+    {
+      "Counter": CounterNode,
+      "Generator": GeneratorNode,
+      "Logic": LogicNode,
+      "Math": MathNode,
+      "Number": NumberNode,
+    };
+
+    const constructor = nodeTypes[model.type];
+    if (!constructor) {
+      console.warn(`Can't find constructor for ${model.type}`);
+      return;
     }
+
+    return new constructor(id, model, this);
   }
 
   public createAndAddNode(nodeType: string, position?: [number, number]) {

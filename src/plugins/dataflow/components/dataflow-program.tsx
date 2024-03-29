@@ -243,7 +243,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     (async () => {
       if (!this.toolDiv || !this.props.program) return;
 
-      const editor = new NodeEditorMST(this.props.program);
+      const editor = new NodeEditorMST(this.props.program, this.tileId);
       this.programEditor = editor;
 
       // editor.addPipe((context) => {

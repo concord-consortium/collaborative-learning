@@ -1,0 +1,6 @@
+import { ITileChangeLogEvent } from "../../../models/tiles/log/log-tile-change-event";
+
+export interface INodeServices {
+  process(): void;
+  logTileChangeEvent(event: Pick<ITileChangeLogEvent, "operation" | "change">): void;
+}

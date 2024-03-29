@@ -4,6 +4,7 @@ import { numSocket } from "../num-socket";
 import { ValueControl } from "../controls/value-control";
 import { BaseNode, BaseNodeModel, NoInputs } from "./base-node";
 import { typeField } from "../../../../utilities/mst-utils";
+import { INodeServices } from "../node-services";
 
 export const CounterNodeModel = BaseNodeModel.named("CounterNodeModel")
 .props(({
@@ -28,9 +29,10 @@ export class CounterNode extends BaseNode<
 
   constructor(
     id: string | undefined,
-    model: ICounterNodeModel
+    model: ICounterNodeModel,
+    services: INodeServices
   ) {
-    super(id, model);
+    super(id, model, services);
 
     this.addOutput("value", new ClassicPreset.Output(numSocket, "Number"));
 

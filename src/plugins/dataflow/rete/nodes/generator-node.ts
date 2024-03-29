@@ -8,6 +8,7 @@ import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-
 import { ValueControl } from "../controls/value-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
 import { typeField } from "../../../../utilities/mst-utils";
+import { INodeServices } from "../node-services";
 
 export const GeneratorNodeModel = BaseNodeModel.named("GeneratorNodeModel")
 .props({
@@ -47,21 +48,21 @@ export class GeneratorNode extends BaseNode<
   constructor(
     id: string | undefined,
     model: IGeneratorNodeModel,
-    process: () => void
+    services: INodeServices
   ) {
-    super(id, model);
+    super(id, model, services);
 
     this.addOutput("value", new ClassicPreset.Output(numSocket, "Number"));
 
     const dropdownOptions = NodeGeneratorTypes.map((nodeOp) => {
       return { name: nodeOp.name, icon: nodeOp.icon };
     });
-    const dropdownControl = new DropdownListControl(model,"generatorType", process, dropdownOptions);
+    const dropdownControl = new DropdownListControl(model,"generatorType", this.services.process, dropdownOptions);
     this.addControl("generatorType", dropdownControl);
 
-    const ampControl = new NumberControl(model, "amplitude", process, "amplitude");
+    const ampControl = new NumberControl(model, "amplitude", this.services.process, "amplitude");
     this.addControl("amplitude", ampControl);
-    const periodControl = new NumberControl(model, "period", process, "period");
+    const periodControl = new NumberControl(model, "period", this.services.process, "period");
     this.addControl("period", periodControl);
 
     this.valueControl = new ValueControl("Generator");
