@@ -30,6 +30,7 @@ import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loadin
 import { problemLoaded } from "../../lib/misc";
 import { CurriculumConfig, ICurriculumConfig } from "./curriculum-config";
 import { urlParams } from "../../utilities/url-params";
+import { createAndLoadExemplarDocs } from "./create-exemplar-docs";
 import curriculumConfigJson from "../../clue/curriculum-config.json";
 import { gImageMap } from "../image-map";
 
@@ -257,6 +258,18 @@ class Stores implements IStores{
       showLoadingMessage("Loading curriculum sections");
       problem.loadSections(unitUrls.content).then(() => {
         removeLoadingMessage("Loading curriculum sections");
+      });
+      showLoadingMessage("Loading exemplar documents");
+      createAndLoadExemplarDocs({
+        unitUrl: unitUrls.content,
+        problem,
+        documents: this.documents,
+        user: this.user,
+        classStore: this.class,
+        curriculumConfig,
+        appConfig
+      }).then(() => {
+        removeLoadingMessage("Loading exemplar documents");
       });
     }
 

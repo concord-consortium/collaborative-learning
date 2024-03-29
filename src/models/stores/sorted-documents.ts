@@ -41,7 +41,7 @@ interface IMatchPropertiesOptions {
 }
 export class SortedDocuments {
   stores: ISortedDocumentsStores;
-  tempTagDocumentMap = new Map<string, Set<string>>();
+  firestoreTagDocumentMap = new Map<string, Set<string>>();
 
   constructor(stores: ISortedDocumentsStores) {
     makeAutoObservable(this);
@@ -156,21 +156,33 @@ export class SortedDocuments {
 
     // Find all unique document keys in tagsWithDocs. Compare this with all sortable documents
     // in store to find "Documents with no comments" then place those doc keys to "Not Tagged"
-    const uniqueDocKeysWithComments = new Set<string>();
+    const uniqueDocKeysWithTags = new Set<string>();
 
-    this.tempTagDocumentMap.forEach((docKeysSet, tag) => {
-      docKeysSet.forEach((docKey: string) =>{
-        uniqueDocKeysWithComments.add(docKey);
-      });
+    // grouping documents based on firestore comment tags
+    this.firestoreTagDocumentMap.forEach((docKeysSet, tag) => {
       const docKeysArray = Array.from(docKeysSet); // Convert the Set to an array
       if (tagsWithDocs[tag]) {
+        docKeysSet.forEach((docKey: string) =>{
+          uniqueDocKeysWithTags.add(docKey);
+        });
         tagsWithDocs[tag].docKeysFoundWithTag = docKeysArray;
       }
     });
 
+    // adding in (exemplar) documents with authored tags
     const allSortableDocKeys = this.filteredDocsByType;
     allSortableDocKeys.forEach(doc => {
-      if (!uniqueDocKeysWithComments.has(doc.key)) {
+      const foundTagKey = doc.getProperty("authoredCommentTag");
+      if (foundTagKey !== undefined && foundTagKey !== "") {
+        if (tagsWithDocs[foundTagKey]) {
+          tagsWithDocs[foundTagKey].docKeysFoundWithTag.push(doc.key);
+          uniqueDocKeysWithTags.add(doc.key);
+        }
+      }
+    });
+
+    allSortableDocKeys.forEach(doc => {
+      if (!uniqueDocKeysWithTags.has(doc.key)) {
         // This document has no comments
         if (tagsWithDocs[""]) {
           tagsWithDocs[""].docKeysFoundWithTag.push(doc.key);
@@ -205,10 +217,10 @@ export class SortedDocuments {
             const commentData = commentDoc.data();
             if (commentData?.tags) {
               commentData.tags.forEach((tag: string) => {
-                let docKeysSet = this.tempTagDocumentMap.get(tag);
+                let docKeysSet = this.firestoreTagDocumentMap.get(tag);
                 if (!docKeysSet) {
                   docKeysSet = new ObservableSet<string>();
-                  this.tempTagDocumentMap.set(tag, docKeysSet);
+                  this.firestoreTagDocumentMap.set(tag, docKeysSet);
                 }
                 docKeysSet.add(doc.key);
               });

@@ -1,7 +1,7 @@
 import { useFirestoreTeacher } from "./firestore-hooks";
 import { useAppConfig, useClassStore, useProblemStore, useUserStore } from "./use-stores";
 import { DocumentModelType } from "../models/document/document";
-import { isPublishedType, isUnpublishedType } from "../models/document/document-types";
+import { ExemplarDocument, isPublishedType, isUnpublishedType } from "../models/document/document-types";
 import { getDocumentDisplayTitle } from "../models/document/document-utils";
 
 export function useDocumentCaption(document: DocumentModelType, isStudentWorkspaceDoc?: boolean) {
@@ -17,7 +17,12 @@ export function useDocumentCaption(document: DocumentModelType, isStudentWorkspa
     || (document.isRemote ? teacher?.name : "")
     || "Unknown User";
 
-  const hasNamePrefix =  document.isRemote || isPublishedType(type) || isUnpublishedType(type) || isStudentWorkspaceDoc;
+  const hasNamePrefix =  document.isRemote
+    || isPublishedType(type)
+    || isUnpublishedType(type)
+    // TODO: ExemplarDocument could be in "isPublishedType" or "isUnpiblishedType" test arrays
+    || type === ExemplarDocument
+    || isStudentWorkspaceDoc;
   const namePrefix = hasNamePrefix ? `${userName}: ` : "";
   const dateSuffix = document.isRemote && document.createdAt
                       ? ` (${new Date(document.createdAt).toLocaleDateString()})`

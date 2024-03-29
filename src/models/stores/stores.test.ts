@@ -22,7 +22,7 @@ describe("stores object", () => {
 
   it("supports passing in stores for testing", () => {
     const curriculumConfig = CurriculumConfig.create({
-      curriculumBaseUrl: "",
+      curriculumSiteUrl: "",
       defaultUnit: "foo",
     });
     const appMode: AppMode = "dev";

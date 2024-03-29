@@ -27,7 +27,6 @@ interface IGraphControllerConstructorProps {
   layout: GraphLayout
   enableAnimation: React.MutableRefObject<boolean>
   instanceId: string
-  autoAdjustAxes: React.MutableRefObject<boolean>
 }
 
 interface IGraphControllerProps {
@@ -39,13 +38,11 @@ export class GraphController {
   layout: GraphLayout;
   enableAnimation: React.MutableRefObject<boolean>;
   instanceId: string;
-  autoAdjustAxes: React.MutableRefObject<boolean>;
 
-  constructor({layout, enableAnimation, instanceId, autoAdjustAxes}: IGraphControllerConstructorProps) {
+  constructor({layout, enableAnimation, instanceId}: IGraphControllerConstructorProps) {
     this.layout = layout;
     this.instanceId = instanceId;
     this.enableAnimation = enableAnimation;
-    this.autoAdjustAxes = autoAdjustAxes;
   }
 
   setProperties(props: IGraphControllerProps) {
@@ -197,14 +194,14 @@ export class GraphController {
   /**
    * Set the domains of all axes to fit all of the data points.
    */
-  autoscaleAllAxes() {
+  autoscaleAllAxes(growOnly: boolean = false) {
     if (!this.graphModel) return;
     startAnimation(this.enableAnimation);
     for (const place of AxisPlaces) {
       const role = graphPlaceToAttrRole[place];
       const axisModel = this.graphModel.getAxis(place);
       if (isNumericAxisModel(axisModel)) {
-        setNiceDomain(this.graphModel.numericValuesForAttrRole(role), axisModel);
+        setNiceDomain(this.graphModel.numericValuesForAttrRole(role), axisModel, growOnly);
       }
     }
   }
