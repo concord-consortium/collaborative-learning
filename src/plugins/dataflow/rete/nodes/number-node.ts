@@ -5,7 +5,7 @@ import { INumberControl, NumberControl } from "../controls/num-control";
 import { BaseNode, BaseNodeModel, NoInputs } from "./base-node";
 import { PlotButtonControl } from "../controls/plot-button-control";
 import { typeField } from "../../../../utilities/mst-utils";
-import { INodeServices } from "../node-services";
+import { INodeServices } from "../service-types";
 
 // There is some weirdness with the Number node and how its "value" is stored
 // The value is an entered input like selecting the units or a math function
@@ -49,7 +49,7 @@ export class NumberNode extends BaseNode<
 
     this.addOutput("value", new ClassicPreset.Output(numSocket, "Number"));
 
-    const valueControl = new NumberControl(model, "value", services.process, "value");
+    const valueControl = new NumberControl(this, "value", "value");
     this.addControl("value", valueControl);
     this.addControl("plotButton", new PlotButtonControl(model));
 

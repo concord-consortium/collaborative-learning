@@ -8,7 +8,7 @@ import { BaseNode, BaseNodeModel } from "./base-node";
 import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-list-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
 import { typeField } from "../../../../utilities/mst-utils";
-import { INodeServices } from "../node-services";
+import { INodeServices } from "../service-types";
 
 export const MathNodeModel = BaseNodeModel.named("MathNodeModel")
 .props({
@@ -57,7 +57,7 @@ export class MathNode extends BaseNode<
     }).map((nodeOp) => {
       return { name: nodeOp.name, icon: nodeOp.icon };
     });
-    const dropdownControl = new DropdownListControl(model,"mathOperator", services.process, dropdownOptions);
+    const dropdownControl = new DropdownListControl(this, "mathOperator", dropdownOptions);
     this.addControl("mathOperator", dropdownControl);
 
     this.valueControl = new ValueControl("Math");

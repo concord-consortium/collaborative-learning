@@ -3,7 +3,7 @@ import { defaultMinigraphOptions } from "../../nodes/dataflow-node-plot";
 import { kMaxNodeValues } from "../../model/utilities/node";
 import { ClassicPreset } from "rete";
 import { Socket } from "rete/_types/presets/classic";
-import { INodeServices } from "../node-services";
+import { INodeServices } from "../service-types";
 import { Schemes } from "../rete-scheme";
 
 export type NoInputs = Record<string, never>;
@@ -107,6 +107,7 @@ export type NodeClass = new (id: string | undefined, model: any, services: INode
 export type IBaseNode = Schemes['Node'] & {
   model: IBaseNodeModel;
   tick(): boolean;
+  process(): void;
 }
 
 export class BaseNode<
@@ -142,5 +143,10 @@ export class BaseNode<
    * @returns whether the nodes need to reprocessed
    */
   tick() { return false; }
+
+  process() {
+    this.services.process();
+  }
+
 }
 

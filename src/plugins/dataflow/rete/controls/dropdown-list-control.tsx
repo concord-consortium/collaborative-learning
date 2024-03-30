@@ -5,7 +5,7 @@ import { ClassicPreset } from "rete";
 import classNames from "classnames";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import { kGripperOutputTypes } from "../../model/utilities/node";
-import { IBaseNodeModel } from "../nodes/base-node";
+import { IBaseNode, IBaseNodeModel } from "../nodes/base-node";
 
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 
@@ -35,7 +35,8 @@ export class DropdownListControl<
     Record<Key, string> &
     Record<`set${Capitalize<Key>}`, (val: string) => void> &
     IBaseNodeModel,
-  Key extends keyof ModelType & string
+  NodeType extends { model: ModelType } & IBaseNode,
+  Key extends keyof NodeType['model'] & string
 >
   extends ClassicPreset.Control
   implements IDropdownListControl
@@ -48,10 +49,8 @@ export class DropdownListControl<
   // TODO: this used to set the initial value of the if it wasn't set based on the first
   // option in the list passed in. I'm not sure if that is needed anymore.
   constructor(
-    public model: ModelType,
-    public key: Key,
-
-    private process: () => void,
+    private node: NodeType,
+    public modelKey: Key,
 
     public optionArray: ListOption[],
     public label = "",
@@ -59,7 +58,7 @@ export class DropdownListControl<
   ) {
     super();
 
-    const setterProp = "set" + key.charAt(0).toUpperCase() + key.slice(1) as `set${Capitalize<Key>}`;
+    const setterProp = "set" + modelKey.charAt(0).toUpperCase() + modelKey.slice(1) as `set${Capitalize<Key>}`;
 
     // The typing above using `set${Capitalize<Key>}` almost works, but it fails here
     // I'm pretty sure there is a way to make it work without having to use the "as any" here
@@ -68,17 +67,21 @@ export class DropdownListControl<
     makeObservable(this);
   }
 
+  public get model() {
+    return this.node.model;
+  }
+
   public setValue(val: string) {
     this.setter(val);
 
     // trigger a reprocess so our new value propagates through the nodes
-    this.process();
+    this.node.process();
 
     // FIXME: need to handle dataflow log events maybe here or in component
   }
 
   public getValue() {
-    return this.model[this.key];
+    return this.model[this.modelKey];
   }
 
   /**
@@ -170,7 +173,7 @@ export class DropdownListControl<
 export interface IDropdownListControl {
   id: string;
   model: IBaseNodeModel;
-  key: string;
+  modelKey: string;
   optionArray: ListOption[];
   label: string;
   tooltip: string;
@@ -206,7 +209,7 @@ const DropdownList: React.FC<{
   const icon = option?.icon?.({}) || null;
   const activeHub = option?.active !== false;
   const liveNode = control.model.type.substring(0,4) === "Live";
-  const disableSelected = control.key === "hubSelect" && liveNode && !activeHub;
+  const disableSelected = control.modelKey === "hubSelect" && liveNode && !activeHub;
   const labelClasses = classNames("item top", { disabled: disableSelected });
 
   const onItemClick = useCallback((v: any) => {
@@ -215,6 +218,7 @@ const DropdownList: React.FC<{
     // in order to select the node.
     // this.emitter.trigger("selectnode", {node: this.getNode()});
     setShowList(value => !value);
+
     // TODO: need to add dataflow logging
     // dataflowLogEvent("nodedropdownclick", this as Control, this.getNode().meta.inTileWithId as string);
   }, []);
@@ -284,7 +288,7 @@ export const DropdownListControlComponent: React.FC<{ data: IDropdownListControl
       <DropdownList
         control={control}
         options={control.optionArray}
-        listClass={control.key}
+        listClass={control.modelKey}
       />
     </div>
   );

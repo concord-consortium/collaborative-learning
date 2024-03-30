@@ -13,7 +13,7 @@ import { LogicNode } from "./nodes/logic-node";
 import { GeneratorNode } from "./nodes/generator-node";
 import { IBaseNodeModel, NodeClass } from "./nodes/base-node";
 import { uniqueId } from "../../../utilities/js-utils";
-import { INodeServices } from "./node-services";
+import { INodeServices } from "./service-types";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 

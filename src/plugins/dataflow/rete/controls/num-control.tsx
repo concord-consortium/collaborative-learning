@@ -3,6 +3,7 @@ import { ClassicPreset } from "rete";
 import { useStopEventPropagation } from "./custom-hooks";
 
 import "./num-control.sass";
+import { IBaseNode } from "../nodes/base-node";
 
 // This generics design isn't very user friendly if a caller
 // tries to construct the NumberControl with a key that doesn't
@@ -15,7 +16,8 @@ import "./num-control.sass";
 //   key: Key & (ModelType[Key] extends number ? Key : never)
 export class NumberControl<
   ModelType extends Record<Key, number> & Record<`set${Capitalize<Key>}`, (val: number) => void>,
-  Key extends keyof ModelType & string
+  NodeType extends { model: ModelType } & IBaseNode,
+  Key extends keyof NodeType['model'] & string
 >
   extends ClassicPreset.Control
   implements INumberControl
@@ -24,21 +26,23 @@ export class NumberControl<
 
   // TODO: switch this to a set of options to make it more clear
   constructor(
-    public model: ModelType,
-    public key: Key,
-
-    private process: () => void,
+    public node: NodeType,
+    public modelKey: Key,
 
     public label = "",
     public minVal: number | null = null,
     public tooltip = ""
   ) {
     super();
-    const setterProp = "set" + key.charAt(0).toUpperCase() + key.slice(1) as `set${Capitalize<Key>}`;
+    const setterProp = "set" + modelKey.charAt(0).toUpperCase() + modelKey.slice(1) as `set${Capitalize<Key>}`;
 
     // The typing above using `set${Capitalize<Key>}` almost works, but it fails here
     // I'm pretty sure there is a way to make it work without having to use the "as any" here
     this.setter = this.model[setterProp] as any;
+  }
+
+  public get model() {
+    return this.node.model;
   }
 
   public setValue(val: number) {
@@ -49,14 +53,14 @@ export class NumberControl<
     this.setter(val);
 
     // trigger a reprocess so our new value propagates through the nodes
-    this.process();
+    this.node.process();
 
     // FIXME: need to handle dataflow log events maybe here or in component
     // dataflowLogEvent("numberinputmanualentry", this as Control, n.meta.inTileWithId as string);
   }
 
   public getValue() {
-    return this.model[this.key];
+    return this.model[this.modelKey];
   }
 }
 

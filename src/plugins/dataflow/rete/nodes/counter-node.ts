@@ -4,7 +4,7 @@ import { numSocket } from "../num-socket";
 import { ValueControl } from "../controls/value-control";
 import { BaseNode, BaseNodeModel, NoInputs } from "./base-node";
 import { typeField } from "../../../../utilities/mst-utils";
-import { INodeServices } from "../node-services";
+import { INodeServices } from "../service-types";
 
 export const CounterNodeModel = BaseNodeModel.named("CounterNodeModel")
 .props(({
