@@ -170,6 +170,10 @@ export class DropdownListControl<
   public logEvent(operation: string) {
     this.node.logControlEvent(operation, "nodedropdown", this.modelKey, this.getValue());
   }
+
+  public selectNode() {
+    this.node.select();
+  }
 }
 
 export interface IDropdownListControl {
@@ -183,6 +187,7 @@ export interface IDropdownListControl {
   setValue(val: string): void;
   disabledFunction?: DisabledChecker;
   logEvent(operation: string): void;
+  selectNode(): void;
 }
 
 const DropdownList: React.FC<{
@@ -216,10 +221,7 @@ const DropdownList: React.FC<{
   const labelClasses = classNames("item top", { disabled: disableSelected });
 
   const onItemClick = useCallback((v: any) => {
-    // TODO: need to figure out how to trigger the node selection
-    // We currently don't have node, and we don't have the the area plugin (or which ever plugin)
-    // in order to select the node.
-    // this.emitter.trigger("selectnode", {node: this.getNode()});
+    control.selectNode();
     setShowList(value => !value);
 
     control.logEvent("nodedropdownclick");
@@ -227,8 +229,7 @@ const DropdownList: React.FC<{
 
   // Generate a handler for each list item
   const onListClick = useCallback((v: string) => () => {
-    // TODO: need to trigger node selection see above
-    // this.emitter.trigger("selectnode", {node: this.getNode()});
+    control.selectNode();
     setShowList(value => !value);
     control.setValue(v);
 

@@ -109,6 +109,7 @@ export type IBaseNode = Schemes['Node'] & {
   model: IBaseNodeModel;
   tick(): boolean;
   process(): void;
+  select(): void;
   logControlEvent(
     operation: string,
     controlType: string,
@@ -157,6 +158,13 @@ export class BaseNode<
 
   process() {
     this.services.process();
+  }
+
+  /**
+   * Select this node
+   */
+  select() {
+    this.services.selectNode(this.id);
   }
 
   logNodeEvent(operation: string) {

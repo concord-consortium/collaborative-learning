@@ -25,7 +25,7 @@ import { IDataSet } from "../../../models/data/data-set";
 import "./dataflow-program.sass";
 import { ClassicPreset, NodeEditor } from "rete";
 import { Presets, ReactPlugin } from "rete-react-plugin";
-import { AreaExtensions, AreaPlugin, BaseAreaPlugin } from "rete-area-plugin";
+import { AreaExtensions, BaseAreaPlugin } from "rete-area-plugin";
 import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
 import { NumberControl, NumberControlComponent } from "../rete/controls/num-control";
 import { ValueControl, ValueControlComponent } from "../rete/controls/value-control";
@@ -243,7 +243,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     (async () => {
       if (!this.toolDiv || !this.props.program) return;
 
-      const editor = new NodeEditorMST(this.props.program, this.tileId);
+      const editor = new NodeEditorMST(this.props.program, this.tileId, this.toolDiv);
       this.programEditor = editor;
 
       // editor.addPipe((context) => {
@@ -251,7 +251,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       //   return context;
       // });
 
-      const area = new AreaPlugin<Schemes, AreaExtra>(this.toolDiv);
+      const area = editor.area;
 
       // area.addPipe((context) => {
       //   if (!["pointermove", "nodetranslate", "nodetranslated"].includes(context?.type as any)) {
@@ -271,10 +271,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       // });
 
       this.programEngine = editor.engine;
-
-      AreaExtensions.selectableNodes(area, AreaExtensions.selector(), {
-        accumulating: AreaExtensions.accumulateOnCtrl()
-      });
 
       render.addPreset({
         render(context: any, plugin: ReactPlugin<Schemes, unknown>):

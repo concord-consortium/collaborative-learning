@@ -2,7 +2,7 @@ import { NodeEditor } from "rete";
 import { DataflowEngine } from "rete-engine";
 import { structures } from "rete-structures";
 import { onPatch } from "mobx-state-tree";
-import { Schemes } from "./rete-scheme";
+import { AreaExtra, Schemes } from "./rete-scheme";
 import {
   DataflowNodeModel, IDataflowNodeModel, DataflowProgramModelType, ConnectionModel
 } from "../model/dataflow-program-model";
@@ -16,19 +16,29 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { INodeServices } from "./service-types";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
+import { AreaExtensions, AreaPlugin } from "rete-area-plugin";
 
 export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices {
   private reteNodesMap: Record<string, Schemes['Node']> = {};
 
   public engine = new DataflowEngine<Schemes>();
+  public area: AreaPlugin<Schemes, AreaExtra>;
 
   constructor(
     private mstProgram: DataflowProgramModelType,
-    private tileId: string
+    private tileId: string,
+    private div: HTMLElement
   ) {
     super();
 
     this.use(this.engine);
+
+    this.area = new AreaPlugin<Schemes, AreaExtra>(div);
+
+    AreaExtensions.selectableNodes(this.area, AreaExtensions.selector(), {
+      accumulating: AreaExtensions.accumulateOnCtrl()
+    });
+
 
     // onPatch(mstProgram.nodes, (patch, reversePatch) => {
     //   console.log("nodes patch", patch);
@@ -102,6 +112,10 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
   ) => {
     const logEventName = LogEventName.DATAFLOW_TOOL_CHANGE;
     logTileChangeEvent(logEventName, { operation, change, tileId: this.tileId });
+  };
+
+  public selectNode = (nodeId: string) => {
+    this.area.emit({ type: "nodepicked", data: { id: nodeId } });
   };
 
   private createReteNodeFromNodeModel(id: string, model: IBaseNodeModel) {
