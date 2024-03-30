@@ -49,7 +49,7 @@ export class DropdownListControl<
   // TODO: this used to set the initial value of the if it wasn't set based on the first
   // option in the list passed in. I'm not sure if that is needed anymore.
   constructor(
-    private node: NodeType,
+    public node: NodeType,
     public modelKey: Key,
 
     public optionArray: ListOption[],
@@ -76,8 +76,6 @@ export class DropdownListControl<
 
     // trigger a reprocess so our new value propagates through the nodes
     this.node.process();
-
-    // FIXME: need to handle dataflow log events maybe here or in component
   }
 
   public getValue() {
@@ -168,6 +166,10 @@ export class DropdownListControl<
       }
     }
   }
+
+  public logEvent(operation: string) {
+    this.node.logControlEvent(operation, "nodedropdown", this.modelKey, this.getValue());
+  }
 }
 
 export interface IDropdownListControl {
@@ -180,6 +182,7 @@ export interface IDropdownListControl {
   getValue(): string;
   setValue(val: string): void;
   disabledFunction?: DisabledChecker;
+  logEvent(operation: string): void;
 }
 
 const DropdownList: React.FC<{
@@ -219,9 +222,8 @@ const DropdownList: React.FC<{
     // this.emitter.trigger("selectnode", {node: this.getNode()});
     setShowList(value => !value);
 
-    // TODO: need to add dataflow logging
-    // dataflowLogEvent("nodedropdownclick", this as Control, this.getNode().meta.inTileWithId as string);
-  }, []);
+    control.logEvent("nodedropdownclick");
+  }, [control]);
 
   // Generate a handler for each list item
   const onListClick = useCallback((v: string) => () => {
@@ -229,8 +231,8 @@ const DropdownList: React.FC<{
     // this.emitter.trigger("selectnode", {node: this.getNode()});
     setShowList(value => !value);
     control.setValue(v);
-    // TODO: need to add dataflow logging
-    // dataflowLogEvent("nodedropdownselection", this as Control, this.getNode().meta.inTileWithId as string);
+
+    control.logEvent("nodedropdownselection");
   }, [control]);
 
   return (

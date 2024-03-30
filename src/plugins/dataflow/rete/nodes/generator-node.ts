@@ -68,7 +68,7 @@ export class GeneratorNode extends BaseNode<
     this.valueControl = new ValueControl("Generator");
     this.addControl("value", this.valueControl);
 
-    this.addControl("plotButton", new PlotButtonControl(model));
+    this.addControl("plotButton", new PlotButtonControl(this));
   }
 
   data(): { value: number } {

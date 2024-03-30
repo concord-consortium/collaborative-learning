@@ -3,6 +3,7 @@ import { defaultMinigraphOptions } from "../../nodes/dataflow-node-plot";
 import { kMaxNodeValues } from "../../model/utilities/node";
 import { ClassicPreset } from "rete";
 import { Socket } from "rete/_types/presets/classic";
+import { DataflowProgramChange } from "../../dataflow-logger";
 import { INodeServices } from "../service-types";
 import { Schemes } from "../rete-scheme";
 
@@ -108,6 +109,16 @@ export type IBaseNode = Schemes['Node'] & {
   model: IBaseNodeModel;
   tick(): boolean;
   process(): void;
+  logControlEvent(
+    operation: string,
+    controlType: string,
+    key: string,
+    value: string | number | boolean,
+    units?: string
+  ): void;
+  logNodeEvent(
+    operation: string
+  ): void;
 }
 
 export class BaseNode<
@@ -148,5 +159,33 @@ export class BaseNode<
     this.services.process();
   }
 
+  logNodeEvent(operation: string) {
+    const change: DataflowProgramChange = {
+      targetType: 'node',
+      nodeTypes: [this.model.type],
+      nodeIds: [this.id],
+    };
+
+    this.services.logTileChangeEvent({operation, change });
+  }
+
+  logControlEvent(
+    operation: string,
+    controlType: string,
+    key: string,
+    value: string | number | boolean,
+    units?: string
+  ) {
+    const change: DataflowProgramChange = {
+      targetType: controlType,
+      nodeTypes: [this.model.type],
+      nodeIds: [this.id],
+      selectItem: key,
+      value,
+      units: units || ""
+    };
+
+    this.services.logTileChangeEvent({operation, change});
+  }
 }
 

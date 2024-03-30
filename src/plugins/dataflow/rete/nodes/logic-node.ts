@@ -63,7 +63,7 @@ export class LogicNode extends BaseNode<
     this.valueControl = new ValueControl("Logic");
     this.addControl("value", this.valueControl);
 
-    this.addControl("plotButton", new PlotButtonControl(model));
+    this.addControl("plotButton", new PlotButtonControl(this));
   }
 
   getSentence(num1: number, num2: number, result: number) {

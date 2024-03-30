@@ -51,7 +51,7 @@ export class NumberNode extends BaseNode<
 
     const valueControl = new NumberControl(this, "value", "value");
     this.addControl("value", valueControl);
-    this.addControl("plotButton", new PlotButtonControl(model));
+    this.addControl("plotButton", new PlotButtonControl(this));
 
   }
 

@@ -6,6 +6,7 @@ import PreviewPlotIcon from "../../assets/icons/preview-plot.svg";
 import "./plot-button-control.scss";
 import { observer } from "mobx-react";
 import { useStopEventPropagation } from "./custom-hooks";
+import { IBaseNode } from "../nodes/base-node";
 
 interface PlottableModel {
   plot: boolean;
@@ -15,21 +16,21 @@ interface PlottableModel {
 export class PlotButtonControl extends ClassicPreset.Control
 {
   constructor(
-    public model: PlottableModel
+    public node: IBaseNode & { model: PlottableModel }
   ) {
     super();
   }
 
-  togglePlot = () => {
-    // TODO: Add logging
-    this.model.setPlot(!this.model.plot);
-  };
+  get model() {
+    return this.node.model;
+  }
 
-  // public logGraphToggle = () => {
-  //   const toggleStr = this.props.showgraph ? "off" : "on";
-  //   const tileId = this.node.meta.inTileWithId as string;
-  //   dataflowLogEvent(`toggle minigraph ${toggleStr}`, this.node, tileId);
-  // };
+  togglePlot = () => {
+    this.model.setPlot(!this.model.plot);
+
+    const toggleStr = this.model.plot ? "off" : "on";
+    this.node.logNodeEvent(`toggle minigraph ${toggleStr}`);
+  };
 }
 
 export const PlotButtonControlComponent = observer(

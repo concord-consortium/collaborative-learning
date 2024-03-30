@@ -55,8 +55,7 @@ export class NumberControl<
     // trigger a reprocess so our new value propagates through the nodes
     this.node.process();
 
-    // FIXME: need to handle dataflow log events maybe here or in component
-    // dataflowLogEvent("numberinputmanualentry", this as Control, n.meta.inTileWithId as string);
+    this.node.logControlEvent("numberinputmanualentry", "nodenumber", this.modelKey, val);
   }
 
   public getValue() {
@@ -87,12 +86,6 @@ export const NumberControlComponent: React.FC<{ data: INumberControl }> = (props
     const v = e.target.value;
     if (isFinite(v)) {
       control.setValue(Number(v));
-
-      // FIXME: need to reprocess data and log the event
-      // perhaps the logging could happen in the control instead of here
-      // this.emitter.trigger("process");
-      // const n = this.getNode();
-      // dataflowLogEvent("numberinputmanualentry", this as Control, n.meta.inTileWithId as string);
     } else {
       // Restore the value to the one currently stored in the control
       setInputValue(control.getValue());
