@@ -1,22 +1,23 @@
 import { ClassicPreset } from "rete";
 import { Instance } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
-import { INumberControl, NumberControl } from "../controls/num-control";
+import { INumberUnitsControl, NumberUnitsControl } from "../controls/num-units-control";
 import { BaseNode, BaseNodeModel, NoInputs } from "./base-node";
-import { NodeGeneratorTypes } from "../../model/utilities/node";
+import { NodeGeneratorTypes, NodePeriodUnits } from "../../model/utilities/node";
 import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-list-control";
 import { ValueControl } from "../controls/value-control";
 import { PlotButtonControl } from "../controls/plot-button-control";
 import { typeField } from "../../../../utilities/mst-utils";
 import { INodeServices } from "../service-types";
+import { INumberControl, NumberControl } from "../controls/num-control";
 
 export const GeneratorNodeModel = BaseNodeModel.named("GeneratorNodeModel")
 .props({
   type: typeField("Generator"),
   generatorType: "Sine",
   amplitude: 1,
-  period: 10
-  // FIXME: need periodUnits so the user can show the period in mins or hours
+  period: 10,
+  periodUnits: "sec"
 })
 .actions(self => ({
   setGeneratorType(gType: string) {
@@ -27,6 +28,9 @@ export const GeneratorNodeModel = BaseNodeModel.named("GeneratorNodeModel")
   },
   setPeriod(period: number) {
     self.period = period;
+  },
+  setPeriodUnits(units: string) {
+    self.periodUnits = units;
   }
 }));
 export interface IGeneratorNodeModel extends Instance<typeof GeneratorNodeModel> {}
@@ -37,7 +41,7 @@ export class GeneratorNode extends BaseNode<
   {
     generatorType: IDropdownListControl,
     amplitude: INumberControl,
-    period: INumberControl,
+    period: INumberUnitsControl,
     value: ValueControl,
     plotButton: PlotButtonControl
   },
@@ -62,7 +66,9 @@ export class GeneratorNode extends BaseNode<
 
     const ampControl = new NumberControl(this, "amplitude", "amplitude");
     this.addControl("amplitude", ampControl);
-    const periodControl = new NumberControl(this, "period", "period");
+
+    const units = NodePeriodUnits.map(u => u.unit);
+    const periodControl = new NumberUnitsControl(this, "period", "period", null, units);
     this.addControl("period", periodControl);
 
     this.valueControl = new ValueControl("Generator");

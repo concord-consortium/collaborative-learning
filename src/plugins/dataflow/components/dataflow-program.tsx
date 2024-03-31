@@ -38,6 +38,7 @@ import { AreaExtra, Schemes } from "../rete/rete-scheme";
 import { NodeEditorMST } from "../rete/node-editor-mst";
 import { IBaseNode } from "../rete/nodes/base-node";
 import { PlotButtonControl, PlotButtonControlComponent } from "../rete/controls/plot-button-control";
+import { NumberUnitsControl, NumberUnitsControlComponent } from "../rete/controls/num-units-control";
 
 
 export interface IStartProgramParams {
@@ -314,6 +315,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           control(data) {
             if (data.payload instanceof ValueControl) {
               return ValueControlComponent;
+            }
+            if (data.payload instanceof NumberUnitsControl) {
+              return NumberUnitsControlComponent;
             }
             if (data.payload instanceof NumberControl) {
               return NumberControlComponent;

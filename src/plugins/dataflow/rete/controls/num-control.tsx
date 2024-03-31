@@ -1,9 +1,9 @@
 import React, { useCallback, useRef, useState } from "react";
 import { ClassicPreset } from "rete";
 import { useStopEventPropagation } from "./custom-hooks";
+import { IBaseNode } from "../nodes/base-node";
 
 import "./num-control.sass";
-import { IBaseNode } from "../nodes/base-node";
 
 // This generics design isn't very user friendly if a caller
 // tries to construct the NumberControl with a key that doesn't
