@@ -596,6 +596,30 @@
           }
         }
       ]
+    },
+    {
+      "description": "Investigation 3",
+      "ordinal": 3,
+      "title": "Test Chip Sim",
+      "introduction": {"tiles": []},
+      "config": {
+        "settings": {
+          "simulator": {
+            "defaultSimulation": "potentiometer_chip_servo"
+          }
+        }
+      },
+      "problems": [
+        {
+          "description": "Problem 0.1",
+          "ordinal": 1,
+          "title": "Test chip sim problem",
+          "subtitle": "let us test the chip sim",
+          "sections": [
+            "investigation-3/problem-1/introduction/content.json"
+          ]
+        }
+      ]
     }
   ]
 }
