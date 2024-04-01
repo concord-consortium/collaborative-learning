@@ -224,5 +224,10 @@ context('Simulator Tile', function () {
     simulatorTile.getBoard().should("have.have.class", "collapsed");
     simulatorTile.getExpandToggle().click();
     simulatorTile.getBoard().should("not.have.class", "collapsed");
+
+    cy.log("dataflow can drive servo position");
+    dataflowTile.getCreateNodeButton("number").click();
+    dataflowTile.getNumberField().type("1{enter}");
+    cy.pause();
   });
 });
