@@ -198,9 +198,31 @@ context('Simulator Tile', function () {
     beforeTest(queryParams3);
     cy.log("renders simulator tile");
     simulatorTile.getSimulatorTile().should("not.exist");
+    cy.collapseResourceTabs();
     clueCanvas.addTile("simulator");
+    clueCanvas.addTile("dataflow");
     simulatorTile.getSimulatorTile().should("exist");
     simulatorTile.getTileTitle().should("exist");
-    simulatorTile.getSimulatorTile().should("contain.text", "Potentiometer");
+    simulatorTile.getSimulatorTile().should("contain.text", "Potentiometer Position");
+    simulatorTile.getSimulatorTile().should("contain.text", "Resistance Reading");
+    simulatorTile.getSimulatorTile().should("contain.text", "Servo Position");
+
+    cy.log("pot value starts at 0");
+    simulatorTile.getVariableDisplayedValue().eq(0).should("contain.text", "0 deg");
+    simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "0");
+
+    cy.log("pot can be adjusted and resistance value changes");
+    simulatorTile.getPotValueSlider().click("right")
+      .trigger('mousedown', { which: 1, pageX: 100, pageY: 100 })
+      .trigger('mousemove', { which: 1, pageX: 200, pageY: 100 })
+      .trigger('mouseup', {force: true});
+    simulatorTile.getVariableDisplayedValue().eq(0).should("contain.text", "225 deg");
+    simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "853");
+
+    cy.log("expand and minimize toggle works");
+    simulatorTile.getExpandToggle().click();
+    simulatorTile.getBoard().should("have.have.class", "collapsed");
+    simulatorTile.getExpandToggle().click();
+    simulatorTile.getBoard().should("not.have.class", "collapsed");
   });
 });
