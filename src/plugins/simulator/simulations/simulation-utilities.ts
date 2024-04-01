@@ -12,15 +12,13 @@ export function getFrame(percent: number, numFrames: number) {
 }
 
 export function getVariableSuffix(variable: VariableType) {
-  console.log("| getVariableSuffix testing variable: ", JSON.parse(JSON.stringify(variable)));
   if (variable.hasLabel("input")){
-    console.log("|  ...hasLabel('input') found");
     if (variable.hasLabel("position")) return "Position";
     if (variable.hasLabel("reading")) return "Reading";
     else return "Sensor";
   }
   if (variable.hasLabel("output")){
-    if (variable.hasLabel("physical")) return "Position";
+    if (variable.hasLabel("position")) return "Position";
     else return "Output";
   }
 }
