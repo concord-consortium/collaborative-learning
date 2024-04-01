@@ -50,16 +50,13 @@ export class DBExemplarsListener extends BaseListener {
   private handleExemplarRemoved = (snapshot: firebase.database.DataSnapshot) => {
     const exemplarId = snapshot.key;
     if (exemplarId) {
-      this.db.stores.documents.visibleExemplars.delete(exemplarId);
+      this.db.stores.documents.setExemplarVisible(exemplarId, false);
     }
   };
 
   private updateExemplarBasedOnValue = (exemplarId: string, value: any) => {
-    if ("visible" in value && value.visible) {
-      this.db.stores.documents.visibleExemplars.add(exemplarId);
-    } else {
-      this.db.stores.documents.visibleExemplars.delete(exemplarId);
-    }
+    const visible = "visible" in value && value.visible;
+    this.db.stores.documents.setExemplarVisible(exemplarId, visible);
   };
 
 }

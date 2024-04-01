@@ -181,6 +181,13 @@ export const DocumentsModel = types
     },
     setFirestore(firestore: Firestore) {
       self.firestore = firestore;
+    },
+    setExemplarVisible(exemplarId: string, visible: boolean) {
+      if (visible) {
+        self.visibleExemplars.add(exemplarId);
+      } else {
+        self.visibleExemplars.delete(exemplarId);
+      }
     }
 
   }))
