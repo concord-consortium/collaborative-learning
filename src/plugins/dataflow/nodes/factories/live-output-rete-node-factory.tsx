@@ -3,7 +3,7 @@ import { NodeData } from "rete/types/core/data";
 import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
-import { getHubSelect, getOutputType } from "../utilities/live-output-utilities";
+import { getHubSelect, getLastValidServoValue, getOutputType } from "../utilities/live-output-utilities";
 import { NodeLiveOutputTypes, NodeMicroBitHubs,
   kMicroBitHubRelaysIndexed, kBinaryOutputTypes, kGripperOutputTypes, kServoOutputTypes
 } from "../../model/utilities/node";
@@ -62,13 +62,13 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
 
         if(kServoOutputTypes.includes(outputType)){
           // angles out of range are set to the nearest valid value
-          newValue = Math.min(Math.max(newValue, 0), 180);
-          nodeValue?.setDisplayMessage(`${newValue}°`);
+          //newValue = Math.min(Math.max(newValue, 0), 180);
+          //nodeValue?.setDisplayMessage(`${newValue}°`);
 
           // leaving the alternative approach in place if needed
           // this just will not move if given an invalid value
-          // const isValidServoValue = newValue >= 0 && newValue <= 180;
-          // if (!isValidServoValue) newValue = getLastValidServoValue(_node);
+          const isValidServoValue = newValue >= 0 && newValue <= 180;
+          if (!isValidServoValue) newValue = getLastValidServoValue(_node);
         }
 
         nodeValue?.setValue(newValue);
