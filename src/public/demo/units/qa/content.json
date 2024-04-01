@@ -613,8 +613,8 @@
         {
           "description": "Problem 0.1",
           "ordinal": 1,
-          "title": "Test chip sim problem",
-          "subtitle": "let us test the chip sim",
+          "title": "QA 3.1 Test Chip Sim",
+          "subtitle": "",
           "sections": [
             "investigation-3/problem-1/introduction/content.json"
           ]
