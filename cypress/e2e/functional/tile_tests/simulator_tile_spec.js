@@ -8,6 +8,7 @@ let simulatorTile = new SimulatorTile;
 
 const queryParams1 = `${Cypress.config("qaUnitStudent5")}`;
 const queryParams2 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
+const queryParams3 = `${Cypress.config("qaUnitStudent7Investigation3")}`;
 
 function beforeTest(params) {
   cy.clearQAData('all');
@@ -192,5 +193,14 @@ context('Simulator Tile', function () {
     dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 1);
     dataflowTile.getDropdownOptions(lo, "hubSelect").eq(0).click();
     simulatorTile.getSimulatorTile().should("contain.text", `Heat Lamp Output1`);
+  });
+  it("Simulator tile with potentiometer, arduino, servo simulation", () => {
+    beforeTest(queryParams3);
+    cy.log("renders simulator tile");
+    simulatorTile.getSimulatorTile().should("not.exist");
+    clueCanvas.addTile("simulator");
+    simulatorTile.getSimulatorTile().should("exist");
+    simulatorTile.getTileTitle().should("exist");
+    simulatorTile.getSimulatorTile().should("contain.text", "Potentiometer");
   });
 });
