@@ -55,6 +55,7 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
   const servoRotationString = `rotate(${valueForRotation}deg)`;
 
   const potServoClasses = classNames('pot-servo-component', { collapsed, "expanded": !collapsed });
+  const boardClasses = classNames('board', { collapsed, "expanded": !collapsed });
 
   return (
     <div className={potServoClasses}>
@@ -68,6 +69,7 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
           <div className="input wire"></div>
           <img
             src={collapsed ? assemblyCollapsed : assemblyExpanded}
+            className={boardClasses}
             alt="Board"
           />
           <div className="output wire"></div>
