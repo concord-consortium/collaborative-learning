@@ -16,6 +16,7 @@ import { DBBookmarksListener } from "./db-bookmarks-listener";
 import { BaseListener } from "./base-listener";
 import { DBDocumentsContentListener } from "./db-docs-content-listener";
 import { DBStudentPersonalDocsListener } from "./db-student-personal-docs-listener";
+import { DBExemplarsListener } from "./db-exemplars-listener";
 
 export class DBListeners extends BaseListener {
   @observable public isListening = false;
@@ -32,6 +33,7 @@ export class DBListeners extends BaseListener {
   private commentsListener: DBCommentsListener;
   private bookmarksListener: DBBookmarksListener;
   private documentsContentListener: DBDocumentsContentListener;
+  private exemplarsListener: DBExemplarsListener;
 
   constructor(db: DB) {
     super("DBListeners");
@@ -48,6 +50,7 @@ export class DBListeners extends BaseListener {
     this.commentsListener = new DBCommentsListener(db);
     this.bookmarksListener = new DBBookmarksListener(db);
     this.documentsContentListener = new DBDocumentsContentListener(db);
+    this.exemplarsListener = new DBExemplarsListener(db);
   }
 
   public async start() {
@@ -67,7 +70,8 @@ export class DBListeners extends BaseListener {
     await Promise.all([
       this.commentsListener.start(),
       this.bookmarksListener.start(),
-      this.documentsContentListener.start()
+      this.documentsContentListener.start(),
+      this.exemplarsListener.start()
     ]);
 
     runInAction(() => this.isListening = true);
@@ -87,6 +91,7 @@ export class DBListeners extends BaseListener {
     this.problemDocumentsListener.stop();
     this.groupsListener.stop();
     this.latestGroupIdListener.stop();
+    this.exemplarsListener.stop();
   }
 
   // sync local support document properties to firebase (teachers only)

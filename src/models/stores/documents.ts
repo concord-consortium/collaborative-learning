@@ -43,6 +43,7 @@ export const DocumentsModel = types
     userContextProvider: undefined as UserContextProvider | undefined,
     firestore: undefined as Firestore | undefined,
     requiredDocuments: {} as Record<string, IRequiredDocumentPromise>,
+    visibleExemplars: observable(new Set<string>()),
     all: observable<DocumentModelType>([])
   }))
   .views(self => ({
@@ -58,6 +59,11 @@ export const DocumentsModel = types
       return self.all.filter((document) => {
         return (document.type === type) && (document.uid === userId);
       });
+    },
+
+    isExemplarVisible(exemplarId: string) {
+      console.log("checking exemplar:", exemplarId);
+      return self.visibleExemplars.has(exemplarId);
     }
   }))
   .views(self => ({

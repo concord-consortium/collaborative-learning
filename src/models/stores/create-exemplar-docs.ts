@@ -78,7 +78,7 @@ function createExemplarDocs(
       title: exemplarData.title,
       uid: 'ivan_idea_1',
       type: ExemplarDocument,
-      visibility: "public",
+      visibility: "private",
       content: exemplarData.content,
       key: exemplarDocId,
       properties: {

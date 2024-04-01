@@ -25,6 +25,9 @@ export function isPersonalType(type: string) {
 export function isLearningLogType(type: string) {
   return [LearningLogDocument, LearningLogPublication].indexOf(type) >= 0;
 }
+export function isExemplarType(type: string) {
+  return type === ExemplarDocument;
+}
 // is this type of document associated with the offering (i.e. with a particular problem)
 export function isOfferingType(type: string) {
   return [SectionDocumentDEPRECATED, PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication]
