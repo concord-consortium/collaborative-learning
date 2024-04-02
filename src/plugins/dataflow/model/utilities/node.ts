@@ -64,7 +64,7 @@ export interface NodeType {
 export const NodeTypes: NodeType[] = [
   {
     name: "Sensor",
-    displayName: "Sensor",
+    displayName: "Input",
   },
   {
     name: "Number",
