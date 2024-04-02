@@ -39,6 +39,7 @@ import { NodeEditorMST } from "../rete/node-editor-mst";
 import { IBaseNode } from "../rete/nodes/base-node";
 import { PlotButtonControl, PlotButtonControlComponent } from "../rete/controls/plot-button-control";
 import { NumberUnitsControl, NumberUnitsControlComponent } from "../rete/controls/num-units-control";
+import { DemoOutputControl, DemoOutputControlComponent } from "../rete/controls/demo-output-control";
 
 
 export interface IStartProgramParams {
@@ -324,6 +325,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             }
             if (data.payload instanceof DropdownListControl) {
               return DropdownListControlComponent;
+            }
+            if (data.payload instanceof DemoOutputControl) {
+              return DemoOutputControlComponent;
             }
             if (data.payload instanceof PlotButtonControl) {
               return PlotButtonControlComponent;

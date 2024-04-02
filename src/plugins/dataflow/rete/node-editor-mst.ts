@@ -17,6 +17,7 @@ import { INodeServices } from "./service-types";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { AreaExtensions, AreaPlugin } from "rete-area-plugin";
+import { DemoOutputNode } from "./nodes/demo-output-node";
 
 export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices {
   private reteNodesMap: Record<string, Schemes['Node']> = {};
@@ -38,7 +39,6 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     AreaExtensions.selectableNodes(this.area, AreaExtensions.selector(), {
       accumulating: AreaExtensions.accumulateOnCtrl()
     });
-
 
     // onPatch(mstProgram.nodes, (patch, reversePatch) => {
     //   console.log("nodes patch", patch);
@@ -118,10 +118,23 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     this.area.emit({ type: "nodepicked", data: { id: nodeId } });
   };
 
+  public update = (type: "node" | "connection" | "socket" | "control", id: string) => {
+    this.area.update(type, id);
+  };
+
+  public removeInputConnection = (nodeId: string, inputKey: string) => {
+    const matchingConnection = [...this.mstProgram.connections.values()].find(connection =>
+      connection.target === nodeId && connection.targetInput === inputKey);
+
+    if (!matchingConnection) return;
+    this.removeConnection(matchingConnection.id);
+  };
+
   private createReteNodeFromNodeModel(id: string, model: IBaseNodeModel) {
     const nodeTypes: Record<string, NodeClass> =
     {
       "Counter": CounterNode,
+      "Demo Output": DemoOutputNode,
       "Generator": GeneratorNode,
       "Logic": LogicNode,
       "Math": MathNode,

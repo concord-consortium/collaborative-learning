@@ -391,7 +391,8 @@ export const NodeDemoOutputTypes = [
     name: "Humidifier",
     icon: HumidIcon
   }
-];
+] as const;
+export type NodeDemoOutputTypeNames = (typeof NodeDemoOutputTypes)[number]['name'];
 
 export const NodeLiveOutputTypes = [
   {

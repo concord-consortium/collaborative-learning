@@ -4,6 +4,7 @@ import { MathNodeModel } from "../rete/nodes/math-node";
 import { CounterNodeModel } from "../rete/nodes/counter-node";
 import { LogicNodeModel } from "../rete/nodes/logic-node";
 import { GeneratorNodeModel } from "../rete/nodes/generator-node";
+import { DemoOutputNodeModel } from "../rete/nodes/demo-output-node";
 
 export const ConnectionModel = types
   .model("Connection", {
@@ -23,6 +24,7 @@ export const DataflowNodeModel = types.
     y: types.number,
     data: types.union(
       CounterNodeModel,
+      DemoOutputNodeModel,
       GeneratorNodeModel,
       LogicNodeModel,
       MathNodeModel,

@@ -17,6 +17,9 @@ export const BaseNodeModel = types.model("BaseNodeModel",
 
   plot: false,
 
+  // This is the name assigned by DataFlow, it probably should be renamed
+  orderedDisplayName: types.maybe(types.string),
+
   // It isn't entirely clear this is the right way to model this.
   // In dataflow v1 these nodeValues and recentValues were basically
   // stored in state.
@@ -27,13 +30,18 @@ export const BaseNodeModel = types.model("BaseNodeModel",
   // previous recent values were loaded. The time value was not saved so
   // the generator would start generating at time 0 even though the
   // recentValues ended at some other time.
+
+  /**
+   * This is the default value that is plotted by the mini-graph. On some
+   * nodes this is their output value. On other nodes this is one of their
+   * input values.
+   */
   nodeValue: types.maybe(types.number),
+
   // FIXME: this union of number and null doesn't seem to be supported
   // in arrays. When the array is set to `[null]` MST is complaining
   recentValues: types.map(types.array(types.union(types.number,types.null))),
 
-  // This is the name assigned by DataFlow, it probably should be renamed
-  orderedDisplayName: types.maybe(types.string)
 })
 .volatile(self => ({
   watchedValues: {

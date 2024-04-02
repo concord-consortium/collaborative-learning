@@ -52,7 +52,7 @@ export class DropdownListControl<
     public node: NodeType,
     public modelKey: Key,
 
-    public optionArray: ListOption[],
+    public optionArray: readonly ListOption[],
     public label = "",
     public tooltip = "Select Type"
   ) {
@@ -180,7 +180,7 @@ export interface IDropdownListControl {
   id: string;
   model: IBaseNodeModel;
   modelKey: string;
-  optionArray: ListOption[];
+  optionArray: readonly ListOption[];
   label: string;
   tooltip: string;
   getValue(): string;
@@ -192,7 +192,7 @@ export interface IDropdownListControl {
 
 const DropdownList: React.FC<{
   control: IDropdownListControl,
-  options: ListOption[],
+  options: readonly ListOption[],
   listClass: string
 }> = observer(function DropdownList(props) {
   const { control, options, listClass } = props;

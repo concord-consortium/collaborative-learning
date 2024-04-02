@@ -4,4 +4,6 @@ export interface INodeServices {
   process(): void;
   logTileChangeEvent(event: Pick<ITileChangeLogEvent, "operation" | "change">): void;
   selectNode(nodeId: string): void;
+  update(type: "node" | "connection" | "socket" | "control", id: string): void;
+  removeInputConnection(nodeId: string, inputKey: string): void;
 }

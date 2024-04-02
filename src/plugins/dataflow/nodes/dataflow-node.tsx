@@ -11,7 +11,7 @@ import { IBaseNode } from "../rete/nodes/base-node";
 
 const { RefSocket, RefControl } = Presets.classic;
 
-// This is how the rete context menu delete an item
+// This is how the rete context menu deletes an item
 //
 // const deleteItem: Item = {
 //   label: 'Delete',
