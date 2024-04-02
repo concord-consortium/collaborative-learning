@@ -373,11 +373,11 @@ export function lineToAxisIntercepts(iSlope: number, iIntercept: number,
 }
 
 export function equationString(slope: number, intercept: number, attrNames: {x: string, y: string}) {
-  const float = format('.4~r');
+  const f = Intl.NumberFormat(undefined, { maximumFractionDigits: 2, useGrouping: false});
   if (isFinite(slope) && slope !== 0) {
-    return `<em>${attrNames.y}</em> = ${float(slope)} <em>${attrNames.x}</em> + ${float(intercept)}`;
+    return `<em>${attrNames.y}</em> = ${f.format(slope)} <em>${attrNames.x}</em> + ${f.format(intercept)}`;
   } else {
-    return `<em>${slope === 0 ? attrNames.y : attrNames.x}</em> = ${float(intercept)}`;
+    return `<em>${slope === 0 ? attrNames.y : attrNames.x}</em> = ${f.format(intercept)}`;
   }
 }
 
