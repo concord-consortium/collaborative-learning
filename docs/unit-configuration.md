@@ -135,6 +135,7 @@ Common toolbar framework. Supports and defaults to the following toolbar buttons
 - `fit-view`
 - `toggle-lock`
 - `toggle-navigator`
+- `["variables-link", "Graph"]`
 - `delete`
 
 #### Drawing
