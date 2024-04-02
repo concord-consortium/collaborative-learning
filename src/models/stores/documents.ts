@@ -62,7 +62,6 @@ export const DocumentsModel = types
     },
 
     isExemplarVisible(exemplarId: string) {
-      console.log("checking exemplar:", exemplarId);
       return self.visibleExemplars.has(exemplarId);
     }
   }))
