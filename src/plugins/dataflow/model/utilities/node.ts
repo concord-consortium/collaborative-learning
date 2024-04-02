@@ -27,11 +27,9 @@ import FanIcon from "../../../shared-assets/icons/dataflow/output/fan.svg";
 import TemperatureIcon from "../../../shared-assets/icons/dataflow/sensor/temperature.svg";
 import CO2Icon from "../../assets/icons/sensor/co2.svg";
 import HumidityIcon from "../../../shared-assets/icons/dataflow/sensor/humidity.svg";
-import LightIcon from "../../assets/icons/sensor/light.svg";
-import O2Icon from "../../assets/icons/sensor/o2.svg";
-import ParticulatesIcon from "../../assets/icons/sensor/particulates.svg";
-import MoistureIcon from "../../assets/icons/sensor/moisture.svg";
-import EmgIcon from "../../../shared-assets/icons/dataflow/control/signal.svg";
+//import O2Icon from "../../assets/icons/sensor/o2.svg";
+import SignalIcon from "../../../shared-assets/icons/dataflow/control/signal.svg";
+import EMGIcon from "../../assets/icons/sensor/sensor-emg-icon.svg";
 import PressureIcon from "../../../shared-assets/icons/dataflow/sensor/pressure.svg";
 import ServoIcon from "../../../shared-assets/icons/dataflow/output/servo.svg";
 
@@ -159,21 +157,21 @@ export const NodeOperationTypes = [
     type: "transform",
     method: (n1: number, n2: number) => Math.round(n1),
     numberSentence: (n1: string, n2: string) => `round(${n1}) = `,
-    icon: EmgIcon
+    icon: SignalIcon
   },
   {
     name: "Floor",
     type: "transform",
     method: (n1: number, n2: number) => Math.floor(n1),
     numberSentence: (n1: string, n2: string) => `floor(${n1}) = `,
-    icon: EmgIcon
+    icon: SignalIcon
   },
   {
     name: "Ceil",
     type: "transform",
     method: (n1: number, n2: number) => Math.ceil(n1),
     numberSentence: (n1: string, n2: string) => `ceil(${n1}) = `,
-    icon: EmgIcon
+    icon: SignalIcon
   },
   {
     name: "Ramp",
@@ -197,7 +195,7 @@ export const NodeOperationTypes = [
       return n1;
     },
     numberSentence: (n1: string, n2: string) => `${n1} → `,
-    icon: EmgIcon
+    icon: SignalIcon
   },
   {
     name: "Greater Than",
@@ -329,35 +327,35 @@ export const NodeSensorTypes = [
     units: "PPM",
     icon: CO2Icon
   },
-  {
-    name: "O₂",
-    type: "O2",
-    units: "%",
-    icon: O2Icon
-  },
-  {
-    name: "Light",
-    type: "light",
-    units: "lux",
-    icon: LightIcon
-  },
-  {
-    name: "Soil Moisture",
-    type: "soil-moisture",
-    units: "",
-    icon: MoistureIcon
-  },
-  {
-    name: "Particulates",
-    type: "particulates",
-    units: "PM2.5",
-    icon: ParticulatesIcon
-  },
+  // {
+  //   name: "O₂",
+  //   type: "O2",
+  //   units: "%",
+  //   icon: O2Icon
+  // },
+  // {
+  //   name: "Light",
+  //   type: "light",
+  //   units: "lux",
+  //   icon: LightIcon
+  // },
+  // {
+  //   name: "Soil Moisture",
+  //   type: "soil-moisture",
+  //   units: "",
+  //   icon: MoistureIcon
+  // },
+  // {
+  //   name: "Particulates",
+  //   type: "particulates",
+  //   units: "PM2.5",
+  //   icon: ParticulatesIcon
+  // },
   {
     name: "EMG",
     type: "emg-reading",
     units: "mV",
-    icon: EmgIcon,
+    icon: EMGIcon,
     decimalPlaces: 0
   },
   {
@@ -365,6 +363,13 @@ export const NodeSensorTypes = [
     type: "fsr-reading",
     units: "psi",
     icon: PressureIcon,
+    decimalPlaces: 0
+  },
+  {
+    name: "Pin Reading",
+    type: "pin-reading",
+    units: "",
+    icon: SignalIcon,
     decimalPlaces: 0
   }
 ];
