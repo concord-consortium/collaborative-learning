@@ -122,6 +122,13 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     this.area.update(type, id);
   };
 
+  public isConnected = (nodeId: string, inputKey: string) => {
+    const matchingConnection = [...this.mstProgram.connections.values()].find(connection =>
+      connection.target === nodeId && connection.targetInput === inputKey);
+
+    return !!matchingConnection;
+  };
+
   public removeInputConnection = (nodeId: string, inputKey: string) => {
     const matchingConnection = [...this.mstProgram.connections.values()].find(connection =>
       connection.target === nodeId && connection.targetInput === inputKey);

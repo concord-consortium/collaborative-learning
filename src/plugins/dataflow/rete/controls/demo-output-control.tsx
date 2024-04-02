@@ -23,22 +23,20 @@ export class DemoOutputControl extends ClassicPreset.Control
     return this.model.outputType;
   }
 
-  get value1() {
-    // TODO: returning 0 if we are undefined just to make things work, this might
-    // might not be the right thing to do
+  get nodeValue() {
     return this.model.nodeValue ?? 0;
   }
 
-  get value2() {
+  get tilt() {
     return this.model.tilt ?? 0;
   }
 
-  get percentClosed() {
-    return Math.max(0, Math.min(1, this.value1));
-  }
-
-  get percentValue2() {
-    return Math.max(0, Math.min(1, this.value2));
+  // Converts [-1,1] to [0,1]. Caps at 0 and 1.
+  get percentTilt() {
+    let percentTilt = (this.tilt + 1) / 2;
+    percentTilt = Math.min(1, percentTilt);
+    percentTilt = Math.max(0, percentTilt);
+    return percentTilt;
   }
 
   getFrame(percent: number, frames: any[]) {
@@ -54,7 +52,7 @@ export const DemoOutputControlComponent: React.FC<{ data: DemoOutputControl }> =
   observer(function DemoOutputControlComponent(props)
 {
   const control = props.data;
-  const { type, value1 } = control;
+  const { type, nodeValue: value1 } = control;
 
   const controlClassName = classNames({
     "lightbulb-control": type === "Light Bulb",
@@ -68,10 +66,10 @@ export const DemoOutputControlComponent: React.FC<{ data: DemoOutputControl }> =
     "spinning fast": value1 === 1
   });
 
-  const grabberFrame = control.getFrame(control.percentClosed, grabberFrames);
-  const advancedGrabberFrame = control.getFrame(control.percentClosed, advancedGrabberFrames);
-  const grabberCordFrame = control.getFrame(control.percentValue2, grabberCordFrames);
-  const grabberDegrees = (control.percentValue2 - .5) * -50;
+  const grabberFrame = control.getFrame(control.nodeValue, grabberFrames);
+  const advancedGrabberFrame = control.getFrame(control.nodeValue, advancedGrabberFrames);
+  const grabberCordFrame = control.getFrame(control.percentTilt, grabberCordFrames);
+  const grabberDegrees = (control.percentTilt - .5) * -50;
   const grabberRotateStyle =  { transform: `rotate(${grabberDegrees}deg)`};
 
   return (
@@ -115,7 +113,7 @@ export const DemoOutputControlComponent: React.FC<{ data: DemoOutputControl }> =
               src={humidifier}
             />}
             <HumidifierAnimation
-              nodeValue={control.value1}
+              nodeValue={control.nodeValue}
             />
         </>
       }

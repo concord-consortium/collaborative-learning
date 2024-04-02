@@ -1,5 +1,3 @@
-
-
 import { ClassicPreset } from "rete";
 import "./value-control.sass";
 import classNames from "classnames";

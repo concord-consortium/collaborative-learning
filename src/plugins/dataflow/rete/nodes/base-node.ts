@@ -118,6 +118,7 @@ export type IBaseNode = Schemes['Node'] & {
   tick(): boolean;
   process(): void;
   select(): void;
+  isConnected(inputKey: string): boolean;
   logControlEvent(
     operation: string,
     controlType: string,
@@ -173,6 +174,10 @@ export class BaseNode<
    */
   select() {
     this.services.selectNode(this.id);
+  }
+
+  isConnected(inputKey: string) {
+    return this.services.isConnected(this.id, inputKey);
   }
 
   logNodeEvent(operation: string) {

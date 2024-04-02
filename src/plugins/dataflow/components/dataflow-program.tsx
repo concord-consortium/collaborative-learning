@@ -40,6 +40,7 @@ import { IBaseNode } from "../rete/nodes/base-node";
 import { PlotButtonControl, PlotButtonControlComponent } from "../rete/controls/plot-button-control";
 import { NumberUnitsControl, NumberUnitsControlComponent } from "../rete/controls/num-units-control";
 import { DemoOutputControl, DemoOutputControlComponent } from "../rete/controls/demo-output-control";
+import { InputValueControl, InputValueControlComponent } from "../rete/controls/input-value-control";
 
 
 export interface IStartProgramParams {
@@ -331,6 +332,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             }
             if (data.payload instanceof PlotButtonControl) {
               return PlotButtonControlComponent;
+            }
+            if (data.payload instanceof InputValueControl) {
+              return InputValueControlComponent;
             }
             return null;
           }
