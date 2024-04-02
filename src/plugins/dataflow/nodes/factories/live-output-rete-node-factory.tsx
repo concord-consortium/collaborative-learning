@@ -61,14 +61,13 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
         }
 
         if(kServoOutputTypes.includes(outputType)){
-          // angles out of range are set to the nearest valid value
-          //newValue = Math.min(Math.max(newValue, 0), 180);
-          //nodeValue?.setDisplayMessage(`${newValue}°`);
-
-          // leaving the alternative approach in place if needed
-          // this just will not move if given an invalid value
+          // out of range value will not move sim servo
           const isValidServoValue = newValue >= 0 && newValue <= 180;
           if (!isValidServoValue) newValue = getLastValidServoValue(_node);
+
+          // alternative: angles out of range move servo to nearest valid angle
+          // newValue = Math.min(Math.max(newValue, 0), 180);
+          // nodeValue?.setDisplayMessage(`${newValue}°`);
         }
 
         nodeValue?.setValue(newValue);

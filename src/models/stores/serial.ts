@@ -175,7 +175,6 @@ export class SerialDevice {
     if (this.hasPort() && outputConfig?.angleOffset !== undefined){
       const scaledAngle = (outputConfig.angleScale * n) + outputConfig.angleOffset;
       const roundedScaled = Math.round(scaledAngle);
-       //console.log("| GOT:", n, "| SENDING :", roundedScaled);
       this.writer.write(`${roundedScaled.toString()}\n`);
     }
   }
