@@ -57,7 +57,7 @@ export class SensorNode extends BaseNode<
       icon: sensorType.icon
     }));
     const sensorTypeControl = new DropdownListControl(this, "sensorType", sensorTypeOptions,
-      "Select Sensor Type",  "Select a sensor type");
+      "Select Input Type",  "Select an input type");
     this.addControl("sensorType", sensorTypeControl);
 
     // A function is passed for the options, this way the dropdown component can
@@ -140,8 +140,17 @@ export class SensorNode extends BaseNode<
   }
 
   data(): { value: number} {
-    // TODO: is NaN the right value here
-    const value = this.model.nodeValue ?? NaN;
+    const { sensorType, nodeValue } = this.model;
+    const isDigitalReading = sensorType === "fsr-reading" || sensorType === "pin-reading";
+    const makeZero = isDigitalReading && (nodeValue == null || isNaN(nodeValue));
+
+    // TODO: is NaN the right value if nodeValue is null or undefined?
+    const value = makeZero ? 0 : nodeValue ?? NaN;
+
+    // TODO: in Rete v1 we'd update the nodeValue here, we are not doing that in Rete v2.
+    // Perhaps we should? It seems bad to use the data method to update the nodeValue
+    // So it would probably be better to move this logic into onTick and then the
+    // data method just returns the nodeValue
     return { value };
   }
 

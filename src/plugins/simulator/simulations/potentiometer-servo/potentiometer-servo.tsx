@@ -22,7 +22,7 @@ const minPotAngle = 0;
 const maxPotAngle = 270;
 const minServoAngle = 0;
 const minResistReading = 0;
-const maxResistReading = 1023;
+const maxResistReading = 675; // our wired assembly sends 3.3V to pot, so max reading is 675
 
 const kPotAngleKey = "pot_angle_key";
 const kResistReadingKey = "resist_reading_key";
@@ -141,8 +141,8 @@ export const potentiometerAndServoSimulation: ISimulation = {
       unit: "deg"
     },
     {
-      displayName: "Resistance",
-      labels: ["input", "reading", "decimalPlaces:0"],
+      displayName: "Pin",
+      labels: ["input", "reading", "sensor:pin-reading", "decimalPlaces:0"],
       icon: iconUrl(kSignalKey),
       name: kResistReadingKey,
       value: minResistReading

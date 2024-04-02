@@ -127,7 +127,7 @@ export const CustomDataflowNode = observer(
       data-testid="node"
     >
       <div className="top-bar" onClick={() => console.log("top-bar click")}>
-        <div className="title" data-testid="title">{label}</div>
+        <div className="title" data-testid="title">{model.orderedDisplayName || label}</div>
         <Delete editor={editor} nodeId={id}/>
       </div>
       {/* Outputs */}

@@ -283,7 +283,7 @@ export class LiveOutputNode extends BaseNode<
       // alternative: angles out of range move servo to nearest valid angle
       // newValue = Math.min(Math.max(newValue, 0), 180);
       this.model.setNodeValue(newValue);
-      this.inputValueControl.setDisplayMessage(`${newValue}°`);
+      this.inputValueControl.setDisplayMessage(`${Math.round((newValue / 10) * 10)}°`);
     } else {
       // We shouldn't hit this case but if we do then just pass the value through
       this.model.setNodeValue(value);
