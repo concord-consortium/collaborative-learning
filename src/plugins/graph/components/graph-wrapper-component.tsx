@@ -20,6 +20,7 @@ import { GraphComponent } from "./graph-component";
 import { isNumericAxisModel } from "../imports/components/axis/models/axis-model";
 import { Point } from "../graph-types";
 import { HotKeys } from "../../../utilities/hot-keys";
+import { LocationSetterContext } from "../hooks/use-location-setter-context";
 
 import "./graph-toolbar-registration";
 
@@ -112,6 +113,20 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
         let coords;
         if (objectType === "dot") {
           coords = getDotCenter(objectId);
+        // Check location cache
+        } else if (content.annotationLocationCache.has(objectId)){
+          const location = content.annotationLocationCache.get(objectId);
+          if (location) {
+            const size = content.annotationSizesCache.get(objectId);
+            if (size) { // This is a rectangle of defined width & height
+              const bbox = {
+                left: location.x + layout.getComputedBounds("plot").left,
+                top: location.y + layout.getComputedBounds("plot").top,
+                ...size };
+              return bbox;
+            }
+            return boundingBoxForPoint(location);
+          }
         } else {
           // Maybe one of our adornments knows about this object
           const pos = objectType && getPositionFromAdornment(objectType, objectId);
@@ -124,7 +139,14 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
       getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
         let coords;
         if (objectType === "dot") {
+          // Native graph object
           coords = getDotCenter(objectId);
+        } else if (content.annotationSizesCache.has(objectId)) {
+          // Adornment object with rectangle shape; do not return SVG
+          return undefined;
+        } else if (content.annotationLocationCache.has(objectId)){
+          // Adornment object with dot shape
+          coords = content.annotationLocationCache.get(objectId);
         } else if (objectType) {
           const pos = getPositionFromAdornment(objectType, objectId);
           coords = pos && getScaledPosition(pos);
@@ -158,8 +180,8 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
       }
     });
     // xDomain and yDomain are included to force updating the sparrow locations when they change
-  }, [getDotCenter, content, layout, onRegisterTileApi,
-      getPositionFromAdornment, boundingBoxForPoint, getScaledPosition]);
+  }, [getDotCenter, content, layout, onRegisterTileApi, getPositionFromAdornment,
+    boundingBoxForPoint, getScaledPosition]);
 
   useEffect(function cleanup() {
     return () => {
@@ -169,20 +191,22 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
 
   return (
     <GraphSettingsContext.Provider value={graphSettings}>
-      <div
-        className={classNames("graph-wrapper", { "read-only": readOnly })}
-        onKeyDown={(e) => hotKeys.current.dispatch(e)}
-        tabIndex={0} // must be able to take focus so that it can receive keyDown events
-      >
-        <BasicEditableTileTitle />
-        <GraphComponent
-          layout={layout}
-          tile={model}
-          tileElt={tileElt}
-          onRequestRowHeight={onRequestRowHeight}
-          readOnly={readOnly}
-        />
-      </div>
+      <LocationSetterContext.Provider value={{ set: content.setAnnotationLocation }}>
+        <div
+          className={classNames("graph-wrapper", { "read-only": readOnly })}
+          onKeyDown={(e) => hotKeys.current.dispatch(e)}
+          tabIndex={0} // must be able to take focus so that it can receive keyDown events
+        >
+          <BasicEditableTileTitle />
+          <GraphComponent
+            layout={layout}
+            tile={model}
+            tileElt={tileElt}
+            onRequestRowHeight={onRequestRowHeight}
+            readOnly={readOnly}
+          />
+        </div>
+      </LocationSetterContext.Provider>
     </GraphSettingsContext.Provider>
   );
 });
