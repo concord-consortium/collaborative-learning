@@ -1,20 +1,22 @@
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {autorun} from "mobx";
 import { observer } from "mobx-react-lite";
-import {drag, select} from "d3";
+import {drag, select, Selection} from "d3";
 import {useAxisLayoutContext} from "../../imports/components/axis/models/axis-layout-context";
 import {ScaleNumericBaseType} from "../../imports/components/axis/axis-types";
 import {INumericAxisModel} from "../../imports/components/axis/models/axis-model";
 import {computeSlopeAndIntercept, equationString, IAxisIntercepts,
         lineToAxisIntercepts} from "../../utilities/graph-utils";
 import {useInstanceIdContext} from "../../imports/hooks/use-instance-id-context";
-import { IMovableLineModel } from "./movable-line-model";
+import { getAnnotationId, IMovableLineModel } from "./movable-line-model";
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { kInfinitePoint } from "../adornment-models";
 import { Point } from "../../graph-types";
+import { kAnnotationNodeDefaultRadius } from "../../../../components/annotations/annotation-utilities";
 
 import "./movable-line.scss";
+import { useLocationSetterContext } from "../../hooks/use-location-setter-context";
 
 function equationContainer(model: IMovableLineModel, subPlotKey: Record<string, string>, containerId: string) {
   const classFromKey = model.classNameFromKey(subPlotKey),
@@ -39,6 +41,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     layout = useAxisLayoutContext(),
     instanceId = useInstanceIdContext(),
     readOnly = useReadOnlyContext(),
+    annotationLocationSetter = useLocationSetterContext(),
     xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType,
     xRange = xScale.range(),
     xScaleCopy = xScale.copy(),
@@ -82,6 +85,21 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       return kInfinitePoint;
     }
   }, [kHandle1Loc, kHandle2Loc]);
+
+  const positionEquation = useCallback((equation: Selection<HTMLElement, unknown, HTMLElement, any>, point: Point) => {
+    const annotationId = getAnnotationId(instanceKey, "equation");
+    equation.style('left', `${point.x}px`)
+        .style('top', `${point.y}px`);
+    if (model.isVisible) {
+      const equationNode = equation.node() as Element,
+        rect = equationNode?.getBoundingClientRect(),
+        width = rect.width || kAnnotationNodeDefaultRadius,
+        height = rect.height || kAnnotationNodeDefaultRadius;
+      annotationLocationSetter?.set(annotationId, point, { width, height });
+    } else {
+      annotationLocationSetter?.set(annotationId, undefined, undefined);
+    }
+  }, [annotationLocationSetter, instanceKey, model]);
 
   // Refresh the line
   useEffect(function refresh() {
@@ -129,30 +147,42 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
             x = point.x;
             y = point.y;
           }
-          elt
-            .attr('cx', x)
-            .attr('cy', y);
+          if (x !== undefined && x !== null && y !== undefined && y !== null) {
+            elt
+              .attr('cx', x)
+              .attr('cy', y);
+            const annotationId = getAnnotationId(instanceKey, "handle", index===1 ? "lower" : "upper");
+            if (model.isVisible) {
+              annotationLocationSetter?.set(annotationId, { x, y }, undefined);
+            } else {
+              annotationLocationSetter?.set(annotationId, undefined, undefined);
+            }
+          }
         }
 
         function refreshEquation() {
           if (!pointsOnAxes.current) return;
           const
-            screenX = xScale((pointsOnAxes.current.pt1.x + pointsOnAxes.current.pt2.x) / 2) / xSubAxesCount,
-            screenY = yScale((pointsOnAxes.current.pt1.y + pointsOnAxes.current.pt2.y) / 2) / ySubAxesCount,
             attrNames = {x: xAttrName, y: yAttrName},
             string = equationString(slope, intercept, attrNames),
-            equation = select(equationContainerSelector).select('p');
+            equation = select<HTMLElement,unknown>(equationContainerSelector).select<HTMLElement>('p');
 
           select(equationContainerSelector)
             .style('width', `${plotWidth}px`)
             .style('height', `${plotHeight}px`);
           equation.html(string);
-          // The equation may have been unpinned from the line if the user
-          // dragged it away from the line. Only move the equation if it
-          // is still pinned.
-          if (!lineModel?.currentEquationCoords) {
-            equation.style('left', `${screenX}px`)
-              .style('top', `${screenY}px`);
+
+          const fixedCoords = lineModel?.currentEquationCoords;
+          if (fixedCoords) {
+            // The equation is unpinned -- the user dragged it away from the line. Use stored position.
+            // It is stored in the model as a fraction of the graph height & width.
+            positionEquation(equation, { x: fixedCoords.x*plotWidth, y: fixedCoords.y*plotHeight });
+          } else {
+            // Pinned to line; calculate position.
+            const
+              screenX = xScale((pointsOnAxes.current.pt1.x + pointsOnAxes.current.pt2.x) / 2) / xSubAxesCount,
+              screenY = yScale((pointsOnAxes.current.pt1.y + pointsOnAxes.current.pt2.y) / 2) / ySubAxesCount;
+            positionEquation(equation, { x: screenX, y: screenY });
           }
         }
 
@@ -178,8 +208,8 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       });
       return () => disposer();
     }, [instanceId, layout, pointsOnAxes, lineObject, plotHeight, plotWidth, xScale, yScale, model, model.lines,
-        xAttrName, xSubAxesCount, xAxis, yAttrName, ySubAxesCount, yAxis, xRange, yRange,
-        equationContainerSelector, subPlotKey, instanceKey, calculateHandlePosition]
+        xAttrName, xSubAxesCount, xAxis, yAttrName, ySubAxesCount, yAxis, xRange, yRange, positionEquation,
+        equationContainerSelector, subPlotKey, instanceKey, calculateHandlePosition, annotationLocationSetter]
   );
 
   const
@@ -284,7 +314,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
 
     moveEquation = useCallback((event: { x: number, y: number, dx: number, dy: number }) => {
       if (event.dx !== 0 || event.dy !== 0) {
-        const equation = select(`${equationContainerSelector} p`),
+        const equation = select<HTMLElement,unknown>(`${equationContainerSelector} p`),
           equationNode = equation.node() as Element,
           equationWidth = equationNode?.getBoundingClientRect().width || 0,
           equationHeight = equationNode?.getBoundingClientRect().height || 0,
@@ -295,11 +325,10 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           x = left / plotWidth,
           y = top / plotHeight;
 
+        positionEquation(equation, { x: left, y: top });
         model.dragEquation({x, y}, instanceKey);
-        equation.style('left', `${left}px`)
-          .style('top', `${top}px`);
       }
-    }, [equationContainerSelector, instanceKey, model, plotWidth, plotHeight]),
+    }, [equationContainerSelector, plotWidth, plotHeight, positionEquation, model, instanceKey]),
 
     endMoveEquation = useCallback(() => {
       model.saveEquationCoords(instanceKey);
@@ -364,24 +393,15 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       .style('width', `${plotWidth}px`)
       .style('height', `${plotHeight}px`);
 
-    const equationP = equationDiv
-      .append('p')
+    equationDiv
+      .append<HTMLElement>('p')
       .attr('class', 'movable-line-equation')
       .attr('data-testid', `movable-line-equation-${model.classNameFromKey(subPlotKey)}`);
-
-    // If the equation is not pinned to the line, set its initial coordinates to
-    // the values specified in the model.
-    const equationCoords = model.lines?.get(instanceKey)?.currentEquationCoords;
-    if (equationCoords) {
-      const left = equationCoords.x * 100,
-        top = equationCoords.y * 100;
-      equationP.style('left', `${left}%`)
-        .style('top', `${top}%`);
-    }
 
     newLineObject.equation = equationDiv;
     setLineObject(newLineObject);
 
+    // disposer
     return () => {
       equationDiv.remove();
     };
