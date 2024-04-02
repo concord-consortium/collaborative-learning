@@ -67,7 +67,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
 
           // alternative: angles out of range move servo to nearest valid angle
           // newValue = Math.min(Math.max(newValue, 0), 180);
-          // nodeValue?.setDisplayMessage(`${newValue}°`);
+          nodeValue?.setDisplayMessage(`${newValue}°`);
         }
 
         nodeValue?.setValue(newValue);
