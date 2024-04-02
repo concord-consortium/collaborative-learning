@@ -546,7 +546,7 @@ export const ProgramDataRates: ProgramDataRate[] = [
   }
 ];
 
-export const kSensorSelectMessage = "Select a sensor";
+export const kSensorSelectMessage = "Select an input";
 export const kSensorMissingMessage = "⚠️";
 export const kAnimatedBinaryTypes = ["Fan", "Humidifier"];
 export const kMicroBitHubRelaysIndexed =  ["Heat Lamp", "Fan", "Humidifier"];

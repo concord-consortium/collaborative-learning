@@ -84,7 +84,7 @@ export class SensorSelectControl extends Rete.Control {
         <div className="node-select sensor-type" ref={divRef} title={"Select Sensor Type"}>
           <div className="item top" onMouseDown={handleChange(onDropdownClick)}>
             { type === "none"
-              ? <div className="label unselected">Select a sensor type</div>
+              ? <div className="label unselected">Select an input type</div>
               : <div className="top-item-holder">
                   <svg className="icon top">
                     {typeof icon === "string" ? icon : icon()}
