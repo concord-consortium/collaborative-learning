@@ -226,8 +226,18 @@ context('Simulator Tile', function () {
     simulatorTile.getBoard().should("not.have.class", "collapsed");
 
     cy.log("dataflow can drive servo position");
+    // collect initial position of servo arm
+    const initialPos = simulatorTile.getServoArm().invoke('offset').its('top');
+    simulatorTile.getVariableDisplayedValue().eq(2).should("contain.text", "0 deg");
     dataflowTile.getCreateNodeButton("number").click();
-    dataflowTile.getNumberField().type("1{enter}");
-    cy.pause();
+    dataflowTile.getNumberField().type("90{enter}");
+    dataflowTile.getCreateNodeButton("live-output").click();
+    dataflowTile.getDropdown("live-output", "liveOutputType").eq(0).click();
+    dataflowTile.getDropdownOptions("live-output", "liveOutputType").eq(5).click(); // Servo
+    dataflowTile.getNode("number").find(".socket.output").click();
+    dataflowTile.getNode("live-output").find(".socket.input").click({ force: true });
+    simulatorTile.getVariableDisplayedValue().eq(2).should("contain.text", "90 deg");
+    cy.wait(500); // wait for servo animation to move, then assert position has changed
+    simulatorTile.getServoArm().invoke('offset').its('top').should('not.eq', initialPos);
   });
 });
