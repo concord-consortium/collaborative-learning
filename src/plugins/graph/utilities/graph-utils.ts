@@ -226,7 +226,10 @@ export interface IMatchCirclesProps {
 
 export function matchCirclesToData(props: IMatchCirclesProps) {
   const { dataConfiguration, enableAnimation, instanceId, dotsElement } = props;
-  const allCaseData = dataConfiguration.joinedCaseDataArrays;
+  const graphModel = getParentOfType(dataConfiguration, GraphModel);
+  const xType = graphModel.attributeType("x");
+  const yType = graphModel.attributeType("y");
+  const allCaseData = dataConfiguration.getJoinedCaseDataArrays(xType, yType);
   const caseDataKeyFunc = (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.plotNum}_${d.caseID}`;
   // Create the circles
   const allCircles = selectGraphDots(dotsElement);

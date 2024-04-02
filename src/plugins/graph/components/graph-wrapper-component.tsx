@@ -12,7 +12,6 @@ import {
   GraphSettingsContext, IGraphSettings, IGraphSettingsFromStores, kDefaultGraphSettings
 } from "../hooks/use-graph-settings-context";
 import { useInitGraphLayout } from "../hooks/use-init-graph-layout";
-import { getScreenX, getScreenY } from "../hooks/use-point-locations";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { IGraphModel } from "../models/graph-model";
 import { decipherDotId } from "../utilities/graph-utils";
@@ -73,8 +72,13 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
       // eslint-disable-next-line unused-imports/no-unused-vars
       const domains = [isNumericAxisModel(xAxis) && xAxis.domain, isNumericAxisModel(yAxis) && yAxis.domain];
 
-      const x = getScreenX({ caseId, dataset: layer.config.dataset, layout, dataConfig: layer.config });
-      const y = getScreenY({ caseId, dataset: layer.config.dataset, layout, dataConfig: layer.config, plotNum });
+      const xValue = layer.config.dataset?.getNumeric(caseId, xAttributeId);
+      const yValue = layer.config.dataset?.getNumeric(caseId, yAttributeId);
+      const x = xValue !== undefined
+        ? layout.getAxisMultiScale("bottom").getScreenCoordinate({ cell: 0, data: xValue }) : NaN;
+      const y = yValue !== undefined
+        ? layout.getAxisMultiScale("left").getScreenCoordinate({ cell: 0, data: yValue }) : NaN;
+
       if (!isFinite(x) || !isFinite(y)) return;
       return { x, y };
     }
