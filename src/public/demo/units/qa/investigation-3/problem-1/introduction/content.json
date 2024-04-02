@@ -1,0 +1,17 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "document_Text_for_sim_1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Left side content</p>"
+          ]
+        }
+      }
+    ]
+  }
+}
