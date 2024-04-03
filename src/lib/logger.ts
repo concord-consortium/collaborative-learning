@@ -15,7 +15,7 @@ const logManagerUrl: Record<LoggerEnvironment, string> = {
 
 const productionPortal = "learn.concord.org";
 
-interface LogMessage {
+export interface LogMessage {
   // these top-level properties are treated specially by the log-ingester:
   // https://github.com/concord-consortium/log-ingester/blob/a8b16fdb02f4cef1f06965a55c5ec6c1f5d3ae1b/canonicalize.js#L3
   application: string;
@@ -80,8 +80,6 @@ export class Logger {
     const time = Date.now(); // eventually we will want server skew (or to add this via FB directly)
     if (this._instance) {
       this._instance.formatAndSend(time, event, parameters, method);
-        // Log messages are also shared with the ExemplarController
-      this._instance.stores.exemplarController.recordLogEvent(time, event, parameters, method);
     } else {
       debugLog(DEBUG_LOGGER, "Queueing log message for later delivery", LogEventName[event]);
       this.pendingMessages.push({ time, event, parameters, method });
@@ -122,6 +120,8 @@ export class Logger {
     const eventString = LogEventName[event];
     const logMessage = this.createLogMessage(time, eventString, parameters, method);
     sendToLoggingService(logMessage, this.stores.user);
+    // Log messages are also shared with the ExemplarController
+    this.stores.exemplarController.processLogMessage(logMessage);
   }
 
   private createLogMessage(

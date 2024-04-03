@@ -18,7 +18,7 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   const stores = useStores();
   const { appConfig: { navTabs: navTabSpecs },
           persistentUI: { navTabContentShown, workspaceShown },
-          documents
+          exemplarController
         } = stores;
   const hotKeys = useRef(new HotKeys());
 
@@ -26,8 +26,8 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
 
   // For testing purposes, have cmd-shift-e reset all exemplars to their default state
   const resetAllExemplars = useCallback(() => {
-    documents.resetAllExemplars();
-  }, [documents]);
+    exemplarController.resetAllExemplars();
+  }, [exemplarController]);
 
   useEffect(() => {
     hotKeys.current.register({

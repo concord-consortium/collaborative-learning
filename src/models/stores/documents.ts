@@ -195,9 +195,6 @@ export const DocumentsModel = types
       } else {
         self.visibleExemplars.delete(exemplarId);
       }
-    },
-    resetAllExemplars() {
-      self.visibleExemplars.clear();
     }
   }))
   .actions((self) => {

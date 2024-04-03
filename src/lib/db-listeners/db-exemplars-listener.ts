@@ -55,7 +55,7 @@ export class DBExemplarsListener extends BaseListener {
   };
 
   private updateExemplarBasedOnValue = (exemplarId: string, value: any) => {
-    const visible = "visible" in value && value.visible;
+    const visible = typeof value === "object" && value !== null && "visible" in value && value.visible;
     this.db.stores.documents.setExemplarVisible(exemplarId, visible);
   };
 
