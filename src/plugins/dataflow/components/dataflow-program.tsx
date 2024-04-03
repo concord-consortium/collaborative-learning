@@ -41,6 +41,7 @@ import { PlotButtonControl, PlotButtonControlComponent } from "../rete/controls/
 import { NumberUnitsControl, NumberUnitsControlComponent } from "../rete/controls/num-units-control";
 import { DemoOutputControl, DemoOutputControlComponent } from "../rete/controls/demo-output-control";
 import { InputValueControl, InputValueControlComponent } from "../rete/controls/input-value-control";
+import { LiveOutputNode } from "../rete/nodes/live-output-node";
 
 
 export interface IStartProgramParams {
@@ -246,7 +247,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     (async () => {
       if (!this.toolDiv || !this.props.program) return;
 
-      const editor = new NodeEditorMST(this.props.program, this.tileId, this.toolDiv);
+      const editor = new NodeEditorMST(this.props.program, this.tileId,
+        this.toolDiv, this.props.tileContent, this.stores, this.props.runnable);
       this.programEditor = editor;
 
       // editor.addPipe((context) => {
@@ -353,9 +355,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       editor.notifyAboutExistingObjects();
 
       // Reprocess when connections are changed
+      // And also count the serial nodes some of which only get counted if they are
+      // connected
       editor.addPipe((context) => {
-        if (["connectioncreated", "connectionremoved"].includes(context.type)) {
+        if (["noderemoved", "connectioncreated", "connectionremoved"].includes(context.type)) {
           this.programEditor.process();
+          this.countSerialDataNodes(this.programEditor.getNodes() as IBaseNode[]);
         }
         return context;
       });
@@ -446,8 +451,24 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (channelIds !== this.previousChannelIds) {
       this.previousChannelIds = channelIds;
       this.channels = channels;
-    }
 
+      // Hack the type for now
+      const nodes = this.programEditor.getNodes() as IBaseNode[];
+      this.countSerialDataNodes(nodes);
+
+      nodes.forEach((node) => {
+        // FIXME: add sensor support
+        // if (node.name === "Sensor") {
+        //   const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
+        //   sensorSelect.setChannels(this.channels);
+        // }
+
+        if (node instanceof LiveOutputNode){
+          node.setChannels(this.channels);
+        }
+      });
+
+    }
   };
 
   private shouldShowProgramCover() {
@@ -546,13 +567,30 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   };
 
-  private countSerialDataNodes(nodes: Node[]){
+  private countSerialDataNodes(nodes: IBaseNode[]){
     // implementing with a "count" of 1 or 0 in case we need to count nodes in future
     // eslint-disable-next-line prefer-const
     let serialNodesCt = 0;
 
     nodes.forEach((n) => {
       const isLiveSensor = /fsr|emg|tmp|[th]-[abcd]/; // match ids any live sensor channels
+
+      // FIXME: support sensor nodes
+      // const sensor = n.data.sensor as string;
+      // if(isLiveSensor.test(sensor) && !sensor.startsWith(kSimulatedChannelPrefix)){
+      //   serialNodesCt++;
+      // }
+
+      // live output block will alert need for serial
+      // only after connection to another node is made
+      // this allows user to drag a block out and work on program before connecting
+      if (n instanceof LiveOutputNode){
+        // Don't count the node if it's updating a shared output variable
+        const outputVariable = n.findOutputVariable();
+        if(!outputVariable && n.isConnected("nodeValue")) {
+          serialNodesCt++;
+        }
+      }
     });
     // constraining all counts to 1 or 0 for now
     if (serialNodesCt > 0){

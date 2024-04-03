@@ -1,4 +1,6 @@
+import { VariableType } from "@concord-consortium/diagram-view";
 import { ITileChangeLogEvent } from "../../../models/tiles/log/log-tile-change-event";
+import { IStores } from "../../../models/stores/stores";
 
 export interface INodeServices {
   process(): void;
@@ -7,4 +9,7 @@ export interface INodeServices {
   update(type: "node" | "connection" | "socket" | "control", id: string): void;
   isConnected(nodeId: string, inputKey: string): boolean;
   removeInputConnection(nodeId: string, inputKey: string): void;
+  getOutputVariables(): VariableType[];
+  stores: IStores;
+  runnable?: boolean;
 }

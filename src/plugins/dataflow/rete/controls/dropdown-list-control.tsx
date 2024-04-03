@@ -46,17 +46,21 @@ export class DropdownListControl<
   @observable
   disabledFunction?: DisabledChecker;
 
+  @observable
+  optionArray: ListOption[];
+
   // TODO: this used to set the initial value of the if it wasn't set based on the first
   // option in the list passed in. I'm not sure if that is needed anymore.
   constructor(
     public node: NodeType,
     public modelKey: Key,
 
-    public optionArray: readonly ListOption[],
+    optionArray: ListOption[],
     public label = "",
     public tooltip = "Select Type"
   ) {
     super();
+    this.optionArray = optionArray;
 
     const setterProp = "set" + modelKey.charAt(0).toUpperCase() + modelKey.slice(1) as `set${Capitalize<Key>}`;
 
@@ -90,13 +94,6 @@ export class DropdownListControl<
     this.disabledFunction = fn;
     this.ensureValueIsInBounds();
   }
-
-  // TODO: this used to have setChannels and getChannels
-  // It isn't clear why these were stored in this control
-  // The channels were not used as the list options, those were set separately
-  // I think this list control was just used a place to store them so other parts
-  // of the system could look them up based on the node.
-  // We should be able to find a better place to store them.
 
   /**
    * If the control has a value that is no longer valid, we pick the best option: if the
@@ -149,10 +146,9 @@ export class DropdownListControl<
     }
   }
 
-  // This is used by the live output node
   public setOptions(options: ListOption[]) {
-    // TODO: if the options array needs to be observed, we'll need to do more here
-    // so the passed in options are observed too
+    // This should automatically convert the passed in array to be observable
+    // so changes to the properties of the options will be observed too
     this.optionArray = options;
   }
 
@@ -180,7 +176,9 @@ export interface IDropdownListControl {
   id: string;
   model: IBaseNodeModel;
   modelKey: string;
+  // TODO: is the readonly keyword correct here?
   optionArray: readonly ListOption[];
+  setOptions(options: ListOption[]): void;
   label: string;
   tooltip: string;
   getValue(): string;
@@ -188,6 +186,7 @@ export interface IDropdownListControl {
   disabledFunction?: DisabledChecker;
   logEvent(operation: string): void;
   selectNode(): void;
+  getSelectionId(): string | undefined;
 }
 
 const DropdownList: React.FC<{

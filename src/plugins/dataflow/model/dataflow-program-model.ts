@@ -5,6 +5,7 @@ import { CounterNodeModel } from "../rete/nodes/counter-node";
 import { LogicNodeModel } from "../rete/nodes/logic-node";
 import { GeneratorNodeModel } from "../rete/nodes/generator-node";
 import { DemoOutputNodeModel } from "../rete/nodes/demo-output-node";
+import { LiveOutputNodeModel } from "../rete/nodes/live-output-node";
 
 export const ConnectionModel = types
   .model("Connection", {
@@ -26,6 +27,7 @@ export const DataflowNodeModel = types.
       CounterNodeModel,
       DemoOutputNodeModel,
       GeneratorNodeModel,
+      LiveOutputNodeModel,
       LogicNodeModel,
       MathNodeModel,
       NumberNodeModel)

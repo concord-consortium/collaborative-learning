@@ -1,11 +1,9 @@
 import { ClassicPreset } from "rete";
 import { Instance } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
-import { ValueControl } from "../controls/value-control";
 import { NodeDemoOutputTypes, NodePlotRed, kBinaryOutputTypes } from "../../model/utilities/node";
 import { BaseNode, BaseNodeModel, NoOutputs } from "./base-node";
 import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-list-control";
-import { PlotButtonControl } from "../controls/plot-button-control";
 import { typeField } from "../../../../utilities/mst-utils";
 import { INodeServices } from "../service-types";
 import { MinigraphOptions } from "../../nodes/dataflow-node-plot";
@@ -61,10 +59,8 @@ export class DemoOutputNode extends BaseNode<
   },
   NoOutputs,
   {
-    value: ValueControl,
     outputType: IDropdownListControl,
-    demoOutput: DemoOutputControl,
-    plotButton: PlotButtonControl
+    demoOutput: DemoOutputControl
   },
   IDemoOutputNodeModel
 > {
@@ -82,7 +78,9 @@ export class DemoOutputNode extends BaseNode<
     const nodeValueInput = new ClassicPreset.Input(numSocket, "NodeValue");
     this.addInput("nodeValue", nodeValueInput);
 
-    const dropdownControl = new DropdownListControl(this, "outputType", NodeDemoOutputTypes);
+    // Copy the types so typescript doesn't complain that they are readonly
+    const outputTypes = [...NodeDemoOutputTypes];
+    const dropdownControl = new DropdownListControl(this, "outputType", outputTypes);
     this.addControl("outputType", dropdownControl);
 
     const demoOutputControl = new DemoOutputControl(model);

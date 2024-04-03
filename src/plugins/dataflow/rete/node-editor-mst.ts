@@ -18,6 +18,9 @@ import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { AreaExtensions, AreaPlugin } from "rete-area-plugin";
 import { DemoOutputNode } from "./nodes/demo-output-node";
+import { LiveOutputNode } from "./nodes/live-output-node";
+import { DataflowContentModelType } from "../model/dataflow-content";
+import { IStores } from "../../../models/stores/stores";
 
 export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices {
   private reteNodesMap: Record<string, Schemes['Node']> = {};
@@ -28,7 +31,10 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
   constructor(
     private mstProgram: DataflowProgramModelType,
     private tileId: string,
-    private div: HTMLElement
+    private div: HTMLElement,
+    private mstContent: DataflowContentModelType,
+    public stores: IStores,
+    public runnable: boolean | undefined
   ) {
     super();
 
@@ -129,6 +135,10 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     return !!matchingConnection;
   };
 
+  public getOutputVariables = () => {
+    return this.mstContent.outputVariables ?? [];
+  };
+
   public removeInputConnection = (nodeId: string, inputKey: string) => {
     const matchingConnection = [...this.mstProgram.connections.values()].find(connection =>
       connection.target === nodeId && connection.targetInput === inputKey);
@@ -143,6 +153,7 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
       "Counter": CounterNode,
       "Demo Output": DemoOutputNode,
       "Generator": GeneratorNode,
+      "Live Output": LiveOutputNode,
       "Logic": LogicNode,
       "Math": MathNode,
       "Number": NumberNode,
