@@ -512,7 +512,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDeleteNodeButton(liveOutputNode).click();
     dataflowToolTile.getNode(liveOutputNode).should("not.exist");
   });
-  it("Sensor Node and Record Data", () => {
+  it("Input Node and Record Data", () => {
     const sensorNode = "sensor";
     beforeTest();
     clueCanvas.addTile("dataflow");
@@ -520,7 +520,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create sensor node");
     dataflowToolTile.getCreateNodeButton(sensorNode).click();
     dataflowToolTile.getNode(sensorNode).should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Sensor");
+    dataflowToolTile.getNodeTitle().should("contain", "Input");
 
     cy.log("can toggle minigraph");
     dataflowToolTile.getShowGraphButton(sensorNode).click();
@@ -530,9 +530,9 @@ context('Dataflow Tool Tile', function () {
 
     cy.log("verify sensor types");
     const dropdown10 = "sensor-type";
-    const sensorTypes = ["Temperature", "Humidity", "CO₂", "O₂", "Light", "Soil Moisture", "Particulates", "EMG", "Surface Pressure"];
+    const sensorTypes = ["Temperature", "Humidity", "CO₂", "EMG", "Surface Pressure", "Pin Reading"];
     dataflowToolTile.getDropdown(sensorNode, dropdown10).click();
-    dataflowToolTile.getSensorDropdownOptions(sensorNode).should("have.length", 9);
+    dataflowToolTile.getSensorDropdownOptions(sensorNode).should("have.length", 6);
     dataflowToolTile.getSensorDropdownOptions(sensorNode).each(($tab, index, $typeList) => {
       expect($tab.text()).to.contain(sensorTypes[index]);
     });
@@ -544,10 +544,14 @@ context('Dataflow Tool Tile', function () {
     cy.log("verify sensor select");
     const sensorSelectdropdown = "sensor-select";
     const sensorSelect = [
-      "Temperature Demo Data", "Humidity Demo Data", "CO2 Demo Data", "O2 Demo Data", "Light Demo Data", "Particulates Demo Data",
+      "Temperature Demo Data",
+      "Humidity Demo Data",
+      "CO2 Demo Data",
+      "Particulates Demo Data",
       "⚠️ Connect Arduino for live EMG",
       "⚠️ Connect Arduino for live Pressure",
       "⚠️ Connect Arduino for live Temperature",
+      "⚠️ Connect Arduino for live A1",
       "⚠️ Connect micro:bit for live Temperature A",
       "⚠️ Connect micro:bit for live Humidity A",
       "⚠️ Connect micro:bit for live Temperature B",
@@ -559,7 +563,7 @@ context('Dataflow Tool Tile', function () {
     ];
     dataflowToolTile.getCreateNodeButton(sensorNode).click();
     dataflowToolTile.getDropdown(sensorNode, sensorSelectdropdown).click();
-    dataflowToolTile.getSensorDropdownOptions(sensorNode).should("have.length", 17);
+    dataflowToolTile.getSensorDropdownOptions(sensorNode).should("have.length", 16);
     dataflowToolTile.getSensorDropdownOptions(sensorNode).each(($tab, index, $typeList) => {
       expect($tab.text()).to.contain(sensorSelect[index]);
     });
