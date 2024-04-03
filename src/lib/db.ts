@@ -153,7 +153,7 @@ export class DB {
           this.firebase.setFirebaseUser(firebaseUser);
           this.firestore.setFirebaseUser(firebaseUser);
           if (!options.dontStartListeners) {
-            const { persistentUI, user, db, unitLoadedPromise} = this.stores;
+            const { persistentUI, user, db, unitLoadedPromise, exemplarController} = this.stores;
             // Start fetching the persistent UI. We want this to happen as early as possible.
             persistentUI.initializePersistentUISync(user, db);
 
@@ -163,6 +163,7 @@ export class DB {
             // We need those types to be registered so the listeners can safely create documents.
             unitLoadedPromise.then(() => {
               this.listeners.start().then(resolve).catch(reject);
+              exemplarController.initialize(user, db);
             });
           }
         }

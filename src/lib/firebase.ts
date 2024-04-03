@@ -112,6 +112,10 @@ export class Firebase {
     return `${this.getUserPath(user)}/exemplars`;
   }
 
+  public getExemplarStatePath(user: UserModelType) {
+    return `${this.getUserExemplarsPath(user)}/state`;
+  }
+
   // Published learning logs metadata
   public getLearningLogPublicationsPath(user: UserModelType) {
     return `${this.getClassPath(user)}/publications`;

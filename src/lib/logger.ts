@@ -80,6 +80,8 @@ export class Logger {
     const time = Date.now(); // eventually we will want server skew (or to add this via FB directly)
     if (this._instance) {
       this._instance.formatAndSend(time, event, parameters, method);
+        // Log messages are also shared with the ExemplarController
+      this._instance.stores.exemplarController.recordLogEvent(time, event, parameters, method);
     } else {
       debugLog(DEBUG_LOGGER, "Queueing log message for later delivery", LogEventName[event]);
       this.pendingMessages.push({ time, event, parameters, method });
