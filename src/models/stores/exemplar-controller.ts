@@ -32,7 +32,6 @@ export const ExemplarControllerModel = types
       const stateRef = db.firebase.ref(statePath);
       const stateVal = (await stateRef.once("value"))?.val();
       const state = safeJsonParse(stateVal);
-      console.log("initializing ExemplarController; state=", state);
       if (state) {
         applySnapshot(self, state);
       }
@@ -75,9 +74,7 @@ export const ExemplarControllerModel = types
       // At the moment we only have one rule: after 3 drawing actions are recorded, reveal a random exemplar.
       if (self.drawingActions >= 3) {
         const chosen = _.sample(self.documentsStore?.invisibleExemplarDocuments);
-        if (!chosen) {
-          console.log("No hidden exemplars to reveal");
-        } else {
+        if (chosen) {
           self.setExemplarVisibility(chosen.key, true);
         }
         self.drawingActions = 0;
@@ -97,7 +94,6 @@ export const ExemplarControllerModel = types
         if (typeof operation === "string"
             && ["addObject", "addAndSelectObject", "duplicateObjects"].includes(operation)) {
           self.drawingActions ++;
-          console.log("Graph actions noted:", self.drawingActions);
           needsUpdate = true;
         }
       }
