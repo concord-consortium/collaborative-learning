@@ -52,9 +52,8 @@ export const ExemplarControllerModel = types
         if (isVisible) {
           // Notify user with a sticky note
           const audience = AudienceModel.create({type: AudienceEnum.user, identifier: self.db.stores.user.id});
-          const title = self.documentsStore?.getDocument(key)?.title;
-          const message = `Nice work, you can now see a new example for this lesson. ${title}`;
-          self.db.createSupport(createStickyNote(message), "", audience);
+          const message = "Nice work, you can now see a new example for this lesson:";
+          self.db.createSupport(createStickyNote(message, key), "", audience);
         }
       }
     }

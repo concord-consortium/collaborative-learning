@@ -304,6 +304,23 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+  private openDocument(key: string) {
+    const doc = this.stores.documents.getDocument(key);
+    if (doc) {
+      this.stores.persistentUI.openResourceDocument(doc);
+    }
+  }
+
+  private renderDocumentLink(key: string|undefined) {
+    if (!key) return null;
+    const title = this.stores.documents.getDocument(key)?.title;
+    if (title) {
+      return (<a onClick={() => this.openDocument(key)} href="#">{title}</a>);
+    } else {
+      return "[broken link!]";
+    }
+  }
+
   private renderStickyNotesPopup() {
     const { user } = this.stores;
     const { stickyNotes, showNotes} = this.getStickyNoteData();
@@ -337,6 +354,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                 </div>
                 <div className="sticky-note-popup-item-content">
                   {support.content}
+                  { ' ' }
+                  { this.renderDocumentLink(support.linkedDocumentKey) }
                 </div>
               </div>
             );

@@ -32,8 +32,9 @@ export function createTextSupport(text: string) {
   return SupportModel.create({ type: ESupportType.text, content: text });
 }
 
-export function createStickyNote(text: string) {
-  return SupportModel.create({ type: ESupportType.text, mode: ESupportMode.stickyNote, content: text });
+export function createStickyNote(text: string, linkedDocumentKey?: string) {
+  return SupportModel.create({
+    type: ESupportType.text, mode: ESupportMode.stickyNote, content: text, linkedDocumentKey });
 }
 
 export const SupportModel = types
@@ -41,7 +42,9 @@ export const SupportModel = types
     type: types.enumeration<ESupportType>("SupportType", Object.values(ESupportType)),
     mode: types.maybe(types.enumeration<ESupportMode>("SupportMode", Object.values(ESupportMode))),
     // text string or path to document
-    content: types.string
+    content: types.string,
+    // if set, sticky note will link to this
+    linkedDocumentKey: types.maybe(types.string)
   })
   .preProcessSnapshot(snapshot => {
     const legacySupport = snapshot as any as LegacySupportSnapshot;
