@@ -6,6 +6,8 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import { LogEventName } from "../../lib/logger-types";
 import { DocumentsModelType } from "./documents";
 import { LogMessage } from "../../lib/logger";
+import { AudienceEnum, AudienceModel } from "./supports";
+import { createStickyNote } from "../curriculum/support";
 
 // The database structure of this object is expected to change frequently as we develop
 // this feature, so keep an explicit version number to make migrations easier.
@@ -47,6 +49,13 @@ export const ExemplarControllerModel = types
     setExemplarVisibility(key: string, isVisible: boolean) {
       if (self.db) {
         self.db.firebase.ref(self.firebasePath).child(`${key}/visible`).set(isVisible);
+        if (isVisible) {
+          // Notify user with a sticky note
+          const audience = AudienceModel.create({type: AudienceEnum.user, identifier: self.db.stores.user.id});
+          const title = self.documentsStore?.getDocument(key)?.title;
+          const message = `Nice work, you can now see a new example for this lesson. ${title}`;
+          self.db.createSupport(createStickyNote(message), "", audience);
+        }
       }
     }
   }))

@@ -132,6 +132,10 @@ class ClueCanvas {
         this.getShareButton().find('.ball').invoke('attr', 'class').should('not.contain', 'toggle-on');
     }
 
+    getStickyNotePopup() {
+      return cy.get('div.sticky-note-popup');
+    }
+
     getToolPalette() {
         return cy.get('.primary-workspace> .toolbar');
     }
