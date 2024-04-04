@@ -6,9 +6,9 @@ let sortWork = new SortedWork,
   clueCanvas = new ClueCanvas,
   drawToolTile = new DrawToolTile;
 
-const exemplarName = "Ivan Idea: First Exemplar";
-
+// This unit has `initiallyHideExemplars` set, and an exemplar defined in curriculum
 const queryParams1 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
+const exemplarName = "Ivan Idea: First Exemplar";
 
 function beforeTest(params) {
   cy.clearQAData('all');
@@ -25,13 +25,13 @@ function drawSmallRectangle(x, y) {
 }
 
 context('Exemplar Documents', function () {
-  it('At least one exemplar should be on sort view page, but hidden initially', function () {
+  it('Unit with exemplars hidden initially, revealed by drawing actions', function () {
     beforeTest(queryParams1);
     cy.openTopTab('sort-work');
     sortWork.checkDocumentInGroup("No Group", exemplarName);
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
 
-    cy.log("Create drawing tile and perform 3 events to reveal one exemplar");
+    cy.log("Create drawing tile and perform 3 events to reveal exemplar");
     clueCanvas.addTile("drawing");
     drawSmallRectangle(100, 50);
     drawSmallRectangle(200, 50);
