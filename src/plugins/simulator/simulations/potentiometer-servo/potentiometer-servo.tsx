@@ -58,21 +58,24 @@ function PotentiometerAndServoComponent({ frame, variables, dataSet }: ISimulati
   const potServoClasses = classNames('pot-servo-component', { collapsed, "expanded": !collapsed });
   const boardClasses = classNames('board', { collapsed, "expanded": !collapsed });
 
-  function getNodeValue(nodeRep: string[]) {
-    console.log("| getNodeValue from nodeRep", nodeRep, dataSet);
-    return 42;
+  function getNodeValue(nodeName: string) {
+    console.log("| 🤔 getNodeValue from nodeRep", nodeName, dataSet);
+    // find the id of the attribute with the name that begins with nodeName
+    if (!dataSet) return;
+    const attrName = Object.keys(dataSet.dataSet.attrNameMap).find(key => key.startsWith(nodeName));
+    if (!attrName) return;
+    //console.log("| 🤔 1 attrId", dataSet.dataSet.attrFromName(attrName));
+    const myAttr = dataSet.dataSet.attrFromName(attrName);
+    return myAttr?.values[myAttr?.values.length -1];
   }
 
   function getMiniNodesData(ds: SharedDataSetType) {
     const encodedNodes = Object.keys(ds.dataSet.attrNameMap).filter(key => key !== "Time (sec)");
-
     const nodesAsArraysOfStringifiedKV = encodedNodes.map(node => node.split("&"));
-
     const theData = nodesAsArraysOfStringifiedKV.map(nodeRep => {
       const name = nodeRep[0];
-      const value = getNodeValue(nodeRep);
+      const value = getNodeValue(name);
       const metaValue = nodeRep[nodeRep.length - 1].split("=")[1];
-
       return { name, metaValue, value };
     });
 
