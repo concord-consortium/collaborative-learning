@@ -59,12 +59,9 @@ function PotentiometerAndServoComponent({ frame, variables, dataSet }: ISimulati
   const boardClasses = classNames('board', { collapsed, "expanded": !collapsed });
 
   function getNodeValue(nodeName: string) {
-    console.log("| 🤔 getNodeValue from nodeRep", nodeName, dataSet);
-    // find the id of the attribute with the name that begins with nodeName
     if (!dataSet) return;
     const attrName = Object.keys(dataSet.dataSet.attrNameMap).find(key => key.startsWith(nodeName));
     if (!attrName) return;
-    //console.log("| 🤔 1 attrId", dataSet.dataSet.attrFromName(attrName));
     const myAttr = dataSet.dataSet.attrFromName(attrName);
     return myAttr?.values[myAttr?.values.length -1];
   }
