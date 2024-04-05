@@ -428,8 +428,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const insertionOrder = getInsertionOrder(this.programEditor, node.id);
       const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
       const displayNameBase = nodeType ? nodeType.displayName : node.name;
-      const encodedNodeData = getNodeDataEncoded(node);
-      node.data.encodedDisplayName = displayNameBase + " " + insertionOrder + encodedNodeData;
+      node.data.encodedDisplayName = displayNameBase + " " + insertionOrder + getNodeDataEncoded(node);
     });
   }
 
