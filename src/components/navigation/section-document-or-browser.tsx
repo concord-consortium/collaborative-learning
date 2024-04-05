@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { observer } from "mobx-react";
 import { useQueryClient } from 'react-query';
 import { DocumentModelType } from "../../models/document/document";
-import { logDocumentEvent } from "../../models/document/log-document-event";
+import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { ISubTabSpec, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
 import { useAppConfig, useClassStore, useProblemStore, useStores,
          useUserStore, usePersistentUIStore } from "../../hooks/use-stores";
@@ -72,10 +72,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
         loadDocumentContent(document);
       }
       persistentUI.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
-      const logEvent = document.isRemote
-        ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
-        : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
-      logDocumentEvent(logEvent, { document });
+      logDocumentViewEvent(document);
     }
   };
 

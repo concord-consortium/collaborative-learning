@@ -8,7 +8,7 @@ import { MyWorkDocumentOrBrowser } from "./mywork-document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentModelType } from "../../models/document/document";
 import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
-import { logDocumentEvent } from "../../models/document/log-document-event";
+import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -308,6 +308,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const doc = this.stores.documents.getDocument(key);
     if (doc) {
       this.stores.persistentUI.openResourceDocument(doc);
+      logDocumentViewEvent(doc);
     }
   }
 

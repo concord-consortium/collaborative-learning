@@ -8,6 +8,7 @@ import { DocumentsModelType } from "./documents";
 import { LogMessage } from "../../lib/logger";
 import { AudienceEnum, AudienceModel } from "./supports";
 import { createStickyNote } from "../curriculum/support";
+import { logExemplarDocumentEvent } from "../document/log-exemplar-document-event";
 
 // The database structure of this object is expected to change frequently as we develop
 // this feature, so keep an explicit version number to make migrations easier.
@@ -76,6 +77,12 @@ export const ExemplarControllerModel = types
         const chosen = _.sample(self.documentsStore?.invisibleExemplarDocuments);
         if (chosen) {
           self.setExemplarVisibility(chosen.key, true);
+          logExemplarDocumentEvent(LogEventName.EXEMPLAR_VISIBILITY_UPDATE,
+            { document: chosen,
+              visibleToUser: true,
+              changeSource: "rule",
+              rule: "3 drawing actions"
+            });
         }
         self.drawingActions = 0;
       }
