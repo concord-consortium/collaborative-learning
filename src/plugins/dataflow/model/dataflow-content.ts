@@ -233,6 +233,26 @@ export const DataflowContentModel = TileContentModel
         updateSharedDataSetColors(dataSets);
       },
       {name: "sharedModelSetup", fireImmediately: true}));
+
+      // NEXT: mechanism for observing
+      // addDisposer(self, autorun(() => {
+      //   const sharedModelManager = self.tileEnv?.sharedModelManager;
+      //   if (!sharedModelManager?.isReady) {
+      //     return;
+      //   }
+      //   // can simplify below, not need to check if sharedModelManager is ready...
+
+      //   const sharedProgramData = sharedModelManager.findFirstSharedModelByType(SharedProgramData);
+
+      //     // go through the routine of attach to one that exists or creating if not
+      //    const tileSharedModels = sharedModelManager.getTileSharedModels(self);
+
+
+      //     // if we don't have a sharedProgramData, create one
+
+      //     // sharedProgramData.updateSelf({program: self.program});
+      //     // ... got through the nodes
+      // }));
     },
     setProgram(program: any) {
       if (program) {
