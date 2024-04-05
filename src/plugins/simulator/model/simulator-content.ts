@@ -11,6 +11,7 @@ import { isInputVariable, isOutputVariable } from "../../shared-variables/simula
 import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { defaultSimulationKey, simulations } from "../simulations/simulations";
+import { SharedDataSet } from "../../../models/shared/shared-data-set";
 
 export function defaultSimulatorContent(): SimulatorContentModelType {
   return SimulatorContentModel.create({});
@@ -36,6 +37,8 @@ export const SimulatorContentModel = TileContentModel
     get sharedModel() {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       const sharedModels = sharedModelManager?.getTileSharedModels(self);
+
+      console.log("| SIM sees what sharedModels at this point? ", sharedModels);
       const sharedVariables =
         sharedModels?.filter((sharedModel: SharedModelType) => sharedModel.type === kSharedVariablesID);
       // We're assuming we want the first SharedVariable associated with this tile.
@@ -82,10 +85,14 @@ export const SimulatorContentModel = TileContentModel
         const tileSharedModels = sharedModelManager?.isReady ?
           sharedModelManager?.getTileSharedModels(self) : undefined;
 
-        const values = {sharedModelManager, containerSharedModel, tileSharedModels};
+        const sharedDataSet = sharedModelManager?.isReady
+          ? sharedModelManager?.findFirstSharedModelByType(SharedDataSet)
+          : undefined;
+
+        const values = {sharedModelManager, containerSharedModel, tileSharedModels, sharedDataSet};
         return values;
       },
-      ({sharedModelManager, containerSharedModel, tileSharedModels}) => {
+      ({sharedModelManager, containerSharedModel, tileSharedModels, sharedDataSet}) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
@@ -100,6 +107,12 @@ export const SimulatorContentModel = TileContentModel
           // is running outside of a document tree action.
           // Add the shared model to both the document and the tile
           sharedModelManager.addTileSharedModel(self, containerSharedModel);
+        }
+
+        if (sharedDataSet) {
+          if (!tileSharedModels?.includes(sharedDataSet)) {
+            sharedModelManager.addTileSharedModel(self, sharedDataSet);
+          }
         }
 
         // Set up starter variables
