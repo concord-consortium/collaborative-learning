@@ -38,6 +38,15 @@ class SortedWork {
       cy.get(".sort-work-view .sorted-sections .section-header-label").should("contain", label);
     });
   }
+
+  getFocusDocument() {
+    return cy.get('.sort-work-view .focus-document.sort-work');
+  }
+
+  getFocusDocumentTitle() {
+    return this.getFocusDocument().find('.document-title');
+  }
+
 }
 
 export default SortedWork;

@@ -136,6 +136,10 @@ class ClueCanvas {
       return cy.get('div.sticky-note-popup');
     }
 
+    getStickyNoteLink() {
+      return this.getStickyNotePopup().find('a');
+    }
+
     getToolPalette() {
         return cy.get('.primary-workspace> .toolbar');
     }
