@@ -230,6 +230,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     deleteSelected,
   };
 
+  console.log("| for comparison, look at table model: ", model);
   return (
     <div className="table-tool">
       <TableToolbarContext.Provider value={toolbarContext} >

@@ -11,7 +11,7 @@ import { isInputVariable, isOutputVariable } from "../../shared-variables/simula
 import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { defaultSimulationKey, simulations } from "../simulations/simulations";
-import { SharedDataSet } from "../../../models/shared/shared-data-set";
+import { SharedDataSet, SharedDataSetType } from "../../../models/shared/shared-data-set";
 
 export function defaultSimulatorContent(): SimulatorContentModelType {
   return SimulatorContentModel.create({});
@@ -47,6 +47,12 @@ export const SimulatorContentModel = TileContentModel
         return undefined;
       }
       return firstSharedModel as SharedVariablesType;
+    },
+    get sharedDataSet() {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const firstSharedModel = sharedModelManager?.getTileSharedModelsByType(self, SharedDataSet)?.[0];
+      if (!firstSharedModel) return undefined;
+      return firstSharedModel as SharedDataSetType;
     },
     get simulationData() {
       // If no simulation has been specified, use the default simulation from appConfig

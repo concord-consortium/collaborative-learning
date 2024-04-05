@@ -13,6 +13,7 @@ import ExpandIcon from "./assets/expand-arduino.svg";
 import MinimizeIcon from "./assets/minimize-arduino.svg";
 
 import "./potentiometer-servo.scss";
+import { SharedDataSetType } from "../../../../models/shared/shared-data-set";
 
 export const kPotentiometerServoKey = "potentiometer_chip_servo";
 
@@ -38,7 +39,7 @@ function getTweenedServoAngle(realValue: number, lastVisibleValue: number) {
   return realValue;
 }
 
-function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) {
+function PotentiometerAndServoComponent({ frame, variables, dataSet }: ISimulationProps) {
   const [collapsed, setMinimized] = useState(false);
   const tweenedServoAngle = useRef(0);
   const lastTweenedAngle = tweenedServoAngle.current;
@@ -57,6 +58,29 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
   const potServoClasses = classNames('pot-servo-component', { collapsed, "expanded": !collapsed });
   const boardClasses = classNames('board', { collapsed, "expanded": !collapsed });
 
+  function getNodeValue(nodeRep: string[]) {
+    console.log("| getNodeValue from nodeRep", nodeRep, dataSet);
+    return 42;
+  }
+
+  function getMiniNodesData(ds: SharedDataSetType) {
+    const encodedNodes = Object.keys(ds.dataSet.attrNameMap).filter(key => key !== "Time (sec)");
+
+    const nodesAsArraysOfStringifiedKV = encodedNodes.map(node => node.split("&"));
+
+    const theData = nodesAsArraysOfStringifiedKV.map(nodeRep => {
+      const name = nodeRep[0];
+      const value = getNodeValue(nodeRep);
+      const metaValue = nodeRep[nodeRep.length - 1].split("=")[1];
+
+      return { name, metaValue, value };
+    });
+
+    return theData;
+  }
+
+  const miniNodesData = dataSet ? getMiniNodesData(dataSet) : [];
+
   return (
     <div className={potServoClasses}>
       <div className="hardware">
@@ -72,6 +96,16 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
             className={boardClasses}
             alt="Board"
           />
+          <div className="mini-nodes">
+            {
+              miniNodesData.map((node, index) => (
+                <div key={index} className="mini-node">
+                  <div className="node-name">{node.name}:  {node.metaValue}</div>
+                  <div className="node-value">{node.value}</div>
+                </div>
+              ))
+            }
+          </div>
           <div className="output wire"></div>
           <img
             className="servo-arm"

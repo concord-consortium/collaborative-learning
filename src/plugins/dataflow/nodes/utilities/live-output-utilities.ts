@@ -100,24 +100,24 @@ export function setLiveOutputOpts(node: Node, deviceFamily: string, sharedVar?: 
 
   // omiited Demo Output keys, and commenting out others that I doubt are needed
   const kRelevantKeys = [
-  "nodeValueUnits",
+  //"nodeValueUnits",
   "sensor",
   "type",
-  "amplitude",
-  "amplitudeUnits",
+  //"amplitude",
+  //"amplitudeUnits",
   "generatorType",
-  "period",
-  "periodUnits",
-  "timeOff",
-  "timeOffUnits",
-  "timeOn",
-  "timeOnUnits",
+  //"period",
+  //"periodUnits",
+  //"timeOff",
+  //"timeOffUnits",
+  //"timeOn",
+  //"timeOnUnits",
   "mathOperator",
   "transformOperator",
   "controlOperator",
-  "timerRunning",
+  //"timerRunning",
   "gateActive",
-  "waitDuration",
+  //"waitDuration",
   "logicOperator",
   "liveOutputType",
   "liveOutput",
@@ -128,10 +128,8 @@ export function setLiveOutputOpts(node: Node, deviceFamily: string, sharedVar?: 
 // Temporary: we have to encode different stuff for different nodes
 // but get it into a common interface to be consumed by simulation
 export function getNodeDataEncoded(node: Node) {
-
   const nodeData = JSON.parse(JSON.stringify(node.data));
   const fields = [] as string[];
-
 
   Object.keys(nodeData).forEach((key) => {
     if (kRelevantKeys.includes(key)) {
@@ -140,9 +138,9 @@ export function getNodeDataEncoded(node: Node) {
     }
   });
 
-  const coreString = `name=${node.name}&id=${node.id}`;
+  const coreString = `&nodeTypeName=${node.name}`; // &id=${node.id}`;
   const fieldsString = fields.join("&");
   const finalEncoded = `${coreString}&${fieldsString}`;
-  console.log("| finalEncoded", finalEncoded);
+  //console.log("| finalEncoded", finalEncoded);
   return finalEncoded;
 }

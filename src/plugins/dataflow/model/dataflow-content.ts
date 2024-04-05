@@ -250,10 +250,9 @@ export const DataflowContentModel = TileContentModel
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing
     },
-    addNewAttrFromNode(nodeId: number, nodeName: string){
-      const newAttributeId = uniqueId() + "*" + nodeId;
+    addNewAttrFromNode(nodeId: number, nodeName: string, newAttrId: string){
       self.dataSet.addAttributeWithID({
-        id: newAttributeId,
+        id: newAttrId,
         name: nodeName,
       });
     },
@@ -306,7 +305,9 @@ export const DataflowContentModel = TileContentModel
       //    0   |   val    | val    |  val
       addAttributeToDataSet(self.dataSet, { name: "Time (sec)" }); //time quantized to nearest sampling rate
       self.program.nodes.forEach((n) => { //add attributes based on nodes in tile
-        n.data.encodedDisplayName && self.addNewAttrFromNode(n.id, n.data.encodedDisplayName);
+        // I probably didn't need to do this...
+        const newAttributeId = uniqueId() + "*" + n.id;
+        n.data.encodedDisplayName && self.addNewAttrFromNode(n.id, n.data.encodedDisplayName, newAttributeId);
       });
     },
     resetRecording() {

@@ -32,6 +32,7 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
   }, [canRunIndependently, content]);
 
   const component = content.simulationData.component;
+  const dataSet = content.sharedDataSet;
 
   return (
     <div className="simulator-content-container">
@@ -53,7 +54,11 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
         </div>
         { component && (
           <div className="simulator-component-container">
-            { component({ frame: _steps, variables: content.variables || [] }) }
+            { component({
+              frame: _steps,
+              variables: content.variables || [],
+              dataSet
+            }) }
           </div>
         )}
       </div>

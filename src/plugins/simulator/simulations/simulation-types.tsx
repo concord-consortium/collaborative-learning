@@ -1,9 +1,11 @@
 import { FunctionComponent } from "react";
 import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
+import { SharedDataSetType } from "../../../models/shared/shared-data-set";
 
 export interface ISimulationProps {
   frame: number;
   variables: VariableType[];
+  dataSet?: SharedDataSetType;
 }
 
 export interface ISimulation {
