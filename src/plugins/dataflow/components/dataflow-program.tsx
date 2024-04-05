@@ -26,7 +26,7 @@ import { DemoOutputReteNodeFactory } from "../nodes/factories/demo-output-rete-n
 import { LiveOutputReteNodeFactory } from "../nodes/factories/live-output-rete-node-factory";
 import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node-factory";
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
-import { getHubSelect, setLiveOutputOpts } from "../nodes/utilities/live-output-utilities";
+import { getHubSelect, getNodeDataEncoded, setLiveOutputOpts } from "../nodes/utilities/live-output-utilities";
 import {
   sendDataToSerialDevice, sendDataToSimulatedOutput, updateNodeChannelInfo, updateGeneratorNode, updateNodeRecentValues,
   updateSensorNode, updateTimerNode
@@ -428,7 +428,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const insertionOrder = getInsertionOrder(this.programEditor, node.id);
       const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
       const displayNameBase = nodeType ? nodeType.displayName : node.name;
-      node.data.orderedDisplayName = displayNameBase + " " + insertionOrder;
+      const encodedNodeData = getNodeDataEncoded(node);
+      node.data.encodedDisplayName = displayNameBase + "_" + insertionOrder + "_" + encodedNodeData;
     });
   }
 

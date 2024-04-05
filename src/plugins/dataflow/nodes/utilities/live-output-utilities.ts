@@ -97,3 +97,52 @@ export function setLiveOutputOpts(node: Node, deviceFamily: string, sharedVar?: 
     hubSelect.setValue(baseLiveOutputOptions.liveGripperOption.name);
   }
 }
+
+  // omiited Demo Output keys, and commenting out others that I doubt are needed
+  const kRelevantKeys = [
+  "nodeValueUnits",
+  "sensor",
+  "type",
+  "amplitude",
+  "amplitudeUnits",
+  "generatorType",
+  "period",
+  "periodUnits",
+  "timeOff",
+  "timeOffUnits",
+  "timeOn",
+  "timeOnUnits",
+  "mathOperator",
+  "transformOperator",
+  "controlOperator",
+  "timerRunning",
+  "gateActive",
+  "waitDuration",
+  "logicOperator",
+  "liveOutputType",
+  "liveOutput",
+  "outputType",
+  "hubSelect"
+];
+
+// Temporary: we have to encode different stuff for different nodes
+// but get it into a common interface to be consumed by simulation
+export function getNodeDataEncoded(node: Node) {
+
+  const nodeData = JSON.parse(JSON.stringify(node.data));
+  const fields = [] as string[];
+
+
+  Object.keys(nodeData).forEach((key) => {
+    if (kRelevantKeys.includes(key)) {
+      const encodedKVString = `${key}=${nodeData[key]}`;
+      fields.push(encodedKVString);
+    }
+  });
+
+  const coreString = `name=${node.name}&id=${node.id}`;
+  const fieldsString = fields.join("&");
+  const finalEncoded = `${coreString}&${fieldsString}`;
+  console.log("| finalEncoded", finalEncoded);
+  return finalEncoded;
+}
