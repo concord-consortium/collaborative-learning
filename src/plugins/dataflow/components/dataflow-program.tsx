@@ -35,13 +35,13 @@ import {
 } from "../nodes/controls/dropdown-list-control";
 import { AreaExtra, Schemes } from "../rete/rete-scheme";
 import { NodeEditorMST } from "../rete/node-editor-mst";
-import { IBaseNode } from "../rete/nodes/base-node";
+import { IBaseNode } from "../nodes/base-node";
 import { PlotButtonControl, PlotButtonControlComponent } from "../nodes/controls/plot-button-control";
 import { NumberUnitsControl, NumberUnitsControlComponent } from "../nodes/controls/num-units-control";
 import { DemoOutputControl, DemoOutputControlComponent } from "../nodes/controls/demo-output-control";
 import { InputValueControl, InputValueControlComponent } from "../nodes/controls/input-value-control";
-import { LiveOutputNode } from "../rete/nodes/live-output-node";
-import { SensorNode } from "../rete/nodes/sensor-node";
+import { LiveOutputNode } from "../nodes/live-output-node";
+import { SensorNode } from "../nodes/sensor-node";
 import { recordCase } from "../model/utilities/recording-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 

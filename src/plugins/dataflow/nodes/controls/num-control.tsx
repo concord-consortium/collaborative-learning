@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from "react";
 import { ClassicPreset } from "rete";
 import { useStopEventPropagation } from "./custom-hooks";
-import { IBaseNode } from "../../rete/nodes/base-node";
+import { IBaseNode } from "../base-node";
 
 import "./num-control.sass";
 

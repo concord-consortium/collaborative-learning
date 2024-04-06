@@ -1,14 +1,14 @@
 import { ClassicPreset } from "rete";
 import { Instance } from "mobx-state-tree";
-import { numSocket } from "../num-socket";
-import { NodeDemoOutputTypes, NodePlotRed, kBinaryOutputTypes } from "../../model/utilities/node";
+import { numSocket } from "../rete/num-socket";
+import { NodeDemoOutputTypes, NodePlotRed, kBinaryOutputTypes } from "../model/utilities/node";
 import { BaseNode, BaseNodeModel, NoOutputs } from "./base-node";
-import { DropdownListControl, IDropdownListControl } from "../../nodes/controls/dropdown-list-control";
-import { typeField } from "../../../../utilities/mst-utils";
-import { INodeServices } from "../service-types";
-import { MinigraphOptions } from "../../nodes/dataflow-node-plot";
-import { DemoOutputControl } from "../../nodes/controls/demo-output-control";
-import { IInputValueControl, InputValueControl } from "../../nodes/controls/input-value-control";
+import { DropdownListControl, IDropdownListControl } from "./controls/dropdown-list-control";
+import { typeField } from "../../../utilities/mst-utils";
+import { INodeServices } from "../rete/service-types";
+import { MinigraphOptions } from "./dataflow-node-plot";
+import { DemoOutputControl } from "./controls/demo-output-control";
+import { IInputValueControl, InputValueControl } from "./controls/input-value-control";
 
 const tiltMinigraphOptions: MinigraphOptions = {
   backgroundColor: "#fff",

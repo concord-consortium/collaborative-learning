@@ -1,28 +1,28 @@
 import { ClassicPreset } from "rete";
 import { Instance } from "mobx-state-tree";
-import { numSocket } from "../num-socket";
-import { ValueControl } from "../../nodes/controls/value-control";
-import { getNumDisplayStr } from "../../nodes/utilities/view-utilities";
-import { NodeOperationTypes } from "../../model/utilities/node";
+import { numSocket } from "../rete/num-socket";
+import { ValueControl } from "./controls/value-control";
+import { getNumDisplayStr } from "./utilities/view-utilities";
+import { NodeOperationTypes } from "../model/utilities/node";
 import { BaseNode, BaseNodeModel } from "./base-node";
-import { DropdownListControl, IDropdownListControl } from "../../nodes/controls/dropdown-list-control";
-import { PlotButtonControl } from "../../nodes/controls/plot-button-control";
-import { typeField } from "../../../../utilities/mst-utils";
-import { INodeServices } from "../service-types";
+import { DropdownListControl, IDropdownListControl } from "./controls/dropdown-list-control";
+import { PlotButtonControl } from "./controls/plot-button-control";
+import { typeField } from "../../../utilities/mst-utils";
+import { INodeServices } from "../rete/service-types";
 
-export const LogicNodeModel = BaseNodeModel.named("LogicNodeModel")
+export const MathNodeModel = BaseNodeModel.named("MathNodeModel")
 .props({
-  type: typeField("Logic"),
-  logicOperator: "Greater Than"
+  type: typeField("Math"),
+  mathOperator: "Add"
 })
 .actions(self => ({
-  setLogicOperator(val: string) {
-    self.logicOperator = val;
+  setMathOperator(val: string) {
+    self.mathOperator = val;
   }
 }));
-export interface ILogicNodeModel extends Instance<typeof LogicNodeModel> {}
+export interface IMathNodeModel extends Instance<typeof MathNodeModel> {}
 
-export class LogicNode extends BaseNode<
+export class MathNode extends BaseNode<
   {
     num1: ClassicPreset.Socket,
     num2: ClassicPreset.Socket
@@ -32,16 +32,16 @@ export class LogicNode extends BaseNode<
   },
   {
     value: ValueControl,
-    logicOperator: IDropdownListControl,
+    mathOperator: IDropdownListControl,
     plotButton: PlotButtonControl
   },
-  ILogicNodeModel
+  IMathNodeModel
 > {
   valueControl: ValueControl;
 
   constructor(
     id: string | undefined,
-    model: ILogicNodeModel,
+    model: IMathNodeModel,
     services: INodeServices
   ) {
     super(id, model, services);
@@ -53,21 +53,21 @@ export class LogicNode extends BaseNode<
 
     const dropdownOptions = NodeOperationTypes
     .filter((nodeOp) => {
-      return nodeOp.type === "logic";
+      return nodeOp.type === "math";
     }).map((nodeOp) => {
       return { name: nodeOp.name, icon: nodeOp.icon };
     });
-    const dropdownControl = new DropdownListControl(this, "logicOperator", dropdownOptions);
-    this.addControl("logicOperator", dropdownControl);
+    const dropdownControl = new DropdownListControl(this, "mathOperator", dropdownOptions);
+    this.addControl("mathOperator", dropdownControl);
 
-    this.valueControl = new ValueControl("Logic");
+    this.valueControl = new ValueControl("Math");
     this.addControl("value", this.valueControl);
 
     this.addControl("plotButton", new PlotButtonControl(this));
   }
 
   getSentence(num1: number, num2: number, result: number) {
-    const nodeOperationTypes = NodeOperationTypes.find(op => op.name === this.model.logicOperator);
+    const nodeOperationTypes = NodeOperationTypes.find(op => op.name === this.model.mathOperator);
     if (nodeOperationTypes) {
       const n1Str = getNumDisplayStr(num1);
       const n2Str = getNumDisplayStr(num2);
@@ -95,7 +95,7 @@ export class LogicNode extends BaseNode<
     // The plot block could record these values internally also, so it seems like we
     // can keep it simple and just pass single values.
 
-    const nodeOperationTypes = NodeOperationTypes.find(op => op.name === this.model.logicOperator);
+    const nodeOperationTypes = NodeOperationTypes.find(op => op.name === this.model.mathOperator);
 
     if (nodeOperationTypes) {
       if (isNaN(n1) || isNaN(n2)) {

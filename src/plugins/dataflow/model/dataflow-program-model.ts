@@ -1,12 +1,12 @@
 import { types, Instance, SnapshotOut, detach, SnapshotIn } from "mobx-state-tree";
-import { NumberNodeModel } from "../rete/nodes/number-node";
-import { MathNodeModel } from "../rete/nodes/math-node";
-import { CounterNodeModel } from "../rete/nodes/counter-node";
-import { LogicNodeModel } from "../rete/nodes/logic-node";
-import { GeneratorNodeModel } from "../rete/nodes/generator-node";
-import { DemoOutputNodeModel } from "../rete/nodes/demo-output-node";
-import { LiveOutputNodeModel } from "../rete/nodes/live-output-node";
-import { SensorNodeModel } from "../rete/nodes/sensor-node";
+import { NumberNodeModel } from "../nodes/number-node";
+import { MathNodeModel } from "../nodes/math-node";
+import { CounterNodeModel } from "../nodes/counter-node";
+import { LogicNodeModel } from "../nodes/logic-node";
+import { GeneratorNodeModel } from "../nodes/generator-node";
+import { DemoOutputNodeModel } from "../nodes/demo-output-node";
+import { LiveOutputNodeModel } from "../nodes/live-output-node";
+import { SensorNodeModel } from "../nodes/sensor-node";
 import { NodeType, NodeTypes } from "./utilities/node";
 
 export const ConnectionModel = types

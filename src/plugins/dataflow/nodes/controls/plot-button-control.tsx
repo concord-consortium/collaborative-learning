@@ -6,7 +6,7 @@ import PreviewPlotIcon from "../../assets/icons/preview-plot.svg";
 import "./plot-button-control.scss";
 import { observer } from "mobx-react";
 import { useStopEventPropagation } from "./custom-hooks";
-import { IBaseNode } from "../../rete/nodes/base-node";
+import { IBaseNode } from "../base-node";
 
 interface PlottableModel {
   plot: boolean;

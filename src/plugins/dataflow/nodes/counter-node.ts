@@ -1,10 +1,10 @@
 import { ClassicPreset } from "rete";
 import { Instance } from "mobx-state-tree";
-import { numSocket } from "../num-socket";
-import { ValueControl } from "../../nodes/controls/value-control";
+import { numSocket } from "../rete/num-socket";
+import { ValueControl } from "./controls/value-control";
 import { BaseNode, BaseNodeModel, NoInputs } from "./base-node";
-import { typeField } from "../../../../utilities/mst-utils";
-import { INodeServices } from "../service-types";
+import { typeField } from "../../../utilities/mst-utils";
+import { INodeServices } from "../rete/service-types";
 
 export const CounterNodeModel = BaseNodeModel.named("CounterNodeModel")
 .props(({

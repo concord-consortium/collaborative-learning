@@ -7,7 +7,7 @@ import { BaseAreaPlugin } from "rete-area-plugin";
 
 import { $nodecolor, $nodecolorselected, $nodewidth, $socketmargin, $socketsize } from "./vars";
 import { DataflowNodePlot } from "./dataflow-node-plot";
-import { IBaseNode } from "../rete/nodes/base-node";
+import { IBaseNode } from "./base-node";
 
 const { RefSocket, RefControl } = Presets.classic;
 

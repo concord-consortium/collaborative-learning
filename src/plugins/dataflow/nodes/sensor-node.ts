@@ -1,14 +1,14 @@
 import { Instance } from "mobx-state-tree";
-import { typeField } from "../../../../utilities/mst-utils";
+import { typeField } from "../../../utilities/mst-utils";
 import { BaseNode, BaseNodeModel, NoInputs } from "./base-node";
-import { INodeServices } from "../service-types";
+import { INodeServices } from "../rete/service-types";
 import { ClassicPreset } from "rete";
-import { DropdownListControl, IDropdownListControl, ListOption } from "../../nodes/controls/dropdown-list-control";
-import { PlotButtonControl } from "../../nodes/controls/plot-button-control";
-import { numSocket } from "../num-socket";
-import { NodeSensorTypes, kSensorMissingMessage, kSensorSelectMessage } from "../../model/utilities/node";
-import { NodeChannelInfo, kDeviceDisplayNames } from "../../model/utilities/channel";
-import { kSimulatedChannelPrefix } from "../../model/utilities/simulated-channel";
+import { DropdownListControl, IDropdownListControl, ListOption } from "./controls/dropdown-list-control";
+import { PlotButtonControl } from "./controls/plot-button-control";
+import { numSocket } from "../rete/num-socket";
+import { NodeSensorTypes, kSensorMissingMessage, kSensorSelectMessage } from "../model/utilities/node";
+import { NodeChannelInfo, kDeviceDisplayNames } from "../model/utilities/channel";
+import { kSimulatedChannelPrefix } from "../model/utilities/simulated-channel";
 
 export const SensorNodeModel = BaseNodeModel.named("SensorNodeModel")
 .props({

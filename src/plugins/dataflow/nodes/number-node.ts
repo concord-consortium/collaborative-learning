@@ -1,11 +1,11 @@
 import { ClassicPreset } from "rete";
 import { Instance } from "mobx-state-tree";
-import { numSocket } from "../num-socket";
-import { INumberControl, NumberControl } from "../../nodes/controls/num-control";
+import { numSocket } from "../rete/num-socket";
+import { INumberControl, NumberControl } from "./controls/num-control";
 import { BaseNode, BaseNodeModel, NoInputs } from "./base-node";
-import { PlotButtonControl } from "../../nodes/controls/plot-button-control";
-import { typeField } from "../../../../utilities/mst-utils";
-import { INodeServices } from "../service-types";
+import { PlotButtonControl } from "./controls/plot-button-control";
+import { typeField } from "../../../utilities/mst-utils";
+import { INodeServices } from "../rete/service-types";
 
 // There is some weirdness with the Number node and how its "value" is stored
 // The value is an entered input like selecting the units or a math function

@@ -1,17 +1,17 @@
-import { typeField } from "../../../../utilities/mst-utils";
+import { typeField } from "../../../utilities/mst-utils";
 import { BaseNode, BaseNodeModel, NoOutputs } from "./base-node";
 import { Instance } from "mobx-state-tree";
 import { ClassicPreset } from "rete";
-import { DropdownListControl, IDropdownListControl, ListOption } from "../../nodes/controls/dropdown-list-control";
-import { INodeServices } from "../service-types";
-import { numSocket } from "../num-socket";
+import { DropdownListControl, IDropdownListControl, ListOption } from "./controls/dropdown-list-control";
+import { INodeServices } from "../rete/service-types";
+import { numSocket } from "../rete/num-socket";
 import { NodeLiveOutputTypes, NodeMicroBitHubs, baseLiveOutputOptions,
   kBinaryOutputTypes,
-  kGripperOutputTypes, kMicroBitHubRelaysIndexed } from "../../model/utilities/node";
-import { IInputValueControl, InputValueControl } from "../../nodes/controls/input-value-control";
-import { SerialDevice } from "../../../../models/stores/serial";
+  kGripperOutputTypes, kMicroBitHubRelaysIndexed } from "../model/utilities/node";
+import { IInputValueControl, InputValueControl } from "./controls/input-value-control";
+import { SerialDevice } from "../../../models/stores/serial";
 import { VariableType } from "@concord-consortium/diagram-view";
-import { simulatedHub, simulatedHubName } from "../../model/utilities/simulated-output";
+import { simulatedHub, simulatedHubName } from "../model/utilities/simulated-output";
 
 // TODO: the list of sensors is populated on the tick, so if the tick is slow, the
 // list of sensors will not update very well
