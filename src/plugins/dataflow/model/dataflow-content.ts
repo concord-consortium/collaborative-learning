@@ -1,5 +1,5 @@
 import { types, Instance, applySnapshot, getSnapshot, addDisposer } from "mobx-state-tree";
-import { reaction } from "mobx";
+import { observable, reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
@@ -21,6 +21,7 @@ import { DataSet, addAttributeToDataSet } from "../../../models/data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
 import { getTileModel } from "../../../models/tiles/tile-model";
+import { NodeChannelInfo } from "./utilities/channel";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -60,6 +61,7 @@ export const DataflowContentModel = TileContentModel
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
     emptyDataSet: DataSet.create(),
+    channels: observable([]) as NodeChannelInfo[],
   }))
   .views(self => ({
     get sharedModel() {
@@ -240,6 +242,9 @@ export const DataflowContentModel = TileContentModel
       if (program) {
         applySnapshot(self.program, cloneDeep(program));
       }
+    },
+    setChannels(channels: NodeChannelInfo[]) {
+      self.channels = observable(channels);
     },
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;

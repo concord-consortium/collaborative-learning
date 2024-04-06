@@ -10,7 +10,6 @@ import { NodeLiveOutputTypes, NodeMicroBitHubs, baseLiveOutputOptions,
   kGripperOutputTypes, kMicroBitHubRelaysIndexed } from "../../model/utilities/node";
 import { IInputValueControl, InputValueControl } from "../controls/input-value-control";
 import { SerialDevice } from "../../../../models/stores/serial";
-import { NodeChannelInfo } from "../../model/utilities/channel";
 import { VariableType } from "@concord-consortium/diagram-view";
 import { simulatedHub, simulatedHubName } from "../../model/utilities/simulated-output";
 
@@ -46,7 +45,6 @@ export class LiveOutputNode extends BaseNode<
   ILiveOutputNodeModel
 > {
   inputValueControl: IInputValueControl;
-  channels: NodeChannelInfo[];
   hubSelectControl: IDropdownListControl;
 
   constructor(
@@ -74,8 +72,12 @@ export class LiveOutputNode extends BaseNode<
     return this.services.getOutputVariables().find(variable => variable.getAllOfType("live-output").includes(type));
   }
 
-  public setChannels(channels: NodeChannelInfo[]) {
-    this.channels = channels;
+  public requiresSerial() {
+    // live output block only indicates it requires serial
+    // after a connection to another node is made.
+    // This allows user to drag a block out and work on program before
+    // the message prompting them to connect.
+    return !this.findOutputVariable() && this.isConnected("nodeValue");
   }
 
   private sendDataToSerialDevice(serialDevice: SerialDevice) {
@@ -93,7 +95,7 @@ export class LiveOutputNode extends BaseNode<
     if (deviceFamily === "microbit"){
       // It is not clear when the channels would be falsey but that is how this
       // code was written before.
-      if (!this.channels) return;
+      if (!this.services.getChannels()) return;
       const hubId = this.hubSelectControl.getSelectionId();
       if (hubId == null) return;
       serialDevice.writeToOutForMicroBitRelayHub(val, hubId, outType);

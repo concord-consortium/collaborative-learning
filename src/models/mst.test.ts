@@ -876,4 +876,21 @@ describe("mst", () => {
       TestObject.create();
     }).toThrow();
   });
+
+  test("NaN is not handled correctly by number types", () => {
+    const TestObject = types.
+      model("TestObject", {
+        propValue: types.number
+      });
+
+    const obj = TestObject.create({propValue: NaN});
+    const snapshot = getSnapshot(obj);
+    expect(snapshot).toEqual({propValue: NaN});
+
+    const snapshotString = JSON.stringify(snapshot);
+    expect(snapshotString).toEqual("{\"propValue\":null}");
+
+    const rehydrated = JSON.parse(snapshotString);
+    expect(rehydrated).toEqual({propValue: null});
+  });
 });

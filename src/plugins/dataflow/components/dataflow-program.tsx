@@ -14,7 +14,7 @@ import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
-import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
+import { serialSensorChannels } from "../model/utilities/channel";
 import { ProgramDataRates } from "../model/utilities/node";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { DocumentContextReact } from "../../../components/document/document-context";
@@ -42,6 +42,7 @@ import { NumberUnitsControl, NumberUnitsControlComponent } from "../rete/control
 import { DemoOutputControl, DemoOutputControlComponent } from "../rete/controls/demo-output-control";
 import { InputValueControl, InputValueControlComponent } from "../rete/controls/input-value-control";
 import { LiveOutputNode } from "../rete/nodes/live-output-node";
+import { SensorNode } from "../rete/nodes/sensor-node";
 
 
 export interface IStartProgramParams {
@@ -94,7 +95,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   public static contextType = DocumentContextReact;
 
   private toolDiv: HTMLElement | null;
-  private channels: NodeChannelInfo[] = [];
   private previousChannelIds = "";
   private intervalHandle: ReturnType<typeof setTimeout>;
   private lastIntervalTime: number;
@@ -450,24 +450,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const channelIds = channels.map(c => c.channelId).join(",");
     if (channelIds !== this.previousChannelIds) {
       this.previousChannelIds = channelIds;
-      this.channels = channels;
+      this.props.tileContent.setChannels(channels);
 
       // Hack the type for now
       const nodes = this.programEditor.getNodes() as IBaseNode[];
       this.countSerialDataNodes(nodes);
-
-      nodes.forEach((node) => {
-        // FIXME: add sensor support
-        // if (node.name === "Sensor") {
-        //   const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
-        //   sensorSelect.setChannels(this.channels);
-        // }
-
-        if (node instanceof LiveOutputNode){
-          node.setChannels(this.channels);
-        }
-      });
-
     }
   };
 
@@ -493,7 +480,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (!this.stores.serialDevice.hasPort()){
       this.stores.serialDevice.requestAndSetPort()
         .then(() => {
-          this.stores.serialDevice.handleStream(this.channels);
+          this.stores.serialDevice.handleStream(this.props.tileContent.channels);
         });
     }
 
@@ -569,27 +556,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private countSerialDataNodes(nodes: IBaseNode[]){
     // implementing with a "count" of 1 or 0 in case we need to count nodes in future
-    // eslint-disable-next-line prefer-const
     let serialNodesCt = 0;
-
     nodes.forEach((n) => {
-      const isLiveSensor = /fsr|emg|tmp|[th]-[abcd]/; // match ids any live sensor channels
-
-      // FIXME: support sensor nodes
-      // const sensor = n.data.sensor as string;
-      // if(isLiveSensor.test(sensor) && !sensor.startsWith(kSimulatedChannelPrefix)){
-      //   serialNodesCt++;
-      // }
-
-      // live output block will alert need for serial
-      // only after connection to another node is made
-      // this allows user to drag a block out and work on program before connecting
-      if (n instanceof LiveOutputNode){
-        // Don't count the node if it's updating a shared output variable
-        const outputVariable = n.findOutputVariable();
-        if(!outputVariable && n.isConnected("nodeValue")) {
-          serialNodesCt++;
-        }
+      if ((n instanceof LiveOutputNode || n instanceof SensorNode) && n.requiresSerial()){
+        serialNodesCt++;
       }
     });
     // constraining all counts to 1 or 0 for now

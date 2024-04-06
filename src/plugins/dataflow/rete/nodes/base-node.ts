@@ -10,6 +10,30 @@ import { Schemes } from "../rete-scheme";
 export type NoInputs = Record<string, never>;
 export type NoOutputs = Record<string, never>;
 
+// This handles NaN, Infinity, and -Infinity
+// This would be more efficient if only those values were stored
+// as strings, but that would complicate the isTargetType function
+export const StringifiedNumber = types.custom<string, number>({
+  name: "StringifiedNumber",
+  fromSnapshot(snapshot: string, env?: any): number {
+    return Number(snapshot);
+  },
+  toSnapshot(value: number): string {
+    return value.toString();
+  },
+  isTargetType(value: string | number): boolean {
+    return typeof value === "number";
+  },
+  getValidationMessage(snapshot: string): string {
+    const parsed = Number(snapshot);
+    if (isNaN(parsed) && snapshot !== "NaN") {
+      return `'${snapshot}' can't be parsed as a number`;
+    } else {
+      return "";
+    }
+  }
+});
+
 export const BaseNodeModel = types.model("BaseNodeModel",
 {
   // This should be overridden by the "subclasses"
@@ -36,11 +60,11 @@ export const BaseNodeModel = types.model("BaseNodeModel",
    * nodes this is their output value. On other nodes this is one of their
    * input values.
    */
-  nodeValue: types.maybe(types.number),
+  nodeValue: types.maybe(StringifiedNumber),
 
   // FIXME: this union of number and null doesn't seem to be supported
   // in arrays. When the array is set to `[null]` MST is complaining
-  recentValues: types.map(types.array(types.union(types.number,types.null))),
+  recentValues: types.map(types.array(types.union(StringifiedNumber,types.null))),
 
 })
 .volatile(self => ({

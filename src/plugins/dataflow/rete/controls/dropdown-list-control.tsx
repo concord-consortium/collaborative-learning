@@ -1,10 +1,9 @@
 import React, { FunctionComponent, SVGProps, useCallback, useRef, useState } from "react";
-import { makeObservable, observable } from "mobx";
+import { computed, makeObservable, observable } from "mobx";
 import { observer } from "mobx-react";
 import { ClassicPreset } from "rete";
 import classNames from "classnames";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
-import { kGripperOutputTypes } from "../../model/utilities/node";
 import { IBaseNode, IBaseNodeModel } from "../nodes/base-node";
 
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
@@ -18,6 +17,9 @@ export interface ListOption {
   icon?: FunctionComponent<SVGProps<SVGSVGElement>>;
   // This property is used by a nodes that work with a "hubSelect" control
   id?: string;
+  // This property is used by hardware menus where some options can
+  // be temporarily missing, but still selectable
+  missing?: boolean;
 }
 
 type DisabledChecker = (opt: ListOption) => boolean;
@@ -49,6 +51,8 @@ export class DropdownListControl<
   @observable
   optionArray: ListOption[];
 
+  private optionsFunc?: () => ListOption[];
+
   // TODO: this used to set the initial value of the if it wasn't set based on the first
   // option in the list passed in. I'm not sure if that is needed anymore.
   constructor(
@@ -56,11 +60,15 @@ export class DropdownListControl<
     public modelKey: Key,
 
     optionArray: ListOption[],
-    public label = "",
-    public tooltip = "Select Type"
+    public tooltip = "Select Type", // This is not currently passed
+    public placeholder = "Select an option",
+
+    // Use a function for the options so they can be computed
+    optionsFunc?: () => ListOption[]
   ) {
     super();
     this.optionArray = optionArray;
+    this.optionsFunc = optionsFunc;
 
     const setterProp = "set" + modelKey.charAt(0).toUpperCase() + modelKey.slice(1) as `set${Capitalize<Key>}`;
 
@@ -146,7 +154,18 @@ export class DropdownListControl<
     }
   }
 
+  @computed
+  public get options() {
+    if (this.optionsFunc) {
+      return this.optionsFunc();
+    }
+    return this.optionArray;
+  }
+
   public setOptions(options: ListOption[]) {
+    if (this.optionsFunc) {
+      console.warn("This dropdown list is using an options function instead of array");
+    }
     // This should automatically convert the passed in array to be observable
     // so changes to the properties of the options will be observed too
     this.optionArray = options;
@@ -176,11 +195,10 @@ export interface IDropdownListControl {
   id: string;
   model: IBaseNodeModel;
   modelKey: string;
-  // TODO: is the readonly keyword correct here?
-  optionArray: readonly ListOption[];
+  options: ListOption[];
   setOptions(options: ListOption[]): void;
-  label: string;
   tooltip: string;
+  placeholder: string;
   getValue(): string;
   setValue(val: string): void;
   disabledFunction?: DisabledChecker;
@@ -189,13 +207,26 @@ export interface IDropdownListControl {
   getSelectionId(): string | undefined;
 }
 
-const DropdownList: React.FC<{
-  control: IDropdownListControl,
-  options: readonly ListOption[],
-  listClass: string
-}> = observer(function DropdownList(props) {
-  const { control, options, listClass } = props;
+const ListOptionComponent: React.FC<{option: ListOption}> = ({option}) => (
+  <>
+    { option.icon &&
+      <svg className="icon">
+        {option.icon({})}
+      </svg>
+    }
+    <div className={optionLabelClass(option.displayName)}>
+      {option.displayName ?? option.name}
+    </div>
+  </>
+);
 
+export const DropdownList: React.FC<{
+  control: IDropdownListControl,
+  listClass: string,
+}> = observer(function DropdownList(props) {
+  const { control, listClass } = props;
+  const title = control.tooltip;
+  const { options, placeholder } = control;
   const divRef = useRef<HTMLDivElement>(null);
   useStopEventPropagation(divRef, "pointerdown");
   useStopEventPropagation(divRef, "wheel");
@@ -211,13 +242,10 @@ const DropdownList: React.FC<{
 
   const val = control.getValue();
   const option = options.find((opt) => optionValue(opt) === val);
-  const name = option?.name ?? val.toString(); // TODO: I'm not sure this is needed anymore???
-  const displayName = option?.displayName ?? name;
-  const icon = option?.icon?.({}) || null;
   const activeHub = option?.active !== false;
   const liveNode = control.model.type.substring(0,4) === "Live";
   const disableSelected = control.modelKey === "hubSelect" && liveNode && !activeHub;
-  const labelClasses = classNames("item top", { disabled: disableSelected });
+  const labelClasses = classNames("item top", { disabled: disableSelected, missing: option?.missing });
 
   const onItemClick = useCallback((v: any) => {
     control.selectNode();
@@ -236,24 +264,26 @@ const DropdownList: React.FC<{
   }, [control]);
 
   return (
-    <div className={`node-select ${listClass}`} ref={divRef}>
+    <div className={`node-select ${listClass}`} ref={divRef} title={title}>
       <div className={labelClasses} onMouseDown={onItemClick}>
-        { icon && <svg className="icon top">{icon}</svg> }
-        <div className={optionLabelClass(displayName)}>{displayName}</div>
+        { option
+          ? <ListOptionComponent option={option}/>
+          : <div className="label unselected">{placeholder}</div>
+        }
         <svg className="icon dropdown-caret">
           <DropdownCaretIcon />
         </svg>
       </div>
       {showList ?
       <div className={`option-list ${listClass}`} ref={listRef}>
-        {options.map((ops: any, i: any) => {
+        {options.map((ops, i) => {
           const disabled = ops.active === false || control.disabledFunction?.(ops);
+          const missing = ops.missing;
           const className = classNames("item", listClass, {
             disabled,
             selectable: !disabled,
             selected: optionValue(ops) === val,
-            microbit: ops.name.includes("micro:bit"),
-            gripper: kGripperOutputTypes.includes(ops.name)
+            missing
           });
           return (
             <div
@@ -261,14 +291,7 @@ const DropdownList: React.FC<{
               key={i}
               onMouseDown={!disabled ? onListClick(optionValue(ops)) : undefined}
             >
-              { ops.icon &&
-                <svg className="icon">
-                  {ops.icon()}
-                </svg>
-              }
-              <div className={optionLabelClass(ops.displayName)}>
-                {ops.displayName ?? ops.name}
-              </div>
+              <ListOptionComponent option={ops} />
             </div>
           );
         })}
@@ -280,16 +303,11 @@ const DropdownList: React.FC<{
 
 export const DropdownListControlComponent: React.FC<{ data: IDropdownListControl}> = (props) => {
   const control = props.data;
-  const { label, tooltip } = control;
 
   return (
-    <div className="node-select-container" title={tooltip}>
-      { label &&
-        <div className="node-select-label">{label}</div>
-      }
+    <div className="node-select-container">
       <DropdownList
         control={control}
-        options={control.optionArray}
         listClass={control.modelKey}
       />
     </div>

@@ -21,6 +21,7 @@ import { DemoOutputNode } from "./nodes/demo-output-node";
 import { LiveOutputNode } from "./nodes/live-output-node";
 import { DataflowContentModelType } from "../model/dataflow-content";
 import { IStores } from "../../../models/stores/stores";
+import { SensorNode } from "./nodes/sensor-node";
 
 export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices {
   private reteNodesMap: Record<string, Schemes['Node']> = {};
@@ -147,6 +148,10 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     this.removeConnection(matchingConnection.id);
   };
 
+  public getChannels = () => {
+    return this.mstContent.channels;
+  };
+
   private createReteNodeFromNodeModel(id: string, model: IBaseNodeModel) {
     const nodeTypes: Record<string, NodeClass> =
     {
@@ -157,6 +162,7 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
       "Logic": LogicNode,
       "Math": MathNode,
       "Number": NumberNode,
+      "Sensor": SensorNode
     };
 
     const constructor = nodeTypes[model.type];

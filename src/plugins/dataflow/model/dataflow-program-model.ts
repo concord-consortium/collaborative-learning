@@ -6,6 +6,7 @@ import { LogicNodeModel } from "../rete/nodes/logic-node";
 import { GeneratorNodeModel } from "../rete/nodes/generator-node";
 import { DemoOutputNodeModel } from "../rete/nodes/demo-output-node";
 import { LiveOutputNodeModel } from "../rete/nodes/live-output-node";
+import { SensorNodeModel } from "../rete/nodes/sensor-node";
 
 export const ConnectionModel = types
   .model("Connection", {
@@ -30,7 +31,8 @@ export const DataflowNodeModel = types.
       LiveOutputNodeModel,
       LogicNodeModel,
       MathNodeModel,
-      NumberNodeModel)
+      NumberNodeModel,
+      SensorNodeModel)
   })
   .preProcessSnapshot((snapshot: any) => {
     // Turn position into x and y because MST has weird issues with arrays
