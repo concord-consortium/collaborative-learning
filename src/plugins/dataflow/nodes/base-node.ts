@@ -139,7 +139,7 @@ export type NodeClass = new (id: string | undefined, model: any, services: INode
 
 export type IBaseNode = Schemes['Node'] & {
   model: IBaseNodeModel;
-  tick(): boolean;
+  onTick(): boolean;
   process(): void;
   select(): void;
   isConnected(inputKey: string): boolean;
@@ -187,7 +187,7 @@ export class BaseNode<
    *
    * @returns whether the nodes need to reprocessed
    */
-  tick() { return false; }
+  onTick() { return false; }
 
   process() {
     this.services.process();

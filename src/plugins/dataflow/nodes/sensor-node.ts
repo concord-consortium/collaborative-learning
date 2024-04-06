@@ -145,7 +145,7 @@ export class SensorNode extends BaseNode<
     return { value };
   }
 
-  tick() {
+  onTick() {
     const chInfo =
       this.services.getChannels().find(ci => ci.channelId === this.model.sensor);
 

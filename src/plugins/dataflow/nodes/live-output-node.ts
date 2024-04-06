@@ -162,7 +162,7 @@ export class LiveOutputNode extends BaseNode<
     }
   }
 
-  tick() {
+  onTick() {
     const { stores, runnable } = this.services;
     const outputVariables = this.services.getOutputVariables();
     const outputVar = this.findOutputVariable();

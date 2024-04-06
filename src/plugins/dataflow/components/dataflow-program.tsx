@@ -517,7 +517,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     nodes.forEach(node => {
       // If tick returns true then it means something was updated
       // and we need to reprocess the diagram
-      if(node.tick()) {
+      if(node.onTick()) {
         processNeeded = true;
       }
       // Perhaps move this to the model since it should just be working on

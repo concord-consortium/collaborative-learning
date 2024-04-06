@@ -86,7 +86,7 @@ export class GeneratorNode extends BaseNode<
     return { value };
   }
 
-  tick() {
+  onTick() {
     const generatorType = this.model.generatorType;
     const period = Number(this.model.period);
     const amplitude = Number(this.model.amplitude);
