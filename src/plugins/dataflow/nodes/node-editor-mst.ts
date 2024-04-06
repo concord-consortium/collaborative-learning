@@ -22,6 +22,7 @@ import { LiveOutputNode } from "./live-output-node";
 import { DataflowContentModelType } from "../model/dataflow-content";
 import { IStores } from "../../../models/stores/stores";
 import { SensorNode } from "./sensor-node";
+import { TransformNode } from "./transform-node";
 
 export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices {
   private reteNodesMap: Record<string, Schemes['Node']> = {};
@@ -179,7 +180,8 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
       "Logic": LogicNode,
       "Math": MathNode,
       "Number": NumberNode,
-      "Sensor": SensorNode
+      "Sensor": SensorNode,
+      "Transform": TransformNode,
     };
 
     const constructor = nodeTypes[model.type];
