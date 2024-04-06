@@ -1,6 +1,6 @@
 import { ClassicPreset } from "rete";
 import { Instance } from "mobx-state-tree";
-import { numSocket } from "../rete/num-socket";
+import { numSocket } from "./num-socket";
 import { INumberUnitsControl, NumberUnitsControl } from "./controls/num-units-control";
 import { BaseNode, BaseNodeModel, NoInputs } from "./base-node";
 import { NodeGeneratorTypes, NodePeriodUnits } from "../model/utilities/node";
@@ -8,7 +8,7 @@ import { DropdownListControl, IDropdownListControl } from "./controls/dropdown-l
 import { ValueControl } from "./controls/value-control";
 import { PlotButtonControl } from "./controls/plot-button-control";
 import { typeField } from "../../../utilities/mst-utils";
-import { INodeServices } from "../rete/service-types";
+import { INodeServices } from "./service-types";
 import { INumberControl, NumberControl } from "./controls/num-control";
 
 export const GeneratorNodeModel = BaseNodeModel.named("GeneratorNodeModel")

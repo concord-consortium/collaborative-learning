@@ -1,4 +1,4 @@
-import "./num-socket";
+import "../nodes/num-socket";
 
 function doSomething<T extends Record<K, number>, K extends keyof T>(key: K, model: T) {
   return model[key];

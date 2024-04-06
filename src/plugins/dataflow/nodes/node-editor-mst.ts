@@ -6,22 +6,22 @@ import { AreaExtra, Schemes } from "./rete-scheme";
 import {
   DataflowNodeModel, IDataflowNodeModel, DataflowProgramModelType, ConnectionModel
 } from "../model/dataflow-program-model";
-import { NumberNode } from "../nodes/number-node";
-import { MathNode } from "../nodes/math-node";
-import { CounterNode } from "../nodes/counter-node";
-import { LogicNode } from "../nodes/logic-node";
-import { GeneratorNode } from "../nodes/generator-node";
-import { IBaseNodeModel, NodeClass } from "../nodes/base-node";
+import { NumberNode } from "./number-node";
+import { MathNode } from "./math-node";
+import { CounterNode } from "./counter-node";
+import { LogicNode } from "./logic-node";
+import { GeneratorNode } from "./generator-node";
+import { IBaseNodeModel, NodeClass } from "./base-node";
 import { uniqueId } from "../../../utilities/js-utils";
 import { INodeServices } from "./service-types";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { AreaExtensions, AreaPlugin } from "rete-area-plugin";
-import { DemoOutputNode } from "../nodes/demo-output-node";
-import { LiveOutputNode } from "../nodes/live-output-node";
+import { DemoOutputNode } from "./demo-output-node";
+import { LiveOutputNode } from "./live-output-node";
 import { DataflowContentModelType } from "../model/dataflow-content";
 import { IStores } from "../../../models/stores/stores";
-import { SensorNode } from "../nodes/sensor-node";
+import { SensorNode } from "./sensor-node";
 
 export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices {
   private reteNodesMap: Record<string, Schemes['Node']> = {};

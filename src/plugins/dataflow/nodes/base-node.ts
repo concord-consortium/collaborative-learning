@@ -4,8 +4,8 @@ import { kMaxNodeValues } from "../model/utilities/node";
 import { ClassicPreset } from "rete";
 import { Socket } from "rete/_types/presets/classic";
 import { DataflowProgramChange } from "../dataflow-logger";
-import { INodeServices } from "../rete/service-types";
-import { Schemes } from "../rete/rete-scheme";
+import { INodeServices } from "./service-types";
+import { Schemes } from "./rete-scheme";
 
 export type NoInputs = Record<string, never>;
 export type NoOutputs = Record<string, never>;

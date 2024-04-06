@@ -1,13 +1,13 @@
 import { ClassicPreset, GetSchemes } from "rete";
 import { DataflowNode } from "rete-engine";
-import { INumberControl } from "../nodes/controls/num-control";
-import { ValueControl } from "../nodes/controls/value-control";
-import { IDropdownListControl } from "../nodes/controls/dropdown-list-control";
+import { INumberControl } from "./controls/num-control";
+import { ValueControl } from "./controls/value-control";
+import { IDropdownListControl } from "./controls/dropdown-list-control";
 import { ReactArea2D } from "rete-react-plugin";
-import { PlotButtonControl } from "../nodes/controls/plot-button-control";
-import { INumberUnitsControl } from "../nodes/controls/num-units-control";
-import { DemoOutputControl } from "../nodes/controls/demo-output-control";
-import { IInputValueControl } from "../nodes/controls/input-value-control";
+import { PlotButtonControl } from "./controls/plot-button-control";
+import { INumberUnitsControl } from "./controls/num-units-control";
+import { DemoOutputControl } from "./controls/demo-output-control";
+import { IInputValueControl } from "./controls/input-value-control";
 
 // Crazy Rete typing...
 class NodeWithControls extends ClassicPreset.Node<

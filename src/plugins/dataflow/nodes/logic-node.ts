@@ -1,6 +1,6 @@
 import { ClassicPreset } from "rete";
 import { Instance } from "mobx-state-tree";
-import { numSocket } from "../rete/num-socket";
+import { numSocket } from "./num-socket";
 import { ValueControl } from "./controls/value-control";
 import { getNumDisplayStr } from "./utilities/view-utilities";
 import { NodeOperationTypes } from "../model/utilities/node";
@@ -8,7 +8,7 @@ import { BaseNode, BaseNodeModel } from "./base-node";
 import { DropdownListControl, IDropdownListControl } from "./controls/dropdown-list-control";
 import { PlotButtonControl } from "./controls/plot-button-control";
 import { typeField } from "../../../utilities/mst-utils";
-import { INodeServices } from "../rete/service-types";
+import { INodeServices } from "./service-types";
 
 export const LogicNodeModel = BaseNodeModel.named("LogicNodeModel")
 .props({

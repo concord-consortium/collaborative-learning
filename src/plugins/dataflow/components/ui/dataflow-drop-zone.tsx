@@ -3,7 +3,7 @@ import { DragEndEvent, useDndMonitor, useDroppable } from "@dnd-kit/core";
 import { observer } from "mobx-react";
 
 import { dataflowDroppableId, getNodeType, isNodeDraggableId } from "../dataflow-types";
-import { NodeEditorMST } from "../../rete/node-editor-mst";
+import { NodeEditorMST } from "../../nodes/node-editor-mst";
 
 interface IDataflowDropZoneProps {
   addNode: (nodeType: string, position?: [number, number]) => void;

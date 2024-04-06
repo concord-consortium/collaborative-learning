@@ -1,11 +1,11 @@
 import { Instance } from "mobx-state-tree";
 import { typeField } from "../../../utilities/mst-utils";
 import { BaseNode, BaseNodeModel, NoInputs } from "./base-node";
-import { INodeServices } from "../rete/service-types";
+import { INodeServices } from "./service-types";
 import { ClassicPreset } from "rete";
 import { DropdownListControl, IDropdownListControl, ListOption } from "./controls/dropdown-list-control";
 import { PlotButtonControl } from "./controls/plot-button-control";
-import { numSocket } from "../rete/num-socket";
+import { numSocket } from "./num-socket";
 import { NodeSensorTypes, kSensorMissingMessage, kSensorSelectMessage } from "../model/utilities/node";
 import { NodeChannelInfo, kDeviceDisplayNames } from "../model/utilities/channel";
 import { kSimulatedChannelPrefix } from "../model/utilities/simulated-channel";

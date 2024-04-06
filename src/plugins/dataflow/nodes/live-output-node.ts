@@ -3,8 +3,8 @@ import { BaseNode, BaseNodeModel, NoOutputs } from "./base-node";
 import { Instance } from "mobx-state-tree";
 import { ClassicPreset } from "rete";
 import { DropdownListControl, IDropdownListControl, ListOption } from "./controls/dropdown-list-control";
-import { INodeServices } from "../rete/service-types";
-import { numSocket } from "../rete/num-socket";
+import { INodeServices } from "./service-types";
+import { numSocket } from "./num-socket";
 import { NodeLiveOutputTypes, NodeMicroBitHubs, baseLiveOutputOptions,
   kBinaryOutputTypes,
   kGripperOutputTypes, kMicroBitHubRelaysIndexed } from "../model/utilities/node";

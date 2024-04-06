@@ -33,8 +33,8 @@ import { CustomDataflowNode } from "../nodes/dataflow-node";
 import {
   DropdownListControl, DropdownListControlComponent
 } from "../nodes/controls/dropdown-list-control";
-import { AreaExtra, Schemes } from "../rete/rete-scheme";
-import { NodeEditorMST } from "../rete/node-editor-mst";
+import { AreaExtra, Schemes } from "../nodes/rete-scheme";
+import { NodeEditorMST } from "../nodes/node-editor-mst";
 import { IBaseNode } from "../nodes/base-node";
 import { PlotButtonControl, PlotButtonControlComponent } from "../nodes/controls/plot-button-control";
 import { NumberUnitsControl, NumberUnitsControlComponent } from "../nodes/controls/num-units-control";
