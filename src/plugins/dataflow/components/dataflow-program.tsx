@@ -301,7 +301,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             // So far we don't need the area, but it might come in handy, perhaps for resizing
             // the node
             const _area = plugin.parentScope<BaseAreaPlugin<Schemes, any>>(BaseAreaPlugin);
-            const _editor = area.parentScope<NodeEditor<Schemes>>(NodeEditor);
+            const _editor = area.parentScope<NodeEditor<Schemes>>(NodeEditor) as NodeEditorMST;
 
             return (
               <CustomDataflowNode

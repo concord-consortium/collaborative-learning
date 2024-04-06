@@ -1,33 +1,16 @@
 import * as React from "react";
 import { observer } from "mobx-react";
 import styled, { css } from "styled-components";
-import { NodeEditor } from "rete";
 import { ClassicScheme, RenderEmit, Presets } from "rete-react-plugin";
 import { BaseAreaPlugin } from "rete-area-plugin";
 
 import { $nodecolor, $nodecolorselected, $nodewidth, $socketmargin, $socketsize } from "./vars";
 import { DataflowNodePlot } from "./dataflow-node-plot";
 import { IBaseNode } from "./base-node";
+import { NodeEditorMST } from "./node-editor-mst";
+import { Delete } from "./delete";
 
 const { RefSocket, RefControl } = Presets.classic;
-
-// This is how the rete context menu deletes an item
-//
-// const deleteItem: Item = {
-//   label: 'Delete',
-//   key: 'delete',
-//   async handler() {
-//     const nodeId = context.id
-//     const connections = editor.getConnections().filter(c => {
-//       return c.source === nodeId || c.target === nodeId
-//     })
-
-//     for (const connection of connections) {
-//       await editor.removeConnection(connection.id)
-//     }
-//     await editor.removeNode(nodeId)
-//   }
-// }
 
 
 type NodeExtraData = { width?: number, height?: number }
@@ -111,22 +94,22 @@ type Props<S extends ClassicScheme> = {
     styles?: () => any
     emit: RenderEmit<S>
     area: BaseAreaPlugin<S, any>
-    editor: NodeEditor<S>
+    editor: NodeEditorMST
 }
 export type DataflowNodeComponent<Scheme extends ClassicScheme> = (props: Props<Scheme>) => JSX.Element
 
 // eslint-disable-next-line max-statements
 export const CustomDataflowNode = observer(
-  function CustomDataflowNode<Scheme extends ClassicScheme>(props: Props<Scheme>)
+  function CustomDataflowNode<Scheme extends ClassicScheme>({data, styles, emit, editor}: Props<Scheme>)
 {
-  const inputs = Object.entries(props.data.inputs);
-  const outputs = Object.entries(props.data.outputs);
-  const controls = Object.entries(props.data.controls);
-  const selected = props.data.selected || false;
-  const { id, label, width, height } = props.data;
+  const inputs = Object.entries(data.inputs);
+  const outputs = Object.entries(data.outputs);
+  const controls = Object.entries(data.controls);
+  const selected = data.selected || false;
+  const { id, label, width, height } = data;
 
   // FIXME: update 'Scheme' so we don't have to typecast here
-  const model = (props.data as unknown as IBaseNode).model;
+  const model = (data as unknown as IBaseNode).model;
 
   const showPlot = model.plot;
 
@@ -140,10 +123,13 @@ export const CustomDataflowNode = observer(
       selected={selected}
       width={width}
       height={height}
-      styles={props.styles}
+      styles={styles}
       data-testid="node"
     >
-      <div className="title" data-testid="title">{label}</div>
+      <div className="top-bar" onClick={() => console.log("top-bar click")}>
+        <div className="title" data-testid="title">{label}</div>
+        <Delete editor={editor} nodeId={id}/>
+      </div>
       {/* Outputs */}
       {outputs.map(([key, output]) => (
         output &&
@@ -154,7 +140,7 @@ export const CustomDataflowNode = observer(
               side="output"
               socketKey={key}
               nodeId={id}
-              emit={props.emit}
+              emit={emit}
               payload={output.socket}
               data-testid="output-socket"
             />
@@ -165,7 +151,7 @@ export const CustomDataflowNode = observer(
         return control ? <RefControl
           key={key}
           name="control"
-          emit={props.emit}
+          emit={emit}
           payload={control}
           data-testid={`control-${key}`}
         /> : null;
@@ -179,7 +165,7 @@ export const CustomDataflowNode = observer(
               side="input"
               socketKey={key}
               nodeId={id}
-              emit={props.emit}
+              emit={emit}
               payload={input.socket}
               data-testid="input-socket"
             />
@@ -190,7 +176,7 @@ export const CustomDataflowNode = observer(
               <RefControl
                 key={key}
                 name="input-control"
-                emit={props.emit}
+                emit={emit}
                 payload={input.control}
                 data-testid="input-control"
               />

@@ -85,6 +85,21 @@ export const DataflowProgramModel = types.
       // We use detach here so Rete code can continue referring to this object
       return detach(self.connections.get(id));
     }
+  }))
+  .actions(self => ({
+    removeNodeAndConnections(nodeId: string) {
+      const connections = [...self.connections.values()].filter(c => {
+        return c.source === nodeId || c.target === nodeId;
+      });
+
+      const removedConnections = [];
+      for (const connection of connections) {
+        removedConnections.push(connection);
+        self.removeConnection(connection.id);
+      }
+      self.removeNode(nodeId);
+      return removedConnections;
+    }
   }));
 export interface DataflowProgramModelType extends Instance<typeof DataflowProgramModel> {}
 export interface DataflowProgramSnapshotOut extends SnapshotOut<typeof DataflowProgramModel> {}

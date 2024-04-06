@@ -152,6 +152,23 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     return this.mstContent.channels;
   };
 
+  public async removeNodeAndConnections(nodeId: string) {
+    const node = this.getNode(nodeId);
+    const removedConnections = this.mstProgram.removeNodeAndConnections(nodeId);
+
+    // FIXME: Rete is not happy with this it reports several canceled promises
+
+    removedConnections.forEach(connection => {
+      // Temporary use this approach to get things working
+      this.emit({ type: 'connectionremoved', data: connection });
+    });
+
+    // Temporary use this approach to get things working
+    this.emit({ type: 'noderemoved', data: node});
+
+    // TODO: might need clear the selection, but it might happen automatically
+  }
+
   private createReteNodeFromNodeModel(id: string, model: IBaseNodeModel) {
     const nodeTypes: Record<string, NodeClass> =
     {
