@@ -1,9 +1,9 @@
 import { ClassicPreset } from "rete";
 import { Instance } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
-import { INumberControl, NumberControl } from "../controls/num-control";
+import { INumberControl, NumberControl } from "../../nodes/controls/num-control";
 import { BaseNode, BaseNodeModel, NoInputs } from "./base-node";
-import { PlotButtonControl } from "../controls/plot-button-control";
+import { PlotButtonControl } from "../../nodes/controls/plot-button-control";
 import { typeField } from "../../../../utilities/mst-utils";
 import { INodeServices } from "../service-types";
 

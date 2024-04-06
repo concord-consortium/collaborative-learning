@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useEffect, useState } from "react";
-import { humidAnimationPhases } from "../../../nodes/controls/demo-output-control-assets";
+import { humidAnimationPhases } from "../demo-output-control-assets";
 
 interface IProps {
   nodeValue: number;

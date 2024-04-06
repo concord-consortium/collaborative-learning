@@ -6,7 +6,7 @@ import { kMaxNodeValues, NodePlotColor } from "../model/utilities/node";
 import "./dataflow-node.scss";
 import { IBaseNodeModel } from "../rete/nodes/base-node";
 import { observer } from "mobx-react";
-import { useStopEventPropagation } from "../rete/controls/custom-hooks";
+import { useStopEventPropagation } from "./controls/custom-hooks";
 
 interface INodePlotProps {
   display: boolean;

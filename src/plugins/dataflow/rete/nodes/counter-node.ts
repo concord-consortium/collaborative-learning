@@ -1,7 +1,7 @@
 import { ClassicPreset } from "rete";
 import { Instance } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
-import { ValueControl } from "../controls/value-control";
+import { ValueControl } from "../../nodes/controls/value-control";
 import { BaseNode, BaseNodeModel, NoInputs } from "./base-node";
 import { typeField } from "../../../../utilities/mst-utils";
 import { INodeServices } from "../service-types";

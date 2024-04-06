@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import { ClassicPreset } from "rete";
 import classNames from "classnames";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
-import { IBaseNode, IBaseNodeModel } from "../nodes/base-node";
+import { IBaseNode, IBaseNodeModel } from "../../rete/nodes/base-node";
 
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 

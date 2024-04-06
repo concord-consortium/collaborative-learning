@@ -26,20 +26,20 @@ import { ClassicPreset, NodeEditor } from "rete";
 import { Presets, ReactPlugin } from "rete-react-plugin";
 import { AreaExtensions, BaseAreaPlugin } from "rete-area-plugin";
 import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
-import { NumberControl, NumberControlComponent } from "../rete/controls/num-control";
-import { ValueControl, ValueControlComponent } from "../rete/controls/value-control";
+import { NumberControl, NumberControlComponent } from "../nodes/controls/num-control";
+import { ValueControl, ValueControlComponent } from "../nodes/controls/value-control";
 import { DataflowEngine } from "rete-engine";
 import { CustomDataflowNode } from "../nodes/dataflow-node";
 import {
   DropdownListControl, DropdownListControlComponent
-} from "../rete/controls/dropdown-list-control";
+} from "../nodes/controls/dropdown-list-control";
 import { AreaExtra, Schemes } from "../rete/rete-scheme";
 import { NodeEditorMST } from "../rete/node-editor-mst";
 import { IBaseNode } from "../rete/nodes/base-node";
-import { PlotButtonControl, PlotButtonControlComponent } from "../rete/controls/plot-button-control";
-import { NumberUnitsControl, NumberUnitsControlComponent } from "../rete/controls/num-units-control";
-import { DemoOutputControl, DemoOutputControlComponent } from "../rete/controls/demo-output-control";
-import { InputValueControl, InputValueControlComponent } from "../rete/controls/input-value-control";
+import { PlotButtonControl, PlotButtonControlComponent } from "../nodes/controls/plot-button-control";
+import { NumberUnitsControl, NumberUnitsControlComponent } from "../nodes/controls/num-units-control";
+import { DemoOutputControl, DemoOutputControlComponent } from "../nodes/controls/demo-output-control";
+import { InputValueControl, InputValueControlComponent } from "../nodes/controls/input-value-control";
 import { LiveOutputNode } from "../rete/nodes/live-output-node";
 import { SensorNode } from "../rete/nodes/sensor-node";
 import { recordCase } from "../model/utilities/recording-utilities";

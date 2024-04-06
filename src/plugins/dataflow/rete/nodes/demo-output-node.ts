@@ -3,12 +3,12 @@ import { Instance } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
 import { NodeDemoOutputTypes, NodePlotRed, kBinaryOutputTypes } from "../../model/utilities/node";
 import { BaseNode, BaseNodeModel, NoOutputs } from "./base-node";
-import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-list-control";
+import { DropdownListControl, IDropdownListControl } from "../../nodes/controls/dropdown-list-control";
 import { typeField } from "../../../../utilities/mst-utils";
 import { INodeServices } from "../service-types";
 import { MinigraphOptions } from "../../nodes/dataflow-node-plot";
-import { DemoOutputControl } from "../controls/demo-output-control";
-import { IInputValueControl, InputValueControl } from "../controls/input-value-control";
+import { DemoOutputControl } from "../../nodes/controls/demo-output-control";
+import { IInputValueControl, InputValueControl } from "../../nodes/controls/input-value-control";
 
 const tiltMinigraphOptions: MinigraphOptions = {
   backgroundColor: "#fff",

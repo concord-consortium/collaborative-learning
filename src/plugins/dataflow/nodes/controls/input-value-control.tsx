@@ -3,8 +3,8 @@ import "./value-control.sass";
 import React from "react";
 import { observer } from "mobx-react";
 import { action, computed, makeObservable, observable } from "mobx";
-import { IBaseNode, IBaseNodeModel } from "../nodes/base-node";
-import { MinigraphOptions, defaultMinigraphOptions } from "../../nodes/dataflow-node-plot";
+import { IBaseNode, IBaseNodeModel } from "../../rete/nodes/base-node";
+import { MinigraphOptions, defaultMinigraphOptions } from "../dataflow-node-plot";
 import { PlotButtonControl, PlotButtonControlComponent } from "./plot-button-control";
 
 import "./input-value-control.scss";

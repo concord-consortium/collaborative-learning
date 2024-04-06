@@ -3,9 +3,9 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import React from "react";
 import { advancedGrabberFrames, fanFrames, fanHousing, fanMotor, grabberCordFrames, grabberFrames,
-  grabberPaddle, humidifier, lightBulbOff, lightBulbOn } from "../../nodes/controls/demo-output-control-assets";
+  grabberPaddle, humidifier, lightBulbOff, lightBulbOn } from "./demo-output-control-assets";
 import { HumidifierAnimation } from "./demo-outputs/humidifier-animation";
-import { IDemoOutputNodeModel } from "../nodes/demo-output-node";
+import { IDemoOutputNodeModel } from "../../rete/nodes/demo-output-node";
 
 import "./demo-output-control.scss";
 

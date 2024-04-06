@@ -1,12 +1,12 @@
 import { ClassicPreset } from "rete";
 import { Instance } from "mobx-state-tree";
 import { numSocket } from "../num-socket";
-import { ValueControl } from "../controls/value-control";
+import { ValueControl } from "../../nodes/controls/value-control";
 import { getNumDisplayStr } from "../../nodes/utilities/view-utilities";
 import { NodeOperationTypes } from "../../model/utilities/node";
 import { BaseNode, BaseNodeModel } from "./base-node";
-import { DropdownListControl, IDropdownListControl } from "../controls/dropdown-list-control";
-import { PlotButtonControl } from "../controls/plot-button-control";
+import { DropdownListControl, IDropdownListControl } from "../../nodes/controls/dropdown-list-control";
+import { PlotButtonControl } from "../../nodes/controls/plot-button-control";
 import { typeField } from "../../../../utilities/mst-utils";
 import { INodeServices } from "../service-types";
 

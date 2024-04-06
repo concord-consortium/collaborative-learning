@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState } from "react";
 import { ClassicPreset } from "rete";
 import { useStopEventPropagation } from "./custom-hooks";
 import { NodePeriodUnits } from "../../model/utilities/node";
-import { IBaseNode } from "../nodes/base-node";
+import { IBaseNode } from "../../rete/nodes/base-node";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 
