@@ -97,7 +97,7 @@ export class DemoOutputNode extends BaseNode<
         const tiltInput = new ClassicPreset.Input(numSocket, "Tilt");
         this.addInput("tilt", tiltInput);
 
-        this.inputTiltControl = new InputValueControl(this, "tilt", "tilt:", "Display for tilt");
+        this.inputTiltControl = new InputValueControl(this, "tilt", "tilt: ", "Display for tilt");
         tiltInput.addControl(this.inputTiltControl);
 
         // Tell rete to re-draw the node since we changed our inputs

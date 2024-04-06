@@ -162,6 +162,46 @@ export class LiveOutputNode extends BaseNode<
     }
   }
 
+  private getSelectedRelayIndex(){
+    return kMicroBitHubRelaysIndexed.indexOf(this.model.liveOutputType);
+  }
+
+  private updateHubsStatusReport(){
+    const hubSelect = this.hubSelectControl;
+    const hubsChannels = this.services.getChannels();
+    if (!hubsChannels) return;
+    const hubSelectOptions = hubSelect.options;
+    hubsChannels
+      .filter(c => c.deviceFamily === "microbit")
+      .forEach(c => {
+        // Incase there is a channel without a microbitId, skip it
+        if (!c.microbitId) return;
+        const targetHub = hubSelectOptions.find(option => option.id === c.microbitId);
+        if (!targetHub) return;
+
+        // The options are observable objects so changing the active status
+        // should trigger the list to re-render. However this is being changed
+        // outside of a transaction, so MobX might complain about it.
+        targetHub.active = c.missing;
+      });
+  }
+
+  private getHubRelaysChannel(){
+    const selectedHubIdentifier = this.hubSelectControl.getSelectionId();
+    const foundChannels = this.services.getChannels();
+    if (!foundChannels) return null;
+    const relayChannels = foundChannels.filter(c => c.type === "relays");
+    return relayChannels.find(c => c.microbitId === selectedHubIdentifier);
+  }
+
+  private getRelayMessageReceived() {
+    const hubRelaysChannel = this.getHubRelaysChannel();
+    if (!hubRelaysChannel || !hubRelaysChannel.relaysState) return "(no hub)";
+    const rIndex = this.getSelectedRelayIndex();
+    const reportedValue = hubRelaysChannel.relaysState[rIndex];
+    return reportedValue === this.model.nodeValue ? "(received)" : "(sent)";
+  }
+
   onTick() {
     const { stores, runnable } = this.services;
     const outputVariables = this.services.getOutputVariables();
@@ -172,6 +212,13 @@ export class LiveOutputNode extends BaseNode<
       this.sendDataToSimulatedOutput(outputVariables);
     }
     this.setLiveOutputOpts(foundDeviceFamily, outputVar);
+
+    // This used to be in `data()` formerly known as `worker()`
+    // it seems more appropriate to be in onTick, but that might
+    // cause problems in the read only view if users are allowed to
+    // look at the options
+    this.updateHubsStatusReport();
+
     return true;
   }
 
@@ -179,12 +226,18 @@ export class LiveOutputNode extends BaseNode<
     // if there is not a valid input, use 0
     const value = nodeValue && nodeValue[0] != null && !isNaN(nodeValue[0]) ? nodeValue[0] : 0;
 
-    if (kBinaryOutputTypes.includes(this.model.liveOutputType)) {
+    const outputType = this.model.liveOutputType;
+
+    if (kBinaryOutputTypes.includes(outputType)) {
       // convert all non-zero to 1
       const newValue = +(value !== 0);
       this.model.setNodeValue(newValue);
-      this.inputValueControl.setDisplayMessage(newValue === 0 ? "off" : "on");
-    } else if (kGripperOutputTypes.includes(this.model.liveOutputType)){
+      const offOnString = newValue === 0 ? "off" : "on";
+      const displayMessage = kMicroBitHubRelaysIndexed.includes(outputType)
+        ? `${offOnString} ${this.getRelayMessageReceived()}`
+        : offOnString;
+      this.inputValueControl.setDisplayMessage(displayMessage);
+    } else if (kGripperOutputTypes.includes(outputType)){
       // NOTE: this looks similar to the Demo Output Node, but in this case we
       // are setting the nodeValue to 0-100. In the Demo Output Node it is set to
       // 0-1

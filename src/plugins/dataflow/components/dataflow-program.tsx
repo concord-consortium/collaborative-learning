@@ -499,6 +499,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private clearProgram = () => {
+    this.programEditor.clear();
   };
 
   private playbackNodesWithCaseData = (dataSet: IDataSet, playBackIndex: number) => {

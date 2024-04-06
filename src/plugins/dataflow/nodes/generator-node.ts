@@ -64,11 +64,13 @@ export class GeneratorNode extends BaseNode<
     const dropdownControl = new DropdownListControl(this, "generatorType", dropdownOptions);
     this.addControl("generatorType", dropdownControl);
 
-    const ampControl = new NumberControl(this, "amplitude", "amplitude");
+    const ampControl = new NumberControl(this, "amplitude", "amplitude",
+      null, "Set Amplitude");
     this.addControl("amplitude", ampControl);
 
     const units = NodePeriodUnits.map(u => u.unit);
-    const periodControl = new NumberUnitsControl(this, "period", "period", null, units);
+    const periodControl = new NumberUnitsControl(this, "period", "period", null, units,
+      "Set Period");
     this.addControl("period", periodControl);
 
     this.valueControl = new ValueControl("Generator");

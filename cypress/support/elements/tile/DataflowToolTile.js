@@ -86,7 +86,10 @@ class DataflowToolTile {
     return Number(style.substring(startIndex, endIndex));
   }
   getNumberNodeOutput() {
-    return cy.get(".flow-tool .node.number .node-output");
+    return cy.get(".flow-tool .node.number .output-socket");
+  }
+  getLiveOutputNodeInput() {
+    return cy.get(".flow-tool .node.live-output .input-socket");
   }
   getModalOkButton() {
     return cy.get('.dialog-contents #okButton');
