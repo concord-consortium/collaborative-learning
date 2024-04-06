@@ -41,10 +41,10 @@ class DataflowToolTile {
     return cy.get(`${getNodeText("number")} .number-input`);
   }
   getNodeInput() {
-    return cy.get('.socket.input.number-value');
+    return cy.get('.input-socket');
   }
   getNodeOutput() {
-    return cy.get('.socket.output.number-value');
+    return cy.get('.output-socket');
   }
   getNodeTitle(workspaceClass) {
     return cy.get(`${workspaceClass || ".primary-workspace"} .node .title`);
