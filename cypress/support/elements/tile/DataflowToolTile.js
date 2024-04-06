@@ -47,7 +47,7 @@ class DataflowToolTile {
     return cy.get('.socket.output.number-value');
   }
   getNodeTitle(workspaceClass) {
-    return cy.get(`${workspaceClass || ".primary-workspace"} .node-title`);
+    return cy.get(`${workspaceClass || ".primary-workspace"} .node .title`);
   }
   getNodeValueContainer(nodeType) {
     return this.getNode(nodeType).find(".value-container");

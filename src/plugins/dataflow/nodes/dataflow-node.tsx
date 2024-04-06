@@ -136,7 +136,7 @@ export const CustomDataflowNode = observer(
 
   return (
     <DataflowNodeStyles
-      className="node"
+      className={`node ${model.type.toLowerCase().replace(/ /g, "-")}`}
       selected={selected}
       width={width}
       height={height}
