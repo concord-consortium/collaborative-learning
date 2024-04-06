@@ -76,6 +76,7 @@ export interface INumberControl {
 export const NumberControlComponent: React.FC<{ data: INumberControl }> = (props) => {
   const control = props.data;
 
+  // FIXME: the type of inputValue is flipping between a number and a string
   const [inputValue, setInputValue] = useState(control.getValue());
 
   const handleChange = useCallback((e: any) => {
@@ -85,7 +86,10 @@ export const NumberControlComponent: React.FC<{ data: INumberControl }> = (props
   const handleBlur = useCallback((e: any) => {
     const v = e.target.value;
     if (isFinite(v)) {
-      control.setValue(Number(v));
+      const newValue = Number(v);
+      control.setValue(newValue);
+      // If the new value string is 01 this will update to 1
+      setInputValue(newValue);
     } else {
       // Restore the value to the one currently stored in the control
       setInputValue(control.getValue());
