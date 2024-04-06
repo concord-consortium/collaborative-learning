@@ -22,7 +22,6 @@ import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { IDataSet } from "../../../models/data/data-set";
 
-import "./dataflow-program.sass";
 import { ClassicPreset, NodeEditor } from "rete";
 import { Presets, ReactPlugin } from "rete-react-plugin";
 import { AreaExtensions, BaseAreaPlugin } from "rete-area-plugin";
@@ -43,7 +42,10 @@ import { DemoOutputControl, DemoOutputControlComponent } from "../rete/controls/
 import { InputValueControl, InputValueControlComponent } from "../rete/controls/input-value-control";
 import { LiveOutputNode } from "../rete/nodes/live-output-node";
 import { SensorNode } from "../rete/nodes/sensor-node";
+import { recordCase } from "../model/utilities/recording-utilities";
+import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 
+import "./dataflow-program.sass";
 
 export interface IStartProgramParams {
   runId: string;
@@ -159,6 +161,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             onNodeCreateClick={this.addNode}
             tileId={this.tileId}
           /> }
+          <DataflowDropZone
+            addNode={this.addNode}
+            className="editor-graph-container"
+            programEditor={this.programEditor}
+            readOnly={readOnly}
+            style={this.getEditorStyle}
+            tileId={this.tileId}
+          >
             <div
               className={editorClass}
               ref={(elt) => this.editorDomElement = elt}
@@ -177,6 +187,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                   disabled={false}
                 /> }
             </div>
+          </DataflowDropZone>
         </div>
       </div>
     );
@@ -394,9 +405,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   }
 
-  private updateNodeNames(){
-  }
-
   private destroyEditor() {
     this.reactElements.forEach(el => {
       ReactDOM.unmountComponentAtNode(el);
@@ -525,7 +533,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private tick = () => {
     const { runnable, tileContent: tileModel, playBackIndex, programMode,
-            isPlaying, updateRecordIndex, updatePlayBackIndex } = this.props;
+            isPlaying,  updateRecordIndex, updatePlayBackIndex } = this.props;
 
     const dataSet = tileModel.dataSet;
     const now = Date.now();
@@ -539,6 +547,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.updateNodes();
         break;
       case ProgramMode.Recording:
+        if (runnable) {
+          recordCase(this.props.tileContent, this.props.recordIndex);
+        }
         this.updateNodes();
         updateRecordIndex(UpdateMode.Increment);
         break;

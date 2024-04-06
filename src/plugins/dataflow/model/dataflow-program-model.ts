@@ -7,6 +7,7 @@ import { GeneratorNodeModel } from "../rete/nodes/generator-node";
 import { DemoOutputNodeModel } from "../rete/nodes/demo-output-node";
 import { LiveOutputNodeModel } from "../rete/nodes/live-output-node";
 import { SensorNodeModel } from "../rete/nodes/sensor-node";
+import { NodeType, NodeTypes } from "./utilities/node";
 
 export const ConnectionModel = types
   .model("Connection", {
@@ -53,14 +54,29 @@ export const DataflowProgramModel = types.
     connections: types.map(ConnectionModel)
   })
   .actions(self => ({
+    // This isn't great but it is how the unique node names have been working
+    updateNodeNames(){
+      let idx = 1;
+      self.nodes.forEach((node) => {
+        const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
+        const displayNameBase = nodeType ? nodeType.displayName : node.name;
+        node.data.orderedDisplayName = displayNameBase + " " + idx;
+        idx++;
+      });
+    }
+  }))
+  .actions(self => ({
     addNode(node: IDataflowNodeModel) {
       self.nodes.put(node);
+      self.updateNodeNames();
     },
     addNodeSnapshot(node: DataflowNodeSnapshotIn) {
       self.nodes.put(node);
+      self.updateNodeNames();
     },
     removeNode(id: IDataflowNodeModel["id"]) {
       self.nodes.delete(id);
+      self.updateNodeNames();
     },
     addConnection(connection: IConnectionModel) {
       self.connections.put(connection);

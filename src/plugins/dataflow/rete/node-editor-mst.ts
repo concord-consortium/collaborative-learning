@@ -186,8 +186,10 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
 
     const node = this.getNode(id);
 
-    // Temporarily emit like normal things are more simple
-    // this is not waiting for the emit before calling the process.
+    // Temporarily emit like normal. Ideally the onPatch above would be used
+    // to emit instead, so this is consistent regardless of how the state
+    // is changed.
+    // This is not waiting for the emit before calling the process.
     // we might need to add it
     this.emit({ type: 'nodecreated', data: node });
 
