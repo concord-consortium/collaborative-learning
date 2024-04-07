@@ -1,3 +1,3 @@
 export const kSimulatorTileType = "Simulator";
 
-export const kSimulatorDefaultHeight = 320;
+export const kSimulatorDefaultHeight = 400;

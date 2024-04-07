@@ -107,7 +107,6 @@ export class GraphController {
     if (!(graphModel && layout)) {
       return;
     }
-    this.callMatchCirclesToData();
     if (['plot', 'legend'].includes(graphPlace)) {
       // Since there is no axis associated with the legend and the plotType will not change, we bail
       return;
@@ -117,6 +116,7 @@ export class GraphController {
       if (!graphModel.lockAxes) {
         yAxisModel && setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
       }
+      this.callMatchCirclesToData();
       return;
     }
 
@@ -136,8 +136,14 @@ export class GraphController {
           primaryRole = otherAttributeType === 'numeric' ? otherAttrRole
             : attributeType === 'numeric' ? graphAttributeRole
               : otherAttributeType !== 'empty' ? otherAttrRole : graphAttributeRole;
-        graphModel.setPrimaryRole(primaryRole);
-        graphModel.setPlotType(plotChoices[primaryType][otherAttributeType]);
+        // Only call setters if something has changed, to avoid triggering unwanted reactions
+        if (primaryRole !== graphModel.primaryRole) {
+          graphModel.setPrimaryRole(primaryRole);
+        }
+        const plotType = plotChoices[primaryType][otherAttributeType];
+        if (plotType !== graphModel.plotType) {
+          graphModel.setPlotType(plotType);
+        }
       }
     };
 
@@ -155,8 +161,6 @@ export class GraphController {
             dataConfiguration.setAttributeType(attrRole, 'numeric');
             layout.setAxisScaleType(place, 'linear');
             setNiceDomain(graphModel.numericValuesForAttrRole(attrRole), newAxisModel);
-          } else {
-            setNiceDomain(graphModel.numericValuesForAttrRole(attrRole), currAxisModel);
           }
         }
           break;
@@ -189,6 +193,7 @@ export class GraphController {
 
     setPrimaryRoleAndPlotType();
     AxisPlaces.forEach(setupAxis);
+    this.callMatchCirclesToData();
   }
 
   /**

@@ -1,4 +1,4 @@
-import { reaction } from "mobx";
+import { ObservableMap, reaction } from "mobx";
 import stringify from "json-stringify-pretty-compact";
 import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import { IClueObject } from "../../../models/annotations/clue-object";
@@ -11,7 +11,7 @@ import {
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
   GraphAttrRole, GraphEditMode, hoverRadiusFactor, kDefaultAxisLabel, kDefaultNumericAxisBounds, kGraphTileType,
-  PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
+  PlotType, PlotTypes, Point, pointRadiusMax, pointRadiusSelectionAddend, RectSize
 } from "../graph-types";
 import { withoutUndo } from "../../../models/history/without-undo";
 import { SharedModelType } from "../../../models/shared/shared-model";
@@ -85,7 +85,11 @@ export const GraphModel = TileContentModel
     // True if a dragging operation is ongoing - automatic rescaling is deferred until drag is done.
     interactionInProgress: false,
     editingMode: "none" as GraphEditMode,
-    editingLayerId: undefined as string|undefined
+    editingLayerId: undefined as string|undefined,
+    // Map from annotation IDs to their current locations.
+    // This allows adornments to flexibly give us these locations.
+    annotationLocationCache: new ObservableMap<string,Point>(),
+    annotationSizesCache: new ObservableMap<string,RectSize>()
   }))
   .preProcessSnapshot((snapshot: any) => {
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
@@ -312,6 +316,10 @@ export const GraphModel = TileContentModel
     get noAttributesAssigned() {
       return !self.layers.some(layer => !layer.config.noAttributesAssigned);
     },
+    // PrimaryRole should be in agreement on all layers, so just return the first.
+    get primaryRole() {
+      return self.layers[0].config?.primaryRole;
+    },
     get annotatableObjects() {
       const tileId = getTileIdFromContent(self) ?? "";
       const objects: IClueObject[] = [];
@@ -410,6 +418,19 @@ export const GraphModel = TileContentModel
     },
     setInteractionInProgress(value: boolean) {
       self.interactionInProgress = value;
+    },
+    setAnnotationLocation(id: string, location: Point|undefined, size: RectSize|undefined) {
+      if (location) {
+        self.annotationLocationCache.set(id, location);
+      } else {
+        self.annotationLocationCache.delete(id);
+      }
+
+      if (size) {
+        self.annotationSizesCache.set(id, size);
+      } else {
+        self.annotationSizesCache.delete(id);
+      }
     }
   }))
   .actions(self => ({

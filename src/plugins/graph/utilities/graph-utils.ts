@@ -226,7 +226,10 @@ export interface IMatchCirclesProps {
 
 export function matchCirclesToData(props: IMatchCirclesProps) {
   const { dataConfiguration, enableAnimation, instanceId, dotsElement } = props;
-  const allCaseData = dataConfiguration.joinedCaseDataArrays;
+  const graphModel = getParentOfType(dataConfiguration, GraphModel);
+  const xType = graphModel.attributeType("x");
+  const yType = graphModel.attributeType("y");
+  const allCaseData = dataConfiguration.getJoinedCaseDataArrays(xType, yType);
   const caseDataKeyFunc = (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.plotNum}_${d.caseID}`;
   // Create the circles
   const allCircles = selectGraphDots(dotsElement);
@@ -373,11 +376,11 @@ export function lineToAxisIntercepts(iSlope: number, iIntercept: number,
 }
 
 export function equationString(slope: number, intercept: number, attrNames: {x: string, y: string}) {
-  const float = format('.4~r');
+  const f = Intl.NumberFormat(undefined, { maximumFractionDigits: 2, useGrouping: false});
   if (isFinite(slope) && slope !== 0) {
-    return `<em>${attrNames.y}</em> = ${float(slope)} <em>${attrNames.x}</em> + ${float(intercept)}`;
+    return `<em>${attrNames.y}</em> = ${f.format(slope)} <em>${attrNames.x}</em> + ${f.format(intercept)}`;
   } else {
-    return `<em>${slope === 0 ? attrNames.y : attrNames.x}</em> = ${float(intercept)}`;
+    return `<em>${slope === 0 ? attrNames.y : attrNames.x}</em> = ${f.format(intercept)}`;
   }
 }
 

@@ -132,8 +132,6 @@ export const GraphLayerModel = types
     },
     updateAdornments(resetPoints=false) {
       const options = this.getUpdateCategoriesOptions(resetPoints);
-      // TODO: should adornments be registered on each layer?
-      // Currently storing and updating them at the Graph level:
       const graph = getParentOfType(self, GraphModel);
       if (graph) {
         graph.adornments.forEach(adornment => adornment.updateCategories(options));
