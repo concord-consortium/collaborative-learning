@@ -370,7 +370,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       // connected
       editor.addPipe((context) => {
         if (["noderemoved", "connectioncreated", "connectionremoved"].includes(context.type)) {
-          this.programEditor.process();
+          //this.programEditor.process();
           this.countSerialDataNodes(this.programEditor.getNodes() as IBaseNode[]);
         }
         return context;
