@@ -6,15 +6,35 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import { LogEventName } from "../../lib/logger-types";
 import { DocumentsModelType } from "./documents";
 import { LogMessage } from "../../lib/logger";
+import { allExemplarControllerRules } from "./exemplar-controller-rules";
+import { kDrawingTileType } from "../../plugins/drawing/model/drawing-types";
+import { kTextTileType } from "../tiles/text/text-content";
+import { countWords } from "../../utilities/string-utils";
+
+/**
+ * Information that the exemplar controller stores about specific tiles.
+ * At the moment this includes two numbers representing the level of activity, and the
+ * length of text in the tile. So far we are only tracking Text and Drawing tiles.
+ */
+export const InProgressTileModel = types
+  .model("InProgressTile", {
+    id: types.identifier,
+    type: types.string,
+    activityLevel: 0,
+    wordCount: 0
+  });
 
 // The database structure of this object is expected to change frequently as we develop
 // this feature, so keep an explicit version number to make migrations easier.
 const kExemplarControllerStateVersion = "1";
 
-export const ExemplarControllerModel = types
-  .model("ExemplarController", {
+export const BaseExemplarControllerModel = types
+  .model("BaseExemplarController", {
     version: types.optional(types.literal(kExemplarControllerStateVersion), kExemplarControllerStateVersion),
-    drawingActions: 0
+    // Store separate maps of tiles that have already been "used" to open up
+    // a new exemplar, and those that have not.
+    completeTiles: types.map(InProgressTileModel),
+    inProgressTiles: types.map(InProgressTileModel)
   })
   .volatile((self) => ({
     documentsStore: undefined as DocumentsModelType | undefined,
@@ -58,19 +78,35 @@ export const ExemplarControllerModel = types
         self.setExemplarVisibility(key, false);
       }
     },
+    showRandomExemplar() {
+      const chosen = _.sample(self.documentsStore?.invisibleExemplarDocuments);
+      if (chosen) {
+        self.setExemplarVisibility(chosen.key, true);
+      }
+    }
+  }));
+
+export const ExemplarControllerModel = BaseExemplarControllerModel
+  .actions((self) => ({
     /**
      * Makes any appropriate changes to exemplars based on the current state.
      * This should be called after any state changes that may require action.
      */
-    updateExemplars() {
-      // At the moment we only have one rule: after 3 drawing actions are recorded, reveal a random exemplar.
-      if (self.drawingActions >= 3) {
-        const chosen = _.sample(self.documentsStore?.invisibleExemplarDocuments);
-        if (chosen) {
-          self.setExemplarVisibility(chosen.key, true);
+    runAllRules() {
+      for (const rule of allExemplarControllerRules) {
+        const result = rule.test(self);
+        if (result) {
+          self.showRandomExemplar();
+          rule.reset(self, result);
         }
-        self.drawingActions = 0;
       }
+    },
+    getOrCreateInProgressTile(id: string, type: string) {
+      let tile = self.inProgressTiles.get(id);
+      if (!tile) {
+        tile = self.inProgressTiles.put({ id, type });
+      }
+      return tile;
     }
   }))
   .actions((self) => ({
@@ -80,19 +116,61 @@ export const ExemplarControllerModel = types
      */
     processLogMessage(logMessage: LogMessage) {
       let needsUpdate = false;
-      // At the moment we are only looking at one type of event: adding an object in a Draw tile.
-      if (logMessage.event === LogEventName[LogEventName.DRAWING_TOOL_CHANGE]) {
+
+      // Text tiles
+      if (logMessage.event === LogEventName[LogEventName.TEXT_TOOL_CHANGE]) {
+        // For text tiles, track the current number of words in the tile.
+        const tileId = logMessage.parameters.tileId;
+        if (self.completeTiles.has(tileId)) {
+          // Don't need to update status on tiles that are 'completed'
+          return;
+        }
         const operation = logMessage.parameters?.operation;
-        if (typeof operation === "string"
-            && ["addObject", "addAndSelectObject", "duplicateObjects"].includes(operation)) {
-          self.drawingActions ++;
-          needsUpdate = true;
+        if (_.isString(operation) && operation === "update") {
+          const tile = self.getOrCreateInProgressTile(tileId, kTextTileType);
+          const wordCount = logMessage.parameters?.wordCount;
+          if (wordCount && wordCount !== tile.wordCount) {
+            tile.wordCount = wordCount;
+            needsUpdate = true;
+          }
         }
       }
+
+      if (logMessage.event === LogEventName[LogEventName.DRAWING_TOOL_CHANGE]) {
+        // For drawing tile, "activityLevel" counts the number of objects that the user has added.
+        // WordCount tracks the content of the longest 'text' object in the drawing.
+        const tileId = logMessage.parameters.tileId;
+        if (self.completeTiles.has(tileId)) {
+          return;
+        }
+        const operation = logMessage.parameters?.operation;
+        if (_.isString(operation)
+            && ["setText", "addObject", "addAndSelectObject", "duplicateObjects"].includes(operation)) {
+          const tile = self.getOrCreateInProgressTile(tileId, kDrawingTileType);
+
+          if (operation === "setText") {
+            const args = logMessage.parameters?.args;
+            if (args && _.isArray(args) && args.length > 0) {
+              const words = countWords(args[0]);
+              if (words > tile.wordCount) {
+                tile.wordCount = words;
+                needsUpdate = true;
+              }
+            }
+          } else {
+            // Add or duplicate object operation
+            tile.activityLevel ++;
+            needsUpdate = true;
+          }
+        }
+      }
+
       if (needsUpdate) {
-        self.updateExemplars();
+        self.runAllRules();
       }
     }
-}));
+  }));
+
+export type BaseExemplarControllerModelType = typeof BaseExemplarControllerModel.Type;
 
 export type ExemplarControllerModelType = typeof ExemplarControllerModel.Type;

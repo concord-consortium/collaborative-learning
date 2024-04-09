@@ -16,6 +16,7 @@ import { createTextPluginInstances, ITextPlugin } from "../../../models/tiles/te
 import { LogEventName } from "../../../lib/logger-types";
 import { TextPluginsContext } from "./text-plugins-context";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
+import { countWords } from "../../../utilities/string-utils";
 
 import "./toolbar/text-toolbar-registration";
 import "./text-tile.sass";
@@ -250,8 +251,14 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     // If the text has changed since the editor was focused, log the new text.
     const text = this.getContent().text;
     if (text !== this.textOnFocus) {
+      const plainText = this.getContent().asPlainText();
+      const wordCount = countWords(plainText);
       const change = {args:[{ text }]};
-      logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, { operation: 'update', change, tileId: this.props.model.id });
+      logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, {
+        operation: 'update',
+        change,
+        wordCount,
+        tileId: this.props.model.id });
     }
     this.setState({ revision: this.state.revision + 1 }); // Force a rerender
   };
