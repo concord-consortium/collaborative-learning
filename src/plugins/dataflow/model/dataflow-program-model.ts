@@ -10,6 +10,7 @@ import { SensorNodeModel } from "../nodes/sensor-node";
 import { NodeType, NodeTypes } from "./utilities/node";
 import { TransformNodeModel } from "../nodes/transform-node";
 import { TimerNodeModel } from "../nodes/timer-node";
+import { ControlNodeModel } from "../nodes/control-node";
 
 export const ConnectionModel = types
   .model("Connection", {
@@ -28,6 +29,7 @@ export const DataflowNodeModel = types.
     x: types.number,
     y: types.number,
     data: types.union(
+      ControlNodeModel,
       CounterNodeModel,
       DemoOutputNodeModel,
       GeneratorNodeModel,

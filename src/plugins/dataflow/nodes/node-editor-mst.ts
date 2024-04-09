@@ -24,6 +24,7 @@ import { IStores } from "../../../models/stores/stores";
 import { SensorNode } from "./sensor-node";
 import { TransformNode } from "./transform-node";
 import { TimerNode } from "./timer-node";
+import { ControlNode } from "./control-node";
 
 export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices {
   private reteNodesMap: Record<string, Schemes['Node']> = {};
@@ -174,6 +175,7 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
   private createReteNodeFromNodeModel(id: string, model: IBaseNodeModel) {
     const nodeTypes: Record<string, NodeClass> =
     {
+      "Control": ControlNode,
       "Counter": CounterNode,
       "Demo Output": DemoOutputNode,
       "Generator": GeneratorNode,

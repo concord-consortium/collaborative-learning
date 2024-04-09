@@ -284,7 +284,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDeleteNodeButton(logicNode).click();
     dataflowToolTile.getNode(logicNode).should("not.exist");
   });
-  it("Transform and Control Nodes", () => {
+  it.only("Transform and Control Nodes", () => {
     const transformNode = "transform";
     beforeTest();
     clueCanvas.addTile("dataflow");
@@ -321,40 +321,40 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDeleteNodeButton(transformNode).click();
     dataflowToolTile.getNode(transformNode).should("not.exist");
 
-    // cy.log("Control Node");
-    // const controlNode = "control";
+    cy.log("Control Node");
+    const controlNode = "control";
 
-    // cy.log("can create control node");
-    // dataflowToolTile.getCreateNodeButton(controlNode).click();
-    // dataflowToolTile.getNode(controlNode).should("exist");
-    // dataflowToolTile.getNodeTitle().should("contain", "Hold");
+    cy.log("can create control node");
+    dataflowToolTile.getCreateNodeButton(controlNode).click();
+    dataflowToolTile.getNode(controlNode).should("exist");
+    dataflowToolTile.getNodeTitle().should("contain", "Hold");
 
-    // cy.log("can toggle minigraph");
-    // dataflowToolTile.getShowGraphButton(controlNode).click();
-    // dataflowToolTile.getMinigraph(controlNode).should("exist");
-    // dataflowToolTile.getShowGraphButton(controlNode).click();
-    // dataflowToolTile.getMinigraph(controlNode).should("not.exist");
+    cy.log("can toggle minigraph");
+    dataflowToolTile.getShowGraphButton(controlNode).click();
+    dataflowToolTile.getMinigraph(controlNode).should("exist");
+    dataflowToolTile.getShowGraphButton(controlNode).click();
+    dataflowToolTile.getMinigraph(controlNode).should("not.exist");
 
-    // cy.log("verify control operator types");
-    // const controlOperator = "controlOperator";
-    // const controlOperatorDisplayNames = ["Hold this", "Hold previous", "Hold 0"];
-    // dataflowToolTile.getDropdown(controlNode, controlOperator).click();
-    // dataflowToolTile.getDropdownOptions(controlNode, controlOperator).should("have.length", 3);
-    // dataflowToolTile.getDropdownOptions(controlNode, controlOperator).each(($tab, index, $typeList) => {
-    //   expect($tab.text()).to.contain(controlOperatorDisplayNames[index]);
-    // });
-    // dataflowToolTile.getDropdownOptions(controlNode, controlOperator).last().click();
-    // dataflowToolTile.getDropdownOptions(controlNode, controlOperator).should("have.length", 0);
-    // dataflowToolTile.getDropdown(controlNode, controlOperator).contains("Hold 0").should("exist");
+    cy.log("verify control operator types");
+    const controlOperator = "controlOperator";
+    const controlOperatorDisplayNames = ["Hold this", "Hold previous", "Hold 0"];
+    dataflowToolTile.getDropdown(controlNode, controlOperator).click();
+    dataflowToolTile.getDropdownOptions(controlNode, controlOperator).should("have.length", 3);
+    dataflowToolTile.getDropdownOptions(controlNode, controlOperator).each(($tab, index, $typeList) => {
+      expect($tab.text()).to.contain(controlOperatorDisplayNames[index]);
+    });
+    dataflowToolTile.getDropdownOptions(controlNode, controlOperator).last().click();
+    dataflowToolTile.getDropdownOptions(controlNode, controlOperator).should("have.length", 0);
+    dataflowToolTile.getDropdown(controlNode, controlOperator).contains("Hold 0").should("exist");
 
-    // cy.log("verify node inputs outputs");
-    // dataflowToolTile.getNodeInput().should("exist");
-    // dataflowToolTile.getNodeInput().should('have.length', 2);
-    // dataflowToolTile.getNodeOutput().should("exist");
+    cy.log("verify node inputs outputs");
+    dataflowToolTile.getNodeInput().should("exist");
+    dataflowToolTile.getNodeInput().should('have.length', 2);
+    dataflowToolTile.getNodeOutput().should("exist");
 
-    // cy.log("can delete control node");
-    // dataflowToolTile.getDeleteNodeButton(controlNode).click();
-    // dataflowToolTile.getNode(controlNode).should("not.exist");
+    cy.log("can delete control node");
+    dataflowToolTile.getDeleteNodeButton(controlNode).click();
+    dataflowToolTile.getNode(controlNode).should("not.exist");
   });
   it("Demo Output and Live Output Nodes", () => {
     const demoOutputNode = "demo-output";
@@ -507,7 +507,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDeleteNodeButton(liveOutputNode).click();
     dataflowToolTile.getNode(liveOutputNode).should("not.exist");
   });
-  it.only("Sensor Node and Record Data", () => {
+  it("Sensor Node and Record Data", () => {
     const sensorNode = "sensor";
     beforeTest();
     clueCanvas.addTile("dataflow");
