@@ -141,6 +141,5 @@ export function getNodeDataEncoded(node: Node) {
   const coreString = `&nodeTypeName=${node.name}`; // &id=${node.id}`;
   const fieldsString = fields.join("&");
   const finalEncoded = `${coreString}&${fieldsString}`;
-  //console.log("| finalEncoded", finalEncoded);
   return finalEncoded;
 }

@@ -37,8 +37,6 @@ export const SimulatorContentModel = TileContentModel
     get sharedModel() {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       const sharedModels = sharedModelManager?.getTileSharedModels(self);
-
-      console.log("| SIM sees what sharedModels at this point? ", sharedModels);
       const sharedVariables =
         sharedModels?.filter((sharedModel: SharedModelType) => sharedModel.type === kSharedVariablesID);
       // We're assuming we want the first SharedVariable associated with this tile.
