@@ -673,7 +673,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateSharedProgramData = () => {
-    console.log("| > Updating shared program data");
+    console.log("|> Updating shared program data");
   };
 
   private countSerialDataNodes(nodes: Node[]){
