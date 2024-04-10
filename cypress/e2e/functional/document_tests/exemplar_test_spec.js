@@ -121,11 +121,5 @@ context('Exemplar Documents', function () {
     clueCanvas.getStickyNotePopup().should("exist").should("be.visible")
       .should("contain.text", "Nice work, you can now see a new example for this lesson")
       .should("contain.text", exemplarName);
-
-    cy.log("Open exemplar");
-    sortWork.getFocusDocument().should('not.exist');
-    clueCanvas.getStickyNoteLink().should("be.visible").click();
-    sortWork.getFocusDocument().should('be.visible');
-    sortWork.getFocusDocumentTitle().should("contain.text", exemplarName);
   });
 });

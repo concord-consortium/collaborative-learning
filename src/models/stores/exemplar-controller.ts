@@ -74,6 +74,7 @@ export const BaseExemplarControllerModel = types
       if (chosen) {
         self.setExemplarVisibility(chosen.key, true);
       }
+      return chosen;
     },
     /**
      * Moves our records of the tiles from the 'inProgress' map to the 'complete' map.
@@ -102,12 +103,16 @@ export const ExemplarControllerModel = BaseExemplarControllerModel
         if (result) {
           const chosen = self.showRandomExemplar();
           rule.reset(self, result);
-          logExemplarDocumentEvent(LogEventName.EXEMPLAR_VISIBILITY_UPDATE,
-            { document: chosen,
-              visibleToUser: true,
-              changeSource: "rule",
-              rule: rule.name
-            });        }
+          if (chosen) {
+            logExemplarDocumentEvent(LogEventName.EXEMPLAR_VISIBILITY_UPDATE,
+              {
+                document: chosen,
+                visibleToUser: true,
+                changeSource: "rule",
+                rule: rule.name
+              });
+          }
+        }
       }
     },
     getOrCreateInProgressTile(id: string, type: string) {
