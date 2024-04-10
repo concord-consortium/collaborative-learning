@@ -13,10 +13,7 @@ import { DataflowContentModelType } from "../model/dataflow-content";
 import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { TileTitleArea } from "../../../components/tiles/tile-title-area";
-import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button";
 import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
-import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
-import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 
 import "../dataflow-toolbar-registration";
@@ -63,7 +60,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       <>
         <TileTitleArea>
           {this.renderTitle()}
-          {this.renderTableLinkButton()}
         </TileTitleArea>
         <div className={classes}>
           <SizeMe monitorHeight={true}>
@@ -140,36 +136,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       />
     );
   }
-
-  private renderTableLinkButton() {
-    const { model, documentId } = this.props;
-    const documentContent = getDocumentContentFromNode(model);
-    const linkableTiles = documentContent?.getLinkableTiles();
-    const isLinkButtonEnabled = linkableTiles && linkableTiles.consumers.length > 0;
-    const actionHandlers = {
-                             handleRequestTableLink: this.handleRequestTableLink,
-                             handleRequestTableUnlink: this.handleRequestTableUnlink
-                           };
-
-    return (!this.state.isEditingTitle && !this.props.readOnly &&
-      <DataflowLinkTableButton
-        key="link-button"
-        isLinkButtonEnabled={isLinkButtonEnabled}
-        //use in useTableLinking
-        documentId={documentId}
-        model={model}
-        actionHandlers={actionHandlers}
-      />
-    );
-  }
-
-  private handleRequestTableLink = (tileInfo: ITileLinkMetadata) => {
-    this.getContent().addLinkedTile(tileInfo.id);
-  };
-
-  private handleRequestTableUnlink = (tileInfo: ITileLinkMetadata) => {
-    this.getContent().removeLinkedTable(tileInfo.id);
-  };
 
   private handleProgramChange = (program: any) => {
     this.getContent().setProgram(program);
