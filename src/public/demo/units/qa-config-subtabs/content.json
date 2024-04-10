@@ -7,6 +7,7 @@
   "config": {
     "placeholderText": "This is where users can type text",
     "defaultDocumentType": "problem",
+    "initiallyHideExemplars": true,
     "settings": {
       "table": {
         "numFormat": ".2~f"

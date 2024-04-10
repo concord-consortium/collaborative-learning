@@ -43,6 +43,7 @@ export const DocumentsModel = types
     userContextProvider: undefined as UserContextProvider | undefined,
     firestore: undefined as Firestore | undefined,
     requiredDocuments: {} as Record<string, IRequiredDocumentPromise>,
+    visibleExemplars: observable(new Set<string>()),
     all: observable<DocumentModelType>([])
   }))
   .views(self => ({
@@ -58,6 +59,10 @@ export const DocumentsModel = types
       return self.all.filter((document) => {
         return (document.type === type) && (document.uid === userId);
       });
+    },
+
+    isExemplarVisible(exemplarId: string) {
+      return self.visibleExemplars.has(exemplarId);
     }
   }))
   .views(self => ({
@@ -175,6 +180,13 @@ export const DocumentsModel = types
     },
     setFirestore(firestore: Firestore) {
       self.firestore = firestore;
+    },
+    setExemplarVisible(exemplarId: string, visible: boolean) {
+      if (visible) {
+        self.visibleExemplars.add(exemplarId);
+      } else {
+        self.visibleExemplars.delete(exemplarId);
+      }
     }
 
   }))

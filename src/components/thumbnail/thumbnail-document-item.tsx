@@ -31,7 +31,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
   } = props;
   const selectedClass = isSelected ? "selected" : "";
   const appMode = useAppMode();
-  const { bookmarks, user } = useStores();
+  const { bookmarks, user, documents } = useStores();
   const classStore = useClassStore();
 
   const handleDocumentClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -60,7 +60,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
 
   const label = DEBUG_BOOKMARKS ? bookmarks.getBookmarkLabel(document.key, user.id, classStore) : "";
 
-  const isPrivate = !document.isAccessibleToUser(user);
+  const isPrivate = !document.isAccessibleToUser(user, documents);
   const privateClass = isPrivate ? "private" : "";
   const documentTitle = appMode !== "authed" && appMode !== "demo"
                           ? `Firebase UID: ${document.key}` : undefined;

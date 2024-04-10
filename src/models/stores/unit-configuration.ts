@@ -77,6 +77,8 @@ export interface UnitConfiguration extends ProblemConfiguration {
   showPublishedDocsInPrimaryWorkspace: boolean;
   // comparison view placeholder content
   comparisonPlaceholderContent: string | string[];
+  // Whether exemplars are hidden from students by default, becoming visible based on conditions
+  initiallyHideExemplars: boolean;
   // configuration of navigation tabs (document navigation UI)
   navTabs: SnapshotIn<typeof NavTabsConfigModel>;
   // used for AI tagging

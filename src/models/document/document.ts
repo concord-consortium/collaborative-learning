@@ -4,6 +4,7 @@ import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
 import { IDocumentAddTileOptions } from "./document-content-types";
 import { DocumentTypeEnum, IDocumentContext, ISetProperties,
+  isExemplarType,
   LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
   PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
@@ -31,6 +32,10 @@ export enum ContentStatus {
   Valid,
   Error
 }
+
+type IExemplarVisibilityProvider = {
+  isExemplarVisible: (id: string) => boolean;
+};
 
 export const DocumentModel = Tree.named("Document")
   .props({
@@ -151,11 +156,14 @@ export const DocumentModel = Tree.named("Document")
     getUniqueTitleForType(tileType: string) {
       return self.content?.getUniqueTitleForType(tileType);
     },
-    isAccessibleToUser(user: UserModelType) {
+    isAccessibleToUser(user: UserModelType, documentStore: IExemplarVisibilityProvider) {
       const ownDocument = self.uid === user.id;
       const isShared = self.visibility === "public";
       if (user.type === "teacher") return true;
-      if (user.type === "student") return ownDocument || isShared || self.isPublished;
+      if (user.type === "student") {
+        return ownDocument || isShared || self.isPublished
+               || (isExemplarType(self.type) && documentStore.isExemplarVisible(self.key));
+      }
       return false;
     }
   }))
