@@ -47,6 +47,9 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
 
     this.area = new AreaPlugin<Schemes, AreaExtra>(div);
 
+    // Disable the zoom handler which zooms on wheel and double click
+    this.area.area.setZoomHandler(null);
+
     AreaExtensions.selectableNodes(this.area, AreaExtensions.selector(), {
       accumulating: AreaExtensions.accumulateOnCtrl()
     });

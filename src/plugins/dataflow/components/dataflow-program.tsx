@@ -620,11 +620,18 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private zoomIn = () => {
+    const { k } = this.programEditor.area.area.transform;
+    this.setZoom(Math.min(MAX_ZOOM, k + .05));
   };
 
   private zoomOut = () => {
+    const { k } = this.programEditor.area.area.transform;
+    this.setZoom(Math.max(MIN_ZOOM, k - .05));
   };
 
-  private setZoom = (zoom: number) => {
+  private setZoom = async (zoom: number) => {
+    await this.programEditor.area.area.zoom(zoom);
+    const { transform } = this.programEditor.area.area;
+    this.props.onZoomChange(transform.x, transform.y, transform.k);
   };
 }

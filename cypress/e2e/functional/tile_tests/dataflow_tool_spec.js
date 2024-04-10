@@ -77,15 +77,15 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNodeInput().should("not.exist");
     dataflowToolTile.getNodeOutput().should("exist");
 
-    // cy.log("verify zoom in & out");
-    // dataflowToolTile.getFlowtool().children().invoke("attr", "style").then(scale => {
-    //   dataflowToolTile.getZoomInButton().click();
-    //   dataflowToolTile.verifyZoomIn(scale);
-    // });
-    // dataflowToolTile.getFlowtool().children().invoke("attr", "style").then(scale => {
-    //   dataflowToolTile.getZoomOutButton().click();
-    //   dataflowToolTile.verifyZoomOut(scale);
-    // });
+    cy.log("verify zoom in & out");
+    dataflowToolTile.getFlowtool().children().invoke("attr", "style").then(scale => {
+      dataflowToolTile.getZoomInButton().click();
+      dataflowToolTile.verifyZoomIn(scale);
+    });
+    dataflowToolTile.getFlowtool().children().invoke("attr", "style").then(scale => {
+      dataflowToolTile.getZoomOutButton().click();
+      dataflowToolTile.verifyZoomOut(scale);
+    });
 
     cy.log("can delete number node");
     dataflowToolTile.getDeleteNodeButton(numberNode).click();
@@ -284,7 +284,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDeleteNodeButton(logicNode).click();
     dataflowToolTile.getNode(logicNode).should("not.exist");
   });
-  it.only("Transform and Control Nodes", () => {
+  it("Transform and Control Nodes", () => {
     const transformNode = "transform";
     beforeTest();
     clueCanvas.addTile("dataflow");
