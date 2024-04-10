@@ -1,5 +1,5 @@
-import { types, Instance, applySnapshot, getSnapshot, addDisposer } from "mobx-state-tree";
-import { reaction } from "mobx";
+import { types, Instance, applySnapshot, getSnapshot, addDisposer, onSnapshot } from "mobx-state-tree";
+import { autorun, reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
@@ -21,6 +21,7 @@ import { DataSet, addAttributeToDataSet } from "../../../models/data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
 import { getTileModel } from "../../../models/tiles/tile-model";
+import { SharedProgramData } from "./shared-program-data";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -74,6 +75,14 @@ export const DataflowContentModel = TileContentModel
       if (!firstSharedVariables) return undefined;
       return firstSharedVariables as SharedVariablesType;
     },
+    // get shareableProgramData(){
+    //   // WIP: if this works we probaly don't want, all of it
+    //   return {
+    //     progam: self.program,
+    //     nodes: self.program.nodes,
+    //     values: self.program.values,
+    //   };
+    // },
     programWithoutRecentValues() {
       const { values, ...rest } = getSnapshot(self.program);
       const castedValues = values as Record<string, any>;
@@ -192,6 +201,7 @@ export const DataflowContentModel = TileContentModel
   .actions(self => ({
     afterAttach() { //
       addDisposer(self, reaction(() => {
+        console.log("| 🤔 1 | reaction of change to existing shared model tests?");
         const sharedModelManager = self.tileEnv?.sharedModelManager;
         const sharedDataSet = sharedModelManager?.isReady
           ? sharedModelManager?.findFirstSharedModelByType(SharedDataSet, self.metadata.id)
@@ -205,12 +215,15 @@ export const DataflowContentModel = TileContentModel
           ? sharedModelManager?.getTileSharedModels(self)
           : undefined;
 
-        return { sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels };
+        const sharedProgramData = sharedModelManager?.isReady
+          ? sharedModelManager?.findFirstSharedModelByType(SharedProgramData)
+          : undefined;
+
+        return { sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels, sharedProgramData };
       },
-      ({sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels}) => {
-        if (!sharedModelManager?.isReady) {
-          return;
-        }
+      ({sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels, sharedProgramData}) => {
+        console.log("| 🤔 2 | effect of change to existing shared model changes");
+        if (!sharedModelManager?.isReady) return;
 
         if (!sharedDataSet) {
           const tileModel = getTileModel(self);
@@ -228,13 +241,42 @@ export const DataflowContentModel = TileContentModel
           sharedModelManager.addTileSharedModel(self, sharedVariables);
         }
 
+        // we need a sharedProgramData model, and we creare it if it doesn't exist
+        if (!sharedProgramData) {
+          const programData = SharedProgramData.create();
+          sharedModelManager.addTileSharedModel(self, programData);
+        }
+
         // update the colors
         const dataSets = sharedModelManager.getSharedModelsByType(kSharedDataSetType) as SharedDataSetType[];
         updateSharedDataSetColors(dataSets);
       },
       {name: "sharedModelSetup", fireImmediately: true}));
+      // Three failed attempts to observe/react to changes to program from this vantage point
+      // leaving in place for future fix/implementation
+      addDisposer(self, autorun(() => {
+        const programStringified = JSON.stringify(self.program);
+        console.log("| 🤔 3 | autorun on stringfied? ",
+          "\n   programStringified:", {programStringified},
+          "\n   actual model:", self.program
+        );
+      }));
+      addDisposer(self, autorun(() => {
+        const programSnapshot = getSnapshot(self.program);
+        console.log("| 🤔 4 | autorun on snapshot? ",
+          "\n   programSnapshot:", {programSnapshot},
+          "\n   actual model:", self.program
+        );
+      }));
+      addDisposer(self, onSnapshot(self.program.nodes, (snapshot) => {
+        console.log("| 🤔 5 | onSnapshot? ",
+          "\n   programSnapshot:", {snapshot},
+          "\n   actual model:", self.program
+        );
+      }));
     },
     setProgram(program: any) {
+      console.log("| 🤔 4 |  setProgram?", program);
       if (program) {
         applySnapshot(self.program, cloneDeep(program));
       }

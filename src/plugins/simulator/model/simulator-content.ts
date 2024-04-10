@@ -52,6 +52,12 @@ export const SimulatorContentModel = TileContentModel
         self.simulation = defaultSimulation as string ?? defaultSimulationKey;
       }
       return simulations[self.simulation];
+    },
+    get sharedProgramData() { // WIP: This is a placeholder for the shared program data view
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const sharedModels = sharedModelManager?.getTileSharedModels(self);
+      return "hi";
+      // return sharedModels?.filter((sharedModel: SharedModelType) => sharedModel.type === "SharedProgramData"))[0] as SharedProgramData;
     }
   }))
   .views(self => ({
