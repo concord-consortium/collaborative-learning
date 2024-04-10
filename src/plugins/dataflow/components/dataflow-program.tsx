@@ -668,6 +668,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         updateRecordIndex(UpdateMode.Reset);
         break;
     }
+
+    this.updateSharedProgramData();
+  };
+
+  private updateSharedProgramData = () => {
+    console.log("| > Updating shared program data");
   };
 
   private countSerialDataNodes(nodes: Node[]){
