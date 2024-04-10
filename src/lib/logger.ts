@@ -55,6 +55,8 @@ interface PendingMessage {
   method?: LogEventMethod;
 }
 
+type ILogListener = (logMessage: LogMessage) => void;
+
 export class Logger {
   public static isLoggingEnabled = false;
   private static _instance: Logger;
@@ -108,6 +110,7 @@ export class Logger {
   private stores: IStores;
   private appContext: Record<string, any> = {};
   private session: string;
+  private logListeners: ILogListener[] = [];
 
   private constructor(stores: IStores, appContext = {}) {
     this.stores = stores;
@@ -115,13 +118,18 @@ export class Logger {
     this.session = uuid();
   }
 
+  public registerLogListener(listener: ILogListener) {
+    this.logListeners.push(listener);
+  }
+
   private formatAndSend(time: number,
       event: LogEventName, parameters?: Record<string, unknown>, method?: LogEventMethod) {
     const eventString = LogEventName[event];
     const logMessage = this.createLogMessage(time, eventString, parameters, method);
     sendToLoggingService(logMessage, this.stores.user);
-    // Log messages are also shared with the ExemplarController
-    this.stores.exemplarController.processLogMessage(logMessage);
+    for (const listener of this.logListeners) {
+      listener(logMessage);
+    }
   }
 
   private createLogMessage(

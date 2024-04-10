@@ -1,11 +1,11 @@
-import { applySnapshot, types, onSnapshot } from "mobx-state-tree";
+import { applySnapshot, types, onSnapshot, detach } from "mobx-state-tree";
 import _ from "lodash";
 import { UserModelType } from "./user";
 import { DB } from "../../lib/db";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { LogEventName } from "../../lib/logger-types";
 import { DocumentsModelType } from "./documents";
-import { LogMessage } from "../../lib/logger";
+import { Logger, LogMessage } from "../../lib/logger";
 import { allExemplarControllerRules } from "./exemplar-controller-rules";
 import { kDrawingTileType } from "../../plugins/drawing/model/drawing-types";
 import { kTextTileType } from "../tiles/text/text-content";
@@ -42,24 +42,6 @@ export const BaseExemplarControllerModel = types
     firebasePath: undefined as string|undefined
   }))
   .actions((self) => ({
-    async initialize(user: UserModelType, db: DB) {
-      self.db = db;
-      self.documentsStore = db.stores.documents;
-      self.firebasePath = db.firebase.getUserExemplarsPath(user);
-      const statePath = db.firebase.getExemplarStatePath(user);
-      const stateRef = db.firebase.ref(statePath);
-      const stateVal = (await stateRef.once("value"))?.val();
-      const state = safeJsonParse(stateVal);
-      if (state) {
-        applySnapshot(self, state);
-      }
-
-      onSnapshot(self, (snapshot)=>{
-        const snapshotStr = JSON.stringify(snapshot);
-        const updateRef = db.firebase.ref(statePath);
-        updateRef.set(snapshotStr);
-      });
-    },
     /**
      * Writes to the database to indicate whether the current user has access to the given exemplar.
      */
@@ -82,6 +64,19 @@ export const BaseExemplarControllerModel = types
       const chosen = _.sample(self.documentsStore?.invisibleExemplarDocuments);
       if (chosen) {
         self.setExemplarVisibility(chosen.key, true);
+      }
+    },
+    /**
+     * Moves our records of the tiles from the 'inProgress' map to the 'complete' map.
+     * @param keys
+     */
+    markTilesComplete(keys: string[]) {
+      for (const key of keys) {
+        const tile = self.inProgressTiles.get(key);
+        if (tile) {
+          detach(tile);
+          self.completeTiles.put(tile);
+        }
       }
     }
   }));
@@ -168,6 +163,27 @@ export const ExemplarControllerModel = BaseExemplarControllerModel
       if (needsUpdate) {
         self.runAllRules();
       }
+    }
+  }))
+  .actions(self => ({
+    async initialize(user: UserModelType, db: DB) {
+      self.db = db;
+      self.documentsStore = db.stores.documents;
+      self.firebasePath = db.firebase.getUserExemplarsPath(user);
+      const statePath = db.firebase.getExemplarStatePath(user);
+      const stateRef = db.firebase.ref(statePath);
+      const stateVal = (await stateRef.once("value"))?.val();
+      const state = safeJsonParse(stateVal);
+      if (state) {
+        applySnapshot(self, state);
+      }
+      Logger.Instance.registerLogListener(self.processLogMessage);
+
+      onSnapshot(self, (snapshot)=>{
+        const snapshotStr = JSON.stringify(snapshot);
+        const updateRef = db.firebase.ref(statePath);
+        updateRef.set(snapshotStr);
+      });
     }
   }));
 

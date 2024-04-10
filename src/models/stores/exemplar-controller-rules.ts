@@ -1,4 +1,3 @@
-import { detach } from "@concord-consortium/mobx-state-tree";
 import { kDrawingTileType } from "../../plugins/drawing/model/drawing-types";
 import { kTextTileType } from "../tiles/text/text-content";
 import { BaseExemplarControllerModelType } from "./exemplar-controller";
@@ -53,14 +52,7 @@ const threeDrawingsRule: IExemplarControllerRule = {
     return false;
   },
   reset: (model: BaseExemplarControllerModelType, tiles: string[]) => {
-    // Move tiles into the "complete" list.
-    for (const key of tiles) {
-      const tile = model.inProgressTiles.get(key);
-      if (tile) {
-        detach(tile);
-        model.completeTiles.put(tile);
-      }
-    }
+    model.markTilesComplete(tiles);
   }
 };
 

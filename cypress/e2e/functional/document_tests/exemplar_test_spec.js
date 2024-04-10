@@ -79,7 +79,7 @@ context('Exemplar Documents', function () {
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
   });
 
-  it.only('Exemplar revealed by 3 drawings that include labels', function () {
+  it('Exemplar revealed by 3 drawings that include labels', function () {
     beforeTest(queryParams1);
     cy.openTopTab('sort-work');
     sortWork.checkDocumentInGroup("No Group", exemplarName);

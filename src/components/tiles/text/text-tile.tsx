@@ -257,6 +257,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, {
         operation: 'update',
         change,
+        plainText,
         wordCount,
         tileId: this.props.model.id });
     }
