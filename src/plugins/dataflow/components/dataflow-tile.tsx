@@ -17,7 +17,9 @@ import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button
 import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
 import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
+import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 
+import "../dataflow-toolbar-registration";
 import "./dataflow-tile.scss";
 
 interface IProps extends ITileProps{
@@ -96,6 +98,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
               );
             }}
           </SizeMe>
+          <TileToolbar tileType="dataflow" readOnly={!!readOnly} tileElement={this.props.tileElt} />
         </div>
       </>
     );
