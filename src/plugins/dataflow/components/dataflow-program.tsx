@@ -357,13 +357,18 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       connection.addPreset(ConnectionPresets.classic.setup());
 
       editor.use(area);
+      // Because these connection and render plugins are added before the notifyAboutExistingObjects,
+      // there is a flash as the nodes move into place. The plugins can't be added afterwards because
+      // they don't look at the existing nodes when they are added. We might have to modify Rete to
+      // remove this flash
       area.use(connection);
       area.use(render);
 
       AreaExtensions.simpleNodesOrder(area);
 
       // Notify after the area, connection, and render plugins have been configured
-      editor.notifyAboutExistingObjects();
+      await editor.notifyAboutExistingObjects();
+
 
       // Reprocess when connections are changed
       // And also count the serial nodes some of which only get counted if they are
@@ -376,14 +381,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         return context;
       });
 
-      // area.nodeViews
-      // await area.translate(a.id, { x: 0, y: 0 });
-      // await area.translate(b.id, { x: 270, y: 0 });
-
-
       setTimeout(() => {
-        // wait until nodes rendered because they dont have predefined width and height
-        AreaExtensions.zoomAt(area, editor.getNodes());
+        // The zoomAt call was centering the origin of the dataflow canvas.
+        // This messes up the default node placement, and would likely mess up saved state.
+        // By removing this, we aren't going to be automatically making sure all of the nodes are visible
+        // AreaExtensions.zoomAt(area, editor.getNodes());
+
+        // In our Rete v1 implementation the origin always started at the top left of the component.
+        // When a user translated the canvas this translation was saved in the file, but
+        // it seems like it is just ignored when the program is loaded back in again.
 
         // This is needed to initialize things like the value control's sentence
         // It was having problems when called earlier

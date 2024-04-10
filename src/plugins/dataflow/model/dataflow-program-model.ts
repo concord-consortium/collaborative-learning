@@ -42,6 +42,12 @@ export const DataflowNodeModel = types.
       TransformNodeModel,
     )
   })
+  .actions(self => ({
+    setPosition(position: {x: number, y: number}) {
+      self.x = position.x;
+      self.y = position.y;
+    }
+  }))
   .preProcessSnapshot((snapshot: any) => {
     // Turn position into x and y because MST has weird issues with arrays
     if (Array.isArray(snapshot.position)) {
