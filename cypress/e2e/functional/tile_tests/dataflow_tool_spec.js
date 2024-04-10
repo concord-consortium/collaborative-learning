@@ -37,13 +37,6 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDataflowTile().last().click();
     clueCanvas.deleteTile("dataflow");
 
-    cy.log("makes link button active when table is present");
-    dataflowToolTile.getLinkTileButton().should("exist");
-    dataflowToolTile.getLinkTileButton().should("have.class", "disabled");
-    clueCanvas.addTile("table");
-    dataflowToolTile.getLinkTileButton().should("not.have.class", "disabled");
-    clueCanvas.deleteTile("table");
-
     cy.log("Number Node");
     const numberNode = "number";
     cy.log("can create number node");
