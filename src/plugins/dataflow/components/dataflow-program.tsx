@@ -44,6 +44,7 @@ import { LiveOutputNode } from "../nodes/live-output-node";
 import { SensorNode } from "../nodes/sensor-node";
 import { recordCase } from "../model/utilities/recording-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
+import { SharedProgramDataType } from "../model/shared-program-data";
 
 import "./dataflow-program.sass";
 
@@ -291,6 +292,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       render.addPreset({
         render(context: any, plugin: ReactPlugin<Schemes, unknown>):
             React.ReactElement<any, string | React.JSXElementConstructor<any>> | null | undefined {
+
           if (context.data.type === 'node') {
             // We could go further than this and completely replace the whole control system
 
@@ -370,7 +372,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       // connected
       editor.addPipe((context) => {
         if (["noderemoved", "connectioncreated", "connectionremoved"].includes(context.type)) {
-          this.programEditor.process();
+          // this.programEditor.process(); // HEY: I need to do this for dev
           this.countSerialDataNodes(this.programEditor.getNodes() as IBaseNode[]);
         }
         return context;
@@ -564,6 +566,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         updateRecordIndex(UpdateMode.Reset);
         break;
     }
+    this.updateSharedProgramData();
+  };
+
+  private updateSharedProgramData = () => {
+    const nodes = this.programEditor.getNodes() as IBaseNode[];
+    const programData = JSON.parse(JSON.stringify(nodes.map(node => node.model)));
+    const sharedProgramModel = this.props.tileContent.sharedProgramData as SharedProgramDataType;
+    sharedProgramModel.setProgramNodes(programData);
   };
 
   private countSerialDataNodes(nodes: IBaseNode[]){

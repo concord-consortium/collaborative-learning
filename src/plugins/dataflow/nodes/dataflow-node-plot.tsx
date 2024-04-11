@@ -91,7 +91,7 @@ function lineData(model: IBaseNodeModel) {
   Object.keys(model.watchedValues).forEach((valueKey: string) => {
     const recentValues = model.recentValues?.get(valueKey);
     if (recentValues !== undefined) {
-      console.log("lineData", recentValues);
+      // console.log("lineData", recentValues);
       const customOptions = model.watchedValues?.[valueKey] || {};
       const dataset: ChartDataSets = {
         backgroundColor: NodePlotColor,

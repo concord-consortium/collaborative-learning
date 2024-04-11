@@ -21,7 +21,8 @@ const gTileRegistration: Record<string, () => void> = {
   "Dataflow": loggedLoad("Dataflow", () => [
     import(/* webpackChunkName: "Dataflow" */"./plugins/dataflow/dataflow-registration"),
     import(/* webpackChunkName: "SharedVariables" */"./plugins/shared-variables/shared-variables-registration"),
-    import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
+    import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration"),
+    import(/* webpackChunkName: "SharedProgramData" */"./models/shared/shared-program-data-registration")
   ]),
   "Diagram": loggedLoad("Diagram", () => [
     import(/* webpackChunkName: "Diagram" */"./plugins/diagram-viewer/diagram-registration"),
