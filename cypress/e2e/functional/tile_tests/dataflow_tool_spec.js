@@ -181,33 +181,33 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDeleteNodeButton(generatorNode).click();
     dataflowToolTile.getNode(generatorNode).should("not.exist");
 
-    // cy.log("Timer Node");
-    // const timerNode = "timer";
-    // beforeTest();
-    // clueCanvas.addTile("dataflow");
+    cy.log("Timer Node");
+    const timerNode = "timer";
+    beforeTest();
+    clueCanvas.addTile("dataflow");
 
-    // cy.log("can create timer node");
-    // dataflowToolTile.getCreateNodeButton(timerNode).click();
-    // dataflowToolTile.getNode(timerNode).should("exist");
-    // dataflowToolTile.getNodeTitle().should("contain", "Timer (on/off)");
+    cy.log("can create timer node");
+    dataflowToolTile.getCreateNodeButton(timerNode).click();
+    dataflowToolTile.getNode(timerNode).should("exist");
+    dataflowToolTile.getNodeTitle().should("contain", "Timer (on/off)");
 
-    // cy.log("timer node labels");
-    // dataflowToolTile.getLabel("On").should('contain', "time on");
-    // dataflowToolTile.getLabel("Off").should('contain', "time off");
+    cy.log("timer node labels");
+    dataflowToolTile.getLabel("On").should('contain', "time on");
+    dataflowToolTile.getLabel("Off").should('contain', "time off");
 
-    // cy.log("can toggle minigraph");
-    // dataflowToolTile.getShowGraphButton(timerNode).click();
-    // dataflowToolTile.getMinigraph(timerNode).should("exist");
-    // dataflowToolTile.getShowGraphButton(timerNode).click();
-    // dataflowToolTile.getMinigraph(timerNode).should("not.exist");
+    cy.log("can toggle minigraph");
+    dataflowToolTile.getShowGraphButton(timerNode).click();
+    dataflowToolTile.getMinigraph(timerNode).should("exist");
+    dataflowToolTile.getShowGraphButton(timerNode).click();
+    dataflowToolTile.getMinigraph(timerNode).should("not.exist");
 
-    // cy.log("verify node inputs outputs");
-    // dataflowToolTile.getNodeInput().should("not.exist");
-    // dataflowToolTile.getNodeOutput().should("exist");
+    cy.log("verify node inputs outputs");
+    dataflowToolTile.getNodeInput().should("not.exist");
+    dataflowToolTile.getNodeOutput().should("exist");
 
-    // cy.log("can delete timer node");
-    // dataflowToolTile.getDeleteNodeButton(timerNode).click();
-    // dataflowToolTile.getNode(timerNode).should("not.exist");
+    cy.log("can delete timer node");
+    dataflowToolTile.getDeleteNodeButton(timerNode).click();
+    dataflowToolTile.getNode(timerNode).should("not.exist");
   });
 
   it("Math and Logic Nodes", () => {
@@ -284,7 +284,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDeleteNodeButton(logicNode).click();
     dataflowToolTile.getNode(logicNode).should("not.exist");
   });
-  it("Transform and Control Nodes", () => {
+  it.only("Transform and Control Nodes", () => {
     const transformNode = "transform";
     beforeTest();
     clueCanvas.addTile("dataflow");
@@ -321,40 +321,40 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDeleteNodeButton(transformNode).click();
     dataflowToolTile.getNode(transformNode).should("not.exist");
 
-    // cy.log("Control Node");
-    // const controlNode = "control";
+    cy.log("Control Node");
+    const controlNode = "control";
 
-    // cy.log("can create control node");
-    // dataflowToolTile.getCreateNodeButton(controlNode).click();
-    // dataflowToolTile.getNode(controlNode).should("exist");
-    // dataflowToolTile.getNodeTitle().should("contain", "Hold");
+    cy.log("can create control node");
+    dataflowToolTile.getCreateNodeButton(controlNode).click();
+    dataflowToolTile.getNode(controlNode).should("exist");
+    dataflowToolTile.getNodeTitle().should("contain", "Hold");
 
-    // cy.log("can toggle minigraph");
-    // dataflowToolTile.getShowGraphButton(controlNode).click();
-    // dataflowToolTile.getMinigraph(controlNode).should("exist");
-    // dataflowToolTile.getShowGraphButton(controlNode).click();
-    // dataflowToolTile.getMinigraph(controlNode).should("not.exist");
+    cy.log("can toggle minigraph");
+    dataflowToolTile.getShowGraphButton(controlNode).click();
+    dataflowToolTile.getMinigraph(controlNode).should("exist");
+    dataflowToolTile.getShowGraphButton(controlNode).click();
+    dataflowToolTile.getMinigraph(controlNode).should("not.exist");
 
-    // cy.log("verify control operator types");
-    // const controlOperator = "controlOperator";
-    // const controlOperatorDisplayNames = ["Hold this", "Hold previous", "Hold 0"];
-    // dataflowToolTile.getDropdown(controlNode, controlOperator).click();
-    // dataflowToolTile.getDropdownOptions(controlNode, controlOperator).should("have.length", 3);
-    // dataflowToolTile.getDropdownOptions(controlNode, controlOperator).each(($tab, index, $typeList) => {
-    //   expect($tab.text()).to.contain(controlOperatorDisplayNames[index]);
-    // });
-    // dataflowToolTile.getDropdownOptions(controlNode, controlOperator).last().click();
-    // dataflowToolTile.getDropdownOptions(controlNode, controlOperator).should("have.length", 0);
-    // dataflowToolTile.getDropdown(controlNode, controlOperator).contains("Hold 0").should("exist");
+    cy.log("verify control operator types");
+    const controlOperator = "controlOperator";
+    const controlOperatorDisplayNames = ["Hold this", "Hold previous", "Hold 0"];
+    dataflowToolTile.getDropdown(controlNode, controlOperator).click();
+    dataflowToolTile.getDropdownOptions(controlNode, controlOperator).should("have.length", 3);
+    dataflowToolTile.getDropdownOptions(controlNode, controlOperator).each(($tab, index, $typeList) => {
+      expect($tab.text()).to.contain(controlOperatorDisplayNames[index]);
+    });
+    dataflowToolTile.getDropdownOptions(controlNode, controlOperator).last().click();
+    dataflowToolTile.getDropdownOptions(controlNode, controlOperator).should("have.length", 0);
+    dataflowToolTile.getDropdown(controlNode, controlOperator).contains("Hold 0").should("exist");
 
-    // cy.log("verify node inputs outputs");
-    // dataflowToolTile.getNodeInput().should("exist");
-    // dataflowToolTile.getNodeInput().should('have.length', 2);
-    // dataflowToolTile.getNodeOutput().should("exist");
+    cy.log("verify node inputs outputs");
+    dataflowToolTile.getNodeInput().should("exist");
+    dataflowToolTile.getNodeInput().should('have.length', 2);
+    dataflowToolTile.getNodeOutput().should("exist");
 
-    // cy.log("can delete control node");
-    // dataflowToolTile.getDeleteNodeButton(controlNode).click();
-    // dataflowToolTile.getNode(controlNode).should("not.exist");
+    cy.log("can delete control node");
+    dataflowToolTile.getDeleteNodeButton(controlNode).click();
+    dataflowToolTile.getNode(controlNode).should("not.exist");
   });
   it("Demo Output and Live Output Nodes", () => {
     const demoOutputNode = "demo-output";
@@ -570,44 +570,49 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDeleteNodeButton(sensorNode).click();
     dataflowToolTile.getNode(sensorNode).should("not.exist");
 
-    // cy.log("Record Data");
-    // cy.log("can create a small program");
-    // const nodes = ["timer", "demo-output"];
-    // dataflowToolTile.getCreateNodeButton(nodes[0]).click();
-    // dataflowToolTile.getNode(nodes[0]).should("exist");
-    // dataflowToolTile.getNodeTitle().should("contain", "Timer (on/off)");
-    // dataflowToolTile.getCreateNodeButton(nodes[1]).click();
-    // dataflowToolTile.getNode(nodes[1]).should("exist");
-    // dataflowToolTile.getNodeTitle().should("contain", "Demo Output");
-    // dataflowToolTile.getNodeOutput().eq(0).click();
-    // dataflowToolTile.getNodeInput().eq(0).click();
-    // dataflowToolTile.getShowGraphButton("demo-output").click();
-    // dataflowToolTile.getMinigraph("demo-output").should("exist");
+    cy.log("Record Data");
+    cy.log("can create a small program");
+    const nodes = ["timer", "demo-output"];
+    dataflowToolTile.getCreateNodeButton(nodes[0]).click();
+    dataflowToolTile.getNode(nodes[0]).should("exist");
+    dataflowToolTile.getNodeTitle().should("contain", "Timer (on/off)");
+    dataflowToolTile.getCreateNodeButton(nodes[1]).click();
+    dataflowToolTile.getNode(nodes[1]).should("exist");
+    dataflowToolTile.getNodeTitle().should("contain", "Demo Output");
+    dataflowToolTile.getNode("demo-output").click(50, 10)
+      .trigger("pointerdown", 50, 10)
+      .trigger("pointermove", dragXDestination, 10, { force: true })
+      .trigger("pointerup", dragXDestination, 10, { force: true });
 
-    // cy.log("verify sampling rate");
-    // const rate = "500";
-    // dataflowToolTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
-    // dataflowToolTile.selectSamplingRate(rate);
+    dataflowToolTile.getNodeOutput().eq(0).click();
+    dataflowToolTile.getNodeInput().eq(0).click();
+    dataflowToolTile.getShowGraphButton("demo-output").click();
+    dataflowToolTile.getMinigraph("demo-output").should("exist");
 
-    // cy.log("verify recording and stop recording");
-    // dataflowToolTile.verifyRecordButtonText();
-    // dataflowToolTile.verifyRecordButtonIcon();
-    // dataflowToolTile.getRecordButton().click();
-    // dataflowToolTile.verifyPlayButtonText();
-    // dataflowToolTile.verifyPlayButtonIcon();
-    // dataflowToolTile.getPlayButton().should("be.disabled");
-    // dataflowToolTile.verifyStopButtonText();
-    // dataflowToolTile.verifyStopButtonIcon();
-    // dataflowToolTile.getTimeSlider().should("be.visible");
-    // dataflowToolTile.getCountdownTimer().should("contain", "/");
-    // cy.wait(5000);
+    cy.log("verify sampling rate");
+    const rate = "500";
+    dataflowToolTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
+    dataflowToolTile.selectSamplingRate(rate);
 
-    // dataflowToolTile.getStopButton().click();
+    cy.log("verify recording and stop recording");
+    dataflowToolTile.verifyRecordButtonText();
+    dataflowToolTile.verifyRecordButtonIcon();
+    dataflowToolTile.getRecordButton().click();
+    dataflowToolTile.verifyPlayButtonText();
+    dataflowToolTile.verifyPlayButtonIcon();
+    dataflowToolTile.getPlayButton().should("be.disabled");
+    dataflowToolTile.verifyStopButtonText();
+    dataflowToolTile.verifyStopButtonIcon();
+    dataflowToolTile.getTimeSlider().should("be.visible");
+    dataflowToolTile.getCountdownTimer().should("contain", "/");
+    cy.wait(5000);
 
-    // cy.log("verify play and pause recording");
-    // dataflowToolTile.getPlayButton().should("be.enabled");
-    // dataflowToolTile.verifyRecordingClearButtonText();
-    // dataflowToolTile.verifyRecordingClearButtonIcon();
+    dataflowToolTile.getStopButton().click();
+
+    cy.log("verify play and pause recording");
+    dataflowToolTile.getPlayButton().should("be.enabled");
+    dataflowToolTile.verifyRecordingClearButtonText();
+    dataflowToolTile.verifyRecordingClearButtonIcon();
     // dataflowToolTile.getPlayButton().click();
 
     // dataflowToolTile.verifyPauseButtonText();
@@ -619,21 +624,21 @@ context('Dataflow Tool Tile', function () {
     // dataflowToolTile.getPlayButton().click();
     // cy.wait(5000);
 
-    // cy.log("verify clear recording");
-    // dataflowToolTile.verifyRecordingClearButtonText();
-    // dataflowToolTile.verifyRecordingClearButtonIcon();
-    // dataflowToolTile.getRecordingClearButton().click();
-    // dataflowToolTile.getClearDataWarningTitle().should("have.text", "Clear Data");
-    // dataflowToolTile.getClearDataWarningContent().should(
-    //   "contain",
-    //   "Remove the program's recorded data and any linked displays of this data? This action is not undoable.");
-    // dataflowToolTile.getClearDataWarningCancel().click();
-    // dataflowToolTile.verifyRecordingClearButtonText();
-    // dataflowToolTile.verifyRecordingClearButtonIcon();
-    // dataflowToolTile.getRecordingClearButton().click();
-    // dataflowToolTile.getClearDataWarningClear().click();
-    // dataflowToolTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
-    // dataflowToolTile.verifyRecordButtonText();
-    // dataflowToolTile.verifyRecordButtonIcon();
+    cy.log("verify clear recording");
+    dataflowToolTile.verifyRecordingClearButtonText();
+    dataflowToolTile.verifyRecordingClearButtonIcon();
+    dataflowToolTile.getRecordingClearButton().click();
+    dataflowToolTile.getClearDataWarningTitle().should("have.text", "Clear Data");
+    dataflowToolTile.getClearDataWarningContent().should(
+      "contain",
+      "Remove the program's recorded data and any linked displays of this data? This action is not undoable.");
+    dataflowToolTile.getClearDataWarningCancel().click();
+    dataflowToolTile.verifyRecordingClearButtonText();
+    dataflowToolTile.verifyRecordingClearButtonIcon();
+    dataflowToolTile.getRecordingClearButton().click();
+    dataflowToolTile.getClearDataWarningClear().click();
+    dataflowToolTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
+    dataflowToolTile.verifyRecordButtonText();
+    dataflowToolTile.verifyRecordButtonIcon();
   });
 });
