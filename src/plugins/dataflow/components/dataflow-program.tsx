@@ -569,18 +569,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.updateSharedProgramData();
   };
 
-  // // HEY: this whole function is blech.  JSON stringfy, deleting...need to rethink
-  // private getProgramDataSummary = (): NodeSummary[] => {
-  //   const nodes = this.programEditor.getNodes() as IBaseNode[];
-  //   const dataSummary = JSON.parse(JSON.stringify(nodes.map(node => node.model)));
-  //   // We don't need "plot" and "recentValues" in the mini version of the data
-  //   dataSummary.forEach((node: any) => {
-  //     delete node.plot;
-  //     delete node.recentValues;
-  //   });
-  //   return dataSummary;
-  // };
-
   private updateSharedProgramData = () => {
     const nodes = this.programEditor.getNodes() as IBaseNode[];
     const sharedProgramModel = this.props.tileContent.sharedProgramData as SharedProgramDataType;
