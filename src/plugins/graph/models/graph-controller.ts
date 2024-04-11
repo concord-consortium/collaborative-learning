@@ -103,18 +103,19 @@ export class GraphController {
   handleAttributeAssignment(dataConfiguration: IDataConfigurationModel, graphPlace: GraphPlace, attrID: string) {
     const {graphModel, layout} = this,
       appConfig = getAppConfig(graphModel),
-      emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
+      emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph"),
+      isPrimaryLayer = graphModel?.layers[0].config === dataConfiguration;
     if (!(graphModel && layout)) {
       return;
     }
     if (['plot', 'legend'].includes(graphPlace)) {
       // Since there is no axis associated with the legend and the plotType will not change, we bail
       return;
-    } else if (graphPlace === 'yPlus') {
-      // The yPlus attribute utilizes the left numeric axis for plotting but doesn't change anything else
-      const yAxisModel = graphModel.getAxis('left');
+    } else if (!isPrimaryLayer || graphPlace === 'yPlus') {
+      // The first trace of the primary (0th) layer controls the plot type.
+      // Other data traces just rescale without altering anything else.
       if (!graphModel.lockAxes) {
-        yAxisModel && setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
+        this.autoscaleAllAxes();
       }
       this.callMatchCirclesToData();
       return;
