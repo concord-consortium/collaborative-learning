@@ -11,7 +11,7 @@ import { isInputVariable, isOutputVariable } from "../../shared-variables/simula
 import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { defaultSimulationKey, simulations } from "../simulations/simulations";
-import { SharedProgramDataType } from "../../dataflow/model/shared-program-data";
+import { SharedProgramData, SharedProgramDataType } from "../../dataflow/model/shared-program-data";
 
 export function defaultSimulatorContent(): SimulatorContentModelType {
   return SimulatorContentModel.create({});
@@ -56,8 +56,8 @@ export const SimulatorContentModel = TileContentModel
     },
     get sharedProgramData() { // HEY: Will this work without "attachment routine"?
       const sharedModelManager = self.tileEnv?.sharedModelManager;
-      const sharedModels = sharedModelManager?.getTileSharedModels(self);
-      const sharedProgramData = sharedModels?.filter((sharedModel: SharedModelType) => {
+      const sharedModels = sharedModelManager?.getTileSharedModels(self); // only returns those who are attached
+      const sharedProgramData = sharedModels?.filter( sharedModel => {
         return sharedModel.type === "SharedProgramData";
       });
       return sharedProgramData?.[0] as SharedProgramDataType;
@@ -91,13 +91,13 @@ export const SimulatorContentModel = TileContentModel
         const tileSharedModels = sharedModelManager?.isReady ?
           sharedModelManager?.getTileSharedModels(self) : undefined;
 
-        // const sharedProgramModel = sharedModelManager?.isReady ?
-        //   sharedModelManager?.findFirstSharedModelByType(SharedProgramData) : undefined;
+        const sharedProgramModel = sharedModelManager?.isReady ?
+          sharedModelManager?.findFirstSharedModelByType(SharedProgramData) : undefined;
 
-        const values = {sharedModelManager, containerSharedModel, tileSharedModels, /*sharedProgramModel*/};
+        const values = {sharedModelManager, containerSharedModel, tileSharedModels, sharedProgramModel};
         return values;
       },
-      ({sharedModelManager, containerSharedModel, tileSharedModels, /*sharedProgramModel*/}) => {
+      ({sharedModelManager, containerSharedModel, tileSharedModels, sharedProgramModel}) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
@@ -114,9 +114,9 @@ export const SimulatorContentModel = TileContentModel
           sharedModelManager.addTileSharedModel(self, containerSharedModel);
         }
 
-        // if(!tileSharedModels?.includes(sharedProgramModel)) {
-        //   sharedModelManager.addTileSharedModel(self, sharedProgramModel);
-        // }
+        if(sharedProgramModel && !tileSharedModels?.includes(sharedProgramModel)) {
+          sharedModelManager.addTileSharedModel(self, sharedProgramModel);
+        }
 
         // Set up starter variables
         const defaultVariableSnapshots = self.simulationData.variables;

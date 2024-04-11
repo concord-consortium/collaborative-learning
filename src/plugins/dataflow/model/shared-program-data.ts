@@ -1,6 +1,7 @@
 import { types, Instance } from "mobx-state-tree";
 import { SharedModel } from "../../../models/shared/shared-model";
 import { IBaseNode } from "../nodes/base-node";
+import { observable } from "mobx";
 
 export const kSharedProgramDataType = "SharedProgramData";
 
@@ -44,23 +45,25 @@ export const kSharedNodeCategories = [
   }
 ];
 
-const SharedProgramNode = types.model("SharedProgramNode", {
-  id: types.string,
-  nodeDisplayedName: types.string,
-  nodeValue: types.number,
-  nodeType: types.string,
-  nodeState: types.frozen(),
-});
+export interface ISharedProgramNode {
+  id: string;
+  nodeDisplayedName: string;
+  nodeValue: number;
+  nodeType: string;
+  nodeState: Record<string, string | number>;
+}
 
 export const SharedProgramData = SharedModel.named("SharedProgramData")
 .props({
-  type: types.optional(types.literal(kSharedProgramDataType), kSharedProgramDataType),
-  programNodes: types.array(SharedProgramNode)
+  type: types.optional(types.literal(kSharedProgramDataType), kSharedProgramDataType)
 })
+.volatile(self => ({
+  programNodes: observable.map() as Map<string, ISharedProgramNode>
+}))
 .actions(self => ({
   setProgramNodes(newNodes: IBaseNode[]) {
     self.programNodes.clear();
-    console.log("|\n\n| setProgramNodes: ");
+
     newNodes.forEach(node => {
       const nodeStateData = {};
       Object.keys(node.model).forEach(key => {
@@ -74,17 +77,18 @@ export const SharedProgramData = SharedModel.named("SharedProgramData")
         nodeValue: node.model.nodeValue || 0,
         nodeType: node.model.type,
         nodeState: nodeStateData
+        // TODO: add the category
       };
       if (!newNode.id) return;
       // REVIEW: ended up needing to make this whole thing an array
       // was unable to put into the map, despite having an id, and simpifying the object
       try {
-        self.programNodes.push(newNode);
+        self.programNodes.set(newNode.id, newNode);
       } catch (error) {
         console.error('Error putting node into programNodes:', error);
       }
     });
-    console.log("| just set program nodes: hmm2? ", self.programNodes.toJSON());
+   console.log("| just set program nodes: hmm? ", self.programNodes);
   }
 }))
 .views(self => ({

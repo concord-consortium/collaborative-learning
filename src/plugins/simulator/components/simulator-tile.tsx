@@ -20,6 +20,10 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
   const content = model.content as SimulatorContentModelType;
   const canRunIndependently = !readOnly || isCurriculumDocument(documentId);
 
+  const sharedProgramData = content.sharedProgramData;
+  const asArray = Array.from(sharedProgramData.programNodes);
+  console.log("| sim want data: ", asArray);
+
   const [_steps, setSteps] = useState(0);
   useEffect(() => {
     const id = setInterval(() => {
