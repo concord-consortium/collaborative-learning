@@ -31,19 +31,18 @@ export const DataflowDropZone = observer((
       if (event.over?.id === droppableId && isNodeDraggableId(draggableId)) {
         const nodeType = getNodeType(draggableId);
         const pointerEvent = event.activatorEvent as PointerEvent;
+
         const clientX = pointerEvent.clientX + event.delta.x;
         const clientY = pointerEvent.clientY + event.delta.y;
-        // const { x, y, k } = programEditor.view.area.transform;
-        // const boundingBox = programEditor.view.area.container.getBoundingClientRect();
-        // const rawX = clientX - boundingBox.x;
-        // const rawY = clientY - boundingBox.y;
-        // const position: [number, number] = [
-        //   (rawX - x) / k,
-        //   (rawY - y) / k
-        // ];
+        const reteArea = programEditor.area.area;
+
+        // This was taken from Rete's Area.setPointerFrom
+        const { x, y } = reteArea.content.getPointerFrom({clientX, clientY} as MouseEvent);
+        const { k } = reteArea.transform;
+        const position: [number, number] = [ x / k, y / k ];
+
         if (nodeType) {
-          // addNode(nodeType, position);
-          addNode(nodeType);
+          addNode(nodeType, position);
         }
       }
     }

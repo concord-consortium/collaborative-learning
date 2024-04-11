@@ -9,6 +9,8 @@ import { LiveOutputNodeModel } from "../nodes/live-output-node";
 import { SensorNodeModel } from "../nodes/sensor-node";
 import { NodeType, NodeTypes } from "./utilities/node";
 import { TransformNodeModel } from "../nodes/transform-node";
+import { TimerNodeModel } from "../nodes/timer-node";
+import { ControlNodeModel } from "../nodes/control-node";
 
 export const ConnectionModel = types
   .model("Connection", {
@@ -27,6 +29,7 @@ export const DataflowNodeModel = types.
     x: types.number,
     y: types.number,
     data: types.union(
+      ControlNodeModel,
       CounterNodeModel,
       DemoOutputNodeModel,
       GeneratorNodeModel,
@@ -35,9 +38,16 @@ export const DataflowNodeModel = types.
       MathNodeModel,
       NumberNodeModel,
       SensorNodeModel,
+      TimerNodeModel,
       TransformNodeModel,
     )
   })
+  .actions(self => ({
+    setPosition(position: {x: number, y: number}) {
+      self.x = position.x;
+      self.y = position.y;
+    }
+  }))
   .preProcessSnapshot((snapshot: any) => {
     // Turn position into x and y because MST has weird issues with arrays
     if (Array.isArray(snapshot.position)) {
