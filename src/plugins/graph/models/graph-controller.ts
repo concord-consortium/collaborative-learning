@@ -161,7 +161,9 @@ export class GraphController {
             graphModel.setAxis(place, newAxisModel);
             dataConfiguration.setAttributeType(attrRole, 'numeric');
             layout.setAxisScaleType(place, 'linear');
-            setNiceDomain(graphModel.numericValuesForAttrRole(attrRole), newAxisModel);
+          }
+          if (!graphModel.lockAxes) {
+            setNiceDomain(graphModel.numericValuesForAttrRole(attrRole), graphModel.getAxis(place)!, false);
           }
         }
           break;
