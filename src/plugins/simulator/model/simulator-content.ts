@@ -11,6 +11,7 @@ import { isInputVariable, isOutputVariable } from "../../shared-variables/simula
 import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { defaultSimulationKey, simulations } from "../simulations/simulations";
+import { SharedProgramDataType } from "../../dataflow/model/shared-program-data";
 
 export function defaultSimulatorContent(): SimulatorContentModelType {
   return SimulatorContentModel.create({});
@@ -52,6 +53,14 @@ export const SimulatorContentModel = TileContentModel
         self.simulation = defaultSimulation as string ?? defaultSimulationKey;
       }
       return simulations[self.simulation];
+    },
+    get sharedProgramData() { // HEY: Will this work without "attachment routine"?
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const sharedModels = sharedModelManager?.getTileSharedModels(self);
+      const sharedProgramData = sharedModels?.filter((sharedModel: SharedModelType) => {
+        return sharedModel.type === "SharedProgramData";
+      });
+      return sharedProgramData?.[0] as SharedProgramDataType;
     }
   }))
   .views(self => ({
