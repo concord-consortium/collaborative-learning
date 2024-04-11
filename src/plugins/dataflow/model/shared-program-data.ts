@@ -1,11 +1,21 @@
 import { types, Instance } from "mobx-state-tree";
 import { SharedModel } from "../../../models/shared/shared-model";
+import { IBaseNode } from "../nodes/base-node";
 
 export const kSharedProgramDataType = "SharedProgramData";
 
+// export interface NodeSummary {
+//   type: string;
+//   nodeValue: number;
+//   orderedDisplayName: string;
+//   //plot: boolean; // not going to need this
+//   //recentValues: number[];
+//   [key: string]: any;
+// }
+
 const SharedProgramNode = types.model("SharedProgramNode", {
   nodeDisplayedName: types.string,
-  nodeValue: types.map(types.maybe(types.number)),
+  nodeValue: types.number,
   nodeType: types.string,
   nodeState: types.map(types.maybe(types.string)),
 });
@@ -16,14 +26,22 @@ export const SharedProgramData = SharedModel.named("SharedProgramData")
   programNodes: types.map(SharedProgramNode)
 })
 .actions(self => ({
-  // NEXT: newNodes might not be of type Map<string, Instance<typeof SharedProgramNode>>
-  // so type it for what you are currently passing
-  // and then set the data
-  // then make a view that the SIM can use and access the model from the sim and pass it on througth
-  setProgramNodes(newNodes: Map<string, Instance<typeof SharedProgramNode>>) {
+  setProgramNodes(newNodes: IBaseNode[]) {
     self.programNodes.clear();
-    console.log("| setProgramNodes | to  newNodes: ", typeof newNodes, newNodes);
-    //newNodes && self.programNodes.merge(newNodes);
+    // console.log("| setProgramNodes | to  newNodes: ", typeof newNodes, newNodes);
+    // newNodes.forEach(node => {
+    //   const { plot, recentValues, ...nodeWithoutUnwantedKeys } = node.model;
+    //   self.programNodes.put(nodeWithoutUnwantedKeys);
+    // });
+    newNodes.forEach(node => {
+      console.log("| make this node an entry in the SharedProgramNode map: ", node);
+      // self.programNodes.put({
+      //   nodeDisplayedName: node.orderedDisplayName,
+      //   nodeValue: node.nodeValue,
+      //   nodeType: node.type,
+      //   //nodeState: node.nodeState
+      // });
+    });
   }
 }))
 .views(self => ({
