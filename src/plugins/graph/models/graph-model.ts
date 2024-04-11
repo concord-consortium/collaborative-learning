@@ -1,6 +1,7 @@
 import { ObservableMap, reaction } from "mobx";
 import stringify from "json-stringify-pretty-compact";
 import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import { cloneDeep } from "lodash";
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { IAdornmentModel } from "../adornments/adornment-models";
@@ -91,22 +92,17 @@ export const GraphModel = TileContentModel
     annotationSizesCache: new ObservableMap<string,RectSize>()
   }))
   .preProcessSnapshot((snapshot: any) => {
+    const newSnap = cloneDeep(snapshot);
     // Remove connecting-lines adornment if found
     if(snapshot?.adornments) {
-      snapshot.adornments = snapshot.adornments.filter((adorn: any) => adorn.type !== 'Connecting Lines');
+      newSnap.adornments = snapshot.adornments.filter((adorn: any) => adorn.type !== 'Connecting Lines');
     }
     // Add layers array if missing
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
     if (!hasLayerAlready && snapshot?.config) {
-      const { config, ...others } = snapshot;
-      if (config != null) {
-        return {
-          layers: [{ config }],
-          ...others
-        };
-      }
+      newSnap.layers = [{ config: snapshot.config }];
     }
-    return snapshot;
+    return newSnap;
   })
   .views(self => ({
     /**
