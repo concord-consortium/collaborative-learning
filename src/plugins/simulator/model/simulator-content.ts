@@ -91,10 +91,13 @@ export const SimulatorContentModel = TileContentModel
         const tileSharedModels = sharedModelManager?.isReady ?
           sharedModelManager?.getTileSharedModels(self) : undefined;
 
-        const values = {sharedModelManager, containerSharedModel, tileSharedModels};
+        // const sharedProgramModel = sharedModelManager?.isReady ?
+        //   sharedModelManager?.findFirstSharedModelByType(SharedProgramData) : undefined;
+
+        const values = {sharedModelManager, containerSharedModel, tileSharedModels, /*sharedProgramModel*/};
         return values;
       },
-      ({sharedModelManager, containerSharedModel, tileSharedModels}) => {
+      ({sharedModelManager, containerSharedModel, tileSharedModels, /*sharedProgramModel*/}) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
@@ -110,6 +113,10 @@ export const SimulatorContentModel = TileContentModel
           // Add the shared model to both the document and the tile
           sharedModelManager.addTileSharedModel(self, containerSharedModel);
         }
+
+        // if(!tileSharedModels?.includes(sharedProgramModel)) {
+        //   sharedModelManager.addTileSharedModel(self, sharedProgramModel);
+        // }
 
         // Set up starter variables
         const defaultVariableSnapshots = self.simulationData.variables;
