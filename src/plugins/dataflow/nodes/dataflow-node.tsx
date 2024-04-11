@@ -1,6 +1,7 @@
 import * as React from "react";
 import { observer } from "mobx-react";
 import styled, { css } from "styled-components";
+import classNames from "classnames";
 import { ClassicScheme, RenderEmit, Presets } from "rete-react-plugin";
 import { BaseAreaPlugin } from "rete-area-plugin";
 
@@ -9,9 +10,13 @@ import { DataflowNodePlot } from "./dataflow-node-plot";
 import { IBaseNode } from "./base-node";
 import { NodeEditorMST } from "./node-editor-mst";
 import { Delete } from "./delete";
+import { ControlNode } from "./control-node";
 
 const { RefSocket, RefControl } = Presets.classic;
 
+
+import "./dataflow-node.scss";
+import "./node-states.scss";
 
 type NodeExtraData = { width?: number, height?: number }
 
@@ -89,6 +94,10 @@ function sortByIndex<T extends [string, undefined | { index?: number }][]>(entri
   });
 }
 
+function inputClass(s?: string) {
+  return s ? "input " + s.toLowerCase().replace(/ /g, "-") : "input";
+}
+
 type Props<S extends ClassicScheme> = {
     data: S['Node'] & NodeExtraData
     styles?: () => any
@@ -98,7 +107,6 @@ type Props<S extends ClassicScheme> = {
 }
 export type DataflowNodeComponent<Scheme extends ClassicScheme> = (props: Props<Scheme>) => JSX.Element
 
-// eslint-disable-next-line max-statements
 export const CustomDataflowNode = observer(
   function CustomDataflowNode<Scheme extends ClassicScheme>({data, styles, emit, editor}: Props<Scheme>)
 {
@@ -109,7 +117,8 @@ export const CustomDataflowNode = observer(
   const { id, label, width, height } = data;
 
   // FIXME: update 'Scheme' so we don't have to typecast here
-  const model = (data as unknown as IBaseNode).model;
+  const node = (data as unknown as IBaseNode);
+  const model = node.model;
 
   const showPlot = model.plot;
 
@@ -117,9 +126,14 @@ export const CustomDataflowNode = observer(
   sortByIndex(outputs);
   sortByIndex(controls);
 
+  const dynamicClasses = classNames({
+    "gate-active": node instanceof ControlNode && node.model.gateActive,
+    "has-flow-in": node instanceof ControlNode && node.hasFlowIn()
+  });
+
   return (
     <DataflowNodeStyles
-      className={`node ${model.type.toLowerCase().replace(/ /g, "-")}`}
+      className={`node ${model.type.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}
       selected={selected}
       width={width}
       height={height}
@@ -159,7 +173,7 @@ export const CustomDataflowNode = observer(
       {/* Inputs */}
       {inputs.map(([key, input]) => (
         input &&
-          <div className="input" key={key} data-testid={`input-${key}`}>
+          <div className={inputClass(input.label)} key={key} data-testid={`input-${key}`}>
             <RefSocket
               name="input-socket"
               side="input"
