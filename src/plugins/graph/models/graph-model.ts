@@ -91,6 +91,11 @@ export const GraphModel = TileContentModel
     annotationSizesCache: new ObservableMap<string,RectSize>()
   }))
   .preProcessSnapshot((snapshot: any) => {
+    // Remove connecting-lines adornment if found
+    if(snapshot?.adornments) {
+      snapshot.adornments = snapshot.adornments.filter((adorn: any) => adorn.type !== 'Connecting Lines');
+    }
+    // Add layers array if missing
     const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
     if (!hasLayerAlready && snapshot?.config) {
       const { config, ...others } = snapshot;
@@ -707,9 +712,6 @@ export const GraphModel = TileContentModel
                 newLayer.setDataConfiguration(dataConfig);
                 dataConfig.setDataset(dataSetModel.dataSet, metaDataModel);
                 newLayer.configureLinkedLayer();
-                // May need these when we want to actually display the new layer:
-                // newLayer.updateAdornments(true);
-                // newLayer.setDataSetListener();
               }
             } else {
               console.warn('| Metadata not found');
