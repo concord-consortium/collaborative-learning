@@ -7,7 +7,7 @@ import { SizeMeProps } from "react-sizeme";
 
 import { BaseComponent } from "../../../components/base";
 import { ProgramZoomType, DataflowContentModelType } from "../model/dataflow-content";
-import { DataflowProgramModelType } from "../model/dataflow-program-model";
+import { DataflowProgramModelType, DataflowProgramSnapshotOut } from "../model/dataflow-program-model";
 import { simulatedChannel } from "../model/utilities/simulated-channel";
 
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
@@ -98,7 +98,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private toolDiv: HTMLElement | null;
   private previousChannelIds = "";
-  private intervalHandle: ReturnType<typeof setTimeout>;
+  private intervalHandle?: ReturnType<typeof setTimeout>;
   private lastIntervalTime: number;
   private programEditor: NodeEditorMST;
   private programEngine: DataflowEngine<Schemes>;
@@ -259,7 +259,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       if (!this.toolDiv || !this.props.program) return;
 
       const editor = new NodeEditorMST(this.props.program, this.tileId,
-        this.toolDiv, this.props.tileContent, this.stores, this.props.runnable);
+        this.toolDiv, this.props.tileContent, this.stores, this.props.runnable, this.props.readOnly);
       this.programEditor = editor;
 
       // editor.addPipe((context) => {
@@ -401,9 +401,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private setupOnSnapshot() {
     if (!this.onSnapshotSetup) {
       if (this.props.program) {
-        this.disposers.push(onSnapshot(this.props.program.nodes, snapshot => {
+        this.disposers.push(onSnapshot(this.props.program, snapshot => {
           if (this.props.readOnly) {
-            this.updateProgramEditor();
+            this.updateProgramEditor(snapshot);
           }
         }));
         this.onSnapshotSetup = true;
@@ -419,38 +419,66 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.reactNodeElements.clear();
   }
 
-  private updateProgramEditor = () => {
+  private updateProgramEditor = async (snapshot: DataflowProgramSnapshotOut) => {
     // TODO: allow updates to write tiles for undo/redo
     if (this.toolDiv && this.props.readOnly) {
-      if (this.programEditor) {
-        // Clean up the old editor first
-        this.destroyEditor();
+      // When sending removed events we have to hack the types because we don't want to
+      // track down an instance of the node or connection that was deleted. The area
+      // plugin only cares about the id.
+
+      // Process connections that were deleted
+      for (const [id] of this.programEditor.area.connectionViews) {
+        if (!snapshot.connections[id]) {
+          await this.programEditor.emit({ type: 'connectionremoved', data: { id } as any });
+        }
       }
-      this.toolDiv.innerHTML = "";
-      this.initProgramEditor();
+
+      // Process nodes that were deleted
+      for (const [id] of this.programEditor.area.nodeViews) {
+        if (!snapshot.nodes[id]) {
+          await this.programEditor.emit({ type: 'noderemoved', data: { id } as any });
+        }
+      }
+
+      // Process nodes that were added
+      for (const id of Object.keys(snapshot.nodes)) {
+        if (!this.programEditor.area.nodeViews.get(id)) {
+          const node = this.programEditor.getNode(id);
+          await this.programEditor.emit({ type: 'nodecreated', data: node });
+        }
+      }
+
+      // Process connections that were added
+      for (const id of Object.keys(snapshot.connections)) {
+        if (!this.programEditor.area.connectionViews.get(id)) {
+          const connection = this.programEditor.getConnection(id);
+          await this.programEditor.emit({ type: 'connectioncreated', data: connection });
+        }
+      }
+
+      // Process nodes that were moved
+      for (const [id, view] of this.programEditor.area.nodeViews) {
+        const snapshotNode = snapshot.nodes[id];
+        const position = view.position;
+        if (snapshotNode.x !== position.x || snapshotNode.y !== position.y) {
+          this.programEditor.area.translate(id, {x: snapshotNode.x, y: snapshotNode.y});
+        }
+      }
     }
   };
 
   private setDataRate = (rate: number) => {
     if (this.intervalHandle) {
       clearInterval(this.intervalHandle);
+      this.intervalHandle = undefined;
     }
+
+    // Do not tick if we are readOnly,
+    // in this case we are relying on state changes from the editable diagram that is
+    // ticking.
+    if (this.props.readOnly) return;
+
     this.intervalHandle = setInterval(() => this.tick(), rate);
-  };
-
-  private processAndSave = async () => {
-    if (this.processing) {
-      // If we're already processing, wait a few milliseconds and try again
-      setTimeout(this.processAndSave, 5);
-      return;
-    }
-
-    this.processing = true;
-    try {
-      return;
-    } finally {
-      this.processing = false;
-    }
   };
 
   private get simulatedChannels() {
@@ -539,6 +567,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
+    console.log("DataFlow.tick");
+
     const { runnable, tileContent: tileModel, playBackIndex, programMode,
             isPlaying,  updateRecordIndex, updatePlayBackIndex } = this.props;
 

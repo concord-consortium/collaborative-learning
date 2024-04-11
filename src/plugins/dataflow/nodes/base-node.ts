@@ -153,6 +153,7 @@ export type IBaseNode = Schemes['Node'] & {
   logNodeEvent(
     operation: string
   ): void;
+  readOnly?: boolean;
 }
 
 export class BaseNode<
@@ -191,6 +192,10 @@ export class BaseNode<
 
   process() {
     this.services.process();
+  }
+
+  get readOnly() {
+    return this.services.readOnly;
   }
 
   /**

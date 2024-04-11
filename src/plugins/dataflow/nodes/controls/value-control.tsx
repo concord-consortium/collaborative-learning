@@ -15,18 +15,27 @@ export class ValueControl extends ClassicPreset.Control
   // So in Dataflow v2 we are just getting rid of the value property and
   // each node will need to explicity save its calculated data in a
   // watchedValue property.
-  @observable sentence = "";
+  @observable _sentence = "";
 
   constructor(
-    public nodeName: string
+    public nodeName: string,
+    private getSentenceFunc?: () => string
   ){
     super();
+    // TODO we can remove this when we've switched everything to using the function
     makeObservable(this);
   }
 
   @action
   public setSentence(sentence: string) {
-    this.sentence = sentence;
+    this._sentence = sentence;
+  }
+
+  get sentence() {
+    if (this.getSentenceFunc) {
+      return this.getSentenceFunc();
+    }
+    return this._sentence;
   }
 }
 

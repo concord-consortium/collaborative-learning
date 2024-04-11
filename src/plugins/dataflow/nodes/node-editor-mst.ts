@@ -39,7 +39,8 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     private div: HTMLElement,
     private mstContent: DataflowContentModelType,
     public stores: IStores,
-    public runnable: boolean | undefined
+    public runnable: boolean | undefined,
+    public readOnly: boolean | undefined,
   ) {
     super();
 
@@ -144,10 +145,13 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
   }
 
   public process = () => {
-    console.warn("NodeEditorMST.process");
-    this.engine.reset();
+    console.log("NodeEditorMST.process");
 
-    console.log("NodeEditorMST.process getNodes", this.getNodes());
+    // Don't do any processing when we are read-only
+    if (this.readOnly) return;
+
+
+    this.engine.reset();
 
     // It seems like structures should correctly handle our setup, but from what
     // I can tell it is reading the empty private nodes and connections from
@@ -159,7 +163,6 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     // will only be called once.
     // debugger;
     const leafNodes = graph.leaves().nodes();
-    console.log("NodeEditorMST.process leafNodes", leafNodes);
     leafNodes.forEach(n => this.engine.fetch(n.id));
   };
 

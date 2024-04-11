@@ -96,7 +96,7 @@ export class ControlNode extends BaseNode<
     const valueControl = new NumberControl(this, "waitDuration", "wait");
     this.addControl("waitDuration", valueControl);
 
-    this.valueControl = new ValueControl("Control");
+    this.valueControl = new ValueControl("Control", this.getSentence);
     this.addControl("value", this.valueControl);
 
     this.addControl("plotButton", new PlotButtonControl(this));
@@ -106,26 +106,43 @@ export class ControlNode extends BaseNode<
     return this.services.isConnected(this.id, "num2");
   }
 
-  private getSentence(result: number, calcResult: number) {
+  getSentence = () => {
+    const result = this.model.nodeValue;
+
     const { gateActive, timerRunning } = this.model;
     const resultString = getNumDisplayStr(result);
-    const cResultString = getNumDisplayStr(calcResult);
-    const waitString = `waiting → ${cResultString}`;
-    const onString = `on → ${cResultString}`;
+    const waitString = `waiting → ${resultString}`;
+    const onString = `on → ${resultString}`;
     const offString = `off → ${resultString}`;
 
     if (gateActive) return timerRunning ? waitString : onString;
     else return offString;
-  }
+  };
 
-  private determineGateAndTimerStates(switchIn: number | undefined){
+  private startTimerIfNecessary(switchIn: number | undefined){
     const timerRunning = this.model.timerRunning;
     const timerIsOption =  this.model.waitDuration > 0;
-    const startTimer = timerIsOption && switchIn === 1 && !timerRunning;
-    const activateGate = timerRunning ? true : switchIn === 1;
-    return { activateGate, startTimer };
+    if (timerIsOption && switchIn === 1 && !timerRunning) {
+      this.model.startTimer();
+    }
   }
 
+  private getValueToHold(signalValue: number, prevValue: number | null) {
+    const funcName = this.model.controlOperator;
+
+    if (funcName === "Hold 0" || funcName === "Output Zero"){
+      return 0;
+    }
+    else if (funcName === "Hold Current"){
+      return signalValue;
+    }
+    else if (funcName === "Hold Prior"){
+      // Note: if the prevValue is null we be returning null here
+      return prevValue;
+    }
+    console.warn("Unknown control operator", funcName);
+    return 0;
+  }
 
   data({num1, num2}: {num1?: number[], num2?: number[]}) {
     const { model } = this;
@@ -133,68 +150,50 @@ export class ControlNode extends BaseNode<
     // TODO: Should we use NaN, undefined or 0 if array is empty?
     // I don't know when the array is empty.
     const signalValue = num2 ? (num2.length ? num2[0] : NaN) : 0;
-    const funcName = model.controlOperator;
+    const switchIn = num1?.[0];
+
     const recents = model.recentValues.get("nodeValue");
     const prevValue = recents && recents.length > 1 ? recents[recents.length - 1] : null;
 
     let result = 0;
-    let cResult = 0;
 
-    const { activateGate, startTimer } = this.determineGateAndTimerStates(num1?.[0]);
+    model.setGateActive(this.model.timerRunning || switchIn === 1);
 
-    // TODO: this should probably only happen if we are in a writable tile?
-    startTimer && model.startTimer();
-    model.setGateActive(activateGate);
+    // If we just restarted the timer because switchIn is still 1
+    // after the timer expired, we might want a different behavior.
+    // Currently when the timer restarts in this case the previously
+    // held value continues to be held. Instead we might want to
+    // update the held value.
+    this.startTimerIfNecessary(switchIn);
 
     // requires value in signalValue (except for case of Output Zero)
     if (isNaN(signalValue)) {
       model.setHeldValue(null);
       result = NaN;
-      cResult = NaN;
     }
 
-    // For each function, evaluate given inputs and node state
-    // TODO - check and see if this gets serialized, and if so, how to handle legacy funcNames on load
-    if (funcName === "Hold 0" || funcName === "Output Zero"){
+    if (!model.gateActive) {
+      // Reset the heldValue so a new value can be held when the gate is active again
       model.setHeldValue(null);
-      result = model.gateActive ? 0 : signalValue;
-      cResult = 0;
+      result = signalValue;
+    } else {
+      // Already a number here? Maintain. Otherwise set the new held value;
+      model.heldValue == null && model.setHeldValue(this.getValueToHold(signalValue, prevValue));
+      // If the previous value is null, and our operator is "hold previous", the heldValue will be null
+      result = model.heldValue ?? 0;
     }
-
-    else if (funcName === "Hold Current"){
-      if (model.gateActive){
-        // Already a number here? Maintain. Otherwise set the new held value;
-        model.heldValue == null && model.setHeldValue(signalValue);
-        result = model.heldValue!;
-        cResult = model.heldValue!;
-      }
-      else {
-        model.setHeldValue(null);
-        result = signalValue;
-        cResult = signalValue; // still signalValue, since the value to be held would be the current
-      }
-    }
-
-    else if (funcName === "Hold Prior"){
-      if (model.gateActive){
-        // Already a number here? Maintain. Otherwise set the new held value;
-        model.heldValue == null && model.setHeldValue(prevValue);
-        result = model.heldValue ?? 0;
-        cResult = model.heldValue ?? 0;
-      }
-      else {
-        model.setHeldValue(null);
-        result = signalValue;
-        cResult = prevValue ?? 0;
-      }
-    }
-
-    const resultSentence = this.getSentence(result, cResult);
 
     // This nodeValue is used to record the recent values of the node
     model.setNodeValue(result);
-    this.valueControl.setSentence(resultSentence);
 
     return { value: result };
+  }
+
+  onTick() {
+    if ( this.model.waitDuration > 0 ) {
+      // We might be waiting for a timer to expire so we need to reprocess after tick
+      return true;
+    }
+    return false;
   }
 }
