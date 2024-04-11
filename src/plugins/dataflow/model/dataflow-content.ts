@@ -1,5 +1,5 @@
 import { types, Instance, applySnapshot, getSnapshot, addDisposer } from "mobx-state-tree";
-import { reaction } from "mobx";
+import { observable, reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
@@ -21,6 +21,7 @@ import { DataSet, addAttributeToDataSet } from "../../../models/data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
 import { getTileModel } from "../../../models/tiles/tile-model";
+import { NodeChannelInfo } from "./utilities/channel";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -60,6 +61,7 @@ export const DataflowContentModel = TileContentModel
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
     emptyDataSet: DataSet.create(),
+    channels: observable([]) as NodeChannelInfo[],
   }))
   .views(self => ({
     get sharedModel() {
@@ -75,16 +77,18 @@ export const DataflowContentModel = TileContentModel
       return firstSharedVariables as SharedVariablesType;
     },
     programWithoutRecentValues() {
-      const { values, ...rest } = getSnapshot(self.program);
-      const castedValues = values as Record<string, any>;
-      const newValues: Record<string, any> = {};
-      if (values) {
-        Object.keys(castedValues).forEach((key: string) => {
-          const { recentValues, ...other } = castedValues[key];
-          newValues[key] = { ...other };
-        });
-      }
-      return { values: newValues, ...rest };
+      // FIXME: remove recent values from the nodes
+      // const { values, ...rest } = getSnapshot(self.program);
+      // const castedValues = values as Record<string, any>;
+      // const newValues: Record<string, any> = {};
+      // if (values) {
+      //   Object.keys(castedValues).forEach((key: string) => {
+      //     const { recentValues, ...other } = castedValues[key];
+      //     newValues[key] = { ...other };
+      //   });
+      // }
+      // return { values: newValues, ...rest };
+      return {};
     },
     get maxRecordableCases() {
       const numNodes = self.program.nodes.size;
@@ -239,6 +243,9 @@ export const DataflowContentModel = TileContentModel
         applySnapshot(self.program, cloneDeep(program));
       }
     },
+    setChannels(channels: NodeChannelInfo[]) {
+      self.channels = observable(channels);
+    },
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;
     },
@@ -250,7 +257,7 @@ export const DataflowContentModel = TileContentModel
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing
     },
-    addNewAttrFromNode(nodeId: number, nodeName: string){
+    addNewAttrFromNode(nodeId: string, nodeName: string){
       const newAttributeId = uniqueId() + "*" + nodeId;
       self.dataSet.addAttributeWithID({
         id: newAttributeId,

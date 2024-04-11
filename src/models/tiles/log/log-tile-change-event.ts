@@ -4,7 +4,7 @@ import { LogEventMethod, LogEventName } from "../../../lib/logger-types";
 import { DocumentsModelType } from "../../stores/documents";
 import { isTileBaseEvent, logTileBaseEvent } from "./log-tile-base-event";
 
-interface ITileChangeLogEvent extends Record<string, any> {
+export interface ITileChangeLogEvent extends Record<string, any> {
   tileId: string;
   operation: string;
   change: Record<string, any>;

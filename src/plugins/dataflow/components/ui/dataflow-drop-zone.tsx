@@ -1,15 +1,15 @@
 import React from "react";
 import { DragEndEvent, useDndMonitor, useDroppable } from "@dnd-kit/core";
 import { observer } from "mobx-react";
-import { NodeEditor } from "rete";
 
 import { dataflowDroppableId, getNodeType, isNodeDraggableId } from "../dataflow-types";
+import { NodeEditorMST } from "../../nodes/node-editor-mst";
 
 interface IDataflowDropZoneProps {
   addNode: (nodeType: string, position?: [number, number]) => void;
   children?: any;
   className?: string;
-  programEditor: NodeEditor;
+  programEditor: NodeEditorMST;
   readOnly?: boolean;
   style?: any;
   tileId: string;
@@ -33,16 +33,17 @@ export const DataflowDropZone = observer((
         const pointerEvent = event.activatorEvent as PointerEvent;
         const clientX = pointerEvent.clientX + event.delta.x;
         const clientY = pointerEvent.clientY + event.delta.y;
-        const { x, y, k } = programEditor.view.area.transform;
-        const boundingBox = programEditor.view.area.container.getBoundingClientRect();
-        const rawX = clientX - boundingBox.x;
-        const rawY = clientY - boundingBox.y;
-        const position: [number, number] = [
-          (rawX - x) / k,
-          (rawY - y) / k
-        ];
+        // const { x, y, k } = programEditor.view.area.transform;
+        // const boundingBox = programEditor.view.area.container.getBoundingClientRect();
+        // const rawX = clientX - boundingBox.x;
+        // const rawY = clientY - boundingBox.y;
+        // const position: [number, number] = [
+        //   (rawX - x) / k,
+        //   (rawY - y) / k
+        // ];
         if (nodeType) {
-          addNode(nodeType, position);
+          // addNode(nodeType, position);
+          addNode(nodeType);
         }
       }
     }

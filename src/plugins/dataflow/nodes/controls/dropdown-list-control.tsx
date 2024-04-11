@@ -1,13 +1,12 @@
-// FIXME: ESLint is unhappy with these control components
-/* eslint-disable react-hooks/rules-of-hooks */
-import React, { FunctionComponent, SVGProps, useRef } from "react";
-import Rete, { NodeEditor, Node, Control } from "rete";
+import React, { FunctionComponent, SVGProps, useCallback, useRef, useState } from "react";
+import { computed, makeObservable, observable } from "mobx";
+import { observer } from "mobx-react";
+import { ClassicPreset } from "rete";
 import classNames from "classnames";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
+import { IBaseNode, IBaseNodeModel } from "../base-node";
+
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
-import { dataflowLogEvent } from "../../dataflow-logger";
-import { NodeChannelInfo } from "../../model/utilities/channel";
-import { kGripperOutputTypes } from "../../model/utilities/node";
 
 import "./dropdown-list-control.scss";
 
@@ -16,217 +15,110 @@ export interface ListOption {
   name: string;
   displayName?: string;
   icon?: FunctionComponent<SVGProps<SVGSVGElement>>;
-  val?: string | number; // if an option includes `val`, it will be used as the value, otherwise `name` will
+  // This property is used by a nodes that work with a "hubSelect" control
+  id?: string;
+  // This property is used by hardware menus where some options can
+  // be temporarily missing, but still selectable
+  missing?: boolean;
 }
 
 type DisabledChecker = (opt: ListOption) => boolean;
 
-const optionValue = (opt: ListOption) => Object.prototype.hasOwnProperty.call(opt, "val") ? opt.val : opt.name;
+// We used to support the `val` property on the list options, I could not find references to that in the current code
+// const optionValue = (opt: ListOption) => Object.prototype.hasOwnProperty.call(opt, "val") ? opt.val : opt.name;
+const optionValue = (opt: ListOption) => opt.name;
 const optionLabelClass = (str?: string) => {
   const optClass = str?.toLowerCase().replace(/ /g, "-") ?? "";
   return "label " + optClass;
 };
-export class DropdownListControl extends Rete.Control {
-  private emitter: NodeEditor;
-  private component: any;
-  private props: any;
-  constructor(emitter: NodeEditor,
-              key: string,
-              node: Node,
-              optionArray: ListOption[],
-              readonly = false,
-              label = "",
-              tooltip = "Select Type") {
-    super(key);
-    this.emitter = emitter;
-    this.key = key;
 
-    const handleChange = (onChange: any) => {
-      return (e: any) => { onChange(e.target.value); };
-    };
-    this.component = (compProps: {
-                                    value: string | number;
-                                    onItemClick: () => void;
-                                    onListClick: () => void;
-                                    showList: boolean
-                                    optionArray: ListOption[];
-                                    listClass: string;
-                                    label: string;
-                                    isDisabled?: DisabledChecker,
-                                    tooltip: string;
-                                  }) => (
-      <div className="node-select-container" title={compProps.tooltip}>
-        { label &&
-        <div className="node-select-label">{label}</div>
-        }
-        { renderDropdownList(compProps.value,
-                             compProps.showList,
-                             compProps.onItemClick,
-                             compProps.onListClick,
-                             compProps.optionArray,
-                             compProps.listClass,
-                             compProps.isDisabled) }
-      </div>
-    );
+export class DropdownListControl<
+  ModelType extends
+    Record<Key, string> &
+    Record<`set${Capitalize<Key>}`, (val: string) => void> &
+    IBaseNodeModel,
+  NodeType extends { model: ModelType } & IBaseNode,
+  Key extends keyof NodeType['model'] & string
+>
+  extends ClassicPreset.Control
+  implements IDropdownListControl
+{
+  setter: (val: string) => void;
 
-    const renderDropdownList = (val: string | number,
-                                showList: boolean,
-                                onItemClick: () => void,
-                                onListClick: any,
-                                options: ListOption[],
-                                listClass: string,
-                                isDisabled?: DisabledChecker) => {
-      const divRef = useRef<HTMLDivElement>(null);
-      useStopEventPropagation(divRef, "pointerdown");
-      useStopEventPropagation(divRef, "wheel");
-      const listRef = useRef<HTMLDivElement>(null);
-      useCloseDropdownOnOutsideEvent(listRef, () => this.props.showList, () => {
-                                      this.props.showList = false;
-                                      (this as any).update();
-                                    });
-      const option = options.find((opt) => optionValue(opt) === val);
-      const name = option?.name ?? val.toString();
-      const displayName = option?.displayName ?? name;
-      const icon = option?.icon?.({}) || null;
-      const activeHub = option?.active !== false;
-      const liveNode = this.getNode().name.substring(0,4) === "Live";
-      const disableSelected = this.key === "hubSelect" && liveNode && !activeHub;
-      const labelClasses = classNames("item top", { disabled: disableSelected });
+  @observable
+  disabledFunction?: DisabledChecker;
 
-      return (
-        <div className={`node-select ${listClass}`} ref={divRef}>
-          <div className={labelClasses} onMouseDown={handleChange(onItemClick)}>
-            { icon && <svg className="icon top">{icon}</svg> }
-            <div className={optionLabelClass(displayName)}>{displayName}</div>
-            <svg className="icon dropdown-caret">
-              <DropdownCaretIcon />
-            </svg>
-          </div>
-          {showList ?
-          <div className={`option-list ${listClass}`} ref={listRef}>
-            {options.map((ops: any, i: any) => {
-              const disabled = ops.active === false || isDisabled?.(ops);
-              const className = classNames("item", listClass, {
-                disabled,
-                selectable: !disabled,
-                selected: optionValue(ops) === val,
-                microbit: ops.name.includes("micro:bit"),
-                gripper: kGripperOutputTypes.includes(ops.name)
-              });
-              return (
-                <div
-                  className={className}
-                  key={i}
-                  onMouseDown={!disabled ? onListClick(optionValue(ops)) : null}
-                >
-                  { ops.icon &&
-                    <svg className="icon">
-                      {ops.icon()}
-                    </svg>
-                  }
-                  <div className={optionLabelClass(ops.displayName)}>
-                    {ops.displayName ?? ops.name}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          : null }
-        </div>
-      );
-    };
+  @observable
+  optionArray: ListOption[];
 
-    const initial = node.data[key] || optionArray[0].name;
-    node.data[key] = initial;
+  private optionsFunc?: () => ListOption[];
 
-    this.props = {
-      readonly,
-      value: initial,
-      onItemClick: (v: any) => {
-        this.emitter.trigger("selectnode", {node: this.getNode()});
-        this.props.showList = !this.props.showList;
-        (this as any).update();
-        dataflowLogEvent("nodedropdownclick", this as Control, this.getNode().meta.inTileWithId as string);
-      },
-      onListClick: (v: any) => () => {
-        this.emitter.trigger("selectnode", {node: this.getNode()});
-        this.props.showList = !this.props.showList;
-        this.setValue(v);
-        this.emitter.trigger("process");
-        dataflowLogEvent("nodedropdownselection", this as Control, this.getNode().meta.inTileWithId as string);
-      },
-      showList: false,
-      optionArray,
-      listClass: key,
-      label,
-      isDisabled: null,
-      tooltip
-    };
+  // TODO: this used to set the initial value of the if it wasn't set based on the first
+  // option in the list passed in. I'm not sure if that is needed anymore.
+  constructor(
+    public node: NodeType,
+    public modelKey: Key,
+
+    optionArray: ListOption[],
+    public tooltip = "Select Type", // This is not currently passed
+    public placeholder = "Select an option",
+
+    // Use a function for the options so they can be computed
+    optionsFunc?: () => ListOption[]
+  ) {
+    super();
+    this.optionArray = optionArray;
+    this.optionsFunc = optionsFunc;
+
+    const setterProp = "set" + modelKey.charAt(0).toUpperCase() + modelKey.slice(1) as `set${Capitalize<Key>}`;
+
+    // The typing above using `set${Capitalize<Key>}` almost works, but it fails here
+    // I'm pretty sure there is a way to make it work without having to use the "as any" here
+    this.setter = this.model[setterProp] as any;
+
+    makeObservable(this);
   }
 
-  public setValue = (val: any) => {
-    this.props.value = val;
-    this.putData(this.key, val);
-    (this as any).update();
-  };
+  public get model() {
+    return this.node.model;
+  }
 
-  public getValue = () => {
-    return this.props.value;
-  };
+  public setValue(val: string) {
+    this.setter(val);
 
-  public getSelectionId = () => {
-    const optionArray = this.props.optionArray;
-    const value = this.props.value;
-    if (optionArray && value){
-      const selectedOption = optionArray.find((option: ListOption) => optionValue(option) === value);
-      const selectionId = selectedOption ? selectedOption.id : undefined;
-      return selectionId;
-    }
-  };
+    // trigger a reprocess so our new value propagates through the nodes
+    this.node.process();
+  }
+
+  public getValue() {
+    return this.model[this.modelKey];
+  }
 
   /**
    * Is passed a function that will check each list option to see if it should
    * be disabled
    */
-  public setDisabledFunction = (fn: DisabledChecker) => {
-    this.props.isDisabled = fn;
+  public setDisabledFunction(fn: DisabledChecker) {
+    this.disabledFunction = fn;
     this.ensureValueIsInBounds();
-    (this as any).update();
-  };
-
-  public setOptions = (options: ListOption[]) => {
-    this.props.optionArray = options;
-    (this as any).update();
-  };
-
-  public setActiveOption = (hubId: string, state: boolean) => {
-    if (this.props.optionArray){
-      const targetHub = this.props.optionArray.filter((o: any) => o.id === hubId);
-      if(targetHub[0]){
-        targetHub[0].active = state;
-      }
-    }
-  };
-
-  public setChannels = (channels: NodeChannelInfo[]) => {
-    this.props.channels = channels;
-  };
-
-  public getChannels = () => {
-    return this.props.channels;
-  };
+  }
 
   /**
-   * This is called both when we load (in case the options have changed, and the user
-   * has a value that is no longer valid) and every time the isDisabled function changes.
    * If the control has a value that is no longer valid, we pick the best option: if the
    * values are numeric, we pick the closest enabled option. Otherwise, we pick the
    * first enabled option.
+   *
+   * TODO: this had a comment saying it was also called "when we load (in case the options
+   * have changed, and the user has a value that is no longer valid)".
+   * It is no longer being called anywhere else. Even in master at the point of this
+   * update.
+   *
    */
-  private ensureValueIsInBounds = () => {
-    const { optionArray, value } = this.props;
+  private ensureValueIsInBounds() {
+    const { optionArray } = this;
+    const value = this.getValue();
     const enabledOptions: ListOption[] = optionArray.filter( (opt: ListOption) => (
-      !this.props.isDisabled || !this.props.isDisabled(opt)
+      !this.disabledFunction || !this.disabledFunction(opt)
     ));
     if (enabledOptions.find(opt => optionValue(opt) === value)) {
       return;
@@ -250,6 +142,174 @@ export class DropdownListControl extends Rete.Control {
       }
     }
     this.setValue(optionValue(enabledOptions[0]));
-  };
+  }
+
+  public getSelectionId() {
+    const optionArray = this.optionArray;
+    const value = this.getValue();
+    if (optionArray && value){
+      const selectedOption = optionArray.find((option: ListOption) => optionValue(option) === value);
+      const selectionId = selectedOption ? selectedOption.id : undefined;
+      return selectionId;
+    }
+  }
+
+  @computed
+  public get options() {
+    if (this.optionsFunc) {
+      return this.optionsFunc();
+    }
+    return this.optionArray;
+  }
+
+  public setOptions(options: ListOption[]) {
+    if (this.optionsFunc) {
+      console.warn("This dropdown list is using an options function instead of array");
+    }
+    // This should automatically convert the passed in array to be observable
+    // so changes to the properties of the options will be observed too
+    this.optionArray = options;
+  }
+
+  // This is used by the live output node
+  public setActiveOption(id: string, state: boolean) {
+    if (this.optionArray){
+      const option = this.optionArray.find(o => o.id === id);
+      if(option){
+        // TODO: this is not currently triggering any updates itself
+        option.active = state;
+      }
+    }
+  }
+
+  public logEvent(operation: string) {
+    this.node.logControlEvent(operation, "nodedropdown", this.modelKey, this.getValue());
+  }
+
+  public selectNode() {
+    this.node.select();
+  }
 }
-/* eslint-enable */
+
+export interface IDropdownListControl {
+  id: string;
+  model: IBaseNodeModel;
+  modelKey: string;
+  options: ListOption[];
+  setOptions(options: ListOption[]): void;
+  tooltip: string;
+  placeholder: string;
+  getValue(): string;
+  setValue(val: string): void;
+  disabledFunction?: DisabledChecker;
+  logEvent(operation: string): void;
+  selectNode(): void;
+  getSelectionId(): string | undefined;
+}
+
+const ListOptionComponent: React.FC<{option: ListOption}> = ({option}) => (
+  <>
+    { option.icon &&
+      <svg className="icon">
+        {option.icon({})}
+      </svg>
+    }
+    <div className={optionLabelClass(option.displayName)}>
+      {option.displayName ?? option.name}
+    </div>
+  </>
+);
+
+export const DropdownList: React.FC<{
+  control: IDropdownListControl,
+  listClass: string,
+}> = observer(function DropdownList(props) {
+  const { control, listClass } = props;
+  const title = control.tooltip;
+  const { options, placeholder } = control;
+  const divRef = useRef<HTMLDivElement>(null);
+  useStopEventPropagation(divRef, "pointerdown");
+  useStopEventPropagation(divRef, "wheel");
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const [showList, setShowList] = useState(false);
+
+  // This will reset the listeners on every render because internally it has a useEffect depending
+  // on the two callbacks
+  useCloseDropdownOnOutsideEvent(listRef, () => showList, () => {
+    setShowList(false);
+  });
+
+  const val = control.getValue();
+  const option = options.find((opt) => optionValue(opt) === val);
+  const activeHub = option?.active !== false;
+  const liveNode = control.model.type.substring(0,4) === "Live";
+  const disableSelected = control.modelKey === "hubSelect" && liveNode && !activeHub;
+  const labelClasses = classNames("item top", { disabled: disableSelected, missing: option?.missing });
+
+  const onItemClick = useCallback((v: any) => {
+    control.selectNode();
+    setShowList(value => !value);
+
+    control.logEvent("nodedropdownclick");
+  }, [control]);
+
+  // Generate a handler for each list item
+  const onListClick = useCallback((v: string) => () => {
+    control.selectNode();
+    setShowList(value => !value);
+    control.setValue(v);
+
+    control.logEvent("nodedropdownselection");
+  }, [control]);
+
+  return (
+    <div className={`node-select ${listClass}`} ref={divRef} title={title}>
+      <div className={labelClasses} onMouseDown={onItemClick}>
+        { option
+          ? <ListOptionComponent option={option}/>
+          : <div className="label unselected">{placeholder}</div>
+        }
+        <svg className="icon dropdown-caret">
+          <DropdownCaretIcon />
+        </svg>
+      </div>
+      {showList ?
+      <div className={`option-list ${listClass}`} ref={listRef}>
+        {options.map((ops, i) => {
+          const disabled = ops.active === false || control.disabledFunction?.(ops);
+          const missing = ops.missing;
+          const className = classNames("item", listClass, {
+            disabled,
+            selectable: !disabled,
+            selected: optionValue(ops) === val,
+            missing
+          });
+          return (
+            <div
+              className={className}
+              key={i}
+              onMouseDown={!disabled ? onListClick(optionValue(ops)) : undefined}
+            >
+              <ListOptionComponent option={ops} />
+            </div>
+          );
+        })}
+      </div>
+      : null }
+    </div>
+  );
+});
+
+export const DropdownListControlComponent: React.FC<{ data: IDropdownListControl}> = (props) => {
+  const control = props.data;
+
+  return (
+    <div className="node-select-container">
+      <DropdownList
+        control={control}
+        listClass={control.modelKey}
+      />
+    </div>
+  );
+};

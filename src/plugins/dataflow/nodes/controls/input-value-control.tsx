@@ -1,105 +1,101 @@
+import { ClassicPreset } from "rete";
+import "./value-control.sass";
 import React from "react";
-import Rete, { NodeEditor, Node } from "rete";
-import { PlotButtonControlComponent } from "./plot-button-control";
-import { NodePlotColor } from "../../model/utilities/node";
+import { observer } from "mobx-react";
+import { action, computed, makeObservable, observable } from "mobx";
+import { IBaseNode, IBaseNodeModel } from "../base-node";
+import { MinigraphOptions, defaultMinigraphOptions } from "../dataflow-node-plot";
+import { PlotButtonControl, PlotButtonControlComponent } from "./plot-button-control";
+
 import "./input-value-control.scss";
 
-// A control closely tied to and displayed next to an input.
-// Includes a minigraph button as well as a display string.
-export class InputValueControl extends Rete.Control {
-  private emitter: NodeEditor;
-  private component: any;
-  private props: any;
+export class InputValueControl<
+  ModelType extends Record<Key, number>,
+  NodeType extends { model: ModelType } & IBaseNode,
+  Key extends keyof NodeType['model'] & string
+>
+  extends ClassicPreset.Control
+{
+  // In Dataflow v1 setting the value also updated the node data with putData
+  // for the given key of the ValueControl. This approach overlapped with the
+  // updating of the node data via the watchedValues feature.
+  // The actual value was not used by the value control because in all cases
+  // the setDisplayMessage was called too.
+  // So in Dataflow v2 we are just getting rid of the value property and
+  // each node will need to explicity save its calculated data in a
+  // watchedValue property.
+  @observable displayMessage = "Undefined";
 
   constructor(
-    emitter: NodeEditor,
-    key: string,
-    node: Node,
-    onGraphButtonClick: () => void,
-    label = "",
-    initVal = 0,
-    tooltip = "",
-    initDisplayMessage = "",
-    backgroundColor = NodePlotColor,
-    borderColor = NodePlotColor,
-    valueDisplayFunction = (val: any) => val,
-  ) {
-    super(key);
-    this.emitter = emitter;
-    this.key = key;
-
-    const initial = node.data[key] || initVal;
-    node.data[key] = initial;
-
-    this.props = {
-      value: initial,
-      label,
-      tooltip,
-      displayMessage: initDisplayMessage, // A message to display instead of the value
-      backgroundColor,
-      borderColor,
-      connected: false,
-      valueDisplayFunction
-    };
-
-    this.component = (compProps: {
-      value: any,
-      label: any,
-      tooltip: string,
-      displayMessage: string,
-      backgroundColor: string,
-      borderColor: string,
-      connected: boolean,
-      valueDisplayFunction: (val: any) => any
-    }) => {
-      return (
-        <div className="demo-output-value-container" title={compProps.tooltip}>
-          <div className="left-content">
-            <PlotButtonControlComponent showgraph={false} onGraphButtonClick={onGraphButtonClick} />
-            <div className="minigraph-legend">
-              { compProps.connected
-                ? <div
-                  className="legend-dot"
-                  style={{
-                    backgroundColor: compProps.backgroundColor,
-                    borderColor: compProps.borderColor
-                  }} />
-                : '' }
-            </div>
-          </div>
-          <div className="display-text">
-            {compProps.value === undefined
-              ? "Undefined"
-              : compProps.label + (compProps.displayMessage || compProps.valueDisplayFunction(compProps.value))}
-          </div>
-        </div>
-      );
-    };
+    public node: NodeType,
+    public modelKey: Key,
+    public label = "",
+    public tooltip = "Something" // FIXME: need better default
+  ){
+    super();
+    makeObservable(this);
   }
 
-  private tryUpdate = () => {
-    if (Object.hasOwn(this, "update")) {
-      (this as any).update();
-    }
-  };
+  public get model() {
+    return this.node.model;
+  }
 
-  public setValue = (val: number) => {
-    this.props.value = val;
-    this.putData(this.key, val);
-    this.tryUpdate();
-  };
+  @action
+  public setDisplayMessage(message: string) {
+    this.displayMessage = message;
+  }
 
-  public setDisplayMessage = (message: string) => {
-    this.props.displayMessage = message;
-    this.tryUpdate();
-  };
+  @computed
+  public get connected() {
+    return this.node.isConnected(this.modelKey);
+  }
 
-  public setConnected = (connected: boolean) => {
-    this.props.connected = connected;
-    this.tryUpdate();
-  };
+  @computed
+  public get legendDotStyle() {
+    const graphStyle = this.model.watchedValues[this.modelKey];
+    return graphStyle ?? defaultMinigraphOptions;
+  }
 
-  public getValue = () => {
-    return this.props.value;
-  };
+  @computed
+  public get plotButtonControl() {
+    return new PlotButtonControl(this.node);
+  }
 }
+
+export interface IInputValueControl {
+  id: string;
+  node: IBaseNode;
+  model: IBaseNodeModel;
+  modelKey: string;
+  label: string;
+  tooltip: string;
+  displayMessage: string;
+  setDisplayMessage(message: string): void;
+  connected: boolean;
+  legendDotStyle: MinigraphOptions;
+  plotButtonControl: PlotButtonControl;
+}
+
+export const InputValueControlComponent: React.FC<{ data: IInputValueControl; }> =
+  observer(function InputValueControlComponent(props)
+{
+  const control = props.data;
+
+  return (
+    <div className="demo-output-value-container" title={control.tooltip}>
+      <div className="left-content">
+        <PlotButtonControlComponent data={control.plotButtonControl} />
+        <div className="minigraph-legend">
+          { control.connected
+            ? <div
+              className="legend-dot"
+              style={control.legendDotStyle} />
+            : '' }
+        </div>
+      </div>
+      <div className="display-text">
+        { control.label + control.displayMessage }
+      </div>
+    </div>
+  );
+});

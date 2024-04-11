@@ -1,58 +1,51 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "regenerator-runtime/runtime";
-import { forEach } from "lodash";
 import { inject, observer } from "mobx-react";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
-import Rete, { NodeEditor, Engine, Node } from "rete";
-import ConnectionPlugin from "rete-connection-plugin";
-import ReactRenderPlugin from "rete-react-render-plugin";
 
 import { BaseComponent } from "../../../components/base";
 import { ProgramZoomType, DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
-import { kSimulatedChannelPrefix, simulatedChannel } from "../model/utilities/simulated-channel";
-import { findOutputVariable } from "../model/utilities/simulated-output";
-import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
-import { DataflowReteNodeFactory } from "../nodes/factories/dataflow-rete-node-factory";
-import { NumberReteNodeFactory } from "../nodes/factories/number-rete-node-factory";
-import { MathReteNodeFactory } from "../nodes/factories/math-rete-node-factory";
-import { TransformReteNodeFactory } from "../nodes/factories/transform-rete-node-factory";
-import { ControlReteNodeFactory } from "../nodes/factories/control-rete-node-factory";
-import { LogicReteNodeFactory } from "../nodes/factories/logic-rete-node-factory";
-import { SensorReteNodeFactory } from "../nodes/factories/sensor-rete-node-factory";
-import { DemoOutputReteNodeFactory } from "../nodes/factories/demo-output-rete-node-factory";
-import { LiveOutputReteNodeFactory } from "../nodes/factories/live-output-rete-node-factory";
-import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node-factory";
-import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
-import { getHubSelect, setLiveOutputOpts } from "../nodes/utilities/live-output-utilities";
-import {
-  sendDataToSerialDevice, sendDataToSimulatedOutput, updateNodeChannelInfo, updateGeneratorNode, updateNodeRecentValues,
-  updateSensorNode, updateTimerNode
-} from "../nodes/utilities/update-utilities";
-import {
-  getBoundingRectOfNodes, getInsertionOrder,
-  getNewNodePosition, moveNodeToFront
-} from "../nodes/utilities/view-utilities";
-import { DataflowDropZone } from "./ui/dataflow-drop-zone";
+import { simulatedChannel } from "../model/utilities/simulated-channel";
+
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
-import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
-import { NodeType, NodeTypes, ProgramDataRates } from "../model/utilities/node";
-import { calculatedRecentValues, runNodePlaybackUpdates,  } from "../utilities/playback-utils";
-import { getAttributeIdForNode, recordCase } from "../model/utilities/recording-utilities";
+import { serialSensorChannels } from "../model/utilities/channel";
+import { ProgramDataRates } from "../model/utilities/node";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { DocumentContextReact } from "../../../components/document/document-context";
-import { dataflowLogEvent } from "../dataflow-logger";
 import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { IDataSet } from "../../../models/data/data-set";
 
-import "./dataflow-program.sass";
+import { ClassicPreset, NodeEditor } from "rete";
+import { Presets, ReactPlugin } from "rete-react-plugin";
+import { AreaExtensions, BaseAreaPlugin } from "rete-area-plugin";
+import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
+import { NumberControl, NumberControlComponent } from "../nodes/controls/num-control";
+import { ValueControl, ValueControlComponent } from "../nodes/controls/value-control";
+import { DataflowEngine } from "rete-engine";
+import { CustomDataflowNode } from "../nodes/dataflow-node";
+import {
+  DropdownListControl, DropdownListControlComponent
+} from "../nodes/controls/dropdown-list-control";
+import { AreaExtra, Schemes } from "../nodes/rete-scheme";
+import { NodeEditorMST } from "../nodes/node-editor-mst";
+import { IBaseNode } from "../nodes/base-node";
+import { PlotButtonControl, PlotButtonControlComponent } from "../nodes/controls/plot-button-control";
+import { NumberUnitsControl, NumberUnitsControlComponent } from "../nodes/controls/num-units-control";
+import { DemoOutputControl, DemoOutputControlComponent } from "../nodes/controls/demo-output-control";
+import { InputValueControl, InputValueControlComponent } from "../nodes/controls/input-value-control";
+import { LiveOutputNode } from "../nodes/live-output-node";
+import { SensorNode } from "../nodes/sensor-node";
+import { recordCase } from "../model/utilities/recording-utilities";
+import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 
+import "./dataflow-program.sass";
 
 export interface IStartProgramParams {
   runId: string;
@@ -92,7 +85,8 @@ interface IState {
   lastIntervalDuration: number;
 }
 
-const numSocket = new Rete.Socket("Number value");
+const numSocket = new ClassicPreset.Socket("Number value");
+
 const RETE_APP_IDENTIFIER = "dataflow@0.1.0";
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
@@ -102,14 +96,12 @@ const MIN_ZOOM = .1;
 export class DataflowProgram extends BaseComponent<IProps, IState> {
   public static contextType = DocumentContextReact;
 
-  private components: DataflowReteNodeFactory[];
   private toolDiv: HTMLElement | null;
-  private channels: NodeChannelInfo[] = [];
   private previousChannelIds = "";
   private intervalHandle: ReturnType<typeof setTimeout>;
   private lastIntervalTime: number;
-  private programEditor: NodeEditor;
-  private programEngine: Engine;
+  private programEditor: NodeEditorMST;
+  private programEngine: DataflowEngine<Schemes>;
   private editorDomElement: HTMLElement | null;
   private disposers: IDisposer[] = [];
   private onSnapshotSetup = false;
@@ -222,17 +214,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public componentDidUpdate(prevProps: IProps) {
-    if (this.programEditor && this.programEditor.view) {
-      if (this.editorDomElement && this.state.editorContainerWidth !== this.editorDomElement.clientWidth) {
-        this.setState({ editorContainerWidth: this.editorDomElement.clientWidth });
-        this.programEditor.view.resize();
-        this.keepNodesInView();
-      } else if (this.props.size !== prevProps.size) {
-        this.programEditor.view.resize();
-        this.keepNodesInView();
-      }
-    }
-
     if (!this.programEditor && this.toolDiv) {
       this.initProgram();
     }
@@ -268,145 +249,146 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private initComponents = () => {
-    this.components = [new NumberReteNodeFactory(numSocket),
-      new MathReteNodeFactory(numSocket),
-      new TransformReteNodeFactory(numSocket),
-      new ControlReteNodeFactory(numSocket),
-      new LogicReteNodeFactory(numSocket),
-      new SensorReteNodeFactory(numSocket),
-      new DemoOutputReteNodeFactory(numSocket),
-      new LiveOutputReteNodeFactory(numSocket),
-      new GeneratorReteNodeFactory(numSocket),
-      new TimerReteNodeFactory(numSocket)];
   };
 
   private initProgramEngine = () => {
-    this.programEngine = new Rete.Engine(RETE_APP_IDENTIFIER);
-
-    this.components.map(c => {
-      this.programEngine.register(c);
-    });
   };
 
   private initProgramEditor = (clearHistory = false) => {
     (async () => {
-      if (!this.toolDiv) return;
+      if (!this.toolDiv || !this.props.program) return;
 
-      this.programEditor = new Rete.NodeEditor(RETE_APP_IDENTIFIER, this.toolDiv);
-      this.programEditor.use(ConnectionPlugin);
-      this.programEditor.use(ReactRenderPlugin);
+      const editor = new NodeEditorMST(this.props.program, this.tileId,
+        this.toolDiv, this.props.tileContent, this.stores, this.props.runnable);
+      this.programEditor = editor;
 
-      // Work around for cleaning up React components created
-      // by the react-render-plugin. The other part of this is
-      // in `destroyEditor`.
-      this.programEditor.on("rendercontrol", ({el, control}) => {
-        const extControl = control as any;
-        if (!extControl.render || extControl.render === "react") {
-          this.reactElements.push(el);
-        }
-      });
+      // editor.addPipe((context) => {
+      //   console.log("editor event", context);
+      //   return context;
+      // });
 
-      this.programEditor.on("rendernode", ({ el, node, component, bindSocket, bindControl }) => {
-        this.updateNodeNames();
-        const extComponent = component as any;
-        if (!extComponent.render || extComponent.render === "react") {
-          this.reactElements.push(el);
-          this.reactNodeElements.set(node, el);
-        }
-      });
+      const area = editor.area;
 
-      this.programEditor.on("noderemoved", node => {
-        const el = this.reactNodeElements.get(node);
-        if (el) {
-          this.reactNodeElements.delete(node);
-          this.reactElements = this.reactElements.filter(item => item !== el);
+      // area.addPipe((context) => {
+      //   if (!["pointermove", "nodetranslate", "nodetranslated"].includes(context?.type as any)) {
+      //     console.log("area event", context);
+      //   }
+      //   return context;
+      // });
 
-          // Remove all the controls inside of this node
-          const childControls = el.getElementsByClassName("control");
-          for (let i=0; i<childControls.length; i++) {
-            const controlEl = childControls[i];
-            if (controlEl instanceof HTMLElement && this.reactElements.indexOf(controlEl)) {
-              this.reactElements = this.reactElements.filter(item => item !== controlEl);
-              ReactDOM.unmountComponentAtNode(controlEl);
-            }
+      const connection = new ConnectionPlugin<Schemes, AreaExtra>();
+      const render = new ReactPlugin<Schemes, AreaExtra>();
+
+      // render.addPipe((context) => {
+      //   if (!["pointermove", "nodetranslate", "nodetranslated"].includes(context?.type as any)) {
+      //     console.log("render event", context);
+      //   }
+      //   return context;
+      // });
+
+      this.programEngine = editor.engine;
+
+      render.addPreset({
+        render(context: any, plugin: ReactPlugin<Schemes, unknown>):
+            React.ReactElement<any, string | React.JSXElementConstructor<any>> | null | undefined {
+          if (context.data.type === 'node') {
+            // We could go further than this and completely replace the whole control system
+
+            // We could get these just from up above, but if we want to make this a real
+            // preset living in another file, then it is better to get them using the
+            // parentScope function
+            // We need them so our custom node can just delete itself
+            // So far we don't need the area, but it might come in handy, perhaps for resizing
+            // the node
+            const _area = plugin.parentScope<BaseAreaPlugin<Schemes, any>>(BaseAreaPlugin);
+            const _editor = area.parentScope<NodeEditor<Schemes>>(NodeEditor) as NodeEditorMST;
+
+            return (
+              <CustomDataflowNode
+                data={context.data.payload}
+                emit={data => _area.emit(data as any)}
+                area={_area}
+                editor={_editor}
+              />
+            );
           }
-          ReactDOM.unmountComponentAtNode(el);
+          // When we return null Rete will fall through to the next preset, which is the
+          // Classic preset which provides the controls.
+          // We might want to replace the current approach of rendering these controls
+          // in their own React root elements, and instead just render them directly
+          // in CustomDataflowNode.
+          return null;
         }
       });
-      // End of work around for cleaning up React components
 
-      this.components.map(c => {
-        this.programEditor.register(c);
-      });
-
-      const program = this.props.program?.snapshotForRete;
-      if (program?.id) {
-        if (!this.props.readOnly && clearHistory) {
-          forEach(program.nodes, (n: Node) => {
-            const recentValues = n.data.recentValues as Record<string, any>;
-            if (recentValues) {
-              forEach(Object.keys(recentValues), (v:string) => {
-                recentValues[v] = [];
-              });
+      render.addPreset(Presets.classic.setup({
+        customize: {
+          node(data) {
+            console.warn("unexpected node customizer called");
+            return null;
+          },
+          control(data) {
+            if (data.payload instanceof ValueControl) {
+              return ValueControlComponent;
             }
-          });
+            if (data.payload instanceof NumberUnitsControl) {
+              return NumberUnitsControlComponent;
+            }
+            if (data.payload instanceof NumberControl) {
+              return NumberControlComponent;
+            }
+            if (data.payload instanceof DropdownListControl) {
+              return DropdownListControlComponent;
+            }
+            if (data.payload instanceof DemoOutputControl) {
+              return DemoOutputControlComponent;
+            }
+            if (data.payload instanceof PlotButtonControl) {
+              return PlotButtonControlComponent;
+            }
+            if (data.payload instanceof InputValueControl) {
+              return InputValueControlComponent;
+            }
+            return null;
+          }
         }
+      }));
 
-        await this.programEditor.fromJSON(program as any);
-      }
-      const { area } = this.programEditor.view;
-      const { programZoom } = this.props;
-      if (programZoom) {
-        area.zoom(programZoom.scale, programZoom.dx, programZoom.dy, "wheel");
-      }
+      connection.addPreset(ConnectionPresets.classic.setup());
 
-      (this.programEditor as any).on("process noderemoved connectioncreated connectionremoved", () => {
-        this.processAndSave();
-        this.countSerialDataNodes(this.programEditor.nodes);
+      editor.use(area);
+      area.use(connection);
+      area.use(render);
+
+      AreaExtensions.simpleNodesOrder(area);
+
+      // Notify after the area, connection, and render plugins have been configured
+      editor.notifyAboutExistingObjects();
+
+      // Reprocess when connections are changed
+      // And also count the serial nodes some of which only get counted if they are
+      // connected
+      editor.addPipe((context) => {
+        if (["noderemoved", "connectioncreated", "connectionremoved"].includes(context.type)) {
+          this.programEditor.process();
+          this.countSerialDataNodes(this.programEditor.getNodes() as IBaseNode[]);
+        }
+        return context;
       });
 
-      this.programEditor.on("nodecreated", node => {
-        this.processAndSave();
-        moveNodeToFront(this.programEditor, node, true);
-        node.meta.inTileWithId = this.tileId;
-        dataflowLogEvent("nodecreated", node, this.tileId);
-      });
+      // area.nodeViews
+      // await area.translate(a.id, { x: 0, y: 0 });
+      // await area.translate(b.id, { x: 270, y: 0 });
 
-      this.programEditor.on("selectnode", ( { node } ) => {
-        moveNodeToFront(this.programEditor, node, false);
-        node.meta.inTileWithId = this.tileId;
-      });
 
-      this.programEditor.on("nodedraged", node => {
-        this.props.onProgramChange(this.programEditor.toJSON());
-      });
+      setTimeout(() => {
+        // wait until nodes rendered because they dont have predefined width and height
+        AreaExtensions.zoomAt(area, editor.getNodes());
 
-      // remove rete double click zoom
-      this.programEditor.on("zoom", ({ source }) => {
-        return false;
-      });
-
-      this.programEditor.on("translated", node => {
-        const { transform } = this.programEditor.view.area;
-        this.props.onZoomChange(transform.x, transform.y, transform.k);
-      });
-
-      this.programEditor.view.resize();
-      this.programEditor.trigger("process");
-
-      // Program changes are logged from here, except nodecreated, above
-      this.programEditor.on("noderemoved", node => {
-        this.updateNodeNames();
-        dataflowLogEvent("noderemoved", node, this.tileId);
-      });
-
-      this.programEditor.on("connectioncreated", connection => {
-        dataflowLogEvent("connectioncreated", connection, this.tileId);
-      });
-
-      this.programEditor.on("connectionremoved", connection => {
-        dataflowLogEvent("connectionremoved", connection, this.tileId);
-      });
+        // This is needed to initialize things like the value control's sentence
+        // It was having problems when called earlier
+        this.programEditor.process();
+      }, 10);
     })();
   };
 
@@ -423,20 +405,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   }
 
-  private updateNodeNames(){
-    this.programEditor.nodes.forEach((node) => {
-      const insertionOrder = getInsertionOrder(this.programEditor, node.id);
-      const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
-      const displayNameBase = nodeType ? nodeType.displayName : node.name;
-      node.data.orderedDisplayName = displayNameBase + " " + insertionOrder;
-    });
-  }
-
   private destroyEditor() {
     this.reactElements.forEach(el => {
       ReactDOM.unmountComponentAtNode(el);
     });
-    this.programEditor.destroy();
     this.reactElements = [];
     this.reactNodeElements.clear();
   }
@@ -469,10 +441,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     this.processing = true;
     try {
-      await this.programEngine.abort();
-      const programJSON = this.programEditor.toJSON();
-      await this.programEngine.process(programJSON);
-      this.props.onProgramChange(programJSON);
+      return;
     } finally {
       this.processing = false;
     }
@@ -489,27 +458,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const channelIds = channels.map(c => c.channelId).join(",");
     if (channelIds !== this.previousChannelIds) {
       this.previousChannelIds = channelIds;
-      this.channels = channels;
-      this.countSerialDataNodes(this.programEditor.nodes);
+      this.props.tileContent.setChannels(channels);
 
-      this.programEditor.nodes.forEach((node) => {
-        if (node.name === "Sensor") {
-          const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
-          sensorSelect.setChannels(this.channels);
-        }
-
-        if (node.name === "Live Output"){
-          const hubSelect = getHubSelect(node);
-          hubSelect.setChannels(this.channels);
-        }
-      });
+      // Hack the type for now
+      const nodes = this.programEditor.getNodes() as IBaseNode[];
+      this.countSerialDataNodes(nodes);
     }
-
-    this.programEditor.nodes.forEach(node => {
-      if (["Sensor", "Live Output"].includes(node.name)) {
-        updateNodeChannelInfo(node, this.channels, this.stores.serialDevice);
-      }
-    });
   };
 
   private shouldShowProgramCover() {
@@ -524,52 +478,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private keepNodesInView = () => {
     const margin = 5;
-    let { k } = this.programEditor.view.area.transform;
-    const { container: { clientWidth, clientHeight }, area: { transform }} = this.programEditor.view;
-
-    // If we're at zero scale but have any window to fill,
-    // give a little scale so we can tell the program's proportions with a valid rect
-    if (k === 0 && clientWidth > 0 && clientHeight > 0) {
-      this.programEditor.view.area.transform = {k: .01, x: transform.x, y: transform.y};
-      this.programEditor.view.area.update();
-      k = this.programEditor.view.area.transform.k;
-    }
-
-    const rect = getBoundingRectOfNodes(this.programEditor);
-
-    if (rect?.isValid) {
-      const widthQ = k * clientWidth / (rect.right + margin);
-      const heightQ = k * clientHeight / (rect.bottom + margin);
-      const newZoom = Math.min(widthQ, heightQ);
-
-      const tooSmall = rect.width < (clientWidth * .25) || rect.height < (clientHeight * .25);
-      const tooBig = newZoom < k && rect.right > 0 && newZoom > 0;
-
-      if (tooSmall) {
-        this.programEditor.view.area.transform = {k: .9, x: transform.x, y: transform.y};
-        this.programEditor.view.area.update();
-        return;
-      }
-
-      if (tooBig) {
-        this.programEditor.view.area.transform = {k: newZoom, x: transform.x, y: transform.y};
-        this.programEditor.view.area.update();
-      }
-    }
   };
 
-  private addNode = async (nodeType: string, position?: [number, number]) => {
-    const nodeFactory = this.programEditor.components.get(nodeType) as DataflowReteNodeFactory;
-    const n1 = await nodeFactory!.createNode();
-    n1.position = position ?? getNewNodePosition(this.programEditor);
-    this.programEditor.addNode(n1);
+  private addNode = (nodeType: string, position?: [number, number]) => {
+    this.programEditor.createAndAddNode(nodeType, position);
   };
 
   private serialDeviceRefresh = () => {
     if (!this.stores.serialDevice.hasPort()){
       this.stores.serialDevice.requestAndSetPort()
         .then(() => {
-          this.stores.serialDevice.handleStream(this.channels);
+          this.stores.serialDevice.handleStream(this.props.tileContent.channels);
         });
     }
 
@@ -586,59 +505,36 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private playbackNodesWithCaseData = (dataSet: IDataSet, playBackIndex: number) => {
     const caseId = dataSet.getCaseAtIndex(playBackIndex)?.__id__;
     if (!caseId) return;
-    this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
-      const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx);
-      const valForNode = dataSet.getValue(caseId, attrId) as number;
-
-      // each node needs to have a particular updates performed explicitly for playback
-      runNodePlaybackUpdates(node, valForNode);
-      node.data.recentValues = calculatedRecentValues(dataSet, playBackIndex, attrId);
-      node.update();
-    });
+    // Keep TS happy
+    return "foo";
   };
 
   private updateNodes = () => {
-    const nodeProcessMap: { [name: string]: (n: Node) => void } = {
-      Generator: updateGeneratorNode,
-      Timer: updateTimerNode,
-      Sensor: (n: Node) => {
-        updateSensorNode(n, this.channels);
-      },
-      "Live Output": (n: Node) => {
-        const outputVar = findOutputVariable(n, this.props.tileContent?.outputVariables);
-        const foundDeviceFamily = this.stores.serialDevice.deviceFamily ?? "unknown device";
-        if (this.props.runnable) {
-          sendDataToSerialDevice(n, this.stores.serialDevice);
-          sendDataToSimulatedOutput(n, this.props.tileContent?.outputVariables);
-        }
-        setLiveOutputOpts(n, foundDeviceFamily, outputVar);
-      }
-    };
     let processNeeded = false;
-    this.programEditor.nodes.forEach((n: Node) => {
-      const nodeProcess = nodeProcessMap[n.name];
-      if (nodeProcess) {
+
+    // This has to be hacked until we figure out the way to specify the Rete Schemes
+    // so its node type is our node specific node types
+    const nodes = this.programEditor.getNodes() as unknown as IBaseNode[];
+    nodes.forEach(node => {
+      // If tick returns true then it means something was updated
+      // and we need to reprocess the diagram
+      if(node.onTick()) {
         processNeeded = true;
-        nodeProcess(n);
       }
-      if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
-        updateNodeRecentValues(n);
-      }
+      // Perhaps move this to the model since it should just be working on
+      // stuff in the model
+      node.model.updateRecentValues();
     });
     if (processNeeded) {
         // if we've updated values on 1 or more nodes (such as a generator),
-        // we need to abort any current processing and reprocess all
-        // nodes so current values are up to date
-      (async () => {
-        await this.programEngine.abort();
-        await this.programEngine.process(this.programEditor.toJSON());
-      })();
+        // reprocess all nodes so current values are up to date
+        this.programEditor.process();
     }
   };
 
   private tick = () => {
     const { runnable, tileContent: tileModel, playBackIndex, programMode,
-            isPlaying, updateRecordIndex, updatePlayBackIndex } = this.props;
+            isPlaying,  updateRecordIndex, updatePlayBackIndex } = this.props;
 
     const dataSet = tileModel.dataSet;
     const now = Date.now();
@@ -653,7 +549,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         break;
       case ProgramMode.Recording:
         if (runnable) {
-          recordCase(this.props.tileContent, this.programEditor, this.props.recordIndex);
+          recordCase(this.props.tileContent, this.props.recordIndex);
         }
         this.updateNodes();
         updateRecordIndex(UpdateMode.Increment);
@@ -670,25 +566,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   };
 
-  private countSerialDataNodes(nodes: Node[]){
+  private countSerialDataNodes(nodes: IBaseNode[]){
     // implementing with a "count" of 1 or 0 in case we need to count nodes in future
     let serialNodesCt = 0;
-
     nodes.forEach((n) => {
-      const isLiveSensor = /fsr|emg|tmp|[th]-[abcd]/; // match ids any live sensor channels
-      const sensor = n.data.sensor as string;
-      if(isLiveSensor.test(sensor) && !sensor.startsWith(kSimulatedChannelPrefix)){
+      if ((n instanceof LiveOutputNode || n instanceof SensorNode) && n.requiresSerial()){
         serialNodesCt++;
-      }
-      //live output block will alert need for serial
-      // only after connection to another node is made
-      // this allows user to drag a block out and work on program before connecting
-      if (n.name === "Live Output"){
-        // Don't count the node if it's connected to a shared output variable
-        const outputVariable = findOutputVariable(n, this.props.tileContent?.outputVariables);
-        if(!outputVariable && n.inputs.entries().next().value[1].connections.length > 0) {
-          serialNodesCt++;
-        }
       }
     });
     // constraining all counts to 1 or 0 for now
@@ -731,20 +614,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private zoomIn = () => {
-    const { k } = this.programEditor.view.area.transform;
-    this.setZoom(Math.min(MAX_ZOOM, k + .05));
   };
 
   private zoomOut = () => {
-    const { k } = this.programEditor.view.area.transform;
-    this.setZoom(Math.max(MIN_ZOOM, k - .05));
   };
 
   private setZoom = (zoom: number) => {
-    const currentTransform = this.programEditor.view.area.transform;
-    this.programEditor.view.area.transform = {k: zoom, x: currentTransform.x, y: currentTransform.y};
-    this.programEditor.view.area.update();
-    const { transform } = this.programEditor.view.area;
-    this.props.onZoomChange(transform.x, transform.y, transform.k);
   };
 }

@@ -41,13 +41,13 @@ class DataflowToolTile {
     return cy.get(`${getNodeText("number")} .number-input`);
   }
   getNodeInput() {
-    return cy.get('.socket.input.number-value');
+    return cy.get('.input-socket');
   }
   getNodeOutput() {
-    return cy.get('.socket.output.number-value');
+    return cy.get('.output-socket');
   }
   getNodeTitle(workspaceClass) {
-    return cy.get(`${workspaceClass || ".primary-workspace"} .node-title`);
+    return cy.get(`${workspaceClass || ".primary-workspace"} .node .title`);
   }
   getNodeValueContainer(nodeType) {
     return this.getNode(nodeType).find(".value-container");
@@ -86,7 +86,10 @@ class DataflowToolTile {
     return Number(style.substring(startIndex, endIndex));
   }
   getNumberNodeOutput() {
-    return cy.get(".flow-tool .node.number .node-output");
+    return cy.get(".flow-tool .node.number .output-socket");
+  }
+  getLiveOutputNodeInput() {
+    return cy.get(".flow-tool .node.live-output .input-socket");
   }
   getModalOkButton() {
     return cy.get('.dialog-contents #okButton');

@@ -1,66 +1,59 @@
-import React from "react";
-import Rete, { NodeEditor, Node } from "rete";
+import React, { useRef } from "react";
+import { ClassicPreset } from "rete";
+
 import PreviewPlotIcon from "../../assets/icons/preview-plot.svg";
-import { dataflowLogEvent } from "../../dataflow-logger";
 
 import "./plot-button-control.scss";
+import { observer } from "mobx-react";
+import { useStopEventPropagation } from "./custom-hooks";
+import { IBaseNode } from "../base-node";
 
-const handleChange = (onChange: any) => {
-  return (e: any) => { onChange(e.target.value); };
-};
+interface PlottableModel {
+  plot: boolean;
+  setPlot: (val: boolean) => void;
+}
 
-export const PlotButtonControlComponent = (compProps: {showgraph: any; onGraphButtonClick: any; }) => (
-  <div className="node-graph-container"
-       title={compProps.showgraph ? "Hide Block Value Graph" : "Show Block Value Graph"}>
-    <div
-      className={`graph-button main-color ${compProps.showgraph ? "active" : ""}`}
-      onClick={handleChange(compProps.onGraphButtonClick)}>
-      <svg className="icon">
-        <PreviewPlotIcon />
-      </svg>
-    </div>
-  </div>
-);
-
-export class PlotButtonControl extends Rete.Control {
-  private emitter: NodeEditor;
-  private component: any;
-  private props: any;
-  private node: Node;
-  private stepY = 5;
-
-  constructor(emitter: NodeEditor, key: string, node: Node) {
-    super(key);
-    this.emitter = emitter;
-    this.key = key;
-    this.node = node;
-
-    const initial = node.data[key] || false;
-    node.data[key] = initial;
-
-    this.props = {
-      showgraph: initial,
-      onGraphButtonClick: () => {
-        this.logGraphToggle();
-        this.setGraph(!this.props.showgraph);
-      }
-    };
-
-    this.component = PlotButtonControlComponent;
+export class PlotButtonControl extends ClassicPreset.Control
+{
+  constructor(
+    public node: IBaseNode & { model: PlottableModel }
+  ) {
+    super();
   }
 
-  public setGraph = (show: boolean) => {
-    this.props.showgraph = show;
-    this.putData(this.key, show);
-    // this update is needed to ensure that we redraw the plot
-    // in the proper state after the button is pressed
-    this.node.update();
-    this.emitter.trigger("process");
-  };
+  get model() {
+    return this.node.model;
+  }
 
-  public logGraphToggle = () => {
-    const toggleStr = this.props.showgraph ? "off" : "on";
-    const tileId = this.node.meta.inTileWithId as string;
-    dataflowLogEvent(`toggle minigraph ${toggleStr}`, this.node, tileId);
+  togglePlot = () => {
+    this.model.setPlot(!this.model.plot);
+
+    const toggleStr = this.model.plot ? "off" : "on";
+    this.node.logNodeEvent(`toggle minigraph ${toggleStr}`);
   };
 }
+
+export const PlotButtonControlComponent = observer(
+  function PlotButtonControlComponent(props: {data: PlotButtonControl})
+{
+  const control = props.data;
+  const showGraph = control.model.plot;
+
+  const divRef = useRef<HTMLDivElement>(null);
+  useStopEventPropagation(divRef, "pointerdown");
+  useStopEventPropagation(divRef, "dblclick");
+
+  return (
+    <div className="node-graph-container"
+        title={showGraph ? "Hide Block Value Graph" : "Show Block Value Graph"}>
+      <div
+        ref={divRef}
+        className={`graph-button main-color ${showGraph ? "active" : ""}`}
+        onClick={control.togglePlot}>
+        <svg className="icon">
+          <PreviewPlotIcon />
+        </svg>
+      </div>
+    </div>
+  );
+});

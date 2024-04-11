@@ -1,59 +1,54 @@
-import React from "react";
-import classNames from "classnames";
-import Rete, { NodeEditor, Node } from "rete";
+import { ClassicPreset } from "rete";
 import "./value-control.sass";
-import { getNumDisplayStr } from "../utilities/view-utilities";
+import classNames from "classnames";
+import React from "react";
+import { observer } from "mobx-react";
+import { action, makeObservable, observable } from "mobx";
 
-export class ValueControl extends Rete.Control {
-  private emitter: NodeEditor;
-  private component: any;
-  private props: any;
-  constructor(emitter: NodeEditor,
-              key: string,
-              node: Node) {
-    super(key);
-    this.emitter = emitter;
-    this.key = key;
+export class ValueControl extends ClassicPreset.Control
+{
+  // In Dataflow v1 setting the value also updated the node data with putData
+  // for the given key of the ValueControl. This approach overlapped with the
+  // updating of the node data via the watchedValues feature.
+  // The actual value was not used by the value control because in all cases
+  // the setSentence was called too.
+  // So in Dataflow v2 we are just getting rid of the value property and
+  // each node will need to explicity save its calculated data in a
+  // watchedValue property.
+  @observable sentence = "";
 
-    this.component = (compProps: { value: number; sentence: string, class: string }) => {
-      const sentLen = compProps.sentence.length;
-      const fontSizeClasses = {
-        "smallest": sentLen >= 15,
-        "small": sentLen > 13 && sentLen < 15,
-        "medium": sentLen > 11 && sentLen <= 13,
-      };
-      const valueClasses = classNames(
-        "value-container", fontSizeClasses, compProps.class.toLowerCase().replace(/ /g, "-"),
-      );
-      return (
-        <div className={valueClasses} title={"Node Value"}>
-          {compProps.sentence ? compProps.sentence : getNumDisplayStr(compProps.value)}
-        </div>
-      );
-    };
-
-    const initial = node.data[key] || 0;
-    node.data[key] = initial;
-
-    this.props = {
-      value: initial,
-      sentence: "",
-      class: node.name,
-    };
+  constructor(
+    public nodeName: string
+  ){
+    super();
+    makeObservable(this);
   }
 
-  public setSentence = (sentence: string) => {
-    this.props.sentence = sentence;
-    (this as any).update();
-  };
-
-  public setValue = (val: number) => {
-    this.props.value = val;
-    this.putData(this.key, val);
-    (this as any).update();
-  };
-
-  public getValue = () => {
-    return this.props.value;
-  };
+  @action
+  public setSentence(sentence: string) {
+    this.sentence = sentence;
+  }
 }
+
+export const ValueControlComponent: React.FC<{ data: ValueControl; }> =
+  observer(function ValueControlComponent(props)
+{
+  const control = props.data;
+
+  const sentLen = control.sentence.length;
+  const fontSizeClasses = {
+    "smallest": sentLen >= 15,
+    "small": sentLen > 13 && sentLen < 15,
+    "medium": sentLen > 11 && sentLen <= 13,
+  };
+  const valueClasses = classNames(
+    "value-container", fontSizeClasses, control.nodeName.toLowerCase().replace(/ /g, "-"),
+  );
+
+  return (
+    <div className={valueClasses} title={"Node Value"}>
+      {control.sentence}
+    </div>
+  );
+
+});
