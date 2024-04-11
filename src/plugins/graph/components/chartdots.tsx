@@ -212,7 +212,8 @@ export const ChartDots = function ChartDots(props: PlotProps) {
       dataConfiguration, pointRadius, selectedPointRadius: graphModel.getPointRadius('select'),
       getColorForId: graphModel.getColorForId,
       dotsRef, selectedOnly, pointColor, pointStrokeColor,
-      getScreenX, getScreenY, getLegendColor, enableAnimation
+      getScreenX, getScreenY, getLegendColor, enableAnimation,
+      enableConnectors: false
     });
   }, [dataConfiguration, primaryAxisPlace, primaryAttrRole, secondaryAttrRole, graphModel, dotsRef,
     extraPrimaryAttrRole, extraSecondaryAttrRole, pointColor,

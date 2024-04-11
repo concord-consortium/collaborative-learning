@@ -24,7 +24,6 @@ import {
   clueGraphColors, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
 } from "../../../utilities/color-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
-import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
 import { isSharedCaseMetadata, SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel, IGraphLayerModel } from "./graph-layer-model";
@@ -811,11 +810,6 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
     yAttributeLabel: axisLabels && axisLabels.left,
     ...snap
   });
-  const connectByDefault = appConfig?.getSetting("connectPointsByDefault", "graph");
-  if (connectByDefault) {
-    const cLines = ConnectingLinesModel.create();
-    createdGraphModel.addAdornment(cLines);
-  }
 
   return createdGraphModel;
 }
