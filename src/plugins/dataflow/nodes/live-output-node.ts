@@ -65,13 +65,35 @@ export class LiveOutputNode extends BaseNode<
     const liveOutputControl = new DropdownListControl(this, "liveOutputType", NodeLiveOutputTypes);
     this.addControl("liveOutputType", liveOutputControl);
 
-    this.hubSelectControl = new DropdownListControl(this, "hubSelect", NodeMicroBitHubs);
+    if (this.readOnly) {
+      // In readOnly mode we will not be updating the list of options, so if the value of hubSelect
+      // is one of these dynamically added options, it will not be found in the readOnly view.
+      // This will result in the readOnly view just showing "Select an option".
+      // To work around this we use a special set of readOnly options which always contains the name
+      // of the current option.
+      // TODO: this could be improved by serializing more info about the current hubSelect option
+      // like the displayName, active, and missing properties. This way the readOnly view could
+      // display these as well.
+      this.hubSelectControl = new DropdownListControl(this, "hubSelect", [], undefined, undefined,
+        this.getReadOnlyHubSelectOptions
+      );
+    } else {
+      this.hubSelectControl = new DropdownListControl(this, "hubSelect", NodeMicroBitHubs);
+    }
     this.addControl("hubSelect", this.hubSelectControl);
 
     const inputValueControl = new InputValueControl(this, "nodeValue", "", "Display for nodeValue",
       this.getDisplayMessageWithStatus);
     nodeValueInput.addControl(inputValueControl);
   }
+
+  getReadOnlyHubSelectOptions = () => {
+    if (this.model.hubSelect) {
+      return [ { name: this.model.hubSelect }];
+    } else {
+      return NodeMicroBitHubs;
+    }
+  };
 
   findOutputVariable() {
     const type = this.model.liveOutputType;
