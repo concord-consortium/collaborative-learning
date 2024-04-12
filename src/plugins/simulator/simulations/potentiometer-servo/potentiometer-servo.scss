@@ -75,32 +75,7 @@
   }
 }
 
-// state-specific positioning
-.pot-servo-component.collapsed {
-  .pot-dial {
-    top: 6px;
-    left:14px;
-  }
-  .servo-arm {
-    top: -58px;
-    right: -53px;
-  }
-
-  .wire {
-    width:70px;
-    height: 4px;
-    &.input {
-      top: 65px;
-      left: 70px;
-    }
-    &.output {
-      top: 65px;
-      right: 43px;
-    }
-  }
-}
-
-.pot-servo-component.expanded {
+.pot-servo-component {
   .pot-dial {
     top: 130px;
     left:14px;
@@ -143,13 +118,17 @@
     padding: 5px 10px;
     border-radius: 4px 20px 20px 4px;
     margin-bottom: 5px;
-    background-color: #3d4ad0;
+    background-color: green;
     color: white;
-    font-size: 12px;
-    width:100%;
-    cursor: pointer;
-    &:hover {
-      background-color: #555;
-    }
+    font-size: 10px;
+    width:80%;
+  }
+  .mini-node.category-input {
+    background-color: blue;
+    transform: translateX(-40px);
+  }
+  .mini-node.category-output {
+    background-color: orange;
+    transform: translateX(40px);
   }
 }

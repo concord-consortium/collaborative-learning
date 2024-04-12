@@ -65,34 +65,52 @@ function getMiniNodeIcon(node: ISharedProgramNode) {
       return "D";
     case "Live Output":
       return "O";
+    case "Timer":
+      return "T";
     default:
       return "?";
   }
 }
 
-function getMiniNodeLabelString(node: ISharedProgramNode) {
+function getMiniNodeLabelString(node: ISharedProgramNode): string {
+  let label;
+
   switch (node.nodeType) {
     case "Sensor":
-      return "S";
+      label = node.nodeState.sensorType;
+      break;
     case "Generator":
-      return "G";
+      label = node.nodeState.generatorType;
+      break;
     case "Number":
-      return "#";
+      label = "Number";
+      break;
     case "Math":
-      return "M";
+      label = node.nodeState.mathOperator;
+      break;
     case "Logic":
-      return "L";
+      label = node.nodeState.logicOperator;
+      break;
     case "Control":
-      return "C";
+      label = node.nodeState.controlOperator;
+      break;
     case "Transform":
-      return "T";
+      label = node.nodeState.transformOperator;
+      break;
     case "Demo Output":
-      return "D";
+      label = node.nodeState.outputType;
+      break;
     case "Live Output":
-      return "O";
+      label = node.nodeState.hubSelect;
+      break;
+    case "Timer":
+      label = "Timer";
+      break;
     default:
-      return "?";
+      label = "?";
   }
+
+  return label.toString();
 }
 
 function getMiniNodesDisplayData(programData?: SharedProgramDataType): IMiniNodeData[] {
@@ -100,14 +118,16 @@ function getMiniNodesDisplayData(programData?: SharedProgramDataType): IMiniNode
   const arr = [...programData.programNodes.values()];
 
   return arr.map(node => {
-    const formattedNum = Number.isInteger(node.nodeValue) ? node.nodeValue : node.nodeValue.toFixed(2);
+    const val = node.nodeValue;
+    const formattedNum = Number.isInteger(val) ? val : val.toFixed(2);
+    const asString = formattedNum.toString();
     return {
       id: node.id,
       icon: getMiniNodeIcon(node),
-      label: getMiniNodeLabelString(node),
-      value: formattedNum.toString(),
+      label: getMiniNodeLabelString(node) as string,
+      value: asString,
       type: node.nodeType.toLowerCase(),
-      category: node.nodeCategory.toLowerCase()
+      category: node.nodeCategory.toLowerCase() ?? "unknown"
     };
   });
 }
@@ -117,8 +137,8 @@ const miniNodeClasses = (node: IMiniNodeData, index:number, length:number) => {
     'mini-node',
     { 'first': index === 0 },
     { 'last': index === length - 1 },
-    `category${node.category}`,
-    `type${node.type}`
+    `category-${node.category}`,
+    `type-${node.type}`
   );
 };
 
@@ -142,10 +162,10 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
 
   const miniNodesData = getMiniNodesDisplayData(programData);
 
-  console.log("\n\n| miniNodesData: \n");
-  miniNodesData.forEach(node => {
-    console.log("|     ", node);
-  } );
+  // console.log("\n\n| miniNodesData: \n");
+  // miniNodesData.forEach(node => {
+  //   console.log("|     ", node);
+  // } );
 
   return (
     <div className={potServoClasses}>
@@ -168,10 +188,10 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
                 <div key={miniNode.id} className={miniNodeClasses(miniNode, index, miniNodesData.length)}>
                   <div className="info">
                     <div className="icon">
-                      {miniNode.icon}
+
                     </div>
                     <div className="label">
-                      {miniNode.label}
+                    [{miniNode.icon}] {miniNode.label}
                     </div>
                   </div>
                   <div className="value">

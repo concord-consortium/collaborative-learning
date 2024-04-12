@@ -12,6 +12,7 @@ export const kSharedNodeKeys = [
   "mathOperator",
   "logicOperator",
   "transformOperator",
+  "controlOperator",
   "outputType", // for demo output node
   "hubSelect",
   "liveOutputType" // for live output node
@@ -26,7 +27,8 @@ export const kNodeTypeToCategoryMap: { [key: string]: string } = {
   "Control": "operator",
   "Transform": "operator",
   "Demo Output": "output",
-  "Live Output": "output"
+  "Live Output": "output",
+  "Timer": "input"
 };
 
 export interface ISharedProgramNode {
