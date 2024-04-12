@@ -1,140 +1,140 @@
 {
   "rowMap": {
     "row1": {"id": "row1", "isSectionHeader": false, "tiles": [{"tileId": "tile1"}]},
-    "JI0d0rC_z_1qNRLK": {
-      "id": "JI0d0rC_z_1qNRLK",
+    "r6ljHBsQ5GQNeTIA": {
+      "id": "r6ljHBsQ5GQNeTIA",
       "height": 480,
       "isSectionHeader": false,
-      "tiles": [{"tileId": "h1XSuHyqbzTsoelo"}]
+      "tiles": [{"tileId": "69JwO1iprT1DiutQ"}]
     },
-    "bY-kTGEI69C1AjDb": {
-      "id": "bY-kTGEI69C1AjDb",
+    "f2S20Z61qieQbGx_": {
+      "id": "f2S20Z61qieQbGx_",
       "height": 400,
       "isSectionHeader": false,
-      "tiles": [{"tileId": "2mGqs-HSYatixjYZ"}]
+      "tiles": [{"tileId": "d2TohdY3v2Vr9lA_"}]
     }
   },
-  "rowOrder": ["row1", "JI0d0rC_z_1qNRLK", "bY-kTGEI69C1AjDb"],
+  "rowOrder": ["row1", "f2S20Z61qieQbGx_", "r6ljHBsQ5GQNeTIA"],
   "tileMap": {
     "tile1": {
       "id": "tile1",
       "content": {"type": "Text", "text": "Welcome to the standalone document editor"}
     },
-    "h1XSuHyqbzTsoelo": {
-      "id": "h1XSuHyqbzTsoelo",
+    "69JwO1iprT1DiutQ": {
+      "id": "69JwO1iprT1DiutQ",
       "content": {
         "type": "Dataflow",
         "program": {
           "nodes": {
-            "9WNZtyz1m9sl7Dk8": {
-              "id": "9WNZtyz1m9sl7Dk8",
+            "9FYVuoy7LKFDtchr": {
+              "id": "9FYVuoy7LKFDtchr",
               "name": "Sensor",
-              "x": 0,
-              "y": 0,
+              "x": 44.265625,
+              "y": 73.44921875,
               "data": {
                 "type": "Sensor",
                 "plot": false,
                 "orderedDisplayName": "Input 1",
-                "nodeValue": "425",
+                "nodeValue": "213",
                 "recentValues": {
                   "nodeValue": [
-                    "425",
-                    "425",
-                    "425",
-                    "425",
-                    "425",
-                    "425",
-                    "425",
-                    "425",
-                    "425",
-                    "425",
-                    "425",
-                    "425",
-                    "425",
-                    "425",
-                    "425",
-                    "425",
-                    "425"
+                    "213",
+                    "213",
+                    "213",
+                    "213",
+                    "213",
+                    "213",
+                    "213",
+                    "213",
+                    "213",
+                    "213",
+                    "213",
+                    "213",
+                    "213",
+                    "213",
+                    "213",
+                    "213",
+                    "213"
                   ]
                 },
                 "sensorType": "pin-reading",
                 "sensor": "SIMresist_reading_key"
               }
             },
-            "CTU_gbKKAELLdKJO": {
-              "id": "CTU_gbKKAELLdKJO",
+            "Xr2qAPVGfd6YMFhB": {
+              "id": "Xr2qAPVGfd6YMFhB",
               "name": "Live Output",
-              "x": 0,
-              "y": 0,
+              "x": 875.94140625,
+              "y": 92.09765625,
               "data": {
                 "type": "Live Output",
-                "plot": true,
+                "plot": false,
                 "orderedDisplayName": "Live Output 2",
-                "nodeValue": "113.33333333333334",
+                "nodeValue": "56.8",
                 "recentValues": {
                   "nodeValue": [
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334"
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8"
                   ]
                 },
                 "liveOutputType": "Servo",
                 "hubSelect": "Simulated Servo"
               }
             },
-            "ZZhxojE6tR7m4A1v": {
-              "id": "ZZhxojE6tR7m4A1v",
+            "tLyNt80xcm8mj1jE": {
+              "id": "tLyNt80xcm8mj1jE",
               "name": "Math",
-              "x": 0,
-              "y": 0,
+              "x": 295.5390625,
+              "y": 100.4296875,
               "data": {
                 "type": "Math",
-                "plot": true,
+                "plot": false,
                 "orderedDisplayName": "Math 3",
-                "nodeValue": "0.6296296296296297",
+                "nodeValue": "0.31555555555555553",
                 "recentValues": {
                   "nodeValue": [
-                    "0.6296296296296297",
-                    "0.6296296296296297",
-                    "0.6296296296296297",
-                    "0.6296296296296297",
-                    "0.6296296296296297",
-                    "0.6296296296296297",
-                    "0.6296296296296297",
-                    "0.6296296296296297",
-                    "0.6296296296296297",
-                    "0.6296296296296297",
-                    "0.6296296296296297",
-                    "0.6296296296296297",
-                    "0.6296296296296297",
-                    "0.6296296296296297",
-                    "0.6296296296296297",
-                    "0.6296296296296297",
-                    "0.6296296296296297"
+                    "0.31555555555555553",
+                    "0.31555555555555553",
+                    "0.31555555555555553",
+                    "0.31555555555555553",
+                    "0.31555555555555553",
+                    "0.31555555555555553",
+                    "0.31555555555555553",
+                    "0.31555555555555553",
+                    "0.31555555555555553",
+                    "0.31555555555555553",
+                    "0.31555555555555553",
+                    "0.31555555555555553",
+                    "0.31555555555555553",
+                    "0.31555555555555553",
+                    "0.31555555555555553",
+                    "0.31555555555555553",
+                    "0.31555555555555553"
                   ]
                 },
                 "mathOperator": "Divide"
               }
             },
-            "ePQKoHbhEnI_R280": {
-              "id": "ePQKoHbhEnI_R280",
+            "6VqzI-gxQ2krdSHr": {
+              "id": "6VqzI-gxQ2krdSHr",
               "name": "Number",
-              "x": 0,
-              "y": 0,
+              "x": 40,
+              "y": 275,
               "data": {
                 "type": "Number",
                 "plot": false,
@@ -164,15 +164,49 @@
                 "value": 675
               }
             },
-            "n_Km2DsoUEOr4YtH": {
-              "id": "n_Km2DsoUEOr4YtH",
+            "4Qi4zm3ay1saj1B7": {
+              "id": "4Qi4zm3ay1saj1B7",
+              "name": "Math",
+              "x": 646.86328125,
+              "y": 66.58984375,
+              "data": {
+                "type": "Math",
+                "plot": false,
+                "orderedDisplayName": "Math 5",
+                "nodeValue": "56.8",
+                "recentValues": {
+                  "nodeValue": [
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8",
+                    "56.8"
+                  ]
+                },
+                "mathOperator": "Multiply"
+              }
+            },
+            "XFpgYtd_-EPJsoA_": {
+              "id": "XFpgYtd_-EPJsoA_",
               "name": "Number",
-              "x": 0,
-              "y": 0,
+              "x": 471.76953125,
+              "y": 281.1953125,
               "data": {
                 "type": "Number",
                 "plot": false,
-                "orderedDisplayName": "Number 5",
+                "orderedDisplayName": "Number 6",
                 "nodeValue": "180",
                 "recentValues": {
                   "nodeValue": [
@@ -197,136 +231,102 @@
                 },
                 "value": 180
               }
-            },
-            "RzKflN5EgvBWEP18": {
-              "id": "RzKflN5EgvBWEP18",
-              "name": "Math",
-              "x": 0,
-              "y": 0,
-              "data": {
-                "type": "Math",
-                "plot": false,
-                "orderedDisplayName": "Math 6",
-                "nodeValue": "113.33333333333334",
-                "recentValues": {
-                  "nodeValue": [
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334",
-                    "113.33333333333334"
-                  ]
-                },
-                "mathOperator": "Multiply"
-              }
             }
           },
           "connections": {
-            "a6717634a54f5dc6": {
-              "id": "a6717634a54f5dc6",
-              "source": "9WNZtyz1m9sl7Dk8",
+            "ac69d0ef0ccb12a8": {
+              "id": "ac69d0ef0ccb12a8",
+              "source": "9FYVuoy7LKFDtchr",
               "sourceOutput": "value",
-              "target": "ZZhxojE6tR7m4A1v",
+              "target": "tLyNt80xcm8mj1jE",
               "targetInput": "num1"
             },
-            "c8cc14362370c873": {
-              "id": "c8cc14362370c873",
-              "source": "ePQKoHbhEnI_R280",
+            "2aec4e269eebc421": {
+              "id": "2aec4e269eebc421",
+              "source": "6VqzI-gxQ2krdSHr",
               "sourceOutput": "value",
-              "target": "ZZhxojE6tR7m4A1v",
+              "target": "tLyNt80xcm8mj1jE",
               "targetInput": "num2"
             },
-            "7f9001dca9f6faef": {
-              "id": "7f9001dca9f6faef",
-              "source": "ZZhxojE6tR7m4A1v",
+            "92878b29ed01fcf8": {
+              "id": "92878b29ed01fcf8",
+              "source": "XFpgYtd_-EPJsoA_",
               "sourceOutput": "value",
-              "target": "RzKflN5EgvBWEP18",
+              "target": "4Qi4zm3ay1saj1B7",
+              "targetInput": "num2"
+            },
+            "6cea4c7beb240fa8": {
+              "id": "6cea4c7beb240fa8",
+              "source": "tLyNt80xcm8mj1jE",
+              "sourceOutput": "value",
+              "target": "4Qi4zm3ay1saj1B7",
               "targetInput": "num1"
             },
-            "4e69a6987de11a56": {
-              "id": "4e69a6987de11a56",
-              "source": "n_Km2DsoUEOr4YtH",
+            "44bf7f73489983b5": {
+              "id": "44bf7f73489983b5",
+              "source": "4Qi4zm3ay1saj1B7",
               "sourceOutput": "value",
-              "target": "RzKflN5EgvBWEP18",
-              "targetInput": "num2"
-            },
-            "e7c3f23474e6d0d1": {
-              "id": "e7c3f23474e6d0d1",
-              "source": "RzKflN5EgvBWEP18",
-              "sourceOutput": "value",
-              "target": "CTU_gbKKAELLdKJO",
+              "target": "Xr2qAPVGfd6YMFhB",
               "targetInput": "nodeValue"
             }
           }
         },
-        "programDataRate": 100,
+        "programDataRate": 1000,
         "programZoom": {"dx": 0, "dy": 0, "scale": 1}
       }
     },
-    "2mGqs-HSYatixjYZ": {
-      "id": "2mGqs-HSYatixjYZ",
+    "d2TohdY3v2Vr9lA_": {
+      "id": "d2TohdY3v2Vr9lA_",
       "title": "Simulation 1",
       "content": {"type": "Simulator", "simulation": "potentiometer_chip_servo"}
     }
   },
   "sharedModelMap": {
-    "MfaKkFf78neuX95s": {
+    "QnoGB1W3lgNHVV4b": {
       "sharedModel": {
         "type": "SharedDataSet",
-        "id": "MfaKkFf78neuX95s",
-        "providerId": "h1XSuHyqbzTsoelo",
-        "dataSet": {"id": "9nv_LZcix4gvWhsY", "name": "Program 1", "attributes": [], "cases": []}
+        "id": "QnoGB1W3lgNHVV4b",
+        "providerId": "69JwO1iprT1DiutQ",
+        "dataSet": {"id": "kWAFQM7hAoQYHGXr", "name": "Program 1", "attributes": [], "cases": []}
       },
-      "tiles": ["h1XSuHyqbzTsoelo"]
+      "tiles": ["69JwO1iprT1DiutQ"]
     },
-    "DlPmVZ1qLHQVuGC-": {
-      "sharedModel": {"type": "SharedProgramData", "id": "DlPmVZ1qLHQVuGC-"},
-      "tiles": ["h1XSuHyqbzTsoelo", "2mGqs-HSYatixjYZ"]
+    "72TFIqnR6GKw7_kv": {
+      "sharedModel": {"type": "SharedProgramData", "id": "72TFIqnR6GKw7_kv"},
+      "tiles": ["69JwO1iprT1DiutQ", "d2TohdY3v2Vr9lA_"]
     },
-    "k-BHzH1LM4Qiz8gA": {
+    "1nBF9bZW8gtqp_48": {
       "sharedModel": {
         "type": "SharedVariables",
-        "id": "k-BHzH1LM4Qiz8gA",
+        "id": "1nBF9bZW8gtqp_48",
         "variables": [
           {
-            "id": "XoqlWHV0yaWt6ax-",
+            "id": "jf5OMBEMCP8AOiJ3",
             "name": "pot_angle_key",
             "displayName": "Potentiometer",
             "unit": "deg",
-            "value": 170,
+            "value": 85,
             "inputs": [],
             "color": "light-gray",
             "icon": "ccicon://potentiometer_key",
             "labels": ["input", "position", "decimalPlaces:0"]
           },
           {
-            "id": "3VigkNE9fB5q8Kxo",
+            "id": "blcw1V-5_wUDkakF",
             "name": "resist_reading_key",
             "displayName": "Pin",
-            "value": 425,
+            "value": 213,
             "inputs": [],
             "color": "light-gray",
             "icon": "ccicon://signal_key",
             "labels": ["input", "reading", "sensor:pin-reading", "decimalPlaces:0"]
           },
           {
-            "id": "r-g092D8lkpkqEDA",
+            "id": "O41x3TnYIwQvLjI_",
             "name": "servo_angle_key",
             "displayName": "Servo",
             "unit": "deg",
-            "value": 113.33333333333334,
+            "value": 56.8,
             "inputs": [],
             "color": "light-gray",
             "icon": "ccicon://servo_key",
@@ -334,7 +334,7 @@
           }
         ]
       },
-      "tiles": ["2mGqs-HSYatixjYZ", "tile1", "h1XSuHyqbzTsoelo"]
+      "tiles": ["d2TohdY3v2Vr9lA_", "tile1", "69JwO1iprT1DiutQ"]
     }
   },
   "annotations": {}

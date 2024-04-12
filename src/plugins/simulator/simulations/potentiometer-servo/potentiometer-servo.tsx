@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import classNames from "classnames";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { iconUrl, kPotentiometerKey, kServoKey, kSignalKey
@@ -8,14 +8,20 @@ import { findVariable } from "../simulation-utilities";
 import potDial from "./assets/pot-top.png";
 import servoArm from "./assets/servo-arm.png";
 import assemblyExpanded from "./assets/assembly-expanded.png";
-import assemblyCollapsed from "./assets/assembly-collapsed.png";
-import ExpandIcon from "./assets/expand-arduino.svg";
-import MinimizeIcon from "./assets/minimize-arduino.svg";
 
 import "./potentiometer-servo.scss";
-import { SharedProgramDataType } from "../../../dataflow/model/shared-program-data";
+import { ISharedProgramNode, SharedProgramDataType } from "../../../dataflow/model/shared-program-data";
 
 export const kPotentiometerServoKey = "potentiometer_chip_servo";
+
+interface IMiniNodeData {
+  id: string;
+  icon: string;
+  label: string;
+  value: string;
+  type: string;
+  category: string;
+}
 
 const potVisibleOffset = 135;
 const servoVisibleOffset = 90;
@@ -39,14 +45,63 @@ function getTweenedServoAngle(realValue: number, lastVisibleValue: number) {
   return realValue;
 }
 
-function getMiniNodesData(programData?: SharedProgramDataType) {
-  if (!programData ) return [];
-  const arr = [...programData.programNodes.values()];
-  return arr.map(node => ({...node, ...node.nodeState })) || [];
+function getMiniNodeIcon(node: ISharedProgramNode) {
+  switch (node.nodeType) {
+    case "Sensor":
+      return "S";
+    case "Generator":
+      return "G";
+    case "Number":
+      return "#";
+    case "Math":
+      return "M";
+    case "Logic":
+      return "L";
+    case "Control":
+      return "C";
+    case "Transform":
+      return "T";
+    case "Demo Output":
+      return "D";
+    case "Live Output":
+      return "O";
+    default:
+      return "?";
+  }
 }
 
+function getMiniNodeLabelString(node: ISharedProgramNode) {
+  return node.nodeDisplayedName;
+}
+
+function getMiniNodesDisplayData(programData?: SharedProgramDataType): IMiniNodeData[] {
+  if (!programData ) return [];
+  const arr = [...programData.programNodes.values()];
+
+  return arr.map(node => {
+    const formattedNum = Number.isInteger(node.nodeValue) ? node.nodeValue : node.nodeValue.toFixed(2);
+    return {
+      id: node.id,
+      icon: getMiniNodeIcon(node),
+      label: getMiniNodeLabelString(node),
+      value: formattedNum.toString(),
+      type: node.nodeType.toLowerCase(),
+      category: node.nodeCategory.toLowerCase()
+    };
+  });
+}
+
+const miniNodeClasses = (node: IMiniNodeData, index:number, length:number) => {
+  return classNames(
+    'mini-node',
+    { 'first': index === 0 },
+    { 'last': index === length - 1 },
+    `category${node.category}`,
+    `type${node.type}`
+  );
+};
+
 function PotentiometerAndServoComponent({ frame, variables, programData }: ISimulationProps) {
-  const [collapsed, setMinimized] = useState(false);
   const tweenedServoAngle = useRef(0);
   const lastTweenedAngle = tweenedServoAngle.current;
 
@@ -61,10 +116,15 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
   const valueForRotation = 180 - (tweenedServoAngle.current - servoVisibleOffset);
   const servoRotationString = `rotate(${valueForRotation}deg)`;
 
-  const potServoClasses = classNames('pot-servo-component', { collapsed, "expanded": !collapsed });
-  const boardClasses = classNames('board', { collapsed, "expanded": !collapsed });
+  const potServoClasses = classNames('pot-servo-component');
+  const boardClasses = classNames('board');
 
-  const miniNodesData = getMiniNodesData(programData);
+  const miniNodesData = getMiniNodesDisplayData(programData);
+
+  console.log("\n\n| miniNodesData: \n");
+  miniNodesData.forEach(node => {
+    console.log("|     ", node);
+  } );
 
   return (
     <div className={potServoClasses}>
@@ -77,17 +137,25 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
           />
           <div className="input wire"></div>
           <img
-            src={collapsed ? assemblyCollapsed : assemblyExpanded}
+            src={assemblyExpanded}
             className={boardClasses}
             alt="Board"
           />
           <div className="mini-nodes">
             {
-              miniNodesData.map((node, index) => (
-                <div key={node.id} className="mini-node">
-                  <pre>
-                    {JSON.stringify(node, null, 2)}
-                  </pre>
+              miniNodesData.map((miniNode, index) => (
+                <div key={miniNode.id} className={miniNodeClasses(miniNode, index, miniNodesData.length)}>
+                  <div className="info">
+                    <div className="icon">
+                      {miniNode.icon}
+                    </div>
+                    <div className="label">
+                      {miniNode.label}
+                    </div>
+                  </div>
+                  <div className="value">
+                    {miniNode.value}
+                  </div>
                 </div>
               ))
             }
@@ -115,23 +183,6 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
               <div className="high">high</div>
             </div>
           </div>
-        </div>
-        <div className="size-toggle area">
-          <button
-            className="expand-toggle"
-            onClick={() => setMinimized(!collapsed)}
-          >
-            { collapsed
-              ? <div>
-                  <ExpandIcon />
-                  <span>Expand</span>
-                </div>
-              : <div>
-                  <MinimizeIcon />
-                  <span>Minimize</span>
-                </div>
-            }
-          </button>
         </div>
       </div>
     </div>

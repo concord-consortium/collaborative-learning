@@ -17,16 +17,15 @@ export const kSharedNodeKeys = [
   "liveOutputType" // for live output node
 ];
 
-// REVIEW: project spec doesn't specify all of these
-// Current values are as close to "reality" as possible*
 export const kNodeTypeToCategoryMap: { [key: string]: string } = {
   "Sensor": "input",
-  "Generator": "operator",
-  "Number": "operator",
+  "Generator": "input",
+  "Number": "input",
   "Math": "operator",
   "Logic": "operator",
+  "Control": "operator",
   "Transform": "operator",
-  "Demo Output": "operator",
+  "Demo Output": "output",
   "Live Output": "output"
 };
 
