@@ -1,5 +1,5 @@
 import React, { FunctionComponent, SVGProps, useCallback, useRef, useState } from "react";
-import { computed, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import { observer } from "mobx-react";
 import { ClassicPreset } from "rete";
 import classNames from "classnames";
@@ -162,6 +162,7 @@ export class DropdownListControl<
     return this.optionArray;
   }
 
+  @action
   public setOptions(options: ListOption[]) {
     if (this.optionsFunc) {
       console.warn("This dropdown list is using an options function instead of array");

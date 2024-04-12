@@ -20,6 +20,6 @@ export function getNewNodePosition(editor: NodeEditorMST) {
   return nodePos;
 }
 
-export function getNumDisplayStr(n: number){
-  return isNaN(n) ? kEmptyValueString : Number(n).toFixed(3).replace(/\.?0+$/, "");
+export function getNumDisplayStr(n: number | undefined ){
+  return (n === undefined || isNaN(n)) ? kEmptyValueString : Number(n).toFixed(3).replace(/\.?0+$/, "");
 }

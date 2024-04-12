@@ -11,7 +11,7 @@ import { MathNode } from "./math-node";
 import { CounterNode } from "./counter-node";
 import { LogicNode } from "./logic-node";
 import { GeneratorNode } from "./generator-node";
-import { IBaseNodeModel, NodeClass } from "./base-node";
+import { IBaseNode, IBaseNodeModel, NodeClass } from "./base-node";
 import { uniqueId } from "../../../utilities/js-utils";
 import { INodeServices } from "./service-types";
 import { LogEventName } from "../../../lib/logger-types";
@@ -28,7 +28,7 @@ import { ControlNode } from "./control-node";
 import { getNewNodePosition } from "./utilities/view-utilities";
 
 export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices {
-  private reteNodesMap: Record<string, Schemes['Node']> = {};
+  public reteNodesMap: Record<string, Schemes['Node']> = {};
 
   public engine = new DataflowEngine<Schemes>();
   public area: AreaPlugin<Schemes, AreaExtra>;
@@ -39,7 +39,8 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     private div: HTMLElement,
     private mstContent: DataflowContentModelType,
     public stores: IStores,
-    public runnable: boolean | undefined
+    public runnable: boolean | undefined,
+    public readOnly: boolean | undefined,
   ) {
     super();
 
@@ -144,10 +145,13 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
   }
 
   public process = () => {
-    console.warn("NodeEditorMST.process");
-    this.engine.reset();
+    console.log("NodeEditorMST.process");
 
-    console.log("NodeEditorMST.process getNodes", this.getNodes());
+    // Don't do any processing when we are read-only
+    if (this.readOnly) return;
+
+
+    this.engine.reset();
 
     // It seems like structures should correctly handle our setup, but from what
     // I can tell it is reading the empty private nodes and connections from
@@ -159,7 +163,6 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     // will only be called once.
     // debugger;
     const leafNodes = graph.leaves().nodes();
-    console.log("NodeEditorMST.process leafNodes", leafNodes);
     leafNodes.forEach(n => this.engine.fetch(n.id));
   };
 
@@ -271,6 +274,11 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     this.process();
   }
 
+  disposeNodes() {
+    const nodes = this.getNodes();
+    nodes.forEach(node => (node as IBaseNode).dispose());
+  }
+
   //
   // Methods implementing the Rete `Editor` interface
   //
@@ -285,6 +293,7 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     if (!mstNode) {
       const _reteNode = this.reteNodesMap[id];
       if (_reteNode) {
+        (_reteNode as IBaseNode).dispose();
         delete this.reteNodesMap[id];
       }
       // We have to hack this to make the types happy, this is a bug
@@ -438,6 +447,7 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
 
     if (!await this.emit({ type: 'noderemove', data: node })) return false;
 
+    (node as IBaseNode).dispose();
     this.mstProgram.removeNode(id);
 
     // Temporary use this approach to get things working

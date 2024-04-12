@@ -140,6 +140,7 @@ export type NodeClass = new (id: string | undefined, model: any, services: INode
 export type IBaseNode = Schemes['Node'] & {
   model: IBaseNodeModel;
   onTick(): boolean;
+  dispose(): void;
   process(): void;
   select(): void;
   isConnected(inputKey: string): boolean;
@@ -153,6 +154,7 @@ export type IBaseNode = Schemes['Node'] & {
   logNodeEvent(
     operation: string
   ): void;
+  readOnly?: boolean;
 }
 
 export class BaseNode<
@@ -189,8 +191,18 @@ export class BaseNode<
    */
   onTick() { return false; }
 
+  /**
+   * If a node has created reactions or other things that need to be cleaned up,
+   * do so here.
+   */
+  dispose() {}
+
   process() {
     this.services.process();
+  }
+
+  get readOnly() {
+    return this.services.readOnly;
   }
 
   /**

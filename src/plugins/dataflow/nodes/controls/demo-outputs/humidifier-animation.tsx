@@ -27,6 +27,7 @@ export const HumidifierAnimation: React.FC<IProps> = ({nodeValue}) => {
     intervalRef.current = _interval;
   }
 
+  // Remove the animation when the component is disposed
   useEffect(() => {
     return removeAnimation;
   }, []);

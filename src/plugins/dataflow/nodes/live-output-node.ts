@@ -9,7 +9,7 @@ import { NodeLiveOutputTypes, NodeMicroBitHubs, baseLiveOutputOptions,
   kBinaryOutputTypes,
   kGripperOutputTypes, kMicroBitHubRelaysIndexed,
   kServoOutputTypes} from "../model/utilities/node";
-import { IInputValueControl, InputValueControl } from "./controls/input-value-control";
+import { InputValueControl } from "./controls/input-value-control";
 import { SerialDevice } from "../../../models/stores/serial";
 import { VariableType } from "@concord-consortium/diagram-view";
 import { simulatedHub, simulatedHubName } from "../model/utilities/simulated-output";
@@ -22,7 +22,10 @@ export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
   liveOutputType: "Gripper 2.0",
   // The default in the old DF was "connect device", choosing this does not bring up
   // the dialog, but it doesn't in the old one either. Hmm.
-  hubSelect: ""
+  hubSelect: "",
+  // We record this in state so readOnly views of this node can mirror the status
+  // without needing to track all of the channel state
+  outputStatus: ""
 })
 .actions(self => ({
   setLiveOutputType(outputType: string) {
@@ -30,6 +33,9 @@ export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
   },
   setHubSelect(hub: string) {
     self.hubSelect = hub;
+  },
+  setOutputStatus(status: string) {
+    self.outputStatus = status;
   }
 }));
 export interface ILiveOutputNodeModel extends Instance<typeof LiveOutputNodeModel> {}
@@ -45,7 +51,6 @@ export class LiveOutputNode extends BaseNode<
   },
   ILiveOutputNodeModel
 > {
-  inputValueControl: IInputValueControl;
   hubSelectControl: IDropdownListControl;
 
   constructor(
@@ -61,12 +66,35 @@ export class LiveOutputNode extends BaseNode<
     const liveOutputControl = new DropdownListControl(this, "liveOutputType", NodeLiveOutputTypes);
     this.addControl("liveOutputType", liveOutputControl);
 
-    this.hubSelectControl = new DropdownListControl(this, "hubSelect", NodeMicroBitHubs);
+    if (this.readOnly) {
+      // In readOnly mode we will not be updating the list of options, so if the value of hubSelect
+      // is one of these dynamically added options, it will not be found in the readOnly view.
+      // This will result in the readOnly view just showing "Select an option".
+      // To work around this we use a special set of readOnly options which always contains the name
+      // of the current option.
+      // TODO: this could be improved by serializing more info about the current hubSelect option
+      // like the displayName, active, and missing properties. This way the readOnly view could
+      // display these as well.
+      this.hubSelectControl = new DropdownListControl(this, "hubSelect", [], undefined, undefined,
+        this.getReadOnlyHubSelectOptions
+      );
+    } else {
+      this.hubSelectControl = new DropdownListControl(this, "hubSelect", NodeMicroBitHubs);
+    }
     this.addControl("hubSelect", this.hubSelectControl);
 
-    this.inputValueControl = new InputValueControl(this, "nodeValue", "", "Display for nodeValue");
-    nodeValueInput.addControl(this.inputValueControl);
+    const inputValueControl = new InputValueControl(this, "nodeValue", "", "Display for nodeValue",
+      this.getDisplayMessageWithStatus);
+    nodeValueInput.addControl(inputValueControl);
   }
+
+  getReadOnlyHubSelectOptions = () => {
+    if (this.model.hubSelect) {
+      return [ { name: this.model.hubSelect }];
+    } else {
+      return NodeMicroBitHubs;
+    }
+  };
 
   findOutputVariable() {
     const type = this.model.liveOutputType;
@@ -142,7 +170,7 @@ export class LiveOutputNode extends BaseNode<
   getLiveOptions(deviceFamily: string, sharedVar?: VariableType ) {
     const options: ListOption[] = [];
     const simOption = sharedVar && simulatedHub(sharedVar);
-    const anyOuputFound = simOption || deviceFamily === "arduino" || deviceFamily === "microbit";
+    const anyOutputFound = simOption || deviceFamily === "arduino" || deviceFamily === "microbit";
     const { liveGripperOption, liveServoOption, warningOption } = baseLiveOutputOptions;
 
     if (sharedVar && simOption) {
@@ -173,7 +201,7 @@ export class LiveOutputNode extends BaseNode<
       }
     }
 
-    if (!anyOuputFound && !options.includes(warningOption)) options.push(warningOption);
+    if (!anyOutputFound && !options.includes(warningOption)) options.push(warningOption);
 
     return options;
   }
@@ -226,10 +254,18 @@ export class LiveOutputNode extends BaseNode<
 
   private getRelayMessageReceived() {
     const hubRelaysChannel = this.getHubRelaysChannel();
-    if (!hubRelaysChannel || !hubRelaysChannel.relaysState) return "(no hub)";
+    if (!hubRelaysChannel || !hubRelaysChannel.relaysState) return "no hub";
     const rIndex = this.getSelectedRelayIndex();
     const reportedValue = hubRelaysChannel.relaysState[rIndex];
-    return reportedValue === this.model.nodeValue ? "(received)" : "(sent)";
+    // TODO: this approach of knowing whether a message was received isn't
+    // accurate. If we are sending the same value that was received before it will
+    // immediately be labeled as "received". To really indicate if a message was
+    // received we'd need an id system so the relay would return the id of message
+    // that it received. However this might not be very useful if there are multiple
+    // programs both trying to update the same relay. So instead showing a status
+    // like: "Y secs ago, relay reported X" might be better. But even that isn't
+    // great.
+    return reportedValue === this.model.nodeValue ? "received" : "sent";
   }
 
   onTick() {
@@ -252,6 +288,30 @@ export class LiveOutputNode extends BaseNode<
     return true;
   }
 
+  getDisplayMessage = () => {
+    // TODO: if the nodeValue is not defined we might want display something
+    // different than just showing it as 0
+    const value = this.model.nodeValue ?? 0;
+    const { liveOutputType } = this.model;
+    if (kBinaryOutputTypes.includes(liveOutputType)) {
+      return value === 0 ? "off" : "on";
+    } else if (kGripperOutputTypes.includes(liveOutputType)){
+      const roundedDisplayValue = Math.round((value / 10) * 10);
+      return `${roundedDisplayValue}% closed`;
+    } else if (kServoOutputTypes.includes(liveOutputType)) {
+      return `${value}°`;
+    }
+
+    // We shouldn't hit this case but if we do then just pass the value through
+    return `${value}`;
+  };
+
+  getDisplayMessageWithStatus = () => {
+    const { outputStatus } = this.model;
+    const displayMessage = this.getDisplayMessage();
+    return displayMessage + (outputStatus ? ` (${outputStatus})` : "");
+  };
+
   data({nodeValue}: {nodeValue?: number[]}) {
     // if there is not a valid input, use 0
     const value = nodeValue && nodeValue[0] != null && !isNaN(nodeValue[0]) ? nodeValue[0] : 0;
@@ -262,19 +322,17 @@ export class LiveOutputNode extends BaseNode<
       // convert all non-zero to 1
       const newValue = +(value !== 0);
       this.model.setNodeValue(newValue);
-      const offOnString = newValue === 0 ? "off" : "on";
-      const displayMessage = kMicroBitHubRelaysIndexed.includes(outputType)
-        ? `${offOnString} ${this.getRelayMessageReceived()}`
-        : offOnString;
-      this.inputValueControl.setDisplayMessage(displayMessage);
+      if (kMicroBitHubRelaysIndexed.includes(outputType)) {
+        this.model.setOutputStatus(this.getRelayMessageReceived());
+      } else {
+        this.model.setOutputStatus("");
+      }
     } else if (kGripperOutputTypes.includes(outputType)){
       // NOTE: this looks similar to the Demo Output Node, but in this case we
       // are setting the nodeValue to 0-100. In the Demo Output Node it is set to
       // 0-1
       const newValue = getPercentageAsInt(value);
       this.model.setNodeValue(newValue);
-      const roundedDisplayValue = Math.round((newValue / 10) * 10);
-      this.inputValueControl.setDisplayMessage(`${roundedDisplayValue}% closed`);
     } else if (kServoOutputTypes.includes(outputType)) {
       // out of range value will not move sim servo
       const isValidServoValue = value >= 0 && value <= 180;
@@ -283,11 +341,10 @@ export class LiveOutputNode extends BaseNode<
       // alternative: angles out of range move servo to nearest valid angle
       // newValue = Math.min(Math.max(newValue, 0), 180);
       this.model.setNodeValue(newValue);
-      this.inputValueControl.setDisplayMessage(`${newValue}°`);
     } else {
       // We shouldn't hit this case but if we do then just pass the value through
       this.model.setNodeValue(value);
-      this.inputValueControl.setDisplayMessage(`${value}`);
+      this.model.setOutputStatus("");
     }
 
     return {};
