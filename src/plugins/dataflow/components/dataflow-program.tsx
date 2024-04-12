@@ -577,8 +577,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    console.log("DataFlow.tick");
-
     const { runnable, tileContent: tileModel, playBackIndex, programMode,
             isPlaying,  updateRecordIndex, updatePlayBackIndex } = this.props;
 
