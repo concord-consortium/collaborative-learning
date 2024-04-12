@@ -65,20 +65,12 @@ export const SharedProgramData = SharedModel.named("SharedProgramData")
         nodeCategory: kNodeTypeToCategoryMap[node.model.type]
       };
       if (!newNode.id) return;
-      // REVIEW: ended up needing to make this whole thing an array
-      // was unable to put into the map, despite having an id, and simpifying the object
       try {
         self.programNodes.set(newNode.id, newNode);
       } catch (error) {
         console.error('Error putting node into programNodes:', error);
       }
     });
-   console.log("| just set program nodes: hmm? ", self.programNodes);
-  }
-}))
-.views(self => ({
-  get allSharedNodesData() {
-    return Array.from(self.programNodes.values());
   }
 }));
 

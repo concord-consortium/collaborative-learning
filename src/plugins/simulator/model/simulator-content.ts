@@ -54,7 +54,7 @@ export const SimulatorContentModel = TileContentModel
       }
       return simulations[self.simulation];
     },
-    get sharedProgramData() { // HEY: Will this work without "attachment routine"?
+    get sharedProgramData() {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       const sharedModels = sharedModelManager?.getTileSharedModels(self); // only returns those who are attached
       const sharedProgramData = sharedModels?.filter( sharedModel => {
