@@ -137,13 +137,19 @@ context('XYPlot Tool Tile', function () {
       // Added data point will be off the right edge of the plot area until we click 'Fit'.
       xyTile.getTile().scrollIntoView();
       xyTile.getGraphDot().should('have.length', 3);
-      // X axis should not have changed in response to adding a data point.
+      xyTile.getGraphDot().eq(0).children('circle.inner-circle').should('be.visible');
+      xyTile.getGraphDot().eq(1).children('circle.inner-circle').should('be.visible');
+      xyTile.getGraphDot().eq(2).children('circle.inner-circle').should('not.be.visible');
+            // X axis should not have changed in response to adding a data point.
       xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
       xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 7, 12);
 
       cy.log("fit view");
       xyTile.getTile().click();
       clueCanvas.clickToolbarButton('graph', 'fit-all');
+      xyTile.getGraphDot().eq(0).children('circle.inner-circle').should('be.visible');
+      xyTile.getGraphDot().eq(1).children('circle.inner-circle').should('be.visible');
+      xyTile.getGraphDot().eq(2).children('circle.inner-circle').should('be.visible');
       xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
       xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 15, 20);
 
