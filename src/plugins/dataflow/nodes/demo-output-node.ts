@@ -1,5 +1,5 @@
 import { ClassicPreset } from "rete";
-import { Instance } from "mobx-state-tree";
+import { Instance, isAlive } from "mobx-state-tree";
 import { numSocket } from "./num-socket";
 import { NodeDemoOutputTypes, NodePlotRed, kBinaryOutputTypes } from "../model/utilities/node";
 import { BaseNode, BaseNodeModel, NoOutputs } from "./base-node";
@@ -121,11 +121,15 @@ export class DemoOutputNode extends BaseNode<
   }
 
   getTiltDisplayMessage = () => {
+    if (!isAlive(this.model)) return "";
+
     const { tilt } = this.model;
     return tilt === 1 ? "up" : tilt === -1 ? "down" : "center";
   };
 
   getNodeValueDisplayMessage = () => {
+    if (!isAlive(this.model)) return "";
+
     const nodeValue = this.model.nodeValue ?? 0;
     if (kBinaryOutputTypes.includes(this.model.outputType)) {
       return nodeValue === 0 ? "off" : "on";

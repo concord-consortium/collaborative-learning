@@ -1,5 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import "regenerator-runtime/runtime";
 import { inject, observer } from "mobx-react";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
@@ -412,10 +411,19 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private destroyEditor() {
-    this.reactElements.forEach(el => {
-      ReactDOM.unmountComponentAtNode(el);
+    const {area} = this.programEditor;
+    // This should unmount the React components.
+    // As far as I can tell Rete doesn't have cleaup or destroy function to unmount
+    // all of the nodes and connections that it creates React roots for. The loops
+    // below do this.  If a node or connection is removed, then all of its
+    // sub parts (controls and sockets) are also unmounted.
+    area.nodeViews.forEach((view, id) => {
+      area.removeNodeView(id);
     });
-    this.reactElements = [];
+    area.connectionViews.forEach((view, id) => {
+      area.removeConnectionView(id);
+    });
+
     this.reactNodeElements.clear();
     this.programEditor.disposeNodes();
   }
