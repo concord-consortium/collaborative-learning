@@ -64,19 +64,25 @@ export class TimerNode extends BaseNode<
       "Set Time Off");
     this.addControl("timeOff", timeOffControl);
 
-    this.valueControl = new ValueControl("Timer");
+    this.valueControl = new ValueControl("Timer", this.getSentence);
     this.addControl("value", this.valueControl);
 
     this.addControl("plotButton", new PlotButtonControl(this));
   }
 
-  data(): { value: number } {
+  get currentValue() {
     // This follows the v1 generator block approach and shows and outputs 0 when
     // it hasn't been 'ticked' yet. This can happen if the sampling rate
     // is 1min and the block is just added to the diagram
-    const value = this.model.nodeValue ?? 0;
-    this.valueControl.setSentence(+value === 0 ? "off" : "on");
-    return { value };
+    return this.model.nodeValue ?? 0;
+  }
+
+  getSentence = () => {
+    return +this.currentValue === 0 ? "off" : "on";
+  };
+
+  data(): { value: number } {
+    return { value: this.currentValue };
   }
 
   onTick() {
