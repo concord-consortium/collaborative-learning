@@ -8,7 +8,8 @@ import { typeField } from "../../../utilities/mst-utils";
 import { INodeServices } from "./service-types";
 import { MinigraphOptions } from "./dataflow-node-plot";
 import { DemoOutputControl } from "./controls/demo-output-control";
-import { IInputValueControl, InputValueControl } from "./controls/input-value-control";
+import { InputValueControl } from "./controls/input-value-control";
+import { autorun } from "mobx";
 
 const tiltMinigraphOptions: MinigraphOptions = {
   backgroundColor: "#fff",
@@ -65,8 +66,7 @@ export class DemoOutputNode extends BaseNode<
   IDemoOutputNodeModel
 > {
   demoOutputControl: DemoOutputControl;
-  inputValueControl: IInputValueControl;
-  inputTiltControl?: IInputValueControl;
+  disposeTiltMonitor?: () => void;
 
   constructor(
     id: string | undefined,
@@ -86,36 +86,54 @@ export class DemoOutputNode extends BaseNode<
     const demoOutputControl = new DemoOutputControl(model);
     this.addControl("demoOutput", demoOutputControl);
 
-    this.inputValueControl = new InputValueControl(this, "nodeValue", "", "Display for nodeValue");
-    nodeValueInput.addControl(this.inputValueControl);
-  }
+    const inputValueControl = new InputValueControl(this, "nodeValue", "", "Display for nodeValue",
+      this.getNodeValueDisplayMessage);
+    nodeValueInput.addControl(inputValueControl);
 
-  private updateTilt(tiltValue: number | null) {
-    this.model.setTilt(tiltValue);
-    if (this.model.outputType === "Advanced Grabber") {
-      if (!this.hasInput("tilt")) {
-        const tiltInput = new ClassicPreset.Input(numSocket, "Tilt");
-        this.addInput("tilt", tiltInput);
+    // This is in an autorun so it will get triggered even when we are readonly
+    this.disposeTiltMonitor = autorun(() => {
+      if (this.model.outputType === "Advanced Grabber") {
+        if (!this.hasInput("tilt")) {
+          const tiltInput = new ClassicPreset.Input(numSocket, "Tilt");
+          this.addInput("tilt", tiltInput);
 
-        this.inputTiltControl = new InputValueControl(this, "tilt", "tilt: ", "Display for tilt");
-        tiltInput.addControl(this.inputTiltControl);
+          const inputTiltControl = new InputValueControl(this, "tilt", "tilt: ", "Display for tilt",
+            this.getTiltDisplayMessage);
+          tiltInput.addControl(inputTiltControl);
 
+          // Tell rete to re-draw the node since we changed our inputs
+          this.services.update("node", this.id);
+        }
+      } else {
+        if (!this.hasInput("tilt")) return;
+
+        if (!this.readOnly) {
+          // Make sure we don't have any connections
+          // Only run this when we are not readOnly since this is modifying the model
+          this.services.removeInputConnection(this.id, "tilt");
+        }
+
+        this.removeInput("tilt");
         // Tell rete to re-draw the node since we changed our inputs
         this.services.update("node", this.id);
       }
-      const { tilt } = this.model;
-      const tiltWord = tilt === 1 ? "up" : tilt === -1 ? "down" : "center";
-      this.inputTiltControl?.setDisplayMessage(tiltWord);
-    } else {
-      if (!this.hasInput("tilt")) return;
-
-      // Make sure we don't have any connections
-      this.services.removeInputConnection(this.id, "tilt");
-      this.removeInput("tilt");
-      // Tell rete to re-draw the node since we changed our inputs
-      this.services.update("node", this.id);
-    }
+    });
   }
+
+  getTiltDisplayMessage = () => {
+    const { tilt } = this.model;
+    return tilt === 1 ? "up" : tilt === -1 ? "down" : "center";
+  };
+
+  getNodeValueDisplayMessage = () => {
+    const nodeValue = this.model.nodeValue ?? 0;
+    if (kBinaryOutputTypes.includes(this.model.outputType)) {
+      return nodeValue === 0 ? "off" : "on";
+    } else {
+      const hundredPercentClosed = Math.round(nodeValue * 10) * 10;
+      return `${hundredPercentClosed}% closed`;
+    }
+  };
 
   data({nodeValue, tilt}: {nodeValue?: number[], tilt?: number[]}) {
     // TODO: we should put this in a MobX transaction so it only triggers
@@ -126,17 +144,18 @@ export class DemoOutputNode extends BaseNode<
       // otherwise convert all non-zero to 1
       const newValue = (value == null || isNaN(value)) ? 0 : +(value !== 0);
       this.model.setNodeValue(newValue);
-      this.inputValueControl.setDisplayMessage(newValue === 0 ? "off" : "on");
     } else {
       // Clamp the value between 0 and 1
       const newValue = (value == null) ? 0 : Math.max(0, Math.min(1, value));
       this.model.setNodeValue(newValue);
-      const hundredPercentClosed = Math.round(newValue * 10) * 10;
-      this.inputValueControl.setDisplayMessage(`${hundredPercentClosed}% closed`);
     }
 
     const tiltValue = tilt ? tilt[0] : null;
-    this.updateTilt(tiltValue);
+    this.model.setTilt(tiltValue);
     return {};
+  }
+
+  dispose() {
+    this.disposeTiltMonitor?.();
   }
 }

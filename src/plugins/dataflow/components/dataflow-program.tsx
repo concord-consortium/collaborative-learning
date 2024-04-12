@@ -417,6 +417,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     });
     this.reactElements = [];
     this.reactNodeElements.clear();
+    this.programEditor.disposeNodes();
   }
 
   private updateProgramEditor = async (snapshot: DataflowProgramSnapshotOut) => {
@@ -436,6 +437,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       // Process nodes that were deleted
       for (const [id] of this.programEditor.area.nodeViews) {
         if (!snapshot.nodes[id]) {
+          (this.programEditor.reteNodesMap[id] as IBaseNode)?.dispose();
           await this.programEditor.emit({ type: 'noderemoved', data: { id } as any });
         }
       }

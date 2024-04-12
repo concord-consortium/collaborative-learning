@@ -11,7 +11,7 @@ import { MathNode } from "./math-node";
 import { CounterNode } from "./counter-node";
 import { LogicNode } from "./logic-node";
 import { GeneratorNode } from "./generator-node";
-import { IBaseNodeModel, NodeClass } from "./base-node";
+import { IBaseNode, IBaseNodeModel, NodeClass } from "./base-node";
 import { uniqueId } from "../../../utilities/js-utils";
 import { INodeServices } from "./service-types";
 import { LogEventName } from "../../../lib/logger-types";
@@ -28,7 +28,7 @@ import { ControlNode } from "./control-node";
 import { getNewNodePosition } from "./utilities/view-utilities";
 
 export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices {
-  private reteNodesMap: Record<string, Schemes['Node']> = {};
+  public reteNodesMap: Record<string, Schemes['Node']> = {};
 
   public engine = new DataflowEngine<Schemes>();
   public area: AreaPlugin<Schemes, AreaExtra>;
@@ -274,6 +274,11 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     this.process();
   }
 
+  disposeNodes() {
+    const nodes = this.getNodes();
+    nodes.forEach(node => (node as IBaseNode).dispose());
+  }
+
   //
   // Methods implementing the Rete `Editor` interface
   //
@@ -288,6 +293,7 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     if (!mstNode) {
       const _reteNode = this.reteNodesMap[id];
       if (_reteNode) {
+        (_reteNode as IBaseNode).dispose();
         delete this.reteNodesMap[id];
       }
       // We have to hack this to make the types happy, this is a bug
@@ -441,6 +447,7 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
 
     if (!await this.emit({ type: 'noderemove', data: node })) return false;
 
+    (node as IBaseNode).dispose();
     this.mstProgram.removeNode(id);
 
     // Temporary use this approach to get things working

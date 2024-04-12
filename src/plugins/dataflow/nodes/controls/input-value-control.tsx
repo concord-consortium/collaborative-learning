@@ -24,13 +24,14 @@ export class InputValueControl<
   // So in Dataflow v2 we are just getting rid of the value property and
   // each node will need to explicity save its calculated data in a
   // watchedValue property.
-  @observable displayMessage = "Undefined";
+  @observable _displayMessage = "Undefined";
 
   constructor(
     public node: NodeType,
     public modelKey: Key,
     public label = "",
-    public tooltip = "Something" // FIXME: need better default
+    public tooltip = "Something", // FIXME: need better default
+    public getDisplayMessage?: () => string
   ){
     super();
     makeObservable(this);
@@ -42,7 +43,14 @@ export class InputValueControl<
 
   @action
   public setDisplayMessage(message: string) {
-    this.displayMessage = message;
+    this._displayMessage = message;
+  }
+
+  get displayMessage() {
+    if (this.getDisplayMessage) {
+      return this.getDisplayMessage();
+    }
+    return this._displayMessage;
   }
 
   @computed
