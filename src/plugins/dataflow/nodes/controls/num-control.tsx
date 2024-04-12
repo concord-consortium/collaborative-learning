@@ -1,5 +1,6 @@
 import React, { useCallback, useRef, useState } from "react";
 import { ClassicPreset } from "rete";
+import { observer } from "mobx-react";
 import { useStopEventPropagation } from "./custom-hooks";
 import { IBaseNode } from "../base-node";
 
@@ -67,13 +68,16 @@ export class NumberControl<
 // means we can't configure Rete's type system with this control
 export interface INumberControl {
   id: string;
+  node: IBaseNode;
   setValue(val: number): void;
   getValue(): number;
   label: string;
   tooltip: string;
 }
 
-export const NumberControlComponent: React.FC<{ data: INumberControl }> = (props) => {
+export const NumberControlComponent: React.FC<{ data: INumberControl }> = observer(
+  function NumberControlComponent(props)
+{
   const control = props.data;
 
   // FIXME: the type of inputValue is flipping between a number and a string
@@ -102,6 +106,11 @@ export const NumberControlComponent: React.FC<{ data: INumberControl }> = (props
     }
   }, []);
 
+  // FIXME: in readOnly mode there is a lot of stuff in this component that is
+  // extraneous. A layer is put on top of dataflow that prevents interactions
+  // with the nodes. It would be better to make this more clear somehow.
+  const possiblyReadOnlyInputValue = control.node.readOnly ? control.getValue() : inputValue;
+
   const inputRef = useRef<HTMLInputElement>(null);
   useStopEventPropagation(inputRef, "pointerdown");
   useStopEventPropagation(inputRef, "dblclick");
@@ -114,11 +123,11 @@ export const NumberControlComponent: React.FC<{ data: INumberControl }> = (props
       <input className={`number-input`}
         ref={inputRef}
         type={"text"}
-        value={inputValue}
+        value={possiblyReadOnlyInputValue}
         onKeyPress={handleKeyPress}
         onChange={handleChange}
         onBlur={handleBlur}
       />
     </div>
   );
-};
+});
