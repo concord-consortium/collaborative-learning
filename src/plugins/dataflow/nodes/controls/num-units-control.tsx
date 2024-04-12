@@ -111,6 +111,7 @@ export class NumberUnitsControl <
 // means we can't configure Rete's type system with this control
 export interface INumberUnitsControl {
   id: string;
+  node: IBaseNode;
   units: string[];
   setValue(val: number): void;
   getValue(): number;
@@ -165,6 +166,11 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
     control.logEvent("unitdropdownselection");
   }, [control]);
 
+  // FIXME: in readOnly mode there is a lot of stuff in this component that is
+  // extraneous. A layer is put on top of dataflow that prevents interactions
+  // with the nodes. It would be better to make this more clear somehow.
+  const possiblyReadOnlyInputValue = control.node.readOnly ? control.getValue() : inputValue;
+
   const inputRef = useRef<HTMLInputElement>(null);
   useStopEventPropagation(inputRef, "pointerdown");
   useStopEventPropagation(inputRef, "dblclick");
@@ -183,7 +189,7 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
       <input className={`number-input units ${unitsCountClass}`}
         ref={inputRef}
         type={"text"}
-        value={inputValue}
+        value={possiblyReadOnlyInputValue}
         onKeyPress={handleKeyPress}
         onChange={handleChange}
         onBlur={handleBlur}
