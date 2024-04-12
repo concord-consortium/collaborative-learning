@@ -71,7 +71,28 @@ function getMiniNodeIcon(node: ISharedProgramNode) {
 }
 
 function getMiniNodeLabelString(node: ISharedProgramNode) {
-  return node.nodeDisplayedName;
+  switch (node.nodeType) {
+    case "Sensor":
+      return "S";
+    case "Generator":
+      return "G";
+    case "Number":
+      return "#";
+    case "Math":
+      return "M";
+    case "Logic":
+      return "L";
+    case "Control":
+      return "C";
+    case "Transform":
+      return "T";
+    case "Demo Output":
+      return "D";
+    case "Live Output":
+      return "O";
+    default:
+      return "?";
+  }
 }
 
 function getMiniNodesDisplayData(programData?: SharedProgramDataType): IMiniNodeData[] {

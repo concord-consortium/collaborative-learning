@@ -32,8 +32,7 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
   }, [canRunIndependently, content]);
 
   const component = content.simulationData.component;
-  // const miniNodesData = [...content.sharedProgramData.programNodes.values()]
-  //   .map(node => ({...node, ...node.nodeState }));
+
   return (
     <div className="simulator-content-container">
       <BasicEditableTileTitle />
