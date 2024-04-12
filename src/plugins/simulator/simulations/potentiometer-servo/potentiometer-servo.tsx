@@ -13,6 +13,7 @@ import ExpandIcon from "./assets/expand-arduino.svg";
 import MinimizeIcon from "./assets/minimize-arduino.svg";
 
 import "./potentiometer-servo.scss";
+import { SharedProgramDataType } from "../../../dataflow/model/shared-program-data";
 
 export const kPotentiometerServoKey = "potentiometer_chip_servo";
 
@@ -38,7 +39,13 @@ function getTweenedServoAngle(realValue: number, lastVisibleValue: number) {
   return realValue;
 }
 
-function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) {
+function getMiniNodesData(programData?: SharedProgramDataType) {
+  if (!programData ) return [];
+  const arr = [...programData.programNodes.values()];
+  return arr.map(node => ({...node, ...node.nodeState })) || [];
+}
+
+function PotentiometerAndServoComponent({ frame, variables, programData }: ISimulationProps) {
   const [collapsed, setMinimized] = useState(false);
   const tweenedServoAngle = useRef(0);
   const lastTweenedAngle = tweenedServoAngle.current;
@@ -57,6 +64,8 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
   const potServoClasses = classNames('pot-servo-component', { collapsed, "expanded": !collapsed });
   const boardClasses = classNames('board', { collapsed, "expanded": !collapsed });
 
+  const miniNodesData = getMiniNodesData(programData);
+
   return (
     <div className={potServoClasses}>
       <div className="hardware">
@@ -72,6 +81,17 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
             className={boardClasses}
             alt="Board"
           />
+          <div className="mini-nodes">
+            {
+              miniNodesData.map((node, index) => (
+                <div key={node.id} className="mini-node">
+                  <pre>
+                    {JSON.stringify(node, null, 2)}
+                  </pre>
+                </div>
+              ))
+            }
+          </div>
           <div className="output wire"></div>
           <img
             className="servo-arm"

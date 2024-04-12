@@ -20,10 +20,6 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
   const content = model.content as SimulatorContentModelType;
   const canRunIndependently = !readOnly || isCurriculumDocument(documentId);
 
-  const sharedProgramData = content.sharedProgramData;
-  const asArray = Array.from(sharedProgramData.programNodes);
-  console.log("| sim want data: ", asArray);
-
   const [_steps, setSteps] = useState(0);
   useEffect(() => {
     const id = setInterval(() => {
@@ -36,7 +32,8 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
   }, [canRunIndependently, content]);
 
   const component = content.simulationData.component;
-
+  // const miniNodesData = [...content.sharedProgramData.programNodes.values()]
+  //   .map(node => ({...node, ...node.nodeState }));
   return (
     <div className="simulator-content-container">
       <BasicEditableTileTitle />
@@ -57,7 +54,11 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
         </div>
         { component && (
           <div className="simulator-component-container">
-            { component({ frame: _steps, variables: content.variables || [] }) }
+            { component({
+              frame: _steps,
+              variables: content.variables || [],
+              programData: content.sharedProgramData
+            }) }
           </div>
         )}
       </div>

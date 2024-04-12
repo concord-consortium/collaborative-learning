@@ -19,31 +19,16 @@ export const kSharedNodeKeys = [
 
 // REVIEW: project spec doesn't specify all of these
 // Current values are as close to "reality" as possible*
-export const kSharedNodeCategories = [
-  {
-    category: "input",
-    nodeTypes: [
-      "Sensor",
-    ]
-  },
-  {
-    category: "operator",
-    nodeTypes: [
-      "Generator",
-      "Number",
-      "Math",
-      "Logic",
-      "Transform",
-      "Demo Output", // *stays "in the chip" (not out to pin)
-    ]
-  },
-  {
-    category: "output",
-    nodeTypes: [
-      "Live Output"
-    ]
-  }
-];
+export const kNodeTypeToCategoryMap: { [key: string]: string } = {
+  "Sensor": "input",
+  "Generator": "operator",
+  "Number": "operator",
+  "Math": "operator",
+  "Logic": "operator",
+  "Transform": "operator",
+  "Demo Output": "operator",
+  "Live Output": "output"
+};
 
 export interface ISharedProgramNode {
   id: string;
@@ -51,6 +36,7 @@ export interface ISharedProgramNode {
   nodeValue: number;
   nodeType: string;
   nodeState: Record<string, string | number>;
+  nodeCategory: string;
 }
 
 export const SharedProgramData = SharedModel.named("SharedProgramData")
@@ -76,8 +62,8 @@ export const SharedProgramData = SharedModel.named("SharedProgramData")
         nodeDisplayedName: node.model.orderedDisplayName || "",
         nodeValue: node.model.nodeValue || 0,
         nodeType: node.model.type,
-        nodeState: nodeStateData
-        // TODO: add the category
+        nodeState: nodeStateData,
+        nodeCategory: kNodeTypeToCategoryMap[node.model.type]
       };
       if (!newNode.id) return;
       // REVIEW: ended up needing to make this whole thing an array

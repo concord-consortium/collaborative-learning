@@ -1,0 +1,341 @@
+{
+  "rowMap": {
+    "row1": {"id": "row1", "isSectionHeader": false, "tiles": [{"tileId": "tile1"}]},
+    "JI0d0rC_z_1qNRLK": {
+      "id": "JI0d0rC_z_1qNRLK",
+      "height": 480,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "h1XSuHyqbzTsoelo"}]
+    },
+    "bY-kTGEI69C1AjDb": {
+      "id": "bY-kTGEI69C1AjDb",
+      "height": 400,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "2mGqs-HSYatixjYZ"}]
+    }
+  },
+  "rowOrder": ["row1", "JI0d0rC_z_1qNRLK", "bY-kTGEI69C1AjDb"],
+  "tileMap": {
+    "tile1": {
+      "id": "tile1",
+      "content": {"type": "Text", "text": "Welcome to the standalone document editor"}
+    },
+    "h1XSuHyqbzTsoelo": {
+      "id": "h1XSuHyqbzTsoelo",
+      "content": {
+        "type": "Dataflow",
+        "program": {
+          "nodes": {
+            "9WNZtyz1m9sl7Dk8": {
+              "id": "9WNZtyz1m9sl7Dk8",
+              "name": "Sensor",
+              "x": 0,
+              "y": 0,
+              "data": {
+                "type": "Sensor",
+                "plot": false,
+                "orderedDisplayName": "Input 1",
+                "nodeValue": "425",
+                "recentValues": {
+                  "nodeValue": [
+                    "425",
+                    "425",
+                    "425",
+                    "425",
+                    "425",
+                    "425",
+                    "425",
+                    "425",
+                    "425",
+                    "425",
+                    "425",
+                    "425",
+                    "425",
+                    "425",
+                    "425",
+                    "425",
+                    "425"
+                  ]
+                },
+                "sensorType": "pin-reading",
+                "sensor": "SIMresist_reading_key"
+              }
+            },
+            "CTU_gbKKAELLdKJO": {
+              "id": "CTU_gbKKAELLdKJO",
+              "name": "Live Output",
+              "x": 0,
+              "y": 0,
+              "data": {
+                "type": "Live Output",
+                "plot": true,
+                "orderedDisplayName": "Live Output 2",
+                "nodeValue": "113.33333333333334",
+                "recentValues": {
+                  "nodeValue": [
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334"
+                  ]
+                },
+                "liveOutputType": "Servo",
+                "hubSelect": "Simulated Servo"
+              }
+            },
+            "ZZhxojE6tR7m4A1v": {
+              "id": "ZZhxojE6tR7m4A1v",
+              "name": "Math",
+              "x": 0,
+              "y": 0,
+              "data": {
+                "type": "Math",
+                "plot": true,
+                "orderedDisplayName": "Math 3",
+                "nodeValue": "0.6296296296296297",
+                "recentValues": {
+                  "nodeValue": [
+                    "0.6296296296296297",
+                    "0.6296296296296297",
+                    "0.6296296296296297",
+                    "0.6296296296296297",
+                    "0.6296296296296297",
+                    "0.6296296296296297",
+                    "0.6296296296296297",
+                    "0.6296296296296297",
+                    "0.6296296296296297",
+                    "0.6296296296296297",
+                    "0.6296296296296297",
+                    "0.6296296296296297",
+                    "0.6296296296296297",
+                    "0.6296296296296297",
+                    "0.6296296296296297",
+                    "0.6296296296296297",
+                    "0.6296296296296297"
+                  ]
+                },
+                "mathOperator": "Divide"
+              }
+            },
+            "ePQKoHbhEnI_R280": {
+              "id": "ePQKoHbhEnI_R280",
+              "name": "Number",
+              "x": 0,
+              "y": 0,
+              "data": {
+                "type": "Number",
+                "plot": false,
+                "orderedDisplayName": "Number 4",
+                "nodeValue": "675",
+                "recentValues": {
+                  "nodeValue": [
+                    "675",
+                    "675",
+                    "675",
+                    "675",
+                    "675",
+                    "675",
+                    "675",
+                    "675",
+                    "675",
+                    "675",
+                    "675",
+                    "675",
+                    "675",
+                    "675",
+                    "675",
+                    "675",
+                    "675"
+                  ]
+                },
+                "value": 675
+              }
+            },
+            "n_Km2DsoUEOr4YtH": {
+              "id": "n_Km2DsoUEOr4YtH",
+              "name": "Number",
+              "x": 0,
+              "y": 0,
+              "data": {
+                "type": "Number",
+                "plot": false,
+                "orderedDisplayName": "Number 5",
+                "nodeValue": "180",
+                "recentValues": {
+                  "nodeValue": [
+                    "180",
+                    "180",
+                    "180",
+                    "180",
+                    "180",
+                    "180",
+                    "180",
+                    "180",
+                    "180",
+                    "180",
+                    "180",
+                    "180",
+                    "180",
+                    "180",
+                    "180",
+                    "180",
+                    "180"
+                  ]
+                },
+                "value": 180
+              }
+            },
+            "RzKflN5EgvBWEP18": {
+              "id": "RzKflN5EgvBWEP18",
+              "name": "Math",
+              "x": 0,
+              "y": 0,
+              "data": {
+                "type": "Math",
+                "plot": false,
+                "orderedDisplayName": "Math 6",
+                "nodeValue": "113.33333333333334",
+                "recentValues": {
+                  "nodeValue": [
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334",
+                    "113.33333333333334"
+                  ]
+                },
+                "mathOperator": "Multiply"
+              }
+            }
+          },
+          "connections": {
+            "a6717634a54f5dc6": {
+              "id": "a6717634a54f5dc6",
+              "source": "9WNZtyz1m9sl7Dk8",
+              "sourceOutput": "value",
+              "target": "ZZhxojE6tR7m4A1v",
+              "targetInput": "num1"
+            },
+            "c8cc14362370c873": {
+              "id": "c8cc14362370c873",
+              "source": "ePQKoHbhEnI_R280",
+              "sourceOutput": "value",
+              "target": "ZZhxojE6tR7m4A1v",
+              "targetInput": "num2"
+            },
+            "7f9001dca9f6faef": {
+              "id": "7f9001dca9f6faef",
+              "source": "ZZhxojE6tR7m4A1v",
+              "sourceOutput": "value",
+              "target": "RzKflN5EgvBWEP18",
+              "targetInput": "num1"
+            },
+            "4e69a6987de11a56": {
+              "id": "4e69a6987de11a56",
+              "source": "n_Km2DsoUEOr4YtH",
+              "sourceOutput": "value",
+              "target": "RzKflN5EgvBWEP18",
+              "targetInput": "num2"
+            },
+            "e7c3f23474e6d0d1": {
+              "id": "e7c3f23474e6d0d1",
+              "source": "RzKflN5EgvBWEP18",
+              "sourceOutput": "value",
+              "target": "CTU_gbKKAELLdKJO",
+              "targetInput": "nodeValue"
+            }
+          }
+        },
+        "programDataRate": 100,
+        "programZoom": {"dx": 0, "dy": 0, "scale": 1}
+      }
+    },
+    "2mGqs-HSYatixjYZ": {
+      "id": "2mGqs-HSYatixjYZ",
+      "title": "Simulation 1",
+      "content": {"type": "Simulator", "simulation": "potentiometer_chip_servo"}
+    }
+  },
+  "sharedModelMap": {
+    "MfaKkFf78neuX95s": {
+      "sharedModel": {
+        "type": "SharedDataSet",
+        "id": "MfaKkFf78neuX95s",
+        "providerId": "h1XSuHyqbzTsoelo",
+        "dataSet": {"id": "9nv_LZcix4gvWhsY", "name": "Program 1", "attributes": [], "cases": []}
+      },
+      "tiles": ["h1XSuHyqbzTsoelo"]
+    },
+    "DlPmVZ1qLHQVuGC-": {
+      "sharedModel": {"type": "SharedProgramData", "id": "DlPmVZ1qLHQVuGC-"},
+      "tiles": ["h1XSuHyqbzTsoelo", "2mGqs-HSYatixjYZ"]
+    },
+    "k-BHzH1LM4Qiz8gA": {
+      "sharedModel": {
+        "type": "SharedVariables",
+        "id": "k-BHzH1LM4Qiz8gA",
+        "variables": [
+          {
+            "id": "XoqlWHV0yaWt6ax-",
+            "name": "pot_angle_key",
+            "displayName": "Potentiometer",
+            "unit": "deg",
+            "value": 170,
+            "inputs": [],
+            "color": "light-gray",
+            "icon": "ccicon://potentiometer_key",
+            "labels": ["input", "position", "decimalPlaces:0"]
+          },
+          {
+            "id": "3VigkNE9fB5q8Kxo",
+            "name": "resist_reading_key",
+            "displayName": "Pin",
+            "value": 425,
+            "inputs": [],
+            "color": "light-gray",
+            "icon": "ccicon://signal_key",
+            "labels": ["input", "reading", "sensor:pin-reading", "decimalPlaces:0"]
+          },
+          {
+            "id": "r-g092D8lkpkqEDA",
+            "name": "servo_angle_key",
+            "displayName": "Servo",
+            "unit": "deg",
+            "value": 113.33333333333334,
+            "inputs": [],
+            "color": "light-gray",
+            "icon": "ccicon://servo_key",
+            "labels": ["output", "position", "live-output:Servo", "decimalPlaces:0"]
+          }
+        ]
+      },
+      "tiles": ["2mGqs-HSYatixjYZ", "tile1", "h1XSuHyqbzTsoelo"]
+    }
+  },
+  "annotations": {}
+}
