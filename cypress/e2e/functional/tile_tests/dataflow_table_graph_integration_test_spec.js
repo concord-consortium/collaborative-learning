@@ -22,7 +22,6 @@ const timer2 = 3;
 
 
 function beforeTest() {
-  // const url = "./doc-editor.html?appMode=qa&unit=./curriculum/example-curriculum/example-curriculum.json&mouseSensor";
   const url = "./doc-editor.html?appMode=qa&unit=./demo/units/qa-config-subtabs/content.json&mouseSensor";
   cy.visit(url);
 }
@@ -40,7 +39,7 @@ context('Dataflow Tool Tile', function () {
 
     cy.log("create linked table, verify empty and with recorded data");
     clueCanvas.clickToolbarButton("dataflow", "data-set-view");
-    // dataflowToolTile.checkEmptyLinkedTable(tableTile, programTitle, defaultTableAttributes);
+    dataflowToolTile.checkEmptyLinkedTable(tableTile, programTitle, defaultTableAttributes);
 
     dataflowToolTile.recordData("1000", timer1);
     dataflowToolTile.checkLinkedTableRecordedData(tableTile, programTitle, linkedTableAttributes, timer1);
