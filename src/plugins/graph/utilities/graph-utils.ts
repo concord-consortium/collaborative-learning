@@ -245,7 +245,6 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
           .property('id', (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.plotNum}_${d.caseID}`);
         g.append('line')
           .attr('class', 'connector')
-          .attr('stroke-width', '2')
           .attr('x2', 0).attr('y2', 0);
         g.append('circle')
           .attr('class', 'outer-circle');
@@ -552,7 +551,9 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
         .select('line') // Set the x1,y1 of the connector line to the position of the previous dot (if any)
           .attr('x1', (d, i) => {
             if (i===0 || !enableConnectors) return 0;
-            const prevX = getScreenX(dots.data()[i-1].caseID);
+            const prevData = dots.data()[i-1];
+            if (prevData.plotNum !== d.plotNum) return 0;
+            const prevX = getScreenX(prevData.caseID);
             const thisX = getScreenX(d.caseID);
             if (isFiniteNumber(thisX) && isFiniteNumber(prevX)) {
               return prevX - thisX;
@@ -562,8 +563,10 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
           })
           .attr('y1', (d, i) => {
             if (i===0 || !enableConnectors) return 0;
-            const prevY = getScreenY(dots.data()[i-1].caseID);
-            const thisY = getScreenY(d.caseID);
+            const prevData = dots.data()[i-1];
+            if (prevData.plotNum !== d.plotNum) return 0;
+            const prevY = getScreenY(prevData.caseID, d.plotNum);
+            const thisY = getScreenY(d.caseID, d.plotNum);
             if (isFiniteNumber(thisY) && isFiniteNumber(prevY)) {
               return prevY - thisY;
             } else {
@@ -607,6 +610,9 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
       circles
         .select('line')
           .style('stroke', (aCaseData: CaseData) => {
+            // Lines are the same color as dots, but partially transparent in CSS.
+            // Alternatively, could use lightenColor() instead of transparency,
+            // but would need to move the lines behind the dots to make the junctions look right.
             return lookupLegendColor(aCaseData);
           });
     }
