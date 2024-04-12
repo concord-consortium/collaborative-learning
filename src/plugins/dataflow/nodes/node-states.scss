@@ -1,0 +1,67 @@
+@import "../../../components/vars";
+@import "../components/dataflow-vars";
+
+@keyframes pulse {
+  0% {
+    filter: opacity(0);
+  }
+  50% {
+    filter: opacity(1);
+  }
+  100% {
+    filter: opacity(0);
+  }
+}
+
+.node.control {
+  .label.hold-current, .label.hold-this, .label.hold-previous {
+    background-image: url("../../shared-assets/icons/dataflow/control/signal.svg");
+    background-repeat:no-repeat;
+    background-size: 20px 20px;
+  }
+
+  .label.hold-current, .label.hold-this {
+    background-position: 47px 1.5px;
+  }
+
+  .label.hold-previous {
+    background-position: 73px 1.5px;
+  }
+
+  .binary .input-socket div div {
+    background-image: url("../assets/icons/control/node-arrow.svg");
+    transition: all .2s ease-in-out;
+    transform: rotate(0deg);
+  }
+}
+
+.node.control.gate-active .binary .input-socket div div {
+  transform:rotate(180deg);
+  background-color: $control-green;
+}
+
+.node.control.has-flow-in {
+  .input-socket {
+    position: relative;
+  }
+
+
+  .input.number2 .input-socket::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    display: block;
+    width: 20px;
+    height: 20px;
+    background-image: url("../../shared-assets/icons/dataflow/control/signal.svg");
+    background-repeat: no-repeat;
+    animation: pulse 1s infinite;
+  }
+}
+
+.node.control.has-flow-in.gate-active {
+  .input.number2 .input-socket::after {
+    animation: none;
+  }
+}

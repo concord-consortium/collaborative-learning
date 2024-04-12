@@ -23,6 +23,9 @@ import { DataflowContentModelType } from "../model/dataflow-content";
 import { IStores } from "../../../models/stores/stores";
 import { SensorNode } from "./sensor-node";
 import { TransformNode } from "./transform-node";
+import { TimerNode } from "./timer-node";
+import { ControlNode } from "./control-node";
+import { getNewNodePosition } from "./utilities/view-utilities";
 
 export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices {
   private reteNodesMap: Record<string, Schemes['Node']> = {};
@@ -44,9 +47,41 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
 
     this.area = new AreaPlugin<Schemes, AreaExtra>(div);
 
+    // Disable the zoom handler which zooms on wheel and double click
+    this.area.area.setZoomHandler(null);
+
     AreaExtensions.selectableNodes(this.area, AreaExtensions.selector(), {
       accumulating: AreaExtensions.accumulateOnCtrl()
     });
+
+    this.area.addPipe((context) => {
+      if (context.type !== "nodedragged") return context;
+
+      const id = context.data.id;
+      const nodeView = this.area.nodeViews.get(id);
+
+      // This should not happen, but it is possible in theory
+      if (!nodeView) return context;
+
+      const nodeModel = mstProgram.nodes.get(id);
+
+      // This should also not happen but seems more likely
+      if (!nodeModel) {
+        console.warn("Cannot find MST node model for a dragged Rete node");
+        return context;
+      }
+
+      nodeModel.setPosition(nodeView.position);
+      return context;
+    });
+
+    // Useful for debugging:
+    // this.area.addPipe((context) => {
+    //   if (["pointermove", "render", "rendered"].includes(context.type)) return context;
+
+    //   console.warn("area event", context, this.area.area.transform);
+    //   return context;
+    // });
 
     // onPatch(mstProgram.nodes, (patch, reversePatch) => {
     //   console.log("nodes patch", patch);
@@ -90,9 +125,22 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     });
   }
 
-  public notifyAboutExistingObjects() {
-    this.getNodes().forEach(node => this.emit({ type: 'nodecreated', data: node }));
-    this.getConnections().forEach(connection => this.emit({ type: 'connectioncreated', data: connection}));
+  public async notifyAboutExistingObjects() {
+    for (const node of this.getNodes()) {
+      // We need to wait for this before we add connections and translate the nodes
+      await this.emit({ type: 'nodecreated', data: node });
+    }
+    for (const connection of this.getConnections()) {
+      await this.emit({ type: 'connectioncreated', data: connection});
+    }
+
+    // FIXME: this causes a flash when the nodes move into position. I think the
+    // right fix is to delay the creation of the render plugin until all of the
+    // nodes have been positioned. But I'm not sure if the render plugin is
+    // smart enough to look at existing nodes or it just watches events.
+    for (const [id, nodeModel] of this.mstProgram.nodes) {
+      await this.area.translate(id, { x: nodeModel.x, y: nodeModel.y });
+    }
   }
 
   public process = () => {
@@ -173,6 +221,7 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
   private createReteNodeFromNodeModel(id: string, model: IBaseNodeModel) {
     const nodeTypes: Record<string, NodeClass> =
     {
+      "Control": ControlNode,
       "Counter": CounterNode,
       "Demo Output": DemoOutputNode,
       "Generator": GeneratorNode,
@@ -181,6 +230,7 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
       "Math": MathNode,
       "Number": NumberNode,
       "Sensor": SensorNode,
+      "Timer": TimerNode,
       "Transform": TransformNode,
     };
 
@@ -193,13 +243,15 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     return new constructor(id, model, this);
   }
 
-  public createAndAddNode(nodeType: string, position?: [number, number]) {
+  public async createAndAddNode(nodeType: string, position?: [number, number]) {
     const id = uniqueId();
+    const newPosition = position ?? getNewNodePosition(this);
+    console.log("createAndAddNode", nodeType, newPosition);
     this.mstProgram.addNodeSnapshot({
       id,
       name: nodeType,
-      x: position?.[0] || 0,
-      y: position?.[1] || 0,
+      x: newPosition[0],
+      y: newPosition[1],
       data: { type: nodeType }
     });
 
@@ -210,7 +262,9 @@ export class NodeEditorMST extends NodeEditor<Schemes> implements INodeServices 
     // is changed.
     // This is not waiting for the emit before calling the process.
     // we might need to add it
-    this.emit({ type: 'nodecreated', data: node });
+    await this.emit({ type: 'nodecreated', data: node });
+
+    this.area.translate(id, {x: newPosition[0], y: newPosition[1]});
 
     // run the process command so this newly added node can update any controls like the
     // value control.
