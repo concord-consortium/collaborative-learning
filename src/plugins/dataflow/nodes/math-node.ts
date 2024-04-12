@@ -1,10 +1,10 @@
 import { ClassicPreset } from "rete";
-import { Instance } from "mobx-state-tree";
+import { Instance, types } from "mobx-state-tree";
 import { numSocket } from "./num-socket";
 import { ValueControl } from "./controls/value-control";
 import { getNumDisplayStr } from "./utilities/view-utilities";
 import { NodeOperationTypes } from "../model/utilities/node";
-import { BaseNode, BaseNodeModel } from "./base-node";
+import { BaseNode, BaseNodeModel, StringifiedNumber } from "./base-node";
 import { DropdownListControl, IDropdownListControl } from "./controls/dropdown-list-control";
 import { PlotButtonControl } from "./controls/plot-button-control";
 import { typeField } from "../../../utilities/mst-utils";
@@ -13,11 +13,23 @@ import { INodeServices } from "./service-types";
 export const MathNodeModel = BaseNodeModel.named("MathNodeModel")
 .props({
   type: typeField("Math"),
-  mathOperator: "Add"
+  mathOperator: "Add",
+
+  // TODO: we'll have to deal with migrating this somehow, we might
+  // need to run the process function once for imported dataflow tiles
+  // so these inputs get saved
+  num1: types.maybe(StringifiedNumber),
+  num2: types.maybe(StringifiedNumber),
 })
 .actions(self => ({
   setMathOperator(val: string) {
     self.mathOperator = val;
+  },
+  setNum1(val: number) {
+    self.num1 = val;
+  },
+  setNum2(val: number) {
+    self.num2 = val;
   }
 }));
 export interface IMathNodeModel extends Instance<typeof MathNodeModel> {}
@@ -60,13 +72,15 @@ export class MathNode extends BaseNode<
     const dropdownControl = new DropdownListControl(this, "mathOperator", dropdownOptions);
     this.addControl("mathOperator", dropdownControl);
 
-    this.valueControl = new ValueControl("Math");
+    this.valueControl = new ValueControl("Math", this.getSentence);
     this.addControl("value", this.valueControl);
 
     this.addControl("plotButton", new PlotButtonControl(this));
   }
 
-  getSentence(num1: number, num2: number, result: number) {
+  getSentence = () => {
+    const result = this.model.nodeValue;
+    const { num1, num2 } = this.model;
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === this.model.mathOperator);
     if (nodeOperationTypes) {
       const n1Str = getNumDisplayStr(num1);
@@ -76,11 +90,10 @@ export class MathNode extends BaseNode<
     } else {
       return "";
     }
-  }
+  };
 
   data({num1, num2}: {num1?: number[], num2?: number[]}) {
     let result = 0;
-    let resultSentence = "";
 
     const n1 = num1 ? num1[0] : NaN;
     const n2 = num2 ? num2[0] : NaN;
@@ -105,13 +118,17 @@ export class MathNode extends BaseNode<
         // Actual math errors like divide-by-zero should output 0.
         result = nodeOperationTypes.method(n1, n2);
       }
-
-      resultSentence = this.getSentence(n1, n2, result);
     }
+
+    // TODO: we should try to wrap these data functions in an action so all of their
+    // changes are grouped together.
+
+    // The input numbers are saved so readOnly views can display the sentence
+    this.model.setNum1(n1);
+    this.model.setNum2(n2);
 
     // This nodeValue is used to record the recent values of the node
     this.model.setNodeValue(result);
-    this.valueControl.setSentence(resultSentence);
 
     return { value: result };
   }

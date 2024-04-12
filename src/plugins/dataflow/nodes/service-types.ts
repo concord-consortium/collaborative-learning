@@ -14,4 +14,5 @@ export interface INodeServices {
   getChannels(): NodeChannelInfo[];
   stores: IStores;
   runnable?: boolean;
+  readOnly?: boolean;
 }
