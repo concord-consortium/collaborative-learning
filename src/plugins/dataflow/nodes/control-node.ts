@@ -93,7 +93,7 @@ export class ControlNode extends BaseNode<
     this.addControl("controlOperator", dropdownControl);
 
     // TODO need to add the readonly "secs" label
-    const valueControl = new NumberControl(this, "waitDuration", "wait");
+    const valueControl = new NumberControl(this, "waitDuration", "wait", null, "", "secs");
     this.addControl("waitDuration", valueControl);
 
     this.valueControl = new ValueControl("Control", this.getSentence);

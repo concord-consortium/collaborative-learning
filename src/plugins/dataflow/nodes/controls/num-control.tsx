@@ -32,7 +32,8 @@ export class NumberControl<
 
     public label = "",
     public minVal: number | null = null,
-    public tooltip = ""
+    public tooltip = "",
+    public units = ""
   ) {
     super();
     const setterProp = "set" + modelKey.charAt(0).toUpperCase() + modelKey.slice(1) as `set${Capitalize<Key>}`;
@@ -73,6 +74,7 @@ export interface INumberControl {
   getValue(): number;
   label: string;
   tooltip: string;
+  units: string;
 }
 
 export const NumberControlComponent: React.FC<{ data: INumberControl }> = observer(
@@ -114,8 +116,10 @@ export const NumberControlComponent: React.FC<{ data: INumberControl }> = observ
   const inputRef = useRef<HTMLInputElement>(null);
   useStopEventPropagation(inputRef, "pointerdown");
   useStopEventPropagation(inputRef, "dblclick");
+
+  const unitsClass = control.units ? "units" : "";
   return (
-    <div className="number-container" title={control.tooltip}>
+    <div className={`number-container ${unitsClass}`} title={control.tooltip}>
       { control.label
         ? <label className="number-label">{control.label}</label>
         : null
@@ -128,6 +132,9 @@ export const NumberControlComponent: React.FC<{ data: INumberControl }> = observ
         onChange={handleChange}
         onBlur={handleBlur}
       />
+      { control.units &&
+        <div className="single-unit">{control.units}</div>
+      }
     </div>
   );
 });
