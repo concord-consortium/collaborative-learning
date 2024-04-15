@@ -92,15 +92,31 @@ export const GraphModel = TileContentModel
     annotationSizesCache: new ObservableMap<string,RectSize>()
   }))
   .preProcessSnapshot((snapshot: any) => {
+    // See if any changes are needed
+    const hasLayerAlready = (snapshot?.layers?.length || 0) > 0;
+    const needsLayerAdded = !hasLayerAlready && snapshot?.config;
+    const hasLegacyAdornment = snapshot?.adornments
+      && snapshot.adornments.find((adorn: any) => adorn.type === 'Connecting Lines');
+    const invalidLeftAxis = snapshot?.axes?.left?.min === null || snapshot?.axes?.left?.max === null;
+    const invalidBotAxis = snapshot?.axes?.bottom?.min === null || snapshot?.axes?.bottom?.max === null;
+    if (!needsLayerAdded && !hasLegacyAdornment && !invalidLeftAxis && !invalidBotAxis) {
+      return snapshot;
+    }
     const newSnap = cloneDeep(snapshot);
     // Remove connecting-lines adornment if found
-    if(snapshot?.adornments) {
+    if(hasLegacyAdornment) {
       newSnap.adornments = snapshot.adornments.filter((adorn: any) => adorn.type !== 'Connecting Lines');
     }
     // Add layers array if missing
-    const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
-    if (!hasLayerAlready && snapshot?.config) {
+    if (needsLayerAdded) {
       newSnap.layers = [{ config: snapshot.config }];
+    }
+    // Fix axes if needed
+    if (invalidLeftAxis) {
+      [newSnap.axes.left.min, newSnap.axes.left.max] = kDefaultNumericAxisBounds;
+    }
+    if (invalidBotAxis) {
+      [newSnap.axes.bottom.min, newSnap.axes.bottom.max] = kDefaultNumericAxisBounds;
     }
     return newSnap;
   })
