@@ -65,6 +65,11 @@ $title-margin: 2px;
       top: 0;
       width: 100%;
 
+      .document-status {
+        margin-left: 5px;
+        flex-grow: 0;
+      }
+
       .document-title {
         text-align: center;
         flex-grow: 1;

@@ -1,14 +1,17 @@
 import React from "react";
 import classNames from "classnames";
+import { observer } from "mobx-react";
 import { useAppConfig, useProblemStore,
   usePersistentUIStore, useUserStore, useClassStore, useUIStore, useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 import { EditableDocumentContent } from "./editable-document-content";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
+import { ENavTab } from "../../models/view/nav-tabs";
+import { isExemplarType } from "../../models/document/document-types";
+
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 import CloseIcon from "../../../src/assets/icons/close/close.svg";
-import { observer } from "mobx-react";
-import { ENavTab } from "../../models/view/nav-tabs";
+import { ExemplarVisibilityCheckbox } from "./exemplar-visibility-checkbox";
 
 interface IProps {
   openDocumentKey: string;
@@ -26,6 +29,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
                        store.networkDocuments.getDocument(openDocumentKey);
   const showPlayback = user.type && !openDocument?.isPublished
                        ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
+  const showExemplarShare = user.type === "teacher" && openDocument && isExemplarType(openDocument.type);
   const getDisplayTitle = (document: DocumentModelType) => {
     const documentOwner = classStore.users.get(document.uid);
     const documentTitle = getDocumentDisplayTitle(document, appConfigStore, problemStore);
@@ -66,6 +70,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
     <div className={classNames("focus-document", ENavTab.kSortWork, sideClasses)}>
       <div className={classNames("document-header", ENavTab.kSortWork, sectionClass, sideClasses)}
             onClick={() => ui.setSelectedTile()}>
+        {showExemplarShare && <ExemplarVisibilityCheckbox document={openDocument} />}
         <div className="document-title">
           {(displayTitle && displayTitle.owner)
               && <span className="document-owner">{displayTitle.owner}: </span>}
