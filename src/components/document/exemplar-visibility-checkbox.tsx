@@ -1,33 +1,51 @@
-import React, { ChangeEvent, useRef } from "react";
-import { useLocalDocuments, useStores } from "../../hooks/use-stores";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
+import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
 
+type ShareState = "pending"|"none"|"some"|"all";
+
+// What state should be set when the user clicks on the checkbox?
+const nextState: Record<ShareState,ShareState> = {
+  "pending" : "pending",
+  "none" : "all",
+  "some" : "none", // Unset visiblity first, since it does not trigger notifications to students.
+  "all" : "none"
+};
 
 interface IProps {
   document: DocumentModelType;
 }
 
 export function ExemplarVisibilityCheckbox({ document }: IProps) {
-  const documents = useLocalDocuments();
   const { db } = useStores();
   const checkbox = useRef<HTMLInputElement|null>(null);
+  const [status, setStatus] = useState<ShareState>("pending");
+
+  useEffect(() => {
+    db.getExemplarVisibilityForClass(document.key).then((map) => {
+      if (Object.values(map).every(v => v)) {
+        setStatus("all");
+      } else if (Object.values(map).some(v => v)) {
+        setStatus("some");
+      } else {
+        setStatus("none");
+      }
+    });
+  }, [db, document.key]);
 
   if (checkbox.current) {
-    // TODO Should we call a method in db that looks up all student shares here?
-    // An always-running listener for every exemplar's shares seems heavy handed.
-    // Set up a listener only as long as this document is open?
-    // Once set:
-    //   - if no students have access, unchecked
-    //   - if all students have access, checked (where do we get the list of all students?)
-    //   - if some do, set indterminate:
-    checkbox.current.indeterminate = true;
+    checkbox.current.disabled = (status === "pending");
+    checkbox.current.indeterminate = (status === "some");
+    checkbox.current.checked = (status === "all");
   }
 
-
   const handleShareClick = (e: ChangeEvent<HTMLInputElement>) => {
-    // TODO  need to determine what first click does if "indeterminate"
     // Set or remove access for every student.
-    console.log("Share clicked", e.target.checked);
+    const newState = nextState[status];
+    setStatus(newState);
+    if (newState === "all" || newState === "none") {
+      db.setExemplarVisibilityForAllStudents(document.key, newState==="all");
+    }
   };
 
   return (
