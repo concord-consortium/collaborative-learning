@@ -137,19 +137,19 @@ context('XYPlot Tool Tile', function () {
       // Added data point will be off the right edge of the plot area until we click 'Fit'.
       xyTile.getTile().scrollIntoView();
       xyTile.getGraphDot().should('have.length', 3);
-      xyTile.getGraphDot().eq(0).should('be.visible');
-      xyTile.getGraphDot().eq(1).should('be.visible');
-      xyTile.getGraphDot().eq(2).should('not.be.visible');
-      // X axis should not have changed in response to adding a data point.
+      xyTile.getGraphDot().eq(0).children('circle.inner-circle').should('be.visible');
+      xyTile.getGraphDot().eq(1).children('circle.inner-circle').should('be.visible');
+      xyTile.getGraphDot().eq(2).children('circle.inner-circle').should('not.be.visible');
+            // X axis should not have changed in response to adding a data point.
       xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
       xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 7, 12);
 
       cy.log("fit view");
       xyTile.getTile().click();
       clueCanvas.clickToolbarButton('graph', 'fit-all');
-      xyTile.getGraphDot().eq(0).should('be.visible');
-      xyTile.getGraphDot().eq(1).should('be.visible');
-      xyTile.getGraphDot().eq(2).should('be.visible');
+      xyTile.getGraphDot().eq(0).children('circle.inner-circle').should('be.visible');
+      xyTile.getGraphDot().eq(1).children('circle.inner-circle').should('be.visible');
+      xyTile.getGraphDot().eq(2).children('circle.inner-circle').should('be.visible');
       xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
       xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 15, 20);
 
@@ -239,14 +239,12 @@ context('XYPlot Tool Tile', function () {
       tableToolTile.getTableTile().should('be.visible');
       clueCanvas.clickToolbarButton('table', 'set-expression');
       cy.get('#expression-input').click().type('x*x{enter}');
-      cy.get(".primary-workspace").within((workspace) => {
-        tableToolTile.typeInTableCellXY(0, 0, '5');
-        tableToolTile.getTableCellXY(0, 0).should('contain', '5');
-        tableToolTile.getTableCellXY(0, 1).should('contain', '25');
-        tableToolTile.typeInTableCellXY(1, 0, '10');
-        tableToolTile.getTableCellXY(1, 0).should('contain', '10');
-        tableToolTile.getTableCellXY(1, 1).should('contain', '100');
-      });
+      tableToolTile.typeInTableCellXY(0, 0, '5');
+      tableToolTile.getTableCellXY(0, 0).should('contain', '5');
+      tableToolTile.getTableCellXY(0, 1).should('contain', '25');
+      tableToolTile.typeInTableCellXY(1, 0, '10');
+      tableToolTile.getTableCellXY(1, 0).should('contain', '10');
+      tableToolTile.getTableCellXY(1, 1).should('contain', '100');
 
       cy.log("Link Table");
       xyTile.getTile().click();
@@ -591,13 +589,13 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.toolbarButtonIsNotSelected('graph', 'add-points');
 
       // Delete point with toolbar button
-      xyTile.getGraphDot().eq(0).click();
+      xyTile.getGraphDot().eq(0).children('circle.inner-circle').click();
       xyTile.getGraphDot().eq(0).children('circle.outer-circle').should("have.class", "selected");
       clueCanvas.clickToolbarButton('graph', 'delete');
       xyTile.getGraphDot().should('have.length', 1);
 
       // Delete point with keyboard shortcut
-      xyTile.getGraphDot().eq(0).click();
+      xyTile.getGraphDot().eq(0).children('circle.inner-circle').click();
       xyTile.getGraphDot().eq(0).children('circle.outer-circle').should("have.class", "selected");
       xyTile.getGraphDot().eq(0).type("{backspace}");
       xyTile.getGraphDot().should('have.length', 0);
