@@ -64,7 +64,6 @@ function getMiniNodeIcon(node: ISharedProgramNode) {
     "Live Output": " ",
     "Timer": " "
   };
-
   return (nodeTypeToIcon as Record<string, any>)[node.nodeType] || "?";
 }
 
@@ -78,12 +77,15 @@ function getMiniNodeLabelString(sharedNode: ISharedProgramNode): string {
     "Control": (node: ISharedProgramNode) => node.nodeState.controlOperator,
     "Transform": (node: ISharedProgramNode) => node.nodeState.transformOperator,
     "Demo Output": (node: ISharedProgramNode) => node.nodeState.outputType,
-    "Live Output": (node: ISharedProgramNode) => node.nodeState.hubSelect.toString().replace(/^Simulated /, ""),
+    "Live Output": (node: ISharedProgramNode) => node.nodeState.hubSelect,
     "Timer": (node: ISharedProgramNode) => "Timer",
   };
 
-  const getLabel = nodeTypeToLabel[sharedNode.nodeType as keyof typeof nodeTypeToLabel];
-  return (getLabel ? getLabel(sharedNode) : "?").toString();
+  const getLabelFunc = nodeTypeToLabel[sharedNode.nodeType as keyof typeof nodeTypeToLabel];
+  const formattable = getLabelFunc ? getLabelFunc(sharedNode) : "?";
+  const capitalSpaced = formattable.charAt(0).toUpperCase() + formattable.slice(1).replace(/-/g, " ");
+  const truncated = capitalSpaced.length > 7 ? `${capitalSpaced.slice(0, 7)}...` : capitalSpaced;
+  return truncated;
 }
 
 function getMiniNodesDisplayData(programData?: SharedProgramDataType) {
@@ -103,8 +105,6 @@ function getMiniNodesDisplayData(programData?: SharedProgramDataType) {
       category: node.nodeCategory.toLowerCase() ?? "unknown"
     };
   });
-
-  //console.log("| formattedData:", formattedData);
 
   // split up formattedData into three arrays.  One for each category.
   const inputNodesArr = formattedData.filter(node => node.category === "input");
