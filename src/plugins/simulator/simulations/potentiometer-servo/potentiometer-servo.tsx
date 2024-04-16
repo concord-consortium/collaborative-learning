@@ -78,7 +78,7 @@ function getMiniNodeLabelString(sharedNode: ISharedProgramNode): string {
     "Control": (node: ISharedProgramNode) => node.nodeState.controlOperator,
     "Transform": (node: ISharedProgramNode) => node.nodeState.transformOperator,
     "Demo Output": (node: ISharedProgramNode) => node.nodeState.outputType,
-    "Live Output": (node: ISharedProgramNode) => node.nodeState.hubSelect,
+    "Live Output": (node: ISharedProgramNode) => node.nodeState.hubSelect.replace("Simulated ", ""),
     "Timer": (node: ISharedProgramNode) => "Timer",
   };
 
@@ -157,6 +157,10 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
   const miniNodesDataPack = getMiniNodesDisplayData(programData) as IMiniNodesDataPack;
   const { inputNodesArr, operatorNodesArr, outputNodesArr, extraCount } = miniNodesDataPack;
 
+  const hasPinIn = inputNodesArr.some(node => node.label.includes("Pin"));
+  const hasOutToServo = outputNodesArr.some(node => node.label.includes("Servo"));
+
+  console.log("|| outputNodesArr", outputNodesArr);
   return (
     <div className={potServoClasses}>
       <div className="hardware">
@@ -173,7 +177,7 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
             style={{ transform: potRotationString }}
             alt="Potentiometer Dial"
           />
-          <div className="input wire"></div>
+          { hasPinIn && <div className="input wire"></div> }
           <img
             src={assemblyExpanded}
             className={boardClasses}
@@ -233,7 +237,7 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
             </div>
           </div>
 
-          <div className="output wire"></div>
+          { hasOutToServo && <div className="output wire"></div> }
           <img
             className="servo-arm"
             src={servoArm}
