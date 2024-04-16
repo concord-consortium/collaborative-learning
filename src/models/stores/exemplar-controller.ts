@@ -6,8 +6,6 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import { LogEventName } from "../../lib/logger-types";
 import { DocumentsModelType } from "./documents";
 import { Logger, LogMessage } from "../../lib/logger";
-import { AudienceEnum, AudienceModel } from "./supports";
-import { createStickyNote } from "../curriculum/support";
 import { logExemplarDocumentEvent } from "../document/log-exemplar-document-event";
 import { allExemplarControllerRules } from "./exemplar-controller-rules";
 import { kDrawingTileType } from "../../plugins/drawing/model/drawing-types";
@@ -51,12 +49,6 @@ export const BaseExemplarControllerModel = types
     setExemplarVisibility(key: string, isVisible: boolean) {
       if (self.db) {
         self.db.firebase.ref(self.firebasePath).child(`${key}/visible`).set(isVisible);
-        if (isVisible) {
-          // Notify user with a sticky note
-          const audience = AudienceModel.create({type: AudienceEnum.user, identifier: self.db.stores.user.id});
-          const message = "Nice work, you can now see a new example for this lesson:";
-          self.db.createSupport(createStickyNote(message, key), "", audience);
-        }
       }
     }
   }))
