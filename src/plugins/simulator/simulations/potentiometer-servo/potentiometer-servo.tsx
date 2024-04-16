@@ -46,71 +46,38 @@ function getTweenedServoAngle(realValue: number, lastVisibleValue: number) {
 }
 
 function getMiniNodeIcon(node: ISharedProgramNode) {
-  switch (node.nodeType) {
-    case "Sensor":
-      return "S";
-    case "Generator":
-      return "G";
-    case "Number":
-      return "#";
-    case "Math":
-      return "M";
-    case "Logic":
-      return "L";
-    case "Control":
-      return "C";
-    case "Transform":
-      return "T";
-    case "Demo Output":
-      return "D";
-    case "Live Output":
-      return "O";
-    case "Timer":
-      return "T";
-    default:
-      return "?";
-  }
+  const nodeTypeToIcon = {
+    "Sensor": "S",
+    "Generator": "G",
+    "Number": "#",
+    "Math": "M",
+    "Logic": "L",
+    "Control": "C",
+    "Transform": "T",
+    "Demo Output": "D",
+    "Live Output": "O",
+    "Timer": "T"
+  };
+
+  return (nodeTypeToIcon as Record<string, any>)[node.nodeType] || "?";
 }
 
-function getMiniNodeLabelString(node: ISharedProgramNode): string {
-  let label;
+function getMiniNodeLabelString(sharedNode: ISharedProgramNode): string {
+  const nodeTypeToLabel = {
+    "Sensor": (node: ISharedProgramNode) => node.nodeState.sensorType,
+    "Generator": (node: ISharedProgramNode) => node.nodeState.generatorType,
+    "Number": (node: ISharedProgramNode) => "Number",
+    "Math": (node: ISharedProgramNode) => node.nodeState.mathOperator,
+    "Logic": (node: ISharedProgramNode) => node.nodeState.logicOperator,
+    "Control": (node: ISharedProgramNode) => node.nodeState.controlOperator,
+    "Transform": (node: ISharedProgramNode) => node.nodeState.transformOperator,
+    "Demo Output": (node: ISharedProgramNode) => node.nodeState.outputType,
+    "Live Output": (node: ISharedProgramNode) => node.nodeState.hubSelect,
+    "Timer": (node: ISharedProgramNode) => "Timer",
+  };
 
-  switch (node.nodeType) {
-    case "Sensor":
-      label = node.nodeState.sensorType;
-      break;
-    case "Generator":
-      label = node.nodeState.generatorType;
-      break;
-    case "Number":
-      label = "Number";
-      break;
-    case "Math":
-      label = node.nodeState.mathOperator;
-      break;
-    case "Logic":
-      label = node.nodeState.logicOperator;
-      break;
-    case "Control":
-      label = node.nodeState.controlOperator;
-      break;
-    case "Transform":
-      label = node.nodeState.transformOperator;
-      break;
-    case "Demo Output":
-      label = node.nodeState.outputType;
-      break;
-    case "Live Output":
-      label = node.nodeState.hubSelect;
-      break;
-    case "Timer":
-      label = "Timer";
-      break;
-    default:
-      label = "?";
-  }
-
-  return label.toString();
+  const getLabel = nodeTypeToLabel[sharedNode.nodeType as keyof typeof nodeTypeToLabel];
+  return (getLabel ? getLabel(sharedNode) : "?").toString();
 }
 
 function getMiniNodesDisplayData(programData?: SharedProgramDataType): IMiniNodeData[] {
@@ -188,10 +155,10 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
                 <div key={miniNode.id} className={miniNodeClasses(miniNode, index, miniNodesData.length)}>
                   <div className="info">
                     <div className="icon">
-
+                      [{miniNode.icon}]
                     </div>
                     <div className="label">
-                    [{miniNode.icon}] {miniNode.label}
+                     {miniNode.label}
                     </div>
                   </div>
                   <div className="value">
