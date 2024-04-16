@@ -8,10 +8,10 @@ import { EditableDocumentContent } from "./editable-document-content";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { isExemplarType } from "../../models/document/document-types";
+import { ExemplarVisibilityCheckbox } from "./exemplar-visibility-checkbox";
 
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 import CloseIcon from "../../../src/assets/icons/close/close.svg";
-import { ExemplarVisibilityCheckbox } from "./exemplar-visibility-checkbox";
 
 interface IProps {
   openDocumentKey: string;
