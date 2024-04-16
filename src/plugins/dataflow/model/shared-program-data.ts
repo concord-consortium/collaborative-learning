@@ -45,6 +45,7 @@ export const SharedProgramData = SharedModel.named("SharedProgramData")
   type: types.optional(types.literal(kSharedProgramDataType), kSharedProgramDataType)
 })
 .volatile(self => ({
+  samplingRate: " ",
   programNodes: observable.map() as Map<string, ISharedProgramNode>
 }))
 .actions(self => ({
@@ -73,6 +74,9 @@ export const SharedProgramData = SharedModel.named("SharedProgramData")
         console.error('Error putting node into programNodes:', error);
       }
     });
+  },
+  setProgramSamplingRate(rate: string) {
+    self.samplingRate = rate;
   }
 }));
 

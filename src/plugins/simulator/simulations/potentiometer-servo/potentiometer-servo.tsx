@@ -160,12 +160,12 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
   const hasPinIn = inputNodesArr.some(node => node.label.includes("Pin"));
   const hasOutToServo = outputNodesArr.some(node => node.label.includes("Servo"));
 
-  console.log("|| outputNodesArr", outputNodesArr);
+  console.log("|| programData", programData);
   return (
     <div className={potServoClasses}>
       <div className="hardware">
           <div className="heading-area">
-            <div className="sample-rate">100ms</div>
+            <div className="sample-rate">{ programData?.samplingRate }</div>
             <div className="arduino-label">Microprocessor</div>
             { extraCount > 0 && (
               <div className="hidden-nodes-count">+{extraCount} more</div>

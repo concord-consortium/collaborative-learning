@@ -33,6 +33,9 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
 
   const component = content.simulationData.component;
 
+  console.log(
+    "|| SIM has sharedProgramData:", content.sharedProgramData
+  );
   return (
     <div className="simulator-content-container">
       <BasicEditableTileTitle />
