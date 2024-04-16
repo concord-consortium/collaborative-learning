@@ -7,9 +7,9 @@ import { IDocumentLogEvent } from "./log-document-event";
 export interface IExemplarDocumentLogEvent extends IDocumentLogEvent {
   // True if after this change the exemplar is visible to the user
   visibleToUser: boolean,
-  // What caused the change?  Manual action, or a rule in the system.
+  // What caused the change?  Teacher action, or a rule in the system.
   // In the future we might have other options, eg AI
-  changeSource: "rule" | "manual",
+  changeSource: "rule" | "teacher",
   // If the change was based on a rule, this is the name of the rule.
   rule?: string
 }

@@ -37,6 +37,7 @@ import { safeJsonParse } from "../utilities/js-utils";
 import { urlParams } from "../utilities/url-params";
 import { firebaseConfig } from "./firebase-config";
 import { UserModelType } from "../models/stores/user";
+import { logExemplarDocumentEvent } from "../models/document/log-exemplar-document-event";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBBaseConnectOptions {
@@ -993,11 +994,22 @@ export class DB {
   }
 
   public setExemplarVisibilityForAllStudents(exemplarId: string, isVisible: boolean) {
-    const { user } = this.stores;
+    const { user, documents } = this.stores;
     const myClass = this.stores.class;
     const classRef = this.firebase.ref(this.firebase.getClassPath(user));
-    for (const student of myClass.students) {
-      classRef.child('users').child(student.id).child('exemplars').child(exemplarId).child('visible').set(isVisible);
+    const exemplar = documents.getDocument(exemplarId);
+    if (exemplar) {
+      for (const student of myClass.students) {
+        classRef.child('users').child(student.id).child('exemplars').child(exemplarId).child('visible').set(isVisible);
+      }
+      logExemplarDocumentEvent(LogEventName.EXEMPLAR_VISIBILITY_UPDATE,
+        {
+          document: exemplar,
+          visibleToUser: isVisible,
+          changeSource: "teacher"
+        });
+    } else {
+      console.warn("Could not find exemplar document");
     }
   }
 
