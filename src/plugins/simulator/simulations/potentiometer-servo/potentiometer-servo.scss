@@ -20,6 +20,35 @@ $output-node-value: #f9ecab;
 .pot-servo-component {
   .hardware {
     position: relative;
+
+    .heading-area {
+      position: absolute;
+      text-align: center;
+      width: 200px;
+      left: 168px;
+      top: 10px;
+      font-weight: bold;
+      .arduino-label {
+        margin-top:10px;
+        font-size: 14px;
+        color: #333;
+      }
+    }
+
+    .hidden-nodes-count {
+      color:white;
+      border-radius: 15px;
+      width: 60px;
+      background-color: #777;
+      font-size: 11px;
+      font-weight: normal;
+      text-align: center;
+      position: absolute;
+      left: 70px;
+      padding: 2px;
+      margin-top: 8px;
+    }
+
     .pot-dial, .servo-arm {
       position: absolute;
     }
@@ -101,8 +130,8 @@ $output-node-value: #f9ecab;
 // program nodes on arduino
 .mini-nodes-column-wrapper {
   position: absolute;
-  bottom: 30px;
-  left: 178px;
+  bottom: -5px;
+  left: 174px;
   width:200px;
   display: flex;
 }
@@ -112,28 +141,37 @@ $output-node-value: #f9ecab;
   flex-direction: column;
   width: 33.33%;
   justify-content: flex-end;
+  .category-label {
+    font-weight: bold;
+    transform: translateY(10px);
+  }
   &.inputs {
-    //border:1px dotted blue;
     left: 160px;
+    .category-label {
+      text-align: left;
+      color: $input;
+    }
   }
   &.operators {
-    //border: 1px dotted teal;
     left: 235px;
+    .category-label {
+      text-align: center;
+      color: $operator-node-border;
+
+    }
   }
   &.outputs {
-    //border:1px dotted orange;
     left: 320px;
+    .category-label {
+      text-align: right;
+      color: $output;
+    }
   }
 }
 
 .mini-node {
-  //display: flex;
-  //flex-direction: column;
   font-size: 8px;
-  //justify-content: space-between;
-  //align-items: center;
   border-radius: 3px 18px 18px 3px;
-  //margin-bottom: 5px;
   font-size: 10px;
   width: 65px;
   height: 34px;

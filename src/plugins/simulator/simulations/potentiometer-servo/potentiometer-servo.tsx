@@ -27,6 +27,7 @@ interface IMiniNodesDataPack {
   inputNodesArr: IMiniNodeData[];
   operatorNodesArr: IMiniNodeData[];
   outputNodesArr: IMiniNodeData[];
+  extraCount: number;
 }
 
 const potVisibleOffset = 135;
@@ -107,13 +108,22 @@ function getMiniNodesDisplayData(programData?: SharedProgramDataType) {
   });
 
   // split up formattedData into three arrays.  One for each category.
-  const inputNodesArr = formattedData.filter(node => node.category === "input");
-  const operatorNodesArr = formattedData.filter(node => node.category === "operator");
-  const outputNodesArr = formattedData.filter(node => node.category === "output");
+  // limit visible nodes to a max of 5 per category
+  // count the total hidden nodes
+  const inputNodes = formattedData.filter(node => node.category === "input");
+  const operatorNodes = formattedData.filter(node => node.category === "operator");
+  const outputNodes = formattedData.filter(node => node.category === "output");
 
-  return { inputNodesArr, operatorNodesArr, outputNodesArr };
+  const extraCount =
+    (inputNodes.length > 5 ? inputNodes.length - 5 : 0) +
+    (operatorNodes.length > 5 ? operatorNodes.length - 5 : 0) +
+    (outputNodes.length > 5 ? outputNodes.length - 5 : 0);
 
-  return formattedData;
+  const inputNodesArr = inputNodes.slice(0, 5);
+  const operatorNodesArr = operatorNodes.slice(0, 5);
+  const outputNodesArr = outputNodes.slice(0, 5);
+
+  return { inputNodesArr, operatorNodesArr, outputNodesArr, extraCount };
 }
 
 const miniNodeClasses = (node: IMiniNodeData, index:number, length:number) => {
@@ -145,16 +155,18 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
   const boardClasses = classNames('board');
 
   const miniNodesDataPack = getMiniNodesDisplayData(programData) as IMiniNodesDataPack;
-  const { inputNodesArr, operatorNodesArr, outputNodesArr } = miniNodesDataPack;
-
-  // console.log("\n\n| miniNodesData: \n");
-  // miniNodesData.forEach(node => {
-  //   console.log("|     ", node);
-  // } );
+  const { inputNodesArr, operatorNodesArr, outputNodesArr, extraCount } = miniNodesDataPack;
 
   return (
     <div className={potServoClasses}>
       <div className="hardware">
+          <div className="heading-area">
+            <div className="sample-rate">100ms</div>
+            <div className="arduino-label">Microprocessor</div>
+            { extraCount > 0 && (
+              <div className="hidden-nodes-count">+{extraCount} more</div>
+            )}
+          </div>
           <img
             className="pot-dial"
             src={potDial}
@@ -183,6 +195,7 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
                   </div>
                 ))
               }
+              <div className="category-label">Inputs</div>
             </div>
 
             <div className="mini-nodes-col operators">
@@ -199,6 +212,7 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
                   </div>
                 ))
               }
+              <div className="category-label">Operators</div>
             </div>
 
             <div className="mini-nodes-col outputs">
@@ -215,9 +229,9 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
                   </div>
                 ))
               }
+              <div className="category-label">Outputs</div>
             </div>
           </div>
-
 
           <div className="output wire"></div>
           <img

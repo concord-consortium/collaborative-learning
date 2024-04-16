@@ -58,7 +58,6 @@ export const SharedProgramData = SharedModel.named("SharedProgramData")
           (nodeStateData as any)[key] = (node.model as any)[key];
         }
       });
-      console.log('| node type vs name?:', node);
       const newNode = {
         id: node.id,
         nodeDisplayedName: node.model.orderedDisplayName || "",
