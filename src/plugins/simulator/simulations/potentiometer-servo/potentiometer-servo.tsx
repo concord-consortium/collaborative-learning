@@ -23,6 +23,12 @@ interface IMiniNodeData {
   category: string;
 }
 
+interface IMiniNodesDataPack {
+  inputNodesArr: IMiniNodeData[];
+  operatorNodesArr: IMiniNodeData[];
+  outputNodesArr: IMiniNodeData[];
+}
+
 const potVisibleOffset = 135;
 const servoVisibleOffset = 90;
 const minPotAngle = 0;
@@ -80,11 +86,11 @@ function getMiniNodeLabelString(sharedNode: ISharedProgramNode): string {
   return (getLabel ? getLabel(sharedNode) : "?").toString();
 }
 
-function getMiniNodesDisplayData(programData?: SharedProgramDataType): IMiniNodeData[] {
-  if (!programData ) return [];
+function getMiniNodesDisplayData(programData?: SharedProgramDataType) {
+  if (!programData ) return;
   const arr = [...programData.programNodes.values()];
 
-  return arr.map(node => {
+  const formattedData = arr.map(node => {
     const val = node.nodeValue;
     const formattedNum = Number.isInteger(val) ? val : val.toFixed(2);
     const asString = formattedNum.toString();
@@ -97,6 +103,17 @@ function getMiniNodesDisplayData(programData?: SharedProgramDataType): IMiniNode
       category: node.nodeCategory.toLowerCase() ?? "unknown"
     };
   });
+
+  //console.log("| formattedData:", formattedData);
+
+  // split up formattedData into three arrays.  One for each category.
+  const inputNodesArr = formattedData.filter(node => node.category === "input");
+  const operatorNodesArr = formattedData.filter(node => node.category === "operator");
+  const outputNodesArr = formattedData.filter(node => node.category === "output");
+
+  return { inputNodesArr, operatorNodesArr, outputNodesArr };
+
+  return formattedData;
 }
 
 const miniNodeClasses = (node: IMiniNodeData, index:number, length:number) => {
@@ -127,7 +144,8 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
   const potServoClasses = classNames('pot-servo-component');
   const boardClasses = classNames('board');
 
-  const miniNodesData = getMiniNodesDisplayData(programData);
+  const miniNodesDataPack = getMiniNodesDisplayData(programData) as IMiniNodesDataPack;
+  const { inputNodesArr, operatorNodesArr, outputNodesArr } = miniNodesDataPack;
 
   // console.log("\n\n| miniNodesData: \n");
   // miniNodesData.forEach(node => {
@@ -149,21 +167,58 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
             className={boardClasses}
             alt="Board"
           />
-          <div className="mini-nodes">
-            {
-              miniNodesData.map((miniNode, index) => (
-                <div key={miniNode.id} className={miniNodeClasses(miniNode, index, miniNodesData.length)}>
-                  <div className="node-info">
-                    <div className="node-icon">{miniNode.icon}</div>
-                    <div className="node-label">{miniNode.label}</div>
+
+          <div className={"mini-nodes-column-wrapper"}>
+            <div className="mini-nodes-col inputs">
+              {
+                inputNodesArr.map((miniNode, index) => (
+                  <div key={miniNode.id} className={miniNodeClasses(miniNode, index, inputNodesArr.length)}>
+                    <div className="node-info">
+                      <div className="node-icon">{miniNode.icon}</div>
+                      <div className="node-label">{miniNode.label}</div>
+                    </div>
+                    <div className="node-value">
+                      {miniNode.value}
+                    </div>
                   </div>
-                  <div className="node-value">
-                    {miniNode.value}
+                ))
+              }
+            </div>
+
+            <div className="mini-nodes-col operators">
+              {
+                operatorNodesArr.map((miniNode, index) => (
+                  <div key={miniNode.id} className={miniNodeClasses(miniNode, index, operatorNodesArr.length)}>
+                    <div className="node-info">
+                      <div className="node-icon">{miniNode.icon}</div>
+                      <div className="node-label">{miniNode.label}</div>
+                    </div>
+                    <div className="node-value">
+                      {miniNode.value}
+                    </div>
                   </div>
-                </div>
-              ))
-            }
+                ))
+              }
+            </div>
+
+            <div className="mini-nodes-col outputs">
+              {
+                outputNodesArr.map((miniNode, index) => (
+                  <div key={miniNode.id} className={miniNodeClasses(miniNode, index, outputNodesArr.length)}>
+                    <div className="node-info">
+                      <div className="node-icon">{miniNode.icon}</div>
+                      <div className="node-label">{miniNode.label}</div>
+                    </div>
+                    <div className="node-value">
+                      {miniNode.value}
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
           </div>
+
+
           <div className="output wire"></div>
           <img
             className="servo-arm"

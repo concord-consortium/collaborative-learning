@@ -99,75 +99,92 @@ $output-node-value: #f9ecab;
 }
 
 // program nodes on arduino
-.mini-nodes {
+.mini-nodes-column-wrapper {
   position: absolute;
-  left:209px;
-  top: 40px;
-  width:125px;
+  bottom: 30px;
+  left: 178px;
+  width:200px;
+  display: flex;
+}
+
+.mini-nodes-col {
   display: flex;
   flex-direction: column;
-
-  .mini-node {
-    //display: flex;
-    //flex-direction: column;
-    font-size: 8px;
-    //justify-content: space-between;
-    //align-items: center;
-    border-radius: 3px 18px 18px 3px;
-    //margin-bottom: 5px;
-    font-size: 10px;
-    width: 71px;
-    height: 34px;
-    margin-bottom: 4px;
-    box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.2);
-    .node-info, .node-value {
-      box-sizing: border-box;
-      display: flex;
-      align-items: center;
-      font-size: 10px;
-      color: #333;
-      padding-top:1px;
-      padding-bottom: 1px;
-      padding-left:2px;
-    }
-    .node-info {
-      display: flex;
-      border-radius: 0px 13.5px 0px 0px;
-    }
-    .node-value {
-      font-weight: bold;
-      display: flex;
-      border-radius: 0px 0px 13.5px 0px;
-      justify-content: flex-end;
-      padding-right:6px;
-    }
+  width: 33.33%;
+  justify-content: flex-end;
+  &.inputs {
+    //border:1px dotted blue;
+    left: 160px;
   }
-  .mini-node.category-input {
-    border: 2px solid $input-node-border;
-    .node-info {
-      background-color: $input-node-label;
-    }
-    .node-value {
-      background-color: $input-node-value;
-    }
+  &.operators {
+    //border: 1px dotted teal;
+    left: 235px;
   }
-  .mini-node.category-output {
-    border: 2px solid $output-node-border;
-    .node-info {
-      background-color: $output-node-label;
-    }
-    .node-value {
-      background-color: $output-node-value;
-    }
-  }
-  .mini-node.category-operator {
-    border: 2px solid $operator-node-border;
-    .node-info {
-      background-color: $operator-node-label;
-    }
-    .node-value {
-      background-color: $operator-node-value;
-    }
+  &.outputs {
+    //border:1px dotted orange;
+    left: 320px;
   }
 }
 
+.mini-node {
+  //display: flex;
+  //flex-direction: column;
+  font-size: 8px;
+  //justify-content: space-between;
+  //align-items: center;
+  border-radius: 3px 18px 18px 3px;
+  //margin-bottom: 5px;
+  font-size: 10px;
+  width: 65px;
+  height: 34px;
+  margin-bottom: 4px;
+  box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.2);
+  .node-info, .node-value {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    font-size: 10px;
+    color: #333;
+    padding-top:1px;
+    padding-bottom: 1px;
+    padding-left:2px;
+  }
+  .node-info {
+    display: flex;
+    border-radius: 0px 13.5px 0px 0px;
+  }
+  .node-value {
+    font-weight: bold;
+    display: flex;
+    border-radius: 0px 0px 13.5px 0px;
+    justify-content: flex-end;
+    padding-right:6px;
+  }
+}
+.mini-node.category-input {
+  border: 2px solid $input-node-border;
+  .node-info {
+    background-color: $input-node-label;
+  }
+  .node-value {
+    background-color: $input-node-value;
+  }
+}
+.mini-node.category-output {
+  border: 2px solid $output-node-border;
+  .node-info {
+    background-color: $output-node-label;
+  }
+  .node-value {
+    background-color: $output-node-value;
+  }
+}
+.mini-node.category-operator {
+  border: 2px solid $operator-node-border;
+  .node-info {
+    background-color: $operator-node-label;
+  }
+  .node-value {
+    background-color: $operator-node-value;
+  }
+}
