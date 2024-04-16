@@ -47,16 +47,16 @@ function getTweenedServoAngle(realValue: number, lastVisibleValue: number) {
 
 function getMiniNodeIcon(node: ISharedProgramNode) {
   const nodeTypeToIcon = {
-    "Sensor": "S",
-    "Generator": "G",
-    "Number": "#",
-    "Math": "M",
-    "Logic": "L",
-    "Control": "C",
-    "Transform": "T",
-    "Demo Output": "D",
-    "Live Output": "O",
-    "Timer": "T"
+    "Sensor": " ",
+    "Generator": " ",
+    "Number": " ",
+    "Math": " ",
+    "Logic": " ",
+    "Control": " ",
+    "Transform": " ",
+    "Demo Output": " ",
+    "Live Output": " ",
+    "Timer": " "
   };
 
   return (nodeTypeToIcon as Record<string, any>)[node.nodeType] || "?";
@@ -72,7 +72,7 @@ function getMiniNodeLabelString(sharedNode: ISharedProgramNode): string {
     "Control": (node: ISharedProgramNode) => node.nodeState.controlOperator,
     "Transform": (node: ISharedProgramNode) => node.nodeState.transformOperator,
     "Demo Output": (node: ISharedProgramNode) => node.nodeState.outputType,
-    "Live Output": (node: ISharedProgramNode) => node.nodeState.hubSelect,
+    "Live Output": (node: ISharedProgramNode) => node.nodeState.hubSelect.toString().replace(/^Simulated /, ""),
     "Timer": (node: ISharedProgramNode) => "Timer",
   };
 
@@ -153,15 +153,11 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
             {
               miniNodesData.map((miniNode, index) => (
                 <div key={miniNode.id} className={miniNodeClasses(miniNode, index, miniNodesData.length)}>
-                  <div className="info">
-                    <div className="icon">
-                      [{miniNode.icon}]
-                    </div>
-                    <div className="label">
-                     {miniNode.label}
-                    </div>
+                  <div className="node-info">
+                    <div className="node-icon">{miniNode.icon}</div>
+                    <div className="node-label">{miniNode.label}</div>
                   </div>
-                  <div className="value">
+                  <div className="node-value">
                     {miniNode.value}
                   </div>
                 </div>

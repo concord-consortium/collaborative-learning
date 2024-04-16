@@ -1,3 +1,22 @@
+$inactive: #d6d6d6;
+$active-ground: #777777;
+$input: #384aff;
+$output: #c66c02;
+$power: #f7a0a0;
+
+$input-node-border: $input;
+$input-node-label: #e8ecff;
+$input-node-value: #d2d8ff;
+
+$operator-node-border: #0271c1;
+$operator-node-label: #d2f3fb;
+$operator-node-value: #a4e7f6;
+
+$output-node-border: $output;
+$output-node-label: #fdf8e3;
+$output-node-value: #f9ecab;
+
+// fixed sections of pot-servo-component
 .pot-servo-component {
   .hardware {
     position: relative;
@@ -31,27 +50,6 @@
           }
         }
       }
-      &.size-toggle {
-        justify-content: right;
-        svg {
-          position: absolute;
-          left: 2px;
-          top: 1px;
-        }
-        button {
-          transform: translateX(3px);
-          background: white;
-          border: 2px solid #ccc;
-          border-radius: 12px;
-          padding: 4px 8px 4px 22px;
-          font-size: 12px;
-          color: #333;
-          cursor: pointer;
-          &:hover {
-            background: #e5e5e5;
-          }
-        }
-      }
     }
   }
 
@@ -75,6 +73,7 @@
   }
 }
 
+// dynamic sections of pot-servo-component
 .pot-servo-component {
   .pot-dial {
     top: 130px;
@@ -99,36 +98,76 @@
   }
 }
 
+// program nodes on arduino
 .mini-nodes {
   position: absolute;
   left:209px;
   top: 40px;
   width:125px;
-  padding: 5px;
-  color: white;
   display: flex;
   flex-direction: column;
 
   .mini-node {
-    display: flex;
-    flex-direction: column;
+    //display: flex;
+    //flex-direction: column;
     font-size: 8px;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 10px;
-    border-radius: 4px 20px 20px 4px;
-    margin-bottom: 5px;
-    background-color: green;
-    color: white;
+    //justify-content: space-between;
+    //align-items: center;
+    border-radius: 3px 18px 18px 3px;
+    //margin-bottom: 5px;
     font-size: 10px;
-    width:80%;
+    width: 71px;
+    height: 34px;
+    margin-bottom: 4px;
+    box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.2);
+    .node-info, .node-value {
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      font-size: 10px;
+      color: #333;
+      padding-top:1px;
+      padding-bottom: 1px;
+      padding-left:2px;
+    }
+    .node-info {
+      display: flex;
+      border-radius: 0px 13.5px 0px 0px;
+    }
+    .node-value {
+      font-weight: bold;
+      display: flex;
+      border-radius: 0px 0px 13.5px 0px;
+      justify-content: flex-end;
+      padding-right:6px;
+    }
   }
   .mini-node.category-input {
-    background-color: blue;
-    transform: translateX(-40px);
+    border: 2px solid $input-node-border;
+    .node-info {
+      background-color: $input-node-label;
+    }
+    .node-value {
+      background-color: $input-node-value;
+    }
   }
   .mini-node.category-output {
-    background-color: orange;
-    transform: translateX(40px);
+    border: 2px solid $output-node-border;
+    .node-info {
+      background-color: $output-node-label;
+    }
+    .node-value {
+      background-color: $output-node-value;
+    }
+  }
+  .mini-node.category-operator {
+    border: 2px solid $operator-node-border;
+    .node-info {
+      background-color: $operator-node-label;
+    }
+    .node-value {
+      background-color: $operator-node-value;
+    }
   }
 }
+
