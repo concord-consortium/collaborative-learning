@@ -1,6 +1,7 @@
-import { reaction } from "mobx";
+import { ObservableMap, reaction } from "mobx";
 import stringify from "json-stringify-pretty-compact";
 import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import { cloneDeep } from "lodash";
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { IAdornmentModel } from "../adornments/adornment-models";
@@ -11,7 +12,7 @@ import {
 import { GraphPlace } from "../imports/components/axis-graph-shared";
 import {
   GraphAttrRole, GraphEditMode, hoverRadiusFactor, kDefaultAxisLabel, kDefaultNumericAxisBounds, kGraphTileType,
-  PlotType, PlotTypes, pointRadiusMax, pointRadiusSelectionAddend
+  PlotType, PlotTypes, Point, pointRadiusMax, pointRadiusSelectionAddend, RectSize
 } from "../graph-types";
 import { withoutUndo } from "../../../models/history/without-undo";
 import { SharedModelType } from "../../../models/shared/shared-model";
@@ -24,7 +25,6 @@ import {
   clueGraphColors, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
 } from "../../../utilities/color-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
-import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
 import { isSharedCaseMetadata, SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel, IGraphLayerModel } from "./graph-layer-model";
@@ -85,20 +85,40 @@ export const GraphModel = TileContentModel
     // True if a dragging operation is ongoing - automatic rescaling is deferred until drag is done.
     interactionInProgress: false,
     editingMode: "none" as GraphEditMode,
-    editingLayerId: undefined as string|undefined
+    editingLayerId: undefined as string|undefined,
+    // Map from annotation IDs to their current locations.
+    // This allows adornments to flexibly give us these locations.
+    annotationLocationCache: new ObservableMap<string,Point>(),
+    annotationSizesCache: new ObservableMap<string,RectSize>()
   }))
   .preProcessSnapshot((snapshot: any) => {
-    const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
-    if (!hasLayerAlready && snapshot?.config) {
-      const { config, ...others } = snapshot;
-      if (config != null) {
-        return {
-          layers: [{ config }],
-          ...others
-        };
-      }
+    // See if any changes are needed
+    const hasLayerAlready = (snapshot?.layers?.length || 0) > 0;
+    const needsLayerAdded = !hasLayerAlready && snapshot?.config;
+    const hasLegacyAdornment = snapshot?.adornments
+      && snapshot.adornments.find((adorn: any) => adorn.type === 'Connecting Lines');
+    const invalidLeftAxis = snapshot?.axes?.left?.min === null || snapshot?.axes?.left?.max === null;
+    const invalidBotAxis = snapshot?.axes?.bottom?.min === null || snapshot?.axes?.bottom?.max === null;
+    if (!needsLayerAdded && !hasLegacyAdornment && !invalidLeftAxis && !invalidBotAxis) {
+      return snapshot;
     }
-    return snapshot;
+    const newSnap = cloneDeep(snapshot);
+    // Remove connecting-lines adornment if found
+    if(hasLegacyAdornment) {
+      newSnap.adornments = snapshot.adornments.filter((adorn: any) => adorn.type !== 'Connecting Lines');
+    }
+    // Add layers array if missing
+    if (needsLayerAdded) {
+      newSnap.layers = [{ config: snapshot.config }];
+    }
+    // Fix axes if needed
+    if (invalidLeftAxis) {
+      [newSnap.axes.left.min, newSnap.axes.left.max] = kDefaultNumericAxisBounds;
+    }
+    if (invalidBotAxis) {
+      [newSnap.axes.bottom.min, newSnap.axes.bottom.max] = kDefaultNumericAxisBounds;
+    }
+    return newSnap;
   })
   .views(self => ({
     /**
@@ -312,6 +332,10 @@ export const GraphModel = TileContentModel
     get noAttributesAssigned() {
       return !self.layers.some(layer => !layer.config.noAttributesAssigned);
     },
+    // PrimaryRole should be in agreement on all layers, so just return the first.
+    get primaryRole() {
+      return self.layers[0].config?.primaryRole;
+    },
     get annotatableObjects() {
       const tileId = getTileIdFromContent(self) ?? "";
       const objects: IClueObject[] = [];
@@ -410,6 +434,19 @@ export const GraphModel = TileContentModel
     },
     setInteractionInProgress(value: boolean) {
       self.interactionInProgress = value;
+    },
+    setAnnotationLocation(id: string, location: Point|undefined, size: RectSize|undefined) {
+      if (location) {
+        self.annotationLocationCache.set(id, location);
+      } else {
+        self.annotationLocationCache.delete(id);
+      }
+
+      if (size) {
+        self.annotationSizesCache.set(id, size);
+      } else {
+        self.annotationSizesCache.delete(id);
+      }
     }
   }))
   .actions(self => ({
@@ -687,9 +724,6 @@ export const GraphModel = TileContentModel
                 newLayer.setDataConfiguration(dataConfig);
                 dataConfig.setDataset(dataSetModel.dataSet, metaDataModel);
                 newLayer.configureLinkedLayer();
-                // May need these when we want to actually display the new layer:
-                // newLayer.updateAdornments(true);
-                // newLayer.setDataSetListener();
               }
             } else {
               console.warn('| Metadata not found');
@@ -790,11 +824,6 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
     yAttributeLabel: axisLabels && axisLabels.left,
     ...snap
   });
-  const connectByDefault = appConfig?.getSetting("connectPointsByDefault", "graph");
-  if (connectByDefault) {
-    const cLines = ConnectingLinesModel.create();
-    createdGraphModel.addAdornment(cLines);
-  }
 
   return createdGraphModel;
 }

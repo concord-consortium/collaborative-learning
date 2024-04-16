@@ -262,7 +262,8 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
         getColorForId: graphModel.getColorForId,
         selectedPointRadius: graphModel.getPointRadius('select'),
         dotsRef, selectedOnly, pointColor, pointStrokeColor,
-        getScreenX, getScreenY, getLegendColor, enableAnimation
+        getScreenX, getScreenY, getLegendColor, enableAnimation,
+        enableConnectors: false
       });
     },
     [graphModel, dataConfiguration, layout, primaryAttrRole, secondaryAttrRole, dataset, dotsRef,

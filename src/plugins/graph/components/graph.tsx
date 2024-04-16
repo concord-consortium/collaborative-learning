@@ -29,7 +29,6 @@ import {IDataSet} from "../../../models/data/data-set";
 // import {useDataTips} from "../hooks/use-data-tips";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
-import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
 import { AxisEndComponents } from "./axis-end-components";
 import { GraphLayer } from "./graph-layer";
 
@@ -134,13 +133,17 @@ export const Graph = observer(
           graphPlace = attrRoleToGraphPlace[role] as GraphPlace;
         }
         else if (isRemoveYAttributeWithIDAction(action)) {
-          const [_attrId] = action.args; // "old" attr ID, do not pass to handleAttributeAssignment
-          const removingLastOne = layer.config.yAttributeDescriptions.length === 0;
-          graphPlace = removingLastOne ? "left" : "yPlus";
+          const [_attrId] = action.args; // "old" attr ID, do not pass to handleAttributeAssignment as attrId
+          graphPlace = "left";
         }
         else if (isReplaceYAttributeAction(action)) {
           const [ , newAttrId] = action.args;
-          graphPlace = "yPlus";
+          // The first attribute of the first layer defines the left axis; others are considered "yPlus"
+          if (layerNumber===0 && newAttrId === layer.config.yAttributeID(0)) {
+            graphPlace = "left";
+          } else {
+            graphPlace = "yPlus";
+          }
           attrId = newAttrId;
         }
         startAnimation(enableAnimation);
@@ -153,14 +156,8 @@ export const Graph = observer(
   const handleTreatAttrAs = (place: GraphPlace, attrId: string, treatAs: AttributeType) => {
     const layer = graphModel.layerForAttributeId(attrId);
     if (!layer) return;
-    layer.config.setAttributeType(graphPlaceToAttrRole[place], treatAs);
+    layer.config.setAttributeType(graphPlaceToAttrRole[place], treatAs, 0, attrId);
     layer.config.dataset && graphController?.handleAttributeAssignment(layer.config, place, attrId);
-
-    const connectingLines = graphModel.adornments.find(a => a.type === kConnectingLinesType);
-    if (connectingLines && place === "left") {
-      treatAs === 'categorical' && graphModel.hideAdornment(kConnectingLinesType);
-      treatAs === 'numeric' && graphModel.showAdornment(kConnectingLinesType);
-    }
   };
 
   // useDataTips({dotsRef, graphModel, enableAnimation});

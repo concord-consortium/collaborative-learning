@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>1BC69672-55C5-4975-ADD2-6F396358A37C</title>
+    <g id="Dataflow---Arduino-Interface-Assets" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Arduino-Interface-Assets" transform="translate(-814, -477)" fill="#707070" fill-rule="nonzero">
+            <g id="EXPORTABLE" transform="translate(207, 61)">
+                <g id="Symbols" transform="translate(567, 416)">
+                    <g id="Expand_Arduino" transform="translate(40, 0)">
+                        <path d="M15,5 L15,8.5 L14,7.5 L12,9.5 L10.5,8 L12.5,6 L11.5,5 L15,5 Z M8.5,5 L5,5 L5,8.5 L6,7.5 L8,9.5 L9.5,8 L7.5,6 L8.5,5 Z M12,10.5 L10.5,12 L12.5,14 L11.5,15 L15,15 L15,11.5 L14,12.5 L12,10.5 Z M8,10.5 L6,12.5 L5,11.5 L5,15 L8.5,15 L7.5,14 L9.5,12 L8,10.5 Z" id="Shape"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

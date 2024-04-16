@@ -1,0 +1,125 @@
+.pot-servo-component {
+  .hardware {
+    position: relative;
+    .pot-dial, .servo-arm {
+      position: absolute;
+    }
+  }
+  .controls {
+    padding-top:20px;
+    display: flex;
+
+    .area {
+      width: 50%;
+      display: flex;
+      align-items: center;
+
+      &.slider {
+        justify-content: left;
+        .pot-slider {
+          width: 120px;
+          display: flex;
+          flex-direction: row;
+        }
+        .slider-labels {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          .label {
+            font-size: 12px;
+            color: #333;
+          }
+        }
+      }
+      &.size-toggle {
+        justify-content: right;
+        svg {
+          position: absolute;
+          left: 2px;
+          top: 1px;
+        }
+        button {
+          transform: translateX(3px);
+          background: white;
+          border: 2px solid #ccc;
+          border-radius: 12px;
+          padding: 4px 8px 4px 22px;
+          font-size: 12px;
+          color: #333;
+          cursor: pointer;
+          &:hover {
+            background: #e5e5e5;
+          }
+        }
+      }
+    }
+  }
+
+  // for this effect to work we need to package these properties together
+  @keyframes moving-dashes-right {
+    to { background-position: 100% 0%; }
+  }
+
+  .input.wire {
+    background: linear-gradient(90deg, rgb(196, 214, 251) 50%, transparent 50%);
+    background-size: 20px 100%;
+    animation: moving-dashes-right 1s linear infinite;
+    position: absolute;
+  }
+
+  .output.wire {
+    background: linear-gradient(90deg, rgb(251, 223, 196) 50%, transparent 50%);
+    background-size: 20px 100%;
+    animation: moving-dashes-right 1s linear infinite;
+    position: absolute;
+  }
+}
+
+// state-specific positioning
+.pot-servo-component.collapsed {
+  .pot-dial {
+    top: 6px;
+    left:14px;
+  }
+  .servo-arm {
+    top: -58px;
+    right: -53px;
+  }
+
+  .wire {
+    width:70px;
+    height: 4px;
+    &.input {
+      top: 65px;
+      left: 70px;
+    }
+    &.output {
+      top: 65px;
+      right: 43px;
+    }
+  }
+}
+
+.pot-servo-component.expanded {
+  .pot-dial {
+    top: 130px;
+    left:14px;
+  }
+  .servo-arm {
+    top: 97px;
+    right: -53px;
+  }
+
+  .wire {
+    width: 60px;
+    height: 4px;
+    &.input {
+      top: 189px;
+      left:70px;
+    }
+    &.output {
+      top: 221px;
+      right:43px;
+    }
+  }
+}

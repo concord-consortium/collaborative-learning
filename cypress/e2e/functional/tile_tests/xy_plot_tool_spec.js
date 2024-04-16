@@ -137,19 +137,19 @@ context('XYPlot Tool Tile', function () {
       // Added data point will be off the right edge of the plot area until we click 'Fit'.
       xyTile.getTile().scrollIntoView();
       xyTile.getGraphDot().should('have.length', 3);
-      xyTile.getGraphDot().eq(0).should('be.visible');
-      xyTile.getGraphDot().eq(1).should('be.visible');
-      xyTile.getGraphDot().eq(2).should('not.be.visible');
-      // X axis should not have changed in response to adding a data point.
+      xyTile.getGraphDot().eq(0).children('circle.inner-circle').should('be.visible');
+      xyTile.getGraphDot().eq(1).children('circle.inner-circle').should('be.visible');
+      xyTile.getGraphDot().eq(2).children('circle.inner-circle').should('not.be.visible');
+            // X axis should not have changed in response to adding a data point.
       xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
       xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 7, 12);
 
       cy.log("fit view");
       xyTile.getTile().click();
       clueCanvas.clickToolbarButton('graph', 'fit-all');
-      xyTile.getGraphDot().eq(0).should('be.visible');
-      xyTile.getGraphDot().eq(1).should('be.visible');
-      xyTile.getGraphDot().eq(2).should('be.visible');
+      xyTile.getGraphDot().eq(0).children('circle.inner-circle').should('be.visible');
+      xyTile.getGraphDot().eq(1).children('circle.inner-circle').should('be.visible');
+      xyTile.getGraphDot().eq(2).children('circle.inner-circle').should('be.visible');
       xyTile.getEditableAxisBox("bottom", "min").invoke('text').then(parseFloat).should("be.within", -1, 5);
       xyTile.getEditableAxisBox("bottom", "max").invoke('text').then(parseFloat).should("be.within", 15, 20);
 
@@ -167,6 +167,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getTile().click();
       xyTile.getYAttributesLabel().should("contain.text", "y");
       xyTile.selectYAttribute("y2");
+      cy.wait(1000); // animation
       // Should have rescaled to the new Y range, approx 30-32
       xyTile.getEditableAxisBox("left", "min").invoke('text').then(parseFloat).should("be.within", 29, 30);
       xyTile.getEditableAxisBox("left", "max").invoke('text').then(parseFloat).should("be.within", 32, 33);
@@ -176,6 +177,7 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.toolbarButtonIsSelected("graph", "toggle-lock");
 
       xyTile.selectYAttribute("y");
+      cy.wait(1000); // animation
       // Should NOT have rescaled this time.
       xyTile.getEditableAxisBox("left", "min").invoke('text').then(parseFloat).should("be.within", 29, 30);
       xyTile.getEditableAxisBox("left", "max").invoke('text').then(parseFloat).should("be.within", 32, 33);
@@ -237,14 +239,12 @@ context('XYPlot Tool Tile', function () {
       tableToolTile.getTableTile().should('be.visible');
       clueCanvas.clickToolbarButton('table', 'set-expression');
       cy.get('#expression-input').click().type('x*x{enter}');
-      cy.get(".primary-workspace").within((workspace) => {
-        tableToolTile.typeInTableCellXY(0, 0, '5');
-        tableToolTile.getTableCellXY(0, 0).should('contain', '5');
-        tableToolTile.getTableCellXY(0, 1).should('contain', '25');
-        tableToolTile.typeInTableCellXY(1, 0, '10');
-        tableToolTile.getTableCellXY(1, 0).should('contain', '10');
-        tableToolTile.getTableCellXY(1, 1).should('contain', '100');
-      });
+      tableToolTile.typeInTableCellXY(0, 0, '5');
+      tableToolTile.getTableCellXY(0, 0).should('contain', '5');
+      tableToolTile.getTableCellXY(0, 1).should('contain', '25');
+      tableToolTile.typeInTableCellXY(1, 0, '10');
+      tableToolTile.getTableCellXY(1, 0).should('contain', '10');
+      tableToolTile.getTableCellXY(1, 1).should('contain', '100');
 
       cy.log("Link Table");
       xyTile.getTile().click();
@@ -589,13 +589,13 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.toolbarButtonIsNotSelected('graph', 'add-points');
 
       // Delete point with toolbar button
-      xyTile.getGraphDot().eq(0).click();
+      xyTile.getGraphDot().eq(0).children('circle.inner-circle').click();
       xyTile.getGraphDot().eq(0).children('circle.outer-circle').should("have.class", "selected");
       clueCanvas.clickToolbarButton('graph', 'delete');
       xyTile.getGraphDot().should('have.length', 1);
 
       // Delete point with keyboard shortcut
-      xyTile.getGraphDot().eq(0).click();
+      xyTile.getGraphDot().eq(0).children('circle.inner-circle').click();
       xyTile.getGraphDot().eq(0).children('circle.outer-circle').should("have.class", "selected");
       xyTile.getGraphDot().eq(0).type("{backspace}");
       xyTile.getGraphDot().should('have.length', 0);
@@ -614,7 +614,8 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.toolbarButtonIsEnabled("graph", "movable-line");
       clueCanvas.toolbarButtonIsSelected("graph", "movable-line");
       xyTile.getMovableLine().should("have.length", 1);
-      xyTile.getMovableLineCover().should("have.length", 3);
+      xyTile.getMovableLineCover().should("have.length", 1);
+      xyTile.getMovableLineHandle().should("have.length", 2);
       xyTile.getMovableLineEquationContainer()
         .should("have.length", 1)
         // .and("be.visible") -- fails, since there's a (transparent) element covering it
@@ -622,15 +623,32 @@ context('XYPlot Tool Tile', function () {
         .and("contain.html", "<em>dist</em>");
       // this is how visibility is actually accomplished:
       xyTile.getMovableLineWrapper().should("have.class", "fadeIn").and("not.have.class", "fadeOut");
-      xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
 
       // Drag movable line
-      // We drag the bottom part to the right enough to make the slope negative
-      xyTile.getMovableLineCover('lower')
-        .trigger("mousedown", { eventConstructor: 'MouseEvent' })
-        .trigger("mousemove", 400, 200, { force: true, eventConstructor: 'MouseEvent' })
-        .trigger("mouseup", { eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineEquationSlope().then(origSlope => {
+        xyTile.getMovableLineEquationIntercept().then(origIntercept => {
+          xyTile.getMovableLineCover()
+            .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' })
+            .trigger("mousemove", 50, 0, { force: true, eventConstructor: 'MouseEvent' })
+            .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
+          xyTile.getMovableLineEquationSlope().should("equal", origSlope);
+          xyTile.getMovableLineEquationIntercept().should("be.greaterThan", origIntercept);
+        });
+      });
+
+      // Now drag the bottom handle up enough to make the slope negative
+      xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
+      xyTile.getMovableLineHandle('lower')
+        .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' })
+        .trigger("mousemove", 0, -100, { force: true, eventConstructor: 'MouseEvent' })
+        .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
       xyTile.getMovableLineEquationSlope().should("be.lessThan", 0);
+      // Then drag the upper handle up and make slope positive again
+      xyTile.getMovableLineHandle('upper')
+        .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' })
+        .trigger("mousemove", 0, -100, { force: true, eventConstructor: 'MouseEvent' })
+        .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
 
       // Hide movable line (it still exists, just hidden)
       clueCanvas.clickToolbarButton("graph", "movable-line");

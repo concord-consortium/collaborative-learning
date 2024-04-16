@@ -166,6 +166,23 @@ export const DataConfigurationModel = types
       const attr = attrID ? self.dataset?.attrFromID(attrID) : undefined;
       return desc?.type || attr?.type;
     },
+    attributeTypeForID(attributeId: string) {
+      let attributeDesc;
+      const plotNum = this.plotNumberForAttributeID(attributeId);
+      if (plotNum !== undefined) {
+        attributeDesc = self._yAttributeDescriptions[plotNum];
+      } else {
+        self._attributeDescriptions.forEach((desc,role) => {
+          if (desc.attributeID === attributeId) {
+            attributeDesc = desc;
+          }
+        });
+      }
+      if (attributeDesc?.type) {
+        return attributeDesc.type;
+      }
+      return self.dataset?.attrFromID(attributeId)?.type;
+    },
     get places() {
       const places = new Set<string>(Object.keys(this.attributeDescriptions));
       self.dataset?.attributes.length && places.add("caption");
@@ -421,17 +438,25 @@ export const DataConfigurationModel = types
       }
       return caseDataArray;
     },
-    get joinedCaseDataArrays() {
+    getJoinedCaseDataArrays(xType: AttributeType|undefined, yType?: AttributeType|undefined) {
       const joinedCaseData: CaseData[] = [];
+      // If X axis doesn't match the given current X axis type, then none of our cases get plotted.
+      if (self.attributeType("x") !== xType) {
+        return joinedCaseData;
+      }
+
       self.filteredCases.forEach((aFilteredCases, index) => {
-        aFilteredCases.caseIds.forEach(
-          (id) => joinedCaseData.push({
-            dataConfigID: self.id,
-            plotNum: index,
-            caseID: id
-          }));
+        // If Y attribute of the attribute in question here doesn't match, skip this attribute.
+        const relatedAttribute = self.yAttributeDescriptions[index]?.attributeID;
+        if (self.attributeTypeForID(relatedAttribute) === yType) {
+          aFilteredCases.caseIds.forEach(
+            (id) => joinedCaseData.push({
+              dataConfigID: self.id,
+              plotNum: index,
+              caseID: id
+            }));
         }
-      );
+      });
       return joinedCaseData;
     },
     get caseDataArray() {
@@ -796,9 +821,15 @@ export const DataConfigurationModel = types
         self.setPointsNeedUpdating(true);
       }
     },
-    setAttributeType(role: GraphAttrRole, type: AttributeType, plotNumber = 0) {
+    // Sets the type of the attribute in the given role.
+    // An attribute ID may be given if specifying the role is ambiguous (eg there can be multple Y attributes)
+    setAttributeType(role: GraphAttrRole, type: AttributeType, plotNumber = 0, attributeId?: string) {
       if (role === 'y') {
-        self._yAttributeDescriptions[plotNumber]?.setType(type);
+        if (attributeId) {
+          self._yAttributeDescriptions.find(desc => desc.attributeID === attributeId)?.setType(type);
+        } else {
+          self._yAttributeDescriptions[plotNumber]?.setType(type);
+        }
       } else {
         self._attributeDescriptions.get(role)?.setType(type);
       }
