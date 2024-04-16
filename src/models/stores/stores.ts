@@ -33,6 +33,7 @@ import { urlParams } from "../../utilities/url-params";
 import { createAndLoadExemplarDocs } from "./create-exemplar-docs";
 import curriculumConfigJson from "../../clue/curriculum-config.json";
 import { gImageMap } from "../image-map";
+import { ExemplarControllerModel, ExemplarControllerModelType } from "./exemplar-controller";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -48,6 +49,7 @@ export interface IStores extends IBaseStores {
   unitLoadedPromise: Promise<void>;
   sectionsLoadedPromise: Promise<void>;
   startedLoadingUnitAndProblem: boolean;
+  exemplarController: ExemplarControllerModelType;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -91,6 +93,7 @@ class Stores implements IStores{
   unitLoadedPromise: Promise<void>;
   sectionsLoadedPromise: Promise<void>;
   startedLoadingUnitAndProblem: boolean;
+  exemplarController: ExemplarControllerModelType;
 
   constructor(params?: ICreateStores){
     // This will mark all properties as observable
@@ -150,6 +153,7 @@ class Stores implements IStores{
 
     this.unitLoadedPromise = when(() => this.unit !== defaultUnit);
     this.sectionsLoadedPromise = when(() => this.problem.sections.length > 0);
+    this.exemplarController = ExemplarControllerModel.create();
   }
 
   get tabsToDisplay() {

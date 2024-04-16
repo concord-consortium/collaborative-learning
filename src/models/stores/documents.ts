@@ -4,7 +4,7 @@ import { observable } from "mobx";
 import { AppConfigModelType } from "./app-config-model";
 import { DocumentModelType } from "../document/document";
 import {
-  DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
+  DocumentType, ExemplarDocument, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../document/document-types";
 import { getTileEnvironment } from "../tiles/tile-environment";
@@ -152,6 +152,14 @@ export const DocumentsModel = types
           ? user1.lastName.localeCompare(user2.lastName)
           : user1.firstName.localeCompare(user2.firstName);
       });
+    },
+
+    get visibleExemplarDocuments() {
+      return self.byType(ExemplarDocument).filter(e => self.isExemplarVisible(e.key));
+    },
+
+    get invisibleExemplarDocuments() {
+      return self.byType(ExemplarDocument).filter(e => !self.isExemplarVisible(e.key));
     }
   }))
   .views(self => ({
@@ -188,7 +196,6 @@ export const DocumentsModel = types
         self.visibleExemplars.delete(exemplarId);
       }
     }
-
   }))
   .actions((self) => {
     const add = (document: DocumentModelType) => {
