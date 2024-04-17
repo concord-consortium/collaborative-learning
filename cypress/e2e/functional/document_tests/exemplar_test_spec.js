@@ -8,7 +8,7 @@ let sortWork = new SortedWork,
   drawToolTile = new DrawToolTile,
   textToolTile = new TextToolTile;
 
-// This unit has `initiallyHideExemplars` set, and an exemplar defined in curriculum
+// The qaConfigSubtabs unit referenced here has `initiallyHideExemplars` set, and an exemplar defined in curriculum
 const queryParams1 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
 const exemplarName = "First Exemplar";
 const exemplarInfo = "Ivan Idea: First Exemplar";
