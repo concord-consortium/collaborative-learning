@@ -25,10 +25,10 @@ import HumidIcon from "../../../shared-assets/icons/dataflow/output/humid.svg";
 import FanIcon from "../../../shared-assets/icons/dataflow/output/fan.svg";
 
 import TemperatureIcon from "../../../shared-assets/icons/dataflow/sensor/temperature.svg";
-import CO2Icon from "../../../shared-assets/icons/dataflow/sensor/co2.svg"; // this one
+import CO2Icon from "../../../shared-assets/icons/dataflow/sensor/co2.svg";
 import HumidityIcon from "../../../shared-assets/icons/dataflow/sensor/humidity.svg";
 import SignalIcon from "../../../shared-assets/icons/dataflow/control/signal.svg";
-import EMGIcon from "../../../shared-assets/icons/dataflow/sensor/sensor-emg-icon.svg"; // this one
+import EMGIcon from "../../../shared-assets/icons/dataflow/sensor/sensor-emg-icon.svg";
 import PressureIcon from "../../../shared-assets/icons/dataflow/sensor/pressure.svg";
 import ServoIcon from "../../../shared-assets/icons/dataflow/output/servo.svg";
 
