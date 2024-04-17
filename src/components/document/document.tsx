@@ -2,7 +2,6 @@ import { inject, observer } from "mobx-react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import React from "react";
 import FileSaver from "file-saver";
-import { usePublishDialog } from "./use-publish-dialog";
 import { DocumentFileMenu } from "./document-file-menu";
 import { MyWorkDocumentOrBrowser } from "./mywork-document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
@@ -51,17 +50,6 @@ const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
     <svg className={`action icon icon-download`} onClick={onClick}>
       <use xlinkHref={`#icon-publish`} />
     </svg>
-  );
-};
-
-const PublishButton = ({ document }: { document: DocumentModelType }) => {
-  const [showPublishDialog] = usePublishDialog(document);
-  const handlePublishButtonClick = () => {
-    showPublishDialog();
-  };
-  return (
-    <IconButton icon="publish" key="publish" className="action icon-publish" dataTestName="publish-icon"
-                onClickButton={handlePublishButtonClick} title="Publish Workspace" />
   );
 };
 
@@ -241,8 +229,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                 onCopyDocument={this.handleCopyDocumentClick}
                 isDeleteDisabled={true}
                 onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
-            {this.showPublishButton(document) &&
-              <PublishButton document={document} />}
           </div>
         }
         <div className="title" data-test="document-title">
@@ -258,18 +244,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         }
       </div>
     );
-  }
-
-  private showPublishButton(document: DocumentModelType) {
-    const { appConfig } = this.stores;
-    if (!appConfig.disablePublish) return true;
-    // When we disable publishing by setting disablePublish=true,
-    // we set showPublishButton to false to hide the Publish button
-    if (document.type === "planning" || appConfig.disablePublish === true) return false;
-    return appConfig.disablePublish
-            .findIndex(spec => {
-              return this.stores.sortedDocuments.isMatchingSpec(document, spec.documentType, spec.properties);
-            }) < 0;
   }
 
   private getStickyNoteData() {
@@ -397,8 +371,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                 isDeleteDisabled={countNotDeleted < 1}
                 onDeleteDocument={this.handleDeleteDocumentClick}
                 onAdminDestroyDocument={this.handleAdminDestroyDocument} /> }
-            {this.showPublishButton(document) &&
-              <PublishButton document={document} />}
           </div>
         }
         {hasDisplayId && <div className="display-id" style={{opacity: 0}}>{displayId}</div>}

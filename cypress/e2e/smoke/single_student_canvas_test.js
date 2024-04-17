@@ -87,7 +87,7 @@ context('single student functional test', () => {
 
     cy.log('verify publish button');
     canvas.publishCanvas("investigation");
-    canvas.getPublishIcon().should('exist');
+    canvas.getPublishItem().should('exist');
 
     cy.log('test the tool palette');
     // This should test the tools in the tool shelf
