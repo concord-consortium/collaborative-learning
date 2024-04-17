@@ -8,7 +8,7 @@ import { MyWorkDocumentOrBrowser } from "./mywork-document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentModelType } from "../../models/document/document";
 import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
-import { logDocumentEvent } from "../../models/document/log-document-event";
+import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -304,6 +304,24 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+  private openDocument(key: string) {
+    const doc = this.stores.documents.getDocument(key);
+    if (doc) {
+      this.stores.persistentUI.openResourceDocument(doc);
+      logDocumentViewEvent(doc);
+    }
+  }
+
+  private renderDocumentLink(key: string|undefined) {
+    if (!key) return null;
+    const title = this.stores.documents.getDocument(key)?.title;
+    if (title) {
+      return (<a onClick={() => this.openDocument(key)} href="#">{title}</a>);
+    } else {
+      return "[broken link!]";
+    }
+  }
+
   private renderStickyNotesPopup() {
     const { user } = this.stores;
     const { stickyNotes, showNotes} = this.getStickyNoteData();
@@ -337,6 +355,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                 </div>
                 <div className="sticky-note-popup-item-content">
                   {support.content}
+                  { ' ' }
+                  { this.renderDocumentLink(support.linkedDocumentKey) }
                 </div>
               </div>
             );

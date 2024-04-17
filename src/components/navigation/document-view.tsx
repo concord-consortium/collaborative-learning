@@ -7,8 +7,7 @@ import { useAppConfig, useLocalDocuments, useProblemStore, useStores,
 import { useUserContext } from "../../hooks/use-user-context";
 import { ISubTabSpec, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
 import { DocumentType } from "../../models/document/document-types";
-import { LogEventName } from "../../lib/logger-types";
-import { logDocumentEvent } from "../../models/document/log-document-event";
+import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DocumentModelType } from "../../models/document/document";
 import { EditableDocumentContent } from "../document/editable-document-content";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
@@ -99,10 +98,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
         loadDocumentContent(document);
       }
       persistentUI.openSubTabDocument(tabSpec.tab, subTab.label, document.key);
-      const logEvent = document.isRemote
-        ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
-        : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
-      logDocumentEvent(logEvent, { document });
+      logDocumentViewEvent(document);
     }
   };
 

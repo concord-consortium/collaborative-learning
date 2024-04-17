@@ -6,6 +6,9 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import { LogEventName } from "../../lib/logger-types";
 import { DocumentsModelType } from "./documents";
 import { Logger, LogMessage } from "../../lib/logger";
+import { AudienceEnum, AudienceModel } from "./supports";
+import { createStickyNote } from "../curriculum/support";
+import { logExemplarDocumentEvent } from "../document/log-exemplar-document-event";
 import { allExemplarControllerRules } from "./exemplar-controller-rules";
 import { kDrawingTileType } from "../../plugins/drawing/model/drawing-types";
 import { kTextTileType } from "../tiles/text/text-content";
@@ -48,6 +51,12 @@ export const BaseExemplarControllerModel = types
     setExemplarVisibility(key: string, isVisible: boolean) {
       if (self.db) {
         self.db.firebase.ref(self.firebasePath).child(`${key}/visible`).set(isVisible);
+        if (isVisible) {
+          // Notify user with a sticky note
+          const audience = AudienceModel.create({type: AudienceEnum.user, identifier: self.db.stores.user.id});
+          const message = "Nice work, you can now see a new example for this lesson:";
+          self.db.createSupport(createStickyNote(message, key), "", audience);
+        }
       }
     }
   }))
@@ -65,6 +74,7 @@ export const BaseExemplarControllerModel = types
       if (chosen) {
         self.setExemplarVisibility(chosen.key, true);
       }
+      return chosen;
     },
     /**
      * Moves our records of the tiles from the 'inProgress' map to the 'complete' map.
@@ -91,8 +101,17 @@ export const ExemplarControllerModel = BaseExemplarControllerModel
       for (const rule of allExemplarControllerRules) {
         const result = rule.test(self);
         if (result) {
-          self.showRandomExemplar();
+          const chosen = self.showRandomExemplar();
           rule.reset(self, result);
+          if (chosen) {
+            logExemplarDocumentEvent(LogEventName.EXEMPLAR_VISIBILITY_UPDATE,
+              {
+                document: chosen,
+                visibleToUser: true,
+                changeSource: "rule",
+                rule: rule.name
+              });
+          }
         }
       }
     },

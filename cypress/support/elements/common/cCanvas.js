@@ -132,6 +132,14 @@ class ClueCanvas {
         this.getShareButton().find('.ball').invoke('attr', 'class').should('not.contain', 'toggle-on');
     }
 
+    getStickyNotePopup() {
+      return cy.get('div.sticky-note-popup');
+    }
+
+    getStickyNoteLink() {
+      return this.getStickyNotePopup().find('a');
+    }
+
     getToolPalette() {
         return cy.get('.primary-workspace> .toolbar');
     }

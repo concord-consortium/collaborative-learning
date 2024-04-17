@@ -8,9 +8,10 @@ let sortWork = new SortedWork,
   drawToolTile = new DrawToolTile,
   textToolTile = new TextToolTile;
 
-// This unit has `initiallyHideExemplars` set, and an exemplar defined in curriculum
+// The qaConfigSubtabs unit referenced here has `initiallyHideExemplars` set, and an exemplar defined in curriculum
 const queryParams1 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
-const exemplarName = "Ivan Idea: First Exemplar";
+const exemplarName = "First Exemplar";
+const exemplarInfo = "Ivan Idea: First Exemplar";
 
 function beforeTest(params) {
   cy.clearQAData('all');
@@ -43,6 +44,7 @@ context('Exemplar Documents', function () {
     cy.openTopTab('sort-work');
     sortWork.checkDocumentInGroup("No Group", exemplarName);
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
+    clueCanvas.getStickyNotePopup().should("not.exist");
 
     cy.log("Create 3 drawing tiles with 3 events");
     clueCanvas.addTile("drawing");
@@ -77,6 +79,17 @@ context('Exemplar Documents', function () {
 
     // Now the exemplar should be revealed
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
+
+    clueCanvas.getStickyNotePopup().should("exist").should("be.visible")
+      .should("contain.text", "Nice work, you can now see a new example for this lesson")
+      .should("contain.text", exemplarName);
+
+    cy.log("Open exemplar");
+    sortWork.getFocusDocument().should('not.exist');
+    clueCanvas.getStickyNoteLink().should("be.visible").click();
+    sortWork.getFocusDocument().should('be.visible');
+    sortWork.getFocusDocumentTitle().should("contain.text", exemplarName);
+
   });
 
   it('Exemplar revealed by 3 drawings that include labels', function () {
@@ -104,6 +117,9 @@ context('Exemplar Documents', function () {
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
     addText(300, 50, "one two three four five six seven eight nine ten");
     // Now the exemplar should be revealed
-    sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
+    sortWork.getSortWorkItemByTitle(exemplarInfo).parents('.list-item').should("not.have.class", "private");
+    clueCanvas.getStickyNotePopup().should("exist").should("be.visible")
+      .should("contain.text", "Nice work, you can now see a new example for this lesson")
+      .should("contain.text", exemplarName);
   });
 });
