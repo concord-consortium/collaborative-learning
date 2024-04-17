@@ -1,22 +1,22 @@
-import SineIcon from "../../assets/icons/generator/sine.svg";
-import SquareIcon from "../../assets/icons/generator/square.svg";
-import TriangleIcon from "../../assets/icons/generator/triangle.svg";
+import SineIcon from "../../../shared-assets/icons/dataflow/generator/sine.svg";
+import SquareIcon from "../../../shared-assets/icons/dataflow/generator/square.svg";
+import TriangleIcon from "../../../shared-assets/icons/dataflow/generator/triangle.svg";
 
-import AndIcon from "../../assets/icons/logic/and.svg";
-import EqualIcon from "../../assets/icons/logic/equal.svg";
-import GreaterThanOrEqualToIcon from "../../assets/icons/logic/greater-than-or-equal-to.svg";
-import GreaterThanIcon from "../../assets/icons/logic/greater-than.svg";
-import LessThanOrEqualToIcon from "../../assets/icons/logic/less-than-or-equal-to.svg";
-import LessThanIcon from "../../assets/icons/logic/less-than.svg";
-import NandIcon from "../../assets/icons/logic/nand.svg";
-import NotEqualIcon from "../../assets/icons/logic/not-equal.svg";
-import OrIcon from "../../assets/icons/logic/or.svg";
-import XorIcon from "../../assets/icons/logic/xor.svg";
+import AndIcon from "../../../shared-assets/icons/dataflow/logic/and.svg";
+import EqualIcon from "../../../shared-assets/icons/dataflow/logic/equal.svg";
+import GreaterThanOrEqualToIcon from "../../../shared-assets/icons/dataflow/logic/greater-than-or-equal-to.svg";
+import GreaterThanIcon from "../../../shared-assets/icons/dataflow/logic/greater-than.svg";
+import LessThanOrEqualToIcon from "../../../shared-assets/icons/dataflow/logic/less-than-or-equal-to.svg";
+import LessThanIcon from "../../../shared-assets/icons/dataflow/logic/less-than.svg";
+import NandIcon from "../../../shared-assets/icons/dataflow/logic/nand.svg";
+import NotEqualIcon from "../../../shared-assets/icons/dataflow/logic/not-equal.svg";
+import OrIcon from "../../../shared-assets/icons/dataflow/logic/or.svg";
+import XorIcon from "../../../shared-assets/icons/dataflow/logic/xor.svg";
 
-import AddIcon from "../../assets/icons/math/add.svg";
-import SubtractIcon from "../../assets/icons/math/subtract.svg";
-import MultiplyIcon from "../../assets/icons/math/multiply.svg";
-import DivideIcon from "../../assets/icons/math/divide.svg";
+import AddIcon from "../../../shared-assets/icons/dataflow/math/add.svg";
+import SubtractIcon from "../../../shared-assets/icons/dataflow/math/subtract.svg";
+import MultiplyIcon from "../../../shared-assets/icons/dataflow/math/multiply.svg";
+import DivideIcon from "../../../shared-assets/icons/dataflow/math/divide.svg";
 
 import LightBulbIcon from "../../../shared-assets/icons/dataflow/output/light-bulb.svg";
 import GrabberIcon from "../../../shared-assets/icons/dataflow/output/grabber.svg";
@@ -25,17 +25,16 @@ import HumidIcon from "../../../shared-assets/icons/dataflow/output/humid.svg";
 import FanIcon from "../../../shared-assets/icons/dataflow/output/fan.svg";
 
 import TemperatureIcon from "../../../shared-assets/icons/dataflow/sensor/temperature.svg";
-import CO2Icon from "../../assets/icons/sensor/co2.svg";
+import CO2Icon from "../../../shared-assets/icons/dataflow/sensor/co2.svg"; // this one
 import HumidityIcon from "../../../shared-assets/icons/dataflow/sensor/humidity.svg";
-//import O2Icon from "../../assets/icons/sensor/o2.svg";
 import SignalIcon from "../../../shared-assets/icons/dataflow/control/signal.svg";
-import EMGIcon from "../../assets/icons/sensor/sensor-emg-icon.svg";
+import EMGIcon from "../../../shared-assets/icons/dataflow/sensor/sensor-emg-icon.svg"; // this one
 import PressureIcon from "../../../shared-assets/icons/dataflow/sensor/pressure.svg";
 import ServoIcon from "../../../shared-assets/icons/dataflow/output/servo.svg";
 
-import AbsoluteValueIcon from "../../assets/icons/transform/absolute-value.svg";
-import NegationIcon from "../../assets/icons/transform/negation.svg";
-import NotIcon from "../../assets/icons/transform/not.svg";
+import AbsoluteValueIcon from "../../../shared-assets/icons/dataflow/transform/absolute-value.svg";
+import NegationIcon from "../../../shared-assets/icons/dataflow/transform/negation.svg";
+import NotIcon from "../../../shared-assets/icons/dataflow/transform/not.svg";
 
 import HoldPreviousArrowIcon from "../../assets/icons/control/hold-previous.svg";
 import HoldCurrentArrowIcon from "../../assets/icons/control/hold-this.svg";
