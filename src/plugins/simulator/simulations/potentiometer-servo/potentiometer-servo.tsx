@@ -8,6 +8,7 @@ import { findVariable } from "../simulation-utilities";
 import potDial from "./assets/pot-top.png";
 import servoArm from "./assets/servo-arm.png";
 import assemblyExpanded from "./assets/assembly-expanded.png";
+import { potToA1 } from "./assets/animated-wires";
 
 import "./potentiometer-servo.scss";
 import { ISharedProgramNode, SharedProgramDataType } from "../../../dataflow/model/shared-program-data";
@@ -52,18 +53,14 @@ function getTweenedServoAngle(realValue: number, lastVisibleValue: number) {
   return realValue;
 }
 
+// This actually has to map from all the possible values in the label to an Icon, (not node types)
 function getMiniNodeIcon(node: ISharedProgramNode) {
   const nodeTypeToIcon = {
-    "Sensor": " ",
-    "Generator": " ",
-    "Number": " ",
-    "Math": " ",
-    "Logic": " ",
-    "Control": " ",
-    "Transform": " ",
-    "Demo Output": " ",
-    "Live Output": " ",
-    "Timer": " "
+    "Multiply": "×", // myIconVar
+    "Add": "+",
+    "Subtract": "-",
+    "Divide": "÷",
+    // etc
   };
   return (nodeTypeToIcon as Record<string, any>)[node.nodeType] || "?";
 }
@@ -160,7 +157,6 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
   const hasPinIn = inputNodesArr.some(node => node.label.includes("Pin"));
   const hasOutToServo = outputNodesArr.some(node => node.label.includes("Servo"));
 
-  console.log("|| programData", programData);
   return (
     <div className={potServoClasses}>
       <div className="hardware">
@@ -177,7 +173,12 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
             style={{ transform: potRotationString }}
             alt="Potentiometer Dial"
           />
-          { hasPinIn && <div className="input wire"></div> }
+          { hasPinIn &&
+            <>
+              { potToA1() }
+              <div className="connected-pin input"></div>
+            </>
+          }
           <img
             src={assemblyExpanded}
             className={boardClasses}
@@ -237,7 +238,13 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
             </div>
           </div>
 
-          { hasOutToServo && <div className="output wire"></div> }
+          { hasOutToServo &&
+            <>
+              <div className="connected-pin output"></div>
+              <div className="output wire bg"></div>
+              <div className="output wire"></div>
+            </>
+          }
           <img
             className="servo-arm"
             src={servoArm}

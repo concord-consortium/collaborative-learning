@@ -91,17 +91,23 @@ $output-node-value: #f9ecab;
     to { background-position: 100% 0%; }
   }
 
-  .input.wire {
-    background: linear-gradient(90deg, rgb(196, 214, 251) 50%, transparent 50%);
-    background-size: 20px 100%;
-    animation: moving-dashes-right 1s linear infinite;
-    position: absolute;
-  }
+  // .input.wire {
+  //   background: linear-gradient(90deg, rgb(196, 214, 251) 50%, transparent 50%);
+  //   background-size: 20px 100%;
+  //   animation: moving-dashes-right 1s linear infinite;
+  //   position: absolute;
+  // }
 
   .output.wire {
     background: linear-gradient(90deg, rgb(251, 223, 196) 50%, transparent 50%);
     background-size: 20px 100%;
     animation: moving-dashes-right 1s linear infinite;
+    position: absolute;
+  }
+
+  .output.wire.bg {
+    background: $output;
+    background-size: 20px 100%;
     position: absolute;
   }
 }
@@ -119,7 +125,7 @@ $output-node-value: #f9ecab;
 
   .wire {
     width: 60px;
-    height: 4px;
+    height: 3px;
     &.input {
       top: 189px;
       left:70px;
@@ -229,4 +235,44 @@ $output-node-value: #f9ecab;
   .node-value {
     background-color: $operator-node-value;
   }
+}
+
+@keyframes flow-right {
+  to {
+    stroke-dashoffset: -300;
+  }
+}
+.pot-to-a1 {
+  position: absolute;
+  top: 190px;
+  left: 75px;
+  .path-to-a1.dashes {
+    stroke: $input;
+    stroke-dasharray: 5;
+    stroke-dashoffset: 5;
+    animation: flow-right 10s linear infinite;
+  }
+  .path-to-a1.line {
+    stroke: $input-node-value;
+  }
+}
+
+.connected-pin {
+  position: absolute;
+  height: 9px;
+  width: 9px;
+}
+
+.connected-pin.input {
+  border-radius: 0px 3px 3px 0px;
+  background-color: $input;
+  top: 203px;
+  left: 134px;
+}
+
+.connected-pin.output {
+  border-radius: 3px 0px 0px 3px;
+  background-color: $output;
+  top: 218px;
+  right: 101px;
 }
