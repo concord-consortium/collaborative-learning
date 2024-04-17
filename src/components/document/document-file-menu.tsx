@@ -99,7 +99,7 @@ export const DocumentFileMenu: React.FC<IProps> = props => {
 
   return (
     <CustomSelect className="document-file-menu" dataTest="document-file-menu"
-                  title="File" titleIcon={titleIcon}
+                  titleIcon={titleIcon} title="File" titleVisuallyHidden={true}
                   items={menuItems} showItemChecks={false} showItemIcons={true}/>
   );
 };
