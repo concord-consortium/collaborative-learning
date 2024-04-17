@@ -76,14 +76,16 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
 
   const hasPinIn = inputNodesArr.some(node => node.label.includes("Pin"));
   const hasOutToServo = outputNodesArr.some(node => node.label.includes("Servo"));
+  const animationRate = programData?.samplingRate ? programData.samplingRate : 0;
 
+  console.log("| programData", programData);
   return (
     <div className={potServoClasses}>
       <div className="hardware">
           <div className="heading-area">
             <div className="sample-rate">
-              <img className="stopwatch" src={stopwatch} />
-              { programData?.samplingRate }
+              <img className="stopwatch" src={stopwatch} style={{animationDuration: `${animationRate}ms`}} />
+              { programData?.samplingRateStr }
             </div>
             <div className="arduino-label">Microprocessor</div>
             { extraCount > 0 && (

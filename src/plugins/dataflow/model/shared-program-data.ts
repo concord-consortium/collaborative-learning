@@ -45,7 +45,8 @@ export const SharedProgramData = SharedModel.named("SharedProgramData")
   type: types.optional(types.literal(kSharedProgramDataType), kSharedProgramDataType)
 })
 .volatile(self => ({
-  samplingRate: " ",
+  samplingRate: 0,
+  samplingRateStr: " ",
   programNodes: observable.map() as Map<string, ISharedProgramNode>
 }))
 .actions(self => ({
@@ -75,7 +76,10 @@ export const SharedProgramData = SharedModel.named("SharedProgramData")
       }
     });
   },
-  setProgramSamplingRate(rate: string) {
+  setProgramSamplingRateStr(rate: string) {
+    self.samplingRateStr = rate;
+  },
+  setProgramSamplingRate(rate: number) {
     self.samplingRate = rate;
   }
 }));

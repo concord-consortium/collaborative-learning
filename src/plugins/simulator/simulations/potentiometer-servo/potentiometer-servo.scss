@@ -284,7 +284,19 @@ $output-node-value: #f9ecab;
   margin-right: 2px;
 }
 
+@keyframes stopwatchPulse {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 .stopwatch {
+  animation-name: stopwatchPulse;
+  animation-timing-function: ease-out;
+  animation-iteration-count: infinite;
   height: 12px;
   position: relative;
   top: 1px;

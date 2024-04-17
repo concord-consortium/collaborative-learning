@@ -618,7 +618,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const sharedProgramModel = this.props.tileContent.sharedProgramData as SharedProgramDataType;
     sharedProgramModel.setProgramNodes(nodes);
     const dataRateStr = ProgramDataRates.find((item) => item.val === Number(this.props.programDataRate))?.text ?? "";
-    sharedProgramModel.setProgramSamplingRate(dataRateStr);
+    const dataRateNum = ProgramDataRates.find((item) => item.val === Number(this.props.programDataRate))?.val ?? 0;
+    sharedProgramModel.setProgramSamplingRateStr(dataRateStr);
+    sharedProgramModel.setProgramSamplingRate(dataRateNum);
   };
 
   private countSerialDataNodes(nodes: IBaseNode[]){
