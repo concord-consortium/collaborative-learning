@@ -78,7 +78,6 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
   const hasOutToServo = outputNodesArr.some(node => node.label.includes("Servo"));
   const animationRate = programData?.samplingRate ? programData.samplingRate : 0;
 
-  console.log("| programData", programData);
   return (
     <div className={potServoClasses}>
       <div className="hardware">
