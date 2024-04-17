@@ -169,6 +169,14 @@ $title-margin: 2px;
       }
     }
 
+    .document-error {
+
+      p {
+        margin-top: 3em;
+        text-align: center;
+      }
+    }
+
     .editable-document-content {
       top: $nav-tab-height;
       flex: 1;

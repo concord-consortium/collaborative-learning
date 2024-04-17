@@ -27,6 +27,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   const appConfigStore = useAppConfig();
   const openDocument = store.documents.getDocument(openDocumentKey) ||
                        store.networkDocuments.getDocument(openDocumentKey);
+  const isVisible = openDocument?.isAccessibleToUser(user, store.documents);
   const showPlayback = user.type && !openDocument?.isPublished
                        ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
   const showExemplarShare = user.type === "teacher" && openDocument && isExemplarType(openDocument.type);
@@ -88,7 +89,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
         </div>
       </div>
      {
-        openDocument &&
+        openDocument && isVisible &&
         <EditableDocumentContent
           mode={"1-up"}
           isPrimary={false}
@@ -97,6 +98,12 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
           showPlayback={showPlayback}
           fullHeight={true}
         />
+     }
+     {
+        openDocument && !isVisible &&
+        <div className="document-error">
+          <p>This document is not shared with you right now.</p>
+        </div>
      }
     </div>
   );
