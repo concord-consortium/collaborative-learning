@@ -8,16 +8,16 @@ import { findVariable } from "../simulation-utilities";
 import potDial from "./assets/pot-top.png";
 import servoArm from "./assets/servo-arm.png";
 import assemblyExpanded from "./assets/assembly-expanded.png";
-import { potToA1 } from "./assets/animated-wires";
+import stopwatch from "./assets/stopwatch.png";
+import { getMiniNodeIcon, getMiniNodesDisplayData, getTweenedServoAngle, wireToA1 } from "./chip-sim-utils";
 
 import "./potentiometer-servo.scss";
-import { ISharedProgramNode, SharedProgramDataType } from "../../../dataflow/model/shared-program-data";
 
 export const kPotentiometerServoKey = "potentiometer_chip_servo";
 
 interface IMiniNodeData {
   id: string;
-  icon: string;
+  iconKey: string;
   label: string;
   value: string;
   type: string;
@@ -42,86 +42,6 @@ const maxResistReading = 675; // our wired assembly sends 3.3V to pot, so max re
 const kPotAngleKey = "pot_angle_key";
 const kResistReadingKey = "resist_reading_key";
 const kServoAngleKey = "servo_angle_key";
-
-function getTweenedServoAngle(realValue: number, lastVisibleValue: number) {
-  const delta = realValue - lastVisibleValue;
-  const steps = 5;
-  const maxDelta = 40;
-  if (Math.abs(delta) > maxDelta) {
-    return (lastVisibleValue + Math.sign(delta) * steps);
-  }
-  return realValue;
-}
-
-// This actually has to map from all the possible values in the label to an Icon, (not node types)
-function getMiniNodeIcon(node: ISharedProgramNode) {
-  const nodeTypeToIcon = {
-    "Multiply": "×", // myIconVar
-    "Add": "+",
-    "Subtract": "-",
-    "Divide": "÷",
-    // etc
-  };
-  return (nodeTypeToIcon as Record<string, any>)[node.nodeType] || "?";
-}
-
-function getMiniNodeLabelString(sharedNode: ISharedProgramNode): string {
-  const nodeTypeToLabel = {
-    "Sensor": (node: ISharedProgramNode) => node.nodeState.sensorType,
-    "Generator": (node: ISharedProgramNode) => node.nodeState.generatorType,
-    "Number": (node: ISharedProgramNode) => "Number",
-    "Math": (node: ISharedProgramNode) => node.nodeState.mathOperator,
-    "Logic": (node: ISharedProgramNode) => node.nodeState.logicOperator,
-    "Control": (node: ISharedProgramNode) => node.nodeState.controlOperator,
-    "Transform": (node: ISharedProgramNode) => node.nodeState.transformOperator,
-    "Demo Output": (node: ISharedProgramNode) => node.nodeState.outputType,
-    "Live Output": (node: ISharedProgramNode) => node.nodeState.hubSelect.replace("Simulated ", ""),
-    "Timer": (node: ISharedProgramNode) => "Timer",
-  };
-
-  const getLabelFunc = nodeTypeToLabel[sharedNode.nodeType as keyof typeof nodeTypeToLabel];
-  const formattable = getLabelFunc ? getLabelFunc(sharedNode) : "?";
-  const capitalSpaced = formattable.charAt(0).toUpperCase() + formattable.slice(1).replace(/-/g, " ");
-  const truncated = capitalSpaced.length > 7 ? `${capitalSpaced.slice(0, 7)}...` : capitalSpaced;
-  return truncated;
-}
-
-function getMiniNodesDisplayData(programData?: SharedProgramDataType) {
-  if (!programData ) return;
-  const arr = [...programData.programNodes.values()];
-
-  const formattedData = arr.map(node => {
-    const val = node.nodeValue;
-    const formattedNum = Number.isInteger(val) ? val : val.toFixed(2);
-    const asString = formattedNum.toString();
-    return {
-      id: node.id,
-      icon: getMiniNodeIcon(node),
-      label: getMiniNodeLabelString(node) as string,
-      value: asString,
-      type: node.nodeType.toLowerCase(),
-      category: node.nodeCategory.toLowerCase() ?? "unknown"
-    };
-  });
-
-  // split up formattedData into three arrays.  One for each category.
-  // limit visible nodes to a max of 5 per category
-  // count the total hidden nodes
-  const inputNodes = formattedData.filter(node => node.category === "input");
-  const operatorNodes = formattedData.filter(node => node.category === "operator");
-  const outputNodes = formattedData.filter(node => node.category === "output");
-
-  const extraCount =
-    (inputNodes.length > 5 ? inputNodes.length - 5 : 0) +
-    (operatorNodes.length > 5 ? operatorNodes.length - 5 : 0) +
-    (outputNodes.length > 5 ? outputNodes.length - 5 : 0);
-
-  const inputNodesArr = inputNodes.slice(0, 5);
-  const operatorNodesArr = operatorNodes.slice(0, 5);
-  const outputNodesArr = outputNodes.slice(0, 5);
-
-  return { inputNodesArr, operatorNodesArr, outputNodesArr, extraCount };
-}
 
 const miniNodeClasses = (node: IMiniNodeData, index:number, length:number) => {
   return classNames(
@@ -161,7 +81,10 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
     <div className={potServoClasses}>
       <div className="hardware">
           <div className="heading-area">
-            <div className="sample-rate">{ programData?.samplingRate }</div>
+            <div className="sample-rate">
+              <img className="stopwatch" src={stopwatch} />
+              { programData?.samplingRate }
+            </div>
             <div className="arduino-label">Microprocessor</div>
             { extraCount > 0 && (
               <div className="hidden-nodes-count">+{extraCount} more</div>
@@ -175,7 +98,7 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
           />
           { hasPinIn &&
             <>
-              { potToA1() }
+              { wireToA1() }
               <div className="connected-pin input"></div>
             </>
           }
@@ -191,7 +114,9 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
                 inputNodesArr.map((miniNode, index) => (
                   <div key={miniNode.id} className={miniNodeClasses(miniNode, index, inputNodesArr.length)}>
                     <div className="node-info">
-                      <div className="node-icon">{miniNode.icon}</div>
+                      <div className="node-icon">
+                        {getMiniNodeIcon(miniNode.iconKey)}
+                      </div>
                       <div className="node-label">{miniNode.label}</div>
                     </div>
                     <div className="node-value">
@@ -208,7 +133,9 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
                 operatorNodesArr.map((miniNode, index) => (
                   <div key={miniNode.id} className={miniNodeClasses(miniNode, index, operatorNodesArr.length)}>
                     <div className="node-info">
-                      <div className="node-icon">{miniNode.icon}</div>
+                      <div className="node-icon">
+                        {getMiniNodeIcon(miniNode.iconKey)}
+                      </div>
                       <div className="node-label">{miniNode.label}</div>
                     </div>
                     <div className="node-value">
@@ -225,7 +152,9 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
                 outputNodesArr.map((miniNode, index) => (
                   <div key={miniNode.id} className={miniNodeClasses(miniNode, index, outputNodesArr.length)}>
                     <div className="node-info">
-                      <div className="node-icon">{miniNode.icon}</div>
+                      <div className="node-icon">
+                        {getMiniNodeIcon(miniNode.iconKey)}
+                      </div>
                       <div className="node-label">{miniNode.label}</div>
                     </div>
                     <div className="node-value">
