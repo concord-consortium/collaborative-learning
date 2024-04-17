@@ -150,7 +150,7 @@ export const Adornments = observer(function Adornments(props: AdornmmentsProps) 
   return (
     <div className={containerClass} data-testid={kGraphAdornmentsClass} style={outerGridStyle}>
       {outerGridCells}
-      <svg ref={dotsRef} className="connecting-lines-svg" />
+      <svg ref={dotsRef} className="adornments-svg" />
     </div>
   );
 });

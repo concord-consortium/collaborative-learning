@@ -45,16 +45,25 @@ class XYPlotToolTile {
   getMovableLineEquationSlope(workspaceClass) {
     return this.getMovableLineEquationContainer()
       .invoke('text')
-      .then(text => text.match(/= *(\u2212?[0-9.]+)/)[1]) // unicode char is negative sign
+      .then(text => text.match(/= *([\u2212-]?[0-9.]+)/)[1]) // unicode char is negative sign
       .then(str => parseFloat(str.replace('\u2212', '-')));
   }
-  // Specify which of the 3 covers you want with argument: lower, middle, upper
+  getMovableLineEquationIntercept(workspaceClass) {
+    return this.getMovableLineEquationContainer()
+      .invoke('text')
+      .then(text => text.match(/\+ *([\u2212-]?[0-9.]+)/)[1]) // unicode char is negative sign
+      .then(str => parseFloat(str.replace('\u2212', '-')));
+  }
+  getMovableLineCover(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .movable-line-cover`);
+  }
+  // Specify which of the handles you want with argument: 'lower' or 'upper'
   // Or falsy arg to get all of them.
-  getMovableLineCover(position, workspaceClass) {
+  getMovableLineHandle(position, workspaceClass) {
     if (position) {
-      return cy.get(`${wsClass(workspaceClass)} .canvas-area .movable-line-${position}-cover`);
+      return cy.get(`${wsClass(workspaceClass)} .canvas-area .movable-line-${position}-handle`);
     } else {
-      return cy.get(`${wsClass(workspaceClass)} .canvas-area .movable-line-cover`);
+      return cy.get(`${wsClass(workspaceClass)} .canvas-area .movable-line-handle`);
     }
   }
   getMovableLineWrapper(workspaceClass) {
@@ -89,6 +98,9 @@ class XYPlotToolTile {
   }
   getLayerNameInput(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .layer-name input`);
+  }
+  getLayerDeleteButton(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .remove-button`);
   }
   getXAttributesLabel(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .canvas-area .multi-legend .legend-row .bottom .simple-attribute-label`);

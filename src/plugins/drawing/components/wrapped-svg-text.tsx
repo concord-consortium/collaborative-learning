@@ -1,4 +1,5 @@
 import React, { CSSProperties, useLayoutEffect, useRef, useState } from "react";
+import { useResizeDetector } from "react-resize-detector";
 
 // Inter-line spacing, as a multiplier to the observed line height
 const LINE_SPACING = 1.2;
@@ -12,13 +13,18 @@ interface ISvgTextProps {
     style?: CSSProperties
   }
 
-// Creates an SVG <text> element of the given dimentions, 
+// Creates an SVG <text> element of the given dimentions,
 // with the requested text broken up into lines that fit within the given width
 // Very long words will not be broken, and may extend past the width bound.
 export const WrappedSvgText = function({text, x, y, width, height, style}: ISvgTextProps) {
     const [completedLines, setCompletedLines] = useState<string[]>([]);
     const [lineHeight, setLineHeight] = useState<number>(0);
     const textRef = useRef<SVGTextElement>(null);
+
+    // This fixes a bug where line height was not being properly determined in 4-up mode;
+    // I think the rendering is done before the 4-up quadrant is properly sized.
+    // Use resize detector to force a recalculation.
+    const {height: resizeHeight, width: resizeWidth, ref} = useResizeDetector();
 
     // This is implemented as a layout effect so that intermediate states are not rendered as a visible flash.
     useLayoutEffect(() => {
@@ -55,7 +61,7 @@ export const WrappedSvgText = function({text, x, y, width, height, style}: ISvgT
             }
             setCompletedLines(done);
         }
-    }, [text, width, lineHeight]);
+    }, [text, width, lineHeight, resizeHeight, resizeWidth]);
 
     const lines: JSX.Element[] = [];
     const dy=lineHeight*LINE_SPACING;
@@ -64,7 +70,7 @@ export const WrappedSvgText = function({text, x, y, width, height, style}: ISvgT
     });
 
     return(
-        <text x={x} y={y} width={width} height={height} style={style}>
+        <text ref={ref} x={x} y={y} width={width} height={height} style={style}>
           {lines}
           <tspan ref={textRef} x={x} dy={dy}></tspan>
         </text>);

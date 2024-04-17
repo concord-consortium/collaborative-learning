@@ -103,20 +103,21 @@ export class GraphController {
   handleAttributeAssignment(dataConfiguration: IDataConfigurationModel, graphPlace: GraphPlace, attrID: string) {
     const {graphModel, layout} = this,
       appConfig = getAppConfig(graphModel),
-      emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph");
+      emptyPlotIsNumeric = appConfig?.getSetting("emptyPlotIsNumeric", "graph"),
+      isPrimaryLayer = graphModel?.layers[0].config === dataConfiguration;
     if (!(graphModel && layout)) {
       return;
     }
-    this.callMatchCirclesToData();
     if (['plot', 'legend'].includes(graphPlace)) {
       // Since there is no axis associated with the legend and the plotType will not change, we bail
       return;
-    } else if (graphPlace === 'yPlus') {
-      // The yPlus attribute utilizes the left numeric axis for plotting but doesn't change anything else
-      const yAxisModel = graphModel.getAxis('left');
+    } else if (!isPrimaryLayer || graphPlace === 'yPlus') {
+      // The first trace of the primary (0th) layer controls the plot type.
+      // Other data traces just rescale without altering anything else.
       if (!graphModel.lockAxes) {
-        yAxisModel && setNiceDomain(graphModel.numericValuesForYAxis, yAxisModel);
+        this.autoscaleAllAxes();
       }
+      this.callMatchCirclesToData();
       return;
     }
 
@@ -136,8 +137,14 @@ export class GraphController {
           primaryRole = otherAttributeType === 'numeric' ? otherAttrRole
             : attributeType === 'numeric' ? graphAttributeRole
               : otherAttributeType !== 'empty' ? otherAttrRole : graphAttributeRole;
-        graphModel.setPrimaryRole(primaryRole);
-        graphModel.setPlotType(plotChoices[primaryType][otherAttributeType]);
+        // Only call setters if something has changed, to avoid triggering unwanted reactions
+        if (primaryRole !== graphModel.primaryRole) {
+          graphModel.setPrimaryRole(primaryRole);
+        }
+        const plotType = plotChoices[primaryType][otherAttributeType];
+        if (plotType !== graphModel.plotType) {
+          graphModel.setPlotType(plotType);
+        }
       }
     };
 
@@ -154,9 +161,9 @@ export class GraphController {
             graphModel.setAxis(place, newAxisModel);
             dataConfiguration.setAttributeType(attrRole, 'numeric');
             layout.setAxisScaleType(place, 'linear');
-            setNiceDomain(graphModel.numericValuesForAttrRole(attrRole), newAxisModel);
-          } else {
-            setNiceDomain(graphModel.numericValuesForAttrRole(attrRole), currAxisModel);
+          }
+          if (!graphModel.lockAxes) {
+            setNiceDomain(graphModel.numericValuesForAttrRole(attrRole), graphModel.getAxis(place)!, false);
           }
         }
           break;
@@ -189,6 +196,7 @@ export class GraphController {
 
     setPrimaryRoleAndPlotType();
     AxisPlaces.forEach(setupAxis);
+    this.callMatchCirclesToData();
   }
 
   /**
