@@ -117,7 +117,7 @@ export const NumberControlComponent: React.FC<{ data: INumberControl }> = observ
   useStopEventPropagation(inputRef, "pointerdown");
   useStopEventPropagation(inputRef, "dblclick");
 
-  const unitsClass = control.units ? "units" : "";
+  const unitsClass = control.units ? "units one" : "";
   return (
     <div className={`number-container ${unitsClass}`} title={control.tooltip}>
       { control.label
