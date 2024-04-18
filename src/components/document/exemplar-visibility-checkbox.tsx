@@ -8,7 +8,7 @@ type ShareState = "pending"|"none"|"some"|"all";
 const nextState: Record<ShareState,ShareState> = {
   "pending" : "pending",
   "none" : "all",
-  "some" : "none", // Unset visiblity first, since it does not trigger notifications to students.
+  "some" : "none", // Unset visibility first, since it does not trigger notifications to students.
   "all" : "none"
 };
 
@@ -33,11 +33,13 @@ export function ExemplarVisibilityCheckbox({ document }: IProps) {
     });
   }, [db, document.key]);
 
-  if (checkbox.current) {
-    checkbox.current.disabled = (status === "pending");
-    checkbox.current.indeterminate = (status === "some");
-    checkbox.current.checked = (status === "all");
-  }
+  useEffect(() => {
+    if (checkbox.current) {
+      checkbox.current.disabled = (status === "pending");
+      checkbox.current.indeterminate = (status === "some");
+      checkbox.current.checked = (status === "all");
+    }
+  }, [status]);
 
   const handleShareClick = (e: ChangeEvent<HTMLInputElement>) => {
     // Set or remove access for every student.

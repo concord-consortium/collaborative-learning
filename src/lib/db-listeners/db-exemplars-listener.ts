@@ -60,7 +60,7 @@ export class DBExemplarsListener extends BaseListener {
     const visible = typeof value === "object" && value !== null && "visible" in value && value.visible;
     this.db.stores.documents.setExemplarVisible(exemplarId, visible);
     if (visible) {
-      // Create sticky note notification is there isn't one already
+      // Create sticky note notification if there isn't one already
       const note = this.db.stores.supports.getStickyNoteForUserWithLink(this.db.stores.user.id, exemplarId);
       if (!note) {
         const audience = AudienceModel.create({type: AudienceEnum.user, identifier: this.db.stores.user.id});
