@@ -12,10 +12,10 @@ import CurvedSparrowIcon from "../../assets/icons/annotations/proportional-arrow
 
 export const DocumentAnnotationToolbar = observer(function DocumentAnnotationToolbar() {
   const stores = useStores();
-  const showToolbar = true; // stores.appConfig...
   const { ui, persistentUI } = stores;
   const sparrowActive = ui.annotationMode === kSparrowAnnotationMode;
 
+  const showToolbar = stores.appConfig.toolbar.find(item => item.id === 'hide-annotations');
   if (!showToolbar) return null;
 
   function handleSparrow() {
