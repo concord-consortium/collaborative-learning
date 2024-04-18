@@ -16,8 +16,9 @@ import { IconButton } from "../utilities/icon-button";
 import ToggleControl from "../utilities/toggle-control";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
+import { DocumentAnnotationToolbar } from "./document-annotation-toolbar";
 
-import "./document.sass";
+import "./document.scss";
 
 export enum DocumentViewMode {
   Live,
@@ -229,6 +230,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                 onCopyDocument={this.handleCopyDocumentClick}
                 isDeleteDisabled={true}
                 onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
+            <DocumentAnnotationToolbar />
           </div>
         }
         <div className="title" data-test="document-title">

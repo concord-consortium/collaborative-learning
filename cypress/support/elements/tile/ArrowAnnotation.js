@@ -4,10 +4,10 @@ function wsClass(wsc) {
 
 class ArrowAnnotation {
   clickArrowToolbarButton(workspaceClass) {
-    cy.get(`${wsClass(workspaceClass)} .tool.sparrow`).click({ force: true });
+    cy.get(`${wsClass(workspaceClass)} [data-testid="curved-sparrow-button"]`).click({ force: true });
   }
   clickHideAnnotationsButton(workspaceClass) {
-    cy.get(`${wsClass(workspaceClass)} .tool.hide-annotations`).click({force: true});
+    cy.get(`${wsClass(workspaceClass)} [data-testid="hide-annotations-button"]`).click({force: true});
   }
   getAnnotationLayer(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .annotation-layer`);
