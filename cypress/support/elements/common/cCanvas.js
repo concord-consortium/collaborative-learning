@@ -32,11 +32,8 @@ class ClueCanvas {
         return cy.get('.primary-workspace [data-test=document-title]');
     }
 
-    getPublishTeacherDocument() {
-        return cy.get('[data-test=publish-icon]');
-    }
     publishTeacherDoc() {
-        this.getPublishTeacherDocument().click();
+        canvas.getPublishItem().click();
         dialog.getModalTitle().should('be.visible').and('contain', 'Publish');
         dialog.getModalButton().contains("Just this class").click();
         dialog.getDialogTitle().should('exist').contains('Published');
@@ -44,7 +41,7 @@ class ClueCanvas {
         dialog.getDialogTitle().should('not.exist');
     }
     publishTeacherDocToMultipleClasses() {
-      this.getPublishTeacherDocument().click();
+      canvas.getPublishItem().click();
       dialog.getModalTitle().should('be.visible').and('contain', 'Publish');
       dialog.getModalButton().contains("All Classes").click();
       dialog.getDialogTitle().should('exist').contains('Published');
@@ -368,7 +365,7 @@ class ClueCanvas {
         return cy.get('.tool.redo');
      }
      publishDoc(button) {
-        this.getPublishTeacherDocument().click();
+        canvas.getPublishItem().click();
         dialog.getModalTitle().should('be.visible').and('contain', 'Publish');
         dialog.getModalButton().contains(button).click();
         dialog.getDialogTitle().should('exist').contains('Published');
