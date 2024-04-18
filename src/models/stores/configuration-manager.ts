@@ -129,7 +129,6 @@ export class ConfigurationManager implements UnitConfiguration {
 
   get initiallyHideExemplars() {
     return this.getProp<UC["initiallyHideExemplars"]>("initiallyHideExemplars");
-
   }
 
   get navTabs() {
@@ -154,6 +153,10 @@ export class ConfigurationManager implements UnitConfiguration {
 
   get toolbar() {
     return this.getProp<UC["toolbar"]>("toolbar");
+  }
+
+  get annotations() {
+    return this.getProp<UC["annotations"]>("annotations");
   }
 
   get authorTools() {

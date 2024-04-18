@@ -15,7 +15,11 @@ export const DocumentAnnotationToolbar = observer(function DocumentAnnotationToo
   const { ui, persistentUI } = stores;
   const sparrowActive = ui.annotationMode === kSparrowAnnotationMode;
 
-  const showToolbar = stores.appConfig.toolbar.find(item => item.id === 'hide-annotations');
+  // Toolbar is enabled by any setting of 'annotation' in the config other than 'none'
+  // in the future there will be more options supported.
+  let showToolbar = stores.appConfig.annotations && stores.appConfig.annotations !== 'none';
+  // we also enable it, for back-compatibility, if the toolbar has a 'hide-annotations' button specified
+  if (stores.appConfig.toolbar.find(item => item.id === 'hide-annotations')) showToolbar  = true;
   if (!showToolbar) return null;
 
   function handleSparrow() {

@@ -364,17 +364,17 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const showPersonalShareToggle = this.showPersonalShareToggle();
     return (
       <div className={`titlebar ${type}`}>
-        {!hideButtons &&
-          <div className="actions">
-            { showFileMenu &&
+        <div className="actions">
+          { !hideButtons && showFileMenu &&
               <DocumentFileMenu document={document}
                 onOpenDocument={this.handleOpenDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}
                 isDeleteDisabled={countNotDeleted < 1}
                 onDeleteDocument={this.handleDeleteDocumentClick}
-                onAdminDestroyDocument={this.handleAdminDestroyDocument} /> }
-          </div>
-        }
+                onAdminDestroyDocument={this.handleAdminDestroyDocument} />
+          }
+          <DocumentAnnotationToolbar />
+        </div>
         {hasDisplayId && <div className="display-id" style={{opacity: 0}}>{displayId}</div>}
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication

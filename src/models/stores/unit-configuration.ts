@@ -85,4 +85,6 @@ export interface UnitConfiguration extends ProblemConfiguration {
   showCommentTag?: boolean;
   tagPrompt?: string;
   commentTags?: Record<string, string>;
+  // List of the types of annotations supported (eg "curved-sparrow") or "all" or "none"
+  annotations?: "all" | "none" | string[];
 }
