@@ -74,12 +74,16 @@ export class TransformNode extends BaseNode<
 
   getSentence = () => {
     const result = this.model.nodeValue;
-    const { num1 } = this.model;
+    const resultStr = getNumDisplayStr(result);
 
+    if (this.services.playback) {
+      return ` → ${resultStr}`;
+    }
+
+    const { num1 } = this.model;
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === this.model.transformOperator);
     if (nodeOperationTypes) {
       const n1Str = getNumDisplayStr(num1);
-      const resultStr = getNumDisplayStr(result);
       return nodeOperationTypes.numberSentence(n1Str, "") + resultStr;
     } else {
       return "";

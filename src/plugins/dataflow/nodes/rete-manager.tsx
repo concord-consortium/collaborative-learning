@@ -49,10 +49,11 @@ export class ReteManager {
     private mstProgram: DataflowProgramModelType,
     private tileId: string,
     div: HTMLElement,
-    private mstContent: DataflowContentModelType,
+    public mstContent: DataflowContentModelType,
     public stores: IStores,
     public runnable: boolean | undefined,
     public readOnly: boolean | undefined,
+    public playback: boolean | undefined
   ){
     this.editor = new NodeEditorMST(mstProgram, this.process, this.createReteNodeFromNodeModel);
     this.area = new AreaPlugin<Schemes, AreaExtra>(div);
@@ -67,6 +68,8 @@ export class ReteManager {
 
     // Disable the zoom handler which zooms on wheel and double click
     area.area.setZoomHandler(null);
+
+    // FIXME: we need to set the initial zoom from the mstContent
 
     AreaExtensions.selectableNodes(area, AreaExtensions.selector(), {
       accumulating: AreaExtensions.accumulateOnCtrl()

@@ -80,12 +80,17 @@ export class MathNode extends BaseNode<
 
   getSentence = () => {
     const result = this.model.nodeValue;
+    const resultStr = getNumDisplayStr(result);
+
+    if (this.services.playback) {
+      return ` → ${resultStr}`;
+    }
+
     const { num1, num2 } = this.model;
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === this.model.mathOperator);
     if (nodeOperationTypes) {
       const n1Str = getNumDisplayStr(num1);
       const n2Str = getNumDisplayStr(num2);
-      const resultStr = getNumDisplayStr(result);
       return nodeOperationTypes.numberSentence(n1Str, n2Str) + resultStr;
     } else {
       return "";
