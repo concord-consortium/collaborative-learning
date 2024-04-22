@@ -108,9 +108,13 @@ export class ControlNode extends BaseNode<
 
   getSentence = () => {
     const result = this.model.nodeValue;
+    const resultString = getNumDisplayStr(result);
+
+    if (this.services.playback) {
+      return ` → ${resultString}`;
+    }
 
     const { gateActive, timerRunning } = this.model;
-    const resultString = getNumDisplayStr(result);
     const waitString = `waiting → ${resultString}`;
     const onString = `on → ${resultString}`;
     const offString = `off → ${resultString}`;
