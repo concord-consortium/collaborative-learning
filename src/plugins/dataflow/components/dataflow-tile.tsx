@@ -69,10 +69,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
               return (
                 <DataflowProgram
                   documentProperties={this.getDocumentProperties()}
-                  model={model}
-                  onProgramChange={this.handleProgramChange}
-                  onProgramDataRateChange={this.handleProgramDataRateChange}
-                  onZoomChange={this.handleProgramZoomChange}
+                  tileId={model.id}
                   program={program}
                   programDataRate={programDataRate}
                   programZoom={programZoom}
@@ -166,18 +163,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   private handleRequestTableUnlink = (tileInfo: ITileLinkMetadata) => {
     this.getContent().removeLinkedTable(tileInfo.id);
-  };
-
-  private handleProgramChange = (program: any) => {
-    this.getContent().setProgram(program);
-  };
-
-  private handleProgramDataRateChange = (program: any) => {
-    this.getContent().setProgramDataRate(program);
-  };
-
-  private handleProgramZoomChange = (dx: number, dy: number, scale: number) => {
-    this.getContent().setProgramZoom(dx, dy, scale);
   };
 
   private handleChangeOfProgramMode = () => {
