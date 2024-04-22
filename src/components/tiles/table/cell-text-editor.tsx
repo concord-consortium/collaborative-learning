@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { EditorProps } from "react-data-grid";
+import { Portal } from "@chakra-ui/react";
+import TextareaAutosize from "react-textarea-autosize";
 import { TColumn } from "./table-types";
 
 // Starting with ReactDataGrid 7.0.0-canary.35, RDG started using Linaria CSS-in-JS for its internal
@@ -26,7 +28,7 @@ import { TColumn } from "./table-types";
 export const RDG_INTERNAL_EDITOR_CONTAINER_CLASS = "e1d24x2700-canary46";
 export const RDG_INTERNAL_TEXT_EDITOR_CLASS = "t16y9g8l700-canary46";
 
-function autoFocusAndSelect(input: HTMLInputElement | null) {
+function autoFocusAndSelect(input: HTMLTextAreaElement | null) {
   input?.focus();
   input?.select();
 }
@@ -34,7 +36,7 @@ function autoFocusAndSelect(input: HTMLInputElement | null) {
 // patterned after TextEditor from "react-data-grid"
 // extended to call our onBeginBodyCellEdit()/onEndBodyCellEdit() functions
 export default function CellTextEditor<TRow, TSummaryRow = unknown>({
-  row, column, onRowChange, onClose
+  row, column, top, left, onRowChange, onClose
 }: EditorProps<TRow, TSummaryRow>) {
   const _column: TColumn = column as unknown as TColumn;
   const origValueRef = useRef(row[column.key as keyof TRow] as unknown as string);
@@ -67,21 +69,25 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <input
-      className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS}`}
-      ref={autoFocusAndSelect}
-      value={value}
-      onChange={event => {
-        updateValue(event.target.value);
-      }}
-      onBlur={event => {
-        saveChange(event.target.value);
-      }}
-      onKeyDown={(event: any) => {
-        if (event.key === 'Tab') {
-          finishAndSave();
-        }
-      }}
-    />
+    <Portal>
+      <TextareaAutosize
+        className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS}`}
+        style={{top, left, width: column.width}}
+        ref={autoFocusAndSelect}
+        onChange={event => {
+          updateValue(event.target.value);
+        }}
+        onBlur={event => {
+          saveChange(event.target.value);
+        }}
+        onKeyDown={(event: any) => {
+          if (event.key === 'Tab') {
+            finishAndSave();
+          }
+        }}
+      >
+        {value}
+      </TextareaAutosize>
+    </Portal>
   );
 }
