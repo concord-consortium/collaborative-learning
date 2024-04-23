@@ -76,6 +76,12 @@ export const DataflowProgramModel = types.
         node.data.orderedDisplayName = displayNameBase + " " + idx;
         idx++;
       });
+    },
+    // This action is used to wrap the changes in a single MST transaction
+    // This could be generic, but a specific name is used so the recorded event has
+    // a useful name.
+    tickAndProcess(runner: () => void) {
+      runner();
     }
   }))
   .actions(self => ({

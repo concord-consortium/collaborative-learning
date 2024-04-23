@@ -1,5 +1,4 @@
 import React from "react";
-import { DataflowEngine } from "rete-engine";
 import { structures } from "rete-structures";
 import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
 import { Presets, ReactPlugin } from "rete-react-plugin";
@@ -35,6 +34,7 @@ import { DropdownListControl, DropdownListControlComponent } from "./controls/dr
 import { DemoOutputControl, DemoOutputControlComponent } from "./controls/demo-output-control";
 import { PlotButtonControl, PlotButtonControlComponent } from "./controls/plot-button-control";
 import { InputValueControl, InputValueControlComponent } from "./controls/input-value-control";
+import { DataflowEngine } from "./engine/dataflow-engine";
 
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
@@ -55,7 +55,7 @@ export class ReteManager {
     public readOnly: boolean | undefined,
     public playback: boolean | undefined
   ){
-    this.editor = new NodeEditorMST(mstProgram, this.process, this.createReteNodeFromNodeModel);
+    this.editor = new NodeEditorMST(mstProgram, this.createReteNodeFromNodeModel);
     this.area = new AreaPlugin<Schemes, AreaExtra>(div);
 
     this.setup();
@@ -204,22 +204,6 @@ export class ReteManager {
       return context;
     });
 
-    // TODO: maybe this isn't needed anymore
-    setTimeout(() => {
-      // The zoomAt call was centering the origin of the dataflow canvas.
-      // This messes up the default node placement, and would likely mess up saved state.
-      // By removing this, we aren't going to be automatically making sure all of the nodes are visible
-      // AreaExtensions.zoomAt(area, editor.getNodes());
-
-      // In our Rete v1 implementation the origin always started at the top left of the component.
-      // When a user translated the canvas this translation was saved in the file, but
-      // it seems like it is just ignored when the program is loaded back in again.
-
-      // This is needed to initialize things like the value control's sentence
-      // It was having problems when called earlier
-      this.process();
-    }, 10);
-
     this.setupOnSnapshot();
   }
 
@@ -243,8 +227,6 @@ export class ReteManager {
   }
 
   public process = () => {
-    console.log("NodeEditorMST.process");
-
     // Don't do any processing when we are read-only
     if (this.readOnly) return;
 
@@ -260,7 +242,6 @@ export class ReteManager {
     // Because rete engine caches values even if the same node is the
     // parent of two leaves the data function of that common parent
     // will only be called once.
-    // debugger;
     const leafNodes = graph.leaves().nodes();
     leafNodes.forEach(n => this.engine.fetch(n.id));
   };
@@ -370,10 +351,6 @@ export class ReteManager {
     await editor.emit({ type: 'nodecreated', data: node });
 
     this.area.translate(id, {x: newPosition[0], y: newPosition[1]});
-
-    // run the process command so this newly added node can update any controls like the
-    // value control.
-    this.process();
   }
 
   getNewNodePosition() {
@@ -445,6 +422,13 @@ export class ReteManager {
   }
 
   public tickAndProcessNodes() {
+    // This is wrapped in an MST action so all of the changes are batched together
+    // We are using our own custom Rete Dataflow Engine which runs synchronously
+    // so all calls to the nodes `data` and `onTick` methods are grouped together.
+    this.mstProgram.tickAndProcess(() => this._tickAndProcessNodes());
+  }
+
+  private _tickAndProcessNodes() {
     let processNeeded = false;
 
     // This has to be hacked until we figure out the way to specify the Rete Schemes
