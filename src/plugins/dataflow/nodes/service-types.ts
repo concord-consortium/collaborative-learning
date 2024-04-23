@@ -15,4 +15,5 @@ export interface INodeServices {
   stores: IStores;
   runnable?: boolean;
   readOnly?: boolean;
+  playback?: boolean;
 }

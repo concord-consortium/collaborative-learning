@@ -92,6 +92,16 @@ export const BaseNodeModel = types.model("BaseNodeModel",
     self.nodeValue = val;
   },
 
+  clearRecentValues() {
+    self.recentValues.clear();
+  },
+
+  setRecentValues(newValues: Record<string, number[]>) {
+    Object.entries(newValues).forEach(([key, values]) => {
+      self.recentValues.set(key, values);
+    });
+  },
+
   updateRecentValues() {
     const { recentValues } = self;
 

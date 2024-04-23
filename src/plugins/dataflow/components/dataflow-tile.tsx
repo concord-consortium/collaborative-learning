@@ -14,7 +14,6 @@ import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { TileTitleArea } from "../../../components/tiles/tile-title-area";
 import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button";
-import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
 import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
 import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
 
@@ -69,29 +68,14 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
               return (
                 <DataflowProgram
                   documentProperties={this.getDocumentProperties()}
-                  model={model}
-                  onProgramChange={this.handleProgramChange}
-                  onProgramDataRateChange={this.handleProgramDataRateChange}
-                  onZoomChange={this.handleProgramZoomChange}
+                  tileId={model.id}
                   program={program}
                   programDataRate={programDataRate}
-                  programZoom={programZoom}
                   readOnly={readOnly}
                   runnable={runnable}
                   size={size}
                   tileHeight={height}
-                  //state
-                  programMode={this.determineProgramMode()}
-                  isPlaying={this.state.isPlaying}
-                  playBackIndex={this.state.playBackIndex}
-                  recordIndex={this.state.recordIndex}
-                  //state handlers
-                  handleChangeOfProgramMode={this.handleChangeOfProgramMode}
-                  handleChangeIsPlaying={this.handleChangeIsPlaying}
-                  updatePlayBackIndex={this.updatePlayBackIndex}
-                  updateRecordIndex={this.updateRecordIndex}
                   tileContent={tileContent}
-
                 />
               );
             }}
@@ -168,90 +152,11 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     this.getContent().removeLinkedTable(tileInfo.id);
   };
 
-  private handleProgramChange = (program: any) => {
-    this.getContent().setProgram(program);
-  };
-
-  private handleProgramDataRateChange = (program: any) => {
-    this.getContent().setProgramDataRate(program);
-  };
-
-  private handleProgramZoomChange = (dx: number, dy: number, scale: number) => {
-    this.getContent().setProgramZoom(dx, dy, scale);
-  };
-
-  private handleChangeOfProgramMode = () => {
-    const tileContent = this.getContent();
-    const programMode = this.determineProgramMode();
-
-    switch (programMode){
-      case ProgramMode.Ready:
-        tileContent.prepareRecording();
-        this.setState({isPlaying: false}); //reset isPlaying
-        this.setState({isRecording: true});
-        break;
-      case ProgramMode.Recording:
-        this.setState({isRecording: false});
-        break;
-      case ProgramMode.Done:
-        tileContent.resetRecording();
-        break;
-    }
-  };
-
   private getRunnable = () => {
     const isCurriculum = isCurriculumDocument(this.props.documentId);
     return !this.props.readOnly || isCurriculum;
   };
 
-  private determineProgramMode = () => {
-    const { isRecording } = this.state;
-    const tileContent = this.getContent();
-    if (!isRecording && tileContent.isDataSetEmptyCases){
-      return ProgramMode.Ready;
-    }
-    else if (isRecording){
-      return ProgramMode.Recording;
-    }
-    else if (!isRecording && !tileContent.isDataSetEmptyCases){
-     return ProgramMode.Done;
-    }
-    return ProgramMode.Ready;
-  };
-
-  private handleChangeIsPlaying = () => {
-    this.setState({isPlaying: !this.state.isPlaying});
-  };
-
-  private updatePlayBackIndex = (update: string) => {
-    if (update === UpdateMode.Increment){
-      const newPlayBackIndex = this.state.playBackIndex + 1;
-      const tileContent = this.getContent();
-      const recordedCases = tileContent.dataSet.cases.length;
-      if (newPlayBackIndex >= recordedCases) {
-        this.setState({isPlaying: false});
-      } else {
-        this.setState({playBackIndex: newPlayBackIndex});
-      }
-    }
-    if (update === UpdateMode.Reset){
-      this.setState({playBackIndex: 0});
-    }
-  };
-
-  private updateRecordIndex = (update: string) => {
-    if (update === UpdateMode.Increment){
-      const newRecordIndex = this.state.recordIndex + 1;
-      if (newRecordIndex >= this.getContent().maxRecordableCases) {
-        this.setState({isRecording: false});
-      } else {
-        this.setState({recordIndex: newRecordIndex});
-      }
-    }
-    if (update === UpdateMode.Reset){
-      this.setState({recordIndex: 0});
-    }
-  };
   private getContent() {
     return this.props.model.content as DataflowContentModelType;
   }
