@@ -11,6 +11,7 @@ import { IBaseNode } from "./base-node";
 import { NodeEditorMST } from "./node-editor-mst";
 import { Delete } from "./delete";
 import { ControlNode } from "./control-node";
+import { ReteManager } from "./rete-manager";
 
 const { RefSocket, RefControl } = Presets.classic;
 
@@ -103,12 +104,13 @@ type Props<S extends ClassicScheme> = {
     styles?: () => any
     emit: RenderEmit<S>
     area: BaseAreaPlugin<S, any>
-    editor: NodeEditorMST
+    editor: NodeEditorMST,
+    reteManager: ReteManager
 }
 export type DataflowNodeComponent<Scheme extends ClassicScheme> = (props: Props<Scheme>) => JSX.Element
 
 export const CustomDataflowNode = observer(
-  function CustomDataflowNode<Scheme extends ClassicScheme>({data, styles, emit, editor}: Props<Scheme>)
+  function CustomDataflowNode<Scheme extends ClassicScheme>({data, styles, emit, editor, reteManager}: Props<Scheme>)
 {
   const inputs = Object.entries(data.inputs);
   const outputs = Object.entries(data.outputs);
@@ -142,7 +144,7 @@ export const CustomDataflowNode = observer(
     >
       <div className="top-bar" onClick={() => console.log("top-bar click")}>
         <div className="title" data-testid="title">{model.orderedDisplayName || label}</div>
-        <Delete editor={editor} nodeId={id}/>
+        <Delete reteManager={reteManager} nodeId={id}/>
       </div>
       {/* Outputs */}
       {outputs.map(([key, output]) => (

@@ -92,8 +92,7 @@ export class ControlNode extends BaseNode<
     const dropdownControl = new DropdownListControl(this, "controlOperator", dropdownOptions);
     this.addControl("controlOperator", dropdownControl);
 
-    // TODO need to add the readonly "secs" label
-    const valueControl = new NumberControl(this, "waitDuration", "wait");
+    const valueControl = new NumberControl(this, "waitDuration", "wait", null, "", "secs");
     this.addControl("waitDuration", valueControl);
 
     this.valueControl = new ValueControl("Control", this.getSentence);
@@ -108,9 +107,13 @@ export class ControlNode extends BaseNode<
 
   getSentence = () => {
     const result = this.model.nodeValue;
+    const resultString = getNumDisplayStr(result);
+
+    if (this.services.playback) {
+      return ` → ${resultString}`;
+    }
 
     const { gateActive, timerRunning } = this.model;
-    const resultString = getNumDisplayStr(result);
     const waitString = `waiting → ${resultString}`;
     const onString = `on → ${resultString}`;
     const offString = `off → ${resultString}`;
