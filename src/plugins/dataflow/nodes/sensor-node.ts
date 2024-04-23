@@ -9,6 +9,8 @@ import { numSocket } from "./num-socket";
 import { NodeSensorTypes, kSensorMissingMessage, kSensorSelectMessage } from "../model/utilities/node";
 import { NodeChannelInfo, kDeviceDisplayNames } from "../model/utilities/channel";
 import { kSimulatedChannelPrefix } from "../model/utilities/simulated-channel";
+import { ValueWithUnitsControl } from "./controls/value-with-units-control";
+import { kEmptyValueString } from "./utilities/view-utilities";
 
 export const SensorNodeModel = BaseNodeModel.named("SensorNodeModel")
 .props({
@@ -21,12 +23,18 @@ export const SensorNodeModel = BaseNodeModel.named("SensorNodeModel")
   sensor: "",
 })
 .actions(self => ({
-  setSensorType(type: string) {
-    self.sensorType = type;
-  },
   setSensor(sensor: string) {
     self.sensor = sensor;
+    self.resetGraph();
   }
+}))
+.actions(self => ({
+  setSensorType(type: string) {
+    if (type === self.sensorType) return;
+
+    self.sensorType = type;
+    self.setSensor("");
+  },
 }));
 export interface ISensorNodeModel extends Instance<typeof SensorNodeModel> {}
 
@@ -36,6 +44,7 @@ export class SensorNode extends BaseNode<
   {
     sensorType: IDropdownListControl,
     sensor: IDropdownListControl,
+    value: ValueWithUnitsControl,
     plotButton: PlotButtonControl
   },
   ISensorNodeModel
@@ -65,7 +74,38 @@ export class SensorNode extends BaseNode<
     this.sensorControl = new DropdownListControl(this, "sensor", [],
       "Select Sensor", kSensorSelectMessage, () => this.getSensorOptions());
     this.addControl("sensor", this.sensorControl);
+
+    const valueControl = new ValueWithUnitsControl("Sensor", this.getDisplayValue,
+      this.getUnits);
+    this.addControl("value", valueControl);
+
+    this.addControl("plotButton", new PlotButtonControl(this));
   }
+
+  getNodeSensorType() {
+    const { sensorType } = this.model;
+    return NodeSensorTypes.find((s: any) => s.type === sensorType);
+  }
+
+  getDisplayValue = () => {
+    const { nodeValue } = this.model;
+
+    // If decimal places are specified for this sensor type, use them, otherwise default to 2
+    const nodeSensorType = this.getNodeSensorType();
+    const foundDecimalPlaces = nodeSensorType?.decimalPlaces;
+    const decimalPlaces = foundDecimalPlaces !== undefined ? foundDecimalPlaces : 2;
+
+    const displayValue = nodeValue == null || isNaN(nodeValue)
+      ? kEmptyValueString
+      : nodeValue.toFixed(decimalPlaces);
+
+    return displayValue;
+  };
+
+  getUnits = () => {
+    const nodeSensorType = this.getNodeSensorType();
+    return nodeSensorType?.units || "";
+  };
 
   public requiresSerial() {
     const isLiveSensor = /fsr|emg|tmp|[th]-[abcd]/; // match ids any live sensor channels
