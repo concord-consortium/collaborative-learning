@@ -53,27 +53,32 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     _column.appData?.onEndBodyCellEdit?.(newValue);
   };
 
-  const finishAndSave = () => {
-    const endValue = valueRef.current;
-    if (endValue !== origValueRef.current) {
-      onRowChange({ ...row, [column.key]: endValue }, true);
+  const finishAndSave = (commitChanges: boolean) => {
+    if (commitChanges) {
+      const endValue = valueRef.current;
+      if (endValue !== origValueRef.current) {
+        onRowChange({ ...row, [column.key]: endValue }, true);
+      }
+      saveChange(endValue);
+    } else {
+      onClose(false);
     }
-    saveChange(endValue);
   };
 
   useEffect(() => {
     _column.appData?.onBeginBodyCellEdit?.();
     return () => {
-      finishAndSave();
+      finishAndSave(false);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Portal>
       <TextareaAutosize
+        value={value}
         className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS}`}
         style={{top, left, width: column.width}}
-        ref={autoFocusAndSelect}
+        autoFocus={true}
         onChange={event => {
           updateValue(event.target.value);
         }}
@@ -81,13 +86,18 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
           saveChange(event.target.value);
         }}
         onKeyDown={(event: any) => {
-          if (event.key === 'Tab') {
-            finishAndSave();
+          const { key } = event;
+          switch (key) {
+            case 'Escape':
+              finishAndSave(false);
+              break;
+            case 'Tab':
+            case 'Enter':
+              event.preventDefault();
+              finishAndSave(true);
           }
         }}
-      >
-        {value}
-      </TextareaAutosize>
+      />
     </Portal>
   );
 }
