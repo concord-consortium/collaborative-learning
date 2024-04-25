@@ -8,6 +8,7 @@ import { PlotButtonControl } from "./controls/plot-button-control";
 import { INumberUnitsControl } from "./controls/num-units-control";
 import { DemoOutputControl } from "./controls/demo-output-control";
 import { IInputValueControl } from "./controls/input-value-control";
+import { ValueWithUnitsControl } from "./controls/value-with-units-control";
 
 // Crazy Rete typing...
 class NodeWithControls extends ClassicPreset.Node<
@@ -18,6 +19,7 @@ class NodeWithControls extends ClassicPreset.Node<
       | INumberControl
       | INumberUnitsControl
       | ValueControl
+      | ValueWithUnitsControl
       | IDropdownListControl
       | IInputValueControl
       | DemoOutputControl

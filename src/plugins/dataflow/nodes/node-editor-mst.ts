@@ -10,7 +10,6 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
 
   constructor(
     private mstProgram: DataflowProgramModelType,
-    private process: () => void,
     private createReteNodeFromNodeModel: (id: string, model: IBaseNodeModel) => IBaseNode | undefined
   ) {
     super();
@@ -130,10 +129,6 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
 
     // Temporarily emit like normal so we can get things back to working.
     await this.emit({ type: 'nodecreated', data: node });
-
-    // run the process command so this newly added node can update any controls like the
-    // value control.
-    this.process();
 
     return true;
   }
