@@ -141,7 +141,18 @@ export const BaseNodeModel = types.model("BaseNodeModel",
   setTickMax(max: number) { self.tickMax = max; },
   setTickMin(min: number) { self.tickMin = min; },
   setDsMax(max: number) { self.dsMax = max; },
-  setDsMin(min: number) { self.dsMin = min; }
+  setDsMin(min: number) { self.dsMin = min; },
+}))
+.actions(self => ({
+  resetGraph () {
+    self.dsMax = -Infinity;
+    self.dsMin = Infinity;
+
+    self.tickMax = undefined;
+    self.tickMin = undefined;
+
+    self.clearRecentValues();
+  }
 }));
 export interface IBaseNodeModel extends Instance<typeof BaseNodeModel> {}
 

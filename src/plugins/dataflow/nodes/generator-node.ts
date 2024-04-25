@@ -47,8 +47,6 @@ export class GeneratorNode extends BaseNode<
   },
   IGeneratorNodeModel
 > {
-  valueControl: ValueControl;
-
   constructor(
     id: string | undefined,
     model: IGeneratorNodeModel,
@@ -73,8 +71,8 @@ export class GeneratorNode extends BaseNode<
       "Set Period");
     this.addControl("period", periodControl);
 
-    this.valueControl = new ValueControl("Generator", this.getSentence);
-    this.addControl("value", this.valueControl);
+    const valueControl = new ValueControl("Generator", this.getSentence);
+    this.addControl("value", valueControl);
 
     this.addControl("plotButton", new PlotButtonControl(this));
   }
