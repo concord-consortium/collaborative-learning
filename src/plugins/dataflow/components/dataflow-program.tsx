@@ -43,7 +43,8 @@ import { LiveOutputNode } from "../nodes/live-output-node";
 import { SensorNode } from "../nodes/sensor-node";
 import { recordCase } from "../model/utilities/recording-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
-import { SharedProgramDataType } from "../model/shared-program-data";
+import { SharedProgramDataType } from "../../shared-program-data/shared-program-data";
+import { getSharedNodes } from "../nodes/utilities/shared-program-data-utilities";
 
 import "./dataflow-program.sass";
 
@@ -616,7 +617,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private updateSharedProgramData = () => {
     const nodes = this.programEditor.getNodes() as IBaseNode[];
     const sharedProgramModel = this.props.tileContent.sharedProgramData as SharedProgramDataType;
-    sharedProgramModel.setProgramNodes(nodes);
+    const sharedNodes = getSharedNodes(nodes);
+    sharedProgramModel.setProgramNodes(sharedNodes);
     const dataRateStr = ProgramDataRates.find((item) => item.val === Number(this.props.programDataRate))?.text ?? "";
     const dataRateNum = ProgramDataRates.find((item) => item.val === Number(this.props.programDataRate))?.val ?? 0;
     sharedProgramModel.setProgramSamplingRateStr(dataRateStr);

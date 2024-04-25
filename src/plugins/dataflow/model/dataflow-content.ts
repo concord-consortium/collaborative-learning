@@ -17,7 +17,7 @@ import {
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { DataSet, addAttributeToDataSet } from "../../../models/data/data-set";
-import { SharedProgramData, SharedProgramDataType } from "./shared-program-data";
+import { SharedProgramData, SharedProgramDataType } from "../../shared-program-data/shared-program-data";
 
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";

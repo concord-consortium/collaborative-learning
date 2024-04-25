@@ -11,7 +11,7 @@ import SignalIcon from "../../../shared-assets/icons/dataflow/control/signal.svg
 import ServoIcon from "../../../shared-assets/icons/dataflow/output/servo.svg";
 
 
-import { ISharedProgramNode, SharedProgramDataType } from '../../../dataflow/model/shared-program-data';
+import { ISharedProgramNode, SharedProgramDataType } from '../../../shared-program-data/shared-program-data';
 
 export function getTweenedServoAngle(realValue: number, lastVisibleValue: number) {
   const delta = realValue - lastVisibleValue;

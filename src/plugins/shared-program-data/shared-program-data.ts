@@ -1,6 +1,5 @@
 import { types, Instance } from "mobx-state-tree";
-import { SharedModel } from "../../../models/shared/shared-model";
-import { IBaseNode } from "../nodes/base-node";
+import { SharedModel } from "../../models/shared/shared-model";
 import { observable } from "mobx";
 
 export const kSharedProgramDataType = "SharedProgramData";
@@ -50,30 +49,12 @@ export const SharedProgramData = SharedModel.named("SharedProgramData")
   programNodes: observable.map() as Map<string, ISharedProgramNode>
 }))
 .actions(self => ({
-  setProgramNodes(newNodes: IBaseNode[]) {
+  setProgramNodes(newNodes: ISharedProgramNode[]) {
     self.programNodes.clear();
 
     newNodes.forEach(node => {
-      const nodeStateData = {};
-      Object.keys(node.model).forEach(key => {
-        if (kSharedNodeKeys.includes(key)) {
-          (nodeStateData as any)[key] = (node.model as any)[key];
-        }
-      });
-      const newNode = {
-        id: node.id,
-        nodeDisplayedName: node.model.orderedDisplayName || "",
-        nodeValue: node.model.nodeValue || 0,
-        nodeType: node.model.type,
-        nodeState: nodeStateData,
-        nodeCategory: kNodeTypeToCategoryMap[node.model.type]
-      };
-      if (!newNode.id) return;
-      try {
-        self.programNodes.set(newNode.id, newNode);
-      } catch (error) {
-        console.error('Error putting node into programNodes:', error);
-      }
+      if (!node.id) return;
+      self.programNodes.set(node.id, node);
     });
   },
   setProgramSamplingRateStr(rate: string) {

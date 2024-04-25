@@ -1,6 +1,6 @@
 import { FunctionComponent } from "react";
 import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
-import { SharedProgramDataType } from "../../dataflow/model/shared-program-data";
+import { SharedProgramDataType } from "../../shared-program-data/shared-program-data";
 
 export interface ISimulationProps {
   frame: number;

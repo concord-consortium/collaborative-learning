@@ -1,4 +1,4 @@
-import { kSharedProgramDataType, SharedProgramData } from "../../plugins/dataflow/model/shared-program-data";
+import { SharedProgramData, kSharedProgramDataType } from "../../plugins/shared-program-data/shared-program-data";
 import { registerSharedModelInfo } from "./shared-model-registry";
 
 registerSharedModelInfo({

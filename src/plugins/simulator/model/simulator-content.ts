@@ -11,7 +11,7 @@ import { isInputVariable, isOutputVariable } from "../../shared-variables/simula
 import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { defaultSimulationKey, simulations } from "../simulations/simulations";
-import { SharedProgramData, SharedProgramDataType } from "../../dataflow/model/shared-program-data";
+import { SharedProgramData, SharedProgramDataType } from "../../shared-program-data/shared-program-data";
 
 export function defaultSimulatorContent(): SimulatorContentModelType {
   return SimulatorContentModel.create({});
