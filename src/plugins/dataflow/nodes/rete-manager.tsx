@@ -35,6 +35,7 @@ import { DropdownListControl, DropdownListControlComponent } from "./controls/dr
 import { DemoOutputControl, DemoOutputControlComponent } from "./controls/demo-output-control";
 import { PlotButtonControl, PlotButtonControlComponent } from "./controls/plot-button-control";
 import { InputValueControl, InputValueControlComponent } from "./controls/input-value-control";
+import { ValueWithUnitsControl, ValueWithUnitsControlComponent } from "./controls/value-with-units-control";
 import { DataflowProgramChange } from "../dataflow-logger";
 
 const MAX_ZOOM = 2;
@@ -154,6 +155,9 @@ export class ReteManager {
         control(data) {
           if (data.payload instanceof ValueControl) {
             return ValueControlComponent;
+          }
+          if (data.payload instanceof ValueWithUnitsControl) {
+            return ValueWithUnitsControlComponent;
           }
           if (data.payload instanceof NumberUnitsControl) {
             return NumberUnitsControlComponent;
