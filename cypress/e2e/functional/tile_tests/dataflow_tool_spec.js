@@ -517,11 +517,11 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNode(sensorNode).should("exist");
     dataflowToolTile.getNodeTitle().should("contain", "Sensor");
 
-    // cy.log("can toggle minigraph");
-    // dataflowToolTile.getShowGraphButton(sensorNode).click();
-    // dataflowToolTile.getMinigraph(sensorNode).should("exist");
-    // dataflowToolTile.getShowGraphButton(sensorNode).click();
-    // dataflowToolTile.getMinigraph(sensorNode).should("not.exist");
+    cy.log("can toggle minigraph");
+    dataflowToolTile.getShowGraphButton(sensorNode).click();
+    dataflowToolTile.getMinigraph(sensorNode).should("exist");
+    dataflowToolTile.getShowGraphButton(sensorNode).click();
+    dataflowToolTile.getMinigraph(sensorNode).should("not.exist");
 
     cy.log("verify sensor types");
     const dropdown10 = "sensorType";
@@ -613,16 +613,16 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getPlayButton().should("be.enabled");
     dataflowToolTile.verifyRecordingClearButtonText();
     dataflowToolTile.verifyRecordingClearButtonIcon();
-    // dataflowToolTile.getPlayButton().click();
+    dataflowToolTile.getPlayButton().click();
 
-    // dataflowToolTile.verifyPauseButtonText();
-    // dataflowToolTile.verifyPauseButtonIcon();
-    // dataflowToolTile.getPauseButton().should("be.enabled");
-    // dataflowToolTile.getPauseButton().click();
+    dataflowToolTile.verifyPauseButtonText();
+    dataflowToolTile.verifyPauseButtonIcon();
+    dataflowToolTile.getPauseButton().should("be.enabled");
+    dataflowToolTile.getPauseButton().click();
 
-    // dataflowToolTile.getPlayButton().should("be.enabled");
-    // dataflowToolTile.getPlayButton().click();
-    // cy.wait(5000);
+    dataflowToolTile.getPlayButton().should("be.enabled");
+    dataflowToolTile.getPlayButton().click();
+    cy.wait(5000);
 
     cy.log("verify clear recording");
     dataflowToolTile.verifyRecordingClearButtonText();

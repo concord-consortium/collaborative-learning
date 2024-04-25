@@ -1,5 +1,4 @@
 import React from "react";
-import { DataflowEngine } from "rete-engine";
 import { structures } from "rete-structures";
 import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
 import { Presets, ReactPlugin } from "rete-react-plugin";
@@ -8,7 +7,7 @@ import { onSnapshot } from "mobx-state-tree";
 
 import { IStores } from "../../../models/stores/stores";
 import { DataflowContentModelType } from "../model/dataflow-content";
-import { DataflowProgramModelType, DataflowProgramSnapshotOut } from "../model/dataflow-program-model";
+import { DataflowProgramModelType, DataflowProgramSnapshotOut, IConnectionModel } from "../model/dataflow-program-model";
 import { AreaExtra, Schemes } from "./rete-scheme";
 import { NodeEditorMST } from "./node-editor-mst";
 import { INodeServices } from "./service-types";
@@ -35,6 +34,9 @@ import { DropdownListControl, DropdownListControlComponent } from "./controls/dr
 import { DemoOutputControl, DemoOutputControlComponent } from "./controls/demo-output-control";
 import { PlotButtonControl, PlotButtonControlComponent } from "./controls/plot-button-control";
 import { InputValueControl, InputValueControlComponent } from "./controls/input-value-control";
+import { DataflowEngine } from "./engine/dataflow-engine";
+import { ValueWithUnitsControl, ValueWithUnitsControlComponent } from "./controls/value-with-units-control";
+import { DataflowProgramChange } from "../dataflow-logger";
 
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
@@ -55,7 +57,7 @@ export class ReteManager {
     public readOnly: boolean | undefined,
     public playback: boolean | undefined
   ){
-    this.editor = new NodeEditorMST(mstProgram, this.process, this.createReteNodeFromNodeModel);
+    this.editor = new NodeEditorMST(mstProgram, this.createReteNodeFromNodeModel);
     this.area = new AreaPlugin<Schemes, AreaExtra>(div);
 
     this.setup();
@@ -109,7 +111,7 @@ export class ReteManager {
     //   return context;
     // });
 
-    const connection = new ConnectionPlugin<Schemes, AreaExtra>();
+    const connectionPlugin = new ConnectionPlugin<Schemes, AreaExtra>();
     const render = new ReactPlugin<Schemes, AreaExtra>();
 
     // render.addPipe((context) => {
@@ -154,6 +156,9 @@ export class ReteManager {
           if (data.payload instanceof ValueControl) {
             return ValueControlComponent;
           }
+          if (data.payload instanceof ValueWithUnitsControl) {
+            return ValueWithUnitsControlComponent;
+          }
           if (data.payload instanceof NumberUnitsControl) {
             return NumberUnitsControlComponent;
           }
@@ -177,14 +182,14 @@ export class ReteManager {
       }
     }));
 
-    connection.addPreset(ConnectionPresets.classic.setup());
+    connectionPlugin.addPreset(ConnectionPresets.classic.setup());
 
     editor.use(area);
     // Because these connection and render plugins are added before the notifyAboutExistingObjects,
     // there is a flash as the nodes move into place. The plugins can't be added afterwards because
     // they don't look at the existing nodes when they are added. We might have to modify Rete to
     // remove this flash
-    area.use(connection);
+    area.use(connectionPlugin);
     area.use(render);
 
     AreaExtensions.simpleNodesOrder(area);
@@ -192,6 +197,39 @@ export class ReteManager {
     // Notify after the area, connection, and render plugins have been configured
     await this.notifyAboutExistingObjects();
 
+
+    if (!this.readOnly) {
+      editor.addPipe(context => {
+        if (["connectioncreated", "connectionremoved"].includes(context.type)){
+          const connection = (context as any).data as IConnectionModel;
+          const { source, target } = connection;
+          const sourceNode = editor.getNode(source);
+          const targetNode = editor.getNode(target);
+          const change: DataflowProgramChange = {
+            targetType: 'connection',
+            nodeTypes: [sourceNode.label, targetNode.label],
+            nodeIds: [sourceNode.id, targetNode.id],
+            connectionOutputNodeId: sourceNode.id,
+            connectionOutputNodeType: sourceNode.label,
+            connectionInputNodeId: targetNode.id,
+            connectionInputNodeType: targetNode.label
+          };
+          this.logTileChangeEvent({operation: context.type, change});
+        }
+
+        if (["nodecreated", "noderemoved"].includes(context.type)){
+          const node = (context as any).data as IBaseNode;
+          const change: DataflowProgramChange = {
+            targetType: 'node',
+            nodeTypes: [node.label],
+            nodeIds: [node.id]
+          };
+          this.logTileChangeEvent({operation: context.type, change});
+        }
+
+        return context;
+      });
+    }
 
     // Reprocess when connections are changed
     // And also count the serial nodes some of which only get counted if they are
@@ -203,22 +241,6 @@ export class ReteManager {
       }
       return context;
     });
-
-    // TODO: maybe this isn't needed anymore
-    setTimeout(() => {
-      // The zoomAt call was centering the origin of the dataflow canvas.
-      // This messes up the default node placement, and would likely mess up saved state.
-      // By removing this, we aren't going to be automatically making sure all of the nodes are visible
-      // AreaExtensions.zoomAt(area, editor.getNodes());
-
-      // In our Rete v1 implementation the origin always started at the top left of the component.
-      // When a user translated the canvas this translation was saved in the file, but
-      // it seems like it is just ignored when the program is loaded back in again.
-
-      // This is needed to initialize things like the value control's sentence
-      // It was having problems when called earlier
-      this.process();
-    }, 10);
 
     this.setupOnSnapshot();
   }
@@ -243,8 +265,6 @@ export class ReteManager {
   }
 
   public process = () => {
-    console.log("NodeEditorMST.process");
-
     // Don't do any processing when we are read-only
     if (this.readOnly) return;
 
@@ -260,7 +280,6 @@ export class ReteManager {
     // Because rete engine caches values even if the same node is the
     // parent of two leaves the data function of that common parent
     // will only be called once.
-    // debugger;
     const leafNodes = graph.leaves().nodes();
     leafNodes.forEach(n => this.engine.fetch(n.id));
   };
@@ -370,10 +389,6 @@ export class ReteManager {
     await editor.emit({ type: 'nodecreated', data: node });
 
     this.area.translate(id, {x: newPosition[0], y: newPosition[1]});
-
-    // run the process command so this newly added node can update any controls like the
-    // value control.
-    this.process();
   }
 
   getNewNodePosition() {
@@ -445,6 +460,13 @@ export class ReteManager {
   }
 
   public tickAndProcessNodes() {
+    // This is wrapped in an MST action so all of the changes are batched together
+    // We are using our own custom Rete Dataflow Engine which runs synchronously
+    // so all calls to the nodes `data` and `onTick` methods are grouped together.
+    this.mstProgram.tickAndProcess(() => this._tickAndProcessNodes());
+  }
+
+  private _tickAndProcessNodes() {
     let processNeeded = false;
 
     // This has to be hacked until we figure out the way to specify the Rete Schemes
