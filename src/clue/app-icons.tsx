@@ -3,6 +3,7 @@ import { FunctionComponent, SVGProps } from "react";
 import CopyWorkspaceIcon from "../assets/icons/copy/copy-icon-default.svg";
 import DeleteWorkspaceIcon from "../assets/icons/delete/delete-workspace-icon-default.svg";
 import OpenWorkspaceIcon from "../assets/icons/1-4-up/1-up-icon-default.svg";
+import PublishWorkspaceIcon from "../assets/icons/publish/publish-icon-default.svg";
 // tool icons
 import DeleteToolIcon from "./assets/icons/delete-tool.svg";
 import DuplicateToolIcon from "./assets/icons/duplicate-tool.svg";
@@ -20,7 +21,8 @@ export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>
   "icon-delete-workspace": DeleteWorkspaceIcon,
   "icon-new-workspace": OpenWorkspaceIcon,
   "icon-open-workspace": OpenWorkspaceIcon,
-  
+  "icon-publish-workspace": PublishWorkspaceIcon,
+
   // built in tool action icons
   "icon-delete-tool": DeleteToolIcon,
   "icon-duplicate-tool": DuplicateToolIcon,

@@ -45,12 +45,9 @@ class Canvas {
     return cy.get('[data-test=list-item-icon-delete-workspace');
   }
 
-  getPublishIcon() {
-    return cy.get('[data-test=publish-icon]');
-  }
-
-  getPersonalPublishIcon() {
-    return cy.get('[data-test=publish-icon]');
+  getPublishItem() {
+    this.openFileMenu();
+    return cy.get('[data-test=list-item-icon-publish-workspace]');
   }
 
   getEditTitleIcon() {
@@ -131,11 +128,7 @@ class Canvas {
   }
 
   publishCanvas(type) {
-    if (type==="investigation" ) {
-      this.getPublishIcon().click({force:true});
-    } else {
-      this.getPersonalPublishIcon().click({force:true});
-    }
+    this.getPublishItem().click({force:true});
     dialog.getModalTitle().should('exist').contains('Publish ');
     dialog.getModalButton().contains("OK").click();
     dialog.getDialogTitle().should('exist').contains('Published');

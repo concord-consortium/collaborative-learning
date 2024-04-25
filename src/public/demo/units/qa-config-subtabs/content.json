@@ -251,6 +251,7 @@
         }
       ]
     },
+    "annotations": "all",
     "toolbar": [
       {"id": "Text", "title": "Text", "isTileTool": true},
       {"id": "Table", "title": "Table", "isTileTool": true},
@@ -264,8 +265,6 @@
       {"id": "Numberline", "title": "Numberline", "isTileTool": true},
       {"id": "Dataflow", "title": "Dataflow", "isTileTool": true},
       {"id": "Simulator", "title": "Terrarium Simulator", "isTileTool": true},
-      {"id": "sparrow", "title": "Sparrow", "iconId": "icon-sparrow-tool", "isTileTool": false},
-      {"id": "hide-annotations", "title": "Hide Annotations", "iconId": "icon-hide-annotations-tool", "isTileTool": false},
       {"id": "undo", "title": "Undo", "iconId": "icon-undo-tool", "isTileTool": false},
       {"id": "redo", "title": "Redo", "iconId": "icon-redo-tool", "isTileTool": false},
       {"id": "duplicate", "title": "Duplicate", "iconId": "icon-duplicate-tool", "isTileTool": false},
