@@ -53,6 +53,26 @@ const miniNodeClasses = (node: IMiniNodeData, index:number, length:number) => {
   );
 };
 
+const NodeColumn = ({ nodes, columnLabel }: { nodes: IMiniNodeData[], columnLabel: string }) => {
+  const catLabel = columnLabel.charAt(0).toUpperCase() + columnLabel.slice(1);
+  return (
+    <div className={`mini-nodes-col ${columnLabel}`}>
+      { nodes.map((miniNode, index) => (
+          <div key={miniNode.id} className={miniNodeClasses(miniNode, index, nodes.length)}>
+            <div className="node-info">
+              <div className="node-icon">{getMiniNodeIcon(miniNode.iconKey)}</div>
+              <div className="node-label">{miniNode.label}</div>
+            </div>
+            <div className="node-value">
+              {miniNode.value}
+            </div>
+          </div>
+        ))}
+      <div className="category-label">{catLabel}</div>
+    </div>
+  );
+};
+
 function PotentiometerAndServoComponent({ frame, variables, programData }: ISimulationProps) {
   const tweenedServoAngle = useRef(0);
   const lastTweenedAngle = tweenedServoAngle.current;
@@ -78,7 +98,6 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
   const hasOutToServo = outputNodesArr.some(node => node.label.includes("Servo"));
   const animationRate = programData?.samplingRate ? programData.samplingRate : 0;
 
-  console.log("| programData", programData);
   return (
     <div className={potServoClasses}>
       <div className="hardware">
@@ -111,62 +130,9 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
           />
 
           <div className={"mini-nodes-column-wrapper"}>
-            <div className="mini-nodes-col inputs">
-              {
-                inputNodesArr.map((miniNode, index) => (
-                  <div key={miniNode.id} className={miniNodeClasses(miniNode, index, inputNodesArr.length)}>
-                    <div className="node-info">
-                      <div className="node-icon">
-                        {getMiniNodeIcon(miniNode.iconKey)}
-                      </div>
-                      <div className="node-label">{miniNode.label}</div>
-                    </div>
-                    <div className="node-value">
-                      {miniNode.value}
-                    </div>
-                  </div>
-                ))
-              }
-              <div className="category-label">Inputs</div>
-            </div>
-
-            <div className="mini-nodes-col operators">
-              {
-                operatorNodesArr.map((miniNode, index) => (
-                  <div key={miniNode.id} className={miniNodeClasses(miniNode, index, operatorNodesArr.length)}>
-                    <div className="node-info">
-                      <div className="node-icon">
-                        {getMiniNodeIcon(miniNode.iconKey)}
-                      </div>
-                      <div className="node-label">{miniNode.label}</div>
-                    </div>
-                    <div className="node-value">
-                      {miniNode.value}
-                    </div>
-                  </div>
-                ))
-              }
-              <div className="category-label">Operators</div>
-            </div>
-
-            <div className="mini-nodes-col outputs">
-              {
-                outputNodesArr.map((miniNode, index) => (
-                  <div key={miniNode.id} className={miniNodeClasses(miniNode, index, outputNodesArr.length)}>
-                    <div className="node-info">
-                      <div className="node-icon">
-                        {getMiniNodeIcon(miniNode.iconKey)}
-                      </div>
-                      <div className="node-label">{miniNode.label}</div>
-                    </div>
-                    <div className="node-value">
-                      {miniNode.value}
-                    </div>
-                  </div>
-                ))
-              }
-              <div className="category-label">Outputs</div>
-            </div>
+            <NodeColumn nodes={inputNodesArr} columnLabel="inputs" />
+            <NodeColumn nodes={operatorNodesArr} columnLabel="operators" />
+            <NodeColumn nodes={outputNodesArr} columnLabel="outputs" />
           </div>
 
           { hasOutToServo &&

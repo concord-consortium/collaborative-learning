@@ -45,8 +45,6 @@ const icons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>> = {
   [kSignalKey]: SignalIcon
 };
 
-console.log("| icons: ", icons);
-
 export function iconUrl(id: string) {
   return `${kIconPrefix}://${id}`;
 }
