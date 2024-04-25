@@ -1,23 +1,22 @@
 import React, { useCallback, useRef } from "react";
 import DeleteNodeIcon from "../assets/icons/delete-node.svg";
-import { NodeEditorMST } from "./node-editor-mst";
+import { useStopEventPropagation } from "./controls/custom-hooks";
+import { ReteManager } from "./rete-manager";
 
 // TODO: why is this imported here?
 import "./controls/num-control.sass";
-import { useStopEventPropagation } from "./controls/custom-hooks";
 
 interface IProps {
   nodeId: string;
-  editor: NodeEditorMST;
+  reteManager: ReteManager;
 }
 
-export const Delete = ({editor, nodeId}: IProps) => {
+export const Delete = ({reteManager, nodeId}: IProps) => {
 
   // FIXME: for some reason onClick doesn't work on these buttons but onMouseDown does
   const handleClick = useCallback(() => {
-    console.log("Delete.handleClick");
-    editor.removeNodeAndConnections(nodeId);
-  }, [editor, nodeId]);
+    reteManager.removeNodeAndConnections(nodeId);
+  }, [reteManager, nodeId]);
 
   const inputRef = useRef<HTMLInputElement>(null);
   useStopEventPropagation(inputRef, "pointerdown");
