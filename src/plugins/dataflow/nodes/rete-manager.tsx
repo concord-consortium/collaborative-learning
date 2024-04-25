@@ -7,7 +7,7 @@ import { onSnapshot } from "mobx-state-tree";
 
 import { IStores } from "../../../models/stores/stores";
 import { DataflowContentModelType } from "../model/dataflow-content";
-import { DataflowProgramModelType, DataflowProgramSnapshotOut } from "../model/dataflow-program-model";
+import { DataflowProgramModelType, DataflowProgramSnapshotOut, IConnectionModel } from "../model/dataflow-program-model";
 import { AreaExtra, Schemes } from "./rete-scheme";
 import { NodeEditorMST } from "./node-editor-mst";
 import { INodeServices } from "./service-types";
@@ -36,6 +36,7 @@ import { PlotButtonControl, PlotButtonControlComponent } from "./controls/plot-b
 import { InputValueControl, InputValueControlComponent } from "./controls/input-value-control";
 import { DataflowEngine } from "./engine/dataflow-engine";
 import { ValueWithUnitsControl, ValueWithUnitsControlComponent } from "./controls/value-with-units-control";
+import { DataflowProgramChange } from "../dataflow-logger";
 
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
@@ -110,7 +111,7 @@ export class ReteManager {
     //   return context;
     // });
 
-    const connection = new ConnectionPlugin<Schemes, AreaExtra>();
+    const connectionPlugin = new ConnectionPlugin<Schemes, AreaExtra>();
     const render = new ReactPlugin<Schemes, AreaExtra>();
 
     // render.addPipe((context) => {
@@ -181,14 +182,14 @@ export class ReteManager {
       }
     }));
 
-    connection.addPreset(ConnectionPresets.classic.setup());
+    connectionPlugin.addPreset(ConnectionPresets.classic.setup());
 
     editor.use(area);
     // Because these connection and render plugins are added before the notifyAboutExistingObjects,
     // there is a flash as the nodes move into place. The plugins can't be added afterwards because
     // they don't look at the existing nodes when they are added. We might have to modify Rete to
     // remove this flash
-    area.use(connection);
+    area.use(connectionPlugin);
     area.use(render);
 
     AreaExtensions.simpleNodesOrder(area);
@@ -196,6 +197,39 @@ export class ReteManager {
     // Notify after the area, connection, and render plugins have been configured
     await this.notifyAboutExistingObjects();
 
+
+    if (!this.readOnly) {
+      editor.addPipe(context => {
+        if (["connectioncreated", "connectionremoved"].includes(context.type)){
+          const connection = (context as any).data as IConnectionModel;
+          const { source, target } = connection;
+          const sourceNode = editor.getNode(source);
+          const targetNode = editor.getNode(target);
+          const change: DataflowProgramChange = {
+            targetType: 'connection',
+            nodeTypes: [sourceNode.label, targetNode.label],
+            nodeIds: [sourceNode.id, targetNode.id],
+            connectionOutputNodeId: sourceNode.id,
+            connectionOutputNodeType: sourceNode.label,
+            connectionInputNodeId: targetNode.id,
+            connectionInputNodeType: targetNode.label
+          };
+          this.logTileChangeEvent({operation: context.type, change});
+        }
+
+        if (["nodecreated", "noderemoved"].includes(context.type)){
+          const node = (context as any).data as IBaseNode;
+          const change: DataflowProgramChange = {
+            targetType: 'node',
+            nodeTypes: [node.label],
+            nodeIds: [node.id]
+          };
+          this.logTileChangeEvent({operation: context.type, change});
+        }
+
+        return context;
+      });
+    }
 
     // Reprocess when connections are changed
     // And also count the serial nodes some of which only get counted if they are
