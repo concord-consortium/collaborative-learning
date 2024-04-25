@@ -1,4 +1,6 @@
-import { ISharedProgramNode, kNodeTypeToCategoryMap, kSharedNodeKeys } from "../../../shared-program-data/shared-program-data";
+import {
+  ISharedProgramNode, kNodeTypeToCategoryMap, kSharedNodeKeys
+ } from "../../../shared-program-data/shared-program-data";
 import { IBaseNode } from "../base-node";
 
 export function convertBaseNodeToSharedNode(node: IBaseNode): ISharedProgramNode {
