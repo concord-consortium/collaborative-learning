@@ -292,7 +292,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       render.addPreset({
         render(context: any, plugin: ReactPlugin<Schemes, unknown>):
             React.ReactElement<any, string | React.JSXElementConstructor<any>> | null | undefined {
-
           if (context.data.type === 'node') {
             // We could go further than this and completely replace the whole control system
 
