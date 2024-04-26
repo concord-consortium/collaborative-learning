@@ -48,9 +48,13 @@ export const ArrowAnnotation = types
   type: types.optional(types.literal(kArrowAnnotationType), kArrowAnnotationType)
 })
 .volatile(self => ({
-  isNew: false
+  isNew: false,
+  isSelected: false
 }))
 .actions(self => ({
+  setSelected(selected: boolean) {
+    self.isSelected = selected;
+  },
   setSourceObject(tileId: string, objectId: string, objectType?: string) {
     self.sourceObject = ClueObjectModel.create({ tileId, objectId, objectType });
   },

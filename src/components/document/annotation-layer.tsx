@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
+import React, { MouseEvent, MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 import useResizeObserver from "use-resize-observer";
 import { AnnotationButton } from "../annotations/annotation-button";
 import { getDefaultPeak } from "../annotations/annotation-utilities";
@@ -12,6 +12,7 @@ import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
 import { ClueObjectModel, IClueObject, OffsetModel } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { Point } from "../../utilities/math-utils";
+import { hasSelectionModifier } from "../../utilities/event-utils";
 
 import "./annotation-layer.scss";
 
@@ -41,12 +42,30 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const persistentUI = usePersistentUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
 
-  // Clear a partially completed annotation when the mode changes
+  // Clicking to select annotations
+  function handleArrowClick(arrowId: string, event: MouseEvent) {
+    event.stopPropagation();
+    const annotation = content?.annotations.get(arrowId);
+    if (annotation) {
+      if (annotation.isSelected) {
+        annotation.setSelected(false); // Toggle off
+      } else {
+        if (hasSelectionModifier(event)) {
+          annotation.setSelected(true); // Toggle on
+        } else {
+          content?.selectAnnotations([arrowId]); // Select only this one
+        }
+      }
+    }
+  }
+
+  // Clear selection and any partially completed annotation when the mode changes
   useEffect(() => {
     setSourceTileId("");
     setSourceObjectId("");
     setSourceObjectType(undefined);
-  }, [ui.annotationMode]);
+    content?.selectAnnotations([]);
+  }, [ui.annotationMode, content]);
 
   // Force rerenders when the layer's size changes
   useResizeObserver({ref: divRef, box: "border-box"});
@@ -80,6 +99,10 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       setMouseX(event.clientX - bb.left);
       setMouseY(event.clientY - bb.top);
     }
+  };
+
+  const handleBackgroundClick: MouseEventHandler<HTMLDivElement> = event => {
+    content?.selectAnnotations([]);
   };
 
   // Returns the x and y offset of the top left corner of a tile with respect to the document
@@ -214,6 +237,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     <div
       className={classes}
       onMouseMove={handleMouseMove}
+      onClick={handleBackgroundClick}
       ref={element => {
         if (element) divRef.current = element;
       }}
@@ -252,6 +276,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
               arrow={arrow}
               canEdit={!readOnly && editing}
               deleteArrow={(arrowId: string) => content?.deleteAnnotation(arrowId)}
+              handleArrowClick={handleArrowClick}
               documentBottom={documentBottom}
               documentLeft={documentLeft}
               documentRight={documentRight}
