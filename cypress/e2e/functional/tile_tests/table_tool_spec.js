@@ -109,6 +109,24 @@ context('Table Tool Tile', function () {
       tableToolTile.getTableRow().should('have.length', 2);
     });
 
+    cy.log('can edit and save changes or edit and cancel changes');
+    // confirm with enter key
+    tableToolTile.typeInTableCell(1, 'first value', true);
+    tableToolTile.getTableCell().eq(1).should('contain', 'first value');
+    // confirm with tab key
+    tableToolTile.typeInTableCell(1, "second value", false);
+    tableToolTile.getTableCellEdit().trigger('keydown', { keyCode: 9 }); // tab
+    tableToolTile.getTableCell().eq(1).should('contain', 'second value');
+    // confirm by clicking outside of the editor
+    tableToolTile.typeInTableCell(1, 'third value', false);
+    tableToolTile.getTableCell().eq(2).click();
+    tableToolTile.getTableCell().eq(1).should('contain', 'third value');
+    // abandon edit with esc key
+    tableToolTile.typeInTableCell(1, 'abandon this edit{esc}', false);
+    tableToolTile.getTableCell().eq(1).should('contain', 'third value');
+    // reset to previous value
+    tableToolTile.typeInTableCell(1, '5');
+
   // Table tile restore upon page reload
     cy.wait(2000);
     cy.reload();

@@ -71,10 +71,11 @@ class TableToolTile{
         this.getTableCellEdit().type(`${text}{enter}`);
       });
     }
-    typeInTableCell(i, text) {
+    typeInTableCell(i, text, confirm=true) {
+      const confirmation = confirm ? '{enter}' : '';
       this.getTableCell().eq(i).dblclick();
       return cy.document().within(() => {
-        this.getTableCellEdit().type(`${text}{enter}`);
+        this.getTableCellEdit().type(`${text}${confirmation}`);
       });
     }
     getTableCellWithColIndex(colIndex, colValue){

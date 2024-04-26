@@ -86,7 +86,7 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
           }, 1);
         }}
         onBlur={event => {
-          saveChange(event.target.value);
+          finishAndSave(true);
         }}
         onKeyDown={(event: KeyboardEvent) => {
           const { key } = event;
@@ -95,6 +95,8 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
               finishAndSave(false);
               break;
             case 'Tab':
+              event.preventDefault();
+              // fall through
             case 'Enter':
               finishAndSave(true);
               break;
