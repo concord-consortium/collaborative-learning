@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, KeyboardEvent } from "react";
 import { EditorProps } from "react-data-grid";
 import { Portal } from "@chakra-ui/react";
 import TextareaAutosize from "react-textarea-autosize";
@@ -27,11 +27,6 @@ import { TColumn } from "./table-types";
 // be able to submit a PR which would obviate the need for some of our overrides.
 export const RDG_INTERNAL_EDITOR_CONTAINER_CLASS = "e1d24x2700-canary46";
 export const RDG_INTERNAL_TEXT_EDITOR_CLASS = "t16y9g8l700-canary46";
-
-function autoFocusAndSelect(input: HTMLTextAreaElement | null) {
-  input?.focus();
-  input?.select();
-}
 
 // patterned after TextEditor from "react-data-grid"
 // extended to call our onBeginBodyCellEdit()/onEndBodyCellEdit() functions
@@ -82,10 +77,18 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
         onChange={event => {
           updateValue(event.target.value);
         }}
+        onFocus={event => {
+          // Select all text when focused, but not until after the current event
+          // has been processed. Otherwise, starting to edit a cell with a
+          // keystroke will select the text and then overwrite it all immediately.
+          setTimeout(() => {
+            event.target.select();
+          }, 1);
+        }}
         onBlur={event => {
           saveChange(event.target.value);
         }}
-        onKeyDown={(event: any) => {
+        onKeyDown={(event: KeyboardEvent) => {
           const { key } = event;
           switch (key) {
             case 'Escape':
@@ -93,8 +96,8 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
               break;
             case 'Tab':
             case 'Enter':
-              event.preventDefault();
               finishAndSave(true);
+              break;
           }
         }}
       />
