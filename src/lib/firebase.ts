@@ -112,6 +112,10 @@ export class Firebase {
     return `${this.getUserPath(user)}/exemplars`;
   }
 
+  public getExemplarDataPath(user: UserModelType, exemplarId: string) {
+    return `${this.getUserExemplarsPath(user)}/${exemplarId}`;
+  }
+
   public getExemplarStatePath(user: UserModelType) {
     return `${this.getUserExemplarsPath(user)}/state`;
   }
