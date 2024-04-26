@@ -25,7 +25,7 @@ import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { SharedProgramDataType } from "../../shared-program-data/shared-program-data";
 import { getSharedNodes } from "../nodes/utilities/shared-program-data-utilities";
 import { ReteManager } from "../nodes/rete-manager";
-import { IBaseNodeModel } from "../nodes/base-node";
+import { IBaseNode, IBaseNodeModel } from "../nodes/base-node";
 import { calculatedRecentValues } from "../utilities/playback-utils";
 
 import "./dataflow-program.sass";
@@ -376,7 +376,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateSharedProgramData = () => {
-    const nodes = this.programEditor.getNodes() as IBaseNode[];
+    const nodes = this.reteManager?.editor.getNodes() as IBaseNode[];
     const sharedProgramModel = this.props.tileContent.sharedProgramData as SharedProgramDataType;
     const sharedNodes = getSharedNodes(nodes);
     sharedProgramModel.setProgramNodes(sharedNodes);
