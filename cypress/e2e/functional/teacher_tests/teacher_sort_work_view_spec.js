@@ -88,6 +88,9 @@ describe('SortWorkView Tests', () => {
       runClueAsStudent(student);
       canvas.copyDocument(copyTitle);
       canvas.getPersonalDocTitle().find('span').text().should('contain', copyTitle);
+      // Check that exemplar is not visible to student
+      cy.openTopTab('sort-work');
+      sortWork.getSortWorkItemByTitle(exemplarDocs[0]).parents('.list-item').should("have.class", "private");
     });
 
     cy.log("run CLUE as teacher and check student problem, personal, and exemplar docs show in Sort Work");
@@ -118,7 +121,13 @@ describe('SortWorkView Tests', () => {
     cy.log("open exemplar doc and make sure Edit button doesn't show and Close button shows");
     sortWork.getSortWorkItem().contains(exemplarDocs[0]).click();
     resourcesPanel.getDocumentEditButton().should("not.exist");
-    resourcesPanel.getDocumentCloseButton().should("exist").click();
+    resourcesPanel.getDocumentCloseButton().should("exist");
+
+    cy.log("set exemplar to be visible to students");
+    resourcesPanel.getExemplarShareCheckbox().should("not.be.checked");
+    resourcesPanel.getExemplarShareCheckbox().check();
+    resourcesPanel.getExemplarShareCheckbox().should("be.checked");
+    resourcesPanel.getDocumentCloseButton().click();
 
     cy.log("check all problem and personal docs show in the correct group");
     studentProblemDocs.forEach(doc => {
@@ -128,8 +137,11 @@ describe('SortWorkView Tests', () => {
       sortWork.checkDocumentInGroup("Group 5", doc);
     });
 
-    cy.log("run CLUE as a student:1 and leave the group");
+    cy.log("run CLUE as student 1; they should now have access to exemplar");
     runClueAsStudent(students[0]);
+    sortWork.getSortWorkItemByTitle(exemplarDocs[0]).parents('.list-item').should("not.have.class", "private");
+
+    cy.log("have student 1 leave the group");
     header.leaveGroup();
 
     cy.log("check student:1 problem, exemplar, and personal docs show in No Group");

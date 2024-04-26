@@ -36,6 +36,8 @@ import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../mo
 import { safeJsonParse } from "../utilities/js-utils";
 import { urlParams } from "../utilities/url-params";
 import { firebaseConfig } from "./firebase-config";
+import { UserModelType } from "../models/stores/user";
+import { logExemplarDocumentEvent } from "../models/document/log-exemplar-document-event";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBBaseConnectOptions {
@@ -958,6 +960,57 @@ export class DB {
 
   public setLastStickyNoteViewTimestamp() {
     this.firebase.getLastStickyNoteViewTimestampRef().set(Date.now());
+  }
+
+  /**
+   * Which students have gained access to this exemplar?
+   * @param exemplarId
+   * @returns a promise whose value will be a map from student IDs to visibility booleans.
+   */
+  public getExemplarVisibilityForClass(exemplarId: string): Promise<Record<string,boolean>> {
+    // Search for records with paths like /classes/CLASS_ID/users/USER_ID/exemplars/EXEMPLAR_ID
+    const { user } = this.stores;
+    const myClass = this.stores.class;
+    const classRef = this.firebase.ref(this.firebase.getClassPath(user));
+    // Promises that will either return the ID of a student who has access, or undefined.
+    const promises = myClass.students.map(student => {
+      const ref = classRef.child('users').child(student.id).child('exemplars').child(exemplarId).child('visible');
+      return ref.get().then((dataSnap) => {
+        const visible = !!dataSnap.val();
+        return {student: student.id, visible};
+      });
+    });
+    return Promise.all(promises).then(values => {
+      const map: Record<string,boolean> = {};
+      for (const v of values) {
+        map[v.student] = v.visible;
+      }
+      return map;
+    });
+  }
+
+  public setExemplarVisibilityForUser(user: UserModelType, exemplarId: string, isVisible: boolean) {
+    this.firebase.ref(this.firebase.getExemplarDataPath(user, exemplarId)).child('visible').set(isVisible);
+  }
+
+  public setExemplarVisibilityForAllStudents(exemplarId: string, isVisible: boolean) {
+    const { user, documents } = this.stores;
+    const myClass = this.stores.class;
+    const classRef = this.firebase.ref(this.firebase.getClassPath(user));
+    const exemplar = documents.getDocument(exemplarId);
+    if (exemplar) {
+      for (const student of myClass.students) {
+        classRef.child('users').child(student.id).child('exemplars').child(exemplarId).child('visible').set(isVisible);
+      }
+      logExemplarDocumentEvent(LogEventName.EXEMPLAR_VISIBILITY_UPDATE,
+        {
+          document: exemplar,
+          visibleToUser: isVisible,
+          changeSource: "teacher"
+        });
+    } else {
+      console.warn("Could not find exemplar document");
+    }
   }
 
 }
