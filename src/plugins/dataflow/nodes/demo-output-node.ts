@@ -1,4 +1,5 @@
 import { ClassicPreset } from "rete";
+import { autorun } from "mobx";
 import { Instance, isAlive } from "mobx-state-tree";
 import { numSocket } from "./num-socket";
 import { NodeDemoOutputTypes, NodePlotRed, kBinaryOutputTypes } from "../model/utilities/node";
@@ -6,10 +7,9 @@ import { BaseNode, BaseNodeModel, NoOutputs } from "./base-node";
 import { DropdownListControl, IDropdownListControl } from "./controls/dropdown-list-control";
 import { typeField } from "../../../utilities/mst-utils";
 import { INodeServices } from "./service-types";
-import { MinigraphOptions } from "./dataflow-node-plot";
 import { DemoOutputControl } from "./controls/demo-output-control";
 import { InputValueControl } from "./controls/input-value-control";
-import { autorun } from "mobx";
+import { MinigraphOptions } from "./dataflow-node-plot-types";
 
 const tiltMinigraphOptions: MinigraphOptions = {
   backgroundColor: "#fff",
@@ -20,10 +20,10 @@ export const DemoOutputNodeModel = BaseNodeModel.named("DemoOutputNodeModel")
 .props({
   type: typeField("Demo Output"),
   outputType: "Light Bulb",
-  // Initialize tilt to 0 whether we use it or not
-  tilt: 0
 })
 .volatile(self =>  ({
+  // Initialize tilt to 0 whether we use it or not
+  tilt: 0,
   targetClosed: 0,
   currentClosed: 0,
   targetTilt: 0,
@@ -37,18 +37,17 @@ export const DemoOutputNodeModel = BaseNodeModel.named("DemoOutputNodeModel")
         // Only update the tilt if it is a legal value: 1, 0, -1
         self.tilt = tilt;
       }
-      self.watchedValues.tilt = tiltMinigraphOptions;
-    } else {
-      delete self.watchedValues.tilt;
     }
   }
 }))
 .actions(self => ({
-  afterCreate() {
-    self.setTilt(self.tilt);
-  },
   setOutputType(val: string) {
     self.outputType = val;
+    // We call process here so the tilt can be added or removed from
+    // the watched values. By using the data function to do this we ensure
+    // this change only happens one time even if there are two views of this
+    // tile in the same CLUE application
+    self.process();
   }
 }));
 export interface IDemoOutputNodeModel extends Instance<typeof DemoOutputNodeModel> {}
@@ -92,7 +91,7 @@ export class DemoOutputNode extends BaseNode<
 
     // This is in an autorun so it will get triggered even when we are readonly
     this.disposeTiltMonitor = autorun(() => {
-      if (this.model.outputType === "Advanced Grabber") {
+      if (model.outputType === "Advanced Grabber") {
         if (!this.hasInput("tilt")) {
           const tiltInput = new ClassicPreset.Input(numSocket, "Tilt");
           this.addInput("tilt", tiltInput);
@@ -140,22 +139,27 @@ export class DemoOutputNode extends BaseNode<
   };
 
   data({nodeValue, tilt}: {nodeValue?: number[], tilt?: number[]}) {
-    // TODO: we should put this in a MobX transaction so it only triggers
-    // one render.
+    const { model } = this;
+    if (model.outputType === "Advanced Grabber") {
+      model.watchedValues.tilt = tiltMinigraphOptions;
+    } else {
+      delete model.watchedValues.tilt;
+    }
+
     const value = nodeValue ? nodeValue[0] : null;
     if (kBinaryOutputTypes.includes(this.model.outputType)) {
       // if there is not a valid input, use 0
       // otherwise convert all non-zero to 1
       const newValue = (value == null || isNaN(value)) ? 0 : +(value !== 0);
-      this.model.setNodeValue(newValue);
+      this.saveNodeValue(newValue);
     } else {
       // Clamp the value between 0 and 1
       const newValue = (value == null) ? 0 : Math.max(0, Math.min(1, value));
-      this.model.setNodeValue(newValue);
+      this.saveNodeValue(newValue);
     }
 
-    const tiltValue = tilt ? tilt[0] : null;
-    this.model.setTilt(tiltValue);
+    const tiltValue = tilt ? tilt[0] : 0;
+    model.setTilt(tiltValue);
     return {};
   }
 

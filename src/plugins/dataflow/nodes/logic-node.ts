@@ -1,10 +1,10 @@
 import { ClassicPreset } from "rete";
-import { Instance, types } from "mobx-state-tree";
+import { Instance } from "mobx-state-tree";
 import { numSocket } from "./num-socket";
 import { ValueControl } from "./controls/value-control";
 import { getNumDisplayStr } from "./utilities/view-utilities";
 import { NodeOperationTypes } from "../model/utilities/node";
-import { BaseNode, BaseNodeModel, StringifiedNumber } from "./base-node";
+import { BaseNode, BaseNodeModel } from "./base-node";
 import { DropdownListControl, IDropdownListControl } from "./controls/dropdown-list-control";
 import { PlotButtonControl } from "./controls/plot-button-control";
 import { typeField } from "../../../utilities/mst-utils";
@@ -14,16 +14,15 @@ export const LogicNodeModel = BaseNodeModel.named("LogicNodeModel")
 .props({
   type: typeField("Logic"),
   logicOperator: "Greater Than",
-
-  // TODO: we'll have to deal with migrating this somehow, we might
-  // need to run the process function once for imported dataflow tiles
-  // so these inputs get saved
-  num1: types.maybe(StringifiedNumber),
-  num2: types.maybe(StringifiedNumber),
 })
-.actions(self => ({
+.volatile(self => ({
+  num1: NaN,
+  num2: NaN,
+})).actions(self => ({
   setLogicOperator(val: string) {
     self.logicOperator = val;
+    // When the logic operator changes we need to update all of the downstream nodes
+    self.process();
   },
   setNum1(val: number) {
     self.num1 = val;
@@ -82,10 +81,6 @@ export class LogicNode extends BaseNode<
     const result = this.model.nodeValue;
     const resultStr = getNumDisplayStr(result);
 
-    if (this.services.playback) {
-      return ` ⇒ ${resultStr}`;
-    }
-
     const { num1, num2 } = this.model;
 
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === this.model.logicOperator);
@@ -116,15 +111,12 @@ export class LogicNode extends BaseNode<
       }
     }
 
-    // TODO: we should try to wrap these data functions in an action so all of their
-    // changes are grouped together.
-
     // The input numbers are saved so readOnly views can display the sentence
     this.model.setNum1(n1);
     this.model.setNum2(n2);
 
     // This nodeValue is used to record the recent values of the node
-    this.model.setNodeValue(result);
+    this.saveNodeValue(result);
 
     return { value: result };
   }

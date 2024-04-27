@@ -29,9 +29,11 @@ export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
 .actions(self => ({
   setLiveOutputType(outputType: string) {
     self.liveOutputType = outputType;
+    // There is nothing downstream from us so we don't need to reprocess
   },
   setHubSelect(hub: string) {
     self.hubSelect = hub;
+    // There is nothing downstream from us so we don't need to reprocess
   },
   setOutputStatus(status: string) {
     self.outputStatus = status;
@@ -177,11 +179,15 @@ export class LiveOutputNode extends BaseNode<
   }
 
   setLiveOutputOpts(deviceFamily: string, sharedVar?: VariableType) {
+    // This is only called in a tick so it won't be called on a readOnly diagram
     const options = this.getLiveOptions(deviceFamily, sharedVar);
 
     this.hubSelectControl.setOptions(options);
 
     const selectionId = this.hubSelectControl.getSelectionId();
+
+    // FIXME: this is modifying state in a tick which can also be modified by a user
+    // directly. This will cause a conflict when restoring the node from an undo.
     if (!selectionId) this.model.setHubSelect(options[0].name);
 
     // if user successfully connects arduino with warning selected, switch to physical gripper
@@ -238,26 +244,6 @@ export class LiveOutputNode extends BaseNode<
     return reportedValue === this.model.nodeValue ? "received" : "sent";
   }
 
-  onTick() {
-    const { stores, runnable } = this.services;
-    const outputVariables = this.services.getOutputVariables();
-    const outputVar = this.findOutputVariable();
-    const foundDeviceFamily = stores.serialDevice.deviceFamily ?? "unknown device";
-    if (runnable) {
-      this.sendDataToSerialDevice(stores.serialDevice);
-      this.sendDataToSimulatedOutput(outputVariables);
-    }
-    this.setLiveOutputOpts(foundDeviceFamily, outputVar);
-
-    // This used to be in `data()` formerly known as `worker()`
-    // it seems more appropriate to be in onTick, but that might
-    // cause problems in the read only view if users are allowed to
-    // look at the options
-    this.updateHubsStatusReport();
-
-    return true;
-  }
-
   getDisplayMessage = () => {
     // TODO: if the nodeValue is not defined we might want display something
     // different than just showing it as 0
@@ -280,6 +266,12 @@ export class LiveOutputNode extends BaseNode<
     return displayMessage + (outputStatus ? ` (${outputStatus})` : "");
   };
 
+  saveOutputStatus(status: string) {
+    if (!this.readOnly) {
+      this.model.setOutputStatus(status);
+    }
+  }
+
   data({nodeValue}: {nodeValue?: number[]}) {
     // if there is not a valid input, use 0
     const value = nodeValue && nodeValue[0] != null && !isNaN(nodeValue[0]) ? nodeValue[0] : 0;
@@ -289,23 +281,40 @@ export class LiveOutputNode extends BaseNode<
     if (kBinaryOutputTypes.includes(outputType)) {
       // convert all non-zero to 1
       const newValue = +(value !== 0);
-      this.model.setNodeValue(newValue);
+      this.saveNodeValue(newValue);
       if (kMicroBitHubRelaysIndexed.includes(outputType)) {
-        this.model.setOutputStatus(this.getRelayMessageReceived());
+        this.saveOutputStatus(this.getRelayMessageReceived());
       } else {
-        this.model.setOutputStatus("");
+        this.saveOutputStatus("");
       }
     } else if (kGripperOutputTypes.includes(outputType)){
       // NOTE: this looks similar to the Demo Output Node, but in this case we
       // are setting the nodeValue to 0-100. In the Demo Output Node it is set to
       // 0-1
       const newValue = getPercentageAsInt(value);
-      this.model.setNodeValue(newValue);
-      this.model.setOutputStatus("");
+      this.saveNodeValue(newValue);
+      this.saveOutputStatus("");
     } else {
       // We shouldn't hit this case but if we do then just pass the value through
-      this.model.setNodeValue(value);
-      this.model.setOutputStatus("");
+      this.saveNodeValue(value);
+      this.saveOutputStatus("");
+    }
+
+    if (this.services.inTick) {
+      const { stores, runnable } = this.services;
+      const outputVariables = this.services.getOutputVariables();
+      const outputVar = this.findOutputVariable();
+      const foundDeviceFamily = stores.serialDevice.deviceFamily ?? "unknown device";
+      if (runnable) {
+        this.sendDataToSerialDevice(stores.serialDevice);
+        this.sendDataToSimulatedOutput(outputVariables);
+      }
+      this.setLiveOutputOpts(foundDeviceFamily, outputVar);
+
+      // We won't be in a tick in a read only view. However users aren't allowed
+      // to look at the options so there isn't a reason to update the status
+      // report outside of the tick.
+      this.updateHubsStatusReport();
     }
 
     return {};
