@@ -26,6 +26,11 @@ export const SensorNodeModel = BaseNodeModel.named("SensorNodeModel")
   setSensor(sensor: string) {
     self.sensor = sensor;
     self.resetGraph();
+    self.setNodeValue(NaN);
+    // It isn't clear if we should reprocess, but since the graph and value
+    // are getting reset it seems like a good idea to keep the downstream nodes
+    // in sync with the graph.
+    self.process();
   }
 }))
 .actions(self => ({
@@ -180,33 +185,31 @@ export class SensorNode extends BaseNode<
   }
 
   data(): { value: number} {
-    // TODO: is NaN the right value here
-    const value = this.model.nodeValue ?? NaN;
-    return { value };
-  }
-
-  onTick() {
-    const chInfo =
+    if (this.services.inTick) {
+      const chInfo =
       this.services.getChannels().find(ci => ci.channelId === this.model.sensor);
 
-    // update virtual sensors
-    if (chInfo?.virtualValueMethod && chInfo.timeFactor) {
-      const time = Math.floor(Date.now() / chInfo.timeFactor);
-      chInfo.value = chInfo.virtualValueMethod(time);
+      // update virtual sensors
+      if (chInfo?.virtualValueMethod && chInfo.timeFactor) {
+        const time = Math.floor(Date.now() / chInfo.timeFactor);
+        chInfo.value = chInfo.virtualValueMethod(time);
+      }
+
+      // update simulated sensors
+      if (chInfo?.simulatedVariable) {
+        chInfo.value = chInfo.simulatedVariable.currentValue || 0;
+      }
+
+      if (chInfo && isFinite(chInfo.value)) {
+        this.saveNodeValue(chInfo.value);
+      } else {
+        // We can safely set NaN because the type of nodeValue is StringifiedNumber
+        this.saveNodeValue(NaN);
+      }
     }
 
-    // update simulated sensors
-    if (chInfo?.simulatedVariable) {
-      chInfo.value = chInfo.simulatedVariable.currentValue || 0;
-    }
-
-    if (chInfo && isFinite(chInfo.value)) {
-      this.model.setNodeValue(chInfo.value);
-    } else {
-      // We can safely set NaN because the type of nodeValue is StringifiedNumber
-      this.model.setNodeValue(NaN);
-    }
-    return true;
+    const value = this.model.nodeValue ?? NaN;
+    return { value };
   }
 }
 

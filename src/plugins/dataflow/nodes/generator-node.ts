@@ -20,6 +20,8 @@ export const GeneratorNodeModel = BaseNodeModel.named("GeneratorNodeModel")
   periodUnits: "sec"
 })
 .actions(self => ({
+  // These doesn't need to trigger a process because the output of this
+  // node only changes on ticks.
   setGeneratorType(gType: string) {
     self.generatorType = gType;
   },
@@ -89,21 +91,20 @@ export class GeneratorNode extends BaseNode<
   };
 
   data(): { value: number } {
-    return { value: this.currentValue };
-  }
-
-  onTick() {
-    const generatorType = this.model.generatorType;
-    const period = Number(this.model.period);
-    const amplitude = Number(this.model.amplitude);
-    const nodeGeneratorType = NodeGeneratorTypes.find(gt => gt.name === generatorType);
-    if (nodeGeneratorType && period && amplitude) {
-      const time = Date.now();
-      // note: period is given in s, but we're passing in ms for time, need to adjust
-      const val = nodeGeneratorType.method(time, period * 1000, amplitude);
-      this.model.setNodeValue(val);
-      return true;
+    // If we are in a tick generate a new value
+    if (this.services.inTick) {
+      const generatorType = this.model.generatorType;
+      const period = Number(this.model.period);
+      const amplitude = Number(this.model.amplitude);
+      const nodeGeneratorType = NodeGeneratorTypes.find(gt => gt.name === generatorType);
+      if (nodeGeneratorType && period && amplitude) {
+        const time = Date.now();
+        // note: period is given in s, but we're passing in ms for time, need to adjust
+        const val = nodeGeneratorType.method(time, period * 1000, amplitude);
+        this.saveNodeValue(val);
+      }
     }
-    return false;
+
+    return { value: this.currentValue };
   }
 }

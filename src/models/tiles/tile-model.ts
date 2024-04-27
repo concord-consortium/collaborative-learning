@@ -76,6 +76,7 @@ export const TileModel = types
      * can provide a title. The empty string is considered an "unset" title.
      */
     get computedTitle() {
+      // FIXME: this causes an MST error when the dataflow tile is deleted now
       return self.title || self.content.contentTitle || "";
     },
     // generally negotiated with tile, e.g. single column width for table

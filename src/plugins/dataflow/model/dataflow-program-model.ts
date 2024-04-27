@@ -60,12 +60,33 @@ export interface DataflowNodeSnapshotIn extends SnapshotIn<typeof DataflowNodeMo
 export interface DataflowNodeSnapshotOut extends SnapshotOut<typeof DataflowNodeModel> {}
 export interface IDataflowNodeModel extends Instance<typeof DataflowNodeModel> {}
 
+/**
+ * Multiple ReteManagers might be running at the same time. We want to use a single
+ * manager to process our nodes and update any volatile state. The ReteManagers
+ * use DataflowProgramModel.processor volatile property to figure out which one
+ * of them should actually do the processing.
+ */
+export interface DataflowProcessor {
+  process(): void;
+  /**
+   * This is used so the system can prefer non readOnly processors
+   */
+  readOnly?: boolean;
+  /**
+   * This is used so the system can replace disposed processors
+   */
+  disposed: boolean;
+}
+
 export const DataflowProgramModel = types.
   model("DataflowProgram", {
     id: types.maybe(types.string),
     nodes: types.map(DataflowNodeModel),
     connections: types.map(ConnectionModel)
   })
+  .volatile(self => ({
+    processor: undefined as DataflowProcessor | undefined
+  }))
   .actions(self => ({
     // This isn't great but it is how the unique node names have been working
     updateNodeNames(){
@@ -82,6 +103,19 @@ export const DataflowProgramModel = types.
     // a useful name.
     tickAndProcess(runner: () => void) {
       runner();
+    },
+
+    // This action is called after a change in the Rete diagram.
+    // When a node is added, or removed, and a connection is added or removed.
+    // FIXME: this will be recorded as a secondary history entry, so it will
+    // break undo. We don't call the program's processor.process directly so
+    // that the rete manager has a chance to update the main processor if
+    // the previous main processor has gone away.
+    processAfterProgramChange(runner: () => void) {
+      runner();
+    },
+    setProcessor(processor: DataflowProcessor) {
+      self.processor = processor;
     }
   }))
   .actions(self => ({

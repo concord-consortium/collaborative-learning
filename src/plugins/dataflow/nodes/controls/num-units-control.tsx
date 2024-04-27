@@ -62,9 +62,6 @@ export class NumberUnitsControl <
     }
 
     this.setter(val);
-
-    // trigger a reprocess so our new value propagates through the nodes
-    this.node.process();
   }
 
   public getValue() {
@@ -72,10 +69,9 @@ export class NumberUnitsControl <
   }
 
   /**
-   * This will not convert the value. In order to support a user changing the units
-   * of a value, the caller needs to convert value at the same time they change the
-   * units. Because the units do not change the underlying value, there should be no
-   * need to reprocess the node when just the units change.
+   * This will not convert the value. That should be done by the caller.
+   * Because the underlying value doesn't change here we don't need to reprocess
+   * the node.
    *
    * @param val
    */
