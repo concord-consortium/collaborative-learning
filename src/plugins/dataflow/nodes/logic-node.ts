@@ -68,7 +68,7 @@ export class LogicNode extends BaseNode<
     }).map((nodeOp) => {
       return { name: nodeOp.name, icon: nodeOp.icon };
     });
-    const dropdownControl = new DropdownListControl(this, "logicOperator", dropdownOptions);
+    const dropdownControl = new DropdownListControl(this, "logicOperator", model.setLogicOperator, dropdownOptions);
     this.addControl("logicOperator", dropdownControl);
 
     this.valueControl = new ValueControl("Logic", this.getSentence);

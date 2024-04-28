@@ -64,7 +64,8 @@ export class TransformNode extends BaseNode<
     }).map((nodeOp) => {
       return { name: nodeOp.name, icon: nodeOp.icon };
     });
-    const dropdownControl = new DropdownListControl(this, "transformOperator", dropdownOptions);
+    const dropdownControl =
+      new DropdownListControl(this, "transformOperator", model.setTransformOperator, dropdownOptions);
     this.addControl("transformOperator", dropdownControl);
 
     this.valueControl = new ValueControl("Transform", this.getSentence);
