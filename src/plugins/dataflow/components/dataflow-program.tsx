@@ -17,15 +17,13 @@ import { serialSensorChannels } from "../model/utilities/channel";
 import { ProgramDataRates } from "../model/utilities/node";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { DocumentContextReact } from "../../../components/document/document-context";
-import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
+import { ProgramMode } from "./types/dataflow-tile-types";
 import { IDataSet } from "../../../models/data/data-set";
 
 
-import { getAttributeIdForNode, recordCase } from "../model/utilities/recording-utilities";
+import { recordCase } from "../model/utilities/recording-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { ReteManager } from "../nodes/rete-manager";
-import { IBaseNodeModel } from "../nodes/base-node";
-import { calculatedRecentValues } from "../utilities/playback-utils";
 
 import "./dataflow-program.sass";
 
@@ -320,23 +318,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.reteManager?.editor.clear();
   };
 
-  private playbackNodesWithCaseData = (dataSet: IDataSet, playBackIndex: number) => {
-    const caseId = dataSet.getCaseAtIndex(playBackIndex)?.__id__;
-    if (!caseId || !this.playbackReteManager) return;
-
-    const { program } = this.playbackReteManager.mstContent;
-    let idx = 0;
-    program.nodes.forEach((_node) => {
-      const node = _node.data as IBaseNodeModel;
-      const attrId = getAttributeIdForNode(this.props.tileContent.dataSet, idx);
-      const valForNode = dataSet.getValue(caseId, attrId) as number;
-      node.setNodeValue(valForNode);
-
-      const recentValues = calculatedRecentValues(dataSet, playBackIndex, attrId);
-      node.setRecentValues(recentValues);
-      idx++;
-    });
-  };
+  private playbackNodesWithCaseData(dataSet: IDataSet, playBackIndex: number) {
+    if (!this.playbackReteManager) return;
+    this.playbackReteManager.mstContent.program.playbackNodesWithCaseData(dataSet, playBackIndex);
+  }
 
   private tick = () => {
     const { runnable, tileContent: tileModel } = this.props;
@@ -358,11 +343,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         break;
       case ProgramMode.Recording:
         this.updateChannels();
+        reteManager.tickAndProcessNodes();
         if (runnable) {
           recordCase(this.props.tileContent, recordIndex);
         }
-        reteManager.tickAndProcessNodes();
-        this.incrementRecordIndex(UpdateMode.Increment);
+        this.incrementRecordIndex();
         break;
       case ProgramMode.Done:
         if (isPlaying) {
@@ -446,7 +431,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
   };
 
-  private incrementRecordIndex = (update: string) => {
+  private incrementRecordIndex = () => {
     const { tileContent } = this.props;
     const newRecordIndex = this.state.recordIndex + 1;
     if (newRecordIndex >= tileContent.maxRecordableCases) {

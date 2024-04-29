@@ -61,7 +61,7 @@ export class GeneratorNode extends BaseNode<
     const dropdownOptions = NodeGeneratorTypes.map((nodeOp) => {
       return { name: nodeOp.name, icon: nodeOp.icon };
     });
-    const dropdownControl = new DropdownListControl(this, "generatorType", dropdownOptions);
+    const dropdownControl = new DropdownListControl(this, "generatorType", model.setGeneratorType, dropdownOptions);
     this.addControl("generatorType", dropdownControl);
 
     const ampControl = new NumberControl(this, "amplitude", "amplitude",

@@ -64,7 +64,6 @@ export class DemoOutputNode extends BaseNode<
   },
   IDemoOutputNodeModel
 > {
-  demoOutputControl: DemoOutputControl;
   disposeTiltMonitor?: () => void;
 
   constructor(
@@ -79,7 +78,7 @@ export class DemoOutputNode extends BaseNode<
 
     // Copy the types so typescript doesn't complain that they are readonly
     const outputTypes = [...NodeDemoOutputTypes];
-    const dropdownControl = new DropdownListControl(this, "outputType", outputTypes);
+    const dropdownControl = new DropdownListControl(this, "outputType", model.setOutputType, outputTypes);
     this.addControl("outputType", dropdownControl);
 
     const demoOutputControl = new DemoOutputControl(model);
