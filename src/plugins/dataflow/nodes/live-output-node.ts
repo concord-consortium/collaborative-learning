@@ -7,7 +7,8 @@ import { INodeServices } from "./service-types";
 import { numSocket } from "./num-socket";
 import { NodeLiveOutputTypes, NodeMicroBitHubs, baseLiveOutputOptions,
   kBinaryOutputTypes,
-  kGripperOutputTypes, kMicroBitHubRelaysIndexed } from "../model/utilities/node";
+  kGripperOutputTypes, kMicroBitHubRelaysIndexed,
+  kServoOutputTypes} from "../model/utilities/node";
 import { InputValueControl } from "./controls/input-value-control";
 import { SerialDevice } from "../../../models/stores/serial";
 import { simulatedHub, simulatedHubName } from "../model/utilities/simulated-output";
@@ -36,6 +37,9 @@ export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
   },
   get isRelayType() {
     return kMicroBitHubRelaysIndexed.includes(self.liveOutputType);
+  },
+  get isServoType() {
+    return self.liveOutputType === "Servo";
   },
   get outputStatus() {
     const currentEntry = self.tickEntries.get(self.currentTick) as ILiveOutputTickEntry | undefined;
@@ -74,6 +78,20 @@ export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
       }
     }
 
+    if (self.isServoType) {
+      if (deviceFamily === "arduino") {
+        // If we have a connected arduino we should have a gripper, prefer that
+        self.setHubSelect(baseLiveOutputOptions.liveServoOption.name);
+      } else if (sharedVar) {
+        self.setHubSelect(simulatedHubName(sharedVar));
+      } else {
+        // Without a valid device, or variable, default to the device
+        // The options list will be updated so this device option will prompt the user to
+        // connect a device
+        self.setHubSelect(baseLiveOutputOptions.liveServoOption.name);
+      }
+    }
+
     // When a relay type is selected this is used with the microbit where hubs need to be
     // selected. We can't just automatically choose a particular hub.
     if (self.isRelayType) {
@@ -88,8 +106,6 @@ export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
         self.setHubSelect(baseLiveOutputOptions.genericWarningOption.name);
       }
     }
-
-    // TODO: what do we do with the new servo type?
 
     // There is nothing downstream from us so we don't need to reprocess
   },
@@ -209,7 +225,12 @@ export class LiveOutputNode extends BaseNode<
     const { deviceFamily } = serialDevice;
 
     if (deviceFamily === "arduino" && isNumberOutput){
-      serialDevice.writeToOutForBBGripper(val, outType);
+      if (kGripperOutputTypes.includes(outType)){
+        serialDevice.writeToOutForBBGripper(val, outType);
+      }
+      if (kServoOutputTypes.includes(outType)){
+        serialDevice.writeToOutForServo(val, outType);
+      }
     }
     if (deviceFamily === "microbit"){
       // It is not clear when the channels would be falsey but that is how this
@@ -230,13 +251,26 @@ export class LiveOutputNode extends BaseNode<
     }
   }
 
+  // TODO: only keep this if we find it matches live servo behavior
+  getLastValidServoValue() {
+    const recordedValues = this.recordedValues();
+
+    const reversedCopy = recordedValues.slice().reverse();
+    const foundValid = reversedCopy.find(v => v != null && v >= 0 && v <= 180);
+    return foundValid || 0;
+  }
+
   setHubSelectOptions() {
     const options: ListOption[] = [];
     const deviceFamily = this.deviceFamily;
     const sharedVar = this.getPotentialOutputVariable();
     const simOption = sharedVar && simulatedHub(sharedVar);
-    const { liveGripperOption, noDeviceLiveGripperOption, genericWarningOption } = baseLiveOutputOptions;
-    const { isGripperType, isRelayType, hubSelect } = this.model;
+    const {
+      liveGripperOption, noDeviceLiveGripperOption,
+      liveServoOption, noDeviceliveServoOption,
+      genericWarningOption
+    } = baseLiveOutputOptions;
+    const { isGripperType, isRelayType, isServoType, hubSelect } = this.model;
 
     if (simOption) {
       options.push(simOption);
@@ -255,6 +289,14 @@ export class LiveOutputNode extends BaseNode<
         options.push(liveGripperOption);
       } else {
         options.push(noDeviceLiveGripperOption);
+      }
+    }
+
+    if (isServoType) {
+      if (deviceFamily === "arduino") {
+        options.push(liveServoOption);
+      } else {
+        options.push(noDeviceliveServoOption);
       }
     }
 
@@ -329,6 +371,8 @@ export class LiveOutputNode extends BaseNode<
     } else if (kGripperOutputTypes.includes(liveOutputType)){
       const roundedDisplayValue = Math.round((value / 10) * 10);
       return `${roundedDisplayValue}% closed`;
+    } else if (kServoOutputTypes.includes(liveOutputType)) {
+      return `${value}°`;
     }
 
     // We shouldn't hit this case but if we do then just pass the value through
@@ -371,6 +415,15 @@ export class LiveOutputNode extends BaseNode<
       // are setting the nodeValue to 0-100. In the Demo Output Node it is set to
       // 0-1
       const newValue = getPercentageAsInt(value);
+      this.saveNodeValue(newValue);
+      this.saveOutputStatus("");
+    } else if (kServoOutputTypes.includes(outputType)) {
+      // out of range value will not move sim servo
+      const isValidServoValue = value >= 0 && value <= 180;
+      const newValue = isValidServoValue ? value : this.getLastValidServoValue();
+
+      // alternative: angles out of range move servo to nearest valid angle
+      // newValue = Math.min(Math.max(newValue, 0), 180);
       this.saveNodeValue(newValue);
       this.saveOutputStatus("");
     } else {

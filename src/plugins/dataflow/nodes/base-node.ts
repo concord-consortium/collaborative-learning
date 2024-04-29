@@ -329,5 +329,10 @@ export class BaseNode<
     const previousEntry = this.model.tickEntries.get(recentTicks[length - 3]);
     return previousEntry ? previousEntry.nodeValue : null;
   }
+
+  recordedValues() {
+    const { recordedTicks } = this.services;
+    return recordedTicks.map(tick => this.model.tickEntries.get(tick)?.nodeValue);
+  }
 }
 

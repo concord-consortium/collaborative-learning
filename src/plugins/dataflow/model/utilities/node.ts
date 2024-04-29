@@ -33,6 +33,7 @@ import ParticulatesIcon from "../../assets/icons/sensor/particulates.svg";
 import MoistureIcon from "../../assets/icons/sensor/moisture.svg";
 import EmgIcon from "../../../shared-assets/icons/dataflow/control/signal.svg";
 import PressureIcon from "../../../shared-assets/icons/dataflow/sensor/pressure.svg";
+import ServoIcon from "../../../shared-assets/icons/dataflow/output/servo.svg";
 
 import AbsoluteValueIcon from "../../assets/icons/transform/absolute-value.svg";
 import NegationIcon from "../../assets/icons/transform/negation.svg";
@@ -422,6 +423,14 @@ export const NodeLiveOutputTypes = [
     name: "Heat Lamp",
     icon: LightBulbIcon,
     relayIndex: 0
+  },
+  {
+    name: "Servo",
+    icon: ServoIcon,
+    angleBase: 0,
+    angleOffset: 30,
+    angleScale: 2 / 3,
+    sweep: 180
   }
 ];
 
@@ -466,6 +475,18 @@ export const baseLiveOutputOptions = {
     active: true,
     id: "no-device-bb-gripper",
     name: "Physical Gripper",
+    displayName: "⚠️ connect device",
+  },
+  liveServoOption: {
+    active: true,
+    icon: ServoIcon,
+    id: "bb-servo",
+    name: "Physical Servo"
+  },
+  noDeviceliveServoOption: {
+    active: true,
+    id: "no-devie-bb-servo",
+    name: "Physical Servo",
     displayName: "⚠️ connect device",
   },
   genericWarningOption: {
@@ -544,3 +565,4 @@ export const kAnimatedBinaryTypes = ["Fan", "Humidifier"];
 export const kMicroBitHubRelaysIndexed =  ["Heat Lamp", "Fan", "Humidifier"];
 export const kBinaryOutputTypes = [...kMicroBitHubRelaysIndexed, "Light Bulb"];
 export const kGripperOutputTypes = ["Grabber", "Gripper", "Gripper 2.0"];
+export const kServoOutputTypes = ["Servo"];
