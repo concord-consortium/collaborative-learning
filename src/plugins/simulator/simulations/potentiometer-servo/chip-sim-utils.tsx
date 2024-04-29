@@ -51,6 +51,21 @@ export function getTweenedServoAngle(realValue: number, lastVisibleValue: number
   return realValue;
 }
 
+export interface IMiniNodeData {
+  id: string;
+  iconKey: string;
+  label: string;
+  value: string;
+  type: string;
+  category: string;
+}
+export interface IMiniNodesDataPack {
+  inputNodesArr: IMiniNodeData[];
+  operatorNodesArr: IMiniNodeData[];
+  outputNodesArr: IMiniNodeData[];
+  extraCount: number;
+}
+
 // this is an svg path that represents a wire connecting a potentiometer to the A1 pin
 // the "shases" version is a dashed line that animates when the wire is active
 // in the future, if a user can connect a potentiometer to a different pin, we would specifiy additional wires
@@ -198,12 +213,18 @@ export function getMiniNodeLabelContent(sharedNode: ISharedProgramNode): {trunca
   const iconKey = getIconKeyFromLabel(formattable);
   const capitalSpaced = formattable.charAt(0).toUpperCase() + formattable.slice(1).replace(/-/g, " ");
   const truncatedLabel = capitalSpaced.length > 7 ? `${capitalSpaced.slice(0, 7)}...` : capitalSpaced;
-  console.log("| label and key: ", truncatedLabel, iconKey);
   return { truncatedLabel, iconKey };
 }
 
-export function getMiniNodesDisplayData(programData?: SharedProgramDataType) {
-  if (!programData ) return;
+export function getMiniNodesDisplayData(programData?: SharedProgramDataType): IMiniNodesDataPack {
+  if (!programData ) {
+    return {
+      inputNodesArr: [],
+      operatorNodesArr: [],
+      outputNodesArr: [],
+      extraCount: 0
+    };
+  }
   const arr = [...programData.programNodes.values()];
 
   const formattedData = arr.map(node => {

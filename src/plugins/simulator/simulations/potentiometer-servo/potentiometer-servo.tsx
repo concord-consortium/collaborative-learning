@@ -9,27 +9,15 @@ import potDial from "./assets/pot-top.png";
 import servoArm from "./assets/servo-arm.png";
 import assemblyExpanded from "./assets/assembly-expanded.png";
 import stopwatch from "./assets/stopwatch.png";
-import { getMiniNodeIcon, getMiniNodesDisplayData, getTweenedServoAngle, wireToA1 } from "./chip-sim-utils";
+import {
+  IMiniNodeData, getMiniNodeIcon, getMiniNodesDisplayData, getTweenedServoAngle, wireToA1
+} from "./chip-sim-utils";
 
 import "./potentiometer-servo.scss";
 
 export const kPotentiometerServoKey = "potentiometer_chip_servo";
 
-interface IMiniNodeData {
-  id: string;
-  iconKey: string;
-  label: string;
-  value: string;
-  type: string;
-  category: string;
-}
 
-interface IMiniNodesDataPack {
-  inputNodesArr: IMiniNodeData[];
-  operatorNodesArr: IMiniNodeData[];
-  outputNodesArr: IMiniNodeData[];
-  extraCount: number;
-}
 
 const potVisibleOffset = 135;
 const servoVisibleOffset = 90;
@@ -91,7 +79,7 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
   const potServoClasses = classNames('pot-servo-component');
   const boardClasses = classNames('board');
 
-  const miniNodesDataPack = getMiniNodesDisplayData(programData) as IMiniNodesDataPack;
+  const miniNodesDataPack = getMiniNodesDisplayData(programData);
   const { inputNodesArr, operatorNodesArr, outputNodesArr, extraCount } = miniNodesDataPack;
 
   const hasPinIn = inputNodesArr.some(node => node.label.includes("Pin"));
