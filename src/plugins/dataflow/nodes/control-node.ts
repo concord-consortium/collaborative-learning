@@ -99,7 +99,8 @@ export class ControlNode extends BaseNode<
       const { name, displayName, icon } = nodeOp;
       return { name, displayName, icon };
     });
-    const dropdownControl = new DropdownListControl(this, "controlOperator", dropdownOptions);
+    const dropdownControl =
+      new DropdownListControl(this, "controlOperator", model.setControlOperator, dropdownOptions);
     this.addControl("controlOperator", dropdownControl);
 
     const valueControl = new NumberControl(this, "waitDuration", "wait", null, "", "secs");
