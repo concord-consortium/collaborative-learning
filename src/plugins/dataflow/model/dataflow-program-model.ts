@@ -7,10 +7,14 @@ import { GeneratorNodeModel } from "../nodes/generator-node";
 import { DemoOutputNodeModel } from "../nodes/demo-output-node";
 import { LiveOutputNodeModel } from "../nodes/live-output-node";
 import { SensorNodeModel } from "../nodes/sensor-node";
-import { NodeType, NodeTypes } from "./utilities/node";
+import { NodeType, NodeTypes, kMaxNodeValues } from "./utilities/node";
 import { TransformNodeModel } from "../nodes/transform-node";
 import { TimerNodeModel } from "../nodes/timer-node";
 import { ControlNodeModel } from "../nodes/control-node";
+import { uniqueId } from "../../../utilities/js-utils";
+import { BaseNodeModel, IBaseNodeModel } from "../nodes/base-node";
+import { IDataSet } from "../../../models/data/data-set";
+import { getAttributeIdForNode } from "./utilities/recording-utilities";
 
 export const ConnectionModel = types
   .model("Connection", {
@@ -40,7 +44,7 @@ export const DataflowNodeModel = types.
       SensorNodeModel,
       TimerNodeModel,
       TransformNodeModel,
-    )
+    ) as typeof BaseNodeModel
   })
   .actions(self => ({
     setPosition(position: {x: number, y: number}) {
@@ -82,10 +86,36 @@ export const DataflowProgramModel = types.
   model("DataflowProgram", {
     id: types.maybe(types.string),
     nodes: types.map(DataflowNodeModel),
-    connections: types.map(ConnectionModel)
+    connections: types.map(ConnectionModel),
+    recentTicks: types.array(types.string),
   })
   .volatile(self => ({
     processor: undefined as DataflowProcessor | undefined
+  }))
+  .views(self => ({
+    get currentTick() {
+      const length = self.recentTicks.length;
+      if (length === 0) return "";
+      return self.recentTicks[length-1];
+    },
+    get recordedTicks() {
+      return self.recentTicks.slice(0,-1);
+    }
+  }))
+  .actions(self => ({
+    clearRecentTicks() {
+      self.recentTicks.clear();
+    },
+    addNewTick(newTick: string) {
+      const { recentTicks, currentTick } = self;
+      if (recentTicks.length > kMaxNodeValues) {
+        recentTicks.shift();
+      }
+      recentTicks.push(newTick);
+      self.nodes.forEach(node => {
+        node.data.createNextTickEntry(currentTick, newTick, recentTicks);
+      });
+    }
   }))
   .actions(self => ({
     // This isn't great but it is how the unique node names have been working
@@ -103,6 +133,12 @@ export const DataflowProgramModel = types.
     // a useful name.
     tickAndProcess(runner: () => void) {
       runner();
+      // We add the new tick after the data and onTick methods have been called
+      // this way any changes triggered by user actions will get stored in the
+      // next tick instead of the one that was just added to the graph
+      // This means that the graph should graph (recentTicks.length - 1) points.
+      const newTick = uniqueId();
+      self.addNewTick(newTick);
     },
 
     // This action is called after a change in the Rete diagram.
@@ -116,16 +152,41 @@ export const DataflowProgramModel = types.
     },
     setProcessor(processor: DataflowProcessor) {
       self.processor = processor;
+    },
+    playbackNodesWithCaseData(dataSet: IDataSet, playBackIndex: number) {
+      self.clearRecentTicks();
+      console.log("playbackNodesWithCaseData", {playBackIndex});
+      const startIndex = Math.max(playBackIndex - kMaxNodeValues, 0);
+
+      for (let index = startIndex; index <= playBackIndex; index++) {
+        self.addNewTick(index.toString());
+        const caseId = dataSet.getCaseAtIndex(index)?.__id__;
+        if (!caseId) break;
+        let nodeIndex = 0;
+        self.nodes.forEach((_node) => {
+          const node = _node.data as IBaseNodeModel;
+          const attrId = getAttributeIdForNode(dataSet, nodeIndex);
+          const nodeValue = dataSet.getValue(caseId, attrId) as number;
+          node.setNodeValue(nodeValue);
+          nodeIndex++;
+        });
+      }
+
+      // add one more tick so the last point is graphed
+      self.addNewTick((playBackIndex+1).toString());
     }
+
   }))
   .actions(self => ({
     addNode(node: IDataflowNodeModel) {
       self.nodes.put(node);
       self.updateNodeNames();
     },
-    addNodeSnapshot(node: DataflowNodeSnapshotIn) {
-      self.nodes.put(node);
+    addNodeSnapshot(nodeSnapshot: DataflowNodeSnapshotIn) {
+      const node = self.nodes.put(nodeSnapshot);
       self.updateNodeNames();
+      node.data.createNextTickEntry(undefined, self.currentTick);
+      return node;
     },
     removeNode(id: IDataflowNodeModel["id"]) {
       self.nodes.delete(id);
