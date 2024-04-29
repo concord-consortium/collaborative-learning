@@ -203,6 +203,7 @@ export const CustomDataflowNode = observer(
       <DataflowNodePlot
         display={showPlot}
         model={model}
+        recordedTicks={reteManager.recordedTicks}
       />
 
     </DataflowNodeStyles>

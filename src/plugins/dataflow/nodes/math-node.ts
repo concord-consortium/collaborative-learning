@@ -69,7 +69,7 @@ export class MathNode extends BaseNode<
     }).map((nodeOp) => {
       return { name: nodeOp.name, icon: nodeOp.icon };
     });
-    const dropdownControl = new DropdownListControl(this, "mathOperator", dropdownOptions);
+    const dropdownControl = new DropdownListControl(this, "mathOperator", model.setMathOperator, dropdownOptions);
     this.addControl("mathOperator", dropdownControl);
 
     this.valueControl = new ValueControl("Math", this.getSentence);

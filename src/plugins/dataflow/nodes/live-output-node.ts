@@ -1,6 +1,6 @@
 import { typeField } from "../../../utilities/mst-utils";
-import { BaseNode, BaseNodeModel, NoOutputs } from "./base-node";
-import { Instance } from "mobx-state-tree";
+import { BaseNode, BaseNodeModel, BaseTickEntry, NoOutputs } from "./base-node";
+import { Instance, types } from "mobx-state-tree";
 import { ClassicPreset } from "rete";
 import { DropdownListControl, IDropdownListControl, ListOption } from "./controls/dropdown-list-control";
 import { INodeServices } from "./service-types";
@@ -10,33 +10,96 @@ import { NodeLiveOutputTypes, NodeMicroBitHubs, baseLiveOutputOptions,
   kGripperOutputTypes, kMicroBitHubRelaysIndexed } from "../model/utilities/node";
 import { InputValueControl } from "./controls/input-value-control";
 import { SerialDevice } from "../../../models/stores/serial";
-import { VariableType } from "@concord-consortium/diagram-view";
 import { simulatedHub, simulatedHubName } from "../model/utilities/simulated-output";
+import { VariableType } from "@concord-consortium/diagram-view";
+import { runInAction } from "mobx";
+
+export const LiveOutputTickEntry = BaseTickEntry.named("LiveOutputTickEntry")
+.props({
+  outputStatus: types.maybe(types.string),
+});
+interface ILiveOutputTickEntry extends Instance<typeof LiveOutputTickEntry> {}
 
 // TODO: the list of sensors is populated on the tick, so if the tick is slow, the
 // list of sensors will not update very well
 export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
 .props({
   type: typeField("Live Output"),
-  liveOutputType: "Gripper 2.0",
-  // The default in the old DF was "connect device", choosing this does not bring up
-  // the dialog, but it doesn't in the old one either. Hmm.
+  liveOutputType: "",
   hubSelect: "",
-  // We record this in state so readOnly views of this node can mirror the status
-  // without needing to track all of the channel state
-  outputStatus: ""
+
+  tickEntries: types.map(LiveOutputTickEntry),
 })
-.actions(self => ({
-  setLiveOutputType(outputType: string) {
-    self.liveOutputType = outputType;
-    // There is nothing downstream from us so we don't need to reprocess
+.views(self => ({
+  get isGripperType() {
+    return kGripperOutputTypes.includes(self.liveOutputType);
   },
+  get isRelayType() {
+    return kMicroBitHubRelaysIndexed.includes(self.liveOutputType);
+  },
+  get outputStatus() {
+    const currentEntry = self.tickEntries.get(self.currentTick) as ILiveOutputTickEntry | undefined;
+    return currentEntry?.outputStatus;
+  }
+}))
+.actions(self => ({
   setHubSelect(hub: string) {
     self.hubSelect = hub;
     // There is nothing downstream from us so we don't need to reprocess
   },
+}))
+.actions(self => ({
+  setLiveOutputType(outputType: string, deviceFamily: string | undefined,
+      getSharedVar: () => VariableType | undefined )
+  {
+    if (outputType === self.liveOutputType) return;
+
+    self.liveOutputType = outputType;
+
+    // Get the shared variable after setting our new outputType since
+    // the variable depends on the outputType
+    const sharedVar = getSharedVar();
+    console.log("setLiveOutputType.sharedVariable", sharedVar?.getAllOfType("live-output"));
+    if (self.isGripperType) {
+      if (deviceFamily === "arduino") {
+        // If we have a connected arduino we should have a gripper, prefer that
+        self.setHubSelect(baseLiveOutputOptions.liveGripperOption.name);
+      } else if (sharedVar) {
+        self.setHubSelect(simulatedHubName(sharedVar));
+      } else {
+        // Without a valid device, or variable, default to the device
+        // The options list will be updated so this device option will prompt the user to
+        // connect a device
+        self.setHubSelect(baseLiveOutputOptions.liveGripperOption.name);
+      }
+    }
+
+    // When a relay type is selected this is used with the microbit where hubs need to be
+    // selected. We can't just automatically choose a particular hub.
+    if (self.isRelayType) {
+      if (deviceFamily === "microbit") {
+        // Prompt the user to select an option if there is a microbit connected
+        self.setHubSelect("");
+      } else if (sharedVar) {
+        self.setHubSelect(simulatedHubName(sharedVar));
+      } else {
+        // Without a valid device, or variable, default to a warning suggesting they
+        // connect a device
+        self.setHubSelect(baseLiveOutputOptions.genericWarningOption.name);
+      }
+    }
+
+    // TODO: what do we do with the new servo type?
+
+    // There is nothing downstream from us so we don't need to reprocess
+  },
   setOutputStatus(status: string) {
-    self.outputStatus = status;
+    const currentEntry = self.tickEntries.get(self.currentTick)  as ILiveOutputTickEntry | undefined;
+    if (currentEntry) {
+      currentEntry.outputStatus = status;
+    } else {
+      console.warn("No current tick entry");
+    }
   }
 }));
 export interface ILiveOutputNodeModel extends Instance<typeof LiveOutputNodeModel> {}
@@ -64,7 +127,8 @@ export class LiveOutputNode extends BaseNode<
     const nodeValueInput = new ClassicPreset.Input(numSocket, "NodeValue");
     this.addInput("nodeValue", nodeValueInput);
 
-    const liveOutputControl = new DropdownListControl(this, "liveOutputType", NodeLiveOutputTypes);
+    const liveOutputControl =
+      new DropdownListControl(this, "liveOutputType", this.setLiveOutputTypeWrapper, NodeLiveOutputTypes);
     this.addControl("liveOutputType", liveOutputControl);
 
     if (this.readOnly) {
@@ -76,11 +140,21 @@ export class LiveOutputNode extends BaseNode<
       // TODO: this could be improved by serializing more info about the current hubSelect option
       // like the displayName, active, and missing properties. This way the readOnly view could
       // display these as well.
-      this.hubSelectControl = new DropdownListControl(this, "hubSelect", [], undefined, undefined,
+      this.hubSelectControl = new DropdownListControl(this, "hubSelect", model.setHubSelect, [], undefined, undefined,
         this.getReadOnlyHubSelectOptions
       );
     } else {
-      this.hubSelectControl = new DropdownListControl(this, "hubSelect", NodeMicroBitHubs);
+      this.hubSelectControl = new DropdownListControl(this, "hubSelect", model.setHubSelect, []);
+
+      if (!model.liveOutputType) {
+        // Set the default value. This also updates the hubSelect depending on the connected device and
+        // and simulation.
+        // FIXME: this might cause problems with undo support since it is changing the state on node
+        // initialization, we'll have to make sure this happens within the node creation action
+        this.setLiveOutputTypeWrapper("Gripper 2.0");
+      }
+      // Update the options now that we have a type
+      this.setHubSelectOptions();
     }
     this.addControl("hubSelect", this.hubSelectControl);
 
@@ -88,6 +162,12 @@ export class LiveOutputNode extends BaseNode<
       this.getDisplayMessageWithStatus);
     nodeValueInput.addControl(inputValueControl);
   }
+
+  setLiveOutputTypeWrapper = (val: string) => {
+    this.model.setLiveOutputType(val, this.deviceFamily, this.getPotentialOutputVariable);
+    // Update the options now that our type might have changed
+    this.setHubSelectOptions();
+  };
 
   getReadOnlyHubSelectOptions = () => {
     if (this.model.hubSelect) {
@@ -97,9 +177,18 @@ export class LiveOutputNode extends BaseNode<
     }
   };
 
-  findOutputVariable() {
+  getPotentialOutputVariable = () => {
     const type = this.model.liveOutputType;
     return this.services.getOutputVariables().find(variable => variable.getAllOfType("live-output").includes(type));
+  };
+
+  private getSelectedOutputVariable() {
+    const outputVariable = this.getPotentialOutputVariable();
+    if (outputVariable && this.model.hubSelect === simulatedHubName(outputVariable)) {
+      return outputVariable;
+    } else {
+      return undefined;
+    }
   }
 
   public requiresSerial() {
@@ -107,7 +196,7 @@ export class LiveOutputNode extends BaseNode<
     // after a connection to another node is made.
     // This allows user to drag a block out and work on program before
     // the message prompting them to connect.
-    return !this.findOutputVariable() && this.isConnected("nodeValue");
+    return !this.getSelectedOutputVariable() && this.isConnected("nodeValue");
   }
 
   private sendDataToSerialDevice(serialDevice: SerialDevice) {
@@ -132,68 +221,49 @@ export class LiveOutputNode extends BaseNode<
     }
   }
 
-  private sendDataToSimulatedOutput(outputVariables?: VariableType[]) {
-    const outputVariable = this.findOutputVariable();
-    if (outputVariable && this.model.hubSelect === simulatedHubName(outputVariable)) {
+  private sendDataToSimulatedOutput() {
+    const outputVariable = this.getSelectedOutputVariable();
+    if (outputVariable) {
       const val = this.model.nodeValue;
       // NOTE: this is where we historically saw NaN values with origins in the Sensor node
       if (val != null && isFinite(val)) outputVariable.setValue(val);
     }
   }
 
-  outputsToAnyRelay() {
-    return kMicroBitHubRelaysIndexed.includes(this.model.liveOutputType);
-  }
-
-  outputsToAnyGripper() {
-    return kGripperOutputTypes.includes(this.model.liveOutputType);
-  }
-
-  getLiveOptions(deviceFamily: string, sharedVar?: VariableType ) {
+  setHubSelectOptions() {
     const options: ListOption[] = [];
+    const deviceFamily = this.deviceFamily;
+    const sharedVar = this.getPotentialOutputVariable();
     const simOption = sharedVar && simulatedHub(sharedVar);
-    const anyOutputFound = simOption || deviceFamily === "arduino" || deviceFamily === "microbit";
-    const { liveGripperOption, warningOption } = baseLiveOutputOptions;
+    const { liveGripperOption, noDeviceLiveGripperOption, genericWarningOption } = baseLiveOutputOptions;
+    const { isGripperType, isRelayType, hubSelect } = this.model;
 
-    if (sharedVar && simOption) {
+    if (simOption) {
       options.push(simOption);
     }
 
-    if (this.outputsToAnyRelay() && deviceFamily === "microbit") {
-      options.push(...NodeMicroBitHubs);
-    }
-
-    if (this.outputsToAnyGripper() && deviceFamily === "arduino") {
-      options.push(liveGripperOption);
-    }
-
-    if (this.outputsToAnyGripper() && deviceFamily !== "arduino") {
-      if (!options.includes(warningOption)) {
-        options.push(warningOption);
+    if (isRelayType) {
+      if (deviceFamily === "microbit") {
+        options.push(...NodeMicroBitHubs);
+      } else {
+        options.push(genericWarningOption);
       }
     }
 
-    if (!anyOutputFound && !options.includes(warningOption)) options.push(warningOption);
+    if (isGripperType) {
+      if (deviceFamily === "arduino") {
+        options.push(liveGripperOption);
+      } else {
+        options.push(noDeviceLiveGripperOption);
+      }
+    }
 
-    return options;
-  }
-
-  setLiveOutputOpts(deviceFamily: string, sharedVar?: VariableType) {
-    // This is only called in a tick so it won't be called on a readOnly diagram
-    const options = this.getLiveOptions(deviceFamily, sharedVar);
+    if (!options.find(option => option.name === hubSelect)) {
+      // In certain cases, if we don't have an option for the current selection
+      // we might need to add one.
+    }
 
     this.hubSelectControl.setOptions(options);
-
-    const selectionId = this.hubSelectControl.getSelectionId();
-
-    // FIXME: this is modifying state in a tick which can also be modified by a user
-    // directly. This will cause a conflict when restoring the node from an undo.
-    if (!selectionId) this.model.setHubSelect(options[0].name);
-
-    // if user successfully connects arduino with warning selected, switch to physical gripper
-    if (selectionId === "no-outputs-found" && deviceFamily === "arduino") {
-      this.model.setHubSelect(baseLiveOutputOptions.liveGripperOption.name);
-    }
   }
 
   private getSelectedRelayIndex(){
@@ -205,7 +275,11 @@ export class LiveOutputNode extends BaseNode<
     const hubsChannels = this.services.getChannels();
     if (!hubsChannels) return;
     const hubSelectOptions = hubSelect.options;
-    hubsChannels
+
+    // Run this in an action so the UI only updates once when the status
+    // of the options is changed
+    runInAction(() => {
+      hubsChannels
       .filter(c => c.deviceFamily === "microbit")
       .forEach(c => {
         // Incase there is a channel without a microbitId, skip it
@@ -214,10 +288,11 @@ export class LiveOutputNode extends BaseNode<
         if (!targetHub) return;
 
         // The options are observable objects so changing the active status
-        // should trigger the list to re-render. However this is being changed
-        // outside of a transaction, so MobX might complain about it.
+        // should trigger the list to re-render.
+        hubSelect.setActiveOption(c.microbitId, c.missing);
         targetHub.active = c.missing;
       });
+    });
   }
 
   private getHubRelaysChannel(){
@@ -272,6 +347,10 @@ export class LiveOutputNode extends BaseNode<
     }
   }
 
+  get deviceFamily() {
+    return this.services.stores.serialDevice.deviceFamily;
+  }
+
   data({nodeValue}: {nodeValue?: number[]}) {
     // if there is not a valid input, use 0
     const value = nodeValue && nodeValue[0] != null && !isNaN(nodeValue[0]) ? nodeValue[0] : 0;
@@ -302,14 +381,11 @@ export class LiveOutputNode extends BaseNode<
 
     if (this.services.inTick) {
       const { stores, runnable } = this.services;
-      const outputVariables = this.services.getOutputVariables();
-      const outputVar = this.findOutputVariable();
-      const foundDeviceFamily = stores.serialDevice.deviceFamily ?? "unknown device";
       if (runnable) {
         this.sendDataToSerialDevice(stores.serialDevice);
-        this.sendDataToSimulatedOutput(outputVariables);
+        this.sendDataToSimulatedOutput();
       }
-      this.setLiveOutputOpts(foundDeviceFamily, outputVar);
+      this.setHubSelectOptions();
 
       // We won't be in a tick in a read only view. However users aren't allowed
       // to look at the options so there isn't a reason to update the status
