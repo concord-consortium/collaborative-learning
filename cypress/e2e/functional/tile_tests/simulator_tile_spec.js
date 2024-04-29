@@ -84,6 +84,9 @@ context('Simulator Tile', function () {
     dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 2);
     dataflowTile.getSensorDropdownOptions(sensor).eq(0).click();
 
+    // Sometimes the value of the input block takes some time to show up
+    // I think the invoke('text') breaks cypress's built in retry code
+    cy.wait(100);
     dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("be.below", 41).should("be.above", 35);
 
     simulatorTile.getEMGSlider().click("right");
@@ -282,8 +285,6 @@ context('Simulator Tile', function () {
 
     simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "288");
 
-    // FIXME: sensors don't have value controls yet
-    // dataflowTile.getNodeValueContainer("sensor").should("contain.text", "288");
-    dataflowTile.getNodeValueContainer("sensor").should("not.exist");
+    dataflowTile.getNodeValueContainer("sensor").should("contain.text", "288");
   });
 });
