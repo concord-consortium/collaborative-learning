@@ -132,7 +132,7 @@ export class LiveOutputNode extends BaseNode<
     } else {
       this.hubSelectControl = new DropdownListControl(this, "hubSelect", model.setHubSelect, []);
 
-      if (!model.hubSelect) {
+      if (!model.liveOutputType) {
         // Set the default value. This also updates the hubSelect depending on the connected device and
         // and simulation.
         // FIXME: this might cause problems with undo support since it is changing the state on node
