@@ -22,10 +22,7 @@ import { IDataSet } from "../../../models/data/data-set";
 
 import { recordCase } from "../model/utilities/recording-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
-import { SharedProgramDataType } from "../../shared-program-data/shared-program-data";
-import { getSharedNodes } from "../nodes/utilities/shared-program-data-utilities";
 import { ReteManager } from "../nodes/rete-manager";
-import { IBaseNode } from "../nodes/base-node";
 
 import "./dataflow-program.sass";
 
@@ -358,18 +355,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
         break;
     }
-    this.updateSharedProgramData();
-  };
-
-  private updateSharedProgramData = () => {
-    const nodes = this.reteManager?.editor.getNodes() as IBaseNode[];
-    const sharedProgramModel = this.props.tileContent.sharedProgramData as SharedProgramDataType;
-    const sharedNodes = getSharedNodes(nodes);
-    sharedProgramModel.setProgramNodes(sharedNodes);
-    const dataRateStr = ProgramDataRates.find((item) => item.val === Number(this.props.programDataRate))?.text ?? "";
-    const dataRateNum = ProgramDataRates.find((item) => item.val === Number(this.props.programDataRate))?.val ?? 0;
-    sharedProgramModel.setProgramSamplingRateStr(dataRateStr);
-    sharedProgramModel.setProgramSamplingRate(dataRateNum);
+    reteManager.updateSharedProgramData();
   };
 
   private stopRecording() {
