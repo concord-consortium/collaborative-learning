@@ -3,7 +3,7 @@ import { structures } from "rete-structures";
 import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
 import { Presets, ReactPlugin } from "rete-react-plugin";
 import { AreaExtensions, AreaPlugin } from "rete-area-plugin";
-import { onSnapshot } from "mobx-state-tree";
+import { onPatch, onSnapshot } from "mobx-state-tree";
 
 import { IStores } from "../../../models/stores/stores";
 import { DataflowContentModelType } from "../model/dataflow-content";
@@ -37,15 +37,18 @@ import { InputValueControl, InputValueControlComponent } from "./controls/input-
 import { DataflowEngine } from "./engine/dataflow-engine";
 import { ValueWithUnitsControl, ValueWithUnitsControlComponent } from "./controls/value-with-units-control";
 import { DataflowProgramChange } from "../dataflow-logger";
+import { runInAction } from "mobx";
 
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
 
-export class ReteManager {
+export class ReteManager implements INodeServices {
   public editor: NodeEditorMST;
   public engine = new DataflowEngine<Schemes>();
   public area: AreaPlugin<Schemes, AreaExtra>;
   private snapshotDisposer: () => void | undefined;
+  public inTick = false;
+  public disposed = false;
 
   constructor(
     private mstProgram: DataflowProgramModelType,
@@ -59,6 +62,7 @@ export class ReteManager {
   ){
     this.editor = new NodeEditorMST(mstProgram, this.createReteNodeFromNodeModel);
     this.area = new AreaPlugin<Schemes, AreaExtra>(div);
+    this.updateMainProcessor();
 
     this.setup();
   }
@@ -197,6 +201,8 @@ export class ReteManager {
     // Notify after the area, connection, and render plugins have been configured
     await this.notifyAboutExistingObjects();
 
+    // Need to do an initial process after all of the nodes are create so their inputs are correct
+    this.processAfterProgramChange();
 
     if (!this.readOnly) {
       editor.addPipe(context => {
@@ -207,12 +213,12 @@ export class ReteManager {
           const targetNode = editor.getNode(target);
           const change: DataflowProgramChange = {
             targetType: 'connection',
-            nodeTypes: [sourceNode.label, targetNode.label],
-            nodeIds: [sourceNode.id, targetNode.id],
-            connectionOutputNodeId: sourceNode.id,
-            connectionOutputNodeType: sourceNode.label,
-            connectionInputNodeId: targetNode.id,
-            connectionInputNodeType: targetNode.label
+            nodeTypes: [sourceNode?.label, targetNode?.label],
+            nodeIds: [source, target],
+            connectionOutputNodeId: source,
+            connectionOutputNodeType: sourceNode?.label,
+            connectionInputNodeId: target,
+            connectionInputNodeType: targetNode?.label
           };
           this.logTileChangeEvent({operation: context.type, change});
         }
@@ -229,20 +235,27 @@ export class ReteManager {
 
         return context;
       });
+
+      // Reprocess when connections are changed
+      // And also count the serial nodes some of which only get counted if they are
+      // connected
+      editor.addPipe((context) => {
+        if (["noderemoved", "connectioncreated", "connectionremoved"].includes(context.type)) {
+          // FIXME: Any changes to the state caused by these events should be combined
+          // into the history entry with the actual node removal, connection creation or removal
+          // In the meantime we wrap this in an action so it only creates one more history entry
+          this.processAfterProgramChange();
+          this.countSerialDataNodes();
+        }
+        return context;
+      });
     }
 
-    // Reprocess when connections are changed
-    // And also count the serial nodes some of which only get counted if they are
-    // connected
-    editor.addPipe((context) => {
-      if (["noderemoved", "connectioncreated", "connectionremoved"].includes(context.type)) {
-        this.process();
-        this.countSerialDataNodes();
-      }
-      return context;
-    });
-
     this.setupOnSnapshot();
+  }
+
+  private processAfterProgramChange() {
+    this.mstProgram.processAfterProgramChange(this.process);
   }
 
   public async notifyAboutExistingObjects() {
@@ -264,9 +277,49 @@ export class ReteManager {
     }
   }
 
+  private updateMainProcessor() {
+    const { mstProgram, readOnly, disposed } = this;
+    if (disposed) {
+      console.warn("Trying to process after being disposed");
+      return;
+    }
+    const { processor } = mstProgram;
+    if (processor === this) {
+      // We already are the processor
+      return;
+    }
+
+    if (
+        // There is no processor, so we are best option
+        !processor ||
+
+        // The processor is disposed, so we are better
+        processor.disposed ||
+
+        // We are not readonly but the processor is, so we are better
+        !readOnly && processor.readOnly
+    ) {
+      mstProgram.setProcessor(this);
+    }
+  }
+
   public process = () => {
-    // Don't do any processing when we are read-only
-    if (this.readOnly) return;
+    this.updateMainProcessor();
+
+    // Only do the process if we are main processor for this MST Program
+    if (this.mstProgram.processor !== this) return;
+
+    let readOnPatchDisposer;
+    if (this.readOnly) {
+      console.log("readOnly process called");
+      readOnPatchDisposer = onPatch(this.mstContent, (patch) => {
+        // It is likely that Dataflow will kind of crash when this happens
+        // So you'll need to fix the problem, and possibly disable readOnly processing
+        // to get the original diagram to load if you need to modify it before fixing
+        // this.
+        console.warn("readOnly process modified the tile", patch);
+      });
+    }
 
     const { editor } = this;
 
@@ -282,6 +335,8 @@ export class ReteManager {
     // will only be called once.
     const leafNodes = graph.leaves().nodes();
     leafNodes.forEach(n => this.engine.fetch(n.id));
+
+    readOnPatchDisposer?.();
   };
 
   public logTileChangeEvent = (
@@ -370,7 +425,11 @@ export class ReteManager {
     const id = uniqueId();
     const { editor } = this;
     const newPosition = position ?? this.getNewNodePosition();
-    console.log("createAndAddNode", nodeType, newPosition);
+    // FIXME: because this is not a single synchronous MST transaction
+    // the nodeValue of the added node is updated by the process call
+    // down below. This means that any readOnly views will try to initialize
+    // the nodeValue. That isn't a problem it is just confusing. The bigger
+    // problem is that this results in two history events so undo is broken.
     this.mstProgram.addNodeSnapshot({
       id,
       name: nodeType,
@@ -387,6 +446,8 @@ export class ReteManager {
     // This is not waiting for the emit before calling the process.
     // we might need to add it
     await editor.emit({ type: 'nodecreated', data: node });
+
+    this.processAfterProgramChange();
 
     this.area.translate(id, {x: newPosition[0], y: newPosition[1]});
   }
@@ -463,30 +524,18 @@ export class ReteManager {
     // This is wrapped in an MST action so all of the changes are batched together
     // We are using our own custom Rete Dataflow Engine which runs synchronously
     // so all calls to the nodes `data` and `onTick` methods are grouped together.
-    this.mstProgram.tickAndProcess(() => this._tickAndProcessNodes());
-  }
+    this.mstProgram.tickAndProcess(() => {
+      this.inTick = true;
+      this.process();
+      this.inTick = false;
 
-  private _tickAndProcessNodes() {
-    let processNeeded = false;
-
-    // This has to be hacked until we figure out the way to specify the Rete Schemes
-    // so its node type is our node specific node types
-    const nodes = this.editor.getNodes() as unknown as IBaseNode[];
-    nodes.forEach(node => {
-      // If tick returns true then it means something was updated
-      // and we need to reprocess the diagram
-      if(node.onTick()) {
-        processNeeded = true;
-      }
-      // Perhaps move this to the model since it should just be working on
-      // stuff in the model
-      node.model.updateRecentValues();
+      // This has to be hacked until we figure out the way to specify the Rete Schemes
+      // so its node type is our node specific node types
+      const nodes = this.editor.getNodes() as unknown as IBaseNode[];
+      nodes.forEach(node => {
+        node.model.updateRecentValues();
+      });
     });
-    if (processNeeded) {
-        // if we've updated values on 1 or more nodes (such as a generator),
-        // reprocess all nodes so current values are up to date
-        this.process();
-    }
   }
 
   public dispose() {
@@ -505,17 +554,19 @@ export class ReteManager {
       area.removeConnectionView(id);
     });
 
-    const nodes = editor.getNodes();
-    nodes.forEach(node => (node as IBaseNode).dispose());
+    // We aren't using editor.getNodes() because the editor might have been deleted
+    // So all we really want to do is clean up any of the rete nodes that might have
+    // timers running
+    Object.values(editor.reteNodesMap).forEach(node => (node as IBaseNode).dispose());
+
+    this.disposed = true;
   }
 
   public setupOnSnapshot() {
     // TODO: handle undo/redo events too
     if (!this.readOnly) return;
 
-    this.snapshotDisposer = onSnapshot(this.mstProgram, snapshot => {
-        this.updateProgramEditor(snapshot);
-    });
+    this.snapshotDisposer = onSnapshot(this.mstProgram, this.updateProgramEditor);
   }
 
   private updateProgramEditor = async (snapshot: DataflowProgramSnapshotOut) => {
@@ -528,6 +579,10 @@ export class ReteManager {
     // Process connections that were deleted
     for (const [id] of area.connectionViews) {
       if (!snapshot.connections[id]) {
+        // FIXME: this causes problems because the rete-area-plugin keeps a
+        // reference to the connection object in its connectionViews. And then
+        // it tries to access the id of this connection object. But MST complains
+        // because the connection object has already been removed from the tree
         await editor.emit({ type: 'connectionremoved', data: { id } as any });
       }
     }
@@ -564,6 +619,17 @@ export class ReteManager {
         area.translate(id, {x: snapshotNode.x, y: snapshotNode.y});
       }
     }
+
+    // Let the nodes update their volatile state so their components can show
+    // the input values without us storing them in state.
+    // We run this in an action because even in readOnly mode some node data
+    // functions update MobX or MobX State tree properties.
+    // We don't use processAfterProgramChange because it shouldn't be modifying
+    // and MST state, so MST should complain if a node's data method messes with
+    // the node model directly. If the data method uses an action this won't be
+    // reported. We also don't care about recording this in history because this
+    // is a readOnly doc.
+    runInAction(this.process);
   };
 
   public zoomIn = () => {

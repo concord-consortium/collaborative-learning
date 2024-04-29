@@ -27,6 +27,7 @@ export const NumberNodeModel = BaseNodeModel.named("NumberNodeModel")
 .actions(self => ({
   setValue(val: number) {
     self.value = val;
+    self.process();
   }
 }));
 export interface INumberNodeModel extends Instance<typeof NumberNodeModel> {}
@@ -56,8 +57,10 @@ export class NumberNode extends BaseNode<
   }
 
   data(): { value: number } {
-    // Save the updated value so it can be recorded in recent values on each tick
-    this.model.setNodeValue(this.model.value);
+    if (this.services.inTick) {
+      // Save the updated value so it can be recorded in recent values on each tick
+      this.saveNodeValue(this.model.value);
+    }
     return { value: this.model.value };
   }
 }

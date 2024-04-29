@@ -205,7 +205,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const contentCopy = DataflowContentModel.create(contentSnapshot);
       this.playbackReteManager = new ReteManager(
         contentCopy.program, this.tileId, this.playbackToolDiv, contentCopy, this.stores,
-        this.props.runnable, this.props.readOnly, true
+        this.props.runnable, true, true
       );
 
       // When we first show the playbackToolDiv after finishing recording it would show

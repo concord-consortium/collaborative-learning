@@ -3,17 +3,13 @@ import "./value-control.sass";
 import React from "react";
 import { observer } from "mobx-react";
 import { computed, makeObservable } from "mobx";
-import { IBaseNode, IBaseNodeModel } from "../base-node";
-import { MinigraphOptions, defaultMinigraphOptions } from "../dataflow-node-plot";
+import { IBaseNode } from "../base-node";
+import { MinigraphOptions, defaultMinigraphOptions } from "../dataflow-node-plot-types";
 import { PlotButtonControl, PlotButtonControlComponent } from "./plot-button-control";
 
 import "./input-value-control.scss";
 
-export class InputValueControl<
-  ModelType extends Record<Key, number>,
-  NodeType extends { model: ModelType } & IBaseNode,
-  Key extends keyof NodeType['model'] & string
->
+export class InputValueControl
   extends ClassicPreset.Control
   implements IInputValueControl
 {
@@ -27,8 +23,8 @@ export class InputValueControl<
   // watchedValue property.
 
   constructor(
-    public node: NodeType,
-    public modelKey: Key,
+    public node: IBaseNode,
+    public inputName: string,
     public label = "",
     public tooltip = "Something", // FIXME: need better default
     public getDisplayMessage: () => string
@@ -43,12 +39,12 @@ export class InputValueControl<
 
   @computed
   public get connected() {
-    return this.node.isConnected(this.modelKey);
+    return this.node.isConnected(this.inputName);
   }
 
   @computed
   public get legendDotStyle() {
-    const graphStyle = this.model.watchedValues[this.modelKey];
+    const graphStyle = this.model.watchedValues[this.inputName];
     return graphStyle ?? defaultMinigraphOptions;
   }
 
@@ -60,9 +56,7 @@ export class InputValueControl<
 
 export interface IInputValueControl {
   id: string;
-  node: IBaseNode;
-  model: IBaseNodeModel;
-  modelKey: string;
+  inputName: string;
   label: string;
   tooltip: string;
   getDisplayMessage(): string;
