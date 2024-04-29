@@ -157,8 +157,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 <DataflowProgramCover editorClass={editorClassForDisplayState} /> }
               {showZoomControl && this.reteManager &&
                 <DataflowProgramZoom
-                  onZoomInClick={this.reteManager.zoomIn}
-                  onZoomOutClick={this.reteManager.zoomOut}
+                  onZoomInClick={this.handleZoomIn}
+                  onZoomOutClick={this.handleZoomOut}
                   disabled={false}
                 /> }
             </div>
@@ -167,6 +167,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       </div>
     );
   }
+
+  private handleZoomIn = () => {
+    const zoomManager = this.playbackReteManager || this.reteManager;
+    zoomManager?.zoomIn();
+  };
+
+  private handleZoomOut = () => {
+    const zoomManager = this.playbackReteManager || this.reteManager;
+    zoomManager?.zoomOut();
+  };
 
   private handleWheel(e: any, toolDiv: HTMLElement | null) {
     if (toolDiv !== null) {
