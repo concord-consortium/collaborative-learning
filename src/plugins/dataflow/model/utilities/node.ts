@@ -483,6 +483,12 @@ export const baseLiveOutputOptions = {
     id: "bb-servo",
     name: "Physical Servo"
   },
+  noDeviceliveServoOption: {
+    active: true,
+    id: "no-devie-bb-servo",
+    name: "Physical Servo",
+    displayName: "⚠️ connect device",
+  },
   genericWarningOption: {
     active: true,
     id: "no-outputs-found",
