@@ -155,7 +155,6 @@ export const DataflowProgramModel = types.
     },
     playbackNodesWithCaseData(dataSet: IDataSet, playBackIndex: number) {
       self.clearRecentTicks();
-      console.log("playbackNodesWithCaseData", {playBackIndex});
       const startIndex = Math.max(playBackIndex - kMaxNodeValues, 0);
 
       for (let index = startIndex; index <= playBackIndex; index++) {

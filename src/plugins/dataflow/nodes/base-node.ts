@@ -48,11 +48,9 @@ export const BaseTickEntry = types.model("BaseTickEntry",
 
   nodeValue: types.maybe(StringifiedNumber),
 
-  // Nodes that need to will extend this, however this brings a dependency
-  // chain problem. Nodes depend on BaseNodeModel and BaseNodeModel depends
-  // on the Node's TickEntry override.
-  // Each node could try to override the tickEntries field of the BaseNodeModel
-  // With their own custom version. This way we don't need types in the entries.
+  // Nodes can extend this to add custom properties.
+  // The node needs to override the default tickEntries field from the BaseNodeModel with its own tickEntries
+  // that uses the nodes custom TickEntry type.
 });
 export interface IBaseTickEntry extends Instance<typeof BaseTickEntry> {}
 
