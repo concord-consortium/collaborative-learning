@@ -1,10 +1,10 @@
 import { ClassicPreset } from "rete";
-import { Instance, types } from "mobx-state-tree";
+import { Instance } from "mobx-state-tree";
 import { numSocket } from "./num-socket";
 import { ValueControl } from "./controls/value-control";
 import { getNumDisplayStr } from "./utilities/view-utilities";
 import { NodeOperationTypes } from "../model/utilities/node";
-import { BaseNode, BaseNodeModel, StringifiedNumber } from "./base-node";
+import { BaseNode, BaseNodeModel } from "./base-node";
 import { DropdownListControl, IDropdownListControl } from "./controls/dropdown-list-control";
 import { PlotButtonControl } from "./controls/plot-button-control";
 import { typeField } from "../../../utilities/mst-utils";
@@ -14,15 +14,16 @@ export const TransformNodeModel = BaseNodeModel.named("TransformNodeModel")
 .props({
   type: typeField("Transform"),
   transformOperator: "Absolute Value",
-
-  // TODO: we'll have to deal with migrating this somehow, we might
-  // need to run the process function once for imported dataflow tiles
-  // so these inputs get saved
-  num1: types.maybe(StringifiedNumber),
 })
+.volatile(self => ({
+  num1: NaN,
+}))
 .actions(self => ({
   setTransformOperator(val: string) {
     self.transformOperator = val;
+    // When the transformOperator changes we want to update all of the
+    // downstream nodes
+    self.process();
   },
   setNum1(val: number) {
     self.num1 = val;
@@ -76,10 +77,6 @@ export class TransformNode extends BaseNode<
     const result = this.model.nodeValue;
     const resultStr = getNumDisplayStr(result);
 
-    if (this.services.playback) {
-      return ` → ${resultStr}`;
-    }
-
     const { num1 } = this.model;
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === this.model.transformOperator);
     if (nodeOperationTypes) {
@@ -97,9 +94,12 @@ export class TransformNode extends BaseNode<
 
     const nodeOperationTypes = NodeOperationTypes.find(op => op.name === this.model.transformOperator);
 
-    // FIXME: The "ramp" transform runs on each `data` call, not each `tick`.
+    // FIXME: The "ramp" transform runs on every `data` call, not just the `ticks`.
     // This is consistent with the previous implementation, but it means that it
-    // doesn't work properly in all cases
+    // doesn't work properly when the diagram is reprocessed not for a tick.
+    // For example a number node is changed. This could be fixed by including
+    // the time elapsed since the prevValue. Or we could change it to only change
+    // the ramp value during a tick.
     if (nodeOperationTypes) {
       if (isNaN(n1)) {
         result = NaN;
@@ -114,27 +114,12 @@ export class TransformNode extends BaseNode<
       }
     }
 
-    // TODO: we should try to wrap these data functions in an action so all of their
-    // changes are grouped together.
-
     // The input numbers are saved so readOnly views can display the sentence
     this.model.setNum1(n1);
 
     // This nodeValue is used to record the recent values of the node
-    this.model.setNodeValue(result);
+    this.saveNodeValue(result);
 
     return { value: result };
-  }
-
-  onTick() {
-    if (this.model.transformOperator === "Ramp") {
-      // If we are "ramping", we need to reprocess on every tick so the values can update
-      // Probably we should go further and move the ramp logic into onTick.
-      // If the program sampling rate is really slow and the user changes connections or
-      // values in another node that causes a reprocess that will cause the ramped value
-      // to change outside of the tick
-      return true;
-    }
-    return false;
   }
 }
