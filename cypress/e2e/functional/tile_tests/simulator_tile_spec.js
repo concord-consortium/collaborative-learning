@@ -214,7 +214,10 @@ context('Simulator Tile', function () {
     output().click();
     input().click({ force: true });
     dataflowTile.getDropdown(lo, "hubSelect").eq(0).click();
-    dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 1);
+    // The hubSelect should have both the simulated heat lamp and the "connect to sensor" warning.
+    // We might want to change this in the future, since the "connect to sensor" won't automatically
+    // switch to the correct sensor when an "microbit" is connected.
+    dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 2);
     dataflowTile.getDropdownOptions(lo, "hubSelect").eq(0).click();
     simulatorTile.getSimulatorTile().should("contain.text", `Heat Lamp Output1`);
   });

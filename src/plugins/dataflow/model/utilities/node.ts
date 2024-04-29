@@ -465,11 +465,17 @@ export const NodeGeneratorTypes = [
 ];
 
 export const baseLiveOutputOptions = {
-   liveGripperOption: {
+  liveGripperOption: {
     active: true,
     icon: GrabberIcon,
     id: "bb-gripper",
     name: "Physical Gripper"
+  },
+  noDeviceLiveGripperOption: {
+    active: true,
+    id: "no-device-bb-gripper",
+    name: "Physical Gripper",
+    displayName: "⚠️ connect device",
   },
   liveServoOption: {
     active: true,
@@ -477,7 +483,7 @@ export const baseLiveOutputOptions = {
     id: "bb-servo",
     name: "Physical Servo"
   },
-  warningOption: {
+  genericWarningOption: {
     active: true,
     id: "no-outputs-found",
     name: "⚠️ connect device",

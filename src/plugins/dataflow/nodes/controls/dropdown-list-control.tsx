@@ -35,7 +35,6 @@ const optionLabelClass = (str?: string) => {
 export class DropdownListControl<
   ModelType extends
     Record<Key, string> &
-    Record<`set${Capitalize<Key>}`, (val: string) => void> &
     IBaseNodeModel,
   NodeType extends { model: ModelType } & IBaseNode,
   Key extends keyof NodeType['model'] & string
@@ -43,8 +42,6 @@ export class DropdownListControl<
   extends ClassicPreset.Control
   implements IDropdownListControl
 {
-  setter: (val: string) => void;
-
   @observable
   disabledFunction?: DisabledChecker;
 
@@ -58,7 +55,7 @@ export class DropdownListControl<
   constructor(
     public node: NodeType,
     public modelKey: Key,
-
+    public setter: (val: string) => void,
     optionArray: ListOption[],
     public tooltip = "Select Type", // This is not currently passed
     public placeholder = "Select an option",
@@ -69,12 +66,6 @@ export class DropdownListControl<
     super();
     this.optionArray = optionArray;
     this.optionsFunc = optionsFunc;
-
-    const setterProp = "set" + modelKey.charAt(0).toUpperCase() + modelKey.slice(1) as `set${Capitalize<Key>}`;
-
-    // The typing above using `set${Capitalize<Key>}` almost works, but it fails here
-    // I'm pretty sure there is a way to make it work without having to use the "as any" here
-    this.setter = this.model[setterProp] as any;
 
     makeObservable(this);
   }
@@ -170,11 +161,11 @@ export class DropdownListControl<
   }
 
   // This is used by the live output node
+  @action
   public setActiveOption(id: string, state: boolean) {
     if (this.optionArray){
       const option = this.optionArray.find(o => o.id === id);
       if(option){
-        // TODO: this is not currently triggering any updates itself
         option.active = state;
       }
     }
@@ -200,6 +191,7 @@ export interface IDropdownListControl {
   getValue(): string;
   setValue(val: string): void;
   disabledFunction?: DisabledChecker;
+  setActiveOption(id: string, state: boolean): void;
   logEvent(operation: string): void;
   selectNode(): void;
   getSelectionId(): string | undefined;
