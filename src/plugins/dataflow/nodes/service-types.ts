@@ -4,6 +4,9 @@ import { IStores } from "../../../models/stores/stores";
 import { NodeChannelInfo } from "../model/utilities/channel";
 
 export interface INodeServices {
+  currentTick: string;
+  recentTicks: string[];
+  recordedTicks: string[];
   process(): void;
   logTileChangeEvent(event: Pick<ITileChangeLogEvent, "operation" | "change">): void;
   selectNode(nodeId: string): void;
