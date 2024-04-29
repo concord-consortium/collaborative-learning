@@ -11,6 +11,7 @@ import { useStopEventPropagation } from "./controls/custom-hooks";
 interface INodePlotProps {
   display: boolean;
   model: IBaseNodeModel;
+  recordedTicks: string[];
 }
 
 let stepY = 5;
@@ -30,7 +31,7 @@ enum Zoom {
 }
 
 export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
-  function DataflowNodePlot({display, model})
+  function DataflowNodePlot({display, model, recordedTicks})
 {
   const divRef = useRef<HTMLDivElement>(null);
   useStopEventPropagation(divRef, "pointerdown");
@@ -67,7 +68,7 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
       </div>
       <div className="node-graph">
         <Line
-          data={lineData(model)}
+          data={lineData(model, recordedTicks)}
           options={lineOptions(model)}
           redraw={true}
         />
@@ -76,10 +77,20 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
   );
 });
 
-function lineData(model: IBaseNodeModel) {
+function lineData(model: IBaseNodeModel, recordedTicks: string[]) {
   const chartDataSets: ChartDataSets[] = [];
+  const recordedEntries = model.getTickEntries(recordedTicks);
   Object.keys(model.watchedValues).forEach((valueKey: string) => {
-    const recentValues = model.recentValues?.get(valueKey);
+    const recentValues = recordedEntries.map(entry => {
+      // If the entry is open we ignore it. This can happen if the node is
+      // restored from the history. See the "Undo Support" section of
+      // `dataflow.md`.
+      if (entry?.open) return;
+
+      // TODO: can we improve this typing here and still support the multiple
+      // values we want to graph?
+      return (entry as any)?.[valueKey];
+    });
     if (recentValues !== undefined) {
       const customOptions = model.watchedValues?.[valueKey] || {};
       const dataset: ChartDataSets = {
@@ -112,7 +123,7 @@ function lineData(model: IBaseNodeModel) {
   stepY = (maxY(model) - minY(model)) / 2;
 
   const chartData: ChartData = {
-    labels: new Array(kMaxNodeValues+1).fill(undefined).map((val,idx) => idx),
+    labels: new Array(kMaxNodeValues).fill(undefined).map((val,idx) => idx),
     datasets: chartDataSets
   };
 

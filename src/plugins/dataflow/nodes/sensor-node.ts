@@ -70,14 +70,14 @@ export class SensorNode extends BaseNode<
       displayName: sensorType.name,
       icon: sensorType.icon
     }));
-    const sensorTypeControl = new DropdownListControl(this, "sensorType", sensorTypeOptions,
-      "Select Input Type",  "Select an input type");
+    const sensorTypeControl = new DropdownListControl(this, "sensorType", model.setSensorType,
+       sensorTypeOptions, "Select Input Type",  "Select an input type");
     this.addControl("sensorType", sensorTypeControl);
 
     // A function is passed for the options, this way the dropdown component can
     // observe this function and re-render when its dependencies change
-    this.sensorControl = new DropdownListControl(this, "sensor", [],
-      "Select Sensor", kSensorSelectMessage, () => this.getSensorOptions());
+    this.sensorControl = new DropdownListControl(this, "sensor", model.setSensor, [],
+      "Select Sensor", kSensorSelectMessage, this.getSensorOptions);
     this.addControl("sensor", this.sensorControl);
 
     const valueControl = new ValueWithUnitsControl("Sensor", this.getDisplayValue,
@@ -149,7 +149,7 @@ export class SensorNode extends BaseNode<
     }));
   }
 
-  getSensorOptions() {
+  getSensorOptions = () => {
     const options = this.convertChannelsToOptions();
 
     // If the current sensor no longer exists in the channels, then add a fake
@@ -182,7 +182,7 @@ export class SensorNode extends BaseNode<
     }
 
     return options;
-  }
+  };
 
   data(): { value: number} {
     if (this.services.inTick) {
