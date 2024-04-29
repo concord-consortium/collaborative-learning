@@ -83,3 +83,26 @@ Then on each "tick" the DataflowProgram updates each node's value from the data 
 
 In most cases this provides enough information for the node displays (sentences or displayValues) to show the same value the user saw when the program was running for real. The one current exception is the control node (Hold block) which can't tell if its "wait" timer was running during the playback tick. So in this case the control node shows a slightly different display.
 
+# Undo Support
+Currently undo is not fully supported. When a live program view does not watch the MST model for changes. Only a readonly program view does that. So when a change is undone or redone by the undo system the live program view will not update.
+
+However the MST model is designed to support undo in the future with its tick entries. The tick entries solve a problem with inconsistent state. We only want to record user events in the undo history. We want to skip changes caused by the tick timer. Because we are storing the current value, and previous values of a node, this causes a problem when a deleted node is restored. These these values are specific to the tick of the diagram.
+
+In a implementation that doesn't track the ticks, the restored node will incorrectly show values from a previous tick. The current value will be corrected on the next tick. However the previous values will stick around and be shown in the graph.
+
+We solve this problem by using tick entries to store each of the previous and current values of the node. These tick entries are key'ed by a tick id. This way when the values are restored if the current tick has changed then the code will correctly not show this value as the current value, and if the value should still be visible in the plot it can be shown in a valid place.
+
+## `open` flag
+Tick entries have an `open` flag. It indicates if the tick entry is currently being edited by the program. The open flag is removed from the tick entry after the tick, so the lack of `open` indicates the the entry has been closed or completed. This is used so open entries stored in the history can be ignored if they are restored. This can happen when a node is deleted.
+
+An example of what this solves:
+1. a generator node is connected to a output node
+2. the output node is deleted
+3. at this point the current entry for the output node would include the current value of the generator node.
+4. a tick then happens after the delete event, the current value of the generator node changes, and get recorded in the generator node's tick entry for the same tick that was stored in the inverse patches of the history event for the deleted output node.
+5. the user undoes the delete event
+
+At this point the restored output node will have a tick entry for the same tick as the generator node. This output node tick entry will have the wrong value for this tick because the node didn't exist when the tick happened.
+
+The `open` flag solves this by identifying these incomplete tick entries. The open flag will be stored in the inverse patches of the deleted output node. And this flag will be restored. Now the plot of the restored output node can ignore this entry which is still marked as `open`.
+

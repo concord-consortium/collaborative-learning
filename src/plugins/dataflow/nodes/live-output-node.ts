@@ -1,6 +1,6 @@
 import { typeField } from "../../../utilities/mst-utils";
-import { BaseNode, BaseNodeModel, NoOutputs } from "./base-node";
-import { Instance } from "mobx-state-tree";
+import { BaseNode, BaseNodeModel, BaseTickEntry, NoOutputs } from "./base-node";
+import { Instance, types } from "mobx-state-tree";
 import { ClassicPreset } from "rete";
 import { DropdownListControl, IDropdownListControl, ListOption } from "./controls/dropdown-list-control";
 import { INodeServices } from "./service-types";
@@ -14,6 +14,12 @@ import { simulatedHub, simulatedHubName } from "../model/utilities/simulated-out
 import { VariableType } from "@concord-consortium/diagram-view";
 import { runInAction } from "mobx";
 
+export const LiveOutputTickEntry = BaseTickEntry.named("LiveOutputTickEntry")
+.props({
+  outputStatus: types.maybe(types.string),
+});
+interface ILiveOutputTickEntry extends Instance<typeof LiveOutputTickEntry> {}
+
 // TODO: the list of sensors is populated on the tick, so if the tick is slow, the
 // list of sensors will not update very well
 export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
@@ -21,9 +27,8 @@ export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
   type: typeField("Live Output"),
   liveOutputType: "",
   hubSelect: "",
-  // We record this in state so readOnly views of this node can mirror the status
-  // without needing to track all of the channel state
-  outputStatus: ""
+
+  tickEntries: types.map(LiveOutputTickEntry),
 })
 .views(self => ({
   get isGripperType() {
@@ -32,6 +37,10 @@ export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
   get isRelayType() {
     return kMicroBitHubRelaysIndexed.includes(self.liveOutputType);
   },
+  get outputStatus() {
+    const currentEntry = self.tickEntries.get(self.currentTick) as ILiveOutputTickEntry | undefined;
+    return currentEntry?.outputStatus;
+  }
 }))
 .actions(self => ({
   setHubSelect(hub: string) {
@@ -85,7 +94,12 @@ export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
     // There is nothing downstream from us so we don't need to reprocess
   },
   setOutputStatus(status: string) {
-    self.outputStatus = status;
+    const currentEntry = self.tickEntries.get(self.currentTick)  as ILiveOutputTickEntry | undefined;
+    if (currentEntry) {
+      currentEntry.outputStatus = status;
+    } else {
+      console.warn("No current tick entry");
+    }
   }
 }));
 export interface ILiveOutputNodeModel extends Instance<typeof LiveOutputNodeModel> {}

@@ -7,7 +7,9 @@ import { onPatch, onSnapshot } from "mobx-state-tree";
 
 import { IStores } from "../../../models/stores/stores";
 import { DataflowContentModelType } from "../model/dataflow-content";
-import { DataflowProgramModelType, DataflowProgramSnapshotOut, IConnectionModel } from "../model/dataflow-program-model";
+import {
+  DataflowProgramModelType, DataflowProgramSnapshotOut, IConnectionModel
+} from "../model/dataflow-program-model";
 import { AreaExtra, Schemes } from "./rete-scheme";
 import { NodeEditorMST } from "./node-editor-mst";
 import { INodeServices } from "./service-types";
@@ -277,6 +279,17 @@ export class ReteManager implements INodeServices {
     }
   }
 
+  public get currentTick() {
+    return this.mstProgram.currentTick;
+  }
+
+  public get recentTicks() {
+    return this.mstProgram.recentTicks;
+  }
+
+  public get recordedTicks() {
+    return this.mstProgram.recordedTicks;
+  }
   private updateMainProcessor() {
     const { mstProgram, readOnly, disposed } = this;
     if (disposed) {
@@ -528,13 +541,6 @@ export class ReteManager implements INodeServices {
       this.inTick = true;
       this.process();
       this.inTick = false;
-
-      // This has to be hacked until we figure out the way to specify the Rete Schemes
-      // so its node type is our node specific node types
-      const nodes = this.editor.getNodes() as unknown as IBaseNode[];
-      nodes.forEach(node => {
-        node.model.updateRecentValues();
-      });
     });
   }
 

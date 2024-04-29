@@ -103,19 +103,17 @@ export class TransformNode extends BaseNode<
     // the ramp value during a tick.
     if (nodeOperationTypes) {
       if (isNaN(n1)) {
-        result = NaN;
-      } else {
         // NaNs are for propagating lack of values.
         // Actual math errors like divide-by-zero should output 0.
-        const recents = this.model.recentValues.get("nodeValue");
-        const prevValue = recents && recents.length > 1 ? recents[recents.length - 1] : undefined;
-
-        // prevValue might be null, and nodeOperationTypes doesn't handle that
-        result = nodeOperationTypes.method(n1, 0, prevValue ?? undefined);
+        result = NaN;
+      } else {
+        // The nodeValue will be the last value that was saved for this node.
+        const nodeValue = this.model.nodeValue;
+        result = nodeOperationTypes.method(n1, 0, nodeValue);
       }
     }
 
-    // The input numbers are saved so readOnly views can display the sentence
+    // The input numbers added to volatile so the sentence can use them
     this.model.setNum1(n1);
 
     // This nodeValue is used to record the recent values of the node

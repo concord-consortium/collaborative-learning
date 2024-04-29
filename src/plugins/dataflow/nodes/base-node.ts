@@ -1,7 +1,6 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, getSnapshot, types } from "mobx-state-tree";
 import { ClassicPreset } from "rete";
 import { Socket } from "rete/_types/presets/classic";
-import { kMaxNodeValues } from "../model/utilities/node";
 import { DataflowProgramChange } from "../dataflow-logger";
 import { INodeServices } from "./service-types";
 import { Schemes } from "./rete-scheme";
@@ -36,6 +35,25 @@ export const StringifiedNumber = types.custom<string, number>({
   }
 });
 
+export const BaseTickEntry = types.model("BaseTickEntry",
+{
+  /**
+   * The open flag is removed after the tick, so the lack of `open`
+   * indicates the the entry has been closed or completed.
+   * This is used so open entries stored in the history can be ignored
+   * if they are restored. This can happen when a node is deleted.
+   * See the "Undo Support" section `dataflow.md`.
+   */
+  open: types.maybe(types.boolean),
+
+  nodeValue: types.maybe(StringifiedNumber),
+
+  // Nodes can extend this to add custom properties.
+  // The node needs to override the default tickEntries field from the BaseNodeModel with its own tickEntries
+  // that uses the nodes custom TickEntry type.
+});
+export interface IBaseTickEntry extends Instance<typeof BaseTickEntry> {}
+
 export const BaseNodeModel = types.model("BaseNodeModel",
 {
   // This should be overridden by the "subclasses"
@@ -46,27 +64,7 @@ export const BaseNodeModel = types.model("BaseNodeModel",
   // This is the name assigned by DataFlow, it probably should be renamed
   orderedDisplayName: types.maybe(types.string),
 
-  // It isn't entirely clear this is the right way to model this.
-  // In dataflow v1 these nodeValues and recentValues were basically
-  // stored in state.
-  // On export the recentValues were stripped.
-  // When the dataflow tile was initialized the recentValues were
-  // cleared if the tile was editable (not readOnly). This is because
-  // node like the generator would have a wrong looking minigraph if the
-  // previous recent values were loaded. The time value was not saved so
-  // the generator would start generating at time 0 even though the
-  // recentValues ended at some other time.
-
-  /**
-   * This is the default value that is plotted by the mini-graph. On some
-   * nodes this is their output value. On other nodes this is one of their
-   * input values.
-   */
-  nodeValue: types.maybe(StringifiedNumber),
-
-  // FIXME: this union of number and null doesn't seem to be supported
-  // in arrays. When the array is set to `[null]` MST is complaining
-  recentValues: types.map(types.array(types.union(StringifiedNumber,types.null))),
+  tickEntries: types.map(BaseTickEntry),
 
 })
 .volatile(self => ({
@@ -94,14 +92,35 @@ export const BaseNodeModel = types.model("BaseNodeModel",
   tickMax: undefined as number | undefined,
   tickMin: undefined as number | undefined
 }))
-.actions(self => ({
-  process() {
+.views(self => ({
+  get program() {
     const program = getParentWithTypeName(self, "DataflowProgram") as any;
     if (!program) {
       console.warn("Can't find program for node");
       return;
     }
-    if (!program.processor) {
+    return program;
+  }
+}))
+.views(self => ({
+  get currentTick() {
+    const program = self.program;
+    return program?.currentTick || "";
+  }
+}))
+.views(self => ({
+  get nodeValue() {
+    return self.tickEntries.get(self.currentTick)?.nodeValue;
+  },
+
+  getTickEntries(ticks: string[]) {
+    return ticks.map(tick => self.tickEntries.get(tick));
+  },
+}))
+.actions(self => ({
+  process() {
+    const program = self.program;
+    if (!program?.processor) {
       console.warn("Program doesn't have a processor");
       return;
     }
@@ -113,53 +132,35 @@ export const BaseNodeModel = types.model("BaseNodeModel",
   },
 
   setNodeValue(val: number) {
-    self.nodeValue = val;
+    const currentEntry = self.tickEntries.get(self.currentTick);
+    if (currentEntry) {
+      currentEntry.nodeValue = val;
+    } else {
+      console.warn("No current tick entry");
+    }
   },
 
-  clearRecentValues() {
-    self.recentValues.clear();
-  },
-
-  setRecentValues(newValues: Record<string, number[]>) {
-    Object.entries(newValues).forEach(([key, values]) => {
-      self.recentValues.set(key, values);
-    });
-  },
-
-  updateRecentValues() {
-    const { recentValues } = self;
-
-    Object.keys(self.watchedValues).forEach((valueKey: string) => {
-      const value: any = (self as any)[valueKey];
-
-      // FIXME: this is bad, since a null value should be a valid recent
-      // value over the past bit of time. However these null values are
-      // causing problems for MST. We need to figure out how to tell
-      // MST the array can be numbers or null. Or we could use undefined
-      // if that works better.
-      if (value == null) return;
-
-      // This used to do:
-      // let recentValue: NodeValue = {};
-      // if (value === "number") {
-      //   recentValue[valueKey] = { name: self.name, val: value };
-      // } else {
-      //   recentValue = value;
-      // }
-      // This makes no sense to me. If the value is the string "number" then
-      // store a map with a value of an object with name of the node and
-      // the val: "number".
-
-      const existingRecentValuesForKey = recentValues.get(valueKey);
-      if (existingRecentValuesForKey) {
-        if (existingRecentValuesForKey.length > kMaxNodeValues) {
-          existingRecentValuesForKey.shift();
+  createNextTickEntry(currentTick: string | undefined, nextTick: string, recentTicks?: string[]) {
+    const previousEntry = currentTick && self.tickEntries.get(currentTick);
+    if (previousEntry) {
+      const previousSnapshot = getSnapshot(previousEntry);
+      self.tickEntries.set(nextTick, previousSnapshot);
+      previousEntry.open = undefined;
+    } else {
+      self.tickEntries.set(nextTick, {open: true});
+    }
+    if (recentTicks) {
+      // Clean up old tick entries
+      for(const key of self.tickEntries.keys()) {
+        if (!recentTicks.includes(key)) {
+          self.tickEntries.delete(key);
         }
-        existingRecentValuesForKey.push(value);
-      } else {
-        recentValues.set(valueKey, [value]);
       }
-    });
+    }
+  },
+
+  clearTickEntries() {
+    self.tickEntries.clear();
   },
 
   setTickMax(max: number) { self.tickMax = max; },
@@ -175,7 +176,10 @@ export const BaseNodeModel = types.model("BaseNodeModel",
     self.tickMax = undefined;
     self.tickMin = undefined;
 
-    self.clearRecentValues();
+    // FIXME: if this change is restored on top of a future tick
+    // the the old tick entries will be restored. This can result in
+    // a plot with wrong points on it.
+    self.clearTickEntries();
   }
 }));
 export interface IBaseNodeModel extends Instance<typeof BaseNodeModel> {}
@@ -306,6 +310,24 @@ export class BaseNode<
     };
 
     this.services.logTileChangeEvent({operation, change});
+  }
+
+  previousTickNodeValue() {
+    const recentTicks = this.services.recentTicks;
+    const { length } = recentTicks;
+
+    // The current open tick will be the last item in the list.
+    // Its nodeValue will be the same as this.model.nodeValue
+    // The last recorded entry will be the second to last item.
+    // If the data function hasn't changed the nodeValue since the last tick,
+    // the nodeValue in the last recorded entry will be the same as the
+    // currentNode value.
+    // So if the data function only changes the value during the tick, the
+    // previous value will be the third to the last item.
+    if (length < 3) return null;
+
+    const previousEntry = this.model.tickEntries.get(recentTicks[length - 3]);
+    return previousEntry ? previousEntry.nodeValue : null;
   }
 }
 

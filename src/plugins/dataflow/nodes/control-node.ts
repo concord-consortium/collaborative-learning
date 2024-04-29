@@ -1,9 +1,9 @@
 import { ClassicPreset } from "rete";
-import { Instance } from "mobx-state-tree";
+import { Instance, types } from "mobx-state-tree";
 import { numSocket } from "./num-socket";
 import { ValueControl } from "./controls/value-control";
 import { HoldFunctionOptions } from "../model/utilities/node";
-import { BaseNode, BaseNodeModel } from "./base-node";
+import { BaseNode, BaseNodeModel, BaseTickEntry } from "./base-node";
 import { DropdownListControl, IDropdownListControl } from "./controls/dropdown-list-control";
 import { PlotButtonControl } from "./controls/plot-button-control";
 import { typeField } from "../../../utilities/mst-utils";
@@ -11,17 +11,28 @@ import { INodeServices } from "./service-types";
 import { INumberControl, NumberControl } from "./controls/num-control";
 import { getNumDisplayStr } from "./utilities/view-utilities";
 
+export const ControlTickEntry = BaseTickEntry.named("ControlTickEntry")
+.props({
+  timerRunning: types.maybe(types.boolean),
+});
+interface IControlTickEntry extends Instance<typeof ControlTickEntry> {}
+
 export const ControlNodeModel = BaseNodeModel.named("ControlNodeModel")
 .props({
   type: typeField("Control"),
   controlOperator: "Hold Current",
   waitDuration: 0,
-  // TODO: this should be moved to a tickEntry
-  timerRunning: false,
+  tickEntries: types.map(ControlTickEntry),
 })
 .volatile(self => ({
   gateActive: false,
   heldValue: null as number | null
+}))
+.views(self => ({
+  get timerRunning() {
+    const currentEntry = self.tickEntries.get(self.currentTick) as IControlTickEntry | undefined;
+    return currentEntry?.timerRunning;
+  }
 }))
 .actions(self => ({
   setControlOperator(val: string) {
@@ -36,7 +47,13 @@ export const ControlNodeModel = BaseNodeModel.named("ControlNodeModel")
     // the waitDuration shouldn't have any immediate affect on the downstream nodes
   },
   setTimerRunning(val: boolean) {
-    self.timerRunning = val;
+    const currentEntry = self.tickEntries.get(self.currentTick) as IControlTickEntry | undefined;
+    if (currentEntry) {
+      currentEntry.timerRunning = val;
+    } else {
+      console.warn("No current tick entry");
+    }
+
     // TODO: we could trigger a reprocess here. This would cause the node to update
     // immediately when the timer expires. Currently the node waits for the next
     // tick before updating its display and output value.
@@ -51,7 +68,8 @@ export const ControlNodeModel = BaseNodeModel.named("ControlNodeModel")
 .actions(self => ({
   startTimer() {
     if (self.timerRunning) return;
-    self.timerRunning = true;
+    self.setTimerRunning(true);
+
     // FIXME: we should dispose this when the node is disposed
     // we should probably also clear it if the user changes the
     // control operator
@@ -149,7 +167,7 @@ export class ControlNode extends BaseNode<
     }
   }
 
-  private getValueToHold(signalValue: number, prevValue: number | null) {
+  private getValueToHold(signalValue: number, prevValue: number | null | undefined) {
     const funcName = this.model.controlOperator;
 
     if (funcName === "Hold 0" || funcName === "Output Zero"){
@@ -159,8 +177,8 @@ export class ControlNode extends BaseNode<
       return signalValue;
     }
     else if (funcName === "Hold Prior"){
-      // Note: if the prevValue is null we be returning null here
-      return prevValue;
+      // Note: if the prevValue is null or undefined we be returning null
+      return prevValue == null ? null : prevValue;
     }
     console.warn("Unknown control operator", funcName);
     return 0;
@@ -174,8 +192,7 @@ export class ControlNode extends BaseNode<
     const signalValue = num2 ? (num2.length ? num2[0] : NaN) : 0;
     const switchIn = num1?.[0];
 
-    const recents = model.recentValues.get("nodeValue");
-    const prevValue = recents && recents.length > 1 ? recents[recents.length - 1] : null;
+    const prevValue = this.previousTickNodeValue();
 
     let result = 0;
 
