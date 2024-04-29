@@ -19,14 +19,6 @@ function beforeTest(params) {
   cy.waitForLoad();
 }
 
-function drawSmallRectangle(x, y) {
-  drawToolTile.getDrawToolRectangle().last().click();
-  drawToolTile.getDrawTile().last()
-  .trigger("mousedown", x, y)
-  .trigger("mousemove", x+25, y+25)
-  .trigger("mouseup", x+25, y+25);
-}
-
 function addText(x, y, text) {
   drawToolTile.getDrawToolText().last().click();
   drawToolTile.getDrawTile().last()
@@ -48,19 +40,19 @@ context('Exemplar Documents', function () {
 
     cy.log("Create 3 drawing tiles with 3 events");
     clueCanvas.addTile("drawing");
-    drawSmallRectangle(100, 50);
-    drawSmallRectangle(200, 50);
-    drawSmallRectangle(300, 50);
+    drawToolTile.drawSmallRectangle(100, 50);
+    drawToolTile.drawSmallRectangle(200, 50);
+    drawToolTile.drawSmallRectangle(300, 50);
 
     clueCanvas.addTile("drawing");
-    drawSmallRectangle(100, 50);
-    drawSmallRectangle(200, 50);
-    drawSmallRectangle(300, 50);
+    drawToolTile.drawSmallRectangle(100, 50);
+    drawToolTile.drawSmallRectangle(200, 50);
+    drawToolTile.drawSmallRectangle(300, 50);
 
     clueCanvas.addTile("drawing");
-    drawSmallRectangle(100, 50);
-    drawSmallRectangle(200, 50);
-    drawSmallRectangle(300, 50);
+    drawToolTile.drawSmallRectangle(100, 50);
+    drawToolTile.drawSmallRectangle(200, 50);
+    drawToolTile.drawSmallRectangle(300, 50);
 
     cy.log("Create 3 text tiles and put 10 words in them");
     clueCanvas.addTile("text");
@@ -100,18 +92,18 @@ context('Exemplar Documents', function () {
 
     cy.log("Create 3 drawing tiles with 3 events and a label");
     clueCanvas.addTile("drawing");
-    drawSmallRectangle(100, 50);
-    drawSmallRectangle(200, 50);
+    drawToolTile.drawSmallRectangle(100, 50);
+    drawToolTile.drawSmallRectangle(200, 50);
     addText(300, 50, "one two three four five six seven eight nine ten");
 
     clueCanvas.addTile("drawing");
-    drawSmallRectangle(100, 50);
-    drawSmallRectangle(200, 50);
+    drawToolTile.drawSmallRectangle(100, 50);
+    drawToolTile.drawSmallRectangle(200, 50);
     addText(300, 50, "one two three four five six seven eight nine ten");
 
     clueCanvas.addTile("drawing");
-    drawSmallRectangle(100, 50);
-    drawSmallRectangle(200, 50);
+    drawToolTile.drawSmallRectangle(100, 50);
+    drawToolTile.drawSmallRectangle(200, 50);
 
     // Still private?
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
