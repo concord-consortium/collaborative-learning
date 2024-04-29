@@ -208,6 +208,12 @@ $output-node-value: #f9ecab;
     justify-content: flex-end;
     padding-right:6px;
   }
+  .node-icon {
+    width: 8px;
+    height: 8px;
+    background-size: 10px 10px;
+    margin-right: 2px;
+  }
 }
 .mini-node.category-input {
   border: 2px solid $input-node-border;
@@ -275,13 +281,6 @@ $output-node-value: #f9ecab;
   background-color: $output;
   top: 218px;
   right: 101px;
-}
-
-.node-icon {
-  width: 8px;
-  height: 8px;
-  background-size: 10px 10px;
-  margin-right: 2px;
 }
 
 @keyframes stopwatchPulse {

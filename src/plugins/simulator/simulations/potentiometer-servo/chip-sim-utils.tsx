@@ -190,7 +190,6 @@ export const getMiniNodeIcon = (str: string) => {
 };
 
 export function getIconKeyFromLabel(label: string) {
-  console.log("| LABEL to cover: ", label);
   return labelStringToIconKey[label];
 }
 
