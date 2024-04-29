@@ -13,6 +13,12 @@ export interface INodeServices {
   getOutputVariables(): VariableType[];
   getChannels(): NodeChannelInfo[];
   stores: IStores;
+  /**
+   * This will be true if dataflow is executing a sampling tick. It should be used by
+   * node `data` methods to read data from sensors or variables, write data to
+   * hardware or variables, generating data based on time.
+   */
+  inTick: boolean;
   runnable?: boolean;
   readOnly?: boolean;
   playback?: boolean;

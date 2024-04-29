@@ -15,24 +15,31 @@ export const ControlNodeModel = BaseNodeModel.named("ControlNodeModel")
 .props({
   type: typeField("Control"),
   controlOperator: "Hold Current",
-  waitDuration: 0
+  waitDuration: 0,
+  // TODO: this should be moved to a tickEntry
+  timerRunning: false,
 })
 .volatile(self => ({
-  // TODO: is this the right default?
-  timerRunning: false,
-  // TODO: is this the right default?
   gateActive: false,
   heldValue: null as number | null
 }))
 .actions(self => ({
   setControlOperator(val: string) {
     self.controlOperator = val;
+    // If we've switched to hold zero or hold current the downstream nodes
+    // should update.
+    self.process();
   },
   setWaitDuration(val: number) {
     self.waitDuration = val;
+    // Currently this won't cause the timer to expire early so just changing
+    // the waitDuration shouldn't have any immediate affect on the downstream nodes
   },
   setTimerRunning(val: boolean) {
     self.timerRunning = val;
+    // TODO: we could trigger a reprocess here. This would cause the node to update
+    // immediately when the timer expires. Currently the node waits for the next
+    // tick before updating its display and output value.
   },
   setGateActive(val: boolean) {
     self.gateActive = val;
@@ -45,6 +52,9 @@ export const ControlNodeModel = BaseNodeModel.named("ControlNodeModel")
   startTimer() {
     if (self.timerRunning) return;
     self.timerRunning = true;
+    // FIXME: we should dispose this when the node is disposed
+    // we should probably also clear it if the user changes the
+    // control operator
     setTimeout(() => {
       self.setTimerRunning(false);
     }, self.waitDuration * 1000);
@@ -106,14 +116,20 @@ export class ControlNode extends BaseNode<
   }
 
   getSentence = () => {
-    const result = this.model.nodeValue;
-    const resultString = getNumDisplayStr(result);
+    const { nodeValue, timerRunning } = this.model;
+    const resultString = getNumDisplayStr(nodeValue);
 
-    if (this.services.playback) {
+    if (this.model.waitDuration && this.services.playback) {
+      // We can't tell if we are waiting from the dataset values
+      // because we don't know if the timer was running.
+      // We could guess the state by comparing the input value
+      // with the output value, but they might be same even if
+      // we aren't holding the value.
+      // So instead we just leave off the hold information.
       return ` → ${resultString}`;
     }
 
-    const { gateActive, timerRunning } = this.model;
+    const { gateActive } = this.model;
     const waitString = `waiting → ${resultString}`;
     const onString = `on → ${resultString}`;
     const offString = `off → ${resultString}`;
@@ -123,10 +139,12 @@ export class ControlNode extends BaseNode<
   };
 
   private startTimerIfNecessary(switchIn: number | undefined){
-    const timerRunning = this.model.timerRunning;
-    const timerIsOption =  this.model.waitDuration > 0;
-    if (timerIsOption && switchIn === 1 && !timerRunning) {
-      this.model.startTimer();
+    if (!this.readOnly) {
+      const timerRunning = this.model.timerRunning;
+      const timerIsOption =  this.model.waitDuration > 0;
+      if (timerIsOption && switchIn === 1 && !timerRunning) {
+        this.model.startTimer();
+      }
     }
   }
 
@@ -186,17 +204,8 @@ export class ControlNode extends BaseNode<
       result = model.heldValue ?? 0;
     }
 
-    // This nodeValue is used to record the recent values of the node
-    model.setNodeValue(result);
+    this.saveNodeValue(result);
 
     return { value: result };
-  }
-
-  onTick() {
-    if ( this.model.waitDuration > 0 ) {
-      // We might be waiting for a timer to expire so we need to reprocess after tick
-      return true;
-    }
-    return false;
   }
 }

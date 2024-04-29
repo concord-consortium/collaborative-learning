@@ -13,16 +13,6 @@ interface INodePlotProps {
   model: IBaseNodeModel;
 }
 
-export interface MinigraphOptions {
-  backgroundColor?: string;
-  borderColor?: string;
-}
-
-export const defaultMinigraphOptions: MinigraphOptions = {
-  backgroundColor: NodePlotColor,
-  borderColor: NodePlotColor
-};
-
 let stepY = 5;
 
 // CHECKME: dsMax defaults to -Infinity this might cause a problem
@@ -122,7 +112,7 @@ function lineData(model: IBaseNodeModel) {
   stepY = (maxY(model) - minY(model)) / 2;
 
   const chartData: ChartData = {
-    labels: new Array(kMaxNodeValues).fill(undefined).map((val,idx) => idx),
+    labels: new Array(kMaxNodeValues+1).fill(undefined).map((val,idx) => idx),
     datasets: chartDataSets
   };
 

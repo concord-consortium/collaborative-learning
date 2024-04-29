@@ -54,9 +54,6 @@ export class NumberControl<
 
     this.setter(val);
 
-    // trigger a reprocess so our new value propagates through the nodes
-    this.node.process();
-
     this.node.logControlEvent("numberinputmanualentry", "nodenumber", this.modelKey, val);
   }
 

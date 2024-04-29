@@ -28,7 +28,7 @@ export class PlotButtonControl extends ClassicPreset.Control
   togglePlot = () => {
     this.model.setPlot(!this.model.plot);
 
-    const toggleStr = this.model.plot ? "off" : "on";
+    const toggleStr = this.model.plot ? "on" : "off";
     this.node.logNodeEvent(`toggle minigraph ${toggleStr}`);
   };
 }
