@@ -26,6 +26,11 @@ export const SensorNodeModel = BaseNodeModel.named("SensorNodeModel")
   setSensor(sensor: string) {
     self.sensor = sensor;
     self.resetGraph();
+    self.setNodeValue(NaN);
+    // It isn't clear if we should reprocess, but since the graph and value
+    // are getting reset it seems like a good idea to keep the downstream nodes
+    // in sync with the graph.
+    self.process();
   }
 }))
 .actions(self => ({
@@ -180,42 +185,46 @@ export class SensorNode extends BaseNode<
   }
 
   data(): { value: number} {
-    const { sensorType, nodeValue } = this.model;
-    const isDigitalReading = sensorType === "fsr-reading" || sensorType === "pin-reading";
-    const makeZero = isDigitalReading && (nodeValue == null || isNaN(nodeValue));
+    if (this.services.inTick) {
+      const { sensorType } = this.model;
+      const chInfo = this.services.getChannels().find(ci => ci.channelId === this.model.sensor);
 
-    // TODO: is NaN the right value if nodeValue is null or undefined?
-    const value = makeZero ? 0 : nodeValue ?? NaN;
+      // update virtual sensors
+      if (chInfo?.virtualValueMethod && chInfo.timeFactor) {
+        const time = Math.floor(Date.now() / chInfo.timeFactor);
+        chInfo.value = chInfo.virtualValueMethod(time);
+      }
 
-    // TODO: in Rete v1 we'd update the nodeValue here, we are not doing that in Rete v2.
-    // Perhaps we should? It seems bad to use the data method to update the nodeValue
-    // So it would probably be better to move this logic into onTick and then the
-    // data method just returns the nodeValue
+      // update simulated sensors
+      if (chInfo?.simulatedVariable) {
+        chInfo.value = chInfo.simulatedVariable.currentValue || 0;
+      }
+
+      if (chInfo){
+        let newValue = chInfo.value;
+        const isDigitalReading = sensorType === "fsr-reading" || sensorType === "pin-reading";
+        if (isDigitalReading) {
+          // For digital readings, if they don't exist make them zero
+          if(newValue == null || isNaN(newValue)) {
+            newValue = 0;
+          }
+        } else {
+          // For other readings pass "doesn't exist" through
+          if (newValue == null) {
+            // This will convert null and undefined to NaN
+            newValue = NaN;
+          }
+        }
+
+        this.saveNodeValue(newValue);
+      } else {
+        // We can safely set NaN because the type of nodeValue is StringifiedNumber
+        this.saveNodeValue(NaN);
+      }
+    }
+
+    const value = this.model.nodeValue ?? NaN;
     return { value };
-  }
-
-  onTick() {
-    const chInfo =
-      this.services.getChannels().find(ci => ci.channelId === this.model.sensor);
-
-    // update virtual sensors
-    if (chInfo?.virtualValueMethod && chInfo.timeFactor) {
-      const time = Math.floor(Date.now() / chInfo.timeFactor);
-      chInfo.value = chInfo.virtualValueMethod(time);
-    }
-
-    // update simulated sensors
-    if (chInfo?.simulatedVariable) {
-      chInfo.value = chInfo.simulatedVariable.currentValue || 0;
-    }
-
-    if (chInfo && isFinite(chInfo.value)) {
-      this.model.setNodeValue(chInfo.value);
-    } else {
-      // We can safely set NaN because the type of nodeValue is StringifiedNumber
-      this.model.setNodeValue(NaN);
-    }
-    return true;
   }
 }
 

@@ -85,9 +85,6 @@ export class DropdownListControl<
 
   public setValue(val: string) {
     this.setter(val);
-
-    // trigger a reprocess so our new value propagates through the nodes
-    this.node.process();
   }
 
   public getValue() {

@@ -82,24 +82,20 @@ export class TimerNode extends BaseNode<
   };
 
   data(): { value: number } {
-    return { value: this.currentValue };
-  }
+    if (this.services.inTick) {
+      const timeOn = Number(this.model.timeOn);
+      const timeOff = Number(this.model.timeOff);
+      // FIXME: this won't handle 0s correctly
+      if (timeOn && timeOff) {
+        const time = Date.now();
 
-  onTick() {
-    const timeOn = Number(this.model.timeOn);
-    const timeOff = Number(this.model.timeOff);
-    // FIXME: this won't handle 0s correctly
-    if (timeOn && timeOff) {
-      const time = Date.now();
-
-      // time on/off is given in s, but we convert to ms so we can use a simple mod function
-      const timeOnMS = timeOn * 1000;
-      const timeOffMS = timeOff * 1000;
-      const value = time % (timeOnMS + timeOffMS) < timeOnMS ? 1 : 0;
-      this.model.setNodeValue(value);
-      return true;
+        // time on/off is given in s, but we convert to ms so we can use a simple mod function
+        const timeOnMS = timeOn * 1000;
+        const timeOffMS = timeOff * 1000;
+        const value = time % (timeOnMS + timeOffMS) < timeOnMS ? 1 : 0;
+        this.saveNodeValue(value);
+      }
     }
-
-    return false;
+    return { value: this.currentValue };
   }
 }

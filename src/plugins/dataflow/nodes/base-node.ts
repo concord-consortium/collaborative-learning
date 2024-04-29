@@ -1,11 +1,13 @@
 import { Instance, types } from "mobx-state-tree";
-import { defaultMinigraphOptions } from "./dataflow-node-plot";
-import { kMaxNodeValues } from "../model/utilities/node";
 import { ClassicPreset } from "rete";
 import { Socket } from "rete/_types/presets/classic";
+import { kMaxNodeValues } from "../model/utilities/node";
 import { DataflowProgramChange } from "../dataflow-logger";
 import { INodeServices } from "./service-types";
 import { Schemes } from "./rete-scheme";
+import { MinigraphOptions, defaultMinigraphOptions } from "./dataflow-node-plot-types";
+import { getParentWithTypeName } from "../../../utilities/mst-utils";
+import { DEBUG_DATAFLOW } from "../../../lib/debug";
 
 export type NoInputs = Record<string, never>;
 export type NoOutputs = Record<string, never>;
@@ -68,9 +70,18 @@ export const BaseNodeModel = types.model("BaseNodeModel",
 
 })
 .volatile(self => ({
+  // FIXME: the watchedValues are not observable. This means that when the data function of
+  // the demo output node adds the tilt, this new tilt does not show up in the plot until the
+  // next render of the plot which happens on the next tick.
+  // The following observable approach doesn't work because this model is somehow passed to
+  // a React component's style property via Rete, and that freezes the property. MobX doesn't
+  // allow freezing dynamic objects (onces where new members are automatically observed).
+  // watchedValues: observable({
+  //   "nodeValue": defaultMinigraphOptions
+  // }) as Record<string, MinigraphOptions>,
   watchedValues: {
     "nodeValue": defaultMinigraphOptions
-  } as Record<string, any>,
+  } as Record<string, MinigraphOptions>,
 
   // Plot properties: it might make sense to move these out of this model
 
@@ -84,6 +95,19 @@ export const BaseNodeModel = types.model("BaseNodeModel",
   tickMin: undefined as number | undefined
 }))
 .actions(self => ({
+  process() {
+    const program = getParentWithTypeName(self, "DataflowProgram") as any;
+    if (!program) {
+      console.warn("Can't find program for node");
+      return;
+    }
+    if (!program.processor) {
+      console.warn("Program doesn't have a processor");
+      return;
+    }
+    program.processor.process();
+  },
+
   setPlot(val: boolean) {
     self.plot = val;
   },
@@ -160,7 +184,6 @@ export type NodeClass = new (id: string | undefined, model: any, services: INode
 
 export type IBaseNode = Schemes['Node'] & {
   model: IBaseNodeModel;
-  onTick(): boolean;
   dispose(): void;
   process(): void;
   select(): void;
@@ -206,13 +229,6 @@ export class BaseNode<
   }
 
   /**
-   * Default tick function, nodes that need to tick should override this
-   *
-   * @returns whether the nodes need to reprocessed
-   */
-  onTick() { return false; }
-
-  /**
    * If a node has created reactions or other things that need to be cleaned up,
    * do so here.
    */
@@ -224,6 +240,32 @@ export class BaseNode<
 
   get readOnly() {
     return this.services.readOnly;
+  }
+
+  /**
+   * Save the node value in the node state if we aren't in a readOnly document
+   *
+   * @param nodeValue
+   */
+  saveNodeValue(nodeValue: number) {
+    if (!this.readOnly) {
+      this.model.setNodeValue(nodeValue);
+    } else {
+      if (DEBUG_DATAFLOW && nodeValue !== this.model.nodeValue) {
+        // In readOnly mode we should normally be called with the same value
+        // that is already set on the model. If we are called with a different
+        // value it means the data function of the node has some non deterministic
+        // which will cause inconsistencies in the diagram.
+        // There is currently at least one case that causes this to happen which haven't
+        // be fixed yet:
+        // - when a new node is added to the diagram this causes to snapshot updates
+        // one for the new node, and a second for the process call which updates the
+        // new nodes value. This triggers the warning because the readOnly tile
+        // is watching the snapshot and will try to initialize the nodeValue too.
+        console.warn("saveNodeValue called with a different value",
+          {passedValue: nodeValue, currentValue: this.model.nodeValue});
+      }
+    }
   }
 
   /**
