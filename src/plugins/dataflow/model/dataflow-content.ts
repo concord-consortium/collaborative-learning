@@ -38,7 +38,10 @@ export const kDefaultLabel = "Dataflow Node";
 const kMaxRecordedValues = 10000;
 
 export function defaultDataSet(title: string|undefined) {
-  const dataSet = DataSet.create({ name: title });
+  const dataSet = DataSet.create({
+    name: title,
+    attributes: [ { name: "x"}, { name: "y"} ]
+  });
   return dataSet;
 }
 

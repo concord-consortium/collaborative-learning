@@ -117,7 +117,15 @@ Not updated to common toolbar framework. However, supports toolbar configuration
 
 #### Dataflow
 
-(no toolbar?)
+Common toolbar framework.  Supports:
+
+- `data-set-view`: Immediate creation of a linked tile.
+- `data-set-link`: Bring up a dialog to choose a tile to link to (or create a new one)
+
+Defaults:
+
+- `["data-set-view", "Table"]`
+- `["data-set-link", "Graph"]`
 
 #### Diagram
 
