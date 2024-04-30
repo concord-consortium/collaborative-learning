@@ -13,7 +13,7 @@
   * https://www.programmingelectronics.com/serial-read/
   * https://docs.arduino.cc/built-in-examples/strings/StringToInt
   *
-  * Tested with Muscle SpikerShield V2.31
+  * Tested with Muscle SpikerShield V2.31 / CLAW PRO R3 / Dataflow
   * ----------------------------------------------------------------------------------------------------
   */
 
@@ -37,6 +37,7 @@
   int emgSaturationValue = 0;
   int emgReading;
   int fsrReading;
+  int a1Reading;
   float tmpReading;
   byte ledbarHeight = 0;                      //temporary variable for led bar height
 
@@ -48,10 +49,12 @@
   String emgId = "emg";
   String fsrId = "fsr";
   String tmpId = "tmp";
+  String a1Id = "a1";
   String kvSeparator = ":";
   String emgStringOut = "";
   String fsrStringOut = "";
   String tmpStringOut = "";
+  String a1StringOut = "";
 
   const int BUFFER_SIZE = 4;                  // Accommodate <=3 digit angle, plus delimiter
   char buf[BUFFER_SIZE];                      // a char array buffer
@@ -120,6 +123,7 @@
     // 3 Collect EMG, Force, and Temperature readings
     // (note that A2 is pin used for FSR in newer Muscle SpikerShield)
     emgReading = analogRead(A0);
+    a1Reading = analogRead(A1);
     fsrReading = analogRead(A2);
     tmpReading = mlx.readObjectTempC();
 
@@ -133,7 +137,7 @@
       digitalWrite(ledPins[k], HIGH);
     }
 
-    // 5 if enough time has passed, send EMG and FSR readings to serial out (where Dataflow will find it)
+    // 5 if enough time has passed send readings to serial out (where Dataflow will find it)
     if (millis() - oldTime > MINIMUM_SERVO_UPDATE_TIME){
       oldTime = millis();
       oldDegrees = newDegree;
@@ -142,10 +146,12 @@
       emgStringOut = String(emgId + kvSeparator + emgReading);
       fsrStringOut = String(fsrId + kvSeparator + fsrReading);
       tmpStringOut = String(tmpId + kvSeparator + tmpReading);
+      a1StringOut = String(a1Id + kvSeparator + a1Reading);
 
       // send to Dataflow via serial out
       Serial.println(emgStringOut);
       Serial.println(fsrStringOut);
       Serial.println(tmpStringOut);
+      Serial.println(a1StringOut);
     }
 }
