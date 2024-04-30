@@ -135,7 +135,7 @@ export class SerialDevice {
   public handleArduinoStreamObj(value: string, channels: Array<NodeChannelInfo>){
     this.localBuffer += value;
 
-    const pattern = /(emg|fsr|tmp):([0-9.]+)[\r][\n]/g;
+    const pattern = /(emg|fsr|a1|tmp):([0-9.]+)[\r][\n]/g;
     let match: RegExpExecArray | null;
 
     do {

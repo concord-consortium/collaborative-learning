@@ -84,6 +84,9 @@ context('Simulator Tile', function () {
     dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 2);
     dataflowTile.getSensorDropdownOptions(sensor).eq(0).click();
 
+    // Sometimes the value of the input block takes some time to show up
+    // I think the invoke('text') breaks cypress's built in retry code
+    cy.wait(100);
     dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("be.below", 41).should("be.above", 35);
 
     simulatorTile.getEMGSlider().click("right");
@@ -231,20 +234,20 @@ context('Simulator Tile', function () {
     simulatorTile.getSimulatorTile().should("exist");
     simulatorTile.getTileTitle().should("exist");
     simulatorTile.getSimulatorTile().should("contain.text", "Potentiometer Position");
-    simulatorTile.getSimulatorTile().should("contain.text", "Resistance Reading");
+    simulatorTile.getSimulatorTile().should("contain.text", "Pin Reading");
     simulatorTile.getSimulatorTile().should("contain.text", "Servo Position");
 
     cy.log("pot value starts at 0");
     simulatorTile.getVariableDisplayedValue().eq(0).should("contain.text", "0 deg");
     simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "0");
 
-    cy.log("pot can be adjusted and resistance value changes");
+    cy.log("pot can be adjusted and pin value changes");
     simulatorTile.getPotValueSlider().click("right")
       .trigger('mousedown', { which: 1, pageX: 100, pageY: 100 })
       .trigger('mousemove', { which: 1, pageX: 200, pageY: 100 })
       .trigger('mouseup', {force: true});
     simulatorTile.getVariableDisplayedValue().eq(0).should("contain.text", "225 deg");
-    simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "853");
+    simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "563");
 
     cy.log("expand and minimize toggle works");
     simulatorTile.getExpandToggle().click();
@@ -272,5 +275,22 @@ context('Simulator Tile', function () {
     simulatorTile.getVariableDisplayedValue().eq(2).should("contain.text", "90 deg");
     cy.wait(500); // wait for servo animation to move, then assert position has changed
     simulatorTile.getServoArm().invoke('offset').its('top').should('not.eq', initialPos);
+
+    cy.log("Dataflow can read pin value");
+    dataflowTile.getCreateNodeButton("sensor").click();
+    dataflowTile.getDropdown("sensor", "sensorType").eq(0).click({scrollBehavior: false});
+    dataflowTile.getSensorDropdownOptions("sensor").eq(5).find(".label").click({force: true}); // Pin?
+    dataflowTile.getDropdown("sensor", "sensor").eq(0).click({scrollBehavior: false});
+    dataflowTile.getNode("sensor").find(".item.sensor").eq(0).click({scrollBehavior: false});
+
+    simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "563");
+    simulatorTile.getPotValueSlider().click("right")
+    .trigger('mousedown', { which: 1, pageX: 100, pageY: 100 })
+    .trigger('mousemove', { which: 1, pageX: 50, pageY: 100 })
+    .trigger('mouseup', {force: true});
+
+    simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "288");
+
+    dataflowTile.getNodeValueContainer("sensor").should("contain.text", "288");
   });
 });

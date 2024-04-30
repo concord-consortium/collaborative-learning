@@ -372,7 +372,7 @@ export class LiveOutputNode extends BaseNode<
       const roundedDisplayValue = Math.round((value / 10) * 10);
       return `${roundedDisplayValue}% closed`;
     } else if (kServoOutputTypes.includes(liveOutputType)) {
-      return `${value}°`;
+      return `${Math.round((value / 10) * 10)}°`;
     }
 
     // We shouldn't hit this case but if we do then just pass the value through
