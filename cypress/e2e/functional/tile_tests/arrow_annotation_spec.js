@@ -115,8 +115,11 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationSparrowGroups().eq(0).should("not.have.class", "selected");
     aa.getAnnotationSparrowGroups().eq(1).should("not.have.class", "selected");
 
-    // Delete second arrow
-    aa.getAnnotationDeleteButtons().eq(1).click();
+    // Select & delete key to delete
+    aa.getAnnotationBackgroundArrowPaths().eq(1).click({ force: true });
+    aa.getAnnotationSparrowGroups().eq(1).should("have.class", "selected");
+    aa.getAnnotationLayer().type('{del}');
+    aa.getAnnotationArrows().should("have.length", 1);
 
     cy.log("Can only edit text in sparrow mode");
     aa.clickArrowToolbarButton();
