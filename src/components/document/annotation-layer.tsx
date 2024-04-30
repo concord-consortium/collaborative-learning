@@ -13,6 +13,7 @@ import { ClueObjectModel, IClueObject, OffsetModel } from "../../models/annotati
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { Point } from "../../utilities/math-utils";
 import { hasSelectionModifier } from "../../utilities/event-utils";
+import { HotKeys } from "../../utilities/hot-keys";
 
 import "./annotation-layer.scss";
 
@@ -41,9 +42,24 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const ui = useUIStore();
   const persistentUI = usePersistentUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
+  const hotKeys = useRef(new HotKeys());
+
+  useEffect(() => {
+    if (!readOnly) {
+      hotKeys.current.register({
+        "delete": () => content?.deleteSelected(),
+        "backspace": () => content?.deleteSelected()
+      });
+    }
+  }, [content, readOnly]);
+
+  function handleKeyDown(event: React.KeyboardEvent) {
+    hotKeys.current.dispatch(event);
+  }
 
   // Clicking to select annotations
   function handleArrowClick(arrowId: string, event: MouseEvent) {
+    if (readOnly) return;
     event.stopPropagation();
     const annotation = content?.annotations.get(arrowId);
     if (annotation) {
@@ -238,6 +254,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       className={classes}
       onMouseMove={handleMouseMove}
       onClick={handleBackgroundClick}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
       ref={element => {
         if (element) divRef.current = element;
       }}
