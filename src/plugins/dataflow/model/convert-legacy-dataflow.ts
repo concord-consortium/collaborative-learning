@@ -121,8 +121,10 @@ function getNodeProps(nodeType: string, data: any, nodeValue: number | undefined
         waitDuration: data.waitDuration,
       };
     case "Demo Output":
+      // There is evidence that some old documents included a "Heat Lamp" outputType
+      // and the old code use to show that as a "Light Bulb"
       return {
-        outputType: data.outputType,
+        outputType: data.outputType === "Heat Lamp" ? "Light Bulb" : data.outputType,
       };
     case "Live Output":
       return {
