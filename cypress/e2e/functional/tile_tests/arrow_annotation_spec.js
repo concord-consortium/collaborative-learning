@@ -95,6 +95,11 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationSparrowGroups().eq(0).should("have.class", "selected");
     aa.getAnnotationSparrowGroups().eq(1).should("not.have.class", "selected");
 
+    // Click again leaves it selected
+    aa.getAnnotationBackgroundArrowPaths().eq(0).click({ force: true });
+    aa.getAnnotationSparrowGroups().eq(0).should("have.class", "selected");
+    aa.getAnnotationSparrowGroups().eq(1).should("not.have.class", "selected");
+
     // Click another one replaces selection
     aa.getAnnotationBackgroundArrowPaths().eq(1).click({ force: true });
     aa.getAnnotationSparrowGroups().eq(0).should("not.have.class", "selected");
