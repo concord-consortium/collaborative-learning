@@ -16,7 +16,7 @@ interface IProps {
 }
 export const HeaderCellInput: React.FC<IProps> = ({ style, inputStyle, value, onKeyDown, onChange, onClose }) => {
   const containerClasses = `rdg-editor-container clue-editor-container ${RDG_INTERNAL_EDITOR_CONTAINER_CLASS}`;
-  const editorClasses = `rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS}`;
+  const editorClasses = `${RDG_INTERNAL_TEXT_EDITOR_CLASS}`;
   return (
     <div className={containerClasses} style={style}>
       <input

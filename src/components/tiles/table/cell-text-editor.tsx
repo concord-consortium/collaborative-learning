@@ -94,7 +94,7 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
               finishAndSave(false);
               break;
             case 'Tab':
-              event.preventDefault();
+              event.preventDefault(); // keep focus in table
               // fall through
             case 'Enter':
               finishAndSave(true);
