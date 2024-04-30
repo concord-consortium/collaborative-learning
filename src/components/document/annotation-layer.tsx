@@ -63,14 +63,10 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     event.stopPropagation();
     const annotation = content?.annotations.get(arrowId);
     if (annotation) {
-      if (annotation.isSelected) {
-        annotation.setSelected(false); // Toggle off
+      if (hasSelectionModifier(event)) {
+        annotation.setSelected(!annotation.isSelected); // Toggle this one, leaving others as-is
       } else {
-        if (hasSelectionModifier(event)) {
-          annotation.setSelected(true); // Toggle on
-        } else {
-          content?.selectAnnotations([arrowId]); // Select only this one
-        }
+        content?.selectAnnotations([arrowId]); // Select only this one
       }
     }
   }
