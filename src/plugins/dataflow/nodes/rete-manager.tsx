@@ -69,6 +69,7 @@ export class ReteManager implements INodeServices {
     this.updateMainProcessor();
 
     this.setup();
+    (window as any).reteManager = this;
   }
 
   async setup() {

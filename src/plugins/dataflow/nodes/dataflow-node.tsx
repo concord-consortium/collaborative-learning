@@ -1,6 +1,5 @@
 import * as React from "react";
 import { observer } from "mobx-react";
-import styled from "styled-components";
 import classNames from "classnames";
 import { ClassicScheme, RenderEmit, Presets } from "rete-react-plugin";
 import { BaseAreaPlugin } from "rete-area-plugin";
@@ -20,18 +19,7 @@ import "./node-states.scss";
 
 type NodeExtraData = { width?: number, height?: number }
 
-export const DataflowNodeStyles = styled.div<NodeExtraData & { selected: boolean, styles?: (props: any) => any }>`
-    ${props => {
-      // console.log("| node props:",
-      //   "\n  className:      ", props.className,
-      //   "\n  props.selected: ", props.selected,
-      //   "\n  props.styles:   ", props.styles,
-      // );
-      // REVIEW: not sure this ever ends up true?
-      return props.styles && props.styles(props);
-    }
-  }
-`;
+//export const DataflowNodeStyles = styled.div<NodeExtraData & { selected: boolean, styles?: (props: any) => any }>``;
 
 function sortByIndex<T extends [string, undefined | { index?: number }][]>(entries: T) {
   entries.sort((a, b) => {
@@ -89,9 +77,8 @@ export const CustomDataflowNode = observer(
   }
 
   return (
-    <DataflowNodeStyles
+    <div
       className={`node ${model.type.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}
-      selected={selected}
       data-testid="node"
     >
       <div className="top-bar" onClick={() => console.log("top-bar click")}>
@@ -104,7 +91,7 @@ export const CustomDataflowNode = observer(
       <input
         value={nodeName}
         onChange={handleInputChange}
-        onBlur={() => {
+        onBlur={() => { // NOTE on next story - look at number control for example that might handle readOnly...and...
           if (nodeName !== model.orderedDisplayName) {
             nodeName && model.setOrderedDisplayName(nodeName);
           }
@@ -171,6 +158,6 @@ export const CustomDataflowNode = observer(
         recordedTicks={reteManager.recordedTicks}
       />
 
-    </DataflowNodeStyles>
+    </div>
   );
 });
