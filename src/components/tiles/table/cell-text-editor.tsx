@@ -39,8 +39,11 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
   const [value, setValue] = useState(origValueRef.current);
 
   const updateValue = (val: string) => {
-    valueRef.current = val;
-    setValue(val);
+    if (val !== valueRef.current) {
+      valueRef.current = val;
+      setValue(val);
+      onRowChange({ ...row, [column.key]: val }, false);
+    }
   };
 
   const saveChange = (newValue: string) => {
@@ -50,11 +53,7 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
 
   const finishAndSave = (commitChanges: boolean) => {
     if (commitChanges) {
-      const endValue = valueRef.current;
-      if (endValue !== origValueRef.current) {
-        onRowChange({ ...row, [column.key]: endValue }, true);
-      }
-      saveChange(endValue);
+      saveChange(valueRef.current);
     } else {
       onClose(false);
     }
