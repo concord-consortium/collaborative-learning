@@ -203,6 +203,10 @@ export class ReteManager implements INodeServices {
 
     AreaExtensions.simpleNodesOrder(area);
 
+    const { programZoom } = this.mstContent;
+    await this.area.area.zoom(programZoom.scale);
+    await this.area.area.translate(programZoom.dx, programZoom.dy);
+
     // Notify after the area, connection, and render plugins have been configured
     await this.notifyAboutExistingObjects();
 
