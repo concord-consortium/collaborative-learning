@@ -7,7 +7,7 @@ $index-column-width: 34px;
 $controls-column-width: 36px;
 $platform-scrollbar-width: 16px;
 $header-color: $workspace-teal-light-5;
-$header-input-color: #eef9fb;
+$header-input-color: #ffffff;
 $border-style: 1px solid $charcoal-light-1;
 $border-input-style: 1px solid #dadada;
 $border-radius: 3px;
@@ -47,6 +47,7 @@ $controls-hover-background: #c0dfe7;
           text-align: center;
           border: solid 1.5px $charcoal-light-1;
           background: $header-input-color;
+
           &:focus {
             border: solid 2px $highlight-blue;
           }
@@ -329,6 +330,11 @@ $controls-hover-background: #c0dfe7;
   padding: 4px;
   box-shadow: inset 0 0 0 3px $highlight-unlinked-edit;
   overflow: hidden;
+  resize: none;
+
+  &.linked {
+    box-shadow: inset 0 0 0 3px $highlight-linked-edit;
+  }
 }
 
 

@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState, KeyboardEvent } from "react";
+import React, { useEffect, useRef, useState, KeyboardEvent, useContext } from "react";
 import { EditorProps } from "react-data-grid";
 import { Portal } from "@chakra-ui/react";
 import TextareaAutosize from "react-textarea-autosize";
 import { TColumn } from "./table-types";
+import { TableContext } from "../hooks/table-context";
 
 // Starting with ReactDataGrid 7.0.0-canary.35, RDG started using Linaria CSS-in-JS for its internal
 // styling. As with CSS Modules and other CSS-in-JS solutions, this involves dynamically generating
@@ -37,6 +38,8 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
   const origValueRef = useRef(row[column.key as keyof TRow] as unknown as string);
   const valueRef = useRef(origValueRef.current);
   const [value, setValue] = useState(origValueRef.current);
+  const tableContext = useContext(TableContext);
+  const linked = tableContext?.linked;
 
   const updateValue = (val: string) => {
     if (val !== valueRef.current) {
@@ -70,7 +73,7 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     <Portal>
       <TextareaAutosize
         value={value}
-        className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS}`}
+        className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS} ${linked && 'linked'}`}
         style={{top, left, width: column.width}}
         autoFocus={true}
         onChange={event => {
