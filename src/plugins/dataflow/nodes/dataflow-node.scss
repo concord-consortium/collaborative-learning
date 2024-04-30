@@ -159,11 +159,11 @@ $top-space: 18px;
     border:2px solid white;
   }
 
-    /* these must be true for connections to line up ¯\_(ツ)_/¯ */
-    .output-socket ,
-    .input-socket {
-      display: inline-block;
-    }
+  /* these must be true for connections to line up */
+  .output-socket,
+  .input-socket {
+    display: inline-block;
+  }
 }
 
 /* node layout for input & operator families */
