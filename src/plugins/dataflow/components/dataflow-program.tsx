@@ -20,7 +20,6 @@ import { DocumentContextReact } from "../../../components/document/document-cont
 import { ProgramMode } from "./types/dataflow-tile-types";
 import { IDataSet } from "../../../models/data/data-set";
 
-
 import { recordCase } from "../model/utilities/recording-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { ReteManager } from "../nodes/rete-manager";
@@ -356,6 +355,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
         break;
     }
+    reteManager.updateSharedProgramData();
   };
 
   private stopRecording() {

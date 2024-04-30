@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import classNames from "classnames";
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { iconUrl, kPotentiometerKey, kServoKey, kSignalKey
@@ -8,13 +8,16 @@ import { findVariable } from "../simulation-utilities";
 import potDial from "./assets/pot-top.png";
 import servoArm from "./assets/servo-arm.png";
 import assemblyExpanded from "./assets/assembly-expanded.png";
-import assemblyCollapsed from "./assets/assembly-collapsed.png";
-import ExpandIcon from "./assets/expand-arduino.svg";
-import MinimizeIcon from "./assets/minimize-arduino.svg";
+import stopwatch from "./assets/stopwatch.png";
+import {
+  IMiniNodeData, getMiniNodeIcon, getMiniNodesDisplayData, getTweenedServoAngle, wireToA1
+} from "./chip-sim-utils";
 
 import "./potentiometer-servo.scss";
 
 export const kPotentiometerServoKey = "potentiometer_chip_servo";
+
+
 
 const potVisibleOffset = 135;
 const servoVisibleOffset = 90;
@@ -28,18 +31,37 @@ const kPotAngleKey = "pot_angle_key";
 const kResistReadingKey = "resist_reading_key";
 const kServoAngleKey = "servo_angle_key";
 
-function getTweenedServoAngle(realValue: number, lastVisibleValue: number) {
-  const delta = realValue - lastVisibleValue;
-  const steps = 5;
-  const maxDelta = 40;
-  if (Math.abs(delta) > maxDelta) {
-    return (lastVisibleValue + Math.sign(delta) * steps);
-  }
-  return realValue;
-}
+const miniNodeClasses = (node: IMiniNodeData, index:number, length:number) => {
+  return classNames(
+    'mini-node',
+    { 'first': index === 0 },
+    { 'last': index === length - 1 },
+    `category-${node.category}`,
+    `type-${node.type}`
+  );
+};
 
-function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) {
-  const [collapsed, setMinimized] = useState(false);
+const NodeColumn = ({ nodes, columnLabel }: { nodes: IMiniNodeData[], columnLabel: string }) => {
+  const catLabel = columnLabel.charAt(0).toUpperCase() + columnLabel.slice(1);
+  return (
+    <div className={`mini-nodes-col ${columnLabel}`}>
+      { nodes.map((miniNode, index) => (
+          <div key={miniNode.id} className={miniNodeClasses(miniNode, index, nodes.length)}>
+            <div className="node-info">
+              <div className="node-icon">{getMiniNodeIcon(miniNode.iconKey)}</div>
+              <div className="node-label">{miniNode.label}</div>
+            </div>
+            <div className="node-value">
+              {miniNode.value}
+            </div>
+          </div>
+        ))}
+      <div className="category-label">{catLabel}</div>
+    </div>
+  );
+};
+
+function PotentiometerAndServoComponent({ frame, variables, programData }: ISimulationProps) {
   const tweenedServoAngle = useRef(0);
   const lastTweenedAngle = tweenedServoAngle.current;
 
@@ -54,25 +76,60 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
   const valueForRotation = 180 - (tweenedServoAngle.current - servoVisibleOffset);
   const servoRotationString = `rotate(${valueForRotation}deg)`;
 
-  const potServoClasses = classNames('pot-servo-component', { collapsed, "expanded": !collapsed });
-  const boardClasses = classNames('board', { collapsed, "expanded": !collapsed });
+  const potServoClasses = classNames('pot-servo-component');
+  const boardClasses = classNames('board');
+
+  const miniNodesDataPack = getMiniNodesDisplayData(programData);
+  const { inputNodesArr, operatorNodesArr, outputNodesArr, extraCount } = miniNodesDataPack;
+
+  const hasPinIn = inputNodesArr.some(node => node.label.includes("Pin"));
+  const hasOutToServo = outputNodesArr.some(node => node.label.includes("Servo"));
+  const animationRate = programData?.samplingRate ? programData.samplingRate : 0;
 
   return (
     <div className={potServoClasses}>
       <div className="hardware">
+          <div className="heading-area">
+            <div className="sample-rate">
+              <img className="stopwatch" src={stopwatch} style={{animationDuration: `${animationRate}ms`}} />
+              { programData?.samplingRateStr }
+            </div>
+            <div className="arduino-label">Microprocessor</div>
+            { extraCount > 0 && (
+              <div className="hidden-nodes-count">+{extraCount} more</div>
+            )}
+          </div>
           <img
             className="pot-dial"
             src={potDial}
             style={{ transform: potRotationString }}
             alt="Potentiometer Dial"
           />
-          <div className="input wire"></div>
+          { hasPinIn &&
+            <>
+              { wireToA1() }
+              <div className="connected-pin input"></div>
+            </>
+          }
           <img
-            src={collapsed ? assemblyCollapsed : assemblyExpanded}
+            src={assemblyExpanded}
             className={boardClasses}
             alt="Board"
           />
-          <div className="output wire"></div>
+
+          <div className={"mini-nodes-column-wrapper"}>
+            <NodeColumn nodes={inputNodesArr} columnLabel="inputs" />
+            <NodeColumn nodes={operatorNodesArr} columnLabel="operators" />
+            <NodeColumn nodes={outputNodesArr} columnLabel="outputs" />
+          </div>
+
+          { hasOutToServo &&
+            <>
+              <div className="connected-pin output"></div>
+              <div className="output wire bg"></div>
+              <div className="output wire"></div>
+            </>
+          }
           <img
             className="servo-arm"
             src={servoArm}
@@ -95,23 +152,6 @@ function PotentiometerAndServoComponent({ frame, variables }: ISimulationProps) 
               <div className="high">high</div>
             </div>
           </div>
-        </div>
-        <div className="size-toggle area">
-          <button
-            className="expand-toggle"
-            onClick={() => setMinimized(!collapsed)}
-          >
-            { collapsed
-              ? <div>
-                  <ExpandIcon />
-                  <span>Expand</span>
-                </div>
-              : <div>
-                  <MinimizeIcon />
-                  <span>Minimize</span>
-                </div>
-            }
-          </button>
         </div>
       </div>
     </div>

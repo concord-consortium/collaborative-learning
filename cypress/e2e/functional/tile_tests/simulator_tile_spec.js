@@ -249,12 +249,6 @@ context('Simulator Tile', function () {
     simulatorTile.getVariableDisplayedValue().eq(0).should("contain.text", "225 deg");
     simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "563");
 
-    cy.log("expand and minimize toggle works");
-    simulatorTile.getExpandToggle().click();
-    simulatorTile.getBoard().should("have.have.class", "collapsed");
-    simulatorTile.getExpandToggle().click();
-    simulatorTile.getBoard().should("not.have.class", "collapsed");
-
     cy.log("dataflow can drive servo position");
     // collect initial position of servo arm
     const initialPos = simulatorTile.getServoArm().invoke('offset').its('top');

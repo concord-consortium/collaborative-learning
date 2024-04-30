@@ -1,6 +1,6 @@
 import React, { FunctionComponent, SVGProps } from "react";
 
-import EMGIcon from "../../../../src/plugins/dataflow/assets/icons/sensor/sensor-emg-icon.svg";
+import EMGIcon from "./dataflow/sensor/sensor-emg-icon.svg";
 import FanIcon from "./dataflow/output/fan.svg";
 import GripperIcon from "./dataflow/output/grabber.svg";
 import HumidifierIcon from "./dataflow/output/humid.svg";

@@ -17,6 +17,7 @@ import {
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { DataSet, addAttributeToDataSet } from "../../../models/data/data-set";
+import { SharedProgramData, SharedProgramDataType } from "../../shared-program-data/shared-program-data";
 
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
@@ -78,6 +79,12 @@ export const DataflowContentModel = TileContentModel
       const firstSharedVariables = sharedModelManager?.getTileSharedModelsByType(self, SharedVariables)?.[0];
       if (!firstSharedVariables) return undefined;
       return firstSharedVariables as SharedVariablesType;
+    },
+    get sharedProgramData() {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const firstSharedProgramData = sharedModelManager?.getTileSharedModelsByType(self, SharedProgramData)?.[0];
+      if (!firstSharedProgramData) return undefined;
+      return firstSharedProgramData as SharedProgramDataType;
     },
     programWithoutRecentValues() {
       // FIXME: remove recent values from the nodes
@@ -212,9 +219,13 @@ export const DataflowContentModel = TileContentModel
           ? sharedModelManager?.getTileSharedModels(self)
           : undefined;
 
-        return { sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels };
+          const sharedProgramData = sharedModelManager?.isReady
+          ? sharedModelManager?.findFirstSharedModelByType(SharedProgramData)
+          : undefined;
+
+        return { sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels, sharedProgramData };
       },
-      ({sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels}) => {
+      ({sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels, sharedProgramData}) => {
         if (!sharedModelManager?.isReady) {
           return;
         }
@@ -233,6 +244,11 @@ export const DataflowContentModel = TileContentModel
         // We won't create a sharedVariables model, but we'll automatically attach to any we find
         if (sharedVariables && !tileSharedModels?.includes(sharedVariables)) {
           sharedModelManager.addTileSharedModel(self, sharedVariables);
+        }
+
+        if (!sharedProgramData) {
+          const programData = SharedProgramData.create();
+          sharedModelManager.addTileSharedModel(self, programData);
         }
 
         // update the colors
