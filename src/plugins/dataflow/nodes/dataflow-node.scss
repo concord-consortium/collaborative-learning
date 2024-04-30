@@ -18,6 +18,9 @@ $top-space: 18px;
   box-sizing: border-box;
   border:3px solid;
   color: $gray-text;
+  cursor: pointer;
+  box-sizing: border-box;
+  user-select: none;
 
   .top-bar {
     display: flex;
@@ -149,11 +152,18 @@ $top-space: 18px;
       }
     }
   }
+
   .output-socket div div,
   .input-socket div div {
     background: $gray-mid;
     border:2px solid white;
   }
+
+    /* these must be true for connections to line up ¯\_(ツ)_/¯ */
+    .output-socket ,
+    .input-socket {
+      display: inline-block;
+    }
 }
 
 /* node layout for input & operator families */
@@ -484,6 +494,13 @@ $top-space: 18px;
   }
 }
 
+/* something in here is fixing our life, figure out what it is and add above */
+
+.node {
+
+
+
+}
 
 
 
