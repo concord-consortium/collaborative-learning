@@ -6,7 +6,7 @@ import { IBaseNode } from "../base-node";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 
-import "./num-control.sass";
+import "./num-control.scss";
 
 export class NumberUnitsControl <
   ModelType extends

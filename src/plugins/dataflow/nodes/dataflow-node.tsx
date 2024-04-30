@@ -1,11 +1,10 @@
 import * as React from "react";
 import { observer } from "mobx-react";
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 import classNames from "classnames";
 import { ClassicScheme, RenderEmit, Presets } from "rete-react-plugin";
 import { BaseAreaPlugin } from "rete-area-plugin";
 
-import { $nodecolor, $nodecolorselected, $nodewidth, $socketmargin, $socketsize } from "./vars";
 import { DataflowNodePlot } from "./dataflow-node-plot";
 import { IBaseNode } from "./base-node";
 import { NodeEditorMST } from "./node-editor-mst";
@@ -22,68 +21,16 @@ import "./node-states.scss";
 type NodeExtraData = { width?: number, height?: number }
 
 export const DataflowNodeStyles = styled.div<NodeExtraData & { selected: boolean, styles?: (props: any) => any }>`
-    background: ${$nodecolor};
-    border: 2px solid #4e58bf;
-    border-radius: 10px;
-    cursor: pointer;
-    box-sizing: border-box;
-    width: ${props => Number.isFinite(props.width) ? `${props.width}px` : `${$nodewidth}px`};
-    height: ${props => Number.isFinite(props.height) ? `${props.height}px` : 'auto'};
-    padding-bottom: 6px;
-    position: relative;
-    user-select: none;
-    line-height: initial;
-    font-family: Arial;
-
-    &:hover {
-        background: lighten(${$nodecolor},4%);
+    ${props => {
+      // console.log("| node props:",
+      //   "\n  className:      ", props.className,
+      //   "\n  props.selected: ", props.selected,
+      //   "\n  props.styles:   ", props.styles,
+      // );
+      // REVIEW: not sure this ever ends up true?
+      return props.styles && props.styles(props);
     }
-    ${props => props.selected && css`
-        background: ${$nodecolorselected};
-        border-color: #e3c000;
-    `}
-    .title {
-        color: white;
-        font-family: sans-serif;
-        font-size: 18px;
-        padding: 8px;
-    }
-    .output {
-        text-align: right;
-    }
-    .input {
-        text-align: left;
-    }
-    .output-socket {
-        text-align: right;
-        margin-right: -${$socketsize / 2 + $socketmargin}px;
-        display: inline-block;
-    }
-    .input-socket {
-        text-align: left;
-        margin-left: -${$socketsize / 2 + $socketmargin}px;
-        display: inline-block;
-    }
-    .input-title,.output-title {
-        vertical-align: middle;
-        color: white;
-        display: inline-block;
-        font-family: sans-serif;
-        font-size: 14px;
-        margin: ${$socketmargin}px;
-        line-height: ${$socketsize}px;
-    }
-    .input-control {
-        z-index: 1;
-        width: calc(100% - ${$socketsize + 2 * $socketmargin}px);
-        vertical-align: middle;
-        display: inline-block;
-    }
-    .control {
-        display: block;
-        padding: ${$socketmargin}px ${$socketsize / 2 + $socketmargin}px;
-    }
-    ${props => props.styles && props.styles(props)}
+  }
 `;
 
 function sortByIndex<T extends [string, undefined | { index?: number }][]>(entries: T) {
@@ -118,9 +65,13 @@ export const CustomDataflowNode = observer(
   const selected = data.selected || false;
   const { id, label, width, height } = data;
 
+  const [nodeName, setNodeName] = React.useState((data as unknown as IBaseNode).model.orderedDisplayName);
+
   // FIXME: update 'Scheme' so we don't have to typecast here
   const node = (data as unknown as IBaseNode);
   const model = node.model;
+
+  const nodeLetter = model.type === "Timer" ? "t" : model.type.substring(0, 1);
 
   const showPlot = model.plot;
 
@@ -133,18 +84,32 @@ export const CustomDataflowNode = observer(
     "has-flow-in": node instanceof ControlNode && node.hasFlowIn()
   });
 
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setNodeName(e.target.value);
+  }
+
   return (
     <DataflowNodeStyles
       className={`node ${model.type.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}
       selected={selected}
-      width={width}
-      height={height}
-      styles={styles}
       data-testid="node"
     >
       <div className="top-bar" onClick={() => console.log("top-bar click")}>
-        <div className="title" data-testid="title">{model.orderedDisplayName || label}</div>
         <Delete reteManager={reteManager} nodeId={id}/>
+      </div>
+
+      <div className="node-type-letter">{nodeLetter}</div>
+
+      <div className="node-name">
+      <input
+        value={nodeName}
+        onChange={handleInputChange}
+        onBlur={() => {
+          if (nodeName !== model.orderedDisplayName) {
+            nodeName && model.setOrderedDisplayName(nodeName);
+          }
+        }}
+      />
       </div>
       {/* Outputs */}
       {outputs.map(([key, output]) => (

@@ -5,8 +5,8 @@ $toolbar-width: 83px;
 
 $toolbar-background: $gray-light;
 
-$button-sensor: $sensor-blue;
-$button-number: $number-blue;
+$button-sensor: $input-blue;
+$button-number: $input-blue;
 $button-generator: $generator-blue;
 $button-timer: $timer-blue;
 $button-math: $math-green;
@@ -87,34 +87,34 @@ $button-label-text: $gray-text;
     background-color: $button-sensor;
 
     &.sensor {
-      background-color: $button-sensor;
+      background-color: $input-blue;
     }
     &.number {
-      background-color: $button-number;
+      background-color: $input-blue;
     }
     &.generator {
-      background-color: $button-generator;
+      background-color: $input-blue;
     }
     &.timer {
-      background-color: $button-timer;
+      background-color: $input-blue;
     }
     &.math {
-      background-color: $button-math;
+      background-color: $operator-green;
     }
     &.logic {
-      background-color: $button-logic;
+      background-color: $operator-green;
     }
     &.transform {
-      background-color: $button-transform;
+      background-color: $operator-green;
     }
     &.control {
-      background-color: $button-control;
+      background-color: $operator-green;
     }
     &.demo-output {
-      background-color: $button-demo-output;
+      background-color: $output-yellow;
     }
     &.live-output {
-      background-color: $button-live-output;
+      background-color: $output-yellow;
     }
 
     .icon-node {

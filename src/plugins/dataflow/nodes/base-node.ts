@@ -163,6 +163,10 @@ export const BaseNodeModel = types.model("BaseNodeModel",
     self.tickEntries.clear();
   },
 
+  setOrderedDisplayName(name: string) {
+    self.orderedDisplayName = name;
+  },
+
   setTickMax(max: number) { self.tickMax = max; },
   setTickMin(min: number) { self.tickMin = min; },
   setDsMax(max: number) { self.dsMax = max; },

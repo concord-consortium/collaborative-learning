@@ -120,6 +120,7 @@ export const DataflowProgramModel = types.
   .actions(self => ({
     // This isn't great but it is how the unique node names have been working
     updateNodeNames(){
+      console.log("| existing code updating node names!");
       let idx = 1;
       self.nodes.forEach((node) => {
         const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
