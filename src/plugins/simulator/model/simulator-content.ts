@@ -11,6 +11,7 @@ import { isInputVariable, isOutputVariable } from "../../shared-variables/simula
 import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { defaultSimulationKey, simulations } from "../simulations/simulations";
+import { SharedProgramData, SharedProgramDataType } from "../../shared-program-data/shared-program-data";
 
 export function defaultSimulatorContent(): SimulatorContentModelType {
   return SimulatorContentModel.create({});
@@ -52,6 +53,14 @@ export const SimulatorContentModel = TileContentModel
         self.simulation = defaultSimulation as string ?? defaultSimulationKey;
       }
       return simulations[self.simulation];
+    },
+    get sharedProgramData() {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const sharedModels = sharedModelManager?.getTileSharedModels(self); // only returns those who are attached
+      const sharedProgramData = sharedModels?.filter( sharedModel => {
+        return sharedModel.type === "SharedProgramData";
+      });
+      return sharedProgramData?.[0] as SharedProgramDataType;
     }
   }))
   .views(self => ({
@@ -82,10 +91,13 @@ export const SimulatorContentModel = TileContentModel
         const tileSharedModels = sharedModelManager?.isReady ?
           sharedModelManager?.getTileSharedModels(self) : undefined;
 
-        const values = {sharedModelManager, containerSharedModel, tileSharedModels};
+        const sharedProgramModel = sharedModelManager?.isReady ?
+          sharedModelManager?.findFirstSharedModelByType(SharedProgramData) : undefined;
+
+        const values = {sharedModelManager, containerSharedModel, tileSharedModels, sharedProgramModel};
         return values;
       },
-      ({sharedModelManager, containerSharedModel, tileSharedModels}) => {
+      ({sharedModelManager, containerSharedModel, tileSharedModels, sharedProgramModel}) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
@@ -100,6 +112,10 @@ export const SimulatorContentModel = TileContentModel
           // is running outside of a document tree action.
           // Add the shared model to both the document and the tile
           sharedModelManager.addTileSharedModel(self, containerSharedModel);
+        }
+
+        if(sharedProgramModel && !tileSharedModels?.includes(sharedProgramModel)) {
+          sharedModelManager.addTileSharedModel(self, sharedProgramModel);
         }
 
         // Set up starter variables

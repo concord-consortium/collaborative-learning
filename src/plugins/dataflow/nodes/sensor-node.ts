@@ -70,9 +70,8 @@ export class SensorNode extends BaseNode<
       displayName: sensorType.name,
       icon: sensorType.icon
     }));
-    const sensorTypeControl =
-      new DropdownListControl(this, "sensorType", model.setSensorType, sensorTypeOptions,
-      "Select Sensor Type",  "Select a sensor type");
+    const sensorTypeControl = new DropdownListControl(this, "sensorType", model.setSensorType,
+       sensorTypeOptions, "Select Input Type",  "Select an input type");
     this.addControl("sensorType", sensorTypeControl);
 
     // A function is passed for the options, this way the dropdown component can
@@ -187,8 +186,8 @@ export class SensorNode extends BaseNode<
 
   data(): { value: number} {
     if (this.services.inTick) {
-      const chInfo =
-      this.services.getChannels().find(ci => ci.channelId === this.model.sensor);
+      const { sensorType } = this.model;
+      const chInfo = this.services.getChannels().find(ci => ci.channelId === this.model.sensor);
 
       // update virtual sensors
       if (chInfo?.virtualValueMethod && chInfo.timeFactor) {
@@ -201,8 +200,23 @@ export class SensorNode extends BaseNode<
         chInfo.value = chInfo.simulatedVariable.currentValue || 0;
       }
 
-      if (chInfo && isFinite(chInfo.value)) {
-        this.saveNodeValue(chInfo.value);
+      if (chInfo){
+        let newValue = chInfo.value;
+        const isDigitalReading = sensorType === "fsr-reading" || sensorType === "pin-reading";
+        if (isDigitalReading) {
+          // For digital readings, if they don't exist make them zero
+          if(newValue == null || isNaN(newValue)) {
+            newValue = 0;
+          }
+        } else {
+          // For other readings pass "doesn't exist" through
+          if (newValue == null) {
+            // This will convert null and undefined to NaN
+            newValue = NaN;
+          }
+        }
+
+        this.saveNodeValue(newValue);
       } else {
         // We can safely set NaN because the type of nodeValue is StringifiedNumber
         this.saveNodeValue(NaN);

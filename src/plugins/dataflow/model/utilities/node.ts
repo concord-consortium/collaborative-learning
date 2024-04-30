@@ -1,22 +1,22 @@
-import SineIcon from "../../assets/icons/generator/sine.svg";
-import SquareIcon from "../../assets/icons/generator/square.svg";
-import TriangleIcon from "../../assets/icons/generator/triangle.svg";
+import SineIcon from "../../../shared-assets/icons/dataflow/generator/sine.svg";
+import SquareIcon from "../../../shared-assets/icons/dataflow/generator/square.svg";
+import TriangleIcon from "../../../shared-assets/icons/dataflow/generator/triangle.svg";
 
-import AndIcon from "../../assets/icons/logic/and.svg";
-import EqualIcon from "../../assets/icons/logic/equal.svg";
-import GreaterThanOrEqualToIcon from "../../assets/icons/logic/greater-than-or-equal-to.svg";
-import GreaterThanIcon from "../../assets/icons/logic/greater-than.svg";
-import LessThanOrEqualToIcon from "../../assets/icons/logic/less-than-or-equal-to.svg";
-import LessThanIcon from "../../assets/icons/logic/less-than.svg";
-import NandIcon from "../../assets/icons/logic/nand.svg";
-import NotEqualIcon from "../../assets/icons/logic/not-equal.svg";
-import OrIcon from "../../assets/icons/logic/or.svg";
-import XorIcon from "../../assets/icons/logic/xor.svg";
+import AndIcon from "../../../shared-assets/icons/dataflow/logic/and.svg";
+import EqualIcon from "../../../shared-assets/icons/dataflow/logic/equal.svg";
+import GreaterThanOrEqualToIcon from "../../../shared-assets/icons/dataflow/logic/greater-than-or-equal-to.svg";
+import GreaterThanIcon from "../../../shared-assets/icons/dataflow/logic/greater-than.svg";
+import LessThanOrEqualToIcon from "../../../shared-assets/icons/dataflow/logic/less-than-or-equal-to.svg";
+import LessThanIcon from "../../../shared-assets/icons/dataflow/logic/less-than.svg";
+import NandIcon from "../../../shared-assets/icons/dataflow/logic/nand.svg";
+import NotEqualIcon from "../../../shared-assets/icons/dataflow/logic/not-equal.svg";
+import OrIcon from "../../../shared-assets/icons/dataflow/logic/or.svg";
+import XorIcon from "../../../shared-assets/icons/dataflow/logic/xor.svg";
 
-import AddIcon from "../../assets/icons/math/add.svg";
-import SubtractIcon from "../../assets/icons/math/subtract.svg";
-import MultiplyIcon from "../../assets/icons/math/multiply.svg";
-import DivideIcon from "../../assets/icons/math/divide.svg";
+import AddIcon from "../../../shared-assets/icons/dataflow/math/add.svg";
+import SubtractIcon from "../../../shared-assets/icons/dataflow/math/subtract.svg";
+import MultiplyIcon from "../../../shared-assets/icons/dataflow/math/multiply.svg";
+import DivideIcon from "../../../shared-assets/icons/dataflow/math/divide.svg";
 
 import LightBulbIcon from "../../../shared-assets/icons/dataflow/output/light-bulb.svg";
 import GrabberIcon from "../../../shared-assets/icons/dataflow/output/grabber.svg";
@@ -25,18 +25,16 @@ import HumidIcon from "../../../shared-assets/icons/dataflow/output/humid.svg";
 import FanIcon from "../../../shared-assets/icons/dataflow/output/fan.svg";
 
 import TemperatureIcon from "../../../shared-assets/icons/dataflow/sensor/temperature.svg";
-import CO2Icon from "../../assets/icons/sensor/co2.svg";
+import CO2Icon from "../../../shared-assets/icons/dataflow/sensor/co2.svg";
 import HumidityIcon from "../../../shared-assets/icons/dataflow/sensor/humidity.svg";
-import LightIcon from "../../assets/icons/sensor/light.svg";
-import O2Icon from "../../assets/icons/sensor/o2.svg";
-import ParticulatesIcon from "../../assets/icons/sensor/particulates.svg";
-import MoistureIcon from "../../assets/icons/sensor/moisture.svg";
-import EmgIcon from "../../../shared-assets/icons/dataflow/control/signal.svg";
+import SignalIcon from "../../../shared-assets/icons/dataflow/control/signal.svg";
+import EMGIcon from "../../../shared-assets/icons/dataflow/sensor/sensor-emg-icon.svg";
 import PressureIcon from "../../../shared-assets/icons/dataflow/sensor/pressure.svg";
+import ServoIcon from "../../../shared-assets/icons/dataflow/output/servo.svg";
 
-import AbsoluteValueIcon from "../../assets/icons/transform/absolute-value.svg";
-import NegationIcon from "../../assets/icons/transform/negation.svg";
-import NotIcon from "../../assets/icons/transform/not.svg";
+import AbsoluteValueIcon from "../../../shared-assets/icons/dataflow/transform/absolute-value.svg";
+import NegationIcon from "../../../shared-assets/icons/dataflow/transform/negation.svg";
+import NotIcon from "../../../shared-assets/icons/dataflow/transform/not.svg";
 
 import HoldPreviousArrowIcon from "../../assets/icons/control/hold-previous.svg";
 import HoldCurrentArrowIcon from "../../assets/icons/control/hold-this.svg";
@@ -63,7 +61,7 @@ export interface NodeType {
 export const NodeTypes: NodeType[] = [
   {
     name: "Sensor",
-    displayName: "Sensor",
+    displayName: "Input",
   },
   {
     name: "Number",
@@ -158,21 +156,21 @@ export const NodeOperationTypes = [
     type: "transform",
     method: (n1: number, n2: number) => Math.round(n1),
     numberSentence: (n1: string, n2: string) => `round(${n1}) = `,
-    icon: EmgIcon
+    icon: SignalIcon
   },
   {
     name: "Floor",
     type: "transform",
     method: (n1: number, n2: number) => Math.floor(n1),
     numberSentence: (n1: string, n2: string) => `floor(${n1}) = `,
-    icon: EmgIcon
+    icon: SignalIcon
   },
   {
     name: "Ceil",
     type: "transform",
     method: (n1: number, n2: number) => Math.ceil(n1),
     numberSentence: (n1: string, n2: string) => `ceil(${n1}) = `,
-    icon: EmgIcon
+    icon: SignalIcon
   },
   {
     name: "Ramp",
@@ -196,7 +194,7 @@ export const NodeOperationTypes = [
       return n1;
     },
     numberSentence: (n1: string, n2: string) => `${n1} → `,
-    icon: EmgIcon
+    icon: SignalIcon
   },
   {
     name: "Greater Than",
@@ -328,35 +326,35 @@ export const NodeSensorTypes = [
     units: "PPM",
     icon: CO2Icon
   },
-  {
-    name: "O₂",
-    type: "O2",
-    units: "%",
-    icon: O2Icon
-  },
-  {
-    name: "Light",
-    type: "light",
-    units: "lux",
-    icon: LightIcon
-  },
-  {
-    name: "Soil Moisture",
-    type: "soil-moisture",
-    units: "",
-    icon: MoistureIcon
-  },
-  {
-    name: "Particulates",
-    type: "particulates",
-    units: "PM2.5",
-    icon: ParticulatesIcon
-  },
+  // {
+  //   name: "O₂",
+  //   type: "O2",
+  //   units: "%",
+  //   icon: O2Icon
+  // },
+  // {
+  //   name: "Light",
+  //   type: "light",
+  //   units: "lux",
+  //   icon: LightIcon
+  // },
+  // {
+  //   name: "Soil Moisture",
+  //   type: "soil-moisture",
+  //   units: "",
+  //   icon: MoistureIcon
+  // },
+  // {
+  //   name: "Particulates",
+  //   type: "particulates",
+  //   units: "PM2.5",
+  //   icon: ParticulatesIcon
+  // },
   {
     name: "EMG",
     type: "emg-reading",
     units: "mV",
-    icon: EmgIcon,
+    icon: EMGIcon,
     decimalPlaces: 0
   },
   {
@@ -364,6 +362,13 @@ export const NodeSensorTypes = [
     type: "fsr-reading",
     units: "psi",
     icon: PressureIcon,
+    decimalPlaces: 0
+  },
+  {
+    name: "Pin Reading",
+    type: "pin-reading",
+    units: "",
+    icon: SignalIcon,
     decimalPlaces: 0
   }
 ];
@@ -422,6 +427,14 @@ export const NodeLiveOutputTypes = [
     name: "Heat Lamp",
     icon: LightBulbIcon,
     relayIndex: 0
+  },
+  {
+    name: "Servo",
+    icon: ServoIcon,
+    angleBase: 0,
+    angleOffset: 30,
+    angleScale: 2 / 3,
+    sweep: 180
   }
 ];
 
@@ -466,6 +479,18 @@ export const baseLiveOutputOptions = {
     active: true,
     id: "no-device-bb-gripper",
     name: "Physical Gripper",
+    displayName: "⚠️ connect device",
+  },
+  liveServoOption: {
+    active: true,
+    icon: ServoIcon,
+    id: "bb-servo",
+    name: "Physical Servo"
+  },
+  noDeviceliveServoOption: {
+    active: true,
+    id: "no-devie-bb-servo",
+    name: "Physical Servo",
     displayName: "⚠️ connect device",
   },
   genericWarningOption: {
@@ -538,9 +563,10 @@ export const ProgramDataRates: ProgramDataRate[] = [
   }
 ];
 
-export const kSensorSelectMessage = "Select a sensor";
+export const kSensorSelectMessage = "Select an input";
 export const kSensorMissingMessage = "⚠️";
 export const kAnimatedBinaryTypes = ["Fan", "Humidifier"];
 export const kMicroBitHubRelaysIndexed =  ["Heat Lamp", "Fan", "Humidifier"];
 export const kBinaryOutputTypes = [...kMicroBitHubRelaysIndexed, "Light Bulb"];
 export const kGripperOutputTypes = ["Grabber", "Gripper", "Gripper 2.0"];
+export const kServoOutputTypes = ["Servo"];

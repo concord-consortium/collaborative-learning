@@ -40,6 +40,8 @@ import { DataflowEngine } from "./engine/dataflow-engine";
 import { ValueWithUnitsControl, ValueWithUnitsControlComponent } from "./controls/value-with-units-control";
 import { DataflowProgramChange } from "../dataflow-logger";
 import { runInAction } from "mobx";
+import { getSharedNodes } from "./utilities/shared-program-data-utilities";
+import { ProgramDataRates } from "../model/utilities/node";
 
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
@@ -209,6 +211,7 @@ export class ReteManager implements INodeServices {
 
     // Need to do an initial process after all of the nodes are create so their inputs are correct
     this.processAfterProgramChange();
+    this.updateSharedProgramData();
 
     if (!this.readOnly) {
       editor.addPipe(context => {
@@ -639,7 +642,22 @@ export class ReteManager implements INodeServices {
     // the node model directly. If the data method uses an action this won't be
     // reported. We also don't care about recording this in history because this
     // is a readOnly doc.
-    runInAction(this.process);
+    runInAction(() => {
+      this.process();
+      this.updateSharedProgramData();
+    });
+  };
+
+  public updateSharedProgramData = () => {
+    const nodes = this.editor.getNodes() as IBaseNode[];
+    const sharedProgramModel = this.mstContent.sharedProgramData;
+    if (!sharedProgramModel) return;
+    const sharedNodes = getSharedNodes(nodes);
+    sharedProgramModel.setProgramNodes(sharedNodes);
+    const rateStr = ProgramDataRates.find((item) => item.val === Number(this.mstContent.programDataRate))?.text ?? "";
+    const rateNum = ProgramDataRates.find((item) => item.val === Number(this.mstContent.programDataRate))?.val ?? 0;
+    sharedProgramModel.setProgramSamplingRateStr(rateStr);
+    sharedProgramModel.setProgramSamplingRate(rateNum);
   };
 
   public zoomIn = () => {
