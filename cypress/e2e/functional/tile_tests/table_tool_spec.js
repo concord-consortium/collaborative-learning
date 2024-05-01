@@ -124,6 +124,8 @@ context('Table Tool Tile', function () {
     // abandon edit with esc key
     tableToolTile.typeInTableCell(1, 'abandon this edit{esc}', false);
     tableToolTile.getTableCell().eq(1).should('contain', 'third value');
+    tableToolTile.getTableCell().eq(1).should('not.contain', 'abandon this edit');
+
     // reset to previous value
     tableToolTile.typeInTableCell(1, '5');
 
