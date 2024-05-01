@@ -2,6 +2,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { MouseEvent, MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 import useResizeObserver from "use-resize-observer";
+import { useMemoOne } from "use-memo-one";
 import { AnnotationButton } from "../annotations/annotation-button";
 import { getDefaultPeak } from "../annotations/annotation-utilities";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
@@ -42,19 +43,24 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const ui = useUIStore();
   const persistentUI = usePersistentUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
-  const hotKeys = useRef(new HotKeys());
+  const hotKeys = useMemoOne(() => new HotKeys(), []);
 
   useEffect(() => {
+    const deleteSelected = () => content?.deleteSelected();
     if (!readOnly) {
-      hotKeys.current.register({
-        "delete": () => content?.deleteSelected(),
-        "backspace": () => content?.deleteSelected()
+      hotKeys.register({
+        "delete": () => deleteSelected(),
+        "backspace": () => deleteSelected()
       });
+      // disposer, to deactivate these bindings in case we switch to read-only later.
+      return () => {
+        hotKeys.unregister(["delete", "backspace"]);
+      };
     }
-  }, [content, readOnly]);
+  }, [content, readOnly, hotKeys]);
 
   function handleKeyDown(event: React.KeyboardEvent) {
-    hotKeys.current.dispatch(event);
+    hotKeys.dispatch(event);
   }
 
   // Clicking to select annotations
