@@ -12,6 +12,10 @@ import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { defaultSimulationKey, simulations } from "../simulations/simulations";
 import { SharedProgramData, SharedProgramDataType } from "../../shared-program-data/shared-program-data";
+import { IClueObject } from "../../../models/annotations/clue-object";
+import { kPotentiometerServoKey } from "../simulations/potentiometer-servo/potentiometer-servo";
+import { getTileIdFromContent } from "../../../models/tiles/tile-model";
+import { getMiniNodesDisplayData } from "../simulations/potentiometer-servo/chip-sim-utils";
 
 export function defaultSimulatorContent(): SimulatorContentModelType {
   return SimulatorContentModel.create({});
@@ -66,6 +70,20 @@ export const SimulatorContentModel = TileContentModel
   .views(self => ({
     get variables() {
       return self.sharedModel?.variables;
+    },
+    get annotatableObjects(): IClueObject[] {
+      const tileId = getTileIdFromContent(self) ?? "";
+      if (self.simulation === kPotentiometerServoKey) {
+        const nodeData = getMiniNodesDisplayData(self.sharedProgramData);
+        return nodeData.inputNodesArr.map(node => {
+          return {
+            tileId,
+            objectId: node.id,
+            objectType: "node"
+          };
+        });
+      }
+      return [];
     }
   }))
   .views(self => ({

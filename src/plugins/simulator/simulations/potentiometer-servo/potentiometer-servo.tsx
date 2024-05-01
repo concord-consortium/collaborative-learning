@@ -37,7 +37,8 @@ const miniNodeClasses = (node: IMiniNodeData, index:number, length:number) => {
     { 'first': index === 0 },
     { 'last': index === length - 1 },
     `category-${node.category}`,
-    `type-${node.type}`
+    `type-${node.type}`,
+    `node-${node.id}`
   );
 };
 

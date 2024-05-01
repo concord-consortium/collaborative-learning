@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
@@ -10,7 +10,7 @@ import { SimulatorVariable } from "./simulator-variable";
 import "./simulator-tile.scss";
 
 export const SimulatorTileComponent = observer(function SimulatorTileComponent({
-  documentId, model, readOnly
+  documentId, model, readOnly, onRegisterTileApi, tileElt
 }: ITileProps) {
   // Note: capturing the content here and using it in handleChange() below may run the risk
   // of encountering a stale closure issue depending on the order in which content changes,
@@ -30,6 +30,37 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
     }, content.simulationData.delay);
     return () => clearInterval(id);
   }, [canRunIndependently, content]);
+
+  const getNodeBoundingBox = useCallback((objectId: string) => {
+    // Find the HTML object representing this node
+    const elt = tileElt?.querySelector(`.node-${objectId}`);
+    // console.log('tileElt', tileElt, 'elt:', elt, 'rect:', elt?.getBoundingClientRect());
+    const tileRect = tileElt?.getBoundingClientRect();
+    const nodeRect = elt?.getBoundingClientRect();
+    if (tileRect && nodeRect) {
+      return {
+        left: nodeRect.left-tileRect.left,
+        top: nodeRect.top-tileRect.top,
+        width: nodeRect.width,
+        height: nodeRect.height
+      };
+    } else {
+      return undefined;
+    }
+  }, [tileElt]);
+
+  useEffect(() => {
+    onRegisterTileApi({
+      getObjectBoundingBox: (objectId: string, objectType?: string) => {
+        if (objectType === "node") {
+          return getNodeBoundingBox(objectId);
+        }
+        return undefined;
+      }
+    });
+  // We do need to redefine this if the tileElt changes (which it does once, from undefined on first render)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tileElt]);
 
   const component = content.simulationData.component;
 
