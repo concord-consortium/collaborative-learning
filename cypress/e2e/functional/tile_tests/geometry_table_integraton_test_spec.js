@@ -29,24 +29,14 @@ context('Geometry Table Integration', function () {
     beforeTest();
     clueCanvas.addTile('table');
     cy.get(".primary-workspace").within((workspace) => {
-      tableToolTile.getTableCell().eq(1).click();
-      tableToolTile.getTableCell().eq(1).click();
-      tableToolTile.getTableCell().eq(1).type(x[0] + '{enter}');
-      tableToolTile.getTableCell().eq(2).click();
-      tableToolTile.getTableCell().eq(2).type(y[0] + '{enter}');
-      tableToolTile.getTableCell().eq(5).click();
-      tableToolTile.getTableCell().eq(5).type(x[1] + '{enter}');
-      tableToolTile.getTableCell().eq(6).click();
-      cy.wait(500);
-      tableToolTile.getTableCell().eq(6).type(y[1] + '{enter}');
-      tableToolTile.getTableCell().eq(9).click();
-      tableToolTile.getTableCell().eq(9).type(x[2] + '{enter}');
-      tableToolTile.getTableCell().eq(10).click();
-      tableToolTile.getTableCell().eq(10).type(y[2] + '{enter}');
-      tableToolTile.getTableCell().eq(13).click();
-      tableToolTile.getTableCell().eq(13).type(x[3] + '{enter}');
-      tableToolTile.getTableCell().eq(14).click();
-      tableToolTile.getTableCell().eq(14).type(y[3] + '{enter}');
+      tableToolTile.typeInTableCell(1, x[0] + '{enter}');
+      tableToolTile.typeInTableCell(2, y[0] + '{enter}');
+      tableToolTile.typeInTableCell(5, x[1] + '{enter}');
+      tableToolTile.typeInTableCell(6, y[1] + '{enter}');
+      tableToolTile.typeInTableCell(9, x[2] + '{enter}');
+      tableToolTile.typeInTableCell(10, y[2] + '{enter}');
+      tableToolTile.typeInTableCell(13, x[3] + '{enter}');
+      tableToolTile.typeInTableCell(14, y[3] + '{enter}');
       tableToolTile.getTableCell().eq(17).click();
     });
     clueCanvas.addTile('geometry');
@@ -189,16 +179,10 @@ context('Geometry Table Integration', function () {
     // Set up and link table and geometry tile
     clueCanvas.addTile('table');
     cy.get(".primary-workspace").within((workspace) => {
-      tableToolTile.getTableCell().eq(1).click();
-      tableToolTile.getTableCell().eq(1).click();
-      tableToolTile.getTableCell().eq(1).type(x[0] + '{enter}');
-      tableToolTile.getTableCell().eq(2).click();
-      tableToolTile.getTableCell().eq(2).type(y[0] + '{enter}');
-      tableToolTile.getTableCell().eq(5).click();
-      tableToolTile.getTableCell().eq(5).type(x[1] + '{enter}');
-      tableToolTile.getTableCell().eq(6).click();
-      cy.wait(500);
-      tableToolTile.getTableCell().eq(6).type(y[1] + '{enter}');
+      tableToolTile.typeInTableCell(1, x[0] + '{enter}');
+      tableToolTile.typeInTableCell(2, y[0] + '{enter}');
+      tableToolTile.typeInTableCell(5, x[1] + '{enter}');
+      tableToolTile.typeInTableCell(6, y[1] + '{enter}');
       tableToolTile.getTableCell().eq(9).click();
     });
     clueCanvas.addTile('geometry');
