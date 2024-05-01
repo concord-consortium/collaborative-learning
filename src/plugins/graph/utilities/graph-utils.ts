@@ -243,6 +243,9 @@ export function matchCirclesToData(props: IMatchCirclesProps) {
         const g = enter.append('g')
           .attr('class', `graph-dot`)
           .property('id', (d: CaseData) => `${d.dataConfigID}_${instanceId}_${d.plotNum}_${d.caseID}`);
+        g.append('line')
+          .attr('class', 'connector')
+          .attr('x2', 0).attr('y2', 0);
         g.append('circle')
           .attr('class', 'outer-circle');
         g.append('circle')
@@ -502,12 +505,13 @@ export interface ISetPointCoordinates {
   getScreenY: ((anID: string, plotNum?:number) => number | null)
   getLegendColor?: ((anID: string) => string)
   enableAnimation: React.MutableRefObject<boolean>
+  enableConnectors: boolean
 }
 
 export function setPointCoordinates(props: ISetPointCoordinates) {
   const {
-    dataConfiguration, dotsRef, pointColor, pointRadius, getColorForId,
-    getScreenX, getScreenY, getLegendColor, enableAnimation, selectedPointRadius
+    dataConfiguration, dotsRef, pointColor, pointRadius, selectedPointRadius, getColorForId,
+    getScreenX, getScreenY, getLegendColor, enableAnimation, enableConnectors
   } = props;
   const duration = enableAnimation.current ? transitionDuration : 0;
 
@@ -544,11 +548,36 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
           return nodes[i].getAttribute('transform') ? duration : 1;
         })
         .attr('transform', transformForCase)
+        .select('line') // Set the x1,y1 of the connector line to the position of the previous dot (if any)
+          .attr('x1', (d, i) => {
+            if (i===0 || !enableConnectors) return 0;
+            const prevData = dots.data()[i-1];
+            if (prevData.plotNum !== d.plotNum) return 0;
+            const prevX = getScreenX(prevData.caseID);
+            const thisX = getScreenX(d.caseID);
+            if (isFiniteNumber(thisX) && isFiniteNumber(prevX)) {
+              return prevX - thisX;
+            } else {
+              return 0;
+            }
+          })
+          .attr('y1', (d, i) => {
+            if (i===0 || !enableConnectors) return 0;
+            const prevData = dots.data()[i-1];
+            if (prevData.plotNum !== d.plotNum) return 0;
+            const prevY = getScreenY(prevData.caseID, d.plotNum);
+            const thisY = getScreenY(d.caseID, d.plotNum);
+            if (isFiniteNumber(thisY) && isFiniteNumber(prevY)) {
+              return prevY - thisY;
+            } else {
+              return 0;
+            }
+          })
+        .end()
         // The rest of this should not be necessary, but works around an apparent Chrome bug.
         // At least in Chrome v120 on MacOS, if the points are animated from a position far off-screen,
         // they never show up when transitioned to visible positions.
         // The no-op setting of the SVG 'x' attribute makes them snap into position if that happened.
-        .end()
         .then(() => {
           dotsRef.current?.setAttribute('x', '0');
         })
@@ -576,8 +605,22 @@ export function setPointCoordinates(props: ISetPointCoordinates) {
     }
   };
 
+  const styleConnectors = (circles: DotSelection | null) => {
+    if (circles != null) {
+      circles
+        .select('line')
+          .style('stroke', (aCaseData: CaseData) => {
+            // Lines are the same color as dots, but partially transparent in CSS.
+            // Alternatively, could use lightenColor() instead of transparency,
+            // but would need to move the lines behind the dots to make the junctions look right.
+            return lookupLegendColor(aCaseData);
+          });
+    }
+  };
+
   const graphDots = selectGraphDots(dotsRef.current);
   setPositions(graphDots);
+  styleConnectors(graphDots);
 
   const innerCircles = selectInnerCircles(dotsRef.current);
   styleInnerCircles(innerCircles);

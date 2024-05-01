@@ -102,7 +102,8 @@ export const CaseDots = function CaseDots(props: PlotProps) {
     setPointCoordinates({
       dataConfiguration, pointRadius, selectedPointRadius, dotsRef, selectedOnly,
       getColorForId: graphModel.getColorForId,
-      pointColor, pointStrokeColor, getScreenX, getScreenY, getLegendColor, enableAnimation
+      pointColor, pointStrokeColor, getScreenX, getScreenY, getLegendColor, enableAnimation,
+      enableConnectors: false
     });
   }, [dataConfiguration, graphModel, layout, dotsRef, enableAnimation]);
 

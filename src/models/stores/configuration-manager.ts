@@ -127,6 +127,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["comparisonPlaceholderContent"]>("comparisonPlaceholderContent");
   }
 
+  get initiallyHideExemplars() {
+    return this.getProp<UC["initiallyHideExemplars"]>("initiallyHideExemplars");
+  }
+
   get navTabs() {
     return this.getProp<UC["navTabs"]>("navTabs");
   }
@@ -149,6 +153,10 @@ export class ConfigurationManager implements UnitConfiguration {
 
   get toolbar() {
     return this.getProp<UC["toolbar"]>("toolbar");
+  }
+
+  get annotations() {
+    return this.getProp<UC["annotations"]>("annotations");
   }
 
   get authorTools() {

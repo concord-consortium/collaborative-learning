@@ -42,6 +42,7 @@
     "supportStackedTwoUpView": false,
     "showPublishedDocsInPrimaryWorkspace": false,
     "comparisonPlaceholderContent": "",
+    "initiallyHideExemplars": false,
     "navTabs": {
       "lazyLoadTabContents": true,
       "showNavPanel": true,

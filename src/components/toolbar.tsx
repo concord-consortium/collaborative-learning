@@ -11,11 +11,13 @@ import { DeleteButton } from "./delete-button";
 import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
-import { kSparrowAnnotationMode } from "../models/stores/persistent-ui";
-import { logSparrowShowHide } from "../models/tiles/log/log-sparrow-event";
-import { LogEventName } from "../../src/lib/logger-types";
 
 import "./toolbar.scss";
+
+// Buttons with these IDs are no longer displayed in this toolbar.
+// They are legal in the config for historical reasons but will be ignored here.
+// (See `annotation-toolbar.tsx`)
+const ignoredButtons = [ "sparrow", "hide-annotations" ];
 
 interface IProps extends IBaseProps {
   document: DocumentModelType;
@@ -60,12 +62,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "delete":
           this.handleDelete();
           break;
-        case "sparrow":
-          this.handleSparrow();
-          break;
-        case "hide-annotations":
-          this.handleHideAnnotations();
-          break;
         case "duplicate":
           this.handleDuplicate();
           break;
@@ -85,18 +81,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       this.handleDragNewTile(tool, e);
     };
     const updateToolButton = (toolButton: IToolbarButtonModel) => {
-      if (toolButton.id === "hide-annotations") {
-        // Update hide annotation button's icon and title based on current annotation visibility
-        const { persistentUI } = this.stores;
-        const appIcons = toolButton.env?.appIcons;
-        toolButton.setIcon(
-          appIcons?.[persistentUI.showAnnotations ? "icon-hide-annotations-tool" : "icon-show-annotations-tool"]
-        );
-        toolButton.setTitle(persistentUI.showAnnotations ? "Hide Annotations" : "Show Annotations");
-      }
+      // Currently no-op; no buttons need updates.
     };
     const renderToolButtons = (toolbarModel: IToolbarModel) => {
       return toolbarModel.map(toolButton => {
+        if (ignoredButtons.includes(toolButton.id)) return null;
         updateToolButton(toolButton);
         const buttonProps: IToolbarButtonProps = {
           toolButton,
@@ -155,11 +144,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private isButtonActive(toolButton: IToolbarButtonModel) {
-    const { ui } = this.stores;
     if (toolButton.id === "solution") {
       return this.selectedTilesIncludeTeacher();
-    } else if (toolButton.id === "sparrow") {
-      return ui.annotationMode === kSparrowAnnotationMode;
     } else {
       return toolButton === this.state.activeTool;
     }
@@ -217,25 +203,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private handleSelect() {
     // nothing to do
-  }
-
-  private handleSparrow() {
-    const { ui, persistentUI } = this.stores;
-    if (ui.annotationMode === kSparrowAnnotationMode) {
-      ui.setAnnotationMode();
-    } else {
-      ui.setAnnotationMode("sparrow");
-      persistentUI.setShowAnnotations(true);
-      ui.setSelectedTile();
-    }
-  }
-
-  private handleHideAnnotations() {
-    const { ui, persistentUI } = this.stores;
-    ui.setAnnotationMode();
-    persistentUI.setShowAnnotations(!persistentUI.showAnnotations);
-    const showOrHideAnnotations = persistentUI.showAnnotations ? "Show" : "Hide";
-    logSparrowShowHide(LogEventName.SPARROW_SHOW_HIDE, showOrHideAnnotations);
   }
 
   private handleUndo() {

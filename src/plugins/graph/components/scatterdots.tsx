@@ -14,18 +14,20 @@ import {
   setPointSelection
 } from "../utilities/graph-utils";
 import { useGraphLayerContext } from "../hooks/use-graph-layer-context";
+import { useGraphSettingsContext } from "../hooks/use-graph-settings-context";
 
 export const ScatterDots = function ScatterDots(props: PlotProps) {
   const {dotsRef, enableAnimation} = props,
     graphModel = useGraphModelContext(),
     layer = useGraphLayerContext(),
     dataConfiguration = useDataConfigurationContext(),
+    layout = useGraphLayoutContext(),
+    { connectPointsByDefault } = useGraphSettingsContext(),
     dataset = dataConfiguration?.dataset,
     secondaryAttrIDsRef = useRef<string[]>([]),
     pointRadiusRef = useRef(0),
     selectedPointRadiusRef = useRef(0),
     dragPointRadiusRef = useRef(0),
-    layout = useGraphLayoutContext(),
     legendAttrID = dataConfiguration?.attributeID('legend') as string,
     yScaleRef = useRef<ScaleNumericBaseType>(),
     target = useRef<any>(),
@@ -146,11 +148,12 @@ export const ScatterDots = function ScatterDots(props: PlotProps) {
       dataConfiguration, dotsRef, pointRadius: pointRadiusRef.current,
       selectedPointRadius: selectedPointRadiusRef.current,
       selectedOnly, getScreenX, getScreenY, getLegendColor,
-      getColorForId: graphModel.getColorForId, enableAnimation, pointColor, pointStrokeColor
+      getColorForId: graphModel.getColorForId, enableAnimation, pointColor, pointStrokeColor,
+      enableConnectors: connectPointsByDefault
     });
     refreshDragHandlers();
   }, [dataConfiguration, dataset, dotsRef, layout, legendAttrID,
-    enableAnimation, graphModel, yScaleRef, refreshDragHandlers]);
+    enableAnimation, graphModel, yScaleRef, refreshDragHandlers, connectPointsByDefault]);
 
   // const refreshPointPositionsSVG = useCallback((selectedOnly: boolean) => {
   //   const xAttrID = dataConfiguration?.attributeID('x') ?? '',

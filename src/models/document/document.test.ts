@@ -1,11 +1,12 @@
 import { getSnapshot, Instance } from "mobx-state-tree";
 import { createDocumentModel, DocumentModelType } from "./document";
-import { PersonalDocument, ProblemDocument } from "./document-types";
+import { ExemplarDocument, PersonalDocument, ProblemDocument } from "./document-types";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { TextContentModelType } from "../tiles/text/text-content";
 import { expectEntryToBeComplete } from "../history/undo-store-test-utils";
 import { TreeManager } from "../history/tree-manager";
 import { LogEventName } from "../../lib/logger-types";
+import { UserModel } from "../stores/user";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../register-tile-types";
@@ -52,6 +53,7 @@ const mockQueryClient = {
 describe("document model", () => {
   let document: DocumentModelType;
   let documentWithoutContent: DocumentModelType;
+  let exemplarDocument: DocumentModelType;
 
   beforeEach(() => {
     document = createDocumentModel({
@@ -68,6 +70,13 @@ describe("document model", () => {
       key: "test",
       createdAt: 1,
       visibility: "public"
+    });
+    exemplarDocument = createDocumentModel({
+      type: ExemplarDocument,
+      uid: "ivan_idea_1",
+      key: "exemplarDoc",
+      createdAt: 1,
+      visibility: "private"
     });
   });
 
@@ -225,6 +234,29 @@ describe("document model", () => {
     expect(document.visibility).toBe("public");
     document.toggleVisibility("private");
     expect(document.visibility).toBe("private");
+  });
+
+  it("properly reports visibility", () => {
+    const owner = UserModel.create({ type: "student", id: "1" });
+    const otherStudent = UserModel.create({ type: "student", id: "2" });
+    const teacher = UserModel.create({ type: "teacher", id: "3" });
+    const mockDocumentsStore = (val: any) => ({ isExemplarVisible: (id: string) => val });
+    document.toggleVisibility("public");
+    expect(document.isAccessibleToUser(owner, mockDocumentsStore(false))).toBeTruthy();
+    expect(document.isAccessibleToUser(otherStudent, mockDocumentsStore(false))).toBeTruthy();
+    expect(document.isAccessibleToUser(teacher, mockDocumentsStore(false))).toBeTruthy();
+
+    document.toggleVisibility("private");
+    expect(document.isAccessibleToUser(owner, mockDocumentsStore(false))).toBeTruthy();
+    expect(document.isAccessibleToUser(otherStudent, mockDocumentsStore(false))).toBeFalsy();
+    expect(document.isAccessibleToUser(teacher, mockDocumentsStore(false))).toBeTruthy();
+
+    // Exemplar should be invisible to students unless explicitly allowed.
+    expect(exemplarDocument.isAccessibleToUser(otherStudent, mockDocumentsStore(false))).toBeFalsy();
+    expect(exemplarDocument.isAccessibleToUser(teacher, mockDocumentsStore(false))).toBeTruthy();
+
+    expect(exemplarDocument.isAccessibleToUser(otherStudent, mockDocumentsStore(true))).toBeTruthy();
+    expect(exemplarDocument.isAccessibleToUser(teacher, mockDocumentsStore(false))).toBeTruthy();
   });
 
   it("can set/get document properties", () => {
