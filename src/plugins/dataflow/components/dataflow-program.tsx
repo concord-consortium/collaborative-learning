@@ -54,8 +54,6 @@ interface IState {
   recordIndex: number; //# of ticks for record
 }
 
-const RETE_APP_IDENTIFIER = "dataflow@0.1.0";
-
 @inject("stores")
 @observer
 export class DataflowProgram extends BaseComponent<IProps, IState> {
