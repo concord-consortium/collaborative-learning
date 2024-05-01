@@ -48,15 +48,11 @@ context('Arrow Annotations (Sparrows)', function () {
     drawToolTile.getTileTitle().should("exist");
 
     cy.log("Add two rectangles and an ellipse");
-    drawToolTile.drawSmallRectangle(50, 50);
+    drawToolTile.drawRectangle(50, 50);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
-    drawToolTile.getDrawToolEllipse().click();
-    drawToolTile.getDrawTile()
-      .trigger("mousedown", 250, 50)
-      .trigger("mousemove", 200, 100)
-      .trigger("mouseup", 200, 100);
+    drawToolTile.drawEllipse(200, 50);
     drawToolTile.getEllipseDrawing().should("exist").and("have.length", 1);
-    drawToolTile.drawSmallRectangle(400, 100);
+    drawToolTile.drawRectangle(400, 100);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 2);
 
     cy.log("Annotation buttons only appear in sparrow mode");
