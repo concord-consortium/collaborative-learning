@@ -56,6 +56,7 @@ $top-space: 18px;
     height: $std-height;
     left: 0px;
     top: $top-space;
+    color: $node-letter-text-color;
   }
   .node-name {
     display: flex;
@@ -81,7 +82,7 @@ $top-space: 18px;
   // this wraps the output socket
   .output {
     position: absolute;
-    right: -25px;
+    right: -21px;
     .output-title {
       display: none;
     }
@@ -91,7 +92,7 @@ $top-space: 18px;
     display: flex;
     height: $std-height;
     .node-select .item {
-      width:140px;
+      //width:140px;
       height: $std-height;
       font-size: 13px;
     }
@@ -194,8 +195,8 @@ $top-space: 18px;
       position: absolute;
       left: 10%;
       top: -10px;
-      height: 2px; // adjust as needed
-      width: 80%; // adjust as needed
+      height: 2px;
+      width: 80%;
     }
   }
   .units-container {
@@ -284,6 +285,9 @@ $top-space: 18px;
       text-align: right;
       font-size: 14px;
     }
+    .single-unit {
+      padding-left: 2px;
+    }
   }
   .graph-button {
     height: 20px;
@@ -298,12 +302,42 @@ $top-space: 18px;
   }
 }
 
+/* particular layout for hold node */
+.node.control {
+  .number-container {
+    .single-unit {
+      padding-left: 3px;
+    }
+  }
+}
+
 /* particular layout for output nodes */
 .node.demo-output,
 .node.live-output {
+  .node-name {
+    margin-bottom: 1px;
+  }
   .input {
     margin-top:10px;
     height: $std-height;
+    &.nodevalue {
+      position: relative;
+      margin-top: 18px;
+      &::after {
+        content: "";
+        position: absolute;
+        left: 10%;
+        top: -10px;
+        height: 2px;
+        width: 80%;
+        background-color: $output-yellow-element;
+        z-index: -1;
+      }
+      .input-socket {
+        left: -34px;
+        top:-3px;
+      }
+    }
   }
 }
 
@@ -409,7 +443,7 @@ $top-space: 18px;
   background-color: $output-yellow;
   border-color: $output-yellow-outline;
   .close-node-button svg {
-    fill: lighten($output-yellow-outline, 10%);
+    fill: $output-yellow-element;
   }
   .node-type-letter {
     border-color: $output-yellow-outline;

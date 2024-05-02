@@ -4,8 +4,6 @@ import { observer } from "mobx-react";
 import { useStopEventPropagation } from "./custom-hooks";
 import { IBaseNode } from "../base-node";
 
-import "./num-control.scss";
-
 // This generics design isn't very user friendly if a caller
 // tries to construct the NumberControl with a key that doesn't
 // exist on the model the error message just complains about all properties

@@ -79,12 +79,14 @@ $button-label-text: $gray-text;
   }
 
   .icon-block {
+    box-sizing: border-box;
     position: relative;
     margin: 3px auto;
     width: 29px;
     height: 15px;
     border-radius: 2px;
     background-color: $button-sensor;
+    border: 1px solid $input-blue-outline;
 
     &.sensor {
       background-color: $input-blue;
@@ -125,22 +127,31 @@ $button-label-text: $gray-text;
       background-color: $button-node;
       border-radius: 8px;
       &.left {
-        left: 0px;
+        left: -2px;
         margin-left: -4px;
       }
       &.right {
-        right: 0px;
+        right: -1px;
         margin-right: -4px;
       }
       &.top {
-        top: 0px;
+        top: -1px;
       }
       &.mid {
-        top: 4px;
+        top: 2px;
       }
       &.bottom {
-        bottom: 0px;
+        bottom: -1px;
       }
     }
+  }
+  .node-icon-letter {
+    position: absolute;
+    font-weight: bold;
+    left: 38px;
+    transform: translateY(-17px);
+    font-size: 10px;
+    color: $node-letter-text-color;
+    font-family: "PT Sans Narrow", Lato, Helvetica, Verdana, sans-serif;
   }
 }

@@ -6,6 +6,7 @@ import { NodeType, NodeTypes } from "../../model/utilities/node";
 import { useUIStore } from "../../../../hooks/use-stores";
 
 import "./dataflow-program-toolbar.scss";
+import { getNodeLetter } from "../../nodes/utilities/view-utilities";
 
 interface INodeIconProps {
   i: number;
@@ -16,7 +17,9 @@ interface INodeIconProps {
 const NodeIcon = ({ i, nodeType, nodeDisplayName }: INodeIconProps) => {
   const iconClass = "icon-block " + nodeType.toLowerCase().replace(" ", "-");
   const iconDisplayName = nodeDisplayName ?? nodeType;
-    const nodeIcons = [];
+  const nodeIcons = [];
+  const nodeLetter = getNodeLetter(nodeType);
+
   switch (nodeType) {
     case "Number":
     case "Sensor":
@@ -45,6 +48,7 @@ const NodeIcon = ({ i, nodeType, nodeDisplayName }: INodeIconProps) => {
       <div className={iconClass}>
         {nodeIcons}
       </div>
+      <div className="node-icon-letter">{ nodeLetter }</div>
       <div className="label">{iconDisplayName}</div>
     </div>
   );

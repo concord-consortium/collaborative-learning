@@ -13,9 +13,9 @@ import { ReteManager } from "./rete-manager";
 
 const { RefSocket, RefControl } = Presets.classic;
 
-
 import "./dataflow-node.scss";
 import "./node-states.scss";
+import { getNodeLetter } from "./utilities/view-utilities";
 
 type NodeExtraData = { width?: number, height?: number }
 
@@ -50,8 +50,7 @@ export const CustomDataflowNode = observer(
   const inputs = Object.entries(data.inputs);
   const outputs = Object.entries(data.outputs);
   const controls = Object.entries(data.controls);
-  const selected = data.selected || false;
-  const { id, label, width, height } = data;
+  const { id } = data;
 
   const [nodeName, setNodeName] = React.useState((data as unknown as IBaseNode).model.orderedDisplayName);
 
@@ -59,7 +58,7 @@ export const CustomDataflowNode = observer(
   const node = (data as unknown as IBaseNode);
   const model = node.model;
 
-  const nodeLetter = model.type === "Timer" ? "t" : model.type.substring(0, 1);
+  const nodeLetter = getNodeLetter(model.type);
 
   const showPlot = model.plot;
 
@@ -71,6 +70,7 @@ export const CustomDataflowNode = observer(
     "gate-active": node instanceof ControlNode && node.model.gateActive,
     "has-flow-in": node instanceof ControlNode && node.hasFlowIn()
   });
+
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     setNodeName(e.target.value);
