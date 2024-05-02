@@ -38,17 +38,6 @@
         background-color: pink;
       }
     }
-    // &.selected {
-    //   &.sensorType, &.sensor, &.generatorType, &.interval {
-    //     background-color: $input-blue;
-    //     &.missing {
-    //       background-color: pink;
-    //     }
-    //   }
-    //   &.mathOperator, &.logicOperator, &.transformOperator {
-    //     background-color: $math-green-control;
-    //   }
-    // }
     &.selectable {
       &.missing {
         background-color: pink;
@@ -153,11 +142,3 @@
   }
 }
 
-
-//   .label {
-//     &.unselected {
-//       font-style: italic;
-//       font-size: 11px;
-//       margin-left: 0px;
-//     }
-//   }

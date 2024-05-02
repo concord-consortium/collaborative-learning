@@ -52,6 +52,7 @@ export const CustomDataflowNode = observer(
   const controls = Object.entries(data.controls);
   const { id } = data;
 
+  // FIXME: This is for styling/UX.  Real saving will be reimplemented in PT-187083097 Dataflow Editable Node Labels
   const [nodeName, setNodeName] = React.useState((data as unknown as IBaseNode).model.orderedDisplayName);
 
   // FIXME: update 'Scheme' so we don't have to typecast here
