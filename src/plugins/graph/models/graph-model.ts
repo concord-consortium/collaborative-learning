@@ -1,6 +1,7 @@
 import { ObservableMap, reaction } from "mobx";
 import stringify from "json-stringify-pretty-compact";
 import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import { cloneDeep } from "lodash";
 import { IClueObject } from "../../../models/annotations/clue-object";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { IAdornmentModel } from "../adornments/adornment-models";
@@ -24,7 +25,6 @@ import {
   clueGraphColors, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
 } from "../../../utilities/color-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
-import { ConnectingLinesModel } from "../adornments/connecting-lines/connecting-lines-model";
 import { isSharedCaseMetadata, SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { getDotId } from "../utilities/graph-utils";
 import { GraphLayerModel, IGraphLayerModel } from "./graph-layer-model";
@@ -92,17 +92,33 @@ export const GraphModel = TileContentModel
     annotationSizesCache: new ObservableMap<string,RectSize>()
   }))
   .preProcessSnapshot((snapshot: any) => {
-    const hasLayerAlready:boolean = (snapshot?.layers?.length || 0) > 0;
-    if (!hasLayerAlready && snapshot?.config) {
-      const { config, ...others } = snapshot;
-      if (config != null) {
-        return {
-          layers: [{ config }],
-          ...others
-        };
-      }
+    // See if any changes are needed
+    const hasLayerAlready = (snapshot?.layers?.length || 0) > 0;
+    const needsLayerAdded = !hasLayerAlready && snapshot?.config;
+    const hasLegacyAdornment = snapshot?.adornments
+      && snapshot.adornments.find((adorn: any) => adorn.type === 'Connecting Lines');
+    const invalidLeftAxis = snapshot?.axes?.left?.min === null || snapshot?.axes?.left?.max === null;
+    const invalidBotAxis = snapshot?.axes?.bottom?.min === null || snapshot?.axes?.bottom?.max === null;
+    if (!needsLayerAdded && !hasLegacyAdornment && !invalidLeftAxis && !invalidBotAxis) {
+      return snapshot;
     }
-    return snapshot;
+    const newSnap = cloneDeep(snapshot);
+    // Remove connecting-lines adornment if found
+    if(hasLegacyAdornment) {
+      newSnap.adornments = snapshot.adornments.filter((adorn: any) => adorn.type !== 'Connecting Lines');
+    }
+    // Add layers array if missing
+    if (needsLayerAdded) {
+      newSnap.layers = [{ config: snapshot.config }];
+    }
+    // Fix axes if needed
+    if (invalidLeftAxis) {
+      [newSnap.axes.left.min, newSnap.axes.left.max] = kDefaultNumericAxisBounds;
+    }
+    if (invalidBotAxis) {
+      [newSnap.axes.bottom.min, newSnap.axes.bottom.max] = kDefaultNumericAxisBounds;
+    }
+    return newSnap;
   })
   .views(self => ({
     /**
@@ -708,9 +724,6 @@ export const GraphModel = TileContentModel
                 newLayer.setDataConfiguration(dataConfig);
                 dataConfig.setDataset(dataSetModel.dataSet, metaDataModel);
                 newLayer.configureLinkedLayer();
-                // May need these when we want to actually display the new layer:
-                // newLayer.updateAdornments(true);
-                // newLayer.setDataSetListener();
               }
             } else {
               console.warn('| Metadata not found');
@@ -811,11 +824,6 @@ export function createGraphModel(snap?: IGraphModelSnapshot, appConfig?: AppConf
     yAttributeLabel: axisLabels && axisLabels.left,
     ...snap
   });
-  const connectByDefault = appConfig?.getSetting("connectPointsByDefault", "graph");
-  if (connectByDefault) {
-    const cLines = ConnectingLinesModel.create();
-    createdGraphModel.addAdornment(cLines);
-  }
 
   return createdGraphModel;
 }

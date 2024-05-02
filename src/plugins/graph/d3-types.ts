@@ -8,7 +8,7 @@ export type DotsElt = SVGSVGElement | null;
 // For proper typing of D3 callbacks, the initial selection must be typed appropriately.
 
 // type arguments:
-//  SVGCircleElement: type of element being selected
+//  SVGElement: type of element being selected
 //  CaseData: type of data attached to selected element
 //  SVGSVGElement: type of parent element selected by initial/global select
 //  unknown: type of data attached to parent element (none in this case)

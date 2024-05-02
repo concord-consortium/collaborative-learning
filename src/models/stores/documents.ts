@@ -4,7 +4,7 @@ import { observable } from "mobx";
 import { AppConfigModelType } from "./app-config-model";
 import { DocumentModelType } from "../document/document";
 import {
-  DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
+  DocumentType, ExemplarDocument, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../document/document-types";
 import { getTileEnvironment } from "../tiles/tile-environment";
@@ -43,6 +43,7 @@ export const DocumentsModel = types
     userContextProvider: undefined as UserContextProvider | undefined,
     firestore: undefined as Firestore | undefined,
     requiredDocuments: {} as Record<string, IRequiredDocumentPromise>,
+    visibleExemplars: observable(new Set<string>()),
     all: observable<DocumentModelType>([])
   }))
   .views(self => ({
@@ -58,6 +59,10 @@ export const DocumentsModel = types
       return self.all.filter((document) => {
         return (document.type === type) && (document.uid === userId);
       });
+    },
+
+    isExemplarVisible(exemplarId: string) {
+      return self.visibleExemplars.has(exemplarId);
     }
   }))
   .views(self => ({
@@ -147,6 +152,14 @@ export const DocumentsModel = types
           ? user1.lastName.localeCompare(user2.lastName)
           : user1.firstName.localeCompare(user2.firstName);
       });
+    },
+
+    get visibleExemplarDocuments() {
+      return self.byType(ExemplarDocument).filter(e => self.isExemplarVisible(e.key));
+    },
+
+    get invisibleExemplarDocuments() {
+      return self.byType(ExemplarDocument).filter(e => !self.isExemplarVisible(e.key));
     }
   }))
   .views(self => ({
@@ -175,8 +188,14 @@ export const DocumentsModel = types
     },
     setFirestore(firestore: Firestore) {
       self.firestore = firestore;
+    },
+    setExemplarVisible(exemplarId: string, visible: boolean) {
+      if (visible) {
+        self.visibleExemplars.add(exemplarId);
+      } else {
+        self.visibleExemplars.delete(exemplarId);
+      }
     }
-
   }))
   .actions((self) => {
     const add = (document: DocumentModelType) => {

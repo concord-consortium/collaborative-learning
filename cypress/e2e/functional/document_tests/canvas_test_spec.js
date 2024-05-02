@@ -43,7 +43,7 @@ context('Test Canvas', function () {
     beforeTest(queryParams1);
     cy.log('verify investigation header UI');
     canvas.getEditTitleIcon().should('not.exist');
-    canvas.getPublishIcon().should('be.visible');
+    canvas.getPublishItem().should('be.visible');
     clueCanvas.getShareButton().should('be.visible');
     clueCanvas.getFourUpViewToggle().should('be.visible');
     clueCanvas.openFourUpView();
@@ -53,7 +53,7 @@ context('Test Canvas', function () {
     cy.log('verify personal workspace header UI');
     canvas.createNewExtraDocumentFromFileMenu(studentWorkspace, "my-work");
     canvas.getEditTitleIcon().should('be.visible');
-    canvas.getPersonalPublishIcon().should('be.visible');
+    canvas.getPublishItem().should('be.visible');
     clueCanvas.getShareButton().should('not.exist');
     clueCanvas.getFourUpViewToggle().should('not.exist');
 
@@ -396,7 +396,7 @@ context('Test Canvas', function () {
 
     cy.log("verify publish button is not visible when publish is disabled");
     cy.get(".icon-button.icon-publish").should("not.exist");
-    
+
     cy.log("Share button visible on personal docs, only when sort-work tab is visible");
     beforeTest(queryParams3);
     canvas.createNewExtraDocumentFromFileMenu(studentWorkspace, "my-work");

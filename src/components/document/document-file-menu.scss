@@ -7,9 +7,9 @@
     margin-left: 5px;
 
     .header {
-      width: 90px;
-      min-width: 90px;
-      max-width: 90px;
+      width: 60px;
+      min-width: 60px;
+      max-width: 60px;
       height: 26px;
       color: $charcoal-dark-2;
       background-color: $workspace-teal-light-4;
@@ -36,6 +36,7 @@
 
       .title-icon {
         margin-left: 2px;
+        margin-right: 4px;
         width: 24px;
         height: 24px;
 

@@ -15,7 +15,7 @@ const logManagerUrl: Record<LoggerEnvironment, string> = {
 
 const productionPortal = "learn.concord.org";
 
-interface LogMessage {
+export interface LogMessage {
   // these top-level properties are treated specially by the log-ingester:
   // https://github.com/concord-consortium/log-ingester/blob/a8b16fdb02f4cef1f06965a55c5ec6c1f5d3ae1b/canonicalize.js#L3
   application: string;
@@ -54,6 +54,8 @@ interface PendingMessage {
   parameters?: Record<string, unknown>;
   method?: LogEventMethod;
 }
+
+type ILogListener = (logMessage: LogMessage) => void;
 
 export class Logger {
   public static isLoggingEnabled = false;
@@ -108,6 +110,7 @@ export class Logger {
   private stores: IStores;
   private appContext: Record<string, any> = {};
   private session: string;
+  private logListeners: ILogListener[] = [];
 
   private constructor(stores: IStores, appContext = {}) {
     this.stores = stores;
@@ -115,11 +118,18 @@ export class Logger {
     this.session = uuid();
   }
 
+  public registerLogListener(listener: ILogListener) {
+    this.logListeners.push(listener);
+  }
+
   private formatAndSend(time: number,
       event: LogEventName, parameters?: Record<string, unknown>, method?: LogEventMethod) {
     const eventString = LogEventName[event];
     const logMessage = this.createLogMessage(time, eventString, parameters, method);
     sendToLoggingService(logMessage, this.stores.user);
+    for (const listener of this.logListeners) {
+      listener(logMessage);
+    }
   }
 
   private createLogMessage(

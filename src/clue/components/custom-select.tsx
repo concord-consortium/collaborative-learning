@@ -1,4 +1,5 @@
 import React, { ReactNode } from "react";
+import { VisuallyHidden } from "@chakra-ui/react";
 import { IDropdownItem } from "@concord-consortium/react-components";
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 
@@ -23,6 +24,7 @@ interface IProps {
   title?: string;
   titlePrefix?: string;
   titleIcon?: ReactNode;
+  titleVisuallyHidden?: boolean;
 }
 
 interface IState {
@@ -68,22 +70,26 @@ export class CustomSelect extends React.PureComponent<IProps, IState> {
   }
 
   private renderHeader = () => {
-    const { items, isDisabled, title, titlePrefix, titleIcon } = this.props;
+    const { items, isDisabled, title, titlePrefix, titleIcon, titleVisuallyHidden } = this.props;
     const selectedItem = items.find(i => i.text === this.state.selected);
     const titleText = title || selectedItem?.text;
     const showListClass = this.state.showList ? "show-list" : "";
     const disabled = isDisabled || items.length === 0 ? "disabled" : "";
-    return (
-      <div className={`header ${showListClass} ${disabled}`}
-        data-test={this.getDataTest("header")} onClick={this.handleHeaderClick}>
-        {titleIcon && <div className="title-icon">{titleIcon}</div>}
-        { titlePrefix
+    const titleMarkup =
+      titleVisuallyHidden
+        ? <VisuallyHidden>{titlePrefix} {titleText}</VisuallyHidden>
+        : titlePrefix
           ? <div className="title-container">
               <div className="title-prefix">{titlePrefix}</div>
               <div className="title">{titleText}</div>
             </div>
-          : <div className="item line-clamp">{titleText}</div>
-        }
+          : <div className="item line-clamp">{titleText}</div>;
+
+    return (
+      <div className={`header ${showListClass} ${disabled}`}
+        data-test={this.getDataTest("header")} onClick={this.handleHeaderClick}>
+        {titleIcon && <div className="title-icon">{titleIcon}</div>}
+        {titleMarkup}
         <ArrowIcon className={`arrow ${showListClass} ${disabled}`} />
       </div>
     );

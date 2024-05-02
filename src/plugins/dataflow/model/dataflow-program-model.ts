@@ -15,6 +15,7 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { BaseNodeModel, IBaseNodeModel } from "../nodes/base-node";
 import { IDataSet } from "../../../models/data/data-set";
 import { getAttributeIdForNode } from "./utilities/recording-utilities";
+import { STATE_VERSION_CURRENT } from "./dataflow-state-versions";
 
 export const ConnectionModel = types
   .model("Connection", {
@@ -25,6 +26,7 @@ export const ConnectionModel = types
     targetInput: types.string
   });
 export interface IConnectionModel extends Instance<typeof ConnectionModel> {}
+export interface ConnectionModelSnapshotIn extends SnapshotIn<typeof ConnectionModel> {}
 
 export const DataflowNodeModel = types.
   model("DataflowNode", {
@@ -84,7 +86,7 @@ export interface DataflowProcessor {
 
 export const DataflowProgramModel = types.
   model("DataflowProgram", {
-    id: types.maybe(types.string),
+    id: STATE_VERSION_CURRENT,
     nodes: types.map(DataflowNodeModel),
     connections: types.map(ConnectionModel),
     recentTicks: types.array(types.string),

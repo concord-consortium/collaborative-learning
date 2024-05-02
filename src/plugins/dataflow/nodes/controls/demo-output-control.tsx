@@ -15,8 +15,6 @@ export class DemoOutputControl extends ClassicPreset.Control
     public model: IDemoOutputNodeModel
   ) {
     super();
-
-    // TODO: convert "Heat Lamp" type to "Light Bulb" this is needed for old programs
   }
 
   get type() {

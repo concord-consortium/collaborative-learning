@@ -2,13 +2,12 @@ import { inject, observer } from "mobx-react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import React from "react";
 import FileSaver from "file-saver";
-import { usePublishDialog } from "./use-publish-dialog";
 import { DocumentFileMenu } from "./document-file-menu";
 import { MyWorkDocumentOrBrowser } from "./mywork-document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentModelType } from "../../models/document/document";
 import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
-import { logDocumentEvent } from "../../models/document/log-document-event";
+import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -17,8 +16,9 @@ import { IconButton } from "../utilities/icon-button";
 import ToggleControl from "../utilities/toggle-control";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
+import { DocumentAnnotationToolbar } from "./document-annotation-toolbar";
 
-import "./document.sass";
+import "./document.scss";
 
 export enum DocumentViewMode {
   Live,
@@ -51,17 +51,6 @@ const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
     <svg className={`action icon icon-download`} onClick={onClick}>
       <use xlinkHref={`#icon-publish`} />
     </svg>
-  );
-};
-
-const PublishButton = ({ document }: { document: DocumentModelType }) => {
-  const [showPublishDialog] = usePublishDialog(document);
-  const handlePublishButtonClick = () => {
-    showPublishDialog();
-  };
-  return (
-    <IconButton icon="publish" key="publish" className="action icon-publish" dataTestName="publish-icon"
-                onClickButton={handlePublishButtonClick} title="Publish Workspace" />
   );
 };
 
@@ -241,8 +230,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                 onCopyDocument={this.handleCopyDocumentClick}
                 isDeleteDisabled={true}
                 onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
-            {this.showPublishButton(document) &&
-              <PublishButton document={document} />}
+            <DocumentAnnotationToolbar />
           </div>
         }
         <div className="title" data-test="document-title">
@@ -258,18 +246,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         }
       </div>
     );
-  }
-
-  private showPublishButton(document: DocumentModelType) {
-    const { appConfig } = this.stores;
-    if (!appConfig.disablePublish) return true;
-    // When we disable publishing by setting disablePublish=true,
-    // we set showPublishButton to false to hide the Publish button
-    if (document.type === "planning" || appConfig.disablePublish === true) return false;
-    return appConfig.disablePublish
-            .findIndex(spec => {
-              return this.stores.sortedDocuments.isMatchingSpec(document, spec.documentType, spec.properties);
-            }) < 0;
   }
 
   private getStickyNoteData() {
@@ -302,6 +278,24 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <StickyNoteButton onClick={onClick} />
       </div>
     );
+  }
+
+  private openDocument(key: string) {
+    const doc = this.stores.documents.getDocument(key);
+    if (doc) {
+      this.stores.persistentUI.openResourceDocument(doc);
+      logDocumentViewEvent(doc);
+    }
+  }
+
+  private renderDocumentLink(key: string|undefined) {
+    if (!key) return null;
+    const title = this.stores.documents.getDocument(key)?.title;
+    if (title) {
+      return (<a onClick={() => this.openDocument(key)} href="#">{title}</a>);
+    } else {
+      return "[broken link!]";
+    }
   }
 
   private renderStickyNotesPopup() {
@@ -337,6 +331,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                 </div>
                 <div className="sticky-note-popup-item-content">
                   {support.content}
+                  { ' ' }
+                  { this.renderDocumentLink(support.linkedDocumentKey) }
                 </div>
               </div>
             );
@@ -368,19 +364,17 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const showPersonalShareToggle = this.showPersonalShareToggle();
     return (
       <div className={`titlebar ${type}`}>
-        {!hideButtons &&
-          <div className="actions">
-            { showFileMenu &&
+        <div className="actions">
+          { !hideButtons && showFileMenu &&
               <DocumentFileMenu document={document}
                 onOpenDocument={this.handleOpenDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}
                 isDeleteDisabled={countNotDeleted < 1}
                 onDeleteDocument={this.handleDeleteDocumentClick}
-                onAdminDestroyDocument={this.handleAdminDestroyDocument} /> }
-            {this.showPublishButton(document) &&
-              <PublishButton document={document} />}
-          </div>
-        }
+                onAdminDestroyDocument={this.handleAdminDestroyDocument} />
+          }
+          <DocumentAnnotationToolbar />
+        </div>
         {hasDisplayId && <div className="display-id" style={{opacity: 0}}>{displayId}</div>}
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication

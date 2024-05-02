@@ -197,6 +197,12 @@ export const SupportsModel = types
       return self.teacherStickyNotes.filter(support => {
         return support.showForUserProblem(target);
       });
+    },
+    getStickyNoteForUserWithLink(userId: string, key: string) {
+      return self.userSupports.find((s) =>
+        s.isStickyNote
+        && s.audience.identifier === userId
+        && s.support.linkedDocumentKey===key);
     }
   }))
   .views((self) => ({

@@ -1,6 +1,6 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import {
-  convertDocument, CustomEditor, Editor, EditorValue, htmlToSlate, serializeValue, slateToHtml, textToSlate
+  convertDocument, CustomEditor, Editor, EditorValue, htmlToSlate, serializeValue, slateToHtml, textToSlate, slateToText
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tile-content-info";
 import { TileContentModel } from "../tile-content";
@@ -80,6 +80,14 @@ export const TextContentModel = TileContentModel
           //return MarkdownSerializer.deserialize(self.joinText);
         default:
           return textToSlate(self.joinText);
+      }
+    },
+    asPlainText(): string {
+      if (self.format) {
+        return slateToText(this.asSlate());
+      } else {
+        // Undefined format means it's plain text already
+        return self.joinText;
       }
     }
   }))

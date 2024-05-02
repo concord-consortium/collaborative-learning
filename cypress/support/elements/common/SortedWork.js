@@ -14,11 +14,17 @@ class SortedWork {
   getSortWorkItem() {
     return cy.get(".sort-work-view .sorted-sections .list-item .footer .info");
   }
+  getSortWorkItemByTitle(title) {
+    return this.getSortWorkItem().contains(title);
+  }
+  getSortWorkGroup(groupName) {
+    return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(groupName).parent().parent();
+  }
   checkDocumentInGroup(groupName, doc) {
-    cy.get(".sort-work-view .sorted-sections .section-header-label").contains(groupName).parent().parent().find(".list .list-item .footer .info").should("contain", doc);
+    this.getSortWorkGroup(groupName).find(".list .list-item .footer .info").should("contain", doc);
   }
   checkDocumentNotInGroup(groupName, doc) {
-    cy.get(".sort-work-view .sorted-sections .section-header-label").contains(groupName).parent().parent().find(".list .list-item .footer .info").should("not.contain", doc);
+    this.getSortWorkGroup(groupName).find(".list .list-item .footer .info").should("not.contain", doc);
   }
   checkGroupIsEmpty(groupName){
     cy.get(".sort-work-view .sorted-sections .section-header-label")
@@ -32,6 +38,15 @@ class SortedWork {
       cy.get(".sort-work-view .sorted-sections .section-header-label").should("contain", label);
     });
   }
+
+  getFocusDocument() {
+    return cy.get('.sort-work-view .focus-document.sort-work');
+  }
+
+  getFocusDocumentTitle() {
+    return this.getFocusDocument().find('.document-title');
+  }
+
 }
 
 export default SortedWork;

@@ -7,7 +7,7 @@ import { isWorkspaceModelSnapshot, WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ENavTab } from "../view/nav-tabs";
 import { buildSectionPath, getCurriculumMetadata } from "../../../functions/src/shared";
-import { LearningLogDocument, LearningLogPublication, PersonalDocument,
+import { ExemplarDocument, LearningLogDocument, LearningLogPublication, PersonalDocument,
   PersonalPublication, PlanningDocument, ProblemDocument,
   ProblemPublication, SupportPublication } from "../document/document-types";
 import { UserModelType } from "./user";
@@ -223,6 +223,9 @@ export const PersistentUIModel = types
           subTab = groupId;
         }
       }
+      if (navTab === ENavTab.kSortWork) {
+        subTab = ENavTab.kSortWork;
+      }
 
       if (!subTab) {
         console.warn("Can't find subTab for doc", getSnapshot(doc));
@@ -293,6 +296,9 @@ const docTypeToNavTab: Record<string, ENavTab | undefined> = {
   [LearningLogPublication]: ENavTab.kClassWork,
   [PersonalPublication]: ENavTab.kClassWork,
   [SupportPublication]: ENavTab.kClassWork,
+
+  // Other
+  [ExemplarDocument]: ENavTab.kSortWork,
 };
 
 

@@ -2,7 +2,7 @@ import { getSnapshot } from "mobx-state-tree";
 import { SupportsModel, SupportTarget, AudienceEnum, TeacherSupportModel, ClassAudienceModel, GroupAudienceModel,
   UserAudienceModel,
   TeacherSupportModelType} from "./supports";
-import { createTextSupport, ESupportType } from "../curriculum/support";
+import { createTextSupport, ESupportType, createStickyNote } from "../curriculum/support";
 import { omitUndefined } from "../../utilities/test-utils";
 
 describe("supports model", () => {
@@ -172,5 +172,24 @@ describe("supports model", () => {
     expect((multiSupports[0] as TeacherSupportModelType).key).toEqual(classSupportAll.key);
     expect((multiSupports[1] as TeacherSupportModelType).key).toEqual(groupSupport.key);
     expect((multiSupports[2] as TeacherSupportModelType).key).toEqual(userSupport.key);
+  });
+
+  it("queries for sticky notes", () => {
+    const nonStickySupport = {uid: "1", key: "4", support: createTextSupport(""),
+      type: SupportTarget.section, sectionId: "didYouKnow",
+      audience: UserAudienceModel.create({identifier: "user1"}), authoredTime: 45};
+    const stickyNote = {uid: "1", key: "4",
+      support: createStickyNote("Message", "Exemplar ID"),
+      type: SupportTarget.section, sectionId: "",
+      audience: UserAudienceModel.create({identifier: "user1"}), authoredTime: 45};
+    const supports = SupportsModel.create({ userSupports: [ nonStickySupport, stickyNote ] });
+
+    expect(supports.getStickyNoteForUserWithLink("user1", "Exemplar ID")).toMatchObject({
+      type: "section",
+      support: {
+        mode: "sticky"
+      }
+    });
+    expect(supports.getStickyNoteForUserWithLink("user4", "Exemplar ID")).toBeFalsy();
   });
 });

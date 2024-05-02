@@ -1,4 +1,4 @@
-import { types, Instance, applySnapshot, getSnapshot, addDisposer } from "mobx-state-tree";
+import { types, Instance, applySnapshot, getSnapshot, addDisposer, SnapshotIn } from "mobx-state-tree";
 import { observable, reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
@@ -346,6 +346,7 @@ export const DataflowContentModel = TileContentModel
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;
+export type DataflowContentModelSnapshotIn = SnapshotIn<typeof DataflowContentModel>;
 
 export function formatTime(seconds: number) {
   const minutes = Math.floor(seconds / 60);

@@ -44,11 +44,15 @@ class ResourcesPanel{
     }
 
     getDocumentCloseButton() {
-      return cy.get('.document-buttons .close-doc-button')
+      return cy.get('.document-buttons .close-doc-button');
     }
 
     getDocumentEditButton() {
-      return cy.get('.document-buttons .edit-button')
+      return cy.get('.document-buttons .edit-button');
+    }
+
+    getExemplarShareCheckbox() {
+      return cy.get('.focus-document .document-status input[type=checkbox]');
     }
 
     getEditableDocumentContent() {

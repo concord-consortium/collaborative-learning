@@ -10,10 +10,15 @@ import { DEBUG_DOC_LIST } from "../../lib/debug";
 import { SortWorkDocumentArea } from "./sort-work-document-area";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { DocListDebug } from "./doc-list-debug";
+import { logDocumentViewEvent } from "../../models/document/log-document-event";
 
 import "../thumbnail/document-type-collection.sass";
 import "./sort-work-view.scss";
 
+/**
+ * Resources pane view of class work and exemplars.
+ * Various options for sorting the display are available - by user, by group, by tools used, etc.
+ */
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, persistentUI, sortedDocuments } = useStores();
 
@@ -56,6 +61,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   //******************************* Click to Open Document  ***************************************
   const handleSelectDocument = (document: DocumentModelType) => {
     persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, document.key);
+    logDocumentViewEvent(document);
   };
 
   const tabState = persistentUI.tabs.get(ENavTab.kSortWork);

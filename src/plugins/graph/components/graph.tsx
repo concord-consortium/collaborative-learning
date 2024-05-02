@@ -29,7 +29,6 @@ import {IDataSet} from "../../../models/data/data-set";
 // import {useDataTips} from "../hooks/use-data-tips";
 import {onAnyAction} from "../../../utilities/mst-utils";
 import { Adornments } from "../adornments/adornments";
-import { kConnectingLinesType } from "../adornments/connecting-lines/connecting-lines-types";
 import { AxisEndComponents } from "./axis-end-components";
 import { GraphLayer } from "./graph-layer";
 
@@ -159,12 +158,6 @@ export const Graph = observer(
     if (!layer) return;
     layer.config.setAttributeType(graphPlaceToAttrRole[place], treatAs, 0, attrId);
     layer.config.dataset && graphController?.handleAttributeAssignment(layer.config, place, attrId);
-
-    const connectingLines = graphModel.adornments.find(a => a.type === kConnectingLinesType);
-    if (connectingLines && place === "left") {
-      treatAs === 'categorical' && graphModel.hideAdornment(kConnectingLinesType);
-      treatAs === 'numeric' && graphModel.showAdornment(kConnectingLinesType);
-    }
   };
 
   // useDataTips({dotsRef, graphModel, enableAnimation});
