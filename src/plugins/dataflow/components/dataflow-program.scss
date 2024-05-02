@@ -70,4 +70,12 @@ $dataflow-toolbar-height: 364px;
   .hidden {
     display: none;
   }
+
+  svg[data-testid="connection"] {
+    path {
+      stroke: $socket-and-connection-gray;
+      stroke-width: 5px;
+      stroke-dasharray: 5, 5;
+    }
+  }
 }

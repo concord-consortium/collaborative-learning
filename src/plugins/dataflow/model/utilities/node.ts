@@ -367,7 +367,7 @@ export const NodeSensorTypes = [
   {
     name: "Pin Reading",
     type: "pin-reading",
-    units: "",
+    units: "mV",
     icon: SignalIcon,
     decimalPlaces: 0
   }
