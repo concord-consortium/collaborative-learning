@@ -24,7 +24,7 @@ import { recordCase } from "../model/utilities/recording-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { ReteManager } from "../nodes/rete-manager";
 
-import "./dataflow-program.sass";
+import "./dataflow-program.scss";
 
 export interface IStartProgramParams {
   runId: string;

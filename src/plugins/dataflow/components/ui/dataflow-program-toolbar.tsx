@@ -1,12 +1,12 @@
 import React from "react";
 import { DragOverlay, useDraggable } from "@dnd-kit/core";
-
 import { getNodeType, isNodeDraggableId, nodeDraggableId } from "../dataflow-types";
 import { NodeType, NodeTypes } from "../../model/utilities/node";
 import { useUIStore } from "../../../../hooks/use-stores";
+import { getNodeLetter } from "../../nodes/utilities/view-utilities";
 
 import "./dataflow-program-toolbar.scss";
-import { getNodeLetter } from "../../nodes/utilities/view-utilities";
+
 
 interface INodeIconProps {
   i: number;

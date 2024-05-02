@@ -88,35 +88,25 @@ $button-label-text: $gray-text;
     background-color: $button-sensor;
     border: 1px solid $input-blue-outline;
 
-    &.sensor {
-      background-color: $input-blue;
-    }
-    &.number {
-      background-color: $input-blue;
-    }
-    &.generator {
-      background-color: $input-blue;
-    }
+    &.sensor,
+    &.number,
+    &.generator,
     &.timer {
       background-color: $input-blue;
     }
-    &.math {
-      background-color: $operator-green;
-    }
-    &.logic {
-      background-color: $operator-green;
-    }
-    &.transform {
-      background-color: $operator-green;
-    }
+    &.math,
+    &.logic,
+    &.transform,
     &.control {
       background-color: $operator-green;
     }
     &.demo-output {
       background-color: $output-yellow;
+      border: 1px solid $output-yellow-outline;
     }
     &.live-output {
       background-color: $output-yellow;
+      border: 1px solid $output-yellow-outline;
     }
 
     .icon-node {

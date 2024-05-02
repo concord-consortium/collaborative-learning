@@ -10,12 +10,12 @@ import { NodeEditorMST } from "./node-editor-mst";
 import { Delete } from "./delete";
 import { ControlNode } from "./control-node";
 import { ReteManager } from "./rete-manager";
+import { getNodeLetter } from "./utilities/view-utilities";
 
 const { RefSocket, RefControl } = Presets.classic;
 
 import "./dataflow-node.scss";
 import "./node-states.scss";
-import { getNodeLetter } from "./utilities/view-utilities";
 
 type NodeExtraData = { width?: number, height?: number }
 
@@ -92,11 +92,6 @@ export const CustomDataflowNode = observer(
       <input
         value={nodeName}
         onChange={handleInputChange}
-        onBlur={() => { // NOTE on next story - look at number control for example that might handle readOnly...and...
-          if (nodeName !== model.orderedDisplayName) {
-            nodeName && model.setOrderedDisplayName(nodeName);
-          }
-        }}
       />
       </div>
       {/* Outputs */}
