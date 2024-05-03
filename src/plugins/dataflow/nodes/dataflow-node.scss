@@ -126,12 +126,11 @@ $top-space: 18px;
     display: flex;
 
     .node-graph {
-      margin-top:7px;
+      margin-top:8px;
       padding: 5px 5px 0 0;
       width: $node-inner-width;
-      background-color: white;
-      border-left: 1.5px solid #c6d6f6;
-      border-top: 1.5px solid #c6d6f6;
+      border: 2px solid white;
+      border-radius: 3px;
     }
 
     .node-bottom-buttons{
@@ -167,12 +166,6 @@ $top-space: 18px;
           &:active {
             color: white;
           }
-        }
-      }
-      svg {
-        path.main-path {
-          stroke: $gray-mid-click;
-          stroke-dasharray: 5;
         }
       }
     }
@@ -412,6 +405,9 @@ $top-space: 18px;
       fill: lighten($input-blue-outline, 10%);
     }
   }
+  .node-graph {
+    background-color: $input-blue-lighter-3;
+  }
   .scale-buttons {
     color: $input-blue-outline;
   }
@@ -462,6 +458,9 @@ $top-space: 18px;
       fill: lighten($operator-green-outline, 10%);
     }
   }
+  .node-graph {
+    background-color: $operator-green-lighter-3;
+  }
   .scale-buttons {
     color: $operator-green-outline;
   }
@@ -485,6 +484,9 @@ $top-space: 18px;
   .node-select-container .icon svg {
     fill: $output-yellow-outline;
   }
+  .demo-output-value-container {
+    background-color: $output-yellow-lighter-3;
+  }
   .graph-button {
     &.active {
       background-color: $output-yellow-lighter-2;
@@ -493,6 +495,9 @@ $top-space: 18px;
     svg {
       fill: lighten($output-yellow-outline, 10%);
     }
+  }
+  .node-graph {
+    background-color: $output-yellow-lighter-3;
   }
   .scale-buttons {
     color: $output-yellow-outline;

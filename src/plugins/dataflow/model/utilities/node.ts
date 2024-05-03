@@ -526,7 +526,7 @@ export const ChartPlotColors = ["#d51eff", "#17ddd7", "#d3d114", "#3974ff", "#ff
                                "#c60e0e", "#cc0860", "#b81da1", "#8d27ad", "#8b989f",
                                "#5dd581", "#3cc8f5", "#aeb9bf", "#92e3aa", "#7ad9f8",
                                "#5d6e77", "#31bc5a", "#0caadd"];
-export const NodePlotColor = "#969696";
+export const NodePlotColor = "#3f3f3f";
 export const NodePlotBlue = ChartPlotColors[3];
 export const NodePlotRed = ChartPlotColors[4];
 
