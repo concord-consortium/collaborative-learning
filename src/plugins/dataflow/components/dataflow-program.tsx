@@ -40,7 +40,6 @@ interface IProps extends SizeMeProps {
   program?: DataflowProgramModelType;
   programDataRate: number;
   readOnly?: boolean;
-  runnable?: boolean;
   tileHeight?: number;
   tileContent: DataflowContentModelType;
 }
@@ -210,7 +209,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const contentCopy = DataflowContentModel.create(contentSnapshot);
       this.playbackReteManager = new ReteManager(
         contentCopy.program, this.tileId, this.playbackToolDiv, contentCopy, this.stores,
-        this.props.runnable, true, true
+        true, true
       );
 
       // When we first show the playbackToolDiv after finishing recording it would show
@@ -253,7 +252,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (!this.toolDiv || !this.props.program) return;
 
     const reteManager = new ReteManager(this.props.program, this.tileId,
-      this.toolDiv, this.props.tileContent, this.stores, this.props.runnable, this.props.readOnly, false);
+      this.toolDiv, this.props.tileContent, this.stores, this.props.readOnly, false);
 
     this.reteManager = reteManager;
   };
@@ -331,7 +330,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private tick = () => {
-    const { runnable, tileContent: tileModel } = this.props;
+    const { readOnly, tileContent: tileModel } = this.props;
     const { playBackIndex, isPlaying, recordIndex } = this.state;
     const programMode = this.determineProgramMode();
     const { reteManager } = this;
@@ -351,7 +350,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       case ProgramMode.Recording:
         this.updateChannels();
         reteManager.tickAndProcessNodes();
-        if (runnable) {
+        if (!readOnly) {
           recordCase(this.props.tileContent, recordIndex);
         }
         this.incrementRecordIndex();

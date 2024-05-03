@@ -55,6 +55,7 @@ export const DataflowNodeModel = types.
     }
   }))
   .preProcessSnapshot((snapshot: any) => {
+    // TODO: is this needed anymore?
     // Turn position into x and y because MST has weird issues with arrays
     if (Array.isArray(snapshot.position)) {
       const { position: [x, y], ...rest } = snapshot;

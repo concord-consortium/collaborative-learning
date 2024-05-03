@@ -236,6 +236,8 @@ There is an alternative entry point for CLUE available at `/doc-editor.html`. Th
 
 The `document` parameter is useful if you want to work on something that requires a document in a specific state. You can just reload the page and get back to this state. You can use this locally by creating an initial document in doc-editor.html, and save the file to `src/public/[filename]`. Now you can load the document back with the parameter `document=[filename]`. This works because the document parameter will load URLs relative to the current page in the browser. This approach can also be used in Cypress tests. It would mean the test could just load in a document to test instead of having to setup the document first.
 
+The Standalone Document Editor also supports a `readOnly` url param. If you specify this param the document you open will be opened in readOnly mode. This is useful for testing or debugging issues with tiles that have different displays when in readOnly model.
+
 ### QA
 
 Along with `dev`, `test`, `authed` and `demo` modes the app has a `qa` mode.  QA mode uses the same parameters as demo mode with two additional parameters:

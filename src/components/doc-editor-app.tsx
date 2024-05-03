@@ -18,6 +18,8 @@ export const DocEditorApp = () => {
   const [sectionSnapshot, setSectionSnapshot] = useState<any>();
   const [fileName, setFileName] = useState<string>("");
 
+  const {document: documentURL, readOnly } = urlParams;
+
   function loadDocument(text: string) {
     const _parsedText = JSON.parse(text);
     let documentContentSnapshot;
@@ -82,7 +84,6 @@ export const DocEditorApp = () => {
   }
 
   useEffect(() => {
-    const {document: documentURL} = urlParams;
     if (!documentURL) {
       return;
     }
@@ -113,7 +114,7 @@ export const DocEditorApp = () => {
         contained={false}
         mode="1-up"
         isPrimary={true}
-        readOnly={false}
+        readOnly={readOnly}
         document={document}
         toolbar={appConfig.authorToolbar}
       />

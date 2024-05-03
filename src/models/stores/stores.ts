@@ -323,7 +323,9 @@ class Stores implements IStores{
           // Not sure if this should be "guide" or "teacher-guide", either ought to work
           unitGuide?.setFacet("teacher-guide");
           const teacherGuide = unitGuide?.getProblem(problemOrdinal || appConfig.defaultProblemOrdinal)?.problem;
-          unitUrls?.guide && teacherGuide.loadSections(unitUrls.guide);
+          // There might not be a teacher guide for this specific problem
+          if (!unitUrls?.guide || !teacherGuide) return;
+          teacherGuide.loadSections(unitUrls.guide);
           this.setTeacherGuide(teacherGuide);
         }
       }
