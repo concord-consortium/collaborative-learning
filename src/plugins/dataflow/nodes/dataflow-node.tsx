@@ -90,10 +90,11 @@ export const CustomDataflowNode = observer(
       <div className="node-type-letter">{nodeLetter}</div>
 
       <div className="node-name">
-      <input
-        value={nodeName}
-        onChange={handleInputChange}
-      />
+        <input
+          className="node-name-input"
+          value={nodeName}
+          onChange={handleInputChange}
+        />
       </div>
       {/* Outputs */}
       {outputs.map(([key, output]) => (

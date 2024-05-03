@@ -47,7 +47,7 @@ class DataflowToolTile {
     return cy.get('.output-socket');
   }
   getNodeTitle(workspaceClass) {
-    return cy.get(`${workspaceClass || ".primary-workspace"} .node .title`);
+    return cy.get(`${workspaceClass || ".primary-workspace"} .node .node-name-input`);
   }
   getNodeValueContainer(nodeType) {
     return this.getNode(nodeType).find(".value-container");
@@ -234,7 +234,7 @@ class DataflowToolTile {
     programNodes.forEach(node => {
       this.getCreateNodeButton(node.name).click();
       this.getNode(node.name).should("exist");
-      this.getNodeTitle().should("contain", node.title);
+      this.getNodeTitle().invoke("val").should("include", node.title);
     });
     this.getNodeOutput().eq(0).click({force: true});
     this.getNodeInput().eq(0).click({force: true});
