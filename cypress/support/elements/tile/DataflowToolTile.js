@@ -11,7 +11,7 @@ class DataflowToolTile {
     return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
   }
   getCreateNodeButton(nodeType) {
-    return cy.get(`.primary-workspace .icon-block.${nodeType}`);
+    return cy.get(`.primary-workspace [data-testid="add-${nodeType}-button"]`);
   }
   getNode(nodeType) {
     return cy.get(getNodeText(nodeType));

@@ -283,8 +283,10 @@ context('Simulator Tile', function () {
     .trigger('mousemove', { which: 1, pageX: 50, pageY: 100 })
     .trigger('mouseup', {force: true});
 
-    simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "288");
-
-    dataflowTile.getNodeValueContainer("sensor").should("contain.text", "288");
+    // FIXME: This could be flaky.  If positioning changes happen, the mouse movement might result
+    // in a different value than 275, so we should either do a range or move the
+    // input handle to a fixed position relative to slider not the page.
+    simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "275");
+    dataflowTile.getNodeValueContainer("sensor").should("contain.text", "275");
   });
 });

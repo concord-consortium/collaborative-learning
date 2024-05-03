@@ -75,6 +75,7 @@ const AddNodeButton = ({ disabled, i, nodeType, nodeDisplayName, onNodeCreateCli
         key={i}
         title={`Add ${nodeDisplayName} Block`}
         onClick={handleAddNodeButtonClick}
+        data-testid={`add-${nodeType.toLowerCase().replace(" ", "-")}-button`}
       >
         <NodeIcon i={i} nodeType={nodeType} nodeDisplayName={nodeDisplayName} />
       </button>
