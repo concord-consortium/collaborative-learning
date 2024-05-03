@@ -39,7 +39,7 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
         if (!tileElt) return undefined;
         switch (objectType) {
           case "node":
-            return getNodeBoundingBox(objectId, tileElt);
+            return getNodeBoundingBox(objectId, tileElt, content.sharedProgramData);
           case "pin":
             return getPinBoundingBox(objectId, tileElt);
           default:
