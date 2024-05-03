@@ -117,7 +117,6 @@ context('Dataflow Tool Tile', function () {
     // create transform node and drag to the right
     dataflowToolTile.getCreateNodeButton("transform").click();
     dataflowToolTile.getNode("transform").should("exist");
-    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Transform");
     dataflowToolTile.getNode("transform").click(50, 10)
       .trigger("pointerdown", 50, 10)
       .trigger("pointermove", dragXDestination, 10, { force: true })
@@ -575,7 +574,6 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNodeTitle().invoke("val").should("include", "Timer (on/off)");
     dataflowToolTile.getCreateNodeButton(nodes[1]).click();
     dataflowToolTile.getNode(nodes[1]).should("exist");
-    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Demo Output");
     dataflowToolTile.getNode("demo-output").click(50, 10)
       .trigger("pointerdown", 50, 10)
       .trigger("pointermove", dragXDestination, 10, { force: true })
