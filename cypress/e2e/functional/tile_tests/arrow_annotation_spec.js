@@ -1,22 +1,27 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import ArrowAnnotation from '../../../support/elements/tile/ArrowAnnotation';
+import DataflowToolTile from '../../../support/elements/tile/DataflowToolTile';
 import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
 import NumberlineToolTile from '../../../support/elements/tile/NumberlineToolTile';
+import SimulatorTile from '../../../support/elements/tile/SimulatorTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
 import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
 
 const aa = new ArrowAnnotation;
 const clueCanvas = new ClueCanvas;
+const dataflowTile = new DataflowToolTile;
+const diagramToolTile = new DiagramToolTile;
 const drawToolTile = new DrawToolTile;
-const tableToolTile = new TableToolTile;
 const geometryToolTile = new GeometryToolTile;
 const numberlineToolTile = new NumberlineToolTile;
+const simulatorTile = new SimulatorTile;
+const tableToolTile = new TableToolTile;
 const xyTile = new XYPlotToolTile;
-const diagramToolTile = new DiagramToolTile;
 
 const queryParams = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
+const queryParamsQa = `${Cypress.config("qaUnitStudent7Investigation3")}`;
 
 // Note copied from drawing tile test
 // NOTE: For some reason cypress+chrome thinks that the SVG elements are in a
@@ -336,8 +341,39 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("have.length", 1);
 
     aa.getAnnotationDeleteButtons().eq(0).click(); // Remove arrow
-    aa.getAnnotationButtons().eq(2).click(); // Connect equation to table
+    aa.getAnnotationButtons().eq(2).click(); // Connect equation to tablec
     aa.getAnnotationButtons().eq(3).click();
     aa.getAnnotationArrows().should("have.length", 1);
+  });
+
+  it.only("Can add annotations to Chip simulator tile", () => {
+    beforeTest(queryParamsQa);
+    clueCanvas.addTile("simulator");
+    simulatorTile.getSimulatorTile().should("exist");
+
+    clueCanvas.addTile("dataflow");
+    dataflowTile.getDataflowTile().should("exist");
+
+    // with no program, sim tile should have 28 "pin" buttons.
+    aa.getAnnotationButtons().should("not.exist");
+    aa.clickArrowToolbarButton();
+    aa.getAnnotationButtons().should("have.length", 28);
+
+    aa.getAnnotationButtons().eq(0).click();
+    aa.getAnnotationButtons().eq(27).click();
+    aa.getAnnotationArrows().should("have.length", 1);
+
+    aa.clickArrowToolbarButton();
+    // Create input, processing, and output nodes
+    dataflowTile.getCreateNodeButton("number").click();
+    dataflowTile.getCreateNodeButton("math").click();
+    dataflowTile.getCreateNodeButton("demo-output").click();
+
+    aa.clickArrowToolbarButton();
+    aa.getAnnotationButtons().should("have.length", 28+3);
+    aa.getAnnotationButtons().eq(0).click();
+    aa.getAnnotationButtons().eq(2).click();
+    aa.getAnnotationArrows().should("have.length", 2);
+
   });
 });
