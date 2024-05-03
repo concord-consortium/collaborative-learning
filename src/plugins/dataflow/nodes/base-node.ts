@@ -140,6 +140,10 @@ export const BaseNodeModel = types.model("BaseNodeModel",
     }
   },
 
+  setOrderedDisplayName(str: string) {
+    self.orderedDisplayName = str;
+  },
+
   createNextTickEntry(currentTick: string | undefined, nextTick: string, recentTicks?: string[]) {
     const previousEntry = currentTick && self.tickEntries.get(currentTick);
     if (previousEntry) {
