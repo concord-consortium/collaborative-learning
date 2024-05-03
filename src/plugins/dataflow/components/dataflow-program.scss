@@ -71,11 +71,13 @@ $dataflow-toolbar-height: 364px;
     display: none;
   }
 
-  svg[data-testid="connection"] {
-    path {
-      stroke: $socket-and-connection-gray;
-      stroke-width: 5px;
-      stroke-dasharray: 5, 5;
+  .dataflow-connection {
+    svg {
+      path {
+        stroke: $socket-and-connection-gray;
+        stroke-width: 5px;
+        stroke-dasharray: 5, 5;
+      }
     }
   }
 }
