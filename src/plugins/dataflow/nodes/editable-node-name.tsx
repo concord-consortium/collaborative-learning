@@ -12,18 +12,27 @@ export const EditableNodeName: React.FC<EditableNodeNameProps> = ({ node }) => {
     setNodeName(e.target.value);
   }
 
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+    }
+  }
+
   function saveNodeName(){
     nodeName && node.model.setOrderedDisplayName(nodeName);
   }
+
+  const valueString = node.readOnly ? node.model.orderedDisplayName : nodeName;
 
   return (
     <div className="node-name">
       <input
         className="node-name-input"
-        value={nodeName}
+        value={valueString}
         onChange={handleInputChange}
         onBlur={saveNodeName}
         disabled={node.readOnly}
+        onKeyDown={handleKeyDown}
       />
     </div>
   );
