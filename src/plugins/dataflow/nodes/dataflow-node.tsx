@@ -69,7 +69,8 @@ export const CustomDataflowNode = observer(
 
   const dynamicClasses = classNames({
     "gate-active": node instanceof ControlNode && node.model.gateActive,
-    "has-flow-in": node instanceof ControlNode && node.hasFlowIn()
+    "has-flow-in": node instanceof ControlNode && node.hasFlowIn(),
+    "plot-open": showPlot,
   });
 
 

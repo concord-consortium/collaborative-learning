@@ -92,9 +92,33 @@ $top-space: 18px;
     display: flex;
     height: $std-height;
     .node-select .item {
-      //width:140px;
       height: $std-height;
       font-size: 13px;
+    }
+  }
+  .node-graph-toggle-button {
+    position: relative;
+    width:$node-inner-width;
+    .graph-button {
+      height: 20px;
+      width: 20px;
+      position: absolute;
+      left: 3px;
+      top:-23px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: row;
+      padding: 3px;
+      box-sizing: border-box;
+      border-radius: 1px;
+      border: 2px solid white;
+      background-color: white;
+      svg {
+        width: 14px;
+        height: 14px;
+        z-index: 1;
+      }
     }
   }
   .node-bottom-section {
@@ -229,17 +253,6 @@ $top-space: 18px;
       height: $std-height;
     }
   }
-  .node-graph-container {
-    position: relative;
-    width:$node-inner-width;
-    .graph-button {
-      height: 20px;
-      width: 20px;
-      position: absolute;
-      left: 3px;
-      top:-23px;
-    }
-  }
 }
 
 /* particular layout for sensor/input node */
@@ -293,8 +306,7 @@ $top-space: 18px;
     height: 20px;
     width: 20px;
     position: absolute;
-    left:18.5px;
-    bottom: 20px;
+    top:-22px;
     svg {
       height: 14px;
       width: 14px;
@@ -339,6 +351,20 @@ $top-space: 18px;
       }
     }
   }
+  .demo-output-value-container {
+    border:2px solid white;
+    position: relative;
+    height: $std-height + 2;
+    width: $node-inner-width;
+    .left-content {
+      width: 30%;
+      .graph-button {
+        position: absolute;
+        top: -10px;
+        left:-1px;
+      }
+    }
+  }
 }
 
 /* node colors for input family */
@@ -379,7 +405,9 @@ $top-space: 18px;
   }
   .graph-button {
     border: 2px solid lighten($input-blue-outline, 10%);
-    background-color: $input-blue-lighter-2;
+    &.active {
+      background-color: $input-blue-lighter-2;
+    }
     svg {
       fill: lighten($input-blue-outline, 10%);
     }
@@ -427,7 +455,9 @@ $top-space: 18px;
   }
   .graph-button {
     border: 2px solid lighten($operator-green-outline, 10%);
-    background-color: $operator-green-lighter-2;
+    &.active {
+      background-color: $operator-green-lighter-2;
+    }
     svg {
       fill: lighten($operator-green-outline, 10%);
     }
@@ -456,6 +486,9 @@ $top-space: 18px;
     fill: $output-yellow-outline;
   }
   .graph-button {
+    &.active {
+      background-color: $output-yellow-lighter-2;
+    }
     border: 2px solid lighten($output-yellow-outline, 10%);
     svg {
       fill: lighten($output-yellow-outline, 10%);
@@ -527,16 +560,4 @@ $top-space: 18px;
     top: 125px;
   }
 }
-
-/* something in here is fixing our life, figure out what it is and add above */
-
-.node {
-
-
-
-}
-
-
-
-
 
