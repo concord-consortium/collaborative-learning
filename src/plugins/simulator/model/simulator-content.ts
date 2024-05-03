@@ -74,14 +74,32 @@ export const SimulatorContentModel = TileContentModel
     get annotatableObjects(): IClueObject[] {
       const tileId = getTileIdFromContent(self) ?? "";
       if (self.simulation === kPotentiometerServoKey) {
+        // Make an annotatable object for each mini-node
         const nodeData = getMiniNodesDisplayData(self.sharedProgramData);
-        return nodeData.inputNodesArr.map(node => {
-          return {
+        const visibleNodes = [
+          ...nodeData.inputNodesArr,
+          ...nodeData.operatorNodesArr,
+          ...nodeData.outputNodesArr];
+        const nodeObjects = visibleNodes.map(node =>
+          ({
             tileId,
             objectId: node.id,
             objectType: "node"
-          };
-        });
+          }));
+
+        // Plus an object for each of the 14 pins on each side of the image
+        const boardPins = [
+          ...Array.from({ length: 14 }, (_, index) => `L${index}`),
+          ...Array.from({ length: 14 }, (_, index) => `R${index}`)
+        ];
+        const pinObjects = boardPins.map(pin =>
+          ({
+            tileId,
+            objectId: pin,
+            objectType: "pin"
+          }));
+
+        return [...nodeObjects, ...pinObjects];
       }
       return [];
     }

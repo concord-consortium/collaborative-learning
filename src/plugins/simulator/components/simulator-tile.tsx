@@ -1,11 +1,13 @@
 import { observer } from "mobx-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { isCurriculumDocument } from "../../../models/document/document-types";
 import { SimulatorContentModelType } from "../model/simulator-content";
 import { SimulatorVariable } from "./simulator-variable";
+import { OffsetModel } from "../../../models/annotations/clue-object";
+import { getNodeBoundingBox, getPinBoundingBox, setPinOffsets } from "../simulations/potentiometer-servo/chip-sim-utils";
 
 import "./simulator-tile.scss";
 
@@ -31,31 +33,26 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
     return () => clearInterval(id);
   }, [canRunIndependently, content]);
 
-  const getNodeBoundingBox = useCallback((objectId: string) => {
-    // Find the HTML object representing this node
-    const elt = tileElt?.querySelector(`.node-${objectId}`);
-    // console.log('tileElt', tileElt, 'elt:', elt, 'rect:', elt?.getBoundingClientRect());
-    const tileRect = tileElt?.getBoundingClientRect();
-    const nodeRect = elt?.getBoundingClientRect();
-    if (tileRect && nodeRect) {
-      return {
-        left: nodeRect.left-tileRect.left,
-        top: nodeRect.top-tileRect.top,
-        width: nodeRect.width,
-        height: nodeRect.height
-      };
-    } else {
-      return undefined;
-    }
-  }, [tileElt]);
-
   useEffect(() => {
     onRegisterTileApi({
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
-        if (objectType === "node") {
-          return getNodeBoundingBox(objectId);
+        if (!tileElt) return undefined;
+        switch (objectType) {
+          case "node":
+            return getNodeBoundingBox(objectId, tileElt);
+          case "pin":
+            return getPinBoundingBox(objectId, tileElt);
+          default:
+            return undefined;
         }
-        return undefined;
+      },
+      getObjectDefaultOffsets: (objectId: string, objectType?: string) => {
+        // Set Pin arrows to attach to the outer edge by default.
+        const offsets = OffsetModel.create({});
+        if (objectType === "pin") {
+          setPinOffsets(objectId, offsets);
+        }
+        return offsets;
       }
     });
   // We do need to redefine this if the tileElt changes (which it does once, from undefined on first render)

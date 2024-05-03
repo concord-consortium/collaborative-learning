@@ -1,4 +1,5 @@
 import React from 'react';
+import { ISharedProgramNode, SharedProgramDataType } from '../../../shared-program-data/shared-program-data';
 
 import SineIcon from "../../../shared-assets/icons/dataflow/generator/sine.svg";
 import SquareIcon from "../../../shared-assets/icons/dataflow/generator/square.svg";
@@ -38,8 +39,13 @@ import NegationIcon from "../../../shared-assets/icons/dataflow/transform/negati
 import NotIcon from "../../../shared-assets/icons/dataflow/transform/not.svg";
 
 import TimerIcon from "../potentiometer-servo/assets/stopwatch.svg";
+import { IOffsetModel } from '../../../../models/annotations/clue-object';
 
-import { ISharedProgramNode, SharedProgramDataType } from '../../../shared-program-data/shared-program-data';
+const kBoardImageLeftEdge = 132;
+const kBoardImageRightEdge = 407;
+const kBoardImageTopEdge = 54;
+const kBoardImagePinSpacing = 16;
+const kBoardImageLabelWidth = 40;
 
 export function getTweenedServoAngle(realValue: number, lastVisibleValue: number) {
   const delta = realValue - lastVisibleValue;
@@ -261,3 +267,48 @@ export function getMiniNodesDisplayData(programData?: SharedProgramDataType): IM
   return { inputNodesArr, operatorNodesArr, outputNodesArr, extraCount };
 }
 
+export function getNodeBoundingBox (objectId: string, tileElt: HTMLElement) {
+  // Find the HTML object representing this node
+  const elt = tileElt.querySelector(`.node-${objectId}`);
+  // console.log('tileElt', tileElt, 'elt:', elt, 'rect:', elt?.getBoundingClientRect());
+  const tileRect = tileElt.getBoundingClientRect();
+  const nodeRect = elt?.getBoundingClientRect();
+  if (tileRect && nodeRect) {
+    return {
+      left: nodeRect.left-tileRect.left,
+      top: nodeRect.top-tileRect.top,
+      width: nodeRect.width,
+      height: nodeRect.height
+    };
+  } else {
+    return undefined;
+  }
+}
+
+export function getPinBoundingBox(objectId: string, tileElt: HTMLElement) {
+  // Find the position of the image with the pins on it
+  const elt = tileElt.querySelector(`.board`);
+  const tileRect = tileElt.getBoundingClientRect();
+  const imgRect = elt?.getBoundingClientRect();
+
+  if (tileRect && imgRect) {
+    const side = objectId.substring(0, 1);  // L or R
+    const pinNumber = Number(objectId.substring(1));
+    return {
+      left: side === 'L'
+        ? imgRect.left - tileRect.left + kBoardImageLeftEdge
+        : imgRect.left - tileRect.left + kBoardImageRightEdge - kBoardImageLabelWidth,
+      top: imgRect.top - tileRect.top + kBoardImageTopEdge + pinNumber*kBoardImagePinSpacing,
+      width: kBoardImageLabelWidth,
+      height: kBoardImagePinSpacing-2
+    };
+  } else {
+    return undefined;
+  }
+}
+
+export function setPinOffsets(objectId: string, offsets: IOffsetModel) {
+  const side = objectId.substring(0, 1);
+  offsets.setDx(side === "L" ? -kBoardImageLabelWidth/2 : kBoardImageLabelWidth/2);
+  return offsets;
+}
