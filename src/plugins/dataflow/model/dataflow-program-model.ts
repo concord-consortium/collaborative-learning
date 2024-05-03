@@ -7,7 +7,7 @@ import { GeneratorNodeModel } from "../nodes/generator-node";
 import { DemoOutputNodeModel } from "../nodes/demo-output-node";
 import { LiveOutputNodeModel } from "../nodes/live-output-node";
 import { SensorNodeModel } from "../nodes/sensor-node";
-import { NodeType, NodeTypes, kMaxNodeValues } from "./utilities/node";
+import { kMaxNodeValues } from "./utilities/node";
 import { TransformNodeModel } from "../nodes/transform-node";
 import { TimerNodeModel } from "../nodes/timer-node";
 import { ControlNodeModel } from "../nodes/control-node";
@@ -120,17 +120,6 @@ export const DataflowProgramModel = types.
     }
   }))
   .actions(self => ({
-    // This isn't great but it is how the unique node names have been working
-    updateNodeNames(){
-      console.log("| updateNodeNames called!");
-      let idx = 1;
-      self.nodes.forEach((node) => {
-        const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
-        const displayNameBase = nodeType ? nodeType.displayName : node.name;
-        node.data.orderedDisplayName = displayNameBase + " " + idx;
-        idx++;
-      });
-    },
     // This action is used to wrap the changes in a single MST transaction
     // This could be generic, but a specific name is used so the recorded event has
     // a useful name.
@@ -181,18 +170,16 @@ export const DataflowProgramModel = types.
   }))
   .actions(self => ({
     addNode(node: IDataflowNodeModel) {
+      // REVIEW: never seem to see this called?
       self.nodes.put(node);
-      self.updateNodeNames();
     },
     addNodeSnapshot(nodeSnapshot: DataflowNodeSnapshotIn) {
       const node = self.nodes.put(nodeSnapshot);
-      self.updateNodeNames();
       node.data.createNextTickEntry(undefined, self.currentTick);
       return node;
     },
     removeNode(id: IDataflowNodeModel["id"]) {
       self.nodes.delete(id);
-      self.updateNodeNames();
     },
     addConnection(connection: IConnectionModel) {
       self.connections.put(connection);

@@ -441,6 +441,13 @@ export class ReteManager implements INodeServices {
     return new constructor(id, model, this);
   };
 
+  private getNewNodeName(nodeType: string) {
+    const indexByType = this.editor.getNodes().filter(n => n.label === nodeType).length + 1;
+    // FIXME: "Input" node is "Sensor" internally, we special-case it in a few places now
+    const printableType = nodeType === "Sensor" ? "Input" : nodeType;
+    return `${printableType} ${indexByType}`;
+  }
+
   public async createAndAddNode(nodeType: string, position?: [number, number]) {
     const id = uniqueId();
     const { editor } = this;
@@ -455,7 +462,10 @@ export class ReteManager implements INodeServices {
       name: nodeType,
       x: newPosition[0],
       y: newPosition[1],
-      data: { type: nodeType }
+      data: {
+        type: nodeType,
+        orderedDisplayName: this.getNewNodeName(nodeType),
+      }
     });
 
     const node = editor.getNode(id);
