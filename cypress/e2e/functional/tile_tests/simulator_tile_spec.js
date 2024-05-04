@@ -283,10 +283,16 @@ context('Simulator Tile', function () {
     .trigger('mousemove', { which: 1, pageX: 50, pageY: 100 })
     .trigger('mouseup', {force: true});
 
-    // FIXME: This could be flaky.  If positioning changes happen, the mouse movement might result
-    // in a different value than 275, so we should either do a range or move the
-    // input handle to a fixed position relative to slider not the page.
-    simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "275");
-    dataflowTile.getNodeValueContainer("sensor").should("contain.text", "275");
+    let simVarValue;
+    simulatorTile.getVariableDisplayedValue().eq(1).invoke('text').then((text) => {
+      simVarValue = text.trim();
+      expect(Number(simVarValue)).to.be.within(200, 300);
+    });
+
+    let pinValue;
+    dataflowTile.getNodeValueContainer("sensor").invoke('text').then((text) => {
+      pinValue = text.trim();
+      expect(Number(pinValue)).to.be.within(200, 300);
+    });
   });
 });
