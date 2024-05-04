@@ -283,6 +283,7 @@ context('Simulator Tile', function () {
     .trigger('mousemove', { which: 1, pageX: 50, pageY: 100 })
     .trigger('mouseup', {force: true});
 
+    cy.wait(500); // wait for servo animation to move, then assert position has changed
     let simVarValue;
     simulatorTile.getVariableDisplayedValue().eq(1).invoke('text').then((text) => {
       simVarValue = text.trim();
