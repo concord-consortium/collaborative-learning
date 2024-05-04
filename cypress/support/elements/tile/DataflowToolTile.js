@@ -231,10 +231,10 @@ class DataflowToolTile {
   }
   createProgram(programNodes) {
     this.getDataflowTile().should("exist");
-    programNodes.forEach(node => {
+    programNodes.forEach((node, i) => {
       this.getCreateNodeButton(node.name).click();
       this.getNode(node.name).should("exist");
-      this.getNodeTitle().invoke("val").should("include", node.title);
+      this.getNodeTitle().eq(i).invoke("val").should("include", node.title);
     });
     this.getNodeOutput().eq(0).click({force: true});
     this.getNodeInput().eq(0).click({force: true});
