@@ -441,11 +441,21 @@ export class ReteManager implements INodeServices {
     return new constructor(id, model, this);
   };
 
+  // TODO - this is not quite working yet
   private getNewNodeName(nodeType: string) {
     const indexByType = this.editor.getNodes().filter(n => n.label === nodeType).length + 1;
-    // FIXME: "Input" node is "Sensor" internally, we special-case it in a few places now
+    const existingNodeNames = this.editor.getNodes().map(n=> (n as IBaseNode).model.orderedDisplayName);
     const printableType = nodeType === "Sensor" ? "Input" : nodeType;
-    return `${printableType} ${indexByType}`;
+    const nameCandidate = `${printableType} ${indexByType}`;
+    const indexOfDuplicate = existingNodeNames.findIndex(name => name === nameCandidate);
+    if (indexOfDuplicate === -1) {
+      return nameCandidate;
+    } else if (existingNodeNames && indexOfDuplicate > -1) {
+      const duplicateNum = existingNodeNames[indexOfDuplicate]?.split(" ")[1];
+      if (duplicateNum) {
+        return `${printableType} ${Number(duplicateNum) + 1}`;
+      }
+    }
   }
 
   public async createAndAddNode(nodeType: string, position?: [number, number]) {
