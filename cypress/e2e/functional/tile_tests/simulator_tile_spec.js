@@ -283,7 +283,7 @@ context('Simulator Tile', function () {
     .trigger('mousemove', { which: 1, pageX: 50, pageY: 100 })
     .trigger('mouseup', {force: true});
 
-    cy.wait(500); // wait for servo animation to move, then assert position has changed
+    cy.wait(3000); // wait for a tick to update data from sim to dataflow
     let simVarValue;
     simulatorTile.getVariableDisplayedValue().eq(1).invoke('text').then((text) => {
       simVarValue = text.trim();
@@ -293,6 +293,7 @@ context('Simulator Tile', function () {
     let pinValue;
     dataflowTile.getNodeValueContainer("sensor").invoke('text').then((text) => {
       pinValue = text.trim();
+      console.log("| pinValue: ", pinValue);
       expect(Number(pinValue)).to.be.within(200, 300);
     });
   });
