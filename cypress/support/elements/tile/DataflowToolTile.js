@@ -11,7 +11,7 @@ class DataflowToolTile {
     return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
   }
   getCreateNodeButton(nodeType) {
-    return cy.get(`.primary-workspace .icon-block.${nodeType}`);
+    return cy.get(`.primary-workspace [data-testid="add-${nodeType}-button"]`);
   }
   getNode(nodeType) {
     return cy.get(getNodeText(nodeType));
@@ -47,7 +47,7 @@ class DataflowToolTile {
     return cy.get('.output-socket');
   }
   getNodeTitle(workspaceClass) {
-    return cy.get(`${workspaceClass || ".primary-workspace"} .node .title`);
+    return cy.get(`${workspaceClass || ".primary-workspace"} .node .node-name-input`);
   }
   getNodeValueContainer(nodeType) {
     return this.getNode(nodeType).find(".value-container");
@@ -231,10 +231,10 @@ class DataflowToolTile {
   }
   createProgram(programNodes) {
     this.getDataflowTile().should("exist");
-    programNodes.forEach(node => {
+    programNodes.forEach((node, i) => {
       this.getCreateNodeButton(node.name).click();
       this.getNode(node.name).should("exist");
-      this.getNodeTitle().should("contain", node.title);
+      this.getNodeTitle().eq(i).invoke("val").should("include", node.title);
     });
     this.getNodeOutput().eq(0).click({force: true});
     this.getNodeInput().eq(0).click({force: true});

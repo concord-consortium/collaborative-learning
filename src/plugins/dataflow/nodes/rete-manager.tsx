@@ -186,6 +186,13 @@ export class ReteManager implements INodeServices {
             return InputValueControlComponent;
           }
           return null;
+        },
+        connection(data) {
+          return () => {
+            const { path } = Presets.classic.useConnection();
+            if (!path) return null;
+            return <div className="dataflow-connection"><Presets.classic.Connection data={data.payload} /></div>;
+          };
         }
       }
     }));
