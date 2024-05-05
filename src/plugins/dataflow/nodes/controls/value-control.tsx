@@ -1,5 +1,4 @@
 import { ClassicPreset } from "rete";
-import "./value-control.sass";
 import classNames from "classnames";
 import React from "react";
 import { observer } from "mobx-react";

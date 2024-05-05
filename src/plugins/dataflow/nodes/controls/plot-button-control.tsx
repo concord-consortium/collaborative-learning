@@ -1,9 +1,6 @@
 import React, { useRef } from "react";
 import { ClassicPreset } from "rete";
-
 import PreviewPlotIcon from "../../assets/icons/preview-plot.svg";
-
-import "./plot-button-control.scss";
 import { observer } from "mobx-react";
 import { useStopEventPropagation } from "./custom-hooks";
 import { IBaseNode } from "../base-node";
@@ -44,7 +41,7 @@ export const PlotButtonControlComponent = observer(
   useStopEventPropagation(divRef, "dblclick");
 
   return (
-    <div className="node-graph-container"
+    <div className="node-graph-toggle-button"
         title={showGraph ? "Hide Block Value Graph" : "Show Block Value Graph"}>
       <div
         ref={divRef}

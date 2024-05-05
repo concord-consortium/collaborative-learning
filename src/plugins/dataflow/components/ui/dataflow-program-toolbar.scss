@@ -5,8 +5,8 @@ $toolbar-width: 83px;
 
 $toolbar-background: $gray-light;
 
-$button-sensor: $sensor-blue;
-$button-number: $number-blue;
+$button-sensor: $input-blue;
+$button-number: $input-blue;
 $button-generator: $generator-blue;
 $button-timer: $timer-blue;
 $button-math: $math-green;
@@ -79,42 +79,34 @@ $button-label-text: $gray-text;
   }
 
   .icon-block {
+    box-sizing: border-box;
     position: relative;
     margin: 3px auto;
     width: 29px;
     height: 15px;
     border-radius: 2px;
     background-color: $button-sensor;
+    border: 1px solid $input-blue-outline;
 
-    &.sensor {
-      background-color: $button-sensor;
-    }
-    &.number {
-      background-color: $button-number;
-    }
-    &.generator {
-      background-color: $button-generator;
-    }
+    &.sensor,
+    &.number,
+    &.generator,
     &.timer {
-      background-color: $button-timer;
+      background-color: $input-blue;
     }
-    &.math {
-      background-color: $button-math;
-    }
-    &.logic {
-      background-color: $button-logic;
-    }
-    &.transform {
-      background-color: $button-transform;
-    }
+    &.math,
+    &.logic,
+    &.transform,
     &.control {
-      background-color: $button-control;
+      background-color: $operator-green;
     }
     &.demo-output {
-      background-color: $button-demo-output;
+      background-color: $output-yellow;
+      border: 1px solid $output-yellow-outline;
     }
     &.live-output {
-      background-color: $button-live-output;
+      background-color: $output-yellow;
+      border: 1px solid $output-yellow-outline;
     }
 
     .icon-node {
@@ -125,22 +117,31 @@ $button-label-text: $gray-text;
       background-color: $button-node;
       border-radius: 8px;
       &.left {
-        left: 0px;
+        left: -2px;
         margin-left: -4px;
       }
       &.right {
-        right: 0px;
+        right: -1px;
         margin-right: -4px;
       }
       &.top {
-        top: 0px;
+        top: -1px;
       }
       &.mid {
-        top: 4px;
+        top: 2px;
       }
       &.bottom {
-        bottom: 0px;
+        bottom: -1px;
       }
     }
+  }
+  .node-icon-letter {
+    position: absolute;
+    font-weight: bold;
+    left: 38px;
+    transform: translateY(-17px);
+    font-size: 10px;
+    color: $node-letter-text-color;
+    font-family: "PT Sans Narrow", Lato, Helvetica, Verdana, sans-serif;
   }
 }
