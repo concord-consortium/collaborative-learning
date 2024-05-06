@@ -178,9 +178,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public componentDidMount() {
-    if (!this.reteManager && this.toolDiv) {
-      this.initProgram();
-    }
+    this.initReteManagersIfNeeded();
   }
 
   public componentWillUnmount() {
@@ -192,15 +190,19 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public componentDidUpdate(prevProps: IProps) {
-    if (!this.reteManager && this.toolDiv) {
-      this.initProgram();
-    }
+    this.initReteManagersIfNeeded();
 
     if (this.props.programDataRate !== prevProps.programDataRate) {
       this.setDataRate(this.props.programDataRate);
     }
+  }
 
-    if (this.playbackToolDiv && !this.playbackReteManager) {
+  private initReteManagersIfNeeded() {
+    if (!this.reteManager && this.toolDiv) {
+      this.initProgram();
+    }
+
+    if (!this.playbackReteManager && this.playbackToolDiv) {
       const contentSnapshot = getSnapshot(this.props.tileContent);
       const contentCopy = DataflowContentModel.create(contentSnapshot);
       this.playbackReteManager = new ReteManager(
@@ -211,7 +213,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       // When we first show the playbackToolDiv after finishing recording it would show
       // the last nodeValues and recent values if we don't do anything.
       // However the playback slider and the time display will be showing the start of the
-      // recording.
+      // recording (00:00)
       // The code below resets the shown nodeValues and recentValues to match the slider
       // position
       const dataSet = this.props.tileContent.dataSet;
