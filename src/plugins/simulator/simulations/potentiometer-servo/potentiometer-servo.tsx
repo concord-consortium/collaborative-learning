@@ -15,9 +15,13 @@ import {
 
 import "./potentiometer-servo.scss";
 
+interface INodeColumnProps {
+  nodes: IMiniNodeData[];
+  extraCount: number;
+  columnLabel: string;
+}
+
 export const kPotentiometerServoKey = "potentiometer_chip_servo";
-
-
 
 const potVisibleOffset = 135;
 const servoVisibleOffset = 90;
@@ -37,25 +41,30 @@ const miniNodeClasses = (node: IMiniNodeData, index:number, length:number) => {
     { 'first': index === 0 },
     { 'last': index === length - 1 },
     `category-${node.category}`,
-    `type-${node.type}`
+    `type-${node.type}`,
+    `has-icon-${node.iconKey}`
   );
 };
 
-const NodeColumn = ({ nodes, columnLabel }: { nodes: IMiniNodeData[], columnLabel: string }) => {
+const NodeColumn = ({ nodes, extraCount, columnLabel }: INodeColumnProps) => {
   const catLabel = columnLabel.charAt(0).toUpperCase() + columnLabel.slice(1);
+  const extraCountMessage = extraCount > 0 ? `+ ${extraCount} more` : null;
   return (
     <div className={`mini-nodes-col ${columnLabel}`}>
-      { nodes.map((miniNode, index) => (
-          <div key={miniNode.id} className={miniNodeClasses(miniNode, index, nodes.length)}>
-            <div className="node-info">
-              <div className="node-icon">{getMiniNodeIcon(miniNode.iconKey)}</div>
-              <div className="node-label">{miniNode.label}</div>
-            </div>
-            <div className="node-value">
-              {miniNode.value}
-            </div>
+      { extraCountMessage &&
+        <div className="extra-nodes-count">+ {extraCount} more</div>
+      }
+      { [...nodes].reverse().map((miniNode, index) => (
+        <div key={miniNode.id} className={miniNodeClasses(miniNode, index, nodes.length)}>
+          <div className="node-info">
+            <div className="node-icon">{getMiniNodeIcon(miniNode.iconKey)}</div>
+            <div className="node-label">{miniNode.label}</div>
           </div>
-        ))}
+          <div className="node-value">
+            {miniNode.value}
+          </div>
+        </div>
+      ))}
       <div className="category-label">{catLabel}</div>
     </div>
   );
@@ -80,7 +89,14 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
   const boardClasses = classNames('board');
 
   const miniNodesDataPack = getMiniNodesDisplayData(programData);
-  const { inputNodesArr, operatorNodesArr, outputNodesArr, extraCount } = miniNodesDataPack;
+  const {
+    inputNodesArr,
+    operatorNodesArr,
+    outputNodesArr,
+    extraInputCount,
+    extraOperatorCount,
+    extraOutputCount
+  } = miniNodesDataPack;
 
   const hasPinIn = inputNodesArr.some(node => node.label.includes("Pin"));
   const hasOutToServo = outputNodesArr.some(node => node.label.includes("Servo"));
@@ -95,9 +111,6 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
               { programData?.samplingRateStr }
             </div>
             <div className="arduino-label">Microprocessor</div>
-            { extraCount > 0 && (
-              <div className="hidden-nodes-count">+{extraCount} more</div>
-            )}
           </div>
           <img
             className="pot-dial"
@@ -118,9 +131,9 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
           />
 
           <div className={"mini-nodes-column-wrapper"}>
-            <NodeColumn nodes={inputNodesArr} columnLabel="inputs" />
-            <NodeColumn nodes={operatorNodesArr} columnLabel="operators" />
-            <NodeColumn nodes={outputNodesArr} columnLabel="outputs" />
+            <NodeColumn nodes={inputNodesArr} extraCount={extraInputCount} columnLabel="inputs" />
+            <NodeColumn nodes={operatorNodesArr} extraCount={extraOperatorCount} columnLabel="operators" />
+            <NodeColumn nodes={outputNodesArr} extraCount={extraOutputCount} columnLabel="outputs" />
           </div>
 
           { hasOutToServo &&

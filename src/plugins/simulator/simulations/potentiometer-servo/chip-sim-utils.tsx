@@ -63,7 +63,9 @@ export interface IMiniNodesDataPack {
   inputNodesArr: IMiniNodeData[];
   operatorNodesArr: IMiniNodeData[];
   outputNodesArr: IMiniNodeData[];
-  extraCount: number;
+  extraInputCount: number;
+  extraOperatorCount: number;
+  extraOutputCount: number;
 }
 
 // this is an svg path that represents a wire connecting a potentiometer to the A1 pin
@@ -195,7 +197,7 @@ export function getIconKeyFromLabel(label: string) {
 
 export function getMiniNodeLabelContent(sharedNode: ISharedProgramNode): {truncatedLabel: string, iconKey: string} {
   const nodeTypeToLabel = {
-    "Sensor": (node: ISharedProgramNode) => node.nodeState.sensorType,
+    "Sensor": (node: ISharedProgramNode) => node.nodeState.sensorType.length > 0 ? node.nodeState.sensorType : "Input",
     "Generator": (node: ISharedProgramNode) => node.nodeState.generatorType,
     "Number": (node: ISharedProgramNode) => "Number",
     "Math": (node: ISharedProgramNode) => node.nodeState.mathOperator,
@@ -221,7 +223,9 @@ export function getMiniNodesDisplayData(programData?: SharedProgramDataType): IM
       inputNodesArr: [],
       operatorNodesArr: [],
       outputNodesArr: [],
-      extraCount: 0
+      extraInputCount: 0,
+      extraOperatorCount: 0,
+      extraOutputCount: 0
     };
   }
   const arr = [...programData.programNodes.values()];
@@ -249,15 +253,14 @@ export function getMiniNodesDisplayData(programData?: SharedProgramDataType): IM
   const operatorNodes = formattedData.filter(node => node.category === "operator");
   const outputNodes = formattedData.filter(node => node.category === "output");
 
-  const extraCount =
-    (inputNodes.length > 5 ? inputNodes.length - 5 : 0) +
-    (operatorNodes.length > 5 ? operatorNodes.length - 5 : 0) +
-    (outputNodes.length > 5 ? outputNodes.length - 5 : 0);
+  const extraInputCount = inputNodes.length > 5 ? inputNodes.length - 5 : 0;
+  const extraOperatorCount = operatorNodes.length > 5 ? operatorNodes.length - 5 : 0;
+  const extraOutputCount = outputNodes.length > 5 ? outputNodes.length - 5 : 0;
 
   const inputNodesArr = inputNodes.slice(0, 5);
   const operatorNodesArr = operatorNodes.slice(0, 5);
   const outputNodesArr = outputNodes.slice(0, 5);
 
-  return { inputNodesArr, operatorNodesArr, outputNodesArr, extraCount };
+  return { inputNodesArr, operatorNodesArr, outputNodesArr, extraInputCount, extraOperatorCount, extraOutputCount };
 }
 
