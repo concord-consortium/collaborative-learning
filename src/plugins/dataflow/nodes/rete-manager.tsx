@@ -448,12 +448,31 @@ export class ReteManager implements INodeServices {
     return new constructor(id, model, this);
   };
 
+  /**
+   * Get an indexed name based on exiting names.
+   * E.g. if existing names are "MyBase 1", "MyBase 3", this will return "MyBase 5"
+   * @param existingNames (Array<string | undefined>)
+   * @param baseName (string)
+   * @returns `{baseName} {num}`
+   */
+  public getNewIndexedName(existingNames: Array<string | undefined>, baseName: string) {
+    const matchTypeAndNum = new RegExp(`^${baseName} *(\\d+)$`);
+    const namedNums: number[] = existingNames.map(name => {
+      const match = name?.match(matchTypeAndNum);
+      return match ? parseInt(match[1], 10) : 0;
+    })
+    .map(n => isNaN(n) ? 0 : Math.round(n));
+
+    const nextNum = namedNums.length > 0 ? Math.max(...namedNums) + 1 : 1;
+    return `${baseName} ${nextNum}`;
+  }
 
   /**
    * Given @param nodeType (string)
-   * Calculates a sensible name for a new node of that type
-   * Handles nodes whose internal names do not match their display names
-   * Searches for nodes with names like {nodeType} {n}
+   * Discovers the display name for that node type
+   * Searches for existing nodes with names like {nodeType} {n}
+   * If it does not find such nodes, it returns {nodeType} 1
+   * Otherwise it uses getNewIndexedName to find the next available index
    * @returns `{nodeType} {n+1}`
    */
   private getNewNodeName(nodeType: string) {
@@ -463,15 +482,8 @@ export class ReteManager implements INodeServices {
       .map(n=> (n as IBaseNode).model.orderedDisplayName)
       .filter(name => name?.includes(printableType));
 
-    const matchTypeAndNum = new RegExp(`^${printableType} (\\d+)$`);
-    const namedNums: number[] = nodesNamedAsType.map(name => {
-      const match = name?.match(matchTypeAndNum);
-      return match ? parseInt(match[1], 10) : 0;
-    })
-    .map(n => isNaN(n) ? 0 : Math.round(n));
-
-    const nextNum = namedNums.length > 0 ? Math.max(...namedNums) + 1 : 1;
-    return `${printableType} ${nextNum}`;
+    if (!nodesNamedAsType) return printableType + " 1";
+    return this.getNewIndexedName(nodesNamedAsType, printableType);
   }
 
   public async createAndAddNode(nodeType: string, position?: [number, number]) {

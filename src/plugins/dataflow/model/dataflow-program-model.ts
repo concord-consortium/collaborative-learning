@@ -170,7 +170,6 @@ export const DataflowProgramModel = types.
   }))
   .actions(self => ({
     addNode(node: IDataflowNodeModel) {
-      // REVIEW: never seem to see this called?
       self.nodes.put(node);
     },
     addNodeSnapshot(nodeSnapshot: DataflowNodeSnapshotIn) {
