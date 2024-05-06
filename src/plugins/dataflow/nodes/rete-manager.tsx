@@ -101,8 +101,6 @@ export class ReteManager implements INodeServices {
     // Disable the zoom handler which zooms on wheel and double click
     area.area.setZoomHandler(null);
 
-    // FIXME: we need to set the initial zoom from the mstContent
-
     AreaExtensions.selectableNodes(area, AreaExtensions.selector(), {
       accumulating: AreaExtensions.accumulateOnCtrl()
     });
@@ -431,12 +429,11 @@ export class ReteManager implements INodeServices {
     const node = editor.getNode(nodeId);
     const removedConnections = this.mstProgram.removeNodeAndConnections(nodeId);
 
-    // FIXME: Rete is not happy with this it reports several canceled promises
-
-    removedConnections.forEach(connection => {
-      // Temporary use this approach to get things working
-      editor.emit({ type: 'connectionremoved', data: connection });
-    });
+    // Temporary use this approach to get things working
+    const removedPromises = removedConnections.map(connection =>
+      editor.emit({ type: 'connectionremoved', data: connection })
+    );
+    await Promise.all(removedPromises);
 
     // Temporary use this approach to get things working
     editor.emit({ type: 'noderemoved', data: node});
@@ -678,7 +675,7 @@ export class ReteManager implements INodeServices {
     // Process connections that were deleted
     for (const [id] of area.connectionViews) {
       if (!snapshot.connections[id]) {
-        // FIXME: this causes problems because the rete-area-plugin keeps a
+        // FIXME-p1: this causes problems because the rete-area-plugin keeps a
         // reference to the connection object in its connectionViews. And then
         // it tries to access the id of this connection object. But MST complains
         // because the connection object has already been removed from the tree

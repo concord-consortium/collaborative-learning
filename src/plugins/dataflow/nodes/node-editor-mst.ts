@@ -115,7 +115,6 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
     this.mstProgram.addNode(DataflowNodeModel.create({
       id: data.id,
       name: model.type,
-      // FIXME: we have to figure out how to handle this positioning
       x: 0,
       y: 0,
       data: model
