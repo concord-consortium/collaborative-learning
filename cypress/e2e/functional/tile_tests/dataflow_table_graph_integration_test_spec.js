@@ -14,7 +14,7 @@ const graphTitle = "Graph 1";
 
 const programNodes = [
   { name: "timer", title: "Timer (on/off)", attribute: "Timer (on/off) 1" },
-  { name: "demo-output", title: "Demo Output", attribute: "Demo Output 2" }];
+  { name: "demo-output", title: "Demo Output 1", attribute: "Demo Output 1" }];
 const linkedTableAttributes = ["Time (sec)", programNodes[0].attribute, programNodes[1].attribute];
 const defaultTableAttributes = ["x", "y"];
 const timer1 = 5;

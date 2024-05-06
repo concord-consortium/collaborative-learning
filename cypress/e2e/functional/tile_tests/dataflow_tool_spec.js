@@ -181,7 +181,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create timer node");
     dataflowToolTile.getCreateNodeButton(timerNode).click();
     dataflowToolTile.getNode(timerNode).should("exist");
-    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Timer (on/off)");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Timer (on/off) 1");
 
     cy.log("timer node labels");
     dataflowToolTile.getLabel("On").should('contain', "time on");
@@ -571,7 +571,7 @@ context('Dataflow Tool Tile', function () {
     const nodes = ["timer", "demo-output"];
     dataflowToolTile.getCreateNodeButton(nodes[0]).click();
     dataflowToolTile.getNode(nodes[0]).should("exist");
-    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Timer (on/off)");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Timer (on/off) 1");
     dataflowToolTile.getCreateNodeButton(nodes[1]).click();
     dataflowToolTile.getNode(nodes[1]).should("exist");
     dataflowToolTile.getNode("demo-output").click(50, 10)
