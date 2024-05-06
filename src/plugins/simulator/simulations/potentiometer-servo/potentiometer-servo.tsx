@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from "react";
 import classNames from "classnames";
 import { useResizeDetector } from "react-resize-detector";
+import { VariableSlider } from "@concord-consortium/diagram-view";
 
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { iconUrl, kPotentiometerKey, kServoKey, kSignalKey
 } from "../../../shared-assets/icons/icon-utilities";
-import { VariableSlider } from "@concord-consortium/diagram-view";
 import { findVariable } from "../simulation-utilities";
 import {
   IMiniNodeData, getMiniNodeIcon, getMiniNodesDisplayData, getTweenedServoAngle, wireToA1, getNodeBoundingBox

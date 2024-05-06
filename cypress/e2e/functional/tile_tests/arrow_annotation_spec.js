@@ -346,7 +346,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("have.length", 1);
   });
 
-  it.only("Can add annotations to Chip simulator tile", () => {
+  it("Can add annotations to chip simulator tile", () => {
     beforeTest(queryParamsQa);
     clueCanvas.addTile("simulator");
     simulatorTile.getSimulatorTile().should("exist");
