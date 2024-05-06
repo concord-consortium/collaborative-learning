@@ -26,7 +26,8 @@ export const ControlNodeModel = BaseNodeModel.named("ControlNodeModel")
 })
 .volatile(self => ({
   gateActive: false,
-  heldValue: null as number | null
+  heldValue: null as number | null,
+  waitTimerId: null as NodeJS.Timeout | null,
 }))
 .views(self => ({
   get timerRunning() {
@@ -35,16 +36,15 @@ export const ControlNodeModel = BaseNodeModel.named("ControlNodeModel")
   }
 }))
 .actions(self => ({
-  setControlOperator(val: string) {
-    self.controlOperator = val;
-    // If we've switched to hold zero or hold current the downstream nodes
-    // should update.
-    self.process();
-  },
-  setWaitDuration(val: number) {
-    self.waitDuration = val;
-    // Currently this won't cause the timer to expire early so just changing
-    // the waitDuration shouldn't have any immediate affect on the downstream nodes
+  /**
+   * This does not update the timerRunning value since it might be called
+   * by a disposer, so it shouldn't update real state.
+   */
+  clearWaitTimer() {
+    if (self.waitTimerId != null) {
+      clearTimeout(self.waitTimerId);
+      self.waitTimerId = null;
+    }
   },
   setTimerRunning(val: boolean) {
     const currentEntry = self.tickEntries.get(self.currentTick) as IControlTickEntry | undefined;
@@ -58,6 +58,31 @@ export const ControlNodeModel = BaseNodeModel.named("ControlNodeModel")
     // immediately when the timer expires. Currently the node waits for the next
     // tick before updating its display and output value.
   },
+}))
+.actions(self => ({
+  stopWaitTimer() {
+    self.clearWaitTimer();
+    self.setTimerRunning(false);
+  },
+  beforeDestroy() {
+    self.clearWaitTimer();
+  }
+}))
+.actions(self => ({
+  setControlOperator(val: string) {
+    self.controlOperator = val;
+    // If we've switched to hold zero or hold current the downstream nodes
+    // should update.
+    self.process();
+  },
+  setWaitDuration(val: number) {
+    if (val === self.waitDuration) return;
+
+    self.waitDuration = val;
+    // If we had a timer running before, stop it.
+    // The next tick will restart the timer if necessary.
+    self.stopWaitTimer();
+  },
   setGateActive(val: boolean) {
     self.gateActive = val;
   },
@@ -66,16 +91,13 @@ export const ControlNodeModel = BaseNodeModel.named("ControlNodeModel")
   }
 }))
 .actions(self => ({
-  startTimer() {
+  startWaitTimer() {
     if (self.timerRunning) return;
-    self.setTimerRunning(true);
 
-    // FIXME: we should dispose this when the node is disposed
-    // we should probably also clear it if the user changes the
-    // control operator
-    setTimeout(() => {
-      self.setTimerRunning(false);
-    }, self.waitDuration * 1000);
+    // Make sure we don't have some orphaned timer sitting around
+    self.clearWaitTimer();
+    self.setTimerRunning(true);
+    self.waitTimerId = setTimeout(self.stopWaitTimer, self.waitDuration * 1000);
   }
 }));
 export interface IControlNodeModel extends Instance<typeof ControlNodeModel> {}
@@ -162,7 +184,7 @@ export class ControlNode extends BaseNode<
       const timerRunning = this.model.timerRunning;
       const timerIsOption =  this.model.waitDuration > 0;
       if (timerIsOption && switchIn === 1 && !timerRunning) {
-        this.model.startTimer();
+        this.model.startWaitTimer();
       }
     }
   }

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { observer } from "mobx-react";
+import { isAlive } from "mobx-state-tree";
 import classNames from "classnames";
 import { ClassicScheme, RenderEmit, Presets } from "rete-react-plugin";
 import { BaseAreaPlugin } from "rete-area-plugin";
@@ -57,6 +58,9 @@ export const CustomDataflowNode = observer(
   // FIXME: update 'Scheme' so we don't have to typecast here
   const node = (data as unknown as IBaseNode);
   const model = node.model;
+
+  // The node model might be destroyed if the node was removed from the program
+  if (!isAlive(model)) return null;
 
   const nodeLetter = getNodeLetter(model.type);
 
