@@ -1,3 +1,4 @@
+import { parse } from "query-string";
 import { processUrlParams } from "./url-params";
 
 describe("urlParams", () => {
@@ -25,7 +26,7 @@ describe("urlParams", () => {
     mockWindowLocation(originalLocation);
   });
 
-  it("appMode must be valid", () => {
+  test("appMode must be valid", () => {
     expect(processQueryParams().appMode).toBeUndefined();
     expect(processQueryParams("appMode").appMode).toBeUndefined();
     expect(processQueryParams("appMode=bogus").appMode).toBeUndefined();
@@ -33,10 +34,20 @@ describe("urlParams", () => {
     expect(processQueryParams("appMode=authed").appMode).toBe("authed");
   });
 
-  it("demo param accepts but does not require value", () => {
+  test("boolean params are true without a value", () => {
     expect(processQueryParams().demo).toBe(false);
     expect(processQueryParams("demo").demo).toBe(true);
     expect(processQueryParams("demo=true").demo).toBe(true);
     expect(processQueryParams("demo=yes").demo).toBe(true);
+    expect(processQueryParams("demo=false").demo).toBe(false);
+  });
+});
+
+describe("query-string parse", () => {
+  it("returns null for a param without a value", () => {
+    const result = parse("?foo&bar=1");
+    expect(result.foo).toBeDefined();
+    expect(result.foo).toBe(null);
+    expect(result.bar).toBe("1");
   });
 });

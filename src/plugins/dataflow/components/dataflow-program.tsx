@@ -7,15 +7,12 @@ import { SizeMeProps } from "react-sizeme";
 import { BaseComponent } from "../../../components/base";
 import { DataflowContentModel, DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
-import { simulatedChannel } from "../model/utilities/simulated-channel";
 
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
-import { serialSensorChannels } from "../model/utilities/channel";
 import { ProgramDataRates } from "../model/utilities/node";
-import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { ProgramMode } from "./types/dataflow-tile-types";
 import { IDataSet } from "../../../models/data/data-set";
@@ -40,7 +37,6 @@ interface IProps extends SizeMeProps {
   program?: DataflowProgramModelType;
   programDataRate: number;
   readOnly?: boolean;
-  runnable?: boolean;
   tileHeight?: number;
   tileContent: DataflowContentModelType;
 }
@@ -61,7 +57,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private toolDiv: HTMLElement | null;
   private playbackToolDiv: HTMLDivElement | null;
-  private previousChannelIds = "";
   private intervalHandle?: ReturnType<typeof setTimeout>;
   private lastIntervalTime: number;
   private reteManager: ReteManager | undefined;
@@ -210,7 +205,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const contentCopy = DataflowContentModel.create(contentSnapshot);
       this.playbackReteManager = new ReteManager(
         contentCopy.program, this.tileId, this.playbackToolDiv, contentCopy, this.stores,
-        this.props.runnable, true, true
+        true, true
       );
 
       // When we first show the playbackToolDiv after finishing recording it would show
@@ -253,7 +248,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (!this.toolDiv || !this.props.program) return;
 
     const reteManager = new ReteManager(this.props.program, this.tileId,
-      this.toolDiv, this.props.tileContent, this.stores, this.props.runnable, this.props.readOnly, false);
+      this.toolDiv, this.props.tileContent, this.stores, this.props.readOnly, false);
 
     this.reteManager = reteManager;
   };
@@ -270,23 +265,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (this.props.readOnly) return;
 
     this.intervalHandle = setInterval(() => this.tick(), rate);
-  };
-
-  private get simulatedChannels() {
-    return this.props.tileContent
-      ? this.props.tileContent.inputVariables?.map(variable => simulatedChannel(variable)) ?? []
-      : [];
-  }
-
-  private updateChannels = () => {
-    const channels = [...virtualSensorChannels, ...this.simulatedChannels, ...serialSensorChannels];
-    const channelIds = channels.map(c => c.channelId).join(",");
-    if (channelIds !== this.previousChannelIds) {
-      this.previousChannelIds = channelIds;
-      this.props.tileContent.setChannels(channels);
-
-      this.reteManager?.countSerialDataNodes();
-    }
   };
 
   private shouldShowProgramCover() {
@@ -331,7 +309,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private tick = () => {
-    const { runnable, tileContent: tileModel } = this.props;
+    const { readOnly, tileContent: tileModel } = this.props;
     const { playBackIndex, isPlaying, recordIndex } = this.state;
     const programMode = this.determineProgramMode();
     const { reteManager } = this;
@@ -345,13 +323,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     switch (programMode){
       case ProgramMode.Ready:
-        this.updateChannels();
         reteManager.tickAndProcessNodes();
         break;
       case ProgramMode.Recording:
-        this.updateChannels();
         reteManager.tickAndProcessNodes();
-        if (runnable) {
+        if (!readOnly) {
           recordCase(this.props.tileContent, recordIndex);
         }
         this.incrementRecordIndex();

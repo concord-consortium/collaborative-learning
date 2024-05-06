@@ -86,20 +86,6 @@ export const DataflowContentModel = TileContentModel
       if (!firstSharedProgramData) return undefined;
       return firstSharedProgramData as SharedProgramDataType;
     },
-    programWithoutRecentValues() {
-      // FIXME: remove recent values from the nodes
-      // const { values, ...rest } = getSnapshot(self.program);
-      // const castedValues = values as Record<string, any>;
-      // const newValues: Record<string, any> = {};
-      // if (values) {
-      //   Object.keys(castedValues).forEach((key: string) => {
-      //     const { recentValues, ...other } = castedValues[key];
-      //     newValues[key] = { ...other };
-      //   });
-      // }
-      // return { values: newValues, ...rest };
-      return {};
-    },
     get maxRecordableCases() {
       const numNodes = self.program.nodes.size;
       // The `+ 1` is for time which is recorded as the first value of each case
@@ -132,20 +118,9 @@ export const DataflowContentModel = TileContentModel
       return true;
     },
     exportJson(options?: ITileExportOptions) {
-      const zoom = getSnapshot(self.programZoom);
-      return [
-        `{`,
-        `  "type": "Dataflow",`,
-        `  "programDataRate": ${self.programDataRate},`,
-        `  "programZoom": {`,
-        `    "dx": ${zoom.dx},`,
-        `    "dy": ${zoom.dy},`,
-        `    "scale": ${zoom.scale}`,
-        `  },`,
-        // `  "programRecordingMode: ${self.programRecordingMode}"`,
-        `  "program": ${stringify(self.programWithoutRecentValues())}`,
-        `}`
-      ].join("\n");
+      const snapshot = getSnapshot(self);
+      // We used to strip out the recent values, maybe we should again?
+      return stringify(snapshot, {maxLength: 120});
     },
     get isDataSetEmptyCases(){
       //Used when DF linked to a table, then we clear. Different than isEmpty
