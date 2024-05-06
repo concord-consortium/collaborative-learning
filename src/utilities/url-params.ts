@@ -1,4 +1,4 @@
-import { parse } from "query-string";
+import { ParsedQuery, parse } from "query-string";
 import { AppMode, AppModes } from "../models/stores/store-types";
 import { DBClearLevel } from "../lib/db";
 
@@ -111,22 +111,51 @@ export interface QueryParams {
 
   // URL to the document to open in the document editor
   document?: string;
+  // Open new documents as readOnly this helps with testing readOnly views
+  readOnly?: boolean
 }
+
+// Make a union of all of the boolean params from the QueryParams
+type BooleanParamNames = Exclude<
+  {
+    [K in keyof QueryParams]: QueryParams[K] extends boolean | undefined ? K : never
+  }[keyof QueryParams],
+undefined>;
+
+const booleanParams: BooleanParamNames[] =
+  [ "demo", "mouseSensor", "localCMSBackend", "noPersistentUI", "readOnly" ];
+
+const processBooleanValue = (value: string | (string | null)[] | null | undefined) => {
+  if (value === undefined || value === "false") {
+    // `undefined` will happen if the parameter isn't specified at all
+    // This has to be treated differently from null which will happen when
+    // the parameter has no value.
+    return false;
+  } else {
+    // `null` will pass through here
+    return true;
+  }
+};
+
+const processBooleanParams = (params: ParsedQuery<string>) => {
+  const result:Record<string, boolean> = {};
+  booleanParams.forEach(paramName => {
+    result[paramName] = processBooleanValue(params[paramName]);
+  });
+  return result;
+};
 
 export const processUrlParams = (): QueryParams => {
   const params = parse(location.search);
+  const processedBooleans = processBooleanParams(params);
+
   return {
     ...params,
+    ...processedBooleans,
     // validate appMode
     appMode: (typeof params.appMode === "string") && AppModes.includes(params.appMode as AppMode)
                   ? params.appMode as AppMode
                   : undefined,  // appMode will be determined internally
-    // allows use of ?demo without a value for demo mode
-    demo: (params.demo !== undefined),
-    // allows use of localCMSBackend without a value
-    localCMSBackend: (params.localCMSBackend !== undefined),
-    // disables persistentUI store initialization
-    noPersistentUI: (params.noPersistentUI !== undefined)
   };
 };
 

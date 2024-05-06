@@ -22,7 +22,6 @@ export interface INodeServices {
    * hardware or variables, generating data based on time.
    */
   inTick: boolean;
-  runnable?: boolean;
   readOnly?: boolean;
   playback?: boolean;
 }

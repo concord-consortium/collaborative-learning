@@ -2,7 +2,6 @@ import React from "react";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
 
-import { isCurriculumDocument } from "../../../models/document/document-types";
 import { DataflowProgram } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
 import { ITileModel } from "../../../models/tiles/tile-model";
@@ -53,7 +52,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
     const tileContent = this.getContent();
-    const runnable = this.getRunnable();
 
     return (
       <>
@@ -70,7 +68,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   program={program}
                   programDataRate={programDataRate}
                   readOnly={readOnly}
-                  runnable={runnable}
                   size={size}
                   tileHeight={height}
                   tileContent={tileContent}
@@ -120,11 +117,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       />
     );
   }
-
-  private getRunnable = () => {
-    const isCurriculum = isCurriculumDocument(this.props.documentId);
-    return !this.props.readOnly || isCurriculum;
-  };
 
   private getContent() {
     return this.props.model.content as DataflowContentModelType;

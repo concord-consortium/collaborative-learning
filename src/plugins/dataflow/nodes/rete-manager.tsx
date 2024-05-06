@@ -60,7 +60,6 @@ export class ReteManager implements INodeServices {
     div: HTMLElement,
     public mstContent: DataflowContentModelType,
     public stores: IStores,
-    public runnable: boolean | undefined,
     public readOnly: boolean | undefined,
     public playback: boolean | undefined
   ){
