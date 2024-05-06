@@ -341,7 +341,6 @@ export class ReteManager implements INodeServices {
 
     let readOnPatchDisposer;
     if (this.readOnly) {
-      console.log("readOnly process called");
       readOnPatchDisposer = onPatch(this.mstContent, (patch) => {
         // It is likely that Dataflow will kind of crash when this happens
         // So you'll need to fix the problem, and possibly disable readOnly processing
