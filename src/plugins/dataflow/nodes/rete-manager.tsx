@@ -448,21 +448,29 @@ export class ReteManager implements INodeServices {
     return new constructor(id, model, this);
   };
 
-  // TODO - this is not quite working yet
+
+  /**
+   * Given @param nodeType (string)
+   * Calculates a sensible name for a new node of that type
+   * Searches for nodes with names like {nodeType} {n}
+   * @returns `{nodeType} {n+1}`
+   */
   private getNewNodeName(nodeType: string) {
-    const indexByType = this.editor.getNodes().filter(n => n.label === nodeType).length + 1;
-    const existingNodeNames = this.editor.getNodes().map(n=> (n as IBaseNode).model.orderedDisplayName);
     const printableType = nodeType === "Sensor" ? "Input" : nodeType;
-    const nameCandidate = `${printableType} ${indexByType}`;
-    const indexOfDuplicate = existingNodeNames.findIndex(name => name === nameCandidate);
-    if (indexOfDuplicate === -1) {
-      return nameCandidate;
-    } else if (existingNodeNames && indexOfDuplicate > -1) {
-      const duplicateNum = existingNodeNames[indexOfDuplicate]?.split(" ")[1];
-      if (duplicateNum) {
-        return `${printableType} ${Number(duplicateNum) + 1}`;
-      }
-    }
+
+    const existingNodeNamesOfType = this.editor.getNodes()
+      .map(n=> (n as IBaseNode).model.orderedDisplayName)
+      .filter(name => name?.includes(printableType));
+
+    const matchTypeAndNum = new RegExp(`^${printableType} (\\d+)$`);
+    const namedNums: number[] = existingNodeNamesOfType.map(name => {
+      const match = name?.match(matchTypeAndNum);
+      return match ? parseInt(match[1], 10) : 0;
+    })
+    .map(n => isNaN(n) ? 0 : Math.round(n));
+
+    const nextOfTypeNumInName = Math.max(...namedNums) + 1;
+    return `${printableType} ${nextOfTypeNumInName}`;
   }
 
   public async createAndAddNode(nodeType: string, position?: [number, number]) {
