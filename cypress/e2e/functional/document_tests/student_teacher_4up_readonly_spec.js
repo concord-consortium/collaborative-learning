@@ -127,7 +127,7 @@ function setupTestBrain(studentIndex) {
   const numberNode = "number";
   dataflowToolTile.getCreateNodeButton(numberNode).click();
   dataflowToolTile.getNode(numberNode).should("exist");
-  dataflowToolTile.getNodeTitle().should("contain", "Number");
+  dataflowToolTile.getNodeTitle().invoke("val").should("include", "Number");
 
   clueCanvas.addTile("simulator");
   const newName = "Test Simulation";

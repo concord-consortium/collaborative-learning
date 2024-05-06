@@ -41,11 +41,6 @@
 }
 
 .node.control.has-flow-in {
-  .input-socket {
-    position: relative;
-  }
-
-
   .input.number2 .input-socket::after {
     content: "";
     position: absolute;

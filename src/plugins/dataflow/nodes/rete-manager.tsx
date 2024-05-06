@@ -42,6 +42,9 @@ import { DataflowProgramChange } from "../dataflow-logger";
 import { runInAction } from "mobx";
 import { getSharedNodes } from "./utilities/shared-program-data-utilities";
 import { ProgramDataRates } from "../model/utilities/node";
+import { simulatedChannel } from "../model/utilities/simulated-channel";
+import { virtualSensorChannels } from "../model/utilities/virtual-channel";
+import { serialSensorChannels } from "../model/utilities/channel";
 
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
@@ -53,6 +56,7 @@ export class ReteManager implements INodeServices {
   private snapshotDisposer: () => void | undefined;
   public inTick = false;
   public disposed = false;
+  private previousChannelIds = "";
 
   constructor(
     private mstProgram: DataflowProgramModelType,
@@ -60,7 +64,6 @@ export class ReteManager implements INodeServices {
     div: HTMLElement,
     public mstContent: DataflowContentModelType,
     public stores: IStores,
-    public runnable: boolean | undefined,
     public readOnly: boolean | undefined,
     public playback: boolean | undefined
   ){
@@ -186,6 +189,13 @@ export class ReteManager implements INodeServices {
             return InputValueControlComponent;
           }
           return null;
+        },
+        connection(data) {
+          return () => {
+            const { path } = Presets.classic.useConnection();
+            if (!path) return null;
+            return <div className="dataflow-connection"><Presets.classic.Connection data={data.payload} /></div>;
+          };
         }
       }
     }));
@@ -331,7 +341,6 @@ export class ReteManager implements INodeServices {
 
     let readOnPatchDisposer;
     if (this.readOnly) {
-      console.log("readOnly process called");
       readOnPatchDisposer = onPatch(this.mstContent, (patch) => {
         // It is likely that Dataflow will kind of crash when this happens
         // So you'll need to fix the problem, and possibly disable readOnly processing
@@ -540,11 +549,47 @@ export class ReteManager implements INodeServices {
     }
   }
 
+  private get simulatedChannels() {
+    return this.mstContent
+      ? this.mstContent.inputVariables?.map(variable => simulatedChannel(variable)) ?? []
+      : [];
+  }
+
+  public updateChannels() {
+    const channels = [...virtualSensorChannels, ...this.simulatedChannels, ...serialSensorChannels];
+
+    // The only channels that might be added or removed from this array change are the simulatedChannels
+    const channelIds = channels.map(c => c.channelId).join(",");
+    if (channelIds !== this.previousChannelIds) {
+      this.previousChannelIds = channelIds;
+      this.mstContent.setChannels(channels);
+
+      this.countSerialDataNodes();
+    }
+
+    // NOTE: these channels are observable, so changes to their missing or connected
+    // status should trigger updates.
+    this.mstContent.channels.filter(c => c.usesSerial).forEach((channel) => {
+      const { serialDevice } = this.stores;
+      if (serialDevice.hasPort()){
+        channel.serialConnected = true;
+        const deviceMismatch = serialDevice.deviceFamily !== channel.deviceFamily;
+        const timeSinceActive = channel.usesSerial && channel.lastMessageReceivedAt
+          ? Date.now() - channel.lastMessageReceivedAt: 0;
+        channel.missing = deviceMismatch || timeSinceActive > 7000;
+      } else {
+        channel.serialConnected = false;
+        channel.missing = true;
+      }
+    });
+  }
+
   public tickAndProcessNodes() {
     // This is wrapped in an MST action so all of the changes are batched together
     // We are using our own custom Rete Dataflow Engine which runs synchronously
     // so all calls to the nodes `data` and `onTick` methods are grouped together.
     this.mstProgram.tickAndProcess(() => {
+      this.updateChannels();
       this.inTick = true;
       this.process();
       this.inTick = false;

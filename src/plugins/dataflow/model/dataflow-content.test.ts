@@ -62,4 +62,24 @@ describe("DataflowContentModel", () => {
     // The connections are just simple string properties so there isn't
     // much to test here
   });
+
+  it("should be able to export proper json", () => {
+    const content = dataflowThreeNode.tileMap["2cLNVyjzmhF5Mij-"].content;
+    // We have to use `as DataflowContentModelSnapshotIn` because the json
+    // gets imported with types that aren't strict enough for DataflowContentModel
+    // See https://github.com/microsoft/TypeScript/issues/32063 which
+    // would make this better.
+    const dcm = DataflowContentModel.create(content as DataflowContentModelSnapshotIn);
+    const jsonString = dcm.exportJson();
+    const exportedJson = JSON.parse(jsonString);
+
+    // Do some sanity checking
+    expect(exportedJson.programDataRate).toBe(1000);
+    expect(exportedJson.programZoom.dx).toBe(0);
+
+    const { nodes, connections } = exportedJson.program;
+    expect(Object.values(nodes).length).toBe(3);
+    expect(Object.values(connections).length).toBe(2);
+  });
+
 });

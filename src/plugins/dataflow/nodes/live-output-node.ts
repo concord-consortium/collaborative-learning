@@ -433,8 +433,8 @@ export class LiveOutputNode extends BaseNode<
     }
 
     if (this.services.inTick) {
-      const { stores, runnable } = this.services;
-      if (runnable) {
+      const { stores, readOnly } = this.services;
+      if (!readOnly) {
         this.sendDataToSerialDevice(stores.serialDevice);
         this.sendDataToSimulatedOutput();
       }

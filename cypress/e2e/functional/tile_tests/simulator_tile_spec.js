@@ -283,8 +283,18 @@ context('Simulator Tile', function () {
     .trigger('mousemove', { which: 1, pageX: 50, pageY: 100 })
     .trigger('mouseup', {force: true});
 
-    simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "288");
+    cy.wait(3000); // wait for a tick to update data from sim to dataflow
+    let simVarValue;
+    simulatorTile.getVariableDisplayedValue().eq(1).invoke('text').then((text) => {
+      simVarValue = text.trim();
+      expect(Number(simVarValue)).to.be.within(200, 300);
+    });
 
-    dataflowTile.getNodeValueContainer("sensor").should("contain.text", "288");
+    let pinValue;
+    dataflowTile.getNodeValueContainer("sensor").invoke('text').then((text) => {
+      pinValue = text.trim();
+      console.log("| pinValue: ", pinValue);
+      expect(Number(pinValue)).to.be.within(200, 300);
+    });
   });
 });

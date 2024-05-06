@@ -2,8 +2,6 @@ import React from "react";
 import { observer } from "mobx-react";
 import { ClassicPreset } from "rete";
 
-import "./value-with-units-control.sass";
-
 export class ValueWithUnitsControl extends ClassicPreset.Control
 {
   constructor(

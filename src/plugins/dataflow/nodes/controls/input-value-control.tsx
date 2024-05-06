@@ -1,5 +1,4 @@
 import { ClassicPreset } from "rete";
-import "./value-control.sass";
 import React from "react";
 import { observer } from "mobx-react";
 import { computed, makeObservable } from "mobx";

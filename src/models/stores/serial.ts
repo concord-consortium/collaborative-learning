@@ -121,12 +121,12 @@ export class SerialDevice {
           if (isFinite(Number(reading))){
             targetChannel.value = Number(reading);
           }
-          targetChannel.lastMessageRecievedAt = Date.now();
+          targetChannel.lastMessageReceivedAt = Date.now();
         }
         if (["r"].includes(element)){
           // handle message about relays state
           targetChannel.relaysState = reading.split('').map(s => Number(s));
-          targetChannel.lastMessageRecievedAt = Date.now();
+          targetChannel.lastMessageReceivedAt = Date.now();
         }
       }
     } while (match);

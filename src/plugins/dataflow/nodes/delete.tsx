@@ -3,8 +3,6 @@ import DeleteNodeIcon from "../assets/icons/delete-node.svg";
 import { useStopEventPropagation } from "./controls/custom-hooks";
 import { ReteManager } from "./rete-manager";
 
-// TODO: why is this imported here?
-import "./controls/num-control.sass";
 
 interface IProps {
   nodeId: string;

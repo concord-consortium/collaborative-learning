@@ -1,4 +1,4 @@
-import { Instance } from "mobx-state-tree";
+import { Instance, types } from "mobx-state-tree";
 import { typeField } from "../../../utilities/mst-utils";
 import { BaseNode, BaseNodeModel, NoInputs } from "./base-node";
 import { INodeServices } from "./service-types";
@@ -7,24 +7,25 @@ import { DropdownListControl, IDropdownListControl, ListOption } from "./control
 import { PlotButtonControl } from "./controls/plot-button-control";
 import { numSocket } from "./num-socket";
 import { NodeSensorTypes, kSensorMissingMessage, kSensorSelectMessage } from "../model/utilities/node";
-import { NodeChannelInfo, kDeviceDisplayNames } from "../model/utilities/channel";
-import { kSimulatedChannelPrefix } from "../model/utilities/simulated-channel";
+import { NodeChannelInfo, kDeviceDisplayNames, serialSensorChannels } from "../model/utilities/channel";
+import { kSimulatedChannelPrefix, niceNameFromSimulationChannelId } from "../model/utilities/simulated-channel";
 import { ValueWithUnitsControl } from "./controls/value-with-units-control";
 import { kEmptyValueString } from "./utilities/view-utilities";
+import { virtualSensorChannels } from "../model/utilities/virtual-channel";
+
+const staticChannels = [...virtualSensorChannels, ...serialSensorChannels];
 
 export const SensorNodeModel = BaseNodeModel.named("SensorNodeModel")
 .props({
   type: typeField("Sensor"),
-
-  // FIXME: we'll have to migrate `type` to `sensorType`. In the old
-  // saved data the sensorType will be called type.
   sensorType: "",
-
   sensor: "",
+  sensorDisplayName: types.maybe(types.string)
 })
 .actions(self => ({
-  setSensor(sensor: string) {
+  setSensor(sensor: string, sensorDisplayName?: string) {
     self.sensor = sensor;
+    self.sensorDisplayName = sensorDisplayName;
     self.resetGraph();
     self.setNodeValue(NaN);
     // It isn't clear if we should reprocess, but since the graph and value
@@ -76,7 +77,7 @@ export class SensorNode extends BaseNode<
 
     // A function is passed for the options, this way the dropdown component can
     // observe this function and re-render when its dependencies change
-    this.sensorControl = new DropdownListControl(this, "sensor", model.setSensor, [],
+    this.sensorControl = new DropdownListControl(this, "sensor", this.setSensorWrapper, [],
       "Select Sensor", kSensorSelectMessage, this.getSensorOptions);
     this.addControl("sensor", this.sensorControl);
 
@@ -86,6 +87,12 @@ export class SensorNode extends BaseNode<
 
     this.addControl("plotButton", new PlotButtonControl(this));
   }
+
+  setSensorWrapper = (sensor: string) => {
+    const options = this.getSensorOptions();
+    const option = options.find(opt => opt.name === sensor);
+    this.model.setSensor(sensor, option?.displayName);
+  };
 
   getNodeSensorType() {
     const { sensorType } = this.model;
@@ -149,29 +156,72 @@ export class SensorNode extends BaseNode<
     }));
   }
 
-  getSensorOptions = () => {
-    const options = this.convertChannelsToOptions();
+  /**
+   * Do our best to return a nice name given a sensor name. This should
+   * only be used for legacy sensor nodes which don't explicitly store
+   * the display name of the sensor.
+   *
+   * @param name
+   * @returns
+   */
+  convertSensorNameToDisplayName(name: string) {
+    const staticChannel = staticChannels.find(channel => channel.channelId === name);
+    if (staticChannel) {
+      return this.getChannelString(staticChannel);
+    }
 
-    // If the current sensor no longer exists in the channels, then add a fake
-    // sensor to the list. I'm not sure how this happens in real life. It
-    // can be emulated by setting the sensor as a simulated sensor, and then
-    // manually editing the document and removing the diagram view and variable
-    // shared model.
-    // Previously this was handled by showing the missing sensor as placeholder
-    // text instead of a fake option.
-    // a fake option. The fake option
-    // TODO: this could be improved to have the correct displayName in most cases,
-    // we'd have to search the possible channels which are not part of the listed
-    // channels.
+    return niceNameFromSimulationChannelId(name);
+  }
+
+
+  /**
+   * If the current sensor doesn't existing in the options, then add a fake sensor
+   * to the list. This will happen in a few cases:
+   * - when a live (not readOnly) tile is loaded and the tick hasn't happened yet
+   * - when a program recording is finished and a copy of the program is displayed
+   * - when a readOnly view of the tile is shown
+   *
+   * We store the displayName of the choice, so we can display something user
+   * friendly in these cases. For the virtual channels and serial sensor channels
+   * we can lookup the display name because the list of these channels is static.
+   * However for the simulated sensors this display name is taken from the
+   * shared variable. And we can't always look up these shared variables. In
+   * particular in a recorded view of the program the shared variables are not
+   * also recorded.
+   *
+   * For backwards compatibility we do the best we can with converting the name
+   * to a displayName.
+   *
+   * @param options
+   */
+  addFakeOptionIfNecessary(options: ListOption[]) {
     const currentSensor = this.model.sensor;
     if (currentSensor && currentSensor !== "none" &&
         !options.find(option => option.name === currentSensor)) {
       options.unshift({
         name: currentSensor,
-        displayName: currentSensor,
-        missing: true
+        displayName: this.model.sensorDisplayName ??
+          this.convertSensorNameToDisplayName(currentSensor),
+        // We don't know if this is a missing sensor or not.
+        // In a readOnly view we do not have enough info to know.
+        // In a live view, or a readOnly view running in the
+        // same app as the live view that hasn't ticked yet, we don't know the channels
+        // at that point.
+        // If there was a channel that was deleted then in a live view it might be
+        // correct to show this fake option as missing. The only way that can currently
+        // happen is if the selected simulated variable is removed from the document.
+        // Given all this, it seems the best we can do is to show this option as missing
+        // when we are not readOnly. In that case there is a chance it was caused by a
+        // deletion. And it will also make it clear that the channels aren't known until
+        // the first tick happens.
+        missing: !this.readOnly
       });
     }
+  }
+
+  getSensorOptions = () => {
+    const options = this.convertChannelsToOptions();
+    this.addFakeOptionIfNecessary(options);
 
     if (options.length === 0) {
       options.push({
