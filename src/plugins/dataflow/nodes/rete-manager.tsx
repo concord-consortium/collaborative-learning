@@ -469,7 +469,7 @@ export class ReteManager implements INodeServices {
     })
     .map(n => isNaN(n) ? 0 : Math.round(n));
 
-    const nextOfTypeNumInName = Math.max(...namedNums) + 1;
+    const nextOfTypeNumInName = namedNums.length > 0 ? Math.max(...namedNums) + 1 : 1;
     return `${printableType} ${nextOfTypeNumInName}`;
   }
 
