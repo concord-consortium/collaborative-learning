@@ -16,6 +16,7 @@ import { INodeServices } from "./service-types";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { IBaseNode, IBaseNodeModel, NodeClass } from "./base-node";
+import { NodeTypes } from "../model/utilities/node";
 import { ControlNode } from "./control-node";
 import { CounterNode } from "./counter-node";
 import { DemoOutputNode } from "./demo-output-node";
@@ -452,25 +453,26 @@ export class ReteManager implements INodeServices {
   /**
    * Given @param nodeType (string)
    * Calculates a sensible name for a new node of that type
+   * Handles nodes whose internal names do not match their display names
    * Searches for nodes with names like {nodeType} {n}
    * @returns `{nodeType} {n+1}`
    */
   private getNewNodeName(nodeType: string) {
-    const printableType = nodeType === "Sensor" ? "Input" : nodeType;
+    const printableType = NodeTypes.find((nt) => nt.name === nodeType)?.displayName ?? nodeType;
 
-    const existingNodeNamesOfType = this.editor.getNodes()
+    const nodesNamedAsType = this.editor.getNodes()
       .map(n=> (n as IBaseNode).model.orderedDisplayName)
       .filter(name => name?.includes(printableType));
 
     const matchTypeAndNum = new RegExp(`^${printableType} (\\d+)$`);
-    const namedNums: number[] = existingNodeNamesOfType.map(name => {
+    const namedNums: number[] = nodesNamedAsType.map(name => {
       const match = name?.match(matchTypeAndNum);
       return match ? parseInt(match[1], 10) : 0;
     })
     .map(n => isNaN(n) ? 0 : Math.round(n));
 
-    const nextOfTypeNumInName = namedNums.length > 0 ? Math.max(...namedNums) + 1 : 1;
-    return `${printableType} ${nextOfTypeNumInName}`;
+    const nextNum = namedNums.length > 0 ? Math.max(...namedNums) + 1 : 1;
+    return `${printableType} ${nextNum}`;
   }
 
   public async createAndAddNode(nodeType: string, position?: [number, number]) {
