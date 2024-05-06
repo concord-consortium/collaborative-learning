@@ -204,7 +204,7 @@ $output-node-value: #f9ecab;
     display: flex;
     border-radius: 0px 0px 15px 0px;
     justify-content: flex-end;
-    padding-right:6px;
+    padding-right:9px;
     height: 16px;
   }
   .node-icon {
@@ -250,6 +250,13 @@ $output-node-value: #f9ecab;
   .node-icon {
     svg {
       transform: translate(-3px, 1px) scale(0.6);
+    }
+  }
+}
+.mini-node.has-icon-number {
+  .node-icon {
+    svg {
+      transform: translate(2px, 1px) scale(1.1);
     }
   }
 }

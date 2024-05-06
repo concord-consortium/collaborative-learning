@@ -19,6 +19,7 @@ import AddIcon from "../../../shared-assets/icons/dataflow/math/add.svg";
 import SubtractIcon from "../../../shared-assets/icons/dataflow/math/subtract.svg";
 import MultiplyIcon from "../../../shared-assets/icons/dataflow/math/multiply.svg";
 import DivideIcon from "../../../shared-assets/icons/dataflow/math/divide.svg";
+import NumIcon from "../../../shared-assets/icons/dataflow/math/num.svg";
 
 import LightBulbIcon from "../../../shared-assets/icons/dataflow/output/light-bulb.svg";
 import GrabberIcon from "../../../shared-assets/icons/dataflow/output/grabber.svg";
@@ -116,6 +117,7 @@ const iconMap: { [key: string]: JSX.Element } = {
   "subtract": <SubtractIcon/>,
   "multiply": <MultiplyIcon/>,
   "divide": <DivideIcon/>,
+  "number": <NumIcon/>,
   "servo": <ServoIcon/>,
   "emg": <EMGIcon/>,
   "pressure": <PressureIcon/>,
@@ -142,7 +144,7 @@ const iconMap: { [key: string]: JSX.Element } = {
 };
 
 const labelStringToIconKey: { [key: string]: string } = {
-  "Number": "signal",
+  "Number": "number",
   "Timer": "timer",
   "Sine": "sine",
   "Square": "square",
