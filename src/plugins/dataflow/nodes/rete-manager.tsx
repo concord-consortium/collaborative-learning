@@ -16,7 +16,7 @@ import { INodeServices } from "./service-types";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { IBaseNode, IBaseNodeModel, NodeClass } from "./base-node";
-import { NodeTypes } from "../model/utilities/node";
+import { NodeTypes, ProgramDataRates } from "../model/utilities/node";
 import { ControlNode } from "./control-node";
 import { CounterNode } from "./counter-node";
 import { DemoOutputNode } from "./demo-output-node";
@@ -42,7 +42,6 @@ import { ValueWithUnitsControl, ValueWithUnitsControlComponent } from "./control
 import { DataflowProgramChange } from "../dataflow-logger";
 import { runInAction } from "mobx";
 import { getSharedNodes } from "./utilities/shared-program-data-utilities";
-import { ProgramDataRates } from "../model/utilities/node";
 
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
