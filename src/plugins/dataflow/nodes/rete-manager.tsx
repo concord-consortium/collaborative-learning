@@ -46,6 +46,25 @@ import { getSharedNodes } from "./utilities/shared-program-data-utilities";
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
 
+ /**
+* Get an indexed name based on exiting names.
+* If existing names are "MyBase 1" and "MyBase 3" this will return "MyBase 5"
+* @param existingNames
+* @param baseName
+* @returns {string} indexed name
+*/
+export function getNewIndexedName(existingNames: Array<string | undefined>, baseName: string) {
+  const matchTypeAndNum = new RegExp(`^${baseName} *(\\d+(\\.\\d+)?)$`);
+ const namedNums: number[] = existingNames.map(name => {
+   const match = name?.match(matchTypeAndNum);
+   return match ? parseInt(match[1], 10) : 0;
+ })
+ .map(n => isNaN(n) ? 0 : Math.round(n));
+
+ const nextNum = namedNums.length > 0 ? Math.max(...namedNums) + 1 : 1;
+ return `${baseName} ${nextNum}`;
+}
+
 export class ReteManager implements INodeServices {
   public editor: NodeEditorMST;
   public engine = new DataflowEngine<Schemes>();
@@ -449,25 +468,6 @@ export class ReteManager implements INodeServices {
   };
 
   /**
-   * Get an indexed name based on exiting names.
-   * E.g. if existing names are "MyBase 1", "MyBase 3", this will return "MyBase 5"
-   * @param existingNames (Array<string | undefined>)
-   * @param baseName (string)
-   * @returns `{baseName} {num}`
-   */
-  public getNewIndexedName(existingNames: Array<string | undefined>, baseName: string) {
-    const matchTypeAndNum = new RegExp(`^${baseName} *(\\d+)$`);
-    const namedNums: number[] = existingNames.map(name => {
-      const match = name?.match(matchTypeAndNum);
-      return match ? parseInt(match[1], 10) : 0;
-    })
-    .map(n => isNaN(n) ? 0 : Math.round(n));
-
-    const nextNum = namedNums.length > 0 ? Math.max(...namedNums) + 1 : 1;
-    return `${baseName} ${nextNum}`;
-  }
-
-  /**
    * Given @param nodeType (string)
    * Discovers the display name for that node type
    * Searches for existing nodes with names like {nodeType} {n}
@@ -483,7 +483,7 @@ export class ReteManager implements INodeServices {
       .filter(name => name?.includes(printableType));
 
     if (!nodesNamedAsType) return printableType + " 1";
-    return this.getNewIndexedName(nodesNamedAsType, printableType);
+    return getNewIndexedName(nodesNamedAsType, printableType);
   }
 
   public async createAndAddNode(nodeType: string, position?: [number, number]) {
