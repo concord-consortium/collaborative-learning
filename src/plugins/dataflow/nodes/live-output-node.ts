@@ -419,12 +419,13 @@ export class LiveOutputNode extends BaseNode<
       this.saveNodeValue(newValue);
       this.saveOutputStatus("");
     } else if (kServoOutputTypes.includes(outputType)) {
-      // out of range value will not move sim servo
-      const isValidServoValue = value >= 0 && value <= 180;
-      const newValue = isValidServoValue ? value : this.getLastValidServoValue();
+      // angles out of range move servo to nearest valid angle
+      const newValue = Math.min(Math.max(value, 0), 180);
 
-      // alternative: angles out of range move servo to nearest valid angle
-      // newValue = Math.min(Math.max(newValue, 0), 180);
+      // alternative: out of range value will not move sim servo
+      // const isValidServoValue = value >= 0 && value <= 180;
+      // const newValue = isValidServoValue ? value : this.getLastValidServoValue();
+
       this.saveNodeValue(newValue);
       this.saveOutputStatus("");
     } else {
