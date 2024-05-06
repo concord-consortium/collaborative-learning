@@ -1,23 +1,26 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import classNames from "classnames";
+import { useResizeDetector } from "react-resize-detector";
+
 import { ISimulation, ISimulationProps } from "../simulation-types";
 import { iconUrl, kPotentiometerKey, kServoKey, kSignalKey
 } from "../../../shared-assets/icons/icon-utilities";
 import { VariableSlider } from "@concord-consortium/diagram-view";
 import { findVariable } from "../simulation-utilities";
+import {
+  IMiniNodeData, getMiniNodeIcon, getMiniNodesDisplayData, getTweenedServoAngle, wireToA1, getNodeBoundingBox
+} from "./chip-sim-utils";
+import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
+import { isSimulatorModel } from "../../model/simulator-content";
+
 import potDial from "./assets/pot-top.png";
 import servoArm from "./assets/servo-arm.png";
 import assemblyExpanded from "./assets/assembly-expanded.png";
 import stopwatch from "./assets/stopwatch.png";
-import {
-  IMiniNodeData, getMiniNodeIcon, getMiniNodesDisplayData, getTweenedServoAngle, wireToA1
-} from "./chip-sim-utils";
 
 import "./potentiometer-servo.scss";
 
 export const kPotentiometerServoKey = "potentiometer_chip_servo";
-
-
 
 const potVisibleOffset = 135;
 const servoVisibleOffset = 90;
@@ -42,27 +45,50 @@ const miniNodeClasses = (node: IMiniNodeData, index:number, length:number) => {
   );
 };
 
-const NodeColumn = ({ nodes, columnLabel }: { nodes: IMiniNodeData[], columnLabel: string }) => {
+const MiniNode = ({ miniNode, index, length }:
+    { miniNode: IMiniNodeData, index: number, length: number }) => {
+  const { tile } = useTileModelContext();
+
+  // Remove cached location when unmounted
+  useEffect(() => {
+    return () => {
+      const content = isSimulatorModel(tile?.content) ? tile?.content : undefined;
+      content?.setObjectBoundingBox(miniNode.id, undefined);
+    };
+  }, [miniNode.id, tile?.content]);
+
+  return (
+    <div key={miniNode.id} className={miniNodeClasses(miniNode, index, length)}>
+      <div className="node-info">
+        <div className="node-icon">{getMiniNodeIcon(miniNode.iconKey)}</div>
+        <div className="node-label">{miniNode.label}</div>
+      </div>
+      <div className="node-value">
+        {miniNode.value}
+      </div>
+    </div>
+  );
+};
+
+const NodeColumn = ({ nodes, columnLabel }:
+  { nodes: IMiniNodeData[], columnLabel: string }) => {
   const catLabel = columnLabel.charAt(0).toUpperCase() + columnLabel.slice(1);
+
   return (
     <div className={`mini-nodes-col ${columnLabel}`}>
-      { nodes.map((miniNode, index) => (
-          <div key={miniNode.id} className={miniNodeClasses(miniNode, index, nodes.length)}>
-            <div className="node-info">
-              <div className="node-icon">{getMiniNodeIcon(miniNode.iconKey)}</div>
-              <div className="node-label">{miniNode.label}</div>
-            </div>
-            <div className="node-value">
-              {miniNode.value}
-            </div>
-          </div>
-        ))}
+      { nodes.map((miniNode, index) =>
+        <MiniNode key={miniNode.id} miniNode={miniNode} index={index} length={nodes.length}/>)
+      }
       <div className="category-label">{catLabel}</div>
     </div>
   );
 };
 
-function PotentiometerAndServoComponent({ frame, variables, programData }: ISimulationProps) {
+function PotentiometerAndServoComponent({ tileElt, simRef, frame, variables, programData }: ISimulationProps) {
+  const { tile } = useTileModelContext();
+  const content = isSimulatorModel(tile?.content) ? tile?.content : undefined;
+  const { height: resizeHeight, width: resizeWidth } = useResizeDetector({ targetRef: simRef });
+
   const tweenedServoAngle = useRef(0);
   const lastTweenedAngle = tweenedServoAngle.current;
 
@@ -86,6 +112,22 @@ function PotentiometerAndServoComponent({ frame, variables, programData }: ISimu
   const hasPinIn = inputNodesArr.some(node => node.label.includes("Pin"));
   const hasOutToServo = outputNodesArr.some(node => node.label.includes("Servo"));
   const animationRate = programData?.samplingRate ? programData.samplingRate : 0;
+
+  const nodeCount =  programData ? programData.programNodes.size : 0;
+
+  // Recalculate and cache the locations of the individual nodes' div elements:
+  // (a) When the component is rendered, (b) when the node count changes, and (c) when the tile changes size
+  useEffect(() => {
+    if (!tileElt || !content) return;
+    const nodes = programData ? [...programData.programNodes.keys()] : [];
+    for (const nodeId of nodes) {
+      const bb = getNodeBoundingBox(nodeId, tileElt);
+      if (!bb || bb.left === 0) {
+        content.setObjectBoundingBox(nodeId, undefined);
+      }
+      content.setObjectBoundingBox(nodeId, bb);
+    }
+  }, [content, programData, nodeCount, tileElt, resizeHeight, resizeWidth]);
 
   return (
     <div className={potServoClasses}>

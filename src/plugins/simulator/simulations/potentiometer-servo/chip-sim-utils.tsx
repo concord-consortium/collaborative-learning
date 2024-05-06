@@ -267,13 +267,9 @@ export function getMiniNodesDisplayData(programData?: SharedProgramDataType): IM
   return { inputNodesArr, operatorNodesArr, outputNodesArr, extraCount };
 }
 
-export function getNodeBoundingBox (objectId: string, tileElt: HTMLElement, program: SharedProgramDataType) {
-  console.log('determining boundingbox for', objectId);
-  // Dereference the map of nodes, so that we will react to new/deleted nodes which can affect the placement.
-  const nodeList = program.programNodes.size; // This is not sufficient
+export function getNodeBoundingBox (objectId: string, tileElt: HTMLElement) {
   // Find the HTML object representing this node
   const elt = tileElt.querySelector(`.node-${objectId}`);
-  // console.log('tileElt', tileElt, 'elt:', elt, 'rect:', elt?.getBoundingClientRect());
   const tileRect = tileElt.getBoundingClientRect();
   const nodeRect = elt?.getBoundingClientRect();
   if (tileRect && nodeRect) {

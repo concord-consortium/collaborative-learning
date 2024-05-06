@@ -1,10 +1,11 @@
-import { reaction } from "mobx";
+import { ObservableMap, reaction } from "mobx";
 import { types, Instance, getType, addDisposer, getSnapshot } from "mobx-state-tree";
 import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
+import _ from "lodash";
 
 import { withoutUndo } from "../../../models/history/without-undo";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
-import { TileContentModel } from "../../../models/tiles/tile-content";
+import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { getAppConfig } from "../../../models/tiles/tile-environment";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
@@ -12,7 +13,7 @@ import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { defaultSimulationKey, simulations } from "../simulations/simulations";
 import { SharedProgramData, SharedProgramDataType } from "../../shared-program-data/shared-program-data";
-import { IClueObject } from "../../../models/annotations/clue-object";
+import { IClueObject, ObjectBoundingBox } from "../../../models/annotations/clue-object";
 import { kPotentiometerServoKey } from "../simulations/potentiometer-servo/potentiometer-servo";
 import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { getMiniNodesDisplayData } from "../simulations/potentiometer-servo/chip-sim-utils";
@@ -28,7 +29,9 @@ export const SimulatorContentModel = TileContentModel
     type: types.optional(types.literal(kSimulatorTileType), kSimulatorTileType),
   })
   .volatile(self => ({
-    frame: 0
+    frame: 0,
+    // Tracks locations of objects for the annotation layer
+    objectBoundingBoxCache: new ObservableMap<string,ObjectBoundingBox>()
   }))
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
@@ -89,8 +92,8 @@ export const SimulatorContentModel = TileContentModel
 
         // Plus an object for each of the 14 pins on each side of the image
         const boardPins = [
-          ...Array.from({ length: 14 }, (_, index) => `L${index}`),
-          ...Array.from({ length: 14 }, (_, index) => `R${index}`)
+          ...Array.from({ length: 14 }, (o, index) => `L${index}`),
+          ...Array.from({ length: 14 }, (o, index) => `R${index}`)
         ];
         const pinObjects = boardPins.map(pin =>
           ({
@@ -182,7 +185,23 @@ export const SimulatorContentModel = TileContentModel
 
       // Increment the frame
       self.frame++;
+    },
+    setObjectBoundingBox(id: string, boundingBox: ObjectBoundingBox|undefined) {
+      if (boundingBox) {
+        const current = self.objectBoundingBoxCache.get(id);
+        const _current = current &&
+          { left: current.left, top: current.top, width: current.width, height: current.height };
+        if (!current || !_.isEqual(boundingBox, _current)) {
+          self.objectBoundingBoxCache.set(id, boundingBox);
+        }
+      } else {
+        self.objectBoundingBoxCache.delete(id);
+      }
     }
   }));
 
 export interface SimulatorContentModelType extends Instance<typeof SimulatorContentModel> {}
+
+export function isSimulatorModel(model?: ITileContentModel): model is SimulatorContentModelType {
+  return model?.type === kSimulatorTileType;
+}

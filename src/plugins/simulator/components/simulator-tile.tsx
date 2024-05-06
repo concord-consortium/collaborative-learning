@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
@@ -7,7 +7,7 @@ import { isCurriculumDocument } from "../../../models/document/document-types";
 import { SimulatorContentModelType } from "../model/simulator-content";
 import { SimulatorVariable } from "./simulator-variable";
 import { OffsetModel } from "../../../models/annotations/clue-object";
-import { getNodeBoundingBox, getPinBoundingBox, setPinOffsets } from "../simulations/potentiometer-servo/chip-sim-utils";
+import { getPinBoundingBox, setPinOffsets } from "../simulations/potentiometer-servo/chip-sim-utils";
 
 import "./simulator-tile.scss";
 
@@ -21,6 +21,7 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
   // and following comments) for details. We should be on the lookout for such issues.
   const content = model.content as SimulatorContentModelType;
   const canRunIndependently = !readOnly || isCurriculumDocument(documentId);
+  const simRef = useRef<HTMLDivElement>(null);
 
   const [_steps, setSteps] = useState(0);
   useEffect(() => {
@@ -36,10 +37,11 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
   useEffect(() => {
     onRegisterTileApi({
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
+        if (content.objectBoundingBoxCache.has(objectId)) {
+          return content.objectBoundingBoxCache.get(objectId);
+        }
         if (!tileElt) return undefined;
         switch (objectType) {
-          case "node":
-            return getNodeBoundingBox(objectId, tileElt, content.sharedProgramData);
           case "pin":
             return getPinBoundingBox(objectId, tileElt);
           default:
@@ -62,7 +64,7 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
   const component = content.simulationData.component;
 
   return (
-    <div className="simulator-content-container">
+    <div ref={simRef} className="simulator-content-container">
       <BasicEditableTileTitle />
       <div className="simulator-content">
         <div className="simulator-variables">
@@ -82,6 +84,8 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
         { component && (
           <div className="simulator-component-container">
             { component({
+              tileElt,
+              simRef,
               frame: _steps,
               variables: content.variables || [],
               programData: content.sharedProgramData
