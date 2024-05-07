@@ -48,15 +48,11 @@ context('Arrow Annotations (Sparrows)', function () {
     drawToolTile.getTileTitle().should("exist");
 
     cy.log("Add two rectangles and an ellipse");
-    drawToolTile.drawSmallRectangle(50, 50);
+    drawToolTile.drawRectangle(50, 50);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
-    drawToolTile.getDrawToolEllipse().click();
-    drawToolTile.getDrawTile()
-      .trigger("mousedown", 250, 50)
-      .trigger("mousemove", 200, 100)
-      .trigger("mouseup", 200, 100);
+    drawToolTile.drawEllipse(200, 50);
     drawToolTile.getEllipseDrawing().should("exist").and("have.length", 1);
-    drawToolTile.drawSmallRectangle(400, 100);
+    drawToolTile.drawRectangle(400, 100);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 2);
 
     cy.log("Annotation buttons only appear in sparrow mode");
@@ -120,8 +116,11 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationSparrowGroups().eq(0).should("not.have.class", "selected");
     aa.getAnnotationSparrowGroups().eq(1).should("not.have.class", "selected");
 
-    // Delete second arrow
-    aa.getAnnotationDeleteButtons().eq(1).click();
+    // Select & delete key to delete
+    aa.getAnnotationBackgroundArrowPaths().eq(1).click({ force: true });
+    aa.getAnnotationSparrowGroups().eq(1).should("have.class", "selected");
+    aa.getAnnotationLayer().type('{del}');
+    aa.getAnnotationArrows().should("have.length", 1);
 
     cy.log("Can only edit text in sparrow mode");
     aa.clickArrowToolbarButton();

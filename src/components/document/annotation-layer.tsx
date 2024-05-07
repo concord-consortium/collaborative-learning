@@ -2,6 +2,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { MouseEvent, MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 import useResizeObserver from "use-resize-observer";
+import { useMemoOne } from "use-memo-one";
 import { AnnotationButton } from "../annotations/annotation-button";
 import { getDefaultPeak } from "../annotations/annotation-utilities";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
@@ -13,6 +14,7 @@ import { ClueObjectModel, IClueObject, OffsetModel } from "../../models/annotati
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { Point } from "../../utilities/math-utils";
 import { hasSelectionModifier } from "../../utilities/event-utils";
+import { HotKeys } from "../../utilities/hot-keys";
 
 import "./annotation-layer.scss";
 
@@ -41,9 +43,29 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const ui = useUIStore();
   const persistentUI = usePersistentUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
+  const hotKeys = useMemoOne(() => new HotKeys(), []);
+
+  useEffect(() => {
+    const deleteSelected = () => content?.deleteSelected();
+    if (!readOnly) {
+      hotKeys.register({
+        "delete": () => deleteSelected(),
+        "backspace": () => deleteSelected()
+      });
+      // disposer, to deactivate these bindings in case we switch to read-only later.
+      return () => {
+        hotKeys.unregister(["delete", "backspace"]);
+      };
+    }
+  }, [content, readOnly, hotKeys]);
+
+  function handleKeyDown(event: React.KeyboardEvent) {
+    hotKeys.dispatch(event);
+  }
 
   // Clicking to select annotations
   function handleArrowClick(arrowId: string, event: MouseEvent) {
+    if (readOnly) return;
     event.stopPropagation();
     const annotation = content?.annotations.get(arrowId);
     if (annotation) {
@@ -234,6 +256,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       className={classes}
       onMouseMove={handleMouseMove}
       onClick={handleBackgroundClick}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
       ref={element => {
         if (element) divRef.current = element;
       }}
