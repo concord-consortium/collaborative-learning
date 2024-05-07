@@ -10,6 +10,10 @@ let sortWork = new SortedWork,
 
 // The qaConfigSubtabs unit referenced here has `initiallyHideExemplars` set, and an exemplar defined in curriculum
 const queryParams1 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
+
+// qaMothPlot unit has an exemplar, but it is not initially hidden.
+const queryParams2 = `${Cypress.config("qaMothPlotUnitStudent5")}`;
+
 const exemplarName = "First Exemplar";
 const exemplarInfo = "Ivan Idea: First Exemplar";
 
@@ -39,6 +43,34 @@ function addText(x, y, text) {
 }
 
 context('Exemplar Documents', function () {
+  it('Unit with default config does not reveal exemplars or generate sticky notes', function () {
+    beforeTest(queryParams2);
+    cy.openTopTab('sort-work');
+    sortWork.checkDocumentInGroup("No Group", exemplarName);
+    sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
+    clueCanvas.getStickyNotePopup().should("not.exist");
+
+    cy.log("Create 3 drawing tiles with 3 events and a label");
+    clueCanvas.addTile("drawing");
+    drawSmallRectangle(100, 50);
+    drawSmallRectangle(200, 50);
+    addText(300, 50, "one two three four five six seven eight nine ten");
+
+    clueCanvas.addTile("drawing");
+    drawSmallRectangle(100, 50);
+    drawSmallRectangle(200, 50);
+    addText(300, 50, "one two three four five six seven eight nine ten");
+
+    clueCanvas.addTile("drawing");
+    drawSmallRectangle(100, 50);
+    drawSmallRectangle(200, 50);
+    addText(300, 50, "one two three four five six seven eight nine ten");
+
+    // No change, no sticky note
+    sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
+    clueCanvas.getStickyNotePopup().should("not.exist");
+  });
+
   it('Unit with exemplars hidden initially, revealed 3 drawings and 3 text tiles', function () {
     beforeTest(queryParams1);
     cy.openTopTab('sort-work');

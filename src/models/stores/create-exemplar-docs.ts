@@ -74,7 +74,7 @@ function createExemplarDocs(
 ) {
   exemplarsData.forEach((exemplarData: any) => {
     const exemplarDocId = createExemplarDocId(exemplarData.url, curriculumConfig.curriculumBaseUrl);
-    const visibility = appConfig.configMgr.initiallyHideExemplars ? "private" : "public";
+    const visibility = appConfig.initiallyHideExemplars ? "private" : "public";
     const newDocParams: DocumentModelSnapshotType = {
       title: exemplarData.title,
       uid: 'ivan_idea_1',
