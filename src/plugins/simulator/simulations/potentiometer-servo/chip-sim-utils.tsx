@@ -1,5 +1,6 @@
 import React from 'react';
 import { ISharedProgramNode, SharedProgramDataType } from '../../../shared-program-data/shared-program-data';
+import { IOffsetModel, ObjectBoundingBox } from '../../../../models/annotations/clue-object';
 
 import SineIcon from "../../../shared-assets/icons/dataflow/generator/sine.svg";
 import SquareIcon from "../../../shared-assets/icons/dataflow/generator/square.svg";
@@ -39,7 +40,6 @@ import NegationIcon from "../../../shared-assets/icons/dataflow/transform/negati
 import NotIcon from "../../../shared-assets/icons/dataflow/transform/not.svg";
 
 import TimerIcon from "../potentiometer-servo/assets/stopwatch.svg";
-import { IOffsetModel } from '../../../../models/annotations/clue-object';
 
 const kBoardImageLeftEdge = 132;
 const kBoardImageRightEdge = 407;
@@ -267,7 +267,7 @@ export function getMiniNodesDisplayData(programData?: SharedProgramDataType): IM
   return { inputNodesArr, operatorNodesArr, outputNodesArr, extraCount };
 }
 
-export function getNodeBoundingBox (objectId: string, tileElt: HTMLElement) {
+export function getNodeBoundingBox (objectId: string, tileElt: HTMLElement): ObjectBoundingBox|undefined {
   // Find the HTML object representing this node
   const elt = tileElt.querySelector(`.node-${objectId}`);
   const tileRect = tileElt.getBoundingClientRect();

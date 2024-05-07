@@ -1,8 +1,11 @@
 import { inject, observer } from "mobx-react";
 import { getSnapshot, destroy } from "mobx-state-tree";
 import React from "react";
+import _ from "lodash";
+import { ObservableMap, runInAction } from "mobx";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import stringify from "json-stringify-pretty-compact";
+
 import { AnnotationLayer } from "./annotation-layer";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
 import { BaseComponent } from "../base";
@@ -21,6 +24,8 @@ import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS, DEBUG_DOCUMENT, DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentError } from "./document-error";
 import { ReadOnlyContext } from "./read-only-context";
+import { CanvasMethodsContext, ICanvasMethods } from "./canvas-methods-context";
+import { ObjectBoundingBox } from "../../models/annotations/clue-object";
 
 import "./canvas.scss";
 
@@ -53,6 +58,10 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   static contextType = EditableTileApiInterfaceRefContext;
   declare context: React.ContextType<typeof EditableTileApiInterfaceRefContext>;
 
+  // Maps tileId and objectId to a bounding box spec.
+  private boundingBoxCache: ObservableMap<string,ObservableMap<string,ObjectBoundingBox>> = new ObservableMap();
+  private canvasMethods: ICanvasMethods;
+
   constructor(props: IProps) {
     super(props);
 
@@ -72,6 +81,8 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       documentScrollY: 0,
       showPlaybackControls: false,
     };
+
+    this.canvasMethods = { cacheObjectBoundingBox: this.cacheObjectBoundingBox };
   }
 
   private fallbackRender = ({ error, resetErrorBoundary }: FallbackProps) => {
@@ -91,36 +102,60 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private cacheObjectBoundingBox = (tileId: string, objectId: string, boundingBox: ObjectBoundingBox | undefined) => {
+    runInAction(() => {
+      if (!this.boundingBoxCache.has(tileId)) {
+        this.boundingBoxCache.set(tileId, new ObservableMap());
+      }
+      const tileBBMap = this.boundingBoxCache.get(tileId);
+      const prevValue = tileBBMap?.get(objectId);
+      if (!_.isEqual(prevValue, boundingBox)) {
+        if (boundingBox) {
+          console.log('cacheBB', objectId, boundingBox);
+          tileBBMap?.set(objectId, boundingBox);
+        } else {
+          tileBBMap?.delete(objectId);
+        }
+      } else {
+        console.log('cacheBB: unchanged');
+      }
+    });
+  };
+
   public render() {
     if (this.context && !this.props.readOnly) {
       // update the editable api interface used by the toolbar
       this.context.current = this.tileApiInterface;
     }
     const content = this.getDocumentToShow()?.content ?? this.getDocumentContent();
+
     return (
       <TileApiInterfaceContext.Provider value={this.tileApiInterface}>
         <AddTilesContext.Provider value={this.getDocumentContent() || null}>
           <ReadOnlyContext.Provider value={this.props.readOnly}>
-            <ErrorBoundary fallbackRender={this.fallbackRender}>
-              <div
-                key="canvas"
-                className="canvas"
-                data-test="canvas"
-                onKeyDown={this.handleKeyDown}
-                ref={(el) => this.setCanvasElement(el)}
-              >
-                {this.renderContent()}
-                {this.renderDebugInfo()}
-                {this.renderOverlayMessage()}
-              </div>
-              <AnnotationLayer
-                canvasElement={this.state.canvasElement}
-                content={content}
-                documentScrollX={this.state.documentScrollX}
-                documentScrollY={this.state.documentScrollY}
-                readOnly={this.props.readOnly}
-              />
-            </ErrorBoundary>
+            <CanvasMethodsContext.Provider value={this.canvasMethods}>
+              <ErrorBoundary fallbackRender={this.fallbackRender}>
+                <div
+                  key="canvas"
+                  className="canvas"
+                  data-test="canvas"
+                  onKeyDown={this.handleKeyDown}
+                  ref={(el) => this.setCanvasElement(el)}
+                >
+                  {this.renderContent()}
+                  {this.renderDebugInfo()}
+                  {this.renderOverlayMessage()}
+                </div>
+                <AnnotationLayer
+                  canvasElement={this.state.canvasElement}
+                  content={content}
+                  documentScrollX={this.state.documentScrollX}
+                  documentScrollY={this.state.documentScrollY}
+                  readOnly={this.props.readOnly}
+                  boundingBoxCache={this.boundingBoxCache}
+                />
+              </ErrorBoundary>
+            </CanvasMethodsContext.Provider>
           </ReadOnlyContext.Provider>
         </AddTilesContext.Provider>
       </TileApiInterfaceContext.Provider>

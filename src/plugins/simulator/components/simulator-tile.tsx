@@ -37,9 +37,8 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
   useEffect(() => {
     onRegisterTileApi({
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
-        if (content.objectBoundingBoxCache.has(objectId)) {
-          return content.objectBoundingBoxCache.get(objectId);
-        }
+        // miniNode bounding boxes are not defined here, since
+        // they get updated via cacheObjectBoundingBox.
         if (!tileElt) return undefined;
         switch (objectType) {
           case "pin":

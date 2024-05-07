@@ -11,7 +11,7 @@ import {
   IMiniNodeData, getMiniNodeIcon, getMiniNodesDisplayData, getTweenedServoAngle, wireToA1, getNodeBoundingBox
 } from "./chip-sim-utils";
 import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile-model-context";
-import { isSimulatorModel } from "../../model/simulator-content";
+import { useCanvasMethodsContext } from "../../../../components/document/canvas-methods-context";
 
 import potDial from "./assets/pot-top.png";
 import servoArm from "./assets/servo-arm.png";
@@ -48,14 +48,16 @@ const miniNodeClasses = (node: IMiniNodeData, index:number, length:number) => {
 const MiniNode = ({ miniNode, index, length }:
     { miniNode: IMiniNodeData, index: number, length: number }) => {
   const { tile } = useTileModelContext();
+  const canvasMethods = useCanvasMethodsContext();
 
   // Remove cached location when unmounted
   useEffect(() => {
     return () => {
-      const content = isSimulatorModel(tile?.content) ? tile?.content : undefined;
-      content?.setObjectBoundingBox(miniNode.id, undefined);
+      if (tile?.id) {
+        canvasMethods?.cacheObjectBoundingBox(tile.id, miniNode.id, undefined);
+      }
     };
-  }, [miniNode.id, tile?.content]);
+  }, [canvasMethods, miniNode.id, tile]);
 
   return (
     <div key={miniNode.id} className={miniNodeClasses(miniNode, index, length)}>
@@ -86,7 +88,7 @@ const NodeColumn = ({ nodes, columnLabel }:
 
 function PotentiometerAndServoComponent({ tileElt, simRef, frame, variables, programData }: ISimulationProps) {
   const { tile } = useTileModelContext();
-  const content = isSimulatorModel(tile?.content) ? tile?.content : undefined;
+  const canvasMethods = useCanvasMethodsContext();
   const { height: resizeHeight, width: resizeWidth } = useResizeDetector({ targetRef: simRef });
 
   const tweenedServoAngle = useRef(0);
@@ -118,16 +120,18 @@ function PotentiometerAndServoComponent({ tileElt, simRef, frame, variables, pro
   // Recalculate and cache the locations of the individual nodes' div elements:
   // (a) When the component is rendered, (b) when the node count changes, and (c) when the tile changes size
   useEffect(() => {
-    if (!tileElt || !content) return;
+    if (!tileElt || !tile) return;
+    console.log('useEffect', resizeWidth, resizeHeight);
     const nodes = programData ? [...programData.programNodes.keys()] : [];
     for (const nodeId of nodes) {
       const bb = getNodeBoundingBox(nodeId, tileElt);
       if (!bb || bb.left === 0) {
-        content.setObjectBoundingBox(nodeId, undefined);
+        canvasMethods?.cacheObjectBoundingBox(tile?.id, nodeId, undefined);
+      } else {
+        canvasMethods?.cacheObjectBoundingBox(tile?.id, nodeId, bb);
       }
-      content.setObjectBoundingBox(nodeId, bb);
     }
-  }, [content, programData, nodeCount, tileElt, resizeHeight, resizeWidth]);
+  }, [tile, tileElt, canvasMethods, programData, nodeCount, resizeHeight, resizeWidth]);
 
   return (
     <div className={potServoClasses}>
