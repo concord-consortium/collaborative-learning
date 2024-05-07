@@ -72,7 +72,7 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
    * @returns Copy of array with connections
    */
   public getConnections() {
-    return [...this.mstProgram.connections.values()];
+    return [...this.mstProgram.connectionWrappers];
   }
 
   /**
@@ -82,7 +82,7 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
    */
   public getConnection(id: Schemes['Connection']['id']) {
     // Again we have to hack the types due to an issue with the Rete types
-    return this.mstProgram.connections.get(id) as unknown as Schemes['Connection'];
+    return this.mstProgram.getConnectionWrapper(id) as unknown as Schemes['Connection'];
   }
 
   /**
@@ -151,15 +151,8 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
     const connection = ConnectionModel.create(data);
     this.mstProgram.addConnection(connection);
 
-    // Note: we are changing the behavior of Rete here. In the default Rete editor
-    // this function doesn't return until the 'connectioncreated' event has been sent and
-    // waited for. In our case the event should be sent when the 'put' happens above
-    // but we are not waiting for this event. We could improve this code if waiting
-    // for the event become important
-
-
-    // Temporary use this approach to get things working
-    await this.emit({ type: 'connectioncreated', data: connection });
+    await this.emit({ type: 'connectioncreated',
+      data: this.mstProgram.getConnectionWrapper(connection.id)! });
 
     return true;
   }
@@ -199,14 +192,13 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
   async removeConnection(id: Schemes['Connection']['id']) {
     if (!this.mstProgram.connections.has(id)) throw new Error('cannot find connection');
 
-    const connection = this.getConnection(id);
+    const connectionWrapper = this.getConnection(id);
 
-    if (!await this.emit({ type: 'connectionremove', data: connection })) return false;
+    if (!await this.emit({ type: 'connectionremove', data: connectionWrapper })) return false;
 
     this.mstProgram.removeConnection(id);
 
-    // Temporary use this approach to get things working
-    await this.emit({ type: 'connectionremoved', data: connection });
+    await this.emit({ type: 'connectionremoved', data: connectionWrapper });
 
     return true;
   }

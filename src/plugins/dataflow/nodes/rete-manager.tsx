@@ -675,10 +675,6 @@ export class ReteManager implements INodeServices {
     // Process connections that were deleted
     for (const [id] of area.connectionViews) {
       if (!snapshot.connections[id]) {
-        // FIXME-p1: this causes problems because the rete-area-plugin keeps a
-        // reference to the connection object in its connectionViews. And then
-        // it tries to access the id of this connection object. But MST complains
-        // because the connection object has already been removed from the tree
         await editor.emit({ type: 'connectionremoved', data: { id } as any });
       }
     }
