@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { useMemo } from "react";
+import React, { useMemo, MouseEvent } from "react";
 
 import { getSparrowCurve } from "./annotation-utilities";
 
@@ -15,11 +15,12 @@ interface ICurvedArrowProps {
   sourceY: number;
   targetX: number;
   targetY: number;
+  onClick?: (event: MouseEvent) => void;
 }
 export function CurvedArrow({
-  className, hideArrowhead, peakX, peakY, setHovering, sourceX, sourceY, targetX, targetY
+  className, hideArrowhead, peakX, peakY, setHovering, sourceX, sourceY, targetX, targetY, onClick
 }: ICurvedArrowProps) {
-  
+
   const { path, arrowheadAngle } = useMemo(() => {
     return getSparrowCurve(sourceX, sourceY, peakX, peakY, targetX, targetY);
   }, [peakX, peakY, sourceX, sourceY, targetX, targetY]);
@@ -32,6 +33,7 @@ export function CurvedArrow({
         fill="none"
         onMouseEnter={e => setHovering?.(true)}
         onMouseLeave={e => setHovering?.(false)}
+        onClick={onClick}
       />
       { !hideArrowhead && (
         <g transform={`translate(${targetX} ${targetY}) rotate(${arrowheadAngle})`}>

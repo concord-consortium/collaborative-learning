@@ -51,5 +51,20 @@ export const DocumentContentModelWithAnnotations = BaseDocumentContentModel
       if (self.annotations) {
         self.annotations.set(id, annotation);
       }
+    },
+    selectAnnotations(ids: string[]) {
+      for (const annotation of self.annotations.values()) {
+        annotation.setSelected(ids.includes(annotation.id));
+      }
+    }
+  }))
+  .actions(self => ({
+    deleteSelected() {
+      const keys = self.annotations.keys();
+      for (const annoId of keys) {
+        if (self.annotations.get(annoId)?.isSelected) {
+          self.deleteAnnotation(annoId);
+        }
+      }
     }
   }));
