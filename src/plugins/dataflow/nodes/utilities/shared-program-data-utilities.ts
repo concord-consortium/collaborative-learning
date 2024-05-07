@@ -11,7 +11,7 @@ export function convertBaseNodeToSharedNode(node: IBaseNode): ISharedProgramNode
     }
   });
 
-  // Sensor and Output Nodes have particular display methods we need to access to pass to shared program nodes
+  // Many node types have particular display methods we need to access to pass a good value to shared program nodes
   let miniNodeDisplayValue = "";
   if (node.model.type === "Sensor" && typeof node.getDisplayValue !== 'undefined') {
     miniNodeDisplayValue = node.getDisplayValue();
@@ -30,8 +30,6 @@ export function convertBaseNodeToSharedNode(node: IBaseNode): ISharedProgramNode
     } else if (isFinite(node.model.nodeValue)) {
       const modelVal = node.model.nodeValue;
       miniNodeDisplayValue = Number.isInteger(modelVal) ? modelVal.toString() : modelVal.toFixed(2);
-    } else {
-      miniNodeDisplayValue = "";
     }
   }
 
