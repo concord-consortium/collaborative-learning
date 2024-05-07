@@ -273,7 +273,7 @@ context('Simulator Tile', function () {
     cy.log("Dataflow can read pin value");
     dataflowTile.getCreateNodeButton("sensor").click();
     dataflowTile.getDropdown("sensor", "sensorType").eq(0).click({scrollBehavior: false});
-    dataflowTile.getSensorDropdownOptions("sensor").eq(5).find(".label").click({force: true}); // Pin?
+    dataflowTile.getSensorDropdownOptions("sensor").eq(6).find(".label").click({force: true}); // Pin?
     dataflowTile.getDropdown("sensor", "sensor").eq(0).click({scrollBehavior: false});
     dataflowTile.getNode("sensor").find(".item.sensor").eq(0).click({scrollBehavior: false});
 
