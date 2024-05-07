@@ -25,7 +25,7 @@ export class InputValueControl
     public node: IBaseNode,
     public inputName: string,
     public label = "",
-    public tooltip = "Something", // FIXME: need better default
+    public tooltip: string,
     public getDisplayMessage: () => string
   ){
     super();

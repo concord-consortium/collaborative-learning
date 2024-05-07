@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotOut, detach, SnapshotIn } from "mobx-state-tree";
+import { types, Instance, SnapshotOut, SnapshotIn } from "mobx-state-tree";
 import { NumberNodeModel } from "../nodes/number-node";
 import { MathNodeModel } from "../nodes/math-node";
 import { CounterNodeModel } from "../nodes/counter-node";
@@ -27,6 +27,27 @@ export const ConnectionModel = types
   });
 export interface IConnectionModel extends Instance<typeof ConnectionModel> {}
 export interface ConnectionModelSnapshotIn extends SnapshotIn<typeof ConnectionModel> {}
+
+/**
+ * The ConnectionModelWrapper is needed because Rete keeps references to the
+ * connections. After a connection model is removed from the MST tree by an applied
+ * snapshot, Rete still tries ot access its id. So we wrap the connection and keep
+ * a copy of the id. This way the actual MST object is not referenced just to get
+ * the id.
+ */
+export class ConnectionModelWrapper {
+  public id;
+  constructor(
+    public model: IConnectionModel
+  ) {
+    this.id = model.id;
+  }
+
+  get source() { return this.model.source; }
+  get sourceOutput() { return this.model.sourceOutput; }
+  get target() { return this.model.target; }
+  get targetInput() { return this.model.targetInput; }
+}
 
 export const DataflowNodeModel = types.
   model("DataflowNode", {
@@ -93,7 +114,8 @@ export const DataflowProgramModel = types.
     recentTicks: types.array(types.string),
   })
   .volatile(self => ({
-    processor: undefined as DataflowProcessor | undefined
+    processor: undefined as DataflowProcessor | undefined,
+    _connectionWrappers: {} as Record<string, ConnectionModelWrapper>
   }))
   .views(self => ({
     get currentTick() {
@@ -103,6 +125,22 @@ export const DataflowProgramModel = types.
     },
     get recordedTicks() {
       return self.recentTicks.slice(0,-1);
+    },
+    getConnectionWrapper(id: string) {
+      const connection = self.connections.get(id);
+      if (!connection) return undefined;
+
+      const existingWrapper = self._connectionWrappers[id];
+      if (existingWrapper) return existingWrapper;
+
+      const newWrapper = new ConnectionModelWrapper(connection);
+      self._connectionWrappers[id] = newWrapper;
+      return newWrapper;
+    }
+  }))
+  .views(self => ({
+    get connectionWrappers() {
+      return [...self.connections.keys()].map(id => self.getConnectionWrapper(id)!);
     }
   }))
   .actions(self => ({
@@ -185,8 +223,10 @@ export const DataflowProgramModel = types.
       self.connections.put(connection);
     },
     removeConnection(id: IConnectionModel["id"]) {
-      // We use detach here so Rete code can continue referring to this object
-      return detach(self.connections.get(id));
+      self.connections.delete(id);
+      if (self._connectionWrappers[id]) {
+        delete self._connectionWrappers[id];
+      }
     }
   }))
   .actions(self => ({
@@ -195,9 +235,12 @@ export const DataflowProgramModel = types.
         return c.source === nodeId || c.target === nodeId;
       });
 
+      // We return the connection wrappers so they can be passed to
+      // rete for cleanup
       const removedConnections = [];
       for (const connection of connections) {
-        removedConnections.push(connection);
+        const wrapper = self.getConnectionWrapper(connection.id);
+        wrapper && removedConnections.push(wrapper);
         self.removeConnection(connection.id);
       }
       self.removeNode(nodeId);

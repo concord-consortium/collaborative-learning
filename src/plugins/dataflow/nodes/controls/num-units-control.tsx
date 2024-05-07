@@ -92,7 +92,9 @@ export class NumberUnitsControl <
   }
 
   public getValueForUser() {
-    return this.getValue() / this.periodUnitsInSeconds;
+    const value = this.getValue() / this.periodUnitsInSeconds;
+    // limit the decimal places of the result since things like 0.12 * 60 / 60 returns 0.11999999
+    return Math.round(value*10000) / 10000;
   }
 
   public logEvent(operation: string) {
@@ -131,8 +133,13 @@ export const NumberUnitsControlComponent: React.FC<{ data: INumberUnitsControl; 
 
   const handleBlur = useCallback((e: any) => {
     const v = e.target.value;
+    // Note that "" and " " are considered finite. This is because they are converted to 0.
     if (isFinite(v)) {
-      control.setValueFromUser(Number(v));
+      const newValue = Number(v);
+      control.setValueFromUser(newValue);
+      // If the new value string is 01 this will update to 1
+      // Or if the value is less than the minimum it will be converted to the minium
+      setInputValue(control.getValueForUser());
       control.logEvent("numberinputmanualentry");
     } else {
       // Restore the value to the one currently stored in the control
