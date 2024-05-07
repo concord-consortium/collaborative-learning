@@ -10,10 +10,35 @@ export function convertBaseNodeToSharedNode(node: IBaseNode): ISharedProgramNode
       (nodeStateData as any)[key] = (node.model as any)[key];
     }
   });
+
+  // Sensor and Output Nodes have particular display methods we need to access to pass to shared program nodes
+  let miniNodeDisplayValue = "";
+  if (node.model.type === "Sensor" && typeof node.getDisplayValue !== 'undefined') {
+    miniNodeDisplayValue = node.getDisplayValue();
+  } else if (node.model.type === "Live Output" && typeof node.getDisplayMessage !== 'undefined') {
+    miniNodeDisplayValue = node.getDisplayMessage();
+  } else if (node.model.type === "Demo Output" && typeof node.getNodeValueDisplayMessage !== 'undefined') {
+    miniNodeDisplayValue = node.getNodeValueDisplayMessage();
+  } else if (node.model.type === "Timer" && typeof node.getSentence !== 'undefined') {
+    miniNodeDisplayValue = node.getSentence();
+  } else {
+    // if NaN or undefined, display empty string
+    if (typeof node.model.nodeValue === 'undefined') {
+      miniNodeDisplayValue = "";
+    } else if (node.model.nodeValue && isNaN(node.model.nodeValue)) {
+      miniNodeDisplayValue = "";
+    } else if (isFinite(node.model.nodeValue)) {
+      const modelVal = node.model.nodeValue;
+      miniNodeDisplayValue = Number.isInteger(modelVal) ? modelVal.toString() : modelVal.toFixed(2);
+    } else {
+      miniNodeDisplayValue = "";
+    }
+  }
+
   return {
     id: node.id,
     nodeDisplayedName: node.model.orderedDisplayName || "",
-    nodeValue: node.model.nodeValue || 0,
+    nodeValue: miniNodeDisplayValue,
     nodeType: node.model.type,
     nodeState: nodeStateData,
     nodeCategory: kNodeTypeToCategoryMap[node.model.type]

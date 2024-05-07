@@ -235,14 +235,12 @@ export function getMiniNodesDisplayData(programData?: SharedProgramDataType): IM
   const formattedData = arr.map(node => {
     const { truncatedLabel, iconKey } = getMiniNodeLabelContent(node);
     const val = node.nodeValue;
-    const valAsNum = Number.isInteger(val) ? val : val.toFixed(2);
-    const valAsString = valAsNum.toString();
 
     return {
       id: node.id,
       iconKey,
       label: truncatedLabel,
-      value: valAsString,
+      value: val.split(" ")[0], // e.g. 100% closed is just 100%
       type: node.nodeType.toLowerCase(),
       category: node.nodeCategory.toLowerCase() ?? "unknown"
     };

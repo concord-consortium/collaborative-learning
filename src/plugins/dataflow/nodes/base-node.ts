@@ -207,6 +207,10 @@ export type IBaseNode = Schemes['Node'] & {
     operation: string
   ): void;
   readOnly?: boolean;
+  getDisplayValue?: () => string;
+  getDisplayMessage?: () => string;
+  getNodeValueDisplayMessage?: () => string;
+  getSentence?: () => string;
 }
 
 export class BaseNode<
