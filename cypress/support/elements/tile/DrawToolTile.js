@@ -107,7 +107,15 @@ class DrawToolTile{
     }
     getDrawTileTitle(workspaceClass){
       return cy.get(`${workspaceClass || ".primary-workspace"} .drawing-tool-tile .editable-tile-title`);
-  }
+    }
+    drawSmallRectangle(x, y) {
+      this.getDrawToolRectangle().last().click();
+      this.getDrawTile().last()
+      .trigger("mousedown", x, y)
+      .trigger("mousemove", x+25, y+25)
+      .trigger("mouseup", x+25, y+25);
+    }
+
 }
 
 export default DrawToolTile;

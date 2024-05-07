@@ -1,9 +1,5 @@
 @use "../vars.sass";
 
-.actual-sparrow {
-  opacity: .5;
-}
-
 .text-object {
   pointer-events: none;
 
@@ -64,8 +60,36 @@
   cursor: pointer;
   fill-opacity: 0;
 
+  .sparrow-delete-button-front {
+    // Allow hover and click to pass through to background 'highlight' element.
+    pointer-events: none;
+  }
+
+  .sparrow-delete-icon {
+    // Allow hover and click to pass through to background 'highlight' element.
+    pointer-events: none;
+  }
+
   .sparrow-delete-button-highlight {
     fill: vars.$annotation-blue;
+  }
+
+  .actual-sparrow.selected & {
+    .sparrow-delete-button-highlight {
+      fill-opacity: 0;
+
+      &:hover, .sparrow-delete-button:hover & {
+        fill-opacity: .125;
+      }
+    }
+
+    .sparrow-delete-button-front {
+      fill: vars.$annotation-blue;
+      fill-opacity: 1;
+    }
+    .sparrow-delete-icon {
+      fill-opacity: 1;
+    }
   }
 
   &:hover {
