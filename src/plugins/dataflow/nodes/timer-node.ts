@@ -81,6 +81,10 @@ export class TimerNode extends BaseNode<
     return +this.currentValue === 0 ? "off" : "on";
   };
 
+  getSharedProgramNodeValue() {
+    return this.getSentence();
+  }
+
   data(): { value: number } {
     if (this.services.inTick) {
       const timeOn = Number(this.model.timeOn);

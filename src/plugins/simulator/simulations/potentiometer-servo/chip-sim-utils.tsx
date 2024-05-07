@@ -42,6 +42,8 @@ import TimerIcon from "../potentiometer-servo/assets/stopwatch.svg";
 
 import { ISharedProgramNode, SharedProgramDataType } from '../../../shared-program-data/shared-program-data';
 
+const kMaxMiniNodes = 5;
+
 export function getTweenedServoAngle(realValue: number, lastVisibleValue: number) {
   const delta = realValue - lastVisibleValue;
   const steps = 5;
@@ -234,13 +236,12 @@ export function getMiniNodesDisplayData(programData?: SharedProgramDataType): IM
 
   const formattedData = arr.map(node => {
     const { truncatedLabel, iconKey } = getMiniNodeLabelContent(node);
-    const val = node.nodeValue;
 
     return {
       id: node.id,
       iconKey,
       label: truncatedLabel,
-      value: val.split(" ")[0], // e.g. 100% closed is just 100%
+      value: node.nodeValue,
       type: node.nodeType.toLowerCase(),
       category: node.nodeCategory.toLowerCase() ?? "unknown"
     };
@@ -253,9 +254,9 @@ export function getMiniNodesDisplayData(programData?: SharedProgramDataType): IM
   const operatorNodes = formattedData.filter(node => node.category === "operator");
   const outputNodes = formattedData.filter(node => node.category === "output");
 
-  const extraInputCount = inputNodes.length > 5 ? inputNodes.length - 5 : 0;
-  const extraOperatorCount = operatorNodes.length > 5 ? operatorNodes.length - 5 : 0;
-  const extraOutputCount = outputNodes.length > 5 ? outputNodes.length - 5 : 0;
+  const extraInputCount = inputNodes.length > kMaxMiniNodes ? inputNodes.length - kMaxMiniNodes : 0;
+  const extraOperatorCount = operatorNodes.length > kMaxMiniNodes ? operatorNodes.length - kMaxMiniNodes : 0;
+  const extraOutputCount = outputNodes.length > kMaxMiniNodes ? outputNodes.length - kMaxMiniNodes : 0;
 
   const inputNodesArr = inputNodes.slice(0, 5);
   const operatorNodesArr = operatorNodes.slice(0, 5);
