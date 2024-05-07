@@ -10,6 +10,7 @@ import { INodeServices } from "./service-types";
 import { DemoOutputControl } from "./controls/demo-output-control";
 import { InputValueControl } from "./controls/input-value-control";
 import { MinigraphOptions } from "./dataflow-node-plot-types";
+import { getValueOrZero } from "./utilities/view-utilities";
 
 const tiltMinigraphOptions: MinigraphOptions = {
   backgroundColor: "#fff",
@@ -150,7 +151,9 @@ export class DemoOutputNode extends BaseNode<
       delete model.watchedValues.tilt;
     }
 
-    const value = nodeValue ? nodeValue[0] : null;
+    // if there is not a valid input, use 0
+    const value = getValueOrZero(nodeValue);
+
     if (kBinaryOutputTypes.includes(this.model.outputType)) {
       // if there is not a valid input, use 0
       // otherwise convert all non-zero to 1

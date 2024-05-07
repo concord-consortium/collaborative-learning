@@ -137,7 +137,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               <div
                 className={`flow-tool ${programMode === ProgramMode.Done ? "hidden" : ""}`}
                 ref={elt => this.toolDiv = elt}
-                onWheel={e => this.handleWheel(e, this.toolDiv) }
               />
               { programMode === ProgramMode.Done &&
                 <div
@@ -169,13 +168,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const zoomManager = this.playbackReteManager || this.reteManager;
     zoomManager?.zoomOut();
   };
-
-  private handleWheel(e: any, toolDiv: HTMLElement | null) {
-    if (toolDiv !== null) {
-      const documentContent = toolDiv.closest(".document-content");
-      documentContent?.scrollBy(e.deltaX, e.deltaY);
-    }
-  }
 
   public componentDidMount() {
     this.initReteManagersIfNeeded();

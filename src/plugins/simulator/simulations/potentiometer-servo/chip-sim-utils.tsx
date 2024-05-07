@@ -29,6 +29,7 @@ import FanIcon from "../../../shared-assets/icons/dataflow/output/fan.svg";
 import TemperatureIcon from "../../../shared-assets/icons/dataflow/sensor/temperature.svg";
 import CO2Icon from "../../../shared-assets/icons/dataflow/sensor/co2.svg";
 import HumidityIcon from "../../../shared-assets/icons/dataflow/sensor/humidity.svg";
+import LightIcon from "../../../shared-assets/icons/dataflow/sensor/light.svg";
 import SignalIcon from "../../../shared-assets/icons/dataflow/control/signal.svg";
 import EMGIcon from "../../../shared-assets/icons/dataflow/sensor/sensor-emg-icon.svg";
 import PressureIcon from "../../../shared-assets/icons/dataflow/sensor/pressure.svg";
@@ -124,6 +125,7 @@ const iconMap: { [key: string]: JSX.Element } = {
   "emg": <EMGIcon/>,
   "pressure": <PressureIcon/>,
   "temperature": <TemperatureIcon/>,
+  "light": <LightIcon/>,
   "co2": <CO2Icon/>,
   "humidity": <HumidityIcon/>,
   "light-bulb": <LightBulbIcon/>,
@@ -161,6 +163,7 @@ const labelStringToIconKey: { [key: string]: string } = {
   "emg-reading": "emg",
   "fsr-reading": "pressure",
   "temperature": "temperature",
+  "light": "light",
   "CO2": "co2",
   "humidity": "humidity",
   "Hold Current": "signal",

@@ -69,7 +69,7 @@ export class GeneratorNode extends BaseNode<
     this.addControl("amplitude", ampControl);
 
     const units = NodePeriodUnits.map(u => u.unit);
-    const periodControl = new NumberUnitsControl(this, "period", "period", null, units,
+    const periodControl = new NumberUnitsControl(this, "period", "period", 0, units,
       "Set Period");
     this.addControl("period", periodControl);
 

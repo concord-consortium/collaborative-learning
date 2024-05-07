@@ -1,7 +1,9 @@
-import { typeField } from "../../../utilities/mst-utils";
-import { BaseNode, BaseNodeModel, BaseTickEntry, NoOutputs } from "./base-node";
+import { runInAction } from "mobx";
 import { Instance, types } from "mobx-state-tree";
 import { ClassicPreset } from "rete";
+import { VariableType } from "@concord-consortium/diagram-view";
+import { typeField } from "../../../utilities/mst-utils";
+import { BaseNode, BaseNodeModel, BaseTickEntry, NoOutputs } from "./base-node";
 import { DropdownListControl, IDropdownListControl, ListOption } from "./controls/dropdown-list-control";
 import { INodeServices } from "./service-types";
 import { numSocket } from "./num-socket";
@@ -12,8 +14,7 @@ import { NodeLiveOutputTypes, NodeMicroBitHubs, baseLiveOutputOptions,
 import { InputValueControl } from "./controls/input-value-control";
 import { SerialDevice } from "../../../models/stores/serial";
 import { simulatedHub, simulatedHubName } from "../model/utilities/simulated-output";
-import { VariableType } from "@concord-consortium/diagram-view";
-import { runInAction } from "mobx";
+import { getValueOrZero } from "./utilities/view-utilities";
 
 export const LiveOutputTickEntry = BaseTickEntry.named("LiveOutputTickEntry")
 .props({
@@ -401,7 +402,7 @@ export class LiveOutputNode extends BaseNode<
 
   data({nodeValue}: {nodeValue?: number[]}) {
     // if there is not a valid input, use 0
-    const value = nodeValue && nodeValue[0] != null && !isNaN(nodeValue[0]) ? nodeValue[0] : 0;
+    const value = getValueOrZero(nodeValue);
 
     const outputType = this.model.liveOutputType;
 
@@ -422,12 +423,13 @@ export class LiveOutputNode extends BaseNode<
       this.saveNodeValue(newValue);
       this.saveOutputStatus("");
     } else if (kServoOutputTypes.includes(outputType)) {
-      // out of range value will not move sim servo
-      const isValidServoValue = value >= 0 && value <= 180;
-      const newValue = isValidServoValue ? value : this.getLastValidServoValue();
+      // angles out of range move servo to nearest valid angle
+      const newValue = Math.min(Math.max(value, 0), 180);
 
-      // alternative: angles out of range move servo to nearest valid angle
-      // newValue = Math.min(Math.max(newValue, 0), 180);
+      // alternative: out of range value will not move sim servo
+      // const isValidServoValue = value >= 0 && value <= 180;
+      // const newValue = isValidServoValue ? value : this.getLastValidServoValue();
+
       this.saveNodeValue(newValue);
       this.saveOutputStatus("");
     } else {

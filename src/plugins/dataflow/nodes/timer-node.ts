@@ -57,10 +57,10 @@ export class TimerNode extends BaseNode<
 
     const units = NodePeriodUnits.map(u => u.unit);
     const timeOnControl = new NumberUnitsControl(this, "timeOn", "time on",
-      null, units, "Set Time On");
+      0, units, "Set Time On");
     this.addControl("timeOn", timeOnControl);
 
-    const timeOffControl = new NumberUnitsControl(this, "timeOff", "time off", null, units,
+    const timeOffControl = new NumberUnitsControl(this, "timeOff", "time off", 0, units,
       "Set Time Off");
     this.addControl("timeOff", timeOffControl);
 
@@ -87,18 +87,18 @@ export class TimerNode extends BaseNode<
 
   data(): { value: number } {
     if (this.services.inTick) {
-      const timeOn = Number(this.model.timeOn);
-      const timeOff = Number(this.model.timeOff);
-      // FIXME: this won't handle 0s correctly
-      if (timeOn && timeOff) {
-        const time = Date.now();
+      const modelTimeOn = Number(this.model.timeOn);
+      const timeOn = isFinite(modelTimeOn) ? modelTimeOn : 0;
+      const modelTimeOff = Number(this.model.timeOff);
+      const timeOff = isFinite(modelTimeOff) ? modelTimeOff : 0;
 
-        // time on/off is given in s, but we convert to ms so we can use a simple mod function
-        const timeOnMS = timeOn * 1000;
-        const timeOffMS = timeOff * 1000;
-        const value = time % (timeOnMS + timeOffMS) < timeOnMS ? 1 : 0;
-        this.saveNodeValue(value);
-      }
+      const time = Date.now();
+
+      // time on/off is given in s, but we convert to ms so we can use a simple mod function
+      const timeOnMS = timeOn * 1000;
+      const timeOffMS = timeOff * 1000;
+      const value = time % (timeOnMS + timeOffMS) < timeOnMS ? 1 : 0;
+      this.saveNodeValue(value);
     }
     return { value: this.currentValue };
   }
