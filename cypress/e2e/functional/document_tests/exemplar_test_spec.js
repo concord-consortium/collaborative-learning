@@ -44,18 +44,18 @@ context('Exemplar Documents', function () {
 
     cy.log("Create 3 drawing tiles with 3 events and a label");
     clueCanvas.addTile("drawing");
-    drawSmallRectangle(100, 50);
-    drawSmallRectangle(200, 50);
+    drawToolTile.drawRectangle(100, 50);
+    drawToolTile.drawRectangle(200, 50);
     addText(300, 50, "one two three four five six seven eight nine ten");
 
     clueCanvas.addTile("drawing");
-    drawSmallRectangle(100, 50);
-    drawSmallRectangle(200, 50);
+    drawToolTile.drawRectangle(100, 50);
+    drawToolTile.drawRectangle(200, 50);
     addText(300, 50, "one two three four five six seven eight nine ten");
 
     clueCanvas.addTile("drawing");
-    drawSmallRectangle(100, 50);
-    drawSmallRectangle(200, 50);
+    drawToolTile.drawRectangle(100, 50);
+    drawToolTile.drawRectangle(200, 50);
     addText(300, 50, "one two three four five six seven eight nine ten");
 
     // No change, no sticky note
