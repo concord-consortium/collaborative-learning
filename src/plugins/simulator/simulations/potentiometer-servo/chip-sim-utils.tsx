@@ -272,12 +272,14 @@ export function getNodeBoundingBox (objectId: string, tileElt: HTMLElement): Obj
   const elt = tileElt.querySelector(`.node-${objectId}`);
   const tileRect = tileElt.getBoundingClientRect();
   const nodeRect = elt?.getBoundingClientRect();
+  const scale = { x : tileElt.offsetWidth / tileRect.width, y : tileElt.offsetHeight / tileRect.height };
+
   if (tileRect && nodeRect) {
     return {
-      left: nodeRect.left-tileRect.left,
-      top: nodeRect.top-tileRect.top,
-      width: nodeRect.width,
-      height: nodeRect.height
+      left: (nodeRect.left-tileRect.left) * scale.x,
+      top:  (nodeRect.top-tileRect.top) * scale.y,
+      width: nodeRect.width * scale.x,
+      height: nodeRect.height * scale.y
     };
   } else {
     return undefined;
@@ -289,15 +291,16 @@ export function getPinBoundingBox(objectId: string, tileElt: HTMLElement) {
   const elt = tileElt.querySelector(`.board`);
   const tileRect = tileElt.getBoundingClientRect();
   const imgRect = elt?.getBoundingClientRect();
+  const scale = { x : tileElt.offsetWidth / tileRect.width, y : tileElt.offsetHeight / tileRect.height };
 
   if (tileRect && imgRect) {
     const side = objectId.substring(0, 1);  // L or R
     const pinNumber = Number(objectId.substring(1));
     return {
       left: side === 'L'
-        ? imgRect.left - tileRect.left + kBoardImageLeftEdge
-        : imgRect.left - tileRect.left + kBoardImageRightEdge - kBoardImageLabelWidth,
-      top: imgRect.top - tileRect.top + kBoardImageTopEdge + pinNumber*kBoardImagePinSpacing,
+        ? (imgRect.left - tileRect.left)*scale.x + kBoardImageLeftEdge
+        : (imgRect.left - tileRect.left)*scale.x + kBoardImageRightEdge - kBoardImageLabelWidth,
+      top: (imgRect.top - tileRect.top)*scale.y + kBoardImageTopEdge + pinNumber*kBoardImagePinSpacing,
       width: kBoardImageLabelWidth,
       height: kBoardImagePinSpacing-2
     };
