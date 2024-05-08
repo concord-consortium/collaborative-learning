@@ -1,5 +1,5 @@
 import { reaction } from "mobx";
-import { types, Instance, getType, addDisposer, getSnapshot, IAnyStateTreeNode } from "mobx-state-tree";
+import { types, Instance, getType, addDisposer, getSnapshot } from "mobx-state-tree";
 import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
 
 import { withoutUndo } from "../../../models/history/without-undo";
@@ -98,21 +98,30 @@ export const SimulatorContentModel = TileContentModel
         const existingSharedPrograms = sharedModelManager?.isReady ?
           sharedModelManager?.getSharedModelsByType("SharedProgramData") : undefined;
 
-        const programTilesMap: Record<string, IAnyStateTreeNode[] | undefined> = {};
+        const programsWithDataflowTiles: SharedModelType[] = [];
         existingSharedPrograms?.forEach((program) => {
-          programTilesMap[program.id] = sharedModelManager?.getSharedModelTiles(program);
+          const programTiles = sharedModelManager?.getSharedModelTiles(program);
+          if (programTiles?.find((tile) => tile?.content?.type === "Dataflow")) {
+            programsWithDataflowTiles.push(program);
+          }
         });
 
         const values = {
           sharedModelManager,
           containerSharedModel,
           tileSharedModels,
-          programTilesMap,
+          programsWithDataflowTiles,
           ourSharedProgramData
         };
         return values;
       },
-      ({sharedModelManager, containerSharedModel, tileSharedModels, programTilesMap, ourSharedProgramData}) => {
+      ({
+        sharedModelManager,
+        containerSharedModel,
+        tileSharedModels,
+        programsWithDataflowTiles,
+        ourSharedProgramData
+      }) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
@@ -129,14 +138,15 @@ export const SimulatorContentModel = TileContentModel
           sharedModelManager.addTileSharedModel(self, containerSharedModel);
         }
 
-        if(ourSharedProgramData) {
-          const tilesAttachedToOurProgram = programTilesMap[ourSharedProgramData.id];
-          if(!tilesAttachedToOurProgram?.find((tile) => tile.type === "Dataflow")){
-            const firstProgramWithDataflowTile = Object.entries(programTilesMap).find(([programId, tiles]) => {
-              return tiles?.find((tile) => tile.type === "Dataflow");
-            });
+        if (programsWithDataflowTiles.length > 0) {
+          if(ourSharedProgramData) {
+            if (!programsWithDataflowTiles.includes(ourSharedProgramData)) {
+              sharedModelManager.removeTileSharedModel(self, ourSharedProgramData);
+              sharedModelManager.addTileSharedModel(self, programsWithDataflowTiles[0]);
+            }
+          } else {
+            sharedModelManager.addTileSharedModel(self, programsWithDataflowTiles[0]);
           }
-          //sharedModelManager.addTileSharedModel(self, ourSharedProgramData);
         }
 
         // Set up starter variables
