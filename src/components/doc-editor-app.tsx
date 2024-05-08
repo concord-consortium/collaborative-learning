@@ -8,6 +8,9 @@ import { createDocumentModelWithEnv } from "../models/document/document";
 import { DocumentContentSnapshotType } from "../models/document/document-content";
 import { urlParams } from "../utilities/url-params";
 import { useAppConfig } from "../hooks/use-stores";
+import { DocumentAnnotationToolbar } from "./document/document-annotation-toolbar";
+
+import "./document/document.scss";
 
 export const DocEditorApp = () => {
   const appConfig = useAppConfig();
@@ -106,17 +109,24 @@ export const DocEditorApp = () => {
   // tests that are looking for stuff in a div like this
   return (
     <div className="primary-workspace">
-      <button onClick={handleOpen}>open</button>
-      <button onClick={handleSave}>save</button>
-      <span>{fileName}</span>
-      <EditableDocumentContent
-        contained={false}
-        mode="1-up"
-        isPrimary={true}
-        readOnly={false}
-        document={document}
-        toolbar={appConfig.authorToolbar}
-      />
+      <div className="document">
+        <div className="titlebar">
+          <div className="actions left">
+            <button onClick={handleOpen}>open</button>
+            <button onClick={handleSave}>save</button>
+            <span>{fileName}</span>
+            <DocumentAnnotationToolbar/>
+          </div>
+        </div>
+        <EditableDocumentContent
+            contained={false}
+            mode="1-up"
+            isPrimary={true}
+            readOnly={false}
+            document={document}
+            toolbar={appConfig.authorToolbar}
+          />
+      </div>
     </div>
   );
 };
