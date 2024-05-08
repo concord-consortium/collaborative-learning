@@ -18,7 +18,7 @@ import "./geometry-tile.sass";
 const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   model, readOnly, ...others
 }) => {
-  const { documentContent, tileElt, scale, onRegisterTileApi, onUnregisterTileApi } = others;
+  const { tileElt } = others;
   const modelRef = useCurrent(model);
   const domElement = useRef<HTMLDivElement>(null);
   const content = model.content as GeometryContentModelType;
@@ -78,5 +78,6 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
     </GeometryTileContext.Provider>
   );
 };
+
 const GeometryToolComponent = React.memo(_GeometryToolComponent);
 export default GeometryToolComponent;
