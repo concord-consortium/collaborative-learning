@@ -5,6 +5,7 @@ import { TileToolbarButton } from "../../toolbar/tile-toolbar-button";
 import { isPoint } from "../../../models/tiles/geometry/jxg-types";
 import { useGeometryTileContext } from "./geometry-tile-context";
 import { canSupportVertexAngle, getVertexAngle } from "../../../models/tiles/geometry/jxg-vertex-angle";
+import { UploadButton } from "../../toolbar/upload-button";
 
 import AngleLabelSvg from "../../../clue/assets/icons/geometry/angle-label.svg";
 import CopyPolygonSvg from "../../../clue/assets/icons/geometry/copy-polygon.svg";
@@ -12,6 +13,7 @@ import LineLabelSvg from "../../../clue/assets/icons/geometry/line-label.svg";
 import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
 import CommentSvg from "../../../assets/icons/comment/comment.svg";
 import DeleteSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
+import UploadButtonSvg from "../../../assets/icons/upload-image/upload-image-icon.svg";
 
 const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButtonComponentProps) {
   const { content, board, handlers } = useGeometryTileContext();
@@ -114,23 +116,24 @@ const DeleteButton = observer(function DeleteButton({name}: IToolbarButtonCompon
   );
 });
 
-// const ImageUploadButton = observer(function ImageUploadButton({name}: IToolbarButtonComponentProps) {
-//   const { content, board, handlers } = useGeometryTileContext();
+const ImageUploadButton = observer(function ImageUploadButton({name}: IToolbarButtonComponentProps) {
+  const { handlers } = useGeometryTileContext();
 
-//   return (
-//     <TileToolbarButton
-//       name={name}
-//       title="Upload image"
-//       disabled={}
-//       onClick={}
-//     >
-//       <CommentSvg/>
-//     </TileToolbarButton>
-//   );
-// });
+  const onUploadImageFile = (x: File) => {
+    handlers?.handleUploadImageFile(x);
+  };
 
-//            <ImageUploadButton onUploadImageFile={handleUploadImageFile} tooltipOffset={{ y: 2 }}/>
-
+  return (
+    <UploadButton
+      name={name}
+      title="Upload image"
+      onUpload={onUploadImageFile}
+      accept="image/png, image/jpeg"
+      >
+      <UploadButtonSvg/>
+    </UploadButton>
+  );
+});
 
 registerTileToolbarButtons("geometry",
   [
@@ -153,6 +156,10 @@ registerTileToolbarButtons("geometry",
     {
       name: "comment",
       component: CommentButton
+    },
+    {
+      name: "upload",
+      component: ImageUploadButton
     },
     {
       name: "delete",
