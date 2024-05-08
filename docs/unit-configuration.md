@@ -156,7 +156,9 @@ In addition, if shared variables are configured, adds additional buttons:
 
 #### Geometry (Shapes Graph)
 
-Not updated to common toolbar framework and does not support toolbar configuration.
+Common toolbar framework. Default buttons:
+
+- `duplicate`
 
 #### Graph
 
