@@ -33,7 +33,7 @@ export const kNodeTypeToCategoryMap: { [key: string]: string } = {
 export interface ISharedProgramNode {
   id: string;
   nodeDisplayedName: string;
-  nodeValue: number;
+  nodeValue: string;
   nodeType: string;
   nodeState: Record<string, string>;
   nodeCategory: string;

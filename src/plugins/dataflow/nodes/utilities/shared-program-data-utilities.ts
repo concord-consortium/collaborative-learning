@@ -10,10 +10,11 @@ export function convertBaseNodeToSharedNode(node: IBaseNode): ISharedProgramNode
       (nodeStateData as any)[key] = (node.model as any)[key];
     }
   });
+
   return {
     id: node.id,
     nodeDisplayedName: node.model.orderedDisplayName || "",
-    nodeValue: node.model.nodeValue || 0,
+    nodeValue: node.getSharedProgramNodeValue(),
     nodeType: node.model.type,
     nodeState: nodeStateData,
     nodeCategory: kNodeTypeToCategoryMap[node.model.type]

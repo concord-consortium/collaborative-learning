@@ -27,6 +27,7 @@ import FanIcon from "../../../shared-assets/icons/dataflow/output/fan.svg";
 import TemperatureIcon from "../../../shared-assets/icons/dataflow/sensor/temperature.svg";
 import CO2Icon from "../../../shared-assets/icons/dataflow/sensor/co2.svg";
 import HumidityIcon from "../../../shared-assets/icons/dataflow/sensor/humidity.svg";
+import LightIcon from "../../../shared-assets/icons/dataflow/sensor/light.svg";
 import SignalIcon from "../../../shared-assets/icons/dataflow/control/signal.svg";
 import EMGIcon from "../../../shared-assets/icons/dataflow/sensor/sensor-emg-icon.svg";
 import PressureIcon from "../../../shared-assets/icons/dataflow/sensor/pressure.svg";
@@ -326,17 +327,17 @@ export const NodeSensorTypes = [
     units: "PPM",
     icon: CO2Icon
   },
+  {
+    name: "Light",
+    type: "light",
+    units: "lux",
+    icon: LightIcon
+  },
   // {
   //   name: "O₂",
   //   type: "O2",
   //   units: "%",
   //   icon: O2Icon
-  // },
-  // {
-  //   name: "Light",
-  //   type: "light",
-  //   units: "lux",
-  //   icon: LightIcon
   // },
   // {
   //   name: "Soil Moisture",

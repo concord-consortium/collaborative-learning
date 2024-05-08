@@ -1,5 +1,6 @@
 import * as React from "react";
 import { observer } from "mobx-react";
+import { isAlive } from "mobx-state-tree";
 import classNames from "classnames";
 import { ClassicScheme, RenderEmit, Presets } from "rete-react-plugin";
 import { BaseAreaPlugin } from "rete-area-plugin";
@@ -11,11 +12,13 @@ import { Delete } from "./delete";
 import { ControlNode } from "./control-node";
 import { ReteManager } from "./rete-manager";
 import { getNodeLetter } from "./utilities/view-utilities";
+import { EditableNodeName } from "./editable-node-name";
 
 const { RefSocket, RefControl } = Presets.classic;
 
 import "./dataflow-node.scss";
 import "./node-states.scss";
+
 
 type NodeExtraData = { width?: number, height?: number }
 
@@ -52,12 +55,12 @@ export const CustomDataflowNode = observer(
   const controls = Object.entries(data.controls);
   const { id } = data;
 
-  // FIXME: This is for styling/UX.  Real saving will be reimplemented in PT-187083097 Dataflow Editable Node Labels
-  const [nodeName, setNodeName] = React.useState((data as unknown as IBaseNode).model.orderedDisplayName);
-
   // FIXME: update 'Scheme' so we don't have to typecast here
   const node = (data as unknown as IBaseNode);
   const model = node.model;
+
+  // The node model might be destroyed if the node was removed from the program
+  if (!isAlive(model)) return null;
 
   const nodeLetter = getNodeLetter(model.type);
 
@@ -73,11 +76,6 @@ export const CustomDataflowNode = observer(
     "plot-open": showPlot,
   });
 
-
-  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setNodeName(e.target.value);
-  }
-
   return (
     <div
       className={`node ${model.type.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}
@@ -89,13 +87,8 @@ export const CustomDataflowNode = observer(
 
       <div className="node-type-letter">{nodeLetter}</div>
 
-      <div className="node-name">
-        <input
-          className="node-name-input"
-          value={nodeName}
-          onChange={handleInputChange}
-        />
-      </div>
+      <EditableNodeName node={node} />
+
       {/* Outputs */}
       {outputs.map(([key, output]) => (
         output &&

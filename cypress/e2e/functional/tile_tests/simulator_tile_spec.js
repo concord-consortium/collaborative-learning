@@ -273,7 +273,7 @@ context('Simulator Tile', function () {
     cy.log("Dataflow can read pin value");
     dataflowTile.getCreateNodeButton("sensor").click();
     dataflowTile.getDropdown("sensor", "sensorType").eq(0).click({scrollBehavior: false});
-    dataflowTile.getSensorDropdownOptions("sensor").eq(5).find(".label").click({force: true}); // Pin?
+    dataflowTile.getSensorDropdownOptions("sensor").eq(6).find(".label").click({force: true}); // Pin?
     dataflowTile.getDropdown("sensor", "sensor").eq(0).click({scrollBehavior: false});
     dataflowTile.getNode("sensor").find(".item.sensor").eq(0).click({scrollBehavior: false});
 
@@ -296,5 +296,12 @@ context('Simulator Tile', function () {
       console.log("| pinValue: ", pinValue);
       expect(Number(pinValue)).to.be.within(200, 300);
     });
+
+    cy.log("when there are more than five mini-nodes in a family, the extra nodes count is displayed");
+    const buttons = ["number", "number", "number", "sensor", "sensor"];
+    buttons.forEach(button => {
+      dataflowTile.getCreateNodeButton(button).click();
+    });
+    simulatorTile.getExtraNodesCount().should("contain.text", "+ 2 more");
   });
 });

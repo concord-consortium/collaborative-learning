@@ -1,5 +1,5 @@
 import { VariableType } from "@concord-consortium/diagram-view";
-import LightIcon from "../../assets/icons/sensor/light.svg";
+import LightIcon from "../../../shared-assets/icons/dataflow/sensor/light.svg";
 
 function simulatedHubId(variable: VariableType) {
   return `HUB${variable.name}`;

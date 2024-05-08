@@ -16,6 +16,7 @@ import { INodeServices } from "./service-types";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { IBaseNode, IBaseNodeModel, NodeClass } from "./base-node";
+import { NodeTypes, ProgramDataRates } from "../model/utilities/node";
 import { ControlNode } from "./control-node";
 import { CounterNode } from "./counter-node";
 import { DemoOutputNode } from "./demo-output-node";
@@ -41,13 +42,31 @@ import { ValueWithUnitsControl, ValueWithUnitsControlComponent } from "./control
 import { DataflowProgramChange } from "../dataflow-logger";
 import { runInAction } from "mobx";
 import { getSharedNodes } from "./utilities/shared-program-data-utilities";
-import { ProgramDataRates } from "../model/utilities/node";
 import { simulatedChannel } from "../model/utilities/simulated-channel";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { serialSensorChannels } from "../model/utilities/channel";
 
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
+
+ /**
+* Get an indexed name based on exiting names.
+* If existing names are "MyBase 1" and "MyBase 3" this will return "MyBase 5"
+* @param existingNames
+* @param baseName
+* @returns {string} indexed name
+*/
+export function getNewIndexedName(existingNames: Array<string | undefined>, baseName: string) {
+  const matchTypeAndNum = new RegExp(`^${baseName} *(\\d+(\\.\\d+)?)$`);
+ const namedNums: number[] = existingNames.map(name => {
+   const match = name?.match(matchTypeAndNum);
+   return match ? parseInt(match[1], 10) : 0;
+ })
+ .map(n => isNaN(n) ? 0 : Math.round(n));
+
+ const nextNum = namedNums.length > 0 ? Math.max(...namedNums) + 1 : 1;
+ return `${baseName} ${nextNum}`;
+}
 
 export class ReteManager implements INodeServices {
   public editor: NodeEditorMST;
@@ -81,8 +100,6 @@ export class ReteManager implements INodeServices {
 
     // Disable the zoom handler which zooms on wheel and double click
     area.area.setZoomHandler(null);
-
-    // FIXME: we need to set the initial zoom from the mstContent
 
     AreaExtensions.selectableNodes(area, AreaExtensions.selector(), {
       accumulating: AreaExtensions.accumulateOnCtrl()
@@ -412,12 +429,11 @@ export class ReteManager implements INodeServices {
     const node = editor.getNode(nodeId);
     const removedConnections = this.mstProgram.removeNodeAndConnections(nodeId);
 
-    // FIXME: Rete is not happy with this it reports several canceled promises
-
-    removedConnections.forEach(connection => {
-      // Temporary use this approach to get things working
-      editor.emit({ type: 'connectionremoved', data: connection });
-    });
+    // Temporary use this approach to get things working
+    const removedPromises = removedConnections.map(connection =>
+      editor.emit({ type: 'connectionremoved', data: connection })
+    );
+    await Promise.all(removedPromises);
 
     // Temporary use this approach to get things working
     editor.emit({ type: 'noderemoved', data: node});
@@ -450,6 +466,25 @@ export class ReteManager implements INodeServices {
     return new constructor(id, model, this);
   };
 
+  /**
+   * Given @param nodeType (string)
+   * Discovers the display name for that node type
+   * Searches for existing nodes with names like {nodeType} {n}
+   * If it does not find such nodes, it returns {nodeType} 1
+   * Otherwise it uses getNewIndexedName to find the next available index
+   * @returns `{nodeType} {n+1}`
+   */
+  private getNewNodeName(nodeType: string) {
+    const printableType = NodeTypes.find((nt) => nt.name === nodeType)?.displayName ?? nodeType;
+
+    const nodesNamedAsType = this.editor.getNodes()
+      .map(n=> (n as IBaseNode).model.orderedDisplayName)
+      .filter(name => name?.includes(printableType));
+
+    if (!nodesNamedAsType) return printableType + " 1";
+    return getNewIndexedName(nodesNamedAsType, printableType);
+  }
+
   public async createAndAddNode(nodeType: string, position?: [number, number]) {
     const id = uniqueId();
     const { editor } = this;
@@ -464,7 +499,10 @@ export class ReteManager implements INodeServices {
       name: nodeType,
       x: newPosition[0],
       y: newPosition[1],
-      data: { type: nodeType }
+      data: {
+        type: nodeType,
+        orderedDisplayName: this.getNewNodeName(nodeType),
+      }
     });
 
     const node = editor.getNode(id);
@@ -637,10 +675,6 @@ export class ReteManager implements INodeServices {
     // Process connections that were deleted
     for (const [id] of area.connectionViews) {
       if (!snapshot.connections[id]) {
-        // FIXME: this causes problems because the rete-area-plugin keeps a
-        // reference to the connection object in its connectionViews. And then
-        // it tries to access the id of this connection object. But MST complains
-        // because the connection object has already been removed from the tree
         await editor.emit({ type: 'connectionremoved', data: { id } as any });
       }
     }
