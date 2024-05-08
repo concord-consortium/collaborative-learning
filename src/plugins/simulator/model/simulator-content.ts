@@ -1,5 +1,5 @@
 import { reaction } from "mobx";
-import { types, Instance, getType, addDisposer, getSnapshot } from "mobx-state-tree";
+import { types, Instance, getType, addDisposer, getSnapshot, IAnyStateTreeNode } from "mobx-state-tree";
 import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
 
 import { withoutUndo } from "../../../models/history/without-undo";
@@ -89,15 +89,30 @@ export const SimulatorContentModel = TileContentModel
           sharedModelManager?.findFirstSharedModelByType(SharedVariables) : undefined;
 
         const tileSharedModels = sharedModelManager?.isReady ?
-          sharedModelManager?.getTileSharedModels(self) : undefined;
+          sharedModelManager?.getTileSharedModels(self) : undefined; // only returns those who are attached
 
-        const sharedProgramModel = sharedModelManager?.isReady ?
-          sharedModelManager?.findFirstSharedModelByType(SharedProgramData) : undefined;
+        const ourSharedProgramData = tileSharedModels?.find( sharedModel => {
+          return getType(sharedModel) === SharedProgramData;
+        });
 
-        const values = {sharedModelManager, containerSharedModel, tileSharedModels, sharedProgramModel};
+        const existingSharedPrograms = sharedModelManager?.isReady ?
+          sharedModelManager?.getSharedModelsByType("SharedProgramData") : undefined;
+
+        const programTilesMap: Record<string, IAnyStateTreeNode[] | undefined> = {};
+        existingSharedPrograms?.forEach((program) => {
+          programTilesMap[program.id] = sharedModelManager?.getSharedModelTiles(program);
+        });
+
+        const values = {
+          sharedModelManager,
+          containerSharedModel,
+          tileSharedModels,
+          programTilesMap,
+          ourSharedProgramData
+        };
         return values;
       },
-      ({sharedModelManager, containerSharedModel, tileSharedModels, sharedProgramModel}) => {
+      ({sharedModelManager, containerSharedModel, tileSharedModels, programTilesMap, ourSharedProgramData}) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
@@ -114,8 +129,14 @@ export const SimulatorContentModel = TileContentModel
           sharedModelManager.addTileSharedModel(self, containerSharedModel);
         }
 
-        if(sharedProgramModel && !tileSharedModels?.includes(sharedProgramModel)) {
-          sharedModelManager.addTileSharedModel(self, sharedProgramModel);
+        if(ourSharedProgramData) {
+          const tilesAttachedToOurProgram = programTilesMap[ourSharedProgramData.id];
+          if(!tilesAttachedToOurProgram?.find((tile) => tile.type === "Dataflow")){
+            const firstProgramWithDataflowTile = Object.entries(programTilesMap).find(([programId, tiles]) => {
+              return tiles?.find((tile) => tile.type === "Dataflow");
+            });
+          }
+          //sharedModelManager.addTileSharedModel(self, ourSharedProgramData);
         }
 
         // Set up starter variables
