@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import stringify from "json-stringify-pretty-compact";
 import { getSnapshot } from "mobx-state-tree";
 
@@ -21,7 +21,7 @@ export const DocEditorApp = () => {
   const [sectionSnapshot, setSectionSnapshot] = useState<any>();
   const [fileName, setFileName] = useState<string>("");
 
-  function loadDocument(text: string) {
+  const loadDocument = useCallback((text: string) => {
     const _parsedText = JSON.parse(text);
     let documentContentSnapshot;
     if (_parsedText.content ) {
@@ -34,7 +34,7 @@ export const DocEditorApp = () => {
       ...defaultDocumentModelParts,
       content: documentContentSnapshot
     }));
-  }
+  }, [appConfig]);
 
   // Handle opening both section documents with a content field
   // and basic documents which are just the content itself
@@ -103,7 +103,7 @@ export const DocEditorApp = () => {
       // This error is printed in the console as an "Uncaught (in promise)..."
       throw Error(`Request rejected with exception ${error}`);
     });
-  }, []);
+  }, [loadDocument]);
 
   // This is wrapped in a div.primary-workspace so it can be used with cypress
   // tests that are looking for stuff in a div like this
