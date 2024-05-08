@@ -380,6 +380,10 @@ export class LiveOutputNode extends BaseNode<
     return `${value}`;
   };
 
+  getSharedProgramNodeValue(): string {
+    return this.getDisplayMessage().split(" ")[0];
+  }
+
   getDisplayMessageWithStatus = () => {
     const { outputStatus } = this.model;
     const displayMessage = this.getDisplayMessage();

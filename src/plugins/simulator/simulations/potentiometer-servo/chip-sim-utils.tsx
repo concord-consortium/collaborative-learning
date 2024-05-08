@@ -19,6 +19,7 @@ import AddIcon from "../../../shared-assets/icons/dataflow/math/add.svg";
 import SubtractIcon from "../../../shared-assets/icons/dataflow/math/subtract.svg";
 import MultiplyIcon from "../../../shared-assets/icons/dataflow/math/multiply.svg";
 import DivideIcon from "../../../shared-assets/icons/dataflow/math/divide.svg";
+import NumIcon from "../../../shared-assets/icons/dataflow/math/num.svg";
 
 import LightBulbIcon from "../../../shared-assets/icons/dataflow/output/light-bulb.svg";
 import GrabberIcon from "../../../shared-assets/icons/dataflow/output/grabber.svg";
@@ -42,6 +43,8 @@ import TimerIcon from "../potentiometer-servo/assets/stopwatch.svg";
 
 import { ISharedProgramNode, SharedProgramDataType } from '../../../shared-program-data/shared-program-data';
 
+const kMaxMiniNodes = 5;
+
 export function getTweenedServoAngle(realValue: number, lastVisibleValue: number) {
   const delta = realValue - lastVisibleValue;
   const steps = 5;
@@ -64,7 +67,9 @@ export interface IMiniNodesDataPack {
   inputNodesArr: IMiniNodeData[];
   operatorNodesArr: IMiniNodeData[];
   outputNodesArr: IMiniNodeData[];
-  extraCount: number;
+  extraInputCount: number;
+  extraOperatorCount: number;
+  extraOutputCount: number;
 }
 
 // this is an svg path that represents a wire connecting a potentiometer to the A1 pin
@@ -115,6 +120,7 @@ const iconMap: { [key: string]: JSX.Element } = {
   "subtract": <SubtractIcon/>,
   "multiply": <MultiplyIcon/>,
   "divide": <DivideIcon/>,
+  "number": <NumIcon/>,
   "servo": <ServoIcon/>,
   "emg": <EMGIcon/>,
   "pressure": <PressureIcon/>,
@@ -142,7 +148,7 @@ const iconMap: { [key: string]: JSX.Element } = {
 };
 
 const labelStringToIconKey: { [key: string]: string } = {
-  "Number": "signal",
+  "Number": "number",
   "Timer": "timer",
   "Sine": "sine",
   "Square": "square",
@@ -198,7 +204,7 @@ export function getIconKeyFromLabel(label: string) {
 
 export function getMiniNodeLabelContent(sharedNode: ISharedProgramNode): {truncatedLabel: string, iconKey: string} {
   const nodeTypeToLabel = {
-    "Sensor": (node: ISharedProgramNode) => node.nodeState.sensorType,
+    "Sensor": (node: ISharedProgramNode) => node.nodeState.sensorType.length > 0 ? node.nodeState.sensorType : "Input",
     "Generator": (node: ISharedProgramNode) => node.nodeState.generatorType,
     "Number": (node: ISharedProgramNode) => "Number",
     "Math": (node: ISharedProgramNode) => node.nodeState.mathOperator,
@@ -224,22 +230,21 @@ export function getMiniNodesDisplayData(programData?: SharedProgramDataType): IM
       inputNodesArr: [],
       operatorNodesArr: [],
       outputNodesArr: [],
-      extraCount: 0
+      extraInputCount: 0,
+      extraOperatorCount: 0,
+      extraOutputCount: 0
     };
   }
   const arr = [...programData.programNodes.values()];
 
   const formattedData = arr.map(node => {
     const { truncatedLabel, iconKey } = getMiniNodeLabelContent(node);
-    const val = node.nodeValue;
-    const valAsNum = Number.isInteger(val) ? val : val.toFixed(2);
-    const valAsString = valAsNum.toString();
 
     return {
       id: node.id,
       iconKey,
       label: truncatedLabel,
-      value: valAsString,
+      value: node.nodeValue,
       type: node.nodeType.toLowerCase(),
       category: node.nodeCategory.toLowerCase() ?? "unknown"
     };
@@ -252,15 +257,14 @@ export function getMiniNodesDisplayData(programData?: SharedProgramDataType): IM
   const operatorNodes = formattedData.filter(node => node.category === "operator");
   const outputNodes = formattedData.filter(node => node.category === "output");
 
-  const extraCount =
-    (inputNodes.length > 5 ? inputNodes.length - 5 : 0) +
-    (operatorNodes.length > 5 ? operatorNodes.length - 5 : 0) +
-    (outputNodes.length > 5 ? outputNodes.length - 5 : 0);
+  const extraInputCount = inputNodes.length > kMaxMiniNodes ? inputNodes.length - kMaxMiniNodes : 0;
+  const extraOperatorCount = operatorNodes.length > kMaxMiniNodes ? operatorNodes.length - kMaxMiniNodes : 0;
+  const extraOutputCount = outputNodes.length > kMaxMiniNodes ? outputNodes.length - kMaxMiniNodes : 0;
 
   const inputNodesArr = inputNodes.slice(0, 5);
   const operatorNodesArr = operatorNodes.slice(0, 5);
   const outputNodesArr = outputNodes.slice(0, 5);
 
-  return { inputNodesArr, operatorNodesArr, outputNodesArr, extraCount };
+  return { inputNodesArr, operatorNodesArr, outputNodesArr, extraInputCount, extraOperatorCount, extraOutputCount };
 }
 

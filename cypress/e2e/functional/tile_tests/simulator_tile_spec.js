@@ -296,5 +296,12 @@ context('Simulator Tile', function () {
       console.log("| pinValue: ", pinValue);
       expect(Number(pinValue)).to.be.within(200, 300);
     });
+
+    cy.log("when there are more than five mini-nodes in a family, the extra nodes count is displayed");
+    const buttons = ["number", "number", "number", "sensor", "sensor"];
+    buttons.forEach(button => {
+      dataflowTile.getCreateNodeButton(button).click();
+    });
+    simulatorTile.getExtraNodesCount().should("contain.text", "+ 2 more");
   });
 });

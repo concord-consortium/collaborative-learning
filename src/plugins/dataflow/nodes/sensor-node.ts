@@ -114,6 +114,10 @@ export class SensorNode extends BaseNode<
     return displayValue;
   };
 
+  getSharedProgramNodeValue() {
+    return this.getDisplayValue();
+  }
+
   getUnits = () => {
     const nodeSensorType = this.getNodeSensorType();
     return nodeSensorType?.units || "";

@@ -138,6 +138,11 @@ export class DemoOutputNode extends BaseNode<
     }
   };
 
+  getSharedProgramNodeValue() {
+    // we don't have room for "100% closed" in the mini node
+    return this.getNodeValueDisplayMessage().split(" ")[0];
+  }
+
   data({nodeValue, tilt}: {nodeValue?: number[], tilt?: number[]}) {
     const { model } = this;
     if (model.outputType === "Advanced Grabber") {

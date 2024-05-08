@@ -207,6 +207,7 @@ export type IBaseNode = Schemes['Node'] & {
     operation: string
   ): void;
   readOnly?: boolean;
+  getSharedProgramNodeValue(): string;
 }
 
 export class BaseNode<
@@ -337,6 +338,14 @@ export class BaseNode<
   recordedValues() {
     const { recordedTicks } = this.services;
     return recordedTicks.map(tick => this.model.tickEntries.get(tick)?.nodeValue);
+  }
+
+  getSharedProgramNodeValue() {
+    if (this.model.nodeValue != null && isFinite(this.model.nodeValue)) {
+      const modelVal = this.model.nodeValue;
+      return Number.isInteger(modelVal) ? modelVal.toString() : modelVal.toFixed(2);
+    }
+    return "";
   }
 }
 
