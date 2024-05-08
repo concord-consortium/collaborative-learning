@@ -138,7 +138,6 @@ function PotentiometerAndServoComponent({ tileElt, simRef, frame, variables, pro
   // (a) When the component is rendered, (b) when the node count changes, and (c) when the tile changes size
   useEffect(() => {
     if (!tileElt || !tile) return;
-    console.log('useEffect', resizeWidth, resizeHeight);
     const nodes = programData ? [...programData.programNodes.keys()] : [];
     for (const nodeId of nodes) {
       const bb = getNodeBoundingBox(nodeId, tileElt);

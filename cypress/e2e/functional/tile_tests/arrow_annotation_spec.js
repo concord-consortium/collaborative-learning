@@ -341,7 +341,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("have.length", 1);
 
     aa.getAnnotationDeleteButtons().eq(0).click(); // Remove arrow
-    aa.getAnnotationButtons().eq(2).click(); // Connect equation to tablec
+    aa.getAnnotationButtons().eq(2).click(); // Connect equation to table
     aa.getAnnotationButtons().eq(3).click();
     aa.getAnnotationArrows().should("have.length", 1);
   });

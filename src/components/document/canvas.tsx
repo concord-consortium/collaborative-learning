@@ -111,13 +111,10 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       const prevValue = tileBBMap?.get(objectId);
       if (!_.isEqual(prevValue, boundingBox)) {
         if (boundingBox) {
-          console.log('cacheBB', objectId, boundingBox);
           tileBBMap?.set(objectId, boundingBox);
         } else {
           tileBBMap?.delete(objectId);
         }
-      } else {
-        console.log('cacheBB: unchanged');
       }
     });
   };
