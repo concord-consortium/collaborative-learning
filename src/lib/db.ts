@@ -5,6 +5,7 @@ import "firebase/firestore";
 import "firebase/functions";
 import "firebase/storage";
 import { observable, makeObservable } from "mobx";
+import { getSnapshot } from "mobx-state-tree";
 import {
   DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
   DBGroupUserConnections, DBPublication, DBPublicationDocumentMetadata, DBDocumentType, DBImage, DBTileComment,
@@ -942,7 +943,7 @@ export class DB {
       properties: {},
       originDoc: "",
       timestamp: firebase.database.ServerValue.TIMESTAMP as number,
-      ...supportModel,
+      ...getSnapshot(supportModel),
       deleted: false
     };
     supportRef.set(support);

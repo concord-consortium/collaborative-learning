@@ -42,7 +42,10 @@ export class DBExemplarsListener extends BaseListener {
   }
 
   private handleExemplarAddedOrChanged = (snapshot: firebase.database.DataSnapshot) => {
-    // Each child should have a key that is an exemplar document ID, and a 'visible' boolean value.
+    if (snapshot.key === 'state') return;
+    const hiddenExemplars = this.db.stores.appConfig.initiallyHideExemplars;
+    if (!hiddenExemplars) return; // no need to mark visible; all should already be visible.
+    // Each child (other than "state") should have a key that is an exemplar document ID, and a 'visible' boolean value.
     const exemplarId = snapshot.key;
     if (exemplarId) {
       this.updateExemplarBasedOnValue(exemplarId, snapshot.val());
