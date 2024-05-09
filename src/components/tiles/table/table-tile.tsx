@@ -27,6 +27,7 @@ import { verifyAlive } from "../../../utilities/mst-utils";
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { TableToolbarContext } from "./table-toolbar-context";
+import { ITableContext, TableContext } from "../hooks/table-context";
 
 import "./table-tile.scss";
 import "./table-toolbar-registration";
@@ -46,6 +47,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const metadata = getContent().metadata;
   const linkedTiles = content.tileEnv?.sharedModelManager?.getSharedModelTiles(content.sharedModel);
   const isLinked = linkedTiles && linkedTiles.length > 1;
+  const tableContextValue: ITableContext = { linked: !!isLinked };
 
   // Basic operations based on the model
   const {
@@ -232,26 +234,28 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   return (
     <div className="table-tool">
-      <TableToolbarContext.Provider value={toolbarContext} >
+      <TableToolbarContext.Provider value={toolbarContext}>
         <TileToolbar
           tileType="table"
           readOnly={!!readOnly}
           tileElement={tileElt}
         />
       </TableToolbarContext.Provider>
-      <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
-        <EditableTableTitle
-          model={model}
-          className="table-title"
-          readOnly={readOnly}
-          titleCellWidth={titleCellWidth}
-          titleCellHeight={getTitleHeight()}
-          onBeginEdit={onBeginTitleEdit}
-          onEndEdit={onEndTitleEdit} />
-        <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
-          headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
-          {...dataGridProps} {...rowProps} />
-      </div>
+      <TableContext.Provider value={tableContextValue}>
+        <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
+          <EditableTableTitle
+            model={model}
+            className="table-title"
+            readOnly={readOnly}
+            titleCellWidth={titleCellWidth}
+            titleCellHeight={getTitleHeight()}
+            onBeginEdit={onBeginTitleEdit}
+            onEndEdit={onEndTitleEdit} />
+          <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
+            headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
+            {...dataGridProps} {...rowProps} />
+        </div>
+      </TableContext.Provider>
     </div>
   );
 });

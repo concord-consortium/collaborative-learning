@@ -39,7 +39,7 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column, height }
   const handleClose = (accept: boolean) => {
     onEndHeaderCellEdit?.(accept ? nameValue : undefined);
   };
-  const ehcStyle: React.CSSProperties = { height };
+  const ehcStyle: React.CSSProperties = { height: height-2 };
   const style: React.CSSProperties = { width: column.width, ...ehcStyle };
   // ReactDataGrid's styling of the cell editor relies on an interesting interplay between the container
   // (.rdg-editor-container), which has `{ display: "contents" }` in its CSS, which according to MDN means:
@@ -53,7 +53,8 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column, height }
   // work just fine in most circumstances and in most browsers, but starting with 7.0.0-canary.44, the
   // height calculation no longer works for the column header cells in Chrome, although it continues to
   // work for the title cell and the table body cells in Chrome as well as in all three contexts in Firefox.
-  // ¯\_(ツ)_/¯ The fix is to force the <input> to be the height of the row with an inline style.
+  // ¯\_(ツ)_/¯ The fix is to force the <input> to be the height of the row (minus space for its border)
+  // with an inline style.
   const inputStyle: React.CSSProperties = { ...ehcStyle };
   return (
     <div className="editable-header-cell" onClick={handleClick} style={ehcStyle}>

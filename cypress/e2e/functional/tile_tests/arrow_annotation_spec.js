@@ -52,27 +52,19 @@ context('Arrow Annotations (Sparrows)', function () {
     drawToolTile.getDrawTile().should("exist");
     drawToolTile.getTileTitle().should("exist");
 
-    cy.log("Add a rectangle");
-    drawToolTile.getDrawToolRectangle().click();
-    drawToolTile.getDrawTile()
-      .trigger("mousedown", 150, 50)
-      .trigger("mousemove", 100, 150)
-      .trigger("mouseup", 100, 50);
+    cy.log("Add two rectangles and an ellipse");
+    drawToolTile.drawRectangle(50, 50);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
-
-    cy.log("Add an ellipse");
-    drawToolTile.getDrawToolEllipse().click();
-    drawToolTile.getDrawTile()
-      .trigger("mousedown", 250, 50)
-      .trigger("mousemove", 200, 100)
-      .trigger("mouseup", 200, 100);
+    drawToolTile.drawEllipse(200, 50);
     drawToolTile.getEllipseDrawing().should("exist").and("have.length", 1);
+    drawToolTile.drawRectangle(400, 100);
+    drawToolTile.getRectangleDrawing().should("exist").and("have.length", 2);
 
     cy.log("Annotation buttons only appear in sparrow mode");
     aa.getAnnotationButtons().should("not.exist");
     aa.clickArrowToolbarButton();
     aa.getAnnotationLayer().should("have.class", "editing");
-    aa.getAnnotationButtons().should("have.length", 2);
+    aa.getAnnotationButtons().should("have.length", 3);
 
     cy.log("Pressing a tile button exits sparrow mode");
     clueCanvas.addTile("drawing");
@@ -90,6 +82,50 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getPreviewArrow().should("not.exist");
     aa.getAnnotationArrows().should("exist");
     aa.getAnnotationTextInputs().should("exist");
+
+    // Add a second arrow
+    aa.getAnnotationButtons().eq(2).click({ force: true });
+    aa.getPreviewArrow().should("exist");
+    aa.getAnnotationButtons().eq(1).click({ force: true });
+    aa.getAnnotationArrows().should("have.length", 2);
+
+    cy.log("Can select arrows");
+    // Click to select
+    aa.getAnnotationSparrowGroups().should("not.have.class", "selected");
+    aa.getAnnotationBackgroundArrowPaths().eq(0).click({ force: true });
+    aa.getAnnotationSparrowGroups().eq(0).should("have.class", "selected");
+    aa.getAnnotationSparrowGroups().eq(1).should("not.have.class", "selected");
+
+    // Click again leaves it selected
+    aa.getAnnotationBackgroundArrowPaths().eq(0).click({ force: true });
+    aa.getAnnotationSparrowGroups().eq(0).should("have.class", "selected");
+    aa.getAnnotationSparrowGroups().eq(1).should("not.have.class", "selected");
+
+    // Click another one replaces selection
+    aa.getAnnotationBackgroundArrowPaths().eq(1).click({ force: true });
+    aa.getAnnotationSparrowGroups().eq(0).should("not.have.class", "selected");
+    aa.getAnnotationSparrowGroups().eq(1).should("have.class", "selected");
+
+    // Click with shift adds to selection
+    aa.getAnnotationBackgroundArrowPaths().eq(0).click({ force: true, shiftKey: true });
+    aa.getAnnotationSparrowGroups().eq(0).should("have.class", "selected");
+    aa.getAnnotationSparrowGroups().eq(1).should("have.class", "selected");
+
+    // Click with shift removes from selection
+    aa.getAnnotationBackgroundArrowPaths().eq(1).click({ force: true, shiftKey: true });
+    aa.getAnnotationSparrowGroups().eq(0).should("have.class", "selected");
+    aa.getAnnotationSparrowGroups().eq(1).should("not.have.class", "selected");
+
+    // Click background unselects all
+    aa.getAnnotationLayer().click();
+    aa.getAnnotationSparrowGroups().eq(0).should("not.have.class", "selected");
+    aa.getAnnotationSparrowGroups().eq(1).should("not.have.class", "selected");
+
+    // Select & delete key to delete
+    aa.getAnnotationBackgroundArrowPaths().eq(1).click({ force: true });
+    aa.getAnnotationSparrowGroups().eq(1).should("have.class", "selected");
+    aa.getAnnotationLayer().type('{del}');
+    aa.getAnnotationArrows().should("have.length", 1);
 
     cy.log("Can only edit text in sparrow mode");
     aa.clickArrowToolbarButton();
@@ -144,9 +180,9 @@ context('Arrow Annotations (Sparrows)', function () {
       .trigger("mousemove", 100, 150)
       .trigger("mouseup", 100, 50);
     aa.clickArrowToolbarButton();
-    aa.getAnnotationButtons().should("have.length", 3);
+    aa.getAnnotationButtons().should("have.length", 4);
     aa.getAnnotationButtons().first().click({ force: true });
-    aa.getAnnotationButtons().eq(2).click();
+    aa.getAnnotationButtons().eq(3).click();
     aa.getAnnotationArrows().should("have.length", 2);
 
     cy.log("Can delete sparrows");

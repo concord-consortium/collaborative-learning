@@ -68,6 +68,7 @@ export const AppConfigModel = types
     get stamps() { return self.configMgr.stamps; },
     get tools() { return self.configMgr.tools; },
     get annotations() { return self.configMgr.annotations; },
+    get initiallyHideExemplars() { return self.configMgr.initiallyHideExemplars; },
     get authorToolbar() {
       return ToolbarModel.create([
         ...self.toolbar.map(button => ToolbarButtonModel.create(getSnapshot(button))),
@@ -108,6 +109,17 @@ export const AppConfigModel = types
     getDocumentLabel(docType: string, num?: number, lowerCase?: boolean) {
       const docLabel = self.documentLabels[docType];
       return docLabel ? DocumentLabelModel.create(docLabel).getLabel(num, lowerCase) : "";
+    },
+    get showAnnotationControls() {
+      return (
+
+        // Controls are enabled by any setting of 'annotation' in the config other than 'none'
+        // in the future there will be more options supported.
+        (self.annotations && self.annotations !== 'none') ||
+
+        // we also enable it, for back-compatibility, if the toolbar has a 'hide-annotations' button specified
+        !!self.toolbar.find(item => item.id === 'hide-annotations')
+      );
     }
   }));
 export interface AppConfigModelType extends Instance<typeof AppConfigModel> {}

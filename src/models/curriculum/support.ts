@@ -57,6 +57,13 @@ export const SupportModel = types
     }
 
     return snapshot;
+  })
+  .postProcessSnapshot(snapshot => {
+    if (snapshot.linkedDocumentKey) return snapshot;
+    // Firebase doesn't handle undefined values, so delete the linkedDocumentKey if it is empty.
+    const copy = { ...snapshot };
+    delete copy.linkedDocumentKey;
+    return copy;
   });
 
 export type SupportModelType = typeof SupportModel.Type;

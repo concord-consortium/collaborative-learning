@@ -34,7 +34,7 @@ const minPotAngle = 0;
 const maxPotAngle = 270;
 const minServoAngle = 0;
 const minResistReading = 0;
-const maxResistReading = 675; // our wired assembly sends 3.3V to pot, so max reading is 675
+const maxResistReading = 1023; // 10-bit ADC
 
 const kPotAngleKey = "pot_angle_key";
 const kResistReadingKey = "resist_reading_key";

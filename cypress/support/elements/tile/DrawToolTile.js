@@ -107,7 +107,23 @@ class DrawToolTile{
     }
     getDrawTileTitle(workspaceClass){
       return cy.get(`${workspaceClass || ".primary-workspace"} .drawing-tool-tile .editable-tile-title`);
-  }
+    }
+    drawRectangle(x, y, width=25, height=25) {
+      this.getDrawToolRectangle().last().click();
+      this.getDrawTile().last()
+        .trigger("mousedown", x, y)
+        .trigger("mousemove", x+width, y+height)
+        .trigger("mouseup", x+width, y+height);
+    }
+
+    drawEllipse(x, y, width=25, height=25) {
+      this.getDrawToolEllipse().click();
+      this.getDrawTile().last()
+        .trigger("mousedown", x, y)
+        .trigger("mousemove", x+width, y+height)
+        .trigger("mouseup", x+width, y+height);
+    }
+
 }
 
 export default DrawToolTile;

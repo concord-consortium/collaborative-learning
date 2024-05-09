@@ -21,6 +21,12 @@ class ArrowAnnotation {
   getAnnotationArrows(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .curved-arrow.foreground-arrow`);
   }
+  getAnnotationBackgroundArrowPaths(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .curved-arrow.background-arrow path`);
+  }
+  getAnnotationSparrowGroups(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .actual-sparrow`);
+  }
   getPreviewArrow(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .curved-arrow.preview-arrow`);
   }

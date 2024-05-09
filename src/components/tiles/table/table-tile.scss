@@ -7,7 +7,7 @@ $index-column-width: 34px;
 $controls-column-width: 36px;
 $platform-scrollbar-width: 16px;
 $header-color: $workspace-teal-light-5;
-$header-input-color: #eef9fb;
+$header-input-color: #ffffff;
 $border-style: 1px solid $charcoal-light-1;
 $border-input-style: 1px solid #dadada;
 $border-radius: 3px;
@@ -46,6 +46,7 @@ $controls-hover-background: #c0dfe7;
         input {
           text-align: center;
           border: solid 1.5px $charcoal-light-1;
+          background: $header-input-color;
 
           &:focus {
             border: solid 2px $highlight-blue;
@@ -143,25 +144,15 @@ $controls-hover-background: #c0dfe7;
         &.selected-column {
           background-color: $highlight-unlinked-header;
 
-          .rdg-text-editor {
-            background-color: white;
-            border: none;
-            box-shadow: inset 0 0 0 3px $highlight-unlinked-edit;
-          }
-
           &.linked {
             background-color: $highlight-linked-header;
-
-            .rdg-text-editor {
-              box-shadow: inset 0 0 0 3px $highlight-linked-edit;
-            }
           }
         }
         &.rdg-cell-editing {
           padding: 0;
         }
         input {
-          background-color: inherit;
+          background-color: $header-input-color;
         }
       }
       .controls-column-header {
@@ -196,17 +187,6 @@ $controls-hover-background: #c0dfe7;
     .rdg-row {
       .rdg-cell {
         box-shadow: none;
-
-        .rdg-text-editor {
-          border: none;
-          box-shadow: inset 0 0 0 3px $highlight-unlinked-edit;
-        }
-
-        &.linked {
-          .rdg-text-editor {
-            box-shadow: inset 0 0 0 3px $highlight-linked-edit;
-          }
-        }
       }
 
       &.rdg-row-selected {
@@ -342,6 +322,22 @@ $controls-hover-background: #c0dfe7;
     }
   }
 }
+
+.rdg-text-editor {
+  position: absolute;
+  background: white;
+  border: none;
+  padding: 4px;
+  box-shadow: inset 0 0 0 3px $highlight-unlinked-edit;
+  overflow: hidden;
+  resize: none;
+
+  &.linked {
+    box-shadow: inset 0 0 0 3px $highlight-linked-edit;
+  }
+}
+
+
 
 // .link-color-0 > .ag-theme-fresh .ag-row-selected
 //   background-color: $link-color-0-light

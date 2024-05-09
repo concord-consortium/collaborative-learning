@@ -65,18 +65,28 @@ export class HotKeys {
 
   private hotKeyMap: IHotKeyMap = {};
 
+  private canonicalizeKeys(keys: string) {
+    const cmdKey = platformCmdKey();
+    return keys.toLowerCase()
+      .replace("cmd", cmdKey)
+      .replace("control", "ctrl")
+      .replace("option", "alt")
+      .replace("arrow", "");
+  }
+
   /*
    * [ctrl|meta|cmd]-[alt|option]-[shift]-[char]
    */
   public register(hotKeys: IHotKeyMap) {
-    const cmdKey = platformCmdKey();
     each(hotKeys, (handler, keys) => {
-      const _keys = keys.toLowerCase()
-                        .replace("cmd", cmdKey)
-                        .replace("control", "ctrl")
-                        .replace("option", "alt")
-                        .replace("arrow", "");
+      const _keys = this.canonicalizeKeys(keys);
       this.hotKeyMap[_keys] = handler;
+    });
+  }
+
+  public unregister(keys: string[]) {
+    each(keys, (key) => {
+      delete this.hotKeyMap[this.canonicalizeKeys(key)];
     });
   }
 

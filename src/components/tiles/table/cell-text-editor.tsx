@@ -1,6 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, KeyboardEvent, useContext } from "react";
 import { EditorProps } from "react-data-grid";
+import { Portal } from "@chakra-ui/react";
+import TextareaAutosize from "react-textarea-autosize";
 import { TColumn } from "./table-types";
+import { TableContext } from "../hooks/table-context";
 
 // Starting with ReactDataGrid 7.0.0-canary.35, RDG started using Linaria CSS-in-JS for its internal
 // styling. As with CSS Modules and other CSS-in-JS solutions, this involves dynamically generating
@@ -26,24 +29,24 @@ import { TColumn } from "./table-types";
 export const RDG_INTERNAL_EDITOR_CONTAINER_CLASS = "e1d24x2700-canary46";
 export const RDG_INTERNAL_TEXT_EDITOR_CLASS = "t16y9g8l700-canary46";
 
-function autoFocusAndSelect(input: HTMLInputElement | null) {
-  input?.focus();
-  input?.select();
-}
-
 // patterned after TextEditor from "react-data-grid"
 // extended to call our onBeginBodyCellEdit()/onEndBodyCellEdit() functions
 export default function CellTextEditor<TRow, TSummaryRow = unknown>({
-  row, column, onRowChange, onClose
+  row, column, top, left, onRowChange, onClose
 }: EditorProps<TRow, TSummaryRow>) {
   const _column: TColumn = column as unknown as TColumn;
   const origValueRef = useRef(row[column.key as keyof TRow] as unknown as string);
   const valueRef = useRef(origValueRef.current);
   const [value, setValue] = useState(origValueRef.current);
+  const tableContext = useContext(TableContext);
+  const linked = tableContext?.linked;
 
   const updateValue = (val: string) => {
-    valueRef.current = val;
-    setValue(val);
+    if (val !== valueRef.current) {
+      valueRef.current = val;
+      setValue(val);
+      onRowChange({ ...row, [column.key]: val }, false);
+    }
   };
 
   const saveChange = (newValue: string) => {
@@ -51,37 +54,57 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
     _column.appData?.onEndBodyCellEdit?.(newValue);
   };
 
-  const finishAndSave = () => {
-    const endValue = valueRef.current;
-    if (endValue !== origValueRef.current) {
-      onRowChange({ ...row, [column.key]: endValue }, true);
+  const finishAndSave = (commitChanges: boolean) => {
+    if (commitChanges) {
+      saveChange(valueRef.current);
+    } else {
+      onClose(false);
     }
-    saveChange(endValue);
   };
 
   useEffect(() => {
     _column.appData?.onBeginBodyCellEdit?.();
     return () => {
-      finishAndSave();
+      finishAndSave(false);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <input
-      className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS}`}
-      ref={autoFocusAndSelect}
-      value={value}
-      onChange={event => {
-        updateValue(event.target.value);
-      }}
-      onBlur={event => {
-        saveChange(event.target.value);
-      }}
-      onKeyDown={(event: any) => {
-        if (event.key === 'Tab') {
-          finishAndSave();
-        }
-      }}
-    />
+    <Portal>
+      <TextareaAutosize
+        value={value}
+        className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS} ${linked && 'linked'}`}
+        style={{top, left, width: column.width}}
+        autoFocus={true}
+        onChange={event => {
+          updateValue(event.target.value);
+        }}
+        onFocus={event => {
+          // Select all text when focused, but not until after the current event
+          // has been processed. Otherwise, starting to edit a cell with a
+          // keystroke will select the text and then overwrite it all immediately.
+          setTimeout(() => {
+            event.target.select();
+          }, 1);
+        }}
+        onBlur={event => {
+          finishAndSave(true);
+        }}
+        onKeyDown={(event: KeyboardEvent) => {
+          const { key } = event;
+          switch (key) {
+            case 'Escape':
+              finishAndSave(false);
+              break;
+            case 'Tab':
+              event.preventDefault(); // keep focus in table
+              // fall through
+            case 'Enter':
+              finishAndSave(true);
+              break;
+          }
+        }}
+      />
+    </Portal>
   );
 }

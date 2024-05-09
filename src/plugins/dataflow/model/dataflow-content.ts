@@ -1,4 +1,4 @@
-import { types, Instance, applySnapshot, getSnapshot, addDisposer, SnapshotIn } from "mobx-state-tree";
+import { types, Instance, applySnapshot, getSnapshot, addDisposer, SnapshotIn, getType } from "mobx-state-tree";
 import { observable, reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
@@ -194,13 +194,13 @@ export const DataflowContentModel = TileContentModel
           ? sharedModelManager?.getTileSharedModels(self)
           : undefined;
 
-          const sharedProgramData = sharedModelManager?.isReady
-          ? sharedModelManager?.findFirstSharedModelByType(SharedProgramData)
-          : undefined;
+        const ourSharedProgramData = tileSharedModels?.find( sharedModel => {
+          return getType(sharedModel) === SharedProgramData;
+        });
 
-        return { sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels, sharedProgramData };
+        return { sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels, ourSharedProgramData };
       },
-      ({sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels, sharedProgramData}) => {
+      ({sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels, ourSharedProgramData}) => {
         if (!sharedModelManager?.isReady) {
           return;
         }
@@ -221,7 +221,7 @@ export const DataflowContentModel = TileContentModel
           sharedModelManager.addTileSharedModel(self, sharedVariables);
         }
 
-        if (!sharedProgramData) {
+        if (!ourSharedProgramData) {
           const programData = SharedProgramData.create();
           sharedModelManager.addTileSharedModel(self, programData);
         }
