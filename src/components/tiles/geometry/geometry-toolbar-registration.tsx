@@ -6,6 +6,9 @@ import { isPoint } from "../../../models/tiles/geometry/jxg-types";
 import { useGeometryTileContext } from "./geometry-tile-context";
 import { canSupportVertexAngle, getVertexAngle } from "../../../models/tiles/geometry/jxg-vertex-angle";
 import { UploadButton } from "../../toolbar/upload-button";
+import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking";
+import { useReadOnlyContext } from "../../document/read-only-context";
+import { useTileModelContext } from "../hooks/use-tile-model-context";
 
 import AngleLabelSvg from "../../../clue/assets/icons/geometry/angle-label.svg";
 import AddImageSvg from "../../../clue/assets/icons/geometry/add-image-icon.svg";
@@ -15,6 +18,7 @@ import LineLabelSvg from "../../../clue/assets/icons/geometry/line-label.svg";
 import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
 import PointSvg from "../../../clue/assets/icons/geometry/point-icon.svg";
 import ShapesDuplicateSvg from "../../../clue/assets/icons/geometry/shapes-duplicate-icon.svg";
+import AddDataSvg from "../../../assets/icons/add-data-graph-icon.svg";
 
 const PointButton = observer(function PointButton({name}: IToolbarButtonComponentProps) {
   const { content, board, handlers } = useGeometryTileContext();
@@ -151,6 +155,23 @@ const ImageUploadButton = observer(function ImageUploadButton({name}: IToolbarBu
   );
 });
 
+const AddDataButton = observer (function AddDataButton({name}: IToolbarButtonComponentProps) {
+  const readOnly = useReadOnlyContext();
+  const { tile } = useTileModelContext();
+  const { isLinkEnabled, showLinkTileDialog }
+    = useProviderTileLinking({ model: tile!, readOnly, sharedModelTypes: [ "SharedDataSet" ] });
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Add data"
+      disabled={!isLinkEnabled}
+      onClick={showLinkTileDialog}
+      >
+      <AddDataSvg/>
+    </TileToolbarButton>
+  );
+});
+
 registerTileToolbarButtons("geometry",
   [
     {
@@ -180,6 +201,10 @@ registerTileToolbarButtons("geometry",
     {
       name: "upload",
       component: ImageUploadButton
+    },
+    {
+      name: "add-data",
+      component: AddDataButton
     },
     {
       name: "delete",

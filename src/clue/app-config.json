@@ -264,12 +264,13 @@
       "geometry": {
         "tools": [
           "point",
+          "upload",
           "duplicate",
           "angle-label",
           "line-label",
           "movable-line",
           "comment",
-          "upload",
+          "add-data",
           "delete"
         ]
       },

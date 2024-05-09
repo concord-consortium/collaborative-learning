@@ -51,7 +51,6 @@ import { EditableTileTitle } from "../editable-tile-title";
 import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
 import placeholderImage from "../../../assets/image_placeholder.png";
-import { LinkTableButton } from "./link-table-button";
 import ErrorAlert from "../../utilities/error-alert";
 import { halfPi, normalizeAngle, Point } from "../../../utilities/math-utils";
 import SingleStringDialog from "../../utilities/single-string-dialog";
@@ -64,10 +63,8 @@ export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
   onSetActionHandlers: (handlers: IActionHandlers) => void;
   onContentChange: () => void;
-  onLinkTileButtonClick?: () => void;
 }
 export interface IProps extends IGeometryContentProps, SizeMeProps {
-  isLinkButtonEnabled: boolean;
   measureText: (text: string) => number;
 }
 
@@ -596,7 +593,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return (
       <TileTitleArea>
         {this.renderTitle()}
-        {this.renderTileLinkButton()}
       </TileTitleArea>
     );
   }
@@ -607,13 +603,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       <EditableTileTitle key="geometry-title"
                               measureText={measureText}
                               onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
-    );
-  }
-
-  private renderTileLinkButton() {
-    const { isLinkButtonEnabled, onLinkTileButtonClick } = this.props;
-    return (!this.state.isEditingTitle && !this.props.readOnly &&
-      <LinkTableButton key="link-button" isEnabled={isLinkButtonEnabled} onClick={onLinkTileButtonClick}/>
     );
   }
 

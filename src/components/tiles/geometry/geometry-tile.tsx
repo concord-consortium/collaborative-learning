@@ -6,7 +6,6 @@ import { useTileSelectionPointerEvents } from "./use-tile-selection-pointer-even
 import { useUIStore } from "../../../hooks/use-stores";
 import { useCurrent } from "../../../hooks/use-current";
 import { useForceUpdate } from "../hooks/use-force-update";
-import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { IGeometryTileContext, GeometryTileContext } from "./geometry-tile-context";
@@ -55,8 +54,6 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
     domElement
   );
 
-  const { isLinkEnabled, showLinkTileDialog }
-    = useProviderTileLinking({ model, readOnly, sharedModelTypes: [ "SharedDataSet" ] });
   // We must listen for pointer events because we want to get the events before
   // JSXGraph, which appears to listen to pointer events on browsers that support them.
   // We must listen for mouse events because some browsers (notably Safari) don't
@@ -71,8 +68,7 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
         onKeyDown={e => hotKeys.current.dispatch(e)} >
         <GeometryContentWrapper model={model} readOnly={readOnly} {...others}
           onSetBoard={setBoard} onSetActionHandlers={handleSetHandlers}
-          onContentChange={forceUpdate} isLinkButtonEnabled={isLinkEnabled}
-          onLinkTileButtonClick={showLinkTileDialog} />
+          onContentChange={forceUpdate} />
         <TileToolbar tileType="geometry" readOnly={!!readOnly} tileElement={tileElt} />
       </div>
     </GeometryTileContext.Provider>
