@@ -263,6 +263,7 @@
       },
       "geometry": {
         "tools": [
+          "select",
           "point",
           "upload",
           "duplicate",

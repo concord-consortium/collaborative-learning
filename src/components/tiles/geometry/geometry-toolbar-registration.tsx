@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FunctionComponent, SVGProps } from "react";
 import { observer } from "mobx-react";
 import { IToolbarButtonComponentProps, registerTileToolbarButtons } from "../../toolbar/toolbar-button-manager";
 import { TileToolbarButton } from "../../toolbar/tile-toolbar-button";
@@ -9,6 +9,7 @@ import { UploadButton } from "../../toolbar/upload-button";
 import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking";
 import { useReadOnlyContext } from "../../document/read-only-context";
 import { useTileModelContext } from "../hooks/use-tile-model-context";
+import { GeometryTileMode } from "./geometry-types";
 
 import AngleLabelSvg from "../../../clue/assets/icons/geometry/angle-label.svg";
 import AddImageSvg from "../../../clue/assets/icons/geometry/add-image-icon.svg";
@@ -17,27 +18,38 @@ import DeleteSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
 import LineLabelSvg from "../../../clue/assets/icons/geometry/line-label.svg";
 import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
 import PointSvg from "../../../clue/assets/icons/geometry/point-icon.svg";
+import SelectSvg from "../../../clue/assets/icons/select-tool.svg";
 import ShapesDuplicateSvg from "../../../clue/assets/icons/geometry/shapes-duplicate-icon.svg";
 import AddDataSvg from "../../../assets/icons/add-data-graph-icon.svg";
 
-const PointButton = observer(function PointButton({name}: IToolbarButtonComponentProps) {
+function ModeButton({name, title, targetMode, Icon}:
+  { name: string, title: string, targetMode: GeometryTileMode, Icon: FunctionComponent<SVGProps<SVGSVGElement>> }) {
   const { mode, setMode } = useGeometryTileContext();
 
   function onClick() {
-    setMode(mode === "points" ? "select" : "points");
+    if (mode !== targetMode) {
+      setMode(targetMode);
+    }
   }
 
   return (
     <TileToolbarButton
       name={name}
-      title="Point"
-      selected={mode === "points"}
+      title={title}
+      selected={mode === targetMode}
       onClick={onClick}
     >
-      <PointSvg/>
+      <Icon />
     </TileToolbarButton>
   );
+}
 
+const SelectButton = observer(function SelectButton({name}: IToolbarButtonComponentProps) {
+  return(<ModeButton name={name} title="Select" targetMode="select" Icon={SelectSvg} />);
+});
+
+const PointButton = observer(function PointButton({name}: IToolbarButtonComponentProps) {
+  return(<ModeButton name={name} title="Point" targetMode="points" Icon={PointSvg} />);
 });
 
 const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButtonComponentProps) {
@@ -179,6 +191,9 @@ const AddDataButton = observer (function AddDataButton({name}: IToolbarButtonCom
 
 registerTileToolbarButtons("geometry",
   [
+    { name: "select",
+      component: SelectButton
+    },
     {
       name: "point",
       component: PointButton
