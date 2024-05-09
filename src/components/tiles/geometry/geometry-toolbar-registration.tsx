@@ -21,13 +21,18 @@ import ShapesDuplicateSvg from "../../../clue/assets/icons/geometry/shapes-dupli
 import AddDataSvg from "../../../assets/icons/add-data-graph-icon.svg";
 
 const PointButton = observer(function PointButton({name}: IToolbarButtonComponentProps) {
-  const { content, board, handlers } = useGeometryTileContext();
+  const { mode, setMode } = useGeometryTileContext();
+
+  function onClick() {
+    setMode(mode === "points" ? "select" : "points");
+  }
 
   return (
     <TileToolbarButton
       name={name}
       title="Point"
-      onClick={() => {}}
+      selected={mode === "points"}
+      onClick={onClick}
     >
       <PointSvg/>
     </TileToolbarButton>

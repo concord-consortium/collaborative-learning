@@ -9,6 +9,7 @@ import { useForceUpdate } from "../hooks/use-force-update";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { IGeometryTileContext, GeometryTileContext } from "./geometry-tile-context";
+import { GeometryTileMode } from "./geometry-types";
 
 import "./geometry-toolbar-registration";
 
@@ -23,6 +24,7 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   const content = model.content as GeometryContentModelType;
   const [board, setBoard] = useState<JXG.Board>();
   const [actionHandlers, setActionHandlers] = useState<IActionHandlers>();
+  const [mode, setMode] = useState<GeometryTileMode>("select");
   const hotKeys = useRef(new HotKeys());
   const forceUpdate = useForceUpdate();
 
@@ -42,6 +44,8 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   };
 
   const context: IGeometryTileContext = {
+    mode,
+    setMode,
     content,
     board,
     handlers: actionHandlers

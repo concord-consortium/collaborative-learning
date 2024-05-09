@@ -268,8 +268,8 @@
           "duplicate",
           "angle-label",
           "line-label",
-          "movable-line",
           "comment",
+          "|",
           "add-data",
           "delete"
         ]

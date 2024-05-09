@@ -56,6 +56,7 @@ import { halfPi, normalizeAngle, Point } from "../../../utilities/math-utils";
 import SingleStringDialog from "../../utilities/single-string-dialog";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 import { TileTitleArea } from "../tile-title-area";
+import { GeometryTileContext } from "./geometry-tile-context";
 
 import "./geometry-tile.sass";
 
@@ -116,6 +117,8 @@ let sInstanceId = 0;
 @inject("stores")
 @observer
 export class GeometryContentComponent extends BaseComponent<IProps, IState> {
+  static contextType = GeometryTileContext;
+
   public state: IState = {
           size: { width: null, height: null },
           disableRotate: false,
@@ -1486,6 +1489,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private handleCreatePoint = (point: JXG.Point) => {
 
     const handlePointerDown = (evt: any) => {
+      const { mode } = this.context;
       const geometryContent = this.props.model.content as GeometryContentModelType;
       const { board } = this.state;
       if (!board) return;
@@ -1494,7 +1498,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const tableId = point.getAttribute("linkedTableId");
       const columnId = point.getAttribute("linkedColId");
       const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
-      if (isFreePoint(point) && this.isDoubleClick(this.lastPointDown, { evt, coords })) {
+      // Connect points into polygon on double-click (unless in "points" mode)
+      if (isFreePoint(point) && mode !== "points" && this.isDoubleClick(this.lastPointDown, { evt, coords })) {
         if (board) {
           this.applyChange(() => {
             const polygon = geometryContent.createPolygonFromFreePoints(board, tableId, columnId);
