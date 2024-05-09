@@ -40,14 +40,10 @@ context('Simulator Tile', function () {
     simulatorTile.getSelectionButtons().should("have.length", 2).eq(1).click();
     cy.get(".gripper-image").should("not.exist");
     cy.get(".temperature-part").should("exist");
+  });
 
-    cy.log("edit tile title");
-    const newName = "Test Simulation";
-    clueCanvas.addTile("simulator");
-    simulatorTile.getTileTitle().should("contain", "Simulation 1");
-    simulatorTile.getSimulatorTileTitle().click();
-    simulatorTile.getSimulatorTileTitle().type(newName + '{enter}');
-    simulatorTile.getTileTitle().should("contain", newName);
+  it("Simulator Tile with Dataflow", () => {
+    beforeTest(queryParams1 + "&mouseSensor");
 
     cy.log("links to dataflow tile");
     clueCanvas.addTile("dataflow");
@@ -56,13 +52,14 @@ context('Simulator Tile', function () {
     // Simulation options are not present in the sensor before the simulation has been added to the document
     const sensor = "sensor";
     dataflowTile.getCreateNodeButton(sensor).click();
-    dataflowTile.getDropdown(sensor, "sensor-type").click();
+    dataflowTile.getDropdown(sensor, "sensorType").click();
     dataflowTile.getSensorDropdownOptions(sensor).find(".label").contains("EMG").click(); // EMG
-    dataflowTile.getDropdown(sensor, "sensor-select").click();
-    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 2);
+    dataflowTile.getDropdown(sensor, "sensor").click();
+    dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 1);
     // Click the background to not select any option
     cy.get(".primary-workspace .flow-tool").click();
-    dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("equal", 0);
+
+    dataflowTile.getNodeValueContainer(sensor).invoke('text').should("equal", "__");
 
     // Simulation options are not present in the live output before the simulation has been added to the document
     const lo = "live-output";
@@ -70,18 +67,32 @@ context('Simulator Tile', function () {
     dataflowTile.getDropdown(lo, "liveOutputType").click();
     dataflowTile.getDropdownOptions(lo, "liveOutputType").eq(1).click(); // Gripper
     dataflowTile.getDropdown(lo, "hubSelect").click();
-    dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 2);
+    dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 1);
     // Click the background to not select any option
     cy.get(".primary-workspace .flow-tool").click();
 
+    // Need to move it out of the way
+    dataflowTile.getNode("live-output").click(50, 10)
+      .trigger("pointerdown", 50, 10)
+      .trigger("pointermove", 300, 100, { force: true })
+      .trigger("pointerup", 300, 100, { force: true });
+
+
     // Sensor options are correct after adding the simulation to the document
     clueCanvas.addTile("simulator");
-    dataflowTile.getDropdown(sensor, "sensor-select").click();
+    dataflowTile.getDropdown(sensor, "sensor").click();
     dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 2);
     dataflowTile.getSensorDropdownOptions(sensor).eq(0).click();
+
+    // Sometimes the value of the input block takes some time to show up
+    // I think the invoke('text') breaks cypress's built in retry code
+    cy.wait(100);
     dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("be.below", 41).should("be.above", 35);
+
     simulatorTile.getEMGSlider().click("right");
+
     cy.wait(50);
+
     dataflowTile.getNodeValueContainer(sensor).invoke('text').then(parseFloat).should("be.below", 441).should("be.above", 390);
 
     // Live output options are correct after adding the simulation to the document
@@ -92,15 +103,24 @@ context('Simulator Tile', function () {
     // Simulator tile's output variable updates when dataflow sets it
     dataflowTile.getCreateNodeButton("number").click();
     dataflowTile.getNumberField().type("1{enter}");
-    const output = () => dataflowTile.getNode("number").find(".socket.output");
-    const input = () => dataflowTile.getNode(lo).find(".socket.input");
-    output().click();
-    input().click({ force: true });
+    const output = () => dataflowTile.getNode("number").find(".output-socket");
+    const input = () => dataflowTile.getNode(lo).find(".input-socket");
+    output().trigger("pointerdown");
+    input().trigger("pointermove", {force: true});
+    input().trigger("pointerup", {force: true});
     dataflowTile.getOutputNodeValueText().should("contain", "100% closed");
     simulatorTile.getSimulatorTile().should("contain.text", "Gripper Output100");
 
     // Pressure variable updates when the gripper changes
     simulatorTile.getSimulatorTile().should("contain.text", "Surface Pressure Sensor300");
+
+    cy.log("edit tile title");
+    const newName = "Test Simulation";
+    clueCanvas.addTile("simulator");
+    simulatorTile.getTileTitle().should("contain", "Simulation 1");
+    simulatorTile.getSimulatorTileTitle().click();
+    simulatorTile.getSimulatorTileTitle().type(newName + '{enter}');
+    simulatorTile.getTileTitle().should("contain", newName);
 
     //Simulator tile restore upon page reload
     cy.wait(2000);
@@ -138,20 +158,20 @@ context('Simulator Tile', function () {
     // Correct sensors have simulated data
     const sensor = "sensor";
     dataflowTile.getCreateNodeButton(sensor).click();
-    dataflowTile.getDropdown(sensor, "sensor-type").click();
+    dataflowTile.getDropdown(sensor, "sensorType").click();
     dataflowTile.getSensorDropdownOptions(sensor).eq(0).find(".label").click(); // Temperature
-    dataflowTile.getDropdown(sensor, "sensor-select").click();
+    dataflowTile.getDropdown(sensor, "sensor").click();
     dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 7);
-    dataflowTile.getDropdown(sensor, "sensor-type").click();
+    dataflowTile.getDropdown(sensor, "sensorType").click();
     dataflowTile.getSensorDropdownOptions(sensor).eq(1).find(".label").click(); // Humidity
-    dataflowTile.getDropdown(sensor, "sensor-select").click();
+    dataflowTile.getDropdown(sensor, "sensor").click();
     dataflowTile.getSensorDropdownOptions(sensor).should("have.length", 6);
 
     // Live outputs can be linked to output variables
     dataflowTile.getCreateNodeButton("number").click();
     dataflowTile.getNumberField().type("1{enter}");
     const lo = "live-output";
-    const output = () => dataflowTile.getNode("number").find(".socket.output");
+    const output = () => dataflowTile.getNode("number").find(".output-socket");
 
     // verify we can send output data to a sim output variable
 
@@ -184,13 +204,23 @@ context('Simulator Tile', function () {
     const liveOutputIndex = 4; // Heat Lamp
     dataflowTile.getCreateNodeButton(lo).click();
     simulatorTile.getSimulatorTile().should("contain.text", `Heat Lamp Output0`);
+
+    // Need to move it out of the way
+    dataflowTile.getNode("live-output").click(50, 10)
+      .trigger("pointerdown", 50, 10)
+      .trigger("pointermove", 300, 10, { force: true })
+      .trigger("pointerup", 300, 10, { force: true });
+
     dataflowTile.getDropdown(lo, "liveOutputType").eq(0).click();
     dataflowTile.getDropdownOptions(lo, "liveOutputType").eq(liveOutputIndex).click();
-    const input = () => dataflowTile.getNode(lo).eq(0).find(".socket.input");
+    const input = () => dataflowTile.getNode(lo).eq(0).find(".input-socket");
     output().click();
     input().click({ force: true });
     dataflowTile.getDropdown(lo, "hubSelect").eq(0).click();
-    dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 1);
+    // The hubSelect should have both the simulated heat lamp and the "connect to sensor" warning.
+    // We might want to change this in the future, since the "connect to sensor" won't automatically
+    // switch to the correct sensor when an "microbit" is connected.
+    dataflowTile.getDropdownOptions(lo, "hubSelect").should("have.length", 2);
     dataflowTile.getDropdownOptions(lo, "hubSelect").eq(0).click();
     simulatorTile.getSimulatorTile().should("contain.text", `Heat Lamp Output1`);
   });
@@ -204,14 +234,14 @@ context('Simulator Tile', function () {
     simulatorTile.getSimulatorTile().should("exist");
     simulatorTile.getTileTitle().should("exist");
     simulatorTile.getSimulatorTile().should("contain.text", "Potentiometer Position");
-    simulatorTile.getSimulatorTile().should("contain.text", "Resistance Reading");
+    simulatorTile.getSimulatorTile().should("contain.text", "Pin Reading");
     simulatorTile.getSimulatorTile().should("contain.text", "Servo Position");
 
     cy.log("pot value starts at 0");
     simulatorTile.getVariableDisplayedValue().eq(0).should("contain.text", "0 deg");
     simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "0");
 
-    cy.log("pot can be adjusted and resistance value changes");
+    cy.log("pot can be adjusted and pin value changes");
     simulatorTile.getPotValueSlider().click("right")
       .trigger('mousedown', { which: 1, pageX: 100, pageY: 100 })
       .trigger('mousemove', { which: 1, pageX: 200, pageY: 100 })
@@ -219,10 +249,59 @@ context('Simulator Tile', function () {
     simulatorTile.getVariableDisplayedValue().eq(0).should("contain.text", "225 deg");
     simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "853");
 
-    cy.log("expand and minimize toggle works");
-    simulatorTile.getExpandToggle().click();
-    simulatorTile.getBoard().should("have.have.class", "collapsed");
-    simulatorTile.getExpandToggle().click();
-    simulatorTile.getBoard().should("not.have.class", "collapsed");
+    cy.log("dataflow can drive servo position");
+    // collect initial position of servo arm
+    const initialPos = simulatorTile.getServoArm().invoke('offset').its('top');
+    simulatorTile.getVariableDisplayedValue().eq(2).should("contain.text", "0 deg");
+    dataflowTile.getCreateNodeButton("number").click();
+    dataflowTile.getNumberField().type("90{enter}");
+    dataflowTile.getCreateNodeButton("live-output").click();
+    // Need to move it out of the way
+    dataflowTile.getNode("live-output").click(50, 10)
+      .trigger("pointerdown", 50, 10)
+      .trigger("pointermove", 300, 10, { force: true })
+      .trigger("pointerup", 300, 10, { force: true });
+
+    dataflowTile.getDropdown("live-output", "liveOutputType").eq(0).click();
+    dataflowTile.getDropdownOptions("live-output", "liveOutputType").eq(5).click(); // Servo
+    dataflowTile.getNode("number").find(".output-socket").click();
+    dataflowTile.getNode("live-output").find(".input-socket").click({ force: true });
+    simulatorTile.getVariableDisplayedValue().eq(2).should("contain.text", "90 deg");
+    cy.wait(500); // wait for servo animation to move, then assert position has changed
+    simulatorTile.getServoArm().invoke('offset').its('top').should('not.eq', initialPos);
+
+    cy.log("Dataflow can read pin value");
+    dataflowTile.getCreateNodeButton("sensor").click();
+    dataflowTile.getDropdown("sensor", "sensorType").eq(0).click({scrollBehavior: false});
+    dataflowTile.getSensorDropdownOptions("sensor").eq(6).find(".label").click({force: true}); // Pin?
+    dataflowTile.getDropdown("sensor", "sensor").eq(0).click({scrollBehavior: false});
+    dataflowTile.getNode("sensor").find(".item.sensor").eq(0).click({scrollBehavior: false});
+
+    simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "853");
+    simulatorTile.getPotValueSlider().click("right")
+    .trigger('mousedown', { which: 1, pageX: 100, pageY: 100 })
+    .trigger('mousemove', { which: 1, pageX: 50, pageY: 100 })
+    .trigger('mouseup', {force: true});
+
+    cy.wait(3000); // wait for a tick to update data from sim to dataflow
+    let simVarValue;
+    simulatorTile.getVariableDisplayedValue().eq(1).invoke('text').then((text) => {
+      simVarValue = text.trim();
+      expect(Number(simVarValue)).to.be.within(400, 475);
+    });
+
+    let pinValue;
+    dataflowTile.getNodeValueContainer("sensor").invoke('text').then((text) => {
+      pinValue = text.trim();
+      console.log("| pinValue: ", pinValue);
+      expect(Number(pinValue)).to.be.within(400, 475);
+    });
+
+    cy.log("when there are more than five mini-nodes in a family, the extra nodes count is displayed");
+    const buttons = ["number", "number", "number", "sensor", "sensor"];
+    buttons.forEach(button => {
+      dataflowTile.getCreateNodeButton(button).click();
+    });
+    simulatorTile.getExtraNodesCount().should("contain.text", "+ 2 more");
   });
 });

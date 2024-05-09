@@ -2,7 +2,6 @@ import React from "react";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
 
-import { isCurriculumDocument } from "../../../models/document/document-types";
 import { DataflowProgram } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
 import { ITileModel } from "../../../models/tiles/tile-model";
@@ -13,11 +12,9 @@ import { DataflowContentModelType } from "../model/dataflow-content";
 import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { TileTitleArea } from "../../../components/tiles/tile-title-area";
-import { DataflowLinkTableButton } from "./ui/dataflow-program-link-table-button";
-import { ProgramMode, UpdateMode } from "./types/dataflow-tile-types";
-import { ITileLinkMetadata } from "../../../models/tiles/tile-link-types";
-import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
+import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 
+import "../dataflow-toolbar-registration";
 import "./dataflow-tile.scss";
 
 interface IProps extends ITileProps{
@@ -55,13 +52,11 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
     const tileContent = this.getContent();
-    const runnable = this.getRunnable();
 
     return (
       <>
         <TileTitleArea>
           {this.renderTitle()}
-          {this.renderTableLinkButton()}
         </TileTitleArea>
         <div className={classes}>
           <SizeMe monitorHeight={true}>
@@ -69,33 +64,18 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
               return (
                 <DataflowProgram
                   documentProperties={this.getDocumentProperties()}
-                  model={model}
-                  onProgramChange={this.handleProgramChange}
-                  onProgramDataRateChange={this.handleProgramDataRateChange}
-                  onZoomChange={this.handleProgramZoomChange}
+                  tileId={model.id}
                   program={program}
                   programDataRate={programDataRate}
-                  programZoom={programZoom}
                   readOnly={readOnly}
-                  runnable={runnable}
                   size={size}
                   tileHeight={height}
-                  //state
-                  programMode={this.determineProgramMode()}
-                  isPlaying={this.state.isPlaying}
-                  playBackIndex={this.state.playBackIndex}
-                  recordIndex={this.state.recordIndex}
-                  //state handlers
-                  handleChangeOfProgramMode={this.handleChangeOfProgramMode}
-                  handleChangeIsPlaying={this.handleChangeIsPlaying}
-                  updatePlayBackIndex={this.updatePlayBackIndex}
-                  updateRecordIndex={this.updateRecordIndex}
                   tileContent={tileContent}
-
                 />
               );
             }}
           </SizeMe>
+          <TileToolbar tileType="dataflow" readOnly={!!readOnly} tileElement={this.props.tileElt} />
         </div>
       </>
     );
@@ -138,120 +118,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     );
   }
 
-  private renderTableLinkButton() {
-    const { model, documentId } = this.props;
-    const documentContent = getDocumentContentFromNode(model);
-    const linkableTiles = documentContent?.getLinkableTiles();
-    const isLinkButtonEnabled = linkableTiles && linkableTiles.consumers.length > 0;
-    const actionHandlers = {
-                             handleRequestTableLink: this.handleRequestTableLink,
-                             handleRequestTableUnlink: this.handleRequestTableUnlink
-                           };
-
-    return (!this.state.isEditingTitle && !this.props.readOnly &&
-      <DataflowLinkTableButton
-        key="link-button"
-        isLinkButtonEnabled={isLinkButtonEnabled}
-        //use in useTableLinking
-        documentId={documentId}
-        model={model}
-        actionHandlers={actionHandlers}
-      />
-    );
-  }
-
-  private handleRequestTableLink = (tileInfo: ITileLinkMetadata) => {
-    this.getContent().addLinkedTile(tileInfo.id);
-  };
-
-  private handleRequestTableUnlink = (tileInfo: ITileLinkMetadata) => {
-    this.getContent().removeLinkedTable(tileInfo.id);
-  };
-
-  private handleProgramChange = (program: any) => {
-    this.getContent().setProgram(program);
-  };
-
-  private handleProgramDataRateChange = (program: any) => {
-    this.getContent().setProgramDataRate(program);
-  };
-
-  private handleProgramZoomChange = (dx: number, dy: number, scale: number) => {
-    this.getContent().setProgramZoom(dx, dy, scale);
-  };
-
-  private handleChangeOfProgramMode = () => {
-    const tileContent = this.getContent();
-    const programMode = this.determineProgramMode();
-
-    switch (programMode){
-      case ProgramMode.Ready:
-        tileContent.prepareRecording();
-        this.setState({isPlaying: false}); //reset isPlaying
-        this.setState({isRecording: true});
-        break;
-      case ProgramMode.Recording:
-        this.setState({isRecording: false});
-        break;
-      case ProgramMode.Done:
-        tileContent.resetRecording();
-        break;
-    }
-  };
-
-  private getRunnable = () => {
-    const isCurriculum = isCurriculumDocument(this.props.documentId);
-    return !this.props.readOnly || isCurriculum;
-  };
-
-  private determineProgramMode = () => {
-    const { isRecording } = this.state;
-    const tileContent = this.getContent();
-    if (!isRecording && tileContent.isDataSetEmptyCases){
-      return ProgramMode.Ready;
-    }
-    else if (isRecording){
-      return ProgramMode.Recording;
-    }
-    else if (!isRecording && !tileContent.isDataSetEmptyCases){
-     return ProgramMode.Done;
-    }
-    return ProgramMode.Ready;
-  };
-
-  private handleChangeIsPlaying = () => {
-    this.setState({isPlaying: !this.state.isPlaying});
-  };
-
-  private updatePlayBackIndex = (update: string) => {
-    if (update === UpdateMode.Increment){
-      const newPlayBackIndex = this.state.playBackIndex + 1;
-      const tileContent = this.getContent();
-      const recordedCases = tileContent.dataSet.cases.length;
-      if (newPlayBackIndex >= recordedCases) {
-        this.setState({isPlaying: false});
-      } else {
-        this.setState({playBackIndex: newPlayBackIndex});
-      }
-    }
-    if (update === UpdateMode.Reset){
-      this.setState({playBackIndex: 0});
-    }
-  };
-
-  private updateRecordIndex = (update: string) => {
-    if (update === UpdateMode.Increment){
-      const newRecordIndex = this.state.recordIndex + 1;
-      if (newRecordIndex >= this.getContent().maxRecordableCases) {
-        this.setState({isRecording: false});
-      } else {
-        this.setState({recordIndex: newRecordIndex});
-      }
-    }
-    if (update === UpdateMode.Reset){
-      this.setState({recordIndex: 0});
-    }
-  };
   private getContent() {
     return this.props.model.content as DataflowContentModelType;
   }

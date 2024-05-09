@@ -244,6 +244,12 @@
       "dataset": {
         "cellsSelectCases": false
       },
+      "dataflow": {
+        "tools": [
+          ["data-set-view", "Table"],
+          ["data-set-link", "Graph"]
+        ]
+      },
       "diagram": {
         "tools": [
           "new-variable",

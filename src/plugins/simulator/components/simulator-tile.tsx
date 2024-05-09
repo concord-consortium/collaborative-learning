@@ -53,7 +53,11 @@ export const SimulatorTileComponent = observer(function SimulatorTileComponent({
         </div>
         { component && (
           <div className="simulator-component-container">
-            { component({ frame: _steps, variables: content.variables || [] }) }
+            { component({
+              frame: _steps,
+              variables: content.variables || [],
+              programData: content.sharedProgramData
+            }) }
           </div>
         )}
       </div>

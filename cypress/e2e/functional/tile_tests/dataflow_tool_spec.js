@@ -37,20 +37,13 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDataflowTile().last().click();
     clueCanvas.deleteTile("dataflow");
 
-    cy.log("makes link button active when table is present");
-    dataflowToolTile.getLinkTileButton().should("exist");
-    dataflowToolTile.getLinkTileButton().should("have.class", "disabled");
-    clueCanvas.addTile("table");
-    dataflowToolTile.getLinkTileButton().should("not.have.class", "disabled");
-    clueCanvas.deleteTile("table");
-
     cy.log("Number Node");
     const numberNode = "number";
     cy.log("can create number node");
 
     dataflowToolTile.getCreateNodeButton(numberNode).click();
     dataflowToolTile.getNode(numberNode).should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Number");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Number");
 
     cy.log("can toggle minigraph");
     dataflowToolTile.getShowGraphButton(numberNode).click();
@@ -117,14 +110,13 @@ context('Dataflow Tool Tile', function () {
     // create a number node
     dataflowToolTile.getCreateNodeButton("number").click();
     dataflowToolTile.getNode("number").should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Number");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Number");
     dataflowToolTile.getNumberField().type("1.8309{enter}");
 
     cy.log('values should be rounded to three decimals for display');
     // create transform node and drag to the right
     dataflowToolTile.getCreateNodeButton("transform").click();
     dataflowToolTile.getNode("transform").should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Transform");
     dataflowToolTile.getNode("transform").click(50, 10)
       .trigger("pointerdown", 50, 10)
       .trigger("pointermove", dragXDestination, 10, { force: true })
@@ -148,7 +140,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create generator node");
     dataflowToolTile.getCreateNodeButton(generatorNode).click();
     dataflowToolTile.getNode(generatorNode).should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Generator");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Generator");
 
     cy.log("can toggle minigraph");
     dataflowToolTile.getShowGraphButton(generatorNode).click();
@@ -189,7 +181,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create timer node");
     dataflowToolTile.getCreateNodeButton(timerNode).click();
     dataflowToolTile.getNode(timerNode).should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Timer (on/off)");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Timer (on/off) 1");
 
     cy.log("timer node labels");
     dataflowToolTile.getLabel("On").should('contain', "time on");
@@ -218,7 +210,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create math node");
     dataflowToolTile.getCreateNodeButton(mathNode).click();
     dataflowToolTile.getNode(mathNode).should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Math");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Math");
 
     cy.log("can toggle minigraph");
     dataflowToolTile.getShowGraphButton(mathNode).click();
@@ -255,7 +247,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create logic node");
     dataflowToolTile.getCreateNodeButton(logicNode).click();
     dataflowToolTile.getNode(logicNode).should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Logic");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Logic");
 
     cy.log("can toggle minigraph");
     dataflowToolTile.getShowGraphButton(logicNode).click();
@@ -292,7 +284,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create transform node");
     dataflowToolTile.getCreateNodeButton(transformNode).click();
     dataflowToolTile.getNode(transformNode).should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Transform");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Transform");
 
     cy.log("can toggle minigraph");
     dataflowToolTile.getShowGraphButton(transformNode).click();
@@ -327,7 +319,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create control node");
     dataflowToolTile.getCreateNodeButton(controlNode).click();
     dataflowToolTile.getNode(controlNode).should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Hold");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Hold");
 
     cy.log("can toggle minigraph");
     dataflowToolTile.getShowGraphButton(controlNode).click();
@@ -364,7 +356,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create demo output node");
     dataflowToolTile.getCreateNodeButton(demoOutputNode).click();
     dataflowToolTile.getNode(demoOutputNode).should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Demo Output");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Demo Output");
 
     cy.log("can change output type");
     const demoOutputType = "outputType";
@@ -438,7 +430,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create live output node");
     dataflowToolTile.getCreateNodeButton(liveOutputNode).click();
     dataflowToolTile.getNode(liveOutputNode).should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Live Output");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Live Output");
 
     cy.log("can toggle minigraph");
     dataflowToolTile.getShowGraphButton(liveOutputNode).click();
@@ -448,13 +440,13 @@ context('Dataflow Tool Tile', function () {
 
     cy.log("verify live output types");
     const liveOutputType = "liveOutputType";
-    const liveOutputTypes = ["Gripper 2.0", "Gripper", "Humidifier", "Fan", "Heat Lamp"];
+    const liveOutputTypes = ["Gripper 2.0", "Gripper", "Humidifier", "Fan", "Heat Lamp", "Servo"];
     dataflowToolTile.getDropdown(liveOutputNode, liveOutputType).click();
-    dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).should("have.length", 5);
+    dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).should("have.length", 6);
     dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).each(($tab, index, $typeList) => {
       expect($tab.text()).to.contain(liveOutputTypes[index]);
     });
-    dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).last().click();
+    dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).eq(4).click();
     dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).should("have.length", 0);
     dataflowToolTile.getDropdown(liveOutputNode, liveOutputType).contains("Heat Lamp").should("exist");
     dataflowToolTile.getOutputNodeValueText().should("contain", "off");
@@ -474,19 +466,14 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).eq(0).click();
 
     cy.log("can connect and trigger modal connection warning");
-    // vars for controlling click and drag to connect nodes
-    const startX = 306;
-    const startY = 182;
-    const deltaX = 70;  //  60 with fixed styles
-    const deltaY = -22; // -10 with fixed styles
     dataflowToolTile.getCreateNodeButton("number").click();
     dataflowToolTile.getNode("number").should("exist");
     dataflowToolTile.getNumberField().type("1{enter}");
     dataflowToolTile.getNumberNodeOutput().should("exist");
-    dataflowToolTile.getDataflowTile().click(startX, startY)
-      .trigger("pointerdown", startX, startY, { force: true })
-      .trigger("pointermove", startX + deltaX, startY + deltaY, { force: true })
-      .trigger("pointerup", startX + deltaX, startY + deltaY, { force: true });
+    dataflowToolTile.getNumberNodeOutput().trigger("pointerdown");
+    dataflowToolTile.getLiveOutputNodeInput().trigger("pointermove");
+    dataflowToolTile.getLiveOutputNodeInput().trigger("pointerup");
+
     dataflowToolTile.getModalOkButton().click();
 
     cy.log("should show needs connection message when fan is selected and there are no outputs");
@@ -512,7 +499,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDeleteNodeButton(liveOutputNode).click();
     dataflowToolTile.getNode(liveOutputNode).should("not.exist");
   });
-  it("Sensor Node and Record Data", () => {
+  it("Input Node and Record Data", () => {
     const sensorNode = "sensor";
     beforeTest();
     clueCanvas.addTile("dataflow");
@@ -520,7 +507,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("can create sensor node");
     dataflowToolTile.getCreateNodeButton(sensorNode).click();
     dataflowToolTile.getNode(sensorNode).should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Sensor");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Input");
 
     cy.log("can toggle minigraph");
     dataflowToolTile.getShowGraphButton(sensorNode).click();
@@ -529,10 +516,10 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getMinigraph(sensorNode).should("not.exist");
 
     cy.log("verify sensor types");
-    const dropdown10 = "sensor-type";
-    const sensorTypes = ["Temperature", "Humidity", "CO₂", "O₂", "Light", "Soil Moisture", "Particulates", "EMG", "Surface Pressure"];
+    const dropdown10 = "sensorType";
+    const sensorTypes = ["Temperature", "Humidity", "CO₂", "Light", "EMG", "Surface Pressure", "Pin Reading"];
     dataflowToolTile.getDropdown(sensorNode, dropdown10).click();
-    dataflowToolTile.getSensorDropdownOptions(sensorNode).should("have.length", 9);
+    dataflowToolTile.getSensorDropdownOptions(sensorNode).should("have.length", 7);
     dataflowToolTile.getSensorDropdownOptions(sensorNode).each(($tab, index, $typeList) => {
       expect($tab.text()).to.contain(sensorTypes[index]);
     });
@@ -542,12 +529,16 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNode(sensorNode).should("not.exist");
 
     cy.log("verify sensor select");
-    const sensorSelectdropdown = "sensor-select";
+    const sensorSelectdropdown = "sensor";
     const sensorSelect = [
-      "Temperature Demo Data", "Humidity Demo Data", "CO2 Demo Data", "O2 Demo Data", "Light Demo Data", "Particulates Demo Data",
+      "Temperature Demo Data",
+      "Humidity Demo Data",
+      "CO2 Demo Data",
+      "Particulates Demo Data",
       "⚠️ Connect Arduino for live EMG",
       "⚠️ Connect Arduino for live Pressure",
       "⚠️ Connect Arduino for live Temperature",
+      "⚠️ Connect Arduino for live A1",
       "⚠️ Connect micro:bit for live Temperature A",
       "⚠️ Connect micro:bit for live Humidity A",
       "⚠️ Connect micro:bit for live Temperature B",
@@ -559,7 +550,7 @@ context('Dataflow Tool Tile', function () {
     ];
     dataflowToolTile.getCreateNodeButton(sensorNode).click();
     dataflowToolTile.getDropdown(sensorNode, sensorSelectdropdown).click();
-    dataflowToolTile.getSensorDropdownOptions(sensorNode).should("have.length", 17);
+    dataflowToolTile.getSensorDropdownOptions(sensorNode).should("have.length", 16);
     dataflowToolTile.getSensorDropdownOptions(sensorNode).each(($tab, index, $typeList) => {
       expect($tab.text()).to.contain(sensorSelect[index]);
     });
@@ -580,10 +571,14 @@ context('Dataflow Tool Tile', function () {
     const nodes = ["timer", "demo-output"];
     dataflowToolTile.getCreateNodeButton(nodes[0]).click();
     dataflowToolTile.getNode(nodes[0]).should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Timer (on/off)");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Timer (on/off) 1");
     dataflowToolTile.getCreateNodeButton(nodes[1]).click();
     dataflowToolTile.getNode(nodes[1]).should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Demo Output");
+    dataflowToolTile.getNode("demo-output").click(50, 10)
+      .trigger("pointerdown", 50, 10)
+      .trigger("pointermove", dragXDestination, 10, { force: true })
+      .trigger("pointerup", dragXDestination, 10, { force: true });
+
     dataflowToolTile.getNodeOutput().eq(0).click();
     dataflowToolTile.getNodeInput().eq(0).click();
     dataflowToolTile.getShowGraphButton("demo-output").click();
