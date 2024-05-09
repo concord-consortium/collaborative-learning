@@ -1,6 +1,7 @@
 @use "../vars.sass";
 
 .curved-arrow {
+  stroke-opacity: .5;
   pointer-events: none;
 
   .curved-arrow-stem {
@@ -21,6 +22,12 @@
     &:hover {
       .curved-arrow-stem {
         stroke-opacity: .125;
+      }
+    }
+
+    .actual-sparrow.selected & {
+      .curved-arrow-stem {
+        stroke-opacity: .25;
       }
     }
   }

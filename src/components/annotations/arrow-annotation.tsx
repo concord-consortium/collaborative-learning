@@ -58,6 +58,7 @@ interface IArrowAnnotationProps {
   arrow: IArrowAnnotation;
   canEdit?: boolean;
   deleteArrow: (arrowId: string) => void;
+  handleArrowClick: (arrowId: string, event: React.MouseEvent) => void;
   documentBottom: number;
   documentLeft: number;
   documentRight: number;
@@ -70,7 +71,8 @@ interface IArrowAnnotationProps {
 }
 export const ArrowAnnotationComponent = observer(
   function ArrowAnnotationComponent({
-    arrow, canEdit, deleteArrow, documentBottom, documentLeft, documentRight, documentTop, getBoundingBox,
+    arrow, canEdit, deleteArrow, handleArrowClick,
+    documentBottom, documentLeft, documentRight, documentTop, getBoundingBox,
     getObjectNodeRadii, readOnly
   }: IArrowAnnotationProps) {
     const [firstClick, setFirstClick] = useState(false);
@@ -231,7 +233,7 @@ export const ArrowAnnotationComponent = observer(
     });
     return (
       <g>
-        <g className="actual-sparrow">
+        <g className={classNames("actual-sparrow", { selected: arrow.isSelected })}>
           <CurvedArrow
             className="background-arrow"
             hideArrowhead={true}
@@ -239,6 +241,7 @@ export const ArrowAnnotationComponent = observer(
             setHovering={setHoveringStem}
             sourceX={sourceX} sourceY={sourceY}
             targetX={targetX} targetY={targetY}
+            onClick={(e) => handleArrowClick(arrow.id, e)}
           />
           <CurvedArrow
             className="foreground-arrow"

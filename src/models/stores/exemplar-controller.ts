@@ -178,6 +178,11 @@ export const ExemplarControllerModel = BaseExemplarControllerModel
   }))
   .actions(self => ({
     async initialize(user: UserModelType, db: DB) {
+      const hide = db.stores.appConfig.initiallyHideExemplars;
+      if (!hide) {
+        // No need for DB listeners or log message watching
+        return;
+      }
       self.db = db;
       self.documentsStore = db.stores.documents;
       self.firebasePath = db.firebase.getUserExemplarsPath(user);

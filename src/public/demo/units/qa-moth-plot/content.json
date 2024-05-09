@@ -320,6 +320,9 @@
             "investigation-1/problem-1/first/content.json",
             "investigation-1/problem-1/second/content.json",
             "investigation-1/problem-1/third/content.json"
+          ],
+          "exemplars": [
+            "exemplars/investigation-1/problem-1/exemplar-1/content.json"
           ]
         },
         {

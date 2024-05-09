@@ -60,16 +60,23 @@ class TableToolTile{
     getTableCellContent(cellIndex) {
       return this.getTableCell().eq(cellIndex).find('.cell');
     }
+    // Note, the editor is in a portal at the document level.
+    // This method will not work if you are in a narrower "within" context.
     getTableCellEdit(){
-      return cy.get('.rdg-row .rdg-cell .rdg-text-editor');
+        return cy.get('.rdg-text-editor');
     }
     typeInTableCellXY(row, col, text) {
       this.getTableCellXY(row, col).dblclick();
-      this.getTableCellEdit().type(`${text}{enter}`);
+      return cy.document().within(() => {
+        this.getTableCellEdit().type(`${text}{enter}`);
+      });
     }
-    typeInTableCell(i, text) {
+    typeInTableCell(i, text, confirm=true) {
+      const confirmation = confirm ? '{enter}' : '';
       this.getTableCell().eq(i).dblclick();
-      this.getTableCellEdit().type(`${text}{enter}`);
+      return cy.document().within(() => {
+        this.getTableCellEdit().type(`${text}${confirmation}`);
+      });
     }
     getTableCellWithColIndex(colIndex, colValue){
         return cy.get('.rdg-row').contains('.rdg-cell[aria-colindex="' + colIndex + '"]', colValue);

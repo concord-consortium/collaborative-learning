@@ -1,7 +1,8 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
+import React, { MouseEvent, MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 import useResizeObserver from "use-resize-observer";
+import { useMemoOne } from "use-memo-one";
 import { AnnotationButton } from "../annotations/annotation-button";
 import { getDefaultPeak } from "../annotations/annotation-utilities";
 import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
@@ -12,6 +13,8 @@ import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
 import { ClueObjectModel, IClueObject, OffsetModel } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { Point } from "../../utilities/math-utils";
+import { hasSelectionModifier } from "../../utilities/event-utils";
+import { HotKeys } from "../../utilities/hot-keys";
 
 import "./annotation-layer.scss";
 
@@ -40,13 +43,47 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const ui = useUIStore();
   const persistentUI = usePersistentUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
+  const hotKeys = useMemoOne(() => new HotKeys(), []);
 
-  // Clear a partially completed annotation when the mode changes
+  useEffect(() => {
+    const deleteSelected = () => content?.deleteSelected();
+    if (!readOnly) {
+      hotKeys.register({
+        "delete": () => deleteSelected(),
+        "backspace": () => deleteSelected()
+      });
+      // disposer, to deactivate these bindings in case we switch to read-only later.
+      return () => {
+        hotKeys.unregister(["delete", "backspace"]);
+      };
+    }
+  }, [content, readOnly, hotKeys]);
+
+  function handleKeyDown(event: React.KeyboardEvent) {
+    hotKeys.dispatch(event);
+  }
+
+  // Clicking to select annotations
+  function handleArrowClick(arrowId: string, event: MouseEvent) {
+    if (readOnly) return;
+    event.stopPropagation();
+    const annotation = content?.annotations.get(arrowId);
+    if (annotation) {
+      if (hasSelectionModifier(event)) {
+        annotation.setSelected(!annotation.isSelected); // Toggle this one, leaving others as-is
+      } else {
+        content?.selectAnnotations([arrowId]); // Select only this one
+      }
+    }
+  }
+
+  // Clear selection and any partially completed annotation when the mode changes
   useEffect(() => {
     setSourceTileId("");
     setSourceObjectId("");
     setSourceObjectType(undefined);
-  }, [ui.annotationMode]);
+    content?.selectAnnotations([]);
+  }, [ui.annotationMode, content]);
 
   // Force rerenders when the layer's size changes
   useResizeObserver({ref: divRef, box: "border-box"});
@@ -80,6 +117,10 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       setMouseX(event.clientX - bb.left);
       setMouseY(event.clientY - bb.top);
     }
+  };
+
+  const handleBackgroundClick: MouseEventHandler<HTMLDivElement> = event => {
+    content?.selectAnnotations([]);
   };
 
   // Returns the x and y offset of the top left corner of a tile with respect to the document
@@ -214,6 +255,9 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     <div
       className={classes}
       onMouseMove={handleMouseMove}
+      onClick={handleBackgroundClick}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
       ref={element => {
         if (element) divRef.current = element;
       }}
@@ -252,6 +296,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
               arrow={arrow}
               canEdit={!readOnly && editing}
               deleteArrow={(arrowId: string) => content?.deleteAnnotation(arrowId)}
+              handleArrowClick={handleArrowClick}
               documentBottom={documentBottom}
               documentLeft={documentLeft}
               documentRight={documentRight}
