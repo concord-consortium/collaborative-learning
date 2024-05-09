@@ -5,11 +5,6 @@ interface IProps {
   nodeValue: number;
 }
 
-// TODO: The old animation used a global map to keep track of the running animations
-// The comment on this code indicated that when the left side of CLUE was open that
-// multiple animations of the same node would start up and keep running.
-// With this upgraded Rete, we should check if that is still a problem.
-
 export const HumidifierAnimation: React.FC<IProps> = ({nodeValue}) => {
   const priorValue = useRef<number | undefined>();
   const [imageSrc, setImageSrc] = useState(humidAnimationPhases.stayOff.frames[0]);

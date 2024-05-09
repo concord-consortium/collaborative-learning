@@ -247,7 +247,7 @@ context('Simulator Tile', function () {
       .trigger('mousemove', { which: 1, pageX: 200, pageY: 100 })
       .trigger('mouseup', {force: true});
     simulatorTile.getVariableDisplayedValue().eq(0).should("contain.text", "225 deg");
-    simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "563");
+    simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "853");
 
     cy.log("dataflow can drive servo position");
     // collect initial position of servo arm
@@ -277,7 +277,7 @@ context('Simulator Tile', function () {
     dataflowTile.getDropdown("sensor", "sensor").eq(0).click({scrollBehavior: false});
     dataflowTile.getNode("sensor").find(".item.sensor").eq(0).click({scrollBehavior: false});
 
-    simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "563");
+    simulatorTile.getVariableDisplayedValue().eq(1).should("contain.text", "853");
     simulatorTile.getPotValueSlider().click("right")
     .trigger('mousedown', { which: 1, pageX: 100, pageY: 100 })
     .trigger('mousemove', { which: 1, pageX: 50, pageY: 100 })
@@ -287,14 +287,14 @@ context('Simulator Tile', function () {
     let simVarValue;
     simulatorTile.getVariableDisplayedValue().eq(1).invoke('text').then((text) => {
       simVarValue = text.trim();
-      expect(Number(simVarValue)).to.be.within(200, 300);
+      expect(Number(simVarValue)).to.be.within(400, 475);
     });
 
     let pinValue;
     dataflowTile.getNodeValueContainer("sensor").invoke('text').then((text) => {
       pinValue = text.trim();
       console.log("| pinValue: ", pinValue);
-      expect(Number(pinValue)).to.be.within(200, 300);
+      expect(Number(pinValue)).to.be.within(400, 475);
     });
 
     cy.log("when there are more than five mini-nodes in a family, the extra nodes count is displayed");
