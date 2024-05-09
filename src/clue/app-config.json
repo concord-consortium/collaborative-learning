@@ -263,6 +263,7 @@
       },
       "geometry": {
         "tools": [
+          "point",
           "duplicate",
           "angle-label",
           "line-label",

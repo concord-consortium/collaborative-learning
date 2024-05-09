@@ -8,12 +8,28 @@ import { canSupportVertexAngle, getVertexAngle } from "../../../models/tiles/geo
 import { UploadButton } from "../../toolbar/upload-button";
 
 import AngleLabelSvg from "../../../clue/assets/icons/geometry/angle-label.svg";
-import CopyPolygonSvg from "../../../clue/assets/icons/geometry/copy-polygon.svg";
-import LineLabelSvg from "../../../clue/assets/icons/geometry/line-label.svg";
-import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
+import AddImageSvg from "../../../clue/assets/icons/geometry/add-image-icon.svg";
 import CommentSvg from "../../../assets/icons/comment/comment.svg";
 import DeleteSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
-import UploadButtonSvg from "../../../assets/icons/upload-image/upload-image-icon.svg";
+import LineLabelSvg from "../../../clue/assets/icons/geometry/line-label.svg";
+import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
+import PointSvg from "../../../clue/assets/icons/geometry/point-icon.svg";
+import ShapesDuplicateSvg from "../../../clue/assets/icons/geometry/shapes-duplicate-icon.svg";
+
+const PointButton = observer(function PointButton({name}: IToolbarButtonComponentProps) {
+  const { content, board, handlers } = useGeometryTileContext();
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Point"
+      onClick={() => {}}
+    >
+      <PointSvg/>
+    </TileToolbarButton>
+  );
+
+});
 
 const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButtonComponentProps) {
   const { content, board, handlers } = useGeometryTileContext();
@@ -27,7 +43,7 @@ const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButton
       disabled={disableDuplicate}
       onClick={() => handlers?.handleDuplicate()}
     >
-      <CopyPolygonSvg/>
+      <ShapesDuplicateSvg/>
     </TileToolbarButton>
   );
 
@@ -130,13 +146,17 @@ const ImageUploadButton = observer(function ImageUploadButton({name}: IToolbarBu
       onUpload={onUploadImageFile}
       accept="image/png, image/jpeg"
       >
-      <UploadButtonSvg/>
+      <AddImageSvg/>
     </UploadButton>
   );
 });
 
 registerTileToolbarButtons("geometry",
   [
+    {
+      name: "point",
+      component: PointButton
+    },
     {
       name: "duplicate",
       component: DuplicateButton
