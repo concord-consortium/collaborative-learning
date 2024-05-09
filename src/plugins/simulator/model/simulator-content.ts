@@ -89,15 +89,39 @@ export const SimulatorContentModel = TileContentModel
           sharedModelManager?.findFirstSharedModelByType(SharedVariables) : undefined;
 
         const tileSharedModels = sharedModelManager?.isReady ?
-          sharedModelManager?.getTileSharedModels(self) : undefined;
+          sharedModelManager?.getTileSharedModels(self) : undefined; // only returns those who are attached
 
-        const sharedProgramModel = sharedModelManager?.isReady ?
-          sharedModelManager?.findFirstSharedModelByType(SharedProgramData) : undefined;
+        const ourSharedProgramData = tileSharedModels?.find( sharedModel => {
+          return getType(sharedModel) === SharedProgramData;
+        });
 
-        const values = {sharedModelManager, containerSharedModel, tileSharedModels, sharedProgramModel};
+        const existingSharedPrograms = sharedModelManager?.isReady ?
+          sharedModelManager?.getSharedModelsByType("SharedProgramData") : undefined;
+
+        const programsWithDataflowTiles: SharedModelType[] = [];
+        existingSharedPrograms?.forEach((program) => {
+          const programTiles = sharedModelManager?.getSharedModelTiles(program);
+          if (programTiles?.find((tile) => tile?.content?.type === "Dataflow")) {
+            programsWithDataflowTiles.push(program);
+          }
+        });
+
+        const values = {
+          sharedModelManager,
+          containerSharedModel,
+          tileSharedModels,
+          programsWithDataflowTiles,
+          ourSharedProgramData
+        };
         return values;
       },
-      ({sharedModelManager, containerSharedModel, tileSharedModels, sharedProgramModel}) => {
+      ({
+        sharedModelManager,
+        containerSharedModel,
+        tileSharedModels,
+        programsWithDataflowTiles,
+        ourSharedProgramData
+      }) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
@@ -114,8 +138,15 @@ export const SimulatorContentModel = TileContentModel
           sharedModelManager.addTileSharedModel(self, containerSharedModel);
         }
 
-        if(sharedProgramModel && !tileSharedModels?.includes(sharedProgramModel)) {
-          sharedModelManager.addTileSharedModel(self, sharedProgramModel);
+        if (programsWithDataflowTiles.length > 0) {
+          if(ourSharedProgramData) {
+            if (!programsWithDataflowTiles.includes(ourSharedProgramData)) {
+              sharedModelManager.removeTileSharedModel(self, ourSharedProgramData);
+              sharedModelManager.addTileSharedModel(self, programsWithDataflowTiles[0]);
+            }
+          } else {
+            sharedModelManager.addTileSharedModel(self, programsWithDataflowTiles[0]);
+          }
         }
 
         // Set up starter variables
