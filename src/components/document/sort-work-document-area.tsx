@@ -28,8 +28,9 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   const openDocument = store.documents.getDocument(openDocumentKey) ||
                        store.networkDocuments.getDocument(openDocumentKey);
   const isVisible = openDocument?.isAccessibleToUser(user, store.documents);
-  const showPlayback = user.type && !openDocument?.isPublished
-                       ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
+  // const showPlayback = user.type && !openDocument?.isPublished
+  //                      ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
+  const showPlayback = true; // POC for testing
   const showExemplarShare = user.type === "teacher" && openDocument && isExemplarType(openDocument.type);
   const getDisplayTitle = (document: DocumentModelType) => {
     const documentOwner = classStore.users.get(document.uid);
