@@ -20,7 +20,7 @@ export interface NodeChannelInfo {
   outputTargetActuator?: string;
   timeFactor?: number;
   deviceFamily?: string | undefined;
-  lastMessageRecievedAt?: number | null;
+  lastMessageReceivedAt?: number | null;
   relaysState?: number[];
   microbitId?: string;
 }
@@ -65,6 +65,22 @@ export const tmpSensorChannel: NodeChannelInfo = {
   channelId: "tmp",
   missing: true,
   type: "temperature",
+  units: "n",
+  value: 0,
+  virtual: false,
+  usesSerial: true,
+  serialConnected: null,
+  deviceFamily: "arduino"
+};
+
+export const a1PinChannel: NodeChannelInfo = {
+  hubId: "SERIAL-ARDUINO",
+  hubName: "Arduino",
+  name: "a1",
+  displayName: "A1",
+  channelId: "a1",
+  missing: true,
+  type: "pin-reading",
   units: "n",
   value: 0,
   virtual: false,
@@ -161,7 +177,7 @@ const microBitSensorChannels = createMicroBitSensorChannels(microBitSensors);
 const microBitRelayChannels = createMicroBitRelayInfoChannels(microBitHubs);
 
 export const serialSensorChannels: NodeChannelInfo[] = [
-  emgSensorChannel, fsrSensorChannel, tmpSensorChannel,
+  emgSensorChannel, fsrSensorChannel, tmpSensorChannel, a1PinChannel,
   ...microBitSensorChannels, ...microBitRelayChannels
 ];
 

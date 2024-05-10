@@ -77,7 +77,7 @@ function testPrimaryWorkspace2() {
   dc.getAttrName().contains("Attr1 Name");
   dc.getAttrValueInput().invoke('val').should('eq', "ocean");
   // Make sure the dataflow tile were copied correctly
-  dataflowToolTile.getNodeTitle().should("contain", "Number");
+  dataflowToolTile.getNodeTitle().invoke("val").should("include", "Number");
   // Make sure the simulator tile were copied correctly
   simulatorTile.getTileTitle().should("contain", simName);
   // Make sure the XY plot tile were copied correctly
@@ -233,7 +233,7 @@ context('Test copy tiles from one document to other document', function () {
     const numberNode = "number";
     dataflowToolTile.getCreateNodeButton(numberNode).click();
     dataflowToolTile.getNode(numberNode).should("exist");
-    dataflowToolTile.getNodeTitle().should("contain", "Number");
+    dataflowToolTile.getNodeTitle().invoke("val").should("include", "Number");
 
     cy.log('Add simulator tile');
     clueCanvas.addTile("simulator");

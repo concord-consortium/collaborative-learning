@@ -1,21 +1,21 @@
 import React from "react";
 import { DragEndEvent, useDndMonitor, useDroppable } from "@dnd-kit/core";
 import { observer } from "mobx-react";
-import { NodeEditor } from "rete";
 
 import { dataflowDroppableId, getNodeType, isNodeDraggableId } from "../dataflow-types";
+import { ReteManager } from "../../nodes/rete-manager";
 
 interface IDataflowDropZoneProps {
   addNode: (nodeType: string, position?: [number, number]) => void;
   children?: any;
   className?: string;
-  programEditor: NodeEditor;
+  reteManager?: ReteManager;
   readOnly?: boolean;
   style?: any;
   tileId: string;
 }
 export const DataflowDropZone = observer((
-  { addNode, children, className, programEditor, readOnly, style, tileId }: IDataflowDropZoneProps
+  { addNode, children, className, reteManager, readOnly, style, tileId }: IDataflowDropZoneProps
 ) => {
 
   const droppableId = dataflowDroppableId(tileId);
@@ -26,21 +26,21 @@ export const DataflowDropZone = observer((
   };
   useDndMonitor({
     onDragEnd: (event: DragEndEvent) => {
-      if (readOnly) return;
+      if (readOnly || !reteManager) return;
       const draggableId = event.active.id.toString();
       if (event.over?.id === droppableId && isNodeDraggableId(draggableId)) {
         const nodeType = getNodeType(draggableId);
         const pointerEvent = event.activatorEvent as PointerEvent;
+
         const clientX = pointerEvent.clientX + event.delta.x;
         const clientY = pointerEvent.clientY + event.delta.y;
-        const { x, y, k } = programEditor.view.area.transform;
-        const boundingBox = programEditor.view.area.container.getBoundingClientRect();
-        const rawX = clientX - boundingBox.x;
-        const rawY = clientY - boundingBox.y;
-        const position: [number, number] = [
-          (rawX - x) / k,
-          (rawY - y) / k
-        ];
+        const reteArea = reteManager.area.area;
+
+        // This was taken from Rete's Area.setPointerFrom
+        const { x, y } = reteArea.content.getPointerFrom({clientX, clientY} as MouseEvent);
+        const { k } = reteArea.transform;
+        const position: [number, number] = [ x / k, y / k ];
+
         if (nodeType) {
           addNode(nodeType, position);
         }

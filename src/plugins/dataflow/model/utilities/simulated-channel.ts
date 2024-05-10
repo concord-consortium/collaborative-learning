@@ -36,3 +36,15 @@ export function simulatedChannel(variable: VariableType): NodeChannelInfo {
     simulatedVariable: variable
   };
 }
+
+export function niceNameFromSimulationChannelId(channelId: string) {
+  if (channelId.startsWith(kSimulatedChannelPrefix)) {
+    let niceName = channelId.substring(kSimulatedChannelPrefix.length);
+    // Some variable names end with _key
+    if (channelId.endsWith("_key")) {
+      niceName = niceName.substring(0, niceName.length - 4);
+    }
+    return niceName;
+  }
+  return channelId;
+}

@@ -28,25 +28,25 @@
     background-position: 73px 1.5px;
   }
 
-  .binary .socket {
+  .binary .input-socket div div {
     background-image: url("../assets/icons/control/node-arrow.svg");
     transition: all .2s ease-in-out;
     transform: rotate(0deg);
   }
 }
 
-.node.control.gate-active .binary .socket {
+.node.control.gate-active .binary .input-socket div div {
   transform:rotate(180deg);
   background-color: $control-green;
-  transition: all .2s ease-in-out;
 }
 
-.node.control.has-flow-in .inputs {
-  .number2 .socket::before {
+.node.control.has-flow-in {
+  .input.number2 .input-socket::after {
     content: "";
     position: absolute;
-    top: 93px;
-    left: -14px;
+    top: 8px;
+    left: 8px;
+    display: block;
     width: 20px;
     height: 20px;
     background-image: url("../../shared-assets/icons/dataflow/control/signal.svg");
@@ -55,8 +55,8 @@
   }
 }
 
-.node.control.has-flow-in.gate-active .inputs {
-  .number2 .socket::before {
+.node.control.has-flow-in.gate-active {
+  .input.number2 .input-socket::after {
     animation: none;
   }
 }

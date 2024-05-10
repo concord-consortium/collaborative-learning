@@ -11,7 +11,7 @@ class DataflowToolTile {
     return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
   }
   getCreateNodeButton(nodeType) {
-    return cy.get(`.primary-workspace .icon-block.${nodeType}`);
+    return cy.get(`.primary-workspace [data-testid="add-${nodeType}-button"]`);
   }
   getNode(nodeType) {
     return cy.get(getNodeText(nodeType));
@@ -41,13 +41,13 @@ class DataflowToolTile {
     return cy.get(`${getNodeText("number")} .number-input`);
   }
   getNodeInput() {
-    return cy.get('.socket.input.number-value');
+    return cy.get('.input-socket');
   }
   getNodeOutput() {
-    return cy.get('.socket.output.number-value');
+    return cy.get('.output-socket');
   }
   getNodeTitle(workspaceClass) {
-    return cy.get(`${workspaceClass || ".primary-workspace"} .node-title`);
+    return cy.get(`${workspaceClass || ".primary-workspace"} .node .node-name-input`);
   }
   getNodeValueContainer(nodeType) {
     return this.getNode(nodeType).find(".value-container");
@@ -86,7 +86,10 @@ class DataflowToolTile {
     return Number(style.substring(startIndex, endIndex));
   }
   getNumberNodeOutput() {
-    return cy.get(".flow-tool .node.number .node-output");
+    return cy.get(".flow-tool .node.number .output-socket");
+  }
+  getLiveOutputNodeInput() {
+    return cy.get(".flow-tool .node.live-output .input-socket");
   }
   getModalOkButton() {
     return cy.get('.dialog-contents #okButton');
@@ -228,10 +231,10 @@ class DataflowToolTile {
   }
   createProgram(programNodes) {
     this.getDataflowTile().should("exist");
-    programNodes.forEach(node => {
+    programNodes.forEach((node, i) => {
       this.getCreateNodeButton(node.name).click();
       this.getNode(node.name).should("exist");
-      this.getNodeTitle().should("contain", node.title);
+      this.getNodeTitle().eq(i).invoke("val").should("include", node.title);
     });
     this.getNodeOutput().eq(0).click({force: true});
     this.getNodeInput().eq(0).click({force: true});
