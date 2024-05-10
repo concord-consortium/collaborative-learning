@@ -1,4 +1,4 @@
-import { castArray, each, filter, find, keys as _keys, throttle, values } from "lodash";
+import { castArray, debounce, each, filter, find, keys as _keys, throttle, values } from "lodash";
 import { observe, reaction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
@@ -32,8 +32,8 @@ import {
 } from "../../../models/tiles/geometry/jxg-polygon";
 import {
   isAxis, isAxisLabel, isBoard, isComment, isFreePoint, isImage, isLine, isMovableLine,
-  isMovableLineControlPoint, isMovableLineLabel, isPoint, isPolygon, isVertexAngle,
-  isVisibleEdge, isVisibleMovableLine, isVisiblePoint, kGeometryDefaultPixelsPerUnit
+  isMovableLineControlPoint, isMovableLineLabel, isPoint, isPolygon, isRealVisiblePoint, isVertexAngle,
+  isVisibleEdge, isVisibleMovableLine, kGeometryDefaultPixelsPerUnit
 } from "../../../models/tiles/geometry/jxg-types";
 import {
   getVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
@@ -472,25 +472,43 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this._isMounted = false;
   }
 
+  private handlePointerMove = debounce((evt: any) => {
+    if (!this.context.board) return;
+    if (this.context.mode !== "points") return;
+    // Move phantom point to location of mouse pointer
+    const content = this.context.content as GeometryContentModelType;
+    const usrCoords = getEventCoords(this.context.board, evt, this.props.scale).usrCoords;
+    if (usrCoords.length >= 2) {
+      const position: JXGCoordPair = [usrCoords[1], usrCoords[2]];
+      if (content.phantomPoint) {
+        content.setPhantomPointPosition(this.context.board, position);
+      } else {
+        content.addPhantomPoint(this.context.board, position);
+      }
+    }
+  }, 10, { leading: true, trailing: true });
+
   public render() {
     const editableClass = this.props.readOnly ? "read-only" : "editable";
     const isLinkedClass = this.getContent().isLinked ? "is-linked" : "";
     const classes = `geometry-content ${editableClass} ${isLinkedClass}`;
-    return ([
-      this.renderCommentEditor(),
-      this.renderLineEditor(),
-      this.renderSettingsEditor(),
-      this.renderSegmentLabelDialog(),
-      <div id={this.elementId} key="jsxgraph"
-          className={classes}
-          ref={elt => this.domElement = elt}
-          onDragOver={this.handleDragOver}
-          onDragLeave={this.handleDragLeave}
-          onDrop={this.handleDrop} />,
-      this.renderRotateHandle(),
-      this.renderTitleArea(),
-      this.renderInvalidTableDataAlert()
-    ]);
+    return (
+      <>
+        {this.renderCommentEditor()}
+        {this.renderLineEditor()}
+        {this.renderSettingsEditor()}
+        {this.renderSegmentLabelDialog()}
+        <div id={this.elementId} key="jsxgraph"
+            className={classes}
+            ref={elt => this.domElement = elt}
+            onMouseMove={this.handlePointerMove}
+            onDragOver={this.handleDragOver}
+            onDragLeave={this.handleDragLeave}
+            onDrop={this.handleDrop} />,
+        {this.renderRotateHandle()}
+        {this.renderTitleArea()}
+        {this.renderInvalidTableDataAlert()}
+      </>);
   }
 
   private renderCommentEditor() {
@@ -1440,7 +1458,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const shouldInterceptPointCreation = (elt: JXG.GeometryElement) => {
       return isPolygon(elt)
-          || isVisiblePoint(elt)
+          || isRealVisiblePoint(elt)
           || isVisibleEdge(elt)
           || isVisibleMovableLine(elt)
           || isAxisLabel(elt)

@@ -21,6 +21,8 @@ export const isGeometryElement = (v: any): v is JXG.GeometryElement => v instanc
 export const isPoint = (v: any): v is JXG.Point => v instanceof JXG.Point;
 export const isPointArray = (v: any): v is JXG.Point[] => Array.isArray(v) && v.every(isPoint);
 export const isVisiblePoint = (v: any): v is JXG.Point => isPoint(v) && v.visProp.visible;
+export const isRealVisiblePoint = (v: any): v is JXG.Point => isPoint(v) && v.visProp.visible
+  && !v.getAttribute("isPhantom");
 
 export const isLinkedPoint = (v: any): v is JXG.Point => {
   return isPoint(v) && (v.getAttribute("clientType") === "linkedPoint");

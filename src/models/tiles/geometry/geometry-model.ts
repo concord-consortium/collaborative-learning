@@ -379,6 +379,10 @@ export const GeometryBaseContentModel = TileContentModel
     // Used for importing table links from legacy documents
     links: types.array(types.string)  // table tile ids
   })
+  .volatile(self => ({
+    // This is the point that tracks the mouse pointer when you're in a shape-creation mode.
+    phantomPoint: undefined as PointModelType|undefined
+  }))
   .preProcessSnapshot(snapshot => {
     // fix null table links ¯\_(ツ)_/¯
     if (snapshot.links?.some(link => link == null)) {

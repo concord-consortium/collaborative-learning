@@ -554,6 +554,41 @@ export const GeometryContentModel = GeometryBaseContentModel
       return isPoint(point) ? point : undefined;
     }
 
+    function addPhantomPoint(board: JXG.Board, parents: JXGCoordPair):
+        JXG.Point | undefined {
+      if (!board) return undefined;
+      // TODO set proper props: snapToGrid? snapSize? color?
+      const props = { id: "phantom", isPhantom: true, fillColor: "#00FF00" };
+      const pointModel = PointModel.create({ x: parents[0], y: parents[1], ...props });
+      self.phantomPoint = pointModel;
+
+      const change: JXGChange = {
+        operation: "create",
+        target: "point",
+        parents,
+        properties: { ...props }
+      };
+      const point = syncChange(board, change);
+      return isPoint(point) ? point : undefined;
+    }
+
+    function setPhantomPointPosition(board: JXG.Board, position: JXGCoordPair) {
+      if (self.phantomPoint) {
+        self.phantomPoint.setPosition(position);
+        const change: JXGChange = {
+          operation: "update",
+          target: "object",
+          targetID: self.phantomPoint.id,
+          properties: {
+            position
+          }
+        };
+        syncChange(board, change);
+      } else {
+        console.log('no phantom point');
+      }
+    }
+
     function addPoints(board: JXG.Board | undefined,
                        parents: JXGUnsafeCoordPair[],
                        _properties?: JXGProperties | JXGProperties[],
@@ -1001,6 +1036,8 @@ export const GeometryContentModel = GeometryBaseContentModel
         addImage,
         addPoint,
         addPoints,
+        addPhantomPoint,
+        setPhantomPointPosition,
         addMovableLine,
         removeObjects,
         updateObjects,
