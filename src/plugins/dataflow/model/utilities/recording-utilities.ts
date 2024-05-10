@@ -1,5 +1,3 @@
-import { NodeEditor } from "rete";
-
 import { DataflowContentModelType } from "../dataflow-content";
 import { addCanonicalCasesToDataSet, IDataSet } from "../../../../models/data/data-set";
 import { ICaseCreation } from "../../../../models/data/data-set-types";
@@ -9,8 +7,8 @@ export function getAttributeIdForNode(dataSet: IDataSet, nodeIndex: number) {
   return dataSet.attributes[nodeIndex + 1].id;
 }
 
-export function recordCase(content: DataflowContentModelType, editor: NodeEditor, recordIndex: number) {
-  const { dataSet, programDataRate } = content;
+export function recordCase(content: DataflowContentModelType, recordIndex: number) {
+  const { dataSet, programDataRate, program } = content;
 
   //Attributes look like Time (quantized) as col 1 followed by all nodes
   const aCase: ICaseCreation = {};
@@ -21,9 +19,16 @@ export function recordCase(content: DataflowContentModelType, editor: NodeEditor
   aCase[timeQuantizedKey] = recordTimeQuantized;
 
   //loop through attribute (nodes) and write each value
-  editor.nodes.forEach((node, idx) => {
+  let idx = 0;
+  program.nodes.forEach((node) => {
     const key = getAttributeIdForNode(dataSet, idx);
-    aCase[key] = node.data.nodeValue as string;
+    const { nodeValue } =  node.data;
+    // TODO: This approach will show NaN as "NaN" in the table.
+    // That is what was happening before.
+    // Perhaps we want to show it as an empty value instead:
+    // aCase[key] = nodeValue == null || isNaN(nodeValue) ? null : nodeValue;
+    aCase[key] = nodeValue;
+    idx++;
   });
   addCanonicalCasesToDataSet(dataSet, [aCase]);
 }

@@ -40,6 +40,36 @@ describe("mst", () => {
     expect(getType(todo2) === Todo1).toBe(true);
   });
 
+  it("preProcessSnapshot is called twice, and is not called extra times for model extensions", () => {
+    let preProcessCount = 0;
+    const Base = types.model("Base", {
+      text1: types.maybe(types.string)
+    })
+    .preProcessSnapshot(snapshot => {
+      preProcessCount++;
+      return snapshot;
+    });
+
+    const Extension1 = Base.named("Extension1").props({
+      text2: types.maybe(types.string)}
+    );
+
+    const Extension2 = Extension1.named("Extension2").props({
+      text3: types.maybe(types.string)
+    });
+
+    Base.create({});
+    expect(preProcessCount).toBe(2);
+
+    preProcessCount = 0;
+    Extension1.create({});
+    expect(preProcessCount).toBe(2);
+
+    preProcessCount = 0;
+    Extension2.create({});
+    expect(preProcessCount).toBe(2);
+  });
+
   it("loads late types when another type referencing is instantiated", () => {
     let lateCalled = false;
     const TypeWithLate = types.model("TypeWithLate", {
@@ -875,5 +905,22 @@ describe("mst", () => {
     expect(() => {
       TestObject.create();
     }).toThrow();
+  });
+
+  test("NaN is not handled correctly by number types", () => {
+    const TestObject = types.
+      model("TestObject", {
+        propValue: types.number
+      });
+
+    const obj = TestObject.create({propValue: NaN});
+    const snapshot = getSnapshot(obj);
+    expect(snapshot).toEqual({propValue: NaN});
+
+    const snapshotString = JSON.stringify(snapshot);
+    expect(snapshotString).toEqual("{\"propValue\":null}");
+
+    const rehydrated = JSON.parse(snapshotString);
+    expect(rehydrated).toEqual({propValue: null});
   });
 });

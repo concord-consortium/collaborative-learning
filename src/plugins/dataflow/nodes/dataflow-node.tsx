@@ -1,143 +1,154 @@
-import React from "react";
+import * as React from "react";
+import { observer } from "mobx-react";
+import { isAlive } from "mobx-state-tree";
 import classNames from "classnames";
-import { Node, Socket, Control } from "rete-react-render-plugin";
+import { ClassicScheme, RenderEmit, Presets } from "rete-react-plugin";
+import { BaseAreaPlugin } from "rete-area-plugin";
+
 import { DataflowNodePlot } from "./dataflow-node-plot";
-import { hasFlowIn } from "./utilities/view-utilities";
-import { outputsToAnyRelay, outputsToAnyGripper } from "./utilities/live-output-utilities";
+import { IBaseNode } from "./base-node";
+import { NodeEditorMST } from "./node-editor-mst";
+import { Delete } from "./delete";
+import { ControlNode } from "./control-node";
+import { ReteManager } from "./rete-manager";
+import { getNodeLetter } from "./utilities/view-utilities";
+import { EditableNodeName } from "./editable-node-name";
+
+const { RefSocket, RefControl } = Presets.classic;
+
 import "./dataflow-node.scss";
 import "./node-states.scss";
 
-export class DataflowNode extends Node {
 
-  public render() {
-    const { node, bindSocket, bindControl } = this.props;
-    const { outputs, controls, inputs } = this.state;
+type NodeExtraData = { width?: number, height?: number }
 
-    const settingsControls = controls.filter(isSettingControl);
-    const outputControls = controls.filter(isOutputControl);
-    const deleteControls = controls.filter(isDeleteControl);
-    const deleteControl = deleteControls && deleteControls.length ? deleteControls[0] : null;
+//export const DataflowNodeStyles = styled.div<NodeExtraData & { selected: boolean, styles?: (props: any) => any }>``;
 
-    const undecoratedInputs = inputs.filter(isDecoratedInput(false));
-    const decoratedInputs = inputs.filter(isDecoratedInput(true));
-    const plotButton = controls.find((c: any) => c.key === "plot");
-    const showPlot = plotButton?.props.showgraph ?? node.data.plot ?? false;
+function sortByIndex<T extends [string, undefined | { index?: number }][]>(entries: T) {
+  entries.sort((a, b) => {
+    const ai = a[1]?.index || 0;
+    const bi = b[1]?.index || 0;
 
-    const dynamicClasses = classNames({
-      "gate-active": node.data.gateActive,
-      "wait-option-selected": node.data.hasWait,
-      "wait-active": node.data.waitActive,
-      "has-flow-in": hasFlowIn(node),
-      "uses-relays": outputsToAnyRelay(node),
-      "uses-gripper": outputsToAnyGripper(node),
-    });
-    const inputClass = (s: string) => "input " + s.toLowerCase().replace(/ /g, "-");
+    return ai - bi;
+  });
+}
 
-    return (
-      <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}>
-        <div className="top-bar">
-          <div className="node-title">
-            { node.data.orderedDisplayName }
-          </div>
-          {deleteControl &&
-            <Control
-              className="control"
-              key={deleteControl.key}
-              control={deleteControl}
-              innerRef={bindControl}
-              title={"Delete Block"}
-            />
-          }
-        </div>
-        {settingsControls.map((control: any) => (
-          <Control
-            className="control"
-            key={control.key}
-            control={control}
-            innerRef={bindControl}
-          />
-        ))}
-        {settingsControls.length > 0 &&
-          <div className="hr control-color" />
-        }
-        <div className="inputs-outputs">
-          <div className="inputs">
-            {!["Demo Output"].includes(this.props.node.name) && undecoratedInputs.map((input: any) => (
-              <div className={inputClass(input.name)} key={input.key}>
-                <Socket
-                  type="input"
-                  socket={input.socket}
-                  io={input}
-                  innerRef={bindSocket}
-                />
-              </div>
-            ))}
-          </div>
-          <div className="output-controls">
-            <div className={`output-container ${node.name.toLowerCase().replace(/ /g, "-")}`}>
-              {outputControls.map((control: any) => (
-                <Control
-                  className="control"
-                  key={control.key}
-                  control={control}
-                  innerRef={bindControl}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="outputs">
-            {outputs.map((output: any) => (
-              <div className="node-output output" key={output.key}>
-                <Socket
-                  type="output"
-                  socket={output.socket}
-                  io={output}
-                  innerRef={bindSocket}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="decorated-inputs">
-          {decoratedInputs.map((input: any) => (
-            <div className="input" key={input.key}>
-              <Socket
-                type="input"
-                socket={input.socket}
-                io={input}
-                innerRef={bindSocket}
-              />
-              <Control
-                className="input-control"
-                control={input.control}
-                key={input.control.key}
-                innerRef={bindControl}
-              />
-            </div>
-          ))}
-        </div>
-        <DataflowNodePlot
-          display={showPlot}
-          data={node}
-        />
+function inputClass(s?: string) {
+  return s ? "input " + s.toLowerCase().replace(/ /g, "-") : "input";
+}
+
+type Props<S extends ClassicScheme> = {
+    data: S['Node'] & NodeExtraData
+    styles?: () => any
+    emit: RenderEmit<S>
+    area: BaseAreaPlugin<S, any>
+    editor: NodeEditorMST,
+    reteManager: ReteManager
+}
+export type DataflowNodeComponent<Scheme extends ClassicScheme> = (props: Props<Scheme>) => JSX.Element
+
+export const CustomDataflowNode = observer(
+  function CustomDataflowNode<Scheme extends ClassicScheme>({data, styles, emit, editor, reteManager}: Props<Scheme>)
+{
+  const inputs = Object.entries(data.inputs);
+  const outputs = Object.entries(data.outputs);
+  const controls = Object.entries(data.controls);
+  const { id } = data;
+
+  // FIXME: update 'Scheme' so we don't have to typecast here
+  const node = (data as unknown as IBaseNode);
+  const model = node.model;
+
+  // The node model might be destroyed if the node was removed from the program
+  if (!isAlive(model)) return null;
+
+  const nodeLetter = getNodeLetter(model.type);
+
+  const showPlot = model.plot;
+
+  sortByIndex(inputs);
+  sortByIndex(outputs);
+  sortByIndex(controls);
+
+  const dynamicClasses = classNames({
+    "gate-active": node instanceof ControlNode && node.model.gateActive,
+    "has-flow-in": node instanceof ControlNode && node.hasFlowIn(),
+    "plot-open": showPlot,
+  });
+
+  return (
+    <div
+      className={`node ${model.type.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}
+      data-testid="node"
+    >
+      <div className="top-bar" onClick={() => console.log("top-bar click")}>
+        <Delete reteManager={reteManager} nodeId={id}/>
       </div>
-    );
-  }
-}
 
-// all controls that are not the readouts of data (outputs) or delete
-function isSettingControl(control: any) {
-  return control.key !== "plot" && control.key !== "nodeValue" && control.key !== "delete";
-}
+      <div className="node-type-letter">{nodeLetter}</div>
 
-function isOutputControl(control: any) {
-  return control.key === "plot" || control.key === "nodeValue";
-}
+      <EditableNodeName node={node} />
 
-function isDeleteControl(control: any) {
-  return control.key === "delete";
-}
+      {/* Outputs */}
+      {outputs.map(([key, output]) => (
+        output &&
+          <div className="output" key={key} data-testid={`output-${key}`}>
+            <div className="output-title" data-testid="output-title">{output?.label}</div>
+            <RefSocket
+              name="output-socket"
+              side="output"
+              socketKey={key}
+              nodeId={id}
+              emit={emit}
+              payload={output.socket}
+              data-testid="output-socket"
+            />
+          </div>
+      ))}
+      {/* Controls */}
+      {controls.map(([key, control]) => {
+        return control ? <RefControl
+          key={key}
+          name="control"
+          emit={emit}
+          payload={control}
+          data-testid={`control-${key}`}
+        /> : null;
+      })}
+      {/* Inputs */}
+      {inputs.map(([key, input]) => (
+        input &&
+          <div className={inputClass(input.label)} key={key} data-testid={`input-${key}`}>
+            <RefSocket
+              name="input-socket"
+              side="input"
+              socketKey={key}
+              nodeId={id}
+              emit={emit}
+              payload={input.socket}
+              data-testid="input-socket"
+            />
+            {input && (!input.control || !input.showControl) && (
+              <div className="input-title" data-testid="input-title">{input?.label}</div>
+            )}
+            {input?.control && input?.showControl && (
+              <RefControl
+                key={key}
+                name="input-control"
+                emit={emit}
+                payload={input.control}
+                data-testid="input-control"
+              />
+            )
+            }
+          </div>
+      ))}
+      <DataflowNodePlot
+        display={showPlot}
+        model={model}
+        recordedTicks={reteManager.recordedTicks}
+      />
 
-function isDecoratedInput(isDecorated: boolean) {
-  return (input: any) => !!input.control === isDecorated;
-}
+    </div>
+  );
+});

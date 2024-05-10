@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import stringify from "json-stringify-pretty-compact";
 import { getSnapshot } from "mobx-state-tree";
 
@@ -8,6 +8,9 @@ import { createDocumentModelWithEnv } from "../models/document/document";
 import { DocumentContentSnapshotType } from "../models/document/document-content";
 import { urlParams } from "../utilities/url-params";
 import { useAppConfig } from "../hooks/use-stores";
+import { DocumentAnnotationToolbar } from "./document/document-annotation-toolbar";
+
+import "./document/document.scss";
 
 export const DocEditorApp = () => {
   const appConfig = useAppConfig();
@@ -18,7 +21,9 @@ export const DocEditorApp = () => {
   const [sectionSnapshot, setSectionSnapshot] = useState<any>();
   const [fileName, setFileName] = useState<string>("");
 
-  function loadDocument(text: string) {
+  const {document: documentURL, readOnly } = urlParams;
+
+  const loadDocument = useCallback((text: string) => {
     const _parsedText = JSON.parse(text);
     let documentContentSnapshot;
     if (_parsedText.content ) {
@@ -31,7 +36,7 @@ export const DocEditorApp = () => {
       ...defaultDocumentModelParts,
       content: documentContentSnapshot
     }));
-  }
+  }, [appConfig]);
 
   // Handle opening both section documents with a content field
   // and basic documents which are just the content itself
@@ -82,7 +87,6 @@ export const DocEditorApp = () => {
   }
 
   useEffect(() => {
-    const {document: documentURL} = urlParams;
     if (!documentURL) {
       return;
     }
@@ -100,23 +104,30 @@ export const DocEditorApp = () => {
       // This error is printed in the console as an "Uncaught (in promise)..."
       throw Error(`Request rejected with exception ${error}`);
     });
-  }, []);
+  }, [loadDocument]);
 
   // This is wrapped in a div.primary-workspace so it can be used with cypress
   // tests that are looking for stuff in a div like this
   return (
     <div className="primary-workspace">
-      <button onClick={handleOpen}>open</button>
-      <button onClick={handleSave}>save</button>
-      <span>{fileName}</span>
-      <EditableDocumentContent
-        contained={false}
-        mode="1-up"
-        isPrimary={true}
-        readOnly={false}
-        document={document}
-        toolbar={appConfig.authorToolbar}
-      />
+      <div className="document">
+        <div className="titlebar">
+          <div className="actions left">
+            <button onClick={handleOpen}>open</button>
+            <button onClick={handleSave}>save</button>
+            <span>{fileName}</span>
+            <DocumentAnnotationToolbar/>
+          </div>
+        </div>
+        <EditableDocumentContent
+            contained={false}
+            mode="1-up"
+            isPrimary={true}
+            readOnly={readOnly}
+            document={document}
+            toolbar={appConfig.authorToolbar}
+          />
+      </div>
     </div>
   );
 };

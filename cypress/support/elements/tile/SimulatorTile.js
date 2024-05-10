@@ -39,6 +39,9 @@ class SimulatorTile {
   getVariableDisplayedValue(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .display-value`);
   }
+  getExtraNodesCount(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .extra-nodes-count`);
+  }
 }
 
 export default SimulatorTile;

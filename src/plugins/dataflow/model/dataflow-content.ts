@@ -1,5 +1,5 @@
-import { types, Instance, applySnapshot, getSnapshot, addDisposer } from "mobx-state-tree";
-import { reaction } from "mobx";
+import { types, Instance, applySnapshot, getSnapshot, addDisposer, SnapshotIn, getType } from "mobx-state-tree";
+import { observable, reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
@@ -17,10 +17,12 @@ import {
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { DataSet, addAttributeToDataSet } from "../../../models/data/data-set";
+import { SharedProgramData, SharedProgramDataType } from "../../shared-program-data/shared-program-data";
 
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
 import { getTileModel } from "../../../models/tiles/tile-model";
+import { NodeChannelInfo } from "./utilities/channel";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -37,7 +39,10 @@ export const kDefaultLabel = "Dataflow Node";
 const kMaxRecordedValues = 10000;
 
 export function defaultDataSet(title: string|undefined) {
-  const dataSet = DataSet.create({ name: title });
+  const dataSet = DataSet.create({
+    name: title,
+    attributes: [ { name: "x"}, { name: "y"} ]
+  });
   return dataSet;
 }
 
@@ -60,6 +65,7 @@ export const DataflowContentModel = TileContentModel
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
     emptyDataSet: DataSet.create(),
+    channels: observable([]) as NodeChannelInfo[],
   }))
   .views(self => ({
     get sharedModel() {
@@ -74,17 +80,11 @@ export const DataflowContentModel = TileContentModel
       if (!firstSharedVariables) return undefined;
       return firstSharedVariables as SharedVariablesType;
     },
-    programWithoutRecentValues() {
-      const { values, ...rest } = getSnapshot(self.program);
-      const castedValues = values as Record<string, any>;
-      const newValues: Record<string, any> = {};
-      if (values) {
-        Object.keys(castedValues).forEach((key: string) => {
-          const { recentValues, ...other } = castedValues[key];
-          newValues[key] = { ...other };
-        });
-      }
-      return { values: newValues, ...rest };
+    get sharedProgramData() {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const firstSharedProgramData = sharedModelManager?.getTileSharedModelsByType(self, SharedProgramData)?.[0];
+      if (!firstSharedProgramData) return undefined;
+      return firstSharedProgramData as SharedProgramDataType;
     },
     get maxRecordableCases() {
       const numNodes = self.program.nodes.size;
@@ -118,20 +118,9 @@ export const DataflowContentModel = TileContentModel
       return true;
     },
     exportJson(options?: ITileExportOptions) {
-      const zoom = getSnapshot(self.programZoom);
-      return [
-        `{`,
-        `  "type": "Dataflow",`,
-        `  "programDataRate": ${self.programDataRate},`,
-        `  "programZoom": {`,
-        `    "dx": ${zoom.dx},`,
-        `    "dy": ${zoom.dy},`,
-        `    "scale": ${zoom.scale}`,
-        `  },`,
-        // `  "programRecordingMode: ${self.programRecordingMode}"`,
-        `  "program": ${stringify(self.programWithoutRecentValues())}`,
-        `}`
-      ].join("\n");
+      const snapshot = getSnapshot(self);
+      // We used to strip out the recent values, maybe we should again?
+      return stringify(snapshot, {maxLength: 120});
     },
     get isDataSetEmptyCases(){
       //Used when DF linked to a table, then we clear. Different than isEmpty
@@ -205,9 +194,13 @@ export const DataflowContentModel = TileContentModel
           ? sharedModelManager?.getTileSharedModels(self)
           : undefined;
 
-        return { sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels };
+        const ourSharedProgramData = tileSharedModels?.find( sharedModel => {
+          return getType(sharedModel) === SharedProgramData;
+        });
+
+        return { sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels, ourSharedProgramData };
       },
-      ({sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels}) => {
+      ({sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels, ourSharedProgramData}) => {
         if (!sharedModelManager?.isReady) {
           return;
         }
@@ -228,6 +221,11 @@ export const DataflowContentModel = TileContentModel
           sharedModelManager.addTileSharedModel(self, sharedVariables);
         }
 
+        if (!ourSharedProgramData) {
+          const programData = SharedProgramData.create();
+          sharedModelManager.addTileSharedModel(self, programData);
+        }
+
         // update the colors
         const dataSets = sharedModelManager.getSharedModelsByType(kSharedDataSetType) as SharedDataSetType[];
         updateSharedDataSetColors(dataSets);
@@ -238,6 +236,9 @@ export const DataflowContentModel = TileContentModel
       if (program) {
         applySnapshot(self.program, cloneDeep(program));
       }
+    },
+    setChannels(channels: NodeChannelInfo[]) {
+      self.channels = observable(channels);
     },
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;
@@ -250,7 +251,7 @@ export const DataflowContentModel = TileContentModel
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing
     },
-    addNewAttrFromNode(nodeId: number, nodeName: string){
+    addNewAttrFromNode(nodeId: string, nodeName: string){
       const newAttributeId = uniqueId() + "*" + nodeId;
       self.dataSet.addAttributeWithID({
         id: newAttributeId,
@@ -320,6 +321,7 @@ export const DataflowContentModel = TileContentModel
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;
+export type DataflowContentModelSnapshotIn = SnapshotIn<typeof DataflowContentModel>;
 
 export function formatTime(seconds: number) {
   const minutes = Math.floor(seconds / 60);

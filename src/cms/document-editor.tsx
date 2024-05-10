@@ -7,6 +7,7 @@ import { AppProvider, initializeApp } from "../initialize-app";
 import { createDocumentModelWithEnv, DocumentModelType } from "../models/document/document";
 import { DEBUG_CMS } from "../lib/debug";
 import { EditableDocumentContent } from "../components/document/editable-document-content";
+import { DocumentAnnotationToolbar } from "../components/document/document-annotation-toolbar";
 
 import "../../cms/src/custom-control.scss";
 
@@ -97,15 +98,24 @@ export class DocumentEditor extends React.Component<IProps, IState>  {
     if (document) {
       return (
         <AppProvider stores={stores} modalAppElement="#app">
-          <EditableDocumentContent
-            className="iframe-control"
-            contained={true}
-            mode="1-up"
-            isPrimary={true}
-            readOnly={false}
-            document={document}
-            toolbar={stores.appConfig.authorToolbar}
-          />
+          <div className="document">
+            { stores.appConfig.showAnnotationControls &&
+              <div className="titlebar">
+                <div className="actions left">
+                   <DocumentAnnotationToolbar/>
+                </div>
+              </div>
+            }
+            <EditableDocumentContent
+              className="iframe-control"
+              contained={!stores.appConfig.showAnnotationControls}
+              mode="1-up"
+              isPrimary={true}
+              readOnly={false}
+              document={document}
+              toolbar={stores.appConfig.authorToolbar}
+            />
+          </div>
         </AppProvider>
       );
     } else {
