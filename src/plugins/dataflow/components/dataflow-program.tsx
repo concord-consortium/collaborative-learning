@@ -14,6 +14,8 @@ import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
 import { ProgramDataRates } from "../model/utilities/node";
 import { DocumentContextReact } from "../../../components/document/document-context";
+import { ITileProps } from "../../../components/tiles/tile-component";
+import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ProgramMode } from "./types/dataflow-tile-types";
 import { IDataSet } from "../../../models/data/data-set";
 
@@ -39,6 +41,8 @@ interface IProps extends SizeMeProps {
   readOnly?: boolean;
   tileHeight?: number;
   tileContent: DataflowContentModelType;
+  tileElt: HTMLElement | null;
+  onRegisterTileApi: ITileProps["onRegisterTileApi"];
 }
 
 interface IState {
@@ -171,6 +175,50 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   public componentDidMount() {
     this.initReteManagersIfNeeded();
+
+    this.props.onRegisterTileApi({
+      exportContentAsTileJson: (options?: ITileExportOptions) => {
+        return this.props.tileContent.exportJson(options);
+      },
+      // Note: when the component mounts it is likely that the tileElt will be undefined.
+      // So we use an arrow function so we can access `this` and look up the tileElt from
+      // props when it is needed.
+      getObjectBoundingBox: (objectId, objectType) => {
+        // The annotation layer adds the tile border when computing the position of the
+        // tile in the document. So basically it is figuring out the "inside" top left
+        // corner of the tile. This makes sense, since internally in the tile its elements
+        // are positioned inside of this border.
+        // However tileElt.getBoundClientRect gives the position include the width of the
+        // border. So this is the position of the "outside" of the tile element. Thus when
+        // we provide our bounding boxes we also need to subtract off the tile border width
+        // so they will line up when the annotation layer re-adds this border width.
+        const tileBorder = 2;
+        const padding = 5;
+
+        const nodeModel = this.props.program?.nodes.get(objectId);
+        const nodeView = this.reteManager?.area.nodeViews.get(objectId);
+        const { tileElt } = this.props;
+        if (!nodeModel || !nodeView || !tileElt) return undefined;
+
+        // eslint-disable-next-line unused-imports/no-unused-vars -- need to observe position changes
+        const {liveX, liveY} = nodeModel;
+
+        // eslint-disable-next-line unused-imports/no-unused-vars -- need to observe program canvas changes
+        const {dx, dy, scale: programScale} = this.props.tileContent.liveProgramZoom;
+
+        const tileRect = tileElt.getBoundingClientRect();
+        const scale = tileElt.offsetWidth / tileRect.width;
+        const nodeRect = nodeView.element.getBoundingClientRect();
+
+        return {
+          left: (nodeRect.left-tileRect.left) * scale - tileBorder - padding,
+          top:  (nodeRect.top-tileRect.top) * scale - tileBorder - padding,
+          width: nodeRect.width * scale + padding*2,
+          height: nodeRect.height * scale + padding*2
+        };
+      }
+    });
+
   }
 
   public componentWillUnmount() {

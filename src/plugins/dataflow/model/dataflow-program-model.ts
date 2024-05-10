@@ -69,10 +69,19 @@ export const DataflowNodeModel = types.
       TransformNodeModel,
     ) as typeof BaseNodeModel
   })
+  .volatile(self => ({
+    // These are stored so annotations can update as the node moves around
+    liveX: NaN,
+    liveY: NaN,
+  }))
   .actions(self => ({
     setPosition(position: {x: number, y: number}) {
-      self.x = position.x;
-      self.y = position.y;
+      self.x = self.liveX = position.x;
+      self.y = self.liveY = position.y;
+    },
+    setLivePosition(position: {x: number, y: number}) {
+      self.liveX = position.x;
+      self.liveY = position.y;
     }
   }))
   .preProcessSnapshot((snapshot: any) => {
