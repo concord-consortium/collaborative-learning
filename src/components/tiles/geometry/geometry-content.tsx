@@ -1397,6 +1397,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
       if (readOnly) return;
 
+      // In select mode, don't create new points
+      if (this.context.mode === "select") {
+        return;
+      }
+
       // extended clicks don't create new points
       const clickTimeThreshold = 500;
       if (evt.timeStamp - this.lastBoardDown.evt.timeStamp > clickTimeThreshold) {
@@ -1421,7 +1426,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         return;
       }
 
-      // clicks on board background create new points
+      // other clicks on board background create new points
       if (!hasSelectionModifier(evt)) {
         const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
         this.applyChange(() => {
