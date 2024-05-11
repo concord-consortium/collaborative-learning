@@ -1,17 +1,19 @@
 @import "../vars";
 $border-radius-base: 6px;
 
+// inner rectangle, expands to fit
 .playback-controls {
   display: flex;
   flex-direction: row;
   align-items: center;
-  width: calc(100% - 2px);
+  width: calc(100% - 5px);
   height: 46px;
 
   &.loading {
     justify-content: center;
   }
 
+  // COLORS: 1 sync up these colors with layouts and stuff on line 60
   &.my-work {
     background-color: $workspace-teal-light-8;
   }
@@ -25,6 +27,7 @@ $border-radius-base: 6px;
     background-color: $learninglog-green-light-8;
   }
 
+  // line between time travel button and play button
   .control-separator {
     width: $canvas-separator-width;
     height: 46px;
@@ -55,6 +58,7 @@ $border-radius-base: 6px;
       pointer-events: none;
     }
 
+    // COLORS: 2 sync these colors with the layouts and stuff on line 15
     &.my-work {
       background-color: $workspace-teal-light-8;
       stroke: $workspace-teal-dark-1;
@@ -166,6 +170,7 @@ $border-radius-base: 6px;
     height: 20px;
     width: 100%;
     position: absolute;
+    // COLORS: 3
     &.my-work {
       background-color: $workspace-teal-light-5;
     }
@@ -198,6 +203,7 @@ $border-radius-base: 6px;
       left: 7px;
       font-size: 11px;
     }
+    // COLORS: 4 sync these colors with the layouts and stuff on line 60
     &.my-work {
       path:first-of-type {
         fill: $workspace-teal-dark-1;
@@ -360,6 +366,7 @@ $border-radius-base: 6px;
     }
   }
 
+  // COLORS 5: sync these colors with the layouts and stuff on line 60
   .rc-slider.my-work {
     .rc-slider-handle {
       border-color: $workspace-teal-dark-1;

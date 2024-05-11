@@ -1,5 +1,18 @@
 @import "../vars";
 
+/* COLORS: think all the color spots need a `.problems` defined and whatever else for the charcoal one
+
+.my-work        teal        works
+.class-work     purple      works     "Published Work"
+.student-work   charcoal
+.learning-log   green
+.problem        orange
+ arggg these are all crazy and confusing and I need to sort them out
+
+
+*/
+
+// outermost rectangle, exapnds to fit
 .playback-component {
   display: flex;
   flex-direction: row;
@@ -8,15 +21,15 @@
   width: 44px;
   height: 50px;
   position: absolute;
-  bottom: 0px;
-  left: 0px;
+  bottom: -3px;
+  left: 1px;
   border: 2px solid;
   border-top-right-radius: 5px;
   background-color: white;
   box-sizing: border-box;
   &.show-control {
     width: calc(100% - 2px);
-    border-right: none;
+    //border-right: none;
     border-top-right-radius: 0px;
   }
   &.disabled {
@@ -39,6 +52,7 @@
     border-color: $learninglog-green;
   }
 
+  // "time travel back" icon
   .playback-toolbar-button-component {
     display: flex;
     justify-content: center;
