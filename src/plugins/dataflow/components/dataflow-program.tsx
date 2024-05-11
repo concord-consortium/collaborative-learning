@@ -1,5 +1,6 @@
 import React from "react";
 import "regenerator-runtime/runtime";
+import { observable, runInAction } from "mobx";
 import { getSnapshot } from "mobx-state-tree";
 import { inject, observer } from "mobx-react";
 import { SizeMeProps } from "react-sizeme";
@@ -65,6 +66,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private lastIntervalTime: number;
   private reteManager: ReteManager | undefined;
   private playbackReteManager: ReteManager | undefined;
+  private updateObservable = observable({updateCount: 0});
 
   constructor(props: IProps) {
     super(props);
@@ -196,14 +198,26 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         const padding = 5;
 
         const nodeModel = this.props.program?.nodes.get(objectId);
-        const nodeView = this.reteManager?.area.nodeViews.get(objectId);
+
+        const reteManager = this.playbackReteManager || this.reteManager;
+        const nodeView = reteManager?.area.nodeViews.get(objectId);
         const { tileElt } = this.props;
         if (!nodeModel || !nodeView || !tileElt) return undefined;
 
-        // eslint-disable-next-line unused-imports/no-unused-vars -- need to observe position changes
+
+        // Observe the updateCount so every time the component is updated
+        // we recompute the bounding boxes. This is mainly important so changes
+        // to the recording state are taken into account.
+        // eslint-disable-next-line unused-imports/no-unused-vars -- need to observe
+        const {updateCount} = this.updateObservable;
+
+        // Observe node position changes. We use liveX and liveY so we update during
+        // the drag.
+        // eslint-disable-next-line unused-imports/no-unused-vars
         const {liveX, liveY} = nodeModel;
 
-        // eslint-disable-next-line unused-imports/no-unused-vars -- need to observe program canvas changes
+        // Observe program canvas changes like translation and zooming.
+        // eslint-disable-next-line unused-imports/no-unused-vars
         const {dx, dy, scale: programScale} = this.props.tileContent.liveProgramZoom;
 
         const tileRect = tileElt.getBoundingClientRect();
@@ -235,6 +249,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (this.props.programDataRate !== prevProps.programDataRate) {
       this.setDataRate(this.props.programDataRate);
     }
+
+    // We need to update an observable that the getObjectBoundingBox
+    // can watch. This is because the location of the blocks changes
+    // when the reteManager changes and when the recording mode changes.
+    // If the playbackReteManager has just been created its elements
+    // won't be setup yet so we need to wait for that to finish before
+    // the boundingBoxes are re computed.
+    const reteManager = this.playbackReteManager || this.reteManager;
+    reteManager?.setupComplete.then(() =>
+      runInAction(() => this.updateObservable.updateCount++)
+    );
   }
 
   private initReteManagersIfNeeded() {

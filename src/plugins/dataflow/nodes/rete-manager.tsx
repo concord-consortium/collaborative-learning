@@ -75,6 +75,7 @@ export class ReteManager implements INodeServices {
   private snapshotDisposer: () => void | undefined;
   public inTick = false;
   public disposed = false;
+  public setupComplete: Promise<void>;
   private previousChannelIds = "";
 
   constructor(
@@ -90,7 +91,7 @@ export class ReteManager implements INodeServices {
     this.area = new AreaPlugin<Schemes, AreaExtra>(div);
     this.updateMainProcessor();
 
-    this.setup();
+    this.setupComplete = this.setup();
   }
 
   async setup() {
