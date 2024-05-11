@@ -1,5 +1,18 @@
 @import "../vars";
 
+/* COLORS: think all the color spots need a `.problems` defined and whatever else for the charcoal one
+
+.my-work        teal        works
+.class-work     purple      works     "Published Work"
+.student-work   charcoal
+.learning-log   green
+.problem        orange
+ arggg these are all crazy and confusing and I need to sort them out
+
+
+*/
+
+// outermost rectangle, exapnds to fit
 .playback-component {
   display: flex;
   flex-direction: row;
@@ -8,15 +21,15 @@
   width: 44px;
   height: 50px;
   position: absolute;
-  bottom: 0px;
-  left: 0px;
+  bottom: -3px;
+  left: 1px;
   border: 2px solid;
   border-top-right-radius: 5px;
   background-color: white;
   box-sizing: border-box;
   &.show-control {
     width: calc(100% - 2px);
-    border-right: none;
+    //border-right: none;
     border-top-right-radius: 0px;
   }
   &.disabled {
@@ -39,6 +52,7 @@
     border-color: $learninglog-green;
   }
 
+  // "time travel back" icon
   .playback-toolbar-button-component {
     display: flex;
     justify-content: center;
@@ -144,170 +158,6 @@
     &.disabled {
       opacity: 35%;
       cursor: auto;
-    }
-  }
-
-  .playback-controls {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: calc(100% - 2px);
-    height: 46px;
-
-    &.my-work {
-      background-color: $workspace-teal-light-8;
-    }
-    &.class-work {
-      background-color: $classwork-purple-light-8;
-    }
-    &.student-work {
-      background-color: $charcoal-light-8;
-    }
-    &.learning-log {
-      background-color: $learninglog-green-light-8;
-    }
-
-    .control-separator {
-      width: $canvas-separator-width;
-      height: 46px;
-      bottom: 2px;
-
-      &.my-work {
-        background-color: $workspace-teal-light-4;
-      }
-      &.class-work {
-        background-color: $classwork-purple-light-4;
-      }
-      &.student-work {
-        background-color: $charcoal-light-4;
-      }
-      &.learning-log {
-        background-color: $learninglog-green-light-5;
-      }
-    }
-
-    .play-button, .pause-button {
-      cursor: pointer;
-      width: 42px;
-      height: 46px;
-      padding: 9px 2px 5px 5px;
-      &.my-work {
-        background-color: $workspace-teal-light-8;
-        stroke: $workspace-teal-dark-1;
-        fill: $workspace-teal-light-8;
-        &:hover {
-          background-color: $workspace-teal-light-4;
-          fill: $workspace-teal-light-4;
-        }
-        &:active {
-          background-color: $workspace-teal-light-2;
-          fill: $workspace-teal-light-2;
-        }
-        path {
-          fill: $workspace-teal-dark-1;
-        }
-        &.playing {
-          background-color: $workspace-teal-light-2;
-          fill: $workspace-teal-light-2;
-          &:hover {
-            background-color: $workspace-teal-light-4;
-            fill: $workspace-teal-light-4;
-          }
-        }
-      }
-      &.class-work {
-        background-color: $classwork-purple-light-8;
-        fill:  $classwork-purple-light-8;
-        stroke: $classwork-purple-dark-1;
-        &:hover {
-          background-color: $classwork-purple-light-4;
-          fill: $classwork-purple-light-4;
-        }
-        &:active {
-          background-color: $classwork-purple-light-2;
-          fill: $classwork-purple-light-2;
-        }
-        path {
-          fill: $classwork-purple-dark-1;
-        }
-        &.playing {
-          background-color: $classwork-purple-light-2;
-          fill: $classwork-purple-light-2;
-          &:hover {
-            background-color: $classwork-purple-light-4;
-            fill: $classwork-purple-light-4;
-          }
-        }
-      }
-      &.student-work {
-        background-color: $charcoal-light-8;
-        fill: $charcoal-light-8;
-        stroke: $charcoal-dark-1;
-        &:hover {
-          background-color: $charcoal-light-4;
-          fill: $charcoal-light-4;
-        }
-        &:active {
-          background-color: $charcoal-light-2;
-          fill: $charcoal-light-2;
-        }
-        path {
-          fill: $charcoal-dark-1;
-        }
-        &.playing {
-          background-color: $charcoal-light-2;
-          fill: $charcoal-light-2;
-          &:hover {
-            background-color: $charcoal-light-4;
-            fill: $charcoal-light-4;
-          }
-        }
-      }
-      &.learning-log {
-        background-color: $learninglog-green-light-8;
-        fill: $learninglog-green-light-8;
-        stroke: $learninglog-green-dark-1;
-        &:hover {
-          background-color: $learninglog-green-light-4;
-          fill: $learninglog-green-light-4;
-        }
-        &:active {
-          background-color: $learninglog-green-light-2;
-          fill: $learninglog-green-light-2;
-        }
-        path {
-          fill: $learninglog-green-dark-1;
-        }
-        &.playing {
-          background-color: $learninglog-green-light-2;
-          fill: $learninglog-green-light-2;
-          &:hover {
-            background-color: $learninglog-green-light-4;
-            fill: $learninglog-green-light-4;
-          }
-        }
-      }
-    }
-    &.disabled {
-      opacity: 35%;
-      cursor: auto;
-    }
-
-    .time-info {
-      width: 85px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: $charcoal-dark-2;
-      font-size: 13px;
-      margin: 0 12px;
-      pointer-events: none;
-
-      div {
-        margin: 0;
-      }
     }
   }
 }
