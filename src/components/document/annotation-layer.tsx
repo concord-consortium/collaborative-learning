@@ -10,7 +10,7 @@ import { PreviewArrow } from "../annotations/preview-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { usePersistentUIStore, useUIStore } from "../../hooks/use-stores";
 import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
-import { ClueObjectModel, IClueObject, OffsetModel } from "../../models/annotations/clue-object";
+import { ClueObjectModel, IClueObject, ObjectBoundingBox, OffsetModel } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { Point } from "../../utilities/math-utils";
 import { hasSelectionModifier } from "../../utilities/event-utils";
@@ -24,10 +24,11 @@ interface IAnnotationLayerProps {
   documentScrollX?: number;
   documentScrollY?: number;
   readOnly?: boolean;
+  boundingBoxCache: Map<string,Map<string,ObjectBoundingBox>>;
 }
 
 export const AnnotationLayer = observer(function AnnotationLayer({
-  canvasElement, content, documentScrollX, documentScrollY, readOnly
+  canvasElement, content, documentScrollX, documentScrollY, readOnly, boundingBoxCache
 }: IAnnotationLayerProps) {
   const [_initialized, setInitialized] = useState(false);
   useEffect(() => {
@@ -151,6 +152,11 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
   // Returns an object bounding box with respect to the containing tile
   function getObjectBoundingBox(tileId: string, objectId: string, objectType?: string) {
+    // First check the cache.
+    const cachedValue = boundingBoxCache.get(tileId)?.get(objectId);
+    if (cachedValue) {
+      return cachedValue;
+    }
     const tileApi = tileApiInterface?.getTileApi(tileId);
     const objectBoundingBox = tileApi?.getObjectBoundingBox?.(objectId, objectType);
     return objectBoundingBox;
