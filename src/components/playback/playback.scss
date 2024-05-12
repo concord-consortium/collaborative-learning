@@ -1,13 +1,13 @@
 @import "../vars";
 
-/* COLORS: think all the color spots need a `.problems` defined and whatever else for the charcoal one
+/* COLORS:
 
-.my-work        teal        works
-.class-work     purple      works     "Published Work"
-.student-work   charcoal
-.learning-log   green
-.problem        orange
- arggg these are all crazy and confusing and I need to sort them out
+  Tab Label       Class Name    Color     ok  Spec
+  ______________________________________________________
+  PROBLEMS        .problems     orange    ✅   🤷🏼
+  MY WORK         .my-work      teal      ✅   ✅
+  CLASS WORK      .sort-work    gray      💥   ✅
+  PUBLISHED WORK  .class-work   purple    ✅   ✅
 
 
 */
@@ -43,7 +43,7 @@
   &.class-work {
     border-color: $classwork-purple
   }
-  &.student-work {
+  &.sort-work {
     border-color: $charcoal;
     bottom: -5px;
     left: -2px;
@@ -84,7 +84,7 @@
           background-color: $classwork-purple-light-2;
         }
       }
-      &.student-work {
+      &.sort-work {
         background-color: $charcoal-light-4;
         &:hover {
           background-color: $charcoal-light-3;
@@ -121,7 +121,7 @@
             background-color: $classwork-purple-light-2;
           }
         }
-        &.student-work {
+        &.sort-work {
           background-color: $charcoal-light-2;
           &:hover {
             background-color: $charcoal-light-3;
@@ -148,7 +148,7 @@
       &.class-work {
         background-color: $classwork-purple-light-2;
       }
-      &.student-work {
+      &.sort-work {
         background-color: $charcoal-light-2;
       }
       &.learning-log {

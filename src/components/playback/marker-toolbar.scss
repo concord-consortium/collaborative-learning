@@ -18,7 +18,7 @@
   &.class-work {
     border-color: $classwork-purple;
   }
-  &.student-work {
+  &.sort-work {
     border-color: $charcoal;
   }
   &.learning-log {
@@ -65,7 +65,7 @@
         fill: $classwork-purple-dark-1;
       }
     }
-    &.student-work {
+    &.sort-work {
       background-color: $charcoal-light-9;
       &:hover {
         background-color: $charcoal-light-6;
@@ -135,7 +135,7 @@
         fill: $classwork-purple-dark-1;
       }
     }
-    &.student-work {
+    &.sort-work {
       background-color: $charcoal-light-9;
       &:hover {
         background-color: $charcoal-light-6;
