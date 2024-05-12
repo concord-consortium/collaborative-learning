@@ -214,21 +214,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDelete() {
-    const tileApiInterface = this.context?.current;
-    if (!tileApiInterface) return;
-    let didDeleteInteriorSelection = false;
-    const { ui } = this.stores;
-    ui.selectedTileIds.forEach(tileId => {
-      const tileApi = tileApiInterface?.getTileApi(tileId);
-      // if there is selected content inside the selected tile, delete it first
-      if (tileApi?.hasSelection?.()) {
-        tileApi.deleteSelection?.();
-        didDeleteInteriorSelection = true;
-      }
-    });
-    if (!didDeleteInteriorSelection) {
-      this.showDeleteTilesConfirmationAlert?.();
-    }
+    this.showDeleteTilesConfirmationAlert?.();
     this.setState(state => ({ activeTool: state.defaultTool }));
   }
 
