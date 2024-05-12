@@ -344,10 +344,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return ( programMode === ProgramMode.Recording || programMode === ProgramMode.Done);
   }
 
-  private keepNodesInView = () => {
-    const margin = 5;
-  };
-
   private addNode = (nodeType: string, position?: [number, number]) => {
     this.reteManager?.createAndAddNode(nodeType, position);
   };
