@@ -1,14 +1,6 @@
 @import "../vars";
 $border-radius-base: 6px;
 
-/* COLORS:
-  Tab Label (msa)  Class Name   Colors
-  PROBLEMS        .problems     orange
-  MY WORK         .my-work      teal
-  CLASS WORK      .sort-work    gray
-  PUBLISHED WORK  .class-work   purple
-*/
-
 .playback-controls {
   display: flex;
   flex-direction: row;
