@@ -1,7 +1,14 @@
 @import "../vars";
 $border-radius-base: 6px;
 
-// inner rectangle, expands to fit
+/* COLORS:
+  Tab Label (msa)  Class Name   Colors
+  PROBLEMS        .problems     orange
+  MY WORK         .my-work      teal
+  CLASS WORK      .sort-work    gray
+  PUBLISHED WORK  .class-work   purple
+*/
+
 .playback-controls {
   display: flex;
   flex-direction: row;
@@ -13,7 +20,6 @@ $border-radius-base: 6px;
     justify-content: center;
   }
 
-  // COLORS: 1 sync up these colors with layouts and stuff on line 60
   &.my-work {
     background-color: $workspace-teal-light-8;
   }
@@ -25,6 +31,9 @@ $border-radius-base: 6px;
   }
   &.learning-log {
     background-color: $learninglog-green-light-8;
+  }
+  &.problems {
+    background-color: $problem-orange-light-8;
   }
 
   // line between time travel button and play button
@@ -43,7 +52,10 @@ $border-radius-base: 6px;
       background-color: $charcoal-light-4;
     }
     &.learning-log {
-      background-color: $learninglog-green-light-5;
+      background-color: $learninglog-green-light-4;
+    }
+    &.problems {
+      background-color: $problem-orange-light-4;
     }
   }
 
@@ -58,7 +70,6 @@ $border-radius-base: 6px;
       pointer-events: none;
     }
 
-    // COLORS: 2 sync these colors with the layouts and stuff on line 15
     &.my-work {
       background-color: $workspace-teal-light-8;
       stroke: $workspace-teal-dark-1;
@@ -84,8 +95,8 @@ $border-radius-base: 6px;
       }
     }
     &.class-work {
-      background-color: $classwork-purple-light-5;
-      fill:  $classwork-purple-light-5;
+      background-color: $classwork-purple-light-8;
+      fill:  $classwork-purple-light-8;
       stroke: $classwork-purple-dark-1;
       &:hover {
         background-color: $classwork-purple-light-4;
@@ -108,8 +119,8 @@ $border-radius-base: 6px;
       }
     }
     &.sort-work {
-      background-color: $charcoal-light-4;
-      fill: $charcoal-light-4;
+      background-color: $charcoal-light-8;
+      fill: $charcoal-light-8;
       stroke: $charcoal-dark-1;
       &:hover {
         background-color: $charcoal-light-4;
@@ -155,6 +166,30 @@ $border-radius-base: 6px;
         }
       }
     }
+    &.problems {
+      background-color: $problem-orange-light-8;
+      fill: $problem-orange-light-8;
+      stroke: $problem-orange-dark-1;
+      &:hover {
+        background-color: $problem-orange-light-4;
+        fill: $problem-orange-light-4;
+      }
+      &:active {
+        background-color: $problem-orange-light-2;
+        fill: $problem-orange-light-2;
+      }
+      path {
+        fill: $problem-orange-dark-1;
+      }
+      &.playing {
+        background-color: $problem-orange-light-2;
+        fill: $problem-orange-light-2;
+        &:hover {
+          background-color: $problem-orange-light-4;
+          fill: $problem-orange-light-4;
+        }
+      }
+    }
   }
 }
 
@@ -168,9 +203,9 @@ $border-radius-base: 6px;
 
   .marker-component {
     height: 20px;
-    width: 100%;
+    width: calc(100% - 3px);
     position: absolute;
-    // COLORS: 3
+    right:0;
     &.my-work {
       background-color: $workspace-teal-light-5;
     }
@@ -182,6 +217,9 @@ $border-radius-base: 6px;
     }
     &.learning-log {
       background-color: $learninglog-green-light-5;
+    }
+    &.problems {
+      background-color: $problem-orange-light-5;
     }
   }
 
@@ -203,7 +241,6 @@ $border-radius-base: 6px;
       left: 7px;
       font-size: 11px;
     }
-    // COLORS: 4 sync these colors with the layouts and stuff on line 60
     &.my-work {
       path:first-of-type {
         fill: $workspace-teal-dark-1;
@@ -265,6 +302,22 @@ $border-radius-base: 6px;
         color: white;
         path:last-of-type {
           fill:  $learninglog-green-dark-1;
+        }
+      }
+    }
+    &.problems {
+      path:first-of-type {
+        fill: $problem-orange-dark-1;
+      }
+      path:last-of-type {
+        fill: $problem-orange-light-5;
+        stroke: $problem-orange-dark-1;
+        stroke-width: 2px;
+      }
+      &.selected {
+        color: white;
+        path:last-of-type {
+          fill:  $problem-orange-dark-1;
         }
       }
     }
@@ -366,7 +419,6 @@ $border-radius-base: 6px;
     }
   }
 
-  // COLORS 5: sync these colors with the layouts and stuff on line 60
   .rc-slider.my-work {
     .rc-slider-handle {
       border-color: $workspace-teal-dark-1;
@@ -411,6 +463,18 @@ $border-radius-base: 6px;
       }
       &:active {
         background-color: $learninglog-green-light-2
+      }
+    }
+  }
+
+  .rc-slider.problems {
+    .rc-slider-handle {
+      border-color: $problem-orange-dark-1;
+      &:hover {
+        background-color: $problem-orange-light-5;
+      }
+      &:active {
+        background-color: $problem-orange-light-2
       }
     }
   }

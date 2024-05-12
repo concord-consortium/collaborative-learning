@@ -1,18 +1,5 @@
 @import "../vars";
 
-/* COLORS:
-
-  Tab Label       Class Name    Color     ok  Spec
-  ______________________________________________________
-  PROBLEMS        .problems     orange    ✅   🤷🏼
-  MY WORK         .my-work      teal      ✅   ✅
-  CLASS WORK      .sort-work    gray      💥   ✅
-  PUBLISHED WORK  .class-work   purple    ✅   ✅
-
-
-*/
-
-// outermost rectangle, exapnds to fit
 .playback-component {
   display: flex;
   flex-direction: row;
@@ -45,21 +32,20 @@
   }
   &.sort-work {
     border-color: $charcoal;
-    bottom: -5px;
-    left: -2px;
   }
   &.learning-log {
     border-color: $learninglog-green;
   }
+  &.problems {
+    border-color: $problem-orange;
+  }
 
-  // "time travel back" icon
   .playback-toolbar-button-component {
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
     width: 42px;
-
     .playback-toolbar-button {
       width: 36px;
       height: 42px;
@@ -102,6 +88,15 @@
           background-color: $learninglog-green-light-2;
         }
       }
+      &.problems {
+        background-color: $problem-orange-light-5;
+        &:hover {
+          background-color: $problem-orange-light-4;
+        }
+        &:active {
+          background-color: $problem-orange-light-2;
+        }
+      }
       &.show-control {
         &.my-work {
           background-color: $workspace-teal-light-2;
@@ -113,9 +108,9 @@
           }
         }
         &.class-work {
-          background-color: $classwork-purple-light-2;
+          background-color: $classwork-purple-light-4;
           &:hover {
-            background-color: $classwork-purple-light-4;
+            background-color: $classwork-purple-light-5;
           }
           &:active {
             background-color: $classwork-purple-light-2;
@@ -139,20 +134,15 @@
             background-color: $learninglog-green-light-2;
           }
         }
-      }
-    }
-    &.show-control {
-      &.my-work {
-        background-color: $workspace-teal-light-2;
-      }
-      &.class-work {
-        background-color: $classwork-purple-light-2;
-      }
-      &.sort-work {
-        background-color: $charcoal-light-2;
-      }
-      &.learning-log {
-        background-color: $learninglog-green-light-2;
+        &.problems {
+          background-color: $problem-orange-light-4;
+          &:hover {
+            background-color: $problem-orange-light-5;
+          }
+          &:active {
+            background-color: $problem-orange-light-2;
+          }
+        }
       }
     }
     &.disabled {
