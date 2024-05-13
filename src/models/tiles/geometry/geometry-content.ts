@@ -6,7 +6,7 @@ import { SelectionStoreModelType } from "../../stores/selection";
 import { ITableLinkProperties, linkedPointId } from "../table-link-types";
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
-import { tileContentAPIActions } from "../tile-model-hooks";
+import { tileContentAPIActions, tileContentAPIViews } from "../tile-model-hooks";
 import { ICreateRowsProperties, IRowProperties, ITableChange } from "../table/table-change";
 import { canonicalizeValue } from "../table/table-model-types";
 import { convertModelToChanges, exportGeometryJson } from "./geometry-migrate";
@@ -31,7 +31,6 @@ import {
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
   kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
-import { getTileIdFromContent } from "../tile-model";
 import { SharedModelType } from "../../shared/shared-model";
 import { ISharedModelManager } from "../../shared/shared-model-manager";
 import { IDataSet } from "../../data/data-set";
@@ -39,7 +38,7 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { LogEventName } from "../../../lib/logger-types";
 import { gImageMap } from "../../image-map";
-import { IClueObject } from "../../annotations/clue-object";
+import { IClueTileObject } from "../../annotations/clue-object";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -194,26 +193,6 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
   }))
   .views(self => ({
-    get annotatableObjects() {
-      const tileId = getTileIdFromContent(self) ?? "";
-      const polygons: IClueObject[] = [];
-      const segments: IClueObject[] = [];
-      const points: IClueObject[] = [];
-      self.objects.forEach(object => {
-        const objectInfo = { tileId, objectId: object.id, objectType: object.type };
-        if (object.type === "polygon") {
-          polygons.push(objectInfo);
-          const polygon = object as PolygonModelType;
-          polygon.segmentIds.forEach(
-            segmentId => segments.push({ tileId, objectId: segmentId, objectType: "segment" })
-          );
-        } else if (object.type === "point") {
-          points.push(objectInfo);
-        }
-      });
-      // The order of the objects is important so buttons to add sparrows don't cover each other
-      return [...polygons, ...segments, ...points];
-    },
     // Returns any object in the model, even a subobject (like a movable line's point)
     getAnyObject(id: string) {
       if (isMovableLinePointId(id)) {
@@ -280,6 +259,27 @@ export const GeometryContentModel = GeometryBaseContentModel
       const jsonChanges = changes.map(change => JSON.stringify(change));
       return exportGeometryJson(jsonChanges, options);
     }
+  }))
+  .views(self => tileContentAPIViews({
+    get annotatableObjects(): IClueTileObject[] {
+      const polygons: IClueTileObject[] = [];
+      const segments: IClueTileObject[] = [];
+      const points: IClueTileObject[] = [];
+      self.objects.forEach(object => {
+        const objectInfo = { objectId: object.id, objectType: object.type };
+        if (object.type === "polygon") {
+          polygons.push(objectInfo);
+          const polygon = object as PolygonModelType;
+          polygon.segmentIds.forEach(
+            segmentId => segments.push({ objectId: segmentId, objectType: "segment" })
+          );
+        } else if (object.type === "point") {
+          points.push(objectInfo);
+        }
+      });
+      // The order of the objects is important so buttons to add sparrows don't cover each other
+      return [...polygons, ...segments, ...points];
+    },
   }))
   .actions(self => ({
     setElementSelection(board: JXG.Board | undefined, id: string, select: boolean) {
