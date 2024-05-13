@@ -224,56 +224,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.initializeContent();
 
     this.props.onRegisterTileApi({
-      hasSelection: () => {
-        const geometryContent = this.props.model.content as GeometryContentModelType;
-        // Note: hasSelection() returns true when there is a selection whether or not
-        // the selection is deletable. We could test for hasDeletableSelection() here,
-        // but the effect of that would be that the document toolbar would still enable
-        // the delete button when undeletable content is selected, but now clicking the
-        // delete button would delete the entire tile. For now, we preserve the current
-        // behavior of enabling the toolbar for an undeletable selection.
-        return !!geometryContent && geometryContent.hasSelection();
-      },
-      deleteSelection: () => {
-        const geometryContent = this.props.model.content as GeometryContentModelType;
-        const { board } = this.state;
-        if (geometryContent && board && !this.props.readOnly) {
-          geometryContent.deleteSelection(board);
-        }
-      },
-      getSelectionInfo: () => {
-        const { board } = this.state;
-        const geometryContent = this.props.model.content as GeometryContentModelType;
-        const selectedIds = board && geometryContent?.getSelectedIds(board) || [];
-        return JSON.stringify(selectedIds);
-      },
-      setSelectionHighlight: (selectionInfo: string, isHighlighted: boolean) => {
-        const { board } = this.state;
-        const content = this.getContent();
-        if (board && content) {
-          const selectedIds: string[] = JSON.parse(selectionInfo);
-          if (isHighlighted) {
-            board.objectsList.forEach(obj => {
-              if (content.isSelected(obj.id)) {
-                setElementColor(board, obj.id, false);
-              }
-            });
-            selectedIds.forEach(key => {
-              setElementColor(board, key, true);
-            });
-          } else {
-            selectedIds.forEach(key => {
-              setElementColor(board, key, false);
-            });
-            // Return selection state to normal
-            board.objectsList.forEach(obj => {
-              if (content.isSelected(obj.id)) {
-                setElementColor(board, obj.id, true);
-              }
-            });
-          }
-        }
-      },
+
       isLinked: () => {
         return this.getContent().isLinked;
       },

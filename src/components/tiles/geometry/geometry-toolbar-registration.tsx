@@ -1,4 +1,4 @@
-import React, { FunctionComponent, SVGProps } from "react";
+import React, { FunctionComponent, SVGProps, useState } from "react";
 import { observer } from "mobx-react";
 import { IToolbarButtonComponentProps, registerTileToolbarButtons } from "../../toolbar/toolbar-button-manager";
 import { TileToolbarButton } from "../../toolbar/tile-toolbar-button";
@@ -76,8 +76,13 @@ const AngleLabelButton = observer(function AngleLabelButton({name}: IToolbarButt
   const selectedPoints = selectedObjects?.filter(isPoint);
   const selectedPoint = selectedPoints?.length === 1 ? selectedPoints[0] : undefined;
   const disableVertexAngle = !(selectedPoint && canSupportVertexAngle(selectedPoint));
-  // FIXME toggling this doesn't trigger the "observer" and thus doesn't change the selected state
   const hasVertexAngle = !!selectedPoint && !!getVertexAngle(selectedPoint);
+  const [clicks, setClicks] = useState<number>(0);
+
+  function handleClick() {
+    handlers?.handleToggleVertexAngle();
+    setClicks(clicks + 1); // this is just to force a re-render. The observer doesn't notice the model change.
+  }
 
   return (
     <TileToolbarButton
@@ -85,7 +90,7 @@ const AngleLabelButton = observer(function AngleLabelButton({name}: IToolbarButt
       title="Angle label"
       disabled={disableVertexAngle}
       selected={hasVertexAngle}
-      onClick={() => handlers?.handleToggleVertexAngle()}
+      onClick={handleClick}
     >
       <AngleLabelSvg/>
     </TileToolbarButton>
