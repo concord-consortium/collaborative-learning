@@ -40,9 +40,7 @@ export class TileCommentsComponent extends BaseComponent<IProps> {
               const student = clazz.getUserById(comment.uid);
               const name = student ? student.displayName : "Student";
               return (
-                <div className="comment" key={comment.key}
-                     onMouseEnter={this.handleHover(comment.selectionInfo)}
-                     onMouseLeave={this.handleLeave(comment.selectionInfo)}>
+                <div className="comment" key={comment.key}>
                   {user.id === comment.uid ? this.renderDelete(comment) : null}
                   {`${name}: ${comment.text}`}
                 </div>
@@ -62,20 +60,6 @@ export class TileCommentsComponent extends BaseComponent<IProps> {
         </svg>
       </div>
     );
-  };
-
-  private handleHover = (selectionInfo?: string) => () => {
-    const { model } = this.props;
-    const tileApiInterface = this.context;
-    const tileApi = tileApiInterface?.getTileApi(model.tileId);
-    selectionInfo && tileApi?.setSelectionHighlight?.(selectionInfo, true);
-  };
-
-  private handleLeave = (selectionInfo?: string) => () => {
-    const { model } = this.props;
-    const tileApiInterface = this.context;
-    const tileApi = tileApiInterface?.getTileApi(model.tileId);
-    selectionInfo && tileApi?.setSelectionHighlight?.(selectionInfo, false);
   };
 
   private handleDelete = (comment: TileCommentModelType) => () => {
