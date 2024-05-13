@@ -205,8 +205,13 @@ export const DataflowProgramModel = types.
         self.nodes.forEach((_node) => {
           const node = _node.data as IBaseNodeModel;
           const attrId = getAttributeIdForNode(dataSet, nodeIndex);
-          const nodeValue = dataSet.getValue(caseId, attrId) as number;
-          node.setNodeValue(nodeValue);
+
+          // The user might have messed with the table, so the attribute might not exist
+          if (attrId) {
+            const nodeValue = dataSet.getValue(caseId, attrId) as number;
+            node.setNodeValue(nodeValue);
+          }
+
           nodeIndex++;
         });
       }
