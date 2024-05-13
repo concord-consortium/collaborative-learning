@@ -406,7 +406,9 @@ context('Arrow Annotations (Sparrows)', function () {
     dataflowTile.getCreateNodeButton("demo-output").click();
 
     aa.clickArrowToolbarButton();
-    aa.getAnnotationButtons().should("have.length", 28+3);
+    // The 3 nodes create annotation buttons in the dataflow tile and mini nodes
+    // in the simulation tile
+    aa.getAnnotationButtons().should("have.length", 28+2*3);
     aa.getAnnotationButtons().eq(0).click();
     aa.getAnnotationButtons().eq(2).click();
     aa.getAnnotationArrows().should("have.length", 2);
