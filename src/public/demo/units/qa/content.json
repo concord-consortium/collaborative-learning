@@ -12,6 +12,7 @@
       {"url": "curriculum/moving-straight-ahead/stamps/lparen.png", "width": 25, "height": 25},
       {"url": "curriculum/moving-straight-ahead/stamps/rparen.png", "width": 25, "height": 25}
     ],
+    "annotations": "all",
     "settings": {
       "table": { "numFormat": ".2~f" },
       "datacard": {

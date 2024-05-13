@@ -183,8 +183,8 @@ class DataflowToolTile {
   getTimeSlider() {
     return cy.get(".primary-workspace .program-editor-topbar .rc-slider.rc-slider-horizontal");
   }
-  getCountdownTimer() {
-    return cy.get(".primary-workspace .program-editor-topbar .countdown-timer");
+  getCountdownTimer(options={}) {
+    return cy.get(".primary-workspace .program-editor-topbar .countdown-timer", options);
   }
   verifyStopButtonText() {
     cy.get(".primary-workspace .record-data-txt").should("have.text", "Stop");

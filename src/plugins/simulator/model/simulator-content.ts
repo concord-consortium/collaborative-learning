@@ -4,7 +4,7 @@ import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view
 
 import { withoutUndo } from "../../../models/history/without-undo";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
-import { TileContentModel } from "../../../models/tiles/tile-content";
+import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { getAppConfig } from "../../../models/tiles/tile-environment";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
@@ -12,6 +12,10 @@ import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { defaultSimulationKey, simulations } from "../simulations/simulations";
 import { SharedProgramData, SharedProgramDataType } from "../../shared-program-data/shared-program-data";
+import { IClueObject } from "../../../models/annotations/clue-object";
+import { kPotentiometerServoKey } from "../simulations/potentiometer-servo/potentiometer-servo";
+import { getTileIdFromContent } from "../../../models/tiles/tile-model";
+import { getMiniNodesDisplayData } from "../simulations/potentiometer-servo/chip-sim-utils";
 
 export function defaultSimulatorContent(): SimulatorContentModelType {
   return SimulatorContentModel.create({});
@@ -66,6 +70,38 @@ export const SimulatorContentModel = TileContentModel
   .views(self => ({
     get variables() {
       return self.sharedModel?.variables;
+    },
+    get annotatableObjects(): IClueObject[] {
+      const tileId = getTileIdFromContent(self) ?? "";
+      if (self.simulation === kPotentiometerServoKey) {
+        // Make an annotatable object for each mini-node
+        const nodeData = getMiniNodesDisplayData(self.sharedProgramData);
+        const visibleNodes = [
+          ...nodeData.inputNodesArr,
+          ...nodeData.operatorNodesArr,
+          ...nodeData.outputNodesArr];
+        const nodeObjects = visibleNodes.map(node =>
+          ({
+            tileId,
+            objectId: node.id,
+            objectType: "node"
+          }));
+
+        // Plus an object for each of the 14 pins on each side of the image
+        const boardPins = [
+          ...Array.from({ length: 14 }, (o, index) => `L${index}`),
+          ...Array.from({ length: 14 }, (o, index) => `R${index}`)
+        ];
+        const pinObjects = boardPins.map(pin =>
+          ({
+            tileId,
+            objectId: pin,
+            objectType: "pin"
+          }));
+
+        return [...nodeObjects, ...pinObjects];
+      }
+      return [];
     }
   }))
   .views(self => ({
@@ -181,3 +217,7 @@ export const SimulatorContentModel = TileContentModel
   }));
 
 export interface SimulatorContentModelType extends Instance<typeof SimulatorContentModel> {}
+
+export function isSimulatorModel(model?: ITileContentModel): model is SimulatorContentModelType {
+  return model?.type === kSimulatorTileType;
+}
