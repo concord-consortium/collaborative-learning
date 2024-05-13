@@ -1,6 +1,6 @@
 import { castArray, difference, each, size as _size, union } from "lodash";
 import { reaction } from "mobx";
-import { addDisposer, applySnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { addDisposer, applySnapshot, detach, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { ITableLinkProperties, linkedPointId } from "../table-link-types";
@@ -24,7 +24,7 @@ import {
   ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
 } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
-import {  kPointDefaults } from "./jxg-point";
+import {  kPointDefaults, kSnapUnit } from "./jxg-point";
 import { prepareToDeleteObjects } from "./jxg-polygon";
 import {
   isAxisArray, isBoard, isComment, isFreePoint, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
@@ -557,8 +557,18 @@ export const GeometryContentModel = GeometryBaseContentModel
     function addPhantomPoint(board: JXG.Board, parents: JXGCoordPair):
         JXG.Point | undefined {
       if (!board) return undefined;
-      // TODO set proper props: snapToGrid? snapSize? color?
-      const props = { id: "phantom", isPhantom: true, fillColor: "#00FF00" };
+      const props = {
+        id: "phantom",
+        isPhantom: true,
+        strokeColor: "#0000FF",
+        fillColor: "#0069FF",
+        selectedFillColor: "#FF0000",
+        selectedStrokeColor: "#FF0000",
+        snapToGrid: true,
+        snapSizeX: kSnapUnit,
+        snapSizeY: kSnapUnit,
+        withLabel: false
+      };
       const pointModel = PointModel.create({ x: parents[0], y: parents[1], ...props });
       self.phantomPoint = pointModel;
 
@@ -587,6 +597,25 @@ export const GeometryContentModel = GeometryBaseContentModel
       } else {
         console.log('no phantom point');
       }
+    }
+
+    function realizePhantomPoint(board: JXG.Board, position: JXGCoordPair) {
+      const point = self.phantomPoint;
+      if (!point) return;
+      detach(point);
+      self.addObjectModel(point);
+
+      const change: JXGChange = {
+        operation: "update",
+        target: "object",
+        targetID: point.id,
+        properties: {
+          isPhantom: false,
+          withLabel: true,
+          position
+        }
+      };
+      syncChange(board, change);
     }
 
     function addPoints(board: JXG.Board | undefined,
@@ -1038,6 +1067,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         addPoints,
         addPhantomPoint,
         setPhantomPointPosition,
+        realizePhantomPoint,
         addMovableLine,
         removeObjects,
         updateObjects,

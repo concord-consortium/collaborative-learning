@@ -1397,12 +1397,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
       // other clicks on board background create new points
       if (!hasSelectionModifier(evt)) {
-        const props = { snapToGrid: true, snapSizeX: kSnapUnit, snapSizeY: kSnapUnit };
         this.applyChange(() => {
-          const point = geometryContent.addPoint(board, [x, y], props);
-          if (point) {
-            this.handleCreatePoint(point);
-          }
+          geometryContent.realizePhantomPoint(board, [x, y]);
+          geometryContent.addPhantomPoint(board, [x, y]);
         });
       }
     };
