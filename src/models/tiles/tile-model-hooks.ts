@@ -1,5 +1,6 @@
 import { ISerializedActionCall } from "mobx-state-tree";
 import { ITileMetadataModel } from "./tile-metadata";
+import { IClueTileObject } from "../annotations/clue-object";
 
 export interface ITileContentAPIActions {
   /**
@@ -77,6 +78,12 @@ export interface ITileContentAPIViews {
    * This can be used so a content model can provide a computed title.
    */
   get contentTitle(): string | undefined,
+
+  /**
+   * Return a list of objects in the tile which can be annotated
+   * see annotations.md for more info.
+   */
+  get annotatableObjects(): IClueTileObject[],
 }
 
 /**
@@ -95,6 +102,9 @@ export function tileContentAPIViews(clientViews: Partial<ITileContentAPIViews>) 
   const defaultHooks: ITileContentAPIViews = {
     get contentTitle() {
       return undefined;
+    },
+    get annotatableObjects(): IClueTileObject[] {
+      return [];
     },
   };
 
