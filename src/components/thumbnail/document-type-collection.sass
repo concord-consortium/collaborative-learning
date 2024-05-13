@@ -108,6 +108,9 @@ $section-padding: 6px
           width: 24px
           fill: $charcoal
           opacity: .25
+          position: relative
+          right: 66px
+          top: -1px
 
           &.starred
             opacity: .75
@@ -144,11 +147,26 @@ $section-padding: 6px
         justify-content: center
 
         .icon-delete-document
-          height: 16px
-          width: 16px
-          fill: #808080
+          height: 23px
+          width: 23px
+          position: relative
+          top: 6px
+          right: -1px
+          border-radius: 4px
+          g
+            transform: translate(2px, 1.5px)
+          path
+            fill: rgba($charcoal, .6)
+
         .icon-delete-document:hover
-          fill: #f00
+          background-color: rgba($charcoal, .25)
+          fill: $charcoal
+          path
+            fill: $charcoal
+        .icon-delete-document:active,
+        .icon-delete-document.selected
+          background-color: rgba($charcoal, .45)
+          fill: $charcoal
 
   &.personal-documents
     .new-document-button-label

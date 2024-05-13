@@ -1,5 +1,5 @@
 import React from "react";
-
+import DeleteThumbIcon from "../../assets/icons/delete/delete-thumb-icon.svg";
 interface IDocumentCaptionProps {
   captionText: string;
   onDeleteClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
@@ -26,7 +26,7 @@ const DocumentDelete = (props: IDocumentDeleteProps) => {
   return (
     <div className="icon-holder" onClick={onDeleteClick}>
       <svg className="icon-delete-document">
-        <use xlinkHref="#icon-delete-document"/>
+        <DeleteThumbIcon />
       </svg>
     </div>
   );
