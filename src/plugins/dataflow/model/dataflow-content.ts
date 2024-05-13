@@ -23,7 +23,8 @@ import { SharedProgramData, SharedProgramDataType } from "../../shared-program-d
 
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
-import { getTileIdFromContent, getTileModel } from "../../../models/tiles/tile-model";
+import { getTileModel } from "../../../models/tiles/tile-model";
+import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { NodeChannelInfo } from "./utilities/channel";
 
 export const kDataflowTileType = "Dataflow";
@@ -102,14 +103,6 @@ export const DataflowContentModel = TileContentModel
       // The `+ 1` is for time which is recorded as the first value of each case
       return (kMaxRecordedValues/(numNodes + 1));
     },
-    get annotatableObjects() {
-      const tileId = getTileIdFromContent(self) ?? "";
-      return [...self.program.nodes.values()].map(node => ({
-        tileId,
-        objectId: node.id,
-        objectType: "Node",
-      }));
-    }
   }))
   .views(self => ({
     get inputVariables() {
@@ -187,7 +180,13 @@ export const DataflowContentModel = TileContentModel
   .views(self => tileContentAPIViews({
     get contentTitle() {
       return self.dataSet.name;
-    }
+    },
+    get annotatableObjects(): IClueTileObject[] {
+      return [...self.program.nodes.values()].map(node => ({
+        objectId: node.id,
+        objectType: "Node",
+      }));
+    },
   }))
   .actions(self => tileContentAPIActions({
     doPostCreate(metadata: ITileMetadataModel) {

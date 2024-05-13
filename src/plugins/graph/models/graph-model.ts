@@ -2,8 +2,8 @@ import { ObservableMap, reaction } from "mobx";
 import stringify from "json-stringify-pretty-compact";
 import { addDisposer, getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import { cloneDeep } from "lodash";
-import { IClueObject } from "../../../models/annotations/clue-object";
-import { getTileIdFromContent } from "../../../models/tiles/tile-model";
+import { IClueTileObject } from "../../../models/annotations/clue-object";
+import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { IAdornmentModel } from "../adornments/adornment-models";
 import { AxisPlace } from "../imports/components/axis/axis-types";
 import {
@@ -336,9 +336,10 @@ export const GraphModel = TileContentModel
     get primaryRole() {
       return self.layers[0].config?.primaryRole;
     },
-    get annotatableObjects() {
-      const tileId = getTileIdFromContent(self) ?? "";
-      const objects: IClueObject[] = [];
+  }))
+  .views(self => tileContentAPIViews({
+    get annotatableObjects(): IClueTileObject[] {
+      const objects: IClueTileObject[] = [];
       for (const layer of self.layers) {
         if (layer.config.dataset) {
           const xAttributeID = layer.config.attributeID("x");
@@ -347,7 +348,6 @@ export const GraphModel = TileContentModel
               if (xAttributeID && yAttributeID) {
                 const objectId = getDotId(c.__id__, xAttributeID, yAttributeID);
                 objects.push({
-                  tileId,
                   objectId,
                   objectType: "dot"
                 });
@@ -358,10 +358,10 @@ export const GraphModel = TileContentModel
       }
       // Include any objects contributed by adornments
       for (const adorn of self.adornments) {
-        objects.push(...adorn.getAnnotatableObjects(tileId));
+        objects.push(...adorn.annotatableObjects);
       }
       return objects;
-    }
+    },
   }))
   .actions(self => ({
     afterCreate() {

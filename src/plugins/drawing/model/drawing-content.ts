@@ -15,8 +15,8 @@ import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-ev
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tiles/tile-content-info";
 import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
-import { getTileIdFromContent } from "../../../models/tiles/tile-model";
-import { tileContentAPIActions } from "../../../models/tiles/tile-model-hooks";
+import { tileContentAPIActions, tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
+import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { GroupObjectSnapshotForAdd, GroupObjectType, isGroupObject } from "../objects/group";
 
 export const DrawingToolMetadataModel = TileMetadataModel
@@ -49,14 +49,6 @@ export const DrawingContentModel = TileContentModel
     selection: [] as string[]
   }))
   .views(self => ({
-    get annotatableObjects() {
-      const tileId = getTileIdFromContent(self) ?? "";
-      return self.objects.map(object => ({
-        objectId: object.id,
-        objectType: object.type,
-        tileId
-      }));
-    },
     get objectMap() {
       // TODO this will rebuild the map when any of the objects change
       // We could handle this more efficiently
@@ -124,6 +116,14 @@ export const DrawingContentModel = TileContentModel
     getSelectedObjects():DrawingObjectType[] {
       return self.selection.map((id) => self.objectMap[id]).filter((x)=>!!x) as DrawingObjectType[];
     }
+  }))
+  .views(self => tileContentAPIViews({
+    get annotatableObjects(): IClueTileObject[] {
+      return self.objects.map(object => ({
+        objectId: object.id,
+        objectType: object.type,
+      }));
+    },
   }))
   .actions(self => tileContentAPIActions({
     doPostCreate(metadata) {

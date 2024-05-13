@@ -10,9 +10,9 @@ import { getCellId } from "./table-utils";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileContentAPIActions, tileContentAPIViews } from "../tile-model-hooks";
-import { getTileIdFromContent, getTileModel } from "../tile-model";
+import { getTileModel } from "../tile-model";
 import { TileContentModel } from "../tile-content";
-import { IClueObject } from "../../annotations/clue-object";
+import { IClueTileObject } from "../../annotations/clue-object";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { updateSharedDataSetColors } from "../../shared/shared-data-set-colors";
@@ -243,23 +243,22 @@ export const TableContentModel = TileContentModel
     }
   }))
   .views(self => ({
-    get annotatableObjects() {
-      const tileId = getTileIdFromContent(self) ?? "";
-      const objects: IClueObject[] = [];
-      const objectType = "cell";
-      self.dataSet.cases.forEach(c => {
-        self.dataSet.attributes.forEach(attribute => {
-          const objectId = getCellId(c.__id__, attribute.id);
-          objects.push({ tileId, objectId, objectType });
-        });
-      });
-      return objects;
-    }
   }))
   .views(self => tileContentAPIViews({
     get contentTitle() {
       return self.dataSet.name;
-    }
+    },
+    get annotatableObjects(): IClueTileObject[] {
+      const objects: IClueTileObject[] = [];
+      const objectType = "cell";
+      self.dataSet.cases.forEach(c => {
+        self.dataSet.attributes.forEach(attribute => {
+          const objectId = getCellId(c.__id__, attribute.id);
+          objects.push({ objectId, objectType });
+        });
+      });
+      return objects;
+    },
   }))
   .actions(self => tileContentAPIActions({
     doPostCreate(metadata) {

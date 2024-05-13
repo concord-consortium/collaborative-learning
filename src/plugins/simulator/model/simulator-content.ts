@@ -12,9 +12,9 @@ import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { defaultSimulationKey, simulations } from "../simulations/simulations";
 import { SharedProgramData, SharedProgramDataType } from "../../shared-program-data/shared-program-data";
-import { IClueObject } from "../../../models/annotations/clue-object";
+import { IClueTileObject } from "../../../models/annotations/clue-object";
+import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { kPotentiometerServoKey } from "../simulations/potentiometer-servo/potentiometer-servo";
-import { getTileIdFromContent } from "../../../models/tiles/tile-model";
 import { getMiniNodesDisplayData } from "../simulations/potentiometer-servo/chip-sim-utils";
 
 export function defaultSimulatorContent(): SimulatorContentModelType {
@@ -71,8 +71,20 @@ export const SimulatorContentModel = TileContentModel
     get variables() {
       return self.sharedModel?.variables;
     },
-    get annotatableObjects(): IClueObject[] {
-      const tileId = getTileIdFromContent(self) ?? "";
+  }))
+  .views(self => ({
+    getVariable(name?: string) {
+      return self.variables?.find(v => v.name === name);
+    },
+    get inputVariables(): VariableType[] {
+      return self.variables?.filter(v => isInputVariable(v)) ?? [];
+    },
+    get outputVariables(): VariableType[] {
+      return self.variables?.filter(v => isOutputVariable(v)) ?? [];
+    }
+  }))
+  .views(self => tileContentAPIViews({
+    get annotatableObjects(): IClueTileObject[] {
       if (self.simulation === kPotentiometerServoKey) {
         // Make an annotatable object for each mini-node
         const nodeData = getMiniNodesDisplayData(self.sharedProgramData);
@@ -82,7 +94,6 @@ export const SimulatorContentModel = TileContentModel
           ...nodeData.outputNodesArr];
         const nodeObjects = visibleNodes.map(node =>
           ({
-            tileId,
             objectId: node.id,
             objectType: "node"
           }));
@@ -94,7 +105,6 @@ export const SimulatorContentModel = TileContentModel
         ];
         const pinObjects = boardPins.map(pin =>
           ({
-            tileId,
             objectId: pin,
             objectType: "pin"
           }));
@@ -102,17 +112,6 @@ export const SimulatorContentModel = TileContentModel
         return [...nodeObjects, ...pinObjects];
       }
       return [];
-    }
-  }))
-  .views(self => ({
-    getVariable(name?: string) {
-      return self.variables?.find(v => v.name === name);
-    },
-    get inputVariables(): VariableType[] {
-      return self.variables?.filter(v => isInputVariable(v)) ?? [];
-    },
-    get outputVariables(): VariableType[] {
-      return self.variables?.filter(v => isOutputVariable(v)) ?? [];
     }
   }))
   .actions(self => ({
