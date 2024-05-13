@@ -104,7 +104,7 @@ export const DocEditorApp = () => {
       // This error is printed in the console as an "Uncaught (in promise)..."
       throw Error(`Request rejected with exception ${error}`);
     });
-  }, [loadDocument]);
+  }, [documentURL, loadDocument]);
 
   // This is wrapped in a div.primary-workspace so it can be used with cypress
   // tests that are looking for stuff in a div like this

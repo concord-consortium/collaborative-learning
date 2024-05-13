@@ -3,6 +3,8 @@ import { observable, reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
 
+import { Transform } from "rete-area-plugin/_types/area";
+
 import { DataflowProgramModel } from "./dataflow-program-model";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
@@ -21,7 +23,7 @@ import { SharedProgramData, SharedProgramDataType } from "../../shared-program-d
 
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
-import { getTileModel } from "../../../models/tiles/tile-model";
+import { getTileIdFromContent, getTileModel } from "../../../models/tiles/tile-model";
 import { NodeChannelInfo } from "./utilities/channel";
 
 export const kDataflowTileType = "Dataflow";
@@ -50,7 +52,15 @@ const ProgramZoom = types.model({
   dx: types.number,
   dy: types.number,
   scale: types.number,
-});
+})
+.actions(self => ({
+  update(transform: Transform) {
+    const { x, y, k} = transform;
+    self.dx = x;
+    self.dy = y;
+    self.scale = k;
+  }
+}));
 export type ProgramZoomType = typeof ProgramZoom.Type;
 export const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
 
@@ -66,6 +76,7 @@ export const DataflowContentModel = TileContentModel
     metadata: undefined as any as ITileMetadataModel,
     emptyDataSet: DataSet.create(),
     channels: observable([]) as NodeChannelInfo[],
+    liveProgramZoom: ProgramZoom.create(getSnapshot(self.programZoom))
   }))
   .views(self => ({
     get sharedModel() {
@@ -90,6 +101,14 @@ export const DataflowContentModel = TileContentModel
       const numNodes = self.program.nodes.size;
       // The `+ 1` is for time which is recorded as the first value of each case
       return (kMaxRecordedValues/(numNodes + 1));
+    },
+    get annotatableObjects() {
+      const tileId = getTileIdFromContent(self) ?? "";
+      return [...self.program.nodes.values()].map(node => ({
+        tileId,
+        objectId: node.id,
+        objectType: "Node",
+      }));
     }
   }))
   .views(self => ({
@@ -243,10 +262,12 @@ export const DataflowContentModel = TileContentModel
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;
     },
-    setProgramZoom(dx: number, dy: number, scale: number) {
-      self.programZoom.dx = dx;
-      self.programZoom.dy = dy;
-      self.programZoom.scale = scale;
+    setLiveProgramZoom(transform: Transform) {
+      self.liveProgramZoom.update(transform);
+    },
+    setProgramZoom(transform: Transform) {
+      self.programZoom.update(transform);
+      self.liveProgramZoom.update(transform);
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing

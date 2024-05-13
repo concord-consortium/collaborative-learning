@@ -406,10 +406,63 @@ context('Arrow Annotations (Sparrows)', function () {
     dataflowTile.getCreateNodeButton("demo-output").click();
 
     aa.clickArrowToolbarButton();
-    aa.getAnnotationButtons().should("have.length", 28+3);
+    // The 3 nodes create annotation buttons in the dataflow tile and mini nodes
+    // in the simulation tile
+    aa.getAnnotationButtons().should("have.length", 28+2*3);
     aa.getAnnotationButtons().eq(0).click();
     aa.getAnnotationButtons().eq(2).click();
     aa.getAnnotationArrows().should("have.length", 2);
 
+  });
+
+  it("Can add annotations to the dataflow tile", () => {
+    const url = "./doc-editor.html?appMode=qa&unit=./demo/units/qa-config-subtabs/content.json&mouseSensor";
+    cy.visit(url);
+
+    clueCanvas.addTile("dataflow");
+    dataflowTile.getDataflowTile().should("exist");
+
+    // Create input, processing, and output nodes
+    dataflowTile.getCreateNodeButton("number").click();
+    dataflowTile.getCreateNodeButton("number").click();
+    dataflowTile.getCreateNodeButton("math").click();
+    dataflowTile.getCreateNodeButton("demo-output").click();
+
+    cy.log("There should be an annotation button for each node");
+    aa.getAnnotationButtons().should("not.exist");
+    aa.clickArrowToolbarButton();
+    aa.getAnnotationButtons().should("have.length", 4);
+
+    aa.getAnnotationButtons().eq(0).click();
+    aa.getAnnotationButtons().eq(2).click();
+    aa.getAnnotationArrows().should("have.length", 1);
+    aa.clickArrowToolbarButton();
+
+    cy.log("The annotation arrow should continue showing when recording");
+    dataflowTile.getRecordButton().click();
+    // This ought to wait until the first tick happens which will update the timer
+    dataflowTile.getCountdownTimer({timeout: 3000}).should("contain", "00:01");
+    aa.getAnnotationArrows().should("have.length", 1);
+    dataflowTile.getStopButton().click();
+
+    cy.log("The annotation arrow should continue showing when stopped");
+    dataflowTile.getPlayButton().should("be.enabled");
+    // Briefly wait to make sure the recorded program blocks are now showing
+    cy.wait(100);
+    aa.getAnnotationArrows().should("have.length", 1);
+
+    cy.log("New annotations can be made on a recorded program");
+    aa.clickArrowToolbarButton();
+    aa.getAnnotationButtons().should("have.length", 4);
+    aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationButtons().eq(3).click();
+    aa.getAnnotationArrows().should("have.length", 2);
+    aa.clickArrowToolbarButton();
+
+    cy.log("Annotations continue showing after clearing the recording");
+    dataflowTile.getRecordingClearButton().click();
+    dataflowTile.getClearDataWarningClear().click();
+    dataflowTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
+    aa.getAnnotationArrows().should("have.length", 2);
   });
 });
