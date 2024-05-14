@@ -18,7 +18,7 @@ $border-radius-base: 6px;
   &.class-work {
     background-color: $classwork-purple-light-8;
   }
-  &.sort-work {
+  &.sort-work, &.student-work {
     background-color: $charcoal-light-8;
   }
   &.learning-log {
@@ -40,7 +40,7 @@ $border-radius-base: 6px;
     &.class-work {
       background-color: $classwork-purple-light-4;
     }
-    &.sort-work {
+    &.sort-work, &.student-work {
       background-color: $charcoal-light-4;
     }
     &.learning-log {
@@ -110,7 +110,7 @@ $border-radius-base: 6px;
         }
       }
     }
-    &.sort-work {
+    &.sort-work, &.student-work {
       background-color: $charcoal-light-8;
       fill: $charcoal-light-8;
       stroke: $charcoal-dark-1;
@@ -204,7 +204,7 @@ $border-radius-base: 6px;
     &.class-work {
       background-color: $classwork-purple-light-5;
     }
-    &.sort-work {
+    &.sort-work, &.student-work {
       background-color: $charcoal-light-5;
     }
     &.learning-log {
@@ -265,7 +265,7 @@ $border-radius-base: 6px;
         }
       }
     }
-    &.sort-work {
+    &.sort-work, &.student-work {
       path:first-of-type {
         fill: $charcoal-dark-1;
       }
@@ -435,7 +435,7 @@ $border-radius-base: 6px;
     }
   }
 
-  .rc-slider.sort-work {
+  .rc-slider.sort-work, .rc-slider.student-work {
     .rc-slider-handle {
       border-color: $charcoal-dark-1;
       &:hover {
