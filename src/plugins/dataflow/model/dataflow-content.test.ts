@@ -23,11 +23,11 @@ describe("DataflowContentModel", () => {
   it("should handle basic changes", () => {
     const dcm = defaultDataflowContent();
     dcm.setProgramDataRate(newDataRate);
-    dcm.setProgramZoom(newZoom.dx, newZoom.dy, newZoom.scale);
+    dcm.setProgramZoom(newZoom);
     expect(dcm.programDataRate).toBe(newDataRate);
-    expect(dcm.programZoom.dx).toBe(newZoom.dx);
-    expect(dcm.programZoom.dy).toBe(newZoom.dy);
-    expect(dcm.programZoom.scale).toBe(newZoom.scale);
+    expect(dcm.programZoom.dx).toBe(newZoom.x);
+    expect(dcm.programZoom.dy).toBe(newZoom.y);
+    expect(dcm.programZoom.scale).toBe(newZoom.k);
   });
 
   it("should be to load a program", () => {

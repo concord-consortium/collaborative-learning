@@ -1,4 +1,6 @@
 import React from 'react';
+import { ISharedProgramNode, SharedProgramDataType } from '../../../shared-program-data/shared-program-data';
+import { IOffsetModel, ObjectBoundingBox } from '../../../../models/annotations/clue-object';
 
 import SineIcon from "../../../shared-assets/icons/dataflow/generator/sine.svg";
 import SquareIcon from "../../../shared-assets/icons/dataflow/generator/square.svg";
@@ -41,7 +43,11 @@ import NotIcon from "../../../shared-assets/icons/dataflow/transform/not.svg";
 
 import TimerIcon from "../potentiometer-servo/assets/stopwatch.svg";
 
-import { ISharedProgramNode, SharedProgramDataType } from '../../../shared-program-data/shared-program-data';
+const kBoardImageLeftEdge = 132;
+const kBoardImageRightEdge = 407;
+const kBoardImageTopEdge = 54;
+const kBoardImagePinSpacing = 16;
+const kBoardImageLabelWidth = 40;
 
 const kMaxMiniNodes = 5;
 
@@ -268,3 +274,50 @@ export function getMiniNodesDisplayData(programData?: SharedProgramDataType): IM
   return { inputNodesArr, operatorNodesArr, outputNodesArr, extraInputCount, extraOperatorCount, extraOutputCount };
 }
 
+export function getNodeBoundingBox (objectId: string, tileElt: HTMLElement): ObjectBoundingBox|undefined {
+  // Find the HTML object representing this node
+  const elt = tileElt.querySelector(`.node-${objectId}`);
+  const tileRect = tileElt.getBoundingClientRect();
+  const nodeRect = elt?.getBoundingClientRect();
+  const scale = { x : tileElt.offsetWidth / tileRect.width, y : tileElt.offsetHeight / tileRect.height };
+
+  if (tileRect && nodeRect) {
+    return {
+      left: (nodeRect.left-tileRect.left) * scale.x,
+      top:  (nodeRect.top-tileRect.top) * scale.y,
+      width: nodeRect.width * scale.x,
+      height: nodeRect.height * scale.y
+    };
+  } else {
+    return undefined;
+  }
+}
+
+export function getPinBoundingBox(objectId: string, tileElt: HTMLElement) {
+  // Find the position of the image with the pins on it
+  const elt = tileElt.querySelector(`.board`);
+  const tileRect = tileElt.getBoundingClientRect();
+  const imgRect = elt?.getBoundingClientRect();
+  const scale = { x : tileElt.offsetWidth / tileRect.width, y : tileElt.offsetHeight / tileRect.height };
+
+  if (tileRect && imgRect) {
+    const side = objectId.substring(0, 1);  // L or R
+    const pinNumber = Number(objectId.substring(1));
+    return {
+      left: side === 'L'
+        ? (imgRect.left - tileRect.left)*scale.x + kBoardImageLeftEdge
+        : (imgRect.left - tileRect.left)*scale.x + kBoardImageRightEdge - kBoardImageLabelWidth,
+      top: (imgRect.top - tileRect.top)*scale.y + kBoardImageTopEdge + pinNumber*kBoardImagePinSpacing,
+      width: kBoardImageLabelWidth,
+      height: kBoardImagePinSpacing-2
+    };
+  } else {
+    return undefined;
+  }
+}
+
+export function setPinOffsets(objectId: string, offsets: IOffsetModel) {
+  const side = objectId.substring(0, 1);
+  offsets.setDx(side === "L" ? -kBoardImageLabelWidth/2 : kBoardImageLabelWidth/2);
+  return offsets;
+}

@@ -1,22 +1,27 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import ArrowAnnotation from '../../../support/elements/tile/ArrowAnnotation';
+import DataflowToolTile from '../../../support/elements/tile/DataflowToolTile';
 import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
 import NumberlineToolTile from '../../../support/elements/tile/NumberlineToolTile';
+import SimulatorTile from '../../../support/elements/tile/SimulatorTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
 import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
 
 const aa = new ArrowAnnotation;
 const clueCanvas = new ClueCanvas;
+const dataflowTile = new DataflowToolTile;
+const diagramToolTile = new DiagramToolTile;
 const drawToolTile = new DrawToolTile;
-const tableToolTile = new TableToolTile;
 const geometryToolTile = new GeometryToolTile;
 const numberlineToolTile = new NumberlineToolTile;
+const simulatorTile = new SimulatorTile;
+const tableToolTile = new TableToolTile;
 const xyTile = new XYPlotToolTile;
-const diagramToolTile = new DiagramToolTile;
 
 const queryParams = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
+const queryParamsQa = `${Cypress.config("qaUnitStudent7Investigation3")}`;
 
 // Note copied from drawing tile test
 // NOTE: For some reason cypress+chrome thinks that the SVG elements are in a
@@ -375,5 +380,89 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationButtons().eq(2).click(); // Connect equation to table
     aa.getAnnotationButtons().eq(3).click();
     aa.getAnnotationArrows().should("have.length", 1);
+  });
+
+  it("Can add annotations to chip simulator tile", () => {
+    beforeTest(queryParamsQa);
+    clueCanvas.addTile("simulator");
+    simulatorTile.getSimulatorTile().should("exist");
+
+    clueCanvas.addTile("dataflow");
+    dataflowTile.getDataflowTile().should("exist");
+
+    // with no program, sim tile should have 28 "pin" buttons.
+    aa.getAnnotationButtons().should("not.exist");
+    aa.clickArrowToolbarButton();
+    aa.getAnnotationButtons().should("have.length", 28);
+
+    aa.getAnnotationButtons().eq(0).click();
+    aa.getAnnotationButtons().eq(27).click();
+    aa.getAnnotationArrows().should("have.length", 1);
+
+    aa.clickArrowToolbarButton();
+    // Create input, processing, and output nodes
+    dataflowTile.getCreateNodeButton("number").click();
+    dataflowTile.getCreateNodeButton("math").click();
+    dataflowTile.getCreateNodeButton("demo-output").click();
+
+    aa.clickArrowToolbarButton();
+    // The 3 nodes create annotation buttons in the dataflow tile and mini nodes
+    // in the simulation tile
+    aa.getAnnotationButtons().should("have.length", 28+2*3);
+    aa.getAnnotationButtons().eq(0).click();
+    aa.getAnnotationButtons().eq(2).click();
+    aa.getAnnotationArrows().should("have.length", 2);
+
+  });
+
+  it("Can add annotations to the dataflow tile", () => {
+    const url = "./doc-editor.html?appMode=qa&unit=./demo/units/qa-config-subtabs/content.json&mouseSensor";
+    cy.visit(url);
+
+    clueCanvas.addTile("dataflow");
+    dataflowTile.getDataflowTile().should("exist");
+
+    // Create input, processing, and output nodes
+    dataflowTile.getCreateNodeButton("number").click();
+    dataflowTile.getCreateNodeButton("number").click();
+    dataflowTile.getCreateNodeButton("math").click();
+    dataflowTile.getCreateNodeButton("demo-output").click();
+
+    cy.log("There should be an annotation button for each node");
+    aa.getAnnotationButtons().should("not.exist");
+    aa.clickArrowToolbarButton();
+    aa.getAnnotationButtons().should("have.length", 4);
+
+    aa.getAnnotationButtons().eq(0).click();
+    aa.getAnnotationButtons().eq(2).click();
+    aa.getAnnotationArrows().should("have.length", 1);
+    aa.clickArrowToolbarButton();
+
+    cy.log("The annotation arrow should continue showing when recording");
+    dataflowTile.getRecordButton().click();
+    // This ought to wait until the first tick happens which will update the timer
+    dataflowTile.getCountdownTimer({timeout: 3000}).should("contain", "00:01");
+    aa.getAnnotationArrows().should("have.length", 1);
+    dataflowTile.getStopButton().click();
+
+    cy.log("The annotation arrow should continue showing when stopped");
+    dataflowTile.getPlayButton().should("be.enabled");
+    // Briefly wait to make sure the recorded program blocks are now showing
+    cy.wait(100);
+    aa.getAnnotationArrows().should("have.length", 1);
+
+    cy.log("New annotations can be made on a recorded program");
+    aa.clickArrowToolbarButton();
+    aa.getAnnotationButtons().should("have.length", 4);
+    aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationButtons().eq(3).click();
+    aa.getAnnotationArrows().should("have.length", 2);
+    aa.clickArrowToolbarButton();
+
+    cy.log("Annotations continue showing after clearing the recording");
+    dataflowTile.getRecordingClearButton().click();
+    dataflowTile.getClearDataWarningClear().click();
+    dataflowTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
+    aa.getAnnotationArrows().should("have.length", 2);
   });
 });
