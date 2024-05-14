@@ -31,7 +31,7 @@ import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
 } from "../../../models/tiles/geometry/jxg-polygon";
 import {
-  isAxis, isAxisLabel, isBoard, isComment, isFreePoint, isImage, isLine, isMovableLine,
+  isAxis, isAxisLabel, isBoard, isComment, isImage, isLine, isMovableLine,
   isMovableLineControlPoint, isMovableLineLabel, isPoint, isPolygon, isRealVisiblePoint, isVertexAngle,
   isVisibleEdge, isVisibleMovableLine, kGeometryDefaultPixelsPerUnit
 } from "../../../models/tiles/geometry/jxg-types";
@@ -348,6 +348,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     this.disposers.push(onSnapshot(this.getContent(), () => {
       if (!this.suspendSnapshotResponse) {
+        console.log("New snapshot - rebuilding board");
         this.destroyBoard();
         this.setState({ board: undefined });
         this.initializeBoard();
@@ -425,7 +426,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private handlePointerMove = debounce((evt: any) => {
     if (!this.context.board) return;
-    if (this.context.mode !== "points") return;
+    if (this.context.mode === "select") return;
     // Move phantom point to location of mouse pointer
     const content = this.context.content as GeometryContentModelType;
     const usrCoords = getEventCoords(this.context.board, evt, this.props.scale).usrCoords;
@@ -1383,9 +1384,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         return;
       }
 
-      for (const elt of board.objectsList) {
-        if (shouldInterceptPointCreation(elt) && elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
-          return;
+      if (this.context.mode === "points") {
+        for (const elt of board.objectsList) {
+          if (shouldInterceptPointCreation(elt) && elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
+            return;
+          }
         }
       }
 
@@ -1397,10 +1400,18 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
       // other clicks on board background create new points
       if (!hasSelectionModifier(evt)) {
+        console.log("creating point. activepoly=", geometryContent.activePolygonId);
         this.applyChange(() => {
-          geometryContent.realizePhantomPoint(board, [x, y]);
-          geometryContent.addPhantomPoint(board, [x, y]);
+          if (this.context.mode === "polygon") {
+            if (!geometryContent.activePolygonId) {
+              geometryContent.createPolygon(board, geometryContent.phantomPoint?.id);
+            }
+          }
+          const polyId = geometryContent.activePolygonId;
+          geometryContent.realizePhantomPoint(board, [x, y], polyId);
+          geometryContent.addPhantomPoint(board, [x, y], polyId);
         });
+        console.log("done with point. activepoly=", geometryContent.activePolygonId);
       }
     };
 
@@ -1469,57 +1480,43 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const tableId = point.getAttribute("linkedTableId");
       const columnId = point.getAttribute("linkedColId");
       const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
-      // Connect points into polygon on double-click (unless in "points" mode)
-      if (isFreePoint(point) && mode !== "points" && this.isDoubleClick(this.lastPointDown, { evt, coords })) {
-        if (board) {
-          this.applyChange(() => {
-            const polygon = geometryContent.createPolygonFromFreePoints(board, tableId, columnId);
-            if (polygon) {
-              this.handleCreatePolygon(polygon);
-              this.props.onContentChange();
-            }
-          });
-          this.lastPointDown = undefined;
+
+      this.dragPts = isPointDraggable ? { [id]: { initial: coords } } : {};
+      this.lastPointDown = { evt, coords };
+
+      // click on selected element - deselect if appropriate modifier key is down
+      if (geometryContent.isSelected(id)) {
+        if (hasSelectionModifier(evt)) {
+          geometryContent.deselectElement(board, id);
+        }
+
+        if (isMovableLineControlPoint(point)) {
+          // When a control point is clicked, deselect the rest of the line so the line slope can be changed
+          const line = find(point.descendants, isMovableLine);
+          if (line) {
+            geometryContent.deselectElement(undefined, line.id);
+            each(line.ancestors, (parentPoint, parentId) => {
+              if (parentId !== point.id) {
+                geometryContent.deselectElement(undefined, parentId);
+              }
+            });
+          }
         }
       }
+      // click on unselected element
       else {
-        this.dragPts = isPointDraggable ? { [id]: { initial: coords } } : {};
-        this.lastPointDown = { evt, coords };
-
-        // click on selected element - deselect if appropriate modifier key is down
-        if (geometryContent.isSelected(id)) {
-          if (hasSelectionModifier(evt)) {
-            geometryContent.deselectElement(board, id);
-          }
-
-          if (isMovableLineControlPoint(point)) {
-            // When a control point is clicked, deselect the rest of the line so the line slope can be changed
-            const line = find(point.descendants, isMovableLine);
-            if (line) {
-              geometryContent.deselectElement(undefined, line.id);
-              each(line.ancestors, (parentPoint, parentId) => {
-                if (parentId !== point.id) {
-                  geometryContent.deselectElement(undefined, parentId);
-                }
-              });
-            }
-          }
+        // deselect other elements unless appropriate modifier key is down
+        if (!hasSelectionModifier(evt)) {
+          geometryContent.deselectAll(board);
         }
-        // click on unselected element
-        else {
-          // deselect other elements unless appropriate modifier key is down
-          if (!hasSelectionModifier(evt)) {
-            geometryContent.deselectAll(board);
-          }
-          geometryContent.selectElement(board, id);
-        }
-
-        if (isPointDraggable) {
-          this.beginDragSelectedPoints(evt, point);
-        }
-
-        this.lastSelectDown = evt;
+        geometryContent.selectElement(board, id);
       }
+
+      if (isPointDraggable) {
+        this.beginDragSelectedPoints(evt, point);
+      }
+
+      this.lastSelectDown = evt;
     };
 
     const handleDrag = (evt: any) => {

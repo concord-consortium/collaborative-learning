@@ -185,6 +185,46 @@ function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
   }
 }
 
+function addPointToPolygon(board: JXG.Board, pointId: string, polygonId: string) {
+  const point = getObjectById(board, pointId);
+  const polygon = getObjectById(board, polygonId);
+  console.log("point", point);
+  console.log("poly", polygon);
+  if (point && isPoint(point) && polygon && isPolygon(polygon)) {
+    console.log("Adding point", point.name, "to poly", polygonId);
+    const vertices = polygon.vertices;
+    console.log("Verts Be4", vertices.map(v => `${v.name}`));
+    if (vertices.length >= 2 && vertices[vertices.length-1]===vertices[0]) {
+      vertices.pop();
+    }
+    vertices.push(point);
+    vertices.push(vertices[0]);
+    console.log("Verts Aft", vertices.map(v => `${v.name}`));
+    // Remove polygon & create a new one
+    board.removeObject(polygon);
+    const props = {
+      id: polygonId,
+      hasInnerPoints: true,
+      // default color changed to yellow in JSXGraph 1.4.0
+      fillColor: "#00FF00",
+      selectedFillColor: "#00FF00",
+      clientFillColor: "#00FF00",
+      clientSelectedFillColor: "#00FF00",
+    };
+    const poly = board.create("polygon", vertices, props);
+    if (poly) {
+      const segments = getPolygonEdges(poly);
+      segments.forEach(seg => {
+        seg.setAttribute({strokeColor: "#0000FF"});
+        seg._set("clientStrokeColor", "#0000FF");
+        seg._set("clientSelectedStrokeColor", "#0000FF");
+      });
+    }
+    console.log("recreated", poly);
+    return poly;
+  }
+}
+
 export const polygonChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     const _board = board as JXG.Board;
@@ -201,7 +241,8 @@ export const polygonChangeAgent: JXGChangeAgent = {
       clientSelectedFillColor: "#00FF00",
       ...change.properties
     };
-    const poly = parents.length ? _board.create("polygon", parents, props) : undefined;
+    const poly = _board.create("polygon", parents, props);
+    console.warn("created poly with", parents, ":", poly.id);
     if (poly) {
       const segments = getPolygonEdges(poly);
       segments.forEach(seg => {
@@ -218,6 +259,12 @@ export const polygonChangeAgent: JXGChangeAgent = {
         !Array.isArray(change.properties) && change.properties?.labelOption) {
       updateSegmentLabelOption(board, change);
       return;
+    }
+    // An update with a single string "parent" is considered to be a request to add a vertex.
+    if ((change.target === "polygon")
+      && change.targetID && !Array.isArray(change.targetID)
+      && change.parents && Array.isArray(change.parents) && typeof(change.parents?.[0]) === "string") {
+      addPointToPolygon(board, change.parents[0], change.targetID);
     }
     // other updates can be handled generically
     return objectChangeAgent.update(board, change);

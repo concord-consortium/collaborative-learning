@@ -18,17 +18,21 @@ import DeleteSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
 import LineLabelSvg from "../../../clue/assets/icons/geometry/line-label.svg";
 import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
 import PointSvg from "../../../clue/assets/icons/geometry/point-icon.svg";
+import PolygonSvg from "../../../clue/assets/icons/geometry/polygon-icon.svg";
 import SelectSvg from "../../../clue/assets/icons/select-tool.svg";
 import ShapesDuplicateSvg from "../../../clue/assets/icons/geometry/shapes-duplicate-icon.svg";
 import AddDataSvg from "../../../assets/icons/add-data-graph-icon.svg";
 
 function ModeButton({name, title, targetMode, Icon}:
   { name: string, title: string, targetMode: GeometryTileMode, Icon: FunctionComponent<SVGProps<SVGSVGElement>> }) {
-  const { mode, setMode } = useGeometryTileContext();
+  const { board, content, mode, setMode } = useGeometryTileContext();
 
   function onClick() {
     if (mode !== targetMode) {
       setMode(targetMode);
+      if (board) {
+        content?.clearPhantomPoint(board);
+      }
     }
   }
 
@@ -50,6 +54,10 @@ const SelectButton = observer(function SelectButton({name}: IToolbarButtonCompon
 
 const PointButton = observer(function PointButton({name}: IToolbarButtonComponentProps) {
   return(<ModeButton name={name} title="Point" targetMode="points" Icon={PointSvg} />);
+});
+
+const PolygonButton = observer(function PolygonButton({name}: IToolbarButtonComponentProps) {
+  return(<ModeButton name={name} title="Polygon" targetMode="polygon" Icon={PolygonSvg} />);
 });
 
 const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButtonComponentProps) {
@@ -202,6 +210,10 @@ registerTileToolbarButtons("geometry",
     {
       name: "point",
       component: PointButton
+    },
+    {
+      name: "polygon",
+      component: PolygonButton
     },
     {
       name: "duplicate",

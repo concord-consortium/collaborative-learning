@@ -381,7 +381,9 @@ export const GeometryBaseContentModel = TileContentModel
   })
   .volatile(self => ({
     // This is the point that tracks the mouse pointer when you're in a shape-creation mode.
-    phantomPoint: undefined as PointModelType|undefined
+    phantomPoint: undefined as PointModelType|undefined,
+    // In polygon mode, the phantom point is considered to be part of an in-progress polygon.
+    activePolygonId: undefined as string|undefined
   }))
   .preProcessSnapshot(snapshot => {
     // fix null table links ¯\_(ツ)_/¯

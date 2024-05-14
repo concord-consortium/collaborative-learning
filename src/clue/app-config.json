@@ -271,6 +271,7 @@
         "tools": [
           "select",
           "point",
+          "polygon",
           "upload",
           "duplicate",
           "angle-label",
