@@ -447,6 +447,10 @@ $border-radius-base: 6px;
     }
   }
 
+  .rc-slider.student-work .rc-slider-handle {
+    top: 6px;
+  }
+
   .rc-slider.learning-log {
     .rc-slider-handle {
       border-color: $learninglog-green-dark-1;
