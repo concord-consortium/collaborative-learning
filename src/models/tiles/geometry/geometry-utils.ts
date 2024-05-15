@@ -1,8 +1,36 @@
 import { getAssociatedPolygon } from "./jxg-polygon";
 import { values } from "lodash";
+import { isPoint, isPolygon } from "./jxg-types";
 
 export function copyCoords(coords: JXG.Coords) {
   return new JXG.Coords(JXG.COORDS_BY_USER, coords.usrCoords.slice(1), coords.board);
+}
+
+export function getPoint(board: JXG.Board, id: string): JXG.Point|undefined {
+  const obj = board.objects[id];
+  return isPoint(obj) ? obj : undefined;
+}
+
+export function getPolygon(board: JXG.Board, id: string): JXG.Polygon|undefined {
+  const obj = board.objects[id];
+  return isPolygon(obj) ? obj : undefined;
+}
+
+/**
+ * Adds a vertex ID to the list of existing IDs.
+ * JSX Graph will append the first ID to the end of its list of vertices to close the shape.
+ * So, this method removes the last ID before appending if it is the same as the first one.
+ * @param existingIds
+ * @param newId
+ * @returns the extended list
+ */
+export function appendVertexId(existingIds: string[], newId: string): string[] {
+  const result: string[] = [...existingIds];
+  if (existingIds.length >= 2 && existingIds[0] === existingIds[existingIds.length-1]) {
+    result.pop();
+  }
+  result.push(newId);
+  return result;
 }
 
 // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates

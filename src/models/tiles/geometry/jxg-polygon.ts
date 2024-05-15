@@ -1,6 +1,8 @@
 import { each, filter, find, uniqueId, values } from "lodash";
+import { notEmpty } from "../../../utilities/js-utils";
+import { getPoint, getPolygon } from "./geometry-utils";
 import { getObjectById } from "./jxg-board";
-import { ESegmentLabelOption, JXGChange, JXGChangeAgent } from "./jxg-changes";
+import { ESegmentLabelOption, JXGChange, JXGChangeAgent, JXGParentType, JXGProperties } from "./jxg-changes";
 import { getElementName, objectChangeAgent } from "./jxg-object";
 import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge } from "./jxg-types";
 import { wn_PnPoly } from "./soft-surfer-sunday";
@@ -50,6 +52,24 @@ export function getAssociatedPolygon(elt: JXG.GeometryElement): JXG.Polygon | un
       if (polygon) return polygon;
     }
   }
+}
+
+function createStyledPolygon(board: JXG.Board, parents: JXG.GeometryElement[], props: JXGProperties) {
+  const poly = board.create("polygon", parents, props);
+  if (poly) {
+    const segments = getPolygonEdges(poly);
+    segments.forEach(seg => {
+      if (seg.point1.getAttribute("isPhantom")) {
+        // this is the "uncompleted side" of an in-progress polygon
+        seg.setAttribute({strokeColor: "none"});
+      } else {
+        seg.setAttribute({strokeColor: "#0000FF"});
+      }
+      seg._set("clientStrokeColor", "#0000FF");
+      seg._set("clientSelectedStrokeColor", "#0000FF");
+    });
+  }
+  return poly;
 }
 
 export function getPointsForVertexAngle(vertex: JXG.Point) {
@@ -185,44 +205,26 @@ function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
   }
 }
 
-function addPointToPolygon(board: JXG.Board, pointId: string, polygonId: string) {
-  const point = getObjectById(board, pointId);
-  const polygon = getObjectById(board, polygonId);
-  console.log("point", point);
-  console.log("poly", polygon);
-  if (point && isPoint(point) && polygon && isPolygon(polygon)) {
-    console.log("Adding point", point.name, "to poly", polygonId);
-    const vertices = polygon.vertices;
-    console.log("Verts Be4", vertices.map(v => `${v.name}`));
-    if (vertices.length >= 2 && vertices[vertices.length-1]===vertices[0]) {
-      vertices.pop();
-    }
-    vertices.push(point);
-    vertices.push(vertices[0]);
-    console.log("Verts Aft", vertices.map(v => `${v.name}`));
-    // Remove polygon & create a new one
-    board.removeObject(polygon);
-    const props = {
-      id: polygonId,
-      hasInnerPoints: true,
-      // default color changed to yellow in JSXGraph 1.4.0
-      fillColor: "#00FF00",
-      selectedFillColor: "#00FF00",
-      clientFillColor: "#00FF00",
-      clientSelectedFillColor: "#00FF00",
-    };
-    const poly = board.create("polygon", vertices, props);
-    if (poly) {
-      const segments = getPolygonEdges(poly);
-      segments.forEach(seg => {
-        seg.setAttribute({strokeColor: "#0000FF"});
-        seg._set("clientStrokeColor", "#0000FF");
-        seg._set("clientSelectedStrokeColor", "#0000FF");
-      });
-    }
-    console.log("recreated", poly);
-    return poly;
-  }
+function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: JXGParentType[]) {
+  const oldPolygon = getPolygon(board, polygonId);
+  if (!oldPolygon) return;
+  // We remove the old polygon and then create a new one. Not sure if there's a simpler way.
+  board.removeObject(oldPolygon);
+
+  const vertices: JXG.Point[]
+    = vertexIds.map(v => typeof(v)==='string' ? getPoint(board, v) : undefined)
+    .filter(notEmpty);
+
+  const props = {
+    id: polygonId, // re-use the same ID
+    hasInnerPoints: true,
+    fillColor: "#00FF00",
+    selectedFillColor: "#00FF00",
+    clientFillColor: "#00FF00",
+    clientSelectedFillColor: "#00FF00",
+  };
+  const poly = createStyledPolygon(board, vertices, props);
+  return poly;
 }
 
 export const polygonChangeAgent: JXGChangeAgent = {
@@ -230,7 +232,7 @@ export const polygonChangeAgent: JXGChangeAgent = {
     const _board = board as JXG.Board;
     const parents = (change.parents || [])
                       .map(id => getObjectById(_board, id as string))
-                      .filter(pt => pt != null);
+                      .filter(notEmpty);
     const props = {
       id: uniqueId(),
       hasInnerPoints: true,
@@ -241,16 +243,7 @@ export const polygonChangeAgent: JXGChangeAgent = {
       clientSelectedFillColor: "#00FF00",
       ...change.properties
     };
-    const poly = _board.create("polygon", parents, props);
-    console.warn("created poly with", parents, ":", poly.id);
-    if (poly) {
-      const segments = getPolygonEdges(poly);
-      segments.forEach(seg => {
-        seg.setAttribute({strokeColor: "#0000FF"});
-        seg._set("clientStrokeColor", "#0000FF");
-        seg._set("clientSelectedStrokeColor", "#0000FF");
-      });
-    }
+    const poly = createStyledPolygon(_board, parents, props);
     return poly;
   },
 
@@ -260,11 +253,11 @@ export const polygonChangeAgent: JXGChangeAgent = {
       updateSegmentLabelOption(board, change);
       return;
     }
-    // An update with a single string "parent" is considered to be a request to add a vertex.
+    // An update with an array of parents is considered to be a request to update the list of vertices.
     if ((change.target === "polygon")
       && change.targetID && !Array.isArray(change.targetID)
-      && change.parents && Array.isArray(change.parents) && typeof(change.parents?.[0]) === "string") {
-      addPointToPolygon(board, change.parents[0], change.targetID);
+      && change.parents && Array.isArray(change.parents)) {
+      updatePolygonVertices(board, change.targetID, change.parents);
     }
     // other updates can be handled generically
     return objectChangeAgent.update(board, change);

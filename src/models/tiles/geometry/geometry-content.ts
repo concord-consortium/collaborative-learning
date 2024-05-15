@@ -40,6 +40,7 @@ import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { LogEventName } from "../../../lib/logger-types";
 import { gImageMap } from "../../image-map";
 import { IClueObject } from "../../annotations/clue-object";
+import { appendVertexId, getPolygon } from "./geometry-utils";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -582,13 +583,17 @@ export const GeometryContentModel = GeometryBaseContentModel
 
       // If a polygon ID was provided, display the phantom point as if it was part of that polygon
       if (polygonId) {
-        const change2: JXGChange = {
-          operation: "update",
-          target: "polygon",
-          targetID: polygonId,
-          parents: [pointModel.id]
-        };
-        syncChange(board, change2);
+        const poly = getPolygon(board, polygonId);
+        if (poly) {
+          const vertexIds = poly.vertices.map(v => v.id);
+          const change2: JXGChange = {
+            operation: "update",
+            target: "polygon",
+            targetID: polygonId,
+            parents: appendVertexId(vertexIds, pointModel.id)
+          };
+          syncChange(board, change2);
+        }
       }
 
       return isPoint(point) ? point : undefined;
@@ -606,20 +611,27 @@ export const GeometryContentModel = GeometryBaseContentModel
           }
         };
         syncChange(board, change);
-      } else {
-        console.log('no phantom point');
       }
     }
 
-    function realizePhantomPoint(board: JXG.Board, position: JXGCoordPair, polygonId?: string) {
+    /**
+     * Make the current phantom point into a real point.
+     * The new point is persisted into the model. It remains a part of the active polygon if any.
+     * @param board
+     * @param position
+     * @param polygonId
+     * @returns the point, now considered "real".
+     */
+    function realizePhantomPoint(board: JXG.Board, position: JXGCoordPair, polygonId?: string):
+        JXG.Point | undefined {
       const point = self.phantomPoint;
       if (!point) return;
       detach(point);
       self.addObjectModel(point);
       if (self.activePolygonId) {
-        const active = self.getObject(self.activePolygonId);
-        if (isPolygonModel(active)) {
-          active.points.push(point.id);
+        const activePoly = self.getObject(self.activePolygonId);
+        if (isPolygonModel(activePoly)) {
+          activePoly.points.push(point.id);
         }
       }
 
@@ -634,6 +646,9 @@ export const GeometryContentModel = GeometryBaseContentModel
         }
       };
       syncChange(board, change);
+      // Return the Point object
+      const obj = board.objects[point.id];
+      return isPoint(obj) ? obj : undefined;
     }
 
     function clearPhantomPoint(board: JXG.Board) {
@@ -645,6 +660,27 @@ export const GeometryContentModel = GeometryBaseContentModel
         };
         syncChange(board, change);
         self.phantomPoint = undefined;
+      }
+      self.activePolygonId = undefined;
+    }
+
+    function closeActivePolygon(board: JXG.Board) {
+      if (!self.activePolygonId) return;
+      const poly = getPolygon(board, self.activePolygonId);
+      if (!poly) return;
+      const vertexIds = poly.vertices.map(v => v.id);
+      // Remove the phantom point from the list of vertices & update polygon
+      const index = vertexIds.findIndex(v => v === self.phantomPoint?.id);
+      if (index >= 0) {
+        vertexIds.splice(index,1);
+
+        const change: JXGChange = {
+          operation: "update",
+          target: "polygon",
+          targetID: poly.id,
+          parents: vertexIds,
+        };
+        syncChange(board, change);
       }
       self.activePolygonId = undefined;
     }
@@ -1123,6 +1159,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         setPhantomPointPosition,
         realizePhantomPoint,
         clearPhantomPoint,
+        closeActivePolygon,
         addMovableLine,
         removeObjects,
         updateObjects,

@@ -1,9 +1,9 @@
+import React from "react";
 import { castArray, debounce, each, filter, find, keys as _keys, throttle, values } from "lodash";
 import { observe, reaction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
 import objectHash from "object-hash";
-import React from "react";
 import { SizeMeProps } from "react-sizeme";
 
 import { pointBoundingBoxSize, pointButtonRadius, segmentButtonWidth } from "./geometry-constants";
@@ -19,7 +19,8 @@ import {
   cloneGeometryObject, GeometryObjectModelType, isPointModel, pointIdsFromSegmentId, PointModelType, PolygonModelType
 } from "../../../models/tiles/geometry/geometry-model";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
-          isDragTargetOrAncestor } from "../../../models/tiles/geometry/geometry-utils";
+          isDragTargetOrAncestor,
+          getPolygon} from "../../../models/tiles/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
 import {
@@ -118,6 +119,7 @@ let sInstanceId = 0;
 @observer
 export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   static contextType = GeometryTileContext;
+  declare context: React.ContextType<typeof GeometryTileContext>;
 
   public state: IState = {
           size: { width: null, height: null },
@@ -220,6 +222,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   public componentDidMount() {
     this._isMounted = true;
     this.disposers = [];
+
+    if (this.props.readOnly) {
+      // Points mode may be the default, but it shouldn't be for read-only tiles.
+      this.context.setMode("select");
+    }
 
     this.initializeContent();
 
@@ -348,7 +355,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     this.disposers.push(onSnapshot(this.getContent(), () => {
       if (!this.suspendSnapshotResponse) {
-        console.log("New snapshot - rebuilding board");
         this.destroyBoard();
         this.setState({ board: undefined });
         this.initializeBoard();
@@ -701,8 +707,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       applyChanges(board, changesToApply);
     }
 
-    const extents = this.getBoardPointsExtents(board);
-    this.rescaleBoardAndAxes(extents);
+    if (!this.props.readOnly) {
+      const extents = this.getBoardPointsExtents(board);
+      this.rescaleBoardAndAxes(extents);
+    }
   }
 
   // remove/recreate all linked points
@@ -1400,7 +1408,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
       // other clicks on board background create new points
       if (!hasSelectionModifier(evt)) {
-        console.log("creating point. activepoly=", geometryContent.activePolygonId);
         this.applyChange(() => {
           if (this.context.mode === "polygon") {
             if (!geometryContent.activePolygonId) {
@@ -1408,10 +1415,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             }
           }
           const polyId = geometryContent.activePolygonId;
-          geometryContent.realizePhantomPoint(board, [x, y], polyId);
+          const point = geometryContent.realizePhantomPoint(board, [x, y], polyId);
+          if (point) {
+            this.handleCreatePoint(point);
+          }
           geometryContent.addPhantomPoint(board, [x, y], polyId);
         });
-        console.log("done with point. activepoly=", geometryContent.activePolygonId);
       }
     };
 
@@ -1471,9 +1480,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private handleCreatePoint = (point: JXG.Point) => {
 
     const handlePointerDown = (evt: any) => {
-      const { mode } = this.context;
+      const { board, mode } = this.context;
       const geometryContent = this.props.model.content as GeometryContentModelType;
-      const { board } = this.state;
       if (!board) return;
       const id = point.id;
       const coords = copyCoords(point.coords);
@@ -1481,6 +1489,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const columnId = point.getAttribute("linkedColId");
       const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
 
+      // In polygon mode, clicking the first point in the polygon again closes it.
+      if (mode === "polygon" && geometryContent.phantomPoint && geometryContent.activePolygonId) {
+        const poly = getPolygon(board, geometryContent.activePolygonId);
+        const firstVertex = isPolygon(poly) && poly.vertices[0];
+        if (firstVertex && id === firstVertex.id) {
+          geometryContent.closeActivePolygon(board);
+          return;
+        }
+      }
       this.dragPts = isPointDraggable ? { [id]: { initial: coords } } : {};
       this.lastPointDown = { evt, coords };
 
