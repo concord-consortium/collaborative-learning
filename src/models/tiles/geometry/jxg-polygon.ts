@@ -2,7 +2,7 @@ import { each, filter, find, uniqueId, values } from "lodash";
 import { notEmpty } from "../../../utilities/js-utils";
 import { getPoint, getPolygon } from "./geometry-utils";
 import { getObjectById } from "./jxg-board";
-import { ESegmentLabelOption, JXGChange, JXGChangeAgent, JXGParentType, JXGProperties } from "./jxg-changes";
+import { ESegmentLabelOption, JXGChange, JXGChangeAgent, JXGParentType } from "./jxg-changes";
 import { getElementName, objectChangeAgent } from "./jxg-object";
 import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge } from "./jxg-types";
 import { wn_PnPoly } from "./soft-surfer-sunday";
@@ -54,22 +54,18 @@ export function getAssociatedPolygon(elt: JXG.GeometryElement): JXG.Polygon | un
   }
 }
 
-function createStyledPolygon(board: JXG.Board, parents: JXG.GeometryElement[], props: JXGProperties) {
-  const poly = board.create("polygon", parents, props);
-  if (poly) {
-    const segments = getPolygonEdges(poly);
-    segments.forEach(seg => {
-      if (seg.point1.getAttribute("isPhantom")) {
-        // this is the "uncompleted side" of an in-progress polygon
-        seg.setAttribute({strokeColor: "none"});
-      } else {
-        seg.setAttribute({strokeColor: "#0000FF"});
-      }
-      seg._set("clientStrokeColor", "#0000FF");
-      seg._set("clientSelectedStrokeColor", "#0000FF");
-    });
-  }
-  return poly;
+function setPolygonEdgeColors(polygon: JXG.Polygon) {
+  const segments = getPolygonEdges(polygon);
+  segments.forEach(seg => {
+    if (seg.point1.getAttribute("isPhantom")) {
+      // this is the "uncompleted side" of an in-progress polygon
+      seg.setAttribute({ strokeColor: "none" });
+    } else {
+      seg.setAttribute({ strokeColor: "#0000FF" });
+    }
+    seg._set("clientStrokeColor", "#0000FF");
+    seg._set("clientSelectedStrokeColor", "#0000FF");
+  });
 }
 
 export function getPointsForVertexAngle(vertex: JXG.Point) {
@@ -223,7 +219,8 @@ function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: J
     clientFillColor: "#00FF00",
     clientSelectedFillColor: "#00FF00",
   };
-  const poly = createStyledPolygon(board, vertices, props);
+  const poly = board.create("polygon", vertices, props);
+  setPolygonEdgeColors(poly);
   return poly;
 }
 
@@ -243,7 +240,8 @@ export const polygonChangeAgent: JXGChangeAgent = {
       clientSelectedFillColor: "#00FF00",
       ...change.properties
     };
-    const poly = createStyledPolygon(_board, parents, props);
+    const poly = _board.create("polygon", parents, props);
+    setPolygonEdgeColors(poly);
     return poly;
   },
 
