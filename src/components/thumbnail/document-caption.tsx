@@ -1,5 +1,7 @@
 import React from "react";
 import DeleteThumbIcon from "../../assets/icons/delete/delete-thumb-icon.svg";
+import { Tooltip } from "react-tippy";
+import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 interface IDocumentCaptionProps {
   captionText: string;
   onDeleteClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
@@ -23,11 +25,14 @@ interface IDocumentDeleteProps {
 
 const DocumentDelete = (props: IDocumentDeleteProps) => {
   const { onDeleteClick } = props;
+  const tooltipOptions = useTooltipOptions({distance: 12});
   return (
     <div className="icon-holder" onClick={onDeleteClick}>
-      <svg className="icon-delete-document">
-        <DeleteThumbIcon />
-      </svg>
+      <Tooltip title="Delete" {...tooltipOptions} >
+        <svg className="icon-delete-document">
+          <DeleteThumbIcon />
+        </svg>
+      </Tooltip>
     </div>
   );
 };
