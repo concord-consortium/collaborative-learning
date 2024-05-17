@@ -1486,14 +1486,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private handleCreatePoint = (point: JXG.Point) => {
 
-    const handlePointerDown = (evt: any) => {
+    const handlePointerDown = (evt: React.MouseEvent) => {
       const { board, mode } = this.context;
       const geometryContent = this.props.model.content as GeometryContentModelType;
       if (!board) return;
       const id = point.id;
       const coords = copyCoords(point.coords);
-      const tableId = point.getAttribute("linkedTableId");
-      const columnId = point.getAttribute("linkedColId");
       const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
 
       // In polygon mode, clicking the first point in the polygon again closes it.
@@ -1501,7 +1499,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         const poly = getPolygon(board, geometryContent.activePolygonId);
         const firstVertex = isPolygon(poly) && poly.vertices[0];
         if (firstVertex && id === firstVertex.id) {
-          geometryContent.closeActivePolygon(board);
+          const polygon = geometryContent.closeActivePolygon(board);
+          if (polygon) {
+            this.handleCreatePolygon(polygon);
+          }
           return;
         }
       }
@@ -1598,6 +1599,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const { readOnly, scale } = this.props;
       const { board } = this.state;
       if (!board || (line !== getClickableObjectUnderMouse(board, evt, !readOnly, scale))) return;
+      if (isInVertex(evt)) return;
 
       const content = this.getContent();
       const vertices = getVertices();

@@ -215,46 +215,47 @@ function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
 }
 
 function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: JXGParentType[]) {
-  // Might need to revert to this previous method:
-  // remove the old polygon and then create a new one.
-  // const oldPolygon = getPolygon(board, polygonId);
-  // if (!oldPolygon) return;
-  // board.removeObject(oldPolygon);
-  // const vertices: JXG.Point[]
-  //   = vertexIds.map(v => typeof(v)==='string' ? getPoint(board, v) : undefined)
-  //   .filter(notEmpty);
-  // const props = {
-  //   id: polygonId, // re-use the same ID
-  //   hasInnerPoints: true,
-  //   fillColor: "#00FF00",
-  //   selectedFillColor: "#00FF00",
-  //   clientFillColor: "#00FF00",
-  //   clientSelectedFillColor: "#00FF00",
-  // };
-  // const poly = board.create("polygon", vertices, props);
-
-  const polygon = getPolygon(board, polygonId);
-  if (!polygon) return;
-
-  const existingVertices = polygon.vertices;
-  const newVertices: JXG.Point[]
+  // Remove the old polygon and create a new one.
+  const oldPolygon = getPolygon(board, polygonId);
+  if (!oldPolygon) return;
+  board.removeObject(oldPolygon);
+  const vertices: JXG.Point[]
     = vertexIds.map(v => typeof(v)==='string' ? getPoint(board, v) : undefined)
-      .filter(notEmpty);
+    .filter(notEmpty);
+  const props = {
+    id: polygonId, // re-use the same ID
+    hasInnerPoints: true,
+    fillColor: "#00FF00",
+    selectedFillColor: "#00FF00",
+    clientFillColor: "#00FF00",
+    clientSelectedFillColor: "#00FF00",
+  };
+  const polygon = board.create("polygon", vertices, props);
 
-  const addedVertices = newVertices.filter(v => !existingVertices.includes(v));
-  const removedVertices = existingVertices.filter(v => !newVertices.includes(v));
 
-  console.log('current:', existingVertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
-  console.log('adding:', addedVertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`),
-    'removing:', removedVertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
+  // Without deleting/rebuilding, would look something like this (but this fails due to apparent bugs in JSXGraph 1.4.x)
+  // const polygon = getPolygon(board, polygonId);
+  // if (!polygon) return;
 
-  for (const v of removedVertices) {
-    polygon.removePoints(v);
-  }
-  for (const v of addedVertices) {
-    polygon.addPoints(v);
-  }
-  console.log('final:', polygon.vertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
+  // const existingVertices = polygon.vertices;
+  // const newVertices: JXG.Point[]
+  //   = vertexIds.map(v => typeof(v)==='string' ? getPoint(board, v) : undefined)
+  //     .filter(notEmpty);
+
+  // const addedVertices = newVertices.filter(v => !existingVertices.includes(v));
+  // const removedVertices = existingVertices.filter(v => !newVertices.includes(v));
+
+  // console.log('current:', existingVertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
+  // console.log('adding:', addedVertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`),
+  //   'removing:', removedVertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
+
+  // for (const v of removedVertices) {
+  //   polygon.removePoints(v);
+  // }
+  // for (const v of addedVertices) {
+  //   polygon.addPoints(v);
+  // }
+  // console.log('final:', polygon.vertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
 
   setPolygonEdgeColors(polygon);
   return polygon;
@@ -291,7 +292,7 @@ export const polygonChangeAgent: JXGChangeAgent = {
     if ((change.target === "polygon")
       && change.targetID && !Array.isArray(change.targetID)
       && change.parents && Array.isArray(change.parents)) {
-      updatePolygonVertices(board, change.targetID, change.parents);
+      return updatePolygonVertices(board, change.targetID, change.parents);
     }
     // other updates can be handled generically
     return objectChangeAgent.update(board, change);

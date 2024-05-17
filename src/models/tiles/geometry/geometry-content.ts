@@ -739,14 +739,13 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
 
     function closeActivePolygon(board: JXG.Board) {
-      console.log("closeActivePolygon");
       if (!self.activePolygonId) return;
-      const poly = getPolygon(board, self.activePolygonId);
+      let poly = getPolygon(board, self.activePolygonId);
       if (!poly) return;
       const vertexIds = poly.vertices.map(v => v.id);
       // Remove the phantom point from the list of vertices & update polygon
       const index = vertexIds.findIndex(v => v === self.phantomPoint?.id);
-      if (index >= 0) {
+      if (index >= 1) {
         vertexIds.splice(index,1);
 
         const change: JXGChange = {
@@ -755,9 +754,22 @@ export const GeometryContentModel = GeometryBaseContentModel
           targetID: poly.id,
           parents: vertexIds,
         };
+        const result = syncChange(board, change);
+        if (isPolygon(result)) {
+          poly = result;
+        }
+      } else {
+        // If index === 1, only a single point remains, no need for a polygon object.
+        const change: JXGChange = {
+          operation: "delete",
+          target: "polygon",
+          targetID: poly.id
+        };
         syncChange(board, change);
+        poly = undefined;
       }
       self.activePolygonId = undefined;
+      return poly;
     }
 
     function addPoints(board: JXG.Board | undefined,
