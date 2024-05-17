@@ -32,6 +32,7 @@ function ModeButton({name, title, targetMode, Icon}:
       setMode(targetMode);
       if (board) {
         content?.clearPhantomPoint(board);
+        content?.clearActivePolygon();
       }
     }
   }

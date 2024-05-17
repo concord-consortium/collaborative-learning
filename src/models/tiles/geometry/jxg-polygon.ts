@@ -54,13 +54,24 @@ export function getAssociatedPolygon(elt: JXG.GeometryElement): JXG.Polygon | un
   }
 }
 
+/**
+ * Set appropriate colors for the edges of a polygon.
+ * An edge between a phantom point and the first vertex is considered as incompleted,
+ * and is not drawn in.
+ * @param polygon
+ */
 function setPolygonEdgeColors(polygon: JXG.Polygon) {
   const segments = getPolygonEdges(polygon);
+  console.log('setting edge colors for', polygon.id, segments);
+  const firstVertex = polygon.vertices[0];
   segments.forEach(seg => {
-    if (seg.point1.getAttribute("isPhantom")) {
+    if ((seg.point1.getAttribute("isPhantom") && seg.point2 === firstVertex)
+      ||(seg.point2.getAttribute("isPhantom") && seg.point1 === firstVertex)) {
       // this is the "uncompleted side" of an in-progress polygon
-      seg.setAttribute({ strokeColor: "none" });
+      console.log("  phantom:", seg.point1.id, seg.point2.id);
+      seg.setAttribute({ strokeColor: "#FF0000" });
     } else {
+      console.log("  not phantom:", seg.point1.id, seg.point2.id);
       seg.setAttribute({ strokeColor: "#0000FF" });
     }
     seg._set("clientStrokeColor", "#0000FF");
@@ -109,6 +120,7 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
   ids.forEach(id => {
     const elt = getObjectById(board, id);
     if (isPoint(elt)) {
+      console.log('point', elt.id, 'has childs', elt.childElements);
       each(elt.childElements, child => {
         if (isPolygon(child)) {
           if (!polygonVertexMap[child.id]) {
@@ -129,6 +141,7 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
   // Consider each polygon with vertices to be deleted
   each(polygonVertexMap, (vertexIds, polygonId) => {
     const polygon = getObjectById(board, polygonId) as JXG.Polygon;
+    console.log('fixing', polygon);
     const vertexCount = polygon.vertices.length - 1;
     const deleteCount = vertexIds.length;
     // remove points from polygons if possible
@@ -202,26 +215,49 @@ function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
 }
 
 function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: JXGParentType[]) {
-  const oldPolygon = getPolygon(board, polygonId);
-  if (!oldPolygon) return;
-  // We remove the old polygon and then create a new one. Not sure if there's a simpler way.
-  board.removeObject(oldPolygon);
+  // Might need to revert to this previous method:
+  // remove the old polygon and then create a new one.
+  // const oldPolygon = getPolygon(board, polygonId);
+  // if (!oldPolygon) return;
+  // board.removeObject(oldPolygon);
+  // const vertices: JXG.Point[]
+  //   = vertexIds.map(v => typeof(v)==='string' ? getPoint(board, v) : undefined)
+  //   .filter(notEmpty);
+  // const props = {
+  //   id: polygonId, // re-use the same ID
+  //   hasInnerPoints: true,
+  //   fillColor: "#00FF00",
+  //   selectedFillColor: "#00FF00",
+  //   clientFillColor: "#00FF00",
+  //   clientSelectedFillColor: "#00FF00",
+  // };
+  // const poly = board.create("polygon", vertices, props);
 
-  const vertices: JXG.Point[]
+  const polygon = getPolygon(board, polygonId);
+  if (!polygon) return;
+
+  const existingVertices = polygon.vertices;
+  const newVertices: JXG.Point[]
     = vertexIds.map(v => typeof(v)==='string' ? getPoint(board, v) : undefined)
-    .filter(notEmpty);
+      .filter(notEmpty);
 
-  const props = {
-    id: polygonId, // re-use the same ID
-    hasInnerPoints: true,
-    fillColor: "#00FF00",
-    selectedFillColor: "#00FF00",
-    clientFillColor: "#00FF00",
-    clientSelectedFillColor: "#00FF00",
-  };
-  const poly = board.create("polygon", vertices, props);
-  setPolygonEdgeColors(poly);
-  return poly;
+  const addedVertices = newVertices.filter(v => !existingVertices.includes(v));
+  const removedVertices = existingVertices.filter(v => !newVertices.includes(v));
+
+  console.log('current:', existingVertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
+  console.log('adding:', addedVertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`),
+    'removing:', removedVertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
+
+  for (const v of removedVertices) {
+    polygon.removePoints(v);
+  }
+  for (const v of addedVertices) {
+    polygon.addPoints(v);
+  }
+  console.log('final:', polygon.vertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
+
+  setPolygonEdgeColors(polygon);
+  return polygon;
 }
 
 export const polygonChangeAgent: JXGChangeAgent = {

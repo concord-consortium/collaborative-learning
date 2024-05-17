@@ -178,6 +178,7 @@ declare namespace JXG {
 
     findPoint: (point: JXG.Point) => number;
     removePoints: (...points: JXG.Point[]) => void;
+    addPoints: (...points: JXG.Point[]) => void;
   }
 
   class Sector extends Curve {

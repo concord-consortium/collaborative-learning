@@ -315,6 +315,7 @@ export const boardChangeAgent: JXGChangeAgent = {
     if (board) {
       const boardScale = props.boardScale;
       if (boardScale) {
+        console.warn("scaling");
         const { canvasWidth, canvasHeight } = boardScale;
         const [xClientName, yClientName] = getClientAxisLabels(board);
         const [xPropName, yPropName] = getAxisLabelsFromProps(props);

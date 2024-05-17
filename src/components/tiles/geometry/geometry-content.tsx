@@ -431,8 +431,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handlePointerMove = debounce((evt: any) => {
-    if (!this.context.board) return;
-    if (this.context.mode === "select") return;
+    if (!this.context.board || this.props.readOnly || this.context.mode === "select") return;
     // Move phantom point to location of mouse pointer
     const content = this.context.content as GeometryContentModelType;
     const usrCoords = getEventCoords(this.context.board, evt, this.props.scale).usrCoords;
@@ -441,10 +440,20 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       if (content.phantomPoint) {
         content.setPhantomPointPosition(this.context.board, position);
       } else {
-        content.addPhantomPoint(this.context.board, position);
+        content.addPhantomPoint(this.context.board, position, content.activePolygonId);
       }
     }
   }, 10, { leading: true, trailing: true });
+
+  private handlePointerLeave = () => {
+    if (!this.context.board || this.props.readOnly || this.context.mode === "select") return;
+    // Make sure deferrred 'mouseMoved' events are not called after we've cleared the point
+    this.handlePointerMove.cancel();
+    if (this.context.board) {
+      console.log("mouse left");
+      this.context.content?.clearPhantomPoint(this.context.board);
+    }
+  };
 
   public render() {
     const editableClass = this.props.readOnly ? "read-only" : "editable";
@@ -460,6 +469,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             className={classes}
             ref={elt => this.domElement = elt}
             onMouseMove={this.handlePointerMove}
+            onMouseLeave={this.handlePointerLeave}
             onDragOver={this.handleDragOver}
             onDragLeave={this.handleDragLeave}
             onDrop={this.handleDrop} />,
@@ -1406,20 +1416,17 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         return;
       }
 
-      // other clicks on board background create new points
+      // other clicks on board background create new points, perhaps even starting a polygon.
       if (!hasSelectionModifier(evt)) {
         this.applyChange(() => {
-          if (this.context.mode === "polygon") {
-            if (!geometryContent.activePolygonId) {
-              geometryContent.createPolygon(board, geometryContent.phantomPoint?.id);
-            }
-          }
-          const polyId = geometryContent.activePolygonId;
-          const point = geometryContent.realizePhantomPoint(board, [x, y], polyId);
+          const createPoly = this.context.mode === "polygon";
+          const { point, polygon } = geometryContent.realizePhantomPoint(board, [x, y], createPoly);
           if (point) {
             this.handleCreatePoint(point);
           }
-          geometryContent.addPhantomPoint(board, [x, y], polyId);
+          if (polygon) {
+            this.handleCreatePolygon(polygon);
+          }
         });
       }
     };
