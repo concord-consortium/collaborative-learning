@@ -39,7 +39,7 @@ registerTileContentInfo({
 registerTileComponentInfo({
   type: kDataflowTileType,
   Component: DataflowToolComponent,
-  tileEltClass: "dataflow-tool-tile",
+  tileEltClass: "dataflow-tool-tile disable-tile-content-drag",
   Icon,
   HeaderIcon
 });
