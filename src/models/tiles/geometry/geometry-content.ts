@@ -1,6 +1,6 @@
 import { castArray, difference, each, size as _size, union } from "lodash";
 import { reaction } from "mobx";
-import { addDisposer, applySnapshot, detach, getSnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { addDisposer, applySnapshot, detach, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { ITableLinkProperties, linkedPointId } from "../table-link-types";
@@ -40,7 +40,7 @@ import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { LogEventName } from "../../../lib/logger-types";
 import { gImageMap } from "../../image-map";
 import { IClueObject } from "../../annotations/clue-object";
-import { appendVertexId, getPoint, getPolygon } from "./geometry-utils";
+import { appendVertexId, getPolygon } from "./geometry-utils";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -562,7 +562,6 @@ export const GeometryContentModel = GeometryBaseContentModel
     function addPhantomPoint(board: JXG.Board, parents: JXGCoordPair, polygonId?: string):
         JXG.Point | undefined {
       if (!board) return undefined;
-      console.log("adding phantom point, activepoly=", self.activePolygonId);
 
       const props = {
         id: uniqueId(),
@@ -591,7 +590,6 @@ export const GeometryContentModel = GeometryBaseContentModel
       if (polygonId) {
         const poly = getPolygon(board, polygonId);
         if (poly) {
-          console.log("adding new phantom to", poly.id);
           const vertexIds = poly.vertices.map(v => v.id);
           const change2: JXGChange = {
             operation: "update",
@@ -601,7 +599,7 @@ export const GeometryContentModel = GeometryBaseContentModel
           };
           syncChange(board, change2);
         } else {
-          console.log("didn't find poly", polygonId);
+          console.warn("didn't find polygon", polygonId);
         }
       }
 
@@ -672,14 +670,10 @@ export const GeometryContentModel = GeometryBaseContentModel
             parents: appendVertexId(vertexIds, phantomPoint?.id)
           };
           syncChange(board, change2);
-          console.log("childs", getPoint(board, phantomPoint.id)?.childElements);
 
           const polyModel = self.activePolygonId && self.getObject(self.activePolygonId);
           if (polyModel && isPolygonModel(polyModel)) {
             polyModel.points.push(newRealPoint.id);
-            console.log("added point", getSnapshot(polyModel));
-          } else {
-            console.log("didn't find active polyModel", self.activePolygonId, polyModel);
           }
         } else {
           // Create a new polygon with the two points (real and phantom)
@@ -697,7 +691,6 @@ export const GeometryContentModel = GeometryBaseContentModel
             const polygonModel = PolygonModel.create({ id: newPolygon.id, points: [newRealPoint.id] });
             self.addObjectModel(polygonModel);
             self.activePolygonId = polygonModel.id;
-            console.log("created new poly", self.activePolygonId, "based on", newPolygon);
           }
         }
       }
@@ -709,7 +702,6 @@ export const GeometryContentModel = GeometryBaseContentModel
 
     function clearPhantomPoint(board: JXG.Board) {
       if (self.phantomPoint) {
-        console.log("clearPhantomPoint");
         const phantomId = self.phantomPoint.id;
 
         // remove from polygon, if it's in one.
@@ -738,7 +730,6 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
 
     function clearActivePolygon() {
-      console.log("clearActivePolygon");
       self.activePolygonId = undefined;
     }
 

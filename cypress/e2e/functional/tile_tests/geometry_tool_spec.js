@@ -121,7 +121,7 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPoint().should("have.length", 2); // same as before
 
     geometryToolTile.getSelectedGraphPoint().should("have.length", 0);
-    // FIXME Not working, no idea why
+    // FIXME Not working.  Return to this when we update the design for selected points.
     // cy.log("select first");
     // geometryToolTile.selectGraphPoint(1, 1, true);
     // geometryToolTile.getGraphPoint().eq(0).should("have.attr", "stroke", "#FF0000");

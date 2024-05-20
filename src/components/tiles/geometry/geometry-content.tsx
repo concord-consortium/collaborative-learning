@@ -450,7 +450,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     // Make sure deferrred 'mouseMoved' events are not called after we've cleared the point
     this.handlePointerMove.cancel();
     if (this.context.board) {
-      console.log("mouse left");
       this.context.content?.clearPhantomPoint(this.context.board);
     }
   };
@@ -1534,7 +1533,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (!hasSelectionModifier(evt)) {
           geometryContent.deselectAll(board);
         }
-        console.log("selecting", id);
         geometryContent.selectElement(board, id);
       }
 

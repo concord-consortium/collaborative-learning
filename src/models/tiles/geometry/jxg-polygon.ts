@@ -62,16 +62,13 @@ export function getAssociatedPolygon(elt: JXG.GeometryElement): JXG.Polygon | un
  */
 function setPolygonEdgeColors(polygon: JXG.Polygon) {
   const segments = getPolygonEdges(polygon);
-  console.log('setting edge colors for', polygon.id, segments);
   const firstVertex = polygon.vertices[0];
   segments.forEach(seg => {
     if ((seg.point1.getAttribute("isPhantom") && seg.point2 === firstVertex)
       ||(seg.point2.getAttribute("isPhantom") && seg.point1 === firstVertex)) {
       // this is the "uncompleted side" of an in-progress polygon
-      console.log("  phantom:", seg.point1.id, seg.point2.id);
       seg.setAttribute({ strokeColor: "#FF0000" });
     } else {
-      console.log("  not phantom:", seg.point1.id, seg.point2.id);
       seg.setAttribute({ strokeColor: "#0000FF" });
     }
     seg._set("clientStrokeColor", "#0000FF");
@@ -120,7 +117,6 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
   ids.forEach(id => {
     const elt = getObjectById(board, id);
     if (isPoint(elt)) {
-      console.log('point', elt.id, 'has childs', elt.childElements);
       each(elt.childElements, child => {
         if (isPolygon(child)) {
           if (!polygonVertexMap[child.id]) {
@@ -141,7 +137,6 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
   // Consider each polygon with vertices to be deleted
   each(polygonVertexMap, (vertexIds, polygonId) => {
     const polygon = getObjectById(board, polygonId) as JXG.Polygon;
-    console.log('fixing', polygon);
     const vertexCount = polygon.vertices.length - 1;
     const deleteCount = vertexIds.length;
     // remove points from polygons if possible

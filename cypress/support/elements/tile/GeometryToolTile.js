@@ -91,10 +91,7 @@ class GeometryToolTile {
             transY=this.transformFromCoordinate('y', y);
 
         this.getGraph().last()
-          .trigger("pointerdown", transX, transY, { force:true, shiftKey: withShiftKey })
-          .trigger("pointerup", transX, transY, { force:true, shiftKey: withShiftKey })
-          .click(transX, transY, { force:true, shiftKey: withShiftKey })
-          .trigger("mouseleave");
+          .click(transX, transY, { force:true, shiftKey: withShiftKey });
     }
     getGraphPointID(point){
          return cy.get('.geometry-content.editable ellipse').eq(point)
