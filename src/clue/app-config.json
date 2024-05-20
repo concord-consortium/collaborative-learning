@@ -35,7 +35,7 @@
       }
     },
     "disablePublish": [],
-    "enableHistoryRoles": [],
+    "enableHistoryRoles": ["student", "teacher"],
     "copyPreferOriginTitle": false,
     "disableTileDrags": false,
     "showClassSwitcher": true,
