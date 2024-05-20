@@ -12,7 +12,7 @@ import { ENavTab } from "../../models/view/nav-tabs";
 import { DocListDebug } from "./doc-list-debug";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
 
-import "../thumbnail/document-type-collection.sass";
+import "../thumbnail/document-type-collection.scss";
 import "./sort-work-view.scss";
 
 /**

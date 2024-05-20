@@ -10,7 +10,7 @@ import { DocumentDragKey, SupportPublication } from "../../models/document/docum
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { LogEventName } from "../../lib/logger-types";
 
-import "./document-type-collection.sass";
+import "./document-type-collection.scss";
 
 interface IProps {
   shouldHandleStarClick: boolean;
