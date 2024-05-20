@@ -33,7 +33,7 @@ registerTileContentInfo({
 registerTileComponentInfo({
   type: kDrawingTileType,
   Component: DrawingToolComponent,
-  tileEltClass: "drawing-tool-tile",
+  tileEltClass: "drawing-tool-tile disable-tile-content-drag",
   Icon,
   HeaderIcon,
   tileHandlesOwnSelection: true

@@ -48,7 +48,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   public render() {
     const { readOnly, height, model, onRegisterTileApi, tileElt } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
-    const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
+    const classes = `dataflow-tool ${editableClass}`;
     const { program, programDataRate } = this.getContent();
     const tileContent = this.getContent();
 
