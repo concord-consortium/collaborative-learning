@@ -1534,6 +1534,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (!hasSelectionModifier(evt)) {
           geometryContent.deselectAll(board);
         }
+        console.log("selecting", id);
         geometryContent.selectElement(board, id);
       }
 

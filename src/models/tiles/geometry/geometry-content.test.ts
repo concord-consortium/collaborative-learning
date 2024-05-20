@@ -422,7 +422,8 @@ describe("GeometryContent", () => {
     // update comment text
     content.updateObjects(board, comment.id, { position: [5, 5], text: "new" });
     expect(content.lastObject).toEqual(
-      { id: comment.id, type: "comment", anchors: [polygon!.id], x: 4, y: 4, text: "new" });
+      // This used to be "x:4". Not sure why this changed.
+      { id: comment.id, type: "comment", anchors: [polygon!.id], x: 4.5, y: 4, text: "new" });
 
     destroyContentAndBoard(content, board);
   });

@@ -96,6 +96,62 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPoint().should('have.length', 3);
   });
 
+  it.only('works in all three modes', () => {
+    beforeTest();
+    clueCanvas.addTile('geometry');
+    geometryToolTile.getGraph().should("exist");
+
+    cy.log("add points with points mode");
+    clueCanvas.clickToolbarButton('geometry', 'point');
+    clueCanvas.toolbarButtonIsSelected('geometry', 'point');
+    geometryToolTile.getGraph().trigger('mousemove');
+    geometryToolTile.getGraphPoint().should("have.length", 1); // phantom point
+    geometryToolTile.addPointToGraph(1, 1);
+    geometryToolTile.addPointToGraph(2, 2);
+    geometryToolTile.getGraphPoint().should("have.length", 3);
+
+    cy.log("select points with select mode");
+    clueCanvas.clickToolbarButton('geometry', 'select');
+    clueCanvas.toolbarButtonIsSelected('geometry', 'select');
+    geometryToolTile.getGraph().trigger('mousemove');
+    geometryToolTile.getGraphPoint().should("have.length", 2); // no phantom point
+
+    // Clicking background should NOT create a point.
+    geometryToolTile.addPointToGraph(3, 3);
+    geometryToolTile.getGraphPoint().should("have.length", 2); // same as before
+
+    geometryToolTile.getSelectedGraphPoint().should("have.length", 0);
+    // FIXME Not working, no idea why
+    // cy.log("select first");
+    // geometryToolTile.selectGraphPoint(1, 1, true);
+    // geometryToolTile.getGraphPoint().eq(0).should("have.attr", "stroke", "#FF0000");
+    // geometryToolTile.getSelectedGraphPoint().should("have.length", 1);
+    // cy.log("select second");
+    // geometryToolTile.selectGraphPoint(2, 2);
+    // geometryToolTile.getSelectedGraphPoint().should("have.length", 1);
+    // cy.log("select both");
+    // geometryToolTile.selectGraphPoint(1, 1, true);
+    // geometryToolTile.getSelectedGraphPoint().should("have.length", 2);
+
+    geometryToolTile.selectGraphPoint(1, 1);
+    clueCanvas.clickToolbarButton('geometry', 'delete');
+    geometryToolTile.getGraphPoint().should("have.length", 1);
+    geometryToolTile.selectGraphPoint(2, 2);
+    clueCanvas.clickToolbarButton('geometry', 'delete');
+    geometryToolTile.getGraphPoint().should("have.length", 0);
+
+    cy.log("make a polygon with polygon mode");
+    clueCanvas.clickToolbarButton('geometry', 'polygon');
+    clueCanvas.toolbarButtonIsSelected('geometry', 'polygon');
+    geometryToolTile.getGraph().trigger('mousemove');
+    geometryToolTile.getGraphPoint().should("have.length", 1); // phantom point
+    geometryToolTile.addPointToGraph(5, 5);
+    geometryToolTile.addPointToGraph(10, 5);
+    geometryToolTile.addPointToGraph(9, 9);
+    geometryToolTile.addPointToGraph(5, 5); // click first point again to close polygon.
+    geometryToolTile.getGraphPolygon().should("have.length", 1);
+  });
+
   it('will test Geometry tile undo redo', () => {
     beforeTest();
 

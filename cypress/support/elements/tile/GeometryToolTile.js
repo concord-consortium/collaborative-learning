@@ -75,6 +75,10 @@ class GeometryToolTile {
     getGraphPoint(){
         return cy.get('.geometry-content.editable ellipse[display="inline"]');
     }
+    getSelectedGraphPoint() {
+        // TODO: when we update the design, should make this a CSS class
+        return cy.get('.geometry-content.editable ellipse[stroke="#FF0000"]');
+    }
     hoverGraphPoint(x,y){
         let transX=this.transformFromCoordinate('x', x),
         transY=this.transformFromCoordinate('y', y);
@@ -82,11 +86,15 @@ class GeometryToolTile {
         this.getGraph().last()
             .trigger('mouseover',transX,transY);
     }
-    selectGraphPoint(x,y){
+    selectGraphPoint(x, y, withShiftKey = false ){
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
 
-        this.getGraph().last().click(transX, transY, {force:true});
+        this.getGraph().last()
+          .trigger("pointerdown", transX, transY, { force:true, shiftKey: withShiftKey })
+          .trigger("pointerup", transX, transY, { force:true, shiftKey: withShiftKey })
+          .click(transX, transY, { force:true, shiftKey: withShiftKey })
+          .trigger("mouseleave");
     }
     getGraphPointID(point){
          return cy.get('.geometry-content.editable ellipse').eq(point)
