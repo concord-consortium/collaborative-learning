@@ -1,9 +1,7 @@
 import classNames from "classnames";
 import React, { useEffect, useState, useRef } from "react";
 import { ITileProps } from "../../../components/tiles/tile-component";
-import { ToolbarView } from "./drawing-toolbar";
 import { DrawingLayerView } from "./drawing-layer";
-import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
 import { DrawingContentModelType } from "../model/drawing-content";
 import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -15,11 +13,12 @@ import "./drawing-tile.scss";
 import { ObjectListView } from "./object-list-view";
 import { useUIStore } from "../../../hooks/use-stores";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
+import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 
 type IProps = ITileProps;
 
 const DrawingToolComponent: React.FC<IProps> = (props) => {
-  const { documentContent, tileElt, model, readOnly, scale, onRegisterTileApi, onUnregisterTileApi } = props;
+  const { tileElt, model, readOnly, onRegisterTileApi } = props;
   const contentRef = useCurrent(model.content as DrawingContentModelType);
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
   const [objectListHoveredObject, setObjectListHoveredObject] = useState(null as string|null);
@@ -124,8 +123,6 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     ui.setSelectedTileId(model.id, { append });
   };
 
-  const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
-
   const getObjectListPanelWidth = () => {
     if (drawingToolElement.current) {
       const objectListElement = drawingToolElement.current.querySelector<HTMLDivElement>('div.object-list');
@@ -133,16 +130,6 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     } else {
       return 0;
     }
-  };
-
-  const getVisibleCanvasSize = () => {
-    if (!drawingToolElement.current
-      || !drawingToolElement.current.clientWidth
-      || !drawingToolElement.current.clientHeight) return undefined;
-    return {
-      x: drawingToolElement.current.clientWidth-getObjectListPanelWidth(),
-      y: drawingToolElement.current.clientHeight
-    };
   };
 
   return (
@@ -156,15 +143,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         onKeyDown={(e) => hotKeys.current.dispatch(e)}
         onMouseDown={handlePointerDown}
       >
-        <ToolbarView
-          model={model}
-          documentContent={documentContent}
-          tileElt={tileElt}
-          scale={scale}
-          setImageUrlToAdd={setImageUrlToAdd}
-          getVisibleCanvasSize={getVisibleCanvasSize}
-          {...toolbarProps}
-        />
+        <TileToolbar tileType="drawing" readOnly={!!readOnly} tileElement={tileElt} />
         <div className="drawing-container">
           {!readOnly && <ObjectListView model={model} setHoverObject={setObjectListHoveredObject} />}
           <DrawingLayerView

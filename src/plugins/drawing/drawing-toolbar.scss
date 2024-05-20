@@ -1,0 +1,21 @@
+@import "../../components/vars";
+
+.drawing-toolbar {
+  .toolbar-button.vector {
+    svg line {
+      stroke: $charcoal-dark-3;
+    }
+  }
+  .toolbar-button.rectangle {
+    svg rect {
+      stroke: $charcoal-dark-3;
+      fill: transparent;
+    }
+  }
+  .toolbar-button.ellipse {
+    svg circle {
+      stroke: $charcoal-dark-3;
+      fill: transparent;
+    }
+  }
+}

@@ -7,6 +7,10 @@ import { DrawingMigrator } from "./model/drawing-migrator";
 import { registerDrawingObjectInfo, registerDrawingToolInfo } from "./components/drawing-object-manager";
 import { GroupObjectsButton, UngroupObjectsButton } from "./components/drawing-toolbar-group-buttons";
 import { GroupComponent, GroupObject } from "./objects/group";
+import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-button-manager";
+import { DeleteButton, DuplicateButton, EllipseButton, FillColorButton,
+  GroupButton, ImageUploadButton, LineButton, RectangleButton, SelectButton,
+  StampButton, StrokeColorButton, TextButton, UngroupButton, VectorButton } from "./drawing-toolbar-buttons";
 
 import Icon from "./assets/draw-tool.svg";
 import HeaderIcon from "./assets/sketch-tile-id.svg";
@@ -54,3 +58,20 @@ registerDrawingToolInfo({
   name: "ungroup",
   buttonComponent: UngroupObjectsButton
 });
+
+registerTileToolbarButtons("drawing", [
+  { name: "select", component: SelectButton },
+  { name: "line", component: LineButton },
+  { name: "vector", component: VectorButton },
+  { name: "rectangle", component: RectangleButton },
+  { name: "ellipse", component: EllipseButton },
+  { name: "stamp", component: StampButton },
+  { name: "stroke-color", component: StrokeColorButton },
+  { name: "fill-color", component: FillColorButton },
+  { name: "text", component: TextButton },
+  { name: "image-upload", component: ImageUploadButton },
+  { name: "group", component: GroupButton },
+  { name: "ungroup", component: UngroupButton },
+  { name: "duplicate", component: DuplicateButton },
+  { name: "delete", component: DeleteButton }
+]);
