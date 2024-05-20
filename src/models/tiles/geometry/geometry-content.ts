@@ -27,7 +27,7 @@ import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispa
 import {  kPointDefaults, kSnapUnit } from "./jxg-point";
 import { prepareToDeleteObjects } from "./jxg-polygon";
 import {
-  isAxisArray, isBoard, isComment, isFreePoint, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
+  isAxisArray, isBoard, isComment, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
   kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
@@ -237,6 +237,10 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     get lastObject() {
       return self.objects.size ? Array.from(self.objects.values())[self.objects.size - 1] : undefined;
+    },
+    lastObjectOfType(type: string) {
+      const ofType = Array.from(self.objects.values()).filter((obj => obj.type === type));
+      return ofType.length ? ofType[ofType.length -1] : undefined;
     },
     isSelected(id: string) {
       return !!self.metadata?.isSelected(id);
@@ -903,56 +907,6 @@ export const GeometryContentModel = GeometryBaseContentModel
       return applyAndLogChange(board, change);
     }
 
-    /**
-     * Creates a polygon with no points, and set it to be active.
-     * @param board
-     * @param properties
-     * @returns polygon object
-     */
-    function createPolygon(board: JXG.Board, initialPoint: string|undefined,
-        properties?: JXGProperties): JXG.Polygon | undefined {
-          console.warn("Not used any more");
-      // const id = uniqueId();
-      // const points = initialPoint ? [initialPoint] : [];
-      // const polygonModel = PolygonModel.create({ id, ...properties||[]});
-      // self.addObjectModel(polygonModel);
-      // self.activePolygonId = id;
-      // const change: JXGChange = {
-      //   operation: "create",
-      //   target: "polygon",
-      //   parents: points,
-      //   properties: { id, ...properties }
-      // };
-      // const polygon = applyAndLogChange(board, change);
-      // return isPolygon(polygon) ? polygon : undefined;
-      return undefined;
-    }
-
-    // TODO not used any more
-    function createPolygonFromFreePoints(
-              board: JXG.Board, linkedTableId?: string, linkedColumnId?: string, properties?: JXGProperties
-            ): JXG.Polygon | undefined {
-      const freePtIds = board.objectsList
-                          .filter(elt => isFreePoint(elt) &&
-                                          (linkedTableId === elt.getAttribute("linkedTableId")) &&
-                                          (linkedColumnId === elt.getAttribute("linkedColId")))
-                          .map(pt => pt.id);
-      if (freePtIds && freePtIds.length > 1) {
-        const { id = uniqueId(), ...props } = properties || {};
-        const polygonModel = PolygonModel.create({ id, points: freePtIds, ...props });
-        self.addObjectModel(polygonModel);
-
-        const change: JXGChange = {
-                operation: "create",
-                target: "polygon",
-                parents: freePtIds,
-                properties: { id, ...props }
-              };
-        const polygon = applyAndLogChange(board, change);
-        return isPolygon(polygon) ? polygon : undefined;
-      }
-    }
-
     function addVertexAngle(board: JXG.Board,
                             parents: string[],
                             properties?: JXGProperties): JXG.Angle | undefined {
@@ -1254,8 +1208,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         addMovableLine,
         removeObjects,
         updateObjects,
-        createPolygon,
-        createPolygonFromFreePoints,
         addVertexAngle,
         updateAxisLabels,
         updatePolygonSegmentLabel,

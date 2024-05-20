@@ -277,8 +277,10 @@ export const polygonChangeAgent: JXGChangeAgent = {
       clientSelectedFillColor: "#00FF00",
       ...change.properties
     };
-    const poly = _board.create("polygon", parents, props);
-    setPolygonEdgeColors(poly);
+    const poly = parents.length ? _board.create("polygon", parents, props) : undefined;
+    if (poly) {
+      setPolygonEdgeColors(poly);
+    }
     return poly;
   },
 
