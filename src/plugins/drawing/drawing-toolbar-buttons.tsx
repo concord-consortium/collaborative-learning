@@ -41,6 +41,7 @@ const ModeToolbarButton = observer(({ name, title, buttonType, Icon }: IModeTool
   );
 });
 
+// [ OK ] - modal
 export const SelectButton = (props: IToolbarButtonComponentProps) => (
   <ModeToolbarButton
     {...props}
@@ -50,6 +51,7 @@ export const SelectButton = (props: IToolbarButtonComponentProps) => (
   />
 );
 
+// [ OK ] - modal
 export const LineButton = (props: IToolbarButtonComponentProps) => (
   <ModeToolbarButton
     {...props}
@@ -59,6 +61,7 @@ export const LineButton = (props: IToolbarButtonComponentProps) => (
   />
 );
 
+// [ OK ] - modal
 export const RectangleButton = (props: IToolbarButtonComponentProps) => (
   <ModeToolbarButton
     {...props}
@@ -68,6 +71,7 @@ export const RectangleButton = (props: IToolbarButtonComponentProps) => (
   />
 );
 
+// [ OK ] - modal
 export const EllipseButton = (props: IToolbarButtonComponentProps) => (
   <ModeToolbarButton
     {...props}
@@ -77,6 +81,7 @@ export const EllipseButton = (props: IToolbarButtonComponentProps) => (
   />
 );
 
+// [ OK ] - modal
 export const TextButton = (props: IToolbarButtonComponentProps) => (
   <ModeToolbarButton
     {...props}
@@ -86,7 +91,7 @@ export const TextButton = (props: IToolbarButtonComponentProps) => (
   />
 );
 
-// VectorButton ("Line" asset name)
+// [ ] VectorButton ("Line" asset name) - has long press
 export function VectorButton({ name }: IToolbarButtonComponentProps) {
   const selected = false;
   const title = "Vector";
@@ -102,7 +107,7 @@ export function VectorButton({ name }: IToolbarButtonComponentProps) {
   );
 }
 
-// StampButton
+// [ ] StampButton - HAS drop down
 export function StampButton({ name }: IToolbarButtonComponentProps) {
   const selected = false;
   const title = "Stamp";
@@ -118,7 +123,7 @@ export function StampButton({ name }: IToolbarButtonComponentProps) {
   );
 }
 
-// StrokeColorButton
+// [ ] StrokeColorButton - IS drop down
 export function StrokeColorButton({ name }: IToolbarButtonComponentProps) {
   const selected = false;
   const title = "Stroke Color";
@@ -134,7 +139,7 @@ export function StrokeColorButton({ name }: IToolbarButtonComponentProps) {
   );
 }
 
-// FillColorButton
+// [ ] FillColorButton - IS drop down
 export function FillColorButton({ name }: IToolbarButtonComponentProps) {
   const selected = false;
   const title = "Fill Color";
@@ -150,7 +155,7 @@ export function FillColorButton({ name }: IToolbarButtonComponentProps) {
   );
 }
 
-// ImageUploadButton
+// [ ] ImageUploadButton - use Boris' generic when it's ready
 export function ImageUploadButton({ name }: IToolbarButtonComponentProps) {
   const selected = false;
   const title = "Image Upload";
@@ -166,65 +171,64 @@ export function ImageUploadButton({ name }: IToolbarButtonComponentProps) {
   );
 }
 
-// GroupButton
+// [ OK ] GroupButton - BASIC ACTION
 export function GroupButton({ name }: IToolbarButtonComponentProps) {
-  const selected = false;
-  const title = "Group";
-
+  const drawingModel = useContext(DrawingContentModelContext);
   function handleClick() {
-    console.log("handleClick: " + name);
+    if (drawingModel.selection.length > 1) {
+      drawingModel.createGroup(drawingModel.selection);
+    }
   }
 
   return (
-    <TileToolbarButton name={name} title={title} selected={selected} onClick={handleClick}>
+    <TileToolbarButton name={name} title={"Group"} onClick={handleClick}>
       <GroupObjectsIcon />
     </TileToolbarButton>
   );
 }
 
-// UngroupButton
+// [ OK ] UngroupButton - BASIC ACTION
 export function UngroupButton({ name }: IToolbarButtonComponentProps) {
-  const selected = false;
-  const title = "Ungroup";
+  const drawingModel = useContext(DrawingContentModelContext);
 
   function handleClick() {
-    console.log("handleClick: " + name);
+    if (drawingModel.selection.length > 0) {
+      drawingModel.ungroupGroups(drawingModel.selection);
+    }
   }
 
   return (
-    <TileToolbarButton name={name} title={title} selected={selected} onClick={handleClick}>
+    <TileToolbarButton name={name} title={"Ungroup"} onClick={handleClick}>
       <UngroupObjectsIcon />
     </TileToolbarButton>
   );
 }
 
-// DuplicateButton
+// [ OK ] DuplicateButton - BASIC ACTION
 export function DuplicateButton({ name }: IToolbarButtonComponentProps) {
-  const selected = false;
-  const title = "Duplicate";
+  const drawingModel = useContext(DrawingContentModelContext);
 
   function handleClick() {
-    console.log("handleClick: " + name);
+    drawingModel.duplicateObjects(drawingModel.selection);
   }
 
   return (
-    <TileToolbarButton name={name} title={title} selected={selected} onClick={handleClick}>
+    <TileToolbarButton name={name} title={"Duplicate"} onClick={handleClick}>
       <DuplicateIcon />
     </TileToolbarButton>
   );
 }
 
-// DeleteButton
+// [ OK ] DeleteButton - BASIC ACTION
 export function DeleteButton({ name }: IToolbarButtonComponentProps) {
-  const selected = false;
-  const title = "Delete";
+  const drawingModel = useContext(DrawingContentModelContext);
 
-  function handleClick() {
-    console.log("handleClick: " + name);
-  }
+  const handleClick = () => {
+    drawingModel.deleteObjects([...drawingModel.selection]);
+  };
 
   return (
-    <TileToolbarButton name={name} title={title} selected={selected} onClick={handleClick}>
+    <TileToolbarButton name={name} title={"Delete"} onClick={handleClick}>
       <DeleteIcon />
     </TileToolbarButton>
   );
