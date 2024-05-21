@@ -108,16 +108,18 @@
 
     &.selected {
       background-color: $workspace-teal-light-4;
-
+      // HEY: I HAD TO DO THIS
+      // I THINK YOU COULD PASS A CUSTOMIZABLE FLAG OR SOMETHING FOR NOW TO CHANGE THIS
       svg {
-        fill: $workspace-teal-dark-1;
+        //fill: $workspace-teal-dark-1; HEY: I HAD TO DO THIS
       }
 
     }
 
-    svg {
-      fill: $charcoal-dark-1;
-    }
+    // HEY: and this
+    // svg {
+    //   fill: $charcoal-dark-1;
+    // }
 
     // Inputs inside a button (eg, for image upload)
     // are sized to be the size of the button.
