@@ -23,6 +23,13 @@ export const DrawingToolMetadataModel = TileMetadataModel
   .named("DrawingToolMetadata");
 export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
 
+export enum OpenPalletteValues {
+  None = "none",
+  Vector = "vector",
+  StrokeColor = "stroke-color",
+  FillColor = "fill-color",
+  Stamps = "stamps",
+}
 export interface DrawingObjectMove {
   id: string,
   destination: {x: number, y: number}
@@ -46,7 +53,8 @@ export const DrawingContentModel = TileContentModel
   .volatile(self => ({
     metadata: undefined as DrawingToolMetadataModelType | undefined,
     selectedButton: "select",
-    selection: [] as string[]
+    selection: [] as string[],
+    openPallette: OpenPalletteValues.None as OpenPalletteValues,
   }))
   .views(self => ({
     get objectMap() {
@@ -155,6 +163,10 @@ export const DrawingContentModel = TileContentModel
 
     setSelectedStamp(stampIndex: number) {
       self.currentStampIndex = stampIndex;
+    },
+
+    setOpenPallette(pallette: OpenPalletteValues) {
+      self.openPallette = pallette;
     },
 
     addObject(object: DrawingObjectSnapshotForAdd, addAtBack=false) {

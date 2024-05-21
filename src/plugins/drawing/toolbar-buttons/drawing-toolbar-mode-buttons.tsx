@@ -1,16 +1,14 @@
 import React, { useContext } from "react";
 import { observer } from "mobx-react";
-import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button";
-import { IToolbarButtonComponentProps } from "../../components/toolbar/toolbar-button-manager";
-import { DrawingContentModelContext } from "./components/drawing-content-context";
-import FreehandIcon from "./assets/freehand-icon.svg";
-import SelectIcon from "../../clue/assets/icons/select-tool.svg";
-import RectangleIcon from "./assets/rectangle-icon.svg";
-import EllipseIcon from "./assets/ellipse-icon.svg";
-import TextIcon from "../../assets/icons/comment/comment.svg";
-import { ToolbarModalButton } from "./objects/drawing-object";
-
-import "./drawing-toolbar.scss";
+import { TileToolbarButton } from "../../../components/toolbar/tile-toolbar-button";
+import { IToolbarButtonComponentProps } from "../../../components/toolbar/toolbar-button-manager";
+import { DrawingContentModelContext } from "../components/drawing-content-context";
+import FreehandIcon from "./../assets/freehand-icon.svg";
+import SelectIcon from "../../../clue/assets/icons/select-tool.svg";
+import RectangleIcon from "./../assets/rectangle-icon.svg";
+import EllipseIcon from "./../assets/ellipse-icon.svg";
+import TextIcon from "../../../assets/icons/comment/comment.svg";
+import { ToolbarModalButton } from "../objects/drawing-object";
 
 interface IModeToolbarButtonProps extends IToolbarButtonComponentProps {
   title: string;

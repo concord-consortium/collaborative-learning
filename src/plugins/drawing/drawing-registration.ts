@@ -8,15 +8,15 @@ import { registerDrawingObjectInfo, registerDrawingToolInfo } from "./components
 import { GroupObjectsButton, UngroupObjectsButton } from "./components/drawing-toolbar-group-buttons";
 import { GroupComponent, GroupObject } from "./objects/group";
 import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-button-manager";
-import { EllipseButton, LineButton, RectangleButton, SelectButton, TextButton } from "./drawing-toolbar-mode-buttons";
-import { VectorButton } from "./drawing-toolbar-vector-button";
-import { StampButton } from "./drawing-toolbar-stamp-button";
-import { FillColorButton, StrokeColorButton } from "./drawing-toolbar-color-select-buttons";
+import { EllipseButton, LineButton, RectangleButton, SelectButton, TextButton } from "./toolbar-buttons/drawing-toolbar-mode-buttons";
+import { VectorButton } from "./toolbar-buttons/drawing-toolbar-vector-button";
+import { StampButton } from "./toolbar-buttons/drawing-toolbar-stamp-button";
+import { FillColorButton, StrokeColorButton } from "./toolbar-buttons/drawing-toolbar-color-select-buttons";
 import { DeleteButton, DuplicateButton, GroupButton, UngroupButton } from "./drawing-toolbar-basic-buttons";
 
 import Icon from "./assets/draw-tool.svg";
 import HeaderIcon from "./assets/sketch-tile-id.svg";
-import { ImageUploadButton } from "./drawing-toolbar-image-button";
+import { ImageUploadButton } from "./toolbar-buttons/drawing-toolbar-image-button";
 
 registerTileContentInfo({
   type: kDrawingTileType,

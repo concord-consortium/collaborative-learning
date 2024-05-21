@@ -88,7 +88,7 @@ export const ToolbarView: React.FC<IProps> = (
       if (!drawingContent.hasSelectedObjects) {
         // If there are no selected objects, user probably wants to create one.
         drawingContent.setSelectedButton("vector");
-      } 
+      }
     }
     clearPaletteState();
   };
@@ -130,7 +130,8 @@ export const ToolbarView: React.FC<IProps> = (
     }
   };
 
-  const toolbarClasses = classNames("drawing-tool-toolbar", { disabled: !isEnabled, flip: flipPalettes });
+  console.log("| NEVER ME? |");
+  const toolbarClasses = classNames("drawing-tool-toolbar SHUM", { disabled: !isEnabled, flip: flipPalettes });
   return documentContent
     ? ReactDOM.createPortal(
         <div className={toolbarClasses} style={location} data-testid="drawing-toolbar">
@@ -140,7 +141,7 @@ export const ToolbarView: React.FC<IProps> = (
             })}
           </div>
           {paletteState.showVectors &&
-            <VectorTypePalette selectedVectorType={drawingContent.toolbarSettings.vectorType} 
+            <VectorTypePalette selectedVectorType={drawingContent.toolbarSettings.vectorType}
             onSelectVectorType={handleVectorTypeChange} settings={drawingContent.toolbarSettings} />}
           {paletteState.showStroke &&
             <StrokeColorPalette selectedColor={drawingContent.stroke} onSelectColor={handleStrokeColorChange} />}
