@@ -1,27 +1,35 @@
 import React, { useContext } from "react";
+import { observer } from "mobx-react";
 import { TileToolbarButton } from "../../../components/toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../components/toolbar/toolbar-button-manager";
 import { VectorTypePalette } from "../components/vector-palette";
-import LineIcon from "./../assets/line-icon.svg";
-
 import { DrawingContentModelContext } from "../components/drawing-content-context";
 import { OpenPalletteValues } from "../model/drawing-content";
 
-export function VectorButton({ name }: IToolbarButtonComponentProps) {
-  console.log("| render Vector button!");
+import LineIcon from "./../assets/line-icon.svg";
+
+export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
-  const selected = drawingModel?.selectedButton === "vector"; // TODO is there an enum somewhere for this string
+  const isSelected = drawingModel?.selectedButton === "vector";
+  const isOpen = drawingModel?.openPallette === OpenPalletteValues.Vector;
 
   function handleClick() {
-    console.log("| VectorButton handleClick just before handle openPallette: ", drawingModel.openPallette);
-    drawingModel.setOpenPallette(OpenPalletteValues.Vector);
-    console.log("| VectorButton handleClick just after handle openPallette: ", drawingModel.openPallette);
+    drawingModel.setSelectedButton(OpenPalletteValues.Vector);
+    toggleOpen();
+  }
+
+  function toggleOpen() {
+    if (isOpen) {
+      drawingModel.setOpenPallette(OpenPalletteValues.None);
+    } else {
+      drawingModel.setOpenPallette(OpenPalletteValues.Vector);
+    }
   }
 
   return (
-    <TileToolbarButton name={name} title={"Vector"} onClick={handleClick} selected={selected}>
+    <TileToolbarButton name={name} title={"Vector"} onClick={handleClick} selected={isSelected}>
       <LineIcon />
-      { drawingModel.openPallette === OpenPalletteValues.Vector &&
+      { isOpen &&
         <VectorTypePalette
           selectedVectorType={drawingModel.toolbarSettings.vectorType}
           onSelectVectorType={() => console.log("onSelectVectorType")}
@@ -30,4 +38,13 @@ export function VectorButton({ name }: IToolbarButtonComponentProps) {
       }
     </TileToolbarButton>
   );
-}
+});
+
+/**
+ * OK - this should actually just be copied into the color switching ones
+ * The vector can do it like this but only on the traingle button
+ * This one has to handle the long click or whatever to do what its doing now
+ * so implement the color ones like this and then come back to this one
+ * On the color ones you will have to pass through the actual state changing buttons so, yeah not sure how that will work.
+ * Oh no wait I'll instantiate the pallettes that already exist so it'll work
+ */

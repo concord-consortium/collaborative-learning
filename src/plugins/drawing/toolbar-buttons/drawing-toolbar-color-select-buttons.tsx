@@ -1,55 +1,87 @@
-import React from "react";
+import React, {useContext} from "react";
+import { observer } from "mobx-react";
+import { DrawingContentModelContext } from "../components/drawing-content-context";
 import { TileToolbarButton } from "../../../components/toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../components/toolbar/toolbar-button-manager";
-import StrokeColorIcon from "../assets/color-stroke-icon.svg";
 import FillColorIcon from "../assets/color-fill-icon.svg";
+import StrokeColorIcon from "../assets/color-stroke-icon.svg";
+import { OpenPalletteValues } from "../model/drawing-content";
+import { FillColorPalette } from "../components/fill-color-palette";
+import { StrokeColorPalette } from "../components/stroke-color-palette";
 
-export function FillColorButton({ name }: IToolbarButtonComponentProps) {
-  const selected = false;
-  const title = "Fill Color";
+export const FillColorButton = observer(({ name }: IToolbarButtonComponentProps) => {
+  const drawingModel = useContext(DrawingContentModelContext);
+  const isOpen = drawingModel?.openPallette === OpenPalletteValues.FillColor;
 
   function handleClick() {
-    console.log("handleClick: " + name);
+    if (isOpen) {
+      drawingModel.setOpenPallette(OpenPalletteValues.None);
+    } else {
+      drawingModel.setOpenPallette(OpenPalletteValues.FillColor);
+    }
   }
 
   function handleTouchHold() {
-    console.log("handleTouchHold: " + name);
+    console.log("| handleTouchHold: " + name);
   }
 
-  return (
-    <TileToolbarButton
-      name={name} title={title}
-      selected={selected}
-      onClick={handleClick}
-      onTouchHold={handleTouchHold}
-    >
-      <FillColorIcon />
-    </TileToolbarButton>
-  );
-}
-
-export function StrokeColorButton({ name }: IToolbarButtonComponentProps) {
-  const selected = false;
-  const title = "Stroke Color";
-
-  function handleClick() {
-    console.log("handleClick: " + name);
-  }
-
-  function handleTouchHold() {
-    console.log("handleTouchHold: " + name);
+  function handleColorChoice(color: string) {
+    drawingModel.setFill(color, drawingModel.selection);
   }
 
   return (
     <TileToolbarButton
       name={name}
-      title={title}
-      selected={selected}
+      title={"Fill Color"}
+      onClick={handleClick}
+      onTouchHold={handleTouchHold}
+    >
+      <FillColorIcon />
+      {isOpen &&
+        <FillColorPalette
+          selectedColor={drawingModel.fill}
+          onSelectColor={handleColorChoice}
+        />
+      }
+    </TileToolbarButton>
+  );
+});
+
+export const StrokeColorButton = observer(({ name }: IToolbarButtonComponentProps) => {
+  const drawingModel = useContext(DrawingContentModelContext);
+  const isOpen = drawingModel?.openPallette === OpenPalletteValues.StrokeColor;
+
+  function handleClick() {
+    if (isOpen) {
+      drawingModel.setOpenPallette(OpenPalletteValues.None);
+    } else {
+      drawingModel.setOpenPallette(OpenPalletteValues.StrokeColor);
+    }
+  }
+
+  function handleTouchHold() {
+    console.log("| handleTouchHold: " + name);
+  }
+
+  function handleColorChoice(color: string) {
+    drawingModel.setStroke(color, drawingModel.selection);
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title={"Stroke Color"}
       onClick={handleClick}
       onTouchHold={handleTouchHold}
     >
       <StrokeColorIcon />
+      {isOpen &&
+        <StrokeColorPalette
+          selectedColor={drawingModel.stroke}
+          onSelectColor={handleColorChoice}
+        />
+      }
     </TileToolbarButton>
   );
-}
+});
 
