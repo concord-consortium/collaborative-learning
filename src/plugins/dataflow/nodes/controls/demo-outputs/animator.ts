@@ -47,9 +47,9 @@ export abstract class Animator<S extends Sequence> {
       console.warn("Animator: requestedFrame is out of bounds", frame);
       return false;
     }
-    this.setImage(sequence.frames[frame]);
     this.currentSequence = sequence;
     this.currentFrame = frame;
+    this.setImage(sequence.frames[frame]);
     return true;
   }
 

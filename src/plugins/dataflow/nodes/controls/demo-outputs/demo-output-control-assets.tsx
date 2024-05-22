@@ -27,7 +27,6 @@ import cord04 from "../../../assets/grabber/cord/Cord_tilt_down_04.png";
 import cord05 from "../../../assets/grabber/cord/Cord_tilt_down_03.png";
 import cord06 from "../../../assets/grabber/cord/Cord_tilt_down_02.png";
 import cord07 from "../../../assets/grabber/cord/Cord_tilt_down_01.png";
-import cord08 from "../../../assets/grabber/cord/Cord_tilt_up_01.png";
 import cord09 from "../../../assets/grabber/cord/Cord_tilt_up_02.png";
 import cord10 from "../../../assets/grabber/cord/Cord_tilt_up_03.png";
 import cord11 from "../../../assets/grabber/cord/Cord_tilt_up_04.png";
@@ -67,10 +66,13 @@ export const advancedGrabberFrames = [
   grabber00, grabber01, grabber02, grabber03,
   grabber04, grabber05, grabber06, grabber07
 ];
+
+// cord07 and cord08 are the same.
+// We want an odd number of frames so there is a frame at the middle of the rotation
 export const grabberCordFrames = [
   cord00, cord01, cord02, cord03,
   cord04, cord05, cord06, cord07,
-  cord08, cord09, cord10, cord11,
+  cord09, cord10, cord11,
   cord12, cord13, cord14, cord15
 ];
 
