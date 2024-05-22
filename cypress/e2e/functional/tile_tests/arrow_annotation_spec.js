@@ -241,17 +241,17 @@ context('Arrow Annotations (Sparrows)', function () {
     clueCanvas.addTile("geometry");
 
     cy.log("Annotation buttons appear for points, polygons, and segments");
-    aa.clickArrowToolbarButton();
+    aa.clickArrowToolbarButton(); // sparrow mode on
     aa.getAnnotationLayer().should("have.class", "editing");
     aa.getAnnotationButtons().should("not.exist");
-    aa.clickArrowToolbarButton();
+    aa.clickArrowToolbarButton(); // sparrow mode off
     // For some reason adding the first point is ignored, so we add four but get three to make a triangle
     geometryToolTile.addPointToGraph(5, 5);
     geometryToolTile.addPointToGraph(10, 5);
     geometryToolTile.addPointToGraph(15, 10);
     geometryToolTile.addPointToGraph(20, 5);
     geometryToolTile.getGraphPoint().last().dblclick({ force: true });
-    aa.clickArrowToolbarButton();
+    aa.clickArrowToolbarButton(); // sparrow mode on
     // 3 points + 3 segments + 1 polygon = 7
     aa.getAnnotationButtons().should("have.length", 7);
 
@@ -259,6 +259,36 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("not.exist");
     aa.getAnnotationButtons().eq(1).click();
     aa.getAnnotationButtons().eq(6).click();
+    aa.getAnnotationArrows().should("have.length", 1);
+    aa.getAnnotationDeleteButtons().eq(0).click();
+    // Remove all the points and polygons
+    aa.clickArrowToolbarButton(); // sparrow mode off
+    geometryToolTile.getGraphPoint().eq(2).click();
+    geometryToolTile.deleteGraphElement();
+    geometryToolTile.getGraphPoint().eq(1).click();
+    geometryToolTile.deleteGraphElement();
+    geometryToolTile.getGraphPoint().eq(0).click();
+    geometryToolTile.deleteGraphElement();
+    aa.getAnnotationButtons().should("have.length", 0);
+    aa.getAnnotationArrows().should("have.length", 0);
+
+    cy.log("Add a table and check annotating linked points");
+    clueCanvas.addTile("table");
+    tableToolTile.typeInTableCellXY(0, 0, 1);
+    tableToolTile.typeInTableCellXY(0, 1, 2);
+    tableToolTile.typeInTableCellXY(1, 0, 3);
+    tableToolTile.typeInTableCellXY(1, 1, 4);
+    cy.linkTableToTile('Table Data 1', "Shapes Graph 1");
+    aa.clickArrowToolbarButton(); // sparrow mode on
+    aa.getAnnotationButtons().should("have.length", 6); // 2 dots + 4 table cells
+    clueCanvas.getSingleWorkspaceDocumentContent().scrollTo("top");
+    aa.getAnnotationButtons().eq(0).scrollIntoView().click();
+    aa.getAnnotationButtons().eq(1).scrollIntoView().click();
+    aa.getAnnotationArrows().should("have.length", 1);
+    aa.getAnnotationDeleteButtons().eq(0).click();
+    aa.getAnnotationArrows().should("have.length", 0);
+    aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationButtons().eq(2).click();
     aa.getAnnotationArrows().should("have.length", 1);
   });
 
