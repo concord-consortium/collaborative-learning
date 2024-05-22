@@ -36,11 +36,9 @@ import { SharedModelType } from "../../shared/shared-model";
 import { ISharedModelManager } from "../../shared/shared-model-manager";
 import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
-import { logTileChangeEvent } from "../log/log-tile-change-event";
-import { LogEventName } from "../../../lib/logger-types";
 import { gImageMap } from "../../image-map";
 import { IClueObject } from "../../annotations/clue-object";
-import { appendVertexId, getPolygon } from "./geometry-utils";
+import { appendVertexId, getPolygon, logGeometryEvent } from "./geometry-utils";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -528,7 +526,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       if (imageIds.length) {
         // change URL if there's already an image present
         const imageId = imageIds[imageIds.length - 1];
-        updateObjects(board, imageId, { url, size: [width, height] });
+        updateObjects(board, imageId, { url, size: [width, height], ...props });
       }
       else {
         const change: JXGChange = {
@@ -644,7 +642,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         return { point: undefined, polygon: undefined };
       }
 
-      // Update JSXGraph canvas
+      // Update the previously-existing JSXGraph point to be real, not phantom
       const change: JXGChange = {
         operation: "update",
         target: "object",
@@ -694,6 +692,12 @@ export const GeometryContentModel = GeometryBaseContentModel
           }
         }
       }
+
+      // Log event
+      logGeometryEvent(self, "create",
+        makePolygon ? "vertex" : "point",
+        self.activePolygonId ? [newRealPoint.id, self.activePolygonId] : newRealPoint.id);
+
       // Return newly-created objects
       const obj = board.objects[newRealPoint.id];
       const point = isPoint(obj) ? obj : undefined;
@@ -864,7 +868,8 @@ export const GeometryContentModel = GeometryBaseContentModel
     function updateObjects(board: JXG.Board | undefined,
                            ids: string | string[],
                            properties: JXGProperties | JXGProperties[],
-                           links?: ILinkProperties) {
+                           links?: ILinkProperties,
+                           userAction?: string) {
       const propsArray = castArray(properties);
       castArray(ids).forEach((id, i) => {
         const obj = self.getAnyObject(id);
@@ -893,7 +898,8 @@ export const GeometryContentModel = GeometryBaseContentModel
               target: "object",
               targetID: ids,
               properties,
-              links
+              links,
+              userAction
             };
       return applyAndLogChange(board, change);
     }
@@ -1121,25 +1127,18 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
     }
 
-    function applyAndLogChange(board: JXG.Board | undefined, _change: JXGChange) {
-      const result = board && syncChange(board, _change);
-
-      let loggedChange = {..._change};
-      if (!Array.isArray(_change.properties)) {
-        // flatten change.properties
-        delete loggedChange.properties;
-        loggedChange = {
-          ...loggedChange,
-          ..._change.properties
-        };
-      } else {
-        // or clean up MST array
-        loggedChange.properties = Array.from(_change.properties);
+    function applyAndLogChange(board: JXG.Board | undefined, change: JXGChange) {
+      const result = board && syncChange(board, change);
+      let propsId, text, labelOption, filename;
+      if (change.properties && !Array.isArray(change.properties)) {
+        propsId = change.properties.id;
+        text = change.properties.text;
+        labelOption = change.properties.labelOption?.toString();
+        filename = change.properties.filename;
       }
-      const tileId = self.metadata?.id || "";
-      const { operation, ...change } = loggedChange;
-      logTileChangeEvent(LogEventName.GEOMETRY_TOOL_CHANGE, { tileId, operation, change });
-
+      const targetId = propsId || change.targetID;
+      logGeometryEvent(self, change.operation, change.target, targetId,
+        { text, labelOption, filename, userAction: change.userAction });
       return result;
     }
 

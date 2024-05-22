@@ -1,6 +1,12 @@
-import { getAssociatedPolygon } from "./jxg-polygon";
 import { values } from "lodash";
+import { Instance } from "mobx-state-tree";
+import { getAssociatedPolygon } from "./jxg-polygon";
 import { isPoint, isPolygon } from "./jxg-types";
+import { JXGObjectType } from "./jxg-changes";
+import { logTileChangeEvent } from "../log/log-tile-change-event";
+import { LogEventName } from "../../../lib/logger-types";
+import { GeometryBaseContentModel } from "./geometry-model";
+import { getTileIdFromContent } from "../tile-model";
 
 export function copyCoords(coords: JXG.Coords) {
   return new JXG.Coords(JXG.COORDS_BY_USER, coords.usrCoords.slice(1), coords.board);
@@ -108,4 +114,20 @@ export function rotateCoords(coords: JXG.Coords, center: JXG.Coords, angle: numb
   x += center.usrCoords[1];
   y += center.usrCoords[2];
   return new JXG.Coords(JXG.COORDS_BY_USER, [x, y], coords.board);
+}
+
+export function logGeometryEvent(model: Instance<typeof GeometryBaseContentModel>,
+    operation: string, target: JXGObjectType, targetId?: string|string[],
+    more?: { text?: string, labelOption?: string, filename?: string, userAction?: string }) {
+  const tileId =getTileIdFromContent(model) || "";
+  const change = {
+    target,
+    targetId,
+    ...more
+  };
+  logTileChangeEvent(LogEventName.GEOMETRY_TOOL_CHANGE, {
+    tileId,
+    operation,
+    change
+  });
 }

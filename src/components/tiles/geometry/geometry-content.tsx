@@ -20,7 +20,8 @@ import {
 } from "../../../models/tiles/geometry/geometry-model";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor,
-          getPolygon} from "../../../models/tiles/geometry/geometry-utils";
+          getPolygon,
+          logGeometryEvent} from "../../../models/tiles/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
 import {
@@ -925,7 +926,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
               vertexCoords
                 .map(coords => ({ snapToGrid: false,
                                   position: coords.usrCoords.slice(1) }))
-                .slice(0, vertexCount));
+                .slice(0, vertexCount),
+              undefined,
+              "rotate");
       });
     }
   };
@@ -949,7 +952,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       // hash the copied objects to create a pasteId tied to the content
       const excludeKeys = (key: string) => ["id", "anchors", "points"].includes(key);
       const hash = objectHash(copiedObjects.map(obj => getSnapshot(obj)), { excludeKeys });
-      this.pasteObjects({ pasteId: hash, isSameTile: true, objects: copiedObjects });
+      this.pasteObjects({ pasteId: hash, isSameTile: true, objects: copiedObjects }, "duplicate");
     }
   };
 
@@ -1027,11 +1030,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const objects = clipboard.getTileContent(content.type);
     const pasteId = clipboard.getTileContentId(content.type) || objectHash(objects);
     const isSameTile = clipboard.isSourceTile(content.type, content.metadata.id);
-    this.pasteObjects({ pasteId, isSameTile, objects });
+    this.pasteObjects({ pasteId, isSameTile, objects }, "paste");
   };
 
   // paste specified object content
-  private pasteObjects = (pasteContent: IPasteContent) => {
+  private pasteObjects = (pasteContent: IPasteContent, userAction: string) => {
     const content = this.getContent();
     const { readOnly } = this.props;
     const { board } = this.state;
@@ -1074,6 +1077,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           content.deselectAll(board);
           content.selectObjects(board, newPointIds);
         }
+
+        // Log both the old and new IDs
+        const targetIds = [ ...Object.keys(idMap), ...Object.values(idMap)];
+        logGeometryEvent(content, "paste", "object", targetIds, { userAction });
       }
       return true;
     }
@@ -1242,7 +1249,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private moveSelectedPoints(dx: number, dy: number) {
     this.beginDragSelectedPoints();
-    if (this.endDragSelectedPoints(undefined, undefined, [0, dx, dy])) {
+    if (this.endDragSelectedPoints(undefined, undefined, [0, dx, dy], "keyboard")) {
       const { board } = this.state;
       const content = this.getContent();
       if (board) {
@@ -1298,7 +1305,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     updateVertexAnglesFromObjects(affectedObjects);
   }
 
-  private endDragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement | undefined, usrDiff: number[]) {
+  private endDragSelectedPoints(evt: any, dragTarget: JXG.GeometryElement | undefined,
+      usrDiff: number[], userAction: string) {
     const { board } = this.state;
     const content = this.getContent();
     if (!board || !content) return false;
@@ -1330,7 +1338,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       });
 
-      this.applyChange(() => content.updateObjects(board, ids, props));
+      this.applyChange(() => content.updateObjects(board, ids, props, undefined, userAction));
     }
     this.dragPts = {};
 
@@ -1569,7 +1577,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         dragEntry.final = copyCoords(point.coords);
         const usrDiff = JXG.Math.Statistics.subtract(dragEntry.final.usrCoords,
                                                     dragEntry.initial.usrCoords) as number[];
-        this.endDragSelectedPoints(evt, point, usrDiff);
+        this.endDragSelectedPoints(evt, point, usrDiff, "drag point");
       }
 
       delete this.dragPts[id];
@@ -1646,7 +1654,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (dragEntry && dragEntry.initial) {
           const usrDiff = JXG.Math.Statistics.subtract(vertex.coords.usrCoords,
                                                       dragEntry.initial.usrCoords) as number[];
-          this.endDragSelectedPoints(evt, line, usrDiff);
+          this.endDragSelectedPoints(evt, line, usrDiff, "drag segment");
         }
       }
       this.isVertexDrag = false;
@@ -1740,7 +1748,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (dragEntry && dragEntry.initial) {
           const usrDiff = JXG.Math.Statistics.subtract(vertex.coords.usrCoords,
                                                       dragEntry.initial.usrCoords) as number[];
-          this.endDragSelectedPoints(evt, polygon, usrDiff);
+          this.endDragSelectedPoints(evt, polygon, usrDiff, "drag polygon");
         }
       }
       this.isVertexDrag = false;
