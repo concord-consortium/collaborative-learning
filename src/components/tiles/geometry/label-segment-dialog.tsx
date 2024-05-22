@@ -10,7 +10,7 @@ interface IProps {
   onClose: () => void;
 }
 
-// Component wrapper for useAxisSettingsDialog() for use by class components.
+// Component wrapper for useLabelSegmentDialog() for use by class components.
 const LabelSegmentDialog: React.FC<IProps> = ({
   board, polygon, points, onAccept, onClose
 }: IProps) => {

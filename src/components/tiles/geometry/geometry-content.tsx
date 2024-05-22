@@ -48,7 +48,6 @@ import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
-import AxisSettingsDialog from "./axis-settings-dialog";
 import { EditableTileTitle } from "../editable-tile-title";
 import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
@@ -92,7 +91,6 @@ interface IState extends Mutable<SizeMeProps> {
   selectedLine?: JXG.Line;
   showSegmentLabelDialog?: boolean;
   showInvalidTableDataAlert?: boolean;
-  axisSettingsOpen: boolean;
 }
 
 interface JXGPtrEvent {
@@ -126,7 +124,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           size: { width: null, height: null },
           disableRotate: false,
           redoStack: [],
-          axisSettingsOpen: false,
         };
 
   private instanceId = ++sInstanceId;
@@ -463,7 +460,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       <>
         {this.renderCommentEditor()}
         {this.renderLineEditor()}
-        {this.renderSettingsEditor()}
         {this.renderSegmentLabelDialog()}
         <div id={this.elementId} key="jsxgraph"
             className={classes}
@@ -507,20 +503,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onAccept={this.handleUpdateLine}
           onClose={this.closeLineDialog}
           line={line}
-        />
-      );
-    }
-  }
-
-  private renderSettingsEditor() {
-    const { board, axisSettingsOpen } = this.state;
-    if (board && axisSettingsOpen) {
-      return (
-        <AxisSettingsDialog
-          key="editor"
-          board={board}
-          onAccept={this.handleUpdateSettings}
-          onClose={this.closeSettings}
         />
       );
     }
@@ -823,10 +805,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.setState({ selectedLine: undefined });
   };
 
-  private closeSettings = () => {
-    this.setState({ axisSettingsOpen: false });
-  };
-
   private handleCreateLineLabel = () => {
     const { board } = this.state;
     const content = this.getContent();
@@ -872,10 +850,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     });
   };
 
-  private handleOpenAxisSettings = () => {
-    this.setState({ axisSettingsOpen: true });
-  };
-
   private handleUpdateComment = (text: string, commentId?: string) => {
     const { board } = this.state;
     const content = this.getContent();
@@ -894,11 +868,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const props = [{position: point1}, {position: point2}];
     this.applyChange(() => content.updateObjects(board, ids, props));
     this.setState({ selectedLine: undefined });
-  };
-
-  private handleUpdateSettings = (params: IAxesParams) => {
-    this.rescaleBoardAndAxes(params);
-    this.setState({ axisSettingsOpen: false });
   };
 
   private handleRotatePolygon = (polygon: JXG.Polygon, vertexCoords: JXG.Coords[], isComplete: boolean) => {
@@ -1476,19 +1445,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleCreateAxis = (axis: JXG.Line) => {
-    const handlePointerDown = (evt: any) => {
-      const { readOnly, scale } = this.props;
-      const { board } = this.state;
-      // Axis labels get the event preferentially even though we think of other potentially
-      // overlapping objects (like movable line labels) as being on top. Therefore, we only
-      // open the axis settings dialog if we consider the axis label to be the preferred
-      // clickable object at the position of the event.
-      if (board && !readOnly && (axis.label === getClickableObjectUnderMouse(board, evt, false, scale))) {
-        this.handleOpenAxisSettings();
-      }
-    };
-
-    axis.label && axis.label.on("down", handlePointerDown);
+    // nothing needed, but keep this method for consistency
   };
 
   private handleCreatePoint = (point: JXG.Point) => {
