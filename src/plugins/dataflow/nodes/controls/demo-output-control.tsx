@@ -38,14 +38,6 @@ export class DemoOutputControl extends ClassicPreset.Control
     percentTilt = Math.max(0, percentTilt);
     return percentTilt;
   }
-
-  getFrame(percent: number, frames: any[]) {
-    const numFrames = frames.length;
-    let frameIndex = Math.floor(numFrames * percent);
-    frameIndex = Math.max(frameIndex, 0);
-    frameIndex = Math.min(frameIndex, numFrames - 1);
-    return frames[frameIndex];
-  }
 }
 
 export const DemoOutputControlComponent: React.FC<{ data: DemoOutputControl }> =
