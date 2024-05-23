@@ -15,8 +15,8 @@ import { SharedVariablesLinkButton } from "../shared-variables/shared-variables-
 import AddVariableCardIcon from "./src/assets/add-variable-card-icon.svg";
 import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
 import VariableEditorIcon from "../shared-variables/assets/variable-editor-icon.svg";
-import ZoomInIcon from "./src/assets/zoom-in-icon.svg";
-import ZoomOutIcon from "./src/assets/zoom-out-icon.svg";
+import ZoomInIcon from "../../clue/assets/icons/zoom-in-icon.svg";
+import ZoomOutIcon from "../../clue/assets/icons/zoom-out-icon.svg";
 import FitViewIcon from "./src/assets/fit-view-icon.svg";
 import LockLayoutIcon from "./src/assets/lock-layout-icon.svg";
 import UnlockLayoutIcon from "./src/assets/unlock-layout-icon.svg";

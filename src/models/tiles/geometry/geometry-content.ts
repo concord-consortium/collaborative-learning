@@ -1,6 +1,6 @@
 import { castArray, difference, each, size as _size, union } from "lodash";
 import { reaction } from "mobx";
-import { addDisposer, applySnapshot, detach, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { addDisposer, applySnapshot, detach, getSnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { ITableLinkProperties, linkedPointId } from "../table-link-types";
@@ -448,6 +448,27 @@ export const GeometryContentModel = GeometryBaseContentModel
       board.resizeContainer(scaledWidth, scaledHeight, false, true);
       board.setBoundingBox(newBoundingBox, false);
       board.update();
+    }
+
+    function zoomBoard(board: JXG.Board, factor: number) {
+      if (!self.board) return;
+      const {xAxis, yAxis} = self.board;
+      console.log("before zoom", getSnapshot(xAxis), getSnapshot(yAxis));
+      const { canvasWidth, canvasHeight } = board;
+      xAxis.zoom(factor);
+      yAxis.zoom(factor);
+
+      const change: JXGChange = {
+        operation: "update",
+        target: "board",
+        targetID: board.id,
+        properties: { boardScale: {
+                        xMin: xAxis.min, yMin: yAxis.min, unitX: xAxis.unit, unitY: yAxis.unit,
+                        canvasWidth, canvasHeight
+                      } },
+        userAction: factor>1 ? "zoom out" : "zoom in"
+      };
+      applyAndLogChange(board, change);
     }
 
     function rescaleBoard(board: JXG.Board, params: IAxesParams) {
@@ -1183,6 +1204,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       actions: {
         initializeBoard,
         destroyBoard,
+        zoomBoard,
         rescaleBoard,
         resizeBoard,
         updateScale,

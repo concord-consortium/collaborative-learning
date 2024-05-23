@@ -22,6 +22,8 @@ import PolygonSvg from "../../../clue/assets/icons/geometry/polygon-icon.svg";
 import SelectSvg from "../../../clue/assets/icons/select-tool.svg";
 import ShapesDuplicateSvg from "../../../clue/assets/icons/geometry/shapes-duplicate-icon.svg";
 import AddDataSvg from "../../../assets/icons/add-data-graph-icon.svg";
+import ZoomInSvg from "../../../clue/assets/icons/zoom-in-icon.svg";
+import ZoomOutSvg from "../../../clue/assets/icons/zoom-out-icon.svg";
 
 function ModeButton({name, title, targetMode, Icon}:
   { name: string, title: string, targetMode: GeometryTileMode, Icon: FunctionComponent<SVGProps<SVGSVGElement>> }) {
@@ -203,6 +205,46 @@ const AddDataButton = observer (function AddDataButton({name}: IToolbarButtonCom
   );
 });
 
+function ZoomInButton({name}: IToolbarButtonComponentProps) {
+  const readOnly = useReadOnlyContext();
+  const { board, content } = useGeometryTileContext();
+
+  function handleClick() {
+    if (readOnly || !board) return;
+    content?.zoomBoard(board, .8);
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Zoom In"
+      onClick={handleClick}
+      >
+      <ZoomInSvg/>
+    </TileToolbarButton>
+  );
+}
+
+function ZoomOutButton({name}: IToolbarButtonComponentProps) {
+  const readOnly = useReadOnlyContext();
+  const { board, content } = useGeometryTileContext();
+
+  function handleClick() {
+    if (readOnly || !board) return;
+    content?.zoomBoard(board, 1.25);
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Zoom Out"
+      onClick={handleClick}
+      >
+      <ZoomOutSvg/>
+    </TileToolbarButton>
+  );
+}
+
 registerTileToolbarButtons("geometry",
   [
     { name: "select",
@@ -247,6 +289,14 @@ registerTileToolbarButtons("geometry",
     {
       name: "delete",
       component: DeleteButton
+    },
+    {
+      name: "zoom-in",
+      component: ZoomInButton
+    },
+    {
+      name: "zoom-out",
+      component: ZoomOutButton
     }
   ]
 );
