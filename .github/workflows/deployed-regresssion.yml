@@ -27,12 +27,12 @@ jobs:
         containers: [1, 2, 3, 4, 5, 6, 7]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           # ref: ${{ github.event.inputs.branch }}
           ref: master
       - name: Run Cypress Tests
-        uses: cypress-io/github-action@v4
+        uses: cypress-io/github-action@v6
         with:
           # TODO: we might need to manual set the build id
           # TODO: the description of the run in cypress will be the commit message of branch
@@ -44,10 +44,9 @@ jobs:
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           browser: chrome
           spec: cypress/e2e/functional/**
+          # config: baseUrl=${{ github.event.inputs.deployedUrl }}
+          config: baseUrl=https://collaborative-learning.concord.org/index-staging.html
         env:
-          # override the baseUrl
-          # CYPRESS_baseUrl: ${{ github.event.inputs.deployedUrl }}
-          CYPRESS_baseUrl: https://collaborative-learning.concord.org/index-staging.html
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           # pass GitHub token to allow accurately detecting a build vs a re-run build
