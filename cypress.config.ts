@@ -1,6 +1,8 @@
 import { defineConfig } from 'cypress';
 import fs from 'fs-extra';
 import path from 'path';
+import installLogsPrinter from 'cypress-terminal-report/src/installLogsPrinter';
+import codeCoverageTask from '@cypress/code-coverage/task';
 
 export default defineConfig({
   video: false,
@@ -42,23 +44,27 @@ export default defineConfig({
     numTestsKeptInMemory: 10,
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
-    setupNodeEvents(on, config) {
-      const fetchConfigurationByFile = file => {
-        const pathOfConfigurationFile = `config/cypress.${file}.json`;
+    async setupNodeEvents(on, config) {
+      // Print out cypress log to the command line so it is recorded by the CI system
+      installLogsPrinter(on);
 
-        return (
-          file && fs.readJson(path.join(__dirname, "./cypress/", pathOfConfigurationFile))
-        );
-      };
+      function getEnvConfig() {
+        const testEnv = config.env.testEnv;
+        if (testEnv) {
+          const pathOfConfigurationFile = `config/cypress.${testEnv}.json`;
+          return fs.readJson(path.join(__dirname, "./cypress/", pathOfConfigurationFile));
+        } else {
+          return {};
+        }
+      }
+      const envConfig = await getEnvConfig();
+      const combinedConfig = { ...config, ...envConfig };
 
-      require('cypress-terminal-report/src/installLogsPrinter')(on);
+      // Save the code coverage information after each test.
+      // This also modifies the combinedConfig so the modified config needs to be returned
+      codeCoverageTask(on, combinedConfig);
 
-      const environment = config.env.testEnv || 'dev';
-      // First, read environments.json.
-      return fetchConfigurationByFile(environment)
-        .then(envConfig => {
-          return require('@cypress/code-coverage/task')(on, { ...config, ...envConfig });
-        });
+      return combinedConfig;
     },
     baseUrl: 'http://localhost:8080/',
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
