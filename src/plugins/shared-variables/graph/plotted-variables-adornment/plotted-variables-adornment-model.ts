@@ -11,7 +11,7 @@ import {
 import { SharedVariables, SharedVariablesType } from "../../shared-variables";
 import { kPlottedVariablesType } from "./plotted-variables-adornment-types";
 import { GraphAttrRole, Point, PrimaryAttrRole } from "../../../graph/graph-types";
-import { IClueObject } from "../../../../models/annotations/clue-object";
+import { IClueTileObject } from "../../../../models/annotations/clue-object";
 import { GraphModel } from "../../../graph/models/graph-model";
 import { isNumericAxisModel } from "../../../graph/imports/components/axis/models/axis-model";
 
@@ -26,7 +26,7 @@ function getSharedVariables(node: IAnyStateTreeNode) {
   }
 }
 
-function getVaribleAnnotationId(xVariableId: string, yVariableId: string) {
+function getVariableAnnotationId(xVariableId: string, yVariableId: string) {
   return `var:{${xVariableId}}:{${yVariableId}}`;
 }
 
@@ -147,13 +147,13 @@ export const PlottedVariablesAdornmentModel = PlottedFunctionAdornmentModel
       }
       return lists;
     },
-    getAnnotatableObjects(tileId: string): IClueObject[] {
+    get annotatableObjects(): IClueTileObject[] {
       const result = [];
       for (const pvi of self.plottedVariables.values()) {
         const vals = pvi.variableValues;
         if (pvi.xVariableId && pvi.yVariableId && vals) {
-          const objectId = getVaribleAnnotationId(pvi.xVariableId, pvi.yVariableId);
-          result.push({ tileId, objectId, objectType: "variable" });
+          const objectId = getVariableAnnotationId(pvi.xVariableId, pvi.yVariableId);
+          result.push({ objectId, objectType: "variable" });
         }
       }
       return result;

@@ -6,7 +6,7 @@ import { IAxisModel } from "../../imports/components/axis/models/axis-model";
 import { computeSlopeAndIntercept } from "../../utilities/graph-utils";
 import { kMovableLineType } from "./movable-line-types";
 import { IGraphModel } from "../../models/graph-model";
-import { IClueObject } from "../../../../models/annotations/clue-object";
+import { IClueTileObject } from "../../../../models/annotations/clue-object";
 
 export function getAnnotationId(lineKey: string, type: "handle"|"equation", position?: "lower"|"upper") {
   if (position) {
@@ -123,13 +123,13 @@ export const MovableLineModel = AdornmentModel
   }
 }))
 .views(self => ({
-  getAnnotatableObjects(tileId: string) {
-    const objects: IClueObject[] = [];
+  get annotatableObjects() {
+    const objects: IClueTileObject[] = [];
     if (self.isVisible) {
       for (const key of self.lines.keys()) {
-        objects.push({ tileId, objectType: "movable-line-handle", objectId: getAnnotationId(key, "handle", "lower") });
-        objects.push({ tileId, objectType: "movable-line-handle", objectId: getAnnotationId(key, "handle", "upper") });
-        objects.push({ tileId, objectType: "movable-line-equation", objectId: getAnnotationId(key, "equation") });
+        objects.push({ objectType: "movable-line-handle", objectId: getAnnotationId(key, "handle", "lower") });
+        objects.push({ objectType: "movable-line-handle", objectId: getAnnotationId(key, "handle", "upper") });
+        objects.push({ objectType: "movable-line-equation", objectId: getAnnotationId(key, "equation") });
       }
     }
     return objects;

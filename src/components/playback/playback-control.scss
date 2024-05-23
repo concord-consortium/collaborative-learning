@@ -5,7 +5,7 @@ $border-radius-base: 6px;
   display: flex;
   flex-direction: row;
   align-items: center;
-  width: calc(100% - 2px);
+  width: calc(100% - 5px);
   height: 46px;
 
   &.loading {
@@ -18,13 +18,17 @@ $border-radius-base: 6px;
   &.class-work {
     background-color: $classwork-purple-light-8;
   }
-  &.student-work {
+  &.sort-work, &.student-work {
     background-color: $charcoal-light-8;
   }
   &.learning-log {
     background-color: $learninglog-green-light-8;
   }
+  &.problems {
+    background-color: $problem-orange-light-8;
+  }
 
+  // line between time travel button and play button
   .control-separator {
     width: $canvas-separator-width;
     height: 46px;
@@ -36,11 +40,14 @@ $border-radius-base: 6px;
     &.class-work {
       background-color: $classwork-purple-light-4;
     }
-    &.student-work {
+    &.sort-work, &.student-work {
       background-color: $charcoal-light-4;
     }
     &.learning-log {
-      background-color: $learninglog-green-light-5;
+      background-color: $learninglog-green-light-4;
+    }
+    &.problems {
+      background-color: $problem-orange-light-4;
     }
   }
 
@@ -80,8 +87,8 @@ $border-radius-base: 6px;
       }
     }
     &.class-work {
-      background-color: $classwork-purple-light-5;
-      fill:  $classwork-purple-light-5;
+      background-color: $classwork-purple-light-8;
+      fill:  $classwork-purple-light-8;
       stroke: $classwork-purple-dark-1;
       &:hover {
         background-color: $classwork-purple-light-4;
@@ -103,9 +110,9 @@ $border-radius-base: 6px;
         }
       }
     }
-    &.student-work {
-      background-color: $charcoal-light-4;
-      fill: $charcoal-light-4;
+    &.sort-work, &.student-work {
+      background-color: $charcoal-light-8;
+      fill: $charcoal-light-8;
       stroke: $charcoal-dark-1;
       &:hover {
         background-color: $charcoal-light-4;
@@ -151,6 +158,30 @@ $border-radius-base: 6px;
         }
       }
     }
+    &.problems {
+      background-color: $problem-orange-light-8;
+      fill: $problem-orange-light-8;
+      stroke: $problem-orange-dark-1;
+      &:hover {
+        background-color: $problem-orange-light-4;
+        fill: $problem-orange-light-4;
+      }
+      &:active {
+        background-color: $problem-orange-light-2;
+        fill: $problem-orange-light-2;
+      }
+      path {
+        fill: $problem-orange-dark-1;
+      }
+      &.playing {
+        background-color: $problem-orange-light-2;
+        fill: $problem-orange-light-2;
+        &:hover {
+          background-color: $problem-orange-light-4;
+          fill: $problem-orange-light-4;
+        }
+      }
+    }
   }
 }
 
@@ -164,19 +195,23 @@ $border-radius-base: 6px;
 
   .marker-component {
     height: 20px;
-    width: 100%;
+    width: calc(100% - 3px);
     position: absolute;
+    right:0;
     &.my-work {
       background-color: $workspace-teal-light-5;
     }
     &.class-work {
       background-color: $classwork-purple-light-5;
     }
-    &.student-work {
+    &.sort-work, &.student-work {
       background-color: $charcoal-light-5;
     }
     &.learning-log {
       background-color: $learninglog-green-light-5;
+    }
+    &.problems {
+      background-color: $problem-orange-light-5;
     }
   }
 
@@ -230,7 +265,7 @@ $border-radius-base: 6px;
         }
       }
     }
-    &.student-work {
+    &.sort-work, &.student-work {
       path:first-of-type {
         fill: $charcoal-dark-1;
       }
@@ -259,6 +294,22 @@ $border-radius-base: 6px;
         color: white;
         path:last-of-type {
           fill:  $learninglog-green-dark-1;
+        }
+      }
+    }
+    &.problems {
+      path:first-of-type {
+        fill: $problem-orange-dark-1;
+      }
+      path:last-of-type {
+        fill: $problem-orange-light-5;
+        stroke: $problem-orange-dark-1;
+        stroke-width: 2px;
+      }
+      &.selected {
+        color: white;
+        path:last-of-type {
+          fill:  $problem-orange-dark-1;
         }
       }
     }
@@ -384,7 +435,7 @@ $border-radius-base: 6px;
     }
   }
 
-  .rc-slider.student-work {
+  .rc-slider.sort-work, .rc-slider.student-work {
     .rc-slider-handle {
       border-color: $charcoal-dark-1;
       &:hover {
@@ -396,6 +447,10 @@ $border-radius-base: 6px;
     }
   }
 
+  .rc-slider.student-work .rc-slider-handle {
+    top: 6px;
+  }
+
   .rc-slider.learning-log {
     .rc-slider-handle {
       border-color: $learninglog-green-dark-1;
@@ -404,6 +459,18 @@ $border-radius-base: 6px;
       }
       &:active {
         background-color: $learninglog-green-light-2
+      }
+    }
+  }
+
+  .rc-slider.problems {
+    .rc-slider-handle {
+      border-color: $problem-orange-dark-1;
+      &:hover {
+        background-color: $problem-orange-light-5;
+      }
+      &:active {
+        background-color: $problem-orange-light-2
       }
     }
   }
