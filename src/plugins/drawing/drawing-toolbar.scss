@@ -1,21 +1,135 @@
 @import "../../components/vars";
 
 .drawing-toolbar {
-  .toolbar-button.vector {
-    svg line {
-      stroke: $charcoal-dark-3;
+  // .toolbar-button.vector {
+  //   svg line {
+  //     stroke: $charcoal-dark-3;
+  //   }
+  // }
+  // .toolbar-button.rectangle {
+  //   svg rect {
+  //     stroke: $charcoal-dark-3;
+  //     fill: transparent;
+  //   }
+  // }
+  // .toolbar-button.ellipse {
+  //   svg circle {
+  //     stroke: $charcoal-dark-3;
+  //     fill: transparent;
+  //   }
+  // }
+  .palette-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+    padding: 2.5px;
+
+    .stamp-button {
+      position: relative;
+      width: 30px;
+      height: 30px;
+
+      img {
+        position: absolute;
+        left: 3px;
+        top: 3px;
+        max-width: 24px;
+        max-height: 24px;
+      }
+
+      &.select {
+        stroke: $workspace-teal;
+      }
+      &:hover {
+        stroke: $workspace-teal-light-2;
+      }
+      &:active {
+        stroke: $workspace-teal;
+      }
+    }
+
+    .color-swatch {
+      position: relative;
+      width: 30px;
+      height: 30px;
+
+      svg {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+
+      .none-icon {
+        left: 4px;
+        top: 4px;
+      }
+      .check-icon {
+        left: 4px;
+        top: 4px;
+        fill: white;
+      }
+      &.light {
+        .check-icon {
+          fill: $workspace-teal;
+        }
+      }
+
+      &.light {
+        .contrast-border {
+          stroke: $charcoal-light-1;
+        }
+      }
+
+      .highlight {
+        &.select {
+          stroke: $workspace-teal;
+        }
+      }
+      &:hover {
+        .highlight {
+          stroke: $workspace-teal-light-2;
+        }
+      }
+      &:active {
+        .highlight {
+          stroke: $workspace-teal;
+        }
+      }
     }
   }
-  .toolbar-button.rectangle {
-    svg rect {
-      stroke: $charcoal-dark-3;
-      fill: transparent;
+
+  .toolbar-palette {
+    position: absolute;
+    height: 70px;
+    background-color: $workspace-teal-light-9;
+    border: $toolbar-border;
+    border-radius: 0 $toolbar-border-radius $toolbar-border-radius $toolbar-border-radius;
+    z-index: $toolbar-z-index;
+    top:34px;
+
+    &.one-row {
+      height: 40px;
     }
-  }
-  .toolbar-button.ellipse {
-    svg circle {
-      stroke: $charcoal-dark-3;
-      fill: transparent;
+
+    &.vectors {
+      left: 70px;
+      height: 38px;
+    }
+
+    &.stamps {
+      left: 180px;
+      width: 190px;
+    }
+
+    &.stroke-color {
+      left: 216px;
+      width: 129px;
+    }
+
+    &.fill-color {
+      left: 252px;
+      width: 159px;
     }
   }
 }

@@ -10,7 +10,7 @@ import DuplicateIcon from "../assets/duplicate-icon.svg";
 import DeleteSelectionIcon from "../../../assets/icons/delete/delete-selection-icon.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { isLightColorRequiringContrastOffset } from "../../../utilities/color-utils";
-import { computeStrokeDashArray, IToolbarButtonProps, IToolbarManager, 
+import { computeStrokeDashArray, IToolbarButtonProps, IToolbarManager,
   ToolbarModalButton } from "../objects/drawing-object";
 import { useTouchHold } from "../../../hooks/use-touch-hold";
 import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
@@ -26,6 +26,7 @@ export const buttonClasses = ({ modalButton, disabled, selected, others }: IButt
   return classNames("drawing-tool-button", modalButtonClass, { disabled, selected }, others);
 };
 
+// HEY: the one you ended up making is pretty much this so see about integrating it, or using the tooltip way at least
 /*
  * SvgToolbarButton
  */
@@ -46,7 +47,7 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
   const tooltipOptions = useTooltipOptions();
 
   // If there is a palette that can be opened, set up touch-hold handlers
-  const { didTouchHold, ...paletteHandlers } 
+  const { didTouchHold, ...paletteHandlers }
       = useTouchHold(openPalette || function(){/*noop*/}, onClick);
   const handlers = openPalette ? paletteHandlers : { onClick };
 
@@ -57,14 +58,14 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
       e.stopPropagation();
     }
   };
-  
+
   return SvgIcon
     ? <Tooltip title={title} {...tooltipOptions}>
-        <button className={buttonClasses({ disabled, selected, others: `button-${buttonClass}` })} 
+        <button className={buttonClasses({ disabled, selected, others: `button-${buttonClass}` })}
             type="button" disabled={disabled} {...handlers} >
           <SvgIcon fill={fill} stroke={stroke} strokeWidth={strokeWidth}
               strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}/>
-          { openPalette && 
+          { openPalette &&
             <div className="expand-collapse" onClick={handleExpandCollapseClick}>
               <SmallCornerTriangle />
             </div>
@@ -93,7 +94,7 @@ export const SvgToolModeButton: React.FC<ISvgToolModeButtonProps> = observer(fun
   const selected = selectedButton === modalButton;
   const _settings = settings || toolbarSettings;
 
-  return <SvgToolbarButton SvgIcon={SvgIcon} buttonClass={modalButton} onClick={handleClick} 
+  return <SvgToolbarButton SvgIcon={SvgIcon} buttonClass={modalButton} onClick={handleClick}
     selected={selected} settings={_settings} {...others} />;
 });
 
@@ -148,6 +149,6 @@ export const DeleteButton: React.FC<IDeleteToolButtonProps> = observer(function 
   };
   const disabled = !toolbarManager.hasSelectedObjects;
 
-  return <SvgToolbarButton SvgIcon={DeleteSelectionIcon} buttonClass="delete" title="Delete" 
+  return <SvgToolbarButton SvgIcon={DeleteSelectionIcon} buttonClass="delete" title="Delete"
     onClick={onClick} disabled={disabled} />;
 });

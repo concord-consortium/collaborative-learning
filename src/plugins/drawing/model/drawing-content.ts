@@ -28,7 +28,7 @@ export enum OpenPalletteValues {
   Vector = "vector",
   StrokeColor = "stroke-color",
   FillColor = "fill-color",
-  Stamps = "stamps",
+  Stamp = "stamp",
 }
 export interface DrawingObjectMove {
   id: string,

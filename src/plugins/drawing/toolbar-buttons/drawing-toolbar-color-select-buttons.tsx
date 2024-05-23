@@ -8,6 +8,7 @@ import StrokeColorIcon from "../assets/color-stroke-icon.svg";
 import { OpenPalletteValues } from "../model/drawing-content";
 import { FillColorPalette } from "../components/fill-color-palette";
 import { StrokeColorPalette } from "../components/stroke-color-palette";
+import { ToolbarButtonSvg } from "./toolbar-button-svg";
 
 export const FillColorButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
@@ -36,7 +37,10 @@ export const FillColorButton = observer(({ name }: IToolbarButtonComponentProps)
       onClick={handleClick}
       onTouchHold={handleTouchHold}
     >
-      <FillColorIcon />
+      <ToolbarButtonSvg
+        SvgIcon={FillColorIcon}
+        settings={{ fill: drawingModel.fill }}
+      />
       {isOpen &&
         <FillColorPalette
           selectedColor={drawingModel.fill}
@@ -74,7 +78,10 @@ export const StrokeColorButton = observer(({ name }: IToolbarButtonComponentProp
       onClick={handleClick}
       onTouchHold={handleTouchHold}
     >
-      <StrokeColorIcon />
+      <ToolbarButtonSvg
+        SvgIcon={StrokeColorIcon}
+        settings={{ fill: drawingModel.stroke }}
+      />
       {isOpen &&
         <StrokeColorPalette
           selectedColor={drawingModel.stroke}
