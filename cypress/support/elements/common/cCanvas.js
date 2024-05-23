@@ -53,6 +53,10 @@ class ClueCanvas {
         return cy.get('.primary-workspace');
     }
 
+    getSingleWorkspaceDocumentContent() {
+      return cy.get('.primary-workspace .document-content');
+    }
+
     getRowSectionHeader() {
         return cy.get('.primary-workspace .row-section-header');
     }

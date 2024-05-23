@@ -3,6 +3,8 @@ import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view
 import { SharedProgramDataType } from "../../shared-program-data/shared-program-data";
 
 export interface ISimulationProps {
+  tileElt?: HTMLElement|null;
+  simRef?: React.RefObject<HTMLDivElement>;
   frame: number;
   variables: VariableType[];
   programData?: SharedProgramDataType;

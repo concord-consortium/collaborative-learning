@@ -5,7 +5,6 @@ import { observer, inject } from "mobx-react";
 import { DataflowProgram } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
 import { ITileModel } from "../../../models/tiles/tile-model";
-import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { EditableTileTitle } from "../../../components/tiles/editable-tile-title";
 import { DataflowContentModelType } from "../model/dataflow-content";
@@ -47,10 +46,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     };
   }
   public render() {
-    const { readOnly, height, model } = this.props;
+    const { readOnly, height, model, onRegisterTileApi, tileElt } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
-    const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
-    const { program, programDataRate, programZoom } = this.getContent();
+    const classes = `dataflow-tool ${editableClass}`;
+    const { program, programDataRate } = this.getContent();
     const tileContent = this.getContent();
 
     return (
@@ -71,6 +70,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   size={size}
                   tileHeight={height}
                   tileContent={tileContent}
+                  tileElt={tileElt}
+                  onRegisterTileApi={onRegisterTileApi}
                 />
               );
             }}
@@ -79,14 +80,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         </div>
       </>
     );
-  }
-
-  public componentDidMount() {
-    this.props.onRegisterTileApi({
-      exportContentAsTileJson: (options?: ITileExportOptions) => {
-        return this.getContent().exportJson(options);
-      }
-    });
   }
 
   private getDocument() {

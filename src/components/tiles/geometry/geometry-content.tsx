@@ -25,7 +25,7 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
 import {
-  ESegmentLabelOption, ILinkProperties, JXGCoordPair
+  ESegmentLabelOption, JXGCoordPair
 } from "../../../models/tiles/geometry/jxg-changes";
 import { applyChange, applyChanges } from "../../../models/tiles/geometry/jxg-dispatcher";
 import { kSnapUnit } from "../../../models/tiles/geometry/jxg-point";
@@ -43,7 +43,6 @@ import {
 import { getAllLinkedPoints, injectGetTableLinkColorsFunction } from "../../../models/tiles/geometry/jxg-table-link";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tile-component";
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
-import { linkedPointId } from "../../../models/tiles/table-link-types";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
@@ -53,13 +52,11 @@ import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import ErrorAlert from "../../utilities/error-alert";
-import { halfPi, normalizeAngle, Point } from "../../../utilities/math-utils";
+import { halfPi, isFiniteNumber, normalizeAngle, Point } from "../../../utilities/math-utils";
 import SingleStringDialog from "../../utilities/single-string-dialog";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 import { TileTitleArea } from "../tile-title-area";
 import { GeometryTileContext } from "./geometry-tile-context";
-
-import "./geometry-tile.sass";
 
 export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
@@ -217,6 +214,24 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return point;
   }
 
+  private getLinkedPointScreenCoords(linkedPointId: string) {
+    if (!this.state.board) return;
+
+    // Access the model to ensure that model changes trigger a rerender
+    const element = this.state.board?.objects[linkedPointId];
+    if (!element) { console.log("didn't find", linkedPointId); return; }
+    const dataSet = this.getContent().getLinkedDataset(element.getAttribute("linkedTableId"))?.dataSet;
+    const caseIndex = dataSet?.caseIndexFromID(element.getAttribute("linkedRowId"));
+    const yValue = caseIndex!==undefined
+      && dataSet?.attrFromID(element.getAttribute("linkedColId")).numValue(caseIndex);
+    if (!isFiniteNumber(yValue)) return;
+
+    const bounds = element.bounds();
+    const coords = new JXG.Coords(JXG.COORDS_BY_USER, bounds.slice(0, 2), this.state.board);
+    const point: Point = [coords.scrCoords[1], coords.scrCoords[2]];
+    return point;
+  }
+
   public componentDidMount() {
     this._isMounted = true;
     this.disposers = [];
@@ -240,8 +255,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         return this.getContent().exportJson(options);
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
-        if (objectType === "point") {
-          const coords = this.getPointScreenCoords(objectId);
+        if (objectType === "point" || objectType === "linkedPoint") {
+          const coords = objectType === "point"
+            ? this.getPointScreenCoords(objectId)
+            : this.getLinkedPointScreenCoords(objectId);
           if (!coords) return undefined;
           const [x, y] = coords;
           const boundingBox = {
@@ -293,9 +310,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       },
       getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
-        if (objectType === "point") {
+        if (objectType === "point" || objectType === "linkedPoint") {
           // Find the center point
-          const coords = this.getPointScreenCoords(objectId);
+          const coords = objectType === "point"
+            ? this.getPointScreenCoords(objectId)
+            : this.getLinkedPointScreenCoords(objectId);
           if (!coords) return;
 
           // Return a circle at the center point
@@ -718,25 +737,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     if (ids.length > 0){
       applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
     }
-    this.getContent().linkedDataSets.forEach(link => {
-      const links: ILinkProperties = { tileIds: [link.providerId] };
-      const parents: JXGCoordPair[] = [];
-      const properties: Array<{ id: string }> = [];
-      for (let ci = 0; ci < link.dataSet.cases.length; ++ci) {
-        const x = link.dataSet.attributes[0]?.numValue(ci);
-        for (let ai = 1; ai < link.dataSet.attributes.length; ++ai) {
-          const attr = link.dataSet.attributes[ai];
-          const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
-          const y = attr.numValue(ci);
-          if (isFinite(x) && isFinite(y)) {
-            parents.push([x, y]);
-            properties.push({ id });
-          }
-        }
-      }
-      const pts = applyChange(board, { operation: "create", target: "linkedPoint", parents, properties, links });
+    const data = this.getContent().getLinkedPointsData();
+    for (const [link,points] of data.entries()) {
+      const pts = applyChange(board, {
+        operation: "create",
+        target: "linkedPoint",
+        parents: points.coords,
+        properties: points.properties,
+        links: { tileIds: [link]} });
       castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
-    });
+    }
   }
 
   private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {

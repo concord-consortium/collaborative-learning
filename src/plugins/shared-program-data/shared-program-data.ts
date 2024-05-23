@@ -50,8 +50,15 @@ export const SharedProgramData = SharedModel.named("SharedProgramData")
 }))
 .actions(self => ({
   setProgramNodes(newNodes: ISharedProgramNode[]) {
-    self.programNodes.clear();
+    const newNodeIds = Array.from(newNodes, n => n.id);
+    // Remove any nodes not in the new list
+    for (const id of self.programNodes.keys()) {
+      if (!newNodeIds.includes(id)) {
+        self.programNodes.delete(id);
+      }
+    }
 
+    // Add new, and update existing, nodes
     newNodes.forEach(node => {
       if (!node.id) return;
       self.programNodes.set(node.id, node);

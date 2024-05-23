@@ -12,7 +12,7 @@ import { DecoratedDocumentThumbnailItem } from "./decorated-document-thumbnail-i
 import { useLastSupportViewTimestamp } from "../../hooks/use-last-support-view-timestamp";
 import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
-import "./document-type-collection.sass";
+import "./document-type-collection.scss";
 
 
 interface IProps {
