@@ -8,12 +8,19 @@ interface IProps {
   selectedStampIndex?: number;
   onSelectStampIndex: (index: number) => void;
 }
-export const StampsPalette: React.FC<IProps> = ({
-  stamps, selectedStampIndex, onSelectStampIndex
-}) => {
-  const oneRow = stamps.length <= 6;
+export const StampsPalette: React.FC<IProps> = ({ stamps, selectedStampIndex, onSelectStampIndex }) => {
+  const rowClass = classNames(
+    "toolbar-palette", "stamps",
+    {
+      "one-row": stamps.length <= 6,
+      "two-rows": stamps.length > 6 && stamps.length <= 12,
+      "three-rows": stamps.length > 12 && stamps.length <= 18,
+      "four-rows": stamps.length > 18
+    }
+  );
+
   return (
-    <div className={classNames("toolbar-palette", "stamps", { "one-row": oneRow })}>
+    <div className={rowClass}>
       <div className="palette-buttons">
         {stamps.map((stamp, i) =>
           <StampButton key={stamp.url} stamp={stamp}

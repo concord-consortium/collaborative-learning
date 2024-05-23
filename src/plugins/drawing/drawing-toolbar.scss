@@ -1,23 +1,6 @@
 @import "../../components/vars";
 
 .drawing-toolbar {
-  // .toolbar-button.vector {
-  //   svg line {
-  //     stroke: $charcoal-dark-3;
-  //   }
-  // }
-  // .toolbar-button.rectangle {
-  //   svg rect {
-  //     stroke: $charcoal-dark-3;
-  //     fill: transparent;
-  //   }
-  // }
-  // .toolbar-button.ellipse {
-  //   svg circle {
-  //     stroke: $charcoal-dark-3;
-  //     fill: transparent;
-  //   }
-  // }
   .palette-buttons {
     display: flex;
     flex-wrap: wrap;
@@ -100,16 +83,26 @@
   }
 
   .toolbar-palette {
-    position: absolute;
     height: 70px;
     background-color: $workspace-teal-light-9;
     border: $toolbar-border;
     border-radius: 0 $toolbar-border-radius $toolbar-border-radius $toolbar-border-radius;
     z-index: $toolbar-z-index;
-    top:34px;
 
     &.one-row {
       height: 40px;
+    }
+
+    &.two-rows {
+      height: 80px;
+    }
+
+    &.three-rows {
+      height: 120px;
+    }
+
+    &.four-rows {
+      height: 160px;
     }
 
     &.vectors {
