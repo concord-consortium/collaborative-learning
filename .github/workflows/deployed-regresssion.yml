@@ -11,6 +11,7 @@ on:
         description: Path to test. It is added to https://collaborative-learning.concord.org/
         default: branch/master
         required: true
+  push:
 jobs:
   all-tests:
     runs-on: ubuntu-latest
@@ -28,8 +29,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch }}
-          # ref: 187652818-cypress-on-staging
+          # ref: ${{ github.event.inputs.branch }}
+          ref: 187652818-cypress-on-staging
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v6
         with:
@@ -47,8 +48,8 @@ jobs:
           # - visiting the doc-editor won't work with that baseUrl
           # - loading the qa units won't work without additional changes because
           #   they would be relative to the root instead of the version folder
-          config: baseUrl=https://collaborative-learning.concord.org/${{ github.event.inputs.deployedPath }}/
-          # config: baseUrl=https://collaborative-learning.concord.org/version/v5.10.1/
+          # config: baseUrl=https://collaborative-learning.concord.org/${{ github.event.inputs.deployedPath }}/
+          config: baseUrl=https://collaborative-learning.concord.org/version/v5.10.1/
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -57,5 +58,7 @@ jobs:
           # Increase memory allocation
           NODE_OPTIONS: "--max_old_space_size=4096"
 
+          # try to figure out why cypress isn't finding the commit info
+          DEBUG: commit-info,cypress:server:record
           # Note: we can't do code coverage because the deployed code will not be
           # instrumented
