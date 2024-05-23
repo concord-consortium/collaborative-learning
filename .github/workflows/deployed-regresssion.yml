@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           # ref: ${{ github.event.inputs.branch }}
-          ref: master
+          ref: 187652818-cypress-on-staging
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v6
         with:
