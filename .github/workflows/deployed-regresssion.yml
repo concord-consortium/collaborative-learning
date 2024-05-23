@@ -1,17 +1,16 @@
 name: Deployed Regression
 
 on:
-  # workflow_dispatch:
-  #   inputs:
-  #     branch:
-  #       description: Branch containing cypress tests
-  #       default: master
-  #       required: true
-  #     deployedUrl:
-  #       description: URL to test
-  #       default: https://collaborative-learning.concord.org/index-staging.html
-  #       required: true
-  push:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch containing cypress tests
+        default: master
+        required: true
+      deployedPath:
+        description: Path to test. It is added to https://collaborative-learning.concord.org/
+        default: branch/master
+        required: true
 jobs:
   all-tests:
     runs-on: ubuntu-latest
@@ -29,8 +28,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          # ref: ${{ github.event.inputs.branch }}
-          ref: 187652818-cypress-on-staging
+          ref: ${{ github.event.inputs.branch }}
+          # ref: 187652818-cypress-on-staging
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v6
         with:
@@ -44,14 +43,12 @@ jobs:
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           browser: chrome
           spec: cypress/e2e/functional/**
-          # explicit wait-on to try to get around the configuration issue
-          # wait-on: https://collaborative-learning.concord.org/index-staging.html
-          # config: baseUrl=${{ github.event.inputs.deployedUrl }}
           # We can't use index-staging.html for several reasons:
           # - visiting the doc-editor won't work with that baseUrl
           # - loading the qa units won't work without additional changes because
           #   they would be relative to the root instead of the version folder
-          config: baseUrl=https://collaborative-learning.concord.org/version/v5.10.1/
+          config: baseUrl=https://collaborative-learning.concord.org/${{ github.event.inputs.deployedPath }}/
+          # config: baseUrl=https://collaborative-learning.concord.org/version/v5.10.1/
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
