@@ -13,7 +13,7 @@ let qaGroup = 10,
   students = [15, 16, 17, 18, 19];
 
 function getUrl(studentIndex) {
-  return `/?appMode=qa&qaGroup=10&fakeClass=10&problem=1.1&fakeUser=student:${students[studentIndex]}&unit=./demo/units/qa/content.json`
+  return `?appMode=qa&qaGroup=10&fakeClass=10&problem=1.1&fakeUser=student:${students[studentIndex]}&unit=./demo/units/qa/content.json`;
 }
 
 function setupTest(studentIndex) {
