@@ -4,6 +4,8 @@ import path from 'path';
 import installLogsPrinter from 'cypress-terminal-report/src/installLogsPrinter';
 import codeCoverageTask from '@cypress/code-coverage/task';
 
+console.log("Loading Cypress Config");
+
 export default defineConfig({
   video: false,
   viewportWidth: 1400,
@@ -45,6 +47,8 @@ export default defineConfig({
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
     async setupNodeEvents(on, config) {
+      console.log("Cypress config baseUrl", config.baseUrl);
+
       // Print out cypress log to the command line so it is recorded by the CI system
       installLogsPrinter(on);
 
