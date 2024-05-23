@@ -26,7 +26,7 @@ function beforeTest() {
 
 function setup(student, opts = {}) {
   const options = { ...defaultSetupOptions, ...opts };
-  cy.visit('?appMode=qa&fakeClass=' + fakeClass + '&fakeUser=student:' + student + '&problem=' + options.problem + '&unit=./demo/units/qa/content.json');
+  cy.visit('/?appMode=qa&fakeClass=' + fakeClass + '&fakeUser=student:' + student + '&problem=' + options.problem + '&unit=./demo/units/qa/content.json');
   if (options.alreadyInGroup) {
     // This is looking for the version div in the header
     cy.waitForLoad();
