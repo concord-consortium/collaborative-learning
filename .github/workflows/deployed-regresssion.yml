@@ -48,6 +48,7 @@ jobs:
           wait-on: https://collaborative-learning.concord.org/index-staging.html
           # config: baseUrl=${{ github.event.inputs.deployedUrl }}
           config: baseUrl=https://collaborative-learning.concord.org/index-staging.html
+          quiet: false
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
