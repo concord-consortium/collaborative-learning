@@ -11,8 +11,6 @@ on:
         description: URL to test
         default: https://collaborative-learning.concord.org/index-staging.html
         required: true
-  # just to get this to be available for testing
-  push:
 jobs:
   all-tests:
     runs-on: ubuntu-latest
