@@ -83,27 +83,10 @@
   }
 
   .toolbar-palette {
-    height: 70px;
     background-color: $workspace-teal-light-9;
     border: $toolbar-border;
     border-radius: 0 $toolbar-border-radius $toolbar-border-radius $toolbar-border-radius;
     z-index: $toolbar-z-index;
-
-    &.one-row {
-      height: 40px;
-    }
-
-    &.two-rows {
-      height: 80px;
-    }
-
-    &.three-rows {
-      height: 120px;
-    }
-
-    &.four-rows {
-      height: 160px;
-    }
 
     &.vectors {
       left: 70px;
