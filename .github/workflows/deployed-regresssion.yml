@@ -44,6 +44,8 @@ jobs:
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           browser: chrome
           spec: cypress/e2e/functional/**
+          # explicit wait-on to try to get around the configuration issue
+          wait-on: https://collaborative-learning.concord.org/index-staging.html
           # config: baseUrl=${{ github.event.inputs.deployedUrl }}
           config: baseUrl=https://collaborative-learning.concord.org/index-staging.html
         env:
