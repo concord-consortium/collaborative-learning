@@ -52,24 +52,6 @@ Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
         });
     });
 });
-
-/**
- * The built in cypress visit command always add a slash between the baseUrl
- * and the url passed to visit.
- * In some cases our baseUrl ends with a file name like index-staging.html
- * So in that case we don't want a slash added between the file name and
- * url being visited. So we override the visit function to identify this case
- * and join the two parts without a slash.
- */
-Cypress.Commands.overwrite('visit', (originalFn, url, options) => {
-  const baseUrl = Cypress.config('baseUrl');
-
-  const dontAddSlash = baseUrl?.startsWith("http") && baseUrl?.endsWith(".html");
-  const newUrl = dontAddSlash ? baseUrl + url : url;
-
-  return originalFn(newUrl, options);
-});
-
 Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (currently data='all' is the only one supported)
     if (data==='all') {
 
