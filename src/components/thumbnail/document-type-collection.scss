@@ -1,0 +1,247 @@
+@import "../vars";
+
+$list-item-height: 660px;
+$list-item-width: 880px;
+$list-item-scale: 0.11;
+$section-padding: 6px;
+
+.tab-panel-documents-section,
+.collapsible-documents-section {
+  display: flex;
+  overflow-y: auto;
+  flex: 1;
+  flex-direction: column;
+  padding: $section-padding;
+  &.horizontal {
+    flex-direction: row;
+  }
+  &.top-panel {
+    padding: 4px $section-padding 0 $section-padding;
+  }
+  .document-divider {
+    width: 100%;
+    border-top: solid 1px $charcoal-light-1;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    .document-divider-label {
+      display: flex;
+      position: relative;
+      top: -10px;
+      justify-content: center;
+      align-self: center;
+      align-items: center;
+      background-color: white;
+      border: solid 1px $charcoal-light-1;
+      width: 130px;
+      height: 26px;
+    }
+  }
+  .list {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    overflow-y: auto;
+    &.top-panel {
+      overflow-y: hidden;
+    }
+    &.bottom-panel {
+      border-top: solid 1px $charcoal-light-1;
+      overflow-y: hidden;
+    }
+    &.horizontal {
+      flex-direction: row;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+    .list-item {
+      position: relative;
+      min-height: 120px;
+      min-width: 116px;
+      border-radius: 5px;
+      padding: $padding 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: white;
+      overflow: hidden;
+      cursor: pointer;
+
+      .scaled-list-item-container {
+        border-radius: 5px;
+        border: solid 1.5px $charcoal-light-1;
+        width: $list-item-width * $list-item-scale;
+        height: $list-item-height * $list-item-scale;
+        background-color: white;
+        padding: 1px;
+
+        .scaled-list-item {
+          transform: scale(.1);
+          transform-origin: 0 0;
+          height: $list-item-height;
+          width: $list-item-width;
+          pointer-events: none;
+        }
+        &.new-document-button {
+          position: relative;
+
+          .new-document-button-label {
+            position: absolute;
+            top: 16px;
+            left: -1px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #C9DAB7;
+
+            label {
+              font-size: 10px;
+              color: $charcoal-dark-2;
+              margin-top: 8px;
+            }
+          }
+        }
+      }
+      .icon-holder {
+        position: absolute;
+        top: 5px;
+        right: 12px;
+        cursor: pointer;
+
+        .icon-star {
+          height: 24px;
+          width: 24px;
+          fill: $charcoal;
+          opacity: .25;
+          position: relative;
+          right: 66px;
+          top: -1px;
+
+          &.starred {
+            opacity: .75;
+            fill: $problem-orange;
+          }
+        }
+        &:hover .icon-star {
+          fill: $problem-orange;
+          opacity: 0.35;
+        }
+        &:active .icon-star {
+          opacity: .75;
+          fill: $problem-orange;
+        }
+        &:active .icon-star.starred {
+          opacity: .75;
+          fill: $problem-orange;
+        }
+        .bookmark-label {
+          position: absolute;
+          top: -2px;
+          right: -4px;
+          margin: 0;
+          font-size: 5pt;
+        }
+      }
+      .info {
+        margin-top: $half-margin;
+        text-align: center;
+        font-size: 10px;
+        width: 90px;
+      }
+      .footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .icon-delete-document {
+          height: 23px;
+          width: 23px;
+          position: relative;
+          top: 6px;
+          right: -1px;
+          border-radius: 4px;
+          path {
+            fill: rgba($charcoal, .6);
+          }
+        }
+        .icon-delete-document:hover {
+          background-color: rgba($charcoal, .25);
+          path {
+            fill: $charcoal;
+          }
+        }
+        .icon-delete-document:active,
+        .icon-delete-document.selected {
+          background-color: rgba($charcoal, .45);
+          fill: $charcoal;
+        }
+      }
+    }
+  }
+  &.personal-documents {
+    .new-document-button-label {
+      svg path {
+        fill: $workspace-teal-dark-1;
+      }
+    }
+  }
+  &.learning-logs {
+    .new-document-button-label {
+      svg path {
+        fill: $learninglog-green-dark-1;
+      }
+    }
+  }
+}
+.my-work .list-item {
+  &:hover {
+    background-color: $workspace-teal-light-7;
+  }
+  &:active,
+  &.selected {
+    background-color: $workspace-teal-light-5;
+  }
+}
+.class-work .list-item {
+  &:hover {
+    background-color: $classwork-purple-light-8;
+  }
+  &:active,
+  &.selected {
+    background-color: $classwork-purple-light-6;
+  }
+}
+.supports .list-item {
+  &:hover {
+    background-color: $support-blue-light-8;
+  }
+  &:active,
+  &.selected {
+    background-color: $support-blue-light-6;
+  }
+}
+.horizontal {
+  .list-item {
+    &:hover {
+      background-color: $document-select-green;
+      opacity: 50%;
+    }
+    &:active,
+    &.selected {
+      background-color: $document-select-green;
+    }
+    &.secondary {
+      &:hover {
+        background-color: $document-select-blue;
+        opacity: 50%;
+      }
+      &:active,
+      &.secondary {
+        background-color: $document-select-blue;
+      }
+    }
+  }
+}

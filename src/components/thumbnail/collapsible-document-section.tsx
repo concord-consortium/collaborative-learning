@@ -11,7 +11,7 @@ import { ISubTabSpec, NavTabSectionModelType } from "../../models/view/nav-tabs"
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 
-import "./document-type-collection.sass";
+import "./document-type-collection.scss";
 import "./collapsible-document-section.scss";
 
 interface IProps {

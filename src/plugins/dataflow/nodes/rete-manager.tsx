@@ -75,6 +75,7 @@ export class ReteManager implements INodeServices {
   private snapshotDisposer: () => void | undefined;
   public inTick = false;
   public disposed = false;
+  public setupComplete: Promise<void>;
   private previousChannelIds = "";
 
   constructor(
@@ -90,7 +91,7 @@ export class ReteManager implements INodeServices {
     this.area = new AreaPlugin<Schemes, AreaExtra>(div);
     this.updateMainProcessor();
 
-    this.setup();
+    this.setupComplete = this.setup();
   }
 
   async setup() {
@@ -106,23 +107,38 @@ export class ReteManager implements INodeServices {
     });
 
     area.addPipe((context) => {
-      if (context.type !== "nodedragged") return context;
+      const event = context.type;
+      if (event === "nodedragged" || event === "nodetranslated") {
 
-      const id = context.data.id;
-      const nodeView = area.nodeViews.get(id);
+        const id = context.data.id;
+        const nodeView = area.nodeViews.get(id);
 
-      // This should not happen, but it is possible in theory
-      if (!nodeView) return context;
+        // This should not happen, but it is possible in theory
+        if (!nodeView) return context;
 
-      const nodeModel = mstProgram.nodes.get(id);
+        const nodeModel = mstProgram.nodes.get(id);
 
-      // This should also not happen but seems more likely
-      if (!nodeModel) {
-        console.warn("Cannot find MST node model for a dragged Rete node");
-        return context;
+        // This should also not happen but seems more likely
+        if (!nodeModel) {
+          console.warn("Cannot find MST node model for a dragged Rete node");
+          return context;
+        }
+
+        if (event === "nodedragged") {
+          // We are done dragging the node, so save the position for real
+          nodeModel.setPosition(nodeView.position);
+        } else {
+          // We are currently translating the node, only save it in volatile
+          nodeModel.setLivePosition(nodeView.position);
+        }
       }
-
-      nodeModel.setPosition(nodeView.position);
+      if (event === "translate" || event === "translated") {
+        if (event === "translate" ) {
+          this.mstContent.setLiveProgramZoom(area.area.transform);
+        } else {
+          this.mstContent.setProgramZoom(area.area.transform);
+        }
+      }
       return context;
     });
 
@@ -752,6 +768,6 @@ export class ReteManager implements INodeServices {
   private async setZoom(zoom: number) {
     await this.area.area.zoom(zoom);
     const { transform } = this.area.area;
-    this.mstContent.setProgramZoom(transform.x, transform.y, transform.k);
+    this.mstContent.setProgramZoom(transform);
   }
 }

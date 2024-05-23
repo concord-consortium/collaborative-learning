@@ -12,6 +12,8 @@ export const ClueObjectModel = types
 export interface IClueObject extends Instance<typeof ClueObjectModel> {}
 export interface IClueObjectSnapshot extends SnapshotIn<typeof ClueObjectModel> {}
 
+export type IClueTileObject = Pick<IClueObjectSnapshot, "objectId" | "objectType">;
+
 /**
  * A simple model to represent a 2d offset
  */
