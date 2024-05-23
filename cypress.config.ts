@@ -47,7 +47,7 @@ export default defineConfig({
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
     async setupNodeEvents(on, config) {
-      console.log("Cypress config baseUrl", config.baseUrl);
+      console.log("Cypress config", {baseUrl: config.baseUrl, testEnv: config.env.testEnv});
 
       // Print out cypress log to the command line so it is recorded by the CI system
       installLogsPrinter(on);
@@ -70,7 +70,8 @@ export default defineConfig({
 
       return combinedConfig;
     },
-    baseUrl: 'http://localhost:8080/',
+    // Try changing default baseUrl to see how that effects github action
+    baseUrl: 'http://localhost:8081/',
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
   },
 });
