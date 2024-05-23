@@ -1,16 +1,17 @@
 name: Deployed Regression
 
 on:
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: Branch containing cypress tests
-        default: master
-        required: true
-      deployedUrl:
-        description: URL to test
-        default: https://collaborative-learning.concord.org/index-staging.html
-        required: true
+  # workflow_dispatch:
+  #   inputs:
+  #     branch:
+  #       description: Branch containing cypress tests
+  #       default: master
+  #       required: true
+  #     deployedUrl:
+  #       description: URL to test
+  #       default: https://collaborative-learning.concord.org/index-staging.html
+  #       required: true
+  push:
 jobs:
   all-tests:
     runs-on: ubuntu-latest
@@ -28,7 +29,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.inputs.branch }}
+          # ref: ${{ github.event.inputs.branch }}
+          ref: master
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v4
         with:
@@ -44,7 +46,8 @@ jobs:
           spec: cypress/e2e/functional/**
         env:
           # override the baseUrl
-          CYPRESS_baseUrl: ${{ github.event.inputs.deployedUrl }}
+          # CYPRESS_baseUrl: ${{ github.event.inputs.deployedUrl }}
+          CYPRESS_baseUrl: https://collaborative-learning.concord.org/index-staging.html
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           # pass GitHub token to allow accurately detecting a build vs a re-run build
