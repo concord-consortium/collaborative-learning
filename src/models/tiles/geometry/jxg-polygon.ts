@@ -64,10 +64,11 @@ function setPolygonEdgeColors(polygon: JXG.Polygon) {
   const segments = getPolygonEdges(polygon);
   const firstVertex = polygon.vertices[0];
   segments.forEach(seg => {
-    if ((seg.point1.getAttribute("isPhantom") && seg.point2 === firstVertex)
-      ||(seg.point2.getAttribute("isPhantom") && seg.point1 === firstVertex)) {
+    if (segments.length > 1 &&
+        ((seg.point1.getAttribute("isPhantom") && seg.point2 === firstVertex)
+         ||(seg.point2.getAttribute("isPhantom") && seg.point1 === firstVertex))) {
       // this is the "uncompleted side" of an in-progress polygon
-      seg.setAttribute({ strokeColor: "#FF0000" });
+      seg.setAttribute({ strokeColor: "none" });
     } else {
       seg.setAttribute({ strokeColor: "#0000FF" });
     }
