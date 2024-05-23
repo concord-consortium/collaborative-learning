@@ -47,7 +47,11 @@ jobs:
           # explicit wait-on to try to get around the configuration issue
           # wait-on: https://collaborative-learning.concord.org/index-staging.html
           # config: baseUrl=${{ github.event.inputs.deployedUrl }}
-          config: baseUrl=https://collaborative-learning.concord.org/index-staging.html
+          # We can't use index-staging.html for several reasons:
+          # - visiting the doc-editor won't work with that baseUrl
+          # - loading the qa units won't work without additional changes because
+          #   they would be relative to the root instead of the version folder
+          config: baseUrl=https://collaborative-learning.concord.org/version/v5.10.1/
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
