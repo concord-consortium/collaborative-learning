@@ -133,8 +133,5 @@ class GeometryToolTile {
     addComment(){
         cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.comment.enabled').click();
     }
-    deleteGraphElement(){
-        cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.delete.enabled').click();
-    }
 }
 export default GeometryToolTile;

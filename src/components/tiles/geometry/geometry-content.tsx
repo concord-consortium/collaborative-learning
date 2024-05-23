@@ -59,8 +59,6 @@ import { getClipboardContent, pasteClipboardImage } from "../../../utilities/cli
 import { TileTitleArea } from "../tile-title-area";
 import { GeometryTileContext } from "./geometry-tile-context";
 
-import "./geometry-tile.sass";
-
 export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
   onSetActionHandlers: (handlers: IActionHandlers) => void;

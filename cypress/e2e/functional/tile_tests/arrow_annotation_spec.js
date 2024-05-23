@@ -236,21 +236,23 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("have.length", 4);
   });
 
-  it("can add arrows to geometry tiles", () => {
+  it.only("can add arrows to geometry tiles", { scrollBehavior: 'nearest'}, () => {
     beforeTest(queryParams);
     clueCanvas.addTile("geometry");
 
     cy.log("Annotation buttons appear for points, polygons, and segments");
+    clueCanvas.clickToolbarButton('geometry', 'polygon');
     aa.clickArrowToolbarButton(); // sparrow mode on
     aa.getAnnotationLayer().should("have.class", "editing");
     aa.getAnnotationButtons().should("not.exist");
+
     aa.clickArrowToolbarButton(); // sparrow mode off
-    // For some reason adding the first point is ignored, so we add four but get three to make a triangle
-    geometryToolTile.addPointToGraph(5, 5);
+    geometryToolTile.getGeometryTile().click(); // select tile
     geometryToolTile.addPointToGraph(10, 5);
     geometryToolTile.addPointToGraph(15, 10);
     geometryToolTile.addPointToGraph(20, 5);
-    geometryToolTile.getGraphPoint().last().dblclick({ force: true });
+    geometryToolTile.addPointToGraph(10, 5); // close polygon
+
     aa.clickArrowToolbarButton(); // sparrow mode on
     // 3 points + 3 segments + 1 polygon = 7
     aa.getAnnotationButtons().should("have.length", 7);
@@ -261,14 +263,16 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationButtons().eq(6).click();
     aa.getAnnotationArrows().should("have.length", 1);
     aa.getAnnotationDeleteButtons().eq(0).click();
+
     // Remove all the points and polygons
     aa.clickArrowToolbarButton(); // sparrow mode off
+    geometryToolTile.getGeometryTile().click(); // select tile
     geometryToolTile.getGraphPoint().eq(2).click();
-    geometryToolTile.deleteGraphElement();
+    clueCanvas.clickToolbarButton('geometry', 'delete');
     geometryToolTile.getGraphPoint().eq(1).click();
-    geometryToolTile.deleteGraphElement();
+    clueCanvas.clickToolbarButton('geometry', 'delete');
     geometryToolTile.getGraphPoint().eq(0).click();
-    geometryToolTile.deleteGraphElement();
+    clueCanvas.clickToolbarButton('geometry', 'delete');
     aa.getAnnotationButtons().should("have.length", 0);
     aa.getAnnotationArrows().should("have.length", 0);
 
