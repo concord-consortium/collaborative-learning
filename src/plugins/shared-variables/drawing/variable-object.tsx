@@ -170,10 +170,10 @@ export const NewVariableButton = observer(({ toolbarManager, getVisibleCanvasSiz
 
   const disabled = toolbarManager.hasSelectedObjects;
   const onClick = () => {
-    showVariableDialog(); 
+    showVariableDialog();
   };
 
-  return <SvgToolbarButton SvgIcon={AddVariableChipIcon} buttonClass="new-variable" title="New Variable" 
+  return <SvgToolbarButton SvgIcon={AddVariableChipIcon} buttonClass="new-variable" title="New Variable"
     onClick={onClick} disabled={disabled} />;
 });
 

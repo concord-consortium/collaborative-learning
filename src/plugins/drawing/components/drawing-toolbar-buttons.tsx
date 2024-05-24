@@ -1,16 +1,9 @@
 import classNames from "classnames";
 import React from "react";
-import { observer } from "mobx-react";
 import { Tooltip } from "react-tippy";
 import { ToolbarSettings } from "../model/drawing-basic-types";
-import SelectToolIcon from "../../../clue/assets/icons/select-tool.svg";
-import ColorFillIcon from "../assets/color-fill-icon.svg";
-import ColorStrokeIcon from "../assets/color-stroke-icon.svg";
-import DuplicateIcon from "../assets/duplicate-icon.svg";
-import DeleteSelectionIcon from "../../../assets/icons/delete/delete-selection-icon.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
-import { isLightColorRequiringContrastOffset } from "../../../utilities/color-utils";
-import { computeStrokeDashArray, IToolbarButtonProps, IToolbarManager,
+import { computeStrokeDashArray,
   ToolbarModalButton } from "../objects/drawing-object";
 import { useTouchHold } from "../../../hooks/use-touch-hold";
 import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
@@ -26,7 +19,6 @@ export const buttonClasses = ({ modalButton, disabled, selected, others }: IButt
   return classNames("drawing-tool-button", modalButtonClass, { disabled, selected }, others);
 };
 
-// HEY: the one you ended up making is pretty much this so see about integrating it, or using the tooltip way at least
 /*
  * SvgToolbarButton
  */
@@ -74,81 +66,3 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
       </Tooltip>
     : null;
 };
-
-/*
- * SvgToolModeButton
- */
-interface ISvgToolModeButtonProps {
-  SvgIcon: React.FC<React.SVGProps<SVGSVGElement>>;
-  toolbarManager: IToolbarManager;
-  modalButton: ToolbarModalButton;
-  selected?: boolean;
-  settings?: Partial<ToolbarSettings>;
-  title: string;
-}
-export const SvgToolModeButton: React.FC<ISvgToolModeButtonProps> = observer(function SvgToolModeButton({
-  SvgIcon, toolbarManager, modalButton, settings, ...others
-}) {
-  const handleClick = () => toolbarManager.setSelectedButton(modalButton);
-  const { selectedButton, toolbarSettings } = toolbarManager;
-  const selected = selectedButton === modalButton;
-  const _settings = settings || toolbarSettings;
-
-  return <SvgToolbarButton SvgIcon={SvgIcon} buttonClass={modalButton} onClick={handleClick}
-    selected={selected} settings={_settings} {...others} />;
-});
-
-export const SelectToolbarButton: React.FC<IToolbarButtonProps> = ({toolbarManager}) => {
-  return <SvgToolModeButton modalButton="select" title="Select"
-    toolbarManager={toolbarManager} SvgIcon={SelectToolIcon} settings={{}}/>;
-};
-
-interface IColorButtonProps {
-  settings: Partial<ToolbarSettings>;
-  onClick: () => void;
-}
-const kLightLuminanceContrastStroke = "#949494";  // $charcoal-light-1
-
-export const FillColorButton: React.FC<IColorButtonProps> = ({ settings, onClick }) => {
-  const stroke = isLightColorRequiringContrastOffset(settings.fill) ? kLightLuminanceContrastStroke : settings.fill;
-  return <SvgToolbarButton SvgIcon={ColorFillIcon} buttonClass="fill-color" title="Fill color"
-            settings={{ fill: settings.fill, stroke }} onClick={onClick} />;
-};
-
-export const StrokeColorButton: React.FC<IColorButtonProps> = ({ settings, onClick }) => {
-  const stroke = isLightColorRequiringContrastOffset(settings.stroke) ? kLightLuminanceContrastStroke : settings.stroke;
-  return <SvgToolbarButton SvgIcon={ColorStrokeIcon} buttonClass="stroke-color" title="Line/border color"
-            settings={{ fill: settings.stroke, stroke }} onClick={onClick} />;
-};
-
-export interface IActionButtonProps {
-  toolbarManager: IToolbarManager;
-}
-
-
-export const DuplicateButton: React.FC<IActionButtonProps> = observer(function DuplicateButton({
-  toolbarManager
-}) {
-  const onClick = () => {
-    toolbarManager.duplicateObjects(toolbarManager.selection);
-  };
-  const disabled = !toolbarManager.hasSelectedObjects;
-
-  return <SvgToolbarButton SvgIcon={DuplicateIcon} buttonClass="duplicate" title="Duplicate"
-    onClick={onClick} disabled={disabled} />;
-});
-
-interface IDeleteToolButtonProps {
-  toolbarManager: IToolbarManager;
-}
-export const DeleteButton: React.FC<IDeleteToolButtonProps> = observer(function DeleteButton({
-  toolbarManager
-}) {
-  const onClick = () => {
-    toolbarManager.deleteObjects([...toolbarManager.selection]);
-  };
-  const disabled = !toolbarManager.hasSelectedObjects;
-
-  return <SvgToolbarButton SvgIcon={DeleteSelectionIcon} buttonClass="delete" title="Delete"
-    onClick={onClick} disabled={disabled} />;
-});

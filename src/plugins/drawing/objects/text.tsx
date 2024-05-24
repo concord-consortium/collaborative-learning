@@ -1,11 +1,9 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React, { useEffect, useRef } from "react";
-import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps, IDrawingLayer,
-  IToolbarButtonProps, ObjectTypeIconViewBox, typeField } from "./drawing-object";
-import { BoundingBoxSides, Point, ToolbarSettings } from "../model/drawing-basic-types";
+import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps, IDrawingLayer, ObjectTypeIconViewBox, typeField } from "./drawing-object";
+import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import TextToolIcon from "../../../assets/icons/comment/comment.svg";
-import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import { uniqueId } from "../../../../src/utilities/js-utils";
 import { WrappedSvgText } from "../components/wrapped-svg-text";
 
@@ -200,15 +198,4 @@ export class TextDrawingTool extends DrawingTool {
     const obj: TextObjectType = this.drawingLayer.addNewDrawingObject(getSnapshot(text)) as TextObjectType;
     obj.setEditing(true);
   }
-}
-
-export function TextToolbarButton({toolbarManager}: IToolbarButtonProps) {
-  const buttonSettings: ToolbarSettings = {
-    stroke: toolbarManager.toolbarSettings.stroke,
-    fill: toolbarManager.toolbarSettings.stroke,
-    strokeWidth: 0,
-    strokeDashArray: ""
-  };
-  return <SvgToolModeButton modalButton="text" title="Text"
-    toolbarManager={toolbarManager} SvgIcon={TextToolIcon}  settings={buttonSettings}/>;
 }

@@ -139,5 +139,8 @@
   }
 }
 
-
-
+.drawing-tool.read-only .drawing-tool-toolbar {
+  .drawing-tool-button {
+    cursor: default;
+  }
+}

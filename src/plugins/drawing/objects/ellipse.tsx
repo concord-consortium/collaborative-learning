@@ -2,9 +2,8 @@ import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { computeStrokeDashArray, DrawingObjectType, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer,
-  IToolbarButtonProps, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
+  ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
-import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import EllipseToolIcon from "../assets/ellipse-icon.svg";
 
 export const EllipseObject = types.compose("EllipseObject", StrokedObject, FilledObject)
@@ -131,9 +130,4 @@ export class EllipseDrawingTool extends DrawingTool {
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
   }
-}
-
-export function EllipseToolbarButton({toolbarManager}: IToolbarButtonProps) {
-  return <SvgToolModeButton modalButton="ellipse" title="Ellipse"
-      toolbarManager={toolbarManager} SvgIcon={EllipseToolIcon} />;
 }
