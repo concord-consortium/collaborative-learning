@@ -48,12 +48,6 @@ export const AxisModel = types.model("AxisModel", {
   },
   setRange(range: number) {
     self.range = range;
-  },
-  zoom(factor: number) {
-    if (!self.range) return;
-    self.unit = self.unit/factor;
-    self.range = self.range*factor;
-    console.log("range", self.range, "unit", self.unit, self);
   }
 }));
 export interface AxisModelType extends Instance<typeof AxisModel> {}

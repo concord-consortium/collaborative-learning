@@ -6,6 +6,7 @@ import {
   kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
 import { goodTickValue } from "../../../utilities/graph-utils";
+import { zoomFactor } from "../../../components/tiles/geometry/geometry-constants";
 
 const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
 
@@ -218,16 +219,26 @@ function getAxisUnitsFromProps(props?: JXGProperties, scale = 1) {
 }
 
 function createBoard(domElementId: string, properties?: JXGProperties) {
-  const defaults = {
-          keepaspectratio: true,
-          showCopyright: false,
-          showNavigation: false,
-          minimizeReflow: "none"
-        };
-  const [unitX, unitY] = getAxisUnitsFromProps(properties);
   // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
-  const overrides = { axis: false, keepaspectratio: unitX === unitY };
+  const defaults = {
+    axis: false,
+    keepaspectratio: true,
+    showCopyright: false,
+    showNavigation: false,
+    minimizeReflow: "none",
+    // Zoom and pan are enabled by default, but if done directly
+    // through JSXGraph do not get persisted to the model.
+    // Do we want to disable them?
+    zoom: {
+      enabled: true,
+      wheel: true,
+      factorX: zoomFactor,
+      factorY: zoomFactor
+    }
+  };
+  const overrides = {};
   const props = combineProperties(domElementId, defaults, properties, overrides);
+  console.warn("Init board properties", props);
   const board = JXG.JSXGraph.initBoard(domElementId, props);
   return board;
 }

@@ -6,7 +6,7 @@ import { getSnapshot, onSnapshot } from "mobx-state-tree";
 import objectHash from "object-hash";
 import { SizeMeProps } from "react-sizeme";
 
-import { pointBoundingBoxSize, pointButtonRadius, segmentButtonWidth } from "./geometry-constants";
+import { pointBoundingBoxSize, pointButtonRadius, segmentButtonWidth, zoomFactor } from "./geometry-constants";
 import { BaseComponent } from "../../base";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { getTableLinkColors } from "../../../models/tiles/table-links";
@@ -194,7 +194,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleCreateLineLabel: this.handleCreateLineLabel,
         handleCreateMovableLine: this.handleCreateMovableLine,
         handleCreateComment: this.handleCreateComment,
-        handleUploadImageFile: this.handleUploadBackgroundImage
+        handleUploadImageFile: this.handleUploadBackgroundImage,
+        handleZoomIn: this.handleZoomIn,
+        handleZoomOut: this.handleZoomOut,
+        handleFitAll: this.handleScaleToFit
       };
       onSetActionHandlers(handlers);
     }
@@ -717,11 +720,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const changesToApply = convertModelObjectsToChanges(modelObjectsToConvert);
       applyChanges(board, changesToApply);
     }
-
-    if (!this.props.readOnly) {
-      const extents = this.getBoardPointsExtents(board);
-      this.rescaleBoardAndAxes(extents);
-    }
+    this.handleScaleToFit();
   }
 
   // remove/recreate all linked points
@@ -748,6 +747,27 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
     }
   }
+
+  private handleZoomIn = () => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (!board || !content) return;
+    content.zoomBoard(board, zoomFactor);
+  };
+
+  private handleZoomOut = () => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (!board || !content) return;
+    content.zoomBoard(board, 1/zoomFactor);
+  };
+
+  private handleScaleToFit = () => {
+    const { board } = this.state;
+    if (!board || this.props.readOnly) return;
+    const extents = this.getBoardPointsExtents(board);
+    this.rescaleBoardAndAxes(extents);
+  };
 
   private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {
     const { board } = this.state;

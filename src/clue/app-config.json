@@ -282,6 +282,7 @@
           "|",
           "zoom-in",
           "zoom-out",
+          "fit-all",
           "|",
           "delete"
         ]

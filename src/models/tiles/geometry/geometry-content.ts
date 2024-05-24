@@ -1,6 +1,6 @@
 import { castArray, difference, each, size as _size, union } from "lodash";
 import { reaction } from "mobx";
-import { addDisposer, applySnapshot, detach, getSnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { addDisposer, applySnapshot, detach, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { ITableLinkProperties, linkedPointId } from "../table-link-types";
@@ -486,22 +486,13 @@ export const GeometryContentModel = GeometryBaseContentModel
     function zoomBoard(board: JXG.Board, factor: number) {
       if (!self.board) return;
       const {xAxis, yAxis} = self.board;
-      console.log("before zoom", getSnapshot(xAxis), getSnapshot(yAxis));
-      const { canvasWidth, canvasHeight } = board;
-      xAxis.zoom(factor);
-      yAxis.zoom(factor);
-
-      const change: JXGChange = {
-        operation: "update",
-        target: "board",
-        targetID: board.id,
-        properties: { boardScale: {
-                        xMin: xAxis.min, yMin: yAxis.min, unitX: xAxis.unit, unitY: yAxis.unit,
-                        canvasWidth, canvasHeight
-                      } },
-        userAction: factor>1 ? "zoom out" : "zoom in"
-      };
-      applyAndLogChange(board, change);
+      xAxis.range = xAxis.range ? xAxis.range / factor : xAxis.range;
+      yAxis.range = yAxis.range ? yAxis.range / factor : yAxis.range;
+      // Update units, but keep them the same (avoid rounding error building up)
+      const oldUnit = (xAxis.unit + yAxis.unit) / 2;
+      const newUnit = oldUnit * factor;
+      xAxis.unit = yAxis.unit = newUnit;
+      // TODO log change
     }
 
     function rescaleBoard(board: JXG.Board, params: IAxesParams) {
@@ -512,19 +503,31 @@ export const GeometryContentModel = GeometryBaseContentModel
       const unitX = width / (xMax - xMin);
       const unitY = height / (yMax - yMin);
 
+      // Now force equal scaling. The smaller unit wins, since we want to keep all points in view.
+      let calcUnit, calcXrange, calcYrange;
+      if (unitX < unitY) {
+        calcUnit = unitX;
+        calcXrange = xMax - xMin;
+        calcYrange = calcUnit * height;
+      } else {
+        calcUnit = unitY;
+        calcXrange = calcUnit * width;
+        calcYrange = yMax - yMin;
+      }
+
       const xAxisProperties = {
         name: xName,
         label: xAnnotation,
         min: xMin,
-        unit: unitX,
-        range: xMax - xMin
+        unit: calcUnit,
+        range: calcXrange
       };
       const yAxisProperties = {
         name: yName,
         label: yAnnotation,
         min: yMin,
-        unit: unitY,
-        range: yMax - yMin
+        unit: calcUnit,
+        range: calcYrange
       };
       if (self.board) {
         applySnapshot(self.board.xAxis, xAxisProperties);
@@ -536,7 +539,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         target: "board",
         targetID: board.id,
         properties: { boardScale: {
-                        xMin, yMin, unitX, unitY,
+                        xMin, yMin, unitX: calcUnit, unitY: calcUnit,
                         ...toObj("xName", xName), ...toObj("yName", yName),
                         ...toObj("xAnnotation", xAnnotation), ...toObj("yAnnotation", yAnnotation),
                         canvasWidth: width, canvasHeight: height
