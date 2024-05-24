@@ -29,7 +29,7 @@ import { prepareToDeleteObjects } from "./jxg-polygon";
 import {
   isAxisArray, isBoard, isComment, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
-  kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
+  kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj, BoundingBox
 } from "./jxg-types";
 import { SharedModelType } from "../../shared/shared-model";
 import { ISharedModelManager } from "../../shared/shared-model-manager";
@@ -37,7 +37,7 @@ import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { gImageMap } from "../../image-map";
 import { IClueTileObject } from "../../annotations/clue-object";
-import { appendVertexId, getPolygon, logGeometryEvent } from "./geometry-utils";
+import { appendVertexId, filterBoardObjects, getBoardObject, getBoardObjectIds, getPolygon, logGeometryEvent } from "./geometry-utils";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -262,14 +262,13 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     getSelectedIds(board: JXG.Board) {
       // returns the ids in creation order
-      return board.objectsList
-                  .filter(obj => self.isSelected(obj.id))
+      return filterBoardObjects(board, (obj) => self.isSelected(obj.id))
                   .map(obj => obj.id);
     },
     getDeletableSelectedIds(board: JXG.Board) {
       // returns the ids in creation order
-      return board.objectsList
-                  .filter(obj => self.isSelected(obj.id) &&
+      return filterBoardObjects(board,
+                  (obj) => self.isSelected(obj.id) &&
                           !obj.getAttribute("fixed") && !obj.getAttribute("clientUndeletable"))
                   .map(obj => obj.id);
     }
@@ -320,7 +319,7 @@ export const GeometryContentModel = GeometryBaseContentModel
   .actions(self => ({
     setElementSelection(board: JXG.Board | undefined, id: string, select: boolean) {
       if (self.isSelected(id) !== select) {
-        const elt = board && board.objects[id];
+        const elt = getBoardObject(board, id);
         const tableId = elt && elt.getAttribute("linkedTableId");
         const rowId = elt && elt.getAttribute("linkedRowId");
         self.metadata.setSelection(id, select);
@@ -472,7 +471,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       const [xMin, yMax, xMax, yMin] = guessUserDesiredBoundingBox(board);
       const { xMinBufferRange, xMaxBufferRange, yBufferRange } = getBoardUnitsAndBuffers(board);
       // Add the buffers back post-scaling
-      const newBoundingBox: JXG.BoundingBox = [
+      const newBoundingBox: BoundingBox = [
         xMin * widthMultiplier - xMinBufferRange,
         yMax * heightMultiplier + yBufferRange,
         xMax * widthMultiplier + xMaxBufferRange,
@@ -1004,7 +1003,7 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
 
     function findObjects(board: JXG.Board, test: (obj: JXG.GeometryElement) => boolean): JXG.GeometryElement[] {
-      return board.objectsList.filter(test);
+      return filterBoardObjects(board, test);
     }
 
     function isCopyableChild(child: JXG.GeometryElement) {
@@ -1026,13 +1025,12 @@ export const GeometryContentModel = GeometryBaseContentModel
     // ancestors are selected.
     function getSelectedIdsAndChildren(board: JXG.Board) {
       // list of selected ids in order of creation
-      const selectedIds = board.objectsList
-                               .map(obj => obj.id)
+      const selectedIds = getBoardObjectIds(board)
                                .filter(id => self.isSelected(id));
       const children: { [id: string]: JXG.GeometryElement } = {};
       // identify children (e.g. polygons) that may be selected as well
       selectedIds.forEach(id => {
-        const obj = board.objects[id];
+        const obj = getBoardObject(board, id);
         if (obj) {
           each(obj.childElements, child => {
             if (child && !self.isSelected(child.id) && isCopyableChild(child)) {

@@ -1,11 +1,12 @@
 import { assign, each, find } from "lodash";
-import "./jxg";
+import JXG from "jsxgraph";
 import { ITableLinkProperties, JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
 import {
   isAxis, isBoard, isLinkedPoint, isPoint, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
-  kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
+  kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj, BoundingBox
 } from "./jxg-types";
 import { goodTickValue } from "../../../utilities/graph-utils";
+import { filterBoardObjects, forEachBoardObject, getBoardObject } from "./geometry-utils";
 
 const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
 
@@ -29,13 +30,13 @@ export function resumeBoardUpdates(board: JXG.Board) {
 }
 
 export function getObjectById(board: JXG.Board, id: string): JXG.GeometryElement | undefined {
-  let obj: JXG.GeometryElement | undefined = board.objects[id];
+  let obj: JXG.GeometryElement | undefined = getBoardObject(board, id);
   if (!obj && id?.includes(":")) {
     // legacy support for early tiles in which points were identified by caseId,
     // before we added support for multiple columns, i.e. multiple points per row/case
     // newer code uses `${caseId}:${attrId}` for the id of points
     const caseId = id.split(":")[0];
-    obj = board.objects[caseId];
+    obj = getBoardObject(board, caseId);
   }
   return obj;
 }
@@ -43,9 +44,9 @@ export function getObjectById(board: JXG.Board, id: string): JXG.GeometryElement
 export function getPointsByCaseId(board: JXG.Board, caseId: string) {
   if (!caseId || caseId.includes(":")) {
     const obj = getObjectById(board, caseId);
-    return obj ? [obj] : [];
+    return isPoint(obj) ? [obj] : [];
   }
-  return board.objectsList.filter(obj => isPoint(obj) && (obj.id.split(":")[0] === caseId));
+  return filterBoardObjects(board, obj => isPoint(obj) && (obj.id.split(":")[0] === caseId));
 }
 
 export function syncLinkedPoints(board: JXG.Board, links: ITableLinkProperties) {
@@ -86,7 +87,8 @@ export const getAxisType = (v: any) => {
   if (stdFormY) return "y";
 };
 export function getAxis(board: JXG.Board, type: "x" | "y") {
-  return find(board.objectsList, obj => isAxis(obj) && (getAxisType(obj) === type));
+  const axis = find(board.objectsList, obj => isAxis(obj) && (getAxisType(obj) === type));
+  return isAxis(axis) ? axis : undefined;
 }
 
 function getClientAxisLabels(board: JXG.Board) {
@@ -140,7 +142,7 @@ export function getTickValues(pixPerUnit: number) {
 export const kReverse = true;
 export function sortByCreation(board: JXG.Board, ids: string[], reverse = false) {
   const indices: { [id: string]: number } = {};
-  board.objectsList.forEach((obj, index) => {
+  forEachBoardObject(board, (obj, index) => {
     indices[obj.id] = index;
   });
   ids.sort(reverse
@@ -173,13 +175,13 @@ function scaleBoundingBoxToElement(domElementID: string, changeProps: any) {
   const eltBounds = elt?.getBoundingClientRect();
   const eltWidth = eltBounds?.width || kGeometryDefaultWidth;
   const eltHeight = eltBounds?.height || kGeometryDefaultHeight;
-  const { boundingBox }: { boundingBox: JXG.BoundingBox } = changeProps;
+  const { boundingBox }: { boundingBox: BoundingBox } = changeProps;
   const [unitX, unitY] = getAxisUnitsFromProps(changeProps, getCanvasScale(elt));
   // eslint-disable-next-line no-sparse-arrays
   const [xMin, , , yMin] = boundingBox || [kGeometryDefaultXAxisMin, , , kGeometryDefaultYAxisMin];
   const xMax = xMin + eltWidth / unitX;
   const yMax = yMin + eltHeight / unitY;
-  return [xMin, yMax, xMax, yMin] as JXG.BoundingBox;
+  return [xMin, yMax, xMax, yMin] as BoundingBox;
 }
 
 export function getBoardUnitsAndBuffers(board: JXG.Board) {
@@ -222,7 +224,8 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
           keepaspectratio: true,
           showCopyright: false,
           showNavigation: false,
-          minimizeReflow: "none"
+          minimizeReflow: "none",
+          attributes: { showNavigation: true}
         };
   const [unitX, unitY] = getAxisUnitsFromProps(properties);
   // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
@@ -239,7 +242,7 @@ interface IAddAxesParams {
   yAnnotation?: string;
   unitX: number;
   unitY: number;
-  boundingBox?: JXG.BoundingBox;
+  boundingBox?: BoundingBox;
 }
 
 function addAxes(board: JXG.Board, params: IAddAxesParams) {
@@ -252,7 +255,7 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
   if (boundingBox && boundingBox.every((val: number) => isFinite(val))) {
     board.setBoundingBox(boundingBox);
   }
-  const xAxis = board.create("axis", [ [0, 0], [1, 0] ], {
+  const xAxis: JXG.Axis = board.create("axis", [ [0, 0], [1, 0] ], {
     name: xName || "x",
     withLabel: true,
     label: {fontSize: 13, anchorX: "right", position: "rt", offset: [0, 15]},
@@ -339,10 +342,10 @@ export const boardChangeAgent: JXGChangeAgent = {
         if (isFinite(xMin) && isFinite(yMin) && isFinite(unitX) && isFinite(unitY)) {
           const xRange = width / unitX;
           const yRange = height / unitY;
-          const bbox: JXG.BoundingBox = [xMin, yMin + yRange, xMin + xRange, yMin];
+          const bbox: BoundingBox = [xMin, yMin + yRange, xMin + xRange, yMin];
           suspendBoardUpdates(board);
           // remove old axes before resetting bounding box
-          board.objectsList.forEach(el => {
+          forEachBoardObject(board, el => {
             if (el.elType === "axis") {
               board.removeObject(el);
             }

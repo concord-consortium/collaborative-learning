@@ -6,6 +6,8 @@ export const kGeometryDefaultPixelsPerUnit = 18.3;  // matches S&S curriculum im
 export const kGeometryDefaultXAxisMin = -2;
 export const kGeometryDefaultYAxisMin = -1;
 
+export type BoundingBox = [x1: number, y1: number, x2: number, y2: number];
+
 // utility for creating an object from a property/value pair
 export const toObj = (p: string, v: any) => v != null ? { [p]: v } : undefined;
 
