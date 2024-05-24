@@ -61,7 +61,7 @@ const gDrawingObjectInfos: Record<string, IDrawingObjectInfo | undefined> = {
 const gDrawingToolInfos: Record<string, IDrawingToolInfo | undefined> = {
   select: {
     name: "select",
-    toolClass: SelectionDrawingTool,
+    toolClass: SelectionDrawingTool
   },
   line: {
     name: "line",

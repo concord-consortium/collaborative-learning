@@ -1,7 +1,10 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
-import { computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps, IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
+import {
+  computeStrokeDashArray, DrawingObjectType, DrawingTool, IDrawingComponentProps,
+  IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField
+} from "./drawing-object";
 import { BoundingBoxSides, Point, VectorEndShape,
   endShapesForVectorType, getVectorTypeIcon, vectorTypeForEndShapes }
   from "../model/drawing-basic-types";
@@ -185,40 +188,3 @@ export class VectorDrawingTool extends DrawingTool {
   }
 }
 
-// export const VectorToolbarButton: React.FC<IToolbarButtonProps> = observer(({
-//   toolbarManager, togglePaletteState, clearPaletteState
-// }) => {
-//   const modalButton = "vector";
-//   const { selectedButton, toolbarSettings } = toolbarManager;
-//   const selected = selectedButton === modalButton;
-
-//   const handleButtonClick = useCallback(() => {
-//     toolbarManager.setSelectedButton(modalButton);
-//     togglePaletteState('showVectors', false);
-//   }, [toolbarManager, togglePaletteState]);
-
-//   const handleButtonTouchHold = useCallback(() => {
-//     // Do not set the vector button as the selected tool yet.
-//     // The user might be opening the palette just to change the type of existing, selected vectors.
-//     togglePaletteState('showVectors');
-//   }, [togglePaletteState]);
-
-//   const icon = getVectorTypeIcon(toolbarSettings.vectorType);
-
-//   // Arrowhead shapes should be drawn entirely with the stroke color
-//   const settings: ToolbarSettings = {
-//     fill: toolbarSettings.stroke,
-//     stroke: toolbarSettings.stroke,
-//     strokeDashArray: toolbarSettings.strokeDashArray,
-//     strokeWidth: toolbarSettings.strokeWidth,
-//     vectorType: toolbarSettings.vectorType
-//   };
-
-//   return null;
-//   return (
-//     <SvgToolbarButton SvgIcon={icon} buttonClass="vector"
-//       title="Line or arrow" selected={selected} settings={settings}
-//       onClick={handleButtonClick}
-//       openPalette={handleButtonTouchHold} />
-//   );
-// });
