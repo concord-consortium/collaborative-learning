@@ -20,7 +20,13 @@ export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => 
   const entry = gImageMap.getImageEntry(currentStamp.url);
 
   function handleClick() {
+    drawingModel.setOpenPallette(OpenPalletteValues.None);
     drawingModel.setSelectedButton(OpenPalletteValues.Stamp);
+  }
+
+  function handleTriangleClick(e: React.MouseEvent) {
+    e.stopPropagation();
+    toggleOpen();
   }
 
   function toggleOpen() {
@@ -41,7 +47,7 @@ export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => 
     <TileToolbarButton name={name} title={"Stamp"} selected={isSelected} onClick={handleClick}>
       <img height={24} src={entry?.displayUrl} draggable="false" />
       <SmallCornerTriangle
-        onClick={toggleOpen}
+        onClick={handleTriangleClick}
         className="corner-triangle"
       />
       {isOpen &&

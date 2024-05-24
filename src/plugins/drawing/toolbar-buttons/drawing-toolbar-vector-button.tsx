@@ -10,6 +10,7 @@ import { ToolbarButtonSvg } from "./toolbar-button-svg";
 import { ToolbarSettings, VectorType, getVectorTypeIcon } from "../model/drawing-basic-types";
 
 import SmallCornerTriangle from "../../../../src/assets/icons/small-corner-triangle.svg";
+import { useTouchHold } from "../../../hooks/use-touch-hold";
 
 export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
@@ -17,7 +18,17 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
   const isOpen = drawingModel?.openPallette === OpenPalletteValues.Vector;
 
   function handleClick() {
-    drawingModel.setSelectedButton(OpenPalletteValues.Vector);
+    drawingModel.setOpenPallette(OpenPalletteValues.None);
+    drawingModel.setSelectedButton("vector");
+  }
+
+  function handleTouchHold() {
+    console.log("| handleTouchHold: " + name);
+  }
+
+  function handleTriangleClick(e: React.MouseEvent) {
+    e.stopPropagation();
+    toggleOpen();
   }
 
   function toggleOpen() {
@@ -36,6 +47,8 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
     }
   }
 
+  const touchHoldHandlers = useTouchHold(handleTouchHold, handleClick, 500);
+
   const settings: ToolbarSettings = {
     fill: drawingModel.stroke,
     stroke: drawingModel.stroke,
@@ -47,7 +60,7 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
   const vectorIcon =  getVectorTypeIcon(drawingModel.toolbarSettings.vectorType);
 
   return (
-    <TileToolbarButton name={name} title={"Vector"} onClick={handleClick} selected={isSelected}>
+    <TileToolbarButton name={name} title={"Vector"} selected={isSelected} {...touchHoldHandlers}>
       <ToolbarButtonSvg SvgIcon={vectorIcon} settings={settings}/>
       { isOpen &&
         <VectorTypePalette
@@ -57,7 +70,7 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
         />
       }
       <SmallCornerTriangle
-        onClick={toggleOpen}
+        onClick={handleTriangleClick}
         className="corner-triangle"
       />
     </TileToolbarButton>
