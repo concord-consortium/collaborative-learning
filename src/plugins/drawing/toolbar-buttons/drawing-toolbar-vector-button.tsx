@@ -9,6 +9,8 @@ import { OpenPalletteValues } from "../model/drawing-content";
 import { ToolbarButtonSvg } from "./toolbar-button-svg";
 import { ToolbarSettings, VectorType, getVectorTypeIcon } from "../model/drawing-basic-types";
 
+import SmallCornerTriangle from "../../../../src/assets/icons/small-corner-triangle.svg";
+
 export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
   const isSelected = drawingModel?.selectedButton === "vector";
@@ -55,6 +57,10 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
           settings={drawingModel.toolbarSettings}
         />
       }
+      <SmallCornerTriangle
+        onClick={toggleOpen}
+        className="corner-triangle"
+      />
     </TileToolbarButton>
   );
 });

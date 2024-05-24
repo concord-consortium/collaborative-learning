@@ -8,6 +8,7 @@ import { OpenPalletteValues } from "../model/drawing-content";
 import { StampsPalette } from "../components/stamps-palette";
 import { gImageMap } from "../../../models/image-map";
 
+import SmallCornerTriangle from "../../../../src/assets/icons/small-corner-triangle.svg";
 
 export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
@@ -21,7 +22,6 @@ export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => 
 
   function handleClick() {
     drawingModel.setSelectedButton(OpenPalletteValues.Stamp);
-    toggleOpen();
   }
 
   function toggleOpen() {
@@ -42,6 +42,10 @@ export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => 
   return (
     <TileToolbarButton name={name} title={"Stamp"} selected={isSelected} onClick={handleClick}>
       <img height={24} src={entry?.displayUrl} draggable="false" />
+      <SmallCornerTriangle
+        onClick={toggleOpen}
+        className="corner-triangle"
+      />
       {isOpen &&
         <StampsPalette
           stamps={stamps}
