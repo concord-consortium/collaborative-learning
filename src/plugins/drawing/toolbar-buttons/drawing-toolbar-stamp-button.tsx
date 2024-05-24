@@ -19,7 +19,6 @@ export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => 
 
   const entry = gImageMap.getImageEntry(currentStamp.url);
 
-
   function handleClick() {
     drawingModel.setSelectedButton(OpenPalletteValues.Stamp);
   }
@@ -32,7 +31,6 @@ export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => 
     }
   }
 
-  // HEY: TODO - look up `isEnabled` usages in original code
   function handleSelectStamp(stampIndex: number){
     drawingModel.setSelectedStamp(stampIndex);
     drawingModel.setSelectedButton("stamp");

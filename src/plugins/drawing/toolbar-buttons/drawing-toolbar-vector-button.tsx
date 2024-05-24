@@ -18,7 +18,6 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
 
   function handleClick() {
     drawingModel.setSelectedButton(OpenPalletteValues.Vector);
-    toggleOpen();
   }
 
   function toggleOpen() {

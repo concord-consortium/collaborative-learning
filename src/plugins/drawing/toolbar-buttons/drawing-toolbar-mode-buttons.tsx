@@ -10,6 +10,7 @@ import SelectIcon from "../../../clue/assets/icons/select-tool.svg";
 import RectangleIcon from "./../assets/rectangle-icon.svg";
 import EllipseIcon from "./../assets/ellipse-icon.svg";
 import TextIcon from "../../../assets/icons/comment/comment.svg";
+import { OpenPalletteValues } from "../model/drawing-content";
 
 interface IModeButtonProps extends IToolbarButtonComponentProps {
   title: string;
@@ -47,6 +48,7 @@ const ModeButton = observer(({ name, title, buttonType, Icon }: IModeButtonProps
   const settings = getSvgPropertiesForType(buttonType, drawingModel);
 
   function handleClick() {
+    drawingModel.setOpenPallette(OpenPalletteValues.None);
     drawingModel?.setSelectedButton(buttonType);
   }
 

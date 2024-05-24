@@ -5,10 +5,11 @@ import { kDrawingTileType, kDrawingDefaultHeight } from "./model/drawing-types";
 import DrawingToolComponent from "./components/drawing-tile";
 import { DrawingMigrator } from "./model/drawing-migrator";
 import { registerDrawingObjectInfo, registerDrawingToolInfo } from "./components/drawing-object-manager";
-import { GroupObjectsButton, UngroupObjectsButton } from "./components/drawing-toolbar-group-buttons";
 import { GroupComponent, GroupObject } from "./objects/group";
 import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-button-manager";
-import { EllipseButton, LineButton, RectangleButton, SelectButton, TextButton } from "./toolbar-buttons/drawing-toolbar-mode-buttons";
+import {
+  EllipseButton, LineButton, RectangleButton, SelectButton, TextButton
+} from "./toolbar-buttons/drawing-toolbar-mode-buttons";
 import { VectorButton } from "./toolbar-buttons/drawing-toolbar-vector-button";
 import { StampButton } from "./toolbar-buttons/drawing-toolbar-stamp-button";
 import { FillColorButton, StrokeColorButton } from "./toolbar-buttons/drawing-toolbar-color-select-buttons";
@@ -53,13 +54,11 @@ registerDrawingObjectInfo({
 });
 
 registerDrawingToolInfo({
-  name: "group",
-  buttonComponent: GroupObjectsButton
+  name: "group"
 });
 
 registerDrawingToolInfo({
-  name: "ungroup",
-  buttonComponent: UngroupObjectsButton
+  name: "ungroup"
 });
 
 registerTileToolbarButtons("drawing", [

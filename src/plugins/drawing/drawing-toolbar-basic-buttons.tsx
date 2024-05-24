@@ -8,11 +8,13 @@ import UngroupObjectsIcon from "./assets/ungroup-objects-icon.svg";
 import DuplicateIcon from "./assets/duplicate-icon.svg";
 
 import "./drawing-toolbar.scss";
+import { OpenPalletteValues } from "./model/drawing-content";
 
 export function GroupButton({ name }: IToolbarButtonComponentProps) {
   const drawingModel = useContext(DrawingContentModelContext);
 
   function groupSelection() {
+    drawingModel.setOpenPallette(OpenPalletteValues.None);
     if (drawingModel.selection.length > 1) {
       drawingModel.createGroup(drawingModel.selection);
     }
@@ -29,6 +31,7 @@ export function UngroupButton({ name }: IToolbarButtonComponentProps) {
   const drawingModel = useContext(DrawingContentModelContext);
 
   function ungroupSelection() {
+    drawingModel.setOpenPallette(OpenPalletteValues.None);
     if (drawingModel.selection.length > 0) {
       drawingModel.ungroupGroups(drawingModel.selection);
     }
@@ -45,6 +48,7 @@ export function DuplicateButton({ name }: IToolbarButtonComponentProps) {
   const drawingModel = useContext(DrawingContentModelContext);
 
   function duplicateSelection() {
+    drawingModel.setOpenPallette(OpenPalletteValues.None);
     drawingModel.duplicateObjects(drawingModel.selection);
   }
 
@@ -59,6 +63,7 @@ export function DeleteButton({ name }: IToolbarButtonComponentProps) {
   const drawingModel = useContext(DrawingContentModelContext);
 
   const deleteSelection = () => {
+    drawingModel.setOpenPallette(OpenPalletteValues.None);
     drawingModel.deleteObjects([...drawingModel.selection]);
   };
 
