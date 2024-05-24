@@ -143,7 +143,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         onKeyDown={(e) => hotKeys.current.dispatch(e)}
         onMouseDown={handlePointerDown}
       >
-        <TileToolbar tileType="drawing" readOnly={!!readOnly} tileElement={tileElt} />
+        <TileToolbar tileType="drawing" readOnly={!!readOnly} tileElement={tileElt} data-testid="drawing-toolbar"/>
         <div className="drawing-container">
           {!readOnly && <ObjectListView model={model} setHoverObject={setObjectListHoveredObject} />}
           <DrawingLayerView
