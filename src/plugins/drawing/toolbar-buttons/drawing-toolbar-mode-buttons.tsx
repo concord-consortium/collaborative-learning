@@ -40,7 +40,6 @@ function getSvgPropertiesForType(type: ToolbarModalButton, drawingModel: any) {
 }
 
 // TODO: Disambiguate or remove duplicate among name, title, and buttonType
-// TODO: Make a more generic way to do this once you are sure they all fit the pattern?
 const ModeButton = observer(({ name, title, buttonType, Icon }: IModeButtonProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
   const selected = drawingModel?.selectedButton === buttonType;
