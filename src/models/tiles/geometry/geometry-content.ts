@@ -190,6 +190,27 @@ export const GeometryContentModel = GeometryBaseContentModel
         }
       });
       return point;
+    },
+    getLinkedPointsData() {
+      const data: Map<string,{coords:JXGCoordPair[],properties:{id:string}[]}> = new Map();
+      self.linkedDataSets.forEach(link => {
+        const coords: JXGCoordPair[] = [];
+        const properties: Array<{ id: string }> = [];
+        for (let ci = 0; ci < link.dataSet.cases.length; ++ci) {
+          const x = link.dataSet.attributes[0]?.numValue(ci);
+          for (let ai = 1; ai < link.dataSet.attributes.length; ++ai) {
+            const attr = link.dataSet.attributes[ai];
+            const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
+            const y = attr.numValue(ci);
+            if (isFinite(x) && isFinite(y)) {
+              coords.push([x, y]);
+              properties.push({ id });
+            }
+          }
+        }
+        data.set(link.providerId, { coords, properties });
+      });
+      return data;
     }
   }))
   .views(self => ({
@@ -233,6 +254,9 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
   }))
   .views(self => ({
+    getLinkedDataset(linkedTableId: string) {
+      return self.linkedDataSets.find(ds => ds.providerId === linkedTableId);
+    },
     getSelectedIds(board: JXG.Board) {
       // returns the ids in creation order
       return board.objectsList
@@ -265,6 +289,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       const polygons: IClueTileObject[] = [];
       const segments: IClueTileObject[] = [];
       const points: IClueTileObject[] = [];
+      const linkedPoints: IClueTileObject[] = [];
       self.objects.forEach(object => {
         const objectInfo = { objectId: object.id, objectType: object.type };
         if (object.type === "polygon") {
@@ -277,8 +302,16 @@ export const GeometryContentModel = GeometryBaseContentModel
           points.push(objectInfo);
         }
       });
+      for (const lpd of self.getLinkedPointsData().values()) {
+        lpd.properties.forEach((prop) => {
+          linkedPoints.push({
+            objectType: "linkedPoint",
+            objectId: prop.id
+          });
+        });
+      }
       // The order of the objects is important so buttons to add sparrows don't cover each other
-      return [...polygons, ...segments, ...points];
+      return [...polygons, ...segments, ...points, ...linkedPoints];
     },
   }))
   .actions(self => ({
