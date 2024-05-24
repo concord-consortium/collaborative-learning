@@ -85,26 +85,21 @@
   .toolbar-palette {
     background-color: $workspace-teal-light-9;
     border: $toolbar-border;
-    border-radius: 0 $toolbar-border-radius $toolbar-border-radius $toolbar-border-radius;
     z-index: $toolbar-z-index;
 
     &.vectors {
-      left: 70px;
       height: 38px;
     }
 
     &.stamps {
-      left: 180px;
       width: 190px;
     }
 
     &.stroke-color {
-      left: 216px;
       width: 129px;
     }
 
     &.fill-color {
-      left: 252px;
       width: 159px;
     }
   }
