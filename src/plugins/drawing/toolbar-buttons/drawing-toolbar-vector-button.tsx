@@ -5,12 +5,10 @@ import { IToolbarButtonComponentProps } from "../../../components/toolbar/toolba
 import { VectorTypePalette } from "../components/vector-palette";
 import { DrawingContentModelContext } from "../components/drawing-content-context";
 import { OpenPalletteValues } from "../model/drawing-content";
-
 import { ToolbarButtonSvg } from "./toolbar-button-svg";
 import { ToolbarSettings, VectorType, getVectorTypeIcon } from "../model/drawing-basic-types";
 
 import SmallCornerTriangle from "../../../../src/assets/icons/small-corner-triangle.svg";
-import { useTouchHold } from "../../../hooks/use-touch-hold";
 
 export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
@@ -20,10 +18,6 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
   function handleClick() {
     drawingModel.setOpenPallette(OpenPalletteValues.None);
     drawingModel.setSelectedButton("vector");
-  }
-
-  function handleTouchHold() {
-    console.log("| handleTouchHold: " + name);
   }
 
   function handleTriangleClick(e: React.MouseEvent) {
@@ -47,8 +41,6 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
     }
   }
 
-  const touchHoldHandlers = useTouchHold(handleTouchHold, handleClick, 500);
-
   const settings: ToolbarSettings = {
     fill: drawingModel.stroke,
     stroke: drawingModel.stroke,
@@ -60,7 +52,7 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
   const vectorIcon =  getVectorTypeIcon(drawingModel.toolbarSettings.vectorType);
 
   return (
-    <TileToolbarButton name={name} title={"Vector"} selected={isSelected} {...touchHoldHandlers}>
+    <TileToolbarButton name={name} title={"Vector"} selected={isSelected} onClick={handleClick}>
       <ToolbarButtonSvg SvgIcon={vectorIcon} settings={settings}/>
       { isOpen &&
         <VectorTypePalette
