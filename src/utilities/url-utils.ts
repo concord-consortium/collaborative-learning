@@ -22,7 +22,14 @@ export function isValidHttpUrl(possibleUrl: string | undefined) {
  */
 export function getUrlFromRelativeOrFullString(param: string) {
   if (param.startsWith("./")) {
-    return new URL(getAssetUrl(param));
+    const assetUrlString = getAssetUrl(param);
+    if (assetUrlString === param) {
+      // This means the webpack public path isn't set so just use window.location
+      // This will should only happen during tests
+      return new URL(param, window.location.href);
+    } else {
+      return new URL(assetUrlString);
+    }
   } else if (isValidHttpUrl(param)) {
     return new URL(param);
   }
