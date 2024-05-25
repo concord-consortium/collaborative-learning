@@ -222,7 +222,7 @@ There are a number of URL parameters that can aid in testing:
 
 The `unit` parameter can be in 3 forms:
 - a valid URL starting with `https:` or `http:` will be treated as an absolute URL.
-- a string starting with `./` will be treated as a URL relative to the current page in the browser.
+- a string starting with `./` will be treated as a URL relative to the javascript files of CLUE.
 - Everything else is treated as a unit code, these codes are first looked up in a map to remap legacy codes. Then the URL of the unit is created by `${curriculumSiteUrl}/branch/${branchName}/${unitCode}/content.json`.
   - `curriculumSiteUrl` defaults to `https://models-resources.concord.org/clue-curriculum`.
   - `branchName` defaults to `main`.
