@@ -7,13 +7,15 @@ import { DrawingContentModelContext } from "../components/drawing-content-contex
 import { OpenPalletteValues } from "../model/drawing-content";
 import { ToolbarButtonSvg } from "./toolbar-button-svg";
 import { ToolbarSettings, VectorType, getVectorTypeIcon } from "../model/drawing-basic-types";
-
+import { useTouchHold } from "../../../hooks/use-touch-hold";
 import SmallCornerTriangle from "../../../../src/assets/icons/small-corner-triangle.svg";
 
 export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
   const isSelected = drawingModel?.selectedButton === "vector";
   const isOpen = drawingModel?.openPallette === OpenPalletteValues.Vector;
+
+  const { onClick } = useTouchHold(toggleOpen, handleClick);
 
   function handleClick() {
     drawingModel.setOpenPallette(OpenPalletteValues.None);
@@ -49,10 +51,16 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
     vectorType: drawingModel.vectorType
   };
 
-  const vectorIcon =  getVectorTypeIcon(drawingModel.toolbarSettings.vectorType);
+  const vectorIcon = getVectorTypeIcon(drawingModel.toolbarSettings.vectorType);
 
   return (
-    <TileToolbarButton name={name} title={"Vector"} selected={isSelected} onClick={handleClick}>
+    <TileToolbarButton
+      name={name}
+      title={"Vector"}
+      selected={isSelected}
+      onClick={onClick}
+      onTouchHold={toggleOpen}
+    >
       <ToolbarButtonSvg SvgIcon={vectorIcon} settings={settings}/>
       { isOpen &&
         <VectorTypePalette

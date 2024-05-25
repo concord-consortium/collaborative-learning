@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
 import { observer } from "mobx-react";
+import { useTouchHold } from "../../../hooks/use-touch-hold";
 import { TileToolbarButton } from "../../../components/toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../components/toolbar/toolbar-button-manager";
 import { DrawingContentModelContext } from "../components/drawing-content-context";
@@ -18,6 +19,7 @@ export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => 
   if (!currentStamp)  return null;
 
   const entry = gImageMap.getImageEntry(currentStamp.url);
+  const { onClick } = useTouchHold(toggleOpen, handleClick);
 
   function handleClick() {
     drawingModel.setOpenPallette(OpenPalletteValues.None);
@@ -44,7 +46,13 @@ export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => 
   }
 
   return (
-    <TileToolbarButton name={name} title={"Stamp"} selected={isSelected} onClick={handleClick}>
+    <TileToolbarButton
+      name={name}
+      title={"Stamp"}
+      selected={isSelected}
+      onClick={onClick}
+      onTouchHold={toggleOpen}
+    >
       <img height={24} src={entry?.displayUrl} draggable="false" />
       <SmallCornerTriangle
         onClick={handleTriangleClick}
