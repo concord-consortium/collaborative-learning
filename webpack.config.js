@@ -26,6 +26,29 @@ const baseHtmlPluginConfig = {
   }
 };
 
+function configHtmlPlugins(config) {
+  const { filename } = config;
+  const numFolders = (filename.match(/\//g) || []).length;
+  const plugins = [
+    new HtmlWebpackPlugin({
+      ...baseHtmlPluginConfig,
+      ...config,
+      publicPath: '.'
+    })
+  ];
+  if (DEPLOY_PATH) {
+    plugins.push(
+      new HtmlWebpackPlugin({
+        ...baseHtmlPluginConfig,
+        ...config,
+        filename: filename.replace('.html', '-top.html'),
+        publicPath: `${"../".repeat(numFolders)}${DEPLOY_PATH}`
+      })
+    );
+  }
+  return plugins;
+}
+
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
 
@@ -230,11 +253,13 @@ module.exports = (env, argv) => {
         filename: devMode ? '[name].css' : '[name].[chunkhash:8].css',
         ignoreOrder: true
       }),
-      new HtmlWebpackPlugin({
-        ...baseHtmlPluginConfig,
+      ...configHtmlPlugins({
         chunks: ['index'],
         filename: 'index.html',
-        publicPath: '.',
+      }),
+      ...configHtmlPlugins({
+        chunks: ['doc-editor'],
+        filename: 'editor/index.html',
       }),
       new HtmlWebpackPlugin({
         ...baseHtmlPluginConfig,
@@ -242,18 +267,6 @@ module.exports = (env, argv) => {
         filename: 'cms-editor.html',
         publicPath: '.',
         template: 'src/cms/cms-editor.html'
-      }),
-      ...(DEPLOY_PATH ? [new HtmlWebpackPlugin({
-        ...baseHtmlPluginConfig,
-        chunks: ['index'],
-        filename: 'index-top.html',
-        publicPath: DEPLOY_PATH,
-      })] : []),
-      new HtmlWebpackPlugin({
-        ...baseHtmlPluginConfig,
-        chunks: ['doc-editor'],
-        filename: 'doc-editor.html',
-        publicPath: '.',
       }),
       new CopyWebpackPlugin({
         patterns: [
