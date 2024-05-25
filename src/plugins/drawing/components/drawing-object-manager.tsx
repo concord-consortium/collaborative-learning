@@ -22,7 +22,7 @@ export interface IDrawingToolInfo {
   // using a simple `typeof DrawingTool` can't be used because that type
   // is an abstract class so can't be instantiated.
   toolClass?: { new(drawingLayer: IDrawingLayer): DrawingTool };
-  buttonComponent?: React.ComponentType<IToolbarButtonProps>; // HEY: was/is used for old shared var tool buttons...
+  buttonComponent?: React.ComponentType<IToolbarButtonProps>; // NOTE: used for shared var tool buttons...
 }
 
 const gDrawingObjectInfos: Record<string, IDrawingObjectInfo | undefined> = {

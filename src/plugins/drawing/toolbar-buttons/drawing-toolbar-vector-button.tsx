@@ -14,7 +14,6 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
   const drawingModel = useContext(DrawingContentModelContext);
   const isSelected = drawingModel?.selectedButton === "vector";
   const isOpen = drawingModel?.openPallette === OpenPalletteValues.Vector;
-
   const { onClick } = useTouchHold(toggleOpen, handleClick);
 
   function handleClick() {

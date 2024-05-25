@@ -4,11 +4,9 @@ import { useTouchHold } from "../../../hooks/use-touch-hold";
 import { TileToolbarButton } from "../../../components/toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../components/toolbar/toolbar-button-manager";
 import { DrawingContentModelContext } from "../components/drawing-content-context";
-
 import { OpenPalletteValues } from "../model/drawing-content";
 import { StampsPalette } from "../components/stamps-palette";
 import { gImageMap } from "../../../models/image-map";
-
 import SmallCornerTriangle from "../../../../src/assets/icons/small-corner-triangle.svg";
 
 export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => {
@@ -16,10 +14,10 @@ export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => 
   const isSelected = drawingModel?.selectedButton === "stamp";
   const isOpen = drawingModel?.openPallette === OpenPalletteValues.Stamp;
   const { stamps, currentStampIndex, currentStamp } = drawingModel;
+  const { onClick } = useTouchHold(toggleOpen, handleClick);
   if (!currentStamp)  return null;
 
   const entry = gImageMap.getImageEntry(currentStamp.url);
-  const { onClick } = useTouchHold(toggleOpen, handleClick);
 
   function handleClick() {
     drawingModel.setOpenPallette(OpenPalletteValues.None);
@@ -68,5 +66,3 @@ export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => 
     </TileToolbarButton>
   );
 });
-
-
