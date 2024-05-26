@@ -141,6 +141,7 @@ jobs:
       - uses: concord-consortium/s3-deploy-action@v1
         id: s3-deploy
         with:
+          build: npm run build:for-deploy
           bucket: models-resources
           prefix: collaborative-learning
           awsAccessKeyId: ${{ secrets.AWS_ACCESS_KEY_ID }}
