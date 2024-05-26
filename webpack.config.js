@@ -29,11 +29,12 @@ const baseHtmlPluginConfig = {
 function configHtmlPlugins(config) {
   const { filename } = config;
   const numFolders = (filename.match(/\//g) || []).length;
+  const rootPath = "../".repeat(numFolders);
   const plugins = [
     new HtmlWebpackPlugin({
       ...baseHtmlPluginConfig,
       ...config,
-      publicPath: '.'
+      publicPath: rootPath ? `${rootPath}` : ''
     })
   ];
   if (DEPLOY_PATH) {
@@ -42,7 +43,7 @@ function configHtmlPlugins(config) {
         ...baseHtmlPluginConfig,
         ...config,
         filename: filename.replace('.html', '-top.html'),
-        publicPath: `${"../".repeat(numFolders)}${DEPLOY_PATH}`
+        publicPath: `${rootPath}${DEPLOY_PATH}`
       })
     );
   }
