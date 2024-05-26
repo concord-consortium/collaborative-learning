@@ -4,7 +4,7 @@ import { useTouchHold } from "../../../hooks/use-touch-hold";
 import { TileToolbarButton } from "../../../components/toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../components/toolbar/toolbar-button-manager";
 import { DrawingContentModelContext } from "../components/drawing-content-context";
-import { OpenPalletteValues } from "../model/drawing-content";
+import { OpenPaletteValues } from "../model/drawing-content";
 import { StampsPalette } from "../components/stamps-palette";
 import { gImageMap } from "../../../models/image-map";
 import SmallCornerTriangle from "../../../../src/assets/icons/small-corner-triangle.svg";
@@ -12,7 +12,7 @@ import SmallCornerTriangle from "../../../../src/assets/icons/small-corner-trian
 export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
   const isSelected = drawingModel?.selectedButton === "stamp";
-  const isOpen = drawingModel?.openPallette === OpenPalletteValues.Stamp;
+  const isOpen = drawingModel?.openPallette === OpenPaletteValues.Stamp;
   const { stamps, currentStampIndex, currentStamp } = drawingModel;
   const { onClick } = useTouchHold(toggleOpen, handleClick);
   if (!currentStamp)  return null;
@@ -20,8 +20,8 @@ export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => 
   const entry = gImageMap.getImageEntry(currentStamp.url);
 
   function handleClick() {
-    drawingModel.setOpenPallette(OpenPalletteValues.None);
-    drawingModel.setSelectedButton(OpenPalletteValues.Stamp);
+    drawingModel.setOpenPalette(OpenPaletteValues.None);
+    drawingModel.setSelectedButton(OpenPaletteValues.Stamp);
   }
 
   function handleTriangleClick(e: React.MouseEvent) {
@@ -31,16 +31,16 @@ export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => 
 
   function toggleOpen() {
     if (isOpen) {
-      drawingModel.setOpenPallette(OpenPalletteValues.None);
+      drawingModel.setOpenPalette(OpenPaletteValues.None);
     } else {
-      drawingModel.setOpenPallette(OpenPalletteValues.Stamp);
+      drawingModel.setOpenPalette(OpenPaletteValues.Stamp);
     }
   }
 
   function handleSelectStamp(stampIndex: number){
     drawingModel.setSelectedStamp(stampIndex);
     drawingModel.setSelectedButton("stamp");
-    drawingModel.setOpenPallette(OpenPalletteValues.None);
+    drawingModel.setOpenPalette(OpenPaletteValues.None);
   }
 
   return (

@@ -4,7 +4,7 @@ import { TileToolbarButton } from "../../../components/toolbar/tile-toolbar-butt
 import { IToolbarButtonComponentProps } from "../../../components/toolbar/toolbar-button-manager";
 import { VectorTypePalette } from "../components/vector-palette";
 import { DrawingContentModelContext } from "../components/drawing-content-context";
-import { OpenPalletteValues } from "../model/drawing-content";
+import { OpenPaletteValues } from "../model/drawing-content";
 import { ToolbarButtonSvg } from "./toolbar-button-svg";
 import { ToolbarSettings, VectorType, getVectorTypeIcon } from "../model/drawing-basic-types";
 import { useTouchHold } from "../../../hooks/use-touch-hold";
@@ -13,11 +13,11 @@ import SmallCornerTriangle from "../../../../src/assets/icons/small-corner-trian
 export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
   const isSelected = drawingModel?.selectedButton === "vector";
-  const isOpen = drawingModel?.openPallette === OpenPalletteValues.Vector;
+  const isOpen = drawingModel?.openPallette === OpenPaletteValues.Vector;
   const { onClick } = useTouchHold(toggleOpen, handleClick);
 
   function handleClick() {
-    drawingModel.setOpenPallette(OpenPalletteValues.None);
+    drawingModel.setOpenPalette(OpenPaletteValues.None);
     drawingModel.setSelectedButton("vector");
   }
 
@@ -28,9 +28,9 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
 
   function toggleOpen() {
     if (isOpen) {
-      drawingModel.setOpenPallette(OpenPalletteValues.None);
+      drawingModel.setOpenPalette(OpenPaletteValues.None);
     } else {
-      drawingModel.setOpenPallette(OpenPalletteValues.Vector);
+      drawingModel.setOpenPalette(OpenPaletteValues.Vector);
     }
   }
 

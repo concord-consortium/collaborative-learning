@@ -5,25 +5,21 @@ import { TileToolbarButton } from "../../../components/toolbar/tile-toolbar-butt
 import { IToolbarButtonComponentProps } from "../../../components/toolbar/toolbar-button-manager";
 import FillColorIcon from "../assets/color-fill-icon.svg";
 import StrokeColorIcon from "../assets/color-stroke-icon.svg";
-import { OpenPalletteValues } from "../model/drawing-content";
+import { OpenPaletteValues } from "../model/drawing-content";
 import { FillColorPalette } from "../components/fill-color-palette";
 import { StrokeColorPalette } from "../components/stroke-color-palette";
 import { ToolbarButtonSvg } from "./toolbar-button-svg";
 
 export const FillColorButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
-  const isOpen = drawingModel?.openPallette === OpenPalletteValues.FillColor;
+  const isOpen = drawingModel?.openPallette === OpenPaletteValues.FillColor;
 
   function handleClick() {
     if (isOpen) {
-      drawingModel.setOpenPallette(OpenPalletteValues.None);
+      drawingModel.setOpenPalette(OpenPaletteValues.None);
     } else {
-      drawingModel.setOpenPallette(OpenPalletteValues.FillColor);
+      drawingModel.setOpenPalette(OpenPaletteValues.FillColor);
     }
-  }
-
-  function handleTouchHold() {
-    console.log("| handleTouchHold: " + name);
   }
 
   function handleColorChoice(color: string) {
@@ -35,7 +31,6 @@ export const FillColorButton = observer(({ name }: IToolbarButtonComponentProps)
       name={name}
       title={"Fill Color"}
       onClick={handleClick}
-      onTouchHold={handleTouchHold}
     >
       <ToolbarButtonSvg
         SvgIcon={FillColorIcon}
@@ -53,18 +48,14 @@ export const FillColorButton = observer(({ name }: IToolbarButtonComponentProps)
 
 export const StrokeColorButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
-  const isOpen = drawingModel?.openPallette === OpenPalletteValues.StrokeColor;
+  const isOpen = drawingModel?.openPallette === OpenPaletteValues.StrokeColor;
 
   function handleClick() {
     if (isOpen) {
-      drawingModel.setOpenPallette(OpenPalletteValues.None);
+      drawingModel.setOpenPalette(OpenPaletteValues.None);
     } else {
-      drawingModel.setOpenPallette(OpenPalletteValues.StrokeColor);
+      drawingModel.setOpenPalette(OpenPaletteValues.StrokeColor);
     }
-  }
-
-  function handleTouchHold() {
-    console.log("| handleTouchHold: " + name);
   }
 
   function handleColorChoice(color: string) {
@@ -76,7 +67,6 @@ export const StrokeColorButton = observer(({ name }: IToolbarButtonComponentProp
       name={name}
       title={"Stroke Color"}
       onClick={handleClick}
-      onTouchHold={handleTouchHold}
     >
       <ToolbarButtonSvg
         SvgIcon={StrokeColorIcon}

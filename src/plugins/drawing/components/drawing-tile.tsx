@@ -6,6 +6,7 @@ import { DrawingContentModelType } from "../model/drawing-content";
 import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { DrawingContentModelContext } from "./drawing-content-context";
+import { DrawingAreaContext } from "./drawing-area-context";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
@@ -132,8 +133,18 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     }
   };
 
+  const getVisibleCanvasSize = () => {
+    if (!drawingToolElement.current
+      || !drawingToolElement.current.clientWidth
+      || !drawingToolElement.current.clientHeight) return undefined;
+    return {
+      x: drawingToolElement.current.clientWidth-getObjectListPanelWidth(),
+      y: drawingToolElement.current.clientHeight
+    };
+  };
+
   return (
-    <DrawingContentModelContext.Provider value={contentRef.current} >
+    <DrawingContentModelContext.Provider value={contentRef.current}>
       <BasicEditableTileTitle />
       <div
         ref={drawingToolElement}
@@ -144,7 +155,9 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         onMouseDown={handlePointerDown}
       >
         <div data-testid="drawing-toolbar" className="drawing-toolbar-wrapper">
+        <DrawingAreaContext.Provider value={{ getObjectListPanelWidth, getVisibleCanvasSize }}>
           <TileToolbar tileType="drawing" readOnly={!!readOnly} tileElement={tileElt} data-testid="drawing-toolbar"/>
+        </DrawingAreaContext.Provider>
         </div>
         <div className="drawing-container">
           {!readOnly && <ObjectListView model={model} setHoverObject={setObjectListHoveredObject} />}
