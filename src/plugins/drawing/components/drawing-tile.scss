@@ -146,48 +146,47 @@
       }
     }
 
-  .drawing-layer {
-    svg {
-      .ghost {
-        opacity: 0.1;
-      }
+    .drawing-layer {
+      svg {
+        .ghost {
+          opacity: 0.1;
+        }
 
-      .resize-handle {
-        fill: #ffffff;
+        .resize-handle {
+          fill: #ffffff;
 
-        &:hover {
-          fill: $workspace-teal-light-6;
+          &:hover {
+            fill: $workspace-teal-light-6;
 
-          &.nw {
-            cursor: nwse-resize;
+            &.nw {
+              cursor: nwse-resize;
+            }
+
+            &.ne {
+              cursor: nesw-resize;
+            }
+
+            &.sw {
+              cursor: nesw-resize;
+            }
+
+            &.se {
+              cursor: nwse-resize;
+            }
           }
 
-          &.ne {
-            cursor: nesw-resize;
-          }
-
-          &.sw {
-            cursor: nesw-resize;
-          }
-
-          &.se {
-            cursor: nwse-resize;
+          &.active {
+            fill: $workspace-teal;
           }
         }
 
-        &.active {
-          fill: $workspace-teal;
+        textarea {
+          width: 100%;
+          height: 100%;
+          resize: none;
         }
       }
-
-      textarea {
-        width: 100%;
-        height: 100%;
-        resize: none;
-      }
-
     }
   }
-}
 }
 

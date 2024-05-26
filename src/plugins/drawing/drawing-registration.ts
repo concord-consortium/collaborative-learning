@@ -9,13 +9,15 @@ import { GroupComponent, GroupObject } from "./objects/group";
 import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-button-manager";
 import {
   EllipseButton, LineButton, RectangleButton, SelectButton, TextButton
-} from "./toolbar-buttons/drawing-toolbar-mode-buttons";
-import { VectorButton } from "./toolbar-buttons/drawing-toolbar-vector-button";
-import { StampButton } from "./toolbar-buttons/drawing-toolbar-stamp-button";
-import { FillColorButton, StrokeColorButton } from "./toolbar-buttons/drawing-toolbar-color-select-buttons";
-import { DeleteButton, DuplicateButton, GroupButton, UngroupButton } from "./drawing-toolbar-basic-buttons";
+} from "./toolbar-buttons/mode-buttons";
+import { VectorButton } from "./toolbar-buttons/vector-button";
+import { StampButton } from "./toolbar-buttons/stamp-button";
+import { FillColorButton, StrokeColorButton } from "./toolbar-buttons/select-buttons";
+import { DeleteButton, DuplicateButton, GroupButton, UngroupButton } from "./action-buttons";
 import { ImageUploadButton } from "./toolbar-buttons/drawing-toolbar-image-button";
-import { NewVariableButton, EditVariableButton, InsertVariableButton } from "../shared-variables/drawing/variable-object";
+import {
+  NewVariableButton, EditVariableButton, InsertVariableButton
+} from "../shared-variables/drawing/variable-object";
 import Icon from "./assets/draw-tool.svg";
 import HeaderIcon from "./assets/sketch-tile-id.svg";
 

@@ -1,7 +1,8 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React, { useEffect, useRef } from "react";
-import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps, IDrawingLayer, ObjectTypeIconViewBox, typeField } from "./drawing-object";
+import { DrawingObjectType, DrawingTool, EditableObject, IDrawingComponentProps,
+  IDrawingLayer, ObjectTypeIconViewBox, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import TextToolIcon from "../../../assets/icons/comment/comment.svg";
 import { uniqueId } from "../../../../src/utilities/js-utils";

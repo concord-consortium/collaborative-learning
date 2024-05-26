@@ -2,7 +2,7 @@ import React from "react";
 import { types } from "mobx-state-tree";
 import { DrawingComponentType, DrawingObject, DrawingObjectType,
   DrawingTool, HandleObjectHover, HandleObjectDrag,
-  IDrawingLayer, IToolbarButtonProps } from "../objects/drawing-object";
+  IDrawingLayer } from "../objects/drawing-object";
 import { EllipseComponent, EllipseDrawingTool, EllipseObject } from "../objects/ellipse";
 import { ImageComponent, ImageObject, StampDrawingTool } from "../objects/image";
 import { LineComponent, LineDrawingTool, LineObject } from "../objects/line";
@@ -22,7 +22,6 @@ export interface IDrawingToolInfo {
   // using a simple `typeof DrawingTool` can't be used because that type
   // is an abstract class so can't be instantiated.
   toolClass?: { new(drawingLayer: IDrawingLayer): DrawingTool };
-  buttonComponent?: React.ComponentType<IToolbarButtonProps>; // NOTE: used for shared var tool buttons...
 }
 
 const gDrawingObjectInfos: Record<string, IDrawingObjectInfo | undefined> = {

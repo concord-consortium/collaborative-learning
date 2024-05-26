@@ -1,15 +1,15 @@
 import React, { useContext } from "react";
+import { observer } from "mobx-react";
 import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../components/toolbar/toolbar-button-manager";
 import { DrawingContentModelContext } from "./components/drawing-content-context";
+import { OpenPaletteValues } from "./model/drawing-content";
 import DeleteIcon from "../../assets/icons/delete/delete-selection-icon.svg";
 import GroupObjectsIcon from "./assets/group-objects-icon.svg";
 import UngroupObjectsIcon from "./assets/ungroup-objects-icon.svg";
 import DuplicateIcon from "./assets/duplicate-icon.svg";
 
 import "./drawing-toolbar.scss";
-import { OpenPaletteValues } from "./model/drawing-content";
-import { observer } from "mobx-react";
 
 export const GroupButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
