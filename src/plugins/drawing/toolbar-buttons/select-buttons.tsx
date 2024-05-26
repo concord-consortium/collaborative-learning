@@ -9,6 +9,7 @@ import { OpenPaletteValues } from "../model/drawing-content";
 import { FillColorPalette } from "../components/fill-color-palette";
 import { StrokeColorPalette } from "../components/stroke-color-palette";
 import { ToolbarButtonSvg } from "./toolbar-button-svg";
+import { isLightColorRequiringContrastOffset, kLightLuminanceContrastStroke } from "../../../utilities/color-utils";
 
 export const FillColorButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
@@ -26,6 +27,10 @@ export const FillColorButton = observer(({ name }: IToolbarButtonComponentProps)
     drawingModel.setFill(color, drawingModel.selection);
   }
 
+  const stroke = isLightColorRequiringContrastOffset(drawingModel.fill)
+    ? kLightLuminanceContrastStroke
+    : drawingModel.fill;
+
   return (
     <TileToolbarButton
       name={name}
@@ -34,7 +39,7 @@ export const FillColorButton = observer(({ name }: IToolbarButtonComponentProps)
     >
       <ToolbarButtonSvg
         SvgIcon={FillColorIcon}
-        settings={{ fill: drawingModel.fill }}
+        settings={{ fill: drawingModel.fill, stroke }}
       />
       {isOpen &&
         <FillColorPalette
@@ -62,6 +67,9 @@ export const StrokeColorButton = observer(({ name }: IToolbarButtonComponentProp
     drawingModel.setStroke(color, drawingModel.selection);
   }
 
+  const stroke = isLightColorRequiringContrastOffset(drawingModel.stroke)
+  ? kLightLuminanceContrastStroke : drawingModel.stroke;
+
   return (
     <TileToolbarButton
       name={name}
@@ -70,7 +78,7 @@ export const StrokeColorButton = observer(({ name }: IToolbarButtonComponentProp
     >
       <ToolbarButtonSvg
         SvgIcon={StrokeColorIcon}
-        settings={{ fill: drawingModel.stroke }}
+        settings={{ fill: drawingModel.stroke, stroke }}
       />
       {isOpen &&
         <StrokeColorPalette

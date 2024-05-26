@@ -71,3 +71,4 @@ export const selectedStrokeWidth = 1; //1 for now - may change such that the str
 export const selectedOuterCircleFillColor = "#14F49E";
 export const selectedOuterCircleStrokeColor = "#FFFFFF";
 
+export const kLightLuminanceContrastStroke = "#949494";  // $charcoal-light-1
