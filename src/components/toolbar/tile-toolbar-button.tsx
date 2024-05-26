@@ -21,6 +21,7 @@ export interface TileToolbarButtonProps {
   onTouchHold?: (e: React.MouseEvent) => void; // Action when long-pressed
   selected?: boolean; // puts button in 'active' state if defined and true
   disabled?: boolean; // makes button grey and unclickable if defined and true
+  extraContent?: JSX.Element; // Additional element added after the button.
 }
 
 /**
@@ -35,6 +36,7 @@ export const TileToolbarButton = function ({
   selected,
   disabled,
   children,
+  extraContent
 }: PropsWithChildren<TileToolbarButtonProps>) {
   const tipOptions = useTooltipOptions();
   const tooltip = formatTooltip(title, keyHint);
@@ -58,6 +60,7 @@ export const TileToolbarButton = function ({
       >
         {children}
       </button>
+      {extraContent}
     </Tooltip>
   );
 };

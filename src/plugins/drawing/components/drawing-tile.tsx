@@ -155,7 +155,9 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         onKeyDown={(e) => hotKeys.current.dispatch(e)}
         onMouseDown={handlePointerDown}
       >
-        <DrawingAreaContext.Provider value={{ getObjectListPanelWidth, getVisibleCanvasSize }}>
+        <DrawingAreaContext.Provider
+          value={{ getObjectListPanelWidth, getVisibleCanvasSize, imageUrlToAdd, setImageUrlToAdd }}
+        >
           <div data-testid="drawing-toolbar" className="drawing-toolbar-wrapper">
             <TileToolbar tileType="drawing" readOnly={!!readOnly} tileElement={tileElt} />
           </div>

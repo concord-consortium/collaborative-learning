@@ -14,7 +14,7 @@ import { VectorButton } from "./toolbar-buttons/vector-button";
 import { StampButton } from "./toolbar-buttons/stamp-button";
 import { FillColorButton, StrokeColorButton } from "./toolbar-buttons/select-buttons";
 import { DeleteButton, DuplicateButton, GroupButton, UngroupButton } from "./action-buttons";
-import { ImageUploadButton } from "./toolbar-buttons/drawing-toolbar-image-button";
+import { ImageUploadButton } from "./toolbar-buttons/image-upload-button";
 import {
   NewVariableButton, EditVariableButton, InsertVariableButton
 } from "../shared-variables/drawing/variable-object";
@@ -74,7 +74,7 @@ registerTileToolbarButtons("drawing", [
   { name: "stroke-color", component: StrokeColorButton },
   { name: "fill-color", component: FillColorButton },
   { name: "text", component: TextButton },
-  { name: "image-upload", component: ImageUploadButton },
+  { name: "upload", component: ImageUploadButton },
   { name: "group", component: GroupButton },
   { name: "ungroup", component: UngroupButton },
   { name: "duplicate", component: DuplicateButton },
