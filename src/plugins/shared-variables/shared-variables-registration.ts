@@ -2,10 +2,9 @@ import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-but
 import { ISharedModelManager } from "../../models/shared/shared-model-manager";
 import { registerSharedModelInfo } from "../../models/shared/shared-model-registry";
 import { registerTextPluginInfo } from "../../models/tiles/text/text-plugin-info";
-import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
+import { registerDrawingObjectInfo } from "../drawing/components/drawing-object-manager";
 import { IGraphModel, registerGraphSharedModelUpdateFunction } from "../graph/models/graph-model";
-import {
-  EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject
+import { VariableChipComponent, VariableChipObject
 } from "./drawing/variable-object";
 import { isPlottedVariablesAdornment, PlottedVariablesAdornmentModel
 } from "./graph/plotted-variables-adornment/plotted-variables-adornment-model";
@@ -52,21 +51,6 @@ registerDrawingObjectInfo({
   type: "variable",
   component:VariableChipComponent,
   modelClass: VariableChipObject
-});
-
-registerDrawingToolInfo({
-  name: "insert-variable",
-  buttonComponent: InsertVariableButton
-});
-
-registerDrawingToolInfo({
-  name: "new-variable",
-  buttonComponent: NewVariableButton
-});
-
-registerDrawingToolInfo({
-  name: "edit-variable",
-  buttonComponent: EditVariableButton
 });
 
 registerGraphSharedModelUpdateFunction(
