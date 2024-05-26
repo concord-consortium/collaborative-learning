@@ -65,7 +65,7 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
         <VectorTypePalette
           selectedVectorType={drawingModel.toolbarSettings.vectorType}
           onSelectVectorType={handleVectorTypeChange}
-          settings={drawingModel.toolbarSettings}
+          settings={settings}
         />
       }
       <SmallCornerTriangle
