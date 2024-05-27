@@ -70,7 +70,7 @@ export const VectorButton = observer(({ name }: IToolbarButtonComponentProps) =>
       }
       <SmallCornerTriangle
         onClick={handleTriangleClick}
-        className="corner-triangle"
+        className="corner-triangle expand-collapse"
       />
     </TileToolbarButton>
   );

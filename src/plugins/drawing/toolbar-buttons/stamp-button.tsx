@@ -54,7 +54,7 @@ export const StampButton = observer(({ name }: IToolbarButtonComponentProps) => 
       <img height={24} src={entry?.displayUrl} draggable="false" />
       <SmallCornerTriangle
         onClick={handleTriangleClick}
-        className="corner-triangle"
+        className="corner-triangle expand-collapse"
       />
       {isOpen &&
         <StampsPalette

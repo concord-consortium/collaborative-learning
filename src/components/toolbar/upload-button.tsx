@@ -42,6 +42,7 @@ export const UploadButton =
         accept={accept || "image/png, image/jpeg"}
         title={title}
         onChange={handleFileInputChange}
+        className="upload-button-input"
       />;
 
   return (
