@@ -56,6 +56,7 @@ context('Copy Document', () => {
     cy.get('.spacer').click();
     textTile.deleteTextTile();
     geometryTile.getGeometryTile().last().click();
+    clueCanvas.clickToolbarButton('geometry', 'point');
     geometryTile.addPointToGraph(5, 5);
     geometryTile.addPointToGraph(10, 5);
     geometryTile.addPointToGraph(10, 10);
