@@ -36,6 +36,7 @@ export const FillColorButton = observer(({ name }: IToolbarButtonComponentProps)
       name={name}
       title={"Fill Color"}
       onClick={handleClick}
+      onTouchHold={handleClick}
     >
       <ToolbarButtonSvg
         SvgIcon={FillColorIcon}
@@ -75,6 +76,7 @@ export const StrokeColorButton = observer(({ name }: IToolbarButtonComponentProp
       name={name}
       title={"Stroke Color"}
       onClick={handleClick}
+      onTouchHold={handleClick}
     >
       <ToolbarButtonSvg
         SvgIcon={StrokeColorIcon}

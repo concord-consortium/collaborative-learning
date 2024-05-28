@@ -18,7 +18,7 @@ export interface TileToolbarButtonProps {
   title: string;      // user-visible name, used in the tooltip
   keyHint?: string,   // If set, displayed to the user as the hotkey equivalent
   onClick: (e: React.MouseEvent) => void; // Action when clicked
-  onTouchHold?: (e: React.MouseEvent) => void; // Action when long-pressed
+  onTouchHold?: () => void; // Action when long-pressed
   selected?: boolean; // puts button in 'active' state if defined and true
   disabled?: boolean; // makes button grey and unclickable if defined and true
   extraContent?: JSX.Element; // Additional element added after the button.
@@ -42,7 +42,7 @@ export const TileToolbarButton = function ({
   const tooltip = formatTooltip(title, keyHint);
 
   const { onTouchStart, onTouchEnd, onMouseDown, onMouseUp, onClick: handleOnClick } = useTouchHold(
-    () => onTouchHold?.({} as React.MouseEvent),
+    () => onTouchHold?.(),
     onClick
   );
 
