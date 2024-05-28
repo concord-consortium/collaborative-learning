@@ -20,7 +20,7 @@ jobs:
       - name: Install CMS Dependencies
         working-directory: ./cms
         run: npm ci
-      - uses: concord-consortium/s3-deploy-action/deploy-path@add-deploy-path-action
+      - uses: concord-consortium/s3-deploy-action/deploy-path@v1
         id: s3-deploy-path
       - name: Lint
         run: npm run lint:build
