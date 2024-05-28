@@ -83,6 +83,7 @@ function setupTest(studentIndex) {
   cy.get('.spacer').click();
   textToolTile.deleteTextTile();
   geometryToolTile.getGeometryTile().last().click();
+  clueCanvas.clickToolbarButton('geometry', 'point');
   geometryToolTile.addPointToGraph(5, 5);
   geometryToolTile.addPointToGraph(10, 5);
   geometryToolTile.addPointToGraph(10, 10);

@@ -7,6 +7,17 @@ import { getElementName, objectChangeAgent } from "./jxg-object";
 import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge } from "./jxg-types";
 import { wn_PnPoly } from "./soft-surfer-sunday";
 
+const polygonDefaultProps = {
+  hasInnerPoints: true,
+  fillColor: "#00FF00",
+  highlightFillColor: "#00FF00",
+  selectedFillColor: "#00FF00",
+  clientFillColor: "#00FF00",
+  clientSelectedFillColor: "#00FF00",
+  fillOpacity: .3,
+  highlightFillOpacity: .3,
+};
+
 export function isPointInPolygon(x: number, y: number, polygon: JXG.Polygon) {
   const v = polygon.vertices.map(vertex => {
               const [, vx, vy] = vertex.coords.scrCoords;
@@ -64,16 +75,20 @@ function setPolygonEdgeColors(polygon: JXG.Polygon) {
   const segments = getPolygonEdges(polygon);
   const firstVertex = polygon.vertices[0];
   segments.forEach(seg => {
-    if (segments.length > 1 &&
+    if (segments.length > 2 &&
         ((seg.point1.getAttribute("isPhantom") && seg.point2 === firstVertex)
          ||(seg.point2.getAttribute("isPhantom") && seg.point1 === firstVertex))) {
       // this is the "uncompleted side" of an in-progress polygon
-      seg.setAttribute({ strokeColor: "none" });
+      seg.setAttribute({ strokeOpacity: 0, highlightStrokeOpacity: 0 });
     } else {
-      seg.setAttribute({ strokeColor: "#0000FF" });
+      seg.setAttribute({ strokeOpacity: 1, highlightStrokeOpacity: 1 });
     }
-    seg._set("clientStrokeColor", "#0000FF");
-    seg._set("clientSelectedStrokeColor", "#0000FF");
+    seg.setAttribute({
+      strokeColor: "#0000FF",
+      highlightStrokeColor: "#0000FF",
+      clientStrokeColor: "#0000FF",
+      clientSelectedStrokeColor: "#0000FF"
+    });
   });
 }
 
@@ -220,11 +235,7 @@ function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: J
     .filter(notEmpty);
   const props = {
     id: polygonId, // re-use the same ID
-    hasInnerPoints: true,
-    fillColor: "#00FF00",
-    selectedFillColor: "#00FF00",
-    clientFillColor: "#00FF00",
-    clientSelectedFillColor: "#00FF00",
+    ...polygonDefaultProps
   };
   const polygon = board.create("polygon", vertices, props);
 
@@ -265,12 +276,7 @@ export const polygonChangeAgent: JXGChangeAgent = {
                       .filter(notEmpty);
     const props = {
       id: uniqueId(),
-      hasInnerPoints: true,
-      // default color changed to yellow in JSXGraph 1.4.0
-      fillColor: "#00FF00",
-      selectedFillColor: "#00FF00",
-      clientFillColor: "#00FF00",
-      clientSelectedFillColor: "#00FF00",
+      ...polygonDefaultProps,
       ...change.properties
     };
     const poly = parents.length ? _board.create("polygon", parents, props) : undefined;

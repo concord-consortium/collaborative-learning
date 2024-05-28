@@ -10,10 +10,10 @@ const kPrevSnapUnit = 0.2;
 export const kSnapUnit = 0.1;
 
 export const kPointDefaults = {
-              fillColor: "#CCCCCC",
-              strokeColor: "#888888",
-              selectedFillColor: "#FF0000",
-              selectedStrokeColor: "#FF0000"
+              fillColor: "#0069ff",
+              strokeColor: "#000000",
+              selectedFillColor: "#0069ff",
+              selectedStrokeColor: "#0081ff"
             };
 
 const defaultProps = {
@@ -36,8 +36,14 @@ export function syncClientColors(props: any) {
     p.clientSelectedStrokeColor = selectedStroke;
   }
   else {
-    if (p.fillColor) p.clientFillColor = p.fillColor;
-    if (p.strokeColor) p.clientStrokeColor = p.strokeColor;
+    if (p.fillColor) {
+      p.clientFillColor = p.fillColor;
+      p.highlightFillColor = p.fillColor;
+    }
+    if (p.strokeColor) {
+      p.clientStrokeColor = p.strokeColor;
+      p.highlightStrokeColor = p.strokeColor;
+    }
     if (selectedFillColor) p.clientSelectedFillColor = selectedFillColor;
     if (selectedStrokeColor) p.clientSelectedStrokeColor = selectedStrokeColor;
   }

@@ -621,10 +621,8 @@ export const GeometryContentModel = GeometryBaseContentModel
       const props = {
         id: uniqueId(),
         isPhantom: true,
-        strokeColor: "#0000FF",
-        fillColor: "#0069FF",
-        selectedFillColor: "#FF0000",
-        selectedStrokeColor: "#FF0000",
+        fillOpacity: .5,
+        highlightFillOpacity: .5,
         snapToGrid: true,
         snapSizeX: kSnapUnit,
         snapSizeY: kSnapUnit,
@@ -707,6 +705,8 @@ export const GeometryContentModel = GeometryBaseContentModel
         properties: {
           isPhantom: false,
           withLabel: true,
+          fillOpacity: 1,
+          highlightFillOpacity: 1,
           position
         }
       };

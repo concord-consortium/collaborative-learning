@@ -24,7 +24,7 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   const content = model.content as GeometryContentModelType;
   const [board, setBoard] = useState<JXG.Board>();
   const [actionHandlers, setActionHandlers] = useState<IActionHandlers>();
-  const [mode, setMode] = useState<GeometryTileMode>("points");
+  const [mode, setMode] = useState<GeometryTileMode>("select");
   const hotKeys = useRef(new HotKeys());
   const forceUpdate = useForceUpdate();
 
