@@ -20,8 +20,12 @@ jobs:
       - name: Install CMS Dependencies
         working-directory: ./cms
         run: npm ci
+      - uses: concord-consortium/s3-deploy-action/deploy-path@add-deploy-path-action
+        id: s3-deploy-path
       - name: Build
         run: npm run build
+        env:
+          DEPLOY_PATH: ${{ steps.s3-deploy-path.outputs.deployPath }}
   jest:
     name: Run Jest Tests
     runs-on: ubuntu-latest
