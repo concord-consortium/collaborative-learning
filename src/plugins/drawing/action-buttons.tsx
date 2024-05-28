@@ -10,6 +10,8 @@ import UngroupObjectsIcon from "./assets/ungroup-objects-icon.svg";
 import DuplicateIcon from "./assets/duplicate-icon.svg";
 import { isGroupObject } from "./objects/group";
 
+import "./drawing-toolbar.scss";
+
 export const GroupButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
   const enabled = drawingModel.selection.length > 1;
