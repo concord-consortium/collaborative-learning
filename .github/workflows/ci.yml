@@ -125,7 +125,6 @@ jobs:
       name: ${{ github.ref_type == 'branch' && 'branches' || 'versions' }}
       url: https://collaborative-learning.concord.org/${{ steps.s3-deploy.outputs.deployPath }}/?demo
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: build
