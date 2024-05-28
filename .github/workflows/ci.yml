@@ -22,8 +22,16 @@ jobs:
         run: npm ci
       - uses: concord-consortium/s3-deploy-action/deploy-path@add-deploy-path-action
         id: s3-deploy-path
-      - name: Build
-        run: npm run build
+      - name: Lint
+        run: npm run lint:build
+      - name: Clean
+        run: npm run clean
+      - name: Build Main App
+        run: npm run build:webpack
+        env:
+          DEPLOY_PATH: ${{ steps.s3-deploy-path.outputs.deployPath }}
+      - name: Build CMS
+        run: npm run build:cms
         env:
           DEPLOY_PATH: ${{ steps.s3-deploy-path.outputs.deployPath }}
       - uses: actions/upload-artifact@v4
