@@ -20,8 +20,24 @@ jobs:
       - name: Install CMS Dependencies
         working-directory: ./cms
         run: npm ci
-      - name: Build
-        run: npm run build
+      - uses: concord-consortium/s3-deploy-action/deploy-path@v1
+        id: s3-deploy-path
+      - name: Lint
+        run: npm run lint:build
+      - name: Clean
+        run: npm run clean
+      - name: Build Main App
+        run: npm run build:webpack
+        env:
+          DEPLOY_PATH: ${{ steps.s3-deploy-path.outputs.deployPath }}
+      - name: Build CMS
+        run: npm run build:cms
+        env:
+          DEPLOY_PATH: ${{ steps.s3-deploy-path.outputs.deployPath }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: dist/
   jest:
     name: Run Jest Tests
     runs-on: ubuntu-latest
@@ -117,31 +133,14 @@ jobs:
       name: ${{ github.ref_type == 'branch' && 'branches' || 'versions' }}
       url: https://collaborative-learning.concord.org/${{ steps.s3-deploy.outputs.deployPath }}/?demo
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v2
+      - uses: actions/download-artifact@v4
         with:
-          node-version: '16'
-          cache: 'npm'
-          cache-dependency-path: |
-            package-lock.json
-            cms/package-lock.json
-      - name: Install Dependencies
-        run: npm ci
-        env:
-          # skip installing cypress since it isn't needed for just building
-          # This decreases the deploy time quite a bit
-          CYPRESS_INSTALL_BINARY: 0
-      - name: Install CMS Dependencies
-        working-directory: ./cms
-        run: npm ci
-        env:
-          # skip installing cypress since it isn't needed for just building
-          # This decreases the deploy time quite a bit
-          CYPRESS_INSTALL_BINARY: 0
+          name: build
+          path: dist
       - uses: concord-consortium/s3-deploy-action@v1
         id: s3-deploy
         with:
-          build: npm run build:for-deploy
+          build: echo no build
           bucket: models-resources
           prefix: collaborative-learning
           awsAccessKeyId: ${{ secrets.AWS_ACCESS_KEY_ID }}
