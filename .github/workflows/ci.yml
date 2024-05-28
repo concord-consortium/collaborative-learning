@@ -26,6 +26,10 @@ jobs:
         run: npm run build
         env:
           DEPLOY_PATH: ${{ steps.s3-deploy-path.outputs.deployPath }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: dist/
   jest:
     name: Run Jest Tests
     runs-on: ubuntu-latest
