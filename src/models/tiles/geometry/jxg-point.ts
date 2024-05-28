@@ -12,8 +12,8 @@ export const kSnapUnit = 0.1;
 export const kPointDefaults = {
               fillColor: "#0069ff",
               strokeColor: "#000000",
-              selectedFillColor: "#0069ff",
-              selectedStrokeColor: "#0081ff"
+              selectedFillColor: "#ff0000",
+              selectedStrokeColor: "#ff0000"
             };
 
 const defaultProps = {
