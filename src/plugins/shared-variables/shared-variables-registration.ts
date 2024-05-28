@@ -4,7 +4,7 @@ import { registerSharedModelInfo } from "../../models/shared/shared-model-regist
 import { registerTextPluginInfo } from "../../models/tiles/text/text-plugin-info";
 import { registerDrawingObjectInfo } from "../drawing/components/drawing-object-manager";
 import { IGraphModel, registerGraphSharedModelUpdateFunction } from "../graph/models/graph-model";
-import { VariableChipComponent, VariableChipObject
+import { VariableChipComponent, VariableChipObject, NewVariableButton, EditVariableButton, InsertVariableButton
 } from "./drawing/variable-object";
 import { isPlottedVariablesAdornment, PlottedVariablesAdornmentModel
 } from "./graph/plotted-variables-adornment/plotted-variables-adornment-model";
@@ -16,6 +16,7 @@ import { kSharedVariablesID, SharedVariables } from "./shared-variables";
 import { NewVariableTextButton, InsertVariableTextButton, EditVariableTextButton,
   kNewVariableButtonName, kInsertVariableButtonName, kEditVariableButtonName} from "./slate/text-tile-buttons";
 import { kVariableTextPluginName, VariablesPlugin } from "./slate/variables-plugin";
+
 
 registerSharedModelInfo({
   type: kSharedVariablesID,
@@ -45,6 +46,12 @@ registerTileToolbarButtons('text', [
     name: kEditVariableButtonName,
     component: EditVariableTextButton
   },
+]);
+
+registerTileToolbarButtons("drawing", [
+  { name: "new-variable", component: NewVariableButton},
+  { name: "insert-variable", component: InsertVariableButton},
+  { name: "edit-variable", component: EditVariableButton},
 ]);
 
 registerDrawingObjectInfo({

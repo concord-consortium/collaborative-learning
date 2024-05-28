@@ -15,9 +15,6 @@ import { StampButton } from "./toolbar-buttons/stamp-button";
 import { FillColorButton, StrokeColorButton } from "./toolbar-buttons/select-buttons";
 import { DeleteButton, DuplicateButton, GroupButton, UngroupButton } from "./action-buttons";
 import { ImageUploadButton } from "./toolbar-buttons/image-upload-button";
-import {
-  NewVariableButton, EditVariableButton, InsertVariableButton
-} from "../shared-variables/drawing/variable-object";
 import Icon from "./assets/draw-tool.svg";
 import HeaderIcon from "./assets/sketch-tile-id.svg";
 
@@ -78,8 +75,5 @@ registerTileToolbarButtons("drawing", [
   { name: "group", component: GroupButton },
   { name: "ungroup", component: UngroupButton },
   { name: "duplicate", component: DuplicateButton },
-  { name: "delete", component: DeleteButton },
-  { name: "new-variable", component: NewVariableButton},
-  { name: "insert-variable", component: InsertVariableButton},
-  { name: "edit-variable", component: EditVariableButton},
+  { name: "delete", component: DeleteButton }
 ]);

@@ -8,14 +8,13 @@ export interface IToolbarButtonSvgProps {
 }
 
 export const ToolbarButtonSvg: React.FC<IToolbarButtonSvgProps> = observer(({SvgIcon, settings}) => {
-  const { fill, stroke, strokeDashArray, strokeWidth, vectorType } = settings || {};
+  const { fill, stroke, strokeDashArray, strokeWidth } = settings || {};
 
   const lowerCaseSettings = {
     fill,
     stroke,
     strokeWidth,
-    "strokeDasharray": strokeDashArray,
-    "vectortype": vectorType
+    "strokeDasharray": strokeDashArray
   };
 
   return SvgIcon ? <SvgIcon {...lowerCaseSettings} /> : null;

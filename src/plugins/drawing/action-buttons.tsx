@@ -8,8 +8,7 @@ import DeleteIcon from "../../assets/icons/delete/delete-selection-icon.svg";
 import GroupObjectsIcon from "./assets/group-objects-icon.svg";
 import UngroupObjectsIcon from "./assets/ungroup-objects-icon.svg";
 import DuplicateIcon from "./assets/duplicate-icon.svg";
-
-import "./drawing-toolbar.scss";
+import { isGroupObject } from "./objects/group";
 
 export const GroupButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
@@ -34,9 +33,10 @@ export const GroupButton = observer(({ name }: IToolbarButtonComponentProps) => 
 
 export const UngroupButton = observer(({ name }: IToolbarButtonComponentProps) => {
   const drawingModel = useContext(DrawingContentModelContext);
-  const enabled = drawingModel.selection.length > 0
-    ? drawingModel.getSelectedObjects()[0].type === "group"
-    : false;
+  const disabled = !drawingModel.selection.some((id: string)=> {
+    const selectedObj = drawingModel.objectMap[id];
+    return selectedObj ? isGroupObject(selectedObj) : false;
+  });
 
   function ungroupSelection() {
     drawingModel.setOpenPalette(OpenPaletteValues.None);
@@ -49,7 +49,7 @@ export const UngroupButton = observer(({ name }: IToolbarButtonComponentProps) =
       name={name}
       title={"Ungroup"}
       onClick={ungroupSelection}
-      disabled={!enabled}
+      disabled={disabled}
     >
       <UngroupObjectsIcon />
     </TileToolbarButton>
