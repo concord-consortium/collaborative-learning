@@ -508,10 +508,10 @@ export const GeometryContentModel = GeometryBaseContentModel
       if (unitX < unitY) {
         calcUnit = unitX;
         calcXrange = xMax - xMin;
-        calcYrange = calcUnit * height;
+        calcYrange = height / calcUnit;
       } else {
         calcUnit = unitY;
-        calcXrange = calcUnit * width;
+        calcXrange = width / calcUnit;
         calcYrange = yMax - yMin;
       }
 
