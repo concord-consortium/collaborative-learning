@@ -1,6 +1,7 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import ImageToolTile from '../../../support/elements/tile/ImageToolTile';
+import { LogEventName } from '../../../../src/lib/logger-types';
 
 let clueCanvas = new ClueCanvas,
   drawToolTile = new DrawToolTile;
@@ -33,7 +34,15 @@ context('Draw Tool Tile', function () {
   it("renders draw tool tile", () => {
     beforeTest();
 
+    cy.window().then(win => {
+      cy.stub(win.ccLogger, "log").as("log");
+    });
+    cy.get("@log").should('not.have.been.called');
     clueCanvas.addTile("drawing");
+    cy.get("@log")
+      .should("have.been.been.calledWith", LogEventName.CREATE_TILE, Cypress.sinon.match.object)
+      .its("firstCall.args.1").should("deep.include", { objectType: "Drawing" });
+
     drawToolTile.getDrawTile().should("exist");
     drawToolTile.getTileTitle().should("exist");
 
