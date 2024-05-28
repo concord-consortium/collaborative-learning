@@ -236,7 +236,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("have.length", 4);
   });
 
-  it.only("can add arrows to geometry tiles", { scrollBehavior: 'nearest'}, () => {
+  it("can add arrows to geometry tiles", { scrollBehavior: 'nearest'}, () => {
     beforeTest(queryParams);
     clueCanvas.addTile("geometry");
 

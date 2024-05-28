@@ -467,7 +467,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private handlePointerLeave = () => {
     if (!this.context.board || this.props.readOnly || this.context.mode === "select") return;
-    // Make sure deferrred 'mouseMoved' events are not called after we've cleared the point
+    // Make sure deferred 'mouseMoved' events are not called after we've cleared the point
     this.handlePointerMove.cancel();
     if (this.context.board) {
       this.context.content?.clearPhantomPoint(this.context.board);

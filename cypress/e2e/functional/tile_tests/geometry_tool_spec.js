@@ -96,7 +96,7 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPoint().should('have.length', 3);
   });
 
-  it.only('works in all three modes', () => {
+  it('works in all three modes', () => {
     beforeTest();
     clueCanvas.addTile('geometry');
     geometryToolTile.getGraph().should("exist");

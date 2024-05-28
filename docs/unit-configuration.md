@@ -166,7 +166,9 @@ In addition, if shared variables are configured, adds additional buttons:
 
 Common toolbar framework. Default buttons:
 
-- `point`: sets point drawing mode
+- `select`: mode for selecting and moving objects
+- `point`: mode for creating points
+- `polygon`: mode for creating polygons
 - `upload`: allows uploading an image to display in the background
 - `duplicate`: copies the currently selected objects
 - `angle-label`: toggles labeling of an angle

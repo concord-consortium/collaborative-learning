@@ -119,7 +119,7 @@ export function rotateCoords(coords: JXG.Coords, center: JXG.Coords, angle: numb
 export function logGeometryEvent(model: Instance<typeof GeometryBaseContentModel>,
     operation: string, target: JXGObjectType, targetId?: string|string[],
     more?: { text?: string, labelOption?: string, filename?: string, userAction?: string }) {
-  const tileId =getTileIdFromContent(model) || "";
+  const tileId = getTileIdFromContent(model) || "";
   const change = {
     target,
     targetId,
