@@ -1425,13 +1425,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       }
 
-      // clicks that affect selection don't create new points
-      if (this.lastSelectDown &&
-          (evt.timeStamp - this.lastSelectDown.timeStamp < clickTimeThreshold)) {
-        console.log("too soon since last select down, returning.", evt.timeStamp, this.lastSelectDown.timeStamp);
-        return;
-      }
-
       if (hasSelectionModifier(evt)) {
         console.log("shift click, returning");
         return;
