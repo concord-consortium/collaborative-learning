@@ -2,10 +2,9 @@ import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-but
 import { ISharedModelManager } from "../../models/shared/shared-model-manager";
 import { registerSharedModelInfo } from "../../models/shared/shared-model-registry";
 import { registerTextPluginInfo } from "../../models/tiles/text/text-plugin-info";
-import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
+import { registerDrawingObjectInfo } from "../drawing/components/drawing-object-manager";
 import { IGraphModel, registerGraphSharedModelUpdateFunction } from "../graph/models/graph-model";
-import {
-  EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject
+import { VariableChipComponent, VariableChipObject, NewVariableButton, EditVariableButton, InsertVariableButton
 } from "./drawing/variable-object";
 import { isPlottedVariablesAdornment, PlottedVariablesAdornmentModel
 } from "./graph/plotted-variables-adornment/plotted-variables-adornment-model";
@@ -17,6 +16,7 @@ import { kSharedVariablesID, SharedVariables } from "./shared-variables";
 import { NewVariableTextButton, InsertVariableTextButton, EditVariableTextButton,
   kNewVariableButtonName, kInsertVariableButtonName, kEditVariableButtonName} from "./slate/text-tile-buttons";
 import { kVariableTextPluginName, VariablesPlugin } from "./slate/variables-plugin";
+
 
 registerSharedModelInfo({
   type: kSharedVariablesID,
@@ -48,25 +48,16 @@ registerTileToolbarButtons('text', [
   },
 ]);
 
+registerTileToolbarButtons("drawing", [
+  { name: "new-variable", component: NewVariableButton},
+  { name: "insert-variable", component: InsertVariableButton},
+  { name: "edit-variable", component: EditVariableButton},
+]);
+
 registerDrawingObjectInfo({
   type: "variable",
   component:VariableChipComponent,
   modelClass: VariableChipObject
-});
-
-registerDrawingToolInfo({
-  name: "insert-variable",
-  buttonComponent: InsertVariableButton
-});
-
-registerDrawingToolInfo({
-  name: "new-variable",
-  buttonComponent: NewVariableButton
-});
-
-registerDrawingToolInfo({
-  name: "edit-variable",
-  buttonComponent: EditVariableButton
 });
 
 registerGraphSharedModelUpdateFunction(

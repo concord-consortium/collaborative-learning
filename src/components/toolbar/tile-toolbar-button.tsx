@@ -1,4 +1,5 @@
 import React, { PropsWithChildren } from "react";
+import { useTouchHold } from "../../hooks/use-touch-hold";
 import classNames from "classnames";
 import { Tooltip } from "react-tippy";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
@@ -17,6 +18,7 @@ export interface TileToolbarButtonProps {
   title: string;      // user-visible name, used in the tooltip
   keyHint?: string,   // If set, displayed to the user as the hotkey equivalent
   onClick: (e: React.MouseEvent) => void; // Action when clicked
+  onTouchHold?: () => void; // Action when long-pressed
   selected?: boolean; // puts button in 'active' state if defined and true
   disabled?: boolean; // makes button grey and unclickable if defined and true
   extraContent?: JSX.Element; // Additional element added after the button.
@@ -25,25 +27,40 @@ export interface TileToolbarButtonProps {
 /**
  * A generic, simple button that can go on a tile toolbar.
  */
-export const TileToolbarButton =
-  function({name, title, keyHint, onClick, selected, disabled, extraContent, children}:
-    PropsWithChildren<TileToolbarButtonProps>) {
+export const TileToolbarButton = function ({
+  name,
+  title,
+  keyHint,
+  onClick,
+  onTouchHold,
+  selected,
+  disabled,
+  children,
+  extraContent
+}: PropsWithChildren<TileToolbarButtonProps>) {
+  const tipOptions = useTooltipOptions();
+  const tooltip = formatTooltip(title, keyHint);
 
-    const tipOptions = useTooltipOptions();
+  const { onTouchStart, onTouchEnd, onMouseDown, onMouseUp, onClick: handleOnClick } = useTouchHold(
+    () => onTouchHold?.(),
+    onClick
+  );
 
-    const tooltip = formatTooltip(title, keyHint);
-    return (
-      <Tooltip title={tooltip} {...tipOptions} >
-        <button
-          className={classNames('toolbar-button', name, { selected, disabled })}
-          // TODO: confer with Scott about aria-disabled vs. disabled
-          disabled={disabled}
-          onClick={onClick}
-          onMouseDown={(e) => { e.preventDefault(); }}
-        >
-          {children}
-        </button>
-        {extraContent}
-      </Tooltip>
-    );
-  };
+  return (
+    <Tooltip title={tooltip} {...tipOptions}>
+      <button
+        className={classNames("toolbar-button", name, { selected, disabled })}
+        // TODO: confer with Scott about aria-disabled vs. disabled
+        disabled={disabled}
+        onClick={handleOnClick}
+        onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        {children}
+      </button>
+      {extraContent}
+    </Tooltip>
+  );
+};

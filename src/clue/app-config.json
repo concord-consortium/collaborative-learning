@@ -267,6 +267,24 @@
           "delete"
         ]
       },
+      "drawing": {
+        "tools": [
+          "select",
+          "line",
+          "vector",
+          "rectangle",
+          "ellipse",
+          "stamp",
+          "stroke-color",
+          "fill-color",
+          "text",
+          "upload",
+          "group",
+          "ungroup",
+          "duplicate",
+          "delete"
+        ]
+      },
       "geometry": {
         "tools": [
           "select",

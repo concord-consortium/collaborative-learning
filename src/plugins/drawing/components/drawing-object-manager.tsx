@@ -2,16 +2,14 @@ import React from "react";
 import { types } from "mobx-state-tree";
 import { DrawingComponentType, DrawingObject, DrawingObjectType,
   DrawingTool, HandleObjectHover, HandleObjectDrag,
-  IDrawingLayer, IToolbarButtonProps } from "../objects/drawing-object";
-import { EllipseComponent, EllipseDrawingTool, EllipseObject, EllipseToolbarButton } from "../objects/ellipse";
-import { ImageComponent, ImageObject, StampDrawingTool, StampToolbarButton } from "../objects/image";
-import { LineComponent, LineDrawingTool, LineObject, LineToolbarButton } from "../objects/line";
-import { RectangleComponent, RectangleDrawingTool, RectangleObject,
-  RectangleToolbarButton} from "../objects/rectangle";
-import { VectorComponent, VectorDrawingTool, VectorObject, VectorToolbarButton } from "../objects/vector";
-import { DeleteButton, DuplicateButton, SelectToolbarButton } from "./drawing-toolbar-buttons";
+  IDrawingLayer } from "../objects/drawing-object";
+import { EllipseComponent, EllipseDrawingTool, EllipseObject } from "../objects/ellipse";
+import { ImageComponent, ImageObject, StampDrawingTool } from "../objects/image";
+import { LineComponent, LineDrawingTool, LineObject } from "../objects/line";
+import { RectangleComponent, RectangleDrawingTool, RectangleObject} from "../objects/rectangle";
+import { VectorComponent, VectorDrawingTool, VectorObject } from "../objects/vector";
 import { SelectionDrawingTool } from "./selection-drawing-tool";
-import { TextComponent, TextDrawingTool, TextObject, TextToolbarButton } from "../objects/text";
+import { TextComponent, TextDrawingTool, TextObject } from "../objects/text";
 
 export interface IDrawingObjectInfo {
   type: string;
@@ -24,7 +22,6 @@ export interface IDrawingToolInfo {
   // using a simple `typeof DrawingTool` can't be used because that type
   // is an abstract class so can't be instantiated.
   toolClass?: { new(drawingLayer: IDrawingLayer): DrawingTool };
-  buttonComponent: React.ComponentType<IToolbarButtonProps>;
 }
 
 const gDrawingObjectInfos: Record<string, IDrawingObjectInfo | undefined> = {
@@ -63,46 +60,37 @@ const gDrawingObjectInfos: Record<string, IDrawingObjectInfo | undefined> = {
 const gDrawingToolInfos: Record<string, IDrawingToolInfo | undefined> = {
   select: {
     name: "select",
-    toolClass: SelectionDrawingTool,
-    buttonComponent: SelectToolbarButton
+    toolClass: SelectionDrawingTool
   },
   line: {
     name: "line",
-    toolClass: LineDrawingTool,
-    buttonComponent: LineToolbarButton
+    toolClass: LineDrawingTool
   },
   vector: {
     name: "vector",
     toolClass: VectorDrawingTool,
-    buttonComponent: VectorToolbarButton
   },
   rectangle: {
     name: "rectangle",
-    toolClass: RectangleDrawingTool,
-    buttonComponent: RectangleToolbarButton
+    toolClass: RectangleDrawingTool
   },
   ellipse: {
     name: "ellipse",
-    toolClass: EllipseDrawingTool,
-    buttonComponent: EllipseToolbarButton
+    toolClass: EllipseDrawingTool
   },
   text: {
     name: "text",
-    toolClass: TextDrawingTool,
-    buttonComponent: TextToolbarButton
+    toolClass: TextDrawingTool
   },
   stamp: {
     name: "stamp",
-    toolClass: StampDrawingTool,
-    buttonComponent: StampToolbarButton
+    toolClass: StampDrawingTool
   },
   duplicate: {
-    name: "duplicate",
-    buttonComponent: DuplicateButton
+    name: "duplicate"
   },
   delete: {
-    name: "delete",
-    buttonComponent: DeleteButton
+    name: "delete"
   }
 };
 
@@ -119,10 +107,6 @@ export function getDrawingObjectComponent(drawingObject: DrawingObjectType) {
   return info?.component;
 }
 
-export function getDrawingToolButtonComponent(toolName: string) {
-  return gDrawingToolInfos[toolName]?.buttonComponent;
-}
-
 export function registerDrawingObjectInfo(drawingObjectInfo: IDrawingObjectInfo) {
   gDrawingObjectInfos[drawingObjectInfo.type] = drawingObjectInfo;
 }
@@ -135,7 +119,7 @@ export function renderDrawingObject(drawingObject: DrawingObjectType, readOnly=f
                                     handleHover?: HandleObjectHover, handleDrag?: HandleObjectDrag) {
   const DrawingObjectComponent = getDrawingObjectComponent(drawingObject);
   if (!DrawingObjectComponent) return null;
-  const element = (<DrawingObjectComponent key={drawingObject.id} model={drawingObject} readOnly={readOnly} 
+  const element = (<DrawingObjectComponent key={drawingObject.id} model={drawingObject} readOnly={readOnly}
                     handleHover={handleHover} handleDrag={handleDrag}/>);
   if (drawingObject.visible) {
     return element;

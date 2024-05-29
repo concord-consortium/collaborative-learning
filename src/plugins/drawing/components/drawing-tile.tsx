@@ -1,25 +1,26 @@
 import classNames from "classnames";
 import React, { useEffect, useState, useRef } from "react";
 import { ITileProps } from "../../../components/tiles/tile-component";
-import { ToolbarView } from "./drawing-toolbar";
 import { DrawingLayerView } from "./drawing-layer";
-import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
 import { DrawingContentModelType } from "../model/drawing-content";
 import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { DrawingContentModelContext } from "./drawing-content-context";
+import { DrawingAreaContext } from "./drawing-area-context";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
-import "./drawing-tile.scss";
 import { ObjectListView } from "./object-list-view";
 import { useUIStore } from "../../../hooks/use-stores";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
+import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
+
+import "./drawing-tile.scss";
 
 type IProps = ITileProps;
 
 const DrawingToolComponent: React.FC<IProps> = (props) => {
-  const { documentContent, tileElt, model, readOnly, scale, onRegisterTileApi, onUnregisterTileApi } = props;
+  const { tileElt, model, readOnly, onRegisterTileApi } = props;
   const contentRef = useCurrent(model.content as DrawingContentModelType);
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
   const [objectListHoveredObject, setObjectListHoveredObject] = useState(null as string|null);
@@ -124,8 +125,6 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     ui.setSelectedTileId(model.id, { append });
   };
 
-  const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
-
   const getObjectListPanelWidth = () => {
     if (drawingToolElement.current) {
       const objectListElement = drawingToolElement.current.querySelector<HTMLDivElement>('div.object-list');
@@ -146,7 +145,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   };
 
   return (
-    <DrawingContentModelContext.Provider value={contentRef.current} >
+    <DrawingContentModelContext.Provider value={contentRef.current}>
       <BasicEditableTileTitle />
       <div
         ref={drawingToolElement}
@@ -156,15 +155,13 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         onKeyDown={(e) => hotKeys.current.dispatch(e)}
         onMouseDown={handlePointerDown}
       >
-        <ToolbarView
-          model={model}
-          documentContent={documentContent}
-          tileElt={tileElt}
-          scale={scale}
-          setImageUrlToAdd={setImageUrlToAdd}
-          getVisibleCanvasSize={getVisibleCanvasSize}
-          {...toolbarProps}
-        />
+        <DrawingAreaContext.Provider
+          value={{ getObjectListPanelWidth, getVisibleCanvasSize, imageUrlToAdd, setImageUrlToAdd }}
+        >
+          <div data-testid="drawing-toolbar" className="drawing-toolbar-wrapper">
+            <TileToolbar tileType="drawing" readOnly={!!readOnly} tileElement={tileElt} />
+          </div>
+        </DrawingAreaContext.Provider>
         <div className="drawing-container">
           {!readOnly && <ObjectListView model={model} setHoverObject={setObjectListHoveredObject} />}
           <DrawingLayerView

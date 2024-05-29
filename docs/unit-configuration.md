@@ -148,11 +148,24 @@ Common toolbar framework. Supports and defaults to the following toolbar buttons
 
 #### Drawing
 
-Not updated to common toolbar framework. However, supports toolbar configuration in a similar manner. Default buttons:
-`["select", "line", "vector", "rectangle", "ellipse",
-  "stamp", "stroke-color", "fill-color", "text", "image-upload", "group", "ungroup", "duplicate", "delete"]`
+Uses common toolbar framework. Default buttons:
 
-In addition, if shared variables are configured, adds additional buttons:
+- `select`
+- `line`
+- `vector`
+- `rectangle`
+- `ellipse`
+- `stamp`
+- `stroke-color`
+- `fill-color`
+- `text`
+- `image-upload`
+- `group`
+- `ungroup`
+- `duplicate`
+- `delete`
+
+In addition, if shared variables are configured in unit, it supports additional buttons:
 
 - `new-variable`
 - `insert-variable`

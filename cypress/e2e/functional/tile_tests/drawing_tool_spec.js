@@ -1,6 +1,7 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import ImageToolTile from '../../../support/elements/tile/ImageToolTile';
+import { LogEventName } from '../../../../src/lib/logger-types';
 
 let clueCanvas = new ClueCanvas,
   drawToolTile = new DrawToolTile;
@@ -33,7 +34,15 @@ context('Draw Tool Tile', function () {
   it("renders draw tool tile", () => {
     beforeTest();
 
+    cy.window().then(win => {
+      cy.stub(win.ccLogger, "log").as("log");
+    });
+    cy.get("@log").should('not.have.been.called');
     clueCanvas.addTile("drawing");
+    cy.get("@log")
+      .should("have.been.been.calledWith", LogEventName.CREATE_TILE, Cypress.sinon.match.object)
+      .its("firstCall.args.1").should("deep.include", { objectType: "Drawing" });
+
     drawToolTile.getDrawTile().should("exist");
     drawToolTile.getTileTitle().should("exist");
 
@@ -206,8 +215,8 @@ context('Draw Tool Tile', function () {
     cy.log("change line to arrow");
     drawToolTile.getVectorDrawing().children().its("length").should("eq", 1); // Only a line, no arrowheads yet.
     drawToolTile.getDrawToolVectorSubmenu().click();
-    cy.get(".toolbar-palette.vectors .drawing-tool-buttons").should("be.visible");
-    cy.get(".toolbar-palette.vectors .drawing-tool-buttons div:nth-child(3) button").click();
+    cy.get(".toolbar-palette.vectors .palette-buttons").should("be.visible");
+    cy.get(".toolbar-palette.vectors .palette-buttons div:nth-child(3) button").click();
     drawToolTile.getVectorDrawing().children().its("length").should("eq", 3); // Now three items in group...
     drawToolTile.getVectorDrawing().find("polygon").its("length").should("eq", 2); // including two arrowheads.
     // selecting from this submenu activates the vector tool, which de-selects the object.
@@ -577,6 +586,7 @@ context('Draw Tool Tile', function () {
     // Once that's fixed, we should drag that image into the drawing tile.
 
     cy.log("uploads images");
+    drawToolTile.getDrawTile().click();
     const imageFilePath2 = 'image.png';
     cy.uploadFile(drawToolTile.getDrawToolUploadImage(), imageFilePath2, 'image/png');
     cy.wait(2000);

@@ -202,24 +202,6 @@ export interface IDrawingComponentProps {
   handleDrag?: HandleObjectDrag;
 }
 
-// TODO: the support for palettes is hard coded to specific tools
-export interface IPaletteState {
-  showStamps: boolean;
-  showStroke: boolean;
-  showFill: boolean;
-  showVectors: boolean;
-}
-export type PaletteKey = keyof IPaletteState;
-export const kClosedPalettesState = { showStamps: false, showStroke: false, showFill: false, showVectors: false };
-
-export interface IToolbarButtonProps {
-  toolbarManager: IToolbarManager;
-  getVisibleCanvasSize: () => Point|undefined;
-  // TODO: the support for palettes is hard coded to specific tools
-  togglePaletteState: (palette: PaletteKey, show?: boolean) => void;
-  clearPaletteState: () => void;
-}
-
 export type DrawingComponentType = React.ComponentType<IDrawingComponentProps>;
 
 export interface IDrawingLayer {

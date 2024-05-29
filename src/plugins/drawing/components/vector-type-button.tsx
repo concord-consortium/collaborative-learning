@@ -1,7 +1,8 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { ToolbarSettings, VectorType, getVectorTypeIcon, getVectorTypeTooltip } from "../model/drawing-basic-types";
-import { SvgToolbarButton } from "./drawing-toolbar-buttons";
+import { TileToolbarButton } from "../../../components/toolbar/tile-toolbar-button";
+import { ToolbarButtonSvg } from "../toolbar-buttons/toolbar-button-svg";
 
 interface IProps {
   vectorType: VectorType;
@@ -24,9 +25,16 @@ export const VectorTypeButton = observer(
     vectorType: settings.vectorType
   };
 
-    return <SvgToolbarButton SvgIcon={icon} buttonClass="vector-type"
-      title={tooltip} selected={isSelected} settings={modSettings}
-      onClick={() => onSelectVectorType(vectorType)} />;
+  return (
+    <TileToolbarButton
+      name={"vector-" + vectorType}
+      title={tooltip}
+      selected={isSelected}
+      onClick={() => onSelectVectorType(vectorType)}
+    >
+      <ToolbarButtonSvg SvgIcon={icon} settings={modSettings}/>
+    </TileToolbarButton>
+  );
 });
 
 
