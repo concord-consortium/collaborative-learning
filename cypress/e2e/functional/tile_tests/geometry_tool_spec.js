@@ -171,6 +171,7 @@ context('Geometry Tool', function () {
     geometryToolTile.addPointToGraph(10, 5);
     geometryToolTile.addPointToGraph(9, 9);
     geometryToolTile.addPointToGraph(5, 5); // click first point again to close polygon.
+    geometryToolTile.getGraph().trigger('mousemove');
     geometryToolTile.getGraphPolygon().should("have.length", 1);
     geometryToolTile.getGraphPoint().should("have.length", 4);
 
