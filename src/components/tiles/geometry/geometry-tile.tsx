@@ -13,7 +13,7 @@ import { GeometryTileMode } from "./geometry-types";
 
 import "./geometry-toolbar-registration";
 
-import "./geometry-tile.sass";
+import "./geometry-tile.scss";
 
 const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   model, readOnly, ...others

@@ -177,6 +177,7 @@ declare namespace JXG {
     borders: JXG.Line[];
 
     findPoint: (point: JXG.Point) => number;
+    addPoints: (...points: JXG.Point[]) => void;
     removePoints: (...points: JXG.Point[]) => void;
   }
 
