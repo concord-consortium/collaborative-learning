@@ -1,8 +1,8 @@
 import React, { PropsWithChildren } from "react";
 import { useTouchHold } from "../../hooks/use-touch-hold";
 import classNames from "classnames";
-import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { Tooltip } from "react-tippy";
+import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 
 /**
  * Create the complete tooltip from the given button information.
@@ -21,6 +21,7 @@ export interface TileToolbarButtonProps {
   onTouchHold?: () => void; // Action when long-pressed
   selected?: boolean; // puts button in 'active' state if defined and true
   disabled?: boolean; // makes button grey and unclickable if defined and true
+  extraContent?: JSX.Element; // Additional element added after the button.
   extraContent?: JSX.Element; // Additional element added after the button.
 }
 
