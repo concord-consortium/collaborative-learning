@@ -22,7 +22,6 @@ export interface TileToolbarButtonProps {
   selected?: boolean; // puts button in 'active' state if defined and true
   disabled?: boolean; // makes button grey and unclickable if defined and true
   extraContent?: JSX.Element; // Additional element added after the button.
-  extraContent?: JSX.Element; // Additional element added after the button.
 }
 
 /**
