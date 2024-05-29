@@ -1428,7 +1428,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       // clicks that affect selection don't create new points
       if (this.lastSelectDown &&
           (evt.timeStamp - this.lastSelectDown.timeStamp < clickTimeThreshold)) {
-        console.log("too soon since last select down, returning");
+        console.log("too soon since last select down, returning.", evt.timeStamp, this.lastSelectDown.timeStamp);
         return;
       }
 
@@ -1548,6 +1548,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         this.beginDragSelectedPoints(evt, point);
       }
 
+      console.log("setting lastSelectDown (pt down)", evt.timeStamp);
       this.lastSelectDown = evt;
     };
 
@@ -1706,6 +1707,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           geometryContent.deselectAll(board);
         }
         selectPolygon = true;
+        console.log("setting lastSelectDown (poly down)", evt.timeStamp);
         this.lastSelectDown = evt;
       }
       if (selectPolygon) {
