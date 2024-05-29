@@ -123,17 +123,22 @@ export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
   const element = getObjectById(board, id);
   if (element) {
-    const fillColor = element.getAttribute("clientFillColor") || kPointDefaults.fillColor;
-    const strokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
-    const selectedFillColor = element.getAttribute("clientSelectedFillColor") || kPointDefaults.selectedFillColor;
-    const selectedStrokeColor = element.getAttribute("clientSelectedStrokeColor") || kPointDefaults.selectedStrokeColor;
+    const clientFillColor = element.getAttribute("clientFillColor") || kPointDefaults.fillColor;
+    const clientStrokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
+    const clientSelectedFillColor = element.getAttribute("clientSelectedFillColor") || kPointDefaults.selectedFillColor;
+    const clientSelectedStrokeColor = element.getAttribute("clientSelectedStrokeColor")
+      || kPointDefaults.selectedStrokeColor;
     const clientCssClass = selected
                             ? element.getAttribute("clientSelectedCssClass")
                             : element.getAttribute("clientCssClass");
     const cssClass = clientCssClass ? { cssClass: clientCssClass } : undefined;
+    const fillColor = selected ? clientSelectedFillColor : clientFillColor;
+    const strokeColor = selected ? clientSelectedStrokeColor : clientStrokeColor;
     element.setAttribute({
-              fillColor: selected ? selectedFillColor : fillColor,
-              strokeColor: selected ? selectedStrokeColor : strokeColor,
+              fillColor,
+              highlightFillColor: fillColor,
+              strokeColor,
+              highlightStrokeColor: strokeColor,
               ...cssClass
             });
   }

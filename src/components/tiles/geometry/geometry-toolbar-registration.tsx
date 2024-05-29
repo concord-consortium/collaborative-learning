@@ -66,9 +66,7 @@ const PolygonButton = observer(function PolygonButton({name}: IToolbarButtonComp
 
 const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButtonComponentProps) {
   const { content, board, handlers } = useGeometryTileContext();
-  const disableDuplicate = board && (!content?.getOneSelectedPoint(board) &&
-    !content?.getOneSelectedPolygon(board));
-
+  const disableDuplicate = !content || !board || !content.hasDeletableSelection(board);
   return (
     <TileToolbarButton
       name={name}
