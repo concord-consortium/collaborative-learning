@@ -11,10 +11,15 @@ interface IProps {
 export function VectorTypePalette ({ selectedVectorType, onSelectVectorType, settings }: IProps) {
   return (
     <div className="toolbar-palette vectors">
-      <div className="drawing-tool-buttons">
-        {Object.values(VectorType).map(type => 
-          <VectorTypeButton key={type} vectorType={type} isSelected={type === selectedVectorType} 
-            onSelectVectorType={onSelectVectorType} settings={settings} />
+      <div className="palette-buttons">
+        {Object.values(VectorType).map(type =>
+          <VectorTypeButton
+            key={type}
+            vectorType={type}
+            isSelected={type === selectedVectorType}
+            onSelectVectorType={onSelectVectorType}
+            settings={settings}
+          />
         )}
       </div>
     </div>

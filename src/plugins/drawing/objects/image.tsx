@@ -1,16 +1,11 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
-import React, { useCallback } from "react";
+import React from "react";
 import { observer } from "mobx-react";
-import { Tooltip } from "react-tippy";
 import { gImageMap } from "../../../models/image-map";
-import { DrawingObject, DrawingObjectSnapshot, DrawingTool, IDrawingComponentProps, IDrawingLayer,
-  IToolbarButtonProps, ObjectTypeIconViewBox, typeField } from "./drawing-object";
+import { DrawingObject, DrawingObjectSnapshot, DrawingTool,
+  IDrawingComponentProps, IDrawingLayer, ObjectTypeIconViewBox, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
 import placeholderImage from "../../../assets/image_placeholder.png";
-import SmallCornerTriangle from "../../../assets/icons/small-corner-triangle.svg";
-import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
-import { buttonClasses } from "../components/drawing-toolbar-buttons";
-import { useTouchHold } from "../../../hooks/use-touch-hold";
 import ImageToolIcon from "../../../clue/assets/icons/image-tool.svg";
 
 export const ImageObject = DrawingObject.named("ImageObject")
@@ -146,56 +141,3 @@ export class StampDrawingTool extends DrawingTool {
     }
   }
 }
-
-export const StampToolbarButton: React.FC<IToolbarButtonProps> = observer(({
-  toolbarManager, togglePaletteState, clearPaletteState
-}) => {
-  const tooltipOptions = useTooltipOptions();
-  const { selectedButton, stamps } = toolbarManager;
-  const { currentStamp } = toolbarManager;
-  const stampCount = stamps.length;
-
-  const modalButton = "stamp";
-  const selected = selectedButton === modalButton;
-
-  const handleStampsButtonClick = useCallback(() => {
-    toolbarManager.setSelectedButton("stamp");
-    togglePaletteState("showStamps", false);
-  }, [toolbarManager, togglePaletteState]);
-
-  const handleStampsButtonTouchHold = useCallback(() => {
-    toolbarManager.setSelectedButton("stamp");
-    togglePaletteState("showStamps");
-  }, [toolbarManager, togglePaletteState]);
-
-  const { didTouchHold, ...handlers } = useTouchHold(handleStampsButtonTouchHold, handleStampsButtonClick);
-
-  const handleExpandCollapseClick = (e: React.MouseEvent) => {
-    if (!didTouchHold()) {
-      handleStampsButtonTouchHold();
-      e.stopPropagation();
-    }
-  };
-
-  if (!currentStamp) {
-    return null;
-  }
-
-  // TODO if stamps can be uploaded by users and shared with tiles that care about
-  // filenames, then we need to start storing the file name in the stamp and passing
-  // it through to getImageEntry
-  const entry = gImageMap.getImageEntry(currentStamp.url);
-
-  return (
-    <Tooltip title="Stamp" {...tooltipOptions}>
-      <div className={buttonClasses({ modalButton, selected })} {...handlers}>
-        <img src={entry?.displayUrl} draggable="false" />
-        {stampCount > 1 &&
-          <div className="expand-collapse" onClick={handleExpandCollapseClick}>
-            <SmallCornerTriangle />
-          </div>}
-      </div>
-    </Tooltip>
-  );
-});
-StampToolbarButton.displayName = "StampToolbarButton";
