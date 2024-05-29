@@ -1,6 +1,6 @@
 import { castArray, difference, each, size as _size, union } from "lodash";
 import { reaction } from "mobx";
-import { addDisposer, applySnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { addDisposer, applySnapshot, detach, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { ITableLinkProperties, linkedPointId } from "../table-link-types";
@@ -24,10 +24,10 @@ import {
   ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
 } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
-import {  kPointDefaults } from "./jxg-point";
+import { kPointDefaults, kSnapUnit } from "./jxg-point";
 import { prepareToDeleteObjects } from "./jxg-polygon";
 import {
-  isAxisArray, isBoard, isComment, isFreePoint, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
+  isAxisArray, isBoard, isComment, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
   kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
@@ -35,10 +35,9 @@ import { SharedModelType } from "../../shared/shared-model";
 import { ISharedModelManager } from "../../shared/shared-model-manager";
 import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
-import { logTileChangeEvent } from "../log/log-tile-change-event";
-import { LogEventName } from "../../../lib/logger-types";
 import { gImageMap } from "../../image-map";
 import { IClueTileObject } from "../../annotations/clue-object";
+import { appendVertexId, getPolygon, logGeometryEvent } from "./geometry-utils";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -236,6 +235,10 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     get lastObject() {
       return self.objects.size ? Array.from(self.objects.values())[self.objects.size - 1] : undefined;
+    },
+    lastObjectOfType(type: string) {
+      const ofType = Array.from(self.objects.values()).filter((obj => obj.type === type));
+      return ofType.length ? ofType[ofType.length -1] : undefined;
     },
     isSelected(id: string) {
       return !!self.metadata?.isSelected(id);
@@ -556,7 +559,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       if (imageIds.length) {
         // change URL if there's already an image present
         const imageId = imageIds[imageIds.length - 1];
-        updateObjects(board, imageId, { url, size: [width, height] });
+        updateObjects(board, imageId, { url, size: [width, height], ...props });
       }
       else {
         const change: JXGChange = {
@@ -585,6 +588,220 @@ export const GeometryContentModel = GeometryBaseContentModel
       };
       const point = applyAndLogChange(board, change);
       return isPoint(point) ? point : undefined;
+    }
+
+    function addPhantomPoint(board: JXG.Board, parents: JXGCoordPair, polygonId?: string):
+        JXG.Point | undefined {
+      if (!board) return undefined;
+
+      const props = {
+        id: uniqueId(),
+        isPhantom: true,
+        fillOpacity: .5,
+        highlightFillOpacity: .5,
+        snapToGrid: true,
+        snapSizeX: kSnapUnit,
+        snapSizeY: kSnapUnit,
+        withLabel: false
+      };
+      const pointModel = PointModel.create({ x: parents[0], y: parents[1], ...props });
+      self.phantomPoint = pointModel;
+
+      const change: JXGChange = {
+        operation: "create",
+        target: "point",
+        parents,
+        properties: { ...props }
+      };
+      const point = syncChange(board, change);
+
+      // If a polygon ID was provided, display the phantom point as if it was part of that polygon
+      if (polygonId) {
+        const poly = getPolygon(board, polygonId);
+        if (poly) {
+          const vertexIds = poly.vertices.map(v => v.id);
+          const change2: JXGChange = {
+            operation: "update",
+            target: "polygon",
+            targetID: polygonId,
+            parents: appendVertexId(vertexIds, pointModel.id)
+          };
+          syncChange(board, change2);
+        } else {
+          console.warn("didn't find polygon", polygonId);
+        }
+      }
+
+      return isPoint(point) ? point : undefined;
+    }
+
+    function setPhantomPointPosition(board: JXG.Board, position: JXGCoordPair) {
+      if (self.phantomPoint) {
+        self.phantomPoint.setPosition(position);
+        const change: JXGChange = {
+          operation: "update",
+          target: "object",
+          targetID: self.phantomPoint.id,
+          properties: {
+            position
+          }
+        };
+        syncChange(board, change);
+      }
+    }
+
+    /**
+     * Make the current phantom point into a real point.
+     * The new point is persisted into the model. It remains a part of the active polygon if any.
+     * @param board
+     * @param position
+     * @param polygonId
+     * @returns the point, now considered "real".
+     */
+    function realizePhantomPoint(board: JXG.Board, position: JXGCoordPair, makePolygon: boolean):
+        { point: JXG.Point | undefined, polygon: JXG.Polygon | undefined } {
+      // Transition the current phantom point into a real point.
+      const newRealPoint = self.phantomPoint;
+      if (!newRealPoint) return { point: undefined, polygon: undefined };
+      detach(newRealPoint);
+      self.addObjectModel(newRealPoint);
+
+      // Create a new phantom point
+      const phantomPoint = addPhantomPoint(board, position);
+      if (!phantomPoint) {
+        console.warn("Failed to create phantom point");
+        return { point: undefined, polygon: undefined };
+      }
+
+      // Update the previously-existing JSXGraph point to be real, not phantom
+      const change: JXGChange = {
+        operation: "update",
+        target: "object",
+        targetID: newRealPoint.id,
+        properties: {
+          isPhantom: false,
+          withLabel: true,
+          fillOpacity: 1,
+          highlightFillOpacity: 1,
+          position
+        }
+      };
+      syncChange(board, change);
+
+      let newPolygon = undefined;
+      if (makePolygon) {
+        const poly = self.activePolygonId && getPolygon(board, self.activePolygonId);
+        if (poly) {
+          // Add new phantom point to existing polygon
+          const vertexIds = poly.vertices.map(v => v.id);
+          const change2: JXGChange = {
+            operation: "update",
+            target: "polygon",
+            targetID: poly.id,
+            parents: appendVertexId(vertexIds, phantomPoint?.id)
+          };
+          syncChange(board, change2);
+
+          const polyModel = self.activePolygonId && self.getObject(self.activePolygonId);
+          if (polyModel && isPolygonModel(polyModel)) {
+            polyModel.points.push(newRealPoint.id);
+          }
+        } else {
+          // Create a new polygon with the two points (real and phantom)
+          const change2: JXGChange = {
+            operation: "create",
+            target: "polygon",
+            parents: [newRealPoint.id, phantomPoint?.id],
+            properties: { id: self.activePolygonId }
+          };
+          const result = syncChange(board, change2);
+          if (isPolygon(result)) {
+            newPolygon = result;
+
+            // Update the model
+            const polygonModel = PolygonModel.create({ id: newPolygon.id, points: [newRealPoint.id] });
+            self.addObjectModel(polygonModel);
+            self.activePolygonId = polygonModel.id;
+          }
+        }
+      }
+
+      // Log event
+      logGeometryEvent(self, "create",
+        makePolygon ? "vertex" : "point",
+        self.activePolygonId ? [newRealPoint.id, self.activePolygonId] : newRealPoint.id);
+
+      // Return newly-created objects
+      const obj = board.objects[newRealPoint.id];
+      const point = isPoint(obj) ? obj : undefined;
+      return { point, polygon: newPolygon };
+    }
+
+    function clearPhantomPoint(board: JXG.Board) {
+      if (self.phantomPoint) {
+        const phantomId = self.phantomPoint.id;
+
+        // remove from polygon, if it's in one.
+        if (self.activePolygonId) {
+          const poly = getPolygon(board, self.activePolygonId);
+          if (poly) {
+            const remainingVertices = poly.vertices.map(v => v.id).filter(id => id !== phantomId);
+            const change1: JXGChange = {
+              operation: "update",
+              target: "polygon",
+              targetID: self.activePolygonId,
+              parents: remainingVertices
+            };
+            syncChange(board, change1);
+          }
+        }
+
+        const change: JXGChange = {
+          operation: "delete",
+          target: "point",
+          targetID: self.phantomPoint.id
+        };
+        syncChange(board, change);
+        self.phantomPoint = undefined;
+      }
+    }
+
+    function clearActivePolygon() {
+      self.activePolygonId = undefined;
+    }
+
+    function closeActivePolygon(board: JXG.Board) {
+      if (!self.activePolygonId) return;
+      let poly = getPolygon(board, self.activePolygonId);
+      if (!poly) return;
+      const vertexIds = poly.vertices.map(v => v.id);
+      // Remove the phantom point from the list of vertices & update polygon
+      const index = vertexIds.findIndex(v => v === self.phantomPoint?.id);
+      if (index >= 1) {
+        vertexIds.splice(index,1);
+
+        const change: JXGChange = {
+          operation: "update",
+          target: "polygon",
+          targetID: poly.id,
+          parents: vertexIds,
+        };
+        const result = syncChange(board, change);
+        if (isPolygon(result)) {
+          poly = result;
+        }
+      } else {
+        // If index === 1, only a single point remains, no need for a polygon object.
+        const change: JXGChange = {
+          operation: "delete",
+          target: "polygon",
+          targetID: poly.id
+        };
+        syncChange(board, change);
+        poly = undefined;
+      }
+      self.activePolygonId = undefined;
+      return poly;
     }
 
     function addPoints(board: JXG.Board | undefined,
@@ -684,7 +901,8 @@ export const GeometryContentModel = GeometryBaseContentModel
     function updateObjects(board: JXG.Board | undefined,
                            ids: string | string[],
                            properties: JXGProperties | JXGProperties[],
-                           links?: ILinkProperties) {
+                           links?: ILinkProperties,
+                           userAction?: string) {
       const propsArray = castArray(properties);
       castArray(ids).forEach((id, i) => {
         const obj = self.getAnyObject(id);
@@ -713,33 +931,10 @@ export const GeometryContentModel = GeometryBaseContentModel
               target: "object",
               targetID: ids,
               properties,
-              links
+              links,
+              userAction
             };
       return applyAndLogChange(board, change);
-    }
-
-    function createPolygonFromFreePoints(
-              board: JXG.Board, linkedTableId?: string, linkedColumnId?: string, properties?: JXGProperties
-            ): JXG.Polygon | undefined {
-      const freePtIds = board.objectsList
-                          .filter(elt => isFreePoint(elt) &&
-                                          (linkedTableId === elt.getAttribute("linkedTableId")) &&
-                                          (linkedColumnId === elt.getAttribute("linkedColId")))
-                          .map(pt => pt.id);
-      if (freePtIds && freePtIds.length > 1) {
-        const { id = uniqueId(), ...props } = properties || {};
-        const polygonModel = PolygonModel.create({ id, points: freePtIds, ...props });
-        self.addObjectModel(polygonModel);
-
-        const change: JXGChange = {
-                operation: "create",
-                target: "polygon",
-                parents: freePtIds,
-                properties: { id, ...props }
-              };
-        const polygon = applyAndLogChange(board, change);
-        return isPolygon(polygon) ? polygon : undefined;
-      }
     }
 
     function addVertexAngle(board: JXG.Board,
@@ -965,25 +1160,18 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
     }
 
-    function applyAndLogChange(board: JXG.Board | undefined, _change: JXGChange) {
-      const result = board && syncChange(board, _change);
-
-      let loggedChange = {..._change};
-      if (!Array.isArray(_change.properties)) {
-        // flatten change.properties
-        delete loggedChange.properties;
-        loggedChange = {
-          ...loggedChange,
-          ..._change.properties
-        };
-      } else {
-        // or clean up MST array
-        loggedChange.properties = Array.from(_change.properties);
+    function applyAndLogChange(board: JXG.Board | undefined, change: JXGChange) {
+      const result = board && syncChange(board, change);
+      let propsId, text, labelOption, filename;
+      if (change.properties && !Array.isArray(change.properties)) {
+        propsId = change.properties.id;
+        text = change.properties.text;
+        labelOption = change.properties.labelOption?.toString();
+        filename = change.properties.filename;
       }
-      const tileId = self.metadata?.id || "";
-      const { operation, ...change } = loggedChange;
-      logTileChangeEvent(LogEventName.GEOMETRY_TOOL_CHANGE, { tileId, operation, change });
-
+      const targetId = propsId || change.targetID;
+      logGeometryEvent(self, change.operation, change.target, targetId,
+        { text, labelOption, filename, userAction: change.userAction });
       return result;
     }
 
@@ -1034,10 +1222,15 @@ export const GeometryContentModel = GeometryBaseContentModel
         addImage,
         addPoint,
         addPoints,
+        addPhantomPoint,
+        setPhantomPointPosition,
+        realizePhantomPoint,
+        clearPhantomPoint,
+        clearActivePolygon,
+        closeActivePolygon,
         addMovableLine,
         removeObjects,
         updateObjects,
-        createPolygonFromFreePoints,
         addVertexAngle,
         updateAxisLabels,
         updatePolygonSegmentLabel,

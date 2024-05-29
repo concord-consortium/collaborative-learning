@@ -5,6 +5,7 @@ import { comma, StringBuilder } from "../../../utilities/string-builder";
 import {
   BoardModel, BoardModelType, CommentModel, CommentModelType, GeometryBaseContentModelType,
   GeometryExtrasContentSnapshotType, GeometryObjectModelType, ImageModel, ImageModelType,
+  isPointModel,
   MovableLineModel, MovableLineModelType, pointIdsFromSegmentId, PointModel, PointModelType,
   PolygonModel, PolygonModelType, PolygonSegmentLabelModelSnapshot, VertexAngleModel, VertexAngleModelType
 } from "./geometry-model";
@@ -77,8 +78,16 @@ function omitNullish(inProps: Record<string, any>) {
 
 export const convertModelObjectsToChanges = (objects: GeometryObjectModelType[]): JXGChange[] => {
   const changes: JXGChange[] = [];
+  // Process points first, before objects like polygons that refer to them.
   objects.forEach(obj => {
-    changes.push(...convertModelObjectToChanges(obj));
+    if (isPointModel(obj)) {
+      changes.push(...convertModelObjectToChanges(obj));
+    }
+  });
+  objects.forEach(obj => {
+    if (!isPointModel(obj)) {
+      changes.push(...convertModelObjectToChanges(obj));
+    }
   });
   return changes;
 };

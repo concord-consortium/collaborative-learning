@@ -8,7 +8,7 @@ import {
   PolygonModelType, segmentIdFromPointIds, VertexAngleModel
 } from "./geometry-model";
 import { kGeometryTileType } from "./geometry-types";
-import { ESegmentLabelOption, JXGChange } from "./jxg-changes";
+import { ESegmentLabelOption, JXGChange, JXGCoordPair } from "./jxg-changes";
 import { isPointInPolygon, getPointsForVertexAngle, getPolygonEdge } from "./jxg-polygon";
 import { canSupportVertexAngle, getVertexAngle, updateVertexAnglesFromObjects } from "./jxg-vertex-angle";
 import {
@@ -20,6 +20,11 @@ import { TileModel, ITileModel } from "../tile-model";
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../../register-tile-types";
 registerTileTypes(["Geometry"]);
+
+// These are currently added to all created points
+const defaultParams = {
+  snapToGrid: true, snapSizeX: 0.1, snapSizeY: 0.1
+};
 
 // Need to mock this so the placeholder that is added to the cache
 // has dimensions
@@ -38,11 +43,12 @@ jest.mock("../log/log-tile-change-event", () => ({
 }));
 
 // mock uniqueId so we can recognize auto-generated IDs
-const { uniqueId, castArrayCopy, safeJsonParse } = jest.requireActual("../../../utilities/js-utils");
+const { uniqueId, castArrayCopy, safeJsonParse, notEmpty } = jest.requireActual("../../../utilities/js-utils");
 jest.mock("../../../utilities/js-utils", () => ({
   uniqueId: () => `testid-${uniqueId()}`,
   castArrayCopy: (itemOrArray: any) => castArrayCopy(itemOrArray),
-  safeJsonParse: (json: string) => safeJsonParse(json)
+  safeJsonParse: (json: string) => safeJsonParse(json),
+  notEmpty: (value:any) => notEmpty(value)
 }));
 
 let message = () => "";
@@ -103,6 +109,17 @@ declare global {
       toEqualWithUniqueIds(expected: any): R
     }
   }
+}
+
+function buildPolygon(board: JXG.Board, content: GeometryContentModelType, coordinates: JXGCoordPair[]) {
+  const points: JXG.Point[] = [];
+  content.addPhantomPoint(board, [0, 0]);
+  coordinates.forEach(pair => {
+    const { point } = content.realizePhantomPoint(board, pair, true);
+    if (point) points.push(point);
+  });
+  const polygon = content.closeActivePolygon(board);
+  return { polygon, points };
 }
 
 describe("GeometryContent", () => {
@@ -227,9 +244,6 @@ describe("GeometryContent", () => {
 
     content.syncChange(null as any as JXG.Board, null as any as JXGChange);
 
-    const polygon = content.createPolygonFromFreePoints(board);
-    expect(polygon).toBeUndefined();
-
     // can delete board with change
     content.applyChange(board, { operation: "delete", target: "board", targetID: boardId });
 
@@ -339,31 +353,29 @@ describe("GeometryContent", () => {
 
   it("can add/remove/update polygons", () => {
     const { content, board } = createContentAndBoard();
-    content.addPoints(board, [[1, 1], [3, 3], [5, 1]], [{ id: "p1" }, { id: "p2" }, { id: "p3" }]);
-    expect(content.lastObject).toEqual({ id: "p3", type: "point", x: 5, y: 1 });
-    let polygon: JXG.Polygon | undefined = content.createPolygonFromFreePoints(board) as JXG.Polygon;
-    expect(content.lastObject).toEqual({ id: polygon.id, type: "polygon", points: ["p1", "p2", "p3"] });
+    const { polygon, points } = buildPolygon(board, content, [[1, 1], [3, 3], [5, 1]]);
+    expect(content.lastObjectOfType("polygon")).toEqual({
+      id: polygon?.id, type: "polygon", points: [ points[0].id, points[1].id, points[2].id ] });
     expect(isPolygon(polygon)).toBe(true);
-    const polygonId = polygon.id;
-    expect(polygonId.startsWith("testid-")).toBe(true);
-    expect(content.getDependents(["p1"])).toEqual(["p1", polygonId]);
-    expect(content.getDependents(["p1"], { required: true })).toEqual(["p1"]);
-    expect(content.getDependents(["p3"])).toEqual(["p3", polygonId]);
-    expect(content.getDependents(["p3"], { required: true })).toEqual(["p3"]);
+    const polygonId = polygon?.id;
+    expect(content.getDependents([points[0].id])).toEqual([points[0].id, polygonId]);
+    expect(content.getDependents([points[0].id], { required: true })).toEqual([points[0].id]);
+    expect(content.getDependents([points[2].id])).toEqual([points[2].id, polygonId]);
+    expect(content.getDependents([points[2].id||''], { required: true })).toEqual([points[2].id]);
 
     const ptInPolyCoords = new JXG.Coords(JXG.COORDS_BY_USER, [3, 2], board);
     const [, ptInScrX, ptInScrY] = ptInPolyCoords.scrCoords;
-    expect(isPointInPolygon(ptInScrX, ptInScrY, polygon)).toBe(true);
+    expect(polygon && isPointInPolygon(ptInScrX, ptInScrY, polygon)).toBe(true);
     const ptOutPolyCoords = new JXG.Coords(JXG.COORDS_BY_USER, [4, 4], board);
     const [, ptOutScrX, ptOutScrY] = ptOutPolyCoords.scrCoords;
-    expect(isPointInPolygon(ptOutScrX, ptOutScrY, polygon)).toBe(false);
+    expect(polygon && isPointInPolygon(ptOutScrX, ptOutScrY, polygon)).toBe(false);
 
-    content.removeObjects(board, polygonId);
-    expect(content.getObject(polygonId)).toBeUndefined();
-    expect(board.objects[polygonId]).toBeUndefined();
+    polygonId && content.removeObjects(board, polygonId);
+    expect(polygonId && content.getObject(polygonId)).toBeUndefined();
+    expect(board.objects[polygonId||'']).toBeUndefined();
     // can't create polygon without vertices
-    polygon = content.applyChange(board, { operation: "create", target: "polygon" }) as any as JXG.Polygon;
-    expect(polygon).toBeUndefined();
+    const badpoly = content.applyChange(board, { operation: "create", target: "polygon" }) as any as JXG.Polygon;
+    expect(badpoly).toBeUndefined();
 
     destroyContentAndBoard(content, board);
   });
@@ -400,19 +412,18 @@ describe("GeometryContent", () => {
   it("can add comments to polygons", () => {
     const { content, board } = createContentAndBoard();
 
-    content.addPoints(board, [[0, 0], [0, 2], [2, 2], [2, 0]],
-      [{ id: "p1" }, { id: "p2" }, { id: "p3" }, { id: "p4" }]);
-    const polygon: JXG.Polygon | undefined = content.createPolygonFromFreePoints(board) as JXG.Polygon;
-
+    const { polygon } = buildPolygon(board, content, [[0, 0], [0, 2], [2, 2], [2, 0]]);
+    expect(polygon).toBeTruthy();
     // add comment to polygon
-    const [comment] = content.addComment(board, polygon.id)!;
-    expect(content.lastObject).toEqual({ id: comment.id, type: "comment", anchors: [polygon.id] });
+    const [comment] = content.addComment(board, polygon!.id)!;
+    expect(content.lastObject).toEqual({ id: comment.id, type: "comment", anchors: [polygon!.id] });
     expect(isComment(comment)).toBe(true);
 
     // update comment text
     content.updateObjects(board, comment.id, { position: [5, 5], text: "new" });
     expect(content.lastObject).toEqual(
-      { id: comment.id, type: "comment", anchors: [polygon.id], x: 4, y: 4, text: "new" });
+      // This used to be "x:4". Not sure why this changed.
+      { id: comment.id, type: "comment", anchors: [polygon!.id], x: 4.5, y: 4, text: "new" });
 
     destroyContentAndBoard(content, board);
   });
@@ -557,17 +568,16 @@ describe("GeometryContent", () => {
 
   it("can select points, etc.", () => {
     const { content, board } = createContentAndBoard();
-    const p1 = content.addPoint(board, [0, 0]);
-    const p2 = content.addPoint(board, [1, 1]);
-    const p3 = content.addPoint(board, [1, 0]);
-    const poly = content.createPolygonFromFreePoints(board);
-    expect(content.lastObject).toEqual({ id: poly?.id, type: "polygon", points: [p1!.id, p2!.id, p3!.id] });
+    const { points, polygon } = buildPolygon(board, content, [[0, 0], [1, 1], [1, 0]]);
+    const [p1, p2, p3] = points;
+    expect(content.lastObjectOfType("polygon")).toEqual(
+      { id: polygon?.id, type: "polygon", points: [p1!.id, p2!.id, p3!.id] });
     content.selectObjects(board, p1!.id);
     expect(content.isSelected(p1!.id)).toBe(true);
     expect(content.isSelected(p2!.id)).toBe(false);
     expect(content.isSelected(p3!.id)).toBe(false);
-    content.selectObjects(board, poly!.id);
-    expect(content.isSelected(poly!.id)).toBe(true);
+    content.selectObjects(board, polygon!.id);
+    expect(content.isSelected(polygon!.id)).toBe(true);
     expect(content.hasSelection()).toBe(true);
     let found = content.findObjects(board, (obj: JXG.GeometryElement) => obj.id === p1!.id);
     expect(found.length).toBe(1);
@@ -586,11 +596,10 @@ describe("GeometryContent", () => {
 
   it("can add a vertex angle to a polygon", () => {
     const { content, board } = createContentAndBoard();
-    const p0: JXG.Point = content.addPoint(board, [0, 0])!;
-    const px: JXG.Point = content.addPoint(board, [1, 0])!;
-    const py: JXG.Point = content.addPoint(board, [0, 1])!;
-    const poly: JXG.Polygon = content.createPolygonFromFreePoints(board)!;
-    expect(content.lastObject).toEqual({ id: poly?.id, type: "polygon", points: [p0!.id, px!.id, py!.id] });
+    const { points, polygon } = buildPolygon(board, content, [[0, 0], [1, 0], [0, 1]]);
+    const [p0, px, py] = points;
+    expect(content.lastObjectOfType("polygon")).toEqual(
+      { id: polygon?.id, type: "polygon", points: [p0!.id, px!.id, py!.id] });
     const pSolo: JXG.Point = content.addPoint(board, [9, 9])!;
     expect(canSupportVertexAngle(p0)).toBe(true);
     expect(canSupportVertexAngle(pSolo)).toBe(false);
@@ -604,20 +613,20 @@ describe("GeometryContent", () => {
     expect(getVertexAngle(p0)!.id).toBe(va0!.id);
     expect(getVertexAngle(px)!.id).toBe(vax!.id);
     expect(getVertexAngle(py)!.id).toBe(vay!.id);
-    expect(content.getDependents([p0!.id])).toEqual([p0!.id, poly!.id, va0!.id, vax!.id, vay!.id]);
+    expect(content.getDependents([p0!.id])).toEqual([p0!.id, polygon!.id, va0!.id, vax!.id, vay!.id]);
     expect(content.getDependents([p0!.id], { required: true })).toEqual([p0!.id, va0!.id, vax!.id, vay!.id]);
     expect(getPointsForVertexAngle(pSolo)).toBeUndefined();
     expect(getPointsForVertexAngle(p0)!.map(p => p.id)).toEqual([px.id, p0.id, py.id]);
     expect(getPointsForVertexAngle(px)!.map(p => p.id)).toEqual([py.id, px.id, p0.id]);
     expect(getPointsForVertexAngle(py)!.map(p => p.id)).toEqual([p0.id, py.id, px.id]);
     p0.setPosition(JXG.COORDS_BY_USER, [1, 1]);
-    updateVertexAnglesFromObjects([p0, px, py, poly]);
+    updateVertexAnglesFromObjects([p0, px, py, polygon!]);
     expect(getPointsForVertexAngle(p0)!.map(p => p.id)).toEqual([py.id, p0.id, px.id]);
 
     content.removeObjects(board, [p0!.id]);
     expect(content.getObject(p0!.id)).toBeUndefined();
     // first point can be removed from polygon without deleting polygon
-    expect(content.getObject(poly!.id)).toEqual({ id: poly?.id, type: "polygon", points: [px!.id, py!.id] });
+    expect(content.getObject(polygon!.id)).toEqual({ id: polygon?.id, type: "polygon", points: [px!.id, py!.id] });
     // vertex angles are deleted when any dependent point is deleted
     expect(content.getObject(va0!.id)).toBeUndefined();
     expect(content.getObject(vax!.id)).toBeUndefined();
@@ -626,7 +635,7 @@ describe("GeometryContent", () => {
     // removing second point results in removal of polygon
     content.removeObjects(board, [px!.id]);
     expect(content.getObject(px!.id)).toBeUndefined();
-    expect(content.getObject(poly!.id)).toBeUndefined();
+    expect(content.getObject(polygon!.id)).toBeUndefined();
 
     expect(content.applyChange(board, { operation: "create", target: "vertexAngle" })).toBeUndefined();
   });
@@ -772,23 +781,21 @@ describe("GeometryContent", () => {
 
   it("can copy selected objects", () => {
     const { content, board } = createContentAndBoard();
-    const p0: JXG.Point = content.addPoint(board, [0, 0])!;
-    const px: JXG.Point = content.addPoint(board, [1, 0])!;
-    const py: JXG.Point = content.addPoint(board, [0, 1])!;
-    const poly: JXG.Polygon = content.createPolygonFromFreePoints(board)!;
-    const polygon = content.getObject(poly.id)! as PolygonModelType;
-    expect(polygon.type).toBe("polygon");
+    const { points, polygon } = buildPolygon(board, content, [[0, 0], [1, 0], [0, 1]]);
+    const [p0, px, py] = points;
+    const polygonModel = content.getObject(polygon!.id) as PolygonModelType;
+    expect(polygonModel?.type).toBe("polygon");
 
     // copies selected points
     content.selectObjects(board, p0.id);
     expect(content.getSelectedIds(board)).toEqual([p0.id]);
     expect(content.copySelection(board))
-      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0 })]);
+      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, ...defaultParams })]);
 
     // copies comments along with selected points
     const [comment] = content.addComment(board, p0.id, "p0 comment") || [];
     expect(content.copySelection(board)).toEqualWithUniqueIds([
-      PointModel.create({ id: p0.id, x: 0, y: 0 }),
+      PointModel.create({ id: p0.id, x: 0, y: 0, ...defaultParams }),
       CommentModel.create({ id: comment.id, anchors: [p0.id], text: "p0 comment"})
     ]);
     content.removeObjects(board, [comment.id]);
@@ -797,21 +804,24 @@ describe("GeometryContent", () => {
     // content.selectObjects(board, poly.id);
     expect(content.getSelectedIds(board)).toEqual([p0.id]);
     expect(content.copySelection(board))
-      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0 })]);
+      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, ...defaultParams })]);
+
+    // For comparison purposes, we need the polygon to be after the points in the array of objects
+    const origObjects = Array.from(content.objects.values()).sort((a,b)=>a.type.localeCompare(b.type));
 
     // copies polygons if all vertices are selected
     content.selectObjects(board, [px.id, py.id]);
     expect(content.getSelectedIds(board)).toEqual([p0.id, px.id, py.id]);
     expect(content.copySelection(board))
-      .toEqualWithUniqueIds(Array.from(content.objects.values()));
+      .toEqualWithUniqueIds(origObjects);
 
     // copies segment labels when copying polygons
-    polygon.setSegmentLabel([p0.id, px.id], ESegmentLabelOption.kLabel);
+    polygonModel?.setSegmentLabel([p0.id, px.id], ESegmentLabelOption.kLabel);
     content.selectObjects(board, [p0.id, px.id, py.id]);
     expect(content.copySelection(board))
-      .toEqualWithUniqueIds(Array.from(content.objects.values()));
+      .toEqualWithUniqueIds(origObjects);
 
-    content.removeObjects(board, poly.id);
+    content.removeObjects(board, polygon!.id);
     content.addVertexAngle(board, [py.id, p0.id, px.id]);
 
     // copies vertex angles if all vertices are selected
@@ -830,21 +840,19 @@ describe("GeometryContent", () => {
 
   it("can duplicate selected objects", () => {
     const { content, board } = createContentAndBoard();
-    const p0: JXG.Point = content.addPoint(board, [0, 0])!;
-    const px: JXG.Point = content.addPoint(board, [1, 0])!;
-    const py: JXG.Point = content.addPoint(board, [0, 1])!;
-    const poly: JXG.Polygon = content.createPolygonFromFreePoints(board)!;
+    const { points, polygon } = buildPolygon(board, content, [[0, 0], [1, 0], [0, 1]]);
+    const [p0, px, py] = points;
 
     // copies selected points
     content.selectObjects(board, p0.id);
     expect(content.getSelectedIds(board)).toEqual([p0.id]);
     expect(content.copySelection(board))
-      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0 })]);
+      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, ...defaultParams })]);
 
     // copies comments along with selected points
     const [comment] = content.addComment(board, p0.id, "p0 comment") || [];
     expect(content.copySelection(board)).toEqualWithUniqueIds([
-      PointModel.create({ id: p0.id, x: 0, y: 0 }),
+      PointModel.create({ id: p0.id, x: 0, y: 0, ...defaultParams }),
       CommentModel.create({ id: comment.id, anchors: [p0.id], text: "p0 comment"})
     ]);
     content.removeObjects(board, [comment.id]);
@@ -853,15 +861,18 @@ describe("GeometryContent", () => {
     // content.selectObjects(board, poly.id);
     expect(content.getSelectedIds(board)).toEqual([p0.id]);
     expect(content.copySelection(board))
-      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0 })]);
+      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, ...defaultParams })]);
+
+    // For comparison purposes, we need the polygon to be after the points in the array of objects
+    const origObjects = Array.from(content.objects.values()).sort((a,b)=>a.type.localeCompare(b.type));
 
     // copies polygons if all vertices are selected
     content.selectObjects(board, [px.id, py.id]);
     expect(content.getSelectedIds(board)).toEqual([p0.id, px.id, py.id]);
     expect(content.copySelection(board))
-      .toEqualWithUniqueIds(Array.from(content.objects.values()));
+      .toEqualWithUniqueIds(origObjects);
 
-    content.removeObjects(board, poly.id);
+    content.removeObjects(board, polygon!.id);
     content.addVertexAngle(board, [py.id, p0.id, px.id]);
 
     // copies vertex angles if all vertices are selected

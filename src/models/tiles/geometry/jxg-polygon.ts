@@ -1,9 +1,22 @@
 import { each, filter, find, uniqueId, values } from "lodash";
+import { notEmpty } from "../../../utilities/js-utils";
+import { getPoint, getPolygon } from "./geometry-utils";
 import { getObjectById } from "./jxg-board";
-import { ESegmentLabelOption, JXGChange, JXGChangeAgent } from "./jxg-changes";
+import { ESegmentLabelOption, JXGChange, JXGChangeAgent, JXGParentType } from "./jxg-changes";
 import { getElementName, objectChangeAgent } from "./jxg-object";
 import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge } from "./jxg-types";
 import { wn_PnPoly } from "./soft-surfer-sunday";
+
+const polygonDefaultProps = {
+  hasInnerPoints: true,
+  fillColor: "#00FF00",
+  highlightFillColor: "#00FF00",
+  selectedFillColor: "#00FF00",
+  clientFillColor: "#00FF00",
+  clientSelectedFillColor: "#00FF00",
+  fillOpacity: .3,
+  highlightFillOpacity: .3,
+};
 
 export function isPointInPolygon(x: number, y: number, polygon: JXG.Polygon) {
   const v = polygon.vertices.map(vertex => {
@@ -50,6 +63,33 @@ export function getAssociatedPolygon(elt: JXG.GeometryElement): JXG.Polygon | un
       if (polygon) return polygon;
     }
   }
+}
+
+/**
+ * Set appropriate colors for the edges of a polygon.
+ * An edge between a phantom point and the first vertex is considered as incompleted,
+ * and is not drawn in.
+ * @param polygon
+ */
+function setPolygonEdgeColors(polygon: JXG.Polygon) {
+  const segments = getPolygonEdges(polygon);
+  const firstVertex = polygon.vertices[0];
+  segments.forEach(seg => {
+    if (segments.length > 2 &&
+        ((seg.point1.getAttribute("isPhantom") && seg.point2 === firstVertex)
+         ||(seg.point2.getAttribute("isPhantom") && seg.point1 === firstVertex))) {
+      // this is the "uncompleted side" of an in-progress polygon
+      seg.setAttribute({ strokeOpacity: 0, highlightStrokeOpacity: 0 });
+    } else {
+      seg.setAttribute({ strokeOpacity: 1, highlightStrokeOpacity: 1 });
+    }
+    seg.setAttribute({
+      strokeColor: "#0000FF",
+      highlightStrokeColor: "#0000FF",
+      clientStrokeColor: "#0000FF",
+      clientSelectedStrokeColor: "#0000FF"
+    });
+  });
 }
 
 export function getPointsForVertexAngle(vertex: JXG.Point) {
@@ -185,30 +225,63 @@ function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
   }
 }
 
+function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: JXGParentType[]) {
+  // Remove the old polygon and create a new one.
+  const oldPolygon = getPolygon(board, polygonId);
+  if (!oldPolygon) return;
+  board.removeObject(oldPolygon);
+  const vertices: JXG.Point[]
+    = vertexIds.map(v => typeof(v)==='string' ? getPoint(board, v) : undefined)
+    .filter(notEmpty);
+  const props = {
+    id: polygonId, // re-use the same ID
+    ...polygonDefaultProps
+  };
+  const polygon = board.create("polygon", vertices, props);
+
+
+  // Without deleting/rebuilding, would look something like this (but this fails due to apparent bugs in JSXGraph 1.4.x)
+  // const polygon = getPolygon(board, polygonId);
+  // if (!polygon) return;
+
+  // const existingVertices = polygon.vertices;
+  // const newVertices: JXG.Point[]
+  //   = vertexIds.map(v => typeof(v)==='string' ? getPoint(board, v) : undefined)
+  //     .filter(notEmpty);
+
+  // const addedVertices = newVertices.filter(v => !existingVertices.includes(v));
+  // const removedVertices = existingVertices.filter(v => !newVertices.includes(v));
+
+  // console.log('current:', existingVertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
+  // console.log('adding:', addedVertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`),
+  //   'removing:', removedVertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
+
+  // for (const v of removedVertices) {
+  //   polygon.removePoints(v);
+  // }
+  // for (const v of addedVertices) {
+  //   polygon.addPoints(v);
+  // }
+  // console.log('final:', polygon.vertices.map(v=>`${v.id}${v.getAttribute('isPhantom')?'*':''}`));
+
+  setPolygonEdgeColors(polygon);
+  return polygon;
+}
+
 export const polygonChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     const _board = board as JXG.Board;
     const parents = (change.parents || [])
                       .map(id => getObjectById(_board, id as string))
-                      .filter(pt => pt != null);
+                      .filter(notEmpty);
     const props = {
       id: uniqueId(),
-      hasInnerPoints: true,
-      // default color changed to yellow in JSXGraph 1.4.0
-      fillColor: "#00FF00",
-      selectedFillColor: "#00FF00",
-      clientFillColor: "#00FF00",
-      clientSelectedFillColor: "#00FF00",
+      ...polygonDefaultProps,
       ...change.properties
     };
     const poly = parents.length ? _board.create("polygon", parents, props) : undefined;
     if (poly) {
-      const segments = getPolygonEdges(poly);
-      segments.forEach(seg => {
-        seg.setAttribute({strokeColor: "#0000FF"});
-        seg._set("clientStrokeColor", "#0000FF");
-        seg._set("clientSelectedStrokeColor", "#0000FF");
-      });
+      setPolygonEdgeColors(poly);
     }
     return poly;
   },
@@ -218,6 +291,12 @@ export const polygonChangeAgent: JXGChangeAgent = {
         !Array.isArray(change.properties) && change.properties?.labelOption) {
       updateSegmentLabelOption(board, change);
       return;
+    }
+    // An update with an array of parents is considered to be a request to update the list of vertices.
+    if ((change.target === "polygon")
+      && change.targetID && !Array.isArray(change.targetID)
+      && change.parents && Array.isArray(change.parents)) {
+      return updatePolygonVertices(board, change.targetID, change.parents);
     }
     // other updates can be handled generically
     return objectChangeAgent.update(board, change);
