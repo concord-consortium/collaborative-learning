@@ -132,7 +132,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private lastBoardDown: JXGPtrEvent;
   private lastPointDown?: JXGPtrEvent;
-  private lastSelectDown?: any;
   private dragPts: { [id: string]: IDragPoint } = {};
   private isVertexDrag: boolean;
 
@@ -1371,15 +1370,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const handlePointerUp = (evt: any) => {
       const { readOnly, scale } = this.props;
-      console.log("handlePointerUp");
       if (!this.lastBoardDown) { return; }
-      console.log("lastBoardDown:", this.lastBoardDown);
 
       // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
       const coords = getEventCoords(board, evt, scale);
       const [ , x, y] = this.lastBoardDown.coords.usrCoords;
       if ((x == null) || !isFinite(x) || (y == null) || !isFinite(y)) {
-        console.log("failed to find usrCoords");
         return;
       }
 
@@ -1392,41 +1388,35 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       }
 
       if (readOnly) {
-        console.log("readOnly, returning");
         return;
       }
 
       // In select mode, don't create new points
       if (this.context.mode === "select") {
-        console.log("select mode, returning");
         return;
       }
 
       // extended clicks don't create new points
       const clickTimeThreshold = 500;
       if (evt.timeStamp - this.lastBoardDown.evt.timeStamp > clickTimeThreshold) {
-        console.log("click too long, returning");
         return;
       }
 
       // clicks that move don't create new points
       const clickSqrDistanceThreshold = 9;
       if (!this.isSqrDistanceWithinThreshold(clickSqrDistanceThreshold, this.lastBoardDown.coords, coords)) {
-        console.log("click moved, returning");
         return;
       }
 
       if (this.context.mode === "points") {
         for (const elt of board.objectsList) {
           if (shouldInterceptPointCreation(elt) && elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
-            console.log("intercepted by", elt);
             return;
           }
         }
       }
 
       if (hasSelectionModifier(evt)) {
-        console.log("shift click, returning");
         return;
       }
 
@@ -1540,9 +1530,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       if (isPointDraggable) {
         this.beginDragSelectedPoints(evt, point);
       }
-
-      console.log("setting lastSelectDown (pt down)", evt.timeStamp);
-      this.lastSelectDown = evt;
     };
 
     const handleDrag = (evt: any) => {
@@ -1700,8 +1687,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           geometryContent.deselectAll(board);
         }
         selectPolygon = true;
-        console.log("setting lastSelectDown (poly down)", evt.timeStamp);
-        this.lastSelectDown = evt;
       }
       if (selectPolygon) {
         geometryContent.selectElement(board, polygon.id);
