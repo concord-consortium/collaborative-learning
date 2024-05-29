@@ -261,17 +261,15 @@ export const GeometryContentModel = GeometryBaseContentModel
       return self.linkedDataSets.find(ds => ds.providerId === linkedTableId);
     },
     getSelectedIds(board: JXG.Board) {
-      // returns the ids in creation order
-      return board.objectsList
-                  .filter(obj => self.isSelected(obj.id))
-                  .map(obj => obj.id);
+      return Array.from(self.metadata.selection.entries())
+        .filter(entry => entry[1]) // [0] is the ID, [1] is boolean "selected"
+        .map(entry => entry[0]);
     },
     getDeletableSelectedIds(board: JXG.Board) {
-      // returns the ids in creation order
-      return board.objectsList
-                  .filter(obj => self.isSelected(obj.id) &&
-                          !obj.getAttribute("fixed") && !obj.getAttribute("clientUndeletable"))
-                  .map(obj => obj.id);
+      return this.getSelectedIds(board).filter(id => {
+        const obj = getObjectById(board, id);
+        return obj && !obj.getAttribute("fixed") && !obj.getAttribute("clientUndeletable");
+      });
     }
   }))
   .views(self => ({
