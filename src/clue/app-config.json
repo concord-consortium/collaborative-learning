@@ -267,6 +267,19 @@
           "delete"
         ]
       },
+      "geometry": {
+        "tools": [
+          "point",
+          "upload",
+          "duplicate",
+          "angle-label",
+          "line-label",
+          "comment",
+          "|",
+          "add-data",
+          "delete"
+        ]
+      },
       "graph": {
         "emptyPlotIsNumeric": true,
         "scalePlotOnValueChange": true,

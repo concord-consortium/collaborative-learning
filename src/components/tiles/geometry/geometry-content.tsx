@@ -50,12 +50,12 @@ import { EditableTileTitle } from "../editable-tile-title";
 import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
 import placeholderImage from "../../../assets/image_placeholder.png";
-import { LinkTableButton } from "./link-table-button";
 import ErrorAlert from "../../utilities/error-alert";
 import { halfPi, isFiniteNumber, normalizeAngle, Point } from "../../../utilities/math-utils";
 import SingleStringDialog from "../../utilities/single-string-dialog";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 import { TileTitleArea } from "../tile-title-area";
+import { GeometryTileContext } from "./geometry-tile-context";
 
 import "./geometry-tile.sass";
 
@@ -63,10 +63,8 @@ export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
   onSetActionHandlers: (handlers: IActionHandlers) => void;
   onContentChange: () => void;
-  onLinkTileButtonClick?: () => void;
 }
 export interface IProps extends IGeometryContentProps, SizeMeProps {
-  isLinkButtonEnabled: boolean;
   measureText: (text: string) => number;
 }
 
@@ -118,6 +116,8 @@ let sInstanceId = 0;
 @inject("stores")
 @observer
 export class GeometryContentComponent extends BaseComponent<IProps, IState> {
+  static contextType = GeometryTileContext;
+
   public state: IState = {
           size: { width: null, height: null },
           disableRotate: false,
@@ -568,7 +568,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return (
       <TileTitleArea>
         {this.renderTitle()}
-        {this.renderTileLinkButton()}
       </TileTitleArea>
     );
   }
@@ -579,13 +578,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       <EditableTileTitle key="geometry-title"
                               measureText={measureText}
                               onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
-    );
-  }
-
-  private renderTileLinkButton() {
-    const { isLinkButtonEnabled, onLinkTileButtonClick } = this.props;
-    return (!this.state.isEditingTitle && !this.props.readOnly &&
-      <LinkTableButton key="link-button" isEnabled={isLinkButtonEnabled} onClick={onLinkTileButtonClick}/>
     );
   }
 
@@ -1460,6 +1452,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private handleCreatePoint = (point: JXG.Point) => {
 
     const handlePointerDown = (evt: any) => {
+      const { mode } = this.context;
       const geometryContent = this.props.model.content as GeometryContentModelType;
       const { board } = this.state;
       if (!board) return;
@@ -1468,7 +1461,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const tableId = point.getAttribute("linkedTableId");
       const columnId = point.getAttribute("linkedColId");
       const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
-      if (isFreePoint(point) && this.isDoubleClick(this.lastPointDown, { evt, coords })) {
+      // Connect points into polygon on double-click (unless in "points" mode)
+      if (isFreePoint(point) && mode !== "points" && this.isDoubleClick(this.lastPointDown, { evt, coords })) {
         if (board) {
           this.applyChange(() => {
             const polygon = geometryContent.createPolygonFromFreePoints(board, tableId, columnId);

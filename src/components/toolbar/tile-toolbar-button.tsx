@@ -1,7 +1,7 @@
 import React, { PropsWithChildren } from "react";
 import classNames from "classnames";
-import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { Tooltip } from "react-tippy";
+import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 
 /**
  * Create the complete tooltip from the given button information.
@@ -19,13 +19,15 @@ export interface TileToolbarButtonProps {
   onClick: (e: React.MouseEvent) => void; // Action when clicked
   selected?: boolean; // puts button in 'active' state if defined and true
   disabled?: boolean; // makes button grey and unclickable if defined and true
+  extraContent?: JSX.Element; // Additional element added after the button.
 }
 
 /**
  * A generic, simple button that can go on a tile toolbar.
  */
 export const TileToolbarButton =
-  function({name, title, keyHint, onClick, selected, disabled, children}: PropsWithChildren<TileToolbarButtonProps>) {
+  function({name, title, keyHint, onClick, selected, disabled, extraContent, children}:
+    PropsWithChildren<TileToolbarButtonProps>) {
 
     const tipOptions = useTooltipOptions();
 
@@ -41,6 +43,7 @@ export const TileToolbarButton =
         >
           {children}
         </button>
+        {extraContent}
       </Tooltip>
     );
   };
