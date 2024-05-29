@@ -1371,12 +1371,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const handlePointerUp = (evt: any) => {
       const { readOnly, scale } = this.props;
+      console.log("handlePointerUp");
       if (!this.lastBoardDown) { return; }
+      console.log("lastBoardDown:", this.lastBoardDown);
 
       // cf. https://jsxgraph.uni-bayreuth.de/wiki/index.php/Browser_event_and_coordinates
       const coords = getEventCoords(board, evt, scale);
       const [ , x, y] = this.lastBoardDown.coords.usrCoords;
       if ((x == null) || !isFinite(x) || (y == null) || !isFinite(y)) {
+        console.log("failed to find usrCoords");
         return;
       }
 
@@ -1386,31 +1389,37 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                             .filter(obj => obj && (obj.elType !== "image"));
       if (!elements.length && !hasSelectionModifier(evt) && geometryContent.hasSelection()) {
         geometryContent.deselectAll(board);
+      }
+
+      if (readOnly) {
+        console.log("readOnly, returning");
         return;
       }
 
-      if (readOnly) return;
-
       // In select mode, don't create new points
       if (this.context.mode === "select") {
+        console.log("select mode, returning");
         return;
       }
 
       // extended clicks don't create new points
       const clickTimeThreshold = 500;
       if (evt.timeStamp - this.lastBoardDown.evt.timeStamp > clickTimeThreshold) {
+        console.log("click too long, returning");
         return;
       }
 
       // clicks that move don't create new points
       const clickSqrDistanceThreshold = 9;
       if (!this.isSqrDistanceWithinThreshold(clickSqrDistanceThreshold, this.lastBoardDown.coords, coords)) {
+        console.log("click moved, returning");
         return;
       }
 
       if (this.context.mode === "points") {
         for (const elt of board.objectsList) {
           if (shouldInterceptPointCreation(elt) && elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
+            console.log("intercepted by", elt);
             return;
           }
         }
@@ -1419,22 +1428,26 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       // clicks that affect selection don't create new points
       if (this.lastSelectDown &&
           (evt.timeStamp - this.lastSelectDown.timeStamp < clickTimeThreshold)) {
+        console.log("too soon since last select down, returning");
+        return;
+      }
+
+      if (hasSelectionModifier(evt)) {
+        console.log("shift click, returning");
         return;
       }
 
       // other clicks on board background create new points, perhaps even starting a polygon.
-      if (!hasSelectionModifier(evt)) {
-        this.applyChange(() => {
-          const createPoly = this.context.mode === "polygon";
-          const { point, polygon } = geometryContent.realizePhantomPoint(board, [x, y], createPoly);
-          if (point) {
-            this.handleCreatePoint(point);
-          }
-          if (polygon) {
-            this.handleCreatePolygon(polygon);
-          }
-        });
-      }
+      this.applyChange(() => {
+        const createPoly = this.context.mode === "polygon";
+        const { point, polygon } = geometryContent.realizePhantomPoint(board, [x, y], createPoly);
+        if (point) {
+          this.handleCreatePoint(point);
+        }
+        if (polygon) {
+          this.handleCreatePolygon(polygon);
+        }
+      });
     };
 
     const shouldInterceptPointCreation = (elt: JXG.GeometryElement) => {
