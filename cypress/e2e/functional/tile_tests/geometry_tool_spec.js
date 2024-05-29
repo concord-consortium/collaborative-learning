@@ -168,12 +168,14 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraph().trigger('mousemove');
     geometryToolTile.getGraphPoint().should("have.length", 1); // phantom point
     geometryToolTile.addPointToGraph(5, 5);
+    geometryToolTile.getGraphPoint().should("have.length", 2);
     geometryToolTile.addPointToGraph(10, 5);
+    geometryToolTile.getGraphPoint().should("have.length", 3);
     geometryToolTile.addPointToGraph(9, 9);
-    geometryToolTile.addPointToGraph(5, 5); // click first point again to close polygon.
-    geometryToolTile.getGraph().trigger('mousemove');
-    geometryToolTile.getGraphPolygon().should("have.length", 1);
     geometryToolTile.getGraphPoint().should("have.length", 4);
+    geometryToolTile.addPointToGraph(5, 5); // click first point again to close polygon.
+    geometryToolTile.getGraphPoint().should("have.length", 4);
+    geometryToolTile.getGraphPolygon().should("have.length", 1);
 
     // Duplicate polygon
     clueCanvas.clickToolbarButton('geometry', 'select');

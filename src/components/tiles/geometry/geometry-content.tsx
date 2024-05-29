@@ -222,7 +222,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     // Access the model to ensure that model changes trigger a rerender
     const element = this.state.board?.objects[linkedPointId];
-    if (!element) { console.log("didn't find", linkedPointId); return; }
+    if (!element) return;
     const dataSet = this.getContent().getLinkedDataset(element.getAttribute("linkedTableId"))?.dataSet;
     const caseIndex = dataSet?.caseIndexFromID(element.getAttribute("linkedRowId"));
     const yValue = caseIndex!==undefined
