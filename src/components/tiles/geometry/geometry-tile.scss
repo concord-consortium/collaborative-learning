@@ -19,6 +19,7 @@ $toolbar-width: 44px;
     }
     .geometry-size-me {
       height: 100%;
+      overflow: hidden; // for older browsers
       overflow: clip;
 
       .geometry-content {

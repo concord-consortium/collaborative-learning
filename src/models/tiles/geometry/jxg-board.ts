@@ -6,7 +6,6 @@ import {
   kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
 import { goodTickValue } from "../../../utilities/graph-utils";
-import { zoomFactor } from "../../../components/tiles/geometry/geometry-constants";
 
 const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
 
@@ -228,17 +227,16 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
     minimizeReflow: "none",
     // Zoom and pan are enabled by default, but if done directly
     // through JSXGraph do not get persisted to the model.
-    // Do we want to disable them?
     zoom: {
-      enabled: true,
-      wheel: true,
-      factorX: zoomFactor,
-      factorY: zoomFactor
+      enabled: false,
+      wheel: false
+    },
+    pan: {
+      enabled: false
     }
   };
   const overrides = {};
   const props = combineProperties(domElementId, defaults, properties, overrides);
-  console.warn("Init board properties", props);
   const board = JXG.JSXGraph.initBoard(domElementId, props);
   return board;
 }
