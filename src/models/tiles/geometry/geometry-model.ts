@@ -1,15 +1,10 @@
 import { difference, intersection } from "lodash";
-import { applySnapshot, getSnapshot, getType, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { applySnapshot, getSnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { kDefaultBoardModelInputProps, kGeometryTileType } from "./geometry-types";
 import { uniqueId } from "../../../utilities/js-utils";
 import { typeField } from "../../../utilities/mst-utils";
 import { TileContentModel } from "../tile-content";
-import { ESegmentLabelOption, JXGChange, JXGPositionProperty } from "./jxg-changes";
-import { imageChangeAgent } from "./jxg-image";
-import { movableLineChangeAgent } from "./jxg-movable-line";
-import { createPoint } from "./jxg-point";
-import { polygonChangeAgent } from "./jxg-polygon";
-import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
+import { ESegmentLabelOption, JXGPositionProperty } from "./jxg-changes";
 import { kGeometryDefaultPixelsPerUnit } from "./jxg-types";
 
 export interface IDependsUponResult {
@@ -155,11 +150,7 @@ export const PointModel = PositionedObjectModel
   .props({
     type: typeField("point"),
     name: types.maybe(types.string),
-    fillColor: types.maybe(types.string),
-    strokeColor: types.maybe(types.string),
-    snapToGrid: types.maybe(types.boolean),
-    snapSizeX: types.maybe(types.number),
-    snapSizeY: types.maybe(types.number)
+    snapToGrid: types.maybe(types.boolean)
   })
   .preProcessSnapshot(preProcessPositionInSnapshot);
 export interface PointModelType extends Instance<typeof PointModel> {}
@@ -298,72 +289,6 @@ export const ImageModel = PositionedObjectModel
   }));
 export interface ImageModelType extends Instance<typeof ImageModel> {}
 export const isImageModel = (o: GeometryObjectModelType): o is ImageModelType => o.type === "image";
-
-export function createObject(board: JXG.Board, obj: GeometryObjectModelType) {
-  const objType = getType(obj);
-  switch(objType.name) {
-
-    case ImageModel.name: {
-      const image = obj as ImageModelType;
-      const { x, y, url, width, height, ...properties } = image;
-      const change: JXGChange = {
-        operation: "create",
-        target: "image",
-        parents: [url, [x, y], [width, height]],
-        properties
-      };
-      imageChangeAgent.create(board, change);
-      break;
-    }
-
-    case MovableLineModel.name: {
-      const line = obj as MovableLineModelType;
-      const { p1, p2, ...properties } = line;
-      const change: JXGChange = {
-        operation: "create",
-        target: "movableLine",
-        parents: [[p1.x, p1.y], [p2.x, p2.y]],
-        properties
-      };
-      movableLineChangeAgent.create(board, change);
-      break;
-    }
-
-    case PointModel.name: {
-      const pt = obj as PointModelType;
-      const { x, y, ...props } = pt;
-      createPoint(board, [pt.x, pt.y], props);
-      break;
-    }
-
-    case PolygonModel.name: {
-      const poly = obj as PolygonModelType;
-      const { points, ...properties } = poly;
-      const change: JXGChange = {
-        operation: "create",
-        target: "polygon",
-        parents: poly.points.filter(id => !!id) as string[],
-        properties
-      };
-      polygonChangeAgent.create(board, change);
-      break;
-    }
-
-    case VertexAngleModel.name: {
-      const angle = obj as VertexAngleModelType;
-      const { points, ...properties } = angle;
-      const change: JXGChange = {
-        operation: "create",
-        target: "vertexAngle",
-        parents: angle.points.filter(id => !!id) as string[],
-        properties
-      };
-      vertexAngleChangeAgent.create(board, change);
-      break;
-    }
-
-  }
-}
 
 export type GeometryObjectModelUnion = CommentModelType | ImageModelType | MovableLineModelType | PointModelType |
                                         PolygonModelType | VertexAngleModelType;

@@ -1,51 +1,49 @@
-import { castArray } from "lodash";
-import { getColorMapEntry } from "../../shared/shared-data-set-colors";
+import { castArray, merge } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
-import { JXGChangeAgent, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
+import { JXGChangeAgent, JXGCoordPair, JXGProperties, JXGUnsafeCoordPair } from "./jxg-changes";
 import { objectChangeAgent, isPositionGraphable, getGraphablePosition } from "./jxg-object";
 import { prepareToDeleteObjects } from "./jxg-polygon";
+import { fillPropsForColorScheme } from "./geometry-utils";
 
-// For snap to grid
-const kPrevSnapUnit = 0.2;
+// Set as snap unit for all points that have snapToGrid set.
+// Also used as the distance moved by arrow-key presses.
 export const kSnapUnit = 0.1;
 
-export const kPointDefaults = {
-              fillColor: "#0069ff",
-              strokeColor: "#000000",
-              selectedFillColor: "#ff0000",
-              selectedStrokeColor: "#ff0000"
-            };
+const defaultPointProperties = Object.freeze({
+  strokeColor: "#000000", highlightStrokeColor: "#0081ff",
+  strokeWidth: 1,         highlightStrokeWidth: 10,
+  strokeOpacity: 1,       highlightStrokeOpacity: .12,
+  fillOpacity: 1,         highlightFillOpacity: 1,
+  size: 4,
+  snapSizeX: kSnapUnit,
+  snapSizeY: kSnapUnit,
+  withLabel: true
+});
 
-const defaultProps = {
-        fillColor: kPointDefaults.fillColor,
-        strokeColor: kPointDefaults.strokeColor
-      };
+const selectedPointProperties = Object.freeze({
+  strokeColor: "#0081ff", highlightStrokeColor: "#0081ff",
+  strokeWidth: 10,        highlightStrokeWidth: 10,
+  strokeOpacity: .25,     highlightStrokeOpacity: .25
+});
 
-// fillColor/strokeColor are ephemeral properties that change with selection;
-// we store the desired colors in clientFillColor/clientStrokeColor for persistence
-// colors for linked points are derived from the link color map
-export function syncClientColors(props: any) {
-  const { selectedFillColor, selectedStrokeColor, ...p } = props || {} as any;
-  const colorMapEntry = getColorMapEntry(p.linkedTableId);
+const phantomPointProperties = Object.freeze({
+  fillOpacity: .5,        highlightFillOpacity: .5,
+  withLabel: false
+});
 
-  if (colorMapEntry?.colorSet) {
-    const { fill, stroke, selectedFill, selectedStroke } = colorMapEntry.colorSet;
-    p.fillColor = p.clientFillColor = fill;
-    p.strokeColor = p.clientStrokeColor = stroke;
-    p.clientSelectedFillColor = selectedFill;
-    p.clientSelectedStrokeColor = selectedStroke;
+export function getPointVisualProps(selected: boolean, phantom: boolean, linkedTableId?: string) {
+  // const colorMapEntry = linkedTableId && getColorMapEntry(linkedTableId);
+  const colorScheme = linkedTableId ? 1 : 0; // TODO
+
+  const p: JXGProperties = { ...defaultPointProperties };
+  merge(p, fillPropsForColorScheme(colorScheme));
+
+  if (selected) {
+    merge(p, selectedPointProperties);
   }
-  else {
-    if (p.fillColor) {
-      p.clientFillColor = p.fillColor;
-      p.highlightFillColor = p.fillColor;
-    }
-    if (p.strokeColor) {
-      p.clientStrokeColor = p.strokeColor;
-      p.highlightStrokeColor = p.strokeColor;
-    }
-    if (selectedFillColor) p.clientSelectedFillColor = selectedFillColor;
-    if (selectedStrokeColor) p.clientSelectedStrokeColor = selectedStrokeColor;
+
+  if (phantom) {
+    merge(p, phantomPointProperties);
   }
   return p;
 }
@@ -54,15 +52,10 @@ export function createPoint(board: JXG.Board, parents: JXGUnsafeCoordPair, chang
   // If id is not provided we generate one, but this will prevent
   // model-level synchronization. This should only occur for very
   // old geometry tiles created before the introduction of the uuid.
-  const props = { id: uniqueId(), ...defaultProps, ...syncClientColors(changeProps) };
-
-  // default snap size has changed over time
-  if (props.snapSizeX === kPrevSnapUnit) {
-    props.snapSizeX = kSnapUnit;
-  }
-  if (props.snapSizeY === kPrevSnapUnit) {
-    props.snapSizeY = kSnapUnit;
-  }
+  const props = {
+    id: uniqueId(),
+    ...getPointVisualProps(false, changeProps.isPhantom, changeProps.linkedTableId),
+    ...changeProps };
   const isGraphable = isPositionGraphable(parents);
   const point = board.create("point", getGraphablePosition(parents), {...props, visible: isGraphable});
   return point;

@@ -1,22 +1,34 @@
-import { each, filter, find, uniqueId, values } from "lodash";
+import { each, filter, find, merge, uniqueId, values } from "lodash";
 import { notEmpty } from "../../../utilities/js-utils";
-import { getPoint, getPolygon } from "./geometry-utils";
+import { fillPropsForColorScheme, getPoint, getPolygon, strokePropsForColorScheme } from "./geometry-utils";
 import { getObjectById } from "./jxg-board";
-import { ESegmentLabelOption, JXGChange, JXGChangeAgent, JXGParentType } from "./jxg-changes";
+import { ESegmentLabelOption, JXGChange, JXGChangeAgent, JXGParentType, JXGProperties } from "./jxg-changes";
 import { getElementName, objectChangeAgent } from "./jxg-object";
 import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge } from "./jxg-types";
 import { wn_PnPoly } from "./soft-surfer-sunday";
 
-const polygonDefaultProps = {
+const defaultPolygonProps = Object.freeze({
   hasInnerPoints: true,
-  fillColor: "#00FF00",
-  highlightFillColor: "#00FF00",
-  selectedFillColor: "#00FF00",
-  clientFillColor: "#00FF00",
-  clientSelectedFillColor: "#00FF00",
-  fillOpacity: .3,
-  highlightFillOpacity: .3,
-};
+  fillOpacity: .2,  highlightFillOpacity: .25
+});
+
+const selectedPolygonProps = Object.freeze({
+  fillOpacity: .3,  highlightFillOpacity: .3
+});
+
+function getPolygonVisualProps(selected: boolean) {
+  const colorScheme = 0; // TODO
+
+  const props: JXGProperties = { ...defaultPolygonProps };
+
+  if (selected) {
+    merge(props, selectedPolygonProps);
+  }
+
+  merge(props, fillPropsForColorScheme(colorScheme));
+
+  return props;
+}
 
 export function isPointInPolygon(x: number, y: number, polygon: JXG.Polygon) {
   const v = polygon.vertices.map(vertex => {
@@ -83,12 +95,8 @@ function setPolygonEdgeColors(polygon: JXG.Polygon) {
     } else {
       seg.setAttribute({ strokeOpacity: 1, highlightStrokeOpacity: 1 });
     }
-    seg.setAttribute({
-      strokeColor: "#0000FF",
-      highlightStrokeColor: "#0000FF",
-      clientStrokeColor: "#0000FF",
-      clientSelectedStrokeColor: "#0000FF"
-    });
+    const colorScheme = 0; // TODO
+    seg.setAttribute(strokePropsForColorScheme(colorScheme));
   });
 }
 
@@ -235,7 +243,7 @@ function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: J
     .filter(notEmpty);
   const props = {
     id: polygonId, // re-use the same ID
-    ...polygonDefaultProps
+    ...getPolygonVisualProps(false)
   };
   const polygon = board.create("polygon", vertices, props);
 
@@ -276,7 +284,7 @@ export const polygonChangeAgent: JXGChangeAgent = {
                       .filter(notEmpty);
     const props = {
       id: uniqueId(),
-      ...polygonDefaultProps,
+      ...getPolygonVisualProps(false),
       ...change.properties
     };
     const poly = parents.length ? _board.create("polygon", parents, props) : undefined;

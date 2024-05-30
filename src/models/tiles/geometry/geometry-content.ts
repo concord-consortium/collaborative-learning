@@ -24,7 +24,6 @@ import {
   ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
 } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
-import { kPointDefaults, kSnapUnit } from "./jxg-point";
 import { prepareToDeleteObjects } from "./jxg-polygon";
 import {
   isAxisArray, isBoard, isComment, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
@@ -38,6 +37,7 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { gImageMap } from "../../image-map";
 import { IClueTileObject } from "../../annotations/clue-object";
 import { appendVertexId, getPolygon, logGeometryEvent } from "./geometry-utils";
+import { getPointVisualProps } from "./jxg-point";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -123,24 +123,11 @@ export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
   const element = getObjectById(board, id);
   if (element) {
-    const clientFillColor = element.getAttribute("clientFillColor") || kPointDefaults.fillColor;
-    const clientStrokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
-    const clientSelectedFillColor = element.getAttribute("clientSelectedFillColor") || kPointDefaults.selectedFillColor;
-    const clientSelectedStrokeColor = element.getAttribute("clientSelectedStrokeColor")
-      || kPointDefaults.selectedStrokeColor;
-    const clientCssClass = selected
-                            ? element.getAttribute("clientSelectedCssClass")
-                            : element.getAttribute("clientCssClass");
-    const cssClass = clientCssClass ? { cssClass: clientCssClass } : undefined;
-    const fillColor = selected ? clientSelectedFillColor : clientFillColor;
-    const strokeColor = selected ? clientSelectedStrokeColor : clientStrokeColor;
-    element.setAttribute({
-              fillColor,
-              highlightFillColor: fillColor,
-              strokeColor,
-              highlightStrokeColor: strokeColor,
-              ...cssClass
-            });
+    if (isPoint(element)) {
+      const props = getPointVisualProps(selected,
+          element.getAttribute("isPhantom"), element.getAttribute("linkedTableId"));
+      element.setAttribute(props);
+    }
   }
 }
 
@@ -623,13 +610,7 @@ export const GeometryContentModel = GeometryBaseContentModel
 
       const props = {
         id: uniqueId(),
-        isPhantom: true,
-        fillOpacity: .5,
-        highlightFillOpacity: .5,
-        snapToGrid: true,
-        snapSizeX: kSnapUnit,
-        snapSizeY: kSnapUnit,
-        withLabel: false
+        isPhantom: true
       };
       const pointModel = PointModel.create({ x: parents[0], y: parents[1], ...props });
       self.phantomPoint = pointModel;
@@ -707,9 +688,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         targetID: newRealPoint.id,
         properties: {
           isPhantom: false,
-          withLabel: true,
-          fillOpacity: 1,
-          highlightFillOpacity: 1,
           position
         }
       };

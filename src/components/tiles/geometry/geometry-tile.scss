@@ -25,6 +25,10 @@ $toolbar-width: 44px;
         height: 100%;
         outline: none;
 
+        svg ellipse {
+          paint-order: stroke fill;
+        }
+
         .comment {
           min-width: 30px;
           max-width: 250px;

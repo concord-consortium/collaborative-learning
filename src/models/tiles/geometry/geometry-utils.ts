@@ -7,6 +7,7 @@ import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { LogEventName } from "../../../lib/logger-types";
 import { GeometryBaseContentModel } from "./geometry-model";
 import { getTileIdFromContent } from "../tile-model";
+import { clueGraphColors } from "../../../utilities/color-utils";
 
 export function copyCoords(coords: JXG.Coords) {
   return new JXG.Coords(JXG.COORDS_BY_USER, coords.usrCoords.slice(1), coords.board);
@@ -130,4 +131,20 @@ export function logGeometryEvent(model: Instance<typeof GeometryBaseContentModel
     operation,
     change
   });
+}
+
+export function fillPropsForColorScheme(colorScheme: number) {
+  const spec = clueGraphColors[colorScheme % clueGraphColors.length];
+  return {
+    fillColor: spec.color,
+    highlightFillColor: spec.color
+  };
+}
+
+export function strokePropsForColorScheme(colorScheme: number) {
+  const spec = clueGraphColors[colorScheme % clueGraphColors.length];
+  return {
+    strokeColor: spec.color,
+    highlightStrokeColor: spec.color
+  };
 }
