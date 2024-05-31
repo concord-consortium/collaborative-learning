@@ -35,6 +35,7 @@ import { multiLegendParts } from "../components/legend/legend-registration";
 import { addAttributeToDataSet, DataSet } from "../../../models/data/data-set";
 import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
 import { ICase } from "../../../models/data/data-set-types";
+import { findLeastUsedNumber } from "../../../utilities/math-utils";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -139,22 +140,7 @@ export const GraphModel = TileContentModel
       return all;
     },
     get nextColor() {
-      const colorCounts: Record<number, number> = {};
-      self._idColors.forEach(index => {
-        if (!colorCounts[index]) colorCounts[index] = 0;
-        colorCounts[index]++;
-      });
-      const usedColorIndices = Object.keys(colorCounts).map(index => Number(index));
-      if (usedColorIndices.length < clueGraphColors.length) {
-        // If there are unused colors, return the index of the first one
-        return Object.keys(clueGraphColors).map(index => Number(index))
-          .filter(index => !usedColorIndices.includes(index))[0];
-      } else {
-        // Otherwise, use the next minimally used color's index
-        const counts = usedColorIndices.map(index => colorCounts[index]);
-        const minCount = Math.min(...counts);
-        return usedColorIndices.find(index => colorCounts[index] === minCount) ?? 0;
-      }
+      return findLeastUsedNumber(clueGraphColors.length, self._idColors.values());
     },
     getAdornmentOfType(type: string) {
       return self.adornments.find(a => a.type === type);

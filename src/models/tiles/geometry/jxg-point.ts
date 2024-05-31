@@ -31,21 +31,19 @@ const phantomPointProperties = Object.freeze({
   withLabel: false
 });
 
-export function getPointVisualProps(selected: boolean, phantom: boolean, linkedTableId?: string) {
+export function getPointVisualProps(selected: boolean, colorScheme: number, phantom: boolean) {
   // const colorMapEntry = linkedTableId && getColorMapEntry(linkedTableId);
-  const colorScheme = linkedTableId ? 1 : 0; // TODO
-
-  const p: JXGProperties = { ...defaultPointProperties };
-  merge(p, fillPropsForColorScheme(colorScheme));
+  const props: JXGProperties = { ...defaultPointProperties };
+  merge(props, fillPropsForColorScheme(colorScheme));
 
   if (selected) {
-    merge(p, selectedPointProperties);
+    merge(props, selectedPointProperties);
   }
 
   if (phantom) {
-    merge(p, phantomPointProperties);
+    merge(props, phantomPointProperties);
   }
-  return p;
+  return props;
 }
 
 export function createPoint(board: JXG.Board, parents: JXGUnsafeCoordPair, changeProps: any) {
@@ -54,7 +52,7 @@ export function createPoint(board: JXG.Board, parents: JXGUnsafeCoordPair, chang
   // old geometry tiles created before the introduction of the uuid.
   const props = {
     id: uniqueId(),
-    ...getPointVisualProps(false, changeProps.isPhantom, changeProps.linkedTableId),
+    ...getPointVisualProps(false, changeProps.colorScheme, changeProps.isPhantom),
     ...changeProps };
   const isGraphable = isPositionGraphable(parents);
   const point = board.create("point", getGraphablePosition(parents), {...props, visible: isGraphable});

@@ -6,6 +6,8 @@ import { typeField } from "../../../utilities/mst-utils";
 import { TileContentModel } from "../tile-content";
 import { ESegmentLabelOption, JXGPositionProperty } from "./jxg-changes";
 import { kGeometryDefaultPixelsPerUnit } from "./jxg-types";
+import { findLeastUsedNumber } from "../../../utilities/math-utils";
+import { clueGraphColors } from "../../../utilities/color-utils";
 
 export interface IDependsUponResult {
   depends: boolean;
@@ -150,7 +152,8 @@ export const PointModel = PositionedObjectModel
   .props({
     type: typeField("point"),
     name: types.maybe(types.string),
-    snapToGrid: types.maybe(types.boolean)
+    snapToGrid: types.maybe(types.boolean),
+    color: types.optional(types.number, 0)
   })
   .preProcessSnapshot(preProcessPositionInSnapshot);
 export interface PointModelType extends Instance<typeof PointModel> {}
@@ -301,6 +304,8 @@ export const GeometryBaseContentModel = TileContentModel
     board: types.maybe(BoardModel),
     bgImage: types.maybe(ImageModel),
     objects: types.map(types.union(CommentModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel)),
+    // Maps attribute ID to color.
+    linkedAttributeColors: types.map(types.number),
     // Used for importing table links from legacy documents
     links: types.array(types.string)  // table tile ids
   })
@@ -325,9 +330,22 @@ export const GeometryBaseContentModel = TileContentModel
     const { links, ...rest } = snapshot;
     return { ...rest };
   })
+  .views(self => ({
+    getColorForAttributeId(id: string) {
+      return self.linkedAttributeColors.get(id);
+    }
+  }))
   .actions(self => ({
     replaceLinks(newLinks: string[]) {
       self.links.replace(newLinks);
+    },
+    assignColorForAttributeId(id: string) {
+      if (self.linkedAttributeColors.get(id)) {
+        return self.linkedAttributeColors.get(id);
+      }
+      const color = findLeastUsedNumber(clueGraphColors.length, self.linkedAttributeColors.values());
+      self.linkedAttributeColors.set(id, color);
+      return color;
     }
   }));
 export interface GeometryBaseContentModelType extends Instance<typeof GeometryBaseContentModel> {}

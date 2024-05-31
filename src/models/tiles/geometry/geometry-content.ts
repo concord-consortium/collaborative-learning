@@ -125,7 +125,7 @@ export function setElementColor(board: JXG.Board, id: string, selected: boolean)
   if (element) {
     if (isPoint(element)) {
       const props = getPointVisualProps(selected,
-          element.getAttribute("isPhantom"), element.getAttribute("linkedTableId"));
+        element.getAttribute("colorScheme"), element.getAttribute("isPhantom"));
       element.setAttribute(props);
     }
   }
@@ -183,19 +183,20 @@ export const GeometryContentModel = GeometryBaseContentModel
       return point;
     },
     getLinkedPointsData() {
-      const data: Map<string,{coords:JXGCoordPair[],properties:{id:string}[]}> = new Map();
+      const data: Map<string,{coords:JXGCoordPair[],properties:{id:string, colorScheme:number}[]}> = new Map();
       self.linkedDataSets.forEach(link => {
         const coords: JXGCoordPair[] = [];
-        const properties: Array<{ id: string }> = [];
+        const properties: Array<{ id: string, colorScheme: number }> = [];
         for (let ci = 0; ci < link.dataSet.cases.length; ++ci) {
           const x = link.dataSet.attributes[0]?.numValue(ci);
           for (let ai = 1; ai < link.dataSet.attributes.length; ++ai) {
             const attr = link.dataSet.attributes[ai];
+            const colorScheme = self.getColorForAttributeId(attr.id) || 0;
             const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
             const y = attr.numValue(ci);
             if (isFinite(x) && isFinite(y)) {
               coords.push([x, y]);
-              properties.push({ id });
+              properties.push({ id, colorScheme });
             }
           }
         }

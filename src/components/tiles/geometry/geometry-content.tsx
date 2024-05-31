@@ -711,11 +711,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const board = _board || this.state.board;
     if (!board) return;
 
+    const content = this.getContent();
+    // Make sure each linked dataset's attributes have colors assigned.
+    content.linkedDataSets.forEach(link => {
+      link.dataSet.attributes.forEach(attr => {
+        content.assignColorForAttributeId(attr.id);
+      });
+    });
+
     this.recreateSharedPoints(board);
 
     // identify objects that exist in the model but not in JSXGraph
     const modelObjectsToConvert: GeometryObjectModelType[] = [];
-    this.getContent().objects.forEach(obj => {
+    content.objects.forEach(obj => {
       if (!board.objects[obj.id]) {
         modelObjectsToConvert.push(obj);
       }
@@ -742,13 +750,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
     }
     const data = this.getContent().getLinkedPointsData();
-    for (const [link,points] of data.entries()) {
+    for (const [link, points] of data.entries()) {
       const pts = applyChange(board, {
         operation: "create",
         target: "linkedPoint",
         parents: points.coords,
         properties: points.properties,
         links: { tileIds: [link]} });
+      console.log('pts', points.properties);
       castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
     }
   }
