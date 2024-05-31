@@ -1474,7 +1474,21 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       if (_board) {
         // this may be a shared selection change; get all points associated with it
         const objs = getPointsByCaseId(_board, change.name);
-        objs.forEach(obj => setElementColor(_board, obj.id, change.newValue.value));
+        const edges: JXG.Line[] = [];
+        objs.forEach(obj => {
+          setElementColor(_board, obj.id, change.newValue.value);
+          // Also find segments that are attached to the changed points
+          Object.values(obj.childElements).forEach(child => {
+            if(isVisibleEdge(child) && !edges.includes(child)) {
+              edges.push(child);
+            }
+          });
+        });
+        edges.forEach(edge => {
+          // Edge is selcted if both end points are.
+          const selected = content.isSelected(edge.point1.id) && content.isSelected(edge.point2.id);
+          setElementColor(_board, edge.id, selected);
+        });
       }
     }));
 

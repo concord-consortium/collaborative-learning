@@ -9,24 +9,52 @@ import { wn_PnPoly } from "./soft-surfer-sunday";
 
 const defaultPolygonProps = Object.freeze({
   hasInnerPoints: true,
-  fillOpacity: .2,  highlightFillOpacity: .25
+  fillOpacity: .2,       highlightFillOpacity: .25
 });
 
 const selectedPolygonProps = Object.freeze({
-  fillOpacity: .3,  highlightFillOpacity: .3
+  fillOpacity: .3,       highlightFillOpacity: .3
+});
+
+
+const defaultPolygonEdgeProps = Object.freeze({
+  strokeWidth: 1,        highlightStrokeWidth: 4,
+  strokeOpacity: 1,      highlightStrokeOpacity: .12,
+                         highlightStrokeColor: '#0081ff'
+});
+
+const selectedPolygonEdgeProps = Object.freeze({
+  strokeWidth: 4,         highlightStrokeWidth: 4,
+  strokeOpacity: .25,     highlightStrokeOpacity: .25,
+  strokeColor: '#0081ff', highlightStrokeColor: '#0081ff'
+});
+
+const phantomPolygonEdgeProps = Object.freeze({
+  strokeOpacity: 0,
+  highlightStrokeOpacity: 0
 });
 
 function getPolygonVisualProps(selected: boolean) {
   const colorScheme = 0; // TODO
-
   const props: JXGProperties = { ...defaultPolygonProps };
-
   if (selected) {
     merge(props, selectedPolygonProps);
   }
-
   merge(props, fillPropsForColorScheme(colorScheme));
+  return props;
+}
 
+export function getEdgeVisualProps(selected: boolean, colorScheme: number, phantom: boolean) {
+  if (phantom) {
+    // Invisible, so don't apply any other styles
+    return phantomPolygonEdgeProps;
+  }
+  const props: JXGProperties = { };
+  merge(props, strokePropsForColorScheme(colorScheme));
+  merge(props, defaultPolygonEdgeProps); // the highlight color needs to override here, so apply after
+  if (selected) {
+    merge(props, selectedPolygonEdgeProps);
+  }
   return props;
 }
 
@@ -87,16 +115,12 @@ function setPolygonEdgeColors(polygon: JXG.Polygon) {
   const segments = getPolygonEdges(polygon);
   const firstVertex = polygon.vertices[0];
   segments.forEach(seg => {
-    if (segments.length > 2 &&
-        ((seg.point1.getAttribute("isPhantom") && seg.point2 === firstVertex)
-         ||(seg.point2.getAttribute("isPhantom") && seg.point1 === firstVertex))) {
-      // this is the "uncompleted side" of an in-progress polygon
-      seg.setAttribute({ strokeOpacity: 0, highlightStrokeOpacity: 0 });
-    } else {
-      seg.setAttribute({ strokeOpacity: 1, highlightStrokeOpacity: 1 });
-    }
-    const colorScheme = 0; // TODO
-    seg.setAttribute(strokePropsForColorScheme(colorScheme));
+    // the "uncompleted side" of an in-progress polygon is considered phantom
+    const phantom = segments.length > 2 &&
+      ((seg.point1.getAttribute("isPhantom") && seg.point2 === firstVertex)
+        ||(seg.point2.getAttribute("isPhantom") && seg.point1 === firstVertex));
+    const props = getEdgeVisualProps(false, polygon.getAttribute("colorScheme")||0, phantom);
+    seg.setAttribute(props);
   });
 }
 
