@@ -1,4 +1,5 @@
 import { parse } from "query-string";
+import { getAssetUrl } from "./asset-utils";
 
 // Adapted from https://stackoverflow.com/a/43467144
 export function isValidHttpUrl(possibleUrl: string | undefined) {
@@ -13,14 +14,22 @@ export function isValidHttpUrl(possibleUrl: string | undefined) {
 /**
  * This returns a URL object only if the param starts with "./" or
  * a protocol of http or https. If it starts with "./" the URL will
- * be relative to the current browser location
+ * be relative Webpack public path. This public path is typically
+ * the location of the built javascript and css files.
  *
  * @param param
  * @returns
  */
 export function getUrlFromRelativeOrFullString(param: string) {
   if (param.startsWith("./")) {
-    return new URL(param, window.location.href);
+    const assetUrlString = getAssetUrl(param);
+    if (assetUrlString === param) {
+      // This means the webpack public path isn't set so just use window.location
+      // This will should only happen during tests
+      return new URL(param, window.location.href);
+    } else {
+      return new URL(assetUrlString);
+    }
   } else if (isValidHttpUrl(param)) {
     return new URL(param);
   }

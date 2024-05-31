@@ -13,7 +13,7 @@ When testing or updating the code of programs there are 4 cases to handle:
 - **recorded program**: the program has been recorded and the user can play it back.
 
 ## Single Live View
-This is the easiest and probably where you'll start your development. You can use the /doc-editor.html to work on this case.
+This is the easiest and probably where you'll start your development. You can use the standalone editor `/editor/` to work on this case.
 
 ## Live plus ReadOnly Views
 This will happen when you have the same document open on the left and right side of CLUE at the same time. In some cases it is possible for a thumbnail of the document to also be active (sometimes visible sometimes not) at the same time.
