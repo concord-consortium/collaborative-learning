@@ -4,14 +4,16 @@ import DataflowToolTile from '../../../support/elements/tile/DataflowToolTile';
 let clueCanvas = new ClueCanvas;
 let dataflowToolTile = new DataflowToolTile;
 let dragXDestination = 300;
+let dragYDestination = 50;
 
-function beforeTest() {
+function loadEditor(useBrowserStorage) {
   const url = "/editor/?appMode=qa&unit=./curriculum/example-curriculum/example-curriculum.json&mouseSensor";
-  cy.visit(url);
+  const withStorageParam = useBrowserStorage ? url : `${url}&noStorage`;
+  cy.visit(withStorageParam);
 }
 context('Dataflow Tool Tile', function () {
   it("Dataflow Tool and Number Node", () => {
-    beforeTest();
+    loadEditor(false);
 
     cy.log("renders dataflow tool tile");
     clueCanvas.addTile("dataflow");
@@ -119,8 +121,8 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNode("transform").should("exist");
     dataflowToolTile.getNode("transform").click(50, 10)
       .trigger("pointerdown", 50, 10)
-      .trigger("pointermove", dragXDestination, 10, { force: true })
-      .trigger("pointerup", dragXDestination, 10, { force: true });
+      .trigger("pointermove", dragXDestination, dragYDestination, { force: true })
+      .trigger("pointerup", dragXDestination, dragYDestination, { force: true });
     cy.wait(2000);
     // connect the number node to the transform node
     dataflowToolTile.getNodeOutput().eq(0).click();
@@ -134,7 +136,7 @@ context('Dataflow Tool Tile', function () {
   });
   it("Generator and Timer Nodes", () => {
     const generatorNode = "generator";
-    beforeTest();
+    loadEditor(false);
     clueCanvas.addTile("dataflow");
 
     cy.log("can create generator node");
@@ -175,7 +177,7 @@ context('Dataflow Tool Tile', function () {
 
     cy.log("Timer Node");
     const timerNode = "timer";
-    beforeTest();
+    loadEditor(false);
     clueCanvas.addTile("dataflow");
 
     cy.log("can create timer node");
@@ -204,7 +206,7 @@ context('Dataflow Tool Tile', function () {
 
   it("Math and Logic Nodes", () => {
     const mathNode = "math";
-    beforeTest();
+    loadEditor(false);
     clueCanvas.addTile("dataflow");
 
     cy.log("can create math node");
@@ -241,7 +243,7 @@ context('Dataflow Tool Tile', function () {
 
     cy.log("Logic Node");
     const logicNode = "logic";
-    beforeTest();
+    loadEditor(false);
     clueCanvas.addTile("dataflow");
 
     cy.log("can create logic node");
@@ -278,7 +280,7 @@ context('Dataflow Tool Tile', function () {
   });
   it("Transform and Control Nodes", () => {
     const transformNode = "transform";
-    beforeTest();
+    loadEditor(false);
     clueCanvas.addTile("dataflow");
 
     cy.log("can create transform node");
@@ -348,9 +350,12 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDeleteNodeButton(controlNode).click();
     dataflowToolTile.getNode(controlNode).should("not.exist");
   });
-  it("Demo Output and Live Output Nodes", () => {
+  it("Demo Output and Live Output Nodes", {
+    // The nodes/blocks were being moved up and then were underneath the title of the tile
+    scrollBehavior: "center"
+  },  () => {
     const demoOutputNode = "demo-output";
-    beforeTest();
+    loadEditor(false);
     clueCanvas.addTile("dataflow");
 
     cy.log("can create demo output node");
@@ -460,8 +465,8 @@ context('Dataflow Tool Tile', function () {
     cy.log("can be dragged to the right and set back to light bulb");
     dataflowToolTile.getNode(liveOutputNode).click(50, 10)
       .trigger("pointerdown", 50, 10)
-      .trigger("pointermove", dragXDestination, 10, { force: true })
-      .trigger("pointerup", dragXDestination, 10, { force: true });
+      .trigger("pointermove", dragXDestination, dragYDestination, { force: true })
+      .trigger("pointerup", dragXDestination, dragYDestination, { force: true });
     dataflowToolTile.getDropdown(liveOutputNode, liveOutputType).click();
     dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).eq(0).click();
 
@@ -470,19 +475,22 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNode("number").should("exist");
     dataflowToolTile.getNumberField().type("1{enter}");
     dataflowToolTile.getNumberNodeOutput().should("exist");
-    dataflowToolTile.getNumberNodeOutput().trigger("pointerdown");
-    dataflowToolTile.getLiveOutputNodeInput().trigger("pointermove");
-    dataflowToolTile.getLiveOutputNodeInput().trigger("pointerup");
+    dataflowToolTile.getNumberNodeOutput().click();
+    dataflowToolTile.getLiveOutputNodeInput().click();
 
     dataflowToolTile.getModalOkButton().click();
 
     cy.log("should show needs connection message when fan is selected and there are no outputs");
+    // This is failing because it is putting the dropdown underneath the title
+    // This started happening because the canvas is narrower so the title now overlaps things.
+    // Maybe a better fix is to set the test level scrollBehavior so it always offsets to avoid this
+    // title.
     dataflowToolTile.getDropdown(liveOutputNode, liveOutputType).click();
     dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).eq(3).click();
     dataflowToolTile.getDropdown(liveOutputNode, liveOutputType).contains("Fan").should("exist");
     dataflowToolTile.getDropdown(liveOutputNode, "hubSelect").should("contain", "connect device");
 
-    cy.log("can recieve a value from a connected block, and display correct on or off string");
+    cy.log("can receive a value from a connected block, and display correct on or off string");
     dataflowToolTile.getNode("number").should("exist");
     dataflowToolTile.getOutputNodeValueText().should("contain", "on");
     dataflowToolTile.getNumberField().type("{backspace}0{enter}");
@@ -501,7 +509,7 @@ context('Dataflow Tool Tile', function () {
   });
   it("Input Node and Record Data", () => {
     const sensorNode = "sensor";
-    beforeTest();
+    loadEditor(false);
     clueCanvas.addTile("dataflow");
 
     cy.log("can create sensor node");
@@ -576,8 +584,8 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNode(nodes[1]).should("exist");
     dataflowToolTile.getNode("demo-output").click(50, 10)
       .trigger("pointerdown", 50, 10)
-      .trigger("pointermove", dragXDestination, 10, { force: true })
-      .trigger("pointerup", dragXDestination, 10, { force: true });
+      .trigger("pointermove", dragXDestination, dragYDestination, { force: true })
+      .trigger("pointerup", dragXDestination, dragYDestination, { force: true });
 
     dataflowToolTile.getNodeOutput().eq(0).click();
     dataflowToolTile.getNodeInput().eq(0).click();

@@ -2,7 +2,6 @@ const url = "/editor/";
 const documentContent = () => cy.get(".canvas-area .canvas .document-content");
 
 function beforeTest() {
-  cy.clearQAData('all');
   cy.visit(url);
   cy.get('.editable-document-content', { timeout: 60000 });
 }

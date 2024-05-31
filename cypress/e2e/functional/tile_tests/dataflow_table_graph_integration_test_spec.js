@@ -2,13 +2,14 @@ import ClueCanvas from '../../../support/elements/common/cCanvas';
 import DataflowToolTile from '../../../support/elements/tile/DataflowToolTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
 import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
+import DocEditor from '../../../support/elements/common/DocEditor';
 
 let clueCanvas = new ClueCanvas;
 let dataflowToolTile = new DataflowToolTile;
 let tableTile = new TableToolTile;
 let graphTile = new XYPlotToolTile;
+let docEditor = new DocEditor;
 
-const tableTitle = "Table Data 1";
 const programTitle = "Program 1";
 const graphTitle = "Graph 1";
 
@@ -26,8 +27,6 @@ function beforeTest() {
   cy.visit(url);
 }
 
-// FIXME: this test was causing cypress crashes, the upper part now uses the doc-editor.
-// The lower part requires reloading which isn't supported by the doc-editor
 context('Dataflow Tool Tile', function () {
   it("Data is shared properly with tables and graphs", () => {
     beforeTest();
@@ -55,6 +54,11 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDataflowTile().click();
 
     cy.log("create a linked graph");
+
+    // FIXME: there is a bug in the graph that shows up when a readOnly view of the same document
+    // is open. For now we close the readOnly views first.
+    docEditor.hideReadOnlyPanes();
+
     clueCanvas.clickToolbarButton("dataflow", "data-set-link");
     tableTile.getLinkGraphModalTileMenu().select("New Graph");
     tableTile.getLinkGraphModalLinkButton().should("contain.text", "Graph It!").click({force: true});
@@ -84,8 +88,7 @@ context('Dataflow Tool Tile', function () {
 
   });
 
-  // Skipped, see comment above
-  it.skip("verify the effect of page reload cause on various button states and linked table state", () => {
+  it("verify the effect of page reload cause on various button states and linked table state", () => {
     beforeTest();
 
     cy.log("create a small program, select sampling rate and record data");
@@ -93,8 +96,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.createProgram(programNodes);
     dataflowToolTile.checkInitialStateButtons();
     dataflowToolTile.recordData("1000", timer1);
-    clueCanvas.addTile("table");
-    cy.linkTableToDataflow(programTitle, tableTitle);
+    clueCanvas.clickToolbarButton("dataflow", "data-set-view");
 
     // record data
     dataflowToolTile.clearRecordedData();
@@ -105,7 +107,7 @@ context('Dataflow Tool Tile', function () {
 
     // check buttons after reload
     dataflowToolTile.checkRecordedStateButtons();
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, tableTitle, linkedTableAttributes, timer2);
+    dataflowToolTile.checkLinkedTableRecordedData(tableTile, programTitle, linkedTableAttributes, timer2);
 
     // play recorded data
     dataflowToolTile.clickPlayButton();
@@ -115,7 +117,7 @@ context('Dataflow Tool Tile', function () {
 
     // check buttons after reload
     dataflowToolTile.checkRecordedStateButtons();
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, tableTitle, linkedTableAttributes, timer2);
+    dataflowToolTile.checkLinkedTableRecordedData(tableTile, programTitle, linkedTableAttributes, timer2);
 
     // pause recorded data
     dataflowToolTile.clickPlayButton();
@@ -127,7 +129,7 @@ context('Dataflow Tool Tile', function () {
 
     // check buttons after reload
     dataflowToolTile.checkRecordedStateButtons();
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, tableTitle, linkedTableAttributes, timer2);
+    dataflowToolTile.checkLinkedTableRecordedData(tableTile, programTitle, linkedTableAttributes, timer2);
 
     // click clear
     dataflowToolTile.getRecordingClearButton().click();
@@ -137,7 +139,7 @@ context('Dataflow Tool Tile', function () {
 
     // check buttons after reload
     dataflowToolTile.checkRecordedStateButtons();
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, tableTitle, linkedTableAttributes, timer2);
+    dataflowToolTile.checkLinkedTableRecordedData(tableTile, programTitle, linkedTableAttributes, timer2);
 
     // record data
     dataflowToolTile.clearRecordedData();
@@ -147,6 +149,6 @@ context('Dataflow Tool Tile', function () {
 
     // check buttons after reload
     dataflowToolTile.checkInitialStateButtons();
-    dataflowToolTile.checkEmptyLinkedTable(tableTile, tableTitle, defaultTableAttributes);
+    dataflowToolTile.checkEmptyLinkedTable(tableTile, programTitle, defaultTableAttributes);
   });
 });
