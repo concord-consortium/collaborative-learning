@@ -271,7 +271,7 @@ describe("GeometryContent", () => {
     expect(content.board?.yAxis.name).toBe("yName");
     expect(content.board?.yAxis.label).toBe("yAnnotation");
     expect(content.board?.yAxis.min).toBe(-2);
-    // Scales are forced to be equal, and & Y axis is slightly longer than X axis (because space is saved for labels)
+    // Scales are forced to be equal, and Y axis is slightly longer than X axis
     expect(content.board?.xAxis.range).toBe(10);
     expect(content.board?.yAxis.range).toBeCloseTo(11.4286);
 

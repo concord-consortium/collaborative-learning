@@ -254,8 +254,8 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     getSelectedIds(board: JXG.Board) {
       return Array.from(self.metadata.selection.entries())
-        .filter(entry => entry[1]) // [0] is the ID, [1] is boolean "selected"
-        .map(entry => entry[0]);
+        .filter(([id, selected]) => selected)
+        .map(([id, selected]) => id);
     },
     getDeletableSelectedIds(board: JXG.Board) {
       return this.getSelectedIds(board).filter(id => {
