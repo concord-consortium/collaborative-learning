@@ -185,7 +185,8 @@ describe("GeometryContent", () => {
 
   it("can create with default properties", () => {
     const content = GeometryContentModel.create();
-    expect(getSnapshot(content)).toEqual({ type: kGeometryTileType, board: defaultBoard(), objects: {} });
+    expect(getSnapshot(content)).toEqual(
+      { type: kGeometryTileType, board: defaultBoard(), objects: {}, linkedAttributeColors: {} });
 
     destroy(content);
   });
@@ -207,7 +208,8 @@ describe("GeometryContent", () => {
         xAxis: { name: "authorX", min: kGeometryDefaultXAxisMin, unit: kGeometryDefaultPixelsPerUnit },
         yAxis: { name: "authorY", min: kGeometryDefaultYAxisMin, unit: kGeometryDefaultPixelsPerUnit }
       },
-      objects: {}
+      objects: {},
+      linkedAttributeColors: {}
     });
 
     destroy(content);
@@ -299,7 +301,7 @@ describe("GeometryContent", () => {
     let p1: JXG.Point = board.objects[p1Id] as JXG.Point;
     expect(p1).toBeUndefined();
     p1 = content.addPoint(board, [1, 1], { id: p1Id }) as JXG.Point;
-    expect(content.lastObject).toEqual({ id: p1Id, type: "point", x: 1, y: 1 });
+    expect(content.lastObject).toEqual({ id: p1Id, type: "point", x: 1, y: 1, colorScheme: 0 });
     expect(isPoint(p1)).toBe(true);
     expect(isFreePoint(p1)).toBe(true);
     // won't create generic objects
@@ -338,7 +340,7 @@ describe("GeometryContent", () => {
     const { content, board } = createContentAndBoard();
     const p1Id = "point-1";
     content.addPoint(board, [1, 1], { id: p1Id }) as JXG.Point;
-    expect(content.lastObject).toEqual({ id: p1Id, type: "point", x: 1, y: 1 });
+    expect(content.lastObject).toEqual({ id: p1Id, type: "point", x: 1, y: 1, colorScheme: 0 });
 
     // add comment to point
     const [comment] = content.addComment(board, p1Id)!;
@@ -356,7 +358,7 @@ describe("GeometryContent", () => {
     const { content, board } = createContentAndBoard();
     const { polygon, points } = buildPolygon(board, content, [[1, 1], [3, 3], [5, 1]]);
     expect(content.lastObjectOfType("polygon")).toEqual({
-      id: polygon?.id, type: "polygon", points: [ points[0].id, points[1].id, points[2].id ] });
+      id: polygon?.id, type: "polygon", points: [ points[0].id, points[1].id, points[2].id ], colorScheme: 0 });
     expect(isPolygon(polygon)).toBe(true);
     const polygonId = polygon?.id;
     expect(content.getDependents([points[0].id])).toEqual([points[0].id, polygonId]);
@@ -465,6 +467,7 @@ describe("GeometryContent", () => {
       _content.addObjectModel(PointModel.create({ id: "p3", x: 5, y: 1 }));
       polygonId = _content.addObjectModel(PolygonModel.create({
         points: ["p1", "p2", "p3"],
+        colorScheme: 0,
         labels: [{ id: segmentIdFromPointIds(["p1", "p2"]), option: ESegmentLabelOption.kLength }]
       }));
     });
@@ -494,6 +497,7 @@ describe("GeometryContent", () => {
       id: polygonId,
       type: "polygon",
       points: ["p1", "p2", "p3"],
+      colorScheme: 0,
       labels: [{ id: segmentIdFromPointIds(["p1", "p2"]), option: ESegmentLabelOption.kLabel }]
     });
     content.updatePolygonSegmentLabel(board, polygon, [p2, p3], ESegmentLabelOption.kLength);
@@ -501,6 +505,7 @@ describe("GeometryContent", () => {
       id: polygonId,
       type: "polygon",
       points: ["p1", "p2", "p3"],
+      colorScheme: 0,
       labels: [{ id: segmentIdFromPointIds(["p1", "p2"]), option: ESegmentLabelOption.kLabel },
                { id: segmentIdFromPointIds(["p2", "p3"]), option: ESegmentLabelOption.kLength }]
     });
@@ -508,6 +513,7 @@ describe("GeometryContent", () => {
     expect(content.getObject(polygon.id)).toEqual({
       id: polygonId,
       type: "polygon",
+      colorScheme: 0,
       points: ["p1", "p2", "p3"],
       labels: [{ id: segmentIdFromPointIds(["p2", "p3"]), option: ESegmentLabelOption.kLength }]
     });
@@ -572,7 +578,7 @@ describe("GeometryContent", () => {
     const { points, polygon } = buildPolygon(board, content, [[0, 0], [1, 1], [1, 0]]);
     const [p1, p2, p3] = points;
     expect(content.lastObjectOfType("polygon")).toEqual(
-      { id: polygon?.id, type: "polygon", points: [p1!.id, p2!.id, p3!.id] });
+      { id: polygon?.id, type: "polygon", colorScheme: 0, points: [p1!.id, p2!.id, p3!.id] });
     content.selectObjects(board, p1!.id);
     expect(content.isSelected(p1!.id)).toBe(true);
     expect(content.isSelected(p2!.id)).toBe(false);
@@ -600,7 +606,7 @@ describe("GeometryContent", () => {
     const { points, polygon } = buildPolygon(board, content, [[0, 0], [1, 0], [0, 1]]);
     const [p0, px, py] = points;
     expect(content.lastObjectOfType("polygon")).toEqual(
-      { id: polygon?.id, type: "polygon", points: [p0!.id, px!.id, py!.id] });
+      { id: polygon?.id, type: "polygon", colorScheme: 0, points: [p0!.id, px!.id, py!.id] });
     const pSolo: JXG.Point = content.addPoint(board, [9, 9])!;
     expect(canSupportVertexAngle(p0)).toBe(true);
     expect(canSupportVertexAngle(pSolo)).toBe(false);
@@ -627,7 +633,8 @@ describe("GeometryContent", () => {
     content.removeObjects(board, [p0!.id]);
     expect(content.getObject(p0!.id)).toBeUndefined();
     // first point can be removed from polygon without deleting polygon
-    expect(content.getObject(polygon!.id)).toEqual({ id: polygon?.id, type: "polygon", points: [px!.id, py!.id] });
+    expect(content.getObject(polygon!.id)).toEqual(
+      { id: polygon?.id, type: "polygon", colorScheme: 0, points: [px!.id, py!.id] });
     // vertex angles are deleted when any dependent point is deleted
     expect(content.getObject(va0!.id)).toBeUndefined();
     expect(content.getObject(vax!.id)).toBeUndefined();
@@ -676,7 +683,8 @@ describe("GeometryContent", () => {
     content.removeObjects(board, [p0!.id]);
     expect(content.getObject(p0!.id)).toBeUndefined();
     // first point can be removed from polygon without deleting polygon
-    expect(content.getObject(poly!.id)).toEqual({ id: poly?.id, type: "polygon", points: [px!.id, py!.id] });
+    expect(content.getObject(poly!.id)).toEqual(
+      { id: poly?.id, type: "polygon", colorScheme: 0, points: [px!.id, py!.id] });
     // vertex angles are deleted when any dependent point is deleted
     expect(content.getObject(vAngle0Id)).toBeUndefined();
     expect(content.getObject(vAngleXId)).toBeUndefined();
@@ -730,8 +738,9 @@ describe("GeometryContent", () => {
     content.addMovableLine(board, [[1, 1], [5, 5]], { id: "ml" });
     expect(content.lastObject).toEqual({
       id: "ml", type: "movableLine",
-      p1: { id: "ml-point1", type: "point", x: 1, y: 1 },
-      p2: { id: "ml-point2", type: "point", x: 5, y: 5 } });
+      colorScheme: 0,
+      p1: { id: "ml-point1", type: "point", colorScheme: 0, x: 1, y: 1 },
+      p2: { id: "ml-point2", type: "point", colorScheme: 0, x: 5, y: 5 } });
     const line = board.objects.ml as JXG.Line;
     expect(isMovableLine(line)).toBe(true);
     const [comment] = content.addComment(board, "ml")!;
@@ -747,6 +756,7 @@ describe("GeometryContent", () => {
     expect(p1).toEqual({
       id: "ml-point1",
       type: "point",
+      colorScheme: 0,
       x: 1,
       y: 1
     });
@@ -754,6 +764,7 @@ describe("GeometryContent", () => {
     expect(p2).toEqual({
       id: "ml-point2",
       type: "point",
+      colorScheme: 0,
       x: 5,
       y:5
     });
@@ -791,12 +802,13 @@ describe("GeometryContent", () => {
     content.selectObjects(board, p0.id);
     expect(content.getSelectedIds(board)).toEqual([p0.id]);
     expect(content.copySelection(board))
-      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, ...defaultParams })]);
+      .toEqualWithUniqueIds([PointModel.create(
+        { id: p0.id, x: 0, y: 0, colorScheme: 0 })]);
 
     // copies comments along with selected points
     const [comment] = content.addComment(board, p0.id, "p0 comment") || [];
     expect(content.copySelection(board)).toEqualWithUniqueIds([
-      PointModel.create({ id: p0.id, x: 0, y: 0, ...defaultParams }),
+      PointModel.create({ id: p0.id, x: 0, y: 0, colorScheme: 0 }),
       CommentModel.create({ id: comment.id, anchors: [p0.id], text: "p0 comment"})
     ]);
     content.removeObjects(board, [comment.id]);
@@ -805,7 +817,7 @@ describe("GeometryContent", () => {
     // content.selectObjects(board, poly.id);
     expect(content.getSelectedIds(board)).toEqual([p0.id]);
     expect(content.copySelection(board))
-      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, ...defaultParams })]);
+      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, colorScheme: 0 })]);
 
     // For comparison purposes, we need the polygon to be after the points in the array of objects
     const origObjects = Array.from(content.objects.values()).sort((a,b)=>a.type.localeCompare(b.type));
@@ -848,12 +860,12 @@ describe("GeometryContent", () => {
     content.selectObjects(board, p0.id);
     expect(content.getSelectedIds(board)).toEqual([p0.id]);
     expect(content.copySelection(board))
-      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, ...defaultParams })]);
+      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, colorScheme: 0 })]);
 
     // copies comments along with selected points
     const [comment] = content.addComment(board, p0.id, "p0 comment") || [];
     expect(content.copySelection(board)).toEqualWithUniqueIds([
-      PointModel.create({ id: p0.id, x: 0, y: 0, ...defaultParams }),
+      PointModel.create({ id: p0.id, x: 0, y: 0, colorScheme: 0 }),
       CommentModel.create({ id: comment.id, anchors: [p0.id], text: "p0 comment"})
     ]);
     content.removeObjects(board, [comment.id]);
@@ -862,7 +874,7 @@ describe("GeometryContent", () => {
     // content.selectObjects(board, poly.id);
     expect(content.getSelectedIds(board)).toEqual([p0.id]);
     expect(content.copySelection(board))
-      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, ...defaultParams })]);
+      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, colorScheme: 0 })]);
 
     // For comparison purposes, we need the polygon to be after the points in the array of objects
     const origObjects = Array.from(content.objects.values()).sort((a,b)=>a.type.localeCompare(b.type));

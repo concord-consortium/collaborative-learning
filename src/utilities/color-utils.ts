@@ -1,5 +1,4 @@
 import colorString from "color-string";
-import clueDataColors from "../clue/data-colors.scss";
 
 export const lightenColor = (color: string, pct = 0.5) => {
   const rgb = colorString.get.rgb(color);
@@ -32,13 +31,21 @@ export interface ClueColor {
 }
 
 export const clueDataColorInfo: ClueColor[] = [
-  { color: clueDataColors.dataBlue, name: "blue" },
-  { color: clueDataColors.dataOrange, name: "orange" },
-  { color: clueDataColors.dataGreen, name: "green" },
-  { color: clueDataColors.dataRed, name: "red" },
-  { color: clueDataColors.dataYellow, name: "yellow" },
-  { color: clueDataColors.dataPurple, name: "purple" },
-  { color: clueDataColors.dataIndigo, name: "indigo" }
+  { color: "#0069ff", name: "blue" },
+  { color: "#ff9617", name: "orange" },
+  { color: "#19a90f", name: "green" },
+  { color: "#ee0000", name: "red" },
+  { color: "#cbd114", name: "yellow" },
+  { color: "#d51eff", name: "purple" },
+  { color: "#6b00d2", name: "indigo" }
+  // FIXME not working for unknown reasons.
+  // { color: clueDataColors.dataBlue, name: "blue" },
+  // { color: clueDataColors.dataOrange, name: "orange" },
+  // { color: clueDataColors.dataGreen, name: "green" },
+  // { color: clueDataColors.dataRed, name: "red" },
+  // { color: clueDataColors.dataYellow, name: "yellow" },
+  // { color: clueDataColors.dataPurple, name: "purple" },
+  // { color: clueDataColors.dataIndigo, name: "indigo" }
 ];
 
 /*

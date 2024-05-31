@@ -153,7 +153,7 @@ export const PointModel = PositionedObjectModel
     type: typeField("point"),
     name: types.maybe(types.string),
     snapToGrid: types.maybe(types.boolean),
-    color: types.optional(types.number, 0)
+    colorScheme: types.optional(types.number, 0)
   })
   .preProcessSnapshot(preProcessPositionInSnapshot);
 export interface PointModelType extends Instance<typeof PointModel> {}
@@ -175,7 +175,8 @@ export const PolygonModel = GeometryObjectModel
   .props({
     type: typeField("polygon"),
     points: types.array(types.string),
-    labels: types.maybe(types.array(PolygonSegmentLabelModel))
+    labels: types.maybe(types.array(PolygonSegmentLabelModel)),
+    colorScheme: types.optional(types.number, 0)
   })
   .views(self => ({
     get dependencies(): string[] {
@@ -266,7 +267,8 @@ export const MovableLineModel = GeometryObjectModel
   .props({
     type: typeField("movableLine"),
     p1: PointModel,
-    p2: PointModel
+    p2: PointModel,
+    colorScheme: types.optional(types.number, 0)
   });
 export interface MovableLineModelType extends Instance<typeof MovableLineModel> {}
 

@@ -134,7 +134,7 @@ export function logGeometryEvent(model: Instance<typeof GeometryBaseContentModel
 }
 
 export function fillPropsForColorScheme(colorScheme: number) {
-  const spec = clueDataColorInfo[colorScheme % clueDataColorInfo.length];
+  const spec = clueDataColorInfo[(colorScheme||0) % clueDataColorInfo.length];
   return {
     fillColor: spec.color,
     highlightFillColor: spec.color
@@ -142,7 +142,7 @@ export function fillPropsForColorScheme(colorScheme: number) {
 }
 
 export function strokePropsForColorScheme(colorScheme: number) {
-  const spec = clueDataColorInfo[colorScheme % clueDataColorInfo.length];
+  const spec = clueDataColorInfo[(colorScheme||0) % clueDataColorInfo.length];
   return {
     strokeColor: spec.color,
     highlightStrokeColor: spec.color

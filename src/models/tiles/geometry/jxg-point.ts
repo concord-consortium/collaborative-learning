@@ -52,7 +52,7 @@ export function createPoint(board: JXG.Board, parents: JXGUnsafeCoordPair, chang
   // old geometry tiles created before the introduction of the uuid.
   const props = {
     id: uniqueId(),
-    ...getPointVisualProps(false, changeProps.colorScheme, changeProps.isPhantom),
+    ...getPointVisualProps(false, changeProps?.colorScheme||0, changeProps?.isPhantom||false),
     ...changeProps };
   const isGraphable = isPositionGraphable(parents);
   const point = board.create("point", getGraphablePosition(parents), {...props, visible: isGraphable});
