@@ -81,8 +81,7 @@ class GeometryToolTile {
         return cy.get('.geometry-content.editable ellipse[display="inline"]');
     }
     getSelectedGraphPoint() {
-        // TODO: when we update the design, should make this a CSS class
-        return cy.get('.geometry-content.editable ellipse[fill="#ff0000"]');
+        return cy.get('.geometry-content.editable ellipse[stroke-opacity="0.25"]');
     }
     hoverGraphPoint(x,y){
         let transX=this.transformFromCoordinate('x', x),
