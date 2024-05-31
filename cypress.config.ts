@@ -68,7 +68,6 @@ export default defineConfig({
 
       return combinedConfig;
     },
-    // Try changing default baseUrl to see how that effects github action
     baseUrl: 'http://localhost:8080/',
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
   },
