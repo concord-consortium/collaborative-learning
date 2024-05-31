@@ -6,7 +6,7 @@ let dataflowToolTile = new DataflowToolTile;
 let dragXDestination = 300;
 
 function beforeTest() {
-  const url = "/doc-editor.html?appMode=qa&unit=./curriculum/example-curriculum/example-curriculum.json&mouseSensor";
+  const url = "/editor/?appMode=qa&unit=./curriculum/example-curriculum/example-curriculum.json&mouseSensor";
   cy.visit(url);
 }
 context('Dataflow Tool Tile', function () {

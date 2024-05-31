@@ -108,15 +108,6 @@
 
     &.selected {
       background-color: $workspace-teal-light-4;
-
-      svg {
-        fill: $workspace-teal-dark-1;
-      }
-
-    }
-
-    svg {
-      fill: $charcoal-dark-1;
     }
 
     // Inputs inside a button (eg, for image upload)

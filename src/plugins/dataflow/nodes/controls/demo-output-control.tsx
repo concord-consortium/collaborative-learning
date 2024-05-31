@@ -2,10 +2,12 @@ import { ClassicPreset } from "rete";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import React from "react";
-import { advancedGrabberFrames, fanFrames, fanHousing, fanMotor, grabberCordFrames, grabberFrames,
-  grabberPaddle, humidifier, lightBulbOff, lightBulbOn } from "./demo-output-control-assets";
-import { HumidifierAnimation } from "./demo-outputs/humidifier-animation";
 import { IDemoOutputNodeModel } from "../demo-output-node";
+import { fanFrames, fanHousing, fanMotor,
+  grabberPaddle, humidifier, lightBulbOff, lightBulbOn } from "./demo-outputs/demo-output-control-assets";
+import { HumidifierAnimation } from "./demo-outputs/humidifier-animation";
+import { GrabberAnimation } from "./demo-outputs/grabber-animation";
+import { AdvancedGrabberAnimation } from "./demo-outputs/advanced-grabber-animation";
 
 import "./demo-output-control.scss";
 
@@ -36,14 +38,6 @@ export class DemoOutputControl extends ClassicPreset.Control
     percentTilt = Math.max(0, percentTilt);
     return percentTilt;
   }
-
-  getFrame(percent: number, frames: any[]) {
-    const numFrames = frames.length;
-    let frameIndex = Math.floor(numFrames * percent);
-    frameIndex = Math.max(frameIndex, 0);
-    frameIndex = Math.min(frameIndex, numFrames - 1);
-    return frames[frameIndex];
-  }
 }
 
 export const DemoOutputControlComponent: React.FC<{ data: DemoOutputControl }> =
@@ -64,12 +58,6 @@ export const DemoOutputControlComponent: React.FC<{ data: DemoOutputControl }> =
     "spinning fast": value1 === 1
   });
 
-  const grabberFrame = control.getFrame(control.nodeValue, grabberFrames);
-  const advancedGrabberFrame = control.getFrame(control.nodeValue, advancedGrabberFrames);
-  const grabberCordFrame = control.getFrame(control.percentTilt, grabberCordFrames);
-  const grabberDegrees = (control.percentTilt - .5) * -50;
-  const grabberRotateStyle =  { transform: `rotate(${grabberDegrees}deg)`};
-
   return (
     <div className={`demo-output-control ${controlClassName}`}>
       { type === "Light Bulb" &&
@@ -80,10 +68,7 @@ export const DemoOutputControlComponent: React.FC<{ data: DemoOutputControl }> =
       }
 
       { type === "Grabber" &&
-        <img
-          src={ grabberFrame }
-          className="demo-output-image grabber-image"
-        />
+        <GrabberAnimation nodeValue={control.nodeValue}/>
       }
 
       { type === "Advanced Grabber" &&
@@ -92,14 +77,9 @@ export const DemoOutputControlComponent: React.FC<{ data: DemoOutputControl }> =
             src={ grabberPaddle }
             className="demo-output-image grabber-paddle-image"
           />
-          <img
-            src={ grabberCordFrame }
-            className="demo-output-image grabber-cord-image"
-          />
-          <img
-            src={ advancedGrabberFrame }
-            className="demo-output-image advanced-grabber-image"
-            style={grabberRotateStyle}
+          <AdvancedGrabberAnimation
+            nodeValue={control.nodeValue}
+            percentTilt={control.percentTilt}
           />
         </>
       }

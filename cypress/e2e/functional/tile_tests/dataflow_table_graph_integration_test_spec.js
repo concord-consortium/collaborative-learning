@@ -22,7 +22,7 @@ const timer2 = 3;
 
 
 function beforeTest() {
-  const url = "/doc-editor.html?appMode=qa&unit=./demo/units/qa-config-subtabs/content.json&mouseSensor";
+  const url = "/editor/?appMode=qa&unit=./demo/units/qa-config-subtabs/content.json&mouseSensor";
   cy.visit(url);
 }
 

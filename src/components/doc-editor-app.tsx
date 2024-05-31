@@ -7,6 +7,7 @@ import { EditableDocumentContent } from "./document/editable-document-content";
 import { createDocumentModelWithEnv } from "../models/document/document";
 import { DocumentContentSnapshotType } from "../models/document/document-content";
 import { urlParams } from "../utilities/url-params";
+import { getAssetUrl } from "../utilities/asset-utils";
 import { useAppConfig } from "../hooks/use-stores";
 import { DocumentAnnotationToolbar } from "./document/document-annotation-toolbar";
 
@@ -91,7 +92,12 @@ export const DocEditorApp = () => {
       return;
     }
 
-    fetch(documentURL)
+    // Load the documentURL relative to the assets not the html page itself.
+    // This makes the document URLs work with /editor/ as well as on a
+    // production release.
+    const adjustedURL = getAssetUrl(documentURL);
+
+    fetch(adjustedURL)
     .then(async response => {
       if (response.ok) {
         const documentText = await response.text();

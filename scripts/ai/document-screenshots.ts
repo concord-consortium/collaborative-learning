@@ -58,7 +58,7 @@ function newFileName(oldFileName: string) {
 
 // makeSnapshot loads document content at path in a CLUE standalone document editor, takes a snapshot of it,
 // then saves it in the output directory as fileName
-const urlRoot = `http://localhost:8080/doc-editor.html?appMode=dev&unit=example&document=`;
+const urlRoot = `http://localhost:8080/editor/?appMode=dev&unit=example&document=`;
 async function makeSnapshot(path: string, fileName: string) {
   console.log(`*   Processing snapshot`, path);
   const targetFile = `${targetPath}/${fileName}`;

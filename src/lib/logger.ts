@@ -207,3 +207,9 @@ function sendToLoggingService(data: LogMessage, user: UserModelType) {
   request.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
   request.send(JSON.stringify(data));
 }
+
+// Add the logger to the window in Cypress so we can stub it
+const aWindow = window as any;
+if (aWindow.Cypress) {
+  aWindow.ccLogger = Logger;
+}

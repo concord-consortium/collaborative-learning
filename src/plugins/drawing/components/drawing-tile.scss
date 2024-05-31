@@ -44,7 +44,6 @@
             transform: rotate(90deg);
           }
         }
-
       }
 
       .header {
@@ -64,7 +63,6 @@
             flex: 0 0 1em;
             vertical-align: middle;
           }
-
         }
 
         .close {
@@ -104,7 +102,6 @@
             }
 
             &.invisible {
-
               span.type-icon, span.label {
                 opacity: .5;
               }
@@ -149,287 +146,47 @@
       }
     }
 
-  .drawing-layer {
-
-    svg {
-
-      .ghost {
-        opacity: 0.1;
-      }
-
-      .resize-handle {
-        fill: #ffffff;
-
-        &:hover {
-          fill: $workspace-teal-light-6;
-
-          &.nw {
-            cursor: nwse-resize;
-          }
-
-          &.ne {
-            cursor: nesw-resize;
-          }
-
-          &.sw {
-            cursor: nesw-resize;
-          }
-
-          &.se {
-            cursor: nwse-resize;
-          }
-        }
-
-        &.active {
-          fill: $workspace-teal;
-        }
-      }
-
-      textarea {
-        width: 100%;
-        height: 100%;
-        resize: none;
-      }
-
-    }
-  }
-}
-}
-
-.drawing-tool-toolbar {
-  position: absolute;
-  height: $toolbar-height;
-  border: $toolbar-border;
-  border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
-  background-color: $workspace-teal-light-9;
-  z-index: $toolbar-z-index;
-  &.disabled {
-    display: none;
-  }
-  .drawing-tool-buttons {
-    display: flex;
-    font-size: 24px;
-    text-align: center;
-
-    div:first-child {
-      .drawing-tool-button {
-        border-bottom-left-radius: 3px;
-      }
-    }
-    div:last-child {
-      .drawing-tool-button {
-        border-bottom-right-radius: 3px;
-      }
-    }
-
-    .drawing-tool-button {
-      position: relative;
-      // These are button elements so we have to disable default button styles
-      // of border, padding, and display
-      border: 0;
-      padding: 0;
-      display: block;
-      user-select: none;
-      width: $toolbar-button-width;
-      height: $toolbar-button-height;
-      background-color: #efefef;
-      cursor: pointer;
-      &.selected {
-        background-color: $workspace-teal-light-4;
-        &.button-select {
-          svg path {
-            fill: $workspace-teal-dark-1;
-          }
-        }
-      }
-      &:hover {
-        background-color: $workspace-teal-light-6;
-      }
-      &:active {
-        background-color: $workspace-teal-light-4;
-        &.button-select {
-          svg path {
-            fill: $workspace-teal-dark-1;
-          }
-        }
-      }
-      &.button-stamp {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        img {
-          max-width: 23px;
-          max-height: 23px;
-          z-index: 1;
-        }
-      }
-      &.disabled {
-        opacity: 25%;
-        cursor: default;
-      }
-
-      .expand-collapse {
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        width: 10px;
-        height: 10px;
-        &:hover {
-          background-color: $workspace-teal-light-4;
-        }
-        svg {
-          position: absolute;
-          left: 1px;
-          top: 1px;
-          fill: $workspace-teal-dark-1;
-        }
-      }
-
-    }
-
-    .image-upload {
-      input {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 36px;
-        height: 34px;
-      }
-    }
-
-    a {
-      text-decoration: none;
-      color: #000;
-    }
-  }
-
-  .palette-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-evenly;
-    align-items: center;
-    padding: 2.5px;
-
-    .stamp-button {
-      position: relative;
-      width: 30px;
-      height: 30px;
-
-      img {
-        position: absolute;
-        left: 3px;
-        top: 3px;
-        max-width: 24px;
-        max-height: 24px;
-      }
-
-      &.select {
-        stroke: $workspace-teal;
-      }
-      &:hover {
-        stroke: $workspace-teal-light-2;
-      }
-      &:active {
-        stroke: $workspace-teal;
-      }
-    }
-
-    .color-swatch {
-      position: relative;
-      width: 30px;
-      height: 30px;
-
+    .drawing-layer {
       svg {
-        position: absolute;
-        left: 0;
-        top: 0;
-      }
-
-      .none-icon {
-        left: 4px;
-        top: 4px;
-      }
-      .check-icon {
-        left: 4px;
-        top: 4px;
-        fill: white;
-      }
-      &.light {
-        .check-icon {
-          fill: $workspace-teal;
+        .ghost {
+          opacity: 0.1;
         }
-      }
 
-      &.light {
-        .contrast-border {
-          stroke: $charcoal-light-1;
+        .resize-handle {
+          fill: #ffffff;
+
+          &:hover {
+            fill: $workspace-teal-light-6;
+
+            &.nw {
+              cursor: nwse-resize;
+            }
+
+            &.ne {
+              cursor: nesw-resize;
+            }
+
+            &.sw {
+              cursor: nesw-resize;
+            }
+
+            &.se {
+              cursor: nwse-resize;
+            }
+          }
+
+          &.active {
+            fill: $workspace-teal;
+          }
         }
-      }
 
-      .highlight {
-        &.select {
-          stroke: $workspace-teal;
+        textarea {
+          width: 100%;
+          height: 100%;
+          resize: none;
         }
-      }
-      &:hover {
-        .highlight {
-          stroke: $workspace-teal-light-2;
-        }
-      }
-      &:active {
-        .highlight {
-          stroke: $workspace-teal;
-        }
-      }
-    }
-  }
-
-  .toolbar-palette {
-    position: absolute;
-    height: 70px;
-    background-color: $workspace-teal-light-9;
-    border: $toolbar-border;
-    border-radius: 0 $toolbar-border-radius $toolbar-border-radius $toolbar-border-radius;
-    z-index: $toolbar-z-index;
-
-    &.one-row {
-      height: 40px;
-    }
-
-    &.vectors {
-      left: 70px;
-      height: 38px;
-    }
-
-    &.stamps {
-      left: 180px;
-      width: 190px;
-    }
-
-    &.stroke-color {
-      left: 216px;
-      width: 129px;
-    }
-
-    &.fill-color {
-      left: 252px;
-      width: 159px;
-    }
-  }
-
-  &.flip {
-    .toolbar-palette {
-      top: -70px;
-      border-radius: $toolbar-border-radius $toolbar-border-radius $toolbar-border-radius 0;
-      &.one-row {
-        top: -40px;
       }
     }
   }
 }
 
-.drawing-tool.read-only .drawing-tool-toolbar {
-  .drawing-tool-button {
-    cursor: default;
-  }
-}
