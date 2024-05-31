@@ -33,7 +33,7 @@ import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
 } from "../../../models/tiles/geometry/jxg-polygon";
 import {
-  isAxis, isAxisLabel, isBoard, isComment, isImage, isLine, isMovableLine,
+  isAxis, isBoard, isComment, isImage, isLine, isMovableLine,
   isMovableLineControlPoint, isMovableLineLabel, isPoint, isPolygon, isRealVisiblePoint, isVertexAngle,
   isVisibleEdge, isVisibleMovableLine, kGeometryDefaultPixelsPerUnit
 } from "../../../models/tiles/geometry/jxg-types";
@@ -468,8 +468,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     if (!this.context.board || this.props.readOnly || this.context.mode === "select") return;
     // Make sure deferred 'mouseMoved' events are not called after we've cleared the point
     this.handlePointerMove.cancel();
-    if (this.context.board) {
-      this.context.content?.clearPhantomPoint(this.context.board);
+    const { board, content } = this.context;
+    if (board && content) {
+      content.clearPhantomPoint(this.context.board);
+      // Removing the phantom point from the polygon re-creates it, so we have to add the handlers again.
+      if (content.activePolygonId) {
+        const poly = getPolygon(board, content.activePolygonId);
+        poly && this.handleCreatePolygon(poly);
+      }
     }
   };
 
@@ -1387,12 +1393,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         geometryContent.deselectAll(board);
       }
 
-      if (readOnly) {
-        return;
-      }
-
-      // In select mode, don't create new points
-      if (this.context.mode === "select") {
+      // Consider whether we should create a point or not.
+      if (readOnly || this.context.mode === "select" || hasSelectionModifier(evt)) {
         return;
       }
 
@@ -1408,16 +1410,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         return;
       }
 
-      if (this.context.mode === "points") {
-        for (const elt of board.objectsList) {
-          if (shouldInterceptPointCreation(elt) && elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
-            return;
-          }
+      // Certain objects can block point creation
+      for (const elt of board.objectsList) {
+        const shouldIntercept = (this.context.mode === "polygon")
+            ? shouldInterceptVertexCreation(elt)
+            : shouldInterceptPointCreation(elt);
+        if (shouldIntercept && elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
+          return;
         }
-      }
-
-      if (hasSelectionModifier(evt)) {
-        return;
       }
 
       // other clicks on board background create new points, perhaps even starting a polygon.
@@ -1433,12 +1433,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       });
     };
 
+    // Don't create new points on top of an existing point, line, etc.
     const shouldInterceptPointCreation = (elt: JXG.GeometryElement) => {
-      return isPolygon(elt)
-          || isRealVisiblePoint(elt)
+      return isRealVisiblePoint(elt)
           || isVisibleEdge(elt)
           || isVisibleMovableLine(elt)
-          || isAxisLabel(elt)
+          || isComment(elt)
+          || isMovableLineLabel(elt);
+    };
+
+    // When creating a polygon, don't put points on top of points or labels.
+    // But, you can put a point on a line or inside another polygon.
+    const shouldInterceptVertexCreation = (elt: JXG.GeometryElement) => {
+      return isRealVisiblePoint(elt)
           || isComment(elt)
           || isMovableLineLabel(elt);
     };
