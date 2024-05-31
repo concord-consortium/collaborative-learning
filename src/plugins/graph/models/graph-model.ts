@@ -22,7 +22,7 @@ import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-co
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import {
-  clueGraphColors, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
+  clueDataColorInfo, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
 } from "../../../utilities/color-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
 import { isSharedCaseMetadata, SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
@@ -140,7 +140,7 @@ export const GraphModel = TileContentModel
       return all;
     },
     get nextColor() {
-      return findLeastUsedNumber(clueGraphColors.length, self._idColors.values());
+      return findLeastUsedNumber(clueDataColorInfo.length, self._idColors.values());
     },
     getAdornmentOfType(type: string) {
       return self.adornments.find(a => a.type === type);
@@ -151,7 +151,7 @@ export const GraphModel = TileContentModel
       if (plotIndex < self._pointColors.length) {
         return self._pointColors[plotIndex];
       } else {
-        return clueGraphColors[plotIndex % clueGraphColors.length].color;
+        return clueDataColorInfo[plotIndex % clueDataColorInfo.length].color;
       }
     },
     get pointColor() {
@@ -599,12 +599,12 @@ export const GraphModel = TileContentModel
     getColorForId(id: string) {
       const colorIndex = self._idColors.get(id);
       if (colorIndex === undefined) return "#000000";
-      return clueGraphColors[colorIndex % clueGraphColors.length].color;
+      return clueDataColorInfo[colorIndex % clueDataColorInfo.length].color;
     },
     getColorNameForId(id: string) {
       const colorIndex = self._idColors.get(id);
       if (colorIndex === undefined) return "black";
-      return clueGraphColors[colorIndex % clueGraphColors.length].name;
+      return clueDataColorInfo[colorIndex % clueDataColorInfo.length].name;
     },
     getEditablePointsColor() {
       let color = "#000000";

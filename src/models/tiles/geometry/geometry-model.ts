@@ -7,7 +7,7 @@ import { TileContentModel } from "../tile-content";
 import { ESegmentLabelOption, JXGPositionProperty } from "./jxg-changes";
 import { kGeometryDefaultPixelsPerUnit } from "./jxg-types";
 import { findLeastUsedNumber } from "../../../utilities/math-utils";
-import { clueGraphColors } from "../../../utilities/color-utils";
+import { clueDataColorInfo } from "../../../utilities/color-utils";
 
 export interface IDependsUponResult {
   depends: boolean;
@@ -331,7 +331,7 @@ export const GeometryBaseContentModel = TileContentModel
     return { ...rest };
   })
   .views(self => ({
-    getColorForAttributeId(id: string) {
+    getColorSchemeForAttributeId(id: string) {
       return self.linkedAttributeColors.get(id);
     }
   }))
@@ -343,7 +343,7 @@ export const GeometryBaseContentModel = TileContentModel
       if (self.linkedAttributeColors.get(id)) {
         return self.linkedAttributeColors.get(id);
       }
-      const color = findLeastUsedNumber(clueGraphColors.length, self.linkedAttributeColors.values());
+      const color = findLeastUsedNumber(clueDataColorInfo.length, self.linkedAttributeColors.values());
       self.linkedAttributeColors.set(id, color);
       return color;
     }

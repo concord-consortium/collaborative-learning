@@ -191,7 +191,7 @@ export const GeometryContentModel = GeometryBaseContentModel
           const x = link.dataSet.attributes[0]?.numValue(ci);
           for (let ai = 1; ai < link.dataSet.attributes.length; ++ai) {
             const attr = link.dataSet.attributes[ai];
-            const colorScheme = self.getColorForAttributeId(attr.id) || 0;
+            const colorScheme = self.getColorSchemeForAttributeId(attr.id) || 0;
             const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
             const y = attr.numValue(ci);
             if (isFinite(x) && isFinite(y)) {
