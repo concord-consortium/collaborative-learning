@@ -351,7 +351,8 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNode(controlNode).should("not.exist");
   });
   it("Demo Output and Live Output Nodes", {
-    // The nodes/blocks were being moved up and then were underneath the title of the tile
+    // Without this, Cypress sometimes translates the program so the nodes/blocks
+    // are underneath the title of the tile.
     scrollBehavior: "center"
   },  () => {
     const demoOutputNode = "demo-output";
@@ -481,10 +482,6 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getModalOkButton().click();
 
     cy.log("should show needs connection message when fan is selected and there are no outputs");
-    // This is failing because it is putting the dropdown underneath the title
-    // This started happening because the canvas is narrower so the title now overlaps things.
-    // Maybe a better fix is to set the test level scrollBehavior so it always offsets to avoid this
-    // title.
     dataflowToolTile.getDropdown(liveOutputNode, liveOutputType).click();
     dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).eq(3).click();
     dataflowToolTile.getDropdown(liveOutputNode, liveOutputType).contains("Fan").should("exist");
