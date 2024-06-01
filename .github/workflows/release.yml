@@ -24,10 +24,10 @@ jobs:
     steps:
       - run: >
           aws s3 cp
-            s3://${{ env.BUCKET }}/${{ env.PREFIX }}/version/${{ inputs.version }}/${{ env.SRC_FILE }}
-            s3://${{ env.BUCKET }}/${{ env.PREFIX }}/${{ inputs.dest-file }}
+          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/version/${{ inputs.version }}/${{ env.SRC_FILE }}
+          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/${{ inputs.dest-file }}
       - run: >
           aws s3 cp
-            s3://${{ env.BUCKET }}/${{ env.PREFIX }}/version/${{ inputs.version }}/editor/${{ env.SRC_FILE }}
-            s3://${{ env.BUCKET }}/${{ env.PREFIX }}/editor/${{ inputs.dest-file }}
+          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/version/${{ inputs.version }}/editor/${{ env.SRC_FILE }}
+          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/editor/${{ inputs.dest-file }}
 
