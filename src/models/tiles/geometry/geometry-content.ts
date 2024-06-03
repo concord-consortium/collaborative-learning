@@ -123,17 +123,22 @@ export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
   const element = getObjectById(board, id);
   if (element) {
-    const fillColor = element.getAttribute("clientFillColor") || kPointDefaults.fillColor;
-    const strokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
-    const selectedFillColor = element.getAttribute("clientSelectedFillColor") || kPointDefaults.selectedFillColor;
-    const selectedStrokeColor = element.getAttribute("clientSelectedStrokeColor") || kPointDefaults.selectedStrokeColor;
+    const clientFillColor = element.getAttribute("clientFillColor") || kPointDefaults.fillColor;
+    const clientStrokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
+    const clientSelectedFillColor = element.getAttribute("clientSelectedFillColor") || kPointDefaults.selectedFillColor;
+    const clientSelectedStrokeColor = element.getAttribute("clientSelectedStrokeColor")
+      || kPointDefaults.selectedStrokeColor;
     const clientCssClass = selected
                             ? element.getAttribute("clientSelectedCssClass")
                             : element.getAttribute("clientCssClass");
     const cssClass = clientCssClass ? { cssClass: clientCssClass } : undefined;
+    const fillColor = selected ? clientSelectedFillColor : clientFillColor;
+    const strokeColor = selected ? clientSelectedStrokeColor : clientStrokeColor;
     element.setAttribute({
-              fillColor: selected ? selectedFillColor : fillColor,
-              strokeColor: selected ? selectedStrokeColor : strokeColor,
+              fillColor,
+              highlightFillColor: fillColor,
+              strokeColor,
+              highlightStrokeColor: strokeColor,
               ...cssClass
             });
   }
@@ -261,17 +266,15 @@ export const GeometryContentModel = GeometryBaseContentModel
       return self.linkedDataSets.find(ds => ds.providerId === linkedTableId);
     },
     getSelectedIds(board: JXG.Board) {
-      // returns the ids in creation order
-      return board.objectsList
-                  .filter(obj => self.isSelected(obj.id))
-                  .map(obj => obj.id);
+      return Array.from(self.metadata.selection.entries())
+        .filter(([id, selected]) => selected)
+        .map(([id, selected]) => id);
     },
     getDeletableSelectedIds(board: JXG.Board) {
-      // returns the ids in creation order
-      return board.objectsList
-                  .filter(obj => self.isSelected(obj.id) &&
-                          !obj.getAttribute("fixed") && !obj.getAttribute("clientUndeletable"))
-                  .map(obj => obj.id);
+      return this.getSelectedIds(board).filter(id => {
+        const obj = getObjectById(board, id);
+        return obj && !obj.getAttribute("fixed") && !obj.getAttribute("clientUndeletable");
+      });
     }
   }))
   .views(self => ({
@@ -483,6 +486,18 @@ export const GeometryContentModel = GeometryBaseContentModel
       board.update();
     }
 
+    function zoomBoard(board: JXG.Board, factor: number) {
+      if (!self.board) return;
+      const {xAxis, yAxis} = self.board;
+      xAxis.range = xAxis.range ? xAxis.range / factor : xAxis.range;
+      yAxis.range = yAxis.range ? yAxis.range / factor : yAxis.range;
+      // Update units, but keep them the same (avoid rounding error building up)
+      const oldUnit = (xAxis.unit + yAxis.unit) / 2;
+      const newUnit = oldUnit * factor;
+      xAxis.unit = yAxis.unit = newUnit;
+      // TODO log change
+    }
+
     function rescaleBoard(board: JXG.Board, params: IAxesParams) {
       const { canvasWidth, canvasHeight } = board;
       const { xName, xAnnotation, xMin, xMax, yName, yAnnotation, yMin, yMax } = params;
@@ -491,19 +506,31 @@ export const GeometryContentModel = GeometryBaseContentModel
       const unitX = width / (xMax - xMin);
       const unitY = height / (yMax - yMin);
 
+      // Now force equal scaling. The smaller unit wins, since we want to keep all points in view.
+      let calcUnit, calcXrange, calcYrange;
+      if (unitX < unitY) {
+        calcUnit = unitX;
+        calcXrange = xMax - xMin;
+        calcYrange = height / calcUnit;
+      } else {
+        calcUnit = unitY;
+        calcXrange = width / calcUnit;
+        calcYrange = yMax - yMin;
+      }
+
       const xAxisProperties = {
         name: xName,
         label: xAnnotation,
         min: xMin,
-        unit: unitX,
-        range: xMax - xMin
+        unit: calcUnit,
+        range: calcXrange
       };
       const yAxisProperties = {
         name: yName,
         label: yAnnotation,
         min: yMin,
-        unit: unitY,
-        range: yMax - yMin
+        unit: calcUnit,
+        range: calcYrange
       };
       if (self.board) {
         applySnapshot(self.board.xAxis, xAxisProperties);
@@ -515,7 +542,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         target: "board",
         targetID: board.id,
         properties: { boardScale: {
-                        xMin, yMin, unitX, unitY,
+                        xMin, yMin, unitX: calcUnit, unitY: calcUnit,
                         ...toObj("xName", xName), ...toObj("yName", yName),
                         ...toObj("xAnnotation", xAnnotation), ...toObj("yAnnotation", yAnnotation),
                         canvasWidth: width, canvasHeight: height
@@ -1216,6 +1243,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       actions: {
         initializeBoard,
         destroyBoard,
+        zoomBoard,
         rescaleBoard,
         resizeBoard,
         updateScale,

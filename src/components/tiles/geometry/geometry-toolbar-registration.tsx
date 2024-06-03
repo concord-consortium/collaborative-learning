@@ -22,6 +22,9 @@ import PolygonSvg from "../../../clue/assets/icons/geometry/polygon-icon.svg";
 import SelectSvg from "../../../clue/assets/icons/select-tool.svg";
 import ShapesDuplicateSvg from "../../../clue/assets/icons/geometry/shapes-duplicate-icon.svg";
 import AddDataSvg from "../../../assets/icons/add-data-graph-icon.svg";
+import ZoomInSvg from "../../../clue/assets/icons/zoom-in-icon.svg";
+import ZoomOutSvg from "../../../clue/assets/icons/zoom-out-icon.svg";
+import FitAllSvg from "../../../clue/assets/icons/fit-view-icon.svg";
 
 function ModeButton({name, title, targetMode, Icon}:
   { name: string, title: string, targetMode: GeometryTileMode, Icon: FunctionComponent<SVGProps<SVGSVGElement>> }) {
@@ -63,9 +66,7 @@ const PolygonButton = observer(function PolygonButton({name}: IToolbarButtonComp
 
 const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButtonComponentProps) {
   const { content, board, handlers } = useGeometryTileContext();
-  const disableDuplicate = board && (!content?.getOneSelectedPoint(board) &&
-    !content?.getOneSelectedPolygon(board));
-
+  const disableDuplicate = !content || !board || !content.hasDeletableSelection(board);
   return (
     <TileToolbarButton
       name={name}
@@ -203,6 +204,66 @@ const AddDataButton = observer (function AddDataButton({name}: IToolbarButtonCom
   );
 });
 
+function ZoomInButton({name}: IToolbarButtonComponentProps) {
+  const readOnly = useReadOnlyContext();
+  const { handlers } = useGeometryTileContext();
+
+  function handleClick() {
+    if (readOnly) return;
+    handlers?.handleZoomIn();
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Zoom In"
+      onClick={handleClick}
+      >
+      <ZoomInSvg/>
+    </TileToolbarButton>
+  );
+}
+
+function ZoomOutButton({name}: IToolbarButtonComponentProps) {
+  const readOnly = useReadOnlyContext();
+  const { handlers } = useGeometryTileContext();
+
+  function handleClick() {
+    if (readOnly) return;
+    handlers?.handleZoomOut();
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Zoom Out"
+      onClick={handleClick}
+      >
+      <ZoomOutSvg/>
+    </TileToolbarButton>
+  );
+}
+
+function FitAllButton({name}: IToolbarButtonComponentProps) {
+  const readOnly = useReadOnlyContext();
+  const { handlers } = useGeometryTileContext();
+
+  function handleClick() {
+    if (readOnly) return;
+    handlers?.handleFitAll();
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Fit all"
+      onClick={handleClick}
+      >
+      <FitAllSvg/>
+    </TileToolbarButton>
+  );
+}
+
 registerTileToolbarButtons("geometry",
   [
     { name: "select",
@@ -247,6 +308,18 @@ registerTileToolbarButtons("geometry",
     {
       name: "delete",
       component: DeleteButton
+    },
+    {
+      name: "zoom-in",
+      component: ZoomInButton
+    },
+    {
+      name: "zoom-out",
+      component: ZoomOutButton
+    },
+    {
+      name: "fit-all",
+      component: FitAllButton
     }
   ]
 );

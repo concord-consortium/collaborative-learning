@@ -218,15 +218,24 @@ function getAxisUnitsFromProps(props?: JXGProperties, scale = 1) {
 }
 
 function createBoard(domElementId: string, properties?: JXGProperties) {
-  const defaults = {
-          keepaspectratio: true,
-          showCopyright: false,
-          showNavigation: false,
-          minimizeReflow: "none"
-        };
-  const [unitX, unitY] = getAxisUnitsFromProps(properties);
   // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
-  const overrides = { axis: false, keepaspectratio: unitX === unitY };
+  const defaults = {
+    axis: false,
+    keepaspectratio: true,
+    showCopyright: false,
+    showNavigation: false,
+    minimizeReflow: "none",
+    // Zoom and pan are enabled by default, but if done directly
+    // through JSXGraph do not get persisted to the model.
+    zoom: {
+      enabled: false,
+      wheel: false
+    },
+    pan: {
+      enabled: false
+    }
+  };
+  const overrides = {};
   const props = combineProperties(domElementId, defaults, properties, overrides);
   const board = JXG.JSXGraph.initBoard(domElementId, props);
   return board;

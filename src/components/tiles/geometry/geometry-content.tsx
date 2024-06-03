@@ -6,7 +6,7 @@ import { getSnapshot, onSnapshot } from "mobx-state-tree";
 import objectHash from "object-hash";
 import { SizeMeProps } from "react-sizeme";
 
-import { pointBoundingBoxSize, pointButtonRadius, segmentButtonWidth } from "./geometry-constants";
+import { pointBoundingBoxSize, pointButtonRadius, segmentButtonWidth, zoomFactor } from "./geometry-constants";
 import { BaseComponent } from "../../base";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { getTableLinkColors } from "../../../models/tiles/table-links";
@@ -33,7 +33,7 @@ import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
 } from "../../../models/tiles/geometry/jxg-polygon";
 import {
-  isAxis, isAxisLabel, isBoard, isComment, isImage, isLine, isMovableLine,
+  isAxis, isBoard, isComment, isImage, isLine, isMovableLine,
   isMovableLineControlPoint, isMovableLineLabel, isPoint, isPolygon, isRealVisiblePoint, isVertexAngle,
   isVisibleEdge, isVisibleMovableLine, kGeometryDefaultPixelsPerUnit
 } from "../../../models/tiles/geometry/jxg-types";
@@ -47,7 +47,6 @@ import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
-import AxisSettingsDialog from "./axis-settings-dialog";
 import { EditableTileTitle } from "../editable-tile-title";
 import LabelSegmentDialog from "./label-segment-dialog";
 import MovableLineDialog from "./movable-line-dialog";
@@ -89,7 +88,6 @@ interface IState extends Mutable<SizeMeProps> {
   selectedLine?: JXG.Line;
   showSegmentLabelDialog?: boolean;
   showInvalidTableDataAlert?: boolean;
-  axisSettingsOpen: boolean;
 }
 
 interface JXGPtrEvent {
@@ -123,7 +121,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           size: { width: null, height: null },
           disableRotate: false,
           redoStack: [],
-          axisSettingsOpen: false,
         };
 
   private instanceId = ++sInstanceId;
@@ -135,7 +132,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private lastBoardDown: JXGPtrEvent;
   private lastPointDown?: JXGPtrEvent;
-  private lastSelectDown?: any;
   private dragPts: { [id: string]: IDragPoint } = {};
   private isVertexDrag: boolean;
 
@@ -197,7 +193,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleCreateLineLabel: this.handleCreateLineLabel,
         handleCreateMovableLine: this.handleCreateMovableLine,
         handleCreateComment: this.handleCreateComment,
-        handleUploadImageFile: this.handleUploadBackgroundImage
+        handleUploadImageFile: this.handleUploadBackgroundImage,
+        handleZoomIn: this.handleZoomIn,
+        handleZoomOut: this.handleZoomOut,
+        handleFitAll: this.handleScaleToFit
       };
       onSetActionHandlers(handlers);
     }
@@ -222,7 +221,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     // Access the model to ensure that model changes trigger a rerender
     const element = this.state.board?.objects[linkedPointId];
-    if (!element) { console.log("didn't find", linkedPointId); return; }
+    if (!element) return;
     const dataSet = this.getContent().getLinkedDataset(element.getAttribute("linkedTableId"))?.dataSet;
     const caseIndex = dataSet?.caseIndexFromID(element.getAttribute("linkedRowId"));
     const yValue = caseIndex!==undefined
@@ -469,8 +468,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     if (!this.context.board || this.props.readOnly || this.context.mode === "select") return;
     // Make sure deferred 'mouseMoved' events are not called after we've cleared the point
     this.handlePointerMove.cancel();
-    if (this.context.board) {
-      this.context.content?.clearPhantomPoint(this.context.board);
+    const { board, content } = this.context;
+    if (board && content) {
+      content.clearPhantomPoint(this.context.board);
+      // Removing the phantom point from the polygon re-creates it, so we have to add the handlers again.
+      if (content.activePolygonId) {
+        const poly = getPolygon(board, content.activePolygonId);
+        poly && this.handleCreatePolygon(poly);
+      }
     }
   };
 
@@ -482,7 +487,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       <>
         {this.renderCommentEditor()}
         {this.renderLineEditor()}
-        {this.renderSettingsEditor()}
         {this.renderSegmentLabelDialog()}
         <div id={this.elementId} key="jsxgraph"
             className={classes}
@@ -526,20 +530,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onAccept={this.handleUpdateLine}
           onClose={this.closeLineDialog}
           line={line}
-        />
-      );
-    }
-  }
-
-  private renderSettingsEditor() {
-    const { board, axisSettingsOpen } = this.state;
-    if (board && axisSettingsOpen) {
-      return (
-        <AxisSettingsDialog
-          key="editor"
-          board={board}
-          onAccept={this.handleUpdateSettings}
-          onClose={this.closeSettings}
         />
       );
     }
@@ -735,11 +725,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const changesToApply = convertModelObjectsToChanges(modelObjectsToConvert);
       applyChanges(board, changesToApply);
     }
-
-    if (!this.props.readOnly) {
-      const extents = this.getBoardPointsExtents(board);
-      this.rescaleBoardAndAxes(extents);
-    }
+    this.handleScaleToFit();
   }
 
   // remove/recreate all linked points
@@ -766,6 +752,27 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
     }
   }
+
+  private handleZoomIn = () => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (!board || !content) return;
+    content.zoomBoard(board, zoomFactor);
+  };
+
+  private handleZoomOut = () => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (!board || !content) return;
+    content.zoomBoard(board, 1/zoomFactor);
+  };
+
+  private handleScaleToFit = () => {
+    const { board } = this.state;
+    if (!board || this.props.readOnly) return;
+    const extents = this.getBoardPointsExtents(board);
+    this.rescaleBoardAndAxes(extents);
+  };
 
   private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {
     const { board } = this.state;
@@ -833,10 +840,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.setState({ selectedLine: undefined });
   };
 
-  private closeSettings = () => {
-    this.setState({ axisSettingsOpen: false });
-  };
-
   private handleCreateLineLabel = () => {
     const { board } = this.state;
     const content = this.getContent();
@@ -882,10 +885,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     });
   };
 
-  private handleOpenAxisSettings = () => {
-    this.setState({ axisSettingsOpen: true });
-  };
-
   private handleUpdateComment = (text: string, commentId?: string) => {
     const { board } = this.state;
     const content = this.getContent();
@@ -904,11 +903,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const props = [{position: point1}, {position: point2}];
     this.applyChange(() => content.updateObjects(board, ids, props));
     this.setState({ selectedLine: undefined });
-  };
-
-  private handleUpdateSettings = (params: IAxesParams) => {
-    this.rescaleBoardAndAxes(params);
-    this.setState({ axisSettingsOpen: false });
   };
 
   private handleRotatePolygon = (polygon: JXG.Polygon, vertexCoords: JXG.Coords[], isComplete: boolean) => {
@@ -1397,13 +1391,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                             .filter(obj => obj && (obj.elType !== "image"));
       if (!elements.length && !hasSelectionModifier(evt) && geometryContent.hasSelection()) {
         geometryContent.deselectAll(board);
-        return;
       }
 
-      if (readOnly) return;
-
-      // In select mode, don't create new points
-      if (this.context.mode === "select") {
+      // Consider whether we should create a point or not.
+      if (readOnly || this.context.mode === "select" || hasSelectionModifier(evt)) {
         return;
       }
 
@@ -1419,41 +1410,42 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         return;
       }
 
-      if (this.context.mode === "points") {
-        for (const elt of board.objectsList) {
-          if (shouldInterceptPointCreation(elt) && elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
-            return;
-          }
+      // Certain objects can block point creation
+      for (const elt of board.objectsList) {
+        const shouldIntercept = (this.context.mode === "polygon")
+            ? shouldInterceptVertexCreation(elt)
+            : shouldInterceptPointCreation(elt);
+        if (shouldIntercept && elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
+          return;
         }
       }
 
-      // clicks that affect selection don't create new points
-      if (this.lastSelectDown &&
-          (evt.timeStamp - this.lastSelectDown.timeStamp < clickTimeThreshold)) {
-        return;
-      }
-
       // other clicks on board background create new points, perhaps even starting a polygon.
-      if (!hasSelectionModifier(evt)) {
-        this.applyChange(() => {
-          const createPoly = this.context.mode === "polygon";
-          const { point, polygon } = geometryContent.realizePhantomPoint(board, [x, y], createPoly);
-          if (point) {
-            this.handleCreatePoint(point);
-          }
-          if (polygon) {
-            this.handleCreatePolygon(polygon);
-          }
-        });
-      }
+      this.applyChange(() => {
+        const createPoly = this.context.mode === "polygon";
+        const { point, polygon } = geometryContent.realizePhantomPoint(board, [x, y], createPoly);
+        if (point) {
+          this.handleCreatePoint(point);
+        }
+        if (polygon) {
+          this.handleCreatePolygon(polygon);
+        }
+      });
     };
 
+    // Don't create new points on top of an existing point, line, etc.
     const shouldInterceptPointCreation = (elt: JXG.GeometryElement) => {
-      return isPolygon(elt)
-          || isRealVisiblePoint(elt)
+      return isRealVisiblePoint(elt)
           || isVisibleEdge(elt)
           || isVisibleMovableLine(elt)
-          || isAxisLabel(elt)
+          || isComment(elt)
+          || isMovableLineLabel(elt);
+    };
+
+    // When creating a polygon, don't put points on top of points or labels.
+    // But, you can put a point on a line or inside another polygon.
+    const shouldInterceptVertexCreation = (elt: JXG.GeometryElement) => {
+      return isRealVisiblePoint(elt)
           || isComment(elt)
           || isMovableLineLabel(elt);
     };
@@ -1486,19 +1478,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleCreateAxis = (axis: JXG.Line) => {
-    const handlePointerDown = (evt: any) => {
-      const { readOnly, scale } = this.props;
-      const { board } = this.state;
-      // Axis labels get the event preferentially even though we think of other potentially
-      // overlapping objects (like movable line labels) as being on top. Therefore, we only
-      // open the axis settings dialog if we consider the axis label to be the preferred
-      // clickable object at the position of the event.
-      if (board && !readOnly && (axis.label === getClickableObjectUnderMouse(board, evt, false, scale))) {
-        this.handleOpenAxisSettings();
-      }
-    };
-
-    axis.label && axis.label.on("down", handlePointerDown);
+    // nothing needed, but keep this method for consistency
   };
 
   private handleCreatePoint = (point: JXG.Point) => {
@@ -1557,8 +1537,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       if (isPointDraggable) {
         this.beginDragSelectedPoints(evt, point);
       }
-
-      this.lastSelectDown = evt;
     };
 
     const handleDrag = (evt: any) => {
@@ -1716,7 +1694,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           geometryContent.deselectAll(board);
         }
         selectPolygon = true;
-        this.lastSelectDown = evt;
       }
       if (selectPolygon) {
         geometryContent.selectElement(board, polygon.id);

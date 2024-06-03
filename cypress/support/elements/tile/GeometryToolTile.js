@@ -58,6 +58,11 @@ class GeometryToolTile {
             return cy.get('.canvas-area .geometry-content .JXGtext').contains('y');
         }
     }
+    // Returns all tick labels on both axes. The X-axis ones are first in the list.
+    getGraphAxisTickLabels(axis) {
+      return cy.get('.canvas-area .geometry-content .JXGtext[id*="_ticks_"]');
+    }
+
     getGraphPointCoordinates(index){ //This is the point coordinate text
         let x=0,
             y=0;
@@ -77,7 +82,7 @@ class GeometryToolTile {
     }
     getSelectedGraphPoint() {
         // TODO: when we update the design, should make this a CSS class
-        return cy.get('.geometry-content.editable ellipse[stroke="#FF0000"]');
+        return cy.get('.geometry-content.editable ellipse[fill="#ff0000"]');
     }
     hoverGraphPoint(x,y){
         let transX=this.transformFromCoordinate('x', x),

@@ -297,6 +297,11 @@
           "comment",
           "|",
           "add-data",
+          "|",
+          "zoom-in",
+          "zoom-out",
+          "fit-all",
+          "|",
           "delete"
         ]
       },

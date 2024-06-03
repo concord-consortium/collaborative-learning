@@ -29,7 +29,7 @@ Notes on dependencies, particularly reasons for not updating to their latest ver
 |jsxgraph            |1.4.4          |1.8.0         |1.4.5 broke scaled rendering, e.g. in 4-up views                                     |
 |mob-state-tree      |5.1.5-cc.1     |5.1.6         |We are using a concord fork which fixes a bug. Additionally latest version changes TS types for arrays which broke a number of our models.|
 |nanoid              |3.3.4          |4.0.0         |v4 switched to ESM and dependencies such as postcss break with v4                    |
-|netlify-cms-app     |2.15.72        |2.15.72       |Requires React 16 or 17. Blocks upgrade to React 18.
+|netlify-cms-app     |2.15.72        |2.15.72       |Requires React 16 or 17. Blocks upgrade to React 18.                                 |
 |react               |17.0.2         |18.2.0        |React 18                                                                             |
 |react-chartjs-2     |2.11.2         |4.3.1         |Major version update not attempted; may not be used any more (was used by Dataflow)  |
 |react-data-grid     |7.0.0-canary.46|7.0.0-beta.16 |Canary.47 changed the RowFormatter props requiring some additional refactoring. Note that `beta` versions come after `canary` versions. We are patching react-data-grid and our patch only applies to 7.0.0-canary.46|

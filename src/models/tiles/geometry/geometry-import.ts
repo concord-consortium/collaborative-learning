@@ -201,7 +201,6 @@ export function defaultGeometryBoardChange(
     operation: "create",
     target: "board",
     properties: {
-      axis: true,
       boundingBox,
       ...units,
       ...overrides
