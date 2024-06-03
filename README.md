@@ -222,7 +222,7 @@ There are a number of URL parameters that can aid in testing:
 
 The `unit` parameter can be in 3 forms:
 - a valid URL starting with `https:` or `http:` will be treated as an absolute URL.
-- a string starting with `./` will be treated as a URL relative to the current page in the browser.
+- a string starting with `./` will be treated as a URL relative to the javascript files of CLUE.
 - Everything else is treated as a unit code, these codes are first looked up in a map to remap legacy codes. Then the URL of the unit is created by `${curriculumSiteUrl}/branch/${branchName}/${unitCode}/content.json`.
   - `curriculumSiteUrl` defaults to `https://models-resources.concord.org/clue-curriculum`.
   - `branchName` defaults to `main`.
@@ -232,7 +232,7 @@ The `firebase`, `firestore`, and `functions` params can take an `emulator` value
 
 ### Standalone Document Editor
 
-There is an alternative entry point for CLUE available at `/doc-editor.html`. This can be used to save and open individual documents from the local file system. Remote documents can be loaded into this editor with the `document` URL parameter. The editor requires a `unit` parameter to configure the toolbar. It can load an exported document content which is typical for section documents. It can also load a raw document content which is the same format that is stored in Firebase. It will save in the same format that was loaded.
+There is an alternative entry point for CLUE available at `/editor/`. This can be used to save and open individual documents from the local file system. Remote documents can be loaded into this editor with the `document` URL parameter. The editor requires a `unit` parameter to configure the toolbar. It can load an exported document content which is typical for section documents. It can also load a raw document content which is the same format that is stored in Firebase. It will save in the same format that was loaded.
 
 The `document` parameter is useful if you want to work on something that requires a document in a specific state. You can just reload the page and get back to this state. You can use this locally by creating an initial document in doc-editor.html, and save the file to `src/public/[filename]`. Now you can load the document back with the parameter `document=[filename]`. This works because the document parameter will load URLs relative to the current page in the browser. This approach can also be used in Cypress tests. It would mean the test could just load in a document to test instead of having to setup the document first.
 

@@ -1,4 +1,4 @@
-const url = "/doc-editor.html";
+const url = "/editor/";
 const documentContent = () => cy.get(".canvas-area .canvas .document-content");
 
 function beforeTest() {
@@ -9,7 +9,7 @@ function beforeTest() {
 context('Doc Editor', () => {
   it('verify doc editor and solution button work', function () {
     beforeTest();
-    
+
     cy.log("verify doc editor loads");
     cy.get(".toolbar").should("exist");
     documentContent().should("exist");

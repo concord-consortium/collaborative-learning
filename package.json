@@ -69,9 +69,9 @@
     "build": "npm-run-all lint:build clean build:webpack build:cms",
     "build-and-serve": "npm-run-all build serve",
     "build:debug": "npm-run-all lint clean build:webpack",
-    "build:top-test": "cross-env DEPLOY_PATH=specific/release/ webpack --mode production --output-path top-test/specific/release && cp top-test/specific/release/index-top.html top-test/",
     "build:webpack": "cross-env NODE_OPTIONS=--max-old-space-size=4096 webpack --mode production",
     "build:cms": "cd cms && webpack --mode production && cd .. && mkdir -p dist && cp -r cms/dist/ dist/cms/ && mv dist/cms/admin.html dist/",
+    "build:for-deploy": "npm-run-all clean build:webpack build:cms",
     "check:types": "tsc --noEmit",
     "clean": "rimraf dist",
     "deploy:database:rules": "firebase deploy --only database",
@@ -85,7 +85,6 @@
     "migrate:debug": "node --inspect-brk ./migrations/migrate",
     "postinstall": "patch-package",
     "serve": "npx serve -c ../serve.json -l 8080 dist",
-    "serve:top-test": "npx http-server top-test",
     "start": "webpack-dev-server --hot",
     "start:secure": "webpack-dev-server --https --hot --cert ~/.localhost-ssl/localhost.pem --key ~/.localhost-ssl/localhost.key",
     "stats": "webpack --profile --json --mode production > stats.json",
@@ -106,7 +105,12 @@
     "test:production": "cypress open --env testEnv=production",
     "test:master": "cypress open --env testEnv=master",
     "test:branch": "cypress open --env testEnv=branch",
-    "test:local": "cypress open --env testEnv=local"
+    "test:local": "cypress open --env testEnv=local",
+    "top-test:build:webpack": "cross-env DEPLOY_PATH=specific/release/ webpack --mode production --output-path top-test/specific/release",
+    "top-test:build:copy-index": "cp top-test/specific/release/index-top.html top-test/index.html",
+    "top-test:build:copy-editor": "mkdir -p top-test/editor && cp top-test/specific/release/editor/index-top.html top-test/editor/index.html",
+    "top-test:build": "npm-run-all top-test:build:*",
+    "top-test:serve": "npx http-server top-test"
   },
   "repository": {
     "type": "git",
