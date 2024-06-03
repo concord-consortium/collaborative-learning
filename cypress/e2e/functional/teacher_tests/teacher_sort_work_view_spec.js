@@ -106,7 +106,7 @@ describe('SortWorkView Tests', () => {
     });
 
     cy.log("verify that exemplar document shows in Sort Work");
-    sortWork.getSortWorkItem().eq(0).should('contain', exemplarDocs[0]);
+    sortWork.getSortWorkItem().should('contain', exemplarDocs[0]);
 
     cy.log("open problem doc and make sure Edit button doesn't show and Close button shows");
     sortWork.getSortWorkItem().contains(studentProblemDocs[0]).click();

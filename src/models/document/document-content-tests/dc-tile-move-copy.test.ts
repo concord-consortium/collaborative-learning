@@ -9,11 +9,11 @@ import { IDropRowInfo } from "../tile-row";
 // - the table model errors when trying to load it
 // - the image does not display
 // you can see these errors using the document editor
-// http://localhost:8080/doc-editor.html
+// http://localhost:8080/editor/
 import multipleTilesExamples from "./multiple-tiles-example.json";
 /*
     You can open this content with the document editor:
-    http://localhost:8080/doc-editor.html
+    http://localhost:8080/editor/
 
     TODO: this content has a few problems in it:
     - the table model errors when trying to load it

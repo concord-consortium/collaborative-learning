@@ -1,0 +1,67 @@
+name: Deployed Regression
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch containing cypress tests
+        default: master
+        required: true
+      deployedPath:
+        description: Path to test. It is added to https://collaborative-learning.concord.org/
+        default: branch/master
+        required: true
+jobs:
+  all-tests:
+    runs-on: ubuntu-latest
+    container:
+      image: cypress/browsers:node-20.11.0-chrome-121.0.6167.184-1-ff-123.0-edge-121.0.2277.128-1
+      # This is needed so the commit info can be recorded by cypress
+      options: --user 1001
+    strategy:
+      # when one test fails, DO NOT cancel the other
+      # containers, because this will kill Cypress processes
+      # leaving the Dashboard hanging ...
+      # https://github.com/cypress-io/github-action/issues/48
+      fail-fast: false
+      matrix:
+        # run 5 copies of the current job in parallel
+        containers: [1, 2, 3, 4, 5, 6, 7]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          # Hard code the branch for testing
+          # ref: 187652818-cypress-on-staging
+      - name: Run Cypress Tests
+        uses: cypress-io/github-action@v6
+        with:
+          # TODO: we might need to manual set the build id
+          # TODO: the description of the run in cypress will be the commit message of branch
+          # instead of something about the app being tested. This can be overriden using these
+          # env variables: https://docs.cypress.io/guides/continuous-integration/introduction#Git-information
+
+          # only record the results to dashboard.cypress.io if CYPRESS_RECORD_KEY is set
+          record: ${{ !!secrets.CYPRESS_RECORD_KEY }}
+          # only do parallel if we have a record key
+          parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
+          browser: chrome
+          spec: cypress/e2e/functional/**
+          # We can't use index-staging.html for several reasons:
+          # - visiting the doc-editor won't work with that baseUrl
+          # - loading the qa units won't work without additional changes because
+          #   they would be relative to the root instead of the version folder
+          config: baseUrl=https://collaborative-learning.concord.org/${{ github.event.inputs.deployedPath }}/
+          # Hard code the baseUrl for testing
+          # config: baseUrl=https://collaborative-learning.concord.org/version/v5.10.1/
+        env:
+          # pass the Dashboard record key as an environment variable
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          # pass GitHub token to allow accurately detecting a build vs a re-run build
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Increase memory allocation
+          NODE_OPTIONS: "--max_old_space_size=4096"
+
+          # Note: we can't do code coverage because the deployed code will not be
+          # instrumented

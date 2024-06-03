@@ -1,93 +1,54 @@
-import React, { useCallback, useRef, useEffect, useState } from "react";
-import { humidAnimationPhases } from "../demo-output-control-assets";
+import React, { useRef, useEffect, useState } from "react";
+import { humidEndingFrames, humidLoopFrames, humidOffFrames, humidStartingFrames } from "./demo-output-control-assets";
+import { StateAnimator, StateSequence } from "./animator";
+
+const stayOffSequence = new StateSequence(humidOffFrames);
+
+const stayOnSequence = new StateSequence(humidLoopFrames);
+stayOnSequence.nextForward = stayOnSequence; // Loop
+
+const rampUpSequence = new StateSequence(humidStartingFrames);
+rampUpSequence.nextForward = stayOnSequence; // go to stayOn
+
+const rampDownSequence = new StateSequence(humidEndingFrames);
 
 interface IProps {
   nodeValue: number;
 }
 
 export const HumidifierAnimation: React.FC<IProps> = ({nodeValue}) => {
-  const priorValue = useRef<number | undefined>();
-  const [imageSrc, setImageSrc] = useState(humidAnimationPhases.stayOff.frames[0]);
-  const intervalRef = useRef<NodeJS.Timeout | undefined>();
-  const loopIndexRef = useRef<number>(0);
+  const priorValueRef = useRef<number | undefined>();
 
-  function removeAnimation() {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = undefined;
-    }
-  }
-
-  function registerAnimation(_interval: any) {
-    intervalRef.current = _interval;
-  }
+  const [imageSrc, setImageSrc] = useState(humidOffFrames[0]);
+  const [animator] = useState<StateAnimator>(() => new StateAnimator(setImageSrc, 100));
 
   // Remove the animation when the component is disposed
   useEffect(() => {
-    return removeAnimation;
-  }, []);
-
-  const advanceFrame = useCallback((frames: string[]) => {
-    loopIndexRef.current = (loopIndexRef.current + 1) % frames.length;
-    const nextFrame = frames[loopIndexRef.current];
-    setImageSrc(nextFrame);
-  }, [setImageSrc]);
-
-  const startLooping = useCallback(() => {
-    if (!intervalRef.current){
-      const interval = setInterval(() => {
-        advanceFrame(humidAnimationPhases.stayOn.frames);
-      }, 100);
-      registerAnimation(interval);
-    }
-  }, [advanceFrame]);
-
-  const stopLooping = useCallback(() => {
-    removeAnimation();
-  }, []);
+    return animator.stopInterval;
+  }, [animator]);
 
   useEffect(() => {
-    const justLoaded = priorValue.current === undefined;
-    const shouldRampUp = priorValue.current === 0 && nodeValue === 1;
-    const shouldRampDown = priorValue.current === 1 && nodeValue === 0;
-    const shouldJustLoop = justLoaded && nodeValue === 1;
-    const shouldJustRest = justLoaded && nodeValue === 0;
+    const priorValue = priorValueRef.current;
+    const justLoaded = priorValue === undefined;
 
-    if (shouldRampUp) {
-      setImageSrc(humidAnimationPhases.rampUp.frames[0]);
-      humidAnimationPhases.rampUp.frames.forEach((frame, index) => {
-        // TODO: we should have a way to cancel this we shouldn't be just adding
-        // timeouts for all of the frames, it'd be better to at least just add
-        // one at a time unless it is canceled.
-        setTimeout(() => {
-          setImageSrc(frame);
-        }, index * 100);
-      });
+    if (justLoaded && nodeValue === 1) {
+      animator.play(stayOnSequence);
     }
 
-    if (shouldRampDown) {
-      setImageSrc(humidAnimationPhases.rampDown.frames[0]);
-      humidAnimationPhases.rampDown.frames.forEach((frame, index) => {
-        // TODO: we should have a way to cancel this we shouldn't be just adding
-        // timeouts for all of the frames, it'd be better to at least just add
-        // one at a time unless it is canceled.
-        setTimeout(() => {
-          setImageSrc(frame);
-        }, index * 100);
-      });
+    if (justLoaded && nodeValue === 0) {
+      animator.play(stayOffSequence);
     }
 
-    if (shouldJustLoop) setImageSrc(humidAnimationPhases.stayOn.frames[0]);
-    if (shouldJustRest) setImageSrc(humidAnimationPhases.stayOff.frames[0]);
-
-    if (shouldJustLoop || shouldRampUp){
-      startLooping();
-    } else {
-      stopLooping();
+    if (priorValue === 0 && nodeValue === 1) {
+      animator.play(rampUpSequence);
     }
 
-    priorValue.current = nodeValue;
-  },[nodeValue, setImageSrc, startLooping, stopLooping]);
+    if (priorValue === 1 && nodeValue === 0) {
+      animator.play(rampDownSequence);
+    }
+
+    priorValueRef.current = nodeValue;
+  },[animator, nodeValue, setImageSrc ]);
 
   return (
     <img className={`mist`} src={imageSrc} />

@@ -14,7 +14,7 @@ Deploying to S3 is handled by the [S3 Deploy Action](https://github.com/concord-
 
 ## index-top.html
 
-The key feature of `index-top.html` is that it references the javascript and css assets using relative paths to the version or branch folder. So the javascript url will be something like `version/v1.2.3/index.js`. This way when the `index-top.html` is copied to the top level, the browser can find these assets. 
+The key feature of `index-top.html` is that it references the javascript and css assets using relative paths to the version or branch folder. So the javascript url will be something like `version/v1.2.3/index.js`. This way when the `index-top.html` is copied to the top level, the browser can find these assets.
 
 Building a functional index.js that works when it is loaded either by `index.html` or `index-top.html` depends on using Webpack a certain way.  Since Webpack 5, the `publicPath` configuration option's default value is `'auto'`. With this value the public path is computed at runtime based on the path the script was loaded from. So if the script was loaded from `https://collaborative-learning.concord.org/version/v1.2.3/index.[hash].js` then at runtime the public path will be set to `https://collaborative-learning.concord.org/version/v1.2.3/`. The reason the public path matters has to do with how javascript loads and references assets like images or json files.
 
@@ -48,18 +48,20 @@ Note: there is a `publicPath` configuration option for the `HtmlWebpackPlugin`. 
 
 ## Local testing for compatibility with index-top.html
 
-When running in the regular dev server, you won't see errors when using hard coded paths. 
+When running in the regular dev server, you won't see errors when using hard coded paths.
 
 Typically, hard coded paths will only work if you are using `CopyWebpackPlugin`. This is because these assets need to be copied into the `dist` folder. With import statements the assets are copied for you. If you remove the `CopyWebpackPlugin` you will likely see errors when using the dev server, so you can find the places that need to be fixed.
 
 If you need to continue referencing files without using import, you can find these issues and test fixes for them locally using the following npm scripts:
-- **`build:top-test`** builds the project into the `top-test/specific/release` folder and copies `top-test/specific/release/index-top.html` to `top-test/index-top.html`.
-- **`serve:top-test`** starts a web server which is serving the `top-test` folder.
+- **`top-test:build`** builds the project into the `top-test/specific/release` folder and copies `top-test/specific/release/index-top.html` to `top-test/index.html`.
+- **`top-test:serve`** starts a web server which is serving the `top-test` folder.
+
+After running the the above two scripts you can try loading http://localhost:[port]/ and see if all of the assets load correctly.
 
 ## Benefits compared to previous branch based releases
 
 Previously we would do releases by updating a branch named `production`. This would build and deploy the application to the top level of the s3 folder.
 
-With this new approach a release is done by copying a single small html file from a version folder up to the top level. This means the javascript and css is not rebuilt just to promote a version. Therefore the exact build products can be tested before it is released. 
+With this new approach a release is done by copying a single small html file from a version folder up to the top level. This means the javascript and css is not rebuilt just to promote a version. Therefore the exact build products can be tested before it is released.
 
 Because deploying a version or branch only updates files within a folder specific to that version or branch, the utility used to copy files up to S3 can be more simple and efficient. In the previous model when the utility was uploading a production branch it would need to make sure to ignore the branch and version folders. Otherwise it might delete these folders because they aren't part of the upload. Even if the utility was configured to never delete files, it still needed to load the meta data of all of the files in the branch and version folders. It did this to know what has changed between local and remote. And S3's APIs don't support filtering listings of files other than a folder prefix.

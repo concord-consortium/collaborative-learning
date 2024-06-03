@@ -22,7 +22,7 @@ jest.mock("../../tiles/log/log-tile-document-event", () => ({
 }));
 
 /*
-  This can be opened with: http://localhost:8080/doc-editor.html
+  This can be opened with: http://localhost:8080/editor/
 */
 import sharedModelExample from "./shared-model-example.json";
 const srcContent: IDocumentImportSnapshot = sharedModelExample.content;
