@@ -26,10 +26,6 @@ $toolbar-width: 44px;
         height: 100%;
         outline: none;
 
-        svg ellipse {
-          paint-order: stroke fill;
-        }
-
         .comment {
           min-width: 30px;
           max-width: 250px;
@@ -43,10 +39,26 @@ $toolbar-width: 44px;
             background-color: red;
           }
         }
+
+        svg {
+
+          ellipse {
+            paint-order: stroke fill;
+          }
+
+          .tool-tile.selected:not(.readonly) & {
+            ellipse, line, polygon {
+              cursor: move;
+            }
+          }
+
+        }
+
       }
     }
   }
 }
+
 .rotate-polygon-icon {
   background-image: url("../../../assets/rotate-selection.svg");
   position: absolute;

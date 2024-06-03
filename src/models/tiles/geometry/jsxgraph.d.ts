@@ -6,6 +6,8 @@ declare namespace JXG {
 
   const touchProperty: string;
 
+  const Options: any;
+
   const boards: { [id: string]: Board };
 
   interface Angle extends Sector {

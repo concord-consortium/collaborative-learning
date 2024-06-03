@@ -238,6 +238,8 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
   const overrides = {};
   const props = combineProperties(domElementId, defaults, properties, overrides);
   const board = JXG.JSXGraph.initBoard(domElementId, props);
+  // I would prefer to have the font specified in CSS, but if this setting is left blank some defaults get inserted.
+  JXG.Options.text.cssDefaultStyle = "font-family: 'Lato', 'Noto Sans Symbols 2', 'Noto Sans Math', sans-serif";
   return board;
 }
 
