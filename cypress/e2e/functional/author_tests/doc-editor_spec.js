@@ -27,5 +27,52 @@ context('Doc Editor', () => {
     solutionButton().click();
     imageTile().should("not.have.class", "teacher");
     solutionButton().should("not.have.class", "active");
+
+    cy.log("test save button");
+    // Note we can't actually save a file because Cypress can't drive the dialog
+    const fakeFile = {
+      name: "test.json",
+      text() {
+        return "{}";
+      }
+    };
+    const fakeFileHandle = {
+      getFile() {
+        return fakeFile;
+      },
+      createWritable() {
+        return {
+          write() {},
+          close() {}
+        };
+      }
+    };
+    cy.window().then((win) =>
+      cy.stub(win, 'showSaveFilePicker').as('showSaveFilePicker')
+        .returns(fakeFileHandle)
+    );
+    cy.contains("button", 'save').click();
+    cy.get('@showSaveFilePicker')
+      .should('have.been.calledOnce')
+      .invoke('restore');
+    cy.get(".status").should("contain", "test.json");
+
+
+    cy.log("test open an empty document");
+    cy.window().then((win) => {
+      fakeFile.name = "test-open.json";
+      cy.stub(win, 'showOpenFilePicker').as('showOpenFilePicker')
+        .returns([fakeFileHandle]);
+    });
+    cy.contains("button", 'open').click();
+    cy.get('@showOpenFilePicker')
+      .should('have.been.calledOnce')
+      .invoke('restore');
+    cy.get(".status").should("contain", "test-open.json");
+
+    cy.log("test opening the settings dialog");
+    cy.contains("button", "settings").click();
+    cy.get(".modal-header").should("contain", "Settings");
   });
+
 });
