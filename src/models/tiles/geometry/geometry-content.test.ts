@@ -111,14 +111,15 @@ declare global {
   }
 }
 
-function buildPolygon(board: JXG.Board, content: GeometryContentModelType, coordinates: JXGCoordPair[]) {
+function buildPolygon(board: JXG.Board, content: GeometryContentModelType,
+    coordinates: JXGCoordPair[], finalVertexClicked=0) {
   const points: JXG.Point[] = [];
   content.addPhantomPoint(board, [0, 0]);
   coordinates.forEach(pair => {
     const { point } = content.realizePhantomPoint(board, pair, true);
     if (point) points.push(point);
   });
-  const polygon = content.closeActivePolygon(board);
+  const polygon = content.closeActivePolygon(board, points[finalVertexClicked]);
   return { polygon, points };
 }
 
@@ -380,6 +381,26 @@ describe("GeometryContent", () => {
     const badpoly = content.applyChange(board, { operation: "create", target: "polygon" }) as any as JXG.Polygon;
     expect(badpoly).toBeUndefined();
 
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can short-circuit a polygon", () => {
+    const { content, board } = createContentAndBoard();
+    const { polygon, points } = buildPolygon(board, content, [[1, 1], [3, 3], [7, 4], [5, 1]], 1);
+    expect(content.lastObjectOfType("polygon")).toEqual({
+      id: polygon?.id, type: "polygon", points: [ points[1].id, points[2].id, points[3].id ], colorScheme: 0 });
+    expect(isPolygon(polygon)).toBe(true);
+    const polygonId = polygon?.id;
+    // point 0 should have been freed
+    expect(content.getDependents([points[0].id])).toEqual([points[0].id]);
+    expect(content.getDependents([points[0].id], { required: true })).toEqual([points[0].id]);
+    // the rest of the points are in the poly
+    expect(content.getDependents([points[1].id])).toEqual([points[1].id, polygonId]);
+    expect(content.getDependents([points[1].id], { required: true })).toEqual([points[1].id]);
+    expect(content.getDependents([points[2].id])).toEqual([points[2].id, polygonId]);
+    expect(content.getDependents([points[2].id||''], { required: true })).toEqual([points[2].id]);
+    expect(content.getDependents([points[3].id])).toEqual([points[3].id, polygonId]);
+    expect(content.getDependents([points[3].id||''], { required: true })).toEqual([points[3].id]);
     destroyContentAndBoard(content, board);
   });
 

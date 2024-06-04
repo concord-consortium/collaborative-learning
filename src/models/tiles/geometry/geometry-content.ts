@@ -779,21 +779,42 @@ export const GeometryContentModel = GeometryBaseContentModel
       self.activePolygonId = undefined;
     }
 
-    function closeActivePolygon(board: JXG.Board) {
+    /**
+     * Complete the polygon being drawn.
+     * The point argument is the point the user clicked; normally the first point of the polygon to close it.
+     * If a different point is clicked, though, the polygon is closed to that vertex, freeing any earlier points
+     * since they are not part of the closed shape.
+     * @param board
+     * @param point
+     * @returns the polygon
+     */
+    function closeActivePolygon(board: JXG.Board, point: JXG.Point) {
       if (!self.activePolygonId) return;
       let poly = getPolygon(board, self.activePolygonId);
       if (!poly) return;
       const vertexIds = poly.vertices.map(v => v.id);
-      // Remove the phantom point from the list of vertices & update polygon
+      // Remove any points prior to the one clicked, they are no longer part of the poly.
+      const clickedIndex = vertexIds.indexOf(point.id);
+      if (clickedIndex) {
+        // Not undefined and not zero; they clicked something other than the first point.
+        vertexIds.splice(0, clickedIndex);
+        // Update the model as well
+        const polyModel = self.activePolygonId && self.getObject(self.activePolygonId);
+        if (polyModel && isPolygonModel(polyModel)) {
+          polyModel.points.splice(0, clickedIndex);
+        }
+      }
+      // Remove the phantom point and from the list of vertices
+      // Also removes the last point, which is always a repeat of the first point.
       const index = vertexIds.findIndex(v => v === self.phantomPoint?.id);
       if (index >= 1) {
-        vertexIds.splice(index,1);
+        vertexIds.splice(index,2);
 
         const change: JXGChange = {
           operation: "update",
           target: "polygon",
           targetID: poly.id,
-          parents: vertexIds,
+          parents: vertexIds
         };
         const result = syncChange(board, change);
         if (isPolygon(result)) {

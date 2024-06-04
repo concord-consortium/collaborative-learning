@@ -1526,12 +1526,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const coords = copyCoords(point.coords);
       const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
 
-      // In polygon mode, clicking the first point in the polygon again closes it.
+      // In polygon mode, clicking a point in the polygon again closes it.
       if (mode === "polygon" && geometryContent.phantomPoint && geometryContent.activePolygonId) {
         const poly = getPolygon(board, geometryContent.activePolygonId);
-        const firstVertex = isPolygon(poly) && poly.vertices[0];
-        if (firstVertex && id === firstVertex.id) {
-          const polygon = geometryContent.closeActivePolygon(board);
+        const vertex = poly && poly.vertices.find(p => p.id === id);
+        if (vertex) {
+          // user clicked on a vertex that is in the current polygon.
+          const polygon = geometryContent.closeActivePolygon(board, vertex);
           if (polygon) {
             this.handleCreatePolygon(polygon);
           }
