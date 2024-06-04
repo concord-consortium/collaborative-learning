@@ -486,7 +486,6 @@ export const GeometryContentModel = GeometryBaseContentModel
       const oldUnit = (xAxis.unit + yAxis.unit) / 2;
       const newUnit = oldUnit * factor;
       xAxis.unit = yAxis.unit = newUnit;
-      // TODO log change
     }
 
     function rescaleBoard(board: JXG.Board, params: IAxesParams) {

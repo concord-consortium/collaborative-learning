@@ -116,6 +116,7 @@ let sInstanceId = 0;
 export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   static contextType = GeometryTileContext;
   declare context: React.ContextType<typeof GeometryTileContext>;
+  private updateObservable = observable({updateCount: 0});
 
   public state: IState = {
           size: { width: null, height: null },
@@ -259,6 +260,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         return this.getContent().exportJson(options);
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
+        // This gets updated when the JSX board needs to be rebuilt
+        // eslint-disable-next-line unused-imports/no-unused-vars -- need to observe
+        const {updateCount} = this.updateObservable;
+
         if (objectType === "point" || objectType === "linkedPoint") {
           const coords = objectType === "point"
             ? this.getPointScreenCoords(objectId)
@@ -463,6 +468,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         geometryContent.updateScale(this.state.board, scale);
       }
     }
+    runInAction(() => this.updateObservable.updateCount++);
   }
 
   public componentWillUnmount() {
