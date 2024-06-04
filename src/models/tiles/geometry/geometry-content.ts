@@ -539,7 +539,7 @@ export const GeometryContentModel = GeometryBaseContentModel
                         canvasWidth: width, canvasHeight: height
                       } }
       };
-      const axes = applyAndLogChange(board, change);
+      const axes = syncChange(board, change);
       return isAxisArray(axes) ? axes : undefined;
     }
 

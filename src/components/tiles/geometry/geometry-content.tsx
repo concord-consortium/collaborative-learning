@@ -762,7 +762,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const changesToApply = convertModelObjectsToChanges(modelObjectsToConvert);
       applyChanges(board, changesToApply);
     }
-    this.handleScaleToFit();
+    this.scaleToFit();
   }
 
   // remove/recreate all linked points
@@ -807,12 +807,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleScaleToFit = () => {
-    const { board } = this.state;
     const content = this.getContent();
+    logGeometryEvent(content, "update", "board", undefined, { userAction: "fit all" });
+    this.scaleToFit();
+  };
+
+  private scaleToFit = () => {
+    const { board } = this.state;
     if (!board || this.props.readOnly) return;
     const extents = this.getBoardPointsExtents(board);
     this.rescaleBoardAndAxes(extents);
-    logGeometryEvent(content, "update", "board", undefined, { userAction: "fit all" });
   };
 
   private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {
