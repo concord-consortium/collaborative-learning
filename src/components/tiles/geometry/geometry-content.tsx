@@ -1,6 +1,6 @@
 import React from "react";
 import { castArray, debounce, each, filter, find, keys as _keys, throttle, values } from "lodash";
-import { observe, reaction } from "mobx";
+import { IObjectDidChange, observe, reaction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
 import objectHash from "object-hash";
@@ -204,8 +204,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private getPointScreenCoords(pointId: string) {
     // Access the model to ensure that model changes trigger a rerender
-    const p = this.getContent().getObject(pointId) as PointModelType;
+    const content = this.getContent();
+    const p = content.getObject(pointId) as PointModelType;
     if (!p || p.x == null || p.y == null) return;
+    if (!content.board?.xAxis.range || !content.board.yAxis.range) return;
 
     if (!this.state.board) return;
     const element = this.state.board?.objects[pointId];
@@ -379,6 +381,33 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         this.initializeBoard();
       }
     }));
+
+    // synchronize selection changes
+    this.disposers.push(observe(this.getContent().metadata.selection, (change: IObjectDidChange<boolean>) => {
+      const { board: _board } = this.state;
+      if (_board) {
+        // this may be a shared selection change; get all points associated with it
+        const objs = getPointsByCaseId(_board, change.name.toString());
+        const edges: JXG.Line[] = [];
+        objs.forEach(obj => {
+          if (change.type !== 'remove') {
+            setElementColor(_board, obj.id, change.newValue.value);
+            // Also find segments that are attached to the changed points
+            Object.values(obj.childElements).forEach(child => {
+              if(isVisibleEdge(child) && !edges.includes(child)) {
+                edges.push(child);
+              }
+            });
+          }
+        });
+        edges.forEach(edge => {
+          // Edge is selcted if both end points are.
+          const selected = this.getContent().isSelected(edge.point1.id) && this.getContent().isSelected(edge.point2.id);
+          setElementColor(_board, edge.id, selected);
+        });
+      }
+    }));
+
   }
 
   private getButtonPath(
@@ -757,7 +786,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         parents: points.coords,
         properties: points.properties,
         links: { tileIds: [link]} });
-      console.log('pts', points.properties);
       castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
     }
   }
@@ -767,6 +795,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     if (!board || !content) return;
     content.zoomBoard(board, zoomFactor);
+    logGeometryEvent(content, "update", "board", undefined, { userAction: "zoom in" });
   };
 
   private handleZoomOut = () => {
@@ -774,13 +803,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     if (!board || !content) return;
     content.zoomBoard(board, 1/zoomFactor);
+    logGeometryEvent(content, "update", "board", undefined, { userAction: "zoom out" });
   };
 
   private handleScaleToFit = () => {
     const { board } = this.state;
+    const content = this.getContent();
     if (!board || this.props.readOnly) return;
     const extents = this.getBoardPointsExtents(board);
     this.rescaleBoardAndAxes(extents);
+    logGeometryEvent(content, "update", "board", undefined, { userAction: "fit all" });
   };
 
   private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {
@@ -1468,30 +1500,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       });
 
-    // synchronize selection changes
-    this.disposers.push(observe(content.metadata.selection, (change: any) => {
-      const { board: _board } = this.state;
-      if (_board) {
-        // this may be a shared selection change; get all points associated with it
-        const objs = getPointsByCaseId(_board, change.name);
-        const edges: JXG.Line[] = [];
-        objs.forEach(obj => {
-          setElementColor(_board, obj.id, change.newValue.value);
-          // Also find segments that are attached to the changed points
-          Object.values(obj.childElements).forEach(child => {
-            if(isVisibleEdge(child) && !edges.includes(child)) {
-              edges.push(child);
-            }
-          });
-        });
-        edges.forEach(edge => {
-          // Edge is selcted if both end points are.
-          const selected = content.isSelected(edge.point1.id) && content.isSelected(edge.point2.id);
-          setElementColor(_board, edge.id, selected);
-        });
-      }
-    }));
-
     if (this.props.onSetBoard) {
       this.props.onSetBoard(board);
     }
@@ -1710,21 +1718,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const geometryContent = this.props.model.content as GeometryContentModelType;
       const inVertex = isInVertex(evt);
       const allVerticesSelected = areAllVerticesSelected();
-      let selectPolygon = false;
       if (!inVertex && !allVerticesSelected) {
         // deselect other elements unless appropriate modifier key is down
-        if (board && !hasSelectionModifier(evt)) {
+        if (!hasSelectionModifier(evt)) {
           geometryContent.deselectAll(board);
         }
-        selectPolygon = true;
-      }
-      if (selectPolygon) {
-        geometryContent.selectElement(board, polygon.id);
-        each(polygon.ancestors, point => {
-          if (board && isPoint(point) && !inVertex) {
-            geometryContent.selectElement(board, point.id);
-          }
-        });
+        const ids = Object.values(polygon.ancestors).filter(obj => isPoint(obj)).map(obj => obj.id);
+        ids.push(polygon.id);
+        geometryContent.selectObjects(board, ids);
       }
 
       if (!readOnly) {
