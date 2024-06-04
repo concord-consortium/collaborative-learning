@@ -2,7 +2,7 @@ import React from "react";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { Map } from "immutable";
 
-import { defaultDocumentModelParts } from "../components/doc-editor-app-defaults";
+import { defaultDocumentModelParts } from "../components/doc-editor/doc-editor-app-defaults";
 import { AppProvider, initializeApp } from "../initialize-app";
 import { createDocumentModelWithEnv, DocumentModelType } from "../models/document/document";
 import { DEBUG_CMS } from "../lib/debug";
@@ -24,7 +24,7 @@ interface IState {
 
 const stores = initializeApp("dev", true);
 
-export class DocumentEditor extends React.Component<IProps, IState>  {
+export class CmsDocumentEditor extends React.Component<IProps, IState>  {
   disposer: IDisposer;
   constructor(props: any) {
     super(props);

@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { DocumentEditor } from "./document-editor";
+import { CmsDocumentEditor } from "./cms-document-editor";
 import { DocumentModelType } from "../models/document/document";
 
 let initialValue = undefined as DocumentModelType | undefined;
@@ -25,7 +25,7 @@ const handleUpdateContent = (json: Record<string, any>) => {
 const renderEditor = () => {
   ReactDOM.render(
     <div id="app">
-      <DocumentEditor initialValue={initialValue} handleUpdateContent={handleUpdateContent} />
+      <CmsDocumentEditor initialValue={initialValue} handleUpdateContent={handleUpdateContent} />
     </div>,
     document.getElementById("app")
   );
