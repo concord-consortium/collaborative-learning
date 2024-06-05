@@ -404,6 +404,23 @@ describe("GeometryContent", () => {
     destroyContentAndBoard(content, board);
   });
 
+  it("can make two polygons that share a vertex", () => {
+    const { content, board } = createContentAndBoard();
+    // first polygon
+    const { polygon, points } = buildPolygon(board, content, [[0, 0], [1, 1], [2, 2]]); // points 0, 1, 2
+    if (!isPolygon(polygon)) fail("buildPolygon did not return a polygon");
+    // second polygon
+    points.push(content.realizePhantomPoint(board, [5, 5], true).point!); // point 3
+    points.push(content.realizePhantomPoint(board, [4, 4], true).point!); // point 4
+    content.addPointToActivePolygon(board, points[2].id);
+    const polygon2 = content.closeActivePolygon(board, points[3]);
+    if (!isPolygon(polygon2)) fail("addPointToActivePolygon did not return a polygon");
+    expect(polygon.vertices.map(v => v.id)).toEqual([points[0].id, points[1].id, points[2].id, points[0].id]);
+    expect(polygon2.vertices.map(v => v.id)).toEqual([points[3].id, points[4].id, points[2].id, points[3].id]);
+
+    expect(content.getDependents([points[2].id])).toEqual([points[2].id, polygon.id, polygon2.id]);
+  });
+
   it("can add/remove/update polygons from model", () => {
     let polygonId = "";
     const { content, board } = createContentAndBoard((_content) => {
