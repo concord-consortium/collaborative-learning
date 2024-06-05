@@ -1,6 +1,6 @@
 import React from "react";
 import { castArray, debounce, each, filter, find, keys as _keys, throttle, values } from "lodash";
-import { IObjectDidChange, observe, reaction } from "mobx";
+import { IObjectDidChange, observable, observe, reaction, runInAction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
 import objectHash from "object-hash";
@@ -1532,19 +1532,45 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const coords = copyCoords(point.coords);
       const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
 
-      // In polygon mode, clicking a point in the polygon again closes it.
-      if (mode === "polygon" && geometryContent.phantomPoint && geometryContent.activePolygonId) {
-        const poly = getPolygon(board, geometryContent.activePolygonId);
-        const vertex = poly && poly.vertices.find(p => p.id === id);
-        if (vertex) {
-          // user clicked on a vertex that is in the current polygon.
-          const polygon = geometryContent.closeActivePolygon(board, vertex);
-          if (polygon) {
-            this.handleCreatePolygon(polygon);
+      // Polygon mode interactions with existing points
+      if (mode === "polygon") {
+        this.applyChange(() => {
+          if (geometryContent.phantomPoint && geometryContent.activePolygonId) {
+            const poly = getPolygon(board, geometryContent.activePolygonId);
+            const vertex = poly && poly.vertices.find(p => p.id === id);
+            if (vertex) {
+              // user clicked on a vertex that is in the current polygon - close the polygon.
+              const polygon = geometryContent.closeActivePolygon(board, vertex);
+              if (polygon) {
+                this.handleCreatePolygon(polygon);
+              }
+            } else {
+              // use clicked a vertex that is not part of the current polygon - adopt it.
+              geometryContent.addPointToActivePolygon(board, point.id);
+            }
+          } else {
+            // No active polygon. Activate one for the point clicked.
+            console.log("Clicked on point with childs:", point.childElements);
+            const polys = Object.values(point.childElements).filter(child => isPolygon(child));
+            if (polys.length > 0 && isPolygon(polys[0])) {
+              // Activate the first polygon returned.  A point may be in more than one.
+              const poly = polys[0];
+              const polygon = geometryContent.makePolygonActive(board, poly.id, point.id);
+              if (polygon) {
+                this.handleCreatePolygon(polygon);
+              }
+            } else {
+              // Point clicked is not part of a polygon.  Create one.
+              const polygon = geometryContent.createPolygonIncludingPoint(board, point.id);
+              if (polygon) {
+                this.handleCreatePolygon(polygon);
+              }
+            }
           }
-          return;
-        }
+        });
+        return;
       }
+
       this.dragPts = isPointDraggable ? { [id]: { initial: coords } } : {};
       this.lastPointDown = { evt, coords };
 

@@ -36,7 +36,7 @@ import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { gImageMap } from "../../image-map";
 import { IClueTileObject } from "../../annotations/clue-object";
-import { appendVertexId, getPolygon, logGeometryEvent } from "./geometry-utils";
+import { appendVertexId, getPoint, getPolygon, logGeometryEvent } from "./geometry-utils";
 import { getPointVisualProps } from "./jxg-point";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
@@ -661,6 +661,59 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
     }
 
+    function makePolygonActive(board: JXG.Board, polygonId: string, pointId: string) {
+      const poly = getPolygon(board, polygonId);
+      const polygonModel = self.getObject(polygonId);
+      const point = getPoint(board, pointId);
+      if (!poly || !point || !polygonModel || !isPolygonModel(polygonModel) || !self.phantomPoint) return;
+      const pointIndex = poly.vertices.indexOf(point);
+      if (pointIndex < 0) return;
+
+      const vertices = poly.vertices.map(vert => vert.id);
+      // remove reiterated point 0
+      if (vertices.length > 1 && vertices[0]===vertices[vertices.length-1]) vertices.pop();
+      // Rewrite the list of vertices so that the point clicked on is last.
+      const reorderedVertices = vertices.slice(pointIndex+1).concat(vertices.slice(0, pointIndex+1));
+      polygonModel.points.replace(reorderedVertices);
+
+      // Then add phantom point at the end
+      reorderedVertices.push(self.phantomPoint.id);
+
+      self.activePolygonId = polygonId;
+      const change: JXGChange = {
+        operation: "update",
+        target: "object",
+        targetID: poly.id,
+        parents: reorderedVertices
+      };
+      const updatedPolygon = syncChange(board, change);
+      return isPolygon(updatedPolygon) ? updatedPolygon : undefined;
+    }
+
+    function addPointToActivePolygon(board: JXG.Board, pointId: string) {
+      // Sanity check everything
+      if (!self.activePolygonId || !self.phantomPoint) return;
+      const poly = getPolygon(board, self.activePolygonId);
+      if (!poly) return;
+      const vertexIds = poly.vertices.map(v => v.id);
+      const phantomPointIndex = vertexIds.indexOf(self.phantomPoint.id);
+      if (phantomPointIndex<0) return;
+      const polygonModel = self.objects.get(self.activePolygonId);
+      if (!isPolygonModel(polygonModel)) return;
+
+      // Insert the new point before the phantom point
+      vertexIds.splice(phantomPointIndex, 0, pointId);
+      const change: JXGChange = {
+        operation: "update",
+        target: "polygon",
+        targetID: poly.id,
+        parents: vertexIds
+      };
+      const updatedPolygon = syncChange(board, change);
+      polygonModel.points.push(pointId);
+      return isPolygon(updatedPolygon) ? updatedPolygon : undefined;
+    }
+
     /**
      * Make the current phantom point into a real point.
      * The new point is persisted into the model. It remains a part of the active polygon if any.
@@ -771,6 +824,24 @@ export const GeometryContentModel = GeometryBaseContentModel
         };
         syncChange(board, change);
         self.phantomPoint = undefined;
+      }
+    }
+
+    function createPolygonIncludingPoint(board: JXG.Board, pointId: string) {
+      const points = [pointId];
+      if (self.phantomPoint) points.push(self.phantomPoint.id);
+      const polygonModel = PolygonModel.create({ points });
+      self.addObjectModel(polygonModel);
+      self.activePolygonId = polygonModel.id;
+    const change: JXGChange = {
+        operation: "create",
+        target: "polygon",
+        parents: points,
+        properties: { id: polygonModel.id }
+      };
+      const result = syncChange(board, change);
+      if (isPolygon(result)) {
+        return result;
       }
     }
 
@@ -1255,7 +1326,10 @@ export const GeometryContentModel = GeometryBaseContentModel
         addPhantomPoint,
         setPhantomPointPosition,
         realizePhantomPoint,
+        addPointToActivePolygon,
+        makePolygonActive,
         clearPhantomPoint,
+        createPolygonIncludingPoint,
         clearActivePolygon,
         closeActivePolygon,
         addMovableLine,
