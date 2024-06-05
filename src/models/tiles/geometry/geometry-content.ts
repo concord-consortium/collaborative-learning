@@ -607,6 +607,14 @@ export const GeometryContentModel = GeometryBaseContentModel
       return isPoint(point) ? point : undefined;
     }
 
+    /**
+     * Creates a "phantom" point, which is shown on the board but not (yet) persisted in the model.
+     * It can be part of a polygon (which is expected to be the activePolygon)
+     * @param board
+     * @param parents
+     * @param polygonId
+     * @returns the Point object
+     */
     function addPhantomPoint(board: JXG.Board, parents: JXGCoordPair, polygonId?: string):
         JXG.Point | undefined {
       if (!board) return undefined;
@@ -746,36 +754,57 @@ export const GeometryContentModel = GeometryBaseContentModel
       return { point, polygon: newPolygon };
     }
 
+    /**
+     * Removes the phantom point from the board, adjusting the active polygon if there is one.
+     * @param board
+     */
     function clearPhantomPoint(board: JXG.Board) {
-      if (self.phantomPoint) {
-        const phantomId = self.phantomPoint.id;
+      if (!self.phantomPoint) return;
+      const phantomId = self.phantomPoint.id;
 
-        // remove from polygon, if it's in one.
-        if (self.activePolygonId) {
-          const poly = getPolygon(board, self.activePolygonId);
-          if (poly) {
-            const remainingVertices = poly.vertices.map(v => v.id).filter(id => id !== phantomId);
-            const change1: JXGChange = {
-              operation: "update",
-              target: "polygon",
-              targetID: self.activePolygonId,
-              parents: remainingVertices
-            };
-            syncChange(board, change1);
-          }
+      // remove from polygon, if it's in one.
+      if (self.activePolygonId) {
+        const poly = getPolygon(board, self.activePolygonId);
+        if (poly) {
+          const remainingVertices = poly.vertices.map(v => v.id).filter(id => id !== phantomId);
+          const change1: JXGChange = {
+            operation: "update",
+            target: "polygon",
+            targetID: self.activePolygonId,
+            parents: remainingVertices
+          };
+          syncChange(board, change1);
         }
-
-        const change: JXGChange = {
-          operation: "delete",
-          target: "point",
-          targetID: self.phantomPoint.id
-        };
-        syncChange(board, change);
-        self.phantomPoint = undefined;
       }
+
+      const change: JXGChange = {
+        operation: "delete",
+        target: "point",
+        targetID: self.phantomPoint.id
+      };
+      syncChange(board, change);
+      self.phantomPoint = undefined;
     }
 
-    function clearActivePolygon() {
+    /**
+     * De-activate the active polygon.
+     * This means it is no longer being edited.
+     * If it only has a single point, the polygon will be deleted, leaving just a regular point.
+     * @param board
+     */
+    function clearActivePolygon(board: JXG.Board) {
+      if (!self.activePolygonId) return;
+      const poly = getPolygon(board, self.activePolygonId);
+      if (!poly) return;
+      if (poly.vertices.length < 2
+          || (poly.vertices.length === 2 && poly.vertices[0]===poly.vertices[1])) {
+        const change: JXGChange = {
+          operation: "delete",
+          target: "polygon",
+          targetID: poly.id
+        };
+        syncChange(board, change);
+      }
       self.activePolygonId = undefined;
     }
 
