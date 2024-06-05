@@ -1,6 +1,6 @@
 import React from "react";
 import { castArray, debounce, each, filter, find, keys as _keys, throttle, values } from "lodash";
-import { IObjectDidChange, observe, reaction } from "mobx";
+import { IObjectDidChange, observable, observe, reaction, runInAction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
 import objectHash from "object-hash";

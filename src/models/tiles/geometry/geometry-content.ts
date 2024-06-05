@@ -690,6 +690,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         target: "object",
         targetID: newRealPoint.id,
         properties: {
+          ...getPointVisualProps(false, newRealPoint.colorScheme, false),
           isPhantom: false,
           position
         }

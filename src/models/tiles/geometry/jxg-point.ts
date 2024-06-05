@@ -17,7 +17,8 @@ const defaultPointProperties = Object.freeze({
   size: 4,
   snapSizeX: kSnapUnit,
   snapSizeY: kSnapUnit,
-  withLabel: true
+  withLabel: true,
+  transitionDuration: 0
 });
 
 const selectedPointProperties = Object.freeze({

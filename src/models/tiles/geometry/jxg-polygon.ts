@@ -20,7 +20,8 @@ const selectedPolygonProps = Object.freeze({
 const defaultPolygonEdgeProps = Object.freeze({
   strokeWidth: 1,        highlightStrokeWidth: 4,
   strokeOpacity: 1,      highlightStrokeOpacity: .12,
-                         highlightStrokeColor: '#0081ff'
+                         highlightStrokeColor: '#0081ff',
+  transitionDuration: 0
 });
 
 const selectedPolygonEdgeProps = Object.freeze({
