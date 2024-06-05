@@ -205,10 +205,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private getPointScreenCoords(pointId: string) {
     // Access the model to ensure that model changes trigger a rerender
-    const content = this.getContent();
-    const p = content.getObject(pointId) as PointModelType;
+    const p = this.getContent().getObject(pointId) as PointModelType;
     if (!p || p.x == null || p.y == null) return;
-    if (!content.board?.xAxis.range || !content.board.yAxis.range) return;
 
     if (!this.state.board) return;
     const element = this.state.board?.objects[pointId];
@@ -750,7 +748,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     // Make sure each linked dataset's attributes have colors assigned.
     content.linkedDataSets.forEach(link => {
       link.dataSet.attributes.forEach(attr => {
-        content.assignColorForAttributeId(attr.id);
+        content.assignColorSchemeForAttributeId(attr.id);
       });
     });
 

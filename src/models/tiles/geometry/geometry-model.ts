@@ -341,7 +341,7 @@ export const GeometryBaseContentModel = TileContentModel
     replaceLinks(newLinks: string[]) {
       self.links.replace(newLinks);
     },
-    assignColorForAttributeId(id: string) {
+    assignColorSchemeForAttributeId(id: string) {
       if (self.linkedAttributeColors.get(id)) {
         return self.linkedAttributeColors.get(id);
       }

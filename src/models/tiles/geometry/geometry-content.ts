@@ -36,7 +36,7 @@ import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { gImageMap } from "../../image-map";
 import { IClueTileObject } from "../../annotations/clue-object";
-import { appendVertexId, getPolygon, logGeometryEvent } from "./geometry-utils";
+import { appendVertexId, getPolygon, logGeometryEvent, removeClosingVertexId } from "./geometry-utils";
 import { getPointVisualProps } from "./jxg-point";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
@@ -793,6 +793,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       let poly = getPolygon(board, self.activePolygonId);
       if (!poly) return;
       const vertexIds = poly.vertices.map(v => v.id);
+      removeClosingVertexId(vertexIds);
       // Remove any points prior to the one clicked, they are no longer part of the poly.
       const clickedIndex = vertexIds.indexOf(point.id);
       if (clickedIndex) {
@@ -804,11 +805,10 @@ export const GeometryContentModel = GeometryBaseContentModel
           polyModel.points.splice(0, clickedIndex);
         }
       }
-      // Remove the phantom point and from the list of vertices
-      // Also removes the last point, which is always a repeat of the first point.
+      // Remove the phantom point from the list of vertices
       const index = vertexIds.findIndex(v => v === self.phantomPoint?.id);
       if (index >= 1) {
-        vertexIds.splice(index,2);
+        vertexIds.splice(index,1);
 
         const change: JXGChange = {
           operation: "update",
@@ -821,7 +821,7 @@ export const GeometryContentModel = GeometryBaseContentModel
           poly = result;
         }
       } else {
-        // If index === 1, only a single point remains, no need for a polygon object.
+        // If index === 1, only a single non-phantom point remains, so we delete the polygon object.
         const change: JXGChange = {
           operation: "delete",
           target: "polygon",
