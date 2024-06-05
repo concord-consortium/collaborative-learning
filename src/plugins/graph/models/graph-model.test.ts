@@ -32,6 +32,22 @@ const createElementSpy = jest.spyOn(document, "createElement")
           : origCreateElement.call(document, tagName, options);
 });
 
+// Mock colors imported from SCSS
+jest.mock("../../../utilities/color-utils.ts", () => {
+  const originalModule = jest.requireActual("../../../utilities/color-utils.ts");
+  return {
+    ...originalModule,
+    clueDataColorInfo: [
+      { color: "#0069ff", name: "blue" },
+      { color: "#ff9617", name: "orange" },
+      { color: "#19a90f", name: "green" },
+      { color: "#ee0000", name: "red" },
+      { color: "#cbd114", name: "yellow" },
+      { color: "#d51eff", name: "purple" },
+      { color: "#6b00d2", name: "indigo" }    ]
+  };
+});
+
 import { getSnapshot } from '@concord-consortium/mobx-state-tree';
 import { GraphModel, IGraphModel } from './graph-model';
 import { kGraphTileType } from '../graph-defs';
