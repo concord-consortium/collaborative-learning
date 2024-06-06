@@ -483,16 +483,17 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handlePointerMove = debounce((evt: any) => {
-    if (!this.context.board || this.props.readOnly || this.context.mode === "select") return;
+    if (this.props.readOnly || this.context.mode === "select") return;
     // Move phantom point to location of mouse pointer
-    const content = this.context.content as GeometryContentModelType;
-    const usrCoords = getEventCoords(this.context.board, evt, this.props.scale).usrCoords;
+    const { board, content } = this.context;
+    if (!board || !content) return;
+    const usrCoords = getEventCoords(board, evt, this.props.scale).usrCoords;
     if (usrCoords.length >= 2) {
       const position: JXGCoordPair = [usrCoords[1], usrCoords[2]];
       if (content.phantomPoint) {
-        content.setPhantomPointPosition(this.context.board, position);
+        content.setPhantomPointPosition(board, position);
       } else {
-        content.addPhantomPoint(this.context.board, position, content.activePolygonId);
+        content.addPhantomPoint(board, position, content.activePolygonId);
       }
     }
   }, 10, { leading: true, trailing: true });
@@ -503,7 +504,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.handlePointerMove.cancel();
     const { board, content } = this.context;
     if (board && content) {
-      content.clearPhantomPoint(this.context.board);
+      content.clearPhantomPoint(board);
       // Removing the phantom point from the polygon re-creates it, so we have to add the handlers again.
       if (content.activePolygonId) {
         const poly = getPolygon(board, content.activePolygonId);
@@ -1548,10 +1549,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             }
           } else {
             // No active polygon. Activate one for the point clicked.
-            console.log("Clicked on point with childs:", point.childElements);
             const polys = Object.values(point.childElements).filter(child => isPolygon(child));
             if (polys.length > 0 && isPolygon(polys[0])) {
-              // Activate the first polygon returned.  A point may be in more than one.
+              // The point clicked is in one or more polygons.
+              // Activate the first polygon returned.
               const poly = polys[0];
               const polygon = geometryContent.makePolygonActive(board, poly.id, point.id);
               if (polygon) {

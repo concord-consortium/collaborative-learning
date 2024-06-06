@@ -3,7 +3,7 @@ import { reaction } from "mobx";
 import { addDisposer, applySnapshot, detach, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
-import { ITableLinkProperties, linkedPointId } from "../table-link-types";
+import { ITableLinkProperties, linkedPointId, splitLinkedPointId } from "../table-link-types";
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileContentAPIActions, tileContentAPIViews } from "../tile-model-hooks";
@@ -216,6 +216,18 @@ export const GeometryContentModel = GeometryBaseContentModel
         return self.getMovableLinePoint(id);
       } else {
         return self.getObject(id);
+      }
+    },
+    getObjectColorScheme(id: string) {
+      const obj = self.getObject(id);
+      if (isPointModel(obj) || isPolygonModel(obj) || isMovableLineModel(obj)) {
+        return obj.colorScheme;
+      }
+      if (obj === undefined) {
+        const [linkedRowId, linkedColId] = splitLinkedPointId(id);
+        if (linkedRowId && linkedColId) {
+          return self.getColorSchemeForAttributeId(linkedColId);
+        }
       }
     },
     getDependents(ids: string[], options?: { required: boolean }) {
@@ -634,7 +646,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       };
       const point = syncChange(board, change);
 
-      // If a polygon ID was provided, display the phantom point as if it was part of that polygon
+      // If a polygon ID is provided, display the phantom point as part of that polygon
       if (polygonId) {
         const poly = getPolygon(board, polygonId);
         if (poly) {
@@ -837,20 +849,20 @@ export const GeometryContentModel = GeometryBaseContentModel
       };
       syncChange(board, change);
       self.phantomPoint = undefined;
-      self.activePolygonId = undefined;
     }
 
     function createPolygonIncludingPoint(board: JXG.Board, pointId: string) {
+      const colorScheme = self.getObjectColorScheme(pointId) || 0;
       const points = [pointId];
       if (self.phantomPoint) points.push(self.phantomPoint.id);
-      const polygonModel = PolygonModel.create({ points });
+      const polygonModel = PolygonModel.create({ points, colorScheme });
       self.addObjectModel(polygonModel);
       self.activePolygonId = polygonModel.id;
     const change: JXGChange = {
         operation: "create",
         target: "polygon",
         parents: points,
-        properties: { id: polygonModel.id }
+        properties: { id: polygonModel.id, colorScheme }
       };
       const result = syncChange(board, change);
       if (isPolygon(result)) {
@@ -867,6 +879,7 @@ export const GeometryContentModel = GeometryBaseContentModel
     function clearActivePolygon(board: JXG.Board) {
       if (!self.activePolygonId) return;
       const poly = getPolygon(board, self.activePolygonId);
+      self.activePolygonId = undefined;
       if (!poly) return;
       if (poly.vertices.length < 2
           || (poly.vertices.length === 2 && poly.vertices[0]===poly.vertices[1])) {

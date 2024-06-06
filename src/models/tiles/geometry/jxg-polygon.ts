@@ -35,8 +35,7 @@ const phantomPolygonEdgeProps = Object.freeze({
   highlightStrokeOpacity: 0
 });
 
-function getPolygonVisualProps(selected: boolean) {
-  const colorScheme = 0; // TODO
+function getPolygonVisualProps(selected: boolean, colorScheme: number) {
   const props: JXGProperties = { ...defaultPolygonProps };
   if (selected) {
     merge(props, selectedPolygonProps);
@@ -261,6 +260,7 @@ function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
 function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: JXGParentType[]) {
   // Remove the old polygon and create a new one.
   const oldPolygon = getPolygon(board, polygonId);
+  const colorScheme = oldPolygon?.getAttribute("colorScheme");
   if (!oldPolygon) return;
   board.removeObject(oldPolygon);
   const vertices: JXG.Point[]
@@ -268,10 +268,10 @@ function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: J
     .filter(notEmpty);
   const props = {
     id: polygonId, // re-use the same ID
-    ...getPolygonVisualProps(false)
+    colorScheme,
+    ...getPolygonVisualProps(false, colorScheme)
   };
   const polygon = board.create("polygon", vertices, props);
-
 
   // Without deleting/rebuilding, would look something like this (but this fails due to apparent bugs in JSXGraph 1.4.x)
   // const polygon = getPolygon(board, polygonId);
@@ -307,9 +307,10 @@ export const polygonChangeAgent: JXGChangeAgent = {
     const parents = (change.parents || [])
                       .map(id => getObjectById(_board, id as string))
                       .filter(notEmpty);
+    const colorScheme = !Array.isArray(change.properties) && change.properties?.colorScheme;
     const props = {
       id: uniqueId(),
-      ...getPolygonVisualProps(false),
+      ...getPolygonVisualProps(false, colorScheme||0),
       ...change.properties
     };
     const poly = parents.length ? _board.create("polygon", parents, props) : undefined;
