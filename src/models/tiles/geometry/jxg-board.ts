@@ -225,19 +225,27 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
     showCopyright: false,
     showNavigation: false,
     minimizeReflow: "none",
-    // Zoom and pan are enabled by default, but if done directly
-    // through JSXGraph do not get persisted to the model.
+    // Disabled for now - could be refactored so that these native abilities of
+    // JSXGraph are available to the user. Changes made via the native zoom,
+    // pan, or keyboard controls are not persisted to the model and so would be
+    // more frustrating than helpful.
+    // For accessibility, it would be very nice to have these work.
     zoom: {
       enabled: false,
       wheel: false
     },
     pan: {
       enabled: false
+    },
+    keyboard: {
+      enabled: false
     }
   };
   const overrides = {};
   const props = combineProperties(domElementId, defaults, properties, overrides);
   const board = JXG.JSXGraph.initBoard(domElementId, props);
+  // I would prefer to have the font specified in CSS, but if this setting is left blank some defaults get inserted.
+  JXG.Options.text.cssDefaultStyle = "font-family: 'Lato', 'Noto Sans Symbols 2', 'Noto Sans Math', sans-serif";
   return board;
 }
 

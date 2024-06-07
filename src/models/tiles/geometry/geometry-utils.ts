@@ -7,6 +7,7 @@ import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { LogEventName } from "../../../lib/logger-types";
 import { GeometryBaseContentModel } from "./geometry-model";
 import { getTileIdFromContent } from "../tile-model";
+import { clueDataColorInfo } from "../../../utilities/color-utils";
 
 export function copyCoords(coords: JXG.Coords) {
   return new JXG.Coords(JXG.COORDS_BY_USER, coords.usrCoords.slice(1), coords.board);
@@ -23,6 +24,21 @@ export function getPolygon(board: JXG.Board, id: string): JXG.Polygon|undefined 
 }
 
 /**
+ * Remove the final item of the array if it is equal to the first item. JSXGraph
+ * polygons' list of vertices includes the first vertex again at the end of the
+ * list to show that it is closed. This method removes it for convenience in
+ * manipulating the list.
+ * @param ids
+ * @returns the array, which has been modified in-place.
+ */
+export function removeClosingVertexId(ids: string[]) {
+  if (ids.length >= 2 && ids[0] === ids[ids.length-1]) {
+    ids.pop();
+  }
+  return ids;
+}
+
+/**
  * Adds a vertex ID to the list of existing IDs.
  * JSX Graph will append the first ID to the end of its list of vertices to close the shape.
  * So, this method removes the last ID before appending if it is the same as the first one.
@@ -32,9 +48,7 @@ export function getPolygon(board: JXG.Board, id: string): JXG.Polygon|undefined 
  */
 export function appendVertexId(existingIds: string[], newId: string): string[] {
   const result: string[] = [...existingIds];
-  if (existingIds.length >= 2 && existingIds[0] === existingIds[existingIds.length-1]) {
-    result.pop();
-  }
+  removeClosingVertexId(result);
   result.push(newId);
   return result;
 }
@@ -130,4 +144,20 @@ export function logGeometryEvent(model: Instance<typeof GeometryBaseContentModel
     operation,
     change
   });
+}
+
+export function fillPropsForColorScheme(colorScheme: number) {
+  const spec = clueDataColorInfo[colorScheme % clueDataColorInfo.length];
+  return {
+    fillColor: spec.color,
+    highlightFillColor: spec.color
+  };
+}
+
+export function strokePropsForColorScheme(colorScheme: number) {
+  const spec = clueDataColorInfo[(colorScheme||0) % clueDataColorInfo.length];
+  return {
+    strokeColor: spec.color,
+    highlightStrokeColor: spec.color
+  };
 }

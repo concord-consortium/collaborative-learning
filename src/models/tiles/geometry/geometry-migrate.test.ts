@@ -237,8 +237,8 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        p1: { type: "point", id: "p1", x: 0, y: 0 },
-        p2: { type: "point", id: "p2", x: 5, y: 5 }
+        p1: { type: "point", id: "p1", colorScheme: 0, x: 0, y: 0 },
+        p2: { type: "point", id: "p2", colorScheme: 0, x: 5, y: 5 }
       }
     });
   });
@@ -265,8 +265,8 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        p1: { type: "point", id: "p1", x: 0, y: 0 },
-        p2: { type: "point", id: "p2", x: 5, y: 5 }
+        p1: { type: "point", id: "p1", colorScheme: 0, x: 0, y: 0 },
+        p2: { type: "point", id: "p2", colorScheme: 0, x: 5, y: 5 }
       }
     });
   });
@@ -295,8 +295,8 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        p1: { type: "point", id: "p1", x: 0, y: 0 },
-        p2: { type: "point", id: "p2", x: 2, y: 2 }
+        p1: { type: "point", id: "p1", colorScheme: 0, x: 0, y: 0 },
+        p2: { type: "point", id: "p2", colorScheme: 0, x: 2, y: 2 }
       }
     });
   });
@@ -325,8 +325,8 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        p1: { type: "point", id: "p1", x: 0, y: 0 },
-        p2: { type: "point", id: "p2", x: 2, y: 2 }
+        p1: { type: "point", id: "p1", colorScheme: 0, x: 0, y: 0 },
+        p2: { type: "point", id: "p2", colorScheme: 0, x: 2, y: 2 }
       }
     });
   });
@@ -356,8 +356,8 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        p1: { type: "point", id: "p1", x: 0, y: 0 },
-        p2: { type: "point", id: "p2", x: 5, y: 5 },
+        p1: { type: "point", id: "p1", colorScheme: 0, x: 0, y: 0 },
+        p2: { type: "point", id: "p2", colorScheme: 0, x: 5, y: 5 },
         c1: { type: "comment", id: "c1", anchors: ["p1"] }
       }
     });
@@ -388,8 +388,8 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        p1: { type: "point", id: "p1", x: 0, y: 0 },
-        p2: { type: "point", id: "p2", x: 5, y: 5 },
+        p1: { type: "point", id: "p1", colorScheme: 0, x: 0, y: 0 },
+        p2: { type: "point", id: "p2", colorScheme: 0, x: 5, y: 5 },
         c1: { type: "comment", id: "c1", anchors: ["p1"], x: 5, y: 5 }
       }
     });
@@ -424,8 +424,8 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        p1: { type: "point", id: "p1", x: 0, y: 0 },
-        p2: { type: "point", id: "p2", x: 5, y: 5 },
+        p1: { type: "point", id: "p1", colorScheme: 0, x: 0, y: 0 },
+        p2: { type: "point", id: "p2", colorScheme: 0, x: 5, y: 5 },
         c1: { type: "comment", id: "c1", anchors: ["p1"], x: 2, y: 2 },
         c2: { type: "comment", id: "c2", anchors: ["p2"], x: 3, y: 3 }
       }
@@ -439,14 +439,14 @@ describe("Geometry migration", () => {
         target: "board",
         properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
       },
-      { operation: "create", target: "point", parents: [0, 0], properties: { id: "p1", fillColor: "blue" } },
+      { operation: "create", target: "point", parents: [0, 0], properties: { id: "p1", colorScheme: 1 } },
       { operation: "create", target: "point", parents: [5, 5], properties: { id: "p2" } }
     ];
     expect(convertChangesToJson(changes)).toEqual({
       type: "Geometry",
       board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
       objects: [
-        { type: "point", parents: [0, 0], properties: { id: "p1", fillColor: "blue" } },
+        { type: "point", parents: [0, 0], properties: { id: "p1", colorScheme: 1 } },
         { type: "point", parents: [5, 5], properties: { id: "p2" } }
       ]
     });
@@ -455,8 +455,8 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        p1: { type: "point", id: "p1", x: 0, y: 0, fillColor: "blue" },
-        p2: { type: "point", id: "p2", x: 5, y: 5 }
+        p1: { type: "point", id: "p1", colorScheme: 1, x: 0, y: 0 },
+        p2: { type: "point", id: "p2", colorScheme: 0, x: 5, y: 5 }
       }
     });
   });
@@ -506,7 +506,7 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        p1: { type: "point", id: "p1", x: 0, y: 0 }
+        p1: { type: "point", id: "p1", colorScheme: 0, x: 0, y: 0 }
       }
     });
   });
@@ -554,7 +554,7 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        p1: { type: "polygon", id: "p1", points: ["lp1", "lp2", "lp3"]},
+        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["lp1", "lp2", "lp3"]},
       }
     });
   });
@@ -644,11 +644,11 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        v1: { type: "point", id: "v1", x: 0, y: 0 },
-        v2: { type: "point", id: "v2", x: 5, y: 0 },
-        v3: { type: "point", id: "v3", x: 0, y: 5 },
-        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3"]},
-        p2: { type: "polygon", id: "p2", points: ["v1", "v2", "v3"]}
+        v1: { type: "point", id: "v1", colorScheme: 0, x: 0, y: 0 },
+        v2: { type: "point", id: "v2", colorScheme: 0, x: 5, y: 0 },
+        v3: { type: "point", id: "v3", colorScheme: 0, x: 0, y: 5 },
+        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["v1", "v2", "v3"]},
+        p2: { type: "polygon", id: "p2", colorScheme: 0, points: ["v1", "v2", "v3"]}
       }
     });
   });
@@ -682,10 +682,10 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        v1: { type: "point", id: "v1", x: 0, y: 0 },
-        v2: { type: "point", id: "v2", x: 5, y: 0 },
-        v3: { type: "point", id: "v3", x: 0, y: 5 },
-        p2: { type: "polygon", id: "p2", points: ["v1", "v2", "v3"]}
+        v1: { type: "point", id: "v1", colorScheme: 0, x: 0, y: 0 },
+        v2: { type: "point", id: "v2", colorScheme: 0, x: 5, y: 0 },
+        v3: { type: "point", id: "v3", colorScheme: 0, x: 0, y: 5 },
+        p2: { type: "polygon", id: "p2", colorScheme: 0, points: ["v1", "v2", "v3"]}
       }
     });
   });
@@ -719,10 +719,10 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        v1: { type: "point", id: "v1", x: 0, y: 0 },
-        v2: { type: "point", id: "v2", x: 5, y: 0 },
-        v3: { type: "point", id: "v3", x: 0, y: 5 },
-        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3"]}
+        v1: { type: "point", id: "v1", colorScheme: 0, x: 0, y: 0 },
+        v2: { type: "point", id: "v2", colorScheme: 0, x: 5, y: 0 },
+        v3: { type: "point", id: "v3", colorScheme: 0, x: 0, y: 5 },
+        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["v1", "v2", "v3"]}
       }
     });
   });
@@ -762,11 +762,11 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        v1: { type: "point", id: "v1", x: 0, y: 6 },
-        v2: { type: "point", id: "v2", x: 6, y: 6 },
-        v3: { type: "point", id: "v3", x: 6, y: 0 },
-        v4: { type: "point", id: "v4", x: 0, y: 0 },
-        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3", "v4"],
+        v1: { type: "point", id: "v1", colorScheme: 0, x: 0, y: 6 },
+        v2: { type: "point", id: "v2", colorScheme: 0, x: 6, y: 6 },
+        v3: { type: "point", id: "v3", colorScheme: 0, x: 6, y: 0 },
+        v4: { type: "point", id: "v4", colorScheme: 0, x: 0, y: 0 },
+        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["v1", "v2", "v3", "v4"],
               labels: [{ id: "v1:v2", option: "length" }, { id: "v2:v3", option: "label" }] }
       }
     });
@@ -803,11 +803,11 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        v1: { type: "point", id: "v1", x: 0, y: 6 },
-        v2: { type: "point", id: "v2", x: 6, y: 6 },
-        v3: { type: "point", id: "v3", x: 6, y: 0 },
-        v4: { type: "point", id: "v4", x: 0, y: 0 },
-        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3", "v4"]},
+        v1: { type: "point", id: "v1", colorScheme: 0, x: 0, y: 6 },
+        v2: { type: "point", id: "v2", colorScheme: 0, x: 6, y: 6 },
+        v3: { type: "point", id: "v3", colorScheme: 0, x: 6, y: 0 },
+        v4: { type: "point", id: "v4", colorScheme: 0, x: 0, y: 0 },
+        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["v1", "v2", "v3", "v4"]},
         c1: { type: "comment", id: "c1", anchors: ["p1"] }
       }
     });
@@ -844,11 +844,11 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        v1: { type: "point", id: "v1", x: 0, y: 6 },
-        v2: { type: "point", id: "v2", x: 6, y: 6 },
-        v3: { type: "point", id: "v3", x: 6, y: 0 },
-        v4: { type: "point", id: "v4", x: 0, y: 0 },
-        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3", "v4"]},
+        v1: { type: "point", id: "v1", colorScheme: 0, x: 0, y: 6 },
+        v2: { type: "point", id: "v2", colorScheme: 0, x: 6, y: 6 },
+        v3: { type: "point", id: "v3", colorScheme: 0, x: 6, y: 0 },
+        v4: { type: "point", id: "v4", colorScheme: 0, x: 0, y: 0 },
+        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["v1", "v2", "v3", "v4"]},
         c1: { type: "comment", id: "c1", anchors: ["p1"], x: 3, y: 3 }
       }
     });
@@ -886,11 +886,11 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        v1: { type: "point", id: "v1", x: 0, y: 6 },
-        v2: { type: "point", id: "v2", x: 6, y: 6 },
-        v3: { type: "point", id: "v3", x: 6, y: 0 },
-        v4: { type: "point", id: "v4", x: 0, y: 0 },
-        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3", "v4"]},
+        v1: { type: "point", id: "v1", colorScheme: 0, x: 0, y: 6 },
+        v2: { type: "point", id: "v2", colorScheme: 0, x: 6, y: 6 },
+        v3: { type: "point", id: "v3", colorScheme: 0, x: 6, y: 0 },
+        v4: { type: "point", id: "v4", colorScheme: 0, x: 0, y: 0 },
+        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["v1", "v2", "v3", "v4"]},
         c1: { type: "comment", id: "c1", anchors: ["p1"], x: 2, y: 2 }
       }
     });
@@ -925,10 +925,10 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        v1: { type: "point", id: "v1", x: 0, y: 0 },
-        v2: { type: "point", id: "v2", x: 5, y: 0 },
-        v3: { type: "point", id: "v3", x: 0, y: 5 },
-        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3"]},
+        v1: { type: "point", id: "v1", colorScheme: 0, x: 0, y: 0 },
+        v2: { type: "point", id: "v2", colorScheme: 0, x: 5, y: 0 },
+        v3: { type: "point", id: "v3", colorScheme: 0, x: 0, y: 5 },
+        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["v1", "v2", "v3"]},
         a1: { type: "vertexAngle", id: "a1", points: ["v1", "v2", "v3"] }
       }
     });
@@ -962,9 +962,9 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        l1: { type: "movableLine", id: "l1",
-              p1: { type: "point", id: "l1-point1", x: 0, y: 0 },
-              p2: { type: "point", id: "l1-point2", x: 5, y: 5 } }
+        l1: { type: "movableLine", id: "l1", colorScheme: 0,
+              p1: { type: "point", id: "l1-point1", colorScheme: 0, x: 0, y: 0 },
+              p2: { type: "point", id: "l1-point2", colorScheme: 0, x: 5, y: 5 } }
       }
     });
   });
@@ -998,9 +998,9 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        l1: { type: "movableLine", id: "l1",
-              p1: { type: "point", id: "l1-point1", x: 0, y: 5 },
-              p2: { type: "point", id: "l1-point2", x: 5, y: 10 } }
+        l1: { type: "movableLine", id: "l1", colorScheme: 0,
+              p1: { type: "point", id: "l1-point1", colorScheme: 0, x: 0, y: 5 },
+              p2: { type: "point", id: "l1-point2", colorScheme: 0, x: 5, y: 10 } }
       }
     });
   });

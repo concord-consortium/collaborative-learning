@@ -150,7 +150,7 @@ context('Geometry Tool', function () {
 
     // select one point
     geometryToolTile.selectGraphPoint(1, 1);
-    geometryToolTile.getGraphPoint().eq(0).should("have.attr", "fill", "#ff0000");
+    geometryToolTile.getGraphPoint().eq(0).should("have.attr", "fill", "#0069ff"); // $data-blue
     geometryToolTile.getSelectedGraphPoint().should("have.length", 1);
     // select a different point
     geometryToolTile.selectGraphPoint(2, 2);
