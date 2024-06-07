@@ -230,6 +230,10 @@ export const GeometryContentModel = GeometryBaseContentModel
         }
       }
     },
+    // Color to use for new points. Placeholder for now until appropriate UI is added.
+    get newPointColorScheme() {
+      return 0;
+    },
     getDependents(ids: string[], options?: { required: boolean }) {
       const { required = false } = options || {};
       let dependents = [...ids];
@@ -633,6 +637,7 @@ export const GeometryContentModel = GeometryBaseContentModel
 
       const props = {
         id: uniqueId(),
+        colorScheme: self.newPointColorScheme,
         isPhantom: true
       };
       const pointModel = PointModel.create({ x: parents[0], y: parents[1], ...props });
@@ -794,14 +799,15 @@ export const GeometryContentModel = GeometryBaseContentModel
             operation: "create",
             target: "polygon",
             parents: [newRealPoint.id, phantomPoint?.id],
-            properties: { id: self.activePolygonId }
+            properties: { id: self.activePolygonId, colorScheme: newRealPoint.colorScheme }
           };
           const result = syncChange(board, change2);
           if (isPolygon(result)) {
             newPolygon = result;
 
             // Update the model
-            const polygonModel = PolygonModel.create({ id: newPolygon.id, points: [newRealPoint.id] });
+            const polygonModel = PolygonModel.create(
+              { id: newPolygon.id, points: [newRealPoint.id], colorScheme: newRealPoint.colorScheme });
             self.addObjectModel(polygonModel);
             self.activePolygonId = polygonModel.id;
           }
