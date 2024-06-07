@@ -123,12 +123,12 @@ export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
   const element = getObjectById(board, id);
   if (element) {
+    const colorScheme = element.getAttribute("colorScheme")||0;
     if (isPoint(element)) {
-      const props = getPointVisualProps(selected,
-        element.getAttribute("colorScheme"), element.getAttribute("isPhantom"));
+      const props = getPointVisualProps(selected, colorScheme, element.getAttribute("isPhantom"));
       element.setAttribute(props);
     } else if (isVisibleEdge(element)) {
-      const props = getEdgeVisualProps(selected, element.getAttribute("colorScheme"), false);
+      const props = getEdgeVisualProps(selected, colorScheme, false);
       element.setAttribute(props);
     }
   }

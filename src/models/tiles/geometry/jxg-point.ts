@@ -1,4 +1,4 @@
-import { castArray, merge } from "lodash";
+import { castArray } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
 import { JXGChangeAgent, JXGCoordPair, JXGProperties, JXGUnsafeCoordPair } from "./jxg-changes";
 import { objectChangeAgent, isPositionGraphable, getGraphablePosition } from "./jxg-object";
@@ -34,7 +34,6 @@ const phantomPointProperties = Object.freeze({
 });
 
 export function getPointVisualProps(selected: boolean, colorScheme: number, phantom: boolean) {
-  // const colorMapEntry = linkedTableId && getColorMapEntry(linkedTableId);
   const props: JXGProperties = {
     ...defaultPointProperties,
     ...fillPropsForColorScheme(colorScheme),
@@ -42,13 +41,6 @@ export function getPointVisualProps(selected: boolean, colorScheme: number, phan
     ...(phantom ? phantomPointProperties : {})
   };
 
-  if (selected) {
-    merge(props, selectedPointProperties);
-  }
-
-  if (phantom) {
-    merge(props, phantomPointProperties);
-  }
   return props;
 }
 
