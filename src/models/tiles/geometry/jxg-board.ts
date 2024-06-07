@@ -1,5 +1,5 @@
 import { assign, each, find } from "lodash";
-import "./jxg";
+import JXG from "jsxgraph";
 import { ITableLinkProperties, JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
 import {
   isAxis, isBoard, isLinkedPoint, isPoint, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
