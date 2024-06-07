@@ -1,0 +1,43 @@
+#doc-editor-app {
+  display: flex;
+  height: 100vh;
+
+  .titlebar {
+    .actions {
+      column-gap: 5px;
+      margin: 0px 5px;
+
+      .status {
+        min-width: 200px;
+      }
+    }
+  }
+
+
+  #left-panel, #right-panel {
+    position: relative;
+    // Allow the width to be less than what is required by the content inside
+    min-width: 0;
+  }
+
+  #left-panel {
+    // 3/4 to left
+    flex: 3;
+  }
+
+  #right-panel {
+    // 1/4 to the right
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    .readonly-header {
+      background-color: darkgray;
+    }
+
+    .canvas-container {
+      position: relative;
+      flex: 1;
+    }
+  }
+}
