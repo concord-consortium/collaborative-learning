@@ -404,7 +404,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           }
         });
         edges.forEach(edge => {
-          // Edge is selcted if both end points are.
+          // Edge is selected if both end points are.
           const selected = this.getContent().isSelected(edge.point1.id) && this.getContent().isSelected(edge.point2.id);
           setElementColor(_board, edge.id, selected);
         });

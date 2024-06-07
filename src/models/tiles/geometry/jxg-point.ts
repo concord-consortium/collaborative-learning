@@ -1,16 +1,17 @@
-import { castArray, merge } from "lodash";
+import { castArray } from "lodash";
 import { uniqueId } from "../../../utilities/js-utils";
 import { JXGChangeAgent, JXGCoordPair, JXGProperties, JXGUnsafeCoordPair } from "./jxg-changes";
 import { objectChangeAgent, isPositionGraphable, getGraphablePosition } from "./jxg-object";
 import { prepareToDeleteObjects } from "./jxg-polygon";
 import { fillPropsForColorScheme } from "./geometry-utils";
+import { kGeometryHighlightColor } from "./jxg-types";
 
 // Set as snap unit for all points that have snapToGrid set.
 // Also used as the distance moved by arrow-key presses.
 export const kSnapUnit = 0.1;
 
 const defaultPointProperties = Object.freeze({
-  strokeColor: "#000000", highlightStrokeColor: "#0081ff",
+  strokeColor: "#000000", highlightStrokeColor: kGeometryHighlightColor,
   strokeWidth: 1,         highlightStrokeWidth: 10,
   strokeOpacity: 1,       highlightStrokeOpacity: .12,
   fillOpacity: 1,         highlightFillOpacity: 1,
@@ -22,7 +23,7 @@ const defaultPointProperties = Object.freeze({
 });
 
 const selectedPointProperties = Object.freeze({
-  strokeColor: "#0081ff", highlightStrokeColor: "#0081ff",
+  strokeColor: kGeometryHighlightColor, highlightStrokeColor: kGeometryHighlightColor,
   strokeWidth: 10,        highlightStrokeWidth: 10,
   strokeOpacity: .25,     highlightStrokeOpacity: .25
 });
@@ -33,17 +34,13 @@ const phantomPointProperties = Object.freeze({
 });
 
 export function getPointVisualProps(selected: boolean, colorScheme: number, phantom: boolean) {
-  // const colorMapEntry = linkedTableId && getColorMapEntry(linkedTableId);
-  const props: JXGProperties = { ...defaultPointProperties };
-  merge(props, fillPropsForColorScheme(colorScheme));
+  const props: JXGProperties = {
+    ...defaultPointProperties,
+    ...fillPropsForColorScheme(colorScheme),
+    ...(selected ? selectedPointProperties : {}),
+    ...(phantom ? phantomPointProperties : {})
+  };
 
-  if (selected) {
-    merge(props, selectedPointProperties);
-  }
-
-  if (phantom) {
-    merge(props, phantomPointProperties);
-  }
   return props;
 }
 

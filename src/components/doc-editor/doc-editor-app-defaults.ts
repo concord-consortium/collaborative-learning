@@ -1,7 +1,7 @@
-import { DocumentType, ProblemDocument } from "../models/document/document-types";
-import { DocumentModelSnapshotType } from "../models/document/document";
-import { DocumentContentSnapshotType } from "../models/document/document-content";
-import { TextContentModelType } from "../models/tiles/text/text-content";
+import { DocumentType, ProblemDocument } from "../../models/document/document-types";
+import { DocumentModelSnapshotType } from "../../models/document/document";
+import { DocumentContentSnapshotType } from "../../models/document/document-content";
+import { TextContentModelType } from "../../models/tiles/text/text-content";
 
 export const defaultDocumentModelParts: DocumentModelSnapshotType = {
   type: ProblemDocument as DocumentType,

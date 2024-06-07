@@ -4,7 +4,7 @@ import { fillPropsForColorScheme, getPoint, getPolygon, strokePropsForColorSchem
 import { getObjectById } from "./jxg-board";
 import { ESegmentLabelOption, JXGChange, JXGChangeAgent, JXGParentType, JXGProperties } from "./jxg-changes";
 import { getElementName, objectChangeAgent } from "./jxg-object";
-import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge } from "./jxg-types";
+import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge, kGeometryHighlightColor } from "./jxg-types";
 import { wn_PnPoly } from "./soft-surfer-sunday";
 
 const defaultPolygonProps = Object.freeze({
@@ -20,14 +20,14 @@ const selectedPolygonProps = Object.freeze({
 const defaultPolygonEdgeProps = Object.freeze({
   strokeWidth: 1,        highlightStrokeWidth: 4,
   strokeOpacity: 1,      highlightStrokeOpacity: .12,
-                         highlightStrokeColor: '#0081ff',
+                         highlightStrokeColor: kGeometryHighlightColor,
   transitionDuration: 0
 });
 
 const selectedPolygonEdgeProps = Object.freeze({
   strokeWidth: 4,         highlightStrokeWidth: 4,
   strokeOpacity: .25,     highlightStrokeOpacity: .25,
-  strokeColor: '#0081ff', highlightStrokeColor: '#0081ff'
+  strokeColor: kGeometryHighlightColor, highlightStrokeColor: kGeometryHighlightColor
 });
 
 const phantomPolygonEdgeProps = Object.freeze({
@@ -49,12 +49,11 @@ export function getEdgeVisualProps(selected: boolean, colorScheme: number, phant
     // Invisible, so don't apply any other styles
     return phantomPolygonEdgeProps;
   }
-  const props: JXGProperties = { };
-  merge(props, strokePropsForColorScheme(colorScheme));
-  merge(props, defaultPolygonEdgeProps); // the highlight color needs to override here, so apply after
-  if (selected) {
-    merge(props, selectedPolygonEdgeProps);
-  }
+  const props: JXGProperties = {
+    ...strokePropsForColorScheme(colorScheme),
+    ...defaultPolygonEdgeProps, // the highlight color needs to override here, so apply after
+    ...(selected ? selectedPolygonEdgeProps : {})
+  };
   return props;
 }
 

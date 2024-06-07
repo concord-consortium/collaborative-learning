@@ -113,6 +113,8 @@ export interface QueryParams {
   document?: string;
   // Open new documents as readOnly this helps with testing readOnly views
   readOnly?: boolean
+  // Don't load or save the document from browser storage
+  noStorage?: boolean
 }
 
 // Make a union of all of the boolean params from the QueryParams
@@ -123,7 +125,7 @@ type BooleanParamNames = Exclude<
 undefined>;
 
 const booleanParams: BooleanParamNames[] =
-  [ "demo", "mouseSensor", "localCMSBackend", "noPersistentUI", "readOnly" ];
+  [ "demo", "mouseSensor", "localCMSBackend", "noPersistentUI", "readOnly", "noStorage" ];
 
 const processBooleanValue = (value: string | (string | null)[] | null | undefined) => {
   if (value === undefined || value === "false") {

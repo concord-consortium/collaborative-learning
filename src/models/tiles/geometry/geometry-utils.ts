@@ -147,7 +147,7 @@ export function logGeometryEvent(model: Instance<typeof GeometryBaseContentModel
 }
 
 export function fillPropsForColorScheme(colorScheme: number) {
-  const spec = clueDataColorInfo[(colorScheme||0) % clueDataColorInfo.length];
+  const spec = clueDataColorInfo[colorScheme % clueDataColorInfo.length];
   return {
     fillColor: spec.color,
     highlightFillColor: spec.color
