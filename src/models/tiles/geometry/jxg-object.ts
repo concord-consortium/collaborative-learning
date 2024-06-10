@@ -36,10 +36,6 @@ export function getGraphablePosition(position: JXGPositionProperty) {
   }) as JXGCoordPair;
 }
 
-export function getElementName(elt: JXG.GeometryElement) {
-  return (typeof elt.name === "function") ? elt.name() : elt.name;
-}
-
 export const objectChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     // can't create generic objects
@@ -64,7 +60,7 @@ export const objectChangeAgent: JXGChangeAgent = {
         // suspended, and a text object (e.g. a comment or its anchor) has moved, the
         // transform will be calculated from a stale position. We unsuspend updates to
         // force a refresh on coordinate positions.
-        if (textObj && board.isSuspendedUpdate) {
+        if (textObj && board.isSuspendedRedraw) {
           hasSuspendedTextUpdates = true;
           board.unsuspendUpdate();
         }

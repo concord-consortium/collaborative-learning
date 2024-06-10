@@ -1,4 +1,5 @@
 import { splitLinkedPointId } from "../table-link-types";
+import { filterBoardObjects, forEachBoardObject } from "./geometry-utils";
 import { resumeBoardUpdates, suspendBoardUpdates, syncLinkedPoints } from "./jxg-board";
 import { ILinkProperties, ITableLinkProperties, JXGChange, JXGChangeAgent, JXGCoordPair } from "./jxg-changes";
 import { createPoint, pointChangeAgent } from "./jxg-point";
@@ -15,7 +16,7 @@ export interface ITableLinkColors {
   fill: string;
   stroke: string;
 }
-export type GetTableLinkColorsFunction = (tableId?: string) => ITableLinkColors | undefined;
+export type GetTableLinkColorsFunction = (tableId?: string) => ITableLinkColors;
 
 let sGetTableLinkColors: GetTableLinkColorsFunction;
 
@@ -27,7 +28,6 @@ function createLinkedPoint(board: JXG.Board, parents: JXGCoordPair, props: any, 
   const tableId = links?.tileIds?.[0];
   const [linkedRowId, linkedColId] = splitLinkedPointId(props?.id);
   const linkColors = sGetTableLinkColors(tableId);
-  if (!board || !linkColors) return;
   const linkedProps = {
           clientType: "linkedPoint",
           fixed: true,
@@ -47,7 +47,7 @@ function createLinkedPoint(board: JXG.Board, parents: JXGCoordPair, props: any, 
 
 export function getAllLinkedPoints(board: JXG.Board) {
   const ids: string[] = [];
-  board.objectsList.forEach(obj => {
+  forEachBoardObject(board, obj => {
     if (obj.elType === "point" && obj.getAttribute("clientType") === "linkedPoint") {
       ids.push(obj.id);
     }
@@ -106,7 +106,7 @@ export const tableLinkChangeAgent: JXGChangeAgent = {
   delete: (board, change) => {
     if (board) {
       const tableId = getTableIdFromLinkChange(change);
-      const pts = board.objectsList.filter(elt => {
+      const pts = filterBoardObjects(board, elt => {
                     return isPoint(elt) && tableId && (elt.getAttribute("linkedTableId") === tableId);
                   });
       suspendBoardUpdates(board);

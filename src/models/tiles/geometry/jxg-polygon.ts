@@ -3,7 +3,7 @@ import { notEmpty } from "../../../utilities/js-utils";
 import { getPoint, getPolygon } from "./geometry-utils";
 import { getObjectById } from "./jxg-board";
 import { ESegmentLabelOption, JXGChange, JXGChangeAgent, JXGParentType } from "./jxg-changes";
-import { getElementName, objectChangeAgent } from "./jxg-object";
+import { objectChangeAgent } from "./jxg-object";
 import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge } from "./jxg-types";
 import { wn_PnPoly } from "./soft-surfer-sunday";
 
@@ -86,8 +86,6 @@ function setPolygonEdgeColors(polygon: JXG.Polygon) {
     seg.setAttribute({
       strokeColor: "#0000FF",
       highlightStrokeColor: "#0000FF",
-      clientStrokeColor: "#0000FF",
-      clientSelectedStrokeColor: "#0000FF"
     });
   });
 }
@@ -191,8 +189,8 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
 }
 
 function segmentNameLabelFn(this: JXG.Line) {
-  const p1Name = getElementName(this.point1);
-  const p2Name = getElementName(this.point2);
+  const p1Name = this.point1.getName();
+  const p2Name = this.point2.getName();
   return `${p1Name}${p2Name}`;
 }
 
@@ -237,7 +235,7 @@ function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: J
     id: polygonId, // re-use the same ID
     ...polygonDefaultProps
   };
-  const polygon = board.create("polygon", vertices, props);
+  const polygon = board.create("polygon", vertices, props) as JXG.Polygon;
 
 
   // Without deleting/rebuilding, would look something like this (but this fails due to apparent bugs in JSXGraph 1.4.x)
@@ -279,7 +277,7 @@ export const polygonChangeAgent: JXGChangeAgent = {
       ...polygonDefaultProps,
       ...change.properties
     };
-    const poly = parents.length ? _board.create("polygon", parents, props) : undefined;
+    const poly = parents.length ? _board.create("polygon", parents, props) as JXG.Polygon : undefined;
     if (poly) {
       setPolygonEdgeColors(poly);
     }
