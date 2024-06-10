@@ -79,7 +79,7 @@ export const objectChangeAgent: JXGChangeAgent = {
           textObj.setText(text);
         }
         if (size(others)) {
-          obj.setAttribute(others);
+          // obj.setAttribute(others);  FIXME -- doesn't match typescript declaration
         }
       }
     });
