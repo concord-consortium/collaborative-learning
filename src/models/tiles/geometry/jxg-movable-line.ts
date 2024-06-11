@@ -2,7 +2,6 @@ import { castArray, find, uniqWith } from "lodash";
 import { getBaseAxisLabels, getObjectById } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
-import { syncClientColors } from "./jxg-point";
 import {
   getMovableLinePointIds, isBoard, isMovableLine, isMovableLineControlPoint, isMovableLineLabel, kMovableLineType
 } from "./jxg-types";
@@ -94,7 +93,7 @@ export const movableLineChangeAgent: JXGChangeAgent = {
   create: (board, change, context) => {
     const { id, pt1, pt2, line, ...shared }: any = change.properties || {};
     const lineId = id || uniqueId();
-    const props = syncClientColors({...sharedProps, ...shared });
+    const props = {...sharedProps, ...shared };
     const lineProps = {...props, ...lineSpecificProps, ...line };
     const pointProps = {...props, ...pointSpecificProps};
     const pointIds = getMovableLinePointIds(lineId);

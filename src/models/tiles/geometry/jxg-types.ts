@@ -6,6 +6,9 @@ export const kGeometryDefaultPixelsPerUnit = 18.3;  // matches S&S curriculum im
 export const kGeometryDefaultXAxisMin = -2;
 export const kGeometryDefaultYAxisMin = -1;
 
+export const kGeometryHighlightColor = "#0081ff";
+
+
 // utility for creating an object from a property/value pair
 export const toObj = (p: string, v: any) => v != null ? { [p]: v } : undefined;
 

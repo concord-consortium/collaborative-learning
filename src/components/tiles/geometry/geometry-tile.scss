@@ -39,15 +39,31 @@ $toolbar-width: 44px;
             background-color: red;
           }
         }
+
+        svg {
+
+          ellipse {
+            paint-order: stroke fill;
+          }
+
+          .tool-tile.selected:not(.readonly) & {
+            ellipse, line, polygon {
+              cursor: move;
+            }
+          }
+
+        }
+
       }
     }
   }
 }
+
 .rotate-polygon-icon {
-  background-image: url("../../../assets/rotate.png");
+  background-image: url("../../../assets/rotate-selection.svg");
   position: absolute;
-  width: 16px;
-  height: 16px;
+  width: 30px;
+  height: 30px;
   z-index: 10;
   display: none;
 

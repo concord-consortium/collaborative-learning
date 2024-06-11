@@ -1,22 +1,62 @@
-import { each, filter, find, uniqueId, values } from "lodash";
+import { each, filter, find, merge, uniqueId, values } from "lodash";
 import { notEmpty } from "../../../utilities/js-utils";
-import { getPoint, getPolygon } from "./geometry-utils";
+import { fillPropsForColorScheme, getPoint, getPolygon, strokePropsForColorScheme } from "./geometry-utils";
 import { getObjectById } from "./jxg-board";
-import { ESegmentLabelOption, JXGChange, JXGChangeAgent, JXGParentType } from "./jxg-changes";
+import { ESegmentLabelOption, JXGChange, JXGChangeAgent, JXGParentType, JXGProperties } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
-import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge } from "./jxg-types";
+import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge, kGeometryHighlightColor } from "./jxg-types";
 import { wn_PnPoly } from "./soft-surfer-sunday";
 
-const polygonDefaultProps = {
+const defaultPolygonProps = Object.freeze({
   hasInnerPoints: true,
-  fillColor: "#00FF00",
-  highlightFillColor: "#00FF00",
-  selectedFillColor: "#00FF00",
-  clientFillColor: "#00FF00",
-  clientSelectedFillColor: "#00FF00",
-  fillOpacity: .3,
-  highlightFillOpacity: .3,
-};
+  fillOpacity: .2,       highlightFillOpacity: .25
+});
+
+const selectedPolygonProps = Object.freeze({
+  fillOpacity: .3,       highlightFillOpacity: .3
+});
+
+
+const defaultPolygonEdgeProps = Object.freeze({
+  strokeWidth: 1,        highlightStrokeWidth: 4,
+  strokeOpacity: 1,      highlightStrokeOpacity: .12,
+                         highlightStrokeColor: kGeometryHighlightColor,
+  transitionDuration: 0
+});
+
+const selectedPolygonEdgeProps = Object.freeze({
+  strokeWidth: 4,         highlightStrokeWidth: 4,
+  strokeOpacity: .25,     highlightStrokeOpacity: .25,
+  strokeColor: kGeometryHighlightColor, highlightStrokeColor: kGeometryHighlightColor
+});
+
+const phantomPolygonEdgeProps = Object.freeze({
+  strokeOpacity: 0,
+  highlightStrokeOpacity: 0
+});
+
+function getPolygonVisualProps(selected: boolean) {
+  const colorScheme = 0; // TODO
+  const props: JXGProperties = { ...defaultPolygonProps };
+  if (selected) {
+    merge(props, selectedPolygonProps);
+  }
+  merge(props, fillPropsForColorScheme(colorScheme));
+  return props;
+}
+
+export function getEdgeVisualProps(selected: boolean, colorScheme: number, phantom: boolean) {
+  if (phantom) {
+    // Invisible, so don't apply any other styles
+    return phantomPolygonEdgeProps;
+  }
+  const props: JXGProperties = {
+    ...strokePropsForColorScheme(colorScheme),
+    ...defaultPolygonEdgeProps, // the highlight color needs to override here, so apply after
+    ...(selected ? selectedPolygonEdgeProps : {})
+  };
+  return props;
+}
 
 export function isPointInPolygon(x: number, y: number, polygon: JXG.Polygon) {
   const v = polygon.vertices.map(vertex => {
@@ -75,18 +115,12 @@ function setPolygonEdgeColors(polygon: JXG.Polygon) {
   const segments = getPolygonEdges(polygon);
   const firstVertex = polygon.vertices[0];
   segments.forEach(seg => {
-    if (segments.length > 2 &&
-        ((seg.point1.getAttribute("isPhantom") && seg.point2 === firstVertex)
-         ||(seg.point2.getAttribute("isPhantom") && seg.point1 === firstVertex))) {
-      // this is the "uncompleted side" of an in-progress polygon
-      seg.setAttribute({ strokeOpacity: 0, highlightStrokeOpacity: 0 });
-    } else {
-      seg.setAttribute({ strokeOpacity: 1, highlightStrokeOpacity: 1 });
-    }
-    seg.setAttribute({
-      strokeColor: "#0000FF",
-      highlightStrokeColor: "#0000FF",
-    });
+    // the "uncompleted side" of an in-progress polygon is considered phantom
+    const phantom = segments.length > 2 &&
+      ((seg.point1.getAttribute("isPhantom") && seg.point2 === firstVertex)
+        ||(seg.point2.getAttribute("isPhantom") && seg.point1 === firstVertex));
+    const props = getEdgeVisualProps(false, polygon.getAttribute("colorScheme")||0, phantom);
+    seg.setAttribute(props);
   });
 }
 
@@ -233,7 +267,7 @@ function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: J
     .filter(notEmpty);
   const props = {
     id: polygonId, // re-use the same ID
-    ...polygonDefaultProps
+    ...getPolygonVisualProps(false)
   };
   const polygon = board.create("polygon", vertices, props) as JXG.Polygon;
 
@@ -274,7 +308,7 @@ export const polygonChangeAgent: JXGChangeAgent = {
                       .filter(notEmpty);
     const props = {
       id: uniqueId(),
-      ...polygonDefaultProps,
+      ...getPolygonVisualProps(false),
       ...change.properties
     };
     const poly = parents.length ? _board.create("polygon", parents, props) as JXG.Polygon : undefined;

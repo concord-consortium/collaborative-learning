@@ -1,16 +1,13 @@
 import { difference, intersection } from "lodash";
-import { applySnapshot, getSnapshot, getType, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { applySnapshot, getSnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { kDefaultBoardModelInputProps, kGeometryTileType } from "./geometry-types";
 import { uniqueId } from "../../../utilities/js-utils";
 import { typeField } from "../../../utilities/mst-utils";
 import { TileContentModel } from "../tile-content";
-import { ESegmentLabelOption, JXGChange, JXGPositionProperty } from "./jxg-changes";
-import { imageChangeAgent } from "./jxg-image";
-import { movableLineChangeAgent } from "./jxg-movable-line";
-import { createPoint } from "./jxg-point";
-import { polygonChangeAgent } from "./jxg-polygon";
-import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
+import { ESegmentLabelOption, JXGPositionProperty } from "./jxg-changes";
 import { kGeometryDefaultPixelsPerUnit } from "./jxg-types";
+import { findLeastUsedNumber } from "../../../utilities/math-utils";
+import { clueDataColorInfo } from "../../../utilities/color-utils";
 
 export interface IDependsUponResult {
   depends: boolean;
@@ -155,11 +152,8 @@ export const PointModel = PositionedObjectModel
   .props({
     type: typeField("point"),
     name: types.maybe(types.string),
-    fillColor: types.maybe(types.string),
-    strokeColor: types.maybe(types.string),
     snapToGrid: types.maybe(types.boolean),
-    snapSizeX: types.maybe(types.number),
-    snapSizeY: types.maybe(types.number)
+    colorScheme: 0
   })
   .preProcessSnapshot(preProcessPositionInSnapshot);
 export interface PointModelType extends Instance<typeof PointModel> {}
@@ -181,7 +175,8 @@ export const PolygonModel = GeometryObjectModel
   .props({
     type: typeField("polygon"),
     points: types.array(types.string),
-    labels: types.maybe(types.array(PolygonSegmentLabelModel))
+    labels: types.maybe(types.array(PolygonSegmentLabelModel)),
+    colorScheme: 0
   })
   .views(self => ({
     get dependencies(): string[] {
@@ -272,7 +267,8 @@ export const MovableLineModel = GeometryObjectModel
   .props({
     type: typeField("movableLine"),
     p1: PointModel,
-    p2: PointModel
+    p2: PointModel,
+    colorScheme: 0
   });
 export interface MovableLineModelType extends Instance<typeof MovableLineModel> {}
 
@@ -299,72 +295,6 @@ export const ImageModel = PositionedObjectModel
 export interface ImageModelType extends Instance<typeof ImageModel> {}
 export const isImageModel = (o: GeometryObjectModelType): o is ImageModelType => o.type === "image";
 
-export function createObject(board: JXG.Board, obj: GeometryObjectModelType) {
-  const objType = getType(obj);
-  switch(objType.name) {
-
-    case ImageModel.name: {
-      const image = obj as ImageModelType;
-      const { x, y, url, width, height, ...properties } = image;
-      const change: JXGChange = {
-        operation: "create",
-        target: "image",
-        parents: [url, [x, y], [width, height]],
-        properties
-      };
-      imageChangeAgent.create(board, change);
-      break;
-    }
-
-    case MovableLineModel.name: {
-      const line = obj as MovableLineModelType;
-      const { p1, p2, ...properties } = line;
-      const change: JXGChange = {
-        operation: "create",
-        target: "movableLine",
-        parents: [[p1.x, p1.y], [p2.x, p2.y]],
-        properties
-      };
-      movableLineChangeAgent.create(board, change);
-      break;
-    }
-
-    case PointModel.name: {
-      const pt = obj as PointModelType;
-      const { x, y, ...props } = pt;
-      createPoint(board, [pt.x, pt.y], props);
-      break;
-    }
-
-    case PolygonModel.name: {
-      const poly = obj as PolygonModelType;
-      const { points, ...properties } = poly;
-      const change: JXGChange = {
-        operation: "create",
-        target: "polygon",
-        parents: poly.points.filter(id => !!id) as string[],
-        properties
-      };
-      polygonChangeAgent.create(board, change);
-      break;
-    }
-
-    case VertexAngleModel.name: {
-      const angle = obj as VertexAngleModelType;
-      const { points, ...properties } = angle;
-      const change: JXGChange = {
-        operation: "create",
-        target: "vertexAngle",
-        parents: angle.points.filter(id => !!id) as string[],
-        properties
-      };
-      vertexAngleChangeAgent.create(board, change);
-      break;
-    }
-
-  }
-}
-
 export type GeometryObjectModelUnion = CommentModelType | ImageModelType | MovableLineModelType | PointModelType |
                                         PolygonModelType | VertexAngleModelType;
 
@@ -376,6 +306,8 @@ export const GeometryBaseContentModel = TileContentModel
     board: types.maybe(BoardModel),
     bgImage: types.maybe(ImageModel),
     objects: types.map(types.union(CommentModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel)),
+    // Maps attribute ID to color.
+    linkedAttributeColors: types.map(types.number),
     // Used for importing table links from legacy documents
     links: types.array(types.string)  // table tile ids
   })
@@ -400,9 +332,22 @@ export const GeometryBaseContentModel = TileContentModel
     const { links, ...rest } = snapshot;
     return { ...rest };
   })
+  .views(self => ({
+    getColorSchemeForAttributeId(id: string) {
+      return self.linkedAttributeColors.get(id);
+    }
+  }))
   .actions(self => ({
     replaceLinks(newLinks: string[]) {
       self.links.replace(newLinks);
+    },
+    assignColorSchemeForAttributeId(id: string) {
+      if (self.linkedAttributeColors.get(id)) {
+        return self.linkedAttributeColors.get(id);
+      }
+      const color = findLeastUsedNumber(clueDataColorInfo.length, self.linkedAttributeColors.values());
+      self.linkedAttributeColors.set(id, color);
+      return color;
     }
   }));
 export interface GeometryBaseContentModelType extends Instance<typeof GeometryBaseContentModel> {}

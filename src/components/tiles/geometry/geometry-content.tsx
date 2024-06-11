@@ -1,6 +1,6 @@
 import React from "react";
 import { castArray, debounce, each, filter, find, keys as _keys, throttle, values } from "lodash";
-import { observe, reaction } from "mobx";
+import { IObjectDidChange, observable, observe, reaction, runInAction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
 import objectHash from "object-hash";
@@ -119,6 +119,7 @@ let sInstanceId = 0;
 export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   static contextType = GeometryTileContext;
   declare context: React.ContextType<typeof GeometryTileContext>;
+  private updateObservable = observable({updateCount: 0});
 
   public state: IState = {
           size: { width: null, height: null },
@@ -260,6 +261,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         return this.getContent().exportJson(options);
       },
       getObjectBoundingBox: (objectId: string, objectType?: string) => {
+        // This gets updated when the JSX board needs to be rebuilt
+        // eslint-disable-next-line unused-imports/no-unused-vars -- need to observe
+        const {updateCount} = this.updateObservable;
+
         if (objectType === "point" || objectType === "linkedPoint") {
           const coords = objectType === "point"
             ? this.getPointScreenCoords(objectId)
@@ -382,6 +387,33 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         this.initializeBoard();
       }
     }));
+
+    // synchronize selection changes
+    this.disposers.push(observe(this.getContent().metadata.selection, (change: IObjectDidChange<boolean>) => {
+      const { board: _board } = this.state;
+      if (_board) {
+        // this may be a shared selection change; get all points associated with it
+        const objs = getPointsByCaseId(_board, change.name.toString());
+        const edges: JXG.Line[] = [];
+        objs.forEach(obj => {
+          if (change.type !== 'remove') {
+            setElementColor(_board, obj.id, change.newValue.value);
+            // Also find segments that are attached to the changed points
+            Object.values(obj.childElements).forEach(child => {
+              if(isVisibleEdge(child) && !edges.includes(child)) {
+                edges.push(child);
+              }
+            });
+          }
+        });
+        edges.forEach(edge => {
+          // Edge is selected if both end points are.
+          const selected = this.getContent().isSelected(edge.point1.id) && this.getContent().isSelected(edge.point2.id);
+          setElementColor(_board, edge.id, selected);
+        });
+      }
+    }));
+
   }
 
   private getButtonPath(
@@ -437,6 +469,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         geometryContent.updateScale(this.state.board, scale);
       }
     }
+    runInAction(() => this.updateObservable.updateCount++);
   }
 
   public componentWillUnmount() {
@@ -714,11 +747,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const board = _board || this.state.board;
     if (!board) return;
 
+    const content = this.getContent();
+    // Make sure each linked dataset's attributes have colors assigned.
+    content.linkedDataSets.forEach(link => {
+      link.dataSet.attributes.forEach(attr => {
+        content.assignColorSchemeForAttributeId(attr.id);
+      });
+    });
+
     this.recreateSharedPoints(board);
 
     // identify objects that exist in the model but not in JSXGraph
     const modelObjectsToConvert: GeometryObjectModelType[] = [];
-    this.getContent().objects.forEach(obj => {
+    content.objects.forEach(obj => {
       if (!board.objects[obj.id]) {
         modelObjectsToConvert.push(obj);
       }
@@ -728,7 +769,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const changesToApply = convertModelObjectsToChanges(modelObjectsToConvert);
       applyChanges(board, changesToApply);
     }
-    this.handleScaleToFit();
+    this.scaleToFit();
   }
 
   // remove/recreate all linked points
@@ -745,7 +786,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
     }
     const data = this.getContent().getLinkedPointsData();
-    for (const [link,points] of data.entries()) {
+    for (const [link, points] of data.entries()) {
       const pts = applyChange(board, {
         operation: "create",
         target: "linkedPoint",
@@ -761,6 +802,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     if (!board || !content) return;
     content.zoomBoard(board, zoomFactor);
+    logGeometryEvent(content, "update", "board", undefined, { userAction: "zoom in" });
   };
 
   private handleZoomOut = () => {
@@ -768,9 +810,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const content = this.getContent();
     if (!board || !content) return;
     content.zoomBoard(board, 1/zoomFactor);
+    logGeometryEvent(content, "update", "board", undefined, { userAction: "zoom out" });
   };
 
   private handleScaleToFit = () => {
+    const content = this.getContent();
+    logGeometryEvent(content, "update", "board", undefined, { userAction: "fit all" });
+    this.scaleToFit();
+  };
+
+  private scaleToFit = () => {
     const { board } = this.state;
     if (!board || this.props.readOnly) return;
     const extents = this.getBoardPointsExtents(board);
@@ -1462,16 +1511,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         }
       });
 
-    // synchronize selection changes
-    this.disposers.push(observe(content.metadata.selection, (change: any) => {
-      const { board: _board } = this.state;
-      if (_board) {
-        // this may be a shared selection change; get all points associated with it
-        const objs = getPointsByCaseId(_board, change.name);
-        objs.forEach(obj => setElementColor(_board, obj.id, change.newValue.value));
-      }
-    }));
-
     if (this.props.onSetBoard) {
       this.props.onSetBoard(board);
     }
@@ -1494,12 +1533,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const coords = copyCoords(point.coords);
       const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
 
-      // In polygon mode, clicking the first point in the polygon again closes it.
+      // In polygon mode, clicking a point in the polygon again closes it.
       if (mode === "polygon" && geometryContent.phantomPoint && geometryContent.activePolygonId) {
         const poly = getPolygon(board, geometryContent.activePolygonId);
-        const firstVertex = isPolygon(poly) && poly.vertices[0];
-        if (firstVertex && id === firstVertex.id) {
-          const polygon = geometryContent.closeActivePolygon(board);
+        const vertex = poly && poly.vertices.find(p => p.id === id);
+        if (vertex) {
+          // user clicked on a vertex that is in the current polygon.
+          const polygon = geometryContent.closeActivePolygon(board, vertex);
           if (polygon) {
             this.handleCreatePolygon(polygon);
           }
@@ -1690,21 +1730,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const geometryContent = this.props.model.content as GeometryContentModelType;
       const inVertex = isInVertex(evt);
       const allVerticesSelected = areAllVerticesSelected();
-      let selectPolygon = false;
       if (!inVertex && !allVerticesSelected) {
         // deselect other elements unless appropriate modifier key is down
-        if (board && !hasSelectionModifier(evt)) {
+        if (!hasSelectionModifier(evt)) {
           geometryContent.deselectAll(board);
         }
-        selectPolygon = true;
-      }
-      if (selectPolygon) {
-        geometryContent.selectElement(board, polygon.id);
-        each(polygon.ancestors, point => {
-          if (board && isPoint(point) && !inVertex) {
-            geometryContent.selectElement(board, point.id);
-          }
-        });
+        const ids = Object.values(polygon.ancestors).filter(obj => isPoint(obj)).map(obj => obj.id);
+        ids.push(polygon.id);
+        geometryContent.selectObjects(board, ids);
       }
 
       if (!readOnly) {
