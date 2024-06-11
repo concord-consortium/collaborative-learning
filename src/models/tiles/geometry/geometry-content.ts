@@ -1170,7 +1170,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         // Labeling polygon edges is not supported due to unpredictable IDs. However, if the polygon has only two sides,
         // then labeling an edge is equivalent to labeling the whole polygon.
         const parentPoly = selectedSegments[0].parentPolygon;
-        if (parentPoly && parentPoly.borders.length === 2) {
+        if (parentPoly && parentPoly.vertices.length === 3) {
           return parentPoly;
         }
       }

@@ -1,7 +1,6 @@
 declare namespace JXG {
 
   const touchProperty: string; // note, documented as private
-  const _round10: (value: number, exp: number) => number; // note, documented as private
 
   interface Angle {
     point1, point2, point3, radiuspoint, anglepoint: Point;
@@ -10,14 +9,15 @@ declare namespace JXG {
   type BoundingBox = [number, number, number, number];
 
   interface Board {
-    cssTransMat: number[][];
-    id: string;
-    suspendCount: number;
+    cssTransMat: number[][]; // not documented
+    id: string; // not documented for Board
+    suspendCount: number; // CLUE added; not part of JSXGraph
     objectsList: GeometryElement[];
-    setAttribute: (attrs: any) => void; // fixme should be more specific.
-    // object: {key1:value1,key2:value2,...}
-    // string: 'key:value'
-    // array: ['key', value]
+    // setAttribute is documented to accept any of these, but we only use the first.
+    //   object: {key1:value1,key2:value2,...}
+    //   string: 'key:value'
+    //   array: ['key', value]
+    setAttribute: (attrs: {[id:string]: string|number|boolean}) => void;
   }
 
   interface GeometryElement {
@@ -47,10 +47,6 @@ declare namespace JXG {
   interface Statistics {
     add: (arr1: number | number[], arr2: number | number[]) => number | number[];
     subtract: (arr1: number | number[], arr2: number | number[]) => number | number[];
-  }
-  interface Polygon {
-    // note, documented as "attributes for polygon border lines" but our use is as a list of borders.
-    borders: JXG.Line[];
   }
 
   interface Text {

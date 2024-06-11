@@ -1,8 +1,9 @@
+import { LineAttributes, PolygonAttributes } from "jsxgraph";
 import { each, filter, find, merge, uniqueId, values } from "lodash";
 import { notEmpty } from "../../../utilities/js-utils";
 import { fillPropsForColorScheme, getPoint, getPolygon, strokePropsForColorScheme } from "./geometry-utils";
 import { getObjectById } from "./jxg-board";
-import { ESegmentLabelOption, JXGChange, JXGChangeAgent, JXGParentType, JXGProperties } from "./jxg-changes";
+import { ESegmentLabelOption, JXGChange, JXGChangeAgent, JXGParentType } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge, kGeometryHighlightColor } from "./jxg-types";
 import { wn_PnPoly } from "./soft-surfer-sunday";
@@ -37,7 +38,7 @@ const phantomPolygonEdgeProps = Object.freeze({
 
 function getPolygonVisualProps(selected: boolean) {
   const colorScheme = 0; // TODO
-  const props: JXGProperties = { ...defaultPolygonProps };
+  const props: PolygonAttributes = { ...defaultPolygonProps };
   if (selected) {
     merge(props, selectedPolygonProps);
   }
@@ -50,7 +51,7 @@ export function getEdgeVisualProps(selected: boolean, colorScheme: number, phant
     // Invisible, so don't apply any other styles
     return phantomPolygonEdgeProps;
   }
-  const props: JXGProperties = {
+  const props: LineAttributes = {
     ...strokePropsForColorScheme(colorScheme),
     ...defaultPolygonEdgeProps, // the highlight color needs to override here, so apply after
     ...(selected ? selectedPolygonEdgeProps : {})
