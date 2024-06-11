@@ -20,7 +20,12 @@ declare namespace JXG {
     setAttribute: (attrs: {[id:string]: string|number|boolean}) => void;
   }
 
+  interface BoardAttributes {
+    keyboard: { enabled: boolean }
+  }
+
   interface GeometryElement {
+    _set: (key: string, value: string | null) => void; // note, documented as private
     ancestors: { [id: string]: GeometryElement };
     bounds: () => [number, number, number, number];
     childElements: GeometryElement[];
@@ -40,16 +45,20 @@ declare namespace JXG {
     parentPolygon?: JXG.Polygon; // note, documented as private.
   }
 
-  interface Math {
-    Statistics: Statistics;
-  }
-
   interface Statistics {
     add: (arr1: number | number[], arr2: number | number[]) => number | number[];
     subtract: (arr1: number | number[], arr2: number | number[]) => number | number[];
   }
 
+  interface Math {
+    Statistics: Statistics;
+  }
+
   interface Text {
     plaintext: string; // Not documented
+  }
+
+  interface ZoomOptions {
+    enabled: boolean;
   }
 }

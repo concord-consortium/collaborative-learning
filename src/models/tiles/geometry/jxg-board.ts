@@ -1,5 +1,5 @@
 import { assign, each } from "lodash";
-import JXG, { GeometryElement } from "jsxgraph";
+import JXG, { BoardAttributes, GeometryElement } from "jsxgraph";
 import { ITableLinkProperties, JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
 import {
   isAxis, isBoard, isLinkedPoint, isPoint, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
@@ -220,7 +220,7 @@ function getAxisUnitsFromProps(props?: JXGProperties, scale = 1) {
 
 function createBoard(domElementId: string, properties?: JXGProperties) {
   // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
-  const defaults = {
+  const defaults: Partial<BoardAttributes> = {
     axis: false,
     keepaspectratio: true,
     showCopyright: false,
@@ -231,16 +231,10 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
     // pan, or keyboard controls are not persisted to the model and so would be
     // more frustrating than helpful.
     // For accessibility, it would be very nice to have these work.
-    zoom: {
-      enabled: false,
-      wheel: false
-    },
-    pan: {
-      enabled: false
-    },
-    keyboard: {
-      enabled: false
-    }
+    zoom: { enabled: false },
+    pan: { enabled: false },
+    keyboard: { enabled: false },
+    renderer: "svg"
   };
   const overrides = {};
   const props = combineProperties(domElementId, defaults, properties, overrides);

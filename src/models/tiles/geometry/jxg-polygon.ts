@@ -244,9 +244,9 @@ function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
     const clientOriginalName = segment.getAttribute("clientOriginalName");
     if (!clientOriginalName && (typeof segment.name === "string")) {
       // store the original generated name so we can restore it if necessary
-      // segment._set("clientOriginalName", segment.name);  FIXME non-standard attribute doesn't fit typescript declaration
+      segment._set("clientOriginalName", segment.name);
     }
-    // segment._set("clientLabelOption", clientLabelOption); FIXME non-standard attribute doesn't fit typescript declaration
+    segment._set("clientLabelOption", clientLabelOption);
     const name = clientLabelOption
                   ? clientLabelOption === "label"
                       ? segmentNameLabelFn

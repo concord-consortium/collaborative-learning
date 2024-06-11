@@ -5,6 +5,7 @@ import {
 import { isLinkedPoint, isText } from "./jxg-types";
 import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray, size } from "lodash";
+import { GeometryElementAttributes } from "jsxgraph";
 
 // Inexplicably, we occasionally encounter JSXGraph objects with null
 // transformations which cause JSXGraph to crash. Until we figure out
@@ -79,7 +80,7 @@ export const objectChangeAgent: JXGChangeAgent = {
           textObj.setText(text);
         }
         if (size(others)) {
-          // obj.setAttribute(others);  FIXME -- doesn't match typescript declaration
+          obj.setAttribute(others as GeometryElementAttributes);
         }
       }
     });
