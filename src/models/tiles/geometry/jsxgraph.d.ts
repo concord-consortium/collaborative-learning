@@ -34,6 +34,10 @@ declare namespace JXG {
     isDraggable: boolean;
   }
 
+  interface GridOptions {
+    majorStep: number;
+  }
+
   interface Image {
     url: string;
     setSize: (width: number, height: number) => void;

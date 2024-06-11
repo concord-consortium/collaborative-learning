@@ -256,10 +256,14 @@ interface IAddAxesParams {
 
 function addAxes(board: JXG.Board, params: IAddAxesParams) {
   const { xName, yName, xAnnotation, yAnnotation, unitX, unitY, boundingBox } = params;
-  const [xMajorTickDistance, xMinorTicks, xMinorTickDistance] = getTickValues(unitX);
-  const [yMajorTickDistance, yMinorTicks, yMinorTickDistance] = getTickValues(unitY);
+  const [ xMajorTickDistance, xMinorTicks, xMinorTickDistance ] = getTickValues(unitX);
+  const [ yMajorTickDistance, yMinorTicks ] = getTickValues(unitY);
+
+  // This grid is pale grey lines for the minor (unlabled) ticks.
+  // The major ticks produce their darker grid by having the axis majorHeight set to -1
   board.removeGrids();
-  board.options.grid = { ...board.options.grid };
+  board.options.grid = { ...board.options.grid, majorStep: xMinorTickDistance };
+  board.addGrid();
   if (boundingBox && boundingBox.every((val: number) => isFinite(val))) {
     board.setBoundingBox(boundingBox);
   }
@@ -271,9 +275,11 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
     ...toObj("clientName", xName),
     ...toObj("clientAnnotation", xAnnotation)
   });
-  board.create("ticks", [xAxis, xMajorTickDistance], {
+  board.create("ticks", [xAxis], {
     strokeColor: "#bbb",
     majorHeight: -1,
+    insertTicks: false,
+    ticksDistance: xMajorTickDistance,
     drawLabels: true,
     label: { anchorX: "middle", offset: [-8, -10] },
     minorTicks: xMinorTicks,
@@ -287,9 +293,11 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
     ...toObj("clientName", yName),
     ...toObj("clientAnnotation", yAnnotation)
   });
-  board.create("ticks", [yAxis, yMajorTickDistance], {
+  board.create("ticks", [yAxis], {
     strokeColor: "#bbb",
     majorHeight: -1,
+    insertTicks: false,
+    ticksDistance: yMajorTickDistance,
     drawLabels: true,
     label: { anchorX: "right", offset: [-4, -1] },
     minorTicks: yMinorTicks,
