@@ -7,10 +7,6 @@ declare namespace JXG {
     point1, point2, point3, radiuspoint, anglepoint: Point;
   }
 
-  interface Axis {
-    removeAllTicks: () => void;
-  }
-
   type BoundingBox = [number, number, number, number];
 
   interface Board {

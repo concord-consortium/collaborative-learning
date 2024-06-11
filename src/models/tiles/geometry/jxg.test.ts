@@ -1,4 +1,4 @@
-import "./jxg";
+import JXG from "jsxgraph";
 
 describe("JSXGraph library", () => {
 

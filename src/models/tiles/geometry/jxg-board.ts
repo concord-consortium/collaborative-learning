@@ -257,8 +257,7 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
   const [xMajorTickDistance, xMinorTicks, xMinorTickDistance] = getTickValues(unitX);
   const [yMajorTickDistance, yMinorTicks, yMinorTickDistance] = getTickValues(unitY);
   board.removeGrids();
-  board.options.grid = { ...board.options.grid, gridX: xMinorTickDistance, gridY: yMinorTickDistance };
-  board.addGrid();
+  board.options.grid = { ...board.options.grid };
   if (boundingBox && boundingBox.every((val: number) => isFinite(val))) {
     board.setBoundingBox(boundingBox);
   }
@@ -266,10 +265,10 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
     name: xName || "x",
     withLabel: true,
     label: {fontSize: 13, anchorX: "right", position: "rt", offset: [0, 15]},
+    ticks: { visible: false },
     ...toObj("clientName", xName),
     ...toObj("clientAnnotation", xAnnotation)
   });
-  xAxis.removeAllTicks();
   board.create("ticks", [xAxis, xMajorTickDistance], {
     strokeColor: "#bbb",
     majorHeight: -1,
@@ -282,10 +281,10 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
     name: yName || "y",
     withLabel: true,
     label: {fontSize: 13, position: "rt", offset: [15, 0]},
+    ticks: { visible: false },
     ...toObj("clientName", yName),
     ...toObj("clientAnnotation", yAnnotation)
   });
-  yAxis.removeAllTicks();
   board.create("ticks", [yAxis, yMajorTickDistance], {
     strokeColor: "#bbb",
     majorHeight: -1,
