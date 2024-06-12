@@ -1,5 +1,5 @@
 import React from "react";
-import { castArray, debounce, each, filter, find, keys as _keys, throttle, values } from "lodash";
+import { castArray, debounce, each, find, keys as _keys, throttle, values } from "lodash";
 import { IObjectDidChange, observable, observe, reaction, runInAction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
@@ -1622,7 +1622,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private handleCreateLine = (line: JXG.Line) => {
 
     function getVertices() {
-      return filter(line.ancestors, isPoint);
+      return [line.point1, line.point2];
     }
 
     const isInVertex = (evt: any) => {
