@@ -1,0 +1,22 @@
+diff --git a/node_modules/jsxgraph/src/renderer/svg.js b/node_modules/jsxgraph/src/renderer/svg.js
+index 150152d..94a0320 100644
+--- a/node_modules/jsxgraph/src/renderer/svg.js
++++ b/node_modules/jsxgraph/src/renderer/svg.js
+@@ -1914,8 +1914,15 @@ JXG.extend(
+ 
+         // documented in AbstractRenderer
+         resize: function (w, h) {
+-            this.svgRoot.setAttribute("width", parseFloat(w));
+-            this.svgRoot.setAttribute("height", parseFloat(h));
++            // Width and height must be adjusted if there is a CSS scale in effect on the SVG element.
++            // The scale can be determined by comparing the element's bounding rect dimensions with its offsetWidth/Height.
++            // See https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model/Determining_the_dimensions_of_elements
++            var rect = this.svgRoot.getBoundingClientRect();
++            var scale = { x: this.svgRoot.offsetWidth / rect.width, y: this.svgRoot.offsetHeight / rect.height };
++            var adjusted = { w: parseFloat(w) * scale.x, h: parseFloat(h) * scale.y };
++
++            this.svgRoot.setAttribute("width", adjusted.w);
++            this.svgRoot.setAttribute("height", adjusted.h);
+         },
+ 
+         // documented in JXG.AbstractRenderer
