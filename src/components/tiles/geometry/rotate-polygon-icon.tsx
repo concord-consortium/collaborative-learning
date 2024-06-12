@@ -104,9 +104,8 @@ export class RotatePolygonIcon extends React.Component<IProps, IState> {
     if (!board || !polygon) return;
 
     const polygonBounds = polygon.bounds();
-    const centerCoords: [number, number]
-      = [(polygonBounds[0] + polygonBounds[2]) / 2,
-         (polygonBounds[1] + polygonBounds[3]) / 2];
+    const centerCoords: [number, number] = [(polygonBounds[0] + polygonBounds[2]) / 2,
+                                            (polygonBounds[1] + polygonBounds[3]) / 2];
     this.polygonCenter = new JXG.Coords(JXG.COORDS_BY_USER, centerCoords, board);
     this.initialIconAnchor = this.state.iconAnchor
                               ? copyCoords(this.state.iconAnchor)

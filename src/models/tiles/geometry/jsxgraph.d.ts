@@ -1,6 +1,10 @@
+// These are additional declarations that the JSXGraph package does not supply.
+// It should be reviewed when updating JSXGraph.
+// As of now we are making use of some items that are not part of the public JSXGraph API,
+// as noted below.
 declare namespace JXG {
 
-  const touchProperty: string; // note, documented as private
+  const touchProperty: string; // Documented as private
 
   interface Angle {
     point1, point2, point3, radiuspoint, anglepoint: Point;
@@ -9,7 +13,7 @@ declare namespace JXG {
   type BoundingBox = [number, number, number, number];
 
   interface Board {
-    id: string; // not documented for Board
+    id: string; // Not documented for Board
     suspendCount: number; // CLUE added; not part of JSXGraph
     objectsList: GeometryElement[];
     // setAttribute is documented to accept any of these, but we only use the first.
@@ -24,7 +28,7 @@ declare namespace JXG {
   }
 
   interface GeometryElement {
-    _set: (key: string, value: string | null) => void; // note, documented as private
+    _set: (key: string, value: string | null) => void; // Documented as private
     ancestors: { [id: string]: GeometryElement };
     bounds: () => [number, number, number, number];
     childElements: GeometryElement[];
@@ -43,9 +47,9 @@ declare namespace JXG {
   }
 
   interface Line {
-    getRise: () => number; // note, not documented
-    getSlope: () => number; // note, not documented
-    parentPolygon?: JXG.Polygon; // note, documented as private.
+    getRise: () => number; // Not documented
+    getSlope: () => number; // Not documented
+    parentPolygon?: JXG.Polygon; // Documented as private.
   }
 
   interface Statistics {
