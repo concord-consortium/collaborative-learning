@@ -9,7 +9,6 @@ declare namespace JXG {
   type BoundingBox = [number, number, number, number];
 
   interface Board {
-    cssTransMat: number[][]; // not documented
     id: string; // not documented for Board
     suspendCount: number; // CLUE added; not part of JSXGraph
     objectsList: GeometryElement[];

@@ -544,18 +544,8 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
 
     function updateScale(board: JXG.Board, scale: number) {
-      // Ostensibly, the "right" thing to do here is to call
-      // board.updateCSSTransforms(), but that call inexplicably incorporates
-      // the scale factor multiple times as it walks the DOM hierarchy, so we
-      // just skip the DOM walk and set the transform to the correct value.
       if (board) {
-        const invScale = 1 / (scale || 1);
-        const cssTransMat = [
-                [1, 0, 0],
-                [0, invScale, 0],
-                [0, 0, invScale]
-              ];
-        board.cssTransMat = cssTransMat;
+        board.updateCSSTransforms();
       }
     }
 
