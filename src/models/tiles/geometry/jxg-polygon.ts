@@ -18,7 +18,7 @@ const selectedPolygonProps = Object.freeze({
 
 
 const defaultPolygonEdgeProps = Object.freeze({
-  strokeWidth: 1,        highlightStrokeWidth: 4,
+  strokeWidth: 2.5,      highlightStrokeWidth: 4,
   strokeOpacity: 1,      highlightStrokeOpacity: .12,
                          highlightStrokeColor: kGeometryHighlightColor,
   transitionDuration: 0
