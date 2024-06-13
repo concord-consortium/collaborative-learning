@@ -4,7 +4,7 @@ import { fillPropsForColorScheme, getPoint, getPolygon, strokePropsForColorSchem
 import { getObjectById } from "./jxg-board";
 import { ESegmentLabelOption, JXGChange, JXGChangeAgent, JXGParentType, JXGProperties } from "./jxg-changes";
 import { getElementName, objectChangeAgent } from "./jxg-object";
-import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge, kGeometryHighlightColor } from "./jxg-types";
+import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge } from "./jxg-types";
 import { wn_PnPoly } from "./soft-surfer-sunday";
 
 const defaultPolygonProps = Object.freeze({
@@ -16,18 +16,18 @@ const selectedPolygonProps = Object.freeze({
   fillOpacity: .3,       highlightFillOpacity: .3
 });
 
-
+// Hack alert: JSXGraph for some reason doesn't allow us to specify a CSS class to be applied.
+// In order to be able to use CSS for adding a drop shadow to hovered & selected lines,
+// using a CSS rule that is targeted on stroke-opacity="0.99".
 const defaultPolygonEdgeProps = Object.freeze({
-  strokeWidth: 1,        highlightStrokeWidth: 4,
-  strokeOpacity: 1,      highlightStrokeOpacity: .12,
-                         highlightStrokeColor: kGeometryHighlightColor,
+  strokeWidth: 2.5,      highlightStrokeWidth: 2.5,
+  strokeOpacity: 1,      highlightStrokeOpacity: 0.99, // 0.99 triggers shadow
   transitionDuration: 0
 });
 
 const selectedPolygonEdgeProps = Object.freeze({
-  strokeWidth: 4,         highlightStrokeWidth: 4,
-  strokeOpacity: .25,     highlightStrokeOpacity: .25,
-  strokeColor: kGeometryHighlightColor, highlightStrokeColor: kGeometryHighlightColor
+  strokeWidth: 2.5,       highlightStrokeWidth: 2.5,
+  strokeOpacity: 0.99,     highlightStrokeOpacity: 0.99, // 0.99 triggers shadow
 });
 
 const phantomPolygonEdgeProps = Object.freeze({
@@ -50,8 +50,8 @@ export function getEdgeVisualProps(selected: boolean, colorScheme: number, phant
     return phantomPolygonEdgeProps;
   }
   const props: JXGProperties = {
+    ...defaultPolygonEdgeProps,
     ...strokePropsForColorScheme(colorScheme),
-    ...defaultPolygonEdgeProps, // the highlight color needs to override here, so apply after
     ...(selected ? selectedPolygonEdgeProps : {})
   };
   return props;
