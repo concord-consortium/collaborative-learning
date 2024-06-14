@@ -281,7 +281,7 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
     insertTicks: false,
     ticksDistance: xMajorTickDistance,
     drawLabels: true,
-    label: { anchorX: "middle", offset: [-8, -10] },
+    label: { anchorX: "middle", offset: [0, -10], cssClass: "tick-label" },
     minorTicks: xMinorTicks,
     drawZero: true
   });
@@ -299,7 +299,7 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
     insertTicks: false,
     ticksDistance: yMajorTickDistance,
     drawLabels: true,
-    label: { anchorX: "right", offset: [-4, -1] },
+    label: { anchorX: "right", offset: [-4, 0], cssClass: "tick-label" },
     minorTicks: yMinorTicks,
     drawZero: false
   });

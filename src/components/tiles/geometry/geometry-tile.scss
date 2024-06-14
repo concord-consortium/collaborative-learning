@@ -40,6 +40,11 @@ $toolbar-width: 44px;
           }
         }
 
+        .tick-label {
+          padding: 2px;
+          background-color: white;
+        }
+
         svg {
 
           ellipse {
