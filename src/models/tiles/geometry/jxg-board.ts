@@ -259,7 +259,7 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
   const [ xMajorTickDistance, xMinorTicks, xMinorTickDistance ] = getTickValues(unitX);
   const [ yMajorTickDistance, yMinorTicks ] = getTickValues(unitY);
 
-  // This grid is pale grey lines for the minor (unlabled) ticks.
+  // This grid is pale grey lines for the minor (unlabeled) ticks.
   // The major ticks produce their darker grid by having the axis majorHeight set to -1
   board.removeGrids();
   board.options.grid = { ...board.options.grid, majorStep: xMinorTickDistance };

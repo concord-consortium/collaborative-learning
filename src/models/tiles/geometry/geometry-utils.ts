@@ -16,6 +16,7 @@ export function copyCoords(coords: JXG.Coords) {
     const shortCoords: [number,number] = [usrCoords[1],usrCoords[2]];
     return new JXG.Coords(JXG.COORDS_BY_USER, shortCoords, coords.board);
   } else {
+    // This should not happen, but return a default value to keep this method type-safe.
     return new JXG.Coords(JXG.COORDS_BY_USER, [0, 0], coords.board);
   }
 }
@@ -45,13 +46,7 @@ export function findBoardObject(board: JXG.Board, callback: (elt: JXG.GeometryEl
 
 export function filterBoardObjects(board: JXG.Board,
     callback: (elt: JXG.GeometryElement) => any): JXG.GeometryElement[] {
-  return board.objectsList.filter((obj) => {
-    if (isGeometryElement(obj)) {
-      return callback(obj);
-    } else {
-      return false;
-    }
-  }) as JXG.GeometryElement[];
+  return board.objectsList.filter((obj) => isGeometryElement(obj) && callback(obj)) as JXG.GeometryElement[];
 }
 
 export function getPoint(board: JXG.Board, id: string): JXG.Point|undefined {
