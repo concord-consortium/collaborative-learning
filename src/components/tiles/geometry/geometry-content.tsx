@@ -1,5 +1,5 @@
 import React from "react";
-import { castArray, debounce, each, find, keys as _keys, throttle, values } from "lodash";
+import { castArray, each, find, keys as _keys, throttle, values } from "lodash";
 import { IObjectDidChange, observable, observe, reaction, runInAction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
@@ -485,7 +485,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this._isMounted = false;
   }
 
-  private handlePointerMove = debounce((evt: any) => {
+  private handlePointerMove = (evt: any) => {
     if (!this.context.board || this.props.readOnly || this.context.mode === "select") return;
     // Move phantom point to location of mouse pointer
     const content = this.context.content as GeometryContentModelType;
@@ -498,12 +498,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         content.addPhantomPoint(this.context.board, position, content.activePolygonId);
       }
     }
-  }, 10, { leading: true, trailing: true });
+  };
 
   private handlePointerLeave = () => {
     if (!this.context.board || this.props.readOnly || this.context.mode === "select") return;
-    // Make sure deferred 'mouseMoved' events are not called after we've cleared the point
-    this.handlePointerMove.cancel();
     const { board, content } = this.context;
     if (board && content) {
       content.clearPhantomPoint(this.context.board);
