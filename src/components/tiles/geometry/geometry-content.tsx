@@ -1,5 +1,5 @@
 import React from "react";
-import { castArray, each, filter, find, keys as _keys, throttle, values } from "lodash";
+import { castArray, each, find, keys as _keys, throttle, values } from "lodash";
 import { IObjectDidChange, observable, observe, reaction, runInAction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
@@ -21,7 +21,10 @@ import {
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor,
           getPolygon,
-          logGeometryEvent} from "../../../models/tiles/geometry/geometry-utils";
+          logGeometryEvent,
+          getPoint,
+          getBoardObject,
+          findBoardObject} from "../../../models/tiles/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
 import {
@@ -45,7 +48,7 @@ import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } 
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
-import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
+import { notEmpty, safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { EditableTileTitle } from "../editable-tile-title";
 import LabelSegmentDialog from "./label-segment-dialog";
@@ -209,10 +212,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     if (!p || p.x == null || p.y == null) return;
 
     if (!this.state.board) return;
-    const element = this.state.board?.objects[pointId];
+    const element = getPoint(this.state.board, pointId);
     if (!element) return;
-    const bounds = element.bounds();
-    const coords = new JXG.Coords(JXG.COORDS_BY_USER, bounds.slice(0, 2), this.state.board);
+    const [a, b] = element.bounds();
+    const coords = new JXG.Coords(JXG.COORDS_BY_USER, [a, b], this.state.board);
     const point: Point = [coords.scrCoords[1], coords.scrCoords[2]];
     return point;
   }
@@ -221,7 +224,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     if (!this.state.board) return;
 
     // Access the model to ensure that model changes trigger a rerender
-    const element = this.state.board?.objects[linkedPointId];
+    const element = getBoardObject(this.state.board, linkedPointId);
     if (!element) return;
     const dataSet = this.getContent().getLinkedDataset(element.getAttribute("linkedTableId"))?.dataSet;
     const caseIndex = dataSet?.caseIndexFromID(element.getAttribute("linkedRowId"));
@@ -229,8 +232,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       && dataSet?.attrFromID(element.getAttribute("linkedColId")).numValue(caseIndex);
     if (!isFiniteNumber(yValue)) return;
 
-    const bounds = element.bounds();
-    const coords = new JXG.Coords(JXG.COORDS_BY_USER, bounds.slice(0, 2), this.state.board);
+    const [a, b] = element.bounds();
+    const coords = new JXG.Coords(JXG.COORDS_BY_USER, [a, b], this.state.board);
     const point: Point = [coords.scrCoords[1], coords.scrCoords[2]];
     return point;
   }
@@ -1306,7 +1309,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       if (board) {
         Object.keys(this.dragPts || {})
               .forEach(id => {
-                const elt = board.objects[id];
+                const elt = getBoardObject(board, id);
                 if (elt && content.isSelected(id)) {
                   board.updateInfobox(elt);
                 }
@@ -1352,7 +1355,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       }
     });
 
-    const affectedObjects = _keys(this.dragPts).map(id => board.objects[id]);
+    const affectedObjects = _keys(this.dragPts).map(id => getBoardObject(board, id)).filter(notEmpty);
     updateVertexAnglesFromObjects(affectedObjects);
   }
 
@@ -1364,7 +1367,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     let didDragPoints = false;
     each(this.dragPts, (entry, id) => {
-      const obj = board.objects[id];
+      const obj = getBoardObject(board, id);
       if (obj) {
         obj.setAttribute({ snapToGrid: !!entry.snapToGrid });
       }
@@ -1458,13 +1461,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       }
 
       // Certain objects can block point creation
-      for (const elt of board.objectsList) {
-        const shouldIntercept = (this.context.mode === "polygon")
+      if (findBoardObject(board, elt => {
+          const shouldIntercept = (this.context.mode === "polygon")
             ? shouldInterceptVertexCreation(elt)
             : shouldInterceptPointCreation(elt);
-        if (shouldIntercept && elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
-          return;
-        }
+          return (shouldIntercept && elt.hasPoint(coords.scrCoords[1], coords.scrCoords[2]));
+          })) {
+        return;
       }
 
       // other clicks on board background create new points, perhaps even starting a polygon.
@@ -1520,7 +1523,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private handleCreatePoint = (point: JXG.Point) => {
 
-    const handlePointerDown = (evt: React.MouseEvent) => {
+    const handlePointerDown = (evt: Event) => {
       const { board, mode } = this.context;
       const geometryContent = this.props.model.content as GeometryContentModelType;
       if (!board) return;
@@ -1546,7 +1549,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
       // click on selected element - deselect if appropriate modifier key is down
       if (geometryContent.isSelected(id)) {
-        if (hasSelectionModifier(evt)) {
+        if (evt instanceof MouseEvent && hasSelectionModifier(evt)) {
           geometryContent.deselectElement(board, id);
         }
 
@@ -1566,7 +1569,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       // click on unselected element
       else {
         // deselect other elements unless appropriate modifier key is down
-        if (!hasSelectionModifier(evt)) {
+        if (evt instanceof MouseEvent && !hasSelectionModifier(evt)) {
           geometryContent.deselectAll(board);
         }
         geometryContent.selectElement(board, id);
@@ -1617,7 +1620,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private handleCreateLine = (line: JXG.Line) => {
 
     function getVertices() {
-      return filter(line.ancestors, isPoint);
+      return [line.point1, line.point2];
     }
 
     const isInVertex = (evt: any) => {

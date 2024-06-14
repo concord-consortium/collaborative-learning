@@ -1,11 +1,12 @@
-import { assign, each, find } from "lodash";
-import "./jxg";
+import { assign, each } from "lodash";
+import JXG, { BoardAttributes, GeometryElement } from "jsxgraph";
 import { ITableLinkProperties, JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
 import {
   isAxis, isBoard, isLinkedPoint, isPoint, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
   kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
 import { goodTickValue } from "../../../utilities/graph-utils";
+import { filterBoardObjects, findBoardObject, forEachBoardObject, getBoardObject } from "./geometry-utils";
 
 const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
 
@@ -29,13 +30,13 @@ export function resumeBoardUpdates(board: JXG.Board) {
 }
 
 export function getObjectById(board: JXG.Board, id: string): JXG.GeometryElement | undefined {
-  let obj: JXG.GeometryElement | undefined = board.objects[id];
+  let obj = getBoardObject(board, id);
   if (!obj && id?.includes(":")) {
     // legacy support for early tiles in which points were identified by caseId,
     // before we added support for multiple columns, i.e. multiple points per row/case
     // newer code uses `${caseId}:${attrId}` for the id of points
     const caseId = id.split(":")[0];
-    obj = board.objects[caseId];
+    obj = getBoardObject(board, caseId);
   }
   return obj;
 }
@@ -45,7 +46,7 @@ export function getPointsByCaseId(board: JXG.Board, caseId: string) {
     const obj = getObjectById(board, caseId);
     return obj ? [obj] : [];
   }
-  return board.objectsList.filter(obj => isPoint(obj) && (obj.id.split(":")[0] === caseId));
+  return filterBoardObjects(board, obj => isPoint(obj) && (obj.id.split(":")[0] === caseId));
 }
 
 export function syncLinkedPoints(board: JXG.Board, links: ITableLinkProperties) {
@@ -86,7 +87,7 @@ export const getAxisType = (v: any) => {
   if (stdFormY) return "y";
 };
 export function getAxis(board: JXG.Board, type: "x" | "y") {
-  return find(board.objectsList, obj => isAxis(obj) && (getAxisType(obj) === type));
+  return findBoardObject(board, obj => isAxis(obj) && (getAxisType(obj) === type));
 }
 
 function getClientAxisLabels(board: JXG.Board) {
@@ -140,7 +141,7 @@ export function getTickValues(pixPerUnit: number) {
 export const kReverse = true;
 export function sortByCreation(board: JXG.Board, ids: string[], reverse = false) {
   const indices: { [id: string]: number } = {};
-  board.objectsList.forEach((obj, index) => {
+  forEachBoardObject(board, (obj, index) => {
     indices[obj.id] = index;
   });
   ids.sort(reverse
@@ -219,7 +220,7 @@ function getAxisUnitsFromProps(props?: JXGProperties, scale = 1) {
 
 function createBoard(domElementId: string, properties?: JXGProperties) {
   // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
-  const defaults = {
+  const defaults: Partial<BoardAttributes> = {
     axis: false,
     keepaspectratio: true,
     showCopyright: false,
@@ -230,16 +231,10 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
     // pan, or keyboard controls are not persisted to the model and so would be
     // more frustrating than helpful.
     // For accessibility, it would be very nice to have these work.
-    zoom: {
-      enabled: false,
-      wheel: false
-    },
-    pan: {
-      enabled: false
-    },
-    keyboard: {
-      enabled: false
-    }
+    zoom: { enabled: false },
+    pan: { enabled: false },
+    keyboard: { enabled: false },
+    renderer: "svg"
   };
   const overrides = {};
   const props = combineProperties(domElementId, defaults, properties, overrides);
@@ -261,10 +256,13 @@ interface IAddAxesParams {
 
 function addAxes(board: JXG.Board, params: IAddAxesParams) {
   const { xName, yName, xAnnotation, yAnnotation, unitX, unitY, boundingBox } = params;
-  const [xMajorTickDistance, xMinorTicks, xMinorTickDistance] = getTickValues(unitX);
-  const [yMajorTickDistance, yMinorTicks, yMinorTickDistance] = getTickValues(unitY);
+  const [ xMajorTickDistance, xMinorTicks, xMinorTickDistance ] = getTickValues(unitX);
+  const [ yMajorTickDistance, yMinorTicks ] = getTickValues(unitY);
+
+  // This grid is pale grey lines for the minor (unlabeled) ticks.
+  // The major ticks produce their darker grid by having the axis majorHeight set to -1
   board.removeGrids();
-  board.options.grid = { ...board.options.grid, gridX: xMinorTickDistance, gridY: yMinorTickDistance };
+  board.options.grid = { ...board.options.grid, majorStep: xMinorTickDistance };
   board.addGrid();
   if (boundingBox && boundingBox.every((val: number) => isFinite(val))) {
     board.setBoundingBox(boundingBox);
@@ -273,13 +271,15 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
     name: xName || "x",
     withLabel: true,
     label: {fontSize: 13, anchorX: "right", position: "rt", offset: [0, 15]},
+    ticks: { visible: false },
     ...toObj("clientName", xName),
     ...toObj("clientAnnotation", xAnnotation)
   });
-  xAxis.removeAllTicks();
-  board.create("ticks", [xAxis, xMajorTickDistance], {
+  board.create("ticks", [xAxis], {
     strokeColor: "#bbb",
     majorHeight: -1,
+    insertTicks: false,
+    ticksDistance: xMajorTickDistance,
     drawLabels: true,
     label: { anchorX: "middle", offset: [-8, -10] },
     minorTicks: xMinorTicks,
@@ -289,13 +289,15 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
     name: yName || "y",
     withLabel: true,
     label: {fontSize: 13, position: "rt", offset: [15, 0]},
+    ticks: { visible: false },
     ...toObj("clientName", yName),
     ...toObj("clientAnnotation", yAnnotation)
   });
-  yAxis.removeAllTicks();
-  board.create("ticks", [yAxis, yMajorTickDistance], {
+  board.create("ticks", [yAxis], {
     strokeColor: "#bbb",
     majorHeight: -1,
+    insertTicks: false,
+    ticksDistance: yMajorTickDistance,
     drawLabels: true,
     label: { anchorX: "right", offset: [-4, -1] },
     minorTicks: yMinorTicks,
@@ -359,7 +361,7 @@ export const boardChangeAgent: JXGChangeAgent = {
           const bbox: JXG.BoundingBox = [xMin, yMin + yRange, xMin + xRange, yMin];
           suspendBoardUpdates(board);
           // remove old axes before resetting bounding box
-          board.objectsList.forEach(el => {
+          forEachBoardObject(board, (el: GeometryElement) => {
             if (el.elType === "axis") {
               board.removeObject(el);
             }
