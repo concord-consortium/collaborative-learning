@@ -98,7 +98,11 @@ export const movableLineChangeAgent: JXGChangeAgent = {
     const pointProps = {...props, ...pointSpecificProps};
     const pointIds = getMovableLinePointIds(lineId);
 
-    if (change.parents && change.parents.length === 2) {
+    if (change.parents
+        && Array.isArray(change.parents)
+        && change.parents.length === 2
+        && Array.isArray(change.parents[0])
+        && Array.isArray(change.parents[1])) {
       const interceptPoint = (board as JXG.Board).create(
         "point",
         change.parents[0],
@@ -147,8 +151,8 @@ export const movableLineChangeAgent: JXGChangeAgent = {
           },
           ...line,
           ...overrides
-        });
-      const label = movableLine && movableLine.label;
+        }) as JXG.Line;
+      const label = movableLine.label!;
 
       return [movableLine, interceptPoint, slopePoint, label];
     }

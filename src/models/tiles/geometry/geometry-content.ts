@@ -36,7 +36,8 @@ import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { gImageMap } from "../../image-map";
 import { IClueTileObject } from "../../annotations/clue-object";
-import { appendVertexId, getPoint, getPolygon, logGeometryEvent, removeClosingVertexId } from "./geometry-utils";
+import { appendVertexId, getPoint, filterBoardObjects, forEachBoardObject, getBoardObject, getBoardObjectIds,
+  getPolygon, logGeometryEvent, removeClosingVertexId } from "./geometry-utils";
 import { getPointVisualProps } from "./jxg-point";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
@@ -289,7 +290,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       return self.getDeletableSelectedIds(board).length > 0;
     },
     selectedObjects(board: JXG.Board) {
-      return board.objectsList.filter(obj => self.isSelected(obj.id));
+      return filterBoardObjects(board, obj => self.isSelected(obj.id));
     },
     exportJson(options?: ITileExportOptions) {
       const changes = convertModelToChanges(self, { addBuffers: false, includeUnits: false});
@@ -330,7 +331,7 @@ export const GeometryContentModel = GeometryBaseContentModel
   .actions(self => ({
     setElementSelection(board: JXG.Board | undefined, id: string, select: boolean) {
       if (self.isSelected(id) !== select) {
-        const elt = board && board.objects[id];
+        const elt = getBoardObject(board, id);
         const tableId = elt && elt.getAttribute("linkedTableId");
         const rowId = elt && elt.getAttribute("linkedRowId");
         self.metadata.setSelection(id, select);
@@ -559,18 +560,8 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
 
     function updateScale(board: JXG.Board, scale: number) {
-      // Ostensibly, the "right" thing to do here is to call
-      // board.updateCSSTransforms(), but that call inexplicably incorporates
-      // the scale factor multiple times as it walks the DOM hierarchy, so we
-      // just skip the DOM walk and set the transform to the correct value.
       if (board) {
-        const invScale = 1 / (scale || 1);
-        const cssTransMat = [
-                [1, 0, 0],
-                [0, invScale, 0],
-                [0, 0, invScale]
-              ];
-        board.cssTransMat = cssTransMat;
+        board.updateCSSTransforms();
       }
     }
 
@@ -1132,7 +1123,7 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
 
     function findObjects(board: JXG.Board, test: (obj: JXG.GeometryElement) => boolean): JXG.GeometryElement[] {
-      return board.objectsList.filter(test);
+      return filterBoardObjects(board, test);
     }
 
     function isCopyableChild(child: JXG.GeometryElement) {
@@ -1154,13 +1145,12 @@ export const GeometryContentModel = GeometryBaseContentModel
     // ancestors are selected.
     function getSelectedIdsAndChildren(board: JXG.Board) {
       // list of selected ids in order of creation
-      const selectedIds = board.objectsList
-                               .map(obj => obj.id)
-                               .filter(id => self.isSelected(id));
+      const selectedIds = getBoardObjectIds(board)
+        .filter(id => self.isSelected(id));
       const children: { [id: string]: JXG.GeometryElement } = {};
       // identify children (e.g. polygons) that may be selected as well
       selectedIds.forEach(id => {
-        const obj = board.objects[id];
+        const obj = getBoardObject(board, id);
         if (obj) {
           each(obj.childElements, child => {
             if (child && !self.isSelected(child.id) && isCopyableChild(child)) {
@@ -1222,7 +1212,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         const selectedPts = selectionEntries
                               .filter(entry => {
                                 const id = entry[0];
-                                const obj = board.objects[id];
+                                const obj = getBoardObject(board, id);
                                 const isSelected = entry[1];
                                 return obj && (obj.elType === "point") && isSelected;
                               });
@@ -1260,7 +1250,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         // Labeling polygon edges is not supported due to unpredictable IDs. However, if the polygon has only two sides,
         // then labeling an edge is equivalent to labeling the whole polygon.
         const parentPoly = selectedSegments[0].parentPolygon;
-        if (parentPoly && parentPoly.borders.length === 2) {
+        if (parentPoly && parentPoly.vertices.length === 3) {
           return parentPoly;
         }
       }
@@ -1272,7 +1262,7 @@ export const GeometryContentModel = GeometryBaseContentModel
 
       // sort into creation order
       const idToIndexMap: { [id: string]: number } = {};
-      board.objectsList.forEach((obj, index) => {
+      forEachBoardObject(board, (obj, index) => {
         idToIndexMap[obj.id] = index;
       });
       selectedIds.sort((a, b) => idToIndexMap[a] - idToIndexMap[b]);
@@ -1303,7 +1293,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       selectedIds.push(...prepareToDeleteObjects(board, selectedIds));
 
       self.deselectAll(board);
-      board.showInfobox(false);
+      board.setAttribute({showInfobox: false});
       if (selectedIds.length) {
         removeObjects(board, selectedIds);
       }

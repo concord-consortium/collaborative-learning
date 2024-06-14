@@ -225,7 +225,6 @@ describe("GeometryContent", () => {
 
     content.resizeBoard(board, 200, 200);
     content.updateScale(board, 0.5);
-    expect(board.cssTransMat).toEqual([[1, 0, 0], [0, 2, 0], [0, 0, 2]]);
 
     const boardId = board.id;
     const boundingBox = clone(board.attr.boundingbox);
