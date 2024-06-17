@@ -1,5 +1,5 @@
 import React from "react";
-import { castArray, each, find, keys as _keys, throttle, values } from "lodash";
+import { castArray, each, find, isEqual, keys as _keys, throttle, values } from "lodash";
 import { IObjectDidChange, observable, observe, reaction, runInAction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
@@ -9,7 +9,6 @@ import { SizeMeProps } from "react-sizeme";
 import { pointBoundingBoxSize, pointButtonRadius, segmentButtonWidth, zoomFactor } from "./geometry-constants";
 import { BaseComponent } from "../../base";
 import { DocumentContentModelType } from "../../../models/document/document-content";
-import { getTableLinkColors } from "../../../models/tiles/table-links";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import {
   GeometryContentModelType, IAxesParams, isGeometryContentReady, setElementColor
@@ -36,14 +35,14 @@ import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
 } from "../../../models/tiles/geometry/jxg-polygon";
 import {
-  isAxis, isBoard, isComment, isImage, isLine, isMovableLine,
+  isAxis, isComment, isImage, isLine, isMovableLine,
   isMovableLineControlPoint, isMovableLineLabel, isPoint, isPolygon, isRealVisiblePoint, isVertexAngle,
   isVisibleEdge, isVisibleMovableLine, kGeometryDefaultPixelsPerUnit
 } from "../../../models/tiles/geometry/jxg-types";
 import {
   getVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
 } from "../../../models/tiles/geometry/jxg-vertex-angle";
-import { getAllLinkedPoints, injectGetTableLinkColorsFunction } from "../../../models/tiles/geometry/jxg-table-link";
+import { createLinkedPoint, getAllLinkedPoints } from "../../../models/tiles/geometry/jxg-table-link";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tile-component";
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -103,8 +102,6 @@ interface IDragPoint {
   final?: JXG.Coords;
   snapToGrid?: boolean;
 }
-
-injectGetTableLinkColorsFunction(getTableLinkColors);
 
 interface IPasteContent {
   pasteId: string;
@@ -754,9 +751,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       });
     });
 
-    this.recreateSharedPoints(board);
+    this.updateSharedPoints(board);
 
     // identify objects that exist in the model but not in JSXGraph
+    // TODO: there may not be any more cases where this is needed.
     const modelObjectsToConvert: GeometryObjectModelType[] = [];
     content.objects.forEach(obj => {
       if (!board.objects[obj.id]) {
@@ -771,29 +769,45 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.scaleToFit();
   }
 
-  // remove/recreate all linked points
-  // Shared points are deleted, and in the process, so are the polygons that depend on them
-  // This is built into JSXGraph's Board#removeObject function, which descends through and deletes all children:
-  // https://github.com/jsxgraph/jsxgraph/blob/60a2504ed66b8c6fea30ef67a801e86877fb2e9f/src/base/board.js#L4775
-  // Ids persist in their recreation because they are ultimately derived from canonical values
-  // NOTE: A more tailored response would match up the existing points with the data set and only
-  // change the affected points, which would eliminate some visual flashing that occurs when
-  // unchanged points are re-created and would allow derived polygons to be preserved rather than created anew.
-  recreateSharedPoints(board: JXG.Board){
-    const ids = getAllLinkedPoints(board);
-    if (ids.length > 0){
-      applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
-    }
-    const data = this.getContent().getLinkedPointsData();
-    for (const [link, points] of data.entries()) {
-      const pts = applyChange(board, {
-        operation: "create",
-        target: "linkedPoint",
-        parents: points.coords,
-        properties: points.properties,
-        links: { tileIds: [link]} });
-      castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
-    }
+  /**
+   * Update/add/remove linked points to matched what is in shared data sets.
+   *
+   * @param board
+   */
+  updateSharedPoints(board: JXG.Board) {
+    this.applyChange(() => {
+      const remainingIds = getAllLinkedPoints(board);
+      const data = this.getContent().getLinkedPointsData();
+      for (const [link, points] of data.entries()) {
+        // Loop through points, adding new ones and updating any that need to be moved.
+        for (let i=0; i<points.coords.length; i++) {
+          const id = points.properties[i].id;
+          const existingIndex = remainingIds.indexOf(id);
+          if (existingIndex < 0) {
+            // Doesn't exist, create the point
+            const pt = createLinkedPoint(board, points.coords[i], points.properties[i], { tileIds: [link] });
+            this.handleCreatePoint(pt);
+          } else {
+            const existing = getPoint(board, id);
+            if (!isEqual(existing?.coords.usrCoords.slice(1), points.coords[i])) {
+              applyChange(board, {
+                operation: "update",
+                target: "linkedPoint",
+                targetID: id,
+                properties: { position: points.coords[i] }
+              });
+              // Remove updated point from remaining list
+            }
+            remainingIds.splice(existingIndex, 1);
+          }
+        }
+      }
+
+      // Now deal with any deleted points
+      if (remainingIds.length > 0){
+        applyChange(board, { operation: "delete", target: "linkedPoint", targetID: remainingIds });
+      }
+    });
   }
 
   private handleZoomIn = () => {

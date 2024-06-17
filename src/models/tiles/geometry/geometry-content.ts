@@ -7,8 +7,6 @@ import { ITableLinkProperties, linkedPointId, splitLinkedPointId } from "../tabl
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileContentAPIActions, tileContentAPIViews } from "../tile-model-hooks";
-import { ICreateRowsProperties, IRowProperties, ITableChange } from "../table/table-change";
-import { canonicalizeValue } from "../table/table-model-types";
 import { convertModelToChanges, exportGeometryJson } from "./geometry-migrate";
 import { preprocessImportFormat } from "./geometry-import";
 import {
@@ -186,6 +184,18 @@ export const GeometryContentModel = GeometryBaseContentModel
       });
       return point;
     },
+    /**
+     * Compile a map of data for all points that are part of linked datasets.
+     * The returned Map has the providing tile's ID as the key, and an object
+     * containing two parallel lists as its value:
+     *
+     * - coords: list of coordinate pairs
+     * - properties: list of point property objects (id and color)
+     *
+     * TODO: should we also look at the selections in the DataSet
+     *
+     * @returns the Map
+     */
     getLinkedPointsData() {
       const data: Map<string,{coords:JXGCoordPair[],properties:{id:string, colorScheme:number}[]}> = new Map();
       self.linkedDataSets.forEach(link => {
@@ -1402,66 +1412,6 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
     };
   })
-  .views(self => ({
-    getPositionOfPoint(dataSet: IDataSet, caseId: string, attrId: string): JXGUnsafeCoordPair {
-      const attrCount = dataSet.attributes.length;
-      const xAttr = attrCount > 0 ? dataSet.attributes[0] : undefined;
-      const yAttr = dataSet.attrFromID(attrId);
-      const xValue = xAttr ? dataSet.getValue(caseId, xAttr.id) : undefined;
-      const yValue = yAttr ? dataSet.getValue(caseId, yAttr.id) : undefined;
-      return [canonicalizeValue(xValue), canonicalizeValue(yValue)];
-    }
-  }))
-  .views(self => ({
-    getPointPositionsForColumns(dataSet: IDataSet, attrIds: string[]): [string[], JXGUnsafeCoordPair[]] {
-      const pointIds: string[] = [];
-      const positions: JXGUnsafeCoordPair[] = [];
-      dataSet.cases.forEach(aCase => {
-        const caseId = aCase.__id__;
-        attrIds.forEach(attrId => {
-          pointIds.push(linkedPointId(caseId, attrId));
-          positions.push(self.getPositionOfPoint(dataSet, caseId, attrId));
-        });
-      });
-      return [pointIds, positions];
-    },
-    getPointPositionsForRowsChange(dataSet: IDataSet, change: ITableChange): [string[], JXGUnsafeCoordPair[]] {
-      const pointIds: string[] = [];
-      const positions: JXGUnsafeCoordPair[] = [];
-      const caseIds = castArray(change.ids);
-      const propsArray: IRowProperties[] = change.action === "create"
-                                            ? (change.props as ICreateRowsProperties)?.rows
-                                            : castArray(change.props as any);
-      const xAttrId = dataSet.attributes.length > 0 ? dataSet.attributes[0].id : undefined;
-      caseIds.forEach((caseId, caseIndex) => {
-        const tableProps = propsArray[caseIndex] || propsArray[0];
-        // if x value changes, all points in row are affected
-        if (xAttrId && tableProps[xAttrId] != null) {
-          for (let attrIndex = 1; attrIndex < dataSet.attributes.length; ++attrIndex) {
-            const attrId = dataSet.attributes[attrIndex].id;
-            const pointId = linkedPointId(caseId, attrId);
-            const position = self.getPositionOfPoint(dataSet, caseId, attrId);
-            if (pointId && position) {
-              pointIds.push(pointId);
-              positions.push(position);
-            }
-          }
-        }
-        // otherwise, only points with y-value changes are affected
-        else {
-          each(tableProps, (value, attrId) => {
-            const pointId = linkedPointId(caseId, attrId);
-            const position = self.getPositionOfPoint(dataSet, caseId, attrId);
-            if (pointId && position) {
-              pointIds.push(pointId);
-              positions.push(position);
-            }
-          });
-        }
-      });
-      return [pointIds, positions];
-    }
-  }))
   .actions(self => ({
     afterAttach() {
       // This reaction monitors legacy links and shared data sets, linking to tables as their

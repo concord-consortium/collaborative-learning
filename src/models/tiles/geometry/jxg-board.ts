@@ -1,8 +1,8 @@
-import { assign, each } from "lodash";
+import { assign } from "lodash";
 import JXG, { BoardAttributes, GeometryElement } from "jsxgraph";
-import { ITableLinkProperties, JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
+import { JXGChange, JXGChangeAgent, JXGProperties } from "./jxg-changes";
 import {
-  isAxis, isBoard, isLinkedPoint, isPoint, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
+  isAxis, isBoard, isPoint, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
   kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
 import { goodTickValue } from "../../../utilities/graph-utils";
@@ -47,30 +47,6 @@ export function getPointsByCaseId(board: JXG.Board, caseId: string) {
     return obj ? [obj] : [];
   }
   return filterBoardObjects(board, obj => isPoint(obj) && (obj.id.split(":")[0] === caseId));
-}
-
-export function syncLinkedPoints(board: JXG.Board, links: ITableLinkProperties) {
-  if (board && links?.labels) {
-    // build map of points associated with each case
-    const ptsForCaseMap: Record<string, JXG.GeometryElement[]> = {};
-    each(board.objects, (obj, id) => {
-      if (isLinkedPoint(obj)) {
-        const caseId = obj.getAttribute("linkedRowId");
-        if (caseId) {
-          if (!ptsForCaseMap[caseId]) ptsForCaseMap[caseId] = [obj];
-          else ptsForCaseMap[caseId].push(obj);
-        }
-      }
-    });
-    // assign case label to each point associated with a given case
-    links.labels.forEach(item => {
-      const { id, label } = item;
-      const ptsForCase = ptsForCaseMap[id];
-      if (ptsForCase) {
-        ptsForCase.forEach(pt => pt?.setAttribute({ name: label }));
-      }
-    });
-  }
 }
 
 // Buffer space in pixels around the plot for labels, etc.
