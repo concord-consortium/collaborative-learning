@@ -202,6 +202,7 @@ function createBoard(domElementId: string, properties?: JXGProperties) {
     showCopyright: false,
     showNavigation: false,
     minimizeReflow: "none",
+    infobox: { color: "#3f3f3f", opacity: 0.75 },
     // Disabled for now - could be refactored so that these native abilities of
     // JSXGraph are available to the user. Changes made via the native zoom,
     // pan, or keyboard controls are not persisted to the model and so would be
