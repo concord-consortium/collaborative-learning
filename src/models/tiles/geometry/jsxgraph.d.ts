@@ -24,6 +24,7 @@ declare namespace JXG {
   }
 
   interface BoardAttributes {
+    infobox: TextAttributes,
     keyboard: { enabled: boolean }
   }
 

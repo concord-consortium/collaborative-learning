@@ -1316,6 +1316,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             this.isSqrDistanceWithinThreshold(9, c1.coords, c2.coords));
   }
 
+  /**
+   * Adjust display parameters depending on whether user is currently dragging a point.
+   * @param value {boolean}
+   */
+  private setDragging(value: boolean) {
+    this.state.board?.infobox.setAttribute({ opacity: value ? 1 : .75 });
+  }
+
   private moveSelectedPoints(dx: number, dy: number) {
     this.beginDragSelectedPoints();
     if (this.endDragSelectedPoints(undefined, undefined, [0, dx, dy], "keyboard")) {
@@ -1338,6 +1346,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private beginDragSelectedPoints(evt?: any, dragTarget?: JXG.GeometryElement) {
     const { board } = this.state;
     const content = this.getContent();
+    this.setDragging(true);
     if (board && !hasSelectionModifier(evt || {})) {
       content.metadata.selection.forEach((isSelected: boolean, id: string) => {
         const obj = board.objects[id];
@@ -1379,6 +1388,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     const content = this.getContent();
     if (!board || !content) return false;
+    this.setDragging(false);
 
     let didDragPoints = false;
     each(this.dragPts, (entry, id) => {
