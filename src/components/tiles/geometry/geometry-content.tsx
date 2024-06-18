@@ -29,7 +29,7 @@ import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
 import {
   ESegmentLabelOption, JXGCoordPair
 } from "../../../models/tiles/geometry/jxg-changes";
-import { applyChange, applyChanges } from "../../../models/tiles/geometry/jxg-dispatcher";
+import { applyChange } from "../../../models/tiles/geometry/jxg-dispatcher";
 import { kSnapUnit } from "../../../models/tiles/geometry/jxg-point";
 import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
@@ -379,9 +379,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     this.disposers.push(onSnapshot(this.getContent(), () => {
       if (!this.suspendSnapshotResponse) {
-        this.destroyBoard();
-        this.setState({ board: undefined });
-        this.initializeBoard();
+        if (this.state.board) {
+          this.destroyBoard();
+          this.setState({ board: undefined });
+          this.initializeBoard();
+        }
       }
     }));
 
@@ -659,14 +661,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private async initializeBoard(): Promise<JXG.Board> {
     return new Promise((resolve, reject) => {
       isGeometryContentReady(this.getContent()).then(() => {
-        const board = this.getContent().initializeBoard(this.elementId, this.handleCreateElements);
+        const board = this.getContent()
+          .initializeBoard(this.elementId, this.handleCreateElements,
+            (b: JXG.Board) => this.syncLinkedGeometry(b));
         if (board) {
           this.handleCreateBoard(board);
           const { url, filename } = this.getContent().bgImage || {};
           if (url) {
             this.updateImageUrl(url, filename);
           }
-          this.syncLinkedGeometry(board);
           this.setState({ board });
           resolve(board);
         }
@@ -742,31 +745,18 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   syncLinkedGeometry(_board?: JXG.Board) {
     const board = _board || this.state.board;
     if (!board) return;
-
     const content = this.getContent();
+
     // Make sure each linked dataset's attributes have colors assigned.
-    content.linkedDataSets.forEach(link => {
-      link.dataSet.attributes.forEach(attr => {
-        content.assignColorSchemeForAttributeId(attr.id);
+    this.applyChange(() => {
+      content.linkedDataSets.forEach(link => {
+        link.dataSet.attributes.forEach(attr => {
+          content.assignColorSchemeForAttributeId(attr.id);
+        });
       });
     });
 
     this.updateSharedPoints(board);
-
-    // identify objects that exist in the model but not in JSXGraph
-    // TODO: there may not be any more cases where this is needed.
-    const modelObjectsToConvert: GeometryObjectModelType[] = [];
-    content.objects.forEach(obj => {
-      if (!board.objects[obj.id]) {
-        modelObjectsToConvert.push(obj);
-      }
-    });
-
-    if (modelObjectsToConvert.length > 0) {
-      const changesToApply = convertModelObjectsToChanges(modelObjectsToConvert);
-      applyChanges(board, changesToApply);
-    }
-    this.scaleToFit();
   }
 
   /**
@@ -776,6 +766,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
    */
   updateSharedPoints(board: JXG.Board) {
     this.applyChange(() => {
+      let pointsAdded = false;
       const remainingIds = getAllLinkedPoints(board);
       const data = this.getContent().getLinkedPointsData();
       for (const [link, points] of data.entries()) {
@@ -787,6 +778,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             // Doesn't exist, create the point
             const pt = createLinkedPoint(board, points.coords[i], points.properties[i], { tileIds: [link] });
             this.handleCreatePoint(pt);
+            pointsAdded = true;
           } else {
             const existing = getPoint(board, id);
             if (!isEqual(existing?.coords.usrCoords.slice(1), points.coords[i])) {
@@ -806,6 +798,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       // Now deal with any deleted points
       if (remainingIds.length > 0){
         applyChange(board, { operation: "delete", target: "linkedPoint", targetID: remainingIds });
+      }
+
+      if (pointsAdded) {
+        this.scaleToFit();
       }
     });
   }

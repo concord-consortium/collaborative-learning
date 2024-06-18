@@ -7,7 +7,7 @@ import { ITableLinkProperties, linkedPointId, splitLinkedPointId } from "../tabl
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileContentAPIActions, tileContentAPIViews } from "../tile-model-hooks";
-import { convertModelToChanges, exportGeometryJson } from "./geometry-migrate";
+import { convertModelToChanges, exportGeometryJson, getGeometryBoardChange } from "./geometry-migrate";
 import { preprocessImportFormat } from "./geometry-import";
 import {
   cloneGeometryObject, CommentModel, CommentModelType, GeometryBaseContentModel, GeometryObjectModelType,
@@ -26,7 +26,7 @@ import { getEdgeVisualProps, prepareToDeleteObjects } from "./jxg-polygon";
 import {
   isAxisArray, isBoard, isComment, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
-  kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
+  kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj, isGeometryElement
 } from "./jxg-types";
 import { SharedModelType } from "../../shared/shared-model";
 import { ISharedModelManager } from "../../shared/shared-model-manager";
@@ -303,7 +303,10 @@ export const GeometryContentModel = GeometryBaseContentModel
       return filterBoardObjects(board, obj => self.isSelected(obj.id));
     },
     exportJson(options?: ITileExportOptions) {
-      const changes = convertModelToChanges(self, { addBuffers: false, includeUnits: false});
+      const changes = [
+        getGeometryBoardChange(self, { addBuffers: false, includeUnits: false}),
+        ...convertModelToChanges(self)
+      ];
       const jsonChanges = changes.map(change => JSON.stringify(change));
       return exportGeometryJson(jsonChanges, options);
     }
@@ -452,13 +455,13 @@ export const GeometryContentModel = GeometryBaseContentModel
         onDidApplyChange: handleDidApplyChange
       };
     }
-    // views
 
-    // actions
-    function initializeBoard(domElementID: string, onCreate?: onCreateCallback): JXG.Board | undefined {
+    function initializeBoard(domElementID: string,
+        onCreate: onCreateCallback, syncLinked: (board:JXG.Board) => void): JXG.Board | undefined {
       let board: JXG.Board | undefined;
-      const changes = convertModelToChanges(self, { addBuffers: true, includeUnits: true});
-      applyChanges(domElementID, changes, getDispatcherContext())
+      const context = getDispatcherContext();
+      // Create the board
+      applyChanges(domElementID, [getGeometryBoardChange(self, { addBuffers: true, includeUnits: true })], context)
         .filter(result => result != null)
         .forEach(changeResult => {
           const changeElems = castArray(changeResult);
@@ -466,15 +469,30 @@ export const GeometryContentModel = GeometryBaseContentModel
             if (isBoard(changeElem)) {
               board = changeElem;
               suspendBoardUpdates(board);
-            }
-            else if (onCreate) {
+            } else {
               onCreate(changeElem);
             }
           });
         });
-      if (board) {
-        resumeBoardUpdates(board);
-      }
+      if (!board) return;
+
+      // Add linked points
+      syncLinked(board);
+
+      // Now add all local objects
+      const changes = convertModelToChanges(self);
+      applyChanges(board, changes, context)
+        .filter(result => result != null)
+        .forEach(changeResult => {
+          const changeElems = castArray(changeResult);
+          changeElems.forEach(changeElem => {
+            if (isGeometryElement(changeElem)) {
+              onCreate(changeElem);
+            }
+          });
+        });
+
+      resumeBoardUpdates(board);
       return board;
     }
 
@@ -549,6 +567,15 @@ export const GeometryContentModel = GeometryBaseContentModel
         unit: calcUnit,
         range: calcYrange
       };
+      // Don't force a redisplay if nothing has changed.
+      const curX = self.board?.xAxis;
+      const curY = self.board?.yAxis;
+      if (curX && curX.min === xAxisProperties.min
+          && curX.unit === xAxisProperties.unit && curX.range === xAxisProperties.range
+          && curY && curY.min === yAxisProperties.min
+          && curY.unit === yAxisProperties.unit && curY.range === yAxisProperties.range) {
+        return undefined;
+      }
       if (self.board) {
         applySnapshot(self.board.xAxis, xAxisProperties);
         applySnapshot(self.board.yAxis, yAxisProperties);
@@ -635,7 +662,6 @@ export const GeometryContentModel = GeometryBaseContentModel
     function addPhantomPoint(board: JXG.Board, parents: JXGCoordPair, polygonId?: string):
         JXG.Point | undefined {
       if (!board) return undefined;
-
       const props = {
         id: uniqueId(),
         colorScheme: self.newPointColorScheme,

@@ -133,7 +133,7 @@ describe("GeometryContent", () => {
     function onCreate(elt: JXG.GeometryElement) {
       // handle a point
     }
-    const board = content.initializeBoard(divId, onCreate) as JXG.Board;
+    const board = content.initializeBoard(divId, onCreate, (b) => {}) as JXG.Board;
     content.resizeBoard(board, 200, 200);
     content.updateScale(board, 0.5);
     return board;
