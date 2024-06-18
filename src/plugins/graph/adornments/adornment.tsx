@@ -3,10 +3,12 @@ import { clsx } from "clsx";
 import { observer } from "mobx-react-lite";
 import { IAdornmentModel } from "./adornment-models";
 import { useGraphLayoutContext } from "../models/graph-layout";
-import { useGraphModelContext } from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import { INumericAxisModel } from "../imports/components/axis/models/axis-model";
 import { getAdornmentComponentInfo } from "./adornment-component-info";
 import { IDotsRef, transitionDuration } from "../graph-types";
+import { uniqueId } from "../../../utilities/js-utils";
+import { useMemoOne } from "use-memo-one";
 
 import "./adornment.scss";
 
@@ -42,6 +44,10 @@ export const Adornment = observer(function Adornment(
   // We can't use the subPlotKey because that value may be duplicated if there are multiple types of
   // adornments active on the graph.
   const adornmentKey = `${adornment.id}${classFromSubPlotKey ? `-${classFromSubPlotKey}` : ''}`;
+
+  // Construct a globally unique ID for this component
+  const id = useMemoOne(() => { return adornmentKey + uniqueId(); }, []);
+
   const componentInfo = getAdornmentComponentInfo(adornment.type);
   if (!componentInfo) return null;
   const { Component } = componentInfo;
@@ -59,13 +65,13 @@ export const Adornment = observer(function Adornment(
 
   return (
     <div
-      id={adornmentKey}
+      id={id}
       className={adornmentWrapperClass}
       style={{animationDuration: `${transitionDuration}ms`}}
       data-testid={'adornment-wrapper'}
     >
       <Component
-        containerId={adornmentKey}
+        containerId={id}
         key={adornmentKey}
         model={adornment}
         plotHeight={subPlotHeight}

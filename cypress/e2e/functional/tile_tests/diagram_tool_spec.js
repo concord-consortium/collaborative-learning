@@ -13,7 +13,7 @@ const undoKeystroke = `{${cmdKey}}z`;
 const redoKeystroke = `{${cmdKey}}{shift}z`;
 
 function beforeTest() {
-  const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=m2s";
+  const queryParams = `${Cypress.config("qaVariablesUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
@@ -64,6 +64,17 @@ context('Diagram Tool Tile', function () {
     const name = "name1";
     dialogField("name").should("exist").type(name);
     dialogOkButton().click();
+    diagramTile.getVariableCard().should("exist");
+    diagramTile.getVariableCardField("name").should("have.value", name);
+
+    // Diagram tile restore upon page reload
+    cy.wait(2000);
+    cy.reload();
+    cy.waitForLoad();
+    cy.showOnlyDocumentWorkspace();
+    diagramTile.getDiagramTile().should("exist").click();
+
+    diagramTile.getTileTitleText().should("contain", newName);
     diagramTile.getVariableCard().should("exist");
     diagramTile.getVariableCardField("name").should("have.value", name);
 
@@ -173,6 +184,7 @@ context('Diagram Tool Tile', function () {
 
     // Draw tile and toolbar buttons render
     drawTile.getDrawTile().should("exist");
+    drawTile.getDrawTile().click();
     drawTile.getDrawToolNewVariable().should("exist").should("be.enabled");
     drawTile.getDrawToolEditVariable().should("exist").should("be.disabled");
     drawTile.getDrawToolInsertVariable().should("exist").should("be.disabled");

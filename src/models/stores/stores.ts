@@ -1,9 +1,11 @@
-import { addDisposer } from "mobx-state-tree";
+import { addDisposer, getSnapshot } from "mobx-state-tree";
 import { makeAutoObservable, runInAction, when } from "mobx";
 import { AppConfigModel, AppConfigModelType } from "./app-config-model";
-import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
+import { UnitModel, UnitModelType } from "../curriculum/unit";
+import { getGuideJson, getUnitJson } from "../curriculum/unit-utils";
 import { InvestigationModel, InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
+import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui";
 import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
@@ -22,6 +24,16 @@ import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
 import { IBaseStores } from "./base-stores-types";
 import { NavTabModelType } from "../view/nav-tabs";
+import { Bookmarks } from "./bookmarks";
+import { SortedDocuments } from "./sorted-documents";
+import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
+import { problemLoaded } from "../../lib/misc";
+import { CurriculumConfig, ICurriculumConfig } from "./curriculum-config";
+import { urlParams } from "../../utilities/url-params";
+import { createAndLoadExemplarDocs } from "./create-exemplar-docs";
+import curriculumConfigJson from "../../clue/curriculum-config.json";
+import { gImageMap } from "../image-map";
+import { ExemplarControllerModel, ExemplarControllerModelType } from "./exemplar-controller";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -32,7 +44,12 @@ export interface IStores extends IBaseStores {
   studentWorkTabSelectedGroupId: string | undefined;
   setAppMode: (appMode: AppMode) => void;
   initializeStudentWorkTab: () => void;
-  setUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
+  loadUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
+  sortedDocuments: SortedDocuments;
+  unitLoadedPromise: Promise<void>;
+  sectionsLoadedPromise: Promise<void>;
+  startedLoadingUnitAndProblem: boolean;
+  exemplarController: ExemplarControllerModelType;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -51,11 +68,13 @@ class Stores implements IStores{
   isPreviewing?: boolean;
   appVersion: string;
   appConfig: AppConfigModelType;
+  curriculumConfig: ICurriculumConfig;
   unit: UnitModelType;
   investigation: InvestigationModelType;
   problem: ProblemModelType;
   teacherGuide?: ProblemModelType;
   user: UserModelType;
+  persistentUI: PersistentUIModelType;
   ui: UIModelType;
   groups: GroupsModelType;
   class: ClassModelType;
@@ -64,11 +83,17 @@ class Stores implements IStores{
   db: DB;
   demo: DemoModelType;
   showDemoCreator: boolean;
+  bookmarks: Bookmarks;
   supports: SupportsModelType;
   clipboard: ClipboardModelType;
   selection: SelectionStoreModelType;
   serialDevice: SerialDevice;
   userContextProvider: UserContextProvider;
+  sortedDocuments: SortedDocuments;
+  unitLoadedPromise: Promise<void>;
+  sectionsLoadedPromise: Promise<void>;
+  startedLoadingUnitAndProblem: boolean;
+  exemplarController: ExemplarControllerModelType;
 
   constructor(params?: ICreateStores){
     // This will mark all properties as observable
@@ -78,34 +103,30 @@ class Stores implements IStores{
     // will do with async functions, but whatever it
     // does seems to work without warnings.
     makeAutoObservable(this);
-
     this.appMode = params?.appMode || "dev";
     this.isPreviewing = params?.isPreviewing || false;
     this.appVersion = params?.appVersion || "unknown";
+    this.curriculumConfig = params?.curriculumConfig || CurriculumConfig.create(curriculumConfigJson, {urlParams});
     this.appConfig = params?.appConfig || AppConfigModel.create();
 
-    // for testing, we create a null problem or investigation if none is provided
+    // To keep the code simple, we create a null unit, investigation, and problem if
+    // they aren't provided.
+    // Code that needs the real unit should wait on the `unitLoadedPromise`.
+    // If the unit is passed in, then the unitLoadedPromise will resolve immediately,
+    // this only happens in tests.
+    const defaultUnit = UnitModel.create({code: "NULL", title: "Null Unit"});
+    this.unit = params?.unit || defaultUnit;
     this.investigation = params?.investigation ||
       InvestigationModel.create({ ordinal: 0, title: "Null Investigation" });
     this.problem = params?.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" });
+
     this.user = params?.user || UserModel.create({ id: "0" });
-    this.ui = params?.ui || UIModel.create({
-        problemWorkspace: {
-          type: ProblemWorkspace,
-          mode: "1-up"
-        },
-        learningLogWorkspace: {
-          type: LearningLogWorkspace,
-          mode: "1-up"
-        },
-      });
     this.groups = params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing });
     this.groups.setEnvironment(this);
     this.class = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });
     this.db = params?.db || new DB();
     this.documents = params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes);
     this.networkDocuments = params?.networkDocuments || DocumentsModel.create({});
-    this.unit = params?.unit || UnitModel.create({code: "NULL", title: "Null Unit"});
     const demoName = params?.demoName || this.appConfig.appName;
     this.demo = params?.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}});
     this.showDemoCreator = params?.showDemoCreator || false;
@@ -113,8 +134,26 @@ class Stores implements IStores{
     this.clipboard = ClipboardModel.create();
     this.selection = SelectionStoreModel.create();
     this.serialDevice = new SerialDevice();
-    this.ui.setProblemPath(this.problemPath);
+    this.ui = params?.ui || UIModel.create({
+      learningLogWorkspace: {
+        type: LearningLogWorkspace,
+        mode: "1-up"
+      },
+    });
+    this.persistentUI = params?.persistentUI || PersistentUIModel.create({
+      problemWorkspace: {
+        type: ProblemWorkspace,
+        mode: "1-up"
+      }
+    });
+    this.persistentUI.setProblemPath(this.problemPath);
     this.userContextProvider = new UserContextProvider(this);
+    this.bookmarks = new Bookmarks({db: this.db});
+    this.sortedDocuments = new SortedDocuments(this);
+
+    this.unitLoadedPromise = when(() => this.unit !== defaultUnit);
+    this.sectionsLoadedPromise = when(() => this.problem.sections.length > 0);
+    this.exemplarController = ExemplarControllerModel.create();
   }
 
   get tabsToDisplay() {
@@ -138,7 +177,7 @@ class Stores implements IStores{
   }
 
   get isShowingTeacherContent() {
-    const { ui: { showTeacherContent }, user: { isTeacher } } = this;
+    const { persistentUI: { showTeacherContent }, user: { isTeacher } } = this;
     return isTeacher && showTeacherContent;
   }
 
@@ -146,8 +185,8 @@ class Stores implements IStores{
    * The currently open group in the Student Work tab
    */
   get studentWorkTabSelectedGroupId() {
-    const { ui, groups } = this;
-    return ui.tabs.get("student-work")?.openSubTab
+    const { persistentUI, groups } = this;
+    return persistentUI.tabs.get("student-work")?.openSubTab
         || (groups.nonEmptyGroups.length ? groups.nonEmptyGroups[0].id : "");
   }
 
@@ -163,7 +202,7 @@ class Stores implements IStores{
     // waiting
     when(
       () => this.studentWorkTabSelectedGroupId !== "",
-      () => this.ui.setOpenSubTab("student-work", this.studentWorkTabSelectedGroupId)
+      () => this.persistentUI.setOpenSubTab("student-work", this.studentWorkTabSelectedGroupId)
     );
   }
 
@@ -175,31 +214,68 @@ class Stores implements IStores{
     this.appMode = mode;
   }
 
+  setUnit(unit: UnitModelType) {
+    this.unit = unit;
+  }
+
   // If we need to batch up the changes even more than currently,
   // we could try changing this to a MobX flow.
   // However typing the yield statements is difficult. Also flows
   // in MobX are slightly different than flows in MST, so there might
   // be some weird interactions with action tracking if we mix them.
-  async setUnitAndProblem(unitId: string | undefined, problemOrdinal?: string) {
-    const { appConfig } = this;
-    let unitJson = await getUnitJson(unitId, appConfig);
+  async loadUnitAndProblem(unitId: string | undefined, problemOrdinal?: string) {
+    const { appConfig, curriculumConfig, persistentUI } = this;
+    this.startedLoadingUnitAndProblem = true;
+    showLoadingMessage("Loading curriculum unit");
+    const unitJson = await getUnitJson(unitId, curriculumConfig);
     if (unitJson.status === 404) {
-      unitJson = await getUnitJson(appConfig.defaultUnit, appConfig);
+      this.ui.setError(`Cannot load the curriculum unit: ${unitId}`);
+      return;
     }
+    removeLoadingMessage("Loading curriculum unit");
+    showLoadingMessage("Setting up curriculum content");
 
-    // read the unit content, but don't instantiate section contents (DocumentModels) yet
-    const unit = createUnitWithoutContent(unitJson);
+    // Initialize the imageMap
+    const unitUrls = curriculumConfig.getUnitSpec(unitId);
+    unitUrls && gImageMap.setUnitUrl(unitUrls.content);
+    gImageMap.setUnitCodeMap(getSnapshot(curriculumConfig.unitCodeMap));
+
+    // read in the unit content (which does not instantiate the sections' contents)
+    const unit = UnitModel.create(unitJson);
 
     const _problemOrdinal = problemOrdinal || appConfig.defaultProblemOrdinal;
-    const { investigation: _investigation, problem: _problem } = unit.getProblem(_problemOrdinal);
+    const { investigation, problem } = unit.getProblem(_problemOrdinal);
 
-    appConfig.setConfigs([unit.config || {}, _investigation?.config || {}, _problem?.config || {}]);
+    appConfig.setConfigs([unit.config || {}, investigation?.config || {}, problem?.config || {}]);
 
     // load/initialize the necessary tools
+    showLoadingMessage("Loading tile types");
     const { authorTools = [], toolbar = [], tools: tileTypes = [] } = appConfig;
     const unitTileTypes = new Set(
       [...toolbar.map(button => button.id), ...authorTools.map(button => button.id), ...tileTypes]);
     await registerTileTypes([...unitTileTypes]);
+    removeLoadingMessage("Loading tile types");
+
+    this.setUnit(unit);
+
+    if (problem && unitUrls) {
+      showLoadingMessage("Loading curriculum sections");
+      problem.loadSections(unitUrls.content).then(() => {
+        removeLoadingMessage("Loading curriculum sections");
+      });
+      showLoadingMessage("Loading exemplar documents");
+      createAndLoadExemplarDocs({
+        unitUrl: unitUrls.content,
+        problem,
+        documents: this.documents,
+        user: this.user,
+        classStore: this.class,
+        curriculumConfig,
+        appConfig
+      }).then(() => {
+        removeLoadingMessage("Loading exemplar documents");
+      });
+    }
 
     // We are changing our observable state here so we need to be in an action.
     // Because this is an async function, we'd have to switch it to a flow to
@@ -209,10 +285,6 @@ class Stores implements IStores{
     // not be batched with the rest of these updates. Having it not batched
     // should be fine and keeps things less complicated.
     runInAction(() => {
-      // read the unit content with full contents now that we have tools
-      this.unit = UnitModel.create(unitJson);
-      const {investigation, problem} = this.unit.getProblem(_problemOrdinal);
-
       // TODO: make this dynamic like the way the components work. The components
       // access these values from the stores when they need them. This way the values
       // can be changed on the fly without having to track down each object that is
@@ -225,16 +297,22 @@ class Stores implements IStores{
         this.investigation = investigation;
         this.problem = problem;
       }
-      this.ui.setProblemPath(this.problemPath);
 
-      // Set the active tab to be the first tab
+      problemLoaded(this, _problemOrdinal);
+
+      persistentUI.setProblemPath(this.problemPath);
+
+      // Set the active tab to be the first tab (unless active tab is already set by persistent UI)
       const tabs = this.tabsToDisplay;
       if (tabs.length > 0) {
-        this.ui.setActiveNavTab(tabs[0].tab);
+        if (!persistentUI.activeNavTab) {
+          persistentUI.setActiveNavTab(tabs[0].tab);
+        }
       }
+      removeLoadingMessage("Setting up curriculum content");
     });
 
-    addDisposer(unit, when(() => {
+    addDisposer(this.unit, when(() => {
         return this.user.isTeacher;
       },
       async () => {
@@ -243,12 +321,15 @@ class Stores implements IStores{
         // await new Promise((resolve) => setTimeout(resolve, 5000));
 
         // only load the teacher guide content for teachers
-        const guideJson = await getGuideJson(unitId, appConfig);
+        const guideJson = await getGuideJson(unitId, curriculumConfig);
         if (guideJson.status !== 404) {
           const unitGuide = guideJson && UnitModel.create(guideJson);
           // Not sure if this should be "guide" or "teacher-guide", either ought to work
           unitGuide?.setFacet("teacher-guide");
           const teacherGuide = unitGuide?.getProblem(problemOrdinal || appConfig.defaultProblemOrdinal)?.problem;
+          // There might not be a teacher guide for this specific problem
+          if (!unitUrls?.guide || !teacherGuide) return;
+          teacherGuide.loadSections(unitUrls.guide);
           this.setTeacherGuide(teacherGuide);
         }
       }

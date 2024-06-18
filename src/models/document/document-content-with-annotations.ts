@@ -2,15 +2,20 @@ import { types } from "mobx-state-tree";
 
 import { BaseDocumentContentModel } from "./base-document-content";
 import { ArrowAnnotation, IArrowAnnotation, IArrowAnnotationSnapshot } from "../annotations/arrow-annotation";
+import { logSparrowCreate, logSparrowDelete } from "../tiles/log/log-sparrow-event";
+import { LogEventName } from "../../../src/lib/logger-types";
 
 /**
- * This is one part of the DocumentContentModel. The other parts are
- * DocumentContentModelWidthTileDragging and BaseDocumentContentModel.
- * It was split out to reduce the size of the DocumentContentModel.
+ * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
+ * - BaseDocumentContentModel
+ * - DocumentContentModelWithAnnotations
+ * - DocumentContentModelWithTileDragging
+ * - DocumentContentModel
  *
  * This file should contain the properties, views, and actions that are
  * related to adorning documents (i.e. sparrows).
  */
+
 export const DocumentContentModelWithAnnotations = BaseDocumentContentModel
   .named("DocumentContentModelWithAnnotations")
   .props({
@@ -36,13 +41,30 @@ export const DocumentContentModelWithAnnotations = BaseDocumentContentModel
   .actions(self => ({
     addArrow(arrow: IArrowAnnotation) {
       self.annotations.put(arrow);
+      logSparrowCreate(LogEventName.SPARROW_CREATION, arrow, self);
     },
     deleteAnnotation(annotationId: string) {
       self.annotations.delete(annotationId);
+      logSparrowDelete(LogEventName.SPARROW_DELETION, annotationId);
     },
     addAnnotationFromImport(id: string, annotation: IArrowAnnotationSnapshot){
       if (self.annotations) {
         self.annotations.set(id, annotation);
+      }
+    },
+    selectAnnotations(ids: string[]) {
+      for (const annotation of self.annotations.values()) {
+        annotation.setSelected(ids.includes(annotation.id));
+      }
+    }
+  }))
+  .actions(self => ({
+    deleteSelected() {
+      const keys = self.annotations.keys();
+      for (const annoId of keys) {
+        if (self.annotations.get(annoId)?.isSelected) {
+          self.deleteAnnotation(annoId);
+        }
       }
     }
   }));

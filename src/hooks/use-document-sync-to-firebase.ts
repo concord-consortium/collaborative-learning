@@ -78,6 +78,20 @@ export function useDocumentSyncToFirebase(
     }
   });
 
+  // sync visibility (public/private) for personal and learning log documents
+  useSyncMstPropToFirebase<typeof document.visibility>({
+    firebase, model: document, prop: "visibility", path: metadata,
+    enabled: commonSyncEnabled && !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
+    options: {
+      onSuccess: (data, visibility) => {
+        debugLog(`DEBUG: Updated document visibility for ${type} document ${key}:`, visibility);
+      },
+      onError: (err, visibility) => {
+        console.warn(`ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
+      }
+    }
+  });
+
   // sync title for personal and learning log documents
   useSyncMstPropToFirebase<typeof document.title>({
     firebase, model: document, prop: "title", path: typedMetadata,

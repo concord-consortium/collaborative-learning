@@ -1,0 +1,25 @@
+.axis-label {
+  align-items: center;
+  background-color: white;
+  border: 1.5px solid #949494; // Match kAxisLabelBorderWidth in graph-types.ts
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  overflow: visible;
+  // Match kAxisLabelHorizontalVerticalPadding and kAxisLabelVerticalPadding in graph-types.ts
+  padding: 5px 10px;
+  position: absolute;
+
+  &.vertical.editing {
+    justify-content: flex-start;
+    padding-left: 1px;
+  }
+
+  div {
+    white-space: nowrap;
+
+    &.vertical {
+      transform: rotate(-90deg);
+    }
+  }
+}

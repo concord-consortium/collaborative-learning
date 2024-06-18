@@ -1,7 +1,7 @@
 import ResourcesPanel from '../../../support/elements/common/ResourcesPanel';
 import Canvas from '../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../support/elements/common/cCanvas';
-import GraphToolTile from '../../../support/elements/tile/GraphToolTile';
+import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
 import ImageToolTile from '../../../support/elements/tile/ImageToolTile';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import TextToolTile from '../../../support/elements/tile/TextToolTile';
@@ -10,7 +10,7 @@ import TableToolTile from '../../../support/elements/tile/TableToolTile';
 let resourcesPanel = new ResourcesPanel;
 let canvas = new Canvas;
 let clueCanvas = new ClueCanvas;
-let graphToolTile = new GraphToolTile;
+let geometryToolTile = new GeometryToolTile;
 let imageToolTile = new ImageToolTile;
 let drawToolTile = new DrawToolTile;
 let textToolTile = new TextToolTile;
@@ -20,11 +20,12 @@ let studentWorkspace = 'My Student Test Workspace';
 let copyTitle = 'Personal Workspace Copy';
 let renameTitlePencil = "Renamed Title pencil";
 
-const queryParams1 = `${Cypress.config("queryParams")}`;
-const queryParams2 = "?appMode=qa&fakeClass=5&fakeUser=student:5&fakeOffering=5&problem=3.3&qaGroup=5&unit=example-no-group-share";
-const queryParams3 = "?appMode=demo&demoName=BrokenDocs&fakeClass=1&fakeUser=student:1&unit=sas&problem=0.1";
+const queryParams1 = `${Cypress.config("qaUnitStudent5")}`;
+const queryParams2 = `${Cypress.config("qaNoGroupShareUnitStudent5")}`;
+const queryParams3 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
+const queryParams4 = "?appMode=demo&demoName=BrokenDocs&fakeClass=1&fakeUser=student:1&unit=sas&problem=0.1";
 
-const title = "SAS 2.1 Drawing Wumps";
+const title = "QA 1.1 Solving a Mystery with Proportional Reasoning";
 
 function beforeTest(params) {
   cy.clearQAData('all');
@@ -42,7 +43,7 @@ context('Test Canvas', function () {
     beforeTest(queryParams1);
     cy.log('verify investigation header UI');
     canvas.getEditTitleIcon().should('not.exist');
-    canvas.getPublishIcon().should('be.visible');
+    canvas.getPublishItem().should('be.visible');
     clueCanvas.getShareButton().should('be.visible');
     clueCanvas.getFourUpViewToggle().should('be.visible');
     clueCanvas.openFourUpView();
@@ -52,7 +53,7 @@ context('Test Canvas', function () {
     cy.log('verify personal workspace header UI');
     canvas.createNewExtraDocumentFromFileMenu(studentWorkspace, "my-work");
     canvas.getEditTitleIcon().should('be.visible');
-    canvas.getPersonalPublishIcon().should('be.visible');
+    canvas.getPublishItem().should('be.visible');
     clueCanvas.getShareButton().should('not.exist');
     clueCanvas.getFourUpViewToggle().should('not.exist');
 
@@ -70,7 +71,7 @@ context('Test Canvas', function () {
     cy.log('verify copy of personal workspace');
     canvas.copyDocument(copyTitle);
     canvas.getPersonalDocTitle().should('contain', copyTitle);
-    graphToolTile.getGraphTile().should('be.visible');
+    geometryToolTile.getGeometryTile().should('be.visible');
     tableToolTile.getTableTile().should('be.visible');
     textToolTile.getTextTile().should('be.visible').and('contain', studentWorkspace);
 
@@ -190,9 +191,9 @@ context('Test Canvas', function () {
     clueCanvas.openOneUpViewFromFourUp(); //clean up
 
     cy.log('test the tool palette');
-    //This should test the tools in the tool shelf
-    // Tool palettes for Graph, Image, Draw,and Table are tested in respective tool spec test
-    //Selection tool is tested as a functionality of graph tool tiles
+    // This should test the tools in the tool shelf
+    // Tool palettes for Geometry, Image, Draw,and Table are tested in respective tool spec test
+    // Selection tool is tested as a functionality of geometry tool tiles
 
     cy.log('adds text tool');
     clueCanvas.addTile('text');
@@ -200,9 +201,9 @@ context('Test Canvas', function () {
     textToolTile.enterText('This is the Investigation ' + title);
     clueCanvas.exportTileAndDocument('text-tool-tile');
 
-    cy.log('adds a graph tool');
+    cy.log('adds a geometry tool');
     clueCanvas.addTile('geometry');
-    graphToolTile.getGraphTile().should('exist');
+    geometryToolTile.getGeometryTile().should('exist');
     // clueCanvas.exportTileAndDocument('geometry-tool-tile');
     // in case we created a point while exporting
     cy.get('.primary-workspace .geometry-toolbar .button.delete').click({ force: true });
@@ -223,7 +224,7 @@ context('Test Canvas', function () {
     // clueCanvas.exportTileAndDocument('table-tool-tile');
 
     cy.log('verifies scrolling');
-    graphToolTile.getGraphTile().scrollIntoView();
+    geometryToolTile.getGeometryTile().scrollIntoView();
     textToolTile.getTextTile().first().scrollIntoView();
 
     // TODO:4-up view canvas selector does not work in cypress even though it works in Chrome. it currently selects the entire canvas and not the scaled one
@@ -231,7 +232,7 @@ context('Test Canvas', function () {
     // canvas.openFourUpView();
     // canvas.scrollToBottom(canvas.getNorthWestCanvas());
     // cy.get('.single-workspace > .document> .canvas-area > .four-up > .canvas-container.north-west >.canvas-scaler >.canvas').scrollTo('bottom');
-    // canvas.getGraphTile().last().should('be.visible');
+    // canvas.getGeometryTile().last().should('be.visible');
     // canvas.getSouthWestCanvas().should('be.visible');
     // canvas.openOneUpViewFromFourUp(); //clean up
 
@@ -242,7 +243,7 @@ context('Test Canvas', function () {
     resourcesPanel.openTopTab("my-work");
     cy.openDocumentWithTitle('my-work', 'workspaces', studentWorkspace);
     canvas.getPersonalDocTitle().should('contain', studentWorkspace);
-    graphToolTile.getGraphTile().should('be.visible');
+    geometryToolTile.getGeometryTile().should('be.visible');
     tableToolTile.getTableTile().should('be.visible');
     textToolTile.getTextTile().should('be.visible').and('contain', studentWorkspace);
 
@@ -252,7 +253,7 @@ context('Test Canvas', function () {
     cy.openDocumentWithTitle('my-work', 'workspaces', title);
     clueCanvas.getInvestigationCanvasTitle().should('contain', title);
     textToolTile.getTextTile().should('be.visible').and('contain', title);
-    graphToolTile.getGraphTile().should('exist');
+    geometryToolTile.getGeometryTile().should('exist');
     drawToolTile.getDrawTile().should('exist');
     imageToolTile.getImageTile().should('exist');
     tableToolTile.getTableTile().should('exist');
@@ -280,18 +281,18 @@ context('Test Canvas', function () {
     //star a document to verify delete
     cy.openSection("my-work", "workspaces");
     cy.get('.list.workspaces [data-test=workspaces-list-items] .footer').contains(renameTitlePencil).parents().siblings('.icon-holder').find('.icon-star').click();
-    cy.openDocumentWithTitle('my-work', 'workspaces', 'SAS 2.1 Drawing Wumps');
+    cy.openDocumentWithTitle('my-work', 'workspaces', 'QA 1.1 Solving a Mystery with Proportional Reasoning');
 
     cy.log('will delete elements from canvas');
     // Delete elements in the canvas
-    clueCanvas.deleteTile('graph');
+    clueCanvas.deleteTile('geometry');
     clueCanvas.deleteTile('image');
     clueCanvas.deleteTile('draw');
     clueCanvas.deleteTile('table');
     clueCanvas.deleteTile('text');
     clueCanvas.deleteTile('text');
     textToolTile.getTextTile().should('not.exist');
-    graphToolTile.getGraphTile().should('not.exist');
+    geometryToolTile.getGeometryTile().should('not.exist');
     drawToolTile.getDrawTile().should('not.exist');
     imageToolTile.getImageTile().should('not.exist');
     tableToolTile.getTableTile().should('not.exist');
@@ -309,7 +310,7 @@ context('Test Canvas', function () {
     resourcesPanel.getResourcesPanelExpandedSpace().find('.image-tool').first()
       .trigger('dragend');
     imageToolTile.getImageTile().should('exist');
-    imageToolTile.getImageTile().find('.editable-tile-title-text').contains('Did You Know?: Images in computer graphics');
+    imageToolTile.getImageTile().find('.editable-tile-title-text').contains('Did You Know?: Measurement in police work');
     clueCanvas.deleteTile('image');
 
     cy.log('will maintain positioning when copying multiple tiles');
@@ -327,9 +328,9 @@ context('Test Canvas', function () {
       .trigger('drop', { force: true, dataTransfer });
 
     // Make sure the tiles were copied in the correct order
-    tableToolTile.getTableTile().first().find('.editable-header-cell').contains('Mug Wump');
-    tableToolTile.getTableTile().eq(1).find('.editable-header-cell').contains('Mug Wump Part 2');
-    tableToolTile.getTableTile().eq(2).find('.editable-header-cell').contains('Mug Wump Part 3');
+    tableToolTile.getTableTile().first().find('.editable-header-cell').contains('QA Table2');
+    tableToolTile.getTableTile().eq(1).find('.editable-header-cell').contains('QA Table1');
+    tableToolTile.getTableTile().eq(2).find('.editable-header-cell').contains('QA Table3');
 
     // Clean up
     clueCanvas.deleteTile('table');
@@ -349,7 +350,7 @@ context('Test Canvas', function () {
       .trigger('drop', { force: true, dataTransfer });
 
     // Make sure the tiles were copied in the correct order
-    tableToolTile.getTableTile().first().find('.editable-header-cell').contains('Mug Wump');
+    tableToolTile.getTableTile().first().find('.editable-header-cell').contains('QA Table2');
 
     // Clean up
     clueCanvas.deleteTile('table');
@@ -365,7 +366,7 @@ context('Test Canvas', function () {
     resourcesPanel.getCanvasItemTitle("my-work", "workspaces").contains('Investigation Copy').should('not.exist');
 
     cy.log('verify original investigation canvas still exist after copy delete');
-    resourcesPanel.getCanvasItemTitle("my-work", "workspaces").contains('Drawing Wumps').should('be.visible');
+    resourcesPanel.getCanvasItemTitle("my-work", "workspaces").contains('Proportional Reasoning').should('be.visible');
 
     cy.log('verify that original personal workspace is not deleted when copy is deleted');
     resourcesPanel.openTopTab("my-work");
@@ -384,8 +385,8 @@ context('Test Canvas', function () {
     resourcesPanel.getCanvasItemTitle("my-work", "workspaces").contains(studentWorkspace).should('not.exist');
 
     cy.log('verify starred document is no longer in the Starred section after delete');
-    cy.openSection('my-work', 'starred');
-    cy.getCanvasItemTitle('my-work', 'starred').should('not.exist');
+    cy.openSection('my-work', 'bookmarks');
+    cy.getCanvasItemTitle('my-work', 'bookmarks').should('not.exist');
 
     cy.log("Canvas unit config test");
     beforeTest(queryParams2);
@@ -396,10 +397,16 @@ context('Test Canvas', function () {
     cy.log("verify publish button is not visible when publish is disabled");
     cy.get(".icon-button.icon-publish").should("not.exist");
 
+    cy.log("Share button visible on personal docs, only when sort-work tab is visible");
+    beforeTest(queryParams3);
+    canvas.createNewExtraDocumentFromFileMenu(studentWorkspace, "my-work");
+    canvas.getEditTitleIcon().should('be.visible');
+    clueCanvas.getShareButton().should('be.visible');
+
     // This is using an intentionally broken document.
     // Info about this document can be found here: src/test-fixtures/broken-doc-content.md
     cy.log("Canvas document error test");
-    beforeTest(queryParams3);
+    beforeTest(queryParams4);
 
     cy.log("verify an error message is shown");
     cy.get('[data-test="document-title"]').should("contain", "0.1 Intro to CLUE");

@@ -4,7 +4,7 @@ export const kDiagramTileType = "Diagram";
 // Currently it is just the version of the diagram-view library.
 // TODO: include a version in the diagram-view library so we can reference that
 // instead
-export const kQPVersion = "0.0.52";
+export const kQPVersion = "1.0.0-beta.1";
 
 // This is a version stored in the state of the tile
 // Currently any state with a different version will be ignored.

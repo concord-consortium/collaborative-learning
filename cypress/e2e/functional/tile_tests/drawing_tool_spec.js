@@ -1,13 +1,14 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import ImageToolTile from '../../../support/elements/tile/ImageToolTile';
+import { LogEventName } from '../../../../src/lib/logger-types';
 
 let clueCanvas = new ClueCanvas,
   drawToolTile = new DrawToolTile;
 const imageToolTile = new ImageToolTile;
 
 function beforeTest() {
-  const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=msa";
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
   cy.clearQAData('all');
 
   cy.visit(queryParams);
@@ -33,7 +34,15 @@ context('Draw Tool Tile', function () {
   it("renders draw tool tile", () => {
     beforeTest();
 
+    cy.window().then(win => {
+      cy.stub(win.ccLogger, "log").as("log");
+    });
+    cy.get("@log").should('not.have.been.called');
     clueCanvas.addTile("drawing");
+    cy.get("@log")
+      .should("have.been.been.calledWith", LogEventName.CREATE_TILE, Cypress.sinon.match.object)
+      .its("firstCall.args.1").should("deep.include", { objectType: "Drawing" });
+
     drawToolTile.getDrawTile().should("exist");
     drawToolTile.getTileTitle().should("exist");
 
@@ -146,6 +155,27 @@ context('Draw Tool Tile', function () {
     drawToolTile.getSelectionBox().should("exist");
     drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click();
     drawToolTile.getFreehandDrawing().should("not.exist");
+
+    cy.log("verify Draw tile restore upon page reload");
+    const newName = "Drawing Tile";
+    drawToolTile.getTileTitle().first().should("contain", "Sketch 1");
+    drawToolTile.getDrawTileTitle().first().click();
+    drawToolTile.getDrawTileTitle().first().type(newName + '{enter}');
+    drawToolTile.getTileTitle().should("contain", newName);
+
+    drawToolTile.getDrawToolRectangle().click();
+    drawToolTile.getDrawTile()
+      .trigger("mousedown", 250, 50)
+      .trigger("mousemove", 100, 150)
+      .trigger("mouseup", 100, 50);
+
+    cy.log("verify Draw tile restore upon page reload");
+    cy.wait(2000);
+    cy.reload();
+    cy.waitForLoad();
+
+    drawToolTile.getTileTitle().should("contain", newName);
+    drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
   });
   it("Vector", { scrollBehavior: false }, () => {
     beforeTest();
@@ -185,8 +215,8 @@ context('Draw Tool Tile', function () {
     cy.log("change line to arrow");
     drawToolTile.getVectorDrawing().children().its("length").should("eq", 1); // Only a line, no arrowheads yet.
     drawToolTile.getDrawToolVectorSubmenu().click();
-    cy.get(".toolbar-palette.vectors .drawing-tool-buttons").should("be.visible");
-    cy.get(".toolbar-palette.vectors .drawing-tool-buttons div:nth-child(3) button").click();
+    cy.get(".toolbar-palette.vectors .palette-buttons").should("be.visible");
+    cy.get(".toolbar-palette.vectors .palette-buttons div:nth-child(3) button").click();
     drawToolTile.getVectorDrawing().children().its("length").should("eq", 3); // Now three items in group...
     drawToolTile.getVectorDrawing().find("polygon").its("length").should("eq", 2); // including two arrowheads.
     // selecting from this submenu activates the vector tool, which de-selects the object.
@@ -443,21 +473,21 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawTileShowSortPanelCloseButton().click();
 
     cy.log("verify stamp images");
-    drawToolTile.getImageDrawing().eq(0).should("have.attr", "href").and("contain", "coin.png");
+    drawToolTile.getImageDrawing().eq(0).should("have.attr", "href").and("contain", "plus.png");
     drawToolTile.getDrawToolStampExpand().click();
     cy.get(".toolbar-palette.stamps .palette-buttons .stamp-button").eq(1).click();
     drawToolTile.getDrawTile()
       .trigger("mousedown", 250, 100)
       .trigger("mouseup");
     drawToolTile.getImageDrawing().should("exist").and("have.length", 2);
-    drawToolTile.getImageDrawing().eq(1).should("have.attr", "href").and("contain", "pouch.png");
+    drawToolTile.getImageDrawing().eq(1).should("have.attr", "href").and("contain", "equals.png");
     drawToolTile.getDrawToolStampExpand().click();
     cy.get(".toolbar-palette.stamps .palette-buttons .stamp-button").eq(2).click();
     drawToolTile.getDrawTile()
       .trigger("mousedown", 250, 150)
       .trigger("mouseup");
     drawToolTile.getImageDrawing().should("exist").and("have.length", 3);
-    drawToolTile.getImageDrawing().eq(2).should("have.attr", "href").and("contain", "plus.png");
+    drawToolTile.getImageDrawing().eq(2).should("have.attr", "href").and("contain", "lparen.png");
 
     cy.log("deletes stamp drawing");
     drawToolTile.getDrawToolSelect().click();
@@ -556,6 +586,7 @@ context('Draw Tool Tile', function () {
     // Once that's fixed, we should drag that image into the drawing tile.
 
     cy.log("uploads images");
+    drawToolTile.getDrawTile().click();
     const imageFilePath2 = 'image.png';
     cy.uploadFile(drawToolTile.getDrawToolUploadImage(), imageFilePath2, 'image/png');
     cy.wait(2000);

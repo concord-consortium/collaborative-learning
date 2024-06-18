@@ -121,12 +121,12 @@ export class SerialDevice {
           if (isFinite(Number(reading))){
             targetChannel.value = Number(reading);
           }
-          targetChannel.lastMessageRecievedAt = Date.now();
+          targetChannel.lastMessageReceivedAt = Date.now();
         }
         if (["r"].includes(element)){
           // handle message about relays state
           targetChannel.relaysState = reading.split('').map(s => Number(s));
-          targetChannel.lastMessageRecievedAt = Date.now();
+          targetChannel.lastMessageReceivedAt = Date.now();
         }
       }
     } while (match);
@@ -135,7 +135,7 @@ export class SerialDevice {
   public handleArduinoStreamObj(value: string, channels: Array<NodeChannelInfo>){
     this.localBuffer += value;
 
-    const pattern = /(emg|fsr|tmp):([0-9.]+)[\r][\n]/g;
+    const pattern = /(emg|fsr|a1|tmp):([0-9.]+)[\r][\n]/g;
     let match: RegExpExecArray | null;
 
     do {
@@ -162,11 +162,20 @@ export class SerialDevice {
   }
 
   public writeToOutForBBGripper(n:number, liveOutputType: string){
-    const gripperVer = NodeLiveOutputTypes.find(o => o.name === liveOutputType);
-    if (this.hasPort() && gripperVer?.angleBase){
+    const outputConfig = NodeLiveOutputTypes.find(o => o.name === liveOutputType);
+    if (this.hasPort() && outputConfig?.angleBase !== undefined){
       const percent = n / 100;
-      const openTo = Math.round(gripperVer.angleBase - (percent * gripperVer.sweep));
+      const openTo = Math.round(outputConfig.angleBase - (percent * outputConfig.sweep));
       this.writer.write(`${openTo.toString()}\n`);
+    }
+  }
+
+  public writeToOutForServo(n:number, liveOutputType: string){
+    const outputConfig = NodeLiveOutputTypes.find(o => o.name === liveOutputType);
+    if (this.hasPort() && outputConfig?.angleOffset !== undefined){
+      const scaledAngle = (outputConfig.angleScale * n) + outputConfig.angleOffset;
+      const roundedScaled = Math.round(scaledAngle);
+      this.writer.write(`${roundedScaled.toString()}\n`);
     }
   }
 }

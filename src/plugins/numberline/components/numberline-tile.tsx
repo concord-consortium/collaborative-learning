@@ -5,7 +5,6 @@ import { observer } from 'mobx-react';
 import { useUIStore } from '../../../hooks/use-stores';
 import { kSmallAnnotationNodeRadius } from '../../../components/annotations/annotation-utilities';
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
-import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { OffsetModel } from '../../../models/annotations/clue-object';
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -17,15 +16,23 @@ import {
   innerPointRadius, outerPointRadius, numberlineYBound, yMidPoint, kTitleHeight, kArrowheadTop,
   kArrowheadOffset, kPointButtonRadius, tickTextTopOffsetDefault, tickTextTopOffsetMinAndMax
 } from '../numberline-tile-constants';
-import { NumberlineToolbar } from "./numberline-toolbar";
-import NumberlineArrowLeft from "../assets/numberline-arrow-left.svg";
-import NumberlineArrowRight from "../assets/numberline-arrow-right.svg";
+import NumberlineArrowLeft from "../../../assets/numberline-arrow-left.svg";
+import NumberlineArrowRight from "../../../assets/numberline-arrow-right.svg";
 import { EditableNumberlineValue } from './editable-numberline-value';
+import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
+import { INumberlineToolbarContext, NumberlineToolbarContext } from './numberline-toolbar-context';
+import "./numberline-toolbar-registration";
 
 import "./numberline-tile.scss";
 
+export enum CreatePointType {
+  Selection = "selection",
+  Filled = "filled",
+  Open = "open"
+}
+
 export const NumberlineTile: React.FC<ITileProps> = observer(function NumberlineTile(props){
-  const { documentContent, model, readOnly, scale, tileElt, onRegisterTileApi, onUnregisterTileApi } = props;
+  const { model, readOnly, tileElt, onRegisterTileApi } = props;
 
   const content = model.content as NumberlineContentModelType;
   const [hoverPointId, setHoverPointId] = useState("");
@@ -33,14 +40,18 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   const ui = useUIStore();
   const isTileSelected = ui.isSelectedTile(model);
 
-  //---------------- Model Manipulation Functions -------------------------------------------------
-  const deleteSelectedPoints = useCallback(() => {
-    content.deleteSelectedPoints();
-  }, [content]);
+  /* ========================== [ Determine Point is Open or Filled ]  ========================= */
 
-  const createPoint = (xValue: number) => {
+  const [toolbarOption, settoolbarOption] = useState<CreatePointType>(CreatePointType.Selection); //"selection"
+
+  const handleCreatePointType = (pointType: CreatePointType) => {
+    settoolbarOption(pointType);
+  };
+
+  /* ============================ [ Model Manipulation Functions ]  ============================ */
+  const createPoint = (xValue: number, _pointTypeIsOpen: boolean) => {
     if (!readOnly) {
-      const point = content.createAndSelectPoint(xValue);
+      const point = content.createAndSelectPoint(xValue, _pointTypeIsOpen);
       setHoverPointId(point.id);
     }
   };
@@ -53,6 +64,10 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
   };
 
+  const deleteSelectedPoints = useCallback(() => {
+    content.deleteSelectedPoints();
+  }, [content]);
+
   // Set up key handling
   const hotKeys = useRef(new HotKeys());
   useEffect(()=>{
@@ -64,7 +79,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
   }, [deleteSelectedPoints, readOnly]);
 
-  //---------------- Calculate Width Of Tile / Scale ----------------------------------------------
+  /* ============================ [ Calculate Width of Tile / Scale ]  ========================= */
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const [tileWidth, setTileWidth] = useState(0);
   const containerWidth = tileWidth * kContainerWidth;
@@ -99,10 +114,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     return () => obs?.disconnect();
   }, []);
 
-
-
-
-  //----------------- Register Tile API functions -------------------------------------------------
+  /* ============================ [ Register Tile API Functions ]  ============================= */
   const annotationPointCenter = useCallback((pointId: string) => {
     const point = content.getPoint(pointId);
     if (!point) return undefined;
@@ -165,7 +177,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     });
   }, [annotationPointCenter, content, getObjectBoundingBox, onRegisterTileApi]);
 
-  //-------------------  SVG Ref to Numberline & SVG ----------------------------------------------
+  /* ============================ [ SVG Ref to Numberline & SVG ]  ============================= */
   const svgRef = useRef<SVGSVGElement | null>(null);
   const svg = select(svgRef.current);
   const svgNode = svg.node();
@@ -183,7 +195,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     return isBetweenYBounds && isBetweenXBounds;
   };
 
-  const handleMouseClick = (e: Event) => {
+  const handleMouseClick = (e: Event, optionClicked: CreatePointType) => {
     if (!readOnly){
       if (hoverPointId) {
         const hoverPoint = content.getPoint(hoverPointId);
@@ -192,10 +204,14 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
           setSelectedPointId(hoverPoint.id);
         }
       } else {
-        // only create point if we are not hovering over a point and within bounding box
+        // Create point if we are not hovering over a point and within bounding box
+        // and toolbarOption is either filled or open
         const [mouseX, mouseY] = mousePos(e);
         if (mouseInBoundingBox(mouseX, mouseY)) {
-          createPoint(xScale.invert(mouseX));
+          if(optionClicked !== CreatePointType.Selection){
+            const isPointOpen = optionClicked === CreatePointType.Open;
+            createPoint(xScale.invert(mouseX), isPointOpen);
+          }
         }
       }
     }
@@ -217,12 +233,29 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
   }
 
   const drawMouseFollowPoint = (mouseX: number) => {
-    svg.append("circle") //create a circle that follows the mouse
+    // When in selection mode - do not draw any hover circle
+    if (toolbarOption === CreatePointType.Selection) {
+      clearMouseFollowPoint();
+      return;
+    }
+    // For either open or filled mode, draw outer circle
+    svg.append("circle")
       .attr("cx", mouseX)
       .attr("cy", yMidPoint)
       .attr("r", innerPointRadius)
       .classed("mouse-follow-point", true)
       .classed("point-inner-circle", true);
+
+    //For open mode - draw inner white circle
+    if (toolbarOption === CreatePointType.Open) {
+      svg.append("circle")
+        .attr("fill", "white")
+        .attr("cx", mouseX)
+        .attr("cy", yMidPoint)
+        .attr("r", innerPointRadius * 0.5)
+        .attr("opacity", 1)
+        .classed("mouse-follow-point", true);
+    }
   };
 
   const clearMouseFollowPoint = () => svg.selectAll(".mouse-follow-point").remove();
@@ -239,7 +272,7 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
     }
   };
 
-  svg.on("click", (e) => handleMouseClick(e));
+  svg.on("click", (e) => handleMouseClick(e, toolbarOption));
   svg.on("mousemove", (e) => handleMouseMove(e));
 
   // * ================================ [ Construct Numberline ] =============================== */
@@ -312,13 +345,16 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
     const updateCircles = () => {
       /* =========================== [ Outer Hover Circles ] ======================= */
+
       //---- Initialize outer hover circles
       const outerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.outer-point')
         .data(content.pointsArr);
 
       outerPoints.enter()
         .append("circle").attr("class", "outer-point")
-        .attr('cx', (p) => xScale(p.currentXValue)) //mapped to axis width
+        .attr('cx', (p) => {
+          return xScale(p.currentXValue);
+        }) //mapped to axis width
         .attr('cy', yMidPoint).attr('r', outerPointRadius).attr('id', p => p.id)
         .classed("point-outer-circle", true)
         .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
@@ -331,8 +367,10 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
 
       outerPoints.exit().remove(); //cleanup
 
+      //TODO: Revise inner circles back to original
+      // create an innerPointsOpen that is white and append it to svg
+
       /* =========================== [ Inner Circles ] ============================= */
-      //---- Initialize inner hover circles
       const innerPoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-point')
         .data(content.pointsArr);
 
@@ -341,22 +379,57 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
         .append("circle")
         .attr("class", "inner-point")
         .attr('cx', (p) => xScale(p.currentXValue)) //mapped to axis width
-        .attr('cy', yMidPoint).attr('r', innerPointRadius).attr('id', p => p.id)
-        .classed("point-inner-circle", true)
+        .attr('cy', yMidPoint)
+        .attr('r', innerPointRadius)
+        .attr('id', p => p.id)
+        .classed("point-inner-circle", true) //may change
         .call((e) => handleDrag(e)); // Attach drag behavior to newly created circles
 
       // --- Update functions inner circles
       innerPoints
-        .attr('cx', (p, idx) => xScale(p.currentXValue))
-        .classed("selected", (p)=> p.id in content.selectedPoints)
-        .call((e) => handleDrag(e)); // pass again in case axisWidth changes
+      .attr('cx', (p, idx) => xScale(p.currentXValue))
+      .classed("selected", (p)=> p.id in content.selectedPoints)
+      .call((e) => handleDrag(e)); // pass again in case axisWidth changes
 
-      innerPoints.exit().remove(); //cleanup
-    };
+      innerPoints.exit().remove();
+
+
+      /* =========================== [ Blue White Circles] ============================= */
+      // Filter the points that should have an inner white circle
+
+
+      const openPoints = content.pointsArr.filter(p => p.isOpen);
+      const innerWhitePoints = svg.selectAll<SVGCircleElement, PointObjectModelType>('.circle,.inner-white-point')
+      .data(openPoints);
+
+      innerWhitePoints.enter()
+        .append("circle")
+          .attr("class", "inner-white-point")
+          .attr("cx", (p) => xScale(p.currentXValue))
+          .attr("cy", yMidPoint)
+          .attr("r", innerPointRadius * 0.5)
+          .attr("fill", "white")
+          .attr('id', (p) => `inner-white-${p.id}`);
+
+      // Update circle positions
+      innerWhitePoints
+      .attr("cx", (p) => xScale(p.currentXValue))
+      .attr("cy", yMidPoint);
+
+      innerWhitePoints.exit().remove();
+    }; //end of updateCircles()
+
     updateCircles();
   }
-  // Set up toolbar props
-  const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
+
+
+  const toolbarFunctions: INumberlineToolbarContext = {
+    handleResetPoints: () => content.deleteAllPoints(),
+    handleDeletePoint: deleteSelectedPoints,
+    handleCreatePointType,
+    toolbarOption
+  };
+
   return (
     <div
       className={classNames("numberline-wrapper", { "read-only": readOnly })}
@@ -364,52 +437,51 @@ export const NumberlineTile: React.FC<ITileProps> = observer(function Numberline
       tabIndex={0}
     >
       <div className={"numberline-title"}>
-        <BasicEditableTileTitle readOnly={readOnly} />
+        <BasicEditableTileTitle />
       </div>
-      <NumberlineToolbar
-        documentContent={documentContent}
-        tileElt={tileElt}
-        {...toolbarProps}
-        scale={scale}
-        handleClearPoints={() => content.deleteAllPoints()}
-        handleDeletePoint={deleteSelectedPoints}
-      />
-      <div
-        className="numberline-tool"
-        ref={documentScrollerRef}
-        data-testid="numberline-tool"
-        style={{"height": `${kNumberLineContainerHeight}`}}
-      >
-        <div className="numberline-tool-container" >
-          <svg ref={svgRef} width={axisWidth}>
-            <g ref={axisRef}></g>
-          </svg>
-          <NumberlineArrowLeft
-            className="arrow"
-            style={{ left: arrowOffset, top: kArrowheadTop }}
-          />
-          <NumberlineArrowRight
-            className="arrow"
-            style={{ right: arrowOffset, top: kArrowheadTop }}
-          />
-          <EditableNumberlineValue
-            value={content.min}
-            minOrMax={"min"}
-            offset={arrowOffset}
-            readOnly={readOnly}
-            isTileSelected={isTileSelected}
-            onValueChange={(newValue) => handleMinMaxChange("min", newValue)}
-          />
-          <EditableNumberlineValue
-            value= {content.max}
-            minOrMax={"max"}
-            offset={arrowOffset}
-            readOnly={readOnly}
-            isTileSelected={isTileSelected}
-            onValueChange={(newValue) => handleMinMaxChange("max", newValue)}
-          />
+      <NumberlineToolbarContext.Provider value={toolbarFunctions}>
+        <TileToolbar
+          tileType="numberline"
+          tileElement={tileElt}
+          readOnly={!!readOnly}
+        />
+        <div
+          className="numberline-tool"
+          ref={documentScrollerRef}
+          data-testid="numberline-tool"
+          style={{"height": `${kNumberLineContainerHeight}`}}
+        >
+          <div className="numberline-tool-container" >
+            <svg ref={svgRef} width={axisWidth}>
+              <g ref={axisRef}></g>
+            </svg>
+            <NumberlineArrowLeft
+              className="arrow"
+              style={{ left: arrowOffset, top: kArrowheadTop }}
+            />
+            <NumberlineArrowRight
+              className="arrow"
+              style={{ right: arrowOffset, top: kArrowheadTop }}
+            />
+            <EditableNumberlineValue
+              value={content.min}
+              minOrMax={"min"}
+              arrowOffset={arrowOffset}
+              readOnly={readOnly}
+              isTileSelected={isTileSelected}
+              onValueChange={(newValue) => handleMinMaxChange("min", newValue)}
+            />
+            <EditableNumberlineValue
+              value= {content.max}
+              minOrMax={"max"}
+              arrowOffset={arrowOffset}
+              readOnly={readOnly}
+              isTileSelected={isTileSelected}
+              onValueChange={(newValue) => handleMinMaxChange("max", newValue)}
+            />
+          </div>
         </div>
-      </div>
+      </NumberlineToolbarContext.Provider>
     </div>
   );
 });

@@ -1,24 +1,29 @@
 import React from "react";
 import { Map } from "immutable";
-import { CmsWidgetControlProps } from "netlify-cms-core";
+import { CmsWidgetControlProps } from "decap-cms-core";
 
-import { urlParams } from "../../src/utilities/url-params";
+import { urlParams } from "./cms-url-params";
 import { DEBUG_CMS } from "../../src/lib/debug";
 import { defaultCurriculumBranch } from "./cms-constants";
 
 import "./iframe-control.scss";
 
 (window as any).DISABLE_FIREBASE_SYNC = true;
+
+const cmsEditorBase = urlParams.cmsEditorBase ?? ".";
+// the URL is relative to the current url of the CMS
+// If the cmsEditorBase is an absolute url then the current url will be ignored
+const cmsEditorBaseURL = new URL(cmsEditorBase, window.location.href);
+const validOrigin = cmsEditorBaseURL.origin;
+
 interface IState {
   initialValue?: string;
-  validOrigin: string;
 }
 export class IframeControl extends React.Component<CmsWidgetControlProps, IState>  {
   constructor(props: CmsWidgetControlProps) {
     super(props);
     this.state = {
       initialValue: this.getValue(),
-      validOrigin: `${window.location.protocol}//${window.location.host}`
     };
   }
 
@@ -36,7 +41,7 @@ export class IframeControl extends React.Component<CmsWidgetControlProps, IState
   };
 
   sendInitialValueToEditor() {
-    const { initialValue, validOrigin } = this.state;
+    const { initialValue } = this.state;
     const iframedEditor = document.getElementById("editor") as HTMLIFrameElement;
     if (iframedEditor.contentWindow) {
       iframedEditor.contentWindow.postMessage(
@@ -48,7 +53,6 @@ export class IframeControl extends React.Component<CmsWidgetControlProps, IState
   }
 
   isValidMessageEvent = (event: MessageEvent) => {
-    const { validOrigin } = this.state;
     return event.data.type === "updateContent" &&
            event.data.content &&
            event.origin === validOrigin;
@@ -62,13 +66,15 @@ export class IframeControl extends React.Component<CmsWidgetControlProps, IState
 
   render() {
     const curriculumBranch = urlParams.curriculumBranch ?? defaultCurriculumBranch;
-    const iframeBaseUrl = `./cms-editor.html?curriculumBranch=${curriculumBranch}`;
+    const iframeBaseUrl = `${cmsEditorBase}/cms-editor.html?curriculumBranch=${curriculumBranch}`;
     const iframeUrl = urlParams.unit
       ? `${iframeBaseUrl}&unit=${urlParams.unit}`
       : iframeBaseUrl;
     return (
       <div className="iframe-control custom-widget">
-        <iframe id="editor" src={iframeUrl} onLoad={this.sendInitialValueToEditor.bind(this)}></iframe>
+        <iframe id="editor" src={iframeUrl} allow="clipboard-read; clipboard-write"
+          onLoad={this.sendInitialValueToEditor.bind(this)}>
+        </iframe>
       </div>
     );
   }

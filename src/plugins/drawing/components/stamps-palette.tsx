@@ -1,4 +1,3 @@
-import classNames from "classnames";
 import React from "react";
 import { StampModelType } from "../model/stamp";
 import { StampButton } from "./stamp-button";
@@ -8,12 +7,10 @@ interface IProps {
   selectedStampIndex?: number;
   onSelectStampIndex: (index: number) => void;
 }
-export const StampsPalette: React.FC<IProps> = ({
-  stamps, selectedStampIndex, onSelectStampIndex
-}) => {
-  const oneRow = stamps.length <= 6;
+
+export const StampsPalette: React.FC<IProps> = ({ stamps, selectedStampIndex, onSelectStampIndex }) => {
   return (
-    <div className={classNames("toolbar-palette", "stamps", { "one-row": oneRow })}>
+    <div className="toolbar-palette stamps">
       <div className="palette-buttons">
         {stamps.map((stamp, i) =>
           <StampButton key={stamp.url} stamp={stamp}

@@ -1,0 +1,145 @@
+@import "../../components/vars";
+
+.drawing-toolbar {
+  .toolbar-button {
+    display: flex;
+    position: relative;
+    .corner-triangle {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      fill: $workspace-teal;
+    }
+    img {
+      height: 24px;
+      width: 24px;
+      margin: auto;
+    }
+  }
+
+  .toolbar-palette {
+    background-color: $workspace-teal-light-9;
+    border: $toolbar-border;
+    z-index: $toolbar-z-index;
+    position: absolute;
+    top:35px;
+    display: flex;
+
+    &.vectors {
+      width: 112px;
+    }
+
+    &.stamps {
+      width: 190px;
+    }
+
+    &.stroke-color {
+      width: 129px;
+    }
+
+    &.fill-color {
+      width: 159px;
+    }
+
+    .palette-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-evenly;
+      align-items: center;
+
+      .stamp-button {
+        position: relative;
+        width: 30px;
+        height: 30px;
+
+        img {
+          position: absolute;
+          left: 3px;
+          top: 3px;
+          max-width: 24px;
+          max-height: 24px;
+        }
+
+        &.select {
+          stroke: $workspace-teal;
+        }
+        &:hover {
+          stroke: $workspace-teal-light-2;
+        }
+        &:active {
+          stroke: $workspace-teal;
+        }
+      }
+
+      .color-swatch {
+        position: relative;
+        width: 30px;
+        height: 30px;
+
+        svg {
+          position: absolute;
+          left: 0;
+          top: 0;
+        }
+
+        .none-icon {
+          left: 4px;
+          top: 4px;
+        }
+        .check-icon {
+          left: 4px;
+          top: 4px;
+          fill: white;
+        }
+        &.light {
+          .check-icon {
+            fill: $workspace-teal;
+          }
+        }
+
+        &.light {
+          .contrast-border {
+            stroke: $charcoal-light-1;
+          }
+        }
+
+        .highlight {
+          &.select {
+            stroke: $workspace-teal;
+          }
+        }
+        &:hover {
+          .highlight {
+            stroke: $workspace-teal-light-2;
+          }
+        }
+        &:active {
+          .highlight {
+            stroke: $workspace-teal;
+          }
+        }
+      }
+    }
+  }
+  // .drawing-toolbar floating-ui position determine some pallete rules
+  &.bottom-start {
+    .toolbar-palette {
+      border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
+    }
+  }
+  &.top-start {
+    .toolbar-palette.vectors {
+      border-radius: $toolbar-border-radius $toolbar-border-radius 0 0;
+      top: -37.5px;
+      .palette-buttons div:first-child button {
+        border-radius: $toolbar-border-radius 0 0 0;
+      }
+    }
+  }
+}
+
+.drawing-tool.read-only .drawing-tool-toolbar {
+  .drawing-tool-button {
+    cursor: default;
+  }
+}

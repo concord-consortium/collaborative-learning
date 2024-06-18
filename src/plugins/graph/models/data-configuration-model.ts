@@ -2,8 +2,8 @@ import { observable } from "mobx";
 import {scaleQuantile, ScaleQuantile, schemeBlues} from "d3";
 import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {AttributeType, attributeTypes} from "../../../models/data/attribute";
-import {ICase} from "../../../models/data/data-set-types";
-import {DataSet, IDataSet } from "../../../models/data/data-set";
+import { ICase } from "../../../models/data/data-set-types";
+import { DataSet, IDataSet } from "../../../models/data/data-set";
 import {getCategorySet, ISharedCaseMetadata, SharedCaseMetadata} from "../../../models/shared/shared-case-metadata";
 import {isRemoveAttributeAction, isSetCaseValuesAction} from "../../../models/data/data-set-actions";
 import {FilteredCases, IFilteredChangedCases} from "../../../models/data/filtered-cases";
@@ -90,6 +90,19 @@ export const DataConfigurationModel = types
     get yAttributeIDs() {
       return this.yAttributeDescriptions.map((d: IAttributeDescriptionSnapshot) => d.attributeID);
     },
+    attributeIdforPlotNumber(plotNum: number) {
+      return this.yAttributeIDs[plotNum];
+    },
+    /**
+     * Returns the sequential number of the given Y attribute ID.
+     * This includes the rightNumeric attribute if any.
+     * If the attribute ID is not found, returns undefined.
+     * @param id ID that should be one of the Y attributes.
+     */
+    plotNumberForAttributeID(id: string) {
+      const index = this.yAttributeIDs.indexOf(id);
+      return index >= 0 ? index : undefined;
+    },
     /**
      * No attribute descriptions beyond the first for y are returned.
      * The rightNumeric attribute description is also not returned.
@@ -152,6 +165,23 @@ export const DataConfigurationModel = types
       const attrID = this.attributeID(role);
       const attr = attrID ? self.dataset?.attrFromID(attrID) : undefined;
       return desc?.type || attr?.type;
+    },
+    attributeTypeForID(attributeId: string) {
+      let attributeDesc;
+      const plotNum = this.plotNumberForAttributeID(attributeId);
+      if (plotNum !== undefined) {
+        attributeDesc = self._yAttributeDescriptions[plotNum];
+      } else {
+        self._attributeDescriptions.forEach((desc,role) => {
+          if (desc.attributeID === attributeId) {
+            attributeDesc = desc;
+          }
+        });
+      }
+      if (attributeDesc?.type) {
+        return attributeDesc.type;
+      }
+      return self.dataset?.attrFromID(attributeId)?.type;
     },
     get places() {
       const places = new Set<string>(Object.keys(this.attributeDescriptions));
@@ -292,8 +322,11 @@ export const DataConfigurationModel = types
         return true;
       });
     },
+    /**
+     * Return true if no attribute has been assigned to any graph role (other than caption).
+     * The first attribute is always assigned as 'caption', so that does not count.
+     */
     get noAttributesAssigned() {
-      // The first attribute is always assigned as 'caption'. So it's really no attributes assigned except for that
       return this.attributes.length <= 1;
     },
     get numberOfPlots() {
@@ -386,6 +419,7 @@ export const DataConfigurationModel = types
       if (self.filteredCases.length <= caseArrayNumber) return [];
       return (self.filteredCases[caseArrayNumber].caseIds || []).map(id => {
         return {
+          dataConfigID: self.id,
           plotNum: caseArrayNumber,
           caseID: id
         };
@@ -404,16 +438,25 @@ export const DataConfigurationModel = types
       }
       return caseDataArray;
     },
-    get joinedCaseDataArrays() {
+    getJoinedCaseDataArrays(xType: AttributeType|undefined, yType?: AttributeType|undefined) {
       const joinedCaseData: CaseData[] = [];
+      // If X axis doesn't match the given current X axis type, then none of our cases get plotted.
+      if (self.attributeType("x") !== xType) {
+        return joinedCaseData;
+      }
+
       self.filteredCases.forEach((aFilteredCases, index) => {
-        aFilteredCases.caseIds.forEach(
-          (id) => joinedCaseData.push({
-            plotNum: index,
-            caseID: id
-          }));
+        // If Y attribute of the attribute in question here doesn't match, skip this attribute.
+        const relatedAttribute = self.yAttributeDescriptions[index]?.attributeID;
+        if (self.attributeTypeForID(relatedAttribute) === yType) {
+          aFilteredCases.caseIds.forEach(
+            (id) => joinedCaseData.push({
+              dataConfigID: self.id,
+              plotNum: index,
+              caseID: id
+            }));
         }
-      );
+      });
       return joinedCaseData;
     },
     get caseDataArray() {
@@ -698,7 +741,14 @@ export const DataConfigurationModel = types
     removeAttributeFromRole(role: GraphAttrRole) {
       self._setAttributeDescription(role);
     },
-    setAttributeForRole(role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot) {
+    /**
+     * Assign the Attribute to the given graph role.
+     * By default will also select the attribute.
+     * @param role graph role.
+     * @param desc attribute description, including the attribute ID and optionally a type.
+     * @param select boolean default true to select the attribute.
+     */
+    setAttributeForRole(role: GraphAttrRole, desc?: IAttributeDescriptionSnapshot, select: boolean=true) {
       if (role === 'y') {
         // Setting "Y" role implies that user only wants one, or no Y attributes.
         while (self._yAttributeDescriptions.length) {
@@ -706,20 +756,16 @@ export const DataConfigurationModel = types
         }
         if (desc && desc.attributeID !== '') {
           self._yAttributeDescriptions.push(desc);
-          self.dataset?.setSelectedAttributes([desc.attributeID]);
         }
       } else if (role === 'yPlus' && desc && desc.attributeID !== '') {
         self._yAttributeDescriptions.push(desc);
       } else if (role === 'rightNumeric') {
         this.setY2Attribute(desc);
-        if (desc) {
-          self.dataset?.setSelectedAttributes([desc.attributeID]);
-        }
       } else {
         self._setAttributeDescription(role, desc);
-        if (desc) {
-          self.dataset?.setSelectedAttributes([desc.attributeID]);
-        }
+      }
+      if (desc && select) {
+        self.dataset?.setSelectedAttributes([desc.attributeID]);
       }
       this.syncFilteredCasesCount(true);
       if (role === 'legend') {
@@ -775,9 +821,15 @@ export const DataConfigurationModel = types
         self.setPointsNeedUpdating(true);
       }
     },
-    setAttributeType(role: GraphAttrRole, type: AttributeType, plotNumber = 0) {
+    // Sets the type of the attribute in the given role.
+    // An attribute ID may be given if specifying the role is ambiguous (eg there can be multple Y attributes)
+    setAttributeType(role: GraphAttrRole, type: AttributeType, plotNumber = 0, attributeId?: string) {
       if (role === 'y') {
-        self._yAttributeDescriptions[plotNumber]?.setType(type);
+        if (attributeId) {
+          self._yAttributeDescriptions.find(desc => desc.attributeID === attributeId)?.setType(type);
+        } else {
+          self._yAttributeDescriptions[plotNumber]?.setType(type);
+        }
       } else {
         self._attributeDescriptions.get(role)?.setType(type);
       }

@@ -6,7 +6,7 @@ import { SelectionStoreModelType } from "../../stores/selection";
 import { ITableLinkProperties, linkedPointId } from "../table-link-types";
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
-import { tileContentAPIActions } from "../tile-model-hooks";
+import { tileContentAPIActions, tileContentAPIViews } from "../tile-model-hooks";
 import { ICreateRowsProperties, IRowProperties, ITableChange } from "../table/table-change";
 import { canonicalizeValue } from "../table/table-model-types";
 import { convertModelToChanges, exportGeometryJson } from "./geometry-migrate";
@@ -31,7 +31,6 @@ import {
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
   kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
-import { getTileIdFromContent } from "../tile-model";
 import { SharedModelType } from "../../shared/shared-model";
 import { ISharedModelManager } from "../../shared/shared-model-manager";
 import { IDataSet } from "../../data/data-set";
@@ -39,7 +38,7 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { LogEventName } from "../../../lib/logger-types";
 import { gImageMap } from "../../image-map";
-import { IClueObject } from "../../annotations/clue-object";
+import { IClueTileObject } from "../../annotations/clue-object";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -191,29 +190,30 @@ export const GeometryContentModel = GeometryBaseContentModel
         }
       });
       return point;
+    },
+    getLinkedPointsData() {
+      const data: Map<string,{coords:JXGCoordPair[],properties:{id:string}[]}> = new Map();
+      self.linkedDataSets.forEach(link => {
+        const coords: JXGCoordPair[] = [];
+        const properties: Array<{ id: string }> = [];
+        for (let ci = 0; ci < link.dataSet.cases.length; ++ci) {
+          const x = link.dataSet.attributes[0]?.numValue(ci);
+          for (let ai = 1; ai < link.dataSet.attributes.length; ++ai) {
+            const attr = link.dataSet.attributes[ai];
+            const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
+            const y = attr.numValue(ci);
+            if (isFinite(x) && isFinite(y)) {
+              coords.push([x, y]);
+              properties.push({ id });
+            }
+          }
+        }
+        data.set(link.providerId, { coords, properties });
+      });
+      return data;
     }
   }))
   .views(self => ({
-    get annotatableObjects() {
-      const tileId = getTileIdFromContent(self) ?? "";
-      const polygons: IClueObject[] = [];
-      const segments: IClueObject[] = [];
-      const points: IClueObject[] = [];
-      self.objects.forEach(object => {
-        const objectInfo = { tileId, objectId: object.id, objectType: object.type };
-        if (object.type === "polygon") {
-          polygons.push(objectInfo);
-          const polygon = object as PolygonModelType;
-          polygon.segmentIds.forEach(
-            segmentId => segments.push({ tileId, objectId: segmentId, objectType: "segment" })
-          );
-        } else if (object.type === "point") {
-          points.push(objectInfo);
-        }
-      });
-      // The order of the objects is important so buttons to add sparrows don't cover each other
-      return [...polygons, ...segments, ...points];
-    },
     // Returns any object in the model, even a subobject (like a movable line's point)
     getAnyObject(id: string) {
       if (isMovableLinePointId(id)) {
@@ -254,6 +254,9 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
   }))
   .views(self => ({
+    getLinkedDataset(linkedTableId: string) {
+      return self.linkedDataSets.find(ds => ds.providerId === linkedTableId);
+    },
     getSelectedIds(board: JXG.Board) {
       // returns the ids in creation order
       return board.objectsList
@@ -280,6 +283,36 @@ export const GeometryContentModel = GeometryBaseContentModel
       const jsonChanges = changes.map(change => JSON.stringify(change));
       return exportGeometryJson(jsonChanges, options);
     }
+  }))
+  .views(self => tileContentAPIViews({
+    get annotatableObjects(): IClueTileObject[] {
+      const polygons: IClueTileObject[] = [];
+      const segments: IClueTileObject[] = [];
+      const points: IClueTileObject[] = [];
+      const linkedPoints: IClueTileObject[] = [];
+      self.objects.forEach(object => {
+        const objectInfo = { objectId: object.id, objectType: object.type };
+        if (object.type === "polygon") {
+          polygons.push(objectInfo);
+          const polygon = object as PolygonModelType;
+          polygon.segmentIds.forEach(
+            segmentId => segments.push({ objectId: segmentId, objectType: "segment" })
+          );
+        } else if (object.type === "point") {
+          points.push(objectInfo);
+        }
+      });
+      for (const lpd of self.getLinkedPointsData().values()) {
+        lpd.properties.forEach((prop) => {
+          linkedPoints.push({
+            objectType: "linkedPoint",
+            objectId: prop.id
+          });
+        });
+      }
+      // The order of the objects is important so buttons to add sparrows don't cover each other
+      return [...polygons, ...segments, ...points, ...linkedPoints];
+    },
   }))
   .actions(self => ({
     setElementSelection(board: JXG.Board | undefined, id: string, select: boolean) {
@@ -949,7 +982,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
       const tileId = self.metadata?.id || "";
       const { operation, ...change } = loggedChange;
-      logTileChangeEvent(LogEventName.GRAPH_TOOL_CHANGE, { tileId, operation, change });
+      logTileChangeEvent(LogEventName.GEOMETRY_TOOL_CHANGE, { tileId, operation, change });
 
       return result;
     }

@@ -1,7 +1,9 @@
-import { types, Instance, applySnapshot, getSnapshot, addDisposer } from "mobx-state-tree";
-import { reaction } from "mobx";
+import { types, Instance, applySnapshot, getSnapshot, addDisposer, SnapshotIn, getType } from "mobx-state-tree";
+import { observable, reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
+
+import { Transform } from "rete-area-plugin/_types/area";
 
 import { DataflowProgramModel } from "./dataflow-program-model";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
@@ -9,7 +11,7 @@ import { SharedVariables, SharedVariablesType } from "../../shared-variables/sha
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
-import { tileContentAPIActions } from "../../../models/tiles/tile-model-hooks";
+import { tileContentAPIActions, tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import {
   SharedDataSet, kSharedDataSetType, SharedDataSetType,
@@ -17,9 +19,13 @@ import {
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { DataSet, addAttributeToDataSet } from "../../../models/data/data-set";
+import { SharedProgramData, SharedProgramDataType } from "../../shared-program-data/shared-program-data";
 
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
+import { getTileModel } from "../../../models/tiles/tile-model";
+import { IClueTileObject } from "../../../models/annotations/clue-object";
+import { NodeChannelInfo } from "./utilities/channel";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -35,8 +41,11 @@ export const kDefaultLabel = "Dataflow Node";
 // A case has one value for time and one value for each node
 const kMaxRecordedValues = 10000;
 
-export function defaultDataSet() {
-  const dataSet = DataSet.create();
+export function defaultDataSet(title: string|undefined) {
+  const dataSet = DataSet.create({
+    name: title,
+    attributes: [ { name: "x"}, { name: "y"} ]
+  });
   return dataSet;
 }
 
@@ -44,7 +53,15 @@ const ProgramZoom = types.model({
   dx: types.number,
   dy: types.number,
   scale: types.number,
-});
+})
+.actions(self => ({
+  update(transform: Transform) {
+    const { x, y, k} = transform;
+    self.dx = x;
+    self.dy = y;
+    self.scale = k;
+  }
+}));
 export type ProgramZoomType = typeof ProgramZoom.Type;
 export const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
 
@@ -59,6 +76,8 @@ export const DataflowContentModel = TileContentModel
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
     emptyDataSet: DataSet.create(),
+    channels: observable([]) as NodeChannelInfo[],
+    liveProgramZoom: ProgramZoom.create(getSnapshot(self.programZoom))
   }))
   .views(self => ({
     get sharedModel() {
@@ -73,23 +92,17 @@ export const DataflowContentModel = TileContentModel
       if (!firstSharedVariables) return undefined;
       return firstSharedVariables as SharedVariablesType;
     },
-    programWithoutRecentValues() {
-      const { values, ...rest } = getSnapshot(self.program);
-      const castedValues = values as Record<string, any>;
-      const newValues: Record<string, any> = {};
-      if (values) {
-        Object.keys(castedValues).forEach((key: string) => {
-          const { recentValues, ...other } = castedValues[key];
-          newValues[key] = { ...other };
-        });
-      }
-      return { values: newValues, ...rest };
+    get sharedProgramData() {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const firstSharedProgramData = sharedModelManager?.getTileSharedModelsByType(self, SharedProgramData)?.[0];
+      if (!firstSharedProgramData) return undefined;
+      return firstSharedProgramData as SharedProgramDataType;
     },
     get maxRecordableCases() {
       const numNodes = self.program.nodes.size;
       // The `+ 1` is for time which is recorded as the first value of each case
       return (kMaxRecordedValues/(numNodes + 1));
-    }
+    },
   }))
   .views(self => ({
     get inputVariables() {
@@ -117,20 +130,9 @@ export const DataflowContentModel = TileContentModel
       return true;
     },
     exportJson(options?: ITileExportOptions) {
-      const zoom = getSnapshot(self.programZoom);
-      return [
-        `{`,
-        `  "type": "Dataflow",`,
-        `  "programDataRate": ${self.programDataRate},`,
-        `  "programZoom": {`,
-        `    "dx": ${zoom.dx},`,
-        `    "dy": ${zoom.dy},`,
-        `    "scale": ${zoom.scale}`,
-        `  },`,
-        // `  "programRecordingMode: ${self.programRecordingMode}"`,
-        `  "program": ${stringify(self.programWithoutRecentValues())}`,
-        `}`
-      ].join("\n");
+      const snapshot = getSnapshot(self);
+      // We used to strip out the recent values, maybe we should again?
+      return stringify(snapshot, {maxLength: 120});
     },
     get isDataSetEmptyCases(){
       //Used when DF linked to a table, then we clear. Different than isEmpty
@@ -175,9 +177,23 @@ export const DataflowContentModel = TileContentModel
       return formatTime(self.durationOfRecording);
     }
   }))
+  .views(self => tileContentAPIViews({
+    get contentTitle() {
+      return self.dataSet.name;
+    },
+    get annotatableObjects(): IClueTileObject[] {
+      return [...self.program.nodes.values()].map(node => ({
+        objectId: node.id,
+        objectType: "Node",
+      }));
+    },
+  }))
   .actions(self => tileContentAPIActions({
     doPostCreate(metadata: ITileMetadataModel) {
       self.metadata = metadata;
+    },
+    setContentTitle(title: string) {
+      self.dataSet.setName(title);
     }
   }))
   .actions(self => ({
@@ -196,16 +212,22 @@ export const DataflowContentModel = TileContentModel
           ? sharedModelManager?.getTileSharedModels(self)
           : undefined;
 
-        return { sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels };
+        const ourSharedProgramData = tileSharedModels?.find( sharedModel => {
+          return getType(sharedModel) === SharedProgramData;
+        });
+
+        return { sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels, ourSharedProgramData };
       },
-      ({sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels}) => {
+      ({sharedModelManager, sharedDataSet, sharedVariables, tileSharedModels, ourSharedProgramData}) => {
         if (!sharedModelManager?.isReady) {
           return;
         }
 
         if (!sharedDataSet) {
-          const dataSet = defaultDataSet();
+          const tileModel = getTileModel(self);
+          const dataSet = defaultDataSet(tileModel?.title);
           sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
+          tileModel?.setTitle(undefined);
         }
 
         if (!tileSharedModels?.includes(sharedDataSet)) {
@@ -215,6 +237,11 @@ export const DataflowContentModel = TileContentModel
         // We won't create a sharedVariables model, but we'll automatically attach to any we find
         if (sharedVariables && !tileSharedModels?.includes(sharedVariables)) {
           sharedModelManager.addTileSharedModel(self, sharedVariables);
+        }
+
+        if (!ourSharedProgramData) {
+          const programData = SharedProgramData.create();
+          sharedModelManager.addTileSharedModel(self, programData);
         }
 
         // update the colors
@@ -228,18 +255,23 @@ export const DataflowContentModel = TileContentModel
         applySnapshot(self.program, cloneDeep(program));
       }
     },
+    setChannels(channels: NodeChannelInfo[]) {
+      self.channels = observable(channels);
+    },
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;
     },
-    setProgramZoom(dx: number, dy: number, scale: number) {
-      self.programZoom.dx = dx;
-      self.programZoom.dy = dy;
-      self.programZoom.scale = scale;
+    setLiveProgramZoom(transform: Transform) {
+      self.liveProgramZoom.update(transform);
+    },
+    setProgramZoom(transform: Transform) {
+      self.programZoom.update(transform);
+      self.liveProgramZoom.update(transform);
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing
     },
-    addNewAttrFromNode(nodeId: number, nodeName: string){
+    addNewAttrFromNode(nodeId: string, nodeName: string){
       const newAttributeId = uniqueId() + "*" + nodeId;
       self.dataSet.addAttributeWithID({
         id: newAttributeId,
@@ -309,6 +341,7 @@ export const DataflowContentModel = TileContentModel
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;
+export type DataflowContentModelSnapshotIn = SnapshotIn<typeof DataflowContentModel>;
 
 export function formatTime(seconds: number) {
   const minutes = Math.floor(seconds / 60);

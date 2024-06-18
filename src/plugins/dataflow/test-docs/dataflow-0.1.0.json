@@ -1,0 +1,352 @@
+{
+  "rowMap": {
+    "row1": {"id": "row1", "isSectionHeader": false, "tiles": [{"tileId": "tile1"}]},
+    "eeatBfOAJPBx30eD": {
+      "id": "eeatBfOAJPBx30eD",
+      "height": 868,
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "CIUYXl4cwYYrfP5t"}]
+    }
+  },
+  "rowOrder": ["row1", "eeatBfOAJPBx30eD"],
+  "tileMap": {
+    "tile1": {
+      "id": "tile1",
+      "content": {"type": "Text", "text": "Welcome to the standalone document editor"}
+    },
+    "CIUYXl4cwYYrfP5t": {
+      "id": "CIUYXl4cwYYrfP5t",
+      "content": {
+        "type": "Dataflow",
+        "program": {
+          "id": "dataflow@0.1.0",
+          "nodes": {
+            "1": {
+              "id": 1,
+              "name": "Sensor",
+              "x": 40,
+              "y": 5,
+              "inputs": {},
+              "outputs": {
+                "num": {
+                  "connections": {"7-undefined-num1": {"node": 7, "input": "num1", "data": {}}}
+                }
+              },
+              "data": {
+                "plot": false,
+                "orderedDisplayName": "Sensor 1",
+                "type": "none",
+                "sensor": "none",
+                "virtual": false
+              }
+            },
+            "2": {
+              "id": 2,
+              "name": "Number",
+              "x": 43.87152775570198,
+              "y": 180.03906577675042,
+              "inputs": {},
+              "outputs": {
+                "num": {
+                  "connections": {
+                    "7-undefined-num2": {"node": 7, "input": "num2", "data": {}},
+                    "8-undefined-num1": {"node": 8, "input": "num1", "data": {}}
+                  }
+                }
+              },
+              "data": {"plot": false, "orderedDisplayName": "Number 2", "nodeValueUnits": ""}
+            },
+            "3": {
+              "id": 3,
+              "name": "Generator",
+              "x": 43.23348848807265,
+              "y": 299.6050216764282,
+              "inputs": {},
+              "outputs": {
+                "num": {
+                  "connections": {
+                    "10-undefined-num2": {"node": 10, "input": "num2", "data": {}},
+                    "9-undefined-num1": {"node": 9, "input": "num1", "data": {}},
+                    "8-undefined-num2": {"node": 8, "input": "num2", "data": {}}
+                  }
+                }
+              },
+              "data": {
+                "plot": false,
+                "orderedDisplayName": "Generator 3",
+                "generatorType": "Sine",
+                "amplitudeUnits": "",
+                "amplitude": 1,
+                "periodUnits": "sec",
+                "period": 10
+              }
+            },
+            "4": {
+              "id": 4,
+              "name": "Timer",
+              "x": 48.01649305555556,
+              "y": 503.48524305555554,
+              "inputs": {},
+              "outputs": {
+                "num": {
+                  "connections": {"10-undefined-num1": {"node": 10, "input": "num1", "data": {}}}
+                }
+              },
+              "data": {
+                "plot": false,
+                "orderedDisplayName": "Timer (on/off) 4",
+                "timeOnUnits": "sec",
+                "timeOn": 5,
+                "timeOffUnits": "sec",
+                "timeOff": 5
+              }
+            },
+            "5": {
+              "id": 5,
+              "name": "Demo Output",
+              "x": 791.2152892468201,
+              "y": 4.778648617220071,
+              "inputs": {
+                "nodeValue": {
+                  "connections": {"7-num-undefined": {"node": 7, "output": "num", "data": {}}}
+                }
+              },
+              "outputs": {},
+              "data": {
+                "orderedDisplayName": "Demo Output 5",
+                "outputType": "Light Bulb",
+                "demoOutput": 0
+              }
+            },
+            "6": {
+              "id": 6,
+              "name": "Live Output",
+              "x": 789.8828190819302,
+              "y": 211.81422372692057,
+              "inputs": {
+                "nodeValue": {
+                  "connections": {"8-num-undefined": {"node": 8, "output": "num", "data": {}}}
+                }
+              },
+              "outputs": {},
+              "data": {
+                "orderedDisplayName": "Live Output 6",
+                "outputType": "Gripper 2.0",
+                "hubSelect": "⚠️ connect device",
+                "liveOutputType": "Gripper 2.0"
+              }
+            },
+            "7": {
+              "id": 7,
+              "name": "Math",
+              "x": 387.09630469633385,
+              "y": 67.59115533846467,
+              "inputs": {
+                "num1": {
+                  "connections": {"1-num-undefined": {"node": 1, "output": "num", "data": {}}}
+                },
+                "num2": {
+                  "connections": {"2-num-undefined": {"node": 2, "output": "num", "data": {}}}
+                }
+              },
+              "outputs": {
+                "num": {
+                  "connections": {
+                    "5-undefined-nodeValue": {"node": 5, "input": "nodeValue", "data": {}}
+                  }
+                }
+              },
+              "data": {"plot": false, "orderedDisplayName": "Math 7", "mathOperator": "Add"}
+            },
+            "8": {
+              "id": 8,
+              "name": "Logic",
+              "x": 384.11892899308964,
+              "y": 209.30555649210444,
+              "inputs": {
+                "num1": {
+                  "connections": {"2-num-undefined": {"node": 2, "output": "num", "data": {}}}
+                },
+                "num2": {
+                  "connections": {"3-num-undefined": {"node": 3, "output": "num", "data": {}}}
+                }
+              },
+              "outputs": {
+                "num": {
+                  "connections": {
+                    "6-undefined-nodeValue": {"node": 6, "input": "nodeValue", "data": {}}
+                  }
+                }
+              },
+              "data": {
+                "plot": false,
+                "orderedDisplayName": "Logic 8",
+                "logicOperator": "Greater Than"
+              }
+            },
+            "9": {
+              "id": 9,
+              "name": "Transform",
+              "x": 385.92445736046795,
+              "y": 357.5781122723031,
+              "inputs": {
+                "num1": {
+                  "connections": {"3-num-undefined": {"node": 3, "output": "num", "data": {}}}
+                }
+              },
+              "outputs": {
+                "num": {
+                  "connections": {
+                    "11-undefined-nodeValue": {"node": 11, "input": "nodeValue", "data": {}}
+                  }
+                }
+              },
+              "data": {
+                "plot": false,
+                "orderedDisplayName": "Transform 9",
+                "transformOperator": "Absolute Value"
+              }
+            },
+            "10": {
+              "id": 10,
+              "name": "Control",
+              "x": 391.9748320735734,
+              "y": 502.18316500820447,
+              "inputs": {
+                "num2": {
+                  "connections": {"3-num-undefined": {"node": 3, "output": "num", "data": {}}}
+                },
+                "num1": {
+                  "connections": {"4-num-undefined": {"node": 4, "output": "num", "data": {}}}
+                }
+              },
+              "outputs": {
+                "num": {
+                  "connections": {
+                    "12-undefined-nodeValue": {"node": 12, "input": "nodeValue", "data": {}}
+                  }
+                }
+              },
+              "data": {
+                "plot": false,
+                "orderedDisplayName": "Hold 10",
+                "controlOperator": "Hold Current",
+                "waitDuration": 0
+              }
+            },
+            "11": {
+              "id": 11,
+              "name": "Demo Output",
+              "x": 792.1875803960479,
+              "y": 373.1164045506652,
+              "inputs": {
+                "nodeValue": {
+                  "connections": {"9-num-undefined": {"node": 9, "output": "num", "data": {}}}
+                }
+              },
+              "outputs": {},
+              "data": {
+                "orderedDisplayName": "Demo Output 11",
+                "outputType": "Light Bulb",
+                "demoOutput": 1
+              }
+            },
+            "12": {
+              "id": 12,
+              "name": "Demo Output",
+              "x": 794.7700452473614,
+              "y": 577.1312193142994,
+              "inputs": {
+                "nodeValue": {
+                  "connections": {"10-num-undefined": {"node": 10, "output": "num", "data": {}}}
+                }
+              },
+              "outputs": {},
+              "data": {
+                "orderedDisplayName": "Demo Output 12",
+                "outputType": "Light Bulb",
+                "demoOutput": 1
+              }
+            }
+          },
+          "values": {
+            "1": {
+              "currentValues": {},
+              "recentValues": {
+                "nodeValue": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+              }
+            },
+            "2": {
+              "currentValues": {"nodeValue": 0},
+              "recentValues": {"nodeValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]"}
+            },
+            "3": {
+              "currentValues": {"nodeValue": 0.4},
+              "recentValues": {
+                "nodeValue": "[0.21,-0.4,-0.86,-1,-0.75,-0.22,0.4,0.86,1,0.74,0.21,-0.41,-0.86,-0.99,-0.75,-0.21,0.4]"
+              }
+            },
+            "4": {
+              "currentValues": {"nodeValue": 1},
+              "recentValues": {"nodeValue": "[1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1]"}
+            },
+            "5": {
+              "currentValues": {"nodeValue": 0},
+              "recentValues": {"nodeValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]"}
+            },
+            "6": {
+              "currentValues": {"nodeValue": 0},
+              "recentValues": {
+                "nodeValue": "[0,0,100,100,100,100,100,0,0,0,0,0,100,100,100,100,100]"
+              }
+            },
+            "7": {
+              "currentValues": {},
+              "recentValues": {
+                "nodeValue": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+              }
+            },
+            "8": {
+              "currentValues": {"nodeValue": 0},
+              "recentValues": {"nodeValue": "[0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1]"}
+            },
+            "9": {
+              "currentValues": {"nodeValue": 0.4},
+              "recentValues": {
+                "nodeValue": "[0.75,0.21,0.4,0.86,1,0.75,0.22,0.4,0.86,1,0.74,0.21,0.41,0.86,0.99,0.75,0.21]"
+              }
+            },
+            "10": {
+              "currentValues": {"nodeValue": 0.4},
+              "recentValues": {
+                "nodeValue": "[0.4,0.4,-0.4,-0.86,-1,-0.75,-0.22,0.4,0.4,0.4,0.4,0.4,-0.41,-0.86,-0.99,-0.75,-0.21]"
+              }
+            },
+            "11": {
+              "currentValues": {"nodeValue": 1},
+              "recentValues": {"nodeValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1]"}
+            },
+            "12": {
+              "currentValues": {"nodeValue": 1},
+              "recentValues": {"nodeValue": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]"}
+            }
+          }
+        },
+        "programDataRate": 1000,
+        "programZoom": {"dx": 0, "dy": 0, "scale": 1}
+      }
+    }
+  },
+  "sharedModelMap": {
+    "wtYmJ9AIXjjPouSq": {
+      "sharedModel": {
+        "type": "SharedDataSet",
+        "id": "wtYmJ9AIXjjPouSq",
+        "providerId": "CIUYXl4cwYYrfP5t",
+        "dataSet": {"id": "vbCh0x6XjDGO2V8B", "name": "Program 1", "attributes": [], "cases": []}
+      },
+      "tiles": ["CIUYXl4cwYYrfP5t"]
+    }
+  },
+  "annotations": {}
+}

@@ -16,14 +16,15 @@ import { DataCardSortArea } from "./components/sort-area";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { mergeTwoDataSets } from "../../models/data/data-set-utils";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
+import { DataCardToolbarContext } from "./data-card-toolbar-context";
+import { CasesCountDisplay } from "./components/cases-count-display";
 import { useDataCardTileHeight } from "./use-data-card-tile-height";
 
 import "./data-card-tile.scss";
-import { DataCardToolbarContext } from "./data-card-toolbar-context";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer(function DataCardToolComponent(props) {
   const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
-            scale, onRequestUniqueTitle, onUnregisterTileApi,
+            scale, onUnregisterTileApi,
             height, onRequestRowHeight } = props;
   const backgroundRef = useRef<HTMLDivElement | null>(null);
 
@@ -44,6 +45,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const displaySingle = !content.selectedSortAttributeId;
   const shouldShowAddField = !readOnly && isTileSelected && displaySingle;
   const attrIdsNames = content.existingAttributesWithNames();
+  const cardOf = `Card ${content.caseIndex + 1 } of `;
 
   // When a highlighted case or cell is set, show it
   const selectedCaseId = dataSet.firstSelectedCaseId ? dataSet.firstSelectedCaseId : dataSet.firstSelectedCell?.caseId;
@@ -52,13 +54,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
       content.setCaseIndex(dataSet.caseIndexFromID(selectedCaseId));
     }
   }, [content, dataSet, selectedCaseId]);
-
-  useEffect(() => {
-    if (!model.computedTitle) {
-      const title = onRequestUniqueTitle(model.id);
-      title && model.setTitle(title);
-    }
-  }, [model, onRequestUniqueTitle]);
 
   useDataCardTileHeight({
     tileElt,
@@ -69,6 +64,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     readOnly: readOnly ?? false,
     onRequestRowHeight,
     attrCount: content.attributes.length,
+    isSingleView: displaySingle
   });
 
   /* ==[ Drag and Drop ] == */
@@ -274,7 +270,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
               <div className="panel title">
                 <CustomEditableTileTitle
                   model={props.model}
-                  onRequestUniqueTitle={props.onRequestUniqueTitle}
                   readOnly={props.readOnly}
                 />
               </div>
@@ -286,18 +281,22 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
                 onSortAttrChange={setSort}
                 attrIdNamePairs={attrIdsNames}
               />
+              <div className="total-label">Total </div>
+              <CasesCountDisplay totalCases={content.totalCases} />
             </div>
             { displaySingle &&
-              <>
+              <div className="single-card-view-wrap">
                 <div
                   className={classNames("panel nav", { highlighted: content.caseSelected, linked: isLinked })}
                   onClick={handleNavPanelClick}
                 >
                   <div className="card-number-of-listing">
+                    <span>{cardOf}</span>
                     <div className="cell-text">
-                      { content.totalCases > 0
-                          ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
-                          : "Add a card" }
+                        { content.totalCases > 0 &&
+                          <CasesCountDisplay totalCases={content.totalCases} />
+                        }
+                        { (!content.totalCases || content.totalCases < 1) && <>Add a card</> }
                     </div>
                   </div>
                   <div className="card-nav-buttons">
@@ -327,7 +326,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
                     />
                   }
                 </div>
-              </>
+              </div>
             }
             { shouldShowAddField && !readOnly &&
               <AddIconButton className="add-field" onClick={handleAddField} />

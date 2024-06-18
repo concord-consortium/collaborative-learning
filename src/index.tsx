@@ -6,27 +6,25 @@ import { AppComponent } from "./components/app";
 import { getAppMode } from "./lib/auth";
 import { urlParams } from "./utilities/url-params";
 import { QAClear } from "./components/qa-clear";
-import { setPageTitle } from "./lib/misc";
+import { getBearerToken, initializeAuthorization } from "./utilities/auth-utils";
+import { removeLoadingMessage, showLoadingMessage } from "./utilities/loading-utils";
 
-const host = window.location.host.split(":")[0];
-const appMode = getAppMode(urlParams.appMode, urlParams.token, host);
+removeLoadingMessage("Loading the application");
+showLoadingMessage("Initializing");
 
-if (appMode === "qa" && urlParams.qaClear === "all") {
-  ReactDOM.render(
-    <QAClear />,
-    document.getElementById("app")
-  );
-} else {
-  initializeApp(appMode).then((stores) => {
-    setPageTitle(stores);
+const redirectingToAuthDomain = initializeAuthorization();
+if (!redirectingToAuthDomain) {
+  const host = window.location.host.split(":")[0];
+  const appMode = getAppMode(urlParams.appMode, getBearerToken(urlParams), host);
+
+  if (appMode === "qa" && urlParams.qaClear === "all") {
+    ReactDOM.render(
+      <QAClear />,
+      document.getElementById("app")
+    );
+  } else {
+    const stores = initializeApp(appMode);
     stores.ui.setShowDemoCreator(!!stores.showDemoCreator);
-    stores.supports.createFromUnit({
-      unit: stores.unit,
-      investigation: stores.investigation,
-      problem: stores.problem,
-      documents: stores.documents,
-      db: stores.db
-    });
 
     ReactDOM.render(
       <AppProvider stores={stores} modalAppElement="#app">
@@ -34,5 +32,6 @@ if (appMode === "qa" && urlParams.qaClear === "all") {
       </AppProvider>,
       document.getElementById("app")
     );
-  });
+    removeLoadingMessage("Initializing");
+  }
 }

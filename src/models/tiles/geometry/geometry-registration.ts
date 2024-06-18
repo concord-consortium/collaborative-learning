@@ -4,7 +4,9 @@ import { GeometryContentModel, GeometryMetadataModel, defaultGeometryContent } f
 import { kGeometryTileType } from "./geometry-types";
 import { kGeometryDefaultHeight } from "./jxg-types";
 import GeometryToolComponent from "../../../components/tiles/geometry/geometry-tile";
-import GeometryToolIcon from "../../../clue/assets/icons/graph-tool.svg";
+
+import Icon from "../../../clue/assets/icons/geometry-tool.svg";
+import HeaderIcon from "../../../assets/icons/sort-by-tools/shapes-graph-tile-id.svg";
 
 export function tileSnapshotPreProcessor(tileSnap: any) {
   // Move the title up to handle legacy geometry tiles
@@ -15,14 +17,14 @@ export function tileSnapshotPreProcessor(tileSnap: any) {
 
 registerTileContentInfo({
   type: kGeometryTileType,
-  titleBase: "Graph",
+  displayName: "Shapes Graph",
   modelClass: GeometryContentModel,
   metadataClass: GeometryMetadataModel,
   addSidecarNotes: true,
   defaultHeight: kGeometryDefaultHeight,
   exportNonDefaultHeight: true,
   isDataConsumer: true,
-  consumesMultipleDataSets: true,
+  consumesMultipleDataSets: () => true,
   defaultContent: defaultGeometryContent,
   tileSnapshotPreProcessor
 });
@@ -32,5 +34,6 @@ registerTileComponentInfo({
   Component: GeometryToolComponent,
   tileEltClass: "geometry-tool-tile",
   tileHandlesOwnSelection: true,
-  Icon: GeometryToolIcon
+  Icon,
+  HeaderIcon
 });

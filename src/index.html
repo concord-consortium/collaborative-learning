@@ -25,11 +25,65 @@
             environment: isProduction ? "production" : "staging"
           }
       };
+      // Show some informative messages to users about what is happening while the application loads.
+      // Any javascript code can write a message into sessionStorage.
+      window.loadingMeasurements = {};
+
+      const requestStart = performance.getEntriesByType('navigation')[0].requestStart || performance.now();
+      sessionStorage.setItem('loading-time-start', requestStart);
+      const loadingStartTime = Math.floor(performance.now()-requestStart);
+      if ((localStorage.getItem("debug")||"").indexOf('loading') > -1) {
+        console.log(`Loading @${loadingStartTime}ms: Loading the application`);
+      }
+      loadingMeasurements["Loading the application Start"] = loadingStartTime;
+      sessionStorage.setItem('loading-message', 'Loading the application<br/>');
+      window.loadingMessageTimer = setInterval(function() {
+        var elt = document.getElementById('loading-message');
+        var msg = sessionStorage.getItem('loading-message');
+        if (elt) {
+          elt.innerHTML = msg;
+        } else {
+          clearInterval(window.loadingMessageTimer);
+        }
+      }, 500);
+
       // Rollbar Snippet
       if (_rollbarConfig.enabled) {
         <%= rollbarSnippet %>
       }
       // End Rollbar Snippet
+    </script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G4BPTMRZ4H"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      // ---------- Send problem and unit to GA -----------
+      function getUrlParam(paramName) {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(paramName);
+      }
+      const problem = getUrlParam('problem');
+      const unit = getUrlParam('unit') || "sas";
+
+      gtag('config', 'G-G4BPTMRZ4H', {
+        'problem': problem,
+        'unit': unit
+      });
+      gtag('event', 'page_view', { //these will be parameters insde of the page_view event
+        'problem': problem,
+        'unit': unit
+      });
+
+      // ---------- Send loadingStartTime to GA -----------
+      gtag('event', 'loadingStartTime', {
+        'event_category': 'Performance',
+        'event_label': 'Custom Metric - performance.now() - requestStart',
+        'value': loadingStartTime
+      });
     </script>
   </head>
   <body>
@@ -76,6 +130,8 @@
         </symbol>
       </defs>
     </svg>
-    <div id="app"></div>
+    <div id="app">
+      <p id="loading-message" class="center progress"></p>
+    </div>
   </body>
 </html>

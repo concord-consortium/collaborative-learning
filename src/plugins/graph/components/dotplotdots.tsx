@@ -4,8 +4,6 @@ import React, {useCallback, useRef, useState} from "react";
 import {CaseData} from "../d3-types";
 import {PlotProps} from "../graph-types";
 import {useDragHandlers, usePlotResponders} from "../hooks/use-plot";
-import {useDataConfigurationContext} from "../hooks/use-data-configuration-context";
-import {useDataSetContext} from "../imports/hooks/use-data-set-context";
 import {useGraphLayoutContext} from "../models/graph-layout";
 import {ICase} from "../../../models/data/data-set-types";
 import {
@@ -14,13 +12,16 @@ import {
   setPointSelection,
   startAnimation
 } from "../utilities/graph-utils";
-import {useGraphModelContext} from "../models/graph-model";
+import { useGraphModelContext } from "../hooks/use-graph-model-context";
+import { useDataConfigurationContext } from "../hooks/use-data-configuration-context";
+import { useGraphLayerContext } from "../hooks/use-graph-layer-context";
 
 export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
   const {dotsRef, enableAnimation} = props,
     graphModel = useGraphModelContext(),
+    layer = useGraphLayerContext(),
     dataConfiguration = useDataConfigurationContext(),
-    dataset = useDataSetContext(),
+    dataset = dataConfiguration?.dataset,
     layout = useGraphLayoutContext(),
     primaryAttrRole = dataConfiguration?.primaryRole ?? 'x',
     primaryIsBottom = primaryAttrRole === 'x',
@@ -124,6 +125,8 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
   }, [dataConfiguration, dotsRef, graphModel, pointColor, pointStrokeColor]);
 
   const refreshPointPositions = useCallback((selectedOnly: boolean) => {
+      if (!dataConfiguration) return;
+
       const primaryPlace = primaryIsBottom ? 'bottom' : 'left',
         secondaryPlace = primaryIsBottom ? 'left' : 'bottom',
         extraPrimaryPlace = primaryIsBottom ? 'top' : 'rightCat',
@@ -256,15 +259,17 @@ export const DotPlotDots = observer(function DotPlotDots(props: PlotProps) {
 
       setPointCoordinates({
         dataConfiguration, pointRadius: graphModel.getPointRadius(),
+        getColorForId: graphModel.getColorForId,
         selectedPointRadius: graphModel.getPointRadius('select'),
         dotsRef, selectedOnly, pointColor, pointStrokeColor,
-        getScreenX, getScreenY, getLegendColor, enableAnimation
+        getScreenX, getScreenY, getLegendColor, enableAnimation,
+        enableConnectors: false
       });
     },
     [graphModel, dataConfiguration, layout, primaryAttrRole, secondaryAttrRole, dataset, dotsRef,
       enableAnimation, primaryIsBottom, pointColor, pointStrokeColor]);
 
-  usePlotResponders({dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
+  usePlotResponders({layer, dotsRef, refreshPointPositions, refreshPointSelection, enableAnimation});
 
   return (
     <>

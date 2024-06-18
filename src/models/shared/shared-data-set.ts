@@ -1,6 +1,7 @@
 import { getType, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
 import { Required } from "utility-types";
+import escapeStringRegexp from "escape-string-regexp";
 
 import { SharedModel, SharedModelType } from "./shared-model";
 import { DataSet, IDataSet, newCaseId } from "../data/data-set";
@@ -16,6 +17,9 @@ export const SharedDataSet = SharedModel
   dataSet: types.optional(DataSet, () => DataSet.create())
 })
 .views(self => ({
+  get name() {
+    return self.dataSet.name;
+  },
   get xLabel() {
     return self.dataSet.attributes[0]?.name;
   },
@@ -26,6 +30,9 @@ export const SharedDataSet = SharedModel
 .actions(self => ({
   setDataSet(data: IDataSet) {
     self.dataSet = data;
+  },
+  setName(name: string) {
+    self.dataSet.setName(name);
   }
 }));
 // all instances have a dataSet, but types.optional() leads to a TypeScript type that doesn't reflect that
@@ -44,6 +51,7 @@ export function isSharedDataSetSnapshot(snapshot: any): snapshot is SharedDataSe
 export interface UpdatedSharedDataSetIds {
   attributeIdMap: Record<string, string>;
   caseIdMap: Record<string, string>;
+  origDataSetId: string|undefined;
   dataSetId: string;
   sharedModelId: string;
 }
@@ -52,6 +60,7 @@ export function getUpdatedSharedDataSetIds(sharedDataSet: SharedDataSetSnapshotT
   const updatedIds: UpdatedSharedDataSetIds = {
     attributeIdMap: {},
     caseIdMap: {},
+    origDataSetId: sharedDataSet.dataSet?.id,
     dataSetId: uniqueId(),
     sharedModelId: uniqueId()
   };
@@ -91,9 +100,40 @@ export function getSharedDataSetSnapshotWithUpdatedIds(
 }
 
 export function updateSharedDataSetSnapshotWithNewTileIds(
-  sharedDataSetSnapshot: SharedDataSetSnapshotType, tileIdMap: Record<string, string>
-) {
+  sharedDataSetSnapshot: SharedDataSetSnapshotType, tileIdMap: Record<string, string>) {
+  // Always makes a copy, so that returned object is not read-only
   if (sharedDataSetSnapshot.providerId) {
-    sharedDataSetSnapshot.providerId = tileIdMap[sharedDataSetSnapshot.providerId];
+    return cloneDeep({
+      ...sharedDataSetSnapshot,
+      providerId: tileIdMap[sharedDataSetSnapshot.providerId]
+    });
+  } else {
+    return cloneDeep(sharedDataSetSnapshot);
   }
+}
+
+function flattenedMap(sharedDatasetIds: UpdatedSharedDataSetIds[]) {
+  const map = {} as Record<string, string>;
+  for (const updatedIds of sharedDatasetIds) {
+    if (updatedIds.origDataSetId) {
+      map[updatedIds.origDataSetId] = updatedIds.dataSetId;
+    }
+    for (const [key, val] of Object.entries(updatedIds.attributeIdMap)) {
+      map[key] = val;
+    }
+    for (const [key, val] of Object.entries(updatedIds.caseIdMap)) {
+      map[key] = val;
+    }
+  }
+  return map;
+}
+
+export function replaceJsonStringsWithUpdatedIds(json: unknown, ...sharedDatasetIds: UpdatedSharedDataSetIds[]) {
+  const flatMap = flattenedMap(sharedDatasetIds);
+  const keyPattern = Object.keys(flatMap).map(key => escapeStringRegexp(key)).join("|");
+  const matchRegexp = new RegExp(`\\"(${keyPattern})\\"`, "g");
+  const updated = JSON.stringify(json).replace(matchRegexp, (match, key) => {
+    return `"${flatMap[key]}"`;
+  });
+  return JSON.parse(updated);
 }

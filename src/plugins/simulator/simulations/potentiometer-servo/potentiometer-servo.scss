@@ -1,0 +1,325 @@
+$inactive: #d6d6d6;
+$active-ground: #777777;
+$input: #384aff;
+$output: #c66c02;
+$power: #f7a0a0;
+
+$input-node-border: $input;
+$input-node-label: #e8ecff;
+$input-node-value: #d2d8ff;
+
+$operator-node-border: #0271c1;
+$operator-node-label: #d2f3fb;
+$operator-node-value: #a4e7f6;
+
+$output-node-border: $output;
+$output-node-label: #fdf8e3;
+$output-node-value: #f9ecab;
+
+// fixed sections of pot-servo-component
+.pot-servo-component {
+  .hardware {
+    position: relative;
+
+    .heading-area {
+      position: absolute;
+      text-align: center;
+      width: 200px;
+      left: 168px;
+      top: 10px;
+      font-weight: bold;
+      .arduino-label {
+        margin-top:10px;
+        font-size: 14px;
+        color: #333;
+      }
+    }
+
+    .extra-nodes-count {
+      color:white;
+      border-radius: 15px;
+      width: 56px;
+      background-color: #777;
+      font-size: 10px;
+      font-weight: normal;
+      text-align: center;
+      padding: 2px;
+      margin-bottom: 5px;
+    }
+
+    .sample-rate {
+      font-weight: normal;
+    }
+
+    .pot-dial, .servo-arm {
+      position: absolute;
+    }
+  }
+  .controls {
+    padding-top:20px;
+    display: flex;
+
+    .area {
+      width: 50%;
+      display: flex;
+      align-items: center;
+
+      &.slider {
+        justify-content: left;
+        .pot-slider {
+          width: 120px;
+          display: flex;
+          flex-direction: row;
+        }
+        .slider-labels {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          .label {
+            font-size: 12px;
+            color: #333;
+          }
+        }
+      }
+    }
+  }
+
+  // for this effect to work we need to package these properties together
+  @keyframes moving-dashes-right {
+    to { background-position: 100% 0%; }
+  }
+
+  // .input.wire {
+  //   background: linear-gradient(90deg, rgb(196, 214, 251) 50%, transparent 50%);
+  //   background-size: 20px 100%;
+  //   animation: moving-dashes-right 1s linear infinite;
+  //   position: absolute;
+  // }
+
+  .output.wire {
+    background: linear-gradient(90deg, rgb(251, 223, 196) 50%, transparent 50%);
+    background-size: 20px 100%;
+    animation: moving-dashes-right 1s linear infinite;
+    position: absolute;
+  }
+
+  .output.wire.bg {
+    background: $output;
+    background-size: 20px 100%;
+    position: absolute;
+  }
+}
+
+// dynamic sections of pot-servo-component
+.pot-servo-component {
+  .pot-dial {
+    top: 130px;
+    left:14px;
+  }
+  .servo-arm {
+    top: 97px;
+    right: -53px;
+  }
+
+  .wire {
+    width: 60px;
+    height: 3px;
+    &.input {
+      top: 189px;
+      left:70px;
+    }
+    &.output {
+      top: 221px;
+      right:43px;
+    }
+  }
+}
+
+// program nodes on arduino
+.mini-nodes-column-wrapper {
+  position: absolute;
+  bottom: -5px;
+  left: 174px;
+  width:200px;
+  display: flex;
+}
+
+.mini-nodes-col {
+  display: flex;
+  flex-direction: column;
+  width: 33.33%;
+  justify-content: flex-end;
+  .category-label {
+    font-weight: bold;
+    transform: translateY(10px);
+  }
+  &.inputs {
+    left: 160px;
+    .category-label {
+      text-align: left;
+      color: $input;
+    }
+  }
+  &.operators {
+    left: 235px;
+    .category-label {
+      text-align: center;
+      color: $operator-node-border;
+
+    }
+  }
+  &.outputs {
+    left: 320px;
+    .category-label {
+      text-align: right;
+      color: $output;
+    }
+  }
+}
+
+.mini-node {
+  font-size: 8px;
+  border-radius: 3px 18px 18px 3px;
+  font-size: 10px;
+  width: 65px;
+  height: 34px;
+  margin-bottom: 4px;
+  box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.2);
+  .node-info, .node-value {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    font-size: 10px;
+    color: #333;
+    padding-top:1px;
+    padding-bottom: 1px;
+    padding-left:2px;
+  }
+  .node-info {
+    display: flex;
+    border-radius: 0px 15px 0px 0px;
+  }
+  .node-value {
+    font-weight: bold;
+    display: flex;
+    border-radius: 0px 0px 15px 0px;
+    justify-content: flex-end;
+    padding-right:9px;
+    height: 16px;
+  }
+  .node-icon {
+    width: 8px;
+    height: 8px;
+    background-size: 10px 10px;
+    margin-right: 2px;
+  }
+}
+.mini-node.category-input {
+  border: 2px solid $input-node-border;
+  .node-info {
+    background-color: $input-node-label;
+  }
+  .node-value {
+    background-color: $input-node-value;
+  }
+}
+.mini-node.category-output {
+  border: 2px solid $output-node-border;
+  .node-info {
+    background-color: $output-node-label;
+  }
+  .node-value {
+    background-color: $output-node-value;
+  }
+}
+.mini-node.category-operator {
+  border: 2px solid $operator-node-border;
+  .node-info {
+    background-color: $operator-node-label;
+  }
+  .node-value {
+    background-color: $operator-node-value;
+  }
+}
+.mini-node.type-live.output.has-icon-gripper {
+  .node-icon {
+    transform: scale(1.4) translate(4px, -1px);
+  }
+}
+.mini-node.has-icon-timer {
+  .node-icon {
+    svg {
+      transform: translate(-3px, 1px) scale(0.6);
+    }
+  }
+}
+.mini-node.has-icon-number {
+  .node-icon {
+    svg {
+      transform: translate(2px, 1px) scale(1.1);
+    }
+  }
+}
+
+@keyframes flow-right {
+  to {
+    stroke-dashoffset: -300;
+  }
+}
+.pot-to-a1 {
+  position: absolute;
+  top: 190px;
+  left: 75px;
+  .path-to-a1.dashes {
+    stroke: $input;
+    stroke-dasharray: 5;
+    stroke-dashoffset: 5;
+    animation: flow-right 10s linear infinite;
+  }
+  .path-to-a1.line {
+    stroke: $input-node-value;
+  }
+}
+
+.connected-pin {
+  position: absolute;
+  height: 9px;
+  width: 9px;
+}
+
+.connected-pin.input {
+  border-radius: 0px 3px 3px 0px;
+  background-color: $input;
+  top: 203px;
+  left: 134px;
+}
+
+.connected-pin.output {
+  border-radius: 3px 0px 0px 3px;
+  background-color: $output;
+  top: 218px;
+  right: 101px;
+}
+
+@keyframes stopwatchPulse {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.stopwatch {
+  animation-name: stopwatchPulse;
+  animation-timing-function: ease-out;
+  animation-iteration-count: infinite;
+  height: 12px;
+  position: relative;
+  top: 1px;
+  left: -2px;
+}
+
+.mini-node.type-live.output svg {
+  transform: translate(-4px, 1px) scale(0.7)
+}

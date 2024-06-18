@@ -221,6 +221,7 @@ export const DataSet = types.model("DataSet", {
       self.cases.push(newCase);
       beforeIndex = self.cases.length - 1;
     }
+    return newCase;
   }
 
   // `affectedAttributes` are not used in the function, but are present as a potential
@@ -378,6 +379,9 @@ export const DataSet = types.model("DataSet", {
                           ? self.pseudoCaseMap[caseID].childCaseIds[0]
                           : caseID;
         const index = _caseId ? self.caseIDMap[_caseId] : undefined;
+        if (index == null) {
+          console.warn('Did not find case', _caseId, 'in', attributeID);
+        }
         return index != null
                 ? this.getNumericAtIndex(self.caseIDMap[_caseId], attributeID)
                 : undefined;
@@ -636,6 +640,7 @@ export const DataSet = types.model("DataSet", {
         for (let i = attribute.values.length; i < self.cases.length; ++i) {
           attribute.values.push("");
         }
+        return attribute;
       },
 
       setAttributeName(attributeID: string, name: string) {
@@ -685,13 +690,14 @@ export const DataSet = types.model("DataSet", {
       },
 
       addCanonicalCasesWithIDs(cases: ICase[], beforeID?: string | string[]) {
+        const newCases: ICase[] = [];
         cases.forEach((aCase, index) => {
           const beforeIndex = beforeIndexForInsert(index, beforeID);
           self.attributes.forEach((attr: IAttribute) => {
             const value = aCase[attr.id];
             attr.addValue(value != null ? value : undefined, beforeIndex);
           });
-          insertCaseIDAtIndex(aCase.__id__, beforeIndex);
+          newCases.push(insertCaseIDAtIndex(aCase.__id__, beforeIndex));
         });
       },
 
@@ -879,7 +885,7 @@ export function addAttributeToDataSet(dataset: IDataSet, snapshot: IAttributeSna
   if (!snapshot.id) {
     snapshot.id = uniqueId();
   }
-  dataset.addAttributeWithID(snapshot, beforeID);
+  return dataset.addAttributeWithID(snapshot, beforeID);
 }
 
 export function addCasesToDataSet(dataset: IDataSet, cases: ICaseCreation[], beforeID?: string | string[]) {
@@ -901,6 +907,7 @@ export function addCanonicalCasesToDataSet(dataset: IDataSet, cases: ICaseCreati
     }
   });
   dataset.addCanonicalCasesWithIDs(newCases, beforeID);
+  return newCases;
 }
 
 export function getDataSetBounds(dataSet: IDataSet) {

@@ -2,9 +2,8 @@ import TeacherDashboard from "../../../support/elements/common/TeacherDashboard"
 
 let dashboard = new TeacherDashboard();
 
-const queryParams = "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6";
-
-function beforeTest(params) {
+function beforeTest() {
+  const queryParams = `${Cypress.config("clueTestqaUnitTeacher6")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
@@ -20,7 +19,7 @@ function beforeTest(params) {
 context('Teacher Dashboard View 4 Quadrants', () => {
   describe('4 quadrants functionality', () => {
     it('verify 4 quadrants functionality', () => {
-      beforeTest(queryParams);
+      beforeTest();
       cy.log('verifies students are in correct groups');
       cy.get('@clueData').then((clueData) => {
         let groups = clueData.classes[0].problems[0].groups;

@@ -43,6 +43,9 @@ export const ClassModel = types
             initials: user.initials,
           }));
         });
+      },
+      addUser(user: any) {
+        self.users.put(user);
       }
     };
   })
@@ -50,6 +53,9 @@ export const ClassModel = types
     return {
       getUserById(uid: string) {
         return self.users.get(uid);
+      },
+      get students() {
+        return Array.from(self.users.values()).filter(u=>u.type === "student");
       }
     };
   })

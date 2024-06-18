@@ -1,4 +1,4 @@
-import { parse } from "query-string";
+import { ParsedQuery, parse } from "query-string";
 import { AppMode, AppModes } from "../models/stores/store-types";
 import { DBClearLevel } from "../lib/db";
 
@@ -15,31 +15,47 @@ export interface QueryParams {
   testMigration?: string;
 
   //
+  // Portal common auth parameters
+  //
+
+  // OAuth2 base URL for site providing authentication, replaces token. Typically https://learn.concord.org
+  authDomain?: string;
+  // If set, this is passed to the portal APIs for JWTs. It should be the offering id that the user is
+  // trying to access. The resource link terminology comes from the LTI standard.
+  resourceLinkId?: string;
+  // short-lived nonce token from portal for authentication
+  token?: string;
+
+  //
   // Portal student auth parameters
   //
 
-  // short-lived nonce token from portal for authentication
-  token?: string;
   // The domain of the portal opening the app
   domain?: string;
   // the user ID of the user launching from the portal domain
   domain_uid?: string;
 
-  // If this exists then the demo ui is shown
-  demo?: boolean;
-
-  // Optional name of the demo to use as a namespace under the demo key
-  demoName?: string;
-
   //
   // Portal external report auth parameters (classOfferings is ignored)
   //
+
   // class info url
   class?: string;
   // offering info url
   offering?: string;
   // type of report
   reportType?: string;
+
+  //
+  // demo features
+  //
+
+  // If this exists then the demo ui is shown
+  demo?: boolean;
+  // Optional name of the demo to use as a namespace under the demo key
+  demoName?: string;
+
+
 
   //
   // teacher network development features
@@ -72,6 +88,10 @@ export interface QueryParams {
   firestore?: string; // "emulator" or host:port url
   // direct firebase function calls to the emulator
   functions?: string; // "emulator" or host:port url
+  // do not use persistentUI in some cy tests that rely on demo
+  noPersistentUI?: boolean;
+  // mouse sensor can be enabled for cypress drag and drop tests for dnd-kit
+  mouseSensor?: boolean;
 
   //
   // CMS options (admin.html)
@@ -81,8 +101,9 @@ export interface QueryParams {
   curriculumBranch?: string;
   // work with a local checkout of the curriculum instead of github
   localCMSBackend?: boolean;
-  // mouse sensor can be enabled for cypress drag and drop tests for dnd-kit
-  mouseSensor?: boolean;
+  // change the location of the cms-editor.html used by iframe widget to edit
+  // CLUE documents.
+  cmsEditorBase?: string;
 
   //
   // Standalone document editor options (doc-editor.html)
@@ -90,21 +111,63 @@ export interface QueryParams {
 
   // URL to the document to open in the document editor
   document?: string;
+  // Open new documents as readOnly this helps with testing readOnly views
+  readOnly?: boolean
+  // Don't load or save the document from browser storage
+  noStorage?: boolean
 }
+
+// Make a union of all of the boolean params from the QueryParams
+type BooleanParamNames = Exclude<
+  {
+    [K in keyof QueryParams]: QueryParams[K] extends boolean | undefined ? K : never
+  }[keyof QueryParams],
+undefined>;
+
+const booleanParams: BooleanParamNames[] =
+  [ "demo", "mouseSensor", "localCMSBackend", "noPersistentUI", "readOnly", "noStorage" ];
+
+const processBooleanValue = (value: string | (string | null)[] | null | undefined) => {
+  if (value === undefined || value === "false") {
+    // `undefined` will happen if the parameter isn't specified at all
+    // This has to be treated differently from null which will happen when
+    // the parameter has no value.
+    return false;
+  } else {
+    // `null` will pass through here
+    return true;
+  }
+};
+
+const processBooleanParams = (params: ParsedQuery<string>) => {
+  const result:Record<string, boolean> = {};
+  booleanParams.forEach(paramName => {
+    result[paramName] = processBooleanValue(params[paramName]);
+  });
+  return result;
+};
 
 export const processUrlParams = (): QueryParams => {
   const params = parse(location.search);
+  const processedBooleans = processBooleanParams(params);
+
   return {
     ...params,
+    ...processedBooleans,
     // validate appMode
     appMode: (typeof params.appMode === "string") && AppModes.includes(params.appMode as AppMode)
                   ? params.appMode as AppMode
                   : undefined,  // appMode will be determined internally
-    // allows use of ?demo without a value for demo mode
-    demo: (params.demo !== undefined),
-    // allows use of localCMSBackend without a value
-    localCMSBackend: (params.localCMSBackend !== undefined)
   };
 };
 
 export const urlParams = processUrlParams();
+
+export const reprocessUrlParams = () => {
+  const newParams = processUrlParams();
+  // clear the old params
+  Object.keys(urlParams).forEach(key => delete (urlParams as any)[key]);
+  // add new params
+  Object.assign(urlParams, newParams);
+};
+

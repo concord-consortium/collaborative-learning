@@ -1,0 +1,58 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "AM7lZv5W7LkqbzVi",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Explore (Digging In)</strong></u></p><p><u>Providing for Individual Needs</u></p><p>You might have students draw two or more hats on the same grid. If students use a different color for each hat, it will be easier to differentiate the images.</p>"
+          ]
+        }
+      },
+      {
+        "id": "Vlt7t7PeH81C_4VT",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p><ul><li>What does the rule tell you that you need to do to the x coordinate? y coordinate?  (Answers will vary.  Possible answer: For (x + 2, y + 3) you would add 2 to the x coordinate and add 3 to the y coordinate.)</li><li>Does adding or subtracting a number to the x or y coordinate make a difference? (It moves the shape on the gird)</li><li>What rule would give the largest possible image on the grids provided? (Answers will vary. Possible answer: (3x - 3, 3y).)</li><li>Make up a rule that would place the image in another quadrant. (Answers will vary. Possible answer: (x - 10, y - 5).)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "RIwxpD1pK-gRqpuB",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Challenge the students to make up rules to fit your constraints. Students have worked with all four quadrants of the coordinate system and should be able to figure out how to move the figure around.</p><p>What If Situation C asks students to write a rule that would put the hat in the right place on the grid to fit on each Wump’s head and to transform the hat to the right size and location for the imposters. This task will be a good chance for the teacher to see if students are making sense of what multiplication in a rule does that is different from adding or subtracting.  </p>"
+          ]
+        }
+      },
+      {
+        "id": "TILEtM1WhDEt6HNK",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Planning for the Summary</u></p><p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p><p><em>Now What Do You Know?</em></p><p><em>If you know the coordinate rules to create an image, how can you tell if the two figures are similar? How can you predict the side lengths of the image? How is the effect of a coordinate rule like the effect of a rubber band stretcher or a copy machine setting?</em></p>"
+          ]
+        }
+      },
+      {
+        "id": "tBmQCwAFerV18IAx",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>As you are circulating during the Explore look for how students are connecting the rules to the hats they are creating. Look for students who can explain the effect of fractional coefficients and adding/subtracting to the x or y coordinate. Select students/groups to explain how to move figures, enlarge or shrink figures on a grid using rules.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

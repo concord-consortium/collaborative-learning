@@ -12,15 +12,12 @@ let header = new ClueHeader;
 let qaGroup = 10,
   students = [15, 16, 17, 18, 19];
 
-const baseUrl = `${Cypress.config("baseUrl")}`;
-
 function getUrl(studentIndex) {
-  return baseUrl + '?appMode=qa&qaGroup=10&fakeClass=10&problem=2.3&fakeUser=student:' + students[studentIndex];
+  return `/?appMode=qa&qaGroup=10&fakeClass=10&problem=1.1&fakeUser=student:${students[studentIndex]}&unit=./demo/units/qa/content.json`;
 }
 
 function setupTest(studentIndex) {
-  const url = getUrl(studentIndex);
-  cy.visit(url);
+  cy.visit(getUrl(studentIndex));
   cy.waitForLoad();
   header.getGroupName().should('contain', 'Group ' + qaGroup);
   header.getGroupMembers().find('div.member').should('contain', 'S' + students[studentIndex]);
@@ -86,6 +83,7 @@ context('Test group functionalities', function () {
     clueCanvas.getSouthWestCanvas().should('be.visible').and('contain', 'Student 18 has not shared their workspace.');
 
     cy.log('restore a 4-up canvas where a groupmate has shared a canvas while it was not open');
+    const defaultProblemDocTitle = "QA 1.1 Solving a Mystery with Proportional Reasoning";
     let copyTitle1 = 'Workspace Copy Document';
     canvas.copyDocument(copyTitle1);
     canvas.getPersonalDocTitle().should('contain', copyTitle1);
@@ -93,16 +91,16 @@ context('Test group functionalities', function () {
     cy.openSection("my-work", "workspaces");
     resourcesPanel.getCanvasItemTitle('my-work', 'workspaces').should('contain', copyTitle1);
     cy.openDocumentWithTitle('my-work', 'workspaces', copyTitle1);
+    //Since we now have persistentUI we switch to the default Problem Document since it has access to the four-up view
+    cy.openDocumentWithTitle('my-work', 'workspaces', defaultProblemDocTitle);
     cy.visit(getUrl(3));
     cy.waitForLoad();
-    clueCanvas.openFourUpView();
     clueCanvas.getFourToOneUpViewToggle().should('be.visible');
     clueCanvas.getNorthEastCanvas().should('contain', 'S15');
     clueCanvas.getNorthEastCanvas().should('be.visible').and('not.contain', 'not shared their workspace');
     clueCanvas.shareCanvas();
     cy.visit(getUrl(0));
     cy.waitForLoad();
-    clueCanvas.openFourUpView();
     clueCanvas.getFourToOneUpViewToggle().should('be.visible');
     clueCanvas.getSouthWestCanvas().should('contain', 'S18');
     clueCanvas.getSouthWestCanvas().should('be.visible').and('not.contain', 'not shared their workspace');
@@ -115,14 +113,13 @@ context('Test group functionalities', function () {
     cy.openDocumentWithTitle('my-work', 'workspaces', copyTitle2);
     cy.visit(getUrl(3));
     cy.waitForLoad();
-    clueCanvas.openFourUpView();
     clueCanvas.getFourToOneUpViewToggle().should('be.visible');
     clueCanvas.getNorthEastCanvas().should('contain', 'S15');
     clueCanvas.getNorthEastCanvas().should('be.visible').and('not.contain', 'not shared their workspace');
     clueCanvas.unshareCanvas();
     cy.visit(getUrl(0));
     cy.waitForLoad();
-    clueCanvas.openFourUpView();
+    cy.openDocumentWithTitle('my-work', 'workspaces', defaultProblemDocTitle);
     clueCanvas.getFourToOneUpViewToggle().should('be.visible');
     clueCanvas.getSouthWestCanvas().should('contain', 'S18');
     clueCanvas.getSouthWestCanvas().should('be.visible').and('contain', 'Student 18 has not shared their workspace.');

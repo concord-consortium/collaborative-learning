@@ -1,0 +1,173 @@
+{
+  "code": "qa-variables",
+  "abbrevTitle": "QA7",
+  "title": "QA Variables",
+  "subtitle": "Shared Variable Tiles",
+  "config": {
+    "autoAssignStudentsToIndividualGroups": true,
+    "disablePublish": [
+      {
+        "documentType": "personal"
+      },
+      {
+        "documentType": "problem"
+      },
+      {
+        "documentType": "learningLog"
+      }
+    ],
+    "placeholderText": "Enter notes here",
+    "defaultDocumentType": "personal",
+    "defaultDocumentTitle": "Untitled",
+    "documentLabels": {
+      "personal": {
+        "labels": {
+          "1": "Document",
+          "n": "Documents"
+        }
+      },
+      "problem": {
+        "labels": {
+          "1": "Document",
+          "n": "Documents"
+        }
+      }
+    },
+    "settings": {
+      "table": {
+        "numFormat": ".2~f"
+      },
+      "text": {
+        "tools": [
+          "bold",
+          "subscript",
+          "superscript",
+          "new-variable",
+          "insert-variable",
+          "edit-variable"
+        ]
+      },
+      "drawing": {
+        "tools": [
+          "select",
+          "line",
+          "vector",
+          "rectangle",
+          "ellipse",
+          "stamp",
+          "stroke-color",
+          "fill-color",
+          "new-variable",
+          "insert-variable",
+          "edit-variable",
+          "delete"
+        ]
+      },
+      "diagram": {
+        "maxTiles": 1
+      }
+    },
+    "defaultStamps": [],
+    "navTabs": {
+      "showNavPanel": false,
+      "lazyLoadTabContents": true,
+      "tabSpecs": [
+        {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [
+            {
+              "title": "Documents",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": [
+                "personal"
+              ],
+              "properties": [
+                "!isDeleted"
+              ],
+              "addDocument": true
+            }
+          ]
+        }
+      ]
+    },
+    "toolbar": [
+      {
+        "id": "Diagram",
+        "title": "Diagram",
+        "isTileTool": true
+      },
+      {
+        "id": "Text",
+        "title": "Text",
+        "isTileTool": true
+      },
+      {
+        "id": "Drawing",
+        "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
+      },
+      {
+        "id": "undo",
+        "title": "Undo",
+        "iconId": "icon-undo-tool",
+        "isTileTool": false
+      },
+      {
+        "id": "redo",
+        "title": "Redo",
+        "iconId": "icon-redo-tool",
+        "isTileTool": false
+      }
+    ]
+  },
+  "sections": {
+    "content": {
+      "initials": "",
+      "title": "Content",
+      "placeholder": ""
+    }
+  },
+  "investigations": [
+    {
+      "description": "M2Studio Investigation Description",
+      "ordinal": 1,
+      "title": "M2Studio Examples",
+      "problems": [
+        {
+          "description": "M2S Problem 1.1 Description",
+          "ordinal": 1,
+          "title": "Standard Document",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            "investigation-1/problem-1/content/content.json"
+          ],
+          "supports": []
+        },
+        {
+          "description": "M2S Problem 1.2 Description",
+          "ordinal": 2,
+          "title": "Dashboard Document",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            "investigation-1/problem-2/content/content.json"
+          ],
+          "config": {
+            "toolbar": []
+          },
+          "supports": []
+        }
+      ]
+    }
+  ]
+}

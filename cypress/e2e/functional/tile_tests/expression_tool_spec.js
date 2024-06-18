@@ -5,7 +5,7 @@ let clueCanvas = new ClueCanvas;
 let exp = new ExpressionToolTile;
 
 function beforeTest() {
-  const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example";
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
@@ -16,7 +16,7 @@ function beforeTest() {
 context('Expression Tool Tile', function () {
   it("Expression Tool", () => {
     beforeTest();
-    
+
     cy.log("renders expression tool tile");
     clueCanvas.addTile("expression");
     exp.getExpressionTile().should("exist");
@@ -28,7 +28,6 @@ context('Expression Tool Tile', function () {
     cy.log("should contain a default value as latex string");
     exp.getMathArea().should("exist");
     exp.getMathField().should("have.value", "a=\\pi r^2");
-    exp.getMathFieldLatex().should("eq", "a=\\pi r^2");
 
     cy.log("should render latex string as math characters");
     exp.getMathFieldMath().should("exist");
@@ -45,10 +44,17 @@ context('Expression Tool Tile', function () {
     cy.log("should accept basic keyboard input");
     // Can now perform keyboard input
     // but thus far cannot get sequences like {del} to work in test
-    exp.getMathField().eq(0).click({ force: true });
+    exp.getMathField().eq(0).dblclick({ force: true });
     exp.getMathField().eq(0).type("hi", { force: true });
-    exp.getMathField().eq(0).should("have.value", "hia=\\pi r^2");
+    exp.getMathField().eq(0).should("have.value", "hi");
     cy.wait(2000);
+
+    //Expression tile restore upon page reload
+    cy.wait(2000);
+    cy.reload();
+    cy.waitForLoad();
+    exp.getTileTitle().should("contain", "(new title)");
+    exp.getMathField().eq(0).should("have.value", "hi");
 
     cy.log("expression can be changed and re-renders");
     //  The below tests a change, but does not follow a genuine user path
@@ -92,6 +98,10 @@ context('Expression Tool Tile', function () {
     exp.getMathField().eq(0).click({ force: true });
     exp.getExpressionToolbar().eq(0).should("be.visible");
     exp.getExpressionToolbar().eq(1).should("not.be.visible");
+
+    cy.log("delete expression tiles");
+    clueCanvas.deleteTile("expression");
+    clueCanvas.deleteTile("expression");
 
     cy.log("delete expression button deletes the whole expression");
     exp.getMathField().eq(0).click({ force: true });

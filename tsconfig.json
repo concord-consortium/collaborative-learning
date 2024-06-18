@@ -23,7 +23,7 @@
       "react-modal-hook": ["node_modules/@concord-consortium/react-modal-hook/dist"],
       "mobx-state-tree": ["node_modules/@concord-consortium/mobx-state-tree/dist"]
     },
-    "types": ["w3c-web-serial"]
+    "types": ["w3c-web-serial", "gtag.js"]
   },
   "include": ["src/**/*"],
   "exclude": ["**/node_modules", "**/.*/"]

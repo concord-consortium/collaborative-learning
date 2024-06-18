@@ -10,6 +10,7 @@ import { TableToolbarContext } from "./table-toolbar-context";
 import { kGraphTileType } from "../../../plugins/graph/graph-defs";
 import { TileToolbarButton } from "../../toolbar/tile-toolbar-button";
 import { DataSetViewButton } from "../../toolbar/data-set-view-button";
+import { SharedDataSet } from "../../../models/shared/shared-data-set";
 
 import DeleteSelectedIcon from "../../../assets/icons/delete/delete-selection-icon.svg";
 import SetExpressionIcon from "../../../clue/assets/icons/table/set-expression-icon.svg";
@@ -59,7 +60,7 @@ export const LinkTableButton = observer(function LinkTableButton({name}: IToolba
   const hasLinkableRows = dataSet ? dataSet.attributes.length > 1 : false;
 
   const { isLinkEnabled, showLinkTileDialog } =
-    useConsumerTileLinking({ model, hasLinkableRows });
+    useConsumerTileLinking({ model, hasLinkableRows, shareType: SharedDataSet });
 
   const handleClick = (e: React.MouseEvent) => {
     isLinkEnabled && showLinkTileDialog();
@@ -84,7 +85,7 @@ export const LinkGraphButton = observer(function LinkGraphButton({name}: IToolba
   const hasLinkableRows = dataSet ? dataSet.attributes.length > 1 : false;
 
   const { isLinkEnabled, showLinkTileDialog }
-  = useConsumerTileLinking({ model, hasLinkableRows, onlyType: kGraphTileType });
+  = useConsumerTileLinking({ model, hasLinkableRows, shareType: SharedDataSet, tileType: kGraphTileType });
 
   const handleClick = (e: React.MouseEvent) => {
     showLinkTileDialog && showLinkTileDialog();
@@ -94,7 +95,7 @@ export const LinkGraphButton = observer(function LinkGraphButton({name}: IToolba
   return (
     <TileToolbarButton
       name={name}
-      title="View data as graph"
+      title="Graph It!"
       onClick={handleClick}
       disabled={!isLinkEnabled}
     >

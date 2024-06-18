@@ -15,14 +15,21 @@ import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-ev
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tiles/tile-content-info";
 import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
-import { getTileIdFromContent } from "../../../models/tiles/tile-model";
-import { tileContentAPIActions } from "../../../models/tiles/tile-model-hooks";
+import { tileContentAPIActions, tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
+import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { GroupObjectSnapshotForAdd, GroupObjectType, isGroupObject } from "../objects/group";
 
 export const DrawingToolMetadataModel = TileMetadataModel
   .named("DrawingToolMetadata");
 export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
 
+export enum OpenPaletteValues {
+  None = "none",
+  Vector = "vector",
+  StrokeColor = "stroke-color",
+  FillColor = "fill-color",
+  Stamp = "stamp",
+}
 export interface DrawingObjectMove {
   id: string,
   destination: {x: number, y: number}
@@ -46,17 +53,10 @@ export const DrawingContentModel = TileContentModel
   .volatile(self => ({
     metadata: undefined as DrawingToolMetadataModelType | undefined,
     selectedButton: "select",
-    selection: [] as string[]
+    selection: [] as string[],
+    openPallette: OpenPaletteValues.None as OpenPaletteValues,
   }))
   .views(self => ({
-    get annotatableObjects() {
-      const tileId = getTileIdFromContent(self) ?? "";
-      return self.objects.map(object => ({
-        objectId: object.id,
-        objectType: object.type,
-        tileId
-      }));
-    },
     get objectMap() {
       // TODO this will rebuild the map when any of the objects change
       // We could handle this more efficiently
@@ -125,6 +125,14 @@ export const DrawingContentModel = TileContentModel
       return self.selection.map((id) => self.objectMap[id]).filter((x)=>!!x) as DrawingObjectType[];
     }
   }))
+  .views(self => tileContentAPIViews({
+    get annotatableObjects(): IClueTileObject[] {
+      return self.objects.map(object => ({
+        objectId: object.id,
+        objectType: object.type,
+      }));
+    },
+  }))
   .actions(self => tileContentAPIActions({
     doPostCreate(metadata) {
       self.metadata = metadata as DrawingToolMetadataModelType;
@@ -133,7 +141,9 @@ export const DrawingContentModel = TileContentModel
       const tileId = self.metadata?.id ?? "";
       const {name: operation, ...change} = call;
       // Ignore actions that don't need to be logged
-      if (["setDisabledFeatures", "setDragPosition", "setDragBounds", "setSelectedButton"].includes(operation)) return;
+      const ignoredActions = ["setDisabledFeatures", "setDragPosition", "setDragBounds",
+        "setSelectedButton", "afterAttach"];
+      if (ignoredActions.includes(operation)) return;
 
       logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, { operation, change, tileId });
     }
@@ -153,6 +163,10 @@ export const DrawingContentModel = TileContentModel
 
     setSelectedStamp(stampIndex: number) {
       self.currentStampIndex = stampIndex;
+    },
+
+    setOpenPalette(pallette: OpenPaletteValues) {
+      self.openPallette = pallette;
     },
 
     addObject(object: DrawingObjectSnapshotForAdd, addAtBack=false) {

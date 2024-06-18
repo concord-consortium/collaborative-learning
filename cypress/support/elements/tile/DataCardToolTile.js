@@ -12,27 +12,27 @@ class DataCardToolTile {
     return this.getTile(tileIndex, workspaceClass).find(`.sort-select-input`);
   }
   getAttrs(tileIndex, workspaceClass) {
-    const nameSelector = ".attribute-name-value-pair .name";
+    const nameSelector = ".case-attribute .name-area";
     return this.getTile(tileIndex, workspaceClass).find(`${nameSelector}`);
   }
   getAttrName(tileIndex = 0, workspaceClass){
-    const nameSelector = ".attribute-name-value-pair .name";
+    const nameSelector = ".case-attribute .name-area";
     return this.getTile(tileIndex, workspaceClass).find(`${nameSelector}`);
   }
   getAttrValueCell(tileIndex = 0, workspaceClass){
-    const valueSelector = ".attribute-name-value-pair .value";
+    const valueSelector = ".case-attribute .value-area";
     return this.getTile(tileIndex, workspaceClass).find(`${valueSelector}`);
   }
   getAttrValue(tileIndex = 0, workspaceClass){
-    const valueSelector = ".attribute-name-value-pair .value input";
+    const valueSelector = ".case-attribute .value-area textarea";
     return this.getTile(tileIndex, workspaceClass).find(`${valueSelector}`);
   }
   getAttrValueInput(tileIndex = 0, workspaceClass){
-    const valueSelector = ".attribute-name-value-pair .value .value-input";
+    const valueSelector = ".case-attribute .value-area .value-input";
     return this.getTile(tileIndex, workspaceClass).find(`${valueSelector}`);
   }
   getDownshiftOptions(tileIndex = 0, workspaceClass){
-    const optionsSelector = ".downshift-dropdown ul li";
+    const optionsSelector = "ul.dropdown li";
     return this.getTile(tileIndex, workspaceClass).find(`${optionsSelector}`);
   }
   getSingleCardView(tileIndex = 0, workspaceClass){
@@ -74,10 +74,6 @@ class DataCardToolTile {
   getSortCardHeading(tileIndex = 0, workspaceClass){
     return this.getTile(tileIndex, workspaceClass).find(`.sortable .heading`);
   }
-  getSortCardCollapseToggle(tileIndex = 0, workspaceClass){
-    const selector = ".expand-toggle-area button.expand-toggle";
-    return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
-  }
   getSortCardAttributes(card = 0, tileIndex = 0, workspaceClass){
     return this.getSortCards(tileIndex, workspaceClass).eq(card).find(`.attribute`);
   }
@@ -97,33 +93,40 @@ class DataCardToolTile {
     return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
   }
   // Toolbar
-  getToolbarButton(buttonClass, tileIndex, workspaceClass) {
-    const selector = `.canvas-area .data-card-toolbar .${buttonClass}`;
+  getToolbarButton(buttonSelector, tileIndex, workspaceClass) {
+    const selector = `.canvas-area .data-card-toolbar ${buttonSelector}`;
     return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`).eq(tileIndex);
   }
   getDuplicateCardButton(tileIndex = 0, workspaceClass) {
-    return this.getToolbarButton('duplicate-data-card-button', tileIndex, workspaceClass);
+    return this.getToolbarButton('.duplicate-data-card-button', tileIndex, workspaceClass);
   }
   getLinkTileButton(tileIndex = 0, workspaceClass) {
-    return this.getToolbarButton('link-tile-button', tileIndex, workspaceClass);
+    return this.getToolbarButton('.link-tile-button', tileIndex, workspaceClass);
   }
   getLinkGraphButton(tileIndex = 0, workspaceClass) {
-    return this.getToolbarButton('link-graph-button', tileIndex, workspaceClass);
+    return this.getToolbarButton('.link-graph-button', tileIndex, workspaceClass);
   }
   getLinkGraphModalTileMenu() {
     const selector = ".ReactModalPortal .modal-content select[data-test=link-tile-select]";
-    return cy.get(`${selector}`).eq(0);
-  }
-  getLinkGraphModalCreateNewButton() {
-    const selector = ".ReactModalPortal .modal-footer button.add-new-button";
     return cy.get(`${selector}`).eq(0);
   }
   getLinkGraphModalLinkButton() {
     const selector = ".ReactModalPortal .modal-footer button.default";
     return cy.get(`${selector}`).eq(0);
   }
+  getGraphItButton(tileIndex = 0, workspaceClass) {
+    return this.getToolbarButton('[data-original-title=\"graph It!\"]', tileIndex, workspaceClass);
+  }
+  getGraphItModalTileMenu() {
+    const selector = ".ReactModalPortal .modal-content select[data-test=link-tile-select]";
+    return cy.get(`${selector}`).eq(0);
+  }
+  getGraphItModalGraphItButton() {
+    const selector = ".ReactModalPortal .modal-footer button.default";
+    return cy.get(`${selector}`).eq(0);
+  }
   getMergeDataButton(tileIndex = 0, workspaceClass) {
-    return this.getToolbarButton('merge-data-button', tileIndex, workspaceClass);
+    return this.getToolbarButton('.merge-data-button', tileIndex, workspaceClass);
   }
   getMergeDataModalSelect(tileIndex = 0){
     const selector = ".ReactModalPortal .modal-content .merge-data-select";
@@ -134,15 +137,35 @@ class DataCardToolTile {
     return cy.get(`${selector}`).eq(tileIndex);
   }
   getLinkTableButton(tileIndex = 0, workspaceClass) {
-    return this.getToolbarButton('dataset-view-button', tileIndex, workspaceClass);
+    return this.getToolbarButton('.dataset-view-button', tileIndex, workspaceClass);
   }
   getDragHandle(cardIndex, workspaceClass, tileIndex = 0) {
-    const selector = ".sort-area-grid .cell.stack .drag-handle svg";
+    const selector = ".sort-area-grid .stack .drag-handle";
     return this.getTile(tileIndex, workspaceClass).find(`${selector}`).eq(cardIndex);
   }
   getDropZone(cardIndex, workspaceClass, tileIndex = 0) {
-    const selector = ".sort-area-grid .cell.stack .stack-drop-zone.show-droppable";
+    const selector = ".sort-area-grid .stack .stack-drop-zone.show-droppable";
     return this.getTile(tileIndex, workspaceClass).find(`${selector}`).eq(cardIndex);
+  }
+  getSortStack(tileIndex = 0, stackIndex = 0) {
+    const selector = ".sort-area-grid .stack";
+    return this.getTile(tileIndex).find(`${selector}`).eq(stackIndex);
+  }
+  getSortStackToggle(tileIndex = 0, stackIndex = 0) {
+    const selector = ".sort-area-grid .stack-expand-toggle";
+    return this.getTile(tileIndex).find(`${selector}`).eq(stackIndex);
+  }
+  getSortStackNextButton(tileIndex = 0, stackIndex = 0) {
+    const selector = ".sort-area-grid .stack-nav-buttons .next";
+    return this.getTile(tileIndex).find(`${selector}`).eq(stackIndex);
+  }
+  getSortStackPreviousButton(tileIndex = 0, stackIndex = 0) {
+    const selector = ".sort-area-grid .stack-nav-buttons .previous";
+    return this.getTile(tileIndex).find(`${selector}`).eq(stackIndex);
+  }
+  getTileHeightHandle(tileIndex = 0, workspaceClass) {
+    const selector = ".tool-tile-resize-handle";
+    return this.getTile(tileIndex, workspaceClass).find(`${selector}`);
   }
   dragCardToStack(dragCard, dropStack) {
     this.getDragHandle(dragCard).click()

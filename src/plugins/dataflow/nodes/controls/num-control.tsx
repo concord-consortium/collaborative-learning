@@ -1,153 +1,135 @@
-// FIXME: ESLint is unhappy with these control components
-/* eslint-disable react-hooks/rules-of-hooks */
-import React, { useRef } from "react";
-import Rete, { NodeEditor, Node, Control } from "rete";
+import React, { useCallback, useRef, useState } from "react";
+import { ClassicPreset } from "rete";
+import { observer } from "mobx-react";
 import { useStopEventPropagation } from "./custom-hooks";
-import { NodePeriodUnits } from "../../model/utilities/node";
-import { dataflowLogEvent } from "../../dataflow-logger";
-import "./num-control.sass";
+import { IBaseNode } from "../base-node";
 
-// cf. https://codesandbox.io/s/retejs-react-render-t899c
-export class NumControl extends Rete.Control {
-  private emitter: NodeEditor;
-  private component: any;
-  private props: any;
-  private min: number | null;
-  constructor(emitter: NodeEditor,
-              key: string,
-              node: Node,
-              readonly = false,
-              label = "",
-              initVal = 0,
-              minVal: number | null = null,
-              units: string[] | null = null,
-              tooltip = "") {
-    super(key);
-    this.emitter = emitter;
-    this.key = key;
-    const handleChange = (onChange: any) => {
-      return (e: any) => { onChange(e.target.value); };
-    };
-    const handleBlur = (onBlur: any) => {
-      return (e: any) => { onBlur(e.target.value); };
-    };
-    const handleKeyPress = (e: any) => {
-      if (e.key === "Enter") {
-        e.currentTarget.blur();
-      }
-    };
-    const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-      this.props.currentUnits = event.target.value;
-      this.putData(this.key + "Units", this.props.currentUnits);
-      const pUnits = NodePeriodUnits.find((u: any) => u.unit === this.props.currentUnits);
-      const pUnitsInSecs = pUnits ? pUnits.lengthInSeconds : 1;
-      this.putData(this.key, this.props.value * pUnitsInSecs);
-      (this as any).update();
-      this.emitter.trigger("process");
+// This generics design isn't very user friendly if a caller
+// tries to construct the NumberControl with a key that doesn't
+// exist on the model the error message just complains about all properties
+// on the model not being numbers.
+// A better approach might be to get rid of the:
+//   ModelType extends Record<Key, number>
+// and instead add the following constraint to the key in the
+// the constructor:
+//   key: Key & (ModelType[Key] extends number ? Key : never)
+export class NumberControl<
+  ModelType extends Record<Key, number> & Record<`set${Capitalize<Key>}`, (val: number) => void>,
+  NodeType extends { model: ModelType } & IBaseNode,
+  Key extends keyof NodeType['model'] & string
+>
+  extends ClassicPreset.Control
+  implements INumberControl
+{
+  setter: (val: number) => void;
 
-      const n = this.getNode();
-      dataflowLogEvent("unitdropdownselection", this as Control, n.meta.inTileWithId as string);
-    };
-    this.component = (compProps: { readonly: any,
-                                   value: any;
-                                   inputValue: any;
-                                   onChange: any;
-                                   onBlur: any;
-                                   label: string;
-                                   currentUnits: string;
-                                   units: string[] | null,
-                                   tooltip: string}) => {
-      const inputRef = useRef<HTMLInputElement>(null);
-      useStopEventPropagation(inputRef, "pointerdown");
-      return (
-        <div className="number-container" title={compProps.tooltip}>
-          { label
-            ? <label className="number-label">{compProps.label}</label>
-            : null
-          }
-          <input className={`number-input ${compProps.units && compProps.units.length ? "units" : ""}`}
-            ref={inputRef}
-            type={"text"}
-            value={compProps.inputValue}
-            onKeyPress={handleKeyPress}
-            onChange={handleChange(compProps.onChange)}
-            onBlur={handleBlur(compProps.onBlur)}
-          />
-          { compProps.units?.length
-            ? <div className="type-options-back">
-                <div className="type-options">
-                  <select onChange={handleSelectChange}
-                    value={compProps.currentUnits}
-                  >
-                    { compProps.units.map((unit, index) => (
-                        <option key={index} value={unit}>{unit}</option>
-                      ))
-                    }
-                  </select>
-                </div>
-              </div>
-            : null
-          }
-        </div>
-      );
-    };
+  // TODO: switch this to a set of options to make it more clear
+  constructor(
+    public node: NodeType,
+    public modelKey: Key,
 
-    const unitsKey = key + "Units";
-    const initialUnits = node.data[unitsKey] || (units?.length ? units[0] : "");
-    node.data[unitsKey] = initialUnits;
-    const periodUnits = NodePeriodUnits.find((u: any) => u.unit === initialUnits);
-    const periodUnitsInSeconds = periodUnits ? periodUnits.lengthInSeconds : 1;
-    this.min = minVal;
-    const initial = Number(node.data[key] || initVal);
-    node.data[key] = initial;
+    public label = "",
+    public minVal: number | null = null,
+    public tooltip = "",
+    public units = ""
+  ) {
+    super();
+    const setterProp = "set" + modelKey.charAt(0).toUpperCase() + modelKey.slice(1) as `set${Capitalize<Key>}`;
 
-    this.props = {
-      readonly,
-      value: initial / periodUnitsInSeconds,
-      inputValue: initial / periodUnitsInSeconds,
-      onChange: (v: any) => {
-        this.setInputValue(v);
-      },
-      onBlur: (v: any) => {
-        if (isFinite(v)) {
-          this.setValue(Number(v));
-          this.emitter.trigger("process");
-          const n = this.getNode();
-          dataflowLogEvent("numberinputmanualentry", this as Control, n.meta.inTileWithId as string);
-        } else {
-          this.restoreValue();
-        }
-      },
-      label,
-      currentUnits: initialUnits,
-      units,
-      tooltip
-    };
+    // The typing above using `set${Capitalize<Key>}` almost works, but it fails here
+    // I'm pretty sure there is a way to make it work without having to use the "as any" here
+    this.setter = this.model[setterProp] as any;
   }
 
-  public setInputValue = (val: string) => {
-    this.props.inputValue = val;
-    (this as any).update();
-  };
+  public get model() {
+    return this.node.model;
+  }
 
-  public setValue = (val: number) => {
-    if (this.min && val < this.min) {
-      val = this.min;
+  public setValue(val: number) {
+    if ((this.minVal != null) && val < this.minVal) {
+      val = this.minVal;
     }
-    this.props.inputValue = val;
-    this.props.value = val;
-    const periodUnits = NodePeriodUnits.find((u: any) => u.unit === this.props.currentUnits);
-    const periodUnitsInSeconds = periodUnits ? periodUnits.lengthInSeconds : 1;
-    this.putData(this.key, val * periodUnitsInSeconds);
-    (this as any).update();
-  };
 
-  public restoreValue = () => {
-    this.setInputValue(this.props.value);
-  };
+    this.setter(val);
 
-  public getValue = () => {
-    return this.props.value;
-  };
+    this.node.logControlEvent("numberinputmanualentry", "nodenumber", this.modelKey, val);
+  }
+
+  public getValue() {
+    return this.model[this.modelKey];
+  }
 }
-/* eslint-enable */
+
+// A separate interface is required, otherwise the generic stuff above
+// means we can't configure Rete's type system with this control
+export interface INumberControl {
+  id: string;
+  node: IBaseNode;
+  setValue(val: number): void;
+  getValue(): number;
+  label: string;
+  tooltip: string;
+  units: string;
+}
+
+export const NumberControlComponent: React.FC<{ data: INumberControl }> = observer(
+  function NumberControlComponent(props)
+{
+  const control = props.data;
+
+  // FIXME: the type of inputValue is flipping between a number and a string
+  const [inputValue, setInputValue] = useState(control.getValue());
+
+  const handleChange = useCallback((e: any) => {
+    setInputValue(e.target.value);
+  }, []);
+
+  const handleBlur = useCallback((e: any) => {
+    const v = e.target.value;
+    if (isFinite(v)) {
+      const newValue = Number(v);
+      control.setValue(newValue);
+      // If the new value string is 01 this will update to 1
+      setInputValue(newValue);
+    } else {
+      // Restore the value to the one currently stored in the control
+      setInputValue(control.getValue());
+    }
+  }, [control]);
+
+  const handleKeyPress = useCallback((e: any) => {
+    if (e.key === "Enter") {
+      e.currentTarget.blur();
+    }
+  }, []);
+
+  // FIXME: in readOnly mode there is a lot of stuff in this component that is
+  // extraneous. A layer is put on top of dataflow that prevents interactions
+  // with the nodes. It would be better to make this more clear somehow.
+  const possiblyReadOnlyInputValue = control.node.readOnly ? control.getValue() : inputValue;
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  useStopEventPropagation(inputRef, "pointerdown");
+  useStopEventPropagation(inputRef, "dblclick");
+
+  const unitsClass = control.units ? "units one" : "";
+  return (
+    <div className={`number-container ${unitsClass}`} title={control.tooltip}>
+      { control.label
+        ? <label className="number-label">{control.label}</label>
+        : null
+      }
+      <input className={`number-input`}
+        ref={inputRef}
+        type={"text"}
+        value={possiblyReadOnlyInputValue}
+        onKeyPress={handleKeyPress}
+        onChange={handleChange}
+        onBlur={handleBlur}
+      />
+      { control.units &&
+        <div className="single-unit">{control.units}</div>
+      }
+    </div>
+  );
+});

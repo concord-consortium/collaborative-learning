@@ -1,16 +1,17 @@
+import classNames from "classnames";
 import { observer } from "mobx-react";
 import React from "react";
-import { useGraphModelContext } from "../../models/graph-model";
+
+import { useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import AddSeriesIcon from "../../imports/assets/add-series-icon.svg";
 
 export const AddSeriesButton = observer(function AddSeriesButton() {
-  const graphModel = useGraphModelContext();
-  const dataConfiguration = graphModel.config;
+  const dataConfiguration = useDataConfigurationContext();
 
   function findUnplottedAttribute() {
     // Find first attribute in the dataset that is not shown in the graph
     // Returns undefined if there are none left.
-    if (!graphModel || !dataConfiguration?.dataset) return;
+    if (!dataConfiguration?.dataset) return;
     const datasetAttributes = dataConfiguration.dataset.attributes;
     const xAttributeId = dataConfiguration._attributeDescriptions.get('x')?.attributeID;
     const yAttributeIds = dataConfiguration.yAttributeDescriptions.map((a)=>a.attributeID);
@@ -19,21 +20,23 @@ export const AddSeriesButton = observer(function AddSeriesButton() {
 
   function handleClick() {
     const first = findUnplottedAttribute();
-    if (first && dataConfiguration.dataset) {
-      graphModel.setAttributeID("yPlus", dataConfiguration.dataset.id, first.id);
+    if (first && dataConfiguration?.dataset) {
+      dataConfiguration.addYAttribute({attributeID: first.id});
     }
   }
 
-  if (findUnplottedAttribute()) {
-    return (
-      <button onClick={handleClick} className="add-series-button">
+  const disabled = !findUnplottedAttribute();
+  const classes = classNames("add-series-button", { disabled });
+  return (
+    <button disabled={disabled} onClick={handleClick} className={classes}>
+      <div className="legend-icon">
         <AddSeriesIcon/>
-        Add Series
-      </button>
-    );
-  } else {
-    return null;
-  }
+      </div>
+      <div className="add-series-label">
+        Add series
+      </div>
+    </button>
+  );
 });
 
 

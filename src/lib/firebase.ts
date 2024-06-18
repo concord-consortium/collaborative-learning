@@ -7,6 +7,7 @@ import { UserModelType } from "../models/stores/user";
 import { DB } from "./db";
 import { escapeKey } from "./fire-utils";
 import { urlParams } from "../utilities/url-params";
+import { DocumentModelType } from "src/models/document/document";
 
 // Set this during database testing in combination with the urlParam testMigration=true to
 // override the top-level Firebase key regardless of mode. For example, setting this to "authed-copy"
@@ -107,6 +108,18 @@ export class Firebase {
     return `${this.getClassPath(user)}/users/${userId || user.id}`;
   }
 
+  public getUserExemplarsPath(user: UserModelType) {
+    return `${this.getUserPath(user)}/exemplars`;
+  }
+
+  public getExemplarDataPath(user: UserModelType, exemplarId: string) {
+    return `${this.getUserExemplarsPath(user)}/${exemplarId}`;
+  }
+
+  public getExemplarStatePath(user: UserModelType) {
+    return `${this.getUserExemplarsPath(user)}/state`;
+  }
+
   // Published learning logs metadata
   public getLearningLogPublicationsPath(user: UserModelType) {
     return `${this.getClassPath(user)}/publications`;
@@ -123,12 +136,26 @@ export class Firebase {
     return `${this.getUserPath(user, userId)}/documents${suffix}`;
   }
 
+  public getDocumentPath(document: DocumentModelType, user: UserModelType) {
+    if (document.isRemote) {
+      return `classes/${document.remoteContext}/users/${document.uid}/documents/${document.key}`;
+    } else {
+      return this.getUserDocumentPath(user, document.key, document.uid);
+    }
+  }
+
+  public getFullDocumentPath(document: DocumentModelType, user: UserModelType) {
+    return this.getFullPath(this.getDocumentPath(document, user));
+  }
+
   // convenience function which returns all of the relevant paths for a given document
   public getUserDocumentPaths(user: UserModelType, documentType: string, documentKey: string, userId?: string) {
     const content = this.getUserDocumentPath(user, documentKey, userId);
     const metadata = this.getUserDocumentMetadataPath(user, documentKey, userId);
     const typedMetadataMap: Record<string, () => string> = {
-      [ProblemDocument]: () => this.getProblemDocumentPath(user, documentKey, userId),
+      [ProblemDocument]: () => {
+        return this.getProblemDocumentPath(user, documentKey, userId);
+      },
       [PlanningDocument]: () => this.getPlanningDocumentPath(user, documentKey, userId),
       [PersonalDocument]: () => this.getOtherDocumentPath(user, PersonalDocument, documentKey),
       [LearningLogDocument]: () => this.getOtherDocumentPath(user, LearningLogDocument, documentKey),
@@ -191,6 +218,10 @@ export class Firebase {
 
   public getOfferingUsersPath(user: UserModelType) {
     return `${this.getOfferingPath(user)}/users`;
+  }
+
+  public getPersistentUIPath(user: UserModelType){
+    return `${this.getOfferingUserPath(user)}/persistentUI`;
   }
 
   // the path to the user folder for a particular problem (assignment)

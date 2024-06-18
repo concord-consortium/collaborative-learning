@@ -6,15 +6,17 @@ import { DEBUG_DROP } from "../../lib/debug";
 import { DocumentContentModelWithAnnotations } from "./document-content-with-annotations";
 
 /**
- * This is one part of the DocumentContentModel. The other part is
- * BaseDocumentContentModel. It was split out to reduce the size of the
- * DocumentContentModel.
+ * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
+ * - BaseDocumentContentModel
+ * - DocumentContentModelWithAnnotations
+ * - DocumentContentModelWithTileDragging
+ * - DocumentContentModel
  *
  * This file should contain the any properties, views, and actions that are
  * related to dragging and dropping tiles.
  *
- * TODO: move tile dropping actions from BaseDocumentContentModel here TODO:
- * consider extending this to include tile copying since that is fundamental
+ * TODO: move tile dropping actions from BaseDocumentContentModel here
+ * TODO: consider extending this to include tile copying since that is fundamental
  * part of dragging and dropping.
  */
 export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnnotations

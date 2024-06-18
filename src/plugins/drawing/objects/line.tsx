@@ -2,10 +2,9 @@ import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { SelectionBox } from "../components/selection-box";
-import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer,
-  IToolbarButtonProps, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
+import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps,
+   IDrawingLayer, ObjectTypeIconViewBox, StrokedObject, typeField } from "./drawing-object";
 import { BoundingBoxSides, Point } from "../model/drawing-basic-types";
-import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
 import FreehandToolIcon from "../assets/freehand-icon.svg";
 
 function* pointIterator(line: LineObjectType): Generator<Point, string, unknown> {
@@ -196,7 +195,3 @@ export class LineDrawingTool extends DrawingTool {
   }
 }
 
-export function LineToolbarButton({toolbarManager}: IToolbarButtonProps) {
-  return <SvgToolModeButton modalButton="line"
-    title="Freehand" toolbarManager={toolbarManager} SvgIcon={FreehandToolIcon} />;
-}

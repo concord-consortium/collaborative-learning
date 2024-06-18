@@ -5,7 +5,7 @@ import { ToolbarButtonModel } from "../models/tiles/toolbar-button";
 import { ToolbarButtonComponent } from "./toolbar-button";
 
 // This is needed so the icon for the text tool can be found
-import "../register-tile-types";
+import "../models/tiles/text/text-registration";
 
 describe("ToolButtonComponent", () => {
 
@@ -55,10 +55,10 @@ describe("ToolButtonComponent", () => {
   it("renders enabled text tool", () => {
     const toolButton = ToolbarButtonModel.create({
       id: "Text",
-      title: "Text",
       isDefault: false,
       isTileTool: true
     });
+    toolButton.initialize();
 
     render(
       <ToolbarButtonComponent
@@ -72,7 +72,9 @@ describe("ToolButtonComponent", () => {
         onHideDropHighlight={onHideDropHighlight}
         />
     );
-    expect(screen.getByTestId("tool-text")).toBeInTheDocument();
+    const element = screen.getByTestId("tool-text");
+    expect(element).toBeInTheDocument();
+    expect(element).toHaveAttribute("title", "Text");
     act(() => {
       userEvent.click(screen.getByTestId("tool-text"));
     });

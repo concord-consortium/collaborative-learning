@@ -14,10 +14,12 @@ import { Logger } from "../lib/logger";
 import { LogEventName } from "../lib/logger-types";
 import { uniqueId } from "../utilities/js-utils";
 import { getUnitCodeFromUnitParam } from "../utilities/url-utils";
+import { convertURLToOAuth2, getBearerToken } from "../utilities/auth-utils";
+import { ICurriculumConfig } from "src/models/stores/curriculum-config";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
-export const FIREBASE_JWT_QUERY = "?firebase_app=collaborative-learning";
+export const FIREBASE_APP_NAME = "collaborative-learning";
 
 export const DEV_STUDENT: StudentUser = {
   type: "student",
@@ -106,7 +108,9 @@ export const getAppMode = (appModeParam?: AppMode, token?: string, host?: string
 
 export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string, rawToken: string) => {
   return new Promise<[string, PortalJWT]>((resolve, reject) => {
-    const url = `${basePortalUrl}${PORTAL_JWT_URL_SUFFIX}`;
+    const resourceLinkIdSuffix =
+      pageUrlParams.resourceLinkId ? `?resource_link_id=${ pageUrlParams.resourceLinkId }` : "";
+    const url = `${basePortalUrl}${PORTAL_JWT_URL_SUFFIX}${resourceLinkIdSuffix}`;
     superagent
       .get(url)
       .set("Authorization", `${type} ${rawToken}`)
@@ -129,7 +133,17 @@ export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string,
 };
 
 export const getFirebaseJWTParams = (classHash?: string) => {
-  return `${FIREBASE_JWT_QUERY}${classHash ? `&class_hash=${classHash}` : ""}`;
+  const params: Record<string,string> = {
+    firebase_app: FIREBASE_APP_NAME
+  };
+  if (classHash) {
+    params.class_hash = classHash;
+  }
+  if (pageUrlParams.resourceLinkId) {
+    params.resource_link_id = pageUrlParams.resourceLinkId;
+  }
+
+  return `?${(new URLSearchParams(params)).toString()}`;
 };
 
 export const getFirebaseJWTWithBearerToken = (basePortalUrl: string, type: string,
@@ -226,168 +240,174 @@ export const getClassInfo = (params: GetClassInfoParams) => {
   });
 };
 
-export const authenticate = (appMode: AppMode, appConfig: AppConfigModelType, urlParams?: QueryParams) => {
-  interface IAuthenticateResponse {
-    appMode?: AppMode;
-    authenticatedUser: AuthenticatedUser;
-    classInfo?: ClassInfo;
-    problemId?: string;
-    unitCode?: string;
+interface IAuthenticateResponse {
+  appMode?: AppMode;
+  authenticatedUser: AuthenticatedUser;
+  classInfo?: ClassInfo;
+  problemId?: string;
+  unitCode?: string;
+}
+
+export const authenticate = async (
+    appMode: AppMode,
+    appConfig: AppConfigModelType,
+    curriculumConfig: ICurriculumConfig,
+    urlParams?: QueryParams): Promise<IAuthenticateResponse> => {
+  urlParams = urlParams || pageUrlParams;
+  // TODO: we should be defaulting to appConfig.defaultUnit here rather than the empty string,
+  // but some cypress tests rely on the fact that in demo mode the offeringId is prefixed with
+  // the unit code, which results in an offeringId of `101` instead of `sas101`.
+  const unitCode = urlParams.unit || "";
+  // when launched as a report, the params will not contain the problemOrdinal
+  const problemOrdinal = urlParams.problem || appConfig.defaultProblemOrdinal;
+  const bearerToken = getBearerToken(urlParams);
+  let basePortalUrl: string;
+
+  let {fakeClass, fakeUser} = urlParams;
+  // handle preview launch from portal
+  if (urlParams.domain && urlParams.domain_uid && !bearerToken) {
+    appMode = "demo";
+    fakeClass = `preview-${urlParams.domain_uid}`;
+    fakeUser = `student:${urlParams.domain_uid}`;
   }
-  return new Promise<IAuthenticateResponse>((resolve, reject) => {
-    urlParams = urlParams || pageUrlParams;
-    // TODO: we should be defaulting to appConfig.defaultUnit here rather than the empty string,
-    // but some cypress tests rely on the fact that in demo mode the offeringId is prefixed with
-    // the unit code, which results in an offeringId of `101` instead of `sas101`.
-    const unitCode = urlParams.unit || "";
-    // when launched as a report, the params will not contain the problemOrdinal
-    const problemOrdinal = urlParams.problem || appConfig.defaultProblemOrdinal;
-    const bearerToken = urlParams.token;
-    let basePortalUrl: string;
 
-    let {fakeClass, fakeUser} = urlParams;
-    // handle preview launch from portal
-    if (urlParams.domain && urlParams.domain_uid && !bearerToken) {
-      appMode = "demo";
-      fakeClass = `preview-${urlParams.domain_uid}`;
-      fakeUser = `student:${urlParams.domain_uid}`;
+  if ((appMode === "demo") || (appMode === "qa")) {
+    if (!fakeClass || !fakeUser) {
+      throw "Missing fakeClass or fakeUser parameter for demo!";
+    }
+    let [userType, userId] = fakeUser.split(":");
+
+    if (((userType !== "student") && (userType !== "teacher")) || !userId) {
+      throw "fakeUser must be in the form of student:<id> or teacher:<id>";
     }
 
-    if ((appMode === "demo") || (appMode === "qa")) {
-      if (!fakeClass || !fakeUser) {
-        return reject("Missing fakeClass or fakeUser parameter for demo!");
-      }
-      let [userType, userId] = fakeUser.split(":");
-
-      if (((userType !== "student") && (userType !== "teacher")) || !userId) {
-        return reject("fakeUser must be in the form of student:<id> or teacher:<id>");
-      }
-
-      if ((userId === "random")) {
-        const url = window.location.toString();
-        const title = document.title;
-        const randomStudentId = uniqueId();
-        fakeUser = `student:${randomStudentId}`;
-        userId = randomStudentId;
-        const newUrl = url.replace(/student:random/, fakeUser);
-        window.history.replaceState(title, title, newUrl);
-      }
-
-      // respect `network` url parameter in demo/qa modes
-      const networkProps = urlParams.network
-                            ? { network: urlParams.network, networks: [urlParams.network] }
-                            : undefined;
-      return resolve({
-              appMode,
-              ...createFakeAuthentication({
-                  appMode,
-                  classId: fakeClass,
-                  userType, userId,
-                  ...networkProps,
-                  unitCode,
-                  problemOrdinal
-                })
-            });
+    if ((userId === "random")) {
+      const url = window.location.toString();
+      const title = document.title;
+      const randomStudentId = uniqueId();
+      fakeUser = `student:${randomStudentId}`;
+      userId = randomStudentId;
+      const newUrl = url.replace(/student:random/, fakeUser);
+      window.history.replaceState(title, title, newUrl);
     }
 
-    if (appMode !== "authed") {
-      return resolve(generateDevAuthentication(unitCode || appConfig.defaultUnit, problemOrdinal));
-    }
-
-    if (!bearerToken) {
-      return reject("No token provided for authentication (must launch from Portal)");
-    }
-
-    if (urlParams.reportType) {
-      if (urlParams.reportType !== "offering") {
-        return reject("Sorry, only external reports at the offering level are supported");
-      }
-      if (!urlParams.class) {
-        return reject("Missing class parameter!");
-      }
-      if (!urlParams.offering) {
-        return reject("Missing offering parameter!");
-      }
-      const {protocol, host} = parseUrl(urlParams.class);
-      basePortalUrl = `${protocol}//${host}/`;
-    }
-    else if (urlParams.domain) {
-      basePortalUrl = urlParams.domain;
-    }
-    else {
-      return reject("Missing domain query parameter!");
-    }
-
-    return getPortalJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken)
-      .then(([rawPortalJWT, portalJWT]) => {
-        if (!((portalJWT.user_type === "learner") || (portalJWT.user_type === "teacher"))) {
-          throw new Error("Only student and teacher logins are currently supported!");
-        }
-
-        const portal = parseUrl(basePortalUrl).host;
-        let classInfoUrl: string | undefined;
-        let offeringId: string | undefined;
-
-        if (portalJWT.user_type === "learner") {
-          classInfoUrl = portalJWT.class_info_url;
-          offeringId = `${portalJWT.offering_id}`;
-        }
-        else if (urlParams && urlParams.class && urlParams.offering) {
-          classInfoUrl = urlParams.class;
-          offeringId = urlParams.offering.split("/").pop() as string;
-        }
-
-        if (!classInfoUrl || !offeringId) {
-          throw new Error("Unable to get classInfoUrl or offeringId");
-        }
-
-        return getClassInfo({classInfoUrl, rawPortalJWT, portal, offeringId})
-          .then((classInfo) => {
-            const { user_type, uid, domain } = portalJWT;
-            const { classHash } = classInfo;
-            const uidAsString = `${portalJWT.uid}`;
-            const firebaseJWTPromise = getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classHash);
-            const portalOfferingsPromise = getPortalOfferings(user_type, uid, domain, rawPortalJWT);
-            const problemIdPromise = getProblemIdForAuthenticatedUser(rawPortalJWT, appConfig, urlParams);
-            Promise
-              .all([firebaseJWTPromise, portalOfferingsPromise, problemIdPromise])
-              .then(([firebaseJWTResult, portalOfferingsResult, problemIdResult]) => {
-                const [rawFirebaseJWT, firebaseJWT] = firebaseJWTResult;
-                const { unitCode: newUnitCode, problemOrdinal: newProblemOrdinal } = problemIdResult;
-
-                const authenticatedUser = user_type === "learner"
-                                            ? classInfo.students.find(student => student.id === uidAsString)
-                                            : classInfo.teachers.find(teacher => teacher.id === uidAsString);
-                if (!authenticatedUser) {
-                  throw new Error("Current user not found in class roster");
-                }
-
-                authenticatedUser.portalJWT = portalJWT;
-                authenticatedUser.rawPortalJWT = rawPortalJWT;
-                authenticatedUser.firebaseJWT = firebaseJWT;
-                authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
-                authenticatedUser.id = uidAsString;
-                authenticatedUser.portal = portal;
-                authenticatedUser.portalClassOfferings =
-                  getPortalClassOfferings(portalOfferingsResult, appConfig, urlParams);
-
-                Logger.log(LogEventName.INTERNAL_AUTHENTICATED, {id: authenticatedUser.id, portal});
-                resolve({
-                  authenticatedUser,
-                  classInfo,
-                  unitCode: newUnitCode,
-                  problemId: newProblemOrdinal
-                });
-              });
+    // respect `network` url parameter in demo/qa modes
+    const networkProps = urlParams.network
+                          ? { network: urlParams.network, networks: [urlParams.network] }
+                          : undefined;
+    const fakeOfferingId = createFakeOfferingIdFromProblem(unitCode, problemOrdinal);
+    return {
+      appMode,
+      ...createFakeAuthentication({
+          appMode,
+          classId: fakeClass,
+          userType, userId,
+          ...networkProps,
+          offeringId: fakeOfferingId
         })
-        .catch(reject);
-    })
-    .catch(reject);
-  });
+    };
+  }
+
+  if (appMode !== "authed") {
+    return generateDevAuthentication(unitCode || curriculumConfig.defaultUnit || "", problemOrdinal);
+  }
+
+  if (!bearerToken) {
+    throw "No token provided for authentication (must launch from Portal)";
+  }
+
+  if (urlParams.reportType) {
+    if (urlParams.reportType !== "offering") {
+      throw "Sorry, only external reports at the offering level are supported";
+    }
+    if (!urlParams.class) {
+      throw "Missing class parameter!";
+    }
+    if (!urlParams.offering) {
+      throw "Missing offering parameter!";
+    }
+    const {protocol, host} = parseUrl(urlParams.class);
+    basePortalUrl = `${protocol}//${host}/`;
+  }
+  else if (urlParams.domain) {
+    basePortalUrl = urlParams.domain;
+  }
+  else {
+    throw "Missing domain query parameter!";
+  }
+
+  const [rawPortalJWT, portalJWT] = await getPortalJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken);
+
+  if (!((portalJWT.user_type === "learner") || (portalJWT.user_type === "teacher"))) {
+    throw new Error(`Only student and teacher logins are currently supported! ` +
+      `Unsupported type: ${portalJWT.user_type}`);
+  }
+
+  const portal = parseUrl(basePortalUrl).host;
+  let classInfoUrl: string | undefined;
+  let offeringId: string | undefined;
+
+  if (portalJWT.user_type === "learner") {
+    classInfoUrl = portalJWT.class_info_url;
+    offeringId = `${portalJWT.offering_id}`;
+  }
+  else if (urlParams && urlParams.class && urlParams.offering) {
+    classInfoUrl = urlParams.class;
+    offeringId = urlParams.offering.split("/").pop() as string;
+  }
+
+  if (!classInfoUrl || !offeringId) {
+    throw new Error("Unable to get classInfoUrl or offeringId");
+  }
+
+  // Re-Write the URL with OAuth2 parameters
+  const oAuth2Url = convertURLToOAuth2(window.location.href, basePortalUrl, offeringId);
+  if (oAuth2Url) {
+    window.history.replaceState(null, "CLUE", oAuth2Url.toString());
+  }
+
+  const classInfo = await getClassInfo({classInfoUrl, rawPortalJWT, portal, offeringId});
+  const { user_type, uid, domain } = portalJWT;
+  const { classHash } = classInfo;
+  const uidAsString = `${portalJWT.uid}`;
+  const firebaseJWTPromise = getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classHash);
+  const portalOfferingsPromise = getPortalOfferings(user_type, uid, domain, rawPortalJWT);
+  const problemIdPromise = getProblemIdForAuthenticatedUser(rawPortalJWT, curriculumConfig, urlParams);
+
+  const [firebaseJWTResult, portalOfferingsResult, problemIdResult] =
+    await Promise.all([firebaseJWTPromise, portalOfferingsPromise, problemIdPromise]);
+
+  const [rawFirebaseJWT, firebaseJWT] = firebaseJWTResult;
+  const { unitCode: newUnitCode, problemOrdinal: newProblemOrdinal } = problemIdResult;
+
+  const authenticatedUser = user_type === "learner"
+                              ? classInfo.students.find(student => student.id === uidAsString)
+                              : classInfo.teachers.find(teacher => teacher.id === uidAsString);
+  if (!authenticatedUser) {
+    throw new Error("Current user not found in class roster");
+  }
+
+  authenticatedUser.portalJWT = portalJWT;
+  authenticatedUser.rawPortalJWT = rawPortalJWT;
+  authenticatedUser.firebaseJWT = firebaseJWT;
+  authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
+  authenticatedUser.id = uidAsString;
+  authenticatedUser.portal = portal;
+  authenticatedUser.portalClassOfferings =
+    getPortalClassOfferings(portalOfferingsResult, appConfig, curriculumConfig, urlParams);
+
+  Logger.log(LogEventName.INTERNAL_AUTHENTICATED, {id: authenticatedUser.id, portal});
+
+  return {
+    authenticatedUser,
+    classInfo,
+    unitCode: newUnitCode,
+    problemId: newProblemOrdinal
+  };
 };
 
 export const generateDevAuthentication = (unitCode: string, problemOrdinal: string) => {
-  const offeringId = createOfferingIdFromProblem(unitCode, problemOrdinal);
+  const offeringId = createFakeOfferingIdFromProblem(unitCode, problemOrdinal);
   DEV_STUDENT.offeringId = offeringId;
   DEV_CLASS_INFO.students.forEach((student) => student.offeringId = offeringId);
   DEV_CLASS_INFO.teachers.forEach((teacher) => teacher.offeringId = offeringId);
@@ -415,11 +435,12 @@ export const generateDevAuthentication = (unitCode: string, problemOrdinal: stri
   return {authenticatedUser, classInfo: DEV_CLASS_INFO};
 };
 
-const createOfferingIdFromProblem = (unitParam: string, problemOrdinal: string) => {
+export const createFakeOfferingIdFromProblem = (unitParam: string, problemOrdinal: string) => {
   // create fake offeringIds per problem so we keep section documents separate
   const [major, minor] = problemOrdinal.split(".");
   const toNumber = (s: string, fallback: number) => isNaN(parseInt(s, 10)) ? fallback : parseInt(s, 10);
-  // TODO: Get the unit code from the loaded unit data?
+  // Ideally we'd get the unit code from the loaded unit data, but we don't have the unit data
+  // yet, and it would complicate things to wait for it to load.
   const offeringPrefix = getUnitCodeFromUnitParam(unitParam);
   return `${offeringPrefix}${(toNumber(major, 1) * 100) + toNumber(minor, 0)}`;
 };
@@ -501,16 +522,14 @@ export interface CreateFakeAuthenticationOptions {
   userType: UserType;
   userId: string;
   network?: string;
-  unitCode: string;
-  problemOrdinal: string;
+  offeringId: string;
 }
 
 export const createFakeAuthentication = (options: CreateFakeAuthenticationOptions) => {
-  const {appMode, classId, userType, userId, network: _network, unitCode, problemOrdinal} = options;
+  const {appMode, classId, userType, userId, network: _network, offeringId} = options;
   const network = userType === "teacher"
                     ? _network || (parseInt(userId, 10) > 1 ? "demo-network" : undefined) || undefined
                     : undefined;
-  const offeringId = createOfferingIdFromProblem(unitCode, problemOrdinal);
   const authenticatedUser = createFakeUser({appMode, classId, userType, network, userId, offeringId});
   const classInfo: ClassInfo = {
     name: authenticatedUser.className,

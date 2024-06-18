@@ -4,7 +4,6 @@ import { DB } from "../db";
 import { DBOfferingUser, DBOfferingUserMap } from "../db-types";
 import { PlanningDocument, ProblemDocument } from "../../models/document/document-types";
 import { BaseListener } from "./base-listener";
-import { syncStars } from "./sync-stars";
 
 export class DBProblemDocumentsListener extends BaseListener {
   private db: DB;
@@ -26,8 +25,8 @@ export class DBProblemDocumentsListener extends BaseListener {
     return new Promise<void>((resolve, reject) => {
       const offeringUsersRef = this.offeringUsersRef = this.db.firebase.ref(
         this.db.firebase.getOfferingUsersPath(user));
-      // use once() so we are ensured that documents are set before we resolve
       this.debugLogHandler("#start", "adding", "once", offeringUsersRef);
+      // once is called immediately, and will proceed to resolve promise even if there is no value
       offeringUsersRef.once("value")
         .then((snapshot) => {
           this.handleLoadOfferingUsersProblemDocuments(snapshot);
@@ -61,8 +60,11 @@ export class DBProblemDocumentsListener extends BaseListener {
         this.handleOfferingUser(user);
       }
     });
-    // if the user doesn't exist in the offering, then there can't be any problem or planning documents
-    !users?.[selfUserId] && documents.resolveRequiredDocumentPromisesWithNull([ProblemDocument, PlanningDocument]);
+    // if the user doesn't exist in the offering or if the user exists without a self
+    // then we need to initialize the user and (most likely) any problem or planning documents
+    // in the case of a user with self and without documents handleOfferingUser creates the documents
+    const currentUser = users?.[selfUserId];
+    !currentUser?.self && documents.resolveRequiredDocumentPromisesWithNull([ProblemDocument, PlanningDocument]);
   };
 
   private handleLoadOfferingUserAddedOrChanged = (eventType: string) => (snapshot: firebase.database.DataSnapshot) => {
@@ -74,12 +76,12 @@ export class DBProblemDocumentsListener extends BaseListener {
   };
 
   private handleOfferingUser = (user: DBOfferingUser) => {
-    if (!user?.self?.uid) return;
+    if (!user.self?.uid) return;
     const { documents, user: currentUser } = this.db.stores;
     // uid should always be a string, but demo users with numeric uids have been encountered
-    const isOwnDocument = String(user.self.uid) === currentUser.id;
+    const isCurrentUser = String(user.self.uid) === currentUser.id;
 
-    if (isOwnDocument && (size(user.documents) === 0)) {
+    if (isCurrentUser && (size(user.documents) === 0)) {
       documents.resolveRequiredDocumentPromiseWithNull(ProblemDocument);
     }
 
@@ -89,17 +91,18 @@ export class DBProblemDocumentsListener extends BaseListener {
       if (existingDoc) {
         this.db.updateDocumentFromProblemDocument(existingDoc, document);
       } else {
+        // TODO: handle rejections of this promise, see the note in
+        // the catch of db.ts#openDocument
         this.db.createDocumentModelFromProblemMetadata(ProblemDocument, document.self.uid, document)
           .then((docModel) => {
-            if (isOwnDocument) {
+            if (isCurrentUser) {
               documents.resolveRequiredDocumentPromise(docModel);
-              syncStars(docModel, this.db);
             }
           });
       }
     });
 
-    if (isOwnDocument && (size(user.planning) === 0)) {
+    if (isCurrentUser && (size(user.planning) === 0)) {
       documents.resolveRequiredDocumentPromiseWithNull(PlanningDocument);
     }
     forEach(user.planning, document => {
@@ -108,7 +111,7 @@ export class DBProblemDocumentsListener extends BaseListener {
       if (!existingDoc) {
         this.db.createDocumentModelFromProblemMetadata(PlanningDocument, document.self.uid, document)
           .then(doc => {
-            isOwnDocument && documents.resolveRequiredDocumentPromise(doc);
+            isCurrentUser && documents.resolveRequiredDocumentPromise(doc);
           });
       }
     });

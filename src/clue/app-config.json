@@ -35,13 +35,14 @@
       }
     },
     "disablePublish": [],
-    "enableHistoryRoles": [],
+    "enableHistoryRoles": ["student", "teacher"],
     "copyPreferOriginTitle": false,
     "disableTileDrags": false,
     "showClassSwitcher": true,
     "supportStackedTwoUpView": false,
     "showPublishedDocsInPrimaryWorkspace": false,
     "comparisonPlaceholderContent": "",
+    "initiallyHideExemplars": false,
     "navTabs": {
       "lazyLoadTabContents": true,
       "showNavPanel": true,
@@ -96,7 +97,7 @@
               "addDocument": true
             },
             {
-              "title": "Starred",
+              "title": "Bookmarks",
               "type": "starred-problem-documents",
               "dataTestHeader": "my-work-section-starred",
               "documentTypes": ["personal", "problem"],
@@ -165,7 +166,7 @@
             },
             {
               "className": "section problem starred",
-              "title": "Starred",
+              "title": "Bookmarks",
               "type": "starred-problem-documents",
               "dataTestHeader": "class-work-section-starred",
               "documentTypes": ["publication"],
@@ -243,6 +244,12 @@
       "dataset": {
         "cellsSelectCases": false
       },
+      "dataflow": {
+        "tools": [
+          ["data-set-view", "Table"],
+          ["data-set-link", "Graph"]
+        ]
+      },
       "diagram": {
         "tools": [
           "new-variable",
@@ -255,6 +262,26 @@
           "toggle-lock",
           "toggle-navigator",
           "|",
+          ["variables-link", "Graph"],
+          "|",
+          "delete"
+        ]
+      },
+      "drawing": {
+        "tools": [
+          "select",
+          "line",
+          "vector",
+          "rectangle",
+          "ellipse",
+          "stamp",
+          "stroke-color",
+          "fill-color",
+          "text",
+          "upload",
+          "group",
+          "ungroup",
+          "duplicate",
           "delete"
         ]
       },
@@ -266,7 +293,25 @@
         "autoAssignAttributes": true,
         "disableAttributeDnD": true,
         "tools": [
-          "link-tile"
+          "link-tile",
+          "add-points-by-hand",
+          "|",
+          "fit-all",
+          "toggle-lock",
+          "movable-line",
+          "|",
+          "move-points",
+          "add-points",
+          "delete"
+        ]
+      },
+      "numberline": {
+        "tools": [
+          "select",
+          "point",
+          "point-open",
+          "reset",
+          "delete"
         ]
       },
       "simulator": {
@@ -296,43 +341,5 @@
         ]
       }
     }
-  },
-  "curriculumBaseUrl": "https://models-resources.concord.org/clue-curriculum",
-  "unitCodeMap": {
-    "bio4community": "bio",
-    "completely-rational": "cr",
-    "comparing-and-scaling": "cas",
-    "dataflow-example": "dfe",
-    "example-curriculum": "example",
-    "example-curriculum/example-no-group-share": "example-no-group-share",
-    "example-curriculum/example-no-my-work": "example-no-my-work",
-    "example-curriculum/example-show-nav-panel": "example-show-nav-panel",
-    "example-curriculum/example-config-subtabs": "example-config-subtabs",
-    "example-curriculum/example-no-section-problem-tab": "example-no-section-problem-tab",
-    "example-curriculum/example-template": "example-template",
-    "example-curriculum/example-variables": "example-variables",
-    "example-curriculum/example-shared-data": "example-shared-data",
-    "filling-and-wrapping": "faw",
-    "frogs-fleas-and-painted-cubes": "ffpc",
-    "flip-spin-slide-stretch": "fsss",
-    "growing-growing-growing": "ggg",
-    "how-likely-is-it": "hlit",
-    "help": "help",
-    "looking-for-pythagoras": "lfp",
-    "m2studio": "m2s",
-    "m2s/m2studio-prototype": "m2s-proto",
-    "mothed": "moth",
-    "mods": "mods",
-    "moving-straight-ahead": "msa",
-    "neural-engineering": "brain",
-    "pc2": "pc",
-    "s s": "sas",
-    "s+s": "sas",
-    "shapes-and-designs": "sad",
-    "samples-and-populations": "sap",
-    "stretching-and-shrinking": "sas",
-    "say-it-with-symbols": "sws",
-    "thinking-with-math-models": "twmm"
-  },
-  "defaultUnit": "sas"
+  }
 }

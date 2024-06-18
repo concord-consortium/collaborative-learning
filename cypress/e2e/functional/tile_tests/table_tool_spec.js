@@ -8,7 +8,6 @@ let clueCanvas = new ClueCanvas,
   xyplot = new XYPlotToolTile;
 
 const canvas = new Canvas;
-const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example";
 
 let headerX = 'pluto';
 let headerY = 'mars';
@@ -19,6 +18,7 @@ let headerY2 = 'y';
 let copyTitle = 'Table Tile Workspace Copy';
 
 function beforeTest() {
+  const queryParams = `${Cypress.config("qaNoNavPanelUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
@@ -109,6 +109,39 @@ context('Table Tool Tile', function () {
       tableToolTile.getTableRow().should('have.length', 2);
     });
 
+    cy.log('can edit and save changes or edit and cancel changes');
+    // confirm with enter key
+    tableToolTile.typeInTableCell(1, 'first value', true);
+    tableToolTile.getTableCell().eq(1).should('contain', 'first value');
+    // confirm with tab key
+    tableToolTile.typeInTableCell(1, "second value", false);
+    tableToolTile.getTableCellEdit().trigger('keydown', { keyCode: 9 }); // tab
+    tableToolTile.getTableCell().eq(1).should('contain', 'second value');
+    // confirm by clicking outside of the editor
+    tableToolTile.typeInTableCell(1, 'third value', false);
+    tableToolTile.getTableCell().eq(2).click();
+    tableToolTile.getTableCell().eq(1).should('contain', 'third value');
+    // abandon edit with esc key
+    tableToolTile.typeInTableCell(1, 'abandon this edit{esc}', false);
+    tableToolTile.getTableCell().eq(1).should('contain', 'third value');
+    tableToolTile.getTableCell().eq(1).should('not.contain', 'abandon this edit');
+
+    // reset to previous value
+    tableToolTile.typeInTableCell(1, '5');
+
+  // Table tile restore upon page reload
+    cy.wait(2000);
+    cy.reload();
+    cy.waitForLoad();
+
+    tableToolTile.getTableTitle().should('contain', title);
+    cy.get(".primary-workspace").within((workspace) => {
+      tableToolTile.getTableCell().eq(1).should('contain', '5');
+      tableToolTile.getTableCell().eq(2).should('contain', '2.5');
+      tableToolTile.getTableRow().should('have.length', 2);
+    });
+
+    tableToolTile.getTableTile().click();
     cy.log('delete button works');
     cy.get(".primary-workspace").within((workspace) => {
       tableToolTile.getTableCell().eq(1).should('contain', '5');
@@ -270,17 +303,18 @@ context('Table Tool Tile', function () {
     tableToolTile.typeInTableCell(5, '4');
     tableToolTile.typeInTableCell(6, '7');
     clueCanvas.clickToolbarButton('table', 'link-graph');
-    tableToolTile.getLinkGraphModalCreateNewButton().click();
-    xyplot.getTile().should("exist").contains("Table 1");
+    tableToolTile.getLinkGraphModalTileMenu().select('New Graph');
+    tableToolTile.getLinkGraphModalLinkButton().should("contain", "Graph It!").click();
+    xyplot.getTile().should("exist").contains("Table Data 1");
 
     cy.log('can unlink and link data from a table using the "Link Table" button');
     // Unlink
     clueCanvas.clickToolbarButton('table', 'link-tile');
-    tableToolTile.getLinkGraphModalTileMenu().select('Table 1');
-    tableToolTile.getLinkGraphModalLinkButton().should("contain", "Unlink").click();
+    tableToolTile.getLinkGraphModalTileMenu().select('Graph 1');
+    tableToolTile.getLinkGraphModalLinkButton().should("contain", "Clear It!").click();
     // Re-link
     clueCanvas.clickToolbarButton('table', 'link-tile');
-    tableToolTile.getLinkGraphModalTileMenu().select('Table 1');
+    tableToolTile.getLinkGraphModalTileMenu().select('Graph 1');
     tableToolTile.getLinkGraphModalLinkButton().should("contain", "Link").click();
   });
 });

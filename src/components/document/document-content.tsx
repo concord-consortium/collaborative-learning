@@ -10,7 +10,6 @@ import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDrag
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { IDragToolCreateInfo, IDragTilesData } from "../../models/document/document-content-types";
-import { getTileContentInfo } from "../../models/tiles/tile-content-info";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
 import { IDropRowInfo } from "../../models/document/tile-row";
 import { logDataTransfer } from "../../models/document/drag-tiles";
@@ -137,10 +136,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { viaTeacherDashboard } = this.props;
-    const { ui, user } = this.stores;
+    const { ui, persistentUI, user } = this.stores;
     const isChatEnabled = user.isTeacher;
-    const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0
-                                          && ui.focusDocument;
+    const documentSelectedForComment = isChatEnabled && persistentUI.showChatPanel && ui.selectedTileIds.length === 0
+                                          && persistentUI.focusDocument;
     const documentClass = classNames(
       "document-content",
       {"document-content-smooth-scroll" : viaTeacherDashboard, "comment-select" : documentSelectedForComment},
@@ -234,7 +233,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                                   documentContent={this.domElement}
                                   rowIndex={index} height={rowHeight} tileMap={tileMap}
                                   dropHighlight={dropHighlight}
-                                  onRequestUniqueTitle={this.handleRequestUniqueTitle}
                                   ref={(elt) => this.rowRefs.push(elt)} {...others} />
               : null;
     });
@@ -261,8 +259,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private handleRequestUniqueTitle = (tileId: string) => {
     const { content } = this.props;
     const tileType = content?.getTile(tileId)?.content.type;
-    const titleBase = getTileContentInfo(tileType)?.titleBase;
-    return tileType && titleBase && content?.getUniqueTitle(tileType, titleBase);
+    return tileType && content?.getUniqueTitleForType(tileType);
   };
 
   private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {

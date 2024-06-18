@@ -45,7 +45,7 @@ jobs:
     # If we run out cypress test runs then we temporarily expand the timeout to 4hrs until cypress cloud is available
     # again
     # timeout-minutes: 240
-    container: cypress/browsers:node16.14.2-slim-chrome103-ff102
+    container: cypress/browsers:node-20.11.0-chrome-121.0.6167.184-1-ff-123.0-edge-121.0.2277.128-1
     strategy:
       # when one test fails, DO NOT cancel the other
       # containers, because this will kill Cypress processes
@@ -99,3 +99,21 @@ jobs:
         with:
           flags: cypress-regression
           token: ${{ secrets.CODECOV_TOKEN }}
+  notify-slack:
+    if: ${{ failure() && github.ref_name == 'master' }}
+    needs: [regression]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack the tests failed
+        id: slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          # This data can be any valid JSON from a previous step in the GitHub Action
+          payload: |
+            {
+              "ref_name": "${{ github.ref_name }}",
+              "workflow": "${{ github.workflow }}",
+              "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

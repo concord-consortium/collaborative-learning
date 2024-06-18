@@ -47,15 +47,35 @@ class TableToolTile{
     getTableCell(){
       return cy.get('.rdg-row .rdg-cell');
     }
+    /**
+     * Get table cell at the given coordinates.
+     * row and col arguments count from 0,0 at the top left,
+     * not including the header row or the label column
+     */
+    getTableCellXY(row, col) {
+      // header/label have rowindex=1 and colindex=1; the data cells start from 2.
+      const rowindex = row+2, colindex = col+2;
+      return cy.get(`.rdg-row[aria-rowindex=${rowindex}] .rdg-cell[aria-colindex=${colindex}]`);
+    }
     getTableCellContent(cellIndex) {
       return this.getTableCell().eq(cellIndex).find('.cell');
     }
+    // Note, the editor is in a portal at the document level.
+    // This method will not work if you are in a narrower "within" context.
     getTableCellEdit(){
-      return cy.get('.rdg-row .rdg-cell .rdg-text-editor');
+        return cy.get('.rdg-text-editor');
     }
-    typeInTableCell(i, text) {
-      this.getTableCell().eq(i).dblclick().then(() => {
+    typeInTableCellXY(row, col, text) {
+      this.getTableCellXY(row, col).dblclick();
+      return cy.document().within(() => {
         this.getTableCellEdit().type(`${text}{enter}`);
+      });
+    }
+    typeInTableCell(i, text, confirm=true) {
+      const confirmation = confirm ? '{enter}' : '';
+      this.getTableCell().eq(i).dblclick();
+      return cy.document().within(() => {
+        this.getTableCellEdit().type(`${text}${confirmation}`);
       });
     }
     getTableCellWithColIndex(colIndex, colValue){
@@ -73,10 +93,6 @@ class TableToolTile{
     }
     getLinkGraphButton(){
       return cy.get('.link-tile-button');
-    }
-    getLinkGraphModalCreateNewButton() {
-      const selector = ".ReactModalPortal .modal-footer button.add-new-button";
-      return cy.get(`${selector}`).eq(0);
     }
     getLinkGraphModalLinkButton() {
       const selector = ".ReactModalPortal .modal-footer button.default";
@@ -96,7 +112,8 @@ class TableToolTile{
     createNewLinkedGraph() {
       this.getTableTile().click();
       cy.get('.toolbar-button.link-graph').click();
-      cy.get('.modal-button.add-new-button').click();
+      this.getLinkGraphModalTileMenu().select('New Graph');
+      this.getLinkGraphModalLinkButton().click();
     }
     createNewDatacard() {
       this.getTableTile().click();

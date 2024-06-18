@@ -3,8 +3,8 @@ import ChatPanel from "../../../support/elements/common/ChatPanel";
 let chatPanel = new ChatPanel;
 
 const portalUrl = "https://learn.portal.staging.concord.org";
-const offeringId1 = "221";
-const offeringId2 = "226";
+const offeringId1 = "279";
+const offeringId2 = "280";
 const reportUrl1 = "https://learn.portal.staging.concord.org/portal/offerings/" + offeringId1 + "/external_report/11";
 const reportUrl2 = "https://learn.portal.staging.concord.org/portal/offerings/" + offeringId2 + "/external_report/11";
 const clueTeacher1 = {
@@ -26,7 +26,6 @@ function beforeTest(url, clueTeacher, reportUrl) {
   cy.login(url, clueTeacher);
   cy.launchReport(reportUrl);
   cy.waitForLoad();
-  chatPanel.getChatPanelToggle().click();
   chatPanel.getChatPanel().should("be.visible");
   cy.openTopTab("problems");
   cy.openProblemSection("Initial Challenge");
@@ -42,7 +41,7 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     // Teacher 1 document comment
     chatPanel.verifyProblemCommentClass();
     chatPanel.addDocumentCommentAndVerify(teacher1DocComment);
-    
+
     chatPanel.getDeleteMessageButton(teacher1DocComment).click();
     chatPanel.getDeleteConfirmModalButton().click();
     chatPanel.getFocusedThread().should("not.contain", teacher1DocComment);

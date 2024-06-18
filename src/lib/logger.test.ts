@@ -9,6 +9,7 @@ import { InvestigationModel } from "../models/curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../models/curriculum/problem";
 import { specAppConfig } from "../models/stores/spec-app-config";
 import { IStores, createStores } from "../models/stores/stores";
+import { PersistentUIModel } from "../models/stores/persistent-ui";
 import { UIModel } from "../models/stores/ui";
 import { UserModel } from "../models/stores/user";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType, LearningLogWorkspace } from "../models/stores/workspace";
@@ -81,12 +82,14 @@ describe("dev/qa/test logger with DEBUG_LOGGER false", () => {
     stores = createStores({
       appMode: "test",
       appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
-      ui: UIModel.create({
+      persistentUI: PersistentUIModel.create({
         activeNavTab: ENavTab.kStudentWork,
         problemWorkspace: {
           type: ProblemWorkspace,
           mode: "1-up"
         },
+      }),
+      ui: UIModel.create({
         learningLogWorkspace: {
           type: LearningLogWorkspace,
           mode: "1-up"
@@ -130,12 +133,14 @@ describe("demo logger with DEBUG_LOGGER false", () => {
     stores = createStores({
       appMode: "demo",
       appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
-      ui: UIModel.create({
+      persistentUI: PersistentUIModel.create({
         activeNavTab: ENavTab.kStudentWork,
         problemWorkspace: {
           type: ProblemWorkspace,
           mode: "1-up"
         },
+      }),
+      ui: UIModel.create({
         learningLogWorkspace: {
           type: LearningLogWorkspace,
           mode: "1-up"
@@ -371,7 +376,7 @@ describe("authed logger", () => {
   //     mockXhr.post(/.*/, (req, res) => {
   //       const request = JSON.parse(req.body());
 
-  //       expect(request.event).toBe("GRAPH_TOOL_CHANGE");
+  //       expect(request.event).toBe("GEOMETRY_TOOL_CHANGE");
   //       expect(request.parameters.toolId).toBe(tile.id);
   //       expect(request.parameters.operation).toBe("create");
   //       expect(request.parameters.target).toBe("point");
@@ -381,7 +386,7 @@ describe("authed logger", () => {
   //       return res.status(201);
   //     });
 
-  //     // Logger.logTileChange(LogEventName.GRAPH_TOOL_CHANGE, "create", change, tile.id);
+  //     // Logger.logTileChange(LogEventName.GEOMETRY_TOOL_CHANGE, "create", change, tile.id);
   //   });
   // });
 

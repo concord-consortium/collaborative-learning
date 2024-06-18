@@ -1,0 +1,33 @@
+name: Release
+on:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        description: The git tag for the version to use for index-staging.html
+        required: true
+      dest-file:
+        type: string
+        description: The released file name for each index-top that is copied
+        required: true
+env:
+  BUCKET: models-resources
+  PREFIX: collaborative-learning
+  SRC_FILE: index-top.html
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+    steps:
+      - run: >
+          aws s3 cp
+          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/version/${{ inputs.version }}/${{ env.SRC_FILE }}
+          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/${{ inputs.dest-file }}
+      - run: >
+          aws s3 cp
+          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/version/${{ inputs.version }}/editor/${{ env.SRC_FILE }}
+          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/editor/${{ inputs.dest-file }}
+

@@ -5,6 +5,7 @@ import "firebase/firestore";
 import "firebase/functions";
 import "firebase/storage";
 import { observable, makeObservable } from "mobx";
+import { getSnapshot } from "mobx-state-tree";
 import {
   DBOfferingGroup, DBOfferingGroupUser, DBOfferingGroupMap, DBOfferingUser, DBDocumentMetadata, DBDocument,
   DBGroupUserConnections, DBPublication, DBPublicationDocumentMetadata, DBDocumentType, DBImage, DBTileComment,
@@ -36,6 +37,8 @@ import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../mo
 import { safeJsonParse } from "../utilities/js-utils";
 import { urlParams } from "../utilities/url-params";
 import { firebaseConfig } from "./firebase-config";
+import { UserModelType } from "../models/stores/user";
+import { logExemplarDocumentEvent } from "../models/document/log-exemplar-document-event";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBBaseConnectOptions {
@@ -153,8 +156,18 @@ export class DB {
           this.firebase.setFirebaseUser(firebaseUser);
           this.firestore.setFirebaseUser(firebaseUser);
           if (!options.dontStartListeners) {
-            // resolve after listeners have started
-            this.listeners.start().then(resolve).catch(reject);
+            const { persistentUI, user, db, unitLoadedPromise, exemplarController} = this.stores;
+            // Start fetching the persistent UI. We want this to happen as early as possible.
+            persistentUI.initializePersistentUISync(user, db);
+
+            // Resolve after listeners have started.
+            // Before they can be started  we need to wait for the unit to be loaded,
+            // since it includes the list of tile types being registered.
+            // We need those types to be registered so the listeners can safely create documents.
+            unitLoadedPromise.then(() => {
+              this.listeners.start().then(resolve).catch(reject);
+              exemplarController.initialize(user, db);
+            });
           }
         }
       });
@@ -334,7 +347,8 @@ export class DB {
       return offeringUserRef.once("value")
         .then((snapshot) => {
           // ensure the offering user exists
-          if (!snapshot.val()) {
+          const candidateSnapshot = snapshot.val();
+          if (!candidateSnapshot?.version || !candidateSnapshot?.self){
             const offeringUser: DBOfferingUser = {
               version: "1.0",
               self: {
@@ -343,7 +357,7 @@ export class DB {
                 uid: user.id,
               }
             };
-            return offeringUserRef.set(offeringUser);
+            return offeringUserRef.update(offeringUser);
           }
          })
         .then(() => {
@@ -566,7 +580,7 @@ export class DB {
               title,
               properties: { ...properties, ...metadata.properties },
               groupId,
-              visibility,
+              visibility: visibility || metadata.visibility,
               uid: userId,
               originDoc,
               key: document.self.documentKey,
@@ -587,7 +601,21 @@ export class DB {
           documents.add(document);
           resolve(document);
         })
-        .catch(reject);
+        .catch((msg) => {
+          // TODO: this rejected promise is not handled by the callers of openDocument. Most of those
+          // callers trace back to firebase listeners. The listener is triggered by some existing or new
+          // entry representing a document. The listener then tries to create a document from the
+          // information. If an error happens this document is likely not added to the documents list.
+          // The document will likely not ever be seen by the user.
+          // The best thing to do here seems to be to add error handling in these listeners so they can
+          // print out a useful error message. Ideally the message should include the paths in firebase
+          // that were accessed, and what data was missing or invalid. Getting all of this information
+          // will probably require additional logging a lower level.
+          // After this is changed, the updated error reporting should be tested to make sure it
+          // continues show a stack trace pointing at the original error site.
+          // For example just calling console.error(msg) here will hide the original stack trace.
+          reject(msg);
+        });
     });
   }
 
@@ -731,7 +759,6 @@ export class DB {
                                            problemDocument: DBOfferingUserProblemDocument) {
     document.setVisibility(problemDocument.visibility);
   }
-
   // handles personal documents and learning logs
   public createDocumentModelFromOtherDocument(dbDocument: DBOtherDocument, type: OtherDocumentType) {
     const {title, properties, self: {uid, documentKey}} = dbDocument;
@@ -871,9 +898,8 @@ export class DB {
     });
   }
 
-  public createUserStar(document: DocumentModelType, starred: boolean) {
+  public createUserStar(docKey: string, starred: boolean) {
     const { user } = this.stores;
-    const { key: docKey } = document;
     const starsRef = this.firebase.ref(
       this.firebase.getUserDocumentStarsPath(user, docKey)
     );
@@ -917,7 +943,7 @@ export class DB {
       properties: {},
       originDoc: "",
       timestamp: firebase.database.ServerValue.TIMESTAMP as number,
-      ...supportModel,
+      ...getSnapshot(supportModel),
       deleted: false
     };
     supportRef.set(support);
@@ -937,4 +963,59 @@ export class DB {
     this.firebase.getLastStickyNoteViewTimestampRef().set(Date.now());
   }
 
+  /**
+   * Which students have gained access to this exemplar?
+   * @param exemplarId
+   * @returns a promise whose value will be a map from student IDs to visibility booleans.
+   */
+  public getExemplarVisibilityForClass(exemplarId: string): Promise<Record<string,boolean>> {
+    // Search for records with paths like /classes/CLASS_ID/users/USER_ID/exemplars/EXEMPLAR_ID
+    const { user } = this.stores;
+    const myClass = this.stores.class;
+    const classRef = this.firebase.ref(this.firebase.getClassPath(user));
+    // Promises that will either return the ID of a student who has access, or undefined.
+    const promises = myClass.students.map(student => {
+      const ref = classRef.child('users').child(student.id).child('exemplars').child(exemplarId).child('visible');
+      return ref.get().then((dataSnap) => {
+        const visible = !!dataSnap.val();
+        return {student: student.id, visible};
+      });
+    });
+    return Promise.all(promises).then(values => {
+      const map: Record<string,boolean> = {};
+      for (const v of values) {
+        map[v.student] = v.visible;
+      }
+      return map;
+    });
+  }
+
+  public setExemplarVisibilityForUser(user: UserModelType, exemplarId: string, isVisible: boolean) {
+    this.firebase.ref(this.firebase.getExemplarDataPath(user, exemplarId)).child('visible').set(isVisible);
+  }
+
+  public setExemplarVisibilityForAllStudents(exemplarId: string, isVisible: boolean) {
+    const { user, documents } = this.stores;
+    const myClass = this.stores.class;
+    const classRef = this.firebase.ref(this.firebase.getClassPath(user));
+    const exemplar = documents.getDocument(exemplarId);
+    if (exemplar) {
+      for (const student of myClass.students) {
+        classRef.child('users').child(student.id).child('exemplars').child(exemplarId).child('visible').set(isVisible);
+      }
+      logExemplarDocumentEvent(LogEventName.EXEMPLAR_VISIBILITY_UPDATE,
+        {
+          document: exemplar,
+          visibleToUser: isVisible,
+          changeSource: "teacher"
+        });
+    } else {
+      console.warn("Could not find exemplar document");
+    }
+  }
+
+}
+
+export function getRefFullPath(ref: firebase.database.Reference) {
+  return ref.toString().substring(ref.root.toString().length-1);
 }

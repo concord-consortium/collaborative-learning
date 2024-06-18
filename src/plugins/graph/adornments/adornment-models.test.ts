@@ -1,9 +1,11 @@
 import { getSnapshot, types } from "mobx-state-tree";
-import { AdornmentModel, PointModel, UnknownAdornmentModel } from "./adornment-models";
-import { AdornmentModelUnion, IAdornmentModelUnion } from "./adornment-types";
-import { MovableLineModel, isMovableLine } from "./movable-line/movable-line-model";
-import { MovablePointModel, isMovablePoint } from "./movable-point/movable-point-model";
-import { MovableValueModel, isMovableValue } from "./movable-value/movable-value-model";
+import {
+  AdornmentModel, IAdornmentModel, IUnknownAdornmentModel, PointModel, UnknownAdornmentModel
+} from "./adornment-models";
+import { IMovableLineModel, MovableLineModel, isMovableLine } from "./movable-line/movable-line-model";
+import { IMovablePointModel, MovablePointModel, isMovablePoint } from "./movable-point/movable-point-model";
+import { IMovableValueModel, MovableValueModel, isMovableValue } from "./movable-value/movable-value-model";
+import "../register-adornment-types";
 
 describe("PointModel", () => {
   it("is valid if x and y are finite", () => {
@@ -81,6 +83,19 @@ describe("UnknownAdornmentModel", () => {
 
 describe("Deserialization", () => {
   it("provides the information required for deserialization of adornments to the appropriate type", () => {
+    const adornmentTypeDispatcher = (adornmentSnap: IAdornmentModel) => {
+      switch (adornmentSnap.type) {
+        case "Movable Line": return MovableLineModel;
+        case "Movable Point": return MovablePointModel;
+        case "Movable Value": return MovableValueModel;
+        default: return UnknownAdornmentModel;
+      }
+    };
+
+    const AdornmentModelUnion = types.union({ dispatcher: adornmentTypeDispatcher },
+      MovableValueModel, MovableLineModel, MovablePointModel, UnknownAdornmentModel);
+    type IAdornmentModelUnion =
+      IMovableValueModel | IMovableLineModel | IMovablePointModel | IUnknownAdornmentModel ;
     const M = types.model("Test", {
       adornment: AdornmentModelUnion
     })

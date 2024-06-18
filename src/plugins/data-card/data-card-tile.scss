@@ -1,18 +1,29 @@
 @import "../../components/vars.sass";
 
+$deck-controls-width: 100%;
 $single-view-card-width: 359px;
 $name-width: 34%;
-$data-row-min-height: 24px;
 $charcoal-light-border: rgb(206, 206, 206);
 $cell-padding: 0px 8px;
 $cell-text-color: #3f3f3f;
 $default-button-border-color: #979797;
+$panel-height: 34px;
 
 .data-card-tool {
   width: 100%;
   height: 100%;
   text-align: left;
   overflow: auto;
+
+  .single-card-view-wrap {
+    margin: 0 auto;
+    width: $single-view-card-width + 7;
+    margin-top:27px;
+    padding:2.5px;
+    border: 1px solid $charcoal-light-1;
+    border-radius: 6.5px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+  }
 
   .data-card-content {
     width: 100%;
@@ -24,13 +35,7 @@ $default-button-border-color: #979797;
     border: 1px solid #cccccc;
   }
 
-  textarea {
-    width: 100%;
-    height: 100%;
-  }
-
   .data-card-container{
-    width: $single-view-card-width + 5;
     &.highlight{
       border: 3px solid yellow;
     }
@@ -40,8 +45,8 @@ $default-button-border-color: #979797;
 
     .panel {
       border: solid 1px $charcoal-light-1;
-      width: $single-view-card-width;
-      height: 34px;
+      width: $deck-controls-width;
+      height: $panel-height;
       font-family: Lato;
       font-size: 14px;
       font-weight: bold;
@@ -76,17 +81,36 @@ $default-button-border-color: #979797;
 
     .panel.sort {
       background-color: $workspace-teal-light-6;
-      border-bottom:0px;
+      border-bottom:1px $charcoal-light-1 solid;
+      display: flex;
+      align-items: center;
+      box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.25);
       select {
-        margin-left: 8px;
+        margin: 8px;
         width: 145px;
+        height: 26px;
+        border: 1.5px solid $charcoal;
+        border-radius: 5px;
+        padding: 0px 4px;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background: url('./assets/expand-more-icon.svg') no-repeat right center;
+        background-size: contain;
+        background-color: $workspace-teal-light-9;
       }
     }
 
     .panel.nav {
-      background-color: $workspace-teal-light-5;
-      display: flex;
+      background-color: $workspace-teal-light-3;
+      width: $single-view-card-width;
+      align-items: center;
+      border-left-color: transparent;
+      border-right-color: transparent;
+      border-top-color: $workspace-teal-light-3;
+      border-radius:5px 5px 0px 0px;
       justify-content: space-between;
+      position: relative;
 
       &.highlighted {
         background-color: $highlight-unlinked-header;
@@ -97,17 +121,16 @@ $default-button-border-color: #979797;
       }
 
       .card-number-of-listing {
-        width: $name-width;
-        text-align: right;
-        justify-content: flex-start;
-
-        .cell-text {
-          padding: $cell-padding;
-        }
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%) (translateY(-1px));
+        display: flex;
+        align-items: center;
       }
 
       .card-nav-buttons {
-        flex-grow: 1;
+        margin-left: auto;
+        transform: translateX(-4px);
         padding-left: 5px;
         .card-nav {
           color:$workspace-teal;
@@ -148,7 +171,7 @@ $default-button-border-color: #979797;
     }
 
     .add-remove-card-buttons {
-      width: 30%;
+      //width: 30%;
       display: flex;
       justify-content: flex-end;
       padding-right: 5px;
@@ -181,192 +204,12 @@ $default-button-border-color: #979797;
       }
     }
 
-    .single-card-data-area {
-      width: $single-view-card-width;
-
-      /* saved state attributes */
-      .attribute-name-value-pair {
-        display:flex;
-        min-height: $data-row-min-height;
-        line-height: $data-row-min-height;
-        border: 1px solid $charcoal-light-1;
-        border-top-width: 0px;
-
-        .name {
-          width: $name-width;
-          background-color: $workspace-teal-light-5;
-          border-right: 1.5px solid $charcoal-light-1;
-          font-weight: bold;
-          color: $cell-text-color;
-          box-sizing: border-box;
-
-          &.highlighted {
-            background-color: $highlight-unlinked-header;
-
-            &.linked {
-              background-color: $highlight-linked-header;
-            }
-          }
-
-          .cell-value {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: right;
-            text-align: right;
-            line-height: 1.3;
-            padding:$cell-padding;
-            &.default-label {
-              font-style: italic;
-            }
-          }
-
-          input {
-            text-align: right;
-
-            &.highlighted {
-              box-shadow: inset 0 0 0 3px $highlight-unlinked-edit;
-
-              &.linked {
-                box-shadow: inset 0 0 0 3px $highlight-linked-edit;
-              }
-            }
-
-            &:hover {
-              background:rgba(245, 245, 245);
-            }
-          }
-        }
-
-        .value {
-          flex: 1;
-          font-weight: normal;
-          color:$cell-text-color;
-
-          &.highlighted {
-            background-color: $highlight-unlinked-cell;
-
-            &.linked {
-              background-color: $highlight-linked-cell;
-            }
-          }
-
-          .cell-value {
-            padding:$cell-padding;
-          }
-
-          input {
-            background-color: rgba(0,0,0,0);
-
-            &:focus {
-              background-color: white;
-
-              &.highlighted {
-                box-shadow: inset 0 0 0 3px $highlight-unlinked-edit;
-
-                &.linked {
-                  background-color: white;
-                  box-shadow: inset 0 0 0 3px $highlight-linked-edit;
-                }
-              }
-            }
-          }
-        }
-
-        .type-icon {
-          padding: 0 4px;
-
-          &.highlighted {
-            background-color: $highlight-unlinked-cell;
-
-            &.linked {
-              background-color: $highlight-linked-cell;
-            }
-          }
-        }
-
-        .delete-attribute {
-          position: absolute;
-          display:none;
-          transform: translateX(351px);
-          &.show {
-            display: inherit;
-          }
-        }
-
-        input {
-          width: 100%;
-          height: $data-row-min-height;
-          padding: $cell-padding;
-          font-style: normal;
-          font-weight: 300;
-          border: 0px;
-          font-family: Lato;
-          outline: 0;
-        }
-
-        .editing input {
-          padding: 2px 8px;
-        }
-
-        .value.has-image {
-          padding:6px;
-          display:flex;
-          align-items: center;
-          justify-content: center;
-          &:hover {
-            background:rgba(245, 245, 245);
-          }
-        }
-
-        .value.has-image img {
-          max-width: 95%;
-          max-height: 90%;
-        }
-
-        .value.has-image.editing {
-          // simulate highlight without using border, which distorts height
-          box-shadow: 0px 0px 0px 2px $highlight-blue inset;
-        }
-      }
-    }
-
     .add-field {
+      position: absolute;
       margin-top: 5px;
-      // half of 35% minus half the width of the icon
-      margin-left: ($single-view-card-width * 0.175) - 12px;
+      left: 50%;
+      transform: translateX(-.5 * ($single-view-card-width));
     }
   }
 }
-
-
-.downshift-dropdown {
-  position: relative;
-
-  ul {
-    padding: 0px;
-    margin: 0px;
-
-    li {
-      list-style: none;
-      background-color: $workspace-teal-light-6;
-      padding-left:7px;
-    }
-  }
-
-  button {
-    position: absolute;
-    right:0px;
-    border: 0px;
-    background-color: transparent;
-    top:3px;
-    cursor: pointer;
-
-    span {
-      color: $workspace-teal;
-      font-size: 11px;
-    }
-  }
-}
-
 

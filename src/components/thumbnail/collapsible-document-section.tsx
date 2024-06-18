@@ -11,7 +11,7 @@ import { ISubTabSpec, NavTabSectionModelType } from "../../models/view/nav-tabs"
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 
-import "./document-type-collection.sass";
+import "./document-type-collection.scss";
 import "./collapsible-document-section.scss";
 
 interface IProps {
@@ -79,6 +79,7 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
 
   const networkDocuments = useNetworkDocuments();
   const currentSection = subTab.sections[0] as NavTabSectionModelType;
+  const shouldHandleStarClick = currentSection.showStarsForUser(user) ?? false;
   const hasDocuments = documentKeys.length > 0;
   return (
     <div className="collapsible-documents-section">
@@ -100,10 +101,11 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
                   <DecoratedDocumentThumbnailItem
                     onSelectDocument={() => onSelectDocument?.(document)}
                     scale={scale}
-                    section={currentSection}
-                    sectionDocument={document}
+                    document={document}
                     selectedDocument={selectedDocument}
                     tab={subTab.label}
+                    shouldHandleStarClick={shouldHandleStarClick}
+                    allowDelete={currentSection.allowDelete}
                   />
                 </DocumentContextReact.Provider>
               );

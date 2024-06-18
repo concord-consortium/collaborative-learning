@@ -5,6 +5,16 @@ import { Point } from "../../graph-types";
 import { IAxisModel } from "../../imports/components/axis/models/axis-model";
 import { computeSlopeAndIntercept } from "../../utilities/graph-utils";
 import { kMovableLineType } from "./movable-line-types";
+import { IGraphModel } from "../../models/graph-model";
+import { IClueTileObject } from "../../../../models/annotations/clue-object";
+
+export function getAnnotationId(lineKey: string, type: "handle"|"equation", position?: "lower"|"upper") {
+  if (position) {
+    return `movable_line_${type}:${lineKey}:${position}`;
+  } else {
+    return `movable_line_${type}:${lineKey}`;
+  }
+}
 
 export const MovableLineInstance = types.model("MovableLineInstance", {
   equationCoords: types.maybe(PointModel),
@@ -13,11 +23,49 @@ export const MovableLineInstance = types.model("MovableLineInstance", {
 })
 .volatile(self => ({
   pivot1: PointModel.create(),
-  pivot2: PointModel.create()
+  pivot2: PointModel.create(),
+  dragEquationCoords: undefined as Point|undefined,
+  dragIntercept: undefined as number|undefined,
+  dragSlope: undefined as number|undefined
+}))
+.views(self => ({
+  get currentEquationCoords() {
+    if (self.dragEquationCoords) return self.dragEquationCoords;
+    if (self.equationCoords?.isValid()) return self.equationCoords;
+    return undefined;
+  },
+  get currentIntercept() {
+    return self.dragIntercept !== undefined ? self.dragIntercept : self.intercept;
+  },
+  get currentSlope() {
+    return self.dragSlope !== undefined ? self.dragSlope : self.slope;
+  }
 }))
 .actions(self => ({
-  setEquationCoords(coords: Point) {
-    self.equationCoords = PointModel.create(coords);
+  setDragEquationCoords(coords: Point) {
+    self.dragEquationCoords = coords;
+  },
+  saveEquationCoords() {
+    self.equationCoords = PointModel.create(self.dragEquationCoords);
+    self.dragEquationCoords = undefined;
+  },
+  setDragIntercept(intercept: number) {
+    self.dragIntercept = intercept;
+  },
+  saveIntercept() {
+    if (self.dragIntercept) {
+      self.intercept = self.dragIntercept;
+      self.dragIntercept = undefined;
+    }
+  },
+  setDragSlope(slope: number) {
+    self.dragSlope = slope;
+  },
+  saveSlope() {
+    if (self.dragSlope) {
+      self.slope = self.dragSlope;
+      self.dragSlope = undefined;
+    }
   },
   setPivot1(point: Point) {
     self.pivot1.set(point);
@@ -34,19 +82,29 @@ export const MovableLineModel = AdornmentModel
   lines: types.map(MovableLineInstance)
 })
 .actions(self => ({
-  setLine(
-    aLine: {intercept: number, slope: number, pivot1?: Point, pivot2?: Point, equationCoords?: Point}, key=''
-  ) {
-    self.lines.set(key, aLine);
+  dragLine(intercept: number, slope: number, key='') {
     const line = self.lines.get(key);
-    line?.setPivot1(aLine.pivot1 ?? kInfinitePoint);
-    line?.setPivot2(aLine.pivot2 ?? kInfinitePoint);
-  }
-}))
-.actions(self => ({
+    line!.setDragIntercept(intercept);
+    line!.setDragSlope(slope);
+  },
+  saveLine(key='') {
+    const line = self.lines.get(key);
+    line!.saveIntercept();
+    line!.saveSlope();
+  },
+  dragEquation(coords: Point, key='') {
+    const line = self.lines.get(key);
+    line!.setDragEquationCoords(coords);
+  },
+  saveEquationCoords(key='') {
+    self.lines.get(key)!.saveEquationCoords();
+  },
   setInitialLine(xAxis?: IAxisModel, yAxis?: IAxisModel, key='') {
     const { intercept, slope } = computeSlopeAndIntercept(xAxis, yAxis);
-    self.setLine({ intercept, slope }, key);
+    self.lines.set(key, { intercept, slope });
+    const line = self.lines.get(key);
+    line!.setPivot1(kInfinitePoint);
+    line!.setPivot2(kInfinitePoint);
   }
 }))
 .actions(self => ({
@@ -63,8 +121,28 @@ export const MovableLineModel = AdornmentModel
       }
     }
   }
+}))
+.views(self => ({
+  get annotatableObjects() {
+    const objects: IClueTileObject[] = [];
+    if (self.isVisible) {
+      for (const key of self.lines.keys()) {
+        objects.push({ objectType: "movable-line-handle", objectId: getAnnotationId(key, "handle", "lower") });
+        objects.push({ objectType: "movable-line-handle", objectId: getAnnotationId(key, "handle", "upper") });
+        objects.push({ objectType: "movable-line-equation", objectId: getAnnotationId(key, "equation") });
+      }
+    }
+    return objects;
+  }
 }));
+
 export interface IMovableLineModel extends Instance<typeof MovableLineModel> {}
 export function isMovableLine(adornment: IAdornmentModel): adornment is IMovableLineModel {
   return adornment.type === kMovableLineType;
+}
+
+export function defaultMovableLineAdornment(graph: IGraphModel) {
+  const mLine = MovableLineModel.create();
+  mLine.setInitialLine(graph.axes.get("bottom"), graph.axes.get("left"), "{}");
+  return mLine;
 }

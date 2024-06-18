@@ -25,6 +25,27 @@ export const isLightColorRequiringContrastOffset = (color?: string) => {
   return (luminance != null) && (luminance >= kLightLuminanceThreshold);
 };
 
+interface ClueColor {
+  color: string;
+  name: string;
+}
+export const kGraphDataBlue = "#0069ff";
+export const kGraphDataOrange = "#ff9617";
+export const kGraphDataGreen = "#19a90f";
+export const kGraphDataRed = "#e00";
+export const kGraphDataYellow = "#cbd114";
+export const kGraphDataPurple = "#d51eff";
+export const kGraphDataIndigo = "#6b00d2";
+export const clueGraphColors: ClueColor[] = [
+  { color: kGraphDataBlue, name: "blue" },
+  { color: kGraphDataOrange, name: "orange" },
+  { color: kGraphDataGreen, name: "green" },
+  { color: kGraphDataRed, name: "red" },
+  { color: kGraphDataYellow, name: "yellow" },
+  { color: kGraphDataPurple, name: "purple" },
+  { color: kGraphDataIndigo, name: "indigo" }
+];
+
 /*
   The following list of 20 colors are maximally visually distinct from each other.
   See http://eleanormaclure.files.wordpress.com/2011/03/colour-coding.pdf
@@ -50,3 +71,4 @@ export const selectedStrokeWidth = 1; //1 for now - may change such that the str
 export const selectedOuterCircleFillColor = "#14F49E";
 export const selectedOuterCircleStrokeColor = "#FFFFFF";
 
+export const kLightLuminanceContrastStroke = "#949494";  // $charcoal-light-1

@@ -14,11 +14,11 @@ The first step in the process is tracking which lines of code are hit. This is d
 - look in the browser console for `window.__coverage__`
 - this variable should contain info about each file that has been covered so far
 
-This coverage information needs to be collected after each test run. This is done by the `@cypress/code-coverage/support` module that is imported in the `cypress/support/index.js` file. It sets up the coverage stats before each test, and then sends the coverage information to the cypress test runner via `cy.task`.
+This coverage information needs to be collected after each test run. This is done by the `@cypress/code-coverage/support` module that is imported in the `cypress/support/e2e.js` file. It sets up the coverage stats before each test, and then sends the coverage information to the cypress test runner via `cy.task`.
 
-The coverage information needs to be received by the cypress test runner and written out to a file. This is done by the plugin `@cypress/code-coverage/task`. It is added to the `cypress/plugins/index.js`. It receives the coverage information, merges it and saves it in the raw file `.nyc_output/out.json`. It also defines a task command which runs the nyc processor to convert this raw file into a set of html files.
+The coverage information needs to be received by the cypress test runner and written out to a file. This is done by the plugin `@cypress/code-coverage/task`. It is added by `cypress.config.ts`. It receives the coverage information, merges it and saves it in the raw file `.nyc_output/out.json`. It also defines a task command which runs the nyc processor to convert this raw file into a set of html files.
 
-By default the cypress coverage tasks are disabled so they don't slow down and clutter up the test log. You can open cypress with them enabled by using the `npm run test:coverage:cypress:open`. For reference, the default behavior is set in `cypress.jon` with the `"coverage": false` entry.
+By default the cypress coverage tasks are disabled so they don't slow down and clutter up the test log. You can open cypress with them enabled by using the `npm run test:coverage:cypress:open`. For reference, the default behavior is set in `cypress.config.ts` with the `coverage: false` entry.
 
 With the coverage tasks enabled, when running the cypress tests you should see extra 'task' events being logged. These are a record of the `support` module communicating with the `task` module.
 

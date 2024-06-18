@@ -1,3 +1,7 @@
+@import "../../../../components/vars";
+
+$movable-line-color: #4782B4;
+
 svg[class^="line-"] {
   left: 0;
   overflow: hidden;
@@ -6,26 +10,28 @@ svg[class^="line-"] {
 }
 
 .movable-line {
-  stroke: #4782B4;
-  stroke-width: 1px;
+  stroke: $movable-line-color;
+  stroke-width: 2px;
+}
+
+.movable-line-arrow {
+  fill: $movable-line-color;
 }
 
 .movable-line-cover {
   pointer-events: all;
-  stroke: rgba(210, 105, 30, 0.01);
+  stroke: transparent;
   stroke-width: 8px;
+  cursor: move;
 }
 
 .movable-line-handle {
-  display: none;
-  fill: #fff;
-  height: 12px;
-  pointer-events: none;
-  stroke: #000;
-  width: 12px;
+  pointer-events: all;
+  fill: $movable-line-color;
+  stroke: $movable-line-color;
 }
 
-.movable-line-lower-cover {
+.movable-line-lower-handle {
   cursor: url("../assets/pivot-bot-left-cursor.png") 8 8, grab;
 
   &.negative-slope {
@@ -33,11 +39,7 @@ svg[class^="line-"] {
   }
 }
 
-.movable-line-middle-cover {
-  cursor: url("../assets/up-down-cursor.png") 8 8, grab;
-}
-
-.movable-line-upper-cover {
+.movable-line-upper-handle {
   cursor: url("../assets/pivot-top-right-cursor.png") 8 8, grab;
 
   &.negative-slope {
@@ -53,10 +55,8 @@ svg[class^="line-"] {
   top: 0;
 
   p {
-    background-color: rgba(255, 255, 0, 0.6);
-    color: #4782b4;
+    color: $movable-line-color;
     cursor: grab;
-    font-family: "Montserrat-Bold", sans-serif;
     font-size: 12px;
     padding: 2px 5px;
     pointer-events: all;
@@ -66,7 +66,7 @@ svg[class^="line-"] {
       cursor: grabbing;
     }
     &:hover {
-      background-color: rgba(255, 255, 0, 1)
+      background-color: $workspace-teal-light-6;
     }
 
     em {

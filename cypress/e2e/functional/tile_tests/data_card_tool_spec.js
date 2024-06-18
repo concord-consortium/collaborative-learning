@@ -7,7 +7,7 @@ let dc = new DataCardToolTile;
 let xyplot = new XYPlotToolTile;
 
 function beforeTest() {
-  const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=moth&mouseSensor";
+  const queryParams = `${Cypress.config("qaMothPlotUnitStudent5")}&mouseSensor`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
@@ -22,7 +22,7 @@ context('Data Card Tool Tile', () => {
     dc.getTile().should("exist");
 
     cy.log("has a default title");
-    dc.getTile().contains("Data Card Collection");
+    dc.getTile().contains("Card Deck Data");
 
     cy.log("can create a new attribute");
     dc.getAttrName().dblclick().type("Attr1 Name{enter}");
@@ -68,14 +68,6 @@ context('Data Card Tool Tile', () => {
     cy.wait(100);
     dc.getCardNofTotalListing().contains("Card 1 of 1");
 
-    cy.log("can expand and collapse a card in sort view");
-    dc.getSortSelect().select("habitat");
-    dc.getSortView().should('exist');
-    dc.getSortCardCollapseToggle().click();
-    dc.getSortCardData().should('not.exist');
-    dc.getSortCardCollapseToggle().click();
-    dc.getSortCardData().should('exist');
-
     cy.log("can add a second attribute and give it a value");
     dc.getSortSelect().select("None");
     dc.getAddAttributeButton().click();
@@ -106,36 +98,88 @@ context('Data Card Tool Tile', () => {
     dc.getDownshiftOptions().should('have.length', 1);
     dc.getDownshiftOptions().eq(0).contains("desert");
 
-    cy.log("can drag a card into another stack in sort view");
+    cy.log("shows type-ahead options that match value substring");
+    dc.getAttrValueInput().eq(0).click().type("{backspace}");
+    dc.getDownshiftOptions().should('have.length', 2);
+    dc.getAttrValueInput().eq(0).click().type("e");
+    dc.getDownshiftOptions().should('have.length', 2);
+
+    cy.log("can drag a card into another stack in sort view, changing the data");
     dc.getSortSelect().select("animal");
     dc.getSortView().should('exist');
-    dc.dragCardToStack(1, 0);
+    dc.dragCardToStack(1, 0); // changes the animal from whale to camel
     dc.getSortSelect().select("None");
     dc.getCardNofTotalListing().contains("Card 1 of 2");
     dc.getAttrValueInput().eq(0).invoke('val').should('eq', "ocean");
     dc.getAttrValueInput().eq(1).invoke('val').should('eq', "camel");
     dc.getNextCardButton().click();
     dc.getCardNofTotalListing().contains("Card 2 of 2");
-    dc.getAttrValueInput().eq(0).invoke('val').should('eq', "d");
+    dc.getAttrValueInput().eq(0).invoke('val').should('eq', "e");
     dc.getAttrValueInput().eq(1).invoke('val').should('eq', "camel");
 
     cy.log("can create a graph from the data");
-    dc.getLinkGraphButton().should('not.be.disabled').click();
-    dc.getLinkGraphModalCreateNewButton().click();
-    xyplot.getTile().should("exist").contains("Data Card Collection 1");
-    xyplot.getXYPlotTitle().should("contain", "Data Card Collection 1");
+    dc.getGraphItButton().should('not.be.disabled').click();
+    xyplot.getTile().should("exist").contains("Graph 1");
+    xyplot.getXYPlotTitle().should("contain", "Graph 1");
     xyplot.getXAxisLabel().should("contain", "habitat");
 
-    cy.log("can link and unlink data from a graph");
-    // Unlink
-    dc.getLinkGraphButton().should('not.be.disabled').click();
-    dc.getLinkGraphModalTileMenu().select('Data Card Collection 1');
-    dc.getLinkGraphModalLinkButton().should("contain", "Unlink").click();
-    xyplot.getXAxisLabel().should("not.contain", "habitat");
-    // Re-link
-    dc.getLinkGraphButton().should('not.be.disabled').click();
-    dc.getLinkGraphModalTileMenu().select('Data Card Collection 1');
-    dc.getLinkGraphModalLinkButton().should("contain", "Link").click();
-    xyplot.getXAxisLabel().should("contain", "habitat");
+    cy.log("Copy card functionality");
+    // Select a card
+    dc.getTile().click();
+    // Click the duplicate card button
+    dc.getDuplicateCardButton().should('not.be.disabled').click();
+    // Number of cards should increase by 1
+    // New card has focus/is in view.
+    dc.getCardNofTotalListing().contains("Card 3 of 3");
+    // New cards can be in the middle of the deck
+    dc.getPreviousCardButton().click();
+    dc.getDuplicateCardButton().should('not.be.disabled').click();
+    dc.getCardNofTotalListing().contains("Card 3 of 4");
+    // Data can be changed/is not linked to original card
+    dc.getAttrValue().eq(0).dblclick().clear().type("river{enter}");
+    dc.getAttrValue().eq(1).dblclick().clear().type("rhinocerotter{enter}");
+    dc.getAttrValueInput().eq(0).invoke('val').should('eq', "river");
+    dc.getAttrValueInput().eq(1).invoke('val').should('eq', "rhinocerotter");
+
+    cy.log("verify Datacard tile title restore upon page reload");
+    const newName = "Data Card Title";
+    dc.getTile().find('.title-text-element').first().dblclick();
+    dc.getTile().find('.title-text-element').first().type(newName + '{enter}');
+    dc.getTile().contains(newName);
+    cy.wait(2000);
+
+    cy.log("verify Datacard tile restore upon page reload");
+    cy.reload();
+    cy.waitForLoad();
+
+    dc.getTile().contains(newName);
+    dc.getCardNofTotalListing().contains("Card 3 of 4");
+    dc.getAttrName().eq(0).contains("habitat");
+    dc.getAttrName().eq(1).contains("animal");
+    dc.getAttrValueInput().eq(0).invoke('val').should('eq', "river");
+    dc.getAttrValueInput().eq(1).invoke('val').should('eq', "rhinocerotter");
+
+    cy.log("can page through a stack of cards in the sort view");
+    dc.getSortSelect().select("habitat");
+    dc.getSortStack().contains("Card 2").should('be.visible');
+    dc.getSortStack().contains("Card 4").should('not.be.visible');
+    dc.getSortStackNextButton().click();
+    dc.getSortStack().contains("Card 2").should('not.be.visible');
+    dc.getSortStack().contains("Card 4").should('be.visible');
+    dc.getSortStackPreviousButton().click();
+    dc.getSortStack().contains("Card 2").should('be.visible');
+    dc.getSortStack().contains("Card 4").should('not.be.visible');
+
+    cy.log("can toggle stacked and unstacked state of cards in a stack");
+    dc.getSortStack().contains("Card 2").should('be.visible');
+    dc.getSortStack().find('.card').eq(0).invoke('offset').its('top').should('be.lt', 200);
+    dc.getSortStack().find('.card').eq(1).invoke('offset').its('top').should('be.lt', 200);
+    dc.getSortStack().should('not.have.class', 'expanded');
+    dc.getSortStack().should('have.class', 'collapsed');
+    dc.getSortStackToggle().click();
+    dc.getSortStack().find('.card').eq(0).invoke('offset').its('top').should('be.lt', 200);
+    dc.getSortStack().find('.card').eq(1).invoke('offset').its('top').should('be.gt', 200);
+    dc.getSortStack().should('not.have.class', 'collapsed');
+    dc.getSortStack().should('have.class', 'expanded');
   });
 });

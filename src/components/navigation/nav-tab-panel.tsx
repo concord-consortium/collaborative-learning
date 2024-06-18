@@ -9,9 +9,9 @@ import { LogEventName } from "../../lib/logger-types";
 import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { SectionDocumentOrBrowser } from "./section-document-or-browser";
-// import { NewCommentsBadge } from "./new-comments-badge";
 import { ChatPanel } from "../chat/chat-panel";
 import ChatIcon from "../../assets/chat-icon.svg";
+import { SortWorkView } from "../document/sort-work-view";
 
 import "react-tabs/style/react-tabs.css";
 import "./nav-tab-panel.sass";
@@ -32,7 +32,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { ui: { activeNavTab, focusDocument, showChatPanel, selectedTileIds },
+    const { persistentUI: { activeNavTab, focusDocument, showChatPanel }, ui: { selectedTileIds },
             user } = this.stores;
     const tabs = this.stores.tabsToDisplay;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
@@ -86,7 +86,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
               })
             }
           </Tabs>
-          {showChatPanel &&
+          {showChatPanel && activeNavTab &&
             <ChatPanel user={user} activeNavTab={activeNavTab} focusDocument={focusDocument} focusTileId={focusTileId}
                         onCloseChatPanel={this.handleShowChatColumn} />}
         </div>
@@ -102,6 +102,8 @@ export class NavTabPanel extends BaseComponent<IProps> {
         return this.renderTeacherGuide();
       case ENavTab.kStudentWork:
         return <StudentGroupView/>;
+      case ENavTab.kSortWork:
+        return <SortWorkView/>;
       case ENavTab.kClassWork:
       case ENavTab.kLearningLog:
       case ENavTab.kMyWork:
@@ -113,7 +115,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private renderDocuments = (tabSpec: NavTabModelType) => {
-    const { ui: { showChatPanel } } = this.stores;
+    const { persistentUI: { showChatPanel } } = this.stores;
     return (
       <SectionDocumentOrBrowser
         tabSpec={tabSpec}
@@ -146,36 +148,36 @@ export class NavTabPanel extends BaseComponent<IProps> {
 
   private handleSelectTab = (tabIndex: number) => {
     const tabs = this.stores.tabsToDisplay;
-    const { ui } = this.stores;
+    const { persistentUI } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];
-      if (ui.activeNavTab !== tabSpec.tab) {
-        ui.setActiveNavTab(tabSpec.tab);
+      if (persistentUI.activeNavTab !== tabSpec.tab) {
+        persistentUI.setActiveNavTab(tabSpec.tab);
         const logParameters = {
           tab_name: tabSpec.tab.toString()
         };
         const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
         logEvent();
       } else {
-        if (ui.openSubTab) {
+        if (persistentUI.openSubTab) {
           // If there is a document open then a click on the active top level tab
           // closes the document. Also a click on the active sub tab closes the
           // document, this is handled in section-document-or-browser
-          ui.closeSubTabDocument(tabSpec.tab, ui.openSubTab);
+          persistentUI.closeSubTabDocument(tabSpec.tab, persistentUI.openSubTab);
         }
       }
     }
   };
 
   private handleShowChatColumn = () => {
-    const { ui } = this.stores;
-    const event = ui.showChatPanel ? LogEventName.CHAT_PANEL_HIDE : LogEventName.CHAT_PANEL_SHOW;
+    const { persistentUI } = this.stores;
+    const event = persistentUI.showChatPanel ? LogEventName.CHAT_PANEL_HIDE : LogEventName.CHAT_PANEL_SHOW;
     Logger.log(event);
-    ui.toggleShowChatPanel(!ui.showChatPanel);
+    persistentUI.toggleShowChatPanel(!persistentUI.showChatPanel);
   };
 
   private handleCloseResources = () => {
-    const { ui } = this.stores;
-    ui.setDividerPosition(kDividerMin);
+    const { persistentUI } = this.stores;
+    persistentUI.setDividerPosition(kDividerMin);
   };
 }

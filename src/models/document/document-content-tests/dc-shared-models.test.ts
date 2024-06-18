@@ -8,6 +8,9 @@ import { IDropRowInfo } from "../tile-row";
 import { IDocumentImportSnapshot } from "../document-content-import-types";
 import { SharedModelDocumentManager } from "../shared-model-document-manager";
 import { ITileEnvironment } from "../../tiles/tile-content";
+
+import "../../../plugins/diagram-viewer/diagram-registration";
+
 // mock Logger calls
 const mockLogTileCopyEvent = jest.fn();
 jest.mock("../../tiles/log/log-tile-copy-event", () => ({
@@ -19,7 +22,7 @@ jest.mock("../../tiles/log/log-tile-document-event", () => ({
 }));
 
 /*
-  This can be opened with: http://localhost:8080/doc-editor.html
+  This can be opened with: http://localhost:8080/editor/
 */
 import sharedModelExample from "./shared-model-example.json";
 const srcContent: IDocumentImportSnapshot = sharedModelExample.content;
@@ -64,7 +67,7 @@ describe("DocumentContentModel -- shared Models --", () => {
     expect(parsedExport(documentContent)).toEqual({
       tiles: [
         [
-          { content: { type: "Table", name: "Demo Dataset", columnWidths } },
+          { content: { type: "Table", columnWidths } },
           { content: { type: "Geometry", objects: [] } }
         ]
       ],
@@ -127,9 +130,9 @@ describe("DocumentContentModel -- shared Models --", () => {
 Object {
   "annotations": Object {},
   "rowMap": Object {
-    "testid-13": Object {
+    "testid-12": Object {
       "height": undefined,
-      "id": "testid-13",
+      "id": "testid-12",
       "isSectionHeader": false,
       "sectionId": undefined,
       "tiles": Array [
@@ -145,7 +148,7 @@ Object {
     },
   },
   "rowOrder": Array [
-    "testid-13",
+    "testid-12",
   ],
   "sharedModelMap": Object {
     "sharedDataSet1": Object {
@@ -252,7 +255,7 @@ Object {
         "importedDataSet": Object {
           "attributes": Array [],
           "cases": Array [],
-          "id": "testid-12",
+          "id": "testid-13",
           "name": undefined,
           "sourceID": undefined,
         },
@@ -308,7 +311,7 @@ Object {
   ],
   "sharedModelMap": Object {
     "testid-28": Object {
-      "provider": undefined,
+      "provider": "testid-31",
       "sharedModel": Object {
         "dataSet": Object {
           "attributes": Array [
@@ -384,7 +387,7 @@ Object {
         "importedDataSet": Object {
           "attributes": Array [],
           "cases": Array [],
-          "id": "testid-20",
+          "id": "testid-21",
           "name": undefined,
           "sourceID": undefined,
         },
@@ -393,7 +396,7 @@ Object {
       },
       "display": undefined,
       "id": "testid-31",
-      "title": "Table 2",
+      "title": undefined,
     },
   },
 }
@@ -441,7 +444,7 @@ Object {
   ],
   "sharedModelMap": Object {
     "testid-47": Object {
-      "provider": undefined,
+      "provider": "testid-50",
       "sharedModel": Object {
         "dataSet": Object {
           "attributes": Array [
@@ -517,7 +520,7 @@ Object {
         "importedDataSet": Object {
           "attributes": Array [],
           "cases": Array [],
-          "id": "testid-37",
+          "id": "testid-38",
           "name": undefined,
           "sourceID": undefined,
         },
@@ -581,7 +584,7 @@ Object {
   ],
   "sharedModelMap": Object {
     "testid-64": Object {
-      "provider": undefined,
+      "provider": "testid-67",
       "sharedModel": Object {
         "dataSet": Object {
           "attributes": Array [
@@ -658,7 +661,7 @@ Object {
         "importedDataSet": Object {
           "attributes": Array [],
           "cases": Array [],
-          "id": "testid-55",
+          "id": "testid-56",
           "name": undefined,
           "sourceID": undefined,
         },
@@ -667,7 +670,7 @@ Object {
       },
       "display": undefined,
       "id": "testid-67",
-      "title": "Table 2",
+      "title": undefined,
     },
     "testid-68": Object {
       "content": Object {
@@ -700,4 +703,13 @@ Object {
 `);
     });
   });
+
+  it("queries for consumer and provider tiles", () => {
+    const { consumers, providers } = documentContent.getLinkableTiles();
+    expect(providers).toHaveLength(1);
+    expect(providers[0].type).toEqual("Table");
+    expect(consumers).toHaveLength(2);
+    expect(consumers.map(t => t.type).sort()).toEqual(["Geometry", "Table"]);
+  });
+
 });

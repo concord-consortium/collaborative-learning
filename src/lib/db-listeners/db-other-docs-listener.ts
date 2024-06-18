@@ -6,7 +6,6 @@ import {
   LearningLogPublication, OtherDocumentType, OtherPublicationType, PersonalDocument, PersonalPublication
 } from "../../models/document/document-types";
 import { BaseListener } from "./base-listener";
-import { syncStars } from "./sync-stars";
 
 export class DBOtherDocumentsListener extends BaseListener {
   private db: DB;
@@ -74,7 +73,6 @@ export class DBOtherDocumentsListener extends BaseListener {
         .then(doc => {
           if (doc.uid === user.id) {
             !doc.getProperty("isDeleted") && documents.resolveRequiredDocumentPromise(doc);
-            (doc.type === PersonalDocument) && syncStars(doc, this.db);
           }
           return doc;
         });
@@ -85,6 +83,8 @@ export class DBOtherDocumentsListener extends BaseListener {
     const dbDoc: DBOtherPublication|null = snapshot.val();
     this.debugLogSnapshot("#handlePublicationAdded", snapshot);
     if (dbDoc) {
+      // TODO: handle rejections of this promise, see the note in
+      // the catch of db.ts#openDocument
       this.db.createDocumentModelFromOtherPublication(dbDoc, this.publicationType);
     }
   };
@@ -97,6 +97,7 @@ export class DBOtherDocumentsListener extends BaseListener {
       const documentModel = documents.getDocument(dbDoc.self.documentKey);
       if (documentModel) {
         documentModel.setTitle(dbDoc.title);
+        if (dbDoc.visibility) documentModel.setVisibility(dbDoc.visibility);
       }
     }
   };

@@ -1,117 +1,91 @@
-import { cloneDeep } from "lodash";
-import { types, Instance, getSnapshot, SnapshotOut } from "mobx-state-tree";
+import { types, Instance, SnapshotOut, SnapshotIn } from "mobx-state-tree";
+import { NumberNodeModel } from "../nodes/number-node";
+import { MathNodeModel } from "../nodes/math-node";
+import { CounterNodeModel } from "../nodes/counter-node";
+import { LogicNodeModel } from "../nodes/logic-node";
+import { GeneratorNodeModel } from "../nodes/generator-node";
+import { DemoOutputNodeModel } from "../nodes/demo-output-node";
+import { LiveOutputNodeModel } from "../nodes/live-output-node";
+import { SensorNodeModel } from "../nodes/sensor-node";
+import { kMaxNodeValues } from "./utilities/node";
+import { TransformNodeModel } from "../nodes/transform-node";
+import { TimerNodeModel } from "../nodes/timer-node";
+import { ControlNodeModel } from "../nodes/control-node";
+import { uniqueId } from "../../../utilities/js-utils";
+import { BaseNodeModel, IBaseNodeModel } from "../nodes/base-node";
+import { IDataSet } from "../../../models/data/data-set";
+import { getAttributeIdForNode } from "./utilities/recording-utilities";
+import { STATE_VERSION_CURRENT } from "./dataflow-state-versions";
 
-const ConnectionModel = types
+export const ConnectionModel = types
   .model("Connection", {
-    node: types.number,
-    output: types.maybe(types.string),
-    input: types.maybe(types.string),
-    data: types.map(types.string)
+    id: types.identifier,
+    source: types.string,
+    sourceOutput: types.string,
+    target: types.string,
+    targetInput: types.string
   });
+export interface IConnectionModel extends Instance<typeof ConnectionModel> {}
+export interface ConnectionModelSnapshotIn extends SnapshotIn<typeof ConnectionModel> {}
 
-// The postProcessXSnapshotForRete functions are used to convert a program snapshot from
-// MST/firebase to a format rete will accept. Comments in preProcessSnapshot() functions
-// in corresponding models describe what these functions are undoing.
-
-const postProcessSocketSnapshotForRete = (snapshot: DataflowSocketSnapshotOut) => {
-  return { connections: Object.values(snapshot.connections) };
-};
-
-const postProcessSocketsSnapshotForRete = (snapshot: Record<string, DataflowSocketSnapshotOut>) => {
-  const processedSockets: any = {};
-  for (const key in snapshot) {
-    processedSockets[key] = postProcessSocketSnapshotForRete(snapshot[key]);
+/**
+ * The ConnectionModelWrapper is needed because Rete keeps references to the
+ * connections. After a connection model is removed from the MST tree by an applied
+ * snapshot, Rete still tries ot access its id. So we wrap the connection and keep
+ * a copy of the id. This way the actual MST object is not referenced just to get
+ * the id.
+ */
+export class ConnectionModelWrapper {
+  public id;
+  constructor(
+    public model: IConnectionModel
+  ) {
+    this.id = model.id;
   }
-  return processedSockets;
-};
 
-export const SocketModel = types
-  .model("Socket", {
-    connections: types.map(ConnectionModel)
-  })
-  .preProcessSnapshot((snapshot: any) => {
-    // Connections are stored in rete as an array, but MST works better with maps
-    if (Array.isArray(snapshot.connections)) {
-      const connections: any = {};
-      snapshot.connections.forEach((connection: any) => {
-        connections[`${connection.node}-${connection.output}-${connection.input}`] = connection;
-      });
-      return { connections };
-    }
-    return snapshot;
-  });
-
-export interface DataflowSocketSnapshotOut extends SnapshotOut<typeof SocketModel> {}
-
-const DataflowNodeDataModel = types.
-  model("DataflowNodeData", {
-    plot: types.maybe(types.boolean),
-    orderedDisplayName: types.maybe(types.string),
-
-    // Sensor
-    type: types.maybe(types.string),
-    sensor: types.maybe(types.string),
-    virtual: types.maybe(types.boolean),
-
-    // Number
-    nodeValueUnits: types.maybe(types.string),
-
-    // Generator
-    generatorType: types.maybe(types.string),
-    amplitudeUnits: types.maybe(types.string),
-    amplitude: types.maybe(types.number),
-    periodUnits: types.maybe(types.string),
-    period: types.maybe(types.number),
-
-    // Timer
-    timeOnUnits: types.maybe(types.string),
-    timeOn: types.maybe(types.number),
-    timeOffUnits: types.maybe(types.string),
-    timeOff: types.maybe(types.number),
-
-    // Math
-    mathOperator: types.maybe(types.string),
-
-    // Logic
-    logicOperator: types.maybe(types.string),
-
-    // Transform
-    transformOperator: types.maybe(types.string),
-
-    // Control
-    controlOperator: types.maybe(types.string),
-
-    // Demo Output
-    outputType: types.maybe(types.string),
-    demoOutput: types.maybe(types.number),
-
-    // Live Output
-    hubSelect: types.maybe(types.string),
-    liveOutputType: types.maybe(types.string),
-    liveOutput: types.maybe(types.number),
-  });
-
-const postProcessNodeSnapshotForRete = (snapshot: DataflowNodeSnapshotOut) => {
-  const { x, y, inputs, outputs, ...rest } = snapshot;
-  return {
-    position: [x, y],
-    inputs: postProcessSocketsSnapshotForRete(inputs),
-    outputs: postProcessSocketsSnapshotForRete(outputs),
-    ...rest
-  };
-};
+  get source() { return this.model.source; }
+  get sourceOutput() { return this.model.sourceOutput; }
+  get target() { return this.model.target; }
+  get targetInput() { return this.model.targetInput; }
+}
 
 export const DataflowNodeModel = types.
   model("DataflowNode", {
-    id: types.number,
+    id: types.identifier,
     name: types.string,
     x: types.number,
     y: types.number,
-    inputs: types.map(SocketModel),
-    outputs: types.map(SocketModel),
-    data: DataflowNodeDataModel,
+    data: types.union(
+      ControlNodeModel,
+      CounterNodeModel,
+      DemoOutputNodeModel,
+      GeneratorNodeModel,
+      LiveOutputNodeModel,
+      LogicNodeModel,
+      MathNodeModel,
+      NumberNodeModel,
+      SensorNodeModel,
+      TimerNodeModel,
+      TransformNodeModel,
+    ) as typeof BaseNodeModel
   })
+  .volatile(self => ({
+    // These are stored so annotations can update as the node moves around
+    liveX: NaN,
+    liveY: NaN,
+  }))
+  .actions(self => ({
+    setPosition(position: {x: number, y: number}) {
+      self.x = self.liveX = position.x;
+      self.y = self.liveY = position.y;
+    },
+    setLivePosition(position: {x: number, y: number}) {
+      self.liveX = position.x;
+      self.liveY = position.y;
+    }
+  }))
   .preProcessSnapshot((snapshot: any) => {
+    // TODO: is this needed anymore?
     // Turn position into x and y because MST has weird issues with arrays
     if (Array.isArray(snapshot.position)) {
       const { position: [x, y], ...rest } = snapshot;
@@ -119,84 +93,173 @@ export const DataflowNodeModel = types.
     }
     return snapshot;
   });
-
+export interface DataflowNodeSnapshotIn extends SnapshotIn<typeof DataflowNodeModel> {}
 export interface DataflowNodeSnapshotOut extends SnapshotOut<typeof DataflowNodeModel> {}
+export interface IDataflowNodeModel extends Instance<typeof DataflowNodeModel> {}
 
-// A model for keeping the values separate from the structure of a node.
-const DataflowValueModel = types.
-  model("DataflowValue", {
-    // Stores values the node watches for minigraphs
-    currentValues: types.map(types.maybe(types.number)),
-    // Map of JSON.stringified arrays of recent node values
-    recentValues: types.map(types.string)
-  });
-
-const postProcessProgramSnapshotForRete = (snapshot: DataflowProgramSnapshotOut) => {
-  const { nodes, values, ...rest } = snapshot;
-  const newNodes = cloneDeep(nodes) as any;
-  const keys = Object.keys(newNodes);
-  keys.forEach((key: string) => {
-    newNodes[key] = postProcessNodeSnapshotForRete(newNodes[key]);
-    const data = newNodes[key].data;
-    data.recentValues = {};
-    if ((values as any)?.[key]) {
-      const { currentValues, recentValues } = (values as any)[key];
-      Object.keys(currentValues).forEach((valueKey: string) => {
-        data[valueKey] = currentValues[valueKey];
-      });
-      Object.keys(recentValues).forEach((recentValuesKey: string) => {
-        data.recentValues[recentValuesKey] = JSON.parse(recentValues[recentValuesKey]);
-      });
-    }
-  });
-  return { nodes: newNodes, ...rest };
-};
+/**
+ * Multiple ReteManagers might be running at the same time. We want to use a single
+ * manager to process our nodes and update any volatile state. The ReteManagers
+ * use DataflowProgramModel.processor volatile property to figure out which one
+ * of them should actually do the processing.
+ */
+export interface DataflowProcessor {
+  process(): void;
+  /**
+   * This is used so the system can prefer non readOnly processors
+   */
+  readOnly?: boolean;
+  /**
+   * This is used so the system can replace disposed processors
+   */
+  disposed: boolean;
+}
 
 export const DataflowProgramModel = types.
   model("DataflowProgram", {
-    id: types.maybe(types.string),
+    id: STATE_VERSION_CURRENT,
     nodes: types.map(DataflowNodeModel),
-    // values has the same keys as nodes, where the values (current and recent) for the
-    // node at nodes[key] is stored at values[key]
-    values: types.map(DataflowValueModel)
+    connections: types.map(ConnectionModel),
+    recentTicks: types.array(types.string),
   })
+  .volatile(self => ({
+    processor: undefined as DataflowProcessor | undefined,
+    _connectionWrappers: {} as Record<string, ConnectionModelWrapper>
+  }))
   .views(self => ({
-    get snapshotForRete() {
-      return postProcessProgramSnapshotForRete(getSnapshot(self));
+    get currentTick() {
+      const length = self.recentTicks.length;
+      if (length === 0) return "";
+      return self.recentTicks[length-1];
+    },
+    get recordedTicks() {
+      return self.recentTicks.slice(0,-1);
+    },
+    getConnectionWrapper(id: string) {
+      const connection = self.connections.get(id);
+      if (!connection) return undefined;
+
+      const existingWrapper = self._connectionWrappers[id];
+      if (existingWrapper) return existingWrapper;
+
+      const newWrapper = new ConnectionModelWrapper(connection);
+      self._connectionWrappers[id] = newWrapper;
+      return newWrapper;
     }
   }))
-  .preProcessSnapshot((snapshot: any) => {
-    const { nodes, ...rest } = cloneDeep(snapshot);
-    const values: { [key: string]: any } = {};
-    if (nodes) {
-      const keys = Object.keys(nodes);
-      keys.forEach((key: string) => {
-        const { recentValues, watchedValues, ...restData } = nodes[key].data;
-        const processedRecentValues: Record<string, string> = {};
-        const currentValues: Record<string, number | undefined> = {};
-        if (watchedValues && recentValues) {
-          Object.keys(watchedValues).forEach((watchedKey: string) => {
-            if (recentValues[watchedKey]) {
-              processedRecentValues[watchedKey] = JSON.stringify(recentValues[watchedKey]);
-            } else {
-              processedRecentValues[watchedKey] = "[]";
-            }
-            const currentValue = restData[watchedKey];
-            // Make null and NaN become undefined when going into MST
-            currentValues[watchedKey] = currentValue === null || !isFinite(currentValue) ? undefined : currentValue;
-          });
-        }
-        values[key] = {
-          // Store all watched values in the currentValues map
-          currentValues,
-          // Store recentValues as a string instead of an array so there's only one patch per update
-          recentValues: processedRecentValues
-        };
-        nodes[key].data = { ...restData };
+  .views(self => ({
+    get connectionWrappers() {
+      return [...self.connections.keys()].map(id => self.getConnectionWrapper(id)!);
+    }
+  }))
+  .actions(self => ({
+    clearRecentTicks() {
+      self.recentTicks.clear();
+    },
+    addNewTick(newTick: string) {
+      const { recentTicks, currentTick } = self;
+      if (recentTicks.length > kMaxNodeValues) {
+        recentTicks.shift();
+      }
+      recentTicks.push(newTick);
+      self.nodes.forEach(node => {
+        node.data.createNextTickEntry(currentTick, newTick, recentTicks);
       });
     }
-    return { nodes, values, ...rest };
-  });
+  }))
+  .actions(self => ({
+    // This action is used to wrap the changes in a single MST transaction
+    // This could be generic, but a specific name is used so the recorded event has
+    // a useful name.
+    tickAndProcess(runner: () => void) {
+      runner();
+      // We add the new tick after the data and onTick methods have been called
+      // this way any changes triggered by user actions will get stored in the
+      // next tick instead of the one that was just added to the graph
+      // This means that the graph should graph (recentTicks.length - 1) points.
+      const newTick = uniqueId();
+      self.addNewTick(newTick);
+    },
 
+    // This action is called after a change in the Rete diagram.
+    // When a node is added, or removed, and a connection is added or removed.
+    // FIXME: this will be recorded as a secondary history entry, so it will
+    // break undo. We don't call the program's processor.process directly so
+    // that the rete manager has a chance to update the main processor if
+    // the previous main processor has gone away.
+    processAfterProgramChange(runner: () => void) {
+      runner();
+    },
+    setProcessor(processor: DataflowProcessor) {
+      self.processor = processor;
+    },
+    playbackNodesWithCaseData(dataSet: IDataSet, playBackIndex: number) {
+      self.clearRecentTicks();
+      const startIndex = Math.max(playBackIndex - kMaxNodeValues, 0);
+
+      for (let index = startIndex; index <= playBackIndex; index++) {
+        self.addNewTick(index.toString());
+        const caseId = dataSet.getCaseAtIndex(index)?.__id__;
+        if (!caseId) break;
+        let nodeIndex = 0;
+        self.nodes.forEach((_node) => {
+          const node = _node.data as IBaseNodeModel;
+          const attrId = getAttributeIdForNode(dataSet, nodeIndex);
+
+          // The user might have messed with the table, so the attribute might not exist
+          if (attrId) {
+            const nodeValue = dataSet.getValue(caseId, attrId) as number;
+            node.setNodeValue(nodeValue);
+          }
+
+          nodeIndex++;
+        });
+      }
+
+      // add one more tick so the last point is graphed
+      self.addNewTick((playBackIndex+1).toString());
+    }
+
+  }))
+  .actions(self => ({
+    addNode(node: IDataflowNodeModel) {
+      self.nodes.put(node);
+    },
+    addNodeSnapshot(nodeSnapshot: DataflowNodeSnapshotIn) {
+      const node = self.nodes.put(nodeSnapshot);
+      node.data.createNextTickEntry(undefined, self.currentTick);
+      return node;
+    },
+    removeNode(id: IDataflowNodeModel["id"]) {
+      self.nodes.delete(id);
+    },
+    addConnection(connection: IConnectionModel) {
+      self.connections.put(connection);
+    },
+    removeConnection(id: IConnectionModel["id"]) {
+      self.connections.delete(id);
+      if (self._connectionWrappers[id]) {
+        delete self._connectionWrappers[id];
+      }
+    }
+  }))
+  .actions(self => ({
+    removeNodeAndConnections(nodeId: string) {
+      const connections = [...self.connections.values()].filter(c => {
+        return c.source === nodeId || c.target === nodeId;
+      });
+
+      // We return the connection wrappers so they can be passed to
+      // rete for cleanup
+      const removedConnections = [];
+      for (const connection of connections) {
+        const wrapper = self.getConnectionWrapper(connection.id);
+        wrapper && removedConnections.push(wrapper);
+        self.removeConnection(connection.id);
+      }
+      self.removeNode(nodeId);
+      return removedConnections;
+    }
+  }));
 export interface DataflowProgramModelType extends Instance<typeof DataflowProgramModel> {}
 export interface DataflowProgramSnapshotOut extends SnapshotOut<typeof DataflowProgramModel> {}

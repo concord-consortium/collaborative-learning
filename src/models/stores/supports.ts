@@ -1,5 +1,4 @@
 import { types, Instance, getSnapshot } from "mobx-state-tree";
-import { cloneDeep } from "lodash";
 import { InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModelType } from "../curriculum/problem";
 import { getSectionInitials, getSectionTitle, kAllSectionType, SectionType } from "../curriculum/section";
@@ -198,61 +197,37 @@ export const SupportsModel = types
       return self.teacherStickyNotes.filter(support => {
         return support.showForUserProblem(target);
       });
+    },
+    getStickyNoteForUserWithLink(userId: string, key: string) {
+      return self.userSupports.find((s) =>
+        s.isStickyNote
+        && s.audience.identifier === userId
+        && s.support.linkedDocumentKey===key);
     }
   }))
   .views((self) => ({
     get allSupports() {
-        return (self.curricularSupports as SupportItemModelType[])
-        .concat(self.classSupports)
-        .concat(self.groupSupports)
-        .concat(self.userSupports);
+      return (self.curricularSupports as SupportItemModelType[])
+      .concat(self.classSupports)
+      .concat(self.groupSupports)
+      .concat(self.userSupports);
     },
 
     getSupportsForUserProblem(target: ISupportTarget): SupportItemModelType[] {
-        const { sectionId } = target;
-        const supports: SupportItemModelType[] = self.curricularSupports.filter((support) => {
-          return sectionId ? support.sectionId === sectionId : true;
-        });
-        return supports.concat(self.getTeacherSupportsForUserProblem(target));
-    }
+      const { sectionId } = target;
+      const supports: SupportItemModelType[] = self.curricularSupports.filter((support) => {
+        return sectionId ? support.sectionId === sectionId : true;
+      });
+      return supports.concat(self.getTeacherSupportsForUserProblem(target));
+  }
   }))
   .views((self) => ({
-    hasNewTeacherSupports(afterTimestamp?: number) {
-      return hasNewTeacherSupports(self.teacherSupports, afterTimestamp);
-    },
     hasNewStickyNotes(afterTimestamp?: number) {
       return hasNewTeacherSupports(self.teacherStickyNotes, afterTimestamp);
     }
   }))
   .actions((self) => {
     return {
-      createFromUnit(params: ICreateFromUnitParams) {
-        const { unit, investigation, problem, documents } = params;
-        const supports: CurricularSupportModelType[] = [];
-        const createItem = (type: SupportTarget, sectionId?: string) => {
-          return (support: SupportModelType) => {
-            supports.push(CurricularSupportModel.create({
-              support: cloneDeep(support),
-              type,
-              sectionId
-            }));
-          };
-        };
-
-        unit.supports.forEach(createItem(SupportTarget.unit));
-        investigation && investigation.supports.forEach(createItem(SupportTarget.investigation));
-        problem && problem.supports.forEach(createItem(SupportTarget.problem));
-        problem && problem.sections.forEach((section) => {
-          section.supports.forEach(createItem(SupportTarget.section, section.type));
-        });
-
-        self.curricularSupports.replace(supports);
-
-        if (documents) {
-          addSupportDocumentsToStore({ supports, ...params });
-        }
-      },
-
       addAuthoredSupports(supports: TeacherSupportModelType[], audienceType: AudienceEnum) {
         const currSupports = audienceType === AudienceEnum.class
           ? self.classSupports

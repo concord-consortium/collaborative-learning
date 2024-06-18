@@ -1,6 +1,6 @@
 
 export const newDataRate = 10;
-export const newZoom = { dx: 1, dy: 1, scale: 10 };
+export const newZoom = { x: 1, y: 1, k: 10 };
 
 // program has four nodes: Generator, Timer, Number, Demo Output
 export const exampleProgram = `{

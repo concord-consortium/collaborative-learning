@@ -1,0 +1,35 @@
+{
+  "type": "first",
+  "content": {
+    "tiles": [
+      {
+        "id": "JGEZwV1ukhksYLcc",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>These are some published equations</p>"
+          ]
+        }
+      },
+      {
+        "id": "hXkYhH1PmrmLAJxY",
+        "title": "Eq. 1",
+        "content": {
+          "type": "Expression",
+          "latexStr": "2+x=5-y"
+        }
+      },
+      {
+        "id": "9RDBFbTvzzfd5iQM",
+        "title": "Eq. 2",
+        "content": {
+          "type": "Expression",
+          "latexStr": "y+2+x=5"
+        }
+      }
+    ]
+  },
+  "supports": []
+}

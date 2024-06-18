@@ -1,4 +1,4 @@
-import GraphToolTile from '../tile/GraphToolTile';
+import GeometryToolTile from '../tile/GeometryToolTile';
 import ImageToolTile from '../tile/ImageToolTile';
 import DrawToolTile from '../tile/DrawToolTile';
 import TextToolTile from '../tile/TextToolTile';
@@ -7,11 +7,12 @@ import DataflowToolTile from '../tile/DataflowToolTile';
 import DiagramToolTile from '../tile/DiagramToolTile';
 import SimulatorToolTile from '../tile/SimulatorTile';
 import NumberlineToolTile from '../tile/NumberlineToolTile';
+import ExpressionToolTile from '../tile/ExpressionToolTile';
 import Canvas from './Canvas';
 import Dialog from './Dialog';
 import XYPlotToolTile from '../tile/XYPlotToolTile';
 
-let graphToolTile = new GraphToolTile,
+let graphToolTile = new GeometryToolTile,
     imageToolTile = new ImageToolTile,
     drawToolTile = new DrawToolTile,
     textToolTile = new TextToolTile,
@@ -20,6 +21,7 @@ let graphToolTile = new GraphToolTile,
     diagramToolTile = new DiagramToolTile,
     simulatorToolTile = new SimulatorToolTile,
     numberlineToolTile = new NumberlineToolTile,
+    expressionToolTile = new ExpressionToolTile,
     xyPlotToolTile = new XYPlotToolTile,
     canvas = new Canvas,
     dialog = new Dialog;
@@ -30,11 +32,8 @@ class ClueCanvas {
         return cy.get('.primary-workspace [data-test=document-title]');
     }
 
-    getPublishTeacherDocument() {
-        return cy.get('[data-test=publish-icon]');
-    }
     publishTeacherDoc() {
-        this.getPublishTeacherDocument().click();
+        canvas.getPublishItem().click();
         dialog.getModalTitle().should('be.visible').and('contain', 'Publish');
         dialog.getModalButton().contains("Just this class").click();
         dialog.getDialogTitle().should('exist').contains('Published');
@@ -42,7 +41,7 @@ class ClueCanvas {
         dialog.getDialogTitle().should('not.exist');
     }
     publishTeacherDocToMultipleClasses() {
-      this.getPublishTeacherDocument().click();
+      canvas.getPublishItem().click();
       dialog.getModalTitle().should('be.visible').and('contain', 'Publish');
       dialog.getModalButton().contains("All Classes").click();
       dialog.getDialogTitle().should('exist').contains('Published');
@@ -52,6 +51,10 @@ class ClueCanvas {
 
     getSingleWorkspace() {
         return cy.get('.primary-workspace');
+    }
+
+    getSingleWorkspaceDocumentContent() {
+      return cy.get('.primary-workspace .document-content');
     }
 
     getRowSectionHeader() {
@@ -130,6 +133,14 @@ class ClueCanvas {
         this.getShareButton().find('.ball').invoke('attr', 'class').should('not.contain', 'toggle-on');
     }
 
+    getStickyNotePopup() {
+      return cy.get('div.sticky-note-popup');
+    }
+
+    getStickyNoteLink() {
+      return this.getStickyNotePopup().find('a');
+    }
+
     getToolPalette() {
         return cy.get('.primary-workspace> .toolbar');
     }
@@ -187,8 +198,8 @@ class ClueCanvas {
                     .trigger('dragstart', { dataTransfer });
                 break;
             case ('geometry'):
-                graphToolTile.getGraphTile().eq(0).click();
-                graphToolTile.getGraphTile().eq(0)
+                graphToolTile.getGeometryTile().eq(0).click();
+                graphToolTile.getGeometryTile().eq(0)
                     .trigger('dragstart', { dataTransfer });
                 break;
             case ('text'):
@@ -251,7 +262,7 @@ class ClueCanvas {
                 tileElement = cy.get('.text-tool-wrapper').last().click({ force: true }).parent();
                 break;
             case 'graph':
-                tileElement = graphToolTile.getGraphTile().last().click({ force: true }).parent();
+                tileElement = graphToolTile.getGeometryTile().last().click({ force: true }).parent();
                 break;
             case 'image':
                 tileElement = imageToolTile.getImageTile().last().click({ force: true }).parent();
@@ -264,7 +275,7 @@ class ClueCanvas {
                 tileElement = tableToolTile.getTableTile().last().click({ force: true }).parent();
                 break;
             case 'geometry':
-                tileElement = graphToolTile.getGraphTile().last().click({ force: true }).parent();
+                tileElement = graphToolTile.getGeometryTile().last().click({ force: true }).parent();
                 break;
             case 'dataflow':
                 tileElement = dataflowToolTile.getDataflowTile().last().click({ force: true });
@@ -277,6 +288,9 @@ class ClueCanvas {
                 break;
             case 'numberline':
                 tileElement = numberlineToolTile.getNumberlineTile().last().click({ force: true });
+                break;
+            case 'expression':
+                tileElement = expressionToolTile.getExpressionTile().last().click({ force: true });
                 break;
             case 'xyplot':
                 tileElement = xyPlotToolTile.getTile().last().click({ force: true });
@@ -355,7 +369,7 @@ class ClueCanvas {
         return cy.get('.tool.redo');
      }
      publishDoc(button) {
-        this.getPublishTeacherDocument().click();
+        canvas.getPublishItem().click();
         dialog.getModalTitle().should('be.visible').and('contain', 'Publish');
         dialog.getModalButton().contains(button).click();
         dialog.getDialogTitle().should('exist').contains('Published');
@@ -389,6 +403,32 @@ class ClueCanvas {
       cy.document().within(() => {
         cy.get(`.tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
           .should('be.disabled');
+      });
+    }
+
+    /**
+     * Locate the requested toolbar button and make sure it is selected.
+     * This escapes from any "within" restriction since toolbars are at the HTML document level.
+     * @param {*} tileType string name of the tile
+     * @param {*} buttonName string name of the button
+     */
+    toolbarButtonIsSelected(tileType, buttonName) {
+      return cy.document().within(() => {
+        cy.get(`.tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+          .should('have.class', 'selected');
+      });
+    }
+
+    /**
+     * Locate the requested toolbar button and make sure it is not selected.
+     * This escapes from any "within" restriction since toolbars are at the HTML document level.
+     * @param {*} tileType string name of the tile
+     * @param {*} buttonName string name of the button
+     */
+    toolbarButtonIsNotSelected(tileType, buttonName) {
+      return cy.document().within(() => {
+        cy.get(`.tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+          .should('not.have.class', 'selected');
       });
     }
 

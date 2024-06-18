@@ -1,12 +1,16 @@
 import { inject, observer } from "mobx-react";
 import { getSnapshot, destroy } from "mobx-state-tree";
 import React from "react";
+import _ from "lodash";
+import { ObservableMap, runInAction } from "mobx";
+import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import stringify from "json-stringify-pretty-compact";
+
 import { AnnotationLayer } from "./annotation-layer";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
 import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
-import { createDocumentModel, ContentStatus, DocumentModelType } from "../../models/document/document";
+import { ContentStatus, DocumentModelType, createDocumentModelWithEnv } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
 import { logHistoryEvent } from "../../models/history/log-history-event";
@@ -20,6 +24,8 @@ import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS, DEBUG_DOCUMENT, DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentError } from "./document-error";
 import { ReadOnlyContext } from "./read-only-context";
+import { CanvasMethodsContext, ICanvasMethods } from "./canvas-methods-context";
+import { ObjectBoundingBox } from "../../models/annotations/clue-object";
 
 import "./canvas.scss";
 
@@ -52,6 +58,10 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   static contextType = EditableTileApiInterfaceRefContext;
   declare context: React.ContextType<typeof EditableTileApiInterfaceRefContext>;
 
+  // Maps tileId and objectId to a bounding box spec.
+  private boundingBoxCache: ObservableMap<string,ObservableMap<string,ObjectBoundingBox>> = new ObservableMap();
+  private canvasMethods: ICanvasMethods;
+
   constructor(props: IProps) {
     super(props);
 
@@ -71,7 +81,20 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       documentScrollY: 0,
       showPlaybackControls: false,
     };
+
+    this.canvasMethods = { cacheObjectBoundingBox: this.cacheObjectBoundingBox };
   }
+
+  private fallbackRender = ({ error, resetErrorBoundary }: FallbackProps) => {
+    return (
+      <DocumentError
+        action="rendering"
+        document={this.props.document}
+        errorMessage={error.message}
+        content={this.props.document?.content}
+      />
+    );
+  };
 
   private setCanvasElement(canvasElement?: HTMLDivElement | null) {
     if (!this.state.canvasElement) {
@@ -79,34 +102,57 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private cacheObjectBoundingBox = (tileId: string, objectId: string, boundingBox: ObjectBoundingBox | undefined) => {
+    runInAction(() => {
+      if (!this.boundingBoxCache.has(tileId)) {
+        this.boundingBoxCache.set(tileId, new ObservableMap());
+      }
+      const tileBBMap = this.boundingBoxCache.get(tileId);
+      const prevValue = tileBBMap?.get(objectId);
+      if (!_.isEqual(prevValue, boundingBox)) {
+        if (boundingBox) {
+          tileBBMap?.set(objectId, boundingBox);
+        } else {
+          tileBBMap?.delete(objectId);
+        }
+      }
+    });
+  };
+
   public render() {
     if (this.context && !this.props.readOnly) {
       // update the editable api interface used by the toolbar
       this.context.current = this.tileApiInterface;
     }
     const content = this.getDocumentToShow()?.content ?? this.getDocumentContent();
+
     return (
       <TileApiInterfaceContext.Provider value={this.tileApiInterface}>
         <AddTilesContext.Provider value={this.getDocumentContent() || null}>
           <ReadOnlyContext.Provider value={this.props.readOnly}>
-            <div
-              key="canvas"
-              className="canvas"
-              data-test="canvas"
-              onKeyDown={this.handleKeyDown}
-              ref={(el) => this.setCanvasElement(el)}
-            >
-              {this.renderContent()}
-              {this.renderDebugInfo()}
-              {this.renderOverlayMessage()}
-            </div>
-            <AnnotationLayer
-              canvasElement={this.state.canvasElement}
-              content={content}
-              documentScrollX={this.state.documentScrollX}
-              documentScrollY={this.state.documentScrollY}
-              readOnly={this.props.readOnly}
-            />
+            <CanvasMethodsContext.Provider value={this.canvasMethods}>
+              <ErrorBoundary fallbackRender={this.fallbackRender}>
+                <div
+                  key="canvas"
+                  className="canvas"
+                  data-test="canvas"
+                  onKeyDown={this.handleKeyDown}
+                  ref={(el) => this.setCanvasElement(el)}
+                >
+                  {this.renderContent()}
+                  {this.renderDebugInfo()}
+                  {this.renderOverlayMessage()}
+                </div>
+                <AnnotationLayer
+                  canvasElement={this.state.canvasElement}
+                  content={content}
+                  documentScrollX={this.state.documentScrollX}
+                  documentScrollY={this.state.documentScrollY}
+                  readOnly={this.props.readOnly}
+                  boundingBoxCache={this.boundingBoxCache}
+                />
+              </ErrorBoundary>
+            </CanvasMethodsContext.Provider>
           </ReadOnlyContext.Provider>
         </AddTilesContext.Provider>
       </TileApiInterfaceContext.Provider>
@@ -124,7 +170,12 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     // It might be useful in the future to support showing the history so a user could try to
     // rewind to a document version that doesn't have an error.
     if (document?.contentStatus === ContentStatus.Error) {
-      return <DocumentError document={document} />;
+      return <DocumentError
+        action="loading"
+        document={document}
+        errorMessage={document.contentErrorMessage}
+        content={document.invalidContent}
+      />;
     } else if (documentContent) {
       return (
         <>
@@ -182,8 +233,8 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   };
 
   private getTransformImageUrl = () => {
-    const { appConfig, unit } = this.stores;
-    const unitBasePath = appConfig.getUnitBasePath(unit.code);
+    const { curriculumConfig, unit } = this.stores;
+    const unitBasePath = curriculumConfig.getUnitBasePath(unit.code);
     return (url?: string, filename?: string) => {
       return transformCurriculumImageUrl(url, unitBasePath, filename);
     };
@@ -278,7 +329,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
 
   private createHistoryDocumentCopy = () => {
     if (this.props.document) {
-      const docCopy = createDocumentModel(getSnapshot(this.props.document));
+      const docCopy = createDocumentModelWithEnv(this.stores.appConfig, getSnapshot(this.props.document));
       // Make a variable available with the current history document
       if (DEBUG_DOCUMENT) {
         (window as any).currentHistoryDocument = docCopy;

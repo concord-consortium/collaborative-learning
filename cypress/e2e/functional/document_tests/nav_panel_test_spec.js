@@ -10,17 +10,20 @@ const clueCanvas = new ClueCanvas;
 const problemSubTabTitles = ['Introduction', 'Initial Challenge', 'What If', 'Now What'];
 const dialog = new Dialog;
 
-const queryParams1 = `${Cypress.config("queryParams")}`;
-const queryParams2 = "?appMode=qa&fakeClass=10&fakeUser=student:11&fakeOffering=10&qaGroup=10&unit=example";
-const queryParams3 = "?appMode=qa&fakeClass=10&fakeUser=student:11&fakeOffering=10&qaGroup=10&unit=example-show-nav-panel";
-const queryParams4 = "?appMode=qa&fakeClass=10&fakeUser=student:11&fakeOffering=10&qaGroup=10&unit=example-no-section-problem-tab";
-const queryParams5 = "?appMode=qa&fakeClass=10&fakeUser=student:11&fakeOffering=10&qaGroup=10&&unit=example-config-subtabs";
+const queryParams1 = `${Cypress.config("qaUnitStudent5")}`;
+const queryParams2 = `${Cypress.config("qaNoNavPanelUnitStudent5")}`;
+const queryParams3 = `${Cypress.config("qaShowNavPanelUnitStudent5")}`;
+const queryParams4 = `${Cypress.config("qaNoSectionProblemTabUnitStudent5")}`;
+const queryParams5 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
 
 function beforeTest(params) {
   cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
 }
+
+//TODO: change all syntax from starred to bookmarks/"bookmarked"
+//https://www.pivotaltracker.com/n/projects/2441242/stories/186891632
 
 context('Nav Panel', function () {
   it('Test nav panel tabs', function () {
@@ -102,13 +105,13 @@ context('Nav Panel', function () {
       resourcesPanel.getCanvasStarIcon('my-work', 'workspaces', copyDocumentTitle).should('have.class', 'starred');
 
       cy.log('verify starred document appears in the Starred section');
-      cy.openSection('my-work', 'starred');
-      resourcesPanel.getCanvasItemTitle('my-work', 'starred').contains(copyDocumentTitle).should('exist');
+      cy.openSection('my-work', 'bookmarks');
+      resourcesPanel.getCanvasItemTitle('my-work', 'bookmarks').contains(copyDocumentTitle).should('exist');
 
       cy.log('remains open after the resources panel is collapsed and expand');
       cy.collapseResourceTabs();
       cy.openResourceTabs();
-      cy.get('.doc-tab.my-work.starred').should('have.class', 'selected');
+      cy.get('.doc-tab.my-work.bookmarks').should('have.class', 'selected');
 
       cy.log('verify Learning Log Section');
       cy.openTopTab('my-work');
@@ -136,7 +139,6 @@ context('Nav Panel', function () {
       cy.openTopTab("class-work");
       cy.openSection("class-work", "learning-logs");
       resourcesPanel.getCanvasItemTitle("class-work", "learning-logs", "Learning Log Copy");
-
 
       cy.log('Class Work tab tests');
       cy.openTopTab('class-work');
@@ -188,8 +190,9 @@ context('Nav Panel', function () {
 
     cy.log('Customized tabs');
     const exampleProblemSubTabTitles = ["First Section", "Second Section", "Third Section"];
-    const exampleMyWorkSubTabTitles = ["Workspaces", "Starred"];
-    const exampleClassWorkSubTabTitles = ["Workspaces", "Supplemental Work", "Starred"];
+    //TODO: Need to change the syntax to "Bookmarks"
+    const exampleMyWorkSubTabTitles = ["Workspaces", "Bookmarks"];
+    const exampleClassWorkSubTabTitles = ["Workspaces", "Supplemental Work", "Bookmarks"];
 
     beforeTest(queryParams5);
     cy.openTopTab("problems");

@@ -1,6 +1,7 @@
 import stringify from "json-stringify-pretty-compact";
 import { types, Instance, getSnapshot } from "mobx-state-tree";
-import { getTileIdFromContent } from "../../../models/tiles/tile-model";
+import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
+import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { uniqueId } from "../../../utilities/js-utils";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -14,6 +15,7 @@ export const PointObjectModel = types
   .model("PointObject", {
     id: types.identifier,
     xValue: 0,
+    isOpen: false
   })
   .volatile(self => ({
     dragXValue: undefined as undefined | number,
@@ -32,7 +34,7 @@ export const PointObjectModel = types
         self.xValue = self.dragXValue;
         self.dragXValue = undefined;
       }
-    }
+    },
   }));
 
 export interface PointObjectModelType extends Instance<typeof PointObjectModel> {}
@@ -66,14 +68,6 @@ export const NumberlineContentModel = TileContentModel
     }
   }))
   .views(self =>({
-    get annotatableObjects() {
-      const tileId = getTileIdFromContent(self) ?? "";
-      return self.pointsArr.map(point => ({
-        objectId: point.id,
-        objectType: "point",
-        tileId
-      }));
-    },
     get pointsXValuesArr() {
       return self.pointsArr.map((pointObj) => pointObj.xValue);
     },
@@ -84,6 +78,14 @@ export const NumberlineContentModel = TileContentModel
       const snapshot = getSnapshot(self);
       return stringify(snapshot, {maxLength: 200});
     }
+  }))
+  .views(self => tileContentAPIViews({
+    get annotatableObjects(): IClueTileObject[] {
+      return self.pointsArr.map(point => ({
+        objectId: point.id,
+        objectType: "point",
+      }));
+    },
   }))
   .actions(self =>({
     clearSelectedPoints() {
@@ -99,9 +101,9 @@ export const NumberlineContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    createNewPoint(xValue: number) {
+    createNewPoint(xValue: number, isOpen: boolean) {
       const id = uniqueId();
-      const pointModel = PointObjectModel.create({ id, xValue });
+      const pointModel = PointObjectModel.create({ id, xValue, isOpen });
       self.points.set(id, pointModel);
       return pointModel;
     },
@@ -123,8 +125,8 @@ export const NumberlineContentModel = TileContentModel
     },
   }))
   .actions(self => ({
-    createAndSelectPoint(xValue: number) {
-      const newPoint = self.createNewPoint(xValue);
+    createAndSelectPoint(xValue: number, isOpen: boolean) {
+      const newPoint = self.createNewPoint(xValue, isOpen);
       self.setSelectedPoint(newPoint);
       return newPoint;
     }

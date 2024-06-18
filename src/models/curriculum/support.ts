@@ -2,16 +2,6 @@ import { types, getSnapshot } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
 import { IAuthoredDocumentContent } from "../document/document-content-import-types";
 
-let gSuspendSupportContentParsing = 0;
-
-export function suspendSupportContentParsing() {
-  ++gSuspendSupportContentParsing;
-}
-
-export function resumeSupportContentParsing() {
-  --gSuspendSupportContentParsing;
-}
-
 export enum ESupportType {
   // simple text supports (e.g. legacy supports); content is simple text
   text = "text",
@@ -42,8 +32,9 @@ export function createTextSupport(text: string) {
   return SupportModel.create({ type: ESupportType.text, content: text });
 }
 
-export function createStickyNote(text: string) {
-  return SupportModel.create({ type: ESupportType.text, mode: ESupportMode.stickyNote, content: text });
+export function createStickyNote(text: string, linkedDocumentKey?: string) {
+  return SupportModel.create({
+    type: ESupportType.text, mode: ESupportMode.stickyNote, content: text, linkedDocumentKey });
 }
 
 export const SupportModel = types
@@ -51,11 +42,11 @@ export const SupportModel = types
     type: types.enumeration<ESupportType>("SupportType", Object.values(ESupportType)),
     mode: types.maybe(types.enumeration<ESupportMode>("SupportMode", Object.values(ESupportMode))),
     // text string or path to document
-    content: types.string
+    content: types.string,
+    // if set, sticky note will link to this
+    linkedDocumentKey: types.maybe(types.string)
   })
   .preProcessSnapshot(snapshot => {
-    if (gSuspendSupportContentParsing) return { type: ESupportType.text, content: "" };
-
     const legacySupport = snapshot as any as LegacySupportSnapshot;
     if (legacySupport.text) return { type: ESupportType.text, content: legacySupport.text };
 
@@ -66,6 +57,13 @@ export const SupportModel = types
     }
 
     return snapshot;
+  })
+  .postProcessSnapshot(snapshot => {
+    if (snapshot.linkedDocumentKey) return snapshot;
+    // Firebase doesn't handle undefined values, so delete the linkedDocumentKey if it is empty.
+    const copy = { ...snapshot };
+    delete copy.linkedDocumentKey;
+    return copy;
   });
 
 export type SupportModelType = typeof SupportModel.Type;

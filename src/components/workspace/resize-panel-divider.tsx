@@ -15,7 +15,7 @@ interface IProps {
 export const ResizePanelDivider: React.FC <IProps> = observer(function ResizePanelDivider() {
     const stores = useStores();
     const {
-      ui: { activeNavTab, dividerPosition, problemWorkspace, setDividerPosition }
+      persistentUI: { activeNavTab, dividerPosition, problemWorkspace, setDividerPosition }
     } = stores;
     const [showExpanders, setShowExpanders] = useState(false);
 
@@ -84,7 +84,7 @@ export const ResizePanelDivider: React.FC <IProps> = observer(function ResizePan
           <DragThumbnailIcon className="drag-thumbnail" onClick={()=>setShowExpanders(true)}
               onMouseEnter={()=>setShowExpanders(true)} />
         </div>
-        <ResourcesExpander onExpandResources={handleExpandResources} resourceType={activeNavTab}/>
+        {activeNavTab && <ResourcesExpander onExpandResources={handleExpandResources} resourceType={activeNavTab}/>}
       </div>
     );
 });

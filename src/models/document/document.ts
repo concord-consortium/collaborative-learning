@@ -3,15 +3,14 @@ import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
 import { IDocumentAddTileOptions } from "./document-content-types";
-import {
-  DocumentType, DocumentTypeEnum, IDocumentContext, ISetProperties,
+import { DocumentTypeEnum, IDocumentContext, ISetProperties,
+  isExemplarType,
   LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
   PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { TileCommentsModel, TileCommentsModelType } from "../tiles/tile-comments";
-import { getSharedModelManager } from "../tiles/tile-environment";
-import { UserStarModel, UserStarModelType } from "../tiles/user-star";
+import { getSharedModelManager, getTileEnvironment } from "../tiles/tile-environment";
 import {
   IDocumentMetadata, IGetNetworkDocumentParams, IGetNetworkDocumentResponse, IUserContext
 } from "../../../functions/src/shared";
@@ -27,15 +26,16 @@ import { TreeManager } from "../history/tree-manager";
 import { ESupportType } from "../curriculum/support";
 import { IDocumentLogEvent, logDocumentEvent } from "./log-document-event";
 import { LogEventMethod, LogEventName } from "../../lib/logger-types";
-
-interface IMatchPropertiesOptions {
-  isTeacherDocument?: boolean;
-}
+import { UserModelType } from "../stores/user";
 
 export enum ContentStatus {
   Valid,
   Error
 }
+
+type IExemplarVisibilityProvider = {
+  isExemplarVisible: (id: string) => boolean;
+};
 
 export const DocumentModel = Tree.named("Document")
   .props({
@@ -48,7 +48,6 @@ export const DocumentModel = Tree.named("Document")
     properties: types.map(types.string),
     content: types.maybe(DocumentContentModel),
     comments: types.map(TileCommentsModel),
-    stars: types.array(UserStarModel),
     groupId: types.maybe(types.string),
     visibility: types.maybe(types.enumeration("VisibilityType", ["public", "private"])),
     groupUserConnections: types.map(types.boolean),
@@ -121,38 +120,8 @@ export const DocumentModel = Tree.named("Document")
     copyProperties(): IDocumentProperties {
       return self.properties.toJSON();
     },
-    get isStarred() {
-      return !!self.stars.find(star => star.starred);
-    },
-    isStarredByUser(userId: string) {
-      return !!self.stars.find(star => star.uid === userId && star.starred);
-    },
-    getUserStarAtIndex(index: number) {
-      return self.stars[index];
-    }
   }))
   .views(self => ({
-    matchProperties(properties?: readonly string[], options?: IMatchPropertiesOptions) {
-      // if no properties specified then consider it a match
-      if (!properties?.length) return true;
-      return properties?.every(p => {
-        const match = /(!)?(.*)/.exec(p);
-        const property = match && match[2];
-        const wantsProperty = !(match && match[1]); // not negated => has property
-        // treat "starred" as a virtual property
-        if (property === "starred") {
-          return self.isStarred === wantsProperty;
-        }
-        if (property === "isTeacherDocument") {
-          return !!options?.isTeacherDocument === wantsProperty;
-        }
-        if (property) {
-            return !!self.getProperty(property) === wantsProperty;
-        }
-        // ignore empty strings, etc.
-        return true;
-      });
-    },
     getLabel(appConfig: AppConfigModelType, count: number, lowerCase?: boolean) {
       const props = appConfig.documentLabelProperties || [];
       let docStr = self.type as string;
@@ -178,13 +147,24 @@ export const DocumentModel = Tree.named("Document")
       if (docDisplayIdPropertyName === "key") return self.key;
       return self.getProperty(docDisplayIdPropertyName);
     },
-    getUniqueTitle(tileType: string, titleBase: string) {
-      return self.content?.getUniqueTitle(tileType, titleBase);
-    }
-  }))
-  .views(self => ({
-    isMatchingSpec(type: DocumentType, properties: string[]) {
-      return (type === self.type) && self.matchProperties(properties);
+    /**
+     * Construct a name for a new tile of the given type.
+     * The returned title will be unique within this document.
+     * @param tileType
+     * @returns new title
+     */
+    getUniqueTitleForType(tileType: string) {
+      return self.content?.getUniqueTitleForType(tileType);
+    },
+    isAccessibleToUser(user: UserModelType, documentStore: IExemplarVisibilityProvider) {
+      const ownDocument = self.uid === user.id;
+      const isShared = self.visibility === "public";
+      if (user.type === "teacher") return true;
+      if (user.type === "student") {
+        return ownDocument || isShared || self.isPublished
+               || (isExemplarType(self.type) && documentStore.isExemplarVisible(self.key));
+      }
+      return false;
     }
   }))
   .actions((self) => ({
@@ -230,7 +210,11 @@ export const DocumentModel = Tree.named("Document")
     },
 
     addTile(toolId: string, options?: IDocumentAddTileOptions) {
-      return self.content?.userAddTile(toolId, options);
+      const optionsWithTitle = {
+        title: self.getUniqueTitleForType(toolId),
+        ...options
+      };
+      return self.content?.userAddTile(toolId, optionsWithTitle);
     },
 
     deleteTile(tileId: string) {
@@ -239,25 +223,6 @@ export const DocumentModel = Tree.named("Document")
 
     setTileComments(tileId: string, comments: TileCommentsModelType) {
       self.comments.set(tileId, comments);
-    },
-
-    setUserStar(newStar: UserStarModelType) {
-      const starIndex = self.stars.findIndex(star => star.uid === newStar.uid);
-      if (starIndex >= 0) {
-        self.stars[starIndex] = newStar;
-      } else {
-        self.stars.push(newStar);
-      }
-    },
-
-    toggleUserStar(userId: string) {
-      const userStar = self.stars.find(star => star.uid === userId);
-      if (userStar) {
-        userStar.starred = !userStar.starred;
-      }
-      else {
-        self.stars.push(UserStarModel.create({ uid: userId, starred: true }));
-      }
     },
 
     incChangeCount() {
@@ -384,6 +349,7 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
     }));
     if (document.content) {
       sharedModelManager.setDocument(document.content);
+      document.content.migrateContentTitles();
     }
     return document;
   } catch (e) {
@@ -411,4 +377,12 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
     documentWithoutContent.setContentError(content, (e as Error)?.message);
     return documentWithoutContent;
   }
+};
+
+export const createDocumentModelWithEnv = (appConfig: AppConfigModelType, docSnapshot: DocumentModelSnapshotType) => {
+  const newDocument = createDocumentModel(docSnapshot);
+  const tileEnv = getTileEnvironment(newDocument);
+  if (!tileEnv) throw new Error("missing tile environment");
+  tileEnv.appConfig = appConfig;
+  return newDocument;
 };

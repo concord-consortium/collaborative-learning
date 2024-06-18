@@ -1,5 +1,6 @@
 import { ISerializedActionCall } from "mobx-state-tree";
 import { ITileMetadataModel } from "./tile-metadata";
+import { IClueTileObject } from "../annotations/clue-object";
 
 export interface ITileContentAPIActions {
   /**
@@ -10,20 +11,28 @@ export interface ITileContentAPIActions {
    * multiple instances of the model if the document of this model is open in
    * more than one place.
    */
-  doPostCreate(metadata: ITileMetadataModel): void,
+  doPostCreate(metadata: ITileMetadataModel): void;
 
   /**
    * This is called for any action that is called on the wrapper (TileModel) or one of
    * its children. It can be used for logging or internal monitoring of action calls.
    */
-  onTileAction(call: ISerializedActionCall): void,
+  onTileAction(call: ISerializedActionCall): void;
 
   /**
    * This is called before the tile is removed from the row of the document.
    * Immediately after the tile is removed from the row it is also removed from
    * the tileMap which is the actual container of the tile.
    */
-  willRemoveFromDocument(): void
+  willRemoveFromDocument(): void;
+
+  /**
+   * Sets the title if it is stored in the tile's content.
+   * This is currently implemented by tiles that use their DataSet name as a title.
+   * @param title
+   */
+  setContentTitle(title: string): void;
+
 }
 
 // This is a way to work with MST action syntax
@@ -54,6 +63,9 @@ export function tileContentAPIActions(clientHooks: Partial<ITileContentAPIAction
     willRemoveFromDocument() {
       // no-op
     },
+    setContentTitle(title: string) {
+      // no-op
+    },
     ...clientHooks
   };
   return {...hooks};
@@ -64,11 +76,14 @@ export interface ITileContentAPIViews {
    * If the TileModel has no stored title,
    * the TileModel will call contentTitle on the content model.
    * This can be used so a content model can provide a computed title.
-   *
-   * TODO: how does this hook into any shared title editing
-   * components
    */
   get contentTitle(): string | undefined,
+
+  /**
+   * Return a list of objects in the tile which can be annotated
+   * see annotations.md for more info.
+   */
+  get annotatableObjects(): IClueTileObject[],
 }
 
 /**
@@ -87,6 +102,9 @@ export function tileContentAPIViews(clientViews: Partial<ITileContentAPIViews>) 
   const defaultHooks: ITileContentAPIViews = {
     get contentTitle() {
       return undefined;
+    },
+    get annotatableObjects(): IClueTileObject[] {
+      return [];
     },
   };
 

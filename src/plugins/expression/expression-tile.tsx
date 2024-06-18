@@ -1,11 +1,11 @@
 import { observer } from "mobx-react";
-import React, { DOMAttributes, useRef, useEffect, FormEvent } from "react";
+import React, { DOMAttributes, useRef, useEffect, FormEvent, useCallback } from "react";
 import { onSnapshot } from "mobx-state-tree";
 import { pick } from "lodash";
 
-import "mathlive"; // separate static import of library for initialization to run
+import { MathfieldElement } from "mathlive"; // separate static import of library for initialization to run
 // eslint-disable-next-line no-duplicate-imports
-import type { MathfieldElementAttributes, MathfieldElement } from "mathlive";
+import type { MathfieldElementAttributes  } from "mathlive";
 import { ComputeEngine, version } from "@concord-consortium/compute-engine";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { ExpressionContentModelType } from "./expression-content";
@@ -42,38 +42,17 @@ function replaceLatex(mfLatex: string) {
 const undoKeys = ["cmd+z", "[Undo]", "ctrl+z"];
 
 export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) => {
-  const { onRegisterTileApi, onRequestUniqueTitle, onUnregisterTileApi,
+  const { onRegisterTileApi, onUnregisterTileApi,
     model, readOnly, documentContent, tileElt, scale } = props;
   const content = model.content as ExpressionContentModelType;
-  const mf = useRef<MathfieldElement>(null);
+  const mf = useRef<MathfieldElement|null>(null);
   const trackedCursorPos = useRef<number>(0);
   const ui = useUIStore();
+  const mathLiveContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleFocus = () => ui.setSelectedTileId(model.id);
-    // Save the math field so we can remove the listener from the same instance
-    // even if the instance is changed for some reason
-    const currentMathField = mf.current;
-    currentMathField?.addEventListener("focus", handleFocus);
-    undoKeys.forEach((key: string) => {
-      mf.current?.keybindings && replaceKeyBinding(mf.current.keybindings, key, "");
-    });
-    if (mf.current) {
-      // Uncomment this line to see all of the available shortcuts
-      // console.log("mf.current.inlineShortcuts", mf.current.inlineShortcuts);
-
-      // Only pick some of the default mathlive shortcuts
-      const defaultShortcuts = pick(mf.current.inlineShortcuts, [
-        "%"
-      ]);
-      // Combine those defaults with some custom shortcuts
-      mf.current.inlineShortcuts = {
-        ...defaultShortcuts,
-        "*": "\\times"
-      };
-    }
-    return () => currentMathField?.removeEventListener("focus", handleFocus);
-  }, [model.id, ui]);
+  const handleFocus = useCallback(
+    () => ui.setSelectedTileId(model.id),
+    [ui, model.id]);
 
   useEffect(() => {
     // model has changed beneath UI - update mathfield, yet restore cursor position
@@ -85,7 +64,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     return () => disposer();
   }, [content, readOnly]);
 
-  const handleMathfieldInput = (e: FormEvent<MathfieldElementAttributes>) => {
+  const handleMathfieldInput = useCallback((e: FormEvent<MathfieldElementAttributes>) => {
     const mathLiveEvent = e.nativeEvent as any;
     const mathField = e.target as MathfieldElement;
 
@@ -113,7 +92,7 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       mf.current.position = trackedCursorPos?.current; //restore cursor position
     }
     content.setLatexStr(replacedLatex);
-  };
+  },[content]);
 
   const toolbarProps = useToolbarTileApi({
     id: model.id,
@@ -122,12 +101,44 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
     onUnregisterTileApi
   });
 
-  const mathfieldAttributes = {
-    ref: mf,
-    value: content.latexStr,
-    onInput: !readOnly ? handleMathfieldInput : undefined,
-    readOnly: readOnly ? "true" : undefined,
-  };
+  useEffect(() => {
+    const mfEl = new MathfieldElement();
+    mf.current = mfEl;
+    mfEl.value = content.latexStr;
+    if (readOnly) {
+      mfEl.readOnly = true;
+    } else {
+      // hack the types for now
+      mfEl.addEventListener("input", handleMathfieldInput as any);
+    }
+
+    // Save the math field so we can remove the listener from the same instance
+    // even if the instance is changed for some reason
+    mfEl.addEventListener("focus", handleFocus);
+    undoKeys.forEach((key: string) => {
+      mfEl.keybindings && replaceKeyBinding(mfEl.keybindings, key, "");
+    });
+
+    // Uncomment this line to see all of the available shortcuts
+    // console.log("mfEl.inlineShortcuts", mfEl.inlineShortcuts);
+
+    // Only pick some of the default mathlive shortcuts
+    const defaultShortcuts = pick(mfEl.inlineShortcuts, [
+      "%"
+    ]);
+    // Combine those defaults with some custom shortcuts
+    mfEl.inlineShortcuts = {
+      ...defaultShortcuts,
+      "*": "\\times"
+    };
+
+    const mathLiveContainer = mathLiveContainerRef.current;
+    mathLiveContainer?.appendChild(mfEl);
+    return () => {
+      mathLiveContainer?.removeChild(mfEl);
+      mfEl.removeEventListener("focus", handleFocus);
+    };
+  }, [mf, mathLiveContainerRef, handleMathfieldInput, content, readOnly, handleFocus]);
 
   return (
     <div className="expression-tool">
@@ -144,13 +155,10 @@ export const ExpressionToolComponent: React.FC<ITileProps> = observer((props) =>
       <div className="expression-title-area">
         <CustomEditableTileTitle
           model={model}
-          onRequestUniqueTitle={onRequestUniqueTitle}
           readOnly={readOnly}
         />
       </div>
-      <div className="expression-math-area">
-        <math-field {...mathfieldAttributes} />
-      </div>
+      <div ref={mathLiveContainerRef} className="expression-math-area" />
     </div>
   );
 });

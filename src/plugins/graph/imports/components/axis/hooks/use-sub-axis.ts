@@ -6,11 +6,21 @@ import {AxisBounds, axisPlaceToAxisFn, AxisScaleType, otherPlace} from "../axis-
 import {useAxisLayoutContext} from "../models/axis-layout-context";
 import {IAxisModel, isCategoricalAxisModel, isNumericAxisModel} from "../models/axis-model";
 import {isVertical} from "../../axis-graph-shared";
-import {between} from "../../../../utilities/math-utils";
-import {kAxisTickLength, transitionDuration} from "../../../../graph-types";
+import {
+  kAxisStrokeWidth, kAxisTickLength, kAxisTickPadding, kTickAndGridColor, kTickFontColor, transitionDuration
+} from "../../../../graph-types";
 import {DragInfo, collisionExists, computeBestNumberOfTicks,
         getCategoricalLabelPlacement,getCoordFunctions, IGetCoordFunctionsProps} from "../axis-utils";
-import { useGraphModelContext } from "../../../../models/graph-model";
+import { useGraphModelContext } from "../../../../hooks/use-graph-model-context";
+
+// This function is used to style to style the axes of multiple types of plots below.
+// It would be better if we had functions like this to style other features consistently (tick marks, grid lines).
+function styleAxis(axisSelection: Selection<any, any, any, any>, duration?: number) {
+  axisSelection.select(".domain")
+  .transition().duration(duration ?? 0)
+    .style("stroke", "#707070")
+    .style("stroke-width", `${kAxisStrokeWidth}px`);
+}
 
 export interface IUseSubAxis {
   subAxisIndex: number
@@ -86,7 +96,11 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     const renderNumericAxis = () => {
       select(subAxisElt).selectAll('*').remove();
       const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
-      const axisScale = axis(numericScale).tickSizeOuter(0).tickFormat(format('.9'));
+      const axisScale = axis(numericScale)
+        .tickSize(kAxisTickLength)
+        .tickPadding(kAxisTickPadding)
+        .tickSizeOuter(0)
+        .tickFormat(format('.9'));
       const duration = enableAnimation.current ? transitionDuration : 0;
       if (!axisIsVertical && numericScale.ticks) {
         const horizontalTicks = numericScale.ticks(computeBestNumberOfTicks(numericScale)); //array of all ticks
@@ -100,19 +114,20 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         // @ts-ignore types are incompatible
         .call(axisScale)
         .selectAll("line,path")
-        .style("stroke", "lightgrey")
-        .style("stroke-opacity", "0.7");
+        .style("stroke", kTickAndGridColor);
 
       select(subAxisElt)
         .selectAll('.tick text')
+        .style("fill", kTickFontColor)
         .style('display', (d, i, nodes) => {
           const  hideMinAndMax = (i === 0 || i === nodes.length - 1) && isNumericAxisModel(axisModel)
                                  && graphModel.isLinkedToDataSet; //hide first and last tick labels when linked
           return hideMinAndMax  ? 'none' : null;
         });
+
+      styleAxis(select(subAxisElt), duration);
     };
 
-    //******  VERTICAL AXIS *****************
     const renderScatterPlotGridLines = () => {
       if (axis) {
         const numericScale = d3Scale as unknown as ScaleLinear<number, number>;
@@ -120,14 +135,13 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
         const tickLength = layout.getAxisLength(otherPlace(place)) ?? 0;
         select(subAxisElt).append('g')
           .attr('class', 'grid')
-          .call(axis(numericScale).tickSizeInner(-tickLength));
+          .call(axis(numericScale)
+          .tickSizeInner(-tickLength)
+          .tickSizeOuter(0))
+          .selectAll("line")
+          .style("stroke", kTickAndGridColor);
         select(subAxisElt).select('.grid').selectAll('text').remove();
-        if (between(0, numericScale.domain()[0], numericScale.domain()[1])) {
-          select(subAxisElt).append('g')
-            .attr('class', 'zero')
-            .call(axis(numericScale).tickSizeInner(-tickLength).tickValues([0]));
-          select(subAxisElt).select('.zero').selectAll('text').remove();
-        }
+        styleAxis(select(subAxisElt).select(".grid"));
       }
     };
 
@@ -232,99 +246,103 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
     dI.initialOffset = dI.currentDragPosition - (dI.indexOfCategory + 0.5) * dI.bandwidth;
   }, []);
 
-    /**
-     * Note: The event actually includes 'dx' and 'dy' properties, but they are not
-     * used here because there was an episode during which they didn't work reliably
-     * and the current less straightforward approach was adopted. It may be worth
-     * revisiting this at some point.
-     */
-    const onDrag = useCallback((event: any) => {
-      const dI = dragInfo.current,
-        delta = dI.axisOrientation === 'horizontal' ? event.dx : event.dy;
-      if (delta !== 0) {
-        const
-          numCategories = dI.categories.length,
-          newDragPosition = dI.currentDragPosition + delta,
-          cellIndex = Math.floor(newDragPosition / dI.bandwidth),
-          newCatIndex = dI.axisOrientation === 'horizontal' ? cellIndex
-            : dI.categories.length - cellIndex - 1;
-        dI.currentOffset += delta;
-        if (newCatIndex >= 0 && newCatIndex !== dI.indexOfCategory && newCatIndex < dI.categories.length) {
-          dI.currentOffset = newDragPosition - (cellIndex + 0.5) * dI.bandwidth - dI.initialOffset;
-
-          // Figure out the label of the category before which the dragged category should be placed
-          const moveToGreater = newCatIndex > dI.indexOfCategory,
-            catToMoveBefore = moveToGreater
-              ? (newCatIndex === numCategories - 1 ? '' : dI.categories[newCatIndex + 1])
-              : dI.categories[newCatIndex];
-          dI.indexOfCategory = newCatIndex;
-          dI.categorySet?.move(dI.catName, catToMoveBefore);
-        } else {
-          renderSubAxis();
-        }
-        dI.currentDragPosition = newDragPosition;
-      }
-    }, [renderSubAxis]);
-
-    const onDragEnd = useCallback(() => {
-      const dI = dragInfo.current;
-      dI.indexOfCategory = -1; // so dragInfo won't influence category placement
-      enableAnimation.current = false; // disable animation for final placement
-      renderSubAxis();
-    }, [enableAnimation, renderSubAxis]);
-
-    const dragBehavior = useMemo(() => drag()
-      .on("start", onDragStart)
-      .on("drag", onDrag)
-      .on("end", onDragEnd), [onDragStart, onDrag, onDragEnd]);
-
-    /**
-     * Make sure there is a group element for each category and that the text elements have drag behavior
-     */
-    const setupCategories = useCallback(() => {
-      if (!subAxisElt) return;
+  /**
+   * Note: The event actually includes 'dx' and 'dy' properties, but they are not
+   * used here because there was an episode during which they didn't work reliably
+   * and the current less straightforward approach was adopted. It may be worth
+   * revisiting this at some point.
+   */
+  const onDrag = useCallback((event: any) => {
+    const dI = dragInfo.current,
+      delta = dI.axisOrientation === 'horizontal' ? event.dx : event.dy;
+    if (delta !== 0) {
       const
-        place = axisModel.place,
-        multiScale = layout.getAxisMultiScale(place),
-        categorySet = multiScale?.categorySet,
-        categories = Array.from(categorySet?.values ?? []),
-        categoryData: CatObject[] = categories.map((cat, index) =>
-          ({cat, index: isVertical(place) ? categories.length - index - 1 : index}));
+        numCategories = dI.categories.length,
+        newDragPosition = dI.currentDragPosition + delta,
+        cellIndex = Math.floor(newDragPosition / dI.bandwidth),
+        newCatIndex = dI.axisOrientation === 'horizontal' ? cellIndex
+          : dI.categories.length - cellIndex - 1;
+      dI.currentOffset += delta;
+      if (newCatIndex >= 0 && newCatIndex !== dI.indexOfCategory && newCatIndex < dI.categories.length) {
+        dI.currentOffset = newDragPosition - (cellIndex + 0.5) * dI.bandwidth - dI.initialOffset;
 
-      subAxisSelectionRef.current = select(subAxisElt);
-      const sAS = subAxisSelectionRef.current;
+        // Figure out the label of the category before which the dragged category should be placed
+        const moveToGreater = newCatIndex > dI.indexOfCategory,
+          catToMoveBefore = moveToGreater
+            ? (newCatIndex === numCategories - 1 ? '' : dI.categories[newCatIndex + 1])
+            : dI.categories[newCatIndex];
+        dI.indexOfCategory = newCatIndex;
+        dI.categorySet?.move(dI.catName, catToMoveBefore);
+      } else {
+        renderSubAxis();
+      }
+      dI.currentDragPosition = newDragPosition;
+    }
+  }, [renderSubAxis]);
 
-      select(subAxisElt).selectAll('*').remove();  // start over
+  const onDragEnd = useCallback(() => {
+    const dI = dragInfo.current;
+    dI.indexOfCategory = -1; // so dragInfo won't influence category placement
+    enableAnimation.current = false; // disable animation for final placement
+    renderSubAxis();
+  }, [enableAnimation, renderSubAxis]);
 
-      sAS.attr('class', 'axis').append('line');
-      categoriesSelectionRef.current = sAS.selectAll('g')
-        .data(categoryData)
-        .join(
-          (enter) => {
-            return enter
-              .append('g')
-              .attr('class', 'category-group')
-              .attr('data-testid', 'category-on-axis')
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              .call(dragBehavior);
-          }
-        );
-      categoriesSelectionRef.current.each(function () {
-        const catGroup = select(this);
-        // ticks
-        catGroup.append('line').attr('class', 'tick');
-        // divider between groups
-        catGroup.append('line')
-          .attr('class', 'divider');
-        // labels
-        catGroup.append('text')
-          .attr('class', 'category-label')
-          .attr('x', 0)
-          .attr('y', 0);
-      });
+  const dragBehavior = useMemo(() => drag()
+    .on("start", onDragStart)
+    .on("drag", onDrag)
+    .on("end", onDragEnd), [onDragStart, onDrag, onDragEnd]);
 
-    }, [axisModel.place, dragBehavior, layout, subAxisElt]);
+  /**
+   * Make sure there is a group element for each category and that the text elements have drag behavior
+   */
+  const setupCategories = useCallback(() => {
+    if (!subAxisElt) return;
+    const
+      place = axisModel.place,
+      multiScale = layout.getAxisMultiScale(place),
+      categorySet = multiScale?.categorySet,
+      categories = Array.from(categorySet?.values ?? []),
+      categoryData: CatObject[] = categories.map((cat, index) =>
+        ({cat, index: isVertical(place) ? categories.length - index - 1 : index}));
+
+    subAxisSelectionRef.current = select(subAxisElt);
+    const sAS = subAxisSelectionRef.current;
+
+    select(subAxisElt).selectAll('*').remove();  // start over
+
+    sAS.attr('class', 'axis').append('line').attr("class", "domain");
+    styleAxis(sAS);
+    categoriesSelectionRef.current = sAS.selectAll('g')
+      .data(categoryData)
+      .join(
+        (enter) => {
+          return enter
+            .append('g')
+            .attr('class', 'category-group')
+            .attr('data-testid', 'category-on-axis')
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            .call(dragBehavior);
+        }
+      );
+    categoriesSelectionRef.current.each(function () {
+      const catGroup = select(this);
+      // ticks
+      catGroup.append('line')
+        .attr('class', 'tick')
+        .style("stroke", kTickAndGridColor);
+      // divider between groups
+      catGroup.append('line')
+        .attr('class', 'divider')
+        .style("stroke", kTickAndGridColor);
+      // labels
+      catGroup.append('text')
+        .attr('class', 'category-label')
+        .attr('x', 0)
+        .attr('y', 0);
+    });
+
+  }, [axisModel.place, dragBehavior, layout, subAxisElt]);
 
   // update d3 scale and axis when scale type changes
   useEffect(() => {

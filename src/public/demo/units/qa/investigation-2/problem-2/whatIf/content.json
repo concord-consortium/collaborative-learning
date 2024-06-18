@@ -1,0 +1,703 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "id": "document_Text_1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation A. Writing New Hat Rules</h3><p>Several members of the computer club wrote different design criteria that would produce hats similar to the original Mug hat.</p><p>What rule would you write for each design?</p><p><strong>Syrah’s Design:</strong> The side lengths are one third as long as Mug’s hat.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_2",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>(1/3 x, 1/3 y)</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Joe’s Design: </strong>The side lengths are 1.5 times as long as Mug’s hat.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_4",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>(1.5 x, 1.5 y)</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Viola’s Design:</strong> The hat is the same size as Mug’s hat but has moved right 1 unit and up 5 units.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_6",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>(x + 1, y - 5)</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_7",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Kathy&#x27;s Design: </strong>The image is in another quadrant of the graph.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_8",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answers will vary.</p><p>To move the image to the second quadrant, you should move it left more than 9 units and up more than 0: possible answers are (x - 9, y), (x - 10, y + 1), (x - 12, y + 3).</p><p>To move the image to the third quadrant, you should move it left more than 9 units and down more than 3 units: possible answers are (x - 9, y - 3), (x - 9, y - 4), (x - 11, y - 4).</p><p>To move the image to the fourth quadrant, you should move it down more than 3 units and right more than 0 units: possible answers are (x, y - 3), (x, y - 5), (x + 2, y - 5).</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Situation B. Raymond&#x27;s Claim about Negative Numbers and Rules</strong></p><p>Raymond&#x27;s Claim:</p><p>If you multiply each coordinate by a negative number, the image is similar but smaller. Is he correct? Explain.</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_10",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>If you multiply each coordinate (x, y) by -1 so you get (-x, -y), then the image has the same size of the original, but it rotates 180 deg as if x-axis and y-axis are used as mirrors. Students may multiply -1 to each coordinate of Mug’s and draw it as an example to see how the image looks like. This new Negative Hat will be in quadrant 3.</p>"
+          ]
+        }
+      },
+      [
+        {
+          "id": "f0AfYBGFZvTA35",
+          "title": "Mug's Hat",
+          "display": "teacher",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "-SGKvJzeVoCV4sFS": 80,
+              "axZAdKRDoNu1QnTV": 80
+            },
+            "name": "Mug's Hat"
+          }
+        },
+        {
+          "id": "-WTuxMU6a-_Aonv7",
+          "title": "Mug's Hat",
+          "display": "teacher",
+          "content": {
+            "type": "Geometry",
+            "board": {
+              "properties": {
+                "axisMin": [
+                  -1,
+                  -1
+                ],
+                "axisRange": [
+                  26.23,
+                  17.486
+                ],
+                "axisNames": [
+                  "x",
+                  "y"
+                ],
+                "axisLabels": [
+                  "x",
+                  "y"
+                ]
+              }
+            },
+            "objects": [
+              {
+                "type": "point",
+                "parents": [
+                  1.007560381566389,
+                  1.016734972677595
+                ],
+                "properties": {
+                  "id": "D4U8qe_5HrzNU41J",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  9,
+                  1
+                ],
+                "properties": {
+                  "id": "TuaMquaQVvVeowpV",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  6.014553467054895,
+                  2.0086663251366113
+                ],
+                "properties": {
+                  "id": "qz4DbQ5dskvYAxV-",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  6,
+                  3
+                ],
+                "properties": {
+                  "id": "2l728kCiExnl7Aho",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  4,
+                  3
+                ],
+                "properties": {
+                  "id": "yQt0c6binEZqz4_h",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  4.000000000000001,
+                  2
+                ],
+                "properties": {
+                  "id": "VMJXVG2nLV6XIlWC",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "polygon",
+                "parents": [
+                  "D4U8qe_5HrzNU41J",
+                  "TuaMquaQVvVeowpV",
+                  "qz4DbQ5dskvYAxV-",
+                  "2l728kCiExnl7Aho",
+                  "yQt0c6binEZqz4_h",
+                  "VMJXVG2nLV6XIlWC"
+                ],
+                "properties": {
+                  "id": "KE8pozQFMjQ9apBB"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      [
+        {
+          "id": "LB20OCT20231100",
+          "title": "Negative Hat",
+          "display": "teacher",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "6dSk-0tZ-SbcYIXZ": 80,
+              "2gcdfAuIojaPLW7u": 80
+            },
+            "name": "Negative Hat"
+          }
+        },
+        {
+          "id": "1-rchbtK5TpKQlL-",
+          "title": "Negative Hat",
+          "display": "teacher",
+          "content": {
+            "type": "Geometry",
+            "board": {
+              "properties": {
+                "axisMin": [
+                  -10,
+                  -4.1
+                ],
+                "axisRange": [
+                  11,
+                  5.1
+                ]
+              }
+            },
+            "objects": [
+              {
+                "type": "point",
+                "parents": [
+                  -1,
+                  -1
+                ],
+                "properties": {
+                  "id": "8DvYJi-FdJ5RsMW9",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  -9,
+                  -1
+                ],
+                "properties": {
+                  "id": "5hamWrwS1_qwAZ-0",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  -6,
+                  -2
+                ],
+                "properties": {
+                  "id": "x5lDReicjeo10ELn",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  -6,
+                  -3.0000000000000004
+                ],
+                "properties": {
+                  "id": "B_BKinRldfS8yvZ-",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  -4.009211244541484,
+                  -3.0192871093749996
+                ],
+                "properties": {
+                  "id": "5wqPZkpmEmhj397m",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  -4.000000000000001,
+                  -2
+                ],
+                "properties": {
+                  "id": "uZMJD9pfPj8CPLwK",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              },
+              {
+                "type": "polygon",
+                "parents": [
+                  "8DvYJi-FdJ5RsMW9",
+                  "5hamWrwS1_qwAZ-0",
+                  "x5lDReicjeo10ELn",
+                  "B_BKinRldfS8yvZ-",
+                  "5wqPZkpmEmhj397m",
+                  "uZMJD9pfPj8CPLwK"
+                ],
+                "properties": {
+                  "id": "lTBYaAfEqGgXWeMb"
+                }
+              },
+              {
+                "type": "polygon",
+                "parents": [
+                  "01HCSTYPMM2KP9EH95HTRZFK4V:2gcdfAuIojaPLW7u",
+                  "01HCSTYPMM2KP9EH95HTRZFK4W:2gcdfAuIojaPLW7u",
+                  "01HCSTYPMM2KP9EH95HTRZFK4X:2gcdfAuIojaPLW7u",
+                  "01HCSTYPMM2KP9EH95HTRZFK4Y:2gcdfAuIojaPLW7u",
+                  "01HCSTYPMM2KP9EH95HTRZFK4Z:2gcdfAuIojaPLW7u",
+                  "01HCSTYPMM2KP9EH95HTRZFK50:2gcdfAuIojaPLW7u",
+                  "01HCSTYPMM2KP9EH95HTRZFK51:2gcdfAuIojaPLW7u"
+                ],
+                "properties": {
+                  "id": "-uDMwOdirdca0T38"
+                }
+              },
+              {
+                "type": "point",
+                "parents": [
+                  -0.020833333333333332,
+                  -1.9322603383458647
+                ],
+                "properties": {
+                  "id": "P5QYmVbCmOvwcY4J",
+                  "snapToGrid": true,
+                  "snapSizeX": 0.1,
+                  "snapSizeY": 0.1
+                }
+              }
+            ]
+          }
+        }
+      ],
+      {
+        "id": "document_Text_11",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Situation C. Isaiah’s Challenge: Putting the Hat on Mug</strong></p><p>Isaiah&#x27;s Challenge: </p><p>I think it is possible to write a rule that will put Mug’s hat on Mug. My group will work on finding the correct rule.</p><p>Is this possible? Why?</p>"
+          ]
+        }
+      },
+      {
+        "id": "document_Text_12",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>It is possible. Because you can move the hat upwards on the coordinate plane by adding numbers to the y-coordinate, you can put the hat on Mug. One possible rule for a hat that student can come up with is (x - 1, y + 6). Students might struggle with making a rule for the move at first. Students can first draw the hat on Mug and make a table for the coordinates of moved hat. Then they can compare the coordinates of the original (points A, B, …, G) with the new coordinates. For the corresponding coordinates, students may count units that moves from the original position to the new position.</p>"
+          ]
+        }
+      },
+      {
+        "id": "-6wzAUG20221115AM",
+        "title": "Mug Hat on Mug",
+        "display": "teacher",
+        "content": {
+          "type": "Image",
+          "url": "qa/images/SS_2_2_MughatOnMug.jpg"
+        }
+      },
+      [
+        {
+          "id": "LB20OCT20231158",
+          "title": "Mug's Hat",
+          "display": "teacher",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "_Eu18yKE7d8bHcaG": 80,
+              "DumMLz6P9oYW0y7e": 80
+            },
+            "name": "Mug's Hat"
+          }
+        },
+        {
+          "id": "LB20OCT20231200",
+          "title": "Mug's Hat on Mug",
+          "display": "teacher",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "kf1B1CNgMXv13T3q": 80,
+              "ItIVHcEapXdM-PKy": 80
+            },
+            "name": "Mug's Hat on Mug"
+          }
+        }
+      ]
+    ],
+    "sharedModels": [
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "hOajZhiW4rmy4E2R",
+          "providerId": "f0AfYBGFZvTA35",
+          "dataSet": {
+            "id": "MNWRs9y8hCmPbmGV",
+            "name": "Mug's Hat",
+            "attributes": [
+              {
+                "id": "-SGKvJzeVoCV4sFS",
+                "clientKey": "",
+                "name": "Point",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                  "G"
+                ],
+                "title": ""
+              },
+              {
+                "id": "axZAdKRDoNu1QnTV",
+                "clientKey": "",
+                "name": "(x, y)",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "(1, 1)",
+                  "(9, 1)",
+                  "(6, 2)",
+                  "(6, 3)",
+                  "(4, 3)",
+                  "(4, 2)",
+                  "(1, 1)"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HCSTYPME4HGTXGHREEM9MW5D"
+              },
+              {
+                "__id__": "01HCSTYPME4HGTXGHREEM9MW5E"
+              },
+              {
+                "__id__": "01HCSTYPME4HGTXGHREEM9MW5F"
+              },
+              {
+                "__id__": "01HCSTYPME4HGTXGHREEM9MW5G"
+              },
+              {
+                "__id__": "01HCSTYPME4HGTXGHREEM9MW5H"
+              },
+              {
+                "__id__": "01HCSTYPME4HGTXGHREEM9MW5J"
+              },
+              {
+                "__id__": "01HCSTYPME4HGTXGHREEM9MW5K"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "f0AfYBGFZvTA35"
+        ]
+      },
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "O_TVTkk7u6DrDSPu",
+          "providerId": "LB20OCT20231100",
+          "dataSet": {
+            "id": "JsIQ4s27sXs-QSnr",
+            "name": "Negative Hat",
+            "attributes": [
+              {
+                "id": "6dSk-0tZ-SbcYIXZ",
+                "clientKey": "",
+                "name": "x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "-1",
+                  "-9",
+                  "-6",
+                  "-6",
+                  "-4",
+                  "-4",
+                  "-1"
+                ],
+                "title": ""
+              },
+              {
+                "id": "2gcdfAuIojaPLW7u",
+                "clientKey": "",
+                "name": "y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "-1",
+                  "-1",
+                  "-2",
+                  "-3",
+                  "-3",
+                  "-2",
+                  "-1"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HCSTYPMM2KP9EH95HTRZFK4V"
+              },
+              {
+                "__id__": "01HCSTYPMM2KP9EH95HTRZFK4W"
+              },
+              {
+                "__id__": "01HCSTYPMM2KP9EH95HTRZFK4X"
+              },
+              {
+                "__id__": "01HCSTYPMM2KP9EH95HTRZFK4Y"
+              },
+              {
+                "__id__": "01HCSTYPMM2KP9EH95HTRZFK4Z"
+              },
+              {
+                "__id__": "01HCSTYPMM2KP9EH95HTRZFK50"
+              },
+              {
+                "__id__": "01HCSTYPMM2KP9EH95HTRZFK51"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "LB20OCT20231100",
+          "1-rchbtK5TpKQlL-"
+        ]
+      },
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "oPQSOo-NVH9PWpGD",
+          "providerId": "LB20OCT20231200",
+          "dataSet": {
+            "id": "r5XXp3K8Q5LJ1JMq",
+            "name": "Mug's Hat on Mug",
+            "attributes": [
+              {
+                "id": "kf1B1CNgMXv13T3q",
+                "clientKey": "",
+                "name": "x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "0",
+                  "8",
+                  "5",
+                  "5",
+                  "3",
+                  "3",
+                  "0"
+                ],
+                "title": ""
+              },
+              {
+                "id": "ItIVHcEapXdM-PKy",
+                "clientKey": "",
+                "name": "y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "7",
+                  "7",
+                  "8",
+                  "9",
+                  "9",
+                  "8",
+                  "7"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "01HCSTYPMZAAFA87P6BEWR5W5D"
+              },
+              {
+                "__id__": "01HCSTYPMZAAFA87P6BEWR5W5E"
+              },
+              {
+                "__id__": "01HCSTYPMZAAFA87P6BEWR5W5F"
+              },
+              {
+                "__id__": "01HCSTYPMZAAFA87P6BEWR5W5G"
+              },
+              {
+                "__id__": "01HCSTYPMZAAFA87P6BEWR5W5H"
+              },
+              {
+                "__id__": "01HCSTYPMZAAFA87P6BEWR5W5J"
+              },
+              {
+                "__id__": "01HCSTYPMZAAFA87P6BEWR5W5K"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "LB20OCT20231200"
+        ]
+      }
+    ]
+  },
+  "supports": [
+    {
+      "text": "What made the hat get smaller?"
+    },
+    {
+      "text": "How did adding to the coordinates change the hat?"
+    },
+    {
+      "text": "What did subtracting do to the hat?"
+    }
+  ]
+}

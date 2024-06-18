@@ -67,9 +67,6 @@ interface ITileBaseProps {
   readOnly?: boolean;
   onResizeRow: (e: React.DragEvent<HTMLDivElement>) => void;
   onSetCanAcceptDrop: (tileId?: string) => void;
-  // TODO: this isn't really necessary to be in component API anymore, it is
-  // implemented in the model layer.
-  onRequestUniqueTitle: (tileId: string) => string | undefined;
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
 }
 
@@ -186,11 +183,11 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   public render() {
     const { model, readOnly, isUserResizable, widthPct } = this.props;
     const { hoverTile } = this.state;
-    const { appConfig, ui } = this.stores;
+    const { appConfig, ui, persistentUI } = this.stores;
     const { Component, tileEltClass } = getTileComponentInfo(model.content.type) || {};
     const isPlaceholderTile = Component === PlaceholderTileComponent;
     const isTileSelected = ui.isSelectedTile(model);
-    const tileSelectedForComment = isTileSelected && ui.showChatPanel;
+    const tileSelectedForComment = isTileSelected && persistentUI.showChatPanel;
     const classes = classNames("tool-tile", model.display, tileEltClass, {
                       placeholder: isPlaceholderTile,
                       readonly: readOnly,
@@ -324,8 +321,8 @@ export class TileComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleCopyImportJsonToClipboard = () => {
-    const { appConfig, unit } = this.stores;
-    const unitBasePath = appConfig.getUnitBasePath(unit.code);
+    const { curriculumConfig, unit } = this.stores;
+    const unitBasePath = curriculumConfig.getUnitBasePath(unit.code);
     const transformImageUrl = (url?: string, filename?: string) => {
       return transformCurriculumImageUrl(url, unitBasePath, filename);
     };

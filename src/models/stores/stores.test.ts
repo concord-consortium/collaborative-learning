@@ -4,10 +4,10 @@ import { UnitModel } from "../curriculum/unit";
 import { InvestigationModel } from "../curriculum/investigation";
 import { ProblemModel } from "../curriculum/problem";
 import { SectionModel, SectionType } from "../curriculum/section";
-import { AppConfigModel } from "./app-config-model";
 import { UserModel } from "./user";
 import { DB } from "../../lib/db";
 import { getSnapshot } from "mobx-state-tree";
+import { CurriculumConfig } from "./curriculum-config";
 
 describe("stores object", () => {
 
@@ -16,15 +16,14 @@ describe("stores object", () => {
     expect(stores).toBeDefined();
     expect(stores.user).toBeDefined();
     expect(stores.problem).toBeDefined();
-    expect(stores.ui).toBeDefined();
+    expect(stores.persistentUI).toBeDefined();
     expect(stores.db).toBeDefined();
   });
 
   it("supports passing in stores for testing", () => {
-    const appConfig = AppConfigModel.create({
+    const curriculumConfig = CurriculumConfig.create({
+      curriculumSiteUrl: "",
       defaultUnit: "foo",
-      config: {} as any,
-      "curriculumBaseUrl": "https://curriculum.example.com",
     });
     const appMode: AppMode = "dev";
     const id = "1";
@@ -34,8 +33,8 @@ describe("stores object", () => {
     const title = "Test Problem";
     const problem = ProblemModel.create({ ordinal: 1, title });
     const db = new DB();
-    const stores = specStores({ appConfig, appMode, user, problem, db });
-    expect(stores.appConfig.defaultUnit).toBe("foo");
+    const stores = specStores({ curriculumConfig, appMode, user, problem, db });
+    expect(stores.curriculumConfig.defaultUnit).toBe("foo");
     expect(stores.appMode).toBe("dev");
     expect(stores.user.id).toBe(id);
     expect(stores.user.type).toBe(type);

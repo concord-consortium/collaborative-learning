@@ -53,7 +53,8 @@ interface TestSharedModelType extends Instance<typeof TestSharedModel> {}
 
 registerSharedModelInfo({
   type: "TestSharedModel",
-  modelClass: TestSharedModel
+  modelClass: TestSharedModel,
+  hasName: false
 });
 
 const TestTileChild = types.model("TestTileChild", {

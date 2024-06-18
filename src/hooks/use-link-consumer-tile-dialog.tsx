@@ -1,18 +1,20 @@
 import React, { useRef, useState } from "react";
-
-import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
 import { IModalButton, useCustomModal } from "./use-custom-modal";
 import { isLinkedToTile } from "../models/shared/shared-data-utils";
 import { ITileLinkMetadata } from "../models/tiles/tile-link-types";
 import { ITileModel } from "../models/tiles/tile-model";
+import { SharedModelType } from "../models/shared/shared-model";
+import { getTileComponentInfo } from "../models/tiles/tile-component-info";
+import { BadgedIcon } from "../components/toolbar/badged-icon";
+import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
+import ViewBadgeIcon from "../assets/icons/view/view-badge.svg";
 
 import "./link-tile-dialog.scss";
 
 // Defines a modal window that allows the user to select a tile
-// to link with or unlinkn from the current tile's dataset.
+// to link with or unlink from the current tile's dataset.
 // If a single tile type is supplied as an argument, an option to
 // create a new tile of that type will be offered as well.
-
 interface IContentProps {
   linkedTiles: ITileLinkMetadata[];
   selectValue: string;
@@ -29,94 +31,114 @@ const Content: React.FC<IContentProps>
   const displayTileTitle = tileTitle || "this tile";
   const selectElt = useRef<HTMLSelectElement>(null);
 
-  let instructions;
+  let instructions, defaultOption;
   if (tileType) {
     const lcTileType = tileType.toLowerCase();
-    instructions = `To view data as a ${lcTileType}, select the ${lcTileType} from this list.
-    To remove the view, select a ${lcTileType} from the Unlink list.`;
+    instructions = `Select a ${lcTileType} to link or unlink.`;
+    defaultOption = `Select a ${lcTileType}`;
   } else {
     instructions = `To link ${displayTileTitle} to another tile, select a tile from the link list.
      To unlink ${displayTileTitle} from another tile, select a tile from the unlink list.`;
+     defaultOption = 'Select a tile';
   }
 
-    return (
-      <>
-        <div className="prompt">
-          {instructions}
-        </div>
-        <select ref={selectElt} value={selectValue} data-test="link-tile-select"
-                                onChange={e => {
-                                  setSelectValue(e.target.value);
-                                  setTimeout(() => selectElt.current?.focus());
-                                }}>
-          <option key="prompt" value={""}>Select a tile</option>
-            {unlinkedTiles.length > 0 &&
-              <optgroup label="Link Tiles">
-                {unlinkedTiles
-                  .map(tileInfo => <option key={tileInfo.id} value={tileInfo.id}>{tileInfo.title}</option>)}
-              </optgroup>
-            }
-            {(unlinkedTiles.length > 0) && (linkedTiles.length > 0) &&
-              <option disabled>──────────────────────────────</option> }
-            {linkedTiles.length > 0 &&
-                <optgroup label="Unlink Tiles">
-                  {linkedTiles
-                    .map(tileInfo => <option key={tileInfo.id} value={tileInfo.id}>{tileInfo.title}</option>)}
-                </optgroup>
-            }
-        </select>
-      </>
-    );
+  const hasNewOption = !!tileType;
+  const hasLinkOptions = unlinkedTiles.length > 0;
+  const hasUnlinkOptions = linkedTiles.length > 0;
+
+  const separator = <option disabled>──────────────────────────────</option>;
+
+  return (
+    <>
+      <div className="prompt">
+        {instructions}
+      </div>
+      <select ref={selectElt} value={selectValue} data-test="link-tile-select"
+        onChange={e => {
+          setSelectValue(e.target.value);
+          setTimeout(() => selectElt.current?.focus());
+        }}>
+        <option key="prompt" value="">{defaultOption}</option>
+        {hasNewOption && <option key="new" value="NEW">New {tileType}</option>}
+        {hasNewOption && (hasLinkOptions || hasUnlinkOptions) && separator }
+        {hasLinkOptions &&
+          <optgroup label="Link">
+            {unlinkedTiles
+              .map(tileInfo => <option key={tileInfo.id} value={tileInfo.id}>{tileInfo.title}</option>)}
+          </optgroup>
+        }
+        {hasLinkOptions && hasUnlinkOptions && separator }
+        {hasUnlinkOptions &&
+          <optgroup label="Unlink">
+            {linkedTiles
+              .map(tileInfo => <option key={tileInfo.id} value={tileInfo.id}>{tileInfo.title}</option>)}
+          </optgroup>
+        }
+      </select>
+    </>
+  );
 };
 
 interface IProps {
   linkableTiles: ITileLinkMetadata[];
   model: ITileModel;
+  modelToShare?: SharedModelType;
   tileType?: string;
   onLinkTile: (tileInfo: ITileLinkMetadata) => void;
   onUnlinkTile: (tileInfo: ITileLinkMetadata) => void;
   onCreateTile: () => void;
 }
 export const useLinkConsumerTileDialog =
-    ({ linkableTiles, model, tileType, onLinkTile, onUnlinkTile, onCreateTile }: IProps) => {
+    ({ linkableTiles, model, modelToShare, tileType, onLinkTile, onUnlinkTile, onCreateTile }: IProps) => {
   const tileTitle = model.computedTitle;
   const [selectValue, setSelectValue] = useState("");
+
   const handleClick = () => {
-    const tileInfo = linkableTiles.find(tile => tile.id === selectValue);
-    if (tileInfo) {
-      if (isLinkedToTile(model, tileInfo.id)) {
-        onUnlinkTile(tileInfo);
-      } else {
-        onLinkTile(tileInfo);
+    if (selectValue === 'NEW') {
+      onCreateTile();
+    } else {
+      const tileInfo = linkableTiles.find(tile => tile.id === selectValue);
+      if (tileInfo && modelToShare) {
+        if (isLinkedToTile(modelToShare, tileInfo.id)) {
+          onUnlinkTile(tileInfo);
+        } else {
+          onLinkTile(tileInfo);
+        }
       }
     }
   };
   const unlinkedTiles = linkableTiles
-    .filter(tileInfo => !isLinkedToTile(model, tileInfo.id));
+    .filter(tileInfo => modelToShare && !isLinkedToTile(modelToShare, tileInfo.id));
   const linkedTiles = linkableTiles
-    .filter(tileInfo => isLinkedToTile(model, tileInfo.id) && tileInfo.id !== model.id);
+    .filter(tileInfo => modelToShare && isLinkedToTile(modelToShare, tileInfo.id) && tileInfo.id !== model.id);
+
+  const primaryButtonText = modelToShare && isLinkedToTile(modelToShare, selectValue)
+    ? 'Clear It!'
+    : tileType ? `${tileType} It!` : 'Link';
+
+  // Builds an appopriate icon for the dialog.
+  // Alternatively, we could consider requiring the caller to pass in an icon.
+  const Icon: React.FC<any> = () => {
+    const baseIcon = tileType && getTileComponentInfo(tileType)?.Icon;
+    if (baseIcon) {
+      return <BadgedIcon Icon={baseIcon} Badge={ViewBadgeIcon}/>;
+    } else {
+      return <LinkGraphIcon/>;
+    }
+  };
 
   const buttons: IModalButton[] = [
     { label: "Cancel" },
     {
-      label: !isLinkedToTile(model, selectValue) ? "Link" : "Unlink",
+      label: primaryButtonText,
       isDefault: true,
       isDisabled: !selectValue,
       onClick: handleClick
     }];
-  if (onCreateTile && tileType) {
-    buttons.splice(1, 0,
-      {
-        label: `Add new ${tileType}`,
-        className: 'add-new-button',
-        onClick: onCreateTile,
-      }
-    );
-  }
   const [showModal, hideModal] = useCustomModal({
     className: "link-tile",
-    Icon: LinkGraphIcon,
-    title: tileType ? `View Data as ${tileType}` : "Link or Unlink Tile",
+    Icon,
+    title: tileType ? `${tileType} It!` : "Link or Unlink Tile",
     Content,
     contentProps: { linkedTiles, selectValue, tileTitle, tileType, unlinkedTiles, setSelectValue },
     buttons

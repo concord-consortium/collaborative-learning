@@ -9,11 +9,11 @@ import { IDropRowInfo } from "../tile-row";
 // - the table model errors when trying to load it
 // - the image does not display
 // you can see these errors using the document editor
-// http://localhost:8080/doc-editor.html
+// http://localhost:8080/editor/
 import multipleTilesExamples from "./multiple-tiles-example.json";
 /*
     You can open this content with the document editor:
-    http://localhost:8080/doc-editor.html
+    http://localhost:8080/editor/
 
     TODO: this content has a few problems in it:
     - the table model errors when trying to load it
@@ -86,8 +86,8 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
     expect(documentContent.getTileCountsPerSection(["initialChallenge"])).toEqual({ initialChallenge: 5 });
     expect(documentContent.getTilesOfType("Text")).toEqual(["textTool1", "textTool2"]);
     expect(documentContent.getTilesOfType("Drawing")).toEqual(["drawingTool1", "drawingTool2"]);
-    // There are no titles in the test content being loaded so Graph 1 is expected
-    expect(documentContent.getUniqueTitle("Geometry", "Graph")).toBe("Graph 1");
+    // There are no titles in the test content being loaded so Shapes Graph 1 is expected
+    expect(documentContent.getUniqueTitleForType("Geometry")).toBe("Shapes Graph 1");
   });
 
   it("can export more complicated content", () => {

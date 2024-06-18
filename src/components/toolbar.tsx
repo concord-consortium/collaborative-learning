@@ -1,6 +1,5 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
-
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType } from "../models/document/document";
 import { orderTilePositions } from "../models/document/drag-tiles";
@@ -12,9 +11,13 @@ import { DeleteButton } from "./delete-button";
 import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
-import { kSparrowAnnotationMode } from "../models/stores/ui";
 
 import "./toolbar.scss";
+
+// Buttons with these IDs are no longer displayed in this toolbar.
+// They are legal in the config for historical reasons but will be ignored here.
+// (See `annotation-toolbar.tsx`)
+const ignoredButtons = [ "sparrow", "hide-annotations" ];
 
 interface IProps extends IBaseProps {
   document: DocumentModelType;
@@ -59,12 +62,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "delete":
           this.handleDelete();
           break;
-        case "sparrow":
-          this.handleSparrow();
-          break;
-        case "hide-annotations":
-          this.handleHideAnnotations();
-          break;
         case "duplicate":
           this.handleDuplicate();
           break;
@@ -84,18 +81,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       this.handleDragNewTile(tool, e);
     };
     const updateToolButton = (toolButton: IToolbarButtonModel) => {
-      if (toolButton.id === "hide-annotations") {
-        // Update hide annotation button's icon and title based on current annotation visibility
-        const { ui } = this.stores;
-        const appIcons = toolButton.env?.appIcons;
-        toolButton.setIcon(
-          appIcons?.[ui.showAnnotations ? "icon-hide-annotations-tool" : "icon-show-annotations-tool"]
-        );
-        toolButton.setTitle(ui.showAnnotations ? "Hide Annotations" : "Show Annotations");
-      }
+      // Currently no-op; no buttons need updates.
     };
     const renderToolButtons = (toolbarModel: IToolbarModel) => {
       return toolbarModel.map(toolButton => {
+        if (ignoredButtons.includes(toolButton.id)) return null;
         updateToolButton(toolButton);
         const buttonProps: IToolbarButtonProps = {
           toolButton,
@@ -148,19 +138,14 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   };
 
   private getUniqueTitle(tileContentInfo: ITileContentInfo) {
-    const tileApiInterface = this.context?.current;
-    if (!tileApiInterface) return;
     const { document } = this.props;
-    const { type, titleBase } = tileContentInfo;
-    return titleBase && document.getUniqueTitle(type, titleBase);
+    const { type } = tileContentInfo;
+    return document.getUniqueTitleForType(type);
   }
 
   private isButtonActive(toolButton: IToolbarButtonModel) {
-    const { ui } = this.stores;
     if (toolButton.id === "solution") {
       return this.selectedTilesIncludeTeacher();
-    } else if (toolButton.id === "sparrow") {
-      return ui.annotationMode === kSparrowAnnotationMode;
     } else {
       return toolButton === this.state.activeTool;
     }
@@ -202,7 +187,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     }
 
     const newTileOptions: IDocumentContentAddTileOptions = {
-            title: this.getUniqueTitle(tileContentInfo),
             addSidecarNotes: !!tileContentInfo?.addSidecarNotes,
             insertRowInfo: { rowInsertIndex: document.content?.defaultInsertRow ?? 0 }
           };
@@ -221,23 +205,6 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     // nothing to do
   }
 
-  private handleSparrow() {
-    const { ui } = this.stores;
-    if (ui.annotationMode === kSparrowAnnotationMode) {
-      ui.setAnnotationMode();
-    } else {
-      ui.setAnnotationMode("sparrow");
-      ui.setShowAnnotations(true);
-      ui.setSelectedTile();
-    }
-  }
-
-  private handleHideAnnotations() {
-    const { ui } = this.stores;
-    ui.setAnnotationMode();
-    ui.setShowAnnotations(!ui.showAnnotations);
-  }
-
   private handleUndo() {
     this.props.document.undoLastAction();
   }
@@ -247,21 +214,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDelete() {
-    const tileApiInterface = this.context?.current;
-    if (!tileApiInterface) return;
-    let didDeleteInteriorSelection = false;
-    const { ui } = this.stores;
-    ui.selectedTileIds.forEach(tileId => {
-      const tileApi = tileApiInterface?.getTileApi(tileId);
-      // if there is selected content inside the selected tile, delete it first
-      if (tileApi?.hasSelection?.()) {
-        tileApi.deleteSelection?.();
-        didDeleteInteriorSelection = true;
-      }
-    });
-    if (!didDeleteInteriorSelection) {
-      this.showDeleteTilesConfirmationAlert?.();
-    }
+    this.showDeleteTilesConfirmationAlert?.();
     this.setState(state => ({ activeTool: state.defaultTool }));
   }
 

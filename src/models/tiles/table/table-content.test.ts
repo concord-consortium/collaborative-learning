@@ -8,6 +8,7 @@ import { kSerializedXKey } from "../../data/expression-utils";
 import { kDefaultColumnWidth } from "../../../components/tiles/table/table-types";
 import { SharedDataSet, SharedDataSetSnapshotType, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { ISharedModelManager } from "../../..//models/shared/shared-model-manager";
+import { SharedModelType } from "../../shared/shared-model";
 
 // mock Logger calls
 const mockLogTileChangeEvent = jest.fn();
@@ -36,8 +37,14 @@ const makeSharedModelManager = ( dataSet?: SharedDataSetType): ISharedModelManag
   let sharedDataSet = dataSet;
   return {
     isReady: true,
+    getSharedModelProviders(model: SharedModelType){
+      return [];
+    },
     findFirstSharedModelByType<IT extends IAnyType>(sharedModelType: IT): IT["Type"] | undefined {
       return sharedDataSet;
+    },
+    getSharedModelLabel(model: SharedModelType) {
+      return model.id;
     },
     getSharedModelsByType<IT extends IAnyType>(type: string): IT["Type"][] {
       return sharedDataSet ? [sharedDataSet] : [];

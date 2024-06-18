@@ -14,10 +14,8 @@ let primaryWorkSpace = new PrimaryWorkspace;
 
 let teacherDoc = "Teacher Investigation Copy";
 
-const queryParams = {
-  teacherQueryParams: "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa",
-  studentWorkspaceQueryParams: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa"
-};
+const teacherQueryParams = `${Cypress.config("qaUnitTeacher6")}`;
+const studentWorkspaceQueryParams = `${Cypress.config("clueTestqaUnitTeacher6")}`;
 
 function beforeTest(params) {
   cy.clearQAData('all');
@@ -53,10 +51,10 @@ function loadStudentWorkspace(params) {
 
 context('Teacher Workspace', () => {
   describe('teacher document functionality', function () {
-    
+
     it('verify teacher workspace tab', function () {
       cy.log('verify save and restore');
-      beforeTest(queryParams.teacherQueryParams);
+      beforeTest(teacherQueryParams);
       beforeAdd();
 
       cy.log('verify save and restore investigation');
@@ -77,7 +75,7 @@ context('Teacher Workspace', () => {
       afterDelete();
   // });
 
-    
+
   // });
 
   // TODO: The placement of this context in the order matters because for some reason the
@@ -106,8 +104,8 @@ context('Teacher Workspace', () => {
       cy.collapseResourceTabs();
       cy.openResourceTabs();
       cy.get('.top-tab.tab-teacher-guide').should('exist').click({force:true});
-      cy.get('.prob-tab.teacher-guide').should('exist').and('have.length', 4).each(function (subTab, index, subTabList) {
-        const teacherGuideSubTabs = ["Launch", "Explore", "Summarize", "Unit Plan"];
+      cy.get('.prob-tab.teacher-guide').should('exist').and('have.length', 3).each(function (subTab, index, subTabList) {
+        const teacherGuideSubTabs = ["Launch", "Explore", "Summarize"];
         cy.wrap(subTab).text().should('contain', teacherGuideSubTabs[index]);
       });
     });
@@ -115,8 +113,8 @@ context('Teacher Workspace', () => {
 
   describe('Student Workspace', () => { //flaky -- could be because it is trying to connect to firebase?
     it('verify student workspace tab', () => {
-      loadStudentWorkspace(queryParams.studentWorkspaceQueryParams);
-      cy.fixture("teacher-dash-data-msa-test.json").as("clueData");
+      loadStudentWorkspace(studentWorkspaceQueryParams);
+      cy.fixture("teacher-dash-data-CLUE-test.json").as("clueData");
       dashboard.switchView("Workspace & Resources");
       primaryWorkSpace.getResizePanelDivider().click();
       cy.wait(2000);
@@ -125,6 +123,7 @@ context('Teacher Workspace', () => {
         cy.get('.top-tab.tab-student-work').should('exist').click({force:true});
         cy.get('.student-group-view').should('be.visible');
         cy.get('.student-group .group-number').should('be.visible').and('have.length', groups.length);
+        cy.get('.student-group .group-number').contains('G1').click({force:true});
         cy.get('.student-group .group-number').eq(0).should('have.class', 'active');
         cy.get('.group-title').should('contain', 'Group 1');
         cy.get('.canvas-area .four-up .member').should('have.length', 4);

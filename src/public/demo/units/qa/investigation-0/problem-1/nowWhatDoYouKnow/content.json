@@ -1,0 +1,38 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {
+        "id": "document_Text_1",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>This section shows students how they can use their past work or published class work to synthesize their learning. Students can access published work, either from other students or from you, and incorporate them into their documents.</p><p>Editing and updating the Learning Log is a particularly powerful way for students to reflect on their learning. Learning Log files are visible in each problem of the Unit. Encourage students to take notes on the Unit content and incorporate it into their Learning Logs.</p>"
+          ]
+        }
+      },
+      {
+        "id": "HD-HSkIEvbn-KvrN",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Accessing Class and Personal Documents</strong></p><p>So far, you have been only using the <strong>Problem</strong> tab on the left side of the screen. Now try using the three remaining tabs to access saved personal documents or class documents while editing another document on the right side of the screen. Explore the tabs to find a document and click the icon of the document. It will appear on the left. If you have a document on the right, you can drag tiles into it just as you would from the Problems tab. The files are sorted by the tabs:</p><ul><li><strong>My Work</strong> holds your present workspace and any extra documents you may have created.</li><li><strong>Class Work</strong> holds all published work from your teacher or from other students.</li><li><strong>Supports</strong> are documents created by the lesson authors (Problem Supports) or your teacher (Teacher Supports) to enhance your learning.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "Qeav9ni5gHG2WzoY",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Under <strong>My Work</strong> and <strong>Class Work</strong>, you also have access to sub-tabs:</p><ul><li><strong>Learning Logs</strong> are documents that you can access throughout the Unit. They are designed for you to take notes and reflect on your learning over time. Your own Learning Logs are located under My Work and Learning Logs shared from other students in your class are under Class Work.</li><li><strong>Starred</strong> documents are documents that you have highlighted as important and want to find easily. You can highlight any document by clicking on the light gray star on the document’s thumbnail icon.</li><li><strong>Workspaces</strong> contain your present workspace document and any extra workspace that you may have created.</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

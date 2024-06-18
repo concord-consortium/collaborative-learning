@@ -12,6 +12,11 @@ interface IProps {
   args?: string[];
 }
 
+/**
+ * Defines a button that will immediately create a tile and link our data to it.
+ * The type of tile is defined by an argument to the button.
+ * So it is used in the toolbar config like `[data-set-view Table]`.
+ */
 export function DataSetViewButton({name, args}: IProps) {
   const addTilesContext = useContext(AddTilesContext);
   const tile = useContext(TileModelContext);
@@ -22,7 +27,7 @@ export function DataSetViewButton({name, args}: IProps) {
   }
 
   const newTileType = args[1];
-  const tooltip = `Create a linked ${newTileType} tile`;
+  const tooltip = `${newTileType} It!`;
 
   // TODO: if the document or tile are undefined then disable the button
 

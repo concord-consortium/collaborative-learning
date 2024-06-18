@@ -2,13 +2,10 @@ import ChatPanel from "../../../support/elements/common/ChatPanel";
 
 let chatPanel = new ChatPanel;
 
-const queryParams = {
-  teacher7NetworkQueryParams: "/?unit=https://models-resources.concord.org/clue-curriculum/branch/add-test-unit-qa/qa/content.json&problem=0.1&appMode=qa&demoName=add-test-unit-qa&fakeClass=5&fakeUser=teacher:7&network=foo"
-};
-
-function beforeTest(params) {
+function beforeTest() {
+  const queryParams = `${Cypress.config("qaUnitTeacher6Network")}`;
   cy.clearQAData('all');
-  cy.visit(params);
+  cy.visit(queryParams);
   cy.waitForLoad();
   cy.openTopTab("problems");
   chatPanel.getChatPanelToggle().should('exist');
@@ -17,7 +14,7 @@ function beforeTest(params) {
 context('Chat Panel Comment Tags', () => {
   it('verify chat panel comment tags', () => {
     const tags = [
-      "Select Student Strategy",
+      "Select QA Strategy",
       "Part-to-Part",
       "Part-to-Whole",
       "Unit Rate",
@@ -30,7 +27,7 @@ context('Chat Panel Comment Tags', () => {
       "This is Ratios of Same Variable tag comment" + Math.random()
     ];
     cy.log('verify chat panel comment tags are accessible if teacher is in network (via url params)');
-    beforeTest(queryParams.teacher7NetworkQueryParams);
+    beforeTest();
 
     cy.log('verify comment tag dropdown');
     chatPanel.getChatPanelToggle().click();

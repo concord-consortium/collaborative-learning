@@ -9,7 +9,7 @@ const imageToolTile = new ImageToolTile;
 let userCanvas = 'Uploaded Images';
 
 function beforeTest() {
-  const queryParams = `${Cypress.config("queryParams")}`;
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
@@ -44,6 +44,20 @@ context('Image Tile', function () {
     // imageToolTile.getImageToolControl().last().click();
     cy.uploadFile(imageToolTile.imageChooseFileButton(), imageFilePath3, 'image/gif');
     cy.wait(2000);
+
+    cy.log('verify Image tile title restore upon page reload');
+    const newName = "Image Tile";
+    clueCanvas.addTile('image');
+    imageToolTile.getTileTitle().first().should("contain", "Image 1");
+    imageToolTile.getImageTileTitle().first().click();
+    imageToolTile.getImageTileTitle().first().type(newName + '{enter}');
+    imageToolTile.getTileTitle().should("contain", newName);
+    cy.wait(2000);
+
+    cy.reload();
+    cy.waitForLoad();
+
+    imageToolTile.getTileTitle().first().should("contain", newName);
   });
 
   it('Image tile title edit, undo redo and delete tile', () => {

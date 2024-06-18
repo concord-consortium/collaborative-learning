@@ -168,17 +168,21 @@ $ npm run deploy:firebase:rules     # deploys firebase (realtime database) rules
 
 To enable per component debugging set the "debug" localstorage key with one or more of the following:
 
+- `bookmarks` this will show a tiny text status above the bookmark indicating which users have bookmarked this document. It will also print information about the document bookmarks each time a bookmark is toggled.
 - `canvas` this will show the document key over the canvas, useful for looking up documents in Firebase
 - `cms` this will print info to the console as changes are made to authored content via the CMS
+- `docList` - this will print a table of information about a list of documents
 - `document` this will add the active document as `window.currentDocument`, you can use MST's hidden toJSON() like `currentDocument.toJSON()` to views its content.
 - `drop` console log the dataTransfer object from drop events on the document.
 - `history` this will: print some info to the console as the history system records changes, print the full history as JSON each time it is loaded from Firestore, and provide a `window.historyDocument` so you can inspect the document while navigating the history.
 - `images` this will set `window.imageMap` so you can look at the status and URLs of images that have been loaded.
 - `listeners` console log the adding, removing, and firing of firebase listeners
+- `loading` console log timing information for various phases of the startup process
 - `logger` console log all messages sent to the logging service
 - `sharedModels` console log messages about shared models, currently this is only used in the variables shared model
 - `stores` this will set `window.stores` so you can monitor the stores global from the browser console.
 - `undo` this will print information about each action that is added to the undo stack.
+
 
 ## Testing
 
@@ -199,35 +203,42 @@ Note that currently, some of the jest tests (notably `db.test.ts`) and many of t
 
 There are a number of URL parameters that can aid in testing:
 
-|Parameter  |Value(s)                  |Description|
-|-----------|--------------------------|-----------|
-|`appMode`  |`dev`, `qa`, `test`       |Unsecured modes that are partitioned off from authenticated sections of the database.|
-|`unit`     |`sas`, `msa`, etc.        |Abbreviated code or URL for the curriculum unit.|
-|`problem`  |`2.1`, `3.2`, etc.        |Reference to individual problem in curriculum unit.|
-|`demo`     |none                      |Launches demo creator UI|
-|`demoName` |string (default: `CLUE`)  |Used to partition the demo portion of the database.|
-|`network`  |string                    |Specify the network with which a teacher user is affiliated.|
-|`fakeClass`|string                    |Class id for demo, qa, or test modes.|
-|`fakeUser` |`(student\|teacher):<id>` |Configure user type and (optionally) id.|
-|`qaGroup`  |string                    |Group id for qa, e.g. automated tests.|
-|`qaClear`  |`all`, `class`, `offering`|Extent of database clearing for automated tests.|
-|`firebase` |`emulator` (for default) or `host:port`|Target emulator for firebase realtime database calls.|
-|`firestore`|`emulator` (for default) or `host:port`|Target emulator for firestore database calls.|
-|`functions`|`emulator` (for default) or `host:port`|Target emulator-hosted firebase functions.|
+|Parameter       |Value(s)                 |Description|
+|----------------|-------------------------|-----------|
+|`appMode`       |`dev`, `qa`, `test`      |Unsecured modes that are partitioned off from authenticated sections of the database.|
+|`unit`          |`sas`, `msa`, etc.       |Abbreviated code or URL for the curriculum unit.|
+|`problem`       |`2.1`, `3.2`, etc.       |Reference to individual problem in curriculum unit.|
+|`demo`          |none                     |Launches demo creator UI|
+|`demoName`      |string (default: `CLUE`) |Used to partition the demo portion of the database.|
+|`network`       |string                   |Specify the network with which a teacher user is affiliated.|
+|`fakeClass`     |string                   |Class id for demo, qa, or test modes.|
+|`fakeUser`      |`(student\|teacher):<id>`|Configure user type and (optionally) id.|
+|`qaGroup`       |string                   |Group id for qa, e.g. automated tests.|
+|`qaClear`       |`all\|class\|offering`   |Extent of database clearing for automated tests.|
+|`firebase`      |`emulator\|<URL>`        |Target emulator for firebase realtime database calls.|
+|`firestore`     |`emulator\|<URL>`        |Target emulator for firestore database calls.|
+|`functions`     |`emulator\|<URL>`        |Target emulator-hosted firebase functions.|
+|`noPersistentUI`|none                     |Do not initialize persistent ui store.|
 
 The `unit` parameter can be in 3 forms:
 - a valid URL starting with `https:` or `http:` will be treated as an absolute URL.
-- a string starting with `./` will be treated as a URL relative to the current page in the browser.
-- Everything else is treated as a unit code, these codes are first looked up in a map to remap legacy codes. Then the URL of the unit is created by `${curriculumBaseUrl}/branch/${branchName}/${unitCode}/content.json`.
-  - `curriculumBaseUrl` defaults to `https://models-resources.concord.org/clue-curriculum`.
+- a string starting with `./` will be treated as a URL relative to the javascript files of CLUE.
+- Everything else is treated as a unit code, these codes are first looked up in a map to remap legacy codes. Then the URL of the unit is created by `${curriculumSiteUrl}/branch/${branchName}/${unitCode}/content.json`.
+  - `curriculumSiteUrl` defaults to `https://models-resources.concord.org/clue-curriculum`.
   - `branchName` defaults to `main`.
   - To find out more about customizing these values look at `app-config-model.ts`.
 
+The `firebase`, `firestore`, and `functions` params can take an `emulator` value which will make CLUE use the default host and port for the emulator of that service. Alternatively you can pass a URL like `http://localhost:1234` for the emulated service.
+
 ### Standalone Document Editor
 
-There is an alternative entry point for CLUE available at `/doc-editor.html`. This can be used to save and open individual documents from the local file system. Remote documents can be loaded into this editor with the `document` URL parameter. The editor requires a `unit` parameter to configure the toolbar. It can load an exported document content which is typical for section documents. It can also load a raw document content which is the same format that is stored in Firebase. It will save in the same format that was loaded.
+There is an alternative entry point for CLUE available at `/editor/`. This can be used to save and open individual documents from the local file system. Remote documents can be loaded into this editor with the `document` URL parameter. The editor requires a `unit` parameter to configure the toolbar. It can load an exported document content which is typical for section documents. It can also load a raw document content which is the same format that is stored in Firebase. It will save in the same format that was loaded.
+
+By default the editor will save the current document to the browser's session storage. When editor is reloaded this same document will be loaded in. If you make a new tab and visit the editor this document won't be there anymore because it is in session storage. There is a "reset doc" button which clears the storage and reloads the page. You can also use the `noStorage` parameter to prevent it from loading or saving to session storage.
 
 The `document` parameter is useful if you want to work on something that requires a document in a specific state. You can just reload the page and get back to this state. You can use this locally by creating an initial document in doc-editor.html, and save the file to `src/public/[filename]`. Now you can load the document back with the parameter `document=[filename]`. This works because the document parameter will load URLs relative to the current page in the browser. This approach can also be used in Cypress tests. It would mean the test could just load in a document to test instead of having to setup the document first.
+
+The Standalone Document Editor also supports a `readOnly` url param. If you specify this param the document you open will be opened in readOnly mode. This is useful for testing or debugging issues with tiles that have different displays when in readOnly model.
 
 ### QA
 

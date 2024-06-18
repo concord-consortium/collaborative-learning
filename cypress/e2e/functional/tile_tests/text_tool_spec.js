@@ -5,11 +5,11 @@ import TextToolTile from '../../../support/elements/tile/TextToolTile';
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
-let title = "SAS 2.1 Drawing Wumps";
+let title = "QA 1.1 Solving a Mystery with Proportional Reasoning";
 let copyTitle = 'Text Tile Workspace Copy';
 
 function beforeTest() {
-  const queryParams = `${Cypress.config("queryParams")}`;
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
@@ -76,6 +76,19 @@ context('Text tool tile functionalities', function () {
     textToolTile.enterText('{end} {enter}');
     textToolTile.enterText('{end} {enter}This should be in a bulleted list');
     clueCanvas.clickToolbarButton('text', 'list-ul');
+    textToolTile.getTextEditor().last().should('have.descendants', 'ul');
+
+    // Text tile restore upon page reload
+    cy.wait(1000);
+    cy.reload();
+    cy.waitForLoad();
+    textToolTile.getTextTile().last().should('exist').and('contain', 'Hello World');
+    textToolTile.getTextEditor().last().should('have.descendants', 'strong');
+    textToolTile.getTextEditor().last().should('have.descendants', 'em');
+    textToolTile.getTextEditor().last().should('have.descendants', 'u');
+    textToolTile.getTextEditor().last().should('have.descendants', 'sub');
+    textToolTile.getTextEditor().last().should('have.descendants', 'sup');
+    textToolTile.getTextEditor().last().should('have.descendants', 'ol');
     textToolTile.getTextEditor().last().should('have.descendants', 'ul');
 
     cy.log('verifies restore of text field content');
@@ -203,5 +216,82 @@ context('Text tool tile functionalities', function () {
     textToolTile.getTextTile().should('not.contain', 'World');
     clueCanvas.getRedoTool().click();
     textToolTile.getTextTile().should('have.text', 'Hello Worl');
+
+    // Access the text tile element
+    textToolTile.getTextTile().should("exist");
+
+    // should undo and redo formatted text changes
+
+    // Undo/Redo checks for bulleted text
+    cy.get('.toolbar-button.list-ul').click();
+    textToolTile.getTextEditor().last().should('have.descendants', 'ul');
+    clueCanvas.getUndoTool().click().click().click();
+    textToolTile.getTextTile().should('not.have.descendants', 'ul');
+    clueCanvas.getRedoTool().click().click().click();
+    textToolTile.getTextEditor().last().should('have.descendants', 'ul');
+
+    //Undo/Redo checks for Numbered List
+    clueCanvas.clickToolbarButton('text', 'list-ol');
+    textToolTile.getTextEditor().last().should('have.descendants', 'ol');
+    clueCanvas.getUndoTool().click().click().click();
+    textToolTile.getTextEditor().last().should('not.have.descendants', 'ol');
+    clueCanvas.getRedoTool().click().click().click();
+    textToolTile.getTextEditor().last().should('have.descendants', 'ol');
+    clueCanvas.getUndoTool().click().click().click();
+    textToolTile.getTextEditor().last().should('not.have.descendants', 'ol');
+
+
+    // Undo/Redo checks for Bold formatting
+    textToolTile.getTextEditor().type('{selectall}');
+    clueCanvas.clickToolbarButton('text', 'bold');
+    textToolTile.getTextEditor().last().should('have.descendants', 'strong');
+    clueCanvas.getUndoTool().click();
+    textToolTile.getTextEditor().last().should('not.have.descendants', 'strong');
+    clueCanvas.getRedoTool().click();
+    textToolTile.getTextEditor().last().should('have.descendants', 'strong');
+    clueCanvas.getUndoTool().click();
+
+
+    //Undo/Redo checks for Italic
+    textToolTile.getTextEditor().type('{selectall}');
+    clueCanvas.clickToolbarButton('text', 'italic');
+    textToolTile.getTextEditor().last().should('have.descendants', 'em');
+    clueCanvas.getUndoTool().click();
+    textToolTile.getTextEditor().last().should('not.have.descendants', 'em');
+    clueCanvas.getRedoTool().click();
+    textToolTile.getTextEditor().last().should('have.descendants', 'em');
+    clueCanvas.getUndoTool().click();
+    textToolTile.getTextEditor().last().should('not.have.descendants', 'em');
+
+    //Undo/Redo checks for Underline
+    textToolTile.getTextEditor().type('{selectall}');
+    clueCanvas.clickToolbarButton('text', 'underline');
+    textToolTile.getTextEditor().last().should('have.descendants', 'u');
+    clueCanvas.getUndoTool().click();
+    textToolTile.getTextEditor().last().should('not.have.descendants', 'u');
+    clueCanvas.getRedoTool().click();
+    textToolTile.getTextEditor().last().should('have.descendants', 'u');
+    clueCanvas.getUndoTool().click();
+    textToolTile.getTextEditor().last().should('not.have.descendants', 'u');
+
+    //Undo/Redo checks for Subscript
+    textToolTile.getTextEditor().type('{selectall}');
+    clueCanvas.clickToolbarButton('text', 'subscript');
+    textToolTile.getTextEditor().last().should('have.descendants', 'sub');
+    clueCanvas.getUndoTool().click();
+    textToolTile.getTextEditor().last().should('not.have.descendants', 'sub');
+    clueCanvas.getRedoTool().click();
+    textToolTile.getTextEditor().last().should('have.descendants', 'sub');
+    clueCanvas.getUndoTool().click();
+    textToolTile.getTextEditor().last().should('not.have.descendants', 'sub');
+
+    //Undo/Redo checks for Superscript
+    textToolTile.getTextEditor().type('{selectall}');
+    clueCanvas.clickToolbarButton('text', 'superscript');
+    textToolTile.getTextEditor().last().should('have.descendants', 'sup');
+    clueCanvas.getUndoTool().click();
+    textToolTile.getTextEditor().last().should('not.have.descendants', 'sup');
+    clueCanvas.getRedoTool().click();
+    textToolTile.getTextEditor().last().should('have.descendants', 'sup');
   });
 });

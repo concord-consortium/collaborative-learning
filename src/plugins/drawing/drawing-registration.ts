@@ -3,15 +3,25 @@ import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
 import { DrawingContentModel, DrawingToolMetadataModel, defaultDrawingContent } from "./model/drawing-content";
 import { kDrawingTileType, kDrawingDefaultHeight } from "./model/drawing-types";
 import DrawingToolComponent from "./components/drawing-tile";
-import DrawingToolIcon from "../../clue/assets/icons/draw-tool.svg";
 import { DrawingMigrator } from "./model/drawing-migrator";
 import { registerDrawingObjectInfo, registerDrawingToolInfo } from "./components/drawing-object-manager";
-import { GroupObjectsButton, UngroupObjectsButton } from "./components/drawing-toolbar-group-buttons";
 import { GroupComponent, GroupObject } from "./objects/group";
+import { registerTileToolbarButtons } from "../../components/toolbar/toolbar-button-manager";
+import {
+  EllipseButton, LineButton, RectangleButton, SelectButton, TextButton
+} from "./toolbar-buttons/mode-buttons";
+import { VectorButton } from "./toolbar-buttons/vector-button";
+import { StampButton } from "./toolbar-buttons/stamp-button";
+import { FillColorButton, StrokeColorButton } from "./toolbar-buttons/select-buttons";
+import { DeleteButton, DuplicateButton, GroupButton, UngroupButton } from "./action-buttons";
+import { ImageUploadButton } from "./toolbar-buttons/image-upload-button";
+import Icon from "./assets/draw-tool.svg";
+import HeaderIcon from "./assets/sketch-tile-id.svg";
+
 
 registerTileContentInfo({
   type: kDrawingTileType,
-  titleBase: "Sketch",
+  displayName: "Sketch",
   // TODO: maybe there is a better way to do this kind of casting?
   //   The issue is that modelClass prop has a type of `typeof TileContentModel`,
   //   That type is pretty restrictive and doesn't accommodate the return of
@@ -27,8 +37,9 @@ registerTileContentInfo({
 registerTileComponentInfo({
   type: kDrawingTileType,
   Component: DrawingToolComponent,
-  tileEltClass: "drawing-tool-tile",
-  Icon: DrawingToolIcon,
+  tileEltClass: "drawing-tool-tile disable-tile-content-drag",
+  Icon,
+  HeaderIcon,
   tileHandlesOwnSelection: true
 });
 
@@ -43,11 +54,26 @@ registerDrawingObjectInfo({
 });
 
 registerDrawingToolInfo({
-  name: "group",
-  buttonComponent: GroupObjectsButton
+  name: "group"
 });
 
 registerDrawingToolInfo({
-  name: "ungroup",
-  buttonComponent: UngroupObjectsButton
+  name: "ungroup"
 });
+
+registerTileToolbarButtons("drawing", [
+  { name: "select", component: SelectButton },
+  { name: "line", component: LineButton },
+  { name: "vector", component: VectorButton },
+  { name: "rectangle", component: RectangleButton },
+  { name: "ellipse", component: EllipseButton },
+  { name: "stamp", component: StampButton },
+  { name: "stroke-color", component: StrokeColorButton },
+  { name: "fill-color", component: FillColorButton },
+  { name: "text", component: TextButton },
+  { name: "upload", component: ImageUploadButton },
+  { name: "group", component: GroupButton },
+  { name: "ungroup", component: UngroupButton },
+  { name: "duplicate", component: DuplicateButton },
+  { name: "delete", component: DeleteButton }
+]);

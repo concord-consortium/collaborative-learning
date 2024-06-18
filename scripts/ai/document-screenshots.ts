@@ -25,13 +25,14 @@ const documentLimit = false;
 // Number of files to process in parallel
 const fileBatchSize = 8;
 
+// The width of the browser window. The height is determined dynamically.
+const windowWidth = 1920 / 2;
+
 const publicRoot = "ai";
 const rootPath = `../../src/public/${publicRoot}`;
 const documentPath = `${rootPath}/${documentDirectory}`;
 const publicPath = `${publicRoot}/${documentDirectory}`;
 const tagFileName = "tags.csv";
-
-const DEFAULT_WIDTH = 1920 / 2;
 
 const startTime = Date.now();
 let checkedFiles = 0;
@@ -57,7 +58,7 @@ function newFileName(oldFileName: string) {
 
 // makeSnapshot loads document content at path in a CLUE standalone document editor, takes a snapshot of it,
 // then saves it in the output directory as fileName
-const urlRoot = `http://localhost:8080/doc-editor.html?appMode=dev&unit=example&document=`;
+const urlRoot = `http://localhost:8080/editor/?appMode=dev&unit=example&document=`;
 async function makeSnapshot(path: string, fileName: string) {
   console.log(`*   Processing snapshot`, path);
   const targetFile = `${targetPath}/${fileName}`;
@@ -86,7 +87,7 @@ async function makeSnapshot(path: string, fileName: string) {
     const boundingBox = await rowElement.boundingBox();
     pageHeight += boundingBox?.height ?? 0;
   }
-  await page.setViewport({ width: DEFAULT_WIDTH, height: Math.round(pageHeight) });
+  await page.setViewport({ width: windowWidth, height: Math.round(pageHeight) });
 
   // Take a screenshot and save it to a file
   const buffer = await page.screenshot({ fullPage: true, type: 'png' });

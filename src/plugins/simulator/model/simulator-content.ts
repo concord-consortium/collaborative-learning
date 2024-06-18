@@ -4,13 +4,18 @@ import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view
 
 import { withoutUndo } from "../../../models/history/without-undo";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
-import { TileContentModel } from "../../../models/tiles/tile-content";
+import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { getAppConfig } from "../../../models/tiles/tile-environment";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
 import { kSimulatorTileType } from "../simulator-types";
 import { kSharedVariablesID, SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { defaultSimulationKey, simulations } from "../simulations/simulations";
+import { SharedProgramData, SharedProgramDataType } from "../../shared-program-data/shared-program-data";
+import { IClueTileObject } from "../../../models/annotations/clue-object";
+import { tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
+import { kPotentiometerServoKey } from "../simulations/potentiometer-servo/potentiometer-servo";
+import { getMiniNodesDisplayData } from "../simulations/potentiometer-servo/chip-sim-utils";
 
 export function defaultSimulatorContent(): SimulatorContentModelType {
   return SimulatorContentModel.create({});
@@ -52,12 +57,20 @@ export const SimulatorContentModel = TileContentModel
         self.simulation = defaultSimulation as string ?? defaultSimulationKey;
       }
       return simulations[self.simulation];
+    },
+    get sharedProgramData() {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const sharedModels = sharedModelManager?.getTileSharedModels(self); // only returns those who are attached
+      const sharedProgramData = sharedModels?.filter( sharedModel => {
+        return sharedModel.type === "SharedProgramData";
+      });
+      return sharedProgramData?.[0] as SharedProgramDataType;
     }
   }))
   .views(self => ({
     get variables() {
       return self.sharedModel?.variables;
-    }
+    },
   }))
   .views(self => ({
     getVariable(name?: string) {
@@ -70,6 +83,37 @@ export const SimulatorContentModel = TileContentModel
       return self.variables?.filter(v => isOutputVariable(v)) ?? [];
     }
   }))
+  .views(self => tileContentAPIViews({
+    get annotatableObjects(): IClueTileObject[] {
+      if (self.simulation === kPotentiometerServoKey) {
+        // Make an annotatable object for each mini-node
+        const nodeData = getMiniNodesDisplayData(self.sharedProgramData);
+        const visibleNodes = [
+          ...nodeData.inputNodesArr,
+          ...nodeData.operatorNodesArr,
+          ...nodeData.outputNodesArr];
+        const nodeObjects = visibleNodes.map(node =>
+          ({
+            objectId: node.id,
+            objectType: "node"
+          }));
+
+        // Plus an object for each of the 14 pins on each side of the image
+        const boardPins = [
+          ...Array.from({ length: 14 }, (o, index) => `L${index}`),
+          ...Array.from({ length: 14 }, (o, index) => `R${index}`)
+        ];
+        const pinObjects = boardPins.map(pin =>
+          ({
+            objectId: pin,
+            objectType: "pin"
+          }));
+
+        return [...nodeObjects, ...pinObjects];
+      }
+      return [];
+    }
+  }))
   .actions(self => ({
     afterAttach() {
       // Monitor our parents and update our shared model when we have a document parent
@@ -80,12 +124,39 @@ export const SimulatorContentModel = TileContentModel
           sharedModelManager?.findFirstSharedModelByType(SharedVariables) : undefined;
 
         const tileSharedModels = sharedModelManager?.isReady ?
-          sharedModelManager?.getTileSharedModels(self) : undefined;
+          sharedModelManager?.getTileSharedModels(self) : undefined; // only returns those who are attached
 
-        const values = {sharedModelManager, containerSharedModel, tileSharedModels};
+        const ourSharedProgramData = tileSharedModels?.find( sharedModel => {
+          return getType(sharedModel) === SharedProgramData;
+        });
+
+        const existingSharedPrograms = sharedModelManager?.isReady ?
+          sharedModelManager?.getSharedModelsByType("SharedProgramData") : undefined;
+
+        const programsWithDataflowTiles: SharedModelType[] = [];
+        existingSharedPrograms?.forEach((program) => {
+          const programTiles = sharedModelManager?.getSharedModelTiles(program);
+          if (programTiles?.find((tile) => tile?.content?.type === "Dataflow")) {
+            programsWithDataflowTiles.push(program);
+          }
+        });
+
+        const values = {
+          sharedModelManager,
+          containerSharedModel,
+          tileSharedModels,
+          programsWithDataflowTiles,
+          ourSharedProgramData
+        };
         return values;
       },
-      ({sharedModelManager, containerSharedModel, tileSharedModels}) => {
+      ({
+        sharedModelManager,
+        containerSharedModel,
+        tileSharedModels,
+        programsWithDataflowTiles,
+        ourSharedProgramData
+      }) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
@@ -100,6 +171,17 @@ export const SimulatorContentModel = TileContentModel
           // is running outside of a document tree action.
           // Add the shared model to both the document and the tile
           sharedModelManager.addTileSharedModel(self, containerSharedModel);
+        }
+
+        if (programsWithDataflowTiles.length > 0) {
+          if(ourSharedProgramData) {
+            if (!programsWithDataflowTiles.includes(ourSharedProgramData)) {
+              sharedModelManager.removeTileSharedModel(self, ourSharedProgramData);
+              sharedModelManager.addTileSharedModel(self, programsWithDataflowTiles[0]);
+            }
+          } else {
+            sharedModelManager.addTileSharedModel(self, programsWithDataflowTiles[0]);
+          }
         }
 
         // Set up starter variables
@@ -134,3 +216,7 @@ export const SimulatorContentModel = TileContentModel
   }));
 
 export interface SimulatorContentModelType extends Instance<typeof SimulatorContentModel> {}
+
+export function isSimulatorModel(model?: ITileContentModel): model is SimulatorContentModelType {
+  return model?.type === kSimulatorTileType;
+}

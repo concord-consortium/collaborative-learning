@@ -22,7 +22,7 @@ useNetworkDocumentKey: (documentKey: string) => `network_${documentKey}`,
     selectedTileIds: []
   }),
   useStores: () => ({
-    appConfig: AppConfigModel.create({ curriculumBaseUrl: "https://curriculum.example.com", config: unitConfigDefaults })
+    appConfig: AppConfigModel.create({ config: unitConfigDefaults })
   })
 }));
 

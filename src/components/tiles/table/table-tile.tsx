@@ -24,9 +24,10 @@ import { useRowHeight } from "./use-row-height";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { verifyAlive } from "../../../utilities/mst-utils";
-import { gImageMap } from "../../../models/image-map";
+import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { TableToolbarContext } from "./table-toolbar-context";
+import { ITableContext, TableContext } from "../hooks/table-context";
 
 import "./table-tile.scss";
 import "./table-toolbar-registration";
@@ -34,17 +35,19 @@ import "./table-toolbar-registration";
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
   documentContent, tileElt, model, readOnly, height, scale,
-  onRequestRowHeight, onRequestUniqueTitle, onRegisterTileApi, onUnregisterTileApi
+  onRequestRowHeight, onRegisterTileApi, onUnregisterTileApi
 }) {
   // Gather data from the model
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
   const content = useMemo(() => getContent(), [getContent]);
+  const imagePromises = useMemo(() => new Map<string, Promise<ImageMapEntry>>(), []);
   const [imageUrls, setImageUrls] = useState(new Map<string,string>());
   verifyAlive(content, "TableToolComponent");
   const metadata = getContent().metadata;
   const linkedTiles = content.tileEnv?.sharedModelManager?.getSharedModelTiles(content.sharedModel);
   const isLinked = linkedTiles && linkedTiles.length > 1;
+  const tableContextValue: ITableContext = { linked: !!isLinked };
 
   // Basic operations based on the model
   const {
@@ -64,12 +67,6 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // These require knowledge of the column widths
   const { rowHeight, headerHeight, headerRowHeight } = useRowHeight({
     dataSet, measureColumnWidth, model });
-
-  // A function to generate a unique title for the tile
-  // TODO The table tile should switch to the new CLUE wide method of determining titles, and this should be removed
-  const handleRequestUniqueTitle = useCallback(() => {
-    return onRequestUniqueTitle(modelRef.current.id);
-  }, [modelRef, onRequestUniqueTitle]);
 
   // Functions and variables to handle selecting and navigating the grid
   const [showRowLabels, setShowRowLabels] = useState(false);
@@ -94,19 +91,20 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // and then looks it up in the background, adds to cache, and updates state to force a refresh.
   const lookupImage = useCallback((value: string) => {
     if (gImageMap.isImageUrl(value)) {
-      const cached = imageUrls.get(value);
-      if (cached) {
-        return cached;
+      let imagePromise = imagePromises.get(value);
+      if (!imagePromise) {
+        imagePromise = gImageMap.getImage(value);
+        imagePromises.set(value, imagePromise);
+        imagePromise.then((image) => {
+          if (image && image.displayUrl) {
+            // This state changes triggers a re-render
+            setImageUrls(urls => new Map(urls).set(value, image.displayUrl));
+          }
+        });
       }
-      gImageMap.getImage(value).then((image) => {
-        if (image && image.displayUrl) {
-          // This state changes forces a re-render - is that good?
-          setImageUrls(new Map(imageUrls).set(value, image.displayUrl));
-        }
-      });
-      return undefined;
+      return imageUrls.get(value);
     }
-  }, [imageUrls]);
+  }, [imagePromises, imageUrls]);
 
   // React components used for the index (left most) column
   const rowLabelProps = useRowLabelColumn({
@@ -157,7 +155,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   // Functions for getting and modifying the title
   const { onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
     gridContext, model, content, readOnly,
-    onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle, requestRowHeight
+    onSetTableTitle, requestRowHeight
   });
 
   // Functions for setting and displaying expressions
@@ -236,26 +234,28 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   return (
     <div className="table-tool">
-      <TableToolbarContext.Provider value={toolbarContext} >
+      <TableToolbarContext.Provider value={toolbarContext}>
         <TileToolbar
           tileType="table"
           readOnly={!!readOnly}
           tileElement={tileElt}
         />
       </TableToolbarContext.Provider>
-      <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
-        <EditableTableTitle
-          model={model}
-          className="table-title"
-          readOnly={readOnly}
-          titleCellWidth={titleCellWidth}
-          titleCellHeight={getTitleHeight()}
-          onBeginEdit={onBeginTitleEdit}
-          onEndEdit={onEndTitleEdit} />
-        <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
-          headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
-          {...dataGridProps} {...rowProps} />
-      </div>
+      <TableContext.Provider value={tableContextValue}>
+        <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
+          <EditableTableTitle
+            model={model}
+            className="table-title"
+            readOnly={readOnly}
+            titleCellWidth={titleCellWidth}
+            titleCellHeight={getTitleHeight()}
+            onBeginEdit={onBeginTitleEdit}
+            onEndEdit={onEndTitleEdit} />
+          <ReactDataGrid ref={gridRef} selectedRows={selectedCaseIds} rows={rows} rowHeight={rowHeight}
+            headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
+            {...dataGridProps} {...rowProps} />
+        </div>
+      </TableContext.Provider>
     </div>
   );
 });

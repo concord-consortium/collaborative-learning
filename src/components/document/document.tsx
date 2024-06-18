@@ -2,13 +2,12 @@ import { inject, observer } from "mobx-react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import React from "react";
 import FileSaver from "file-saver";
-import { usePublishDialog } from "./use-publish-dialog";
 import { DocumentFileMenu } from "./document-file-menu";
 import { MyWorkDocumentOrBrowser } from "./mywork-document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentModelType } from "../../models/document/document";
 import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
-import { logDocumentEvent } from "../../models/document/log-document-event";
+import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -17,8 +16,9 @@ import { IconButton } from "../utilities/icon-button";
 import ToggleControl from "../utilities/toggle-control";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
+import { DocumentAnnotationToolbar } from "./document-annotation-toolbar";
 
-import "./document.sass";
+import "./document.scss";
 
 export enum DocumentViewMode {
   Live,
@@ -54,17 +54,6 @@ const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
   );
 };
 
-const PublishButton = ({ document }: { document: DocumentModelType }) => {
-  const [showPublishDialog] = usePublishDialog(document);
-  const handlePublishButtonClick = () => {
-    showPublishDialog();
-  };
-  return (
-    <IconButton icon="publish" key="publish" className="action icon-publish" dataTestName="publish-icon"
-                onClickButton={handlePublishButtonClick} title="Publish Workspace" />
-  );
-};
-
 const EditButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="edit" key="edit" className="action icon-edit"
@@ -96,7 +85,7 @@ const ShareButton = ({ onClick, isShared }: { onClick: () => void, isShared: boo
     <>
       {<div className="share-separator" />}
       <ToggleControl className={`share-button ${visibility}`} dataTest="share-button"
-                      initialValue={isShared} onChange={onClick}
+                      value={isShared} onChange={onClick}
                       title={`${isShared ? "Shared: click to unshare from" : "Unshared: click to share to"} group`} />
       <div className="share-label">Share</div>
     </>
@@ -147,7 +136,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   public componentDidUpdate() {
     this.openHandlerDisposer = reaction(
       // data function: changes to primaryDocumentKey trigger the reaction
-      () => this.stores.ui.problemWorkspace.primaryDocumentKey,
+      () => this.stores.persistentUI.problemWorkspace.primaryDocumentKey,
       // reaction function
       () => this.setState({ showBrowser: false })
     );
@@ -188,7 +177,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         const isDeleted = document.getProperty("isDeleted");
         // close comparison when comparison document is deleted
         if (isDeleted && (side === "comparison")) {
-          const { ui: { problemWorkspace } } = stores;
+          const { persistentUI: { problemWorkspace } } = stores;
           problemWorkspace.toggleComparisonVisible({ override: false, muteLog: true });
         }
       });
@@ -199,6 +188,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const { appConfig: { navTabs } } = this.stores;
     // show the File menu if my work navigation is enabled
     return !!navTabs.getNavTabSpec(ENavTab.kMyWork);
+  }
+
+  private showPersonalShareToggle() {
+    const tabNames = this.stores.appConfig.navTabs.tabSpecs.map(tab => tab.tab);
+    return tabNames.includes(ENavTab.kSortWork);
   }
 
   private renderTitleBar(type: string) {
@@ -220,6 +214,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const problemTitle = problem.title;
     const { document, workspace } = this.props;
     const isShared = document.visibility === "public";
+    const showShareButton = type !== "planning";
     const showFileMenu = this.showFileMenu();
     const show4up = !workspace.comparisonVisible && !isTeacher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
@@ -235,8 +230,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                 onCopyDocument={this.handleCopyDocumentClick}
                 isDeleteDisabled={true}
                 onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
-            {this.showPublishButton(document) &&
-              <PublishButton document={document} />}
+            <DocumentAnnotationToolbar />
           </div>
         }
         <div className="title" data-test="document-title">
@@ -246,25 +240,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           <div className="actions right" data-test="document-titlebar-actions">
             {downloadButton}
             {show4up && this.renderMode()}
-            {!isTeacher &&
+            {showShareButton &&
               <ShareButton isShared={isShared} onClick={this.handleToggleVisibility} />}
           </div>
         }
       </div>
     );
-  }
-
-  private showPublishButton(document: DocumentModelType) {
-    const { appConfig } = this.stores;
-    if (!appConfig.disablePublish) return true;
-    // When we disable publishing by setting disablePublish=true,
-    // we set showPublishButton to false to hide the Publish button
-    if (document.type === "planning" || appConfig.disablePublish === true) return false;
-    return appConfig.disablePublish
-            .findIndex(spec => {
-              return (document.type === spec.documentType) &&
-                      document.matchProperties(spec.properties);
-            }) < 0;
   }
 
   private getStickyNoteData() {
@@ -297,6 +278,24 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <StickyNoteButton onClick={onClick} />
       </div>
     );
+  }
+
+  private openDocument(key: string) {
+    const doc = this.stores.documents.getDocument(key);
+    if (doc) {
+      this.stores.persistentUI.openResourceDocument(doc);
+      logDocumentViewEvent(doc);
+    }
+  }
+
+  private renderDocumentLink(key: string|undefined) {
+    if (!key) return null;
+    const title = this.stores.documents.getDocument(key)?.title;
+    if (title) {
+      return (<a onClick={() => this.openDocument(key)} href="#">{title}</a>);
+    } else {
+      return "[broken link!]";
+    }
   }
 
   private renderStickyNotesPopup() {
@@ -332,6 +331,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                 </div>
                 <div className="sticky-note-popup-item-content">
                   {support.content}
+                  { ' ' }
+                  { this.renderDocumentLink(support.linkedDocumentKey) }
                 </div>
               </div>
             );
@@ -360,21 +361,20 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const displayId = document.getDisplayId(appConfig);
     const hasDisplayId = !!displayId;
     const showFileMenu = this.showFileMenu();
+    const showPersonalShareToggle = this.showPersonalShareToggle();
     return (
       <div className={`titlebar ${type}`}>
-        {!hideButtons &&
-          <div className="actions">
-            { showFileMenu &&
+        <div className="actions">
+          { !hideButtons && showFileMenu &&
               <DocumentFileMenu document={document}
                 onOpenDocument={this.handleOpenDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}
                 isDeleteDisabled={countNotDeleted < 1}
                 onDeleteDocument={this.handleDeleteDocumentClick}
-                onAdminDestroyDocument={this.handleAdminDestroyDocument} /> }
-            {this.showPublishButton(document) &&
-              <PublishButton document={document} />}
-          </div>
-        }
+                onAdminDestroyDocument={this.handleAdminDestroyDocument} />
+          }
+          <DocumentAnnotationToolbar />
+        </div>
         {hasDisplayId && <div className="display-id" style={{opacity: 0}}>{displayId}</div>}
         {
           document.type === LearningLogDocument || document.type === LearningLogPublication
@@ -391,6 +391,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <div className="actions">
           {(!hideButtons || supportStackedTwoUpView) &&
             <div className="actions">
+              {showPersonalShareToggle &&
+                <ShareButton isShared={document.visibility === "public"} onClick={this.handleToggleVisibility} />}
               {supportStackedTwoUpView && isPrimary &&
                 <OneUpButton onClick={this.handleHideTwoUp} selected={!workspace.comparisonVisible} />}
               {supportStackedTwoUpView && isPrimary &&
@@ -465,8 +467,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleSelectDocument = (document: DocumentModelType) => {
-    const { appConfig, ui } = this.stores;
-    ui.rightNavDocumentSelected(appConfig, document);
+    const { appConfig, persistentUI } = this.stores;
+    persistentUI.rightNavDocumentSelected(appConfig, document);
     this.setState({ showBrowser: false });
   };
 

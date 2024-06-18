@@ -7,15 +7,12 @@ const textToolTile = new TextToolTile;
 let dashboard = new TeacherDashboard();
 let students = [15, 16, 17, 18];
 
-const baseUrl = `${Cypress.config("baseUrl")}`;
-
 function getUrl(studentIndex) {
-  return baseUrl + '?appMode=qa&qaGroup=10&fakeClass=10&problem=2.3&fakeUser=student:' + students[studentIndex];
+  return `/?appMode=qa&qaGroup=10&fakeClass=10&problem=1.1&fakeUser=student:${students[studentIndex]}&unit=./demo/units/qa/content.json`;
 }
 
 function setupTest(studentIndex) {
-  const url = getUrl(studentIndex);
-  cy.visit(url);
+  cy.visit(getUrl(studentIndex));
   cy.waitForLoad();
   clueCanvas.shareCanvas();//all students will share their canvas
   cy.wait(10000);
@@ -26,7 +23,7 @@ function setupTest(studentIndex) {
 
 context('Test group functionalities', function () {
   it('4-up view read-only', function () {
-    
+
     cy.log('students to check each others tiles in 4-up view read-only');
     cy.clearQAData('all');
 

@@ -2,8 +2,8 @@ import { ITileMetadataModel, TileMetadataModel } from "./tile-metadata";
 import { TileContentModel, ITileContentModel } from "./tile-content";
 import { IClueObjectSnapshot } from "../annotations/clue-object";
 import { AppConfigModelType } from "../stores/app-config-model";
-import { PartialSharedModelEntry } from "../document/document-content-types";
 import { UpdatedSharedDataSetIds } from "../shared/shared-data-set";
+import { SharedModelEntrySnapshotType } from "../document/shared-model-entry";
 
 export interface IDefaultContentOptions {
   // title is only currently used by the Geometry and Table tiles
@@ -22,13 +22,13 @@ type TileContentSnapshotPostProcessor =
 
 type TileContentNewSharedModelIdUpdater = (
   content: any,
-  sharedModelEntries: PartialSharedModelEntry[],
+  sharedModelEntries: SharedModelEntrySnapshotType[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) => any;
 
 type ClueObjectNewSharedModelIdUpdater = (
   clueObject: IClueObjectSnapshot,
-  sharedModelEntries: PartialSharedModelEntry[],
+  sharedModelEntries: SharedModelEntrySnapshotType[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) => any;
 
@@ -36,14 +36,30 @@ export interface ITileContentInfo {
   type: string;
   modelClass: typeof TileContentModel;
   defaultContent: (options?: IDefaultContentOptions) => ITileContentModel;
+  /**
+   * used for the title of the toolbar button and the title of the heading in
+   * the sort work tab. If not set, the type is used.
+   */
+  displayName?: string;
+  /**
+   * used as the prefix when naming a new tile of this type, if titleBase
+   * isn't set the displayName is used. If both are not set then in most
+   * cases the type is used.
+   */
   titleBase?: string;
+  /**
+   * If true, the tile uses a title specified by its content rather than in the tile model itself.
+   * Currently the tiles that specify this all use the name of a linked DataSet as the title.
+   */
+  useContentTitle?: boolean;
   metadataClass?: typeof TileMetadataModel;
   addSidecarNotes?: boolean;
   defaultHeight?: number;
   exportNonDefaultHeight?: boolean;
   isDataConsumer?: boolean;
   isDataProvider?: boolean;
-  consumesMultipleDataSets?: boolean;
+  isVariableProvider?: boolean;
+  consumesMultipleDataSets?: (appConfig: AppConfigModelType) => boolean;
   tileSnapshotPreProcessor?: TileModelSnapshotPreProcessor;
   contentSnapshotPostProcessor?: TileContentSnapshotPostProcessor;
   updateContentWithNewSharedModelIds?: TileContentNewSharedModelIdUpdater;
@@ -53,8 +69,12 @@ export interface ITileContentInfo {
 const gTileContentInfoMap: Record<string, ITileContentInfo> = {};
 
 export function registerTileContentInfo(tileContentInfo: ITileContentInfo) {
+  const { type, displayName, titleBase } = tileContentInfo;
   // toLowerCase() for legacy support of tool names
-  gTileContentInfoMap[tileContentInfo.type.toLowerCase()] = tileContentInfo;
+  gTileContentInfoMap[type.toLowerCase()] = tileContentInfo;
+  if (displayName && !titleBase) {
+    tileContentInfo.titleBase = displayName;
+  }
 }
 
 // ToolContent type, e.g. kDrawingTileType, kGeometryTileType, etc.

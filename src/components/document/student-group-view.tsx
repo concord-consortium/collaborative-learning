@@ -12,16 +12,17 @@ import "./student-group-view.scss";
 
 export const StudentGroupView:React.FC = observer(function StudentGroupView(){
   const stores = useStores();
-  const {groups, ui } = stores;
+  const {groups, ui, persistentUI} = stores;
 
   useEffect(() => stores.initializeStudentWorkTab(), [stores]);
 
-  const selectedGroupId = ui.tabs.get("student-work")?.openSubTab || "";
+  const selectedGroupId = persistentUI.tabs.get("student-work")?.openSubTab || "";
   const group = groups.getGroupById(selectedGroupId);
-  const openDocId = ui.tabs.get("student-work")?.openDocuments.get(selectedGroupId);
+  const openDocId = persistentUI.tabs.get("student-work")?.openDocuments.get(selectedGroupId);
   const focusedGroupUser = getFocusedGroupUser(group, openDocId, DocumentViewMode.Live);
-  const isChatPanelShown = ui.showChatPanel;
-  const documentSelectedForComment = ui.showChatPanel && ui.selectedTileIds.length === 0 && ui.focusDocument;
+  const isChatPanelShown = persistentUI.showChatPanel;
+  const documentSelectedForComment = persistentUI.showChatPanel && (ui.selectedTileIds.length === 0)
+                                     && persistentUI.focusDocument;
   const studentGroupViewClasses = classNames( "editable-document-content", "document", "student-group-view",
     {"chat-open": isChatPanelShown}, {"comment-select" : documentSelectedForComment});
 
@@ -47,17 +48,17 @@ interface IGroupComponentProps {
 }
 
 const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function GroupViewTitlebar({group, groupUser}) {
-  const {groups, ui} = useStores();
+  const {groups, persistentUI} = useStores();
   const focusedGroupUser = groupUser;
 
   const handleFocusedUserChange = (selectedUser: GroupUserModelType) => {
     group?.id && selectedUser.problemDocument &&
-      ui.openSubTabDocument("student-work", group.id, selectedUser.problemDocument.key);
+      persistentUI.openSubTabDocument("student-work", group.id, selectedUser.problemDocument.key);
   };
 
   const handleSelectGroup = (id: string) => {
-    ui.setOpenSubTab("student-work", id);
-    ui.closeSubTabDocument("student-work", id);
+    persistentUI.setOpenSubTab("student-work", id);
+    persistentUI.closeSubTabDocument("student-work", id);
     Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
   };
 

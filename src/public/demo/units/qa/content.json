@@ -1,0 +1,626 @@
+{
+  "code": "qa",
+  "abbrevTitle": "QA1",
+  "title": "QA Unit",
+  "subtitle": "Understanding Similarity",
+  "config": {
+    "enableHistoryRoles": ["teacher"],
+    "placeholderText": "Enter notes here",
+    "stamps": [
+      {"url": "curriculum/moving-straight-ahead/stamps/plus.png", "width": 25, "height": 25},
+      {"url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+      {"url": "curriculum/moving-straight-ahead/stamps/lparen.png", "width": 25, "height": 25},
+      {"url": "curriculum/moving-straight-ahead/stamps/rparen.png", "width": 25, "height": 25}
+    ],
+    "annotations": "all",
+    "settings": {
+      "table": { "numFormat": ".2~f" },
+      "datacard": {
+        "tools": [
+          "duplicate",
+          "merge-in",
+          [
+            "data-set-view",
+            "Table"
+          ],
+          [
+            "data-set-view",
+            "graph"
+          ],
+          "image-upload",
+          "delete-attribute"
+        ]
+      },
+      "diagram": {
+        "maxTiles": 1,
+        "tools": [
+          "new-variable",
+          "insert-variable",
+          "edit-variable",
+          "|",
+          "zoom-in",
+          "zoom-out",
+          "fit-view",
+          "toggle-lock",
+          "toggle-navigator",
+          "|",
+          "delete"
+        ]
+      },
+      "graph": {
+        "defaultAxisLabels": {
+          "bottom": "x",
+          "left": "y"
+        },
+        "emptyPlotIsNumeric": true,
+        "scalePlotOnValueChange": true,
+        "defaultSeriesLegend": true,
+        "connectPointsByDefault": true,
+        "tools": [
+          "link-tile-multiple",
+          "fit-all",
+          "toggle-lock"
+        ]
+      },
+      "simulator": {
+        "defaultSimulation": "EMG_and_claw",
+        "maxTiles": 1
+      }
+    },
+    "toolbar": [
+      {"id": "Text", "title": "Text", "isTileTool": true},
+      {"id": "Table", "title": "Table", "isTileTool": true},
+      {"id": "DataCard", "title": "Data Card", "isTileTool": true},
+      {"id": "Dataflow", "title": "Sensor Program", "isTileTool": true},
+      {"id": "Diagram", "title": "Diagram", "isTileTool": true},
+      {"id": "Numberline", "title": "Numberline", "isTileTool": true},
+      {"id": "Graph", "title": "XY Plot", "iconId": "icon-plot-tool", "isTileTool": true},
+      {"id": "Geometry", "title": "Graph", "isTileTool": true},
+      {"id": "Image", "title": "Image", "isTileTool": true},
+      {"id": "Drawing", "title": "Drawing", "isTileTool": true},
+      {"id": "Starter", "title": "Starter", "isTileTool": true},
+      {"id": "Simulator", "title": "EMG Simulator", "isTileTool": true},
+      {"id": "Expression", "title": "Expression", "isTileTool": true},
+      {"id": "undo", "title": "Undo", "iconId": "icon-undo-tool", "isTileTool": false},
+      {"id": "redo", "title": "Redo", "iconId": "icon-redo-tool", "isTileTool": false},
+      {"id": "duplicate", "title": "Duplicate", "iconId": "icon-duplicate-tool", "isTileTool": false},
+      {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false}
+    ],
+    "tools": ["Simulator"],
+    "showCommentTag": true,
+    "commentTags": {
+      "part-to-part": "Part-to-Part",
+      "part-to-whole": "Part-to-Whole",
+      "unit-rate": "Unit Rate",
+      "ratios": "Ratios of Same Variable"
+    },
+    "tagPrompt": "Select QA Strategy"
+  },
+  "sections": {
+    "introduction": {"initials": "IN", "title": "Introduction", "placeholder": "Work area for\nIntroduction section"},
+    "initialChallenge": {"initials": "IC", "title": "Initial Challenge", "placeholder": "Work area for\nInitial Challenge section"},
+    "whatIf": {"initials": "WI", "title": "What If...?", "placeholder": "Work area for\nWhat If...? section"},
+    "nowWhatDoYouKnow": {"initials": "NW", "title": "Now What Do You Know?", "placeholder": "Work area for\nNow What Do You Know? section"}
+  },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "overview": {"initials": "OV", "title": "Overview", "placeholder": "Work area for\nOverview section"},
+      "launch": {"initials": "LC", "title": "Launch", "placeholder": "Work area for\nLaunch section"},
+      "explore": {"initials": "EX", "title": "Explore", "placeholder": "Work area for\nExplore section"},
+      "summarize": {"initials": "SM", "title": "Summarize", "placeholder": "Work area for\nSummarize section"}
+    },
+    "sections": [{"type": "overview"}, {"type": "launch"}, {"type": "explore"}, {"type": "summarize"}]
+  },
+  "investigations": [
+    {
+      "description": "Investigation 0",
+      "ordinal": 0,
+      "title": "Introduction to CLUE",
+      "introduction": {"tiles": []},
+      "problems": [
+        {
+          "description": "Problem 0.1",
+          "ordinal": 1,
+          "title": "0.1 Intro to CLUE",
+          "subtitle": "Working in the Collaborative Learning User Environment",
+          "sections": [
+            "investigation-0/problem-1/introduction/content.json",
+            "investigation-0/problem-1/initialChallenge/content.json",
+            "investigation-0/problem-1/whatIf/content.json",
+            "investigation-0/problem-1/nowWhatDoYouKnow/content.json"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "QA Investigation 1 Enlarging and Reducing Shapes",
+      "introduction": {"tiles": []},
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "QA 1.1 Solving a Mystery with Proportional Reasoning",
+          "subtitle": "",
+          "sections": [
+            "investigation-1/problem-1/introduction/content.json",
+            "investigation-1/problem-1/initialChallenge/content.json",
+            "investigation-1/problem-1/whatIf/content.json",
+            "investigation-1/problem-1/nowWhatDoYouKnow/content.json"
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "jp9Qts8S6wcfwbuB",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 1.1 Solving a Mystery with Proportional Reasoning</strong></p>",
+                        "<p>This Problem can be used to assess students’ initial ideas about the concept of scaled drawings/similarity. In the Initial Challenge, the P.I. Mystery Club enters a contest to guess the identity of a teacher in disguise. A photo of the mystery teacher is shown, and students use a known measure (height of a magazine) to estimate an unknown measure (height of the mystery teacher). In the What If Situations students are asked to express their informal ideas about the mathematical meaning of similarity.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "YYF7EraIgGb7tZwK",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<p><strong>NWDYK</strong></p>", "<p>The Mystery Club advisor says that the picture is similar to the actual scene. What do you suppose the advisor means by similar? How is the photo similar to the actual scene that is photographed?</p>"]
+                    }
+                  },
+                  {"id": "8Rq8Uw_LJZwpiSsX", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Arc of Learning</strong></p>", "<p>Similar Figures: <em>Introduction</em> </p>", "<p>Proportional Reasoning: <em>Analysis</em></p>"]}},
+                  {"id": "Qfk0rPo-Jx-0jxU2", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Key Terms</strong></p>", "<p>Similar</p>", "<p>Scale drawing</p>", "<p></p>", "<p></p>", "<p></p>"]}},
+                  {"id": "X9PI6Cb8DoYeJGh9", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Materials</strong></p>", "<p>Learning Aid 1.1: Photograph of Mystery Teacher </p>", "<p></p>", "<p></p>", "<p></p>"]}},
+                  {
+                    "id": "7KnyqQODcWqrcgMZ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p>1  Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>2</p>",
+                        "<p><strong>A</strong> #1-2</p>",
+                        "<p><strong>C</strong> #8-11</p>",
+                        "<p><strong>E</strong> #16</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.G.A.1</p>",
+                        "<p>7.RP.A.2</p>",
+                        "<p>7.RP.A.2.B</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "l5m8ZM18T7UcbLXW",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>Students began their work in proportional reasoning in 6th grade. They have used “for every” statements in many situations.  Have them recall some of that work. Examples from Comparing Quantities: for every $3 the Washington students plan to raise the Central students plan to raise $1; for every 10 students who prefer cheese, five students prefer pepperoni; for every 30 Chewy Fruit worms it costs $30. In this Problem students will expand their thinking around “for every” statements using similar figures which are also called scale drawings or scale figures. This will lay a foundation for future work on proportional reasoning. </p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Display Learning Aid 1.1: Photograph of Mystery Teacher or have the students refer to their books.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What information do we have?</li><li>What are we trying to find?</li><li>How does the real-life teacher differ from the teacher in the photo?</li></ul>",
+                        "<p>Be careful to leave the task of finding the teacher’s height open enough so that you can learn what your students think about similar figures.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "F4n9NSGq7MUwL5y9",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p><em>Teacher Moves: Agency, Identity, Ownership</em></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>Students can use rulers or edges of a piece of paper to make informal estimates of various measurements. Do not push for precise measurement at this time. Pay attention, though, to which students measure naturally and easily and which struggle with measurement. This will help you to plan your teaching in later Problems in the Unit where careful measurement is important.</p>",
+                        "<p><em>Teacher Moves: Language</em></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>Look for language such as <em>ratio, rates, fractions, percentage, more than, or less than</em> as students express their comparisons. In the Summarize you can come back to the comparisons and ask students to describe them using terms they learned in previous grades. This is a good assessment of what understanding students bring from Grade 6 about ratios, rational numbers and proportional reasoning.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "ZiAtUwKkxmxnep0y",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>S﻿UMMARIZE</strong></p>",
+                        "<p>SOLUTIONS AND STRATEGIES</p>",
+                        "<p>Have students share their strategies and solutions on the height of the teacher. It is helpful for students to hear others’ ideas while they are developing their own. You should expect some variation in the answers because all measurements are approximations. However, answers that are obviously unreasonable should be examined closely and efforts should be made to figure out why they are incorrect.</p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><em>Teacher Moves: Compare Thinking, Language</em></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p>Focus the summary conversations on the use of ratios, “for every” statements and measurement.  Listen for the use of formal and informal language to assess your students’ understanding of these ideas.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What measurements were important to you in finding the height of the teacher?</li></ul>",
+                        "<p>Discuss students’ perception of similar figures/scaled drawings. They might say things like, “look alike,” “same shape,” “same features,” “different size,”...</p>",
+                        "<ul><li>Can you think of some other times when you might want to use a photograph to estimate the size of something?</li><li>In the movie theater, the image of the person on screen is taller than the real person. How can you use the same techniques to estimate someone’s height from their image on a movie screen?</li><li>Would you have been able to solve the problem had you not known the magazine was 10 inches tall?</li><li>Can someone explain Daphne’s statement: For every one magazine height, there are 10 inches in real life?</li><li>In What If Situation A, do you agree with Daphne’s reasoning?</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Investigation 2",
+      "ordinal": 2,
+      "title": "QA Investigation 2 The Mug Wump Family: Similar Figures",
+      "introduction": {},
+      "problems": [
+        {
+          "description": "Problem 2.1",
+          "ordinal": 1,
+          "title": "QA 2.1 Drawing Wumps",
+          "subtitle": "Making Similar Figures",
+          "disabled": ["GeometryLinkedTables"],
+          "sections": [
+            "investigation-2/problem-1/introduction/content.json",
+            "investigation-2/problem-1/initialChallenge/content.json",
+            "investigation-2/problem-1/whatIf/content.json",
+            "investigation-2/problem-1/nowWhatDoYouKnow/content.json"
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "wG02htlUyzSBJWxj",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 2.1 Drawing Wumps:  Making Similar Figures</strong></p>",
+                        "<p>In this Problem students learn how to make similar and non-similar shapes using a coordinate system. In the Initial Challenge students graph members of the Wump family, plus other figures that claim to be in the Wump family. Students will notice that members of the Wump family are similar to one another and the imposters are not similar.  In the What If Situations students will focus on finding that corresponding angles are not congruent, and that corresponding side lengths are not multiplied by the same factor.  They will also identify the type of rules that create similar shapes. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "MstJDywCPs_IVPSo",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": ["<p><strong>NWDYK</strong></p>", "<p>How can you determine if an original figure and its image are similar by looking at the coordinate rule that produced the image? What features (attributes) stay the same for Mug and similar figures? What features change? </p>"]
+                    }
+                  },
+                  {"id": "HQEcVqVef3HyZHAg", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Arc of Learning</strong></p>", "<p>Proportional Reasoning: <em>Analysis</em></p>", "<p>Similar Figures: <em>Exploration and Analysis</em></p>"]}},
+                  {"id": "VcNfMmDAptger270", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Key Terms</strong></p>"]}},
+                  {
+                    "id": "MFymJ4pRD8xiqEPY",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 2.1A</p>",
+                        "<p>Table of Coordinates Mug Characters</p>",
+                        "<p></p>",
+                        "<p>Learning Aid 2.1B 1-3           </p>",
+                        "<p>Four choices of grids with one, two, or six grids on a Learning Aid (larger grids may provide accessibility for some students)</p>",
+                        "<p></p>",
+                        "<p>Tracing paper, patty paper, transparency, etc. (optional)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "PjUoHQJVttAnznt0",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p>1  Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>2-4</p>",
+                        "<p><strong>A</strong> #1-3</p>",
+                        "<p><strong>C</strong> #14-16</p>",
+                        "<p><strong>E</strong> #24</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.G.A.1 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.B </p>",
+                        "<p>7.EE.B.4.A</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "iJZZgN4-YdraaOs4",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p><strong>Optional review of graphing: </strong></p>",
+                        "<p>If your students need to review graphing, you might introduce them to tic-tac-toe on a 4 × 4 board, such as  Teaching Aid 2.1A:  4-by 4- Board.</p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>In this Problem, students create similar and non-similar figures using a coordinate system. </p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Students may need help in drawing Mug Wump because the points are used in sets that are connected in order. </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>The rule is (2x, 2y). What do you think this rule tells us to do to a Mug point to get a Zug point? </li><li>What do the other rules tell you to do for Lug, Bug, and Glug?</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "NJ29MEsYpTHVlkN1",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>As students are working, their figures should look roughly like Mug Wump. Ask students if their new characters generally look like Mug as a quick check to see if they are plotting the points correctly. Be careful to avoid using the word similar as this has a particular mathematical meaning, especially in this Problem.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>To create the coordinates for Zug, what must you multiply the coordinates of Mug by? </li><li>Describe the shape of Mug. </li><li>What measures help you identify the imposters? </li><li>What features are the same about Mug and the others?</li><li>What features are different? </li></ul>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>Listen for the way students are deciding on the imposters.  Take notes on groups that are using ratios, “for every” statements, etc. to describe the figures that are scaled drawings of Mug.  Listen for students finding relationships between both dimensions with the figures that are similar.  Listen for students describing that Mug, Bug, and Zug have congruent corresponding angles and that Zug and Glug do not.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "erZnS9ndIakOZuzf",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>It is very helpful to display copies of the figures for the class to view. You can use <strong>Learning Aid 2.1B: Grids, Teaching Aid 2.1B: Wump Characters, and Teaching Aid 2.1C: Wump Characters on Grids</strong> or student work. </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>How would you describe to a friend the growth of the figures that you drew? </li><li>Which figures seem to belong to the Wump family and which do not?</li></ul>",
+                        "<p><em>T﻿eacher Moves: Compare Thinking</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Which characters are imposters? How do you know? </li><li>How do the corresponding angles of the five figures compare</li><li>Are the lengths related? Are some of them related and others not? How do the lengths in similar Wumps compare? </li><li>Are the perimeters related? Are some of them related and others not? How do the perimeters in similar Wumps compare? </li><li>Could you use ratios or “for every” statements to describe the characters that are similar to Mug? </li><li>For What If Situation A, which claims are correct? Why? </li><li>What are some rules you could use to create a figure similar to Lug in What If Situation B?  </li></ul>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "description": "Problem 2.2",
+          "ordinal": 2,
+          "title": "QA 2.2 Hats Off to the Wumps",
+          "subtitle": "Changing a Figure's Size and Location",
+          "sections": [
+            "investigation-2/problem-2/initialChallenge/content.json",
+            "investigation-2/problem-2/whatIf/content.json",
+            "investigation-2/problem-2/nowWhatDoYouKnow/content.json"
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "dMIBfTO4O_iLdopC",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 2.2 Hats Off to the Wumps:  Changing a Figure’s Size and Location</strong></p>",
+                        "<p>In this Problem, students investigate the effects that various algebraic rules have on Mug’s hat. In the Initial Challenge students explore what happens to the location of the hat when numbers are added to or subtracted from each coordinate versus when they are multiplied which changes the size of the hat. In the What If Situations they will be able to distinguish rules that produce similar figures from rules that do not produce similar figures, recognizing the role that multiplication plays in scaled drawings or similarity relationships. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "zVcnIOOdugDAXzNV",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p>",
+                        "<p>If you know the coordinate rules to create an image, how can you tell if the two figures are similar? How can you use the rule to predict the side lengths of the image? How is the effect of a coordinate rule like the effect of a rubber band stretcher or a copy machine setting?</p>"
+                      ]
+                    }
+                  },
+                  {"id": "RGGN6d5POv0r0g_6", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Arc of Learning</strong></p>", "<p> Proportional Reasoning: <em>Analysis</em></p>", "<p>Similar Figures: <em>Analysis</em></p>"]}},
+                  {"id": "27JO8nc0dIYNfmUP", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Key Terms</strong></p>"]}},
+                  {
+                    "id": "B7Ua1FozLl1UQhHo",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 2.2A                   </p>",
+                        "<p>Table for Mug Hats</p>",
+                        "<p></p>",
+                        "<p>Learning Aid 2.2B                      </p>",
+                        "<p>Six First-Quadrant Grids </p>",
+                        "<p></p>",
+                        "<p>Tracing paper, patty paper, transparency, etc. (optional)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "q9nfg-jyziAne1RA",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>Think-Pair-Share</p>",
+                        "<p><strong>A</strong> #4-7</p>",
+                        "<p><strong>C </strong>#17-19</p>",
+                        "<p><strong>E</strong> #25-27</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.G.A.1  </p>",
+                        "<p>7.G.B.6 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.B </p>",
+                        "<p>7.NS.A.2</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "PJI_LIV5h9l5ao0-",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>Tell the students that this Problem is related to drawing the Wump family and imposters. In this case they are looking at hats for the Wump family.</p>",
+                        "<p><em>Drawing the hats in the Initial Challenge can be time consuming. During the What If you could have students do one of the situations and then have groups share the findings during the summary conversation.</em></p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Have students look at the table and the grids that are provided. They should have little trouble drawing the figures. However, it is important that the students start the Problem knowing that the main point of the Problem is to look back over their drawings and make sense of what adding or multiplying in the rule does to the image.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "1yxUQg_G8QLQVzb4",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>You might have students draw two or more hats on the same grid. If students use a different color for each hat, it will be easier to differentiate the images.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What does the rule tell you that you need to do to the x coordinate? y coordinate?  </li><li>Does adding a number to or subtracting a number from x or y coordinate make a difference? </li><li>What rule would give the largest possible image on the grids provided? </li><li>Make up a rule that would place the image in another quadrant.</li></ul>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>As you are circulating during the Explore look for how students are connecting the rules to the hats they are creating. Look for students who can explain the effect of fractional coefficients and adding/subtracting to the x or y coordinate. Select students/groups to explain how to move figures, enlarge figures, or shrink figures on a grid using rules.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "6Us7u4JKxuhhHXdB",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><strong></strong></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>Ask students what happened with each of the rules.</p>",
+                        "<ul><li>Are the images similar to the original? Why or why not?</li></ul>",
+                        "<p><em><strong>Teaching Aid 2.2: Wump Hats on Grids </strong></em><em>or student work can be used during the discussions</em></p>",
+                        "<p><em>Claim, Support, Question</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>How did adding/subtracting to the coordinates change the hat? </li><li>Do adding and subtracting change a figure in the same way that multiplication changed Mug in Problem 2.1?  </li><li>What rule made a hat get smaller?  Why? </li><li>How can you tell if two rectangles (or triangles) are similar? What information should you collect? </li><li>What rule would make a hat with line segments 1/3 the length of Hat 1’s line segments?</li><li>What rule would make a hat the same size as Hat 1 but moved up 2 units on the grid? </li><li>Describe a rule that moves Hat 1 and does not produce a similar figure. </li><li>What are the effects of multiplying each coordinate by a number? </li><li>What effect does the rule (5x - 5, 5y + 5) have on the original hat? </li><li>Make up a rule that will shrink the figure, keep it similar, and then move it to the right and up.</li><li>Describe how to transform Hats 1–5 back to Mug’s Hat.</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Investigation 3",
+      "ordinal": 3,
+      "title": "Test Chip Sim",
+      "introduction": {"tiles": []},
+      "config": {
+        "settings": {
+          "simulator": {
+            "defaultSimulation": "potentiometer_chip_servo"
+          }
+        }
+      },
+      "problems": [
+        {
+          "description": "Problem 0.1",
+          "ordinal": 1,
+          "title": "QA 3.1 Test Chip Sim",
+          "subtitle": "",
+          "sections": [
+            "investigation-3/problem-1/introduction/content.json"
+          ]
+        }
+      ]
+    }
+  ]
+}

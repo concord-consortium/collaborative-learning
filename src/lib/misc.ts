@@ -1,13 +1,11 @@
-import { ProblemModelType } from "../models/curriculum/problem";
 import { IStores } from "../models/stores/stores";
 import { Logger } from "./logger";
 
-export const setPageTitle = (stores: IStores, argProblem?: ProblemModelType) => {
-  const { appConfig, showDemoCreator, unit, problem: storeProblem } = stores;
+function setPageTitle(stores: IStores) {
+  const { appConfig, showDemoCreator, unit, problem } = stores;
   const pageTitleTemplate = appConfig && appConfig.pageTitle;
   let pageTitle;
   if (pageTitleTemplate) {
-    const problem = argProblem || storeProblem;
     pageTitle = pageTitleTemplate
                   .replace("%unitTitle%", unit && unit.fullTitle || "")
                   .replace("%problemTitle%", problem && problem.fullTitle || "");
@@ -15,15 +13,32 @@ export const setPageTitle = (stores: IStores, argProblem?: ProblemModelType) => 
   document.title = showDemoCreator
                     ? `CLUE: Demo Creator`
                     : (pageTitle || document.title);
-};
+}
 
-export const updateProblem = (stores: IStores, problemId: string) => {
-  const {unit} = stores;
-  const {investigation, problem} = unit.getProblem(problemId);
-  if (investigation && problem) {
-    Logger.updateAppContext({ investigation: investigation.title, problem: problem.title });
-    setPageTitle(stores, problem);
-    stores.supports.createFromUnit({unit, investigation, problem, documents: stores.documents});
-    stores.problem = problem;
+function initRollbar(stores: IStores, problemId: string) {
+  const {user, unit, appVersion} = stores;
+  if (typeof (window as any).Rollbar !== "undefined") {
+    const _Rollbar = (window as any).Rollbar;
+    if (_Rollbar.configure) {
+      const config = { payload: {
+              class: user.classHash,
+              offering: user.offeringId,
+              person: { id: user.id },
+              problemId: problemId || "",
+              problem: stores.problem.title,
+              role: user.type,
+              unit: unit.title,
+              version: appVersion
+            }};
+      _Rollbar.configure(config);
+    }
   }
-};
+}
+
+export function problemLoaded(stores: IStores, problemId: string) {
+  setPageTitle(stores);
+  initRollbar(stores, problemId);
+
+  // The logger will only be enabled if the appMode is "authed", or DEBUG_LOGGER is true
+  Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
+}

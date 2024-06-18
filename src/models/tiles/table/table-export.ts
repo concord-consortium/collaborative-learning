@@ -35,9 +35,7 @@ export const exportTableContentAsJson = (
     const widthComma = attrIndex < attrs.length - 1 ? "," : "";
     builder.pushLine(`"${attr.id}": ${columnWidth(attr.id)}${widthComma}`, 4);
   });
-  const nameComma = dataSet.name ? "," : "";
-  builder.pushLine(`}${nameComma}`, 2);
-  dataSet.name && builder.pushLine(`"name": "${dataSet.name}"`, 2);
+  builder.pushLine(`}`, 2);
   builder.pushLine("}");
   return builder.build();
 };

@@ -1,13 +1,21 @@
 (window as any).CMS_MANUAL_INIT = true;
 
-import CMS from "netlify-cms-app";
-import { CmsBackendType, CmsConfig, CmsField } from "netlify-cms-core";
+import CMS from "decap-cms-app";
+import { CmsBackendType, CmsConfig } from "decap-cms-core";
 
-import { urlParams } from "../../src/utilities/url-params";
+import { urlParams } from "./cms-url-params";
 import { IframeControl } from "./iframe-control";
 import { JsonControl } from "./json-control";
 import { PreviewLinkControl } from "./preview-link-control";
 import { defaultCurriculumBranch } from "./cms-constants";
+import { getCmsCollections } from "./cms-collections";
+import { getUnitJson } from "../../src/models/curriculum/unit-utils";
+import { CurriculumConfig } from "../../src/models/stores/curriculum-config";
+
+import curriculumConfigJson from "../../src/clue/curriculum-config.json";
+
+const curriculumConfig = CurriculumConfig.create(curriculumConfigJson, { urlParams });
+const unit = urlParams.unit ?? curriculumConfig.defaultUnit;
 
 // Local testing of the CMS without working with github directly:
 // - Add the localCMSBacked parameter to the URL
@@ -35,56 +43,25 @@ function cmsBackend() {
 }
 
 // Config for Decap CMS
-const cmsConfig: CmsConfig = {
-  load_config_file: false,
-  ...cmsBackend(),
-  media_folder: urlParams.unit ? `curriculum/${urlParams.unit}/images` : `curriculum/images`,
-  // The public_folder setting doesn't apply to the top level "Media" dialog.
-  // It is configured here for documentation, and in case we start using
-  // the media api within out CLUE editor
-  public_folder: urlParams.unit ? `${urlParams.unit}/images` : `images`,
-  collections: [
-    {
-      name: "sections",
-      label: "Curriculum Sections",
-      label_singular: "Curriculum Section",
-      identifier_field: "type",
-      format: "json",
-      folder: urlParams.unit ? `curriculum/${urlParams.unit}` : `curriculum`,
-      // create: true
-      // adding a nested object will show the collection folder structure
-      nested: {
-        depth: 6, // max depth to show in the collection tree
-      },
-      fields: [
-        {
-          label: "Type",
-          name: "type",
-          widget: "string"
-        },
-        {
-          label: "Preview Link",
-          name: "preview-link",
-          required: false,
-          widget: "preview-link"
-        } as CmsField,
-        {
-          label: "Content",
-          name: "content",
-          widget: "clue" as any
-        }
-      ],
-      // adding a meta object with a path property allows editing the path of entries
-      // moving an existing entry will move the entire sub tree of the entry to the new location
-      // However, this causes the path to be lowercased when publishing an entry.
-      // meta: { path: { widget: "hidden", label: "Path", index_file: "content" } }
-    }
-  ]
-};
+function cmsConfig(unitJson: any): CmsConfig {
+  return {
+    load_config_file: false,
+    ...cmsBackend(),
+    media_folder: urlParams.unit ? `curriculum/${urlParams.unit}/images` : `curriculum/images`,
+    // The public_folder setting doesn't apply to the top level "Media" dialog.
+    // It is configured here for documentation, and in case we start using
+    // the media api within out CLUE editor
+    public_folder: urlParams.unit ? `${urlParams.unit}/images` : `images`,
+    collections: getCmsCollections(unitJson)
+  };
+}
 
-export function initCMS() {
+export async function initCMS() {
   CMS.registerWidget("clue", IframeControl);
   CMS.registerWidget("json", JsonControl);
   CMS.registerWidget("preview-link", PreviewLinkControl);
-  CMS.init({config: cmsConfig});
+  const unitJson = await getUnitJson(unit, curriculumConfig);
+  CMS.init({config: cmsConfig(unitJson)});
 }
+
+

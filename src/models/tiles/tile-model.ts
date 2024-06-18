@@ -76,6 +76,7 @@ export const TileModel = types
      * can provide a title. The empty string is considered an "unset" title.
      */
     get computedTitle() {
+      // FIXME: this causes an MST error when the dataflow tile is deleted now
       return self.title || self.content.contentTitle || "";
     },
     // generally negotiated with tile, e.g. single column width for table
@@ -121,15 +122,36 @@ export const TileModel = types
     }
   }))
   .actions(self => ({
-    setTitle(title: string) {
+    /**
+     * Low-level method to set the "title" field of this model.
+     * In most cases you should use `setTitleOrContentTitle` instead.
+     * @param title
+     */
+    setTitle(title: string|undefined) {
+      // if (title && getTileContentInfo(self.content.type)?.useContentTitle) {
+      //   console.warn("possibly bad call to setTitle, setting", title, "on", self.id);
+      // }
       self.title = title;
-      logTileDocumentEvent(LogEventName.RENAME_TILE,{ tile: self as ITileModel });
     },
     setDisplay(display: DisplayUserType) {
       self.display = display;
     }
   }))
   .actions(self => ({
+    /**
+     * Set the title in the appropriate way for this tile.
+     * For tables and data cards, this will set the name of the DataSet;
+     * for other tiles, it is set in the Tile model.
+     * @param title
+     */
+    setTitleOrContentTitle(title: string) {
+      logTileDocumentEvent(LogEventName.RENAME_TILE,{ tile: self as ITileModel });
+      if (getTileContentInfo(self.content.type)?.useContentTitle) {
+        self.content.setContentTitle(title);
+      } else {
+        self.setTitle(title);
+      }
+    },
     afterCreate() {
       const metadata = findMetadata(self.content.type, self.id);
       const content = self.content;

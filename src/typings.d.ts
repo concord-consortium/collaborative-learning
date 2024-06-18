@@ -1,8 +1,5 @@
 // declare modules that don't have TypeScript bindings here
 declare module "d3-v6-tip";
-declare module "rete-connection-plugin";
-declare module "rete-area-plugin";
-declare module "rete-react-render-plugin";
 
 declare module "*.png"
 

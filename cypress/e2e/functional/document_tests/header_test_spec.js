@@ -3,10 +3,9 @@ import Header from '../../../support/elements/common/Header';
 const header = new Header;
 
 function beforeTest() {
-  const baseUrl = `${Cypress.config("baseUrl")}`;
-  const queryParams = `${Cypress.config("queryParams")}`;
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
   cy.clearQAData('all');
-  cy.visit(baseUrl + queryParams);
+  cy.visit(queryParams);
   cy.waitForLoad();
 }
 
@@ -23,8 +22,8 @@ context('Test header elements', () => {
       });
       header.getVersionNumber().should('exist');
       header.getClassName().should('exist').and('contain', headerInfoObj.fakeClass);
-      header.getUnitTitle().should('exist').and('contain', "Stretching and Shrinking");
-      header.getInvestigationTitle().should('exist').and('contain', 'The Mug Wump Family');
+      header.getUnitTitle().should('exist').and('contain', "QA Unit");
+      header.getInvestigationTitle().should('exist').and('contain', 'Enlarging and Reducing Shapes');
       header.getProblemTitle().should('exist').and('contain', headerInfoObj.problem);
       header.getUserName().should('exist').and('contain', ((headerInfoObj.fakeUser).split(":"))[1]);
       header.getGroupNumber().should('exist').and('contain', headerInfoObj.qaGroup);

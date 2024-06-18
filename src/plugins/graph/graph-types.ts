@@ -62,6 +62,8 @@ export type Point = { x: number, y: number };
 export type CPLine = { slope: number, intercept: number, pivot1?: Point, pivot2?: Point };
 export const kNullPoint = {x: -999, y: -999};
 
+export interface RectSize { width: number, height: number }
+
 export interface Rect {
   x: number, y: number, width: number, height: number
 }
@@ -82,8 +84,17 @@ export const
   hoverRadiusFactor = 1.0,
   kGraphFont = "12px sans-serif",
   kChoroplethHeight = 16,
-  kAxisTickLength = 4,
-  kAxisGap = 2;
+  kTopAndRightDefaultExtent = 3,
+  kTickAndGridColor = "#bfbfbf",
+  kTickFontColor = "#3f3f3f",
+  kAxisStrokeWidth = 2,
+  kAxisTickLength = 25,
+  kAxisTickPadding = 6,
+  kAxisGap = 2,
+  kAxisLabelHorizontalPadding = 10, // Match .axis-label padding in attribute-label.scss
+  kAxisLabelVerticalPadding = 5, // Match .axis-label padding in attribute-label.scss
+  kAxisLabelBorderWidth = 1.5, // Match .axis-label border in attribute-label.scss
+  kDefaultAxisLabel = "axis label";
 export const outerCircleSelectedRadius = 10;
 export const outerCircleUnselectedRadius = 0;
 
@@ -96,4 +107,9 @@ export const kGraphAdornmentsClass = "graph-adornments-grid";
 export const kGraphAdornmentsClassSelector = `.${kGraphAdornmentsClass}`;
 
 // TODO: determine this via configuration, e.g. appConfig, since apps may prefer different defaults
-export const kDefaultNumericAxisBounds = [-10, 11] as const;
+export const kDefaultNumericAxisBounds = [0, 10] as const;
+
+export const kGraphPortalClass = ".canvas-area";
+
+export const GraphEditModes = ["none", "edit", "add"];
+export type GraphEditMode = typeof GraphEditModes[number];
