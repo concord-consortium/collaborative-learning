@@ -3,6 +3,7 @@ import { safeJsonParse } from "../../../utilities/js-utils";
 import { DocumentContentModel, DocumentContentModelType, DocumentContentSnapshotType } from "../document-content";
 import { TableContentModelType } from "../../tiles/table/table-content";
 import { kDefaultColumnWidth } from "../../../components/tiles/table/table-types";
+import { isPlaceholderContent } from "../../../models/tiles/placeholder/placeholder-content";
 
 import placeholderImage from "../../assets/image_placeholder.png";
 
@@ -25,21 +26,23 @@ jest.mock("../../../utilities/js-utils", () => {
   };
 });
 
+export function prepareTileForMatch(tile: any) {
+  if (tile?.content?.type === "Geometry") {
+    // eliminate board properties to make matching more robust for tests
+    delete tile.content.board;
+  }
+  if (tile?.content?.type === "Image") {
+    if (tile.content.url !== placeholderImage) {
+      tile.content.url = "image/url";
+    }
+  }
+  return tile;
+}
+
 export function parseJson(json: string) {
   const parsed = safeJsonParse(json);
   if (parsed) {
     // console.log("Parsed Content\n--------------\n", json);
-    const prepareTileForMatch = (tile: any) => {
-      if (tile?.content?.type === "Geometry") {
-        // eliminate board properties to make matching more robust for tests
-        delete tile.content.board;
-      }
-      if (tile?.content?.type === "Image") {
-        if (tile.content.url !== placeholderImage) {
-          tile.content.url = "image/url";
-        }
-      }
-    };
     parsed.tiles.forEach((tileOrRow: any) => {
       if (Array.isArray(tileOrRow)) {
         tileOrRow.forEach(tile => {
@@ -109,5 +112,45 @@ export function setupDocumentContent(srcContent: DocumentContentSnapshotType) {
       return getRowLayout(documentContent);
     }
   };
+}
+
+/**
+ * Export all rows of the document in a format that is easy to read.
+ * This includes header rows and placeholder tiles
+ */
+export function getAllRows(doc: DocumentContentModelType) {
+  const rows = doc.rowOrder.map(rowId => doc.getRow(rowId) );
+
+  return rows.map((row, rowIndex) => {
+    const tileExports = row?.tiles.map((tileInfo, tileIndex) => {
+      const rowHeight = doc.rowHeightToExport(row, tileInfo.tileId);
+      const rowHeightOption = rowHeight ? { rowHeight } : undefined;
+      const tile = doc.getTile(tileInfo.tileId);
+      const content = tile?.content;
+      if (isPlaceholderContent(content)) {
+        return { Placeholder: content.sectionId };
+      } else {
+        const tileExport = doc.exportTileAsJson(tileInfo, { ...rowHeightOption });
+        return tileExport && prepareTileForMatch(JSON.parse(tileExport));
+      }
+    });
+    if (row?.isSectionHeader) {
+      if (tileExports?.length) {
+        throw new Error("Header row should not have any tiles");
+      }
+      return { Header: row.sectionId };
+    } else if (tileExports?.length) {
+      if (tileExports.length > 1) {
+        // multiple tiles in a row are exported in an array
+        return tileExports;
+      } else if (tileExports[0]) {
+        // single tile rows are exported directly
+        return tileExports[0];
+      }
+    } else {
+      return "Empty Row that isn't a section header";
+    }
+  });
+
 }
 

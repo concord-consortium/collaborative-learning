@@ -12,7 +12,7 @@ All of the contents of the realtime database for a given class are stored at a p
 
 The content and generic metadata for all documents associated with the user's work in a given class is stored at `/{classPath}/users/{userId}/documents` and `/{classPath}/users/{userId}/documentMetadata`. Additional type-specific metadata is stored elsewhere to make it easier to find documents of specific types associated with specific problems, for instance.
 
-The document metadata at `/{classPath}/users/{userId}/documentMetadata` can be typed as:
+The document metadata at `/{classPath}/users/{userId}/documentMetadata` [is typed as](/src/lib/db-types.ts):
 ```typescript
 export type DBDocumentType = "section" |  // section documents are deprecated
                               "problem" | "planning" | "publication" |
@@ -31,6 +31,7 @@ export interface DBBaseDocumentMetadata {
   type: DBDocumentType;
   // previously in DBOtherDocument
   properties?: IDocumentProperties;
+  visibility?: "public" | "private";
 }
 
 export interface DBBaseProblemDocumentMetadata extends DBBaseDocumentMetadata {
@@ -39,7 +40,7 @@ export interface DBBaseProblemDocumentMetadata extends DBBaseDocumentMetadata {
 }
 ```
 
-Document contents at `/{classPath}/users/{userId}/documents` can be typed as:
+Document contents at `/{classPath}/users/{userId}/documents` [is typed as](/src/lib/db-types.ts):
 ```typescript
 export interface DBDocument {
   version: "1.0";
