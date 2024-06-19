@@ -958,7 +958,7 @@ describe("mst", () => {
     let valueReturnedByPreProcess: any;
     const TestObject = types
       .model("TestObject", {
-        prop: types.optional(types.string, "default")
+        prop: types.string
       })
       .preProcessSnapshot(snapshot => {
         snapshotPassedToPreProcess = snapshot;
@@ -979,10 +979,46 @@ describe("mst", () => {
 
     valueReturnedByPreProcess = {};
     const container2 = TestContainer.create({});
+    expect(container2.child).toBeUndefined();
+
+    valueReturnedByPreProcess = {prop: "value"};
+    const container3 = TestContainer.create({});
+    expect(container3.child?.prop).toBe("value");
+  });
+
+  test("preProcessSnapshot with and optional prop can also return `{}` to respect `types.maybe`", () => {
+    let snapshotPassedToPreProcess = "Initial Value" as any;
+    let valueReturnedByPreProcess: any;
+    const TestObject = types
+      .model("TestObject", {
+        // This is different than the case above because this prop is optional
+        prop: types.optional(types.string, "default")
+      })
+      .preProcessSnapshot(snapshot => {
+        snapshotPassedToPreProcess = snapshot;
+        return valueReturnedByPreProcess;
+      });
+
+    const TestContainer = types.
+      model("TestContainer", {
+        child: types.maybe(TestObject)
+      });
+
+    valueReturnedByPreProcess = undefined;
+    const container1 = TestContainer.create({});
+    expect(snapshotPassedToPreProcess).toBeUndefined();
+    expect(container1.child).toBeUndefined();
+
+    // This is different than the case above returning `{}` results in
+    // an child object instead of undefined
+    valueReturnedByPreProcess = {};
+    const container2 = TestContainer.create({});
     expect(container2.child?.prop).toBe("default");
 
     valueReturnedByPreProcess = {prop: "value"};
     const container3 = TestContainer.create({});
     expect(container3.child?.prop).toBe("value");
   });
+
+
 });
