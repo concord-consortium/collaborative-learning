@@ -1,5 +1,5 @@
 import { LineAttributes, PolygonAttributes } from "jsxgraph";
-import { each, filter, find, merge, uniqueId, values } from "lodash";
+import { each, filter, find, merge, remove, uniqueId, values } from "lodash";
 import { notEmpty } from "../../../utilities/js-utils";
 import { fillPropsForColorScheme, getPoint, getPolygon, strokePropsForColorScheme } from "./geometry-utils";
 import { getObjectById } from "./jxg-board";
@@ -155,18 +155,22 @@ export function getPointsForVertexAngle(vertex: JXG.Point) {
           : [p2, p1, p0];
 }
 
-export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
+export function prepareToDeleteObjects(board: JXG.Board, ids: string[]): string[] {
+  const selectedPoints: string[] = [];
   const polygonsToDelete: { [id: string]: JXG.Polygon } = {};
   const anglesToDelete: { [id: string]: JXG.GeometryElement } = {};
-  const moreIdsToDelete: string[] = [];
 
   // Identify polygons and angles scheduled for deletion and points that are vertices of polygons
-  const polygonVertexMap: { [id: string]: string[] } = {};
+  const polygonVertexMap: { [id: string]: string[] } = {}; // maps polygon ids to vertex ids
+  const vertexPolygonMap: { [id: string]: string[] } = {}; // maps vertex ids to polygon ids
   ids.forEach(id => {
     const elt = getObjectById(board, id);
     if (isPoint(elt)) {
+      selectedPoints.push(elt.id);
+      vertexPolygonMap[elt.id] = [];
       each(elt.childElements, child => {
         if (isPolygon(child)) {
+          vertexPolygonMap[elt.id].push(child.id);
           if (!polygonVertexMap[child.id]) {
             polygonVertexMap[child.id] = [];
           }
@@ -182,44 +186,63 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
     }
   });
 
-  // Consider each polygon with vertices to be deleted
+  // "Fully selected" polygons means polygons where all of their vertices are selected
+  const fullySelectedPolygons = Object.entries(polygonVertexMap)
+    .filter(([polyId, vertexIds]) => {
+      const poly = getPolygon(board, polyId)!;
+      return vertexIds.length === poly.vertices.length - 1; })
+    .map(([polyId, poly]) => polyId);
+
+  // Implement intuitive behavior for deleting a polygon that may be connected to other polygons.
+  // Polygons that are fully selected are deleted, but any of their points that are shared
+  // with a polygon that is NOT fully selected, are NOT deleted.
+  const pointsToDelete = selectedPoints;
+  each(fullySelectedPolygons, polyId => {
+    each(polygonVertexMap[polyId], vertexId => {
+      const externalPolygon = vertexPolygonMap[vertexId].find(pId => !fullySelectedPolygons.includes(pId));
+      if (externalPolygon) {
+        // Do not actually delete this point, it connects to a polygon that should not be altered.
+        remove(pointsToDelete, v => v===vertexId);
+      }
+    });
+  });
+
+  // Remove vertices that are going to be deleted from polygons,
+  // and find polygons that need to be deleted since they lost most or all of their points.
   each(polygonVertexMap, (vertexIds, polygonId) => {
     const polygon = getObjectById(board, polygonId) as JXG.Polygon;
     const vertexCount = polygon.vertices.length - 1;
-    const deleteCount = vertexIds.length;
-    // remove points from polygons if possible
-    if (vertexCount - deleteCount >= 2) {
-      vertexIds.forEach(id => {
-        const pt = getObjectById(board, id) as JXG.Point;
-        // removing multiple points at one time sometimes gives unexpected results
-        polygon.removePoints(pt);
-      });
-    }
-    // otherwise, the polygon should be deleted as well
-    else {
-      if (!polygonsToDelete[polygon.id]) {
-        polygonsToDelete[polygon.id] = polygon;
-        moreIdsToDelete.push(polygon.id);
+    const deleteCount = vertexIds.filter(id=>pointsToDelete.includes(id)).length;
+
+    // Remove polygons that will have 0 or 1 points left.
+    if (fullySelectedPolygons.includes(polygonId) || vertexCount - deleteCount <= 1) {
+      if (!polygonsToDelete[polygonId]) {
+        polygonsToDelete[polygonId] = polygon;
+      }
+    } else {
+      // Leave this polygon, but remove points that will be deleted from it.
+      const deletePoints = polygon.vertices.filter(v => pointsToDelete.includes(v.id));
+      if (deletePoints.length) {
+        each(deletePoints, v => polygon.removePoints(v));
+        setPolygonEdgeColors(polygon);
       }
     }
   });
 
   // identify angle labels to delete
-  each(polygonsToDelete, polygon => {
-    polygon.vertices.forEach(vertex => {
-      each(vertex.childElements, child => {
-        if (isVertexAngle(child)) {
-          if (!anglesToDelete[child.id]) {
-            anglesToDelete[child.id] = child;
-            moreIdsToDelete.push(child.id);
-          }
+  each(pointsToDelete, pointId => {
+    const vertex = getPoint(board, pointId)!;
+    each(vertex.childElements, child => {
+      if (isVertexAngle(child)) {
+        if (!anglesToDelete[child.id]) {
+          anglesToDelete[child.id] = child;
         }
-      });
+      }
     });
   });
 
-  // return ids of additional objects to delete
-  return moreIdsToDelete;
+  // return adjusted list of ids to delete
+  return [...pointsToDelete, ...Object.keys(polygonsToDelete), ...Object.keys(anglesToDelete)];
 }
 
 function segmentNameLabelFn(this: JXG.Line) {

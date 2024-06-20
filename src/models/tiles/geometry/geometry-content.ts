@@ -1322,16 +1322,21 @@ export const GeometryContentModel = GeometryBaseContentModel
       return copies;
     }
 
+    /**
+     * Delete the selected objects.
+     * Adjusts for various business logic before actually deleting:
+     * eg, preserving linked points and points connected to polygons that are not being deleted.
+     * @param board
+     */
     function deleteSelection(board: JXG.Board) {
       const selectedIds = self.getDeletableSelectedIds(board);
+      self.deselectAll(board);
 
       // remove points from polygons; identify additional objects to delete
-      selectedIds.push(...prepareToDeleteObjects(board, selectedIds));
+      const deleteIds = prepareToDeleteObjects(board, selectedIds);
 
-      self.deselectAll(board);
-      board.setAttribute({showInfobox: false});
-      if (selectedIds.length) {
-        removeObjects(board, selectedIds);
+      if (deleteIds.length) {
+        removeObjects(board, deleteIds);
       }
     }
 
