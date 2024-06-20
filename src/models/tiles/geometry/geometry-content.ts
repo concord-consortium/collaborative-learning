@@ -277,6 +277,10 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     isLinkedToTile(tileId: string) {
       return self.linkedDataSets.some(link => link.providerId === tileId);
+    },
+    isDeletable(board: JXG.Board, id: string) {
+      const obj = getObjectById(board, id);
+      return obj && !obj.getAttribute("fixed") && !obj.getAttribute("clientUndeletable");
     }
   }))
   .views(self => ({
@@ -289,10 +293,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         .map(([id, selected]) => id);
     },
     getDeletableSelectedIds(board: JXG.Board) {
-      return this.getSelectedIds(board).filter(id => {
-        const obj = getObjectById(board, id);
-        return obj && !obj.getAttribute("fixed") && !obj.getAttribute("clientUndeletable");
-      });
+      return this.getSelectedIds(board).filter(id => self.isDeletable(board, id));
     }
   }))
   .views(self => ({
@@ -1036,14 +1037,15 @@ export const GeometryContentModel = GeometryBaseContentModel
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
-    function removeObjects(board: JXG.Board | undefined, ids: string | string[], links?: ILinkProperties) {
-      board && self.deselectObjects(board, ids);
-      self.deleteObjects(castArray(ids));
+    function removeObjects(board: JXG.Board, ids: string | string[], links?: ILinkProperties) {
+      self.deselectObjects(board, ids);
+      const deletable = castArray(ids).filter(id => self.isDeletable(board, id));
+      self.deleteObjects(deletable);
 
       const change: JXGChange = {
         operation: "delete",
         target: "object",
-        targetID: ids,
+        targetID: deletable,
         links
       };
       return applyAndLogChange(board, change);
@@ -1329,8 +1331,7 @@ export const GeometryContentModel = GeometryBaseContentModel
      * @param board
      */
     function deleteSelection(board: JXG.Board) {
-      const selectedIds = self.getDeletableSelectedIds(board);
-      self.deselectAll(board);
+      const selectedIds = self.getSelectedIds(board);
 
       // remove points from polygons; identify additional objects to delete
       const deleteIds = prepareToDeleteObjects(board, selectedIds);
