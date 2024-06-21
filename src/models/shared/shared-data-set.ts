@@ -128,12 +128,27 @@ function flattenedMap(sharedDatasetIds: UpdatedSharedDataSetIds[]) {
   return map;
 }
 
-export function replaceJsonStringsWithUpdatedIds(json: unknown, ...sharedDatasetIds: UpdatedSharedDataSetIds[]) {
+/**
+ * Find all IDs referenced in the JSON and replace them. This method assumes
+ * we're dealing with IDs that are globally unique, so all the replacement lists
+ * can be merged together without duplication.
+ *
+ * The separator pattern is normally just a double quote, if IDs are expected to
+ * be found as string values in the JSON. However, it can be a different string;
+ * for example the Geometry uses quote and colon since there are JSON values
+ * like "ID:ID" and each ID needs to be separately replaced.
+ * @param json
+ * @param separator
+ * @param sharedDatasetIds
+ * @returns updated json
+ */
+export function replaceJsonStringsWithUpdatedIds(json: unknown, separator: string,
+    ...sharedDatasetIds: UpdatedSharedDataSetIds[]) {
   const flatMap = flattenedMap(sharedDatasetIds);
   const keyPattern = Object.keys(flatMap).map(key => escapeStringRegexp(key)).join("|");
-  const matchRegexp = new RegExp(`\\"(${keyPattern})\\"`, "g");
-  const updated = JSON.stringify(json).replace(matchRegexp, (match, key) => {
-    return `"${flatMap[key]}"`;
+  const matchRegexp = new RegExp(`(?<=${separator})(${keyPattern})(?=${separator})`, "g");
+  const updated = JSON.stringify(json).replace(matchRegexp, (match) => {
+    return `${flatMap[match]}`;
   });
   return JSON.parse(updated);
 }

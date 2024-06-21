@@ -35,7 +35,7 @@ import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
 } from "../../../models/tiles/geometry/jxg-polygon";
 import {
-  isAxis, isComment, isImage, isLine, isMovableLine,
+  isAxis, isComment, isImage, isLine, isLinkedPoint, isMovableLine,
   isMovableLineControlPoint, isMovableLineLabel, isPoint, isPolygon, isRealVisiblePoint, isVertexAngle,
   isVisibleEdge, isVisibleMovableLine, kGeometryDefaultPixelsPerUnit
 } from "../../../models/tiles/geometry/jxg-types";
@@ -204,6 +204,17 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private getPointScreenCoords(pointId: string) {
+    if (!this.state.board) return;
+    const pt = getPoint(this.state.board, pointId);
+    if (!pt) return;
+    if (isLinkedPoint(pt)) {
+      return this.getLinkedPointScreenCoords(pointId);
+    } else {
+      return this.getLocalPointScreenCoords(pointId);
+    }
+  }
+
+  private getLocalPointScreenCoords(pointId: string) {
     // Access the model to ensure that model changes trigger a rerender
     const p = this.getContent().getObject(pointId) as PointModelType;
     if (!p || p.x == null || p.y == null) return;
@@ -264,7 +275,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
         if (objectType === "point" || objectType === "linkedPoint") {
           const coords = objectType === "point"
-            ? this.getPointScreenCoords(objectId)
+            ? this.getLocalPointScreenCoords(objectId)
             : this.getLinkedPointScreenCoords(objectId);
           if (!coords) return undefined;
           const [x, y] = coords;
@@ -320,7 +331,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (objectType === "point" || objectType === "linkedPoint") {
           // Find the center point
           const coords = objectType === "point"
-            ? this.getPointScreenCoords(objectId)
+            ? this.getLocalPointScreenCoords(objectId)
             : this.getLinkedPointScreenCoords(objectId);
           if (!coords) return;
 
