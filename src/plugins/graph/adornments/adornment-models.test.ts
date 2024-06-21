@@ -26,6 +26,14 @@ describe("PointModel", () => {
     expect(point.x).toBe(2);
     expect(point.y).toBe(2);
   });
+  it("can be created without values and reloaded", () => {
+    const point = PointModel.create({});
+    const pointSnapshot = getSnapshot(point);
+    const pointString = JSON.stringify(pointSnapshot);
+    const reloadedPoint = PointModel.create(JSON.parse(pointString));
+    const reloadedPointSnapshot = getSnapshot(reloadedPoint);
+    expect(reloadedPointSnapshot).toEqual(pointSnapshot);
+  });
 });
 
 describe("AdornmentModel", () => {
