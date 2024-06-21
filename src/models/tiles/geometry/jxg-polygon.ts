@@ -67,15 +67,7 @@ export function isPointInPolygon(x: number, y: number, polygon: JXG.Polygon) {
 }
 
 export function getPolygonEdges(polygon: JXG.Polygon) {
-  const edges: { [id: string]: JXG.Line } = {};
-  polygon.vertices.forEach(vertex => {
-    each(vertex.childElements, child => {
-      if (child.elType === "segment") {
-        edges[child.id] = child as JXG.Line;
-      }
-    });
-  });
-  return values(edges);
+  return polygon.borders;
 }
 
 export function getPolygonEdge(board: JXG.Board, polygonId: string, pointIds: string[]) {
@@ -96,12 +88,13 @@ export function getAssociatedPolygon(elt: JXG.GeometryElement): JXG.Polygon | un
   if (isPoint(elt)) {
     return find(elt.childElements, isPolygon);
   }
-  if (elt.elType === "segment") {
-    const vertices = filter(elt.ancestors, isPoint);
-    for (const vertex of vertices) {
-      const polygon = find(vertex.childElements, isPolygon);
-      if (polygon) return polygon;
-    }
+  if (isLine(elt)) {
+    // Find a polygon that contains both ends of this segment.
+    // It can still be ambiguous if polygons overlap at more than one point,
+    // in which case we just return the first one found.
+    const p1polygons = filter(elt.point1.childElements, isPolygon);
+    const p2polygons = filter(elt.point2.childElements, isPolygon);
+    return p1polygons.find(p => p2polygons.includes(p));
   }
 }
 
@@ -332,6 +325,9 @@ export const polygonChangeAgent: JXGChangeAgent = {
                       .map(id => getObjectById(_board, id as string))
                       .filter(notEmpty);
     const colorScheme = !Array.isArray(change.properties) && change.properties?.colorScheme;
+    if (change.parents?.length !== parents.length) {
+      console.warn("Some points were missing when creating polygon");
+    }
     const props = {
       id: uniqueId(),
       ...getPolygonVisualProps(false, colorScheme||0),

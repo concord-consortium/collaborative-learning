@@ -22,7 +22,7 @@ import {
   ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
 } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
-import { getEdgeVisualProps, prepareToDeleteObjects } from "./jxg-polygon";
+import { getAssociatedPolygon, getEdgeVisualProps, prepareToDeleteObjects } from "./jxg-polygon";
 import {
   isAxisArray, isBoard, isComment, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
@@ -122,11 +122,12 @@ export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
   const element = getObjectById(board, id);
   if (element) {
-    const colorScheme = element.getAttribute("colorScheme")||0;
+    let colorScheme = element.getAttribute("colorScheme")||0;
     if (isPoint(element)) {
       const props = getPointVisualProps(selected, colorScheme, element.getAttribute("isPhantom"));
       element.setAttribute(props);
     } else if (isVisibleEdge(element)) {
+      colorScheme = getAssociatedPolygon(element)?.getAttribute("colorScheme")||0;
       const props = getEdgeVisualProps(selected, colorScheme, false);
       element.setAttribute(props);
     }
