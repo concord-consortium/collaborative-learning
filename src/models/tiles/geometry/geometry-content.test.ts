@@ -21,11 +21,6 @@ import { TileModel, ITileModel } from "../tile-model";
 import { registerTileTypes } from "../../../register-tile-types";
 registerTileTypes(["Geometry"]);
 
-// These are currently added to all created points
-const defaultParams = {
-  snapToGrid: true, snapSizeX: 0.1, snapSizeY: 0.1
-};
-
 // Need to mock this so the placeholder that is added to the cache
 // has dimensions
 jest.mock( "../../../utilities/image-utils", () => ({

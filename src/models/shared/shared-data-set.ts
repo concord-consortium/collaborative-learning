@@ -145,7 +145,10 @@ function flattenedMap(sharedDatasetIds: UpdatedSharedDataSetIds[]) {
 export function replaceJsonStringsWithUpdatedIds(json: unknown, separator: string,
     ...sharedDatasetIds: UpdatedSharedDataSetIds[]) {
   const flatMap = flattenedMap(sharedDatasetIds);
-  const keyPattern = Object.keys(flatMap).map(key => escapeStringRegexp(key)).join("|");
+  const keys = Object.keys(flatMap);
+  if (keys.length === 0) { return json; }
+
+  const keyPattern = keys.map(key => escapeStringRegexp(key)).join("|");
   const matchRegexp = new RegExp(`(?<=${separator})(${keyPattern})(?=${separator})`, "g");
   const updated = JSON.stringify(json).replace(matchRegexp, (match) => {
     return `${flatMap[match]}`;

@@ -462,7 +462,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         onCreate: onCreateCallback, syncLinked: (board:JXG.Board) => void): JXG.Board | undefined {
       let board: JXG.Board | undefined;
       const context = getDispatcherContext();
-      // Create the board
+      // Create the board and axes
       applyChanges(domElementID, [getGeometryBoardChange(self, { addBuffers: true, includeUnits: true })], context)
         .filter(result => result != null)
         .forEach(changeResult => {
