@@ -765,6 +765,11 @@ export const GeometryContentModel = GeometryBaseContentModel
       };
       const updatedPolygon = syncChange(board, change);
       polygonModel.points.push(pointId);
+
+      logGeometryEvent(self, "update",
+        "vertex",
+        pointId, { userAction: "join to polygon" });
+
       return isPolygon(updatedPolygon) ? updatedPolygon : undefined;
     }
 
@@ -893,13 +898,18 @@ export const GeometryContentModel = GeometryBaseContentModel
       const polygonModel = PolygonModel.create({ points, colorScheme });
       self.addObjectModel(polygonModel);
       self.activePolygonId = polygonModel.id;
-    const change: JXGChange = {
+      const change: JXGChange = {
         operation: "create",
         target: "polygon",
         parents: points,
         properties: { id: polygonModel.id, colorScheme }
       };
       const result = syncChange(board, change);
+
+      logGeometryEvent(self, "update",
+        "vertex",
+        pointId, { userAction: "join to polygon" });
+
       if (isPolygon(result)) {
         return result;
       }
