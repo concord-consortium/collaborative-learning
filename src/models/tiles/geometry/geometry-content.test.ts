@@ -325,6 +325,9 @@ describe("GeometryContent", () => {
     expect(p1.getAttribute("fixed")).toBe(true);
     content.updateObjects(board, "foo", { });
     content.applyChange(board, { operation: "update", target: "point" });
+    content.removeObjects(board, p1Id); // should not be removed because it is "fixed"
+    expect(board.objects[p1Id]).toBeDefined();
+    content.updateObjects(board, [p1Id], { fixed: false });
     content.removeObjects(board, p1Id);
     expect(board.objects[p1Id]).toBeUndefined();
     const p3: JXG.Point = content.addPoint(board, [2, 2]) as JXG.Point;
