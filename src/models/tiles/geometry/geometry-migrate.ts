@@ -121,6 +121,10 @@ export const convertModelObjectToChanges = (obj: GeometryObjectModelType): JXGCh
     case "point": {
       const { type, x, y, ...props } = obj as PointModelType;
       const properties = omitNullish(props);
+      if (properties.labelOption) {
+        properties.clientLabelOption = properties.labelOption;
+        properties.labelOption = undefined;
+      }
       changes.push({ operation: "create", target: "point", parents: [x, y], properties });
       break;
     }

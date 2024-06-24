@@ -292,6 +292,7 @@
           "polygon",
           "upload",
           "duplicate",
+          "label",
           "angle-label",
           "line-label",
           "comment",

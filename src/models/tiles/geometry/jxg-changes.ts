@@ -16,6 +16,12 @@ export type JXGImageParents = [string, JXGCoordPair, JXGCoordPair];
 
 export type JXGParentType = string | number | undefined | JXGCoordPair | JXGUnsafeCoordPair;
 
+export enum ELabelOption {
+  kNone = "none",
+  kLabel = "label",
+  kMeasure = "measure"
+}
+
 export enum ESegmentLabelOption {
   kNone = "none",
   kLabel = "label", // parents

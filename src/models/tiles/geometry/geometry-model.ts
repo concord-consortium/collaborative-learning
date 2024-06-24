@@ -4,7 +4,7 @@ import { kDefaultBoardModelInputProps, kGeometryTileType } from "./geometry-type
 import { uniqueId } from "../../../utilities/js-utils";
 import { typeField } from "../../../utilities/mst-utils";
 import { TileContentModel } from "../tile-content";
-import { ESegmentLabelOption, JXGPositionProperty } from "./jxg-changes";
+import { ELabelOption, ESegmentLabelOption, JXGPositionProperty } from "./jxg-changes";
 import { kGeometryDefaultPixelsPerUnit } from "./jxg-types";
 import { findLeastUsedNumber } from "../../../utilities/math-utils";
 import { clueDataColorInfo } from "../../../utilities/color-utils";
@@ -153,9 +153,16 @@ export const PointModel = PositionedObjectModel
     type: typeField("point"),
     name: types.maybe(types.string),
     snapToGrid: types.maybe(types.boolean),
-    colorScheme: 0
+    colorScheme: 0,
+    labelOption: types.optional(types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption)),
+      ELabelOption.kNone)
   })
-  .preProcessSnapshot(preProcessPositionInSnapshot);
+  .preProcessSnapshot(preProcessPositionInSnapshot)
+  .actions(self => ({
+    setLabelOption(option: ELabelOption) {
+      self.labelOption = option;
+    }
+  }));
 export interface PointModelType extends Instance<typeof PointModel> {}
 
 export const isPointModel = (o?: GeometryObjectModelType): o is PointModelType => o?.type === "point";

@@ -27,10 +27,11 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
 import {
+  ELabelOption,
   ESegmentLabelOption, JXGCoordPair
 } from "../../../models/tiles/geometry/jxg-changes";
 import { applyChange } from "../../../models/tiles/geometry/jxg-dispatcher";
-import { kSnapUnit } from "../../../models/tiles/geometry/jxg-point";
+import { kSnapUnit, setPropertiesForLabelOption } from "../../../models/tiles/geometry/jxg-point";
 import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
 } from "../../../models/tiles/geometry/jxg-polygon";
@@ -59,6 +60,7 @@ import SingleStringDialog from "../../utilities/single-string-dialog";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 import { TileTitleArea } from "../tile-title-area";
 import { GeometryTileContext } from "./geometry-tile-context";
+import LabelPointDialog from "./label-point-dialog";
 
 export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
@@ -88,6 +90,7 @@ interface IState extends Mutable<SizeMeProps> {
   redoStack: string[][];
   selectedComment?: JXG.Text;
   selectedLine?: JXG.Line;
+  showPointLabelDialog?: boolean;
   showSegmentLabelDialog?: boolean;
   showInvalidTableDataAlert?: boolean;
 }
@@ -190,6 +193,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handlePaste: this.handlePaste,
         handleDuplicate: this.handleDuplicate,
         handleDelete: this.handleDelete,
+        handleLabelDialog: this.handleLabelDialog,
         handleToggleVertexAngle: this.handleToggleVertexAngle,
         handleCreateLineLabel: this.handleCreateLineLabel,
         handleCreateMovableLine: this.handleCreateMovableLine,
@@ -533,6 +537,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         {this.renderCommentEditor()}
         {this.renderLineEditor()}
         {this.renderSegmentLabelDialog()}
+        {this.renderPointLabelDialog()}
         <div id={this.elementId} key="jsxgraph"
             className={classes}
             ref={elt => this.domElement = elt}
@@ -575,6 +580,27 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           onAccept={this.handleUpdateLine}
           onClose={this.closeLineDialog}
           line={line}
+        />
+      );
+    }
+  }
+
+  private renderPointLabelDialog() {
+    const content = this.getContent();
+    const { board, showPointLabelDialog } = this.state;
+    if (board && showPointLabelDialog) {
+      const point = content.getOneSelectedPoint(board);
+      if (!point) return;
+      const handleClose = () => this.setState({ showPointLabelDialog: false });
+      const handleAccept = (p: JXG.Point, labelOption: ELabelOption) => {
+        this.handleSetLabelOption(p, labelOption);
+      };
+      return (
+        <LabelPointDialog
+          board={board}
+          point={point}
+          onAccept={handleAccept}
+          onClose={handleClose}
         />
       );
     }
@@ -864,6 +890,21 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       (throttle(nudge, 250))();
     }
     return hasSelectedPoints;
+  };
+
+  private handleLabelDialog = () => {
+    this.setState({ showPointLabelDialog: true });
+  };
+
+  private handleSetLabelOption = (point: JXG.Point, labelOption: ELabelOption) => {
+    point._set("clientLabelOption", labelOption);
+    setPropertiesForLabelOption(point);
+    this.applyChange(() => {
+      const pointModel = this.getContent().getObject(point.id);
+      if (isPointModel(pointModel)) {
+        pointModel.setLabelOption(labelOption);
+      }
+    });
   };
 
   private handleToggleVertexAngle = () => {

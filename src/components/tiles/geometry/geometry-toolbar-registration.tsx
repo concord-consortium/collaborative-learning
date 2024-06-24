@@ -10,11 +10,14 @@ import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking
 import { useReadOnlyContext } from "../../document/read-only-context";
 import { useTileModelContext } from "../hooks/use-tile-model-context";
 import { GeometryTileMode } from "./geometry-types";
+import { isPointModel } from "../../../models/tiles/geometry/geometry-model";
+import { ELabelOption } from "../../../models/tiles/geometry/jxg-changes";
 
 import AngleLabelSvg from "../../../clue/assets/icons/geometry/angle-label.svg";
 import AddImageSvg from "../../../clue/assets/icons/geometry/add-image-icon.svg";
 import CommentSvg from "../../../assets/icons/comment/comment.svg";
 import DeleteSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
+import LabelSvg from "../../../clue/assets/icons/shapes-label-value-icon.svg";
 import LineLabelSvg from "../../../clue/assets/icons/geometry/line-label.svg";
 import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
 import PointSvg from "../../../clue/assets/icons/geometry/point-icon.svg";
@@ -75,6 +78,30 @@ const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButton
       onClick={() => handlers?.handleDuplicate()}
     >
       <ShapesDuplicateSvg/>
+    </TileToolbarButton>
+  );
+
+});
+
+const LabelButton = observer(function LabelButton({name}: IToolbarButtonComponentProps) {
+  const { content, board, handlers } = useGeometryTileContext();
+  const selectedPoint = board && content?.getOneSelectedPoint(board);
+  const pointModel = selectedPoint && content?.getObject(selectedPoint.id);
+  const labelOption = isPointModel(pointModel) && pointModel.labelOption;
+
+  function handleClick() {
+    handlers?.handleLabelDialog();
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Label/Value"
+      disabled={!selectedPoint}
+      selected={labelOption && labelOption !== ELabelOption.kNone}
+      onClick={handleClick}
+    >
+      <LabelSvg/>
     </TileToolbarButton>
   );
 
@@ -280,6 +307,10 @@ registerTileToolbarButtons("geometry",
     {
       name: "duplicate",
       component: DuplicateButton
+    },
+    {
+      name: "label",
+      component: LabelButton
     },
     {
       name: "angle-label",

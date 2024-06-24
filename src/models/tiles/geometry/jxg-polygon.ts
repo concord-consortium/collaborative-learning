@@ -239,8 +239,14 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]): string[
 }
 
 function segmentNameLabelFn(this: JXG.Line) {
-  const p1Name = this.point1.getName();
-  const p2Name = this.point2.getName();
+  let p1Name = this.point1.getName();
+  if (typeof p1Name === "function") {
+    p1Name = this.point1.getAttribute("clientName");
+  }
+  let p2Name = this.point2.getName();
+  if (typeof p2Name === "function") {
+    p2Name = this.point2.getAttribute("clientName");
+  }
   return `${p1Name}${p2Name}`;
 }
 

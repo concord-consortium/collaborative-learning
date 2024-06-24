@@ -19,6 +19,7 @@ import {
   resumeBoardUpdates, suspendBoardUpdates
 } from "./jxg-board";
 import {
+  ELabelOption,
   ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
 } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
@@ -124,7 +125,8 @@ export function setElementColor(board: JXG.Board, id: string, selected: boolean)
   if (element) {
     let colorScheme = element.getAttribute("colorScheme")||0;
     if (isPoint(element)) {
-      const props = getPointVisualProps(selected, colorScheme, element.getAttribute("isPhantom"));
+      const props = getPointVisualProps(selected, colorScheme, element.getAttribute("isPhantom"),
+        element.getAttribute("clientLabelOption"));
       element.setAttribute(props);
     } else if (isVisibleEdge(element)) {
       colorScheme = getAssociatedPolygon(element)?.getAttribute("colorScheme")||0;
@@ -667,7 +669,8 @@ export const GeometryContentModel = GeometryBaseContentModel
       const props = {
         id: uniqueId(),
         colorScheme: self.newPointColorScheme,
-        isPhantom: true
+        isPhantom: true,
+        clientLabelOption: ELabelOption.kNone
       };
       const pointModel = PointModel.create({ x: parents[0], y: parents[1], ...props });
       self.phantomPoint = pointModel;
@@ -802,7 +805,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         target: "object",
         targetID: newRealPoint.id,
         properties: {
-          ...getPointVisualProps(false, newRealPoint.colorScheme, false),
+          ...getPointVisualProps(false, newRealPoint.colorScheme, false, ELabelOption.kNone),
           isPhantom: false,
           position
         }
@@ -1230,7 +1233,7 @@ export const GeometryContentModel = GeometryBaseContentModel
 
     function getOneSelectedPoint(board: JXG.Board) {
       const selected = self.selectedObjects(board);
-      return (selected.length === 1 && isPoint(selected[0]));
+      return (selected.length === 1 && isPoint(selected[0])) ? selected[0] : undefined;
     }
 
     function getOneSelectedPolygon(board: JXG.Board) {
