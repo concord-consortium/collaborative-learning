@@ -1,7 +1,7 @@
 import { types } from "mobx-state-tree";
 
 import { BaseDocumentContentModel } from "./base-document-content";
-import { ArrowAnnotation, IArrowAnnotation, IArrowAnnotationSnapshot } from "../annotations/arrow-annotation";
+import { ArrowAnnotation, IArrowAnnotation } from "../annotations/arrow-annotation";
 import { logSparrowCreate, logSparrowDelete } from "../tiles/log/log-sparrow-event";
 import { LogEventName } from "../../../src/lib/logger-types";
 
@@ -46,11 +46,6 @@ export const DocumentContentModelWithAnnotations = BaseDocumentContentModel
     deleteAnnotation(annotationId: string) {
       self.annotations.delete(annotationId);
       logSparrowDelete(LogEventName.SPARROW_DELETION, annotationId);
-    },
-    addAnnotationFromImport(id: string, annotation: IArrowAnnotationSnapshot){
-      if (self.annotations) {
-        self.annotations.set(id, annotation);
-      }
     },
     selectAnnotations(ids: string[]) {
       for (const annotation of self.annotations.values()) {
