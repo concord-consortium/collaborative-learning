@@ -130,9 +130,9 @@ describe("DocumentContentModel -- shared Models --", () => {
 Object {
   "annotations": Object {},
   "rowMap": Object {
-    "testid-12": Object {
+    "testid-6": Object {
       "height": undefined,
-      "id": "testid-12",
+      "id": "testid-6",
       "isSectionHeader": false,
       "sectionId": undefined,
       "tiles": Array [
@@ -148,7 +148,7 @@ Object {
     },
   },
   "rowOrder": Array [
-    "testid-12",
+    "testid-6",
   ],
   "sharedModelMap": Object {
     "sharedDataSet1": Object {
@@ -255,7 +255,7 @@ Object {
         "importedDataSet": Object {
           "attributes": Array [],
           "cases": Array [],
-          "id": "testid-13",
+          "id": "testid-7",
           "name": undefined,
           "sourceID": undefined,
         },
@@ -293,25 +293,25 @@ Object {
 Object {
   "annotations": Object {},
   "rowMap": Object {
-    "testid-32": Object {
+    "testid-21": Object {
       "height": undefined,
-      "id": "testid-32",
+      "id": "testid-21",
       "isSectionHeader": false,
       "sectionId": undefined,
       "tiles": Array [
         Object {
-          "tileId": "testid-31",
+          "tileId": "testid-20",
           "widthPct": undefined,
         },
       ],
     },
   },
   "rowOrder": Array [
-    "testid-32",
+    "testid-21",
   ],
   "sharedModelMap": Object {
-    "testid-28": Object {
-      "provider": "testid-31",
+    "testid-17": Object {
+      "provider": "testid-20",
       "sharedModel": Object {
         "dataSet": Object {
           "attributes": Array [
@@ -323,7 +323,7 @@ Object {
                 "display": undefined,
               },
               "hidden": false,
-              "id": "testid-29",
+              "id": "testid-18",
               "name": "x",
               "precision": undefined,
               "sourceID": undefined,
@@ -343,7 +343,7 @@ Object {
                 "display": undefined,
               },
               "hidden": false,
-              "id": "testid-30",
+              "id": "testid-19",
               "name": "y",
               "precision": undefined,
               "sourceID": undefined,
@@ -367,27 +367,27 @@ Object {
               "__id__": "caseid-2",
             },
           ],
-          "id": "testid-27",
+          "id": "testid-16",
           "name": "Demo Dataset",
           "sourceID": undefined,
         },
-        "id": "testid-28",
-        "providerId": "testid-31",
+        "id": "testid-17",
+        "providerId": "testid-20",
         "type": "SharedDataSet",
       },
       "tiles": Array [
-        "testid-31",
+        "testid-20",
       ],
     },
   },
   "tileMap": Object {
-    "testid-31": Object {
+    "testid-20": Object {
       "content": Object {
         "columnWidths": Object {},
         "importedDataSet": Object {
           "attributes": Array [],
           "cases": Array [],
-          "id": "testid-21",
+          "id": "testid-12",
           "name": undefined,
           "sourceID": undefined,
         },
@@ -395,7 +395,7 @@ Object {
         "type": "Table",
       },
       "display": undefined,
-      "id": "testid-31",
+      "id": "testid-20",
       "title": undefined,
     },
   },
@@ -422,9 +422,9 @@ Object {
 Object {
   "annotations": Object {},
   "rowMap": Object {
-    "testid-44": Object {
+    "testid-28": Object {
       "height": undefined,
-      "id": "testid-44",
+      "id": "testid-28",
       "isSectionHeader": false,
       "sectionId": undefined,
       "tiles": Array [
@@ -433,18 +433,18 @@ Object {
           "widthPct": undefined,
         },
         Object {
-          "tileId": "testid-50",
+          "tileId": "testid-34",
           "widthPct": undefined,
         },
       ],
     },
   },
   "rowOrder": Array [
-    "testid-44",
+    "testid-28",
   ],
   "sharedModelMap": Object {
-    "testid-47": Object {
-      "provider": "testid-50",
+    "testid-31": Object {
+      "provider": "testid-34",
       "sharedModel": Object {
         "dataSet": Object {
           "attributes": Array [
@@ -456,7 +456,7 @@ Object {
                 "display": undefined,
               },
               "hidden": false,
-              "id": "testid-48",
+              "id": "testid-32",
               "name": "x",
               "precision": undefined,
               "sourceID": undefined,
@@ -476,7 +476,7 @@ Object {
                 "display": undefined,
               },
               "hidden": false,
-              "id": "testid-49",
+              "id": "testid-33",
               "name": "y",
               "precision": undefined,
               "sourceID": undefined,
@@ -500,27 +500,27 @@ Object {
               "__id__": "caseid-5",
             },
           ],
-          "id": "testid-46",
+          "id": "testid-30",
           "name": "Demo Dataset",
           "sourceID": undefined,
         },
-        "id": "testid-47",
-        "providerId": "testid-50",
+        "id": "testid-31",
+        "providerId": "testid-34",
         "type": "SharedDataSet",
       },
       "tiles": Array [
-        "testid-50",
+        "testid-34",
       ],
     },
   },
   "tileMap": Object {
-    "testid-50": Object {
+    "testid-34": Object {
       "content": Object {
         "columnWidths": Object {},
         "importedDataSet": Object {
           "attributes": Array [],
           "cases": Array [],
-          "id": "testid-38",
+          "id": "testid-24",
           "name": undefined,
           "sourceID": undefined,
         },
@@ -528,7 +528,7 @@ Object {
         "type": "Table",
       },
       "display": undefined,
-      "id": "testid-50",
+      "id": "testid-34",
       "title": undefined,
     },
     "textTool": Object {
@@ -562,29 +562,29 @@ Object {
 Object {
   "annotations": Object {},
   "rowMap": Object {
-    "testid-69": Object {
+    "testid-48": Object {
       "height": undefined,
-      "id": "testid-69",
+      "id": "testid-48",
       "isSectionHeader": false,
       "sectionId": undefined,
       "tiles": Array [
         Object {
-          "tileId": "testid-67",
+          "tileId": "testid-46",
           "widthPct": undefined,
         },
         Object {
-          "tileId": "testid-68",
+          "tileId": "testid-47",
           "widthPct": undefined,
         },
       ],
     },
   },
   "rowOrder": Array [
-    "testid-69",
+    "testid-48",
   ],
   "sharedModelMap": Object {
-    "testid-64": Object {
-      "provider": "testid-67",
+    "testid-43": Object {
+      "provider": "testid-46",
       "sharedModel": Object {
         "dataSet": Object {
           "attributes": Array [
@@ -596,7 +596,7 @@ Object {
                 "display": undefined,
               },
               "hidden": false,
-              "id": "testid-65",
+              "id": "testid-44",
               "name": "x",
               "precision": undefined,
               "sourceID": undefined,
@@ -616,7 +616,7 @@ Object {
                 "display": undefined,
               },
               "hidden": false,
-              "id": "testid-66",
+              "id": "testid-45",
               "name": "y",
               "precision": undefined,
               "sourceID": undefined,
@@ -640,28 +640,28 @@ Object {
               "__id__": "caseid-8",
             },
           ],
-          "id": "testid-63",
+          "id": "testid-42",
           "name": "Demo Dataset",
           "sourceID": undefined,
         },
-        "id": "testid-64",
-        "providerId": "testid-67",
+        "id": "testid-43",
+        "providerId": "testid-46",
         "type": "SharedDataSet",
       },
       "tiles": Array [
-        "testid-67",
-        "testid-68",
+        "testid-46",
+        "testid-47",
       ],
     },
   },
   "tileMap": Object {
-    "testid-67": Object {
+    "testid-46": Object {
       "content": Object {
         "columnWidths": Object {},
         "importedDataSet": Object {
           "attributes": Array [],
           "cases": Array [],
-          "id": "testid-56",
+          "id": "testid-37",
           "name": undefined,
           "sourceID": undefined,
         },
@@ -669,10 +669,10 @@ Object {
         "type": "Table",
       },
       "display": undefined,
-      "id": "testid-67",
+      "id": "testid-46",
       "title": undefined,
     },
-    "testid-68": Object {
+    "testid-47": Object {
       "content": Object {
         "bgImage": undefined,
         "board": Object {
@@ -695,7 +695,7 @@ Object {
         "type": "Geometry",
       },
       "display": undefined,
-      "id": "testid-68",
+      "id": "testid-47",
       "title": undefined,
     },
   },

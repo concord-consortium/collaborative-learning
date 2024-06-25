@@ -27,6 +27,7 @@ export const TileLayoutModel = types
     }
   }));
 export type TileLayoutModelType = Instance<typeof TileLayoutModel>;
+export type TileLayoutSnapshotType = SnapshotIn<typeof TileLayoutModel>;
 
 export const TileRowModel = types
   .model("TileRow", {
