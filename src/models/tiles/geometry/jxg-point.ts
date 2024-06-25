@@ -1,7 +1,7 @@
 import { castArray } from "lodash";
 import { PointAttributes } from "jsxgraph";
 import { uniqueId } from "../../../utilities/js-utils";
-import { ELabelOption, JXGChangeAgent, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
+import { ESegmentLabelOption, JXGChangeAgent, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
 import { objectChangeAgent, isPositionGraphable, getGraphablePosition } from "./jxg-object";
 import { prepareToDeleteObjects } from "./jxg-polygon";
 import { fillPropsForColorScheme } from "./geometry-utils";
@@ -34,8 +34,8 @@ const phantomPointProperties = Object.freeze({
 });
 
 export function getPointVisualProps(selected: boolean, colorScheme: number, phantom: boolean,
-    labelOption?: ELabelOption) {
-  const withLabel = labelOption && [ELabelOption.kLabel, ELabelOption.kMeasure].includes(labelOption);
+    labelOption?: ESegmentLabelOption) {
+  const withLabel = labelOption && [ESegmentLabelOption.kLabel, ESegmentLabelOption.kLength].includes(labelOption);
   const props: PointAttributes = {
     ...defaultPointProperties,
     ...fillPropsForColorScheme(colorScheme),
@@ -64,15 +64,15 @@ export function createPoint(board: JXG.Board, parents: JXGUnsafeCoordPair, chang
 }
 
 export function setPropertiesForLabelOption(point: JXG.Point) {
-  const labelOption = point.getAttribute("clientLabelOption") || ELabelOption.kNone;
+  const labelOption = point.getAttribute("clientLabelOption") || ESegmentLabelOption.kNone;
   switch (labelOption) {
-    case ELabelOption.kMeasure:
+    case ESegmentLabelOption.kLength:
       point.setAttribute({
         withLabel: true,
         name() { return `(${point.X().toFixed(2)}, ${point.Y().toFixed(2)})`; }
       });
       break;
-    case ELabelOption.kLabel:
+    case ESegmentLabelOption.kLabel:
       point.setAttribute({
         withLabel: true,
         name: point.getAttribute("clientName")

@@ -296,7 +296,8 @@ describe("GeometryContent", () => {
     let p1: JXG.Point = board.objects[p1Id] as JXG.Point;
     expect(p1).toBeUndefined();
     p1 = content.addPoint(board, [1, 1], { id: p1Id }) as JXG.Point;
-    expect(content.lastObject).toEqual({ id: p1Id, type: "point", x: 1, y: 1, colorScheme: 0 });
+    expect(content.lastObject).toEqual({ id: p1Id, type: "point", x: 1, y: 1, colorScheme: 0,
+      labelOption: "none", name: undefined, snapToGrid: undefined });
     expect(isPoint(p1)).toBe(true);
     expect(isFreePoint(p1)).toBe(true);
     // won't create generic objects
@@ -338,7 +339,8 @@ describe("GeometryContent", () => {
     const { content, board } = createContentAndBoard();
     const p1Id = "point-1";
     content.addPoint(board, [1, 1], { id: p1Id }) as JXG.Point;
-    expect(content.lastObject).toEqual({ id: p1Id, type: "point", x: 1, y: 1, colorScheme: 0 });
+    expect(content.lastObject).toEqual({ id: p1Id, type: "point", x: 1, y: 1, colorScheme: 0,
+      labelOption: "none", name: undefined, snapToGrid: undefined });
 
     // add comment to point
     const [comment] = content.addComment(board, p1Id)!;
@@ -774,8 +776,11 @@ describe("GeometryContent", () => {
     expect(content.lastObject).toEqual({
       id: "ml", type: "movableLine",
       colorScheme: 0,
-      p1: { id: "ml-point1", type: "point", colorScheme: 0, x: 1, y: 1 },
-      p2: { id: "ml-point2", type: "point", colorScheme: 0, x: 5, y: 5 } });
+      p1: { id: "ml-point1", type: "point", colorScheme: 0, x: 1, y: 1,
+        labelOption: "none", name: undefined, snapToGrid: undefined },
+      p2: { id: "ml-point2", type: "point", colorScheme: 0, x: 5, y: 5,
+        labelOption: "none", name: undefined, snapToGrid: undefined }
+    });
     const line = board.objects.ml as JXG.Line;
     expect(isMovableLine(line)).toBe(true);
     const [comment] = content.addComment(board, "ml")!;
@@ -793,7 +798,10 @@ describe("GeometryContent", () => {
       type: "point",
       colorScheme: 0,
       x: 1,
-      y: 1
+      y: 1,
+      labelOption: "none",
+      name: undefined,
+      snapToGrid: undefined
     });
     const p2 = content.getAnyObject("ml-point2");
     expect(p2).toEqual({
@@ -801,7 +809,10 @@ describe("GeometryContent", () => {
       type: "point",
       colorScheme: 0,
       x: 5,
-      y:5
+      y:5,
+      labelOption: "none",
+      name: undefined,
+      snapToGrid: undefined
     });
 
     // removing the line removes the line and its comment from the model and the board

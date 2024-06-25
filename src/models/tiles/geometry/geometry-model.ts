@@ -4,7 +4,7 @@ import { kDefaultBoardModelInputProps, kGeometryTileType } from "./geometry-type
 import { uniqueId } from "../../../utilities/js-utils";
 import { typeField } from "../../../utilities/mst-utils";
 import { TileContentModel } from "../tile-content";
-import { ELabelOption, ESegmentLabelOption, JXGPositionProperty } from "./jxg-changes";
+import { ESegmentLabelOption, JXGPositionProperty } from "./jxg-changes";
 import { kGeometryDefaultPixelsPerUnit } from "./jxg-types";
 import { findLeastUsedNumber } from "../../../utilities/math-utils";
 import { clueDataColorInfo } from "../../../utilities/color-utils";
@@ -154,13 +154,21 @@ export const PointModel = PositionedObjectModel
     name: types.maybe(types.string),
     snapToGrid: types.maybe(types.boolean),
     colorScheme: 0,
-    labelOption: types.optional(types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption)),
-      ELabelOption.kNone)
+    labelOption: types.optional(
+      types.enumeration<ESegmentLabelOption>("LabelOption", Object.values(ESegmentLabelOption)),
+      ESegmentLabelOption.kNone)
   })
   .preProcessSnapshot(preProcessPositionInSnapshot)
   .actions(self => ({
-    setLabelOption(option: ELabelOption) {
-      self.labelOption = option;
+    setLabelOption(option: ESegmentLabelOption) {
+      if (option !== self.labelOption) {
+        self.labelOption = option;
+      }
+    },
+    setName(name: string) {
+      if (name !== self.name) {
+        self.name = name;
+      }
     }
   }));
 export interface PointModelType extends Instance<typeof PointModel> {}

@@ -19,7 +19,6 @@ import {
   resumeBoardUpdates, suspendBoardUpdates
 } from "./jxg-board";
 import {
-  ELabelOption,
   ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
 } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
@@ -283,7 +282,9 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     isDeletable(board: JXG.Board, id: string) {
       const obj = getObjectById(board, id);
-      return obj && !obj.getAttribute("fixed") && !obj.getAttribute("clientUndeletable");
+      if (!obj || obj.getAttribute("clientUndeletable")) return false;
+      if (isVertexAngle(obj)) return true;
+      return !obj.getAttribute("fixed");
     }
   }))
   .views(self => ({
@@ -670,7 +671,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         id: uniqueId(),
         colorScheme: self.newPointColorScheme,
         isPhantom: true,
-        clientLabelOption: ELabelOption.kNone
+        clientLabelOption: ESegmentLabelOption.kNone
       };
       const pointModel = PointModel.create({ x: parents[0], y: parents[1], ...props });
       self.phantomPoint = pointModel;
@@ -805,7 +806,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         target: "object",
         targetID: newRealPoint.id,
         properties: {
-          ...getPointVisualProps(false, newRealPoint.colorScheme, false, ELabelOption.kNone),
+          ...getPointVisualProps(false, newRealPoint.colorScheme, false, ESegmentLabelOption.kNone),
           isPhantom: false,
           position
         }

@@ -27,7 +27,6 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
 import {
-  ELabelOption,
   ESegmentLabelOption, JXGCoordPair
 } from "../../../models/tiles/geometry/jxg-changes";
 import { applyChange } from "../../../models/tiles/geometry/jxg-dispatcher";
@@ -194,7 +193,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleDuplicate: this.handleDuplicate,
         handleDelete: this.handleDelete,
         handleLabelDialog: this.handleLabelDialog,
-        handleToggleVertexAngle: this.handleToggleVertexAngle,
         handleCreateLineLabel: this.handleCreateLineLabel,
         handleCreateMovableLine: this.handleCreateMovableLine,
         handleCreateComment: this.handleCreateComment,
@@ -592,8 +590,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const point = content.getOneSelectedPoint(board);
       if (!point) return;
       const handleClose = () => this.setState({ showPointLabelDialog: false });
-      const handleAccept = (p: JXG.Point, labelOption: ELabelOption) => {
-        this.handleSetLabelOption(p, labelOption);
+      const handleAccept = (p: JXG.Point, labelOption: ESegmentLabelOption, name: string, angleLabel: boolean) => {
+        this.handleSetPointLabelOptions(p, labelOption, name, angleLabel);
       };
       return (
         <LabelPointDialog
@@ -896,42 +894,47 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.setState({ showPointLabelDialog: true });
   };
 
-  private handleSetLabelOption = (point: JXG.Point, labelOption: ELabelOption) => {
+  private handleSetPointLabelOptions =
+      (point: JXG.Point, labelOption: ESegmentLabelOption, name: string, angleLabel: boolean) => {
     point._set("clientLabelOption", labelOption);
+    point._set("clientName", name);
     setPropertiesForLabelOption(point);
     this.applyChange(() => {
       const pointModel = this.getContent().getObject(point.id);
       if (isPointModel(pointModel)) {
         pointModel.setLabelOption(labelOption);
+        pointModel.setName(name);
+        const vertexAngle = getVertexAngle(point);
+        if (vertexAngle && !angleLabel) {
+          this.handleUnlabelVertexAngle(vertexAngle);
+        }
+        if (!vertexAngle && angleLabel) {
+          this.handleLabelVertexAngle(point);
+        }
       }
     });
   };
 
-  private handleToggleVertexAngle = () => {
+  private handleLabelVertexAngle = (point: JXG.Point) => {
     const { board } = this.state;
-    const selectedObjects = board && this.getContent().selectedObjects(board);
-    const selectedPoints = selectedObjects?.filter(isPoint);
-    const selectedPoint = selectedPoints?.[0];
-    if (board && selectedPoint) {
-      const vertexAngle = getVertexAngle(selectedPoint);
-      if (!vertexAngle) {
-        const anglePts = getPointsForVertexAngle(selectedPoint);
-        if (anglePts) {
-          const anglePtIds = anglePts.map(pt => pt.id);
-          this.applyChange(() => {
-            const angle = this.getContent().addVertexAngle(board, anglePtIds);
-            if (angle) {
-              this.handleCreateVertexAngle(angle);
-            }
-          });
+    const anglePts = getPointsForVertexAngle(point);
+    if (board && anglePts) {
+      const anglePtIds = anglePts.map(pt => pt.id);
+      this.applyChange(() => {
+        const angle = this.getContent().addVertexAngle(board, anglePtIds);
+        if (angle) {
+          this.handleCreateVertexAngle(angle);
         }
-      }
-      else {
-        this.applyChange(() => {
-          this.getContent().removeObjects(board, vertexAngle.id);
-        });
-      }
+      });
     }
+  };
+
+  private handleUnlabelVertexAngle = (vertexAngle: JXG.Angle) => {
+    const { board } = this.state;
+    if (!board || !vertexAngle) return;
+    this.applyChange(() => {
+      this.getContent().removeObjects(board, vertexAngle.id);
+    });
   };
 
   private handleCreateMovableLine = () => {

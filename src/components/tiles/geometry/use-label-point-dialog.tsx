@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { ELabelOption } from "../../../models/tiles/geometry/jxg-changes";
+import React, { PropsWithChildren, useState } from "react";
+import { ESegmentLabelOption } from "../../../models/tiles/geometry/jxg-changes";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
+import { canSupportVertexAngle, getVertexAngle } from "../../../models/tiles/geometry/jxg-vertex-angle";
 
 import LabelSvg from "../../../clue/assets/icons/shapes-label-value-icon.svg";
 
@@ -12,7 +13,8 @@ interface LabelRadioButtonProps {
   checkedLabel: string;
   setLabelOption: React.Dispatch<React.SetStateAction<string>>;
 }
-const LabelRadioButton: React.FC<LabelRadioButtonProps> = ({display, label, checkedLabel, setLabelOption}) => {
+const LabelRadioButton = function (
+    {display, label, checkedLabel, setLabelOption, children}: PropsWithChildren<LabelRadioButtonProps>) {
   return (
     <div className="radio-button-container">
       <input
@@ -31,6 +33,7 @@ const LabelRadioButton: React.FC<LabelRadioButtonProps> = ({display, label, chec
       <label htmlFor={label}>
         {display}
       </label>
+      {children}
     </div>
   );
 };
@@ -38,28 +41,51 @@ const LabelRadioButton: React.FC<LabelRadioButtonProps> = ({display, label, chec
 interface IContentProps {
   labelOption: string;
   setLabelOption: React.Dispatch<React.SetStateAction<string>>;
+  pointName?: string;
+  onNameChange: React.Dispatch<React.SetStateAction<string>>;
+  supportsAngle: boolean;
+  hasAngle: boolean;
+  setHasAngle: React.Dispatch<React.SetStateAction<boolean>>;
 }
-const Content: React.FC<IContentProps> = ({ labelOption, setLabelOption }) => {
+const Content = function (
+    { labelOption, setLabelOption, pointName, onNameChange, supportsAngle, hasAngle, setHasAngle }: IContentProps) {
   return (
     <fieldset className="radio-button-set">
       <LabelRadioButton
         display="None"
-        label={ELabelOption.kNone}
+        label={ESegmentLabelOption.kNone}
         checkedLabel={labelOption}
         setLabelOption={setLabelOption}
       />
       <LabelRadioButton
-        display="Label"
-        label={ELabelOption.kLabel}
+        display="Label:"
+        label={ESegmentLabelOption.kLabel}
         checkedLabel={labelOption}
         setLabelOption={setLabelOption}
-      />
+      >
+        <input type="text" className="name-input"
+          disabled={labelOption !== ESegmentLabelOption.kLabel}
+          value={pointName}
+          onChange={(e) => { console.log('set', e.target.value); onNameChange(e.target.value); }} />
+      </LabelRadioButton>
       <LabelRadioButton
         display="x, y coordinates"
-        label={ELabelOption.kMeasure}
+        label={ESegmentLabelOption.kLength}
         checkedLabel={labelOption}
         setLabelOption={setLabelOption}
       />
+      <div className="radio-button-container">
+        <input
+          id="angle-checkbox"
+          type="checkbox"
+          name="angle"
+          className="checkbox"
+          disabled={!supportsAngle}
+          checked={hasAngle}
+          onChange={(e) => setHasAngle(e.target.checked) }
+        />
+        <label htmlFor="angle-checkbox">Angle</label>
+      </div>
     </fieldset>
   );
 };
@@ -67,17 +93,22 @@ const Content: React.FC<IContentProps> = ({ labelOption, setLabelOption }) => {
 interface IProps {
   board: JXG.Board;
   point: JXG.Point;
-  onAccept: (point: JXG.Point, labelOption: ELabelOption) => void;
+  onAccept: (point: JXG.Point, labelOption: ESegmentLabelOption, name: string, hasAngle: boolean) => void;
   onClose: () => void;
 }
 
 export const useLabelPointDialog = ({ board, point, onAccept, onClose }: IProps) => {
-  const [initialLabelOption] = useState(point.getAttribute("clientLabelOption") || ELabelOption.kNone);
+  const [initialLabelOption] = useState(point.getAttribute("clientLabelOption") || ESegmentLabelOption.kNone);
+  const [initialPointName] = useState(point.getAttribute("clientName") || "");
   const [labelOption, setLabelOption] = useState(initialLabelOption);
+  const [pointName, setPointName] = useState(initialPointName);
+  const supportsAngle = canSupportVertexAngle(point);
+  const [initialHasAngle] = useState(!!getVertexAngle(point));
+  const [hasAngle, setHasAngle] = useState(initialHasAngle);
 
-  const handleClick = () => {
-    if (initialLabelOption !== labelOption) {
-      onAccept(point, labelOption);
+  const handleSubmit = () => {
+    if (initialLabelOption !== labelOption || initialPointName !== pointName || initialHasAngle !== hasAngle) {
+      onAccept(point, labelOption, pointName, hasAngle);
     } else {
       onClose();
     }
@@ -87,17 +118,18 @@ export const useLabelPointDialog = ({ board, point, onAccept, onClose }: IProps)
     Icon: LabelSvg,
     title: "Point Label/Value",
     Content,
-    contentProps: { labelOption, setLabelOption },
+    contentProps:
+      { labelOption, setLabelOption, pointName, onNameChange: setPointName, supportsAngle, hasAngle, setHasAngle },
     buttons: [
       { label: "Cancel" },
       { label: "OK",
         isDefault: true,
         isDisabled: false,
-        onClick: handleClick
+        onClick: handleSubmit
       }
     ],
     onClose
-  }, [labelOption]);
+  }, [labelOption, pointName, hasAngle]);
 
   return [showModal, hideModal];
 };

@@ -5,7 +5,6 @@ export interface IToolbarActionHandlers {
   handleDuplicate: () => void;
   handleDelete: () => void;
   handleLabelDialog: () => void;
-  handleToggleVertexAngle: () => void;
   handleCreateMovableLine: () => void;
   handleCreateLineLabel: () => void;
   handleCreateComment: () => void;
