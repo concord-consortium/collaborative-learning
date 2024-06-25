@@ -27,7 +27,7 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
 import {
-  ESegmentLabelOption, JXGCoordPair
+  ELabelOption, JXGCoordPair
 } from "../../../models/tiles/geometry/jxg-changes";
 import { applyChange } from "../../../models/tiles/geometry/jxg-dispatcher";
 import { kSnapUnit, setPropertiesForLabelOption } from "../../../models/tiles/geometry/jxg-point";
@@ -590,7 +590,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const point = content.getOneSelectedPoint(board);
       if (!point) return;
       const handleClose = () => this.setState({ showPointLabelDialog: false });
-      const handleAccept = (p: JXG.Point, labelOption: ESegmentLabelOption, name: string, angleLabel: boolean) => {
+      const handleAccept = (p: JXG.Point, labelOption: ELabelOption, name: string, angleLabel: boolean) => {
         this.handleSetPointLabelOptions(p, labelOption, name, angleLabel);
       };
       return (
@@ -613,7 +613,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const polygon = segment && getAssociatedPolygon(segment);
       if (!polygon || !segment || (points.length !== 2)) return;
       const handleClose = () => this.setState({ showSegmentLabelDialog: false });
-      const handleAccept = (poly: JXG.Polygon, pts: [JXG.Point, JXG.Point], labelOption: ESegmentLabelOption) =>
+      const handleAccept = (poly: JXG.Polygon, pts: [JXG.Point, JXG.Point], labelOption: ELabelOption) =>
                             {
                               this.handleLabelSegment(poly, pts, labelOption);
                               handleClose();
@@ -895,7 +895,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleSetPointLabelOptions =
-      (point: JXG.Point, labelOption: ESegmentLabelOption, name: string, angleLabel: boolean) => {
+      (point: JXG.Point, labelOption: ELabelOption, name: string, angleLabel: boolean) => {
     point._set("clientLabelOption", labelOption);
     point._set("clientName", name);
     setPropertiesForLabelOption(point);
@@ -995,7 +995,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleLabelSegment =
-            (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ESegmentLabelOption) => {
+            (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ELabelOption) => {
     this.applyChange(() => {
       this.getContent().updatePolygonSegmentLabel(this.state.board, polygon, points, labelOption);
     });

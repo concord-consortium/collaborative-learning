@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
-import { ESegmentLabelOption } from "../../../models/tiles/geometry/jxg-changes";
+import { ELabelOption } from "../../../models/tiles/geometry/jxg-changes";
 import { useLabelPointDialog } from "./use-label-point-dialog";
 
 interface IProps {
   board: JXG.Board;
   point: JXG.Point;
-  onAccept: (point: JXG.Point, labelOption: ESegmentLabelOption, name: string, hasAngle: boolean) => void;
+  onAccept: (point: JXG.Point, labelOption: ELabelOption, name: string, hasAngle: boolean) => void;
   onClose: () => void;
 }
 

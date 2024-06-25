@@ -1,7 +1,7 @@
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { omitUndefined } from "../../../utilities/test-utils";
 import { convertChangesToModel, exportGeometryJson } from "./geometry-migrate";
-import { ESegmentLabelOption, JXGChange } from "./jxg-changes";
+import { ELabelOption, JXGChange } from "./jxg-changes";
 
 
 // default unitPx is 18.3, but for testing purposes we use rounder numbers
@@ -441,7 +441,7 @@ describe("Geometry migration", () => {
       },
       { operation: "create", target: "point", parents: [0, 0], properties: { id: "p1", colorScheme: 1 } },
       { operation: "create", target: "point", parents: [5, 5],
-          properties: { id: "p2", name: "Bob", labelOption: ESegmentLabelOption.kLabel } }
+          properties: { id: "p2", name: "Bob", labelOption: ELabelOption.kLabel } }
     ];
     expect(convertChangesToJson(changes)).toEqual({
       type: "Geometry",
@@ -741,9 +741,9 @@ describe("Geometry migration", () => {
       { operation: "create", target: "point", parents: [0, 0], properties: { id: "v4" } },
       { operation: "create", target: "polygon", parents: ["v1", "v2", "v3", "v4"], properties: { id: "p1" } },
       { operation: "update", target: "polygon", targetID: "p1", parents: ["v1", "v2"],
-        properties: { labelOption: ESegmentLabelOption.kLength } },
+        properties: { labelOption: ELabelOption.kLength } },
       { operation: "update", target: "polygon", targetID: "p1", parents: ["v2", "v3"],
-        properties: { labelOption: ESegmentLabelOption.kLabel } }
+        properties: { labelOption: ELabelOption.kLabel } }
     ];
     // NOTE: Legacy JSON export apparently never supported segment labels. ¯\_ (ツ)_/¯
     // We could fix this, but since we're deprecating the legacy import format, it doesn't seem worth it.

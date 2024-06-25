@@ -19,7 +19,7 @@ import {
   resumeBoardUpdates, suspendBoardUpdates
 } from "./jxg-board";
 import {
-  ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
+  ELabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
 } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
 import { getAssociatedPolygon, getEdgeVisualProps, prepareToDeleteObjects } from "./jxg-polygon";
@@ -671,7 +671,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         id: uniqueId(),
         colorScheme: self.newPointColorScheme,
         isPhantom: true,
-        clientLabelOption: ESegmentLabelOption.kNone
+        clientLabelOption: ELabelOption.kNone
       };
       const pointModel = PointModel.create({ x: parents[0], y: parents[1], ...props });
       self.phantomPoint = pointModel;
@@ -806,7 +806,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         target: "object",
         targetID: newRealPoint.id,
         properties: {
-          ...getPointVisualProps(false, newRealPoint.colorScheme, false, ESegmentLabelOption.kNone),
+          ...getPointVisualProps(false, newRealPoint.colorScheme, false, ELabelOption.kNone),
           isPhantom: false,
           position
         }
@@ -1158,7 +1158,7 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
 
     function updatePolygonSegmentLabel(board: JXG.Board | undefined, polygon: JXG.Polygon,
-                                       points: [JXG.Point, JXG.Point], labelOption: ESegmentLabelOption) {
+                                       points: [JXG.Point, JXG.Point], labelOption: ELabelOption) {
       const polygonModel = self.getObject(polygon.id);
       if (isPolygonModel(polygonModel)) {
         polygonModel.setSegmentLabel([points[0].id, points[1].id], labelOption);

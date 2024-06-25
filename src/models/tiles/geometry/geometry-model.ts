@@ -4,7 +4,7 @@ import { kDefaultBoardModelInputProps, kGeometryTileType } from "./geometry-type
 import { uniqueId } from "../../../utilities/js-utils";
 import { typeField } from "../../../utilities/mst-utils";
 import { TileContentModel } from "../tile-content";
-import { ESegmentLabelOption, JXGPositionProperty } from "./jxg-changes";
+import { ELabelOption, JXGPositionProperty } from "./jxg-changes";
 import { kGeometryDefaultPixelsPerUnit } from "./jxg-types";
 import { findLeastUsedNumber } from "../../../utilities/math-utils";
 import { clueDataColorInfo } from "../../../utilities/color-utils";
@@ -155,12 +155,12 @@ export const PointModel = PositionedObjectModel
     snapToGrid: types.maybe(types.boolean),
     colorScheme: 0,
     labelOption: types.optional(
-      types.enumeration<ESegmentLabelOption>("LabelOption", Object.values(ESegmentLabelOption)),
-      ESegmentLabelOption.kNone)
+      types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption)),
+      ELabelOption.kNone)
   })
   .preProcessSnapshot(preProcessPositionInSnapshot)
   .actions(self => ({
-    setLabelOption(option: ESegmentLabelOption) {
+    setLabelOption(option: ELabelOption) {
       if (option !== self.labelOption) {
         self.labelOption = option;
       }
@@ -180,7 +180,7 @@ export const pointIdsFromSegmentId = (segmentId: string) => segmentId.split(":")
 
 export const PolygonSegmentLabelModel = types.model("PolygonSegmentLabel", {
   id: types.identifier, // {pt1Id}:{pt2Id}
-  option: types.enumeration<ESegmentLabelOption>("LabelOption", Object.values(ESegmentLabelOption))
+  option: types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption))
 });
 export interface PolygonSegmentLabelModelType extends Instance<typeof PolygonSegmentLabelModel> {}
 export interface PolygonSegmentLabelModelSnapshot extends SnapshotIn<typeof PolygonSegmentLabelModel> {}
@@ -228,12 +228,12 @@ export const PolygonModel = GeometryObjectModel
     replacePoints(ids: string[]) {
       self.points.replace(ids);
     },
-    setSegmentLabel(ptIds: [string, string], option: ESegmentLabelOption) {
+    setSegmentLabel(ptIds: [string, string], option: ELabelOption) {
       const id = segmentIdFromPointIds(ptIds);
       const value = { id, option };
       const foundIndex = self.labels?.findIndex(label => label.id === id);
       // remove any existing label if setting label to "none"
-      if (option === ESegmentLabelOption.kNone) {
+      if (option === ELabelOption.kNone) {
         if (self.labels && foundIndex != null && foundIndex >= 0) {
           self.labels.splice(foundIndex, 1);
         }

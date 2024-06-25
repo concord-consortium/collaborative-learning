@@ -9,7 +9,7 @@ import { useReadOnlyContext } from "../../document/read-only-context";
 import { useTileModelContext } from "../hooks/use-tile-model-context";
 import { GeometryTileMode } from "./geometry-types";
 import { isPointModel } from "../../../models/tiles/geometry/geometry-model";
-import { ESegmentLabelOption } from "../../../models/tiles/geometry/jxg-changes";
+import { ELabelOption } from "../../../models/tiles/geometry/jxg-changes";
 
 import AddImageSvg from "../../../clue/assets/icons/geometry/add-image-icon.svg";
 import CommentSvg from "../../../assets/icons/comment/comment.svg";
@@ -95,7 +95,7 @@ const LabelButton = observer(function LabelButton({name}: IToolbarButtonComponen
       name={name}
       title="Label/Value"
       disabled={!selectedPoint}
-      selected={labelOption && labelOption !== ESegmentLabelOption.kNone}
+      selected={labelOption && labelOption !== ELabelOption.kNone}
       onClick={handleClick}
     >
       <LabelSvg/>

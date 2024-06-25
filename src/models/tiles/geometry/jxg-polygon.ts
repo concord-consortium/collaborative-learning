@@ -3,7 +3,7 @@ import { each, filter, find, merge, remove, uniqueId, values } from "lodash";
 import { notEmpty } from "../../../utilities/js-utils";
 import { fillPropsForColorScheme, getPoint, getPolygon, strokePropsForColorScheme } from "./geometry-utils";
 import { getObjectById } from "./jxg-board";
-import { ESegmentLabelOption, JXGChange, JXGChangeAgent, JXGParentType } from "./jxg-changes";
+import { ELabelOption, JXGChange, JXGChangeAgent, JXGParentType } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { isLine, isPoint, isPolygon, isVertexAngle, isVisibleEdge } from "./jxg-types";
 import { wn_PnPoly } from "./soft-surfer-sunday";
@@ -258,8 +258,8 @@ function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
   const segment = getPolygonEdge(board, change.targetID as string, change.parents as string[]);
   if (segment) {
     const labelOption = !Array.isArray(change.properties) && change.properties?.labelOption;
-    const clientLabelOption = (labelOption === ESegmentLabelOption.kLabel) ||
-                              (labelOption === ESegmentLabelOption.kLength)
+    const clientLabelOption = (labelOption === ELabelOption.kLabel) ||
+                              (labelOption === ELabelOption.kLength)
                                 ? labelOption
                                 : null;
     const clientOriginalName = segment.getAttribute("clientOriginalName");

@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useState } from "react";
-import { ESegmentLabelOption } from "../../../models/tiles/geometry/jxg-changes";
+import { ELabelOption } from "../../../models/tiles/geometry/jxg-changes";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { canSupportVertexAngle, getVertexAngle } from "../../../models/tiles/geometry/jxg-vertex-angle";
 
@@ -53,24 +53,24 @@ const Content = function (
     <fieldset className="radio-button-set">
       <LabelRadioButton
         display="None"
-        label={ESegmentLabelOption.kNone}
+        label={ELabelOption.kNone}
         checkedLabel={labelOption}
         setLabelOption={setLabelOption}
       />
       <LabelRadioButton
         display="Label:"
-        label={ESegmentLabelOption.kLabel}
+        label={ELabelOption.kLabel}
         checkedLabel={labelOption}
         setLabelOption={setLabelOption}
       >
         <input type="text" className="name-input"
-          disabled={labelOption !== ESegmentLabelOption.kLabel}
+          disabled={labelOption !== ELabelOption.kLabel}
           value={pointName}
-          onChange={(e) => { console.log('set', e.target.value); onNameChange(e.target.value); }} />
+          onChange={(e) => { onNameChange(e.target.value); }} />
       </LabelRadioButton>
       <LabelRadioButton
         display="x, y coordinates"
-        label={ESegmentLabelOption.kLength}
+        label={ELabelOption.kLength}
         checkedLabel={labelOption}
         setLabelOption={setLabelOption}
       />
@@ -93,12 +93,12 @@ const Content = function (
 interface IProps {
   board: JXG.Board;
   point: JXG.Point;
-  onAccept: (point: JXG.Point, labelOption: ESegmentLabelOption, name: string, hasAngle: boolean) => void;
+  onAccept: (point: JXG.Point, labelOption: ELabelOption, name: string, hasAngle: boolean) => void;
   onClose: () => void;
 }
 
 export const useLabelPointDialog = ({ board, point, onAccept, onClose }: IProps) => {
-  const [initialLabelOption] = useState(point.getAttribute("clientLabelOption") || ESegmentLabelOption.kNone);
+  const [initialLabelOption] = useState(point.getAttribute("clientLabelOption") || ELabelOption.kNone);
   const [initialPointName] = useState(point.getAttribute("clientName") || "");
   const [labelOption, setLabelOption] = useState(initialLabelOption);
   const [pointName, setPointName] = useState(initialPointName);

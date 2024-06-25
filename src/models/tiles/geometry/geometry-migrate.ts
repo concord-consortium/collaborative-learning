@@ -10,7 +10,7 @@ import {
   PolygonModel, PolygonModelType, PolygonSegmentLabelModelSnapshot, VertexAngleModel, VertexAngleModelType
 } from "./geometry-model";
 import {
-  ESegmentLabelOption, JXGChange, JXGCoordPair, JXGImageParents, JXGObjectType, JXGProperties
+  ELabelOption, JXGChange, JXGCoordPair, JXGImageParents, JXGObjectType, JXGProperties
 } from "./jxg-changes";
 import { getMovableLinePointIds, kGeometryDefaultHeight, kGeometryDefaultWidth } from "./jxg-types";
 import { kDefaultBoardModelOutputProps, kGeometryTileType } from "./geometry-types";
@@ -493,7 +493,7 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
 
   const exportPolygon = (id: string, isLast: boolean) => {
     const _changes = objectInfoMap[id].changes;
-    const labelMap = new Map<string, { points: string[], option: ESegmentLabelOption }>();
+    const labelMap = new Map<string, { points: string[], option: ELabelOption }>();
     let props: any = {};
     _changes.forEach(change => {
       const { parents, properties } = change;
