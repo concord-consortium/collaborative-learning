@@ -107,6 +107,9 @@ class GeometryToolTile {
     getGraphPolygon(){
         return cy.get('.single-workspace .geometry-content.editable polygon');
     }
+    getPolygonColor(){
+      return cy.get('.single-workspace .geometry-content.editable polygon')
+    }
     addPointToGraph(x,y){
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);

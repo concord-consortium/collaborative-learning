@@ -33,37 +33,6 @@ context('Geometry Tool', function () {
     geometryToolTile.addPointToGraph(0, 0);
     geometryToolTile.getGraphPointCoordinates().should('exist');
 
-    // Creating Polygons with Different Types of Points:
-
-    // The system should allow the creation of polygons using all new points.
-    // The system should support creating polygons with some points sourced from a table.
-    // The system should enable creating polygons with points that are already part of other polygons.
-
-      //     Creating Polygons with Different Types of Points:
-
-      // The system should allow the creation of polygons using all new points.
-      // The system should support creating polygons with some points sourced from a table.
-      // The system should enable creating polygons with points that are already part of other polygons.
-
-      // Inserting Non-Existing Points:
-
-      // The system should allow the insertion of non-existing points into polygons.
-      // Polygon Color Assignment:
-
-      // Polygons should inherit the color of their first point. By default, this is blue, but it can be a different color if starting from a linked point (e.g., a point from table data).
-      // Closing Polygons:
-
-      // Clicking a point in the current polygon being drawn, not just the first point, should close the polygon. This may result in some points being "liberated" (or "orphaned") since they are no longer part of the polygon.
-      // Removing Polygons:
-
-      // Clicking the same point twice in a row should remove the polygon, leaving its points. This behavior provides a way to remove a polygon without deleting points.
-      // Polygon Selection in Overlapping Areas:
-
-      // Clicking inside overlapping polygons should select the one created last (and therefore drawn on top), which might appear arbitrary to the user.
-      // Movement and Rotation Restrictions:
-
-      // Polygons that contain linked points cannot be moved or rotated.
-      // When two polygons are linked together by one or more shared points, neither polygon can be rotated. If they don't contain linked points, though, they can be moved.
     cy.log("add points to a geometry");
     canvas.createNewExtraDocumentFromFileMenu(ptsDoc, "my-work");
     clueCanvas.addTile('geometry');
@@ -141,7 +110,7 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphAxisTickLabels().last().should("have.text", "15");
   });
 
-  it('works in all three modes', () => {
+  it.only('works in all three modes', () => {
     beforeTest();
     clueCanvas.addTile('geometry');
     geometryToolTile.getGraph().should("exist");
@@ -207,6 +176,7 @@ context('Geometry Tool', function () {
     geometryToolTile.addPointToGraph(5, 5); // click first point again to close polygon.
     geometryToolTile.getGraphPoint().should("have.length", 4);
     geometryToolTile.getGraphPolygon().should("have.length", 1);
+    geometryToolTile.getPolygonColor().should('have.attr', 'fill', '#0069ff');
 
     // Duplicate polygon
     clueCanvas.clickToolbarButton('geometry', 'select');
@@ -224,6 +194,44 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPolygon().should("have.length", 1);
     geometryToolTile.getGraphPoint().should("have.length", 3);
     geometryToolTile.getSelectedGraphPoint().should("have.length", 0);
+
+
+
+    //geometryToolTile.getSelectedGraphPoint().should("have.length", 3);
+
+
+
+    // Creating Polygons with Different Types of Points:
+
+    // [x] The system should allow the creation of polygons using all new points.
+    // [geometry-table-integration] The system should support creating polygons with some points sourced from a table.
+    // []The system should enable creating polygons with points that are already part of other polygons.
+
+      //     Creating Polygons with Different Types of Points:
+
+      // The system should allow the creation of polygons using all new points.
+      // The system should support creating polygons with some points sourced from a table.
+      // The system should enable creating polygons with points that are already part of other polygons.
+
+      // Inserting Non-Existing Points:
+
+      // The system should allow the insertion of non-existing points into polygons.
+      // Polygon Color Assignment:
+
+      // Polygons should inherit the color of their first point. By default, this is blue, but it can be a different color if starting from a linked point (e.g., a point from table data).
+      // Closing Polygons:
+
+      // Clicking a point in the current polygon being drawn, not just the first point, should close the polygon. This may result in some points being "liberated" (or "orphaned") since they are no longer part of the polygon.
+      // Removing Polygons:
+
+      // Clicking the same point twice in a row should remove the polygon, leaving its points. This behavior provides a way to remove a polygon without deleting points.
+      // Polygon Selection in Overlapping Areas:
+
+      // Clicking inside overlapping polygons should select the one created last (and therefore drawn on top), which might appear arbitrary to the user.
+      // Movement and Rotation Restrictions:
+
+      // Polygons that contain linked points cannot be moved or rotated.
+      // When two polygons are linked together by one or more shared points, neither polygon can be rotated. If they don't contain linked points, though, they can be moved.
   });
 
   it('will test Geometry tile undo redo', () => {
