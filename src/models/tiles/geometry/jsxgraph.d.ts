@@ -62,6 +62,10 @@ declare namespace JXG {
     Statistics: Statistics;
   }
 
+  interface Polygon {
+    borders: Line[];
+  }
+
   interface Text {
     plaintext: string; // Not documented
   }

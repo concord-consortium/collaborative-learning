@@ -21,11 +21,6 @@ import { TileModel, ITileModel } from "../tile-model";
 import { registerTileTypes } from "../../../register-tile-types";
 registerTileTypes(["Geometry"]);
 
-// These are currently added to all created points
-const defaultParams = {
-  snapToGrid: true, snapSizeX: 0.1, snapSizeY: 0.1
-};
-
 // Need to mock this so the placeholder that is added to the cache
 // has dimensions
 jest.mock( "../../../utilities/image-utils", () => ({
@@ -133,7 +128,7 @@ describe("GeometryContent", () => {
     function onCreate(elt: JXG.GeometryElement) {
       // handle a point
     }
-    const board = content.initializeBoard(divId, onCreate) as JXG.Board;
+    const board = content.initializeBoard(divId, onCreate, (b) => {}) as JXG.Board;
     content.resizeBoard(board, 200, 200);
     content.updateScale(board, 0.5);
     return board;
@@ -325,6 +320,9 @@ describe("GeometryContent", () => {
     expect(p1.getAttribute("fixed")).toBe(true);
     content.updateObjects(board, "foo", { });
     content.applyChange(board, { operation: "update", target: "point" });
+    content.removeObjects(board, p1Id); // should not be removed because it is "fixed"
+    expect(board.objects[p1Id]).toBeDefined();
+    content.updateObjects(board, [p1Id], { fixed: false });
     content.removeObjects(board, p1Id);
     expect(board.objects[p1Id]).toBeUndefined();
     const p3: JXG.Point = content.addPoint(board, [2, 2]) as JXG.Point;

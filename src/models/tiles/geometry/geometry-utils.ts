@@ -1,5 +1,5 @@
 import { values } from "lodash";
-import { Instance } from "mobx-state-tree";
+import { Instance, SnapshotOut } from "mobx-state-tree";
 import { getAssociatedPolygon } from "./jxg-polygon";
 import { isGeometryElement, isPoint, isPolygon } from "./jxg-types";
 import { JXGObjectType } from "./jxg-changes";
@@ -9,6 +9,11 @@ import { GeometryBaseContentModel } from "./geometry-model";
 import { getTileIdFromContent } from "../tile-model";
 import { isFiniteNumber } from "../../../utilities/math-utils";
 import { clueDataColorInfo } from "../../../utilities/color-utils";
+import { GeometryContentModel } from "./geometry-content";
+import { SharedModelEntrySnapshotType } from "../../document/shared-model-entry";
+import { replaceJsonStringsWithUpdatedIds, UpdatedSharedDataSetIds } from "../../shared/shared-data-set";
+import { IClueObjectSnapshot } from "../../annotations/clue-object";
+import { linkedPointId, splitLinkedPointId } from "../table-link-types";
 
 export function copyCoords(coords: JXG.Coords) {
   const usrCoords = coords.usrCoords;
@@ -196,4 +201,36 @@ export function strokePropsForColorScheme(colorScheme: number) {
     strokeColor: spec.color,
     highlightStrokeColor: spec.color
   };
+}
+
+// The geometry model uses IDs of the Attributes and Cases in the shared dataset
+// when listing the vertices of polygons formed with these points.  These need
+// to be updated to the new values when a tile is copied.
+export function updateGeometryContentWithNewSharedModelIds(
+  content: SnapshotOut<typeof GeometryContentModel>,
+  sharedDataSetEntries: SharedModelEntrySnapshotType[],
+  updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
+) {
+  return replaceJsonStringsWithUpdatedIds(content, '[":]', ...Object.values(updatedSharedModelMap));
+}
+
+// Update an annotated object with new IDs after copy.
+// Geometry object types are: point, linkedPoint, segment, polygon
+// Of these, only linkedPoint needs to be modified
+export function updateGeometryObjectWithNewSharedModelIds(
+    object: IClueObjectSnapshot,
+    sharedDataSetEntries: SharedModelEntrySnapshotType[],
+    updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>) {
+  if (object.objectType === "linkedPoint") {
+    const [caseId, attrId] = splitLinkedPointId(object.objectId);
+    // The ID values don't distinguish which shared model they came from, so we loop through the options.
+    for (const updates of Object.values(updatedSharedModelMap)) {
+      if (caseId in updates.caseIdMap && attrId in updates.attributeIdMap) {
+        object.objectId = linkedPointId(updates.caseIdMap[caseId], updates.attributeIdMap[attrId]);
+        return object;
+      }
+    }
+    console.warn("Could not find new IDs for object:", object);
+  }
+  return object;
 }

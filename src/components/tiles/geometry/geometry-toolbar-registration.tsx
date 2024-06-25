@@ -154,7 +154,7 @@ const CommentButton = observer(function CommentButton({name}: IToolbarButtonComp
 
 const DeleteButton = observer(function DeleteButton({name}: IToolbarButtonComponentProps) {
   const { content, board, handlers } = useGeometryTileContext();
-  const disableDelete = board && !content?.getDeletableSelectedIds(board).length;
+  const disableDelete = !board || !content?.hasDeletableSelection(board);
 
   return (
     <TileToolbarButton
