@@ -68,18 +68,21 @@ export function setPropertiesForLabelOption(point: JXG.Point) {
   switch (labelOption) {
     case ELabelOption.kLength:
       point.setAttribute({
+        showInfobox: false,
         withLabel: true,
         name() { return `(${point.X().toFixed(2)}, ${point.Y().toFixed(2)})`; }
       });
       break;
     case ELabelOption.kLabel:
       point.setAttribute({
+        showInfobox: true,
         withLabel: true,
         name: point.getAttribute("clientName")
       });
       break;
     default:
       point.setAttribute({
+        showInfobox: true,
         withLabel: false
       });
   }
