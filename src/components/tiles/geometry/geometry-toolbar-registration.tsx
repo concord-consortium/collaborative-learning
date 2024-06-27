@@ -8,7 +8,6 @@ import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking
 import { useReadOnlyContext } from "../../document/read-only-context";
 import { useTileModelContext } from "../hooks/use-tile-model-context";
 import { GeometryTileMode } from "./geometry-types";
-import { isPointModel } from "../../../models/tiles/geometry/geometry-model";
 import { ELabelOption } from "../../../models/tiles/geometry/jxg-changes";
 
 import AddImageSvg from "../../../clue/assets/icons/geometry/add-image-icon.svg";
@@ -83,8 +82,8 @@ const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButton
 const LabelButton = observer(function LabelButton({name}: IToolbarButtonComponentProps) {
   const { content, board, handlers } = useGeometryTileContext();
   const selectedPoint = board && content?.getOneSelectedPoint(board);
-  const pointModel = selectedPoint && content?.getObject(selectedPoint.id);
-  const labelOption = isPointModel(pointModel) && pointModel.labelOption;
+  const labelProps = selectedPoint && content?.getPointLabelProps(selectedPoint.id);
+  const selected = labelProps && labelProps?.labelOption !== ELabelOption.kNone;
 
   function handleClick() {
     handlers?.handleLabelDialog();
@@ -95,7 +94,7 @@ const LabelButton = observer(function LabelButton({name}: IToolbarButtonComponen
       name={name}
       title="Label/Value"
       disabled={!selectedPoint}
-      selected={labelOption && labelOption !== ELabelOption.kNone}
+      selected={selected}
       onClick={handleClick}
     >
       <LabelSvg/>

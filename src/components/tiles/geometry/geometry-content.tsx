@@ -802,8 +802,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   updateSharedPoints(board: JXG.Board) {
     this.applyChange(() => {
       let pointsAdded = false;
+      const content = this.getContent();
+      const data = content.getLinkedPointsData();
       const remainingIds = getAllLinkedPoints(board);
-      const data = this.getContent().getLinkedPointsData();
       for (const [link, points] of data.entries()) {
         // Loop through points, adding new ones and updating any that need to be moved.
         for (let i=0; i<points.coords.length; i++) {
@@ -811,7 +812,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           const existingIndex = remainingIds.indexOf(id);
           if (existingIndex < 0) {
             // Doesn't exist, create the point
-            const pt = createLinkedPoint(board, points.coords[i], points.properties[i], { tileIds: [link] });
+            const labelProperties = content.getPointLabelProps(id);
+            const allProps = {
+              ...points.properties[i],
+              name: labelProperties.name,
+              clientLabelOption: labelProperties.labelOption
+            };
+            const pt = createLinkedPoint(board, points.coords[i], allProps, { tileIds: [link] });
             this.handleCreatePoint(pt);
             pointsAdded = true;
           } else {
@@ -900,17 +907,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     point._set("clientName", name);
     setPropertiesForLabelOption(point);
     this.applyChange(() => {
-      const pointModel = this.getContent().getObject(point.id);
-      if (isPointModel(pointModel)) {
-        pointModel.setLabelOption(labelOption);
-        pointModel.setName(name);
-        const vertexAngle = getVertexAngle(point);
-        if (vertexAngle && !angleLabel) {
-          this.handleUnlabelVertexAngle(vertexAngle);
-        }
-        if (!vertexAngle && angleLabel) {
-          this.handleLabelVertexAngle(point);
-        }
+      this.getContent().setPointLabelProps(point.id, name, labelOption);
+      const vertexAngle = getVertexAngle(point);
+      if (vertexAngle && !angleLabel) {
+        this.handleUnlabelVertexAngle(vertexAngle);
+      }
+      if (!vertexAngle && angleLabel) {
+        this.handleLabelVertexAngle(point);
       }
     });
   };
