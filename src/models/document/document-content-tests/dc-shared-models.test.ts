@@ -68,7 +68,7 @@ describe("DocumentContentModel -- shared Models --", () => {
       tiles: [
         [
           { content: { type: "Table", columnWidths } },
-          { content: { type: "Geometry", objects: [] } }
+          { content: { type: "Geometry", objects: {}, linkedAttributeColors: {} } }
         ]
       ],
       sharedModels: [
