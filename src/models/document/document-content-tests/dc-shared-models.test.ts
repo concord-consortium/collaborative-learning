@@ -564,29 +564,29 @@ Object {
 Object {
   "annotations": Object {},
   "rowMap": Object {
-    "testid-14": Object {
+    "testid-48": Object {
       "height": undefined,
-      "id": "testid-14",
+      "id": "testid-48",
       "isSectionHeader": false,
       "sectionId": undefined,
       "tiles": Array [
         Object {
-          "tileId": "testid-12",
+          "tileId": "testid-46",
           "widthPct": undefined,
         },
         Object {
-          "tileId": "testid-13",
+          "tileId": "testid-47",
           "widthPct": undefined,
         },
       ],
     },
   },
   "rowOrder": Array [
-    "testid-14",
+    "testid-48",
   ],
   "sharedModelMap": Object {
-    "testid-9": Object {
-      "provider": "testid-12",
+    "testid-43": Object {
+      "provider": "testid-46",
       "sharedModel": Object {
         "dataSet": Object {
           "attributes": Array [
@@ -598,7 +598,7 @@ Object {
                 "display": undefined,
               },
               "hidden": false,
-              "id": "testid-10",
+              "id": "testid-44",
               "name": "x",
               "precision": undefined,
               "sourceID": undefined,
@@ -618,7 +618,7 @@ Object {
                 "display": undefined,
               },
               "hidden": false,
-              "id": "testid-11",
+              "id": "testid-45",
               "name": "y",
               "precision": undefined,
               "sourceID": undefined,
@@ -633,37 +633,37 @@ Object {
           ],
           "cases": Array [
             Object {
-              "__id__": "caseid-0",
+              "__id__": "caseid-6",
             },
             Object {
-              "__id__": "caseid-1",
+              "__id__": "caseid-7",
             },
             Object {
-              "__id__": "caseid-2",
+              "__id__": "caseid-8",
             },
           ],
-          "id": "testid-8",
+          "id": "testid-42",
           "name": "Demo Dataset",
           "sourceID": undefined,
         },
-        "id": "testid-9",
-        "providerId": "testid-12",
+        "id": "testid-43",
+        "providerId": "testid-46",
         "type": "SharedDataSet",
       },
       "tiles": Array [
-        "testid-12",
-        "testid-13",
+        "testid-46",
+        "testid-47",
       ],
     },
   },
   "tileMap": Object {
-    "testid-12": Object {
+    "testid-46": Object {
       "content": Object {
         "columnWidths": Object {},
         "importedDataSet": Object {
           "attributes": Array [],
           "cases": Array [],
-          "id": "testid-3",
+          "id": "testid-37",
           "name": undefined,
           "sourceID": undefined,
         },
@@ -671,10 +671,10 @@ Object {
         "type": "Table",
       },
       "display": undefined,
-      "id": "testid-12",
+      "id": "testid-46",
       "title": undefined,
     },
-    "testid-13": Object {
+    "testid-47": Object {
       "content": Object {
         "bgImage": undefined,
         "board": Object {
@@ -699,7 +699,7 @@ Object {
         "type": "Geometry",
       },
       "display": undefined,
-      "id": "testid-13",
+      "id": "testid-47",
       "title": undefined,
     },
   },
