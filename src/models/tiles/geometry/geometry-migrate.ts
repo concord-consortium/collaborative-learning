@@ -238,6 +238,12 @@ function getDependenciesFromChange(change: JXGChange, objectInfoMap: Record<stri
   return [];
 }
 
+//
+// The following exportGeometry* methods are used only (a) in tests and (b) when
+// importing old legacy Geometry content stored as a list of changes. At some
+// point it would be good to do a content migration and delete this code.
+//
+
 export const exportGeometryJson = (changes: string[], options?: ITileExportOptions) => {
   return exportGeometry(changes, { ...options, json: true }) as string;
 };

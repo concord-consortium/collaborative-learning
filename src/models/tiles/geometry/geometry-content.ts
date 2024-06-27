@@ -1,13 +1,14 @@
 import { castArray, difference, each, size as _size, union } from "lodash";
 import { reaction } from "mobx";
-import { addDisposer, applySnapshot, detach, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { addDisposer, applySnapshot, detach, Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
+import stringify from "json-stringify-pretty-compact";
 import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { ITableLinkProperties, linkedPointId, splitLinkedPointId } from "../table-link-types";
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileContentAPIActions, tileContentAPIViews } from "../tile-model-hooks";
-import { convertModelToChanges, exportGeometryJson, getGeometryBoardChange } from "./geometry-migrate";
+import { convertModelToChanges, getGeometryBoardChange } from "./geometry-migrate";
 import { preprocessImportFormat } from "./geometry-import";
 import {
   cloneGeometryObject, CommentModel, CommentModelType, GeometryBaseContentModel, GeometryObjectModelType,
@@ -308,12 +309,8 @@ export const GeometryContentModel = GeometryBaseContentModel
       return filterBoardObjects(board, obj => self.isSelected(obj.id));
     },
     exportJson(options?: ITileExportOptions) {
-      const changes = [
-        getGeometryBoardChange(self, { addBuffers: false, includeUnits: false}),
-        ...convertModelToChanges(self)
-      ];
-      const jsonChanges = changes.map(change => JSON.stringify(change));
-      return exportGeometryJson(jsonChanges, options);
+      const snapshot = getSnapshot(self);
+      return stringify(snapshot, {maxLength: 200});
     }
   }))
   .views(self => tileContentAPIViews({
@@ -671,7 +668,8 @@ export const GeometryContentModel = GeometryBaseContentModel
         id: uniqueId(),
         colorScheme: self.newPointColorScheme,
         isPhantom: true,
-        clientLabelOption: ELabelOption.kNone
+        clientLabelOption: ELabelOption.kNone,
+        snapToGrid: true
       };
       const pointModel = PointModel.create({ x: parents[0], y: parents[1], ...props });
       self.phantomPoint = pointModel;
@@ -788,8 +786,9 @@ export const GeometryContentModel = GeometryBaseContentModel
     function realizePhantomPoint(board: JXG.Board, position: JXGCoordPair, makePolygon: boolean):
         { point: JXG.Point | undefined, polygon: JXG.Polygon | undefined } {
       // Transition the current phantom point into a real point.
+      if (!self.phantomPoint) return { point: undefined, polygon: undefined };
+      self.phantomPoint.setPosition(position);
       const newRealPoint = self.phantomPoint;
-      if (!newRealPoint) return { point: undefined, polygon: undefined };
       detach(newRealPoint);
       self.addObjectModel(newRealPoint);
 

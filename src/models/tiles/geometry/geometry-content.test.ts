@@ -118,6 +118,12 @@ function buildPolygon(board: JXG.Board, content: GeometryContentModelType,
   return { polygon, points };
 }
 
+function exportAndSimplifyIds(content: GeometryContentModelType) {
+  return content.exportJson()
+    .replaceAll(/testid-[a-zA-Z0-9_-]+/g, "testid")
+    .replaceAll(/jxgBoard[a-zA-Z0-9_-]+/g, "jxgid");
+}
+
 describe("GeometryContent", () => {
 
   const divId = "1234";
@@ -366,6 +372,11 @@ describe("GeometryContent", () => {
     expect(content.getDependents([points[2].id])).toEqual([points[2].id, polygonId]);
     expect(content.getDependents([points[2].id||''], { required: true })).toEqual([points[2].id]);
 
+    expect(points.length).toEqual(3);
+    expect(points[0].coords.usrCoords).toEqual([1, 1, 1]);
+    expect(points[1].coords.usrCoords).toEqual([1, 3, 3]);
+    expect(points[2].coords.usrCoords).toEqual([1, 5, 1]);
+
     const ptInPolyCoords = new JXG.Coords(JXG.COORDS_BY_USER, [3, 2], board);
     const [, ptInScrX, ptInScrY] = ptInPolyCoords.scrCoords;
     expect(polygon && isPointInPolygon(ptInScrX, ptInScrY, polygon)).toBe(true);
@@ -462,8 +473,7 @@ describe("GeometryContent", () => {
     // update comment text
     content.updateObjects(board, comment.id, { position: [5, 5], text: "new" });
     expect(content.lastObject).toEqual(
-      // This used to be "x:4". Not sure why this changed.
-      { id: comment.id, type: "comment", anchors: [polygon!.id], x: 4.5, y: 4, text: "new" });
+      { id: comment.id, type: "comment", anchors: [polygon!.id], x: 4, y: 4, text: "new" });
 
     destroyContentAndBoard(content, board);
   });
@@ -849,12 +859,12 @@ describe("GeometryContent", () => {
     expect(content.getSelectedIds(board)).toEqual([p0.id]);
     expect(content.copySelection(board))
       .toEqualWithUniqueIds([PointModel.create(
-        { id: p0.id, x: 0, y: 0, colorScheme: 0 })]);
+        { id: p0.id, x: 0, y: 0, snapToGrid:true, colorScheme: 0 })]);
 
     // copies comments along with selected points
     const [comment] = content.addComment(board, p0.id, "p0 comment") || [];
     expect(content.copySelection(board)).toEqualWithUniqueIds([
-      PointModel.create({ id: p0.id, x: 0, y: 0, colorScheme: 0 }),
+      PointModel.create({ id: p0.id, x: 0, y: 0,  snapToGrid: true, colorScheme: 0 }),
       CommentModel.create({ id: comment.id, anchors: [p0.id], text: "p0 comment"})
     ]);
     content.removeObjects(board, [comment.id]);
@@ -863,7 +873,7 @@ describe("GeometryContent", () => {
     // content.selectObjects(board, poly.id);
     expect(content.getSelectedIds(board)).toEqual([p0.id]);
     expect(content.copySelection(board))
-      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, colorScheme: 0 })]);
+      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, snapToGrid: true, colorScheme: 0 })]);
 
     // For comparison purposes, we need the polygon to be after the points in the array of objects
     const origObjects = Array.from(content.objects.values()).sort((a,b)=>a.type.localeCompare(b.type));
@@ -906,12 +916,12 @@ describe("GeometryContent", () => {
     content.selectObjects(board, p0.id);
     expect(content.getSelectedIds(board)).toEqual([p0.id]);
     expect(content.copySelection(board))
-      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, colorScheme: 0 })]);
+      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, snapToGrid: true, colorScheme: 0 })]);
 
     // copies comments along with selected points
     const [comment] = content.addComment(board, p0.id, "p0 comment") || [];
     expect(content.copySelection(board)).toEqualWithUniqueIds([
-      PointModel.create({ id: p0.id, x: 0, y: 0, colorScheme: 0 }),
+      PointModel.create({ id: p0.id, x: 0, y: 0,  snapToGrid: true, colorScheme: 0 }),
       CommentModel.create({ id: comment.id, anchors: [p0.id], text: "p0 comment"})
     ]);
     content.removeObjects(board, [comment.id]);
@@ -920,7 +930,7 @@ describe("GeometryContent", () => {
     // content.selectObjects(board, poly.id);
     expect(content.getSelectedIds(board)).toEqual([p0.id]);
     expect(content.copySelection(board))
-      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, colorScheme: 0 })]);
+      .toEqualWithUniqueIds([PointModel.create({ id: p0.id, x: 0, y: 0, snapToGrid: true, colorScheme: 0 })]);
 
     // For comparison purposes, we need the polygon to be after the points in the array of objects
     const origObjects = Array.from(content.objects.values()).sort((a,b)=>a.type.localeCompare(b.type));
@@ -963,4 +973,95 @@ describe("GeometryContent", () => {
     expect(content.batchChangeCount).toBe(0);
     expect(content.isUserResizable).toBe(true);
   });
+
+  it("exports basic content properly", () => {
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "p1", x: 1, y: 1 }));
+      _content.addObjectModel(PointModel.create({ id: "p2", x: 3, y: 3, colorScheme: 1, snapToGrid: false }));
+      _content.addObjectModel(PointModel.create({ id: "p3", x: 5, y: 1, name: "A", labelOption: "label" }));
+    });
+
+    console.log(getSnapshot(content));
+
+    expect(exportAndSimplifyIds(content)).toMatchInlineSnapshot(`
+"{
+  \\"type\\": \\"Geometry\\",
+  \\"board\\": {\\"xAxis\\": {\\"name\\": \\"x\\", \\"label\\": \\"x\\", \\"min\\": -2, \\"unit\\": 18.3, \\"range\\": 26.229508196721312}, \\"yAxis\\": {\\"name\\": \\"y\\", \\"label\\": \\"y\\", \\"min\\": -1, \\"unit\\": 18.3, \\"range\\": 17.486338797814206}},
+  \\"objects\\": {
+    \\"p1\\": {\\"type\\": \\"point\\", \\"id\\": \\"p1\\", \\"x\\": 1, \\"y\\": 1, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
+    \\"p2\\": {\\"type\\": \\"point\\", \\"id\\": \\"p2\\", \\"x\\": 3, \\"y\\": 3, \\"snapToGrid\\": false, \\"colorScheme\\": 1, \\"labelOption\\": \\"none\\"},
+    \\"p3\\": {\\"type\\": \\"point\\", \\"id\\": \\"p3\\", \\"x\\": 5, \\"y\\": 1, \\"name\\": \\"A\\", \\"colorScheme\\": 0, \\"labelOption\\": \\"label\\"}
+  },
+  \\"linkedAttributeColors\\": {}
+}"
+`);
+  });
+
+  it("exports polygons and vertexangles correctly", () => {
+    const { content, board } = createContentAndBoard();
+    const { points, polygon } = buildPolygon(board, content, [[0, 0], [1, 0], [0, 1]]);
+    console.log(getSnapshot(content));
+    content.addVertexAngle(board, [points[0].id, points[1].id, points[2].id]);
+    console.log(getSnapshot(content));
+    expect(exportAndSimplifyIds(content)).
+toMatchInlineSnapshot(`
+"{
+  \\"type\\": \\"Geometry\\",
+  \\"board\\": {\\"xAxis\\": {\\"name\\": \\"x\\", \\"label\\": \\"x\\", \\"min\\": -2, \\"unit\\": 18.3, \\"range\\": 26.229508196721312}, \\"yAxis\\": {\\"name\\": \\"y\\", \\"label\\": \\"y\\", \\"min\\": -1, \\"unit\\": 18.3, \\"range\\": 17.486338797814206}},
+  \\"objects\\": {
+    \\"testid\\": {\\"type\\": \\"point\\", \\"id\\": \\"testid\\", \\"x\\": 0, \\"y\\": 0, \\"snapToGrid\\": true, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
+    \\"jxgid\\": {\\"type\\": \\"polygon\\", \\"id\\": \\"jxgid\\", \\"points\\": [\\"testid\\", \\"testid\\", \\"testid\\"], \\"colorScheme\\": 0},
+    \\"testid\\": {\\"type\\": \\"point\\", \\"id\\": \\"testid\\", \\"x\\": 1, \\"y\\": 0, \\"snapToGrid\\": true, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
+    \\"testid\\": {\\"type\\": \\"point\\", \\"id\\": \\"testid\\", \\"x\\": 0, \\"y\\": 1, \\"snapToGrid\\": true, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
+    \\"testid\\": {\\"type\\": \\"vertexAngle\\", \\"id\\": \\"testid\\", \\"points\\": [\\"testid\\", \\"testid\\", \\"testid\\"]}
+  },
+  \\"linkedAttributeColors\\": {}
+}"
+`);
+  });
+
+  it("exports movable lines and comments correctly", () => {
+    const { content, board } = createContentAndBoard();
+    content.addMovableLine(board, [[1, 1], [5, 5]], { id: "ml" });
+    const line = board.objects.ml as JXG.Line;
+    expect(isMovableLine(line)).toBe(true);
+    const [comment] = content.addComment(board, "ml")!;
+
+    expect(exportAndSimplifyIds(content)).
+toMatchInlineSnapshot(`
+"{
+  \\"type\\": \\"Geometry\\",
+  \\"board\\": {\\"xAxis\\": {\\"name\\": \\"x\\", \\"label\\": \\"x\\", \\"min\\": -2, \\"unit\\": 18.3, \\"range\\": 26.229508196721312}, \\"yAxis\\": {\\"name\\": \\"y\\", \\"label\\": \\"y\\", \\"min\\": -1, \\"unit\\": 18.3, \\"range\\": 17.486338797814206}},
+  \\"objects\\": {
+    \\"ml\\": {
+      \\"type\\": \\"movableLine\\",
+      \\"id\\": \\"ml\\",
+      \\"p1\\": {\\"type\\": \\"point\\", \\"id\\": \\"ml-point1\\", \\"x\\": 1, \\"y\\": 1, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
+      \\"p2\\": {\\"type\\": \\"point\\", \\"id\\": \\"ml-point2\\", \\"x\\": 5, \\"y\\": 5, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
+      \\"colorScheme\\": 0
+    },
+    \\"testid\\": {\\"type\\": \\"comment\\", \\"id\\": \\"testid\\", \\"anchors\\": [\\"ml\\"]}
+  },
+  \\"linkedAttributeColors\\": {}
+}"
+`);
+  });
+
+  it("exports background image correctly", () => {
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.setBackgroundImage(
+        ImageModel.create({ id: "img", url: placeholderImage, x: 0, y: 0, width: 5, height: 5 }));
+    });
+
+    expect(exportAndSimplifyIds(content)).toMatchInlineSnapshot(`
+"{
+  \\"type\\": \\"Geometry\\",
+  \\"board\\": {\\"xAxis\\": {\\"name\\": \\"x\\", \\"label\\": \\"x\\", \\"min\\": -2, \\"unit\\": 18.3, \\"range\\": 26.229508196721312}, \\"yAxis\\": {\\"name\\": \\"y\\", \\"label\\": \\"y\\", \\"min\\": -1, \\"unit\\": 18.3, \\"range\\": 17.486338797814206}},
+  \\"bgImage\\": {\\"type\\": \\"image\\", \\"id\\": \\"img\\", \\"x\\": 0, \\"y\\": 0, \\"url\\": \\"test-file-stub\\", \\"width\\": 5, \\"height\\": 5},
+  \\"objects\\": {},
+  \\"linkedAttributeColors\\": {}
+}"
+`);
+  });
+
 });
