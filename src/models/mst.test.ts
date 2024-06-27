@@ -923,4 +923,102 @@ describe("mst", () => {
     const rehydrated = JSON.parse(snapshotString);
     expect(rehydrated).toEqual({propValue: null});
   });
+
+  test("preProcessSnapshot gets called with undefined in some cases", () => {
+    let snapshotPassedToPreProcess = "Initial Value" as any;
+    const TestObject = types
+      .model("TestObject", {
+        prop: types.optional(types.string, "default")
+      })
+      .preProcessSnapshot(snapshot => {
+        snapshotPassedToPreProcess = snapshot;
+        return snapshot;
+      });
+
+    const TestContainer = types.
+      model("TestContainer", {
+        child: types.maybe(TestObject)
+      });
+
+    const container1 = TestContainer.create({});
+    expect(snapshotPassedToPreProcess).toBeUndefined();
+    expect(container1.child).toBeUndefined();
+
+    const container2 = TestContainer.create({child: {prop: "value"}});
+    expect(snapshotPassedToPreProcess).toEqual({prop: "value"});
+    expect(container2.child?.prop).toBe("value");
+
+    const container3 = TestContainer.create({child: {}});
+    expect(snapshotPassedToPreProcess).toEqual({});
+    expect(container3.child?.prop).toBe("default");
+  });
+
+  test("preProcessSnapshot should return undefined to respect `types.maybe`", () => {
+    let snapshotPassedToPreProcess = "Initial Value" as any;
+    let valueReturnedByPreProcess: any;
+    const TestObject = types
+      .model("TestObject", {
+        prop: types.string
+      })
+      .preProcessSnapshot(snapshot => {
+        snapshotPassedToPreProcess = snapshot;
+        return valueReturnedByPreProcess;
+      });
+
+    const TestContainer = types.
+      model("TestContainer", {
+        child: types.maybe(TestObject)
+      });
+
+    // Note: the MST type system doesn't want you to return undefined from preProcessSnapshot
+    // but you have to if you want the child to be undefined as expected
+    valueReturnedByPreProcess = undefined;
+    const container1 = TestContainer.create({});
+    expect(snapshotPassedToPreProcess).toBeUndefined();
+    expect(container1.child).toBeUndefined();
+
+    valueReturnedByPreProcess = {};
+    const container2 = TestContainer.create({});
+    expect(container2.child).toBeUndefined();
+
+    valueReturnedByPreProcess = {prop: "value"};
+    const container3 = TestContainer.create({});
+    expect(container3.child?.prop).toBe("value");
+  });
+
+  test("preProcessSnapshot with an optional prop can also return `{}` to respect `types.maybe`", () => {
+    let snapshotPassedToPreProcess = "Initial Value" as any;
+    let valueReturnedByPreProcess: any;
+    const TestObject = types
+      .model("TestObject", {
+        // This is different than the case above because this prop is optional
+        prop: types.optional(types.string, "default")
+      })
+      .preProcessSnapshot(snapshot => {
+        snapshotPassedToPreProcess = snapshot;
+        return valueReturnedByPreProcess;
+      });
+
+    const TestContainer = types.
+      model("TestContainer", {
+        child: types.maybe(TestObject)
+      });
+
+    valueReturnedByPreProcess = undefined;
+    const container1 = TestContainer.create({});
+    expect(snapshotPassedToPreProcess).toBeUndefined();
+    expect(container1.child).toBeUndefined();
+
+    // This is different than the case above. Returning `{}` results in
+    // a child object instead of undefined.
+    valueReturnedByPreProcess = {};
+    const container2 = TestContainer.create({});
+    expect(container2.child?.prop).toBe("default");
+
+    valueReturnedByPreProcess = {prop: "value"};
+    const container3 = TestContainer.create({});
+    expect(container3.child?.prop).toBe("value");
+  });
+
+
 });
