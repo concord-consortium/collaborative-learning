@@ -9,7 +9,8 @@ import { externalUrlImagesHandler, localAssetsImagesHandler,
   IImageHandler, ImageMapEntry, ImageMap,
   EntryStatus, IImageHandlerStoreOptions,
   IImageHandlerStoreResult,
-  ImageMapEntrySnapshot} from "./image-map";
+  ImageMapEntrySnapshot,
+  blobUrlImagesHandler} from "./image-map";
 
 let sImageMap: ImageMap;
 
@@ -35,7 +36,7 @@ describe("ImageMap", () => {
           localAssetsImagesHandler, externalUrlImagesHandler, externalUrlImagesHandler,
           firebaseStorageImagesHandler, firebaseStorageImagesHandler,
           firebaseRealTimeDBImagesHandler, firebaseRealTimeDBImagesHandler, firebaseRealTimeDBImagesHandler,
-          externalUrlImagesHandler, undefined, undefined ];
+          externalUrlImagesHandler, undefined, blobUrlImagesHandler ];
 
   beforeEach(() => {
     jest.restoreAllMocks();
