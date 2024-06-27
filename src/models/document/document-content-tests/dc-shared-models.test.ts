@@ -68,7 +68,7 @@ describe("DocumentContentModel -- shared Models --", () => {
       tiles: [
         [
           { content: { type: "Table", columnWidths } },
-          { content: { type: "Geometry", objects: {}, linkedAttributeColors: {} } }
+          { content: { type: "Geometry", objects: {}, linkedAttributeColors: {}, pointMetadata: {} } }
         ]
       ],
       sharedModels: [
@@ -244,6 +244,7 @@ Object {
         },
         "linkedAttributeColors": Object {},
         "objects": Object {},
+        "pointMetadata": Object {},
         "type": "Geometry",
       },
       "display": undefined,
@@ -563,29 +564,29 @@ Object {
 Object {
   "annotations": Object {},
   "rowMap": Object {
-    "testid-48": Object {
+    "testid-14": Object {
       "height": undefined,
-      "id": "testid-48",
+      "id": "testid-14",
       "isSectionHeader": false,
       "sectionId": undefined,
       "tiles": Array [
         Object {
-          "tileId": "testid-46",
+          "tileId": "testid-12",
           "widthPct": undefined,
         },
         Object {
-          "tileId": "testid-47",
+          "tileId": "testid-13",
           "widthPct": undefined,
         },
       ],
     },
   },
   "rowOrder": Array [
-    "testid-48",
+    "testid-14",
   ],
   "sharedModelMap": Object {
-    "testid-43": Object {
-      "provider": "testid-46",
+    "testid-9": Object {
+      "provider": "testid-12",
       "sharedModel": Object {
         "dataSet": Object {
           "attributes": Array [
@@ -597,7 +598,7 @@ Object {
                 "display": undefined,
               },
               "hidden": false,
-              "id": "testid-44",
+              "id": "testid-10",
               "name": "x",
               "precision": undefined,
               "sourceID": undefined,
@@ -617,7 +618,7 @@ Object {
                 "display": undefined,
               },
               "hidden": false,
-              "id": "testid-45",
+              "id": "testid-11",
               "name": "y",
               "precision": undefined,
               "sourceID": undefined,
@@ -632,37 +633,37 @@ Object {
           ],
           "cases": Array [
             Object {
-              "__id__": "caseid-6",
+              "__id__": "caseid-0",
             },
             Object {
-              "__id__": "caseid-7",
+              "__id__": "caseid-1",
             },
             Object {
-              "__id__": "caseid-8",
+              "__id__": "caseid-2",
             },
           ],
-          "id": "testid-42",
+          "id": "testid-8",
           "name": "Demo Dataset",
           "sourceID": undefined,
         },
-        "id": "testid-43",
-        "providerId": "testid-46",
+        "id": "testid-9",
+        "providerId": "testid-12",
         "type": "SharedDataSet",
       },
       "tiles": Array [
-        "testid-46",
-        "testid-47",
+        "testid-12",
+        "testid-13",
       ],
     },
   },
   "tileMap": Object {
-    "testid-46": Object {
+    "testid-12": Object {
       "content": Object {
         "columnWidths": Object {},
         "importedDataSet": Object {
           "attributes": Array [],
           "cases": Array [],
-          "id": "testid-37",
+          "id": "testid-3",
           "name": undefined,
           "sourceID": undefined,
         },
@@ -670,10 +671,10 @@ Object {
         "type": "Table",
       },
       "display": undefined,
-      "id": "testid-46",
+      "id": "testid-12",
       "title": undefined,
     },
-    "testid-47": Object {
+    "testid-13": Object {
       "content": Object {
         "bgImage": undefined,
         "board": Object {
@@ -694,10 +695,11 @@ Object {
         },
         "linkedAttributeColors": Object {},
         "objects": Object {},
+        "pointMetadata": Object {},
         "type": "Geometry",
       },
       "display": undefined,
-      "id": "testid-47",
+      "id": "testid-13",
       "title": undefined,
     },
   },

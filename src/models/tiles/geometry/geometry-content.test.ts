@@ -188,7 +188,7 @@ describe("GeometryContent", () => {
   it("can create with default properties", () => {
     const content = GeometryContentModel.create();
     expect(getSnapshot(content)).toEqual(
-      { type: kGeometryTileType, board: defaultBoard(), objects: {}, linkedAttributeColors: {} });
+      { type: kGeometryTileType, board: defaultBoard(), objects: {}, linkedAttributeColors: {}, pointMetadata: {} });
 
     destroy(content);
   });
@@ -211,7 +211,8 @@ describe("GeometryContent", () => {
         yAxis: { name: "authorY", min: kGeometryDefaultYAxisMin, unit: kGeometryDefaultPixelsPerUnit }
       },
       objects: {},
-      linkedAttributeColors: {}
+      linkedAttributeColors: {},
+      pointMetadata: {}
     });
 
     destroy(content);
@@ -992,6 +993,7 @@ describe("GeometryContent", () => {
     \\"p2\\": {\\"type\\": \\"point\\", \\"id\\": \\"p2\\", \\"x\\": 3, \\"y\\": 3, \\"snapToGrid\\": false, \\"colorScheme\\": 1, \\"labelOption\\": \\"none\\"},
     \\"p3\\": {\\"type\\": \\"point\\", \\"id\\": \\"p3\\", \\"x\\": 5, \\"y\\": 1, \\"name\\": \\"A\\", \\"colorScheme\\": 0, \\"labelOption\\": \\"label\\"}
   },
+  \\"pointMetadata\\": {},
   \\"linkedAttributeColors\\": {}
 }"
 `);
@@ -1015,6 +1017,7 @@ toMatchInlineSnapshot(`
     \\"testid\\": {\\"type\\": \\"point\\", \\"id\\": \\"testid\\", \\"x\\": 0, \\"y\\": 1, \\"snapToGrid\\": true, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
     \\"testid\\": {\\"type\\": \\"vertexAngle\\", \\"id\\": \\"testid\\", \\"points\\": [\\"testid\\", \\"testid\\", \\"testid\\"]}
   },
+  \\"pointMetadata\\": {},
   \\"linkedAttributeColors\\": {}
 }"
 `);
@@ -1042,6 +1045,7 @@ toMatchInlineSnapshot(`
     },
     \\"testid\\": {\\"type\\": \\"comment\\", \\"id\\": \\"testid\\", \\"anchors\\": [\\"ml\\"]}
   },
+  \\"pointMetadata\\": {},
   \\"linkedAttributeColors\\": {}
 }"
 `);
@@ -1059,6 +1063,7 @@ toMatchInlineSnapshot(`
   \\"board\\": {\\"xAxis\\": {\\"name\\": \\"x\\", \\"label\\": \\"x\\", \\"min\\": -2, \\"unit\\": 18.3, \\"range\\": 26.229508196721312}, \\"yAxis\\": {\\"name\\": \\"y\\", \\"label\\": \\"y\\", \\"min\\": -1, \\"unit\\": 18.3, \\"range\\": 17.486338797814206}},
   \\"bgImage\\": {\\"type\\": \\"image\\", \\"id\\": \\"img\\", \\"x\\": 0, \\"y\\": 0, \\"url\\": \\"test-file-stub\\", \\"width\\": 5, \\"height\\": 5},
   \\"objects\\": {},
+  \\"pointMetadata\\": {},
   \\"linkedAttributeColors\\": {}
 }"
 `);

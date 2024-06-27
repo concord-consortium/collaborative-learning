@@ -106,7 +106,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
           { content: { type: "Image", url: "image/url" } }
         ],
         [
-          { content: { type: "Geometry", objects: {}, linkedAttributeColors: {} } },
+          { content: { type: "Geometry", objects: {}, linkedAttributeColors: {}, pointMetadata: {} } },
           { content: { type: "Text", format: "html", text: ["<p>More text</p>"] } },
           // explicit row height exported since it differs from drawing tool default
           { content: { type: "Drawing", objects: [] }, layout: { height: 320 } }
@@ -133,7 +133,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
           { content: { type: "Image", url: "image/url" } }
         ],
         [
-          { content: { type: "Geometry", objects: {}, linkedAttributeColors: {} } },
+          { content: { type: "Geometry", objects: {}, linkedAttributeColors: {}, pointMetadata: {} } },
           { content: { type: "Text", format: "html", text: ["<p>More text</p>"] } },
           // explicit row height exported since it differs from drawing tool default
           { content: { type: "Drawing", objects: [] }, layout: { height: 320 } }
