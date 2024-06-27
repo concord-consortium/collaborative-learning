@@ -32,18 +32,20 @@ export const convertChangesToModel = (changes: JXGChange[]) => {
   return exportGeometryModel(changesJson);
 };
 
-export const convertModelToChanges = (
+export const getGeometryBoardChange = (
   model: GeometryBaseContentModelType, boardOptions?: IGeometryBoardChangeOptions
-): JXGChange[] => {
-  const { board, bgImage, objects } = model;
-  const changes: JXGChange[] = [];
-  // convert the board
-  const { xAxis, yAxis } = board || BoardModel.create(kDefaultBoardModelOutputProps);
+): JXGChange => {
+  const { xAxis, yAxis } = model.board || BoardModel.create(kDefaultBoardModelOutputProps);
   const { name: xName, label: xAnnotation } = xAxis;
   const { name: yName, label: yAnnotation } = yAxis;
-  changes.push(
+  return (
     defaultGeometryBoardChange(xAxis, yAxis, { xName, yName, xAnnotation, yAnnotation }, boardOptions )
   );
+};
+
+export const convertModelToChanges = (model: GeometryBaseContentModelType): JXGChange[] => {
+  const { bgImage, objects } = model;
+  const changes: JXGChange[] = [];
   // convert the background image (if any)
   if (bgImage) {
     changes.push(...convertModelObjectToChanges(bgImage));

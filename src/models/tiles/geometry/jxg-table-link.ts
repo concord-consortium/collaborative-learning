@@ -1,7 +1,7 @@
 import { splitLinkedPointId } from "../table-link-types";
 import { filterBoardObjects, forEachBoardObject } from "./geometry-utils";
-import { resumeBoardUpdates, suspendBoardUpdates, syncLinkedPoints } from "./jxg-board";
-import { ILinkProperties, ITableLinkProperties, JXGChange, JXGChangeAgent, JXGCoordPair } from "./jxg-changes";
+import { resumeBoardUpdates, suspendBoardUpdates } from "./jxg-board";
+import { ILinkProperties, JXGChange, JXGChangeAgent, JXGCoordPair } from "./jxg-changes";
 import { createPoint, pointChangeAgent } from "./jxg-point";
 import { isPoint } from "./jxg-types";
 
@@ -16,18 +16,10 @@ export interface ITableLinkColors {
   fill: string;
   stroke: string;
 }
-export type GetTableLinkColorsFunction = (tableId?: string) => ITableLinkColors;
 
-let sGetTableLinkColors: GetTableLinkColorsFunction;
-
-export function injectGetTableLinkColorsFunction(getTableLinkColors: GetTableLinkColorsFunction) {
-  sGetTableLinkColors = getTableLinkColors;
-}
-
-function createLinkedPoint(board: JXG.Board, parents: JXGCoordPair, props: any, links?: ILinkProperties) {
+export function createLinkedPoint(board: JXG.Board, parents: JXGCoordPair, props: any, links?: ILinkProperties) {
   const tableId = links?.tileIds?.[0];
   const [linkedRowId, linkedColId] = splitLinkedPointId(props?.id);
-  const linkColors = sGetTableLinkColors(tableId);
   const linkedProps = {
           clientType: "linkedPoint",
           fixed: true,
@@ -62,9 +54,6 @@ export const linkedPointChangeAgent: JXGChangeAgent = {
     else {
       result = createLinkedPoint(board as JXG.Board, change.parents as JXGCoordPair, change.properties, change.links);
     }
-
-    syncLinkedPoints(board as JXG.Board, change.links as ITableLinkProperties);
-
     return result;
   },
 
@@ -72,8 +61,6 @@ export const linkedPointChangeAgent: JXGChangeAgent = {
 
   delete: (board, change) => {
     pointChangeAgent.delete(board, change);
-
-    syncLinkedPoints(board, change.links as ITableLinkProperties);
   }
 };
 

@@ -267,6 +267,7 @@ context('Arrow Annotations (Sparrows)', function () {
     // Remove all the points and polygons
     aa.clickArrowToolbarButton(); // sparrow mode off
     geometryToolTile.getGeometryTile().click(); // select tile
+    clueCanvas.clickToolbarButton('geometry', 'select'); // switch to select mode
     geometryToolTile.getGraphPoint().eq(2).click();
     clueCanvas.clickToolbarButton('geometry', 'delete');
     geometryToolTile.getGraphPoint().eq(1).click();

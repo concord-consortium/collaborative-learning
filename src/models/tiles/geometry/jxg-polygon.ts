@@ -1,5 +1,5 @@
 import { LineAttributes, PolygonAttributes } from "jsxgraph";
-import { each, filter, find, merge, uniqueId, values } from "lodash";
+import { each, filter, find, merge, remove, uniqueId, values } from "lodash";
 import { notEmpty } from "../../../utilities/js-utils";
 import { fillPropsForColorScheme, getPoint, getPolygon, strokePropsForColorScheme } from "./geometry-utils";
 import { getObjectById } from "./jxg-board";
@@ -36,8 +36,7 @@ const phantomPolygonEdgeProps = Object.freeze({
   highlightStrokeOpacity: 0
 });
 
-function getPolygonVisualProps(selected: boolean) {
-  const colorScheme = 0; // TODO
+function getPolygonVisualProps(selected: boolean, colorScheme: number) {
   const props: PolygonAttributes = { ...defaultPolygonProps };
   if (selected) {
     merge(props, selectedPolygonProps);
@@ -68,15 +67,7 @@ export function isPointInPolygon(x: number, y: number, polygon: JXG.Polygon) {
 }
 
 export function getPolygonEdges(polygon: JXG.Polygon) {
-  const edges: { [id: string]: JXG.Line } = {};
-  polygon.vertices.forEach(vertex => {
-    each(vertex.childElements, child => {
-      if (child.elType === "segment") {
-        edges[child.id] = child as JXG.Line;
-      }
-    });
-  });
-  return values(edges);
+  return polygon.borders;
 }
 
 export function getPolygonEdge(board: JXG.Board, polygonId: string, pointIds: string[]) {
@@ -97,12 +88,13 @@ export function getAssociatedPolygon(elt: JXG.GeometryElement): JXG.Polygon | un
   if (isPoint(elt)) {
     return find(elt.childElements, isPolygon);
   }
-  if (elt.elType === "segment") {
-    const vertices = filter(elt.ancestors, isPoint);
-    for (const vertex of vertices) {
-      const polygon = find(vertex.childElements, isPolygon);
-      if (polygon) return polygon;
-    }
+  if (isLine(elt)) {
+    // Find a polygon that contains both ends of this segment.
+    // It can still be ambiguous if polygons overlap at more than one point,
+    // in which case we just return the first one found.
+    const p1polygons = filter(elt.point1.childElements, isPolygon);
+    const p2polygons = filter(elt.point2.childElements, isPolygon);
+    return p1polygons.find(p => p2polygons.includes(p));
   }
 }
 
@@ -156,18 +148,22 @@ export function getPointsForVertexAngle(vertex: JXG.Point) {
           : [p2, p1, p0];
 }
 
-export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
+export function prepareToDeleteObjects(board: JXG.Board, ids: string[]): string[] {
+  const selectedPoints: string[] = [];
   const polygonsToDelete: { [id: string]: JXG.Polygon } = {};
   const anglesToDelete: { [id: string]: JXG.GeometryElement } = {};
-  const moreIdsToDelete: string[] = [];
 
   // Identify polygons and angles scheduled for deletion and points that are vertices of polygons
-  const polygonVertexMap: { [id: string]: string[] } = {};
+  const polygonVertexMap: { [id: string]: string[] } = {}; // maps polygon ids to vertex ids
+  const vertexPolygonMap: { [id: string]: string[] } = {}; // maps vertex ids to polygon ids
   ids.forEach(id => {
     const elt = getObjectById(board, id);
     if (isPoint(elt)) {
+      selectedPoints.push(elt.id);
+      vertexPolygonMap[elt.id] = [];
       each(elt.childElements, child => {
         if (isPolygon(child)) {
+          vertexPolygonMap[elt.id].push(child.id);
           if (!polygonVertexMap[child.id]) {
             polygonVertexMap[child.id] = [];
           }
@@ -183,44 +179,63 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]) {
     }
   });
 
-  // Consider each polygon with vertices to be deleted
+  // "Fully selected" polygons means polygons where all of their vertices are selected
+  const fullySelectedPolygons = Object.entries(polygonVertexMap)
+    .filter(([polyId, vertexIds]) => {
+      const poly = getPolygon(board, polyId)!;
+      return vertexIds.length === poly.vertices.length - 1; })
+    .map(([polyId, poly]) => polyId);
+
+  // Implement intuitive behavior for deleting a polygon that may be connected to other polygons.
+  // Polygons that are fully selected are deleted, but any of their points that are shared
+  // with a polygon that is NOT fully selected, are NOT deleted.
+  const pointsToDelete = selectedPoints;
+  each(fullySelectedPolygons, polyId => {
+    each(polygonVertexMap[polyId], vertexId => {
+      const externalPolygon = vertexPolygonMap[vertexId].find(pId => !fullySelectedPolygons.includes(pId));
+      if (externalPolygon) {
+        // Do not actually delete this point, it connects to a polygon that should not be altered.
+        remove(pointsToDelete, v => v===vertexId);
+      }
+    });
+  });
+
+  // Remove vertices that are going to be deleted from polygons,
+  // and find polygons that need to be deleted since they lost most or all of their points.
   each(polygonVertexMap, (vertexIds, polygonId) => {
     const polygon = getObjectById(board, polygonId) as JXG.Polygon;
     const vertexCount = polygon.vertices.length - 1;
-    const deleteCount = vertexIds.length;
-    // remove points from polygons if possible
-    if (vertexCount - deleteCount >= 2) {
-      vertexIds.forEach(id => {
-        const pt = getObjectById(board, id) as JXG.Point;
-        // removing multiple points at one time sometimes gives unexpected results
-        polygon.removePoints(pt);
-      });
-    }
-    // otherwise, the polygon should be deleted as well
-    else {
-      if (!polygonsToDelete[polygon.id]) {
-        polygonsToDelete[polygon.id] = polygon;
-        moreIdsToDelete.push(polygon.id);
+    const deleteCount = vertexIds.filter(id=>pointsToDelete.includes(id)).length;
+
+    // Remove polygons that will have 0 or 1 points left.
+    if (fullySelectedPolygons.includes(polygonId) || vertexCount - deleteCount <= 1) {
+      if (!polygonsToDelete[polygonId]) {
+        polygonsToDelete[polygonId] = polygon;
+      }
+    } else {
+      // Leave this polygon, but remove points that will be deleted from it.
+      const deletePoints = polygon.vertices.filter(v => pointsToDelete.includes(v.id));
+      if (deletePoints.length) {
+        each(deletePoints, v => polygon.removePoints(v));
+        setPolygonEdgeColors(polygon);
       }
     }
   });
 
   // identify angle labels to delete
-  each(polygonsToDelete, polygon => {
-    polygon.vertices.forEach(vertex => {
-      each(vertex.childElements, child => {
-        if (isVertexAngle(child)) {
-          if (!anglesToDelete[child.id]) {
-            anglesToDelete[child.id] = child;
-            moreIdsToDelete.push(child.id);
-          }
+  each(pointsToDelete, pointId => {
+    const vertex = getPoint(board, pointId)!;
+    each(vertex.childElements, child => {
+      if (isVertexAngle(child)) {
+        if (!anglesToDelete[child.id]) {
+          anglesToDelete[child.id] = child;
         }
-      });
+      }
     });
   });
 
-  // return ids of additional objects to delete
-  return moreIdsToDelete;
+  // return adjusted list of ids to delete
+  return [...pointsToDelete, ...Object.keys(polygonsToDelete), ...Object.keys(anglesToDelete)];
 }
 
 function segmentNameLabelFn(this: JXG.Line) {
@@ -261,6 +276,7 @@ function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
 function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: JXGParentType[]) {
   // Remove the old polygon and create a new one.
   const oldPolygon = getPolygon(board, polygonId);
+  const colorScheme = oldPolygon?.getAttribute("colorScheme");
   if (!oldPolygon) return;
   board.removeObject(oldPolygon);
   const vertices: JXG.Point[]
@@ -268,7 +284,8 @@ function updatePolygonVertices(board: JXG.Board, polygonId: string, vertexIds: J
     .filter(notEmpty);
   const props = {
     id: polygonId, // re-use the same ID
-    ...getPolygonVisualProps(false)
+    colorScheme,
+    ...getPolygonVisualProps(false, colorScheme)
   };
   const polygon = board.create("polygon", vertices, props) as JXG.Polygon;
 
@@ -307,9 +324,13 @@ export const polygonChangeAgent: JXGChangeAgent = {
     const parents = (change.parents || [])
                       .map(id => getObjectById(_board, id as string))
                       .filter(notEmpty);
+    const colorScheme = !Array.isArray(change.properties) && change.properties?.colorScheme;
+    if (change.parents?.length !== parents.length) {
+      console.warn("Some points were missing when creating polygon");
+    }
     const props = {
       id: uniqueId(),
-      ...getPolygonVisualProps(false),
+      ...getPolygonVisualProps(false, colorScheme||0),
       ...change.properties
     };
     const poly = parents.length ? _board.create("polygon", parents, props) as JXG.Polygon : undefined;

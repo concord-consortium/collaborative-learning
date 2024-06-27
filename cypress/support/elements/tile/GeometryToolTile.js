@@ -60,7 +60,7 @@ class GeometryToolTile {
     }
     // Returns all tick labels on both axes. The X-axis ones are first in the list.
     getGraphAxisTickLabels(axis) {
-      return cy.get('.canvas-area .geometry-content .JXGtext[id*="_ticks_"]');
+      return cy.get('.canvas-area .geometry-content .tick-label');
     }
 
     getGraphPointCoordinates(index){ //This is the point coordinate text

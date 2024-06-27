@@ -1,5 +1,5 @@
 import React from "react";
-import { castArray, each, find, keys as _keys, throttle, values } from "lodash";
+import { castArray, each, find, isEqual, keys as _keys, throttle, values } from "lodash";
 import { IObjectDidChange, observable, observe, reaction, runInAction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
@@ -9,7 +9,6 @@ import { SizeMeProps } from "react-sizeme";
 import { pointBoundingBoxSize, pointButtonRadius, segmentButtonWidth, zoomFactor } from "./geometry-constants";
 import { BaseComponent } from "../../base";
 import { DocumentContentModelType } from "../../../models/document/document-content";
-import { getTableLinkColors } from "../../../models/tiles/table-links";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import {
   GeometryContentModelType, IAxesParams, isGeometryContentReady, setElementColor
@@ -30,20 +29,20 @@ import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
 import {
   ESegmentLabelOption, JXGCoordPair
 } from "../../../models/tiles/geometry/jxg-changes";
-import { applyChange, applyChanges } from "../../../models/tiles/geometry/jxg-dispatcher";
+import { applyChange } from "../../../models/tiles/geometry/jxg-dispatcher";
 import { kSnapUnit } from "../../../models/tiles/geometry/jxg-point";
 import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
 } from "../../../models/tiles/geometry/jxg-polygon";
 import {
-  isAxis, isBoard, isComment, isImage, isLine, isMovableLine,
+  isAxis, isComment, isImage, isLine, isLinkedPoint, isMovableLine,
   isMovableLineControlPoint, isMovableLineLabel, isPoint, isPolygon, isRealVisiblePoint, isVertexAngle,
   isVisibleEdge, isVisibleMovableLine, kGeometryDefaultPixelsPerUnit
 } from "../../../models/tiles/geometry/jxg-types";
 import {
   getVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
 } from "../../../models/tiles/geometry/jxg-vertex-angle";
-import { getAllLinkedPoints, injectGetTableLinkColorsFunction } from "../../../models/tiles/geometry/jxg-table-link";
+import { createLinkedPoint, getAllLinkedPoints } from "../../../models/tiles/geometry/jxg-table-link";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tile-component";
 import { gImageMap, ImageMapEntry } from "../../../models/image-map";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -103,8 +102,6 @@ interface IDragPoint {
   final?: JXG.Coords;
   snapToGrid?: boolean;
 }
-
-injectGetTableLinkColorsFunction(getTableLinkColors);
 
 interface IPasteContent {
   pasteId: string;
@@ -207,6 +204,17 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private getPointScreenCoords(pointId: string) {
+    if (!this.state.board) return;
+    const pt = getPoint(this.state.board, pointId);
+    if (!pt) return;
+    if (isLinkedPoint(pt)) {
+      return this.getLinkedPointScreenCoords(pointId);
+    } else {
+      return this.getLocalPointScreenCoords(pointId);
+    }
+  }
+
+  private getLocalPointScreenCoords(pointId: string) {
     // Access the model to ensure that model changes trigger a rerender
     const p = this.getContent().getObject(pointId) as PointModelType;
     if (!p || p.x == null || p.y == null) return;
@@ -267,7 +275,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
         if (objectType === "point" || objectType === "linkedPoint") {
           const coords = objectType === "point"
-            ? this.getPointScreenCoords(objectId)
+            ? this.getLocalPointScreenCoords(objectId)
             : this.getLinkedPointScreenCoords(objectId);
           if (!coords) return undefined;
           const [x, y] = coords;
@@ -323,7 +331,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (objectType === "point" || objectType === "linkedPoint") {
           // Find the center point
           const coords = objectType === "point"
-            ? this.getPointScreenCoords(objectId)
+            ? this.getLocalPointScreenCoords(objectId)
             : this.getLinkedPointScreenCoords(objectId);
           if (!coords) return;
 
@@ -382,9 +390,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     this.disposers.push(onSnapshot(this.getContent(), () => {
       if (!this.suspendSnapshotResponse) {
-        this.destroyBoard();
-        this.setState({ board: undefined });
-        this.initializeBoard();
+        if (this.state.board) {
+          this.destroyBoard();
+          this.setState({ board: undefined });
+          this.initializeBoard();
+        }
       }
     }));
 
@@ -486,16 +496,17 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handlePointerMove = (evt: any) => {
-    if (!this.context.board || this.props.readOnly || this.context.mode === "select") return;
+    if (this.props.readOnly || this.context.mode === "select") return;
     // Move phantom point to location of mouse pointer
-    const content = this.context.content as GeometryContentModelType;
-    const usrCoords = getEventCoords(this.context.board, evt, this.props.scale).usrCoords;
+    const { board, content } = this.context;
+    if (!board || !content) return;
+    const usrCoords = getEventCoords(board, evt, this.props.scale).usrCoords;
     if (usrCoords.length >= 2) {
       const position: JXGCoordPair = [usrCoords[1], usrCoords[2]];
       if (content.phantomPoint) {
-        content.setPhantomPointPosition(this.context.board, position);
+        content.setPhantomPointPosition(board, position);
       } else {
-        content.addPhantomPoint(this.context.board, position, content.activePolygonId);
+        content.addPhantomPoint(board, position, content.activePolygonId);
       }
     }
   };
@@ -504,7 +515,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     if (!this.context.board || this.props.readOnly || this.context.mode === "select") return;
     const { board, content } = this.context;
     if (board && content) {
-      content.clearPhantomPoint(this.context.board);
+      content.clearPhantomPoint(board);
       // Removing the phantom point from the polygon re-creates it, so we have to add the handlers again.
       if (content.activePolygonId) {
         const poly = getPolygon(board, content.activePolygonId);
@@ -661,14 +672,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private async initializeBoard(): Promise<JXG.Board> {
     return new Promise((resolve, reject) => {
       isGeometryContentReady(this.getContent()).then(() => {
-        const board = this.getContent().initializeBoard(this.elementId, this.handleCreateElements);
+        const board = this.getContent()
+          .initializeBoard(this.elementId, this.handleCreateElements,
+            (b: JXG.Board) => this.syncLinkedGeometry(b));
         if (board) {
           this.handleCreateBoard(board);
           const { url, filename } = this.getContent().bgImage || {};
           if (url) {
             this.updateImageUrl(url, filename);
           }
-          this.syncLinkedGeometry(board);
           this.setState({ board });
           resolve(board);
         }
@@ -744,55 +756,65 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   syncLinkedGeometry(_board?: JXG.Board) {
     const board = _board || this.state.board;
     if (!board) return;
-
     const content = this.getContent();
+
     // Make sure each linked dataset's attributes have colors assigned.
-    content.linkedDataSets.forEach(link => {
-      link.dataSet.attributes.forEach(attr => {
-        content.assignColorSchemeForAttributeId(attr.id);
+    this.applyChange(() => {
+      content.linkedDataSets.forEach(link => {
+        link.dataSet.attributes.forEach(attr => {
+          content.assignColorSchemeForAttributeId(attr.id);
+        });
       });
     });
 
-    this.recreateSharedPoints(board);
-
-    // identify objects that exist in the model but not in JSXGraph
-    const modelObjectsToConvert: GeometryObjectModelType[] = [];
-    content.objects.forEach(obj => {
-      if (!board.objects[obj.id]) {
-        modelObjectsToConvert.push(obj);
-      }
-    });
-
-    if (modelObjectsToConvert.length > 0) {
-      const changesToApply = convertModelObjectsToChanges(modelObjectsToConvert);
-      applyChanges(board, changesToApply);
-    }
-    this.scaleToFit();
+    this.updateSharedPoints(board);
   }
 
-  // remove/recreate all linked points
-  // Shared points are deleted, and in the process, so are the polygons that depend on them
-  // This is built into JSXGraph's Board#removeObject function, which descends through and deletes all children:
-  // https://github.com/jsxgraph/jsxgraph/blob/60a2504ed66b8c6fea30ef67a801e86877fb2e9f/src/base/board.js#L4775
-  // Ids persist in their recreation because they are ultimately derived from canonical values
-  // NOTE: A more tailored response would match up the existing points with the data set and only
-  // change the affected points, which would eliminate some visual flashing that occurs when
-  // unchanged points are re-created and would allow derived polygons to be preserved rather than created anew.
-  recreateSharedPoints(board: JXG.Board){
-    const ids = getAllLinkedPoints(board);
-    if (ids.length > 0){
-      applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
-    }
-    const data = this.getContent().getLinkedPointsData();
-    for (const [link, points] of data.entries()) {
-      const pts = applyChange(board, {
-        operation: "create",
-        target: "linkedPoint",
-        parents: points.coords,
-        properties: points.properties,
-        links: { tileIds: [link]} });
-      castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
-    }
+  /**
+   * Update/add/remove linked points to matched what is in shared data sets.
+   *
+   * @param board
+   */
+  updateSharedPoints(board: JXG.Board) {
+    this.applyChange(() => {
+      let pointsAdded = false;
+      const remainingIds = getAllLinkedPoints(board);
+      const data = this.getContent().getLinkedPointsData();
+      for (const [link, points] of data.entries()) {
+        // Loop through points, adding new ones and updating any that need to be moved.
+        for (let i=0; i<points.coords.length; i++) {
+          const id = points.properties[i].id;
+          const existingIndex = remainingIds.indexOf(id);
+          if (existingIndex < 0) {
+            // Doesn't exist, create the point
+            const pt = createLinkedPoint(board, points.coords[i], points.properties[i], { tileIds: [link] });
+            this.handleCreatePoint(pt);
+            pointsAdded = true;
+          } else {
+            const existing = getPoint(board, id);
+            if (!isEqual(existing?.coords.usrCoords.slice(1), points.coords[i])) {
+              applyChange(board, {
+                operation: "update",
+                target: "linkedPoint",
+                targetID: id,
+                properties: { position: points.coords[i] }
+              });
+              // Remove updated point from remaining list
+            }
+            remainingIds.splice(existingIndex, 1);
+          }
+        }
+      }
+
+      // Now deal with any deleted points
+      if (remainingIds.length > 0){
+        applyChange(board, { operation: "delete", target: "linkedPoint", targetID: remainingIds });
+      }
+
+      if (pointsAdded) {
+        this.scaleToFit();
+      }
+    });
   }
 
   private handleZoomIn = () => {
@@ -1301,6 +1323,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             this.isSqrDistanceWithinThreshold(9, c1.coords, c2.coords));
   }
 
+  /**
+   * Adjust display parameters depending on whether user is currently dragging a point.
+   * @param value {boolean}
+   */
+  private setDragging(value: boolean) {
+    this.state.board?.infobox.setAttribute({ opacity: value ? 1 : .75 });
+  }
+
   private moveSelectedPoints(dx: number, dy: number) {
     this.beginDragSelectedPoints();
     if (this.endDragSelectedPoints(undefined, undefined, [0, dx, dy], "keyboard")) {
@@ -1323,6 +1353,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private beginDragSelectedPoints(evt?: any, dragTarget?: JXG.GeometryElement) {
     const { board } = this.state;
     const content = this.getContent();
+    this.setDragging(true);
     if (board && !hasSelectionModifier(evt || {})) {
       content.metadata.selection.forEach((isSelected: boolean, id: string) => {
         const obj = board.objects[id];
@@ -1364,6 +1395,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     const content = this.getContent();
     if (!board || !content) return false;
+    this.setDragging(false);
 
     let didDragPoints = false;
     each(this.dragPts, (entry, id) => {
@@ -1531,19 +1563,45 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const coords = copyCoords(point.coords);
       const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
 
-      // In polygon mode, clicking a point in the polygon again closes it.
-      if (mode === "polygon" && geometryContent.phantomPoint && geometryContent.activePolygonId) {
-        const poly = getPolygon(board, geometryContent.activePolygonId);
-        const vertex = poly && poly.vertices.find(p => p.id === id);
-        if (vertex) {
-          // user clicked on a vertex that is in the current polygon.
-          const polygon = geometryContent.closeActivePolygon(board, vertex);
-          if (polygon) {
-            this.handleCreatePolygon(polygon);
+      // Polygon mode interactions with existing points
+      if (mode === "polygon") {
+        this.applyChange(() => {
+          if (geometryContent.phantomPoint && geometryContent.activePolygonId) {
+            const poly = getPolygon(board, geometryContent.activePolygonId);
+            const vertex = poly && poly.vertices.find(p => p.id === id);
+            if (vertex) {
+              // user clicked on a vertex that is in the current polygon - close the polygon.
+              const polygon = geometryContent.closeActivePolygon(board, vertex);
+              if (polygon) {
+                this.handleCreatePolygon(polygon);
+              }
+            } else {
+              // use clicked a vertex that is not part of the current polygon - adopt it.
+              geometryContent.addPointToActivePolygon(board, point.id);
+            }
+          } else {
+            // No active polygon. Activate one for the point clicked.
+            const polys = Object.values(point.childElements).filter(child => isPolygon(child));
+            if (polys.length > 0 && isPolygon(polys[0])) {
+              // The point clicked is in one or more polygons.
+              // Activate the first polygon returned.
+              const poly = polys[0];
+              const polygon = geometryContent.makePolygonActive(board, poly.id, point.id);
+              if (polygon) {
+                this.handleCreatePolygon(polygon);
+              }
+            } else {
+              // Point clicked is not part of a polygon.  Create one.
+              const polygon = geometryContent.createPolygonIncludingPoint(board, point.id);
+              if (polygon) {
+                this.handleCreatePolygon(polygon);
+              }
+            }
           }
-          return;
-        }
+        });
+        return;
       }
+
       this.dragPts = isPointDraggable ? { [id]: { initial: coords } } : {};
       this.lastPointDown = { evt, coords };
 

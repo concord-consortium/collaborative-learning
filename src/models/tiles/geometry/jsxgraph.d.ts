@@ -24,6 +24,7 @@ declare namespace JXG {
   }
 
   interface BoardAttributes {
+    infobox: TextAttributes,
     keyboard: { enabled: boolean }
   }
 
@@ -59,6 +60,10 @@ declare namespace JXG {
 
   interface Math {
     Statistics: Statistics;
+  }
+
+  interface Polygon {
+    borders: Line[];
   }
 
   interface Text {

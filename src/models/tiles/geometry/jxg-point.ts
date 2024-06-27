@@ -78,7 +78,9 @@ export const pointChangeAgent: JXGChangeAgent = {
   update: objectChangeAgent.update,
 
   delete: (board, change) => {
-    prepareToDeleteObjects(board, castArray(change.targetID));
-    objectChangeAgent.delete(board, change);
+    // Removes the point from any polygons
+    const idsToDelete = prepareToDeleteObjects(board, castArray(change.targetID));
+    const revisedChange = { ...change, targetID: idsToDelete };
+    objectChangeAgent.delete(board, revisedChange);
   }
 };

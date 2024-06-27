@@ -3,13 +3,11 @@ import { reaction } from "mobx";
 import { addDisposer, applySnapshot, detach, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
-import { ITableLinkProperties, linkedPointId } from "../table-link-types";
+import { ITableLinkProperties, linkedPointId, splitLinkedPointId } from "../table-link-types";
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileContentAPIActions, tileContentAPIViews } from "../tile-model-hooks";
-import { ICreateRowsProperties, IRowProperties, ITableChange } from "../table/table-change";
-import { canonicalizeValue } from "../table/table-model-types";
-import { convertModelToChanges, exportGeometryJson } from "./geometry-migrate";
+import { convertModelToChanges, exportGeometryJson, getGeometryBoardChange } from "./geometry-migrate";
 import { preprocessImportFormat } from "./geometry-import";
 import {
   cloneGeometryObject, CommentModel, CommentModelType, GeometryBaseContentModel, GeometryObjectModelType,
@@ -24,11 +22,11 @@ import {
   ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
 } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
-import { getEdgeVisualProps, prepareToDeleteObjects } from "./jxg-polygon";
+import { getAssociatedPolygon, getEdgeVisualProps, prepareToDeleteObjects } from "./jxg-polygon";
 import {
   isAxisArray, isBoard, isComment, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
-  kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
+  kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj, isGeometryElement
 } from "./jxg-types";
 import { SharedModelType } from "../../shared/shared-model";
 import { ISharedModelManager } from "../../shared/shared-model-manager";
@@ -36,7 +34,7 @@ import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { gImageMap } from "../../image-map";
 import { IClueTileObject } from "../../annotations/clue-object";
-import { appendVertexId, filterBoardObjects, forEachBoardObject, getBoardObject, getBoardObjectIds,
+import { appendVertexId, getPoint, filterBoardObjects, forEachBoardObject, getBoardObject, getBoardObjectIds,
   getPolygon, logGeometryEvent, removeClosingVertexId } from "./geometry-utils";
 import { getPointVisualProps } from "./jxg-point";
 
@@ -124,11 +122,12 @@ export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
   const element = getObjectById(board, id);
   if (element) {
-    const colorScheme = element.getAttribute("colorScheme")||0;
+    let colorScheme = element.getAttribute("colorScheme")||0;
     if (isPoint(element)) {
       const props = getPointVisualProps(selected, colorScheme, element.getAttribute("isPhantom"));
       element.setAttribute(props);
     } else if (isVisibleEdge(element)) {
+      colorScheme = getAssociatedPolygon(element)?.getAttribute("colorScheme")||0;
       const props = getEdgeVisualProps(selected, colorScheme, false);
       element.setAttribute(props);
     }
@@ -186,6 +185,18 @@ export const GeometryContentModel = GeometryBaseContentModel
       });
       return point;
     },
+    /**
+     * Compile a map of data for all points that are part of linked datasets.
+     * The returned Map has the providing tile's ID as the key, and an object
+     * containing two parallel lists as its value:
+     *
+     * - coords: list of coordinate pairs
+     * - properties: list of point property objects (id and color)
+     *
+     * TODO: should we also look at the selections in the DataSet
+     *
+     * @returns the Map
+     */
     getLinkedPointsData() {
       const data: Map<string,{coords:JXGCoordPair[],properties:{id:string, colorScheme:number}[]}> = new Map();
       self.linkedDataSets.forEach(link => {
@@ -219,6 +230,22 @@ export const GeometryContentModel = GeometryBaseContentModel
         return self.getObject(id);
       }
     },
+    getObjectColorScheme(id: string) {
+      const obj = self.getObject(id);
+      if (isPointModel(obj) || isPolygonModel(obj) || isMovableLineModel(obj)) {
+        return obj.colorScheme;
+      }
+      if (obj === undefined) {
+        const [linkedRowId, linkedColId] = splitLinkedPointId(id);
+        if (linkedRowId && linkedColId) {
+          return self.getColorSchemeForAttributeId(linkedColId);
+        }
+      }
+    },
+    // Color to use for new points. Placeholder for now until appropriate UI is added.
+    get newPointColorScheme() {
+      return 0;
+    },
     getDependents(ids: string[], options?: { required: boolean }) {
       const { required = false } = options || {};
       let dependents = [...ids];
@@ -251,6 +278,10 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     isLinkedToTile(tileId: string) {
       return self.linkedDataSets.some(link => link.providerId === tileId);
+    },
+    isDeletable(board: JXG.Board, id: string) {
+      const obj = getObjectById(board, id);
+      return obj && !obj.getAttribute("fixed") && !obj.getAttribute("clientUndeletable");
     }
   }))
   .views(self => ({
@@ -263,10 +294,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         .map(([id, selected]) => id);
     },
     getDeletableSelectedIds(board: JXG.Board) {
-      return this.getSelectedIds(board).filter(id => {
-        const obj = getObjectById(board, id);
-        return obj && !obj.getAttribute("fixed") && !obj.getAttribute("clientUndeletable");
-      });
+      return this.getSelectedIds(board).filter(id => self.isDeletable(board, id));
     }
   }))
   .views(self => ({
@@ -277,7 +305,10 @@ export const GeometryContentModel = GeometryBaseContentModel
       return filterBoardObjects(board, obj => self.isSelected(obj.id));
     },
     exportJson(options?: ITileExportOptions) {
-      const changes = convertModelToChanges(self, { addBuffers: false, includeUnits: false});
+      const changes = [
+        getGeometryBoardChange(self, { addBuffers: false, includeUnits: false}),
+        ...convertModelToChanges(self)
+      ];
       const jsonChanges = changes.map(change => JSON.stringify(change));
       return exportGeometryJson(jsonChanges, options);
     }
@@ -426,13 +457,13 @@ export const GeometryContentModel = GeometryBaseContentModel
         onDidApplyChange: handleDidApplyChange
       };
     }
-    // views
 
-    // actions
-    function initializeBoard(domElementID: string, onCreate?: onCreateCallback): JXG.Board | undefined {
+    function initializeBoard(domElementID: string,
+        onCreate: onCreateCallback, syncLinked: (board:JXG.Board) => void): JXG.Board | undefined {
       let board: JXG.Board | undefined;
-      const changes = convertModelToChanges(self, { addBuffers: true, includeUnits: true});
-      applyChanges(domElementID, changes, getDispatcherContext())
+      const context = getDispatcherContext();
+      // Create the board and axes
+      applyChanges(domElementID, [getGeometryBoardChange(self, { addBuffers: true, includeUnits: true })], context)
         .filter(result => result != null)
         .forEach(changeResult => {
           const changeElems = castArray(changeResult);
@@ -440,15 +471,30 @@ export const GeometryContentModel = GeometryBaseContentModel
             if (isBoard(changeElem)) {
               board = changeElem;
               suspendBoardUpdates(board);
-            }
-            else if (onCreate) {
+            } else {
               onCreate(changeElem);
             }
           });
         });
-      if (board) {
-        resumeBoardUpdates(board);
-      }
+      if (!board) return;
+
+      // Add linked points
+      syncLinked(board);
+
+      // Now add all local objects
+      const changes = convertModelToChanges(self);
+      applyChanges(board, changes, context)
+        .filter(result => result != null)
+        .forEach(changeResult => {
+          const changeElems = castArray(changeResult);
+          changeElems.forEach(changeElem => {
+            if (isGeometryElement(changeElem)) {
+              onCreate(changeElem);
+            }
+          });
+        });
+
+      resumeBoardUpdates(board);
       return board;
     }
 
@@ -523,6 +569,15 @@ export const GeometryContentModel = GeometryBaseContentModel
         unit: calcUnit,
         range: calcYrange
       };
+      // Don't force a redisplay if nothing has changed.
+      const curX = self.board?.xAxis;
+      const curY = self.board?.yAxis;
+      if (curX && curX.min === xAxisProperties.min
+          && curX.unit === xAxisProperties.unit && curX.range === xAxisProperties.range
+          && curY && curY.min === yAxisProperties.min
+          && curY.unit === yAxisProperties.unit && curY.range === yAxisProperties.range) {
+        return undefined;
+      }
       if (self.board) {
         applySnapshot(self.board.xAxis, xAxisProperties);
         applySnapshot(self.board.yAxis, yAxisProperties);
@@ -609,9 +664,9 @@ export const GeometryContentModel = GeometryBaseContentModel
     function addPhantomPoint(board: JXG.Board, parents: JXGCoordPair, polygonId?: string):
         JXG.Point | undefined {
       if (!board) return undefined;
-
       const props = {
         id: uniqueId(),
+        colorScheme: self.newPointColorScheme,
         isPhantom: true
       };
       const pointModel = PointModel.create({ x: parents[0], y: parents[1], ...props });
@@ -625,7 +680,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       };
       const point = syncChange(board, change);
 
-      // If a polygon ID was provided, display the phantom point as if it was part of that polygon
+      // If a polygon ID is provided, display the phantom point as part of that polygon
       if (polygonId) {
         const poly = getPolygon(board, polygonId);
         if (poly) {
@@ -658,6 +713,64 @@ export const GeometryContentModel = GeometryBaseContentModel
         };
         syncChange(board, change);
       }
+    }
+
+    function makePolygonActive(board: JXG.Board, polygonId: string, pointId: string) {
+      const poly = getPolygon(board, polygonId);
+      const polygonModel = self.getObject(polygonId);
+      const point = getPoint(board, pointId);
+      if (!poly || !point || !polygonModel || !isPolygonModel(polygonModel) || !self.phantomPoint) return;
+      const pointIndex = poly.vertices.indexOf(point);
+      if (pointIndex < 0) return;
+
+      const vertices = poly.vertices.map(vert => vert.id);
+      // remove reiterated point 0
+      if (vertices.length > 1 && vertices[0]===vertices[vertices.length-1]) vertices.pop();
+      // Rewrite the list of vertices so that the point clicked on is last.
+      const reorderedVertices = vertices.slice(pointIndex+1).concat(vertices.slice(0, pointIndex+1));
+      polygonModel.points.replace(reorderedVertices);
+
+      // Then add phantom point at the end
+      reorderedVertices.push(self.phantomPoint.id);
+
+      self.activePolygonId = polygonId;
+      const change: JXGChange = {
+        operation: "update",
+        target: "object",
+        targetID: poly.id,
+        parents: reorderedVertices
+      };
+      const updatedPolygon = syncChange(board, change);
+      return isPolygon(updatedPolygon) ? updatedPolygon : undefined;
+    }
+
+    function addPointToActivePolygon(board: JXG.Board, pointId: string) {
+      // Sanity check everything
+      if (!self.activePolygonId || !self.phantomPoint) return;
+      const poly = getPolygon(board, self.activePolygonId);
+      if (!poly) return;
+      const vertexIds = poly.vertices.map(v => v.id);
+      const phantomPointIndex = vertexIds.indexOf(self.phantomPoint.id);
+      if (phantomPointIndex<0) return;
+      const polygonModel = self.objects.get(self.activePolygonId);
+      if (!isPolygonModel(polygonModel)) return;
+
+      // Insert the new point before the phantom point
+      vertexIds.splice(phantomPointIndex, 0, pointId);
+      const change: JXGChange = {
+        operation: "update",
+        target: "polygon",
+        targetID: poly.id,
+        parents: vertexIds
+      };
+      const updatedPolygon = syncChange(board, change);
+      polygonModel.points.push(pointId);
+
+      logGeometryEvent(self, "update",
+        "vertex",
+        pointId, { userAction: "join to polygon" });
+
+      return isPolygon(updatedPolygon) ? updatedPolygon : undefined;
     }
 
     /**
@@ -720,14 +833,15 @@ export const GeometryContentModel = GeometryBaseContentModel
             operation: "create",
             target: "polygon",
             parents: [newRealPoint.id, phantomPoint?.id],
-            properties: { id: self.activePolygonId }
+            properties: { id: self.activePolygonId, colorScheme: newRealPoint.colorScheme }
           };
           const result = syncChange(board, change2);
           if (isPolygon(result)) {
             newPolygon = result;
 
             // Update the model
-            const polygonModel = PolygonModel.create({ id: newPolygon.id, points: [newRealPoint.id] });
+            const polygonModel = PolygonModel.create(
+              { id: newPolygon.id, points: [newRealPoint.id], colorScheme: newRealPoint.colorScheme });
             self.addObjectModel(polygonModel);
             self.activePolygonId = polygonModel.id;
           }
@@ -777,6 +891,30 @@ export const GeometryContentModel = GeometryBaseContentModel
       self.phantomPoint = undefined;
     }
 
+    function createPolygonIncludingPoint(board: JXG.Board, pointId: string) {
+      const colorScheme = self.getObjectColorScheme(pointId) || 0;
+      const points = [pointId];
+      if (self.phantomPoint) points.push(self.phantomPoint.id);
+      const polygonModel = PolygonModel.create({ points, colorScheme });
+      self.addObjectModel(polygonModel);
+      self.activePolygonId = polygonModel.id;
+      const change: JXGChange = {
+        operation: "create",
+        target: "polygon",
+        parents: points,
+        properties: { id: polygonModel.id, colorScheme }
+      };
+      const result = syncChange(board, change);
+
+      logGeometryEvent(self, "update",
+        "vertex",
+        pointId, { userAction: "join to polygon" });
+
+      if (isPolygon(result)) {
+        return result;
+      }
+    }
+
     /**
      * De-activate the active polygon.
      * This means it is no longer being edited.
@@ -786,6 +924,7 @@ export const GeometryContentModel = GeometryBaseContentModel
     function clearActivePolygon(board: JXG.Board) {
       if (!self.activePolygonId) return;
       const poly = getPolygon(board, self.activePolygonId);
+      self.activePolygonId = undefined;
       if (!poly) return;
       if (poly.vertices.length < 2
           || (poly.vertices.length === 2 && poly.vertices[0]===poly.vertices[1])) {
@@ -796,7 +935,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         };
         syncChange(board, change);
       }
-      self.activePolygonId = undefined;
     }
 
     /**
@@ -910,14 +1048,15 @@ export const GeometryContentModel = GeometryBaseContentModel
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
-    function removeObjects(board: JXG.Board | undefined, ids: string | string[], links?: ILinkProperties) {
-      board && self.deselectObjects(board, ids);
-      self.deleteObjects(castArray(ids));
+    function removeObjects(board: JXG.Board, ids: string | string[], links?: ILinkProperties) {
+      self.deselectObjects(board, ids);
+      const deletable = castArray(ids).filter(id => self.isDeletable(board, id));
+      self.deleteObjects(deletable);
 
       const change: JXGChange = {
         operation: "delete",
         target: "object",
-        targetID: ids,
+        targetID: deletable,
         links
       };
       return applyAndLogChange(board, change);
@@ -1196,16 +1335,20 @@ export const GeometryContentModel = GeometryBaseContentModel
       return copies;
     }
 
+    /**
+     * Delete the selected objects.
+     * Adjusts for various business logic before actually deleting:
+     * eg, preserving linked points and points connected to polygons that are not being deleted.
+     * @param board
+     */
     function deleteSelection(board: JXG.Board) {
-      const selectedIds = self.getDeletableSelectedIds(board);
+      const selectedIds = self.getSelectedIds(board);
 
       // remove points from polygons; identify additional objects to delete
-      selectedIds.push(...prepareToDeleteObjects(board, selectedIds));
+      const deleteIds = prepareToDeleteObjects(board, selectedIds);
 
-      self.deselectAll(board);
-      board.setAttribute({showInfobox: false});
-      if (selectedIds.length) {
-        removeObjects(board, selectedIds);
+      if (deleteIds.length) {
+        removeObjects(board, deleteIds);
       }
     }
 
@@ -1275,7 +1418,10 @@ export const GeometryContentModel = GeometryBaseContentModel
         addPhantomPoint,
         setPhantomPointPosition,
         realizePhantomPoint,
+        addPointToActivePolygon,
+        makePolygonActive,
         clearPhantomPoint,
+        createPolygonIncludingPoint,
         clearActivePolygon,
         closeActivePolygon,
         addMovableLine,
@@ -1309,66 +1455,6 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
     };
   })
-  .views(self => ({
-    getPositionOfPoint(dataSet: IDataSet, caseId: string, attrId: string): JXGUnsafeCoordPair {
-      const attrCount = dataSet.attributes.length;
-      const xAttr = attrCount > 0 ? dataSet.attributes[0] : undefined;
-      const yAttr = dataSet.attrFromID(attrId);
-      const xValue = xAttr ? dataSet.getValue(caseId, xAttr.id) : undefined;
-      const yValue = yAttr ? dataSet.getValue(caseId, yAttr.id) : undefined;
-      return [canonicalizeValue(xValue), canonicalizeValue(yValue)];
-    }
-  }))
-  .views(self => ({
-    getPointPositionsForColumns(dataSet: IDataSet, attrIds: string[]): [string[], JXGUnsafeCoordPair[]] {
-      const pointIds: string[] = [];
-      const positions: JXGUnsafeCoordPair[] = [];
-      dataSet.cases.forEach(aCase => {
-        const caseId = aCase.__id__;
-        attrIds.forEach(attrId => {
-          pointIds.push(linkedPointId(caseId, attrId));
-          positions.push(self.getPositionOfPoint(dataSet, caseId, attrId));
-        });
-      });
-      return [pointIds, positions];
-    },
-    getPointPositionsForRowsChange(dataSet: IDataSet, change: ITableChange): [string[], JXGUnsafeCoordPair[]] {
-      const pointIds: string[] = [];
-      const positions: JXGUnsafeCoordPair[] = [];
-      const caseIds = castArray(change.ids);
-      const propsArray: IRowProperties[] = change.action === "create"
-                                            ? (change.props as ICreateRowsProperties)?.rows
-                                            : castArray(change.props as any);
-      const xAttrId = dataSet.attributes.length > 0 ? dataSet.attributes[0].id : undefined;
-      caseIds.forEach((caseId, caseIndex) => {
-        const tableProps = propsArray[caseIndex] || propsArray[0];
-        // if x value changes, all points in row are affected
-        if (xAttrId && tableProps[xAttrId] != null) {
-          for (let attrIndex = 1; attrIndex < dataSet.attributes.length; ++attrIndex) {
-            const attrId = dataSet.attributes[attrIndex].id;
-            const pointId = linkedPointId(caseId, attrId);
-            const position = self.getPositionOfPoint(dataSet, caseId, attrId);
-            if (pointId && position) {
-              pointIds.push(pointId);
-              positions.push(position);
-            }
-          }
-        }
-        // otherwise, only points with y-value changes are affected
-        else {
-          each(tableProps, (value, attrId) => {
-            const pointId = linkedPointId(caseId, attrId);
-            const position = self.getPositionOfPoint(dataSet, caseId, attrId);
-            if (pointId && position) {
-              pointIds.push(pointId);
-              positions.push(position);
-            }
-          });
-        }
-      });
-      return [pointIds, positions];
-    }
-  }))
   .actions(self => ({
     afterAttach() {
       // This reaction monitors legacy links and shared data sets, linking to tables as their

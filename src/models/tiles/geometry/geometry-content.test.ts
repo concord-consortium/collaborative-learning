@@ -21,11 +21,6 @@ import { TileModel, ITileModel } from "../tile-model";
 import { registerTileTypes } from "../../../register-tile-types";
 registerTileTypes(["Geometry"]);
 
-// These are currently added to all created points
-const defaultParams = {
-  snapToGrid: true, snapSizeX: 0.1, snapSizeY: 0.1
-};
-
 // Need to mock this so the placeholder that is added to the cache
 // has dimensions
 jest.mock( "../../../utilities/image-utils", () => ({
@@ -133,7 +128,7 @@ describe("GeometryContent", () => {
     function onCreate(elt: JXG.GeometryElement) {
       // handle a point
     }
-    const board = content.initializeBoard(divId, onCreate) as JXG.Board;
+    const board = content.initializeBoard(divId, onCreate, (b) => {}) as JXG.Board;
     content.resizeBoard(board, 200, 200);
     content.updateScale(board, 0.5);
     return board;
@@ -325,6 +320,9 @@ describe("GeometryContent", () => {
     expect(p1.getAttribute("fixed")).toBe(true);
     content.updateObjects(board, "foo", { });
     content.applyChange(board, { operation: "update", target: "point" });
+    content.removeObjects(board, p1Id); // should not be removed because it is "fixed"
+    expect(board.objects[p1Id]).toBeDefined();
+    content.updateObjects(board, [p1Id], { fixed: false });
     content.removeObjects(board, p1Id);
     expect(board.objects[p1Id]).toBeUndefined();
     const p3: JXG.Point = content.addPoint(board, [2, 2]) as JXG.Point;
@@ -401,6 +399,23 @@ describe("GeometryContent", () => {
     expect(content.getDependents([points[3].id])).toEqual([points[3].id, polygonId]);
     expect(content.getDependents([points[3].id||''], { required: true })).toEqual([points[3].id]);
     destroyContentAndBoard(content, board);
+  });
+
+  it("can make two polygons that share a vertex", () => {
+    const { content, board } = createContentAndBoard();
+    // first polygon
+    const { polygon, points } = buildPolygon(board, content, [[0, 0], [1, 1], [2, 2]]); // points 0, 1, 2
+    if (!isPolygon(polygon)) fail("buildPolygon did not return a polygon");
+    // second polygon
+    points.push(content.realizePhantomPoint(board, [5, 5], true).point!); // point 3
+    points.push(content.realizePhantomPoint(board, [4, 4], true).point!); // point 4
+    content.addPointToActivePolygon(board, points[2].id);
+    const polygon2 = content.closeActivePolygon(board, points[3]);
+    if (!isPolygon(polygon2)) fail("addPointToActivePolygon did not return a polygon");
+    expect(polygon.vertices.map(v => v.id)).toEqual([points[0].id, points[1].id, points[2].id, points[0].id]);
+    expect(polygon2.vertices.map(v => v.id)).toEqual([points[3].id, points[4].id, points[2].id, points[3].id]);
+
+    expect(content.getDependents([points[2].id])).toEqual([points[2].id, polygon.id, polygon2.id]);
   });
 
   it("can add/remove/update polygons from model", () => {
