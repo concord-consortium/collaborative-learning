@@ -50,8 +50,7 @@ const tiles2 = [
   { "name": "dataflow" },
   { "name": "simulator" },
   { "name": "graph" },
-  { "name": "diagram" },
-  { "name": "graph" }
+  { "name": "diagram" }
 ];
 
 function beforeTest(queryParams) {
@@ -88,7 +87,6 @@ function testPrimaryWorkspace2() {
   simulatorTile.getTileTitle().should("contain", simName);
   // Make sure the XY plot tile were copied correctly
   cy.get('.primary-workspace .graph-wrapper .editable-tile-title-text').should("contain", "XY Plot test");
-
   //Verify my work document tiles are copied correctly
   diagramTile.getTileTitleText().should("contain", diagramName);
 
