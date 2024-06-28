@@ -65,7 +65,7 @@ describe("MovableLineModel", () => {
   });
   it("can have a line added to its lines property", () => {
     const movableLine = MovableLineModel.create();
-    movableLine.setInitialLine();
+    movableLine.setLine();
     expect(movableLine.lines.size).toEqual(1);
   });
   // Multiple lines not currently supported

@@ -3,10 +3,11 @@ import { AdornmentModel, IAdornmentModel, IUpdateCategoriesOptions, PointModel,
          kInfinitePoint } from "../adornment-models";
 import { Point } from "../../graph-types";
 import { IAxisModel } from "../../imports/components/axis/models/axis-model";
-import { computeSlopeAndIntercept } from "../../utilities/graph-utils";
+import { computeSlopeAndIntercept, getUniqueLineColor } from "../../utilities/graph-utils";
 import { kMovableLineType } from "./movable-line-types";
 import { IGraphModel } from "../../models/graph-model";
 import { IClueTileObject } from "../../../../models/annotations/clue-object";
+import { uniqueId } from "lodash";
 
 export function getAnnotationId(lineKey: string, type: "handle"|"equation", position?: "lower"|"upper") {
   if (position) {
@@ -17,8 +18,10 @@ export function getAnnotationId(lineKey: string, type: "handle"|"equation", posi
 }
 
 export const MovableLineInstance = types.model("MovableLineInstance", {
+  color: types.optional(types.string, "#4782B4"),
   equationCoords: types.maybe(PointModel),
   intercept: types.number,
+  isSelected: types.maybe(types.boolean),
   slope: types.number,
 })
 .volatile(self => ({
@@ -75,6 +78,8 @@ export const MovableLineInstance = types.model("MovableLineInstance", {
   }
 }));
 
+export interface IMovableLineInstance extends Instance<typeof MovableLineInstance> {}
+
 export const MovableLineModel = AdornmentModel
 .named('MovableLineModel')
 .props({
@@ -99,12 +104,31 @@ export const MovableLineModel = AdornmentModel
   saveEquationCoords(key='') {
     self.lines.get(key)!.saveEquationCoords();
   },
-  setInitialLine(xAxis?: IAxisModel, yAxis?: IAxisModel, key='') {
+  setLine(xAxis?: IAxisModel, yAxis?: IAxisModel, key='') {
     const { intercept, slope } = computeSlopeAndIntercept(xAxis, yAxis);
-    self.lines.set(key, { intercept, slope });
+    const color = getUniqueLineColor(key);
+    self.lines.set(key, { color, intercept, slope });
     const line = self.lines.get(key);
     line!.setPivot1(kInfinitePoint);
     line!.setPivot2(kInfinitePoint);
+  },
+  toggleSelected(key='') {
+    // Only one line can be selected at a time.
+    self.lines.forEach((line, lineKey) => {
+      if (lineKey !== key) line.isSelected = false;
+    });
+    const targetLine = self.lines.get(key);
+    if (!targetLine) return;
+    targetLine.isSelected = !targetLine.isSelected;
+  }
+}))
+.actions(self => ({
+  addLine(xAxis?: IAxisModel, yAxis?: IAxisModel) {
+    const key = uniqueId();
+    self.setLine(xAxis, yAxis, key);
+  },
+  deleteLine(key: string) {
+    self.lines.delete(key);
   }
 }))
 .actions(self => ({
@@ -117,9 +141,16 @@ export const MovableLineModel = AdornmentModel
       const subPlotKey = self.setSubPlotKey(options, i);
       const instanceKey = self.instanceKey(subPlotKey);
       if (!self.lines.get(instanceKey) || resetPoints) {
-        self.setInitialLine(xAxis, yAxis, instanceKey);
+        self.setLine(xAxis, yAxis, instanceKey);
       }
     }
+  },
+  deleteSelected() {
+    self.lines.forEach((line, key) => {
+      if (line.isSelected) {
+        self.lines.delete(key);
+      }
+    });
   }
 }))
 .views(self => ({
@@ -133,6 +164,9 @@ export const MovableLineModel = AdornmentModel
       }
     }
     return objects;
+  },
+  hasSelectedInstances() {
+    return Array.from(self.lines.values()).some(line => line.isSelected);
   }
 }));
 
@@ -143,6 +177,7 @@ export function isMovableLine(adornment: IAdornmentModel): adornment is IMovable
 
 export function defaultMovableLineAdornment(graph: IGraphModel) {
   const mLine = MovableLineModel.create();
-  mLine.setInitialLine(graph.axes.get("bottom"), graph.axes.get("left"), "{}");
+  const mLineKey = uniqueId();
+  mLine.setLine(graph.axes.get("bottom"), graph.axes.get("left"), mLineKey);
   return mLine;
 }

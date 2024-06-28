@@ -326,6 +326,9 @@ export const GraphModel = TileContentModel
       }
       return false;
     },
+    get isAnyAdornmentSelected() {
+      return self.adornments.some(adorn => adorn.hasSelectedInstances());
+    },
     /**
      * Return true if no attribute has been assigned to any graph role in any layer.
      */

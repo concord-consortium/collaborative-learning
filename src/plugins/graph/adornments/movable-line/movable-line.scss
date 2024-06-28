@@ -10,12 +10,11 @@ svg[class^="line-"] {
 }
 
 .movable-line {
-  stroke: $movable-line-color;
   stroke-width: 2px;
-}
 
-.movable-line-arrow {
-  fill: $movable-line-color;
+  &.selected {
+    stroke-width: 1px;
+  }
 }
 
 .movable-line-cover {
@@ -27,8 +26,6 @@ svg[class^="line-"] {
 
 .movable-line-handle {
   pointer-events: all;
-  fill: $movable-line-color;
-  stroke: $movable-line-color;
 }
 
 .movable-line-lower-handle {
