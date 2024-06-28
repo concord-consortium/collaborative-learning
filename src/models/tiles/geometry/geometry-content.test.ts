@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { clone, isEqualWith } from "lodash";
 import { destroy, getSnapshot } from "mobx-state-tree";
 import {
@@ -1051,14 +1050,13 @@ describe("GeometryContent", () => {
     expect(content.isUserResizable).toBe(true);
   });
 
+  /* eslint-disable max-len */
   it("exports basic content properly", () => {
-    const { content, board } = createContentAndBoard((_content) => {
+    const { content } = createContentAndBoard((_content) => {
       _content.addObjectModel(PointModel.create({ id: "p1", x: 1, y: 1 }));
       _content.addObjectModel(PointModel.create({ id: "p2", x: 3, y: 3, colorScheme: 1, snapToGrid: false }));
       _content.addObjectModel(PointModel.create({ id: "p3", x: 5, y: 1, name: "A", labelOption: "label" }));
     });
-
-    console.log(getSnapshot(content));
 
     expect(exportAndSimplifyIds(content)).toMatchInlineSnapshot(`
 "{
@@ -1077,10 +1075,8 @@ describe("GeometryContent", () => {
 
   it("exports polygons and vertexangles correctly", () => {
     const { content, board } = createContentAndBoard();
-    const { points, polygon } = buildPolygon(board, content, [[0, 0], [1, 0], [0, 1]]);
-    console.log(getSnapshot(content));
+    const { points } = buildPolygon(board, content, [[0, 0], [1, 0], [0, 1]]);
     content.addVertexAngle(board, [points[0].id, points[1].id, points[2].id]);
-    console.log(getSnapshot(content));
     expect(exportAndSimplifyIds(content)).
 toMatchInlineSnapshot(`
 "{
@@ -1104,7 +1100,7 @@ toMatchInlineSnapshot(`
     content.addMovableLine(board, [[1, 1], [5, 5]], { id: "ml" });
     const line = board.objects.ml as JXG.Line;
     expect(isMovableLine(line)).toBe(true);
-    const [comment] = content.addComment(board, "ml")!;
+    content.addComment(board, "ml")!;
 
     expect(exportAndSimplifyIds(content)).
 toMatchInlineSnapshot(`
@@ -1128,7 +1124,7 @@ toMatchInlineSnapshot(`
   });
 
   it("exports background image correctly", () => {
-    const { content, board } = createContentAndBoard((_content) => {
+    const { content } = createContentAndBoard((_content) => {
       _content.setBackgroundImage(
         ImageModel.create({ id: "img", url: placeholderImage, x: 0, y: 0, width: 5, height: 5 }));
     });
@@ -1146,3 +1142,4 @@ toMatchInlineSnapshot(`
   });
 
 });
+/* eslint-enable max-len */
