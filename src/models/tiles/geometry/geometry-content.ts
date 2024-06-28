@@ -717,6 +717,17 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
     }
 
+    /**
+     * "Opens up" the polygon for editing.
+     * Sets the active polygon ID.
+     * The vertices of this polygon are "rotated" if necessary so that the point
+     * clicked becomes the last point in the list of vertices, and then the
+     * phantom point is inserted after it.
+     * @param board
+     * @param polygonId
+     * @param pointId
+     * @returns the updated polygon
+     */
     function makePolygonActive(board: JXG.Board, polygonId: string, pointId: string) {
       const poly = getPolygon(board, polygonId);
       const polygonModel = self.getObject(polygonId);
@@ -738,7 +749,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       self.activePolygonId = polygonId;
       const change: JXGChange = {
         operation: "update",
-        target: "object",
+        target: "polygon",
         targetID: poly.id,
         parents: reorderedVertices
       };
@@ -746,6 +757,15 @@ export const GeometryContentModel = GeometryBaseContentModel
       return isPolygon(updatedPolygon) ? updatedPolygon : undefined;
     }
 
+    /**
+     * Adds the given existing point to the active polygon.
+     * It is appended to the end of the list of vertexes in the model.
+     * On the board the phantom point will be moved to after this new vertex,
+     * and the polygon will remain unclosed.
+     * @param board
+     * @param pointId
+     * @returns the polygon
+     */
     function addPointToActivePolygon(board: JXG.Board, pointId: string) {
       // Sanity check everything
       if (!self.activePolygonId || !self.phantomPoint) return;
@@ -824,7 +844,8 @@ export const GeometryContentModel = GeometryBaseContentModel
             targetID: poly.id,
             parents: appendVertexId(vertexIds, phantomPoint?.id)
           };
-          syncChange(board, change2);
+          const result = syncChange(board, change2);
+          if (isPolygon(result)) newPolygon = result;
 
           const polyModel = self.activePolygonId && self.getObject(self.activePolygonId);
           if (polyModel && isPolygonModel(polyModel)) {
@@ -895,16 +916,15 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
 
     function createPolygonIncludingPoint(board: JXG.Board, pointId: string) {
+      if (!self.phantomPoint) return;
       const colorScheme = self.getObjectColorScheme(pointId) || 0;
-      const points = [pointId];
-      if (self.phantomPoint) points.push(self.phantomPoint.id);
-      const polygonModel = PolygonModel.create({ points, colorScheme });
+      const polygonModel = PolygonModel.create({ points: [pointId], colorScheme });
       self.addObjectModel(polygonModel);
       self.activePolygonId = polygonModel.id;
       const change: JXGChange = {
         operation: "create",
         target: "polygon",
-        parents: points,
+        parents: [pointId, self.phantomPoint.id],
         properties: { id: polygonModel.id, colorScheme }
       };
       const result = syncChange(board, change);

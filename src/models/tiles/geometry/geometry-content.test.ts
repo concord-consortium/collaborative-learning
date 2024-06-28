@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { clone, isEqualWith } from "lodash";
 import { destroy, getSnapshot } from "mobx-state-tree";
 import {
@@ -16,6 +17,8 @@ import {
   isText, kGeometryDefaultPixelsPerUnit, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin
 } from "./jxg-types";
 import { TileModel, ITileModel } from "../tile-model";
+import { getPoint } from "./geometry-utils";
+import placeholderImage from "../../../assets/image_placeholder.png";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../../register-tile-types";
@@ -28,8 +31,6 @@ jest.mock( "../../../utilities/image-utils", () => ({
   getImageDimensions: jest.fn(() =>
     Promise.resolve({ src: "test-file-stub", width: 200, height: 150 }))
 }));
-
-import placeholderImage from "../../../assets/image_placeholder.png";
 
 // mock Logger calls
 const mockLogTileChangeEvent = jest.fn();
@@ -115,6 +116,7 @@ function buildPolygon(board: JXG.Board, content: GeometryContentModelType,
     if (point) points.push(point);
   });
   const polygon = content.closeActivePolygon(board, points[finalVertexClicked]);
+  assertIsDefined(polygon);
   return { polygon, points };
 }
 
@@ -415,21 +417,95 @@ describe("GeometryContent", () => {
     destroyContentAndBoard(content, board);
   });
 
+  it("can create polygon from existing points", () => {
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "p1", x: 1, y: 1, colorScheme: 3 }));
+      _content.addObjectModel(PointModel.create({ id: "p2", x: 3, y: 3, colorScheme: 2 }));
+      _content.addObjectModel(PointModel.create({ id: "p3", x: 5, y: 1 }));
+    });
+    const phantom = content.addPhantomPoint(board, [0, 0]);
+
+    let polygon = content.createPolygonIncludingPoint(board, "p1");
+    assertIsDefined(polygon);
+    expect(polygon.vertices.map(v => v.id)).toEqual(["p1", phantom?.id, "p1"]);
+    const polyModel = content.getObject(polygon.id) as PolygonModelType;
+    assertIsDefined(polyModel);
+    expect(polyModel.points).toEqual(["p1"]);
+
+    polygon = content.addPointToActivePolygon(board, "p2")!;
+    expect(polygon.vertices.map(v => v.id)).toEqual(["p1", "p2", phantom?.id, "p1"]);
+    expect(polyModel.points).toEqual(["p1", "p2"]);
+
+    polygon = content.addPointToActivePolygon(board, "p3")!;
+    expect(polygon.vertices.map(v => v.id)).toEqual(["p1", "p2", "p3", phantom?.id, "p1"]);
+    expect(polyModel.points).toEqual(["p1", "p2", "p3"]);
+
+    polygon = content.closeActivePolygon(board, getPoint(board, "p1")!)!;
+    expect(polygon.vertices.map(v => v.id)).toEqual(["p1", "p2", "p3", "p1"]);
+    expect(polyModel.points).toEqual(["p1", "p2", "p3"]);
+    expect(polyModel.colorScheme).toEqual(3); // Starting point sets color
+    destroyContentAndBoard(content, board);
+  });
+
   it("can make two polygons that share a vertex", () => {
     const { content, board } = createContentAndBoard();
     // first polygon
     const { polygon, points } = buildPolygon(board, content, [[0, 0], [1, 1], [2, 2]]); // points 0, 1, 2
-    if (!isPolygon(polygon)) fail("buildPolygon did not return a polygon");
     // second polygon
     points.push(content.realizePhantomPoint(board, [5, 5], true).point!); // point 3
     points.push(content.realizePhantomPoint(board, [4, 4], true).point!); // point 4
     content.addPointToActivePolygon(board, points[2].id);
-    const polygon2 = content.closeActivePolygon(board, points[3]);
-    if (!isPolygon(polygon2)) fail("addPointToActivePolygon did not return a polygon");
-    expect(polygon.vertices.map(v => v.id)).toEqual([points[0].id, points[1].id, points[2].id, points[0].id]);
+    const polygon2 = content.closeActivePolygon(board, points[3])!;
+    expect(polygon?.vertices.map(v => v.id)).toEqual([points[0].id, points[1].id, points[2].id, points[0].id]);
     expect(polygon2.vertices.map(v => v.id)).toEqual([points[3].id, points[4].id, points[2].id, points[3].id]);
 
-    expect(content.getDependents([points[2].id])).toEqual([points[2].id, polygon.id, polygon2.id]);
+    expect(content.getDependents([points[2].id])).toEqual([points[2].id, polygon?.id, polygon2.id]);
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can extend a polygon with additional points", () => {
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "extra1", x: 1, y: 1, colorScheme: 3 }));
+    });
+    const { polygon, points } = buildPolygon(board, content, [[1, 1], [3, 3], [7, 4]], 0);
+    expect(polygon?.vertices.map(v => v.id)).toEqual([points[0].id, points[1].id, points[2].id, points[0].id]);
+    expect(content.lastObjectOfType("polygon")).toEqual({
+      id: polygon?.id, type: "polygon", points: [ points[0].id, points[1].id, points[2].id ], colorScheme: 0 });
+
+    // Let's add some points between point[1] and points[2].
+    let newPoly = content.makePolygonActive(board, polygon.id, points[1].id);
+    expect(newPoly?.vertices.map(v => v.id)).toEqual(
+      [points[2].id, points[0].id, points[1].id, content.phantomPoint?.id, points[2].id]);
+    expect(content.lastObjectOfType("polygon")).toEqual({
+      id: polygon?.id, type: "polygon", points: [ points[2].id, points[0].id, points[1].id ], colorScheme: 0 });
+
+    // Add existing point
+    newPoly = content.addPointToActivePolygon(board, "extra1");
+    expect(newPoly?.vertices.map(v => v.id)).toEqual(
+      [points[2].id, points[0].id, points[1].id, "extra1", content.phantomPoint?.id, points[2].id]);
+    expect(content.lastObjectOfType("polygon")).toEqual({
+      id: polygon?.id, type: "polygon",
+      points: [ points[2].id, points[0].id, points[1].id, "extra1" ], colorScheme: 0 });
+
+    // Add new point
+    const result = content.realizePhantomPoint(board, [10, 10], true);
+    newPoly = result.polygon;
+    const newPoint = result.point;
+    expect(newPoly?.vertices.map(v => v.id)).toEqual(
+      [points[2].id, points[0].id, points[1].id, "extra1", newPoint?.id, content.phantomPoint?.id, points[2].id]);
+    expect(content.lastObjectOfType("polygon")).toEqual({
+      id: polygon?.id, type: "polygon",
+      points: [ points[2].id, points[0].id, points[1].id, "extra1", newPoint?.id ], colorScheme: 0 });
+
+    newPoly = content.closeActivePolygon(board, points[2]);
+    expect(newPoly?.vertices.map(v => v.id)).toEqual(
+      [points[2].id, points[0].id, points[1].id, "extra1", newPoint?.id, points[2].id]);
+    expect(content.lastObjectOfType("polygon")).toEqual({
+      id: polygon?.id, type: "polygon",
+      points: [ points[2].id, points[0].id, points[1].id, "extra1", newPoint?.id ], colorScheme: 0 });
+
+    destroyContentAndBoard(content, board);
+
   });
 
   it("can add/remove/update polygons from model", () => {
