@@ -916,6 +916,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         this.handleLabelVertexAngle(point);
       }
     });
+    logGeometryEvent(this.getContent(), "update", "point", point.id, { text: name, labelOption });
   };
 
   private handleLabelVertexAngle = (point: JXG.Point) => {
