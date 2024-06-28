@@ -153,7 +153,9 @@ export class GraphController {
         attrType = dataConfiguration.attributeType(attrRole) ?? 'empty',
         currAxisModel = graphModel.getAxis(place),
         currentType = currAxisModel?.type ?? 'empty',
-        [min, max] = kDefaultNumericAxisBounds;
+        [min, max] = graphModel.lockAxes && isNumericAxisModel(currAxisModel)
+                       ? [currAxisModel.min, currAxisModel.max]
+                       : kDefaultNumericAxisBounds;
       switch (attrType) {
         case 'numeric': {
           if (!currAxisModel || !isNumericAxisModel(currAxisModel)) {
