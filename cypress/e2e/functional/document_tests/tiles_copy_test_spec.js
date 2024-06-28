@@ -30,16 +30,21 @@ let canvas = new Canvas;
 const imageName = "Image Tile";
 const simName = "Test Simulation";
 const diagramName = "Test Diagram";
+const categoricalGraphName = "Categorical Graph Test";
+const categoricalGraphCopyName = "Categorical Graph Test 1";
+
 const studentWorkspace = 'QA 1.1 Solving a Mystery with Proportional Reasoning';
 const studentWorkspaceCopyTiles = 'Test Workspace Copy Tiles';
 const studentClassWorkCopyTiles = 'Test Class Work Copy Tiles';
 
-const tiles1 = [{ "name": "table" },
-{ "name": "geometry" },
-{ "name": "drawing" },
-{ "name": "expression" },
-{ "name": "numberline" },
-{ "name": "image" }];
+const tiles1 = [
+  { "name": "table" },
+  { "name": "geometry" },
+  { "name": "drawing" },
+  { "name": "expression" },
+  { "name": "numberline" },
+  { "name": "image" }
+];
 const tiles2 = [
   { "name": "data-card" },
   { "name": "dataflow" },
@@ -299,6 +304,49 @@ context('Test copy tiles from one document to other document', function () {
 
     //Verify class work document tiles are copied correctly
     testPrimaryWorkspace2();
+
+  });
+});
+
+context("Test copy tile within a document", function () {
+  it("Copies a graph tile within a document", function () {
+    beforeTest(student5);
+
+    // Add table tile and populate it with categorical data.
+    cy.log("Add table tile with categorical data");
+    clueCanvas.addTile("table");
+    cy.get(".primary-workspace").within((workspace) => {
+      tableToolTile.typeInTableCellXY(0, 0, "small");
+      tableToolTile.getTableCellXY(0, 0).should("contain", "small");
+      tableToolTile.typeInTableCellXY(1, 0, "medium");
+      tableToolTile.getTableCellXY(1, 0).should("contain", "medium");
+      tableToolTile.typeInTableCellXY(0, 1, "red");
+      tableToolTile.getTableCellXY(0, 1).should("contain", "red");
+      tableToolTile.typeInTableCellXY(1, 1, "green");
+      tableToolTile.getTableCellXY(1, 1).should("contain", "green");
+    });
+
+    // Graph the table data in a new graph tile
+    cy.get(".primary-workspace .tile-toolbar button.toolbar-button.link-graph").click();
+    cy.get("[data-test=link-tile-select]").select("New Graph");
+    cy.get(".modal-button").contains("Graph It").click();
+    cy.get(".primary-workspace .graph-wrapper").should("have.length", 1);
+    cy.get(".primary-workspace .graph-wrapper .editable-tile-title-text").first().should("contain", "Graph 1");
+    cy.get(".primary-workspace .graph-wrapper .editable-tile-title-text").first().click();
+    cy.get(".primary-workspace .graph-wrapper .editable-tile-title").first().type(categoricalGraphName + "{enter}");
+    cy.get(".primary-workspace .graph-wrapper .editable-tile-title-text").first().should("contain", categoricalGraphName);
+    cy.get(".primary-workspace .graph-wrapper").first().find("g.graph-dot").should("have.length", 2).each(($g) => {
+      cy.wrap($g).should("have.attr", "transform").should("not.be.empty");
+    });
+
+    // Click on new graph tile to select it, then copy it
+    cy.get(".primary-workspace .graph-wrapper").first().click();
+    cy.get("[data-testid=tool-duplicate]").click();
+    cy.get(".primary-workspace .graph-wrapper").should("have.length", 2);
+    cy.get(".primary-workspace .graph-wrapper .editable-tile-title-text").eq(1).should("contain", categoricalGraphCopyName);
+    cy.get(".primary-workspace .graph-wrapper").eq(1).find("g.graph-dot").should("have.length", 2).each(($g) => {
+      cy.wrap($g).should("have.attr", "transform").should("not.be.empty");
+    });
 
   });
 });
