@@ -61,13 +61,12 @@ context('Geometry Table Integration', function () {
     geometryToolTile.getGeometryTile().siblings(clueCanvas.linkIconEl()).children('svg').attribute('data-indicator-width').should('exist');
     geometryToolTile.getGraph().should('have.class', 'is-linked');
 
-    cy.log('verify points added has label in table and geometry');
+    cy.log('verify points added not labeled by default');
     tableToolTile.getIndexNumberToggle().should('exist').click({ force: true });
     tableToolTile.getTableIndexColumnCell().first().should('contain', '1');
-    geometryToolTile.getGraphPointLabel().contains('A').should('exist');
-    geometryToolTile.getGraphPointLabel().contains('B').should('exist');
-    geometryToolTile.getGraphPointLabel().contains('C').should('exist');
-    geometryToolTile.getGraphPointLabel().contains('D').should('exist');
+    geometryToolTile.getGeometryTile().click();
+    geometryToolTile.getGraphPointLabel().should('have.length', 2); // just x and y labels
+    geometryToolTile.getGraphPointLabel().contains('A').should('not.exist');
 
     cy.log('verify table can be linked to two geometry tiles');
     clueCanvas.addTile('geometry');
@@ -80,7 +79,7 @@ context('Geometry Table Integration', function () {
     geometryToolTile.getGraph().last().should('not.have.class', 'is-linked');
 
     cy.log('verify point no longer has p1 in table and geometry');
-    geometryToolTile.getGraphPointLabel().contains('A').should('have.length', 1);
+    geometryToolTile.getGraphPointLabel().contains('A').should('not.exist');
 
     clueCanvas.deleteTile('geometry');
   });
