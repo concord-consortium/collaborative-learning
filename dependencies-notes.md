@@ -20,7 +20,6 @@ Notes on dependencies, particularly reasons for not updating to their latest ver
 
 |Dependency          |Current Version|Latest Version|Notes                                                                                |
 |--------------------|---------------|--------------|-------------------------------------------------------------------------------------|
-|@concord-consortium/jsxgraph|0.99.8-cc.1|1.4.4     |We have our own fork that (unfortunately) hasn't been updated for a long time.       |
 |@concord-consortium/react-hook-form|3.0.0-cc.1|3.0.0|Had to create our own fork to update React `peerDependencies` for npm 8.11. Original appears to have been abandoned.|
 |@chakra-ui/react    |1.8.9          |2.5.5         |Brought in with CODAP's Graph component. CODAP uses v2 but v2 requires React 18      |
 |chart.js            |2.9.4          |3.9.1         |Major version not attempted; only used by Dataflow tile, which doesn't really use it.|
