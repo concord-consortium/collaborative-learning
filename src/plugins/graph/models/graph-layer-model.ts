@@ -11,6 +11,7 @@ import { IDataSet, addCanonicalCasesToDataSet } from "../../../models/data/data-
 import { ISharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { DotsElt } from "../d3-types";
 import { ICaseCreation } from "../../../models/data/data-set-types";
+import { isImageUrl } from "../../../utilities/string-utils";
 
 export const GraphLayerModel = types
   .model('GraphLayerModel')
@@ -101,10 +102,19 @@ export const GraphLayerModel = types
         const isValidYAttr = yAttrId && !!data?.attrFromID(yAttrId);
 
         if (!isValidXAttr && !isValidYAttr) {
-          this.autoAssignAttributeID("bottom", "x", data?.id ?? "", data?.attributes[0].id || '');
-          if (attributeCount > 1) {
-            this.autoAssignAttributeID("left", "y", data?.id ?? "", data?.attributes[1].id || '');
-          }
+          const validAttributes = data?.attributes.filter(attr => {
+            return data?.cases.every((c) => {
+              const value = data?.getValue(c.__id__, attr.id);
+              // For now at least, we do not graph images.
+              return !(typeof value === "string" && isImageUrl(value));
+            });
+          });
+
+          const bottomAttrId = validAttributes && validAttributes.length > 0 ? validAttributes[0].id : "";
+          const leftAttrId = validAttributes && validAttributes.length > 1 ? validAttributes[1].id : "";
+
+          this.autoAssignAttributeID("bottom", "x", data?.id ?? "", bottomAttrId);
+          this.autoAssignAttributeID("left", "y", data?.id ?? "", leftAttrId);
         }
       } else {
         console.log('autoAssign is off');

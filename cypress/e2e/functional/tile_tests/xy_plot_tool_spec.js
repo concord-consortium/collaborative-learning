@@ -305,6 +305,30 @@ context('XYPlot Tool Tile', function () {
       xyTile.getGraphDot().should('have.length', 8);
     });
 
+    it("Does not graph image URLs", () => {
+      beforeTest(`${Cypress.config("qaMothPlotUnitStudent5")}&mouseSensor`);
+      clueCanvas.addTile("datacard");
+      dataCard.getTile().should("exist");
+      dataCard.getAddAttributeButton().click();
+      dataCard.getAttrName().eq(0).dblclick().type("Image{enter}");
+      dataCard.getAddAttributeButton().click();
+      dataCard.getAttrName().eq(1).dblclick().type("Name{enter}");
+      dataCard.getAddAttributeButton().click();
+      dataCard.getAttrName().eq(2).dblclick().type("Type{enter}");
+      dataCard.getAttrValue().eq(0).click().type("https://concord.org/images/energy3d.png{enter}");
+      dataCard.getAttrValue().eq(1).click().type("Energy3D{enter}");
+      dataCard.getAttrValue().eq(2).click().type("download{enter}");
+      dataCard.getAddCardButton().click();
+      dataCard.getAttrValue().eq(0).click().type("https://concord.org/images/codap.png{enter}");
+      dataCard.getAttrValue().eq(1).click().type("CODAP{enter}");
+      dataCard.getAttrValue().eq(2).click().type("web app{enter}");
+      dataCard.getGraphItButton().click();
+      cy.wait(1000);
+      // Image shold not be graphed
+      xyTile.getXAxisLabel().should("contain", "Name");
+      xyTile.getYAxisLabel().should("contain", "Type");
+    });
+
     it("Test undo redo actions", () => {
       beforeTest(queryParamsMultiDataset);
       cy.log("Undo redo  XY Plot Tile creation");
