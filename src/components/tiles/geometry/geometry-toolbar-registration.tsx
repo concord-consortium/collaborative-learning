@@ -82,18 +82,21 @@ const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButton
 const LabelButton = observer(function LabelButton({name}: IToolbarButtonComponentProps) {
   const { content, board, handlers } = useGeometryTileContext();
   const selectedPoint = board && content?.getOneSelectedPoint(board);
+  const selectedSegment = board && content?.getOneSelectedSegment(board);
   const labelProps = selectedPoint && content?.getPointLabelProps(selectedPoint.id);
+
+  // TODO
   const selected = labelProps && labelProps?.labelOption !== ELabelOption.kNone;
 
   function handleClick() {
-    handlers?.handleLabelDialog();
+    handlers?.handleLabelDialog(selectedPoint, selectedSegment);
   }
 
   return (
     <TileToolbarButton
       name={name}
       title="Label/Value"
-      disabled={!selectedPoint}
+      disabled={!selectedPoint && !selectedSegment}
       selected={selected}
       onClick={handleClick}
     >

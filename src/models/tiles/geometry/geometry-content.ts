@@ -1177,10 +1177,11 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
 
     function updatePolygonSegmentLabel(board: JXG.Board | undefined, polygon: JXG.Polygon,
-                                       points: [JXG.Point, JXG.Point], labelOption: ELabelOption) {
+                                       points: [JXG.Point, JXG.Point], labelOption: ELabelOption,
+                                       name: string|undefined ) {
       const polygonModel = self.getObject(polygon.id);
       if (isPolygonModel(polygonModel)) {
-        polygonModel.setSegmentLabel([points[0].id, points[1].id], labelOption);
+        polygonModel.setSegmentLabel([points[0].id, points[1].id], labelOption, name);
       }
 
       const parentIds = points.map(obj => obj.id);
@@ -1189,7 +1190,7 @@ export const GeometryContentModel = GeometryBaseContentModel
               target: "polygon",
               targetID: polygon.id,
               parents: parentIds,
-              properties: { labelOption }
+              properties: { labelOption, name }
             };
       return applyAndLogChange(board, change);
     }

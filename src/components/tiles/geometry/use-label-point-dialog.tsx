@@ -1,42 +1,12 @@
-import React, { PropsWithChildren, useState } from "react";
+import React, { useState } from "react";
 import { ELabelOption } from "../../../models/tiles/geometry/jxg-changes";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { canSupportVertexAngle, getVertexAngle } from "../../../models/tiles/geometry/jxg-vertex-angle";
+import { LabelRadioButton } from "./label-radio-button";
 
 import LabelSvg from "../../../clue/assets/icons/shapes-label-value-icon.svg";
 
 import "./label-dialog.scss";
-
-interface LabelRadioButtonProps {
-  display: string;
-  label: string;
-  checkedLabel: string;
-  setLabelOption: React.Dispatch<React.SetStateAction<string>>;
-}
-const LabelRadioButton = function (
-    {display, label, checkedLabel, setLabelOption, children}: PropsWithChildren<LabelRadioButtonProps>) {
-  return (
-    <div className="radio-button-container">
-      <input
-        className="radio-button"
-        type="radio"
-        id={label}
-        name="labelOption"
-        value={label}
-        checked={label === checkedLabel}
-        onChange={e => {
-          if (e.target.checked) {
-            setLabelOption(e.target.value);
-          }
-        }}
-      />
-      <label htmlFor={label}>
-        {display}
-      </label>
-      {children}
-    </div>
-  );
-};
 
 interface IContentProps {
   labelOption: string;

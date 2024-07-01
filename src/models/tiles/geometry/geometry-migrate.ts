@@ -133,11 +133,11 @@ export const convertModelObjectToChanges = (obj: GeometryObjectModelType): JXGCh
       const { type, points: parents, labels, ...props } = poly;
       const properties = omitNullish(props);
       changes.push({ operation: "create", target: "polygon", parents, properties });
-      (labels || []).forEach(({ id, option }) => {
+      (labels || []).forEach(({ id, option, name }) => {
         const pts = pointIdsFromSegmentId(id);
         if (pts.length === 2) {
           const _parents = [pts[0], pts[1]];
-          const _properties = { labelOption: option };
+          const _properties = { labelOption: option, name };
           changes.push({
             operation: "update", target: "polygon", targetID: poly.id, parents: _parents, properties: _properties });
         }

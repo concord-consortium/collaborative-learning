@@ -258,24 +258,18 @@ function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
   const segment = getPolygonEdge(board, change.targetID as string, change.parents as string[]);
   if (segment) {
     const labelOption = !Array.isArray(change.properties) && change.properties?.labelOption;
+    const requestedName = (!Array.isArray(change.properties) && change.properties?.name) || "";
     const clientLabelOption = (labelOption === ELabelOption.kLabel) ||
                               (labelOption === ELabelOption.kLength)
                                 ? labelOption
                                 : null;
-    const clientOriginalName = segment.getAttribute("clientOriginalName");
-    if (!clientOriginalName && (typeof segment.name === "string")) {
-      // store the original generated name so we can restore it if necessary
-      segment._set("clientOriginalName", segment.name);
-    }
+    segment._set("clientOriginalName", requestedName);
     segment._set("clientLabelOption", clientLabelOption);
-    const name = clientLabelOption
-                  ? clientLabelOption === "label"
-                      ? segmentNameLabelFn
-                      : segmentNameLengthFn
-                  // if we're removing our label, restore the original one
-                  : clientOriginalName || board.generateName(segment);
+    const name = clientLabelOption && clientLabelOption === ELabelOption.kLength
+                  ? segmentNameLengthFn
+                  : requestedName;
     segment.setAttribute({ name, withLabel: !!clientLabelOption });
-    segment.label?.setAttribute({ visible: !!clientLabelOption });
+//    segment.label?.setAttribute({ visible: !!clientLabelOption });
   }
 }
 
@@ -348,7 +342,7 @@ export const polygonChangeAgent: JXGChangeAgent = {
 
   update: (board, change) => {
     if ((change.target === "polygon") && change.parents &&
-        !Array.isArray(change.properties) && change.properties?.labelOption) {
+        !Array.isArray(change.properties) && (change.properties?.labelOption || change.properties?.name)) {
       updateSegmentLabelOption(board, change);
       return;
     }

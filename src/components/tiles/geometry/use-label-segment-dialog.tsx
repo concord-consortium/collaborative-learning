@@ -1,44 +1,21 @@
 import React, { useState, useMemo } from "react";
-import LineLabelSvg from "../../../clue/assets/icons/geometry/line-label.svg";
 import { ELabelOption } from "../../../models/tiles/geometry/jxg-changes";
 import { getPolygonEdge } from "../../../models/tiles/geometry/jxg-polygon";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
-import "./label-segment-dialog.scss";
+import { LabelRadioButton } from "./label-radio-button";
 
-interface LabelRadioButtonProps {
-  display: string;
-  label: string;
-  checkedLabel: string;
-  setLabelOption: React.Dispatch<React.SetStateAction<string>>;
-}
-const LabelRadioButton: React.FC<LabelRadioButtonProps> = ({display, label, checkedLabel, setLabelOption}) => {
-  return (
-    <div className="radio-button-container">
-      <input
-        className="radio-button"
-        type="radio"
-        id={label}
-        name="labelOption"
-        value={label}
-        checked={label === checkedLabel}
-        onChange={e => {
-          if (e.target.checked) {
-            setLabelOption(e.target.value);
-          }
-        }}
-      />
-      <label htmlFor={label}>
-        {display}
-      </label>
-    </div>
-  );
-};
+import LabelSvg from "../../../clue/assets/icons/shapes-label-value-icon.svg";
+
+import "./label-dialog.scss";
 
 interface IContentProps {
   labelOption: string;
   setLabelOption: React.Dispatch<React.SetStateAction<string>>;
+  name?: string;
+  setName: React.Dispatch<React.SetStateAction<string>>;
 }
-const Content: React.FC<IContentProps> = ({ labelOption, setLabelOption }) => {
+const Content: React.FC<IContentProps> = (
+  { labelOption, setLabelOption, name, setName }) => {
   return (
     <fieldset className="radio-button-set">
       <LabelRadioButton
@@ -48,11 +25,16 @@ const Content: React.FC<IContentProps> = ({ labelOption, setLabelOption }) => {
         setLabelOption={setLabelOption}
       />
       <LabelRadioButton
-        display="Label"
+        display="Label:"
         label={ELabelOption.kLabel}
         checkedLabel={labelOption}
         setLabelOption={setLabelOption}
-      />
+      >
+        <input type="text" className="name-input"
+          disabled={labelOption !== ELabelOption.kLabel}
+          value={name}
+          onChange={(e) => { setName(e.target.value); }} />
+      </LabelRadioButton>
       <LabelRadioButton
         display="Length"
         label={ELabelOption.kLength}
@@ -72,37 +54,39 @@ interface IProps {
   board: JXG.Board;
   polygon: JXG.Polygon;
   points: [JXG.Point, JXG.Point];
-  onAccept: (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ELabelOption) => void;
+  onAccept: (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ELabelOption, name: string) => void;
   onClose: () => void;
 }
 export const useLabelSegmentDialog = ({ board, polygon, points, onAccept, onClose }: IProps) => {
   const segment = useMemo(() => getPolygonSegment(board, polygon, points), [board, polygon, points]);
   const [initialLabelOption] = useState(segment?.getAttribute("clientLabelOption") || "none");
   const [labelOption, setLabelOption] = useState(initialLabelOption);
+  const [initialName] = useState(segment?.getAttribute("clientOriginalName") || "");
+  const [name, setName] = useState(initialName);
 
-  const handleClick = () => {
+  const handleSubmit = () => {
     if (polygon && points && (initialLabelOption !== labelOption)) {
-      onAccept(polygon, points, labelOption);
+      onAccept(polygon, points, labelOption, name);
     } else {
       onClose();
     }
   };
 
   const [showModal, hideModal] = useCustomModal({
-    Icon: LineLabelSvg,
-    title: "Segment Label",
+    Icon: LabelSvg,
+    title: "Segment Label/Value",
     Content,
-    contentProps: { labelOption, setLabelOption },
+    contentProps: { labelOption, setLabelOption, name, setName },
     buttons: [
       { label: "Cancel" },
       { label: "OK",
         isDefault: true,
         isDisabled: false,
-        onClick: handleClick
+        onClick: handleSubmit
       }
     ],
     onClose
-  }, [labelOption]);
+  }, [labelOption, name]);
 
   return [showModal, hideModal];
 };

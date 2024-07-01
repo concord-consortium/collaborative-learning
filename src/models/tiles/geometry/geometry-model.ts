@@ -203,12 +203,22 @@ export const PointMetadataModel = types.model("PointMetadata", {
 
 export interface PointMetadataModelType extends Instance<typeof PointMetadataModel> {}
 
-export const segmentIdFromPointIds = (ptIds: [string, string]) => `${ptIds[0]}:${ptIds[1]}`;
-export const pointIdsFromSegmentId = (segmentId: string) => segmentId.split(":");
+// PolygonSegments are edges of polygons.
+// Usually we don't need to know anything about them since they are defined by
+// the polygon and its vertices. However, if they are labeled we store that
+// information. The ID used is the concatenated IDs of the endpoints.
+
+// We use a double colon separator since linked point IDs have a single colon in
+// them. Besides these methods, also note the separator comes into play in
+// `updateGeometryContentWithNewSharedModelIds`.
+
+export const segmentIdFromPointIds = (ptIds: [string, string]) => `${ptIds[0]}::${ptIds[1]}`;
+export const pointIdsFromSegmentId = (segmentId: string) => segmentId.split("::");
 
 export const PolygonSegmentLabelModel = types.model("PolygonSegmentLabel", {
-  id: types.identifier, // {pt1Id}:{pt2Id}
-  option: types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption))
+  id: types.identifier, // {pt1Id}::{pt2Id}
+  option: types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption)),
+  name: types.maybe(types.string)
 });
 export interface PolygonSegmentLabelModelType extends Instance<typeof PolygonSegmentLabelModel> {}
 export interface PolygonSegmentLabelModelSnapshot extends SnapshotIn<typeof PolygonSegmentLabelModel> {}
@@ -256,9 +266,9 @@ export const PolygonModel = GeometryObjectModel
     replacePoints(ids: string[]) {
       self.points.replace(ids);
     },
-    setSegmentLabel(ptIds: [string, string], option: ELabelOption) {
+    setSegmentLabel(ptIds: [string, string], option: ELabelOption, name: string|undefined) {
       const id = segmentIdFromPointIds(ptIds);
-      const value = { id, option };
+      const value = { id, option, name };
       const foundIndex = self.labels?.findIndex(label => label.id === id);
       // remove any existing label if setting label to "none"
       if (option === ELabelOption.kNone) {

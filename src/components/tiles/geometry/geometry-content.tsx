@@ -613,14 +613,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const polygon = segment && getAssociatedPolygon(segment);
       if (!polygon || !segment || (points.length !== 2)) return;
       const handleClose = () => this.setState({ showSegmentLabelDialog: false });
-      const handleAccept = (poly: JXG.Polygon, pts: [JXG.Point, JXG.Point], labelOption: ELabelOption) =>
+      const handleAccept = (poly: JXG.Polygon, pts: [JXG.Point, JXG.Point], labelOption: ELabelOption, name: string) =>
                             {
-                              this.handleLabelSegment(poly, pts, labelOption);
+                              this.handleLabelSegment(poly, pts, labelOption, name);
                               handleClose();
                             };
       return (
         <LabelSegmentDialog
-          key="editor"
           board={board}
           polygon={polygon}
           points={points as [JXG.Point, JXG.Point]}
@@ -897,8 +896,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return hasSelectedPoints;
   };
 
-  private handleLabelDialog = () => {
-    this.setState({ showPointLabelDialog: true });
+  private handleLabelDialog = (selectedPoint: JXG.Point|undefined, selectedSegment: JXG.Line|undefined) => {
+    if (selectedSegment) {
+      this.setState({ showSegmentLabelDialog: true });
+    } else {
+      this.setState({ showPointLabelDialog: true });
+    }
   };
 
   private handleSetPointLabelOptions =
@@ -999,9 +1002,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleLabelSegment =
-            (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ELabelOption) => {
+            (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ELabelOption, name: string) => {
     this.applyChange(() => {
-      this.getContent().updatePolygonSegmentLabel(this.state.board, polygon, points, labelOption);
+      this.getContent().updatePolygonSegmentLabel(this.state.board, polygon, points, labelOption, name);
     });
   };
 

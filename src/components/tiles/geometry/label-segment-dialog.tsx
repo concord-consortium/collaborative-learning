@@ -6,7 +6,7 @@ interface IProps {
   board: JXG.Board;
   polygon: JXG.Polygon;
   points: [JXG.Point, JXG.Point];
-  onAccept: (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ELabelOption) => void;
+  onAccept: (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ELabelOption, name: string) => void;
   onClose: () => void;
 }
 
