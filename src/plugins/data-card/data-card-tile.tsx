@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useRef, useState } from "react";
-import { ITileProps, extractDragTileType, kDragTiles } from "../../components/tiles/tile-component";
+import { ITileProps } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
 import { DataCardContentModelType } from "./data-card-content";
 import { DataCardRows } from "./components/data-card-rows";
@@ -13,8 +13,6 @@ import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 import { useCautionAlert } from "../../components/utilities/use-caution-alert";
 import { EditFacet } from "./data-card-types";
 import { DataCardSortArea } from "./components/sort-area";
-import { safeJsonParse } from "../../utilities/js-utils";
-import { mergeTwoDataSets } from "../../models/data/data-set-utils";
 import { CustomEditableTileTitle } from "../../components/tiles/custom-editable-tile-title";
 import { DataCardToolbarContext } from "./data-card-toolbar-context";
 import { CasesCountDisplay } from "./components/cases-count-display";
@@ -23,9 +21,8 @@ import { useDataCardTileHeight } from "./use-data-card-tile-height";
 import "./data-card-tile.scss";
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer(function DataCardToolComponent(props) {
-  const { documentId, model, readOnly, documentContent, tileElt, onSetCanAcceptDrop, onRegisterTileApi,
-            scale, onUnregisterTileApi,
-            height, onRequestRowHeight } = props;
+  const { documentId, model, readOnly, documentContent, tileElt, onRegisterTileApi,
+          scale, onUnregisterTileApi, height, onRequestRowHeight } = props;
   const backgroundRef = useRef<HTMLDivElement | null>(null);
 
   const content = model.content as DataCardContentModelType;
@@ -38,7 +35,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const [currEditAttrId, setCurrEditAttrId] = useState<string>("");
   const [currEditFacet, setCurrEditFacet] = useState<EditFacet>("");
   const [imageUrlToAdd, setImageUrlToAdd] = useState<string>("");
-  const [highlightDataCard, setHighlightDataCard] = useState(false);
 
   const shouldShowAddCase = !readOnly && isTileSelected;
   const shouldShowDeleteCase = !readOnly && isTileSelected && dataSet.cases.length > 1;
@@ -66,79 +62,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
     attrCount: content.attributes.length,
     isSingleView: displaySingle
   });
-
-  /* ==[ Drag and Drop ] == */
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    const isAcceptableDrag = isAcceptableDataCardDrag(e);
-    onSetCanAcceptDrop(isAcceptableDrag ? model.id : undefined); //this turns off highlighting outer edge
-  };
-
-  const isAcceptableDataCardDrag =  (e: React.DragEvent<HTMLDivElement>) => {
-    const draggingWithinItself = ui?.selectedTileIds.includes(model.id);
-    if (draggingWithinItself){
-      setHighlightDataCard(false);
-      return false;
-    }
-    const tileTypeDragged = extractDragTileType(e.dataTransfer);
-    const isDraggedTileDataCard = tileTypeDragged === "datacard"; //if two cards dragged, tileTypeDragged is undefined
-    if (!readOnly && isDraggedTileDataCard) {
-      const kImgDropMarginPct = 0.1;
-      const eltBounds = e.currentTarget.getBoundingClientRect();
-      const kImgDropMarginX = eltBounds.width * kImgDropMarginPct;
-      const kImgDropMarginY = eltBounds.height * kImgDropMarginPct;
-      if ((e.clientX > eltBounds.left + kImgDropMarginX) &&
-          (e.clientX < eltBounds.right - kImgDropMarginX) &&
-          (e.clientY > eltBounds.top + kImgDropMarginY) &&
-          (e.clientY < ((eltBounds.bottom - kImgDropMarginY) * 0.95))){
-        setHighlightDataCard(true); //within bounds
-        return true;
-      } else {
-        setHighlightDataCard(false); //out of bounds
-        return false;
-      }
-    }
-    else { //not of type Datacard
-      setHighlightDataCard(false);
-      return false;
-    }
-  };
-
-  const highlightContainerClasses = classNames(
-    "data-card-container",
-    {"highlight": highlightDataCard},
-    {"no-highlight": !highlightDataCard}
-  );
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-
-    if (isAcceptableDataCardDrag(e)) {
-      if (highlightDataCard) {
-        setHighlightDataCard(false); //after you drop turn off highlighting
-      }
-
-      /* ==[ Merge dragged tile -> dropped tile ] == */
-      const getDataDraggedTile = e.dataTransfer.getData(kDragTiles);
-      const parsedDataDraggedTile = safeJsonParse(getDataDraggedTile);
-      const contentOfDraggedTile= safeJsonParse(parsedDataDraggedTile.sharedModels[0].content);
-      const dataSetOfDraggedTile = contentOfDraggedTile.dataSet;
-
-      mergeTwoDataSets(dataSetOfDraggedTile, dataSet);
-      e.preventDefault();
-      e.stopPropagation(); //prevents calling document-content > handleDrop
-
-      /* ==[ Delete tile (if within same document) ] == */
-      const sourceDocIdDraggedTile = parsedDataDraggedTile.sourceDocId;
-      const docIdDroppedTile = props.docId;
-      const idDraggedTile = parsedDataDraggedTile.tiles[0].tileId;
-      if (sourceDocIdDraggedTile === docIdDroppedTile){
-        ui.removeTileIdFromSelection(idDraggedTile);
-        // document.deleteTile(idDraggedTile);
-        //TODO - document cannot be accessed, this would require a refactor
-        //https://www.pivotaltracker.com/n/projects/2441242/stories/185129553
-      }
-    }
-  };
 
   function nextCase() {
     if (content.caseIndex < content.totalCases - 1) {
@@ -261,11 +184,9 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
         <div
           className="data-card-content"
           onClick={handleBackgroundClick}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
           ref={element => backgroundRef.current = element}
         >
-          <div className={highlightContainerClasses}>
+          <div className="data-card-container">
             <div className="data-card-header-row">
               <div className="panel title">
                 <CustomEditableTileTitle
