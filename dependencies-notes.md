@@ -20,13 +20,11 @@ Notes on dependencies, particularly reasons for not updating to their latest ver
 
 |Dependency          |Current Version|Latest Version|Notes                                                                                |
 |--------------------|---------------|--------------|-------------------------------------------------------------------------------------|
-|@concord-consortium/jsxgraph|0.99.8-cc.1|1.4.4     |We have our own fork that (unfortunately) hasn't been updated for a long time.       |
 |@concord-consortium/react-hook-form|3.0.0-cc.1|3.0.0|Had to create our own fork to update React `peerDependencies` for npm 8.11. Original appears to have been abandoned.|
 |@chakra-ui/react    |1.8.9          |2.5.5         |Brought in with CODAP's Graph component. CODAP uses v2 but v2 requires React 18      |
 |chart.js            |2.9.4          |3.9.1         |Major version not attempted; only used by Dataflow tile, which doesn't really use it.|
 |firebase            |8.10.1         |9.9.3         |Version 9 requires substantial migration; attempted update with `compat` imports failed.|
 |immutable           |3.8.2          |4.1.0         |Major version update not attempted; only required by legacy slate versions.          |
-|jsxgraph            |1.4.4          |1.8.0         |1.4.5 broke scaled rendering, e.g. in 4-up views                                     |
 |mob-state-tree      |5.1.5-cc.1     |5.1.6         |We are using a concord fork which fixes a bug. Additionally latest version changes TS types for arrays which broke a number of our models.|
 |nanoid              |3.3.4          |4.0.0         |v4 switched to ESM and dependencies such as postcss break with v4                    |
 |netlify-cms-app     |2.15.72        |2.15.72       |Requires React 16 or 17. Blocks upgrade to React 18.                                 |
