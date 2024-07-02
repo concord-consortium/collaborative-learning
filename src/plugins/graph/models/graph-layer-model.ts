@@ -105,7 +105,7 @@ export const GraphLayerModel = types
           const validAttributes = data?.attributes.filter(attr => {
             return data?.cases.every((c) => {
               const value = data?.getValue(c.__id__, attr.id);
-              // For now at least, we do not graph images.
+              // Do not auto assign attributes containing image URLs.
               return !(typeof value === "string" && isImageUrl(value));
             });
           });
