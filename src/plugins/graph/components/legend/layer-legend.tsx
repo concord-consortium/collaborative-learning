@@ -7,7 +7,7 @@ import { useReadOnlyContext } from "../../../../components/document/read-only-co
 import { useGraphModelContext } from "../../hooks/use-graph-model-context";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
 import { isSharedDataSet, SharedDataSet } from "../../../../models/shared/shared-data-set";
-import { clueGraphColors } from "../../../../utilities/color-utils";
+import { clueDataColorInfo } from "../../../../utilities/color-utils";
 import { DataConfigurationContext, useDataConfigurationContext } from "../../hooks/use-data-configuration-context";
 import { IGraphLayerModel } from "../../models/graph-layer-model";
 import { LegendDropdown } from "./legend-dropdown";
@@ -101,7 +101,7 @@ const SingleLayerLegend = observer(function SingleLayerLegend(props: ILegendPart
           buttonAriaLabel={`Color: ${graphModel.getColorNameForId(description.attributeID)}`}
           buttonLabel={<ColorKey color={graphModel.getColorForId(description.attributeID)} />}
           menuItems={
-            clueGraphColors.map((color, colorIndex) => ({
+            clueDataColorInfo.map((color, colorIndex) => ({
               ariaLabel: color.name,
               key: color.color,
               label: <ColorKey color={color.color} />,

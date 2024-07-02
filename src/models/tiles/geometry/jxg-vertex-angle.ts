@@ -1,4 +1,5 @@
 import { castArray, each, values } from "lodash";
+import JXG from "jsxgraph";
 import { getObjectById } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";

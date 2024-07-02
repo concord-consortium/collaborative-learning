@@ -45,7 +45,7 @@ export function getTableLinkColors(tableId?: string) {
   const linkIndex = 0;
   return linkIndex >= 0
           ? colors[linkIndex % colors.length]
-          : undefined;
+          : colors[0];
 }
 
 export function isLinkableTable(client: IAnyStateTreeNode, tableId: string) {

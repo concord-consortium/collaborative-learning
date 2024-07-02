@@ -5,6 +5,7 @@ import { comma, StringBuilder } from "../../../utilities/string-builder";
 import {
   BoardModel, BoardModelType, CommentModel, CommentModelType, GeometryBaseContentModelType,
   GeometryExtrasContentSnapshotType, GeometryObjectModelType, ImageModel, ImageModelType,
+  isPointModel,
   MovableLineModel, MovableLineModelType, pointIdsFromSegmentId, PointModel, PointModelType,
   PolygonModel, PolygonModelType, PolygonSegmentLabelModelSnapshot, VertexAngleModel, VertexAngleModelType
 } from "./geometry-model";
@@ -31,18 +32,20 @@ export const convertChangesToModel = (changes: JXGChange[]) => {
   return exportGeometryModel(changesJson);
 };
 
-export const convertModelToChanges = (
+export const getGeometryBoardChange = (
   model: GeometryBaseContentModelType, boardOptions?: IGeometryBoardChangeOptions
-): JXGChange[] => {
-  const { board, bgImage, objects } = model;
-  const changes: JXGChange[] = [];
-  // convert the board
-  const { xAxis, yAxis } = board || BoardModel.create(kDefaultBoardModelOutputProps);
+): JXGChange => {
+  const { xAxis, yAxis } = model.board || BoardModel.create(kDefaultBoardModelOutputProps);
   const { name: xName, label: xAnnotation } = xAxis;
   const { name: yName, label: yAnnotation } = yAxis;
-  changes.push(
+  return (
     defaultGeometryBoardChange(xAxis, yAxis, { xName, yName, xAnnotation, yAnnotation }, boardOptions )
   );
+};
+
+export const convertModelToChanges = (model: GeometryBaseContentModelType): JXGChange[] => {
+  const { bgImage, objects } = model;
+  const changes: JXGChange[] = [];
   // convert the background image (if any)
   if (bgImage) {
     changes.push(...convertModelObjectToChanges(bgImage));
@@ -77,8 +80,16 @@ function omitNullish(inProps: Record<string, any>) {
 
 export const convertModelObjectsToChanges = (objects: GeometryObjectModelType[]): JXGChange[] => {
   const changes: JXGChange[] = [];
+  // Process points first, before objects like polygons that refer to them.
   objects.forEach(obj => {
-    changes.push(...convertModelObjectToChanges(obj));
+    if (isPointModel(obj)) {
+      changes.push(...convertModelObjectToChanges(obj));
+    }
+  });
+  objects.forEach(obj => {
+    if (!isPointModel(obj)) {
+      changes.push(...convertModelObjectToChanges(obj));
+    }
   });
   return changes;
 };

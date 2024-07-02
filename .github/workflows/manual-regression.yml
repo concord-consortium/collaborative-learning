@@ -48,8 +48,8 @@ on:
           - functional/tile_tests/drawing_tool_spec.js
           - functional/tile_tests/duplicate_tile_spec.js
           - functional/tile_tests/expression_tool_spec.js
-          - functional/tile_tests/graph_table_integraton_test_spec.js
-          - functional/tile_tests/graph_tool_spec.js
+          - functional/tile_tests/geometry_tool_spec.js
+          - functional/tile_tests/geometry_table_integraton_test_spec.js
           - functional/tile_tests/image_tool_spec.js
           - functional/tile_tests/numberline_tool_spec.js
           - functional/tile_tests/shared_dataset_spec.js

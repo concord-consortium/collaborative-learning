@@ -177,7 +177,22 @@ In addition, if shared variables are configured in unit, it supports additional 
 
 #### Geometry (Shapes Graph)
 
-Not updated to common toolbar framework and does not support toolbar configuration.
+Common toolbar framework. Default buttons:
+
+- `select`: mode for selecting and moving objects
+- `point`: mode for creating points
+- `polygon`: mode for creating polygons
+- `upload`: allows uploading an image to display in the background
+- `duplicate`: copies the currently selected objects
+- `angle-label`: toggles labeling of an angle
+- `line-label`: brings up a menu allowing labeling of segments
+- `comment`: adds a label to the currently selected object
+- `add-data`: link or unlink from a dataset
+- `delete`: delete the currently selected objects
+
+Available buttons not in default set:
+
+- `movable-line`: creates a line that can be positioned
 
 #### Graph
 

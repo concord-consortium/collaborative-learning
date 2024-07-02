@@ -669,7 +669,7 @@ export function updateGraphContentWithNewSharedModelIds(
   sharedDataSetEntries: SharedModelEntrySnapshotType[],
   updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds>
 ) {
-  return replaceJsonStringsWithUpdatedIds(content, ...Object.values(updatedSharedModelMap));
+  return replaceJsonStringsWithUpdatedIds(content, '"', ...Object.values(updatedSharedModelMap));
 }
 
 export function updateGraphObjectWithNewSharedModelIds(

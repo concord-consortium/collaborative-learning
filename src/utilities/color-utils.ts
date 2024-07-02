@@ -1,4 +1,5 @@
 import colorString from "color-string";
+import clueDataColors from "../clue/data-colors.scss";
 
 export const lightenColor = (color: string, pct = 0.5) => {
   const rgb = colorString.get.rgb(color);
@@ -25,25 +26,19 @@ export const isLightColorRequiringContrastOffset = (color?: string) => {
   return (luminance != null) && (luminance >= kLightLuminanceThreshold);
 };
 
-interface ClueColor {
+export interface ClueColor {
   color: string;
   name: string;
 }
-export const kGraphDataBlue = "#0069ff";
-export const kGraphDataOrange = "#ff9617";
-export const kGraphDataGreen = "#19a90f";
-export const kGraphDataRed = "#e00";
-export const kGraphDataYellow = "#cbd114";
-export const kGraphDataPurple = "#d51eff";
-export const kGraphDataIndigo = "#6b00d2";
-export const clueGraphColors: ClueColor[] = [
-  { color: kGraphDataBlue, name: "blue" },
-  { color: kGraphDataOrange, name: "orange" },
-  { color: kGraphDataGreen, name: "green" },
-  { color: kGraphDataRed, name: "red" },
-  { color: kGraphDataYellow, name: "yellow" },
-  { color: kGraphDataPurple, name: "purple" },
-  { color: kGraphDataIndigo, name: "indigo" }
+
+export const clueDataColorInfo: ClueColor[] = [
+  { color: clueDataColors.dataBlue, name: "blue" },
+  { color: clueDataColors.dataOrange, name: "orange" },
+  { color: clueDataColors.dataGreen, name: "green" },
+  { color: clueDataColors.dataRed, name: "red" },
+  { color: clueDataColors.dataYellow, name: "yellow" },
+  { color: clueDataColors.dataPurple, name: "purple" },
+  { color: clueDataColors.dataIndigo, name: "indigo" }
 ];
 
 /*

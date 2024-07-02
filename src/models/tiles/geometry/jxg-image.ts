@@ -15,7 +15,7 @@ export const imageChangeAgent: JXGChangeAgent = {
     if (displayUrl) parents[0] = displayUrl;
     const props = { id: uniqueId(), fixed: true, ...change.properties };
     return parents && parents.length >= 3
-            ? _board.create("image", parents, props)
+            ? _board.create("image", parents, props) as JXG.Image
             : undefined;
   },
 

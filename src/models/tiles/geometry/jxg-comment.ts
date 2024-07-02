@@ -87,17 +87,18 @@ export const commentChangeAgent: JXGChangeAgent = {
         "point",
         [1, 0], // places the end point of the comment line one unit to the right of the left edge of the comment
         { ...pointProps, anchor: comment.id, id: `${id}-commentPoint` }
-      );
+      ) as JXG.Point;
       const anchorPoint = _board.create(
         "point",
         // pass functions so that centroid is computed dynamically as anchor changes
         [centroidCoordinateGetter(0), centroidCoordinateGetter(1)],
         { ...pointProps, id: `${id}-anchorPoint` }
-      );
+      ) as JXG.Point;
       const line = _board.create(
         "line",
         [anchorPoint, commentPoint],
-        { ...lineProps, id: `${id}-labelLine`});
+        { ...lineProps, id: `${id}-labelLine`}
+      ) as JXG.Line;
       return [comment, commentPoint, anchorPoint, line];
     }
   },

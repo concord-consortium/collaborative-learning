@@ -152,3 +152,15 @@ export function formatTimeZoneOffset(offset: number) {
           pad2(Math.floor(posOffset / 60)) +
           pad2(posOffset % 60);
 }
+
+/**
+ * Check whether the given value is not null or undefined.
+ * This is useful for `filter` statements since it gives typescript the type certainty it needs.
+ * See https://stackoverflow.com/questions/43118692/typescript-filter-out-nulls-from-an-array
+ * Should be unnecessary after Typescript version 5.5
+ * @param value
+ * @returns
+ */
+export function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
+  return value != null;
+}

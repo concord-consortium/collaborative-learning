@@ -32,11 +32,27 @@ const createElementSpy = jest.spyOn(document, "createElement")
           : origCreateElement.call(document, tagName, options);
 });
 
+// Mock colors imported from SCSS
+jest.mock("../../../utilities/color-utils.ts", () => {
+  const originalModule = jest.requireActual("../../../utilities/color-utils.ts");
+  return {
+    ...originalModule,
+    clueDataColorInfo: [
+      { color: "#0069ff", name: "blue" },
+      { color: "#ff9617", name: "orange" },
+      { color: "#19a90f", name: "green" },
+      { color: "#ee0000", name: "red" },
+      { color: "#cbd114", name: "yellow" },
+      { color: "#d51eff", name: "purple" },
+      { color: "#6b00d2", name: "indigo" }    ]
+  };
+});
+
 import { getSnapshot } from '@concord-consortium/mobx-state-tree';
 import { GraphModel, IGraphModel } from './graph-model';
 import { kGraphTileType } from '../graph-defs';
 import {
-  clueGraphColors, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
+  clueDataColorInfo, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
 } from "../../../utilities/color-utils";
 import { MovablePointModel } from '../adornments/movable-point/movable-point-model';
 import { createDocumentModel, DocumentModelType } from '../../../models/document/document';
@@ -179,21 +195,21 @@ describe('GraphModel', () => {
       }
 
       // Colors should loop once we've gone through them all
-      clueGraphColors.forEach(color => {
+      clueDataColorInfo.forEach(color => {
         graphModel.setColorForId(color.color);
         // graphModel.getColorForId(color.color);
       });
       const extraId = "extra";
       graphModel.setColorForId(extraId);
       // graphModel.getColorForId(extraId);
-      expect(getUniqueColorIndices().length).toEqual(clueGraphColors.length);
+      expect(getUniqueColorIndices().length).toEqual(clueDataColorInfo.length);
 
       // After removing a color, we should get it when we add a new color
       const uniqueKey =
-        clueGraphColors.find(id => graphModel.getColorForId(id.color) !== graphModel.getColorForId(extraId))!.color;
+        clueDataColorInfo.find(id => graphModel.getColorForId(id.color) !== graphModel.getColorForId(extraId))!.color;
       const oldColor = graphModel.getColorForId(uniqueKey);
       graphModel.removeColorForId(uniqueKey);
-      expect(getUniqueColorIndices().length).toEqual(clueGraphColors.length - 1);
+      expect(getUniqueColorIndices().length).toEqual(clueDataColorInfo.length - 1);
       const newKey = "new";
       graphModel.setColorForId(newKey);
       const newColor = graphModel.getColorForId(newKey);

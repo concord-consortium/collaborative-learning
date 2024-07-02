@@ -58,6 +58,11 @@ class GeometryToolTile {
             return cy.get('.canvas-area .geometry-content .JXGtext').contains('y');
         }
     }
+    // Returns all tick labels on both axes. The X-axis ones are first in the list.
+    getGraphAxisTickLabels(axis) {
+      return cy.get('.canvas-area .geometry-content .tick-label');
+    }
+
     getGraphPointCoordinates(index){ //This is the point coordinate text
         let x=0,
             y=0;
@@ -75,6 +80,9 @@ class GeometryToolTile {
     getGraphPoint(){
         return cy.get('.geometry-content.editable ellipse[display="inline"]');
     }
+    getSelectedGraphPoint() {
+        return cy.get('.geometry-content.editable ellipse[stroke-opacity="0.25"]');
+    }
     hoverGraphPoint(x,y){
         let transX=this.transformFromCoordinate('x', x),
         transY=this.transformFromCoordinate('y', y);
@@ -82,11 +90,12 @@ class GeometryToolTile {
         this.getGraph().last()
             .trigger('mouseover',transX,transY);
     }
-    selectGraphPoint(x,y){
+    selectGraphPoint(x, y, withShiftKey = false ){
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
 
-        this.getGraph().last().click(transX, transY, {force:true});
+        this.getGraph().last()
+          .click(transX, transY, { force:true, shiftKey: withShiftKey });
     }
     getGraphPointID(point){
          return cy.get('.geometry-content.editable ellipse').eq(point)
@@ -127,9 +136,6 @@ class GeometryToolTile {
     }
     addComment(){
         cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.comment.enabled').click();
-    }
-    deleteGraphElement(){
-        cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.delete.enabled').click();
     }
 }
 export default GeometryToolTile;

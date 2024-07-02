@@ -206,7 +206,7 @@ context('Test Canvas', function () {
     geometryToolTile.getGeometryTile().should('exist');
     // clueCanvas.exportTileAndDocument('geometry-tool-tile');
     // in case we created a point while exporting
-    cy.get('.primary-workspace .geometry-toolbar .button.delete').click({ force: true });
+    // cy.get('.primary-workspace .geometry-toolbar .button.delete').click({ force: true });
 
     cy.log('adds an image tool');
     clueCanvas.addTile('image');

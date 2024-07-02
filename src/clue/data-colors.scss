@@ -1,0 +1,20 @@
+// These colors are used for data points in the Graph and Geometry tiles
+// The export allows them to be referenced in Javascript (via data-colors.scss.d.ts)
+
+$data-blue:   #0069ff;
+$data-orange: #ff9617;
+$data-green : #19a90f;
+$data-red:    #ee0000;
+$data-yellow: #cbd114;
+$data-purple: #d51eff;
+$data-indigo: #6b00d2;
+
+:export {
+  dataBlue:   $data-blue;
+  dataOrange: $data-orange;
+  dataGreen:  $data-green;
+  dataRed:    $data-red;
+  dataYellow: $data-yellow;
+  dataPurple: $data-purple;
+  dataIndigo: $data-indigo;
+}

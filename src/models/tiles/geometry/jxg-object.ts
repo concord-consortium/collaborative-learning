@@ -1,10 +1,10 @@
-import { sortByCreation, kReverse, getObjectById, syncLinkedPoints } from "./jxg-board";
-import {
-  ITableLinkProperties, JXGChangeAgent, JXGCoordPair, JXGPositionProperty, JXGProperties
+import { sortByCreation, kReverse, getObjectById } from "./jxg-board";
+import { JXGChangeAgent, JXGCoordPair, JXGPositionProperty, JXGProperties
 } from "./jxg-changes";
-import { isLinkedPoint, isText } from "./jxg-types";
+import { isText } from "./jxg-types";
 import { castArrayCopy } from "../../../utilities/js-utils";
 import { castArray, size } from "lodash";
+import { GeometryElementAttributes } from "jsxgraph";
 
 // Inexplicably, we occasionally encounter JSXGraph objects with null
 // transformations which cause JSXGraph to crash. Until we figure out
@@ -36,10 +36,6 @@ export function getGraphablePosition(position: JXGPositionProperty) {
   }) as JXGCoordPair;
 }
 
-export function getElementName(elt: JXG.GeometryElement) {
-  return (typeof elt.name === "function") ? elt.name() : elt.name;
-}
-
 export const objectChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     // can't create generic objects
@@ -51,10 +47,8 @@ export const objectChangeAgent: JXGChangeAgent = {
     const ids = castArray(change.targetID);
     const props: JXGProperties[] = castArray(change.properties);
     let hasSuspendedTextUpdates = false;
-    let hasLinkedPoints = false;
     ids.forEach((id, index) => {
       const obj = getObjectById(board, id);
-      if (isLinkedPoint(obj)) hasLinkedPoints = true;
       const textObj = isText(obj) ? obj : undefined;
       const objProps = index < props.length ? props[index] : props[0];
       if (obj && objProps) {
@@ -64,7 +58,7 @@ export const objectChangeAgent: JXGChangeAgent = {
         // suspended, and a text object (e.g. a comment or its anchor) has moved, the
         // transform will be calculated from a stale position. We unsuspend updates to
         // force a refresh on coordinate positions.
-        if (textObj && board.isSuspendedUpdate) {
+        if (textObj && board.isSuspendedRedraw) {
           hasSuspendedTextUpdates = true;
           board.unsuspendUpdate();
         }
@@ -83,11 +77,10 @@ export const objectChangeAgent: JXGChangeAgent = {
           textObj.setText(text);
         }
         if (size(others)) {
-          obj.setAttribute(others);
+          obj.setAttribute(others as GeometryElementAttributes);
         }
       }
     });
-    if (hasLinkedPoints) syncLinkedPoints(board, change.links as ITableLinkProperties);
     if (hasSuspendedTextUpdates) board.suspendUpdate();
     board.update();
     return undefined;

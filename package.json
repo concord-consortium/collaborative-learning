@@ -39,7 +39,7 @@
     },
     "transformIgnorePatterns": [
       "/comments/ESM-only (https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c) modules that should not be transformed by ts-jest",
-      "/node_modules/(?!(d3|d3-(.+)|delaunator|escape-string-regexp|internmap|json-stringify-pretty-compact|nanoid|robust-predicates)/)"
+      "/node_modules/(?!(d3|d3-(.+)|delaunator|escape-string-regexp|internmap|json-stringify-pretty-compact|jsxgraph|nanoid|robust-predicates)/)"
     ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
@@ -244,7 +244,7 @@
     "immutable": "^4.3.0",
     "initials": "^3.1.2",
     "json-stringify-pretty-compact": "^4.0.0",
-    "jsxgraph": "1.4.4",
+    "jsxgraph": "1.9.2",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
     "mathlive": "^0.94.6",

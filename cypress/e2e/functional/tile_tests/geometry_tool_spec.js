@@ -24,11 +24,12 @@ function beforeTest() {
 }
 
 context('Geometry Tool', function () {
-  it('will test adding points to a geometry', function () {
+  it('will test basic geometry functions', function () {
     beforeTest();
 
     cy.log("add a point to the origin");
     clueCanvas.addTile('geometry');
+    clueCanvas.clickToolbarButton('geometry', 'point');
     geometryToolTile.addPointToGraph(0, 0);
     geometryToolTile.getGraphPointCoordinates().should('exist');
 
@@ -38,6 +39,7 @@ context('Geometry Tool', function () {
     cy.get('.spacer').click();
     textToolTile.deleteTextTile();
     geometryToolTile.getGeometryTile().last().click();
+    clueCanvas.clickToolbarButton('geometry', 'point');
     geometryToolTile.addPointToGraph(5, 5);
     geometryToolTile.addPointToGraph(10, 5);
     geometryToolTile.addPointToGraph(10, 10);
@@ -94,6 +96,103 @@ context('Geometry Tool', function () {
 
     geometryToolTile.getGraphTitle().should("contain", newName);
     geometryToolTile.getGraphPoint().should('have.length', 3);
+
+    // Zoom in and out, fit
+    geometryToolTile.getGraphTileTitle().click();
+    geometryToolTile.getGraphAxisTickLabels().last().should("have.text", "10");
+    clueCanvas.clickToolbarButton('geometry', 'zoom-in');
+    clueCanvas.clickToolbarButton('geometry', 'zoom-in');
+    geometryToolTile.getGraphAxisTickLabels().last().should("have.text", "8");
+    clueCanvas.clickToolbarButton('geometry', 'fit-all');
+    geometryToolTile.getGraphAxisTickLabels().last().should("have.text", "10");
+    clueCanvas.clickToolbarButton('geometry', 'zoom-out');
+    clueCanvas.clickToolbarButton('geometry', 'zoom-out');
+    geometryToolTile.getGraphAxisTickLabels().last().should("have.text", "15");
+  });
+
+  it('works in all three modes', () => {
+    beforeTest();
+    clueCanvas.addTile('geometry');
+    geometryToolTile.getGraph().should("exist");
+
+    cy.log("add points with points mode");
+    clueCanvas.clickToolbarButton('geometry', 'point');
+    clueCanvas.toolbarButtonIsSelected('geometry', 'point');
+    geometryToolTile.getGraph().trigger('mousemove');
+    geometryToolTile.getGraphPoint().should("have.length", 1); // phantom point
+    geometryToolTile.addPointToGraph(1, 1);
+    geometryToolTile.addPointToGraph(2, 2);
+    geometryToolTile.getGraphPoint().should("have.length", 3);
+
+    // Duplicate point
+    geometryToolTile.selectGraphPoint(1, 1);
+    clueCanvas.clickToolbarButton('geometry', 'duplicate');
+    geometryToolTile.getGraph().trigger('mousemove'); // get phantom point back onto canvas after toolbar use
+    geometryToolTile.getGraphPoint().should("have.length", 4);
+
+    // Delete point
+    geometryToolTile.getGraphPoint().eq(2).click();
+    clueCanvas.clickToolbarButton('geometry', 'delete');
+    geometryToolTile.getGraph().trigger('mousemove');
+    geometryToolTile.getGraphPoint().should("have.length", 3);
+
+    cy.log("select points with select mode");
+    clueCanvas.clickToolbarButton('geometry', 'select');
+    clueCanvas.toolbarButtonIsSelected('geometry', 'select');
+    geometryToolTile.getGraph().trigger('mousemove');
+    geometryToolTile.getGraphPoint().should("have.length", 2); // no phantom point
+
+    // Clicking background should NOT create a point.
+    geometryToolTile.addPointToGraph(3, 3);
+    geometryToolTile.getGraphPoint().should("have.length", 2); // same as before
+
+    geometryToolTile.getSelectedGraphPoint().should("have.length", 0);
+
+    // select one point
+    geometryToolTile.selectGraphPoint(1, 1);
+    geometryToolTile.getGraphPoint().eq(0).should("have.attr", "fill", "#0069ff"); // $data-blue
+    geometryToolTile.getSelectedGraphPoint().should("have.length", 1);
+    // select a different point
+    geometryToolTile.selectGraphPoint(2, 2);
+    geometryToolTile.getSelectedGraphPoint().should("have.length", 1);
+    // use shift to select both points
+    geometryToolTile.selectGraphPoint(1, 1, true);
+    geometryToolTile.getSelectedGraphPoint().should("have.length", 2);
+
+    clueCanvas.clickToolbarButton('geometry', 'delete');
+    geometryToolTile.getGraphPoint().should("have.length", 0);
+
+    cy.log("make a polygon with polygon mode");
+    clueCanvas.clickToolbarButton('geometry', 'polygon');
+    clueCanvas.toolbarButtonIsSelected('geometry', 'polygon');
+    geometryToolTile.getGraph().trigger('mousemove');
+    geometryToolTile.getGraphPoint().should("have.length", 1); // phantom point
+    geometryToolTile.addPointToGraph(5, 5);
+    geometryToolTile.getGraphPoint().should("have.length", 2);
+    geometryToolTile.addPointToGraph(10, 5);
+    geometryToolTile.getGraphPoint().should("have.length", 3);
+    geometryToolTile.addPointToGraph(9, 9);
+    geometryToolTile.getGraphPoint().should("have.length", 4);
+    geometryToolTile.addPointToGraph(5, 5); // click first point again to close polygon.
+    geometryToolTile.getGraphPoint().should("have.length", 4);
+    geometryToolTile.getGraphPolygon().should("have.length", 1);
+
+    // Duplicate polygon
+    clueCanvas.clickToolbarButton('geometry', 'select');
+    geometryToolTile.selectGraphPoint(7, 6); // click middle of polygon to select it
+    geometryToolTile.getSelectedGraphPoint().should("have.length", 3);
+    clueCanvas.clickToolbarButton('geometry', 'duplicate');
+    geometryToolTile.getGraphPolygon().should("have.length", 2);
+    geometryToolTile.getGraphPoint().should("have.length", 6);
+    geometryToolTile.getSelectedGraphPoint().should("have.length", 0);
+
+    // Delete polygon
+    geometryToolTile.selectGraphPoint(7, 6);
+    geometryToolTile.getSelectedGraphPoint().should("have.length", 3);
+    clueCanvas.clickToolbarButton('geometry', 'delete');
+    geometryToolTile.getGraphPolygon().should("have.length", 1);
+    geometryToolTile.getGraphPoint().should("have.length", 3);
+    geometryToolTile.getSelectedGraphPoint().should("have.length", 0);
   });
 
   it('will test Geometry tile undo redo', () => {
