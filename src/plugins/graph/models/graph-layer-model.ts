@@ -11,7 +11,7 @@ import { IDataSet, addCanonicalCasesToDataSet } from "../../../models/data/data-
 import { ISharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
 import { DotsElt } from "../d3-types";
 import { ICaseCreation } from "../../../models/data/data-set-types";
-import { isImageUrl } from "../../../utilities/string-utils";
+import { isImageUrl } from "../../../models/data/data-types";
 
 export const GraphLayerModel = types
   .model('GraphLayerModel')
