@@ -305,7 +305,7 @@ context('XYPlot Tool Tile', function () {
       xyTile.getGraphDot().should('have.length', 8);
     });
 
-    it("Does not graph image URLs", () => {
+    it("On initialization from data card containing image URLs, does not graph image URLs", () => {
       beforeTest(`${Cypress.config("qaMothPlotUnitStudent5")}&mouseSensor`);
       clueCanvas.addTile("datacard");
       dataCard.getTile().should("exist");
@@ -324,9 +324,14 @@ context('XYPlot Tool Tile', function () {
       dataCard.getAttrValue().eq(2).click().type("web app{enter}");
       dataCard.getGraphItButton().click();
       cy.wait(1000);
-      // Image shold not be graphed
+      // Image URLs should not be graphed.
       xyTile.getXAxisLabel().should("contain", "Name");
       xyTile.getYAxisLabel().should("contain", "Type");
+      // If the user assigns the image URLs to an axis, "<image>" should be used in place of the full URL values
+      // for the tick labels.
+      xyTile.clickPortalButton("Name");
+      xyTile.getPortalButton().contains("Image").should("exist").click();
+      cy.get("[data-testid=axis-bottom]").find("text").should("contain", "<image>");
     });
 
     it("Test undo redo actions", () => {
