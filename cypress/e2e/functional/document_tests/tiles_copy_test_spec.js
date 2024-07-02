@@ -327,7 +327,7 @@ context("Test copy tile within a document", function () {
     });
 
     // Graph the table data in a new graph tile
-    cy.get(".primary-workspace .tile-toolbar button.toolbar-button.link-graph").click();
+    cy.get("[data-original-title='Graph It!']").click();
     cy.get("[data-test=link-tile-select]").select("New Graph");
     cy.get(".modal-button").contains("Graph It").click();
     cy.get(".primary-workspace .graph-wrapper").should("have.length", 1);
