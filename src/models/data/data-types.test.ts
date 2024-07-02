@@ -163,7 +163,7 @@ describe("data-types", () => {
       return [value, isImageUrl(value)];
     });
     expect({ testCases }).toMatchInlineSnapshot(`
-"https://something.concord.org/hello.png" => false
+"https://something.concord.org/hello.png" => true
 "ccimg://fbrtdb.concord.org/hello.png" => true
 "ccimg://fbrtdb.concord.org/anything.txt" => true
 "ccimg://not-a-cc.domain.com/hello.png" => false
