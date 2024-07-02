@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import LineLabelSvg from "../../../clue/assets/icons/geometry/line-label.svg";
-import { ESegmentLabelOption } from "../../../models/tiles/geometry/jxg-changes";
+import { ELabelOption } from "../../../models/tiles/geometry/jxg-changes";
 import { getPolygonEdge } from "../../../models/tiles/geometry/jxg-polygon";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import "./label-segment-dialog.scss";
@@ -43,19 +43,19 @@ const Content: React.FC<IContentProps> = ({ labelOption, setLabelOption }) => {
     <fieldset className="radio-button-set">
       <LabelRadioButton
         display="None"
-        label={ESegmentLabelOption.kNone}
+        label={ELabelOption.kNone}
         checkedLabel={labelOption}
         setLabelOption={setLabelOption}
       />
       <LabelRadioButton
         display="Label"
-        label={ESegmentLabelOption.kLabel}
+        label={ELabelOption.kLabel}
         checkedLabel={labelOption}
         setLabelOption={setLabelOption}
       />
       <LabelRadioButton
         display="Length"
-        label={ESegmentLabelOption.kLength}
+        label={ELabelOption.kLength}
         checkedLabel={labelOption}
         setLabelOption={setLabelOption}
       />
@@ -72,7 +72,7 @@ interface IProps {
   board: JXG.Board;
   polygon: JXG.Polygon;
   points: [JXG.Point, JXG.Point];
-  onAccept: (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ESegmentLabelOption) => void;
+  onAccept: (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ELabelOption) => void;
   onClose: () => void;
 }
 export const useLabelSegmentDialog = ({ board, polygon, points, onAccept, onClose }: IProps) => {

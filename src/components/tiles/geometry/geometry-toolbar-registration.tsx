@@ -1,20 +1,19 @@
-import React, { FunctionComponent, SVGProps, useState } from "react";
+import React, { FunctionComponent, SVGProps } from "react";
 import { observer } from "mobx-react";
 import { IToolbarButtonComponentProps, registerTileToolbarButtons } from "../../toolbar/toolbar-button-manager";
 import { TileToolbarButton } from "../../toolbar/tile-toolbar-button";
-import { isPoint } from "../../../models/tiles/geometry/jxg-types";
 import { useGeometryTileContext } from "./geometry-tile-context";
-import { canSupportVertexAngle, getVertexAngle } from "../../../models/tiles/geometry/jxg-vertex-angle";
 import { UploadButton } from "../../toolbar/upload-button";
 import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking";
 import { useReadOnlyContext } from "../../document/read-only-context";
 import { useTileModelContext } from "../hooks/use-tile-model-context";
 import { GeometryTileMode } from "./geometry-types";
+import { ELabelOption } from "../../../models/tiles/geometry/jxg-changes";
 
-import AngleLabelSvg from "../../../clue/assets/icons/geometry/angle-label.svg";
 import AddImageSvg from "../../../clue/assets/icons/geometry/add-image-icon.svg";
 import CommentSvg from "../../../assets/icons/comment/comment.svg";
 import DeleteSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
+import LabelSvg from "../../../clue/assets/icons/shapes-label-value-icon.svg";
 import LineLabelSvg from "../../../clue/assets/icons/geometry/line-label.svg";
 import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
 import PointSvg from "../../../clue/assets/icons/geometry/point-icon.svg";
@@ -80,31 +79,28 @@ const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButton
 
 });
 
-const AngleLabelButton = observer(function AngleLabelButton({name}: IToolbarButtonComponentProps) {
+const LabelButton = observer(function LabelButton({name}: IToolbarButtonComponentProps) {
   const { content, board, handlers } = useGeometryTileContext();
-  const selectedObjects = board && content?.selectedObjects(board);
-  const selectedPoints = selectedObjects?.filter(isPoint);
-  const selectedPoint = selectedPoints?.length === 1 ? selectedPoints[0] : undefined;
-  const disableVertexAngle = !(selectedPoint && canSupportVertexAngle(selectedPoint));
-  const hasVertexAngle = !!selectedPoint && !!getVertexAngle(selectedPoint);
-  const [clicks, setClicks] = useState<number>(0);
+  const selectedPoint = board && content?.getOneSelectedPoint(board);
+  const labelProps = selectedPoint && content?.getPointLabelProps(selectedPoint.id);
+  const selected = labelProps && labelProps?.labelOption !== ELabelOption.kNone;
 
   function handleClick() {
-    handlers?.handleToggleVertexAngle();
-    setClicks(clicks + 1); // this is just to force a re-render. The observer doesn't notice the model change.
+    handlers?.handleLabelDialog();
   }
 
   return (
     <TileToolbarButton
       name={name}
-      title="Angle label"
-      disabled={disableVertexAngle}
-      selected={hasVertexAngle}
+      title="Label/Value"
+      disabled={!selectedPoint}
+      selected={selected}
       onClick={handleClick}
     >
-      <AngleLabelSvg/>
+      <LabelSvg/>
     </TileToolbarButton>
   );
+
 });
 
 const LineLabelButton = observer(function LineLabelButton({name}: IToolbarButtonComponentProps) {
@@ -282,8 +278,8 @@ registerTileToolbarButtons("geometry",
       component: DuplicateButton
     },
     {
-      name: "angle-label",
-      component: AngleLabelButton
+      name: "label",
+      component: LabelButton
     },
     {
       name: "line-label",

@@ -184,6 +184,7 @@ Common toolbar framework. Default buttons:
 - `polygon`: mode for creating polygons
 - `upload`: allows uploading an image to display in the background
 - `duplicate`: copies the currently selected objects
+- `label`: opens dialog to choose the type of label for selected object
 - `angle-label`: toggles labeling of an angle
 - `line-label`: brings up a menu allowing labeling of segments
 - `comment`: adds a label to the currently selected object

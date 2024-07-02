@@ -16,7 +16,7 @@ export type JXGImageParents = [string, JXGCoordPair, JXGCoordPair];
 
 export type JXGParentType = string | number | undefined | JXGCoordPair | JXGUnsafeCoordPair;
 
-export enum ESegmentLabelOption {
+export enum ELabelOption {
   kNone = "none",
   kLabel = "label", // parents
   kLength = "length"
@@ -38,7 +38,7 @@ export interface IBoardScale {
 export interface JXGProperties {
   id?: string;
   ids?: string[]; // ids of linked points in tableLink change
-  labelOption?: ESegmentLabelOption;
+  labelOption?: ELabelOption;
   position?: JXGPositionProperty;
   title?: string; // metadata property
   url?: string;

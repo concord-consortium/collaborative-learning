@@ -74,8 +74,8 @@ class GeometryToolTile {
                 return '"(' + this.transformToCoordinate('x',x) + ', ' + this.transformToCoordinate('y',y) + ')"';
             });
     }
-    getGraphPointLabel(){ //This is the letter label for a point
-        return cy.get('.geometry-content.editable .JXGtext');
+    getGraphPointLabel(){ // This selects the letter labels for points as well as the x,y labels on the axes
+        return cy.get('.geometry-content.editable .JXGtext:visible');
     }
     getGraphPoint(){
         return cy.get('.geometry-content.editable ellipse[display="inline"]');
@@ -119,6 +119,18 @@ class GeometryToolTile {
     getGraphToolMenuIcon(){
         return cy.get('.geometry-menu-button');
     }
+
+    // Name should be something like 'none', 'label', or 'length'
+    chooseLabelOption(name) {
+      cy.get(`.ReactModalPortal input[value=${name}]`).click();
+      cy.get('.ReactModalPortal button.default').click();
+    }
+
+    toggleAngleCheckbox(value) {
+      cy.get('.ReactModalPortal input#angle-checkbox').click();
+      cy.get('.ReactModalPortal button.default').click();
+    }
+
     showAngle(){
         cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.angle-label').click({force: true});
     }

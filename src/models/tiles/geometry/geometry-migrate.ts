@@ -10,7 +10,7 @@ import {
   PolygonModel, PolygonModelType, PolygonSegmentLabelModelSnapshot, VertexAngleModel, VertexAngleModelType
 } from "./geometry-model";
 import {
-  ESegmentLabelOption, JXGChange, JXGCoordPair, JXGImageParents, JXGObjectType, JXGProperties
+  ELabelOption, JXGChange, JXGCoordPair, JXGImageParents, JXGObjectType, JXGProperties
 } from "./jxg-changes";
 import { getMovableLinePointIds, kGeometryDefaultHeight, kGeometryDefaultWidth } from "./jxg-types";
 import { kDefaultBoardModelOutputProps, kGeometryTileType } from "./geometry-types";
@@ -121,6 +121,10 @@ export const convertModelObjectToChanges = (obj: GeometryObjectModelType): JXGCh
     case "point": {
       const { type, x, y, ...props } = obj as PointModelType;
       const properties = omitNullish(props);
+      if (properties.labelOption) {
+        properties.clientLabelOption = properties.labelOption;
+        properties.labelOption = undefined;
+      }
       changes.push({ operation: "create", target: "point", parents: [x, y], properties });
       break;
     }
@@ -233,6 +237,12 @@ function getDependenciesFromChange(change: JXGChange, objectInfoMap: Record<stri
   }
   return [];
 }
+
+//
+// The following exportGeometry* methods are used only (a) in tests and (b) when
+// importing old legacy Geometry content stored as a list of changes. At some
+// point it would be good to do a content migration and delete this code.
+//
 
 export const exportGeometryJson = (changes: string[], options?: ITileExportOptions) => {
   return exportGeometry(changes, { ...options, json: true }) as string;
@@ -489,7 +499,7 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
 
   const exportPolygon = (id: string, isLast: boolean) => {
     const _changes = objectInfoMap[id].changes;
-    const labelMap = new Map<string, { points: string[], option: ESegmentLabelOption }>();
+    const labelMap = new Map<string, { points: string[], option: ELabelOption }>();
     let props: any = {};
     _changes.forEach(change => {
       const { parents, properties } = change;

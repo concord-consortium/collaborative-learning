@@ -32,7 +32,7 @@ declare namespace JXG {
     _set: (key: string, value: string | null) => void; // Documented as private
     ancestors: { [id: string]: GeometryElement };
     bounds: () => [number, number, number, number];
-    childElements: GeometryElement[];
+    childElements: { [id: string]: GeometryElement };
     descendants: { [id: string]: GeometryElement };
     hasPoint: (x: number, y: number) => boolean;
     isDraggable: boolean;
