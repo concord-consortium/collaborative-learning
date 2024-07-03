@@ -508,6 +508,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       } else {
         content.addPhantomPoint(board, position, content.activePolygonId);
       }
+      const phantom = content.phantomPoint && getPoint(board, content.phantomPoint?.id);
+      phantom && updateVertexAnglesFromObjects([phantom]);
     }
   };
 

@@ -12,7 +12,7 @@ import { preprocessImportFormat } from "./geometry-import";
 import {
   cloneGeometryObject, CommentModel, CommentModelType, GeometryBaseContentModel, GeometryObjectModelType,
   GeometryObjectModelUnion, ImageModel, ImageModelType, isCommentModel, isMovableLineModel, isMovableLinePointId,
-  isPointModel, isPolygonModel, MovableLineModel, PointModel, PolygonModel, PolygonModelType, VertexAngleModel
+  isPointModel, isPolygonModel, isVertexAngleModel, MovableLineModel, PointModel, PolygonModel, PolygonModelType, VertexAngleModel
 } from "./geometry-model";
 import {
   getBoardUnitsAndBuffers, getObjectById, guessUserDesiredBoundingBox, kXAxisTotalBuffer, kYAxisTotalBuffer,
@@ -37,6 +37,7 @@ import { IClueTileObject } from "../../annotations/clue-object";
 import { appendVertexId, getPoint, filterBoardObjects, forEachBoardObject, getBoardObject, getBoardObjectIds,
   getPolygon, logGeometryEvent, removeClosingVertexId } from "./geometry-utils";
 import { getPointVisualProps } from "./jxg-point";
+import { getVertexAngle } from "./jxg-vertex-angle";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -733,6 +734,32 @@ export const GeometryContentModel = GeometryBaseContentModel
       // Then add phantom point at the end
       reorderedVertices.push(self.phantomPoint.id);
 
+      // Any vertex angle on the clicked vertex or the next vertex needs to be updated
+      const lastPointVertexAngle = getVertexAngle(point);
+      const nextPoint = getPoint(board, reorderedVertices[0]);
+      if (lastPointVertexAngle && nextPoint) {
+        // Angle ABC, when B is clicked, becomes AB[phantom]
+        const angleModel = self.getObject(lastPointVertexAngle.id);
+        if (isVertexAngleModel(angleModel)) {
+          console.warn("Couldn't find VertexAngle to modify");
+          angleModel.replacePoint(nextPoint.id, self.phantomPoint.id);
+          rebuildVertexAngle(board, lastPointVertexAngle.id, angleModel.points);
+          console.log("rebuild last");
+        }
+      }
+
+      const nextPointVertexAngle = nextPoint && getVertexAngle(nextPoint);
+      if (nextPointVertexAngle) {
+        // Angle BCD, when B is clicked, becomes [phantom]CD
+        const angleModel = self.getObject(nextPointVertexAngle.id);
+        if (isVertexAngleModel(angleModel)) {
+          console.warn("Couldn't find VertexAngle to modify");
+          angleModel.replacePoint(pointId, self.phantomPoint.id);
+          rebuildVertexAngle(board, nextPointVertexAngle.id, angleModel.points);
+          console.log("rebuild next");
+        }
+      }
+
       self.activePolygonId = polygonId;
       const change: JXGChange = {
         operation: "update",
@@ -742,6 +769,23 @@ export const GeometryContentModel = GeometryBaseContentModel
       };
       const updatedPolygon = syncChange(board, change);
       return isPolygon(updatedPolygon) ? updatedPolygon : undefined;
+    }
+
+    // Delete old angle from board and build new one with the new parent points
+    function rebuildVertexAngle(board: JXG.Board, id: string, points: string[]) {
+      syncChange(board,
+        {
+          operation: "delete",
+          target: "vertexAngle",
+          targetID: id
+        });
+      syncChange(board,
+        {
+          operation: "create",
+          target: "vertexAngle",
+          parents: points,
+          properties: { id }
+        });
     }
 
     function addPointToActivePolygon(board: JXG.Board, pointId: string) {
