@@ -503,11 +503,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const usrCoords = getEventCoords(board, evt, this.props.scale).usrCoords;
     if (usrCoords.length >= 2) {
       const position: JXGCoordPair = [usrCoords[1], usrCoords[2]];
-      if (content.phantomPoint) {
-        content.setPhantomPointPosition(board, position);
-      } else {
-        content.addPhantomPoint(board, position, content.activePolygonId);
-      }
+      this.applyChange(() => {
+        if (content.phantomPoint) {
+          content.setPhantomPointPosition(board, position);
+        } else {
+          content.addPhantomPoint(board, position, content.activePolygonId);
+        }
+      });
       const phantom = content.phantomPoint && getPoint(board, content.phantomPoint?.id);
       phantom && updateVertexAnglesFromObjects([phantom]);
     }
