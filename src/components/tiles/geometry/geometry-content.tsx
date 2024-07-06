@@ -27,10 +27,10 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
 import {
-  ESegmentLabelOption, JXGCoordPair
+  ELabelOption, JXGCoordPair
 } from "../../../models/tiles/geometry/jxg-changes";
 import { applyChange } from "../../../models/tiles/geometry/jxg-dispatcher";
-import { kSnapUnit } from "../../../models/tiles/geometry/jxg-point";
+import { kSnapUnit, setPropertiesForLabelOption } from "../../../models/tiles/geometry/jxg-point";
 import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
 } from "../../../models/tiles/geometry/jxg-polygon";
@@ -59,6 +59,7 @@ import SingleStringDialog from "../../utilities/single-string-dialog";
 import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 import { TileTitleArea } from "../tile-title-area";
 import { GeometryTileContext } from "./geometry-tile-context";
+import LabelPointDialog from "./label-point-dialog";
 
 export interface IGeometryContentProps extends IGeometryProps {
   onSetBoard: (board: JXG.Board) => void;
@@ -88,6 +89,7 @@ interface IState extends Mutable<SizeMeProps> {
   redoStack: string[][];
   selectedComment?: JXG.Text;
   selectedLine?: JXG.Line;
+  showPointLabelDialog?: boolean;
   showSegmentLabelDialog?: boolean;
   showInvalidTableDataAlert?: boolean;
 }
@@ -190,7 +192,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handlePaste: this.handlePaste,
         handleDuplicate: this.handleDuplicate,
         handleDelete: this.handleDelete,
-        handleToggleVertexAngle: this.handleToggleVertexAngle,
+        handleLabelDialog: this.handleLabelDialog,
         handleCreateLineLabel: this.handleCreateLineLabel,
         handleCreateMovableLine: this.handleCreateMovableLine,
         handleCreateComment: this.handleCreateComment,
@@ -533,6 +535,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         {this.renderCommentEditor()}
         {this.renderLineEditor()}
         {this.renderSegmentLabelDialog()}
+        {this.renderPointLabelDialog()}
         <div id={this.elementId} key="jsxgraph"
             className={classes}
             ref={elt => this.domElement = elt}
@@ -580,6 +583,27 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private renderPointLabelDialog() {
+    const content = this.getContent();
+    const { board, showPointLabelDialog } = this.state;
+    if (board && showPointLabelDialog) {
+      const point = content.getOneSelectedPoint(board);
+      if (!point) return;
+      const handleClose = () => this.setState({ showPointLabelDialog: false });
+      const handleAccept = (p: JXG.Point, labelOption: ELabelOption, name: string, angleLabel: boolean) => {
+        this.handleSetPointLabelOptions(p, labelOption, name, angleLabel);
+      };
+      return (
+        <LabelPointDialog
+          board={board}
+          point={point}
+          onAccept={handleAccept}
+          onClose={handleClose}
+        />
+      );
+    }
+  }
+
   private renderSegmentLabelDialog() {
     const content = this.getContent();
     const { board, showSegmentLabelDialog } = this.state;
@@ -589,7 +613,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const polygon = segment && getAssociatedPolygon(segment);
       if (!polygon || !segment || (points.length !== 2)) return;
       const handleClose = () => this.setState({ showSegmentLabelDialog: false });
-      const handleAccept = (poly: JXG.Polygon, pts: [JXG.Point, JXG.Point], labelOption: ESegmentLabelOption) =>
+      const handleAccept = (poly: JXG.Polygon, pts: [JXG.Point, JXG.Point], labelOption: ELabelOption) =>
                             {
                               this.handleLabelSegment(poly, pts, labelOption);
                               handleClose();
@@ -778,8 +802,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   updateSharedPoints(board: JXG.Board) {
     this.applyChange(() => {
       let pointsAdded = false;
+      const content = this.getContent();
+      const data = content.getLinkedPointsData();
       const remainingIds = getAllLinkedPoints(board);
-      const data = this.getContent().getLinkedPointsData();
       for (const [link, points] of data.entries()) {
         // Loop through points, adding new ones and updating any that need to be moved.
         for (let i=0; i<points.coords.length; i++) {
@@ -787,7 +812,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           const existingIndex = remainingIds.indexOf(id);
           if (existingIndex < 0) {
             // Doesn't exist, create the point
-            const pt = createLinkedPoint(board, points.coords[i], points.properties[i], { tileIds: [link] });
+            const labelProperties = content.getPointLabelProps(id);
+            const allProps = {
+              ...points.properties[i],
+              name: labelProperties.name,
+              clientLabelOption: labelProperties.labelOption
+            };
+            const pt = createLinkedPoint(board, points.coords[i], allProps, { tileIds: [link] });
             this.handleCreatePoint(pt);
             pointsAdded = true;
           } else {
@@ -866,31 +897,48 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return hasSelectedPoints;
   };
 
-  private handleToggleVertexAngle = () => {
+  private handleLabelDialog = () => {
+    this.setState({ showPointLabelDialog: true });
+  };
+
+  private handleSetPointLabelOptions =
+      (point: JXG.Point, labelOption: ELabelOption, name: string, angleLabel: boolean) => {
+    point._set("clientLabelOption", labelOption);
+    point._set("clientName", name);
+    setPropertiesForLabelOption(point);
+    this.applyChange(() => {
+      this.getContent().setPointLabelProps(point.id, name, labelOption);
+      const vertexAngle = getVertexAngle(point);
+      if (vertexAngle && !angleLabel) {
+        this.handleUnlabelVertexAngle(vertexAngle);
+      }
+      if (!vertexAngle && angleLabel) {
+        this.handleLabelVertexAngle(point);
+      }
+    });
+    logGeometryEvent(this.getContent(), "update", "point", point.id, { text: name, labelOption });
+  };
+
+  private handleLabelVertexAngle = (point: JXG.Point) => {
     const { board } = this.state;
-    const selectedObjects = board && this.getContent().selectedObjects(board);
-    const selectedPoints = selectedObjects?.filter(isPoint);
-    const selectedPoint = selectedPoints?.[0];
-    if (board && selectedPoint) {
-      const vertexAngle = getVertexAngle(selectedPoint);
-      if (!vertexAngle) {
-        const anglePts = getPointsForVertexAngle(selectedPoint);
-        if (anglePts) {
-          const anglePtIds = anglePts.map(pt => pt.id);
-          this.applyChange(() => {
-            const angle = this.getContent().addVertexAngle(board, anglePtIds);
-            if (angle) {
-              this.handleCreateVertexAngle(angle);
-            }
-          });
+    const anglePts = getPointsForVertexAngle(point);
+    if (board && anglePts) {
+      const anglePtIds = anglePts.map(pt => pt.id);
+      this.applyChange(() => {
+        const angle = this.getContent().addVertexAngle(board, anglePtIds);
+        if (angle) {
+          this.handleCreateVertexAngle(angle);
         }
-      }
-      else {
-        this.applyChange(() => {
-          this.getContent().removeObjects(board, vertexAngle.id);
-        });
-      }
+      });
     }
+  };
+
+  private handleUnlabelVertexAngle = (vertexAngle: JXG.Angle) => {
+    const { board } = this.state;
+    if (!board || !vertexAngle) return;
+    this.applyChange(() => {
+      this.getContent().removeObjects(board, vertexAngle.id);
+    });
   };
 
   private handleCreateMovableLine = () => {
@@ -951,7 +999,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleLabelSegment =
-            (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ESegmentLabelOption) => {
+            (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ELabelOption) => {
     this.applyChange(() => {
       this.getContent().updatePolygonSegmentLabel(this.state.board, polygon, points, labelOption);
     });

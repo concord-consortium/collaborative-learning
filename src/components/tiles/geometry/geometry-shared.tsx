@@ -4,7 +4,7 @@ import { HotKeyHandler } from "../../../utilities/hot-keys";
 export interface IToolbarActionHandlers {
   handleDuplicate: () => void;
   handleDelete: () => void;
-  handleToggleVertexAngle: () => void;
+  handleLabelDialog: () => void;
   handleCreateMovableLine: () => void;
   handleCreateLineLabel: () => void;
   handleCreateComment: () => void;

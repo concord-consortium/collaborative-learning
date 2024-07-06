@@ -152,6 +152,16 @@ context('Geometry Tool', function () {
     geometryToolTile.selectGraphPoint(1, 1);
     geometryToolTile.getGraphPoint().eq(0).should("have.attr", "fill", "#0069ff"); // $data-blue
     geometryToolTile.getSelectedGraphPoint().should("have.length", 1);
+    // set label options
+    geometryToolTile.getGraphPointLabel().contains('A').should('not.exist');
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.chooseLabelOption('label');
+    geometryToolTile.getGraphPointLabel().contains('A').should('exist');
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.chooseLabelOption('length');
+    geometryToolTile.getGraphPointLabel().contains('A').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('1.00, 1.00').should('not.exist');
+
     // select a different point
     geometryToolTile.selectGraphPoint(2, 2);
     geometryToolTile.getSelectedGraphPoint().should("have.length", 1);
@@ -171,11 +181,19 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPoint().should("have.length", 2);
     geometryToolTile.addPointToGraph(10, 5);
     geometryToolTile.getGraphPoint().should("have.length", 3);
-    geometryToolTile.addPointToGraph(9, 9);
+    geometryToolTile.addPointToGraph(10, 10);
     geometryToolTile.getGraphPoint().should("have.length", 4);
     geometryToolTile.addPointToGraph(5, 5); // click first point again to close polygon.
     geometryToolTile.getGraphPoint().should("have.length", 4);
     geometryToolTile.getGraphPolygon().should("have.length", 1);
+
+    // Create vertex angle
+    geometryToolTile.getGraphPointLabel().contains('90°').should('not.exist');
+    clueCanvas.clickToolbarButton('geometry', 'select');
+    geometryToolTile.selectGraphPoint(10, 5); // this point is a 90 degree angle
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.toggleAngleCheckbox();
+    geometryToolTile.getGraphPointLabel().contains('90°').should('exist');
 
     // Duplicate polygon
     clueCanvas.clickToolbarButton('geometry', 'select');

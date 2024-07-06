@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
-import { ESegmentLabelOption } from "../../../models/tiles/geometry/jxg-changes";
+import { ELabelOption } from "../../../models/tiles/geometry/jxg-changes";
 import { useLabelSegmentDialog } from "./use-label-segment-dialog";
 
 interface IProps {
   board: JXG.Board;
   polygon: JXG.Polygon;
   points: [JXG.Point, JXG.Point];
-  onAccept: (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ESegmentLabelOption) => void;
+  onAccept: (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ELabelOption) => void;
   onClose: () => void;
 }
 
