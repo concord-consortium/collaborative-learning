@@ -1,13 +1,14 @@
 import { castArray, difference, each, size as _size, union } from "lodash";
 import { reaction } from "mobx";
-import { addDisposer, applySnapshot, detach, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { addDisposer, applySnapshot, detach, Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
+import stringify from "json-stringify-pretty-compact";
 import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { ITableLinkProperties, linkedPointId, splitLinkedPointId } from "../table-link-types";
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileContentAPIActions, tileContentAPIViews } from "../tile-model-hooks";
-import { convertModelToChanges, exportGeometryJson, getGeometryBoardChange } from "./geometry-migrate";
+import { convertModelToChanges, getGeometryBoardChange } from "./geometry-migrate";
 import { preprocessImportFormat } from "./geometry-import";
 import {
   cloneGeometryObject, CommentModel, CommentModelType, GeometryBaseContentModel, GeometryObjectModelType,
@@ -20,7 +21,7 @@ import {
   resumeBoardUpdates, suspendBoardUpdates
 } from "./jxg-board";
 import {
-  ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
+  ELabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
 } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
 import { getAssociatedPolygon, getEdgeVisualProps, prepareToDeleteObjects } from "./jxg-polygon";
@@ -126,7 +127,8 @@ export function setElementColor(board: JXG.Board, id: string, selected: boolean)
   if (element) {
     let colorScheme = element.getAttribute("colorScheme")||0;
     if (isPoint(element)) {
-      const props = getPointVisualProps(selected, colorScheme, element.getAttribute("isPhantom"));
+      const props = getPointVisualProps(selected, colorScheme, element.getAttribute("isPhantom"),
+        element.getAttribute("clientLabelOption"));
       element.setAttribute(props);
     } else if (isVisibleEdge(element)) {
       colorScheme = getAssociatedPolygon(element)?.getAttribute("colorScheme")||0;
@@ -283,7 +285,9 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     isDeletable(board: JXG.Board, id: string) {
       const obj = getObjectById(board, id);
-      return obj && !obj.getAttribute("fixed") && !obj.getAttribute("clientUndeletable");
+      if (!obj || obj.getAttribute("clientUndeletable")) return false;
+      if (isVertexAngle(obj)) return true;
+      return !obj.getAttribute("fixed");
     }
   }))
   .views(self => ({
@@ -307,12 +311,8 @@ export const GeometryContentModel = GeometryBaseContentModel
       return filterBoardObjects(board, obj => self.isSelected(obj.id));
     },
     exportJson(options?: ITileExportOptions) {
-      const changes = [
-        getGeometryBoardChange(self, { addBuffers: false, includeUnits: false}),
-        ...convertModelToChanges(self)
-      ];
-      const jsonChanges = changes.map(change => JSON.stringify(change));
-      return exportGeometryJson(jsonChanges, options);
+      const snapshot = getSnapshot(self);
+      return stringify(snapshot, {maxLength: 200});
     }
   }))
   .views(self => tileContentAPIViews({
@@ -671,7 +671,9 @@ export const GeometryContentModel = GeometryBaseContentModel
       const props = {
         id,
         colorScheme: self.newPointColorScheme,
-        isPhantom: true
+        isPhantom: true,
+        clientLabelOption: ELabelOption.kNone,
+        snapToGrid: true
       };
       const pointModel = PointModel.create({ x: coordinates[0], y: coordinates[1], ...props });
       self.phantomPoint = pointModel;
@@ -757,6 +759,17 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
     }
 
+    /**
+     * "Opens up" the polygon for editing.
+     * Sets the active polygon ID.
+     * The vertices of this polygon are "rotated" if necessary so that the point
+     * clicked becomes the last point in the list of vertices, and then the
+     * phantom point is inserted after it.
+     * @param board
+     * @param polygonId
+     * @param pointId
+     * @returns the updated polygon
+     */
     function makePolygonActive(board: JXG.Board, polygonId: string, pointId: string) {
       const poly = getPolygon(board, polygonId);
       const polygonModel = self.getObject(polygonId);
@@ -772,12 +785,11 @@ export const GeometryContentModel = GeometryBaseContentModel
 
       const change: JXGChange = {
         operation: "update",
-        target: "object",
+        target: "polygon",
         targetID: polygonId,
         parents: reorderedVertices
       };
       syncChange(board, change);
-
       self.activePolygonId = polygonId;
 
       // Then add phantom point at the end
@@ -803,6 +815,15 @@ export const GeometryContentModel = GeometryBaseContentModel
         });
     }
 
+    /**
+     * Adds the given existing point to the active polygon.
+     * It is appended to the end of the list of vertexes in the model.
+     * On the board the phantom point will be moved to after this new vertex,
+     * and the polygon will remain unclosed.
+     * @param board
+     * @param pointId
+     * @returns the polygon
+     */
     function addPointToActivePolygon(board: JXG.Board, pointId: string) {
       // Sanity check everything
       if (!self.activePolygonId || !self.phantomPoint) return;
@@ -847,8 +868,9 @@ export const GeometryContentModel = GeometryBaseContentModel
     function realizePhantomPoint(board: JXG.Board, position: JXGCoordPair, makePolygon: boolean):
         { point: JXG.Point | undefined, polygon: JXG.Polygon | undefined } {
       // Transition the current phantom point into a real point.
+      if (!self.phantomPoint) return { point: undefined, polygon: undefined };
+      self.phantomPoint.setPosition(position);
       const newRealPoint = self.phantomPoint;
-      if (!newRealPoint) return { point: undefined, polygon: undefined };
       detach(newRealPoint);
       self.addObjectModel(newRealPoint);
 
@@ -865,7 +887,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         target: "object",
         targetID: newRealPoint.id,
         properties: {
-          ...getPointVisualProps(false, newRealPoint.colorScheme, false),
+          ...getPointVisualProps(false, newRealPoint.colorScheme, false, ELabelOption.kNone),
           isPhantom: false,
           position
         }
@@ -950,16 +972,15 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
 
     function createPolygonIncludingPoint(board: JXG.Board, pointId: string) {
+      if (!self.phantomPoint) return;
       const colorScheme = self.getObjectColorScheme(pointId) || 0;
-      const points = [pointId];
-      if (self.phantomPoint) points.push(self.phantomPoint.id);
-      const polygonModel = PolygonModel.create({ points, colorScheme });
+      const polygonModel = PolygonModel.create({ points: [pointId], colorScheme });
       self.addObjectModel(polygonModel);
       self.activePolygonId = polygonModel.id;
       const change: JXGChange = {
         operation: "create",
         target: "polygon",
-        parents: points,
+        parents: [pointId, self.phantomPoint.id],
         properties: { id: polygonModel.id, colorScheme }
       };
       const result = syncChange(board, change);
@@ -1219,7 +1240,7 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
 
     function updatePolygonSegmentLabel(board: JXG.Board | undefined, polygon: JXG.Polygon,
-                                       points: [JXG.Point, JXG.Point], labelOption: ESegmentLabelOption) {
+                                       points: [JXG.Point, JXG.Point], labelOption: ELabelOption) {
       const polygonModel = self.getObject(polygon.id);
       if (isPolygonModel(polygonModel)) {
         polygonModel.setSegmentLabel([points[0].id, points[1].id], labelOption);
@@ -1295,7 +1316,7 @@ export const GeometryContentModel = GeometryBaseContentModel
 
     function getOneSelectedPoint(board: JXG.Board) {
       const selected = self.selectedObjects(board);
-      return (selected.length === 1 && isPoint(selected[0]));
+      return (selected.length === 1 && isPoint(selected[0])) ? selected[0] : undefined;
     }
 
     function getOneSelectedPolygon(board: JXG.Board) {
