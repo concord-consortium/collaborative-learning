@@ -5,7 +5,7 @@ import {
 } from "./geometry-content";
 import {
   CommentModel, defaultBoard, ImageModel, MovableLineModel, PointModel, PolygonModel,
-  PolygonModelType, segmentIdFromPointIds, VertexAngleModel
+  PolygonModelType, segmentIdFromPointIds, VertexAngleModel, VertexAngleModelType
 } from "./geometry-model";
 import { kGeometryTileType } from "./geometry-types";
 import { ELabelOption, JXGChange, JXGCoordPair } from "./jxg-changes";
@@ -16,7 +16,7 @@ import {
   isText, kGeometryDefaultPixelsPerUnit, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin
 } from "./jxg-types";
 import { TileModel, ITileModel } from "../tile-model";
-import { getPoint } from "./geometry-utils";
+import { getPoint, getPolygon } from "./geometry-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
 // This is needed so MST can deserialize snapshots referring to tools
@@ -394,6 +394,58 @@ describe("GeometryContent", () => {
     expect(badpoly).toBeUndefined();
 
     destroyContentAndBoard(content, board);
+  });
+
+  it("handles vertex angles in polygons properly", () => {
+    let polygonId;
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "p1", x: 1, y: 1 }));
+      _content.addObjectModel(PointModel.create({ id: "p2", x: 3, y: 3 }));
+      _content.addObjectModel(PointModel.create({ id: "p3", x: 5, y: 1 }));
+      _content.addObjectModel(PointModel.create({ id: "p5", x: 10, y: 7 }));
+      polygonId = _content.addObjectModel(PolygonModel.create({ points: ["p1", "p2", "p3"] }));
+    });
+    assertIsDefined(polygonId);
+    const poly = content.getObject(polygonId) as PolygonModelType;
+    content.addVertexAngle(board, ["p3", "p1", "p2"], { id: "va1" });
+    content.addVertexAngle(board, ["p1", "p2", "p3"], { id: "va2" });
+    content.addVertexAngle(board, ["p2", "p3", "p1"], { id: "va3" });
+
+    expect(getPolygon(board, polygonId)!.vertices.map(v=>v.id)).toEqual(["p1", "p2", "p3", "p1"]);
+    expect(poly.points).toEqual(["p1", "p2", "p3"]);
+    expect((content.getObject("va1") as VertexAngleModelType).points).toEqual(["p3", "p1", "p2"]);
+
+    // Simulate going back into polygon mode, clicking one of the vertices, and adding some points to the polygon
+    const p4 = content.addPhantomPoint(board, [1, 1])!;
+    content.makePolygonActive(board, polygonId, "p2");
+    expect(poly.points).toEqual(["p3", "p1", "p2"]);
+    expect(getPolygon(board, polygonId)!.vertices.map(v=>v.id)).toEqual(["p3", "p1", "p2", p4.id, "p3"]);
+    expect((content.getObject("va1") as VertexAngleModelType).points).toEqual(["p3", "p1", "p2"]);
+    expect((content.getObject("va2") as VertexAngleModelType).points).toEqual(["p1", "p2", p4.id]);
+    expect((content.getObject("va3") as VertexAngleModelType).points).toEqual([p4.id, "p3", "p1"]);
+
+    content.realizePhantomPoint(board, [1, 1], true);
+    const p6 = content.phantomPoint!;
+    expect(poly.points).toEqual(["p3", "p1", "p2", p4.id]);
+    expect(getPolygon(board, polygonId)!.vertices.map(v=>v.id)).toEqual(["p3", "p1", "p2", p4.id, p6.id, "p3"]);
+    expect((content.getObject("va1") as VertexAngleModelType).points).toEqual(["p3", "p1", "p2"]);
+    expect((content.getObject("va2") as VertexAngleModelType).points).toEqual(["p1", "p2", p4.id]);
+    expect((content.getObject("va3") as VertexAngleModelType).points).toEqual([p6.id, "p3", "p1"]);
+
+    content.addPointToActivePolygon(board, "p5");
+    expect(poly.points).toEqual(["p3", "p1", "p2", p4.id, "p5"]);
+    expect(getPolygon(board, polygonId)!.vertices.map(v=>v.id)).toEqual(["p3", "p1", "p2", p4.id, "p5", p6.id, "p3"]);
+    expect((content.getObject("va1") as VertexAngleModelType).points).toEqual(["p3", "p1", "p2"]);
+    expect((content.getObject("va2") as VertexAngleModelType).points).toEqual(["p1", "p2", p4.id]);
+    expect((content.getObject("va3") as VertexAngleModelType).points).toEqual([p6.id, "p3", "p1"]);
+
+    // Shortcut polygon by clicking p1 rather than the expected p3. p3 gets cut out.
+    content.closeActivePolygon(board, getPoint(board, "p1")!);
+    expect(poly.points).toEqual(["p1", "p2", p4.id, "p5"]);
+    expect(getPolygon(board, polygonId)!.vertices.map(v=>v.id)).toEqual(["p1", "p2", p4.id, "p5", "p1"]);
+    expect((content.getObject("va1") as VertexAngleModelType).points).toEqual(["p5", "p1", "p2"]);
+    expect((content.getObject("va2") as VertexAngleModelType).points).toEqual(["p1", "p2", p4.id]);
+    expect(content.getObject("va3")).toBeUndefined();
   });
 
   it("can short-circuit a polygon", () => {

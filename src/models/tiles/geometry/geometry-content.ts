@@ -13,7 +13,8 @@ import { preprocessImportFormat } from "./geometry-import";
 import {
   cloneGeometryObject, CommentModel, CommentModelType, GeometryBaseContentModel, GeometryObjectModelType,
   GeometryObjectModelUnion, ImageModel, ImageModelType, isCommentModel, isMovableLineModel, isMovableLinePointId,
-  isPointModel, isPolygonModel, MovableLineModel, PointModel, PolygonModel, PolygonModelType, VertexAngleModel
+  isPointModel, isPolygonModel, isVertexAngleModel, MovableLineModel, PointModel, PolygonModel, PolygonModelType,
+  VertexAngleModel
 } from "./geometry-model";
 import {
   getBoardUnitsAndBuffers, getObjectById, guessUserDesiredBoundingBox, kXAxisTotalBuffer, kYAxisTotalBuffer,
@@ -38,6 +39,7 @@ import { IClueTileObject } from "../../annotations/clue-object";
 import { appendVertexId, getPoint, filterBoardObjects, forEachBoardObject, getBoardObject, getBoardObjectIds,
   getPolygon, logGeometryEvent, removeClosingVertexId } from "./geometry-utils";
 import { getPointVisualProps } from "./jxg-point";
+import { getVertexAngle } from "./jxg-vertex-angle";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -655,51 +657,91 @@ export const GeometryContentModel = GeometryBaseContentModel
 
     /**
      * Creates a "phantom" point, which is shown on the board but not (yet) persisted in the model.
-     * It can be part of a polygon (which is expected to be the activePolygon)
+     * It can be part of a polygon (which is expected to be the activePolygon).
+     * If a polygon is provided the phantom point will be added at the end of its list of vertices.
      * @param board
-     * @param parents
-     * @param polygonId
-     * @returns the Point object
+     * @param coordinates
+     * @param polygonId optional polygon
+     * @returns the new Point object
      */
-    function addPhantomPoint(board: JXG.Board, parents: JXGCoordPair, polygonId?: string):
+    function addPhantomPoint(board: JXG.Board, coordinates: JXGCoordPair, polygonId?: string):
         JXG.Point | undefined {
       if (!board) return undefined;
+      const id = uniqueId();
       const props = {
-        id: uniqueId(),
+        id,
         colorScheme: self.newPointColorScheme,
         isPhantom: true,
         clientLabelOption: ELabelOption.kNone,
         snapToGrid: true
       };
-      const pointModel = PointModel.create({ x: parents[0], y: parents[1], ...props });
+      const pointModel = PointModel.create({ x: coordinates[0], y: coordinates[1], ...props });
       self.phantomPoint = pointModel;
 
       const change: JXGChange = {
         operation: "create",
         target: "point",
-        parents,
+        parents: coordinates,
         properties: { ...props }
       };
-      const point = syncChange(board, change);
+      const result = syncChange(board, change);
+      const point = isPoint(result) ? result : undefined;
 
-      // If a polygon ID is provided, display the phantom point as part of that polygon
-      if (polygonId) {
-        const poly = getPolygon(board, polygonId);
-        if (poly) {
-          const vertexIds = poly.vertices.map(v => v.id);
-          const change2: JXGChange = {
-            operation: "update",
-            target: "polygon",
-            targetID: polygonId,
-            parents: appendVertexId(vertexIds, pointModel.id)
-          };
-          syncChange(board, change2);
-        } else {
-          console.warn("didn't find polygon", polygonId);
-        }
+      if (point && polygonId) {
+        appendPhantomPointToPolygon(board, polygonId);
       }
+      return point;
+    }
 
-      return isPoint(point) ? point : undefined;
+    function appendPhantomPointToPolygon(board: JXG.Board, polygonId: string) {
+      const poly = getPolygon(board, polygonId);
+      const id = self.phantomPoint?.id;
+      if (!poly || !id) return;
+      const vertexIds = poly.vertices.map(v => v.id);
+      // The point before the one we're adding
+      const lastPoint = poly.vertices[poly.vertices.length-2];
+      // The point after the one we're adding
+      const nextPoint = poly.vertices[0];
+
+      const newPolygon = syncChange(board, {
+        operation: "update",
+        target: "polygon",
+        targetID: polygonId,
+        parents: appendVertexId(vertexIds, id)
+      });
+      if (!isPolygon(newPolygon)) return;
+
+      // If there is a vertex angle before or after the added point, it needs to be updated
+      fixVertexAngle(board, newPolygon, lastPoint);
+      fixVertexAngle(board, newPolygon, nextPoint);
+      return newPolygon;
+    }
+
+    function fixVertexAngle(board: JXG.Board, polygon: JXG.Polygon, point: JXG.Point) {
+      const vertexAngle = getVertexAngle(point);
+      if (!vertexAngle) return;
+      const model = self.getObject(vertexAngle.id);
+      if (!isVertexAngleModel(model)) return;
+      const pointIndex = polygon.vertices.indexOf(point);
+      const newPoints = [
+        polygon.vertices[pointIndex>0 ? pointIndex-1 : polygon.vertices.length-2].id,
+        polygon.vertices[pointIndex].id,
+        polygon.vertices[pointIndex+1].id
+      ];
+      model.replacePoints(newPoints);
+      rebuildVertexAngle(board, vertexAngle.id, newPoints);
+    }
+
+    function deleteVertexAngle(board: JXG.Board, point: JXG.Point) {
+      const va = getVertexAngle(point);
+      if (va) {
+        self.deleteObjects([va.id]);
+        syncChange(board, {
+          operation: "delete",
+          target: "vertexAngle",
+          targetID: va.id
+        });
+      }
     }
 
     function setPhantomPointPosition(board: JXG.Board, position: JXGCoordPair) {
@@ -736,25 +778,41 @@ export const GeometryContentModel = GeometryBaseContentModel
       const pointIndex = poly.vertices.indexOf(point);
       if (pointIndex < 0) return;
 
-      const vertices = poly.vertices.map(vert => vert.id);
-      // remove reiterated point 0
-      if (vertices.length > 1 && vertices[0]===vertices[vertices.length-1]) vertices.pop();
+      const vertices = removeClosingVertexId(poly.vertices.map(vert => vert.id));
       // Rewrite the list of vertices so that the point clicked on is last.
       const reorderedVertices = vertices.slice(pointIndex+1).concat(vertices.slice(0, pointIndex+1));
       polygonModel.points.replace(reorderedVertices);
 
-      // Then add phantom point at the end
-      reorderedVertices.push(self.phantomPoint.id);
-
-      self.activePolygonId = polygonId;
       const change: JXGChange = {
         operation: "update",
         target: "polygon",
-        targetID: poly.id,
+        targetID: polygonId,
         parents: reorderedVertices
       };
-      const updatedPolygon = syncChange(board, change);
-      return isPolygon(updatedPolygon) ? updatedPolygon : undefined;
+      syncChange(board, change);
+      self.activePolygonId = polygonId;
+
+      // Then add phantom point at the end
+      appendPhantomPointToPolygon(board, polygonId);
+
+      return getPolygon(board, polygonId);
+    }
+
+    // Delete old angle from board and build new one with the new parent points
+    function rebuildVertexAngle(board: JXG.Board, id: string, points: string[]) {
+      syncChange(board,
+        {
+          operation: "delete",
+          target: "vertexAngle",
+          targetID: id
+        });
+      syncChange(board,
+        {
+          operation: "create",
+          target: "vertexAngle",
+          parents: points,
+          properties: { id }
+        });
     }
 
     /**
@@ -786,7 +844,11 @@ export const GeometryContentModel = GeometryBaseContentModel
         parents: vertexIds
       };
       const updatedPolygon = syncChange(board, change);
+      if (!isPolygon(updatedPolygon)) return;
       polygonModel.points.push(pointId);
+
+      fixVertexAngle(board, updatedPolygon, updatedPolygon.vertices[phantomPointIndex-1]);
+      fixVertexAngle(board, updatedPolygon, updatedPolygon.vertices[phantomPointIndex]);
 
       logGeometryEvent(self, "update",
         "vertex",
@@ -832,21 +894,11 @@ export const GeometryContentModel = GeometryBaseContentModel
       };
       syncChange(board, change);
 
-      let newPolygon = undefined;
+      let newPolygon: JXG.Polygon|undefined = undefined;
       if (makePolygon) {
         const poly = self.activePolygonId && getPolygon(board, self.activePolygonId);
         if (poly) {
-          // Add new phantom point to existing polygon
-          const vertexIds = poly.vertices.map(v => v.id);
-          const change2: JXGChange = {
-            operation: "update",
-            target: "polygon",
-            targetID: poly.id,
-            parents: appendVertexId(vertexIds, phantomPoint?.id)
-          };
-          const result = syncChange(board, change2);
-          if (isPolygon(result)) newPolygon = result;
-
+          newPolygon = appendPhantomPointToPolygon(board, poly.id);
           const polyModel = self.activePolygonId && self.getObject(self.activePolygonId);
           if (polyModel && isPolygonModel(polyModel)) {
             polyModel.points.push(newRealPoint.id);
@@ -892,17 +944,21 @@ export const GeometryContentModel = GeometryBaseContentModel
       const phantomId = self.phantomPoint.id;
 
       // remove from polygon, if it's in one.
-      if (self.activePolygonId) {
-        const poly = getPolygon(board, self.activePolygonId);
-        if (poly) {
-          const remainingVertices = poly.vertices.map(v => v.id).filter(id => id !== phantomId);
-          const change1: JXGChange = {
-            operation: "update",
-            target: "polygon",
-            targetID: self.activePolygonId,
-            parents: remainingVertices
-          };
-          syncChange(board, change1);
+      const activePolygon = self.activePolygonId && getPolygon(board, self.activePolygonId);
+      if (activePolygon) {
+        const phantomIndex = activePolygon.vertices.findIndex(v => v.id === phantomId);
+        const remainingVertices = activePolygon.vertices.map(v => v.id).filter(id => id !== phantomId);
+        const change1: JXGChange = {
+          operation: "update",
+          target: "polygon",
+          targetID: self.activePolygonId,
+          parents: remainingVertices
+        };
+        const updatedPolygon = syncChange(board, change1);
+        if (isPolygon(updatedPolygon) && phantomIndex) {
+          // Check for VertexAngles on the vertices before and after the deleted one.
+          fixVertexAngle(board, updatedPolygon, updatedPolygon.vertices[phantomIndex - 1]);
+          fixVertexAngle(board, updatedPolygon, updatedPolygon.vertices[phantomIndex]);
         }
       }
 
@@ -979,6 +1035,11 @@ export const GeometryContentModel = GeometryBaseContentModel
       const clickedIndex = vertexIds.indexOf(point.id);
       if (clickedIndex) {
         // Not undefined and not zero; they clicked something other than the first point.
+        // First remove vertex angles
+        for (let i = 0; i < clickedIndex; i++) {
+          deleteVertexAngle(board, poly.vertices[i]);
+        }
+        // Update the polygon's list of vertices
         vertexIds.splice(0, clickedIndex);
         // Update the model as well
         const polyModel = self.activePolygonId && self.getObject(self.activePolygonId);
@@ -1001,6 +1062,8 @@ export const GeometryContentModel = GeometryBaseContentModel
         if (isPolygon(result)) {
           poly = result;
         }
+        fixVertexAngle(board, poly, poly.vertices[index-1]);
+        fixVertexAngle(board, poly, poly.vertices[index]);
       } else {
         // If index === 1, only a single non-phantom point remains, so we delete the polygon object.
         const change: JXGChange = {
