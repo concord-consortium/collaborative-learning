@@ -66,6 +66,9 @@ describe('SortWorkView Tests', () => {
 
 
   it("should open Sort Work tab and test sorting by group", () => {
+    // Clear data before the test so it can be retried and will start with a clean slate
+    cy.clearQAData('all');
+
     const students = ["student:1", "student:2", "student:3", "student:4"];
     const studentProblemDocs = [
       `Student 1: ${title}`,
