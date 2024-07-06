@@ -255,10 +255,6 @@ export const VertexAngleModel = GeometryObjectModel
   .actions(self => ({
     replacePoints(ids: string[]) {
       self.points.replace(ids);
-    },
-    replacePoint(oldPointId: string, newPointId: string) {
-      const index = self.points.indexOf(oldPointId);
-      self.points.splice(index, 1, newPointId);
     }
   }));
 export interface VertexAngleModelType extends Instance<typeof VertexAngleModel> {}
