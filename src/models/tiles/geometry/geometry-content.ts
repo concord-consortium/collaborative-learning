@@ -14,6 +14,7 @@ import {
   cloneGeometryObject, CommentModel, CommentModelType, GeometryBaseContentModel, GeometryObjectModelType,
   GeometryObjectModelUnion, ImageModel, ImageModelType, isCommentModel, isMovableLineModel, isMovableLinePointId,
   isPointModel, isPolygonModel, isVertexAngleModel, MovableLineModel, PointModel, PolygonModel, PolygonModelType,
+  segmentIdFromPointIds,
   VertexAngleModel
 } from "./geometry-model";
 import {
@@ -1255,7 +1256,10 @@ export const GeometryContentModel = GeometryBaseContentModel
               parents: parentIds,
               properties: { labelOption, name }
             };
-      return applyAndLogChange(board, change);
+      logGeometryEvent(self, "update", "segment",
+        segmentIdFromPointIds(parentIds as [string,string]),
+        { text: name, labelOption });
+      return board && syncChange(board, change);
     }
 
     function findObjects(board: JXG.Board, test: (obj: JXG.GeometryElement) => boolean): JXG.GeometryElement[] {

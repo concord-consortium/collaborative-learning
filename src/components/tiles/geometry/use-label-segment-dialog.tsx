@@ -75,7 +75,7 @@ export const useLabelSegmentDialog = ({ board, polygon, points, onAccept, onClos
   const [name, setName] = useState(initialName);
 
   const handleSubmit = () => {
-    if (polygon && points && (initialLabelOption !== labelOption)) {
+    if (polygon && points && (initialLabelOption !== labelOption || initialName !== name)) {
       onAccept(polygon, points, labelOption, name);
     } else {
       onClose();
