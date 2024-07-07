@@ -14,7 +14,6 @@ import AddImageSvg from "../../../clue/assets/icons/geometry/add-image-icon.svg"
 import CommentSvg from "../../../assets/icons/comment/comment.svg";
 import DeleteSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
 import LabelSvg from "../../../clue/assets/icons/shapes-label-value-icon.svg";
-import LineLabelSvg from "../../../clue/assets/icons/geometry/line-label.svg";
 import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
 import PointSvg from "../../../clue/assets/icons/geometry/point-icon.svg";
 import PolygonSvg from "../../../clue/assets/icons/geometry/polygon-icon.svg";
@@ -104,22 +103,6 @@ const LabelButton = observer(function LabelButton({name}: IToolbarButtonComponen
     </TileToolbarButton>
   );
 
-});
-
-const LineLabelButton = observer(function LineLabelButton({name}: IToolbarButtonComponentProps) {
-  const { content, board, handlers } = useGeometryTileContext();
-  const disableLineLabel = board && !content?.getOneSelectedSegment(board);
-
-  return (
-    <TileToolbarButton
-      name={name}
-      title="Segment label"
-      disabled={disableLineLabel}
-      onClick={() => handlers?.handleCreateLineLabel()}
-    >
-      <LineLabelSvg/>
-    </TileToolbarButton>
-  );
 });
 
 const MovableLineButton = observer(function MovableLineButton({name}: IToolbarButtonComponentProps) {
@@ -283,10 +266,6 @@ registerTileToolbarButtons("geometry",
     {
       name: "label",
       component: LabelButton
-    },
-    {
-      name: "line-label",
-      component: LineLabelButton
     },
     {
       name: "movable-line",
