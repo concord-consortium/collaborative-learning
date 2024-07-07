@@ -104,6 +104,9 @@ class GeometryToolTile {
                 return id;
          });
     }
+    getGraphLine(){
+        return cy.get('.single-workspace .geometry-content.editable line');
+    }
     getGraphPolygon(){
         return cy.get('.single-workspace .geometry-content.editable polygon');
     }
