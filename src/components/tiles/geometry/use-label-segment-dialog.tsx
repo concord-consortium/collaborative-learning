@@ -50,6 +50,15 @@ function getPolygonSegment(board: JXG.Board, polygon: JXG.Polygon, points: [JXG.
   return getPolygonEdge(board, polygon.id, pointIds);
 }
 
+function pointName(point: JXG.Point) {
+  const origName = point.getAttribute("clientName");
+  if (origName) return origName;
+  if (typeof(point.name) === "string") {
+    return point.name;
+  }
+  return "";
+}
+
 interface IProps {
   board: JXG.Board;
   polygon: JXG.Polygon;
@@ -61,7 +70,8 @@ export const useLabelSegmentDialog = ({ board, polygon, points, onAccept, onClos
   const segment = useMemo(() => getPolygonSegment(board, polygon, points), [board, polygon, points]);
   const [initialLabelOption] = useState(segment?.getAttribute("clientLabelOption") || "none");
   const [labelOption, setLabelOption] = useState(initialLabelOption);
-  const [initialName] = useState(segment?.getAttribute("clientOriginalName") || "");
+  const [initialName] = useState(segment?.getAttribute("clientName")
+          || (pointName(points[0]) + pointName(points[1])));
   const [name, setName] = useState(initialName);
 
   const handleSubmit = () => {

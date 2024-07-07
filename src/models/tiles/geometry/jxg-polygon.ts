@@ -238,18 +238,6 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]): string[
   return [...pointsToDelete, ...Object.keys(polygonsToDelete), ...Object.keys(anglesToDelete)];
 }
 
-function segmentNameLabelFn(this: JXG.Line) {
-  let p1Name = this.point1.getName();
-  if (typeof p1Name === "function") {
-    p1Name = this.point1.getAttribute("clientName");
-  }
-  let p2Name = this.point2.getName();
-  if (typeof p2Name === "function") {
-    p2Name = this.point2.getAttribute("clientName");
-  }
-  return `${p1Name}${p2Name}`;
-}
-
 function segmentNameLengthFn(this: JXG.Line) {
   return JXG.toFixed(this.L(), 1);
 }
@@ -257,19 +245,21 @@ function segmentNameLengthFn(this: JXG.Line) {
 function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
   const segment = getPolygonEdge(board, change.targetID as string, change.parents as string[]);
   if (segment) {
-    const labelOption = !Array.isArray(change.properties) && change.properties?.labelOption;
-    const requestedName = (!Array.isArray(change.properties) && change.properties?.name) || "";
-    const clientLabelOption = (labelOption === ELabelOption.kLabel) ||
-                              (labelOption === ELabelOption.kLength)
-                                ? labelOption
-                                : null;
-    segment._set("clientOriginalName", requestedName);
-    segment._set("clientLabelOption", clientLabelOption);
-    const name = clientLabelOption && clientLabelOption === ELabelOption.kLength
-                  ? segmentNameLengthFn
-                  : requestedName;
-    segment.setAttribute({ name, withLabel: !!clientLabelOption });
-//    segment.label?.setAttribute({ visible: !!clientLabelOption });
+    const labelOption = (!Array.isArray(change.properties) && change.properties?.labelOption)
+      || ELabelOption.kNone;
+
+    const nameOption = !Array.isArray(change.properties) && change.properties?.name;
+
+    segment._set("clientLabelOption", labelOption);
+    segment._set("clientName", nameOption);
+
+    const name = labelOption === "label"
+      ? nameOption
+      : labelOption === "length"
+        ? segmentNameLengthFn
+        : "";
+
+    segment.setAttribute({ name, withLabel: labelOption !== ELabelOption.kNone });
   }
 }
 
@@ -342,7 +332,7 @@ export const polygonChangeAgent: JXGChangeAgent = {
 
   update: (board, change) => {
     if ((change.target === "polygon") && change.parents &&
-        !Array.isArray(change.properties) && (change.properties?.labelOption || change.properties?.name)) {
+        !Array.isArray(change.properties) && change.properties?.labelOption) {
       updateSegmentLabelOption(board, change);
       return;
     }
