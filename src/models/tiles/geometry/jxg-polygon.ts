@@ -238,6 +238,18 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]): string[
   return [...pointsToDelete, ...Object.keys(polygonsToDelete), ...Object.keys(anglesToDelete)];
 }
 
+function segmentNameLabelFn(line: JXG.Line) {
+  let p1Name = line.point1.getName();
+  if (typeof p1Name === "function") {
+    p1Name = line.point1.getAttribute("clientName");
+  }
+  let p2Name = line.point2.getName();
+  if (typeof p2Name === "function") {
+    p2Name = line.point2.getAttribute("clientName");
+  }
+  return `${p1Name}${p2Name}`;
+}
+
 function segmentNameLengthFn(this: JXG.Line) {
   return JXG.toFixed(this.L(), 1);
 }
@@ -248,7 +260,8 @@ function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
     const labelOption = (!Array.isArray(change.properties) && change.properties?.labelOption)
       || ELabelOption.kNone;
 
-    const nameOption = !Array.isArray(change.properties) && change.properties?.name;
+    const nameOption = (!Array.isArray(change.properties) && change.properties?.name)
+      || segmentNameLabelFn(segment);
 
     segment._set("clientLabelOption", labelOption);
     segment._set("clientName", nameOption);

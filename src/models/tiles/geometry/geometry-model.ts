@@ -219,7 +219,29 @@ export const PolygonSegmentLabelModel = types.model("PolygonSegmentLabel", {
   id: types.identifier, // {pt1Id}::{pt2Id}
   option: types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption)),
   name: types.maybe(types.string)
+})
+.preProcessSnapshot(snap => {
+  // Previously a single colon was used as a separator.
+  // If this is found, replace it with a double colon.
+  // If the point IDs were from linked points, there would be 3 colons, and the middle one should be doubled.
+  // Since it was previously not possible to make a polygon from a mixture of linked and unlinked points,
+  // there should never be 2 ambiguous colons in legacy content.
+  const id = snap.id;
+  if (id.match(/::/)) {
+    // Modern format, return as-is.
+    return snap;
+  }
+  let newId = id;
+  const colons = (id.match(/:/g) || []).length;
+  if (colons === 1) {
+    newId = id.replace(":", "::");
+  } else if (colons === 3) {
+    const parts = id.split(":");
+    newId = parts[0] + ":" + parts[1] + "::" + parts[2] + ":" + parts[3];
+  }
+  return { ...snap, id: newId };
 });
+
 export interface PolygonSegmentLabelModelType extends Instance<typeof PolygonSegmentLabelModel> {}
 export interface PolygonSegmentLabelModelSnapshot extends SnapshotIn<typeof PolygonSegmentLabelModel> {}
 
