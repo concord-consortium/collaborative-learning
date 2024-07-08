@@ -1262,6 +1262,24 @@ export const GeometryContentModel = GeometryBaseContentModel
       return board && syncChange(board, change);
     }
 
+    function updatePolygonLabel(board: JXG.Board|undefined, polygon: JXG.Polygon,
+        labelOption: ELabelOption, name: string|undefined ) {
+      const polygonModel = self.getObject(polygon.id);
+      if (!board || !isPolygonModel(polygonModel)) return;
+      polygonModel.labelOption = labelOption;
+      polygonModel.name = name;
+
+      logGeometryEvent(self, "update", "polygon", polygon.id,
+        { text: name, labelOption });
+
+      return syncChange(board, {
+        operation: "update",
+        target: "polygon",
+        targetID: polygon.id,
+        properties: { labelOption, clientName: name }
+      });
+    }
+
     function findObjects(board: JXG.Board, test: (obj: JXG.GeometryElement) => boolean): JXG.GeometryElement[] {
       return filterBoardObjects(board, test);
     }
@@ -1520,6 +1538,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         updateObjects,
         addVertexAngle,
         updateAxisLabels,
+        updatePolygonLabel,
         updatePolygonSegmentLabel,
         deleteSelection,
         applyChange: applyAndLogChange,

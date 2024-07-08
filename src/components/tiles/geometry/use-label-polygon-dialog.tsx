@@ -1,6 +1,5 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { ELabelOption } from "../../../models/tiles/geometry/jxg-changes";
-import { getPolygonEdge } from "../../../models/tiles/geometry/jxg-polygon";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { LabelRadioButton } from "./label-radio-button";
 import { pointName } from "../../../models/tiles/geometry/jxg-point";
@@ -37,7 +36,7 @@ const Content: React.FC<IContentProps> = (
           onChange={(e) => { setName(e.target.value); }} />
       </LabelRadioButton>
       <LabelRadioButton
-        display="Length"
+        display="Area"
         label={ELabelOption.kLength}
         checkedLabel={labelOption}
         setLabelOption={setLabelOption}
@@ -46,28 +45,26 @@ const Content: React.FC<IContentProps> = (
   );
 };
 
-function getPolygonSegment(board: JXG.Board, polygon: JXG.Polygon, points: [JXG.Point, JXG.Point]) {
-  const pointIds = points.map(pt => pt.id);
-  return getPolygonEdge(board, polygon.id, pointIds);
+function constructName(polygon: JXG.Polygon) {
+  return polygon.vertices.slice(0, -1)
+    .reduce((name: string, point) => { return name + pointName(point); }, "");
 }
 
 interface IProps {
   board: JXG.Board;
   polygon: JXG.Polygon;
-  points: [JXG.Point, JXG.Point];
-  onAccept: (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ELabelOption, name: string) => void;
+  onAccept: (polygon: JXG.Polygon, labelOption: ELabelOption, name: string) => void;
   onClose: () => void;
 }
-export const useLabelSegmentDialog = ({ board, polygon, points, onAccept, onClose }: IProps) => {
-  const segment = useMemo(() => getPolygonSegment(board, polygon, points), [board, polygon, points]);
-  const [initialLabelOption] = useState(segment?.getAttribute("clientLabelOption") || "none");
+export const useLabelPolygonDialog = ({ board, polygon, onAccept, onClose }: IProps) => {
+  const [initialLabelOption] = useState(polygon?.getAttribute("clientLabelOption") || "none");
   const [labelOption, setLabelOption] = useState(initialLabelOption);
-  const [initialName] = useState(segment?.getAttribute("clientName"));
-  const [name, setName] = useState(initialName || (pointName(points[0]) + pointName(points[1])));
+  const [initialName] = useState(polygon?.getAttribute("clientName"));
+  const [name, setName] = useState(initialName || constructName(polygon));
 
   const handleSubmit = () => {
-    if (polygon && points && (initialLabelOption !== labelOption || initialName !== name)) {
-      onAccept(polygon, points, labelOption, name);
+    if (polygon && (initialLabelOption !== labelOption || initialName !== name)) {
+      onAccept(polygon, labelOption, name);
     } else {
       onClose();
     }
@@ -75,7 +72,7 @@ export const useLabelSegmentDialog = ({ board, polygon, points, onAccept, onClos
 
   const [showModal, hideModal] = useCustomModal({
     Icon: LabelSvg,
-    title: "Segment Label/Value",
+    title: "Polygon Label/Value",
     Content,
     contentProps: { labelOption, setLabelOption, name, setName },
     buttons: [

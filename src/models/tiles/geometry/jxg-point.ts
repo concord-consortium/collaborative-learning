@@ -63,6 +63,15 @@ export function createPoint(board: JXG.Board, parents: JXGUnsafeCoordPair, chang
   return point;
 }
 
+export function pointName(point: JXG.Point) {
+  const origName = point.getAttribute("clientName");
+  if (origName) return origName;
+  if (typeof(point.name) === "string") {
+    return point.name;
+  }
+  return "";
+}
+
 export function setPropertiesForLabelOption(point: JXG.Point) {
   const labelOption = point.getAttribute("clientLabelOption") || ELabelOption.kNone;
   switch (labelOption) {

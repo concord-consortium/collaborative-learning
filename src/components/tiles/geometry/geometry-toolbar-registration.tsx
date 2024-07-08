@@ -81,20 +81,22 @@ const LabelButton = observer(function LabelButton({name}: IToolbarButtonComponen
   const { content, board, handlers } = useGeometryTileContext();
   const selectedPoint = board && content?.getOneSelectedPoint(board);
   const selectedSegment = board && content?.getOneSelectedSegment(board);
+  const selectedPolygon = board && content?.getOneSelectedPolygon(board);
 
   const pointHasLabel = selectedPoint && selectedPoint.hasLabel;
   const segmentHasLabel = selectedSegment && selectedSegment.hasLabel;
+  const polygonHasLabel = selectedPolygon && selectedPolygon.hasLabel;
 
   function handleClick() {
-    handlers?.handleLabelDialog(selectedPoint, selectedSegment);
+    handlers?.handleLabelDialog(selectedPoint, selectedSegment, selectedPolygon);
   }
 
   return (
     <TileToolbarButton
       name={name}
       title="Label/Value"
-      disabled={!selectedPoint && !selectedSegment}
-      selected={pointHasLabel || segmentHasLabel}
+      disabled={!selectedPoint && !selectedSegment && !selectedPolygon}
+      selected={pointHasLabel || segmentHasLabel || polygonHasLabel}
       onClick={handleClick}
     >
       <LabelSvg/>
