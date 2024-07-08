@@ -1,4 +1,4 @@
-import { castArray, difference, each, size as _size, union } from "lodash";
+import { castArray, difference, each, every, size as _size, union } from "lodash";
 import { reaction } from "mobx";
 import { addDisposer, applySnapshot, detach, Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import stringify from "json-stringify-pretty-compact";
@@ -1344,36 +1344,16 @@ export const GeometryContentModel = GeometryBaseContentModel
 
     function getOneSelectedPolygon(board: JXG.Board) {
       // all vertices of polygon must be selected to show rotate handle
-      const polygonSelection: { [id: string]: { any: boolean, all: boolean } } = {};
       const polygons = board.objectsList
-                            .filter(isPolygon)
-                            .filter(polygon => {
-                              const selected = { any: false, all: true };
-                              each(polygon.ancestors, vertex => {
-                                if (self.metadata.isSelected(vertex.id)) {
-                                  selected.any = true;
-                                }
-                                else {
-                                  selected.all = false;
-                                }
-                              });
-                              polygonSelection[polygon.id] = selected;
-                              return selected.any;
-                            });
+        .filter(isPolygon)
+        .filter(polygon => {
+          return every(polygon.ancestors, vertex => self.metadata.isSelected(vertex.id));
+        });
       const selectedPolygonId = (polygons.length === 1) && polygons[0].id;
-      const selectedPolygon = selectedPolygonId && polygonSelection[selectedPolygonId].all
-                                ? polygons[0] : undefined;
+      const selectedPolygon = selectedPolygonId ? polygons[0] : undefined;
       // must not have any selected points other than the polygon vertices
       if (selectedPolygon) {
-        type IEntry = [string, boolean];
-        const selectionEntries = Array.from(self.metadata.selection.entries()) as IEntry[];
-        const selectedPts = selectionEntries
-                              .filter(entry => {
-                                const id = entry[0];
-                                const obj = getBoardObject(board, id);
-                                const isSelected = entry[1];
-                                return obj && (obj.elType === "point") && isSelected;
-                              });
+        const selectedPts = self.selectedObjects(board).filter(isPoint);
         return _size(selectedPolygon.ancestors) === selectedPts.length
                   ? selectedPolygon : undefined;
       }
