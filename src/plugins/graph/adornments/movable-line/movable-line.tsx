@@ -19,7 +19,7 @@ import { useLocationSetterContext } from "../../hooks/use-location-setter-contex
 
 import "./movable-line.scss";
 
-function equationContainer(model: IMovableLineModel, subPlotKey: Record<string, string>, containerId: string) {
+function equationContainer(model: IMovableLineModel, subPlotKey: Record<string, string>) {
   const classFromKey = model.classNameFromKey(subPlotKey),
     equationContainerClass = `movable-line-equation-container-${classFromKey}`;
   return { equationContainerClass };
@@ -49,21 +49,17 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
   const {containerId, model, plotHeight, plotWidth, subPlotKey={}, xAxis, yAxis} = props,
     graphModel = useGraphModelContext(),
     layout = useAxisLayoutContext(),
-    // instanceId = useInstanceIdContext(),
     readOnly = useReadOnlyContext(),
     annotationLocationSetter = useLocationSetterContext(),
     xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType,
-    // xRange = xScale.range(),
     xScaleCopy = xScale.copy(),
     yScale = layout.getAxisScale("left") as ScaleNumericBaseType,
-    // yRange = yScale.range(),
     yScaleCopy = yScale.copy(),
     kTolerance = 4, // pixels to snap to horizontal or vertical
     kHandleSize = 10,
     kHandle1Loc = 1/3,
     kHandle2Loc = 2/3,
-    {equationContainerClass} = equationContainer(model, subPlotKey, containerId),
-    modelLinesArray = Array.from(model.lines.entries()),
+    {equationContainerClass} = equationContainer(model, subPlotKey),
     lineRef = useRef<SVGSVGElement>(null),
     lineObjects = useRef<ILineObject[]>([]),
     pointsOnAxes = useRef<IAxisIntercepts[]>([]);
@@ -81,9 +77,8 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     ySubAxesCount = layout.getAxisMultiScale('left')?.repetitions ?? 1;
 
   const toggleLineSelection = useCallback((index: number) => {
-    const lineKey = modelLinesArray[index][0];
-    model.toggleSelected(lineKey);
-  }, [model, modelLinesArray]);
+    model.toggleSelected(index);
+  }, [model]);
 
   // Calculate where the drag handles go, given the line endpoints
   const calculateHandlePosition = useCallback((index: number, pt1: Point, pt2: Point) => {
@@ -99,8 +94,8 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
   }, [kHandle1Loc, kHandle2Loc]);
 
   const positionEquation = useCallback(
-    (equation: Selection<HTMLElement, unknown, HTMLElement, any>, point: Point, instanceKey: string) => {
-    const annotationId = getAnnotationId(instanceKey, "equation");
+    (equation: Selection<HTMLElement, unknown, HTMLElement, any>, point: Point, index: number) => {
+    const annotationId = getAnnotationId(index, "equation");
     equation.style('left', `${point.x}px`)
         .style('top', `${point.y}px`);
     if (model.isVisible) {
@@ -175,17 +170,15 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     }
 
     function updateClasses(elt: Selection<SVGLineElement, unknown, null, undefined>, index: number) {
-      const lineKey = modelLinesArray[index][0];
-      const isLineSelected = !!model.lines.get(lineKey)?.isSelected;
+      const isLineSelected = !!model.lines[index]?.isSelected;
       elt.classed("selected", isLineSelected);
     }
 
     function refreshEquation(slope: number, intercept: number, lineModel: IMovableLineInstance, index: number) {
       if (pointsOnAxes.current.length < 1) return;
-      const lineKey = modelLinesArray[index][0];
-      const lineEquationContainer = select(`.primary-workspace #${`movable-line-equation-${lineKey}`}`);
+      const lineEquationContainer = select(`.primary-workspace #${`movable-line-equation-${index}`}`);
       const lineEquationElt =
-        select<HTMLElement,unknown>(`.primary-workspace #${`movable-line-equation-${lineKey}`} p`);
+        select<HTMLElement,unknown>(`.primary-workspace #${`movable-line-equation-${index}`} p`);
       const
         attrNames = {x: xAttrName, y: yAttrName},
         string = equationString(slope, intercept, attrNames);
@@ -199,20 +192,19 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       if (fixedCoords) {
         // The equation is unpinned -- the user dragged it away from the line. Use stored position.
         // It is stored in the model as a fraction of the graph height & width.
-        positionEquation(lineEquationElt, { x: fixedCoords.x*plotWidth, y: fixedCoords.y*plotHeight }, lineKey);
+        positionEquation(lineEquationElt, { x: fixedCoords.x*plotWidth, y: fixedCoords.y*plotHeight }, index);
       } else {
         // Pinned to line; calculate position.
         const pointXSum = pointsOnAxes.current[index].pt1.x + pointsOnAxes.current[index].pt2.x;
         const pointYSum = pointsOnAxes.current[index].pt1.y + pointsOnAxes.current[index].pt2.y;
         const screenX = xScale(pointXSum / 2) / xSubAxesCount;
         const screenY = yScale(pointYSum / 2) / ySubAxesCount;
-        positionEquation(lineEquationElt, { x: screenX, y: screenY }, lineKey);
+        positionEquation(lineEquationElt, { x: screenX, y: screenY }, index);
       }
     }
 
     lineObjects.current.forEach((lineObject, index) => {
-      const lineKey = modelLinesArray[index][0];
-      const lineModel = model.lines.get(lineKey);
+      const lineModel = model.lines[index];
       if (!lineObject.line || !lineModel) return;
 
       const
@@ -243,9 +235,8 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       updateClasses(lineObject.line, index);
       refreshEquation(slope, intercept, lineModel, index);
     });
-  }, [annotationLocationSetter, calculateHandlePosition, layout, model.isVisible, model.lines, modelLinesArray,
-      plotHeight, plotWidth, positionEquation, xAttrName, xAxis, xScale, xSubAxesCount, yAttrName, yAxis, yScale,
-      ySubAxesCount]);
+  }, [annotationLocationSetter, calculateHandlePosition, layout, model.isVisible, model.lines, plotHeight, plotWidth,
+      positionEquation, xAttrName, xAxis, xScale, xSubAxesCount, yAttrName, yAxis, yScale, ySubAxesCount]);
 
   // Refresh the lines
   useEffect(function refresh() {
@@ -258,8 +249,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
   const
     // Line drag handler
     continueTranslate = useCallback((event: MouseEvent, index: number) => {
-      const lineKey = modelLinesArray[index][0],
-        lineParams = model.lines?.get(lineKey),
+      const lineParams = model.lines[index],
         slope = lineParams?.currentSlope || 0,
         tWorldX = xScaleCopy.invert(event.x),
         tWorldY = yScaleCopy.invert(event.y);
@@ -272,18 +262,17 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           tWorldY > yScaleCopy.domain()[1]
       ) {
         const { intercept, slope: initSlope } = computeSlopeAndIntercept(xAxis, yAxis);
-        model.dragLine(intercept, initSlope, lineKey);
+        model.dragLine(intercept, initSlope, index);
         return;
       }
 
       const newIntercept = isFinite(slope) ? tWorldY - slope * tWorldX : tWorldX;
-      model.dragLine(newIntercept, slope, lineKey);
-    }, [model, modelLinesArray, xAxis, xScaleCopy, yAxis, yScaleCopy]),
+      model.dragLine(newIntercept, slope, index);
+    }, [model, xAxis, xScaleCopy, yAxis, yScaleCopy]),
 
     endTranslate = useCallback((index: number) => {
-      const lineKey = modelLinesArray[index][0];
-      model.saveLine(lineKey);
-    }, [model, modelLinesArray]),
+      model.saveLine(index);
+    }, [model]),
 
     startRotation = useCallback((
       event: { x: number, y: number },
@@ -291,8 +280,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       index: number
     ) => {
       // Fix the pivot position of the handle not being dragged for the duration of the drag.
-      const lineKey = modelLinesArray[index][0];
-      const lineParams = model.lines?.get(lineKey);
+      const lineParams = model.lines[index];
       if (lineParams && pointsOnAxes.current) {
         const pivot = calculateHandlePosition(lineSection === "lower" ? 2 : 1,
           pointsOnAxes.current[index].pt1, pointsOnAxes.current[index].pt2);
@@ -302,7 +290,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           lineParams.setPivot1(pivot);
         }
       }
-    }, [calculateHandlePosition, model.lines, modelLinesArray]),
+    }, [calculateHandlePosition, model.lines]),
 
     continueRotation = useCallback((
       event: { x: number, y: number, dx: number, dy: number },
@@ -311,8 +299,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     ) => {
       if (!pointsOnAxes.current) return;
       const lineObject = lineObjects.current[index];
-      const lineKey = modelLinesArray[index][0];
-      const lineParams = model.lines?.get(lineKey);
+      const lineParams = model.lines[index];
       // This is the point we rotate around: it will not move.
       const pivot = lineSection === "lower" ? lineParams?.pivot2 : lineParams?.pivot1;
       if (!pivot) return;
@@ -346,29 +333,27 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         lineObject.handleLower?.classed('negative-slope', newSlope < 0);
         lineObject.handleUpper?.classed('negative-slope', newSlope < 0);
 
-        model.dragLine(newIntercept, newSlope, lineKey);
-        const lineModel = model.lines?.get(lineKey);
+        model.dragLine(newIntercept, newSlope, index);
+        const lineModel = model.lines[index];
         if (lineSection === "lower") {
           lineModel!.setPivot1(dragPivot);
         } else {
           lineModel!.setPivot2(dragPivot);
         }
       }
-    }, [model, modelLinesArray, xScaleCopy, yScaleCopy]),
+    }, [model, xScaleCopy, yScaleCopy]),
 
     endRotation = useCallback((index: number) => {
-      const lineKey = modelLinesArray[index][0];
-      const lineParams = model.lines?.get(lineKey);
-      model.saveLine(lineKey);
+      const lineParams = model.lines[index];
+      model.saveLine(index);
       lineParams?.setPivot1(kInfinitePoint);
       lineParams?.setPivot2(kInfinitePoint);
-    }, [model, modelLinesArray]),
+    }, [model]),
 
     moveEquation = useCallback((event: { x: number, y: number, dx: number, dy: number }, index: number) => {
       if (event.dx !== 0 || event.dy !== 0) {
-        const lineKey = modelLinesArray[index][0];
         const equation =
-          select<HTMLElement,unknown>(`.primary-workspace #${`movable-line-equation-${lineKey}`} p`),
+          select<HTMLElement,unknown>(`.primary-workspace #${`movable-line-equation-${index}`} p`),
           equationNode = equation.node() as Element,
           equationWidth = equationNode?.getBoundingClientRect().width || 0,
           equationHeight = equationNode?.getBoundingClientRect().height || 0,
@@ -379,15 +364,14 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           x = left / plotWidth,
           y = top / plotHeight;
 
-        positionEquation(equation, { x: left, y: top }, lineKey);
-        model.dragEquation({x, y}, lineKey);
+        positionEquation(equation, { x: left, y: top }, index);
+        model.dragEquation({x, y}, index);
       }
-    }, [modelLinesArray, plotWidth, plotHeight, positionEquation, model]),
+    }, [plotWidth, plotHeight, positionEquation, model]),
 
     endMoveEquation = useCallback((index: number) => {
-      const lineKey = modelLinesArray[index][0];
-      model.saveEquationCoords(lineKey);
-    }, [model, modelLinesArray]);
+      model.saveEquationCoords(index);
+    }, [model]);
 
   // Add the behaviors to the line segments
   useEffect(function addBehaviors() {
@@ -428,7 +412,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
   // Build the lines and their cover segments and handles just once
   useEffect(function createElements() {
     return autorun(() => {
-      if (!model.lines || lineObjects.current.length === model.lines.size) return;
+      if (!model.lines || lineObjects.current.length === model.lines.length) return;
 
       // Clear any previously added elements
       lineObjects.current = [];
@@ -436,13 +420,13 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       selection.html(null);
       select(`#${containerId}`).selectAll("div").remove();
 
-      modelLinesArray.map(([key, line]) => {
+      model.lines.map((line, index) => {
         const newLineObject: ILineObject = {};
         // Set up the line and its cover segments and handles
-        const lineClassNames = classNames("movable-line", `movable-line-${key}`, { selected: line.isSelected });
+        const lineClassNames = classNames("movable-line", `movable-line-${index}`, { selected: line.isSelected });
         newLineObject.line = selection.append('line')
           .attr('class', lineClassNames)
-          .attr('data-testid', `movable-line${`-${key}`}`)
+          .attr('data-testid', `movable-line${`-${index}`}`)
           .attr('stroke', line.color);
         newLineObject.arrowLower = selection.append('polygon')
           .attr('class', 'movable-line-arrow')
@@ -468,7 +452,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         // Set up the corresponding equation box
         // Define the selector that corresponds with this specific movable line's adornment container
         const equationDiv = select(`#${containerId}`).append('div')
-          .attr('id', `movable-line-equation-${key}`)
+          .attr('id', `movable-line-equation-${index}`)
           .attr('class', `movable-line-equation-container ${equationContainerClass}`)
           .attr('data-testid', `${equationContainerClass}`)
           .style('width', `${plotWidth}px`)
@@ -484,8 +468,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         refreshLines();
       });
     }, { name: "MovableLine.createElements" });
-  }, [containerId, equationContainerClass, model, model.lines, modelLinesArray, plotHeight, plotWidth, refreshLines,
-      subPlotKey]);
+  }, [containerId, equationContainerClass, model, model.lines, plotHeight, plotWidth, refreshLines, subPlotKey]);
 
   return (
     <svg

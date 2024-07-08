@@ -7,9 +7,8 @@ import { computeSlopeAndIntercept, getUniqueLineColor } from "../../utilities/gr
 import { kMovableLineType } from "./movable-line-types";
 import { IGraphModel } from "../../models/graph-model";
 import { IClueTileObject } from "../../../../models/annotations/clue-object";
-import { uniqueId } from "lodash";
 
-export function getAnnotationId(lineKey: string, type: "handle"|"equation", position?: "lower"|"upper") {
+export function getAnnotationId(lineKey: string | number, type: "handle"|"equation", position?: "lower"|"upper") {
   if (position) {
     return `movable_line_${type}:${lineKey}:${position}`;
   } else {
@@ -84,51 +83,52 @@ export const MovableLineModel = AdornmentModel
 .named('MovableLineModel')
 .props({
   type: 'Movable Line',
-  lines: types.map(MovableLineInstance)
+  lines: types.array(MovableLineInstance)
 })
 .actions(self => ({
-  dragLine(intercept: number, slope: number, key='') {
-    const line = self.lines.get(key);
+  dragLine(intercept: number, slope: number, index: number) {
+    const line = self.lines[index];
     line!.setDragIntercept(intercept);
     line!.setDragSlope(slope);
   },
-  saveLine(key='') {
-    const line = self.lines.get(key);
+  saveLine(index: number) {
+    const line = self.lines[index];
     line!.saveIntercept();
     line!.saveSlope();
   },
-  dragEquation(coords: Point, key='') {
-    const line = self.lines.get(key);
+  dragEquation(coords: Point, index: number) {
+    const line = self.lines[index];
     line!.setDragEquationCoords(coords);
   },
-  saveEquationCoords(key='') {
-    self.lines.get(key)!.saveEquationCoords();
+  saveEquationCoords(index: number) {
+    self.lines[index]!.saveEquationCoords();
   },
-  setLine(xAxis?: IAxisModel, yAxis?: IAxisModel, key='') {
+  setLine(xAxis?: IAxisModel, yAxis?: IAxisModel) {
     const { intercept, slope } = computeSlopeAndIntercept(xAxis, yAxis);
-    const color = getUniqueLineColor(key);
-    self.lines.set(key, { color, intercept, slope });
-    const line = self.lines.get(key);
+    const lineIndex = self.lines.length;
+    const lineColorKey = `line-${lineIndex}-color`;
+    const color = getUniqueLineColor(lineColorKey);
+    self.lines.push({ color, intercept, slope });
+    const line = self.lines[lineIndex];
     line!.setPivot1(kInfinitePoint);
     line!.setPivot2(kInfinitePoint);
   },
-  toggleSelected(key='') {
+  toggleSelected(index: number) {
     // Only one line can be selected at a time.
-    self.lines.forEach((line, lineKey) => {
-      if (lineKey !== key) line.isSelected = false;
+    self.lines.forEach((line, lineIndex) => {
+      if (lineIndex !== index) line.isSelected = false;
     });
-    const targetLine = self.lines.get(key);
+    const targetLine = self.lines[index];
     if (!targetLine) return;
     targetLine.isSelected = !targetLine.isSelected;
   }
 }))
 .actions(self => ({
   addLine(xAxis?: IAxisModel, yAxis?: IAxisModel) {
-    const key = uniqueId();
-    self.setLine(xAxis, yAxis, key);
+    self.setLine(xAxis, yAxis);
   },
-  deleteLine(key: string) {
-    self.lines.delete(key);
+  deleteLine(index: number) {
+    self.lines.splice(index, 1);
   }
 }))
 .actions(self => ({
@@ -138,17 +138,15 @@ export const MovableLineModel = AdornmentModel
     const rowCount = rightCats?.length || 1;
     const totalCount = rowCount * columnCount;
     for (let i = 0; i < totalCount; ++i) {
-      const subPlotKey = self.setSubPlotKey(options, i);
-      const instanceKey = self.instanceKey(subPlotKey);
-      if (!self.lines.get(instanceKey) || resetPoints) {
-        self.setLine(xAxis, yAxis, instanceKey);
+      if (!self.lines[i] || resetPoints) {
+        self.setLine(xAxis, yAxis);
       }
     }
   },
   deleteSelected() {
-    self.lines.forEach((line, key) => {
+    self.lines.forEach((line, index) => {
       if (line.isSelected) {
-        self.lines.delete(key);
+        self.lines.splice(index, 1);
       }
     });
   }
@@ -166,7 +164,7 @@ export const MovableLineModel = AdornmentModel
     return objects;
   },
   hasSelectedInstances() {
-    return Array.from(self.lines.values()).some(line => line.isSelected);
+    return self.lines.some(line => line.isSelected);
   }
 }));
 
@@ -177,7 +175,6 @@ export function isMovableLine(adornment: IAdornmentModel): adornment is IMovable
 
 export function defaultMovableLineAdornment(graph: IGraphModel) {
   const mLine = MovableLineModel.create();
-  const mLineKey = uniqueId();
-  mLine.setLine(graph.axes.get("bottom"), graph.axes.get("left"), mLineKey);
+  mLine.setLine(graph.axes.get("bottom"), graph.axes.get("left"));
   return mLine;
 }

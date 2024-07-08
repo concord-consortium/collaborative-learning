@@ -61,32 +61,17 @@ describe("MovableLineModel", () => {
   it("is created with its type property set to 'Movable Line' and with its lines property set to an empty map", () => {
     const movableLine = MovableLineModel.create();
     expect(movableLine.type).toEqual("Movable Line");
-    expect(movableLine.lines.size).toEqual(0);
+    expect(movableLine.lines.length).toEqual(0);
   });
   it("can have a line added to its lines property", () => {
     const movableLine = MovableLineModel.create();
     movableLine.setLine();
-    expect(movableLine.lines.size).toEqual(1);
+    expect(movableLine.lines.length).toEqual(1);
   });
-  // Multiple lines not currently supported
-  it.skip("can have multiple lines added to its lines property", () => {
-    const line1 = {
-      intercept: 1,
-      slope: 1,
-      pivot1: {x: 2, y: 2},
-      pivot2: {x: 3, y: 3}
-    };
-    const line2 = {
-      intercept: 2,
-      slope: 2,
-      pivot1: {x: 3, y: 3},
-      pivot2: {x: 4, y: 4}
-    };
+  it("can have multiple lines added to its lines property", () => {
     const movableLine = MovableLineModel.create();
-    movableLine.lines.set("line1key", line1);
-    movableLine.lines.set("line2key", line2);
-    expect(movableLine.lines.size).toEqual(2);
-    expect(movableLine.lines.get('line1key')).toEqual(line1);
-    expect(movableLine.lines.get('line2key')).toEqual(line2);
+    movableLine.setLine();
+    movableLine.setLine();
+    expect(movableLine.lines.length).toEqual(2);
   });
 });
