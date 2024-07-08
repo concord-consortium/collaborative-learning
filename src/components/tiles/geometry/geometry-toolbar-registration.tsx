@@ -8,7 +8,6 @@ import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking
 import { useReadOnlyContext } from "../../document/read-only-context";
 import { useTileModelContext } from "../hooks/use-tile-model-context";
 import { GeometryTileMode } from "./geometry-types";
-import { ELabelOption } from "../../../models/tiles/geometry/jxg-changes";
 
 import AddImageSvg from "../../../clue/assets/icons/geometry/add-image-icon.svg";
 import CommentSvg from "../../../assets/icons/comment/comment.svg";
@@ -82,10 +81,9 @@ const LabelButton = observer(function LabelButton({name}: IToolbarButtonComponen
   const { content, board, handlers } = useGeometryTileContext();
   const selectedPoint = board && content?.getOneSelectedPoint(board);
   const selectedSegment = board && content?.getOneSelectedSegment(board);
-  const labelProps = selectedPoint && content?.getPointLabelProps(selectedPoint.id);
 
-  // TODO
-  const selected = labelProps && labelProps?.labelOption !== ELabelOption.kNone;
+  const pointHasLabel = selectedPoint && selectedPoint.hasLabel;
+  const segmentHasLabel = selectedSegment && selectedSegment.hasLabel;
 
   function handleClick() {
     handlers?.handleLabelDialog(selectedPoint, selectedSegment);
@@ -96,7 +94,7 @@ const LabelButton = observer(function LabelButton({name}: IToolbarButtonComponen
       name={name}
       title="Label/Value"
       disabled={!selectedPoint && !selectedSegment}
-      selected={selected}
+      selected={pointHasLabel || segmentHasLabel}
       onClick={handleClick}
     >
       <LabelSvg/>
