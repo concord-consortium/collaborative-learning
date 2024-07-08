@@ -70,9 +70,8 @@ export const useLabelSegmentDialog = ({ board, polygon, points, onAccept, onClos
   const segment = useMemo(() => getPolygonSegment(board, polygon, points), [board, polygon, points]);
   const [initialLabelOption] = useState(segment?.getAttribute("clientLabelOption") || "none");
   const [labelOption, setLabelOption] = useState(initialLabelOption);
-  const [initialName] = useState(segment?.getAttribute("clientName")
-          || (pointName(points[0]) + pointName(points[1])));
-  const [name, setName] = useState(initialName);
+  const [initialName] = useState(segment?.getAttribute("clientName"));
+  const [name, setName] = useState(initialName || (pointName(points[0]) + pointName(points[1])));
 
   const handleSubmit = () => {
     if (polygon && points && (initialLabelOption !== labelOption || initialName !== name)) {
