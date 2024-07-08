@@ -218,14 +218,16 @@ describe("Geometry import", () => {
       type: kGeometryTileType,
       board: kDefaultBoardModelOutputProps,
       objects: {
-        "testid-1": { type: "polygon", id: "testid-1", colorScheme: 0, points: ["testid-2", "testid-3", "testid-4"] },
+        "testid-1": { type: "polygon", id: "testid-1", colorScheme: 0, labelOption: "none",
+          points: ["testid-2", "testid-3", "testid-4"] },
         "testid-2": { type: "point", id: "testid-2", colorScheme: 0, x: 0, y: 0, labelOption: "none" },
         "testid-3": { type: "point", id: "testid-3", colorScheme: 0, x: 5, y: 0, labelOption: "none" },
         "testid-4": { type: "point", id: "testid-4", colorScheme: 0, x: 5, y: 5, labelOption: "none" },
         "testid-5": { type: "point", id: "testid-5", colorScheme: 0, x: 10, y: 10, labelOption: "none" },
         "testid-6": { type: "point", id: "testid-6", colorScheme: 0, x: 15, y: 10, labelOption: "none" },
         "testid-7": { type: "point", id: "testid-7", colorScheme: 0, x: 15, y: 15, labelOption: "none" },
-        "poly1": { type: "polygon", id: "poly1", colorScheme: 0, points: ["testid-5", "testid-6", "testid-7"] },
+        "poly1": { type: "polygon", id: "poly1", colorScheme: 0, labelOption: "none",
+          points: ["testid-5", "testid-6", "testid-7"] },
       }
     });
 
@@ -250,7 +252,8 @@ describe("Geometry import", () => {
       type: kGeometryTileType,
       board: kDefaultBoardModelOutputProps,
       objects: {
-        "testid-1": { type: "polygon", id: "testid-1", colorScheme: 0, points: ["testid-2", "testid-3", "testid-4"] },
+        "testid-1": { type: "polygon", id: "testid-1", colorScheme: 0, labelOption: "none",
+          points: ["testid-2", "testid-3", "testid-4"] },
         "testid-2": { type: "point", id: "testid-2", colorScheme: 0, x: 0, y: 0, labelOption: "none" },
         "testid-3": { type: "point", id: "testid-3", colorScheme: 0, x: 5, y: 0, labelOption: "none" },
         "testid-4": { type: "point", id: "testid-4", colorScheme: 0, x: 5, y: 5, labelOption: "none" },
@@ -284,7 +287,7 @@ describe("Geometry import", () => {
         "v1": { type: "point", id: "v1", colorScheme: 0, x: 0, y: 0, labelOption: "none" },
         "v2": { type: "point", id: "v2", colorScheme: 0, x: 5, y: 0, labelOption: "none" },
         "v3": { type: "point", id: "v3", colorScheme: 0, x: 5, y: 5, labelOption: "none" },
-        "p1": { type: "polygon", id: "p1", colorScheme: 0, points: ["v1", "v2", "v3"] },
+        "p1": { type: "polygon", id: "p1", colorScheme: 0, labelOption: "none", points: ["v1", "v2", "v3"] },
         "a1": { type: "vertexAngle", id: "a1", points: ["v3", "v1", "v2"] },
         "a2": { type: "vertexAngle", id: "a2", points: ["v1", "v2", "v3"] },
         "a3": { type: "vertexAngle", id: "a3", points: ["v2", "v3", "v1"] }
@@ -313,7 +316,8 @@ describe("Geometry import", () => {
       type: kGeometryTileType,
       board: kDefaultBoardModelOutputProps,
       objects: {
-        "testid-1": { type: "polygon", id: "testid-1", colorScheme: 0, points: ["testid-2", "testid-3", "testid-4"] },
+        "testid-1": { type: "polygon", id: "testid-1", colorScheme: 0, labelOption: "none",
+          points: ["testid-2", "testid-3", "testid-4"] },
         "testid-2": { type: "point", id: "testid-2", colorScheme: 0, x: 0, y: 0, labelOption: "none" },
         "testid-3": { type: "point", id: "testid-3", colorScheme: 0, x: 5, y: 0, labelOption: "none" },
         "testid-4": { type: "point", id: "testid-4", colorScheme: 0, x: 5, y: 5, labelOption: "none" },

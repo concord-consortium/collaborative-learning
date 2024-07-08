@@ -555,7 +555,7 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps, objects: {
-        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["lp1", "lp2", "lp3"]},
+        p1: { type: "polygon", id: "p1", colorScheme: 0, labelOption: "none", points: ["lp1", "lp2", "lp3"]},
       }
     });
   });
@@ -648,8 +648,8 @@ describe("Geometry migration", () => {
         v1: { type: "point", id: "v1", colorScheme: 0, x: 0, y: 0, labelOption: "none" },
         v2: { type: "point", id: "v2", colorScheme: 0, x: 5, y: 0, labelOption: "none" },
         v3: { type: "point", id: "v3", colorScheme: 0, x: 0, y: 5, labelOption: "none" },
-        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["v1", "v2", "v3"]},
-        p2: { type: "polygon", id: "p2", colorScheme: 0, points: ["v1", "v2", "v3"]}
+        p1: { type: "polygon", id: "p1", colorScheme: 0, labelOption: "none", points: ["v1", "v2", "v3"]},
+        p2: { type: "polygon", id: "p2", colorScheme: 0, labelOption: "none", points: ["v1", "v2", "v3"]}
       }
     });
   });
@@ -686,7 +686,7 @@ describe("Geometry migration", () => {
         v1: { type: "point", id: "v1", colorScheme: 0, x: 0, y: 0, labelOption: "none" },
         v2: { type: "point", id: "v2", colorScheme: 0, x: 5, y: 0, labelOption: "none" },
         v3: { type: "point", id: "v3", colorScheme: 0, x: 0, y: 5, labelOption: "none" },
-        p2: { type: "polygon", id: "p2", colorScheme: 0, points: ["v1", "v2", "v3"]}
+        p2: { type: "polygon", id: "p2", colorScheme: 0, labelOption: "none", points: ["v1", "v2", "v3"]}
       }
     });
   });
@@ -723,7 +723,7 @@ describe("Geometry migration", () => {
         v1: { type: "point", id: "v1", colorScheme: 0, x: 0, y: 0, labelOption: "none" },
         v2: { type: "point", id: "v2", colorScheme: 0, x: 5, y: 0, labelOption: "none" },
         v3: { type: "point", id: "v3", colorScheme: 0, x: 0, y: 5, labelOption: "none" },
-        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["v1", "v2", "v3"]}
+        p1: { type: "polygon", id: "p1", colorScheme: 0, labelOption: "none", points: ["v1", "v2", "v3"]}
       }
     });
   });
@@ -767,7 +767,7 @@ describe("Geometry migration", () => {
         v2: { type: "point", id: "v2", colorScheme: 0, x: 6, y: 6, labelOption: "none" },
         v3: { type: "point", id: "v3", colorScheme: 0, x: 6, y: 0, labelOption: "none" },
         v4: { type: "point", id: "v4", colorScheme: 0, x: 0, y: 0, labelOption: "none" },
-        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["v1", "v2", "v3", "v4"],
+        p1: { type: "polygon", id: "p1", colorScheme: 0, labelOption: "none", points: ["v1", "v2", "v3", "v4"],
               labels: [{ id: "v1::v2", option: "length" }, { id: "v2::v3", option: "label" }] }
       }
     });
@@ -808,7 +808,7 @@ describe("Geometry migration", () => {
         v2: { type: "point", id: "v2", colorScheme: 0, x: 6, y: 6, labelOption: "none" },
         v3: { type: "point", id: "v3", colorScheme: 0, x: 6, y: 0, labelOption: "none" },
         v4: { type: "point", id: "v4", colorScheme: 0, x: 0, y: 0, labelOption: "none" },
-        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["v1", "v2", "v3", "v4"]},
+        p1: { type: "polygon", id: "p1", colorScheme: 0, labelOption: "none", points: ["v1", "v2", "v3", "v4"]},
         c1: { type: "comment", id: "c1", anchors: ["p1"] }
       }
     });
@@ -849,7 +849,7 @@ describe("Geometry migration", () => {
         v2: { type: "point", id: "v2", colorScheme: 0, x: 6, y: 6, labelOption: "none" },
         v3: { type: "point", id: "v3", colorScheme: 0, x: 6, y: 0, labelOption: "none" },
         v4: { type: "point", id: "v4", colorScheme: 0, x: 0, y: 0, labelOption: "none" },
-        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["v1", "v2", "v3", "v4"]},
+        p1: { type: "polygon", id: "p1", colorScheme: 0, labelOption: "none", points: ["v1", "v2", "v3", "v4"]},
         c1: { type: "comment", id: "c1", anchors: ["p1"], x: 3, y: 3 }
       }
     });
@@ -891,7 +891,7 @@ describe("Geometry migration", () => {
         v2: { type: "point", id: "v2", colorScheme: 0, x: 6, y: 6, labelOption: "none" },
         v3: { type: "point", id: "v3", colorScheme: 0, x: 6, y: 0, labelOption: "none" },
         v4: { type: "point", id: "v4", colorScheme: 0, x: 0, y: 0, labelOption: "none" },
-        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["v1", "v2", "v3", "v4"]},
+        p1: { type: "polygon", id: "p1", colorScheme: 0, labelOption: "none", points: ["v1", "v2", "v3", "v4"]},
         c1: { type: "comment", id: "c1", anchors: ["p1"], x: 2, y: 2 }
       }
     });
@@ -929,7 +929,7 @@ describe("Geometry migration", () => {
         v1: { type: "point", id: "v1", colorScheme: 0, x: 0, y: 0, labelOption: "none" },
         v2: { type: "point", id: "v2", colorScheme: 0, x: 5, y: 0, labelOption: "none" },
         v3: { type: "point", id: "v3", colorScheme: 0, x: 0, y: 5, labelOption: "none" },
-        p1: { type: "polygon", id: "p1", colorScheme: 0, points: ["v1", "v2", "v3"]},
+        p1: { type: "polygon", id: "p1", colorScheme: 0, labelOption: "none", points: ["v1", "v2", "v3"]},
         a1: { type: "vertexAngle", id: "a1", points: ["v1", "v2", "v3"] }
       }
     });
