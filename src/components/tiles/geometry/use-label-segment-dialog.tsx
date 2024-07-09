@@ -33,7 +33,7 @@ const Content: React.FC<IContentProps> = (
         <input type="text" className="name-input"
           disabled={labelOption !== ELabelOption.kLabel}
           value={name}
-          onChange={(e) => { setName(e.target.value); }} />
+          onChange={(e) => setName(e.target.value)} />
       </LabelRadioButton>
       <LabelRadioButton
         display="Length"
