@@ -3,14 +3,12 @@ import Canvas from '../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
-import TextToolTile from '../../../support/elements/tile/TextToolTile';
 
 let resourcesPanel = new ResourcesPanel;
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const geometryToolTile = new GeometryToolTile;
 const tableToolTile = new TableToolTile;
-const textToolTile = new TextToolTile;
 
 const x = ['3', '7', '6', '0'];
 const y = ['2.5', '5', '1', '0'];
@@ -40,7 +38,6 @@ context('Geometry Table Integration', function () {
       tableToolTile.getTableCell().eq(17).click();
     });
     clueCanvas.addTile('geometry');
-    textToolTile.deleteTextTile();
 
     cy.log('verify correct geometry tile names appear in selection list');
     tableToolTile.getTableTile().click();
@@ -185,7 +182,6 @@ context('Geometry Table Integration', function () {
       tableToolTile.getTableCell().eq(9).click();
     });
     clueCanvas.addTile('geometry');
-    textToolTile.deleteTextTile();
     cy.linkTableToTile('Table Data 1', "Shapes Graph 1");
 
     // Open the document on the left, then create a new document on the right

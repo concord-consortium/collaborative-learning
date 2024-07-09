@@ -3,14 +3,12 @@ import ClueCanvas from '../../../support/elements/common/cCanvas';
 import PrimaryWorkspace from '../../../support/elements/common/PrimaryWorkspace';
 import ResourcePanel from '../../../support/elements/common/ResourcesPanel';
 import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
-import TextToolTile from '../../../support/elements/tile/TextToolTile';
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const geometryToolTile = new GeometryToolTile;
 const primaryWorkspace = new PrimaryWorkspace;
 const resourcePanel = new ResourcePanel;
-const textToolTile = new TextToolTile;
 
 const problemDoc = 'QA 1.1 Solving a Mystery with Proportional Reasoning';
 const ptsDoc = 'Points';
@@ -37,7 +35,6 @@ context('Geometry Tool', function () {
     canvas.createNewExtraDocumentFromFileMenu(ptsDoc, "my-work");
     clueCanvas.addTile('geometry');
     cy.get('.spacer').click();
-    textToolTile.deleteTextTile();
     geometryToolTile.getGeometryTile().last().click();
     clueCanvas.clickToolbarButton('geometry', 'point');
     geometryToolTile.addPointToGraph(5, 5);
@@ -236,29 +233,23 @@ context('Geometry Tool', function () {
     // Creation - Undo/Redo
     clueCanvas.addTile('geometry');
     geometryToolTile.getGraph().should("exist");
-    textToolTile.getTextTile().should("exist");
     clueCanvas.getUndoTool().should("not.have.class", "disabled");
     clueCanvas.getRedoTool().should("have.class", "disabled");
     clueCanvas.getUndoTool().click();
     geometryToolTile.getGraph().should("not.exist");
-    textToolTile.getTextTile().should("not.exist");
     clueCanvas.getUndoTool().should("have.class", "disabled");
     clueCanvas.getRedoTool().should("not.have.class", "disabled");
     clueCanvas.getRedoTool().click();
     geometryToolTile.getGraph().should("exist");
-    textToolTile.getTextTile().should("exist");
     clueCanvas.getUndoTool().should("not.have.class", "disabled");
     clueCanvas.getRedoTool().should("have.class", "disabled");
     // Deletion - Undo/Redo
     clueCanvas.deleteTile('geometry');
     geometryToolTile.getGraph().should("not.exist");
-    textToolTile.getTextTile().should("exist");
     clueCanvas.getUndoTool().click();
     geometryToolTile.getGraph().should("exist");
-    textToolTile.getTextTile().should("exist");
     clueCanvas.getRedoTool().click();
     geometryToolTile.getGraph().should("not.exist");
-    textToolTile.getTextTile().should("exist");
     clueCanvas.getUndoTool().click();
 
     cy.log("edit tile title");
@@ -277,6 +268,5 @@ context('Geometry Tool', function () {
     cy.log("verify delete geometry");
     clueCanvas.deleteTile('geometry');
     geometryToolTile.getGraph().should("not.exist");
-    textToolTile.getTextTile().should("exist");
   });
 });
