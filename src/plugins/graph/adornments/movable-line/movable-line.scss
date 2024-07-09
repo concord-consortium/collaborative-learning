@@ -12,8 +12,12 @@ svg[class^="line-"] {
 .movable-line {
   stroke-width: 2px;
 
-  &.selected {
-    stroke-width: 1px;
+  &.hover {
+    stroke-opacity: .6;
+
+    &.selected {
+      stroke-width: 1;
+    }
   }
 }
 

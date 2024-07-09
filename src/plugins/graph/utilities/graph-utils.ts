@@ -1,4 +1,4 @@
-import {extent, format, scaleOrdinal, schemeCategory10, select, timeout} from "d3";
+import {extent, format, select, timeout} from "d3";
 import React from "react";
 import { isInteger} from "lodash";
 import { SnapshotOut, getParentOfType } from "mobx-state-tree";
@@ -761,14 +761,4 @@ export const curveBasis = (points: Point[]) => {
   path += pathBasis(p1, p2, p3, p3);
   path += pathBasis(p2, p3, p3, p3);
   return path;
-};
-
-const lineColorScale = scaleOrdinal(schemeCategory10);
-const lineColors: { [key: string]: string } = {};
-
-export const getUniqueLineColor = (key: string) => {
-  if (!lineColors[key]) {
-    lineColors[key] = lineColorScale(key);
-    return lineColors[key];
-  }
 };

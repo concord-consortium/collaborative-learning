@@ -1,9 +1,10 @@
 import { Instance, types } from "mobx-state-tree";
+import { schemeCategory10 } from "d3";
 import { AdornmentModel, IAdornmentModel, IUpdateCategoriesOptions, PointModel,
          kInfinitePoint } from "../adornment-models";
 import { Point } from "../../graph-types";
 import { IAxisModel } from "../../imports/components/axis/models/axis-model";
-import { computeSlopeAndIntercept, getUniqueLineColor } from "../../utilities/graph-utils";
+import { computeSlopeAndIntercept } from "../../utilities/graph-utils";
 import { kMovableLineType } from "./movable-line-types";
 import { IGraphModel } from "../../models/graph-model";
 import { IClueTileObject } from "../../../../models/annotations/clue-object";
@@ -106,8 +107,7 @@ export const MovableLineModel = AdornmentModel
   setLine(xAxis?: IAxisModel, yAxis?: IAxisModel) {
     const { intercept, slope } = computeSlopeAndIntercept(xAxis, yAxis);
     const lineIndex = self.lines.length;
-    const lineColorKey = `line-${lineIndex}-color`;
-    const color = getUniqueLineColor(lineColorKey);
+    const color = schemeCategory10[lineIndex];
     self.lines.push({ color, intercept, slope });
     const line = self.lines[lineIndex];
     line!.setPivot1(kInfinitePoint);
@@ -155,11 +155,11 @@ export const MovableLineModel = AdornmentModel
   get annotatableObjects() {
     const objects: IClueTileObject[] = [];
     if (self.isVisible) {
-      for (const key of self.lines.keys()) {
-        objects.push({ objectType: "movable-line-handle", objectId: getAnnotationId(key, "handle", "lower") });
-        objects.push({ objectType: "movable-line-handle", objectId: getAnnotationId(key, "handle", "upper") });
-        objects.push({ objectType: "movable-line-equation", objectId: getAnnotationId(key, "equation") });
-      }
+      self.lines.forEach((line, index) => {
+        objects.push({ objectType: "movable-line-handle", objectId: getAnnotationId(index, "handle", "lower") });
+        objects.push({ objectType: "movable-line-handle", objectId: getAnnotationId(index, "handle", "upper") });
+        objects.push({ objectType: "movable-line-equation", objectId: getAnnotationId(index, "equation") });
+      });
     }
     return objects;
   },

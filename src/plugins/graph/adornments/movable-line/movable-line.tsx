@@ -109,6 +109,13 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     }
   }, [annotationLocationSetter, model]);
 
+  const updateClasses = useCallback(
+    (elt: Selection<SVGLineElement, unknown, null, undefined>, index: number, hover = false) => {
+      const isLineSelected = !!model.lines[index]?.isSelected;
+      elt.classed("selected", isLineSelected);
+      elt.classed("hover", hover);
+  }, [model.lines]);
+
   const refreshLines = useCallback(() => {
     function fixEndPoints(
       iLine: Selection<SVGLineElement, unknown, null, undefined>,
@@ -144,7 +151,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       index: number,
       pixelPtsOnAxes: { pt1: Point, pt2: Point },
       lineModel: IMovableLineInstance,
-      instanceKey: string
+      lineIndex: number
     ) {
       const pivot = index === 1 ? lineModel?.pivot1 : lineModel?.pivot2;
       let x,y;
@@ -160,18 +167,13 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         elt
           .attr('cx', x)
           .attr('cy', y);
-        const annotationId = getAnnotationId(instanceKey, "handle", index===1 ? "lower" : "upper");
+        const annotationId = getAnnotationId(lineIndex, "handle", index===1 ? "lower" : "upper");
         if (model.isVisible) {
           annotationLocationSetter?.set(annotationId, { x, y }, undefined);
         } else {
           annotationLocationSetter?.set(annotationId, undefined, undefined);
         }
       }
-    }
-
-    function updateClasses(elt: Selection<SVGLineElement, unknown, null, undefined>, index: number) {
-      const isLineSelected = !!model.lines[index]?.isSelected;
-      elt.classed("selected", isLineSelected);
     }
 
     function refreshEquation(slope: number, intercept: number, lineModel: IMovableLineInstance, index: number) {
@@ -230,13 +232,14 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       lineObject.cover && fixEndPoints(lineObject.cover, pixelPtsOnAxes);
       lineObject.arrowLower && fixArrow(lineObject.arrowLower, 1, pixelPtsOnAxes);
       lineObject.arrowUpper && fixArrow(lineObject.arrowUpper, 2, pixelPtsOnAxes);
-      lineObject.handleLower && fixHandles(lineObject.handleLower, 1, pixelPtsOnAxes, lineModel, String(index + 1));
-      lineObject.handleUpper && fixHandles(lineObject.handleUpper, 2, pixelPtsOnAxes, lineModel, String(index + 1));
+      lineObject.handleLower && fixHandles(lineObject.handleLower, 1, pixelPtsOnAxes, lineModel, index);
+      lineObject.handleUpper && fixHandles(lineObject.handleUpper, 2, pixelPtsOnAxes, lineModel, index);
       updateClasses(lineObject.line, index);
       refreshEquation(slope, intercept, lineModel, index);
     });
   }, [annotationLocationSetter, calculateHandlePosition, layout, model.isVisible, model.lines, plotHeight, plotWidth,
-      positionEquation, xAttrName, xAxis, xScale, xSubAxesCount, yAttrName, yAxis, yScale, ySubAxesCount]);
+      positionEquation, updateClasses, xAttrName, xAxis, xScale, xSubAxesCount, yAttrName, yAxis, yScale,
+      ySubAxesCount]);
 
   // Refresh the lines
   useEffect(function refresh() {
@@ -268,11 +271,13 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
 
       const newIntercept = isFinite(slope) ? tWorldY - slope * tWorldX : tWorldX;
       model.dragLine(newIntercept, slope, index);
-    }, [model, xAxis, xScaleCopy, yAxis, yScaleCopy]),
+      refreshLines();
+    }, [model, refreshLines, xAxis, xScaleCopy, yAxis, yScaleCopy]),
 
     endTranslate = useCallback((index: number) => {
       model.saveLine(index);
-    }, [model]),
+      refreshLines();
+    }, [model, refreshLines]),
 
     startRotation = useCallback((
       event: { x: number, y: number },
@@ -290,7 +295,8 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           lineParams.setPivot1(pivot);
         }
       }
-    }, [calculateHandlePosition, model.lines]),
+      refreshLines();
+    }, [calculateHandlePosition, model.lines, refreshLines]),
 
     continueRotation = useCallback((
       event: { x: number, y: number, dx: number, dy: number },
@@ -341,14 +347,16 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
           lineModel!.setPivot2(dragPivot);
         }
       }
-    }, [model, xScaleCopy, yScaleCopy]),
+      refreshLines();
+    }, [model, refreshLines, xScaleCopy, yScaleCopy]),
 
     endRotation = useCallback((index: number) => {
       const lineParams = model.lines[index];
       model.saveLine(index);
       lineParams?.setPivot1(kInfinitePoint);
       lineParams?.setPivot2(kInfinitePoint);
-    }, [model]),
+      refreshLines();
+    }, [model, refreshLines]),
 
     moveEquation = useCallback((event: { x: number, y: number, dx: number, dy: number }, index: number) => {
       if (event.dx !== 0 || event.dy !== 0) {
@@ -373,10 +381,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       model.saveEquationCoords(index);
     }, [model]);
 
-  // Add the behaviors to the line segments
-  useEffect(function addBehaviors() {
-    if (readOnly) return;
-
+  const addBehaviors = useCallback(() => {
     lineObjects.current.forEach((lineObject, index) => {
       const behaviors: {
         cover: DragBehavior<SVGLineElement, unknown, unknown>,
@@ -401,13 +406,15 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       };
 
       lineObject.cover?.call(behaviors.cover);
-      lineObject.cover?.on("click", (e) => toggleLineSelection(index));
+      lineObject.cover?.on("click", () => toggleLineSelection(index));
+      lineObject.cover?.on("mouseover", () => updateClasses(lineObject.line!, index, true));
+      lineObject.cover?.on("mouseout", () => updateClasses(lineObject.line!, index, false));
       lineObject.handleLower?.call(behaviors.lower);
       lineObject.handleUpper?.call(behaviors.upper);
       lineObject.equation?.call(behaviors.equation);
     });
-  }, [lineObjects, readOnly, continueTranslate, endTranslate, startRotation, continueRotation, endRotation,
-      moveEquation, endMoveEquation, toggleLineSelection]);
+  }, [continueRotation, continueTranslate, endMoveEquation, endRotation, endTranslate, moveEquation, startRotation,
+      toggleLineSelection, updateClasses]);
 
   // Build the lines and their cover segments and handles just once
   useEffect(function createElements() {
@@ -426,7 +433,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         const lineClassNames = classNames("movable-line", `movable-line-${index}`, { selected: line.isSelected });
         newLineObject.line = selection.append('line')
           .attr('class', lineClassNames)
-          .attr('data-testid', `movable-line${`-${index}`}`)
+          .attr('data-testid', `movable-line`)
           .attr('stroke', line.color);
         newLineObject.arrowLower = selection.append('polygon')
           .attr('class', 'movable-line-arrow')
@@ -465,10 +472,14 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
 
         newLineObject.equation = equationDiv;
         lineObjects.current.push(newLineObject);
-        refreshLines();
       });
+      refreshLines();
+      if (!readOnly) {
+        addBehaviors();
+      }
     }, { name: "MovableLine.createElements" });
-  }, [containerId, equationContainerClass, model, model.lines, plotHeight, plotWidth, refreshLines, subPlotKey]);
+  }, [addBehaviors, containerId, equationContainerClass, model, model.lines, plotHeight, plotWidth, readOnly,
+      refreshLines, subPlotKey]);
 
   return (
     <svg

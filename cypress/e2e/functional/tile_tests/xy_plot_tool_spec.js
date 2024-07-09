@@ -612,7 +612,6 @@ context('XYPlot Tool Tile', function () {
       // Add movable line
       clueCanvas.clickToolbarButton("graph", "movable-line");
       clueCanvas.toolbarButtonIsEnabled("graph", "movable-line");
-      clueCanvas.toolbarButtonIsSelected("graph", "movable-line");
       xyTile.getMovableLine().should("have.length", 1);
       xyTile.getMovableLineCover().should("have.length", 1);
       xyTile.getMovableLineHandle().should("have.length", 2);
@@ -650,12 +649,19 @@ context('XYPlot Tool Tile', function () {
         .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
       xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
 
-      // Hide movable line (it still exists, just hidden)
+      // Add another movable line
       clueCanvas.clickToolbarButton("graph", "movable-line");
       clueCanvas.toolbarButtonIsEnabled("graph", "movable-line");
-      clueCanvas.toolbarButtonIsNotSelected("graph", "movable-line");
+      xyTile.getMovableLine().should("have.length", 2);
+      xyTile.getMovableLineCover().should("have.length", 2);
+      xyTile.getMovableLineHandle().should("have.length", 4);
+      xyTile.getMovableLineEquationContainer().should("have.length", 2);
+
+      // Select a movable line and delete it using the toolbar button
+      xyTile.getMovableLineCover().eq(1).click({force: true});
+      clueCanvas.clickToolbarButton("graph", "delete");
       xyTile.getMovableLine().should("have.length", 1);
-      xyTile.getMovableLineWrapper().should("have.class", "fadeOut").and("not.have.class", "fadeIn");
+
     });
   });
 });
