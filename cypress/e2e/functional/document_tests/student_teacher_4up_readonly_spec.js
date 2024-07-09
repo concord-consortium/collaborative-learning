@@ -81,7 +81,6 @@ function setupTest(studentIndex) {
   });
   clueCanvas.addTile('geometry');
   cy.get('.spacer').click();
-  textToolTile.deleteTextTile();
   geometryToolTile.getGeometryTile().last().click();
   clueCanvas.clickToolbarButton('geometry', 'point');
   geometryToolTile.addPointToGraph(5, 5);
