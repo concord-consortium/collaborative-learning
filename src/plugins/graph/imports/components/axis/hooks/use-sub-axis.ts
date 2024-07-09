@@ -12,6 +12,7 @@ import {
 import {DragInfo, collisionExists, computeBestNumberOfTicks,
         getCategoricalLabelPlacement,getCoordFunctions, IGetCoordFunctionsProps} from "../axis-utils";
 import { useGraphModelContext } from "../../../../hooks/use-graph-model-context";
+import { isImageUrl } from "../../../../../../models/data/data-types";
 
 // This function is used to style to style the axes of multiple types of plots below.
 // It would be better if we had functions like this to style other features consistently (tick marks, grid lines).
@@ -152,7 +153,9 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
       const dividerLength = layout.getAxisLength(otherPlace(place)) ?? 0;
       const isRightCat = place === 'rightCat';
       const isTop = place === 'top';
-      const categories = Array.from(categorySet?.values ?? []);
+      const _categories = Array.from(categorySet?.values ?? []);
+      // Replace image URLs with placeholder string
+      const categories = _categories.map(cat => isImageUrl(cat) ? "<image>" : cat);
       const numCategories = categories.length;
       const bandWidth = subAxisLength / numCategories;
       const collision = collisionExists({bandWidth, categories, centerCategoryLabels});
@@ -302,8 +305,11 @@ export const useSubAxis = ({subAxisIndex, axisModel, subAxisElt, showScatterPlot
       multiScale = layout.getAxisMultiScale(place),
       categorySet = multiScale?.categorySet,
       categories = Array.from(categorySet?.values ?? []),
-      categoryData: CatObject[] = categories.map((cat, index) =>
-        ({cat, index: isVertical(place) ? categories.length - index - 1 : index}));
+      categoryData: CatObject[] = categories.map((cat, index) => {
+        // Replace image URLs with a placeholder string
+        const validCatValue = isImageUrl(cat) ? "<image>" : cat;
+        return ({cat: validCatValue, index: isVertical(place) ? categories.length - index - 1 : index});
+      });
 
     subAxisSelectionRef.current = select(subAxisElt);
     const sAS = subAxisSelectionRef.current;
