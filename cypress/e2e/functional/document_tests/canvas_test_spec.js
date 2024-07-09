@@ -290,7 +290,6 @@ context('Test Canvas', function () {
     clueCanvas.deleteTile('draw');
     clueCanvas.deleteTile('table');
     clueCanvas.deleteTile('text');
-    clueCanvas.deleteTile('text');
     textToolTile.getTextTile().should('not.exist');
     geometryToolTile.getGeometryTile().should('not.exist');
     drawToolTile.getDrawTile().should('not.exist');

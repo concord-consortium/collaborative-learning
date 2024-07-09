@@ -22,7 +22,6 @@ registerTileContentInfo({
   displayName: "Shapes Graph",
   modelClass: GeometryContentModel,
   metadataClass: GeometryMetadataModel,
-  addSidecarNotes: true,
   defaultHeight: kGeometryDefaultHeight,
   exportNonDefaultHeight: true,
   isDataConsumer: true,
