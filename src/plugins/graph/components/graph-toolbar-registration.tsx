@@ -113,7 +113,6 @@ const MovableLineButton = observer(function MovableLineButton({name}: IToolbarBu
       name={name}
       title="Movable line"
       disabled={disabled}
-      selected={false}
       onClick={handleClick}>
       <MovableLineIcon />
     </TileToolbarButton>
@@ -204,9 +203,7 @@ const DeleteButton = observer(function({name}: IToolbarButtonComponentProps) {
 
   function handleClick() {
     graph.clearSelectedCellValues();
-    for (const adorn of graph.adornments) {
-      adorn.deleteSelected();
-    }
+    graph.clearSelectedAdornmentInstances();
   }
 
   return (

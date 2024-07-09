@@ -78,16 +78,10 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     }
   }, [content.adornments]);
 
-  const deleteSelectedAdornments = useCallback(() => {
-    for (const adorn of content.adornments) {
-      adorn.deleteSelected();
-    }
-  }, [content.adornments]);
-
   const handleDelete = useCallback(() => {
-    deleteSelectedAdornments();
+    content.clearSelectedAdornmentInstances();
     content.clearSelectedCellValues();
-  }, [content, deleteSelectedAdornments]);
+  }, [content]);
 
   const getScaledPosition = useCallback((pos: Point) => {
     const xScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>;

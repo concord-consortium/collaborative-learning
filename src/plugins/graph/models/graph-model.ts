@@ -550,6 +550,11 @@ export const GraphModel = TileContentModel
         }
       }
     },
+    clearSelectedAdornmentInstances() {
+      for (const adorn of self.adornments) {
+        adorn.deleteSelected();
+      }
+    },
     setGraphProperties(props: GraphProperties) {
       (Object.keys(props.axes) as AxisPlace[]).forEach(aKey => {
         this.setAxis(aKey, props.axes[aKey]);
