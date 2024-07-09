@@ -58,7 +58,7 @@ describe("MovableLineInstance", () => {
 });
 
 describe("MovableLineModel", () => {
-  it("is created with its type property set to 'Movable Line' and with its lines property set to an empty map", () => {
+  it("is created with type property set to 'Movable Line' and with lines property set to an empty array", () => {
     const movableLine = MovableLineModel.create();
     expect(movableLine.type).toEqual("Movable Line");
     expect(movableLine.lines.length).toEqual(0);
@@ -68,10 +68,49 @@ describe("MovableLineModel", () => {
     movableLine.setLine();
     expect(movableLine.lines.length).toEqual(1);
   });
-  it("can have multiple lines added to its lines property", () => {
+  it("can have multiple lines added to its lines property using the addLine action", () => {
     const movableLine = MovableLineModel.create();
     movableLine.setLine();
     movableLine.setLine();
     expect(movableLine.lines.length).toEqual(2);
+  });
+  it("can set one line as selected at a time", () => {
+    const movableLine = MovableLineModel.create();
+    movableLine.setLine();
+    movableLine.setLine();
+    movableLine.toggleSelected(0);
+    expect(movableLine.lines[0].isSelected).toBeTruthy();
+    expect(movableLine.lines[1].isSelected).toBeFalsy();
+    movableLine.toggleSelected(1);
+    expect(movableLine.lines[0].isSelected).toBeFalsy();
+    expect(movableLine.lines[1].isSelected).toBeTruthy();
+    movableLine.toggleSelected();
+    expect(movableLine.lines[0].isSelected).toBeFalsy();
+    expect(movableLine.lines[1].isSelected).toBeFalsy();
+  });
+  it("can report when there is a selected line", () => {
+    const movableLine = MovableLineModel.create();
+    movableLine.setLine();
+    movableLine.setLine();
+    expect(movableLine.hasSelectedInstances()).toBeFalsy();
+    movableLine.toggleSelected(0);
+    expect(movableLine.hasSelectedInstances()).toBeTruthy();
+  });
+  it("can delete a specified line", () => {
+    const movableLine = MovableLineModel.create();
+    movableLine.setLine();
+    movableLine.setLine();
+    expect(movableLine.lines.length).toEqual(2);
+    movableLine.deleteLine(0);
+    expect(movableLine.lines.length).toEqual(1);
+  });
+  it("can delete any selected line", () => {
+    const movableLine = MovableLineModel.create();
+    movableLine.setLine();
+    movableLine.setLine();
+    expect(movableLine.lines.length).toEqual(2);
+    movableLine.toggleSelected(0);
+    movableLine.deleteSelected();
+    expect(movableLine.lines.length).toEqual(1);
   });
 });
