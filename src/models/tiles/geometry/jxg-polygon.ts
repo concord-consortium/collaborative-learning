@@ -238,14 +238,14 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]): string[
   return [...pointsToDelete, ...Object.keys(polygonsToDelete), ...Object.keys(anglesToDelete)];
 }
 
-function segmentNameLabelFn(this: JXG.Line) {
-  let p1Name = this.point1.getName();
+function segmentNameLabelFn(line: JXG.Line) {
+  let p1Name = line.point1.getName();
   if (typeof p1Name === "function") {
-    p1Name = this.point1.getAttribute("clientName");
+    p1Name = line.point1.getAttribute("clientName");
   }
-  let p2Name = this.point2.getName();
+  let p2Name = line.point2.getName();
   if (typeof p2Name === "function") {
-    p2Name = this.point2.getAttribute("clientName");
+    p2Name = line.point2.getAttribute("clientName");
   }
   return `${p1Name}${p2Name}`;
 }
@@ -257,25 +257,22 @@ function segmentNameLengthFn(this: JXG.Line) {
 function updateSegmentLabelOption(board: JXG.Board, change: JXGChange) {
   const segment = getPolygonEdge(board, change.targetID as string, change.parents as string[]);
   if (segment) {
-    const labelOption = !Array.isArray(change.properties) && change.properties?.labelOption;
-    const clientLabelOption = (labelOption === ELabelOption.kLabel) ||
-                              (labelOption === ELabelOption.kLength)
-                                ? labelOption
-                                : null;
-    const clientOriginalName = segment.getAttribute("clientOriginalName");
-    if (!clientOriginalName && (typeof segment.name === "string")) {
-      // store the original generated name so we can restore it if necessary
-      segment._set("clientOriginalName", segment.name);
-    }
-    segment._set("clientLabelOption", clientLabelOption);
-    const name = clientLabelOption
-                  ? clientLabelOption === "label"
-                      ? segmentNameLabelFn
-                      : segmentNameLengthFn
-                  // if we're removing our label, restore the original one
-                  : clientOriginalName || board.generateName(segment);
-    segment.setAttribute({ name, withLabel: !!clientLabelOption });
-    segment.label?.setAttribute({ visible: !!clientLabelOption });
+    const labelOption = (!Array.isArray(change.properties) && change.properties?.labelOption)
+      || ELabelOption.kNone;
+
+    const nameOption = (!Array.isArray(change.properties) && change.properties?.name)
+      || segmentNameLabelFn(segment);
+
+    segment._set("clientLabelOption", labelOption);
+    segment._set("clientName", nameOption);
+
+    const name = labelOption === "label"
+      ? nameOption
+      : labelOption === "length"
+        ? segmentNameLengthFn
+        : "";
+
+    segment.setAttribute({ name, withLabel: labelOption !== ELabelOption.kNone });
   }
 }
 

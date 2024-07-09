@@ -4,7 +4,7 @@ import { HotKeyHandler } from "../../../utilities/hot-keys";
 export interface IToolbarActionHandlers {
   handleDuplicate: () => void;
   handleDelete: () => void;
-  handleLabelDialog: () => void;
+  handleLabelDialog: (selectedPoint: JXG.Point|undefined, selectedSegment: JXG.Line|undefined ) => void;
   handleCreateMovableLine: () => void;
   handleCreateLineLabel: () => void;
   handleCreateComment: () => void;

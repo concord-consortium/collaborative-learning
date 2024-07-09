@@ -4,7 +4,7 @@ export { type ILinkProperties, type ITableLinkProperties };
 
 export type JXGOperation = "create" | "update" | "delete";
 export type JXGObjectType = "board" | "comment" | "image" | "linkedPoint" | "metadata" | "movableLine" |
-                              "object" | "point" | "polygon" | "tableLink" | "vertex" | "vertexAngle";
+                              "object" | "point" | "polygon" | "segment" | "tableLink" | "vertex" | "vertexAngle";
 
 export type JXGCoordPair = [number, number];
 export type JXGNormalizedCoordPair = [1, number, number];

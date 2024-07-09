@@ -203,13 +203,45 @@ export const PointMetadataModel = types.model("PointMetadata", {
 
 export interface PointMetadataModelType extends Instance<typeof PointMetadataModel> {}
 
-export const segmentIdFromPointIds = (ptIds: [string, string]) => `${ptIds[0]}:${ptIds[1]}`;
-export const pointIdsFromSegmentId = (segmentId: string) => segmentId.split(":");
+// PolygonSegments are edges of polygons.
+// Usually we don't need to know anything about them since they are defined by
+// the polygon and its vertices. However, if they are labeled we store that
+// information. The ID used is the concatenated IDs of the endpoints.
+
+// We use a double colon separator since linked point IDs have a single colon in
+// them. Besides these methods, also note the separator comes into play in
+// `updateGeometryContentWithNewSharedModelIds`.
+
+export const segmentIdFromPointIds = (ptIds: [string, string]) => `${ptIds[0]}::${ptIds[1]}`;
+export const pointIdsFromSegmentId = (segmentId: string) => segmentId.split("::");
 
 export const PolygonSegmentLabelModel = types.model("PolygonSegmentLabel", {
-  id: types.identifier, // {pt1Id}:{pt2Id}
-  option: types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption))
+  id: types.identifier, // {pt1Id}::{pt2Id}
+  option: types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption)),
+  name: types.maybe(types.string)
+})
+.preProcessSnapshot(snap => {
+  // Previously a single colon was used as a separator.
+  // If this is found, replace it with a double colon.
+  // If the point IDs were from linked points, there would be 3 colons, and the middle one should be doubled.
+  // Since it was previously not possible to make a polygon from a mixture of linked and unlinked points,
+  // there should never be 2 ambiguous colons in legacy content.
+  const id = snap.id;
+  if (id.match(/::/)) {
+    // Modern format, return as-is.
+    return snap;
+  }
+  let newId = id;
+  const colons = (id.match(/:/g) || []).length;
+  if (colons === 1) {
+    newId = id.replace(":", "::");
+  } else if (colons === 3) {
+    const parts = id.split(":");
+    newId = parts[0] + ":" + parts[1] + "::" + parts[2] + ":" + parts[3];
+  }
+  return { ...snap, id: newId };
 });
+
 export interface PolygonSegmentLabelModelType extends Instance<typeof PolygonSegmentLabelModel> {}
 export interface PolygonSegmentLabelModelSnapshot extends SnapshotIn<typeof PolygonSegmentLabelModel> {}
 
@@ -256,9 +288,9 @@ export const PolygonModel = GeometryObjectModel
     replacePoints(ids: string[]) {
       self.points.replace(ids);
     },
-    setSegmentLabel(ptIds: [string, string], option: ELabelOption) {
+    setSegmentLabel(ptIds: [string, string], option: ELabelOption, name: string|undefined) {
       const id = segmentIdFromPointIds(ptIds);
-      const value = { id, option };
+      const value = { id, option, name };
       const foundIndex = self.labels?.findIndex(label => label.id === id);
       // remove any existing label if setting label to "none"
       if (option === ELabelOption.kNone) {

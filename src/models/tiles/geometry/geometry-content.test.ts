@@ -667,30 +667,30 @@ describe("GeometryContent", () => {
     const p1 = board.objects.p1 as JXG.Point;
     const p2 = board.objects.p2 as JXG.Point;
     const p3 = board.objects.p3 as JXG.Point;
-    content.updatePolygonSegmentLabel(board, polygon, [p1, p2], ELabelOption.kLabel);
+    content.updatePolygonSegmentLabel(board, polygon, [p1, p2], ELabelOption.kLabel, "seg1");
     expect(content.getObject(polygon.id)).toEqual({
       id: polygonId,
       type: "polygon",
       points: ["p1", "p2", "p3"],
       colorScheme: 0,
-      labels: [{ id: segmentIdFromPointIds(["p1", "p2"]), option: ELabelOption.kLabel }]
+      labels: [{ id: segmentIdFromPointIds(["p1", "p2"]), option: ELabelOption.kLabel, name: "seg1" }]
     });
-    content.updatePolygonSegmentLabel(board, polygon, [p2, p3], ELabelOption.kLength);
+    content.updatePolygonSegmentLabel(board, polygon, [p2, p3], ELabelOption.kLength, "seg2");
     expect(content.getObject(polygon.id)).toEqual({
       id: polygonId,
       type: "polygon",
       points: ["p1", "p2", "p3"],
       colorScheme: 0,
-      labels: [{ id: segmentIdFromPointIds(["p1", "p2"]), option: ELabelOption.kLabel },
-               { id: segmentIdFromPointIds(["p2", "p3"]), option: ELabelOption.kLength }]
+      labels: [{ id: segmentIdFromPointIds(["p1", "p2"]), option: ELabelOption.kLabel, name: "seg1" },
+               { id: segmentIdFromPointIds(["p2", "p3"]), option: ELabelOption.kLength, name: "seg2" }]
     });
-    content.updatePolygonSegmentLabel(board, polygon, [p1, p2], ELabelOption.kNone);
+    content.updatePolygonSegmentLabel(board, polygon, [p1, p2], ELabelOption.kNone, undefined);
     expect(content.getObject(polygon.id)).toEqual({
       id: polygonId,
       type: "polygon",
       colorScheme: 0,
       points: ["p1", "p2", "p3"],
-      labels: [{ id: segmentIdFromPointIds(["p2", "p3"]), option: ELabelOption.kLength }]
+      labels: [{ id: segmentIdFromPointIds(["p2", "p3"]), option: ELabelOption.kLength, name: "seg2" }]
     });
 
     content.removeObjects(board, polygonId);
@@ -1013,7 +1013,7 @@ describe("GeometryContent", () => {
       .toEqualWithUniqueIds(origObjects);
 
     // copies segment labels when copying polygons
-    polygonModel?.setSegmentLabel([p0.id, px.id], ELabelOption.kLabel);
+    polygonModel?.setSegmentLabel([p0.id, px.id], ELabelOption.kLabel, "name1");
     content.selectObjects(board, [p0.id, px.id, py.id]);
     expect(content.copySelection(board))
       .toEqualWithUniqueIds(origObjects);

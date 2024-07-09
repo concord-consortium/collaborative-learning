@@ -192,6 +192,22 @@ context('Geometry Tool', function () {
     geometryToolTile.toggleAngleCheckbox();
     geometryToolTile.getGraphPointLabel().contains('90°').should('exist');
 
+    // Label a segment
+    geometryToolTile.getGraphPointLabel().contains('AB').should('not.exist');
+    geometryToolTile.getGraphLine().should('have.length', 5); // 0-1 = axis lines, 2-4 = triangle
+    geometryToolTile.getGraphLine().eq(4).click({ force: true });
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.chooseLabelOption('label');
+    geometryToolTile.getGraphPointLabel().contains('AB').should('exist');
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.chooseLabelOption('length');
+    geometryToolTile.getGraphPointLabel().contains('AB').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('5').should('exist');
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.chooseLabelOption('none');
+    geometryToolTile.getGraphPointLabel().contains('AB').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('5').should('not.exist');
+
     // Duplicate polygon
     clueCanvas.clickToolbarButton('geometry', 'select');
     geometryToolTile.selectGraphPoint(7, 6); // click middle of polygon to select it

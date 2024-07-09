@@ -8,13 +8,11 @@ import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking
 import { useReadOnlyContext } from "../../document/read-only-context";
 import { useTileModelContext } from "../hooks/use-tile-model-context";
 import { GeometryTileMode } from "./geometry-types";
-import { ELabelOption } from "../../../models/tiles/geometry/jxg-changes";
 
 import AddImageSvg from "../../../clue/assets/icons/geometry/add-image-icon.svg";
 import CommentSvg from "../../../assets/icons/comment/comment.svg";
 import DeleteSvg from "../../../assets/icons/delete/delete-selection-icon.svg";
 import LabelSvg from "../../../clue/assets/icons/shapes-label-value-icon.svg";
-import LineLabelSvg from "../../../clue/assets/icons/geometry/line-label.svg";
 import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
 import PointSvg from "../../../clue/assets/icons/geometry/point-icon.svg";
 import PolygonSvg from "../../../clue/assets/icons/geometry/polygon-icon.svg";
@@ -82,41 +80,27 @@ const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButton
 const LabelButton = observer(function LabelButton({name}: IToolbarButtonComponentProps) {
   const { content, board, handlers } = useGeometryTileContext();
   const selectedPoint = board && content?.getOneSelectedPoint(board);
-  const labelProps = selectedPoint && content?.getPointLabelProps(selectedPoint.id);
-  const selected = labelProps && labelProps?.labelOption !== ELabelOption.kNone;
+  const selectedSegment = board && content?.getOneSelectedSegment(board);
+
+  const pointHasLabel = selectedPoint && selectedPoint.hasLabel;
+  const segmentHasLabel = selectedSegment && selectedSegment.hasLabel;
 
   function handleClick() {
-    handlers?.handleLabelDialog();
+    handlers?.handleLabelDialog(selectedPoint, selectedSegment);
   }
 
   return (
     <TileToolbarButton
       name={name}
       title="Label/Value"
-      disabled={!selectedPoint}
-      selected={selected}
+      disabled={!selectedPoint && !selectedSegment}
+      selected={pointHasLabel || segmentHasLabel}
       onClick={handleClick}
     >
       <LabelSvg/>
     </TileToolbarButton>
   );
 
-});
-
-const LineLabelButton = observer(function LineLabelButton({name}: IToolbarButtonComponentProps) {
-  const { content, board, handlers } = useGeometryTileContext();
-  const disableLineLabel = board && !content?.getOneSelectedSegment(board);
-
-  return (
-    <TileToolbarButton
-      name={name}
-      title="Segment label"
-      disabled={disableLineLabel}
-      onClick={() => handlers?.handleCreateLineLabel()}
-    >
-      <LineLabelSvg/>
-    </TileToolbarButton>
-  );
 });
 
 const MovableLineButton = observer(function MovableLineButton({name}: IToolbarButtonComponentProps) {
@@ -280,10 +264,6 @@ registerTileToolbarButtons("geometry",
     {
       name: "label",
       component: LabelButton
-    },
-    {
-      name: "line-label",
-      component: LineLabelButton
     },
     {
       name: "movable-line",
