@@ -148,10 +148,10 @@ context('Geometry Table Integration', function () {
     cy.log('normal geometry interactions');
     cy.log('will add a polygon directly onto the geometry');
     geometryToolTile.getGeometryTile().click();
-    geometryToolTile.addPointToGraph(10, 10); //not sure why this isn't appearing
-    geometryToolTile.addPointToGraph(10, 10);
-    geometryToolTile.addPointToGraph(15, 10);
-    geometryToolTile.addPointToGraph(10, 5);
+    geometryToolTile.clickGraphPosition(10, 10); //not sure why this isn't appearing
+    geometryToolTile.clickGraphPosition(10, 10);
+    geometryToolTile.clickGraphPosition(15, 10);
+    geometryToolTile.clickGraphPosition(10, 5);
     geometryToolTile.getGraphPoint().last().click({ force: true }).click({ force: true });
 
     cy.log('will add an angle to a point created from a table');
