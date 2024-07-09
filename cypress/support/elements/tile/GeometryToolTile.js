@@ -110,7 +110,7 @@ class GeometryToolTile {
     getGraphPolygon(){
         return cy.get('.single-workspace .geometry-content.editable polygon');
     }
-    addPointToGraph(x,y){
+    clickGraphPosition(x,y){
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
 
@@ -121,6 +121,14 @@ class GeometryToolTile {
     }
     getGraphToolMenuIcon(){
         return cy.get('.geometry-menu-button');
+    }
+
+    getModalTitle() {
+      return cy.get('.ReactModalPortal');
+    }
+
+    getModalLabelInput() {
+      return cy.get('.ReactModalPortal input[type=text]');
     }
 
     // Name should be something like 'none', 'label', or 'length'
