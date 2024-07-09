@@ -1,4 +1,40 @@
+import { AxisOrientation, IScaleType } from "../../imports/components/axis/axis-types";
 import { MovableLineModel, MovableLineInstance } from "./movable-line-model";
+
+// Set up mock axes
+const hOrientation = "horizontal" as AxisOrientation;
+const vOrientation = "vertical" as AxisOrientation;
+const bottomPlace = "bottom" as "bottom" | "left" | "rightNumeric" | "rightCat" | "top";
+const leftPlace = "left" as "bottom" | "left" | "rightNumeric" | "rightCat" | "top";
+const scaleType = "linear" as IScaleType;
+const mockAxes = {
+  bottom: {
+    isCategorical: false,
+    isNumeric: true,
+    max: 10,
+    min: 0,
+    orientation: hOrientation,
+    place: bottomPlace,
+    scale: scaleType,
+    setScale: jest.fn(),
+    setTransitionDuration: jest.fn(),
+    transitionDuration: 0,
+    type: "linear"
+  },
+  left: {
+    isCategorical: false,
+    isNumeric: true,
+    max: 10,
+    min: 0,
+    orientation: vOrientation,
+    place: leftPlace,
+    scale: scaleType,
+    setScale: jest.fn(),
+    setTransitionDuration: jest.fn(),
+    transitionDuration: 0,
+    type: "linear"
+  }
+};
 
 describe("MovableLineInstance", () => {
   it("is created with intercept and slope properties", () => {
@@ -112,5 +148,24 @@ describe("MovableLineModel", () => {
     movableLine.toggleSelected(0);
     movableLine.deleteSelected();
     expect(movableLine.lines.length).toEqual(1);
+  });
+  it("can update a line's intercept and slope values after dragging", () => {
+    const movableLine = MovableLineModel.create();
+    movableLine.setLine(mockAxes.bottom, mockAxes.left);
+    expect(movableLine.lines[0].intercept).toEqual(0);
+    expect(movableLine.lines[0].slope).toEqual(2);
+    movableLine.dragLine(2, 3, 0);
+    movableLine.saveLine(0);
+    expect(movableLine.lines[0].intercept).toEqual(2);
+    expect(movableLine.lines[0].slope).toEqual(3);
+  });
+  it("can update a line's equation coordinates after dragging", () => {
+    const movableLine = MovableLineModel.create();
+    movableLine.setLine(mockAxes.bottom, mockAxes.left);
+    expect(movableLine.lines[0].equationCoords).toBeUndefined();
+    movableLine.dragEquation({x: 50, y: 50}, 0);
+    movableLine.saveEquationCoords(0);
+    expect(movableLine.lines[0].equationCoords?.x).toEqual(50);
+    expect(movableLine.lines[0].equationCoords?.y).toEqual(50);
   });
 });

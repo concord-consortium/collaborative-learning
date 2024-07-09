@@ -39,6 +39,7 @@ import {
   clueGraphColors, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
 } from "../../../utilities/color-utils";
 import { MovablePointModel } from '../adornments/movable-point/movable-point-model';
+import { MovableLineModel } from '../adornments/movable-line/movable-line-model';
 import { createDocumentModel, DocumentModelType } from '../../../models/document/document';
 import { SharedDataSet } from '../../../models/shared/shared-data-set';
 import { getTileSharedModels } from '../../../models/shared/shared-data-utils';
@@ -80,6 +81,19 @@ describe('GraphModel', () => {
     expect(graphModel.adornments[0].isVisible).toBe(false);
     graphModel.showAdornment('Movable Point');
     expect(graphModel.adornments[0].isVisible).toBe(true);
+  });
+
+  it('should clear selected adornment instances', () => {
+    const graphModel = GraphModel.create();
+    const testMovableLineAdornment = MovableLineModel.create();
+    testMovableLineAdornment.setLine();
+    graphModel.addAdornment(testMovableLineAdornment);
+    expect(testMovableLineAdornment.lines.length).toBe(1);
+    testMovableLineAdornment.toggleSelected(0);
+    expect(graphModel.isAnyAdornmentSelected).toBe(true);
+    graphModel.clearSelectedAdornmentInstances();
+    expect(graphModel.isAnyAdornmentSelected).toBe(false);
+    expect(testMovableLineAdornment.lines.length).toBe(0);
   });
 
   describe('Responding to shared data', () => {
