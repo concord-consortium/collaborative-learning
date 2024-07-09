@@ -12,9 +12,6 @@ Notes on dependencies, particularly reasons for not updating to their latest ver
 |@types/react-dom            |17.0.17        |18.0.6        |React 18                                                                     |
 |@types/react-tabs           |2.3.4          |5.0.5         |Versions 3 and 4 were never published(?); Version 5 requires React 18        |
 |@types/slate-react          |0.22.9         |0.50.1        |Requires slate-editor library update to latest slate                         |
-|cypress                     |9.7.0          |10.6.0        |Cypress 10 requires non-trivial migration.                                   |
-|cypress-commands            |2.0.1          |3.0.0         |Cypress 10                                                                   |
-|cypress-terminal-report     |3.5.2          |4.1.2         |Cypress 10                                                                   |
 
 ## Runtime Dependencies
 
