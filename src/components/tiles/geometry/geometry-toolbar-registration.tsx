@@ -16,6 +16,7 @@ import LabelSvg from "../../../clue/assets/icons/shapes-label-value-icon.svg";
 import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
 import PointSvg from "../../../clue/assets/icons/geometry/point-icon.svg";
 import PolygonSvg from "../../../clue/assets/icons/geometry/polygon-icon.svg";
+import CircleSvg from "../../../clue/assets/icons/geometry/circle-icon.svg";
 import SelectSvg from "../../../clue/assets/icons/select-tool.svg";
 import ShapesDuplicateSvg from "../../../clue/assets/icons/geometry/shapes-duplicate-icon.svg";
 import AddDataSvg from "../../../assets/icons/add-data-graph-icon.svg";
@@ -59,6 +60,10 @@ const PointButton = observer(function PointButton({name}: IToolbarButtonComponen
 
 const PolygonButton = observer(function PolygonButton({name}: IToolbarButtonComponentProps) {
   return(<ModeButton name={name} title="Polygon" targetMode="polygon" Icon={PolygonSvg} />);
+});
+
+const CircleButton = observer(function CircleButton({name}: IToolbarButtonComponentProps) {
+  return(<ModeButton name={name} title="Circle" targetMode="circle" Icon={CircleSvg} />);
 });
 
 const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButtonComponentProps) {
@@ -258,6 +263,10 @@ registerTileToolbarButtons("geometry",
     {
       name: "polygon",
       component: PolygonButton
+    },
+    {
+      name: "circle",
+      component: CircleButton
     },
     {
       name: "duplicate",

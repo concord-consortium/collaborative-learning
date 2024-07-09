@@ -203,6 +203,31 @@ export const PointMetadataModel = types.model("PointMetadata", {
 
 export interface PointMetadataModelType extends Instance<typeof PointMetadataModel> {}
 
+/**
+ * Circles are defined by a center point and a point that is somewhere on the circumference.
+ * These are actual points which can be labeled, so the circle itself does not get a label.
+ */
+export const CircleModel = GeometryObjectModel
+.named("CircleModel")
+.props({
+  type: typeField("circle"),
+  centerPoint: types.string,
+  tangentPoint: types.maybe(types.string),
+  colorScheme: 0
+})
+.views(self => ({
+  get dependencies(): string[] {
+    if (self.tangentPoint) {
+      return [self.centerPoint, self.tangentPoint];
+    }
+    return [self.centerPoint];
+  }
+}));
+
+export interface CircleModelType extends Instance<typeof CircleModel> {}
+
+export const isCircleModel = (o?: GeometryObjectModelType): o is CircleModelType => o?.type === "circle";
+
 // PolygonSegments are edges of polygons.
 // Usually we don't need to know anything about them since they are defined by
 // the polygon and its vertices. However, if they are labeled we store that
@@ -374,8 +399,8 @@ export const ImageModel = PositionedObjectModel
 export interface ImageModelType extends Instance<typeof ImageModel> {}
 export const isImageModel = (o: GeometryObjectModelType): o is ImageModelType => o.type === "image";
 
-export type GeometryObjectModelUnion = CommentModelType | ImageModelType | MovableLineModelType | PointModelType |
-                                        PolygonModelType | VertexAngleModelType;
+export type GeometryObjectModelUnion = CircleModelType | CommentModelType | ImageModelType | MovableLineModelType |
+                                       PointModelType | PolygonModelType | VertexAngleModelType;
 
 // Define the shape of the geometry content without the views/actions, etc. to avoid circular references
 export const GeometryBaseContentModel = TileContentModel
