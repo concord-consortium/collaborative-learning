@@ -70,7 +70,7 @@ context('Exemplar Documents', function () {
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
     clueCanvas.getStickyNotePopup().should("not.exist");
 
-    cy.log("Create 3 drawing tiles with 3 events");
+    cy.log("Create 2 drawing tiles with 3 events");
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);
@@ -81,24 +81,17 @@ context('Exemplar Documents', function () {
     drawToolTile.drawRectangle(200, 50);
     drawToolTile.drawRectangle(300, 50);
 
-    clueCanvas.addTile("drawing");
-    drawToolTile.drawRectangle(100, 50);
-    drawToolTile.drawRectangle(200, 50);
-    drawToolTile.drawRectangle(300, 50);
-
-    cy.log("Create 3 text tiles and put 10 words in them");
+    cy.log("Create 2 text tiles and put 5 words in them");
     clueCanvas.addTile("text");
-    textToolTile.enterText("one two three four five six seven eight nine ten");
+    textToolTile.enterText("one two three four five");
 
     clueCanvas.addTile("text");
-    textToolTile.enterText("one two three four five six seven eight nine ten");
+    textToolTile.enterText("one two three four");
 
-    clueCanvas.addTile("text");
-    textToolTile.enterText("one two three four five six seven eight nine");
     drawToolTile.getDrawTile().eq(0).click(); // text is saved in onBlur
     // Still private?
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
-    textToolTile.enterText(" ten");
+    textToolTile.enterText(" five");
     drawToolTile.getDrawTile().eq(0).click();
 
     // Now the exemplar should be revealed
@@ -116,22 +109,17 @@ context('Exemplar Documents', function () {
 
   });
 
-  it('Exemplar revealed by 3 drawings that include labels', function () {
+  it('Exemplar revealed by 2 drawings that include labels', function () {
     beforeTest(queryParams1);
     cy.openTopTab('sort-work');
     sortWork.checkDocumentInGroup("No Group", exemplarName);
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
 
-    cy.log("Create 3 drawing tiles with 3 events and a label");
+    cy.log("Create 2 drawing tiles with 2 events and a label");
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);
-    addText(300, 50, "one two three four five six seven eight nine ten");
-
-    clueCanvas.addTile("drawing");
-    drawToolTile.drawRectangle(100, 50);
-    drawToolTile.drawRectangle(200, 50);
-    addText(300, 50, "one two three four five six seven eight nine ten");
+    addText(300, 50, "one two three four five");
 
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
@@ -139,7 +127,7 @@ context('Exemplar Documents', function () {
 
     // Still private?
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
-    addText(300, 50, "one two three four five six seven eight nine ten");
+    addText(300, 50, "one two three four five");
     // Now the exemplar should be revealed
     sortWork.getSortWorkItemByTitle(exemplarInfo).parents('.list-item').should("not.have.class", "private");
     clueCanvas.getStickyNotePopup().should("exist").should("be.visible")
