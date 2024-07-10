@@ -305,6 +305,35 @@ context('XYPlot Tool Tile', function () {
       xyTile.getGraphDot().should('have.length', 8);
     });
 
+    it("On initialization from data card containing image URLs, does not graph image URLs", () => {
+      beforeTest(`${Cypress.config("qaMothPlotUnitStudent5")}&mouseSensor`);
+      clueCanvas.addTile("datacard");
+      dataCard.getTile().should("exist");
+      dataCard.getAddAttributeButton().click();
+      dataCard.getAttrName().eq(0).dblclick().type("Image{enter}");
+      dataCard.getAddAttributeButton().click();
+      dataCard.getAttrName().eq(1).dblclick().type("Name{enter}");
+      dataCard.getAddAttributeButton().click();
+      dataCard.getAttrName().eq(2).dblclick().type("Type{enter}");
+      dataCard.getAttrValue().eq(0).click().type("https://concord.org/images/energy3d.png{enter}");
+      dataCard.getAttrValue().eq(1).click().type("Energy3D{enter}");
+      dataCard.getAttrValue().eq(2).click().type("download{enter}");
+      dataCard.getAddCardButton().click();
+      dataCard.getAttrValue().eq(0).click().type("https://concord.org/images/codap.png{enter}");
+      dataCard.getAttrValue().eq(1).click().type("CODAP{enter}");
+      dataCard.getAttrValue().eq(2).click().type("web app{enter}");
+      dataCard.getGraphItButton().click();
+      cy.wait(1000);
+      // Image URLs should not be graphed.
+      xyTile.getXAxisLabel().should("contain", "Name");
+      xyTile.getYAxisLabel().should("contain", "Type");
+      // If the user assigns the image URLs to an axis, "<image>" should be used in place of the full URL values
+      // for the tick labels.
+      xyTile.clickPortalButton("Name");
+      xyTile.getPortalButton().contains("Image").should("exist").click();
+      cy.get("[data-testid=axis-bottom]").find("text").should("contain", "<image>");
+    });
+
     it("Test undo redo actions", () => {
       beforeTest(queryParamsMultiDataset);
       cy.log("Undo redo  XY Plot Tile creation");
