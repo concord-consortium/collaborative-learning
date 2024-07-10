@@ -111,7 +111,7 @@ function buildPolygon(board: JXG.Board, content: GeometryContentModelType,
   const points: JXG.Point[] = [];
   content.addPhantomPoint(board, [0, 0]);
   coordinates.forEach(pair => {
-    const { point } = content.realizePhantomPoint(board, pair, true);
+    const { point } = content.realizePhantomPoint(board, pair, "polygon");
     if (point) points.push(point);
   });
   const polygon = content.closeActivePolygon(board, points[finalVertexClicked]);
@@ -425,7 +425,7 @@ describe("GeometryContent", () => {
     expect((content.getObject("va2") as VertexAngleModelType).points).toEqual(["p1", "p2", p4.id]);
     expect((content.getObject("va3") as VertexAngleModelType).points).toEqual([p4.id, "p3", "p1"]);
 
-    content.realizePhantomPoint(board, [1, 1], true);
+    content.realizePhantomPoint(board, [1, 1], "polygon");
     const p6 = content.phantomPoint!;
     expect(poly.points).toEqual(["p3", "p1", "p2", p4.id]);
     expect(getPolygon(board, polygonId)!.vertices.map(v=>v.id)).toEqual(["p3", "p1", "p2", p4.id, p6.id, "p3"]);
@@ -505,8 +505,8 @@ describe("GeometryContent", () => {
     // first polygon
     const { polygon, points } = buildPolygon(board, content, [[0, 0], [1, 1], [2, 2]]); // points 0, 1, 2
     // second polygon
-    points.push(content.realizePhantomPoint(board, [5, 5], true).point!); // point 3
-    points.push(content.realizePhantomPoint(board, [4, 4], true).point!); // point 4
+    points.push(content.realizePhantomPoint(board, [5, 5], "polygon").point!); // point 3
+    points.push(content.realizePhantomPoint(board, [4, 4], "polygon").point!); // point 4
     content.addPointToActivePolygon(board, points[2].id);
     const polygon2 = content.closeActivePolygon(board, points[3])!;
     expect(polygon?.vertices.map(v => v.id)).toEqual([points[0].id, points[1].id, points[2].id, points[0].id]);
@@ -543,7 +543,7 @@ describe("GeometryContent", () => {
       points: [ points[2].id, points[0].id, points[1].id, "extra1" ], colorScheme: 0, labelOption: "none" });
 
     // Add new point
-    const result = content.realizePhantomPoint(board, [10, 10], true);
+    const result = content.realizePhantomPoint(board, [10, 10], "polygon");
     newPoly = result.polygon;
     const newPoint = result.point;
     expect(newPoly?.vertices.map(v => v.id)).toEqual(

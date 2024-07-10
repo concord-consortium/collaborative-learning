@@ -1581,16 +1581,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         return;
       }
 
-      // other clicks on board background create new points, perhaps even starting a polygon.
+      // other clicks on board background create new points, perhaps starting a polygon or circle.
       this.applyChange(() => {
-        const createPoly = this.context.mode === "polygon";
-        const { point, polygon } = geometryContent.realizePhantomPoint(board, [x, y], createPoly);
+        const { point, polygon } = geometryContent.realizePhantomPoint(board, [x, y], this.context.mode);
         if (point) {
           this.handleCreatePoint(point);
         }
         if (polygon) {
           this.handleCreatePolygon(polygon);
         }
+        // TODO if circle!
       });
     };
 

@@ -409,7 +409,8 @@ export const GeometryBaseContentModel = TileContentModel
     type: types.optional(types.literal(kGeometryTileType), kGeometryTileType),
     board: types.maybe(BoardModel),
     bgImage: types.maybe(ImageModel),
-    objects: types.map(types.union(CommentModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel)),
+    objects: types.map(types.union(
+      CircleModel, CommentModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel)),
     pointMetadata: types.map(PointMetadataModel),
     // Maps attribute ID to color.
     linkedAttributeColors: types.map(types.number),
@@ -420,7 +421,9 @@ export const GeometryBaseContentModel = TileContentModel
     // This is the point that tracks the mouse pointer when you're in a shape-creation mode.
     phantomPoint: undefined as PointModelType|undefined,
     // In polygon mode, the phantom point is considered to be part of an in-progress polygon.
-    activePolygonId: undefined as string|undefined
+    activePolygonId: undefined as string|undefined,
+    // In circle mode, the phantom point is used to construct a cirlce
+    activeCircleId: undefined as string|undefined
   }))
   .preProcessSnapshot(snapshot => {
     // fix null table links ¯\_(ツ)_/¯

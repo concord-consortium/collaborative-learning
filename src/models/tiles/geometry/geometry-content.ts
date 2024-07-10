@@ -11,11 +11,10 @@ import { tileContentAPIActions, tileContentAPIViews } from "../tile-model-hooks"
 import { convertModelToChanges, getGeometryBoardChange } from "./geometry-migrate";
 import { preprocessImportFormat } from "./geometry-import";
 import {
-  cloneGeometryObject, CommentModel, CommentModelType, GeometryBaseContentModel, GeometryObjectModelType,
-  GeometryObjectModelUnion, ImageModel, ImageModelType, isCommentModel, isMovableLineModel, isMovableLinePointId,
-  isPointModel, isPolygonModel, isVertexAngleModel, MovableLineModel, PointModel, PolygonModel, PolygonModelType,
-  segmentIdFromPointIds,
-  VertexAngleModel
+  CircleModel, cloneGeometryObject, CommentModel, CommentModelType, GeometryBaseContentModel, GeometryObjectModelType,
+  GeometryObjectModelUnion, ImageModel, ImageModelType, isCircleModel, isCommentModel, isMovableLineModel,
+  isMovableLinePointId, isPointModel, isPolygonModel, isVertexAngleModel, MovableLineModel, PointModel,
+  PolygonModel, PolygonModelType, segmentIdFromPointIds, VertexAngleModel
 } from "./geometry-model";
 import {
   getBoardUnitsAndBuffers, getObjectById, guessUserDesiredBoundingBox, kXAxisTotalBuffer, kYAxisTotalBuffer,
@@ -41,6 +40,7 @@ import { appendVertexId, getPoint, filterBoardObjects, forEachBoardObject, getBo
   getPolygon, logGeometryEvent, removeClosingVertexId } from "./geometry-utils";
 import { getPointVisualProps } from "./jxg-point";
 import { getVertexAngle } from "./jxg-vertex-angle";
+import { GeometryTileMode } from "../../../components/tiles/geometry/geometry-types";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -226,6 +226,10 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
   }))
   .views(self => ({
+    getCircle(id: string) {
+      const obj = self.getObject(id);
+      return isCircleModel(obj) ? obj : undefined;
+    },
     // Returns any object in the model, even a subobject (like a movable line's point)
     getAnyObject(id: string) {
       if (isMovableLinePointId(id)) {
@@ -860,13 +864,14 @@ export const GeometryContentModel = GeometryBaseContentModel
 
     /**
      * Make the current phantom point into a real point.
-     * The new point is persisted into the model. It remains a part of the active polygon if any.
+     * The new point is persisted into the model.
+     * Depending on the mode, the active polygon or circle will be updated.
      * @param board
      * @param position
-     * @param polygonId
+     * @param mode
      * @returns the point, now considered "real".
      */
-    function realizePhantomPoint(board: JXG.Board, position: JXGCoordPair, makePolygon: boolean):
+    function realizePhantomPoint(board: JXG.Board, position: JXGCoordPair, mode: GeometryTileMode):
         { point: JXG.Point | undefined, polygon: JXG.Polygon | undefined } {
       // Transition the current phantom point into a real point.
       if (!self.phantomPoint) return { point: undefined, polygon: undefined };
@@ -896,7 +901,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       syncChange(board, change);
 
       let newPolygon: JXG.Polygon|undefined = undefined;
-      if (makePolygon) {
+      if (mode === "polygon") {
         const poly = self.activePolygonId && getPolygon(board, self.activePolygonId);
         if (poly) {
           newPolygon = appendPhantomPointToPolygon(board, poly.id);
@@ -925,9 +930,32 @@ export const GeometryContentModel = GeometryBaseContentModel
         }
       }
 
+      // let newCircle: JXG.Circle|undefined = undefined;
+      if (mode === "circle") {
+        const circleModel = self.activeCircleId && self.getCircle(self.activeCircleId);
+        if (circleModel) {
+          circleModel.tangentPoint = newRealPoint.id;
+          self.activeCircleId = undefined;
+          console.log("completed circle");
+        } else {
+          const newCircleModel = CircleModel.create(
+            { id: uniqueId(), centerPoint: newRealPoint.id, colorScheme: newRealPoint.colorScheme }
+          );
+          self.addObjectModel(newCircleModel);
+          self.activeCircleId = newCircleModel.id;
+          syncChange(board, {
+            operation: "create",
+            target: "circle",
+            parents: [newRealPoint.id, phantomPoint.id],
+            properties: { id: newCircleModel.id, colorScheme: newRealPoint.colorScheme }
+          });
+          console.log("created circle");
+        }
+      }
+
       // Log event
       logGeometryEvent(self, "create",
-        makePolygon ? "vertex" : "point",
+        mode === "polygon" ? "vertex" : "point",
         self.activePolygonId ? [newRealPoint.id, self.activePolygonId] : newRealPoint.id);
 
       // Return newly-created objects
