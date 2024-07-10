@@ -250,6 +250,10 @@ export const PolygonModel = GeometryObjectModel
   .props({
     type: typeField("polygon"),
     points: types.array(types.string),
+    labelOption: types.optional(
+      types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption)),
+      ELabelOption.kNone),
+    name: types.maybe(types.string),
     labels: types.maybe(types.array(PolygonSegmentLabelModel)),
     colorScheme: 0
   })

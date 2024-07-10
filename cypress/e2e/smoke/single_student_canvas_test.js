@@ -102,7 +102,7 @@ context('single student functional test', () => {
     cy.log('adds a geometry tool');
     clueCanvas.addTile('geometry');
     geometryToolTile.getGeometryTile().should('exist');
-    geometryToolTile.addPointToGraph(0, 0);
+    geometryToolTile.clickGraphPosition(0, 0);
 
     cy.log('adds an image tool');
     clueCanvas.addTile('image');

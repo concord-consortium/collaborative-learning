@@ -146,9 +146,9 @@ context('Test copy tiles from one document to other document', function () {
     cy.get('.spacer').click();
     geometryToolTile.getGeometryTile().last().click();
     clueCanvas.clickToolbarButton('geometry', 'point');
-    geometryToolTile.addPointToGraph(5, 5);
-    geometryToolTile.addPointToGraph(10, 5);
-    geometryToolTile.addPointToGraph(10, 10);
+    geometryToolTile.clickGraphPosition(5, 5);
+    geometryToolTile.clickGraphPosition(10, 5);
+    geometryToolTile.clickGraphPosition(10, 10);
     geometryToolTile.getGraphPoint().should('have.length', 4);
 
     cy.log('Add drawing tile');

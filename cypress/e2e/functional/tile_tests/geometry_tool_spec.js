@@ -28,7 +28,7 @@ context('Geometry Tool', function () {
     cy.log("add a point to the origin");
     clueCanvas.addTile('geometry');
     clueCanvas.clickToolbarButton('geometry', 'point');
-    geometryToolTile.addPointToGraph(0, 0);
+    geometryToolTile.clickGraphPosition(0, 0);
     geometryToolTile.getGraphPointCoordinates().should('exist');
 
     cy.log("add points to a geometry");
@@ -37,9 +37,9 @@ context('Geometry Tool', function () {
     cy.get('.spacer').click();
     geometryToolTile.getGeometryTile().last().click();
     clueCanvas.clickToolbarButton('geometry', 'point');
-    geometryToolTile.addPointToGraph(5, 5);
-    geometryToolTile.addPointToGraph(10, 5);
-    geometryToolTile.addPointToGraph(10, 10);
+    geometryToolTile.clickGraphPosition(5, 5);
+    geometryToolTile.clickGraphPosition(10, 5);
+    geometryToolTile.clickGraphPosition(10, 10);
 
     cy.log("copy a point to the clipboard");
     let clipSpy;
@@ -117,8 +117,8 @@ context('Geometry Tool', function () {
     clueCanvas.toolbarButtonIsSelected('geometry', 'point');
     geometryToolTile.getGraph().trigger('mousemove');
     geometryToolTile.getGraphPoint().should("have.length", 1); // phantom point
-    geometryToolTile.addPointToGraph(1, 1);
-    geometryToolTile.addPointToGraph(2, 2);
+    geometryToolTile.clickGraphPosition(1, 1);
+    geometryToolTile.clickGraphPosition(2, 2);
     geometryToolTile.getGraphPoint().should("have.length", 3);
 
     // Duplicate point
@@ -140,7 +140,7 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPoint().should("have.length", 2); // no phantom point
 
     // Clicking background should NOT create a point.
-    geometryToolTile.addPointToGraph(3, 3);
+    geometryToolTile.clickGraphPosition(3, 3);
     geometryToolTile.getGraphPoint().should("have.length", 2); // same as before
 
     geometryToolTile.getSelectedGraphPoint().should("have.length", 0);
@@ -174,13 +174,13 @@ context('Geometry Tool', function () {
     clueCanvas.toolbarButtonIsSelected('geometry', 'polygon');
     geometryToolTile.getGraph().trigger('mousemove');
     geometryToolTile.getGraphPoint().should("have.length", 1); // phantom point
-    geometryToolTile.addPointToGraph(5, 5);
+    geometryToolTile.clickGraphPosition(5, 5);
     geometryToolTile.getGraphPoint().should("have.length", 2);
-    geometryToolTile.addPointToGraph(10, 5);
+    geometryToolTile.clickGraphPosition(10, 5);
     geometryToolTile.getGraphPoint().should("have.length", 3);
-    geometryToolTile.addPointToGraph(10, 10);
+    geometryToolTile.clickGraphPosition(10, 10);
     geometryToolTile.getGraphPoint().should("have.length", 4);
-    geometryToolTile.addPointToGraph(5, 5); // click first point again to close polygon.
+    geometryToolTile.clickGraphPosition(5, 5); // click first point again to close polygon.
     geometryToolTile.getGraphPoint().should("have.length", 4);
     geometryToolTile.getGraphPolygon().should("have.length", 1);
 
@@ -192,11 +192,30 @@ context('Geometry Tool', function () {
     geometryToolTile.toggleAngleCheckbox();
     geometryToolTile.getGraphPointLabel().contains('90°').should('exist');
 
+    // Label the polygon
+    geometryToolTile.getGraphPolygon().click(50, 50, { force: true,  });
+    geometryToolTile.getSelectedGraphPoint().should('have.length', 3);
+    geometryToolTile.getGraphPointLabel().contains('12.5').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('ABC').should('not.exist');
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.getModalTitle().should('contain.text', 'Polygon Label/Value');
+    geometryToolTile.chooseLabelOption('length');
+    geometryToolTile.getGraphPointLabel().contains('12.5').should('exist');
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.getModalLabelInput().should('have.value', 'ABC');
+    geometryToolTile.chooseLabelOption('label');
+    geometryToolTile.getGraphPointLabel().contains('12.5').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('ABC').should('exist');
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.chooseLabelOption('none');
+    geometryToolTile.clickGraphPosition(0, 0); // deselect polygon
+
     // Label a segment
     geometryToolTile.getGraphPointLabel().contains('AB').should('not.exist');
     geometryToolTile.getGraphLine().should('have.length', 5); // 0-1 = axis lines, 2-4 = triangle
     geometryToolTile.getGraphLine().eq(4).click({ force: true });
     clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.getModalTitle().should('contain.text', 'Segment Label/Value');
     geometryToolTile.chooseLabelOption('label');
     geometryToolTile.getGraphPointLabel().contains('AB').should('exist');
     clueCanvas.clickToolbarButton('geometry', 'label');
