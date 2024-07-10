@@ -1,5 +1,4 @@
 import { Instance, types } from "mobx-state-tree";
-import { schemeCategory10 } from "d3";
 import { AdornmentModel, IAdornmentModel, IUpdateCategoriesOptions, PointModel,
          kInfinitePoint } from "../adornment-models";
 import { Point } from "../../graph-types";
@@ -18,13 +17,12 @@ export function getAnnotationId(lineKey: string | number, type: "handle"|"equati
 }
 
 export const MovableLineInstance = types.model("MovableLineInstance", {
-  color: types.optional(types.string, "#4782B4"),
   equationCoords: types.maybe(PointModel),
   intercept: types.number,
-  isSelected: types.maybe(types.boolean),
   slope: types.number,
 })
 .volatile(self => ({
+  isSelected: false,
   pivot1: PointModel.create(),
   pivot2: PointModel.create(),
   dragEquationCoords: undefined as Point|undefined,
@@ -107,8 +105,7 @@ export const MovableLineModel = AdornmentModel
   setLine(xAxis?: IAxisModel, yAxis?: IAxisModel) {
     const { intercept, slope } = computeSlopeAndIntercept(xAxis, yAxis);
     const lineIndex = self.lines.length;
-    const color = schemeCategory10[lineIndex];
-    self.lines.push({ color, intercept, slope });
+    self.lines.push({ intercept, slope });
     const line = self.lines[lineIndex];
     line!.setPivot1(kInfinitePoint);
     line!.setPivot2(kInfinitePoint);
@@ -144,11 +141,11 @@ export const MovableLineModel = AdornmentModel
     }
   },
   deleteSelected() {
-    self.lines.forEach((line, index) => {
-      if (line.isSelected) {
-        self.lines.splice(index, 1);
-      }
-    });
+    // Only one line can be selected at a time.
+    const selectedLineIndex = self.lines.findIndex(line => line.isSelected);
+    if (selectedLineIndex >= 0) {
+      self.lines.splice(selectedLineIndex, 1);
+    }
   }
 }))
 .views(self => ({

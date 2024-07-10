@@ -104,7 +104,7 @@ describe("MovableLineModel", () => {
     movableLine.setLine();
     expect(movableLine.lines.length).toEqual(1);
   });
-  it("can have multiple lines added to its lines property using the addLine action", () => {
+  it("can have multiple lines added to its lines property using the setLine action", () => {
     const movableLine = MovableLineModel.create();
     movableLine.setLine();
     movableLine.setLine();

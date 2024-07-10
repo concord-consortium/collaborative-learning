@@ -16,6 +16,7 @@ import { kInfinitePoint } from "../adornment-models";
 import { Point } from "../../graph-types";
 import { kAnnotationNodeDefaultRadius } from "../../../../components/annotations/annotation-utilities";
 import { useLocationSetterContext } from "../../hooks/use-location-setter-context";
+import { useInstanceIdContext } from "../../imports/hooks/use-instance-id-context";
 
 import "./movable-line.scss";
 
@@ -49,6 +50,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
   const {containerId, model, plotHeight, plotWidth, subPlotKey={}, xAxis, yAxis} = props,
     graphModel = useGraphModelContext(),
     layout = useAxisLayoutContext(),
+    instanceId = useInstanceIdContext(),
     readOnly = useReadOnlyContext(),
     annotationLocationSetter = useLocationSetterContext(),
     xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType,
@@ -178,9 +180,9 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
 
     function refreshEquation(slope: number, intercept: number, lineModel: IMovableLineInstance, index: number) {
       if (pointsOnAxes.current.length < 1) return;
-      const lineEquationContainer = select(`.primary-workspace #${`movable-line-equation-${index}`}`);
+      const lineEquationContainer = select(`.primary-workspace #${`movable-line-equation-${index}-${instanceId}`}`);
       const lineEquationElt =
-        select<HTMLElement,unknown>(`.primary-workspace #${`movable-line-equation-${index}`} p`);
+        select<HTMLElement,unknown>(`.primary-workspace #${`movable-line-equation-${index}-${instanceId}`} p`);
       const
         attrNames = {x: xAttrName, y: yAttrName},
         string = equationString(slope, intercept, attrNames);
@@ -361,7 +363,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     moveEquation = useCallback((event: { x: number, y: number, dx: number, dy: number }, index: number) => {
       if (event.dx !== 0 || event.dy !== 0) {
         const equation =
-          select<HTMLElement,unknown>(`.primary-workspace #${`movable-line-equation-${index}`} p`),
+          select<HTMLElement,unknown>(`.primary-workspace #${`movable-line-equation-${index}-${instanceId}`} p`),
           equationNode = equation.node() as Element,
           equationWidth = equationNode?.getBoundingClientRect().width || 0,
           equationHeight = equationNode?.getBoundingClientRect().height || 0,
@@ -416,7 +418,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
   }, [continueRotation, continueTranslate, endMoveEquation, endRotation, endTranslate, moveEquation, startRotation,
       toggleLineSelection, updateClasses]);
 
-  // Build the lines and their cover segments and handles just once
+  // Build the lines and their cover segments and handles
   useEffect(function createElements() {
     return autorun(() => {
       if (!model.lines || lineObjects.current.length === model.lines.length) return;
@@ -429,37 +431,42 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
 
       model.lines.map((line, index) => {
         const newLineObject: ILineObject = {};
+        const lineID = `movable-line-${index}`;
+        if (graphModel.getColorForId(lineID) === "#000000") {
+          graphModel.setColorForId(lineID);
+        }
+        const lineColor = graphModel.getColorForId(lineID);
         // Set up the line and its cover segments and handles
         const lineClassNames = classNames("movable-line", `movable-line-${index}`, { selected: line.isSelected });
         newLineObject.line = selection.append('line')
           .attr('class', lineClassNames)
           .attr('data-testid', `movable-line`)
-          .attr('stroke', line.color);
+          .attr('stroke', lineColor);
         newLineObject.arrowLower = selection.append('polygon')
           .attr('class', 'movable-line-arrow')
           .attr('points', '0 0 -7 -14 7 -14 0 0')
-          .attr('fill', line.color);
+          .attr('fill', lineColor);
         newLineObject.arrowUpper = selection.append('polygon')
           .attr('class', 'movable-line-arrow')
           .attr('points', '0 0 -7 -14 7 -14 0 0')
-          .attr('fill', line.color);
+          .attr('fill', lineColor);
         newLineObject.cover = selection.append('line')
           .attr('class', 'movable-line-cover');
         newLineObject.handleLower = selection.append('circle')
           .attr('r', kHandleSize/2)
           .attr('class', 'movable-line-handle movable-line-lower-handle')
-          .attr('fill', line.color)
-          .attr('stroke', line.color);
+          .attr('fill', lineColor)
+          .attr('stroke', lineColor);
         newLineObject.handleUpper = selection.append('circle')
           .attr('r', kHandleSize/2)
           .attr('class', 'movable-line-handle movable-line-upper-handle')
-          .attr('fill', line.color)
-          .attr('stroke', line.color);
+          .attr('fill', lineColor)
+          .attr('stroke', lineColor);
 
         // Set up the corresponding equation box
         // Define the selector that corresponds with this specific movable line's adornment container
         const equationDiv = select(`#${containerId}`).append('div')
-          .attr('id', `movable-line-equation-${index}`)
+          .attr('id', `movable-line-equation-${index}-${instanceId}`)
           .attr('class', `movable-line-equation-container ${equationContainerClass}`)
           .attr('data-testid', `${equationContainerClass}`)
           .style('width', `${plotWidth}px`)
@@ -478,8 +485,8 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         addBehaviors();
       }
     }, { name: "MovableLine.createElements" });
-  }, [addBehaviors, containerId, equationContainerClass, model, model.lines, plotHeight, plotWidth, readOnly,
-      refreshLines, subPlotKey]);
+  }, [addBehaviors, containerId, equationContainerClass, graphModel, instanceId, model, model.lines, plotHeight,
+      plotWidth, readOnly, refreshLines, subPlotKey]);
 
   return (
     <svg
