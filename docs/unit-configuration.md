@@ -159,7 +159,7 @@ Uses common toolbar framework. Default buttons:
 - `stroke-color`
 - `fill-color`
 - `text`
-- `image-upload`
+- `upload`
 - `group`
 - `ungroup`
 - `duplicate`
