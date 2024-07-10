@@ -81,12 +81,12 @@ function setupTest(studentIndex) {
   });
   clueCanvas.addTile('geometry');
   cy.get('.spacer').click();
-  textToolTile.deleteTextTile();
   geometryToolTile.getGeometryTile().last().click();
-  geometryToolTile.addPointToGraph(5, 5);
-  geometryToolTile.addPointToGraph(10, 5);
-  geometryToolTile.addPointToGraph(10, 10);
-  geometryToolTile.getGraphPoint().should('have.length', 3);
+  clueCanvas.clickToolbarButton('geometry', 'point');
+  geometryToolTile.clickGraphPosition(5, 5);
+  geometryToolTile.clickGraphPosition(10, 5);
+  geometryToolTile.clickGraphPosition(10, 10);
+  geometryToolTile.getGraphPoint().should('have.length', 4); // including phantom point
   clueCanvas.addTile("drawing");
   drawToolTile.getDrawToolRectangle().click();
   drawToolTile.getDrawTile()

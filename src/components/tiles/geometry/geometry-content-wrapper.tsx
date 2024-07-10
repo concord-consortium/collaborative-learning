@@ -6,7 +6,6 @@ import { useMeasureText } from "../hooks/use-measure-text";
 import { GeometryContentComponent, IGeometryContentProps } from "./geometry-content";
 
 interface IProps extends IGeometryContentProps{
-  isLinkButtonEnabled: boolean;
   readOnly?: boolean;
 }
 export const GeometryContentWrapper: React.FC<IProps> = (props) => {

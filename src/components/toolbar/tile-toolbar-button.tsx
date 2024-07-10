@@ -1,8 +1,8 @@
 import React, { PropsWithChildren } from "react";
 import { useTouchHold } from "../../hooks/use-touch-hold";
 import classNames from "classnames";
-import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { Tooltip } from "react-tippy";
+import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 
 /**
  * Create the complete tooltip from the given button information.

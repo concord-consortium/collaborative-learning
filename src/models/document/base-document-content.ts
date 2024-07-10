@@ -4,7 +4,6 @@ import { kPlaceholderTileDefaultHeight } from "../tiles/placeholder/placeholder-
 import {
   getPlaceholderSectionId, isPlaceholderTile, PlaceholderContentModel
 } from "../tiles/placeholder/placeholder-content";
-import { kTextTileType } from "../tiles/text/text-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
 import { ITileContentModel, ITileEnvironment, TileContentModel } from "../tiles/tile-content";
 import { ILinkableTiles, ITypedTileLinkMetadata } from "../tiles/tile-link-types";
@@ -790,13 +789,12 @@ export const BaseDocumentContentModel = types
        * @param toolId the type of tile to create.
        * @param options an options object, which can include:
        * @param options.title title for the new tile
-       * @param options.addSidecarNotes if true, creates an additional text tile alongside
        * @param options.url passed to the default content creation method
        * @param options.insertRowInfo specifies where the tile should be placed
        * @returns an object containing information about the results: rowId, tileId, additionalTileIds
        */
       addTile(toolId: string, options?: IDocumentContentAddTileOptions) {
-        const { title, addSidecarNotes, url, insertRowInfo } = options || {};
+        const { title, url, insertRowInfo } = options || {};
         // for historical reasons, this function initially places new rows at
         // the end of the content and then moves them to the desired location.
         const contentInfo = getTileContentInfo(toolId);
@@ -813,38 +811,17 @@ export const BaseDocumentContentModel = types
         const tileInfo = self.addTileContentInNewRow(
                               newContent,
                               addTileOptions);
-        if (addSidecarNotes) {
-          const { rowId } = tileInfo;
-          const row = self.rowMap.get(rowId);
-          const textContentInfo = getTileContentInfo(kTextTileType);
-          if (row && textContentInfo) {
-            const tile = TileModel.create({ content: textContentInfo.defaultContent() });
-            self.insertNewTileInRow(tile, row, 1);
-            tileInfo.additionalTileIds = [ tile.id ];
-          }
-        }
-
         // TODO: For historical reasons, this function initially places new rows at the end of the content
         // and then moves them to their desired locations from there using the insertRowInfo to specify the
         // desired destination. The underlying addTileInNewRow() function has a separate mechanism for specifying
         // the location of newly created rows. It would be better to eliminate the redundant insertRowInfo
         // specification used by this function and instead just use the one from addTileInNewRow().
         if (tileInfo && insertRowInfo) {
-          // Move newly-create tile(s) into requested row. If we have created more than one tile, e.g. the sidecar text
-          // for the graph tool, we need to insert the tiles one after the other. If we are inserting on the left, we
-          // have to reverse the order of insertion. If we are inserting into a new row, the first tile is inserted
-          // into a new row and then the sidecar tiles into that same row. This makes the logic rather verbose...
+          // Move newly-create tile(s) into requested row.
           const { rowDropLocation } = insertRowInfo;
 
-          let tileIdsToMove;
-          if (tileInfo.additionalTileIds) {
-            tileIdsToMove = [tileInfo.tileId, ...tileInfo.additionalTileIds];
-            if (rowDropLocation && rowDropLocation === "left") {
-              tileIdsToMove = tileIdsToMove.reverse();
-            }
-          } else {
-            tileIdsToMove = [tileInfo.tileId];
-          }
+          // TODO simplify this
+          const tileIdsToMove = [tileInfo.tileId];
 
           const moveSubsequentTilesRight = !rowDropLocation
                                            || rowDropLocation === "bottom"
