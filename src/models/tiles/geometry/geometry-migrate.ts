@@ -3,7 +3,7 @@ import { ITileExportOptions } from "../tile-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { comma, StringBuilder } from "../../../utilities/string-builder";
 import {
-  BoardModel, BoardModelType, CommentModel, CommentModelType, GeometryBaseContentModelType,
+  BoardModel, BoardModelType, CircleModelType, CommentModel, CommentModelType, GeometryBaseContentModelType,
   GeometryExtrasContentSnapshotType, GeometryObjectModelType, ImageModel, ImageModelType,
   isPointModel,
   MovableLineModel, MovableLineModelType, pointIdsFromSegmentId, PointModel, PointModelType,
@@ -97,6 +97,12 @@ export const convertModelObjectsToChanges = (objects: GeometryObjectModelType[])
 export const convertModelObjectToChanges = (obj: GeometryObjectModelType): JXGChange[] => {
   const changes: JXGChange[] = [];
   switch (obj.type) {
+    case "circle": {
+      const { centerPoint, tangentPoint, ...props } = obj as CircleModelType;
+      const properties = omitNullish(props);
+      changes.push({ operation: "create", target: "circle", parents: [centerPoint, tangentPoint], properties });
+      break;
+    }
     case "comment": {
       const { type, x, y, anchors, ...props } = obj as CommentModelType;
       const anchor = anchors?.length ? anchors[0] : undefined;

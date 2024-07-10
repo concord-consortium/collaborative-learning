@@ -35,7 +35,7 @@ import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
 } from "../../../models/tiles/geometry/jxg-polygon";
 import {
-  isAxis, isComment, isImage, isLine, isLinkedPoint, isMovableLine,
+  isAxis, isCircle, isComment, isImage, isLine, isLinkedPoint, isMovableLine,
   isMovableLineControlPoint, isMovableLineLabel, isPoint, isPolygon, isRealVisiblePoint, isVertexAngle,
   isVisibleEdge, isVisibleMovableLine, kGeometryDefaultPixelsPerUnit
 } from "../../../models/tiles/geometry/jxg-types";
@@ -510,7 +510,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (content.phantomPoint) {
           content.setPhantomPointPosition(board, position);
         } else {
-          content.addPhantomPoint(board, position, content.activePolygonId);
+          content.addPhantomPoint(board, position);
         }
       });
       const phantom = content.phantomPoint && getPoint(board, content.phantomPoint?.id);
@@ -1361,6 +1361,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       else if (isPolygon(elt)) {
         this.handleCreatePolygon(elt);
       }
+      else if (isCircle(elt)) {
+        this.handleCreateCircle(elt);
+      }
       else if (isVertexAngle(elt)) {
         this.handleCreateVertexAngle(elt);
       }
@@ -1583,14 +1586,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
       // other clicks on board background create new points, perhaps starting a polygon or circle.
       this.applyChange(() => {
-        const { point, polygon } = geometryContent.realizePhantomPoint(board, [x, y], this.context.mode);
+        const { point, polygon, circle } = geometryContent.realizePhantomPoint(board, [x, y], this.context.mode);
         if (point) {
           this.handleCreatePoint(point);
         }
         if (polygon) {
           this.handleCreatePolygon(polygon);
         }
-        // TODO if circle!
+        if (circle) {
+          this.handleCreateCircle(circle);
+        }
       });
     };
 
@@ -1643,6 +1648,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
 
       // Polygon mode interactions with existing points
+      // TODO circle mode
       if (mode === "polygon") {
         this.applyChange(() => {
           if (geometryContent.phantomPoint && geometryContent.activePolygonId) {
@@ -1829,6 +1835,92 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     line.on("down", handlePointerDown);
     line.on("drag", handleDrag);
     line.on("up", handlePointerUp);
+  };
+
+  private handleCreateCircle = (circle: JXG.Circle) => {
+
+    const isInVertex = (evt: any) => {
+      const { scale } = this.props;
+      const { board } = this.state;
+      if (!board) return false;
+      const coords = getEventCoords(board, evt, scale);
+      let inVertex = false;
+      each(circle.ancestors, point => {
+        if (isPoint(point) && point.hasPoint(coords.scrCoords[1], coords.scrCoords[2])) {
+          inVertex = true;
+        }
+      });
+      return inVertex;
+    };
+
+    const areAllVerticesSelected = () => {
+      const geometryContent = this.props.model.content as GeometryContentModelType;
+      let allSelected = true;
+      each(circle.ancestors, point => {
+        if (isPoint(point) && !geometryContent.isSelected(point.id)) {
+          allSelected = false;
+        }
+      });
+      return allSelected;
+    };
+
+    const handlePointerDown = (evt: any) => {
+      const { readOnly, scale } = this.props;
+      const { board } = this.state;
+      if (!board || (circle !== getClickableObjectUnderMouse(board, evt, !readOnly, scale))) return;
+      const geometryContent = this.props.model.content as GeometryContentModelType;
+      const inVertex = isInVertex(evt);
+      const allVerticesSelected = areAllVerticesSelected();
+      if (!inVertex && !allVerticesSelected) {
+        // deselect other elements unless appropriate modifier key is down
+        if (!hasSelectionModifier(evt)) {
+          geometryContent.deselectAll(board);
+        }
+        const ids = Object.values(circle.ancestors).filter(obj => isPoint(obj)).map(obj => obj.id);
+        ids.push(circle.id);
+        geometryContent.selectObjects(board, ids);
+      }
+
+      if (!readOnly) {
+        // point handles vertex drags
+        this.isVertexDrag = isInVertex(evt);
+        if (!this.isVertexDrag) {
+          this.beginDragSelectedPoints(evt, circle);
+        }
+      }
+    };
+
+    const handleDrag = (evt: any) => {
+      if (this.props.readOnly || this.isVertexDrag) return;
+
+      const vertex = circle.center;
+      const dragEntry = this.dragPts[vertex.id];
+      if (dragEntry && dragEntry.initial) {
+        const usrDiff = JXG.Math.Statistics.subtract(vertex.coords.usrCoords,
+                                                    dragEntry.initial.usrCoords) as number[];
+        this.dragSelectedPoints(evt, circle, usrDiff);
+      }
+      this.setState({ disableRotate: true });
+    };
+
+    const handlePointerUp = (evt: any) => {
+      this.setState({ disableRotate: false });
+
+      if (!this.props.readOnly && !this.isVertexDrag) {
+        const vertex = circle.center;
+        const dragEntry = this.dragPts[vertex.id];
+        if (dragEntry && dragEntry.initial) {
+          const usrDiff = JXG.Math.Statistics.subtract(vertex.coords.usrCoords,
+                                                      dragEntry.initial.usrCoords) as number[];
+          this.endDragSelectedPoints(evt, circle, usrDiff, "drag circle");
+        }
+      }
+      this.isVertexDrag = false;
+    };
+
+    circle.on("down", handlePointerDown);
+    circle.on("drag", handleDrag);
+    circle.on("up", handlePointerUp);
   };
 
   private handleCreatePolygon = (polygon: JXG.Polygon) => {

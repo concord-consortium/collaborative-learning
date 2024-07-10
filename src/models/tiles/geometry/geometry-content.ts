@@ -28,7 +28,7 @@ import { getAssociatedPolygon, getEdgeVisualProps, prepareToDeleteObjects } from
 import {
   isAxisArray, isBoard, isComment, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
-  kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj, isGeometryElement
+  kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj, isGeometryElement, isCircle
 } from "./jxg-types";
 import { SharedModelType } from "../../shared/shared-model";
 import { ISharedModelManager } from "../../shared/shared-model-manager";
@@ -662,14 +662,13 @@ export const GeometryContentModel = GeometryBaseContentModel
 
     /**
      * Creates a "phantom" point, which is shown on the board but not (yet) persisted in the model.
-     * It can be part of a polygon (which is expected to be the activePolygon).
-     * If a polygon is provided the phantom point will be added at the end of its list of vertices.
+     * If there is an activePolygon the phantom point will be added at the end of its list of vertices.
+     * Or, if there is an activeCircle, the phantom point will be set as its tangent point.
      * @param board
      * @param coordinates
-     * @param polygonId optional polygon
      * @returns the new Point object
      */
-    function addPhantomPoint(board: JXG.Board, coordinates: JXGCoordPair, polygonId?: string):
+    function addPhantomPoint(board: JXG.Board, coordinates: JXGCoordPair):
         JXG.Point | undefined {
       if (!board) return undefined;
       const id = uniqueId();
@@ -692,8 +691,11 @@ export const GeometryContentModel = GeometryBaseContentModel
       const result = syncChange(board, change);
       const point = isPoint(result) ? result : undefined;
 
-      if (point && polygonId) {
-        appendPhantomPointToPolygon(board, polygonId);
+      if (point && self.activePolygonId) {
+        appendPhantomPointToPolygon(board, self.activePolygonId);
+      }
+      if (point && self.activeCircleId) {
+        // TODO set as tangent point
       }
       return point;
     }
@@ -872,9 +874,9 @@ export const GeometryContentModel = GeometryBaseContentModel
      * @returns the point, now considered "real".
      */
     function realizePhantomPoint(board: JXG.Board, position: JXGCoordPair, mode: GeometryTileMode):
-        { point: JXG.Point | undefined, polygon: JXG.Polygon | undefined } {
+        { point: JXG.Point | undefined, polygon: JXG.Polygon | undefined, circle: JXG.Circle | undefined } {
       // Transition the current phantom point into a real point.
-      if (!self.phantomPoint) return { point: undefined, polygon: undefined };
+      if (!self.phantomPoint) return { point: undefined, polygon: undefined, circle: undefined };
       self.phantomPoint.setPosition(position);
       const newRealPoint = self.phantomPoint;
       detach(newRealPoint);
@@ -884,7 +886,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       const phantomPoint = addPhantomPoint(board, position);
       if (!phantomPoint) {
         console.warn("Failed to create phantom point");
-        return { point: undefined, polygon: undefined };
+        return { point: undefined, polygon: undefined, circle: undefined };
       }
 
       // Update the previously-existing JSXGraph point to be real, not phantom
@@ -930,26 +932,27 @@ export const GeometryContentModel = GeometryBaseContentModel
         }
       }
 
-      // let newCircle: JXG.Circle|undefined = undefined;
+      let newCircle: JXG.Circle|undefined = undefined;
       if (mode === "circle") {
         const circleModel = self.activeCircleId && self.getCircle(self.activeCircleId);
         if (circleModel) {
           circleModel.tangentPoint = newRealPoint.id;
           self.activeCircleId = undefined;
-          console.log("completed circle");
         } else {
           const newCircleModel = CircleModel.create(
             { id: uniqueId(), centerPoint: newRealPoint.id, colorScheme: newRealPoint.colorScheme }
           );
           self.addObjectModel(newCircleModel);
           self.activeCircleId = newCircleModel.id;
-          syncChange(board, {
+          const result = syncChange(board, {
             operation: "create",
             target: "circle",
             parents: [newRealPoint.id, phantomPoint.id],
             properties: { id: newCircleModel.id, colorScheme: newRealPoint.colorScheme }
           });
-          console.log("created circle");
+          if (isCircle(result)) {
+            newCircle = result;
+          }
         }
       }
 
@@ -961,7 +964,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       // Return newly-created objects
       const obj = board.objects[newRealPoint.id];
       const point = isPoint(obj) ? obj : undefined;
-      return { point, polygon: newPolygon };
+      return { point, polygon: newPolygon, circle: newCircle };
     }
 
     /**

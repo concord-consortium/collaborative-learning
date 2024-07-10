@@ -1,6 +1,6 @@
 import { CircleAttributes } from "jsxgraph";
 import { uniqueId } from "../../../utilities/js-utils";
-import { fillPropsForColorScheme } from "./geometry-utils";
+import { fillPropsForColorScheme, strokePropsForColorScheme } from "./geometry-utils";
 import { JXGChangeAgent, JXGProperties } from "./jxg-changes";
 import { isCircle } from "./jxg-types";
 import { objectChangeAgent } from "./jxg-object";
@@ -8,7 +8,9 @@ import { objectChangeAgent } from "./jxg-object";
 
 const defaultCircleProps = Object.freeze({
   hasInnerPoints: true,
-  fillOpacity: .2,       highlightFillOpacity: .25
+  fillOpacity: .2,       highlightFillOpacity: .25,
+  strokeWidth: 2.5,      highlightStrokeWidth: 2.5,
+  strokeOpacity: 1,      highlightStrokeOpacity: 0.99, // 0.99 triggers shadow
 });
 
 const selectedCircleProps = Object.freeze({
@@ -22,6 +24,7 @@ export function getCircleVisualProps(selected: boolean, colorScheme: number) {
     ...defaultCircleProps,
     ...selectedProps,
     ...fillPropsForColorScheme(colorScheme),
+    ...strokePropsForColorScheme(colorScheme)
   };
 
   return props;
@@ -44,7 +47,7 @@ export const circleChangeAgent: JXGChangeAgent = {
     if (Array.isArray(parents) && parents.length === 2 && change.properties && !Array.isArray(change.properties)) {
       return createCircle(board as JXG.Board, parents, change.properties);
     } else {
-      console.warn("Invalid change for circle creation");
+      console.warn("Invalid change for circle creation:", change);
     }
   },
 
