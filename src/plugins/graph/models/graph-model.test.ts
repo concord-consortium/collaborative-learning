@@ -32,6 +32,41 @@ const createElementSpy = jest.spyOn(document, "createElement")
           : origCreateElement.call(document, tagName, options);
 });
 
+// Set up mock axes
+const hOrientation = "horizontal" as AxisOrientation;
+const vOrientation = "vertical" as AxisOrientation;
+const bottomPlace = "bottom" as "bottom" | "left" | "rightNumeric" | "rightCat" | "top";
+const leftPlace = "left" as "bottom" | "left" | "rightNumeric" | "rightCat" | "top";
+const scaleType = "linear" as IScaleType;
+const mockAxes = {
+  bottom: {
+    isCategorical: false,
+    isNumeric: true,
+    max: 10,
+    min: 0,
+    orientation: hOrientation,
+    place: bottomPlace,
+    scale: scaleType,
+    setScale: jest.fn(),
+    setTransitionDuration: jest.fn(),
+    transitionDuration: 0,
+    type: "linear"
+  },
+  left: {
+    isCategorical: false,
+    isNumeric: true,
+    max: 10,
+    min: 0,
+    orientation: vOrientation,
+    place: leftPlace,
+    scale: scaleType,
+    setScale: jest.fn(),
+    setTransitionDuration: jest.fn(),
+    transitionDuration: 0,
+    type: "linear"
+  }
+};
+
 import { getSnapshot } from '@concord-consortium/mobx-state-tree';
 import { GraphModel, IGraphModel } from './graph-model';
 import { kGraphTileType } from '../graph-defs';
@@ -44,6 +79,7 @@ import { createDocumentModel, DocumentModelType } from '../../../models/document
 import { SharedDataSet } from '../../../models/shared/shared-data-set';
 import { getTileSharedModels } from '../../../models/shared/shared-data-utils';
 import { getSharedModelManager } from '../../../models/tiles/tile-environment';
+import { AxisOrientation, IScaleType } from '../imports/components/axis/axis-types';
 
 import "../../../models/shared/shared-data-set-registration";
 import "../../../models/shared/shared-case-metadata-registration";
@@ -86,14 +122,14 @@ describe('GraphModel', () => {
   it('should clear selected adornment instances', () => {
     const graphModel = GraphModel.create();
     const testMovableLineAdornment = MovableLineModel.create();
-    testMovableLineAdornment.setLine();
+    testMovableLineAdornment.setLine(mockAxes.bottom, mockAxes.left, "line1");
     graphModel.addAdornment(testMovableLineAdornment);
-    expect(testMovableLineAdornment.lines.length).toBe(1);
-    testMovableLineAdornment.toggleSelected(0);
+    expect(testMovableLineAdornment.lines.size).toBe(1);
+    testMovableLineAdornment.toggleSelected("line1");
     expect(graphModel.isAnyAdornmentSelected).toBe(true);
     graphModel.clearSelectedAdornmentInstances();
     expect(graphModel.isAnyAdornmentSelected).toBe(false);
-    expect(testMovableLineAdornment.lines.length).toBe(0);
+    expect(testMovableLineAdornment.lines.size).toBe(0);
   });
 
   describe('Responding to shared data', () => {

@@ -113,7 +113,7 @@ describe("Deserialization", () => {
       }
     }));
 
-    const movableLine = MovableLineModel.create({ type: "Movable Line", lines: [] });
+    const movableLine = MovableLineModel.create({ type: "Movable Line", lines: {} });
     const testModel = M.create({ adornment: movableLine });
     expect(isMovableLine(testModel.adornment) && testModel.adornment.lines).toBeDefined();
     const snap1 = getSnapshot(testModel);
