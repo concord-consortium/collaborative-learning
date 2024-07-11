@@ -188,7 +188,7 @@ export class GraphController {
                                      ? NumericAxisModel.create({place, min, max})
                                      : EmptyAxisModel.create({place});
               graphModel.setAxis(place, newAxisModel);
-              layout.setAxisScaleType(place, 'ordinal');
+              !emptyPlotIsNumeric && layout.setAxisScaleType(place, 'ordinal');
             }
           }
         }
