@@ -153,7 +153,7 @@ export class GraphController {
         attrType = dataConfiguration.attributeType(attrRole) ?? 'empty',
         currAxisModel = graphModel.getAxis(place),
         currentType = currAxisModel?.type ?? 'empty',
-        currentLayer = graphModel.layers.find(l => l.config === dataConfiguration),
+        currentLayer = graphModel.layerForDataConfigurationId(dataConfiguration.id),
         shouldNotResetBounds = (currentLayer?.editable || graphModel.lockAxes) &&
                                isNumericAxisModel(currAxisModel),
         [min, max] = shouldNotResetBounds ? [currAxisModel.min, currAxisModel.max] : kDefaultNumericAxisBounds;
