@@ -100,7 +100,9 @@ export const convertModelObjectToChanges = (obj: GeometryObjectModelType): JXGCh
     case "circle": {
       const { centerPoint, tangentPoint, ...props } = obj as CircleModelType;
       const properties = omitNullish(props);
-      changes.push({ operation: "create", target: "circle", parents: [centerPoint, tangentPoint], properties });
+      if (centerPoint && tangentPoint) {
+        changes.push({ operation: "create", target: "circle", parents: [centerPoint, tangentPoint], properties });
+      }
       break;
     }
     case "comment": {

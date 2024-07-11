@@ -510,7 +510,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         if (content.phantomPoint) {
           content.setPhantomPointPosition(board, position);
         } else {
-          content.addPhantomPoint(board, position);
+          content.addPhantomPoint(board, position, true);
         }
       });
       const phantom = content.phantomPoint && getPoint(board, content.phantomPoint?.id);

@@ -37,7 +37,7 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { gImageMap } from "../../image-map";
 import { IClueTileObject } from "../../annotations/clue-object";
 import { appendVertexId, getPoint, filterBoardObjects, forEachBoardObject, getBoardObject, getBoardObjectIds,
-  getPolygon, logGeometryEvent, removeClosingVertexId } from "./geometry-utils";
+  getPolygon, logGeometryEvent, removeClosingVertexId, getCircle } from "./geometry-utils";
 import { getPointVisualProps } from "./jxg-point";
 import { getVertexAngle } from "./jxg-vertex-angle";
 import { GeometryTileMode } from "../../../components/tiles/geometry/geometry-types";
@@ -666,9 +666,10 @@ export const GeometryContentModel = GeometryBaseContentModel
      * Or, if there is an activeCircle, the phantom point will be set as its tangent point.
      * @param board
      * @param coordinates
+     * @param restore if the phantom point is being restored after mouse left the window
      * @returns the new Point object
      */
-    function addPhantomPoint(board: JXG.Board, coordinates: JXGCoordPair):
+    function addPhantomPoint(board: JXG.Board, coordinates: JXGCoordPair, restoring?: boolean):
         JXG.Point | undefined {
       if (!board) return undefined;
       const id = uniqueId();
@@ -694,8 +695,17 @@ export const GeometryContentModel = GeometryBaseContentModel
       if (point && self.activePolygonId) {
         appendPhantomPointToPolygon(board, self.activePolygonId);
       }
-      if (point && self.activeCircleId) {
-        // TODO set as tangent point
+      if (point && self.activeCircleId && restoring) {
+        // Set the phantom as active circle's tangent point
+        const activeCircle = self.getCircle(self.activeCircleId);
+        if (activeCircle) {
+          syncChange(board, {
+            operation: "create",
+            target: "circle",
+            parents: [activeCircle.centerPoint, self.phantomPoint.id],
+            properties: { id: self.activeCircleId, colorScheme: self.phantomPoint.colorScheme }
+          });
+        }
       }
       return point;
     }
@@ -936,9 +946,11 @@ export const GeometryContentModel = GeometryBaseContentModel
       if (mode === "circle") {
         const circleModel = self.activeCircleId && self.getCircle(self.activeCircleId);
         if (circleModel) {
+          // This point completes the circle and frees it from being active
           circleModel.tangentPoint = newRealPoint.id;
           self.activeCircleId = undefined;
         } else {
+          // This is the center point, create a circle with the new phantom as the tangent point
           const newCircleModel = CircleModel.create(
             { id: uniqueId(), centerPoint: newRealPoint.id, colorScheme: newRealPoint.colorScheme }
           );
@@ -968,7 +980,8 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
 
     /**
-     * Removes the phantom point from the board, adjusting the active polygon if there is one.
+     * Removes the phantom point from the board
+     * The active polygon or active circle are updated if needed.
      * @param board
      */
     function clearPhantomPoint(board: JXG.Board) {
@@ -992,6 +1005,16 @@ export const GeometryContentModel = GeometryBaseContentModel
           fixVertexAngle(board, updatedPolygon, updatedPolygon.vertices[phantomIndex - 1]);
           fixVertexAngle(board, updatedPolygon, updatedPolygon.vertices[phantomIndex]);
         }
+      }
+
+      // Remove circle if one is displayed
+      const activeCircle = self.activeCircleId && getCircle(board, self.activeCircleId);
+      if (activeCircle) {
+        syncChange(board, {
+          operation: "delete",
+          target: "circle",
+          targetID: self.activeCircleId
+        });
       }
 
       const change: JXGChange = {
