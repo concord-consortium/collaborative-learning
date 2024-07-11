@@ -68,7 +68,7 @@ describe("DocumentContentModel -- shared Models --", () => {
       tiles: [
         [
           { content: { type: "Table", columnWidths } },
-          { content: { type: "Geometry", objects: [] } }
+          { content: { type: "Geometry", objects: {}, linkedAttributeColors: {}, pointMetadata: {} } }
         ]
       ],
       sharedModels: [
@@ -242,7 +242,9 @@ Object {
             "unit": 18.3,
           },
         },
+        "linkedAttributeColors": Object {},
         "objects": Object {},
+        "pointMetadata": Object {},
         "type": "Geometry",
       },
       "display": undefined,
@@ -691,7 +693,9 @@ Object {
             "unit": 18.3,
           },
         },
+        "linkedAttributeColors": Object {},
         "objects": Object {},
+        "pointMetadata": Object {},
         "type": "Geometry",
       },
       "display": undefined,

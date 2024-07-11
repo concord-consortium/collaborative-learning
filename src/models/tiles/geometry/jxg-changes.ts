@@ -4,7 +4,7 @@ export { type ILinkProperties, type ITableLinkProperties };
 
 export type JXGOperation = "create" | "update" | "delete";
 export type JXGObjectType = "board" | "comment" | "image" | "linkedPoint" | "metadata" | "movableLine" |
-                              "object" | "point" | "polygon" | "tableLink" | "vertexAngle";
+                              "object" | "point" | "polygon" | "segment" | "tableLink" | "vertex" | "vertexAngle";
 
 export type JXGCoordPair = [number, number];
 export type JXGNormalizedCoordPair = [1, number, number];
@@ -16,7 +16,7 @@ export type JXGImageParents = [string, JXGCoordPair, JXGCoordPair];
 
 export type JXGParentType = string | number | undefined | JXGCoordPair | JXGUnsafeCoordPair;
 
-export enum ESegmentLabelOption {
+export enum ELabelOption {
   kNone = "none",
   kLabel = "label", // parents
   kLength = "length"
@@ -38,7 +38,7 @@ export interface IBoardScale {
 export interface JXGProperties {
   id?: string;
   ids?: string[]; // ids of linked points in tableLink change
-  labelOption?: ESegmentLabelOption;
+  labelOption?: ELabelOption;
   position?: JXGPositionProperty;
   title?: string; // metadata property
   url?: string;
@@ -59,6 +59,7 @@ export interface JXGChange {
   links?: ILinkProperties;
   startBatch?: boolean;
   endBatch?: boolean;
+  userAction?: string;
 }
 
 export interface JXGNormalizedChange {

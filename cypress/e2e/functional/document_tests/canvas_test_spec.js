@@ -206,7 +206,7 @@ context('Test Canvas', function () {
     geometryToolTile.getGeometryTile().should('exist');
     // clueCanvas.exportTileAndDocument('geometry-tool-tile');
     // in case we created a point while exporting
-    cy.get('.primary-workspace .geometry-toolbar .button.delete').click({ force: true });
+    // cy.get('.primary-workspace .geometry-toolbar .button.delete').click({ force: true });
 
     cy.log('adds an image tool');
     clueCanvas.addTile('image');
@@ -289,7 +289,6 @@ context('Test Canvas', function () {
     clueCanvas.deleteTile('image');
     clueCanvas.deleteTile('draw');
     clueCanvas.deleteTile('table');
-    clueCanvas.deleteTile('text');
     clueCanvas.deleteTile('text');
     textToolTile.getTextTile().should('not.exist');
     geometryToolTile.getGeometryTile().should('not.exist');

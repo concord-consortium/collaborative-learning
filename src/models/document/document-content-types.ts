@@ -5,7 +5,6 @@ import { IDropRowInfo } from "./tile-row";
 
 export interface IDocumentAddTileOptions {
   title?: string;
-  addSidecarNotes?: boolean;
   url?: string;
 }
 
@@ -21,7 +20,6 @@ export interface INewTileOptions {
 export interface INewRowTile {
   rowId: string;
   tileId: string;
-  additionalTileIds?: string[];
 }
 export type NewRowTileArray = Array<INewRowTile | undefined>;
 

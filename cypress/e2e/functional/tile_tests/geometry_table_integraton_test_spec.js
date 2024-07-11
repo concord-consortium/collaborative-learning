@@ -3,14 +3,12 @@ import Canvas from '../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
-import TextToolTile from '../../../support/elements/tile/TextToolTile';
 
 let resourcesPanel = new ResourcesPanel;
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const geometryToolTile = new GeometryToolTile;
 const tableToolTile = new TableToolTile;
-const textToolTile = new TextToolTile;
 
 const x = ['3', '7', '6', '0'];
 const y = ['2.5', '5', '1', '0'];
@@ -40,7 +38,6 @@ context('Geometry Table Integration', function () {
       tableToolTile.getTableCell().eq(17).click();
     });
     clueCanvas.addTile('geometry');
-    textToolTile.deleteTextTile();
 
     cy.log('verify correct geometry tile names appear in selection list');
     tableToolTile.getTableTile().click();
@@ -61,13 +58,12 @@ context('Geometry Table Integration', function () {
     geometryToolTile.getGeometryTile().siblings(clueCanvas.linkIconEl()).children('svg').attribute('data-indicator-width').should('exist');
     geometryToolTile.getGraph().should('have.class', 'is-linked');
 
-    cy.log('verify points added has label in table and geometry');
+    cy.log('verify points added not labeled by default');
     tableToolTile.getIndexNumberToggle().should('exist').click({ force: true });
     tableToolTile.getTableIndexColumnCell().first().should('contain', '1');
-    geometryToolTile.getGraphPointLabel().contains('A').should('exist');
-    geometryToolTile.getGraphPointLabel().contains('B').should('exist');
-    geometryToolTile.getGraphPointLabel().contains('C').should('exist');
-    geometryToolTile.getGraphPointLabel().contains('D').should('exist');
+    geometryToolTile.getGeometryTile().click();
+    geometryToolTile.getGraphPointLabel().should('have.length', 2); // just x and y labels
+    geometryToolTile.getGraphPointLabel().contains('A').should('not.exist');
 
     cy.log('verify table can be linked to two geometry tiles');
     clueCanvas.addTile('geometry');
@@ -80,7 +76,7 @@ context('Geometry Table Integration', function () {
     geometryToolTile.getGraph().last().should('not.have.class', 'is-linked');
 
     cy.log('verify point no longer has p1 in table and geometry');
-    geometryToolTile.getGraphPointLabel().contains('A').should('have.length', 1);
+    geometryToolTile.getGraphPointLabel().contains('A').should('not.exist');
 
     clueCanvas.deleteTile('geometry');
   });
@@ -152,10 +148,10 @@ context('Geometry Table Integration', function () {
     cy.log('normal geometry interactions');
     cy.log('will add a polygon directly onto the geometry');
     geometryToolTile.getGeometryTile().click();
-    geometryToolTile.addPointToGraph(10, 10); //not sure why this isn't appearing
-    geometryToolTile.addPointToGraph(10, 10);
-    geometryToolTile.addPointToGraph(15, 10);
-    geometryToolTile.addPointToGraph(10, 5);
+    geometryToolTile.clickGraphPosition(10, 10); //not sure why this isn't appearing
+    geometryToolTile.clickGraphPosition(10, 10);
+    geometryToolTile.clickGraphPosition(15, 10);
+    geometryToolTile.clickGraphPosition(10, 5);
     geometryToolTile.getGraphPoint().last().click({ force: true }).click({ force: true });
 
     cy.log('will add an angle to a point created from a table');
@@ -186,7 +182,6 @@ context('Geometry Table Integration', function () {
       tableToolTile.getTableCell().eq(9).click();
     });
     clueCanvas.addTile('geometry');
-    textToolTile.deleteTextTile();
     cy.linkTableToTile('Table Data 1', "Shapes Graph 1");
 
     // Open the document on the left, then create a new document on the right

@@ -4,11 +4,14 @@ import { HotKeyHandler } from "../../../utilities/hot-keys";
 export interface IToolbarActionHandlers {
   handleDuplicate: () => void;
   handleDelete: () => void;
-  handleToggleVertexAngle: () => void;
+  handleLabelDialog: (selectedPoint: JXG.Point|undefined, selectedSegment: JXG.Line|undefined,
+    selectedPolygon: JXG.Polygon|undefined ) => void;
   handleCreateMovableLine: () => void;
-  handleCreateLineLabel: () => void;
   handleCreateComment: () => void;
   handleUploadImageFile: (file: File) => void;
+  handleZoomIn: () => void;
+  handleZoomOut: () => void;
+  handleFitAll: () => void;
 }
 export interface IActionHandlers extends IToolbarActionHandlers {
   handleArrows: HotKeyHandler;
