@@ -159,7 +159,7 @@ Uses common toolbar framework. Default buttons:
 - `stroke-color`
 - `fill-color`
 - `text`
-- `image-upload`
+- `upload`
 - `group`
 - `ungroup`
 - `duplicate`
@@ -177,7 +177,21 @@ In addition, if shared variables are configured in unit, it supports additional 
 
 #### Geometry (Shapes Graph)
 
-Not updated to common toolbar framework and does not support toolbar configuration.
+Common toolbar framework. Default buttons:
+
+- `select`: mode for selecting and moving objects
+- `point`: mode for creating points
+- `polygon`: mode for creating polygons
+- `upload`: allows uploading an image to display in the background
+- `duplicate`: copies the currently selected objects
+- `label`: opens dialog to choose the type of label for selected object
+- `add-data`: link or unlink from a dataset
+- `delete`: delete the currently selected objects
+
+Available buttons not in default set:
+
+- `comment`: adds a text callout to the currently selected object
+- `movable-line`: creates a line that can be positioned
 
 #### Graph
 

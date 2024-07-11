@@ -53,7 +53,6 @@ export interface ITileContentInfo {
    */
   useContentTitle?: boolean;
   metadataClass?: typeof TileMetadataModel;
-  addSidecarNotes?: boolean;
   defaultHeight?: number;
   exportNonDefaultHeight?: boolean;
   isDataConsumer?: boolean;

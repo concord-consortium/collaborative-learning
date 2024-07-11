@@ -1,5 +1,4 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
-import TextToolTile from '../../../support/elements/tile/TextToolTile';
 import Canvas from '../../../support/elements/common/Canvas';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
 import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
@@ -16,7 +15,6 @@ const student5 = `${Cypress.config("qaUnitStudent5")}`;
 const student6 = `${Cypress.config("qaUnitStudent6")}`;
 
 let clueCanvas = new ClueCanvas,
-  textToolTile = new TextToolTile,
   tableToolTile = new TableToolTile,
   geometryToolTile = new GeometryToolTile,
   drawToolTile = new DrawToolTile,
@@ -146,12 +144,12 @@ context('Test copy tiles from one document to other document', function () {
     cy.log('Add graph tile');
     clueCanvas.addTile('geometry');
     cy.get('.spacer').click();
-    textToolTile.deleteTextTile();
     geometryToolTile.getGeometryTile().last().click();
-    geometryToolTile.addPointToGraph(5, 5);
-    geometryToolTile.addPointToGraph(10, 5);
-    geometryToolTile.addPointToGraph(10, 10);
-    geometryToolTile.getGraphPoint().should('have.length', 3);
+    clueCanvas.clickToolbarButton('geometry', 'point');
+    geometryToolTile.clickGraphPosition(5, 5);
+    geometryToolTile.clickGraphPosition(10, 5);
+    geometryToolTile.clickGraphPosition(10, 10);
+    geometryToolTile.getGraphPoint().should('have.length', 4);
 
     cy.log('Add drawing tile');
     clueCanvas.addTile("drawing");

@@ -1,16 +1,13 @@
 import { difference, intersection } from "lodash";
-import { applySnapshot, getSnapshot, getType, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { applySnapshot, getSnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { kDefaultBoardModelInputProps, kGeometryTileType } from "./geometry-types";
 import { uniqueId } from "../../../utilities/js-utils";
 import { typeField } from "../../../utilities/mst-utils";
 import { TileContentModel } from "../tile-content";
-import { ESegmentLabelOption, JXGChange, JXGPositionProperty } from "./jxg-changes";
-import { imageChangeAgent } from "./jxg-image";
-import { movableLineChangeAgent } from "./jxg-movable-line";
-import { createPoint } from "./jxg-point";
-import { polygonChangeAgent } from "./jxg-polygon";
-import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
+import { ELabelOption, JXGPositionProperty } from "./jxg-changes";
 import { kGeometryDefaultPixelsPerUnit } from "./jxg-types";
+import { findLeastUsedNumber } from "../../../utilities/math-utils";
+import { clueDataColorInfo } from "../../../utilities/color-utils";
 
 export interface IDependsUponResult {
   depends: boolean;
@@ -155,24 +152,96 @@ export const PointModel = PositionedObjectModel
   .props({
     type: typeField("point"),
     name: types.maybe(types.string),
-    fillColor: types.maybe(types.string),
-    strokeColor: types.maybe(types.string),
     snapToGrid: types.maybe(types.boolean),
-    snapSizeX: types.maybe(types.number),
-    snapSizeY: types.maybe(types.number)
+    colorScheme: 0,
+    labelOption: types.optional(
+      types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption)),
+      ELabelOption.kNone)
   })
-  .preProcessSnapshot(preProcessPositionInSnapshot);
+  .preProcessSnapshot(preProcessPositionInSnapshot)
+  .actions(self => ({
+    setLabelOption(option: ELabelOption) {
+      if (option !== self.labelOption) {
+        self.labelOption = option;
+      }
+    },
+    setName(name: string) {
+      if (name !== self.name) {
+        self.name = name;
+      }
+    }
+  }));
 export interface PointModelType extends Instance<typeof PointModel> {}
 
 export const isPointModel = (o?: GeometryObjectModelType): o is PointModelType => o?.type === "point";
 
-export const segmentIdFromPointIds = (ptIds: [string, string]) => `${ptIds[0]}:${ptIds[1]}`;
-export const pointIdsFromSegmentId = (segmentId: string) => segmentId.split(":");
+/**
+ * PointMetadata supplements the information about points that are stored in a DataSet.
+ * The ID corresponds to the ID that we construct for the DataSet point,
+ * and the metadata record holds labeling options. If no metadata record exists
+ * for a given point, then default values are assumed.
+ */
+export const PointMetadataModel = types.model("PointMetadata", {
+  id: types.identifier,
+  name: types.maybe(types.string),
+  labelOption: types.optional(
+    types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption)),
+    ELabelOption.kNone)
+})
+.actions(self => ({
+  setLabelOption(option: ELabelOption) {
+    if (option !== self.labelOption) {
+      self.labelOption = option;
+    }
+  },
+  setName(name: string) {
+    if (name !== self.name) {
+      self.name = name;
+    }
+  }
+}));
+
+export interface PointMetadataModelType extends Instance<typeof PointMetadataModel> {}
+
+// PolygonSegments are edges of polygons.
+// Usually we don't need to know anything about them since they are defined by
+// the polygon and its vertices. However, if they are labeled we store that
+// information. The ID used is the concatenated IDs of the endpoints.
+
+// We use a double colon separator since linked point IDs have a single colon in
+// them. Besides these methods, also note the separator comes into play in
+// `updateGeometryContentWithNewSharedModelIds`.
+
+export const segmentIdFromPointIds = (ptIds: [string, string]) => `${ptIds[0]}::${ptIds[1]}`;
+export const pointIdsFromSegmentId = (segmentId: string) => segmentId.split("::");
 
 export const PolygonSegmentLabelModel = types.model("PolygonSegmentLabel", {
-  id: types.identifier, // {pt1Id}:{pt2Id}
-  option: types.enumeration<ESegmentLabelOption>("LabelOption", Object.values(ESegmentLabelOption))
+  id: types.identifier, // {pt1Id}::{pt2Id}
+  option: types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption)),
+  name: types.maybe(types.string)
+})
+.preProcessSnapshot(snap => {
+  // Previously a single colon was used as a separator.
+  // If this is found, replace it with a double colon.
+  // If the point IDs were from linked points, there would be 3 colons, and the middle one should be doubled.
+  // Since it was previously not possible to make a polygon from a mixture of linked and unlinked points,
+  // there should never be 2 ambiguous colons in legacy content.
+  const id = snap.id;
+  if (id.match(/::/)) {
+    // Modern format, return as-is.
+    return snap;
+  }
+  let newId = id;
+  const colons = (id.match(/:/g) || []).length;
+  if (colons === 1) {
+    newId = id.replace(":", "::");
+  } else if (colons === 3) {
+    const parts = id.split(":");
+    newId = parts[0] + ":" + parts[1] + "::" + parts[2] + ":" + parts[3];
+  }
+  return { ...snap, id: newId };
 });
+
 export interface PolygonSegmentLabelModelType extends Instance<typeof PolygonSegmentLabelModel> {}
 export interface PolygonSegmentLabelModelSnapshot extends SnapshotIn<typeof PolygonSegmentLabelModel> {}
 
@@ -181,7 +250,12 @@ export const PolygonModel = GeometryObjectModel
   .props({
     type: typeField("polygon"),
     points: types.array(types.string),
-    labels: types.maybe(types.array(PolygonSegmentLabelModel))
+    labelOption: types.optional(
+      types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption)),
+      ELabelOption.kNone),
+    name: types.maybe(types.string),
+    labels: types.maybe(types.array(PolygonSegmentLabelModel)),
+    colorScheme: 0
   })
   .views(self => ({
     get dependencies(): string[] {
@@ -218,12 +292,12 @@ export const PolygonModel = GeometryObjectModel
     replacePoints(ids: string[]) {
       self.points.replace(ids);
     },
-    setSegmentLabel(ptIds: [string, string], option: ESegmentLabelOption) {
+    setSegmentLabel(ptIds: [string, string], option: ELabelOption, name: string|undefined) {
       const id = segmentIdFromPointIds(ptIds);
-      const value = { id, option };
+      const value = { id, option, name };
       const foundIndex = self.labels?.findIndex(label => label.id === id);
       // remove any existing label if setting label to "none"
-      if (option === ESegmentLabelOption.kNone) {
+      if (option === ELabelOption.kNone) {
         if (self.labels && foundIndex != null && foundIndex >= 0) {
           self.labels.splice(foundIndex, 1);
         }
@@ -272,7 +346,8 @@ export const MovableLineModel = GeometryObjectModel
   .props({
     type: typeField("movableLine"),
     p1: PointModel,
-    p2: PointModel
+    p2: PointModel,
+    colorScheme: 0
   });
 export interface MovableLineModelType extends Instance<typeof MovableLineModel> {}
 
@@ -299,72 +374,6 @@ export const ImageModel = PositionedObjectModel
 export interface ImageModelType extends Instance<typeof ImageModel> {}
 export const isImageModel = (o: GeometryObjectModelType): o is ImageModelType => o.type === "image";
 
-export function createObject(board: JXG.Board, obj: GeometryObjectModelType) {
-  const objType = getType(obj);
-  switch(objType.name) {
-
-    case ImageModel.name: {
-      const image = obj as ImageModelType;
-      const { x, y, url, width, height, ...properties } = image;
-      const change: JXGChange = {
-        operation: "create",
-        target: "image",
-        parents: [url, [x, y], [width, height]],
-        properties
-      };
-      imageChangeAgent.create(board, change);
-      break;
-    }
-
-    case MovableLineModel.name: {
-      const line = obj as MovableLineModelType;
-      const { p1, p2, ...properties } = line;
-      const change: JXGChange = {
-        operation: "create",
-        target: "movableLine",
-        parents: [[p1.x, p1.y], [p2.x, p2.y]],
-        properties
-      };
-      movableLineChangeAgent.create(board, change);
-      break;
-    }
-
-    case PointModel.name: {
-      const pt = obj as PointModelType;
-      const { x, y, ...props } = pt;
-      createPoint(board, [pt.x, pt.y], props);
-      break;
-    }
-
-    case PolygonModel.name: {
-      const poly = obj as PolygonModelType;
-      const { points, ...properties } = poly;
-      const change: JXGChange = {
-        operation: "create",
-        target: "polygon",
-        parents: poly.points.filter(id => !!id) as string[],
-        properties
-      };
-      polygonChangeAgent.create(board, change);
-      break;
-    }
-
-    case VertexAngleModel.name: {
-      const angle = obj as VertexAngleModelType;
-      const { points, ...properties } = angle;
-      const change: JXGChange = {
-        operation: "create",
-        target: "vertexAngle",
-        parents: angle.points.filter(id => !!id) as string[],
-        properties
-      };
-      vertexAngleChangeAgent.create(board, change);
-      break;
-    }
-
-  }
-}
-
 export type GeometryObjectModelUnion = CommentModelType | ImageModelType | MovableLineModelType | PointModelType |
                                         PolygonModelType | VertexAngleModelType;
 
@@ -376,9 +385,18 @@ export const GeometryBaseContentModel = TileContentModel
     board: types.maybe(BoardModel),
     bgImage: types.maybe(ImageModel),
     objects: types.map(types.union(CommentModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel)),
+    pointMetadata: types.map(PointMetadataModel),
+    // Maps attribute ID to color.
+    linkedAttributeColors: types.map(types.number),
     // Used for importing table links from legacy documents
     links: types.array(types.string)  // table tile ids
   })
+  .volatile(self => ({
+    // This is the point that tracks the mouse pointer when you're in a shape-creation mode.
+    phantomPoint: undefined as PointModelType|undefined,
+    // In polygon mode, the phantom point is considered to be part of an in-progress polygon.
+    activePolygonId: undefined as string|undefined
+  }))
   .preProcessSnapshot(snapshot => {
     // fix null table links ¯\_(ツ)_/¯
     if (snapshot.links?.some(link => link == null)) {
@@ -394,9 +412,65 @@ export const GeometryBaseContentModel = TileContentModel
     const { links, ...rest } = snapshot;
     return { ...rest };
   })
+  .views(self => ({
+    getColorSchemeForAttributeId(id: string) {
+      return self.linkedAttributeColors.get(id);
+    },
+    /**
+     * Return the name and labelOption for a given point.
+     * If this is a regular point, these values are stored in the Point object.
+     * If it is a linked point, they are stored in pointMetadata,
+     * or default values are used if no record is found in either place.
+     * @param id
+     * @returns an object with "name" and "labelOption" properties
+     */
+    getPointLabelProps(id: string) {
+      const object = self.objects.get(id);
+      if (isPointModel(object)) {
+        return { name: object.name, labelOption: object.labelOption };
+      }
+      const metadata = self.pointMetadata.get(id);
+      if (metadata) {
+        return { name: metadata.name, labelOption: metadata.labelOption };
+      }
+      return { name: "", labelOption: ELabelOption.kNone };
+    }
+  }))
   .actions(self => ({
     replaceLinks(newLinks: string[]) {
       self.links.replace(newLinks);
+    },
+    assignColorSchemeForAttributeId(id: string) {
+      if (self.linkedAttributeColors.get(id)) {
+        return self.linkedAttributeColors.get(id);
+      }
+      const color = findLeastUsedNumber(clueDataColorInfo.length, self.linkedAttributeColors.values());
+      self.linkedAttributeColors.set(id, color);
+      return color;
+    },
+    /**
+     * Sets the name and labelOption properties in the correct place for the point.
+     * If this is a regular point, these values are stored in the Point object.
+     * If it is a linked point, they are stored in pointMetadata. A new metadata record
+     * will be created if necessary.
+     * @param id
+     * @param name
+     * @param labelOption
+     */
+    setPointLabelProps(id: string, name: string, labelOption: ELabelOption) {
+      const object = self.objects.get(id);
+      if (isPointModel(object)) {
+        object.setName(name);
+        object.setLabelOption(labelOption);
+        return;
+      }
+      const metadata = self.pointMetadata.get(id);
+      if (metadata) {
+        metadata.setName(name);
+        metadata.setLabelOption(labelOption);
+      } else {
+        self.pointMetadata.put(PointMetadataModel.create({ id, name, labelOption }));
+      }
     }
   }));
 export interface GeometryBaseContentModelType extends Instance<typeof GeometryBaseContentModel> {}

@@ -46,22 +46,19 @@ describe("DocumentContentModel", () => {
     expect(documentContent.tileMap.size).toBe(0);
     documentContent.addTile("text", { title: "Text 1" });
     expect(documentContent.tileMap.size).toBe(1);
-    // adding geometry tool adds sidecar text tool
-    documentContent.addTile("geometry", { addSidecarNotes: true, title: "Shapes Graph 1" });
-    expect(documentContent.tileMap.size).toBe(3);
+    documentContent.addTile("geometry", { title: "Shapes Graph 1" });
+    expect(documentContent.tileMap.size).toBe(2);
     expect(documentContent.defaultInsertRow).toBe(2);
     const newRowTile = documentContent.addTile("table", { title: "Table 1" });
     const columnWidths = getColumnWidths(documentContent, newRowTile?.tileId);
-    expect(documentContent.tileMap.size).toBe(4);
+    expect(documentContent.tileMap.size).toBe(3);
     documentContent.addTile("drawing", { title: "Sketch 1" });
-    expect(documentContent.tileMap.size).toBe(5);
+    expect(documentContent.tileMap.size).toBe(4);
     expect(parsedContentExport()).toEqual({
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
-        [
-          { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } },
-          { content: { type: "Text", format: "html", text: ["<p></p>"] } }
-        ],
+        { title: "Shapes Graph 1", content: { type: "Geometry", objects: {},
+            linkedAttributeColors: {}, pointMetadata: {} } },
         { title: "Table 1", content: { type: "Table", columnWidths } },
         { title: "Sketch 1", content: { type: "Drawing", objects: [] } }
       ]
@@ -80,7 +77,6 @@ describe("DocumentContentModel", () => {
     // insert image between text tiles
     const imageTile1 = documentContent.addTile("image", {
       title: "Image 1",
-      addSidecarNotes: false,
       insertRowInfo: {
         rowInsertIndex: 1,
         rowDropIndex: 1,
@@ -102,7 +98,6 @@ describe("DocumentContentModel", () => {
     // insert image at bottom
     const imageTile2 = documentContent.addTile("image", {
       title: "Image 2",
-      addSidecarNotes: false,
       insertRowInfo: {
         rowInsertIndex: 3,
         rowDropIndex: 3,
@@ -136,7 +131,6 @@ describe("DocumentContentModel", () => {
 
     const imageTile1 = documentContent.addTile("image", {
       title: "Image 1",
-      addSidecarNotes: false,
       insertRowInfo: {
         rowInsertIndex: 1,
         rowDropIndex: 1,
@@ -165,95 +159,6 @@ describe("DocumentContentModel", () => {
       ]
     });
   });
-
-  it("allows the geometry tiles to be added with sidecar text as new row", () => {
-    documentContent.addTile("text", { title: "Text 1" });
-    const textTile2 = documentContent.addTile("text", { title: "Text 2" });
-
-    const graphTileInfo = documentContent.addTile("geometry", {
-      title: "Shapes Graph 1",
-      addSidecarNotes: true,
-      insertRowInfo: {
-        rowInsertIndex: 1,
-        rowDropIndex: 1,
-        rowDropLocation: "bottom"
-      }
-    });
-
-    const geometryRowId = documentContent.findRowContainingTile(graphTileInfo!.tileId);
-    const geometryRowIndex = documentContent.rowOrder.findIndex((id: string) => id === geometryRowId);
-
-    expect(geometryRowIndex).toBe(1);
-
-    // sidecar text tile should be on same row
-    expect(graphTileInfo!.additionalTileIds).toBeDefined();
-
-    const sidecarRowId = documentContent.findRowContainingTile(graphTileInfo!.tileId);
-    const sidecarRowIndex = documentContent.rowOrder.findIndex((id: string) => id === sidecarRowId);
-
-    expect(sidecarRowIndex).toBe(1);
-
-    // text tile should be on 2
-    const textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
-    const textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
-
-    expect(textTile2RowIndex1).toBe(2);
-    expect(parsedContentExport()).toEqual({
-      tiles: [
-        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
-        [
-          { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } },
-          { content: { type: "Text", format: "html", text: ["<p></p>"] } }
-        ],
-        { title: "Text 2", content: { type: "Text", format: "html", text: ["<p></p>"] } }
-      ]
-    });
-  });
-
-  it("allows the geometry tiles to be added with sidecar text at side of existing rows", () => {
-    documentContent.addTile("text", { title: "Text 1" });
-    const textTile2 = documentContent.addTile("text", { title: "Text 2" });
-
-    const graphTileInfo = documentContent.addTile("geometry", {
-      title: "Shapes Graph 1",
-      addSidecarNotes: true,
-      insertRowInfo: {
-        rowInsertIndex: 1,
-        rowDropIndex: 1,
-        rowDropLocation: "left"
-      }
-    });
-
-    const geometryRowId = documentContent.findRowContainingTile(graphTileInfo!.tileId);
-    const geometryRowIndex = documentContent.rowOrder.findIndex((id: string) => id === geometryRowId);
-
-    expect(geometryRowIndex).toBe(1);
-
-    // sidecar text tile should be on same row
-    expect(graphTileInfo!.additionalTileIds).toBeDefined();
-
-    const sidecarRowId = documentContent.findRowContainingTile(graphTileInfo!.tileId);
-    const sidecarRowIndex = documentContent.rowOrder.findIndex((id: string) => id === sidecarRowId);
-
-    expect(sidecarRowIndex).toBe(1);
-
-    // original text tile should be on 1 as well
-    const textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
-    const textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
-
-    expect(textTile2RowIndex1).toBe(1);
-    expect(parsedContentExport()).toEqual({
-      tiles: [
-        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
-        [
-          { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } },
-          { content: { type: "Text", format: "html", text: ["<p></p>"] } },
-          { title: "Text 2", content: { type: "Text", format: "html", text: ["<p></p>"] } }
-        ]
-      ]
-    });
-  });
-
 });
 
 const sectionedContent = {
@@ -561,14 +466,11 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);
 
-    content.addTile("geometry", { title: "Shapes Graph 1", addSidecarNotes: true,
-      insertRowInfo: { rowInsertIndex: 2 } });
+    content.addTile("geometry", { title: "Shapes Graph 1", insertRowInfo: { rowInsertIndex: 2 } });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
-      [
-        { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } },
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
-      ],
+      { title: "Shapes Graph 1",
+          content: { type: "Geometry", objects: {}, linkedAttributeColors: {}, pointMetadata: {} } },
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);
@@ -577,10 +479,11 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     content.moveTile(geometryId, { rowDropIndex: 3, rowDropLocation: "left", rowInsertIndex: 3 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
-      { content: { type: "Text", format: "html", text: ["<p></p>"] } },
+      { Placeholder: "A" },
       { Header: "B"},
       [
-        { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } },
+        { title: "Shapes Graph 1", content: { type: "Geometry", objects: {},
+          linkedAttributeColors: {}, pointMetadata: {} } },
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ],
     ]);
@@ -588,10 +491,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     content.moveTile(geometryId, { rowDropIndex: 1, rowDropLocation: "left", rowInsertIndex: 1 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
-      [
-        { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } },
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
-      ],
+        { title: "Shapes Graph 1", content: { type: "Geometry", objects: {},
+          linkedAttributeColors: {}, pointMetadata: {} } },
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);
@@ -607,7 +508,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "A"},
       [
         { content: { type: "Text", format: "html", text: ["<p></p>"] } },
-        { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } },
+        { title: "Shapes Graph 1", content: { type: "Geometry", objects: {},
+          linkedAttributeColors: {}, pointMetadata: {} } },
       ],
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
@@ -622,7 +524,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     content.deleteTile(tileId);
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
-      { title: "Shapes Graph 1", content: { type: "Geometry", objects: [] } },
+      { title: "Shapes Graph 1", content: { type: "Geometry", objects: {},
+        linkedAttributeColors: {}, pointMetadata: {} } },
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);

@@ -4,6 +4,8 @@ import { GeometryContentModel, GeometryMetadataModel, defaultGeometryContent } f
 import { kGeometryTileType } from "./geometry-types";
 import { kGeometryDefaultHeight } from "./jxg-types";
 import GeometryToolComponent from "../../../components/tiles/geometry/geometry-tile";
+import { updateGeometryContentWithNewSharedModelIds, updateGeometryObjectWithNewSharedModelIds }
+  from "./geometry-utils";
 
 import Icon from "../../../clue/assets/icons/geometry-tool.svg";
 import HeaderIcon from "../../../assets/icons/sort-by-tools/shapes-graph-tile-id.svg";
@@ -20,13 +22,14 @@ registerTileContentInfo({
   displayName: "Shapes Graph",
   modelClass: GeometryContentModel,
   metadataClass: GeometryMetadataModel,
-  addSidecarNotes: true,
   defaultHeight: kGeometryDefaultHeight,
   exportNonDefaultHeight: true,
   isDataConsumer: true,
   consumesMultipleDataSets: () => true,
   defaultContent: defaultGeometryContent,
-  tileSnapshotPreProcessor
+  tileSnapshotPreProcessor,
+  updateContentWithNewSharedModelIds: updateGeometryContentWithNewSharedModelIds,
+  updateObjectReferenceWithNewSharedModelIds: updateGeometryObjectWithNewSharedModelIds
 });
 
 registerTileComponentInfo({
