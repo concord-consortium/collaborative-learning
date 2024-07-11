@@ -153,8 +153,8 @@ export class GraphController {
         attrType = dataConfiguration.attributeType(attrRole) ?? 'empty',
         currAxisModel = graphModel.getAxis(place),
         currentType = currAxisModel?.type ?? 'empty',
-        graphHasEditableLayer = graphModel.layers.some(l => l.editable === true),
-        shouldNotResetBounds = (graphHasEditableLayer || graphModel.lockAxes) &&
+        currentLayer = graphModel.layers.find(l => l.config === dataConfiguration),
+        shouldNotResetBounds = (currentLayer?.editable || graphModel.lockAxes) &&
                                isNumericAxisModel(currAxisModel),
         [min, max] = shouldNotResetBounds ? [currAxisModel.min, currAxisModel.max] : kDefaultNumericAxisBounds;
       switch (attrType) {
@@ -165,7 +165,7 @@ export class GraphController {
             dataConfiguration.setAttributeType(attrRole, 'numeric');
             layout.setAxisScaleType(place, 'linear');
           }
-          if (!graphModel.lockAxes && !graphHasEditableLayer) {
+          if (!graphModel.lockAxes && !currentLayer?.editable) {
             setNiceDomain(graphModel.numericValuesForAttrRole(attrRole), graphModel.getAxis(place)!, false);
           }
         }
