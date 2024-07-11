@@ -1081,7 +1081,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
       // Remove the phantom point from the list of vertices
       const index = vertexIds.findIndex(v => v === self.phantomPoint?.id);
-      if (index >= 1) {
+      if (index > 1) {
         vertexIds.splice(index,1);
 
         const change: JXGChange = {
@@ -1094,10 +1094,12 @@ export const GeometryContentModel = GeometryBaseContentModel
         if (isPolygon(result)) {
           poly = result;
         }
+
         fixVertexAngle(board, poly, poly.vertices[index-1]);
         fixVertexAngle(board, poly, poly.vertices[index]);
       } else {
         // If index === 1, only a single non-phantom point remains, so we delete the polygon object.
+        self.deleteObjects([poly.id]);
         const change: JXGChange = {
           operation: "delete",
           target: "polygon",
