@@ -1647,8 +1647,22 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const coords = copyCoords(point.coords);
       const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
 
+      if (mode === "circle") {
+        // Either start a circle, or close the active circle using the clicked
+        this.applyChange(() => {
+          let circle;
+          if (geometryContent.activeCircleId) {
+            circle = geometryContent.closeActiveCircle(board, point);
+          } else {
+            circle = geometryContent.createCircleIncludingPoint(board, point.id);
+          }
+          if (circle) {
+            this.handleCreateCircle(circle);
+          }
+      });
+      }
+
       // Polygon mode interactions with existing points
-      // TODO circle mode
       if (mode === "polygon") {
         this.applyChange(() => {
           if (geometryContent.phantomPoint && geometryContent.activePolygonId) {

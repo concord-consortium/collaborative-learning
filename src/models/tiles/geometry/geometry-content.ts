@@ -949,6 +949,7 @@ export const GeometryContentModel = GeometryBaseContentModel
           // This point completes the circle and frees it from being active
           circleModel.tangentPoint = newRealPoint.id;
           self.activeCircleId = undefined;
+          newCircle = getCircle(board, circleModel.id);
         } else {
           // This is the center point, create a circle with the new phantom as the tangent point
           const newCircleModel = CircleModel.create(
@@ -969,10 +970,16 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
 
       // Log event
-      logGeometryEvent(self, "create",
-        mode === "polygon" ? "vertex" : "point",
-        self.activePolygonId ? [newRealPoint.id, self.activePolygonId] : newRealPoint.id);
-
+      if (mode === "polygon") {
+        logGeometryEvent(self, "create", "vertex",
+          self.activePolygonId ? [newRealPoint.id, self.activePolygonId] : newRealPoint.id);
+      } else if (mode === "circle") {
+        logGeometryEvent(self, "create", "circle",
+          newCircle ? [newRealPoint.id, newCircle.id] : newRealPoint.id,
+          { userAction: self.activeCircleId ? "place center point" : "place tangent point" });
+      } else {
+        logGeometryEvent(self, "create", "point", newRealPoint.id);
+      }
       // Return newly-created objects
       const obj = board.objects[newRealPoint.id];
       const point = isPoint(obj) ? obj : undefined;
@@ -1045,6 +1052,29 @@ export const GeometryContentModel = GeometryBaseContentModel
         pointId, { userAction: "join to polygon" });
 
       if (isPolygon(result)) {
+        return result;
+      }
+    }
+
+    function createCircleIncludingPoint(board: JXG.Board, pointId: string) {
+      if (!self.phantomPoint) return;
+      const colorScheme = self.getObjectColorScheme(pointId) || 0;
+      const circleModel = CircleModel.create({ centerPoint: pointId, colorScheme });
+      self.addObjectModel(circleModel);
+      self.activeCircleId = circleModel.id;
+      const change: JXGChange = {
+        operation: "create",
+        target: "circle",
+        parents: [pointId, self.phantomPoint.id],
+        properties: { id: circleModel.id, colorScheme }
+      };
+      const result = syncChange(board, change);
+
+      logGeometryEvent(self, "update",
+        "point",
+        pointId, { userAction: "join center to circle" });
+
+      if (isCircle(result)) {
         return result;
       }
     }
@@ -1133,6 +1163,35 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
       self.activePolygonId = undefined;
       return poly;
+    }
+
+    /**
+     * Use the given point as the tangent point for the active circle.
+     * @param board
+     * @param point
+     * @returns the adjusted circle
+     */
+    function closeActiveCircle(board: JXG.Board, point: JXG.Point): JXG.Circle|undefined {
+      if (!self.activeCircleId) return;
+      // Update the model
+      const circleModel = self.getCircle(self.activeCircleId);
+      if (!circleModel) return;
+      circleModel.tangentPoint = point.id;
+
+      // On the board, emove the circle that attches to the phantom point and replace it with a new circle
+      syncChange(board, {
+        operation: "delete",
+        target: "circle",
+        targetID: circleModel.id
+      });
+      const result = syncChange(board, {
+        operation: "create",
+        target: "circle",
+        parents: [circleModel.centerPoint, circleModel.tangentPoint],
+        properties: { id: circleModel.id, colorScheme: circleModel.colorScheme }
+      });
+      self.activeCircleId = undefined;
+      return isCircle(result) ? result : undefined;
     }
 
     function addPoints(board: JXG.Board | undefined,
@@ -1567,8 +1626,10 @@ export const GeometryContentModel = GeometryBaseContentModel
         makePolygonActive,
         clearPhantomPoint,
         createPolygonIncludingPoint,
+        createCircleIncludingPoint,
         clearActivePolygon,
         closeActivePolygon,
+        closeActiveCircle,
         addMovableLine,
         removeObjects,
         updateObjects,
