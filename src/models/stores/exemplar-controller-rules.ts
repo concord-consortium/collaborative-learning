@@ -17,35 +17,38 @@ interface IExemplarControllerRule {
   reset: (model: BaseExemplarControllerModelType, tiles: string[]) => void;
 }
 
-// "3 drawings/3 labels" Rule: reveal an exemplar for each:
-// 3 drawing tiles, each with at least 3 actions AND
-// 3 labels with least 10 words each, where a label can be a text tile or a text object in a drawing.
+// "2 drawings/2 labels" Rule: reveal an exemplar for each:
+// 2 drawing tiles, each with at least 3 actions AND
+// 2 labels with least 5 words each, where a label can be a text tile or a text object in a drawing.
 
 const kDrawingMinActivityLevel = 3;
-const kLabelMinWords = 10;
+const kLabelMinWords = 5;
+const kNumDrawings = 2;
+const kNumLabels = 2;
+
 
 const threeDrawingsRule: IExemplarControllerRule = {
-  name: "3 drawings/3 labels",
+  name: "2 drawings/2 labels",
   test: (model: BaseExemplarControllerModelType) => {
     let foundDrawings = 0, foundLabels = 0;
     const tileIds: string[] = [];
     for (const [key, tile] of model.inProgressTiles.entries()) {
-      if (tile.type === kTextTileType && tile.wordCount >= kLabelMinWords && foundLabels < 3) {
+      if (tile.type === kTextTileType && tile.wordCount >= kLabelMinWords && foundLabels < kNumLabels) {
         foundLabels++;
         tileIds.push(key);
       }
       if (tile.type === kDrawingTileType) {
-        if (tile.activityLevel >= kDrawingMinActivityLevel && foundDrawings < 3) {
+        if (tile.activityLevel >= kDrawingMinActivityLevel && foundDrawings < kNumDrawings) {
           foundDrawings++;
           tileIds.push(key);
         }
-        if (tile.wordCount >= kLabelMinWords && foundLabels < 3) {
+        if (tile.wordCount >= kLabelMinWords && foundLabels < kNumLabels) {
           foundLabels++;
           if (!tileIds.includes(key)) tileIds.push(key);
         }
       }
 
-      if (foundDrawings >= 3 && foundLabels >= 3) {
+      if (foundDrawings >= kNumDrawings && foundLabels >= kNumLabels) {
         return tileIds;
       }
     }

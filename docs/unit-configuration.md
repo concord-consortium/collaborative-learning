@@ -159,7 +159,7 @@ Uses common toolbar framework. Default buttons:
 - `stroke-color`
 - `fill-color`
 - `text`
-- `image-upload`
+- `upload`
 - `group`
 - `ungroup`
 - `duplicate`
@@ -185,12 +185,12 @@ Common toolbar framework. Default buttons:
 - `upload`: allows uploading an image to display in the background
 - `duplicate`: copies the currently selected objects
 - `label`: opens dialog to choose the type of label for selected object
-- `comment`: adds a label to the currently selected object
 - `add-data`: link or unlink from a dataset
 - `delete`: delete the currently selected objects
 
 Available buttons not in default set:
 
+- `comment`: adds a text callout to the currently selected object
 - `movable-line`: creates a line that can be positioned
 
 #### Graph

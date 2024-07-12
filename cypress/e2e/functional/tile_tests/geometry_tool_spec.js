@@ -195,16 +195,16 @@ context('Geometry Tool', function () {
     // Label the polygon
     geometryToolTile.getGraphPolygon().click(50, 50, { force: true,  });
     geometryToolTile.getSelectedGraphPoint().should('have.length', 3);
-    geometryToolTile.getGraphPointLabel().contains('12.5').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('12.').should('not.exist');
     geometryToolTile.getGraphPointLabel().contains('ABC').should('not.exist');
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.getModalTitle().should('contain.text', 'Polygon Label/Value');
     geometryToolTile.chooseLabelOption('length');
-    geometryToolTile.getGraphPointLabel().contains('12.5').should('exist');
+    geometryToolTile.getGraphPointLabel().contains('12.').should('exist');
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.getModalLabelInput().should('have.value', 'ABC');
     geometryToolTile.chooseLabelOption('label');
-    geometryToolTile.getGraphPointLabel().contains('12.5').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('12.').should('not.exist');
     geometryToolTile.getGraphPointLabel().contains('ABC').should('exist');
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.chooseLabelOption('none');

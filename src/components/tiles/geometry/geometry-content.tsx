@@ -643,11 +643,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const polygon = content.getOneSelectedPolygon(board);
       if (!polygon) return;
       const handleClose = () => this.setState({ showPolygonLabelDialog: false });
-      const handleAccept = (poly: JXG.Polygon, labelOption: ELabelOption, name: string) =>
-                            {
-                              this.handleLabelPolygon(poly, labelOption, name);
-                              handleClose();
-                            };
+      const handleAccept = (poly: JXG.Polygon, labelOption: ELabelOption, name: string) => {
+        this.handleLabelPolygon(poly, labelOption, name);
+        handleClose();
+      };
       return (
         <LabelPolygonDialog
           board={board}
