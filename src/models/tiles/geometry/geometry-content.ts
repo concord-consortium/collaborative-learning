@@ -692,7 +692,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       const result = syncChange(board, change);
       const point = isPoint(result) ? result : undefined;
 
-      if (point && self.activePolygonId) {
+      if (point && self.activePolygonId && restoring) {
         appendPhantomPointToPolygon(board, self.activePolygonId);
       }
       if (point && self.activeCircleId && restoring) {

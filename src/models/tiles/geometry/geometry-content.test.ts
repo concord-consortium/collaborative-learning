@@ -12,7 +12,7 @@ import { ELabelOption, JXGChange, JXGCoordPair } from "./jxg-changes";
 import { isPointInPolygon, getPointsForVertexAngle, getPolygonEdge } from "./jxg-polygon";
 import { canSupportVertexAngle, getVertexAngle, updateVertexAnglesFromObjects } from "./jxg-vertex-angle";
 import {
-  isBoard, isComment, isFreePoint, isImage, isLine, isMovableLine, isPoint, isPolygon,
+  isBoard, isCircle, isComment, isFreePoint, isImage, isLine, isMovableLine, isPoint, isPolygon,
   isText, kGeometryDefaultPixelsPerUnit, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin
 } from "./jxg-types";
 import { TileModel, ITileModel } from "../tile-model";
@@ -704,6 +704,51 @@ describe("GeometryContent", () => {
     content.removeObjects(board, polygonId);
     expect(board.objects[polygonId]).toBeUndefined();
 
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can add and remove a circle", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    const { point: point1 } = content.realizePhantomPoint(board, [0, 0], "circle");
+    const { point: point2, circle } = content.realizePhantomPoint(board, [1, 0], "circle");
+    expect(isPoint(point1)).toBeTruthy();
+    expect(isPoint(point2)).toBeTruthy();
+    expect(isCircle(circle)).toBeTruthy();
+    expect(board.objectsList.filter(o => isCircle(o)).length).toBe(1);
+    expect(content.getDependents([point1!.id])).toEqual([point1!.id, circle!.id]);
+    expect(content.getDependents([point2!.id])).toEqual([point2!.id, circle!.id]);
+    expect(content.getDependents([circle!.id])).toEqual([circle!.id]);
+    expect(content.lastObjectOfType("circle")).toEqual({
+      id: circle?.id,
+      type: "circle",
+      centerPoint: point1?.id,
+      tangentPoint: point2?.id,
+      colorScheme: 0 });
+
+    // Removing point should remove circle
+    content.removeObjects(board, [point1!.id]);
+    expect(board.objectsList.filter(o => isCircle(o)).length).toBe(0);
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can add a circle from existing points", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    const { point: point1 } = content.realizePhantomPoint(board, [1, 1], "points");
+    const { point: point2 } = content.realizePhantomPoint(board, [2, 2], "points");
+    expect(board.objectsList.filter(o => isCircle(o)).length).toBe(0);
+    content.createCircleIncludingPoint(board, point1!.id);
+    const circle = content.closeActiveCircle(board, point2!);
+    expect(isCircle(circle)).toBeTruthy();
+    expect(circle?.center.X()).toBe(1);
+    expect(circle?.center.Y()).toBe(1);
+    expect(board.objectsList.filter(o => isCircle(o)).length).toBe(1);
+    content.removeObjects(board, [circle!.id]);
+    expect(board.objectsList.filter(o => isCircle(o)).length).toBe(0);
+    // points should remain when circle removed
+    expect(isPoint(board.objects[point1!.id])).toBeTruthy();
+    expect(isPoint(board.objects[point2!.id])).toBeTruthy();
     destroyContentAndBoard(content, board);
   });
 
