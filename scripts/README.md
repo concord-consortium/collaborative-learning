@@ -1,3 +1,11 @@
+# Local Setup
+For most scripts here you'll need Firebase credentials. You can get this by going to
+https://console.firebase.google.com/u/0/project/collaborative-learning-ec215/settings/serviceaccounts/adminsdk
+
+From that page if you click "Generate a new private key", it will download a json file. You should rename this file `serviceAccountKey.json` and move it to the the scripts folder.
+
+Most scripts can be run using `npx tsx <script filename>`
+
 # Running on Google Cloud Virtual Machine
 
 It can be useful to offload the running of scripts to a virtual machine in Google Cloud. They will usually run faster there.

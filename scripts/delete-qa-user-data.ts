@@ -7,7 +7,7 @@
 
 import admin from "firebase-admin";
 
-const credential = admin.credential.cert('../serviceAccountKey.json');
+const credential = admin.credential.cert('./serviceAccountKey.json');
 admin.initializeApp({
   credential,
   databaseURL: 'https://collaborative-learning-ec215.firebaseio.com'

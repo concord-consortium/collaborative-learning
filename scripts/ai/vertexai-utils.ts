@@ -1,8 +1,8 @@
 import fs from "fs";
 
-import { IOutputFileProps } from "./script-types";
+import { IOutputFileProps } from "./script-types.js";
 
-import { datasetPath } from "./script-constants";
+import { datasetPath } from "./script-constants.js";
 
 export const cloudFileRoot = "gs://cloud-ai-platform-d76df5a1-f27c-4288-8b89-f41e345567b9/";
 
