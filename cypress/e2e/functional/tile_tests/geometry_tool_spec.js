@@ -264,6 +264,7 @@ context('Geometry Tool', function () {
     geometryToolTile.clickGraphPosition(10, 5);
     geometryToolTile.getGraphCircle().should("have.length", 1);
     geometryToolTile.getGraphPoint().should("have.length", 2);
+
     // Click outside circle to deselect
     clueCanvas.clickToolbarButton('geometry', 'select');
     geometryToolTile.clickGraphPosition(10, 10);
@@ -275,6 +276,22 @@ context('Geometry Tool', function () {
     clueCanvas.clickToolbarButton('geometry', 'delete');
     geometryToolTile.getGraphCircle().should("have.length", 0);
     geometryToolTile.getGraphPoint().should("have.length", 0);
+
+    // Create a circle from existing points
+    clueCanvas.clickToolbarButton('geometry', 'point');
+    geometryToolTile.clickGraphPosition(0, 5);
+    geometryToolTile.clickGraphPosition(0, 10);
+    clueCanvas.clickToolbarButton('geometry', 'circle');
+    geometryToolTile.getGraphPoint().should("have.length", 2);
+    geometryToolTile.getGraphPoint().eq(1).click();
+    geometryToolTile.getGraphPoint().eq(0).click();
+    geometryToolTile.getGraphCircle().should("have.length", 1);
+    geometryToolTile.getGraphPoint().should("have.length", 2);
+    // Delete it by deleting one point
+    geometryToolTile.selectGraphPoint(0, 10);
+    clueCanvas.clickToolbarButton('geometry', 'delete');
+    geometryToolTile.getGraphCircle().should("have.length", 0);
+    geometryToolTile.getGraphPoint().should("have.length", 1);
   });
 
   it('will test Geometry tile undo redo', () => {
