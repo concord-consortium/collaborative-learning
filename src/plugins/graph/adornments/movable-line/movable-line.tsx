@@ -247,11 +247,8 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
 
   // Refresh the scale copies
   useEffect(() => {
-    const disposer = autorun(() => {
-      xScaleCopy.current = xScale.copy();
-      yScaleCopy.current = yScale.copy();
-    });
-    return () => disposer();
+    xScaleCopy.current = xScale.copy();
+    yScaleCopy.current = yScale.copy();
   }, [xScale, yScale]);
 
   // Refresh the lines
@@ -285,7 +282,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       const newIntercept = isFinite(slope) ? tWorldY - slope * tWorldX : tWorldX;
       model.dragLine(newIntercept, slope, lineKey);
       refreshLines();
-    }, [model, refreshLines, xAxis, xScaleCopy, yAxis, yScaleCopy]),
+    }, [model, refreshLines, xAxis, yAxis]),
 
     endTranslate = useCallback((lineKey: string) => {
       model.saveLine(lineKey);
@@ -362,7 +359,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         }
       }
       refreshLines();
-    }, [model, refreshLines, xScaleCopy, yScaleCopy]),
+    }, [model, refreshLines]),
 
     endRotation = useCallback((lineKey: string) => {
       const lineParams = model.lines.get(lineKey);
