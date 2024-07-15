@@ -19,7 +19,7 @@ export function tileSnapshotPreProcessor(tileSnap: any) {
 
 registerTileContentInfo({
   type: kGeometryTileType,
-  displayName: "Shapes Graph",
+  displayName: "Coordinate Grid",
   modelClass: GeometryContentModel,
   metadataClass: GeometryMetadataModel,
   defaultHeight: kGeometryDefaultHeight,
