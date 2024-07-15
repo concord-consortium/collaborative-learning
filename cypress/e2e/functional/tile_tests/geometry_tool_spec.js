@@ -255,6 +255,25 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPoint().should("have.length", 0);
     geometryToolTile.getSelectedGraphPoint().should("have.length", 0);
 
+    // Create polygon from existing points
+    clueCanvas.clickToolbarButton('geometry', 'point');
+    geometryToolTile.clickGraphPosition(0, 0);
+    geometryToolTile.clickGraphPosition(10, 0);
+    geometryToolTile.clickGraphPosition(5, 5);
+    clueCanvas.clickToolbarButton('geometry', 'polygon');
+    geometryToolTile.getGraphPoint().should("have.length", 3);
+    geometryToolTile.getGraphPoint().eq(0).click();
+    geometryToolTile.getGraphPoint().eq(1).click();
+    geometryToolTile.getGraphPoint().eq(2).click();
+    geometryToolTile.getGraphPoint().eq(0).click();
+    geometryToolTile.getGraphPolygon().should("have.length", 1);
+    geometryToolTile.getGraphPoint().should("have.length", 3);
+    // Delete it
+    clueCanvas.clickToolbarButton('geometry', 'select');
+    geometryToolTile.clickGraphPosition(5, 3);
+    clueCanvas.clickToolbarButton('geometry', 'delete');
+    geometryToolTile.getGraphPolygon().should("have.length", 0);
+    geometryToolTile.getGraphPoint().should("have.length", 0);
 
     // Create a circle
     clueCanvas.clickToolbarButton('geometry', 'circle');
