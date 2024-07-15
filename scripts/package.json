@@ -10,7 +10,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "puppeteer": "^21.3.8",
+    "dotenv": "^16.4.5",
+    "puppeteer": "^22.13.0",
     "tsx": "^4.16.2"
   }
 }

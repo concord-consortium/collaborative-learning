@@ -1,3 +1,9 @@
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const scriptsRoot = path.resolve(__dirname, "..");
+
 // _duration should be in miliseconds
 export function prettyDuration(_duration: number) {
   const miliseconds = _duration % 1000;
@@ -22,4 +28,8 @@ export function getFirestoreBasePath(portal: string, demo?: string | boolean) {
   return demo
     ? `demo/${demo}/documents`
     : `authed/${portal.replace(/\./g, "_")}/documents`;
+}
+
+export function getScriptRootFilePath(filename: string) {
+  return path.resolve(scriptsRoot, filename);
 }
