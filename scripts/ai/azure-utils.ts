@@ -2,8 +2,8 @@
 import fs from "fs";
 import stringify from "json-stringify-pretty-compact";
 
-import { datasetPath } from "./script-constants";
-import { IAzureMetadata, IOutputFileProps } from "./script-types";
+import { datasetPath } from "./script-constants.js";
+import { IAzureMetadata, IOutputFileProps } from "./script-types.js";
 
 const defaultAzureMetadata: IAzureMetadata = {
   projectName: "Project Name",

@@ -11,15 +11,13 @@
 
 import fs from "fs";
 import admin from "firebase-admin";
-import {google} from "googleapis";
 import stringify from "json-stringify-pretty-compact";
-import fetch from 'node-fetch';
 
-import { datasetPath, networkFileName } from "./script-constants";
-import { getFirebaseBasePath, prettyDuration } from "./script-utils";
+import { datasetPath, networkFileName } from "./script-constants.js";
+import { getFirebaseBasePath, prettyDuration } from "../lib/script-utils.js";
 
 // Load the service account key JSON file.
-import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
+import { getClassKeys } from "../lib/firebase-classes.js";
 
 // The portal to get documents from. For example, "learn.concord.org".
 const portal = "learn.concord.org";
@@ -29,6 +27,7 @@ const demo = false;
 
 // Make falsy to include all documents
 const documentLimit = false;
+// const documentLimit = 10000;
 
 console.log(`*** Starting to Download Documents ***`);
 
@@ -38,66 +37,58 @@ let undefinedDocuments = 0;
 let failedDocuments = 0;
 let emptyDocuments = 0;
 
-// Define the required scopes.
-const scopes = [
-  "https://www.googleapis.com/auth/userinfo.email",
-  "https://www.googleapis.com/auth/firebase.database"
-];
-
-console.log("Creating Google JWT Client");
-
-// Authenticate a JWT client with the service account.
-const jwtClient = new google.auth.JWT(
-  serviceAccount.client_email,
-  undefined,
-  serviceAccount.private_key,
-  scopes
-);
-
-console.log("Generating an access token");
-
-// Use the JWT client to generate an access token.
-// this is using a toplevel await which might be a problem
-const accessToken = await new Promise<string|undefined>((resolve, reject) => {
-  jwtClient.authorize(function(error, tokens) {
-    if (error || !tokens) {
-      console.log("Error making request to generate access token:", error);
-      reject();
-    } else if (tokens.access_token === null) {
-      console.log("Provided service account does not have permission to generate access tokens");
-      reject();
-    } else {
-      resolve(tokens.access_token);
-    }
-  });
-});
-
-const accessTime = Date.now();
-
 const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
 const firebaseBasePath = getFirebaseBasePath(portal, demo);
-const fetchURL = `${databaseURL}${firebaseBasePath}.json?shallow=true`;
-console.log(`Fetching URL: ${fetchURL}`);
 
-const response = await fetch(fetchURL,
-  {
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  }
-);
-const classKeys  = await response.json() as Record<string, boolean>;
-
-const fetchTime = Date.now();
+const {classKeys, accessTime, fetchTime} = await getClassKeys(firebaseBasePath);
 
 // Fetch the service account key JSON file contents; must be in same folder as script
-const credential = admin.credential.cert('./serviceAccountKey.json');
+const credential = admin.credential.cert('../serviceAccountKey.json');
 // Initialize the app with a service account, granting admin privileges
 admin.initializeApp({
   credential,
   databaseURL
 });
+
+/**
+ * Firebase publications are stored with different keys than their document
+ * id for some reason. In some cases the real document id is in self.documentKey
+ * so we make a map with that documentKey as the key of the map.
+ *
+ * @param fbPublications
+ */
+function remapFirebaseClassPublications(fbPublications: Record<string, any>) {
+  if (!fbPublications) return undefined;
+  const publications = {};
+  for (const [fbId, publication] of Object.entries(fbPublications)) {
+    if (!publication?.self?.documentKey) {
+      console.log("Invalid publication found: ", fbId);
+      continue;
+    }
+    publications[publication.self.documentKey] = publication;
+  }
+  return publications;
+}
+
+/**
+ * Firebase publications are stored with different keys than their document
+ * id for some reason. In some cases the real document id is in documentKey
+ * so we make a map with that documentKey as the key of the map.
+ * @param fbPublications
+ */
+function remapFirebaseProblemDocPublications(fbPublications: Record<string, any>) {
+  if (!fbPublications) return undefined;
+  const publications = {};
+  for (const [fbId, publication] of Object.entries(fbPublications)) {
+    if (!publication?.documentKey) {
+      console.log("Invalid publication found: ", fbId);
+      continue;
+    }
+    publications[publication.documentKey] = publication;
+  }
+  return publications;
+}
 
 const credentialTime = Date.now();
 
@@ -109,11 +100,33 @@ await fs.mkdir(targetPath, error => {
   }
 });
 for (const key of Object.keys(classKeys)) {
+  const getClassValue = async (prop: string) => {
+    const snapshot = await admin.database().ref(`${firebaseBasePath}/${key}/${prop}`).once("value");
+    return snapshot.val();
+  };
+
   if (documentLimit && documentsProcessed >= documentLimit) break;
-  const usersSnapshot = await admin.database().ref(`${firebaseBasePath}/${key}/users`).once("value");
-  const users = usersSnapshot.val();
+  const users = await getClassValue("users");
+  const offerings = await getClassValue("offerings");
+  const fbPersonalPublications = await getClassValue("personalPublications");
+  const personalPublications = remapFirebaseClassPublications(fbPersonalPublications);
+  const fbLearningLogPublications = await getClassValue("publications");
+  const learningLogPublications = remapFirebaseClassPublications(fbLearningLogPublications);
+
+  const problemDocPublications = {};
+  for (const [offeringId, offering] of Object.entries(offerings)) {
+    const fbProblemDocPublications = (offering as any).publications;
+    if (!fbProblemDocPublications) continue;
+    problemDocPublications[offeringId] = remapFirebaseProblemDocPublications(fbProblemDocPublications);
+  }
+
   // console.log(key);
   // console.log(`  - ${Object.keys(users).length} users`);
+  // console.log(`  - ${Object.keys(offerings).length} offerings`);
+  // personalPublications &&
+  //   console.log(`  - ${Object.keys(personalPublications).length} personalPublications`);
+  // learningLogPublications &&
+  //   console.log(`  - ${Object.keys(learningLogPublications).length} learningLogPublications`);
   for (const [userId, user] of Object.entries<any>(users)) {
     if (documentLimit && documentsProcessed >= documentLimit) break;
     // console.log(`  ${userId}`);
@@ -121,35 +134,74 @@ for (const key of Object.keys(classKeys)) {
       if (documentLimit && documentsProcessed >= documentLimit) break;
 
       const content = doc.content as string | undefined;
+      let parsedContent;
+      let tiles;
       if (!content) {
         // console.log(`    ${docId} - undefined content`);
         undefinedDocuments++;
-        break;
+      } else {
+        try {
+          parsedContent = JSON.parse(content);
+          tiles = Object.values<any>(parsedContent.tileMap);
+          if (tiles.length === 0) {
+            // console.log(`      - no tiles`);
+            emptyDocuments++;
+          }
+        } catch (e) {
+          // console.log(`    ${docId} - error parsing content`);
+          // console.log(`      ${e}`);
+          failedDocuments++;
+        }
       }
-      let parsedContent;
-      try {
-        parsedContent = JSON.parse(content);
-      } catch (e) {
-        // console.log(`    ${docId} - error parsing content`);
-        // console.log(`      ${e}`);
-        failedDocuments++;
-        break;
-      }
-      // console.log(`    ${docId}`);
-      const tiles = Object.values<any>(parsedContent.tileMap);
-      if (tiles.length === 0) {
-        // console.log(`      - no tiles`);
-        emptyDocuments++;
-        break;
-      }
-      const documentId = `documentInfo${docId}`;
-      const documentFile = `${targetPath}/${documentId}.txt`;
+
       const documentMetadata = user.documentMetadata[docId];
       const offeringId = documentMetadata?.offeringId;
+      const offering = offeringId && offerings[offeringId];
+      const problemDocPublication = offeringId && problemDocPublications[offeringId]?.[docId];
+      const extraInfo = {} as any;
+      if (offering) {
+        const offeringUser = offering.users?.[userId];
+        const problemMetadata = offeringUser?.documents?.[docId];
+        extraInfo.problemVisibility = problemMetadata?.visbility;
+        const planningMetadata = offeringUser?.planning?.[docId];
+        extraInfo.planningVisibility = planningMetadata?.visbility;
+      }
+
+      // It should really be published as one type or the other
+      // TODO: add error checking to see if the documentType matches
+      const classPublication = personalPublications?.[docId] || learningLogPublications?.[docId];
+
+      extraInfo.documentTitle =
+        user.personalDocs?.[docId]?.title ||
+        user.learningLogs?.[docId]?.title ||
+        classPublication?.title;
+
+      if (classPublication) {
+        extraInfo.originDoc = classPublication.originDoc;
+        extraInfo.pubVersion = classPublication.pubVersion;
+      }
+
+      if (problemDocPublication) {
+        extraInfo.pubVersion = problemDocPublication.pubVersion;
+        extraInfo.groupId = problemDocPublication.groupId;
+        extraInfo.groupUserConnections = problemDocPublication.groupUserConnections;
+        // These problem document publications don't have originDoc keys. The originDoc
+        // should be the problem doc for the same user and offering
+      }
+
+      // console.log(`    ${docId}`);
+      const documentId = `documentInfo${docId}`;
+      const documentFile = `${targetPath}/${documentId}.txt`;
       const documentType = documentMetadata?.type;
-      const documentTitle = ["learningLog", "personal"].includes(documentType) ? user[documentType]?.title : undefined;
       const fileContent = {
-        classId: key, offeringId, userId, documentId: docId, documentType, documentTitle, documentContent: parsedContent
+        classId: key,
+        offeringId,
+        userId,
+        documentId: docId,
+        documentType,
+        documentContent: parsedContent,
+        contentStatus: !content ? "none" : !parsedContent ? "invalid" : !tiles?.length ? "empty" : "full",
+        ...extraInfo
       };
       fs.writeFileSync(documentFile, stringify(fileContent));
       documentsProcessed++;
