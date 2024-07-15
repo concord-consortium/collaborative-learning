@@ -190,6 +190,7 @@ export class GraphController {
                                      ? NumericAxisModel.create({place, min, max})
                                      : EmptyAxisModel.create({place});
               graphModel.setAxis(place, newAxisModel);
+              !emptyPlotIsNumeric && layout.setAxisScaleType(place, 'ordinal');
             }
           }
         }
