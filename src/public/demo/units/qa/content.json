@@ -75,7 +75,7 @@
       {"id": "Diagram", "title": "Diagram", "isTileTool": true},
       {"id": "Numberline", "title": "Numberline", "isTileTool": true},
       {"id": "Graph", "title": "XY Plot", "iconId": "icon-plot-tool", "isTileTool": true},
-      {"id": "Geometry", "title": "Graph", "isTileTool": true},
+      {"id": "Geometry", "isTileTool": true},
       {"id": "Image", "title": "Image", "isTileTool": true},
       {"id": "Drawing", "title": "Drawing", "isTileTool": true},
       {"id": "Starter", "title": "Starter", "isTileTool": true},

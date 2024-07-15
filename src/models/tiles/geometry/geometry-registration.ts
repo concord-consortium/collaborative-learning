@@ -20,6 +20,7 @@ export function tileSnapshotPreProcessor(tileSnap: any) {
 registerTileContentInfo({
   type: kGeometryTileType,
   displayName: "Coordinate Grid",
+  shortName: "Grid",
   modelClass: GeometryContentModel,
   metadataClass: GeometryMetadataModel,
   defaultHeight: kGeometryDefaultHeight,

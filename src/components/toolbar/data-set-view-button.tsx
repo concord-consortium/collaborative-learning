@@ -4,6 +4,7 @@ import { SharedDataSet } from "../../models/shared/shared-data-set";
 import { AddTilesContext, TileModelContext } from "../tiles/tile-api";
 import { TileToolbarButton } from "./tile-toolbar-button";
 import { BadgedIcon } from "./badged-icon";
+import { getTileCreateActionName } from "../../models/tiles/tile-content-info";
 
 import ViewBadgeIcon from "../../assets/icons/view/view-badge.svg";
 
@@ -27,7 +28,7 @@ export function DataSetViewButton({name, args}: IProps) {
   }
 
   const newTileType = args[1];
-  const tooltip = `${newTileType} It!`;
+  const tooltip = getTileCreateActionName(newTileType);
 
   // TODO: if the document or tile are undefined then disable the button
 
