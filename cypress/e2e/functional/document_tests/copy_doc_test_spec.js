@@ -58,7 +58,8 @@ context('Copy Document', () => {
     geometryTile.clickGraphPosition(5, 5);
     geometryTile.clickGraphPosition(10, 5);
     geometryTile.clickGraphPosition(10, 10);
-    geometryTile.getGraphPoint().should('have.length', 4);
+    geometryTile.getPhantomGraphPoint().should('exist');
+    geometryTile.getGraphPoint().should('have.length', 3);
 
     cy.log('Add drawing tile');
     clueCanvas.addTile("drawing");

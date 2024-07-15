@@ -2,6 +2,9 @@ const kGraphPixPerCoord = { x: 18.33, y: -18.33 };
 // determined by inspection
 const kGraphOriginCoordPix = { x: 40, y: 296 };
 
+// NOTE: These don't produce exactly the right results;
+// if you watch the test you can see that the coordinates are somewhat off.
+// However, this does not keep the tests from passing since they are off in a consistent way.
 export function pointCoordsToPix(ptCoords, originPix) {
     return { x: originPix.x + ptCoords.x * kGraphPixPerCoord.x,
              y: originPix.y + ptCoords.y * kGraphPixPerCoord.y };
@@ -78,10 +81,13 @@ class GeometryToolTile {
         return cy.get('.geometry-content.editable .JXGtext:visible');
     }
     getGraphPoint(){
-        return cy.get('.geometry-content.editable ellipse[display="inline"]');
+        return cy.get('.geometry-content.editable ellipse[display="inline"][fill-opacity="1"]');
+    }
+    getPhantomGraphPoint(){
+        return cy.get('.geometry-content.editable ellipse[fill-opacity="0.5"]');
     }
     getSelectedGraphPoint() {
-        return cy.get('.geometry-content.editable ellipse[stroke-opacity="0.25"]');
+        return cy.get('.geometry-content.editable ellipse[fill-opacity="1"][stroke-opacity="0.25"]');
     }
     hoverGraphPoint(x,y){
         let transX=this.transformFromCoordinate('x', x),
@@ -110,6 +116,10 @@ class GeometryToolTile {
     getGraphPolygon(){
         return cy.get('.single-workspace .geometry-content.editable polygon');
     }
+    getGraphCircle(){
+      return cy.get('.single-workspace .geometry-content.editable ellipse[fill-opacity="0.2"]');
+    }
+
     clickGraphPosition(x,y){
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);

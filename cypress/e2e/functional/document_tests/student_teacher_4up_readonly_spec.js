@@ -86,7 +86,8 @@ function setupTest(studentIndex) {
   geometryToolTile.clickGraphPosition(5, 5);
   geometryToolTile.clickGraphPosition(10, 5);
   geometryToolTile.clickGraphPosition(10, 10);
-  geometryToolTile.getGraphPoint().should('have.length', 4); // including phantom point
+  geometryToolTile.getGraphPoint().should('have.length', 3);
+  geometryToolTile.getPhantomGraphPoint().should('exist');
   clueCanvas.addTile("drawing");
   drawToolTile.getDrawToolRectangle().click();
   drawToolTile.getDrawTile()
