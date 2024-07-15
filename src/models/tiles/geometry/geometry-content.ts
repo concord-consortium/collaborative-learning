@@ -1175,7 +1175,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       if (!circleModel) return;
       circleModel.tangentPoint = point.id;
 
-      // On the board, emove the circle that attches to the phantom point and replace it with a new circle
+      // On the board, remove the circle that attaches to the phantom point and replace it with a new circle
       syncChange(board, {
         operation: "delete",
         target: "circle",
