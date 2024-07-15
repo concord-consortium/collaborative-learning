@@ -7,6 +7,7 @@ import { computeSlopeAndIntercept } from "../../utilities/graph-utils";
 import { kMovableLineType } from "./movable-line-types";
 import { IGraphModel } from "../../models/graph-model";
 import { IClueTileObject } from "../../../../models/annotations/clue-object";
+import { uniqueId } from "../../../../utilities/js-utils";
 
 export function getAnnotationId(lineKey: string, type: "handle"|"equation", position?: "lower"|"upper") {
   if (position) {
@@ -121,8 +122,8 @@ export const MovableLineModel = AdornmentModel
 }))
 .actions(self => ({
   addLine(xAxis?: IAxisModel, yAxis?: IAxisModel) {
-    const lineKey = `movable-line-${self.lines.size.toString()}`;
-    self.setLine(xAxis, yAxis, lineKey);
+    const uniqueID = uniqueId();
+    self.setLine(xAxis, yAxis, uniqueID);
   },
   deleteLine(key: string) {
     self.lines.delete(key);
@@ -180,6 +181,7 @@ export function isMovableLine(adornment: IAdornmentModel): adornment is IMovable
 
 export function defaultMovableLineAdornment(graph: IGraphModel) {
   const mLine = MovableLineModel.create();
-  mLine.setLine(graph.axes.get("bottom"), graph.axes.get("left"), "movable-line-0");
+  const uniqueID = uniqueId();
+  mLine.setLine(graph.axes.get("bottom"), graph.axes.get("left"), uniqueID);
   return mLine;
 }

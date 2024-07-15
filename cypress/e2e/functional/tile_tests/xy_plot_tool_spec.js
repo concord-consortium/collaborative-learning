@@ -655,10 +655,9 @@ context('XYPlot Tool Tile', function () {
       // Drag movable line
       xyTile.getMovableLineEquationSlope().then(origSlope => {
         xyTile.getMovableLineEquationIntercept().then(origIntercept => {
-          xyTile.getMovableLineCover()
-            .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' })
-            .trigger("mousemove", 50, 0, { force: true, eventConstructor: 'MouseEvent' })
-            .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
+          xyTile.getMovableLineCover().trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' });
+          xyTile.getMovableLineCover().trigger("mousemove", 50, 0, { force: true, eventConstructor: 'MouseEvent' });
+          xyTile.getMovableLineCover().trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
           xyTile.getMovableLineEquationSlope().should("equal", origSlope);
           xyTile.getMovableLineEquationIntercept().should("be.greaterThan", origIntercept);
         });
@@ -666,16 +665,14 @@ context('XYPlot Tool Tile', function () {
 
       // Now drag the bottom handle up enough to make the slope negative
       xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
-      xyTile.getMovableLineHandle('lower')
-        .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' })
-        .trigger("mousemove", 0, -100, { force: true, eventConstructor: 'MouseEvent' })
-        .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineHandle('lower').trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineHandle('lower').trigger("mousemove", 0, -100, { force: true, eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineHandle('lower').trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
       xyTile.getMovableLineEquationSlope().should("be.lessThan", 0);
       // Then drag the upper handle up and make slope positive again
-      xyTile.getMovableLineHandle('upper')
-        .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' })
-        .trigger("mousemove", 0, -100, { force: true, eventConstructor: 'MouseEvent' })
-        .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineHandle('upper').trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineHandle('upper').trigger("mousemove", 0, -100, { force: true, eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineHandle('upper').trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
       xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
 
       // Add another movable line

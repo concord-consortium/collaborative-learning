@@ -55,22 +55,22 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     readOnly = useReadOnlyContext(),
     annotationLocationSetter = useLocationSetterContext(),
     xScale = layout.getAxisScale("bottom") as ScaleNumericBaseType,
-    xScaleCopy = xScale.copy(),
     yScale = layout.getAxisScale("left") as ScaleNumericBaseType,
-    yScaleCopy = yScale.copy(),
     kTolerance = 4, // pixels to snap to horizontal or vertical
     kHandleSize = 10,
     kHandle1Loc = 1/3,
     kHandle2Loc = 2/3,
     {equationContainerClass} = equationContainer(model, subPlotKey),
+    xScaleCopy = useRef(xScale.copy()),
+    yScaleCopy = useRef(yScale.copy()),
     lineRef = useRef<SVGSVGElement>(null),
     lineObjects = useRef<ILineObject[]>([]),
     pointsOnAxes = useRef<IAxisIntercepts[]>([]);
 
-    // Set scale copy ranges. The scale copies are used when computing the line's
-    // coordinates during dragging.
-    xScaleCopy.range([0, plotWidth]);
-    yScaleCopy.range([plotHeight, 0]);
+  // Set scale copy ranges. The scale copies are used when computing the line's
+  // coordinates during dragging.
+  xScaleCopy.current.range([0, plotWidth]);
+  yScaleCopy.current.range([plotHeight, 0]);
 
   // get attributes for use in equation
   const
@@ -220,7 +220,6 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         {domain: xDomain} = xAxis,
         {domain: yDomain} = yAxis;
       pointsOnAxes.current[index] = lineToAxisIntercepts(slope, intercept, xDomain, yDomain);
-
       const
         // The coordinates at which the line intersects the axes
         pixelPtsOnAxes = {
@@ -246,6 +245,15 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       plotWidth, positionEquation, updateClasses, xAttrName, xAxis, xScale, xSubAxesCount, yAttrName, yAxis, yScale,
       ySubAxesCount]);
 
+  // Refresh the scale copies
+  useEffect(() => {
+    const disposer = autorun(() => {
+      xScaleCopy.current = xScale.copy();
+      yScaleCopy.current = yScale.copy();
+    });
+    return () => disposer();
+  }, [xScale, yScale]);
+
   // Refresh the lines
   useEffect(function refresh() {
     const disposer = autorun(() => {
@@ -259,15 +267,15 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     continueTranslate = useCallback((event: MouseEvent, lineKey: string) => {
       const lineParams = model.lines.get(lineKey),
         slope = lineParams?.currentSlope || 0,
-        tWorldX = xScaleCopy.invert(event.x),
-        tWorldY = yScaleCopy.invert(event.y);
+        tWorldX = xScaleCopy.current.invert(event.x),
+        tWorldY = yScaleCopy.current.invert(event.y);
 
       // If the line is dragged outside plot area, reset it to the initial state
       if (
-          tWorldX < xScaleCopy.domain()[0] ||
-          tWorldX > xScaleCopy.domain()[1] ||
-          tWorldY < yScaleCopy.domain()[0] ||
-          tWorldY > yScaleCopy.domain()[1]
+          tWorldX < xScaleCopy.current.domain()[0] ||
+          tWorldX > xScaleCopy.current.domain()[1] ||
+          tWorldY < yScaleCopy.current.domain()[0] ||
+          tWorldY > yScaleCopy.current.domain()[1]
       ) {
         const { intercept, slope: initSlope } = computeSlopeAndIntercept(xAxis, yAxis);
         model.dragLine(intercept, initSlope, lineKey);
@@ -319,15 +327,15 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       if (event.dx !== 0 || event.dy !== 0) {
         let isVertical = false;
         // The dragPivot will be the point on the line section where it is being dragged.
-        const dragPivot = { x: xScaleCopy.invert(event.x), y: yScaleCopy.invert(event.y) };
+        const dragPivot = { x: xScaleCopy.current.invert(event.x), y: yScaleCopy.current.invert(event.y) };
 
         // If the line is perfectly vertical, set the dragPivot's x coordinate to the x coordinate of the
         // original pivot. If the line is perfectly horizontal, set the dragPivot's y coordinate to the y
         // coordinate of the original pivot.
-        if (Math.abs(xScaleCopy(dragPivot.x) - xScaleCopy(pivot.x)) < kTolerance) { // vertical
+        if (Math.abs(xScaleCopy.current(dragPivot.x) - xScaleCopy.current(pivot.x)) < kTolerance) { // vertical
           dragPivot.x = pivot.x;
           isVertical = true;
-        } else if (Math.abs(yScaleCopy(dragPivot.y) - yScaleCopy(pivot.y)) < kTolerance) { // horizontal
+        } else if (Math.abs(yScaleCopy.current(dragPivot.y) - yScaleCopy.current(pivot.y)) < kTolerance) { // horizontal
           dragPivot.y = pivot.y;
         }
 
@@ -427,7 +435,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
   // Build the lines and their cover segments and handles
   useEffect(function createElements() {
     return autorun(() => {
-      if (!model.lines || lineObjects.current.length === model.lines.size) return;
+      if (!model.lines) return;
 
       // Clear any previously added elements
       lineObjects.current = [];
@@ -490,8 +498,8 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         addBehaviors();
       }
     }, { name: "MovableLine.createElements" });
-  }, [addBehaviors, containerId, equationContainerClass, graphModel, instanceId, model, model.lines, plotHeight,
-      plotWidth, readOnly, refreshLines, subPlotKey]);
+  }, [addBehaviors, containerId, equationContainerClass, graphModel, instanceId, model.lines, plotHeight, plotWidth,
+      readOnly, refreshLines]);
 
   return (
     <svg
