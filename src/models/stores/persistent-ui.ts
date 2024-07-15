@@ -2,7 +2,7 @@ import { getSnapshot, applySnapshot, types,
   onSnapshot
 } from "mobx-state-tree";
 import { AppConfigModelType } from "./app-config-model";
-import { kDividerHalf, kDividerMax, kDividerMin } from "./ui-types";
+import { DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax, kDividerMin } from "./ui-types";
 import { isWorkspaceModelSnapshot, WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ENavTab } from "../view/nav-tabs";
@@ -36,6 +36,7 @@ export const PersistentUIModel = types
   .model("PersistentUI", {
     dividerPosition: kDividerHalf,
     activeNavTab: types.maybe(types.string),
+    docFilter: types.optional(DocFilterTypeEnum, "Problem"),
     showAnnotations: true,
     showTeacherContent: true,
     showChatPanel: false,
@@ -188,6 +189,9 @@ export const PersistentUIModel = types
       },
       setProblemPath(problemPath: string) {
         self.problemPath = problemPath;
+      },
+      setDocFilter(docFilter: DocFilterType) {
+        self.docFilter = docFilter;
       }
     };
   })

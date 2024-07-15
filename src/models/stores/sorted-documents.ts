@@ -11,6 +11,7 @@ import { ENavTabOrder, NavTabSectionModelType } from "../view/nav-tabs";
 import { UserModelType } from "./user";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
+import { DocFilterType } from "./ui-types";
 
 import SparrowHeaderIcon from "../../assets/icons/sort-by-tools/sparrow-id.svg";
 
@@ -33,6 +34,7 @@ export interface ISortedDocumentsStores {
   db: DB;
   appConfig: AppConfigModelType;
   bookmarks: Bookmarks;
+  docFilter: DocFilterType;
   user: UserModelType;
 }
 
@@ -42,6 +44,7 @@ interface IMatchPropertiesOptions {
 export class SortedDocuments {
   stores: ISortedDocumentsStores;
   firestoreTagDocumentMap = new Map<string, Set<string>>();
+  firestoreMetadataDocs: any = [];
 
   constructor(stores: ISortedDocumentsStores) {
     makeAutoObservable(this);
@@ -72,7 +75,8 @@ export class SortedDocuments {
   }
 
   get filteredDocsByType(): DocumentModelType[] {
-    return this.documents.all.filter((doc: DocumentModelType) => {
+    const documents = this.stores.docFilter === "Problem" ? this.documents.all : this.firestoreMetadataDocs;
+    return documents.filter((doc: DocumentModelType) => {
       return isSortableType(doc.type);
     });
   }
@@ -172,12 +176,21 @@ export class SortedDocuments {
     // adding in (exemplar) documents with authored tags
     const allSortableDocKeys = this.filteredDocsByType;
     allSortableDocKeys.forEach(doc => {
-      const foundTagKey = doc.getProperty("authoredCommentTag");
-      if (foundTagKey !== undefined && foundTagKey !== "") {
-        if (tagsWithDocs[foundTagKey]) {
-          tagsWithDocs[foundTagKey].docKeysFoundWithTag.push(doc.key);
-          uniqueDocKeysWithTags.add(doc.key);
+      if (this.stores.docFilter === "Problem") {
+        const foundTagKey = doc.getProperty("authoredCommentTag");
+        if (foundTagKey !== undefined && foundTagKey !== "") {
+          if (tagsWithDocs[foundTagKey]) {
+            tagsWithDocs[foundTagKey].docKeysFoundWithTag.push(doc.key);
+            uniqueDocKeysWithTags.add(doc.key);
+          }
         }
+      } else {
+        doc.strategies?.forEach(strategy => {
+          if (tagsWithDocs[strategy]) {
+            tagsWithDocs[strategy].docKeysFoundWithTag.push(doc.key);
+            uniqueDocKeysWithTags.add(doc.key);
+          }
+        });
       }
     });
 
@@ -195,7 +208,8 @@ export class SortedDocuments {
       const tagWithDocs = tagKeyAndValObj[1] as TagWithDocs;
       const sectionLabel = tagWithDocs.tagValue;
       const docKeys = tagWithDocs.docKeysFoundWithTag;
-      const documents = this.documents.all.filter(doc => docKeys.includes(doc.key));
+      const docs = this.stores.docFilter === "Problem" ? this.documents.all : this.firestoreMetadataDocs;
+      const documents = docs.filter((doc: any) => docKeys.includes(doc.key));
       sortedDocsArr.push({
         sectionLabel,
         documents
@@ -228,6 +242,41 @@ export class SortedDocuments {
           });
         });
       });
+    });
+  }
+
+  async updateMetaDataDocs (filter: string, unit: string, investigation: number, problem: number) {
+    const db = this.db.firestore;
+    let query = db.collection("documents").where("context_id", "==", this.user.classHash);
+
+    if (filter !== "All") {
+      query = query.where("unit" , "==", unit);
+    }
+    if (filter === "Investigation" || filter === "Problem") {
+      query = query.where("investigation", "==", String(investigation));
+    }
+    if (filter === "Problem") {
+      query = query.where("problem", "==", String(problem));
+    }
+    const queryForUnitNull = db.collection("documents").where("context_id", "==", this.user.classHash)
+                                                       .where("unit" , "==", null);
+    const [docsWithUnit, docsWithoutUnit] = await Promise.all([query.get(), queryForUnitNull.get()]);
+    const docsArray: any = [];
+
+    const matchedDocKeys = new Set<string>();
+    docsWithUnit.docs.forEach(doc => {
+      if (matchedDocKeys.has(doc.data().key)) return;
+      docsArray.push(doc.data());
+      matchedDocKeys.add(doc.data().key);
+    });
+    docsWithoutUnit.docs.forEach(doc => {
+      if (matchedDocKeys.has(doc.data().key)) return;
+      docsArray.push(doc.data());
+      matchedDocKeys.add(doc.data().key);
+    });
+
+    runInAction(() => {
+      this.firestoreMetadataDocs.replace(docsArray);
     });
   }
 
@@ -265,22 +314,36 @@ export class SortedDocuments {
     //Iterate through all documents, determine if they are valid,
     //create a map of valid ones, otherwise put them into the "No Tools" section
     this.filteredDocsByType.forEach((doc) => {
-      const tilesByTypeMap = doc.content?.getAllTilesByType();
-      if (tilesByTypeMap) {
-        const tileTypes = Object.keys(tilesByTypeMap);
-        const validTileTypes = tileTypes.filter(type => type !== "Placeholder" && type !== "Unknown");
-        if (validTileTypes.length > 0) {
-          validTileTypes.forEach(tileType => {
-            addDocByType(doc, tileType);
-          });
+      if (this.stores.docFilter === "Problem") {
+        const tilesByTypeMap = doc.content?.getAllTilesByType();
+        if (tilesByTypeMap) {
+          const tileTypes = Object.keys(tilesByTypeMap);
+          const validTileTypes = tileTypes.filter(type => type !== "Placeholder" && type !== "Unknown");
+          if (validTileTypes.length > 0) {
+            validTileTypes.forEach(tileType => {
+              addDocByType(doc, tileType);
+            });
 
-          //Assuming validTileTypes, we can check if the document has "Sparrow" annotations
-          const docHasAnnotations = doc.content?.annotations && doc.content?.annotations.size > 0;
-          if(docHasAnnotations){
-            addDocByType(doc, "Sparrow");
+            //Assuming validTileTypes, we can check if the document has "Sparrow" annotations
+            const docHasAnnotations = doc.content?.annotations && doc.content?.annotations.size > 0;
+            if(docHasAnnotations){
+              addDocByType(doc, "Sparrow");
+            }
+          } else { //Documents with only all Placeholder or Unknown tiles
+            addDocByType(doc, "No Tools");
           }
-        } else { //Documents with only all Placeholder or Unknown tiles
-          addDocByType(doc, "No Tools");
+        }
+      } else {
+        if (doc.tileTypes) {
+          const validTileTypes = doc.tileTypes.filter(type => type !== "Placeholder" && type !== "Unknown");
+          if (validTileTypes.length > 0) {
+            validTileTypes.forEach(tileType => {
+              addDocByType(doc, tileType);
+            });
+            // TODO: Sparrow annotations. We'll first need to add information about these to metadata docs.
+          } else {
+            addDocByType(doc, "No Tools");
+          }
         }
       }
     });
@@ -381,6 +444,10 @@ export class SortedDocuments {
                                                             { isTeacherDocument: this.isTeacherDocument(doc) }));
     }
     return sectDocs;
+  }
+
+  setDocFilter(filter: DocFilterType) {
+    this.stores.docFilter = filter;
   }
 
 }
