@@ -867,9 +867,8 @@ export const GeometryContentModel = GeometryBaseContentModel
       fixVertexAngle(board, updatedPolygon, updatedPolygon.vertices[phantomPointIndex-1]);
       fixVertexAngle(board, updatedPolygon, updatedPolygon.vertices[phantomPointIndex]);
 
-      logGeometryEvent(self, "update",
-        "vertex",
-        pointId, { userAction: "join to polygon" });
+      logGeometryEvent(self, "update", "vertex", [pointId, poly.id],
+        { userAction: "join to polygon" });
 
       return isPolygon(updatedPolygon) ? updatedPolygon : undefined;
     }
@@ -1047,9 +1046,8 @@ export const GeometryContentModel = GeometryBaseContentModel
       };
       const result = syncChange(board, change);
 
-      logGeometryEvent(self, "update",
-        "vertex",
-        pointId, { userAction: "join to polygon" });
+      logGeometryEvent(self, "update", "vertex", [pointId, polygonModel.id],
+        { userAction: "join to polygon" });
 
       if (isPolygon(result)) {
         return result;
@@ -1070,9 +1068,8 @@ export const GeometryContentModel = GeometryBaseContentModel
       };
       const result = syncChange(board, change);
 
-      logGeometryEvent(self, "update",
-        "point",
-        pointId, { userAction: "join center to circle" });
+      logGeometryEvent(self, "update", "point", [pointId, circleModel.id],
+        { userAction: "join center to circle" });
 
       if (isCircle(result)) {
         return result;
@@ -1190,6 +1187,8 @@ export const GeometryContentModel = GeometryBaseContentModel
         parents: [circleModel.centerPoint, circleModel.tangentPoint],
         properties: { id: circleModel.id, colorScheme: circleModel.colorScheme }
       });
+      logGeometryEvent(self, "update", "point", [point.id, circleModel.id],
+        { userAction: "join tangent point to circle" });
       self.activeCircleId = undefined;
       return isCircle(result) ? result : undefined;
     }
