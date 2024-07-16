@@ -15,8 +15,8 @@
 
 import fs from "fs";
 
-import { datasetPath } from "./script-constants";
-import { prettyDuration } from "./script-utils";
+import { datasetPath } from "./script-constants.js";
+import { prettyDuration } from "../lib/script-utils.js";
 
 const sourceDirectory = "dataset1706677550897";
 
@@ -33,7 +33,7 @@ let processedFiles = 0;
 const typeCounts: Record<string, number> = {};
 let titles = 0;
 
-// Porcesses a file, counting the relevant tiles in it if it's a document
+// Processes a file, counting the relevant tiles in it if it's a document
 async function processFile(file: string) {
   const path = `${sourcePath}/${file}`;
   if (file.startsWith("documentInfo")) {
