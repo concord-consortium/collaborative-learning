@@ -183,9 +183,9 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
       slope: number, intercept: number, lineModel: IMovableLineInstance, index: number, lineKey: string
     ) {
       if (pointsOnAxes.current.length < 1) return;
-      const lineEquationContainer = select(`.primary-workspace #${`movable-line-equation-${lineKey}-${instanceId}`}`);
+      const lineEquationContainer = select(`.${`movable-line-equation-${lineKey}-${instanceId}`}`);
       const lineEquationElt =
-        select<HTMLElement,unknown>(`.primary-workspace #${`movable-line-equation-${lineKey}-${instanceId}`} p`);
+        select<HTMLElement,unknown>(`.${`movable-line-equation-${lineKey}-${instanceId}`} p`);
       const
         attrNames = {x: xAttrName, y: yAttrName},
         string = equationString(slope, intercept, attrNames);
@@ -374,7 +374,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     ) => {
       if (event.dx !== 0 || event.dy !== 0) {
         const equation =
-          select<HTMLElement,unknown>(`.primary-workspace #${`movable-line-equation-${lineKey}-${instanceId}`} p`),
+          select<HTMLElement,unknown>(`.${`movable-line-equation-${lineKey}-${instanceId}`} p`),
           equationNode = equation.node() as Element,
           equationWidth = equationNode?.getBoundingClientRect().width || 0,
           equationHeight = equationNode?.getBoundingClientRect().height || 0,
@@ -475,10 +475,14 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
 
         // Set up the corresponding equation box
         // Define the selector that corresponds with this specific movable line's adornment container
+        const equationDivClass = classNames(
+          equationContainerClass,
+          "movable-line-equation-container",
+          `movable-line-equation-${key}-${instanceId}`
+        );
         const equationDiv = select(`#${containerId}`).append('div')
-          .attr('id', `movable-line-equation-${key}-${instanceId}`)
-          .attr('class', `movable-line-equation-container ${equationContainerClass}`)
-          .attr('data-testid', `${equationContainerClass}`)
+          .attr('class', equationDivClass)
+          .attr('data-testid', equationContainerClass)
           .style('width', `${plotWidth}px`)
           .style('height', `${plotHeight}px`);
 
