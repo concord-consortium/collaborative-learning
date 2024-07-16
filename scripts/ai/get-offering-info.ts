@@ -91,6 +91,10 @@ console.log(`*** Loaded ${processedFiles} files in ${prettyDuration(loadingDurat
 console.log(`*** Found ${filesWithOfferings} documents with offerings ***`);
 console.log(`*** Found ${offeringIds.size} unique offerings ***`);
 
+// FIXME: To support the current usage of a teacher array in the metadata documents
+// we should save the list of teachers of the offering. However it would be best to
+// update this list in the Firestore <root>/classes/[class doc], and remove the
+// teacher list from the metadata documents.
 interface OfferingInfo {
   activity_url,
   clazz_id,
