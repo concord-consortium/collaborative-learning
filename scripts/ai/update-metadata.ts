@@ -16,7 +16,7 @@ import { getFirestoreBasePath, getScriptRootFilePath } from "../lib/script-utils
 // The directory containing the documents you're interested in.
 // This should be the output of download-documents.ts.
 // Each document should be named like documentID.txt, where ID is the document's id in the database.
-const sourceDirectory = "dataset1721072285516";
+const sourceDirectory = "dataset1721156514478";
 
 console.log(`*** Starting to Update Metadata ***`);
 
@@ -31,6 +31,20 @@ admin.initializeApp({
 });
 
 const sourcePath = `${datasetPath}${sourceDirectory}`;
+
+const processComment = (
+  commentSnapshot: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>,
+  strategies: string[]
+) => {
+  const commentTags = commentSnapshot.data().tags ?? [];
+  commentTags.forEach(tag => {
+    if (tag) {
+      if (!strategies.includes(tag)) {
+        strategies.push(tag);
+      }
+    }
+  });
+};
 
 // Get network info from portal file. This should have been created by download-documents.ts.
 function getNetworkInfo() {
@@ -65,6 +79,7 @@ async function processFile(file: string) {
     const parsedContent = JSON.parse(content);
     const {
       classId,
+      documentContent,
       documentId,
       documentTitle,
       documentType,
@@ -75,6 +90,15 @@ async function processFile(file: string) {
 
     processedFiles++;
 
+    // TODO: Determine if we need to skip certain tile types like placeholders.
+    const tiles = documentContent?.tileMap ? Object.values<any>(documentContent.tileMap) : [];
+    const tileTypes = [];
+    for (const tile of tiles) {
+      if (!tileTypes.includes(tile.content.type)) {
+        tileTypes.push(tile.content.type);
+      }
+    }
+
     // If it has no offering we add a
     // unit: null field so it is easy to find these metadata documents without looking at what
     // type of document the metadata is for
@@ -83,9 +107,28 @@ async function processFile(file: string) {
     };
 
     if (offeringId) {
-      let [_full, unitCode, investigation, problem] = offeringId.match(/(.*)(\d)(\d\d)/);
+      // Extract the unit, investigation, and problem from the offeringId.
+      // The `offeringId` structure can vary. In some cases, there is no unit code. There are also cases where
+      // there is no investigation number. For example, in demo mode if the unit is not specified, there will
+      // be no unit value. And in the case where the investigation is 0 (like with the Intro to CLUE
+      // investigation in the Introduction to CLUE unit) the investigation will be undefined. In those cases,
+      // we default to "sas" for the unit and "0" for the investigation.
+      let unitCode = "";
+      let investigation = "";
+      let problem = "";
+      const match = offeringId.match(/(.*?)(\d)(\d\d)$/);
+
+      if (match) {
+        [, unitCode, investigation, problem] = match;
+      } else {
+        investigation = "0";
+        problem = offeringId.match(/\d+/)?.[0] || "";
+      }
+
       if (!unitCode) unitCode = "sas";
       problem = stripLeadingZero(problem);
+
+      console.log({ unitCode, investigation, problem });
 
       unitFields = {
         problem,
@@ -96,6 +139,18 @@ async function processFile(file: string) {
 
     // TODO: download docs in batches instead of one at a time
     const documentSnapshots = await documentCollection.where("key", "==", documentId).select().get();
+
+    const strategies = [];
+    for (const _documentSnapshot of documentSnapshots.docs) {
+      // Get the document's comments from firestore
+      const commentsUrl = `${_documentSnapshot.ref.path}/comments`;
+      const commentCollection = admin.firestore().collection(commentsUrl);
+      const commentSnapshots = await commentCollection.get();
+      for (const _commentSnapshot of commentSnapshots.docs) {
+        processComment(_commentSnapshot, strategies);
+      }
+    }
+
     if (documentSnapshots.empty) {
       const metaData = {
         ...unitFields,
@@ -131,11 +186,13 @@ async function processFile(file: string) {
         // leave it as an empty object which is the most common case.
         properties: {},
 
+        strategies,
         // For now we just handle demo documents where the teachers are hardcoded.
         // To support Portal launches we'll either have to get the list of teachers from the offering
         // info, or refactor the code so this teacher list isn't needed here. See:
         // https://docs.google.com/document/d/1VDr-nkthu333eVD0BQXPYPVD8kt60qkMYq2jRkXza9c/edit#heading=h.pw87siu4ztwo
         teachers: ["1001", "1002", "1003"],
+        tileTypes,
         title: documentTitle || null,
         type: documentType,
         uid: userId
@@ -159,6 +216,8 @@ async function processFile(file: string) {
       documentSnapshots.forEach(doc => {
         doc.ref.update(unitFields as any);
         console.log(documentId, doc.id, "Updated metadata with", unitFields);
+        doc.ref.update({ strategies, tileTypes } as any);
+        console.log(documentId, doc.id, "Updated metadata with", { strategies, tileTypes });
         metadataUpdated++;
       });
     }
