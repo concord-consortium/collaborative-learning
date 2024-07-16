@@ -54,6 +54,8 @@ export const isVisibleEdge = (v: any): v is JXG.Line => {
   return v instanceof JXG.Line && (v.elType === "segment") && !!v.visProp.visible;
 };
 
+export const isCircle = (v: any): v is JXG.Circle => v instanceof JXG.Circle;
+
 export const isText = (v: any): v is JXG.Text => v instanceof JXG.Text;
 
 export const isVertexAngle = (v: any): v is JXG.Angle => {
