@@ -692,19 +692,21 @@ export const GeometryContentModel = GeometryBaseContentModel
       const result = syncChange(board, change);
       const point = isPoint(result) ? result : undefined;
 
-      if (point && self.activePolygonId && restoring) {
-        appendPhantomPointToPolygon(board, self.activePolygonId);
-      }
-      if (point && self.activeCircleId && restoring) {
-        // Set the phantom as active circle's tangent point
-        const activeCircle = self.getCircle(self.activeCircleId);
-        if (activeCircle) {
-          syncChange(board, {
-            operation: "create",
-            target: "circle",
-            parents: [activeCircle.centerPoint, self.phantomPoint.id],
-            properties: { id: self.activeCircleId, colorScheme: self.phantomPoint.colorScheme }
-          });
+      if (point && restoring) {
+        if (self.activePolygonId) {
+          appendPhantomPointToPolygon(board, self.activePolygonId);
+        }
+        if (self.activeCircleId) {
+          // Set the phantom as active circle's tangent point
+          const activeCircle = self.getCircle(self.activeCircleId);
+          if (activeCircle) {
+            syncChange(board, {
+              operation: "create",
+              target: "circle",
+              parents: [activeCircle.centerPoint, self.phantomPoint.id],
+              properties: { id: self.activeCircleId, colorScheme: self.phantomPoint.colorScheme }
+            });
+          }
         }
       }
       return point;

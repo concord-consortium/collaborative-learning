@@ -1647,7 +1647,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const isPointDraggable = !this.props.readOnly && !point.getAttribute("fixed");
 
       if (mode === "circle") {
-        // Either start a circle, or close the active circle using the clicked
+        // Either start a circle, or close the active circle using the clicked point
         this.applyChange(() => {
           let circle;
           if (geometryContent.activeCircleId) {
