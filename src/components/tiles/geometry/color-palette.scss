@@ -1,0 +1,109 @@
+@import "../../../clue/data-colors.scss";
+@import "../../vars";
+
+.color-palette {
+  width: 134px;
+  height: 68px;
+  border: $toolbar-border;
+  z-index: $toolbar-z-index;
+  background-color: $workspace-teal-light-9;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 0 auto;
+
+  .palette-buttons {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    .color-swatch {
+      width: 30px;
+      height: 28px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 4px;
+
+      svg {
+        position: absolute;
+        fill: transparent;
+      }
+
+      &.selected {
+        border: $toolbar-border;
+
+        svg {
+          fill: $workspace-teal;
+        }
+      }
+
+      &:hover {
+        border: 2px solid rgb($workspace-teal, .5);
+        svg {
+          fill: rgb($workspace-teal, .5);
+        }
+      }
+
+      &:active:not(.selected) {
+        border: $toolbar-border;
+
+        svg {
+          fill: $workspace-teal;
+        }
+      }
+
+      // how do i make a rule so that if any other sibling element is active, do something?
+
+
+
+      .color-icon {
+        width: 25px;
+        height: 23px;
+        border-radius: 3px;
+
+        &.blue {
+          border: 2px solid $data-blue;
+          background-color: rgb($data-blue, .2);
+        }
+
+        &.orange {
+          border: 2px solid $data-orange;
+          background-color: rgb($data-orange, .2);
+        }
+
+        &.green {
+          border: 2px solid $data-green;
+          background-color: rgb($data-green, .2);
+        }
+
+        &.red {
+          border: 2px solid $data-red;
+          background-color: rgb($data-red, .2);
+        }
+
+        &.yellow {
+          border: 2px solid $data-yellow;
+          background-color: rgb($data-yellow, .2);
+        }
+
+        &.purple {
+          border: 2px solid $data-purple;
+          background-color: rgb($data-purple, .2);
+        }
+
+        &.indigo {
+          border: 2px solid $data-indigo;
+          background-color: rgb($data-indigo, .2);
+        }
+
+        &.black {
+          border: 2px solid $data-black;
+          background-color: rgb($data-black, .2);
+        }
+
+      }
+    }
+  }
+}

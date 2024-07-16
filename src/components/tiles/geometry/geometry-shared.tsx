@@ -12,6 +12,8 @@ export interface IToolbarActionHandlers {
   handleZoomIn: () => void;
   handleZoomOut: () => void;
   handleFitAll: () => void;
+  handleSetShowColorPalette: (showColorPalette: boolean) => void;
+  handleColorChange: (color: number) => void;
 }
 export interface IActionHandlers extends IToolbarActionHandlers {
   handleArrows: HotKeyHandler;

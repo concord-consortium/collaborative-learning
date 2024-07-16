@@ -11,7 +11,7 @@ import { BaseComponent } from "../../base";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import {
-  GeometryContentModelType, IAxesParams, isGeometryContentReady, setElementColor
+  GeometryContentModelType, IAxesParams, isGeometryContentReady, setElementSelected
 } from "../../../models/tiles/geometry/geometry-content";
 import { convertModelObjectsToChanges } from "../../../models/tiles/geometry/geometry-migrate";
 import {
@@ -92,6 +92,7 @@ interface IState extends Mutable<SizeMeProps> {
   showPointLabelDialog?: boolean;
   showSegmentLabelDialog?: boolean;
   showInvalidTableDataAlert?: boolean;
+  showColorPalette?: boolean;
 }
 
 interface JXGPtrEvent {
@@ -199,7 +200,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleUploadImageFile: this.handleUploadBackgroundImage,
         handleZoomIn: this.handleZoomIn,
         handleZoomOut: this.handleZoomOut,
-        handleFitAll: this.handleScaleToFit
+        handleFitAll: this.handleScaleToFit,
+        handleSetShowColorPalette: this.handleSetShowColorPalette,
+        handleColorChange: this.handleColorChange
       };
       onSetActionHandlers(handlers);
     }
@@ -409,7 +412,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         const edges: JXG.Line[] = [];
         objs.forEach(obj => {
           if (change.type !== 'remove') {
-            setElementColor(_board, obj.id, change.newValue.value);
+            setElementSelected(_board, obj.id, change.newValue.value);
             // Also find segments that are attached to the changed points
             Object.values(obj.childElements).forEach(child => {
               if(isVisibleEdge(child) && !edges.includes(child)) {
@@ -421,7 +424,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         edges.forEach(edge => {
           // Edge is selected if both end points are.
           const selected = this.getContent().isSelected(edge.point1.id) && this.getContent().isSelected(edge.point2.id);
-          setElementColor(_board, edge.id, selected);
+          setElementSelected(_board, edge.id, selected);
         });
       }
     }));
@@ -1064,6 +1067,20 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   };
 
+  private handleSetShowColorPalette = (showColorPalette: boolean) => {
+    const content = this.getContent();
+    this.applyChange(() => content.setShowColorPalette(showColorPalette));
+  };
+
+  private handleColorChange = (color: number) => {
+    const { board } = this.state;
+    if (!board) return;
+
+    this.applyChange(() => {
+      this.getContent().setSelectedColor(color, board);
+    });
+  }
+
   private handleDelete = () => {
     const content = this.getContent();
     const { readOnly } = this.props;
@@ -1592,7 +1609,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     content.findObjects(board, (elt: JXG.GeometryElement) => isPoint(elt))
       .forEach(pt => {
         if (content.isSelected(pt.id)) {
-          setElementColor(board, pt.id, true);
+          setElementSelected(board, pt.id, true);
         }
       });
 

@@ -1,0 +1,73 @@
+@import "../../../clue/data-colors.scss";
+
+@mixin polygon-styling($color) {
+  &.polygon {
+    .polygon-icon-fill, .polygon-icon-lines, .polygon-icon-point-fill {
+      fill: $color;
+    }
+  }
+}
+
+@mixin point-styling($color) {
+  &.point {
+    .point-icon-fill {
+      fill: $color;
+    }
+  }
+}
+
+@mixin color-icon-styling($color) {
+  &.color {
+    .color-icon-fill, .color-icon-outline {
+      fill: $color;
+    }
+  }
+}
+
+.blue {
+  @include polygon-styling($data-blue);
+  @include point-styling($data-blue);
+  @include color-icon-styling($data-blue);
+}
+
+.orange {
+  @include polygon-styling($data-orange);
+  @include point-styling($data-orange);
+  @include color-icon-styling($data-orange);
+}
+
+.green {
+  @include polygon-styling($data-green);
+  @include point-styling($data-green);
+  @include color-icon-styling($data-green);
+}
+
+.red {
+  @include polygon-styling($data-red);
+  @include point-styling($data-red);
+  @include color-icon-styling($data-red);
+}
+
+.yellow {
+  @include polygon-styling($data-yellow);
+  @include point-styling($data-yellow);
+  @include color-icon-styling($data-yellow);
+}
+
+.purple {
+  @include polygon-styling($data-purple);
+  @include point-styling($data-purple);
+  @include color-icon-styling($data-purple);
+}
+
+.indigo {
+  @include polygon-styling($data-indigo);
+  @include point-styling($data-indigo);
+  @include color-icon-styling($data-indigo);
+}
+
+.black {
+  @include polygon-styling($data-black);
+  @include point-styling($data-black);
+  @include color-icon-styling($data-black);
+}

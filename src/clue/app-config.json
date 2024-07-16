@@ -292,6 +292,7 @@
           "polygon",
           "upload",
           "duplicate",
+          "color",
           "label",
           "comment",
           "|",

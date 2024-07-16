@@ -25,7 +25,7 @@ import {
   ELabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
 } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
-import { getAssociatedPolygon, getEdgeVisualProps, prepareToDeleteObjects } from "./jxg-polygon";
+import { getAssociatedPolygon, getEdgeVisualProps, getPolygonVisualProps, prepareToDeleteObjects } from "./jxg-polygon";
 import {
   isAxisArray, isBoard, isComment, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
@@ -41,6 +41,7 @@ import { appendVertexId, getPoint, filterBoardObjects, forEachBoardObject, getBo
   getPolygon, logGeometryEvent, removeClosingVertexId } from "./geometry-utils";
 import { getPointVisualProps } from "./jxg-point";
 import { getVertexAngle } from "./jxg-vertex-angle";
+import dataColors from "../../../clue/data-colors.scss";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -123,8 +124,9 @@ export const GeometryMetadataModel = TileMetadataModel
   }));
 export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 
-export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
+export function setElementSelected(board: JXG.Board, id: string, selected: boolean) {
   const element = getObjectById(board, id);
+  console.log("element", element);
   if (element) {
     let colorScheme = element.getAttribute("colorScheme")||0;
     if (isPoint(element)) {
@@ -132,9 +134,14 @@ export function setElementColor(board: JXG.Board, id: string, selected: boolean)
         element.getAttribute("clientLabelOption"));
       element.setAttribute(props);
     } else if (isVisibleEdge(element)) {
-      colorScheme = getAssociatedPolygon(element)?.getAttribute("colorScheme")||0;
-      const props = getEdgeVisualProps(selected, colorScheme, false);
-      element.setAttribute(props);
+      const associatedPolygon = getAssociatedPolygon(element);
+      colorScheme = associatedPolygon?.getAttribute("colorScheme")||0;
+
+      const edgeProps = getEdgeVisualProps(selected, colorScheme, false);
+      element.setAttribute(edgeProps);
+
+      const polyProps = getPolygonVisualProps(selected, colorScheme);
+      associatedPolygon?.setAttribute(polyProps);
     }
   }
 }
@@ -148,7 +155,9 @@ export const GeometryContentModel = GeometryBaseContentModel
   .volatile(self => ({
     metadata: undefined as any as GeometryMetadataModelType,
     // Used to force linkedDataSets() to update. Hope to remove in the future.
-    updateSharedModels: 0
+    updateSharedModels: 0,
+    showColorPalette: false,
+    selectedColor: 0,
   }))
   .actions(self => ({
     forceSharedModelUpdate() {
@@ -436,6 +445,9 @@ export const GeometryContentModel = GeometryBaseContentModel
       self.metadata.selection.forEach((value, id) => {
         self.deselectElement(board, id);
       });
+    },
+    setShowColorPalette(showOrHide: boolean) {
+      self.showColorPalette = showOrHide;
     }
   }))
   .extend(self => {
@@ -671,7 +683,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       const id = uniqueId();
       const props = {
         id,
-        colorScheme: self.newPointColorScheme,
+        colorScheme: self.selectedColor,
         isPhantom: true,
         clientLabelOption: ELabelOption.kNone,
         snapToGrid: true
@@ -974,7 +986,7 @@ export const GeometryContentModel = GeometryBaseContentModel
 
     function createPolygonIncludingPoint(board: JXG.Board, pointId: string) {
       if (!self.phantomPoint) return;
-      const colorScheme = self.getObjectColorScheme(pointId) || 0;
+      const colorScheme = self.getObjectColorScheme(pointId) || self.selectedColor;
       const polygonModel = PolygonModel.create({ points: [pointId], colorScheme });
       self.addObjectModel(polygonModel);
       self.activePolygonId = polygonModel.id;
@@ -1133,6 +1145,27 @@ export const GeometryContentModel = GeometryBaseContentModel
       };
       const elems = applyAndLogChange(board, change);
       return elems ? elems as JXG.GeometryElement[] : undefined;
+    }
+
+    function setSelectedColor (color: number, board: JXG.Board) {
+      self.selectedColor = color;
+      const selectedIds = self.getSelectedIds(board);
+      // need to refactor this to first check if point is part of polygon -- if so, update whole polygon once instead of iterating over selection
+      // but will also need to check if any other id's are not part of the same polygon - multiples might be selected
+      selectedIds.forEach(id => {
+        const obj = self.getObject(id);
+        if (isPolygonModel(obj) || isPointModel(obj)) {
+          obj.setColorScheme(color);
+          console.log("setColorScheme", color);
+          const change: JXGChange = {
+            operation: "update",
+            target: isPolygonModel(obj) ? "polygon" : "point",
+            targetID: id,
+            properties: { colorScheme: color }
+          };
+          applyAndLogChange(board, change);
+        }
+      });
     }
 
     function removeObjects(board: JXG.Board, ids: string | string[], links?: ILinkProperties) {
@@ -1526,6 +1559,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         applyBatchChanges,
         syncChange,
         addComment,
+        setSelectedColor,
 
         suspendSync() {
           ++suspendCount;

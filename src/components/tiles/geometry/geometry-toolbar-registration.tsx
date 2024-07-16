@@ -17,14 +17,19 @@ import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg
 import PointSvg from "../../../clue/assets/icons/geometry/point-icon.svg";
 import PolygonSvg from "../../../clue/assets/icons/geometry/polygon-icon.svg";
 import SelectSvg from "../../../clue/assets/icons/select-tool.svg";
+import ShapesColorIcon from "../../../clue/assets/icons/geometry/shapes-color-icon.svg";
 import ShapesDuplicateSvg from "../../../clue/assets/icons/geometry/shapes-duplicate-icon.svg";
 import AddDataSvg from "../../../assets/icons/add-data-graph-icon.svg";
 import ZoomInSvg from "../../../clue/assets/icons/zoom-in-icon.svg";
 import ZoomOutSvg from "../../../clue/assets/icons/zoom-out-icon.svg";
 import FitAllSvg from "../../../clue/assets/icons/fit-view-icon.svg";
+import { ColorPalette } from "./color-palette";
+import { clueDataColorInfo } from "../../../utilities/color-utils";
 
-function ModeButton({name, title, targetMode, Icon}:
-  { name: string, title: string, targetMode: GeometryTileMode, Icon: FunctionComponent<SVGProps<SVGSVGElement>> }) {
+import "./geometry-toolbar.scss";
+
+function ModeButton({name, title, targetMode, Icon, colorClass}:
+  { name: string, title: string, targetMode: GeometryTileMode, Icon: FunctionComponent<SVGProps<SVGSVGElement>>, colorClass?: string }) {
   const { board, content, mode, setMode } = useGeometryTileContext();
 
   function onClick() {
@@ -43,6 +48,7 @@ function ModeButton({name, title, targetMode, Icon}:
       title={title}
       selected={mode === targetMode}
       onClick={onClick}
+      colorClass={colorClass || ""}
     >
       <Icon />
     </TileToolbarButton>
@@ -54,11 +60,46 @@ const SelectButton = observer(function SelectButton({name}: IToolbarButtonCompon
 });
 
 const PointButton = observer(function PointButton({name}: IToolbarButtonComponentProps) {
-  return(<ModeButton name={name} title="Point" targetMode="points" Icon={PointSvg} />);
+  const { content } = useGeometryTileContext();
+  const colorClass = clueDataColorInfo[content?.selectedColor || 0].name;
+  return(<ModeButton name={name} title="Point" targetMode="points" Icon={PointSvg} colorClass={colorClass} />);
 });
 
 const PolygonButton = observer(function PolygonButton({name}: IToolbarButtonComponentProps) {
-  return(<ModeButton name={name} title="Polygon" targetMode="polygon" Icon={PolygonSvg} />);
+  const { content } = useGeometryTileContext();
+  const colorClass = clueDataColorInfo[content?.selectedColor || 0].name;
+  return(<ModeButton name={name} title="Polygon" targetMode="polygon" Icon={PolygonSvg} colorClass={colorClass}/>);
+});
+
+const ColorChangeButton = observer(function ColorChangeButton({name}: IToolbarButtonComponentProps) {
+  const { content, handlers } = useGeometryTileContext();
+
+  const handleClick = () => {
+    if (content?.showColorPalette) {
+      handlers?.handleSetShowColorPalette(false);
+    } else {
+      handlers?.handleSetShowColorPalette(true);
+    }
+  }
+
+  return (
+    <TileToolbarButton
+      name={name}
+      title="Color"
+      onClick={handleClick}
+      colorClass={content?.selectedColor ? clueDataColorInfo[content.selectedColor].name : undefined}
+    >
+      <ShapesColorIcon/>
+      {content?.showColorPalette &&
+        <div>
+         <ColorPalette
+          selectedColor={content?.selectedColor}
+          onSelectColor={(color) => handlers?.handleColorChange(color)}
+         />
+        </div>
+      }
+    </TileToolbarButton>
+  );
 });
 
 const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButtonComponentProps) {
@@ -256,6 +297,10 @@ registerTileToolbarButtons("geometry",
     {
       name: "polygon",
       component: PolygonButton
+    },
+    {
+      name: "color",
+      component: ColorChangeButton
     },
     {
       name: "duplicate",

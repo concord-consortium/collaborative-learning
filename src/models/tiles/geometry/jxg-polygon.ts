@@ -36,7 +36,7 @@ const phantomPolygonEdgeProps = Object.freeze({
   highlightStrokeOpacity: 0
 });
 
-function getPolygonVisualProps(selected: boolean, colorScheme: number) {
+export function getPolygonVisualProps(selected: boolean, colorScheme: number) {
   const props: PolygonAttributes = { ...defaultPolygonProps };
   if (selected) {
     merge(props, selectedPolygonProps);
@@ -349,6 +349,7 @@ export const polygonChangeAgent: JXGChangeAgent = {
       updateSegmentLabelOption(board, change);
       return;
     }
+    console.log("change.parents", change.parents);
     // An update with an array of parents is considered to be a request to update the list of vertices.
     if ((change.target === "polygon")
       && change.targetID && !Array.isArray(change.targetID)
