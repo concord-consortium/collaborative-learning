@@ -560,6 +560,8 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.toolbarButtonIsNotSelected('graph', 'move-points');
       clueCanvas.toolbarButtonIsDisabled('graph', 'add-points');
       clueCanvas.toolbarButtonIsNotSelected('graph', 'add-points');
+      xyTile.getEditableAxisBox("left", "max").click().type("100{enter}");
+      xyTile.getEditableAxisBox("bottom", "max").click().type("100{enter}");
 
       // Create manual layer
       clueCanvas.clickToolbarButton('graph', 'add-points-by-hand');
@@ -571,6 +573,10 @@ context('XYPlot Tool Tile', function () {
       xyTile.getYAttributesLabel().should('have.length', 1).should('contain.text', 'Y Variable 1');
       xyTile.getLayerName().should('have.length', 1).should('contain.text', 'Added by hand');
       xyTile.getLayerNameInput().should('not.be.visible');
+
+      // Custom axis bounds should not have been changed
+      xyTile.getEditableAxisBox("left", "max").should('contain.text', '100');
+      xyTile.getEditableAxisBox("bottom", "max").should('contain.text', '100');
 
       // Rename manual layer
       xyTile.getLayerNameEditButton().click();
