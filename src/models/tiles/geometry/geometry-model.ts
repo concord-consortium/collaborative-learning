@@ -206,6 +206,31 @@ export const PointMetadataModel = types.model("PointMetadata", {
 
 export interface PointMetadataModelType extends Instance<typeof PointMetadataModel> {}
 
+/**
+ * Circles are defined by a center point and a point that is somewhere on the circumference.
+ * These are actual points which can be labeled, so the circle itself does not get a label.
+ */
+export const CircleModel = GeometryObjectModel
+.named("CircleModel")
+.props({
+  type: typeField("circle"),
+  centerPoint: types.string,
+  tangentPoint: types.maybe(types.string),
+  colorScheme: 0
+})
+.views(self => ({
+  get dependencies(): string[] {
+    if (self.tangentPoint) {
+      return [self.centerPoint, self.tangentPoint];
+    }
+    return [self.centerPoint];
+  }
+}));
+
+export interface CircleModelType extends Instance<typeof CircleModel> {}
+
+export const isCircleModel = (o?: GeometryObjectModelType): o is CircleModelType => o?.type === "circle";
+
 // PolygonSegments are edges of polygons.
 // Usually we don't need to know anything about them since they are defined by
 // the polygon and its vertices. However, if they are labeled we store that
@@ -253,6 +278,10 @@ export const PolygonModel = GeometryObjectModel
   .props({
     type: typeField("polygon"),
     points: types.array(types.string),
+    labelOption: types.optional(
+      types.enumeration<ELabelOption>("LabelOption", Object.values(ELabelOption)),
+      ELabelOption.kNone),
+    name: types.maybe(types.string),
     labels: types.maybe(types.array(PolygonSegmentLabelModel)),
     colorScheme: 0
   })
@@ -376,8 +405,8 @@ export const ImageModel = PositionedObjectModel
 export interface ImageModelType extends Instance<typeof ImageModel> {}
 export const isImageModel = (o: GeometryObjectModelType): o is ImageModelType => o.type === "image";
 
-export type GeometryObjectModelUnion = CommentModelType | ImageModelType | MovableLineModelType | PointModelType |
-                                        PolygonModelType | VertexAngleModelType;
+export type GeometryObjectModelUnion = CircleModelType | CommentModelType | ImageModelType | MovableLineModelType |
+                                       PointModelType | PolygonModelType | VertexAngleModelType;
 
 // Define the shape of the geometry content without the views/actions, etc. to avoid circular references
 export const GeometryBaseContentModel = TileContentModel
@@ -386,7 +415,8 @@ export const GeometryBaseContentModel = TileContentModel
     type: types.optional(types.literal(kGeometryTileType), kGeometryTileType),
     board: types.maybe(BoardModel),
     bgImage: types.maybe(ImageModel),
-    objects: types.map(types.union(CommentModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel)),
+    objects: types.map(types.union(
+      CircleModel, CommentModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel)),
     pointMetadata: types.map(PointMetadataModel),
     // Maps attribute ID to color.
     linkedAttributeColors: types.map(types.number),
@@ -397,7 +427,9 @@ export const GeometryBaseContentModel = TileContentModel
     // This is the point that tracks the mouse pointer when you're in a shape-creation mode.
     phantomPoint: undefined as PointModelType|undefined,
     // In polygon mode, the phantom point is considered to be part of an in-progress polygon.
-    activePolygonId: undefined as string|undefined
+    activePolygonId: undefined as string|undefined,
+    // In circle mode, the phantom point is used to construct a cirlce
+    activeCircleId: undefined as string|undefined
   }))
   .preProcessSnapshot(snapshot => {
     // fix null table links ¯\_(ツ)_/¯

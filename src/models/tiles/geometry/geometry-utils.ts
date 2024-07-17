@@ -1,7 +1,7 @@
 import { values } from "lodash";
 import { Instance, SnapshotOut } from "mobx-state-tree";
 import { getAssociatedPolygon } from "./jxg-polygon";
-import { isGeometryElement, isPoint, isPolygon } from "./jxg-types";
+import { isCircle, isGeometryElement, isPoint, isPolygon } from "./jxg-types";
 import { JXGObjectType } from "./jxg-changes";
 import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { LogEventName } from "../../../lib/logger-types";
@@ -62,6 +62,11 @@ export function getPoint(board: JXG.Board, id: string): JXG.Point|undefined {
 export function getPolygon(board: JXG.Board, id: string): JXG.Polygon|undefined {
   const obj = board.objects[id];
   return isPolygon(obj) ? obj : undefined;
+}
+
+export function getCircle(board: JXG.Board, id: string): JXG.Circle|undefined {
+  const obj = board.objects[id];
+  return isCircle(obj) ? obj : undefined;
 }
 
 /**

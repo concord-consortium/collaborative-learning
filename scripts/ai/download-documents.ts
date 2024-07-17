@@ -10,15 +10,12 @@
 
 import fs from "fs";
 import admin from "firebase-admin";
-import {google} from "googleapis";
 import stringify from "json-stringify-pretty-compact";
-import fetch from 'node-fetch';
 
-import { datasetPath, networkFileName } from "./script-constants";
-import { getFirebaseBasePath, prettyDuration } from "./script-utils";
+import { datasetPath, networkFileName } from "./script-constants.js";
+import { getFirebaseBasePath, prettyDuration } from "../lib/script-utils.js";
 
-// Load the service account key JSON file.
-import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
+import { getClassKeys } from "../lib/firebase-classes.js";
 
 // The portal to get documents from. For example, "learn.concord.org".
 const portal = "learn.concord.org";
@@ -37,61 +34,14 @@ let undefinedDocuments = 0;
 let failedDocuments = 0;
 let emptyDocuments = 0;
 
-// Define the required scopes.
-const scopes = [
-  "https://www.googleapis.com/auth/userinfo.email",
-  "https://www.googleapis.com/auth/firebase.database"
-];
-
-console.log("Creating Google JWT Client");
-
-// Authenticate a JWT client with the service account.
-const jwtClient = new google.auth.JWT(
-  serviceAccount.client_email,
-  undefined,
-  serviceAccount.private_key,
-  scopes
-);
-
-console.log("Generating an access token");
-
-// Use the JWT client to generate an access token.
-// this is using a toplevel await which might be a problem
-const accessToken = await new Promise<string|undefined>((resolve, reject) => {
-  jwtClient.authorize(function(error, tokens) {
-    if (error || !tokens) {
-      console.log("Error making request to generate access token:", error);
-      reject();
-    } else if (tokens.access_token === null) {
-      console.log("Provided service account does not have permission to generate access tokens");
-      reject();
-    } else {
-      resolve(tokens.access_token);
-    }
-  });
-});
-
-const accessTime = Date.now();
-
 const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
 const firebaseBasePath = getFirebaseBasePath(portal, demo);
-const fetchURL = `${databaseURL}${firebaseBasePath}.json?shallow=true`;
-console.log(`Fetching URL: ${fetchURL}`);
 
-const response = await fetch(fetchURL,
-  {
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  }
-);
-const classKeys  = await response.json() as Record<string, boolean>;
-
-const fetchTime = Date.now();
+const {classKeys, accessTime, fetchTime} = await getClassKeys(firebaseBasePath);
 
 // Fetch the service account key JSON file contents; must be in same folder as script
-const credential = admin.credential.cert('./serviceAccountKey.json');
+const credential = admin.credential.cert('../serviceAccountKey.json');
 // Initialize the app with a service account, granting admin privileges
 admin.initializeApp({
   credential,

@@ -12,7 +12,7 @@ import { ELabelOption, JXGChange, JXGCoordPair } from "./jxg-changes";
 import { isPointInPolygon, getPointsForVertexAngle, getPolygonEdge } from "./jxg-polygon";
 import { canSupportVertexAngle, getVertexAngle, updateVertexAnglesFromObjects } from "./jxg-vertex-angle";
 import {
-  isBoard, isComment, isFreePoint, isImage, isLine, isMovableLine, isPoint, isPolygon,
+  isBoard, isCircle, isComment, isFreePoint, isImage, isLine, isMovableLine, isPoint, isPolygon,
   isText, kGeometryDefaultPixelsPerUnit, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin
 } from "./jxg-types";
 import { TileModel, ITileModel } from "../tile-model";
@@ -111,7 +111,7 @@ function buildPolygon(board: JXG.Board, content: GeometryContentModelType,
   const points: JXG.Point[] = [];
   content.addPhantomPoint(board, [0, 0]);
   coordinates.forEach(pair => {
-    const { point } = content.realizePhantomPoint(board, pair, true);
+    const { point } = content.realizePhantomPoint(board, pair, "polygon");
     if (point) points.push(point);
   });
   const polygon = content.closeActivePolygon(board, points[finalVertexClicked]);
@@ -366,7 +366,8 @@ describe("GeometryContent", () => {
     const { content, board } = createContentAndBoard();
     const { polygon, points } = buildPolygon(board, content, [[1, 1], [3, 3], [5, 1]]);
     expect(content.lastObjectOfType("polygon")).toEqual({
-      id: polygon?.id, type: "polygon", points: [ points[0].id, points[1].id, points[2].id ], colorScheme: 0 });
+      id: polygon?.id, type: "polygon", points: [ points[0].id, points[1].id, points[2].id ],
+      colorScheme: 0, labelOption: "none" });
     expect(isPolygon(polygon)).toBe(true);
     const polygonId = polygon?.id;
     expect(content.getDependents([points[0].id])).toEqual([points[0].id, polygonId]);
@@ -424,7 +425,7 @@ describe("GeometryContent", () => {
     expect((content.getObject("va2") as VertexAngleModelType).points).toEqual(["p1", "p2", p4.id]);
     expect((content.getObject("va3") as VertexAngleModelType).points).toEqual([p4.id, "p3", "p1"]);
 
-    content.realizePhantomPoint(board, [1, 1], true);
+    content.realizePhantomPoint(board, [1, 1], "polygon");
     const p6 = content.phantomPoint!;
     expect(poly.points).toEqual(["p3", "p1", "p2", p4.id]);
     expect(getPolygon(board, polygonId)!.vertices.map(v=>v.id)).toEqual(["p3", "p1", "p2", p4.id, p6.id, "p3"]);
@@ -452,7 +453,8 @@ describe("GeometryContent", () => {
     const { content, board } = createContentAndBoard();
     const { polygon, points } = buildPolygon(board, content, [[1, 1], [3, 3], [7, 4], [5, 1]], 1);
     expect(content.lastObjectOfType("polygon")).toEqual({
-      id: polygon?.id, type: "polygon", points: [ points[1].id, points[2].id, points[3].id ], colorScheme: 0 });
+      id: polygon?.id, type: "polygon", points: [ points[1].id, points[2].id, points[3].id ],
+      colorScheme: 0, labelOption: "none" });
     expect(isPolygon(polygon)).toBe(true);
     const polygonId = polygon?.id;
     // point 0 should have been freed
@@ -503,8 +505,8 @@ describe("GeometryContent", () => {
     // first polygon
     const { polygon, points } = buildPolygon(board, content, [[0, 0], [1, 1], [2, 2]]); // points 0, 1, 2
     // second polygon
-    points.push(content.realizePhantomPoint(board, [5, 5], true).point!); // point 3
-    points.push(content.realizePhantomPoint(board, [4, 4], true).point!); // point 4
+    points.push(content.realizePhantomPoint(board, [5, 5], "polygon").point!); // point 3
+    points.push(content.realizePhantomPoint(board, [4, 4], "polygon").point!); // point 4
     content.addPointToActivePolygon(board, points[2].id);
     const polygon2 = content.closeActivePolygon(board, points[3])!;
     expect(polygon?.vertices.map(v => v.id)).toEqual([points[0].id, points[1].id, points[2].id, points[0].id]);
@@ -521,14 +523,16 @@ describe("GeometryContent", () => {
     const { polygon, points } = buildPolygon(board, content, [[1, 1], [3, 3], [7, 4]], 0);
     expect(polygon?.vertices.map(v => v.id)).toEqual([points[0].id, points[1].id, points[2].id, points[0].id]);
     expect(content.lastObjectOfType("polygon")).toEqual({
-      id: polygon?.id, type: "polygon", points: [ points[0].id, points[1].id, points[2].id ], colorScheme: 0 });
+      id: polygon?.id, type: "polygon", points: [ points[0].id, points[1].id, points[2].id ],
+      colorScheme: 0, labelOption: "none" });
 
     // Let's add some points between point[1] and points[2].
     let newPoly = content.makePolygonActive(board, polygon.id, points[1].id);
     expect(newPoly?.vertices.map(v => v.id)).toEqual(
       [points[2].id, points[0].id, points[1].id, content.phantomPoint?.id, points[2].id]);
     expect(content.lastObjectOfType("polygon")).toEqual({
-      id: polygon?.id, type: "polygon", points: [ points[2].id, points[0].id, points[1].id ], colorScheme: 0 });
+      id: polygon?.id, type: "polygon", points: [ points[2].id, points[0].id, points[1].id ],
+      colorScheme: 0, labelOption: "none" });
 
     // Add existing point
     newPoly = content.addPointToActivePolygon(board, "extra1");
@@ -536,27 +540,28 @@ describe("GeometryContent", () => {
       [points[2].id, points[0].id, points[1].id, "extra1", content.phantomPoint?.id, points[2].id]);
     expect(content.lastObjectOfType("polygon")).toEqual({
       id: polygon?.id, type: "polygon",
-      points: [ points[2].id, points[0].id, points[1].id, "extra1" ], colorScheme: 0 });
+      points: [ points[2].id, points[0].id, points[1].id, "extra1" ], colorScheme: 0, labelOption: "none" });
 
     // Add new point
-    const result = content.realizePhantomPoint(board, [10, 10], true);
+    const result = content.realizePhantomPoint(board, [10, 10], "polygon");
     newPoly = result.polygon;
     const newPoint = result.point;
     expect(newPoly?.vertices.map(v => v.id)).toEqual(
       [points[2].id, points[0].id, points[1].id, "extra1", newPoint?.id, content.phantomPoint?.id, points[2].id]);
     expect(content.lastObjectOfType("polygon")).toEqual({
       id: polygon?.id, type: "polygon",
-      points: [ points[2].id, points[0].id, points[1].id, "extra1", newPoint?.id ], colorScheme: 0 });
+      points: [ points[2].id, points[0].id, points[1].id, "extra1", newPoint?.id ],
+      colorScheme: 0, labelOption: "none" });
 
     newPoly = content.closeActivePolygon(board, points[2]);
     expect(newPoly?.vertices.map(v => v.id)).toEqual(
       [points[2].id, points[0].id, points[1].id, "extra1", newPoint?.id, points[2].id]);
     expect(content.lastObjectOfType("polygon")).toEqual({
       id: polygon?.id, type: "polygon",
-      points: [ points[2].id, points[0].id, points[1].id, "extra1", newPoint?.id ], colorScheme: 0 });
+      points: [ points[2].id, points[0].id, points[1].id, "extra1", newPoint?.id ],
+      colorScheme: 0, labelOption: "none" });
 
     destroyContentAndBoard(content, board);
-
   });
 
   it("can add/remove/update polygons from model", () => {
@@ -673,6 +678,7 @@ describe("GeometryContent", () => {
       type: "polygon",
       points: ["p1", "p2", "p3"],
       colorScheme: 0,
+      labelOption: "none",
       labels: [{ id: segmentIdFromPointIds(["p1", "p2"]), option: ELabelOption.kLabel, name: "seg1" }]
     });
     content.updatePolygonSegmentLabel(board, polygon, [p2, p3], ELabelOption.kLength, "seg2");
@@ -681,6 +687,7 @@ describe("GeometryContent", () => {
       type: "polygon",
       points: ["p1", "p2", "p3"],
       colorScheme: 0,
+      labelOption: "none",
       labels: [{ id: segmentIdFromPointIds(["p1", "p2"]), option: ELabelOption.kLabel, name: "seg1" },
                { id: segmentIdFromPointIds(["p2", "p3"]), option: ELabelOption.kLength, name: "seg2" }]
     });
@@ -689,6 +696,7 @@ describe("GeometryContent", () => {
       id: polygonId,
       type: "polygon",
       colorScheme: 0,
+      labelOption: "none",
       points: ["p1", "p2", "p3"],
       labels: [{ id: segmentIdFromPointIds(["p2", "p3"]), option: ELabelOption.kLength, name: "seg2" }]
     });
@@ -696,6 +704,51 @@ describe("GeometryContent", () => {
     content.removeObjects(board, polygonId);
     expect(board.objects[polygonId]).toBeUndefined();
 
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can add and remove a circle", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    const { point: point1 } = content.realizePhantomPoint(board, [0, 0], "circle");
+    const { point: point2, circle } = content.realizePhantomPoint(board, [1, 0], "circle");
+    expect(isPoint(point1)).toBeTruthy();
+    expect(isPoint(point2)).toBeTruthy();
+    expect(isCircle(circle)).toBeTruthy();
+    expect(board.objectsList.filter(o => isCircle(o)).length).toBe(1);
+    expect(content.getDependents([point1!.id])).toEqual([point1!.id, circle!.id]);
+    expect(content.getDependents([point2!.id])).toEqual([point2!.id, circle!.id]);
+    expect(content.getDependents([circle!.id])).toEqual([circle!.id]);
+    expect(content.lastObjectOfType("circle")).toEqual({
+      id: circle?.id,
+      type: "circle",
+      centerPoint: point1?.id,
+      tangentPoint: point2?.id,
+      colorScheme: 0 });
+
+    // Removing point should remove circle
+    content.removeObjects(board, [point1!.id]);
+    expect(board.objectsList.filter(o => isCircle(o)).length).toBe(0);
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can add a circle from existing points", () => {
+    const { content, board } = createContentAndBoard();
+    content.addPhantomPoint(board, [0, 0]);
+    const { point: point1 } = content.realizePhantomPoint(board, [1, 1], "points");
+    const { point: point2 } = content.realizePhantomPoint(board, [2, 2], "points");
+    expect(board.objectsList.filter(o => isCircle(o)).length).toBe(0);
+    content.createCircleIncludingPoint(board, point1!.id);
+    const circle = content.closeActiveCircle(board, point2!);
+    expect(isCircle(circle)).toBeTruthy();
+    expect(circle?.center.X()).toBe(1);
+    expect(circle?.center.Y()).toBe(1);
+    expect(board.objectsList.filter(o => isCircle(o)).length).toBe(1);
+    content.removeObjects(board, [circle!.id]);
+    expect(board.objectsList.filter(o => isCircle(o)).length).toBe(0);
+    // points should remain when circle removed
+    expect(isPoint(board.objects[point1!.id])).toBeTruthy();
+    expect(isPoint(board.objects[point2!.id])).toBeTruthy();
     destroyContentAndBoard(content, board);
   });
 
@@ -753,7 +806,9 @@ describe("GeometryContent", () => {
     const { points, polygon } = buildPolygon(board, content, [[0, 0], [1, 1], [1, 0]]);
     const [p1, p2, p3] = points;
     expect(content.lastObjectOfType("polygon")).toEqual(
-      { id: polygon?.id, type: "polygon", colorScheme: 0, points: [p1!.id, p2!.id, p3!.id] });
+      { id: polygon?.id, type: "polygon", colorScheme: 0, points: [p1!.id, p2!.id, p3!.id],
+        labelOption: "none"
+       });
     content.selectObjects(board, p1!.id);
     expect(content.isSelected(p1!.id)).toBe(true);
     expect(content.isSelected(p2!.id)).toBe(false);
@@ -781,7 +836,9 @@ describe("GeometryContent", () => {
     const { points, polygon } = buildPolygon(board, content, [[0, 0], [1, 0], [0, 1]]);
     const [p0, px, py] = points;
     expect(content.lastObjectOfType("polygon")).toEqual(
-      { id: polygon?.id, type: "polygon", colorScheme: 0, points: [p0!.id, px!.id, py!.id] });
+      { id: polygon?.id, type: "polygon", colorScheme: 0, points: [p0!.id, px!.id, py!.id],
+        labelOption: "none"
+       });
     const pSolo: JXG.Point = content.addPoint(board, [9, 9])!;
     expect(canSupportVertexAngle(p0)).toBe(true);
     expect(canSupportVertexAngle(pSolo)).toBe(false);
@@ -809,7 +866,7 @@ describe("GeometryContent", () => {
     expect(content.getObject(p0!.id)).toBeUndefined();
     // first point can be removed from polygon without deleting polygon
     expect(content.getObject(polygon!.id)).toEqual(
-      { id: polygon?.id, type: "polygon", colorScheme: 0, points: [px!.id, py!.id] });
+      { id: polygon?.id, type: "polygon", colorScheme: 0, points: [px!.id, py!.id], labelOption: "none" });
     // vertex angles are deleted when any dependent point is deleted
     expect(content.getObject(va0!.id)).toBeUndefined();
     expect(content.getObject(vax!.id)).toBeUndefined();
@@ -859,7 +916,9 @@ describe("GeometryContent", () => {
     expect(content.getObject(p0!.id)).toBeUndefined();
     // first point can be removed from polygon without deleting polygon
     expect(content.getObject(poly!.id)).toEqual(
-      { id: poly?.id, type: "polygon", colorScheme: 0, points: [px!.id, py!.id] });
+      { id: poly?.id, type: "polygon", colorScheme: 0, points: [px!.id, py!.id],
+        labelOption: "none"
+       });
     // vertex angles are deleted when any dependent point is deleted
     expect(content.getObject(vAngle0Id)).toBeUndefined();
     expect(content.getObject(vAngleXId)).toBeUndefined();
@@ -1136,7 +1195,13 @@ toMatchInlineSnapshot(`
   \\"board\\": {\\"xAxis\\": {\\"name\\": \\"x\\", \\"label\\": \\"x\\", \\"min\\": -2, \\"unit\\": 18.3, \\"range\\": 26.229508196721312}, \\"yAxis\\": {\\"name\\": \\"y\\", \\"label\\": \\"y\\", \\"min\\": -1, \\"unit\\": 18.3, \\"range\\": 17.486338797814206}},
   \\"objects\\": {
     \\"testid\\": {\\"type\\": \\"point\\", \\"id\\": \\"testid\\", \\"x\\": 0, \\"y\\": 0, \\"snapToGrid\\": true, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
-    \\"jxgid\\": {\\"type\\": \\"polygon\\", \\"id\\": \\"jxgid\\", \\"points\\": [\\"testid\\", \\"testid\\", \\"testid\\"], \\"colorScheme\\": 0},
+    \\"jxgid\\": {
+      \\"type\\": \\"polygon\\",
+      \\"id\\": \\"jxgid\\",
+      \\"points\\": [\\"testid\\", \\"testid\\", \\"testid\\"],
+      \\"labelOption\\": \\"none\\",
+      \\"colorScheme\\": 0
+    },
     \\"testid\\": {\\"type\\": \\"point\\", \\"id\\": \\"testid\\", \\"x\\": 1, \\"y\\": 0, \\"snapToGrid\\": true, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
     \\"testid\\": {\\"type\\": \\"point\\", \\"id\\": \\"testid\\", \\"x\\": 0, \\"y\\": 1, \\"snapToGrid\\": true, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
     \\"testid\\": {\\"type\\": \\"vertexAngle\\", \\"id\\": \\"testid\\", \\"points\\": [\\"testid\\", \\"testid\\", \\"testid\\"]}

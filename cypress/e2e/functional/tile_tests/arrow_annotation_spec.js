@@ -248,10 +248,10 @@ context('Arrow Annotations (Sparrows)', function () {
 
     aa.clickArrowToolbarButton(); // sparrow mode off
     geometryToolTile.getGeometryTile().click(); // select tile
-    geometryToolTile.addPointToGraph(10, 5);
-    geometryToolTile.addPointToGraph(15, 10);
-    geometryToolTile.addPointToGraph(20, 5);
-    geometryToolTile.addPointToGraph(10, 5); // close polygon
+    geometryToolTile.clickGraphPosition(10, 5);
+    geometryToolTile.clickGraphPosition(15, 10);
+    geometryToolTile.clickGraphPosition(20, 5);
+    geometryToolTile.clickGraphPosition(10, 5); // close polygon
 
     aa.clickArrowToolbarButton(); // sparrow mode on
     // 3 points + 3 segments + 1 polygon = 7

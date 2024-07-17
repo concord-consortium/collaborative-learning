@@ -238,6 +238,28 @@ export function prepareToDeleteObjects(board: JXG.Board, ids: string[]): string[
   return [...pointsToDelete, ...Object.keys(polygonsToDelete), ...Object.keys(anglesToDelete)];
 }
 
+function setPropertiesForPolygonLabelOption(polygon: JXG.Polygon) {
+  const labelOption = polygon.getAttribute("clientLabelOption") || ELabelOption.kNone;
+  switch (labelOption) {
+    case ELabelOption.kLength:
+      polygon.setAttribute({
+        withLabel: true,
+        name() { return polygon.Area().toFixed(2); }
+      });
+      break;
+    case ELabelOption.kLabel:
+      polygon.setAttribute({
+        withLabel: true,
+        name: polygon.getAttribute("clientName")
+      });
+      break;
+    default:
+      polygon.setAttribute({
+        withLabel: false
+      });
+  }
+}
+
 function segmentNameLabelFn(line: JXG.Line) {
   let p1Name = line.point1.getName();
   if (typeof p1Name === "function") {
@@ -325,12 +347,12 @@ export const polygonChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     const _board = board as JXG.Board;
     const parents = (change.parents || [])
-                      .map(id => getObjectById(_board, id as string))
-                      .filter(notEmpty);
-    const colorScheme = !Array.isArray(change.properties) && change.properties?.colorScheme;
+      .map(id => getObjectById(_board, id as string))
+      .filter(notEmpty);
     if (change.parents?.length !== parents.length) {
       console.warn("Some points were missing when creating polygon");
     }
+    const colorScheme = !Array.isArray(change.properties) && change.properties?.colorScheme;
     const props = {
       id: uniqueId(),
       ...getPolygonVisualProps(false, colorScheme||0),
@@ -338,15 +360,29 @@ export const polygonChangeAgent: JXGChangeAgent = {
     };
     const poly = parents.length ? _board.create("polygon", parents, props) as JXG.Polygon : undefined;
     if (poly) {
+      setPropertiesForPolygonLabelOption(poly);
       setPolygonEdgeColors(poly);
     }
     return poly;
   },
 
   update: (board, change) => {
+    // Parents and a labelOption means we're updating a segment label
     if ((change.target === "polygon") && change.parents &&
         !Array.isArray(change.properties) && change.properties?.labelOption) {
       updateSegmentLabelOption(board, change);
+      return;
+    }
+    // labelOption without parents is updating the polygon's label
+    if (change.target === "polygon" &&
+        change.targetID && !Array.isArray(change.targetID) &&
+        !Array.isArray(change.properties) && change.properties?.labelOption) {
+      const polygon = getPolygon(board, change.targetID);
+      if (isPolygon(polygon)) {
+        polygon._set("clientLabelOption", change.properties.labelOption);
+        polygon._set("clientName", change.properties.clientName);
+        setPropertiesForPolygonLabelOption(polygon);
+      }
       return;
     }
     // An update with an array of parents is considered to be a request to update the list of vertices.

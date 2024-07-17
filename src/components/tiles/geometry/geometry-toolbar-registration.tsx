@@ -16,6 +16,7 @@ import LabelSvg from "../../../clue/assets/icons/shapes-label-value-icon.svg";
 import MovableLineSvg from "../../../clue/assets/icons/geometry/movable-line.svg";
 import PointSvg from "../../../clue/assets/icons/geometry/point-icon.svg";
 import PolygonSvg from "../../../clue/assets/icons/geometry/polygon-icon.svg";
+import CircleSvg from "../../../clue/assets/icons/geometry/circle-icon.svg";
 import SelectSvg from "../../../clue/assets/icons/select-tool.svg";
 import ShapesColorIcon from "../../../clue/assets/icons/geometry/shapes-color-icon.svg";
 import ShapesDuplicateSvg from "../../../clue/assets/icons/geometry/shapes-duplicate-icon.svg";
@@ -102,6 +103,10 @@ const ColorChangeButton = observer(function ColorChangeButton({name}: IToolbarBu
   );
 });
 
+const CircleButton = observer(function CircleButton({name}: IToolbarButtonComponentProps) {
+  return(<ModeButton name={name} title="Circle" targetMode="circle" Icon={CircleSvg} />);
+});
+
 const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButtonComponentProps) {
   const { content, board, handlers } = useGeometryTileContext();
   const disableDuplicate = !content || !board || !content.hasDeletableSelection(board);
@@ -122,20 +127,22 @@ const LabelButton = observer(function LabelButton({name}: IToolbarButtonComponen
   const { content, board, handlers } = useGeometryTileContext();
   const selectedPoint = board && content?.getOneSelectedPoint(board);
   const selectedSegment = board && content?.getOneSelectedSegment(board);
+  const selectedPolygon = board && content?.getOneSelectedPolygon(board);
 
   const pointHasLabel = selectedPoint && selectedPoint.hasLabel;
   const segmentHasLabel = selectedSegment && selectedSegment.hasLabel;
+  const polygonHasLabel = selectedPolygon && selectedPolygon.hasLabel;
 
   function handleClick() {
-    handlers?.handleLabelDialog(selectedPoint, selectedSegment);
+    handlers?.handleLabelDialog(selectedPoint, selectedSegment, selectedPolygon);
   }
 
   return (
     <TileToolbarButton
       name={name}
       title="Label/Value"
-      disabled={!selectedPoint && !selectedSegment}
-      selected={pointHasLabel || segmentHasLabel}
+      disabled={!selectedPoint && !selectedSegment && !selectedPolygon}
+      selected={pointHasLabel || segmentHasLabel || polygonHasLabel}
       onClick={handleClick}
     >
       <LabelSvg/>
@@ -301,6 +308,10 @@ registerTileToolbarButtons("geometry",
     {
       name: "color",
       component: ColorChangeButton
+    },
+    {
+      name: "circle",
+      component: CircleButton
     },
     {
       name: "duplicate",

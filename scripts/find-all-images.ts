@@ -6,45 +6,7 @@
 // $ node --loader ts-node/esm load-docs-example.ts
 
 import admin from "firebase-admin";
-import {google} from "googleapis";
-import fetch from 'node-fetch';
-
-// Load the service account key JSON file.
-import serviceAccount from "./serviceAccountKey.json" assert { type: "json" };
-
-// Define the required scopes.
-const scopes = [
-  "https://www.googleapis.com/auth/userinfo.email",
-  "https://www.googleapis.com/auth/firebase.database"
-];
-
-console.log("Creating Google JWT Client");
-
-// Authenticate a JWT client with the service account.
-const jwtClient = new google.auth.JWT(
-  serviceAccount.client_email,
-  undefined,
-  serviceAccount.private_key,
-  scopes
-);
-
-console.log("Generating an access token");
-
-// Use the JWT client to generate an access token.
-// this is using a toplevel await which might be a problem
-const accessToken = await new Promise<string|undefined>((resolve, reject) => {
-  jwtClient.authorize(function(error, tokens) {
-    if (error || !tokens) {
-      console.log("Error making request to generate access token:", error);
-      reject();
-    } else if (tokens.access_token === null) {
-      console.log("Provided service account does not have permission to generate access tokens");
-      reject();
-    } else {
-      resolve(tokens.access_token);
-    }
-  });
-});
+import { getClassKeys } from "./lib/firebase-classes.js";
 
 const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
@@ -55,17 +17,8 @@ function buildFirebasePath(portal?: string) {
 }
 
 const firebaseBasePath = buildFirebasePath("learn.concord.org");
-const fetchURL = `${databaseURL}${firebaseBasePath}.json?shallow=true`;
-console.log(`Fetching URL: ${fetchURL}`);
 
-const response = await fetch(fetchURL,
-  {
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  }
-);
-const classKeys  = await response.json() as Record<string, boolean>;
+const {classKeys} = await getClassKeys(firebaseBasePath);
 
 // Fetch the service account key JSON file contents; must be in same folder as script
 const credential = admin.credential.cert('./serviceAccountKey.json');
@@ -86,6 +39,11 @@ const urls = [] as any[];
 for (const key of Object.keys(classKeys)) {
   const usersSnapshot = await admin.database().ref(`${firebaseBasePath}/${key}/users`).once("value");
   const users = usersSnapshot.val();
+  if (!users) {
+    console.log(`no users in class ${key}`);
+    continue;
+  }
+
   console.log(key);
   console.log(`  - ${Object.keys(users).length} users`);
   for (const [userId, user] of Object.entries<any>(users)) {

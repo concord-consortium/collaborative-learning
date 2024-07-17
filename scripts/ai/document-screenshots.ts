@@ -2,7 +2,7 @@ import fs from "fs";
 import readline from "readline";
 import puppeteer from "puppeteer";
 
-import { prettyDuration } from "./script-utils";
+import { prettyDuration } from "../lib/script-utils.js";
 
 // This script saves images of all the documents in a folder and updates its tags.csv with new folder and file names.
 // It's intended to be used on the output of count-document-tiles.ts.

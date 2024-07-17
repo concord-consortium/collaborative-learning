@@ -55,10 +55,11 @@ context('Copy Document', () => {
     clueCanvas.addTile('geometry');
     geometryTile.getGeometryTile().last().click();
     clueCanvas.clickToolbarButton('geometry', 'point');
-    geometryTile.addPointToGraph(5, 5);
-    geometryTile.addPointToGraph(10, 5);
-    geometryTile.addPointToGraph(10, 10);
-    geometryTile.getGraphPoint().should('have.length', 4);
+    geometryTile.clickGraphPosition(5, 5);
+    geometryTile.clickGraphPosition(10, 5);
+    geometryTile.clickGraphPosition(10, 10);
+    geometryTile.getPhantomGraphPoint().should('exist');
+    geometryTile.getGraphPoint().should('have.length', 3);
 
     cy.log('Add drawing tile');
     clueCanvas.addTile("drawing");

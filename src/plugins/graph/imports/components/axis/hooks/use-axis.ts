@@ -12,6 +12,7 @@ import {maxWidthOfStringsD3} from "../../../../utilities/graph-utils";
 import {useDataConfigurationContext} from "../../../../hooks/use-data-configuration-context";
 import {collisionExists, getStringBounds} from "../axis-utils";
 import graphVars from "../../../../components/graph.scss";
+import { isImageUrl } from "../../../../../../models/data/data-types";
 
 export interface IUseAxis {
   axisModel?: IAxisModel
@@ -66,7 +67,10 @@ export const useAxis = ({
       repetitions = multiScale?.repetitions ?? 1,
       bandWidth = ((ordinalScale?.bandwidth?.()) ?? 0) / repetitions,
       collision = collisionExists({bandWidth, categories, centerCategoryLabels}),
-      maxLabelExtent = maxWidthOfStringsD3(dataConfiguration?.categoryArrayForAttrRole(attrRole) ?? []),
+      categoryArrayValues = dataConfiguration?.categoryArrayForAttrRole(attrRole),
+      // Image URLs will be replaced with the placeholder "<image>", so do not measure the URL values
+      validCategoryArrayValues = categoryArrayValues?.map(cat => isImageUrl(cat) ? "<image>" : cat),
+      maxLabelExtent = maxWidthOfStringsD3(validCategoryArrayValues ?? []),
       d3Scale = multiScale?.scale ?? (type === 'numeric' ? scaleLinear() : scaleOrdinal());
     let desiredExtent =
       axisTitleHeight + 2 * (axisGap + kAxisLabelVerticalPadding) + kAxisTickLength + kAxisTickPadding;

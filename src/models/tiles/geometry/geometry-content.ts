@@ -1,4 +1,4 @@
-import { castArray, difference, each, size as _size, union } from "lodash";
+import { castArray, difference, each, every, size as _size, union } from "lodash";
 import { reaction } from "mobx";
 import { addDisposer, applySnapshot, detach, Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import stringify from "json-stringify-pretty-compact";
@@ -11,11 +11,10 @@ import { tileContentAPIActions, tileContentAPIViews } from "../tile-model-hooks"
 import { convertModelToChanges, getGeometryBoardChange } from "./geometry-migrate";
 import { preprocessImportFormat } from "./geometry-import";
 import {
-  cloneGeometryObject, CommentModel, CommentModelType, GeometryBaseContentModel, GeometryObjectModelType,
-  GeometryObjectModelUnion, ImageModel, ImageModelType, isCommentModel, isMovableLineModel, isMovableLinePointId,
-  isPointModel, isPolygonModel, isVertexAngleModel, MovableLineModel, PointModel, PolygonModel, PolygonModelType,
-  segmentIdFromPointIds,
-  VertexAngleModel
+  CircleModel, cloneGeometryObject, CommentModel, CommentModelType, GeometryBaseContentModel, GeometryObjectModelType,
+  GeometryObjectModelUnion, ImageModel, ImageModelType, isCircleModel, isCommentModel, isMovableLineModel,
+  isMovableLinePointId, isPointModel, isPolygonModel, isVertexAngleModel, MovableLineModel, PointModel,
+  PolygonModel, PolygonModelType, segmentIdFromPointIds, VertexAngleModel
 } from "./geometry-model";
 import {
   getBoardUnitsAndBuffers, getObjectById, guessUserDesiredBoundingBox, kXAxisTotalBuffer, kYAxisTotalBuffer,
@@ -29,7 +28,7 @@ import { getAssociatedPolygon, getEdgeVisualProps, getPolygonVisualProps, prepar
 import {
   isAxisArray, isBoard, isComment, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
-  kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj, isGeometryElement
+  kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj, isGeometryElement, isCircle
 } from "./jxg-types";
 import { SharedModelType } from "../../shared/shared-model";
 import { ISharedModelManager } from "../../shared/shared-model-manager";
@@ -38,9 +37,10 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { gImageMap } from "../../image-map";
 import { IClueTileObject } from "../../annotations/clue-object";
 import { appendVertexId, getPoint, filterBoardObjects, forEachBoardObject, getBoardObject, getBoardObjectIds,
-  getPolygon, logGeometryEvent, removeClosingVertexId } from "./geometry-utils";
+  getPolygon, logGeometryEvent, removeClosingVertexId, getCircle } from "./geometry-utils";
 import { getPointVisualProps } from "./jxg-point";
 import { getVertexAngle } from "./jxg-vertex-angle";
+import { GeometryTileMode } from "../../../components/tiles/geometry/geometry-types";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -237,6 +237,10 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
   }))
   .views(self => ({
+    getCircle(id: string) {
+      const obj = self.getObject(id);
+      return isCircleModel(obj) ? obj : undefined;
+    },
     // Returns any object in the model, even a subobject (like a movable line's point)
     getAnyObject(id: string) {
       if (isMovableLinePointId(id)) {
@@ -672,14 +676,14 @@ export const GeometryContentModel = GeometryBaseContentModel
 
     /**
      * Creates a "phantom" point, which is shown on the board but not (yet) persisted in the model.
-     * It can be part of a polygon (which is expected to be the activePolygon).
-     * If a polygon is provided the phantom point will be added at the end of its list of vertices.
+     * If there is an activePolygon the phantom point will be added at the end of its list of vertices.
+     * Or, if there is an activeCircle, the phantom point will be set as its tangent point.
      * @param board
      * @param coordinates
-     * @param polygonId optional polygon
+     * @param restore if the phantom point is being restored after mouse left the window
      * @returns the new Point object
      */
-    function addPhantomPoint(board: JXG.Board, coordinates: JXGCoordPair, polygonId?: string):
+    function addPhantomPoint(board: JXG.Board, coordinates: JXGCoordPair, restoring?: boolean):
         JXG.Point | undefined {
       if (!board) return undefined;
       const id = uniqueId();
@@ -702,8 +706,22 @@ export const GeometryContentModel = GeometryBaseContentModel
       const result = syncChange(board, change);
       const point = isPoint(result) ? result : undefined;
 
-      if (point && polygonId) {
-        appendPhantomPointToPolygon(board, polygonId);
+      if (point && restoring) {
+        if (self.activePolygonId) {
+          appendPhantomPointToPolygon(board, self.activePolygonId);
+        }
+        if (self.activeCircleId) {
+          // Set the phantom as active circle's tangent point
+          const activeCircle = self.getCircle(self.activeCircleId);
+          if (activeCircle) {
+            syncChange(board, {
+              operation: "create",
+              target: "circle",
+              parents: [activeCircle.centerPoint, self.phantomPoint.id],
+              properties: { id: self.activeCircleId, colorScheme: self.phantomPoint.colorScheme }
+            });
+          }
+        }
       }
       return point;
     }
@@ -865,25 +883,25 @@ export const GeometryContentModel = GeometryBaseContentModel
       fixVertexAngle(board, updatedPolygon, updatedPolygon.vertices[phantomPointIndex-1]);
       fixVertexAngle(board, updatedPolygon, updatedPolygon.vertices[phantomPointIndex]);
 
-      logGeometryEvent(self, "update",
-        "vertex",
-        pointId, { userAction: "join to polygon" });
+      logGeometryEvent(self, "update", "vertex", [pointId, poly.id],
+        { userAction: "join to polygon" });
 
       return isPolygon(updatedPolygon) ? updatedPolygon : undefined;
     }
 
     /**
      * Make the current phantom point into a real point.
-     * The new point is persisted into the model. It remains a part of the active polygon if any.
+     * The new point is persisted into the model.
+     * Depending on the mode, the active polygon or circle will be updated.
      * @param board
      * @param position
-     * @param polygonId
+     * @param mode
      * @returns the point, now considered "real".
      */
-    function realizePhantomPoint(board: JXG.Board, position: JXGCoordPair, makePolygon: boolean):
-        { point: JXG.Point | undefined, polygon: JXG.Polygon | undefined } {
+    function realizePhantomPoint(board: JXG.Board, position: JXGCoordPair, mode: GeometryTileMode):
+        { point: JXG.Point | undefined, polygon: JXG.Polygon | undefined, circle: JXG.Circle | undefined } {
       // Transition the current phantom point into a real point.
-      if (!self.phantomPoint) return { point: undefined, polygon: undefined };
+      if (!self.phantomPoint) return { point: undefined, polygon: undefined, circle: undefined };
       self.phantomPoint.setPosition(position);
       const newRealPoint = self.phantomPoint;
       detach(newRealPoint);
@@ -893,7 +911,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       const phantomPoint = addPhantomPoint(board, position);
       if (!phantomPoint) {
         console.warn("Failed to create phantom point");
-        return { point: undefined, polygon: undefined };
+        return { point: undefined, polygon: undefined, circle: undefined };
       }
 
       // Update the previously-existing JSXGraph point to be real, not phantom
@@ -910,7 +928,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       syncChange(board, change);
 
       let newPolygon: JXG.Polygon|undefined = undefined;
-      if (makePolygon) {
+      if (mode === "polygon") {
         const poly = self.activePolygonId && getPolygon(board, self.activePolygonId);
         if (poly) {
           newPolygon = appendPhantomPointToPolygon(board, poly.id);
@@ -939,19 +957,53 @@ export const GeometryContentModel = GeometryBaseContentModel
         }
       }
 
-      // Log event
-      logGeometryEvent(self, "create",
-        makePolygon ? "vertex" : "point",
-        self.activePolygonId ? [newRealPoint.id, self.activePolygonId] : newRealPoint.id);
+      let newCircle: JXG.Circle|undefined = undefined;
+      if (mode === "circle") {
+        const circleModel = self.activeCircleId && self.getCircle(self.activeCircleId);
+        if (circleModel) {
+          // This point completes the circle and frees it from being active
+          circleModel.tangentPoint = newRealPoint.id;
+          self.activeCircleId = undefined;
+          newCircle = getCircle(board, circleModel.id);
+        } else {
+          // This is the center point, create a circle with the new phantom as the tangent point
+          const newCircleModel = CircleModel.create(
+            { id: uniqueId(), centerPoint: newRealPoint.id, colorScheme: newRealPoint.colorScheme }
+          );
+          self.addObjectModel(newCircleModel);
+          self.activeCircleId = newCircleModel.id;
+          const result = syncChange(board, {
+            operation: "create",
+            target: "circle",
+            parents: [newRealPoint.id, phantomPoint.id],
+            properties: { id: newCircleModel.id, colorScheme: newRealPoint.colorScheme }
+          });
+          if (isCircle(result)) {
+            newCircle = result;
+          }
+        }
+      }
 
+      // Log event
+      if (mode === "polygon") {
+        logGeometryEvent(self, "create", "vertex",
+          self.activePolygonId ? [newRealPoint.id, self.activePolygonId] : newRealPoint.id);
+      } else if (mode === "circle") {
+        logGeometryEvent(self, "create", "circle",
+          newCircle ? [newRealPoint.id, newCircle.id] : newRealPoint.id,
+          { userAction: self.activeCircleId ? "place center point" : "place tangent point" });
+      } else {
+        logGeometryEvent(self, "create", "point", newRealPoint.id);
+      }
       // Return newly-created objects
       const obj = board.objects[newRealPoint.id];
       const point = isPoint(obj) ? obj : undefined;
-      return { point, polygon: newPolygon };
+      return { point, polygon: newPolygon, circle: newCircle };
     }
 
     /**
-     * Removes the phantom point from the board, adjusting the active polygon if there is one.
+     * Removes the phantom point from the board
+     * The active polygon or active circle are updated if needed.
      * @param board
      */
     function clearPhantomPoint(board: JXG.Board) {
@@ -977,6 +1029,16 @@ export const GeometryContentModel = GeometryBaseContentModel
         }
       }
 
+      // Remove circle if one is displayed
+      const activeCircle = self.activeCircleId && getCircle(board, self.activeCircleId);
+      if (activeCircle) {
+        syncChange(board, {
+          operation: "delete",
+          target: "circle",
+          targetID: self.activeCircleId
+        });
+      }
+
       const change: JXGChange = {
         operation: "delete",
         target: "point",
@@ -1000,11 +1062,32 @@ export const GeometryContentModel = GeometryBaseContentModel
       };
       const result = syncChange(board, change);
 
-      logGeometryEvent(self, "update",
-        "vertex",
-        pointId, { userAction: "join to polygon" });
+      logGeometryEvent(self, "update", "vertex", [pointId, polygonModel.id],
+        { userAction: "join to polygon" });
 
       if (isPolygon(result)) {
+        return result;
+      }
+    }
+
+    function createCircleIncludingPoint(board: JXG.Board, pointId: string) {
+      if (!self.phantomPoint) return;
+      const colorScheme = self.getObjectColorScheme(pointId) || 0;
+      const circleModel = CircleModel.create({ centerPoint: pointId, colorScheme });
+      self.addObjectModel(circleModel);
+      self.activeCircleId = circleModel.id;
+      const change: JXGChange = {
+        operation: "create",
+        target: "circle",
+        parents: [pointId, self.phantomPoint.id],
+        properties: { id: circleModel.id, colorScheme }
+      };
+      const result = syncChange(board, change);
+
+      logGeometryEvent(self, "update", "point", [pointId, circleModel.id],
+        { userAction: "join center to circle" });
+
+      if (isCircle(result)) {
         return result;
       }
     }
@@ -1064,7 +1147,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
       // Remove the phantom point from the list of vertices
       const index = vertexIds.findIndex(v => v === self.phantomPoint?.id);
-      if (index >= 1) {
+      if (index > 1) {
         vertexIds.splice(index,1);
 
         const change: JXGChange = {
@@ -1077,10 +1160,12 @@ export const GeometryContentModel = GeometryBaseContentModel
         if (isPolygon(result)) {
           poly = result;
         }
+
         fixVertexAngle(board, poly, poly.vertices[index-1]);
         fixVertexAngle(board, poly, poly.vertices[index]);
       } else {
         // If index === 1, only a single non-phantom point remains, so we delete the polygon object.
+        self.deleteObjects([poly.id]);
         const change: JXGChange = {
           operation: "delete",
           target: "polygon",
@@ -1091,6 +1176,37 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
       self.activePolygonId = undefined;
       return poly;
+    }
+
+    /**
+     * Use the given point as the tangent point for the active circle.
+     * @param board
+     * @param point
+     * @returns the adjusted circle
+     */
+    function closeActiveCircle(board: JXG.Board, point: JXG.Point): JXG.Circle|undefined {
+      if (!self.activeCircleId) return;
+      // Update the model
+      const circleModel = self.getCircle(self.activeCircleId);
+      if (!circleModel) return;
+      circleModel.tangentPoint = point.id;
+
+      // On the board, remove the circle that attaches to the phantom point and replace it with a new circle
+      syncChange(board, {
+        operation: "delete",
+        target: "circle",
+        targetID: circleModel.id
+      });
+      const result = syncChange(board, {
+        operation: "create",
+        target: "circle",
+        parents: [circleModel.centerPoint, circleModel.tangentPoint],
+        properties: { id: circleModel.id, colorScheme: circleModel.colorScheme }
+      });
+      logGeometryEvent(self, "update", "point", [point.id, circleModel.id],
+        { userAction: "join tangent point to circle" });
+      self.activeCircleId = undefined;
+      return isCircle(result) ? result : undefined;
     }
 
     function addPoints(board: JXG.Board | undefined,
@@ -1296,6 +1412,24 @@ export const GeometryContentModel = GeometryBaseContentModel
       return board && syncChange(board, change);
     }
 
+    function updatePolygonLabel(board: JXG.Board|undefined, polygon: JXG.Polygon,
+        labelOption: ELabelOption, name: string|undefined ) {
+      const polygonModel = self.getObject(polygon.id);
+      if (!board || !isPolygonModel(polygonModel)) return;
+      polygonModel.labelOption = labelOption;
+      polygonModel.name = name;
+
+      logGeometryEvent(self, "update", "polygon", polygon.id,
+        { text: name, labelOption });
+
+      return syncChange(board, {
+        operation: "update",
+        target: "polygon",
+        targetID: polygon.id,
+        properties: { labelOption, clientName: name }
+      });
+    }
+
     function findObjects(board: JXG.Board, test: (obj: JXG.GeometryElement) => boolean): JXG.GeometryElement[] {
       return filterBoardObjects(board, test);
     }
@@ -1360,36 +1494,16 @@ export const GeometryContentModel = GeometryBaseContentModel
 
     function getOneSelectedPolygon(board: JXG.Board) {
       // all vertices of polygon must be selected to show rotate handle
-      const polygonSelection: { [id: string]: { any: boolean, all: boolean } } = {};
       const polygons = board.objectsList
-                            .filter(isPolygon)
-                            .filter(polygon => {
-                              const selected = { any: false, all: true };
-                              each(polygon.ancestors, vertex => {
-                                if (self.metadata.isSelected(vertex.id)) {
-                                  selected.any = true;
-                                }
-                                else {
-                                  selected.all = false;
-                                }
-                              });
-                              polygonSelection[polygon.id] = selected;
-                              return selected.any;
-                            });
+        .filter(isPolygon)
+        .filter(polygon => {
+          return every(polygon.ancestors, vertex => self.metadata.isSelected(vertex.id));
+        });
       const selectedPolygonId = (polygons.length === 1) && polygons[0].id;
-      const selectedPolygon = selectedPolygonId && polygonSelection[selectedPolygonId].all
-                                ? polygons[0] : undefined;
+      const selectedPolygon = selectedPolygonId ? polygons[0] : undefined;
       // must not have any selected points other than the polygon vertices
       if (selectedPolygon) {
-        type IEntry = [string, boolean];
-        const selectionEntries = Array.from(self.metadata.selection.entries()) as IEntry[];
-        const selectedPts = selectionEntries
-                              .filter(entry => {
-                                const id = entry[0];
-                                const obj = getBoardObject(board, id);
-                                const isSelected = entry[1];
-                                return obj && (obj.elType === "point") && isSelected;
-                              });
+        const selectedPts = self.selectedObjects(board).filter(isPoint);
         return _size(selectedPolygon.ancestors) === selectedPts.length
                   ? selectedPolygon : undefined;
       }
@@ -1547,13 +1661,16 @@ export const GeometryContentModel = GeometryBaseContentModel
         makePolygonActive,
         clearPhantomPoint,
         createPolygonIncludingPoint,
+        createCircleIncludingPoint,
         clearActivePolygon,
         closeActivePolygon,
+        closeActiveCircle,
         addMovableLine,
         removeObjects,
         updateObjects,
         addVertexAngle,
         updateAxisLabels,
+        updatePolygonLabel,
         updatePolygonSegmentLabel,
         deleteSelection,
         applyChange: applyAndLogChange,

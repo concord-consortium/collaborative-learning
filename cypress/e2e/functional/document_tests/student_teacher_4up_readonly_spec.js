@@ -83,10 +83,11 @@ function setupTest(studentIndex) {
   cy.get('.spacer').click();
   geometryToolTile.getGeometryTile().last().click();
   clueCanvas.clickToolbarButton('geometry', 'point');
-  geometryToolTile.addPointToGraph(5, 5);
-  geometryToolTile.addPointToGraph(10, 5);
-  geometryToolTile.addPointToGraph(10, 10);
-  geometryToolTile.getGraphPoint().should('have.length', 4); // including phantom point
+  geometryToolTile.clickGraphPosition(5, 5);
+  geometryToolTile.clickGraphPosition(10, 5);
+  geometryToolTile.clickGraphPosition(10, 10);
+  geometryToolTile.getGraphPoint().should('have.length', 3);
+  geometryToolTile.getPhantomGraphPoint().should('exist');
   clueCanvas.addTile("drawing");
   drawToolTile.getDrawToolRectangle().click();
   drawToolTile.getDrawTile()
