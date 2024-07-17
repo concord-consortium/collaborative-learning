@@ -1,7 +1,7 @@
 <svg width="36" height="34" viewBox="0 0 36 34" xmlns="http://www.w3.org/2000/svg">
     <g fill="none" fill-rule="evenodd">
         <path d="M0 0h36v34H0z"/>
-        <circle class="point-icon-fill" fill="#0069FF" fill-rule="nonzero" cx="18" cy="17" r="5"/>
+        <circle class="reactive-to-color-change" fill="#0069FF" fill-rule="nonzero" cx="18" cy="17" r="5"/>
         <path d="M18 11.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zm0 1a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z" fill="#000" fill-rule="nonzero"/>
     </g>
 </svg>

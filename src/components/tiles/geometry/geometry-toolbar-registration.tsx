@@ -104,7 +104,9 @@ const ColorChangeButton = observer(function ColorChangeButton({name}: IToolbarBu
 });
 
 const CircleButton = observer(function CircleButton({name}: IToolbarButtonComponentProps) {
-  return(<ModeButton name={name} title="Circle" targetMode="circle" Icon={CircleSvg} />);
+  const { content } = useGeometryTileContext();
+  const colorClass = clueDataColorInfo[content?.selectedColor || 0].name;
+  return(<ModeButton name={name} title="Circle" targetMode="circle" Icon={CircleSvg} colorClass={colorClass}/>);
 });
 
 const DuplicateButton = observer(function DuplicateButton({name}: IToolbarButtonComponentProps) {
