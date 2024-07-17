@@ -412,7 +412,8 @@ export const BaseDocumentContentModel = types
      * @returns a unique title.
      */
     getUniqueTitleForType(tileType: string) {
-      const titleBase = getTileContentInfo(tileType)?.titleBase || tileType;
+      const contentInfo = getTileContentInfo(tileType);
+      const titleBase = contentInfo?.titleBase || contentInfo?.displayName || contentInfo?.shortName || tileType;
       const tileIds = self.getTilesOfType(tileType);
       const maxSoFar = self.getMaxNumberFromTileTiles(titleBase, tileIds);
       return defaultTitle(titleBase, maxSoFar >=0 ? maxSoFar + 1 : 1);

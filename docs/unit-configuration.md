@@ -175,7 +175,7 @@ In addition, if shared variables are configured in unit, it supports additional 
 
 (Custom toolbar implementation?)
 
-#### Geometry (Shapes Graph)
+#### Geometry (Coordinate Grid)
 
 Common toolbar framework. Default buttons:
 
