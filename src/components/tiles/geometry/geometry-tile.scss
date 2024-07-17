@@ -48,7 +48,7 @@ $toolbar-width: 44px;
 
           // JSXGraph doesn't allow us to set a class attribute
           // so we use stroke opacity .99 to signal highlighting via drop-shadow.
-          line[stroke-opacity="0.99"] {
+          line[stroke-opacity="0.99"], ellipse[stroke-opacity="0.99"] {
             -webkit-filter: drop-shadow(0 0 6px #0081ff);
             filter: drop-shadow(0 0 6px #0081ff);
           }

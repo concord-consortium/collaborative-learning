@@ -283,7 +283,7 @@ context('Arrow Annotations (Sparrows)', function () {
     tableToolTile.typeInTableCellXY(0, 1, 2);
     tableToolTile.typeInTableCellXY(1, 0, 3);
     tableToolTile.typeInTableCellXY(1, 1, 4);
-    cy.linkTableToTile('Table Data 1', "Shapes Graph 1");
+    cy.linkTableToTile('Table Data 1', "Coordinate Grid 1");
     aa.clickArrowToolbarButton(); // sparrow mode on
     aa.getAnnotationButtons().should("have.length", 6); // 2 dots + 4 table cells
     clueCanvas.getSingleWorkspaceDocumentContent().scrollTo("top");

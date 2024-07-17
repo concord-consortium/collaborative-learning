@@ -5,6 +5,7 @@ import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button"
 import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { SharedVariables } from "./shared-variables";
+import { getTileCreateActionName } from "../../models/tiles/tile-content-info";
 
 import ViewBadgeIcon from "../../assets/icons/view/view-badge.svg";
 
@@ -22,7 +23,7 @@ export function SharedVariablesLinkButton({name, args, disabled}: IProps) {
   }
 
   const newTileType = args?.[1] || '';
-  const tooltip = `${newTileType} It!`;
+  const tooltip = getTileCreateActionName(newTileType);
 
   const newTileInfo = getTileComponentInfo(newTileType);
   const Icon = newTileInfo?.Icon;

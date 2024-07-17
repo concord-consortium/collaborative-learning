@@ -8,7 +8,7 @@ import { IToolbarButtonComponentProps, registerTileToolbarButtons }
 import { GraphControllerContext } from "../models/graph-controller";
 import { useGraphModelContext } from "../hooks/use-graph-model-context";
 import { kMovableLineType } from "../adornments/movable-line/movable-line-types";
-import { defaultMovableLineAdornment } from "../adornments/movable-line/movable-line-model";
+import { defaultMovableLineAdornment, isMovableLine } from "../adornments/movable-line/movable-line-model";
 
 import LinkTableIcon from "../../../clue/assets/icons/geometry/link-table-icon.svg";
 import AddIcon from "../../../assets/icons/add-data-graph-icon.svg";
@@ -99,18 +99,12 @@ const MovableLineButton = observer(function MovableLineButton({name}: IToolbarBu
   const graph = useGraphModelContext();
   const disabled = graph.plotType !== "scatterPlot";
   const adornment = graph.getAdornmentOfType(kMovableLineType);
-  const showing = adornment?.isVisible;
 
   function handleClick() {
-    // Toggle whether movable line is showing
-    if (showing) {
-      graph.hideAdornment(kMovableLineType);
+    if (adornment && isMovableLine(adornment)) {
+      adornment.addLine(graph.axes.get("bottom"), graph.axes.get("left"));
     } else {
-      if (adornment) {
-        graph.showAdornment(kMovableLineType);
-      } else {
-        graph.addAdornment(defaultMovableLineAdornment(graph));
-      }
+      graph.addAdornment(defaultMovableLineAdornment(graph));
     }
   }
 
@@ -119,7 +113,6 @@ const MovableLineButton = observer(function MovableLineButton({name}: IToolbarBu
       name={name}
       title="Movable line"
       disabled={disabled}
-      selected={showing && !disabled}
       onClick={handleClick}>
       <MovableLineIcon />
     </TileToolbarButton>
@@ -206,10 +199,11 @@ const AddPointsButton = observer(function({name}: IToolbarButtonComponentProps) 
 
 const DeleteButton = observer(function({name}: IToolbarButtonComponentProps) {
   const graph = useGraphModelContext();
-  const disabled = !graph.isAnyCellSelected;
+  const disabled = !graph.isAnyCellSelected && !graph.isAnyAdornmentSelected;
 
   function handleClick() {
     graph.clearSelectedCellValues();
+    graph.clearSelectedAdornmentInstances();
   }
 
   return (
