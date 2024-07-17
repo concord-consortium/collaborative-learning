@@ -737,12 +737,14 @@ describe("GeometryContent", () => {
     const { content, board } = createContentAndBoard();
 
     // create a point with default color
-    const point0 = content.addPoint(board, [0, 0]);
+    content.addPhantomPoint(board, [0, 0]);
+    const {point: point0} = content.realizePhantomPoint(board, [0, 0], "points");
     expect(point0?.getAttribute("colorScheme")).toBe(0);
 
     // create a point
     content.setSelectedColor(1, board);
-    const { point: point1 } = content.realizePhantomPoint(board, [0, 0], "points");
+    content.addPhantomPoint(board, [1, 1]);
+    const { point: point1 } = content.realizePhantomPoint(board, [1, 1], "points");
     expect(point1?.getAttribute("colorScheme")).toBe(1);
 
     // create a circle
@@ -770,8 +772,8 @@ describe("GeometryContent", () => {
       { id: polygon?.id, type: "polygon", colorScheme: 0, points: [p1!.id, p2!.id, p3!.id],
         labelOption: "none"
        });
-    expect(polygon?.getAttribute("colorScheme")).toBe(0);
-    content.selectObjects(board, polygon!.id);
+    expect(polygon.getAttribute("colorScheme")).toBe(0);
+    content.selectObjects(board, polygon.id);
     content.setSelectedColor(1, board);
     expect(polygon.getAttribute("colorScheme")).toBe(1);
     // expect points associated with polygon to change color
