@@ -104,7 +104,7 @@ export function getAssociatedPolygon(elt: JXG.GeometryElement): JXG.Polygon | un
  * and is not drawn in.
  * @param polygon
  */
-function setPolygonEdgeColors(polygon: JXG.Polygon) {
+export function setPolygonEdgeColors(polygon: JXG.Polygon) {
   const segments = getPolygonEdges(polygon);
   const firstVertex = polygon.vertices[0];
   segments.forEach(seg => {
@@ -349,7 +349,6 @@ export const polygonChangeAgent: JXGChangeAgent = {
       updateSegmentLabelOption(board, change);
       return;
     }
-    console.log("change.parents", change.parents);
     // An update with an array of parents is considered to be a request to update the list of vertices.
     if ((change.target === "polygon")
       && change.targetID && !Array.isArray(change.targetID)

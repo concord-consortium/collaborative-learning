@@ -11,7 +11,7 @@ import { BaseComponent } from "../../base";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import {
-  GeometryContentModelType, IAxesParams, isGeometryContentReady, setElementSelected
+  GeometryContentModelType, IAxesParams, isGeometryContentReady, updateVisualProps
 } from "../../../models/tiles/geometry/geometry-content";
 import { convertModelObjectsToChanges } from "../../../models/tiles/geometry/geometry-migrate";
 import {
@@ -412,7 +412,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         const edges: JXG.Line[] = [];
         objs.forEach(obj => {
           if (change.type !== 'remove') {
-            setElementSelected(_board, obj.id, change.newValue.value);
+            updateVisualProps(_board, obj.id, change.newValue.value);
             // Also find segments that are attached to the changed points
             Object.values(obj.childElements).forEach(child => {
               if(isVisibleEdge(child) && !edges.includes(child)) {
@@ -424,7 +424,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         edges.forEach(edge => {
           // Edge is selected if both end points are.
           const selected = this.getContent().isSelected(edge.point1.id) && this.getContent().isSelected(edge.point2.id);
-          setElementSelected(_board, edge.id, selected);
+          updateVisualProps(_board, edge.id, selected);
         });
       }
     }));
@@ -1609,7 +1609,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     content.findObjects(board, (elt: JXG.GeometryElement) => isPoint(elt))
       .forEach(pt => {
         if (content.isSelected(pt.id)) {
-          setElementSelected(board, pt.id, true);
+          updateVisualProps(board, pt.id, true);
         }
       });
 
