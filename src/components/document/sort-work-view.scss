@@ -1,5 +1,6 @@
 @import "../vars";
 $title-margin: 2px;
+$new-header-bg-color: #f4e0ff;
 
 .sort-work-view {
   height: 100%;
@@ -32,12 +33,13 @@ $title-margin: 2px;
         position: absolute;
         left: 10px;
         height: 26px;
-        border-radius: 5px;
-        background-color: $classwork-purple-light-7;
+        width: calc(100% - 20px);
+        border-radius: 5px 5px 0px 0px;
+        background-color: $new-header-bg-color;
         font-weight: bold;
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: left;
         color: $charcoal-dark-2;
         z-index: 1;
         padding: 0px 7px;
