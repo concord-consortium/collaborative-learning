@@ -55,6 +55,12 @@ function getNetworkInfo() {
 }
 const { portal, demo } = getNetworkInfo();
 
+// For now, only run for demo spaces
+if (!demo) {
+  console.error("demo not defined, exiting");
+  process.exit(1);
+}
+
 console.log(`***** Reading doc and updating metadata *****`);
 const collectionUrl = getFirestoreBasePath(portal, demo);
 console.log(`*** Updating docs in ${collectionUrl} ***`);
