@@ -225,6 +225,11 @@ export const CircleModel = GeometryObjectModel
     }
     return [self.centerPoint];
   }
+}))
+.actions(self => ({
+  setColorScheme(colorScheme: number) {
+    self.colorScheme = colorScheme;
+  }
 }));
 
 export interface CircleModelType extends Instance<typeof CircleModel> {}

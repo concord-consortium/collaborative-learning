@@ -41,6 +41,7 @@ import { appendVertexId, getPoint, filterBoardObjects, forEachBoardObject, getBo
 import { getPointVisualProps } from "./jxg-point";
 import { getVertexAngle } from "./jxg-vertex-angle";
 import { GeometryTileMode } from "../../../components/tiles/geometry/geometry-types";
+import { getCircleVisualProps } from "./jxg-circle";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -144,6 +145,9 @@ export function updateVisualProps(board: JXG.Board, id: string, selected: boolea
       const polyProps = getPolygonVisualProps(selected, colorScheme);
       element.setAttribute(polyProps);
       setPolygonEdgeColors(element);
+    } else if (isCircle(element)) {
+      const circleProps = getCircleVisualProps(selected, colorScheme);
+      element.setAttribute(circleProps);
     }
   }
 }
@@ -252,7 +256,7 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     getObjectColorScheme(id: string) {
       const obj = self.getObject(id);
-      if (isPointModel(obj) || isPolygonModel(obj) || isMovableLineModel(obj)) {
+      if (isPointModel(obj) || isPolygonModel(obj) || isMovableLineModel(obj) || isCircleModel(obj)) {
         return obj.colorScheme;
       }
       if (obj === undefined) {
@@ -1270,12 +1274,11 @@ export const GeometryContentModel = GeometryBaseContentModel
       const selectedIds = self.getSelectedIds(board);
       selectedIds.forEach(id => {
         const obj = self.getObject(id);
-        if (isPolygonModel(obj) || isPointModel(obj)) {
-          console.log("isPolygonModel(obj)", isPolygonModel(obj));
+        if (isPolygonModel(obj) || isPointModel(obj) || isCircleModel(obj)) {
           obj.setColorScheme(color);
           const change: JXGChange = {
             operation: "update",
-            target: isPolygonModel(obj) ? "polygon" : "point",
+            target: "object",
             targetID: id,
             properties: { colorScheme: color }
           };
