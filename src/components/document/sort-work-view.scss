@@ -1,6 +1,5 @@
 @import "../vars";
 $title-margin: 2px;
-$new-header-bg-color: #f4e0ff;
 
 .sort-work-view {
   height: 100%;
@@ -35,14 +34,32 @@ $new-header-bg-color: #f4e0ff;
         height: 26px;
         width: calc(100% - 20px);
         border-radius: 5px 5px 0px 0px;
-        background-color: $new-header-bg-color;
-        font-weight: bold;
+        background-color: $violet-light-7;
         display: flex;
         align-items: center;
-        justify-content: left;
+        justify-content: space-between;
         color: $charcoal-dark-2;
         z-index: 1;
         padding: 0px 7px;
+
+        .section-header-right {
+          display: flex;
+          align-items: center;
+          font-weight: bold;
+        }
+
+        .section-header-left {
+          display: flex;
+          align-items: center;
+
+          .section-header-arrow {
+            cursor: pointer;
+            fill: $violet-dark-1;
+            &.up {
+              transform: rotate(180deg);
+            }
+          }
+        }
       }
     }
   }

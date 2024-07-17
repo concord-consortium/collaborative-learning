@@ -28,7 +28,7 @@
     border-color: $workspace-teal;
   }
   &.class-work {
-    border-color: $classwork-purple
+    border-color: $violet
   }
   &.sort-work, &.student-work {
     border-color: $charcoal;
@@ -61,13 +61,13 @@
         }
       }
       &.class-work {
-        border-color: $classwork-purple;
-        background-color: $classwork-purple-light-5;
+        border-color: $violet;
+        background-color: $violet-light-5;
         &:hover {
-          background-color: $classwork-purple-light-4;
+          background-color: $violet-light-4;
         }
         &:active {
-          background-color: $classwork-purple-light-2;
+          background-color: $violet-light-2;
         }
       }
       &.sort-work, &.student-work {
@@ -108,12 +108,12 @@
           }
         }
         &.class-work {
-          background-color: $classwork-purple-light-4;
+          background-color: $violet-light-4;
           &:hover {
-            background-color: $classwork-purple-light-5;
+            background-color: $violet-light-5;
           }
           &:active {
-            background-color: $classwork-purple-light-2;
+            background-color: $violet-light-2;
           }
         }
         &.sort-work, &.student-work {

@@ -106,13 +106,13 @@
     }
   }
   &.class-work {
-    border-color: $classwork-purple;
-    background-color: $classwork-purple-light-4;
+    border-color: $violet;
+    background-color: $violet-light-4;
     &:hover {
-      background-color: $classwork-purple-light-3;
+      background-color: $violet-light-3;
     }
     &:active {
-      background-color: $classwork-purple-light-2;
+      background-color: $violet-light-2;
     }
   }
   &.supports {

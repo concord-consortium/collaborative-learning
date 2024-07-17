@@ -3,18 +3,15 @@ import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
 import { useStores } from "../../hooks/use-stores";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
-import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
-import { DocumentModelType, getDocumentContext } from "../../models/document/document";
-import { DocumentContextReact } from "./document-context";
+import { DocumentModelType } from "../../models/document/document";
 import { DEBUG_DOC_LIST } from "../../lib/debug";
 import { SortWorkDocumentArea } from "./sort-work-document-area";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { DocListDebug } from "./doc-list-debug";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
+import { SortedDocuments } from "./sorted-documents";
 
 import "../thumbnail/document-type-collection.scss";
-import "./sort-work-view.scss";
-
 /**
  * Resources pane view of class work and exemplars.
  * Various options for sorting the display are available - by user, by group, by tools used, etc.
@@ -79,31 +76,11 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
             { renderedSortedDocuments &&
               renderedSortedDocuments.map((sortedSection, idx) => {
                 return (
-                  <div className="sorted-sections" key={`sortedSection-${idx}`}>
-                    <div className="section-header">
-                      <div className="section-header-label">
-                      {sortedSection.icon ? <sortedSection.icon/>: null} {sortedSection.sectionLabel}
-                      </div>
-                    </div>
-                    <div className="list">
-                      {sortedSection.documents.map((doc: any, sortIdx: number) => {
-                        const documentContext = getDocumentContext(doc);
-                        return (
-                          <DocumentContextReact.Provider key={doc.key} value={documentContext}>
-                            <DecoratedDocumentThumbnailItem
-                              key={doc.key}
-                              scale={0.1}
-                              document={doc}
-                              tab={ENavTab.kSortWork}
-                              shouldHandleStarClick={true}
-                              allowDelete={false}
-                              onSelectDocument={handleSelectDocument}
-                            />
-                          </DocumentContextReact.Provider>
-                        );
-                      })}
-                    </div>
-                  </div>
+                  <SortedDocuments
+                    key={`sortedDocuments-${idx}`}
+                    idx={idx}
+                    sortedSection={sortedSection}
+                  />
                 );
               })
             }
