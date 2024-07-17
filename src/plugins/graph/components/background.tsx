@@ -162,6 +162,9 @@ export const Background = forwardRef<SVGGElement, IProps>((props, ref) => {
       const coords = pointCoordinates(event.offsetX, event.offsetY);
       addAndSelectPoint(coords);
     }
+    graphModel.adornments.forEach(adornment => {
+      adornment.toggleSelected();
+    });
   }, [addAndSelectPoint, graphModel, pointCoordinates]);
 
   // Define the dragging behaviors for "edit" mode and for "add" mode, then assemble into one "drag" object.

@@ -103,6 +103,10 @@ export const AdornmentModel = types.model("AdornmentModel", {
      */
     getAnnotatableObjectPosition(type: string, objectId: string): Point|undefined {
       return undefined;
+    },
+    hasSelectedInstances() {
+      // derived models should override to return true if they have selected instances
+      return false;
     }
   }))
   .actions(self => ({
@@ -120,6 +124,12 @@ export const AdornmentModel = types.model("AdornmentModel", {
       if (yAttrId && yCats[0]) subPlotKey[yAttrId] = yCats?.[index % yCats.length];
       if (xAttrId && xCats[0]) subPlotKey[xAttrId] = xCats?.[index % xCats.length];
       return subPlotKey;
+    },
+    toggleSelected() {
+      // derived models should override to toggle the selected state of an instance
+    },
+    deleteSelected() {
+      // derived models should override to delete an instance when requested
     }
   }));
 export interface IAdornmentModel extends Instance<typeof AdornmentModel> {}

@@ -10,12 +10,15 @@ svg[class^="line-"] {
 }
 
 .movable-line {
-  stroke: $movable-line-color;
   stroke-width: 2px;
-}
 
-.movable-line-arrow {
-  fill: $movable-line-color;
+  &.hover {
+    stroke-opacity: .6;
+
+    &.selected {
+      stroke-width: 1;
+    }
+  }
 }
 
 .movable-line-cover {
@@ -27,8 +30,6 @@ svg[class^="line-"] {
 
 .movable-line-handle {
   pointer-events: all;
-  fill: $movable-line-color;
-  stroke: $movable-line-color;
 }
 
 .movable-line-lower-handle {
