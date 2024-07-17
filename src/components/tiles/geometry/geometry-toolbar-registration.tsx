@@ -81,7 +81,7 @@ const ColorChangeButton = observer(function ColorChangeButton({name}: IToolbarBu
     } else {
       handlers?.handleSetShowColorPalette(true);
     }
-  }
+  };
 
   return (
     <TileToolbarButton

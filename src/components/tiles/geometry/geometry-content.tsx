@@ -1102,7 +1102,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.applyChange(() => {
       this.getContent().setSelectedColor(color, board);
     });
-  }
+  };
 
   private handleDelete = () => {
     const content = this.getContent();

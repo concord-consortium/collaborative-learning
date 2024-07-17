@@ -757,7 +757,7 @@ describe("GeometryContent", () => {
     expect(polygon?.getAttribute("colorScheme")).toBe(3);
 
     destroyContentAndBoard(content, board);
-  })
+  });
 
   it ("can change the color of a selected polygon, circle, or point", () => {
     const { content, board } = createContentAndBoard();

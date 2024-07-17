@@ -23,4 +23,4 @@ export const ColorSwatch: React.FC<IProps> = ({ color, isSelected, onSelectColor
       <SwatchCheckIcon/>
     </div>
   );
-}
+};
