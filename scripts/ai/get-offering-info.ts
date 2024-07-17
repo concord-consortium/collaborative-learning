@@ -129,7 +129,7 @@ if (demo) {
     }
   }
 
-  // Write a offering Info as a JSON file for use by later scripts
+  // Write offering info as a JSON file for use by later scripts
   const offeringInfoFile = `${sourcePath}/offering-info.json`;
   fs.writeFileSync(offeringInfoFile, stringify(offeringInfo));
 

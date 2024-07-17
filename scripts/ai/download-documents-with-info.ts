@@ -7,7 +7,7 @@
 // to run this script type the following in the terminal
 // cf. https://stackoverflow.com/a/66626333/16328462
 // $ cd scripts/ai
-// $ npx tsx download-documents.ts
+// $ npx tsx download-documents-with-info.ts
 
 import fs from "fs";
 import admin from "firebase-admin";
@@ -95,7 +95,7 @@ const credentialTime = Date.now();
 
 // CHECKME: what about cross class supports?
 // They might be saved as a supportPublication with an offering but then there
-// is an metadata file that has extra information about it.
+// is a metadata file that has extra information about it.
 
 const targetDir = `dataset${startTime}`;
 const targetPath = `${datasetPath}${targetDir}`;
