@@ -21,6 +21,7 @@ import placeholderImage from "../../../assets/image_placeholder.png";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../../register-tile-types";
+import { getObjectById } from "./jxg-board";
 registerTileTypes(["Geometry"]);
 
 // Need to mock this so the placeholder that is added to the cache
@@ -729,6 +730,68 @@ describe("GeometryContent", () => {
     // Removing point should remove circle
     content.removeObjects(board, [point1!.id]);
     expect(board.objectsList.filter(o => isCircle(o)).length).toBe(0);
+    destroyContentAndBoard(content, board);
+  });
+
+  it ("will create a point, circle, or polygon with the correct selected color or default color", () => {
+    const { content, board } = createContentAndBoard();
+
+    // create a point with default color
+    const { point: point0 } = content.realizePhantomPoint(board, [0, 0], "points");
+    expect(point0?.getAttribute("colorScheme")).toBe(0);
+
+    // create a point
+    content.setSelectedColor(1, board);
+    const { point: point1 } = content.realizePhantomPoint(board, [0, 0], "points");
+    expect(point1?.getAttribute("colorScheme")).toBe(1);
+
+    // create a circle
+    content.setSelectedColor(2, board);
+    content.realizePhantomPoint(board, [0, 0], "circle");
+    const { circle } = content.realizePhantomPoint(board, [1, 0], "circle");
+    expect(circle?.getAttribute("colorScheme")).toBe(2);
+
+    // create a polygon
+    content.setSelectedColor(3, board);
+    const { polygon } = buildPolygon(board, content, [[0, 0], [1, 1], [1, 0]]);
+    expect(polygon?.getAttribute("colorScheme")).toBe(3);
+
+    destroyContentAndBoard(content, board);
+  })
+
+  it ("can change the color of a selected polygon, circle, or point", () => {
+    const { content, board } = createContentAndBoard();
+
+    // change color of polygon
+    const { points, polygon } = buildPolygon(board, content, [[0, 0], [1, 1], [1, 0]]);
+    const [p1, p2, p3] = points;
+    expect(content.lastObjectOfType("polygon")).toEqual(
+      { id: polygon?.id, type: "polygon", colorScheme: 0, points: [p1!.id, p2!.id, p3!.id],
+        labelOption: "none"
+       });
+    expect(polygon?.getAttribute("colorScheme")).toBe(0);
+    content.selectObjects(board, polygon!.id);
+    content.setSelectedColor(1, board);
+    expect(polygon.getAttribute("colorScheme")).toBe(1);
+    content.removeObjects(board, polygon!.id);
+
+    content.setSelectedColor(0, board);
+
+    // change color of circle
+    content.realizePhantomPoint(board, [0, 0], "circle");
+    const { circle } = content.realizePhantomPoint(board, [1, 0], "circle");
+    content.selectObjects(board, circle!.id);
+    content.setSelectedColor(2, board);
+    expect(circle?.getAttribute("colorScheme")).toBe(2);
+    content.removeObjects(board, circle!.id);
+
+    content.setSelectedColor(0, board);
+    // change color of a point
+    const { point: point3 } = content.realizePhantomPoint(board, [3, 3], "points");
+    content.selectObjects(board, point3!.id);
+    content.setSelectedColor(3, board);
+    expect(getObjectById(board, point3!.id)!.getAttribute("colorScheme")).toBe(3);
+
     destroyContentAndBoard(content, board);
   });
 
