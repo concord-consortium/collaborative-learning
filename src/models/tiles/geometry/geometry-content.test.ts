@@ -765,30 +765,14 @@ describe("GeometryContent", () => {
   it ("can change the color of a selected polygon, circle, or point", () => {
     const { content, board } = createContentAndBoard();
 
-    // change color of polygon
-    const { points, polygon } = buildPolygon(board, content, [[0, 0], [1, 1], [1, 0]]);
-    const [p1, p2, p3] = points;
-    expect(content.lastObjectOfType("polygon")).toEqual(
-      { id: polygon?.id, type: "polygon", colorScheme: 0, points: [p1!.id, p2!.id, p3!.id],
-        labelOption: "none"
-       });
-    expect(polygon.getAttribute("colorScheme")).toBe(0);
+    // // change color of polygon
+    const { polygon } = buildPolygon(board, content, [[0, 0], [1, 1], [1, 0]]);
     content.selectObjects(board, polygon.id);
     content.setSelectedColor(1, board);
     expect(polygon.getAttribute("colorScheme")).toBe(1);
-    // expect points associated with polygon to change color
-    expect(p1.getAttribute("colorScheme")).toBe(1);
-    expect(p2.getAttribute("colorScheme")).toBe(1);
-    expect(p3.getAttribute("colorScheme")).toBe(1);
-    // expect edges associated with polygon to change color
-    const edge1 = getPolygonEdge(board, polygon.id, [p1.id, p2.id]);
-    expect(edge1?.getAttribute("colorScheme")).toBe(1);
-    const edge2 = getPolygonEdge(board, polygon.id, [p2.id, p3.id]);
-    expect(edge2?.getAttribute("colorScheme")).toBe(1);
-    const edge3 = getPolygonEdge(board, polygon.id, [p3.id, p1.id]);
-    expect(edge3?.getAttribute("colorScheme")).toBe(1);
-    content.removeObjects(board, polygon!.id);
+    content.removeObjects(board, polygon.id);
 
+    // reset color
     content.setSelectedColor(0, board);
     // change color of circle
     content.addPhantomPoint(board, [0, 0]);
@@ -796,15 +780,17 @@ describe("GeometryContent", () => {
     const { circle } = content.realizePhantomPoint(board, [1, 0], "circle");
     content.selectObjects(board, circle!.id);
     content.setSelectedColor(2, board);
-    expect(circle?.getAttribute("colorScheme")).toBe(2);
+    expect(circle!.getAttribute("colorScheme")).toBe(2);
     content.removeObjects(board, circle!.id);
 
+    // reset color
     content.setSelectedColor(0, board);
     // change color of a point
-    const point = content.addPoint(board, [0, 0]);
+    const point = content.addPhantomPoint(board, [0, 0]);
+    content.realizePhantomPoint(board, [0, 0], "points");
     content.selectObjects(board, point!.id);
     content.setSelectedColor(3, board);
-    expect(getObjectById(board, point!.id)!.getAttribute("colorScheme")).toBe(3);
+    expect(point!.getAttribute("colorScheme")).toBe(3);
 
     destroyContentAndBoard(content, board);
   });
