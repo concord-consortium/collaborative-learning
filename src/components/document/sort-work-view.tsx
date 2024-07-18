@@ -3,12 +3,10 @@ import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
 import { useStores } from "../../hooks/use-stores";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
-import { DocumentModelType } from "../../models/document/document";
 import { DEBUG_DOC_LIST } from "../../lib/debug";
 import { SortWorkDocumentArea } from "./sort-work-document-area";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { DocListDebug } from "./doc-list-debug";
-import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { SortedDocuments } from "./sorted-documents";
 
 import "../thumbnail/document-type-collection.scss";
