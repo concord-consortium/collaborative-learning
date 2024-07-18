@@ -21,7 +21,7 @@ class SortedWork {
     return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(groupName).parent().parent().parent();
   }
   openSortWorkSection(sectionLabel) {
-    return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(sectionLabel).get(".section-header-right .section-header-arrow").click();
+    return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(sectionLabel).get(".section-header-right .section-header-arrow").click({multiple: true});
   }
   checkDocumentInGroup(groupName, doc) {
     this.getSortWorkGroup(groupName).find(".list .list-item .footer .info").should("contain", doc);
@@ -31,7 +31,7 @@ class SortedWork {
   }
   checkGroupIsEmpty(groupName){
     cy.get(".sort-work-view .sorted-sections .section-header-label")
-      .contains(groupName).parent().parent().parent().find(".list").should('be.empty');
+      .contains(groupName).parent().parent().parent.find(".list").should('be.empty');
   }
   checkGroupDoesNotExist(group) {
     cy.get(".sort-work-view .sorted-sections .section-header-label").should("not.contain", group);
