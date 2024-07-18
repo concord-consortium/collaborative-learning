@@ -34,7 +34,7 @@ $title-margin: 2px;
         height: 26px;
         width: calc(100% - 20px);
         border-radius: 5px 5px 0px 0px;
-        background-color: $violet-light-7;
+        background-color: $classwork-purple-light-7;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -42,19 +42,20 @@ $title-margin: 2px;
         z-index: 1;
         padding: 0px 7px;
 
-        .section-header-right {
+        .section-header-left {
           display: flex;
           align-items: center;
           font-weight: bold;
         }
 
-        .section-header-left {
+        .section-header-right {
           display: flex;
           align-items: center;
 
           .section-header-arrow {
             cursor: pointer;
-            fill: $violet-dark-1;
+            fill: $classwork-purple-dark-1;
+            margin-right: 0px;
             &.up {
               transform: rotate(180deg);
             }

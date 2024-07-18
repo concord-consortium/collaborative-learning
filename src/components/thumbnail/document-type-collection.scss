@@ -207,11 +207,11 @@ $section-padding: 6px;
 }
 .class-work .list-item {
   &:hover {
-    background-color: $violet-light-8;
+    background-color: $classwork-purple-light-8;
   }
   &:active,
   &.selected {
-    background-color: $violet-light-6;
+    background-color: $classwork-purple-light-6;
   }
 }
 .supports .list-item {

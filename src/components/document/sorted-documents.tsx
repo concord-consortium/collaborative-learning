@@ -28,7 +28,7 @@ export const SortedDocuments: React.FC<IProps> = observer(function SortedDocumen
     logDocumentViewEvent(document);
   };
 
-  const handleArrowClick = () => {
+  const handleToggleShowDocuments = () => {
     setShowDocuments(!showDocuments);
   };
 
@@ -36,10 +36,15 @@ export const SortedDocuments: React.FC<IProps> = observer(function SortedDocumen
     <div className="sorted-sections" key={`sortedSection-${idx}`}>
       <div className="section-header">
         <div className="section-header-label">
-        <div className="section-header-right">{sortedSection.icon ? <sortedSection.icon/>: null} {sortedSection.sectionLabel}</div>
         <div className="section-header-left">
+          {sortedSection.icon ? <sortedSection.icon/>: null} {sortedSection.sectionLabel}
+        </div>
+        <div className="section-header-right">
           <div>Total workspaces: {sortedSection.documents.length}</div>
-          <ArrowIcon className={classNames("section-header-arrow", {up: showDocuments})} onClick={handleArrowClick}/>
+          <ArrowIcon
+            className={classNames("section-header-arrow", {up: showDocuments})}
+            onClick={handleToggleShowDocuments}
+          />
         </div>
         </div>
       </div>

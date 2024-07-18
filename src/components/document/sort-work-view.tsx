@@ -55,12 +55,6 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
       break;
   }
 
-  //******************************* Click to Open Document  ***************************************
-  const handleSelectDocument = (document: DocumentModelType) => {
-    persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, document.key);
-    logDocumentViewEvent(document);
-  };
-
   const tabState = persistentUI.tabs.get(ENavTab.kSortWork);
   const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
   const showSortWorkDocumentArea = !!openDocumentKey;

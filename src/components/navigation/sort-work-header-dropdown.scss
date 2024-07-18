@@ -3,7 +3,7 @@
 .sort-work-header {
   height: 36px;
   width: 100%;
-  background-color: $violet-light-4;
+  background-color: $classwork-purple-light-4;
   display: flex;
 
   .header-text {
@@ -23,12 +23,12 @@
         min-width: 151px;
         width: auto;
         height: 26px;
-        background-color: $violet-light-4;
+        background-color: $classwork-purple-light-4;
         padding-left: 5px;
         font-weight: bold;
       }
       .header.show-list {
-        background-color: $violet-dark-1;
+        background-color: $classwork-purple-dark-1;
       }
 
       .list {
@@ -41,7 +41,7 @@
           padding-left:9px;
 
           &:hover {
-            background-color: $violet-light-5;
+            background-color: $classwork-purple-light-5;
           }
           &.selected {
             color:$charcoal-dark-2;
