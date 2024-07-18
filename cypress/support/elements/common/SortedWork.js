@@ -18,7 +18,10 @@ class SortedWork {
     return this.getSortWorkItem().contains(title);
   }
   getSortWorkGroup(groupName) {
-    return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(groupName).parent().parent();
+    return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(groupName).parent().parent().parent();
+  }
+  openSortWorkSection(sectionLabel) {
+    return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(sectionLabel).get(".section-header-right .section-header-arrow").click();
   }
   checkDocumentInGroup(groupName, doc) {
     this.getSortWorkGroup(groupName).find(".list .list-item .footer .info").should("contain", doc);
