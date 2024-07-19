@@ -15,9 +15,10 @@ import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { getDocumentContentFromNode } from "../../utilities/mst-utils";
+import "../../utilities/dom-utils";
+
 import TileDragHandle from "../../assets/icons/drag-tile/move.svg";
 import TileResizeHandle from "../../assets/icons/resize-tile/expand-handle.svg";
-import "../../utilities/dom-utils";
 import dragPlaceholderImage from "../../assets/image_drag.png";
 
 import "./tile-component.scss";
