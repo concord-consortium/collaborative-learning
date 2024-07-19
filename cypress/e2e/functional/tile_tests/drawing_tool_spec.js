@@ -214,7 +214,38 @@ context('Draw Tool Tile', function () {
       .trigger("pointerup", 260, 60);
     drawToolTile.getDrawToolDelete().click();
     drawToolTile.getVectorDrawing().should("not.exist");
+
+    cy.log("draws vector constrained to horizontal or vertical");
+    drawToolTile.getDrawToolVector().click();
+    drawToolTile.getDrawTile()
+      .trigger("pointerdown", 100, 100, { shiftKey: true })
+      .trigger("pointermove", 200, 110, { shiftKey: true }) // Y value is different, but should be constrained to horizontal
+      .trigger("pointerup",   200, 110, { shiftKey: true });
+    drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
+    drawToolTile.getVectorDrawing().get('line').invoke('attr', 'y1')
+      .then(y1 => {
+        drawToolTile.getVectorDrawing().get('line').invoke('attr', 'y2')
+        .should('eq', y1);
+      });
+    drawToolTile.getDrawToolDelete().click();
+    drawToolTile.getVectorDrawing().should("not.exist");
+
+    // Same for vertical vector
+    drawToolTile.getDrawToolVector().click();
+    drawToolTile.getDrawTile()
+      .trigger("pointerdown", 100, 25, { shiftKey: true })
+      .trigger("pointermove", 110, 125, { shiftKey: true }) // X value is different, but should be constrained to vertical
+      .trigger("pointerup",   110, 125, { shiftKey: true });
+    drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
+    drawToolTile.getVectorDrawing().get('line').invoke('attr', 'x1')
+      .then(x1 => {
+        drawToolTile.getVectorDrawing().get('line').invoke('attr', 'x2')
+        .should('eq', x1);
+      });
+    drawToolTile.getDrawToolDelete().click();
+    drawToolTile.getVectorDrawing().should("not.exist");
   });
+
   it("Rectangle", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");

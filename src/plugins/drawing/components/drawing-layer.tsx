@@ -388,6 +388,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       e2.preventDefault();
       window.removeEventListener("pointermove", handleResizeMove);
       window.removeEventListener("pointerup", handleResizecomplete);
+      handleResizeMove.flush(); // complete any movement pending in the debounce
       handle.classList.remove('active');
       object.resizeObject();
     };
