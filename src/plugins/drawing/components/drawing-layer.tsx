@@ -49,6 +49,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     implements IDrawingLayer {
   static contextType = MobXProviderContext;
   public tools: DrawingToolMap;
+  private viewRef: React.RefObject<HTMLDivElement>;
   private svgRef: React.RefObject<any>|null;
   private setSvgRef: (element: any) => void;
   private _isMounted: boolean;
@@ -70,6 +71,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       }
     });
 
+    this.viewRef = React.createRef();
     this.svgRef = null;
     this.setSvgRef = (element) => {
       this.svgRef = element;
@@ -77,6 +79,13 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public componentDidMount() {
+    // Prevent scrolling on touch devices
+    // For iPad, listeners must be registered as non-passive in order to prevent scrolling
+    // Check touches.length to allow scrolling with 2 fingers
+    this.viewRef.current?.addEventListener("touchstart", (e) => {
+      if (e.touches.length === 1) e.preventDefault(); }, { passive: false });
+    this.viewRef.current?.addEventListener("touchmove", (e) => {
+      if (e.touches.length === 1) e.preventDefault(); }, { passive: false });
     this._isMounted = true;
   }
 
@@ -432,10 +441,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       // We don't propagate pointer events to the tile, since the drawing layer
       // already handles selecting the tile when necessary and we don't want to
       // deselect it when shift-click is used to select multiple drawing objects.
-      <div className="drawing-layer"
+      <div ref={this.viewRef}
+          className="drawing-layer"
           data-testid="drawing-layer"
           onMouseDown={(e) => { e.stopPropagation(); }}
-          onTouchStart={(e) => { e.stopPropagation(); }}
           onPointerDown={this.handlePointerDown}
           onDragOver={this.handleDragOver}
           onDragLeave={this.handleDragLeave}
