@@ -23,17 +23,6 @@ function beforeTest(params) {
   cy.waitForLoad();
 }
 
-function addText(x, y, text) {
-  drawToolTile.getDrawToolText().last().click();
-  drawToolTile.getDrawTile().last()
-    .trigger("mousedown", x, y)
-    .trigger("mouseup", x, y);
-  drawToolTile.getDrawTile().last()
-    .trigger("mousedown", x, y)
-    .trigger("mouseup", x, y);
-  drawToolTile.getTextDrawing().get('textarea').type(text + "{enter}");
-}
-
 context('Exemplar Documents', function () {
   it('Unit with default config does not reveal exemplars or generate sticky notes', function () {
     beforeTest(queryParams2);
@@ -46,17 +35,17 @@ context('Exemplar Documents', function () {
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);
-    addText(300, 50, "one two three four five six seven eight nine ten");
+    drawToolTile.addText(300, 50, "one two three four five six seven eight nine ten");
 
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);
-    addText(300, 50, "one two three four five six seven eight nine ten");
+    drawToolTile.addText(300, 50, "one two three four five six seven eight nine ten");
 
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);
-    addText(300, 50, "one two three four five six seven eight nine ten");
+    drawToolTile.addText(300, 50, "one two three four five six seven eight nine ten");
 
     // No change, no sticky note
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
@@ -119,7 +108,7 @@ context('Exemplar Documents', function () {
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);
-    addText(300, 50, "one two three four five");
+    drawToolTile.addText(300, 50, "one two three four five");
 
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
@@ -127,7 +116,7 @@ context('Exemplar Documents', function () {
 
     // Still private?
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
-    addText(300, 50, "one two three four five");
+    drawToolTile.addText(300, 50, "one two three four five");
     // Now the exemplar should be revealed
     sortWork.getSortWorkItemByTitle(exemplarInfo).parents('.list-item').should("not.have.class", "private");
     clueCanvas.getStickyNotePopup().should("exist").should("be.visible")
