@@ -79,9 +79,12 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public componentDidMount() {
-    // Prevent scrolling on touch devices
-    // For iPad, listeners must be registered as non-passive in order to prevent scrolling
-    // Check touches.length to allow scrolling with 2 fingers
+    // Prevent drag events from scrolling the window on touch devices,
+    // since drag gestures are needed for various sketching functions.
+    // For iPad, listeners must be registered as non-passive in order to prevent scrolling, see
+    // https://stackoverflow.com/questions/49500339/prevent-scrolling-when-touching-the-screen-in-ios
+    // We check touches.length and only intercept events when there is a single touch.
+    // This should allow for pinch-to-zoom and scrolling with 2 fingers to still work.
     this.viewRef.current?.addEventListener("touchstart", (e) => {
       if (e.touches.length === 1) e.preventDefault(); }, { passive: false });
     this.viewRef.current?.addEventListener("touchmove", (e) => {
