@@ -24,11 +24,12 @@ The bookmarks are managed by `models/stores/bookmarks.ts` and `lib/db-listeners/
 
 `db-bookmark-listener.ts` listens to changes in `<class root>/offerings/<offering id>/commentaries/stars/`. There is a single Firebase listener for all of the offering's bookmarks.
 
-Previously only certain bookmarks were updated in Firebase:
+Before Feb 2024, only certain bookmarks were updated in Firebase:
 - personal documents loaded by the `db-other-docs-listener` bookmarks were sync'd
 - problem documents that are owned by the current user bookmarks were sync'd
 - publication document bookmarks were sync'd
-Document types not in that list would not sync their bookmarks before.
+Document types not in that list would not sync their bookmarks.
+The `v5.2.0` release fixed this and now all bookmarks are updated in Firebase.
 
 # Debugging
 
