@@ -7,6 +7,7 @@ import { TileToolbarButton } from "./tile-toolbar-button";
 import { BadgedIcon } from "./badged-icon";
 import { useConsumerTileLinking } from "../../hooks/use-consumer-tile-linking";
 import { getTileDataSet } from "../../models/shared/shared-data-utils";
+import { getTileCreateActionName } from "../../models/tiles/tile-content-info";
 
 import ViewBadgeIcon from "../../assets/icons/view/view-badge.svg";
 
@@ -24,7 +25,7 @@ export const DataSetLinkButton = observer(({name, args}: IProps) => {
   const model = useContext(TileModelContext)!;
 
   const newTileType = args?.[1];
-  const tooltip = `${newTileType} It!`;
+  const tooltip = getTileCreateActionName(newTileType);
 
   const dataSet = model && getTileDataSet(model.content);
   const hasLinkableRows = dataSet ? dataSet.attributes.length > 1 : false;

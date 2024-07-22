@@ -115,7 +115,7 @@ class DataCardToolTile {
     return cy.get(`${selector}`).eq(0);
   }
   getGraphItButton(tileIndex = 0, workspaceClass) {
-    return this.getToolbarButton('[data-original-title=\"graph It!\"]', tileIndex, workspaceClass);
+    return this.getToolbarButton('[data-original-title=\"Graph It!\"]', tileIndex, workspaceClass);
   }
   getGraphItModalTileMenu() {
     const selector = ".ReactModalPortal .modal-content select[data-test=link-tile-select]";

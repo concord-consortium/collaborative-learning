@@ -97,7 +97,7 @@ context('Geometry Tool', function () {
       });
 
     const newName = "Graph Tile";
-    geometryToolTile.getGraphTitle().first().should("contain", "Shapes Graph 1");
+    geometryToolTile.getGraphTitle().first().should("contain", "Coordinate Grid 1");
     geometryToolTile.getGraphTileTitle().first().click();
     geometryToolTile.getGraphTileTitle().first().type(newName + '{enter}');
     geometryToolTile.getGraphTitle().should("contain", newName);
@@ -369,14 +369,14 @@ context('Geometry Tool', function () {
 
     cy.log("edit tile title");
     const newName = "Graph Tile";
-    geometryToolTile.getGraphTitle().first().should("contain", "Shapes Graph 1");
+    geometryToolTile.getGraphTitle().first().should("contain", "Coordinate Grid 1");
     geometryToolTile.getGraphTileTitle().first().click();
     geometryToolTile.getGraphTileTitle().first().type(newName + '{enter}');
     geometryToolTile.getGraphTitle().should("contain", newName);
 
     cy.log("undo redo actions");
     clueCanvas.getUndoTool().click();
-    geometryToolTile.getGraphTitle().first().should("contain", "Shapes Graph 1");
+    geometryToolTile.getGraphTitle().first().should("contain", "Coordinate Grid 1");
     clueCanvas.getRedoTool().click();
     geometryToolTile.getGraphTitle().should("contain", "Graph Tile");
 

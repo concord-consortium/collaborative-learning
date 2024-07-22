@@ -14,7 +14,7 @@ import { getTileComponentInfo } from "../tiles/tile-component-info";
 
 import SparrowHeaderIcon from "../../assets/icons/sort-by-tools/sparrow-id.svg";
 
-type SortedDocument = {
+export type SortedDocument = {
   sectionLabel: string;
   documents: DocumentModelType[];
   icon?: React.FC<React.SVGProps<SVGSVGElement>>; //exists only in the "sort by tools" case

@@ -38,6 +38,7 @@ context('Exemplar Documents', function () {
   it('Unit with default config does not reveal exemplars or generate sticky notes', function () {
     beforeTest(queryParams2);
     cy.openTopTab('sort-work');
+    sortWork.openSortWorkSection("No Group");
     sortWork.checkDocumentInGroup("No Group", exemplarName);
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
     clueCanvas.getStickyNotePopup().should("not.exist");
@@ -66,6 +67,7 @@ context('Exemplar Documents', function () {
   it('Unit with exemplars hidden initially, revealed 3 drawings and 3 text tiles', function () {
     beforeTest(queryParams1);
     cy.openTopTab('sort-work');
+    sortWork.openSortWorkSection("No Group");
     sortWork.checkDocumentInGroup("No Group", exemplarName);
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
     clueCanvas.getStickyNotePopup().should("not.exist");
@@ -112,6 +114,7 @@ context('Exemplar Documents', function () {
   it('Exemplar revealed by 2 drawings that include labels', function () {
     beforeTest(queryParams1);
     cy.openTopTab('sort-work');
+    sortWork.openSortWorkSection("No Group");
     sortWork.checkDocumentInGroup("No Group", exemplarName);
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
 

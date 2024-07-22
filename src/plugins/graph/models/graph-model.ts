@@ -312,6 +312,9 @@ export const GraphModel = TileContentModel
       }
       return false;
     },
+    get isAnyAdornmentSelected() {
+      return self.adornments.some(adorn => adorn.hasSelectedInstances());
+    },
     /**
      * Return true if no attribute has been assigned to any graph role in any layer.
      */
@@ -531,6 +534,11 @@ export const GraphModel = TileContentModel
             dataset.setSelectedCells([]);
           }
         }
+      }
+    },
+    clearSelectedAdornmentInstances() {
+      for (const adorn of self.adornments) {
+        adorn.deleteSelected();
       }
     },
     setGraphProperties(props: GraphProperties) {

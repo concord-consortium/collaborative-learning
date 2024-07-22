@@ -3,6 +3,7 @@ import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { SharedDataSet } from "../../models/shared/shared-data-set";
 import { AddTilesContext, TileModelContext } from "../tiles/tile-api";
 import { TileToolbarButton } from "./tile-toolbar-button";
+import { getTileCreateActionName } from "../../models/tiles/tile-content-info";
 
 import ViewBadgeIcon from "../../assets/icons/view/view-badge.svg";
 
@@ -40,13 +41,13 @@ export const DataSetViewButton: React.FC<IProps> = ({args}) => {
     addTilesContext.addTileAfter(newTileType, tile, sharedModels);
   }
 
-  const newTileInfo = getTileComponentInfo(newTileType);
-  const Icon = newTileInfo?.Icon;
+  const title = getTileCreateActionName(newTileType);
+  const Icon = getTileComponentInfo(newTileType)?.Icon;
 
   return (
     <TileToolbarButton
         className="dataset-view-button" onClick={handleClick}
-        title={`${newTileType} It!`}>
+        title={title}>
       { Icon ? <Icon/> : "??" }
       <ViewBadgeIcon className="button-badge"/>
     </TileToolbarButton>
