@@ -19,7 +19,7 @@ export const SimpleDocumentItem = ({ document, investigationOrdinal, onSelectDoc
   const investigation = investigations[investigationOrdinal];
   const problem = investigation?.problems[problemOrdinal - 1];
   const title = document.title ? `${userName}: ${document.title}` : `${userName}: ${problem?.title ?? "unknown title"}`;
-  // TODO: Account for isPrivate. The below call to isAccessibleToUser won't currently work here.
+  // TODO: Account for and use isPrivate in the view. isAccessibleToUser won't currently work here.
   // const isPrivate = !document.isAccessibleToUser(user, documents);
 
   const handleClick = () => {

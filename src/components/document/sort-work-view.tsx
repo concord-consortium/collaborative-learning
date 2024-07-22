@@ -39,8 +39,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     sortedDocuments.updateMetaDataDocs(docFilter, unit.code, investigation.ordinal, problem.ordinal);
   },[sortedDocuments, sortBy, sortTagPrompt, docFilter, investigation, unit, problem]);
 
-  const primarySortItems: ICustomDropdownItem[] = sortOptions.map((option) => ({
-    selected: option === sortBy,
+  const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
     text: option,
     onClick: () => setSortBy(option)
   }));
@@ -84,7 +83,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
             filter={docFilter}
             filterItems={filterItems}
             primarySort={sortBy}
-            primarySortItems={primarySortItems}
+            primarySortItems={sortByOptions}
           />
           <div key={sortBy} className="tab-panel-documents-section">
             { renderedSortedDocuments &&

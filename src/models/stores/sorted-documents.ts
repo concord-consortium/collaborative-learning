@@ -1,4 +1,4 @@
-import { ObservableSet, makeAutoObservable, runInAction } from "mobx";
+import { ObservableSet, makeAutoObservable, runInAction, IObservableArray, observable } from "mobx";
 import { DocumentModelType } from "../document/document";
 import { isPublishedType, isSortableType, isUnpublishedType } from "../document/document-types";
 import { DocumentsModelType } from "./documents";
@@ -44,7 +44,7 @@ interface IMatchPropertiesOptions {
 export class SortedDocuments {
   stores: ISortedDocumentsStores;
   firestoreTagDocumentMap = new Map<string, Set<string>>();
-  firestoreMetadataDocs: any = [];
+  firestoreMetadataDocs: IObservableArray<DocumentModelType> = observable.array([]);
 
   constructor(stores: ISortedDocumentsStores) {
     makeAutoObservable(this);
@@ -209,7 +209,7 @@ export class SortedDocuments {
       const sectionLabel = tagWithDocs.tagValue;
       const docKeys = tagWithDocs.docKeysFoundWithTag;
       const docs = this.stores.docFilter === "Problem" ? this.documents.all : this.firestoreMetadataDocs;
-      const documents = docs.filter((doc: any) => docKeys.includes(doc.key));
+      const documents = docs.filter((doc: DocumentModelType) => docKeys.includes(doc.key));
       sortedDocsArr.push({
         sectionLabel,
         documents
@@ -261,17 +261,17 @@ export class SortedDocuments {
     const queryForUnitNull = db.collection("documents").where("context_id", "==", this.user.classHash)
                                                        .where("unit" , "==", null);
     const [docsWithUnit, docsWithoutUnit] = await Promise.all([query.get(), queryForUnitNull.get()]);
-    const docsArray: any = [];
+    const docsArray: DocumentModelType[] = [];
 
     const matchedDocKeys = new Set<string>();
     docsWithUnit.docs.forEach(doc => {
       if (matchedDocKeys.has(doc.data().key)) return;
-      docsArray.push(doc.data());
+      docsArray.push(doc.data() as DocumentModelType);
       matchedDocKeys.add(doc.data().key);
     });
     docsWithoutUnit.docs.forEach(doc => {
       if (matchedDocKeys.has(doc.data().key)) return;
-      docsArray.push(doc.data());
+      docsArray.push(doc.data() as DocumentModelType);
       matchedDocKeys.add(doc.data().key);
     });
 
