@@ -24,7 +24,7 @@ import {
   ELabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
 } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
-import { getAssociatedPolygon, getEdgeVisualProps, prepareToDeleteObjects } from "./jxg-polygon";
+import { getAssociatedPolygon, getEdgeVisualProps, getPolygonVisualProps, prepareToDeleteObjects, setPolygonEdgeColors } from "./jxg-polygon";
 import {
   isAxisArray, isBoard, isComment, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
@@ -41,6 +41,7 @@ import { appendVertexId, getPoint, filterBoardObjects, forEachBoardObject, getBo
 import { getPointVisualProps } from "./jxg-point";
 import { getVertexAngle } from "./jxg-vertex-angle";
 import { GeometryTileMode } from "../../../components/tiles/geometry/geometry-types";
+import { getCircleVisualProps } from "./jxg-circle";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -123,7 +124,7 @@ export const GeometryMetadataModel = TileMetadataModel
   }));
 export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 
-export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
+export function updateVisualProps(board: JXG.Board, id: string, selected: boolean) {
   const element = getObjectById(board, id);
   if (element) {
     let colorScheme = element.getAttribute("colorScheme")||0;
@@ -132,9 +133,21 @@ export function setElementColor(board: JXG.Board, id: string, selected: boolean)
         element.getAttribute("clientLabelOption"));
       element.setAttribute(props);
     } else if (isVisibleEdge(element)) {
-      colorScheme = getAssociatedPolygon(element)?.getAttribute("colorScheme")||0;
-      const props = getEdgeVisualProps(selected, colorScheme, false);
-      element.setAttribute(props);
+      const associatedPolygon = getAssociatedPolygon(element);
+      colorScheme = associatedPolygon?.getAttribute("colorScheme")||0;
+
+      const edgeProps = getEdgeVisualProps(selected, colorScheme, false);
+      element.setAttribute(edgeProps);
+
+      const polyProps = getPolygonVisualProps(selected, colorScheme);
+      associatedPolygon?.setAttribute(polyProps);
+    } else if (isPolygon(element)) {
+      const polyProps = getPolygonVisualProps(selected, colorScheme);
+      element.setAttribute(polyProps);
+      setPolygonEdgeColors(element);
+    } else if (isCircle(element)) {
+      const circleProps = getCircleVisualProps(selected, colorScheme);
+      element.setAttribute(circleProps);
     }
   }
 }
@@ -148,7 +161,9 @@ export const GeometryContentModel = GeometryBaseContentModel
   .volatile(self => ({
     metadata: undefined as any as GeometryMetadataModelType,
     // Used to force linkedDataSets() to update. Hope to remove in the future.
-    updateSharedModels: 0
+    updateSharedModels: 0,
+    showColorPalette: false,
+    selectedColor: 0,
   }))
   .actions(self => ({
     forceSharedModelUpdate() {
@@ -241,7 +256,7 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     getObjectColorScheme(id: string) {
       const obj = self.getObject(id);
-      if (isPointModel(obj) || isPolygonModel(obj) || isMovableLineModel(obj)) {
+      if (isPointModel(obj) || isPolygonModel(obj) || isMovableLineModel(obj) || isCircleModel(obj)) {
         return obj.colorScheme;
       }
       if (obj === undefined) {
@@ -250,10 +265,6 @@ export const GeometryContentModel = GeometryBaseContentModel
           return self.getColorSchemeForAttributeId(linkedColId);
         }
       }
-    },
-    // Color to use for new points. Placeholder for now until appropriate UI is added.
-    get newPointColorScheme() {
-      return 0;
     },
     getDependents(ids: string[], options?: { required: boolean }) {
       const { required = false } = options || {};
@@ -440,6 +451,9 @@ export const GeometryContentModel = GeometryBaseContentModel
       self.metadata.selection.forEach((value, id) => {
         self.deselectElement(board, id);
       });
+    },
+    setShowColorPalette(showOrHide: boolean) {
+      self.showColorPalette = showOrHide;
     }
   }))
   .extend(self => {
@@ -675,7 +689,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       const id = uniqueId();
       const props = {
         id,
-        colorScheme: self.newPointColorScheme,
+        colorScheme: self.selectedColor,
         isPhantom: true,
         clientLabelOption: ELabelOption.kNone,
         snapToGrid: true
@@ -1036,7 +1050,7 @@ export const GeometryContentModel = GeometryBaseContentModel
 
     function createPolygonIncludingPoint(board: JXG.Board, pointId: string) {
       if (!self.phantomPoint) return;
-      const colorScheme = self.getObjectColorScheme(pointId) || 0;
+      const colorScheme = self.getObjectColorScheme(pointId) || self.selectedColor;
       const polygonModel = PolygonModel.create({ points: [pointId], colorScheme });
       self.addObjectModel(polygonModel);
       self.activePolygonId = polygonModel.id;
@@ -1249,6 +1263,33 @@ export const GeometryContentModel = GeometryBaseContentModel
       };
       const elems = applyAndLogChange(board, change);
       return elems ? elems as JXG.GeometryElement[] : undefined;
+    }
+
+    function setSelectedColor(color: number) {
+      self.selectedColor = color;
+    }
+
+    function updateSelectedObjectsColor(board: JXG.Board, color: number) {
+      const selectedIds = self.getSelectedIds(board);
+      const targetIds: string[] = [];
+
+      selectedIds.forEach(id => {
+        const obj = self.getObject(id);
+        if (isPolygonModel(obj) || isPointModel(obj) || isCircleModel(obj)) {
+          obj.setColorScheme(color);
+          targetIds.push(id);
+        }
+      });
+
+      const change: JXGChange = {
+        operation: "update",
+        target: "object",
+        targetID: targetIds,
+        properties: { colorScheme: color }
+      };
+
+      applyAndLogChange(board, change);
+      targetIds.forEach(id => updateVisualProps(board, id, true));
     }
 
     function removeObjects(board: JXG.Board, ids: string | string[], links?: ILinkProperties) {
@@ -1643,6 +1684,8 @@ export const GeometryContentModel = GeometryBaseContentModel
         applyBatchChanges,
         syncChange,
         addComment,
+        setSelectedColor,
+        updateSelectedObjectsColor,
 
         suspendSync() {
           ++suspendCount;

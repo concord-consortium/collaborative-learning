@@ -1,0 +1,42 @@
+@import "../../../clue/data-colors.scss";
+
+@mixin icon-styling($color) {
+  &.toolbar-button {
+    .reactive-to-color-change {
+      fill: $color;
+    }
+  }
+}
+
+.blue {
+
+  @include icon-styling($data-blue);
+}
+
+.orange {
+  @include icon-styling($data-orange);
+}
+
+.green {
+  @include icon-styling($data-green);
+}
+
+.red {
+  @include icon-styling($data-red);
+}
+
+.yellow {
+  @include icon-styling($data-yellow);
+}
+
+.purple {
+  @include icon-styling($data-purple);
+}
+
+.indigo {
+  @include icon-styling($data-indigo);
+}
+
+.black {
+  @include icon-styling($data-black);
+}

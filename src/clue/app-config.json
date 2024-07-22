@@ -294,6 +294,7 @@
           "upload",
           "|",
           "duplicate",
+          "color",
           "label",
           "|",
           "add-data",
