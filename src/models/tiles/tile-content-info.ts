@@ -42,9 +42,15 @@ export interface ITileContentInfo {
    */
   displayName?: string;
   /**
+   * A shorter version of the name of the tile.
+   * This is used for action buttons, like "Graph It!"
+   * If not set, the displayName is used.
+   */
+  shortName?: string;
+  /**
    * used as the prefix when naming a new tile of this type, if titleBase
-   * isn't set the displayName is used. If both are not set then in most
-   * cases the type is used.
+   * isn't set the displayName or shortName is used.
+   * If none are not set then the type is used.
    */
   titleBase?: string;
   /**
@@ -91,6 +97,12 @@ export function getTileContentModels() {
 export function getTileTypes() {
   // the keys are toLowerCased(), so we look up the actual id
   return Object.values(gTileContentInfoMap).map(info => info.type);
+}
+
+export function getTileCreateActionName(type?: string) {
+  const info = getTileContentInfo(type);
+  const bestName = info?.shortName || info?.displayName || type || "Create";
+  return `${bestName} It!`;
 }
 
 export interface ITileExportOptions {

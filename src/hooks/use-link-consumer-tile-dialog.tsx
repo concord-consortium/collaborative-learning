@@ -6,6 +6,8 @@ import { ITileModel } from "../models/tiles/tile-model";
 import { SharedModelType } from "../models/shared/shared-model";
 import { getTileComponentInfo } from "../models/tiles/tile-component-info";
 import { BadgedIcon } from "../components/toolbar/badged-icon";
+import { getTileContentInfo, getTileCreateActionName } from "../models/tiles/tile-content-info";
+
 import LinkGraphIcon from "../clue/assets/icons/table/link-graph-icon.svg";
 import ViewBadgeIcon from "../assets/icons/view/view-badge.svg";
 
@@ -23,19 +25,20 @@ interface IContentProps {
   setSelectValue: React.Dispatch<React.SetStateAction<string>>;
   tileType?: string;
 }
+
+/**
+ * Content for the link/unlink/create modal dialog.
+ */
 const Content: React.FC<IContentProps>
               = ({ linkedTiles, selectValue, tileTitle, unlinkedTiles, setSelectValue, tileType })=> {
-  /**
-   * Content for the link/unlink/create modal dialog.
-   */
   const displayTileTitle = tileTitle || "this tile";
+  const typeDisplayName = (getTileContentInfo(tileType)?.displayName || tileType)?.toLowerCase();
   const selectElt = useRef<HTMLSelectElement>(null);
 
   let instructions, defaultOption;
   if (tileType) {
-    const lcTileType = tileType.toLowerCase();
-    instructions = `Select a ${lcTileType} to link or unlink.`;
-    defaultOption = `Select a ${lcTileType}`;
+    instructions = `Select a ${typeDisplayName} to link or unlink.`;
+    defaultOption = `Select a ${typeDisplayName}`;
   } else {
     instructions = `To link ${displayTileTitle} to another tile, select a tile from the link list.
      To unlink ${displayTileTitle} from another tile, select a tile from the unlink list.`;
@@ -92,6 +95,8 @@ export const useLinkConsumerTileDialog =
     ({ linkableTiles, model, modelToShare, tileType, onLinkTile, onUnlinkTile, onCreateTile }: IProps) => {
   const tileTitle = model.computedTitle;
   const [selectValue, setSelectValue] = useState("");
+  const tileComponentInfo = getTileComponentInfo(tileType);
+  const actionName = getTileCreateActionName(tileType);
 
   const handleClick = () => {
     if (selectValue === 'NEW') {
@@ -114,12 +119,12 @@ export const useLinkConsumerTileDialog =
 
   const primaryButtonText = modelToShare && isLinkedToTile(modelToShare, selectValue)
     ? 'Clear It!'
-    : tileType ? `${tileType} It!` : 'Link';
+    : tileType ? actionName : 'Link';
 
   // Builds an appopriate icon for the dialog.
   // Alternatively, we could consider requiring the caller to pass in an icon.
   const Icon: React.FC<any> = () => {
-    const baseIcon = tileType && getTileComponentInfo(tileType)?.Icon;
+    const baseIcon = tileComponentInfo?.Icon;
     if (baseIcon) {
       return <BadgedIcon Icon={baseIcon} Badge={ViewBadgeIcon}/>;
     } else {
@@ -138,7 +143,7 @@ export const useLinkConsumerTileDialog =
   const [showModal, hideModal] = useCustomModal({
     className: "link-tile",
     Icon,
-    title: tileType ? `${tileType} It!` : "Link or Unlink Tile",
+    title: tileType ? actionName : "Link or Unlink Tile",
     Content,
     contentProps: { linkedTiles, selectValue, tileTitle, tileType, unlinkedTiles, setSelectValue },
     buttons

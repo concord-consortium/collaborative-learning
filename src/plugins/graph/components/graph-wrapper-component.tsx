@@ -38,20 +38,6 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
   const xAttrType = content.config.attributeType("x");
   const yAttrType = content.config.attributeType("y");
 
-  const handleDelete = useCallback(() => {
-    content.clearSelectedCellValues();
-  }, [content]);
-
-  // One-time setup
-  useEffect(() => {
-    if (!readOnly) {
-      hotKeys.current.register({
-        "delete": handleDelete,
-        "backspace": handleDelete
-      });
-    }
-  }, [handleDelete, readOnly]);
-
   // This is used for locating Sparrow endpoints.
   const getDotCenter = useCallback((dotId: string) => {
     // FIXME Currently, getScreenX and getScreenY only handle numeric axes, so just bail if they are a different type.
@@ -92,6 +78,11 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
     }
   }, [content.adornments]);
 
+  const handleDelete = useCallback(() => {
+    content.clearSelectedAdornmentInstances();
+    content.clearSelectedCellValues();
+  }, [content]);
+
   const getScaledPosition = useCallback((pos: Point) => {
     const xScale = layout.getAxisScale('bottom') as ScaleLinear<number, number>;
     const yScale = layout.getAxisScale('left') as ScaleLinear<number, number>;
@@ -107,6 +98,16 @@ export const GraphWrapperComponent: React.FC<ITileProps> = observer(function(pro
       width: 2 * halfSide
     };
   }, [content, layout]);
+
+  // One-time setup
+  useEffect(() => {
+    if (!readOnly) {
+      hotKeys.current.register({
+        "delete": handleDelete,
+        "backspace": handleDelete
+      });
+    }
+  }, [handleDelete, readOnly]);
 
   useEffect(() => {
     onRegisterTileApi?.({

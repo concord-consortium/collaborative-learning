@@ -46,7 +46,7 @@ describe("DocumentContentModel", () => {
     expect(documentContent.tileMap.size).toBe(0);
     documentContent.addTile("text", { title: "Text 1" });
     expect(documentContent.tileMap.size).toBe(1);
-    documentContent.addTile("geometry", { title: "Shapes Graph 1" });
+    documentContent.addTile("geometry", { title: "Coordinate Grid 1" });
     expect(documentContent.tileMap.size).toBe(2);
     expect(documentContent.defaultInsertRow).toBe(2);
     const newRowTile = documentContent.addTile("table", { title: "Table 1" });
@@ -57,7 +57,7 @@ describe("DocumentContentModel", () => {
     expect(parsedContentExport()).toEqual({
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
-        { title: "Shapes Graph 1", content: { type: "Geometry", objects: {},
+        { title: "Coordinate Grid 1", content: { type: "Geometry", objects: {},
             linkedAttributeColors: {}, pointMetadata: {} } },
         { title: "Table 1", content: { type: "Table", columnWidths } },
         { title: "Sketch 1", content: { type: "Drawing", objects: [] } }
@@ -193,7 +193,7 @@ const sectionedContent = {
     "[Header:A, [Geometry, Text], Header:B, Text]": [
       { content: { isSectionHeader: true, sectionId: "A" } },
       [
-        { title: "Shapes Graph 1", content: { type: "Geometry" } },
+        { title: "Coordinate Grid 1", content: { type: "Geometry" } },
         { content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ],
       { content: { isSectionHeader: true, sectionId: "B" } },
@@ -203,7 +203,7 @@ const sectionedContent = {
       { content: { isSectionHeader: true, sectionId: "A" } },
       [
         { content: { type: "Text", format: "html", text: ["<p></p>"] } },
-        { title: "Shapes Graph 1", content: { type: "Geometry" } }
+        { title: "Coordinate Grid 1", content: { type: "Geometry" } }
       ],
       { content: { isSectionHeader: true, sectionId: "B" } },
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
@@ -466,10 +466,10 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);
 
-    content.addTile("geometry", { title: "Shapes Graph 1", insertRowInfo: { rowInsertIndex: 2 } });
+    content.addTile("geometry", { title: "Coordinate Grid 1", insertRowInfo: { rowInsertIndex: 2 } });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
-      { title: "Shapes Graph 1",
+      { title: "Coordinate Grid 1",
           content: { type: "Geometry", objects: {}, linkedAttributeColors: {}, pointMetadata: {} } },
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
@@ -482,7 +482,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Placeholder: "A" },
       { Header: "B"},
       [
-        { title: "Shapes Graph 1", content: { type: "Geometry", objects: {},
+        { title: "Coordinate Grid 1", content: { type: "Geometry", objects: {},
           linkedAttributeColors: {}, pointMetadata: {} } },
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ],
@@ -491,7 +491,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     content.moveTile(geometryId, { rowDropIndex: 1, rowDropLocation: "left", rowInsertIndex: 1 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
-        { title: "Shapes Graph 1", content: { type: "Geometry", objects: {},
+        { title: "Coordinate Grid 1", content: { type: "Geometry", objects: {},
           linkedAttributeColors: {}, pointMetadata: {} } },
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
@@ -508,7 +508,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "A"},
       [
         { content: { type: "Text", format: "html", text: ["<p></p>"] } },
-        { title: "Shapes Graph 1", content: { type: "Geometry", objects: {},
+        { title: "Coordinate Grid 1", content: { type: "Geometry", objects: {},
           linkedAttributeColors: {}, pointMetadata: {} } },
       ],
       { Header: "B"},
@@ -524,7 +524,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     content.deleteTile(tileId);
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
-      { title: "Shapes Graph 1", content: { type: "Geometry", objects: {},
+      { title: "Coordinate Grid 1", content: { type: "Geometry", objects: {},
         linkedAttributeColors: {}, pointMetadata: {} } },
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
