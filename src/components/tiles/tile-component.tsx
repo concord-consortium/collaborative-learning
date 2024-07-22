@@ -88,11 +88,21 @@ interface IDragTileButtonProps {
   hovered: boolean;
   selected: boolean;
   onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+  handleTileDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
+  triggerResizeHandler: () => void;
 }
-const DragTileButton = ({ divRef, hovered, selected, onClick }: IDragTileButtonProps) => {
+const DragTileButton = (
+    { divRef, hovered, selected, onClick, handleTileDragStart, triggerResizeHandler }: IDragTileButtonProps) => {
   const classes = classNames("tool-tile-drag-handle", { hovered, selected });
   return (
-    <div className={`tool-tile-drag-handle-wrapper`} ref={divRef} onClick={onClick}>
+    <div className={`tool-tile-drag-handle-wrapper`}
+      ref={divRef}
+      onClick={onClick}
+      onDragStart={handleTileDragStart}
+      onDragEnd={triggerResizeHandler}
+      draggable={true}
+      aria-label="Drag to move tile"
+    >
       <TileDragHandle className={classes} />
     </div>
   );
@@ -109,7 +119,12 @@ const ResizeTileButton =
   ({ divRef, hovered, selected, onDragStart }: IResizeTileButtonProps) => {
   const classes = classNames("tool-tile-resize-handle", { hovered, selected });
   return (
-    <div className={`tool-tile-resize-handle-wrapper`} ref={divRef} onDragStart={onDragStart}>
+    <div className={`tool-tile-resize-handle-wrapper`}
+      ref={divRef}
+      draggable={true}
+      onDragStart={onDragStart}
+      aria-label="Drag to resize tile"
+    >
       <TileResizeHandle className={classes} />
     </div>
   );
@@ -198,9 +213,14 @@ export class TileComponent extends BaseComponent<IProps, IState> {
                       "selected-for-comment": tileSelectedForComment});
     const isDraggable = !isPlaceholderTile && !appConfig.disableTileDrags;
     const dragTileButton = isDraggable &&
-                            <DragTileButton divRef={elt => this.dragElement = elt}
-                              hovered={hoverTile} selected={isTileSelected}
-                              onClick={e => ui.setSelectedTile(model, {append: hasSelectionModifier(e)})} />;
+                            <DragTileButton
+                              divRef={elt => this.dragElement = elt}
+                              hovered={hoverTile}
+                              selected={isTileSelected}
+                              onClick={e => ui.setSelectedTile(model, {append: hasSelectionModifier(e)})}
+                              handleTileDragStart={this.handleTileDragStart}
+                              triggerResizeHandler={this.triggerResizeHandler}
+                              />;
     const resizeTileButton = isUserResizable &&
                               <ResizeTileButton divRef={elt => this.resizeElement = elt}
                                 hovered={hoverTile}
@@ -221,9 +241,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
             onMouseEnter={isDraggable ? e => this.setState({ hoverTile: true }) : undefined}
             onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
             onKeyDown={this.handleKeyDown}
-            onDragStart={this.handleTileDragStart}
-            onDragEnd={this.triggerResizeHandler}
-            draggable={true}
         >
           {this.renderLinkIndicators()}
           {dragTileButton}
