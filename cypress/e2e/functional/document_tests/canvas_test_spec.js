@@ -302,11 +302,12 @@ context('Test Canvas', function () {
     cy.log('will drag image from resource panel to canvas');
     resourcesPanel.openTopTab('problems');
     resourcesPanel.openBottomTab("Now What Do You Know?");
-    resourcesPanel.getResourcesPanelExpandedSpace().find('.image-tool').first()
+    resourcesPanel.getResourcesPanelExpandedSpace().find('.image-tool-tile').first().click();
+    resourcesPanel.getResourcesPanelExpandedSpace().find('.image-tool-tile').first().find('.tool-tile-drag-handle')
       .trigger('dragstart', { dataTransfer });
     cy.get('.single-workspace .canvas .document-content').first()
       .trigger('drop', { force: true, dataTransfer });
-    resourcesPanel.getResourcesPanelExpandedSpace().find('.image-tool').first()
+    resourcesPanel.getResourcesPanelExpandedSpace().find('.image-tool-tile').first().find('.tool-tile-drag-handle')
       .trigger('dragend');
     imageToolTile.getImageTile().should('exist');
     imageToolTile.getImageTile().find('.editable-tile-title-text').contains('Did You Know?: Measurement in police work');
@@ -322,7 +323,7 @@ context('Test Canvas', function () {
     leftTile('table').eq(2).click({ shiftKey: true });
 
     // Drag the selected copies to the workspace on the right
-    leftTile('table').eq(2).trigger('dragstart', { dataTransfer });
+    leftTile('table').eq(2).find('.tool-tile-drag-handle').trigger('dragstart', { dataTransfer });
     cy.get('.single-workspace .canvas .document-content').first()
       .trigger('drop', { force: true, dataTransfer });
 
@@ -344,7 +345,7 @@ context('Test Canvas', function () {
     leftTile('table').first().click();
 
     // Drag the selected copies to the workspace on the right
-    leftTile('table').first().trigger('dragstart', { dataTransfer });
+    leftTile('table').first().find('.tool-tile-drag-handle').trigger('dragstart', { dataTransfer });
     cy.get('.single-workspace .canvas .document-content').first()
       .trigger('drop', { force: true, dataTransfer });
 

@@ -154,7 +154,7 @@ context('Diagram Tool Tile', function () {
     const dataTransfer = new DataTransfer;
     const draggable = () => diagramTile.getDraggableToolbarButton();
     draggable().focus().trigger("dragstart", { dataTransfer });
-    diagramTile.getDiagramTile().trigger("drop", { dataTransfer });
+    diagramTile.getDiagramTile().find('.drop-target').trigger("drop", { dataTransfer });
     draggable().trigger("dragend");
     diagramTile.getVariableCard().should("exist");
 

@@ -87,17 +87,15 @@ interface IDragTileButtonProps {
   divRef: (instance: HTMLDivElement | null) => void;
   hovered: boolean;
   selected: boolean;
-  onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
   handleTileDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
   triggerResizeHandler: () => void;
 }
 const DragTileButton = (
-    { divRef, hovered, selected, onClick, handleTileDragStart, triggerResizeHandler }: IDragTileButtonProps) => {
+    { divRef, hovered, selected, handleTileDragStart, triggerResizeHandler }: IDragTileButtonProps) => {
   const classes = classNames("tool-tile-drag-handle", { hovered, selected });
   return (
     <div className={`tool-tile-drag-handle-wrapper`}
       ref={divRef}
-      onClick={onClick}
       onDragStart={handleTileDragStart}
       onDragEnd={triggerResizeHandler}
       draggable={true}
@@ -217,7 +215,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
                               divRef={elt => this.dragElement = elt}
                               hovered={hoverTile}
                               selected={isTileSelected}
-                              onClick={e => ui.setSelectedTile(model, {append: hasSelectionModifier(e)})}
                               handleTileDragStart={this.handleTileDragStart}
                               triggerResizeHandler={this.triggerResizeHandler}
                               />;
@@ -372,21 +369,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
       return;
     }
 
-    // tile dragging can be disabled for individual tiles
-    const target: HTMLElement | null = e.target as HTMLElement;
-    if (!target || target.querySelector(".disable-tile-drag")) {
-      e.preventDefault();
-      return;
-    }
-    // tile dragging can be disabled for individual tile contents,
-    // which only allows those tiles to be dragged by their drag handle
-    if (target?.closest(".disable-tile-content-drag")) {
-      const eltTarget = document.elementFromPoint(e.clientX, e.clientY);
-      if (!eltTarget?.closest(".tool-tile-drag-handle")) {
-        e.preventDefault();
-        return;
-      }
-    }
     // set the drag data
     const { model, docId } = this.props;
 
