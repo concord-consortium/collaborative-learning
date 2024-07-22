@@ -170,5 +170,8 @@ class GeometryToolTile {
     addComment(){
         cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.comment.enabled').click();
     }
+    selectColor(color){
+      return cy.get(`[data-test=canvas] .tile-toolbar .toolbar-button.color .palette-buttons .color-swatch.${color}`).click();
+    }
 }
 export default GeometryToolTile;

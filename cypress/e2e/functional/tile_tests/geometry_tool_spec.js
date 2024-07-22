@@ -10,6 +10,9 @@ const geometryToolTile = new GeometryToolTile;
 const primaryWorkspace = new PrimaryWorkspace;
 const resourcePanel = new ResourcePanel;
 
+const green  = "#19a90f";
+const red   = "#ee0000";
+
 const problemDoc = 'QA 1.1 Solving a Mystery with Proportional Reasoning';
 const ptsDoc = 'Points';
 
@@ -41,6 +44,19 @@ context('Geometry Tool', function () {
     geometryToolTile.clickGraphPosition(10, 5);
     geometryToolTile.clickGraphPosition(10, 10);
 
+    cy.log("draw a point with the correct color");
+    clueCanvas.clickToolbarButton('geometry', 'color');
+    geometryToolTile.selectColor('red');
+    clueCanvas.clickToolbarButton('geometry', 'point');
+    geometryToolTile.clickGraphPosition(7, 7);
+    geometryToolTile.getGraphPoint().last().should("have.attr", "fill", red);
+
+    cy.log("select a point and change its color");
+    geometryToolTile.selectGraphPoint(7, 7);
+    clueCanvas.clickToolbarButton('geometry', 'color');
+    geometryToolTile.selectColor('green');
+    geometryToolTile.getGraphPoint().last().should("have.attr", "fill", green);
+
     cy.log("copy a point to the clipboard");
     let clipSpy;
     cy.window().then((win) => {
@@ -64,7 +80,7 @@ context('Geometry Tool', function () {
 
     cy.log("verify restore of multiple points");
     cy.openDocumentWithTitle('my-work', 'workspaces', ptsDoc);
-    geometryToolTile.getGraphPoint().should('have.length', 3);
+    geometryToolTile.getGraphPoint().should('have.length', 4);
 
     cy.log("select a point");
     let point = 4;
@@ -92,7 +108,7 @@ context('Geometry Tool', function () {
     cy.waitForLoad();
 
     geometryToolTile.getGraphTitle().should("contain", newName);
-    geometryToolTile.getGraphPoint().should('have.length', 3);
+    geometryToolTile.getGraphPoint().should('have.length', 4);
 
     // Zoom in and out, fit
     geometryToolTile.getGraphTileTitle().click();
@@ -231,6 +247,12 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPointLabel().contains('AB').should('not.exist');
     geometryToolTile.getGraphPointLabel().contains('5').should('not.exist');
 
+    // Change color of polygon
+    geometryToolTile.selectGraphPoint(7, 6); // click middle of polygon to select it
+    clueCanvas.clickToolbarButton('geometry', 'color');
+    geometryToolTile.selectColor('green');
+    geometryToolTile.getGraphPolygon().should("have.attr", "fill", green);
+
     // Duplicate polygon
     clueCanvas.clickToolbarButton('geometry', 'select');
     geometryToolTile.selectGraphPoint(7, 6); // click middle of polygon to select it
@@ -291,6 +313,12 @@ context('Geometry Tool', function () {
     // Click inside circle to select
     geometryToolTile.selectGraphPoint(7, 7);
     geometryToolTile.getSelectedGraphPoint().should("have.length", 2);
+
+    // Change color of circle
+    clueCanvas.clickToolbarButton('geometry', 'color');
+    geometryToolTile.selectColor('red');
+    cy.get('.single-workspace .geometry-content.editable ellipse[fill-opacity="0.3"').should("have.attr", "fill", red); // selected circle has fill-opacity="0.3"
+
     // Delete circle
     clueCanvas.clickToolbarButton('geometry', 'delete');
     geometryToolTile.getGraphCircle().should("have.length", 0);
