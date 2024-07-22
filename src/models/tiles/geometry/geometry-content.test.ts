@@ -21,7 +21,6 @@ import placeholderImage from "../../../assets/image_placeholder.png";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../../register-tile-types";
-import { getObjectById } from "./jxg-board";
 registerTileTypes(["Geometry"]);
 
 // Need to mock this so the placeholder that is added to the cache

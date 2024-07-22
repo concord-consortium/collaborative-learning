@@ -1108,7 +1108,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     if (selectedObjects.length > 0) {
       this.applyChange(() => {
         content.updateSelectedObjectsColor(board, color);
-      })
+      });
     }
   };
 
