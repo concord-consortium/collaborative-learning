@@ -131,6 +131,7 @@ describe('Sorted Documents Model', () => {
       documents: { all: mockDocuments },
       groups: mockGroups,
       class: mockClass,
+      docFilter: "Problem"
     };
 
     sortedDocuments = new SortedDocuments(mockStores as ISortedDocumentsStores);

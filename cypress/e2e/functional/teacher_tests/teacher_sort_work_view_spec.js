@@ -66,6 +66,28 @@ describe('SortWorkView Tests', () => {
     sortWork.getSortWorkItem().should('be.visible'); // Verify the document is closed
   });
 
+  it.only("should open Sort Work tab and test showing by Problem, Investigation, Unit, All", () => {
+    beforeTest(queryParams1);
+
+    sortWork.getShowForMenu().should("be.visible");
+    sortWork.getShowForProblemOption().should("have.class", "selected"); // "Problem" selected by default
+    sortWork.getShowForInvestigationOption().should("exist");
+    sortWork.getShowForUnitOption().should("exist");
+    sortWork.getShowForAllOption().should("exist");
+
+    cy.get(".section-header-arrow").click({multiple: true}); // Open the sections
+    // For the "Problem" option, the documents should be listed using the larger thumbnail view
+    // [data-test=sort-work-list-items] should have a length greater than 0
+    cy.get("[data-test=sort-work-list-items]").should("have.length.greaterThan", 0);
+    cy.get("[data-test=simple-document-item]").should("not.exist");
+    sortWork.getShowForMenu().click();
+    cy.wait(500);
+    sortWork.getShowForInvestigationOption().click();
+    cy.wait(500);
+    cy.get("[data-test=sort-work-list-items]").should("not.exist");
+    cy.get("[data-test=simple-document-item]").should("have.length.greaterThan", 0);
+  });
+
 
   it("should open Sort Work tab and test sorting by group", () => {
     // Clear data before the test so it can be retried and will start with a clean slate

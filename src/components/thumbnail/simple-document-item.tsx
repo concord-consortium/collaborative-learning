@@ -27,6 +27,12 @@ export const SimpleDocumentItem = ({ document, investigationOrdinal, onSelectDoc
   };
 
   return (
-    <div className="simple-document-item" title={title} onClick={handleClick}></div>
+    <div
+      className="simple-document-item"
+      data-test="simple-document-item"
+      title={title}
+      onClick={handleClick}
+    >
+    </div>
   );
 };

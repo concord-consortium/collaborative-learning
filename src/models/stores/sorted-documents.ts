@@ -264,14 +264,15 @@ export class SortedDocuments {
     const docsArray: DocumentModelType[] = [];
 
     const matchedDocKeys = new Set<string>();
+    const propertiesPlaceholder = new Map();
     docsWithUnit.docs.forEach(doc => {
       if (matchedDocKeys.has(doc.data().key)) return;
-      docsArray.push(doc.data() as DocumentModelType);
+      docsArray.push({...doc.data(), properties: propertiesPlaceholder} as DocumentModelType);
       matchedDocKeys.add(doc.data().key);
     });
     docsWithoutUnit.docs.forEach(doc => {
       if (matchedDocKeys.has(doc.data().key)) return;
-      docsArray.push(doc.data() as DocumentModelType);
+      docsArray.push({...doc.data(), properties: propertiesPlaceholder} as DocumentModelType);
       matchedDocKeys.add(doc.data().key);
     });
 
