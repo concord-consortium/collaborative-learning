@@ -29,7 +29,7 @@ registerTileContentInfo({
 registerTileComponentInfo({
   type: kDiagramTileType,
   Component: DiagramToolComponent,
-  tileEltClass: "diagram-tool-tile disable-tile-content-drag nowheel",
+  tileEltClass: "diagram-tool-tile nowheel",
   Icon,
   HeaderIcon
 });
