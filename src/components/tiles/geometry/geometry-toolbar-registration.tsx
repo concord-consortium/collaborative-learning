@@ -8,6 +8,9 @@ import { useProviderTileLinking } from "../../../hooks/use-provider-tile-linking
 import { useReadOnlyContext } from "../../document/read-only-context";
 import { useTileModelContext } from "../hooks/use-tile-model-context";
 import { GeometryTileMode } from "./geometry-types";
+import { ColorPalette } from "./color-palette";
+import { clueDataColorInfo } from "../../../utilities/color-utils";
+import { GeometryContentModelType } from "src/models/tiles/geometry/geometry-content";
 
 import AddImageSvg from "../../../clue/assets/icons/geometry/add-image-icon.svg";
 import CommentSvg from "../../../assets/icons/comment/comment.svg";
@@ -24,10 +27,12 @@ import AddDataSvg from "../../../assets/icons/add-data-graph-icon.svg";
 import ZoomInSvg from "../../../clue/assets/icons/zoom-in-icon.svg";
 import ZoomOutSvg from "../../../clue/assets/icons/zoom-out-icon.svg";
 import FitAllSvg from "../../../clue/assets/icons/fit-view-icon.svg";
-import { ColorPalette } from "./color-palette";
-import { clueDataColorInfo } from "../../../utilities/color-utils";
 
 import "./geometry-toolbar.scss";
+
+function getColorClass (content: GeometryContentModelType | undefined) {
+  return content?.selectedColor ? clueDataColorInfo[content.selectedColor].name : undefined;
+}
 
 function ModeButton({name, title, targetMode, Icon, colorClass}:
   { name: string, title: string, targetMode: GeometryTileMode, Icon: FunctionComponent<SVGProps<SVGSVGElement>>, colorClass?: string }) {
@@ -62,25 +67,23 @@ const SelectButton = observer(function SelectButton({name}: IToolbarButtonCompon
 
 const PointButton = observer(function PointButton({name}: IToolbarButtonComponentProps) {
   const { content } = useGeometryTileContext();
-  const colorClass = clueDataColorInfo[content?.selectedColor || 0].name;
+  const colorClass = getColorClass(content);
   return(<ModeButton name={name} title="Point" targetMode="points" Icon={PointSvg} colorClass={colorClass} />);
 });
 
 const PolygonButton = observer(function PolygonButton({name}: IToolbarButtonComponentProps) {
   const { content } = useGeometryTileContext();
-  const colorClass = clueDataColorInfo[content?.selectedColor || 0].name;
+  const colorClass = getColorClass(content);
   return(<ModeButton name={name} title="Polygon" targetMode="polygon" Icon={PolygonSvg} colorClass={colorClass}/>);
 });
 
 const ColorChangeButton = observer(function ColorChangeButton({name}: IToolbarButtonComponentProps) {
   const { content, handlers } = useGeometryTileContext();
+  const colorClass = getColorClass(content);
+
 
   const handleClick = () => {
-    if (content?.showColorPalette) {
-      handlers?.handleSetShowColorPalette(false);
-    } else {
-      handlers?.handleSetShowColorPalette(true);
-    }
+    handlers?.handleSetShowColorPalette(!content?.showColorPalette);
   };
 
   return (
@@ -88,7 +91,7 @@ const ColorChangeButton = observer(function ColorChangeButton({name}: IToolbarBu
       name={name}
       title="Color"
       onClick={handleClick}
-      colorClass={content?.selectedColor ? clueDataColorInfo[content.selectedColor].name : undefined}
+      colorClass={colorClass}
     >
       <ShapesColorIcon/>
       {content?.showColorPalette &&

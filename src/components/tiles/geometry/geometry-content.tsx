@@ -1097,11 +1097,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private handleColorChange = (color: number) => {
     const { board } = this.state;
+    const content = this.getContent();
     if (!board) return;
 
     this.applyChange(() => {
-      this.getContent().setSelectedColor(color, board);
+      content.setSelectedColor(color);
     });
+
+    const selectedObjects = content.selectedObjects(board);
+    if (selectedObjects.length > 0) {
+      this.applyChange(() => {
+        content.updateSelectedObjectsColor(board, color);
+      })
+    }
   };
 
   private handleDelete = () => {

@@ -266,10 +266,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         }
       }
     },
-    // Color to use for new points. Placeholder for now until appropriate UI is added.
-    get newPointColorScheme() {
-      return 0;
-    },
     getDependents(ids: string[], options?: { required: boolean }) {
       const { required = false } = options || {};
       let dependents = [...ids];
@@ -1269,23 +1265,31 @@ export const GeometryContentModel = GeometryBaseContentModel
       return elems ? elems as JXG.GeometryElement[] : undefined;
     }
 
-    function setSelectedColor (color: number, board: JXG.Board) {
+    function setSelectedColor(color: number) {
       self.selectedColor = color;
+    }
+
+    function updateSelectedObjectsColor(board: JXG.Board, color: number) {
       const selectedIds = self.getSelectedIds(board);
+      const targetIds: string[] = [];
+
       selectedIds.forEach(id => {
         const obj = self.getObject(id);
         if (isPolygonModel(obj) || isPointModel(obj) || isCircleModel(obj)) {
           obj.setColorScheme(color);
-          const change: JXGChange = {
-            operation: "update",
-            target: "object",
-            targetID: id,
-            properties: { colorScheme: color }
-          };
-          applyAndLogChange(board, change);
-          updateVisualProps(board, id, true);
+          targetIds.push(id);
         }
       });
+
+      const change: JXGChange = {
+        operation: "update",
+        target: "object",
+        targetID: targetIds,
+        properties: { colorScheme: color }
+      };
+
+      applyAndLogChange(board, change);
+      targetIds.forEach(id => updateVisualProps(board, id, true));
     }
 
     function removeObjects(board: JXG.Board, ids: string | string[], links?: ILinkProperties) {
@@ -1681,6 +1685,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         syncChange,
         addComment,
         setSelectedColor,
+        updateSelectedObjectsColor,
 
         suspendSync() {
           ++suspendCount;
