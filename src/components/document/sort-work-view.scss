@@ -37,15 +37,35 @@ $title-margin: 2px;
         position: absolute;
         left: 10px;
         height: 26px;
-        border-radius: 5px;
+        width: calc(100% - 20px);
+        border-radius: 5px 5px 0px 0px;
         background-color: $classwork-purple-light-7;
-        font-weight: bold;
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
         color: $charcoal-dark-2;
         z-index: 1;
         padding: 0px 7px;
+
+        .section-header-left {
+          display: flex;
+          align-items: center;
+          font-weight: bold;
+        }
+
+        .section-header-right {
+          display: flex;
+          align-items: center;
+
+          .section-header-arrow {
+            cursor: pointer;
+            fill: $classwork-purple-dark-1;
+            margin-right: 0px;
+            &.up {
+              transform: rotate(180deg);
+            }
+          }
+        }
       }
     }
   }
