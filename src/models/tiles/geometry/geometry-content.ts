@@ -1285,7 +1285,8 @@ export const GeometryContentModel = GeometryBaseContentModel
         operation: "update",
         target: "object",
         targetID: targetIds,
-        properties: { colorScheme: color }
+        properties: { colorScheme: color },
+        userAction: "change color"
       };
 
       applyAndLogChange(board, change);
