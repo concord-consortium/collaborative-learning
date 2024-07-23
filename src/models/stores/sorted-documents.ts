@@ -337,7 +337,6 @@ export class SortedDocuments {
             addDocByType(doc, "No Tools");
           }
         }
-      //}
     });
 
     // Map the tile types to their display names

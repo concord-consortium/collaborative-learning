@@ -66,7 +66,7 @@ describe('SortWorkView Tests', () => {
     sortWork.getSortWorkItem().should('be.visible'); // Verify the document is closed
   });
 
-  it.only("should open Sort Work tab and test showing by Problem, Investigation, Unit, All", () => {
+  it("should open Sort Work tab and test showing by Problem, Investigation, Unit, All", () => {
     beforeTest(queryParams1);
 
     sortWork.getShowForMenu().should("be.visible");
