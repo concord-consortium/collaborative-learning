@@ -14,7 +14,7 @@ export const ColorSwatch: React.FC<IProps> = ({ color, isSelected, onSelectColor
 
   return (
     <div
-      className={classNames("color-swatch",
+      className={classNames("color-swatch", name,
       { selected: isSelected })}
       onClick={() =>
       onSelectColor(index)}
