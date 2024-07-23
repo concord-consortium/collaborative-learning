@@ -55,8 +55,8 @@ export const DocumentModel = Tree.named("Document")
     changeCount: types.optional(types.number, 0),
     pubVersion: types.maybe(types.number),
     supportContentType: types.maybe(types.enumeration<ESupportType>("SupportType", Object.values(ESupportType))),
-    strategies: types.maybe(types.array(types.string)),
-    tileTypes: types.maybe(types.array(types.string))
+    problemOrdinal: types.maybe(types.string),
+    unit: types.maybe(types.string),
   })
   .volatile(self => ({
     treeMonitor: undefined as TreeMonitor | undefined,
@@ -316,6 +316,10 @@ export const DocumentModel = Tree.named("Document")
 
 export type DocumentModelType = Instance<typeof DocumentModel>;
 export type DocumentModelSnapshotType = SnapshotIn<typeof DocumentModel>;
+
+export const isDocumentModel = (document: any): document is DocumentModelType => {
+  return DocumentModel.is(document);
+};
 
 export const getDocumentContext = (document: DocumentModelType): IDocumentContext => {
   const { type, key, title, originDoc } = document;

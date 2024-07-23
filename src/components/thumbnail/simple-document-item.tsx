@@ -1,14 +1,14 @@
 import React from "react";
+import { IDocumentMetadata } from "../../../functions/src/shared";
 import { useStores } from "../../hooks/use-stores";
-import { DocumentModelType } from "../../models/document/document";
 
 import "./simple-document-item.scss";
 
 interface IProps {
-  document: DocumentModelType;
+  document: IDocumentMetadata;
   investigationOrdinal: number;
   problemOrdinal: number;
-  onSelectDocument: (document: DocumentModelType) => void;
+  onSelectDocument: (document: IDocumentMetadata) => void;
 }
 
 export const SimpleDocumentItem = ({ document, investigationOrdinal, onSelectDocument, problemOrdinal }: IProps) => {

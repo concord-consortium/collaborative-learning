@@ -1,23 +1,23 @@
 import { ObservableSet, makeAutoObservable, runInAction, IObservableArray, observable } from "mobx";
-import { DocumentModelType } from "../document/document";
-import { isPublishedType, isSortableType, isUnpublishedType } from "../document/document-types";
+import { isSortableType } from "../document/document-types";
 import { DocumentsModelType } from "./documents";
 import { GroupsModelType } from "./groups";
 import { ClassModelType } from "./class";
 import { DB } from "../../lib/db";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
-import { ENavTabOrder, NavTabSectionModelType } from "../view/nav-tabs";
 import { UserModelType } from "./user";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { DocFilterType } from "./ui-types";
+import { IDocumentMetadata } from "../../../functions/src/shared";
+import { typeConverter } from "../../utilities/db-utils";
 
 import SparrowHeaderIcon from "../../assets/icons/sort-by-tools/sparrow-id.svg";
 
 export type SortedDocument = {
   sectionLabel: string;
-  documents: DocumentModelType[];
+  documents: IDocumentMetadata[];
   icon?: React.FC<React.SVGProps<SVGSVGElement>>; //exists only in the "sort by tools" case
 }
 
@@ -38,13 +38,10 @@ export interface ISortedDocumentsStores {
   user: UserModelType;
 }
 
-interface IMatchPropertiesOptions {
-  isTeacherDocument?: boolean;
-}
 export class SortedDocuments {
   stores: ISortedDocumentsStores;
   firestoreTagDocumentMap = new Map<string, Set<string>>();
-  firestoreMetadataDocs: IObservableArray<DocumentModelType> = observable.array([]);
+  firestoreMetadataDocs: IObservableArray<IDocumentMetadata> = observable.array([]);
 
   constructor(stores: ISortedDocumentsStores) {
     makeAutoObservable(this);
@@ -74,9 +71,14 @@ export class SortedDocuments {
     return this.stores.user;
   }
 
-  get filteredDocsByType(): DocumentModelType[] {
-    const documents = this.stores.docFilter === "Problem" ? this.documents.all : this.firestoreMetadataDocs;
-    return documents.filter((doc: DocumentModelType) => {
+
+  // The error is occurring because the this.firestoreMetadataDocs array is of type
+  // IObservableArray<IDocumentMetadata>, but the filteredDocsByType getter is returning
+  // an array of type IDocumentMetadata[]. To fix this, you can convert the IObservableArray
+  // to a regular array using the slice() method.
+  get filteredDocsByType(): IDocumentMetadata[] {
+    // const documents = this.stores.docFilter === "Problem" ? this.documents.all : this.firestoreMetadataDocs;
+    return this.firestoreMetadataDocs.filter((doc: IDocumentMetadata) => {
       return isSortableType(doc.type);
     });
   }
@@ -176,22 +178,22 @@ export class SortedDocuments {
     // adding in (exemplar) documents with authored tags
     const allSortableDocKeys = this.filteredDocsByType;
     allSortableDocKeys.forEach(doc => {
-      if (this.stores.docFilter === "Problem") {
-        const foundTagKey = doc.getProperty("authoredCommentTag");
-        if (foundTagKey !== undefined && foundTagKey !== "") {
-          if (tagsWithDocs[foundTagKey]) {
-            tagsWithDocs[foundTagKey].docKeysFoundWithTag.push(doc.key);
-            uniqueDocKeysWithTags.add(doc.key);
-          }
-        }
-      } else {
+      // if (this.stores.docFilter === "Problem") {
+      //   const foundTagKey = doc.getProperty("authoredCommentTag");
+      //   if (foundTagKey !== undefined && foundTagKey !== "") {
+      //     if (tagsWithDocs[foundTagKey]) {
+      //       tagsWithDocs[foundTagKey].docKeysFoundWithTag.push(doc.key);
+      //       uniqueDocKeysWithTags.add(doc.key);
+      //     }
+      //   }
+      // } else {
         doc.strategies?.forEach(strategy => {
           if (tagsWithDocs[strategy]) {
             tagsWithDocs[strategy].docKeysFoundWithTag.push(doc.key);
             uniqueDocKeysWithTags.add(doc.key);
           }
         });
-      }
+      //}
     });
 
     allSortableDocKeys.forEach(doc => {
@@ -208,8 +210,8 @@ export class SortedDocuments {
       const tagWithDocs = tagKeyAndValObj[1] as TagWithDocs;
       const sectionLabel = tagWithDocs.tagValue;
       const docKeys = tagWithDocs.docKeysFoundWithTag;
-      const docs = this.stores.docFilter === "Problem" ? this.documents.all : this.firestoreMetadataDocs;
-      const documents = docs.filter((doc: DocumentModelType) => docKeys.includes(doc.key));
+      // const docs = this.stores.docFilter === "Problem" ? this.documents.all : this.firestoreMetadataDocs;
+      const documents = this.firestoreMetadataDocs.filter((doc: IDocumentMetadata) => docKeys.includes(doc.key));
       sortedDocsArr.push({
         sectionLabel,
         documents
@@ -247,7 +249,8 @@ export class SortedDocuments {
 
   async updateMetaDataDocs (filter: string, unit: string, investigation: number, problem: number) {
     const db = this.db.firestore;
-    let query = db.collection("documents").where("context_id", "==", this.user.classHash);
+    const converter = typeConverter<IDocumentMetadata>();
+    let query = db.collection("documents").withConverter(converter).where("context_id", "==", this.user.classHash);
 
     if (filter !== "All") {
       query = query.where("unit" , "==", unit);
@@ -258,27 +261,53 @@ export class SortedDocuments {
     if (filter === "Problem") {
       query = query.where("problem", "==", String(problem));
     }
-    const queryForUnitNull = db.collection("documents").where("context_id", "==", this.user.classHash)
+    const queryForUnitNull = db.collection("documents").withConverter(converter)
+                                                       .where("context_id", "==", this.user.classHash)
                                                        .where("unit" , "==", null);
     const [docsWithUnit, docsWithoutUnit] = await Promise.all([query.get(), queryForUnitNull.get()]);
-    const docsArray: DocumentModelType[] = [];
+    const docsArray: IDocumentMetadata[] = [];
 
     const matchedDocKeys = new Set<string>();
-    const propertiesPlaceholder = new Map();
     docsWithUnit.docs.forEach(doc => {
       if (matchedDocKeys.has(doc.data().key)) return;
-      docsArray.push({...doc.data(), properties: propertiesPlaceholder} as DocumentModelType);
+      docsArray.push(doc.data());
       matchedDocKeys.add(doc.data().key);
     });
     docsWithoutUnit.docs.forEach(doc => {
       if (matchedDocKeys.has(doc.data().key)) return;
-      docsArray.push({...doc.data(), properties: propertiesPlaceholder} as DocumentModelType);
+      docsArray.push(doc.data());
       matchedDocKeys.add(doc.data().key);
     });
 
     runInAction(() => {
       this.firestoreMetadataDocs.replace(docsArray);
     });
+  }
+
+  async fetchFullDocument(docKey: string) {
+    const metadataDoc = this.firestoreMetadataDocs.find(doc => doc.key === docKey);
+    if (!metadataDoc) return;
+
+    const problemOrdinal = metadataDoc?.type === "problem"
+                             ? `${metadataDoc?.investigation}.${metadataDoc?.problem}`
+                             : undefined;
+    const unit = metadataDoc?.type === "problem" ? metadataDoc?.unit : undefined;
+
+    const props = {
+      documentKey: metadataDoc?.key,
+      type: metadataDoc?.type as any,
+      title: metadataDoc?.title || undefined,
+      properties: metadataDoc?.properties,
+      userId: metadataDoc?.uid,
+      groupId: undefined,
+      visibility: undefined,
+      originDoc: undefined,
+      pubVersion: undefined,
+      problemOrdinal,
+      unit,
+    };
+
+    return  this.db.openDocument(props);
   }
 
   //*************************************** Sort By Bookmarks *************************************
@@ -303,9 +332,9 @@ export class SortedDocuments {
   //**************************************** Sort By Tools ****************************************
 
   get sortByTools(): SortedDocument[] {
-    const tileTypeToDocumentsMap: Record<string, DocumentModelType[]> = {};
+    const tileTypeToDocumentsMap: Record<string, IDocumentMetadata[]> = {};
 
-    const addDocByType = (docToAdd: DocumentModelType, type: string) => {
+    const addDocByType = (docToAdd: IDocumentMetadata, type: string) => {
       if (!tileTypeToDocumentsMap[type]) {
         tileTypeToDocumentsMap[type] = [];
       }
@@ -315,26 +344,6 @@ export class SortedDocuments {
     //Iterate through all documents, determine if they are valid,
     //create a map of valid ones, otherwise put them into the "No Tools" section
     this.filteredDocsByType.forEach((doc) => {
-      if (this.stores.docFilter === "Problem") {
-        const tilesByTypeMap = doc.content?.getAllTilesByType();
-        if (tilesByTypeMap) {
-          const tileTypes = Object.keys(tilesByTypeMap);
-          const validTileTypes = tileTypes.filter(type => type !== "Placeholder" && type !== "Unknown");
-          if (validTileTypes.length > 0) {
-            validTileTypes.forEach(tileType => {
-              addDocByType(doc, tileType);
-            });
-
-            //Assuming validTileTypes, we can check if the document has "Sparrow" annotations
-            const docHasAnnotations = doc.content?.annotations && doc.content?.annotations.size > 0;
-            if(docHasAnnotations){
-              addDocByType(doc, "Sparrow");
-            }
-          } else { //Documents with only all Placeholder or Unknown tiles
-            addDocByType(doc, "No Tools");
-          }
-        }
-      } else {
         if (doc.tileTypes) {
           const validTileTypes = doc.tileTypes.filter(type => type !== "Placeholder" && type !== "Unknown");
           if (validTileTypes.length > 0) {
@@ -346,7 +355,7 @@ export class SortedDocuments {
             addDocByType(doc, "No Tools");
           }
         }
-      }
+      //}
     });
 
     // Map the tile types to their display names
@@ -374,77 +383,6 @@ export class SortedDocuments {
     });
 
     return sortedByLabel;
-  }
-
-  matchProperties(doc: DocumentModelType, properties?: readonly string[], options?: IMatchPropertiesOptions) {
-    // if no properties specified then consider it a match
-    if (!properties?.length) return true;
-    return properties?.every(p => {
-      const match = /(!)?(.*)/.exec(p);
-      const property = match && match[2];
-      const wantsProperty = !(match && match[1]); // not negated => has property
-      // treat "starred" as a virtual property
-      // This will be a problem if we extract starred
-      if (property === "starred") {
-        return this.bookmarks.isDocumentBookmarked(doc.key) === wantsProperty;
-      }
-      if (property === "isTeacherDocument") {
-        return !!options?.isTeacherDocument === wantsProperty;
-      }
-      if (property) {
-        return !!doc.getProperty(property) === wantsProperty;
-      }
-      // ignore empty strings, etc.
-      return true;
-    });
-  }
-
-  isMatchingSpec(doc: DocumentModelType, type: string, properties?: readonly string[]) {
-    return (type === doc.type) && this.matchProperties(doc, properties);
-  }
-
-  isTeacherDocument(doc: DocumentModelType){
-    return this.class.isTeacher(doc.uid);
-  }
-
-  getSectionDocs(section: NavTabSectionModelType): DocumentModelType[] {
-    let sectDocs: DocumentModelType[] = [];
-    (section.documentTypes || []).forEach(type => {
-      if (isUnpublishedType(type)) {
-        sectDocs.push(...this.documents.byTypeForUser(type as any, this.user.id));
-      }
-      else if (isPublishedType(type)) {
-        const publishedDocs: { [source: string]: DocumentModelType[] } = {};
-        this.documents
-          .byType(type as any)
-          .forEach(doc => {
-            // personal documents and learning logs have originDocs.
-            // problem documents only have the uids of their creator,
-            // but as long as we're scoped to a single problem, there
-            // shouldn't be published documents from other problems.
-            const source = doc.originDoc || doc.uid;
-            if (source) {
-              if (!publishedDocs.source) {
-                publishedDocs.source = [];
-              }
-              publishedDocs.source.push(doc);
-            }
-          });
-        for (const sourceId in publishedDocs) {
-          sectDocs.push(...publishedDocs[sourceId]);
-        }
-      }
-    });
-    // Reverse the order to approximate a most-recently-used ordering.
-    if (section.order === ENavTabOrder.kReverse) {
-      sectDocs = sectDocs.reverse();
-    }
-    // filter by additional properties
-    if (section.properties && section.properties.length) {
-      sectDocs = sectDocs.filter(doc => this.matchProperties(doc, section.properties,
-                                                            { isTeacherDocument: this.isTeacherDocument(doc) }));
-    }
-    return sectDocs;
   }
 
   setDocFilter(filter: DocFilterType) {

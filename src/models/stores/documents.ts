@@ -50,6 +50,21 @@ export const DocumentsModel = types
     getDocument(documentKey: string) {
       return self.all.find((document) => document.key === documentKey);
     },
+    async fetchDocument(documentKey: string) {
+      let doc = self.all.find((document) => document.key === documentKey);
+      if (!doc) {
+        const docSnapshot = await self.firestore?.collection("documents").where("key", "==", documentKey)
+                                     .where("context_id", "==", self.userContextProvider?.userContext.classHash).get();
+        if (docSnapshot?.docs.length) {
+          const _doc = docSnapshot?.docs[0].data();
+          const key = _doc?.data().key;
+          const type = _doc?.data().type;
+          const uid = _doc?.data().uid;
+          doc = {..._doc.data(), key, type, uid};
+        }
+      }
+      return doc;
+    },
 
     byType(type: DocumentType) {
       return self.all.filter((document) => document.type === type);

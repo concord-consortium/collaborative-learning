@@ -22,8 +22,8 @@ import { getClassKeys } from "../lib/firebase-classes.js";
 // The portal to get documents from. For example, "learn.concord.org".
 const portal = "learn.concord.org";
 // The demo name to use. Make falsy to not use a demo.
-// const demo = "TAGCLUE";
-const demo = false;
+const demo = "TAGCLUE";
+// const demo = false;
 
 // Make falsy to include all documents
 const documentLimit = false;

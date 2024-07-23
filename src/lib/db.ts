@@ -87,6 +87,8 @@ export interface OpenDocumentOptions {
   groupUserConnections?: Record<string, unknown>;
   originDoc?: string;
   pubVersion?: number;
+  problemOrdinal?: string;
+  unit?: string;
 }
 
 export class DB {
@@ -544,7 +546,8 @@ export class DB {
 
   public openDocument(options: OpenDocumentOptions) {
     const { documents } = this.stores;
-    const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion} = options;
+    const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion,
+           problemOrdinal, unit} = options;
     return new Promise<DocumentModelType>((resolve, reject) => {
       const {user} = this.stores;
       const documentPath = this.firebase.getUserDocumentPath(user, documentKey, userId);
@@ -587,7 +590,9 @@ export class DB {
               createdAt: metadata.createdAt,
               content: content ? content : {},
               changeCount: document.changeCount,
-              pubVersion
+              pubVersion,
+              problemOrdinal,
+              unit
             });
           } catch (e) {
             const msg = "Could not open " +
