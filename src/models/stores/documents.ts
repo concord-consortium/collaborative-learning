@@ -14,6 +14,7 @@ import { DEBUG_DOCUMENT } from "../../lib/debug";
 import { Firestore } from "../../lib/firestore";
 import { TreeManagerType } from "../history/tree-manager";
 import { UserContextProvider } from "./user-context-provider";
+import { typeConverter } from "../../utilities/db-utils";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
   const latestPublications: DocumentModelType[] = [];
@@ -52,15 +53,15 @@ export const DocumentsModel = types
     },
     async fetchDocument(documentKey: string) {
       let doc = self.all.find((document) => document.key === documentKey);
+
       if (!doc) {
-        const docSnapshot = await self.firestore?.collection("documents").where("key", "==", documentKey)
+        const converter = typeConverter<DocumentModelType>();
+        const docSnapshot = await self.firestore?.collection("documents")
+                                     .withConverter(converter)
+                                     .where("key", "==", documentKey)
                                      .where("context_id", "==", self.userContextProvider?.userContext.classHash).get();
         if (docSnapshot?.docs.length) {
-          const _doc = docSnapshot?.docs[0].data();
-          const key = _doc?.data().key;
-          const type = _doc?.data().type;
-          const uid = _doc?.data().uid;
-          doc = {..._doc.data(), key, type, uid};
+          doc = docSnapshot?.docs[0].data();
         }
       }
       return doc;

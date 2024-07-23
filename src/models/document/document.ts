@@ -317,10 +317,6 @@ export const DocumentModel = Tree.named("Document")
 export type DocumentModelType = Instance<typeof DocumentModel>;
 export type DocumentModelSnapshotType = SnapshotIn<typeof DocumentModel>;
 
-export const isDocumentModel = (document: any): document is DocumentModelType => {
-  return DocumentModel.is(document);
-};
-
 export const getDocumentContext = (document: DocumentModelType): IDocumentContext => {
   const { type, key, title, originDoc } = document;
   return {

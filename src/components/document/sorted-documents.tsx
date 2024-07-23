@@ -4,7 +4,7 @@ import classNames from "classnames";
 
 import { DocumentContextReact } from "./document-context";
 import { SortedDocument } from "../../models/stores/sorted-documents";
-import { DocumentModelType, getDocumentContext, isDocumentModel } from "../../models/document/document";
+import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { useStores } from "../../hooks/use-stores";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
@@ -49,21 +49,17 @@ export const SortedDocuments: React.FC<IProps> = observer(function SortedDocumen
     return downloadedDocs.length;
   };
 
-  const getDocumentFromMetadata = (docKey: string) => {
-    return sortedDocuments.fetchFullDocument(docKey);
-  };
-
   const handleSelectDocument = async (document: DocumentModelType | IDocumentMetadata) => {
+    persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, document.key);
     try {
-      const doc = isDocumentModel(document)
-                    ? getDocument(document.key)
-                    : getDocument(document.key) || await getDocumentFromMetadata(document.key);
-      persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, document.key);
-      if (doc) {
-        logDocumentViewEvent(doc as DocumentModelType);
+      // The full document data is needed to log a view event, but we may only have the metadata (if type
+      // of `document` is `IDocumentMetadata`). Use `getDocument` to attempt get the full document data.
+      const fullDoc = getDocument(document.key);
+      if (fullDoc) {
+        logDocumentViewEvent(fullDoc);
       }
     } catch (e) {
-      console.error("Error selecting document", e);
+      console.warn("Error logging document view", e);
     }
   };
 
@@ -73,7 +69,7 @@ export const SortedDocuments: React.FC<IProps> = observer(function SortedDocumen
 
   const renderDocumentItem = (doc: any) => {
     const fullDocument = getDocument(doc.key);
-    if(docFilter === "Problem" && fullDocument) {
+    if (docFilter === "Problem" && fullDocument) {
       return <DecoratedDocumentThumbnailItem
           scale={0.1}
           document={fullDocument}
@@ -89,8 +85,6 @@ export const SortedDocuments: React.FC<IProps> = observer(function SortedDocumen
               problemOrdinal={doc.problem}
               onSelectDocument={handleSelectDocument}
             />;
-    } else {
-      return null;
     }
   };
 

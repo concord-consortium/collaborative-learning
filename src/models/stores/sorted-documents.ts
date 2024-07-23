@@ -70,14 +70,7 @@ export class SortedDocuments {
   get user() {
     return this.stores.user;
   }
-
-
-  // The error is occurring because the this.firestoreMetadataDocs array is of type
-  // IObservableArray<IDocumentMetadata>, but the filteredDocsByType getter is returning
-  // an array of type IDocumentMetadata[]. To fix this, you can convert the IObservableArray
-  // to a regular array using the slice() method.
   get filteredDocsByType(): IDocumentMetadata[] {
-    // const documents = this.stores.docFilter === "Problem" ? this.documents.all : this.firestoreMetadataDocs;
     return this.firestoreMetadataDocs.filter((doc: IDocumentMetadata) => {
       return isSortableType(doc.type);
     });
@@ -178,22 +171,12 @@ export class SortedDocuments {
     // adding in (exemplar) documents with authored tags
     const allSortableDocKeys = this.filteredDocsByType;
     allSortableDocKeys.forEach(doc => {
-      // if (this.stores.docFilter === "Problem") {
-      //   const foundTagKey = doc.getProperty("authoredCommentTag");
-      //   if (foundTagKey !== undefined && foundTagKey !== "") {
-      //     if (tagsWithDocs[foundTagKey]) {
-      //       tagsWithDocs[foundTagKey].docKeysFoundWithTag.push(doc.key);
-      //       uniqueDocKeysWithTags.add(doc.key);
-      //     }
-      //   }
-      // } else {
-        doc.strategies?.forEach(strategy => {
-          if (tagsWithDocs[strategy]) {
-            tagsWithDocs[strategy].docKeysFoundWithTag.push(doc.key);
-            uniqueDocKeysWithTags.add(doc.key);
-          }
-        });
-      //}
+      doc.strategies?.forEach(strategy => {
+        if (tagsWithDocs[strategy]) {
+          tagsWithDocs[strategy].docKeysFoundWithTag.push(doc.key);
+          uniqueDocKeysWithTags.add(doc.key);
+        }
+      });
     });
 
     allSortableDocKeys.forEach(doc => {
@@ -210,7 +193,6 @@ export class SortedDocuments {
       const tagWithDocs = tagKeyAndValObj[1] as TagWithDocs;
       const sectionLabel = tagWithDocs.tagValue;
       const docKeys = tagWithDocs.docKeysFoundWithTag;
-      // const docs = this.stores.docFilter === "Problem" ? this.documents.all : this.firestoreMetadataDocs;
       const documents = this.firestoreMetadataDocs.filter((doc: IDocumentMetadata) => docKeys.includes(doc.key));
       sortedDocsArr.push({
         sectionLabel,

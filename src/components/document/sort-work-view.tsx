@@ -44,7 +44,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     onClick: () => setSortBy(option)
   }));
 
-  const filterItems: ICustomDropdownItem[] = filterOptions.map((option) => ({
+  const docFilterOptions: ICustomDropdownItem[] = filterOptions.map((option) => ({
     selected: option === docFilter,
     text: option,
     onClick: () => handleDocFilterSelection(option)
@@ -80,8 +80,8 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
         <SortWorkDocumentArea openDocumentKey={openDocumentKey}/> :
         <>
           <SortWorkHeader
-            filter={docFilter}
-            filterItems={filterItems}
+            docFilter={docFilter}
+            docFilterItems={docFilterOptions}
             primarySort={sortBy}
             primarySortItems={sortByOptions}
           />

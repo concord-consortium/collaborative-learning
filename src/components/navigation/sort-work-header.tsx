@@ -5,14 +5,14 @@ import { CustomSelect, ICustomDropdownItem } from "../../clue/components/custom-
 import "./sort-work-header.scss";
 
 interface ISortHeaderProps{
-  filter: string;
-  filterItems: ICustomDropdownItem[];
+  docFilter: string;
+  docFilterItems: ICustomDropdownItem[];
   primarySort: string;
   primarySortItems: ICustomDropdownItem[];
 }
 
 export const SortWorkHeader:React.FC<ISortHeaderProps>= observer(function SortWorkView(props){
-  const { filter, filterItems, primarySort, primarySortItems } = props;
+  const { docFilter, docFilterItems, primarySort, primarySortItems } = props;
   return (
     <div className="sort-filter-menu-container">
       <div className="sort-work-header">
@@ -33,8 +33,8 @@ export const SortWorkHeader:React.FC<ISortHeaderProps>= observer(function SortWo
           <CustomSelect
             className="filter-work-menu primary-filter-menu"
             dataTest="filter-work-menu"
-            title={filter}
-            items={filterItems}
+            title={docFilter}
+            items={docFilterItems}
             showItemChecks={false}
           />
         </div>
