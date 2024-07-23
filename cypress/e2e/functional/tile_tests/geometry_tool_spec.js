@@ -317,7 +317,7 @@ context('Geometry Tool', function () {
     // Change color of circle
     clueCanvas.clickToolbarButton('geometry', 'color');
     geometryToolTile.selectColor('red');
-    cy.get('.single-workspace .geometry-content.editable ellipse[fill-opacity="0.3"').should("have.attr", "fill", red); // selected circle has fill-opacity="0.3"
+    geometryToolTile.getSelectedGraphCircle().should("have.attr", "fill", red);
 
     // Delete circle
     clueCanvas.clickToolbarButton('geometry', 'delete');

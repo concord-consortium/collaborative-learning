@@ -119,6 +119,9 @@ class GeometryToolTile {
     getGraphCircle(){
       return cy.get('.single-workspace .geometry-content.editable ellipse[fill-opacity="0.2"]');
     }
+    getSelectedGraphCircle(){
+      return cy.get('.single-workspace .geometry-content.editable ellipse[fill-opacity="0.3"]');
+    }
 
     clickGraphPosition(x,y){
         let transX=this.transformFromCoordinate('x', x),
