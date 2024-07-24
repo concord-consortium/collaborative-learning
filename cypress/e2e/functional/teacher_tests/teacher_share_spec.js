@@ -39,7 +39,7 @@ context('Teacher Sharing', function() {
       verifySwitch('private');
     });
 
-    it.only('does not allow student to access private teacher document', function() {
+    it('does not allow student to access private teacher document', function() {
       cy.visit(studentQueryParams);
       cy.waitForLoad();
       verifyStudentSeesAsPrivate();

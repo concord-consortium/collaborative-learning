@@ -27,16 +27,13 @@ class SortedWork {
     return cy.get("[data-test=list-item-problem]");
   }
   getShowForInvestigationOption() {
-    return cy.get("[data-test=list-item-problem]");
+    return cy.get("[data-test=list-item-investigation]");
   }
   getShowForUnitOption() {
     return cy.get("[data-test=list-item-unit]");
   }
   getShowForAllOption() {
     return cy.get("[data-test=list-item-all]");
-  }
-  getShowForMenuOption(level) {
-    return cy.get("[data-test=filter-work-menu-list]").contains(level);
   }
   openSortWorkSection(sectionLabel) {
     return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(sectionLabel).get(".section-header-right .section-header-arrow").click({multiple: true});

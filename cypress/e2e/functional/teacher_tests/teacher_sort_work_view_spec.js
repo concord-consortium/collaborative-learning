@@ -14,8 +14,11 @@ let chatPanel = new ChatPanel;
 const canvas = new Canvas;
 const title = "1.1 Unit Toolbar Configuration";
 const copyTitle = "Personal Workspace";
-const queryParams1 = `${Cypress.config("clueTestqaConfigSubtabsUnitTeacher6")}`;
+// TODO: Bring back queryParams1? For now we're using queryParams3 instead because it
+// uses the TAGCLUE demo space which has updated metadata docs.
+// const queryParams1 = `${Cypress.config("clueTestqaConfigSubtabsUnitTeacher6")}`;
 const queryParams2 = `${Cypress.config("qaConfigSubtabsUnitTeacher1")}`;
+const queryParams3 = `${Cypress.config("tagClueqaConfigSubtabsUnitTeacher1")}`;
 
 function beforeTest(params) {
   cy.clearQAData('all');
@@ -43,7 +46,7 @@ function runClueAsStudent(student, group = 5) {
 
 describe('SortWorkView Tests', () => {
   it('should open SortWorkView tab and interact with it', () => {
-    beforeTest(queryParams1);
+    beforeTest(queryParams3);
     cy.log('verify clicking the sort menu');
     sortWork.getSortByMenu().click(); // Open the sort menu
     cy.wait(1000);
@@ -67,7 +70,7 @@ describe('SortWorkView Tests', () => {
   });
 
   it("should open Sort Work tab and test showing by Problem, Investigation, Unit, All", () => {
-    beforeTest(queryParams1);
+    beforeTest(queryParams3);
 
     sortWork.getShowForMenu().should("be.visible");
     sortWork.getShowForProblemOption().should("have.class", "selected"); // "Problem" selected by default
@@ -76,16 +79,31 @@ describe('SortWorkView Tests', () => {
     sortWork.getShowForAllOption().should("exist");
 
     cy.get(".section-header-arrow").click({multiple: true}); // Open the sections
-    // For the "Problem" option, the documents should be listed using the larger thumbnail view
-    // [data-test=sort-work-list-items] should have a length greater than 0
+    // For the "Problem" option, documents should be listed using the larger thumbnail view
     cy.get("[data-test=sort-work-list-items]").should("have.length.greaterThan", 0);
     cy.get("[data-test=simple-document-item]").should("not.exist");
     sortWork.getShowForMenu().click();
     cy.wait(500);
     sortWork.getShowForInvestigationOption().click();
     cy.wait(500);
+    // For the "Investigation", "Unit", and "All" options, documents should be listed using the smaller "simple" view
     cy.get("[data-test=sort-work-list-items]").should("not.exist");
     cy.get("[data-test=simple-document-item]").should("have.length.greaterThan", 0);
+    sortWork.getShowForMenu().click();
+    cy.wait(500);
+    sortWork.getShowForUnitOption().click();
+    cy.wait(500);
+    cy.get("[data-test=sort-work-list-items]").should("not.exist");
+    cy.get("[data-test=simple-document-item]").should("have.length.greaterThan", 0);
+    sortWork.getShowForMenu().click();
+    cy.wait(500);
+    sortWork.getShowForAllOption().click();
+    cy.wait(500);
+    cy.get("[data-test=sort-work-list-items]").should("not.exist");
+    cy.get("[data-test=simple-document-item]").should("have.length.greaterThan", 0);
+    cy.get("[data-test=simple-document-item]").should("have.attr", "title").and("not.be.empty");
+    cy.get("[data-test=simple-document-item]").first().click();
+    sortWork.getFocusDocument().should("be.visible");
   });
 
 
