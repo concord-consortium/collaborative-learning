@@ -9,7 +9,6 @@ import { Bookmarks } from "./bookmarks";
 import { UserModelType } from "./user";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
-import { DocFilterType } from "./ui-types";
 import { IDocumentMetadata } from "../../../functions/src/shared";
 import { typeConverter } from "../../utilities/db-utils";
 
@@ -34,7 +33,6 @@ export interface ISortedDocumentsStores {
   db: DB;
   appConfig: AppConfigModelType;
   bookmarks: Bookmarks;
-  docFilter: DocFilterType;
   user: UserModelType;
 }
 
@@ -240,26 +238,26 @@ export class SortedDocuments {
   }
 
   async fetchFullDocument(docKey: string) {
-    const metadataDoc = this.firestoreMetadataDocs.find(doc => doc.key === docKey);
-    if (!metadataDoc) return;
+      const metadataDoc = this.firestoreMetadataDocs.find(doc => doc.key === docKey);
+      if (!metadataDoc) return;
 
-    const unit = metadataDoc?.type === "problem" ? metadataDoc?.unit : undefined;
-    const props = {
-      documentKey: metadataDoc?.key,
-      type: metadataDoc?.type as any,
-      title: metadataDoc?.title || undefined,
-      properties: metadataDoc?.properties,
-      userId: metadataDoc?.uid,
-      groupId: undefined,
-      visibility: undefined,
-      originDoc: undefined,
-      pubVersion: undefined,
-      problem: metadataDoc?.problem,
-      investigation: metadataDoc?.investigation,
-      unit,
-    };
+      const unit = metadataDoc?.unit ?? undefined;
+      const props = {
+        documentKey: metadataDoc?.key,
+        type: metadataDoc?.type as any,
+        title: metadataDoc?.title || undefined,
+        properties: metadataDoc?.properties,
+        userId: metadataDoc?.uid,
+        groupId: undefined,
+        visibility: undefined,
+        originDoc: undefined,
+        pubVersion: undefined,
+        problem: metadataDoc?.problem,
+        investigation: metadataDoc?.investigation,
+        unit,
+      };
 
-    return  this.db.openDocument(props);
+      return  this.db.openDocument(props);
   }
 
   //*************************************** Sort By Bookmarks *************************************
@@ -334,10 +332,6 @@ export class SortedDocuments {
     });
 
     return sortedByLabel;
-  }
-
-  setDocFilter(filter: DocFilterType) {
-    this.stores.docFilter = filter;
   }
 
 }

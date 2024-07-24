@@ -26,14 +26,12 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const docFilter = persistentUIDocFilter;
 
   const handleDocFilterSelection = (filter: DocFilterType) => {
-    sortedDocuments.setDocFilter(filter);
     persistentUI.setDocFilter(filter);
   };
 
   useEffect(()=>{
-    sortedDocuments.setDocFilter(docFilter);
     sortedDocuments.updateMetaDataDocs(docFilter, unit.code, investigation.ordinal, problem.ordinal);
-  },[sortedDocuments, sortBy, sortTagPrompt, docFilter, investigation, unit, problem]);
+  }, [docFilter, unit.code, investigation.ordinal, problem.ordinal, sortedDocuments]);
 
   const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
     text: option,

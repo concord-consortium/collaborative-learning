@@ -80,7 +80,6 @@ class Stores implements IStores{
   ui: UIModelType;
   groups: GroupsModelType;
   class: ClassModelType;
-  docFilter: "Problem" | "Investigation" | "Unit" = "Problem";
   documents: DocumentsModelType;
   networkDocuments: DocumentsModelType;
   db: DB;

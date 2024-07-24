@@ -100,6 +100,7 @@ export class DB {
   public stores: IStores;
 
   private authStateUnsubscribe?: firebase.Unsubscribe;
+  private documentFetchPromiseMap = new Map<string, Promise<DocumentModelType>>();
 
   constructor() {
     makeObservable(this);
@@ -549,7 +550,10 @@ export class DB {
     const { documents } = this.stores;
     const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion,
            problem, investigation, unit} = options;
-    return new Promise<DocumentModelType>((resolve, reject) => {
+    const existingPromise = this.documentFetchPromiseMap.get(documentKey);
+    if (existingPromise) return existingPromise;
+
+    const documentFetchPromise = new Promise<DocumentModelType>((resolve, reject) => {
       const {user} = this.stores;
       const documentPath = this.firebase.getUserDocumentPath(user, documentKey, userId);
       const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, userId);
@@ -624,6 +628,9 @@ export class DB {
           reject(msg);
         });
     });
+
+    this.documentFetchPromiseMap.set(documentKey, documentFetchPromise);
+    return documentFetchPromise;
   }
 
   public createLearningLogDocument(title?: string) {
