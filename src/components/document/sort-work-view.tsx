@@ -23,19 +23,15 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const sortOptions = ["Group", "Name", sortTagPrompt, "Bookmarked", "Tools"];
   const filterOptions: DocFilterType[] = ["Problem", "Investigation", "Unit", "All"];
   const [sortBy, setSortBy] = useState("Group");
-  const [docFilter, setDocFilter] = useState(persistentUIDocFilter);
+  const docFilter = persistentUIDocFilter;
 
   const handleDocFilterSelection = (filter: DocFilterType) => {
     sortedDocuments.setDocFilter(filter);
     persistentUI.setDocFilter(filter);
-    setDocFilter(filter);
   };
 
   useEffect(()=>{
     sortedDocuments.setDocFilter(docFilter);
-    if (sortBy === sortTagPrompt){
-      sortedDocuments.updateTagDocumentMap();
-    }
     sortedDocuments.updateMetaDataDocs(docFilter, unit.code, investigation.ordinal, problem.ordinal);
   },[sortedDocuments, sortBy, sortTagPrompt, docFilter, investigation, unit, problem]);
 

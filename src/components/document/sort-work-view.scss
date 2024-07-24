@@ -68,6 +68,13 @@ $title-margin: 2px;
         }
       }
     }
+    .loading-spinner {
+      background-image: url("../../assets/Spinner-1s-200px.svg");
+      background-size: contain;
+      background-repeat: no-repeat;
+      width: 100px;
+      height: 75px;
+    }
   }
 
   .focus-document {

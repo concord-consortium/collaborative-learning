@@ -1,4 +1,4 @@
-import { ObservableSet, makeAutoObservable, runInAction, IObservableArray, observable } from "mobx";
+import { makeAutoObservable, runInAction, IObservableArray, observable } from "mobx";
 import { isSortableType } from "../document/document-types";
 import { DocumentsModelType } from "./documents";
 import { GroupsModelType } from "./groups";
@@ -200,33 +200,6 @@ export class SortedDocuments {
       });
     });
     return sortedDocsArr;
-  }
-
-  async updateTagDocumentMap () {
-    const db = this.db.firestore;
-    const filteredDocs = this.filteredDocsByType;
-    filteredDocs.forEach(async doc => {
-      const docsSnapshot = await db.collection("documents").where("key", "==", doc.key)
-                           .where("context_id", "==", this.user.classHash).get();
-      docsSnapshot.docs.forEach(async docSnapshot => {
-        const commentsSnapshot = await docSnapshot.ref.collection("comments").get();
-        runInAction(() => {
-          commentsSnapshot.docs.forEach(commentDoc => {
-            const commentData = commentDoc.data();
-            if (commentData?.tags) {
-              commentData.tags.forEach((tag: string) => {
-                let docKeysSet = this.firestoreTagDocumentMap.get(tag);
-                if (!docKeysSet) {
-                  docKeysSet = new ObservableSet<string>();
-                  this.firestoreTagDocumentMap.set(tag, docKeysSet);
-                }
-                docKeysSet.add(doc.key);
-              });
-            }
-          });
-        });
-      });
-    });
   }
 
   async updateMetaDataDocs (filter: string, unit: string, investigation: number, problem: number) {

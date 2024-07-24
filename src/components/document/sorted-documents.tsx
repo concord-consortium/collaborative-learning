@@ -40,27 +40,13 @@ export const SortedDocuments: React.FC<IProps> = observer(function SortedDocumen
   };
 
   const documentCount = () => {
-    if (docFilter !== "Problem") return sortedSection.documents.length;
-
-    const downloadedDocs = sortedSection.documents.filter(doc => {
-      const exists = getDocument(doc.key);
-      return exists;
-    });
+    const downloadedDocs = sortedSection.documents.filter(doc => getDocument(doc.key));
     return downloadedDocs.length;
   };
 
   const handleSelectDocument = async (document: DocumentModelType | IDocumentMetadata) => {
     persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, document.key);
-    try {
-      // The full document data is needed to log a view event, but we may only have the metadata (if type
-      // of `document` is `IDocumentMetadata`). Use `getDocument` to attempt get the full document data.
-      const fullDoc = getDocument(document.key);
-      if (fullDoc) {
-        logDocumentViewEvent(fullDoc);
-      }
-    } catch (e) {
-      console.warn("Error logging document view", e);
-    }
+    logDocumentViewEvent(document);
   };
 
   const handleToggleShowDocuments = () => {
@@ -78,7 +64,9 @@ export const SortedDocuments: React.FC<IProps> = observer(function SortedDocumen
           allowDelete={false}
           onSelectDocument={handleSelectDocument}
         />;
-    } else if (docFilter !== "Problem") {
+    } else if (docFilter === "Problem") {
+      return <div className="loading-spinner"/>;
+    } else {
       return <SimpleDocumentItem
               document={doc}
               investigationOrdinal={doc.investigation}
