@@ -208,6 +208,22 @@ context('Test Canvas', function () {
     // in case we created a point while exporting
     // cy.get('.primary-workspace .geometry-toolbar .button.delete').click({ force: true });
 
+    cy.log('Tile can be resized');
+    geometryToolTile.getGeometryTile().then(tile => {
+      const rect = tile[0].getBoundingClientRect();
+      const dragToY = rect.top + rect.height + 100;
+      const transfer = new DataTransfer;
+      geometryToolTile.getGeometryTile().parent('.tool-tile').find('.tool-tile-resize-handle')
+        .trigger('dragstart', { dataTransfer: transfer });
+      geometryToolTile.getGeometryTile().parent('.tool-tile')
+        .trigger('dragover', { clientX: rect.left, clientY: dragToY, force: true, dataTransfer: transfer });
+      geometryToolTile.getGeometryTile().parent('.tool-tile')
+        .trigger('drop', { clientX: rect.left, clientY: dragToY, force: true, dataTransfer: transfer });
+      geometryToolTile.getGeometryTile().parent('.tool-tile').find('.tool-tile-resize-handle')
+        .trigger('dragend', { clientX: rect.left, clientY: dragToY, force: true, dataTransfer: transfer });
+      geometryToolTile.getGeometryTile().invoke('height').should('be.approximately', rect.height + 150, 30);
+    });
+
     cy.log('adds an image tool');
     clueCanvas.addTile('image');
     imageToolTile.getImageTile().should('exist');

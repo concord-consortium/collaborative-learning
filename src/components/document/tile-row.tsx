@@ -210,7 +210,8 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     (newHeight != null) && setRowHeightWithoutUndo(newHeight);
   };
 
-
+  // Starts a resize operation.
+  // The handlers for drag, dragover etc are in the DocumentContentComponent
   private handleStartResizeRow = (e: React.DragEvent<HTMLDivElement>) => {
     const { model, docId } = this.props;
     const { id } = model;
