@@ -55,7 +55,8 @@ export const DocumentModel = Tree.named("Document")
     changeCount: types.optional(types.number, 0),
     pubVersion: types.maybe(types.number),
     supportContentType: types.maybe(types.enumeration<ESupportType>("SupportType", Object.values(ESupportType))),
-    problemOrdinal: types.maybe(types.string),
+    problem: types.maybe(types.string),
+    investigation: types.maybe(types.string),
     unit: types.maybe(types.string),
   })
   .volatile(self => ({

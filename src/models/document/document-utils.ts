@@ -12,10 +12,11 @@ export function getDocumentDisplayTitle(
   unit?: string
 ) {
   const { type } = document;
-  const problemTitle = !(document.problemOrdinal || document.unit) ||
-                       (document.problemOrdinal === String(problem?.ordinal) && unit === document?.unit)
-    ? problem?.title || "Unknown Problem"
-    : "Unknown Problem";
+  const documentProblemOrdinal = `${document.investigation}.${document.problem}`;
+  const problemTitle = !(document.problem || document.investigation || document.unit) ||
+                       (documentProblemOrdinal === String(problem?.ordinal) && unit === document?.unit)
+                         ? problem?.title || "Unknown Problem"
+                         : "Unknown Problem";
   return document.isSupport
     ? document.getProperty("caption") || "Support"
     : isProblemType(type)

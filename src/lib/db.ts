@@ -87,7 +87,8 @@ export interface OpenDocumentOptions {
   groupUserConnections?: Record<string, unknown>;
   originDoc?: string;
   pubVersion?: number;
-  problemOrdinal?: string;
+  problem?: string;
+  investigation?: string;
   unit?: string;
 }
 
@@ -547,7 +548,7 @@ export class DB {
   public openDocument(options: OpenDocumentOptions) {
     const { documents } = this.stores;
     const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion,
-           problemOrdinal, unit} = options;
+           problem, investigation, unit} = options;
     return new Promise<DocumentModelType>((resolve, reject) => {
       const {user} = this.stores;
       const documentPath = this.firebase.getUserDocumentPath(user, documentKey, userId);
@@ -591,7 +592,8 @@ export class DB {
               content: content ? content : {},
               changeCount: document.changeCount,
               pubVersion,
-              problemOrdinal,
+              problem,
+              investigation,
               unit
             });
           } catch (e) {

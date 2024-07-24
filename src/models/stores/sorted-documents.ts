@@ -243,11 +243,7 @@ export class SortedDocuments {
     const metadataDoc = this.firestoreMetadataDocs.find(doc => doc.key === docKey);
     if (!metadataDoc) return;
 
-    const problemOrdinal = metadataDoc?.type === "problem"
-                             ? `${metadataDoc?.investigation}.${metadataDoc?.problem}`
-                             : undefined;
     const unit = metadataDoc?.type === "problem" ? metadataDoc?.unit : undefined;
-
     const props = {
       documentKey: metadataDoc?.key,
       type: metadataDoc?.type as any,
@@ -258,7 +254,8 @@ export class SortedDocuments {
       visibility: undefined,
       originDoc: undefined,
       pubVersion: undefined,
-      problemOrdinal,
+      problem: metadataDoc?.problem,
+      investigation: metadataDoc?.investigation,
       unit,
     };
 
