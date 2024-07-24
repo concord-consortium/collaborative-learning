@@ -14,11 +14,8 @@ let chatPanel = new ChatPanel;
 const canvas = new Canvas;
 const title = "1.1 Unit Toolbar Configuration";
 const copyTitle = "Personal Workspace";
-// TODO: Bring back queryParams1? For now we're using queryParams3 instead because it
-// uses the TAGCLUE demo space which has updated metadata docs.
-// const queryParams1 = `${Cypress.config("clueTestqaConfigSubtabsUnitTeacher6")}`;
+const queryParams1 = `${Cypress.config("clueTestqaConfigSubtabsUnitTeacher6")}`;
 const queryParams2 = `${Cypress.config("qaConfigSubtabsUnitTeacher1")}`;
-const queryParams3 = `${Cypress.config("tagClueqaConfigSubtabsUnitTeacher1")}`;
 
 function beforeTest(params) {
   cy.clearQAData('all');
@@ -46,7 +43,7 @@ function runClueAsStudent(student, group = 5) {
 
 describe('SortWorkView Tests', () => {
   it('should open SortWorkView tab and interact with it', () => {
-    beforeTest(queryParams3);
+    beforeTest(queryParams1);
     cy.log('verify clicking the sort menu');
     sortWork.getSortByMenu().click(); // Open the sort menu
     cy.wait(1000);
@@ -70,7 +67,7 @@ describe('SortWorkView Tests', () => {
   });
 
   it("should open Sort Work tab and test showing by Problem, Investigation, Unit, All", () => {
-    beforeTest(queryParams3);
+    beforeTest(queryParams1);
 
     sortWork.getShowForMenu().should("be.visible");
     sortWork.getShowForProblemOption().should("have.class", "selected"); // "Problem" selected by default
@@ -106,8 +103,11 @@ describe('SortWorkView Tests', () => {
     sortWork.getFocusDocument().should("be.visible");
   });
 
-
-  it("should open Sort Work tab and test sorting by group", () => {
+  // TODO: Reinstate the tests below. They will fail until all metadata documents are updated with
+  // the new fields. Currently, we've only updated a small set of metadata documents in some of the
+  // demo spaces. (The tests above use the CLUE-Test demo which has updated metadata documents, so
+  // they should work.)
+  it.skip("should open Sort Work tab and test sorting by group", () => {
     // Clear data before the test so it can be retried and will start with a clean slate
     cy.clearQAData('all');
 
