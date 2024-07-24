@@ -82,6 +82,16 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   public state: IState = {};
 
   public tileRowDiv: HTMLElement | null;
+  private transparentPixel: HTMLImageElement;
+
+  constructor(props: IProps) {
+    super(props);
+    // When dragging to resize, we don't want to show any drag image.
+    // The API gives us no simple way to say 'no drag image', so we use a transparent pixel.
+    // See https://stackoverflow.com/questions/7680285/how-do-you-turn-off-setdragimage
+    this.transparentPixel = document.createElement("img");
+    this.transparentPixel.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+  }
 
   public render() {
     const { model, typeClass } = this.props;
@@ -200,9 +210,12 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     (newHeight != null) && setRowHeightWithoutUndo(newHeight);
   };
 
+
   private handleStartResizeRow = (e: React.DragEvent<HTMLDivElement>) => {
     const { model, docId } = this.props;
     const { id } = model;
+    e.dataTransfer.setDragImage(this.transparentPixel, 0, 0);
+    e.dataTransfer.effectAllowed = "none";
     e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
     e.dataTransfer.setData(kDragResizeRowId, id);
     e.dataTransfer.setData(dragResizeRowId(id), id);
