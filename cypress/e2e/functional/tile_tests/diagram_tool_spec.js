@@ -13,7 +13,7 @@ const undoKeystroke = `{${cmdKey}}z`;
 const redoKeystroke = `{${cmdKey}}{shift}z`;
 
 function beforeTest() {
-  const queryParams = `${Cypress.config("qaVariablesUnitStudent5")}`;
+  const queryParams = `${Cypress.config("qaVariablesUnitStudent5")}&mouseSensor`;
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
@@ -149,13 +149,22 @@ context('Diagram Tool Tile', function () {
     clueCanvas.clickToolbarButton("diagram", "insert-variable");
     diagramTile.getDiagramDialog().should("contain.text", "Unused variables:");
     diagramTile.getDiagramDialogCloseButton().click();
+    diagramTile.getVariableCard().should("not.exist");
 
     // Can drag new variable button to create a new variable card
-    const dataTransfer = new DataTransfer;
+    // This uses dnd-kit so it is actually looking for mouse down/moved/up events, not drag events.
     const draggable = () => diagramTile.getDraggableToolbarButton();
-    draggable().focus().trigger("dragstart", { dataTransfer });
-    diagramTile.getDiagramTile().find('.drop-target').trigger("drop", { dataTransfer });
-    draggable().trigger("dragend");
+    draggable().should("exist");
+    draggable().parent("button").should("have.class", "new-variable");
+
+    draggable().then((button) => {
+      const rect = button[0].getBoundingClientRect();
+      draggable().trigger('mousedown', { force: true });
+      draggable().trigger('mousemove', { force: true, clientX: rect.left+50, clientY: rect.top-200});
+      draggable().trigger('mouseup', { force: true });
+      cy.wait(300); // wait for the variable card to be fully created, otherwise undo fails
+    });
+
     diagramTile.getVariableCard().should("exist");
 
     // Can undo previous step by pressing control+z or command+z on the keyboard
