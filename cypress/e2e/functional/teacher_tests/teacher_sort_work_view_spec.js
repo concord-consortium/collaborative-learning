@@ -103,10 +103,7 @@ describe('SortWorkView Tests', () => {
     sortWork.getFocusDocument().should("be.visible");
   });
 
-  // TODO: Reinstate the tests below. They will fail until all metadata documents are updated with
-  // the new fields. Currently, we've only updated a small set of metadata documents in some of the
-  // demo spaces. (The tests above use the CLUE-Test demo which has updated metadata documents, so
-  // they should work.)
+  // TODO: Reinstate the tests below when all metadata documents have the new fields and are updated in real time.
   it.skip("should open Sort Work tab and test sorting by group", () => {
     // Clear data before the test so it can be retried and will start with a clean slate
     cy.clearQAData('all');
