@@ -65,6 +65,19 @@ context('Geometry Table Integration', function () {
     geometryToolTile.getGraphPointLabel().should('have.length', 2); // just x and y labels
     geometryToolTile.getGraphPointLabel().contains('A').should('not.exist');
 
+    cy.log('verify points added to table are added to geometry');
+    geometryToolTile.getGraphPoint().should('have.length', 4);
+    tableToolTile.getTableTile().click();
+    tableToolTile.getAddColumnButton().click();
+    tableToolTile.typeInTableCellXY(0, 2, '4'); // point is at (3,4)
+    geometryToolTile.getGraphPoint().should('have.length', 5);
+    geometryToolTile.getGraphAxisTickLabels().eq(1).text().should('eq', '2');
+
+    cy.log('verify a new point will cause the geometry tile to rescale');
+    tableToolTile.typeInTableCellXY(1, 2, '400'); // point is at (7,400)
+    geometryToolTile.getGraphPoint().should('have.length', 6);
+    geometryToolTile.getGraphAxisTickLabels().eq(1).text().should('eq', '100');
+
     cy.log('verify table can be linked to two geometry tiles');
     clueCanvas.addTile('geometry');
     cy.linkTableToTile('Table Data 1', "Coordinate Grid 2");
