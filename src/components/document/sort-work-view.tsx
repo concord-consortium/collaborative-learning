@@ -22,7 +22,8 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const sortTagPrompt = tagPrompt || ""; //first dropdown choice for comment tags
   const sortOptions = ["Group", "Name", sortTagPrompt, "Bookmarked", "Tools"];
   const filterOptions: DocFilterType[] = ["Problem", "Investigation", "Unit", "All"];
-  const [sortBy, setSortBy] = useState("Group");
+  const [primarySortBy, setPrimarySortBy] = useState("Group");
+  const [secondarySortBy, setSecondarySortBy] = useState("Name");
   const docFilter = persistentUIDocFilter;
 
   const handleDocFilterSelection = (filter: DocFilterType) => {
@@ -33,9 +34,14 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     sortedDocuments.updateMetaDataDocs(docFilter, unit.code, investigation.ordinal, problem.ordinal);
   }, [docFilter, unit.code, investigation.ordinal, problem.ordinal, sortedDocuments]);
 
-  const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
+  const primarySortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
     text: option,
-    onClick: () => setSortBy(option)
+    onClick: () => setPrimarySortBy(option)
+  }));
+
+  const secondarySortOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
+    text: option,
+    onClick: () => setSecondarySortBy(option)
   }));
 
   const docFilterOptions: ICustomDropdownItem[] = filterOptions.map((option) => ({
@@ -44,24 +50,9 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     onClick: () => handleDocFilterSelection(option)
   }));
 
-  let renderedSortedDocuments;
-  switch (sortBy) {
-    case "Group":
-      renderedSortedDocuments = sortedDocuments.sortByGroup;
-      break;
-    case "Name":
-      renderedSortedDocuments = sortedDocuments.sortByName;
-      break;
-    case sortTagPrompt: //Sort by Strategy
-      renderedSortedDocuments = sortedDocuments.sortByStrategy;
-      break;
-    case "Bookmarked":
-      renderedSortedDocuments = sortedDocuments.sortByBookmarks;
-      break;
-    case "Tools":
-      renderedSortedDocuments = sortedDocuments.sortByTools;
-      break;
-  }
+  const primarySearchTerm = primarySortBy === sortTagPrompt ? "Strategy" : primarySortBy;
+  const secondarySearchTerm = secondarySortBy === sortTagPrompt ? "Strategy" : secondarySortBy;
+  const renderedSortedDocuments = sortedDocuments.sortDocuments(primarySearchTerm, secondarySearchTerm);
 
   const tabState = persistentUI.tabs.get(ENavTab.kSortWork);
   const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
@@ -76,10 +67,12 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
           <SortWorkHeader
             docFilter={docFilter}
             docFilterItems={docFilterOptions}
-            primarySort={sortBy}
-            primarySortItems={sortByOptions}
+            primarySort={primarySortBy}
+            primarySortItems={primarySortByOptions}
+            secondarySort={secondarySortBy}
+            secondarySortItems={secondarySortOptions}
           />
-          <div key={sortBy} className="tab-panel-documents-section">
+          <div key={primarySortBy} className="tab-panel-documents-section">
             { renderedSortedDocuments &&
               renderedSortedDocuments.map((sortedSection, idx) => {
                 return (

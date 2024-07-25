@@ -9,10 +9,12 @@ interface ISortHeaderProps{
   docFilterItems: ICustomDropdownItem[];
   primarySort: string;
   primarySortItems: ICustomDropdownItem[];
+  secondarySort: string;
+  secondarySortItems: ICustomDropdownItem[];
 }
 
 export const SortWorkHeader:React.FC<ISortHeaderProps>= observer(function SortWorkView(props){
-  const { docFilter, docFilterItems, primarySort, primarySortItems } = props;
+  const { docFilter, docFilterItems, primarySort, primarySortItems, secondarySort, secondarySortItems } = props;
   return (
     <div className="sort-filter-menu-container">
       <div className="sort-work-header">
@@ -23,6 +25,15 @@ export const SortWorkHeader:React.FC<ISortHeaderProps>= observer(function SortWo
             dataTest="sort-work-sort-menu"
             title={primarySort}
             items={primarySortItems}
+            showItemChecks={true}
+          />
+        </div>
+        <div className="header-dropdown">
+          <CustomSelect
+            className="sort-work-sort-menu secondary-sort-menu"
+            dataTest="sort-work-sort-menu"
+            title={secondarySort}
+            items={secondarySortItems}
             showItemChecks={true}
           />
         </div>
