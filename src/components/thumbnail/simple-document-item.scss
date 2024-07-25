@@ -1,0 +1,11 @@
+@import "../vars";
+
+.simple-document-item {
+  background: $classwork-purple-light-7;
+  border: solid 1px #707070;
+  border-radius: 1px;
+  cursor: pointer;
+  height: 12px;
+  margin: 2px 5px;
+  width: 12px;
+}

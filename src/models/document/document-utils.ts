@@ -8,15 +8,21 @@ import { DocumentContentModelType } from "./document-content";
 import { isPlanningType, isProblemType } from "./document-types";
 
 export function getDocumentDisplayTitle(
-  document: DocumentModelType, appConfig: AppConfigModelType, problem: ProblemModelType
+  document: DocumentModelType, appConfig: AppConfigModelType, problem?: ProblemModelType,
+  unit?: string
 ) {
   const { type } = document;
+  const documentProblemOrdinal = `${document.investigation}.${document.problem}`;
+  const problemTitle = !(document.problem || document.investigation || document.unit) ||
+                       (documentProblemOrdinal === String(problem?.ordinal) && unit === document?.unit)
+                         ? problem?.title || "Unknown Problem"
+                         : "Unknown Problem";
   return document.isSupport
     ? document.getProperty("caption") || "Support"
     : isProblemType(type)
-        ? problem.title
+        ? problemTitle
         : isPlanningType(type)
-            ? `${problem.title}: Planning`
+            ? `${problem?.title || "Unkown"}: Planning`
             : document.getDisplayTitle(appConfig);
 }
 

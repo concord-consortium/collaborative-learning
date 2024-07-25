@@ -1,3 +1,4 @@
+import { IObservableArray, observable } from "mobx";
 import { DocumentModelType, createDocumentModel, DocumentModelSnapshotType } from "../document/document";
 import { GroupModel, GroupsModel, GroupsModelType, GroupUserModel } from './groups';
 import { ClassModel, ClassModelType, ClassUserModel } from './class';
@@ -5,6 +6,7 @@ import { ProblemDocument } from '../document/document-types';
 import { ISortedDocumentsStores, SortedDocuments } from "./sorted-documents";
 import { DeepPartial } from "utility-types";
 import { DocumentContentSnapshotType } from "../document/document-content";
+import { IDocumentMetadata } from "../../../functions/src/shared";
 
 import "../tiles/text/text-registration";
 import "../../plugins/drawing/drawing-registration";
@@ -30,6 +32,29 @@ const mockDocumentsData: DocumentModelSnapshotType[] = [
     content: { tiles: [] } as DocumentContentSnapshotType
   }
 ];
+
+const mockMetadataDocuments: IObservableArray<IDocumentMetadata> = observable.array([
+  {
+    uid: "1", //Joe
+    type: ProblemDocument, key:"Student 1 Problem Doc Group 5", createdAt: 1,
+    tileTypes: []
+  },
+  {
+    uid: "2", //Scott
+    type: ProblemDocument, key:"Student 2 Problem Doc Group 3", createdAt: 2,
+    tileTypes: ["Text"]
+  },
+  {
+    uid: "3", //Dennis
+    type: ProblemDocument, key:"Student 3 Problem Doc Group 9", createdAt: 3,
+    tileTypes: ["Drawing"]
+  },
+  {
+    uid: "4", //Kirk
+    type: ProblemDocument, key:"Student 4 Problem Doc Group 3", createdAt: 4,
+    tileTypes: []
+  }
+]);
 
 const createMockDocuments = () => {
   return mockDocumentsData.map(createDocumentModel);
@@ -134,6 +159,7 @@ describe('Sorted Documents Model', () => {
     };
 
     sortedDocuments = new SortedDocuments(mockStores as ISortedDocumentsStores);
+    sortedDocuments.firestoreMetadataDocs = mockMetadataDocuments;
   });
 
 

@@ -87,6 +87,9 @@ export interface OpenDocumentOptions {
   groupUserConnections?: Record<string, unknown>;
   originDoc?: string;
   pubVersion?: number;
+  problem?: string;
+  investigation?: string;
+  unit?: string;
 }
 
 export class DB {
@@ -97,6 +100,7 @@ export class DB {
   public stores: IStores;
 
   private authStateUnsubscribe?: firebase.Unsubscribe;
+  private documentFetchPromiseMap = new Map<string, Promise<DocumentModelType>>();
 
   constructor() {
     makeObservable(this);
@@ -544,8 +548,12 @@ export class DB {
 
   public openDocument(options: OpenDocumentOptions) {
     const { documents } = this.stores;
-    const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion} = options;
-    return new Promise<DocumentModelType>((resolve, reject) => {
+    const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion,
+           problem, investigation, unit} = options;
+    const existingPromise = this.documentFetchPromiseMap.get(documentKey);
+    if (existingPromise) return existingPromise;
+
+    const documentFetchPromise = new Promise<DocumentModelType>((resolve, reject) => {
       const {user} = this.stores;
       const documentPath = this.firebase.getUserDocumentPath(user, documentKey, userId);
       const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, userId);
@@ -587,7 +595,10 @@ export class DB {
               createdAt: metadata.createdAt,
               content: content ? content : {},
               changeCount: document.changeCount,
-              pubVersion
+              pubVersion,
+              problem,
+              investigation,
+              unit
             });
           } catch (e) {
             const msg = "Could not open " +
@@ -617,6 +628,9 @@ export class DB {
           reject(msg);
         });
     });
+
+    this.documentFetchPromiseMap.set(documentKey, documentFetchPromise);
+    return documentFetchPromise;
   }
 
   public createLearningLogDocument(title?: string) {

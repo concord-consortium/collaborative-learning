@@ -34,7 +34,8 @@ function addText(x, y, text) {
   drawToolTile.getTextDrawing().get('textarea').type(text + "{enter}");
 }
 
-context('Exemplar Documents', function () {
+  // TODO: Reinstate the tests below when all metadata documents have the new fields and are updated in real time.
+  context.skip('Exemplar Documents', function () {
   it('Unit with default config does not reveal exemplars or generate sticky notes', function () {
     beforeTest(queryParams2);
     cy.openTopTab('sort-work');

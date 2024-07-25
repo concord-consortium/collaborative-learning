@@ -7,6 +7,7 @@ import { DEBUG_DOC_LIST } from "../../lib/debug";
 import { SortWorkDocumentArea } from "./sort-work-document-area";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { DocListDebug } from "./doc-list-debug";
+import { DocFilterType } from "../../models/stores/ui-types";
 import { SortedDocuments } from "./sorted-documents";
 
 import "../thumbnail/document-type-collection.scss";
@@ -15,23 +16,32 @@ import "../thumbnail/document-type-collection.scss";
  * Various options for sorting the display are available - by user, by group, by tools used, etc.
  */
 export const SortWorkView: React.FC = observer(function SortWorkView() {
-  const { appConfig, persistentUI, sortedDocuments } = useStores();
-
-  //*************************** Determine Sort Options & State  ***********************************
-  const {tagPrompt} = appConfig;
+  const { appConfig, investigation, persistentUI, problem, sortedDocuments, unit } = useStores();
+  const { tagPrompt } = appConfig;
+  const { docFilter: persistentUIDocFilter } = persistentUI;
   const sortTagPrompt = tagPrompt || ""; //first dropdown choice for comment tags
   const sortOptions = ["Group", "Name", sortTagPrompt, "Bookmarked", "Tools"];
+  const filterOptions: DocFilterType[] = ["Problem", "Investigation", "Unit", "All"];
   const [sortBy, setSortBy] = useState("Group");
+  const docFilter = persistentUIDocFilter;
+
+  const handleDocFilterSelection = (filter: DocFilterType) => {
+    persistentUI.setDocFilter(filter);
+  };
 
   useEffect(()=>{
-    if (sortBy === sortTagPrompt){
-      sortedDocuments.updateTagDocumentMap();
-    }
-  },[sortedDocuments, sortBy, sortTagPrompt]);
+    sortedDocuments.updateMetaDataDocs(docFilter, unit.code, investigation.ordinal, problem.ordinal);
+  }, [docFilter, unit.code, investigation.ordinal, problem.ordinal, sortedDocuments]);
 
   const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
     text: option,
     onClick: () => setSortBy(option)
+  }));
+
+  const docFilterOptions: ICustomDropdownItem[] = filterOptions.map((option) => ({
+    selected: option === docFilter,
+    text: option,
+    onClick: () => handleDocFilterSelection(option)
   }));
 
   let renderedSortedDocuments;
@@ -63,13 +73,19 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
         showSortWorkDocumentArea ?
         <SortWorkDocumentArea openDocumentKey={openDocumentKey}/> :
         <>
-          <SortWorkHeader sortBy={sortBy} sortByOptions={sortByOptions} />
+          <SortWorkHeader
+            docFilter={docFilter}
+            docFilterItems={docFilterOptions}
+            primarySort={sortBy}
+            primarySortItems={sortByOptions}
+          />
           <div key={sortBy} className="tab-panel-documents-section">
             { renderedSortedDocuments &&
               renderedSortedDocuments.map((sortedSection, idx) => {
                 return (
                   <SortedDocuments
                     key={`sortedDocuments-${idx}`}
+                    docFilter={docFilter}
                     idx={idx}
                     sortedSection={sortedSection}
                   />

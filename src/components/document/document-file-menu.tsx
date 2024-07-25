@@ -35,7 +35,7 @@ function showPublishOption(document: DocumentModelType, stores: IStores) {
   if (document.type === "planning" || appConfig.disablePublish === true) return false;
   return appConfig.disablePublish
           .findIndex(spec => {
-            return stores.sortedDocuments.isMatchingSpec(document, spec.documentType, spec.properties);
+            return stores.sectionDocuments.isMatchingSpec(document, spec.documentType, spec.properties);
           }) < 0;
 }
 

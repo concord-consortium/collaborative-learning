@@ -7,16 +7,21 @@ $title-margin: 2px;
   display: flex;
   flex-direction: column;
 
-  .sorted-sections{
+  .tab-panel-documents-section {
+    border: solid 1.5px $classwork-purple;
+    border-top: none;
+  }
+
+  .sorted-sections {
     width: 100%;
 
-    .section-header{
+    .section-header {
       height: 30px;
       position: relative;
       margin-top: 5px;
       margin-bottom: 5px;
 
-      &::after{ //divider line drawn across
+      &::after { //divider line drawn across
         content: "";
         position: absolute;
         left: 0px;
@@ -25,7 +30,7 @@ $title-margin: 2px;
         border-bottom: 1px solid $charcoal-light-1;
       }
 
-      .section-header-label{
+      .section-header-label {
         svg{
           margin-right: 5px;
         }
@@ -62,6 +67,13 @@ $title-margin: 2px;
           }
         }
       }
+    }
+    .loading-spinner {
+      background-image: url("../../assets/Spinner-1s-200px.svg");
+      background-size: contain;
+      background-repeat: no-repeat;
+      width: 100px;
+      height: 75px;
     }
   }
 
