@@ -197,7 +197,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
           >
             <Slate
               editor={this.editor as ReactEditor}
-              value={this.state.initialValue}
+              initialValue={this.state.initialValue}
               onChange={this.handleChange}
             >
               <SlateEditor
@@ -206,7 +206,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                 readOnly={readOnly}
                 onFocus={this.handleFocus}
                 onBlur={this.handleBlur}
-                className={`ccrte-editor slate-editor ${classes || ""}`}
+                className={classes}
               />
               <TileToolbar tileType="text" tileElement={this.props.tileElt} readOnly={!!readOnly} />
             </Slate>
