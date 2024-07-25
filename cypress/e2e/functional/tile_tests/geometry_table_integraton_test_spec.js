@@ -73,10 +73,15 @@ context('Geometry Table Integration', function () {
     geometryToolTile.getGraphPoint().should('have.length', 5);
     geometryToolTile.getGraphAxisTickLabels().eq(1).text().should('eq', '2');
 
-    cy.log('verify a new point will cause the geometry tile to rescale');
+    cy.log('verify adding data to table can cause the geometry tile to rescale');
     tableToolTile.typeInTableCellXY(1, 2, '400'); // point is at (7,400)
     geometryToolTile.getGraphPoint().should('have.length', 6);
     geometryToolTile.getGraphAxisTickLabels().eq(1).text().should('eq', '100');
+
+    cy.log('verify changing data in the table can cause geometry tile to rescale');
+    tableToolTile.typeInTableCellXY(1, 2, '200'); // point is now at (7,200)
+    geometryToolTile.getGraphPoint().should('have.length', 6);
+    geometryToolTile.getGraphAxisTickLabels().eq(1).text().should('eq', '50');
 
     cy.log('verify table can be linked to two geometry tiles');
     clueCanvas.addTile('geometry');
