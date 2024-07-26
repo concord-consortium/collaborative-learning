@@ -15,11 +15,11 @@
 
 import fs from "fs";
 
-import { outputAzureFile } from "./azure-utils";
-import { AIService, datasetPath, tagFileExtension } from "./script-constants";
-import { DocumentInfo, IAzureMetadata } from "./script-types";
-import { prettyDuration } from "./script-utils";
-import { outputVertexAIFile } from "./vertexai-utils";
+import { outputAzureFile } from "./azure-utils.js";
+import { AIService, datasetPath, tagFileExtension } from "./script-constants.js";
+import { DocumentInfo, IAzureMetadata } from "./script-types.js";
+import { prettyDuration } from "../lib/script-utils.js";
+import { outputVertexAIFile } from "./vertexai-utils.js";
 
 const sourceDirectory = "dataset1698192448944";
 // const targetTileTypes = ["Geometry", "Text", "Table"];

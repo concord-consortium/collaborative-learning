@@ -1,4 +1,4 @@
-import { applySnapshot, types, Instance, SnapshotIn, onAction, addDisposer, destroy } from "mobx-state-tree";
+import { applySnapshot, types, Instance, SnapshotIn, onAction, addDisposer, destroy, typecheck } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
@@ -336,7 +336,36 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
     sharedModelManager
   };
   try {
-    const document = DocumentModel.create(snapshot, fullEnvironment);
+    let document: DocumentModelType;
+    try {
+      document = DocumentModel.create(snapshot, fullEnvironment);
+    } catch (e) {
+      if (!snapshot?.content ) {
+        // More info is logged about this error in the next catch statement
+        throw e;
+      }
+
+      let error = e;
+      try {
+        // In production mode, MST does not do typechecking. This makes the errors from loading
+        // an invalid document not as useful. By doing an explicit type check we can get the
+        // more useful errors even in production.
+        typecheck(DocumentModel, snapshot);
+      } catch (typecheckError) {
+        error = typecheckError;
+      }
+
+      // Putting the error in an object like this prevents Chrome from expanding the
+      // error and taking up a bunch of console lines.
+      console.error("Failed to load document", {docKey: snapshot.key, error});
+
+      return createErrorDocument(
+        // When we switch to typescript 5.5 this narrowing can probably be removed
+        snapshot as DocumentModelSnapshotTypeWithContent,
+        fullEnvironment,
+        error as Error);
+    }
+
     addDisposer(document, onAction(document, (call) => {
       if (!document.content || !call.path?.match(/\/content\/tileMap\//)) {
         return;
@@ -349,12 +378,9 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
     }));
     if (document.content) {
       sharedModelManager.setDocument(document.content);
-      document.content.migrateContentTitles();
     }
     return document;
   } catch (e) {
-    // The only time we've seen this error so far is when MST fails to load the content
-    // because it doesn't match the types of the MST models
     if (!snapshot) {
       console.error("Empty document failed to be created");
       throw e;
@@ -365,19 +391,38 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
       throw e;
     }
 
-    // Putting the error in an object like this prevents Chrome from expanding the
-    // error and taking up a bunch of console lines.
-    console.error("Failed to load document", {docKey: snapshot.key, error: e});
+    // If there was an error in the content of the document, it should have been caught above
+    // and an error document returned already.
+    console.error("Failed to setup document",
+      // Putting the error in an object like this prevents Chrome from expanding the
+      // error and taking up a bunch of console lines.
+      {docKey: snapshot.key, error: e});
 
-    // Create a document without the content, so this can be returned and passed
-    // through the rest of the CLUE system. The Canvas component checks the contentStatus
-    // and renders a DocumentError component if the status is Error
-    const {content, ...snapshotWithoutContent} = snapshot;
-    const documentWithoutContent = DocumentModel.create(snapshotWithoutContent, fullEnvironment);
-    documentWithoutContent.setContentError(content, (e as Error)?.message);
-    return documentWithoutContent;
+    return createErrorDocument(
+      // When we switch to typescript 5.5 this narrowing can probably be removed
+      snapshot as DocumentModelSnapshotTypeWithContent,
+      fullEnvironment,
+      e as Error);
   }
 };
+
+type DocumentModelSnapshotTypeWithContent = DocumentModelSnapshotType &
+  Required<Pick<DocumentModelSnapshotType, 'content'>>;
+
+/**
+ * Create a document without the content, so this can be returned and passed
+ * through the rest of the CLUE system. The Canvas component checks the contentStatus
+ * and renders a DocumentError component if the status is Error.
+ */
+function createErrorDocument(
+  snapshot: DocumentModelSnapshotTypeWithContent,
+  fullEnvironment: ITileEnvironment,
+  error?: Error) {
+    const {content, ...snapshotWithoutContent} = snapshot;
+    const documentWithoutContent = DocumentModel.create(snapshotWithoutContent, fullEnvironment);
+    documentWithoutContent.setContentError(content, error?.message);
+    return documentWithoutContent;
+}
 
 export const createDocumentModelWithEnv = (appConfig: AppConfigModelType, docSnapshot: DocumentModelSnapshotType) => {
   const newDocument = createDocumentModel(docSnapshot);

@@ -2,7 +2,6 @@ import { castArray, find, uniqWith } from "lodash";
 import { getBaseAxisLabels, getObjectById } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
-import { syncClientColors } from "./jxg-point";
 import {
   getMovableLinePointIds, isBoard, isMovableLine, isMovableLineControlPoint, isMovableLineLabel, kMovableLineType
 } from "./jxg-types";
@@ -94,12 +93,16 @@ export const movableLineChangeAgent: JXGChangeAgent = {
   create: (board, change, context) => {
     const { id, pt1, pt2, line, ...shared }: any = change.properties || {};
     const lineId = id || uniqueId();
-    const props = syncClientColors({...sharedProps, ...shared });
+    const props = {...sharedProps, ...shared };
     const lineProps = {...props, ...lineSpecificProps, ...line };
     const pointProps = {...props, ...pointSpecificProps};
     const pointIds = getMovableLinePointIds(lineId);
 
-    if (change.parents && change.parents.length === 2) {
+    if (change.parents
+        && Array.isArray(change.parents)
+        && change.parents.length === 2
+        && Array.isArray(change.parents[0])
+        && Array.isArray(change.parents[1])) {
       const interceptPoint = (board as JXG.Board).create(
         "point",
         change.parents[0],
@@ -148,8 +151,8 @@ export const movableLineChangeAgent: JXGChangeAgent = {
           },
           ...line,
           ...overrides
-        });
-      const label = movableLine && movableLine.label;
+        }) as JXG.Line;
+      const label = movableLine.label!;
 
       return [movableLine, interceptPoint, slopePoint, label];
     }

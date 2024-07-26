@@ -1,10 +1,9 @@
-import { cloneDeep, each } from "lodash";
+import { each } from "lodash";
 import { types, getType, getEnv, SnapshotIn } from "mobx-state-tree";
 import { kPlaceholderTileDefaultHeight } from "../tiles/placeholder/placeholder-constants";
 import {
   getPlaceholderSectionId, isPlaceholderTile, PlaceholderContentModel
 } from "../tiles/placeholder/placeholder-content";
-import { kTextTileType } from "../tiles/text/text-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
 import { ITileContentModel, ITileEnvironment, TileContentModel } from "../tiles/tile-content";
 import { ILinkableTiles, ITypedTileLinkMetadata } from "../tiles/tile-link-types";
@@ -15,7 +14,7 @@ import {
   IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileLayoutModelType
 } from "../document/tile-row";
 import { migrateSnapshot } from "./document-content-import";
-import { isImportDocument, OriginalAuthoredTileModel } from "./document-content-import-types";
+import { isImportDocument } from "./document-content-import-types";
 import { logTileCopyEvent } from "../tiles/log/log-tile-copy-event";
 import { logTileDocumentEvent } from "../tiles/log/log-tile-document-event";
 import { getAppConfig } from "../tiles/tile-environment";
@@ -23,6 +22,7 @@ import { LogEventName } from "../../lib/logger-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { defaultTitle, extractTitleBase, titleMatchesDefault } from "../../utilities/title-utils";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
+import { getSharedModelInfoByType } from "../shared/shared-model-registry";
 import { kSectionHeaderHeight } from "./document-constants";
 import { IDocumentContentAddTileOptions, INewRowTile, INewTileOptions,
    ITileCountsPerSection, NewRowTileArray } from "./document-content-types";
@@ -53,8 +53,6 @@ export const BaseDocumentContentModel = types
   .volatile(self => ({
     visibleRows: [] as string[],
     highlightPendingDropLocation: -1,
-    importContextCurrentSection: "",
-    importContextTileCounts: {} as Record<string, number>
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
@@ -414,7 +412,8 @@ export const BaseDocumentContentModel = types
      * @returns a unique title.
      */
     getUniqueTitleForType(tileType: string) {
-      const titleBase = getTileContentInfo(tileType)?.titleBase || tileType;
+      const contentInfo = getTileContentInfo(tileType);
+      const titleBase = contentInfo?.titleBase || contentInfo?.displayName || contentInfo?.shortName || tileType;
       const tileIds = self.getTilesOfType(tileType);
       const maxSoFar = self.getMaxNumberFromTileTiles(titleBase, tileIds);
       return defaultTitle(titleBase, maxSoFar >=0 ? maxSoFar + 1 : 1);
@@ -428,36 +427,6 @@ export const BaseDocumentContentModel = types
     },
   }))
   .actions(self => ({
-    setImportContext(section: string) {
-      self.importContextCurrentSection = section;
-      self.importContextTileCounts = {};
-    },
-    getNextTileId(tileType: string) {
-      if (!self.importContextTileCounts[tileType]) {
-        self.importContextTileCounts[tileType] = 1;
-      } else {
-        ++self.importContextTileCounts[tileType];
-      }
-      // FIXME: This doesn't generate unique ids.
-      // Many sections seem to be unnamed, so they never set the importContextCurrentSection.
-      // The result is tiles in different sections (including different investigations and problems)
-      // have the same id, and in turn share the same metadata.
-      const section = self.importContextCurrentSection || "document";
-      return `${section}_${tileType}_${self.importContextTileCounts[tileType]}`;
-    },
-    migrateContentTitles() {
-      // Find and fix any tiles that have a title incorrectly set on the tile, rather than on the content.
-      // We iterate through the tiles in reverse order, so that if there is more than one tile
-      // linked to the same shared title, the first tile's name is the one that ends up being used.
-      const tiles = self.getTilesInDocumentOrder().reverse();
-      for (const id of tiles) {
-        const tile = self.tileMap.get(id);
-        if (tile && tile.title && getTileContentInfo(tile.content.type)?.useContentTitle) {
-          tile.content.setContentTitle(tile.title);
-          tile.setTitle(undefined);
-        }
-      }
-    },
     insertRow(row: TileRowModelType, index?: number) {
       self.rowMap.put(row);
       if ((index != null) && (index < self.rowOrder.length)) {
@@ -488,9 +457,6 @@ export const BaseDocumentContentModel = types
     }
   }))
   .actions(self => ({
-    addSectionHeaderRow(sectionId: string) {
-      self.insertRow(TileRowModel.create({ isSectionHeader: true, sectionId }));
-    },
     addNewTileInNewRowAtIndex(tile: ITileModel, rowIndex: number) {
       const row = TileRowModel.create({});
       self.insertRow(row, rowIndex);
@@ -536,23 +502,25 @@ export const BaseDocumentContentModel = types
       for (let i = 1; i < self.rowCount; ++i) {
         self.addPlaceholderRowIfAppropriate(i);
       }
-    },
-    addImportedTileToRow(tile: OriginalAuthoredTileModel, row: TileRowModelType) {
 
-      const { layout, ...newTile } = cloneDeep(tile);
-      const tileHeight = layout?.height;
-
-      const id = newTile.id || self.getNextTileId(newTile.content.type);
-      const tileSnapshot = { id, ...newTile };
-
-      // Add the snapshot directly to the map instead of creating it
-      // independently. This way if the snapshot has references to
-      // shared model objects, those references will be valid.
-      const tileModel = self.tileMap.put(tileSnapshot);
-      row.insertTileInRow(tileModel!);
-
-      if (tileHeight) {
-        row.setRowHeight(Math.max((row.height || 0), tileHeight));
+      // Find and fix any tiles that have a title incorrectly set on the tile, rather than on the content.
+      // We iterate through the tiles in reverse order, so that if there is more than one tile
+      // linked to the same shared title, the first tile's name is the one that ends up being used.
+      // We have to do this without the sharedModelManagers's help because it won't be available
+      // immediately after creation.
+      const tiles = self.getTilesInDocumentOrder().reverse();
+      for (const id of tiles) {
+        const tile = self.tileMap.get(id);
+        if (tile && tile.title && getTileContentInfo(tile.content.type)?.useContentTitle) {
+          // Look for a SharedModel that can hold the title
+          for (const sm of Object.values(self.getSharedModelsUsedByTiles([id]))) {
+            if (getSharedModelInfoByType(sm.sharedModel.type)?.hasName) {
+              sm.sharedModel.setName(tile.title);
+              tile.setTitle(undefined);
+              break;
+            }
+          }
+        }
       }
     }
   }))
@@ -822,13 +790,12 @@ export const BaseDocumentContentModel = types
        * @param toolId the type of tile to create.
        * @param options an options object, which can include:
        * @param options.title title for the new tile
-       * @param options.addSidecarNotes if true, creates an additional text tile alongside
        * @param options.url passed to the default content creation method
        * @param options.insertRowInfo specifies where the tile should be placed
        * @returns an object containing information about the results: rowId, tileId, additionalTileIds
        */
       addTile(toolId: string, options?: IDocumentContentAddTileOptions) {
-        const { title, addSidecarNotes, url, insertRowInfo } = options || {};
+        const { title, url, insertRowInfo } = options || {};
         // for historical reasons, this function initially places new rows at
         // the end of the content and then moves them to the desired location.
         const contentInfo = getTileContentInfo(toolId);
@@ -845,38 +812,17 @@ export const BaseDocumentContentModel = types
         const tileInfo = self.addTileContentInNewRow(
                               newContent,
                               addTileOptions);
-        if (addSidecarNotes) {
-          const { rowId } = tileInfo;
-          const row = self.rowMap.get(rowId);
-          const textContentInfo = getTileContentInfo(kTextTileType);
-          if (row && textContentInfo) {
-            const tile = TileModel.create({ content: textContentInfo.defaultContent() });
-            self.insertNewTileInRow(tile, row, 1);
-            tileInfo.additionalTileIds = [ tile.id ];
-          }
-        }
-
         // TODO: For historical reasons, this function initially places new rows at the end of the content
         // and then moves them to their desired locations from there using the insertRowInfo to specify the
         // desired destination. The underlying addTileInNewRow() function has a separate mechanism for specifying
         // the location of newly created rows. It would be better to eliminate the redundant insertRowInfo
         // specification used by this function and instead just use the one from addTileInNewRow().
         if (tileInfo && insertRowInfo) {
-          // Move newly-create tile(s) into requested row. If we have created more than one tile, e.g. the sidecar text
-          // for the graph tool, we need to insert the tiles one after the other. If we are inserting on the left, we
-          // have to reverse the order of insertion. If we are inserting into a new row, the first tile is inserted
-          // into a new row and then the sidecar tiles into that same row. This makes the logic rather verbose...
+          // Move newly-create tile(s) into requested row.
           const { rowDropLocation } = insertRowInfo;
 
-          let tileIdsToMove;
-          if (tileInfo.additionalTileIds) {
-            tileIdsToMove = [tileInfo.tileId, ...tileInfo.additionalTileIds];
-            if (rowDropLocation && rowDropLocation === "left") {
-              tileIdsToMove = tileIdsToMove.reverse();
-            }
-          } else {
-            tileIdsToMove = [tileInfo.tileId];
-          }
+          // TODO simplify this
+          const tileIdsToMove = [tileInfo.tileId];
 
           const moveSubsequentTilesRight = !rowDropLocation
                                            || rowDropLocation === "bottom"

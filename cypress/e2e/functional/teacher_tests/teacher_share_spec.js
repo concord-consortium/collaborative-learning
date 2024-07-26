@@ -22,11 +22,13 @@ function verifySwitch(publicOrPrivate) {
 
 function verifyStudentSeesAsPrivate() {
   cy.get('.tab-sort-work').click();
+  cy.get('.section-header-arrow').click({multiple: true});
   cy.get('.thumbnail-private').should('exist');
 }
 
 function verifyStudentSeesAsPublic() {
   cy.get('.tab-sort-work').click();
+  cy.get('.section-header-arrow').click({multiple: true});
   cy.get('.thumbnail-public').should('not.exist');
 }
 

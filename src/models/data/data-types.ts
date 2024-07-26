@@ -126,12 +126,14 @@ export function isImageUrl(val: IValueType) {
     return false;
   }
 
-  // We might need to support more advanced image detection in the future
-  // For now we just look for strings matching the URL for an user uploaded
-  // image. Like:
+  // Look for strings matching the URL for a user uploaded image, like:
   // ccimg://fbrtdb.concord.org/devclass/-NcP-LmubeWUdANUM_vO
-  // The ImageMap has a isImageUrl function but it will pickup pretty
-  // much any http URL. And I'd guess we don't want to add a dependency
-  // on the imageMap to this shared code.
-  return val.startsWith("ccimg://fbrtdb.concord.org");
+  // Or that match more generic image URL strings, like:
+  // https://concord.org/image.png
+  // The ImageMap has an isImageUrl function but it will pickup pretty much any http URL.
+  // And we don't want to add a dependency on the imageMap to this shared code.
+  const ccImagePattern = /^ccimg:\/\/fbrtdb\.concord\.org/;
+  const imageUrlPattern =
+    /(^(https?:\/\/)?[^:]*\/[^:]*\.(gif|jpg|jpeg|png)$)|(^data:image\/(gif|jpg|jpeg|png);base64,)/i;
+  return ccImagePattern.test(val) || imageUrlPattern.test(val);
 }

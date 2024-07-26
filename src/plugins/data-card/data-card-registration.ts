@@ -15,6 +15,7 @@ registerTileContentInfo({
   modelClass: DataCardContentModel,
   titleBase: "Card Deck Data",
   displayName: "Data Cards",
+  shortName: "Data Card",
   useContentTitle: true,
   metadataClass: TileMetadataModel,
   defaultContent: defaultDataCardContent,

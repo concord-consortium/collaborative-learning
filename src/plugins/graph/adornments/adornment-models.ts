@@ -24,7 +24,24 @@ export const PointModel = types.model("Point", {
         self.y = aPt.y;
       }
     }
-  }));
+  }))
+  .preProcessSnapshot(snapshot => {
+    // Sometimes the snapshot is undefined. And in this case it is necessary
+    // to return undefined. This happens when the Point model is referenced
+    // by `prop: types.maybe(PointModel)`.
+    // However, the MST type system isn't happy with returning undefined,
+    // so we cast it to any to bypass the types.
+    if (snapshot == null) return undefined as any;
+
+    // When NaN is written out to JSON it will be converted to null,
+    // So we need to convert it back to NaN. It would be better to avoid using
+    // NaN in MST models, or use a primitive type other than the default
+    // `types.number` which can handle NaN correctly.
+    return {
+      x: snapshot.x == null ? NaN : snapshot.x,
+      y: snapshot.y == null ? NaN : snapshot.y
+    };
+  });
 export interface IPointModel extends Instance<typeof PointModel> {}
 export const kInfinitePoint = {x:NaN, y:NaN};
 
@@ -86,6 +103,10 @@ export const AdornmentModel = types.model("AdornmentModel", {
      */
     getAnnotatableObjectPosition(type: string, objectId: string): Point|undefined {
       return undefined;
+    },
+    hasSelectedInstances() {
+      // derived models should override to return true if they have selected instances
+      return false;
     }
   }))
   .actions(self => ({
@@ -103,6 +124,12 @@ export const AdornmentModel = types.model("AdornmentModel", {
       if (yAttrId && yCats[0]) subPlotKey[yAttrId] = yCats?.[index % yCats.length];
       if (xAttrId && xCats[0]) subPlotKey[xAttrId] = xCats?.[index % xCats.length];
       return subPlotKey;
+    },
+    toggleSelected() {
+      // derived models should override to toggle the selected state of an instance
+    },
+    deleteSelected() {
+      // derived models should override to delete an instance when requested
     }
   }));
 export interface IAdornmentModel extends Instance<typeof AdornmentModel> {}

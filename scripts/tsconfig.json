@@ -1,6 +1,7 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
+    "module": "nodenext",
+    "resolveJsonModule": true,
     "types": ["node"]
   }
 }

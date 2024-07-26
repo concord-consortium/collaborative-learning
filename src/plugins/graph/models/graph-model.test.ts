@@ -32,17 +32,70 @@ const createElementSpy = jest.spyOn(document, "createElement")
           : origCreateElement.call(document, tagName, options);
 });
 
+// Mock colors imported from SCSS
+jest.mock("../../../utilities/color-utils.ts", () => {
+  const originalModule = jest.requireActual("../../../utilities/color-utils.ts");
+  return {
+    ...originalModule,
+    clueDataColorInfo: [
+      { color: "#0069ff", name: "blue" },
+      { color: "#ff9617", name: "orange" },
+      { color: "#19a90f", name: "green" },
+      { color: "#ee0000", name: "red" },
+      { color: "#cbd114", name: "yellow" },
+      { color: "#d51eff", name: "purple" },
+      { color: "#6b00d2", name: "indigo" }    ]
+  };
+});
+
+// Set up mock axes
+const hOrientation = "horizontal" as AxisOrientation;
+const vOrientation = "vertical" as AxisOrientation;
+const bottomPlace = "bottom" as "bottom" | "left" | "rightNumeric" | "rightCat" | "top";
+const leftPlace = "left" as "bottom" | "left" | "rightNumeric" | "rightCat" | "top";
+const scaleType = "linear" as IScaleType;
+const mockAxes = {
+  bottom: {
+    isCategorical: false,
+    isNumeric: true,
+    max: 10,
+    min: 0,
+    orientation: hOrientation,
+    place: bottomPlace,
+    scale: scaleType,
+    setScale: jest.fn(),
+    setTransitionDuration: jest.fn(),
+    transitionDuration: 0,
+    type: "linear"
+  },
+  left: {
+    isCategorical: false,
+    isNumeric: true,
+    max: 10,
+    min: 0,
+    orientation: vOrientation,
+    place: leftPlace,
+    scale: scaleType,
+    setScale: jest.fn(),
+    setTransitionDuration: jest.fn(),
+    transitionDuration: 0,
+    type: "linear"
+  }
+};
+
 import { getSnapshot } from '@concord-consortium/mobx-state-tree';
 import { GraphModel, IGraphModel } from './graph-model';
 import { kGraphTileType } from '../graph-defs';
 import {
-  clueGraphColors, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
+  clueDataColorInfo, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
 } from "../../../utilities/color-utils";
 import { MovablePointModel } from '../adornments/movable-point/movable-point-model';
+import { MovableLineModel } from '../adornments/movable-line/movable-line-model';
 import { createDocumentModel, DocumentModelType } from '../../../models/document/document';
 import { SharedDataSet } from '../../../models/shared/shared-data-set';
 import { getTileSharedModels } from '../../../models/shared/shared-data-utils';
 import { getSharedModelManager } from '../../../models/tiles/tile-environment';
+import { AxisOrientation, IScaleType } from '../imports/components/axis/axis-types';
 
 import "../../../models/shared/shared-data-set-registration";
 import "../../../models/shared/shared-case-metadata-registration";
@@ -80,6 +133,19 @@ describe('GraphModel', () => {
     expect(graphModel.adornments[0].isVisible).toBe(false);
     graphModel.showAdornment('Movable Point');
     expect(graphModel.adornments[0].isVisible).toBe(true);
+  });
+
+  it('should clear selected adornment instances', () => {
+    const graphModel = GraphModel.create();
+    const testMovableLineAdornment = MovableLineModel.create();
+    testMovableLineAdornment.setLine(mockAxes.bottom, mockAxes.left, "line1");
+    graphModel.addAdornment(testMovableLineAdornment);
+    expect(testMovableLineAdornment.lines.size).toBe(1);
+    testMovableLineAdornment.toggleSelected("line1");
+    expect(graphModel.isAnyAdornmentSelected).toBe(true);
+    graphModel.clearSelectedAdornmentInstances();
+    expect(graphModel.isAnyAdornmentSelected).toBe(false);
+    expect(testMovableLineAdornment.lines.size).toBe(0);
   });
 
   describe('Responding to shared data', () => {
@@ -179,21 +245,21 @@ describe('GraphModel', () => {
       }
 
       // Colors should loop once we've gone through them all
-      clueGraphColors.forEach(color => {
+      clueDataColorInfo.forEach(color => {
         graphModel.setColorForId(color.color);
         // graphModel.getColorForId(color.color);
       });
       const extraId = "extra";
       graphModel.setColorForId(extraId);
       // graphModel.getColorForId(extraId);
-      expect(getUniqueColorIndices().length).toEqual(clueGraphColors.length);
+      expect(getUniqueColorIndices().length).toEqual(clueDataColorInfo.length);
 
       // After removing a color, we should get it when we add a new color
       const uniqueKey =
-        clueGraphColors.find(id => graphModel.getColorForId(id.color) !== graphModel.getColorForId(extraId))!.color;
+        clueDataColorInfo.find(id => graphModel.getColorForId(id.color) !== graphModel.getColorForId(extraId))!.color;
       const oldColor = graphModel.getColorForId(uniqueKey);
       graphModel.removeColorForId(uniqueKey);
-      expect(getUniqueColorIndices().length).toEqual(clueGraphColors.length - 1);
+      expect(getUniqueColorIndices().length).toEqual(clueDataColorInfo.length - 1);
       const newKey = "new";
       graphModel.setColorForId(newKey);
       const newColor = graphModel.getColorForId(newKey);

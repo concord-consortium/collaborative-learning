@@ -285,6 +285,27 @@
           "delete"
         ]
       },
+      "geometry": {
+        "tools": [
+          "select",
+          "point",
+          "polygon",
+          "circle",
+          "upload",
+          "|",
+          "duplicate",
+          "color",
+          "label",
+          "|",
+          "add-data",
+          "|",
+          "zoom-in",
+          "zoom-out",
+          "fit-all",
+          "|",
+          "delete"
+        ]
+      },
       "graph": {
         "emptyPlotIsNumeric": true,
         "scalePlotOnValueChange": true,

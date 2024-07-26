@@ -2,6 +2,9 @@ const kGraphPixPerCoord = { x: 18.33, y: -18.33 };
 // determined by inspection
 const kGraphOriginCoordPix = { x: 40, y: 296 };
 
+// NOTE: These don't produce exactly the right results;
+// if you watch the test you can see that the coordinates are somewhat off.
+// However, this does not keep the tests from passing since they are off in a consistent way.
 export function pointCoordsToPix(ptCoords, originPix) {
     return { x: originPix.x + ptCoords.x * kGraphPixPerCoord.x,
              y: originPix.y + ptCoords.y * kGraphPixPerCoord.y };
@@ -58,6 +61,11 @@ class GeometryToolTile {
             return cy.get('.canvas-area .geometry-content .JXGtext').contains('y');
         }
     }
+    // Returns all tick labels on both axes. The X-axis ones are first in the list.
+    getGraphAxisTickLabels(axis) {
+      return cy.get('.canvas-area .geometry-content .tick-label');
+    }
+
     getGraphPointCoordinates(index){ //This is the point coordinate text
         let x=0,
             y=0;
@@ -69,11 +77,17 @@ class GeometryToolTile {
                 return '"(' + this.transformToCoordinate('x',x) + ', ' + this.transformToCoordinate('y',y) + ')"';
             });
     }
-    getGraphPointLabel(){ //This is the letter label for a point
-        return cy.get('.geometry-content.editable .JXGtext');
+    getGraphPointLabel(){ // This selects the letter labels for points as well as the x,y labels on the axes
+        return cy.get('.geometry-content.editable .JXGtext:visible');
     }
     getGraphPoint(){
-        return cy.get('.geometry-content.editable ellipse[display="inline"]');
+        return cy.get('.geometry-content.editable ellipse[display="inline"][fill-opacity="1"]');
+    }
+    getPhantomGraphPoint(){
+        return cy.get('.geometry-content.editable ellipse[fill-opacity="0.5"]');
+    }
+    getSelectedGraphPoint() {
+        return cy.get('.geometry-content.editable ellipse[fill-opacity="1"][stroke-opacity="0.25"]');
     }
     hoverGraphPoint(x,y){
         let transX=this.transformFromCoordinate('x', x),
@@ -82,11 +96,12 @@ class GeometryToolTile {
         this.getGraph().last()
             .trigger('mouseover',transX,transY);
     }
-    selectGraphPoint(x,y){
+    selectGraphPoint(x, y, withShiftKey = false ){
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
 
-        this.getGraph().last().click(transX, transY, {force:true});
+        this.getGraph().last()
+          .click(transX, transY, { force:true, shiftKey: withShiftKey });
     }
     getGraphPointID(point){
          return cy.get('.geometry-content.editable ellipse').eq(point)
@@ -95,10 +110,20 @@ class GeometryToolTile {
                 return id;
          });
     }
+    getGraphLine(){
+        return cy.get('.single-workspace .geometry-content.editable line');
+    }
     getGraphPolygon(){
         return cy.get('.single-workspace .geometry-content.editable polygon');
     }
-    addPointToGraph(x,y){
+    getGraphCircle(){
+      return cy.get('.single-workspace .geometry-content.editable ellipse[fill-opacity="0.2"]');
+    }
+    getSelectedGraphCircle(){
+      return cy.get('.single-workspace .geometry-content.editable ellipse[fill-opacity="0.3"]');
+    }
+
+    clickGraphPosition(x,y){
         let transX=this.transformFromCoordinate('x', x),
             transY=this.transformFromCoordinate('y', y);
 
@@ -110,6 +135,26 @@ class GeometryToolTile {
     getGraphToolMenuIcon(){
         return cy.get('.geometry-menu-button');
     }
+
+    getModalTitle() {
+      return cy.get('.ReactModalPortal');
+    }
+
+    getModalLabelInput() {
+      return cy.get('.ReactModalPortal input[type=text]');
+    }
+
+    // Name should be something like 'none', 'label', or 'length'
+    chooseLabelOption(name) {
+      cy.get(`.ReactModalPortal input[value=${name}]`).click();
+      cy.get('.ReactModalPortal button.default').click();
+    }
+
+    toggleAngleCheckbox(value) {
+      cy.get('.ReactModalPortal input#angle-checkbox').click();
+      cy.get('.ReactModalPortal button.default').click();
+    }
+
     showAngle(){
         cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.angle-label').click({force: true});
     }
@@ -128,8 +173,8 @@ class GeometryToolTile {
     addComment(){
         cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.comment.enabled').click();
     }
-    deleteGraphElement(){
-        cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.delete.enabled').click();
+    selectColor(color){
+      return cy.get(`[data-test=canvas] .tile-toolbar .toolbar-button.color .palette-buttons .color-swatch.${color}`).click();
     }
 }
 export default GeometryToolTile;

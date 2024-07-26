@@ -1,0 +1,21 @@
+fieldset.radio-button-set {
+  border: none;
+  padding: 6px 0;
+}
+
+.radio-button-container {
+  display: flex;
+  align-items: center;
+}
+
+input.radio-button {
+  margin-right: .5em;
+}
+
+input.name-input {
+  margin-left: 8px;
+}
+
+input.checkbox {
+  margin-right: .5em;
+}

@@ -22,7 +22,7 @@ import {ITileContentModel, TileContentModel} from "../../../models/tiles/tile-co
 import {ITileExportOptions} from "../../../models/tiles/tile-content-info";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import {
-  clueGraphColors, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
+  clueDataColorInfo, defaultBackgroundColor, defaultPointColor, defaultStrokeColor
 } from "../../../utilities/color-utils";
 import { AdornmentModelUnion } from "../adornments/adornment-types";
 import { isSharedCaseMetadata, SharedCaseMetadata } from "../../../models/shared/shared-case-metadata";
@@ -35,6 +35,7 @@ import { multiLegendParts } from "../components/legend/legend-registration";
 import { addAttributeToDataSet, DataSet } from "../../../models/data/data-set";
 import { getDocumentContentFromNode } from "../../../utilities/mst-utils";
 import { ICase } from "../../../models/data/data-set-types";
+import { findLeastUsedNumber } from "../../../utilities/math-utils";
 
 export interface GraphProperties {
   axes: Record<string, IAxisModelUnion>
@@ -139,22 +140,7 @@ export const GraphModel = TileContentModel
       return all;
     },
     get nextColor() {
-      const colorCounts: Record<number, number> = {};
-      self._idColors.forEach(index => {
-        if (!colorCounts[index]) colorCounts[index] = 0;
-        colorCounts[index]++;
-      });
-      const usedColorIndices = Object.keys(colorCounts).map(index => Number(index));
-      if (usedColorIndices.length < clueGraphColors.length) {
-        // If there are unused colors, return the index of the first one
-        return Object.keys(clueGraphColors).map(index => Number(index))
-          .filter(index => !usedColorIndices.includes(index))[0];
-      } else {
-        // Otherwise, use the next minimally used color's index
-        const counts = usedColorIndices.map(index => colorCounts[index]);
-        const minCount = Math.min(...counts);
-        return usedColorIndices.find(index => colorCounts[index] === minCount) ?? 0;
-      }
+      return findLeastUsedNumber(clueDataColorInfo.length, self._idColors.values());
     },
     getAdornmentOfType(type: string) {
       return self.adornments.find(a => a.type === type);
@@ -165,7 +151,7 @@ export const GraphModel = TileContentModel
       if (plotIndex < self._pointColors.length) {
         return self._pointColors[plotIndex];
       } else {
-        return clueGraphColors[plotIndex % clueGraphColors.length].color;
+        return clueDataColorInfo[plotIndex % clueDataColorInfo.length].color;
       }
     },
     get pointColor() {
@@ -325,6 +311,9 @@ export const GraphModel = TileContentModel
         if (layer.config.dataset?.isAnyCellSelected) return true;
       }
       return false;
+    },
+    get isAnyAdornmentSelected() {
+      return self.adornments.some(adorn => adorn.hasSelectedInstances());
     },
     /**
      * Return true if no attribute has been assigned to any graph role in any layer.
@@ -547,6 +536,11 @@ export const GraphModel = TileContentModel
         }
       }
     },
+    clearSelectedAdornmentInstances() {
+      for (const adorn of self.adornments) {
+        adorn.deleteSelected();
+      }
+    },
     setGraphProperties(props: GraphProperties) {
       (Object.keys(props.axes) as AxisPlace[]).forEach(aKey => {
         this.setAxis(aKey, props.axes[aKey]);
@@ -613,12 +607,12 @@ export const GraphModel = TileContentModel
     getColorForId(id: string) {
       const colorIndex = self._idColors.get(id);
       if (colorIndex === undefined) return "#000000";
-      return clueGraphColors[colorIndex % clueGraphColors.length].color;
+      return clueDataColorInfo[colorIndex % clueDataColorInfo.length].color;
     },
     getColorNameForId(id: string) {
       const colorIndex = self._idColors.get(id);
       if (colorIndex === undefined) return "black";
-      return clueGraphColors[colorIndex % clueGraphColors.length].name;
+      return clueDataColorInfo[colorIndex % clueDataColorInfo.length].name;
     },
     getEditablePointsColor() {
       let color = "#000000";
@@ -735,19 +729,18 @@ export const GraphModel = TileContentModel
       }
     },
     afterAttach() {
-      if (self.layers.length === 1 && !self.layers[0].config.dataset && !self.layers[0].config.isEmpty) {
-        // Non-empty DataConfiguration lacking a dataset reference = legacy data needing a one-time fix.
-        // We can't do that fix until the SharedModelManager is ready, though.
-        addDisposer(self, reaction(
-          () => {
-            return self.tileEnv?.sharedModelManager?.isReady;
-          },
-          (ready) => {
-            if (!ready) return;
-            this.setDataConfigurationReferences();
-          }
-        ));
-      }
+      // Some shared model references may need to be updated. We can't update them until the SharedModelManager
+      // is ready, though.
+      addDisposer(self, reaction(
+        () => {
+          return self.tileEnv?.sharedModelManager?.isReady;
+        },
+        (ready) => {
+          if (!ready) return;
+          this.initializeSharedModelReferences();
+
+        }, { fireImmediately: true }
+      ));
 
       // Automatically asign colors to anything that might need them.
       addDisposer(self, reaction(
@@ -765,13 +758,40 @@ export const GraphModel = TileContentModel
         }
       ));
     },
-    setDataConfigurationReferences() {
-      // Updates pre-existing DataConfiguration objects that don't have the now-required references
-      // for dataset and metadata. We can determine these from the unique shared models these
-      // legacy tile models should have.
+    initializeSharedModelReferences() {
       const smm = getSharedModelManager(self);
       if (smm && smm.isReady) {
         const sharedDataSets = smm.getTileSharedModelsByType(self, SharedDataSet);
+        let sharedMetadata = smm.getTileSharedModelsByType(self, SharedCaseMetadata);
+
+        // If there's a shared dataset without corresponding shared case metadata, create a new shared case
+        // metadata instance, link it to the dataset, and add it to the tile. This is needed when graph tiles are
+        // copied since the original graph tile's case metadata is not copied along with the shared dataset.
+        sharedDataSets.forEach((sds) => {
+          if (!isSharedDataSet(sds)) return;
+          const hasLinkedCaseMetadata = sharedMetadata.some((smd) => {
+            if (isSharedCaseMetadata(smd)) {
+              return smd.data === sds.dataSet;
+            }
+          });
+          if (!hasLinkedCaseMetadata) {
+            const smd = SharedCaseMetadata.create();
+            smd.setData(sds.dataSet);
+            smm.addTileSharedModel(self, smd);
+            const datasetLayer = self.layers.find((layer) => layer.config.dataset === sds.dataSet);
+            if (datasetLayer) {
+              datasetLayer.config.metadata = smd;
+            }
+          }
+        });
+
+        // Update pre-existing, legacy DataConfiguration objects that don't have the now-required references
+        // for dataset and metadata. We can determine these from the unique shared models these
+        // legacy tile models should have.
+        const legacyGraph = self.layers.length === 1 && !self.layers[0].config.dataset &&
+                                !self.layers[0].config.isEmpty;
+        if (!legacyGraph) return;
+
         if (sharedDataSets.length === 1) {
           const sds = sharedDataSets[0];
           if (isSharedDataSet(sds)) {
@@ -779,7 +799,7 @@ export const GraphModel = TileContentModel
             console.log('Updated legacy document - set dataset reference');
           }
         }
-        const sharedMetadata = smm.getTileSharedModelsByType(self, SharedCaseMetadata);
+        sharedMetadata = smm.getTileSharedModelsByType(self, SharedCaseMetadata);
         if (sharedMetadata.length === 1) {
           const smd = sharedMetadata[0];
           if (isSharedCaseMetadata(smd)) {

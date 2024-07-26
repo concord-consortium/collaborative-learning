@@ -1,13 +1,35 @@
-# Implementation Notes:
+# Bookmarks Notes
 
-Previously only certain bookmarks were updated in Firebase:
+Bookmarks used to be called stars.
+
+The bookmarks are stored in Firebase at:
+`<class root>/offerings/<offering id>/commentaries/stars/<doc id>/<star id>`.
+
+Underneath that path is a star object that looks like:
+```
+{
+  starred: boolean,
+  timestamp: number,
+  uid: string // User id that added this star or bookmark
+}
+```
+
+A couple of nuances here:
+- the presence of a star object doesn't mean the document is bookmarked, the starred property of this object has to be true
+- the stars are stored under the offering. If a user bookmarks a personal document, that bookmark will only be seen on that personal document when the user opens the same assignment from the portal.
+
+The bookmarks are managed by `models/stores/bookmarks.ts` and `lib/db-listeners/db-bookmarks-listener.ts`.
+
+`bookmarks.ts` uses Firebase as the source of truth. So when a user changes a star that star is changed in Firebase directly. The change in Firebase is picked up by `db-bookmark-listener.ts` which then updates the bookmarks MobX model in `bookmarks.ts`. Firebase triggers listeners like this immediately even when offline, so this approach of using Firebase as the source of truth does not add extra time. The single source of truth keeps the code less complex.
+
+`db-bookmark-listener.ts` listens to changes in `<class root>/offerings/<offering id>/commentaries/stars/`. There is a single Firebase listener for all of the offering's bookmarks.
+
+Before Feb 2024, only certain bookmarks were updated in Firebase:
 - personal documents loaded by the `db-other-docs-listener` bookmarks were sync'd
 - problem documents that are owned by the current user bookmarks were sync'd
 - publication document bookmarks were sync'd
-
-This was changed to update in Firebase any star the user can change in the UI.
-
-The bookmarks use Firebase as the source of truth. So when a user changes a star that star is changed in Firebase directly. The change in Firebase causes an update to the bookmarks MobX model. Firebase triggers these changes immediately even when offline so this approach should not add extra time, and it makes the code more simple.
+Document types not in that list would not sync their bookmarks.
+The `v5.2.0` release fixed this and now all bookmarks are updated in Firebase.
 
 # Debugging
 
@@ -40,8 +62,7 @@ If there is more than one teacher in the class, each of them might want to contr
 - rename all references to `stars` to `bookmarks`.
 - remove the flag of `starred` on the star in Firebase, and just use the presence of the star.
 - move the bookmarks to Firestore, they fit the firestore model better because we can query them for the ones owned by a user and ones owned by a teacher.
-- make bookmarks independent of the offering so a document bookmarked is bookmarked for all offerings in the class. It isn't clear if this is really what a user would want, but it might be.
-
+- make bookmarks independent of the offering so a document bookmarked is bookmarked for all offerings in the class. It isn't clear if this is really what a user would want, but it probably is.
 
 # Use of ts-jest-mocker
 

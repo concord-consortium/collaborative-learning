@@ -11,11 +11,11 @@
 import fs from "fs";
 import admin from "firebase-admin";
 
-import { outputAzureFile } from "./azure-utils";
-import { AIService, datasetPath, networkFileName, tagFileExtension } from "./script-constants";
-import { DocumentInfo, IAzureMetadata } from "./script-types";
-import { getFirestoreBasePath, prettyDuration } from "./script-utils";
-import { outputVertexAIFile } from "./vertexai-utils";
+import { outputAzureFile } from "./azure-utils.js";
+import { AIService, datasetPath, networkFileName, tagFileExtension } from "./script-constants.js";
+import { DocumentInfo, IAzureMetadata } from "./script-types.js";
+import { getFirestoreBasePath, prettyDuration } from "../lib/script-utils.js";
+import { outputVertexAIFile } from "./vertexai-utils.js";
 
 // The directory containing the documents you're interested in.
 // This should be the output of download-documents.ts.
@@ -41,7 +41,7 @@ const documentInfo: Record<string, DocumentInfo> = {};
 const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
 
 // Fetch the service account key JSON file contents; must be in same folder as script
-const credential = admin.credential.cert('./serviceAccountKey.json');
+const credential = admin.credential.cert('../serviceAccountKey.json');
 // Initialize the app with a service account, granting admin privileges
 admin.initializeApp({
   credential,

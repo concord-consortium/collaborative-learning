@@ -1,3 +1,4 @@
+import { castArray } from "lodash";
 import { JXGChange, JXGChangeAgent, JXGChangeResult, JXGCreateHandler, JXGObjectType, IChangeContext
         } from "./jxg-changes";
 import {
@@ -13,7 +14,7 @@ import { linkedPointChangeAgent, tableLinkChangeAgent } from "./jxg-table-link";
 import { isBoard } from "./jxg-types";
 import { vertexAngleChangeAgent } from "./jxg-vertex-angle";
 import { castArrayCopy } from "../../../utilities/js-utils";
-import { castArray } from "lodash";
+import { circleChangeAgent } from "./jxg-circle";
 
 type OnWillApplyChange = (board: JXG.Board | string, change: JXGChange) => false | undefined;
 type OnDidApplyChange = (board: JXG.Board | undefined, change: JXGChange) => void;
@@ -24,11 +25,12 @@ interface JXGChangeAgents {
 
 const agents: JXGChangeAgents = {
   board: boardChangeAgent,
+  circle: circleChangeAgent,
   comment: commentChangeAgent,
   image: imageChangeAgent,
   linkedpoint: linkedPointChangeAgent,
-  object: objectChangeAgent,
   movableline: movableLineChangeAgent,
+  object: objectChangeAgent,
   point: pointChangeAgent,
   polygon: polygonChangeAgent,
   tablelink: tableLinkChangeAgent,

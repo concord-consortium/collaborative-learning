@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { getSharedModelManager } from "../../../../models/tiles/tile-environment";
-import { clueGraphColors } from "../../../../utilities/color-utils";
+import { clueDataColorInfo } from "../../../../utilities/color-utils";
 import { LegendDropdown } from "../../../graph/components/legend/legend-dropdown";
 import {
   LegendIdListFunction, ILegendHeightFunctionProps, ILegendPartProps
@@ -92,7 +92,7 @@ export const SingleVariableFunctionLegend = observer(function SingleVariableFunc
                     buttonAriaLabel={`Color: ${graphModel.getColorNameForId(instanceKey)}`}
                     buttonLabel={<ColorKey color={graphModel.getColorForId(instanceKey)} />}
                     menuItems={
-                      clueGraphColors.map((color, index) => ({
+                      clueDataColorInfo.map((color, index) => ({
                         ariaLabel: color.name,
                         key: color.color,
                         label: <ColorKey color={color.color} />,

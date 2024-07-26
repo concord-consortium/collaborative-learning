@@ -3,13 +3,14 @@ import { ITileExportOptions } from "../tile-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { comma, StringBuilder } from "../../../utilities/string-builder";
 import {
-  BoardModel, BoardModelType, CommentModel, CommentModelType, GeometryBaseContentModelType,
+  BoardModel, BoardModelType, CircleModelType, CommentModel, CommentModelType, GeometryBaseContentModelType,
   GeometryExtrasContentSnapshotType, GeometryObjectModelType, ImageModel, ImageModelType,
+  isPointModel,
   MovableLineModel, MovableLineModelType, pointIdsFromSegmentId, PointModel, PointModelType,
   PolygonModel, PolygonModelType, PolygonSegmentLabelModelSnapshot, VertexAngleModel, VertexAngleModelType
 } from "./geometry-model";
 import {
-  ESegmentLabelOption, JXGChange, JXGCoordPair, JXGImageParents, JXGObjectType, JXGProperties
+  ELabelOption, JXGChange, JXGCoordPair, JXGImageParents, JXGObjectType, JXGProperties
 } from "./jxg-changes";
 import { getMovableLinePointIds, kGeometryDefaultHeight, kGeometryDefaultWidth } from "./jxg-types";
 import { kDefaultBoardModelOutputProps, kGeometryTileType } from "./geometry-types";
@@ -31,18 +32,20 @@ export const convertChangesToModel = (changes: JXGChange[]) => {
   return exportGeometryModel(changesJson);
 };
 
-export const convertModelToChanges = (
+export const getGeometryBoardChange = (
   model: GeometryBaseContentModelType, boardOptions?: IGeometryBoardChangeOptions
-): JXGChange[] => {
-  const { board, bgImage, objects } = model;
-  const changes: JXGChange[] = [];
-  // convert the board
-  const { xAxis, yAxis } = board || BoardModel.create(kDefaultBoardModelOutputProps);
+): JXGChange => {
+  const { xAxis, yAxis } = model.board || BoardModel.create(kDefaultBoardModelOutputProps);
   const { name: xName, label: xAnnotation } = xAxis;
   const { name: yName, label: yAnnotation } = yAxis;
-  changes.push(
+  return (
     defaultGeometryBoardChange(xAxis, yAxis, { xName, yName, xAnnotation, yAnnotation }, boardOptions )
   );
+};
+
+export const convertModelToChanges = (model: GeometryBaseContentModelType): JXGChange[] => {
+  const { bgImage, objects } = model;
+  const changes: JXGChange[] = [];
   // convert the background image (if any)
   if (bgImage) {
     changes.push(...convertModelObjectToChanges(bgImage));
@@ -77,8 +80,16 @@ function omitNullish(inProps: Record<string, any>) {
 
 export const convertModelObjectsToChanges = (objects: GeometryObjectModelType[]): JXGChange[] => {
   const changes: JXGChange[] = [];
+  // Process points first, before objects like polygons that refer to them.
   objects.forEach(obj => {
-    changes.push(...convertModelObjectToChanges(obj));
+    if (isPointModel(obj)) {
+      changes.push(...convertModelObjectToChanges(obj));
+    }
+  });
+  objects.forEach(obj => {
+    if (!isPointModel(obj)) {
+      changes.push(...convertModelObjectToChanges(obj));
+    }
   });
   return changes;
 };
@@ -86,6 +97,14 @@ export const convertModelObjectsToChanges = (objects: GeometryObjectModelType[])
 export const convertModelObjectToChanges = (obj: GeometryObjectModelType): JXGChange[] => {
   const changes: JXGChange[] = [];
   switch (obj.type) {
+    case "circle": {
+      const { centerPoint, tangentPoint, ...props } = obj as CircleModelType;
+      const properties = omitNullish(props);
+      if (centerPoint && tangentPoint) {
+        changes.push({ operation: "create", target: "circle", parents: [centerPoint, tangentPoint], properties });
+      }
+      break;
+    }
     case "comment": {
       const { type, x, y, anchors, ...props } = obj as CommentModelType;
       const anchor = anchors?.length ? anchors[0] : undefined;
@@ -110,6 +129,10 @@ export const convertModelObjectToChanges = (obj: GeometryObjectModelType): JXGCh
     case "point": {
       const { type, x, y, ...props } = obj as PointModelType;
       const properties = omitNullish(props);
+      if (properties.labelOption) {
+        properties.clientLabelOption = properties.labelOption;
+        properties.labelOption = undefined;
+      }
       changes.push({ operation: "create", target: "point", parents: [x, y], properties });
       break;
     }
@@ -117,12 +140,20 @@ export const convertModelObjectToChanges = (obj: GeometryObjectModelType): JXGCh
       const poly = obj as PolygonModelType;
       const { type, points: parents, labels, ...props } = poly;
       const properties = omitNullish(props);
+      if (properties.labelOption) {
+        properties.clientLabelOption = properties.labelOption;
+        properties.labelOption = undefined;
+      }
+      if (properties.name) {
+        properties.clientName = properties.name;
+        properties.name = undefined;
+      }
       changes.push({ operation: "create", target: "polygon", parents, properties });
-      (labels || []).forEach(({ id, option }) => {
+      (labels || []).forEach(({ id, option, name }) => {
         const pts = pointIdsFromSegmentId(id);
         if (pts.length === 2) {
           const _parents = [pts[0], pts[1]];
-          const _properties = { labelOption: option };
+          const _properties = { labelOption: option, name };
           changes.push({
             operation: "update", target: "polygon", targetID: poly.id, parents: _parents, properties: _properties });
         }
@@ -222,6 +253,12 @@ function getDependenciesFromChange(change: JXGChange, objectInfoMap: Record<stri
   }
   return [];
 }
+
+//
+// The following exportGeometry* methods are used only (a) in tests and (b) when
+// importing old legacy Geometry content stored as a list of changes. At some
+// point it would be good to do a content migration and delete this code.
+//
 
 export const exportGeometryJson = (changes: string[], options?: ITileExportOptions) => {
   return exportGeometry(changes, { ...options, json: true }) as string;
@@ -478,7 +515,7 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
 
   const exportPolygon = (id: string, isLast: boolean) => {
     const _changes = objectInfoMap[id].changes;
-    const labelMap = new Map<string, { points: string[], option: ESegmentLabelOption }>();
+    const labelMap = new Map<string, { points: string[], option: ELabelOption }>();
     let props: any = {};
     _changes.forEach(change => {
       const { parents, properties } = change;

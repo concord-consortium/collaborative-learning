@@ -311,6 +311,35 @@ context('XYPlot Tool Tile', function () {
       xyTile.getGraphDot().should('have.length', 8);
     });
 
+    it("On initialization from data card containing image URLs, does not graph image URLs", () => {
+      beforeTest(`${Cypress.config("qaMothPlotUnitStudent5")}&mouseSensor`);
+      clueCanvas.addTile("datacard");
+      dataCard.getTile().should("exist");
+      dataCard.getAddAttributeButton().click();
+      dataCard.getAttrName().eq(0).dblclick().type("Image{enter}");
+      dataCard.getAddAttributeButton().click();
+      dataCard.getAttrName().eq(1).dblclick().type("Name{enter}");
+      dataCard.getAddAttributeButton().click();
+      dataCard.getAttrName().eq(2).dblclick().type("Type{enter}");
+      dataCard.getAttrValue().eq(0).click().type("https://concord.org/images/energy3d.png{enter}");
+      dataCard.getAttrValue().eq(1).click().type("Energy3D{enter}");
+      dataCard.getAttrValue().eq(2).click().type("download{enter}");
+      dataCard.getAddCardButton().click();
+      dataCard.getAttrValue().eq(0).click().type("https://concord.org/images/codap.png{enter}");
+      dataCard.getAttrValue().eq(1).click().type("CODAP{enter}");
+      dataCard.getAttrValue().eq(2).click().type("web app{enter}");
+      dataCard.getGraphItButton().click();
+      cy.wait(1000);
+      // Image URLs should not be graphed.
+      xyTile.getXAxisLabel().should("contain", "Name");
+      xyTile.getYAxisLabel().should("contain", "Type");
+      // If the user assigns the image URLs to an axis, "<image>" should be used in place of the full URL values
+      // for the tick labels.
+      xyTile.clickPortalButton("Name");
+      xyTile.getPortalButton().contains("Image").should("exist").click();
+      cy.get("[data-testid=axis-bottom]").find("text").should("contain", "<image>");
+    });
+
     it("Test undo redo actions", () => {
       beforeTest(queryParamsMultiDataset);
       cy.log("Undo redo  XY Plot Tile creation");
@@ -537,6 +566,8 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.toolbarButtonIsNotSelected('graph', 'move-points');
       clueCanvas.toolbarButtonIsDisabled('graph', 'add-points');
       clueCanvas.toolbarButtonIsNotSelected('graph', 'add-points');
+      xyTile.getEditableAxisBox("left", "max").click().type("100{enter}");
+      xyTile.getEditableAxisBox("bottom", "max").click().type("100{enter}");
 
       // Create manual layer
       clueCanvas.clickToolbarButton('graph', 'add-points-by-hand');
@@ -548,6 +579,10 @@ context('XYPlot Tool Tile', function () {
       xyTile.getYAttributesLabel().should('have.length', 1).should('contain.text', 'Y Variable 1');
       xyTile.getLayerName().should('have.length', 1).should('contain.text', 'Added by hand');
       xyTile.getLayerNameInput().should('not.be.visible');
+
+      // Custom axis bounds should not have been changed
+      xyTile.getEditableAxisBox("left", "max").should('contain.text', '100');
+      xyTile.getEditableAxisBox("bottom", "max").should('contain.text', '100');
 
       // Rename manual layer
       xyTile.getLayerNameEditButton().click();
@@ -618,7 +653,6 @@ context('XYPlot Tool Tile', function () {
       // Add movable line
       clueCanvas.clickToolbarButton("graph", "movable-line");
       clueCanvas.toolbarButtonIsEnabled("graph", "movable-line");
-      clueCanvas.toolbarButtonIsSelected("graph", "movable-line");
       xyTile.getMovableLine().should("have.length", 1);
       xyTile.getMovableLineCover().should("have.length", 1);
       xyTile.getMovableLineHandle().should("have.length", 2);
@@ -633,10 +667,9 @@ context('XYPlot Tool Tile', function () {
       // Drag movable line
       xyTile.getMovableLineEquationSlope().then(origSlope => {
         xyTile.getMovableLineEquationIntercept().then(origIntercept => {
-          xyTile.getMovableLineCover()
-            .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' })
-            .trigger("mousemove", 50, 0, { force: true, eventConstructor: 'MouseEvent' })
-            .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
+          xyTile.getMovableLineCover().trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' });
+          xyTile.getMovableLineCover().trigger("mousemove", 50, 0, { force: true, eventConstructor: 'MouseEvent' });
+          xyTile.getMovableLineCover().trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
           xyTile.getMovableLineEquationSlope().should("equal", origSlope);
           xyTile.getMovableLineEquationIntercept().should("be.greaterThan", origIntercept);
         });
@@ -644,24 +677,29 @@ context('XYPlot Tool Tile', function () {
 
       // Now drag the bottom handle up enough to make the slope negative
       xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
-      xyTile.getMovableLineHandle('lower')
-        .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' })
-        .trigger("mousemove", 0, -100, { force: true, eventConstructor: 'MouseEvent' })
-        .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineHandle('lower').trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineHandle('lower').trigger("mousemove", 0, -100, { force: true, eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineHandle('lower').trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
       xyTile.getMovableLineEquationSlope().should("be.lessThan", 0);
       // Then drag the upper handle up and make slope positive again
-      xyTile.getMovableLineHandle('upper')
-        .trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' })
-        .trigger("mousemove", 0, -100, { force: true, eventConstructor: 'MouseEvent' })
-        .trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineHandle('upper').trigger("mousedown", { force: true, eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineHandle('upper').trigger("mousemove", 0, -100, { force: true, eventConstructor: 'MouseEvent' });
+      xyTile.getMovableLineHandle('upper').trigger("mouseup", { force: true, eventConstructor: 'MouseEvent' });
       xyTile.getMovableLineEquationSlope().should("be.greaterThan", 0);
 
-      // Hide movable line (it still exists, just hidden)
+      // Add another movable line
       clueCanvas.clickToolbarButton("graph", "movable-line");
       clueCanvas.toolbarButtonIsEnabled("graph", "movable-line");
-      clueCanvas.toolbarButtonIsNotSelected("graph", "movable-line");
+      xyTile.getMovableLine().should("have.length", 2);
+      xyTile.getMovableLineCover().should("have.length", 2);
+      xyTile.getMovableLineHandle().should("have.length", 4);
+      xyTile.getMovableLineEquationContainer().should("have.length", 2);
+
+      // Select a movable line and delete it using the toolbar button
+      xyTile.getMovableLineCover().eq(1).click({force: true});
+      clueCanvas.clickToolbarButton("graph", "delete");
       xyTile.getMovableLine().should("have.length", 1);
-      xyTile.getMovableLineWrapper().should("have.class", "fadeOut").and("not.have.class", "fadeIn");
+
     });
   });
 });

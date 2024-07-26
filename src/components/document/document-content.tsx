@@ -419,10 +419,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     const { toolId, title } = createTileInfo;
     const insertRowInfo = this.getDropRowInfo(e);
-    const isInsertingInExistingRow = insertRowInfo?.rowDropLocation &&
-                                      (["left", "right"].indexOf(insertRowInfo.rowDropLocation) >= 0);
-    const addSidecarNotes = (toolId.toLowerCase() === "geometry") && !isInsertingInExistingRow;
-    const rowTile = content.userAddTile(toolId, {title, addSidecarNotes, insertRowInfo});
+    const rowTile = content.userAddTile(toolId, {title, insertRowInfo});
 
     if (rowTile?.tileId) {
       ui.setSelectedTileId(rowTile.tileId);

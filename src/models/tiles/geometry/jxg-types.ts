@@ -6,6 +6,9 @@ export const kGeometryDefaultPixelsPerUnit = 18.3;  // matches S&S curriculum im
 export const kGeometryDefaultXAxisMin = -2;
 export const kGeometryDefaultYAxisMin = -1;
 
+export const kGeometryHighlightColor = "#0081ff";
+
+
 // utility for creating an object from a property/value pair
 export const toObj = (p: string, v: any) => v != null ? { [p]: v } : undefined;
 
@@ -20,7 +23,9 @@ export const isGeometryElement = (v: any): v is JXG.GeometryElement => v instanc
 
 export const isPoint = (v: any): v is JXG.Point => v instanceof JXG.Point;
 export const isPointArray = (v: any): v is JXG.Point[] => Array.isArray(v) && v.every(isPoint);
-export const isVisiblePoint = (v: any): v is JXG.Point => isPoint(v) && v.visProp.visible;
+export const isVisiblePoint = (v: any): v is JXG.Point => isPoint(v) && !!v.visProp.visible;
+export const isRealVisiblePoint = (v: any): v is JXG.Point => isPoint(v) && !!v.visProp.visible
+  && !v.getAttribute("isPhantom");
 
 export const isLinkedPoint = (v: any): v is JXG.Point => {
   return isPoint(v) && (v.getAttribute("clientType") === "linkedPoint");
@@ -46,8 +51,10 @@ export const isLine = (v: any): v is JXG.Line => v instanceof JXG.Line;
 
 export const isPolygon = (v: any): v is JXG.Polygon => v instanceof JXG.Polygon;
 export const isVisibleEdge = (v: any): v is JXG.Line => {
-  return v instanceof JXG.Line && (v.elType === "segment") && v.visProp.visible;
+  return v instanceof JXG.Line && (v.elType === "segment") && !!v.visProp.visible;
 };
+
+export const isCircle = (v: any): v is JXG.Circle => v instanceof JXG.Circle;
 
 export const isText = (v: any): v is JXG.Text => v instanceof JXG.Text;
 
@@ -59,7 +66,7 @@ export const kMovableLineType = "movableLine";
 export const isMovableLine = (v: any): v is JXG.Line => {
   return v && (v.elType === "line") && (v.getAttribute("clientType") === kMovableLineType);
 };
-export const isVisibleMovableLine = (v: any): v is JXG.Line => isMovableLine(v) && v.visProp.visible;
+export const isVisibleMovableLine = (v: any): v is JXG.Line => isMovableLine(v) && !!v.visProp.visible;
 export const isMovableLineControlPoint = (v: any): v is JXG.Point => {
   return isPoint(v) && v.getAttribute("clientType") === kMovableLineType;
 };

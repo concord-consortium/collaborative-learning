@@ -180,9 +180,8 @@ describe("document model", () => {
     expect(document.content!.tileMap.size).toBe(0);
     document.addTile("text");
     expect(document.content!.tileMap.size).toBe(1);
-    // adding geometry tool adds sidecar text tool
-    document.addTile("geometry", {addSidecarNotes: true});
-    expect(document.content!.tileMap.size).toBe(3);
+    document.addTile("geometry");
+    expect(document.content!.tileMap.size).toBe(2);
   });
 
   it("allows tiles to be deleted", () => {
@@ -313,6 +312,6 @@ describe("document model", () => {
     expect(tiles?.length).toBe(3);
 
     expect(tiles?.map(t => document.content?.getTile(t)?.title)).toEqual([
-      "Text 1", "Shapes Graph 1", "Text 2"]);
+      "Text 1", "Coordinate Grid 1", "Text 2"]);
   });
 });

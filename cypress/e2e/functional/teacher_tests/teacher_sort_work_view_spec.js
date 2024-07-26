@@ -58,14 +58,19 @@ describe('SortWorkView Tests', () => {
     cy.wait(1000);
 
     cy.log('verify opening and closing a document from the sort work view');
+    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().eq(1).click(); // Open the first document in the list
     resourcesPanel.getEditableDocumentContent().should('be.visible');
     resourcesPanel.getDocumentCloseButton().click();
+    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().should('be.visible'); // Verify the document is closed
   });
 
 
   it("should open Sort Work tab and test sorting by group", () => {
+    // Clear data before the test so it can be retried and will start with a clean slate
+    cy.clearQAData('all');
+
     const students = ["student:1", "student:2", "student:3", "student:4"];
     const studentProblemDocs = [
       `Student 1: ${title}`,
@@ -90,6 +95,7 @@ describe('SortWorkView Tests', () => {
       canvas.getPersonalDocTitle().find('span').text().should('contain', copyTitle);
       // Check that exemplar is not visible to student
       cy.openTopTab('sort-work');
+      cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
       sortWork.getSortWorkItemByTitle(exemplarDocs[0]).parents('.list-item').should("have.class", "private");
     });
 
@@ -97,6 +103,7 @@ describe('SortWorkView Tests', () => {
     cy.visit(queryParams2);
     cy.waitForLoad();
     cy.openTopTab('sort-work');
+    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     cy.wait(1000);
     studentProblemDocs.forEach(doc => {
       sortWork.getSortWorkItem().should('contain', doc);
@@ -114,11 +121,13 @@ describe('SortWorkView Tests', () => {
     resourcesPanel.getDocumentCloseButton().should("exist").click();
 
     cy.log("open personal doc and make sure Edit button doesn't show and Close button shows");
+    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().contains(studentPersonalDocs[0]).click();
     resourcesPanel.getDocumentEditButton().should("not.exist");
     resourcesPanel.getDocumentCloseButton().should("exist").click();
 
     cy.log("open exemplar doc and make sure Edit button doesn't show and Close button shows");
+    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().contains(exemplarDocs[0]).click();
     resourcesPanel.getDocumentEditButton().should("not.exist");
     resourcesPanel.getDocumentCloseButton().should("exist");
@@ -130,6 +139,7 @@ describe('SortWorkView Tests', () => {
     resourcesPanel.getDocumentCloseButton().click();
 
     cy.log("check all problem and personal docs show in the correct group");
+    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     studentProblemDocs.forEach(doc => {
       sortWork.checkDocumentInGroup("Group 5", doc);
     });
@@ -139,6 +149,7 @@ describe('SortWorkView Tests', () => {
 
     cy.log("run CLUE as student 1; they should now have access to exemplar");
     runClueAsStudent(students[0]);
+    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItemByTitle(exemplarDocs[0]).parents('.list-item').should("not.have.class", "private");
 
     cy.log("have student 1 leave the group");
@@ -149,6 +160,7 @@ describe('SortWorkView Tests', () => {
     cy.waitForLoad();
     cy.openTopTab('sort-work');
     cy.wait(1000);
+    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentNotInGroup("Group 5", studentProblemDocs[0]);
     sortWork.checkDocumentNotInGroup("Group 5", studentPersonalDocs[0]);
     sortWork.checkDocumentInGroup("No Group", studentProblemDocs[0]);
@@ -166,6 +178,7 @@ describe('SortWorkView Tests', () => {
     sortWork.checkSectionHeaderLabelsExist([
       "1, Student", "1, Teacher", "2, Student", "3, Student", "4, Student", "Idea, Ivan"
     ]);
+    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Idea, Ivan", exemplarDocs[0]);
     sortWork.checkDocumentInGroup("1, Student", studentProblemDocs[0]);
 
@@ -173,6 +186,7 @@ describe('SortWorkView Tests', () => {
     sortWork.getSortByMenu().click();
     cy.wait(1000);
     sortWork.getSortByTagOption().click();
+    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Unit Rate", exemplarDocs[0]);
 
     cy.log("check that exemplar document can also be assigned tag by teacher");
@@ -188,6 +202,7 @@ describe('SortWorkView Tests', () => {
     sortWork.getSortByNameOption().click();
     sortWork.getSortByMenu().click();
     sortWork.getSortByTagOption().click();
+    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Diverging Designs", exemplarDocs[0]);
 
     cy.log("remove the teacher added tag and reload");
@@ -202,6 +217,7 @@ describe('SortWorkView Tests', () => {
     cy.log("check that exemplar document is still displayed in strategy tag sourced from CMS but not in teacher added tag");
     sortWork.getSortByMenu().click();
     sortWork.getSortByTagOption().click();
+    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Unit Rate", exemplarDocs[0]);
     sortWork.checkGroupIsEmpty("Diverging Designs");
 
@@ -213,6 +229,7 @@ describe('SortWorkView Tests', () => {
     cy.waitForLoad();
     cy.openTopTab('sort-work');
     cy.wait(1000);
+    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Group 6", studentProblemDocs[0]);
     sortWork.checkDocumentInGroup("Group 6", studentPersonalDocs[0]);
     sortWork.checkDocumentInGroup("Group 5", studentProblemDocs[1]);
@@ -229,6 +246,7 @@ describe('SortWorkView Tests', () => {
     cy.waitForLoad();
     cy.openTopTab('sort-work');
     cy.wait(1000);
+    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("No Group", studentProblemDocs[0]);
     sortWork.checkDocumentInGroup("No Group", studentPersonalDocs[0]);
     sortWork.checkGroupDoesNotExist("Group 6");

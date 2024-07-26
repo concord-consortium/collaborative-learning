@@ -14,8 +14,8 @@
 import fs from "fs";
 import stringify from "json-stringify-pretty-compact";
 
-import { datasetPath } from "./script-constants";
-import { prettyDuration } from "./script-utils";
+import { datasetPath } from "./script-constants.js";
+import { prettyDuration } from "../lib/script-utils.js";
 
 const sourceDirectory = "dataset1706677550897";
 const annotationTypes = ["arrowAnnotation"];
