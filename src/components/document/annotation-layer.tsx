@@ -123,19 +123,10 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
   const handleBackgroundClick: MouseEventHandler<HTMLDivElement> = event => {
     content?.selectAnnotations([]);
-    // FIXME: this doesn't work because the event target is the annotation-svg, not the background,
-    // not on the tiles that are behind it.
-    const target = event.target;
-    if (target instanceof HTMLElement) {
-      const tile = target.closest('.tool-tile');
-      if (tile && tile.classList.contains('placeholder-tile')) {
-        ui.setAnnotationMode();
-      }
-    }
   };
 
   const handleBackgroundDoubleClick: MouseEventHandler<HTMLDivElement> = event => {
-    // Make sure it's really a click on the annotation-svg background, not bubbled up from a button
+    // Make sure it's a click on the annotation-svg background, not bubbled up from a button
     if ((event.target as HTMLElement).classList.contains("annotation-svg")) {
       ui.setAnnotationMode();
     }
