@@ -5,6 +5,7 @@ import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
 import objectHash from "object-hash";
 import { SizeMeProps } from "react-sizeme";
+import { GeometryElement } from "jsxgraph";
 
 import { pointBoundingBoxSize, pointButtonRadius, segmentButtonWidth, zoomFactor } from "./geometry-constants";
 import { BaseComponent } from "../../base";
@@ -23,7 +24,8 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           logGeometryEvent,
           getPoint,
           getBoardObject,
-          findBoardObject} from "../../../models/tiles/geometry/geometry-utils";
+          findBoardObject,
+          forEachBoardObject} from "../../../models/tiles/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
 import {
@@ -788,20 +790,20 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     });
   }
 
-  private getBoardPointsExtents(board: JXG.Board){
+  private getBoardObjectsExtents(board: JXG.Board) {
     let xMax = 1;
     let yMax = 1;
     let xMin = -1;
     let yMin = -1;
 
-    board.objectsList.forEach((obj: any) => {
-      if (obj.elType === "point"){
-        const pointX = obj.coords.usrCoords[1];
-        const pointY = obj.coords.usrCoords[2];
-        if (pointX < xMin) xMin = pointX - 1;
-        if (pointX > xMax) xMax = pointX + 1;
-        if (pointY < yMin) yMin = pointY - 1;
-        if (pointY > yMax) yMax = pointY + 1;
+    forEachBoardObject(board, (obj: GeometryElement) => {
+      // Don't need to consider polygons since the extent of their points will be enough.
+      if (isPoint(obj) || isCircle(obj)) {
+        const [left, top, right, bottom] = obj.bounds();
+        if (left < xMin) xMin = left - 1;
+        if (right > xMax) xMax = right + 1;
+        if (top > yMax) yMax = top + 1;
+        if (bottom < yMin) yMin = bottom - 1;
       }
     });
     return { xMax, yMax, xMin, yMin };
@@ -903,7 +905,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private scaleToFit = () => {
     const { board } = this.state;
     if (!board || this.props.readOnly) return;
-    const extents = this.getBoardPointsExtents(board);
+    const extents = this.getBoardObjectsExtents(board);
     this.rescaleBoardAndAxes(extents);
   };
 
