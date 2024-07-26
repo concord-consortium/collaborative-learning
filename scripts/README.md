@@ -22,7 +22,7 @@ This api user was probably created by this rake task: https://github.com/concord
 
 This access token should be stored in a /scripts/.env file with:
 ```
-PORTAL_ACCESS_TOKEN=76580a138af6909c6758bdbea0cd8e12
+PORTAL_ACCESS_TOKEN=[token]
 ```
 
 # Running on Google Cloud Virtual Machine
