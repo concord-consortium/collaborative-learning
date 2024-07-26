@@ -46,7 +46,7 @@ function beforeTest(params) {
 }
 
 context('Arrow Annotations (Sparrows)', function () {
-  it.only("can add arrows to draw tiles", () => {
+  it("can add arrows to draw tiles", () => {
     beforeTest(queryParams);
     clueCanvas.addTile("drawing");
     drawToolTile.getDrawTile().should("exist");
@@ -86,6 +86,10 @@ context('Arrow Annotations (Sparrows)', function () {
     cy.log("ESC key exits sparrow mode");
     aa.getAnnotationLayer().should("have.class", "editing");
     aa.getAnnotationLayer().type("{esc}");
+    aa.getAnnotationLayer().should("not.have.class", "editing");
+    aa.clickArrowToolbarButton();
+    aa.getAnnotationLayer().should("have.class", "editing");
+    aa.getArrowToolbarButton().type("{esc}");
     aa.getAnnotationLayer().should("not.have.class", "editing");
     aa.clickArrowToolbarButton();
 
