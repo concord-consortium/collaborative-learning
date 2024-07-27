@@ -7,6 +7,11 @@ import { logSparrowTitleChange } from "../tiles/log/log-sparrow-event";
 
 export const kArrowAnnotationType = "arrowAnnotation";
 
+export enum ArrowShape {
+  straight = "straight",
+  curved = "curved"
+}
+
 export function isArrowAnnotationSnapshot(snapshot: any): snapshot is IArrowAnnotationSnapshot {
   return "type" in snapshot && snapshot.type === kArrowAnnotationType;
 }
@@ -45,6 +50,7 @@ export const ArrowAnnotation = types
   targetOffset: types.maybe(OffsetModel),
   text: types.maybe(types.string),
   textOffset: types.maybe(OffsetModel),
+  shape: types.optional(types.enumeration(Object.values(ArrowShape)), ArrowShape.curved),
   type: types.optional(types.literal(kArrowAnnotationType), kArrowAnnotationType)
 })
 .volatile(self => ({

@@ -17,7 +17,6 @@ import { urlParams } from "../../utilities/url-params";
 import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
 
 export const kPersistentUiStateVersion = "1.0.0";
-export const kSparrowAnnotationMode = "sparrow";
 
 // This generic model should work for both the problem tab, and the MyWork/ClassWork tabs
 // The StudentWorkspaces tab might work this way too. It has an open group which could be

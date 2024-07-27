@@ -4,7 +4,7 @@ import classNames from "classnames";
 import { useStores } from "../../hooks/use-stores";
 import { LogEventName } from "../../lib/logger-types";
 import { logSparrowShowHide } from "../../models/tiles/log/log-sparrow-event";
-import { kSparrowAnnotationMode } from "../../models/stores/persistent-ui";
+import { ArrowShape } from "../../models/annotations/arrow-annotation";
 
 import HideAnnotationsIcon from "../../assets/icons/annotations/proportional-arrows-hide-icon.svg";
 import ShowAnnotationsIcon from "../../assets/icons/annotations/proportional-arrows-show-icon.svg";
@@ -13,15 +13,18 @@ import CurvedSparrowIcon from "../../assets/icons/annotations/proportional-arrow
 export const DocumentAnnotationToolbar = observer(function DocumentAnnotationToolbar() {
   const stores = useStores();
   const { ui, persistentUI } = stores;
-  const sparrowActive = ui.annotationMode === kSparrowAnnotationMode;
 
   if (!stores.appConfig.showAnnotationControls) return null;
 
-  function handleSparrow() {
-    if (sparrowActive) {
+  /**
+   * Switches to the given annotation mode, or toggles it off if already selected.
+   * @param mode
+   */
+  function handleSparrow(mode: ArrowShape) {
+    if (ui.annotationMode === mode) {
       ui.setAnnotationMode();
     } else {
-      ui.setAnnotationMode("sparrow");
+      ui.setAnnotationMode(mode);
       persistentUI.setShowAnnotations(true);
       ui.setSelectedTile();
     }
@@ -36,9 +39,14 @@ export const DocumentAnnotationToolbar = observer(function DocumentAnnotationToo
 
   return (
     <div className="button-set sparrow-buttons">
-      <button onClick={handleSparrow} data-testid="curved-sparrow-button"
-        title="Sparrow"
-        className={classNames({active: sparrowActive})}>
+      <button onClick={() => handleSparrow(ArrowShape.curved)} data-testid="curved-sparrow-button"
+        title="Curved aarrow"
+        className={classNames({active: ui.annotationMode === ArrowShape.curved})}>
+        <CurvedSparrowIcon/>
+      </button>
+      <button onClick={() => handleSparrow(ArrowShape.straight)} data-testid="straight-sparrow-button"
+        title="Straight aarrow"
+        className={classNames({active: ui.annotationMode === ArrowShape.straight})}>
         <CurvedSparrowIcon/>
       </button>
       <button onClick={handleAnnotationToggle} data-testid="hide-annotations-button"
