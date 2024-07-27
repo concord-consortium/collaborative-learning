@@ -1,12 +1,14 @@
 import classNames from "classnames";
 import React, { useMemo, MouseEvent } from "react";
 
+import { ArrowShape } from "../../models/annotations/arrow-annotation";
 import { getSparrowCurve } from "./annotation-utilities";
 
 import "./curved-arrow.scss";
 
 interface ICurvedArrowProps {
   className?: string;
+  shape: ArrowShape;
   hideArrowhead?: boolean;
   peakX: number;
   peakY: number;
@@ -18,7 +20,7 @@ interface ICurvedArrowProps {
   onClick?: (event: MouseEvent) => void;
 }
 export function CurvedArrow({
-  className, hideArrowhead, peakX, peakY, setHovering, sourceX, sourceY, targetX, targetY, onClick
+  className, shape, hideArrowhead, peakX, peakY, setHovering, sourceX, sourceY, targetX, targetY, onClick
 }: ICurvedArrowProps) {
 
   const { path, arrowheadAngle } = useMemo(() => {
@@ -31,6 +33,7 @@ export function CurvedArrow({
         className="curved-arrow-stem"
         d={path}
         fill="none"
+        strokeDasharray={shape === ArrowShape.curved ? "none" : "5,5"}
         onMouseEnter={e => setHovering?.(true)}
         onMouseLeave={e => setHovering?.(false)}
         onClick={onClick}

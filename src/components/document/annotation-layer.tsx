@@ -9,7 +9,7 @@ import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { PreviewArrow } from "../annotations/preview-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { usePersistentUIStore, useUIStore } from "../../hooks/use-stores";
-import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
+import { ArrowAnnotation, ArrowShape } from "../../models/annotations/arrow-annotation";
 import { ClueObjectModel, IClueObject, ObjectBoundingBox, OffsetModel } from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { Point } from "../../utilities/math-utils";
@@ -240,7 +240,9 @@ export const AnnotationLayer = observer(function AnnotationLayer({
         const _peakDy = Math.max(documentTop - textY, Math.min(documentBottom - textY, peakDy));
         textOffset = OffsetModel.create({ dx: _peakDx, dy: _peakDy });
       }
-      const newArrow = ArrowAnnotation.create({ sourceObject, sourceOffset, targetObject, targetOffset, textOffset });
+      const newArrow = ArrowAnnotation.create({ sourceObject, sourceOffset, targetObject, targetOffset, textOffset,
+        shape: ui.annotationMode as ArrowShape
+       });
       newArrow.setIsNew(true);
       content?.addArrow(newArrow);
       setSourceTileId("");
@@ -323,6 +325,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
           sourceY={previewArrowSourceY}
           targetX={mouseX}
           targetY={mouseY}
+          shape={ui.annotationMode as ArrowShape || ArrowShape.curved}
         />
       </svg>
     </div>

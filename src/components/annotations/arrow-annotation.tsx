@@ -236,6 +236,7 @@ export const ArrowAnnotationComponent = observer(
         <g className={classNames("actual-sparrow", { selected: arrow.isSelected })}>
           <CurvedArrow
             className="background-arrow"
+            shape={arrow.shape}
             hideArrowhead={true}
             peakX={textCenterX} peakY={textCenterY}
             setHovering={setHoveringStem}
@@ -245,6 +246,7 @@ export const ArrowAnnotationComponent = observer(
           />
           <CurvedArrow
             className="foreground-arrow"
+            shape={arrow.shape}
             peakX={textCenterX} peakY={textCenterY}
             sourceX={sourceX} sourceY={sourceY}
             targetX={targetX} targetY={targetY}
