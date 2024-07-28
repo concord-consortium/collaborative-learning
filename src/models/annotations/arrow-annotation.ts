@@ -4,12 +4,17 @@ import { ClueObjectModel, ObjectBoundingBox, OffsetModel } from "./clue-object";
 import { uniqueId } from "../../utilities/js-utils";
 import { LogEventName } from "../../../src/lib/logger-types";
 import { logSparrowTitleChange } from "../tiles/log/log-sparrow-event";
+import { constrainToLine } from "../../components/annotations/annotation-utilities";
 
 export const kArrowAnnotationType = "arrowAnnotation";
 
 export enum ArrowShape {
   straight = "straight",
   curved = "curved"
+}
+
+export function isArrowShape(value: string|undefined): value is ArrowShape {
+  return value ? value in ArrowShape : false;
 }
 
 export function isArrowAnnotationSnapshot(snapshot: any): snapshot is IArrowAnnotationSnapshot {
@@ -136,10 +141,17 @@ export const ArrowAnnotation = types
     const textMaxXOffset = documentRight - kTextHorizontalMargin - textOriginX;
     const textMinYOffset = documentTop + kTextVerticalMargin - textOriginY;
     const textMaxYOffset = documentBottom - kTextVerticalMargin - textOriginY;
-    const textCenterX = textOriginX
+    let textCenterX = textOriginX
       + Math.max(textMinXOffset, Math.min(textMaxXOffset, textDxOffset + textDragOffsetX));
-    const textCenterY = textOriginY
+    let textCenterY = textOriginY
       + Math.max(textMinYOffset, Math.min(textMaxYOffset, textDyOffset + textDragOffsetY));
+
+    // If this is a straight arrow, text is constrained to be on the line.
+    if (self.shape === ArrowShape.straight) {
+      [textCenterX, textCenterY] = constrainToLine([sourceX, sourceY], [targetX, targetY], [textCenterX, textCenterY]);
+    }
+
+    // Adjust for size of text label
     const textX = textCenterX - kArrowAnnotationTextWidth / 2;
     const textY = textCenterY - kArrowAnnotationTextHeight / 2;
 

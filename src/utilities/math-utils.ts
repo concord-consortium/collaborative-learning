@@ -1,5 +1,6 @@
 export const halfPi = Math.PI / 2;
 export const twoPi = Math.PI * 2;
+
 export function normalizeAngle(angle: number) {
   let _angle = angle;
   while (_angle < 0) { _angle += twoPi; }
@@ -7,7 +8,15 @@ export function normalizeAngle(angle: number) {
   return _angle;
 }
 
+export function radiansToDegrees(radians: number) {
+  return normalizeAngle(radians) * 180 / Math.PI;
+}
+
 export type Point = [x: number, y: number];
+
+export function distanceBetweenPoints([x1, y1]: Point, [x2, y2]: Point) {
+  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+}
 
 export function isFiniteNumber(x: any): x is number {
   return x != null && Number.isFinite(x);

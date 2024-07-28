@@ -2,11 +2,11 @@ import classNames from "classnames";
 import React, { useMemo, MouseEvent } from "react";
 
 import { ArrowShape } from "../../models/annotations/arrow-annotation";
-import { getSparrowCurve } from "./annotation-utilities";
+import { getSparrowCurve, getSparrowStraight } from "./annotation-utilities";
 
-import "./curved-arrow.scss";
+import "./annotation-arrow.scss";
 
-interface ICurvedArrowProps {
+interface IAnnotationArrowProps {
   className?: string;
   shape: ArrowShape;
   hideArrowhead?: boolean;
@@ -19,13 +19,17 @@ interface ICurvedArrowProps {
   targetY: number;
   onClick?: (event: MouseEvent) => void;
 }
-export function CurvedArrow({
+export function AnnotationArrow({
   className, shape, hideArrowhead, peakX, peakY, setHovering, sourceX, sourceY, targetX, targetY, onClick
-}: ICurvedArrowProps) {
+}: IAnnotationArrowProps) {
 
   const { path, arrowheadAngle } = useMemo(() => {
-    return getSparrowCurve(sourceX, sourceY, peakX, peakY, targetX, targetY);
-  }, [peakX, peakY, sourceX, sourceY, targetX, targetY]);
+    if (shape === ArrowShape.straight) {
+      return getSparrowStraight(sourceX, sourceY, peakX, peakY, targetX, targetY);
+    } else {
+      return getSparrowCurve(sourceX, sourceY, peakX, peakY, targetX, targetY);
+    }
+  }, [shape, peakX, peakY, sourceX, sourceY, targetX, targetY]);
 
   return (
     <g className={classNames("curved-arrow", className)}>

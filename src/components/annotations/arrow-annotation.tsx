@@ -3,8 +3,8 @@ import { observer } from "mobx-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { AnnotationNode } from "./annotation-node";
-import { getSparrowCurve, kAnnotationNodeDefaultRadius } from "./annotation-utilities";
-import { CurvedArrow } from "./curved-arrow";
+import { getSparrowCurve, getSparrowStraight, kAnnotationNodeDefaultRadius } from "./annotation-utilities";
+import { AnnotationArrow } from "./annotation-arrow";
 import { boundDelta } from "../../models/annotations/annotation-utils";
 import {
   IArrowAnnotation, kArrowAnnotationTextHeight, kArrowAnnotationTextWidth
@@ -125,8 +125,12 @@ export const ArrowAnnotationComponent = observer(
       || textCenterY === undefined || targetX === undefined || targetY === undefined;
     const curveData = useMemo(() => {
       if (missingData) return undefined;
-      return getSparrowCurve(sourceX, sourceY, textCenterX, textCenterY, targetX, targetY, true);
-    }, [missingData, sourceX, sourceY, textCenterX, textCenterY, targetX, targetY]);
+      if (arrow.shape === "straight") {
+        return getSparrowStraight(sourceX, sourceY, textCenterX, textCenterY, targetX, targetY, true);
+      } else {
+        return getSparrowCurve(sourceX, sourceY, textCenterX, textCenterY, targetX, targetY, true);
+      }
+    }, [missingData, arrow.shape, sourceX, sourceY, targetX, targetY, textCenterX, textCenterY]);
 
     // Bail if we're missing anything necessary
     if (!sourceBB || !targetBB || !curveData || missingData) return null;
@@ -234,7 +238,7 @@ export const ArrowAnnotationComponent = observer(
     return (
       <g>
         <g className={classNames("actual-sparrow", { selected: arrow.isSelected })}>
-          <CurvedArrow
+          <AnnotationArrow
             className="background-arrow"
             shape={arrow.shape}
             hideArrowhead={true}
@@ -244,7 +248,7 @@ export const ArrowAnnotationComponent = observer(
             targetX={targetX} targetY={targetY}
             onClick={(e) => handleArrowClick(arrow.id, e)}
           />
-          <CurvedArrow
+          <AnnotationArrow
             className="foreground-arrow"
             shape={arrow.shape}
             peakX={textCenterX} peakY={textCenterY}

@@ -1,35 +1,70 @@
-import { halfPi, twoPi, normalizeAngle } from "../../utilities/math-utils";
+import { ArrowShape } from "../../models/annotations/arrow-annotation";
+import {
+  halfPi, twoPi, normalizeAngle, radiansToDegrees, distanceBetweenPoints, Point
+} from "../../utilities/math-utils";
 
 export const kAnnotationNodeDefaultRadius = 24;
 export const kSmallAnnotationNodeRadius = 7;
+
+/**
+ * Find the point on the line from source to target that is closest to the input point.
+ * @param source - The start point of the line.
+ * @param target - The end point of the line.
+ * @param point - The point to constrain to the line.
+ * @returns The point on the line from source to target that is closest to the input point.
+ */
+export function constrainToLine(source: Point, target: Point, point: Point): Point {
+  const dx = target[0] - source[0];
+  const dy = target[1] - source[1];
+  const length = Math.sqrt(dx ** 2 + dy ** 2);
+  let percent = ((point[0] - source[0]) * dx + (point[1] - source[1]) * dy) / length ** 2;
+  percent = Math.max(0, Math.min(1, percent));
+  const constrainedX = source[0] + dx * percent;
+  const constrainedY = source[1] + dy * percent;
+  return [constrainedX, constrainedY];
+}
 
 // Returns the default peak for a sparrow from sourceX, sourceY to targetX, targetY.
 const shortArcPeakScale = 1;
 const longArcPeakScale = .5;
 const shortArcLength = 100;
 const longArcLength = 300;
-export function getDefaultPeak(sourceX: number, sourceY: number, targetX: number, targetY: number) {
+export function getDefaultPeak(shape: ArrowShape, sourceX: number, sourceY: number, targetX: number, targetY: number) {
   const dx = targetX - sourceX;
   const dy = targetY - sourceY;
+  // Midpoint
   const mx = sourceX + dx / 2;
   const my = sourceY + dy / 2;
-  const arcLength = Math.sqrt((dx / 2)**2 + (dy / 2)**2);
-  const arrowAngle = normalizeAngle(Math.atan2(-dy, dx));
 
-  const multiplier = arrowAngle > halfPi && arrowAngle < 3 * halfPi ? 1 : -1;
-  const perpendicularAngle = normalizeAngle(multiplier * Math.PI / 2 - arrowAngle);
-  const peakPercent = arcLength <= shortArcLength ? shortArcPeakScale
-    : arcLength >= longArcLength ? longArcPeakScale
-    : (arcLength - shortArcLength) / (longArcLength - shortArcLength)
-      * (longArcPeakScale - shortArcPeakScale) + shortArcPeakScale;
-  const peakDx = Math.cos(perpendicularAngle) * arcLength * peakPercent;
-  const peakDy = Math.sin(perpendicularAngle) * arcLength * peakPercent;
-  const peakX = mx + peakDx;
-  const peakY = my + peakDy;
-  return {
-    peakDx, peakDy,
-    peakX, peakY
-  };
+  if (shape === ArrowShape.straight) {
+    // For striaght-line arrows, we put the label by default 2/3 of the way from source to target
+    const peakX = sourceX + dx * 2/3;
+    const peakY = sourceY + dy * 2/3;
+
+    const peakDx = peakX - mx, peakDy = peakY - my;
+
+    return { peakX, peakY, peakDx, peakDy };
+
+  } else {
+    // Curved sparrows have a peak that is perpendicular to the line from source to target
+    const arcLength = Math.sqrt((dx / 2)**2 + (dy / 2)**2);
+    const arrowAngle = normalizeAngle(Math.atan2(-dy, dx));
+
+    const multiplier = arrowAngle > halfPi && arrowAngle < 3 * halfPi ? 1 : -1;
+    const perpendicularAngle = normalizeAngle(multiplier * Math.PI / 2 - arrowAngle);
+    const peakPercent = arcLength <= shortArcLength ? shortArcPeakScale
+      : arcLength >= longArcLength ? longArcPeakScale
+      : (arcLength - shortArcLength) / (longArcLength - shortArcLength)
+        * (longArcPeakScale - shortArcPeakScale) + shortArcPeakScale;
+    const peakDx = Math.cos(perpendicularAngle) * arcLength * peakPercent;
+    const peakDy = Math.sin(perpendicularAngle) * arcLength * peakPercent;
+    const peakX = mx + peakDx;
+    const peakY = my + peakDy;
+    return {
+      peakDx, peakDy,
+      peakX, peakY
+    };
+  }
 }
 
 interface CurveData {
@@ -38,6 +73,42 @@ interface CurveData {
   deleteY?: number;
   path: string;
 }
+
+export function getSparrowStraight(
+  sourceX: number, sourceY: number,
+  peakX: number, peakY: number,
+  targetX: number, targetY: number,
+  includeDelete?: boolean
+): CurveData {
+  // Determine deltas and angle between source and target
+  const arrowDx = targetX - sourceX;
+  const arrowDy = targetY - sourceY;
+
+  const arrowAngle = Math.atan2(-arrowDy, arrowDx);
+  // atan2 gives us radians counter-clockwise from East. We want CW from North. And in degrees.
+  const arrowheadAngle = radiansToDegrees(Math.PI/2 - arrowAngle);
+
+  // straight-line path
+  const path = `M ${sourceX} ${sourceY} L ${targetX} ${targetY}`;
+
+  let deleteX, deleteY;
+  if (includeDelete) {
+    // Delete button is halfway between the text label and the end of the arrow,
+    // on whichever part of the line is longer.
+    const firstPartLength = distanceBetweenPoints([sourceX, sourceY], [peakX, peakY]);
+    const secondPartLength = distanceBetweenPoints([peakX, peakY], [targetX, targetY]);
+    if (firstPartLength > secondPartLength) {
+      deleteX = (sourceX + peakX) / 2;
+      deleteY = (sourceY + peakY) / 2;
+    } else {
+      deleteX = (peakX + targetX) / 2;
+      deleteY = (peakY + targetY) / 2;
+    }
+  }
+
+  return { arrowheadAngle, deleteX, deleteY, path };
+}
+
 const controlStrength = .5;
 export function getSparrowCurve(
   sourceX: number, sourceY: number,
