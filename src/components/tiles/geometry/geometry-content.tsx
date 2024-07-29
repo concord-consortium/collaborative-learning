@@ -833,7 +833,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
    */
   updateSharedPoints(board: JXG.Board) {
     this.applyChange(() => {
-      let pointsAdded = false;
+      let pointsChanged = false;
       const content = this.getContent();
       const data = content.getLinkedPointsData();
       const remainingIds = getAllLinkedPoints(board);
@@ -852,7 +852,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             };
             const pt = createLinkedPoint(board, points.coords[i], allProps, { tileIds: [link] });
             this.handleCreatePoint(pt);
-            pointsAdded = true;
+            pointsChanged = true;
           } else {
             const existing = getPoint(board, id);
             if (!isEqual(existing?.coords.usrCoords.slice(1), points.coords[i])) {
@@ -862,8 +862,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                 targetID: id,
                 properties: { position: points.coords[i] }
               });
-              // Remove updated point from remaining list
+              pointsChanged = true;
             }
+            // Remove updated point from remaining list
             remainingIds.splice(existingIndex, 1);
           }
         }
@@ -872,9 +873,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       // Now deal with any deleted points
       if (remainingIds.length > 0){
         applyChange(board, { operation: "delete", target: "linkedPoint", targetID: remainingIds });
+        pointsChanged = true;
       }
 
-      if (pointsAdded) {
+      if (pointsChanged) {
         this.scaleToFit();
       }
     });
