@@ -253,6 +253,7 @@
     },
     "annotations": "all",
     "toolbar": [
+      {"id": "select", "title": "Select", "iconId": "icon-select-tool", "isTileTool": false, "isDefault": true},
       {"id": "Text", "title": "Text", "isTileTool": true},
       {"id": "Table", "title": "Table", "isTileTool": true},
       {"id": "DataCard", "title": "Data Card", "isTileTool": true},
