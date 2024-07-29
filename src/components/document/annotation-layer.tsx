@@ -10,7 +10,8 @@ import { PreviewArrow } from "../annotations/preview-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { usePersistentUIStore, useUIStore } from "../../hooks/use-stores";
 import { ArrowAnnotation, ArrowShape, isArrowShape } from "../../models/annotations/arrow-annotation";
-import { ClueObjectModel, IClueObject, IOffsetModel, ObjectBoundingBox, OffsetModel } from "../../models/annotations/clue-object";
+import { ClueObjectModel, IClueObject, IOffsetModel, ObjectBoundingBox, OffsetModel
+} from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { midpoint, Point } from "../../utilities/math-utils";
 import { hasSelectionModifier } from "../../utilities/event-utils";
@@ -126,14 +127,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     // If there is a mousedown on, say, a sparrow text label, followed by dragging it to a new position,
     // followed by a mouseup, a click event is sent to the AnnotationLayer. But we don't want to
     // consider that as a real background click & initiate drawing a sparrow.
-    console.log("mousedown event:", event);
-    if ((event.target instanceof SVGElement) && event.target.classList.contains('annotation-svg')) {
-      console.log("Background mousedown");
-      setIsBackgroundClick(true);
-    } else {
-      console.log("Non-background mousedown");
-      setIsBackgroundClick(false);
-    }
+    const isBackground = (event.target instanceof SVGElement) && event.target.classList.contains('annotation-svg');
+    setIsBackgroundClick(isBackground);
   };
 
   const handleMouseMove: MouseEventHandler<HTMLDivElement> = event => {
@@ -233,7 +228,13 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     { tileId: sourceTileId, objectId: sourceObjectId, objectType: sourceObjectType }
   );
 
-  // TODO: factor out common code in creating annotations in two methods below.
+  /**
+   * Create an arrow annotation.
+   * The source object is determined by the state variables.
+   * The target object can be passed in as an argument, or if not provided,
+   * it is the current mouse location.
+   * @param targetObject
+   */
   const createAnnotation = (targetObject?: IClueObject) => {
     // Determine source object/location based on state variables
     if (!sourceBoundingBox) return;
@@ -284,50 +285,40 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   };
 
   const handleBackgroundClick: MouseEventHandler<HTMLDivElement> = event => {
-    if (!isBackgroundClick) {
-      console.log("Ignoring click event");
-      return;
-    }
+    if (!isBackgroundClick) return;
     setIsBackgroundClick(false); // reset for next time.
 
     // Update the mouseX and mouseY state based on this new event
     handleMouseMove(event);
 
-    // In straight-arrow mode we need to create arrows from background clicks.
     if (shape === ArrowShape.straight) {
-      if (!sourceBoundingBox) {
-        // Store this point as the beginning of an arrow
-        setSourcePoint([mouseX ?? 0, mouseY ?? 0]);
-        console.log("arrow starting event:", event);
+      if (sourceObjectId) {
+        // Create an arrow from the source object to this X,Y location.
+        createAnnotation();
+        clearSource();
 
       } else {
-        // Create a straight arrow from the already-selected source object to the click location
-        if (!mouseX || !mouseY) return;
-        // Source is center of source object.
-        const sourceObject =
-          ClueObjectModel.create({ tileId: sourceTileId, objectId: sourceObjectId, objectType: sourceObjectType });
-        const sourceCenter = boundingBoxCenter(sourceBoundingBox);
-        // Target is the click location
-        // Since there is no target object, it is stored in the ArrowAnnotation as
-        // an offset relative to the source location.
-        const targetOffset = OffsetModel.create(
-          { dx: mouseX - sourceCenter[0], dy: mouseY - sourceCenter[1] });
-        const { peakDx, peakDy } = getDefaultPeak(shape, sourceCenter[0], sourceCenter[1], mouseX, mouseY);
-        const textOffset = OffsetModel.create({ dx: peakDx, dy: peakDy });
-        const newArrow = ArrowAnnotation.create(
-          { sourceObject, sourceOffset, targetObject: undefined, targetOffset, textOffset, shape });
-        newArrow.setIsNew(true);
-        content?.addArrow(newArrow);
-        clearSource();
+        // Either no source is selected, or the source is another X,Y point.
+        // In either case, store this as the source location, overriding any previous one.
+        setSourcePoint([mouseX ?? 0, mouseY ?? 0]);
       }
     }
+
     content?.selectAnnotations([]);
   };
 
   const handleAnnotationButtonClick = (e: React.MouseEvent, tileId: string, objectId: string, objectType?: string) => {
     // If we are in straight arrow mode, and one object has already been
-    // selected, just let this get handled as a background click.
+    // selected, then we ignore the object clicked on and create an arrow to this X,Y location.
     if (shape === ArrowShape.straight && sourceObjectId) {
+      createAnnotation();
+      clearSource();
+      return;
+    }
+
+    if (tileId === sourceTileId && objectId === sourceObjectId && objectType === sourceObjectType) {
+      // This object is already selected as the source object, so deselect it
+      clearSource();
       return;
     }
 
@@ -336,43 +327,11 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       setSourceTileId(tileId);
       setSourceObjectId(objectId);
       setSourceObjectType(objectType);
-    } else if (tileId === sourceTileId && objectId === sourceObjectId && objectType === sourceObjectType) {
-      // This object is already selected as the source object, so deselect it
-      clearSource();
+
     } else {
       // Create an arrow from the source (object or location) to this object
-      const sourceCenter = boundingBoxCenter(sourceBoundingBox);
-      const sourceObject = sourceObjectId
-        ? ClueObjectModel.create({ tileId: sourceTileId, objectId: sourceObjectId, objectType: sourceObjectType })
-        : undefined;
-
       const targetObject = ClueObjectModel.create({ tileId, objectId, objectType });
-      const targetBoundingBox = getObjectBoundingBoxUnknownRow(tileId, objectId, objectType);
-      if (!targetBoundingBox) return;
-      const targetCenter = boundingBoxCenter(targetBoundingBox);
-      const targetOffset = defaultOffset(tileId, objectId, objectType);
-
-      // If the source object is not set, the source offset is relative to the target object.
-      let _sourceOffset;
-      if (sourceObject) {
-        _sourceOffset = sourceOffset;
-      } else {
-        _sourceOffset = OffsetModel.create(
-          { dx: sourceCenter[0] - targetCenter[0], dy: sourceCenter[1] - targetCenter[1] });
-      }
-
-      const { peakDx, peakDy } = getDefaultPeak(shape,
-        sourceCenter[0], sourceCenter[1], targetCenter[0], targetCenter[1]);
-      // Bound the text offset to the document
-      const midPoint = midpoint(sourceCenter, targetCenter);
-      const _peakDx = Math.max(documentLeft - midPoint[0], Math.min(documentRight - midPoint[0], peakDx));
-      const _peakDy = Math.max(documentTop - midPoint[1], Math.min(documentBottom - midPoint[1], peakDy));
-      const textOffset = OffsetModel.create({ dx: _peakDx, dy: _peakDy });
-      console.log("creating sparrow");
-      const newArrow = ArrowAnnotation.create(
-        { sourceObject, sourceOffset: _sourceOffset, targetObject, targetOffset, textOffset, shape });
-      newArrow.setIsNew(true);
-      content?.addArrow(newArrow);
+      createAnnotation(targetObject);
       clearSource();
     }
   };
