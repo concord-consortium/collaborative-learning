@@ -182,7 +182,7 @@ describe('DocumentGroup Model', () => {
   });
 
   describe("byBookMarked Function", () => {
-    it.only('should return a doc collection sorted by bookmarks and with the correct documents per bookmark', () => {
+    it('should return a doc collection sorted by bookmarks and with the correct documents per bookmark', () => {
       addDocBookmarks(bookmarks, {
         ["Student 2 Problem Doc Group 3"]: [
           new Bookmark("1", "a", true),
