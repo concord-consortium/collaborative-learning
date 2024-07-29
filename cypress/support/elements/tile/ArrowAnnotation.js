@@ -3,8 +3,11 @@ function wsClass(wsc) {
 }
 
 class ArrowAnnotation {
+  getArrowToolbarButton(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} [data-testid="curved-sparrow-button"]`);
+  }
   clickArrowToolbarButton(workspaceClass) {
-    cy.get(`${wsClass(workspaceClass)} [data-testid="curved-sparrow-button"]`).click({ force: true });
+    this.getArrowToolbarButton().click({ force: true });
   }
   clickHideAnnotationsButton(workspaceClass) {
     cy.get(`${wsClass(workspaceClass)} [data-testid="hide-annotations-button"]`).click({force: true});

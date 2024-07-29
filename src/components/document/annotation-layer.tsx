@@ -51,14 +51,15 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     if (!readOnly) {
       hotKeys.register({
         "delete": () => deleteSelected(),
-        "backspace": () => deleteSelected()
+        "backspace": () => deleteSelected(),
+        "escape": () => ui.setAnnotationMode()
       });
       // disposer, to deactivate these bindings in case we switch to read-only later.
       return () => {
-        hotKeys.unregister(["delete", "backspace"]);
+        hotKeys.unregister(["delete", "backspace", "escape"]);
       };
     }
-  }, [content, readOnly, hotKeys]);
+  }, [content, readOnly, hotKeys, ui]);
 
   function handleKeyDown(event: React.KeyboardEvent) {
     hotKeys.dispatch(event);
@@ -122,6 +123,13 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
   const handleBackgroundClick: MouseEventHandler<HTMLDivElement> = event => {
     content?.selectAnnotations([]);
+  };
+
+  const handleBackgroundDoubleClick: MouseEventHandler<HTMLDivElement> = event => {
+    // Make sure it's a click on the annotation-svg background, not bubbled up from a button
+    if ((event.target as HTMLElement).classList.contains("annotation-svg")) {
+      ui.setAnnotationMode();
+    }
   };
 
   // Returns the x and y offset of the top left corner of a tile with respect to the document
@@ -262,6 +270,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       className={classes}
       onMouseMove={handleMouseMove}
       onClick={handleBackgroundClick}
+      onDoubleClick={handleBackgroundDoubleClick}
       tabIndex={0}
       onKeyDown={handleKeyDown}
       ref={element => {

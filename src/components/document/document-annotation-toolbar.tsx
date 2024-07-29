@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import classNames from "classnames";
+import { useMemoOne } from "use-memo-one";
 import { useStores } from "../../hooks/use-stores";
 import { LogEventName } from "../../lib/logger-types";
 import { logSparrowShowHide } from "../../models/tiles/log/log-sparrow-event";
 import { kSparrowAnnotationMode } from "../../models/stores/persistent-ui";
+import { HotKeys } from "../../utilities/hot-keys";
 
 import HideAnnotationsIcon from "../../assets/icons/annotations/proportional-arrows-hide-icon.svg";
 import ShowAnnotationsIcon from "../../assets/icons/annotations/proportional-arrows-show-icon.svg";
@@ -14,6 +16,22 @@ export const DocumentAnnotationToolbar = observer(function DocumentAnnotationToo
   const stores = useStores();
   const { ui, persistentUI } = stores;
   const sparrowActive = ui.annotationMode === kSparrowAnnotationMode;
+  const hotKeys = useMemoOne(() => new HotKeys(), []);
+
+  // Make sure ESC cancels annotation mode,
+  // even if the user just clicked on the annotation button so it, rather than the annotation layer, has focus.
+  useEffect(() => {
+    hotKeys.register({
+      "escape": () => ui.setAnnotationMode()
+    });
+    return () => {
+      hotKeys.unregister(["escape"]);
+    };
+  }, [hotKeys, ui]);
+
+  function handleKeyDown(event: React.KeyboardEvent) {
+    hotKeys.dispatch(event);
+  }
 
   if (!stores.appConfig.showAnnotationControls) return null;
 
@@ -35,7 +53,7 @@ export const DocumentAnnotationToolbar = observer(function DocumentAnnotationToo
   }
 
   return (
-    <div className="button-set sparrow-buttons">
+    <div className="button-set sparrow-buttons" onKeyDown={handleKeyDown}>
       <button onClick={handleSparrow} data-testid="curved-sparrow-button"
         title="Sparrow"
         className={classNames({active: sparrowActive})}>
