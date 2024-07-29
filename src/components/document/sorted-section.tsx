@@ -2,29 +2,31 @@ import React, { useState } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 
-import { DocumentContextReact } from "./document-context";
-import { SortedDocument } from "../../models/stores/sorted-documents";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { useStores } from "../../hooks/use-stores";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { ENavTab } from "../../models/view/nav-tabs";
-import { DocFilterType } from "../../models/stores/ui-types";
+import { DocFilterType, SecondarySortType } from "../../models/stores/ui-types";
 import { SimpleDocumentItem } from "../thumbnail/simple-document-item";
 import { IDocumentMetadata } from "../../../functions/src/shared";
+import { DocumentContextReact } from "./document-context";
+import { DocumentCollection } from "../../utilities/sort-document-utils";
+import { DocumentGroup } from "../../models/stores/sorted-documents-documents-group";
 
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 
-import "./sort-work-view.scss";
+import "./sorted-section.scss";
 
 interface IProps {
   docFilter: DocFilterType;
+  documentGroup: DocumentGroup;
   idx: number;
-  sortedSection: SortedDocument
+  secondarySort: SecondarySortType;
 }
 
-export const SortedDocuments: React.FC<IProps> = observer(function SortedDocuments(props: IProps) {
-  const { docFilter, idx, sortedSection } = props;
+export const SortedSection: React.FC<IProps> = observer(function SortedDocuments(props: IProps) {
+  const { docFilter, documentGroup, idx, secondarySort } = props;
   const { persistentUI, sortedDocuments } = useStores();
   const [showDocuments, setShowDocuments] = useState(false);
 
@@ -40,7 +42,7 @@ export const SortedDocuments: React.FC<IProps> = observer(function SortedDocumen
   };
 
   const documentCount = () => {
-    const downloadedDocs = sortedSection.documents.filter(doc => getDocument(doc.key));
+    const downloadedDocs = documentGroup.metaDataDocs?.filter((doc: IDocumentMetadata) => getDocument(doc.key)) ?? [];
     return downloadedDocs.length;
   };
 
@@ -54,8 +56,10 @@ export const SortedDocuments: React.FC<IProps> = observer(function SortedDocumen
   };
 
   const renderDocumentItem = (doc: any) => {
-    const fullDocument = getDocument(doc.key);
-    if (docFilter === "Problem" && fullDocument) {
+    if (docFilter === "Problem" && secondarySort === "byNone") {
+      const fullDocument = docFilter === "Problem" ? getDocument(doc.key) : undefined;
+      if (!fullDocument) return <div className="loading-spinner"/>;
+
       return <DecoratedDocumentThumbnailItem
           scale={0.1}
           document={fullDocument}
@@ -64,8 +68,6 @@ export const SortedDocuments: React.FC<IProps> = observer(function SortedDocumen
           allowDelete={false}
           onSelectDocument={handleSelectDocument}
         />;
-    } else if (docFilter === "Problem") {
-      return <div className="loading-spinner"/>;
     } else {
       return <SimpleDocumentItem
               document={doc}
@@ -76,12 +78,45 @@ export const SortedDocuments: React.FC<IProps> = observer(function SortedDocumen
     }
   };
 
+  const renderList = () => {
+    if (secondarySort !== "byNone") {
+      return documentGroup[secondarySort]?.map((group: DocumentCollection) => {
+        return (
+          <div key={group.label} className="doc-group">
+            <div className="doc-group-sub-group-label">{group.label}</div>
+            {group.documents?.map((doc: any) => {
+              const documentContext = getDocumentContext(doc);
+              return (
+                <DocumentContextReact.Provider key={doc.key} value={documentContext}>
+                  {renderDocumentItem(doc)}
+                </DocumentContextReact.Provider>
+              );
+            })}
+          </div>
+        );
+      });
+    } else {
+      return (
+        <div className="doc-group">
+          {documentGroup.metaDataDocs?.map((doc: any) => {
+            const documentContext = getDocumentContext(doc);
+            return (
+              <DocumentContextReact.Provider key={doc.key} value={documentContext}>
+                {renderDocumentItem(doc)}
+              </DocumentContextReact.Provider>
+            );
+          })}
+        </div>
+      );
+    }
+  };
+
   return (
-    <div className="sorted-sections" key={`sortedSection-${idx}`}>
+    <div className="sorted-sections" key={`documentGroup-${idx}`}>
       <div className="section-header">
         <div className="section-header-label">
         <div className="section-header-left">
-          {sortedSection.icon ? <sortedSection.icon/>: null} {sortedSection.sectionLabel}
+          {documentGroup.icon ? <documentGroup.icon/>: null} {documentGroup.label}
         </div>
         <div className="section-header-right">
           <div>Total workspaces: {documentCount()}</div>
@@ -93,14 +128,7 @@ export const SortedDocuments: React.FC<IProps> = observer(function SortedDocumen
         </div>
       </div>
       <div className="list">
-        {showDocuments && sortedSection.documents.map((doc: any, sortIdx: number) => {
-          const documentContext = getDocumentContext(doc);
-          return (
-            <DocumentContextReact.Provider key={doc.key} value={documentContext}>
-              {renderDocumentItem(doc)}
-            </DocumentContextReact.Provider>
-          );
-        })}
+        {showDocuments && renderList()}
       </div>
     </div>
   );

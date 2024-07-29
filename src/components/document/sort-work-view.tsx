@@ -7,10 +7,13 @@ import { DEBUG_DOC_LIST } from "../../lib/debug";
 import { SortWorkDocumentArea } from "./sort-work-document-area";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { DocListDebug } from "./doc-list-debug";
-import { DocFilterType } from "../../models/stores/ui-types";
-import { SortedDocuments } from "./sorted-documents";
+import { DocFilterType, PrimarySortType, SecondarySortType } from "../../models/stores/ui-types";
+import { SortedSection } from "./sorted-section";
+import { DocumentGroup } from "../../models/stores/sorted-documents-documents-group";
+
 
 import "../thumbnail/document-type-collection.scss";
+
 /**
  * Resources pane view of class work and exemplars.
  * Various options for sorting the display are available - by user, by group, by tools used, etc.
@@ -23,23 +26,25 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const sortOptions = ["Group", "Name", sortTagPrompt, "Bookmarked", "Tools"];
   const filterOptions: DocFilterType[] = ["Problem", "Investigation", "Unit", "All"];
   const [primarySortBy, setPrimarySortBy] = useState("Group");
-  const [secondarySortBy, setSecondarySortBy] = useState("Name");
+  const [secondarySortBy, setSecondarySortBy] = useState("None");
   const docFilter = persistentUIDocFilter;
 
   const handleDocFilterSelection = (filter: DocFilterType) => {
     persistentUI.setDocFilter(filter);
   };
 
-  useEffect(()=>{
-    sortedDocuments.updateMetaDataDocs(docFilter, unit.code, investigation.ordinal, problem.ordinal);
-  }, [docFilter, unit.code, investigation.ordinal, problem.ordinal, sortedDocuments]);
-
   const primarySortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
+    disabled: false,
+    selected: option === primarySortBy,
     text: option,
     onClick: () => setPrimarySortBy(option)
   }));
 
-  const secondarySortOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
+  const secondarySortOptions: ICustomDropdownItem[] = [];
+  secondarySortOptions.push({ text: "None", onClick: () => setSecondarySortBy("None") });
+  sortOptions.map((option) => secondarySortOptions.push({
+    disabled: option === primarySortBy,
+    selected: option === secondarySortBy,
     text: option,
     onClick: () => setSecondarySortBy(option)
   }));
@@ -50,13 +55,25 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     onClick: () => handleDocFilterSelection(option)
   }));
 
-  const primarySearchTerm = primarySortBy === sortTagPrompt ? "Strategy" : primarySortBy;
-  const secondarySearchTerm = secondarySortBy === sortTagPrompt ? "Strategy" : secondarySortBy;
-  const renderedSortedDocuments = sortedDocuments.sortDocuments(primarySearchTerm, secondarySearchTerm);
+  const primarySearchTerm = primarySortBy === sortTagPrompt ? "byStrategy" : `by${primarySortBy}` as PrimarySortType;
+  const secondarySearchTerm = secondarySortBy === sortTagPrompt
+                                ? "byStrategy"
+                                : `by${secondarySortBy}` as SecondarySortType;
+  const sortedDocumentGroups = sortedDocuments[primarySearchTerm];
 
   const tabState = persistentUI.tabs.get(ENavTab.kSortWork);
   const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
   const showSortWorkDocumentArea = !!openDocumentKey;
+
+  useEffect(()=>{
+    sortedDocuments.updateMetaDataDocs(docFilter, unit.code, investigation.ordinal, problem.ordinal);
+  }, [docFilter, unit.code, investigation.ordinal, problem.ordinal, sortedDocuments]);
+
+  useEffect(() => {
+    if (primarySortBy === secondarySortBy) {
+      setSecondarySortBy("None");
+    }
+  }, [primarySortBy, secondarySortBy]);
 
   return (
     <div key="sort-work-view" className="sort-work-view">
@@ -73,14 +90,15 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
             secondarySortItems={secondarySortOptions}
           />
           <div key={primarySortBy} className="tab-panel-documents-section">
-            { renderedSortedDocuments &&
-              renderedSortedDocuments.map((sortedSection, idx) => {
+            { sortedDocumentGroups &&
+              sortedDocumentGroups.map((documentGroup: DocumentGroup, idx: number) => {
                 return (
-                  <SortedDocuments
-                    key={`sortedDocuments-${idx}`}
+                  <SortedSection
+                    key={`sortedDocuments-${documentGroup.label}`}
                     docFilter={docFilter}
+                    documentGroup={documentGroup}
                     idx={idx}
-                    sortedSection={sortedSection}
+                    secondarySort={secondarySearchTerm}
                   />
                 );
               })

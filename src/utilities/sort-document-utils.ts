@@ -1,8 +1,12 @@
 import { IDocumentMetadata } from "functions/src/shared";
+import { FC, SVGProps } from "react";
 import { Bookmarks } from "src/models/stores/bookmarks";
+import { getTileComponentInfo } from "../models/tiles/tile-component-info";
 
-export type SortedDocument = {
-  sectionLabel: string;
+import SparrowHeaderIcon from "../assets/icons/sort-by-tools/sparrow-id.svg";
+
+export type DocumentCollection = {
+  label: string;
   documents: IDocumentMetadata[];
   icon?: React.FC<React.SVGProps<SVGSVGElement>>; //exists only in the "sort by tools" case
 }
@@ -128,13 +132,23 @@ export const getTagsWithDocs = (documents: IDocumentMetadata[], commentTags: Rec
 };
 
 export const createTileTypeToDocumentsMap = (documents: IDocumentMetadata[]) => {
-  const tileTypeToDocumentsMap: Record<string, IDocumentMetadata[]> = {};
-
+  const tileTypeToDocumentsMap = new Map<string, Record<string, any>>();
   const addDocByType = (docToAdd: IDocumentMetadata, type: string) => {
-    if (!tileTypeToDocumentsMap[type]) {
-      tileTypeToDocumentsMap[type] = [];
+    if (!tileTypeToDocumentsMap.get(type)) {
+      let icon: FC<SVGProps<SVGSVGElement>> | undefined;
+      if (type === "Sparrow") {
+        icon = SparrowHeaderIcon;
+      } else {
+        const componentInfo = getTileComponentInfo(type);
+        icon = componentInfo?.HeaderIcon;
+      }
+      tileTypeToDocumentsMap.set(type, {
+          icon,
+          documents: []
+        }
+      );
     }
-    tileTypeToDocumentsMap[type].push(docToAdd);
+    tileTypeToDocumentsMap.get(type)?.documents.push(docToAdd);
   };
 
   //Iterate through all documents, determine if they are valid,

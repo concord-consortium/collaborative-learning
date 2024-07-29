@@ -6,8 +6,8 @@ import "./simple-document-item.scss";
 
 interface IProps {
   document: IDocumentMetadata;
-  investigationOrdinal: number;
-  problemOrdinal: number;
+  investigationOrdinal: string;
+  problemOrdinal: string;
   onSelectDocument: (document: IDocumentMetadata) => void;
 }
 
@@ -16,8 +16,8 @@ export const SimpleDocumentItem = ({ document, investigationOrdinal, onSelectDoc
   const { uid } = document;
   const userName = classStore.getUserById(uid)?.displayName;
   const investigations = unit.investigations;
-  const investigation = investigations[investigationOrdinal];
-  const problem = investigation?.problems[problemOrdinal - 1];
+  const investigation = investigations[Number(investigationOrdinal)];
+  const problem = investigation?.problems[Number(problemOrdinal) - 1];
   const title = document.title ? `${userName}: ${document.title}` : `${userName}: ${problem?.title ?? "unknown title"}`;
   // TODO: Account for and use isPrivate in the view. isAccessibleToUser won't currently work here.
   // const isPrivate = !document.isAccessibleToUser(user, documents);

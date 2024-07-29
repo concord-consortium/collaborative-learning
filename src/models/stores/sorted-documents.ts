@@ -7,7 +7,6 @@ import { DB } from "../../lib/db";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
 import { UserModelType } from "./user";
-import { getTileContentInfo } from "../tiles/tile-content-info";
 import { IDocumentMetadata } from "../../../functions/src/shared";
 import { typeConverter } from "../../utilities/db-utils";
 import {
@@ -16,14 +15,15 @@ import {
   createDocMapByNames,
   createTileTypeToDocumentsMap,
   getTagsWithDocs,
-  SortedDocument,
+  DocumentCollection,
   sortGroupSectionLabels,
   sortNameSectionLabels
 } from "../../utilities/sort-document-utils";
 import { DocumentGroup } from "./sorted-documents-documents-group";
+import { getTileContentInfo } from "../tiles/tile-content-info";
 
 
-export type SortedDocumentsMap = Record<string, SortedDocument[]>;
+export type SortedDocumentsMap = Record<string, DocumentCollection[]>;
 
 export type TagWithDocs = {
   tagKey: string;
@@ -79,118 +79,69 @@ export class SortedDocuments {
   }
 
   // ** views ** //
-  get groups(): DocumentGroup[] {
+  get byGroup(): DocumentGroup[] {
     const documentMap = createDocMapByGroups(this.filteredDocsByType, this.groupsStore.groupForUser);
     const sortedSectionLabels = sortGroupSectionLabels(Array.from(documentMap.keys()));
-    return sortedSectionLabels.map(sectionLabel => {
-      return new DocumentGroup(this.stores, sectionLabel, documentMap.get(sectionLabel), "group");
+    return sortedSectionLabels.map(label => {
+      return new DocumentGroup({stores: this.stores, label, metaDataDocs: documentMap.get(label).documents });
     });
   }
-  get names(): DocumentGroup[] {
+  get byName(): DocumentGroup[] {
     const documentMap = createDocMapByNames(this.filteredDocsByType, this.class.getUserById);
     const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()));
-    return sortedSectionLabels.map((sectionLabel) =>{
-      return new DocumentGroup(this.stores, sectionLabel, documentMap.get(sectionLabel).documents, "name");
+    return sortedSectionLabels.map(label => {
+      return new DocumentGroup({ stores: this.stores, label, metaDataDocs: documentMap.get(label).documents });
     });
   }
 
-  get strategies(): DocumentGroup[] {
+  get byStrategy(): DocumentGroup[] {
     const commentTags = this.commentTags;
     const tagsWithDocs = getTagsWithDocs(this.firestoreMetadataDocs, commentTags, this.firestoreTagDocumentMap);
 
     const sortedDocsArr: DocumentGroup[] = [];
     Object.entries(tagsWithDocs).forEach((tagKeyAndValObj) => {
       const tagWithDocs = tagKeyAndValObj[1] as TagWithDocs;
-      const sectionLabel = tagWithDocs.tagValue;
+      const label = tagWithDocs.tagValue;
       const docKeys = tagWithDocs.docKeysFoundWithTag;
       const documents = this.firestoreMetadataDocs.filter((doc: IDocumentMetadata) => docKeys.includes(doc.key));
-      sortedDocsArr.push(new DocumentGroup(this.stores, sectionLabel, documents, "strategy"));
+      sortedDocsArr.push(new DocumentGroup({ stores: this.stores, label, metaDataDocs: documents }));
     });
     return sortedDocsArr;
   }
 
-  get tools(): DocumentGroup[] {
+  get byTools(): DocumentGroup[] {
     const tileTypeToDocumentsMap = createTileTypeToDocumentsMap(this.firestoreMetadataDocs);
 
-    const sectionedDocuments = Object.keys(tileTypeToDocumentsMap).map(tileType => {
+    const sectionedDocuments = Array.from(tileTypeToDocumentsMap.keys()).map(tileType => {
+
       const contentInfo = getTileContentInfo(tileType);
-      const value = contentInfo?.displayName || tileType;
-      const section: DocumentGroup = new DocumentGroup(this.stores, value, tileTypeToDocumentsMap[tileType], "tool");
+      const label = contentInfo?.displayName || tileType;
+      const documents = tileTypeToDocumentsMap.get(tileType)?.documents ?? [];
+      const icon = tileTypeToDocumentsMap.get(tileType)?.icon;
+      const section = new DocumentGroup({ stores: this.stores, label, metaDataDocs: documents, icon });
       return section;
     });
 
     // Sort the tile types. 'No Tools' should be at the end.
     const sortedByLabel = sectionedDocuments.sort((a, b) => {
-      if (a.value === "No Tools") return 1;   // Move 'No Tools' to the end
-      if (b.value === "No Tools") return -1;  // Alphabetically sort all others
-      return a.value.localeCompare(b.value);
+      if (a.label === "No Tools") return 1;   // Move 'No Tools' to the end
+      if (b.label === "No Tools") return -1;  // Alphabetically sort all others
+      return a.label.localeCompare(b.label);
     });
 
     return sortedByLabel;
   }
 
-  get bookmarks(): DocumentGroup[] {
+  get byBookmarked(): DocumentGroup[] {
     const documentMap = createDocMapByBookmarks(this.firestoreMetadataDocs, this.bookmarksStore);
 
     const sortedSectionLabels = ["Bookmarked", "Not Bookmarked"];
     return sortedSectionLabels.filter(label => documentMap.has(label))
-                              .map(label => new DocumentGroup(this.stores,
-                                label, documentMap.get(label).documents, "bookmark"));
-  }
-
-  sortDocuments (primarySort: string, secondarySort: string) {
-    let documentGroups: DocumentGroup[] = [];
-    switch (primarySort) {
-      case "Group":
-        documentGroups = this.groups;
-        break;
-      case "Name":
-        documentGroups = this.names;
-        break;
-      case "Strategy":
-        documentGroups = this.strategies;
-        break;
-      case "Tool":
-        documentGroups = this.tools;
-        break;
-      case "Bookmark":
-        documentGroups = this.bookmarks;
-        break;
-    }
-    const sortedDocuments: SortedDocumentsMap = {};
-    switch (secondarySort) {
-      case "None":
-        documentGroups.forEach(documentGroup => {
-          sortedDocuments[documentGroup.value] = documentGroup.all;
-        });
-        break;
-      case "Group":
-        documentGroups.forEach(documentGroup => {
-          sortedDocuments[documentGroup.value] = documentGroup.groups;
-        });
-        break;
-      case "Name":
-        documentGroups.forEach(documentGroup => {
-          sortedDocuments[documentGroup.value] = documentGroup.names;
-        });
-        break;
-      case "Strategy":
-        documentGroups.forEach(documentGroup => {
-          sortedDocuments[documentGroup.value] = documentGroup.strategies;
-        });
-        break;
-      case "Tool":
-        documentGroups.forEach(documentGroup => {
-          sortedDocuments[documentGroup.value] = documentGroup.tools;
-        });
-        break;
-      case "Bookmark":
-        documentGroups.forEach(documentGroup => {
-          sortedDocuments[documentGroup.value] = documentGroup.bookmarks;
-        });
-        break;
-    }
-    return sortedDocuments;
+                              .map(label => new DocumentGroup({
+                                stores: this.stores,
+                                label,
+                                metaDataDocs: documentMap.get(label).documents
+                              }));
   }
 
   async updateMetaDataDocs (filter: string, unit: string, investigation: number, problem: number) {
