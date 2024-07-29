@@ -28,6 +28,7 @@ export const SortWorkHeader:React.FC<ISortHeaderProps>= observer(function SortWo
             showItemChecks={true}
           />
         </div>
+        <div className="header-text secondary">then</div>
         <div className="header-dropdown">
           <CustomSelect
             className="sort-work-sort-menu secondary-sort-menu"

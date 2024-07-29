@@ -15,6 +15,11 @@
       align-items: center;
       display: flex;
       margin: 0 6px 0 8px;
+
+
+      &.secondary {
+        margin: 0 5px 0 0;
+      }
     }
 
     .header-dropdown {
@@ -24,7 +29,7 @@
       .custom-select.sort-work-sort-menu,
       .custom-select.filter-work-menu {
         color: $charcoal-dark-2;
-        margin-right: 8px;
+        margin-right: 5px;
 
         .header {
           min-width: 151px;
