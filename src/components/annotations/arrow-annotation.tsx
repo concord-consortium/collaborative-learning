@@ -133,18 +133,14 @@ export const ArrowAnnotationComponent = observer(
     }, [missingData, arrow.shape, sourceX, sourceY, targetX, targetY, textCenterX, textCenterY]);
 
     // Bail if we're missing anything necessary
-    if (!sourceBB || !targetBB || !curveData || missingData) return null;
+    if (!curveData || missingData) return null;
 
     // Set up text handlers
-    function handleTextClick() {
+    function handleTextClick(e: React.MouseEvent) {
       if (!canEdit) return;
 
-      if (firstClick) {
+      if (e.detail === 2) {
         setEditingText(true);
-        setFirstClick(false);
-      } else {
-        setFirstClick(true);
-        setTimeout(() => setFirstClick(false), 500);
       }
     }
     function acceptText() {
@@ -285,7 +281,7 @@ export const ArrowAnnotationComponent = observer(
               ) : (
                 <button
                   className={textButtonClasses}
-                  onClick={handleTextClick}
+                  onClick={e => handleTextClick(e)}
                   onMouseDown={e => handleMouseDown(e, "text")}
                 >
                   {displayText || "Add text"}
