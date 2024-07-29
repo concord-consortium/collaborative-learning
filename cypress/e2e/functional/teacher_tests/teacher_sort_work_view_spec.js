@@ -45,23 +45,23 @@ describe('SortWorkView Tests', () => {
   it('should open SortWorkView tab and interact with it', () => {
     beforeTest(queryParams1);
     cy.log('verify clicking the sort menu');
-    sortWork.getSortByMenu().click(); // Open the sort menu
+    sortWork.getPrimarySortByMenu().click(); // Open the sort menu
     cy.wait(1000);
 
-    sortWork.getSortByNameOption().click(); //Select 'Name' sort type
+    sortWork.getPrimarySortByNameOption().click(); //Select 'Name' sort type
     cy.wait(1000);
 
-    sortWork.getSortByMenu().click(); // Open the sort menu again
+    sortWork.getPrimarySortByMenu().click(); // Open the sort menu again
     cy.wait(1000);
 
-    sortWork.getSortByGroupOption().click(); // Select 'Group' sort type
+    sortWork.getPrimarySortByGroupOption().click(); // Select 'Group' sort type
     cy.wait(1000);
 
     cy.log('verify opening and closing a document from the sort work view');
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().eq(1).click(); // Open the first document in the list
     resourcesPanel.getEditableDocumentContent().should('be.visible');
-    resourcesPanel.getDocumentCloseButton().click();
+    resourcesPanel.getDocumentCloseButton().click({ force: true });
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().should('be.visible'); // Verify the document is closed
   });
@@ -209,9 +209,9 @@ describe('SortWorkView Tests', () => {
     sortWork.checkDocumentInGroup("No Group", exemplarDocs[0]);
 
     cy.log("check that problem and exemplar documents can be sorted by name");
-    sortWork.getSortByMenu().click();
+    sortWork.getPrimarySortByMenu().click();
     cy.wait(1000);
-    sortWork.getSortByNameOption().click();
+    sortWork.getPrimarySortByNameOption().click();
     sortWork.checkSectionHeaderLabelsExist([
       "1, Student", "1, Teacher", "2, Student", "3, Student", "4, Student", "Idea, Ivan"
     ]);
@@ -220,9 +220,9 @@ describe('SortWorkView Tests', () => {
     sortWork.checkDocumentInGroup("1, Student", studentProblemDocs[0]);
 
     cy.log("check that exemplar document is displayed in strategy tag sourced from CMS");
-    sortWork.getSortByMenu().click();
+    sortWork.getPrimarySortByMenu().click();
     cy.wait(1000);
-    sortWork.getSortByTagOption().click();
+    sortWork.getPrimarySortByTagOption().click();
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Unit Rate", exemplarDocs[0]);
 
@@ -235,10 +235,10 @@ describe('SortWorkView Tests', () => {
     chatPanel.getChatCloseButton().click();
     cy.openTopTab('sort-work');
     // at the moment this is required to refresh the sort
-    sortWork.getSortByMenu().click();
-    sortWork.getSortByNameOption().click();
-    sortWork.getSortByMenu().click();
-    sortWork.getSortByTagOption().click();
+    sortWork.getPrimarySortByMenu().click();
+    sortWork.getPrimarySortByNameOption().click();
+    sortWork.getPrimarySortByMenu().click();
+    sortWork.getPrimarySortByTagOption().click();
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Diverging Designs", exemplarDocs[0]);
 
@@ -252,8 +252,8 @@ describe('SortWorkView Tests', () => {
     cy.openTopTab('sort-work');
 
     cy.log("check that exemplar document is still displayed in strategy tag sourced from CMS but not in teacher added tag");
-    sortWork.getSortByMenu().click();
-    sortWork.getSortByTagOption().click();
+    sortWork.getPrimarySortByMenu().click();
+    sortWork.getPrimarySortByTagOption().click();
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Unit Rate", exemplarDocs[0]);
     sortWork.checkGroupIsEmpty("Diverging Designs");
