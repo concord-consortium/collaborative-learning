@@ -12,7 +12,7 @@ import { SimpleDocumentItem } from "../thumbnail/simple-document-item";
 import { IDocumentMetadata } from "../../../functions/src/shared";
 import { DocumentContextReact } from "./document-context";
 import { DocumentCollection } from "../../utilities/sort-document-utils";
-import { DocumentGroup } from "../../models/stores/sorted-documents-documents-group";
+import { DocumentGroup } from "../../models/stores/document-group";
 
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 

@@ -19,7 +19,7 @@ import {
   sortGroupSectionLabels,
   sortNameSectionLabels
 } from "../../utilities/sort-document-utils";
-import { DocumentGroup } from "./sorted-documents-documents-group";
+import { DocumentGroup } from "./document-group";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 
 

@@ -9,7 +9,7 @@ import { ENavTab } from "../../models/view/nav-tabs";
 import { DocListDebug } from "./doc-list-debug";
 import { DocFilterType, PrimarySortType, SecondarySortType } from "../../models/stores/ui-types";
 import { SortedSection } from "./sorted-section";
-import { DocumentGroup } from "../../models/stores/sorted-documents-documents-group";
+import { DocumentGroup } from "../../models/stores/document-group";
 
 
 import "../thumbnail/document-type-collection.scss";
