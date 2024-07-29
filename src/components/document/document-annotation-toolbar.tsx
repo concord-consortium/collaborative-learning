@@ -59,12 +59,12 @@ export const DocumentAnnotationToolbar = observer(function DocumentAnnotationToo
   return (
     <div className="button-set sparrow-buttons" onKeyDown={handleKeyDown}>
       <button onClick={() => handleSparrow(ArrowShape.curved)} data-testid="curved-sparrow-button"
-        title="Curved aarrow"
+        title="Sparrow: curved"
         className={classNames({active: ui.annotationMode === ArrowShape.curved})}>
         <CurvedSparrowIcon/>
       </button>
       <button onClick={() => handleSparrow(ArrowShape.straight)} data-testid="straight-sparrow-button"
-        title="Straight aarrow"
+        title="Sparrow: straight"
         className={classNames({active: ui.annotationMode === ArrowShape.straight})}>
         <StraightSparrowIcon/>
       </button>
