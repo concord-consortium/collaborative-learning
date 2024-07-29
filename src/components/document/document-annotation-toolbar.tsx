@@ -9,6 +9,7 @@ import { ArrowShape } from "../../models/annotations/arrow-annotation";
 import HideAnnotationsIcon from "../../assets/icons/annotations/proportional-arrows-hide-icon.svg";
 import ShowAnnotationsIcon from "../../assets/icons/annotations/proportional-arrows-show-icon.svg";
 import CurvedSparrowIcon from "../../assets/icons/annotations/proportional-arrow-single-curved-mode-icon.svg";
+import StraightSparrowIcon from "../../assets/icons/annotations/proportional-arrow-single-straight-mode-icon.svg";
 
 export const DocumentAnnotationToolbar = observer(function DocumentAnnotationToolbar() {
   const stores = useStores();
@@ -47,7 +48,7 @@ export const DocumentAnnotationToolbar = observer(function DocumentAnnotationToo
       <button onClick={() => handleSparrow(ArrowShape.straight)} data-testid="straight-sparrow-button"
         title="Straight aarrow"
         className={classNames({active: ui.annotationMode === ArrowShape.straight})}>
-        <CurvedSparrowIcon/>
+        <StraightSparrowIcon/>
       </button>
       <button onClick={handleAnnotationToggle} data-testid="hide-annotations-button"
         title={persistentUI.showAnnotations ? "Hide annotations" : "Show annotations" } >

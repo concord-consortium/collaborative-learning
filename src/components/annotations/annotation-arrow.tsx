@@ -37,7 +37,6 @@ export function AnnotationArrow({
         className="curved-arrow-stem"
         d={path}
         fill="none"
-        strokeDasharray={shape === ArrowShape.curved ? "none" : "5,5"}
         onMouseEnter={e => setHovering?.(true)}
         onMouseLeave={e => setHovering?.(false)}
         onClick={onClick}
