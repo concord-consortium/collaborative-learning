@@ -3,12 +3,15 @@ import ClueCanvas from '../../../support/elements/common/cCanvas';
 import PrimaryWorkspace from '../../../support/elements/common/PrimaryWorkspace';
 import ResourcePanel from '../../../support/elements/common/ResourcesPanel';
 import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
+import TableToolTile from '../../../support/elements/tile/TableToolTile';
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const geometryToolTile = new GeometryToolTile;
 const primaryWorkspace = new PrimaryWorkspace;
 const resourcePanel = new ResourcePanel;
+
+let tableToolTile = new TableToolTile;
 
 const green  = "#19a90f";
 const red   = "#ee0000";
@@ -339,6 +342,28 @@ context('Geometry Tool', function () {
     clueCanvas.clickToolbarButton('geometry', 'delete');
     geometryToolTile.getGraphCircle().should("have.length", 0);
     geometryToolTile.getGraphPoint().should("have.length", 1);
+
+    cy.log('creates polygons from table data');
+    clueCanvas.addTile('table');
+    // Add points to the table
+    tableToolTile.typeInTableCellXY(0, 0, '5');
+    tableToolTile.typeInTableCellXY(0, 1, '5');
+    tableToolTile.typeInTableCellXY(1, 0, '10');
+    tableToolTile.typeInTableCellXY(1, 1, '5');
+    tableToolTile.typeInTableCellXY(2, 0, '9');
+    tableToolTile.typeInTableCellXY(2, 1, '9');
+
+    // Click the "Graph IT!" button to create the polygon
+    clueCanvas.clickToolbarButton('table', 'link-graph');
+    tableToolTile.getLinkGraphModalTileMenu().select('New Graph');
+    tableToolTile.getLinkGraphModalLinkButton().should("contain", "Graph It!").click();
+
+    // Wait for the Geometry tile to appear
+    geometryToolTile.getGraph().should("exist");
+    geometryToolTile.getGraphPointEclipse().should("have.length", 5); // Verify that points are added to the graph
+
+    cy.log('Waiting for the polygon to be created from table');
+    geometryToolTile.getGraphPolygon().should("have.length", 0); // Verify the polygon is created
   });
 
   it('will test Geometry tile undo redo', () => {
