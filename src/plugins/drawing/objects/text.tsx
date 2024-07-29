@@ -112,7 +112,7 @@ export const TextComponent = observer(
             defaultValue={text}
             onBlur={(e) => handleClose(true)}
             onKeyDown={handleTextAreaKeyDown}
-            onMouseDown={handleTextAreaMouseDown}>
+            onPointerDown={handleTextAreaPointerDown}>
           </textarea>
         </foreignObject>);
     } else {
@@ -126,7 +126,7 @@ export const TextComponent = observer(
     }
   };
 
-  const handleTextAreaMouseDown = (e: React.MouseEvent<HTMLTextAreaElement>) => {
+  const handleTextAreaPointerDown = (e: React.PointerEvent<HTMLTextAreaElement>) => {
     e.stopPropagation();
   };
 
@@ -159,7 +159,7 @@ export const TextComponent = observer(
           className="text"
           onMouseEnter={(e) => handleHover?.(e, model, true)}
           onMouseLeave={(e) => handleHover?.(e, model, false)}
-          onMouseDown={(e)=> handleDrag?.(e, model)}
+          onPointerDown={(e)=> handleDrag?.(e, model)}
           pointerEvents={handleHover ? "visible" : "none"}
          >
           <rect x={x} y={y}
@@ -180,7 +180,7 @@ export class TextDrawingTool extends DrawingTool {
     super(drawingLayer);
   }
 
-  public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+  public handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     // Select the drawing tile, but don't propagate event to do normal Cmd-click procesing.
     this.drawingLayer.selectTile(false);
     e.stopPropagation();

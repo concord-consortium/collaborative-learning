@@ -47,20 +47,12 @@ context('Draw Tool Tile', function () {
     drawToolTile.getTileTitle().should("exist");
 
     cy.log("can open show/sort panel and select objects");
-    drawToolTile.getDrawToolRectangle().click();
-    drawToolTile.getDrawTile()
-      .trigger("mousedown", 100, 50)
-      .trigger("mousemove", 250, 150)
-      .trigger("mouseup", 250, 150);
-    drawToolTile.getDrawToolEllipse().click();
-    drawToolTile.getDrawTile()
-      .trigger("mousedown", 300, 50)
-      .trigger("mousemove", 400, 150)
-      .trigger("mouseup", 400, 150);
+    drawToolTile.drawRectangle(100, 50, 150, 100);
+    drawToolTile.drawEllipse(300, 50, 100, 100);
     // Unselect all
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 50, 50)
-      .trigger("mouseup", 50, 50);
+      .trigger("pointerdown", 50, 50)
+      .trigger("pointerup", 50, 50);
     drawToolTile.getSelectionBox().should("not.exist");
 
     // Open panel
@@ -108,10 +100,10 @@ context('Draw Tool Tile', function () {
     cy.log("verify draw a line");
     drawToolTile.getDrawToolFreehand().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 350, 50)
-      .trigger("mousemove", 350, 100)
-      .trigger("mousemove", 450, 100)
-      .trigger("mouseup", 450, 100);
+      .trigger("pointerdown", 350, 50)
+      .trigger("pointermove", 350, 100)
+      .trigger("pointermove", 450, 100)
+      .trigger("pointerup", 450, 100);
     drawToolTile.getFreehandDrawing().should("exist").and("have.length", 1);
     // Freehand tool should still be active
     drawToolTile.getDrawToolFreehand().should("have.class", "selected");
@@ -127,15 +119,15 @@ context('Draw Tool Tile', function () {
     // First make sure we don't select it even if we are inside of its
     // bounding box
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 370, 50)
-      .trigger("mousemove", 450, 80)
-      .trigger("mouseup", 450, 80);
+      .trigger("pointerdown", 370, 50)
+      .trigger("pointermove", 450, 80)
+      .trigger("pointerup", 450, 80);
     drawToolTile.getDrawToolDelete().should("have.class", "disabled");
 
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 340, 90)
-      .trigger("mousemove", 360, 110)
-      .trigger("mouseup", 360, 110);
+      .trigger("pointerdown", 340, 90)
+      .trigger("pointermove", 360, 110)
+      .trigger("pointerup", 360, 110);
     drawToolTile.getDrawToolDelete().should("not.have.class", "disabled");
 
     cy.log("verify change outline color");
@@ -150,8 +142,8 @@ context('Draw Tool Tile', function () {
     // is not on the path
     // drawToolTile.getDrawToolSelect().click();
     // drawToolTile.getDrawTile()
-    //   .trigger("mousedown", 350, 100)
-    //   .trigger("mouseup", 350, 100);
+    //   .trigger("pointerdown", 350, 100)
+    //   .trigger("pointerup", 350, 100);
     drawToolTile.getSelectionBox().should("exist");
     drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click();
     drawToolTile.getFreehandDrawing().should("not.exist");
@@ -163,11 +155,7 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawTileTitle().first().type(newName + '{enter}');
     drawToolTile.getTileTitle().should("contain", newName);
 
-    drawToolTile.getDrawToolRectangle().click();
-    drawToolTile.getDrawTile()
-      .trigger("mousedown", 250, 50)
-      .trigger("mousemove", 100, 150)
-      .trigger("mouseup", 100, 50);
+    drawToolTile.drawRectangle(250, 50, -150, 100);
 
     cy.log("verify Draw tile restore upon page reload");
     cy.wait(2000);
@@ -182,11 +170,7 @@ context('Draw Tool Tile', function () {
     clueCanvas.addTile("drawing");
 
     cy.log("verify draw vector");
-    drawToolTile.getDrawToolVector().click();
-    drawToolTile.getDrawTile()
-      .trigger("mousedown", 250, 50)
-      .trigger("mousemove", 100, 50)
-      .trigger("mouseup", 100, 50);
+    drawToolTile.drawVector(250, 50, -150, 0);
     drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
     // Select tool should be selected after object created
     drawToolTile.getDrawToolSelect().should("have.class", "selected");
@@ -225,22 +209,49 @@ context('Draw Tool Tile', function () {
     // re-select the object using a selection rectangle.
     drawToolTile.getDrawToolSelect().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 90, 40)
-      .trigger("mousemove", 260, 60)
-      .trigger("mouseup", 260, 60);
+      .trigger("pointerdown", 90, 40)
+      .trigger("pointermove", 260, 60)
+      .trigger("pointerup", 260, 60);
+    drawToolTile.getDrawToolDelete().click();
+    drawToolTile.getVectorDrawing().should("not.exist");
+
+    cy.log("draws vector constrained to horizontal or vertical");
+    drawToolTile.getDrawToolVector().click();
+    drawToolTile.getDrawTile()
+      .trigger("pointerdown", 100, 100, { shiftKey: true })
+      .trigger("pointermove", 200, 110, { shiftKey: true }) // Y value is different, but should be constrained to horizontal
+      .trigger("pointerup",   200, 110, { shiftKey: true });
+    drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
+    drawToolTile.getVectorDrawing().get('line').invoke('attr', 'y1')
+      .then(y1 => {
+        drawToolTile.getVectorDrawing().get('line').invoke('attr', 'y2')
+        .should('eq', y1);
+      });
+    drawToolTile.getDrawToolDelete().click();
+    drawToolTile.getVectorDrawing().should("not.exist");
+
+    // Same for vertical vector
+    drawToolTile.getDrawToolVector().click();
+    drawToolTile.getDrawTile()
+      .trigger("pointerdown", 100, 25, { shiftKey: true })
+      .trigger("pointermove", 110, 125, { shiftKey: true }) // X value is different, but should be constrained to vertical
+      .trigger("pointerup",   110, 125, { shiftKey: true });
+    drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
+    drawToolTile.getVectorDrawing().get('line').invoke('attr', 'x1')
+      .then(x1 => {
+        drawToolTile.getVectorDrawing().get('line').invoke('attr', 'x2')
+        .should('eq', x1);
+      });
     drawToolTile.getDrawToolDelete().click();
     drawToolTile.getVectorDrawing().should("not.exist");
   });
+
   it("Rectangle", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
 
     cy.log("verify draw rectangle");
-    drawToolTile.getDrawToolRectangle().click();
-    drawToolTile.getDrawTile()
-      .trigger("mousedown", 250, 50)
-      .trigger("mousemove", 100, 150)
-      .trigger("mouseup", 100, 50);
+    drawToolTile.drawRectangle(250, 50, -150, 100);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
     // Select tool should be selected after object created
     drawToolTile.getDrawToolSelect().should("have.class", "selected");
@@ -269,17 +280,17 @@ context('Draw Tool Tile', function () {
     cy.log("verify moving pre-selected object");
     drawToolTile.getDrawToolSelect().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 100, 100)
-      .trigger("mousemove", 200, 100)
-      .trigger("mouseup", 200, 100);
+      .trigger("pointerdown", 100, 100)
+      .trigger("pointermove", 200, 100)
+      .trigger("pointerup", 200, 100);
     // For some reason the move isn't very accurate in cypress so often the final location off
     drawToolTile.getRectangleDrawing().first().should("have.attr", "x").then(parseInt).and("within", 160, 220);
 
     cy.log("verify hovering objects");
     drawToolTile.getDrawTile()
       // Un-select the rectangle
-      .trigger("mousedown", 500, 100)
-      .trigger("mouseup", 500, 100);
+      .trigger("pointerdown", 500, 100)
+      .trigger("pointerup", 500, 100);
 
     drawToolTile.getRectangleDrawing().first()
       // Get the rectangle to be hovered. In the code we are listening to
@@ -296,19 +307,15 @@ context('Draw Tool Tile', function () {
     drawToolTile.getHighlightBox().should("not.exist");
 
     cy.log("verify moving not selected object");
-    drawToolTile.getDrawToolRectangle().click();
-    drawToolTile.getDrawTile()
-      .trigger("mousedown", 250, 50)
-      .trigger("mousemove", 100, 150)
-      .trigger("mouseup", 100, 150);
+    drawToolTile.drawRectangle(250, 50, -150, 100);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
     drawToolTile.getSelectionBox().should("exist");
 
     // Unselect the rectangle just drawn
     drawToolTile.getDrawTile()
       // Un-select the rectangle
-      .trigger("mousedown", 500, 100)
-      .trigger("mouseup", 500, 100);
+      .trigger("pointerdown", 500, 100)
+      .trigger("pointerup", 500, 100);
     drawToolTile.getSelectionBox().should("not.exist");
 
     // Get the rectangle to be hovered, see above for more info.
@@ -317,9 +324,9 @@ context('Draw Tool Tile', function () {
     drawToolTile.getHighlightBox().should("exist").should("have.attr", "stroke").and("eq", "#bbdd00");
 
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 100, 135)
-      .trigger("mousemove", 200, 135)
-      .trigger("mouseup", 200, 135);
+      .trigger("pointerdown", 100, 135)
+      .trigger("pointermove", 200, 135)
+      .trigger("pointerup", 200, 135);
 
     drawToolTile.getRectangleDrawing().first().should("have.attr", "x").then(parseInt).and("within", 150, 250);
 
@@ -333,9 +340,9 @@ context('Draw Tool Tile', function () {
     // starting from top edge
     drawToolTile.getDrawToolRectangle().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 100, 50, { altKey: true })
-      .trigger("mousemove", 100, 70, { altKey: true })
-      .trigger("mouseup", 100, 70);
+      .trigger("pointerdown", 100, 50, { altKey: true })
+      .trigger("pointermove", 100, 70, { altKey: true })
+      .trigger("pointerup", 100, 70);
 
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
     drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "20");
@@ -344,9 +351,9 @@ context('Draw Tool Tile', function () {
     // starting from the left edge
     drawToolTile.getDrawToolRectangle().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 200, 50, { altKey: true })
-      .trigger("mousemove", 230, 50, { altKey: true })
-      .trigger("mouseup", 230, 50);
+      .trigger("pointerdown", 200, 50, { altKey: true })
+      .trigger("pointermove", 230, 50, { altKey: true })
+      .trigger("pointerup", 230, 50);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 2);
     drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "30");
     drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "30");
@@ -354,9 +361,9 @@ context('Draw Tool Tile', function () {
     // draw a square starting at the bottom edge
     drawToolTile.getDrawToolRectangle().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 300, 90, { altKey: true })
-      .trigger("mousemove", 300, 50, { altKey: true })
-      .trigger("mouseup", 300, 50);
+      .trigger("pointerdown", 300, 90, { altKey: true })
+      .trigger("pointermove", 300, 50, { altKey: true })
+      .trigger("pointerup", 300, 50);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 3);
     drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "40");
     drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "40");
@@ -364,9 +371,9 @@ context('Draw Tool Tile', function () {
     // draw a square starting at the right edge
     drawToolTile.getDrawToolRectangle().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 450, 50, { altKey: true })
-      .trigger("mousemove", 400, 50, { altKey: true })
-      .trigger("mouseup", 400, 50);
+      .trigger("pointerdown", 450, 50, { altKey: true })
+      .trigger("pointermove", 400, 50, { altKey: true })
+      .trigger("pointerup", 400, 50);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 4);
     drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "50");
     drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "50");
@@ -374,9 +381,9 @@ context('Draw Tool Tile', function () {
     // Diagonal from top right to bottom left with the width 60 and height 50
     drawToolTile.getDrawToolRectangle().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 560, 50, { altKey: true })
-      .trigger("mousemove", 500, 100, { altKey: true })
-      .trigger("mouseup", 500, 100);
+      .trigger("pointerdown", 560, 50, { altKey: true })
+      .trigger("pointermove", 500, 100, { altKey: true })
+      .trigger("pointerup", 500, 100);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 5);
     drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "60");
     drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "60");
@@ -384,9 +391,9 @@ context('Draw Tool Tile', function () {
     // Diagonal from bottom right to top left with the width 50 and the height 70
     drawToolTile.getDrawToolRectangle().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 650, 120, { altKey: true })
-      .trigger("mousemove", 600, 50, { altKey: true })
-      .trigger("mouseup", 600, 50);
+      .trigger("pointerdown", 650, 120, { altKey: true })
+      .trigger("pointermove", 600, 50, { altKey: true })
+      .trigger("pointerup", 600, 50);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 6);
     drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "70");
     drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "70");
@@ -418,11 +425,7 @@ context('Draw Tool Tile', function () {
     clueCanvas.addTile("drawing");
 
     cy.log("verify draw ellipse");
-    drawToolTile.getDrawToolEllipse().click();
-    drawToolTile.getDrawTile()
-      .trigger("mousedown", 250, 50)
-      .trigger("mousemove", 100, 150)
-      .trigger("mouseup", 100, 150);
+    drawToolTile.drawEllipse(250, 50, -150, 100);
     drawToolTile.getEllipseDrawing().should("exist").and("have.length", 1);
     // Select tool should be selected after object created
     drawToolTile.getDrawToolSelect().should("have.class", "selected");
@@ -436,9 +439,9 @@ context('Draw Tool Tile', function () {
     cy.log("verify draw circle");
     drawToolTile.getDrawToolEllipse().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 450, 50, { altKey: true })
-      .trigger("mousemove", 450, 150, { altKey: true })
-      .trigger("mouseup", 450, 150);
+      .trigger("pointerdown", 450, 50, { altKey: true })
+      .trigger("pointermove", 450, 150, { altKey: true })
+      .trigger("pointerup", 450, 150);
     drawToolTile.getEllipseDrawing().should("exist").and("have.length", 2);
     drawToolTile.getEllipseDrawing().last().should("have.attr", "rx").and("eq", "100");
     drawToolTile.getEllipseDrawing().last().should("have.attr", "ry").and("eq", "100");
@@ -460,8 +463,8 @@ context('Draw Tool Tile', function () {
     cy.log("verify draw stamp");
     drawToolTile.getDrawToolStamp().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 250, 50)
-      .trigger("mouseup");
+      .trigger("pointerdown", 250, 50)
+      .trigger("pointerup");
     drawToolTile.getImageDrawing().should("exist").and("have.length", 1);
     // Stamp tool should still be active
     drawToolTile.getDrawToolStamp().should("have.class", "selected");
@@ -477,15 +480,15 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawToolStampExpand().click();
     cy.get(".toolbar-palette.stamps .palette-buttons .stamp-button").eq(1).click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 250, 100)
-      .trigger("mouseup");
+      .trigger("pointerdown", 250, 100)
+      .trigger("pointerup");
     drawToolTile.getImageDrawing().should("exist").and("have.length", 2);
     drawToolTile.getImageDrawing().eq(1).should("have.attr", "href").and("contain", "equals.png");
     drawToolTile.getDrawToolStampExpand().click();
     cy.get(".toolbar-palette.stamps .palette-buttons .stamp-button").eq(2).click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 250, 150)
-      .trigger("mouseup");
+      .trigger("pointerdown", 250, 150)
+      .trigger("pointerup");
     drawToolTile.getImageDrawing().should("exist").and("have.length", 3);
     drawToolTile.getImageDrawing().eq(2).should("have.attr", "href").and("contain", "lparen.png");
 
@@ -507,8 +510,8 @@ context('Draw Tool Tile', function () {
     cy.log("adds text object");
     drawToolTile.getDrawToolText().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 100, 100)
-      .trigger("mouseup", 100, 100);
+      .trigger("pointerdown", 100, 100)
+      .trigger("pointerup", 100, 100);
     drawToolTile.getTextDrawing().should("exist").and("have.length", 1);
     // Select tool should be selected after object created
     drawToolTile.getDrawToolSelect().should("have.class", "selected");
@@ -522,16 +525,16 @@ context('Draw Tool Tile', function () {
     cy.log("edits text content of object");
     // Click inside drawing box to enter edit mode
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 150, 150)
-      .trigger("mouseup", 150, 150);
+      .trigger("pointerdown", 150, 150)
+      .trigger("pointerup", 150, 150);
     drawToolTile.getTextDrawing().get('textarea').type("The five boxing wizards jump quickly.{enter}");
     drawToolTile.getTextDrawing().get('text tspan').should("exist").and("have.length", 7);
 
     cy.log("deletes text object");
     drawToolTile.getDrawToolSelect().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 150, 150)
-      .trigger("mouseup", 150, 150);
+      .trigger("pointerdown", 150, 150)
+      .trigger("pointerup", 150, 150);
     drawToolTile.getSelectionBox().should("exist");
     drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click();
     drawToolTile.getTextDrawing().should("not.exist");
@@ -543,26 +546,26 @@ context('Draw Tool Tile', function () {
     cy.log("can group and ungroup");
     drawToolTile.getDrawToolRectangle().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 250, 50)
-      .trigger("mousemove", 100, 150)
-      .trigger("mouseup", 100, 150);
+      .trigger("pointerdown", 250, 50)
+      .trigger("pointermove", 100, 150)
+      .trigger("pointerup", 100, 150);
     drawToolTile.getDrawToolEllipse().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 50, 100)
-      .trigger("mousemove", 100, 150)
-      .trigger("mouseup", 100, 150);
+      .trigger("pointerdown", 50, 100)
+      .trigger("pointermove", 100, 150)
+      .trigger("pointerup", 100, 150);
     drawToolTile.getDrawToolFreehand().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 150, 50)
-      .trigger("mousemove", 200, 150)
-      .trigger("mouseup", 200, 150);
+      .trigger("pointerdown", 150, 50)
+      .trigger("pointermove", 200, 150)
+      .trigger("pointerup", 200, 150);
 
     // Select all 3
     drawToolTile.getDrawToolSelect().click();
     drawToolTile.getDrawTile()
-      .trigger("mousedown", 40, 40)
-      .trigger("mousemove", 250, 150)
-      .trigger("mouseup", 250, 150);
+      .trigger("pointerdown", 40, 40)
+      .trigger("pointermove", 250, 150)
+      .trigger("pointerup", 250, 150);
     cy.wait(1000);
     drawToolTile.getSelectionBox().should("have.length", 3);
 

@@ -151,11 +151,7 @@ context('Test copy tiles from one document to other document', function () {
 
     cy.log('Add drawing tile');
     clueCanvas.addTile("drawing");
-    drawToolTile.getDrawToolRectangle().click();
-    drawToolTile.getDrawTile()
-      .trigger("mousedown", 250, 50)
-      .trigger("mousemove", 100, 150)
-      .trigger("mouseup", 100, 50);
+    drawToolTile.drawRectangle(250, 50, -150, 100);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
 
     cy.log("Add expression tile");

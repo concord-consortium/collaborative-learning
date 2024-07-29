@@ -198,9 +198,9 @@ context('Arrow Annotations (Sparrows)', function () {
     clueCanvas.addTile("drawing");
     drawToolTile.getDrawToolVector().eq(0).click();
     drawToolTile.getDrawTile().eq(1)
-      .trigger("mousedown", 150, 50)
-      .trigger("mousemove", 100, 150)
-      .trigger("mouseup", 100, 50);
+      .trigger("pointerdown", 150, 50)
+      .trigger("pointermove", 100, 150)
+      .trigger("pointerup", 100, 50);
     aa.clickArrowToolbarButton();
     aa.getAnnotationButtons().should("have.length", 4);
     aa.getAnnotationButtons().first().click({ force: true });
