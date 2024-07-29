@@ -24,7 +24,9 @@ import {
   ELabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
 } from "./jxg-changes";
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
-import { getAssociatedPolygon, getEdgeVisualProps, getPolygonVisualProps, prepareToDeleteObjects, setPolygonEdgeColors } from "./jxg-polygon";
+import { getAssociatedPolygon, getEdgeVisualProps, getPolygonVisualProps, prepareToDeleteObjects,
+  setPolygonEdgeColors
+} from "./jxg-polygon";
 import {
   isAxisArray, isBoard, isComment, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,

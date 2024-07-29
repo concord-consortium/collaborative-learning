@@ -81,7 +81,7 @@ export const EllipseComponent = observer(function EllipseComponent({model, handl
     strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onMouseDown={(e)=> handleDrag?.(e, model)}
+    onPointerDown={(e)=> handleDrag?.(e, model)}
     pointerEvents={handleHover ? "visible" : "none"}
   />;
 });
@@ -92,7 +92,7 @@ export class EllipseDrawingTool extends DrawingTool {
     super(drawingLayer);
   }
 
-  public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+  public handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     // Select the drawing tile, but don't propagate event to do normal Cmd-click procesing.
     this.drawingLayer.selectTile(false);
     e.stopPropagation();
@@ -108,7 +108,7 @@ export class EllipseDrawingTool extends DrawingTool {
       stroke, fill, strokeWidth, strokeDashArray
     });
 
-    const handleMouseMove = (e2: MouseEvent) => {
+    const handlePointerMove = (e2: PointerEvent) => {
       e2.preventDefault();
       const end = this.drawingLayer.getWorkspacePoint(e2);
       if (!end) return;
@@ -116,18 +116,18 @@ export class EllipseDrawingTool extends DrawingTool {
       ellipse.resize(start, end, makeCircle);
       this.drawingLayer.setCurrentDrawingObject(ellipse);
     };
-    const handleMouseUp = (e2: MouseEvent) => {
+    const handlePointerUp = (e2: PointerEvent) => {
       e2.preventDefault();
       if ((ellipse.rx > 0) && (ellipse.ry > 0)) {
         this.drawingLayer.addNewDrawingObject(getSnapshot(ellipse));
       }
       this.drawingLayer.setCurrentDrawingObject(null);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
     };
 
     this.drawingLayer.setCurrentDrawingObject(ellipse);
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
   }
 }

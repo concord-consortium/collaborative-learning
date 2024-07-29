@@ -56,14 +56,15 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     if (!readOnly) {
       hotKeys.register({
         "delete": () => deleteSelected(),
-        "backspace": () => deleteSelected()
+        "backspace": () => deleteSelected(),
+        "escape": () => ui.setAnnotationMode()
       });
       // disposer, to deactivate these bindings in case we switch to read-only later.
       return () => {
-        hotKeys.unregister(["delete", "backspace"]);
+        hotKeys.unregister(["delete", "backspace", "escape"]);
       };
     }
-  }, [content, readOnly, hotKeys]);
+  }, [content, readOnly, hotKeys, ui]);
 
   function clearSource() {
     setSourceTileId("");
@@ -136,6 +137,13 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       const bb = divRef.current.getBoundingClientRect();
       setMouseX(event.clientX - bb.left);
       setMouseY(event.clientY - bb.top);
+    }
+  };
+
+  const handleBackgroundDoubleClick: MouseEventHandler<HTMLDivElement> = event => {
+    // Make sure it's a click on the annotation-svg background, not bubbled up from a button
+    if ((event.target as HTMLElement).classList.contains("annotation-svg")) {
+      ui.setAnnotationMode();
     }
   };
 
@@ -350,6 +358,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onClick={handleBackgroundClick}
+      onDoubleClick={handleBackgroundDoubleClick}
       tabIndex={0}
       onKeyDown={handleKeyDown}
       ref={element => {

@@ -107,7 +107,7 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
     strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onMouseDown={(e)=> handleDrag?.(e, model)}
+    onPointerDown={(e)=> handleDrag?.(e, model)}
     pointerEvents={handleHover ? "visible" : "none"}
   />;
 
@@ -119,7 +119,7 @@ export class RectangleDrawingTool extends DrawingTool {
     super(drawingLayer);
   }
 
-  public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+  public handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     // Select the drawing tile, but don't propagate event to do normal Cmd-click procesing.
     this.drawingLayer.selectTile(false);
     e.stopPropagation();
@@ -135,7 +135,7 @@ export class RectangleDrawingTool extends DrawingTool {
       stroke, fill, strokeWidth, strokeDashArray
     });
 
-    const handleMouseMove = (e2: MouseEvent) => {
+    const handlePointerMove = (e2: PointerEvent) => {
       e2.preventDefault();
       const end = this.drawingLayer.getWorkspacePoint(e2);
       if (!end) return;
@@ -143,19 +143,19 @@ export class RectangleDrawingTool extends DrawingTool {
       rectangle.resize(start, end, makeSquare);
       this.drawingLayer.setCurrentDrawingObject(rectangle);
     };
-    const handleMouseUp = (e2: MouseEvent) => {
+    const handlePointerUp = (e2: PointerEvent) => {
       e2.preventDefault();
       if ((rectangle.width > 0) && (rectangle.height > 0)) {
         this.drawingLayer.addNewDrawingObject(getSnapshot(rectangle));
       }
       this.drawingLayer.setCurrentDrawingObject(null);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
     };
 
     this.drawingLayer.setCurrentDrawingObject(rectangle);
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
   }
 }
 

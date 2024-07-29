@@ -71,6 +71,28 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationLayer().should("not.have.class", "editing");
     aa.clickArrowToolbarButton();
 
+    cy.log("Pressing select button exits sparrow mode");
+    aa.getAnnotationLayer().should("have.class", "editing");
+    clueCanvas.getSelectTool().click();
+    aa.getAnnotationLayer().should("not.have.class", "editing");
+    aa.clickArrowToolbarButton();
+
+    cy.log("Double-clicking background exits sparrow mode");
+    aa.getAnnotationLayer().should("have.class", "editing");
+    aa.getAnnotationLayer().dblclick();
+    aa.getAnnotationLayer().should("not.have.class", "editing");
+    aa.clickArrowToolbarButton();
+
+    cy.log("ESC key exits sparrow mode");
+    aa.getAnnotationLayer().should("have.class", "editing");
+    aa.getAnnotationLayer().type("{esc}");
+    aa.getAnnotationLayer().should("not.have.class", "editing");
+    aa.clickArrowToolbarButton();
+    aa.getAnnotationLayer().should("have.class", "editing");
+    aa.getArrowToolbarButton().type("{esc}");
+    aa.getAnnotationLayer().should("not.have.class", "editing");
+    aa.clickArrowToolbarButton();
+
     cy.log("Can draw an arrow between two objects");
     aa.getAnnotationArrows().should("not.exist");
     aa.getAnnotationTextDisplays().should("not.exist");
@@ -176,9 +198,9 @@ context('Arrow Annotations (Sparrows)', function () {
     clueCanvas.addTile("drawing");
     drawToolTile.getDrawToolVector().eq(0).click();
     drawToolTile.getDrawTile().eq(1)
-      .trigger("mousedown", 150, 50)
-      .trigger("mousemove", 100, 150)
-      .trigger("mouseup", 100, 50);
+      .trigger("pointerdown", 150, 50)
+      .trigger("pointermove", 100, 150)
+      .trigger("pointerup", 100, 50);
     aa.clickArrowToolbarButton();
     aa.getAnnotationButtons().should("have.length", 4);
     aa.getAnnotationButtons().first().click({ force: true });

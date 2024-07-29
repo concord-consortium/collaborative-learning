@@ -35,7 +35,8 @@ function getColorClass (content: GeometryContentModelType | undefined) {
 }
 
 function ModeButton({name, title, targetMode, Icon, colorClass}:
-  { name: string, title: string, targetMode: GeometryTileMode, Icon: FunctionComponent<SVGProps<SVGSVGElement>>, colorClass?: string }) {
+  { name: string, title: string, targetMode: GeometryTileMode,
+    Icon: FunctionComponent<SVGProps<SVGSVGElement>>, colorClass?: string }) {
   const { board, content, mode, setMode } = useGeometryTileContext();
 
   function onClick() {

@@ -15,9 +15,10 @@ import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { getDocumentContentFromNode } from "../../utilities/mst-utils";
+import "../../utilities/dom-utils";
+
 import TileDragHandle from "../../assets/icons/drag-tile/move.svg";
 import TileResizeHandle from "../../assets/icons/resize-tile/expand-handle.svg";
-import "../../utilities/dom-utils";
 import dragPlaceholderImage from "../../assets/image_drag.png";
 
 import "./tile-component.scss";
@@ -86,12 +87,20 @@ interface IDragTileButtonProps {
   divRef: (instance: HTMLDivElement | null) => void;
   hovered: boolean;
   selected: boolean;
-  onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+  handleTileDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
+  triggerResizeHandler: () => void;
 }
-const DragTileButton = ({ divRef, hovered, selected, onClick }: IDragTileButtonProps) => {
+const DragTileButton = (
+    { divRef, hovered, selected, handleTileDragStart, triggerResizeHandler }: IDragTileButtonProps) => {
   const classes = classNames("tool-tile-drag-handle", { hovered, selected });
   return (
-    <div className={`tool-tile-drag-handle-wrapper`} ref={divRef} onClick={onClick}>
+    <div className={`tool-tile-drag-handle-wrapper`}
+      ref={divRef}
+      onDragStart={handleTileDragStart}
+      onDragEnd={triggerResizeHandler}
+      draggable={true}
+      aria-label="Drag to move tile"
+    >
       <TileDragHandle className={classes} />
     </div>
   );
@@ -108,7 +117,12 @@ const ResizeTileButton =
   ({ divRef, hovered, selected, onDragStart }: IResizeTileButtonProps) => {
   const classes = classNames("tool-tile-resize-handle", { hovered, selected });
   return (
-    <div className={`tool-tile-resize-handle-wrapper`} ref={divRef} onDragStart={onDragStart}>
+    <div className={`tool-tile-resize-handle-wrapper`}
+      ref={divRef}
+      draggable={true}
+      onDragStart={onDragStart}
+      aria-label="Drag to resize tile"
+    >
       <TileResizeHandle className={classes} />
     </div>
   );
@@ -197,9 +211,13 @@ export class TileComponent extends BaseComponent<IProps, IState> {
                       "selected-for-comment": tileSelectedForComment});
     const isDraggable = !isPlaceholderTile && !appConfig.disableTileDrags;
     const dragTileButton = isDraggable &&
-                            <DragTileButton divRef={elt => this.dragElement = elt}
-                              hovered={hoverTile} selected={isTileSelected}
-                              onClick={e => ui.setSelectedTile(model, {append: hasSelectionModifier(e)})} />;
+                            <DragTileButton
+                              divRef={elt => this.dragElement = elt}
+                              hovered={hoverTile}
+                              selected={isTileSelected}
+                              handleTileDragStart={this.handleTileDragStart}
+                              triggerResizeHandler={this.triggerResizeHandler}
+                              />;
     const resizeTileButton = isUserResizable &&
                               <ResizeTileButton divRef={elt => this.resizeElement = elt}
                                 hovered={hoverTile}
@@ -220,9 +238,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
             onMouseEnter={isDraggable ? e => this.setState({ hoverTile: true }) : undefined}
             onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
             onKeyDown={this.handleKeyDown}
-            onDragStart={this.handleTileDragStart}
-            onDragEnd={this.triggerResizeHandler}
-            draggable={true}
         >
           {this.renderLinkIndicators()}
           {dragTileButton}
@@ -354,21 +369,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
       return;
     }
 
-    // tile dragging can be disabled for individual tiles
-    const target: HTMLElement | null = e.target as HTMLElement;
-    if (!target || target.querySelector(".disable-tile-drag")) {
-      e.preventDefault();
-      return;
-    }
-    // tile dragging can be disabled for individual tile contents,
-    // which only allows those tiles to be dragged by their drag handle
-    if (target?.closest(".disable-tile-content-drag")) {
-      const eltTarget = document.elementFromPoint(e.clientX, e.clientY);
-      if (!eltTarget?.closest(".tool-tile-drag-handle")) {
-        e.preventDefault();
-        return;
-      }
-    }
     // set the drag data
     const { model, docId } = this.props;
 
