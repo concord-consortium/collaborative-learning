@@ -16,7 +16,7 @@ import { DocumentGroup } from "../../models/stores/document-group";
 
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 
-import "./sorted-section.scss";
+import "./sort-work-view.scss";
 
 interface IProps {
   docFilter: DocFilterType;

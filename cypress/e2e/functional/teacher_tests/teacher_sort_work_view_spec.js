@@ -61,7 +61,7 @@ describe('SortWorkView Tests', () => {
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().eq(1).click(); // Open the first document in the list
     resourcesPanel.getEditableDocumentContent().should('be.visible');
-    resourcesPanel.getDocumentCloseButton().click({ force: true });
+    resourcesPanel.getDocumentCloseButton().click();
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().should('be.visible'); // Verify the document is closed
   });
