@@ -21,6 +21,7 @@ import {
 } from "../../utilities/sort-document-utils";
 import { DocumentGroup } from "./document-group";
 import { getTileContentInfo } from "../tiles/tile-content-info";
+import { PrimarySortType } from "./ui-types";
 
 
 export type SortedDocumentsMap = Record<string, DocumentCollection[]>;
@@ -78,19 +79,36 @@ export class SortedDocuments {
     return this.stores.user;
   }
 
+  sortBy(sortType: PrimarySortType): DocumentGroup[] {
+    switch (sortType) {
+      case "Group":
+        return this.byGroup;
+      case "Name":
+        return this.byName;
+      case "Strategy":
+        return this.byStrategy;
+      case "Tools":
+        return this.byTools;
+      case "Bookmarked":
+        return this.byBookmarked;
+      default:
+        return [];
+    }
+  }
+
   // ** views ** //
   get byGroup(): DocumentGroup[] {
     const documentMap = createDocMapByGroups(this.filteredDocsByType, this.groupsStore.groupForUser);
     const sortedSectionLabels = sortGroupSectionLabels(Array.from(documentMap.keys()));
     return sortedSectionLabels.map(label => {
-      return new DocumentGroup({stores: this.stores, label, metaDataDocs: documentMap.get(label).documents });
+      return new DocumentGroup({stores: this.stores, label, metaDataDocs: documentMap.get(label) ?? [] });
     });
   }
   get byName(): DocumentGroup[] {
     const documentMap = createDocMapByNames(this.filteredDocsByType, this.class.getUserById);
     const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()));
     return sortedSectionLabels.map(label => {
-      return new DocumentGroup({ stores: this.stores, label, metaDataDocs: documentMap.get(label).documents });
+      return new DocumentGroup({ stores: this.stores, label, metaDataDocs: documentMap.get(label) ?? [] });
     });
   }
 
@@ -140,7 +158,7 @@ export class SortedDocuments {
                               .map(label => new DocumentGroup({
                                 stores: this.stores,
                                 label,
-                                metaDataDocs: documentMap.get(label).documents
+                                metaDataDocs: documentMap.get(label) ?? []
                               }));
   }
 

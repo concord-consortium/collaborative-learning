@@ -56,8 +56,8 @@ export const SortedSection: React.FC<IProps> = observer(function SortedDocuments
   };
 
   const renderDocumentItem = (doc: any) => {
-    if (docFilter === "Problem" && secondarySort === "byNone") {
-      const fullDocument = docFilter === "Problem" ? getDocument(doc.key) : undefined;
+    const fullDocument = docFilter === "Problem" ? getDocument(doc.key) : undefined;
+    if (docFilter === "Problem" && secondarySort === "None") {
       if (!fullDocument) return <div className="loading-spinner"/>;
 
       return <DecoratedDocumentThumbnailItem
@@ -79,8 +79,8 @@ export const SortedSection: React.FC<IProps> = observer(function SortedDocuments
   };
 
   const renderList = () => {
-    if (secondarySort !== "byNone") {
-      return documentGroup[secondarySort]?.map((group: DocumentCollection) => {
+    if (secondarySort !== "None") {
+      return documentGroup.sortBy(secondarySort)?.map((group: DocumentCollection) => {
         return (
           <div key={group.label} className="doc-group">
             <div className="doc-group-sub-group-label">{group.label}</div>

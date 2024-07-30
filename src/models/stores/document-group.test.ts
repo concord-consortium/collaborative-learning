@@ -202,14 +202,18 @@ describe('DocumentGroup Model', () => {
       expect(documentCollection[1].documents.length).toBe(1);
 
       const documentCollection2 = documentsByGroup[1].byBookmarked;
-      expect(documentCollection2.length).toBe(1);
+      expect(documentCollection2.length).toBe(2);
       expect(documentCollection2[0].label).toBe("Bookmarked");
       expect(documentCollection2[0].documents.length).toBe(1);
+      expect(documentCollection2[1].label).toBe("Not Bookmarked");
+      expect(documentCollection2[1].documents.length).toBe(0);
 
       const documentCollection3 = documentsByGroup[2].byBookmarked;
-      expect(documentCollection3.length).toBe(1);
-      expect(documentCollection3[0].label).toBe("Not Bookmarked");
-      expect(documentCollection3[0].documents.length).toBe(1);
+      expect(documentCollection3.length).toBe(2);
+      expect(documentCollection3[0].label).toBe("Bookmarked");
+      expect(documentCollection3[0].documents.length).toBe(0);
+      expect(documentCollection3[1].label).toBe("Not Bookmarked");
+      expect(documentCollection3[1].documents.length).toBe(1);
     });
   });
 
@@ -260,7 +264,6 @@ describe('DocumentGroup Model', () => {
     it('should return a document collection sorted by strategy with the correct documents per strategy', () => {
       const documentGroup = sortedDocuments.byName[0];
       const documentCollection = documentGroup.byStrategy;
-      console.log("documentCollection!!", documentCollection);
       expect(documentCollection.length).toBe(3); // 'Not Tagged' is added by default to the list of strategies
       expect(documentCollection[0].label).toBe("foo");
       expect(documentCollection[0].documents.length).toBe(1);

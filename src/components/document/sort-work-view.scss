@@ -78,6 +78,7 @@ $title-margin: 2px;
     .list {
       .doc-group {
         display: flex;
+        flex-wrap: wrap;
         width: 100%;
       }
     }

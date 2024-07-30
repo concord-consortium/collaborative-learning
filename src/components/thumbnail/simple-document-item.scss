@@ -5,6 +5,8 @@
   border: solid 1px #707070;
   border-radius: 1px;
   cursor: pointer;
+  display: flex;
+  flex-shrink: 0;
   height: 12px;
   margin: 2px 5px;
   width: 12px;

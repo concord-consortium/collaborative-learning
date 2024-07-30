@@ -40,14 +40,13 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     onClick: () => setPrimarySortBy(option)
   }));
 
-  const secondarySortOptions: ICustomDropdownItem[] = [];
-  secondarySortOptions.push({ text: "None", onClick: () => setSecondarySortBy("None") });
-  sortOptions.map((option) => secondarySortOptions.push({
+  const secondarySortOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
     disabled: option === primarySortBy,
     selected: option === secondarySortBy,
     text: option,
     onClick: () => setSecondarySortBy(option)
   }));
+  secondarySortOptions.unshift({ text: "None", onClick: () => setSecondarySortBy("None") });
 
   const docFilterOptions: ICustomDropdownItem[] = filterOptions.map((option) => ({
     selected: option === docFilter,
@@ -55,12 +54,10 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     onClick: () => handleDocFilterSelection(option)
   }));
 
-  const primarySearchTerm = primarySortBy === sortTagPrompt ? "byStrategy" : `by${primarySortBy}` as PrimarySortType;
-  const secondarySearchTerm = secondarySortBy === sortTagPrompt
-                                ? "byStrategy"
-                                : `by${secondarySortBy}` as SecondarySortType;
-  const sortedDocumentGroups = sortedDocuments[primarySearchTerm];
-
+  const sortedDocumentGroups = sortedDocuments.sortBy(
+    primarySortBy === sortTagPrompt ? "Strategy" : primarySortBy as PrimarySortType
+  );
+  const secondarySearchTerm = secondarySortBy === sortTagPrompt ? "Strategy" : secondarySortBy as SecondarySortType;
   const tabState = persistentUI.tabs.get(ENavTab.kSortWork);
   const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
   const showSortWorkDocumentArea = !!openDocumentKey;

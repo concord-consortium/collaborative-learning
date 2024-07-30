@@ -14,6 +14,7 @@ import {
 } from "../../utilities/sort-document-utils";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { getTileComponentInfo } from "../tiles/tile-component-info";
+import { SecondarySortType } from "./ui-types";
 
 import SparrowHeaderIcon from "../../assets/icons/sort-by-tools/sparrow-id.svg";
 
@@ -40,26 +41,44 @@ export class DocumentGroup {
     this.icon = icon;
   }
 
-  get byGroup(): DocumentCollection[] {
-    const documentMap = createDocMapByGroups(this.metaDataDocs, this.stores.groups.groupForUser);
-    const sortedSectionLabels = sortGroupSectionLabels(Array.from(documentMap.keys()));
+  buildDocumentCollection(
+    sortedSectionLabels: string[], docMap: Map<any, any>
+  ): DocumentCollection[] {
     return sortedSectionLabels.map(label => {
       return {
         label,
-        documents: documentMap.get(label)!.documents
+        documents: docMap.get(label) ?? []
       };
     });
+  }
+
+  sortBy(sortType: SecondarySortType): DocumentCollection[] {
+    switch (sortType) {
+      case "Group":
+        return this.byGroup;
+      case "Name":
+        return this.byName;
+      case "Strategy":
+        return this.byStrategy;
+      case "Tools":
+        return this.byTools;
+      case "Bookmarked":
+        return this.byBookmarked;
+      default:
+        return [];
+    }
+  }
+
+  get byGroup(): DocumentCollection[] {
+    const documentMap = createDocMapByGroups(this.metaDataDocs, this.stores.groups.groupForUser);
+    const sortedSectionLabels = sortGroupSectionLabels(Array.from(documentMap.keys()));
+    return this.buildDocumentCollection(sortedSectionLabels, documentMap);
   }
 
   get byName(): DocumentCollection[] {
     const documentMap = createDocMapByNames(this.metaDataDocs, this.stores.class.getUserById);
     const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()));
-    return sortedSectionLabels.map((label) =>{
-      return {
-        label,
-        documents: documentMap.get(label).documents
-      };
-    });
+    return this.buildDocumentCollection(sortedSectionLabels, documentMap);
   }
 
   get byStrategy(): DocumentCollection[] {
@@ -113,10 +132,6 @@ export class DocumentGroup {
   get byBookmarked(): DocumentCollection[] {
     const documentMap = createDocMapByBookmarks(this.metaDataDocs, this.stores.bookmarks);
     const sortedSectionLabels = ["Bookmarked", "Not Bookmarked"];
-    return sortedSectionLabels.filter(label => documentMap.has(label))
-      .map(label => ({
-        label,
-        documents: documentMap.get(label).documents
-      }));
-    }
+    return this.buildDocumentCollection(sortedSectionLabels, documentMap);
+  }
 }

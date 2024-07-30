@@ -18,19 +18,16 @@ type TagWithDocs = {
 };
 
 export const createDocMapByGroups = (documents: IDocumentMetadata[], groupForUser: (userId: string) => any) => {
-  const documentMap = new Map();
+  const documentMap: Map<string, IDocumentMetadata[]> = new Map();
   documents.forEach((doc) => {
     const userId = doc.uid;
     const group = groupForUser(userId);
     const sectionLabel = group ? `Group ${group.id}` : "No Group";
 
     if (!documentMap.has(sectionLabel)) {
-      documentMap.set(sectionLabel, {
-        sectionLabel,
-        documents: []
-      });
+      documentMap.set(sectionLabel, []);
     }
-    documentMap.get(sectionLabel).documents.push(doc);
+    documentMap.get(sectionLabel)?.push(doc);
   });
   return documentMap;
 };
@@ -44,17 +41,14 @@ export const sortGroupSectionLabels = (docMapKeys: string[]) => {
 };
 
 export const createDocMapByNames = (documents: IDocumentMetadata[], getUserById: (uid: string) => any) => {
-  const documentMap = new Map();
+  const documentMap: Map<string, IDocumentMetadata[]> = new Map();
   documents.forEach((doc) => {
     const user = getUserById(doc.uid);
     const sectionLabel = user && `${user.lastName}, ${user.firstName}`;
     if (!documentMap.has(sectionLabel)) {
-      documentMap.set(sectionLabel, {
-        sectionLabel,
-        documents: []
-      });
+      documentMap.set(sectionLabel, []);
     }
-    documentMap.get(sectionLabel).documents.push(doc);
+    documentMap.get(sectionLabel)?.push(doc);
   });
   return documentMap;
 };
@@ -171,16 +165,13 @@ export const createTileTypeToDocumentsMap = (documents: IDocumentMetadata[]) => 
 };
 
 export const createDocMapByBookmarks = (documents: IDocumentMetadata[], bookmarks: Bookmarks) => {
-  const documentMap = new Map();
+  const documentMap: Map<string, IDocumentMetadata[]> = new Map();
   documents.forEach((doc) => {
     const sectionLabel = bookmarks.isDocumentBookmarked(doc.key) ? "Bookmarked" : "Not Bookmarked";
     if (!documentMap.has(sectionLabel)) {
-      documentMap.set(sectionLabel, {
-        sectionLabel,
-        documents: []
-      });
+      documentMap.set(sectionLabel, []);
     }
-    documentMap.get(sectionLabel).documents.push(doc);
+    documentMap.get(sectionLabel)?.push(doc);
   });
   return documentMap;
 };
