@@ -305,13 +305,17 @@ export const AnnotationLayer = observer(function AnnotationLayer({
         createAnnotation();
         clearSource();
 
+      } else if (sourcePoint) {
+        // Source location is already selected; clear it.
+        setSourcePoint(undefined);
+
       } else {
-        // Either no source is selected, or the source is another X,Y point.
-        // In either case, store this as the source location, overriding any previous one.
+        // No source is selected. Store this as the source location.
         setSourcePoint([mouseX ?? 0, mouseY ?? 0]);
       }
     }
 
+    // Clear any selected annotations.
     content?.selectAnnotations([]);
   };
 

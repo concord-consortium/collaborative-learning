@@ -131,45 +131,71 @@ export const ArrowAnnotation = types
     const [sDxOffset, sDyOffset] = self.sourceOffset ? [self.sourceOffset.dx, self.sourceOffset.dy] : [0, 0];
     const [tDxOffset, tDyOffset] = self.targetOffset ? [self.targetOffset.dx, self.targetOffset.dy] : [0, 0];
 
-    let sourceX, sourceY;
+    let sourceX, sourceY, preDragSourceX, preDragSourceY;
     if (sourceBB && sBBcenter) {
       // Relative to source object
       sourceX = sBBcenter[0] + boundDelta(sDxOffset + sourceDragOffsetX, sourceBB.width);
       sourceY = sBBcenter[1] + boundDelta(sDyOffset + sourceDragOffsetY, sourceBB.height);
+      preDragSourceX = sBBcenter[0] + boundDelta(sDxOffset, sourceBB.width);
+      preDragSourceY = sBBcenter[1] + boundDelta(sDyOffset, sourceBB.height);
     } else if (tBBcenter) {
       // No source object, so interpret source offsets relative to target object.
       sourceX = tBBcenter[0] + sDxOffset + sourceDragOffsetX;
       sourceY = tBBcenter[1] + sDyOffset + sourceDragOffsetY;
+      preDragSourceX = tBBcenter[0] + sDxOffset;
+      preDragSourceY = tBBcenter[1] + sDyOffset;
     }
 
-    let targetX, targetY;
+    let targetX, targetY, preDragTargetX, preDragTargetY;
     if (targetBB && tBBcenter) {
       targetX = tBBcenter[0] + boundDelta(tDxOffset + targetDragOffsetX, targetBB.width);
       targetY = tBBcenter[1] + boundDelta(tDyOffset + targetDragOffsetY, targetBB.height);
+      preDragTargetX = tBBcenter[0] + boundDelta(tDxOffset, targetBB.width);
+      preDragTargetY = tBBcenter[1] + boundDelta(tDyOffset, targetBB.height);
     } else if (sBBcenter) {
       // No target object, so interpret target offsets relative to source object.
       targetX = sBBcenter[0] + tDxOffset + targetDragOffsetX;
       targetY = sBBcenter[1] + tDyOffset + targetDragOffsetY;
+      preDragTargetX = sBBcenter[0] + tDxOffset;
+      preDragTargetY = sBBcenter[1] + tDyOffset;
     }
-    if (sourceX === undefined || sourceY === undefined || targetX === undefined || targetY === undefined) {
+    if (sourceX === undefined || sourceY === undefined || targetX === undefined || targetY === undefined
+        || preDragSourceX === undefined || preDragSourceY === undefined || preDragTargetX === undefined
+        || preDragTargetY === undefined) {
       return defaultObj;
     }
 
     // Set up text location
     const [textDxOffset, textDyOffset] = self.textOffset ? [self.textOffset.dx, self.textOffset.dy] : [0, 0];
-    const dx = targetX - sourceX;
-    const dy = targetY - sourceY;
-    const textOriginX = targetX - dx / 2;
-    const textOriginY = targetY - dy / 2;
-    // Bound the text offset to the document
+    const textOriginX = (sourceX + targetX) / 2;
+    const textOriginY = (sourceY + targetY) / 2;
+
+    let textCenterX, textCenterY;
+    if (textDragOffsetX || textDragOffsetY) {
+      // If text is being dragged, we just apply the drag offsets.
+      textCenterX = textOriginX + textDxOffset + textDragOffsetX;
+      textCenterY = textOriginY + textDyOffset + textDragOffsetY;
+
+    } else {
+      // If source or target is dragged, text should be dragged with it by a proportional amount.
+      // Calculate the ratio by which the offsets should be adjusted to maintain the same relative position.
+      const xRatio = (targetX - sourceX) / (preDragTargetX - preDragSourceX);
+      const yRatio = (targetY - sourceY) / (preDragTargetY - preDragSourceY);
+      console.log('ratios:', xRatio, yRatio);
+      textCenterX = textOriginX + textDxOffset * xRatio;
+      textCenterY = textOriginY + textDyOffset * yRatio;
+    }
+
+    // Finally, it is constrained to be within the document bounding box
     const textMinXOffset = documentLeft + kTextHorizontalMargin - textOriginX;
     const textMaxXOffset = documentRight - kTextHorizontalMargin - textOriginX;
     const textMinYOffset = documentTop + kTextVerticalMargin - textOriginY;
     const textMaxYOffset = documentBottom - kTextVerticalMargin - textOriginY;
-    let textCenterX = textOriginX
-      + Math.max(textMinXOffset, Math.min(textMaxXOffset, textDxOffset + textDragOffsetX));
-    let textCenterY = textOriginY
-      + Math.max(textMinYOffset, Math.min(textMaxYOffset, textDyOffset + textDragOffsetY));
+
+    textCenterX = Math.max(documentLeft + kTextHorizontalMargin,
+      Math.min(documentRight - kTextHorizontalMargin, textCenterX));
+    textCenterY = Math.max(documentTop + kTextVerticalMargin,
+      Math.min(documentBottom - kTextVerticalMargin, textCenterY));
 
     // If this is a straight arrow, text is constrained to be on the line.
     if (self.shape === ArrowShape.straight) {
