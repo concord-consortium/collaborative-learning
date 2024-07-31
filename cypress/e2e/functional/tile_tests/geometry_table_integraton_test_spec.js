@@ -3,8 +3,10 @@ import Canvas from '../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
+import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
 
 let resourcesPanel = new ResourcesPanel;
+let xyTile = new XYPlotToolTile;
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const geometryToolTile = new GeometryToolTile;
@@ -96,7 +98,31 @@ context('Geometry Table Integration', function () {
     cy.log('verify point no longer has p1 in table and geometry');
     geometryToolTile.getGraphPointLabel().contains('A').should('not.exist');
 
+    // clear the canvas
     clueCanvas.deleteTile('geometry');
+    clueCanvas.deleteTile('geometry');
+    clueCanvas.deleteTile('table');
+
+    cy.log('creates polygons from table data');
+    clueCanvas.addTile('table');
+
+    // Add points to the table
+    tableToolTile.typeInTableCellXY(0, 0, '5');
+    tableToolTile.typeInTableCellXY(0, 1, '5');
+    tableToolTile.typeInTableCellXY(1, 0, '10');
+    tableToolTile.typeInTableCellXY(1, 1, '5');
+    tableToolTile.typeInTableCellXY(2, 0, '9');
+    tableToolTile.typeInTableCellXY(2, 1, '9');
+
+    // Click the "Graph IT!" button to create the polygon
+    clueCanvas.clickToolbarButton('table', 'link-graph');
+    tableToolTile.getLinkGraphModalTileMenu().select('New Graph');
+    tableToolTile.getLinkGraphModalLinkButton().should("contain", "Graph It!").click();
+
+    // Verify that points are added to the graph
+    xyTile.getTile().should('be.visible');
+    xyTile.getXYPlotTitle().should('contain', 'Graph 1');
+    xyTile.getGraphDot().should('have.length', 3);
   });
 
   it.skip('test creating a polygon', function () {
