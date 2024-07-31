@@ -1,5 +1,13 @@
 import { useCallback, useRef } from "react";
 
+/**
+ * This returns an onClick event that differentiates between a click and a touch hold.
+ * One of the two handlers will be called depending on the duration of the touch.
+ * @param onTouchHold handler for long-presses
+ * @param onClick handler for short presses
+ * @param holdTime milliseconds required before a touch is considered a hold
+ * @returns onClick handler to attach to your button
+ */
 export const useTouchHold = (onTouchHold: () => void, onClick: (e:React.MouseEvent) => void, holdTime = 500) => {
   const holdTimer = useRef<number>();
   const didTouchHold = useRef(false);
