@@ -25,6 +25,23 @@ interface IDocumentGroup {
   stores: ISortedDocumentsStores;
 }
 
+/*
+ * DocumentGroup
+ *
+ * Represents a collection of related metadata documents, allowing for various
+ * sorting options to organize these documents based on different criteria.
+ *
+ * Provides methods to sort and group documents by:
+ * - Groups
+ * - Names
+ * - Strategies
+ * - Tools
+ * - Bookmarks
+ *
+ * Its main purpose is to provide sub sorting options for documents that are already
+ * sorted by a primary sort filter.
+ *
+ */
 export class DocumentGroup {
   stores: ISortedDocumentsStores;
   label: string;

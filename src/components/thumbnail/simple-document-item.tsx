@@ -16,6 +16,9 @@ export const SimpleDocumentItem = ({ document, investigationOrdinal, onSelectDoc
   const { uid } = document;
   const userName = classStore.getUserById(uid)?.displayName;
   const investigations = unit.investigations;
+  // TODO: Make it so we don't have to convert investigationOrdinal and problemOrdinal to numbers here? We do so
+  // because the values originate as strings. Changing their types to numbers in the model would make this unnecessary,
+  // but doing that causes errors elsewhere when trying to load documents that aren't associated with a problem.
   const investigation = investigations[Number(investigationOrdinal)];
   const problem = investigation?.problems[Number(problemOrdinal) - 1];
   const title = document.title ? `${userName}: ${document.title}` : `${userName}: ${problem?.title ?? "unknown title"}`;

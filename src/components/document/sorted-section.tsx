@@ -29,6 +29,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedDocuments
   const { docFilter, documentGroup, idx, secondarySort } = props;
   const { persistentUI, sortedDocuments } = useStores();
   const [showDocuments, setShowDocuments] = useState(false);
+  const documentCount = documentGroup.metaDataDocs?.length || 0;
 
   const getDocument = (docKey: string) => {
     const document = sortedDocuments.documents.all.find((doc: DocumentModelType) => doc.key === docKey);
@@ -39,11 +40,6 @@ export const SortedSection: React.FC<IProps> = observer(function SortedDocuments
     sortedDocuments.fetchFullDocument(docKey);
 
     return undefined;
-  };
-
-  const documentCount = () => {
-    const downloadedDocs = documentGroup.metaDataDocs?.filter((doc: IDocumentMetadata) => getDocument(doc.key)) ?? [];
-    return downloadedDocs.length;
   };
 
   const handleSelectDocument = async (document: DocumentModelType | IDocumentMetadata) => {
@@ -119,7 +115,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedDocuments
           {documentGroup.icon ? <documentGroup.icon/>: null} {documentGroup.label}
         </div>
         <div className="section-header-right">
-          <div>Total workspaces: {documentCount()}</div>
+          <div>Total workspaces: {documentCount}</div>
           <ArrowIcon
             className={classNames("section-header-arrow", {up: showDocuments})}
             onClick={handleToggleShowDocuments}
