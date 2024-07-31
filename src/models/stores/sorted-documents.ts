@@ -15,7 +15,6 @@ import {
   createDocMapByNames,
   createTileTypeToDocumentsMap,
   getTagsWithDocs,
-  DocumentCollection,
   sortGroupSectionLabels,
   sortNameSectionLabels
 } from "../../utilities/sort-document-utils";
@@ -23,8 +22,7 @@ import { DocumentGroup } from "./document-group";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { PrimarySortType } from "./ui-types";
 
-
-export type SortedDocumentsMap = Record<string, DocumentCollection[]>;
+export type SortedDocumentsMap = Record<string, DocumentGroup[]>;
 
 export type TagWithDocs = {
   tagKey: string;
@@ -101,14 +99,14 @@ export class SortedDocuments {
     const documentMap = createDocMapByGroups(this.filteredDocsByType, this.groupsStore.groupForUser);
     const sortedSectionLabels = sortGroupSectionLabels(Array.from(documentMap.keys()));
     return sortedSectionLabels.map(label => {
-      return new DocumentGroup({stores: this.stores, label, metaDataDocs: documentMap.get(label) ?? [] });
+      return new DocumentGroup({stores: this.stores, label, documents: documentMap.get(label) ?? [] });
     });
   }
   get byName(): DocumentGroup[] {
     const documentMap = createDocMapByNames(this.filteredDocsByType, this.class.getUserById);
     const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()));
     return sortedSectionLabels.map(label => {
-      return new DocumentGroup({ stores: this.stores, label, metaDataDocs: documentMap.get(label) ?? [] });
+      return new DocumentGroup({ stores: this.stores, label, documents: documentMap.get(label) ?? [] });
     });
   }
 
@@ -122,7 +120,7 @@ export class SortedDocuments {
       const label = tagWithDocs.tagValue;
       const docKeys = tagWithDocs.docKeysFoundWithTag;
       const documents = this.firestoreMetadataDocs.filter((doc: IDocumentMetadata) => docKeys.includes(doc.key));
-      sortedDocsArr.push(new DocumentGroup({ stores: this.stores, label, metaDataDocs: documents }));
+      sortedDocsArr.push(new DocumentGroup({ stores: this.stores, label, documents }));
     });
     return sortedDocsArr;
   }
@@ -136,7 +134,7 @@ export class SortedDocuments {
       const label = contentInfo?.displayName || tileType;
       const documents = tileTypeToDocumentsMap.get(tileType)?.documents ?? [];
       const icon = tileTypeToDocumentsMap.get(tileType)?.icon;
-      const section = new DocumentGroup({ stores: this.stores, label, metaDataDocs: documents, icon });
+      const section = new DocumentGroup({ stores: this.stores, label, documents, icon });
       return section;
     });
 
@@ -158,7 +156,7 @@ export class SortedDocuments {
                               .map(label => new DocumentGroup({
                                 stores: this.stores,
                                 label,
-                                metaDataDocs: documentMap.get(label) ?? []
+                                documents: documentMap.get(label) ?? []
                               }));
   }
 

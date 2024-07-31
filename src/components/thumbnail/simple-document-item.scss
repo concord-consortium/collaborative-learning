@@ -6,8 +6,16 @@
   border-radius: 1px;
   cursor: pointer;
   display: flex;
+  flex-grow: 0;
   flex-shrink: 0;
-  height: 12px;
-  margin: 2px 5px;
-  width: 12px;
+  height: 16px;
+  margin: 0;
+  width: 16px;
+
+  &:hover {
+    background: $classwork-purple-light-4;
+  }
+  &:active {
+    background: $classwork-purple-light-2;
+  }
 }
