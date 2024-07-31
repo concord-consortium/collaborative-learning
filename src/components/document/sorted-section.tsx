@@ -2,21 +2,22 @@ import React, { useState } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 
-import { DocumentModelType, getDocumentContext } from "../../models/document/document";
-import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
+import { DocumentModelType } from "../../models/document/document";
 import { useStores } from "../../hooks/use-stores";
-import { logDocumentViewEvent } from "../../models/document/log-document-event";
-import { ENavTab } from "../../models/view/nav-tabs";
 import { DocFilterType, SecondarySortType } from "../../models/stores/ui-types";
-import { SimpleDocumentItem } from "../thumbnail/simple-document-item";
 import { IDocumentMetadata } from "../../../functions/src/shared";
-import { DocumentContextReact } from "./document-context";
-import { DocumentCollection } from "../../utilities/sort-document-utils";
 import { DocumentGroup } from "../../models/stores/document-group";
+import { DocumentGroupComponent } from "./document-group";
+import { logDocumentViewEvent } from "../../models/document/log-document-event";
+import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
+import { ENavTab } from "../../models/view/nav-tabs";
 
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 
+// TODO: Figure out how to totally move sorted-section-specific styles out of sort-work-view.scss without
+// breaking the layout. The focus document header and close button are being affected.
 import "./sort-work-view.scss";
+import "./sorted-section.scss";
 
 interface IProps {
   docFilter: DocFilterType;
@@ -29,7 +30,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedDocuments
   const { docFilter, documentGroup, idx, secondarySort } = props;
   const { persistentUI, sortedDocuments } = useStores();
   const [showDocuments, setShowDocuments] = useState(false);
-  const documentCount = documentGroup.metaDataDocs?.length || 0;
+  const documentCount = documentGroup.documents?.length || 0;
 
   const getDocument = (docKey: string) => {
     const document = sortedDocuments.documents.all.find((doc: DocumentModelType) => doc.key === docKey);
@@ -51,68 +52,48 @@ export const SortedSection: React.FC<IProps> = observer(function SortedDocuments
     setShowDocuments(!showDocuments);
   };
 
-  const renderDocumentItem = (doc: any) => {
-    const fullDocument = docFilter === "Problem" ? getDocument(doc.key) : undefined;
-    if (docFilter === "Problem" && secondarySort === "None") {
-      if (!fullDocument) return <div className="loading-spinner"/>;
+  const renderUngroupedDocument = (doc: IDocumentMetadata) => {
+    const fullDocument = getDocument(doc.key);
+    if (!fullDocument) return <div className="loading-spinner"/>;
 
-      return <DecoratedDocumentThumbnailItem
-          scale={0.1}
-          document={fullDocument}
-          tab={ENavTab.kSortWork}
-          shouldHandleStarClick={true}
-          allowDelete={false}
-          onSelectDocument={handleSelectDocument}
-        />;
-    } else {
-      return <SimpleDocumentItem
-              document={doc}
-              investigationOrdinal={doc.investigation}
-              problemOrdinal={doc.problem}
-              onSelectDocument={handleSelectDocument}
-            />;
-    }
+    return <DecoratedDocumentThumbnailItem
+             key={doc.key}
+             scale={0.1}
+             document={fullDocument}
+             tab={ENavTab.kSortWork}
+             shouldHandleStarClick
+             allowDelete={false}
+             onSelectDocument={handleSelectDocument}
+           />;
   };
 
   const renderList = () => {
-    if (secondarySort !== "None") {
-      return documentGroup.sortBy(secondarySort)?.map((group: DocumentCollection) => {
-        return (
-          <div key={group.label} className="doc-group">
-            <div className="doc-group-sub-group-label">{group.label}</div>
-            {group.documents?.map((doc: any) => {
-              const documentContext = getDocumentContext(doc);
-              return (
-                <DocumentContextReact.Provider key={doc.key} value={documentContext}>
-                  {renderDocumentItem(doc)}
-                </DocumentContextReact.Provider>
-              );
-            })}
-          </div>
-        );
-      });
-    } else {
-      return (
-        <div className="doc-group">
-          {documentGroup.metaDataDocs?.map((doc: any) => {
-            const documentContext = getDocumentContext(doc);
-            return (
-              <DocumentContextReact.Provider key={doc.key} value={documentContext}>
-                {renderDocumentItem(doc)}
-              </DocumentContextReact.Provider>
-            );
-          })}
-        </div>
-      );
+    if (docFilter === "Problem" && secondarySort === "None") {
+      return documentGroup.documents.map(renderUngroupedDocument);
     }
+
+    const renderDocumentGroup = (group: DocumentGroup) => (
+      <DocumentGroupComponent
+        key={group.label}
+        documentGroup={group}
+        secondarySort={secondarySort}
+        onSelectDocument={handleSelectDocument}
+      />
+    );
+
+    return secondarySort === "None"
+      ? renderDocumentGroup(documentGroup)
+      : documentGroup.sortBy(secondarySort).map(renderDocumentGroup);
   };
 
+  const sectionClasses = classNames("sorted-sections", {"show-documents": showDocuments});
+
   return (
-    <div className="sorted-sections" key={`documentGroup-${idx}`}>
+    <div className={sectionClasses} key={`documentGroup-${idx}`}>
       <div className="section-header">
         <div className="section-header-label">
         <div className="section-header-left">
-          {documentGroup.icon ? <documentGroup.icon/>: null} {documentGroup.label}
+          {documentGroup.icon && <documentGroup.icon/>} {documentGroup.label}
         </div>
         <div className="section-header-right">
           <div>Total workspaces: {documentCount}</div>
@@ -123,7 +104,12 @@ export const SortedSection: React.FC<IProps> = observer(function SortedDocuments
         </div>
         </div>
       </div>
-      <div className="list">
+      {secondarySort !== "None" &&
+        <div className="section-sub-header" data-testid="section-sub-header">
+          {secondarySort}
+        </div>
+      }
+      <div className="list" data-testid="section-document-list">
         {showDocuments && renderList()}
       </div>
     </div>

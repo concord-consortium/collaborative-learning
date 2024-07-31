@@ -23,6 +23,24 @@ class SortedWork {
   getSecondarySortByMenu() {
     return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu');
   }
+  getSecondarySortByNoneOption() {
+    return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-none"]');
+  }
+  getSecondarySortByNameOption() {
+    return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-name"]');
+  }
+  getSecondarySortByGroupOption() {
+    return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-group"]');
+  }
+  getSecondarySortByTagOption(){
+    return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-identify-design approach"]');
+  }
+  getSecondarySortByBookmarkedOption(){
+    return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-bookmarked"]');
+  }
+  getSecondarySortByToolsOption(){
+    return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-tools"]');
+  }
   getShowForMenu() {
     return cy.get("[data-test=filter-work-menu]");
   }
