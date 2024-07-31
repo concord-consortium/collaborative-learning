@@ -7,10 +7,13 @@ import { DEBUG_DOC_LIST } from "../../lib/debug";
 import { SortWorkDocumentArea } from "./sort-work-document-area";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { DocListDebug } from "./doc-list-debug";
-import { DocFilterType } from "../../models/stores/ui-types";
-import { SortedDocuments } from "./sorted-documents";
+import { DocFilterType, PrimarySortType, SecondarySortType } from "../../models/stores/ui-types";
+import { SortedSection } from "./sorted-section";
+import { DocumentGroup } from "../../models/stores/document-group";
+
 
 import "../thumbnail/document-type-collection.scss";
+
 /**
  * Resources pane view of class work and exemplars.
  * Various options for sorting the display are available - by user, by group, by tools used, etc.
@@ -22,21 +25,28 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const sortTagPrompt = tagPrompt || ""; //first dropdown choice for comment tags
   const sortOptions = ["Group", "Name", sortTagPrompt, "Bookmarked", "Tools"];
   const filterOptions: DocFilterType[] = ["Problem", "Investigation", "Unit", "All"];
-  const [sortBy, setSortBy] = useState("Group");
+  const [primarySortBy, setPrimarySortBy] = useState("Group");
+  const [secondarySortBy, setSecondarySortBy] = useState("None");
   const docFilter = persistentUIDocFilter;
 
   const handleDocFilterSelection = (filter: DocFilterType) => {
     persistentUI.setDocFilter(filter);
   };
 
-  useEffect(()=>{
-    sortedDocuments.updateMetaDataDocs(docFilter, unit.code, investigation.ordinal, problem.ordinal);
-  }, [docFilter, unit.code, investigation.ordinal, problem.ordinal, sortedDocuments]);
-
-  const sortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
+  const primarySortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
+    disabled: false,
+    selected: option === primarySortBy,
     text: option,
-    onClick: () => setSortBy(option)
+    onClick: () => setPrimarySortBy(option)
   }));
+
+  const secondarySortOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
+    disabled: option === primarySortBy,
+    selected: option === secondarySortBy,
+    text: option,
+    onClick: () => setSecondarySortBy(option)
+  }));
+  secondarySortOptions.unshift({ text: "None", onClick: () => setSecondarySortBy("None") });
 
   const docFilterOptions: ICustomDropdownItem[] = filterOptions.map((option) => ({
     selected: option === docFilter,
@@ -44,28 +54,23 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     onClick: () => handleDocFilterSelection(option)
   }));
 
-  let renderedSortedDocuments;
-  switch (sortBy) {
-    case "Group":
-      renderedSortedDocuments = sortedDocuments.sortByGroup;
-      break;
-    case "Name":
-      renderedSortedDocuments = sortedDocuments.sortByName;
-      break;
-    case sortTagPrompt: //Sort by Strategy
-      renderedSortedDocuments = sortedDocuments.sortByStrategy;
-      break;
-    case "Bookmarked":
-      renderedSortedDocuments = sortedDocuments.sortByBookmarks;
-      break;
-    case "Tools":
-      renderedSortedDocuments = sortedDocuments.sortByTools;
-      break;
-  }
-
+  const sortedDocumentGroups = sortedDocuments.sortBy(
+    primarySortBy === sortTagPrompt ? "Strategy" : primarySortBy as PrimarySortType
+  );
+  const secondarySearchTerm = secondarySortBy === sortTagPrompt ? "Strategy" : secondarySortBy as SecondarySortType;
   const tabState = persistentUI.tabs.get(ENavTab.kSortWork);
   const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
   const showSortWorkDocumentArea = !!openDocumentKey;
+
+  useEffect(()=>{
+    sortedDocuments.updateMetaDataDocs(docFilter, unit.code, investigation.ordinal, problem.ordinal);
+  }, [docFilter, unit.code, investigation.ordinal, problem.ordinal, sortedDocuments]);
+
+  useEffect(() => {
+    if (primarySortBy === secondarySortBy) {
+      setSecondarySortBy("None");
+    }
+  }, [primarySortBy, secondarySortBy]);
 
   return (
     <div key="sort-work-view" className="sort-work-view">
@@ -76,18 +81,21 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
           <SortWorkHeader
             docFilter={docFilter}
             docFilterItems={docFilterOptions}
-            primarySort={sortBy}
-            primarySortItems={sortByOptions}
+            primarySort={primarySortBy}
+            primarySortItems={primarySortByOptions}
+            secondarySort={secondarySortBy}
+            secondarySortItems={secondarySortOptions}
           />
-          <div key={sortBy} className="tab-panel-documents-section">
-            { renderedSortedDocuments &&
-              renderedSortedDocuments.map((sortedSection, idx) => {
+          <div key={primarySortBy} className="tab-panel-documents-section">
+            { sortedDocumentGroups &&
+              sortedDocumentGroups.map((documentGroup: DocumentGroup, idx: number) => {
                 return (
-                  <SortedDocuments
-                    key={`sortedDocuments-${idx}`}
+                  <SortedSection
+                    key={`sortedDocuments-${documentGroup.label}`}
                     docFilter={docFilter}
+                    documentGroup={documentGroup}
                     idx={idx}
-                    sortedSection={sortedSection}
+                    secondarySort={secondarySearchTerm}
                   />
                 );
               })

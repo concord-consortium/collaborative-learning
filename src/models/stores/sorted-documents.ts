@@ -7,20 +7,26 @@ import { DB } from "../../lib/db";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
 import { UserModelType } from "./user";
-import { getTileContentInfo } from "../tiles/tile-content-info";
-import { getTileComponentInfo } from "../tiles/tile-component-info";
 import { IDocumentMetadata } from "../../../functions/src/shared";
 import { typeConverter } from "../../utilities/db-utils";
+import {
+  createDocMapByBookmarks,
+  createDocMapByGroups,
+  createDocMapByNames,
+  createTileTypeToDocumentsMap,
+  getTagsWithDocs,
+  DocumentCollection,
+  sortGroupSectionLabels,
+  sortNameSectionLabels
+} from "../../utilities/sort-document-utils";
+import { DocumentGroup } from "./document-group";
+import { getTileContentInfo } from "../tiles/tile-content-info";
+import { PrimarySortType } from "./ui-types";
 
-import SparrowHeaderIcon from "../../assets/icons/sort-by-tools/sparrow-id.svg";
 
-export type SortedDocument = {
-  sectionLabel: string;
-  documents: IDocumentMetadata[];
-  icon?: React.FC<React.SVGProps<SVGSVGElement>>; //exists only in the "sort by tools" case
-}
+export type SortedDocumentsMap = Record<string, DocumentCollection[]>;
 
-type TagWithDocs = {
+export type TagWithDocs = {
   tagKey: string;
   tagValue: string;
   docKeysFoundWithTag: string[];
@@ -46,158 +52,114 @@ export class SortedDocuments {
     this.stores = stores;
   }
 
-  //********************************************* Views *******************************************
-  get documents(): DocumentsModelType {
-    return this.stores.documents;
-  }
-  get groups(): GroupsModelType {
-    return this.stores.groups;
+  get bookmarksStore() {
+    return this.stores.bookmarks;
   }
   get class(): ClassModelType {
     return this.stores.class;
   }
-  get db(): DB {
-    return this.stores.db;
-  }
   get commentTags(): Record<string, string> | undefined {
     return this.stores.appConfig.commentTags;
   }
-  get bookmarks() {
-    return this.stores.bookmarks;
+  get db(): DB {
+    return this.stores.db;
   }
-  get user() {
-    return this.stores.user;
+  get documents(): DocumentsModelType {
+    return this.stores.documents;
   }
   get filteredDocsByType(): IDocumentMetadata[] {
     return this.firestoreMetadataDocs.filter((doc: IDocumentMetadata) => {
       return isSortableType(doc.type);
     });
   }
-
-  //******************************************* Sort By Group *************************************
-  get sortByGroup(): SortedDocument[]{
-    const documentMap = new Map();
-    this.filteredDocsByType.forEach((doc) => {
-      const userId = doc.uid;
-      const group = this.groups.groupForUser(userId);
-      const sectionLabel =  group ? `Group ${group.id}` : "No Group";
-      if (!documentMap.has(sectionLabel)) {
-        documentMap.set(sectionLabel, {
-          sectionLabel,
-          documents: []
-        });
-      }
-      documentMap.get(sectionLabel).documents.push(doc);
-    });
-    //sort from least to greatest
-    const sortedSectionLabels = Array.from(documentMap.keys()).sort((a, b) => {
-      const numA = parseInt(a.replace(/^\D+/g, ''), 10);
-      const numB = parseInt(b.replace(/^\D+/g, ''), 10);
-      return numA - numB;
-    });
-    return sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel));
+  get groupsStore(): GroupsModelType {
+    return this.stores.groups;
+  }
+  get user() {
+    return this.stores.user;
   }
 
-  //******************************************* Sort By Name **************************************
-  get sortByName(): SortedDocument[]{
-    const documentMap = new Map();
-    this.filteredDocsByType.forEach((doc) => {
-      const user = this.class.getUserById(doc.uid);
-      const sectionLabel = user && `${user.lastName}, ${user.firstName}`;
-      if (!documentMap.has(sectionLabel)) {
-        documentMap.set(sectionLabel, {
-          sectionLabel,
-          documents: []
-        });
-      }
-      documentMap.get(sectionLabel).documents.push(doc);
-    });
-
-    const sortedSectionLabels = Array.from(documentMap.keys()).sort((a, b) => {
-      const parseName = (name: any) => {
-        const [lastName, firstName] = name.split(", ").map((part: any) => part.trim());
-        return { firstName, lastName };
-      };
-      const aParsed = parseName(a);
-      const bParsed = parseName(b);
-
-      // Compare by last name, then by first name if last names are equal
-      const lastNameCompare = aParsed.lastName.localeCompare(bParsed.lastName);
-      if (lastNameCompare !== 0) {
-        return lastNameCompare;
-      }
-      return aParsed.firstName.localeCompare(bParsed.firstName);
-    });
-    return sortedSectionLabels.map(sectionLabel => documentMap.get(sectionLabel));
-  }
-
-  //*************************************** Sort By Strategy **************************************
-
-  get sortByStrategy(): SortedDocument[]{
-    const commentTags = this.commentTags;
-    const tagsWithDocs: Record<string, TagWithDocs> = {};
-    if (commentTags) {
-      for (const key of Object.keys(commentTags)) {
-        tagsWithDocs[key] = {
-          tagKey: key,
-          tagValue: commentTags[key],
-          docKeysFoundWithTag: []
-        };
-      }
-      tagsWithDocs[""] = { //this accounts for when user commented with tagPrompt (no tag selected)
-        tagKey: "",
-        tagValue: "Not Tagged",
-        docKeysFoundWithTag: []
-      };
+  sortBy(sortType: PrimarySortType): DocumentGroup[] {
+    switch (sortType) {
+      case "Group":
+        return this.byGroup;
+      case "Name":
+        return this.byName;
+      case "Strategy":
+        return this.byStrategy;
+      case "Tools":
+        return this.byTools;
+      case "Bookmarked":
+        return this.byBookmarked;
+      default:
+        return [];
     }
+  }
 
-    // Find all unique document keys in tagsWithDocs. Compare this with all sortable documents
-    // in store to find "Documents with no comments" then place those doc keys to "Not Tagged"
-    const uniqueDocKeysWithTags = new Set<string>();
-
-    // grouping documents based on firestore comment tags
-    this.firestoreTagDocumentMap.forEach((docKeysSet, tag) => {
-      const docKeysArray = Array.from(docKeysSet); // Convert the Set to an array
-      if (tagsWithDocs[tag]) {
-        docKeysSet.forEach((docKey: string) =>{
-          uniqueDocKeysWithTags.add(docKey);
-        });
-        tagsWithDocs[tag].docKeysFoundWithTag = docKeysArray;
-      }
+  // ** views ** //
+  get byGroup(): DocumentGroup[] {
+    const documentMap = createDocMapByGroups(this.filteredDocsByType, this.groupsStore.groupForUser);
+    const sortedSectionLabels = sortGroupSectionLabels(Array.from(documentMap.keys()));
+    return sortedSectionLabels.map(label => {
+      return new DocumentGroup({stores: this.stores, label, metaDataDocs: documentMap.get(label) ?? [] });
     });
-
-    // adding in (exemplar) documents with authored tags
-    const allSortableDocKeys = this.filteredDocsByType;
-    allSortableDocKeys.forEach(doc => {
-      doc.strategies?.forEach(strategy => {
-        if (tagsWithDocs[strategy]) {
-          tagsWithDocs[strategy].docKeysFoundWithTag.push(doc.key);
-          uniqueDocKeysWithTags.add(doc.key);
-        }
-      });
+  }
+  get byName(): DocumentGroup[] {
+    const documentMap = createDocMapByNames(this.filteredDocsByType, this.class.getUserById);
+    const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()));
+    return sortedSectionLabels.map(label => {
+      return new DocumentGroup({ stores: this.stores, label, metaDataDocs: documentMap.get(label) ?? [] });
     });
+  }
 
-    allSortableDocKeys.forEach(doc => {
-      if (!uniqueDocKeysWithTags.has(doc.key)) {
-        // This document has no comments
-        if (tagsWithDocs[""]) {
-          tagsWithDocs[""].docKeysFoundWithTag.push(doc.key);
-        }
-      }
-    });
+  get byStrategy(): DocumentGroup[] {
+    const commentTags = this.commentTags;
+    const tagsWithDocs = getTagsWithDocs(this.firestoreMetadataDocs, commentTags, this.firestoreTagDocumentMap);
 
-    const sortedDocsArr: SortedDocument[] = [];
+    const sortedDocsArr: DocumentGroup[] = [];
     Object.entries(tagsWithDocs).forEach((tagKeyAndValObj) => {
       const tagWithDocs = tagKeyAndValObj[1] as TagWithDocs;
-      const sectionLabel = tagWithDocs.tagValue;
+      const label = tagWithDocs.tagValue;
       const docKeys = tagWithDocs.docKeysFoundWithTag;
       const documents = this.firestoreMetadataDocs.filter((doc: IDocumentMetadata) => docKeys.includes(doc.key));
-      sortedDocsArr.push({
-        sectionLabel,
-        documents
-      });
+      sortedDocsArr.push(new DocumentGroup({ stores: this.stores, label, metaDataDocs: documents }));
     });
     return sortedDocsArr;
+  }
+
+  get byTools(): DocumentGroup[] {
+    const tileTypeToDocumentsMap = createTileTypeToDocumentsMap(this.firestoreMetadataDocs);
+
+    const sectionedDocuments = Array.from(tileTypeToDocumentsMap.keys()).map(tileType => {
+
+      const contentInfo = getTileContentInfo(tileType);
+      const label = contentInfo?.displayName || tileType;
+      const documents = tileTypeToDocumentsMap.get(tileType)?.documents ?? [];
+      const icon = tileTypeToDocumentsMap.get(tileType)?.icon;
+      const section = new DocumentGroup({ stores: this.stores, label, metaDataDocs: documents, icon });
+      return section;
+    });
+
+    // Sort the tile types. 'No Tools' should be at the end.
+    const sortedByLabel = sectionedDocuments.sort((a, b) => {
+      if (a.label === "No Tools") return 1;   // Move 'No Tools' to the end
+      if (b.label === "No Tools") return -1;  // Alphabetically sort all others
+      return a.label.localeCompare(b.label);
+    });
+
+    return sortedByLabel;
+  }
+
+  get byBookmarked(): DocumentGroup[] {
+    const documentMap = createDocMapByBookmarks(this.firestoreMetadataDocs, this.bookmarksStore);
+
+    const sortedSectionLabels = ["Bookmarked", "Not Bookmarked"];
+    return sortedSectionLabels.filter(label => documentMap.has(label))
+                              .map(label => new DocumentGroup({
+                                stores: this.stores,
+                                label,
+                                metaDataDocs: documentMap.get(label) ?? []
+                              }));
   }
 
   async updateMetaDataDocs (filter: string, unit: string, investigation: number, problem: number) {
@@ -238,100 +200,25 @@ export class SortedDocuments {
   }
 
   async fetchFullDocument(docKey: string) {
-      const metadataDoc = this.firestoreMetadataDocs.find(doc => doc.key === docKey);
-      if (!metadataDoc) return;
+    const metadataDoc = this.firestoreMetadataDocs.find(doc => doc.key === docKey);
+    if (!metadataDoc) return;
 
-      const unit = metadataDoc?.unit ?? undefined;
-      const props = {
-        documentKey: metadataDoc?.key,
-        type: metadataDoc?.type as any,
-        title: metadataDoc?.title || undefined,
-        properties: metadataDoc?.properties,
-        userId: metadataDoc?.uid,
-        groupId: undefined,
-        visibility: undefined,
-        originDoc: undefined,
-        pubVersion: undefined,
-        problem: metadataDoc?.problem,
-        investigation: metadataDoc?.investigation,
-        unit,
-      };
-
-      return  this.db.openDocument(props);
-  }
-
-  //*************************************** Sort By Bookmarks *************************************
-
-  get sortByBookmarks(): SortedDocument[] {
-    const documentMap = new Map();
-    this.filteredDocsByType.forEach((doc) => {
-      const sectionLabel = this.bookmarks.isDocumentBookmarked(doc.key) ? "Bookmarked" : "Not Bookmarked";
-      if (!documentMap.has(sectionLabel)) {
-        documentMap.set(sectionLabel, {
-          sectionLabel,
-          documents: []
-        });
-      }
-      documentMap.get(sectionLabel).documents.push(doc);
-    });
-
-    const sortedSectionLabels = ["Bookmarked", "Not Bookmarked"];
-    return sortedSectionLabels.filter(label => documentMap.has(label)).map(label => documentMap.get(label));
-  }
-
-  //**************************************** Sort By Tools ****************************************
-
-  get sortByTools(): SortedDocument[] {
-    const tileTypeToDocumentsMap: Record<string, IDocumentMetadata[]> = {};
-
-    const addDocByType = (docToAdd: IDocumentMetadata, type: string) => {
-      if (!tileTypeToDocumentsMap[type]) {
-        tileTypeToDocumentsMap[type] = [];
-      }
-      tileTypeToDocumentsMap[type].push(docToAdd);
+    const unit = metadataDoc?.unit ?? undefined;
+    const props = {
+      documentKey: metadataDoc?.key,
+      type: metadataDoc?.type as any,
+      title: metadataDoc?.title || undefined,
+      properties: metadataDoc?.properties,
+      userId: metadataDoc?.uid,
+      groupId: undefined,
+      visibility: undefined,
+      originDoc: undefined,
+      pubVersion: undefined,
+      problem: metadataDoc?.problem,
+      investigation: metadataDoc?.investigation,
+      unit,
     };
 
-    //Iterate through all documents, determine if they are valid,
-    //create a map of valid ones, otherwise put them into the "No Tools" section
-    this.filteredDocsByType.forEach((doc) => {
-        if (doc.tileTypes) {
-          const validTileTypes = doc.tileTypes.filter(type => type !== "Placeholder" && type !== "Unknown");
-          if (validTileTypes.length > 0) {
-            validTileTypes.forEach(tileType => {
-              addDocByType(doc, tileType);
-            });
-            // TODO: Sparrow annotations. We'll first need to add information about these to metadata docs.
-          } else {
-            addDocByType(doc, "No Tools");
-          }
-        }
-    });
-
-    // Map the tile types to their display names
-    const sectionedDocuments = Object.keys(tileTypeToDocumentsMap).map(tileType => {
-      const section: SortedDocument = {
-        sectionLabel: tileType,
-        documents: tileTypeToDocumentsMap[tileType],
-      };
-      if (tileType === "Sparrow") {
-        section.icon = SparrowHeaderIcon;
-      } else {
-        const contentInfo = getTileContentInfo(tileType);
-        section.sectionLabel = contentInfo?.displayName || tileType;
-        const componentInfo = getTileComponentInfo(tileType);
-        section.icon = componentInfo?.HeaderIcon;
-      }
-      return section;
-    });
-
-    // Sort the tile types. 'No Tools' should be at the end.
-    const sortedByLabel = sectionedDocuments.sort((a, b) => {
-      if (a.sectionLabel === "No Tools") return 1;   // Move 'No Tools' to the end
-      if (b.sectionLabel === "No Tools") return -1;  // Alphabetically sort all others
-      return a.sectionLabel.localeCompare(b.sectionLabel);
-    });
-
-    return sortedByLabel;
+    return  this.db.openDocument(props);
   }
-
 }

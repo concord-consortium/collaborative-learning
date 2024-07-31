@@ -75,6 +75,13 @@ $title-margin: 2px;
       width: 100px;
       height: 75px;
     }
+    .list {
+      .doc-group {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+      }
+    }
   }
 
   .focus-document {

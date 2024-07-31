@@ -1,15 +1,15 @@
 class SortedWork {
-  getSortByMenu() {
-    return cy.get('.custom-select.sort-work-sort-menu');
+  getPrimarySortByMenu() {
+    return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu');
   }
-  getSortByNameOption() {
-    return cy.get('[data-test="list-item-name"]');
+  getPrimarySortByNameOption() {
+    return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-name"]');
   }
-  getSortByGroupOption() {
-    return cy.get('[data-test="list-item-group"]');
+  getPrimarySortByGroupOption() {
+    return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-group"]');
   }
-  getSortByTagOption(){
-    return cy.get('[data-test="list-item-identify-design approach"]');
+  getPrimarySortByTagOption(){
+    return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-identify-design approach"]');
   }
   getSortWorkItem() {
     return cy.get(".sort-work-view .sorted-sections .list-item .footer .info");
@@ -19,6 +19,9 @@ class SortedWork {
   }
   getSortWorkGroup(groupName) {
     return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(groupName).parent().parent().parent();
+  }
+  getSecondarySortByMenu() {
+    return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu');
   }
   getShowForMenu() {
     return cy.get("[data-test=filter-work-menu]");
