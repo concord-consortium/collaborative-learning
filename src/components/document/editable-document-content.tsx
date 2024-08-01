@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import classNames from "classnames";
-import { clone, onSnapshot } from "mobx-state-tree";
+import { clone } from "mobx-state-tree";
 import { AppConfigContext } from "../../app-config-context";
 import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
@@ -10,11 +10,10 @@ import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-fire
 import { useGroupsStore, useStores } from "../../hooks/use-stores";
 import { ToolbarComponent } from "../toolbar";
 import { EditableTileApiInterfaceRef, EditableTileApiInterfaceRefContext } from "../tiles/tile-api";
-import { DocumentModelSnapshotType, DocumentModelType } from "../../models/document/document";
+import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { WorkspaceMode } from "../../models/stores/workspace";
-import { ITileMapEntry } from "../../../functions/src/shared";
 
 import "./editable-document-content.scss";
 
@@ -115,34 +114,7 @@ export function EditableDocumentContent({
     contained ? "contained-editable-document-content" : "full-screen-editable-document-content",
     {"comment-select" : documentSelectedForComment, "full-height": fullHeight}, className);
 
-  useEffect(() => {
-    const disposer = onSnapshot(document, (snapshot: DocumentModelSnapshotType) => {
-      const tileMap = snapshot.content?.tileMap || {};
-      const tileTypes: string[] = [];
-
-      Object.keys(tileMap).forEach((key) => {
-        const tileInfo = tileMap[key] as ITileMapEntry;
-        const type = tileInfo.content.type;
-        if (!tileTypes.includes(type)) {
-          tileTypes.push(type);
-        }
-      });
-
-      // update tiletypes for metadata document in firestore
-      const query = firestore.collection("documents").where("key", "==", document.key);
-      query.get().then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-          const docRef = doc.ref;
-          docRef.update({
-            tileTypes,
-          });
-        });
-      });
-    });
-    return () => disposer();
-  }, [document, firestore]);
-
-  useDocumentSyncToFirebase(user, firebase, document, readOnly);
+  useDocumentSyncToFirebase(user, firebase, firestore, document, readOnly);
   return (
     <DocumentContextReact.Provider value={documentContext}>
       <EditableTileApiInterfaceRefContext.Provider value={editableTileApiInterfaceRef}>

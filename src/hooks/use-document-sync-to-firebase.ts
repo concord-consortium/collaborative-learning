@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { throttle as _throttle } from "lodash";
 import { useSyncMstNodeToFirebase } from "./use-sync-mst-node-to-firebase";
 import { useSyncMstPropToFirebase } from "./use-sync-mst-prop-to-firebase";
 import { DEBUG_DOCUMENT, DEBUG_SAVE } from "../lib/debug";
@@ -8,6 +9,11 @@ import { isPublishedType, LearningLogDocument, LearningLogPublication, PersonalD
          PersonalPublication, ProblemDocument, ProblemPublication, SupportPublication
         } from "../models/document/document-types";
 import { UserModelType } from "../models/stores/user";
+import { Firestore } from "src/lib/firestore";
+import { useMutation, UseMutationOptions } from "react-query";
+import { onSnapshot, SnapshotOut } from "@concord-consortium/mobx-state-tree";
+import { ITileMapEntry } from "functions/src/shared";
+import { DocumentContentSnapshotType } from "src/models/document/document-content";
 
 function debugLog(...args: any[]) {
   // eslint-disable-next-line no-console
@@ -25,7 +31,12 @@ function debugLog(...args: any[]) {
  * trying to keep track of listeners on all of a user's documents simultaneously.
  */
 export function useDocumentSyncToFirebase(
-                  user: UserModelType, firebase: Firebase, document: DocumentModelType, readOnly = false) {
+  user: UserModelType,
+  firebase: Firebase,
+  firestore: Firestore,
+  document: DocumentModelType,
+  readOnly = false
+) {
   const { key, type, uid, contentStatus } = document;
   const { content: contentPath, metadata, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
 
@@ -139,19 +150,67 @@ export function useDocumentSyncToFirebase(
   });
 
   // sync content for editable document types
-  useSyncMstNodeToFirebase({
-    firebase, model: document.content, path: contentPath,
-    enabled: commonSyncEnabled && !readOnly && !!document.content && !isPublishedType(type),
-    transform: snapshot => ({ changeCount: document.incChangeCount(), content: JSON.stringify(snapshot) }),
-    options: {
-      onSuccess: (data, snapshot) => {
-        debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, document.changeCount);
-      },
-      onError: (err, properties) => {
-        console.warn(`ERROR: Failed to update document content for ${type} document ${key}:`, document.changeCount);
-      }
+  const enabled = commonSyncEnabled && !readOnly && !!document.content && !isPublishedType(type);
+  const options: Omit<UseMutationOptions<unknown, unknown, SnapshotOut<DocumentContentSnapshotType>>, 'mutationFn'> = {
+    // default is to retry with linear back-off to a maximum
+    retry: true,
+    retryDelay: (attempt) => Math.min(attempt * 5, 30),
+    // but clients may override the defaults
+    onSuccess: (data: any, snapshot: DocumentContentSnapshotType) => {
+      debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, document.changeCount);
+    },
+    onError: (err: any, properties: DocumentContentSnapshotType) => {
+      console.warn(`ERROR: Failed to update document content for ${type} document ${key}:`, document.changeCount);
     }
-  });
+  };
+  const transform = (snapshot: DocumentContentSnapshotType) =>
+    ({ changeCount: document.incChangeCount(), content: JSON.stringify(snapshot) });
+
+  const mutation = useMutation((snapshot: DocumentContentSnapshotType) => {
+    const tileMap = snapshot.tileMap || {};
+
+    const tileTypes: string[] = [];
+
+    Object.keys(tileMap).forEach((tileKey) => {
+      const tileInfo = tileMap[tileKey] as ITileMapEntry;
+      const tileType = tileInfo.content.type;
+      if (!tileTypes.includes(tileType)) {
+        tileTypes.push(tileType);
+      }
+    });
+
+    const promises = [];
+
+    // update tiletypes for metadata document in firestore
+    const query = firestore.collection("documents").where("key", "==", document.key);
+    promises.push(query.get().then((querySnapshot) => {
+      return Promise.all(
+        querySnapshot.docs.map((doc) => {
+          const docRef = doc.ref;
+          return docRef.update({
+            tileTypes,
+          });
+        })
+      );
+    }));
+
+    promises.push(firebase.ref(contentPath).update(transform?.(snapshot) ?? snapshot));
+    return Promise.all(promises);
+  }, options);
+
+  const throttledMutate = useMemo(() => _throttle(mutation.mutate, 1000), [mutation.mutate, 1000]);
+
+
+  useEffect(() => {
+    const cleanup = enabled
+            ? onSnapshot<DocumentContentSnapshotType>(document.content!, snapshot => {
+                // reset (e.g. stop retrying and restart) when value changes
+                mutation.isError && mutation.reset();
+                throttledMutate(snapshot);
+              })
+            : undefined;
+    return () => cleanup?.();
+  }, [enabled, document.content, mutation, throttledMutate]);
 
   useEffect(() => {
     DEBUG_SAVE && !readOnly &&
