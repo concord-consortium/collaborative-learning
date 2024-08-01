@@ -91,7 +91,8 @@ async function processFile(file: string) {
       documentType,
       offeringId,
       originDoc,
-      userId
+      userId,
+      visibility
     } = parsedContent;
 
     processedFiles++;
@@ -200,7 +201,8 @@ async function processFile(file: string) {
         tileTypes,
         title: documentTitle || null,
         type: documentType,
-        uid: userId
+        uid: userId,
+        visibility
       };
 
       // Use a prefix of `uid:[owner_uid]` for metadata documents that we create for more
@@ -223,6 +225,8 @@ async function processFile(file: string) {
         console.log(documentId, doc.id, "Updated metadata with", unitFields);
         doc.ref.update({ strategies, tileTypes } as any);
         console.log(documentId, doc.id, "Updated metadata with", { strategies, tileTypes });
+        doc.ref.update({ visibility } as any);
+        console.log(documentId, doc.id, "Updated metadata with", { visibility });
         metadataUpdated++;
       });
     }

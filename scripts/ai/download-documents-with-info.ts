@@ -164,12 +164,42 @@ for (const key of Object.keys(classKeys)) {
       const offering = offeringId && offerings[offeringId];
       const problemDocPublication = offeringId && problemDocPublications[offeringId]?.[docId];
       const extraInfo = {} as any;
+
+      // Set the visibility of the document based on type or existing visibility value.
+      // The default values vary per document type.
+      switch (documentMetadata?.type) {
+        case "problem":
+        case "planning":
+          extraInfo.visibility = documentMetadata.visibility || "unknown";
+          break;
+        case "learningLog":
+        case "personal":
+          extraInfo.visibility = documentMetadata.visibility || "private";
+          break;
+        case "learningLogPublication":
+        case "personalPublication":
+        case "publication":
+          extraInfo.visibility = "public";
+          break;
+        default:
+          extraInfo.visibility = "unknown";
+          break;
+      }
+
       if (offering) {
         const offeringUser = offering.users?.[userId];
         const problemMetadata = offeringUser?.documents?.[docId];
         extraInfo.problemVisibility = problemMetadata?.visbility;
         const planningMetadata = offeringUser?.planning?.[docId];
         extraInfo.planningVisibility = planningMetadata?.visbility;
+        // If there is a problemMetadata or planningMetadata, then the visibility value
+        // previously set above should be overridden. Note that we use different default
+        // values here than above for problem and planning.
+        if (problemMetadata) {
+          extraInfo.visibility = problemMetadata.visibility || "private";
+        } else if (planningMetadata) {
+          extraInfo.visibility = planningMetadata.visibility || "private";
+        }
       }
 
       // It should really be published as one type or the other
