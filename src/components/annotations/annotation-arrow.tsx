@@ -32,9 +32,9 @@ export function AnnotationArrow({
   }, [shape, peakX, peakY, sourceX, sourceY, targetX, targetY]);
 
   return (
-    <g className={classNames("curved-arrow", className)}>
+    <g className={classNames("arrow", className)}>
       <path
-        className="curved-arrow-stem"
+        className="arrow-stem"
         d={path}
         fill="none"
         onMouseEnter={e => setHovering?.(true)}
@@ -43,7 +43,7 @@ export function AnnotationArrow({
       />
       { !hideArrowhead && (
         <g transform={`translate(${targetX} ${targetY}) rotate(${arrowheadAngle})`}>
-          <polygon className="curved-arrow-arrowhead" points="0 -5 10 13 -10 13 0 -5" />
+          <polygon className="arrow-arrowhead" points="0 -5 10 13 -10 13 0 -5" />
         </g>
       )}
     </g>

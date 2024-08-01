@@ -62,36 +62,59 @@ context('Arrow Annotations (Sparrows)', function () {
 
     cy.log("Annotation buttons only appear in sparrow mode");
     aa.getAnnotationButtons().should("not.exist");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationLayer().should("have.class", "editing");
     aa.getAnnotationButtons().should("have.length", 3);
 
     cy.log("Pressing a tile button exits sparrow mode");
     clueCanvas.addTile("drawing");
     aa.getAnnotationLayer().should("not.have.class", "editing");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
 
     cy.log("Pressing select button exits sparrow mode");
     aa.getAnnotationLayer().should("have.class", "editing");
     clueCanvas.getSelectTool().click();
     aa.getAnnotationLayer().should("not.have.class", "editing");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
 
     cy.log("Double-clicking background exits sparrow mode");
     aa.getAnnotationLayer().should("have.class", "editing");
     aa.getAnnotationLayer().dblclick();
     aa.getAnnotationLayer().should("not.have.class", "editing");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
 
     cy.log("ESC key exits sparrow mode");
     aa.getAnnotationLayer().should("have.class", "editing");
     aa.getAnnotationLayer().type("{esc}");
     aa.getAnnotationLayer().should("not.have.class", "editing");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationLayer().should("have.class", "editing");
-    aa.getArrowToolbarButton().type("{esc}");
+    aa.getAnnotationModeButton().type("{esc}");
     aa.getAnnotationLayer().should("not.have.class", "editing");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
+
+    cy.log("Annotation mode can switch between curved and straight arrows");
+    aa.getAnnotationModeButton().should("have.attr", "title", "Sparrow: curved");
+    aa.getCurvedArrowToolbarButton().should("not.exist");
+    aa.getStraightArrowToolbarButton().should("not.exist");
+    aa.getAnnotationMenuExpander().click();
+    aa.getCurvedArrowToolbarButton().should("exist").and("have.class", "active");
+    aa.getStraightArrowToolbarButton().should("exist").and("not.have.class", "active");
+
+    aa.getStraightArrowToolbarButton().click(); // select straight arrows and close menu
+    aa.getAnnotationModeButton().should("have.attr", "title", "Sparrow: straight");
+    aa.getCurvedArrowToolbarButton().should("not.exist");
+    aa.getStraightArrowToolbarButton().should("not.exist");
+    // long-press should also open menu
+    aa.getAnnotationModeButton().trigger("mousedown");
+    cy.wait(600);
+    aa.getAnnotationModeButton().trigger("mouseup");
+    aa.getCurvedArrowToolbarButton().should("exist").and("not.have.class", "active");
+    aa.getStraightArrowToolbarButton().should("exist").and("have.class", "active");
+    aa.getCurvedArrowToolbarButton().click();
+    aa.getAnnotationModeButton().should("have.attr", "title", "Sparrow: curved");
+    aa.getCurvedArrowToolbarButton().should("not.exist");
+    aa.getStraightArrowToolbarButton().should("not.exist");
 
     cy.log("Can draw an arrow between two objects");
     aa.getAnnotationArrows().should("not.exist");
@@ -150,11 +173,11 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("have.length", 1);
 
     cy.log("Can only edit text in sparrow mode");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationTextInputs().should("not.exist");
     aa.getAnnotationTextDisplays().first().should("have.css", "pointer-events", "none");
     aa.getAnnotationTextInputs().should("not.exist");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationTextDisplays().first().dblclick();
     aa.getAnnotationTextInputs().should("exist");
 
@@ -181,12 +204,12 @@ context('Arrow Annotations (Sparrows)', function () {
     // TODO Test position of sparrow
 
     cy.log("Can hide annotations by pressing the hide button");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.clickHideAnnotationsButton();
     aa.getAnnotationLayer().should("not.be.visible");
 
     cy.log("Arrows become visible when you enter sparrow mode");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationLayer().should("be.visible");
 
     cy.log("Arrows persist on reload");
@@ -194,22 +217,48 @@ context('Arrow Annotations (Sparrows)', function () {
     cy.reload();
     aa.getAnnotationArrows().should("exist");
 
+    aa.getAnnotationModeButton().click();
+    aa.getAnnotationDeleteButtons().eq(0).click({force: true});
+    aa.getAnnotationArrows().should("have.length", 0);
+
+    cy.log("Can create straight arrow annotations");
+    aa.getAnnotationMenuExpander().click();
+    aa.getStraightArrowToolbarButton().click();
+    aa.getAnnotationButtons().eq(0).click(); // First end is anchored to an object
+    aa.getAnnotationSvg().click(200, 150);
+    aa.getAnnotationArrows().should("have.length", 1);
+
+    aa.getAnnotationSvg().click(300, 100);
+    aa.getAnnotationButtons().eq(1).click(); // Second end is anchored to an object
+    aa.getAnnotationArrows().should("have.length", 2);
+
+    aa.getAnnotationDeleteButtons().eq(0).click();
+    aa.getAnnotationDeleteButtons().eq(0).click();
+    aa.getAnnotationSvg().click(200, 200); // Both ends free should not create an arrow
+    aa.getAnnotationSvg().click(300, 100);
+    aa.getAnnotationArrows().should("have.length", 0);
+
+    aa.getAnnotationMenuExpander().click();
+    aa.getCurvedArrowToolbarButton().click();
+    clueCanvas.getSelectTool().click();
+
     cy.log("Can create sparrows across two tiles");
     clueCanvas.addTile("drawing");
+    drawToolTile.getDrawTile().should("have.length", 2);
     drawToolTile.getDrawToolVector().eq(0).click();
     drawToolTile.getDrawTile().eq(1)
       .trigger("pointerdown", 150, 50)
       .trigger("pointermove", 100, 150)
       .trigger("pointerup", 100, 50);
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationButtons().should("have.length", 4);
     aa.getAnnotationButtons().first().click({ force: true });
     aa.getAnnotationButtons().eq(3).click();
-    aa.getAnnotationArrows().should("have.length", 2);
+    aa.getAnnotationArrows().should("have.length", 1);
 
     cy.log("Can delete sparrows");
-    aa.getAnnotationDeleteButtons().eq(1).click({ force: true });
-    aa.getAnnotationArrows().should("have.length", 1);
+    aa.getAnnotationDeleteButtons().eq(0).click({ force: true });
+    aa.getAnnotationArrows().should("have.length", 0);
   });
 
   it("can add arrows to table tiles", () => {
@@ -217,13 +266,13 @@ context('Arrow Annotations (Sparrows)', function () {
     clueCanvas.addTile("table");
 
     cy.log("Annotation buttons only appear for actual cells");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationLayer().should("have.class", "editing");
     aa.getAnnotationButtons().should("not.exist");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     tableToolTile.typeInTableCell(1, '3');
     tableToolTile.typeInTableCell(2, '2');
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationButtons().should("have.length", 2);
 
     cy.log("Can create an annotation arrow between two cells");
@@ -233,27 +282,27 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("have.length", 1);
 
     cy.log("Can duplicate annotations contained within one tile");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     tableToolTile.getTableCell().eq(1).click();
     clueCanvas.getDuplicateTool().click();
-    aa.clickArrowToolbarButton(); // To force a rerender of the annotation layer
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click(); // To force a rerender of the annotation layer
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationArrows().should("have.length", 2);
 
     cy.log("Can duplicate annotations that span multiple tiles");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     // Delete the copied sparrow so only the original remains
     aa.getAnnotationDeleteButtons().eq(1).click();
     // Create a sparrow between the two tables
     aa.getAnnotationButtons().eq(3).click();
     aa.getAnnotationButtons().eq(1).click({ force: true });
     aa.getAnnotationArrows().should("have.length", 2);
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     // Copy the original table. This has one internal sparrow and one sparrow shared with the other tile.
     tableToolTile.getTableCell().eq(0).click();
     clueCanvas.getDuplicateTool().click();
-    aa.clickArrowToolbarButton(); // To force a rerender of the annotation layer
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click(); // To force a rerender of the annotation layer
+    aa.getAnnotationModeButton().click();
     // Both sparrows should have been copied.
     aa.getAnnotationArrows().should("have.length", 4);
   });
@@ -264,18 +313,18 @@ context('Arrow Annotations (Sparrows)', function () {
 
     cy.log("Annotation buttons appear for points, polygons, and segments");
     clueCanvas.clickToolbarButton('geometry', 'polygon');
-    aa.clickArrowToolbarButton(); // sparrow mode on
+    aa.getAnnotationModeButton().click(); // sparrow mode on
     aa.getAnnotationLayer().should("have.class", "editing");
     aa.getAnnotationButtons().should("not.exist");
 
-    aa.clickArrowToolbarButton(); // sparrow mode off
+    aa.getAnnotationModeButton().click(); // sparrow mode off
     geometryToolTile.getGeometryTile().click(); // select tile
     geometryToolTile.clickGraphPosition(10, 5);
     geometryToolTile.clickGraphPosition(15, 10);
     geometryToolTile.clickGraphPosition(20, 5);
     geometryToolTile.clickGraphPosition(10, 5); // close polygon
 
-    aa.clickArrowToolbarButton(); // sparrow mode on
+    aa.getAnnotationModeButton().click(); // sparrow mode on
     // 3 points + 3 segments + 1 polygon = 7
     aa.getAnnotationButtons().should("have.length", 7);
 
@@ -287,7 +336,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationDeleteButtons().eq(0).click();
 
     // Remove all the points and polygons
-    aa.clickArrowToolbarButton(); // sparrow mode off
+    aa.getAnnotationModeButton().click(); // sparrow mode off
     geometryToolTile.getGeometryTile().click(); // select tile
     clueCanvas.clickToolbarButton('geometry', 'select'); // switch to select mode
     geometryToolTile.getGraphPoint().eq(2).click();
@@ -306,7 +355,7 @@ context('Arrow Annotations (Sparrows)', function () {
     tableToolTile.typeInTableCellXY(1, 0, 3);
     tableToolTile.typeInTableCellXY(1, 1, 4);
     cy.linkTableToTile('Table Data 1', "Coordinate Grid 1");
-    aa.clickArrowToolbarButton(); // sparrow mode on
+    aa.getAnnotationModeButton().click(); // sparrow mode on
     aa.getAnnotationButtons().should("have.length", 6); // 2 dots + 4 table cells
     clueCanvas.getSingleWorkspaceDocumentContent().scrollTo("top");
     aa.getAnnotationButtons().eq(0).scrollIntoView().click();
@@ -324,12 +373,12 @@ context('Arrow Annotations (Sparrows)', function () {
     clueCanvas.addTile("numberline");
 
     cy.log("annotations buttons don't exist when empty numberline");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationLayer().should("have.class", "editing");
     aa.getAnnotationButtons().should("not.exist");
     // Disable the annotation tool again so there isn't a layer on top
     // of the numberline tile
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
 
     cy.log("add points so we can add annotations");
     // Click on tile to get the tool bar to show up
@@ -338,7 +387,7 @@ context('Arrow Annotations (Sparrows)', function () {
     numberlineToolTile.setToolbarPoint();
     numberlineToolTile.addPointOnNumberlineTick(-4.0);
     numberlineToolTile.addPointOnNumberlineTick(2.0);
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
 
     aa.getAnnotationButtons().should("exist");
     aa.getAnnotationButtons().should("have.length", 2);
@@ -364,14 +413,14 @@ context('Arrow Annotations (Sparrows)', function () {
     tableToolTile.typeInTableCell(13, '2');
 
     cy.log("Annotation buttons appear for dots");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     // Table cells should have buttons, but there are no dots until the xy plot is connected to the table's dataset
     aa.getAnnotationButtons().should("have.length", 9);
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     xyTile.getTile().click();
     clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
     xyTile.linkTable("Table Data 1");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationButtons().should("have.length", 12);
 
     cy.log("Can add an arrow to xy plot dots");
@@ -381,7 +430,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("have.length", 1);
 
     cy.log("Dots are considered different objects when the axes change");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     xyTile.selectYAttribute("y2");
     aa.getAnnotationArrows().should("not.exist");
 
@@ -401,33 +450,33 @@ context('Arrow Annotations (Sparrows)', function () {
     xyTile.getTile().click();
     clueCanvas.clickToolbarButton('graph', 'link-tile-multiple');
     xyTile.linkTable("Diagram 1");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationButtons().should("have.length", 12);
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
 
     xyTile.selectXVariable(varName);
     xyTile.selectYVariable(varName);
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationButtons().should("have.length", 13);
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
 
     cy.log("Can add an arrow to variable dots");
     xyTile.getTile().click();
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationArrows().should("not.exist");
     aa.getAnnotationButtons().eq(0).click();
     aa.getAnnotationButtons().eq(1).click();
     aa.getAnnotationArrows().should("have.length", 1);
     aa.getAnnotationDeleteButtons().eq(0).click(); // Remove arrow
     aa.getAnnotationArrows().should("have.length", 0);
-    aa.clickArrowToolbarButton(); // exit sparrow mode
+    aa.getAnnotationModeButton().click(); // exit sparrow mode
     xyTile.getLayerDeleteButton().eq(1).click(); // Clean up graph
     xyTile.getLayerDeleteButton().eq(0).click();
 
     cy.log("Annotation buttons for movable line");
     xyTile.getTile().click();
     clueCanvas.clickToolbarButton('graph', 'movable-line');
-    aa.clickArrowToolbarButton(); // sparrow mode
+    aa.getAnnotationModeButton().click(); // sparrow mode
     aa.getAnnotationButtons().should("have.length", 12); // 9 for the table + 3 for movable line
     aa.getAnnotationButtons().eq(0).click(); // Connect handles
     aa.getAnnotationButtons().eq(1).click();
@@ -449,20 +498,20 @@ context('Arrow Annotations (Sparrows)', function () {
 
     // with no program, sim tile should have 28 "pin" buttons.
     aa.getAnnotationButtons().should("not.exist");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationButtons().should("have.length", 28);
 
     aa.getAnnotationButtons().eq(0).click();
     aa.getAnnotationButtons().eq(27).click();
     aa.getAnnotationArrows().should("have.length", 1);
 
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     // Create input, processing, and output nodes
     dataflowTile.getCreateNodeButton("number").click();
     dataflowTile.getCreateNodeButton("math").click();
     dataflowTile.getCreateNodeButton("demo-output").click();
 
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     // The 3 nodes create annotation buttons in the dataflow tile and mini nodes
     // in the simulation tile
     aa.getAnnotationButtons().should("have.length", 28+2*3);
@@ -487,13 +536,13 @@ context('Arrow Annotations (Sparrows)', function () {
 
     cy.log("There should be an annotation button for each node");
     aa.getAnnotationButtons().should("not.exist");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationButtons().should("have.length", 4);
 
     aa.getAnnotationButtons().eq(0).click();
     aa.getAnnotationButtons().eq(2).click();
     aa.getAnnotationArrows().should("have.length", 1);
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
 
     cy.log("The annotation arrow should continue showing when recording");
     dataflowTile.getRecordButton().click();
@@ -509,12 +558,12 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationArrows().should("have.length", 1);
 
     cy.log("New annotations can be made on a recorded program");
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
     aa.getAnnotationButtons().should("have.length", 4);
     aa.getAnnotationButtons().eq(1).click();
     aa.getAnnotationButtons().eq(3).click();
     aa.getAnnotationArrows().should("have.length", 2);
-    aa.clickArrowToolbarButton();
+    aa.getAnnotationModeButton().click();
 
     cy.log("Annotations continue showing after clearing the recording");
     dataflowTile.getRecordingClearButton().click();

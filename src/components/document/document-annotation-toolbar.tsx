@@ -91,7 +91,7 @@ export const DocumentAnnotationToolbar = observer(function DocumentAnnotationToo
   return (
     <div className="button-set sparrow-buttons" onKeyDown={handleKeyDown}>
       <button ref={menuButton}
-        data-testid="mode-menu-button"
+        data-testid="annotation-mode-button"
         title={menuTooltip}
         className={classNames({active: ui.annotationMode })}
         onTouchStart={onTouchStart}
@@ -101,7 +101,9 @@ export const DocumentAnnotationToolbar = observer(function DocumentAnnotationToo
         onClick={onClick}
       >
         <MenuIcon/>
-        <SmallCornerTriangle className="corner-triangle" onClick={(e) => { toggleMenu(); e.stopPropagation(); }} />
+        <SmallCornerTriangle data-testid="annotation-menu-expander"
+          className="corner-triangle"
+          onClick={(e) => { toggleMenu(); e.stopPropagation(); }} />
       </button>
 
       <button onClick={handleAnnotationToggle} data-testid="hide-annotations-button"
@@ -126,7 +128,7 @@ export function AnnotationModeSelection ({ trigger, select , close }: IAnnotatio
   const { ui } = useStores();
   const docElement: HTMLElement|undefined = trigger.current?.closest('.document') || undefined;
 
-  const { refs, placement, floatingStyles, middlewareData } = useFloating({
+  const { refs, placement, floatingStyles } = useFloating({
     open: true,
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
