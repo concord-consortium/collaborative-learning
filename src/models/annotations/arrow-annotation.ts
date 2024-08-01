@@ -179,10 +179,12 @@ export const ArrowAnnotation = types
     } else {
       // If source or target is dragged, text should be dragged with it by a proportional amount.
       // Calculate the ratio by which the offsets should be adjusted to maintain the same relative position.
-      const xRatio = (targetX - sourceX) / (preDragTargetX - preDragSourceX);
-      const yRatio = (targetY - sourceY) / (preDragTargetY - preDragSourceY);
-      console.log('ratios:', xRatio, yRatio);
+      const pdx = preDragTargetX - preDragSourceX;
+      const xRatio = (pdx !== 0) ? (targetX - sourceX) / pdx : 1;
       textCenterX = textOriginX + textDxOffset * xRatio;
+
+      const pdy = preDragTargetY - preDragSourceY;
+      const yRatio = (pdy !== 0) ? (targetY - sourceY) / pdy : 1;
       textCenterY = textOriginY + textDyOffset * yRatio;
     }
 
