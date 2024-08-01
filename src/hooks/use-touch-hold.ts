@@ -1,12 +1,16 @@
 import { useCallback, useRef } from "react";
 
 /**
- * This returns an onClick event that differentiates between a click and a touch hold.
- * One of the two handlers will be called depending on the duration of the touch.
+ * Allows a button to differentiate between a quick click and a long press or "touch hold".
+ * The method returns a set of event handlers to be attached to the component.
+ * For each user interaction, one of the two methods passed in will be called depending on the duration of the touch.
  * @param onTouchHold handler for long-presses
  * @param onClick handler for short presses
  * @param holdTime milliseconds required before a touch is considered a hold
- * @returns onClick handler to attach to your button
+ * @returns : onTouchStart, onTouchEnd, onMouseDown, onMouseUp, and onClick handlers
+ *   that should be attached to your component.  Also returns a didTouchHold method
+ *   that can be used to determine if the touch was a long press or not, may be useful for
+ *   implementing even more complex behaviors.
  */
 export const useTouchHold = (onTouchHold: () => void, onClick: (e:React.MouseEvent) => void, holdTime = 500) => {
   const holdTimer = useRef<number>();
