@@ -339,7 +339,6 @@ context('Geometry Tool', function () {
     clueCanvas.clickToolbarButton('geometry', 'delete');
     geometryToolTile.getGraphCircle().should("have.length", 0);
     geometryToolTile.getGraphPoint().should("have.length", 1);
-
     cy.log('Waiting for the polygon to be created from table');
     geometryToolTile.getGraphPolygon().should("have.length", 0); // Verify the polygon is created
   });
