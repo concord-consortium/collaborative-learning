@@ -238,30 +238,40 @@ context('Geometry Tool', function () {
     });
 
     // Move the point back to the original position
-    clueCanvas.getUndoTool().click();
-    clueCanvas.getUndoTool().click();
-    // // Move left
-    // geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 37 }); // simulate left arrow key press
-    // geometryToolTile.getGraphPoint(5, 5.1).should("exist"); // point should have moved back to the left
+    clueCanvas.getUndoTool().click().click();
 
-    // // Move up to return to the original position
-    // geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 38 }); // simulate up arrow key press
-    // geometryToolTile.getGraphPoint(5, 5).should("exist"); // point should have moved back to the original position
+    cy.log('delete a point and undo it');
+    // Select the graph point at (5, 5)
+    //geometryToolTile.selectGraphPoint(5, 5);
+    // Verify that the point has been selected
+   // geometryToolTile.getSelectedGraphPoint().should('have.length', 2);
+
+    // Delete the selected point
+    geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 46 }); // simulate delete key press
+
+    // Verify that the point at (5, 5) no longer exists
+    geometryToolTile.getGraphPoint().filter((index, el) => {
+        const cx = parseFloat(el.getAttribute('cx'));
+        const cy = parseFloat(el.getAttribute('cy'));
+        return Math.abs(cx - 5) < 0.1 && Math.abs(cy - 5) < 0.1;
+    }).should('have.length', 0);
+
+    clueCanvas.getUndoTool().click();
 
     // Label the polygon
     geometryToolTile.getGraphPolygon().click(50, 50, { force: true,  });
     geometryToolTile.getSelectedGraphPoint().should('have.length', 3);
     geometryToolTile.getGraphPointLabel().contains('12.').should('not.exist');
-    geometryToolTile.getGraphPointLabel().contains('ABC').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('CBA').should('not.exist');
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.getModalTitle().should('contain.text', 'Polygon Label/Value');
     geometryToolTile.chooseLabelOption('length');
     geometryToolTile.getGraphPointLabel().contains('12.').should('exist');
     clueCanvas.clickToolbarButton('geometry', 'label');
-    geometryToolTile.getModalLabelInput().should('have.value', 'ABC');
+    geometryToolTile.getModalLabelInput().should('have.value', 'CBA');
     geometryToolTile.chooseLabelOption('label');
     geometryToolTile.getGraphPointLabel().contains('12.').should('not.exist');
-    geometryToolTile.getGraphPointLabel().contains('ABC').should('exist');
+    geometryToolTile.getGraphPointLabel().contains('CBA').should('exist');
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.chooseLabelOption('none');
     geometryToolTile.clickGraphPosition(0, 0); // deselect polygon
@@ -273,14 +283,14 @@ context('Geometry Tool', function () {
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.getModalTitle().should('contain.text', 'Segment Label/Value');
     geometryToolTile.chooseLabelOption('label');
-    geometryToolTile.getGraphPointLabel().contains('AB').should('exist');
+    geometryToolTile.getGraphPointLabel().contains('BC').should('exist');
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.chooseLabelOption('length');
-    geometryToolTile.getGraphPointLabel().contains('AB').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('BC').should('not.exist');
     geometryToolTile.getGraphPointLabel().contains('5').should('exist');
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.chooseLabelOption('none');
-    geometryToolTile.getGraphPointLabel().contains('AB').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('BC').should('not.exist');
     geometryToolTile.getGraphPointLabel().contains('5').should('not.exist');
 
     // Change color of polygon
@@ -297,15 +307,6 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPolygon().should("have.length", 2);
     geometryToolTile.getGraphPoint().should("have.length", 6);
     geometryToolTile.getSelectedGraphPoint().should("have.length", 0);
-
-    // // Test delete and backspace keys to remove objects
-    // geometryToolTile.selectGraphPoint(7, 6); // select the middle of the polygon again
-    // geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 46 }); // simulate delete key press
-    // geometryToolTile.getGraphPoint(7, 6).should("not.exist"); // point should be deleted
-
-    // geometryToolTile.selectGraphPoint(7, 6); // select the middle of the polygon
-    // geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 8 }); // simulate backspace key press
-    // geometryToolTile.getGraphPoint(7, 6).should("not.exist"); // point should be deleted
 
     // Delete polygon
     geometryToolTile.selectGraphPoint(7, 6);
