@@ -323,6 +323,64 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPoint().should("have.length", 0);
     geometryToolTile.getSelectedGraphPoint().should("have.length", 0);
 
+    // Create first polygon from existing points
+    cy.log('Create first polygon from existing points')
+    clueCanvas.clickToolbarButton('geometry', 'point');
+    geometryToolTile.clickGraphPosition(0, 0);
+    geometryToolTile.clickGraphPosition(10, 0);
+    geometryToolTile.clickGraphPosition(5, 5);
+    clueCanvas.clickToolbarButton('geometry', 'polygon');
+    geometryToolTile.getGraphPoint().should("have.length", 3);
+    geometryToolTile.getGraphPoint().eq(0).click();
+    geometryToolTile.getGraphPoint().eq(1).click();
+    geometryToolTile.getGraphPoint().eq(2).click();
+    geometryToolTile.getGraphPoint().eq(0).click();
+    geometryToolTile.getGraphPolygon().should("have.length", 1);
+    geometryToolTile.getGraphPoint().should("have.length", 3);
+
+    // // Create a second polygon that shares a point with the first polygon
+    // cy.log('Create a second polygon that shares a point with the first polygon');
+    // geometryToolTile.clickGraphPosition(10, 0); // Reuse existing point
+    // geometryToolTile.clickGraphPosition(15, 5);
+    // geometryToolTile.clickGraphPosition(5, 5); // Reuse existing point
+    // clueCanvas.clickToolbarButton('geometry', 'polygon');
+    // geometryToolTile.getGraphPoint().should("have.length", 4);
+    // //geometryToolTile.getGraphPoint().eq(3).click();
+    // //geometryToolTile.getGraphPoint().eq(4).click();
+    // //geometryToolTile.getGraphPoint().eq(2).click(); // Shared point with first polygon
+    // //geometryToolTile.getGraphPoint().eq(3).click();
+    // geometryToolTile.getGraphPolygon().should("have.length", 1);
+
+    // // Edit the first polygon by adding a new point and an existing point
+    // cy.log('Edit the first polygon by adding a new point and an existing point');
+    // geometryToolTile.getGraphPoint().eq(0).click(); // Enter edit mode for the first polygon
+    // geometryToolTile.clickGraphPosition(2, 2); // Add a new point
+    // geometryToolTile.clickGraphPosition(10, 0); // Add an existing point (already part of the second polygon)
+    // geometryToolTile.getGraphPoint().eq(0).click(); // Close the polygon
+    // geometryToolTile.getGraphPolygon().should("have.length", 2);
+    // geometryToolTile.getGraphPoint().should("have.length", 6); // New point added
+
+    // // Verify the first polygon has been updated
+    // cy.log('Verify the first polygon has been updated');
+    // geometryToolTile.getGraphPolygon().eq(0).should('exist');
+    // geometryToolTile.getGraphPolygon().eq(1).should('exist');
+
+    // // Delete the first polygon
+    // cy.log('Delete the first polygon');
+    // clueCanvas.clickToolbarButton('geometry', 'select');
+    // geometryToolTile.getGraphPolygon().eq(0).click(); // Select the first polygon
+    // clueCanvas.clickToolbarButton('geometry', 'delete');
+    // geometryToolTile.getGraphPolygon().should("have.length", 1);
+    // geometryToolTile.getGraphPoint().should("have.length", 3); // Points associated with the second polygon should remain
+
+    // // Edit the second polygon by adding an existing point from the first polygon
+    // cy.log('Edit the second polygon by adding an existing point from the first polygon');
+    // geometryToolTile.getGraphPoint().eq(0).click(); // Enter edit mode for the second polygon
+    // geometryToolTile.clickGraphPosition(0, 0); // Add an existing point from the deleted first polygon
+    // geometryToolTile.getGraphPoint().eq(0).click(); // Close the polygon
+    // geometryToolTile.getGraphPolygon().should("have.length", 1);
+    // geometryToolTile.getGraphPoint().should("have.length", 4); // New point added to the second polygon
+
     // Create polygon from existing points
     clueCanvas.clickToolbarButton('geometry', 'point');
     geometryToolTile.clickGraphPosition(0, 0);
