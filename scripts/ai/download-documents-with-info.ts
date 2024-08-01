@@ -7,14 +7,14 @@
 // to run this script type the following in the terminal
 // cf. https://stackoverflow.com/a/66626333/16328462
 // $ cd scripts/ai
-// $ npx tsx download-documents.ts
+// $ npx tsx download-documents-with-info.ts
 
 import fs from "fs";
 import admin from "firebase-admin";
 import stringify from "json-stringify-pretty-compact";
 
 import { datasetPath, networkFileName } from "./script-constants.js";
-import { getFirebaseBasePath, prettyDuration } from "../lib/script-utils.js";
+import { getFirebaseBasePath, getScriptRootFilePath, prettyDuration } from "../lib/script-utils.js";
 
 // Load the service account key JSON file.
 import { getClassKeys } from "../lib/firebase-classes.js";
@@ -44,7 +44,8 @@ const firebaseBasePath = getFirebaseBasePath(portal, demo);
 const {classKeys, accessTime, fetchTime} = await getClassKeys(firebaseBasePath);
 
 // Fetch the service account key JSON file contents; must be in same folder as script
-const credential = admin.credential.cert('../serviceAccountKey.json');
+const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
+const credential = admin.credential.cert(serviceAccountFile);
 // Initialize the app with a service account, granting admin privileges
 admin.initializeApp({
   credential,
@@ -91,6 +92,10 @@ function remapFirebaseProblemDocPublications(fbPublications: Record<string, any>
 }
 
 const credentialTime = Date.now();
+
+// CHECKME: what about cross class supports?
+// They might be saved as a supportPublication with an offering but then there
+// is a metadata file that has extra information about it.
 
 const targetDir = `dataset${startTime}`;
 const targetPath = `${datasetPath}${targetDir}`;
