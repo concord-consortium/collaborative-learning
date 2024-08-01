@@ -96,7 +96,6 @@ async function processFile(file: string) {
 
     processedFiles++;
 
-    // TODO: Determine if we need to skip certain tile types like placeholders.
     const tiles = documentContent?.tileMap ? Object.values<any>(documentContent.tileMap) : [];
     const tileTypes = [];
     for (const tile of tiles) {
