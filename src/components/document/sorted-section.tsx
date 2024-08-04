@@ -14,9 +14,6 @@ import { ENavTab } from "../../models/view/nav-tabs";
 
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 
-// TODO: Figure out how to totally move sorted-section-specific styles out of sort-work-view.scss without
-// breaking the layout. The focus document header and close button are being affected.
-import "./sort-work-view.scss";
 import "./sorted-section.scss";
 
 interface IProps {

@@ -129,11 +129,11 @@ describe('SortWorkView Tests', () => {
     cy.get("[data-testid=scroll-button-left]").should("exist").and("be.disabled");
     cy.get("[data-testid=scroll-button-right]").should("exist").and("not.be.disabled");
     cy.get("[data-testid=scroll-button-right]").click();
-    cy.wait(500);
+    cy.wait(500); // allow time for the scroll to complete
     cy.get("[data-testid=scroll-button-left]").should("exist").and("not.be.disabled");
     cy.get("[data-testid=doc-group-list]").invoke("prop", "scrollLeft").should("be.gt", 0);
     cy.get("[data-testid=scroll-button-left]").click();
-    cy.wait(500);
+    cy.wait(500); // allow time for the scroll to complete
     cy.get("[data-testid=scroll-button-left]").should("exist").and("be.disabled");
     cy.get("[data-testid=doc-group-list]").invoke("prop", "scrollLeft").should("be.eq", 0);
 

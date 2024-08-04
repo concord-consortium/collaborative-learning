@@ -13,6 +13,7 @@ import { DocumentGroup } from "../../models/stores/document-group";
 
 
 import "../thumbnail/document-type-collection.scss";
+import "./sort-work-view.scss";
 
 /**
  * Resources pane view of class work and exemplars.
