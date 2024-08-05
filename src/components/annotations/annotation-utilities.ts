@@ -94,10 +94,11 @@ export function getSparrowStraight(
   let deleteX, deleteY;
   if (includeDelete) {
     // Delete button is halfway between the text label and the end of the arrow,
-    // on whichever part of the line is longer.
+    // on whichever part of the line is longer. If nearly equal, default to the arrow end.
     const firstPartLength = distanceBetweenPoints([sourceX, sourceY], [peakX, peakY]);
     const secondPartLength = distanceBetweenPoints([peakX, peakY], [targetX, targetY]);
-    if (firstPartLength > secondPartLength) {
+    // The 10% buffer is to make sure that it always defaults to the arrow end when lengths are nearly equal
+    if (firstPartLength > secondPartLength*1.1) {
       deleteX = (sourceX + peakX) / 2;
       deleteY = (sourceY + peakY) / 2;
     } else {
