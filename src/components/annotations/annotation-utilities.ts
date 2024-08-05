@@ -24,7 +24,11 @@ export function constrainToLine(source: Point, target: Point, point: Point): Poi
   return [constrainedX, constrainedY];
 }
 
-// Returns the default peak for a sparrow from sourceX, sourceY to targetX, targetY.
+/** Returns the default peak for a sparrow from sourceX, sourceY to targetX, targetY.
+ * By "peak" here we really mean the position of the text label; for curved arrows this is the
+ * peak of the curve (where it is farthest from the line between source and target).
+ * For straight arrows though, we just pick a point on the line.
+ */
 const shortArcPeakScale = 1;
 const longArcPeakScale = .5;
 const shortArcLength = 100;
@@ -37,7 +41,7 @@ export function getDefaultPeak(shape: ArrowShape, sourceX: number, sourceY: numb
   const my = sourceY + dy / 2;
 
   if (shape === ArrowShape.straight) {
-    // For striaght-line arrows, we put the label by default 2/3 of the way from source to target
+    // For straight-line arrows, we put the label by default 2/3 of the way from source to target
     const peakX = sourceX + dx * 2/3;
     const peakY = sourceY + dy * 2/3;
 
