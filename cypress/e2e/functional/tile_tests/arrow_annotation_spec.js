@@ -228,7 +228,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationSvg().click(200, 150);
     aa.getAnnotationArrows().should("have.length", 1);
 
-    aa.getAnnotationSvg().click(300, 100);
+    aa.getAnnotationSvg().click(500, 100);
     aa.getAnnotationButtons().eq(1).click(); // Second end is anchored to an object
     aa.getAnnotationArrows().should("have.length", 2);
 
