@@ -41,13 +41,9 @@ export function getDefaultPeak(shape: ArrowShape, sourceX: number, sourceY: numb
   const my = sourceY + dy / 2;
 
   if (shape === ArrowShape.straight) {
-    // For straight-line arrows, we put the label by default 2/3 of the way from source to target
-    const peakX = sourceX + dx * 2/3;
-    const peakY = sourceY + dy * 2/3;
+    // For straight-line arrows, we put the label in the center
 
-    const peakDx = peakX - mx, peakDy = peakY - my;
-
-    return { peakX, peakY, peakDx, peakDy };
+    return { peakX: mx, peakY: my, peakDx: 0, peakDy: 0 };
 
   } else {
     // Curved sparrows have a peak that is perpendicular to the line from source to target
