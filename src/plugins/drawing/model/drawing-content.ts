@@ -48,7 +48,8 @@ export const DrawingContentModel = TileContentModel
     stamps: types.array(StampModel),
     vectorType: types.maybe(types.enumeration<VectorType>("VectorType", Object.values(VectorType))),
     // is type.maybe to avoid need for migration
-    currentStampIndex: types.maybe(types.number)
+    currentStampIndex: types.maybe(types.number),
+    zoom: types.optional(types.number, 1)
   })
   .volatile(self => ({
     metadata: undefined as DrawingToolMetadataModelType | undefined,
@@ -167,6 +168,10 @@ export const DrawingContentModel = TileContentModel
 
     setOpenPalette(pallette: OpenPaletteValues) {
       self.openPallette = pallette;
+    },
+
+    setZoom(zoom: number) {
+      self.zoom = zoom;
     },
 
     addObject(object: DrawingObjectSnapshotForAdd, addAtBack=false) {

@@ -17,6 +17,7 @@ import { DeleteButton, DuplicateButton, GroupButton, UngroupButton } from "./act
 import { ImageUploadButton } from "./toolbar-buttons/image-upload-button";
 import Icon from "./assets/draw-tool.svg";
 import HeaderIcon from "./assets/sketch-tile-id.svg";
+import { ZoomInButton, ZoomOutButton, FitAllButton } from "./toolbar-buttons/zoom-buttons";
 
 
 registerTileContentInfo({
@@ -75,5 +76,8 @@ registerTileToolbarButtons("drawing", [
   { name: "group", component: GroupButton },
   { name: "ungroup", component: UngroupButton },
   { name: "duplicate", component: DuplicateButton },
+  { name: "zoom-in", component: ZoomInButton },
+  { name: "zoom-out", component: ZoomOutButton },
+  { name: "fit-all", component: FitAllButton },
   { name: "delete", component: DeleteButton }
 ]);
