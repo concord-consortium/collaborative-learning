@@ -13,6 +13,7 @@ import { DocumentGroup } from "../../models/stores/document-group";
 
 
 import "../thumbnail/document-type-collection.scss";
+import "./sort-work-view.scss";
 
 /**
  * Resources pane view of class work and exemplars.
@@ -33,11 +34,18 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     persistentUI.setDocFilter(filter);
   };
 
+  const handlePrimarySortBySelection = (sort: string) => {
+    setPrimarySortBy(sort);
+    if (sort === secondarySortBy) {
+      setSecondarySortBy("None");
+    }
+  };
+
   const primarySortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
     disabled: false,
     selected: option === primarySortBy,
     text: option,
-    onClick: () => setPrimarySortBy(option)
+    onClick: () => handlePrimarySortBySelection(option)
   }));
 
   const secondarySortOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
@@ -46,7 +54,12 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     text: option,
     onClick: () => setSecondarySortBy(option)
   }));
-  secondarySortOptions.unshift({ text: "None", onClick: () => setSecondarySortBy("None") });
+  secondarySortOptions.unshift({
+    disabled: false,
+    selected: secondarySortBy === "None",
+    text: "None",
+    onClick: () => setSecondarySortBy("None")
+  });
 
   const docFilterOptions: ICustomDropdownItem[] = filterOptions.map((option) => ({
     selected: option === docFilter,
@@ -66,12 +79,6 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     sortedDocuments.updateMetaDataDocs(docFilter, unit.code, investigation.ordinal, problem.ordinal);
   }, [docFilter, unit.code, investigation.ordinal, problem.ordinal, sortedDocuments]);
 
-  useEffect(() => {
-    if (primarySortBy === secondarySortBy) {
-      setSecondarySortBy("None");
-    }
-  }, [primarySortBy, secondarySortBy]);
-
   return (
     <div key="sort-work-view" className="sort-work-view">
       {
@@ -79,6 +86,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
         <SortWorkDocumentArea openDocumentKey={openDocumentKey}/> :
         <>
           <SortWorkHeader
+            key={`sort-work-header-${primarySortBy}`}
             docFilter={docFilter}
             docFilterItems={docFilterOptions}
             primarySort={primarySortBy}

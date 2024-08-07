@@ -168,11 +168,11 @@ describe('Sorted Documents Model', () => {
       const sortedDocsByGroup = sortedDocuments.byGroup;
       expect(sortedDocsByGroup.length).toBe(3);
       const group3 = sortedDocsByGroup.find(group => group.label === 'Group 3');
-      expect(group3?.metaDataDocs.length).toBe(2); // Group 3 - Kirk + Scott
+      expect(group3?.documents.length).toBe(2); // Group 3 - Kirk + Scott
       const group5 = sortedDocsByGroup.find(group => group.label === 'Group 5');
-      expect(group5?.metaDataDocs.length).toBe(1); // Group 5 - Joe
+      expect(group5?.documents.length).toBe(1); // Group 5 - Joe
       const group9 = sortedDocsByGroup.find(group => group.label === 'Group 9');
-      expect(group9?.metaDataDocs.length).toBe(1); // Group 9 - Dennis
+      expect(group9?.documents.length).toBe(1); // Group 9 - Dennis
     });
 
     it('should sort the groups numerically from least to greatest', () => {
@@ -201,7 +201,7 @@ describe('Sorted Documents Model', () => {
       const sortedDocsByTools = sortedDocuments.byTools;
       const summaryOfResult = sortedDocsByTools.map(section => ({
         sectionLabel: section.label,
-        docKeys: section.metaDataDocs.map(doc => doc.key)
+        docKeys: section.documents.map(doc => doc.key)
       }));
       expect(summaryOfResult).toEqual([
         { sectionLabel: "Sketch", docKeys: [
