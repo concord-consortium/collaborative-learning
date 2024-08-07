@@ -6,17 +6,22 @@ exports[`Drawing Layer Components Ellipse adds a ellipse 1`] = `
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
-  <ellipse
-    cx="10"
-    cy="10"
-    fill="#cccccc"
-    pointer-events="visible"
-    rx="10"
-    ry="10"
-    stroke="#888888"
-    stroke-dasharray=""
-    stroke-width="1"
-  />
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  >
+    <ellipse
+      cx="10"
+      cy="10"
+      fill="#cccccc"
+      pointer-events="visible"
+      rx="10"
+      ry="10"
+      stroke="#888888"
+      stroke-dasharray=""
+      stroke-width="1"
+    />
+  </g>
 </svg>
 `;
 
@@ -25,7 +30,12 @@ exports[`Drawing Layer Components Ellipse deletes a ellipse 1`] = `
   height="1500"
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
-/>
+>
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  />
+</svg>
 `;
 
 exports[`Drawing Layer Components Ellipse moves a ellipse 1`] = `
@@ -34,17 +44,22 @@ exports[`Drawing Layer Components Ellipse moves a ellipse 1`] = `
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
-  <ellipse
-    cx="5"
-    cy="5"
-    fill="#cccccc"
-    pointer-events="visible"
-    rx="10"
-    ry="10"
-    stroke="#888888"
-    stroke-dasharray=""
-    stroke-width="1"
-  />
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  >
+    <ellipse
+      cx="5"
+      cy="5"
+      fill="#cccccc"
+      pointer-events="visible"
+      rx="10"
+      ry="10"
+      stroke="#888888"
+      stroke-dasharray=""
+      stroke-width="1"
+    />
+  </g>
 </svg>
 `;
 
@@ -54,14 +69,19 @@ exports[`Drawing Layer Components Freehand Line adds a freehand line 1`] = `
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
-  <path
-    d="M 10 10 l 1 1 l 2 2"
-    fill="none"
-    pointer-events="visible"
-    stroke="#888888"
-    stroke-dasharray=""
-    stroke-width="1"
-  />
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  >
+    <path
+      d="M 10 10 l 1 1 l 2 2"
+      fill="none"
+      pointer-events="visible"
+      stroke="#888888"
+      stroke-dasharray=""
+      stroke-width="1"
+    />
+  </g>
 </svg>
 `;
 
@@ -70,7 +90,12 @@ exports[`Drawing Layer Components Freehand Line deletes a freehand line 1`] = `
   height="1500"
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
-/>
+>
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  />
+</svg>
 `;
 
 exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
@@ -79,14 +104,19 @@ exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
-  <path
-    d="M 5 5 l 1 1 l 2 2"
-    fill="none"
-    pointer-events="visible"
-    stroke="#888888"
-    stroke-dasharray=""
-    stroke-width="1"
-  />
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  >
+    <path
+      d="M 5 5 l 1 1 l 2 2"
+      fill="none"
+      pointer-events="visible"
+      stroke="#888888"
+      stroke-dasharray=""
+      stroke-width="1"
+    />
+  </g>
 </svg>
 `;
 
@@ -96,102 +126,107 @@ exports[`Drawing Layer Components Group creates a group 1`] = `
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
-  <rect
-    class="group"
-    fill="none"
-    height="20"
-    pointer-events="visible"
-    stroke="none"
-    width="20"
-    x="0"
-    y="0"
-  />
-  <rect
-    class="rectangle"
-    fill="#cccccc"
-    height="10"
-    pointer-events="none"
-    stroke="#888888"
-    stroke-dasharray=""
-    stroke-width="1"
-    width="10"
-    x="10"
-    y="10"
-  />
-  <ellipse
-    cx="10"
-    cy="10"
-    fill="#cccccc"
-    pointer-events="none"
-    rx="10"
-    ry="10"
-    stroke="#888888"
-    stroke-dasharray=""
-    stroke-width="1"
-  />
-  <g>
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  >
     <rect
-      data-testid="selection-box"
-      fill="#777"
-      fill-opacity="0"
-      height="40"
+      class="group"
+      fill="none"
+      height="20"
+      pointer-events="visible"
+      stroke="none"
+      width="20"
+      x="0"
+      y="0"
+    />
+    <rect
+      class="rectangle"
+      fill="#cccccc"
+      height="10"
       pointer-events="none"
-      stroke="#777"
-      stroke-dasharray="10 5"
-      stroke-width="1.5"
-      width="40"
-      x="-10"
-      y="-10"
+      stroke="#888888"
+      stroke-dasharray=""
+      stroke-width="1"
+      width="10"
+      x="10"
+      y="10"
+    />
+    <ellipse
+      cx="10"
+      cy="10"
+      fill="#cccccc"
+      pointer-events="none"
+      rx="10"
+      ry="10"
+      stroke="#888888"
+      stroke-dasharray=""
+      stroke-width="1"
     />
     <g>
       <rect
-        class="resize-handle nw"
-        data-corner="nw"
-        fill="#FFF"
-        fill-opacity="1"
-        height="10"
+        data-testid="selection-box"
+        fill="#777"
+        fill-opacity="0"
+        height="40"
+        pointer-events="none"
         stroke="#777"
-        stroke-width="1"
-        width="10"
-        x="-15"
-        y="-15"
+        stroke-dasharray="10 5"
+        stroke-width="1.5"
+        width="40"
+        x="-10"
+        y="-10"
       />
-      <rect
-        class="resize-handle ne"
-        data-corner="ne"
-        fill="#FFF"
-        fill-opacity="1"
-        height="10"
-        stroke="#777"
-        stroke-width="1"
-        width="10"
-        x="25"
-        y="-15"
-      />
-      <rect
-        class="resize-handle sw"
-        data-corner="sw"
-        fill="#FFF"
-        fill-opacity="1"
-        height="10"
-        stroke="#777"
-        stroke-width="1"
-        width="10"
-        x="-15"
-        y="25"
-      />
-      <rect
-        class="resize-handle se"
-        data-corner="se"
-        fill="#FFF"
-        fill-opacity="1"
-        height="10"
-        stroke="#777"
-        stroke-width="1"
-        width="10"
-        x="25"
-        y="25"
-      />
+      <g>
+        <rect
+          class="resize-handle nw"
+          data-corner="nw"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="-15"
+          y="-15"
+        />
+        <rect
+          class="resize-handle ne"
+          data-corner="ne"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="25"
+          y="-15"
+        />
+        <rect
+          class="resize-handle sw"
+          data-corner="sw"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="-15"
+          y="25"
+        />
+        <rect
+          class="resize-handle se"
+          data-corner="se"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="25"
+          y="25"
+        />
+      </g>
     </g>
   </g>
 </svg>
@@ -202,7 +237,12 @@ exports[`Drawing Layer Components Group deletes a group 1`] = `
   height="1500"
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
-/>
+>
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  />
+</svg>
 `;
 
 exports[`Drawing Layer Components Group moves a group 1`] = `
@@ -211,102 +251,107 @@ exports[`Drawing Layer Components Group moves a group 1`] = `
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
-  <rect
-    class="group"
-    fill="none"
-    height="20"
-    pointer-events="visible"
-    stroke="none"
-    width="20"
-    x="0"
-    y="0"
-  />
-  <rect
-    class="rectangle"
-    fill="#cccccc"
-    height="10"
-    pointer-events="none"
-    stroke="#888888"
-    stroke-dasharray=""
-    stroke-width="1"
-    width="10"
-    x="10"
-    y="10"
-  />
-  <ellipse
-    cx="10"
-    cy="10"
-    fill="#cccccc"
-    pointer-events="none"
-    rx="10"
-    ry="10"
-    stroke="#888888"
-    stroke-dasharray=""
-    stroke-width="1"
-  />
-  <g>
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  >
     <rect
-      data-testid="selection-box"
-      fill="#777"
-      fill-opacity="0"
-      height="40"
+      class="group"
+      fill="none"
+      height="20"
+      pointer-events="visible"
+      stroke="none"
+      width="20"
+      x="0"
+      y="0"
+    />
+    <rect
+      class="rectangle"
+      fill="#cccccc"
+      height="10"
       pointer-events="none"
-      stroke="#777"
-      stroke-dasharray="10 5"
-      stroke-width="1.5"
-      width="40"
-      x="-10"
-      y="-10"
+      stroke="#888888"
+      stroke-dasharray=""
+      stroke-width="1"
+      width="10"
+      x="10"
+      y="10"
+    />
+    <ellipse
+      cx="10"
+      cy="10"
+      fill="#cccccc"
+      pointer-events="none"
+      rx="10"
+      ry="10"
+      stroke="#888888"
+      stroke-dasharray=""
+      stroke-width="1"
     />
     <g>
       <rect
-        class="resize-handle nw"
-        data-corner="nw"
-        fill="#FFF"
-        fill-opacity="1"
-        height="10"
+        data-testid="selection-box"
+        fill="#777"
+        fill-opacity="0"
+        height="40"
+        pointer-events="none"
         stroke="#777"
-        stroke-width="1"
-        width="10"
-        x="-15"
-        y="-15"
+        stroke-dasharray="10 5"
+        stroke-width="1.5"
+        width="40"
+        x="-10"
+        y="-10"
       />
-      <rect
-        class="resize-handle ne"
-        data-corner="ne"
-        fill="#FFF"
-        fill-opacity="1"
-        height="10"
-        stroke="#777"
-        stroke-width="1"
-        width="10"
-        x="25"
-        y="-15"
-      />
-      <rect
-        class="resize-handle sw"
-        data-corner="sw"
-        fill="#FFF"
-        fill-opacity="1"
-        height="10"
-        stroke="#777"
-        stroke-width="1"
-        width="10"
-        x="-15"
-        y="25"
-      />
-      <rect
-        class="resize-handle se"
-        data-corner="se"
-        fill="#FFF"
-        fill-opacity="1"
-        height="10"
-        stroke="#777"
-        stroke-width="1"
-        width="10"
-        x="25"
-        y="25"
-      />
+      <g>
+        <rect
+          class="resize-handle nw"
+          data-corner="nw"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="-15"
+          y="-15"
+        />
+        <rect
+          class="resize-handle ne"
+          data-corner="ne"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="25"
+          y="-15"
+        />
+        <rect
+          class="resize-handle sw"
+          data-corner="sw"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="-15"
+          y="25"
+        />
+        <rect
+          class="resize-handle se"
+          data-corner="se"
+          fill="#FFF"
+          fill-opacity="1"
+          height="10"
+          stroke="#777"
+          stroke-width="1"
+          width="10"
+          x="25"
+          y="25"
+        />
+      </g>
     </g>
   </g>
 </svg>
@@ -318,15 +363,20 @@ exports[`Drawing Layer Components Image adds an image 1`] = `
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
-  <image
-    height="10"
-    href="test-file-stub"
-    pointer-events="visible"
-    preserveAspectRatio="none"
-    width="10"
-    x="10"
-    y="10"
-  />
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  >
+    <image
+      height="10"
+      href="test-file-stub"
+      pointer-events="visible"
+      preserveAspectRatio="none"
+      width="10"
+      x="10"
+      y="10"
+    />
+  </g>
 </svg>
 `;
 
@@ -335,7 +385,12 @@ exports[`Drawing Layer Components Image deletes a image 1`] = `
   height="1500"
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
-/>
+>
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  />
+</svg>
 `;
 
 exports[`Drawing Layer Components Image moves a image 1`] = `
@@ -344,15 +399,20 @@ exports[`Drawing Layer Components Image moves a image 1`] = `
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
-  <image
-    height="10"
-    href="assets/logo_tw.png"
-    pointer-events="visible"
-    preserveAspectRatio="none"
-    width="10"
-    x="5"
-    y="5"
-  />
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  >
+    <image
+      height="10"
+      href="assets/logo_tw.png"
+      pointer-events="visible"
+      preserveAspectRatio="none"
+      width="10"
+      x="5"
+      y="5"
+    />
+  </g>
 </svg>
 `;
 
@@ -362,18 +422,23 @@ exports[`Drawing Layer Components Rectangle adds a Rectangle 1`] = `
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
-  <rect
-    class="rectangle"
-    fill="#cccccc"
-    height="10"
-    pointer-events="visible"
-    stroke="#888888"
-    stroke-dasharray=""
-    stroke-width="1"
-    width="10"
-    x="10"
-    y="10"
-  />
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  >
+    <rect
+      class="rectangle"
+      fill="#cccccc"
+      height="10"
+      pointer-events="visible"
+      stroke="#888888"
+      stroke-dasharray=""
+      stroke-width="1"
+      width="10"
+      x="10"
+      y="10"
+    />
+  </g>
 </svg>
 `;
 
@@ -382,7 +447,12 @@ exports[`Drawing Layer Components Rectangle deletes a rectangle 1`] = `
   height="1500"
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
-/>
+>
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  />
+</svg>
 `;
 
 exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
@@ -391,18 +461,23 @@ exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
-  <rect
-    class="rectangle"
-    fill="#cccccc"
-    height="10"
-    pointer-events="visible"
-    stroke="#888888"
-    stroke-dasharray=""
-    stroke-width="1"
-    width="10"
-    x="5"
-    y="5"
-  />
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  >
+    <rect
+      class="rectangle"
+      fill="#cccccc"
+      height="10"
+      pointer-events="visible"
+      stroke="#888888"
+      stroke-dasharray=""
+      stroke-width="1"
+      width="10"
+      x="5"
+      y="5"
+    />
+  </g>
 </svg>
 `;
 
@@ -413,32 +488,37 @@ exports[`Drawing Layer Components Vector arrow adds a Vector arrow 1`] = `
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
-    class="vector"
-    fill="#777777"
-    pointer-events="visible"
-    stroke="#777777"
-    stroke-dasharray=""
-    stroke-width="2"
+    class="object-canvas"
+    transform="scale(1)"
   >
-    <line
-      x1="20"
-      x2="40"
-      y1="20"
-      y2="40"
-    />
     <g
-      transform="translate(40 40) rotate(135)"
+      class="vector"
+      fill="#777777"
+      pointer-events="visible"
+      stroke="#777777"
+      stroke-dasharray=""
+      stroke-width="2"
     >
-      <polygon
-        points="0 0 4.5 9 -4.5 9 0 0"
+      <line
+        x1="20"
+        x2="40"
+        y1="20"
+        y2="40"
       />
-    </g>
-    <g
-      transform="translate(20 20) rotate(315)"
-    >
-      <polygon
-        points="0 0 4.5 9 -4.5 9 0 0"
-      />
+      <g
+        transform="translate(40 40) rotate(135)"
+      >
+        <polygon
+          points="0 0 4.5 9 -4.5 9 0 0"
+        />
+      </g>
+      <g
+        transform="translate(20 20) rotate(315)"
+      >
+        <polygon
+          points="0 0 4.5 9 -4.5 9 0 0"
+        />
+      </g>
     </g>
   </g>
 </svg>
@@ -451,32 +531,37 @@ exports[`Drawing Layer Components Vector arrow changes vector to double arrow 1`
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
-    class="vector"
-    fill="#777777"
-    pointer-events="visible"
-    stroke="#777777"
-    stroke-dasharray=""
-    stroke-width="2"
+    class="object-canvas"
+    transform="scale(1)"
   >
-    <line
-      x1="20"
-      x2="40"
-      y1="20"
-      y2="40"
-    />
     <g
-      transform="translate(40 40) rotate(135)"
+      class="vector"
+      fill="#777777"
+      pointer-events="visible"
+      stroke="#777777"
+      stroke-dasharray=""
+      stroke-width="2"
     >
-      <polygon
-        points="0 0 4.5 9 -4.5 9 0 0"
+      <line
+        x1="20"
+        x2="40"
+        y1="20"
+        y2="40"
       />
-    </g>
-    <g
-      transform="translate(20 20) rotate(315)"
-    >
-      <polygon
-        points="0 0 4.5 9 -4.5 9 0 0"
-      />
+      <g
+        transform="translate(40 40) rotate(135)"
+      >
+        <polygon
+          points="0 0 4.5 9 -4.5 9 0 0"
+        />
+      </g>
+      <g
+        transform="translate(20 20) rotate(315)"
+      >
+        <polygon
+          points="0 0 4.5 9 -4.5 9 0 0"
+        />
+      </g>
     </g>
   </g>
 </svg>
@@ -489,25 +574,30 @@ exports[`Drawing Layer Components Vector arrow changes vector to single arrow 1`
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
-    class="vector"
-    fill="#777777"
-    pointer-events="visible"
-    stroke="#777777"
-    stroke-dasharray=""
-    stroke-width="2"
+    class="object-canvas"
+    transform="scale(1)"
   >
-    <line
-      x1="20"
-      x2="40"
-      y1="20"
-      y2="40"
-    />
     <g
-      transform="translate(40 40) rotate(135)"
+      class="vector"
+      fill="#777777"
+      pointer-events="visible"
+      stroke="#777777"
+      stroke-dasharray=""
+      stroke-width="2"
     >
-      <polygon
-        points="0 0 4.5 9 -4.5 9 0 0"
+      <line
+        x1="20"
+        x2="40"
+        y1="20"
+        y2="40"
       />
+      <g
+        transform="translate(40 40) rotate(135)"
+      >
+        <polygon
+          points="0 0 4.5 9 -4.5 9 0 0"
+        />
+      </g>
     </g>
   </g>
 </svg>
@@ -518,7 +608,12 @@ exports[`Drawing Layer Components Vector arrow deletes a vector arrow 1`] = `
   height="1500"
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
-/>
+>
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  />
+</svg>
 `;
 
 exports[`Drawing Layer Components Vector arrow moves a vector arrow 1`] = `
@@ -528,32 +623,37 @@ exports[`Drawing Layer Components Vector arrow moves a vector arrow 1`] = `
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
-    class="vector"
-    fill="#777777"
-    pointer-events="visible"
-    stroke="#777777"
-    stroke-dasharray=""
-    stroke-width="2"
+    class="object-canvas"
+    transform="scale(1)"
   >
-    <line
-      x1="5"
-      x2="25"
-      y1="5"
-      y2="25"
-    />
     <g
-      transform="translate(25 25) rotate(135)"
+      class="vector"
+      fill="#777777"
+      pointer-events="visible"
+      stroke="#777777"
+      stroke-dasharray=""
+      stroke-width="2"
     >
-      <polygon
-        points="0 0 4.5 9 -4.5 9 0 0"
+      <line
+        x1="5"
+        x2="25"
+        y1="5"
+        y2="25"
       />
-    </g>
-    <g
-      transform="translate(5 5) rotate(315)"
-    >
-      <polygon
-        points="0 0 4.5 9 -4.5 9 0 0"
-      />
+      <g
+        transform="translate(25 25) rotate(135)"
+      >
+        <polygon
+          points="0 0 4.5 9 -4.5 9 0 0"
+        />
+      </g>
+      <g
+        transform="translate(5 5) rotate(315)"
+      >
+        <polygon
+          points="0 0 4.5 9 -4.5 9 0 0"
+        />
+      </g>
     </g>
   </g>
 </svg>
@@ -566,19 +666,24 @@ exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
-    class="vector"
-    fill="#888888"
-    pointer-events="visible"
-    stroke="#888888"
-    stroke-dasharray=""
-    stroke-width="1"
+    class="object-canvas"
+    transform="scale(1)"
   >
-    <line
-      x1="10"
-      x2="20"
-      y1="10"
-      y2="20"
-    />
+    <g
+      class="vector"
+      fill="#888888"
+      pointer-events="visible"
+      stroke="#888888"
+      stroke-dasharray=""
+      stroke-width="1"
+    >
+      <line
+        x1="10"
+        x2="20"
+        y1="10"
+        y2="20"
+      />
+    </g>
   </g>
 </svg>
 `;
@@ -588,7 +693,12 @@ exports[`Drawing Layer Components Vector line deletes a vector line 1`] = `
   height="1500"
   width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
-/>
+>
+  <g
+    class="object-canvas"
+    transform="scale(1)"
+  />
+</svg>
 `;
 
 exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
@@ -598,19 +708,24 @@ exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
-    class="vector"
-    fill="#888888"
-    pointer-events="visible"
-    stroke="#888888"
-    stroke-dasharray=""
-    stroke-width="1"
+    class="object-canvas"
+    transform="scale(1)"
   >
-    <line
-      x1="5"
-      x2="15"
-      y1="5"
-      y2="15"
-    />
+    <g
+      class="vector"
+      fill="#888888"
+      pointer-events="visible"
+      stroke="#888888"
+      stroke-dasharray=""
+      stroke-width="1"
+    >
+      <line
+        x1="5"
+        x2="15"
+        y1="5"
+        y2="15"
+      />
+    </g>
   </g>
 </svg>
 `;
