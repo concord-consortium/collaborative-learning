@@ -729,3 +729,55 @@ exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
   </g>
 </svg>
 `;
+
+exports[`Drawing Layer Zoom zooms in 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    transform="scale(2)"
+  >
+    <rect
+      class="rectangle"
+      fill="#cccccc"
+      height="10"
+      pointer-events="visible"
+      stroke="#888888"
+      stroke-dasharray=""
+      stroke-width="1"
+      width="10"
+      x="10"
+      y="10"
+    />
+  </g>
+</svg>
+`;
+
+exports[`Drawing Layer Zoom zooms out 1`] = `
+<svg
+  height="1500"
+  width="1500"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+  <g
+    class="object-canvas"
+    transform="scale(0.5)"
+  >
+    <rect
+      class="rectangle"
+      fill="#cccccc"
+      height="10"
+      pointer-events="visible"
+      stroke="#888888"
+      stroke-dasharray=""
+      stroke-width="1"
+      width="10"
+      x="10"
+      y="10"
+    />
+  </g>
+</svg>
+`;

@@ -4,6 +4,7 @@ import { observer } from 'mobx-react';
 import { TileToolbarButton } from '../../../components/toolbar/tile-toolbar-button';
 import { IToolbarButtonComponentProps } from "../../../components/toolbar/toolbar-button-manager";
 import { DrawingContentModelContext } from '../components/drawing-content-context';
+import { useDrawingAreaContext } from '../components/drawing-area-context';
 
 import ZoomInIcon from "../../../clue/assets/icons/zoom-in-icon.svg";
 import ZoomOutIcon from "../../../clue/assets/icons/zoom-out-icon.svg";
@@ -54,10 +55,18 @@ export const ZoomOutButton = observer(function ZoomOutButton({ name }: IToolbarB
 });
 
 export const FitAllButton = ({ name }: IToolbarButtonComponentProps) => {
-  // const drawingModel = useContext(DrawingContentModelContext);
+  const drawingModel = useContext(DrawingContentModelContext);
+  const drawingAreaContext = useDrawingAreaContext();
+  const padding = 10;
 
   function handleClick() {
-    // drawingModel?.zoomIn();
+    const canvasSize = drawingAreaContext?.getVisibleCanvasSize();
+    if (canvasSize) {
+      const bb = drawingModel.objectsBoundingBox;
+      const optimalZoom = Math.min((canvasSize.x-padding) / bb.se.x, (canvasSize.y-padding) / bb.se.y);
+      const legalZoom = Math.max(minZoom, Math.min(maxZoom, optimalZoom));
+      drawingModel?.setZoom(legalZoom);
+    }
   }
 
   return (

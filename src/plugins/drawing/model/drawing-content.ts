@@ -100,6 +100,18 @@ export const DrawingContentModel = TileContentModel
         return (obj.x === pos.x && obj.y === pos.y);
       });
     },
+    /** Return a bounding box that contains all objects in the content */
+    get objectsBoundingBox() {
+      const nw = {x: 0, y: 0}, se = {x: 0, y: 0};
+      self.objects.forEach((obj) => {
+        const bb = obj.boundingBox;
+        if (bb.nw.x < nw.x) nw.x = bb.nw.x;
+        if (bb.nw.y < nw.y) nw.y = bb.nw.y;
+        if (bb.se.x > se.x) se.x = bb.se.x;
+        if (bb.se.y > se.y) se.y = bb.se.y;
+      });
+      return {nw, se};
+    },
     exportJson(options?: ITileExportOptions) {
       // Translate image urls if necessary
       const {type, objects: originalObjects} = getSnapshot(self);
