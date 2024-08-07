@@ -426,7 +426,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public getWorkspacePoint = (e: PointerEvent|React.PointerEvent<any>): Point|null => {
     if (this.svgRef) {
-      const scale = this.props.scale || 1;
+      const zoom = this.getContent().zoom;
+      const scale = (this.props.scale || 1) * zoom;
       const rect = ((this.svgRef as unknown) as Element).getBoundingClientRect();
       return {
         x: (e.clientX - rect.left) / scale,
