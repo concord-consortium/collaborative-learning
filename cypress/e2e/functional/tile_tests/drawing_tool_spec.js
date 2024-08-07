@@ -85,6 +85,44 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Rectangle");
     drawToolTile.getDrawTileShowSortPanel().get('li:last').should("contain.text", "Circle");
 
+    cy.log("can zoom in, zoom out, and fit objects");
+    drawToolTile.getDrawTileObjectCanvas().should('have.attr', 'transform', 'scale(1)');
+    clueCanvas.clickToolbarButton('drawing', 'zoom-in');
+    drawToolTile.getDrawTileObjectCanvas().should('have.attr', 'transform', 'scale(1.25)');
+    cy.get("@log")
+      .should("have.been.been.calledWith", LogEventName.DRAWING_TOOL_CHANGE, Cypress.sinon.match.object)
+      .its("lastCall.args.1").should("deep.include", { operation: "setZoom", args: [1.25] });
+
+    clueCanvas.clickToolbarButton('drawing', 'zoom-out');
+    drawToolTile.getDrawTileObjectCanvas().should('have.attr', 'transform', 'scale(1)');
+    cy.get("@log")
+      .should("have.been.been.calledWith", LogEventName.DRAWING_TOOL_CHANGE, Cypress.sinon.match.object)
+      .its("lastCall.args.1").should("deep.include", { operation: "setZoom", args: [1] });
+
+    // Should not zoom out past zoom level .1
+    for (let z=0; z< 11; z++) {
+      clueCanvas.clickToolbarButton('drawing', 'zoom-out');
+    }
+    clueCanvas.toolbarButtonIsDisabled('drawing', 'zoom-out');
+    drawToolTile.getDrawTileObjectCanvas().should('have.attr', 'transform', 'scale(0.1)');
+
+    // Should not zoom in past zoom level 2
+    for (let z=0; z< 14; z++) {
+      clueCanvas.clickToolbarButton('drawing', 'zoom-in');
+    }
+    clueCanvas.toolbarButtonIsDisabled('drawing', 'zoom-in');
+    drawToolTile.getDrawTileObjectCanvas().should('have.attr', 'transform', 'scale(2)');
+
+    // Fit should return an appropriate zoom level for the objects drawn
+    clueCanvas.clickToolbarButton('drawing', 'fit-all');
+    clueCanvas.toolbarButtonIsEnabled('drawing', 'zoom-in');
+    clueCanvas.toolbarButtonIsEnabled('drawing', 'zoom-out');
+    drawToolTile.getDrawTileObjectCanvas().then(canvas => {
+      // Check that the canvas has a transform attribute like 'scale(x)' where x is approximatesly 1.12
+      const scale = parseFloat(canvas.attr('transform').replace(/scale\((\d+\.\d+)\)/, '$1'));
+      expect(scale).to.be.within(1.1, 1.2);
+    });
+
     cy.log("can delete objects and close panel");
     // Delete objects
     drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Rectangle").click();

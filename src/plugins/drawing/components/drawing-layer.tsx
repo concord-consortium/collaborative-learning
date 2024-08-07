@@ -312,7 +312,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     const zoom = this.getContent().zoom;
     const strokeWidth = 1.5/zoom;
     const padding = SELECTION_BOX_PADDING/zoom;
-    const dashArray = `${10/zoom} ${5/zoom}`;
+    const dashArray = [10/zoom, 5/zoom];
 
     return selectedObjects.map((object, index) => {
       let {nw: {x: nwX, y: nwY}, se: {x: seX, y: seY}} = object.boundingBox;
@@ -344,7 +344,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
                 fillOpacity="0"
                 stroke={color}
                 strokeWidth={strokeWidth}
-                strokeDasharray={dashArray}
+                strokeDasharray={dashArray.join(" ")}
                 pointerEvents={"none"}
                />
                {resizers}

@@ -163,6 +163,9 @@ Uses common toolbar framework. Default buttons:
 - `group`
 - `ungroup`
 - `duplicate`
+- `zoom-in`
+- `zoom-out`
+- `fit-all`
 - `delete`
 
 In addition, if shared variables are configured in unit, it supports additional buttons:

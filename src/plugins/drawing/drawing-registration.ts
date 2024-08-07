@@ -15,10 +15,10 @@ import { StampButton } from "./toolbar-buttons/stamp-button";
 import { FillColorButton, StrokeColorButton } from "./toolbar-buttons/select-buttons";
 import { DeleteButton, DuplicateButton, GroupButton, UngroupButton } from "./action-buttons";
 import { ImageUploadButton } from "./toolbar-buttons/image-upload-button";
-import Icon from "./assets/draw-tool.svg";
-import HeaderIcon from "./assets/sketch-tile-id.svg";
 import { ZoomInButton, ZoomOutButton, FitAllButton } from "./toolbar-buttons/zoom-buttons";
 
+import Icon from "./assets/draw-tool.svg";
+import HeaderIcon from "./assets/sketch-tile-id.svg";
 
 registerTileContentInfo({
   type: kDrawingTileType,
