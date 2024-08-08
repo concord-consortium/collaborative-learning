@@ -170,6 +170,10 @@ export const DocumentsModel = types
       });
     },
 
+    get exemplarDocuments() {
+      return self.byType(ExemplarDocument);
+    },
+
     get visibleExemplarDocuments() {
       return self.byType(ExemplarDocument).filter(e => self.isExemplarVisible(e.key));
     },

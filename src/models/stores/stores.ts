@@ -269,7 +269,9 @@ class Stores implements IStores{
       });
       showLoadingMessage("Loading exemplar documents");
       createAndLoadExemplarDocs({
+        unit,
         unitUrl: unitUrls.content,
+        investigation,
         problem,
         documents: this.documents,
         user: this.user,

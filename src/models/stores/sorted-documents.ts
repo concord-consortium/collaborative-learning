@@ -192,6 +192,27 @@ export class SortedDocuments {
       matchedDocKeys.add(doc.data().key);
     });
 
+    // Add Exemplar documents, which should have been loaded into the documents
+    // store but are not found in the firestore query -- they are authored as
+    // content, not found in the database.
+    this.stores.documents.exemplarDocuments.forEach(doc => {
+      const exemplarStrategy = doc.properties.get('authoredCommentTag');
+      const metadata: IDocumentMetadata = {
+        uid: doc.uid,
+        type: doc.type,
+        key: doc.key,
+        createdAt: doc.createdAt,
+        title: doc.title,
+        properties: undefined,
+        tileTypes: Array.from(doc.content?.tileTypes || []),
+        strategies: exemplarStrategy ? [exemplarStrategy] : [],
+        investigation: doc.investigation,
+        problem: doc.problem,
+        unit: doc.unit
+      };
+      docsArray.push(metadata);
+    });
+
     runInAction(() => {
       this.firestoreMetadataDocs.replace(docsArray);
     });
