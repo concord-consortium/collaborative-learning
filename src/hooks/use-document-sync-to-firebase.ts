@@ -198,8 +198,7 @@ export function useDocumentSyncToFirebase(
     return Promise.all(promises);
   }, options);
 
-  const throttledMutate = useMemo(() => _throttle(mutation.mutate, 1000), [mutation.mutate, 1000]);
-
+  const throttledMutate = useMemo(() => _throttle(mutation.mutate, 1000), [mutation.mutate]);
 
   useEffect(() => {
     const cleanup = enabled
@@ -209,7 +208,9 @@ export function useDocumentSyncToFirebase(
                 throttledMutate(snapshot);
               })
             : undefined;
-    return () => cleanup?.();
+    return () => {
+      cleanup?.();
+    };
   }, [enabled, document.content, mutation, throttledMutate]);
 
   useEffect(() => {
