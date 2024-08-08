@@ -11,6 +11,12 @@ class SortedWork {
   getPrimarySortByTagOption(){
     return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-identify-design approach"]');
   }
+  getPrimarySortByBookmarkedOption(){
+    return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-bookmarked"]');
+  }
+  getPrimarySortByToolsOption(){
+    return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-tools"]');
+  }
   getSortWorkItem() {
     return cy.get(".sort-work-view .sorted-sections .list-item .footer .info");
   }
@@ -19,6 +25,10 @@ class SortedWork {
   }
   getSortWorkGroup(groupName) {
     return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(groupName).parent().parent().parent();
+  }
+  getSortWorkSubgroup(groupName, subgroupName) {
+    return this.getSortWorkGroup(groupName)
+      .find('[data-testid="doc-group"] [data-testid="doc-group-label"]').contains(subgroupName).parent();
   }
   getSecondarySortByMenu() {
     return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu');
@@ -64,6 +74,12 @@ class SortedWork {
   }
   checkDocumentNotInGroup(groupName, doc) {
     this.getSortWorkGroup(groupName).find(".list .list-item .footer .info").should("not.contain", doc);
+  }
+  checkSimpleDocumentInGroup(groupName, doc) {
+    this.getSortWorkGroup(groupName).find('[data-testid="section-document-list"] [data-test="simple-document-item"]').should("have.attr", "title", doc);
+  }
+  checkSimpleDocumentInSubgroup(groupName, subgroupName, doc) {
+    this.getSortWorkSubgroup(groupName, subgroupName).find('[data-test="simple-document-item"]').should("have.attr", "title", doc);
   }
   checkGroupIsEmpty(groupName){
     cy.get(".sort-work-view .sorted-sections .section-header-label")
