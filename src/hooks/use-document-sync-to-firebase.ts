@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { throttle as _throttle } from "lodash";
+import { onSnapshot, SnapshotOut } from "mobx-state-tree";
 import { useSyncMstNodeToFirebase } from "./use-sync-mst-node-to-firebase";
 import { useSyncMstPropToFirebase } from "./use-sync-mst-prop-to-firebase";
 import { DEBUG_DOCUMENT, DEBUG_SAVE } from "../lib/debug";
@@ -11,7 +12,6 @@ import { isPublishedType, LearningLogDocument, LearningLogPublication, PersonalD
 import { UserModelType } from "../models/stores/user";
 import { Firestore } from "src/lib/firestore";
 import { useMutation, UseMutationOptions } from "react-query";
-import { onSnapshot, SnapshotOut } from "@concord-consortium/mobx-state-tree";
 import { ITileMapEntry } from "functions/src/shared";
 import { DocumentContentSnapshotType } from "src/models/document/document-content";
 

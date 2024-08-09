@@ -3,6 +3,7 @@ import { waitFor } from "@testing-library/react";
 import { observable, reaction, runInAction } from "mobx";
 import { SnapshotIn } from "mobx-state-tree";
 import { UseMutationOptions } from "react-query";
+import firebase from "firebase/app";
 import { Firebase } from "../lib/firebase";
 import { Firestore } from "../lib/firestore";
 import { DocumentModel, createDocumentModel } from "../models/document/document";
@@ -56,7 +57,6 @@ const mockHttpsCallable = jest.fn((fn: string) => {
 });
 
 jest.mock("firebase/app", () => {
-  const mockInitializeApp = jest.fn();
   const mockFirestore = jest.fn().mockReturnValue({
     collection: jest.fn().mockReturnValue({
       where: jest.fn().mockReturnValue({
@@ -67,25 +67,12 @@ jest.mock("firebase/app", () => {
     })
   });
   return {
-    initializeApp: mockInitializeApp,
     firestore: mockFirestore,
     functions: () => ({
       httpsCallable: (fn: string) => mockHttpsCallable(fn)
     }),
   };
 });
-
-const firebaseConfig = {
-  apiKey: "fake-api-key",
-  authDomain: "fake-auth-domain",
-  projectId: "fake-project-id",
-  storageBucket: "fake-storage-bucket",
-  messagingSenderId: "fake-messaging-sender-id",
-  appId: "fake-app-id"
-};
-
-import firebase from "firebase/app";
-firebase.initializeApp(firebaseConfig);
 
 const mockUpdate = jest.fn();
 const mockRef = jest.fn();
