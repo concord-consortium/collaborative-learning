@@ -36,7 +36,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     const { bookmarks } = useStores();
 
     // sync delete a publication to firebase
-    useDocumentSyncToFirebase(user, dbStore.firebase, document, true);
+    useDocumentSyncToFirebase(user, dbStore.firebase, dbStore.firestore, document, true);
 
     function handleDocumentDragStart(e: React.DragEvent<HTMLDivElement>) {
       e.dataTransfer.setData(DocumentDragKey, document.key);
