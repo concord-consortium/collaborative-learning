@@ -309,12 +309,17 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public renderSelectionBorders(selectedObjects: DrawingObjectType[], enableActions: boolean) {
+    const zoom = this.getContent().zoom;
+    const strokeWidth = 1.5/zoom;
+    const padding = SELECTION_BOX_PADDING/zoom;
+    const dashArray = [10/zoom, 5/zoom];
+
     return selectedObjects.map((object, index) => {
       let {nw: {x: nwX, y: nwY}, se: {x: seX, y: seY}} = object.boundingBox;
-      nwX -= SELECTION_BOX_PADDING;
-      nwY -= SELECTION_BOX_PADDING;
-      seX += SELECTION_BOX_PADDING;
-      seY += SELECTION_BOX_PADDING;
+      nwX -= padding;
+      nwY -= padding;
+      seX += padding;
+      seY += padding;
 
       const color = enableActions ? SELECTION_COLOR : HOVER_COLOR;
 
@@ -338,8 +343,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
                 fill={color}
                 fillOpacity="0"
                 stroke={color}
-                strokeWidth="1.5"
-                strokeDasharray="10 5"
+                strokeWidth={strokeWidth}
+                strokeDasharray={dashArray.join(" ")}
                 pointerEvents={"none"}
                />
                {resizers}
@@ -348,12 +353,15 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public renderResizeHandle(object: DrawingObjectType, corner: string, x: number, y: number, color: string) {
-    const resizeBoxOffset = SELECTION_BOX_RESIZE_HANDLE_SIZE/2;
+    const zoom = this.getContent().zoom;
+    const handleSize = SELECTION_BOX_RESIZE_HANDLE_SIZE / zoom;
+    const strokeWidth = 1/zoom;
+    const resizeBoxOffset = handleSize/2;
 
     return <rect key={corner} data-corner={corner} className={"resize-handle " + corner}
                 x={x-resizeBoxOffset} y={y-resizeBoxOffset}
-                width={SELECTION_BOX_RESIZE_HANDLE_SIZE} height={SELECTION_BOX_RESIZE_HANDLE_SIZE}
-                stroke={color} strokeWidth="1" fill="#FFF" fillOpacity="1"
+                width={handleSize} height={handleSize}
+                stroke={color} strokeWidth={strokeWidth} fill="#FFF" fillOpacity="1"
                 onPointerDown={(e) => this.handleResizeStart(e, object)}
           />;
   }
@@ -418,7 +426,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public getWorkspacePoint = (e: PointerEvent|React.PointerEvent<any>): Point|null => {
     if (this.svgRef) {
-      const scale = this.props.scale || 1;
+      const zoom = this.getContent().zoom;
+      const scale = (this.props.scale || 1) * zoom;
       const rect = ((this.svgRef as unknown) as Element).getBoundingClientRect();
       return {
         x: (e.clientX - rect.left) / scale,
@@ -440,6 +449,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       }
     }
 
+    const zoom = this.getContent().zoom;
+
     return (
       // We don't propagate pointer events to the tile, since the drawing layer
       // already handles selecting the tile when necessary and we don't want to
@@ -454,15 +465,17 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           onDrop={this.handleDrop} >
 
         <svg xmlnsXlink="http://www.w3.org/1999/xlink" width={1500} height={1500} ref={this.setSvgRef}>
-          {this.renderObjects()}
-          {!this.props.readOnly && this.renderSelectionBorders(this.getSelectedObjects(), true)}
-          {highlightObject
-            ? this.renderSelectionBorders([highlightObject], false)
-            : null}
-          {this.state.currentDrawingObject
-            ? renderDrawingObject(this.state.currentDrawingObject)
-            : null}
-          {this.state.selectionBox ? this.state.selectionBox.render() : null}
+          <g className="object-canvas" transform={`scale(${zoom})`}>
+            {this.renderObjects()}
+            {!this.props.readOnly && this.renderSelectionBorders(this.getSelectedObjects(), true)}
+            {highlightObject
+              ? this.renderSelectionBorders([highlightObject], false)
+              : null}
+            {this.state.currentDrawingObject
+              ? renderDrawingObject(this.state.currentDrawingObject)
+              : null}
+            {this.state.selectionBox ? this.state.selectionBox.render(zoom) : null}
+          </g>
         </svg>
       </div>
     );

@@ -15,9 +15,10 @@ import { StampButton } from "./toolbar-buttons/stamp-button";
 import { FillColorButton, StrokeColorButton } from "./toolbar-buttons/select-buttons";
 import { DeleteButton, DuplicateButton, GroupButton, UngroupButton } from "./action-buttons";
 import { ImageUploadButton } from "./toolbar-buttons/image-upload-button";
+import { ZoomInButton, ZoomOutButton, FitAllButton } from "./toolbar-buttons/zoom-buttons";
+
 import Icon from "./assets/draw-tool.svg";
 import HeaderIcon from "./assets/sketch-tile-id.svg";
-
 
 registerTileContentInfo({
   type: kDrawingTileType,
@@ -75,5 +76,8 @@ registerTileToolbarButtons("drawing", [
   { name: "group", component: GroupButton },
   { name: "ungroup", component: UngroupButton },
   { name: "duplicate", component: DuplicateButton },
+  { name: "zoom-in", component: ZoomInButton },
+  { name: "zoom-out", component: ZoomOutButton },
+  { name: "fit-all", component: FitAllButton },
   { name: "delete", component: DeleteButton }
 ]);
