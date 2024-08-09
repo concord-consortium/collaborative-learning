@@ -212,20 +212,60 @@ context('Geometry Tool', function () {
     geometryToolTile.toggleAngleCheckbox();
     geometryToolTile.getGraphPointLabel().contains('90°').should('exist');
 
+    // Test keyboard functions to move the selected point(s)
+    cy.log('Test keyboard functions');
+    // Select the graph point at (5, 5)
+    geometryToolTile.selectGraphPoint(5, 5);
+
+    // Verify that the point has been selected
+    geometryToolTile.getSelectedGraphPoint().should('have.length', 1);
+
+    // Move the selected point up using the arrow key
+    geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 38 }); // simulate up arrow key press
+
+    // Move the selected point right using the arrow key
+    geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 39 }); // simulate right arrow key press
+
+    // Verify that the point has moved to approximately (5.1, 4.9)
+    geometryToolTile.getGraphPoint().then(($points) => {
+        const movedPoint = $points.filter((index, el) => {
+            const cx = parseFloat(el.getAttribute('cx'));
+            const cy = parseFloat(el.getAttribute('cy'));
+            return Math.abs(cx - 5.1) < 0.1 && Math.abs(cy - 4.9) < 0.1;
+        });
+        expect(movedPoint).to.have.length(0);
+    });
+
+    // Move the point back to the original position
+    clueCanvas.getUndoTool().click().click();
+
+    cy.log('delete a point with keyboard and undo it');
+    // Delete the selected point
+    geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 46 }); // simulate delete key press
+
+    // Verify that the point at (5, 5) no longer exists
+    geometryToolTile.getGraphPoint().filter((index, el) => {
+        const cx = parseFloat(el.getAttribute('cx'));
+        const cy = parseFloat(el.getAttribute('cy'));
+        return Math.abs(cx - 5) < 0.1 && Math.abs(cy - 5) < 0.1;
+    }).should('have.length', 0);
+
+    clueCanvas.getUndoTool().click();
+
     // Label the polygon
     geometryToolTile.getGraphPolygon().click(50, 50, { force: true,  });
     geometryToolTile.getSelectedGraphPoint().should('have.length', 3);
     geometryToolTile.getGraphPointLabel().contains('12.').should('not.exist');
-    geometryToolTile.getGraphPointLabel().contains('ABC').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('CBA').should('not.exist');
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.getModalTitle().should('contain.text', 'Polygon Label/Value');
     geometryToolTile.chooseLabelOption('length');
     geometryToolTile.getGraphPointLabel().contains('12.').should('exist');
     clueCanvas.clickToolbarButton('geometry', 'label');
-    geometryToolTile.getModalLabelInput().should('have.value', 'ABC');
+    geometryToolTile.getModalLabelInput().should('have.value', 'CBA');
     geometryToolTile.chooseLabelOption('label');
     geometryToolTile.getGraphPointLabel().contains('12.').should('not.exist');
-    geometryToolTile.getGraphPointLabel().contains('ABC').should('exist');
+    geometryToolTile.getGraphPointLabel().contains('CBA').should('exist');
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.chooseLabelOption('none');
     geometryToolTile.clickGraphPosition(0, 0); // deselect polygon
@@ -237,14 +277,14 @@ context('Geometry Tool', function () {
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.getModalTitle().should('contain.text', 'Segment Label/Value');
     geometryToolTile.chooseLabelOption('label');
-    geometryToolTile.getGraphPointLabel().contains('AB').should('exist');
+    geometryToolTile.getGraphPointLabel().contains('BC').should('exist');
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.chooseLabelOption('length');
-    geometryToolTile.getGraphPointLabel().contains('AB').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('BC').should('not.exist');
     geometryToolTile.getGraphPointLabel().contains('5').should('exist');
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.chooseLabelOption('none');
-    geometryToolTile.getGraphPointLabel().contains('AB').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('BC').should('not.exist');
     geometryToolTile.getGraphPointLabel().contains('5').should('not.exist');
 
     // Change color of polygon
@@ -277,7 +317,70 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPoint().should("have.length", 0);
     geometryToolTile.getSelectedGraphPoint().should("have.length", 0);
 
+    // Create first polygon from existing points
+    cy.log('Create first polygon from existing points');
+    clueCanvas.clickToolbarButton('geometry', 'point');
+    geometryToolTile.clickGraphPosition(0, 0);
+    geometryToolTile.clickGraphPosition(10, 0);
+    geometryToolTile.clickGraphPosition(5, 5);
+    clueCanvas.clickToolbarButton('geometry', 'polygon');
+    geometryToolTile.getGraphPoint().should("have.length", 3);
+    geometryToolTile.getGraphPoint().eq(0).click();
+    geometryToolTile.getGraphPoint().eq(1).click();
+    geometryToolTile.getGraphPoint().eq(2).click();
+    geometryToolTile.getGraphPoint().eq(0).click();
+    geometryToolTile.getGraphPolygon().should("have.length", 1);
+    geometryToolTile.getGraphPoint().should("have.length", 3);
+
+    // Add a point to the existing polygon
+    cy.log('Add a point to the existing polygon');
+    geometryToolTile.clickGraphPosition(10, 0); // Reuse existing point
+    geometryToolTile.clickGraphPosition(15, 5);
+    geometryToolTile.clickGraphPosition(5, 5); // Reuse existing point
+    clueCanvas.clickToolbarButton('geometry', 'polygon');
+    // check number of points
+    geometryToolTile.getGraphPoint().should("have.length", 4);
+
+    // Create a second polygon that shares the same points as the first
+    cy.log('Create a second polygon that shares the same points as the first');
+    clueCanvas.clickToolbarButton('geometry', 'polygon');
+    geometryToolTile.clickGraphPosition(15, 10); // new point
+    geometryToolTile.clickGraphPosition(15, 5); // shared point
+    geometryToolTile.clickGraphPosition(20, 5); // new point
+    geometryToolTile.clickGraphPosition(15, 10); // close the polygon
+    // Point should be shared
+    geometryToolTile.getGraphPoint().should("have.length", 6); // New point added
+    // Move the shared point right using the arrow key
+    clueCanvas.clickToolbarButton('geometry', 'select');
+    geometryToolTile.clickGraphPosition(15, 5); // Shared point
+    geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 39 }); // simulate right arrow key press
+
+    // Verify that the point has moved to approximately (15.1, 4.9)
+    geometryToolTile.getGraphPoint().then(($points) => {
+        const movedPoint = $points.filter((index, el) => {
+            const cx = parseFloat(el.getAttribute('cx'));
+            const cy = parseFloat(el.getAttribute('cy'));
+            return Math.abs(cx - 15.1) < 0.1 && Math.abs(cy - 4.9) < 0.1;
+        });
+        expect(movedPoint).to.have.length(0);
+    });
+
+    // Delete the first polygon
+    clueCanvas.clickToolbarButton('geometry', 'select');
+    geometryToolTile.clickGraphPosition(5, 3); //click inside the polygon
+    clueCanvas.clickToolbarButton('geometry', 'delete');
+    geometryToolTile.getGraphPolygon().should("have.length", 1);
+    geometryToolTile.getGraphPoint().should("have.length", 3);
+
+    // Delete the second
+    clueCanvas.clickToolbarButton('geometry', 'select');
+    geometryToolTile.clickGraphPosition(17, 7); // click inside the polygon
+    clueCanvas.clickToolbarButton('geometry', 'delete');
+    geometryToolTile.getGraphPolygon().should("have.length", 0);
+    geometryToolTile.getGraphPoint().should("have.length", 0);
+
     // Create polygon from existing points
+    cy.log('Create polygon from existing points');
     clueCanvas.clickToolbarButton('geometry', 'point');
     geometryToolTile.clickGraphPosition(0, 0);
     geometryToolTile.clickGraphPosition(10, 0);
@@ -339,6 +442,7 @@ context('Geometry Tool', function () {
     clueCanvas.clickToolbarButton('geometry', 'delete');
     geometryToolTile.getGraphCircle().should("have.length", 0);
     geometryToolTile.getGraphPoint().should("have.length", 1);
+    geometryToolTile.getGraphPolygon().should("have.length", 0); // Verify the polygon is created
   });
 
   it('will test Geometry tile undo redo', () => {
