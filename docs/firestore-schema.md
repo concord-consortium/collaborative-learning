@@ -1,0 +1,89 @@
+# Firestore database structure
+
+## Top level collections
+
+These are similar to Firebase.
+
+`authed, demo, dev, qa, tests, users`
+
+Within `authed`, various portal URLs:
+
+- learn-migrate_concord_org (has only `documents`)
+- learn_concord_org
+- learn_portal_staging_concord_org
+- learn_staging_concord_org
+
+Within `demo`, the names of demo spaces (eg, "CLUE")
+
+Within `dev`, UUIDs of dev instances.
+
+Within `qa`, UUIDs of test instances.
+
+`tests` is something different, doc TODO.
+
+`users` top level collection looks like a mistake.
+
+## Second level
+
+Collections within `(authed|demo|dev|qa)/{id}`:
+
+- classes
+- curriculum
+- documents
+- images
+- mcimages
+- mcsupports
+- offerings
+- users
+
+## Third level
+
+### Contents of `classes/{classId}`
+
+Fields:
+
+- id  (string, eg "60349")
+- name (string)
+- context_id (string, uuid)
+- network: (string, name of network)
+- teacher: (string, full name of teacher who created it)
+- uri: (uri on the portal)
+- teachers: (array of IDs of teachers) _this needs updating_
+
+### Contents of `curriculum/{docPath}`
+
+TODO
+
+### Contents of `documents/{docId}`
+
+Fields:
+
+- key: (string, a mobx id)
+- title: (string)
+- type: (string, eg "problem")
+- uid: (string, id of user who owns this document)
+- contextId: (always "Ignored"?)
+- context_id: (string, uuid, should match context_id of a class)
+- createdAt: (timestamp)
+- network: (string, name of a network)
+- originDoc: ?
+- properties: (map, eg { pubCount: 1 })
+- teachers: (array of user IDs) _should be removed_
+
+Collection:
+
+- comments
+
+#### Contents of `documents/{docId}/comments/{commentId}`
+
+- content
+- createdAt (date & time)
+- name: (full name)
+- network (network name)
+- tileId: (string, mobx id)
+- uid: (string)
+- tags: (array of strings)
+
+### images, mcimages, mcsupports, offerings, users
+
+TODO

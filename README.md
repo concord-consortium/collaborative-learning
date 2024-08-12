@@ -140,28 +140,41 @@ $ npm run start:secure
 
 ## Testing/Deploying database rules
 
-### Requirements:
+### Requirements
 
- * You should install the firebase CLI via: `npm install -g firebase-tools`
- * You should be logged in to firebase: `firebase login`
+- The tests currently only run with Node.js version 16.x
+- You need the firebase CLI. Version 12 is compatible with Node 16: `npm install -g firebase-tools@12`
+- You should be logged in to firebase: `firebase login`
+
+Java is also required for running the emulators. There are various ways to install it; I did this:
+
+```shell
+brew install java
+echo 'export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"' >> ~/.zshrc
+```
 
 Firestore security rules are unit tested and realtime database rules could be with some additional work.
 
 ### To test database rules
+
+The emulator must be running when the test is invoked.
+
+```shell
+cd firebase-test
+npm run start &
+npm run test
 ```
-$ cd firebase-test
-$ npm run test
-```
+
+### To deploy database rules
 
 You deploy firebase functions and rules directly from the working directory using
 the `firebase deploy` command. You can see `firebase deploy help` for more info.
 
 See which project you have access to and which you are currently using via: `firebase projects:list`
 
-### To deploy database rules:
-```
-$ npm run deploy:firestore:rules    # deploys firestore rules
-$ npm run deploy:firebase:rules     # deploys firebase (realtime database) rules
+```shell
+npm run deploy:firestore:rules    # deploys firestore rules
+npm run deploy:firebase:rules     # deploys firebase (realtime database) rules
 ```
 
 ## Debugging
