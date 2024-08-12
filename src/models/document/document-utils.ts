@@ -7,8 +7,7 @@ import { AppConfigModelType } from "../stores/app-config-model";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
-import { isExemplarType, isPlanningType, isProblemType, LearningLogPublication, PersonalPublication,
-         ProblemPublication, SupportPublication } from "./document-types";
+import { isExemplarType, isPlanningType, isProblemType, isPublishedType } from "./document-types";
 
 export function getDocumentDisplayTitle(
   document: DocumentModelType, appConfig: AppConfigModelType, problem?: ProblemModelType,
@@ -48,21 +47,15 @@ export function getDocumentIdentifier(document?: DocumentContentModelType) {
   }
 }
 
-export const isDocumentPublished = (doc: IDocumentMetadata) => {
-  return (doc.type === ProblemPublication)
-          || (doc.type === LearningLogPublication)
-          || (doc.type === PersonalPublication)
-          || (doc.type === SupportPublication);
-};
-
 export const isDocumentAccessibleToUser = (
   doc: IDocumentMetadata, user: UserModelType, documentStore: IExemplarVisibilityProvider
 ) => {
   const ownDocument = doc.uid === user.id;
   const isShared = doc.visibility === "public";
+  const isPublished = isPublishedType(doc.type);
   if (user.type === "teacher") return true;
   if (user.type === "student") {
-    return ownDocument || isShared || isDocumentPublished(doc)
+    return ownDocument || isShared || isPublished
            || (isExemplarType(doc.type) && documentStore.isExemplarVisible(doc.key));
   }
   return false;

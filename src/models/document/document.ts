@@ -3,7 +3,7 @@ import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
 import { IDocumentAddTileOptions } from "./document-content-types";
-import { DocumentTypeEnum, IDocumentContext, ISetProperties,
+import { DocumentTypeEnum, IDocumentContext, ISetProperties, isPublishedType,
   LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
   PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
@@ -26,7 +26,7 @@ import { ESupportType } from "../curriculum/support";
 import { IDocumentLogEvent, logDocumentEvent } from "./log-document-event";
 import { LogEventMethod, LogEventName } from "../../lib/logger-types";
 import { UserModelType } from "../stores/user";
-import { isDocumentAccessibleToUser, isDocumentPublished } from "./document-utils";
+import { isDocumentAccessibleToUser } from "./document-utils";
 
 export enum ContentStatus {
   Valid,
@@ -86,6 +86,9 @@ export const DocumentModel = Tree.named("Document")
     get isSupport() {
       return self.type === SupportPublication;
     },
+    get isPublished() {
+      return isPublishedType(self.type);
+    },
     get isRemote() {
       return !!self.remoteContext;
     },
@@ -119,9 +122,6 @@ export const DocumentModel = Tree.named("Document")
     },
   }))
   .views(self => ({
-    get isPublished() {
-      return isDocumentPublished(self.metadata);
-    },
     getLabel(appConfig: AppConfigModelType, count: number, lowerCase?: boolean) {
       const props = appConfig.documentLabelProperties || [];
       let docStr = self.type as string;
