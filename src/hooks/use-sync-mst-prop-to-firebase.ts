@@ -21,9 +21,11 @@ interface IProps<T> {
   shouldMutate?: boolean | ((value: T) => boolean),
   options?: Omit<UseMutationOptions<unknown, unknown, T>, 'mutationFn'>;
   throttle?: number;
+  additionalMutation?: (prop: string, value: T) => Promise<unknown>;
 }
 export function useSyncMstPropToFirebase<T extends string | number | boolean | undefined>({
-  firebase, model, prop, path, enabled = true, shouldMutate = true, options: clientOptions, throttle = 1000
+  firebase, model, prop, path, enabled = true, shouldMutate = true, options: clientOptions, throttle = 1000,
+  additionalMutation
 }: IProps<T>) {
 
   const options: Omit<UseMutationOptions<unknown, unknown, T>, 'mutationFn'> = {
@@ -35,7 +37,12 @@ export function useSyncMstPropToFirebase<T extends string | number | boolean | u
   };
   const mutation = useMutation((value: T) => {
     const should = typeof shouldMutate === "function" ? shouldMutate(value) : shouldMutate;
-    return should ? firebase.ref(path).update({ [prop]: value }) : Promise.resolve();
+    const mutations = Promise.all([
+      should ? firebase.ref(path).update({ [prop]: value }) : Promise.resolve(),
+      additionalMutation ? additionalMutation(prop, value) : Promise.resolve()
+    ]);
+
+    return mutations;
   }, options);
   const throttledMutate = useMemo(() => _throttle(mutation.mutate, throttle), [mutation.mutate, throttle]);
 

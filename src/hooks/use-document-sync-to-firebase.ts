@@ -75,6 +75,19 @@ export function useDocumentSyncToFirebase(
 
   const commonSyncEnabled = !disableFirebaseSync && contentStatus === ContentStatus.Valid;
 
+  const syncFirestoreDocumentProp = (prop: string, value?: string) => {
+    const promises = [];
+    const query = firestore.collection("documents").where("key", "==", document.key);
+
+    promises.push(query.get().then((querySnapshot) => {
+      return Promise.all(
+        querySnapshot.docs.map((doc) => doc.ref.update({ [prop]: value}))
+      );
+    }));
+
+    return Promise.all(promises);
+  };
+
   // sync visibility (public/private) for problem documents
   useSyncMstPropToFirebase<typeof document.visibility>({
     firebase, model: document, prop: "visibility", path: typedMetadata,
@@ -86,7 +99,8 @@ export function useDocumentSyncToFirebase(
       onError: (err, visibility) => {
         console.warn(`ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
       }
-    }
+    },
+    additionalMutation: syncFirestoreDocumentProp
   });
 
   // sync visibility (public/private) for personal and learning log documents
@@ -100,7 +114,8 @@ export function useDocumentSyncToFirebase(
       onError: (err, visibility) => {
         console.warn(`ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
       }
-    }
+    },
+    additionalMutation: syncFirestoreDocumentProp
   });
 
   // sync title for personal and learning log documents
