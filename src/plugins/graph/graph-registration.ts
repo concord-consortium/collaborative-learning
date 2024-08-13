@@ -30,6 +30,6 @@ registerTileComponentInfo({
   Component: GraphWrapperComponent,
   Icon,
   HeaderIcon,
-  tileEltClass: "graph-tool-tile disable-tile-content-drag",
+  tileEltClass: "graph-tool-tile",
   type: kGraphTileType
 });

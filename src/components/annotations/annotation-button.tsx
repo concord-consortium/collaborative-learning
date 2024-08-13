@@ -15,7 +15,7 @@ interface IAnnotationButtonProps {
   key?: string;
   objectId: string;
   objectType?: string;
-  onClick?: (tileId: string, objectId: string, objectType?: string) => void;
+  onClick?: (event: React.MouseEvent, tileId: string, objectId: string, objectType?: string) => void;
   sourceObjectId?: string;
   sourceTileId?: string;
   tileId: string;
@@ -25,7 +25,7 @@ export const AnnotationButton = observer(function AnnotationButton({
 }: IAnnotationButtonProps) {
   const tileApiInterface = useContext(TileApiInterfaceContext);
 
-  const handleClick = () => onClick?.(tileId, objectId, objectType);
+  const handleClick = (e: React.MouseEvent) => onClick?.(e, tileId, objectId, objectType);
 
   const source = sourceObjectId === objectId && sourceTileId === tileId;
   const classes = classNames("annotation-button", { source });

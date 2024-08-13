@@ -141,7 +141,7 @@ export const LineComponent = observer(function LineComponent({model, handleHover
     strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onMouseDown={(e)=> handleDrag?.(e, model)}
+    onPointerDown={(e)=> handleDrag?.(e, model)}
     pointerEvents={handleHover ? "visible" : "none"}
   />;
 });
@@ -153,7 +153,7 @@ export class LineDrawingTool extends DrawingTool {
     this.drawingLayer = drawingLayer;
   }
 
-  public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+  public handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     // Select the drawing tile, but don't propagate event to do normal Cmd-click procesing.
     this.drawingLayer.selectTile(false);
     e.stopPropagation();
@@ -165,7 +165,7 @@ export class LineDrawingTool extends DrawingTool {
       deltaPoints: [], stroke, strokeWidth, strokeDashArray});
 
     let lastPoint = start;
-    const addPoint = (e2: MouseEvent|React.MouseEvent<HTMLDivElement>) => {
+    const addPoint = (e2: PointerEvent|React.PointerEvent<HTMLDivElement>) => {
       const p = this.drawingLayer.getWorkspacePoint(e2);
       if (p && (p.x >= 0) && (p.y >= 0)) {
         line.addPoint({dx: p.x - lastPoint.x, dy: p.y - lastPoint.y});
@@ -174,24 +174,24 @@ export class LineDrawingTool extends DrawingTool {
       }
     };
 
-    const handleMouseMove = (e2: MouseEvent) => {
+    const handlePointerMove = (e2: PointerEvent) => {
       e2.preventDefault();
       addPoint(e2);
     };
-    const handleMouseUp = (e2: MouseEvent) => {
+    const handlePointerUp = (e2: PointerEvent) => {
       e2.preventDefault();
       if (line.deltaPoints.length > 0) {
         addPoint(e2);
         this.drawingLayer.addNewDrawingObject(getSnapshot(line), { keepToolActive: true });
       }
       this.drawingLayer.setCurrentDrawingObject(null);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
     };
 
     this.drawingLayer.setCurrentDrawingObject(line);
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
   }
 }
 

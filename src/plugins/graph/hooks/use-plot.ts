@@ -109,12 +109,15 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
   }, []);
 
   const callRescaleIfNeeded = useCallback((growOnly: boolean = false) => {
+    const currentLayer = graphModel.layerForDataConfigurationId(dataConfiguration.id);
     if (graphSettings.scalePlotOnValueChange &&
         !graphModel.lockAxes &&
-        !graphModel.interactionInProgress) {
+        !graphModel.interactionInProgress &&
+        // If the layer is editable (i.e. manual points is enabled), do not autoscale the axes
+        !currentLayer?.editable) {
       controller!.autoscaleAllAxes(growOnly);
     }
-  }, [controller, graphModel, graphSettings]);
+  }, [controller, dataConfiguration.id, graphModel, graphSettings.scalePlotOnValueChange]);
 
   // respond to numeric axis domain changes (e.g. axis dragging)
   useEffect(() => {
