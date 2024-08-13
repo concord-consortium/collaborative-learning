@@ -1,5 +1,6 @@
 import { Optional } from "utility-types";
 import { UserModelType } from "../models/stores/user";
+import { arraysEqualIgnoringOrder } from "../utilities/js-utils";
 import { Firestore } from "./firestore";
 import { ClassDocument, OfferingDocument } from "./firestore-schema";
 import { IPortalClassInfo } from "./portal-types";
@@ -49,7 +50,6 @@ export function getProblemPath(unit: string, problem: string) {
 // synchronize the current teacher's classes and offerings to firestore
 export function syncTeacherClassesAndOfferings(firestore: Firestore, user: UserModelType, rawPortalJWT: string) {
   const { network } = user;
-  if (!network) return [];
 
   const promises: Promise<any>[] = [];
 
@@ -67,31 +67,44 @@ export function syncTeacherClassesAndOfferings(firestore: Firestore, user: UserM
     promises.push(syncClass(firestore, rawPortalJWT, userClasses[context_id]));
   });
 
-  // synchronize the offerings
-  user.portalClassOfferings.forEach(async offering => {
-    const {
-      offeringId: id, activityTitle: name, activityUrl: uri, classHash: context_id, classUrl,
-      unitCode: unit, problemOrdinal: problem
-    } = offering;
-    const problemPath = getProblemPath(unit, problem);
-    const fsOffering: OfferingWithoutTeachers = { id, name, uri, context_id, unit, problem, problemPath, network };
-    promises.push(syncOffering(firestore, rawPortalJWT, classUrl, fsOffering));
-  });
+  if (network) {
+    // synchronize the offerings
+    user.portalClassOfferings.forEach(async offering => {
+      const {
+        offeringId: id, activityTitle: name, activityUrl: uri, classHash: context_id, classUrl,
+        unitCode: unit, problemOrdinal: problem
+      } = offering;
+      const problemPath = getProblemPath(unit, problem);
+      const fsOffering: OfferingWithoutTeachers = { id, name, uri, context_id, unit, problem, problemPath, network };
+      promises.push(syncOffering(firestore, rawPortalJWT, classUrl, fsOffering));
+    });
+  }
+  return Promise.all(promises);
+}
 
-  return promises;
+async function createOrUpdateClassDoc(firestore: Firestore, docPath: string, aClass: ClassDocument):
+      Promise<void|ClassDocument> {
+  return firestore.guaranteeDocument(docPath,
+     async () => { return aClass; },
+     (content) => { return !content || !arraysEqualIgnoringOrder(aClass.teachers, content.teachers); }
+  );
 }
 
 export async function syncClass(firestore: Firestore, rawPortalJWT: string, aClass: ClassWithoutTeachers) {
   const { uri, context_id, network } = aClass;
-  if (uri && context_id && network && rawPortalJWT) {
-    return firestore.guaranteeDocument(`classes/${network}_${context_id}`, async () => {
-      const teachers = await getClassTeachers(uri, rawPortalJWT);
-      if (teachers) {
-        aClass.teachers = teachers;
-        return aClass;
-      }
-    });
+  const promises: Promise<void|ClassDocument>[] = [];
+  if (uri && context_id && rawPortalJWT) {
+    const teachers = await getClassTeachers(uri, rawPortalJWT);
+    if (!teachers) return;
+    const classWithTeachers = { ...aClass, teachers };
+    // Old location of the class document
+    if (network) {
+      promises.push(createOrUpdateClassDoc(firestore, `classes/${network}_${context_id}`, classWithTeachers));
+    }
+    // New location of the class document
+    promises.push(createOrUpdateClassDoc(firestore, `classes/${context_id}`, classWithTeachers));
   }
+  return Promise.all(promises);
 }
 
 export async function syncOffering(

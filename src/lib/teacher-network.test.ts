@@ -165,6 +165,7 @@ describe("Teacher network functions", () => {
 
     it("should do nothing if the class already exists", async () => {
       mockDocGet.mockImplementation(() => Promise.resolve(fsClass1));
+      fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
       const firestore = new Firestore(mockDB);
       const result = await syncClass(firestore, kPortalJWT, partClass1);
       expect(mockDoc).toHaveBeenCalledWith(classDocPath);
@@ -179,8 +180,8 @@ describe("Teacher network functions", () => {
       fetchMock.mockResponseOnce('{}', { status: 500, headers: { 'content-type': 'application/json' } });
       const firestore = new Firestore(mockDB);
       const result = await syncClass(firestore, kPortalJWT, partClass1);
-      expect(mockDoc).toHaveBeenCalledWith(classDocPath);
-      expect(mockDocGet).toHaveBeenCalled();
+      expect(mockDoc).not.toHaveBeenCalled();
+      expect(mockDocGet).not.toHaveBeenCalled();
       expect(mockDocSet).not.toHaveBeenCalled();
       return result;
     });
@@ -190,8 +191,8 @@ describe("Teacher network functions", () => {
       fetchMock.mockRejectOnce(new Error());
       const firestore = new Firestore(mockDB);
       const result = await syncClass(firestore, kPortalJWT, partClass1);
-      expect(mockDoc).toHaveBeenCalledWith(classDocPath);
-      expect(mockDocGet).toHaveBeenCalled();
+      expect(mockDoc).not.toHaveBeenCalled();
+      expect(mockDocGet).not.toHaveBeenCalled();
       expect(mockDocSet).not.toHaveBeenCalled();
       return result;
     });
@@ -309,23 +310,24 @@ describe("Teacher network functions", () => {
       expect(mockDocSet).not.toHaveBeenCalled();
     });
 
-    it("should do nothing if the user has no network", async () => {
+    it("should sync class even if the user has no network", async () => {
       const user = UserModel.create({ id: kTeacher1Id, type: "teacher", portalClassOfferings: [userOffering1()] });
+      fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
       const firestore = new Firestore(mockDB);
       await syncTeacherClassesAndOfferings(firestore, user, kPortalJWT);
-      expect(mockDoc).not.toHaveBeenCalled();
-      expect(mockDocGet).not.toHaveBeenCalled();
-      expect(mockDocSet).not.toHaveBeenCalled();
+      expect(mockDoc).toHaveBeenCalledTimes(1);
+      expect(mockDocGet).toHaveBeenCalledTimes(1);
+      expect(mockDocSet).toHaveBeenCalledTimes(0);
     });
 
     it("should sync classes and offerings when appropriate", async () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestorePermissionsError(); });
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
       const firestore = new Firestore(mockDB);
-      await Promise.all(syncTeacherClassesAndOfferings(firestore, completeTeacher, kPortalJWT));
-      expect(mockDoc).toHaveBeenCalledTimes(3);
-      expect(mockDocGet).toHaveBeenCalledTimes(3);
-      expect(mockDocSet).toHaveBeenCalledTimes(3);
+      await syncTeacherClassesAndOfferings(firestore, completeTeacher, kPortalJWT);
+      expect(mockDoc).toHaveBeenCalledTimes(4);
+      expect(mockDocGet).toHaveBeenCalledTimes(4);
+      expect(mockDocSet).toHaveBeenCalledTimes(4);
     });
   });
 
