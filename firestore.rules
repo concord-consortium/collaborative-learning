@@ -124,17 +124,18 @@ service cloud.firestore {
     match /authed/{portal} {
       allow read, write: if isAuthedTeacher();
 
+      // Check that the class given by the context_id exists and includes the logged-in teacher
+      function teacherIsInClass(contextid) {
+        let class_doc = get(/databases/$(database)/documents/authed/$(portal)/classes/$(contextid)).data;
+        return class_doc != null && string(request.auth.token.platform_user_id) in class_doc.teachers;
+      }
+
       // user's platform_user_id must be listed in the class of the requested document
       // also allows access to legacy documents which contain their own list of teachers
       function userInResourceTeachers() {
-        let is_authed = isAuthed();
-        let contextid = resource.data.context_id;
-        let resource_class = get(/databases/$(database)/documents/authed/$(portal)/classes/$(contextid)).data;
-        let teacher_in_class = resource_class!=null && string(request.auth.token.platform_user_id) in resource_class.teachers;
-        return
-          (is_authed && teacher_in_class)
-          || (is_authed && string(request.auth.token.platform_user_id) in resource.data.teachers)
-          ;
+        return isAuthed() &&
+               ( teacherIsInClass(resource.data.context_id) ||
+                 string(request.auth.token.platform_user_id) in resource.data.teachers);
       }
 
       function isValidDocumentUpdateRequest() {
@@ -339,13 +340,16 @@ service cloud.firestore {
           let docData = getDocumentData();
           let docNetwork = docData.network;
           return (
-            // check whether the current user is one of the teachers associated with the document
-            ('teachers' in docData &&
-              (string(request.auth.token.platform_user_id) in docData.teachers)) ||
+            // check if document is in user's class
+            request.auth.token.class_hash == docData.context_id ||
             // check whether the document's network corresponds to one of the users's networks
             exists(docNetwork) && (docNetwork in getTeacherNetworks()) ||
-            // check if document is in user's class
-            request.auth.token.class_hash == docData.context_id
+            // check whether the document is in a different class for the teacher
+            teacherIsInClass(docData.context_id) ||
+            // check whether the current user is one of the teachers associated with the (legacy) document
+            // (listing teachers in the document is no longer current practice)
+            ('teachers' in docData &&
+              (string(request.auth.token.platform_user_id) in docData.teachers))
           );
         }
 
