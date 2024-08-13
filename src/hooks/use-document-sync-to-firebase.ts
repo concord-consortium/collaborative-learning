@@ -14,6 +14,7 @@ import { Firestore } from "src/lib/firestore";
 import { useMutation, UseMutationOptions } from "react-query";
 import { ITileMapEntry } from "functions/src/shared";
 import { DocumentContentSnapshotType } from "src/models/document/document-content";
+import { IArrowAnnotation } from "src/models/annotations/arrow-annotation";
 
 function debugLog(...args: any[]) {
   // eslint-disable-next-line no-console
@@ -176,6 +177,20 @@ export function useDocumentSyncToFirebase(
       const tileType = tileInfo.content.type;
       if (!tileTypes.includes(tileType)) {
         tileTypes.push(tileType);
+      }
+    });
+
+    // The annotations property does exist on the snapshot but MobX doesn't recognize it
+    // as a property because of the way we are constructing the DocumentContentModel
+    // on top of multiple other models. This typing is a workaround so TS doesn't complain.
+    const annotations =
+      (snapshot as {annotations: Record<string, IArrowAnnotation>}).annotations || {};
+
+    Object.keys(annotations).forEach((annotationKey) => {
+      const annotation = annotations[annotationKey];
+      const annotationType = annotation.type;
+      if (!tileTypes.includes(annotationType)) {
+        tileTypes.push(annotationType);
       }
     });
 
