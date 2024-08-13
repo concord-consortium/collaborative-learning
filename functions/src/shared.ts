@@ -100,6 +100,12 @@ export function networkDocumentKey(uid: string, documentKey: string, network?: s
   return `${prefix}_${escapedKey}`;
 }
 
+export function getDocumentPath(userId: string, documentKey: string, network?: string) {
+  const networkDocKey = networkDocumentKey(userId, documentKey, network);
+  const documentPath = `documents/${networkDocKey}`;
+  return documentPath;
+}
+
 export interface IDocumentMetadata {
   uid: string;
   type: string;

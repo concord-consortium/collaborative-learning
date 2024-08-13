@@ -30,7 +30,8 @@ import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
 import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
-import { IGetImageDataParams, IPublishSupportParams } from "../../functions/src/shared";
+import { getDocumentPath, ICommentableDocumentParams, IDocumentMetadata, IGetImageDataParams,
+         IPublishSupportParams } from "../../functions/src/shared";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
@@ -396,9 +397,48 @@ export class DB {
     });
   }
 
-  public createDocument(params: { type: DBDocumentType, content?: string }) {
+  async createFirestoreMetadataDocument(metadata: DBDocumentMetadata, documentKey: string) {
+    const userContext = this.stores.userContextProvider.userContext;
+
+    if (!this.stores.userContextProvider || !this.firestore || !userContext?.uid) {
+      console.error("cannot create Firestore metadata document because environment is not valid",
+        { userContext, firestore: this.firestore });
+      throw new Error("cannot create Firestore metadata document because environment is not valid");
+    }
+
+    const documentPath = getDocumentPath(userContext.uid, documentKey, userContext.network);
+    const documentRef = this.firestore.doc(documentPath);
+    const docSnapshot = await documentRef.get();
+
+    if (!docSnapshot.exists) {
+      const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
+      const firestoreMetadata: IDocumentMetadata & { contextId: string } = {
+        ...cleanedMetadata,
+        contextId: "ignored",
+        key: documentKey,
+        properties: {},
+        uid: userContext.uid,
+      };
+      if ("offeringId" in metadata) {
+        const { investigation, problem, unit } = this.stores;
+        const investigationOrdinal = String(investigation.ordinal);
+        const problemOrdinal = String(problem.ordinal);
+        const unitCode = unit.code;
+        firestoreMetadata.investigation = investigationOrdinal;
+        firestoreMetadata.problem = problemOrdinal;
+        firestoreMetadata.unit = unitCode;
+      }
+      const validateCommentableDocument =
+        getFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
+      // FIXME-HISTORY: rename this function to validateFirestoreDocumentMetadata_v1
+      validateCommentableDocument({context: userContext, document: firestoreMetadata});
+    }
+  }
+
+  public async createDocument(params: { type: DBDocumentType, content?: string }) {
     const { type, content } = params;
-    const {user} = this.stores;
+    const { user } = this.stores;
+
     return new Promise<{document: DBDocument, metadata: DBDocumentMetadata}>((resolve, reject) => {
       const documentRef = this.firebase.ref(this.firebase.getUserDocumentPath(user)).push();
       const documentKey = documentRef.key!;
@@ -430,7 +470,13 @@ export class DB {
       }
 
       return documentRef.set(document)
-        .then(() => metadataRef.set(metadata))
+        .then(() => {
+          metadataRef.set(metadata);
+          return metadataRef.once("value");
+        })
+        .then((metadataValue) => {
+          this.createFirestoreMetadataDocument(metadataValue.val(), documentKey);
+        })
         .then(() => {
           resolve({document, metadata});
         })
