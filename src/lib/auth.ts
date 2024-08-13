@@ -538,6 +538,8 @@ export const createFakeAuthentication = (options: CreateFakeAuthenticationOption
     teachers: [],
   };
   // Add the random student to the class first and then fill the class
+  // FIXME: It looks like if the teacher id is not 1,2,3 then the teacher won't
+  // be added to the class.
   classInfo.students.push(
     createFakeUser({
       appMode,

@@ -14,12 +14,15 @@ function processSparrowEventParams(arrow: IArrowAnnotation, self: any) {
   const targetTileModel = self.tileMap.get(targetTileId);
   const targetTileType = targetTileModel ? targetTileModel.content.type : undefined;
 
+  const shape = arrow.shape;
+
   return {
     arrowId: arrow.id,
     sourceTileId,
     sourceTileType,
     targetTileId,
-    targetTileType
+    targetTileType,
+    shape
   };
 }
 

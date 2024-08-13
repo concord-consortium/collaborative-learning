@@ -7,7 +7,7 @@ export class SelectionDrawingTool extends DrawingTool {
     super(drawingLayer);
   }
 
-  public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+  public handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     const drawingLayerView = this.drawingLayer;
     const addToSelectedObjects = e.ctrlKey || e.metaKey || e.shiftKey;
     const start = this.drawingLayer.getWorkspacePoint(e);
@@ -19,7 +19,7 @@ export class SelectionDrawingTool extends DrawingTool {
 
     drawingLayerView.startSelectionBox(start);
 
-    const handleMouseMove = (e2: MouseEvent) => {
+    const handlePointerMove = (e2: PointerEvent) => {
       e2.preventDefault();
       if (!moved) {
         // User started to drag. Make sure tile is selected.
@@ -31,11 +31,11 @@ export class SelectionDrawingTool extends DrawingTool {
       drawingLayerView.updateSelectionBox(p);
     };
 
-    const handleMouseUp = (e2: MouseEvent) => {
+    const handlePointerUp = (e2: PointerEvent) => {
       e2.preventDefault();
       drawingLayerView.endSelectionBox(addToSelectedObjects);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
 
       if (!moved) {
         // User just clicked on the canvas w/no drag. They may be trying to select or deselect the tile.
@@ -43,11 +43,11 @@ export class SelectionDrawingTool extends DrawingTool {
       }
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
   }
 
-  public handleObjectClick(e: React.MouseEvent<HTMLDivElement>, obj: DrawingObjectType) {
+  public handleObjectClick(e: React.PointerEvent<HTMLDivElement>, obj: DrawingObjectType) {
     const selectedObjects = this.drawingLayer.getSelectedObjects();
     const index = selectedObjects.indexOf(obj);
     if (index === -1) {

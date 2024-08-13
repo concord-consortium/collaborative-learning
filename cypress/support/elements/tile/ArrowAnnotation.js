@@ -3,8 +3,17 @@ function wsClass(wsc) {
 }
 
 class ArrowAnnotation {
-  clickArrowToolbarButton(workspaceClass) {
-    cy.get(`${wsClass(workspaceClass)} [data-testid="curved-sparrow-button"]`).click({ force: true });
+  getAnnotationModeButton(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} [data-testid="annotation-mode-button"]`);
+  }
+  getAnnotationMenuExpander(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} [data-testid="annotation-menu-expander"]`);
+  }
+  getCurvedArrowToolbarButton() {
+    return cy.get(`[data-testid="curved-sparrow-button"]`);
+  }
+  getStraightArrowToolbarButton() {
+    return cy.get(`[data-testid="straight-sparrow-button"]`);
   }
   clickHideAnnotationsButton(workspaceClass) {
     cy.get(`${wsClass(workspaceClass)} [data-testid="hide-annotations-button"]`).click({force: true});
@@ -19,16 +28,16 @@ class ArrowAnnotation {
     return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg`);
   }
   getAnnotationArrows(workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .curved-arrow.foreground-arrow`);
+    return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .arrow.foreground-arrow`);
   }
   getAnnotationBackgroundArrowPaths(workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .curved-arrow.background-arrow path`);
+    return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .arrow.background-arrow path`);
   }
   getAnnotationSparrowGroups(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .actual-sparrow`);
   }
   getPreviewArrow(workspaceClass) {
-    return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .curved-arrow.preview-arrow`);
+    return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .arrow.preview-arrow`);
   }
   getAnnotationTextDisplays(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .text-region .text-display`);

@@ -122,6 +122,9 @@ export const GraphModel = TileContentModel
     return newSnap;
   })
   .views(self => ({
+    get isUserResizable() {
+      return true;
+    },
     /**
      * Transitional way to get the layer 0 DataConfiguration.
      * This method will be removed when we are fully transitioned to layers.

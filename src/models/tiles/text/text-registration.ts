@@ -19,7 +19,7 @@ registerPlugins();
 registerTileComponentInfo({
   type: kTextTileType,
   Component: TextToolComponent,
-  tileEltClass: "text-tool-tile disable-tile-content-drag",
+  tileEltClass: "text-tool-tile",
   Icon,
   HeaderIcon,
   tileHandlesOwnSelection: true

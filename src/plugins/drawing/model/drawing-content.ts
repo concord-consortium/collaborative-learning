@@ -48,7 +48,8 @@ export const DrawingContentModel = TileContentModel
     stamps: types.array(StampModel),
     vectorType: types.maybe(types.enumeration<VectorType>("VectorType", Object.values(VectorType))),
     // is type.maybe to avoid need for migration
-    currentStampIndex: types.maybe(types.number)
+    currentStampIndex: types.maybe(types.number),
+    zoom: types.optional(types.number, 1)
   })
   .volatile(self => ({
     metadata: undefined as DrawingToolMetadataModelType | undefined,
@@ -98,6 +99,18 @@ export const DrawingContentModel = TileContentModel
       return self.objects.find((obj) => {
         return (obj.x === pos.x && obj.y === pos.y);
       });
+    },
+    /** Return a bounding box that contains all objects in the content */
+    get objectsBoundingBox() {
+      const nw = {x: 0, y: 0}, se = {x: 0, y: 0};
+      self.objects.forEach((obj) => {
+        const bb = obj.boundingBox;
+        if (bb.nw.x < nw.x) nw.x = bb.nw.x;
+        if (bb.nw.y < nw.y) nw.y = bb.nw.y;
+        if (bb.se.x > se.x) se.x = bb.se.x;
+        if (bb.se.y > se.y) se.y = bb.se.y;
+      });
+      return {nw, se};
     },
     exportJson(options?: ITileExportOptions) {
       // Translate image urls if necessary
@@ -167,6 +180,10 @@ export const DrawingContentModel = TileContentModel
 
     setOpenPalette(pallette: OpenPaletteValues) {
       self.openPallette = pallette;
+    },
+
+    setZoom(zoom: number) {
+      self.zoom = zoom;
     },
 
     addObject(object: DrawingObjectSnapshotForAdd, addAtBack=false) {
