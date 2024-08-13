@@ -7,7 +7,8 @@ import {
   teacher2Auth, teacher2Id, teacher2Name,
   teacher4Auth, teacher4Id, teacher4Name,
   teacherAuth, teacherId, teacherName,
-  tearDownTests, thisClass
+  tearDownTests,
+  thisClass
 } from "./setup-rules-tests";
 
 describe("Firestore security rules", () => {
@@ -30,7 +31,7 @@ describe("Firestore security rules", () => {
   }
   function specDocumentDoc(options?: ISpecDocumentDoc) {
     // a valid document specification
-    const documentDoc = { context_id: thisClass, network: noNetwork, teachers: [teacherId], uid: teacherId,
+    const documentDoc = { context_id: thisClass, network: noNetwork, uid: teacherId,
                           type: "problemDocument", key: "my-document", createdAt: mockTimestamp() };
     // remove specified props for validating the tests that require them
     options?.remove?.forEach(prop => delete (documentDoc as any)[prop]);
@@ -51,6 +52,19 @@ describe("Firestore security rules", () => {
   async function specTeacher4(network: string) {
     await adminWriteDoc(`${kUsersDocPath}/${teacher4Id}`,
       { uid: teacher4Id, name: teacher4Name, type: "teacher", network, networks: [network] });
+  }
+
+  const kClassDocPath = `authed/myPortal/classes`;
+
+  async function specClassDoc(classId: string, teacherId: string) {
+    await adminWriteDoc(`${kClassDocPath}/${classId}`,
+        { id: classId,
+          name: 'MyClass',
+          context_id: classId,
+          teacher: "Some Teacher",
+          teachers: [teacherId]
+        }
+      );
   }
 
   describe("user documents", () => {
@@ -129,12 +143,21 @@ describe("Firestore security rules", () => {
 
     it("authenticated teachers can write user documents", async () => {
       db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
       await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc());
     });
 
     it("authenticated teachers can update user documents", async () => {
       db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
+      await expectUpdateToSucceed(db, kDocumentDocPath, { title: "new-title" });
+    });
+
+    it("authenticated teachers can update legacy user documents", async () => {
+      // Before 8/2024, teachers were listed in documents directly, rather than looked up in the class docs.
+      db = initFirestore(teacherAuth);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({ add: { teachers: [teacherId] }}));
       await expectUpdateToSucceed(db, kDocumentDocPath, { title: "new-title" });
     });
 

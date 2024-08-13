@@ -6,12 +6,12 @@ These are similar to Firebase.
 
 `authed, demo, dev, qa, tests, users`
 
-Within `authed`, various portal URLs:
+Within `authed`, there are several portal site names:
 
-- learn-migrate_concord_org (has only `documents`)
-- learn_concord_org
-- learn_portal_staging_concord_org
-- learn_staging_concord_org
+- `learn_concord_org` (production)
+- `learn_portal_staging_concord_org`
+- `learn_staging_concord_org`
+- `learn-migrate_concord_org` (not sure of status, has only `documents`)
 
 Within `demo`, the names of demo spaces (eg, "CLUE")
 
