@@ -204,7 +204,7 @@ export class SortedDocuments {
         createdAt: doc.createdAt,
         title: doc.title,
         properties: undefined,
-        tileTypes: Array.from(doc.content?.tileTypes || []),
+        tools: Array.from(doc.content?.tileTypes || []),
         strategies: exemplarStrategy ? [exemplarStrategy] : [],
         investigation: doc.investigation,
         problem: doc.problem,

@@ -126,9 +126,9 @@ export const getTagsWithDocs = (documents: IDocumentMetadata[], commentTags: Rec
 };
 
 export const createTileTypeToDocumentsMap = (documents: IDocumentMetadata[]) => {
-  const tileTypeToDocumentsMap = new Map<string, Record<string, any>>();
+  const toolToDocumentsMap = new Map<string, Record<string, any>>();
   const addDocByType = (docToAdd: IDocumentMetadata, type: string) => {
-    if (!tileTypeToDocumentsMap.get(type)) {
+    if (!toolToDocumentsMap.get(type)) {
       let icon: FC<SVGProps<SVGSVGElement>> | undefined;
       if (type === "Sparrow") {
         icon = SparrowHeaderIcon;
@@ -136,23 +136,23 @@ export const createTileTypeToDocumentsMap = (documents: IDocumentMetadata[]) => 
         const componentInfo = getTileComponentInfo(type);
         icon = componentInfo?.HeaderIcon;
       }
-      tileTypeToDocumentsMap.set(type, {
+      toolToDocumentsMap.set(type, {
           icon,
           documents: []
         }
       );
     }
-    tileTypeToDocumentsMap.get(type)?.documents.push(docToAdd);
+    toolToDocumentsMap.get(type)?.documents.push(docToAdd);
   };
 
   //Iterate through all documents, determine if they are valid,
   //create a map of valid ones, otherwise put them into the "No Tools" section
   documents.forEach((doc) => {
-      if (doc.tileTypes) {
-        const validTileTypes = doc.tileTypes.filter(type => type !== "Placeholder" && type !== "Unknown");
+      if (doc.tools) {
+        const validTileTypes = doc.tools.filter(type => type !== "Placeholder" && type !== "Unknown");
         if (validTileTypes.length > 0) {
-          validTileTypes.forEach(tileType => {
-            addDocByType(doc, tileType);
+          validTileTypes.forEach(tool => {
+            addDocByType(doc, tool);
           });
           // TODO: Sparrow annotations. We'll first need to add information about these to metadata docs.
         } else {
@@ -161,7 +161,7 @@ export const createTileTypeToDocumentsMap = (documents: IDocumentMetadata[]) => 
       }
   });
 
-  return tileTypeToDocumentsMap;
+  return toolToDocumentsMap;
 };
 
 export const createDocMapByBookmarks = (documents: IDocumentMetadata[], bookmarks: Bookmarks) => {

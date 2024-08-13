@@ -170,13 +170,13 @@ export function useDocumentSyncToFirebase(
   const mutation = useMutation((snapshot: DocumentContentSnapshotType) => {
     const tileMap = snapshot.tileMap || {};
 
-    const tileTypes: string[] = [];
+    const tools: string[] = [];
 
     Object.keys(tileMap).forEach((tileKey) => {
       const tileInfo = tileMap[tileKey] as ITileMapEntry;
       const tileType = tileInfo.content.type;
-      if (!tileTypes.includes(tileType)) {
-        tileTypes.push(tileType);
+      if (!tools.includes(tileType)) {
+        tools.push(tileType);
       }
     });
 
@@ -186,11 +186,12 @@ export function useDocumentSyncToFirebase(
     const annotations =
       (snapshot as {annotations: Record<string, IArrowAnnotation>}).annotations || {};
 
-    Object.keys(annotations).forEach((annotationKey) => {
+    Object.keys(annotations).forEach((annotationKey: string) => {
       const annotation = annotations[annotationKey];
-      const annotationType = annotation.type;
-      if (!tileTypes.includes(annotationType)) {
-        tileTypes.push(annotationType);
+      // for now we only want Sparrow annotations
+      // we might want to change this if we want to count other types in the future
+      if (!tools.includes(annotation.type) && annotation.type === "arrowAnnotation") {
+        tools.push("Sparrow");
       }
     });
 
@@ -203,7 +204,7 @@ export function useDocumentSyncToFirebase(
         querySnapshot.docs.map((doc) => {
           const docRef = doc.ref;
           return docRef.update({
-            tileTypes,
+            tools,
           });
         })
       );

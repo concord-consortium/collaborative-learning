@@ -108,7 +108,7 @@ export interface IDocumentMetadata {
   title?: string;
   originDoc?: string;
   properties?: Record<string, string>;
-  tileTypes?: string[];
+  tools?: string[];
   strategies?: string[];
   investigation?: string;
   problem?: string;
