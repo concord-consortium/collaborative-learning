@@ -128,10 +128,9 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
     .then(firestoreUser => {
       if (firestoreUser?.network) {
         user.setNetworks(firestoreUser.network, firestoreUser.networks);
-
-        if (rawPortalJWT) {
-          syncTeacherClassesAndOfferings(db.firestore, user, rawPortalJWT);
-        }
+      }
+      if (rawPortalJWT) {
+        syncTeacherClassesAndOfferings(db.firestore, user, rawPortalJWT);
       }
     })
     .then(() => {

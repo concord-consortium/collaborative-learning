@@ -97,11 +97,19 @@ export async function syncClass(firestore: Firestore, rawPortalJWT: string, aCla
     const teachers = await getClassTeachers(uri, rawPortalJWT);
     if (!teachers) return;
     const classWithTeachers = { ...aClass, teachers };
+
+    // Firestore will not accept 'undefined' values
+    if (classWithTeachers.network === undefined) {
+      delete classWithTeachers.network;
+    }
+
     // Old location of the class document
     if (network) {
+      console.log('attempting to set new class doc:', `classes/${network}_${context_id}`, classWithTeachers);
       promises.push(createOrUpdateClassDoc(firestore, `classes/${network}_${context_id}`, classWithTeachers));
     }
     // New location of the class document
+    console.log('attempting to set new class doc:', `classes/${context_id}`, classWithTeachers);
     promises.push(createOrUpdateClassDoc(firestore, `classes/${context_id}`, classWithTeachers));
   }
   return Promise.all(promises);
