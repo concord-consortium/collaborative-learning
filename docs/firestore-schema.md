@@ -38,17 +38,22 @@ Collections within `(authed|demo|dev|qa)/{id}`:
 
 ## Third level
 
-### Contents of `classes/{classId}`
+### Contents of `classes/{classDocId}`
+
+Currently we are storing class docs under both of these `classDocId`s:
+
+- classes/{network}_{contextid}
+- classes/{contextid}
 
 Fields:
 
-- id  (string, eg "60349")
+- id (string)
 - name (string)
 - context_id (string, uuid)
 - network: (string, name of network)
 - teacher: (string, full name of teacher who created it)
 - uri: (uri on the portal)
-- teachers: (array of IDs of teachers) _this needs updating_
+- teachers: (array of IDs of teachers)
 
 ### Contents of `curriculum/{docPath}`
 
@@ -58,11 +63,11 @@ TODO
 
 Fields:
 
-- key: (string, a mobx id)
+- key: (string, the id of the document in firebase)
 - title: (string)
 - type: (string, eg "problem")
-- uid: (string, id of user who owns this document)
-- contextId: (always "Ignored"?)
+- uid: (string).  TODO: determine if this is the owner of the document, the owner of the comments, or sometimes either.
+- contextId: (currently ignored; see `DocumentModel.metadata()`)
 - context_id: (string, uuid, should match context_id of a class)
 - createdAt: (timestamp)
 - network: (string, name of a network)
@@ -73,6 +78,7 @@ Fields:
 Collection:
 
 - comments
+- history
 
 #### Contents of `documents/{docId}/comments/{commentId}`
 
