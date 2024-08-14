@@ -94,7 +94,7 @@ service cloud.firestore {
     }
 
     function preservesReadOnlyDocumentFields() {
-      let readOnlyFieldsSet = ["uid", "network", "type", "key", "createdAt"].toSet();
+      let readOnlyFieldsSet = ["uid", "network", "type", "key", "createdAt", "context_id"].toSet();
       let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
       return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
     }

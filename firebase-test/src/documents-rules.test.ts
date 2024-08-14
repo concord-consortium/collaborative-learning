@@ -192,10 +192,46 @@ describe("Firestore security rules", () => {
       await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title" });
     });
 
-    it("authenticated teachers can't update user documents' read-only fields", async () => {
+    it("authenticated teachers can't update user documents' read-only uid field", async () => {
       db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
       await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", uid: teacher2Id });
+    });
+
+    it("authenticated teachers can't update user documents' read-only network field", async () => {
+      db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
+      await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", network: "new-network" });
+    });
+
+    it("authenticated teachers can't update user documents' read-only type field", async () => {
+      db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
+      await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", type: "LearningLog" });
+    });
+
+    it("authenticated teachers can't update user documents' read-only key field", async () => {
+      db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
+      await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", key: "my-new-document" });
+    });
+
+    it("authenticated teachers can't update user documents' read-only createdAt field", async () => {
+      db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
+      await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", createdAt: mockTimestamp() });
+    });
+
+    it("authenticated teachers can't update user documents' read-only context-id field", async () => {
+      db = initFirestore(teacherAuth);
+      await specClassDoc(thisClass, teacherId);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
+      await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", context_id: otherClass });
     });
 
     it("authenticated teachers can't update other teachers' documents", async () => {
