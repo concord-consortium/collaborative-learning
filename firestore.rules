@@ -139,7 +139,8 @@ service cloud.firestore {
       }
 
       function isValidDocumentUpdateRequest() {
-        return userInResourceTeachers() && preservesReadOnlyDocumentFields();
+        return preservesReadOnlyDocumentFields() &&
+               ( resourceInUserClass() || userInResourceTeachers() );
       }
 
       // return list of networks available to the current teacher
@@ -303,14 +304,14 @@ service cloud.firestore {
 
       match /documents/{docId} {
         // portal-authenticated teachers can create valid documents
-        allow create: if isAuthedTeacher() && isValidDocumentCreateRequest();
+        allow create: if isValidDocumentCreateRequest();
         // teachers can only update their own documents and only if they're valid
-        allow update: if isAuthedTeacher() && isValidDocumentUpdateRequest();
+        allow update: if isValidDocumentUpdateRequest();
         // teachers can only delete their own documents
         allow delete: if isAuthedTeacher() && userIsResourceUser();
         // teachers can read their own documents or other documents in their network
-        allow read: if (isAuthed() && (resource == null || userOwnsDocument())) ||
-          (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks() || resourceInUserClass()))
+        allow read: if (isAuthed() && (resource == null || userOwnsDocument() || resourceInUserClass())) ||
+          (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks()))
 
         function getDocumentData() {
           return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data;
