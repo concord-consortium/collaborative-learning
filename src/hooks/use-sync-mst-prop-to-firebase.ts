@@ -37,10 +37,12 @@ export function useSyncMstPropToFirebase<T extends string | number | boolean | u
   };
   const mutation = useMutation((value: T) => {
     const should = typeof shouldMutate === "function" ? shouldMutate(value) : shouldMutate;
-    const mutations = Promise.all([
-      should ? firebase.ref(path).update({ [prop]: value }) : Promise.resolve(),
-      additionalMutation ? additionalMutation(prop, value) : Promise.resolve()
-    ]);
+    const mutations = should
+                        ? Promise.all([
+                            firebase.ref(path).update({ [prop]: value }),
+                            additionalMutation ? additionalMutation(prop, value) : Promise.resolve()
+                          ])
+                        : Promise.resolve();
 
     return mutations;
   }, options);

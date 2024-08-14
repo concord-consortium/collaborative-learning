@@ -76,16 +76,13 @@ export function useDocumentSyncToFirebase(
   const commonSyncEnabled = !disableFirebaseSync && contentStatus === ContentStatus.Valid;
 
   const syncFirestoreDocumentProp = (prop: string, value?: string) => {
-    const promises = [];
     const query = firestore.collection("documents").where("key", "==", document.key);
 
-    promises.push(query.get().then((querySnapshot) => {
+    return query.get().then((querySnapshot) => {
       return Promise.all(
         querySnapshot.docs.map((doc) => doc.ref.update({ [prop]: value}))
       );
-    }));
-
-    return Promise.all(promises);
+    });
   };
 
   // sync visibility (public/private) for problem documents
