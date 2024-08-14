@@ -37,22 +37,22 @@ const mockMetadataDocuments: IObservableArray<IDocumentMetadata> = observable.ar
   {
     uid: "1", //Joe
     type: ProblemDocument, key:"Student 1 Problem Doc Group 5", createdAt: 1,
-    tileTypes: []
+    tools: []
   },
   {
     uid: "2", //Scott
     type: ProblemDocument, key:"Student 2 Problem Doc Group 3", createdAt: 2,
-    tileTypes: ["Text"]
+    tools: ["Text"]
   },
   {
     uid: "3", //Dennis
     type: ProblemDocument, key:"Student 3 Problem Doc Group 9", createdAt: 3,
-    tileTypes: ["Drawing"]
+    tools: ["Drawing"]
   },
   {
     uid: "4", //Kirk
     type: ProblemDocument, key:"Student 4 Problem Doc Group 3", createdAt: 4,
-    tileTypes: []
+    tools: []
   }
 ]);
 
