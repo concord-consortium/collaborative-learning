@@ -109,7 +109,7 @@ async function processFile(file: string) {
     for (const annotation of annotations) {
       // for now we only want Sparrow annotations
       // we might want to change this if we want to count other types in the future
-      if (!tools.includes(annotation.type) && annotation.type === "arrowAnnotation") {
+      if (annotation.type === "arrowAnnotation" && !tools.includes("Sparrow")) {
         tools.push("Sparrow");
       }
     }

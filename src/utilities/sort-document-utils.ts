@@ -154,7 +154,6 @@ export const createTileTypeToDocumentsMap = (documents: IDocumentMetadata[]) => 
           validTileTypes.forEach(tool => {
             addDocByType(doc, tool);
           });
-          // TODO: Sparrow annotations. We'll first need to add information about these to metadata docs.
         } else {
           addDocByType(doc, "No Tools");
         }

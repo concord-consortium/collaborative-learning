@@ -21,6 +21,7 @@ import {
 import { DocumentGroup } from "./document-group";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { PrimarySortType } from "./ui-types";
+import { IArrowAnnotation } from "../annotations/arrow-annotation";
 
 export type SortedDocumentsMap = Record<string, DocumentGroup[]>;
 
@@ -197,6 +198,16 @@ export class SortedDocuments {
     // content, not found in the database.
     this.stores.documents.exemplarDocuments.forEach(doc => {
       const exemplarStrategy = doc.properties.get('authoredCommentTag');
+
+      const tools: string[] = [];
+      const contentTileTypes = doc.content?.tileTypes || [];
+      const annotationsArray = Array.from(doc.content?.annotations || []);
+      const annotationTypes = annotationsArray.map(([key, annotation]: [string, IArrowAnnotation]) => annotation.type);
+      contentTileTypes.forEach(tileType => tools.push(tileType));
+      if (annotationTypes.includes("arrowAnnotation")) {
+        tools.push("Sparrow");
+      }
+
       const metadata: IDocumentMetadata = {
         uid: doc.uid,
         type: doc.type,
@@ -204,7 +215,7 @@ export class SortedDocuments {
         createdAt: doc.createdAt,
         title: doc.title,
         properties: undefined,
-        tools: Array.from(doc.content?.tileTypes || []),
+        tools,
         strategies: exemplarStrategy ? [exemplarStrategy] : [],
         investigation: doc.investigation,
         problem: doc.problem,
