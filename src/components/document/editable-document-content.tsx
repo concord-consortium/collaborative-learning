@@ -101,7 +101,7 @@ export function EditableDocumentContent({
   className, contained, mode, isPrimary, document, toolbar, readOnly, showPlayback, fullHeight
 }: IProps) {
   const documentContext = useDocumentContext(document);
-  const { db: { firebase }, ui, persistentUI, user } = useStores();
+  const { db: { firebase, firestore }, ui, persistentUI, user } = useStores();
   // set by the canvas and used by the toolbar
   const editableTileApiInterfaceRef: EditableTileApiInterfaceRef = useRef(null);
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
@@ -114,7 +114,7 @@ export function EditableDocumentContent({
     contained ? "contained-editable-document-content" : "full-screen-editable-document-content",
     {"comment-select" : documentSelectedForComment, "full-height": fullHeight}, className);
 
-  useDocumentSyncToFirebase(user, firebase, document, readOnly);
+  useDocumentSyncToFirebase(user, firebase, firestore, document, readOnly);
   return (
     <DocumentContextReact.Provider value={documentContext}>
       <EditableTileApiInterfaceRefContext.Provider value={editableTileApiInterfaceRef}>

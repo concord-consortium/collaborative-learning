@@ -1,11 +1,11 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, getMembers, isAlive, types } from "mobx-state-tree";
-import { DrawingObject, DrawingObjectType, IDrawingComponentProps, 
-  StrokedObjectType, 
-  isFilledObject, 
-  isStrokedObject, 
-  typeField, 
+import { DrawingObject, DrawingObjectType, IDrawingComponentProps,
+  StrokedObjectType,
+  isFilledObject,
+  isStrokedObject,
+  typeField,
   ObjectTypeIconViewBox} from "./drawing-object";
 import { BoundingBoxSides, VectorEndShape } from "../model/drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
@@ -15,7 +15,7 @@ import GroupObjectsIcon from "../assets/group-objects-icon.svg";
 // An "extent" represents the position of each side of a member object's bounding box,
 // as a fraction of the group's overall bounding box.
 // The members' extents are stored when the group is created and never changed.
-// This avoids objects getting distorted by rounding error if the group is 
+// This avoids objects getting distorted by rounding error if the group is
 // resized to, say, 1 pixel and then expanded again.
 const Extents = types.model("Extents")
 .props({
@@ -64,15 +64,15 @@ export const GroupObject = DrawingObject.named("GroupObject")
     },
     setStrokeDashArray(strokeDashArray: string) {
       self.objects.forEach((member) => {
-        if (getMembers(member).actions.includes("setStrokeDashArray")) { 
-          (member as StrokedObjectType).setStrokeDashArray(strokeDashArray); 
+        if (getMembers(member).actions.includes("setStrokeDashArray")) {
+          (member as StrokedObjectType).setStrokeDashArray(strokeDashArray);
         }
       });
     },
     setStrokeWidth(strokeWidth: number) {
       self.objects.forEach((member) => {
-        if (getMembers(member).actions.includes("setStrokeWidth")) { 
-          (member as StrokedObjectType).setStrokeWidth(strokeWidth); 
+        if (getMembers(member).actions.includes("setStrokeWidth")) {
+          (member as StrokedObjectType).setStrokeWidth(strokeWidth);
         }
       });
     },
@@ -104,7 +104,7 @@ export const GroupObject = DrawingObject.named("GroupObject")
       });
     },
     setDragBounds(deltas: BoundingBoxSides) {
-      // Each contained object gets adjusted in proportion to its 
+      // Each contained object gets adjusted in proportion to its
       // size relative to the whole group's size.
       self.objects.forEach((obj) => {
         // How much to adjust each side of the object.
@@ -153,7 +153,7 @@ export const GroupComponent = observer(function GroupComponent(
     fill="none"
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onMouseDown={(e)=> handleDrag?.(e, model)}
+    onPointerDown={(e)=> handleDrag?.(e, model)}
     pointerEvents={"visible"}
    />;
 });

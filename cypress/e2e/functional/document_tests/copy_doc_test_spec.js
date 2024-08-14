@@ -63,11 +63,7 @@ context('Copy Document', () => {
 
     cy.log('Add drawing tile');
     clueCanvas.addTile("drawing");
-    drawTile.getDrawToolRectangle().click();
-    drawTile.getDrawTile()
-      .trigger("mousedown", 250, 50)
-      .trigger("mousemove", 100, 150)
-      .trigger("mouseup", 100, 50);
+    drawTile.drawRectangle(250, 50, -150, 100);
     drawTile.getRectangleDrawing().should("exist").and("have.length", 1);
 
     cy.log("Add expression tile");

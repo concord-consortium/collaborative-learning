@@ -20,6 +20,6 @@ registerTileComponentInfo({
   Component: SimulatorTileComponent,
   Icon,
   HeaderIcon,
-  tileEltClass: "simulator-tool-tile disable-tile-content-drag",
+  tileEltClass: "simulator-tool-tile",
   type: kSimulatorTileType,
 });

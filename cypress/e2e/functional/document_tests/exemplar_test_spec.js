@@ -23,19 +23,7 @@ function beforeTest(params) {
   cy.waitForLoad();
 }
 
-function addText(x, y, text) {
-  drawToolTile.getDrawToolText().last().click();
-  drawToolTile.getDrawTile().last()
-    .trigger("mousedown", x, y)
-    .trigger("mouseup", x, y);
-  drawToolTile.getDrawTile().last()
-    .trigger("mousedown", x, y)
-    .trigger("mouseup", x, y);
-  drawToolTile.getTextDrawing().get('textarea').type(text + "{enter}");
-}
-
-  // TODO: Reinstate the tests below when all metadata documents have the new fields and are updated in real time.
-  context.skip('Exemplar Documents', function () {
+context('Exemplar Documents', function () {
   it('Unit with default config does not reveal exemplars or generate sticky notes', function () {
     beforeTest(queryParams2);
     cy.openTopTab('sort-work');
@@ -48,21 +36,56 @@ function addText(x, y, text) {
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);
-    addText(300, 50, "one two three four five six seven eight nine ten");
+    drawToolTile.addText(300, 50, "one two three four five six seven eight nine ten");
 
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);
-    addText(300, 50, "one two three four five six seven eight nine ten");
+    drawToolTile.addText(300, 50, "one two three four five six seven eight nine ten");
 
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);
-    addText(300, 50, "one two three four five six seven eight nine ten");
+    drawToolTile.addText(300, 50, "one two three four five six seven eight nine ten");
 
     // No change, no sticky note
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
     clueCanvas.getStickyNotePopup().should("not.exist");
+  });
+
+  it('Exemplars show up in the correct place in the sort work view', function () {
+    beforeTest(queryParams2);
+    cy.openTopTab('sort-work');
+
+    // With no secondary sort, the full exemplar tile should show up in the right sections.
+    sortWork.openSortWorkSection("No Group");
+    sortWork.checkDocumentInGroup("No Group", exemplarName);
+
+    sortWork.getPrimarySortByMenu().click();
+    sortWork.getPrimarySortByNameOption().click();
+    sortWork.openSortWorkSection("Idea, Ivan");
+    sortWork.checkDocumentInGroup("Idea, Ivan", exemplarName);
+
+    sortWork.getPrimarySortByMenu().click();
+    sortWork.getPrimarySortByTagOption().click();
+    sortWork.openSortWorkSection("Varies Material/Surface");
+    sortWork.checkDocumentInGroup("Varies Material/Surface", exemplarName);
+
+    sortWork.getPrimarySortByMenu().click();
+    sortWork.getPrimarySortByBookmarkedOption().click();
+    sortWork.openSortWorkSection("Not Bookmarked");
+    sortWork.checkDocumentInGroup("Not Bookmarked", exemplarName);
+
+    sortWork.getPrimarySortByMenu().click();
+    sortWork.getPrimarySortByToolsOption().click();
+    sortWork.openSortWorkSection("Text");
+    sortWork.checkDocumentInGroup("Text", exemplarName);
+
+    // With a secondary sort, "simple documents" (little boxes) should show up for exemplars.
+
+    sortWork.getSecondarySortByMenu().click();
+    sortWork.getSecondarySortByNameOption().click();
+    sortWork.checkSimpleDocumentInSubgroup("Text", "Idea, Ivan", exemplarInfo);
   });
 
   it('Unit with exemplars hidden initially, revealed 3 drawings and 3 text tiles', function () {
@@ -123,7 +146,7 @@ function addText(x, y, text) {
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);
-    addText(300, 50, "one two three four five");
+    drawToolTile.addText(300, 50, "one two three four five");
 
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
@@ -131,7 +154,7 @@ function addText(x, y, text) {
 
     // Still private?
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
-    addText(300, 50, "one two three four five");
+    drawToolTile.addText(300, 50, "one two three four five");
     // Now the exemplar should be revealed
     sortWork.getSortWorkItemByTitle(exemplarInfo).parents('.list-item').should("not.have.class", "private");
     clueCanvas.getStickyNotePopup().should("exist").should("be.visible")

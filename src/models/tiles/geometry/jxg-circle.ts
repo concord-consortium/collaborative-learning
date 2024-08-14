@@ -34,8 +34,9 @@ export function createCircle(board: JXG.Board, points: string[], properties: JXG
   const colorScheme = properties.colorScheme || 0;
   const id = properties.id || uniqueId();
   const props = {
+    ...properties,
     id,
-    ...getCircleVisualProps(false, colorScheme)
+    ...getCircleVisualProps(false, colorScheme),
   };
   const circle = board.create("circle", points, {...props, visible: true});
   return isCircle(circle) ? circle : undefined;

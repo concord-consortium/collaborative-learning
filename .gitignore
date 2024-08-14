@@ -4,6 +4,7 @@ node_modules
 npm-error.log
 .DS_Store
 serviceAccountKey.json
+.env
 .idea
 .yalc
 yalc.lock

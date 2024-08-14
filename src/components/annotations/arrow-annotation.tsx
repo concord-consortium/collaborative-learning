@@ -3,8 +3,8 @@ import { observer } from "mobx-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { AnnotationNode } from "./annotation-node";
-import { getSparrowCurve, kAnnotationNodeDefaultRadius } from "./annotation-utilities";
-import { CurvedArrow } from "./curved-arrow";
+import { getSparrowCurve, getSparrowStraight, kAnnotationNodeDefaultRadius } from "./annotation-utilities";
+import { AnnotationArrow } from "./annotation-arrow";
 import { boundDelta } from "../../models/annotations/annotation-utils";
 import {
   IArrowAnnotation, kArrowAnnotationTextHeight, kArrowAnnotationTextWidth
@@ -54,6 +54,19 @@ function DragHandle({
   );
 }
 
+function determineDragOffsets(dragType: DragType|undefined,
+    clientX: number|undefined, clientY: number|undefined, dragX: number|undefined, dragY: number|undefined) {
+  const dragDx = clientX !== undefined && dragX !== undefined ? clientX - dragX : 0;
+  const dragDy = clientY !== undefined && dragY !== undefined ? clientY - dragY : 0;
+  const isDragging = clientX !== undefined && clientY !== undefined && dragX !== undefined && dragY !== undefined;
+  const [sourceDragOffsetX, sourceDragOffsetY] = isDragging && dragType === "source" ? [dragDx, dragDy] : [0, 0];
+  const [targetDragOffsetX, targetDragOffsetY] = isDragging && dragType === "target" ? [dragDx, dragDy] : [0, 0];
+  const [textDragOffsetX, textDragOffsetY] = isDragging && dragType === "text" ? [dragDx, dragDy] : [0, 0];
+  return {
+    sourceDragOffsetX, sourceDragOffsetY, targetDragOffsetX, targetDragOffsetY, textDragOffsetX, textDragOffsetY
+  };
+}
+
 interface IArrowAnnotationProps {
   arrow: IArrowAnnotation;
   canEdit?: boolean;
@@ -75,7 +88,6 @@ export const ArrowAnnotationComponent = observer(
     documentBottom, documentLeft, documentRight, documentTop, getBoundingBox,
     getObjectNodeRadii, readOnly
   }: IArrowAnnotationProps) {
-    const [firstClick, setFirstClick] = useState(false);
     const [editingText, setEditingText] = useState(false);
     const [tempText, setTempText] = useState(arrow.text ?? "");
     const [hoveringStem, setHoveringStem] = useState(false);
@@ -99,24 +111,17 @@ export const ArrowAnnotationComponent = observer(
     const [dragType, setDragType] = useState<DragType|undefined>();
     const [dragX, setDragX] = useState<number|undefined>();
     const [dragY, setDragY] = useState<number|undefined>();
-    const dragDx = clientX !== undefined && dragX !== undefined ? clientX - dragX : 0;
-    const dragDy = clientY !== undefined && dragY !== undefined ? clientY - dragY : 0;
     const dragging = clientX !== undefined && clientY !== undefined && dragX !== undefined && dragY !== undefined;
     const draggingSource = dragging && dragType === "source";
     const draggingTarget = dragging && dragType === "target";
     const draggingText = dragging && dragType === "text";
-    const [sourceDragOffsetX, sourceDragOffsetY] = draggingSource ? [dragDx, dragDy] : [0, 0];
-    const [targetDragOffsetX, targetDragOffsetY] = draggingTarget ? [dragDx, dragDy] : [0, 0];
-    const [textDragOffsetX, textDragOffsetY] = draggingText ? [dragDx, dragDy] : [0, 0];
 
     // Find bounding boxes for source and target objects
     const sourceBB = arrow.sourceObject ? getBoundingBox(arrow.sourceObject) : undefined;
     const targetBB = arrow.targetObject ? getBoundingBox(arrow.targetObject) : undefined;
 
-    // The the arrow's points curve data, given current drag and the source and target bounding boxes
-    const dragOffsets = {
-      sourceDragOffsetX, sourceDragOffsetY, targetDragOffsetX, targetDragOffsetY, textDragOffsetX, textDragOffsetY
-    };
+    // Find the arrow's points curve data, given current drag and the source and target bounding boxes
+    const dragOffsets = determineDragOffsets(dragType, clientX, clientY, dragX, dragY);
     const {
       sourceX, sourceY, targetX, targetY, textX, textY, textCenterX, textCenterY,
       textMinXOffset, textMaxXOffset, textMinYOffset, textMaxYOffset
@@ -125,22 +130,22 @@ export const ArrowAnnotationComponent = observer(
       || textCenterY === undefined || targetX === undefined || targetY === undefined;
     const curveData = useMemo(() => {
       if (missingData) return undefined;
-      return getSparrowCurve(sourceX, sourceY, textCenterX, textCenterY, targetX, targetY, true);
-    }, [missingData, sourceX, sourceY, textCenterX, textCenterY, targetX, targetY]);
+      if (arrow.shape === "straight") {
+        return getSparrowStraight(sourceX, sourceY, textCenterX, textCenterY, targetX, targetY, true);
+      } else {
+        return getSparrowCurve(sourceX, sourceY, textCenterX, textCenterY, targetX, targetY, true);
+      }
+    }, [missingData, arrow.shape, sourceX, sourceY, targetX, targetY, textCenterX, textCenterY]);
 
     // Bail if we're missing anything necessary
-    if (!sourceBB || !targetBB || !curveData || missingData) return null;
+    if (!curveData || missingData) return null;
 
     // Set up text handlers
-    function handleTextClick() {
+    function handleTextClick(e: React.MouseEvent) {
       if (!canEdit) return;
 
-      if (firstClick) {
+      if (e.detail === 2) {
         setEditingText(true);
-        setFirstClick(false);
-      } else {
-        setFirstClick(true);
-        setTimeout(() => setFirstClick(false), 500);
       }
     }
     function acceptText() {
@@ -192,6 +197,7 @@ export const ArrowAnnotationComponent = observer(
         setClientX(e2.clientX);
         setClientY(e2.clientY);
       }
+
       function handleMouseUp(e2: MouseEvent) {
         const [startingOffset, setFunc, widthBound, heightBound] =
           _dragType === "source" ? [arrow.sourceOffset, arrow.setSourceOffset, sourceBB?.width, sourceBB?.height]
@@ -206,6 +212,15 @@ export const ArrowAnnotationComponent = observer(
           const dy = Math.max(textMinYOffset ?? 0, Math.min(textMaxYOffset ?? 0, startingDy + dDy));
           setFunc(dx, dy);
         } else {
+          // For source and target changes, also update the text offset propoprtionally
+          const currentDragOffsets = determineDragOffsets(_dragType, e2.clientX, e2.clientY, e.clientX, e.clientY);
+          const { textCenterX: tcX, textCenterY: tcY, textOriginX: toX, textOriginY: toY }
+            = arrow.getPoints(documentLeft, documentRight, documentTop, documentBottom,
+                currentDragOffsets, sourceBB, targetBB);
+          if (tcX !== undefined && tcY !== undefined) {
+            arrow.setTextOffset(tcX - toX, tcY - toY);
+          }
+          // And then update the source or target
           setFunc(boundDelta(startingDx + dDx, widthBound), boundDelta(startingDy + dDy, heightBound));
         }
 
@@ -234,8 +249,9 @@ export const ArrowAnnotationComponent = observer(
     return (
       <g>
         <g className={classNames("actual-sparrow", { selected: arrow.isSelected })}>
-          <CurvedArrow
+          <AnnotationArrow
             className="background-arrow"
+            shape={arrow.shape}
             hideArrowhead={true}
             peakX={textCenterX} peakY={textCenterY}
             setHovering={setHoveringStem}
@@ -243,8 +259,9 @@ export const ArrowAnnotationComponent = observer(
             targetX={targetX} targetY={targetY}
             onClick={(e) => handleArrowClick(arrow.id, e)}
           />
-          <CurvedArrow
+          <AnnotationArrow
             className="foreground-arrow"
+            shape={arrow.shape}
             peakX={textCenterX} peakY={textCenterY}
             sourceX={sourceX} sourceY={sourceY}
             targetX={targetX} targetY={targetY}
@@ -279,7 +296,7 @@ export const ArrowAnnotationComponent = observer(
               ) : (
                 <button
                   className={textButtonClasses}
-                  onClick={handleTextClick}
+                  onClick={e => handleTextClick(e)}
                   onMouseDown={e => handleMouseDown(e, "text")}
                 >
                   {displayText || "Add text"}

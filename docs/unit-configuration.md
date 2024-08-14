@@ -63,6 +63,8 @@ These properties are configurable at the application (built into the code) or th
   documentLabels: Record<string, SnapshotIn<typeof DocumentLabelModel>>;
   // disables publishing documents of particular types or with particular properties
   disablePublish: Array<SnapshotIn<typeof DocumentSpecModel>> | boolean;
+  // enable/disable showing the history-scrubbing controls for users in different roles
+  enableHistoryRoles: Array<"student" | "teacher">;
   // configures naming of copied documents
   copyPreferOriginTitle: boolean;
   // enable/disable dragging of tiles
@@ -79,6 +81,13 @@ These properties are configurable at the application (built into the code) or th
   initiallyHideExemplars: boolean;
   // configuration of navigation tabs (document navigation UI)
   navTabs: SnapshotIn<typeof NavTabsConfigModel>;
+  // used for AI tagging
+  showCommentTag?: boolean;
+  tagPrompt?: string;
+  commentTags?: Record<string, string>;
+  // List of the types of annotations supported (eg "curved-sparrow") or "all" or "none"
+  // Currently any value other than "none" will be treated as "all".
+  annotations?: "all" | "none" | string[];
 ```
 
 ## Unit- or Problem-level `config` properties
@@ -163,6 +172,9 @@ Uses common toolbar framework. Default buttons:
 - `group`
 - `ungroup`
 - `duplicate`
+- `zoom-in`
+- `zoom-out`
+- `fit-all`
 - `delete`
 
 In addition, if shared variables are configured in unit, it supports additional buttons:

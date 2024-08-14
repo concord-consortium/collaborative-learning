@@ -65,11 +65,7 @@ context('History Playback', () => {
     cy.get('.primary-workspace .editable-document-content .canvas .document-content .drawing-tool-tile').should('be.visible');
 
     cy.log('verify playback document does not have changes to primary document');
-    drawToolTile.getDrawToolVector().click();
-    drawToolTile.getDrawTile()
-      .trigger('mousedown')
-      .trigger('mousemove', 50, 0)
-      .trigger('mouseup');
+    drawToolTile.drawVector(50, 50, 50, 0);
     cy.get('.primary-workspace .editable-document-content .canvas .document-content .drawing-tool .drawing-layer line').should('be.visible');
     cy.get('[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content .drawing-tool .drawing-layer line').should('not.exist');
 

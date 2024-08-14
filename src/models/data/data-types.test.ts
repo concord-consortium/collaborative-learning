@@ -157,7 +157,10 @@ describe("data-types", () => {
       "ccimg://fbrtdb.concord.org/hello.png",
       "ccimg://fbrtdb.concord.org/anything.txt",
       "ccimg://not-a-cc.domain.com/hello.png",
-      "random.string.com/"
+      "random.string.com/",
+      "curriculum/unitname/images/test.png",
+      "test/unit/images/test.png",
+      "test.png"
     ];
     const testCases = valuesToTest.map(value => {
       return [value, isImageUrl(value)];
@@ -168,6 +171,9 @@ describe("data-types", () => {
 "ccimg://fbrtdb.concord.org/anything.txt" => true
 "ccimg://not-a-cc.domain.com/hello.png" => false
 "random.string.com/" => false
+"curriculum/unitname/images/test.png" => true
+"test/unit/images/test.png" => true
+"test.png" => false
 `);
   });
 

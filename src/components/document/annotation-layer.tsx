@@ -9,12 +9,14 @@ import { ArrowAnnotationComponent } from "../annotations/arrow-annotation";
 import { PreviewArrow } from "../annotations/preview-arrow";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { usePersistentUIStore, useUIStore } from "../../hooks/use-stores";
-import { ArrowAnnotation } from "../../models/annotations/arrow-annotation";
-import { ClueObjectModel, IClueObject, ObjectBoundingBox, OffsetModel } from "../../models/annotations/clue-object";
+import { ArrowAnnotation, ArrowShape, isArrowShape } from "../../models/annotations/arrow-annotation";
+import { ClueObjectModel, IClueObject, IOffsetModel, ObjectBoundingBox, OffsetModel
+} from "../../models/annotations/clue-object";
 import { DocumentContentModelType } from "../../models/document/document-content";
-import { Point } from "../../utilities/math-utils";
+import { midpoint, Point } from "../../utilities/math-utils";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { HotKeys } from "../../utilities/hot-keys";
+import { boundingBoxCenter } from "../../models/annotations/annotation-utils";
 
 import "./annotation-layer.scss";
 
@@ -38,27 +40,38 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const [sourceTileId, setSourceTileId] = useState("");
   const [sourceObjectId, setSourceObjectId] = useState("");
   const [sourceObjectType, setSourceObjectType] = useState<string | undefined>();
+  const [sourcePoint, setSourcePoint] = useState<Point | undefined>();
   const [mouseX, setMouseX] = useState<number | undefined>();
   const [mouseY, setMouseY] = useState<number | undefined>();
+  const [isBackgroundClick, setIsBackgroundClick] = useState(false);
   const divRef = useRef<Element|null>(null);
   const ui = useUIStore();
   const persistentUI = usePersistentUIStore();
   const tileApiInterface = useContext(TileApiInterfaceContext);
   const hotKeys = useMemoOne(() => new HotKeys(), []);
+  const shape: ArrowShape = isArrowShape(ui.annotationMode) ? ui.annotationMode : ArrowShape.curved;
 
   useEffect(() => {
     const deleteSelected = () => content?.deleteSelected();
     if (!readOnly) {
       hotKeys.register({
         "delete": () => deleteSelected(),
-        "backspace": () => deleteSelected()
+        "backspace": () => deleteSelected(),
+        "escape": () => ui.setAnnotationMode()
       });
       // disposer, to deactivate these bindings in case we switch to read-only later.
       return () => {
-        hotKeys.unregister(["delete", "backspace"]);
+        hotKeys.unregister(["delete", "backspace", "escape"]);
       };
     }
-  }, [content, readOnly, hotKeys]);
+  }, [content, readOnly, hotKeys, ui]);
+
+  function clearSource() {
+    setSourceTileId("");
+    setSourceObjectId("");
+    setSourceObjectType(undefined);
+    setSourcePoint(undefined);
+  }
 
   function handleKeyDown(event: React.KeyboardEvent) {
     hotKeys.dispatch(event);
@@ -80,9 +93,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
   // Clear selection and any partially completed annotation when the mode changes
   useEffect(() => {
-    setSourceTileId("");
-    setSourceObjectId("");
-    setSourceObjectType(undefined);
+    clearSource();
     content?.selectAnnotations([]);
   }, [ui.annotationMode, content]);
 
@@ -112,6 +123,15 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const documentBottom = documentHeight - (documentScrollY ?? 0);
   const documentTop = -(documentScrollY ?? 0);
 
+  const handleMouseDown: MouseEventHandler<HTMLDivElement> = event => {
+    // We need to distinguish "real" clicks on the background (the annotation SVG).
+    // If there is a mousedown on, say, a sparrow text label, followed by dragging it to a new position,
+    // followed by a mouseup, a click event is sent to the AnnotationLayer. But we don't want to
+    // consider that as a real background click & initiate drawing a sparrow.
+    const isBackground = (event.target instanceof SVGElement) && event.target.classList.contains('annotation-svg');
+    setIsBackgroundClick(isBackground);
+  };
+
   const handleMouseMove: MouseEventHandler<HTMLDivElement> = event => {
     if (divRef.current) {
       const bb = divRef.current.getBoundingClientRect();
@@ -120,8 +140,11 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     }
   };
 
-  const handleBackgroundClick: MouseEventHandler<HTMLDivElement> = event => {
-    content?.selectAnnotations([]);
+  const handleBackgroundDoubleClick: MouseEventHandler<HTMLDivElement> = event => {
+    // Make sure it's a click on the annotation-svg background, not bubbled up from a button
+    if ((event.target as HTMLElement).classList.contains("annotation-svg")) {
+      ui.setAnnotationMode();
+    }
   };
 
   // Returns the x and y offset of the top left corner of a tile with respect to the document
@@ -187,9 +210,14 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     return getTileAdjustedBoundingBox(rowId ?? "", tileId, objectId, objectType);
   }
 
-  const sourceBoundingBox = sourceTileId && sourceObjectId
-    ? getObjectBoundingBoxUnknownRow(sourceTileId, sourceObjectId, sourceObjectType)
-    : undefined;
+  let sourceBoundingBox: ObjectBoundingBox|undefined = undefined;
+  if (sourceTileId && sourceObjectId) {
+    sourceBoundingBox = getObjectBoundingBoxUnknownRow(sourceTileId, sourceObjectId, sourceObjectType);
+  }
+  if (sourcePoint) {
+    sourceBoundingBox = { left: sourcePoint[0], top: sourcePoint[1], height: 0, width: 0 };
+  }
+
   function defaultOffset(tileId?: string, objectId?: string, objectType?: string) {
     return (tileId && objectId
       ? tileApiInterface?.getTileApi(tileId)?.getObjectDefaultOffsets?.(objectId, objectType)
@@ -208,44 +236,115 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     { tileId: sourceTileId, objectId: sourceObjectId, objectType: sourceObjectType }
   );
 
-  const handleAnnotationButtonClick = (tileId: string, objectId: string, objectType?: string) => {
+  /**
+   * Create an arrow annotation.
+   * The source object is determined by the state variables.
+   * The target object can be passed in as an argument, or if not provided,
+   * it is the current mouse location.
+   * @param targetObject
+   */
+  const createAnnotation = (targetObject?: IClueObject) => {
+    // Determine source object/location based on state variables
+    if (!sourceBoundingBox) return;
+    const sourceCenter = boundingBoxCenter(sourceBoundingBox);
+    const sourceObject = sourceObjectId
+      ? ClueObjectModel.create({ tileId: sourceTileId, objectId: sourceObjectId, objectType: sourceObjectType })
+      : undefined;
+
+    // Determine target object/location based on input
+    let targetCenter: Point, targetOffset: IOffsetModel;
+    if (targetObject) {
+      const targetBoundingBox = getObjectBoundingBoxUnknownRow(
+        targetObject.tileId, targetObject.objectId, targetObject.objectType);
+      if (!targetBoundingBox) return;
+      targetCenter = boundingBoxCenter(targetBoundingBox);
+      targetOffset = defaultOffset(targetObject.tileId, targetObject.objectId, targetObject.objectType);
+    } else {
+      // Target is the click location
+      if (!mouseX || !mouseY) return;
+      targetCenter = [mouseX, mouseY];
+      // Since there is no target object, it is stored in the ArrowAnnotation as
+      // an offset relative to the source location.
+      targetOffset = OffsetModel.create(
+        { dx: mouseX - sourceCenter[0], dy: mouseY - sourceCenter[1] });
+    }
+
+    // If the source object is not set, the source offset is relative to the target object.
+    let _sourceOffset: IOffsetModel;
+    if (sourceObject) {
+      _sourceOffset = sourceOffset;
+    } else {
+      _sourceOffset = OffsetModel.create(
+        { dx: sourceCenter[0] - targetCenter[0], dy: sourceCenter[1] - targetCenter[1] });
+    }
+
+    const { peakDx, peakDy } = getDefaultPeak(shape,
+      sourceCenter[0], sourceCenter[1], targetCenter[0], targetCenter[1]);
+    // Bound the text offset to the document
+    const midPoint = midpoint(sourceCenter, targetCenter);
+    const _peakDx = Math.max(documentLeft - midPoint[0], Math.min(documentRight - midPoint[0], peakDx));
+    const _peakDy = Math.max(documentTop - midPoint[1], Math.min(documentBottom - midPoint[1], peakDy));
+    const textOffset = OffsetModel.create({ dx: _peakDx, dy: _peakDy });
+
+    const newArrow = ArrowAnnotation.create(
+      { sourceObject, sourceOffset: _sourceOffset, targetObject, targetOffset, textOffset, shape });
+    newArrow.setIsNew(true);
+    content?.addArrow(newArrow);
+  };
+
+  const handleBackgroundClick: MouseEventHandler<HTMLDivElement> = event => {
+    if (!isBackgroundClick) return;
+    setIsBackgroundClick(false); // reset for next time.
+
+    // Update the mouseX and mouseY state based on this new event
+    handleMouseMove(event);
+
+    if (shape === ArrowShape.straight) {
+      if (sourceObjectId) {
+        // Create an arrow from the source object to this X,Y location.
+        createAnnotation();
+        clearSource();
+
+      } else if (sourcePoint) {
+        // Source location is already selected; clear it.
+        setSourcePoint(undefined);
+
+      } else {
+        // No source is selected. Store this as the source location.
+        setSourcePoint([mouseX ?? 0, mouseY ?? 0]);
+      }
+    }
+
+    // Clear any selected annotations.
+    content?.selectAnnotations([]);
+  };
+
+  const handleAnnotationButtonClick = (e: React.MouseEvent, tileId: string, objectId: string, objectType?: string) => {
+    // If we are in straight arrow mode, and one object has already been
+    // selected, then we ignore the object clicked on and create an arrow to this X,Y location.
+    if (shape === ArrowShape.straight && sourceObjectId) {
+      createAnnotation();
+      clearSource();
+      return;
+    }
+
+    if (tileId === sourceTileId && objectId === sourceObjectId && objectType === sourceObjectType) {
+      // This object is already selected as the source object, so deselect it
+      clearSource();
+      return;
+    }
+
     if (!sourceBoundingBox) {
       // We don't have a source object yet, so make this one the source object
       setSourceTileId(tileId);
       setSourceObjectId(objectId);
       setSourceObjectType(objectType);
-    } else if (tileId === sourceTileId && objectId === sourceObjectId && objectType === sourceObjectType) {
-      // This object is already selected as the source object, so deselect it
-      setSourceTileId("");
-      setSourceObjectId("");
-      setSourceObjectType(undefined);
+
     } else {
-      // Create an arrow from the source object to this object
-      const sourceObject =
-        ClueObjectModel.create({ tileId: sourceTileId, objectId: sourceObjectId, objectType: sourceObjectType });
+      // Create an arrow from the source (object or location) to this object
       const targetObject = ClueObjectModel.create({ tileId, objectId, objectType });
-      const targetBoundingBox = getObjectBoundingBoxUnknownRow(tileId, objectId, objectType);
-      const targetOffset = defaultOffset(tileId, objectId, objectType);
-      let textOffset;
-      if (targetBoundingBox) {
-        const sourceX = sourceBoundingBox.left + sourceBoundingBox.width / 2;
-        const sourceY = sourceBoundingBox.top + sourceBoundingBox.height / 2;
-        const targetX = targetBoundingBox.left + targetBoundingBox.width / 2;
-        const targetY = targetBoundingBox.top + targetBoundingBox.height / 2;
-        const textX = sourceX + (targetX - sourceX) / 2;
-        const textY = sourceY + (targetY - sourceY) / 2;
-        const { peakDx, peakDy } = getDefaultPeak(sourceX, sourceY, targetX, targetY);
-        // Bound the text offset to the document
-        const _peakDx = Math.max(documentLeft - textX, Math.min(documentRight - textX, peakDx));
-        const _peakDy = Math.max(documentTop - textY, Math.min(documentBottom - textY, peakDy));
-        textOffset = OffsetModel.create({ dx: _peakDx, dy: _peakDy });
-      }
-      const newArrow = ArrowAnnotation.create({ sourceObject, sourceOffset, targetObject, targetOffset, textOffset });
-      newArrow.setIsNew(true);
-      content?.addArrow(newArrow);
-      setSourceTileId("");
-      setSourceObjectId("");
-      setSourceObjectType(undefined);
+      createAnnotation(targetObject);
+      clearSource();
     }
   };
 
@@ -260,15 +359,17 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   return (
     <div
       className={classes}
+      onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onClick={handleBackgroundClick}
+      onDoubleClick={handleBackgroundDoubleClick}
       tabIndex={0}
       onKeyDown={handleKeyDown}
       ref={element => {
         if (element) divRef.current = element;
       }}
     >
-      <svg className="annotation-svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+      <svg className="annotation-svg">
         { editing && !readOnly && rowIds.map(rowId => {
           const row = content?.rowMap.get(rowId);
           if (row) {
@@ -323,6 +424,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
           sourceY={previewArrowSourceY}
           targetX={mouseX}
           targetY={mouseY}
+          shape={shape}
         />
       </svg>
     </div>

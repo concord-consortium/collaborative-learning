@@ -36,7 +36,7 @@ const phantomPolygonEdgeProps = Object.freeze({
   highlightStrokeOpacity: 0
 });
 
-function getPolygonVisualProps(selected: boolean, colorScheme: number) {
+export function getPolygonVisualProps(selected: boolean, colorScheme: number) {
   const props: PolygonAttributes = { ...defaultPolygonProps };
   if (selected) {
     merge(props, selectedPolygonProps);
@@ -104,7 +104,7 @@ export function getAssociatedPolygon(elt: JXG.GeometryElement): JXG.Polygon | un
  * and is not drawn in.
  * @param polygon
  */
-function setPolygonEdgeColors(polygon: JXG.Polygon) {
+export function setPolygonEdgeColors(polygon: JXG.Polygon) {
   const segments = getPolygonEdges(polygon);
   const firstVertex = polygon.vertices[0];
   segments.forEach(seg => {

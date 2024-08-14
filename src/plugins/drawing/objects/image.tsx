@@ -103,7 +103,7 @@ export const ImageComponent: React.FC<IDrawingComponentProps> = observer(functio
     preserveAspectRatio="none"
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onMouseDown={(e)=> handleDrag?.(e, model)}
+    onPointerDown={(e)=> handleDrag?.(e, model)}
     pointerEvents={handleHover ? "visible" : "none"}
   />;
 
@@ -115,7 +115,7 @@ export class StampDrawingTool extends DrawingTool {
     super(drawingLayer);
   }
 
-  public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+  public handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     // Select the drawing tile, but don't propagate event to do normal Cmd-click procesing.
     this.drawingLayer.selectTile(false);
     e.stopPropagation();
