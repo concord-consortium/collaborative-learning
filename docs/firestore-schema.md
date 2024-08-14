@@ -71,7 +71,7 @@ Fields:
 - context_id: (string, uuid, should match context_id of a class)
 - createdAt: (timestamp)
 - network: (string, name of a network)
-- originDoc: ?
+- originDoc: (string, if set = key of the original document that created this PublishedDocument)
 - properties: (map, eg { pubCount: 1 })
 - teachers: (array of user IDs) _should be removed_
 
