@@ -34,7 +34,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedDocuments
     if (document) return document;
 
     // Calling `fetchFullDocument` will update the `documents` store with the full document,
-    // triggering a re-render of this component since its an observer.
+    // triggering a re-render of this component since it's an observer.
     sortedDocuments.fetchFullDocument(docKey);
 
     return undefined;
