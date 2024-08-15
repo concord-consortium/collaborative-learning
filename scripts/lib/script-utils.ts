@@ -30,6 +30,18 @@ export function getFirestoreBasePath(portal: string, demo?: string | boolean) {
     : `authed/${portal.replace(/\./g, "_")}/documents`;
 }
 
+export function getFirestoreUsersPath(portal: string, demo?: string | boolean) {
+  return demo
+    ? `demo/${demo}/users`
+    : `authed/${portal.replace(/\./g, "_")}/users`;
+}
+
+export function getFirestoreClassesPath(portal: string, demo?: string | boolean) {
+  return demo
+    ? `demo/${demo}/classes`
+    : `authed/${portal.replace(/\./g, "_")}/classes`;
+}
+
 export function getScriptRootFilePath(filename: string) {
   return path.resolve(scriptsRoot, filename);
 }
