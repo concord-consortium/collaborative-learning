@@ -37,6 +37,14 @@ export interface ICreateCommentableDocumentParams extends ICommentableDocumentPa
   firestoreRoot: string;
   uid: string;
 }
+
+// This can create multiple "commentable documents" also known as metadata documents for the same
+// document content. The uid is the user id of the current user, not the user id of the owner
+// of the document. This is by design so the comments by one network of teachers are not
+// available to the other network of teachers. However approach complicates the usage of these documents
+// for extra metadata like history and document filtering.
+// History handles this by always looking for a document with the prefix of `uid:[owner_uid]`, and
+// when history entries are written they are always written by the owner.
 export async function createCommentableDocumentIfNecessary(params?: ICreateCommentableDocumentParams) {
   const { context, document, firestoreRoot, uid } = params || {};
   if (!context || !document || !firestoreRoot || !uid) return null;

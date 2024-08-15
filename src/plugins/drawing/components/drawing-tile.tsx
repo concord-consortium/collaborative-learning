@@ -40,12 +40,13 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
       getObjectBoundingBox(objectId, objectType) {
         const bbPadding = 5;
         const object = contentRef.current.objectMap[objectId];
+        const zoom = contentRef.current.zoom;
         if (object) {
           const bb = object.boundingBox;
-          const height = bb.se.y - bb.nw.y + bbPadding * 2;
-          const width = bb.se.x - bb.nw.x + bbPadding * 2;
-          const left = bb.nw.x - bbPadding + getObjectListPanelWidth();
-          const top = bb.nw.y - bbPadding;
+          const height = (bb.se.y - bb.nw.y + bbPadding * 2) * zoom;
+          const width = (bb.se.x - bb.nw.x + bbPadding * 2) * zoom;
+          const left = (bb.nw.x - bbPadding) * zoom + getObjectListPanelWidth();
+          const top = (bb.nw.y - bbPadding) * zoom;
           return { height, left, top, width };
         }
         return undefined;

@@ -108,11 +108,12 @@ export interface IDocumentMetadata {
   title?: string;
   originDoc?: string;
   properties?: Record<string, string>;
-  tileTypes?: string[];
+  tools?: string[];
   strategies?: string[];
   investigation?: string;
   problem?: string;
   unit?: string;
+  visibility?: string;
 }
 export function isDocumentMetadata(o: any): o is IDocumentMetadata {
   return !!o.uid && !!o.type && !!o.key;

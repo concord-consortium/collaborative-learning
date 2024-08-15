@@ -275,7 +275,8 @@ describe("document model", () => {
       uid: "1",
       key: "test",
       createdAt: 1,
-      properties: {}
+      properties: {},
+      visibility: "public"
     });
   });
 

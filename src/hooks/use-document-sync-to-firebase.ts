@@ -14,6 +14,7 @@ import { Firestore } from "src/lib/firestore";
 import { useMutation, UseMutationOptions } from "react-query";
 import { ITileMapEntry } from "functions/src/shared";
 import { DocumentContentSnapshotType } from "src/models/document/document-content";
+import { IArrowAnnotation } from "src/models/annotations/arrow-annotation";
 
 function debugLog(...args: any[]) {
   // eslint-disable-next-line no-console
@@ -181,13 +182,28 @@ export function useDocumentSyncToFirebase(
   const mutation = useMutation((snapshot: DocumentContentSnapshotType) => {
     const tileMap = snapshot.tileMap || {};
 
-    const tileTypes: string[] = [];
+    const tools: string[] = [];
 
     Object.keys(tileMap).forEach((tileKey) => {
       const tileInfo = tileMap[tileKey] as ITileMapEntry;
       const tileType = tileInfo.content.type;
-      if (!tileTypes.includes(tileType)) {
-        tileTypes.push(tileType);
+      if (!tools.includes(tileType)) {
+        tools.push(tileType);
+      }
+    });
+
+    // The annotations property does exist on the snapshot but MobX doesn't recognize it
+    // as a property because of the way we are constructing the DocumentContentModel
+    // on top of multiple other models. This typing is a workaround so TS doesn't complain.
+    const annotations =
+      (snapshot as {annotations: Record<string, IArrowAnnotation>}).annotations || {};
+
+    Object.keys(annotations).forEach((annotationKey: string) => {
+      const annotation = annotations[annotationKey];
+      // for now we only want Sparrow annotations
+      // we might want to change this if we want to count other types in the future
+      if (annotation.type === "arrowAnnotation" && !tools.includes("Sparrow")) {
+        tools.push("Sparrow");
       }
     });
 
@@ -200,7 +216,7 @@ export function useDocumentSyncToFirebase(
         querySnapshot.docs.map((doc) => {
           const docRef = doc.ref;
           return docRef.update({
-            tileTypes,
+            tools,
           });
         })
       );

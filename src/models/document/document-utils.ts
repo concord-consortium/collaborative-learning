@@ -1,11 +1,13 @@
 import { getParent } from "mobx-state-tree";
+import { IDocumentMetadata } from "../../../functions/src/shared";
 import { ProblemModelType } from "../curriculum/problem";
 import { SectionModelType } from "../curriculum/section";
 import { getSectionPath } from "../curriculum/unit";
 import { AppConfigModelType } from "../stores/app-config-model";
-import { DocumentModelType } from "./document";
+import { UserModelType } from "../stores/user";
+import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
-import { isPlanningType, isProblemType } from "./document-types";
+import { isExemplarType, isPlanningType, isProblemType, isPublishedType } from "./document-types";
 
 export function getDocumentDisplayTitle(
   document: DocumentModelType, appConfig: AppConfigModelType, problem?: ProblemModelType,
@@ -44,3 +46,17 @@ export function getDocumentIdentifier(document?: DocumentContentModelType) {
     return getSectionPath(section);
   }
 }
+
+export const isDocumentAccessibleToUser = (
+  doc: IDocumentMetadata, user: UserModelType, documentStore: IExemplarVisibilityProvider
+) => {
+  const ownDocument = doc.uid === user.id;
+  const isShared = doc.visibility === "public";
+  const isPublished = isPublishedType(doc.type);
+  if (user.type === "teacher") return true;
+  if (user.type === "student") {
+    return ownDocument || isShared || isPublished
+           || (isExemplarType(doc.type) && documentStore.isExemplarVisible(doc.key));
+  }
+  return false;
+};

@@ -22,6 +22,7 @@ export interface TileToolbarButtonProps {
   selected?: boolean; // puts button in 'active' state if defined and true
   disabled?: boolean; // makes button grey and unclickable if defined and true
   extraContent?: JSX.Element; // Additional element added after the button.
+  colorClass?: string; // color to use for the button icon
 }
 
 /**
@@ -36,7 +37,8 @@ export const TileToolbarButton = function ({
   selected,
   disabled,
   children,
-  extraContent
+  extraContent,
+  colorClass
 }: PropsWithChildren<TileToolbarButtonProps>) {
   const tipOptions = useTooltipOptions();
   const tooltip = formatTooltip(title, keyHint);
@@ -49,7 +51,7 @@ export const TileToolbarButton = function ({
   return (
     <Tooltip title={tooltip} {...tipOptions}>
       <button
-        className={classNames("toolbar-button", name, { selected, disabled })}
+        className={classNames("toolbar-button", name, colorClass, { selected, disabled })}
         // TODO: confer with Scott about aria-disabled vs. disabled
         disabled={disabled}
         onClick={handleOnClick}

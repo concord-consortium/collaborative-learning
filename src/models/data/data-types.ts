@@ -133,6 +133,7 @@ export function isImageUrl(val: IValueType) {
   // The ImageMap has an isImageUrl function but it will pickup pretty much any http URL.
   // And we don't want to add a dependency on the imageMap to this shared code.
   const ccImagePattern = /^ccimg:\/\/fbrtdb\.concord\.org/;
-  const imageUrlPattern = /^(https?:\/\/.*\.(gif|jpg|jpeg|png)|data:image\/(gif|jpg|jpeg|png);base64,)/i;
+  const imageUrlPattern =
+    /(^(https?:\/\/)?[^:]*\/[^:]*\.(gif|jpg|jpeg|png)$)|(^data:image\/(gif|jpg|jpeg|png);base64,)/i;
   return ccImagePattern.test(val) || imageUrlPattern.test(val);
 }

@@ -119,6 +119,9 @@ class GeometryToolTile {
     getGraphCircle(){
       return cy.get('.single-workspace .geometry-content.editable ellipse[fill-opacity="0.2"]');
     }
+    getSelectedGraphCircle(){
+      return cy.get('.single-workspace .geometry-content.editable ellipse[fill-opacity="0.3"]');
+    }
 
     clickGraphPosition(x,y){
         let transX=this.transformFromCoordinate('x', x),
@@ -169,6 +172,9 @@ class GeometryToolTile {
     }
     addComment(){
         cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.comment.enabled').click();
+    }
+    selectColor(color){
+      return cy.get(`[data-test=canvas] .tile-toolbar .toolbar-button.color .palette-buttons .color-swatch.${color}`).click();
     }
 }
 export default GeometryToolTile;

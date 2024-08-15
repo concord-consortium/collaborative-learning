@@ -174,7 +174,7 @@ describe("Drawing Layer Components", () => {
     });
   });
 
-  // TODO: should test TextObject, but it fails 
+  // TODO: should test TextObject, but it fails
   // because the virual DOM doesn't implement getComputedTextLength
 
   describe("Group", () => {
@@ -259,5 +259,30 @@ describe("Drawing Layer Components", () => {
       content.deleteObjects([image.id]);
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
+  });
+});
+
+describe("Drawing Layer Zoom", () => {
+  let rect: RectangleObjectType;
+  beforeEach(() => {
+    rect = RectangleObject.create({
+      id: "345",
+      x: 10, y: 10,
+      width: 10, height: 10,
+      fill: "#cccccc",
+      stroke: "#888888",
+      strokeDashArray: "3,3",
+      strokeWidth: 1
+    });
+    content = createDrawingContent({ objects: [rect] });
+  });
+
+  it("zooms in", () => {
+    content.setZoom(2);
+    expect(getDrawingObject(content)).toMatchSnapshot();
+  });
+  it("zooms out", () => {
+    content.setZoom(0.5);
+    expect(getDrawingObject(content)).toMatchSnapshot();
   });
 });

@@ -49,6 +49,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     implements IDrawingLayer {
   static contextType = MobXProviderContext;
   public tools: DrawingToolMap;
+  private viewRef: React.RefObject<HTMLDivElement>;
   private svgRef: React.RefObject<any>|null;
   private setSvgRef: (element: any) => void;
   private _isMounted: boolean;
@@ -70,6 +71,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       }
     });
 
+    this.viewRef = React.createRef();
     this.svgRef = null;
     this.setSvgRef = (element) => {
       this.svgRef = element;
@@ -77,6 +79,16 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public componentDidMount() {
+    // Prevent drag events from scrolling the window on touch devices,
+    // since drag gestures are needed for various sketching functions.
+    // For iPad, listeners must be registered as non-passive in order to prevent scrolling, see
+    // https://stackoverflow.com/questions/49500339/prevent-scrolling-when-touching-the-screen-in-ios
+    // We check touches.length and only intercept events when there is a single touch.
+    // This should allow for pinch-to-zoom and scrolling with 2 fingers to still work.
+    this.viewRef.current?.addEventListener("touchstart", (e) => {
+      if (e.touches.length === 1) e.preventDefault(); }, { passive: false });
+    this.viewRef.current?.addEventListener("touchmove", (e) => {
+      if (e.touches.length === 1) e.preventDefault(); }, { passive: false });
     this._isMounted = true;
   }
 
@@ -140,13 +152,13 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     return drawingContent.currentStamp;
   }
 
-  public handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  public handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!this.props.readOnly) {
-      this.getCurrentTool()?.handleMouseDown(e);
+      this.getCurrentTool()?.handlePointerDown(e);
     }
   };
 
-  public handleObjectClick = (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObjectType) => {
+  public handleObjectClick = (e: PointerEvent|React.PointerEvent<any>, obj: DrawingObjectType) => {
     if (!this.props.readOnly) {
       this.getCurrentTool()?.handleObjectClick(e, obj);
     }
@@ -159,7 +171,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   };
 
   // Handles click/drag of selected/hovered objects
-  public handleSelectedObjectMouseDown = (e: React.MouseEvent<any>, obj: DrawingObjectType) => {
+  public handleSelectedObjectPointerDown = (e: React.PointerEvent<any>, obj: DrawingObjectType) => {
     // Only the select tool does anything special when an object is clicked.
     // Other tools just let the click pass through to the canvas layer.
     if (this.props.readOnly || !this.getContent().isSelectedButton('select')) return;
@@ -200,7 +212,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     e.stopPropagation();
     this.selectTile(false);
 
-    const handleMouseMove = (e2: MouseEvent) => {
+    const handlePointerMove = (e2: PointerEvent) => {
       e2.preventDefault();
       e2.stopPropagation();
 
@@ -226,11 +238,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         needToAddHoverToSelection = false;
       }
     };
-    const handleMouseUp = (e2: MouseEvent) => {
+    const handlePointerUp = (e2: PointerEvent) => {
       e2.preventDefault();
       e2.stopPropagation();
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
       if (moved) {
         objectsToMove.map((object, index) => {
           object.repositionObject();
@@ -240,8 +252,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       }
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
   };
 
   public startSelectionBox(p: Point) {
@@ -276,10 +288,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   private conditionallyRenderObject(object: DrawingObjectType, selected: boolean, inGroup: boolean) {
     if (!object) return null;
     if (!selected && !object.visible) return null;
-    // Objects that are members of a group do not individually respond to mouse events.
+    // Objects that are members of a group do not individually respond to pointer events.
     const hoverAction = inGroup ? undefined : this.handleObjectHover;
-    const mouseDownAction = inGroup ? undefined : this.handleSelectedObjectMouseDown;
-    return renderDrawingObject(object, this.props.readOnly, hoverAction, mouseDownAction);
+    const pointerDownAction = inGroup ? undefined : this.handleSelectedObjectPointerDown;
+    return renderDrawingObject(object, this.props.readOnly, hoverAction, pointerDownAction);
   }
 
   public renderObjects() {
@@ -297,12 +309,17 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public renderSelectionBorders(selectedObjects: DrawingObjectType[], enableActions: boolean) {
+    const zoom = this.getContent().zoom;
+    const strokeWidth = 1.5/zoom;
+    const padding = SELECTION_BOX_PADDING/zoom;
+    const dashArray = [10/zoom, 5/zoom];
+
     return selectedObjects.map((object, index) => {
       let {nw: {x: nwX, y: nwY}, se: {x: seX, y: seY}} = object.boundingBox;
-      nwX -= SELECTION_BOX_PADDING;
-      nwY -= SELECTION_BOX_PADDING;
-      seX += SELECTION_BOX_PADDING;
-      seY += SELECTION_BOX_PADDING;
+      nwX -= padding;
+      nwY -= padding;
+      seX += padding;
+      seY += padding;
 
       const color = enableActions ? SELECTION_COLOR : HOVER_COLOR;
 
@@ -326,8 +343,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
                 fill={color}
                 fillOpacity="0"
                 stroke={color}
-                strokeWidth="1.5"
-                strokeDasharray="10 5"
+                strokeWidth={strokeWidth}
+                strokeDasharray={dashArray.join(" ")}
                 pointerEvents={"none"}
                />
                {resizers}
@@ -336,17 +353,20 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public renderResizeHandle(object: DrawingObjectType, corner: string, x: number, y: number, color: string) {
-    const resizeBoxOffset = SELECTION_BOX_RESIZE_HANDLE_SIZE/2;
+    const zoom = this.getContent().zoom;
+    const handleSize = SELECTION_BOX_RESIZE_HANDLE_SIZE / zoom;
+    const strokeWidth = 1/zoom;
+    const resizeBoxOffset = handleSize/2;
 
     return <rect key={corner} data-corner={corner} className={"resize-handle " + corner}
                 x={x-resizeBoxOffset} y={y-resizeBoxOffset}
-                width={SELECTION_BOX_RESIZE_HANDLE_SIZE} height={SELECTION_BOX_RESIZE_HANDLE_SIZE}
-                stroke={color} strokeWidth="1" fill="#FFF" fillOpacity="1"
-                onMouseDown={(e) => this.handleResizeStart(e, object)}
+                width={handleSize} height={handleSize}
+                stroke={color} strokeWidth={strokeWidth} fill="#FFF" fillOpacity="1"
+                onPointerDown={(e) => this.handleResizeStart(e, object)}
           />;
   }
 
-  private handleResizeStart(e: React.MouseEvent<SVGRectElement, MouseEvent>, object: DrawingObjectType) {
+  private handleResizeStart(e: React.PointerEvent<SVGRectElement>, object: DrawingObjectType) {
     e.stopPropagation();
     e.preventDefault();
     const handle = e.currentTarget;
@@ -359,10 +379,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     const origWidth = origBoundingBox.se.x - origBoundingBox.nw.x;
     const origHeight = origBoundingBox.se.y - origBoundingBox.nw.y;
 
-    const handleResizeMove = debounce((e2: MouseEvent) => {
+    const handleResizeMove = debounce((e2: PointerEvent) => {
       e2.stopPropagation();
       e2.preventDefault();
-      // Check if mouse is within the drawtool canvas; if not do nothing.
+      // Check if pointer is within the drawtool canvas; if not do nothing.
       if (!((this.svgRef as unknown) as Element).matches(':hover')) {
         return;
       }
@@ -383,17 +403,18 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
     }, 10);
 
-    const handleResizecomplete = (e2: MouseEvent) => {
+    const handleResizecomplete = (e2: PointerEvent) => {
       e2.stopPropagation();
       e2.preventDefault();
-      window.removeEventListener("mousemove", handleResizeMove);
-      window.removeEventListener("mouseup", handleResizecomplete);
+      window.removeEventListener("pointermove", handleResizeMove);
+      window.removeEventListener("pointerup", handleResizecomplete);
+      handleResizeMove.flush(); // complete any movement pending in the debounce
       handle.classList.remove('active');
       object.resizeObject();
     };
 
-    window.addEventListener("mousemove", handleResizeMove);
-    window.addEventListener("mouseup", handleResizecomplete);
+    window.addEventListener("pointermove", handleResizeMove);
+    window.addEventListener("pointerup", handleResizecomplete);
   }
 
 
@@ -403,9 +424,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     this.setState({currentDrawingObject: object});
   }
 
-  public getWorkspacePoint = (e: MouseEvent|React.MouseEvent<any>): Point|null => {
+  public getWorkspacePoint = (e: PointerEvent|React.PointerEvent<any>): Point|null => {
     if (this.svgRef) {
-      const scale = this.props.scale || 1;
+      const zoom = this.getContent().zoom;
+      const scale = (this.props.scale || 1) * zoom;
       const rect = ((this.svgRef as unknown) as Element).getBoundingClientRect();
       return {
         x: (e.clientX - rect.left) / scale,
@@ -427,24 +449,33 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       }
     }
 
+    const zoom = this.getContent().zoom;
+
     return (
-      <div className="drawing-layer"
+      // We don't propagate pointer events to the tile, since the drawing layer
+      // already handles selecting the tile when necessary and we don't want to
+      // deselect it when shift-click is used to select multiple drawing objects.
+      <div ref={this.viewRef}
+          className="drawing-layer"
           data-testid="drawing-layer"
-          onMouseDown={this.handleMouseDown}
+          onMouseDown={(e) => { e.stopPropagation(); }}
+          onPointerDown={this.handlePointerDown}
           onDragOver={this.handleDragOver}
           onDragLeave={this.handleDragLeave}
           onDrop={this.handleDrop} >
 
         <svg xmlnsXlink="http://www.w3.org/1999/xlink" width={1500} height={1500} ref={this.setSvgRef}>
-          {this.renderObjects()}
-          {!this.props.readOnly && this.renderSelectionBorders(this.getSelectedObjects(), true)}
-          {highlightObject
-            ? this.renderSelectionBorders([highlightObject], false)
-            : null}
-          {this.state.currentDrawingObject
-            ? renderDrawingObject(this.state.currentDrawingObject)
-            : null}
-          {this.state.selectionBox ? this.state.selectionBox.render() : null}
+          <g className="object-canvas" transform={`scale(${zoom})`}>
+            {this.renderObjects()}
+            {!this.props.readOnly && this.renderSelectionBorders(this.getSelectedObjects(), true)}
+            {highlightObject
+              ? this.renderSelectionBorders([highlightObject], false)
+              : null}
+            {this.state.currentDrawingObject
+              ? renderDrawingObject(this.state.currentDrawingObject)
+              : null}
+            {this.state.selectionBox ? this.state.selectionBox.render(zoom) : null}
+          </g>
         </svg>
       </div>
     );

@@ -169,6 +169,9 @@ export const PointModel = PositionedObjectModel
       if (name !== self.name) {
         self.name = name;
       }
+    },
+    setColorScheme(colorScheme: number) {
+      self.colorScheme = colorScheme;
     }
   }));
 export interface PointModelType extends Instance<typeof PointModel> {}
@@ -221,6 +224,11 @@ export const CircleModel = GeometryObjectModel
       return [self.centerPoint, self.tangentPoint];
     }
     return [self.centerPoint];
+  }
+}))
+.actions(self => ({
+  setColorScheme(colorScheme: number) {
+    self.colorScheme = colorScheme;
   }
 }));
 
@@ -338,6 +346,9 @@ export const PolygonModel = GeometryObjectModel
       else {
         self.labels.push(value);
       }
+    },
+    setColorScheme(colorScheme: number) {
+      self.colorScheme = colorScheme;
     }
   }));
 export interface PolygonModelType extends Instance<typeof PolygonModel> {}
