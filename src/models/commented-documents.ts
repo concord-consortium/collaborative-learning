@@ -1,6 +1,7 @@
 import { makeAutoObservable } from "mobx";
+import { chunk } from "lodash";
 import { Firestore } from "../lib/firestore";
-import { CurriculumDocument, DocumentDocument } from "../lib/firestore-schema";
+import { ClassDocument, CurriculumDocument, DocumentDocument } from "../lib/firestore-schema";
 import { getSectionTitle } from "./curriculum/section";
 import { UserModelType } from "./stores/user";
 
@@ -90,46 +91,56 @@ export class CommentedDocumentsQuery {
     this.curriculumDocs = commentedDocs;
   }
 
-// classes = db.collection("classes").where("teachers", "array-contains", user.id) OR db.collection("classes").where("network", "==", user.network);
-// where "context_id" is in classes.  Iterate over classes because there's a limit of ~10 for "in" queries.
-
-
   async queryStudentDocs() {
     console.log("running queryStudentDocs");
-    const collection = this.db.collection("documents");
-    let docsQuery;
-    if(this.user.network){
-      docsQuery = collection.where("network", "==", this.user.network);
-    } else {
-      docsQuery = collection.where("uid", "==", this.user.id);
+
+    // Find teacher's classes
+    const classesRef = this.db.collection("classes");
+    const individualClasses = (await classesRef.where("teachers", "array-contains", this.user.id).get()).docs;
+    const networkClasses = this.user.network
+      ? (await classesRef.where("network", "==", this.user.network).get()).docs
+      : [];
+    const allClasses = individualClasses.concat(networkClasses);
+    console.log("teacher classes:", individualClasses, networkClasses);
+    const classIds = allClasses.map(doc => { return (doc.data() as ClassDocument).context_id; });
+
+    // Find student documents
+    if (classIds.length === 0) {
+      return;
     }
-    const result = await docsQuery.get();
-    console.log('query result:', result.docs.length);
-    const docs: StudentDocumentInfo[] = result.docs.map(doc => {
-      const data = doc.data() as DocumentDocument;
-      return {
-        id: doc.id,
-        numComments: 0,
-        title: "temp",
-        ...data
-      };
-    });
+    const collection = this.db.collection("documents");
+    // Firestore has a limit of ~10 for "in" queries (30 in recent versions), so we need to iterate over the classes
+    const chunkSize = 10;
+    const teacherClassGroups = chunk(classIds, chunkSize);
+    const studentDocs: StudentDocumentInfo[] = [];
+    for (const group of teacherClassGroups) {
+      const docsQuery = collection.where("context_id", "in", group);
+      const result = await docsQuery.get();
+      for (const doc of result.docs) {
+        const data = doc.data() as DocumentDocument;
+        studentDocs.push({
+          id: doc.id,
+          title: "temp",
+          numComments: 0,
+          ...data
+        });
+      }
+    }
     const commentedDocs: StudentDocumentInfo[] = [];
     const promiseArr: Promise<void>[] = [];
     // TODO maybe combine multiple "docs" that have same ID?
-    for (let doc of docs){
+    for (const doc of studentDocs){
       const docCommentsRef = collection.doc(doc.id).collection("comments");
+      // NOTE, Firestore v10 supports `.count()` queries so we wouldn't have to fetch the entire collection
       promiseArr.push(docCommentsRef.get().then((qs)=>{
-        console.log('comments:', docCommentsRef.path, qs.size);
         if (qs.empty === false){
-          doc = {...doc, numComments: qs.size};
-          commentedDocs.push(doc);
+          const commentedDoc = {...doc, numComments: qs.size};
+          commentedDocs.push(commentedDoc);
         }
       }));
     }
     await Promise.all(promiseArr);
     this.studentDocs = commentedDocs;
-    console.log('stored studentDocs:', this.studentDocs);
   }
 
 }
