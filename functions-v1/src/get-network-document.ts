@@ -2,7 +2,7 @@ import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { canonicalizeUrl } from "./canonicalize-url";
 import { parseDocumentContent } from "./parse-document-content";
-import { IGetNetworkDocumentUnionParams, isWarmUpParams } from "./shared";
+import { IGetNetworkDocumentUnionParams, isWarmUpParams } from "../../shared/shared";
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function

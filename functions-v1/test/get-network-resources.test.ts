@@ -1,7 +1,7 @@
 import {
   apps, clearFirestoreData, initializeAdminApp} from "@firebase/rules-unit-testing";
 import { getNetworkResources } from "../src/get-network-resources";
-import { IGetNetworkResourcesParams } from "../src/shared";
+import { IGetNetworkResourcesParams } from "../../shared/shared";
 import {
   configEmulators, kClassHash, kOffering1Id, kOffering2Id, kOtherClassHash, kProblemPath,
   kTeacherName, kTeacherNetwork, kUserId, specAuth, specUserContext

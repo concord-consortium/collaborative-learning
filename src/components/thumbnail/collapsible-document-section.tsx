@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { DocumentContextReact } from "../document/document-context";
-import { INetworkResourceClassResponse } from "../../../functions/src/shared";
+import { INetworkResourceClassResponse } from "../../../shared/shared";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { IStores } from "../../models/stores/stores";
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";

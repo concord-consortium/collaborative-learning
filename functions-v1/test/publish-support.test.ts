@@ -1,7 +1,7 @@
 import { apps, clearFirestoreData, initializeAdminApp } from "@firebase/rules-unit-testing";
 import { publishSupport } from "../src/publish-support";
-import { IPublishSupportParams } from "../src/shared";
-import { buildFirebaseImageUrl, parseFirebaseImageUrl, replaceAll } from "../src/shared-utils";
+import { IPublishSupportParams } from "../../shared/shared";
+import { buildFirebaseImageUrl, parseFirebaseImageUrl, replaceAll } from "../../shared/shared-utils";
 import {
   configEmulators,
   kCanonicalPortal, kClassHash, kOtherClassHash, kPortal, kTeacherNetwork,

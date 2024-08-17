@@ -1,5 +1,5 @@
 import * as admin from "firebase-admin";
-import { buildFirebaseImageUrl, parseFirebaseImageUrl } from "./shared-utils";
+import { buildFirebaseImageUrl, parseFirebaseImageUrl } from "../../shared/shared-utils";
 
 export async function canonicalizeUrl(url: string, defaultClassHash: string, firestoreRoot: string) {
   const { imageClassHash, imageKey } = parseFirebaseImageUrl(url);

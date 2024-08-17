@@ -1,5 +1,5 @@
 import { AuthData } from "firebase-functions/lib/common/providers/https";
-import { escapeKey, IUserContext } from "./shared";
+import { escapeKey, IUserContext } from "../../shared/shared";
 
 export interface IValidatedUserContext {
   isValid: boolean;

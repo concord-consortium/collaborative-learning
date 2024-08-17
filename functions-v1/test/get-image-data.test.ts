@@ -1,6 +1,6 @@
 import { apps, clearFirestoreData, initializeAdminApp } from "@firebase/rules-unit-testing";
 import { getImageData } from "../src/get-image-data";
-import { IGetImageDataParams, IUserContext } from "../src/shared";
+import { IGetImageDataParams, IUserContext } from "../../shared/shared";
 import { validateUserContext } from "../src/user-context";
 import {
   configEmulators,

@@ -10,7 +10,7 @@ import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { ICommentableDocumentParams, IDocumentMetadata,
-  networkDocumentKey } from "../../../functions/src/shared";
+  networkDocumentKey } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserModelType } from "../stores/user";
 import { UserContextProvider } from "../stores/user-context-provider";

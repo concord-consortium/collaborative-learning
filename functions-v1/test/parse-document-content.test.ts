@@ -1,5 +1,5 @@
 import { parseDocumentContent } from "../src/parse-document-content";
-import { buildFirebaseImageUrl, parseFirebaseImageUrl, replaceAll } from "../src/shared-utils";
+import { buildFirebaseImageUrl, parseFirebaseImageUrl, replaceAll } from "../../shared/shared-utils";
 import { specDocumentContent } from "./test-utils";
 import sharedDatasetExample from "./shared-dataset-example";
 

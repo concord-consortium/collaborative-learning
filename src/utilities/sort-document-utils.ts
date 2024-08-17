@@ -1,4 +1,4 @@
-import { IDocumentMetadata } from "functions/src/shared";
+import { IDocumentMetadata } from "../../shared/shared";
 import { FC, SVGProps } from "react";
 import { Bookmarks } from "src/models/stores/bookmarks";
 import { getTileComponentInfo } from "../models/tiles/tile-component-info";

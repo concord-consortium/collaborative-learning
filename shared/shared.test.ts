@@ -1,11 +1,12 @@
-import { buildSectionPath, escapeKey, getCurriculumMetadata, isProblemPath, isSectionPath, networkDocumentKey, parseProblemPath, parseSectionPath } from "../src/shared";
+import { buildSectionPath, escapeKey, getCurriculumMetadata, isProblemPath, isSectionPath,
+  networkDocumentKey, parseProblemPath, parseSectionPath } from "./shared";
 
 describe("shared types and utilities", () => {
 
   describe("escapeKey", () => {
 
     it("should escape the appropriate characters", () => {
-      expect(escapeKey(".$[]#\/")).toBe("______");
+      expect(escapeKey(".$[]#/")).toBe("______");
 
       const kNormalChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@%^&*()-_=+";
       expect(escapeKey(kNormalChars)).toBe(kNormalChars);

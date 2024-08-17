@@ -2,8 +2,8 @@ import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { canonicalizeUrl } from "./canonicalize-url";
 import { parseDocumentContent } from "./parse-document-content";
-import { IPublishSupportUnionParams, isWarmUpParams } from "./shared";
-import { parseFirebaseImageUrl } from "./shared-utils";
+import { IPublishSupportUnionParams, isWarmUpParams } from "../../shared/shared";
+import { parseFirebaseImageUrl } from "../../shared/shared-utils";
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function

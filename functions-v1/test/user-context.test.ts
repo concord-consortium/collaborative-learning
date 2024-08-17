@@ -1,5 +1,5 @@
 import { AuthData } from "firebase-functions/lib/common/providers/https";
-import { IUserContext } from "../src/shared";
+import { IUserContext } from "../../shared/shared";
 import { getFirebaseClassPath, validateUserContext } from "../src/user-context";
 import {
   kCanonicalPortal, kClassHash, kDemoName, kFirebaseUserId, kOtherCanonicalPortal, kOtherClaimPortal, kOtherClassHash,

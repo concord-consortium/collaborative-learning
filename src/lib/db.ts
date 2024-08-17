@@ -30,7 +30,7 @@ import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
 import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
-import { IGetImageDataParams, IPublishSupportParams } from "../../functions/src/shared";
+import { IGetImageDataParams, IPublishSupportParams } from "../../shared/shared";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";

@@ -1,5 +1,5 @@
-import { IDocumentContent } from "./shared";
-import { matchAll, parseFirebaseImageUrl, replaceAll, safeJsonParse } from "./shared-utils";
+import { IDocumentContent } from "../../shared/shared";
+import { matchAll, parseFirebaseImageUrl, replaceAll, safeJsonParse } from "../../shared/shared-utils";
 
 // regular expression for identifying firebase image urls in document content
 // In some tile state the image URLS are inside of a double escaped JSON. This means

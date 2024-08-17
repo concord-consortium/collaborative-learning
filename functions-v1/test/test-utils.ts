@@ -1,7 +1,7 @@
 import { useEmulators } from "@firebase/rules-unit-testing";
 import { AuthData } from "firebase-functions/lib/common/providers/https";
 import { DeepPartial } from "utility-types";
-import { IRowMapEntry, ITileMapEntry, IUserContext } from "../src/shared";
+import { IRowMapEntry, ITileMapEntry, IUserContext } from "../../shared/shared";
 
 // You might need to switch this to "localhost" if 127.0.0.1 doesn't work for you
 export const kEmulatorHost = "127.0.0.1";

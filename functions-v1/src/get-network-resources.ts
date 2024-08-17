@@ -3,7 +3,7 @@ import * as functions from "firebase-functions";
 import {
   IGetNetworkResourcesUnionParams, INetworkResourceClassResponse, INetworkResourceOfferingResponse,
   INetworkResourceTeacherClassResponse, INetworkResourceTeacherOfferingResponse, isWarmUpParams
-} from "./shared";
+} from "../../shared/shared";
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function

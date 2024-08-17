@@ -1,8 +1,8 @@
 import {
   apps, clearFirestoreData, initializeAdminApp} from "@firebase/rules-unit-testing";
 import { getNetworkDocument } from "../src/get-network-document";
-import { IGetNetworkDocumentParams } from "../src/shared";
-import { buildFirebaseImageUrl, parseFirebaseImageUrl } from "../src/shared-utils";
+import { IGetNetworkDocumentParams } from "../../shared/shared";
+import { buildFirebaseImageUrl, parseFirebaseImageUrl } from "../../shared/shared-utils";
 import { validateUserContext } from "../src/user-context";
 import {
   configEmulators,

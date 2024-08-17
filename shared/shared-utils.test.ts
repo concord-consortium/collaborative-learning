@@ -35,16 +35,16 @@ describe("safeJsonParse", () => {
   it("should return parsed result with valid JSON", () => {
     const obj = { prop: "value" };
     expect(safeJsonParse(JSON.stringify(obj))).toEqual(obj);
-  })
+  });
   it("should return undefined for invalid JSON", () => {
     expect(safeJsonParse()).toBeUndefined();
     expect(safeJsonParse("{")).toBeUndefined();
-  })
+  });
 });
 
 describe("buildFirebaseImageUrl", () => {
   it("should work as expected", () => {
-    expect(buildFirebaseImageUrl("class-hash", "image-key")).toBe("ccimg://fbrtdb.concord.org/class-hash/image-key")
+    expect(buildFirebaseImageUrl("class-hash", "image-key")).toBe("ccimg://fbrtdb.concord.org/class-hash/image-key");
   });
 });
 

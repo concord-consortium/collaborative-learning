@@ -7,7 +7,7 @@ import { DB } from "../../lib/db";
 import { AppConfigModelType } from "./app-config-model";
 import { Bookmarks } from "./bookmarks";
 import { UserModelType } from "./user";
-import { IDocumentMetadata } from "../../../functions/src/shared";
+import { IDocumentMetadata } from "../../../shared/shared";
 import { typeConverter } from "../../utilities/db-utils";
 import {
   createDocMapByBookmarks,

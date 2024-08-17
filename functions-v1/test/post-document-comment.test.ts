@@ -4,7 +4,7 @@ import { postDocumentComment } from "../src/post-document-comment";
 import {
   ICurriculumMetadata, IDocumentMetadata, IPostDocumentCommentParams, isCurriculumMetadata,
   IUserContext, networkDocumentKey
-} from "../src/shared";
+} from "../../shared/shared";
 import {
   configEmulators, kCanonicalPortal, kCurriculumKey, kDemoName, kDocumentKey, kDocumentType, kFirebaseUserId,
   kTeacherName, kTeacherNetwork, kUserId, specAuth, specUserContext

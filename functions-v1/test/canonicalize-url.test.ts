@@ -1,5 +1,5 @@
 import { canonicalizeUrl } from "../src/canonicalize-url";
-import { buildFirebaseImageUrl } from "../src/shared-utils";
+import { buildFirebaseImageUrl } from "../../shared/shared-utils";
 
 describe("canonicalizeUrl", () => {
   it("should simply return invalid urls", async () => {

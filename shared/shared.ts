@@ -1,5 +1,5 @@
 export const escapeKey = (s: string): string => {
-  return s.replace(/[.$[\]#\/]/g, "_");
+  return s.replace(/[.$[\]#/]/g, "_");
 };
 
 const kProblemPathRegEx = /(.+)\/(\d)\/(\d)$/;
@@ -19,7 +19,7 @@ export const isProblemPath = (key?: string) => {
 export const parseProblemPath = (key?: string) => {
   const result = kProblemPathRegEx.exec(key || "");
   return result ? result?.slice(1) : undefined;
-}
+};
 
 /*
  * isSectionPath
@@ -45,12 +45,12 @@ export const isSectionPath = (key?: string) => {
  */
 export const parseSectionPath = (key?: string) => {
   const result = kSectionPathRegEx.exec(key || "");
-  return result ? [result[1], ...result?.slice(3)] : undefined;
-}
+  return result ? [result[1], ...result.slice(3)] : undefined;
+};
 
 const facetMap: Record<string, string> = {
   "teacher-guide": "guide"
-}
+};
 
 export const buildProblemPath = (unitCode: string, investigationOrdinal: string, problemOrdinal: string) => {
   return `${unitCode}/${investigationOrdinal}/${problemOrdinal}`;
@@ -70,7 +70,7 @@ export const getCurriculumMetadata = (sectionPath?: string): ICurriculumMetadata
   return sectionPath && unit && investigation && problem && section
           ? { unit, facet, problem: `${investigation}.${problem}`, section, path: sectionPath }
           : undefined;
-}
+};
 
 /*
  * Types that are shared between cloud functions and client code.

@@ -1,4 +1,4 @@
-import { isSectionPath, parseSectionPath } from "../../../../functions/src/shared";
+import { isSectionPath, parseSectionPath } from "../../../../shared/shared";
 import { ProblemModelType } from "../../curriculum/problem";
 import { Logger } from "../../../lib/logger";
 import { getTileTitleForLogging } from "../../../lib/logger-utils";

@@ -3,7 +3,7 @@ import * as functions from "firebase-functions";
 import {
   ICommentableDocumentParams, ICommentableDocumentUnionParams, isCurriculumMetadata, isDocumentMetadata,
   isWarmUpParams, networkDocumentKey
-} from "./shared";
+} from "../../shared/shared";
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function

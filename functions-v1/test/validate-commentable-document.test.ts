@@ -3,7 +3,7 @@ import {
 import {
   ICommentableDocumentParams, ICurriculumMetadata, IDocumentMetadata, isCurriculumMetadata,
   IUserContext, networkDocumentKey
-} from "../src/shared";
+} from "../../shared/shared";
 import { validateCommentableDocument } from "../src/validate-commentable-document";
 import {
   configEmulators, kCanonicalPortal, kCurriculumKey, kDemoName, kDocumentKey, kDocumentType, kFirebaseUserId,

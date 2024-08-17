@@ -1,6 +1,6 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
-import { IGetImageDataUnionParams, isWarmUpParams } from "./shared";
+import { IGetImageDataUnionParams, isWarmUpParams } from "../../shared/shared";
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function
