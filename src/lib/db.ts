@@ -414,12 +414,14 @@ export class DB {
       const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
       const firestoreMetadata: IDocumentMetadata & { contextId: string } = {
         ...cleanedMetadata,
+        // The validateCommentableDocument firebase function currently deployed to production is out of date.
+        // It requires contextId to defined, but doesn't check its value.
         contextId: "ignored",
         key: documentKey,
         properties: {},
         uid: userContext.uid,
       };
-      if ("offeringId" in metadata) {
+      if ("offeringId" in metadata && metadata.offeringId != null) {
         const { investigation, problem, unit } = this.stores;
         const investigationOrdinal = String(investigation.ordinal);
         const problemOrdinal = String(problem.ordinal);
