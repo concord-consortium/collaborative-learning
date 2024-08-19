@@ -120,12 +120,6 @@ describe("Firestore security rules", () => {
       await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ remove: ["uid"] }));
     });
 
-    it("authenticated teachers can't write user documents without required network", async () => {
-      db = initFirestore(teacherAuth);
-      await specClassDoc(thisClass, teacherId);
-      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({ remove: ["network"] }));
-    });
-
     it("authenticated teachers can't write user documents without required type", async () => {
       db = initFirestore(teacherAuth);
       await specClassDoc(thisClass, teacherId);
@@ -161,14 +155,14 @@ describe("Firestore security rules", () => {
     // Should teachers be able to create documents in other classes that they belong to
     // (that is, a class other than the one they logged in with)?
     // If so, these tests should be unskipped.
-    it.skip("authenticated teachers can write user documents in secondary class", async () => {
+    it("authenticated teachers can write user documents in secondary class", async () => {
       db = initFirestore(teacherAuth);
       await specClassDoc(thisClass, teacherId);
       await specClassDoc(otherClass, teacherId);
       await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({ add: { context_id: otherClass }}));
     });
 
-    it.skip("authenticated teachers can update user documents in secondary class", async () => {
+    it("authenticated teachers can update user documents in secondary class", async () => {
       db = initFirestore(teacherAuth);
       await specClassDoc(thisClass, teacherId);
       await specClassDoc(otherClass, teacherId);
@@ -194,13 +188,6 @@ describe("Firestore security rules", () => {
       await specClassDoc(thisClass, teacherId);
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
       await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", uid: teacher2Id });
-    });
-
-    it("authenticated teachers can't update user documents' read-only network field", async () => {
-      db = initFirestore(teacherAuth);
-      await specClassDoc(thisClass, teacherId);
-      await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
-      await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title", network: "new-network" });
     });
 
     it("authenticated teachers can't update user documents' read-only type field", async () => {
@@ -590,12 +577,6 @@ describe("Firestore security rules", () => {
       await initFirestoreWithUserDocument(teacherAuth);
       await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
       await expectUpdateToFail(db, kDocumentCommentDocPath, { content: "A new comment!", uid: teacher2Id });
-    });
-
-    it("authenticated teachers can't update document comments' read-only network field", async () => {
-      await initFirestoreWithUserDocument(teacherAuth);
-      await adminWriteDoc(kDocumentCommentDocPath, specCommentDoc());
-      await expectUpdateToFail(db, kDocumentCommentDocPath, { content: "A new comment!", network: "other-network" });
     });
 
     it("authenticated teachers can update document comments", async () => {

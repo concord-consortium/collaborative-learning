@@ -34,7 +34,8 @@ const mockCollection = jest.fn((path: string) => {
 jest.mock("firebase/app", () => ({
   firestore: () => ({
     collection: mockCollection,
-    doc: mockDoc
+    doc: mockDoc,
+    runTransaction: jest.fn(callback => callback())
   })
 }));
 
@@ -161,15 +162,21 @@ describe("Teacher network functions", () => {
       resetMocks();
     });
 
-    const classDocPath = `/authed/test-portal/classes/test-network_${kClass1Hash}`;
+    const oldClassDocPath = `/authed/test-portal/classes/test-network_${kClass1Hash}`;
+    const newClassDocPath = `/authed/test-portal/classes/${kClass1Hash}`;
 
     it("should do nothing if the class already exists", async () => {
-      mockDocGet.mockImplementation(() => Promise.resolve(fsClass1));
+      mockDocGet.mockImplementation(() => Promise.resolve({
+        exists: true,
+        data: () => fsClass1}));
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
       const firestore = new Firestore(mockDB);
       const result = await syncClass(firestore, kPortalJWT, partClass1);
-      expect(mockDoc).toHaveBeenCalledWith(classDocPath);
-      expect(mockDocGet).toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(mockDoc).toHaveBeenCalledTimes(2);
+      expect(mockDoc).toHaveBeenCalledWith(oldClassDocPath);
+      expect(mockDoc).toHaveBeenCalledWith(newClassDocPath);
+      expect(mockDocGet).toHaveBeenCalledTimes(2);
       expect(mockDocSet).not.toHaveBeenCalled();
       return result;
     });
@@ -202,7 +209,7 @@ describe("Teacher network functions", () => {
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
       const firestore = new Firestore(mockDB);
       const result = await syncClass(firestore, kPortalJWT, partClass1);
-      expect(mockDoc).toHaveBeenCalledWith(classDocPath);
+      expect(mockDoc).toHaveBeenCalledWith(oldClassDocPath);
       expect(mockDocGet).toHaveBeenCalled();
       expect(mockDocSet).not.toHaveBeenCalled();
       return result;
@@ -213,7 +220,7 @@ describe("Teacher network functions", () => {
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
       const firestore = new Firestore(mockDB);
       const result = await syncClass(firestore, kPortalJWT, partClass1);
-      expect(mockDoc).toHaveBeenCalledWith(classDocPath);
+      expect(mockDoc).toHaveBeenCalledWith(oldClassDocPath);
       expect(mockDocGet).toHaveBeenCalled();
       expect(mockDocSet).toHaveBeenCalledWith(fsClass1);
       return result;
@@ -317,7 +324,8 @@ describe("Teacher network functions", () => {
       await syncTeacherClassesAndOfferings(firestore, user, kPortalJWT);
       expect(mockDoc).toHaveBeenCalledTimes(1);
       expect(mockDocGet).toHaveBeenCalledTimes(1);
-      expect(mockDocSet).toHaveBeenCalledTimes(0);
+      expect(mockDocSet).toHaveBeenCalledTimes(1);
+      expect(mockDocSet).toHaveBeenCalledWith({...fsClass1, network: undefined});
     });
 
     it("should sync classes and offerings when appropriate", async () => {

@@ -1,7 +1,8 @@
+import { FieldValue } from "@google-cloud/firestore";
 import { Optional } from "utility-types";
 import { UserModelType } from "../models/stores/user";
 import { arraysEqualIgnoringOrder } from "../utilities/js-utils";
-import { Firestore } from "./firestore";
+import { Firestore, isFirestorePermissionsError } from "./firestore";
 import { ClassDocument, OfferingDocument } from "./firestore-schema";
 import { IPortalClassInfo } from "./portal-types";
 
@@ -64,7 +65,7 @@ export function syncTeacherClassesAndOfferings(firestore: Firestore, user: UserM
 
   // synchronize the classes
   Object.keys(userClasses).forEach(async context_id => {
-    promises.push(syncClass(firestore, rawPortalJWT, userClasses[context_id]));
+    promises.push(syncClass(firestore, rawPortalJWT, userClasses[context_id], network));
   });
 
   if (network) {
@@ -82,35 +83,71 @@ export function syncTeacherClassesAndOfferings(firestore: Firestore, user: UserM
   return Promise.all(promises);
 }
 
-async function createOrUpdateClassDoc(firestore: Firestore, docPath: string, aClass: ClassDocument):
-      Promise<void|ClassDocument> {
-  return firestore.guaranteeDocument(docPath,
-     async () => { return aClass; },
-     (content) => { return !content || !arraysEqualIgnoringOrder(aClass.teachers, content.teachers); }
-  );
+async function createOrUpdateClassDoc(
+    firestore: Firestore, docPath: string, aClass: ClassDocument, addNetwork?: string) {
+  const docRef = firestore.doc(docPath);
+  return firestore.runTransaction(async (transaction) => {
+    // Security rules can depend on the contents of the document, so we could get a permissions
+    // error when trying to read, but still be able to write a document into this location.
+    let current;
+    try {
+      current = await docRef.get();
+    } catch (e) {
+      // Ignore permissions error, but quit on any other problem
+      if (!isFirestorePermissionsError(e)) {
+        console.warn("Error retrieving class document:", e);
+        return;
+      }
+    }
+    if (current && current.exists) {
+      // Update existing doc
+      const data = current.data() as ClassDocument;
+      if (!arraysEqualIgnoringOrder(aClass.teachers, data.teachers)) {
+        console.log("updating teacher array:", data.teachers, aClass.teachers);
+        await docRef.update({ teachers: aClass.teachers });
+      }
+      if (addNetwork && !data.network?.includes(addNetwork)) {
+        console.log("updating networks array:", data.network, addNetwork);
+        await docRef.update({ network: FieldValue.arrayUnion(addNetwork) });
+      }
+    } else {
+      // Create the document.
+      console.log("new doc:", aClass, addNetwork);
+      if (addNetwork) {
+        await docRef.set({ ...aClass, network: addNetwork, networks: [addNetwork] });
+      } else {
+        await docRef.set(aClass);
+      }
+    }
+  });
 }
 
-export async function syncClass(firestore: Firestore, rawPortalJWT: string, aClass: ClassWithoutTeachers) {
-  const { uri, context_id, network } = aClass;
-  const promises: Promise<void|ClassDocument>[] = [];
+export async function syncClass(firestore: Firestore, rawPortalJWT: string,
+    aClass: ClassWithoutTeachers, addNetwork?: string) {
+  const { uri, context_id } = aClass;
+  const promises: Promise<any>[] = [];
   if (uri && context_id && rawPortalJWT) {
     const teachers = await getClassTeachers(uri, rawPortalJWT);
     if (!teachers) return;
     const classWithTeachers = { ...aClass, teachers };
-
+    if (addNetwork) {
+      classWithTeachers.network = addNetwork;
+    }
     // Firestore will not accept 'undefined' values
     if (classWithTeachers.network === undefined) {
       delete classWithTeachers.network;
     }
 
     // Old location of the class document
-    if (network) {
-      console.log('attempting to set new class doc:', `classes/${network}_${context_id}`, classWithTeachers);
-      promises.push(createOrUpdateClassDoc(firestore, `classes/${network}_${context_id}`, classWithTeachers));
+    if (aClass.network) {
+      console.log('attempting to set old class doc:', `classes/${aClass.network}_${context_id}`,
+        classWithTeachers, addNetwork);
+      promises.push(createOrUpdateClassDoc(firestore, `classes/${aClass.network}_${context_id}`,
+        classWithTeachers, addNetwork));
     }
     // New location of the class document
-    console.log('attempting to set new class doc:', `classes/${context_id}`, classWithTeachers);
-    promises.push(createOrUpdateClassDoc(firestore, `classes/${context_id}`, classWithTeachers));
+    console.log('attempting to set new class doc:', `classes/${context_id}`, classWithTeachers, addNetwork);
+    promises.push(createOrUpdateClassDoc(firestore, `classes/${context_id}`, classWithTeachers, addNetwork));
   }
   return Promise.all(promises);
 }

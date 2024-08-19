@@ -87,14 +87,8 @@ service cloud.firestore {
               request.resource.data.keys().hasAll(["uid", "unit", "problem", "section", "path", "network"]);
     }
 
-    function isValidDocumentCreateRequest() {
-      return
-        classIsRequestContextId() &&
-        request.resource.data.keys().hasAll(["uid", "network", "type", "key", "createdAt"]);
-    }
-
     function preservesReadOnlyDocumentFields() {
-      let readOnlyFieldsSet = ["uid", "network", "type", "key", "createdAt", "context_id"].toSet();
+      let readOnlyFieldsSet = ["uid", "type", "key", "createdAt", "context_id"].toSet();
       let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
       return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
     }
@@ -126,8 +120,8 @@ service cloud.firestore {
 
       // Check that the class given by the context_id exists and includes the logged-in teacher
       function teacherIsInClass(contextid) {
-        let class_doc = get(/databases/$(database)/documents/authed/$(portal)/classes/$(contextid)).data;
-        return class_doc != null && string(request.auth.token.platform_user_id) in class_doc.teachers;
+        let class_doc = get(/databases/$(database)/documents/authed/$(portal)/classes/$(contextid));
+        return class_doc != null && string(request.auth.token.platform_user_id) in class_doc.data.teachers;
       }
 
       // user's platform_user_id must be listed in the class of the requested document
@@ -136,6 +130,12 @@ service cloud.firestore {
         return isAuthed() &&
                ( teacherIsInClass(resource.data.context_id) ||
                  string(request.auth.token.platform_user_id) in resource.data.teachers);
+      }
+
+      function isValidDocumentCreateRequest() {
+        return
+          request.resource.data.keys().hasAll(["uid", "type", "key", "createdAt"]) &&
+          (classIsRequestContextId() || teacherIsInClass(request.resource.data.context_id));
       }
 
       function isValidDocumentUpdateRequest() {
