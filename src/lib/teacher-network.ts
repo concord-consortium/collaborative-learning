@@ -1,4 +1,4 @@
-import { FieldValue } from "@google-cloud/firestore";
+import firebase from "firebase/app";
 import { Optional } from "utility-types";
 import { UserModelType } from "../models/stores/user";
 import { arraysEqualIgnoringOrder } from "../utilities/js-utils";
@@ -108,7 +108,7 @@ async function createOrUpdateClassDoc(
       }
       if (addNetwork && !data.network?.includes(addNetwork)) {
         console.log("updating networks array:", data.network, addNetwork);
-        await docRef.update({ network: FieldValue.arrayUnion(addNetwork) });
+        await docRef.update({ network: firebase.firestore.FieldValue.arrayUnion(addNetwork) });
       }
     } else {
       // Create the document.
