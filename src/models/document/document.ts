@@ -108,7 +108,8 @@ export const DocumentModel = Tree.named("Document")
       // ignoring this contextId. So the contextId is added here so the client
       // code can work with the old functions.
       return { contextId: "ignored", uid, type, key, createdAt, title,
-        originDoc, properties: properties.toJSON(), visibility } as IDocumentMetadata;
+        originDoc, properties: properties.toJSON(), investigation: self.investigation,
+        problem: self.problem, unit: self.unit, visibility } as IDocumentMetadata;
     },
     getProperty(key: string) {
       return self.properties.get(key);
