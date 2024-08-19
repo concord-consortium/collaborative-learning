@@ -1,16 +1,17 @@
 import Header from '../../../support/elements/common/Header';
 import ClueHeader from '../../../support/elements/common/cHeader';
+import SortedWork from "../../../support/elements/common/SortedWork";
 
 
 const header = new Header;
 const clueHeader = new ClueHeader;
+const sortWork = new SortedWork;
 
 let student = '5',
   classroom = '5',
   group = '5';
 
-function beforeTest() {
-  const queryParams = `${Cypress.config("qaUnitStudent5")}`;
+function beforeTest(queryParams) {
   cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
@@ -18,7 +19,7 @@ function beforeTest() {
 
 context('Check header area for correctness', function () {
   it('verify header area', function () {
-    beforeTest();
+    beforeTest(`${Cypress.config("qaUnitStudent5")}`);
 
     cy.log('will verify if class name is correct');
     header.getClassName().should('contain', 'Class ' + classroom);
@@ -43,3 +44,25 @@ context('Check header area for correctness', function () {
   });
 });
 
+context("check public/private document access", function() {
+  it("marks private documents as private and only shows public documents as accessible", function() {
+    const queryParams = (`${Cypress.config("clueTestNoUnitStudent5")}`);
+    beforeTest(queryParams);
+
+    cy.openTopTab("sort-work");
+    cy.get(".section-header-arrow").click({multiple: true}); // Open all sections
+    cy.log("will verify if private documents are marked as private and are not accessible");
+    sortWork.checkGroupDocumentVisibility("No Group", true, true);
+    cy.log("will verify if user's own documents are not marked as private and are accessible");
+    sortWork.checkGroupDocumentVisibility("Group 2", false, true);
+
+    // Check the above for a view that contains compact document items
+    sortWork.getShowForMenu().click();
+    sortWork.getShowForInvestigationOption().click();
+    cy.get(".section-header-arrow").click({multiple: true}); // Open all sections
+    cy.log("will verify if private documents are marked as private and are not accessible in the compact view");
+    sortWork.checkGroupDocumentVisibility("No Group", true);
+    cy.log("will verify if user's own documents are not marked as private and are accessible in the compact view");
+    sortWork.checkGroupDocumentVisibility("Group 2", false);
+  });
+});

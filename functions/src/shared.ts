@@ -119,6 +119,7 @@ export interface IDocumentMetadata {
   investigation?: string;
   problem?: string;
   unit?: string;
+  visibility?: string;
 }
 export function isDocumentMetadata(o: any): o is IDocumentMetadata {
   return !!o.uid && !!o.type && !!o.key;

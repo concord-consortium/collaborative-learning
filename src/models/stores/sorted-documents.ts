@@ -234,6 +234,9 @@ export class SortedDocuments {
     if (!metadataDoc) return;
 
     const unit = metadataDoc?.unit ?? undefined;
+    const visibility = metadataDoc?.visibility === "public" || metadataDoc?.visibility === "private"
+                         ? metadataDoc?.visibility as "public" | "private"
+                         : undefined;
     const props = {
       documentKey: metadataDoc?.key,
       type: metadataDoc?.type as any,
@@ -241,7 +244,7 @@ export class SortedDocuments {
       properties: metadataDoc?.properties,
       userId: metadataDoc?.uid,
       groupId: undefined,
-      visibility: undefined,
+      visibility,
       originDoc: undefined,
       pubVersion: undefined,
       problem: metadataDoc?.problem,

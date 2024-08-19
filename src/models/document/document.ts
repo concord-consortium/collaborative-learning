@@ -3,8 +3,7 @@ import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
 import { IDocumentAddTileOptions } from "./document-content-types";
-import { DocumentTypeEnum, IDocumentContext, ISetProperties,
-  isExemplarType,
+import { DocumentTypeEnum, IDocumentContext, ISetProperties, isPublishedType,
   LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
   PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
@@ -27,13 +26,14 @@ import { ESupportType } from "../curriculum/support";
 import { IDocumentLogEvent, logDocumentEvent } from "./log-document-event";
 import { LogEventMethod, LogEventName } from "../../lib/logger-types";
 import { UserModelType } from "../stores/user";
+import { isDocumentAccessibleToUser } from "./document-utils";
 
 export enum ContentStatus {
   Valid,
   Error
 }
 
-type IExemplarVisibilityProvider = {
+export type IExemplarVisibilityProvider = {
   isExemplarVisible: (id: string) => boolean;
 };
 
@@ -87,10 +87,7 @@ export const DocumentModel = Tree.named("Document")
       return self.type === SupportPublication;
     },
     get isPublished() {
-      return (self.type === ProblemPublication)
-              || (self.type === LearningLogPublication)
-              || (self.type === PersonalPublication)
-              || (self.type === SupportPublication);
+      return isPublishedType(self.type);
     },
     get isRemote() {
       return !!self.remoteContext;
@@ -104,7 +101,7 @@ export const DocumentModel = Tree.named("Document")
       return !!self.content;
     },
     get metadata(): IDocumentMetadata {
-      const { uid, type, key, createdAt, title, originDoc, properties } = self;
+      const { uid, type, key, createdAt, title, originDoc, properties, visibility } = self;
       // FIXME: the contextId was added here temporarily. This metadata is sent
       // up to the Firestore functions. The new functions do not require the
       // contextId. However the old functions do. The old functions were just
@@ -112,7 +109,7 @@ export const DocumentModel = Tree.named("Document")
       // code can work with the old functions.
       return { contextId: "ignored", uid, type, key, createdAt, title,
         originDoc, properties: properties.toJSON(), investigation: self.investigation,
-        problem: self.problem, unit: self.unit } as IDocumentMetadata;
+        problem: self.problem, unit: self.unit, visibility } as IDocumentMetadata;
     },
     getProperty(key: string) {
       return self.properties.get(key);
@@ -161,14 +158,7 @@ export const DocumentModel = Tree.named("Document")
       return self.content?.getUniqueTitleForType(tileType);
     },
     isAccessibleToUser(user: UserModelType, documentStore: IExemplarVisibilityProvider) {
-      const ownDocument = self.uid === user.id;
-      const isShared = self.visibility === "public";
-      if (user.type === "teacher") return true;
-      if (user.type === "student") {
-        return ownDocument || isShared || self.isPublished
-               || (isExemplarType(self.type) && documentStore.isExemplarVisible(self.key));
-      }
-      return false;
+      return isDocumentAccessibleToUser(self.metadata, user, documentStore);
     }
   }))
   .actions((self) => ({
