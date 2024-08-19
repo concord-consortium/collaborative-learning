@@ -98,10 +98,19 @@ async function processFile(file: string) {
     processedFiles++;
 
     const tiles = documentContent?.tileMap ? Object.values<any>(documentContent.tileMap) : [];
-    const tileTypes = [];
+    const tools = [];
     for (const tile of tiles) {
-      if (!tileTypes.includes(tile.content.type)) {
-        tileTypes.push(tile.content.type);
+      if (!tools.includes(tile.content.type)) {
+        tools.push(tile.content.type);
+      }
+    }
+
+    const annotations = documentContent?.annotations || [];
+    for (const annotation of annotations) {
+      // for now we only want Sparrow annotations
+      // we might want to change this if we want to count other types in the future
+      if (annotation.type === "arrowAnnotation" && !tools.includes("Sparrow")) {
+        tools.push("Sparrow");
       }
     }
 
@@ -198,7 +207,7 @@ async function processFile(file: string) {
         // info, or refactor the code so this teacher list isn't needed here. See:
         // https://docs.google.com/document/d/1VDr-nkthu333eVD0BQXPYPVD8kt60qkMYq2jRkXza9c/edit#heading=h.pw87siu4ztwo
         teachers: ["1001", "1002", "1003"],
-        tileTypes,
+        tools,
         title: documentTitle || null,
         type: documentType,
         uid: userId,
@@ -223,8 +232,8 @@ async function processFile(file: string) {
       documentSnapshots.forEach(doc => {
         doc.ref.update(unitFields as any);
         console.log(documentId, doc.id, "Updated metadata with", unitFields);
-        doc.ref.update({ strategies, tileTypes } as any);
-        console.log(documentId, doc.id, "Updated metadata with", { strategies, tileTypes });
+        doc.ref.update({ strategies, tools } as any);
+        console.log(documentId, doc.id, "Updated metadata with", { strategies, tools });
         doc.ref.update({ visibility } as any);
         console.log(documentId, doc.id, "Updated metadata with", { visibility });
         metadataUpdated++;

@@ -35,6 +35,7 @@ export default defineConfig({
   qaMothPlotUnitStudent5: "/?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&problem=1.1&unit=./demo/units/qa-moth-plot/content.json",
   qaNoSectionProblemTabUnitStudent5: "/?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&problem=1.1&unit=./demo/units/qa-no-section-problem-tab/content.json",
   clueTestqaUnitStudent5: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeUser=student:5&problem=1.1&unit=./demo/units/qa/content.json&noPersistentUI",
+  clueTestNoUnitStudent5: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeUser=student:5&problem=1.1&noPersistentUI",
   clueTestqaUnitTeacher6: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeUser=teacher:6&problem=1.1&unit=./demo/units/qa/content.json&noPersistentUI",
   clueTestqaConfigSubtabsUnitTeacher6: "/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeUser=teacher:6&problem=1.1&unit=qa-config-subtabs&noPersistentUI",
   e2e: {
