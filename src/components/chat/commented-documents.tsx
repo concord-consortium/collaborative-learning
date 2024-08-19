@@ -6,7 +6,7 @@ import { useDocumentCaption } from "../../hooks/use-document-caption";
 import { UserModelType } from "../../models/stores/user";
 import { getNavTabOfDocument, getTabsOfCurriculumDoc, isStudentWorkspaceDoc } from "../../models/stores/persistent-ui";
 import { DocumentModelType } from "../../models/document/document";
-import { CommentedDocumentsQuery, CurriculumDocumentInfo, StudentDocumentInfo } from "../../models/commented-documents";
+import { CommentedDocumentsQuery } from "../../models/commented-documents";
 
 import DocumentIcon from "../../assets/icons/document-icon.svg";
 
@@ -25,30 +25,19 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   const problem =  store.problemOrdinal;
   const unit = store.unit.code;
 
-  const [commentedDocumentsQuery, setCommentedDocumentsQuery] = useState<CommentedDocumentsQuery>();
-  const [curricumDocs, setCurricumDocs] = useState<CurriculumDocumentInfo[]>([]);
-  const [studentDocs, setStudentDocs] = useState<StudentDocumentInfo[]>([]);
-
+  const [commentedDocumentsQuery]
+    = useState<CommentedDocumentsQuery>(() => new CommentedDocumentsQuery(db, unit, problem));
 
   useEffect(() => {
     if (user) {
-      setCommentedDocumentsQuery(new CommentedDocumentsQuery(db, user, unit, problem));
+      commentedDocumentsQuery.setUser(user);
     }
-  }, [user, db, unit, problem]);
-
-  useEffect(() => {
-    commentedDocumentsQuery?.queryCurriculumDocs().then(() => {
-      setCurricumDocs(commentedDocumentsQuery.getCurricumDocs());
-    });
-    commentedDocumentsQuery?.queryStudentDocs().then(() => {
-      setStudentDocs(commentedDocumentsQuery.getStudentDocs());
-    });
-  }, [commentedDocumentsQuery]);
+  }, [commentedDocumentsQuery, user]);
 
   return (
     <div className="commented-document-list">
       {
-        (curricumDocs).map((doc, index) => {
+        (commentedDocumentsQuery.getCurricumDocs()).map((doc, index) => {
           const {navTab} = getTabsOfCurriculumDoc(doc.path);
           return (
             <div
@@ -76,7 +65,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
         })
       }
       {
-        (studentDocs).map((doc, index) =>{
+        (commentedDocumentsQuery.getUserDocs()).map((doc, index) =>{
           const sectionDoc =  store.documents.getDocument(doc.key);
           const networkDoc = store.networkDocuments.getDocument(doc.key);
           if (sectionDoc){

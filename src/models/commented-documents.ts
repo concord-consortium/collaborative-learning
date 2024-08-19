@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { chunk } from "lodash";
 import { Firestore } from "../lib/firestore";
 import { ClassDocument, CurriculumDocument, DocumentDocument } from "../lib/firestore-schema";
@@ -14,7 +14,7 @@ export interface CurriculumDocumentInfo {
   numComments: number;
 }
 
-export interface StudentDocumentInfo {
+export interface UserDocumentInfo {
   id: string;
   key: string;
   title: string;
@@ -28,29 +28,33 @@ export class CommentedDocumentsQuery {
   problem: string;
 
   curriculumDocs: CurriculumDocumentInfo[] = [];
-  studentDocs: StudentDocumentInfo[] = [];
+  userDocs: UserDocumentInfo[] = [];
 
   constructor(
       db: Firestore,
-      user: UserModelType,
       unit: string,
       problem: string) {
     makeAutoObservable(this);
     this.db = db;
-    this.user = user;
     this.unit = unit;
     this.problem = problem;
+  }
+
+  setUser(user: UserModelType) {
+    this.user = user;
+    this.queryCurriculumDocs();
+    this.queryUserDocs();
   }
 
   getCurricumDocs(): CurriculumDocumentInfo[] {
     return this.curriculumDocs;
   }
 
-  getStudentDocs(): StudentDocumentInfo[] {
-    return this.studentDocs;
+  getUserDocs(): UserDocumentInfo[] {
+    return this.userDocs;
   }
 
-  async queryCurriculumDocs() {
+  private async queryCurriculumDocs() {
     const cDocsRef = this.db.collection("curriculum");
     let docsQuery;
     if (this.user.network){
@@ -88,17 +92,19 @@ export class CommentedDocumentsQuery {
       }));
     }
     await Promise.all(promiseArr);
-    this.curriculumDocs = commentedDocs;
+    runInAction(() => {
+      this.curriculumDocs = commentedDocs;
+    });
   }
 
-  async queryStudentDocs() {
-    console.log("running queryStudentDocs");
+  private async queryUserDocs() {
+    console.log("running queryUserDocs");
 
     // Find teacher's classes
     const classesRef = this.db.collection("classes");
     const individualClasses = (await classesRef.where("teachers", "array-contains", this.user.id).get()).docs;
     const networkClasses = this.user.network
-      ? (await classesRef.where("network", "==", this.user.network).get()).docs
+      ? (await classesRef.where("networks", "array-contains", this.user.network).get()).docs
       : [];
     const allClasses = individualClasses.concat(networkClasses);
     console.log("teacher classes:", individualClasses, networkClasses);
@@ -112,7 +118,7 @@ export class CommentedDocumentsQuery {
     // Firestore has a limit of ~10 for "in" queries (30 in recent versions), so we need to iterate over the classes
     const chunkSize = 10;
     const teacherClassGroups = chunk(classIds, chunkSize);
-    const studentDocs: StudentDocumentInfo[] = [];
+    const studentDocs: UserDocumentInfo[] = [];
     for (const group of teacherClassGroups) {
       const docsQuery = collection.where("context_id", "in", group);
       const result = await docsQuery.get();
@@ -126,7 +132,7 @@ export class CommentedDocumentsQuery {
         });
       }
     }
-    const commentedDocs: StudentDocumentInfo[] = [];
+    const commentedDocs: UserDocumentInfo[] = [];
     const promiseArr: Promise<void>[] = [];
     // TODO maybe combine multiple "docs" that have same ID?
     for (const doc of studentDocs){
@@ -140,7 +146,9 @@ export class CommentedDocumentsQuery {
       }));
     }
     await Promise.all(promiseArr);
-    this.studentDocs = commentedDocs;
+    runInAction(() => {
+      this.userDocs = commentedDocs;
+    });
   }
 
 }
