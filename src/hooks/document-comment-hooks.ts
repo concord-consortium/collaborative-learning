@@ -125,7 +125,7 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
       // update metadata document with the new tags
       const tags = comment.tags || [];
       const documentKey = isDocumentMetadata(document) ? document.key : undefined;
-      if (documentKey) {
+      if (documentKey && tags.length > 0) {
         const metadataQuery = firestore.collection("documents").where("key", "==", documentKey);
         metadataQuery.get().then(querySnapshot => {
           querySnapshot.docs.forEach(doc => {
