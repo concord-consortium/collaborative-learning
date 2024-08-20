@@ -81,6 +81,26 @@ class SortedWork {
   checkSimpleDocumentInSubgroup(groupName, subgroupName, doc) {
     this.getSortWorkSubgroup(groupName, subgroupName).find('[data-test="simple-document-item"]').should("have.attr", "title", doc);
   }
+  checkGroupDocumentVisibility(groupName, isPrivate, isThumbnailView = false) {
+    const docSelector = isThumbnailView
+      ? '[data-test="sort-work-list-items"]'
+      : '[data-testid="doc-group-list"] [data-test="simple-document-item"]';
+
+    // Assign the documents list to a variable to simplify the code
+    cy.get(".section-header-left").contains(groupName).parent().parent()
+      .siblings('[data-testid="section-document-list"]')
+      .within(() => {
+        cy.get(docSelector).as("groupDocs");
+      });
+
+    cy.get("@groupDocs").should(`${isPrivate ? "" : "not."}have.class`, "private");
+    cy.get("@groupDocs").first().click();
+    cy.get(".focus-document").should(`${isPrivate ? "not." : ""}exist`);
+
+    if (!isPrivate) {
+      cy.get(".close-doc-button").click();
+    }
+  }
   checkGroupIsEmpty(groupName){
     cy.get(".sort-work-view .sorted-sections .section-header-label")
       .contains(groupName).parent().parent().parent().find(".list").should('be.empty');

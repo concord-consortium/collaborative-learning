@@ -60,7 +60,10 @@ export interface DBBaseDocumentMetadata {
 
 export interface DBBaseProblemDocumentMetadata extends DBBaseDocumentMetadata {
   classHash: string;
+  investigation?: string;
   offeringId: string;
+  problem?: string;
+  unit?: string;
 }
 
 export interface DBSectionDocumentMetadataDEPRECATED extends DBBaseProblemDocumentMetadata {

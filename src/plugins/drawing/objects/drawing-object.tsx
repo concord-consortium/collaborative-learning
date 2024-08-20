@@ -193,7 +193,7 @@ export type HandleObjectHover =
   (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObjectType, hovering: boolean) => void;
 
 export type HandleObjectDrag =
-(e: React.MouseEvent<any>, obj: DrawingObjectType) => void;
+(e: React.PointerEvent<any>, obj: DrawingObjectType) => void;
 
 export interface IDrawingComponentProps {
   model: DrawingObjectType;
@@ -206,7 +206,7 @@ export type DrawingComponentType = React.ComponentType<IDrawingComponentProps>;
 
 export interface IDrawingLayer {
   selectTile: (append: boolean) => void;
-  getWorkspacePoint: (e:MouseEvent|React.MouseEvent) => Point|null;
+  getWorkspacePoint: (e:PointerEvent|React.PointerEvent) => Point|null;
   setCurrentDrawingObject: (object: DrawingObjectType|null) => void;
   addNewDrawingObject:
     (object: DrawingObjectSnapshotForAdd,
@@ -227,11 +227,11 @@ export abstract class DrawingTool {
     this.drawingLayer = drawingLayer;
   }
 
-  public handleMouseDown(e: React.MouseEvent<HTMLDivElement>): void {
+  public handlePointerDown(e: React.PointerEvent<HTMLDivElement>): void {
     // handled in subclass
   }
 
-  public handleObjectClick(e: MouseEvent|React.MouseEvent<any>, obj: DrawingObjectType): void   {
+  public handleObjectClick(e: PointerEvent|React.PointerEvent<any>, obj: DrawingObjectType): void   {
     // handled in subclass
   }
 }

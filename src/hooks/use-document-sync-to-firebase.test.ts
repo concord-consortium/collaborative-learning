@@ -401,13 +401,12 @@ describe("useDocumentSyncToFirebase hook", () => {
     });
 
     // responds to visibility change
-    await jestSpyConsole("log", spy => {
+    await jestSpyConsole("log", async spy => {
       document.setVisibility("public");
-      jest.runAllTimers();
-      expect(spy).not.toBeCalled();
+      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(spy).toBeCalledTimes(1));
     });
-    expect(mockRef).toHaveBeenCalledTimes(1);
-    expect(mockUpdate).toHaveBeenCalledTimes(1);
 
     // saves when title changes with additional logging
     mockRef.mockClear();

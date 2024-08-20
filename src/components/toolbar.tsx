@@ -201,7 +201,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleSelect() {
-    // nothing to do
+    this.stores.ui.setAnnotationMode();
   }
 
   private handleUndo() {

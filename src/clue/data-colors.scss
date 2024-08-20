@@ -8,6 +8,7 @@ $data-red:    #ee0000;
 $data-yellow: #cbd114;
 $data-purple: #d51eff;
 $data-indigo: #6b00d2;
+$data-black : #000000;
 
 :export {
   dataBlue:   $data-blue;
@@ -17,4 +18,5 @@ $data-indigo: #6b00d2;
   dataYellow: $data-yellow;
   dataPurple: $data-purple;
   dataIndigo: $data-indigo;
+  dataBlack:  $data-black;
 }

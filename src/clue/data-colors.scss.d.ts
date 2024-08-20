@@ -10,6 +10,7 @@ export interface IClueDataColors {
   dataYellow: string;
   dataPurple: string;
   dataIndigo: string;
+  dataBlack: string;
 }
 
 export const clueDataColors: IClueDataColors;

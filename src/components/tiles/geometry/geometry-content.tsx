@@ -5,13 +5,14 @@ import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
 import objectHash from "object-hash";
 import { SizeMeProps } from "react-sizeme";
+import { GeometryElement } from "jsxgraph";
 
 import { pointBoundingBoxSize, pointButtonRadius, segmentButtonWidth, zoomFactor } from "./geometry-constants";
 import { BaseComponent } from "../../base";
 import { DocumentContentModelType } from "../../../models/document/document-content";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import {
-  GeometryContentModelType, IAxesParams, isGeometryContentReady, setElementColor
+  GeometryContentModelType, IAxesParams, isGeometryContentReady, updateVisualProps
 } from "../../../models/tiles/geometry/geometry-content";
 import { convertModelObjectsToChanges } from "../../../models/tiles/geometry/geometry-migrate";
 import {
@@ -23,7 +24,8 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           logGeometryEvent,
           getPoint,
           getBoardObject,
-          findBoardObject} from "../../../models/tiles/geometry/geometry-utils";
+          findBoardObject,
+          forEachBoardObject} from "../../../models/tiles/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
 import {
@@ -94,6 +96,7 @@ interface IState extends Mutable<SizeMeProps> {
   showSegmentLabelDialog?: boolean;
   showPolygonLabelDialog?: boolean;
   showInvalidTableDataAlert?: boolean;
+  showColorPalette?: boolean;
 }
 
 interface JXGPtrEvent {
@@ -200,7 +203,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handleUploadImageFile: this.handleUploadBackgroundImage,
         handleZoomIn: this.handleZoomIn,
         handleZoomOut: this.handleZoomOut,
-        handleFitAll: this.handleScaleToFit
+        handleFitAll: this.handleScaleToFit,
+        handleSetShowColorPalette: this.handleSetShowColorPalette,
+        handleColorChange: this.handleColorChange
       };
       onSetActionHandlers(handlers);
     }
@@ -410,7 +415,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         const edges: JXG.Line[] = [];
         objs.forEach(obj => {
           if (change.type !== 'remove') {
-            setElementColor(_board, obj.id, change.newValue.value);
+            updateVisualProps(_board, obj.id, change.newValue.value);
             // Also find segments that are attached to the changed points
             Object.values(obj.childElements).forEach(child => {
               if(isVisibleEdge(child) && !edges.includes(child)) {
@@ -422,7 +427,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         edges.forEach(edge => {
           // Edge is selected if both end points are.
           const selected = this.getContent().isSelected(edge.point1.id) && this.getContent().isSelected(edge.point2.id);
-          setElementColor(_board, edge.id, selected);
+          updateVisualProps(_board, edge.id, selected);
         });
       }
     }));
@@ -430,7 +435,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private getButtonPath(
-    coords: (Point | undefined)[], handleClick: () => void, classes?: string
+    coords: (Point | undefined)[], handleClick: (e: React.MouseEvent) => void, classes?: string
   ) {
     let path = "";
     coords.forEach((coord, index) => {
@@ -785,20 +790,20 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     });
   }
 
-  private getBoardPointsExtents(board: JXG.Board){
+  private getBoardObjectsExtents(board: JXG.Board) {
     let xMax = 1;
     let yMax = 1;
     let xMin = -1;
     let yMin = -1;
 
-    board.objectsList.forEach((obj: any) => {
-      if (obj.elType === "point"){
-        const pointX = obj.coords.usrCoords[1];
-        const pointY = obj.coords.usrCoords[2];
-        if (pointX < xMin) xMin = pointX - 1;
-        if (pointX > xMax) xMax = pointX + 1;
-        if (pointY < yMin) yMin = pointY - 1;
-        if (pointY > yMax) yMax = pointY + 1;
+    forEachBoardObject(board, (obj: GeometryElement) => {
+      // Don't need to consider polygons since the extent of their points will be enough.
+      if (isPoint(obj) || isCircle(obj)) {
+        const [left, top, right, bottom] = obj.bounds();
+        if (left < xMin) xMin = left - 1;
+        if (right > xMax) xMax = right + 1;
+        if (top > yMax) yMax = top + 1;
+        if (bottom < yMin) yMin = bottom - 1;
       }
     });
     return { xMax, yMax, xMin, yMin };
@@ -828,7 +833,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
    */
   updateSharedPoints(board: JXG.Board) {
     this.applyChange(() => {
-      let pointsAdded = false;
+      let pointsChanged = false;
       const content = this.getContent();
       const data = content.getLinkedPointsData();
       const remainingIds = getAllLinkedPoints(board);
@@ -847,7 +852,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             };
             const pt = createLinkedPoint(board, points.coords[i], allProps, { tileIds: [link] });
             this.handleCreatePoint(pt);
-            pointsAdded = true;
+            pointsChanged = true;
           } else {
             const existing = getPoint(board, id);
             if (!isEqual(existing?.coords.usrCoords.slice(1), points.coords[i])) {
@@ -857,8 +862,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                 targetID: id,
                 properties: { position: points.coords[i] }
               });
-              // Remove updated point from remaining list
+              pointsChanged = true;
             }
+            // Remove updated point from remaining list
             remainingIds.splice(existingIndex, 1);
           }
         }
@@ -867,9 +873,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       // Now deal with any deleted points
       if (remainingIds.length > 0){
         applyChange(board, { operation: "delete", target: "linkedPoint", targetID: remainingIds });
+        pointsChanged = true;
       }
 
-      if (pointsAdded) {
+      if (pointsChanged) {
         this.scaleToFit();
       }
     });
@@ -900,7 +907,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private scaleToFit = () => {
     const { board } = this.state;
     if (!board || this.props.readOnly) return;
-    const extents = this.getBoardPointsExtents(board);
+    const extents = this.getBoardObjectsExtents(board);
     this.rescaleBoardAndAxes(extents);
   };
 
@@ -1083,6 +1090,28 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                 .slice(0, vertexCount),
               undefined,
               "rotate");
+      });
+    }
+  };
+
+  private handleSetShowColorPalette = (showColorPalette: boolean) => {
+    const content = this.getContent();
+    this.applyChange(() => content.setShowColorPalette(showColorPalette));
+  };
+
+  private handleColorChange = (color: number) => {
+    const { board } = this.state;
+    const content = this.getContent();
+    if (!board) return;
+
+    this.applyChange(() => {
+      content.setSelectedColor(color);
+    });
+
+    const selectedObjects = content.selectedObjects(board);
+    if (selectedObjects.length > 0) {
+      this.applyChange(() => {
+        content.updateSelectedObjectsColor(board, color);
       });
     }
   };
@@ -1620,7 +1649,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     content.findObjects(board, (elt: JXG.GeometryElement) => isPoint(elt))
       .forEach(pt => {
         if (content.isSelected(pt.id)) {
-          setElementColor(board, pt.id, true);
+          updateVisualProps(board, pt.id, true);
         }
       });
 

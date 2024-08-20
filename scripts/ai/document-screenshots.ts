@@ -98,7 +98,7 @@ async function makeSnapshot(path: string, fileName: string) {
   totalSnapshots++;
 }
 
-// Porcesses a file, usually making a screenshot but updating tags.csv when that file is encountered
+// Processes a file, usually making a screenshot but updating tags.csv when that file is encountered
 async function processFile(file: string) {
   const path = `${documentPath}/${file}`;
   if (file.startsWith("document")) {
