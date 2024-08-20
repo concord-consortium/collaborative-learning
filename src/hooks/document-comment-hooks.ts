@@ -109,6 +109,7 @@ type PostDocumentCommentUseMutationOptions =
 
 export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationOptions) => {
   const queryClient = useQueryClient();
+  const [firestore] = useFirestore();
   const postDocumentComment = useFirebaseFunction<IPostDocumentCommentParams>("postDocumentComment_v1");
   const context = useUserContext();
   const postComment = useCallback((clientParams: IPostDocumentCommentClientParams) => {
@@ -120,6 +121,26 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
     onMutate: async newCommentParams => {
       const { document, comment } = newCommentParams;
       const queryKey = getCommentsQueryKeyFromMetadata(document);
+
+      // update metadata document with the new tags
+      const tags = comment.tags || [];
+      const documentKey = isDocumentMetadata(document) ? document.key : undefined;
+      if (documentKey) {
+        const metadataQuery = firestore.collection("documents").where("key", "==", documentKey);
+        metadataQuery.get().then(querySnapshot => {
+          querySnapshot.docs.forEach(doc => {
+            const docRef = doc.ref;
+            const docStrategies = doc.get("strategies") || [];
+            tags.forEach(tag => {
+              if (!docStrategies.includes(tag)) {
+                docStrategies.push(tag);
+              }
+            });
+            docRef.update({ strategies: docStrategies });
+          });
+        });
+      }
+
       // snapshot the current state of the comments in case we need to roll back on error
       const rollbackComments = queryKey && queryClient.getQueryData<CommentWithId[]>(queryKey);
       type CommentWithId = WithId<CommentDocument>;
