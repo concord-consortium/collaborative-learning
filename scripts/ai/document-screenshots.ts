@@ -1,8 +1,9 @@
 import fs from "fs";
 import readline from "readline";
-import puppeteer from "puppeteer";
 
 import { prettyDuration } from "../lib/script-utils.js";
+import { makeCLUEScreenshot } from "../lib/screenshot.js";
+import { IProcessFilesStats, processFiles } from "../lib/process-files.js";
 
 // This script saves images of all the documents in a folder and updates its tags.csv with new folder and file names.
 // It's intended to be used on the output of count-document-tiles.ts.
@@ -19,15 +20,6 @@ import { prettyDuration } from "../lib/script-utils.js";
 const documentDirectory = "dataset1697150265495";
 // const documentDirectory = "dataset1";
 
-// Make falsy to include all documents
-const documentLimit = false;
-
-// Number of files to process in parallel
-const fileBatchSize = 8;
-
-// The width of the browser window. The height is determined dynamically.
-const windowWidth = 1920 / 2;
-
 const publicRoot = "ai";
 const rootPath = `../../src/public/${publicRoot}`;
 const documentPath = `${rootPath}/${documentDirectory}`;
@@ -35,7 +27,6 @@ const publicPath = `${publicRoot}/${documentDirectory}`;
 const tagFileName = "tags.csv";
 
 const startTime = Date.now();
-let checkedFiles = 0;
 let totalSnapshots = 0;
 const targetDir = `screenshotDataset${startTime}`;
 const targetPath = `${rootPath}/${targetDir}`;
@@ -59,53 +50,22 @@ function newFileName(oldFileName: string) {
 // makeSnapshot loads document content at path in a CLUE standalone document editor, takes a snapshot of it,
 // then saves it in the output directory as fileName
 const urlRoot = `http://localhost:8080/editor/?appMode=dev&unit=example&document=`;
-async function makeSnapshot(path: string, fileName: string) {
-  console.log(`*   Processing snapshot`, path);
-  const targetFile = `${targetPath}/${fileName}`;
-
-  // View the document in the document editor
-  const browser = await puppeteer.launch({ headless: "new" });
-  const page = await browser.newPage();
-  const url = `${urlRoot}${path}`;
-  try {
-    await page.goto(url, {
-      timeout: 60000, // 30 seconds
-      waitUntil: 'networkidle0'
-    });
-  } catch (error) {
-    console.log(`!!!!! Failed to load file ${url}`, error);
-    failedFiles.push(path);
-    await page.close();
-    await browser.close();
-    return;
-  }
-
-  // Approximate the height of the document by adding up the heights of the rows and make the viewport that tall
-  let pageHeight = 30;
-  const rowElements = await page.$$(".tile-row");
-  for (const rowElement of rowElements) {
-    const boundingBox = await rowElement.boundingBox();
-    pageHeight += boundingBox?.height ?? 0;
-  }
-  await page.setViewport({ width: windowWidth, height: Math.round(pageHeight) });
-
-  // Take a screenshot and save it to a file
-  const buffer = await page.screenshot({ fullPage: true, type: 'png' });
-  await page.close();
-  await browser.close();
-  fs.writeFileSync(targetFile, buffer);
-
-  totalSnapshots++;
-}
 
 // Processes a file, usually making a screenshot but updating tags.csv when that file is encountered
-async function processFile(file: string) {
-  const path = `${documentPath}/${file}`;
+async function processFile(file: string, path) {
   if (file.startsWith("document")) {
     // For files named like documentXXX.txt, make a snapshot and save it
     const docEditorPath = `${publicPath}/${file}`;
     const screenshotFileName = newFileName(file);
-    await makeSnapshot(docEditorPath, screenshotFileName);
+    try {
+      await makeCLUEScreenshot({
+        url: `${urlRoot}${docEditorPath}`,
+        outputFile: `${targetPath}/${screenshotFileName}`
+      });
+      totalSnapshots++;
+    } catch (error) {
+      failedFiles.push(docEditorPath);
+    }
   } else if (file === tagFileName) {
     // For the tag.csv file, duplicate the file, modifying the directory and file names
     // Based on top answer at https://stackoverflow.com/questions/6156501/read-a-file-one-line-at-a-time-in-node-js
@@ -122,38 +82,22 @@ async function processFile(file: string) {
   }
 }
 
-let fileBatch: string[] = [];
-// Process a batch of files
-async function processBatch() {
-  await Promise.all(fileBatch.map(async f => processFile(f)));
-  fileBatch = [];
-
-  const currentDuration = Date.now() - startTime;
+function batchComplete(stats: IProcessFilesStats) {
+  const currentDuration = Date.now() - stats.startTime;
   console.log(`*** Time to process ${totalSnapshots} snapshots`, prettyDuration(currentDuration));
 }
 
 // Process every file in the source directory
-fs.readdir(documentPath, async (_error, files) => {
-  for (const file of files) {
-    if (documentLimit && checkedFiles >= documentLimit) break;
-
-    checkedFiles++;
-    fileBatch.push(file);
-
-    // We're finished if we've made it through all of the files or we've hit our limit
-    const finished = checkedFiles >= files.length || (documentLimit && checkedFiles >= documentLimit);
-    if (fileBatch.length >= fileBatchSize || finished) {
-      await processBatch();
-
-      if (finished) {
-        const endTime = Date.now();
-        const finalDuration = endTime - startTime;
-        console.log(`***** Finished in ${prettyDuration(finalDuration)}`);
-        if (failedFiles.length > 0) {
-          console.log(`Failed to get snapshots for the following files:`);
-          console.log(failedFiles);
-        }
-      }
-    }
-  }
+const resultStats = await processFiles({
+  sourcePath: documentPath,
+  processFile,
+  batchComplete,
+  // Uncomment to limit the number of files processed
+  // fileLimit: 100
 });
+
+console.log(`***** Finished in ${prettyDuration(resultStats.duration)}`);
+if (failedFiles.length > 0) {
+  console.log(`Failed to get snapshots for the following files:`);
+  console.log(failedFiles);
+}
