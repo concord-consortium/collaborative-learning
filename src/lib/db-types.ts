@@ -52,6 +52,7 @@ export interface DBBaseDocumentMetadata {
     documentKey: string;
   };
   createdAt: number;
+  title?: string;
   type: DBDocumentType;
   // previously in DBOtherDocument
   properties?: IDocumentProperties;

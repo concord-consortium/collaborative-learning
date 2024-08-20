@@ -437,8 +437,8 @@ export class DB {
     }
   }
 
-  public async createDocument(params: { type: DBDocumentType, content?: string }) {
-    const { type, content } = params;
+  public async createDocument(params: { type: DBDocumentType, content?: string, title?: string }) {
+    const { type, content, title } = params;
     const { user } = this.stores;
 
     return new Promise<{document: DBDocument, metadata: DBDocumentMetadata}>((resolve, reject) => {
@@ -461,7 +461,7 @@ export class DB {
         case LearningLogDocument:
         case PersonalPublication:
         case LearningLogPublication:
-          metadata = {version, self, createdAt, type};
+          metadata = {version, self, createdAt, type, title};
           break;
         case PlanningDocument:
         case ProblemDocument:
@@ -542,7 +542,8 @@ export class DB {
     let pubCount = documentModel.getNumericProperty("pubCount");
     documentModel.setNumericProperty("pubCount", ++pubCount);
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
-      this.createDocument({ type: publicationType, content }).then(({document, metadata}) => {
+      this.createDocument({ type: publicationType, content, title: documentModel.title })
+      .then(({document, metadata}) => {
         const publicationPath = publicationType === "personalPublication"
                                 ? this.firebase.getPersonalPublicationsPath(user)
                                 : this.firebase.getLearningLogPublicationsPath(user);
@@ -695,7 +696,7 @@ export class DB {
     const docTitle = title || documents.getNextOtherDocumentTitle(user, documentType, baseTitle);
 
     return new Promise<DocumentModelType | null>((resolve, reject) => {
-      return this.createDocument({ type: documentType, content: JSON.stringify(content) })
+      return this.createDocument({ type: documentType, content: JSON.stringify(content), title: docTitle })
         .then(({document, metadata}) => {
           const {documentKey} = document.self;
           const newDocument: DBOtherDocument = {
