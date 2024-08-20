@@ -420,6 +420,7 @@ export class DB {
         key: documentKey,
         properties: {},
         uid: userContext.uid,
+        unit: null
       };
       if ("offeringId" in metadata && metadata.offeringId != null) {
         const { investigation, problem, unit } = this.stores;
@@ -429,8 +430,6 @@ export class DB {
         firestoreMetadata.investigation = investigationOrdinal;
         firestoreMetadata.problem = problemOrdinal;
         firestoreMetadata.unit = unitCode;
-      } else if (metadata.type === "personal") {
-        firestoreMetadata.unit = null;
       }
       const validateCommentableDocument =
         getFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
