@@ -429,6 +429,8 @@ export class DB {
         firestoreMetadata.investigation = investigationOrdinal;
         firestoreMetadata.problem = problemOrdinal;
         firestoreMetadata.unit = unitCode;
+      } else if (metadata.type === "personal") {
+        firestoreMetadata.unit = null;
       }
       const validateCommentableDocument =
         getFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");

@@ -118,7 +118,7 @@ export interface IDocumentMetadata {
   strategies?: string[];
   investigation?: string;
   problem?: string;
-  unit?: string;
+  unit?: string|null;
   visibility?: string;
 }
 export function isDocumentMetadata(o: any): o is IDocumentMetadata {
