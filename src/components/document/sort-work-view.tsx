@@ -75,6 +75,10 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
   const showSortWorkDocumentArea = !!openDocumentKey;
 
+  const openDocumentsGroup = openDocumentKey
+    ? sortedDocumentGroups.find(group => group.documents.some(doc => doc.key === openDocumentKey)) ?? undefined
+    : undefined;
+
   useEffect(()=>{
     sortedDocuments.updateMetaDataDocs(docFilter, unit.code, investigation.ordinal, problem.ordinal);
   }, [docFilter, unit.code, investigation.ordinal, problem.ordinal, sortedDocuments]);
@@ -83,34 +87,34 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     <div key="sort-work-view" className="sort-work-view">
       {
         showSortWorkDocumentArea ?
-        <SortWorkDocumentArea openDocumentKey={openDocumentKey}/> :
-        <>
-          <SortWorkHeader
-            key={`sort-work-header-${primarySortBy}`}
-            docFilter={docFilter}
-            docFilterItems={docFilterOptions}
-            primarySort={primarySortBy}
-            primarySortItems={primarySortByOptions}
-            secondarySort={secondarySortBy}
-            secondarySortItems={secondarySortOptions}
-          />
-          <div key={primarySortBy} className="tab-panel-documents-section">
-            { sortedDocumentGroups &&
-              sortedDocumentGroups.map((documentGroup: DocumentGroup, idx: number) => {
-                return (
-                  <SortedSection
-                    key={`sortedDocuments-${documentGroup.label}`}
-                    docFilter={docFilter}
-                    documentGroup={documentGroup}
-                    idx={idx}
-                    secondarySort={secondarySearchTerm}
-                  />
-                );
-              })
-            }
-            {DEBUG_DOC_LIST && <DocListDebug docs={sortedDocuments.filteredDocsByType} />}
-          </div>
-        </>
+          <SortWorkDocumentArea openDocumentsGroup={openDocumentsGroup} openDocumentKey={openDocumentKey}/> :
+          <>
+            <SortWorkHeader
+              key={`sort-work-header-${primarySortBy}`}
+              docFilter={docFilter}
+              docFilterItems={docFilterOptions}
+              primarySort={primarySortBy}
+              primarySortItems={primarySortByOptions}
+              secondarySort={secondarySortBy}
+              secondarySortItems={secondarySortOptions}
+            />
+            <div key={primarySortBy} className="tab-panel-documents-section">
+              { sortedDocumentGroups &&
+                sortedDocumentGroups.map((documentGroup: DocumentGroup, idx: number) => {
+                  return (
+                    <SortedSection
+                      key={`sortedDocuments-${documentGroup.label}`}
+                      docFilter={docFilter}
+                      documentGroup={documentGroup}
+                      idx={idx}
+                      secondarySort={secondarySearchTerm}
+                    />
+                  );
+                })
+              }
+              {DEBUG_DOC_LIST && <DocListDebug docs={sortedDocuments.filteredDocsByType} />}
+            </div>
+          </>
       }
     </div>
   );

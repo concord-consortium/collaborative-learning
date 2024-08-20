@@ -9,8 +9,8 @@
   height: 50px;
   position: absolute;
   bottom: -3px;
-  left: 1px;
-  border: 2px solid;
+  left: -1px;
+  border: 1.5px solid;
   border-top-right-radius: 5px;
   background-color: white;
   box-sizing: border-box;
@@ -27,10 +27,10 @@
   &.my-work {
     border-color: $workspace-teal;
   }
-  &.class-work {
+  &.class-work, &.sort-work {
     border-color: $classwork-purple
   }
-  &.sort-work, &.student-work {
+  &.student-work {
     border-color: $charcoal;
   }
   &.learning-log {
@@ -60,7 +60,7 @@
           background-color: $workspace-teal-light-2
         }
       }
-      &.class-work {
+      &.class-work, &.sort-work {
         border-color: $classwork-purple;
         background-color: $classwork-purple-light-5;
         &:hover {
@@ -70,7 +70,7 @@
           background-color: $classwork-purple-light-2;
         }
       }
-      &.sort-work, &.student-work {
+      &.student-work {
         background-color: $charcoal-light-4;
         &:hover {
           background-color: $charcoal-light-3;
@@ -107,7 +107,7 @@
             background-color: $workspace-teal-light-2
           }
         }
-        &.class-work {
+        &.class-work, &.sort-work {
           background-color: $classwork-purple-light-4;
           &:hover {
             background-color: $classwork-purple-light-5;
@@ -116,7 +116,7 @@
             background-color: $classwork-purple-light-2;
           }
         }
-        &.sort-work, &.student-work {
+        &.student-work {
           background-color: $charcoal-light-2;
           &:hover {
             background-color: $charcoal-light-3;

@@ -61,6 +61,42 @@ describe('SortWorkView Tests', () => {
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().eq(1).click(); // Open the first document in the list
     resourcesPanel.getEditableDocumentContent().should('be.visible');
+
+    cy.log('verify document scroller is visible, populated, and functions');
+    let prevFocusDocKey = "";
+    let selectedDocIndex = 0;
+    resourcesPanel.getEditableDocumentContent().invoke('attr', 'data-focus-document').then((focusDocKey) => {
+      prevFocusDocKey = focusDocKey;
+    });
+    resourcesPanel.getDocumentScroller().should('be.visible').and($el => {
+      expect($el.find('[data-testid="document-thumbnail"]')).to.have.length.greaterThan(1);
+      expect($el.find('[data-testid="document-thumbnail"].selected')).to.have.length(1);
+      selectedDocIndex = $el.find('[data-testid="document-thumbnail"]')
+                         .index($el.find('[data-testid="document-thumbnail"].selected'));
+    });
+    resourcesPanel.getDocumentScrollerLeftBtn().should('not.exist');
+    cy.get('[data-testid="document-thumbnail"]').first().should('be.visible');
+    resourcesPanel.getDocumentScrollerRightBtn().should('exist').click();
+    cy.get('[data-testid="document-thumbnail"]').first().should('not.be.visible');
+    resourcesPanel.getDocumentScrollerLeftBtn().should('exist').click();
+    cy.get('[data-testid="document-thumbnail"]').first().should('be.visible');
+    cy.get('[data-testid="document-thumbnail"]').eq(selectedDocIndex + 1).click();
+    resourcesPanel.getEditableDocumentContent().invoke('attr', 'data-focus-document')
+                                               .should('not.eq', prevFocusDocKey).then((focusDocKey) => {
+                                                 prevFocusDocKey = focusDocKey;
+                                               });
+
+    cy.log('verify document scroller is collapsible, and that switch document buttons appear when it is collapsed');
+    resourcesPanel.getDocumentSwitchBtnPrev().should('not.exist');
+    resourcesPanel.getDocumentSwitchBtnNext().should('not.exist');
+    resourcesPanel.getDocumentScrollerToggle().should('exist').click();
+    resourcesPanel.getDocumentScroller().should('not.exist');
+    resourcesPanel.getDocumentSwitchBtnPrev().should('exist').and('not.have.class', 'disabled').click();
+    resourcesPanel.getDocumentSwitchBtnPrev().should('have.class', 'disabled');
+    resourcesPanel.getEditableDocumentContent().invoke('attr', 'data-focus-document')
+                                               .should('not.eq', prevFocusDocKey);
+    resourcesPanel.getDocumentSwitchBtnNext().should('exist').and('not.have.class', 'disabled');
+
     resourcesPanel.getDocumentCloseButton().click();
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().should('be.visible'); // Verify the document is closed

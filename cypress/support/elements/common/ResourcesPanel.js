@@ -59,6 +59,30 @@ class ResourcesPanel{
       return cy.get('.resource-and-chat-panel .editable-document-content .document-content');
     }
 
+    getDocumentScroller() {
+      return cy.get('[data-testid="document-thumbnail-scroller"]');
+    }
+
+    getDocumentScrollerLeftBtn() {
+      return cy.get('[data-testid="scroll-arrow-left"]');
+    }
+
+    getDocumentScrollerRightBtn() {
+      return cy.get('[data-testid="scroll-arrow-right"]');
+    }
+
+    getDocumentScrollerToggle() {
+      return cy.get('[data-testid="toggle-document-scroller"]');
+    }
+
+    getDocumentSwitchBtnPrev() {
+      return cy.get('[data-testid="switch-document-button-previous"]');
+    }
+
+    getDocumentSwitchBtnNext() {
+      return cy.get('[data-testid="switch-document-button-next"]');
+    }
+
     closePrimaryWorkspaceTab(tab){
         cy.get('#primaryWorkspaceTab-'+tab+'.tab').click();
         cy.wait(2000);

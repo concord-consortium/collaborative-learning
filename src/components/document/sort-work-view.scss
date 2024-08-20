@@ -1,5 +1,5 @@
 @import "../vars";
-$title-margin: 2px;
+$title-margin: 0;
 
 .sort-work-view {
   height: 100%;
@@ -13,6 +13,7 @@ $title-margin: 2px;
   }
 
   .focus-document {
+    border: solid 1.5px $classwork-purple;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -25,7 +26,7 @@ $title-margin: 2px;
       display: flex;
       align-items: center;
       height: $workspace-titlebar-height;
-      background-color: $charcoal-light-5;
+      background-color: $classwork-purple-light-5;
       margin-top: $title-margin;
       justify-content: center;
       position: relative;
@@ -38,10 +39,15 @@ $title-margin: 2px;
       }
 
       .document-title {
-        text-align: center;
         flex-grow: 1;
         font-size: 13px;
         font-weight: bold;
+        overflow: hidden;
+        text-align: center;
+        text-overflow: ellipsis;
+        text-wrap: nowrap;
+        white-space: nowrap;
+
         .sort-work {
           font-weight: normal;
         }
@@ -52,9 +58,7 @@ $title-margin: 2px;
         flex-direction: row;
         height: 100%;
         align-items: center;
-        position: absolute;
-        top: -1px;
-        right: 5px;
+        margin: 0 5px 0 0;
       }
 
       .close-doc-button {
@@ -62,7 +66,7 @@ $title-margin: 2px;
           position: relative;
           left:-2px;
           .x-shape {
-            fill: rgba(0,0,0,0.6);
+            fill: $classwork-purple-dark-1;
           }
         }
         margin-left: 6px;
@@ -98,15 +102,15 @@ $title-margin: 2px;
         height: 26px;
         border-radius: 5px;
         border: solid 1.5px $charcoal-light-1;
-        background-color: $workspace-teal-light-4;
+        background-color: $classwork-purple-light-5;
         padding: 0;
         box-sizing: border-box;
         cursor: pointer;
         &:hover {
-          background-color: $workspace-teal-light-3;
+          background-color: $classwork-purple-light-3;
         }
         &:active {
-          background-color: $workspace-teal-light-1;
+          background-color: $classwork-purple-dark-1;
           color: white;
           .edit-icon {
             fill: white;
@@ -124,13 +128,92 @@ $title-margin: 2px;
         }
 
         .edit-icon {
-          fill: $workspace-teal-dark-1;
+          fill: $classwork-purple-dark-1;
           width: 24px;
           height: 24px;
           margin-left: 4px;
           margin-right: 3px;
           &.learning-log {
             fill: $learninglog-green-dark-1;
+          }
+        }
+      }
+      .switch-document-button {
+        background: $classwork-purple-light-5;
+        border: none;
+        cursor: pointer;
+        height: 24px;
+        margin: 0 0 0 9px;
+        outline: none;
+        padding: 0;
+        width: 24px;
+
+        &:hover {
+          background: $classwork-purple-light-3;
+        }
+        &:active {
+          background: $classwork-purple-dark-1;
+
+          svg {
+            .highlighted-path {
+              fill: white;
+            }
+          }
+        }
+
+        &.disabled {
+          background: $classwork-purple-light-5;
+          cursor: not-allowed;
+          opacity: 0.35;
+
+          svg {
+            .highlighted-path {
+              fill: $classwork-purple-dark-1;
+            }
+          }
+        }
+
+        &.next {
+          transform: rotate(180deg);
+        }
+
+        svg {
+          .highlighted-path {
+            fill: $classwork-purple-dark-1;
+          }
+        }
+      }
+      .toggle-document-scroller {
+        align-items: center;
+        background-color: $classwork-purple-light-5;
+        border: none;
+        box-sizing: border-box;
+        cursor: pointer;
+        display: flex;
+        flex-grow: 0;
+        flex-shrink: 0;
+        height: 26px;
+        justify-items: center;
+        margin-left: 5px;
+        padding: 0;
+        width: 26px;
+
+        &.closed {
+          svg {
+            transform: rotate(180deg);
+            transition: .2s;
+          }
+        }
+
+        &:hover {
+          background-color: $classwork-purple-light-3;
+        }
+        &:active {
+          background-color: $classwork-purple-dark-1;
+          svg {
+            .highlighted-path {
+              fill: white;
+            }
           }
         }
       }
@@ -163,7 +246,7 @@ $title-margin: 2px;
 
         .playback-component {
           // This is to compensate for the - 4px above
-          bottom: -4px;
+          bottom: -5px;
         }
       }
     }

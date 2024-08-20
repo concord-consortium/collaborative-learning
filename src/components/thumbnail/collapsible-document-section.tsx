@@ -90,7 +90,7 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
         {hasDocuments && <ArrowIcon className={`arrow-icon ${isOpen ? "open": ""}`} />}
       </div>
       { isOpen &&
-        <div className="list">
+        <div className="documents-list">
           {hasDocuments
             ? documentKeys.map((key, i) => {
               const document = networkDocuments.getDocument(key);

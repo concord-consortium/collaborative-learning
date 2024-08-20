@@ -106,7 +106,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedDocuments
           {secondarySort}
         </div>
       }
-      <div className="list" data-testid="section-document-list">
+      <div className="documents-list" data-testid="section-document-list">
         {showDocuments && renderList()}
       </div>
     </div>
