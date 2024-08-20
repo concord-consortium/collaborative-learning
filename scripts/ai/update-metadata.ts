@@ -11,12 +11,13 @@ import fs from "fs";
 import admin from "firebase-admin";
 
 import { datasetPath, networkFileName } from "./script-constants.js";
-import { getFirestoreBasePath, getScriptRootFilePath } from "../lib/script-utils.js";
+import { getFirestoreBasePath, getProblemDetailsFromUrl, getScriptRootFilePath } from "../lib/script-utils.js";
+import { getUnitParam, getUnitCode } from "./offering-json-to-csv.js";
 
 // The directory containing the documents you're interested in.
 // This should be the output of download-documents.ts.
 // Each document should be named like documentID.txt, where ID is the document's id in the database.
-const sourceDirectory = "dataset1721156514478";
+const sourceDirectory = "dataset1724185627549";
 
 console.log(`*** Starting to Update Metadata ***`);
 
@@ -56,10 +57,10 @@ function getNetworkInfo() {
 const { portal, demo } = getNetworkInfo();
 
 // For now, only run for demo spaces
-if (!demo) {
-  console.error("demo not defined, exiting");
-  process.exit(1);
-}
+// if (!demo) {
+//   console.error("demo not defined, exiting");
+//   process.exit(1);
+// }
 
 console.log(`***** Reading doc and updating metadata *****`);
 const collectionUrl = getFirestoreBasePath(portal, demo);
@@ -105,7 +106,7 @@ async function processFile(file: string) {
       }
     }
 
-    const annotations = documentContent?.annotations || [];
+    const annotations = documentContent?.annotations ? Object.values<any>(documentContent.annotations) : [];
     for (const annotation of annotations) {
       // for now we only want Sparrow annotations
       // we might want to change this if we want to count other types in the future
@@ -121,35 +122,54 @@ async function processFile(file: string) {
       unit: null
     };
 
-    if (offeringId) {
-      // Extract the unit, investigation, and problem from the offeringId.
-      // The `offeringId` structure can vary. In some cases, there is no unit code. There are also cases where
-      // there is no investigation number. For example, in demo mode if the unit is not specified, there will
-      // be no unit value. And in the case where the investigation is 0 (like with the Intro to CLUE
-      // investigation in the Introduction to CLUE unit) the investigation will be undefined. In those cases,
-      // we default to "sas" for the unit and "0" for the investigation.
-      let unitCode = "";
-      let investigation = "";
-      let problem = "";
-      const match = offeringId.match(/(.*?)(\d)(\d\d)$/);
+    if (!demo) {
+      const offeringInfoFile = `${sourcePath}/offering-info.json`;
+      const offeringInfo = JSON.parse(fs.readFileSync(offeringInfoFile, "utf8"));
 
-      if (match) {
-        [, unitCode, investigation, problem] = match;
-      } else {
-        investigation = "0";
-        problem = offeringId.match(/\d+/)?.[0] || "";
+      const offering = offeringInfo[offeringId];
+      if (offering) {
+        const { activity_url } = offering;
+        const unitParam = getUnitParam(activity_url);
+        const unitCode = getUnitCode(unitParam);
+        const { investigation, problem } = getProblemDetailsFromUrl(activity_url);
+
+        unitFields = {
+          problem,
+          investigation,
+          unit: unitCode
+        };
       }
+    } else {
+      if (offeringId) {
+        // Extract the unit, investigation, and problem from the offeringId.
+        // The `offeringId` structure can vary. In some cases, there is no unit code. There are also cases where
+        // there is no investigation number. For example, in demo mode if the unit is not specified, there will
+        // be no unit value. And in the case where the investigation is 0 (like with the Intro to CLUE
+        // investigation in the Introduction to CLUE unit) the investigation will be undefined. In those cases,
+        // we default to "sas" for the unit and "0" for the investigation.
+        let unitCode = "";
+        let investigation = "";
+        let problem = "";
+        const match = offeringId.match(/(.*?)(\d)(\d\d)$/);
 
-      if (!unitCode) unitCode = "sas";
-      problem = stripLeadingZero(problem);
+        if (match) {
+          [, unitCode, investigation, problem] = match;
+        } else {
+          investigation = "0";
+          problem = offeringId.match(/\d+/)?.[0] || "";
+        }
 
-      console.log({ unitCode, investigation, problem });
+        if (!unitCode) unitCode = "sas";
+        problem = stripLeadingZero(problem);
 
-      unitFields = {
-        problem,
-        investigation,
-        unit: unitCode
-      };
+        console.log({ unitCode, investigation, problem });
+
+        unitFields = {
+          problem,
+          investigation,
+          unit: unitCode
+        };
+      }
     }
 
     // TODO: download docs in batches instead of one at a time
@@ -282,5 +302,3 @@ function stripLeadingZero(input: string) {
 console.log(`*** Processed ${processedFiles} downloaded CLUE docs ***`);
 console.log(`*** Created ${metadataCreated} metadata docs ***`);
 console.log(`*** Updated ${metadataUpdated} metadata docs ***`);
-
-process.exit(0);

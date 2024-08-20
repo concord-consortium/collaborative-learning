@@ -45,3 +45,11 @@ export function getFirestoreClassesPath(portal: string, demo?: string | boolean)
 export function getScriptRootFilePath(filename: string) {
   return path.resolve(scriptsRoot, filename);
 }
+
+export function getProblemDetailsFromUrl(url: string) {
+  const urlParams = new URLSearchParams(url);
+  const unit = urlParams.get("unit");
+  const investigationAndProblem = urlParams.get("problem");
+  const [investigation, problem] = investigationAndProblem ? investigationAndProblem.split(".") : [null, null];
+  return { unit, investigation, problem };
+}
