@@ -420,6 +420,7 @@ export class DB {
         key: documentKey,
         properties: {},
         uid: userContext.uid,
+        unit: null
       };
       if ("offeringId" in metadata && metadata.offeringId != null) {
         const { investigation, problem, unit } = this.stores;
