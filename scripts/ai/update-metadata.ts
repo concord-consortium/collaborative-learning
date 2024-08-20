@@ -11,8 +11,7 @@ import fs from "fs";
 import admin from "firebase-admin";
 
 import { datasetPath, networkFileName } from "./script-constants.js";
-import { getFirestoreBasePath, getProblemDetailsFromUrl, getScriptRootFilePath } from "../lib/script-utils.js";
-import { getUnitParam, getUnitCode } from "./offering-json-to-csv.js";
+import { getFirestoreBasePath, getProblemDetails, getScriptRootFilePath } from "../lib/script-utils.js";
 
 // The directory containing the documents you're interested in.
 // This should be the output of download-documents.ts.
@@ -55,12 +54,6 @@ function getNetworkInfo() {
   }
 }
 const { portal, demo } = getNetworkInfo();
-
-// For now, only run for demo spaces
-// if (!demo) {
-//   console.error("demo not defined, exiting");
-//   process.exit(1);
-// }
 
 console.log(`***** Reading doc and updating metadata *****`);
 const collectionUrl = getFirestoreBasePath(portal, demo);
@@ -129,14 +122,12 @@ async function processFile(file: string) {
       const offering = offeringInfo[offeringId];
       if (offering) {
         const { activity_url } = offering;
-        const unitParam = getUnitParam(activity_url);
-        const unitCode = getUnitCode(unitParam);
-        const { investigation, problem } = getProblemDetailsFromUrl(activity_url);
+        const { investigation, problem, unit } = getProblemDetails(activity_url);
 
         unitFields = {
           problem,
           investigation,
-          unit: unitCode
+          unit
         };
       }
     } else {

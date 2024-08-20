@@ -46,10 +46,45 @@ export function getScriptRootFilePath(filename: string) {
   return path.resolve(scriptsRoot, filename);
 }
 
-export function getProblemDetailsFromUrl(url: string) {
+// eslint-disable-next-line prefer-regex-literals
+const clueBranchRegExp = new RegExp("^https://[^/]*(/[^?]*)");
+export function getClueBranch(activityUrl: string) {
+  return clueBranchRegExp.exec(activityUrl)?.[1];
+}
+
+// eslint-disable-next-line prefer-regex-literals
+const unitParamRegExp = new RegExp("unit=([^&]*)");
+export function getUnitParam(activityUrl: string) {
+  return unitParamRegExp.exec(activityUrl)?.[1];
+}
+
+// eslint-disable-next-line prefer-regex-literals
+const unitBranchRegExp = new RegExp("/branch/[^/]*");
+export function getUnitBranch(unitParam: string | undefined) {
+  if (unitParam?.startsWith("https://")) {
+    return unitBranchRegExp.exec(unitParam)?.[0];
+  } else {
+    return "";
+  }
+}
+
+// eslint-disable-next-line prefer-regex-literals
+const unitCodeRegExp = new RegExp("/([^/]*)/content.json");
+export function getUnitCode(unitParam: string | undefined) {
+  if (unitParam?.startsWith("https://")) {
+    const unitCode = unitCodeRegExp.exec(unitParam)?.[1];
+    return unitCode ? unitCode : null;
+  } else {
+    return unitParam ? unitParam : null;
+  }
+}
+
+export function getProblemDetails(url: string) {
   const urlParams = new URLSearchParams(url);
-  const unit = urlParams.get("unit");
+  const unitParam = urlParams.get("unit");
+  // The unit param's value may be a unit code or a full url, so we make sure to get just the unit code
+  const unit = getUnitCode(unitParam);
   const investigationAndProblem = urlParams.get("problem");
   const [investigation, problem] = investigationAndProblem ? investigationAndProblem.split(".") : [null, null];
-  return { unit, investigation, problem };
+  return { investigation, problem, unit };
 }
