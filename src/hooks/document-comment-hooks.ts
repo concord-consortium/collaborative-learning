@@ -130,7 +130,7 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
         metadataQuery.get().then(querySnapshot => {
           querySnapshot.docs.forEach(doc => {
             const docRef = doc.ref;
-            docRef.update({ strategies: firebase.firestore.FieldValue.arrayUnion(tags) });
+            docRef.update({ strategies: firebase.firestore.FieldValue.arrayUnion(...tags) });
           });
         });
       }
