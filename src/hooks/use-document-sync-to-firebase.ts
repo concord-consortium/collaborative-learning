@@ -127,7 +127,8 @@ export function useDocumentSyncToFirebase(
       onError: (err, title) => {
         console.warn(`ERROR: Failed to update document title for ${type} document ${key}:`, title);
       }
-    }
+    },
+    additionalMutation: syncFirestoreDocumentProp
   });
 
   // sync properties for problem, personal, and learning log documents
