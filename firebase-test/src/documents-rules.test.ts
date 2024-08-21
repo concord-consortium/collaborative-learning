@@ -540,6 +540,15 @@ describe("Firestore security rules", () => {
       await expectReadToSucceed(db, kDocumentCommentDocPath);
     });
 
+    it ("teacher can look for comments on a metadata document that doesn't exist", async () => {
+      db = initFirestore(teacherAuth);
+
+      // In practice this is not going to be a direct comment read. Instead it will be a query
+      // for the list of comments under the document. However the access check should be the
+      // same.
+      await expectReadToSucceed(db, kDocumentCommentDocPath);
+    });
+
     it("authenticated teachers can't write document comments without required uid", async () => {
       await initFirestoreWithUserDocument(teacherAuth);
       await expectWriteToFail(db, kDocumentCommentDocPath, specCommentDoc({ remove: ["uid"] }));

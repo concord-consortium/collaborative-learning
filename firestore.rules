@@ -12,7 +12,7 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    function exists(s) {
+    function stringExists(s) {
       return (s != null) && (s != "");
     }
 
@@ -259,7 +259,7 @@ service cloud.firestore {
         // check whether the (curriculum) document is associated with one of the teacher's networks
         function curriculumInTeacherNetworks() {
           let curriculumNetwork = getCurriculumNetwork();
-          return exists(curriculumNetwork) && (curriculumNetwork in getTeacherNetworks());
+          return stringExists(curriculumNetwork) && (curriculumNetwork in getTeacherNetworks());
         }
 
         // check whether the teacher owns/created the curriculum document
@@ -311,10 +311,14 @@ service cloud.firestore {
         allow delete: if isAuthedTeacher() && userIsResourceUser();
         // teachers can read their own documents or other documents in their network
         allow read: if (isAuthed() && (resource == null || userOwnsDocument() || resourceInUserClass())) ||
-          (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks()))
+          (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks()));
+
+        function getDocumentPath() {
+          return /databases/$(database)/documents/authed/$(portal)/documents/$(docId)
+        }
 
         function getDocumentData() {
-          return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data;
+          return get(getDocumentPath()).data;
         }
 
         // return owner of the parent document
@@ -344,7 +348,7 @@ service cloud.firestore {
             // check if document is in user's class
             request.auth.token.class_hash == docData.context_id ||
             // check whether the document's network corresponds to one of the users's networks
-            exists(docNetwork) && (docNetwork in getTeacherNetworks()) ||
+            stringExists(docNetwork) && (docNetwork in getTeacherNetworks()) ||
             // check whether the document is in a different class for the teacher
             teacherIsInClass(docData.context_id) ||
             // check whether the current user is one of the teachers associated with the (legacy) document
@@ -356,7 +360,7 @@ service cloud.firestore {
 
         // check whether the teacher can access the document
         function teacherCanAccessDocument() {
-          return isAuthedTeacher() && userCanAccessDocument();
+          return isAuthedTeacher() && (!exists(getDocumentPath()) || userCanAccessDocument());
         }
 
         function isValidCommentCreateRequest() {
