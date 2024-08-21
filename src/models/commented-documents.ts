@@ -90,8 +90,6 @@ export class CommentedDocumentsQuery {
   }
 
   private async queryUserDocs() {
-    console.log("running queryUserDocs");
-
     // Find teacher's classes
     const classesRef = this.db.collection("classes");
     const individualClasses = (await classesRef.where("teachers", "array-contains", this.user.id).get()).docs;
@@ -99,7 +97,6 @@ export class CommentedDocumentsQuery {
       ? (await classesRef.where("networks", "array-contains", this.user.network).get()).docs
       : [];
     const allClasses = individualClasses.concat(networkClasses);
-    console.log("teacher classes:", individualClasses, networkClasses);
     const classIds = allClasses.map(doc => { return (doc.data() as ClassDocument).context_id; });
 
     // Find student documents

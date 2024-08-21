@@ -116,16 +116,13 @@ async function createOrUpdateClassDoc(
       // Update existing doc
       const data = current.data() as ClassDocument;
       if (!arraysEqualIgnoringOrder(aClass.teachers, data.teachers)) {
-        console.log("updating teacher array:", data.teachers, aClass.teachers);
         await docRef.update({ teachers: aClass.teachers });
       }
       if (addNetwork && !data.network?.includes(addNetwork)) {
-        console.log("updating networks array:", data.network, addNetwork);
         await docRef.update({ network: firebase.firestore.FieldValue.arrayUnion(addNetwork) });
       }
     } else {
       // Create the document.
-      console.log("new doc:", aClass, addNetwork);
       if (addNetwork) {
         await docRef.set({ ...aClass, network: addNetwork, networks: [addNetwork] });
       } else {
@@ -155,13 +152,10 @@ export async function syncClass(firestore: Firestore, rawPortalJWT: string|undef
 
     // Old location of the class document
     if (aClass.network) {
-      console.log('attempting to set old class doc:', `classes/${aClass.network}_${context_id}`,
-        classWithTeachers, addNetwork);
       promises.push(createOrUpdateClassDoc(firestore, `classes/${aClass.network}_${context_id}`,
         classWithTeachers, addNetwork));
     }
     // New location of the class document
-    console.log('attempting to set new class doc:', `classes/${context_id}`, classWithTeachers, addNetwork);
     promises.push(createOrUpdateClassDoc(firestore, `classes/${context_id}`, classWithTeachers, addNetwork));
   }
   return Promise.all(promises);
