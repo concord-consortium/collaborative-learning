@@ -129,9 +129,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
       if (firestoreUser?.network) {
         user.setNetworks(firestoreUser.network, firestoreUser.networks);
       }
-      if (rawPortalJWT) {
-        syncTeacherClassesAndOfferings(db.firestore, user, rawPortalJWT);
-      }
+      syncTeacherClassesAndOfferings(db.firestore, user, stores.class, rawPortalJWT);
     })
     .then(() => {
       removeLoadingMessage("Connecting");

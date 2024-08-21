@@ -9,6 +9,7 @@ import {
   OfferingWithoutTeachers, syncClass, syncOffering, syncTeacherClassesAndOfferings
 } from "./teacher-network";
 import { DB } from "./db";
+import { ClassModel, ClassModelType } from "../models/stores/class";
 
 const mockStores = {
   appMode: "authed",
@@ -61,10 +62,16 @@ class MockFirestoreOtherError extends Error {
 const kPortalJWT = "JWT";
 const kTeacher1IdNumeric = 11;
 const kTeacher1Id = `${kTeacher1IdNumeric}`;
-const kTeacher1Name = "Teacher 1";
+const kTeacher1FirstName = "Teacher";
+const kTeacher1LastName = "1";
+const kTeacher1Initials = "T1";
+const kTeacher1Name = kTeacher1FirstName + " " + kTeacher1LastName;
 const kTeacher1User: IPortalClassUser = {
         id: "https://concord.org/users/11", user_id: kTeacher1IdNumeric, first_name: "Teacher", last_name: "1"
       };
+const kTeacherUserModel = UserModel.create({
+  type: "teacher", name: kTeacher1Name, id: kTeacher1Id
+});
 
 const kClass1IdNumeric = 1;
 const kClass1Id = `${kClass1IdNumeric}`;
@@ -80,6 +87,15 @@ const portalClass1: IPortalClassInfo = {
   students: [],
   offerings: []
 };
+const portalClass1Model: ClassModelType = ClassModel.create({
+  name: kClass1Name,
+  classHash: kClass1Hash,
+  users: {
+    t1: { type: "teacher", id: kTeacher1Id, firstName: kTeacher1FirstName, lastName: kTeacher1LastName,
+      fullName: kTeacher1Name, initials: kTeacher1Initials }
+  }
+});
+
 const partClass1: ClassWithoutTeachers = {
         id: kClass1Id,
         name: kClass1Name,
@@ -171,7 +187,7 @@ describe("Teacher network functions", () => {
         data: () => fsClass1}));
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
       const firestore = new Firestore(mockDB);
-      const result = await syncClass(firestore, kPortalJWT, partClass1);
+      const result = await syncClass(firestore, kPortalJWT, partClass1, kTeacherUserModel);
       expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(mockDoc).toHaveBeenCalledTimes(2);
       expect(mockDoc).toHaveBeenCalledWith(oldClassDocPath);
@@ -186,7 +202,7 @@ describe("Teacher network functions", () => {
       // !ok response from fetch
       fetchMock.mockResponseOnce('{}', { status: 500, headers: { 'content-type': 'application/json' } });
       const firestore = new Firestore(mockDB);
-      const result = await syncClass(firestore, kPortalJWT, partClass1);
+      const result = await syncClass(firestore, kPortalJWT, partClass1, kTeacherUserModel);
       expect(mockDoc).not.toHaveBeenCalled();
       expect(mockDocGet).not.toHaveBeenCalled();
       expect(mockDocSet).not.toHaveBeenCalled();
@@ -197,7 +213,7 @@ describe("Teacher network functions", () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestorePermissionsError(); });
       fetchMock.mockRejectOnce(new Error());
       const firestore = new Firestore(mockDB);
-      const result = await syncClass(firestore, kPortalJWT, partClass1);
+      const result = await syncClass(firestore, kPortalJWT, partClass1, kTeacherUserModel);
       expect(mockDoc).not.toHaveBeenCalled();
       expect(mockDocGet).not.toHaveBeenCalled();
       expect(mockDocSet).not.toHaveBeenCalled();
@@ -208,7 +224,7 @@ describe("Teacher network functions", () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestoreOtherError(); });
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
       const firestore = new Firestore(mockDB);
-      const result = await syncClass(firestore, kPortalJWT, partClass1);
+      const result = await syncClass(firestore, kPortalJWT, partClass1, kTeacherUserModel);
       expect(mockDoc).toHaveBeenCalledWith(oldClassDocPath);
       expect(mockDocGet).toHaveBeenCalled();
       expect(mockDocSet).not.toHaveBeenCalled();
@@ -219,7 +235,7 @@ describe("Teacher network functions", () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestorePermissionsError(); });
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
       const firestore = new Firestore(mockDB);
-      const result = await syncClass(firestore, kPortalJWT, partClass1);
+      const result = await syncClass(firestore, kPortalJWT, partClass1, kTeacherUserModel);
       expect(mockDoc).toHaveBeenCalledWith(oldClassDocPath);
       expect(mockDocGet).toHaveBeenCalled();
       expect(mockDocSet).toHaveBeenCalledWith(fsClass1);
@@ -299,29 +315,53 @@ describe("Teacher network functions", () => {
     const completeTeacher = UserModel.create({ id: kTeacher1Id, type: "teacher", network: "test-network",
                                                 portalClassOfferings: [userOffering1(), userOffering2()] });
 
-    it("should do nothing if there is no portal JWT", async () => {
+    it("should sync demo class if there is no portal JWT", async () => {
       const user = UserModel.create({ id: kTeacher1Id, type: "teacher", network: "test-network" });
       const firestore = new Firestore(mockDB);
-      await syncTeacherClassesAndOfferings(firestore, user, "");
-      expect(mockDoc).not.toHaveBeenCalled();
-      expect(mockDocGet).not.toHaveBeenCalled();
-      expect(mockDocSet).not.toHaveBeenCalled();
+      await syncTeacherClassesAndOfferings(firestore, user, portalClass1Model, "");
+      expect(mockDoc).toHaveBeenCalledTimes(2);
+      expect(mockDoc).toHaveBeenCalledWith(`/authed/test-portal/classes/test-network_${kClass1Hash}`);
+      expect(mockDoc).toHaveBeenCalledWith(`/authed/test-portal/classes/${kClass1Hash}`);
+      expect(mockDocGet).toHaveBeenCalledTimes(2);
+      expect(mockDocSet).toHaveBeenCalledTimes(2);
+      expect(mockDocSet).toHaveBeenCalledWith({
+        id: "class-hash-1",
+        context_id: "class-hash-1",
+        name: "Class 1",
+        network: "test-network",
+        networks: ["test-network"],
+        teacher: "11",
+        teachers: [ "11" ],
+        uri: ""
+      });
     });
 
-    it("should do nothing if the user has no offerings", async () => {
+    it("should sync demo class if the user has no offerings", async () => {
       const user = UserModel.create({ id: kTeacher1Id, type: "teacher", network: "test-network" });
       const firestore = new Firestore(mockDB);
-      await syncTeacherClassesAndOfferings(firestore, user, kPortalJWT);
-      expect(mockDoc).not.toHaveBeenCalled();
-      expect(mockDocGet).not.toHaveBeenCalled();
-      expect(mockDocSet).not.toHaveBeenCalled();
+      await syncTeacherClassesAndOfferings(firestore, user, portalClass1Model, kPortalJWT);
+      expect(mockDoc).toHaveBeenCalledTimes(2);
+      expect(mockDoc).toHaveBeenCalledWith(`/authed/test-portal/classes/test-network_${kClass1Hash}`);
+      expect(mockDoc).toHaveBeenCalledWith(`/authed/test-portal/classes/${kClass1Hash}`);
+      expect(mockDocGet).toHaveBeenCalledTimes(2);
+      expect(mockDocSet).toHaveBeenCalledTimes(2);
+      expect(mockDocSet).toHaveBeenCalledWith({
+        id: "class-hash-1",
+        context_id: "class-hash-1",
+        name: "Class 1",
+        network: "test-network",
+        networks: ["test-network"],
+        teacher: "11",
+        teachers: [ "11" ],
+        uri: ""
+      });
     });
 
     it("should sync class even if the user has no network", async () => {
       const user = UserModel.create({ id: kTeacher1Id, type: "teacher", portalClassOfferings: [userOffering1()] });
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
       const firestore = new Firestore(mockDB);
-      await syncTeacherClassesAndOfferings(firestore, user, kPortalJWT);
+      await syncTeacherClassesAndOfferings(firestore, user, portalClass1Model, kPortalJWT);
       expect(mockDoc).toHaveBeenCalledTimes(1);
       expect(mockDocGet).toHaveBeenCalledTimes(1);
       expect(mockDocSet).toHaveBeenCalledTimes(1);
@@ -332,7 +372,7 @@ describe("Teacher network functions", () => {
       mockDocGet.mockImplementation(() => { throw new MockFirestorePermissionsError(); });
       fetchMock.mockResponseOnce(JSON.stringify(portalClass1));
       const firestore = new Firestore(mockDB);
-      await syncTeacherClassesAndOfferings(firestore, completeTeacher, kPortalJWT);
+      await syncTeacherClassesAndOfferings(firestore, completeTeacher, portalClass1Model, kPortalJWT);
       expect(mockDoc).toHaveBeenCalledTimes(4);
       expect(mockDocGet).toHaveBeenCalledTimes(4);
       expect(mockDocSet).toHaveBeenCalledTimes(4);

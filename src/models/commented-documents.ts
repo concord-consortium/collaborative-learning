@@ -46,14 +46,6 @@ export class CommentedDocumentsQuery {
     this.queryUserDocs();
   }
 
-  getCurricumDocs(): CurriculumDocumentInfo[] {
-    return this.curriculumDocs;
-  }
-
-  getUserDocs(): UserDocumentInfo[] {
-    return this.userDocs;
-  }
-
   private async queryCurriculumDocs() {
     const cDocsRef = this.db.collection("curriculum");
     let docsQuery;

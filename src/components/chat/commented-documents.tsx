@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { observer } from "mobx-react";
 
 import { useFirestore } from "../../hooks/firestore-hooks";
 import { useStores, usePersistentUIStore, useUserStore, useUIStore} from "../../hooks/use-stores";
@@ -17,7 +18,8 @@ interface IProps {
   handleDocView: (() => void) | undefined;
 }
 
-export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
+export const CommentedDocuments: React.FC<IProps>
+    = observer(function CommentedDocuments({user, handleDocView}) {
   const [db] = useFirestore();
   const ui = useUIStore();
   const persistentUI = usePersistentUIStore();
@@ -37,7 +39,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   return (
     <div className="commented-document-list">
       {
-        (commentedDocumentsQuery.getCurricumDocs()).map((doc, index) => {
+        (commentedDocumentsQuery.curriculumDocs).map((doc, index) => {
           const {navTab} = getTabsOfCurriculumDoc(doc.path);
           return (
             <div
@@ -65,7 +67,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
         })
       }
       {
-        (commentedDocumentsQuery.getUserDocs()).map((doc, index) =>{
+        (commentedDocumentsQuery.userDocs).map((doc, index) =>{
           const sectionDoc =  store.documents.getDocument(doc.key);
           const networkDoc = store.networkDocuments.getDocument(doc.key);
           if (sectionDoc){
@@ -94,7 +96,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
       }
     </div>
   );
-};
+});
 
 
 interface JProps {

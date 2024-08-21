@@ -1,5 +1,6 @@
 import firebase from "firebase/app";
 import { Optional } from "utility-types";
+import { ClassModelType } from "../models/stores/class";
 import { UserModelType } from "../models/stores/user";
 import { arraysEqualIgnoringOrder } from "../utilities/js-utils";
 import { Firestore, isFirestorePermissionsError } from "./firestore";
@@ -49,9 +50,9 @@ export function getProblemPath(unit: string, problem: string) {
 }
 
 // synchronize the current teacher's classes and offerings to firestore
-export function syncTeacherClassesAndOfferings(firestore: Firestore, user: UserModelType, rawPortalJWT: string) {
+export function syncTeacherClassesAndOfferings(
+    firestore: Firestore, user: UserModelType, classModel: ClassModelType, rawPortalJWT?: string) {
   const { network } = user;
-
   const promises: Promise<any>[] = [];
 
   // map portal offerings to classes
@@ -63,12 +64,24 @@ export function syncTeacherClassesAndOfferings(firestore: Firestore, user: UserM
     }
   });
 
+  // If the current class has not been set up (eg demo/qa site), add it with some stubbed-in fields.
+  if (!userClasses[classModel.classHash]) {
+    userClasses[classModel.classHash] = {
+      id: classModel.classHash,
+      context_id: classModel.classHash,
+      name: classModel.name,
+      teacher: user.id,
+      uri: "",
+      network
+    };
+  }
+
   // synchronize the classes
   Object.keys(userClasses).forEach(async context_id => {
-    promises.push(syncClass(firestore, rawPortalJWT, userClasses[context_id], network));
+    promises.push(syncClass(firestore, rawPortalJWT, userClasses[context_id], user, network));
   });
 
-  if (network) {
+  if (network && rawPortalJWT) {
     // synchronize the offerings
     user.portalClassOfferings.forEach(async offering => {
       const {
@@ -122,12 +135,14 @@ async function createOrUpdateClassDoc(
   });
 }
 
-export async function syncClass(firestore: Firestore, rawPortalJWT: string,
-    aClass: ClassWithoutTeachers, addNetwork?: string) {
+export async function syncClass(firestore: Firestore, rawPortalJWT: string|undefined,
+    aClass: ClassWithoutTeachers, user: UserModelType, addNetwork?: string) {
   const { uri, context_id } = aClass;
   const promises: Promise<any>[] = [];
-  if (uri && context_id && rawPortalJWT) {
-    const teachers = await getClassTeachers(uri, rawPortalJWT);
+  if (context_id) {
+    // Get list of teachers from the portal, if we have a portal login.
+    // Otherwise, default to just the current teacher (for demo/qa)
+    const teachers = (uri && rawPortalJWT) ? await getClassTeachers(uri, rawPortalJWT) : [user.id];
     if (!teachers) return;
     const classWithTeachers = { ...aClass, teachers };
     if (addNetwork) {
