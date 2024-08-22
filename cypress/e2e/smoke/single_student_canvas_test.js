@@ -35,7 +35,7 @@ context('single student functional test', () => {
     const section = "learning-log";
     cy.openSection('my-work', section);
     cy.get('[data-test=subtab-learning-log]').should('be.visible');
-    cy.get('.list.' + section + ' [data-test=' + section + '-list-items] .footer').should('contain', "My First Learning Log");
+    cy.get('.documents-list.' + section + ' [data-test=' + section + '-list-items] .footer').should('contain', "My First Learning Log");
 
     cy.log('verify click on document thumbnail opens document in nav panel');
     cy.openDocumentWithTitle('my-work', 'learning-log', 'My First Learning Log');

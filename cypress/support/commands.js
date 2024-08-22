@@ -162,19 +162,19 @@ Cypress.Commands.add("openSection", (tab, section) => {//doc-tab my-work workspa
 // is passed in. Passing the tab is safer, otherwise this can find document items
 // in other tabs.
 Cypress.Commands.add("getCanvasItemTitle", (section) => {
-  cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer');
+  cy.get('.documents-list.'+section+' [data-test='+section+'-list-items] .footer');
 });
 Cypress.Commands.add("openDocumentThumbnail", (navTab,section,title) => { //opens thumbnail into the nav panel
-  cy.get('.document-tabs.'+navTab+' .list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
+  cy.get('.document-tabs.'+navTab+' .documents-list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
 });
 Cypress.Commands.add("openDocumentWithTitle", (tab, section, title) => {
   cy.openSection(tab,section);
-  cy.get('.document-tabs.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
+  cy.get('.document-tabs.'+tab+' .documents-list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
   cy.get('.document-tabs.'+tab+' [data-test=subtab-'+section+'] .edit-button').click();
 });
 Cypress.Commands.add("openDocumentWithIndex", (tab, section, docIndex) => {
   cy.openSection(tab,section);
-  cy.get('.list.'+section+' [data-test='+section+'-list-items] .footer').eq(docIndex).siblings('.scaled-list-item-container').click({force:true});
+  cy.get('.document-list.'+section+' [data-test='+section+'-list-items] .footer').eq(docIndex).siblings('.scaled-list-item-container').click({force:true});
   cy.get('.edit-button').click();
 });
 Cypress.Commands.add("clickProblemResourceTile", (subsection, tileIndex = 0) => {
@@ -257,5 +257,5 @@ Cypress.Commands.add('unlinkTableToDataflow', (program, table) => {
   });
 });
 Cypress.Commands.add("deleteDocumentThumbnail", (tab, section,title) => {
-  cy.get('.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer .icon-delete-document').eq(1).click({force:true});
+  cy.get('.'+tab+' .documents-list.'+section+' [data-test='+section+'-list-items] .footer .icon-delete-document').eq(1).click({force:true});
 });

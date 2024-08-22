@@ -70,10 +70,10 @@ class SortedWork {
     return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(sectionLabel).get(".section-header-right .section-header-arrow").click({multiple: true});
   }
   checkDocumentInGroup(groupName, doc) {
-    this.getSortWorkGroup(groupName).find(".list .list-item .footer .info").should("contain", doc);
+    this.getSortWorkGroup(groupName).find(".documents-list .list-item .footer .info").should("contain", doc);
   }
   checkDocumentNotInGroup(groupName, doc) {
-    this.getSortWorkGroup(groupName).find(".list .list-item .footer .info").should("not.contain", doc);
+    this.getSortWorkGroup(groupName).find(".documents-list .list-item .footer .info").should("not.contain", doc);
   }
   checkSimpleDocumentInGroup(groupName, doc) {
     this.getSortWorkGroup(groupName).find('[data-testid="section-document-list"] [data-test="simple-document-item"]').should("have.attr", "title", doc);
@@ -103,7 +103,7 @@ class SortedWork {
   }
   checkGroupIsEmpty(groupName){
     cy.get(".sort-work-view .sorted-sections .section-header-label")
-      .contains(groupName).parent().parent().parent().find(".list").should('be.empty');
+      .contains(groupName).parent().parent().parent().find(".documents-list").should('be.empty');
   }
   checkGroupDoesNotExist(group) {
     cy.get(".sort-work-view .sorted-sections .section-header-label").should("not.contain", group);

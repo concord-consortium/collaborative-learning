@@ -32,11 +32,11 @@ class ResourcesPanel{
     // TODO: this is duplicated in commands.js, however in that case the tab
     // isn't passed in.
     getCanvasItemTitle(tab, section){
-        return cy.get('.document-tabs.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer');
+        return cy.get('.document-tabs.'+tab+' .documents-list.'+section+' [data-test='+section+'-list-items] .footer');
     }
 
     starCanvasItem(tab, section,title){
-        cy.get('.list.'+section+' .list-item[data-test='+section+'-list-items]').contains('.footer', title).siblings('.icon-holder').find('.icon-star').click();
+        cy.get('.documents-list.'+section+' .list-item[data-test='+section+'-list-items]').contains('.footer', title).siblings('.icon-holder').find('.icon-star').click();
     }
 
     getCanvasStarIcon(tab,section,title){

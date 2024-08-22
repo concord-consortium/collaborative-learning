@@ -296,7 +296,7 @@ context('Test Canvas', function () {
     cy.log('delete elements from canvas');
     //star a document to verify delete
     cy.openSection("my-work", "workspaces");
-    cy.get('.list.workspaces [data-test=workspaces-list-items] .footer').contains(renameTitlePencil).parents().siblings('.icon-holder').find('.icon-star').click();
+    cy.get('.documents-list.workspaces [data-test=workspaces-list-items] .footer').contains(renameTitlePencil).parents().siblings('.icon-holder').find('.icon-star').click();
     cy.openDocumentWithTitle('my-work', 'workspaces', 'QA 1.1 Solving a Mystery with Proportional Reasoning');
 
     cy.log('will delete elements from canvas');
