@@ -214,7 +214,7 @@ context('Geometry Table Integration', function () {
     leftTile('geometry').first().click({ shiftKey: true });
 
     // Drag the selected tiles to the workspace on the right
-    leftTile('geometry').first().trigger('dragstart', { dataTransfer });
+    leftTile('geometry').first().find('.tool-tile-drag-handle').trigger('dragstart', { dataTransfer });
     cy.get('.single-workspace .canvas .document-content').first()
       .trigger('drop', { force: true, dataTransfer });
 

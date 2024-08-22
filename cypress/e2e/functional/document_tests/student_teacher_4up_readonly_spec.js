@@ -89,11 +89,7 @@ function setupTest(studentIndex) {
   geometryToolTile.getGraphPoint().should('have.length', 3);
   geometryToolTile.getPhantomGraphPoint().should('exist');
   clueCanvas.addTile("drawing");
-  drawToolTile.getDrawToolRectangle().click();
-  drawToolTile.getDrawTile()
-    .trigger("mousedown", 250, 50)
-    .trigger("mousemove", 100, 150)
-    .trigger("mouseup", 100, 50);
+  drawToolTile.drawRectangle(100, 100);
   drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
   clueCanvas.addTile("expression");
   exp.getMathField().should("have.value", "a=\\pi r^2");

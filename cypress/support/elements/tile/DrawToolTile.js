@@ -8,6 +8,9 @@ class DrawToolTile{
     getDrawTileComponent(){
       return cy.get('.primary-workspace [data-testid=drawing-tool]');
     }
+    getDrawTileObjectCanvas(){
+      return cy.get('.primary-workspace [data-testid=drawing-tool] .object-canvas');
+    }
     getDrawTileShowSortPanel(){
       return cy.get('.primary-workspace .drawing-tool .object-list');
     }
@@ -111,17 +114,36 @@ class DrawToolTile{
     drawRectangle(x, y, width=25, height=25) {
       this.getDrawToolRectangle().last().click();
       this.getDrawTile().last()
-        .trigger("mousedown", x, y)
-        .trigger("mousemove", x+width, y+height)
-        .trigger("mouseup", x+width, y+height);
+        .trigger("pointerdown", x, y)
+        .trigger("pointermove", x+width, y+height)
+        .trigger("pointerup", x+width, y+height);
     }
 
     drawEllipse(x, y, width=25, height=25) {
       this.getDrawToolEllipse().click();
       this.getDrawTile().last()
-        .trigger("mousedown", x, y)
-        .trigger("mousemove", x+width, y+height)
-        .trigger("mouseup", x+width, y+height);
+        .trigger("pointerdown", x, y)
+        .trigger("pointermove", x+width, y+height)
+        .trigger("pointerup", x+width, y+height);
+    }
+
+    drawVector(x, y, width=25, height=25) {
+      this.getDrawToolVector().click();
+      this.getDrawTile().last()
+        .trigger("pointerdown", x, y)
+        .trigger("pointermove", x+width, y+height)
+        .trigger("pointerup", x+width, y+height);
+    }
+
+    addText(x, y, text) {
+      this.getDrawToolText().click();
+      this.getDrawTile().last()
+        .trigger("pointerdown", x, y)
+        .trigger("pointerup", x, y);
+      this.getDrawTile().last()
+        .trigger("pointerdown", x, y)
+        .trigger("pointerup", x, y);
+      this.getTextDrawing().last().get('textarea').type(text + "{enter}");
     }
 
 }

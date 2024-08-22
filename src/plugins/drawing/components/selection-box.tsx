@@ -15,7 +15,9 @@ export class SelectionBox {
     this.computeBox();
   }
 
-  public render() {
+  public render(zoom: number) {
+    const strokeWidth = 1 / zoom;
+    const dashArray = [5 / zoom, 3 / zoom];
     const {nw, se} = this;
     return <rect
       x={nw.x}
@@ -24,8 +26,8 @@ export class SelectionBox {
       height={se.y - nw.y}
       fill="none"
       stroke={SELECTION_COLOR}
-      strokeWidth="1"
-      strokeDasharray="5 3"
+      strokeWidth={strokeWidth}
+      strokeDasharray={dashArray.join(" ")}
     />;
   }
 

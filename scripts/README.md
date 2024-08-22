@@ -6,6 +6,25 @@ From that page if you click "Generate a new private key", it will download a jso
 
 Most scripts can be run using `npx tsx <script filename>`
 
+# Running scripts that connect with the portal
+You need to first get the portal admin api token.
+
+In 1Password you can find it in the Developer Admin vault under a "Learn Portal admin api user" entry.
+
+If the 1Password entry is out of date. You can also get it this way:
+You can follow these steps to get a console in the portal:
+https://docs.google.com/document/d/1dmAV4ojzwau2C-TANvoxw9jAnUN2F5FdOSSy6f42H84/edit#heading=h.l053izhapf0l
+Then look for the admin api user:
+`api_user = User.where(:login => "admin_api_user").first`
+`api_user.access_grants.first.access_token`
+
+This api user was probably created by this rake task: https://github.com/concord-consortium/rigse/blob/97a4bf3a2a911f88424b502361ae8dafd71d9823/rails/lib/tasks/api.rake#L18
+
+This access token should be stored in a /scripts/.env file with:
+```
+PORTAL_ACCESS_TOKEN=[token]
+```
+
 # Running on Google Cloud Virtual Machine
 
 It can be useful to offload the running of scripts to a virtual machine in Google Cloud. They will usually run faster there.

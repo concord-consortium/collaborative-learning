@@ -11,7 +11,7 @@ export type TileResizeEntry = Optional<ResizeObserverEntry,
                                         "borderBoxSize" | "contentBoxSize" | "devicePixelContentBoxSize">;
 interface IGetObjectButtonSVGParams {
   classes?: string;
-  handleClick: () => void;
+  handleClick: (e: React.MouseEvent) => void;
   objectId: string;
   objectType?: string;
   translateTilePointToScreenPoint?: (point: [x: number, y: number]) => [x: number, y: number] | undefined;

@@ -114,10 +114,7 @@ function dragTile() {
       // and the handle is at the top
       scrollBehavior: false });
 
-    // We send the dragstart to the tile(root) since that is the parent component with
-    // `draggable= true`. In a general utility we'd want to search for the closest parent
-    // with `draggable= true`
-    cy.root().trigger('dragstart', { dataTransfer,
+    cy.wrap($handle).trigger('dragstart', { dataTransfer,
       // We have to explicity set the clientX and clientY because cypress will just use
       // the center of the target instead of the location of the previous trigger
       clientX, clientY,
@@ -154,11 +151,7 @@ context('Test copy tiles from one document to other document', function () {
 
     cy.log('Add drawing tile');
     clueCanvas.addTile("drawing");
-    drawToolTile.getDrawToolRectangle().click();
-    drawToolTile.getDrawTile()
-      .trigger("mousedown", 250, 50)
-      .trigger("mousemove", 100, 150)
-      .trigger("mouseup", 100, 50);
+    drawToolTile.drawRectangle(250, 50, -150, 100);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
 
     cy.log("Add expression tile");

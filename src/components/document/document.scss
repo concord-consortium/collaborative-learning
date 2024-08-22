@@ -124,9 +124,12 @@
         border-radius: 5px;
         border: solid 1.5px $charcoal-light-1;
         box-sizing: border-box;
+        display: flex;
+        flex-wrap: nowrap;
         height: 26px;
 
         button {
+          position: relative;
           border: none;
           height: 23px;
           padding: 0 2px;
@@ -141,8 +144,17 @@
             background-color: $workspace-teal-light-3;
           }
 
+          svg.corner-triangle {
+            position: absolute;
+            right: 1px;
+            bottom: 1px;
+            fill: #0481A0;
+          }
+
         }
       }
+
+
       .icon {
         box-sizing: content-box;
         background-repeat: no-repeat;
@@ -422,4 +434,35 @@
       }
     }
   }
+}
+
+.annotation-mode-selection {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 1px 1.5px;
+  border-radius: 0 5px 5px 5px;
+  border: solid 1.5px #949494;
+
+  .clue-app-content & {
+    // Set background color that matches the app header bar; different from standalone doc editor header
+    background-color: $workspace-teal-light-4;
+  }
+
+  button {
+    height: 23px;
+    padding: 0 2px;
+    border: none;
+    border-radius: 3px;
+    background-color: inherit;
+
+    &.active {
+      background-color: $workspace-teal-light-2;
+    }
+
+    &:hover {
+      background-color: $workspace-teal-light-3;
+    }
+  }
+
 }
