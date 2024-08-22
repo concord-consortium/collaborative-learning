@@ -176,8 +176,7 @@ describe('SortWorkView Tests', () => {
 
   });
 
-  // TODO: Reinstate the tests below when all metadata documents have the new fields and are being updated in real time.
-  it.skip("should open Sort Work tab and test sorting by group", () => {
+  it("should open Sort Work tab and test sorting by group", () => {
     // Clear data before the test so it can be retried and will start with a clean slate
     cy.clearQAData('all');
 

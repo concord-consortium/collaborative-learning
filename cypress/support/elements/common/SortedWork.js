@@ -24,7 +24,7 @@ class SortedWork {
     return this.getSortWorkItem().contains(title);
   }
   getSortWorkGroup(groupName) {
-    return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(groupName).parent().parent().parent();
+    return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(groupName).parents(".sorted-sections");
   }
   getSortWorkSubgroup(groupName, subgroupName) {
     return this.getSortWorkGroup(groupName)
@@ -103,7 +103,7 @@ class SortedWork {
   }
   checkGroupIsEmpty(groupName){
     cy.get(".sort-work-view .sorted-sections .section-header-label")
-      .contains(groupName).parent().parent().parent().find(".list").should('be.empty');
+      .contains(groupName).parents(".sorted-sections").find(".list").should('be.empty');
   }
   checkGroupDoesNotExist(group) {
     cy.get(".sort-work-view .sorted-sections .section-header-label").should("not.contain", group);
