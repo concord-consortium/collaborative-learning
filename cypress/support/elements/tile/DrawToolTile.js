@@ -8,6 +8,9 @@ class DrawToolTile{
     getDrawTileComponent(){
       return cy.get('.primary-workspace [data-testid=drawing-tool]');
     }
+    getDrawTileObjectCanvas(){
+      return cy.get('.primary-workspace [data-testid=drawing-tool] .object-canvas');
+    }
     getDrawTileShowSortPanel(){
       return cy.get('.primary-workspace .drawing-tool .object-list');
     }

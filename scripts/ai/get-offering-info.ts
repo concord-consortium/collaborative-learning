@@ -11,7 +11,7 @@
 // Change targetTileTypes to be a list of the tile types you want to count (like ["Geometry", "Text", "Table"])
 // Set aiService to be whichever service you're interested in. This will determine the format of the output file.
 // $ cd scripts/ai
-// $ npx tsx count-docs.ts
+// $ npx tsx get-offering-info.ts
 
 import fs from "fs";
 import path from "path";

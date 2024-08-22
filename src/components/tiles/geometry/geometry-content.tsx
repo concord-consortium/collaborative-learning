@@ -435,7 +435,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private getButtonPath(
-    coords: (Point | undefined)[], handleClick: () => void, classes?: string
+    coords: (Point | undefined)[], handleClick: (e: React.MouseEvent) => void, classes?: string
   ) {
     let path = "";
     coords.forEach((coord, index) => {

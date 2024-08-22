@@ -1,32 +1,32 @@
 @use "../vars.sass";
 
-.curved-arrow {
+.arrow {
   stroke-opacity: .5;
   pointer-events: none;
 
-  .curved-arrow-stem {
+  .arrow-stem {
     stroke: vars.$annotation-blue;
     stroke-width: 3;
   }
 
-  .curved-arrow-arrowhead {
+  .arrow-arrowhead {
     fill: vars.$annotation-blue;
   }
 
   &.background-arrow {
-    .curved-arrow-stem {
+    .arrow-stem {
       stroke-opacity: 0;
       stroke-width: 11px;
     }
 
     &:hover {
-      .curved-arrow-stem {
+      .arrow-stem {
         stroke-opacity: .125;
       }
     }
 
     .actual-sparrow.selected & {
-      .curved-arrow-stem {
+      .arrow-stem {
         stroke-opacity: .25;
       }
     }
@@ -34,7 +34,7 @@
 }
 
 .annotation-layer.editing {
-  .curved-arrow.background-arrow {
+  .arrow.background-arrow {
     pointer-events: stroke;
   }
 }
