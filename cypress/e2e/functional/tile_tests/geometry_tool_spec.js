@@ -356,6 +356,9 @@ context('Geometry Tool', function () {
     // check number of points
     geometryToolTile.getGraphPoint().should("have.length", 4);
 
+    // Verify the polygon count is still 1
+    geometryToolTile.getGraphPolygon().should("have.length", 1);
+
     // Create a second polygon that shares the same points as the first
     cy.log('Create a second polygon that shares the same points as the first');
     clueCanvas.clickToolbarButton('geometry', 'polygon');
