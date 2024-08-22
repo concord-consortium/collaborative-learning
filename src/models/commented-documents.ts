@@ -40,10 +40,11 @@ export class CommentedDocumentsQuery {
     this.problem = problem;
   }
 
-  setUser(user: UserModelType) {
+  async setUser(user: UserModelType) {
     this.user = user;
-    this.queryCurriculumDocs();
-    this.queryUserDocs();
+    return Promise.all([
+      this.queryCurriculumDocs(),
+      this.queryUserDocs()]);
   }
 
   private async queryCurriculumDocs() {
