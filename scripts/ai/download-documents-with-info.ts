@@ -135,6 +135,7 @@ for (const key of Object.keys(classKeys)) {
   for (const [userId, user] of Object.entries<any>(users)) {
     if (documentLimit && documentsProcessed >= documentLimit) break;
     // console.log(`  ${userId}`);
+    if (!user.documents) continue;
     for (const [docId, doc] of Object.entries<any>(user.documents)) {
       if (documentLimit && documentsProcessed >= documentLimit) break;
 

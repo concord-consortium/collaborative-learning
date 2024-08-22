@@ -2,7 +2,7 @@
 
 .simple-document-item {
   background: $classwork-purple-light-7;
-  border: solid 1px #707070;
+  border: solid 1px $charcoal;
   border-radius: 1px;
   cursor: pointer;
   display: flex;
@@ -17,5 +17,18 @@
   }
   &:active {
     background: $classwork-purple-light-2;
+  }
+
+  &.private {
+    background: $charcoal-light-7;
+    border: dotted 1px $charcoal;
+    cursor: not-allowed;
+
+    &:hover {
+      background: $charcoal-light-4;
+    }
+    &:active {
+      background: $color3;
+    }
   }
 }

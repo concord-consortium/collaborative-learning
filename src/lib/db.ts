@@ -30,7 +30,8 @@ import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
 import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
-import { IGetImageDataParams, IPublishSupportParams } from "../../shared/shared";
+import { getDocumentPath, ICommentableDocumentParams, IDocumentMetadata, IGetImageDataParams,
+         IPublishSupportParams } from "../../shared/shared";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
@@ -396,9 +397,51 @@ export class DB {
     });
   }
 
-  public createDocument(params: { type: DBDocumentType, content?: string }) {
-    const { type, content } = params;
-    const {user} = this.stores;
+  async createFirestoreMetadataDocument(metadata: DBDocumentMetadata, documentKey: string) {
+    const userContext = this.stores.userContextProvider.userContext;
+
+    if (!this.stores.userContextProvider || !this.firestore || !userContext?.uid) {
+      console.error("cannot create Firestore metadata document because environment is not valid",
+        { userContext, firestore: this.firestore });
+      throw new Error("cannot create Firestore metadata document because environment is not valid");
+    }
+
+    const documentPath = getDocumentPath(userContext.uid, documentKey, userContext.network);
+    const documentRef = this.firestore.doc(documentPath);
+    const docSnapshot = await documentRef.get();
+
+    if (!docSnapshot.exists) {
+      const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
+      const firestoreMetadata: IDocumentMetadata & { contextId: string } = {
+        ...cleanedMetadata,
+        // The validateCommentableDocument firebase function currently deployed to production is out of date.
+        // It requires contextId to defined, but doesn't check its value.
+        contextId: "ignored",
+        key: documentKey,
+        properties: {},
+        uid: userContext.uid,
+        unit: null
+      };
+      if ("offeringId" in metadata && metadata.offeringId != null) {
+        const { investigation, problem, unit } = this.stores;
+        const investigationOrdinal = String(investigation.ordinal);
+        const problemOrdinal = String(problem.ordinal);
+        const unitCode = unit.code;
+        firestoreMetadata.investigation = investigationOrdinal;
+        firestoreMetadata.problem = problemOrdinal;
+        firestoreMetadata.unit = unitCode;
+      }
+      const validateCommentableDocument =
+        getFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
+      // FIXME-HISTORY: rename this function to validateFirestoreDocumentMetadata_v1
+      validateCommentableDocument({context: userContext, document: firestoreMetadata});
+    }
+  }
+
+  public async createDocument(params: { type: DBDocumentType, content?: string, title?: string }) {
+    const { type, content, title } = params;
+    const { user } = this.stores;
+
     return new Promise<{document: DBDocument, metadata: DBDocumentMetadata}>((resolve, reject) => {
       const documentRef = this.firebase.ref(this.firebase.getUserDocumentPath(user)).push();
       const documentKey = documentRef.key!;
@@ -419,7 +462,7 @@ export class DB {
         case LearningLogDocument:
         case PersonalPublication:
         case LearningLogPublication:
-          metadata = {version, self, createdAt, type};
+          metadata = {version, self, createdAt, type, title};
           break;
         case PlanningDocument:
         case ProblemDocument:
@@ -430,7 +473,13 @@ export class DB {
       }
 
       return documentRef.set(document)
-        .then(() => metadataRef.set(metadata))
+        .then(() => {
+          metadataRef.set(metadata);
+          return metadataRef.once("value");
+        })
+        .then((metadataValue) => {
+          this.createFirestoreMetadataDocument(metadataValue.val(), documentKey);
+        })
         .then(() => {
           resolve({document, metadata});
         })
@@ -494,7 +543,8 @@ export class DB {
     let pubCount = documentModel.getNumericProperty("pubCount");
     documentModel.setNumericProperty("pubCount", ++pubCount);
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
-      this.createDocument({ type: publicationType, content }).then(({document, metadata}) => {
+      this.createDocument({ type: publicationType, content, title: documentModel.title })
+      .then(({document, metadata}) => {
         const publicationPath = publicationType === "personalPublication"
                                 ? this.firebase.getPersonalPublicationsPath(user)
                                 : this.firebase.getLearningLogPublicationsPath(user);
@@ -647,7 +697,7 @@ export class DB {
     const docTitle = title || documents.getNextOtherDocumentTitle(user, documentType, baseTitle);
 
     return new Promise<DocumentModelType | null>((resolve, reject) => {
-      return this.createDocument({ type: documentType, content: JSON.stringify(content) })
+      return this.createDocument({ type: documentType, content: JSON.stringify(content), title: docTitle })
         .then(({document, metadata}) => {
           const {documentKey} = document.self;
           const newDocument: DBOtherDocument = {
