@@ -66,6 +66,15 @@
       background-color: $learninglog-green-light-2;
     }
   }
+  &.sort-work {
+    fill: $classwork-purple;
+    &:hover {
+      background-color: $classwork-purple-light-4;
+    }
+    &:active {
+      background-color: $classwork-purple-light-3;
+    }
+  }
   &.no-action {
     cursor: none;
     &:hover {

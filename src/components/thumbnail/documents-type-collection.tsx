@@ -49,12 +49,12 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
   const appConfigStore = useAppConfig();
   const classStore = useClassStore();
   const user = useUserStore();
-  const { sortedDocuments } = useStores();
+  const { sectionDocuments } = useStores();
   const showNewDocumentThumbnail = section.addDocument && !!onSelectNewDocument;
   const newDocumentLabel = getNewDocumentLabel(section, appConfigStore);
   const isSinglePanel = numSections < 2;
   const tabName = tab?.toLowerCase().replace(' ', '-');
-  const sectionDocs = sortedDocuments.getSectionDocs(section);
+  const sectionDocs = sectionDocuments.getSectionDocs(section);
   const isTopPanel = index === 0 && numSections > 1;
   const isBottomPanel = index > 0 && index === numSections - 1;
 

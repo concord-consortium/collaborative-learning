@@ -9,8 +9,7 @@ import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
   HistoryOperation } from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { getFirebaseFunction } from "../../hooks/use-firebase-function";
-import { ICommentableDocumentParams, IDocumentMetadata,
-  networkDocumentKey } from "../../../functions/src/shared";
+import { getDocumentPath, ICommentableDocumentParams, IDocumentMetadata } from "../../../functions/src/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserModelType } from "../stores/user";
 import { UserContextProvider } from "../stores/user-context-provider";
@@ -643,10 +642,4 @@ async function prepareFirestoreHistoryInfo(
     // We use null here so this is a valid Firestore property value
     lastEntryId: lastHistoryEntry?.id || null
   };
-}
-
-function getDocumentPath(userId: string, documentKey: string, network?: string) {
-  const networkDocKey = networkDocumentKey(userId, documentKey, network);
-  const documentPath = `documents/${networkDocKey}`;
-  return documentPath;
 }

@@ -1,0 +1,112 @@
+@import "../vars";
+
+.doc-group {
+  align-items: center;
+  background: $classwork-purple-light-9;
+  display: flex;
+  margin-bottom: 2px;
+  padding: 4px 10px;
+  width: 100%;
+
+  .doc-group-label {
+    align-items: center;
+    display: flex;
+    flex-basis: 140px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: normal;
+    margin-right: 10px;
+
+    svg {
+      margin-right: 5px;
+    }
+  }
+  .doc-group-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    width: 100%;
+
+    &.simple {
+      align-items: flex-start;
+      column-gap: 10px;
+      display: flex;
+      flex-grow: 1;
+      row-gap: 10px;
+    }
+  }
+  .doc-group-count {
+    flex-basis: 60px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: normal;
+    text-align: right;
+  }
+}
+
+.scroll-button {
+  background: #fff;
+  border: solid 1px #707070;
+  border-radius: 1px;
+  color: $classwork-purple-dark-1;
+  cursor: pointer;
+  display: flex;
+  flex-grow: 0;
+  flex-shrink: 0;
+  height: 16px;
+  justify-content: center;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  width: 16px;
+
+  &.scroll-left {
+    margin-right: 10px;
+  }
+  &.scroll-right {
+    margin-left: 10px;
+
+    svg {
+      transform: rotate(180deg);
+    }
+  }
+
+  svg {
+    margin: -3px;
+  }
+
+  &:hover {
+    svg {
+      rect {
+        fill: $classwork-purple-light-4;
+      }
+    }
+  }
+
+  &:active {
+    svg {
+      path {
+        fill: white;
+      }
+      rect {
+        fill: $classwork-purple-dark-1;
+      }
+    }
+  }
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.35;
+
+    svg {
+      path {
+        fill: $classwork-purple-dark-1;
+      }
+      rect {
+        fill: white;
+      }
+    }
+  }
+}
