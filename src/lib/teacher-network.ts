@@ -55,6 +55,9 @@ export function syncTeacherClassesAndOfferings(
   const { network } = user;
   const promises: Promise<any>[] = [];
 
+  // Non teachers are not allowed to update classes and offerings
+  if (!user.isTeacher) return;
+
   // map portal offerings to classes
   const userClasses: Record<string, ClassWithoutTeachers> = {};
   user.portalClassOfferings.forEach(offering => {
