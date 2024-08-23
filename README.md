@@ -187,6 +187,7 @@ To enable per component debugging set the "debug" localstorage key with one or m
 - `docList` - this will print a table of information about a list of documents
 - `document` this will add the active document as `window.currentDocument`, you can use MST's hidden toJSON() like `currentDocument.toJSON()` to views its content.
 - `drop` console log the dataTransfer object from drop events on the document.
+- `firestore` turn on Firestore's internal debugging, this logs all queries to Firestore.
 - `history` this will: print some info to the console as the history system records changes, print the full history as JSON each time it is loaded from Firestore, and provide a `window.historyDocument` so you can inspect the document while navigating the history.
 - `images` this will set `window.imageMap` so you can look at the status and URLs of images that have been loaded.
 - `listeners` console log the adding, removing, and firing of firebase listeners
