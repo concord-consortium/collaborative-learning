@@ -1,6 +1,9 @@
+import firebase from "firebase/app";
 import { Optional } from "utility-types";
+import { ClassModelType } from "../models/stores/class";
 import { UserModelType } from "../models/stores/user";
-import { Firestore } from "./firestore";
+import { arraysEqualIgnoringOrder } from "../utilities/js-utils";
+import { Firestore, isFirestorePermissionsError } from "./firestore";
 import { ClassDocument, OfferingDocument } from "./firestore-schema";
 import { IPortalClassInfo } from "./portal-types";
 
@@ -47,10 +50,9 @@ export function getProblemPath(unit: string, problem: string) {
 }
 
 // synchronize the current teacher's classes and offerings to firestore
-export function syncTeacherClassesAndOfferings(firestore: Firestore, user: UserModelType, rawPortalJWT: string) {
+export function syncTeacherClassesAndOfferings(
+    firestore: Firestore, user: UserModelType, classModel: ClassModelType, rawPortalJWT?: string) {
   const { network } = user;
-  if (!network) return [];
-
   const promises: Promise<any>[] = [];
 
   // map portal offerings to classes
@@ -62,36 +64,108 @@ export function syncTeacherClassesAndOfferings(firestore: Firestore, user: UserM
     }
   });
 
+  // If the current class has not been set up (eg demo/qa site), add it with some stubbed-in fields.
+  if (!userClasses[classModel.classHash]) {
+    userClasses[classModel.classHash] = {
+      id: classModel.classHash,
+      context_id: classModel.classHash,
+      name: classModel.name,
+      teacher: user.id,
+      uri: "",
+      network
+    };
+  }
+
   // synchronize the classes
   Object.keys(userClasses).forEach(async context_id => {
-    promises.push(syncClass(firestore, rawPortalJWT, userClasses[context_id]));
+    promises.push(syncClass(firestore, rawPortalJWT, userClasses[context_id], user, network));
   });
 
-  // synchronize the offerings
-  user.portalClassOfferings.forEach(async offering => {
-    const {
-      offeringId: id, activityTitle: name, activityUrl: uri, classHash: context_id, classUrl,
-      unitCode: unit, problemOrdinal: problem
-    } = offering;
-    const problemPath = getProblemPath(unit, problem);
-    const fsOffering: OfferingWithoutTeachers = { id, name, uri, context_id, unit, problem, problemPath, network };
-    promises.push(syncOffering(firestore, rawPortalJWT, classUrl, fsOffering));
-  });
-
-  return promises;
-}
-
-export async function syncClass(firestore: Firestore, rawPortalJWT: string, aClass: ClassWithoutTeachers) {
-  const { uri, context_id, network } = aClass;
-  if (uri && context_id && network && rawPortalJWT) {
-    return firestore.guaranteeDocument(`classes/${network}_${context_id}`, async () => {
-      const teachers = await getClassTeachers(uri, rawPortalJWT);
-      if (teachers) {
-        aClass.teachers = teachers;
-        return aClass;
-      }
+  if (network && rawPortalJWT) {
+    // synchronize the offerings
+    user.portalClassOfferings.forEach(async offering => {
+      const {
+        offeringId: id, activityTitle: name, activityUrl: uri, classHash: context_id, classUrl,
+        unitCode: unit, problemOrdinal: problem
+      } = offering;
+      const problemPath = getProblemPath(unit, problem);
+      const fsOffering: OfferingWithoutTeachers = { id, name, uri, context_id, unit, problem, problemPath, network };
+      promises.push(syncOffering(firestore, rawPortalJWT, classUrl, fsOffering));
     });
   }
+  return Promise.all(promises);
+}
+
+async function createOrUpdateClassDoc(
+    firestore: Firestore, docPath: string, aClass: ClassDocument, addNetwork?: string) {
+  const docRef = firestore.doc(docPath);
+  return firestore.runTransaction(async (transaction) => {
+    // Security rules can depend on the contents of the document, so we could get a permissions
+    // error when trying to read, but still be able to write a document into this location.
+    let current;
+    try {
+      current = await docRef.get();
+    } catch (e) {
+      // Ignore permissions error, but quit on any other problem
+      if (!isFirestorePermissionsError(e)) {
+        console.warn("Error retrieving class document:", e);
+        return;
+      }
+    }
+    if (current && current.exists) {
+      // Update existing doc
+      const data = current.data() as ClassDocument;
+      if (!arraysEqualIgnoringOrder(aClass.teachers, data.teachers)) {
+        await docRef.update({ teachers: aClass.teachers });
+      }
+      // To support the legacy class docs we add the singular network when the classDoc is
+      // first created. However when updating the document there isn't a need to update
+      // this legacy singular network.
+      if (addNetwork && !data.networks?.includes(addNetwork)) {
+        await docRef.update({ networks: firebase.firestore.FieldValue.arrayUnion(addNetwork) });
+      }
+    } else {
+      // Create the document.
+      if (addNetwork) {
+        // TODO: there could be co-teachers in this class which are in other networks.
+        // In the future a firebase function should be watching for class doc creation
+        // and will update the networks. When that happens we can remove the networks
+        // property here and above.
+        await docRef.set({ ...aClass, network: addNetwork, networks: [addNetwork] });
+      } else {
+        await docRef.set(aClass);
+      }
+    }
+  });
+}
+
+export async function syncClass(firestore: Firestore, rawPortalJWT: string|undefined,
+    aClass: ClassWithoutTeachers, user: UserModelType, addNetwork?: string) {
+  const { uri, context_id } = aClass;
+  const promises: Promise<any>[] = [];
+  if (context_id) {
+    // Get list of teachers from the portal, if we have a portal login.
+    // Otherwise, default to just the current teacher (for demo/qa)
+    const teachers = (uri && rawPortalJWT) ? await getClassTeachers(uri, rawPortalJWT) : [user.id];
+    if (!teachers) return;
+    const classWithTeachers = { ...aClass, teachers };
+    if (addNetwork) {
+      classWithTeachers.network = addNetwork;
+    }
+    // Firestore will not accept 'undefined' values
+    if (classWithTeachers.network === undefined) {
+      delete classWithTeachers.network;
+    }
+
+    // Old location of the class document
+    if (aClass.network) {
+      promises.push(createOrUpdateClassDoc(firestore, `classes/${aClass.network}_${context_id}`,
+        classWithTeachers, addNetwork));
+    }
+    // New location of the class document
+    promises.push(createOrUpdateClassDoc(firestore, `classes/${context_id}`, classWithTeachers, addNetwork));
+  }
+  return Promise.all(promises);
 }
 
 export async function syncOffering(
