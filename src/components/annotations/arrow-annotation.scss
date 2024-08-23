@@ -52,13 +52,25 @@
   }
 }
 
+// Only allow interacting with the drag handle when we see the 'show-handles' class.
 .drag-handle {
   cursor: pointer;
+  pointer-events: none;
+
+  .annotation-layer.show-handles & {
+    pointer-events: auto;
+  }
 }
 
 .sparrow-delete-button {
   cursor: pointer;
   fill-opacity: 0;
+
+  pointer-events: none;
+
+  .annotation-layer.show-handles & {
+    pointer-events: auto;
+  }
 
   .sparrow-delete-button-front {
     // Allow hover and click to pass through to background 'highlight' element.
@@ -92,7 +104,7 @@
     }
   }
 
-  &:hover {
+  .annotation-layer.show-handles &:hover {
     .sparrow-delete-button-highlight {
       fill-opacity: .125;
     }
@@ -123,7 +135,7 @@
   }
 }
 
-.visible-delete-button {
+.annotation-layer.show-handles .visible-delete-button {
   .sparrow-delete-button-front {
     fill: vars.$annotation-half-blue;
     fill-opacity: 1;

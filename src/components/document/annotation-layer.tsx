@@ -51,6 +51,11 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const hotKeys = useMemoOne(() => new HotKeys(), []);
   const shape: ArrowShape = isArrowShape(ui.annotationMode) ? ui.annotationMode : ArrowShape.curved;
 
+  // Buttons are active unless a straight sparrow is being drawn from an object
+  const showButtons = !(shape === ArrowShape.straight && sourceObjectId);
+  // Drag handles are active unless any sort of sparrow is being drawn
+  const showDragHandles = !(sourceObjectId || sourcePoint);
+
   useEffect(() => {
     const deleteSelected = () => content?.deleteSelected();
     if (!readOnly) {
@@ -79,6 +84,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
   // Clicking to select annotations
   function handleArrowClick(arrowId: string, event: MouseEvent) {
+    console.log("handleArrowClick");
     if (readOnly) return;
     event.stopPropagation();
     const annotation = content?.annotations.get(arrowId);
@@ -320,9 +326,10 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   };
 
   const handleAnnotationButtonClick = (e: React.MouseEvent, tileId: string, objectId: string, objectType?: string) => {
+    console.log("handleAnnotationButtonClick");
     // If we are in straight arrow mode, and one object has already been
     // selected, then we ignore the object clicked on and create an arrow to this X,Y location.
-    if (shape === ArrowShape.straight && sourceObjectId) {
+    if (!showButtons) {
       createAnnotation();
       clearSource();
       return;
@@ -355,7 +362,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const rowIds = content?.rowOrder || [];
   const editing = ui.annotationMode !== undefined;
   const hidden = !persistentUI.showAnnotations;
-  const classes = classNames("annotation-layer", { editing, hidden });
+  const classes = classNames("annotation-layer",
+    { editing, hidden, 'show-buttons': showButtons, 'show-handles': showDragHandles });
   return (
     <div
       className={classes}

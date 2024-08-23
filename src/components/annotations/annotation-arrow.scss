@@ -19,7 +19,7 @@
       stroke-width: 11px;
     }
 
-    &:hover {
+    .annotation-layer.show-handles &:hover {
       .arrow-stem {
         stroke-opacity: .125;
       }

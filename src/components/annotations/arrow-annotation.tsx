@@ -35,6 +35,7 @@ function DragHandle({
     <g
       className={classNames("drag-handle", { dragging: draggingHandle })}
       onMouseDown={e => handleMouseDown(e, dragTarget)}
+      onClick={e => console.log('click drag handle')}
     >
       <rect
         fill="transparent"
@@ -187,6 +188,7 @@ export const ArrowAnnotationComponent = observer(
 
     // Set up drag handles
     function handleMouseDown(e: React.MouseEvent<SVGElement|HTMLButtonElement, MouseEvent>, _dragType: DragType) {
+      console.log('handle handleMouseDown');
       if (!canEdit) return;
 
       setDragX(e.clientX);
