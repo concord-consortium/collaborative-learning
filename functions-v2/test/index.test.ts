@@ -223,4 +223,8 @@ describe("functions", () => {
       ]);
     });
   });
+
+  afterAll(() => {
+    fft.cleanup();
+  });
 });
