@@ -118,12 +118,19 @@ async function createOrUpdateClassDoc(
       if (!arraysEqualIgnoringOrder(aClass.teachers, data.teachers)) {
         await docRef.update({ teachers: aClass.teachers });
       }
-      if (addNetwork && !data.network?.includes(addNetwork)) {
-        await docRef.update({ network: firebase.firestore.FieldValue.arrayUnion(addNetwork) });
+      // To support the legacy class docs we add the singular network when the classDoc is
+      // first created. However when updating the document there isn't a need to update
+      // this legacy singular network.
+      if (addNetwork && !data.networks?.includes(addNetwork)) {
+        await docRef.update({ networks: firebase.firestore.FieldValue.arrayUnion(addNetwork) });
       }
     } else {
       // Create the document.
       if (addNetwork) {
+        // TODO: there could be co-teachers in this class which are in other networks.
+        // In the future a firebase function should be watching for class doc creation
+        // and will update the networks. When that happens we can remove the networks
+        // property here and above.
         await docRef.set({ ...aClass, network: addNetwork, networks: [addNetwork] });
       } else {
         await docRef.set(aClass);

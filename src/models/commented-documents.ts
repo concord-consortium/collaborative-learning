@@ -98,16 +98,19 @@ export class CommentedDocumentsQuery {
       ? (await classesRef.where("networks", "array-contains", this.user.network).get()).docs
       : [];
     const allClasses = individualClasses.concat(networkClasses);
-    const classIds = allClasses.map(doc => { return (doc.data() as ClassDocument).context_id; });
+    const classIds = new Set<string>();
+    allClasses.forEach(doc => {
+      classIds.add((doc.data() as ClassDocument).context_id);
+    });
 
     // Find student documents
-    if (classIds.length === 0) {
+    if (classIds.size === 0) {
       return;
     }
     const collection = this.db.collection("documents");
     // Firestore has a limit of ~10 for "in" queries (30 in recent versions), so we need to iterate over the classes
     const chunkSize = 10;
-    const teacherClassGroups = chunk(classIds, chunkSize);
+    const teacherClassGroups = chunk([...classIds], chunkSize);
     const studentDocs: UserDocumentInfo[] = [];
     for (const group of teacherClassGroups) {
       const docsQuery = collection.where("context_id", "in", group);
