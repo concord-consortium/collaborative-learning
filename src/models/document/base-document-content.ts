@@ -258,6 +258,9 @@ export const BaseDocumentContentModel = types
       });
       return tiles;
     },
+    get tileTypes() {
+      return new Set(Array.from(self.tileMap.values()).map(tile => tile.content.type));
+    },
     getTilesOfType(type: string) {
       const tiles: string[] = [];
       const lcType = type.toLowerCase();

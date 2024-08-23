@@ -1,3 +1,4 @@
+import { IObservableArray, observable } from "mobx";
 import { DocumentModelType, createDocumentModel, DocumentModelSnapshotType } from "../document/document";
 import { GroupModel, GroupsModel, GroupsModelType, GroupUserModel } from './groups';
 import { ClassModel, ClassModelType, ClassUserModel } from './class';
@@ -5,6 +6,7 @@ import { ProblemDocument } from '../document/document-types';
 import { ISortedDocumentsStores, SortedDocuments } from "./sorted-documents";
 import { DeepPartial } from "utility-types";
 import { DocumentContentSnapshotType } from "../document/document-content";
+import { IDocumentMetadata } from "../../../functions/src/shared";
 
 import "../tiles/text/text-registration";
 import "../../plugins/drawing/drawing-registration";
@@ -30,6 +32,29 @@ const mockDocumentsData: DocumentModelSnapshotType[] = [
     content: { tiles: [] } as DocumentContentSnapshotType
   }
 ];
+
+const mockMetadataDocuments: IObservableArray<IDocumentMetadata> = observable.array([
+  {
+    uid: "1", //Joe
+    type: ProblemDocument, key:"Student 1 Problem Doc Group 5", createdAt: 1,
+    tools: []
+  },
+  {
+    uid: "2", //Scott
+    type: ProblemDocument, key:"Student 2 Problem Doc Group 3", createdAt: 2,
+    tools: ["Text"]
+  },
+  {
+    uid: "3", //Dennis
+    type: ProblemDocument, key:"Student 3 Problem Doc Group 9", createdAt: 3,
+    tools: ["Drawing"]
+  },
+  {
+    uid: "4", //Kirk
+    type: ProblemDocument, key:"Student 4 Problem Doc Group 3", createdAt: 4,
+    tools: []
+  }
+]);
 
 const createMockDocuments = () => {
   return mockDocumentsData.map(createDocumentModel);
@@ -134,29 +159,30 @@ describe('Sorted Documents Model', () => {
     };
 
     sortedDocuments = new SortedDocuments(mockStores as ISortedDocumentsStores);
+    sortedDocuments.firestoreMetadataDocs = mockMetadataDocuments;
   });
 
 
-  describe('sortByGroup Function', () => {
+  describe('byGroup Function', () => {
     it('should correctly sort documents by group', () => {
-      const sortedDocsByGroup = sortedDocuments.sortByGroup;
+      const sortedDocsByGroup = sortedDocuments.byGroup;
       expect(sortedDocsByGroup.length).toBe(3);
-      const group3 = sortedDocsByGroup.find(group => group.sectionLabel === 'Group 3');
+      const group3 = sortedDocsByGroup.find(group => group.label === 'Group 3');
       expect(group3?.documents.length).toBe(2); // Group 3 - Kirk + Scott
-      const group5 = sortedDocsByGroup.find(group => group.sectionLabel === 'Group 5');
+      const group5 = sortedDocsByGroup.find(group => group.label === 'Group 5');
       expect(group5?.documents.length).toBe(1); // Group 5 - Joe
-      const group9 = sortedDocsByGroup.find(group => group.sectionLabel === 'Group 9');
+      const group9 = sortedDocsByGroup.find(group => group.label === 'Group 9');
       expect(group9?.documents.length).toBe(1); // Group 9 - Dennis
     });
 
     it('should sort the groups numerically from least to greatest', () => {
       //Verify "Group 3" comes before "Group 5" and before "Group 9"
-      const sortedSectionLabels = sortedDocuments.sortByGroup.map(group => group.sectionLabel);
+      const sortedSectionLabels = sortedDocuments.byGroup.map(group => group.label);
       expect(sortedSectionLabels).toEqual(['Group 3', 'Group 5', 'Group 9']);
     });
   });
 
-  describe('sortByName Function', () => {
+  describe('byName Function', () => {
     it('should correctly sort documents by last name', () => {
       const expectedOrder = [
         "Bacal, Joe",
@@ -164,17 +190,17 @@ describe('Sorted Documents Model', () => {
         "Cytacki, Scott",
         "Swenson, Kirk"
       ];
-      const sortedDocsByName = sortedDocuments.sortByName;
-      const actualOrder = sortedDocsByName.map(group => group.sectionLabel);
+      const sortedDocsByName = sortedDocuments.byName;
+      const actualOrder = sortedDocsByName.map(group => group.label);
       expect(actualOrder).toEqual(expectedOrder);
     });
   });
 
-  describe('sortByTools Function', () => {
+  describe('byTools Function', () => {
     it('should correctly sort documents by tool', () => {
-      const sortedDocsByTools = sortedDocuments.sortByTools;
+      const sortedDocsByTools = sortedDocuments.byTools;
       const summaryOfResult = sortedDocsByTools.map(section => ({
-        sectionLabel: section.sectionLabel,
+        sectionLabel: section.label,
         docKeys: section.documents.map(doc => doc.key)
       }));
       expect(summaryOfResult).toEqual([

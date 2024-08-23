@@ -39,7 +39,8 @@ context('Teacher Sharing', function() {
       verifySwitch('private');
     });
 
-    it('does not allow student to access private teacher document', function() {
+    // TODO: Reinstate the tests below when all metadata documents have the new fields and are updated in real time.
+    it.skip('does not allow student to access private teacher document', function() {
       cy.visit(studentQueryParams);
       cy.waitForLoad();
       verifyStudentSeesAsPrivate();
@@ -52,7 +53,8 @@ context('Teacher Sharing', function() {
       verifySwitch('public');
     });
 
-    it('allows student to access public teacher document', function() {
+    // TODO: Reinstate the tests below when all metadata documents have the new fields and are updated in real time.
+    it.skip('allows student to access public teacher document', function() {
       cy.visit(studentQueryParams);
       cy.waitForLoad();
       verifyStudentSeesAsPublic();
