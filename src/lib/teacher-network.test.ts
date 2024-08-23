@@ -3,7 +3,7 @@ import "firebase/firestore";
 import { Firestore } from "./firestore";
 import { ClassDocument, OfferingDocument } from "./firestore-schema";
 import { IPortalClassInfo, IPortalClassUser } from "./portal-types";
-import { UserModel, UserPortalOffering } from "../models/stores/user";
+import { UserModel, UserModelType, UserPortalOffering } from "../models/stores/user";
 import {
   ClassWithoutTeachers, clearTeachersPromises, getNetworkClassesThatAssignedProblem, getProblemPath,
   OfferingWithoutTeachers, syncClass, syncOffering, syncTeacherClassesAndOfferings
@@ -314,6 +314,15 @@ describe("Teacher network functions", () => {
 
     const completeTeacher = UserModel.create({ id: kTeacher1Id, type: "teacher", network: "test-network",
                                                 portalClassOfferings: [userOffering1(), userOffering2()] });
+
+    it("should do nothing if the user is not a teacher", () => {
+      // If this tried to do something it would fail due to the bogus arguments
+      syncTeacherClassesAndOfferings(
+        undefined as unknown as Firestore,
+        {isTeacher: false, network: null} as unknown as UserModelType,
+        undefined as unknown as ClassModelType
+      );
+    });
 
     it("should sync demo class if there is no portal JWT", async () => {
       const user = UserModel.create({ id: kTeacher1Id, type: "teacher", network: "test-network" });
