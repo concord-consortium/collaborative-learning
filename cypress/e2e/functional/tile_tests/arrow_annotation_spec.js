@@ -283,7 +283,7 @@ context('Arrow Annotations (Sparrows)', function () {
 
     cy.log("Can duplicate annotations contained within one tile");
     aa.getAnnotationModeButton().click();
-    tableToolTile.getTableCell().eq(1).click();
+    tableToolTile.getTableTile().click();
     clueCanvas.getDuplicateTool().click();
     aa.getAnnotationModeButton().click(); // To force a rerender of the annotation layer
     aa.getAnnotationModeButton().click();
@@ -560,7 +560,7 @@ context('Arrow Annotations (Sparrows)', function () {
     cy.log("New annotations can be made on a recorded program");
     aa.getAnnotationModeButton().click();
     aa.getAnnotationButtons().should("have.length", 4);
-    aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationButtons().eq(1).click({ force: true });
     aa.getAnnotationButtons().eq(3).click();
     aa.getAnnotationArrows().should("have.length", 2);
     aa.getAnnotationModeButton().click();

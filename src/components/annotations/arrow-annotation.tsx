@@ -73,6 +73,8 @@ interface IArrowAnnotationProps {
   canEdit?: boolean;
   deleteArrow: (arrowId: string) => void;
   handleArrowClick: (arrowId: string, event: React.MouseEvent) => void;
+  handleDragHandleNonDrag:
+    (e: MouseEvent, tileId?: string, objectId?: string, objectType?: string) => void;
   documentBottom: number;
   documentLeft: number;
   documentRight: number;
@@ -85,7 +87,7 @@ interface IArrowAnnotationProps {
 }
 export const ArrowAnnotationComponent = observer(
   function ArrowAnnotationComponent({
-    arrow, canEdit, deleteArrow, handleArrowClick,
+    arrow, canEdit, deleteArrow, handleArrowClick, handleDragHandleNonDrag,
     documentBottom, documentLeft, documentRight, documentTop, getBoundingBox,
     getObjectNodeRadii, readOnly
   }: IArrowAnnotationProps) {
@@ -112,6 +114,7 @@ export const ArrowAnnotationComponent = observer(
     const [dragType, setDragType] = useState<DragType|undefined>();
     const [dragX, setDragX] = useState<number|undefined>();
     const [dragY, setDragY] = useState<number|undefined>();
+    const mouseDownTime = useRef<number|undefined>();
     const dragging = clientX !== undefined && clientY !== undefined && dragX !== undefined && dragY !== undefined;
     const draggingSource = dragging && dragType === "source";
     const draggingTarget = dragging && dragType === "target";
@@ -186,14 +189,16 @@ export const ArrowAnnotationComponent = observer(
       }
     }
 
-    // Set up drag handles
+    // Set up drag handles.
+    // A quick click that doesn't move on a drag handle doesn't drag it; it creates a new Sparrow.
+    // So, mouse down tracks the time and location.
     function handleMouseDown(e: React.MouseEvent<SVGElement|HTMLButtonElement, MouseEvent>, _dragType: DragType) {
-      console.log('handle handleMouseDown');
       if (!canEdit) return;
 
       setDragX(e.clientX);
       setDragY(e.clientY);
       setDragType(_dragType);
+      mouseDownTime.current = performance.now();
 
       function handleMouseMove(e2: MouseEvent) {
         setClientX(e2.clientX);
@@ -214,18 +219,30 @@ export const ArrowAnnotationComponent = observer(
           const dy = Math.max(textMinYOffset ?? 0, Math.min(textMaxYOffset ?? 0, startingDy + dDy));
           setFunc(dx, dy);
         } else {
-          // For source and target changes, also update the text offset propoprtionally
-          const currentDragOffsets = determineDragOffsets(_dragType, e2.clientX, e2.clientY, e.clientX, e.clientY);
-          const { textCenterX: tcX, textCenterY: tcY, textOriginX: toX, textOriginY: toY }
-            = arrow.getPoints(documentLeft, documentRight, documentTop, documentBottom,
-                currentDragOffsets, sourceBB, targetBB);
-          if (tcX !== undefined && tcY !== undefined) {
-            arrow.setTextOffset(tcX - toX, tcY - toY);
+          if (mouseDownTime.current
+            && performance.now() - mouseDownTime.current < 500
+            && Math.abs(dDx) < 4
+            && Math.abs(dDy) < 4) {
+            // If the mouse didn't move much and the duration was short, treat it as a click
+            const attachedObject = _dragType === "source" ? arrow.sourceObject : arrow.targetObject;
+            if (attachedObject) {
+              handleDragHandleNonDrag(e2, attachedObject.tileId, attachedObject.objectId, attachedObject.objectType);
+            } else {
+              handleDragHandleNonDrag(e2); // free end of arrow has no object.
+            }
+          } else {
+            // For source and target changes, also update the text offset propoprtionally
+            const currentDragOffsets = determineDragOffsets(_dragType, e2.clientX, e2.clientY, e.clientX, e.clientY);
+            const { textCenterX: tcX, textCenterY: tcY, textOriginX: toX, textOriginY: toY }
+              = arrow.getPoints(documentLeft, documentRight, documentTop, documentBottom,
+                  currentDragOffsets, sourceBB, targetBB);
+            if (tcX !== undefined && tcY !== undefined) {
+              arrow.setTextOffset(tcX - toX, tcY - toY);
+            }
+            // And then update the source or target
+            setFunc(boundDelta(startingDx + dDx, widthBound), boundDelta(startingDy + dDy, heightBound));
           }
-          // And then update the source or target
-          setFunc(boundDelta(startingDx + dDx, widthBound), boundDelta(startingDy + dDy, heightBound));
         }
-
         setClientX(undefined);
         setClientY(undefined);
         setDragX(undefined);
