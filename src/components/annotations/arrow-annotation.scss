@@ -1,147 +1,152 @@
 @use "../vars.sass";
 
-.text-object {
-  pointer-events: none;
+.annotation-layer {
 
-  .text-region {
-    align-items: center;
-    display: flex;
-    height: 100%;
-    justify-content: center;
+  .text-object {
     pointer-events: none;
-    width: 100%;
 
-    .text-box {
-      background-color: white;
-      border: 2px solid vars.$annotation-blue;
-      border-radius: 10px;
-      max-width: calc(100% - 8px);
+    .text-region {
+      align-items: center;
+      display: flex;
+      height: 100%;
+      justify-content: center;
+      pointer-events: none;
+      width: 100%;
 
-      &.text-display {
-        color: vars.$annotation-blue;
+      .text-box {
+        background-color: white;
+        border: 2px solid vars.$annotation-blue;
+        border-radius: 10px;
+        max-width: calc(100% - 8px);
 
-        &.default-text {
-          font-style: italic;
-        }
+        &.text-display {
+          color: vars.$annotation-blue;
 
-        &:hover {
-          outline: 4px solid vars.$annotation-blue-very-transparent;
-        }
+          &.default-text {
+            font-style: italic;
+          }
 
-        &.can-edit {
           &:hover {
-            cursor: pointer;
+            outline: 4px solid vars.$annotation-blue-very-transparent;
+          }
+
+          &.can-edit {
+            &:hover {
+              cursor: pointer;
+            }
+          }
+
+          &.dragging {
+            background-color: vars.$annotation-blue;
+            color: white;
+
+            &:hover {
+              outline: 4px solid vars.$annotation-blue-transparent;
+            }
           }
         }
 
-        &.dragging {
-          background-color: vars.$annotation-blue;
-          color: white;
-
-          &:hover {
-            outline: 4px solid vars.$annotation-blue-transparent;
-          }
+        &.text-input {
+          background-color: vars.$annotation-light-blue;
+          text-align: center;
         }
-      }
-
-      &.text-input {
-        background-color: vars.$annotation-light-blue;
-        text-align: center;
       }
     }
   }
-}
 
-// Only allow interacting with the drag handle when we see the 'show-handles' class.
-.drag-handle {
-  cursor: pointer;
-  pointer-events: none;
-
-  .annotation-layer.show-handles & {
-    pointer-events: auto;
-  }
-}
-
-.sparrow-delete-button {
-  cursor: pointer;
-  fill-opacity: 0;
-
-  pointer-events: none;
-
-  .annotation-layer.show-handles & {
-    pointer-events: auto;
-  }
-
-  .sparrow-delete-button-front {
-    // Allow hover and click to pass through to background 'highlight' element.
+  // Only allow interacting with the drag handle when we see the 'show-handles' class.
+  .drag-handle {
     pointer-events: none;
   }
 
-  .sparrow-delete-icon {
-    // Allow hover and click to pass through to background 'highlight' element.
+  &.show-handles .drag-handle {
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .sparrow-delete-button {
+    fill-opacity: 0;
     pointer-events: none;
-  }
 
-  .sparrow-delete-button-highlight {
-    fill: vars.$annotation-blue;
-  }
+    .sparrow-delete-button-front {
+      // Allow hover and click to pass through to background 'highlight' element.
+      pointer-events: none;
+    }
 
-  .actual-sparrow.selected & {
+    .sparrow-delete-icon {
+      // Allow hover and click to pass through to background 'highlight' element.
+      pointer-events: none;
+    }
+
     .sparrow-delete-button-highlight {
-      fill-opacity: 0;
+      fill: vars.$annotation-blue;
+    }
 
-      &:hover, .sparrow-delete-button:hover & {
+    .actual-sparrow.selected & {
+      .sparrow-delete-button-highlight {
+        fill-opacity: 0;
+
+        &:hover,
+        .sparrow-delete-button:hover & {
+          fill-opacity: .125;
+        }
+      }
+
+      .sparrow-delete-button-front {
+        fill: vars.$annotation-blue;
+        fill-opacity: 1;
+      }
+
+      .sparrow-delete-icon {
+        fill-opacity: 1;
+      }
+    }
+
+    &:active {
+      .sparrow-delete-button-highlight {
+        fill-opacity: .25;
+      }
+
+      .sparrow-delete-button-front {
+        fill: vars.$annotation-blue;
+        fill-opacity: 1;
+      }
+
+      .sparrow-delete-icon {
+        fill-opacity: 1;
+      }
+    }
+  }
+
+  &.show-handles .sparrow-delete-button {
+    cursor: pointer;
+    pointer-events: auto;
+
+    &:hover {
+      .sparrow-delete-button-highlight {
         fill-opacity: .125;
       }
+
+      .sparrow-delete-button-front {
+        fill: vars.$annotation-blue;
+        fill-opacity: 1;
+      }
+
+      .sparrow-delete-icon {
+        fill-opacity: 1;
+      }
     }
 
-    .sparrow-delete-button-front {
-      fill: vars.$annotation-blue;
-      fill-opacity: 1;
-    }
-    .sparrow-delete-icon {
-      fill-opacity: 1;
-    }
   }
 
-  .annotation-layer.show-handles &:hover {
-    .sparrow-delete-button-highlight {
-      fill-opacity: .125;
-    }
-
+  &.show-handles .visible-delete-button {
     .sparrow-delete-button-front {
-      fill: vars.$annotation-blue;
-      fill-opacity: 1;
-    }
-
-    .sparrow-delete-icon {
-      fill-opacity: 1;
-    }
-  }
-
-  &:active {
-    .sparrow-delete-button-highlight {
-      fill-opacity: .25;
-    }
-
-    .sparrow-delete-button-front {
-      fill: vars.$annotation-blue;
+      fill: vars.$annotation-half-blue;
       fill-opacity: 1;
     }
 
     .sparrow-delete-icon {
       fill-opacity: 1;
     }
-  }
-}
-
-.annotation-layer.show-handles .visible-delete-button {
-  .sparrow-delete-button-front {
-    fill: vars.$annotation-half-blue;
-    fill-opacity: 1;
-  }
-
-  .sparrow-delete-icon {
-    fill-opacity: 1;
   }
 }
