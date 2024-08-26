@@ -84,7 +84,6 @@ export const AnnotationLayer = observer(function AnnotationLayer({
 
   // Clicking to select annotations
   function handleArrowClick(arrowId: string, event: MouseEvent) {
-    console.log("handleArrowClick");
     if (readOnly) return;
     event.stopPropagation();
     const annotation = content?.annotations.get(arrowId);

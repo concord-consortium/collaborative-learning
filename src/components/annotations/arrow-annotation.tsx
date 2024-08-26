@@ -35,7 +35,6 @@ function DragHandle({
     <g
       className={classNames("drag-handle", { dragging: draggingHandle })}
       onMouseDown={e => handleMouseDown(e, dragTarget)}
-      onClick={e => console.log('click drag handle')}
     >
       <rect
         fill="transparent"
