@@ -344,9 +344,14 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
 
   private getDocumentToShow = () => {
     const {showPlaybackControls, historyDocumentCopy: documentToShow} = this.state;
-    if (showPlaybackControls && documentToShow) {
+    if (showPlaybackControls && documentToShow && documentToShow.key === this.props.document?.key) {
       return documentToShow;
     } else {
+      // If we are showing a new document, make sure the history document gets updated. This may not happen
+      // otherwise if the user is using the document scroller and the playback controls are open.
+      if (showPlaybackControls) {
+        this.handleTogglePlaybackControlComponent();
+      }
       return this.props.document;
     }
   };
