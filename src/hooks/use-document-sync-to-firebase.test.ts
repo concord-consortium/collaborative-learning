@@ -56,15 +56,19 @@ const mockHttpsCallable = jest.fn((fn: string) => {
   }
 });
 
+
 jest.mock("firebase/app", () => {
+  // Queries can have where clauses chained off of them
+  const mockQuery = jest.fn();
+  mockQuery.mockReturnValue({
+    get: jest.fn().mockResolvedValue({
+      docs: [{ ref: { update: jest.fn().mockResolvedValue(undefined) } }]
+    }),
+    where: mockQuery
+  });
+
   const mockFirestore = jest.fn().mockReturnValue({
-    collection: jest.fn().mockReturnValue({
-      where: jest.fn().mockReturnValue({
-        get: jest.fn().mockResolvedValue({
-          docs: [{ ref: { update: jest.fn().mockResolvedValue(undefined) } }]
-        })
-      })
-    })
+    collection: mockQuery
   });
   return {
     firestore: mockFirestore,
