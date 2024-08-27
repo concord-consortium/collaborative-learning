@@ -2,7 +2,10 @@ import firebase from "firebase";
 import {
   adminWriteDoc, expectDeleteToFail, expectReadToFail, expectReadToSucceed, expectWriteToFail, expectWriteToSucceed,
   genericAuth, initFirestore, network1, network2, prepareEachTest, studentAuth,
-  teacher2Auth, teacher2Id, teacher2Name, teacher3Auth, teacher3Id, teacher3Name, teacherAuth, teacherId, teacherName,
+  teacher2Auth, teacher2Id, teacher2Name,
+  teacher3Auth, teacher3Id, teacher3Name,
+  teacher4Auth, teacher4Id, teacher4Name,
+  teacherAuth, teacherId, teacherName,
   tearDownTests, thisClass
 } from "./setup-rules-tests";
 
@@ -35,7 +38,12 @@ describe("Firestore security rules for offering (activity) documents", () => {
     await adminWriteDoc(
             `authed/myPortal/users/${teacher3Id}`,
             { uid: teacher3Id, name: teacher3Name, type: "teacher", network: network2, networks: [network2] });
-  });
+    // teacher 4 is not in a network
+    // TODO: should have a teacher with no networks array for testing purposes too.
+    await adminWriteDoc(
+      `authed/myPortal/users/${teacher4Id}`,
+      { uid: teacher4Id, name: teacher4Name, type: "teacher", networks: [] });
+});
 
   afterAll(async () => {
     await tearDownTests();
@@ -73,9 +81,20 @@ describe("Firestore security rules for offering (activity) documents", () => {
       await expectWriteToFail(db, kClassDocPath, specClass());
     });
 
-    it("authenticated teachers can read their own class documents", async () => {
+    it("authenticated teachers in a network can read their own class documents", async () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kClassDocPath, specClass());
+      await expectReadToSucceed(db, kClassDocPath);
+    });
+
+    it("authenticated teachers without a network can read their own class documents", async () => {
+      db = initFirestore(teacher4Auth);
+      await adminWriteDoc(kClassDocPath, specClass({teachers: [teacher4Id]}, ["network"]));
+      await expectReadToSucceed(db, kClassDocPath);
+    });
+
+    it("authenticated teachers can read class documents that don't exist", async () => {
+      db = initFirestore(teacherAuth);
       await expectReadToSucceed(db, kClassDocPath);
     });
 
@@ -131,9 +150,9 @@ describe("Firestore security rules for offering (activity) documents", () => {
       await expectWriteToFail(db, kClassDocPath, specClass({ teachers: [teacher2Id] }));
     });
 
-    it("authenticated teachers can't write their own class documents without network", async () => {
+    it("authenticated teachers can write their own class documents without network", async () => {
       db = initFirestore(teacherAuth);
-      await expectWriteToFail(db, kClassDocPath, specClass({}, ["network"]));
+      await expectWriteToSucceed(db, kClassDocPath, specClass({}, ["network"]));
     });
 
     it("authenticated teachers can update the name of their own class documents", async () => {
@@ -182,12 +201,6 @@ describe("Firestore security rules for offering (activity) documents", () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kClassDocPath, specClass());
       await expectWriteToFail(db, kClassDocPath, specClass({ context_id: "better-context-id" }));
-    });
-
-    it("authenticated teachers can't update read-only properties of class documents: network", async () => {
-      db = initFirestore(teacherAuth);
-      await adminWriteDoc(kClassDocPath, specClass());
-      await expectWriteToFail(db, kClassDocPath, specClass({ network: "better-network" }));
     });
 
     it("authenticated teachers can't delete their own class documents", async () => {

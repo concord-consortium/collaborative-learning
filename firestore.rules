@@ -179,13 +179,14 @@ service cloud.firestore {
       }
 
       function isValidClassCreateRequest() {
-        let requiredFields = ["id", "name", "uri", "context_id", "teacher", "teachers", "network"];
-        return userInRequestTeachers() && requestInTeacherNetworks() &&
-                request.resource.data.keys().hasAll(requiredFields);
+        let requiredFields = ["id", "name", "uri", "context_id", "teacher", "teachers"];
+        return userInRequestTeachers() &&
+          (!("network" in request.resource) || requestInTeacherNetworks()) &&
+          request.resource.data.keys().hasAll(requiredFields);
       }
 
       function preservesReadOnlyClassFields() {
-        let readOnlyFieldsSet = ["id", "uri", "context_id", "network"].toSet();
+        let readOnlyFieldsSet = ["id", "uri", "context_id"].toSet();
         let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
         return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
       }
@@ -202,8 +203,11 @@ service cloud.firestore {
         allow update: if isAuthedTeacher() && isValidClassUpdateRequest();
         // we don't support deleting classes at this time
         allow delete: if false;
-        // teachers can read their own classes or any class in their network
-        allow read: if isAuthedTeacher() && (userInRequestTeachers() || resourceInTeacherNetworks());
+        // teachers can read, non existing classes, their own classes, or any class in their network
+        allow read: if isAuthedTeacher() && (
+          resource == null ||
+          userInResourceTeachers() ||
+          resourceInTeacherNetworks());
       }
 
       function isValidOfferingCreateRequest() {
