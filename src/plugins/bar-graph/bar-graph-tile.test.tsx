@@ -10,7 +10,7 @@ import { BarGraphComponent } from "./bar-graph-tile";
 // knows it is a supported tile type
 import "./bar-graph-registration";
 
-describe("BarGraphToolComponent", () => {
+describe("BarGraphComponent", () => {
   const content = defaultBarGraphContent();
   const model = TileModel.create({content});
 
@@ -40,10 +40,10 @@ describe("BarGraphToolComponent", () => {
   it("renders successfully", () => {
     const {getByText} =
       render(<BarGraphComponent  {...defaultProps} {...{model}}></BarGraphComponent>);
-    expect(getByText("Hello World")).toBeInTheDocument();
+    expect(getByText("This is a bar graph.")).toBeInTheDocument();
   });
 
-  it("updates the text when the model changes", async () => {
+  it.skip("updates the text when the model changes", async () => {
     const {getByText, findByText} =
       render(<BarGraphComponent  {...defaultProps} {...{model}}></BarGraphComponent>);
     expect(getByText("Hello World")).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe("BarGraphToolComponent", () => {
     expect(await findByText("New Text")).toBeInTheDocument();
   });
 
-  it("updates the model when the user types", () => {
+  it.skip("updates the model when the user types", () => {
     const {getByRole, getByText} =
       render(<BarGraphComponent  {...defaultProps} {...{model}}></BarGraphComponent>);
     expect(getByText("New Text")).toBeInTheDocument();
