@@ -2,8 +2,14 @@
 
 .bar-graph-content {
   width: 100%;
-  // height: 100%;
+  height: 100%;
   text-align: center;
   overflow: auto;
-  margin-top: 6em;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
 }
+
