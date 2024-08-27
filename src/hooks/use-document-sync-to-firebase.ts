@@ -77,7 +77,14 @@ export function useDocumentSyncToFirebase(
   const commonSyncEnabled = !disableFirebaseSync && contentStatus === ContentStatus.Valid;
 
   const syncFirestoreDocumentProp = (prop: string, value?: string) => {
-    const query = firestore.collection("documents").where("key", "==", document.key);
+    // The context_id is required so the security rules know we aren't trying
+    // to get documents we don't have access to.
+    // We only update document props like visibility and the title
+    // when the document is being edited. The document can only be edited
+    // within its class, so it is safe to add the context_id restriction here.
+    const query = firestore.collection("documents")
+      .where("key", "==", document.key)
+      .where("context_id", "==", user.classHash);
 
     return query.get().then((querySnapshot) => {
       return Promise.all(
@@ -211,7 +218,14 @@ export function useDocumentSyncToFirebase(
     const promises = [];
 
     // update tiletypes for metadata document in firestore
-    const query = firestore.collection("documents").where("key", "==", document.key);
+    // The context_id is required so the security rules know we aren't trying
+    // to get documents we don't have access to.
+    // We only update document the tools property when the document is being edited.
+    // The document can only be edited within its class,
+    // so it is safe to add the context_id restriction here.
+    const query = firestore.collection("documents")
+      .where("key", "==", document.key)
+      .where("context_id", "==", user.classHash);
     promises.push(query.get().then((querySnapshot) => {
       return Promise.all(
         querySnapshot.docs.map((doc) => {
