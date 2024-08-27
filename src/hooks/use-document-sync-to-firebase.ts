@@ -76,17 +76,25 @@ export function useDocumentSyncToFirebase(
 
   const commonSyncEnabled = !disableFirebaseSync && contentStatus === ContentStatus.Valid;
 
-  const syncFirestoreDocumentProp = (prop: string, value?: string) => {
+  /**
+   * We currently have multiple firestore metadata docs for each real doc.
+   * Use this function to update a property in all of them.
+   *
+   * @param prop
+   * @param value
+   * @returns
+   */
+  const updateFirestoreDocumentProp = (prop: string, value?: string | string[]) => {
     // The context_id is required so the security rules know we aren't trying
     // to get documents we don't have access to.
-    // We only update document props like visibility and the title
+    // We only update document props like visibility, the title, and tools
     // when the document is being edited. The document can only be edited
-    // within its class, so it is safe to add the context_id restriction here.
-    const query = firestore.collection("documents")
+    // within its class, so it is safe to use the user.classHash here.
+    const firestoreMetadataDocs = firestore.collection("documents")
       .where("key", "==", document.key)
       .where("context_id", "==", user.classHash);
 
-    return query.get().then((querySnapshot) => {
+    return firestoreMetadataDocs.get().then((querySnapshot) => {
       return Promise.all(
         querySnapshot.docs.map((doc) => doc.ref.update({ [prop]: value}))
       );
@@ -105,7 +113,7 @@ export function useDocumentSyncToFirebase(
         console.warn(`ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
       }
     },
-    additionalMutation: syncFirestoreDocumentProp
+    additionalMutation: updateFirestoreDocumentProp
   });
 
   // sync visibility (public/private) for personal and learning log documents
@@ -120,7 +128,7 @@ export function useDocumentSyncToFirebase(
         console.warn(`ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
       }
     },
-    additionalMutation: syncFirestoreDocumentProp
+    additionalMutation: updateFirestoreDocumentProp
   });
 
   // sync title for personal and learning log documents
@@ -135,7 +143,7 @@ export function useDocumentSyncToFirebase(
         console.warn(`ERROR: Failed to update document title for ${type} document ${key}:`, title);
       }
     },
-    additionalMutation: syncFirestoreDocumentProp
+    additionalMutation: updateFirestoreDocumentProp
   });
 
   // sync properties for problem, personal, and learning log documents
@@ -218,24 +226,7 @@ export function useDocumentSyncToFirebase(
     const promises = [];
 
     // update tiletypes for metadata document in firestore
-    // The context_id is required so the security rules know we aren't trying
-    // to get documents we don't have access to.
-    // We only update document the tools property when the document is being edited.
-    // The document can only be edited within its class,
-    // so it is safe to add the context_id restriction here.
-    const query = firestore.collection("documents")
-      .where("key", "==", document.key)
-      .where("context_id", "==", user.classHash);
-    promises.push(query.get().then((querySnapshot) => {
-      return Promise.all(
-        querySnapshot.docs.map((doc) => {
-          const docRef = doc.ref;
-          return docRef.update({
-            tools,
-          });
-        })
-      );
-    }));
+    promises.push(updateFirestoreDocumentProp("tools", tools));
 
     promises.push(firebase.ref(contentPath).update(transform?.(snapshot) ?? snapshot));
     return Promise.all(promises);
