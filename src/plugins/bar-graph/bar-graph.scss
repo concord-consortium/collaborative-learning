@@ -3,12 +3,52 @@
 .bar-graph-content {
   width: 100%;
   height: 100%;
-  text-align: center;
+  border: 1px solid red;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
   overflow: auto;
+
+  .y-axis-label {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    rotate: -90deg;
+    transform-origin: center;
+    text-wrap: nowrap;
+    width: 20px;
+    border: 1px solid red;
+  }
 
   svg {
     width: 100%;
     height: 100%;
+
+    .visx-bar-group .visx-bar {
+      stroke: black;
+      stroke-width: 1px;
+    }
+
+    foreignObject {
+      background-color: pink;
+    }
+
+    div.axislabel {
+      height: 100%;
+      width: 100%;
+      background-color: orange;
+    }
+
+    button {
+      height: 2em;
+      rotate: -90deg;
+      transform-origin: top left;
+      margin-top: 100px;
+      margin-left: 5px;
+      text-wrap: nowrap;
+    }
+
   }
 
 }

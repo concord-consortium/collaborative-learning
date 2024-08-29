@@ -1,17 +1,16 @@
 import { types, Instance } from "mobx-state-tree";
-import { TileContentModel } from "../../models/tiles/tile-content";
-import { kBarGraphTileType } from "./bar-graph-types";
+import { ITileContentModel, TileContentModel } from "../../models/tiles/tile-content";
+import { kBarGraphTileType, kBarGraphContentType } from "./bar-graph-types";
 
 export function defaultBarGraphContent(): BarGraphContentModelType {
-  return BarGraphContentModel.create({text: "Hello World"});
+  return BarGraphContentModel.create({yAxisLabel: "Counts"});
 }
 
-
 export const BarGraphContentModel = TileContentModel
-  .named("BarGraphContentModel")
+  .named(kBarGraphContentType)
   .props({
     type: types.optional(types.literal(kBarGraphTileType), kBarGraphTileType),
-    text: "",
+    yAxisLabel: "",
   })
   .views(self => ({
     get isUserResizable() {
@@ -19,9 +18,14 @@ export const BarGraphContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    setText(text: string) {
-      self.text = text;
+    setYAxisLabel(text: string) {
+      self.yAxisLabel = text;
     }
   }));
 
 export interface BarGraphContentModelType extends Instance<typeof BarGraphContentModel> {}
+
+
+export function isBarGraphModel(model?: ITileContentModel): model is BarGraphContentModelType {
+  return model?.type === kBarGraphTileType;
+}

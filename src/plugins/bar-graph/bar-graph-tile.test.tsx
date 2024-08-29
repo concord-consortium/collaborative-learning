@@ -10,6 +10,8 @@ import { BarGraphComponent } from "./bar-graph-tile";
 // knows it is a supported tile type
 import "./bar-graph-registration";
 
+// TODO these tests do not work since Jest's JSDOM does not support SVG methods like getBBox
+
 describe("BarGraphComponent", () => {
   const content = defaultBarGraphContent();
   const model = TileModel.create({content});
@@ -40,15 +42,17 @@ describe("BarGraphComponent", () => {
   it("renders successfully", () => {
     const {getByText} =
       render(<BarGraphComponent  {...defaultProps} {...{model}}></BarGraphComponent>);
-    expect(getByText("This is a bar graph.")).toBeInTheDocument();
+    expect(getByText("Bar Graph 1")).toBeInTheDocument();
+    expect(getByText("Counts")).toBeInTheDocument();
+    expect(getByText("6/23/24")).toBeInTheDocument();
   });
 
-  it.skip("updates the text when the model changes", async () => {
+  it("updates the text when the model changes", async () => {
     const {getByText, findByText} =
       render(<BarGraphComponent  {...defaultProps} {...{model}}></BarGraphComponent>);
-    expect(getByText("Hello World")).toBeInTheDocument();
+    expect(getByText("Counts")).toBeInTheDocument();
 
-    content.setText("New Text");
+    content.setYAxisLabel("New Text");
 
     expect(await findByText("New Text")).toBeInTheDocument();
   });
@@ -62,6 +66,6 @@ describe("BarGraphComponent", () => {
     userEvent.type(textBox, "{selectall}{del}Typed Text");
 
     expect(textBox).toHaveValue("Typed Text");
-    expect(content.text).toBe("Typed Text");
+    expect(content.yAxisLabel).toBe("Typed Text");
   });
 });

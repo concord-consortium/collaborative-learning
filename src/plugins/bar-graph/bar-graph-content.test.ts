@@ -1,15 +1,15 @@
 import { defaultBarGraphContent, BarGraphContentModel } from "./bar-graph-content";
 
 describe("Bar Graph Content", () => {
-  it("has default content of 'hello world'", () => {
+  it("yAxisLabel has default content of 'Counts'", () => {
     const content = defaultBarGraphContent();
-    expect(content.text).toBe("Hello World");
+    expect(content.yAxisLabel).toBe("Counts");
   });
 
   it("supports changing the text", () => {
     const content = BarGraphContentModel.create();
-    content.setText("New Text");
-    expect(content.text).toBe("New Text");
+    content.setYAxisLabel("New Text");
+    expect(content.yAxisLabel).toBe("New Text");
   });
 
   it("is always user resizable", () => {
