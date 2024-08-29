@@ -80,7 +80,8 @@ export function getUnitCode(unitParam: string | undefined) {
 }
 
 export function getProblemDetails(url: string) {
-  const urlParams = new URLSearchParams(url);
+  const activityURL = new URL(url);
+  const urlParams = activityURL.searchParams;
   const unitParam = urlParams.get("unit");
   // The unit param's value may be a unit code or a full url, so we make sure to get just the unit code
   const unit = getUnitCode(unitParam);
