@@ -12,7 +12,7 @@ import "./bar-graph-registration";
 
 // TODO these tests do not work since Jest's JSDOM does not support SVG methods like getBBox
 
-describe("BarGraphComponent", () => {
+describe.skip("BarGraphComponent", () => {
   const content = defaultBarGraphContent();
   const model = TileModel.create({content});
 

@@ -7,20 +7,61 @@ interface Props {
   x: number;
   y: number;
   text?: string;
+  setText: (text: string) => void;
 }
 
-const EditableAxisLabel: React.FC<Props> = ({text, x, y}) => {
+const EditableAxisLabel: React.FC<Props> = ({text, x, y, setText}) => {
 
   const textRef = React.useRef<SVGGElement|null>(null);
   const [boundingBox, setBoundingBox] = React.useState<DOMRect | null>(null);
+  const [editing, setEditing] = React.useState(false);
+  const [displayText, setDisplayText] = React.useState<string>(text || "Y axis");
+  const [editText, setEditText] = React.useState<string>(text || "Y axis");
 
   useEffect(() => {
     if (textRef.current) {
       const bb = textRef.current.getBBox();
-      console.log(bb);
       setBoundingBox(bb);
     }
-  }, [textRef]);
+  }, [x, y, displayText, textRef]);
+
+  const handleClose = (accept: boolean) => {
+    setEditing(false);
+    if (accept && editText) {
+      const trimmed = editText.trim();
+      setDisplayText(trimmed);
+      setText(trimmed);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const { key } = e;
+    switch (key) {
+      case "Escape":
+        handleClose(false);
+        break;
+      case "Enter":
+      case "Tab":
+        handleClose(true);
+        break;
+    }
+  };
+
+  if (editing) {
+    return (
+      <foreignObject x={x} y={y} width={500} height={30}>
+        <input
+          type="text"
+          className="focusable"
+          value={editText}
+          size={editText.length + 5}
+          onKeyDown={handleKeyDown}
+          onBlur={() => handleClose(true)}
+          onChange={(e) => setEditText(e.target.value)}
+        />
+      </foreignObject>
+    );
+  }
 
   return (
     <g>
@@ -34,7 +75,10 @@ const EditableAxisLabel: React.FC<Props> = ({text, x, y}) => {
           ry={paddingX}
           stroke="#949494"
           strokeWidth={1.5}
-          fill="none" />}
+          fill="none"
+          pointerEvents={editing ? "none" : "all"}
+          onClick={() => setEditing(true)}
+        />}
       <g ref={textRef}>
         <Text
           x={x+paddingX}
@@ -44,8 +88,10 @@ const EditableAxisLabel: React.FC<Props> = ({text, x, y}) => {
           verticalAnchor="start"
           className="editable-axis-label"
           fontFamily="Lato"
-          fontSize={14}>
-          {text}
+          fontSize={14}
+          pointerEvents="none"
+        >
+          {displayText}
         </Text>
       </g>
     </g>

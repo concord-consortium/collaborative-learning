@@ -135,6 +135,7 @@ export function BarGraphChart({ width, height }: IBarGraphChartProps) {
         x={20}
         y={margin.top + yMax/2}
         text={model?.yAxisLabel}
+        setText={(text) => model?.setYAxisLabel(text)}
       />
     </svg>
   );
