@@ -226,11 +226,6 @@ async function processFile(file: string) {
         properties: {},
 
         strategies,
-        // For now we just handle demo documents where the teachers are hardcoded.
-        // To support Portal launches we'll either have to get the list of teachers from the offering
-        // info, or refactor the code so this teacher list isn't needed here. See:
-        // https://docs.google.com/document/d/1VDr-nkthu333eVD0BQXPYPVD8kt60qkMYq2jRkXza9c/edit#heading=h.pw87siu4ztwo
-        teachers: ["1001", "1002", "1003"],
         tools,
         title: documentTitle || null,
         type: documentType,
