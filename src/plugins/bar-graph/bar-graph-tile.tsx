@@ -28,7 +28,7 @@ export const BarGraphComponent: React.FC<ITileProps> = observer((props: ITilePro
         className={classNames("bar-graph-content", { "read-only": readOnly })}
         data-testid="bar-graph-content"
       >
-        <BarGraphChart width={resizeWidth||200} height={resizeHeight||200} />
+        <BarGraphChart width={resizeWidth||10} height={resizeHeight||10} />
       </div>
     </BarGraphModelContext.Provider>
   );

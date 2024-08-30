@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Text } from '@visx/text';
+import { getBBox } from './bar-graph-utils';
 
 const paddingX = 5, paddingY = 10;
 
@@ -20,7 +21,7 @@ const EditableAxisLabel: React.FC<Props> = ({text, x, y, setText}) => {
 
   useEffect(() => {
     if (textRef.current) {
-      const bb = textRef.current.getBBox();
+      const bb = getBBox(textRef.current);
       setBoundingBox(bb);
     }
   }, [x, y, displayText, textRef]);

@@ -54,8 +54,6 @@ interface IBarGraphChartProps {
 
 export function BarGraphChart({ width, height }: IBarGraphChartProps) {
 
-  console.log('BarGraphChart', width, height);
-
   const model = useBarGraphModelContext();
 
   const xMax = width - margin.left - margin.right;
