@@ -40,6 +40,7 @@ import { urlParams } from "../utilities/url-params";
 import { firebaseConfig } from "./firebase-config";
 import { UserModelType } from "../models/stores/user";
 import { logExemplarDocumentEvent } from "../models/document/log-exemplar-document-event";
+import { DEBUG_FIRESTORE } from "./debug";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBBaseConnectOptions {
@@ -115,6 +116,9 @@ export class DB {
   }
 
   public connect(options: IDBConnectOptions) {
+    if (DEBUG_FIRESTORE) {
+      firebase.firestore.setLogLevel('debug');
+    }
     return new Promise<void>((resolve, reject) => {
       if (this.firebase.isConnected) {
         reject("Already connected to database!");

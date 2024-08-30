@@ -12,7 +12,7 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    function exists(s) {
+    function stringExists(s) {
       return (s != null) && (s != "");
     }
 
@@ -57,6 +57,7 @@ service cloud.firestore {
     // user's platform_user_id must be in submitted document's list of teachers
     function userInRequestTeachers() {
       return isAuthed() &&
+        'teachers' in request.resource.data &&
         string(request.auth.token.platform_user_id) in request.resource.data.teachers;
     }
 
@@ -64,12 +65,6 @@ service cloud.firestore {
     function userIsResourceUser() {
       return isAuthed() &&
         string(request.auth.token.platform_user_id) == resource.data.uid;
-    }
-
-    // user's platform_user_id must be in requested document's list of teachers
-    function userInResourceTeachers() {
-      return isAuthed() &&
-        string(request.auth.token.platform_user_id) in resource.data.teachers;
     }
 
     // user's class_hash must be in submitted document's list of classes
@@ -92,19 +87,10 @@ service cloud.firestore {
               request.resource.data.keys().hasAll(["uid", "unit", "problem", "section", "path", "network"]);
     }
 
-    function isValidDocumentCreateRequest() {
-      return userInRequestTeachers() && classIsRequestContextId() &&
-              request.resource.data.keys().hasAll(["uid", "network", "type", "key", "createdAt"]);
-    }
-
     function preservesReadOnlyDocumentFields() {
-      let readOnlyFieldsSet = ["uid", "network", "type", "key", "createdAt"].toSet();
+      let readOnlyFieldsSet = ["uid", "type", "key", "createdAt", "context_id"].toSet();
       let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
       return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
-    }
-
-    function isValidDocumentUpdateRequest() {
-      return userInResourceTeachers() && preservesReadOnlyDocumentFields();
     }
 
     function isValidSupportCreateRequest() {
@@ -131,6 +117,31 @@ service cloud.firestore {
     //
     match /authed/{portal} {
       allow read, write: if isAuthedTeacher();
+
+      // Check that the class given by the context_id exists and includes the logged-in teacher
+      function teacherIsInClass(contextid) {
+        let class_doc = get(/databases/$(database)/documents/authed/$(portal)/classes/$(contextid));
+        return class_doc != null && string(request.auth.token.platform_user_id) in class_doc.data.teachers;
+      }
+
+      // user's platform_user_id must be listed in the class of the requested document
+      // also allows access to legacy documents which contain their own list of teachers
+      function userInResourceTeachers() {
+        return isAuthed() &&
+               ( teacherIsInClass(resource.data.context_id) ||
+                 string(request.auth.token.platform_user_id) in resource.data.teachers);
+      }
+
+      function isValidDocumentCreateRequest() {
+        return
+          request.resource.data.keys().hasAll(["uid", "type", "key", "createdAt"]) &&
+          (classIsRequestContextId() || teacherIsInClass(request.resource.data.context_id));
+      }
+
+      function isValidDocumentUpdateRequest() {
+        return preservesReadOnlyDocumentFields() &&
+               ( resourceInUserClass() || userInResourceTeachers() );
+      }
 
       // return list of networks available to the current teacher
       function getTeacherNetworks() {
@@ -168,13 +179,14 @@ service cloud.firestore {
       }
 
       function isValidClassCreateRequest() {
-        let requiredFields = ["id", "name", "uri", "context_id", "teacher", "teachers", "network"];
-        return userInRequestTeachers() && requestInTeacherNetworks() &&
-                request.resource.data.keys().hasAll(requiredFields);
+        let requiredFields = ["id", "name", "uri", "context_id", "teacher", "teachers"];
+        return userInRequestTeachers() &&
+          (!("network" in request.resource) || requestInTeacherNetworks()) &&
+          request.resource.data.keys().hasAll(requiredFields);
       }
 
       function preservesReadOnlyClassFields() {
-        let readOnlyFieldsSet = ["id", "uri", "context_id", "network"].toSet();
+        let readOnlyFieldsSet = ["id", "uri", "context_id"].toSet();
         let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
         return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
       }
@@ -191,8 +203,11 @@ service cloud.firestore {
         allow update: if isAuthedTeacher() && isValidClassUpdateRequest();
         // we don't support deleting classes at this time
         allow delete: if false;
-        // teachers can read their own classes or any class in their network
-        allow read: if isAuthedTeacher() && (userInRequestTeachers() || resourceInTeacherNetworks());
+        // teachers can read, non existing classes, their own classes, or any class in their network
+        allow read: if isAuthedTeacher() && (
+          resource == null ||
+          userInResourceTeachers() ||
+          resourceInTeacherNetworks());
       }
 
       function isValidOfferingCreateRequest() {
@@ -248,7 +263,7 @@ service cloud.firestore {
         // check whether the (curriculum) document is associated with one of the teacher's networks
         function curriculumInTeacherNetworks() {
           let curriculumNetwork = getCurriculumNetwork();
-          return exists(curriculumNetwork) && (curriculumNetwork in getTeacherNetworks());
+          return stringExists(curriculumNetwork) && (curriculumNetwork in getTeacherNetworks());
         }
 
         // check whether the teacher owns/created the curriculum document
@@ -293,17 +308,21 @@ service cloud.firestore {
 
       match /documents/{docId} {
         // portal-authenticated teachers can create valid documents
-        allow create: if isAuthedTeacher() && isValidDocumentCreateRequest();
+        allow create: if isValidDocumentCreateRequest();
         // teachers can only update their own documents and only if they're valid
-        allow update: if isAuthedTeacher() && isValidDocumentUpdateRequest();
+        allow update: if isValidDocumentUpdateRequest();
         // teachers can only delete their own documents
         allow delete: if isAuthedTeacher() && userIsResourceUser();
         // teachers can read their own documents or other documents in their network
-        allow read: if (isAuthed() && (resource == null || userOwnsDocument())) ||
-          (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks() || resourceInUserClass()))
+        allow read: if (isAuthed() && (resource == null || userOwnsDocument() || resourceInUserClass())) ||
+          (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks()));
+
+        function getDocumentPath() {
+          return /databases/$(database)/documents/authed/$(portal)/documents/$(docId)
+        }
 
         function getDocumentData() {
-          return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data;
+          return get(getDocumentPath()).data;
         }
 
         // return owner of the parent document
@@ -330,18 +349,22 @@ service cloud.firestore {
           let docData = getDocumentData();
           let docNetwork = docData.network;
           return (
-            // check whether the current user is one of the teachers associated with the document
-            string(request.auth.token.platform_user_id) in docData.teachers ||
-            // check whether the document's network corresponds to one of the users's networks
-            exists(docNetwork) && (docNetwork in getTeacherNetworks()) ||
             // check if document is in user's class
-            request.auth.token.class_hash == docData.context_id
+            request.auth.token.class_hash == docData.context_id ||
+            // check whether the document's network corresponds to one of the users's networks
+            stringExists(docNetwork) && (docNetwork in getTeacherNetworks()) ||
+            // check whether the document is in a different class for the teacher
+            teacherIsInClass(docData.context_id) ||
+            // check whether the current user is one of the teachers associated with the (legacy) document
+            // (listing teachers in the document is no longer current practice)
+            ('teachers' in docData &&
+              (string(request.auth.token.platform_user_id) in docData.teachers))
           );
         }
 
         // check whether the teacher can access the document
         function teacherCanAccessDocument() {
-          return isAuthedTeacher() && userCanAccessDocument();
+          return isAuthedTeacher() && (!exists(getDocumentPath()) || userCanAccessDocument());
         }
 
         function isValidCommentCreateRequest() {

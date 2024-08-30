@@ -14,6 +14,10 @@ function loggedLoad(name: string, imports: () => Promise<unknown>[]) {
 
 const gTileRegistration: Record<string, () => void> = {
 
+  "BarGraph": loggedLoad("BarGraph", () => [
+    import(/* webpackChunkName: "BarGraph" */"./plugins/bar-graph/bar-graph-registration"),
+    import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
+  ]),
   "DataCard": loggedLoad("DataCard", () => [
     import(/* webpackChunkName: "DataCard" */"./plugins/data-card/data-card-registration"),
     import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")

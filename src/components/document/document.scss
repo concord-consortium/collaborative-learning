@@ -124,6 +124,8 @@
         border-radius: 5px;
         border: solid 1.5px $charcoal-light-1;
         box-sizing: border-box;
+        display: flex;
+        flex-wrap: nowrap;
         height: 26px;
 
         button {
