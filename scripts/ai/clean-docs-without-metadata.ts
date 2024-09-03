@@ -1,17 +1,17 @@
 #!/usr/bin/node
 
-// This script downloads documents from firebase and saves them as text files in src/public/ai
-// It will ignore documents that are undefined, fail to parse, or have no tiles in them
-// This script differs from download-documents.ts in that it saves more information than just the document content
+// This script finds documents without metadata in the realtime database.
+// If the deleteTypes array is uncommented, it will delete these documents.
 
 // to run this script type the following in the terminal
 // cf. https://stackoverflow.com/a/66626333/16328462
 // $ cd scripts/ai
-// $ npx tsx find-docs-without-metadata.ts
+// $ npx tsx clean-docs-without-metadata.ts
 
 import admin from "firebase-admin";
 
-import { getFirebaseBasePath, getScriptRootFilePath, prettyDuration } from "../lib/script-utils.js";
+import { getFirebaseBasePath, getScriptRootFilePath, prettyDuration,
+  remapFirebaseClassPublications, remapFirebaseProblemDocPublications } from "../lib/script-utils.js";
 
 // Load the service account key JSON file.
 import { getClassKeys } from "../lib/firebase-classes.js";
@@ -69,45 +69,6 @@ admin.initializeApp({
   credential,
   databaseURL
 });
-
-/**
- * Firebase publications are stored with different keys than their document
- * id for some reason. In some cases the real document id is in self.documentKey
- * so we make a map with that documentKey as the key of the map.
- *
- * @param fbPublications
- */
-function remapFirebaseClassPublications(fbPublications: Record<string, any>) {
-  if (!fbPublications) return undefined;
-  const publications = {};
-  for (const [fbId, publication] of Object.entries(fbPublications)) {
-    if (!publication?.self?.documentKey) {
-      console.log("Invalid publication found: ", fbId);
-      continue;
-    }
-    publications[publication.self.documentKey] = publication;
-  }
-  return publications;
-}
-
-/**
- * Firebase publications are stored with different keys than their document
- * id for some reason. In some cases the real document id is in documentKey
- * so we make a map with that documentKey as the key of the map.
- * @param fbPublications
- */
-function remapFirebaseProblemDocPublications(fbPublications: Record<string, any>) {
-  if (!fbPublications) return undefined;
-  const publications = {};
-  for (const [fbId, publication] of Object.entries(fbPublications)) {
-    if (!publication?.documentKey) {
-      console.log("Invalid publication found: ", fbId);
-      continue;
-    }
-    publications[publication.documentKey] = publication;
-  }
-  return publications;
-}
 
 const credentialTime = Date.now();
 

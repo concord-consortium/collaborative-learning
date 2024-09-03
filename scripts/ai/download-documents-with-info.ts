@@ -14,7 +14,8 @@ import admin from "firebase-admin";
 import stringify from "json-stringify-pretty-compact";
 
 import { datasetPath, networkFileName } from "./script-constants.js";
-import { getFirebaseBasePath, getScriptRootFilePath, prettyDuration } from "../lib/script-utils.js";
+import { getFirebaseBasePath, getScriptRootFilePath, prettyDuration,
+  remapFirebaseClassPublications, remapFirebaseProblemDocPublications } from "../lib/script-utils.js";
 
 // Load the service account key JSON file.
 import { getClassKeys } from "../lib/firebase-classes.js";
@@ -52,45 +53,6 @@ admin.initializeApp({
   credential,
   databaseURL
 });
-
-/**
- * Firebase publications are stored with different keys than their document
- * id for some reason. In some cases the real document id is in self.documentKey
- * so we make a map with that documentKey as the key of the map.
- *
- * @param fbPublications
- */
-function remapFirebaseClassPublications(fbPublications: Record<string, any>) {
-  if (!fbPublications) return undefined;
-  const publications = {};
-  for (const [fbId, publication] of Object.entries(fbPublications)) {
-    if (!publication?.self?.documentKey) {
-      console.log("Invalid publication found: ", fbId);
-      continue;
-    }
-    publications[publication.self.documentKey] = publication;
-  }
-  return publications;
-}
-
-/**
- * Firebase publications are stored with different keys than their document
- * id for some reason. In some cases the real document id is in documentKey
- * so we make a map with that documentKey as the key of the map.
- * @param fbPublications
- */
-function remapFirebaseProblemDocPublications(fbPublications: Record<string, any>) {
-  if (!fbPublications) return undefined;
-  const publications = {};
-  for (const [fbId, publication] of Object.entries(fbPublications)) {
-    if (!publication?.documentKey) {
-      console.log("Invalid publication found: ", fbId);
-      continue;
-    }
-    publications[publication.documentKey] = publication;
-  }
-  return publications;
-}
 
 const credentialTime = Date.now();
 
