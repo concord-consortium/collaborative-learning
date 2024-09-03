@@ -117,6 +117,10 @@ Cypress.Commands.add("launchReport", (reportUrl) => {
 });
 Cypress.Commands.add("waitForLoad", () => {
   cy.get('.version', {timeout: 60000});
+  // Log the firebase user id
+  cy.window().its('stores.db.firebase.userId').then(id => {
+    cy.log("Firebase uid", id);
+  });
 });
 Cypress.Commands.add("deleteWorkspaces",(baseUrl,queryParams)=>{
     let primaryWorkspace = new PrimaryWorkspace;

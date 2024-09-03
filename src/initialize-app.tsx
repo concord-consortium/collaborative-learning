@@ -59,8 +59,10 @@ export const initializeApp = (appMode: AppMode, authoring?: boolean): IStores =>
   const stores = createStores(
     { appMode, appVersion, appConfig, user, showDemoCreator, demoName, isPreviewing });
 
-  if (DEBUG_STORES) {
-    (window as any).stores = stores;
+  // Expose the stores if the debug flag is set or we are running in Cypress
+  const aWindow = window as any;
+  if (DEBUG_STORES || aWindow.Cypress) {
+    aWindow.stores = stores;
   }
 
 
