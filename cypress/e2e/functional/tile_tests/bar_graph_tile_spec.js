@@ -50,7 +50,6 @@ context('Bar Graph Tile', function () {
     barGraph.getXAxisPulldown().should('have.text', 'date');
     barGraph.getXAxisPulldownButton().click();
     barGraph.getXAxisPulldownMenuItem().eq(1).click();
-    cy.get('.primary-category-menu').contains('location').click();
     barGraph.getXAxisPulldown().should('have.text', 'location');
   });
 
