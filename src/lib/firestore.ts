@@ -108,6 +108,10 @@ export class Firestore {
     return docRef.get();
   }
 
+  public runTransaction(fn: (t: firebase.firestore.Transaction) => Promise<any>) {
+    return firebase.firestore().runTransaction(fn);
+  }
+
   /*
    * Guarantees the existence of the specified document by reading it first and then
    * creating it if it doesn't already exist. Optionally, client can specify a

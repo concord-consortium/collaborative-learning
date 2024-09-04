@@ -34,6 +34,7 @@ export const DEBUG_DATAFLOW = debugContains("dataflow");
 export const DEBUG_DOC_LIST = debugContains("docList");
 export const DEBUG_DOCUMENT = debugContains("document");
 export const DEBUG_DROP = debugContains("drop");
+export const DEBUG_FIRESTORE = debugContains("firestore");
 export const DEBUG_HISTORY = debugContains("history");
 export const DEBUG_IMAGES = debugContains("images");
 export const DEBUG_LISTENERS = debugContains("listeners");

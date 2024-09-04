@@ -51,6 +51,11 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const hotKeys = useMemoOne(() => new HotKeys(), []);
   const shape: ArrowShape = isArrowShape(ui.annotationMode) ? ui.annotationMode : ArrowShape.curved;
 
+  // Buttons are active unless a straight sparrow is being drawn from an object
+  const showButtons = !(shape === ArrowShape.straight && sourceObjectId);
+  // Drag handles are active unless any sort of sparrow is being drawn
+  const showDragHandles = !(sourceObjectId || sourcePoint);
+
   useEffect(() => {
     const deleteSelected = () => content?.deleteSelected();
     if (!readOnly) {
@@ -132,7 +137,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     setIsBackgroundClick(isBackground);
   };
 
-  const handleMouseMove: MouseEventHandler<HTMLDivElement> = event => {
+  const handleMouseMove = (event: { clientX: number, clientY: number }) => {
     if (divRef.current) {
       const bb = divRef.current.getBoundingClientRect();
       setMouseX(event.clientX - bb.left);
@@ -319,10 +324,35 @@ export const AnnotationLayer = observer(function AnnotationLayer({
     content?.selectAnnotations([]);
   };
 
+  /**
+   * Handle the case where a drag handle is clicked.
+   * We treat a long-press or drag as an intention to move the handle,
+   * but a quick click as an intention to create a new arrow.
+   */
+  const handleDragHandleNonDrag = (e: globalThis.MouseEvent,
+      tileId?: string, objectId?: string, objectType?: string) => {
+    // Verify that there is no source object
+    if (sourceObjectId || sourcePoint) return;
+
+    if (tileId && objectId) {
+      // Set the source object to the clicked handle's object
+      setSourceTileId(tileId);
+      setSourceObjectId(objectId);
+      setSourceObjectType(objectType);
+    } else {
+      if (shape === ArrowShape.straight) {
+        // Must have clicked the free end of a straight arrow, which has no object.
+        // Assuming we're in straight-arrow mode, start a new arrow with the free end here.
+        handleMouseMove(e);
+        setSourcePoint([mouseX ?? 0, mouseY ?? 0]);
+      }
+    }
+  };
+
   const handleAnnotationButtonClick = (e: React.MouseEvent, tileId: string, objectId: string, objectType?: string) => {
     // If we are in straight arrow mode, and one object has already been
     // selected, then we ignore the object clicked on and create an arrow to this X,Y location.
-    if (shape === ArrowShape.straight && sourceObjectId) {
+    if (!showButtons) {
       createAnnotation();
       clearSource();
       return;
@@ -355,7 +385,8 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const rowIds = content?.rowOrder || [];
   const editing = ui.annotationMode !== undefined;
   const hidden = !persistentUI.showAnnotations;
-  const classes = classNames("annotation-layer", { editing, hidden });
+  const classes = classNames("annotation-layer",
+    { editing, hidden, 'show-buttons': showButtons, 'show-handles': showDragHandles });
   return (
     <div
       className={classes}
@@ -404,6 +435,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
               canEdit={!readOnly && editing}
               deleteArrow={(arrowId: string) => content?.deleteAnnotation(arrowId)}
               handleArrowClick={handleArrowClick}
+              handleDragHandleNonDrag={handleDragHandleNonDrag}
               documentBottom={documentBottom}
               documentLeft={documentLeft}
               documentRight={documentRight}

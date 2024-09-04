@@ -109,6 +109,7 @@ type PostDocumentCommentUseMutationOptions =
 
 export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationOptions) => {
   const queryClient = useQueryClient();
+  const [firestore] = useFirestore();
   const postDocumentComment = useFirebaseFunction<IPostDocumentCommentParams>("postDocumentComment_v1");
   const context = useUserContext();
   const postComment = useCallback((clientParams: IPostDocumentCommentClientParams) => {
@@ -120,6 +121,35 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
     onMutate: async newCommentParams => {
       const { document, comment } = newCommentParams;
       const queryKey = getCommentsQueryKeyFromMetadata(document);
+
+      // update metadata document with the new tags
+      const tags = comment.tags || [];
+      const documentKey = isDocumentMetadata(document) ? document.key : undefined;
+      if (documentKey && tags.length > 0) {
+        // Just the document key is not enough for Firestore to know that we have permission
+        // to access the document. Providing a context_id gives the rules enough info to make
+        // sure we have access to the returned docs. The `context.classHash` used here is
+        // the current class that CLUE has been run in. However, a teacher might be commenting
+        // on a document from a different class. In that case the code below will not find
+        // the documents that need to have their strategies updated.
+        // Instead we should be using the context_id of the document that we are commenting on.
+        // CLUE tries to track the context_id when it loads a remote document. That
+        // information should be stored in the DocumentModel#remoteContext field. We don't
+        // have access to the DocumentModel here though, just document.metadata.
+        // FIXME: provide access to remoteContext here so we can update strategies on remote
+        // documents. Alternatively move this into a firebase function instead of doing this
+        // in the client.
+        const metadataQuery = firestore.collection("documents")
+          .where("key", "==", documentKey)
+          .where("context_id", "==", context.classHash);
+        metadataQuery.get().then(querySnapshot => {
+          querySnapshot.docs.forEach(doc => {
+            const docRef = doc.ref;
+            docRef.update({ strategies: firebase.firestore.FieldValue.arrayUnion(...tags) });
+          });
+        });
+      }
+
       // snapshot the current state of the comments in case we need to roll back on error
       const rollbackComments = queryKey && queryClient.getQueryData<CommentWithId[]>(queryKey);
       type CommentWithId = WithId<CommentDocument>;

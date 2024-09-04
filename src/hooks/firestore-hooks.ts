@@ -3,6 +3,7 @@ import { observable } from "mobx";
 import { useCallback, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from 'react-query';
 import { UserDocument } from "../lib/firestore-schema";
+import { typeConverter } from "../utilities/db-utils";
 import { useDBStore } from './use-stores';
 
 export type WithId<T> = T & { id: string };
@@ -41,14 +42,6 @@ export function useFirestoreTeacher(uid: string, network: string) {
   return firestoreTeachers.get(uid);
 }
 
-// https://medium.com/swlh/using-firestore-with-typescript-65bd2a602945
-const defaultConverter = <T extends firebase.firestore.DocumentData>():
-  firebase.firestore.FirestoreDataConverter<T> =>
-({
-  toFirestore: (data: T) => data,
-  fromFirestore: (doc: firebase.firestore.QueryDocumentSnapshot) => doc.data() as T
-});
-
 export interface IUseOrderedCollectionRealTimeQuery<T> {
   converter?: firebase.firestore.FirestoreDataConverter<T>;
   orderBy?: string;
@@ -56,7 +49,7 @@ export interface IUseOrderedCollectionRealTimeQuery<T> {
 }
 export function useCollectionOrderedRealTimeQuery<T extends firebase.firestore.DocumentData>(
           partialPath: string, options?: IUseOrderedCollectionRealTimeQuery<T>) {
-  const { converter = defaultConverter<T>(), orderBy, useQueryOptions: _useQueryOptions } = options || {};
+  const { converter = typeConverter<T>(), orderBy, useQueryOptions: _useQueryOptions } = options || {};
   const queryClient = useQueryClient();
   const [db, root] = useFirestore();
   const fsPath = partialPath ? `${root}/${partialPath}` : "";

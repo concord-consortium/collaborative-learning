@@ -1,4 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { throttle as _throttle } from "lodash";
+import { onSnapshot, SnapshotOut } from "mobx-state-tree";
 import { useSyncMstNodeToFirebase } from "./use-sync-mst-node-to-firebase";
 import { useSyncMstPropToFirebase } from "./use-sync-mst-prop-to-firebase";
 import { DEBUG_DOCUMENT, DEBUG_SAVE } from "../lib/debug";
@@ -8,6 +10,11 @@ import { isPublishedType, LearningLogDocument, LearningLogPublication, PersonalD
          PersonalPublication, ProblemDocument, ProblemPublication, SupportPublication
         } from "../models/document/document-types";
 import { UserModelType } from "../models/stores/user";
+import { Firestore } from "src/lib/firestore";
+import { useMutation, UseMutationOptions } from "react-query";
+import { ITileMapEntry } from "functions/src/shared";
+import { DocumentContentSnapshotType } from "src/models/document/document-content";
+import { IArrowAnnotation } from "src/models/annotations/arrow-annotation";
 
 function debugLog(...args: any[]) {
   // eslint-disable-next-line no-console
@@ -25,7 +32,12 @@ function debugLog(...args: any[]) {
  * trying to keep track of listeners on all of a user's documents simultaneously.
  */
 export function useDocumentSyncToFirebase(
-                  user: UserModelType, firebase: Firebase, document: DocumentModelType, readOnly = false) {
+  user: UserModelType,
+  firebase: Firebase,
+  firestore: Firestore,
+  document: DocumentModelType,
+  readOnly = false
+) {
   const { key, type, uid, contentStatus } = document;
   const { content: contentPath, metadata, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
 
@@ -64,6 +76,31 @@ export function useDocumentSyncToFirebase(
 
   const commonSyncEnabled = !disableFirebaseSync && contentStatus === ContentStatus.Valid;
 
+  /**
+   * We currently have multiple firestore metadata docs for each real doc.
+   * Use this function to update a property in all of them.
+   *
+   * @param prop
+   * @param value
+   * @returns
+   */
+  const updateFirestoreDocumentProp = (prop: string, value?: string | string[]) => {
+    // The context_id is required so the security rules know we aren't trying
+    // to get documents we don't have access to.
+    // We only update document props like visibility, the title, and tools
+    // when the document is being edited. The document can only be edited
+    // within its class, so it is safe to use the user.classHash here.
+    const firestoreMetadataDocs = firestore.collection("documents")
+      .where("key", "==", document.key)
+      .where("context_id", "==", user.classHash);
+
+    return firestoreMetadataDocs.get().then((querySnapshot) => {
+      return Promise.all(
+        querySnapshot.docs.map((doc) => doc.ref.update({ [prop]: value}))
+      );
+    });
+  };
+
   // sync visibility (public/private) for problem documents
   useSyncMstPropToFirebase<typeof document.visibility>({
     firebase, model: document, prop: "visibility", path: typedMetadata,
@@ -75,7 +112,8 @@ export function useDocumentSyncToFirebase(
       onError: (err, visibility) => {
         console.warn(`ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
       }
-    }
+    },
+    additionalMutation: updateFirestoreDocumentProp
   });
 
   // sync visibility (public/private) for personal and learning log documents
@@ -89,7 +127,8 @@ export function useDocumentSyncToFirebase(
       onError: (err, visibility) => {
         console.warn(`ERROR: Failed to update document visibility for ${type} document ${key}:`, visibility);
       }
-    }
+    },
+    additionalMutation: updateFirestoreDocumentProp
   });
 
   // sync title for personal and learning log documents
@@ -103,7 +142,8 @@ export function useDocumentSyncToFirebase(
       onError: (err, title) => {
         console.warn(`ERROR: Failed to update document title for ${type} document ${key}:`, title);
       }
-    }
+    },
+    additionalMutation: updateFirestoreDocumentProp
   });
 
   // sync properties for problem, personal, and learning log documents
@@ -139,19 +179,73 @@ export function useDocumentSyncToFirebase(
   });
 
   // sync content for editable document types
-  useSyncMstNodeToFirebase({
-    firebase, model: document.content, path: contentPath,
-    enabled: commonSyncEnabled && !readOnly && !!document.content && !isPublishedType(type),
-    transform: snapshot => ({ changeCount: document.incChangeCount(), content: JSON.stringify(snapshot) }),
-    options: {
-      onSuccess: (data, snapshot) => {
-        debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, document.changeCount);
-      },
-      onError: (err, properties) => {
-        console.warn(`ERROR: Failed to update document content for ${type} document ${key}:`, document.changeCount);
-      }
+  const enabled = commonSyncEnabled && !readOnly && !!document.content && !isPublishedType(type);
+  const options: Omit<UseMutationOptions<unknown, unknown, SnapshotOut<DocumentContentSnapshotType>>, 'mutationFn'> = {
+    // default is to retry with linear back-off to a maximum
+    retry: true,
+    retryDelay: (attempt) => Math.min(attempt * 5, 30),
+    // but clients may override the defaults
+    onSuccess: (data: any, snapshot: DocumentContentSnapshotType) => {
+      debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, document.changeCount);
+    },
+    onError: (err: any, properties: DocumentContentSnapshotType) => {
+      console.warn(`ERROR: Failed to update document content for ${type} document ${key}:`, document.changeCount);
     }
-  });
+  };
+  const transform = (snapshot: DocumentContentSnapshotType) =>
+    ({ changeCount: document.incChangeCount(), content: JSON.stringify(snapshot) });
+
+  const mutation = useMutation((snapshot: DocumentContentSnapshotType) => {
+    const tileMap = snapshot.tileMap || {};
+
+    const tools: string[] = [];
+
+    Object.keys(tileMap).forEach((tileKey) => {
+      const tileInfo = tileMap[tileKey] as ITileMapEntry;
+      const tileType = tileInfo.content.type;
+      if (!tools.includes(tileType)) {
+        tools.push(tileType);
+      }
+    });
+
+    // The annotations property does exist on the snapshot but MobX doesn't recognize it
+    // as a property because of the way we are constructing the DocumentContentModel
+    // on top of multiple other models. This typing is a workaround so TS doesn't complain.
+    const annotations =
+      (snapshot as {annotations: Record<string, IArrowAnnotation>}).annotations || {};
+
+    Object.keys(annotations).forEach((annotationKey: string) => {
+      const annotation = annotations[annotationKey];
+      // for now we only want Sparrow annotations
+      // we might want to change this if we want to count other types in the future
+      if (annotation.type === "arrowAnnotation" && !tools.includes("Sparrow")) {
+        tools.push("Sparrow");
+      }
+    });
+
+    const promises = [];
+
+    // update tiletypes for metadata document in firestore
+    promises.push(updateFirestoreDocumentProp("tools", tools));
+
+    promises.push(firebase.ref(contentPath).update(transform?.(snapshot) ?? snapshot));
+    return Promise.all(promises);
+  }, options);
+
+  const throttledMutate = useMemo(() => _throttle(mutation.mutate, 1000), [mutation.mutate]);
+
+  useEffect(() => {
+    const cleanup = enabled
+            ? onSnapshot<DocumentContentSnapshotType>(document.content!, snapshot => {
+                // reset (e.g. stop retrying and restart) when value changes
+                mutation.isError && mutation.reset();
+                throttledMutate(snapshot);
+              })
+            : undefined;
+    return () => {
+      cleanup?.();
+    };
+  }, [enabled, document.content, mutation, throttledMutate]);
 
   useEffect(() => {
     DEBUG_SAVE && !readOnly &&
