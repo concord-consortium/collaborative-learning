@@ -166,6 +166,10 @@ export class DB {
           this.firestore.setFirebaseUser(firebaseUser);
           if (!options.dontStartListeners) {
             const { persistentUI, user, db, unitLoadedPromise, exemplarController} = this.stores;
+
+            // Record launch time in Firestore
+            this.firestore.recordLaunchTime();
+
             // Start fetching the persistent UI. We want this to happen as early as possible.
             persistentUI.initializePersistentUISync(user, db);
 
@@ -181,6 +185,7 @@ export class DB {
         }
       });
 
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
       if (options.appMode === "authed") {
         firebase.auth()
           .signOut()

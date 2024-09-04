@@ -61,7 +61,11 @@ export const initializeApp = (appMode: AppMode, authoring?: boolean): IStores =>
 
   // Expose the stores if the debug flag is set or we are running in Cypress
   const aWindow = window as any;
-  if (DEBUG_STORES || aWindow.Cypress) {
+
+  // The Cypress docs say you can just check window.Cypress but after a page reload in
+  // some cases you have to use window.parent.Cypress
+  const inCypress = aWindow.Cypress || aWindow.parent?.Cypress;
+  if (DEBUG_STORES || inCypress) {
     aWindow.stores = stores;
   }
 
