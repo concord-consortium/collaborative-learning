@@ -3,7 +3,6 @@
 .bar-graph-content {
   width: 100%;
   height: 100%;
-  border: 1px solid red;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -26,6 +25,28 @@
         left: 0;
         border: 2px solid blue;
         padding: 3px;
+      }
+
+      button {
+        font-family: Lato;
+        border: 1.5px solid #949494;
+        border-radius: 5px;
+        padding: 5px;
+
+        .button-content {
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+
+          svg {
+            max-height: 1em;
+            max-width: 1em;
+            margin-left: 1em;
+            opacity: .35;
+          }
+        }
+
       }
     }
 

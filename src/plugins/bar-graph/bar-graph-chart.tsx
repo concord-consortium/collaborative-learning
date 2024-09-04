@@ -2,11 +2,13 @@ import { AxisBottom, AxisLeft } from "@visx/axis";
 import { GridRows } from "@visx/grid";
 import { Group } from "@visx/group";
 import { scaleBand, scaleLinear } from "@visx/scale";
-import { BarGroup } from "@visx/shape";
+import { Bar, BarGroup } from "@visx/shape";
 import { isNumber } from "lodash";
+import { observer } from "mobx-react";
 import React, { useMemo } from "react";
 import { clueDataColorInfo } from "../../utilities/color-utils";
 import { useBarGraphModelContext } from "./bar-graph-content-context";
+import { CategoryPulldown } from "./category-pulldown";
 import EditableAxisLabel from "./editable-axis-label";
 
 const margin = {
@@ -16,21 +18,23 @@ const margin = {
   right: 80,
 };
 
-const data = [
-  { date: '6/23/24', 'backyard': 0, 'deck': 1, 'porch': 1, 'tree': 1 },
-  { date: '6/24/24', 'backyard': 0, 'deck': 0, 'porch': 2, 'tree': 2 },
-  { date: '6/25/24', 'backyard': 1, 'deck': 3, 'porch': 0, 'tree': 1 },
-  { date: '6/26/24', 'backyard': 1, 'deck': 2, 'porch': 1, 'tree': 1 }
+const demoCases: Record<string,string>[] = [
+  { date: '6/23/24', location: 'deck' },
+  { date: '6/23/24', location: 'porch' },
+  { date: '6/23/24', location: 'tree' },
+  { date: '6/24/24', location: 'porch' },
+  { date: '6/24/24', location: 'porch' },
+  { date: '6/25/24', location: 'backyard' },
+  { date: '6/25/24', location: 'deck' },
+  { date: '6/25/24', location: 'deck' },
+  { date: '6/25/24', location: 'deck' },
+  { date: '6/25/24', location: 'tree' },
+  { date: '6/26/24', location: 'backyard' },
+  { date: '6/26/24', location: 'deck' },
+  { date: '6/26/24', location: 'deck' },
+  { date: '6/26/24', location: 'porch' },
+  { date: '6/26/24', location: 'tree' }
 ];
-// find the maximum data value
-const maxValue = data.reduce((acc, row) => {
-  const rowValues = Object.values(row).slice(1) as (string | number)[];
-  const maxInRow = Math.max(...rowValues.map(v => isNumber(v) ? v : 0));
-  return Math.max(maxInRow, acc);
-}, 0);
-
-const primaryKeys = data.map(d => d.date);
-const secondaryKeys = Object.keys(data[0]).filter(key => key !== 'date');
 
 function roundTo5(n: number): number {
   return Math.ceil(n/5)*5;
@@ -39,8 +43,6 @@ function roundTo5(n: number): number {
 function barColor(n: number) {
   return clueDataColorInfo[n % clueDataColorInfo.length].color;
 }
-
-
 
 interface IBarGraphChartProps {
   width: number;
@@ -52,12 +54,55 @@ interface IBarGraphChartProps {
 // https://github.com/airbnb/visx/discussions/1494
 
 
-export function BarGraphChart({ width, height }: IBarGraphChartProps) {
+export const BarGraphChart = observer(function BarGraphChart({ width, height }: IBarGraphChartProps) {
 
   const model = useBarGraphModelContext();
+  const primary = model?.primaryAttribute || "date";
+  const secondary = model?.secondaryAttribute || "location";
 
   const xMax = width - margin.left - margin.right;
   const yMax = height - margin.top - margin.bottom;
+
+  function setDemoCategory(catname: string) {
+    if (catname === "date") {
+      model?.setPrimaryAttribute("date");
+      model?.setSecondaryAttribute("location");
+    } else{
+      model?.setPrimaryAttribute("location");
+      model?.setSecondaryAttribute("date");
+    }
+  }
+
+  // Count cases and make the data array
+  const data = useMemo(
+    () => demoCases.reduce((acc, row) => {
+        const cat = primary in row ? row[primary] : "";
+        const subCat = row[secondary] || "";
+        const index = acc.findIndex(r => r[primary] === cat);
+        if (index >= 0) {
+          const cur = acc[index][subCat];
+          acc[index][subCat] = (isNumber(cur) ? cur : 0) + 1;
+        } else {
+          const newRow = { [primary]: cat, [subCat]: 1 };
+          acc.push(newRow);
+        }
+        return acc;
+      }, [] as { [key: string]: number|string }[]),
+    [primary, secondary]);
+
+  const primaryKeys: string[]
+    = useMemo(() => data.map(d => d[primary] as string),
+      [data, primary]);
+  const secondaryKeys: string[]
+    = useMemo(() => Array.from(new Set(data.flatMap(d => Object.keys(d)).filter(k => k !== primary))),
+      [data, primary]);
+
+  // find the maximum data value
+  const maxValue = data.reduce((acc, row) => {
+    const rowValues = Object.values(row).slice(1) as (string | number)[];
+    const maxInRow = Math.max(...rowValues.map(v => isNumber(v) ? v : 0));
+    return Math.max(maxInRow, acc);
+  }, 0);
 
   const primaryScale = useMemo(
     () =>
@@ -65,7 +110,7 @@ export function BarGraphChart({ width, height }: IBarGraphChartProps) {
         domain: primaryKeys,
         padding: 0.2,
         range: [0, xMax]}),
-    [xMax]);
+    [xMax, primaryKeys]);
 
   const secondaryScale = useMemo(
     () =>
@@ -73,7 +118,7 @@ export function BarGraphChart({ width, height }: IBarGraphChartProps) {
         domain: secondaryKeys,
         padding: 0.2,
         range: [0, primaryScale.bandwidth()]}),
-    [primaryScale]);
+    [primaryScale, secondaryKeys]);
 
   const countScale = useMemo(
     () =>
@@ -81,15 +126,15 @@ export function BarGraphChart({ width, height }: IBarGraphChartProps) {
       domain: [0, roundTo5(maxValue)],
       range: [yMax, 0],
     }),
-    [yMax]);
+    [yMax, maxValue]);
 
   if (xMax <= 0 || yMax <= 0) return <span>Too small</span>;
 
-  const ticks = Math.min(4, Math.floor(yMax/40)); // leave generous vertical space
-  const labelWidth = (xMax/primaryKeys.length)-10;       // setting width will wrap words in labels when needed
+  const ticks = Math.min(4, Math.floor(yMax/40));  // leave generous vertical space (>=40 px) between ticks
+  const labelWidth = (xMax/primaryKeys.length)-10; // setting width will wrap lines in labels when needed
 
   return (
-    <svg width={width} height={height}>
+    <svg width={width} height={height} data-testid="bar-graph-svg">
       <Group top={margin.top} left={margin.left}>
         <GridRows
           scale={countScale}
@@ -114,7 +159,7 @@ export function BarGraphChart({ width, height }: IBarGraphChartProps) {
           stroke="#707070"
           numTicks={ticks}
           tickLineProps={{ stroke: '#bfbfbf', strokeWidth: 1.5, width: 5 }}
-          tickLabelProps={{ dx: -5, fontSize: 14, fontFamily: 'Lato', fill: '#3f3f3f', }}
+          tickLabelProps={{ dx: -5, fontSize: 14, fontFamily: 'Lato', fill: '#3f3f3f' }}
           tickFormat={(value) => Number(value).toFixed(0)}
         />
         <BarGroup
@@ -123,11 +168,31 @@ export function BarGraphChart({ width, height }: IBarGraphChartProps) {
           className="bar"
           keys={secondaryKeys}
           height={yMax}
-          x0={(d) => d.date}
+          x0={(d) => d[primary] as string}
           x0Scale={primaryScale}
           x1Scale={secondaryScale}
           yScale={countScale}
-        />
+        >
+          {(barGroups) =>
+            <Group className="visx-bar-group">
+              {barGroups.map((barGroup) => (
+                <Group key={`bar-group-${barGroup.index}-${barGroup.x0}`} left={barGroup.x0}>
+                  {barGroup.bars.map((bar) => {
+                    if(!bar.value) return null;
+                    return <Bar
+                      key={`bar-group-bar-${barGroup.index}-${bar.index}-${bar.value}-${bar.key}`}
+                      x={bar.x}
+                      y={bar.y}
+                      width={bar.width}
+                      height={bar.height}
+                      fill={bar.color}
+                    />;
+                  })}
+                </Group>
+              ))}
+            </Group>
+          }
+        </BarGroup>
       </Group>
       <EditableAxisLabel
         x={20}
@@ -135,6 +200,15 @@ export function BarGraphChart({ width, height }: IBarGraphChartProps) {
         text={model?.yAxisLabel}
         setText={(text) => model?.setYAxisLabel(text)}
       />
+      <CategoryPulldown
+        categoryList={["date", "location"]}
+        category={primary}
+        setCategory={setDemoCategory}
+        x={margin.left}
+        y={height-35}
+        width={xMax}
+        height={30}
+      />
     </svg>
   );
-}
+});

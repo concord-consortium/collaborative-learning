@@ -11,6 +11,8 @@ export const BarGraphContentModel = TileContentModel
   .props({
     type: types.optional(types.literal(kBarGraphTileType), kBarGraphTileType),
     yAxisLabel: "",
+    primaryAttribute: types.maybe(types.string),
+    secondaryAttribute: types.maybe(types.string)
   })
   .views(self => ({
     get isUserResizable() {
@@ -20,6 +22,12 @@ export const BarGraphContentModel = TileContentModel
   .actions(self => ({
     setYAxisLabel(text: string) {
       self.yAxisLabel = text;
+    },
+    setPrimaryAttribute(attrId: string) {
+      self.primaryAttribute = attrId;
+    },
+    setSecondaryAttribute(attrId: string) {
+      self.secondaryAttribute = attrId;
     }
   }));
 

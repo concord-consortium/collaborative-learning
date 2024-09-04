@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Text } from '@visx/text';
 import { getBBox } from './bar-graph-utils';
+import { useReadOnlyContext } from '../../components/document/read-only-context';
 
 const paddingX = 5, paddingY = 10;
 
@@ -13,6 +14,7 @@ interface Props {
 
 const EditableAxisLabel: React.FC<Props> = ({text, x, y, setText}) => {
 
+  const readOnly = useReadOnlyContext();
   const textRef = React.useRef<SVGGElement|null>(null);
   const [boundingBox, setBoundingBox] = React.useState<DOMRect | null>(null);
   const [editing, setEditing] = React.useState(false);
@@ -50,7 +52,7 @@ const EditableAxisLabel: React.FC<Props> = ({text, x, y, setText}) => {
 
   if (editing) {
     return (
-      <foreignObject x={x} y={y} width={500} height={30}>
+      <foreignObject data-testid="axis-label-editor" x={x} y={y} width={500} height={30}>
         <input
           type="text"
           className="focusable"
@@ -68,6 +70,7 @@ const EditableAxisLabel: React.FC<Props> = ({text, x, y, setText}) => {
     <g>
       {boundingBox &&
         <rect
+          data-testid="axis-label-button"
           x={boundingBox.x - paddingX}
           y={boundingBox.y - paddingY}
           width={boundingBox.width + 2*paddingX}
@@ -78,7 +81,7 @@ const EditableAxisLabel: React.FC<Props> = ({text, x, y, setText}) => {
           strokeWidth={1.5}
           fill="none"
           pointerEvents={editing ? "none" : "all"}
-          onClick={() => setEditing(true)}
+          onClick={() => { if (!readOnly) setEditing(true); }}
         />}
       <g ref={textRef}>
         <Text
