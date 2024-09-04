@@ -15,7 +15,8 @@ export const updateClassDocNetworksOnUserChange =
 
     // For every class of this teacher update the networks.
     // We could do something more efficient in the case where a network was
-    // added. That can be figured out by looking at the event.data.before and
+    // added. Or in the case that networks were not changed.
+    // That can be figured out by looking at the event.data.before and
     // event.data.after documents.
     // However to keep the code more simple we just always do the scan
     // of classes and teachers. This is required when a network is deleted
@@ -55,7 +56,7 @@ export const updateClassDocNetworksOnUserChange =
     const classUpdatePromises: Promise<unknown>[] = [];
     classesResult.forEach((classDoc) => {
       // Update each class with the networks of each teacher in the class
-      const {teachers} = classDoc.data() as {teachers: string[]};
+      const {teachers, networks} = classDoc.data() as {teachers: string[], networks: string[] | undefined};
       if (!Array.isArray(teachers)) return;
       const classNetworks = new Set<string>();
       teachers.forEach((teacher) => {
@@ -64,6 +65,8 @@ export const updateClassDocNetworksOnUserChange =
         networks.forEach((network) => classNetworks.add(network));
       });
       const orderedNetworks = [...classNetworks].sort();
+      if (isArrayEqual(networks, orderedNetworks)) return;
+
       classUpdatePromises.push(
         classDoc.ref.update({networks: orderedNetworks})
       );
@@ -73,3 +76,7 @@ export const updateClassDocNetworksOnUserChange =
 
     logger.info("User updated", event.document);
   });
+
+function isArrayEqual(array1: string[] | undefined, array2: string[]) {
+  return array1?.length === array2.length && array1.every((value, index) => value === array2[index]);
+}
