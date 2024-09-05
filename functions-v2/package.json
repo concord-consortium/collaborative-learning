@@ -1,5 +1,5 @@
 {
-  "name": "functions",
+  "name": "functions-v2",
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",
@@ -10,7 +10,7 @@
     "start": "npm run shell",
     "test": "jest",
     "test:emulator": "firebase emulators:start --project demo-test --only firestore,database",
-    "deploy": "firebase deploy --only functions",
+    "deploy": "firebase deploy --only functions:functions-v2",
     "logs": "firebase functions:log"
   },
   "engines": {
