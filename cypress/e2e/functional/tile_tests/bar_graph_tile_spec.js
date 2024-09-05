@@ -23,13 +23,34 @@ context('Bar Graph Tile', function () {
 
     clueCanvas.addTile('bargraph');
     barGraph.getTiles().should('have.length', 1);
-    barGraph.getTile(0)
+    barGraph.getTile()
       .should('be.visible')
       .and('have.class', 'bar-graph-tile')
-      .and('not.have.class', 'read-only')
-      .and('contain.text', 'This is a bar graph');
+      .and('not.have.class', 'read-only');
 
-    barGraph.getTileTitle(0).should('have.text', 'Bar Graph 1');
+    barGraph.getTileTitle().should("be.visible").and('have.text', 'Bar Graph 1');
+    barGraph.getYAxisLabel().should('have.text', 'Counts');
+    barGraph.getXAxisPulldownButton(0).should('have.text', 'date');
+  });
+
+  it('Can edit Y axis label', function () {
+    beforeTest();
+    clueCanvas.addTile('bargraph');
+    barGraph.getYAxisLabel().should('have.text', 'Counts');
+    barGraph.getYAxisLabelEditor().should('not.exist');
+    barGraph.getYAxisLabelButton().click();
+    barGraph.getYAxisLabelEditor().should('be.visible').type(' of something{enter}');
+    barGraph.getYAxisLabelEditor().should('not.exist');
+    barGraph.getYAxisLabel().should('have.text', 'Counts of something');
+  });
+
+  it('Can change primary category', function () {
+    beforeTest();
+    clueCanvas.addTile('bargraph');
+    barGraph.getXAxisPulldown().should('have.text', 'date');
+    barGraph.getXAxisPulldownButton().click();
+    barGraph.getXAxisPulldownMenuItem().eq(1).click();
+    barGraph.getXAxisPulldown().should('have.text', 'location');
   });
 
 });
