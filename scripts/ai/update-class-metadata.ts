@@ -74,7 +74,7 @@ async function processFile() {
 
     const documentSnapshots = await documentCollection.where("id", "==", id).get();
 
-    if (documentSnapshots.empty) {
+    const createClassDoc = async () => {
       const metaData = {
         context_id,
         id,
@@ -88,28 +88,38 @@ async function processFile() {
       await newMetaDataDoc.create(metaData);
       console.log("Created new class metadata", metaDataDocId);
       metadataCreated++;
-    } else {
-      // There can be multiple class metadata documents for each actual class. Note that the name/path for these
-      // Firestore documents may be "[network name]_[class hash]" and/or simply "[class hash]".
-      // For now we just update all of these documents.
-      documentSnapshots.forEach(doc => {
-        const requiredMatches = [
-          { field: "context_id", expected: context_id, actual: doc.data().context_id },
-          { field: "id", expected: id, actual: doc.data().id },
-          { field: "uri", expected: uri, actual: doc.data().uri }
-        ];
+    };
 
-        for (const { field, expected, actual } of requiredMatches) {
-          if (expected !== actual) {
-            console.error(`Skipping update due to ${field} mismatch. Expected ${expected}, got ${actual}.`);
-            return;
-          }
+    // There can be multiple class metadata documents for each actual class. Note that the name/path for these
+    // Firestore documents may be "[network name]_[class hash]" and/or simply "[class hash]".
+    // For now we just update all of these documents.
+
+    let hasClassDocWithSimpleId = false;
+    for (const doc of documentSnapshots.docs) {
+      if (doc.id === context_id) hasClassDocWithSimpleId = true;
+
+      const requiredMatches = [
+        { field: "context_id", expected: context_id, actual: doc.data().context_id },
+        { field: "id", expected: id, actual: doc.data().id },
+        { field: "uri", expected: uri, actual: doc.data().uri }
+      ];
+
+      let hasMismatch = false;
+      for (const { field, expected, actual } of requiredMatches) {
+        if (expected !== actual) {
+          console.error(`Skipping update of ${doc.id} due to ${field} mismatch. Expected ${expected}, got ${actual}.`);
+          hasMismatch = true;
         }
+      }
+      if (hasMismatch) continue;
 
-        doc.ref.update({ name, networks, teachers } as any);
-        console.log(context_id, doc.id, "Updated existing class metadata with", { name, networks, teachers });
-        metadataUpdated++;
-      });
+      await doc.ref.update({ name, networks, teachers } as any);
+      console.log(context_id, doc.id, "Updated existing class metadata with", { name, networks, teachers });
+      metadataUpdated++;
+    }
+
+    if (!hasClassDocWithSimpleId) {
+      await createClassDoc();
     }
   }
 }

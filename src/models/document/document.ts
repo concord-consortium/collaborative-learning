@@ -12,7 +12,7 @@ import { TileCommentsModel, TileCommentsModelType } from "../tiles/tile-comments
 import { getSharedModelManager, getTileEnvironment } from "../tiles/tile-environment";
 import {
   IDocumentMetadata, IGetNetworkDocumentParams, IGetNetworkDocumentResponse, IUserContext
-} from "../../../functions/src/shared";
+} from "../../../shared/shared";
 import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";

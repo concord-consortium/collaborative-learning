@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { DocumentModelType, getDocumentContext } from "../../models/document/document";
 import { SimpleDocumentItem } from "../thumbnail/simple-document-item";
 import { DocumentContextReact } from "./document-context";
-import { IDocumentMetadata } from "../../../functions/src/shared";
+import { IDocumentMetadata } from "../../../shared/shared";
 import { DocumentGroup } from "../../models/stores/document-group";
 
 import ScrollArrowIcon from "../../assets/workspace-instance-scroll.svg";

@@ -31,7 +31,7 @@ import { DBListeners } from "./db-listeners";
 import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
 import { getDocumentPath, ICommentableDocumentParams, IDocumentMetadata, IGetImageDataParams,
-         IPublishSupportParams } from "../../functions/src/shared";
+         IPublishSupportParams } from "../../shared/shared";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";

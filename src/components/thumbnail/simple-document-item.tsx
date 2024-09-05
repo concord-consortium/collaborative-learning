@@ -1,5 +1,5 @@
 import React from "react";
-import { IDocumentMetadata } from "../../../functions/src/shared";
+import { IDocumentMetadata } from "../../../shared/shared";
 import { useStores } from "../../hooks/use-stores";
 import { isDocumentAccessibleToUser } from "../../models/document/document-utils";
 
