@@ -5,8 +5,9 @@ import { isGraphModel } from "../plugins/graph/models/graph-model";
 import { getSharedModelManager } from "../models/tiles/tile-environment";
 import { SharedModelType } from "../models/shared/shared-model";
 import { LogEventName } from "../lib/logger-types";
-
 import { logSharedModelDocEvent } from "../models/document/log-shared-model-document-event";
+import { getTileContentInfo } from "../models/tiles/tile-content-info";
+import { useAppConfig } from "./use-stores";
 
 interface IProps {
   actionHandlers?: any;
@@ -36,6 +37,7 @@ interface IProps {
 export const useProviderTileLinking = ({
   actionHandlers, model, readOnly, sharedModelTypes, allowMultipleGraphDatasets
 }: IProps) => {
+  const appConfig = useAppConfig();
   const {handleRequestTileLink, handleRequestTileUnlink} = actionHandlers || {};
   const sharedModelManager = getSharedModelManager(model);
   const sharedModels: SharedModelType[] = [];
@@ -55,10 +57,14 @@ export const useProviderTileLinking = ({
 
   const linkTile = useCallback((sharedModel: SharedModelType) => {
     if (!readOnly && sharedModelManager?.isReady) {
-      // TODO: this is temporary while we are working on getting Graph to work with multiple datasets
-      // Once multiple datasets are fully implemented, we should look at the "consumesMultipleDataSets"
-      // setting for the tile type; but for now graph has to allow multiples while not having that be the default.
-      if (!allowMultipleGraphDatasets && isGraphModel(model.content)) {
+      // Depending on the unit configuration, graphs sometimes allow multiple datasets and sometimes not.
+      // Other tiles register their ability to consume multiple datasets as part of their content info.
+      const allowsMultiple = isGraphModel(model.content)
+       ? allowMultipleGraphDatasets
+       : getTileContentInfo(model.content.type)?.consumesMultipleDataSets?.(appConfig);
+
+      if (!allowsMultiple) {
+        // Remove any existing shared models before adding the new one
         for (const shared of sharedModelManager.getTileSharedModels(model.content)) {
           sharedModelManager.removeTileSharedModel(model.content, shared);
         }
@@ -68,7 +74,7 @@ export const useProviderTileLinking = ({
       logSharedModelDocEvent(LogEventName.TILE_LINK, model, sharedTiles, sharedModel);
 
     }
-  }, [readOnly, sharedModelManager, model, allowMultipleGraphDatasets]);
+  }, [appConfig, readOnly, sharedModelManager, model, allowMultipleGraphDatasets]);
 
   const unlinkTile = useCallback((sharedModel: SharedModelType) => {
     if (!readOnly && sharedModelManager?.isReady) {

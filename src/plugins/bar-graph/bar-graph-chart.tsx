@@ -18,24 +18,6 @@ const margin = {
   right: 80,
 };
 
-const demoCases: Record<string,string>[] = [
-  { date: '6/23/24', location: 'deck' },
-  { date: '6/23/24', location: 'porch' },
-  { date: '6/23/24', location: 'tree' },
-  { date: '6/24/24', location: 'porch' },
-  { date: '6/24/24', location: 'porch' },
-  { date: '6/25/24', location: 'backyard' },
-  { date: '6/25/24', location: 'deck' },
-  { date: '6/25/24', location: 'deck' },
-  { date: '6/25/24', location: 'deck' },
-  { date: '6/25/24', location: 'tree' },
-  { date: '6/26/24', location: 'backyard' },
-  { date: '6/26/24', location: 'deck' },
-  { date: '6/26/24', location: 'deck' },
-  { date: '6/26/24', location: 'porch' },
-  { date: '6/26/24', location: 'tree' }
-];
-
 function roundTo5(n: number): number {
   return Math.ceil(n/5)*5;
 }
@@ -57,27 +39,26 @@ interface IBarGraphChartProps {
 export const BarGraphChart = observer(function BarGraphChart({ width, height }: IBarGraphChartProps) {
 
   const model = useBarGraphModelContext();
+  model?.cacheSharedDataSet(); // FIXME should be just on initialization
   const primary = model?.primaryAttribute || "date";
-  const secondary = model?.secondaryAttribute || "location";
+  const secondary = model?.secondaryAttribute || "location"; // FIXME
 
   const xMax = width - margin.left - margin.right;
   const yMax = height - margin.top - margin.bottom;
 
   function setDemoCategory(catname: string) {
-    if (catname === "date") {
-      model?.setPrimaryAttribute("date");
-      model?.setSecondaryAttribute("location");
-    } else{
-      model?.setPrimaryAttribute("location");
-      model?.setSecondaryAttribute("date");
-    }
+    model?.setPrimaryAttribute(catname);
+    model?.setSecondaryAttribute("");
   }
 
   // Count cases and make the data array
   const data = useMemo(
-    () => demoCases.reduce((acc, row) => {
-        const cat = primary in row ? row[primary] : "";
-        const subCat = row[secondary] || "";
+    () => {
+      const dataSet = model?.dataSet;
+      if (!dataSet || !primary || !model.cases) return [];
+      return model.cases.reduce((acc, caseID) => {
+        const cat = dataSet?.dataSet.getStrValue(caseID.__id__, primary);
+        const subCat = "A";
         const index = acc.findIndex(r => r[primary] === cat);
         if (index >= 0) {
           const cur = acc[index][subCat];
@@ -87,8 +68,10 @@ export const BarGraphChart = observer(function BarGraphChart({ width, height }: 
           acc.push(newRow);
         }
         return acc;
-      }, [] as { [key: string]: number|string }[]),
-    [primary, secondary]);
+      }, [] as { [key: string]: number|string }[]);
+    },
+    [model?.cases, model?.dataSet, primary]);
+  console.log(data);
 
   const primaryKeys: string[]
     = useMemo(() => data.map(d => d[primary] as string),
@@ -201,8 +184,6 @@ export const BarGraphChart = observer(function BarGraphChart({ width, height }: 
         setText={(text) => model?.setYAxisLabel(text)}
       />
       <CategoryPulldown
-        categoryList={["date", "location"]}
-        category={primary}
         setCategory={setDemoCategory}
         x={margin.left}
         y={height-35}

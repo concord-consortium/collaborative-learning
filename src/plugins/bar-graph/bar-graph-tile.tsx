@@ -8,8 +8,11 @@ import { ITileProps } from "../../components/tiles/tile-component";
 import { BarGraphChart } from "./bar-graph-chart";
 import { BarGraphModelContext } from "./bar-graph-content-context";
 import { isBarGraphModel } from "./bar-graph-content";
+import { TileToolbar } from "../../components/toolbar/tile-toolbar";
 
 import "./bar-graph.scss";
+
+import "./bar-graph-toolbar";
 
 export const BarGraphComponent: React.FC<ITileProps> = observer((props: ITileProps) => {
 
@@ -23,6 +26,7 @@ export const BarGraphComponent: React.FC<ITileProps> = observer((props: ITilePro
   return (
     <BarGraphModelContext.Provider value={content}>
       <BasicEditableTileTitle />
+      <TileToolbar tileType="bargraph" readOnly={!!readOnly} tileElement={props.tileElt} />
       <div
         ref={ref}
         className={classNames("bar-graph-content", { "read-only": readOnly })}

@@ -3,11 +3,10 @@ import { Menu, MenuButton, MenuItem, MenuList, Portal } from "@chakra-ui/react";
 import { useReadOnlyContext } from "../../components/document/read-only-context";
 
 import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
+import { useBarGraphModelContext } from "./bar-graph-content-context";
 
 
 interface IProps {
-  categoryList: string[];
-  category: string;
   setCategory: (category: string) => void;
   x: number;
   y: number;
@@ -15,22 +14,29 @@ interface IProps {
   height: number;
 }
 
-export function CategoryPulldown({categoryList, category, setCategory, x, y, width, height}: IProps) {
+export function CategoryPulldown({setCategory, x, y, width, height}: IProps) {
   const readOnly = useReadOnlyContext();
+  const model = useBarGraphModelContext();
+
+  const dataSet = model?.dataSet?.dataSet;
+  const attributes = dataSet?.attributes || [];
+  const current = (dataSet && model.primaryAttribute)
+    ? dataSet.attrFromID(model.primaryAttribute)?.name
+    : "Choose one";
 
   return (
     <foreignObject data-testid="category-pulldown" x={x} y={y} width={width} height={height}>
       <Menu boundary="scrollParent">
         <MenuButton>
           <span className="button-content">
-            <span className="button-text">{category}</span>
+            <span className="button-text">{current}</span>
             <DropdownCaretIcon/>
           </span>
         </MenuButton>
         <Portal>
           <MenuList>
-            {categoryList.map((c) => (
-              <MenuItem isDisabled={readOnly} key={c} onClick={() => setCategory(c)}>{c}</MenuItem>
+            {attributes.map((a) => (
+              <MenuItem isDisabled={readOnly} key={a.id} onClick={() => setCategory(a.id)}>{a.name}</MenuItem>
             ))}
           </MenuList>
         </Portal>
