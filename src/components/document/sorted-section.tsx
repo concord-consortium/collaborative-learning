@@ -5,7 +5,7 @@ import classNames from "classnames";
 import { DocumentModelType } from "../../models/document/document";
 import { useStores } from "../../hooks/use-stores";
 import { DocFilterType, SecondarySortType } from "../../models/stores/ui-types";
-import { IDocumentMetadata } from "../../../functions/src/shared";
+import { IDocumentMetadata } from "../../../shared/shared";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { DocumentGroupComponent } from "./document-group";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";

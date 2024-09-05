@@ -1,5 +1,5 @@
 import { IAnyStateTreeNode, Instance, SnapshotIn, types } from "mobx-state-tree";
-import { parseSectionPath } from "../../../functions/src/shared";
+import { parseSectionPath } from "../../../shared/shared";
 import { DocumentContentModel } from "../document/document-content";
 import { IAuthoredTileContent } from "../document/document-content-import-types";
 import { SupportModel } from "./support";

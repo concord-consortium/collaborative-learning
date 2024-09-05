@@ -1,7 +1,7 @@
 import { each } from "lodash";
 import { useCallback } from "react";
 import { useQuery } from "react-query";
-import { IGetNetworkResourcesParams, IGetNetworkResourcesResponse } from "../../functions/src/shared";
+import { IGetNetworkResourcesParams, IGetNetworkResourcesResponse } from "../../shared/shared";
 import { DBOfferingUserProblemDocument, DBOtherDocument, DBOtherPublication, DBPublication } from "../lib/db-types";
 import { createDocumentModel } from "../models/document/document";
 import {

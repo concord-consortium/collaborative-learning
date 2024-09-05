@@ -5,7 +5,7 @@ import { ProblemDocument } from '../document/document-types';
 import { ClassModel, ClassModelType, ClassUserModel } from "./class";
 import { GroupModel, GroupsModel, GroupsModelType, GroupUserModel } from "./groups";
 import { DeepPartial } from "utility-types";
-import { IDocumentMetadata } from "../../../functions/src/shared";
+import { IDocumentMetadata } from "../../../shared/shared";
 import { ISortedDocumentsStores, SortedDocuments } from "./sorted-documents";
 import { DB } from "../../lib/db";
 import { mock } from "ts-jest-mocker";

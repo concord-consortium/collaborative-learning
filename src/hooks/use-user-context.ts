@@ -1,4 +1,4 @@
-import { IUserContext } from "../../functions/src/shared";
+import { IUserContext } from "../../shared/shared";
 import { useStores } from "./use-stores";
 
 export const useUserContext = (): IUserContext => {

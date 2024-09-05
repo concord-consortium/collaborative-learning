@@ -27,7 +27,8 @@
       "/node_modules/",
       "/cypress/",
       "/firebase-test/",
-      "/functions/test/(?!(shared\\.test\\.ts)$).*$"
+      "/functions-v1/",
+      "/functions-v2/"
     ],
     "transform": {
       "^.+\\.tsx?$": [
