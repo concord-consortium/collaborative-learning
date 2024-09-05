@@ -6,9 +6,15 @@ let dc = new DataCardToolTile;
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaUnitStudent5")}`;
-  cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
+}
+
+function startFresh() {
+  cy.clearAllSessionStorage();
+  cy.clearAllCookies();
+  cy.clearAllLocalStorage();
+  beforeTest();
 }
 
 context('Merge Data Card Tool Tile', function () {
@@ -43,7 +49,7 @@ context('Merge Data Card Tool Tile', function () {
     dc.getAttrValue(1).eq(1).invoke("val").should("contain", "cat");
 
     cy.log("merges two empty Data Card tool tiles");
-    beforeTest();
+    startFresh();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
     dc.getTileTitle(0).should("have.text", "Card Deck Data 1");
@@ -70,7 +76,7 @@ context('Merge Data Card Tool Tile', function () {
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
 
     cy.log("merges filled-in into empty Data Card tool tile");
-    beforeTest();
+    startFresh();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
     dc.getTileTitle(0).should("have.text", "Card Deck Data 1");
@@ -109,7 +115,7 @@ context('Merge Data Card Tool Tile', function () {
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
 
     cy.log("merges empty into filled-in Data Card tool tile");
-    beforeTest();
+    startFresh();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
     dc.getTileTitle(0).should("have.text", "Card Deck Data 1");
@@ -148,7 +154,7 @@ context('Merge Data Card Tool Tile', function () {
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
 
     cy.log("merges two filled-in Data Card tool tiles");
-    beforeTest();
+    startFresh();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
     dc.getTileTitle(0).should("have.text", "Card Deck Data 1");
@@ -191,7 +197,7 @@ context('Merge Data Card Tool Tile', function () {
     dc.getCardNofTotalListing(1).should("have.text", "Card 1 of 2");
 
     cy.log("merges datacards with same attribute labels");
-    beforeTest();
+    startFresh();
     clueCanvas.addTile("datacard");
     dc.getTile(0).should("exist");
     dc.getTileTitle(0).should("have.text", "Card Deck Data 1");

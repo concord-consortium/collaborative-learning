@@ -18,7 +18,6 @@ const teacherQueryParams = `${Cypress.config("qaUnitTeacher6")}`;
 const studentWorkspaceQueryParams = `${Cypress.config("clueTestqaUnitTeacher6")}`;
 
 function beforeTest(params) {
-  cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
   dashboard.switchView("Workspace & Resources");

@@ -282,7 +282,6 @@ implementation simpler. Existing commands at the moment:
 
     - setupGroup
     - upLoadFile
-    - clearQAData
 
 ## License
 

@@ -4,7 +4,6 @@ let chatPanel = new ChatPanel;
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaUnitTeacher6Network")}`;
-  cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
   cy.openTopTab("problems");

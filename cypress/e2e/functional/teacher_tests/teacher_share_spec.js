@@ -8,7 +8,6 @@ const teacherQueryParams = `${Cypress.config("qaConfigSubtabsUnitTeacher1")}`;
 const studentQueryParams = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
 
 function beforeTest(params) {
-  cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
   dashboard.switchView("Workspace & Resources");

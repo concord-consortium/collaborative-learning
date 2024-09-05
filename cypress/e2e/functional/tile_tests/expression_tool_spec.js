@@ -6,7 +6,6 @@ let exp = new ExpressionToolTile;
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaUnitStudent5")}`;
-  cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
   //TODO - implement within a curriculum unit

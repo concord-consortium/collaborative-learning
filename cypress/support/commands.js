@@ -52,21 +52,6 @@ Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
         });
     });
 });
-Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (currently data='all' is the only one supported)
-    if (data==='all') {
-
-        cy.visit('?appMode=qa&qaClear=' + data + '&fakeClass=5&fakeUser=student:5');
-        // For some reason when using
-        //   cy.get('span', {timeout: 60000}).should('contain','QA Cleared: OK');
-        // If there is a test failure then a weird
-        // error is shown:
-        //   object tested must be an array, a map, an object, a set, a string,
-        //   or a weakset, but undefined given
-        // The log shows the assertion passing and then shows it failing right after
-        // using contains fixes this problem.
-        cy.contains('span', 'QA Cleared: OK', {timeout: 60000});
-    }
-});
 
 // Login using cy.request, this is faster than using visit, and it makes it possible
 // to visit a local domain after logging in
