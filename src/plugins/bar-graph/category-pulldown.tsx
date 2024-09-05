@@ -2,7 +2,7 @@ import React from "react";
 import { Menu, MenuButton, MenuItem, MenuList, Portal } from "@chakra-ui/react";
 import { useReadOnlyContext } from "../../components/document/read-only-context";
 
-import DropdownCaretIcon from "../dataflow/assets/icons/dropdown-caret.svg";
+import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
 
 
 interface IProps {

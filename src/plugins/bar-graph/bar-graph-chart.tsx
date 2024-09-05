@@ -1,11 +1,11 @@
+import React, { useMemo } from "react";
+import { observer } from "mobx-react";
+import { isNumber } from "lodash";
 import { AxisBottom, AxisLeft } from "@visx/axis";
 import { GridRows } from "@visx/grid";
 import { Group } from "@visx/group";
 import { scaleBand, scaleLinear } from "@visx/scale";
 import { Bar, BarGroup } from "@visx/shape";
-import { isNumber } from "lodash";
-import { observer } from "mobx-react";
-import React, { useMemo } from "react";
 import { clueDataColorInfo } from "../../utilities/color-utils";
 import { useBarGraphModelContext } from "./bar-graph-content-context";
 import { CategoryPulldown } from "./category-pulldown";
