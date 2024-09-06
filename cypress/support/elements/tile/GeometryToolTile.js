@@ -152,7 +152,7 @@ class GeometryToolTile {
 
     toggleAngleCheckbox(value) {
       cy.get('.ReactModalPortal input#angle-checkbox').click();
-      cy.get('.ReactModalPortal button.default').click({force:true});
+      cy.get('.ReactModalPortal button.default').click();
     }
 
     showAngle(){

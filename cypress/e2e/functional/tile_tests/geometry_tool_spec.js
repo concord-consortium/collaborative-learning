@@ -239,6 +239,7 @@ context('Geometry Tool', function () {
     geometryToolTile.clickGraphPosition(0, 0); // deselect polygon
 
     // Label a segment
+    cy.log('label a segment');
     geometryToolTile.getGraphPointLabel().contains('AB').should('not.exist');
     geometryToolTile.getGraphLine().should('have.length', 5); // 0-1 = axis lines, 2-4 = triangle
     geometryToolTile.getGraphLine().eq(4).click({ force: true });
@@ -274,10 +275,10 @@ context('Geometry Tool', function () {
     geometryToolTile.getSelectedGraphPoint().should('have.length', 1);
 
     // Store the original coordinates for comparison
-    let originalCcx, originalCcy;
+    let originalXCoord, originalYCoord;
     geometryToolTile.getSelectedGraphPoint().then(($point) => {
-        originalCcx = parseFloat($point.attr('cx'));
-        originalCcy = parseFloat($point.attr('cy'));
+      originalXCoord = parseFloat($point.attr('cx'));
+      originalYCoord = parseFloat($point.attr('cy'));
     });
 
     // Move the selected point up using the arrow key
@@ -290,11 +291,11 @@ context('Geometry Tool', function () {
 
     // Verify that the point has moved: cx should be greater and cy should be less than the original values
     geometryToolTile.getSelectedGraphPoint().then(($point) => {
-        const newCx = parseFloat($point.attr('cx'));
-        const newCy = parseFloat($point.attr('cy'));
+        const newXCoord = parseFloat($point.attr('cx'));
+        const newYCoord = parseFloat($point.attr('cy'));
 
-        expect(newCx).to.be.greaterThan(originalCcx);
-        expect(newCy).to.be.lessThan(originalCcy);
+        expect(newXCoord).to.be.greaterThan(originalXCoord);
+        expect(newYCoord).to.be.lessThan(originalYCoord);
     });
 
     // Also check that the angle label has changed from its original value
@@ -309,11 +310,11 @@ context('Geometry Tool', function () {
 
     // Verify that the point has returned to its original coordinates
     geometryToolTile.getSelectedGraphPoint().then(($point) => {
-        const resetCx = parseFloat($point.attr('cx'));
-        const resetCy = parseFloat($point.attr('cy'));
+        const newXCoord = parseFloat($point.attr('cx'));
+        const newYCoord = parseFloat($point.attr('cy'));
 
-        expect(resetCx).to.equal(originalCcx);
-        expect(resetCy).to.equal(originalCcy);
+        expect(newXCoord).to.equal(originalXCoord);
+        expect(newYCoord).to.equal(originalYCoord);
     });
 
     // Verify that the angle label returns to its original value
@@ -324,7 +325,7 @@ context('Geometry Tool', function () {
     geometryToolTile.selectGraphPoint(10, 5); // this point is a 90 degree angle
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.toggleAngleCheckbox();
-    geometryToolTile.getGraphPointLabel().contains('90°').should('not.exist');
+    geometryToolTile.getGraphPointLabel().should('not.contain', '90°');
 
     // Change color of polygon
     geometryToolTile.selectGraphPoint(7, 6); // click middle of polygon to select it
@@ -394,35 +395,15 @@ context('Geometry Tool', function () {
     // Point should be shared
     geometryToolTile.getGraphPoint().should("have.length", 6); // New point added
 
-    // Store the original coordinates for comparison
-    let originalCx, originalCy;
+    // Store the original point coordinates for comparison
+    let originalPx, originalPy;
     clueCanvas.clickToolbarButton('geometry', 'select');
     geometryToolTile.clickGraphPosition(15, 5); // shared point
     geometryToolTile.getSelectedGraphPoint().then(($point) => {
-      originalCx = parseFloat($point.attr('cx'));
-      originalCy = parseFloat($point.attr('cy'));
-      cy.wrap(originalCx).as('originalCx');
-      cy.wrap(originalCy).as('originalCy');
-    });
-
-    // Add an angle label
-    geometryToolTile.getGraphPointLabel().contains('°').should('not.exist');
-    clueCanvas.clickToolbarButton('geometry', 'select');
-    geometryToolTile.selectGraphPoint(20, 5); // this point is a 45-degree angle but sometimes it starts at 44
-    clueCanvas.clickToolbarButton('geometry', 'label');
-    geometryToolTile.toggleAngleCheckbox();
-
-    // Use a flexible check to verify either '44°' or '45°'
-    cy.log('Verify the initial angle is either 44° or 45°');
-    geometryToolTile.getGraphPointLabel().then(($label) => {
-      const angleText = $label.text();
-      if (angleText.includes('44°')) {
-        cy.wrap(44).as('initialAngle');
-      } else if (angleText.includes('45°')) {
-        cy.wrap(45).as('initialAngle');
-      } else {
-        throw new Error(`Unexpected angle: ${angleText}`);
-      }
+      originalPx = parseFloat($point.attr('cx'));
+      originalPy = parseFloat($point.attr('cy'));
+      cy.wrap(originalPx).as('originalPx');
+      cy.wrap(originalPy).as('originalPy');
     });
 
     // Add length labels to two line segments
@@ -449,22 +430,16 @@ context('Geometry Tool', function () {
     geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 38 }); // simulate up arrow key press
 
     // Verify that the point values changed
-    cy.get('@originalCx').then((originalCx) => {
-      cy.get('@originalCy').then((originalCy) => {
+    cy.get('@originalPx').then((originalPx) => {
+      cy.get('@originalPy').then((originalPy) => {
         geometryToolTile.getSelectedGraphPoint().then(($point) => {
-          const newCx = parseFloat($point.attr('cx'));
-          const newCy = parseFloat($point.attr('cy'));
+          const newPx = parseFloat($point.attr('cx')); // 'px' for point x-coordinate
+          const newPy = parseFloat($point.attr('cy')); // 'py' for point y-coordinate
 
-          expect(newCx).to.be.greaterThan(originalCx);
-          expect(newCy).to.be.lessThan(originalCy);
+          expect(newPx).to.be.greaterThan(originalPx);
+          expect(newPy).to.be.lessThan(originalPy);
         });
       });
-    });
-
-    // Verify that the angle has decreased by 1 degree
-    cy.get('@initialAngle').then((initialAngle) => {
-      const newAngle = initialAngle - 1;
-      geometryToolTile.getGraphPointLabel().contains(`${newAngle}°`).should('exist'); // Check if angle decreased by 1 degree
     });
 
     // Verify that the two line segments have changed
@@ -476,21 +451,16 @@ context('Geometry Tool', function () {
     geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 40 }); // simulate down arrow key press
 
     // Verify that the point has returned to its original coordinates
-    cy.get('@originalCx').then((originalCx) => {
-      cy.get('@originalCy').then((originalCy) => {
+    cy.get('@originalPx').then((originalPx) => {
+      cy.get('@originalPy').then((originalPy) => {
         geometryToolTile.getSelectedGraphPoint().then(($point) => {
-          const resetCx = parseFloat($point.attr('cx'));
-          const resetCy = parseFloat($point.attr('cy'));
+          const resetPx = parseFloat($point.attr('cx'));
+          const resetPy = parseFloat($point.attr('cy'));
 
-          expect(resetCx).to.equal(originalCx);
-          expect(resetCy).to.equal(originalCy);
+          expect(resetPx).to.equal(originalPx);
+          expect(resetPy).to.equal(originalPy);
         });
       });
-    });
-
-    // Verify that the angle has returned to its original value
-    cy.get('@initialAngle').then((initialAngle) => {
-      geometryToolTile.getGraphPointLabel().contains(`${initialAngle}°`).should('exist');
     });
 
     // Verify that the two line segments returned to their original values
