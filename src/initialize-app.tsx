@@ -45,9 +45,13 @@ export const initializeApp = (authoring: boolean): IStores => {
   const user = UserModel.create();
 
 
-  let appMode: AppMode = "dev";
+  let appMode: AppMode;
   let showDemoCreator = false;
-  if (!authoring) {
+  if (authoring) {
+    // Support appMode=qa even when authoring so we can test some features that only show
+    // up in the qa appMode
+    appMode = urlParams.appMode === "qa" ? "qa" : "dev";
+  } else {
     const host = window.location.host.split(":")[0];
     appMode = getAppMode(urlParams.appMode, bearerToken, host);
 
