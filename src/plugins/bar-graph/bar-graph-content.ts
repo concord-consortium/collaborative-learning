@@ -1,11 +1,13 @@
 import { reaction } from "mobx";
 import { types, Instance, addDisposer } from "mobx-state-tree";
+import { isNumber } from "lodash";
 import { SharedModelType } from "../../models/shared/shared-model";
 import { ITileContentModel, TileContentModel } from "../../models/tiles/tile-content";
 import { kBarGraphTileType, kBarGraphContentType } from "./bar-graph-types";
 import { getSharedModelManager } from "../../models/tiles/tile-environment";
 import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../models/shared/shared-data-set";
 import { ISharedModelManager } from "../../models/shared/shared-model-manager";
+import { clueDataColorInfo } from "../../utilities/color-utils";
 
 export function defaultBarGraphContent(): BarGraphContentModelType {
   return BarGraphContentModel.create({yAxisLabel: "Counts"});
@@ -41,6 +43,56 @@ export const BarGraphContentModel = TileContentModel
       }
     }
   }))
+  .views(self => ({
+    // TODO what should this do in the case of no secondary attribute?
+    get dataArray() {
+      console.log("calculating dataArray");
+      const dataSet = self.dataSet?.dataSet;
+      const primary = self.primaryAttribute;
+      const secondary = self.secondaryAttribute;
+      const cases = self.cases;
+      if (!dataSet || !primary || !cases) return [];
+      return cases.reduce((acc, caseID) => {
+        const cat = dataSet.getStrValue(caseID.__id__, primary);
+        const subCat = secondary ? dataSet.getStrValue(caseID.__id__, secondary) : "default"; // ??
+        const index = acc.findIndex(r => r[primary] === cat);
+        if (index >= 0) {
+          const cur = acc[index][subCat];
+          acc[index][subCat] = (isNumber(cur) ? cur : 0) + 1;
+        } else {
+          const newRow = { [primary]: cat, [subCat]: 1 };
+          acc.push(newRow);
+        }
+        return acc;
+      }, [] as { [key: string]: number|string }[]);
+    }
+  }))
+  .views(self => ({
+    get primaryKeys() {
+      const primary = self.primaryAttribute;
+      if (!primary) return [];
+      return self.dataArray.map(d => d[primary] as string);
+    },
+    get secondaryKeys() {
+      const primary = self.primaryAttribute;
+      if (!primary) return [];
+      return Array.from(new Set(self.dataArray.flatMap(d => Object.keys(d)).filter(k => k !== primary)));
+    },
+    get maxDataValue(): number {
+      return self.dataArray.reduce((acc, row) => {
+        const rowValues = Object.values(row).filter(v => isNumber(v)) as number[];
+        const maxInRow = Math.max(...rowValues);
+        return Math.max(maxInRow, acc);
+      }, 0);
+    }
+  }))
+  .views(self => ({
+    // TODO this should track colors in a way that can be edited later
+    getColorForSecondaryKey(key: string) {
+      const n = self.secondaryKeys.indexOf(key) || 0;
+      return clueDataColorInfo[n % clueDataColorInfo.length].color;
+    }
+  }))
   .actions(self => ({
     setYAxisLabel(text: string) {
       self.yAxisLabel = text;
@@ -48,7 +100,7 @@ export const BarGraphContentModel = TileContentModel
     setPrimaryAttribute(attrId: string) {
       self.primaryAttribute = attrId;
     },
-    setSecondaryAttribute(attrId: string) {
+    setSecondaryAttribute(attrId: string|undefined) {
       self.secondaryAttribute = attrId;
     },
     setSharedDataSet() {

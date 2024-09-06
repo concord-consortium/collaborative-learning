@@ -1,9 +1,9 @@
 import React from "react";
 import { Menu, MenuButton, MenuItem, MenuList, Portal } from "@chakra-ui/react";
 import { useReadOnlyContext } from "../../components/document/read-only-context";
+import { useBarGraphModelContext } from "./bar-graph-content-context";
 
 import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
-import { useBarGraphModelContext } from "./bar-graph-content-context";
 
 
 interface IProps {
@@ -22,12 +22,12 @@ export function CategoryPulldown({setCategory, x, y, width, height}: IProps) {
   const attributes = dataSet?.attributes || [];
   const current = (dataSet && model.primaryAttribute)
     ? dataSet.attrFromID(model.primaryAttribute)?.name
-    : "Choose one";
+    : "Categories";
 
   return (
     <foreignObject data-testid="category-pulldown" x={x} y={y} width={width} height={height}>
       <Menu boundary="scrollParent">
-        <MenuButton>
+        <MenuButton className="dropdown-menu-button">
           <span className="button-content">
             <span className="button-text">{current}</span>
             <DropdownCaretIcon/>

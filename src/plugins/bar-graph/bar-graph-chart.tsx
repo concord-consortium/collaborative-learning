@@ -1,12 +1,10 @@
 import React, { useMemo } from "react";
 import { observer } from "mobx-react";
-import { isNumber } from "lodash";
 import { AxisBottom, AxisLeft } from "@visx/axis";
 import { GridRows } from "@visx/grid";
 import { Group } from "@visx/group";
 import { scaleBand, scaleLinear } from "@visx/scale";
 import { Bar, BarGroup } from "@visx/shape";
-import { clueDataColorInfo } from "../../utilities/color-utils";
 import { useBarGraphModelContext } from "./bar-graph-content-context";
 import { CategoryPulldown } from "./category-pulldown";
 import EditableAxisLabel from "./editable-axis-label";
@@ -18,12 +16,9 @@ const margin = {
   right: 10,
 };
 
+// Round a number up to the next multiple of 5.
 function roundTo5(n: number): number {
-  return Math.ceil(n/5)*5;
-}
-
-function barColor(n: number) {
-  return clueDataColorInfo[n % clueDataColorInfo.length].color;
+  return Math.max(5, Math.ceil(n/5)*5);
 }
 
 interface IBarGraphChartProps {
@@ -40,51 +35,28 @@ export const BarGraphChart = observer(function BarGraphChart({ width, height }: 
 
   const model = useBarGraphModelContext();
   const primary = model?.primaryAttribute || "date";
-  const secondary = model?.secondaryAttribute || "location"; // FIXME
 
   const xMax = width - margin.left - margin.right;
   const yMax = height - margin.top - margin.bottom;
 
-  function setDemoCategory(catname: string) {
-    model?.setPrimaryAttribute(catname);
-    model?.setSecondaryAttribute("");
+  function setPrimaryAttribute(id: string) {
+    model?.setPrimaryAttribute(id);
+    model?.setSecondaryAttribute(undefined);
+  }
+
+  function barColor(key: string) {
+    if (!model) return "black";
+    return model.getColorForSecondaryKey(key);
   }
 
   // Count cases and make the data array
-  const data = useMemo(
-    () => {
-      const dataSet = model?.dataSet;
-      if (!dataSet || !primary || !model.cases) return [];
-      return model.cases.reduce((acc, caseID) => {
-        const cat = dataSet?.dataSet.getStrValue(caseID.__id__, primary);
-        const subCat = "A";
-        const index = acc.findIndex(r => r[primary] === cat);
-        if (index >= 0) {
-          const cur = acc[index][subCat];
-          acc[index][subCat] = (isNumber(cur) ? cur : 0) + 1;
-        } else {
-          const newRow = { [primary]: cat, [subCat]: 1 };
-          acc.push(newRow);
-        }
-        return acc;
-      }, [] as { [key: string]: number|string }[]);
-    },
-    [model?.cases, model?.dataSet, primary]);
-  console.log(data);
+  const data = model?.dataArray || [];
 
-  const primaryKeys: string[]
-    = useMemo(() => data.map(d => d[primary] as string),
-      [data, primary]);
-  const secondaryKeys: string[]
-    = useMemo(() => Array.from(new Set(data.flatMap(d => Object.keys(d)).filter(k => k !== primary))),
-      [data, primary]);
+  const primaryKeys = useMemo(() => model?.primaryKeys || [], [model?.primaryKeys]);
+  const secondaryKeys = useMemo(() => model?.secondaryKeys || [], [model?.secondaryKeys]);
 
   // find the maximum data value
-  const maxValue = data.reduce((acc, row) => {
-    const rowValues = Object.values(row).slice(1) as (string | number)[];
-    const maxInRow = Math.max(...rowValues.map(v => isNumber(v) ? v : 0));
-    return Math.max(maxInRow, acc);
-  }, 0);
+  const maxValue = model?.maxDataValue || 0;
 
   const primaryScale = useMemo(
     () =>
@@ -110,7 +82,7 @@ export const BarGraphChart = observer(function BarGraphChart({ width, height }: 
     }),
     [yMax, maxValue]);
 
-  if (xMax <= 0 || yMax <= 0) return <span>Too small ({width}x{height})</span>;
+  if (xMax <= 0 || yMax <= 0) return <span>Tile too small to show graph ({width}x{height})</span>;
 
   const ticks = Math.min(4, Math.floor(yMax/40));  // leave generous vertical space (>=40 px) between ticks
   const labelWidth = (xMax/primaryKeys.length)-10; // setting width will wrap lines in labels when needed
@@ -146,7 +118,7 @@ export const BarGraphChart = observer(function BarGraphChart({ width, height }: 
         />
         <BarGroup
           data={data}
-          color={(d, i) => barColor(i)}
+          color={barColor}
           className="bar"
           keys={secondaryKeys}
           height={yMax}
@@ -183,7 +155,7 @@ export const BarGraphChart = observer(function BarGraphChart({ width, height }: 
         setText={(text) => model?.setYAxisLabel(text)}
       />
       <CategoryPulldown
-        setCategory={setDemoCategory}
+        setCategory={setPrimaryAttribute}
         x={margin.left}
         y={height-35}
         width={xMax}

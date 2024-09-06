@@ -31,34 +31,6 @@
         padding: 3px;
       }
 
-      button {
-        font-family: Lato;
-        border: 1.5px solid #949494;
-        border-radius: 5px;
-        padding: 5px;
-
-        .button-content {
-          display: flex;
-          flex-direction: row;
-          flex-wrap: nowrap;
-          justify-content: center;
-          align-items: center;
-
-          .button-text {
-            white-space: nowrap;
-          }
-
-          svg {
-            width: 100%;
-            height: 100%;
-            max-height: 1em;
-            max-width: 1em;
-            margin-left: .75em;
-            opacity: .35;
-          }
-        }
-
-      }
     }
 
   }
@@ -67,7 +39,7 @@
     height: 100%;
     width: 186px;
     border-left: 1.5px solid #0592af;
-    padding: 0 0 0 5px;
+    padding: 0 10px 0 5px;
     text-align: left;
 
     .dataset-header {
@@ -94,7 +66,36 @@
     }
 
     .sort-by {
-      margin: 10px 0 0 5px;
+      margin: 10px 0 10px 5px;
+    }
+
+    button.chakra-menu__menu-button {
+      background-color: $workspace-teal-light-8;
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    .secondaryValue {
+      display: flex;
+      margin: 5px 0 5px 5px;
+      align-items: center;
+
+      .colorButton {
+        width: 26px;
+        height: 26px;
+        margin: 0 7px 0 0;
+        padding: 5px;
+        background-color: $workspace-teal-light-8;
+        border-radius: 5px;
+        border: solid 1.5px #949494;
+
+        .colorSwatch {
+          border: 1px solid black;
+          width: 100%;
+          height: 100%;
+          margin: 0;
+        }
+      }
     }
   }
 
@@ -104,6 +105,35 @@
     border-top: 1.5px solid #0592af;
     border-left: none;
     padding: 8px 0 0 0;
+  }
+
+  button.chakra-menu__menu-button {
+    font-family: Lato;
+    border: 1.5px solid #949494;
+    border-radius: 5px;
+    padding: 5px;
+
+    .button-content {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+
+      .button-text {
+        white-space: nowrap;
+      }
+
+      svg {
+        width: 100%;
+        height: 100%;
+        max-height: 1em;
+        max-width: 1em;
+        margin-left: .75em;
+        opacity: .35;
+      }
+    }
+
   }
 
 }
