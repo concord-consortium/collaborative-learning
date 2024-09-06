@@ -96,10 +96,7 @@ context('Geometry Table Integration', function () {
     cy.log('verify point no longer has p1 in table and geometry');
     geometryToolTile.getGraphPointLabel().contains('A').should('not.exist');
 
-    // clear the canvas
     clueCanvas.deleteTile('geometry');
-    clueCanvas.deleteTile('geometry');
-    clueCanvas.deleteTile('table');
   });
 
   it.skip('test creating a polygon', function () {
