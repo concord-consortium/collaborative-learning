@@ -4,13 +4,12 @@ import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { mode } from "@chakra-ui/theme-tools";
 import { DocEditorApp } from "./components/doc-editor/doc-editor-app";
 import { DialogComponent } from "./components/utilities/dialog";
-import { urlParams } from "./utilities/url-params";
 
 import { AppProvider, initializeApp } from "./initialize-app";
 
 (window as any).DISABLE_FIREBASE_SYNC = true;
 
-const stores = initializeApp(urlParams.appMode || "dev", true);
+const stores = initializeApp(true);
 
 // By default Chakra adds some global styles which break some of the
 // CLUE styles. But removing these styles then breaks the Chakra

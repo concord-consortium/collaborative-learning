@@ -155,7 +155,6 @@ There are a number of URL parameters that can aid in testing:
 |`fakeClass`     |string                   |Class id for demo, qa, or test modes.|
 |`fakeUser`      |`(student\|teacher):<id>`|Configure user type and (optionally) id.|
 |`qaGroup`       |string                   |Group id for qa, e.g. automated tests.|
-|`qaClear`       |`all\|class\|offering`   |Extent of database clearing for automated tests.|
 |`firebase`      |`emulator\|<URL>`        |Target emulator for firebase realtime database calls.|
 |`firestore`     |`emulator\|<URL>`        |Target emulator for firestore database calls.|
 |`functions`     |`emulator\|<URL>`        |Target emulator-hosted firebase functions.|
@@ -183,11 +182,11 @@ The Standalone Document Editor also supports a `readOnly` url param. If you spec
 
 ### QA
 
-Along with `dev`, `test`, `authed` and `demo` modes the app has a `qa` mode.  QA mode uses the same parameters as demo mode with two additional parameters:
+Along with `dev`, `test`, `authed` and `demo` modes the app has a `qa` mode.  QA mode uses the same parameters as demo mode with one additional parameter:
 
-1. qaGroup - the group to automatically assign the fake user to after connecting to the database.
-2. qaClear - either "all", "class" or "offering".  When this parameter is present the QA database is cleared at the level requested based on the user parameters.
-   This is useful to clear data between automated QA runs.  When complete the app will display `<span className="qa-clear">QA Cleared: OK</span>`.
+qaGroup - the group to automatically assign the fake user to after connecting to the database.
+
+Additionally in `qa` mode the "root" in Firestore and the Realtime database is based on the Firebase user uid. This user is stored in session storage so each new tab will start a new root. In Cypress session storage is cleared between tests so each new test will have its own root.
 
 ### To run Cypress integration tests:
 - `npm run test:local`

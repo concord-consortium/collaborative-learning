@@ -15,6 +15,7 @@ import { IStores } from "./models/stores/stores";
 import { UserModel } from "./models/stores/user";
 import { urlParams } from "./utilities/url-params";
 import { getBearerToken } from "./utilities/auth-utils";
+import { getAppMode } from "./lib/auth";
 import { DEBUG_STORES } from "./lib/debug";
 import { gImageMap } from "./models/image-map";
 import PackageJson from "./../package.json";
@@ -37,24 +38,33 @@ const kEnableLivelinessChecking = false;
  * @param appMode
  * @returns
  */
-export const initializeApp = (appMode: AppMode, authoring?: boolean): IStores => {
+export const initializeApp = (authoring: boolean): IStores => {
   const appVersion = PackageJson.version;
+  const bearerToken = getBearerToken(urlParams);
 
   const user = UserModel.create();
 
-  const showDemoCreator = urlParams.demo;
-  if (showDemoCreator) {
-    // Override the app mode when the demo creator is being used.
-    // `authenticate` is still called when the demo creator is shown
-    // and with an undefined appMode then it will default to `authed` on
-    // a remote host. This will cause an error as it looks for a token.
-    // This error was always happening but for some reason before the app
-    // was still rendering, and now it doesn't.
-    appMode = "demo";
+
+  let appMode: AppMode = "dev";
+  let showDemoCreator = false;
+  if (!authoring) {
+    const host = window.location.host.split(":")[0];
+    appMode = getAppMode(urlParams.appMode, bearerToken, host);
+
+    showDemoCreator = !!urlParams.demo;
+    if (showDemoCreator) {
+      // Override the app mode when the demo creator is being used.
+      // `authenticate` is still called when the demo creator is shown
+      // and with an undefined appMode then it will default to `authed` on
+      // a remote host. This will cause an error as it looks for a token.
+      // This error was always happening but for some reason before the app
+      // was still rendering, and now it doesn't.
+      appMode = "demo";
+    }
   }
   const demoName = urlParams.demoName;
 
-  const isPreviewing = !!(urlParams.domain && urlParams.domain_uid && !getBearerToken(urlParams));
+  const isPreviewing = !!(urlParams.domain && urlParams.domain_uid && !bearerToken);
   const appConfig = AppConfigModel.create(appConfigSnapshot);
   const stores = createStores(
     { appMode, appVersion, appConfig, user, showDemoCreator, demoName, isPreviewing });

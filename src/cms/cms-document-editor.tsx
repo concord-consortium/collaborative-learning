@@ -22,7 +22,7 @@ interface IState {
   document?: DocumentModelType;
 }
 
-const stores = initializeApp("dev", true);
+const stores = initializeApp(true);
 
 export class CmsDocumentEditor extends React.Component<IProps, IState>  {
   disposer: IDisposer;

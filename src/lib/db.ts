@@ -64,8 +64,6 @@ export interface GroupUsersMap {
   [key: string]: string[];
 }
 
-export type DBClearLevel = "all" | "class" | "offering";
-
 export interface ICreateOtherDocumentParams {
   title?: string;
   properties?: IDocumentProperties;
@@ -185,7 +183,11 @@ export class DB {
         }
       });
 
-      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+      if (!options.dontStartListeners) {
+        // We only use dontStartListeners during tests. And during tests which run in NodeJS,
+        // the session persistence mode is not allowed.
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+      }
       if (options.appMode === "authed") {
         firebase.auth()
           .signOut()
@@ -783,35 +785,6 @@ export class DB {
       this.firebase.ref(typedMetadata).set(null)
     ]);
     this.stores.documents.resolveRequiredDocumentPromiseWithNull(document.type);
-  }
-
-  public clear(level: DBClearLevel) {
-    return new Promise<void>((resolve, reject) => {
-      const {user} = this.stores;
-      const clearPath = (path?: string) => {
-        this.firebase.ref(path).remove().then(resolve).catch(reject);
-      };
-
-      if (this.stores.appMode !== "qa") {
-        return reject("db#clear is only available in qa mode");
-      }
-
-      if (level === "all") {
-        return reject("clearing 'all' is handled by clearFirebaseAnonQAUser");
-      }
-
-      switch (level) {
-        case "class":
-          clearPath(this.firebase.getClassPath(user));
-          break;
-        case "offering":
-          clearPath(this.firebase.getOfferingPath(user));
-          break;
-        default:
-          reject(`Invalid clear level: ${level}`);
-          break;
-      }
-    });
   }
 
   public createDocumentModelFromProblemMetadata(

@@ -18,14 +18,12 @@ import "./app.scss";
 
 interface IProps extends IBaseProps {}
 interface IState {
-  qaCleared: boolean;
-  qaClearError?: string;
 }
 
 function resolveAppMode(
   stores: IStores,
-  rawFirebaseJWT: string | undefined,
-  onQAClear?: (result: boolean, err?: string) => void) {
+  rawFirebaseJWT: string | undefined
+) {
   const { appMode, db, ui} = stores;
   if (appMode === "authed")  {
     if (rawFirebaseJWT) {
@@ -39,18 +37,8 @@ function resolveAppMode(
     return db.connect({appMode, stores})
       .then(() => {
         if (appMode === "qa") {
-          const {qaClear, qaGroup} = urlParams;
-          if (qaClear) {
-            const cleared = (err?: string) => {
-              if (onQAClear) {
-                onQAClear(!err, err);
-              }
-            };
-            db.clear(qaClear)
-              .then(() => cleared())
-              .catch(cleared);
-          }
-          else if (qaGroup) {
+          const {qaGroup} = urlParams;
+          if (qaGroup) {
             db.leaveGroup().then(() => db.joinGroup(qaGroup));
           }
         }
@@ -61,7 +49,7 @@ function resolveAppMode(
   }
 }
 
-export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, err?: string) => void) => {
+export const authAndConnect = (stores: IStores) => {
   const {appConfig, curriculumConfig, appMode, db, user, ui} = stores;
   let rawPortalJWT: string | undefined;
 
@@ -118,7 +106,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
           stores.loadUnitAndProblem(unitCode, problemId);
         }
       }
-      return resolveAppMode(stores, authenticatedUser.rawFirebaseJWT, onQAClear);
+      return resolveAppMode(stores, authenticatedUser.rawFirebaseJWT);
     })
     .then(() => {
       return user.isTeacher
@@ -151,16 +139,12 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
 export class AppComponent extends BaseComponent<IProps, IState> {
 
   public state: IState = {
-    qaCleared: false,
-    qaClearError: undefined
   };
 
   constructor(props: IProps) {
     super(props);
 
-    authAndConnect(this.stores, (qaCleared, qaClearError) => {
-      this.setState({qaCleared, qaClearError});
-    });
+    authAndConnect(this.stores);
   }
 
   public componentWillUnmount() {
@@ -195,15 +179,6 @@ export class AppComponent extends BaseComponent<IProps, IState> {
     // in this case.
     if (!user.authenticated || !db.listeners.isListening) {
       return this.renderApp(this.renderLoading());
-    }
-
-    if (urlParams.qaClear) {
-      const {qaCleared, qaClearError} = this.state;
-      return this.renderApp(
-        <span className="qa-clear">
-          {qaCleared ? `QA Cleared: ${qaClearError || "OK"}` : "QA Clearing..."}
-        </span>
-      );
     }
 
     if (user.isStudent) {
