@@ -267,12 +267,10 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPointLabel().contains('90°').should('exist');
 
     // Select the graph point at (5, 5)
-    cy.log('select graph point');
     clueCanvas.clickToolbarButton('geometry', 'select');
     geometryToolTile.clickGraphPosition(5, 5);
 
     // Verify that the point has been selected
-    cy.log('graph point selected');
     geometryToolTile.getSelectedGraphPoint().should('have.length', 1);
 
     // Store the original coordinates for comparison
@@ -397,7 +395,6 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPoint().should("have.length", 6); // New point added
 
     // Store the original coordinates for comparison
-    cy.log('Store original coordinates');
     let originalCx, originalCy;
     clueCanvas.clickToolbarButton('geometry', 'select');
     geometryToolTile.clickGraphPosition(15, 5); // shared point
@@ -409,7 +406,6 @@ context('Geometry Tool', function () {
     });
 
     // Add an angle label
-    cy.log('Add an angle label');
     geometryToolTile.getGraphPointLabel().contains('°').should('not.exist');
     clueCanvas.clickToolbarButton('geometry', 'select');
     geometryToolTile.selectGraphPoint(20, 5); // this point is a 45-degree angle but sometimes it starts at 44
@@ -430,8 +426,6 @@ context('Geometry Tool', function () {
     });
 
     // Add length labels to two line segments
-    cy.log('Add length labels to two line segments');
-
     // Select line segments by clicking between two points
     geometryToolTile.clickGraphPosition(7.5, 5); // Middle of the first segment between (5, 5) and (10, 5)
     clueCanvas.clickToolbarButton('geometry', 'label');
@@ -442,7 +436,6 @@ context('Geometry Tool', function () {
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.getModalTitle().should('contain.text', 'Length');
     geometryToolTile.chooseLabelOption('length');
-    cy.log('let us figure out the labels here');
     geometryToolTile.clickGraphPosition(0, 0); // deselect
 
     // Verify that the two line segments were created
@@ -450,14 +443,12 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPointLabel().contains('5.0').should('exist');
 
     // Move the point
-    cy.log('Move the point');
     clueCanvas.clickToolbarButton('geometry', 'select');
     geometryToolTile.clickGraphPosition(15, 5); // shared point
     geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 39 }); // simulate right arrow key press
     geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 38 }); // simulate up arrow key press
 
     // Verify that the point values changed
-    cy.log('Verify that the point values changed');
     cy.get('@originalCx').then((originalCx) => {
       cy.get('@originalCy').then((originalCy) => {
         geometryToolTile.getSelectedGraphPoint().then(($point) => {
@@ -471,7 +462,6 @@ context('Geometry Tool', function () {
     });
 
     // Verify that the angle has decreased by 1 degree
-    cy.log('Verify that the angle has changed by decreasing 1 degree');
     cy.get('@initialAngle').then((initialAngle) => {
       const newAngle = initialAngle - 1;
       geometryToolTile.getGraphPointLabel().contains(`${newAngle}°`).should('exist'); // Check if angle decreased by 1 degree
@@ -482,12 +472,10 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPointLabel().contains('4.9').should('exist');
 
     // Move the point back to the original position
-    cy.log('Move the point back to the original position');
     geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 37 }); // simulate left arrow key press
     geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 40 }); // simulate down arrow key press
 
     // Verify that the point has returned to its original coordinates
-    cy.log('Verify point return to original coordinates');
     cy.get('@originalCx').then((originalCx) => {
       cy.get('@originalCy').then((originalCy) => {
         geometryToolTile.getSelectedGraphPoint().then(($point) => {
@@ -501,7 +489,6 @@ context('Geometry Tool', function () {
     });
 
     // Verify that the angle has returned to its original value
-    cy.log('Verify the angle returns to the original value');
     cy.get('@initialAngle').then((initialAngle) => {
       geometryToolTile.getGraphPointLabel().contains(`${initialAngle}°`).should('exist');
     });
@@ -511,7 +498,6 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPointLabel().contains('5.0').should('exist');
 
     // Verify the point is still shared
-    cy.log('Verify that the point is still shared');
     geometryToolTile.getGraphPoint().should("have.length", 6); // New point added
 
     // Delete the first polygon
@@ -529,7 +515,6 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPoint().should("have.length", 0);
 
     // Create polygon from existing points
-    cy.log('Create polygon from existing points');
     clueCanvas.clickToolbarButton('geometry', 'point');
     geometryToolTile.clickGraphPosition(0, 0);
     geometryToolTile.clickGraphPosition(10, 0);
