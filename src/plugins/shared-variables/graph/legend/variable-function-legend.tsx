@@ -16,8 +16,8 @@ import {
 } from "../plotted-variables-adornment/plotted-variables-adornment-model";
 import { VariableSelection } from "./variable-selection";
 
+import RemoveDataIcon from "../../../../assets/remove-data-icon.svg";
 import AddSeriesIcon from "../../../graph/imports/assets/add-series-icon.svg";
-import RemoveDataIcon from "../../../graph/assets/remove-data-icon.svg";
 import XAxisIcon from "../../../graph/assets/x-axis-icon.svg";
 import YAxisIcon from "../../../graph/assets/y-axis-icon.svg";
 

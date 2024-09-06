@@ -3,15 +3,19 @@
 .bar-graph-content {
   width: 100%;
   height: 100%;
+  padding: 44px 0 12px 0;
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
   align-items: center;
   overflow: auto;
 
-  svg {
-    width: 100%;
-    height: 100%;
+  &.vertical {
+    flex-direction: column;
+  }
+
+  svg.bar-graph-svg {
+    // width: 100%;
+    // height: 100%;
 
     .visx-bar-group .visx-bar {
       stroke: black;
@@ -36,13 +40,20 @@
         .button-content {
           display: flex;
           flex-direction: row;
+          flex-wrap: nowrap;
           justify-content: center;
           align-items: center;
 
+          .button-text {
+            white-space: nowrap;
+          }
+
           svg {
+            width: 100%;
+            height: 100%;
             max-height: 1em;
             max-width: 1em;
-            margin-left: 1em;
+            margin-left: .75em;
             opacity: .35;
           }
         }
@@ -50,6 +61,49 @@
       }
     }
 
+  }
+
+  div.bar-graph-legend {
+    height: 100%;
+    width: 186px;
+    border-left: 1.5px solid #0592af;
+    padding: 0 0 0 5px;
+    text-align: left;
+
+    .dataset-header {
+      display: flex;
+      align-items: top;
+
+      .dataset-icon {
+        margin-right: 7px;
+
+        &:hover {
+          background-color: $workspace-teal-light-6;
+        }
+      }
+
+      .dataset-label {
+        .dataset-label-text {
+          display: block;
+        }
+        .dataset-name {
+          display: block;
+          font-weight: bold;
+        }
+      }
+    }
+
+    .sort-by {
+      margin: 10px 0 0 5px;
+    }
+  }
+
+  &.vertical div.bar-graph-legend {
+    width: 100%;
+    height: 186px;
+    border-top: 1.5px solid #0592af;
+    border-left: none;
+    padding: 8px 0 0 0;
   }
 
 }

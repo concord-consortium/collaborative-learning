@@ -12,10 +12,10 @@ import { CategoryPulldown } from "./category-pulldown";
 import EditableAxisLabel from "./editable-axis-label";
 
 const margin = {
-  top: 60,
-  bottom: 60,
-  left: 80,
-  right: 80,
+  top: 7,
+  bottom: 70,
+  left: 70,
+  right: 10,
 };
 
 function roundTo5(n: number): number {
@@ -39,7 +39,6 @@ interface IBarGraphChartProps {
 export const BarGraphChart = observer(function BarGraphChart({ width, height }: IBarGraphChartProps) {
 
   const model = useBarGraphModelContext();
-  model?.cacheSharedDataSet(); // FIXME should be just on initialization
   const primary = model?.primaryAttribute || "date";
   const secondary = model?.secondaryAttribute || "location"; // FIXME
 
@@ -111,13 +110,13 @@ export const BarGraphChart = observer(function BarGraphChart({ width, height }: 
     }),
     [yMax, maxValue]);
 
-  if (xMax <= 0 || yMax <= 0) return <span>Too small</span>;
+  if (xMax <= 0 || yMax <= 0) return <span>Too small ({width}x{height})</span>;
 
   const ticks = Math.min(4, Math.floor(yMax/40));  // leave generous vertical space (>=40 px) between ticks
   const labelWidth = (xMax/primaryKeys.length)-10; // setting width will wrap lines in labels when needed
 
   return (
-    <svg width={width} height={height} data-testid="bar-graph-svg">
+    <svg width={width} height={height} className="bar-graph-svg" data-testid="bar-graph-svg">
       <Group top={margin.top} left={margin.left}>
         <GridRows
           scale={countScale}

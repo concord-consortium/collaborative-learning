@@ -18,7 +18,7 @@ import { useTileModelContext } from "../../../../components/tiles/hooks/use-tile
 import { EditableLabelWithButton } from "../../../../components/utilities/editable-label-with-button";
 import { GraphLayerContext, useGraphLayerContext } from "../../hooks/use-graph-layer-context";
 
-import RemoveDataIcon from "../../assets/remove-data-icon.svg";
+import RemoveDataIcon from "../../../../assets/remove-data-icon.svg";
 import XAxisIcon from "../../assets/x-axis-icon.svg";
 import YAxisIcon from "../../assets/y-axis-icon.svg";
 
