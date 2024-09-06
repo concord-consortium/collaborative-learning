@@ -45,7 +45,10 @@ import { DEBUG_FIRESTORE } from "./debug";
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBBaseConnectOptions {
   stores: IStores;
-  dontStartListeners?: boolean; // for unit tests
+
+  // for unit tests
+  dontStartListeners?: boolean;
+  authPersistence?: firebase.auth.Auth.Persistence;
 }
 export interface IDBAuthConnectOptions extends IDBBaseConnectOptions {
   appMode: "authed";
@@ -183,11 +186,10 @@ export class DB {
         }
       });
 
-      if (!options.dontStartListeners) {
-        // We only use dontStartListeners during tests. And during tests which run in NodeJS,
-        // the session persistence mode is not allowed.
-        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
-      }
+      // SESSION auth persistence is used so each new tab or window gets its own Firebase authentication
+      // Unless overridden this applies to all app modes (qa, dev, app, auth, test)
+      firebase.auth().setPersistence(options.authPersistence || firebase.auth.Auth.Persistence.SESSION);
+
       if (options.appMode === "authed") {
         firebase.auth()
           .signOut()
