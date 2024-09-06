@@ -167,6 +167,7 @@ context('Geometry Tool', function () {
     geometryToolTile.selectGraphPoint(1, 1);
     geometryToolTile.getGraphPoint().eq(0).should("have.attr", "fill", "#0069ff"); // $data-blue
     geometryToolTile.getSelectedGraphPoint().should("have.length", 1);
+
     // set label options
     geometryToolTile.getGraphPointLabel().contains('A').should('not.exist');
     clueCanvas.clickToolbarButton('geometry', 'label');
@@ -205,20 +206,77 @@ context('Geometry Tool', function () {
     geometryToolTile.getPhantomGraphPoint().should("have.length", 1);
 
     // Create vertex angle
+    cy.log('Create vertex angle');
+    clueCanvas.clickToolbarButton('geometry', 'select');
     geometryToolTile.getGraphPointLabel().contains('90°').should('not.exist');
     clueCanvas.clickToolbarButton('geometry', 'select');
     geometryToolTile.selectGraphPoint(10, 5); // this point is a 90 degree angle
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.toggleAngleCheckbox();
     geometryToolTile.getGraphPointLabel().contains('90°').should('exist');
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.toggleAngleCheckbox();
+    geometryToolTile.getGraphPointLabel().contains('90°').should('not.exist');
+
+
+    // The label tests below keep misbehaving: PT: #188159177
+
+    //Label the polygon
+    cy.log('label the polygon');
+    clueCanvas.clickToolbarButton('geometry', 'select');
+    geometryToolTile.getGraphPolygon().click(50, 50, { force: true,  });
+    geometryToolTile.getSelectedGraphPoint().should('have.length', 3);
+    geometryToolTile.getGraphPointLabel().contains('12.').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('ABC').should('not.exist');
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.getModalTitle().should('include.text', 'Label');
+    geometryToolTile.chooseLabelOption('length');
+    geometryToolTile.getGraphPointLabel().contains('12.').should('exist');
+    cy.log('label ABC');
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.getModalLabelInput().should('have.value', 'ABC');
+    geometryToolTile.chooseLabelOption('label');
+    geometryToolTile.getGraphPointLabel().contains('12.').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('ABC').should('exist');
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.chooseLabelOption('none');
+    geometryToolTile.clickGraphPosition(0, 0); // deselect polygon
+
+    // Label a segment
+    geometryToolTile.getGraphPointLabel().contains('AB').should('not.exist');
+    geometryToolTile.getGraphLine().should('have.length', 5); // 0-1 = axis lines, 2-4 = triangle
+    geometryToolTile.getGraphLine().eq(4).click({ force: true });
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.getModalTitle().should('contain.text', 'Segment Label/Value');
+    geometryToolTile.chooseLabelOption('label');
+    geometryToolTile.getGraphPointLabel().contains('AB').should('exist');
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.chooseLabelOption('length');
+    geometryToolTile.getGraphPointLabel().contains('AB').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('5').should('exist');
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.chooseLabelOption('none');
+    geometryToolTile.getGraphPointLabel().contains('AB').should('not.exist');
+    geometryToolTile.getGraphPointLabel().contains('5').should('not.exist');
+    geometryToolTile.clickGraphPosition(20, 20); // deselect the segment
 
     // Test keyboard functions to move the selected point(s)
     cy.log('Test keyboard functions');
 
+    // turn on 90 degree angle for check
+    clueCanvas.clickToolbarButton('geometry', 'select');
+    geometryToolTile.selectGraphPoint(10, 5); // this point is a 90 degree angle
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.toggleAngleCheckbox();
+    geometryToolTile.getGraphPointLabel().contains('90°').should('exist');
+
     // Select the graph point at (5, 5)
-    geometryToolTile.selectGraphPoint(5, 5);
+    cy.log('select graph point');
+    clueCanvas.clickToolbarButton('geometry', 'select');
+    geometryToolTile.clickGraphPosition(5, 5);
 
     // Verify that the point has been selected
+    cy.log('graph point selected');
     geometryToolTile.getSelectedGraphPoint().should('have.length', 1);
 
     // Store the original coordinates for comparison
@@ -229,6 +287,8 @@ context('Geometry Tool', function () {
     });
 
     // Move the selected point up using the arrow key
+    clueCanvas.clickToolbarButton('geometry', 'select');
+    geometryToolTile.clickGraphPosition(5, 5); // shared point
     geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 38 }); // simulate up arrow key press
 
     // Move the selected point right using the arrow key
@@ -243,7 +303,7 @@ context('Geometry Tool', function () {
         expect(newCy).to.be.lessThan(originalCcy);
     });
 
-    // Additionally, check that the angle label has changed from its original value (if applicable)
+    // Also check that the angle label has changed from its original value
     geometryToolTile.getAngleAdornment().should(($label) => {
         const angleText = $label.text();
         expect(angleText).not.to.equal('90'); // 90° was the original value
@@ -262,45 +322,15 @@ context('Geometry Tool', function () {
         expect(resetCy).to.equal(originalCcy);
     });
 
-    // Verify that the angle label returns to its original value (if applicable)
+    // Verify that the angle label returns to its original value
     geometryToolTile.getGraphPointLabel().contains('90°').should('exist');
 
-    // The label tests below keep misbehaving: PT: #188159177
-
-    // Label the polygon
-    // geometryToolTile.getGraphPolygon().click(50, 50, { force: true,  });
-    // geometryToolTile.getSelectedGraphPoint().should('have.length', 2);
-    // geometryToolTile.getGraphPointLabel().contains('12.').should('not.exist');
-    // geometryToolTile.getGraphPointLabel().contains('CBA').should('not.exist');
-    // clueCanvas.clickToolbarButton('geometry', 'label');
-    // geometryToolTile.getModalTitle().should('include.text', 'Segment Label/Value');
-     //geometryToolTile.chooseLabelOption('length');
-    // geometryToolTile.getGraphPointLabel().contains('7.').should('exist');
-    // clueCanvas.clickToolbarButton('geometry', 'label');
-    // geometryToolTile.getModalLabelInput().should('have.value', 'AC');
-    // geometryToolTile.chooseLabelOption('label');
-    // geometryToolTile.getGraphPointLabel().contains('12.').should('not.exist');
-    // //geometryToolTile.getGraphPointLabel().contains('AC').should('exist');
-    // clueCanvas.clickToolbarButton('geometry', 'label');
-    // geometryToolTile.chooseLabelOption('none');
-    // geometryToolTile.clickGraphPosition(0, 0); // deselect polygon
-
-    // // Label a segment
-    // geometryToolTile.getGraphPointLabel().contains('AB').should('exist');
-    // geometryToolTile.getGraphLine().should('have.length', 5); // 0-1 = axis lines, 2-4 = triangle
-    // geometryToolTile.getGraphLine().eq(4).click({ force: true });
-    // clueCanvas.clickToolbarButton('geometry', 'label');
-    // geometryToolTile.getModalTitle().should('include.text', 'Segment Label/Value');
-    // geometryToolTile.chooseLabelOption('label');
-    // geometryToolTile.getGraphPointLabel().contains('BC').should('exist');
-    // clueCanvas.clickToolbarButton('geometry', 'label');
-    // geometryToolTile.chooseLabelOption('length');
-    // geometryToolTile.getGraphPointLabel().contains('BC').should('not.exist');
-    // geometryToolTile.getGraphPointLabel().contains('5').should('exist');
-    // clueCanvas.clickToolbarButton('geometry', 'label');
-    // geometryToolTile.chooseLabelOption('none');
-    // geometryToolTile.getGraphPointLabel().contains('BC').should('not.exist');
-    // geometryToolTile.getGraphPointLabel().contains('5').should('not.exist');
+    // turn off 90 degree angle for check
+    clueCanvas.clickToolbarButton('geometry', 'select');
+    geometryToolTile.selectGraphPoint(10, 5); // this point is a 90 degree angle
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.toggleAngleCheckbox();
+    geometryToolTile.getGraphPointLabel().contains('90°').should('not.exist');
 
     // Change color of polygon
     geometryToolTile.selectGraphPoint(7, 6); // click middle of polygon to select it
