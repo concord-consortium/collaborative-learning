@@ -123,7 +123,7 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphAxisTickLabels().last().should("have.text", "15");
   });
 
-  it.only('works in all four modes', () => {
+  it('works in all four modes', () => {
     beforeTest();
     clueCanvas.addTile('geometry');
     geometryToolTile.getGraph().should("exist");
@@ -218,9 +218,6 @@ context('Geometry Tool', function () {
     geometryToolTile.toggleAngleCheckbox();
     geometryToolTile.getGraphPointLabel().contains('90°').should('not.exist');
 
-
-    // The label tests below keep misbehaving: PT: #188159177
-
     //Label the polygon
     cy.log('label the polygon');
     clueCanvas.clickToolbarButton('geometry', 'select');
@@ -232,7 +229,6 @@ context('Geometry Tool', function () {
     geometryToolTile.getModalTitle().should('include.text', 'Label');
     geometryToolTile.chooseLabelOption('length');
     geometryToolTile.getGraphPointLabel().contains('12.').should('exist');
-    cy.log('label ABC');
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.getModalLabelInput().should('have.value', 'ABC');
     geometryToolTile.chooseLabelOption('label');
@@ -258,10 +254,10 @@ context('Geometry Tool', function () {
     geometryToolTile.chooseLabelOption('none');
     geometryToolTile.getGraphPointLabel().contains('AB').should('not.exist');
     geometryToolTile.getGraphPointLabel().contains('5').should('not.exist');
-    geometryToolTile.clickGraphPosition(20, 20); // deselect the segment
+    geometryToolTile.clickGraphPosition(0, 0); // deselect the segment
 
     // Test keyboard functions to move the selected point(s)
-    cy.log('Test keyboard functions');
+    cy.log('Test keyboard functions to move polygon points');
 
     // turn on 90 degree angle for check
     clueCanvas.clickToolbarButton('geometry', 'select');
@@ -325,7 +321,7 @@ context('Geometry Tool', function () {
     // Verify that the angle label returns to its original value
     geometryToolTile.getGraphPointLabel().contains('90°').should('exist');
 
-    // turn off 90 degree angle for check
+    // Turn off 90 degree angle label for check
     clueCanvas.clickToolbarButton('geometry', 'select');
     geometryToolTile.selectGraphPoint(10, 5); // this point is a 90 degree angle
     clueCanvas.clickToolbarButton('geometry', 'label');
@@ -433,6 +429,26 @@ context('Geometry Tool', function () {
       }
     });
 
+    // Add length labels to two line segments
+    cy.log('Add length labels to two line segments');
+
+    // Select line segments by clicking between two points
+    geometryToolTile.clickGraphPosition(7.5, 5); // Middle of the first segment between (5, 5) and (10, 5)
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.getModalTitle().should('contain.text', 'Length');
+    geometryToolTile.chooseLabelOption('length');
+
+    geometryToolTile.clickGraphPosition(15, 7.5); // Middle of the second segment between (15, 5) and (15, 10)
+    clueCanvas.clickToolbarButton('geometry', 'label');
+    geometryToolTile.getModalTitle().should('contain.text', 'Length');
+    geometryToolTile.chooseLabelOption('length');
+    cy.log('let us figure out the labels here');
+    geometryToolTile.clickGraphPosition(0, 0); // deselect
+
+    // Verify that the two line segments were created
+    geometryToolTile.getGraphPointLabel().contains('10.0').should('exist');
+    geometryToolTile.getGraphPointLabel().contains('5.0').should('exist');
+
     // Move the point
     cy.log('Move the point');
     clueCanvas.clickToolbarButton('geometry', 'select');
@@ -461,6 +477,10 @@ context('Geometry Tool', function () {
       geometryToolTile.getGraphPointLabel().contains(`${newAngle}°`).should('exist'); // Check if angle decreased by 1 degree
     });
 
+    // Verify that the two line segments have changed
+    geometryToolTile.getGraphPointLabel().contains('10.1').should('exist');
+    geometryToolTile.getGraphPointLabel().contains('4.9').should('exist');
+
     // Move the point back to the original position
     cy.log('Move the point back to the original position');
     geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 37 }); // simulate left arrow key press
@@ -485,6 +505,10 @@ context('Geometry Tool', function () {
     cy.get('@initialAngle').then((initialAngle) => {
       geometryToolTile.getGraphPointLabel().contains(`${initialAngle}°`).should('exist');
     });
+
+    // Verify that the two line segments returned to their original values
+    geometryToolTile.getGraphPointLabel().contains('10.0').should('exist');
+    geometryToolTile.getGraphPointLabel().contains('5.0').should('exist');
 
     // Verify the point is still shared
     cy.log('Verify that the point is still shared');
@@ -567,7 +591,7 @@ context('Geometry Tool', function () {
     clueCanvas.clickToolbarButton('geometry', 'delete');
     geometryToolTile.getGraphCircle().should("have.length", 0);
     geometryToolTile.getGraphPoint().should("have.length", 1);
-    geometryToolTile.getGraphPolygon().should("have.length", 0); // Verify the polygon is created
+    geometryToolTile.getGraphPolygon().should("have.length", 0);
   });
 
   it('will test Geometry tile undo redo', () => {
