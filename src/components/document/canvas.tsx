@@ -119,6 +119,20 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     });
   };
 
+  componentDidUpdate(prevProps: IProps) {
+    if (prevProps.document !== this.props.document) {
+      this.setState((prevState, props) => {
+        return this.updateHistoryDocument(prevState, prevState.showPlaybackControls);
+      });
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.state.historyDocumentCopy) {
+      destroy(this.state.historyDocumentCopy);
+    }
+  }
+
   public render() {
     if (this.context && !this.props.readOnly) {
       // update the editable api interface used by the toolbar
@@ -308,22 +322,9 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   private handleTogglePlaybackControlComponent = () => {
     this.setState((prevState, props) => {
       const showPlaybackControls = !prevState.showPlaybackControls;
-      const historyDocumentCopy = showPlaybackControls ?
-        this.createHistoryDocumentCopy() : undefined;
-
-      if (DEBUG_HISTORY) {
-        (window as any).historyDocument = historyDocumentCopy;
-      }
-
-      if (prevState.historyDocumentCopy) {
-        destroy(prevState.historyDocumentCopy);
-      }
       logHistoryEvent({documentId: this.props.document?.key || '',
         action: showPlaybackControls ? "showControls": "hideControls" });
-      return {
-        showPlaybackControls,
-        historyDocumentCopy
-      };
+      return this.updateHistoryDocument(prevState, showPlaybackControls);
     });
   };
 
@@ -342,16 +343,28 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     }
   };
 
+  private updateHistoryDocument = (prevState: IState, showPlaybackControls: boolean) => {
+    const historyDocumentCopy = showPlaybackControls ?
+      this.createHistoryDocumentCopy() : undefined;
+
+    if (DEBUG_HISTORY) {
+      (window as any).historyDocument = historyDocumentCopy;
+    }
+
+    if (prevState.historyDocumentCopy) {
+      destroy(prevState.historyDocumentCopy);
+    }
+    return {
+      showPlaybackControls,
+      historyDocumentCopy
+    };
+  };
+
   private getDocumentToShow = () => {
     const {showPlaybackControls, historyDocumentCopy: documentToShow} = this.state;
-    if (showPlaybackControls && documentToShow && documentToShow.key === this.props.document?.key) {
+    if (showPlaybackControls && documentToShow) {
       return documentToShow;
     } else {
-      // If we are showing a new document, make sure the history document gets updated. This may not happen
-      // otherwise if the user is using the document scroller and the playback controls are open.
-      if (showPlaybackControls) {
-        this.handleTogglePlaybackControlComponent();
-      }
       return this.props.document;
     }
   };
