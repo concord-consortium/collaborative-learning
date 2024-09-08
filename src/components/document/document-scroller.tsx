@@ -16,12 +16,13 @@ import "./document-scroller.scss";
 
 interface IProps {
   documentGroup?: DocumentGroup;
-  openDocumentKey?: string;
 }
 
 export const DocumentScroller: React.FC<IProps> = observer(function DocumentThumbnailCarousel(props: IProps) {
-  const { documentGroup, openDocumentKey } = props;
-  const { persistentUI, sortedDocuments } = useStores();
+  const { documentGroup } = props;
+  const { documents, networkDocuments, persistentUI, sortedDocuments } = useStores();
+  const tabState = persistentUI.tabs.get(ENavTab.kSortWork);
+  const openDocumentKey = tabState?.openSubTab && tabState?.openDocuments.get(tabState.openSubTab);
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const documentListRef = useRef<HTMLDivElement>(null);
   const [scrollToLocation, setScrollToLocation] = useState(0);
@@ -30,7 +31,11 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
   const maxScrollTo = scrollWidth - panelWidth;
 
   const handleSelectDocument = async (document: DocumentModelType) => {
-    persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, document.key);
+    if (!tabState?.openSubTab) {
+      console.error("No openSubTab found in persistentUI");
+      return;
+    }
+    persistentUI.openSubTabDocument(ENavTab.kSortWork, tabState?.openSubTab, document.key);
     logDocumentViewEvent(document);
   };
 
@@ -42,14 +47,15 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
   };
 
   const getDocument = (docKey: string) => {
-    const document = sortedDocuments.documents.all.find((doc: DocumentModelType) => doc.key === docKey);
-    if (document) return document;
+    const openDoc = documents.getDocument(docKey) ||
+                      networkDocuments.getDocument(docKey);
+    if (openDoc) {
+      return openDoc;
+    }
 
     // Calling `fetchFullDocument` will update the `documents` store with the full document,
     // triggering a re-render of this component since it's an observer.
     sortedDocuments.fetchFullDocument(docKey);
-
-    return undefined;
   };
 
   const renderThumbnail = (docKey: string) => {

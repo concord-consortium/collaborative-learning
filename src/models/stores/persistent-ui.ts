@@ -36,9 +36,12 @@ export const PersistentUIModel = types
     dividerPosition: kDividerHalf,
     activeNavTab: types.maybe(types.string),
     docFilter: types.optional(DocFilterTypeEnum, "Problem"),
+    primarySortBy: types.optional(types.string, "Group"),
+    secondarySortBy: types.optional(types.string, "None"),
     showAnnotations: true,
     showTeacherContent: true,
     showChatPanel: false,
+    showDocumentScroller: true,
     tabs: types.map(UITabModel),
     problemWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string),
@@ -108,8 +111,11 @@ export const PersistentUIModel = types
       toggleShowTeacherContent(show: boolean) {
         self.showTeacherContent = show;
       },
-      toggleShowChatPanel(show:boolean) {
+      toggleShowChatPanel(show: boolean) {
         self.showChatPanel = show;
+      },
+      toggleShowDocumentScroller(show: boolean) {
+        self.showDocumentScroller = show;
       },
       setActiveNavTab(tab: string) {
         self.activeNavTab = tab;
@@ -191,7 +197,13 @@ export const PersistentUIModel = types
       },
       setDocFilter(docFilter: DocFilterType) {
         self.docFilter = docFilter;
-      }
+      },
+      setPrimarySortBy(sort: string) {
+        self.primarySortBy = sort;
+      },
+      setSecondarySortBy(sort: string) {
+        self.secondarySortBy = sort;
+      },
     };
   })
   .actions(self => ({

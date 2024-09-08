@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import { useAppConfig, useProblemStore,
@@ -19,12 +19,11 @@ import ToggleDocumentScrollerIcon from "../../../src/assets/show-hide-thumbnail-
 import SwitchDocumentIcon from "../../assets/scroll-arrow-small-icon.svg";
 
 interface IProps {
-  openDocumentsGroup?: DocumentGroup;
-  openDocumentKey: string;
+  openDocumentsGroup: DocumentGroup;
 }
 
 export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWorkDocumentArea(props: IProps) {
-  const {openDocumentsGroup, openDocumentKey} = props;
+  const { openDocumentsGroup } = props;
   const store = useStores();
   const ui = useUIStore();
   const persistentUI = usePersistentUIStore();
@@ -32,10 +31,30 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   const classStore = useClassStore();
   const problemStore = useProblemStore();
   const appConfigStore = useAppConfig();
-  const [openDocument, setOpenDocument] = useState<DocumentModelType|undefined>();
-  const [showScroller, setShowScroller] = useState(!!openDocumentsGroup);
-  const [prevBtnEnabled, setPrevBtnEnabled] = useState(openDocumentKey !== openDocumentsGroup?.documents.at(0)?.key);
-  const [nextBtnEnabled, setNextBtnEnabled] = useState(openDocumentKey !== openDocumentsGroup?.documents.at(-1)?.key);
+  const tabState = persistentUI.tabs.get(ENavTab.kSortWork);
+  const openDocumentKey = tabState?.openSubTab && tabState?.openDocuments.get(tabState.openSubTab);
+  const showScroller = persistentUI.showDocumentScroller;
+  const [prevBtnEnabled, setPrevBtnEnabled] = useState(openDocumentKey !== openDocumentsGroup.documents.at(0)?.key);
+  const [nextBtnEnabled, setNextBtnEnabled] = useState(openDocumentKey !== openDocumentsGroup.documents.at(-1)?.key);
+
+  if (!openDocumentKey) {
+    console.warn("No open document key available, returning null.");
+    return null;
+  }
+
+  const getOpenDocument = () => {
+    const openDoc = store.documents.getDocument(openDocumentKey) ||
+                      store.networkDocuments.getDocument(openDocumentKey);
+    if (openDoc) {
+      return openDoc;
+    }
+
+    // Calling `fetchFullDocument` will update the `documents` store with the full document,
+    // triggering a re-render of this component since it's an observer.
+    store.sortedDocuments.fetchFullDocument(openDocumentKey);
+  };
+
+  const openDocument = getOpenDocument();
   const isVisible = openDocument?.isAccessibleToUser(user, store.documents);
   const showPlayback = user.type && appConfigStore.enableHistoryRoles.includes(user.type);
   const showExemplarShare = user.type === "teacher" && openDocument && isExemplarType(openDocument.type);
@@ -74,7 +93,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   };
 
   const handleToggleScroller = () => {
-    setShowScroller(!showScroller);
+    persistentUI.toggleShowDocumentScroller(!showScroller);
   };
 
   const handleSwitchDocument = (direction: "previous" | "next") => () => {
@@ -82,36 +101,23 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
     const currentIndex = docKeys.indexOf(openDocumentKey);
     const newIndex = direction === "previous" ? currentIndex - 1 : currentIndex + 1;
     const newKey = docKeys[newIndex];
-    if (newKey) {
-      persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, newKey);
+    const openSubTab = persistentUI.tabs.get(ENavTab.kSortWork)?.openSubTab;
+    if (!openSubTab) {
+      console.error("No openSubTab found in persistentUI");
+      return;
     }
-
+    if (newKey) {
+      persistentUI.openSubTabDocument(ENavTab.kSortWork, openSubTab, newKey);
+    }
     setPrevBtnEnabled(newIndex !== 0);
     setNextBtnEnabled(newIndex !== docKeys.length - 1);
   };
 
   const sideClasses = { secondary: false, primary: false && !false };
 
-  useEffect(() => {
-    const openDoc = store.documents.getDocument(openDocumentKey) ||
-                       store.networkDocuments.getDocument(openDocumentKey);
-    if (openDoc) {
-      setOpenDocument(openDoc);
-      return;
-    }
-
-    const fetchOpenDoc = store.sortedDocuments.fetchFullDocument(openDocumentKey);
-    fetchOpenDoc.then((doc) => {
-      setOpenDocument(doc);
-    });
-
-    // TODO: Figure out how to cancel fetch if the component is unmounted before the fetch is complete
-
-  }, [openDocumentKey, store.documents, store.networkDocuments, store.sortedDocuments]);
-
   return (
     <>
-      {showScroller && <DocumentScroller documentGroup={openDocumentsGroup} openDocumentKey={openDocumentKey} />}
+      {showScroller && <DocumentScroller documentGroup={openDocumentsGroup} />}
       <div className={classNames("focus-document", ENavTab.kSortWork, sideClasses)}>
         <div className={classNames("document-header", ENavTab.kSortWork, sectionClass, sideClasses)}
               onClick={() => ui.setSelectedTile()}>
@@ -158,7 +164,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
           </div>
         </div>
       {
-          openDocument && isVisible &&
+        openDocument && isVisible &&
           <EditableDocumentContent
             mode={"1-up"}
             isPrimary={false}
@@ -169,15 +175,12 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
           />
       }
       {
-          openDocument && !isVisible &&
+        openDocument && !isVisible &&
           <div className="document-error">
             <p>This document is not shared with you right now.</p>
           </div>
       }
-      {
-          !openDocument &&
-          <DocumentLoadingSpinner/>
-      }
+      { !openDocument && <DocumentLoadingSpinner/> }
       </div>
     </>
   );

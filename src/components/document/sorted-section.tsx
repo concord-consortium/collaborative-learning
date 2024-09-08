@@ -23,6 +23,13 @@ interface IProps {
   secondarySort: SecondarySortType;
 }
 
+export interface IOpenDocumentsGroupMetadata {
+  primaryType: string;
+  primaryLabel: string;
+  secondaryType?: string;
+  secondaryLabel?: string;
+}
+
 export const SortedSection: React.FC<IProps> = observer(function SortedDocuments(props: IProps) {
   const { docFilter, documentGroup, idx, secondarySort } = props;
   const { persistentUI, sortedDocuments } = useStores();
@@ -40,9 +47,18 @@ export const SortedSection: React.FC<IProps> = observer(function SortedDocuments
     return undefined;
   };
 
-  const handleSelectDocument = async (document: DocumentModelType | IDocumentMetadata) => {
-    persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, document.key);
-    logDocumentViewEvent(document);
+  const handleSelectDocument = (docGroup: DocumentGroup) => {
+    const { label, sortType } = docGroup;
+    const openSubTabInfo: IOpenDocumentsGroupMetadata = secondarySort === "None"
+                             ? { primaryLabel: label, primaryType: sortType }
+                             : { primaryLabel: documentGroup.label, primaryType: documentGroup.sortType,
+                                 secondaryLabel: label, secondaryType: sortType };
+
+    return async (document: DocumentModelType | IDocumentMetadata) => {
+      const openSubTab = JSON.stringify(openSubTabInfo);
+      persistentUI.openSubTabDocument(ENavTab.kSortWork, openSubTab, document.key);
+      logDocumentViewEvent(document);
+    };
   };
 
   const handleToggleShowDocuments = () => {
@@ -60,7 +76,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedDocuments
              tab={ENavTab.kSortWork}
              shouldHandleStarClick
              allowDelete={false}
-             onSelectDocument={handleSelectDocument}
+             onSelectDocument={handleSelectDocument(documentGroup)}
            />;
   };
 
@@ -71,10 +87,10 @@ export const SortedSection: React.FC<IProps> = observer(function SortedDocuments
 
     const renderDocumentGroup = (group: DocumentGroup) => (
       <DocumentGroupComponent
-        key={group.label}
+        key={`${group.label}-${group.sortType}`}
         documentGroup={group}
         secondarySort={secondarySort}
-        onSelectDocument={handleSelectDocument}
+        onSelectDocument={handleSelectDocument(group)}
       />
     );
 

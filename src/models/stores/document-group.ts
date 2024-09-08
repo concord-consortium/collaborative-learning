@@ -20,8 +20,15 @@ import SparrowHeaderIcon from "../../assets/icons/sort-by-tools/sparrow-id.svg";
 interface IDocumentGroup {
   icon?:FC<SVGProps<SVGSVGElement>>;
   label: string;
+  sortType: SecondarySortType;
   documents: IDocumentMetadata[];
   stores: ISortedDocumentsStores;
+}
+
+interface IBuildDocumentCollectionProps {
+  docMap: Map<string, IDocumentMetadata[]>;
+  sortedSectionLabels: string[];
+  sortType: SecondarySortType;
 }
 
 /*
@@ -44,23 +51,27 @@ interface IDocumentGroup {
 export class DocumentGroup {
   stores: ISortedDocumentsStores;
   label: string;
+  sortType: SecondarySortType;
   documents: IDocumentMetadata[];
   firestoreTagDocumentMap = new Map<string, Set<string>>();
   icon?: FC<SVGProps<SVGSVGElement>>;
 
   constructor(props: IDocumentGroup) {
     makeAutoObservable(this);
-    const { stores, label, documents, icon } = props;
+    const { stores, label, sortType, documents, icon } = props;
     this.stores = stores;
     this.label = label;
+    this.sortType = sortType;
     this.documents = documents;
     this.icon = icon;
   }
 
-  buildDocumentCollection(sortedSectionLabels: string[], docMap: Map<string, IDocumentMetadata[]>): DocumentGroup[] {
+  buildDocumentCollection(props: IBuildDocumentCollectionProps): DocumentGroup[] {
+    const { docMap, sortedSectionLabels, sortType } = props;
     return sortedSectionLabels.map(label => {
       return new DocumentGroup({
         label,
+        sortType,
         documents: docMap.get(label) ?? [],
         stores: this.stores
       });
@@ -87,13 +98,13 @@ export class DocumentGroup {
   get byGroup(): DocumentGroup[] {
     const docMap = createDocMapByGroups(this.documents, this.stores.groups.groupForUser);
     const sortedSectionLabels = sortGroupSectionLabels(Array.from(docMap.keys()));
-    return this.buildDocumentCollection(sortedSectionLabels, docMap);
+    return this.buildDocumentCollection({sortedSectionLabels, sortType: "Group", docMap});
   }
 
   get byName(): DocumentGroup[] {
     const docMap = createDocMapByNames(this.documents, this.stores.class.getUserById);
     const sortedSectionLabels = sortNameSectionLabels(Array.from(docMap.keys()));
-    return this.buildDocumentCollection(sortedSectionLabels, docMap);
+    return this.buildDocumentCollection({sortedSectionLabels, sortType: "Name", docMap});
   }
 
   get byStrategy(): DocumentGroup[] {
@@ -106,11 +117,7 @@ export class DocumentGroup {
       const label = tagWithDocs.tagValue;
       const docKeys = tagWithDocs.docKeysFoundWithTag;
       const documents = this.documents.filter((doc: IDocumentMetadata) => docKeys.includes(doc.key));
-      sortedDocsArr.push(new DocumentGroup({
-        label,
-        documents,
-        stores: this.stores
-      }));
+      sortedDocsArr.push(new DocumentGroup({label, sortType: "Strategy", documents, stores: this.stores }));
     });
     return sortedDocsArr;
   }
@@ -122,6 +129,7 @@ export class DocumentGroup {
     const sectionedDocuments = Array.from(tileTypeToDocumentsMap.keys()).map(tileType => {
       const section: DocumentGroup = new DocumentGroup({
         label: tileType,
+        sortType: "Tools",
         documents: tileTypeToDocumentsMap.get(tileType)?.documents ?? [],
         stores: this.stores
       });
@@ -149,6 +157,6 @@ export class DocumentGroup {
   get byBookmarked(): DocumentGroup[] {
     const docMap = createDocMapByBookmarks(this.documents, this.stores.bookmarks);
     const sortedSectionLabels = ["Bookmarked", "Not Bookmarked"];
-    return this.buildDocumentCollection(sortedSectionLabels, docMap);
+    return this.buildDocumentCollection({sortedSectionLabels, sortType: "Bookmarked", docMap});
   }
 }
