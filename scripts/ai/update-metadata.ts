@@ -60,6 +60,12 @@ const collectionUrl = getFirestoreBasePath(portal, demo);
 console.log(`*** Updating docs in ${collectionUrl} ***`);
 const documentCollection = admin.firestore().collection(collectionUrl);
 
+const offeringInfoFile = `${sourcePath}/offering-info.json`;
+let offeringInfo;
+if (!demo) {
+  offeringInfo = JSON.parse(fs.readFileSync(offeringInfoFile, "utf8"));
+}
+
 let processedFiles = 0;
 let metadataUpdated = 0;
 let metadataCreated = 0;
@@ -116,19 +122,26 @@ async function processFile(file: string) {
     };
 
     if (!demo) {
-      const offeringInfoFile = `${sourcePath}/offering-info.json`;
-      const offeringInfo = JSON.parse(fs.readFileSync(offeringInfoFile, "utf8"));
-
       const offering = offeringInfo[offeringId];
       if (offering) {
         const { activity_url } = offering;
-        const { investigation, problem, unit } = getProblemDetails(activity_url);
+        try {
+          const { investigation, problem, unit } = getProblemDetails(activity_url);
 
-        unitFields = {
-          problem,
-          investigation,
-          unit
-        };
+          if (unit && !problem) {
+            console.log("Found unit but not problem in activity_url", activity_url);
+          }
+
+          unitFields = {
+            problem,
+            investigation,
+            unit
+          };
+        } catch (e) {
+          console.error(e, {offeringId, offering});
+          console.log("Skipping document because it has an invalid offering", {offeringId, offering});
+          return;
+        }
       }
     } else {
       if (offeringId) {
@@ -213,11 +226,6 @@ async function processFile(file: string) {
         properties: {},
 
         strategies,
-        // For now we just handle demo documents where the teachers are hardcoded.
-        // To support Portal launches we'll either have to get the list of teachers from the offering
-        // info, or refactor the code so this teacher list isn't needed here. See:
-        // https://docs.google.com/document/d/1VDr-nkthu333eVD0BQXPYPVD8kt60qkMYq2jRkXza9c/edit#heading=h.pw87siu4ztwo
-        teachers: ["1001", "1002", "1003"],
         tools,
         title: documentTitle || null,
         type: documentType,
@@ -225,15 +233,19 @@ async function processFile(file: string) {
         visibility
       };
 
+      if (!documentType) {
+        console.log("Skipping document because it has no documentType", documentId);
+        return;
+      }
+
       // Use a prefix of `uid:[owner_uid]` for metadata documents that we create for more
       // info see:
       // https://docs.google.com/document/d/1VDr-nkthu333eVD0BQXPYPVD8kt60qkMYq2jRkXza9c/edit#heading=h.5t2tt6igiiou
       const metaDataDocId = `uid:${userId}_${documentId}`;
 
-      console.log(documentId, "Created new metadata", metaDataDocId);
       const newMetaDataDoc = documentCollection.doc(metaDataDocId);
       await newMetaDataDoc.create(metaData);
-      console.log(documentId, "Created new metadata", metaDataDocId);
+      console.log(processedFiles, documentId, "Created new metadata", metaDataDocId);
       metadataCreated++;
     } else {
       // There can be multiple metadata documents for each actual document.
@@ -241,12 +253,14 @@ async function processFile(file: string) {
       // stops creating multiple copies. See:
       // https://docs.google.com/document/d/1VDr-nkthu333eVD0BQXPYPVD8kt60qkMYq2jRkXza9c/edit#heading=h.5t2tt6igiiou
       documentSnapshots.forEach(doc => {
-        doc.ref.update(unitFields as any);
-        console.log(documentId, doc.id, "Updated metadata with", unitFields);
-        doc.ref.update({ strategies, tools } as any);
-        console.log(documentId, doc.id, "Updated metadata with", { strategies, tools });
-        doc.ref.update({ visibility } as any);
-        console.log(documentId, doc.id, "Updated metadata with", { visibility });
+        const newMetadata = {
+          ...unitFields,
+          strategies,
+          tools,
+          visibility
+        };
+        doc.ref.update(newMetadata as any);
+        console.log(processedFiles, documentId, doc.id, "Updated metadata with", newMetadata);
         metadataUpdated++;
       });
     }
@@ -269,6 +283,7 @@ const fileBatchSize = 8;
 await new Promise<void>((resolve) => {
   // Process every file in the source directory
   fs.readdir(sourcePath, async (_error, files) => {
+    console.log(`*** Processing ${files.length} documents ***`);
     for (const file of files) {
       checkedFiles++;
       fileBatch.push(file);

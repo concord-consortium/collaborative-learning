@@ -17,9 +17,14 @@
     .arrow-stem {
       stroke-opacity: 0;
       stroke-width: 11px;
+      pointer-events: none;
+
+      .annotation-layer.show-handles & {
+        pointer-events: visible;
+      }
     }
 
-    &:hover {
+    .annotation-layer.show-handles &:hover {
       .arrow-stem {
         stroke-opacity: .125;
       }

@@ -1,6 +1,6 @@
 import { autorun, flowResult, runInAction, when } from "mobx";
 
-import { parseFirebaseImageUrl } from "../../functions/src/shared-utils";
+import { parseFirebaseImageUrl } from "../../shared/shared-utils";
 import { DB } from "../lib/db";
 import * as ImageUtils from "../utilities/image-utils";
 import placeholderImage from "../assets/image_placeholder.png";

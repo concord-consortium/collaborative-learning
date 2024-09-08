@@ -25,6 +25,6 @@
     },
     "types": ["w3c-web-serial", "gtag.js"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "shared/*"],
   "exclude": ["**/node_modules", "**/.*/"]
 }
