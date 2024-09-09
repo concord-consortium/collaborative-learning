@@ -32,7 +32,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   };
 
   const normalizeSortString = (sort: string) => {
-    return sort === "Strategy" ? sortTagPrompt : sort;
+    return sort === sortTagPrompt ? "Strategy" : sort;
   };
 
   const handlePrimarySortBySelection = (sort: string) => {
