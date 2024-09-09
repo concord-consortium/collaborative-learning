@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import { useMutation, UseMutationOptions, useQuery, useQueryClient } from "react-query";
 import { ICurriculumMetadata, IDocumentMetadata, IPostDocumentCommentParams,
   isCurriculumMetadata, isDocumentMetadata, isSectionPath
-} from "../../functions/src/shared";
+} from "../../shared/shared";
 import { CommentDocument, CurriculumDocument, DocumentDocument } from "../lib/firestore-schema";
 import { useCollectionOrderedRealTimeQuery, useFirestore, WithId } from "./firestore-hooks";
 import { useFirebaseFunction } from "./use-firebase-function";

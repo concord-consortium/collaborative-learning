@@ -6,7 +6,7 @@ import { ProblemDocument } from '../document/document-types';
 import { ISortedDocumentsStores, SortedDocuments } from "./sorted-documents";
 import { DeepPartial } from "utility-types";
 import { DocumentContentSnapshotType } from "../document/document-content";
-import { IDocumentMetadata } from "../../../functions/src/shared";
+import { IDocumentMetadata } from "../../../shared/shared";
 
 import "../tiles/text/text-registration";
 import "../../plugins/drawing/drawing-registration";

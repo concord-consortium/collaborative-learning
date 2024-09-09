@@ -1,5 +1,5 @@
 import { getParent } from "mobx-state-tree";
-import { IDocumentMetadata } from "../../../functions/src/shared";
+import { IDocumentMetadata } from "../../../shared/shared";
 import { ProblemModelType } from "../curriculum/problem";
 import { SectionModelType } from "../curriculum/section";
 import { getSectionPath } from "../curriculum/unit";

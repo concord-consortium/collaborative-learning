@@ -3,7 +3,7 @@ import { useContext, useMemo } from "react";
 import { DB } from "../lib/db";
 import {
   buildSectionPath, getCurriculumMetadata, ICurriculumMetadata, IDocumentMetadata, isSectionPath, networkDocumentKey
-} from "../../functions/src/shared";
+} from "../../shared/shared";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { DocumentsModelType } from "../models/stores/documents";

@@ -6,7 +6,7 @@ import { DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax, kDividerMi
 import { isWorkspaceModelSnapshot, WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ENavTab } from "../view/nav-tabs";
-import { buildSectionPath, getCurriculumMetadata } from "../../../functions/src/shared";
+import { buildSectionPath, getCurriculumMetadata } from "../../../shared/shared";
 import { ExemplarDocument, LearningLogDocument, LearningLogPublication, PersonalDocument,
   PersonalPublication, PlanningDocument, ProblemDocument,
   ProblemPublication, SupportPublication } from "../document/document-types";

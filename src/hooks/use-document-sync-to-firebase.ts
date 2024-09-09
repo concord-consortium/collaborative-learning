@@ -12,7 +12,7 @@ import { isPublishedType, LearningLogDocument, LearningLogPublication, PersonalD
 import { UserModelType } from "../models/stores/user";
 import { Firestore } from "src/lib/firestore";
 import { useMutation, UseMutationOptions } from "react-query";
-import { ITileMapEntry } from "functions/src/shared";
+import { ITileMapEntry } from "../../shared/shared";
 import { DocumentContentSnapshotType } from "src/models/document/document-content";
 import { IArrowAnnotation } from "src/models/annotations/arrow-annotation";
 
