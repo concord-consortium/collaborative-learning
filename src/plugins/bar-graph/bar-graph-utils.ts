@@ -1,5 +1,16 @@
+const kMissingValueString = "(no value)";
 
-// Just wraps the native getBBox method to make it mockable in tests
+// Substitute "(no value)" for missing data
+export function displayValue(attrValue: string | undefined): string {
+  return attrValue ? attrValue : kMissingValueString;
+}
+
+// true if the string matches the pattern that we use for missing data
+export function isMissingData(display: string): boolean {
+  return display === kMissingValueString;
+}
+
+// Wraps the native getBBox method to make it mockable in tests
 export function getBBox(element: SVGGraphicsElement): DOMRect {
     return element.getBBox();
 }

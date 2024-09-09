@@ -8,6 +8,7 @@ import { getSharedModelManager } from "../../models/tiles/tile-environment";
 import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../models/shared/shared-data-set";
 import { ISharedModelManager } from "../../models/shared/shared-model-manager";
 import { clueDataColorInfo } from "../../utilities/color-utils";
+import { displayValue } from "./bar-graph-utils";
 
 export function defaultBarGraphContent(): BarGraphContentModelType {
   return BarGraphContentModel.create({yAxisLabel: "Counts"});
@@ -62,6 +63,7 @@ export const BarGraphContentModel = TileContentModel
      *   { species: "owl", backyard: 1, street: 0, forest: 2 }
      * ]
      * ```
+     * Any empty values of attributes are replaced with "(no value)".
      */
     get dataArray() {
       const dataSet = self.dataSet?.dataSet;
@@ -72,8 +74,8 @@ export const BarGraphContentModel = TileContentModel
       if (secondary) {
         // Two-dimensionsal data
         return cases.reduce((acc, caseID) => {
-          const cat = dataSet.getStrValue(caseID.__id__, primary);
-          const subCat = dataSet.getStrValue(caseID.__id__, secondary);
+          const cat = displayValue(dataSet.getStrValue(caseID.__id__, primary));
+          const subCat = displayValue(dataSet.getStrValue(caseID.__id__, secondary));
           const index = acc.findIndex(r => r[primary] === cat);
           if (index >= 0) {
             const cur = acc[index][subCat];
@@ -87,7 +89,7 @@ export const BarGraphContentModel = TileContentModel
       } else {
         // One-dimensional data
         return cases.reduce((acc, caseID) => {
-          const cat = dataSet.getStrValue(caseID.__id__, primary);
+          const cat = displayValue(dataSet.getStrValue(caseID.__id__, primary));
           const index = acc.findIndex(r => r[primary] === cat);
           if (index >= 0) {
             const cur = acc[index].value;
