@@ -24,7 +24,7 @@ function beforeTest() {
 
 context('Bar Graph Tile', function () {
 
-  it('Basic tile operations, ', function () {
+  it('Basic tile operations', function () {
     beforeTest();
 
     clueCanvas.addTile('bargraph');
