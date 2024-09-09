@@ -47,8 +47,7 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
   };
 
   const getDocument = (docKey: string) => {
-    const openDoc = documents.getDocument(docKey) ||
-                      networkDocuments.getDocument(docKey);
+    const openDoc = documents.getDocument(docKey) || networkDocuments.getDocument(docKey);
     if (openDoc) {
       return openDoc;
     }

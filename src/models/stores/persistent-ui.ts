@@ -2,7 +2,8 @@ import { getSnapshot, applySnapshot, types,
   onSnapshot
 } from "mobx-state-tree";
 import { AppConfigModelType } from "./app-config-model";
-import { DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax, kDividerMin } from "./ui-types";
+import { DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax,
+         kDividerMin } from "./ui-types";
 import { isWorkspaceModelSnapshot, WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ENavTab } from "../view/nav-tabs";
@@ -213,7 +214,7 @@ export const PersistentUIModel = types
      *
      * @param doc a non curriculum document
      */
-    openResourceDocument(doc: DocumentModelType, user?: UserModelType) {
+    openResourceDocument(doc: DocumentModelType, user?: UserModelType, docGroupLabel?: string) {
       const navTab = getNavTabOfDocument(doc, user)  || "";
       let subTab = "";
       if (navTab === ENavTab.kClassWork) {
@@ -239,7 +240,7 @@ export const PersistentUIModel = types
         }
       }
       if (navTab === ENavTab.kSortWork) {
-        subTab = ENavTab.kSortWork;
+        subTab = JSON.stringify({"primaryLabel": docGroupLabel, "primaryType": self.primarySortBy});
       }
 
       if (!subTab) {

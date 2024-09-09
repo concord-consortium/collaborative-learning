@@ -43,19 +43,17 @@ export const SortedSection: React.FC<IProps> = observer(function SortedDocuments
     // Calling `fetchFullDocument` will update the `documents` store with the full document,
     // triggering a re-render of this component since it's an observer.
     sortedDocuments.fetchFullDocument(docKey);
-
-    return undefined;
   };
 
   const handleSelectDocument = (docGroup: DocumentGroup) => {
     const { label, sortType } = docGroup;
-    const openSubTabInfo: IOpenDocumentsGroupMetadata = secondarySort === "None"
-                             ? { primaryLabel: label, primaryType: sortType }
-                             : { primaryLabel: documentGroup.label, primaryType: documentGroup.sortType,
-                                 secondaryLabel: label, secondaryType: sortType };
+    const openSubTabMetadata: IOpenDocumentsGroupMetadata = secondarySort === "None"
+                               ? { primaryLabel: label, primaryType: sortType }
+                               : { primaryLabel: documentGroup.label, primaryType: documentGroup.sortType,
+                                   secondaryLabel: label, secondaryType: sortType };
 
     return async (document: DocumentModelType | IDocumentMetadata) => {
-      const openSubTab = JSON.stringify(openSubTabInfo);
+      const openSubTab = JSON.stringify(openSubTabMetadata);
       persistentUI.openSubTabDocument(ENavTab.kSortWork, openSubTab, document.key);
       logDocumentViewEvent(document);
     };
