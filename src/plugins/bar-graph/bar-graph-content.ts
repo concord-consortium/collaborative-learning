@@ -44,27 +44,61 @@ export const BarGraphContentModel = TileContentModel
     }
   }))
   .views(self => ({
-    // TODO what should this do in the case of no secondary attribute?
+    /**
+     * Returns the dataset data in a format suitable for plotting.
+     *
+     * With a primary attribute "species" and no secondary attribute, this will be something like:
+     * ```json
+     * [
+     *   { species: "cat", value: 7 },
+     *   { species: "owl", value: 3 }
+     * ]
+     * ```
+     *
+     * If there is a secondary attribute "location", this will be like:
+     * ```json
+     * [
+     *   { species: "cat", backyard: 5, street: 2, forest: 0 },
+     *   { species: "owl", backyard: 1, street: 0, forest: 2 }
+     * ]
+     * ```
+     */
     get dataArray() {
-      console.log("calculating dataArray");
       const dataSet = self.dataSet?.dataSet;
       const primary = self.primaryAttribute;
       const secondary = self.secondaryAttribute;
       const cases = self.cases;
       if (!dataSet || !primary || !cases) return [];
-      return cases.reduce((acc, caseID) => {
-        const cat = dataSet.getStrValue(caseID.__id__, primary);
-        const subCat = secondary ? dataSet.getStrValue(caseID.__id__, secondary) : "default"; // ??
-        const index = acc.findIndex(r => r[primary] === cat);
-        if (index >= 0) {
-          const cur = acc[index][subCat];
-          acc[index][subCat] = (isNumber(cur) ? cur : 0) + 1;
-        } else {
-          const newRow = { [primary]: cat, [subCat]: 1 };
-          acc.push(newRow);
-        }
-        return acc;
-      }, [] as { [key: string]: number|string }[]);
+      if (secondary) {
+        // Two-dimensionsal data
+        return cases.reduce((acc, caseID) => {
+          const cat = dataSet.getStrValue(caseID.__id__, primary);
+          const subCat = dataSet.getStrValue(caseID.__id__, secondary);
+          const index = acc.findIndex(r => r[primary] === cat);
+          if (index >= 0) {
+            const cur = acc[index][subCat];
+            acc[index][subCat] = (isNumber(cur) ? cur : 0) + 1;
+          } else {
+            const newRow = { [primary]: cat, [subCat]: 1 };
+            acc.push(newRow);
+          }
+          return acc;
+        }, [] as { [key: string]: number | string }[]);
+      } else {
+        // One-dimensional data
+        return cases.reduce((acc, caseID) => {
+          const cat = dataSet.getStrValue(caseID.__id__, primary);
+          const index = acc.findIndex(r => r[primary] === cat);
+          if (index >= 0) {
+            const cur = acc[index].value;
+            acc[index].value = isNumber(cur) ? cur + 1 : 1;
+          } else {
+            const newRow = { [primary]: cat, value: 1 };
+            acc.push(newRow);
+          }
+          return acc;
+        }, [] as { [key: string]: number | string }[]);
+      }
     }
   }))
   .views(self => ({

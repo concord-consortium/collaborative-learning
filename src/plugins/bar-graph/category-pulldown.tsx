@@ -6,7 +6,6 @@ import { useBarGraphModelContext } from "./bar-graph-content-context";
 
 import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
 
-
 interface IProps {
   setCategory: (category: string) => void;
   x: number;
