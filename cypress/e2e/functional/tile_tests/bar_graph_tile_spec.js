@@ -65,8 +65,8 @@ context('Bar Graph Tile', function () {
     barGraph.getXAxisPulldownButton(1).should('have.text', 'Categories');
 
     cy.log('Delete tile');
-    clueCanvas.deleteTile('bar-graph');
-    clueCanvas.deleteTile('bar-graph');
+    clueCanvas.deleteTile('bargraph');
+    clueCanvas.deleteTile('bargraph');
     barGraph.getTiles().should('have.length', 0);
   });
 

@@ -297,7 +297,7 @@ class ClueCanvas {
             case 'xyplot':
                 tileElement = xyPlotToolTile.getTile().last().click({ force: true });
                 break;
-            case 'bar-graph':
+            case 'bargraph':
                 tileElement = barGraphTile.getTile().last().click({ force: true });
                 break;
         }
