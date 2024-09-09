@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react';
+import { Menu, MenuButton, MenuItem, MenuList, Portal } from '@chakra-ui/react';
 import { useBarGraphModelContext } from './bar-graph-content-context';
 import { LegendSecondaryRow } from './legend-secondary-row';
 
@@ -61,16 +61,18 @@ export const LegendArea = observer(function LegendArea () {
               <DropdownCaretIcon/>
             </span>
           </MenuButton>
-          <MenuList>
-            <MenuItem onClick={() => setSecondaryAttribute(undefined)}>None</MenuItem>
-            {availableAttributes.map((a) => (
-              <MenuItem key={a.id} onClick={() => setSecondaryAttribute(a.id)}>{a.name}</MenuItem>
-            ))}
-          </MenuList>
+          <Portal>
+            <MenuList>
+              <MenuItem onClick={() => setSecondaryAttribute(undefined)}>None</MenuItem>
+              {availableAttributes.map((a) => (
+                <MenuItem key={a.id} onClick={() => setSecondaryAttribute(a.id)}>{a.name}</MenuItem>
+              ))}
+            </MenuList>
+          </Portal>
         </Menu>
       </div>
 
-      <div className="secondaryValues">
+      <div className="secondary-values">
         {currentSecondary
          ? secondaryKeys.map((key) => <LegendSecondaryRow key={key} attrValue={key} />)
          : <LegendSecondaryRow attrValue={currentPrimary.name}/> }

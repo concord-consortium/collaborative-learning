@@ -98,7 +98,6 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
           return (
             <Bar
               key={key}
-              className="bar"
               x={primaryScale(key) || 0}
               y={countScale(val)}
               width={primaryScale.bandwidth()}
@@ -116,7 +115,6 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
       <BarGroup
         data={data}
         color={barColor}
-        className="bar"
         keys={secondaryKeys}
         height={yMax}
         x0={(d) => d[primary] as string}

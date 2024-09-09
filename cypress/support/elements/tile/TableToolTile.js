@@ -91,6 +91,26 @@ class TableToolTile{
     getTableIndexColumnCell(){
         return cy.get('.canvas-area .rdg-cell.index-column');
     }
+    // Fill in a table tile with the given data (a list of lists)
+    // Table tile should in the default state (2 columns, no rows)
+    fillTable($tile, data) {
+      // at least two cols, or as many as the longest row in the data array
+      const cols = Math.max(2, ...data.map(row => row.length));
+      $tile.within((tile) => {
+        // tile will start with two columns; make more if desired
+        for (let i=2; i<cols; i++) {
+          this.getAddColumnButton().click();
+        }
+        for (let i=0; i<data.length; i++) {
+          for (let j=0; j<data[i].length; j++) {
+            const cellContent = data[i][j];
+            this.typeInTableCellXY(i, j, cellContent);
+            this.getTableCellXY(i, j).should('contain', cellContent);
+          }
+        }
+      });
+    }
+
     getLinkGraphButton(){
       return cy.get('.link-tile-button');
     }

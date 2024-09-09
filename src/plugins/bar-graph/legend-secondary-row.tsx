@@ -10,11 +10,11 @@ export function LegendSecondaryRow({attrValue}: IProps) {
   if (!model) return null;
 
   return (
-    <div key={attrValue} className="secondaryValue">
-      <div className="colorButton">
-        <div className="colorSwatch" style={{ backgroundColor: model.getColorForSecondaryKey(attrValue) }} />
+    <div key={attrValue} className="secondary-value">
+      <div className="color-button">
+        <div className="color-swatch" style={{ backgroundColor: model.getColorForSecondaryKey(attrValue) }} />
       </div>
-      <div className="secondaryValueName">{attrValue}</div>
+      <div className="secondary-value-name">{attrValue}</div>
     </div>
   );
 }
