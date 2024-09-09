@@ -120,6 +120,12 @@ Under 'dataset', there is one option:
 
 - `cellsSelectCases`: boolean
 
+#### Bar Graph
+
+Common toolbar framework.  One default button:
+
+- `link-tile`: bring up the linking dialog to connect/disconnect a dataset
+
 #### Data Deck
 
 Not updated to common toolbar framework. However, supports toolbar configuration in a similar manner. Default buttons:

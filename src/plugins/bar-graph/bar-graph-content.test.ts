@@ -11,16 +11,20 @@ const mockCases: ICaseCreation[] = [
   { species: "owl", location: "forest" }
 ];
 
-const emptyDataSet = DataSet.create();
-addAttributeToDataSet(emptyDataSet, { id: "att-s", name: "species" });
-addAttributeToDataSet(emptyDataSet, { id: "att-l", name: "location" });
-const sharedEmptyDataSet = SharedDataSet.create({ dataSet: emptyDataSet });
+function sharedEmptyDataSet() {
+  const emptyDataSet = DataSet.create();
+  addAttributeToDataSet(emptyDataSet, { id: "att-s", name: "species" });
+  addAttributeToDataSet(emptyDataSet, { id: "att-l", name: "location" });
+  return SharedDataSet.create({ dataSet: emptyDataSet });
+}
 
-const sampleDataSet = DataSet.create();
-addAttributeToDataSet(sampleDataSet, { id: "att-s", name: "species" });
-addAttributeToDataSet(sampleDataSet, { id: "att-l", name: "location" });
-addCasesToDataSet(sampleDataSet, mockCases);
-const sharedSampleDataSet = SharedDataSet.create({ dataSet: sampleDataSet });
+function sharedSampleDataSet() {
+  const sampleDataSet = DataSet.create();
+  addAttributeToDataSet(sampleDataSet, { id: "att-s", name: "species" });
+  addAttributeToDataSet(sampleDataSet, { id: "att-l", name: "location" });
+  addCasesToDataSet(sampleDataSet, mockCases);
+  return SharedDataSet.create({ dataSet: sampleDataSet });
+}
 
 const TestableBarGraphContentModel = BarGraphContentModel
   .actions(self => ({
@@ -75,19 +79,19 @@ Object {
 
   it("returns empty data array when there are no cases", () => {
     const content = TestableBarGraphContentModel.create({ });
-    content.setDataSet(sharedEmptyDataSet);
+    content.setDataSet(sharedEmptyDataSet());
     expect(content.dataArray).toEqual([]);
   });
 
   it("returns empty data array when there is no primary attribute", () => {
     const content = TestableBarGraphContentModel.create({ });
-    content.setDataSet(sharedSampleDataSet);
+    content.setDataSet(sharedSampleDataSet());
     expect(content.dataArray).toEqual([]);
   });
 
   it("returns expected data array with primary attribute", () => {
     const content = TestableBarGraphContentModel.create({ });
-    content.setDataSet(sharedSampleDataSet);
+    content.setDataSet(sharedSampleDataSet());
     content.setPrimaryAttribute("att-s");
     expect(content.dataArray).toEqual([
       { "att-s": "cat", "value": 2 },
@@ -103,25 +107,46 @@ Object {
 
   it("returns expected data array with primary and secondary attributes", () => {
     const content = TestableBarGraphContentModel.create({ });
-    content.setDataSet(sharedSampleDataSet);
+    content.setDataSet(sharedSampleDataSet());
     content.setPrimaryAttribute("att-s");
     content.setSecondaryAttribute("att-l");
     expect(content.dataArray).toEqual([
-        { "att-s": "cat", "yard": 2 },
-        { "att-s": "owl", "yard": 1, "forest": 1 }
-      ]);
+      { "att-s": "cat", "yard": 2 },
+      { "att-s": "owl", "yard": 1, "forest": 1 }
+    ]);
+  });
+
+  it("fills in missing values with (no value)", () => {
+    const content = TestableBarGraphContentModel.create({ });
+    const dataSet = sharedSampleDataSet();
+    dataSet.dataSet?.attributes[1].setValue(3, undefined); // hide forest owl's location
+    content.setDataSet(dataSet);
+    content.setPrimaryAttribute("att-s");
+    content.setSecondaryAttribute("att-l");
+    expect(content.dataArray).toEqual([
+      { "att-s": "cat", "yard": 2 },
+      { "att-s": "owl", "yard": 1, "(no value)": 1 }
+    ]);
+
+    dataSet.dataSet?.attributes[0].setValue(3, undefined); // hide that owl entirely
+    expect(content.dataArray).toEqual([
+      { "att-s": "cat", "yard": 2 },
+      { "att-s": "owl", "yard": 1 },
+      { "att-s": "(no value)", "(no value)": 1 }
+    ]);
+
   });
 
   it("extracts primary keys", () => {
     const content = TestableBarGraphContentModel.create({ });
-    content.setDataSet(sharedSampleDataSet);
+    content.setDataSet(sharedSampleDataSet());
     content.setPrimaryAttribute("att-s");
     expect(content.primaryKeys).toEqual(["cat", "owl"]);
   });
 
   it("extracts secondary keys", () => {
     const content = TestableBarGraphContentModel.create({ });
-    content.setDataSet(sharedSampleDataSet);
+    content.setDataSet(sharedSampleDataSet());
     content.setPrimaryAttribute("att-s");
     content.setSecondaryAttribute("att-l");
     expect(content.secondaryKeys).toEqual(["yard", "forest"]);
@@ -129,7 +154,7 @@ Object {
 
   it("calculates the maximum data value", () => {
     const content = TestableBarGraphContentModel.create({ });
-    content.setDataSet(sharedSampleDataSet);
+    content.setDataSet(sharedSampleDataSet());
     content.setPrimaryAttribute("att-s");
     expect(content.maxDataValue).toBe(2);
 
