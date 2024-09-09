@@ -396,14 +396,14 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPoint().should("have.length", 6); // New point added
 
     // Store the original point coordinates for comparison
-    let originalPx, originalPy;
+    let originalCx, originalCy;
     clueCanvas.clickToolbarButton('geometry', 'select');
     geometryToolTile.clickGraphPosition(15, 5); // shared point
     geometryToolTile.getSelectedGraphPoint().then(($point) => {
-      originalPx = parseFloat($point.attr('cx'));
-      originalPy = parseFloat($point.attr('cy'));
-      cy.wrap(originalPx).as('originalPx');
-      cy.wrap(originalPy).as('originalPy');
+      originalCx = parseFloat($point.attr('cx'));
+      originalCy = parseFloat($point.attr('cy'));
+      cy.wrap(originalCx).as('originalCx');
+      cy.wrap(originalCy).as('originalCy');
     });
 
     // Add length labels to two line segments
@@ -430,16 +430,12 @@ context('Geometry Tool', function () {
     geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 38 }); // simulate up arrow key press
 
     // Verify that the point values changed
-    cy.get('@originalPx').then((originalPx) => {
-      cy.get('@originalPy').then((originalPy) => {
-        geometryToolTile.getSelectedGraphPoint().then(($point) => {
-          const newPx = parseFloat($point.attr('cx')); // 'px' for point x-coordinate
-          const newPy = parseFloat($point.attr('cy')); // 'py' for point y-coordinate
+    geometryToolTile.getSelectedGraphPoint().then(($point) => {
+      const newPx = parseFloat($point.attr('cx')); // 'px' for point x-coordinate
+      const newPy = parseFloat($point.attr('cy')); // 'py' for point y-coordinate
 
-          expect(newPx).to.be.greaterThan(originalPx);
-          expect(newPy).to.be.lessThan(originalPy);
-        });
-      });
+      expect(newPx).to.be.greaterThan(originalCx);
+      expect(newPy).to.be.lessThan(originalCy);
     });
 
     // Verify that the two line segments have changed
@@ -451,16 +447,12 @@ context('Geometry Tool', function () {
     geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 40 }); // simulate down arrow key press
 
     // Verify that the point has returned to its original coordinates
-    cy.get('@originalPx').then((originalPx) => {
-      cy.get('@originalPy').then((originalPy) => {
-        geometryToolTile.getSelectedGraphPoint().then(($point) => {
-          const resetPx = parseFloat($point.attr('cx'));
-          const resetPy = parseFloat($point.attr('cy'));
+    geometryToolTile.getSelectedGraphPoint().then(($point) => {
+      const resetPx = parseFloat($point.attr('cx'));
+      const resetPy = parseFloat($point.attr('cy'));
 
-          expect(resetPx).to.equal(originalPx);
-          expect(resetPy).to.equal(originalPy);
-        });
-      });
+      expect(resetPx).to.equal(originalCx);
+      expect(resetPy).to.equal(originalCy);
     });
 
     // Verify that the two line segments returned to their original values
