@@ -1,4 +1,5 @@
 import React from "react";
+import { observer } from "mobx-react";
 import { Menu, MenuButton, MenuItem, MenuList, Portal } from "@chakra-ui/react";
 import { useReadOnlyContext } from "../../components/document/read-only-context";
 import { useBarGraphModelContext } from "./bar-graph-content-context";
@@ -14,7 +15,7 @@ interface IProps {
   height: number;
 }
 
-export function CategoryPulldown({setCategory, x, y, width, height}: IProps) {
+export const CategoryPulldown = observer(function CategoryPulldown({setCategory, x, y, width, height}: IProps) {
   const readOnly = useReadOnlyContext();
   const model = useBarGraphModelContext();
 
@@ -43,4 +44,7 @@ export function CategoryPulldown({setCategory, x, y, width, height}: IProps) {
       </Menu>
     </foreignObject>
   );
-}
+});
+
+export default CategoryPulldown;
+

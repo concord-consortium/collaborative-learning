@@ -2,12 +2,13 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react';
 import { useBarGraphModelContext } from './bar-graph-content-context';
+import { LegendSecondaryRow } from './legend-secondary-row';
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
 
 
-export const BarGraphLegend = observer(function BarGraphLegend () {
+export const LegendArea = observer(function LegendArea () {
   const model = useBarGraphModelContext();
 
   function unlinkDataset() {
@@ -22,13 +23,14 @@ export const BarGraphLegend = observer(function BarGraphLegend () {
     }
   }
 
-  if (!model || !model.dataSet) {
+  if (!model || !model.dataSet || !model.primaryAttribute) {
     return null;
   }
 
   const dataSet = model.dataSet.dataSet;
   const allAttributes = dataSet?.attributes || [];
   const availableAttributes = allAttributes.filter((a) => a.id !== model.primaryAttribute);
+  const currentPrimary = dataSet?.attrFromID(model.primaryAttribute);
   const currentSecondary = model.secondaryAttribute ? dataSet?.attrFromID(model.secondaryAttribute) : undefined;
   const currentLabel = currentSecondary?.name || "None";
 
@@ -69,15 +71,12 @@ export const BarGraphLegend = observer(function BarGraphLegend () {
       </div>
 
       <div className="secondaryValues">
-        {secondaryKeys.map((key) => (
-          <div key={key} className="secondaryValue">
-            <div className="colorButton">
-              <div className="colorSwatch" style={{backgroundColor: model.getColorForSecondaryKey(key)}}/>
-            </div>
-            <div className="secondaryValueName">{key}</div>
-          </div>
-        ))}
+        {currentSecondary
+         ? secondaryKeys.map((key) => <LegendSecondaryRow key={key} attrValue={key} />)
+         : <LegendSecondaryRow attrValue={currentPrimary.name}/> }
       </div>
     </div>
   );
 });
+
+export default LegendArea;

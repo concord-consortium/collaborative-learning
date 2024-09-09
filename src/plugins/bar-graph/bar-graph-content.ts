@@ -89,7 +89,8 @@ export const BarGraphContentModel = TileContentModel
   .views(self => ({
     // TODO this should track colors in a way that can be edited later
     getColorForSecondaryKey(key: string) {
-      const n = self.secondaryKeys.indexOf(key) || 0;
+      let n = self.secondaryKeys.indexOf(key);
+      if (!n || n<0) n=0;
       return clueDataColorInfo[n % clueDataColorInfo.length].color;
     }
   }))
@@ -97,7 +98,7 @@ export const BarGraphContentModel = TileContentModel
     setYAxisLabel(text: string) {
       self.yAxisLabel = text;
     },
-    setPrimaryAttribute(attrId: string) {
+    setPrimaryAttribute(attrId: string|undefined) {
       self.primaryAttribute = attrId;
     },
     setSecondaryAttribute(attrId: string|undefined) {
@@ -133,6 +134,8 @@ export const BarGraphContentModel = TileContentModel
       // When new dataset is attached, cache a reference to it and pick a category attribute.
       const dataSet = self.sharedModelDataSet(getSharedModelManager(self));
       if (self.dataSet !== dataSet) {
+        self.setPrimaryAttribute(undefined);
+        self.setSecondaryAttribute(undefined);
         self.dataSet = dataSet;
         if (dataSet) {
           const atts = dataSet.dataSet.attributes;

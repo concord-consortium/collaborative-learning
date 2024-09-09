@@ -5,11 +5,11 @@ import { useResizeDetector } from "react-resize-detector";
 
 import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
 import { ITileProps } from "../../components/tiles/tile-component";
-import { BarGraphChart } from "./bar-graph-chart";
+import { ChartArea } from "./chart-area";
 import { BarGraphModelContext } from "./bar-graph-content-context";
 import { isBarGraphModel } from "./bar-graph-content";
 import { TileToolbar } from "../../components/toolbar/tile-toolbar";
-import { BarGraphLegend } from "./bar-graph-legend";
+import { LegendArea } from "./legend-area";
 
 import "./bar-graph.scss";
 
@@ -41,8 +41,8 @@ export const BarGraphComponent: React.FC<ITileProps> = observer((props: ITilePro
         className={classNames("bar-graph-content", legendBelow ? "vertical" : "horizontal", { "read-only": readOnly })}
         data-testid="bar-graph-content"
       >
-        <BarGraphChart width={svgWidth} height={svgHeight} />
-        <BarGraphLegend />
+        <ChartArea width={svgWidth} height={svgHeight} />
+        <LegendArea />
       </div>
     </BarGraphModelContext.Provider>
   );

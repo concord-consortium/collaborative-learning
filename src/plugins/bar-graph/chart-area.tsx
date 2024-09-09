@@ -21,20 +21,20 @@ function roundTo5(n: number): number {
   return Math.max(5, Math.ceil(n/5)*5);
 }
 
-interface IBarGraphChartProps {
+interface IProps {
   width: number;
   height: number;
 }
 
-// TODO rotate labels if needed
+// Consider: rotating labels if needed
 // angle: -45, textAnchor: 'end'
 // https://github.com/airbnb/visx/discussions/1494
 
 
-export const BarGraphChart = observer(function BarGraphChart({ width, height }: IBarGraphChartProps) {
+export const ChartArea = observer(function BarGraphChart({ width, height }: IProps) {
 
   const model = useBarGraphModelContext();
-  const primary = model?.primaryAttribute || "date";
+  const primary = model?.primaryAttribute || "";
 
   const xMax = width - margin.left - margin.right;
   const yMax = height - margin.top - margin.bottom;
@@ -84,7 +84,9 @@ export const BarGraphChart = observer(function BarGraphChart({ width, height }: 
 
   if (xMax <= 0 || yMax <= 0) return <span>Tile too small to show graph ({width}x{height})</span>;
 
-  const ticks = Math.min(4, Math.floor(yMax/40));  // leave generous vertical space (>=40 px) between ticks
+  const ticks = data.length > 0
+    ? Math.min(4, Math.floor(yMax/40))  // leave generous vertical space (>=40 px) between ticks
+    : 0;
   const labelWidth = (xMax/primaryKeys.length)-10; // setting width will wrap lines in labels when needed
 
   return (

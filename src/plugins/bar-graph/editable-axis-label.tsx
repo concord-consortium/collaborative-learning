@@ -5,14 +5,14 @@ import { useReadOnlyContext } from '../../components/document/read-only-context'
 
 const paddingX = 5, paddingY = 10;
 
-interface Props {
+interface IProps {
   x: number;
   y: number;
   text?: string;
   setText: (text: string) => void;
 }
 
-const EditableAxisLabel: React.FC<Props> = ({text, x, y, setText}) => {
+const EditableAxisLabel: React.FC<IProps> = ({text, x, y, setText}) => {
 
   const readOnly = useReadOnlyContext();
   const textRef = React.useRef<SVGGElement|null>(null);
