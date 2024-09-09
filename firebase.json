@@ -20,19 +20,39 @@
       "port": 5001
     }
   },
-  "functions": {
-    "predeploy": [
-      "npm --prefix \"$RESOURCE_DIR\" run lint",
-      "npm --prefix \"$RESOURCE_DIR\" run build"
-    ],
-    "source": "functions",
-    "ignore": [
-      "*.log",
-      ".*",
-      ".git",
-      "coverage",
-      "node_modules",
-      "test"
-    ]
-  }
+  "functions": [
+    {
+      "source": "functions-v1",
+      "codebase": "functions-v1",
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint",
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ],
+      "ignore": [
+        "*.log",
+        ".*",
+        ".git",
+        "coverage",
+        "node_modules",
+        "test"
+      ]
+    },
+    {
+      "source": "functions-v2",
+      "codebase": "functions-v2",
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint",
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ],
+      "ignore": [
+        "node_modules",
+        ".*",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local",
+        "*.log",
+        "coverage"
+      ]
+    }
+  ]
 }

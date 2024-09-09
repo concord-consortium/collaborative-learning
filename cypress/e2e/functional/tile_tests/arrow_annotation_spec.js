@@ -134,6 +134,22 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationButtons().eq(1).click({ force: true });
     aa.getAnnotationArrows().should("have.length", 2);
 
+    // Short click on the "drag handle" of existing sparrow can create a new sparrow
+    aa.getAnnotationArrowDragHandles().should('have.length', 4);
+    aa.getAnnotationArrowDragHandles().eq(0).trigger('mousedown', { force: true });
+    aa.getAnnotationArrowDragHandles().eq(0).trigger('mouseup', { force: true });
+    aa.getPreviewArrow().should("exist");
+    aa.getAnnotationButtons().eq(2).click({ force: true });
+    aa.getAnnotationArrows().should("have.length", 3);
+    aa.getPreviewArrow().should("not.exist");
+    aa.getAnnotationDeleteButtons().eq(2).click();
+
+    // Long click or drag, however, does not create a new sparrow.
+    aa.getAnnotationArrowDragHandles().eq(3).trigger('mousedown', { force: true });
+    cy.wait(500);
+    aa.getAnnotationArrowDragHandles().eq(3).trigger('mouseup', { force: true });
+    aa.getPreviewArrow().should("not.exist");
+
     cy.log("Can select arrows");
     // Click to select
     aa.getAnnotationSparrowGroups().should("not.have.class", "selected");
@@ -231,12 +247,28 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationSvg().click(500, 100);
     aa.getAnnotationButtons().eq(1).click(); // Second end is anchored to an object
     aa.getAnnotationArrows().should("have.length", 2);
+    aa.getAnnotationDeleteButtons().eq(0).click();
+    aa.getAnnotationDeleteButtons().eq(0).click();
 
-    aa.getAnnotationDeleteButtons().eq(0).click();
-    aa.getAnnotationDeleteButtons().eq(0).click();
     aa.getAnnotationSvg().click(200, 200); // Both ends free should not create an arrow
     aa.getAnnotationSvg().click(300, 100);
     aa.getAnnotationArrows().should("have.length", 0);
+
+    // Attempting to connect both ends to objects results in second end being free
+    aa.getAnnotationButtons().eq(0).click();
+    aa.getAnnotationButtons().eq(1).click(); // Just the click location is used.
+    aa.getAnnotationModeButton().click(); // exit sparrow mode
+    aa.getAnnotationArrows().should("have.length", 1);
+    drawToolTile.getEllipseDrawing().click({ force: true, scrollBehavior: false });
+    clueCanvas.clickToolbarButton('drawing', 'delete'); // delete the object under the second end; arrow should remain since it was not attached.
+    aa.getAnnotationArrows().should("have.length", 1);
+    drawToolTile.getRectangleDrawing().eq(0).click({ force: true, scrollBehavior: false });
+    clueCanvas.clickToolbarButton('drawing', 'delete'); // delete the object under the first end; arrow should be deleted.
+    aa.getAnnotationArrows().should("have.length", 0);
+
+    // put the two deleted objects back
+    drawToolTile.drawRectangle(50, 50);
+    drawToolTile.drawEllipse(200, 50);
 
     aa.getAnnotationMenuExpander().click();
     aa.getCurvedArrowToolbarButton().click();
@@ -245,11 +277,7 @@ context('Arrow Annotations (Sparrows)', function () {
     cy.log("Can create sparrows across two tiles");
     clueCanvas.addTile("drawing");
     drawToolTile.getDrawTile().should("have.length", 2);
-    drawToolTile.getDrawToolVector().eq(0).click();
-    drawToolTile.getDrawTile().eq(1)
-      .trigger("pointerdown", 150, 50)
-      .trigger("pointermove", 100, 150)
-      .trigger("pointerup", 100, 50);
+    drawToolTile.drawVector(100, 50, 50, 100);
     aa.getAnnotationModeButton().click();
     aa.getAnnotationButtons().should("have.length", 4);
     aa.getAnnotationButtons().first().click({ force: true });
@@ -283,7 +311,7 @@ context('Arrow Annotations (Sparrows)', function () {
 
     cy.log("Can duplicate annotations contained within one tile");
     aa.getAnnotationModeButton().click();
-    tableToolTile.getTableCell().eq(1).click();
+    tableToolTile.getTableTile().click();
     clueCanvas.getDuplicateTool().click();
     aa.getAnnotationModeButton().click(); // To force a rerender of the annotation layer
     aa.getAnnotationModeButton().click();
@@ -560,7 +588,7 @@ context('Arrow Annotations (Sparrows)', function () {
     cy.log("New annotations can be made on a recorded program");
     aa.getAnnotationModeButton().click();
     aa.getAnnotationButtons().should("have.length", 4);
-    aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationButtons().eq(1).click({ force: true });
     aa.getAnnotationButtons().eq(3).click();
     aa.getAnnotationArrows().should("have.length", 2);
     aa.getAnnotationModeButton().click();

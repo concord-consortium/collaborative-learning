@@ -1,7 +1,7 @@
 import { IReactionDisposer, reaction } from "mobx";
 import { getParent, Instance, SnapshotIn, types } from "mobx-state-tree";
 
-import { buildProblemPath, buildSectionPath } from "../../../functions/src/shared";
+import { buildProblemPath, buildSectionPath } from "../../../shared/shared";
 import { DocumentContentModel } from "../document/document-content";
 import { InvestigationModel, InvestigationModelType } from "./investigation";
 import { ISectionInfoMap, SectionModel, SectionModelType,registerSectionInfo } from "./section";

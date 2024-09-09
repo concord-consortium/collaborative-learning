@@ -7,9 +7,13 @@ import { kExemplarUserParams } from "./user-types";
 import { ICurriculumConfig } from "./curriculum-config";
 import { ExemplarDocument } from "../document/document-types";
 import { AppConfigModelType } from "./app-config-model";
+import { UnitModelType } from "../curriculum/unit";
+import { InvestigationModelType } from "../curriculum/investigation";
 
 interface ICreateExemplarDocsParams {
+  unit: UnitModelType;
   unitUrl: string;
+  investigation?: InvestigationModelType;
   problem: ProblemModelType;
   documents: DocumentsModelType;
   classStore: ClassModelType;
@@ -29,7 +33,9 @@ interface IExemplarData {
 // plus a second paramter for the unitUrl
 // function would only require the properties it needs
 export async function createAndLoadExemplarDocs({
+  unit,
   unitUrl,
+  investigation,
   problem,
   documents,
   classStore,
@@ -39,7 +45,7 @@ export async function createAndLoadExemplarDocs({
   const { exemplars } = problem;
   const exemplarsData = await getExemplarsData(unitUrl, exemplars);
   classStore.addUser(ClassUserModel.create(kExemplarUserParams));
-  createExemplarDocs(documents, exemplarsData, curriculumConfig, appConfig);
+  createExemplarDocs(unit, investigation, problem, documents, exemplarsData, curriculumConfig, appConfig);
 }
 
 export async function getExemplarsData(unitUrl: string, exemplarUrls: string[]){
@@ -67,6 +73,9 @@ export function createExemplarDocId(exemplarDataUrl: string, curriculumBaseUrl: 
 }
 
 function createExemplarDocs(
+  unit: UnitModelType,
+  investigation: InvestigationModelType | undefined,
+  problem: ProblemModelType,
   documents: DocumentsModelType,
   exemplarsData: IExemplarData[],
   curriculumConfig: ICurriculumConfig,
@@ -84,7 +93,10 @@ function createExemplarDocs(
       key: exemplarDocId,
       properties: {
         authoredCommentTag: exemplarData.tag
-      }
+      },
+      unit: unit.code,
+      investigation: investigation?.ordinal.toString(),
+      problem: problem.ordinal.toString()
     };
     const newDoc = createDocumentModelWithEnv(appConfig, newDocParams);
     documents.add(newDoc);
