@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react-hooks";
-import { INetworkResourceClassResponse } from "../../functions/src/shared";
+import { INetworkResourceClassResponse } from "../../shared/shared";
 import { useNetworkResources } from "./network-resources";
 
 const mockGetNetworkResources = jest.fn(() => Promise.resolve({

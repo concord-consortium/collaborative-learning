@@ -1,10 +1,10 @@
 import React from "react";
-import { DocumentModelType } from "../../models/document/document";
+import { IDocumentMetadata } from "../../../shared/shared";
 
 import "./doc-list-debug.scss";
 
 interface IProps {
-  docs: DocumentModelType[];
+  docs: IDocumentMetadata[];
 }
 
 export function DocListDebug(props: IProps) {
@@ -30,9 +30,10 @@ export function DocListDebug(props: IProps) {
               <td>{ct}</td>
               <td>{doc.key}</td>
               <td>{doc.type}</td>
-              <td>{doc.visibility ? doc.visibility : "undefined"}</td>
+              {/* TODO: Reinstate visibility and groupId */}
+              {/* <td>{doc.visibility ? doc.visibility : "undefined"}</td> */}
               <td>{doc.uid}</td>
-              <td>{doc.groupId ?? " "}</td>
+              {/* <td>{doc.groupId ?? " "}</td> */}
               <td>{doc.title}</td>
             </tr>
           );

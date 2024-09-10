@@ -112,7 +112,7 @@ export interface OfferingDocument {
   unit: string;           // e.g. "msa"
   problem: string;        // e.g. "1.4"
   problemPath: string;    // e.g. "msa/1/4"
-  network: string;        // network within which this offering instance is available
+  network?: string;        // network within which this offering instance is available
 }
 // collection key is `${network}_${offering id}`
 type OfferingsCollection = FSCollection<OfferingDocument>;
@@ -138,7 +138,8 @@ export interface ClassDocument {
   context_id: string;         // portal class hash
   teacher: string;            // name of primary(?) teacher
   teachers: string[];         // uids of teachers of class
-  network: string;            // network of teacher creating class
+  network?: string;           // network of teacher creating class
+  networks?: string[];        // networks of all teachers in the class
 }
 // collection key is `${network}_${context_id (class hash)}`
 type ClassesCollection = FSCollection<ClassDocument>;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import { useAppConfig, useProblemStore,
@@ -9,6 +9,7 @@ import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { isExemplarType } from "../../models/document/document-types";
 import { ExemplarVisibilityCheckbox } from "./exemplar-visibility-checkbox";
+import { DocumentLoadingSpinner } from "./document-loading-spinner";
 
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 import CloseIcon from "../../../src/assets/icons/close/close.svg";
@@ -25,14 +26,13 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   const classStore = useClassStore();
   const problemStore = useProblemStore();
   const appConfigStore = useAppConfig();
-  const openDocument = store.documents.getDocument(openDocumentKey) ||
-                       store.networkDocuments.getDocument(openDocumentKey);
+  const [openDocument, setOpenDocument] = useState<DocumentModelType|undefined>();
   const isVisible = openDocument?.isAccessibleToUser(user, store.documents);
   const showPlayback = user.type && appConfigStore.enableHistoryRoles.includes(user.type);
   const showExemplarShare = user.type === "teacher" && openDocument && isExemplarType(openDocument.type);
   const getDisplayTitle = (document: DocumentModelType) => {
     const documentOwner = classStore.users.get(document.uid);
-    const documentTitle = getDocumentDisplayTitle(document, appConfigStore, problemStore);
+    const documentTitle = getDocumentDisplayTitle(document, appConfigStore, problemStore, store.unit.code);
     return {owner: documentOwner ? documentOwner.fullName : "", title: documentTitle};
   };
   const displayTitle = openDocument && getDisplayTitle(openDocument);
@@ -65,6 +65,23 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   };
 
   const sideClasses = { secondary: false, primary: false && !false };
+
+  useEffect(() => {
+    const openDoc = store.documents.getDocument(openDocumentKey) ||
+                       store.networkDocuments.getDocument(openDocumentKey);
+    if (openDoc) {
+      setOpenDocument(openDoc);
+      return;
+    }
+
+    const fetchOpenDoc = store.sortedDocuments.fetchFullDocument(openDocumentKey);
+    fetchOpenDoc.then((doc) => {
+      setOpenDocument(doc);
+    });
+
+    // TODO: Figure out how to cancel fetch if the component is unmounted before the fetch is complete
+
+  }, [openDocumentKey, store.documents, store.networkDocuments, store.sortedDocuments]);
 
   return (
     <div className={classNames("focus-document", ENavTab.kSortWork, sideClasses)}>
@@ -103,6 +120,10 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
         <div className="document-error">
           <p>This document is not shared with you right now.</p>
         </div>
+     }
+     {
+        !openDocument &&
+        <DocumentLoadingSpinner/>
      }
     </div>
   );

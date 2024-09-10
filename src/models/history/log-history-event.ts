@@ -1,4 +1,4 @@
-import { isSectionPath } from "../../../functions/src/shared";
+import { isSectionPath } from "../../../shared/shared";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { isCurriculumLogEvent, logCurriculumEvent } from "../curriculum/log-curriculum-event";

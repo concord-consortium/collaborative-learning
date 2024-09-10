@@ -1,28 +1,35 @@
 #!/usr/bin/node
 
-// This script counts documents downloaded with download-documents-with-info.ts,
-// then prints the counts to the terminal.
-// It is currently set up to count the types of documents in the document collection, as well as how many
-// documents have titles.
+// This script parses documents downloaded with download-documents-with-info.ts, uses the information in them
+// to fetch related offering and class data from a portal, and writes that data to local files that can be used by
+// other scripts to update Firestore metadata documents.
 
 // to run this script type the following in the terminal
 // cf. https://stackoverflow.com/a/66626333/16328462
 // Change sourceDirectory to be the name of the directory containing your documents
-// Change targetTileTypes to be a list of the tile types you want to count (like ["Geometry", "Text", "Table"])
-// Set aiService to be whichever service you're interested in. This will determine the format of the output file.
 // $ cd scripts/ai
 // $ npx tsx get-offering-info.ts
 
 import fs from "fs";
+import admin from "firebase-admin";
 import path from "path";
 import stringify from "json-stringify-pretty-compact";
 
-import { fetchOffering } from "../lib/fetch-offering.js";
-import { prettyDuration } from "../lib/script-utils.js";
+import { fetchPortalClass, fetchPortalOffering } from "../lib/fetch-portal-entity.js";
+import { getFirestoreUsersPath, getScriptRootFilePath, prettyDuration } from "../lib/script-utils.js";
+
+const databaseURL = "https://collaborative-learning-ec215.firebaseio.com";
+// Fetch the service account key JSON file contents
+const serviceAccountFile = getScriptRootFilePath("serviceAccountKey.json");
+const credential = admin.credential.cert(serviceAccountFile);
+// Initialize the app with a service account, granting admin privileges
+admin.initializeApp({
+  credential,
+  databaseURL
+});
 
 import { datasetPath } from "./script-constants.js";
-// const sourceDirectory = "dataset1720814823478";
-const sourceDirectory = "dataset1721059336040";
+const sourceDirectory = "dataset1724085367882";
 // src/public/ai/dataset1720819925834
 // The number of files to process in parallel
 const fileBatchSize = 8;
@@ -96,30 +103,60 @@ console.log(`*** Found ${offeringIds.size} unique offerings ***`);
 // update this list in the Firestore <root>/classes/[class doc], and remove the
 // teacher list from the metadata documents.
 interface OfferingInfo {
-  activity_url,
-  clazz_id,
-  clazz_hash
+  activity_url: string,
+  clazz_id: string,
+  clazz_hash: string
 }
+
+interface IClassTeacher {
+  user_id: string
+}
+
+interface IPortalClassData {
+  class_hash: string,
+  name: string,
+  teachers: IClassTeacher[],
+  uri: string
+}
+
+interface ClassInfo {
+  context_id: string,
+  id: string,
+  name: string,
+  networks: string[],
+  teachers: string[],
+  uri: string
+}
+
 const offeringInfo: Record<string, OfferingInfo> = {};
+const classInfo: Record<string, ClassInfo> = {};
 
 const networkInfoContent = fs.readFileSync(path.resolve(sourcePath, "network.json"), "utf8");
 const networkInfo = JSON.parse(networkInfoContent);
 
-const { demo } = networkInfo;
+const { demo, portal } = networkInfo;
 if (demo) {
   for (const offeringId of offeringIds) {
-    let [full, unitCode, investigation, problem] = offeringId.match(/(.*)(\d)(\d\d)/);
-    if (!unitCode) unitCode = "sas";
-    problem = stripLeadingZero(problem);
-    console.log({unitCode, investigation, problem});
+    const match = offeringId.match(/(.*)(\d)(\d\d)/);
+    if (match) {
+      let [full, unitCode, investigation, problem] = match;
+      if (!unitCode) unitCode = "sas";
+      problem = stripLeadingZero(problem);
+      console.log({unitCode, investigation, problem});
+    }
   }
 } else {
   let numFetchedOfferings = 0;
+  const clazzes = new Set<string>();
 
   for (const offeringId of offeringIds) {
-    const offering = await fetchOffering("https://learn.concord.org", offeringId);
+    if (!offeringId) continue;
+    const offering = await fetchPortalOffering(`https://${portal}`, offeringId);
     if (!offering) continue;
     const {activity_url, clazz_id, clazz_hash} = offering;
+    if (!clazzes.has(clazz_id)) {
+      clazzes.add(clazz_id);
+    }
     offeringInfo[offeringId] = {
       activity_url, clazz_id, clazz_hash
     };
@@ -130,8 +167,68 @@ if (demo) {
   }
 
   // Write offering info as a JSON file for use by later scripts
+  console.log("Preparing to write offering file.");
   const offeringInfoFile = `${sourcePath}/offering-info.json`;
   fs.writeFileSync(offeringInfoFile, stringify(offeringInfo));
+
+  const processedTeachers = new Map<string, string[]>();
+
+  const collectionUrl = getFirestoreUsersPath(portal, demo);
+  const documentCollection = admin.firestore().collection(collectionUrl);
+
+  for (const clazz_id of clazzes) {
+    if (!clazz_id) continue;
+
+    const clazzData = await fetchPortalClass(`https://${portal}`, clazz_id);
+    if (Object.keys(clazzData).length === 0) continue;
+
+    const { class_hash, name, teachers, uri } = clazzData as IPortalClassData;
+    const teacherNetworks = new Set<string>();
+    const teacherIds: string[] = [];
+
+    // Prepare an array of teacher user IDs that need to be fetched
+    const teacherFetchPromises = teachers.map(async (classTeacher: IClassTeacher) => {
+      const { user_id } = classTeacher;
+      teacherIds.push(user_id);
+
+      if (!processedTeachers.has(user_id)) {
+        const userQuery = await documentCollection.where("uid", "==", String(user_id)).get();
+          if (userQuery.empty) {
+            console.log(`No user found with uid ${user_id}`);
+            return;
+          }
+
+          const userDoc = userQuery.docs[0].data();
+          const { networks } = userDoc;
+
+          for (const network of networks) {
+            teacherNetworks.add(network);
+          }
+
+          processedTeachers.set(user_id, networks);
+        } else {
+          const networks = processedTeachers.get(user_id);
+          for (const network of networks) {
+            teacherNetworks.add(network);
+          }
+        }
+    });
+
+    await Promise.all(teacherFetchPromises);
+
+    classInfo[clazz_id] = {
+        context_id: class_hash,
+        id: clazz_id,
+        name,
+        networks: Array.from(teacherNetworks),
+        teachers: teacherIds,
+        uri
+    };
+  }
+
+  // For each classInfo write class info as a JSON file for use by later scripts
+  const classInfoFile = `${sourcePath}/class-info.json`;
+  fs.writeFileSync(classInfoFile, stringify(classInfo));
 
   const finishedFetchingOfferings = Date.now();
   const fetchingDuration = finishedFetchingOfferings - finishedLoading;

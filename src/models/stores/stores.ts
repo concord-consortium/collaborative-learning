@@ -34,6 +34,7 @@ import { createAndLoadExemplarDocs } from "./create-exemplar-docs";
 import curriculumConfigJson from "../../clue/curriculum-config.json";
 import { gImageMap } from "../image-map";
 import { ExemplarControllerModel, ExemplarControllerModelType } from "./exemplar-controller";
+import { SectionDocuments } from "./section-docs-store";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -46,6 +47,7 @@ export interface IStores extends IBaseStores {
   initializeStudentWorkTab: () => void;
   loadUnitAndProblem: (unitId: string | undefined, problemOrdinal?: string) => Promise<void>;
   sortedDocuments: SortedDocuments;
+  sectionDocuments: SectionDocuments;
   unitLoadedPromise: Promise<void>;
   sectionsLoadedPromise: Promise<void>;
   startedLoadingUnitAndProblem: boolean;
@@ -90,6 +92,7 @@ class Stores implements IStores{
   serialDevice: SerialDevice;
   userContextProvider: UserContextProvider;
   sortedDocuments: SortedDocuments;
+  sectionDocuments: SectionDocuments;
   unitLoadedPromise: Promise<void>;
   sectionsLoadedPromise: Promise<void>;
   startedLoadingUnitAndProblem: boolean;
@@ -150,6 +153,7 @@ class Stores implements IStores{
     this.userContextProvider = new UserContextProvider(this);
     this.bookmarks = new Bookmarks({db: this.db});
     this.sortedDocuments = new SortedDocuments(this);
+    this.sectionDocuments = new SectionDocuments(this);
 
     this.unitLoadedPromise = when(() => this.unit !== defaultUnit);
     this.sectionsLoadedPromise = when(() => this.problem.sections.length > 0);
@@ -265,7 +269,9 @@ class Stores implements IStores{
       });
       showLoadingMessage("Loading exemplar documents");
       createAndLoadExemplarDocs({
+        unit,
         unitUrl: unitUrls.content,
+        investigation,
         problem,
         documents: this.documents,
         user: this.user,

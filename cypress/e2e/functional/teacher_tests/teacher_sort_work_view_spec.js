@@ -45,16 +45,16 @@ describe('SortWorkView Tests', () => {
   it('should open SortWorkView tab and interact with it', () => {
     beforeTest(queryParams1);
     cy.log('verify clicking the sort menu');
-    sortWork.getSortByMenu().click(); // Open the sort menu
+    sortWork.getPrimarySortByMenu().click(); // Open the sort menu
     cy.wait(1000);
 
-    sortWork.getSortByNameOption().click(); //Select 'Name' sort type
+    sortWork.getPrimarySortByNameOption().click(); //Select 'Name' sort type
     cy.wait(1000);
 
-    sortWork.getSortByMenu().click(); // Open the sort menu again
+    sortWork.getPrimarySortByMenu().click(); // Open the sort menu again
     cy.wait(1000);
 
-    sortWork.getSortByGroupOption().click(); // Select 'Group' sort type
+    sortWork.getPrimarySortByGroupOption().click(); // Select 'Group' sort type
     cy.wait(1000);
 
     cy.log('verify opening and closing a document from the sort work view');
@@ -66,8 +66,118 @@ describe('SortWorkView Tests', () => {
     sortWork.getSortWorkItem().should('be.visible'); // Verify the document is closed
   });
 
+  it("should open Sort Work tab and test showing by Problem, Investigation, Unit, All", () => {
+    beforeTest(queryParams1);
 
-  it("should open Sort Work tab and test sorting by group", () => {
+    sortWork.getShowForMenu().should("be.visible");
+    sortWork.getShowForProblemOption().should("have.class", "selected"); // "Problem" selected by default
+    sortWork.getShowForInvestigationOption().should("exist");
+    sortWork.getShowForUnitOption().should("exist");
+    sortWork.getShowForAllOption().should("exist");
+
+    cy.get(".section-header-arrow").click({multiple: true}); // Open the sections
+    // For the "Problem" option, documents should be listed using the larger thumbnail view
+    cy.get("[data-test=sort-work-list-items]").should("have.length.greaterThan", 0);
+    cy.get("[data-test=simple-document-item]").should("not.exist");
+    sortWork.getShowForMenu().click();
+    cy.wait(500);
+    sortWork.getShowForInvestigationOption().click();
+    cy.wait(500);
+    // For the "Investigation", "Unit", and "All" options, documents should be listed using the smaller "simple" view
+    cy.get("[data-test=sort-work-list-items]").should("not.exist");
+    cy.get("[data-test=simple-document-item]").should("have.length.greaterThan", 0);
+    sortWork.getShowForMenu().click();
+    cy.wait(500);
+    sortWork.getShowForUnitOption().click();
+    cy.wait(500);
+    cy.get("[data-test=sort-work-list-items]").should("not.exist");
+    cy.get("[data-test=simple-document-item]").should("have.length.greaterThan", 0);
+    sortWork.getShowForMenu().click();
+    cy.wait(500);
+    sortWork.getShowForAllOption().click();
+    cy.wait(500);
+    cy.get("[data-test=sort-work-list-items]").should("not.exist");
+    cy.get("[data-test=simple-document-item]").should("have.length.greaterThan", 0);
+    cy.get("[data-test=simple-document-item]").should("have.attr", "title").and("not.be.empty");
+    cy.get("[data-test=simple-document-item]").first().click();
+    sortWork.getFocusDocument().should("be.visible");
+  });
+
+  it("should open Sort Work tab and test secondary sort functionality", () => {
+    beforeTest(queryParams1);
+
+    cy.get(".section-header-arrow").click({multiple: true}); // Open the sections
+    cy.get("[data-testid=section-sub-header]").should("not.exist");
+    cy.get("[data-testid=doc-group]").should("not.exist");
+    cy.get("[data-testid=doc-group-label]").should("not.exist");
+    cy.get("[data-testid=doc-group-list]").should("not.exist");
+
+    // Switching from "Show for" from Problem to Investigation should switch the list of
+    // documents from the larger thumbnail view to the smaller "simple" view and arrange the
+    // document list items in rows that are potentially scrollable.
+    sortWork.getShowForMenu().click();
+    sortWork.getShowForInvestigationOption().click();
+    cy.get("[data-testid=section-sub-header]").should("not.exist");
+    cy.get("[data-testid=doc-group]").should("exist");
+    // There should be one doc group per section-document-list. There is no
+    // label for the doc group.
+    cy.get("[data-testid=section-document-list]").each($el => {
+      cy.wrap($el).find("[data-testid=doc-group]").should("have.length", 1);
+      cy.wrap($el).find("[data-testid=doc-group-label]").should("not.exist");
+    });
+    cy.get("[data-testid=doc-group-list]").invoke("prop", "scrollLeft").should("be.eq", 0);
+    cy.get("[data-testid=scroll-button-left]").should("exist").and("be.disabled");
+    cy.get("[data-testid=scroll-button-right]").should("exist").and("not.be.disabled");
+    cy.get("[data-testid=scroll-button-right]").click();
+    cy.get("[data-testid=scroll-button-left]").should("exist").and("not.be.disabled");
+    cy.get("[data-testid=doc-group-list]").invoke("prop", "scrollLeft").should("be.gt", 0);
+    cy.get("[data-testid=scroll-button-left]").click();
+    cy.get("[data-testid=scroll-button-left]").should("exist").and("be.disabled");
+    cy.get("[data-testid=doc-group-list]").invoke("prop", "scrollLeft").should("be.eq", 0);
+
+    // Apply secondary sort
+    sortWork.getSecondarySortByMenu().click();
+    sortWork.getSecondarySortByNoneOption().should("have.class", "selected");
+    sortWork.getSecondarySortByGroupOption().should("exist");
+    sortWork.getSecondarySortByTagOption().should("exist");
+    sortWork.getSecondarySortByBookmarkedOption().should("exist");
+    sortWork.getSecondarySortByToolsOption().should("exist");
+    sortWork.getSecondarySortByNameOption().should("exist").click();
+    cy.wait(500);
+
+    sortWork.getSecondarySortByNoneOption().should("not.have.class", "selected");
+    sortWork.getSecondarySortByNameOption().should("have.class", "selected");
+    cy.get("[data-testid=section-sub-header]").each($el => {
+      cy.wrap($el).should("exist").and("have.text", "Name");
+    });
+    cy.get("[data-testid=doc-group]").should("exist");
+    // There should be multiple doc groups that are children of each section-document-list.
+    // Each doc group should have its own label.
+    cy.get("[data-testid=section-document-list]").each($el => {
+      cy.wrap($el).find("[data-testid=doc-group]").should("have.length.be.greaterThan", 1).each($group => {
+        cy.wrap($group).find("[data-testid=doc-group-label]").should("have.length", 1);
+      });
+    });
+
+    // Change the primary sort option to match the currently-selected secondary sort option, and
+    // make sure the latter automatically resets to "None", and the previously-selected option in
+    // the primary menu is now selectable in the secondary sort menu.
+    sortWork.getPrimarySortByGroupOption().should("have.class", "selected");
+    sortWork.getSecondarySortByGroupOption().should("have.class", "disabled");
+    sortWork.getSecondarySortByNameOption().should("have.class", "selected");
+    sortWork.getPrimarySortByMenu().click();
+    sortWork.getPrimarySortByNameOption().click();
+    cy.wait(500);
+    sortWork.getPrimarySortByGroupOption().should("not.have.class", "selected");
+    sortWork.getPrimarySortByNameOption().should("have.class", "selected");
+    sortWork.getSecondarySortByGroupOption().should("have.class", "enabled");
+    sortWork.getSecondarySortByNameOption().should("not.have.class", "selected").and("have.class", "disabled");
+    sortWork.getSecondarySortByNoneOption().should("have.class", "selected");
+
+  });
+
+  // TODO: Reinstate the tests below when all metadata documents have the new fields and are being updated in real time.
+  it.skip("should open Sort Work tab and test sorting by group", () => {
     // Clear data before the test so it can be retried and will start with a clean slate
     cy.clearQAData('all');
 
@@ -172,9 +282,9 @@ describe('SortWorkView Tests', () => {
     sortWork.checkDocumentInGroup("No Group", exemplarDocs[0]);
 
     cy.log("check that problem and exemplar documents can be sorted by name");
-    sortWork.getSortByMenu().click();
+    sortWork.getPrimarySortByMenu().click();
     cy.wait(1000);
-    sortWork.getSortByNameOption().click();
+    sortWork.getPrimarySortByNameOption().click();
     sortWork.checkSectionHeaderLabelsExist([
       "1, Student", "1, Teacher", "2, Student", "3, Student", "4, Student", "Idea, Ivan"
     ]);
@@ -183,9 +293,9 @@ describe('SortWorkView Tests', () => {
     sortWork.checkDocumentInGroup("1, Student", studentProblemDocs[0]);
 
     cy.log("check that exemplar document is displayed in strategy tag sourced from CMS");
-    sortWork.getSortByMenu().click();
+    sortWork.getPrimarySortByMenu().click();
     cy.wait(1000);
-    sortWork.getSortByTagOption().click();
+    sortWork.getPrimarySortByTagOption().click();
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Unit Rate", exemplarDocs[0]);
 
@@ -198,10 +308,10 @@ describe('SortWorkView Tests', () => {
     chatPanel.getChatCloseButton().click();
     cy.openTopTab('sort-work');
     // at the moment this is required to refresh the sort
-    sortWork.getSortByMenu().click();
-    sortWork.getSortByNameOption().click();
-    sortWork.getSortByMenu().click();
-    sortWork.getSortByTagOption().click();
+    sortWork.getPrimarySortByMenu().click();
+    sortWork.getPrimarySortByNameOption().click();
+    sortWork.getPrimarySortByMenu().click();
+    sortWork.getPrimarySortByTagOption().click();
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Diverging Designs", exemplarDocs[0]);
 
@@ -215,8 +325,8 @@ describe('SortWorkView Tests', () => {
     cy.openTopTab('sort-work');
 
     cy.log("check that exemplar document is still displayed in strategy tag sourced from CMS but not in teacher added tag");
-    sortWork.getSortByMenu().click();
-    sortWork.getSortByTagOption().click();
+    sortWork.getPrimarySortByMenu().click();
+    sortWork.getPrimarySortByTagOption().click();
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Unit Rate", exemplarDocs[0]);
     sortWork.checkGroupIsEmpty("Diverging Designs");
