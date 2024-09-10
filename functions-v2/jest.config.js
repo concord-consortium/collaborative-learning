@@ -2,6 +2,15 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   testPathIgnorePatterns: ['lib/', 'node_modules/'],
+  moduleNameMapper: {
+    // These are necessary so code imported from ../shared/ will use the same version of
+    // firebase-admin that the local code does.
+    // The explicit `^` and `$` are needed so this only matches what we are importing.
+    // Otherwise it breaks the internal firebase admin code's imports
+    "^firebase-admin$": "<rootDir>/node_modules/firebase-admin",
+    "^firebase-admin/firestore$": "<rootDir>/node_modules/firebase-admin/lib/firestore",
+    "^firebase-admin/app$": "<rootDir>/node_modules/firebase-admin/lib/app",
+  }
 };
 
 // This is configured here because the clearFirebaseData function from

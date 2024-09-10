@@ -11,6 +11,14 @@
     // This prevents typescript from trying to include @types from the parent folders.
     // The types in the parent folders conflict so they break the build.
     "typeRoots": ["./node_modules/@types"],
+    "paths": {
+      // These are necessary so code imported from ../shared/ will use the same version of
+      // firebase-admin that the local code does.
+      "firebase-admin": ["./node_modules/firebase-admin/lib"],
+      "firebase-admin/firestore": ["./node_modules/firebase-admin/lib/firestore"],
+      "firebase-admin/app": ["./node_modules/firebase-admin/lib/app"],
+    },
+
   },
   "compileOnSave": true,
   "include": [
