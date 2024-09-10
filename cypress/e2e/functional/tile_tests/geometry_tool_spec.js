@@ -301,7 +301,7 @@ context('Geometry Tool', function () {
     // Also check that the angle label has changed from its original value
     geometryToolTile.getAngleAdornment().should(($label) => {
         const angleText = $label.text();
-        expect(angleText).not.to.equal('90'); // 90° was the original value
+        expect(angleText).not.contains('90°'); // 90° was the original value
     });
 
     // Move the point back to the original position
@@ -385,7 +385,7 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphPolygon().should("have.length", 1);
 
     // Create a second polygon that shares the same points as the first
-    cy.log('Create a second polygon that shares the same points as the first');
+    cy.log('Create a second polygon that shares a point with the first');
     clueCanvas.clickToolbarButton('geometry', 'polygon');
     geometryToolTile.clickGraphPosition(15, 10); // new point
     geometryToolTile.clickGraphPosition(15, 5); // shared point
