@@ -17,8 +17,6 @@ import "react-tippy/dist/tippy.css";
 import "./app.scss";
 
 interface IProps extends IBaseProps {}
-interface IState {
-}
 
 function resolveAppMode(
   stores: IStores,
@@ -136,10 +134,7 @@ export const authAndConnect = (stores: IStores) => {
 
 @inject("stores")
 @observer
-export class AppComponent extends BaseComponent<IProps, IState> {
-
-  public state: IState = {
-  };
+export class AppComponent extends BaseComponent<IProps> {
 
   constructor(props: IProps) {
     super(props);
