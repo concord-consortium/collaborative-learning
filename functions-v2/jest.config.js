@@ -1,6 +1,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
+  testPathIgnorePatterns: ['lib/', 'node_modules/'],
 };
 
 // This is configured here because the clearFirebaseData function from
