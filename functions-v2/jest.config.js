@@ -10,7 +10,11 @@ module.exports = {
     "^firebase-admin$": "<rootDir>/node_modules/firebase-admin",
     "^firebase-admin/firestore$": "<rootDir>/node_modules/firebase-admin/lib/firestore",
     "^firebase-admin/app$": "<rootDir>/node_modules/firebase-admin/lib/app",
-  }
+    "^firebase-admin/database$": "<rootDir>/node_modules/firebase-admin/lib/database",
+  },
+  // The tests can't be run in parallel because they are using a shared Firestore and
+  // Realtime database.
+  maxWorkers: 1,
 };
 
 // This is configured here because the clearFirebaseData function from
@@ -19,3 +23,4 @@ module.exports = {
 // The port here should match the port that is set in the emulators
 // section of firebase.json
 process.env["FIRESTORE_EMULATOR_HOST"]="127.0.0.1:8088";
+process.env["FIREBASE_DATABASE_EMULATOR_HOST"]="127.0.0.1:9000";

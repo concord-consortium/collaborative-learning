@@ -42,7 +42,6 @@ export async function cleanFirebaseRoots(
     // and try again later.
     const databasePath = `/${appMode}/${root.id}`;
     logger.info(`Deleting Realtime Database root: ${databasePath} ...`);
-    // TODO: what if the ref doesn't exist?
     if (!dryRun) await getDatabase().ref(`/${appMode}/${root.id}`).remove();
     logger.info(`Deleting Firestore root: ${root.ref.path} ...`);
     if (!dryRun) await getFirestore().recursiveDelete(root.ref);
