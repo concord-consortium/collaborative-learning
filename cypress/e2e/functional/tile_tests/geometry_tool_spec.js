@@ -123,7 +123,7 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphAxisTickLabels().last().should("have.text", "15");
   });
 
-  it.only('works in all four modes', () => {
+  it('works in all four modes', () => {
     beforeTest();
     clueCanvas.addTile('geometry');
     geometryToolTile.getGraph().should("exist");
@@ -419,31 +419,38 @@ context('Geometry Tool', function () {
     geometryToolTile.chooseLabelOption('length');
     geometryToolTile.clickGraphPosition(20, 20); // deselect
 
-    // Store initial values for the line segments
-    let originalValue1 = 10.0;
-    let originalValue2 = 5.0;
+    let origPointLabel1 = 10.0;
+    let origPointLabel2 = 5.0;
 
     // Verify that the first point label is close to 10.0
     geometryToolTile.getGraphPointLabel().eq(2).invoke('text').then((text) => {
       const value = parseFloat(text);
-      expect(value).to.be.closeTo(originalValue1, 0.1); // Allow tolerance for value close to 10.0
+      expect(value).to.be.closeTo(origPointLabel1, 0.1); // Allow tolerance for value close to 10.0
     });
 
     // Verify that the second point label is close to 5.0
     geometryToolTile.getGraphPointLabel().eq(3).invoke('text').then((text) => {
       const value = parseFloat(text);
-      expect(value).to.be.closeTo(originalValue2, 0.1); // Allow tolerance for value close to 5.0
+      expect(value).to.be.closeTo(origPointLabel2, 0.1); // Allow tolerance for value close to 5.0
     });
 
     // Move the point
     clueCanvas.clickToolbarButton('geometry', 'select');
     geometryToolTile.clickGraphPosition(15, 5); // shared point
-    geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 39 }); // simulate right arrow key press
-    geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 38 }); // simulate up arrow key press
+
+    // Simulate 4 right arrow key presses
+    for (let i = 0; i < 4; i++) {
+      geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 39 });
+    }
+
+    // Simulate 4 up arrow key presses
+    for (let i = 0; i < 4; i++) {
+      geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 38 });
+    }
 
     // Updated expected values after the point move
-    let updatedValue1 = originalValue1 + 0.1; // 10.1
-    let updatedValue2 = originalValue2 - 0.1; // 4.9
+    let updatedValue1 = origPointLabel1 + 0.4; // 10.4
+    let updatedValue2 = origPointLabel2 - 0.4; // 4.6
 
     // Verify that the point values changed
     geometryToolTile.getSelectedGraphPoint().then(($point) => {
@@ -454,21 +461,28 @@ context('Geometry Tool', function () {
       expect(newPy).to.be.lessThan(originalCy);
     });
 
-    // Verify that the first line segment has changed to a value close to 10.1
+    // Verify that the first line segment has changed to a value close to 10.4
     geometryToolTile.getGraphPointLabel().eq(2).invoke('text').then((text) => {
-      const value = parseFloat(text);
-      expect(value).to.be.closeTo(updatedValue1, 0.1); // Tolerance for value close to 10.1
+      const lineSegment1 = parseFloat(text);
+      expect(lineSegment1).to.be.closeTo(updatedValue1, 0.1); // Tolerance for value close to 10.4
     });
 
-    // Verify that the second line segment has changed to a value close to 4.9
+    // Verify that the second line segment has changed to a value close to 4.6
     geometryToolTile.getGraphPointLabel().eq(3).invoke('text').then((text) => {
-      const value = parseFloat(text);
-      expect(value).to.be.closeTo(updatedValue2, 0.1); // Tolerance for value close to 4.9
+      const lineSegment2 = parseFloat(text);
+      expect(lineSegment2).to.be.closeTo(updatedValue2, 0.1); // Tolerance for value close to 4.6
     });
 
     // Move the point back to the original position
-    geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 37 }); // simulate left arrow key press
-    geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 40 }); // simulate down arrow key press
+    // Simulate 4 left arrow key presses
+    for (let i = 0; i < 4; i++) {
+      geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 37 });
+    }
+
+    // Simulate 4 down arrow key presses
+    for (let i = 0; i < 4; i++) {
+      geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 40 });
+    }
 
     // Verify that the point has returned to its original coordinates
     geometryToolTile.getSelectedGraphPoint().then(($point) => {
@@ -481,14 +495,14 @@ context('Geometry Tool', function () {
 
     // Verify that the first line segment has returned to a value close to 10.0
     geometryToolTile.getGraphPointLabel().eq(2).invoke('text').then((text) => {
-      const value = parseFloat(text);
-      expect(value).to.be.closeTo(originalValue1, 0.1); // Tolerance for value close to 10.0
+      const lineSegment1 = parseFloat(text);
+      expect(lineSegment1).to.be.closeTo(origPointLabel1, 0.1); // Tolerance for value close to 10.0
     });
 
     // Verify that the second line segment has returned to a value close to 5.0
     geometryToolTile.getGraphPointLabel().eq(3).invoke('text').then((text) => {
-      const value = parseFloat(text);
-      expect(value).to.be.closeTo(originalValue2, 0.1); // Tolerance for value close to 5.0
+      const lineSegment2 = parseFloat(text);
+      expect(lineSegment2).to.be.closeTo(origPointLabel2, 0.1); // Tolerance for value close to 5.0
     });
 
     // Verify the point is still shared
