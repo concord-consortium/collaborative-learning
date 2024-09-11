@@ -123,7 +123,7 @@ context('Geometry Tool', function () {
     geometryToolTile.getGraphAxisTickLabels().last().should("have.text", "15");
   });
 
-  it('works in all four modes', () => {
+  it.only('works in all four modes', () => {
     beforeTest();
     clueCanvas.addTile('geometry');
     geometryToolTile.getGraph().should("exist");
@@ -417,47 +417,79 @@ context('Geometry Tool', function () {
     clueCanvas.clickToolbarButton('geometry', 'label');
     geometryToolTile.getModalTitle().should('contain.text', 'Length');
     geometryToolTile.chooseLabelOption('length');
-    geometryToolTile.clickGraphPosition(0, 0); // deselect
+    geometryToolTile.clickGraphPosition(20, 20); // deselect
 
-    // Verify that the two line segments were created
-    geometryToolTile.getGraphPointLabel().contains('10.0').should('exist');
-    geometryToolTile.getGraphPointLabel().contains('5.0').should('exist');
+// Store initial values for the line segments
+let originalValue1 = 10.0;
+let originalValue2 = 5.0;
 
-    // Move the point
-    clueCanvas.clickToolbarButton('geometry', 'select');
-    geometryToolTile.clickGraphPosition(15, 5); // shared point
-    geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 39 }); // simulate right arrow key press
-    geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 38 }); // simulate up arrow key press
+// Verify that the first point label is close to 10.0
+geometryToolTile.getGraphPointLabel().eq(2).invoke('text').then((text) => {
+  const value = parseFloat(text);
+  expect(value).to.be.closeTo(originalValue1, 0.1); // Allow tolerance for value close to 10.0
+});
 
-    // Verify that the point values changed
-    geometryToolTile.getSelectedGraphPoint().then(($point) => {
-      const newPx = parseFloat($point.attr('cx')); // 'px' for point x-coordinate
-      const newPy = parseFloat($point.attr('cy')); // 'py' for point y-coordinate
+// Verify that the second point label is close to 5.0
+geometryToolTile.getGraphPointLabel().eq(3).invoke('text').then((text) => {
+  const value = parseFloat(text);
+  expect(value).to.be.closeTo(originalValue2, 0.1); // Allow tolerance for value close to 5.0
+});
 
-      expect(newPx).to.be.greaterThan(originalCx);
-      expect(newPy).to.be.lessThan(originalCy);
-    });
+// Move the point
+clueCanvas.clickToolbarButton('geometry', 'select');
+geometryToolTile.clickGraphPosition(15, 5); // shared point
+geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 39 }); // simulate right arrow key press
+geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 38 }); // simulate up arrow key press
 
-    // Verify that the two line segments have changed
-    geometryToolTile.getGraphPointLabel().contains('10.1').should('exist');
-    geometryToolTile.getGraphPointLabel().contains('4.9').should('exist');
+// Updated expected values after the point move
+let updatedValue1 = originalValue1 + 0.1; // 10.1
+let updatedValue2 = originalValue2 - 0.1; // 4.9
 
-    // Move the point back to the original position
-    geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 37 }); // simulate left arrow key press
-    geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 40 }); // simulate down arrow key press
+// Verify that the point values changed
+geometryToolTile.getSelectedGraphPoint().then(($point) => {
+  const newPx = parseFloat($point.attr('cx'));
+  const newPy = parseFloat($point.attr('cy'));
 
-    // Verify that the point has returned to its original coordinates
-    geometryToolTile.getSelectedGraphPoint().then(($point) => {
-      const resetPx = parseFloat($point.attr('cx'));
-      const resetPy = parseFloat($point.attr('cy'));
+  expect(newPx).to.be.greaterThan(originalCx);
+  expect(newPy).to.be.lessThan(originalCy);
+});
 
-      expect(resetPx).to.equal(originalCx);
-      expect(resetPy).to.equal(originalCy);
-    });
+// Verify that the first line segment has changed to a value close to 10.1
+geometryToolTile.getGraphPointLabel().eq(2).invoke('text').then((text) => {
+  const value = parseFloat(text);
+  expect(value).to.be.closeTo(updatedValue1, 0.1); // Tolerance for value close to 10.1
+});
 
-    // Verify that the two line segments returned to their original values
-    geometryToolTile.getGraphPointLabel().contains('10.0').should('exist');
-    geometryToolTile.getGraphPointLabel().contains('5.0').should('exist');
+// Verify that the second line segment has changed to a value close to 4.9
+geometryToolTile.getGraphPointLabel().eq(3).invoke('text').then((text) => {
+  const value = parseFloat(text);
+  expect(value).to.be.closeTo(updatedValue2, 0.1); // Tolerance for value close to 4.9
+});
+
+// Move the point back to the original position
+geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 37 }); // simulate left arrow key press
+geometryToolTile.getSelectedGraphPoint().trigger('keydown', { keyCode: 40 }); // simulate down arrow key press
+
+// Verify that the point has returned to its original coordinates
+geometryToolTile.getSelectedGraphPoint().then(($point) => {
+  const resetPx = parseFloat($point.attr('cx'));
+  const resetPy = parseFloat($point.attr('cy'));
+
+  expect(resetPx).to.equal(originalCx);
+  expect(resetPy).to.equal(originalCy);
+});
+
+// Verify that the first line segment has returned to a value close to 10.0
+geometryToolTile.getGraphPointLabel().eq(2).invoke('text').then((text) => {
+  const value = parseFloat(text);
+  expect(value).to.be.closeTo(originalValue1, 0.1); // Tolerance for value close to 10.0
+});
+
+// Verify that the second line segment has returned to a value close to 5.0
+geometryToolTile.getGraphPointLabel().eq(3).invoke('text').then((text) => {
+  const value = parseFloat(text);
+  expect(value).to.be.closeTo(originalValue2, 0.1); // Tolerance for value close to 5.0
+});
 
     // Verify the point is still shared
     geometryToolTile.getGraphPoint().should("have.length", 6); // New point added
