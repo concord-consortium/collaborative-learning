@@ -301,7 +301,7 @@ context('Geometry Tool', function () {
     // Also check that the angle label has changed from its original value
     geometryToolTile.getAngleAdornment().should(($label) => {
         const angleText = $label.text();
-        expect(angleText).not.contains('90°'); // 90° was the original value
+        expect(angleText).not.to.equal('90'); // 90° was the original value
     });
 
     // Move the point back to the original position
