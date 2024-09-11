@@ -18,7 +18,6 @@ const queryParams1 = `${Cypress.config("clueTestqaConfigSubtabsUnitTeacher6")}`;
 const queryParams2 = `${Cypress.config("qaConfigSubtabsUnitTeacher1")}`;
 
 function beforeTest(params) {
-  cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
   dashboard.switchView("Workspace & Resources");
@@ -178,8 +177,6 @@ describe('SortWorkView Tests', () => {
 
   // TODO: Reinstate the tests below when all metadata documents have the new fields and are being updated in real time.
   it.skip("should open Sort Work tab and test sorting by group", () => {
-    // Clear data before the test so it can be retried and will start with a clean slate
-    cy.clearQAData('all');
 
     const students = ["student:1", "student:2", "student:3", "student:4"];
     const studentProblemDocs = [

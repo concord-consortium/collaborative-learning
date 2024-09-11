@@ -11,7 +11,6 @@ let xyTile = new XYPlotTile;
 const queryParams = `${Cypress.config("qaNoNavPanelUnitStudent5")}`;
 
 function beforeTest(params) {
-  cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
 }

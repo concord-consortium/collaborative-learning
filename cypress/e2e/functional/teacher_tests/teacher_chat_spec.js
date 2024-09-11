@@ -34,7 +34,6 @@ const ss = [{ "section": "problems",
 const comment = [ "This is document comment for ", "This is tile comment for " ];
 
 function beforeTest(params) {
-  cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
   cy.openTopTab("problems");
@@ -44,7 +43,6 @@ function beforeTest(params) {
 }
 
 function beforeTestCommentedDocumentList(params) {
-  cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
   cy.openTopTab("my-work");

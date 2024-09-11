@@ -18,7 +18,6 @@ const ptsDoc = 'Points';
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaUnitStudent5")}`;
-  cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
   cy.collapseResourceTabs();
