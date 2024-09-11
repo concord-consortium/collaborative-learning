@@ -39,7 +39,6 @@ const queryParamsQa = `${Cypress.config("qaUnitStudent7Investigation3")}`;
 //   so cypress+chrome simply cannot scroll the container.
 
 function beforeTest(params) {
-  cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
   cy.showOnlyDocumentWorkspace();

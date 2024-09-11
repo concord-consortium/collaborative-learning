@@ -144,8 +144,6 @@ function setupTestBrain(studentIndex) {
 context('Test 4-up and 1-up views tiles read only functionalities', function () {
   it('4-up and 1-up views read-only text, table, geometry, drawing, expression, numberline, image, datacard tiles', function () {
 
-    cy.clearQAData('all');
-
     setupTest(0);
     setupTest(1);
 
@@ -173,8 +171,6 @@ context('Test 4-up and 1-up views tiles read only functionalities', function () 
     testTilesReadOnly("student-group-view", ".north-east");
   });
   it('4-up and 1-up views read-only dataflow, expression, xy plot tiles', function () {
-
-    cy.clearQAData('all');
 
     setupTestBrain(0);
     setupTestBrain(1);

@@ -31,7 +31,7 @@ import { DBListeners } from "./db-listeners";
 import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
 import { getDocumentPath, ICommentableDocumentParams, IDocumentMetadata, IGetImageDataParams,
-         IPublishSupportParams } from "../../functions/src/shared";
+         IPublishSupportParams } from "../../shared/shared";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
@@ -45,7 +45,10 @@ import { DEBUG_FIRESTORE } from "./debug";
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBBaseConnectOptions {
   stores: IStores;
-  dontStartListeners?: boolean; // for unit tests
+
+  // for unit tests
+  dontStartListeners?: boolean;
+  authPersistence?: firebase.auth.Auth.Persistence;
 }
 export interface IDBAuthConnectOptions extends IDBBaseConnectOptions {
   appMode: "authed";
@@ -63,8 +66,6 @@ export interface UserGroupMap {
 export interface GroupUsersMap {
   [key: string]: string[];
 }
-
-export type DBClearLevel = "all" | "class" | "offering";
 
 export interface ICreateOtherDocumentParams {
   title?: string;
@@ -166,6 +167,10 @@ export class DB {
           this.firestore.setFirebaseUser(firebaseUser);
           if (!options.dontStartListeners) {
             const { persistentUI, user, db, unitLoadedPromise, exemplarController} = this.stores;
+
+            // Record launch time in Firestore
+            this.firestore.recordLaunchTime();
+
             // Start fetching the persistent UI. We want this to happen as early as possible.
             persistentUI.initializePersistentUISync(user, db);
 
@@ -180,6 +185,10 @@ export class DB {
           }
         }
       });
+
+      // SESSION auth persistence is used so each new tab or window gets its own Firebase authentication
+      // Unless overridden this applies to all app modes (qa, dev, app, auth, test)
+      firebase.auth().setPersistence(options.authPersistence || firebase.auth.Auth.Persistence.SESSION);
 
       if (options.appMode === "authed") {
         firebase.auth()
@@ -778,35 +787,6 @@ export class DB {
       this.firebase.ref(typedMetadata).set(null)
     ]);
     this.stores.documents.resolveRequiredDocumentPromiseWithNull(document.type);
-  }
-
-  public clear(level: DBClearLevel) {
-    return new Promise<void>((resolve, reject) => {
-      const {user} = this.stores;
-      const clearPath = (path?: string) => {
-        this.firebase.ref(path).remove().then(resolve).catch(reject);
-      };
-
-      if (this.stores.appMode !== "qa") {
-        return reject("db#clear is only available in qa mode");
-      }
-
-      if (level === "all") {
-        return reject("clearing 'all' is handled by clearFirebaseAnonQAUser");
-      }
-
-      switch (level) {
-        case "class":
-          clearPath(this.firebase.getClassPath(user));
-          break;
-        case "offering":
-          clearPath(this.firebase.getOfferingPath(user));
-          break;
-        default:
-          reject(`Invalid clear level: ${level}`);
-          break;
-      }
-    });
   }
 
   public createDocumentModelFromProblemMetadata(

@@ -1,4 +1,4 @@
-import { parseSectionPath } from "../../../functions/src/shared";
+import { parseSectionPath } from "../../../shared/shared";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 

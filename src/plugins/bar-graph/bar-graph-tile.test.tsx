@@ -1,6 +1,6 @@
-import { render } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import React from "react";
+import { render, getByText as globalGetByText } from "@testing-library/react";
+
 import { ITileApi } from "../../components/tiles/tile-api";
 import { TileModel } from "../../models/tiles/tile-model";
 import { defaultBarGraphContent } from "./bar-graph-content";
@@ -9,6 +9,15 @@ import { BarGraphComponent } from "./bar-graph-tile";
 // The tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
 import "./bar-graph-registration";
+
+jest.mock("react-resize-detector", () => ({
+  useResizeDetector: jest.fn(() => ({height: 200, width: 200, ref: null}))
+}));
+
+jest.mock("./bar-graph-utils", () => ({
+  getBBox: jest.fn(() => ({x: 0, y: 0, width: 500, height: 200}))
+}));
+
 
 describe("BarGraphComponent", () => {
   const content = defaultBarGraphContent();
@@ -38,30 +47,22 @@ describe("BarGraphComponent", () => {
   };
 
   it("renders successfully", () => {
-    const {getByText} =
+    const {getByText, getByTestId} =
       render(<BarGraphComponent  {...defaultProps} {...{model}}></BarGraphComponent>);
-    expect(getByText("This is a bar graph.")).toBeInTheDocument();
+    expect(getByText("Tile Title")).toBeInTheDocument();
+    expect(getByTestId("bar-graph-content")).toBeInTheDocument();
+    expect(globalGetByText(getByTestId("bar-graph-content"), "Counts")).toBeInTheDocument();
+    expect(getByText("6/23/24")).toBeInTheDocument();
   });
 
   it.skip("updates the text when the model changes", async () => {
-    const {getByText, findByText} =
+    const {getByTestId, findByText} =
       render(<BarGraphComponent  {...defaultProps} {...{model}}></BarGraphComponent>);
-    expect(getByText("Hello World")).toBeInTheDocument();
+    expect(globalGetByText(getByTestId("bar-graph-content"), "Counts")).toBeInTheDocument();
 
-    content.setText("New Text");
+    content.setYAxisLabel("New Text");
 
-    expect(await findByText("New Text")).toBeInTheDocument();
+    expect(await findByText( "New Text")).toBeInTheDocument();
   });
 
-  it.skip("updates the model when the user types", () => {
-    const {getByRole, getByText} =
-      render(<BarGraphComponent  {...defaultProps} {...{model}}></BarGraphComponent>);
-    expect(getByText("New Text")).toBeInTheDocument();
-
-    const textBox = getByRole("textbox");
-    userEvent.type(textBox, "{selectall}{del}Typed Text");
-
-    expect(textBox).toHaveValue("Typed Text");
-    expect(content.text).toBe("Typed Text");
-  });
 });

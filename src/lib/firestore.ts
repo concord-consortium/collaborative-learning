@@ -160,4 +160,29 @@ export class Firestore {
     const userDoc = await this.doc(`users/${uid}`).get();
     return userDoc.data() as UserDocument | undefined;
   }
+
+  /**
+   * Record the lastLaunchTime in the Firestore root.
+   *
+   * This is only recorded for dev, qa, test, and demo appModes.
+   * In the dev, qa, and test modes each user has their own root or a new root
+   * is created on each test.
+   * In the demo mode there could be lots of users launching in the same root
+   * but this number should be manageable, and it will be useful to keep track
+   * of how old various demo roots are.
+   * In the auth (portal launch) case lots of users will be launching the same
+   * root so the lastLaunchTime would be updated too frequently. Also we can use
+   * logs and portal information to find the last portal launch.
+   *
+   * @returns a promise that resolves when the lastLaunchTime has been updated
+   */
+  public async recordLaunchTime() {
+    const { appMode } = this.db.stores;
+
+    if (!["dev", "qa", "test", "demo"].includes(appMode)) {
+      return;
+    }
+
+    return this.doc("").set({lastLaunchTime: this.timestamp()}, {merge: true});
+  }
 }

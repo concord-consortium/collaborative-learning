@@ -1,5 +1,5 @@
 import { FC, SVGProps } from "react";
-import { IDocumentMetadata } from "functions/src/shared";
+import { IDocumentMetadata } from "../../../shared/shared";
 import { ISortedDocumentsStores, TagWithDocs } from "./sorted-documents";
 import { makeAutoObservable } from "mobx";
 import {

@@ -20,10 +20,6 @@ const defaultSetupOptions = {
   problem
 };
 
-function beforeTest() {
-  cy.clearQAData('all');
-}
-
 function setup(student, opts = {}) {
   const options = { ...defaultSetupOptions, ...opts };
   cy.visit('/?appMode=qa&fakeClass=' + fakeClass + '&fakeUser=student:' + student + '&problem=' + options.problem + '&unit=./demo/units/qa/content.json');
@@ -40,8 +36,6 @@ function setup(student, opts = {}) {
 
 context('Test student join a group', function () {
   it('Test student join a group', function () {
-    beforeTest();
-
     cy.log('Student 1 will join and will verify Join Group Dialog comes up with welcome message to correct student');
     setup(student1);
     cy.get('.app > .join > .join-title').should('contain', 'Join Group');

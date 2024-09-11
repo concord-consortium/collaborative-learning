@@ -12,7 +12,6 @@ let student = '5',
   group = '5';
 
 function beforeTest(queryParams) {
-  cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
 }

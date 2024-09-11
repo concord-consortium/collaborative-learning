@@ -58,7 +58,6 @@ function attributeOfTransform(matcher, n) {
 
 
 function beforeTest(params) {
-  cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
 }
