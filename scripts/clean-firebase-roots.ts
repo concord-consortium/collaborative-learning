@@ -1,11 +1,11 @@
 #!/usr/bin/node
 
-// This script finds documents without metadata in the realtime database.
-// If the deleteTypes array is uncommented, it will delete these documents.
+// This script cleans the roots out of the QA or Dev sections of
+// the Firebase Realtime database and Firestore.
 
 // to run this script type the following in the terminal
 // cf. https://stackoverflow.com/a/66626333/16328462
-// $ cd scripts/ai
+// $ cd scripts
 // $ npx tsx clean-firebase-roots.ts
 
 import admin from "firebase-admin";

@@ -24,7 +24,7 @@ export async function cleanFirebaseRoots(
     throw new Error(`Invalid appMode ${appMode}`);
   }
 
-  // Clean up Firestore and Realtime database roots that haven't been updated in a 6 hours
+  // Clean up Firestore and Realtime database roots that haven't been launched in `hoursAgo` hours
   const cutOffMillis = Date.now() - hoursAgo*HOUR;
   const qaRootsResult = await getFirestore()
     .collection(appMode)

@@ -8,7 +8,7 @@ import * as logger from "firebase-functions/logger";
 // type errors.
 import {cleanFirebaseRoots} from "../../shared/clean-firebase-roots";
 
-export const atMidnight = onSchedule("0 0 * * *", runAtMidnight);
+export const atMidnight = onSchedule("0 7 * * *", runAtMidnight);
 
 // This function is split out so it can be tested by Jest. The
 // firebase-functions-test library doesn't support wrapping onSchedule.
