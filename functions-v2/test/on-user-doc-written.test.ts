@@ -1,22 +1,14 @@
-import initializeFFT from "firebase-functions-test";
 import {
   clearFirestoreData,
 } from "firebase-functions-test/lib/providers/firestore";
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
+import {initialize, projectConfig} from "./initialize";
 import {onUserDocWritten} from "../src/on-user-doc-written";
 
 jest.mock("firebase-functions/logger");
 
-process.env["FIRESTORE_EMULATOR_HOST"]="127.0.0.1:8088";
-const projectConfig = {projectId: "demo-test"};
-const fft = initializeFFT(projectConfig);
-
-// When the function is running in the cloud initializeApp is called by index.ts
-// Here we are importing the function's module directly so we can call
-// initializeApp ourselves. This is beneficial since initializeApp needs to
-// be called after initializeFFT above.
-admin.initializeApp();
+const {fft, cleanup} = initialize();
 
 type CollectionRef = admin.firestore.CollectionReference<
   admin.firestore.DocumentData, admin.firestore.DocumentData
@@ -288,7 +280,7 @@ describe("functions", () => {
     });
   });
 
-  afterAll(() => {
-    fft.cleanup();
+  afterAll(async () => {
+    await cleanup();
   });
 });
