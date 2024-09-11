@@ -73,12 +73,12 @@ describe("atMidnight", () => {
       .toHaveBeenCalledWith("Found 1 roots to delete");
   });
 
-  test("only clean up firestore roots older than 6 hours", async () => {
+  test("only clean up firestore roots older than 24 hours", async () => {
     await writeFirestoreRoot(Date.now() - HOUR);
-    await writeFirestoreRoot(Date.now() - 2*HOUR);
-    await writeFirestoreRoot(Date.now() - 5*HOUR);
-    await writeFirestoreRoot(Date.now() - 8*HOUR);
-    await writeFirestoreRoot(Date.now() - 24*HOUR);
+    await writeFirestoreRoot(Date.now() - 12*HOUR);
+    await writeFirestoreRoot(Date.now() - 23*HOUR);
+    await writeFirestoreRoot(Date.now() - 25*HOUR);
+    await writeFirestoreRoot(Date.now() - 48*HOUR);
 
     await runAtMidnight();
 

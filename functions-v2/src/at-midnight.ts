@@ -15,7 +15,7 @@ export const atMidnight = onSchedule("0 0 * * *", runAtMidnight);
 export async function runAtMidnight() {
   await cleanFirebaseRoots({
     appMode: "qa",
-    hoursAgo: 6,
+    hoursAgo: 24,
     logger,
     dryRun: false,
   });
