@@ -73,7 +73,9 @@ export class Firebase {
       parts.push(FIREBASE_ROOT_OVERRIDE);
     } else {
       parts.push(`${appMode}`);
-      parts.push(getRootId(this.db.stores, this.userId));
+      if (appMode !== "authed") {
+        parts.push(getRootId(this.db.stores, this.userId));
+      }
     }
     parts.push("portals");
     parts.push(escapeKey(user.portal));

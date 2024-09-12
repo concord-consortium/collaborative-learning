@@ -21,7 +21,7 @@ describe("Firebase class", () => {
   describe("getRootFolder", () => {
     it("should handle authed mode", () => {
       const firebase = new Firebase(mockDB);
-      expect(firebase.getRootFolder()).toBe("/authed/test-portal/portals/test-portal/");
+      expect(firebase.getRootFolder()).toBe("/authed/portals/test-portal/");
     });
     it("should handle the dev appMode", () => {
       window.localStorage.setItem(kClueDevIDKey, "random-id");
