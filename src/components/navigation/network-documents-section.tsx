@@ -1,5 +1,5 @@
 import React from "react";
-import { INetworkResourceClassResponse } from "../../../functions/src/shared";
+import { INetworkResourceClassResponse } from "../../../shared/shared";
 import { useNetworkResources } from "../../hooks/network-resources";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";

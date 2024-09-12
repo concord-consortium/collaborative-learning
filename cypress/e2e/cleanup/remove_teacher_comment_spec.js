@@ -56,7 +56,6 @@ function beforePortalTest(url, clueTeacher, reportUrl) {
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaUnitTeacher6Network")}`;
-  cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
   cy.openTopTab("problems");
@@ -78,7 +77,7 @@ describe('Delete Teacher Comments In chat panel', () => {
       // Teacher 1 tile comment
       chatPanel.deleteTeacherComments();
     });
-    
+
     cy.log("login teacher2 and setup clue chat");
     cy.logout(portalUrl);
     beforePortalTest(portalUrl, clueTeacher2, reportUrl2);
@@ -93,7 +92,7 @@ describe('Delete Teacher Comments In chat panel', () => {
       cy.clickProblemResourceTile(tab.sectionCode);
       // Teacher 2 tile comment
       chatPanel.deleteTeacherComments();
-    });  
+    });
   });
   it('Delete chat panel comment tags', () => {
     beforeTest();
@@ -102,7 +101,7 @@ describe('Delete Teacher Comments In chat panel', () => {
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
     chatPanel.deleteTeacherComments();
-    
+
     cy.log('Delete comment tags on tile comment');
     cy.openTopTab("problems");
     cy.clickProblemResourceTile('introduction');

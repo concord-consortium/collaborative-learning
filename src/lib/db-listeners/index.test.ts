@@ -18,7 +18,9 @@ describe("DBListeners", () => {
   const db = new DB();
 
   beforeEach(async () => {
-    await db.connect({appMode: "test", stores, dontStartListeners: true});
+    // NOTE: for better or worse this is actually connecting to Firebase for real
+    // in other tests the Firebase library is mocked.
+    await db.connect({appMode: "test", stores, dontStartListeners: true, authPersistence: "none"});
   });
 
   afterEach(() => {

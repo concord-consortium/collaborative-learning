@@ -1,0 +1,40 @@
+{
+  "name": "functions-v2",
+  "scripts": {
+    "lint": "eslint --ext .js,.ts .",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "emulator": "firebase emulators:start --project demo-test",
+    "emulator:online": "firebase emulators:start",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell --project demo-test",
+    "start": "npm run shell",
+    "test": "jest",
+    "test:emulator": "firebase emulators:start --project demo-test --only firestore,database",
+    "deploy": "firebase deploy --only functions:functions-v2",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "main": "lib/functions-v2/src/index.js",
+  "dependencies": {
+    "firebase-admin": "^12.1.0",
+    "firebase-functions": "^5.1.1"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.12",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
+    "eslint": "^8.22.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-import": "^2.25.4",
+    "firebase-functions-test": "^3.1.0",
+    "firebase-tools": "^13.15.1",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.4",
+    "typescript": "^4.9.0"
+  },
+  "private": true
+}

@@ -15,8 +15,6 @@ const y = ['2.5', '5', '1', '0'];
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaUnitStudent5")}`;
-  cy.clearQAData('all');
-
   cy.visit(queryParams);
   cy.waitForLoad();
   clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');

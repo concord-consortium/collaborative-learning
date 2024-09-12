@@ -8,13 +8,12 @@ const teacherQueryParams = `${Cypress.config("qaUnitTeacher6")}`;
 const studentQueryParams = `${Cypress.config("qaUnitStudent5")}`;
 
 function beforeTest(params) {
-    cy.clearQAData('all');
     cy.visit(params);
     cy.waitForLoad();
     dashboard.switchView("Workspace & Resources");
     cy.wait(4000);
 }
-  
+
 function loadStudentSession(params) {
     cy.visit(params);
     cy.waitForLoad();
@@ -36,7 +35,7 @@ context('Teacher Support', function() {
             cy.openTopTab("class-work");
             cy.openSection('class-work','workspaces');
             resourcesPanel.getCanvasItemTitle('class-work','workspaces').should('contain',title);
-        
+
             cy.log('verify teacher support is visible in student nav');
             loadStudentSession(studentQueryParams);
             cy.openTopTab("class-work");

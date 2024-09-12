@@ -164,3 +164,13 @@ export function formatTimeZoneOffset(offset: number) {
 export function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
   return value != null;
 }
+
+/**
+ * Compare the contents of two arrays, ignoring the order of the elements.
+ * @param a array
+ * @param b array
+ * @returns true if a and b have elements that compare equal, ignoring order
+ */
+export function arraysEqualIgnoringOrder(a: string[], b: string[]) {
+  return a.length === b.length && a.every((value) => b.includes(value));
+}

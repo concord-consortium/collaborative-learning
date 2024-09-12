@@ -30,7 +30,8 @@ import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
 import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
-import { IGetImageDataParams, IPublishSupportParams } from "../../functions/src/shared";
+import { getDocumentPath, ICommentableDocumentParams, IDocumentMetadata, IGetImageDataParams,
+         IPublishSupportParams } from "../../shared/shared";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
@@ -39,11 +40,15 @@ import { urlParams } from "../utilities/url-params";
 import { firebaseConfig } from "./firebase-config";
 import { UserModelType } from "../models/stores/user";
 import { logExemplarDocumentEvent } from "../models/document/log-exemplar-document-event";
+import { DEBUG_FIRESTORE } from "./debug";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBBaseConnectOptions {
   stores: IStores;
-  dontStartListeners?: boolean; // for unit tests
+
+  // for unit tests
+  dontStartListeners?: boolean;
+  authPersistence?: firebase.auth.Auth.Persistence;
 }
 export interface IDBAuthConnectOptions extends IDBBaseConnectOptions {
   appMode: "authed";
@@ -61,8 +66,6 @@ export interface UserGroupMap {
 export interface GroupUsersMap {
   [key: string]: string[];
 }
-
-export type DBClearLevel = "all" | "class" | "offering";
 
 export interface ICreateOtherDocumentParams {
   title?: string;
@@ -87,6 +90,9 @@ export interface OpenDocumentOptions {
   groupUserConnections?: Record<string, unknown>;
   originDoc?: string;
   pubVersion?: number;
+  problem?: string;
+  investigation?: string;
+  unit?: string;
 }
 
 export class DB {
@@ -97,6 +103,7 @@ export class DB {
   public stores: IStores;
 
   private authStateUnsubscribe?: firebase.Unsubscribe;
+  private documentFetchPromiseMap = new Map<string, Promise<DocumentModelType>>();
 
   constructor() {
     makeObservable(this);
@@ -110,6 +117,9 @@ export class DB {
   }
 
   public connect(options: IDBConnectOptions) {
+    if (DEBUG_FIRESTORE) {
+      firebase.firestore.setLogLevel('debug');
+    }
     return new Promise<void>((resolve, reject) => {
       if (this.firebase.isConnected) {
         reject("Already connected to database!");
@@ -157,6 +167,10 @@ export class DB {
           this.firestore.setFirebaseUser(firebaseUser);
           if (!options.dontStartListeners) {
             const { persistentUI, user, db, unitLoadedPromise, exemplarController} = this.stores;
+
+            // Record launch time in Firestore
+            this.firestore.recordLaunchTime();
+
             // Start fetching the persistent UI. We want this to happen as early as possible.
             persistentUI.initializePersistentUISync(user, db);
 
@@ -171,6 +185,10 @@ export class DB {
           }
         }
       });
+
+      // SESSION auth persistence is used so each new tab or window gets its own Firebase authentication
+      // Unless overridden this applies to all app modes (qa, dev, app, auth, test)
+      firebase.auth().setPersistence(options.authPersistence || firebase.auth.Auth.Persistence.SESSION);
 
       if (options.appMode === "authed") {
         firebase.auth()
@@ -392,9 +410,51 @@ export class DB {
     });
   }
 
-  public createDocument(params: { type: DBDocumentType, content?: string }) {
-    const { type, content } = params;
-    const {user} = this.stores;
+  async createFirestoreMetadataDocument(metadata: DBDocumentMetadata, documentKey: string) {
+    const userContext = this.stores.userContextProvider.userContext;
+
+    if (!this.stores.userContextProvider || !this.firestore || !userContext?.uid) {
+      console.error("cannot create Firestore metadata document because environment is not valid",
+        { userContext, firestore: this.firestore });
+      throw new Error("cannot create Firestore metadata document because environment is not valid");
+    }
+
+    const documentPath = getDocumentPath(userContext.uid, documentKey, userContext.network);
+    const documentRef = this.firestore.doc(documentPath);
+    const docSnapshot = await documentRef.get();
+
+    if (!docSnapshot.exists) {
+      const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
+      const firestoreMetadata: IDocumentMetadata & { contextId: string } = {
+        ...cleanedMetadata,
+        // The validateCommentableDocument firebase function currently deployed to production is out of date.
+        // It requires contextId to defined, but doesn't check its value.
+        contextId: "ignored",
+        key: documentKey,
+        properties: {},
+        uid: userContext.uid,
+        unit: null
+      };
+      if ("offeringId" in metadata && metadata.offeringId != null) {
+        const { investigation, problem, unit } = this.stores;
+        const investigationOrdinal = String(investigation.ordinal);
+        const problemOrdinal = String(problem.ordinal);
+        const unitCode = unit.code;
+        firestoreMetadata.investigation = investigationOrdinal;
+        firestoreMetadata.problem = problemOrdinal;
+        firestoreMetadata.unit = unitCode;
+      }
+      const validateCommentableDocument =
+        getFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
+      // FIXME-HISTORY: rename this function to validateFirestoreDocumentMetadata_v1
+      validateCommentableDocument({context: userContext, document: firestoreMetadata});
+    }
+  }
+
+  public async createDocument(params: { type: DBDocumentType, content?: string, title?: string }) {
+    const { type, content, title } = params;
+    const { user } = this.stores;
+
     return new Promise<{document: DBDocument, metadata: DBDocumentMetadata}>((resolve, reject) => {
       const documentRef = this.firebase.ref(this.firebase.getUserDocumentPath(user)).push();
       const documentKey = documentRef.key!;
@@ -415,7 +475,7 @@ export class DB {
         case LearningLogDocument:
         case PersonalPublication:
         case LearningLogPublication:
-          metadata = {version, self, createdAt, type};
+          metadata = {version, self, createdAt, type, title};
           break;
         case PlanningDocument:
         case ProblemDocument:
@@ -426,7 +486,13 @@ export class DB {
       }
 
       return documentRef.set(document)
-        .then(() => metadataRef.set(metadata))
+        .then(() => {
+          metadataRef.set(metadata);
+          return metadataRef.once("value");
+        })
+        .then((metadataValue) => {
+          this.createFirestoreMetadataDocument(metadataValue.val(), documentKey);
+        })
         .then(() => {
           resolve({document, metadata});
         })
@@ -490,7 +556,8 @@ export class DB {
     let pubCount = documentModel.getNumericProperty("pubCount");
     documentModel.setNumericProperty("pubCount", ++pubCount);
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
-      this.createDocument({ type: publicationType, content }).then(({document, metadata}) => {
+      this.createDocument({ type: publicationType, content, title: documentModel.title })
+      .then(({document, metadata}) => {
         const publicationPath = publicationType === "personalPublication"
                                 ? this.firebase.getPersonalPublicationsPath(user)
                                 : this.firebase.getLearningLogPublicationsPath(user);
@@ -544,8 +611,12 @@ export class DB {
 
   public openDocument(options: OpenDocumentOptions) {
     const { documents } = this.stores;
-    const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion} = options;
-    return new Promise<DocumentModelType>((resolve, reject) => {
+    const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion,
+           problem, investigation, unit} = options;
+    const existingPromise = this.documentFetchPromiseMap.get(documentKey);
+    if (existingPromise) return existingPromise;
+
+    const documentFetchPromise = new Promise<DocumentModelType>((resolve, reject) => {
       const {user} = this.stores;
       const documentPath = this.firebase.getUserDocumentPath(user, documentKey, userId);
       const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, userId);
@@ -587,7 +658,10 @@ export class DB {
               createdAt: metadata.createdAt,
               content: content ? content : {},
               changeCount: document.changeCount,
-              pubVersion
+              pubVersion,
+              problem,
+              investigation,
+              unit
             });
           } catch (e) {
             const msg = "Could not open " +
@@ -617,6 +691,9 @@ export class DB {
           reject(msg);
         });
     });
+
+    this.documentFetchPromiseMap.set(documentKey, documentFetchPromise);
+    return documentFetchPromise;
   }
 
   public createLearningLogDocument(title?: string) {
@@ -633,7 +710,7 @@ export class DB {
     const docTitle = title || documents.getNextOtherDocumentTitle(user, documentType, baseTitle);
 
     return new Promise<DocumentModelType | null>((resolve, reject) => {
-      return this.createDocument({ type: documentType, content: JSON.stringify(content) })
+      return this.createDocument({ type: documentType, content: JSON.stringify(content), title: docTitle })
         .then(({document, metadata}) => {
           const {documentKey} = document.self;
           const newDocument: DBOtherDocument = {
@@ -710,35 +787,6 @@ export class DB {
       this.firebase.ref(typedMetadata).set(null)
     ]);
     this.stores.documents.resolveRequiredDocumentPromiseWithNull(document.type);
-  }
-
-  public clear(level: DBClearLevel) {
-    return new Promise<void>((resolve, reject) => {
-      const {user} = this.stores;
-      const clearPath = (path?: string) => {
-        this.firebase.ref(path).remove().then(resolve).catch(reject);
-      };
-
-      if (this.stores.appMode !== "qa") {
-        return reject("db#clear is only available in qa mode");
-      }
-
-      if (level === "all") {
-        return reject("clearing 'all' is handled by clearFirebaseAnonQAUser");
-      }
-
-      switch (level) {
-        case "class":
-          clearPath(this.firebase.getClassPath(user));
-          break;
-        case "offering":
-          clearPath(this.firebase.getOfferingPath(user));
-          break;
-        default:
-          reject(`Invalid clear level: ${level}`);
-          break;
-      }
-    });
   }
 
   public createDocumentModelFromProblemMetadata(

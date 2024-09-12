@@ -22,7 +22,7 @@ const mockFunctions = jest.fn();
 const mockAuthStateUnsubscribe = jest.fn();
 
 jest.mock("firebase/app", () => {
-  return {
+  const mockFirebase = {
     apps: [],
     initializeApp: () => null,
     auth: () => ({
@@ -30,12 +30,15 @@ jest.mock("firebase/app", () => {
         callback({ uid: "user-id" });
         return mockAuthStateUnsubscribe;
       },
-      signInAnonymously: () => Promise.resolve()
+      signInAnonymously: () => Promise.resolve(),
+      setPersistence: (persistence: string) => Promise.resolve()
     }),
     database: () => mockDatabase(),
     firestore: () => mockFirestore(),
     functions: () => mockFunctions()
   };
+  (mockFirebase.auth as any).Auth = { Persistence: { SESSION: "session"}};
+  return mockFirebase;
 });
 
 type QueryParams = UrlParams.QueryParams;

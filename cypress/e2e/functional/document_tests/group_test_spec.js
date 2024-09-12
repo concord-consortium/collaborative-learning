@@ -45,7 +45,6 @@ context('Test group functionalities', function () {
   it('4-up view tests', function () {
 
     cy.log('will set up groups');
-    cy.clearQAData('all');
     setupTest(0);
     setupTest(1);
     setupTest(2);

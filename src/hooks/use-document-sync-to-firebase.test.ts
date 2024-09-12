@@ -1,8 +1,11 @@
 import { renderHook } from "@testing-library/react-hooks";
+import { waitFor } from "@testing-library/react";
 import { observable, reaction, runInAction } from "mobx";
 import { SnapshotIn } from "mobx-state-tree";
 import { UseMutationOptions } from "react-query";
+import firebase from "firebase/app";
 import { Firebase } from "../lib/firebase";
+import { Firestore } from "../lib/firestore";
 import { DocumentModel, createDocumentModel } from "../models/document/document";
 import {
   LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
@@ -52,11 +55,28 @@ const mockHttpsCallable = jest.fn((fn: string) => {
       return mockPostDocumentComment_v1;
   }
 });
-jest.mock("firebase/app", () => ({
-  functions: () => ({
-    httpsCallable: (fn: string) => mockHttpsCallable(fn)
-  })
-}));
+
+
+jest.mock("firebase/app", () => {
+  // Queries can have where clauses chained off of them
+  const mockQuery = jest.fn();
+  mockQuery.mockReturnValue({
+    get: jest.fn().mockResolvedValue({
+      docs: [{ ref: { update: jest.fn().mockResolvedValue(undefined) } }]
+    }),
+    where: mockQuery
+  });
+
+  const mockFirestore = jest.fn().mockReturnValue({
+    collection: mockQuery
+  });
+  return {
+    firestore: mockFirestore,
+    functions: () => ({
+      httpsCallable: (fn: string) => mockHttpsCallable(fn)
+    }),
+  };
+});
 
 const mockUpdate = jest.fn();
 const mockRef = jest.fn();
@@ -78,6 +98,10 @@ const specFirebase = (type: string, key: string) => {
   } as unknown as Firebase;
 };
 
+const specFirestore = () => {
+  return (firebase.firestore()) as unknown as Firestore;
+};
+
 const specDocument = (overrides?: Partial<SnapshotIn<typeof DocumentModel>>) => {
   const props: SnapshotIn<typeof DocumentModel> = {
     type: "problem", key: "doc-key", uid: "1", content: {}, ...overrides };
@@ -89,9 +113,10 @@ const specArgs = (type: string, key: string,
                   documentOverrides?: Partial<SnapshotIn<typeof DocumentModel>>) => {
   const user = specUser(userOverrides);
   const { id: uid } = user;
-  const firebase = specFirebase(type, key);
+  const fb = specFirebase(type, key);
+  const firestore = specFirestore();
   const document = specDocument({ type: type as any, key, uid, ...documentOverrides });
-  return { user, firebase, document };
+  return { user, fb, firestore, document };
 };
 
 describe("useDocumentSyncToFirebase hook", () => {
@@ -155,8 +180,8 @@ describe("useDocumentSyncToFirebase hook", () => {
   });
 
   it("doesn't monitor read-only documents", () => {
-    const { user, firebase, document } = specArgs(PlanningDocument, "xyz");
-    renderHook(() => useDocumentSyncToFirebase(user, firebase, document, true));
+    const { user, fb, firestore, document } = specArgs(PlanningDocument, "xyz");
+    renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document, true));
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
 
@@ -182,8 +207,8 @@ describe("useDocumentSyncToFirebase hook", () => {
   });
 
   it("monitors problem documents", async () => {
-    const { user, firebase, document } = specArgs(ProblemDocument, "xyz");
-    renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
+    renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
 
@@ -211,8 +236,8 @@ describe("useDocumentSyncToFirebase hook", () => {
   });
 
   it("monitors planning documents", () => {
-    const { user, firebase, document } = specArgs(PlanningDocument, "xyz");
-    renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    const { user, fb, firestore, document } = specArgs(PlanningDocument, "xyz");
+    renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
 
@@ -239,8 +264,8 @@ describe("useDocumentSyncToFirebase hook", () => {
   });
 
   it("monitors personal documents", () => {
-    const { user, firebase, document } = specArgs(PersonalDocument, "xyz");
-    renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    const { user, fb, firestore, document } = specArgs(PersonalDocument, "xyz");
+    renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
 
@@ -269,8 +294,8 @@ describe("useDocumentSyncToFirebase hook", () => {
   });
 
   it("monitors learning log documents", () => {
-    const { user, firebase, document } = specArgs(LearningLogDocument, "xyz");
-    renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    const { user, fb, firestore, document } = specArgs(LearningLogDocument, "xyz");
+    renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
 
@@ -300,18 +325,15 @@ describe("useDocumentSyncToFirebase hook", () => {
 
   it("monitors problem documents with additional logging when DEBUG_SAVE == true", async () => {
     libDebug.DEBUG_SAVE = true;
-    const { user, firebase, document } = specArgs(ProblemDocument, "xyz");
+    const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
 
     expect.assertions(18);
 
     // logs monitoring of document
     let unmount: () => void;
-    let waitFor: (callback: () => boolean | void) => Promise<void>;
     await jestSpyConsole("log", async spy => {
-      const { unmount: _unmount, waitFor: _waitFor } =
-        renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+      const { unmount: _unmount } = renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
       unmount = _unmount;
-      waitFor = _waitFor;
       await waitFor(() => expect(spy).toBeCalledTimes(1));
       expect(mockRef).toHaveBeenCalledTimes(0);
       expect(mockUpdate).toHaveBeenCalledTimes(0);
@@ -368,31 +390,27 @@ describe("useDocumentSyncToFirebase hook", () => {
 
   it("monitors personal documents with additional logging when DEBUG_SAVE == true", async () => {
     libDebug.DEBUG_SAVE = true;
-    const { user, firebase, document } = specArgs(PersonalDocument, "xyz");
+    const { user, fb, firestore, document } = specArgs(PersonalDocument, "xyz");
 
     expect.assertions(19);
 
     // logs monitoring of document
     let unmount: () => void;
-    let waitFor: (callback: () => boolean | void) => Promise<void>;
     await jestSpyConsole("log", async spy => {
-      const { unmount: _unmount, waitFor: _waitFor } =
-        renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+      const { unmount: _unmount } = renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
       unmount = _unmount;
-      waitFor = _waitFor;
       await waitFor(() => expect(spy).toBeCalledTimes(1));
       expect(mockRef).toHaveBeenCalledTimes(0);
       expect(mockUpdate).toHaveBeenCalledTimes(0);
     });
 
     // responds to visibility change
-    await jestSpyConsole("log", spy => {
+    await jestSpyConsole("log", async spy => {
       document.setVisibility("public");
-      jest.runAllTimers();
-      expect(spy).not.toBeCalled();
+      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(spy).toBeCalledTimes(1));
     });
-    expect(mockRef).toHaveBeenCalledTimes(1);
-    expect(mockUpdate).toHaveBeenCalledTimes(1);
 
     // saves when title changes with additional logging
     mockRef.mockClear();
@@ -437,9 +455,9 @@ describe("useDocumentSyncToFirebase hook", () => {
   it("warns when asked to monitor another user's document", async () => {
     libDebug.DEBUG_SAVE = false;
 
-    const { user, firebase, document } = specArgs(PersonalDocument, "xyz", {}, { uid: "2" });
+    const { user, fb, firestore, document } = specArgs(PersonalDocument, "xyz", {}, { uid: "2" });
     jestSpyConsole("warn", mockConsole => {
-      renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+      renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
       expect(mockConsole).toHaveBeenCalledTimes(1);
     });
     expect(mockRef).toHaveBeenCalledTimes(0);
@@ -458,8 +476,8 @@ describe("useDocumentSyncToFirebase hook", () => {
       .mockImplementationOnce(() => Promise.reject("No save for you!"))
       .mockImplementationOnce(value => Promise.resolve(value));
 
-    const { user, firebase, document } = specArgs(ProblemDocument, "xyz");
-    const { waitFor } = renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
+    renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
 
@@ -517,9 +535,8 @@ describe("useDocumentSyncToFirebase hook", () => {
       .mockImplementationOnce(() => Promise.reject("No save for you!"))
       .mockImplementationOnce(value => Promise.resolve(value));
 
-    const { user, firebase, document } = specArgs(PersonalDocument, "xyz");
-    const { waitFor } =
-      renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    const { user, fb, firestore, document } = specArgs(PersonalDocument, "xyz");
+    renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
 
@@ -577,13 +594,13 @@ describe("useDocumentSyncToFirebase hook", () => {
 
   it("sets window.currentDocument when DOCUMENT_DEBUG is true", () => {
     libDebug.DEBUG_DOCUMENT = true;
-    const { user, firebase, document } = specArgs(ProblemDocument, "xyz");
-    renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
+    renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
     expect((window as any).currentDocument).toBe(document);
 
     (window as any).currentDocument = undefined;
     libDebug.DEBUG_DOCUMENT = false;
-    renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
     expect((window as any).currentDocument).toBeUndefined();
   });
 });

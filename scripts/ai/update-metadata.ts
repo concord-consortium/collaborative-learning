@@ -11,12 +11,12 @@ import fs from "fs";
 import admin from "firebase-admin";
 
 import { datasetPath, networkFileName } from "./script-constants.js";
-import { getFirestoreBasePath, getScriptRootFilePath } from "../lib/script-utils.js";
+import { getFirestoreBasePath, getProblemDetails, getScriptRootFilePath } from "../lib/script-utils.js";
 
 // The directory containing the documents you're interested in.
 // This should be the output of download-documents.ts.
 // Each document should be named like documentID.txt, where ID is the document's id in the database.
-const sourceDirectory = "dataset1721156514478";
+const sourceDirectory = "dataset1724185627549";
 
 console.log(`*** Starting to Update Metadata ***`);
 
@@ -55,16 +55,16 @@ function getNetworkInfo() {
 }
 const { portal, demo } = getNetworkInfo();
 
-// For now, only run for demo spaces
-if (!demo) {
-  console.error("demo not defined, exiting");
-  process.exit(1);
-}
-
 console.log(`***** Reading doc and updating metadata *****`);
 const collectionUrl = getFirestoreBasePath(portal, demo);
 console.log(`*** Updating docs in ${collectionUrl} ***`);
 const documentCollection = admin.firestore().collection(collectionUrl);
+
+const offeringInfoFile = `${sourcePath}/offering-info.json`;
+let offeringInfo;
+if (!demo) {
+  offeringInfo = JSON.parse(fs.readFileSync(offeringInfoFile, "utf8"));
+}
 
 let processedFiles = 0;
 let metadataUpdated = 0;
@@ -98,10 +98,19 @@ async function processFile(file: string) {
     processedFiles++;
 
     const tiles = documentContent?.tileMap ? Object.values<any>(documentContent.tileMap) : [];
-    const tileTypes = [];
+    const tools = [];
     for (const tile of tiles) {
-      if (!tileTypes.includes(tile.content.type)) {
-        tileTypes.push(tile.content.type);
+      if (!tools.includes(tile.content.type)) {
+        tools.push(tile.content.type);
+      }
+    }
+
+    const annotations = documentContent?.annotations ? Object.values<any>(documentContent.annotations) : [];
+    for (const annotation of annotations) {
+      // for now we only want Sparrow annotations
+      // we might want to change this if we want to count other types in the future
+      if (annotation.type === "arrowAnnotation" && !tools.includes("Sparrow")) {
+        tools.push("Sparrow");
       }
     }
 
@@ -112,35 +121,59 @@ async function processFile(file: string) {
       unit: null
     };
 
-    if (offeringId) {
-      // Extract the unit, investigation, and problem from the offeringId.
-      // The `offeringId` structure can vary. In some cases, there is no unit code. There are also cases where
-      // there is no investigation number. For example, in demo mode if the unit is not specified, there will
-      // be no unit value. And in the case where the investigation is 0 (like with the Intro to CLUE
-      // investigation in the Introduction to CLUE unit) the investigation will be undefined. In those cases,
-      // we default to "sas" for the unit and "0" for the investigation.
-      let unitCode = "";
-      let investigation = "";
-      let problem = "";
-      const match = offeringId.match(/(.*?)(\d)(\d\d)$/);
+    if (!demo) {
+      const offering = offeringInfo[offeringId];
+      if (offering) {
+        const { activity_url } = offering;
+        try {
+          const { investigation, problem, unit } = getProblemDetails(activity_url);
 
-      if (match) {
-        [, unitCode, investigation, problem] = match;
-      } else {
-        investigation = "0";
-        problem = offeringId.match(/\d+/)?.[0] || "";
+          if (unit && !problem) {
+            console.log("Found unit but not problem in activity_url", activity_url);
+          }
+
+          unitFields = {
+            problem,
+            investigation,
+            unit
+          };
+        } catch (e) {
+          console.error(e, {offeringId, offering});
+          console.log("Skipping document because it has an invalid offering", {offeringId, offering});
+          return;
+        }
       }
+    } else {
+      if (offeringId) {
+        // Extract the unit, investigation, and problem from the offeringId.
+        // The `offeringId` structure can vary. In some cases, there is no unit code. There are also cases where
+        // there is no investigation number. For example, in demo mode if the unit is not specified, there will
+        // be no unit value. And in the case where the investigation is 0 (like with the Intro to CLUE
+        // investigation in the Introduction to CLUE unit) the investigation will be undefined. In those cases,
+        // we default to "sas" for the unit and "0" for the investigation.
+        let unitCode = "";
+        let investigation = "";
+        let problem = "";
+        const match = offeringId.match(/(.*?)(\d)(\d\d)$/);
 
-      if (!unitCode) unitCode = "sas";
-      problem = stripLeadingZero(problem);
+        if (match) {
+          [, unitCode, investigation, problem] = match;
+        } else {
+          investigation = "0";
+          problem = offeringId.match(/\d+/)?.[0] || "";
+        }
 
-      console.log({ unitCode, investigation, problem });
+        if (!unitCode) unitCode = "sas";
+        problem = stripLeadingZero(problem);
 
-      unitFields = {
-        problem,
-        investigation,
-        unit: unitCode
-      };
+        console.log({ unitCode, investigation, problem });
+
+        unitFields = {
+          problem,
+          investigation,
+          unit: unitCode
+        };
+      }
     }
 
     // TODO: download docs in batches instead of one at a time
@@ -193,27 +226,26 @@ async function processFile(file: string) {
         properties: {},
 
         strategies,
-        // For now we just handle demo documents where the teachers are hardcoded.
-        // To support Portal launches we'll either have to get the list of teachers from the offering
-        // info, or refactor the code so this teacher list isn't needed here. See:
-        // https://docs.google.com/document/d/1VDr-nkthu333eVD0BQXPYPVD8kt60qkMYq2jRkXza9c/edit#heading=h.pw87siu4ztwo
-        teachers: ["1001", "1002", "1003"],
-        tileTypes,
+        tools,
         title: documentTitle || null,
         type: documentType,
         uid: userId,
         visibility
       };
 
+      if (!documentType) {
+        console.log("Skipping document because it has no documentType", documentId);
+        return;
+      }
+
       // Use a prefix of `uid:[owner_uid]` for metadata documents that we create for more
       // info see:
       // https://docs.google.com/document/d/1VDr-nkthu333eVD0BQXPYPVD8kt60qkMYq2jRkXza9c/edit#heading=h.5t2tt6igiiou
       const metaDataDocId = `uid:${userId}_${documentId}`;
 
-      console.log(documentId, "Created new metadata", metaDataDocId);
       const newMetaDataDoc = documentCollection.doc(metaDataDocId);
       await newMetaDataDoc.create(metaData);
-      console.log(documentId, "Created new metadata", metaDataDocId);
+      console.log(processedFiles, documentId, "Created new metadata", metaDataDocId);
       metadataCreated++;
     } else {
       // There can be multiple metadata documents for each actual document.
@@ -221,12 +253,14 @@ async function processFile(file: string) {
       // stops creating multiple copies. See:
       // https://docs.google.com/document/d/1VDr-nkthu333eVD0BQXPYPVD8kt60qkMYq2jRkXza9c/edit#heading=h.5t2tt6igiiou
       documentSnapshots.forEach(doc => {
-        doc.ref.update(unitFields as any);
-        console.log(documentId, doc.id, "Updated metadata with", unitFields);
-        doc.ref.update({ strategies, tileTypes } as any);
-        console.log(documentId, doc.id, "Updated metadata with", { strategies, tileTypes });
-        doc.ref.update({ visibility } as any);
-        console.log(documentId, doc.id, "Updated metadata with", { visibility });
+        const newMetadata = {
+          ...unitFields,
+          strategies,
+          tools,
+          visibility
+        };
+        doc.ref.update(newMetadata as any);
+        console.log(processedFiles, documentId, doc.id, "Updated metadata with", newMetadata);
         metadataUpdated++;
       });
     }
@@ -249,6 +283,7 @@ const fileBatchSize = 8;
 await new Promise<void>((resolve) => {
   // Process every file in the source directory
   fs.readdir(sourcePath, async (_error, files) => {
+    console.log(`*** Processing ${files.length} documents ***`);
     for (const file of files) {
       checkedFiles++;
       fileBatch.push(file);
@@ -273,5 +308,3 @@ function stripLeadingZero(input: string) {
 console.log(`*** Processed ${processedFiles} downloaded CLUE docs ***`);
 console.log(`*** Created ${metadataCreated} metadata docs ***`);
 console.log(`*** Updated ${metadataUpdated} metadata docs ***`);
-
-process.exit(0);

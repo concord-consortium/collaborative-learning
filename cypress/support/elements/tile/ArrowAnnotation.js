@@ -30,6 +30,9 @@ class ArrowAnnotation {
   getAnnotationArrows(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .arrow.foreground-arrow`);
   }
+  getAnnotationArrowDragHandles(workspaceClass) {
+    return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .drag-handle`);
+  }
   getAnnotationBackgroundArrowPaths(workspaceClass) {
     return cy.get(`${wsClass(workspaceClass)} .annotation-layer .annotation-svg .arrow.background-arrow path`);
   }

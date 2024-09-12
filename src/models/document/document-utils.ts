@@ -1,22 +1,30 @@
 import { getParent } from "mobx-state-tree";
+import { IDocumentMetadata } from "../../../shared/shared";
 import { ProblemModelType } from "../curriculum/problem";
 import { SectionModelType } from "../curriculum/section";
 import { getSectionPath } from "../curriculum/unit";
 import { AppConfigModelType } from "../stores/app-config-model";
-import { DocumentModelType } from "./document";
+import { UserModelType } from "../stores/user";
+import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
-import { isPlanningType, isProblemType } from "./document-types";
+import { isExemplarType, isPlanningType, isProblemType, isPublishedType } from "./document-types";
 
 export function getDocumentDisplayTitle(
-  document: DocumentModelType, appConfig: AppConfigModelType, problem: ProblemModelType
+  document: DocumentModelType, appConfig: AppConfigModelType, problem?: ProblemModelType,
+  unit?: string
 ) {
   const { type } = document;
+  const documentProblemOrdinal = `${document.investigation}.${document.problem}`;
+  const problemTitle = !(document.problem || document.investigation || document.unit) ||
+                       (documentProblemOrdinal === String(problem?.ordinal) && unit === document?.unit)
+                         ? problem?.title || "Unknown Problem"
+                         : "Unknown Problem";
   return document.isSupport
     ? document.getProperty("caption") || "Support"
     : isProblemType(type)
-        ? problem.title
+        ? problemTitle
         : isPlanningType(type)
-            ? `${problem.title}: Planning`
+            ? `${problem?.title || "Unkown"}: Planning`
             : document.getDisplayTitle(appConfig);
 }
 
@@ -38,3 +46,17 @@ export function getDocumentIdentifier(document?: DocumentContentModelType) {
     return getSectionPath(section);
   }
 }
+
+export const isDocumentAccessibleToUser = (
+  doc: IDocumentMetadata, user: UserModelType, documentStore: IExemplarVisibilityProvider
+) => {
+  const ownDocument = doc.uid === user.id;
+  const isShared = doc.visibility === "public";
+  const isPublished = isPublishedType(doc.type);
+  if (user.type === "teacher") return true;
+  if (user.type === "student") {
+    return ownDocument || isShared || isPublished
+           || (isExemplarType(doc.type) && documentStore.isExemplarVisible(doc.key));
+  }
+  return false;
+};

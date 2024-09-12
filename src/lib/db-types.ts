@@ -52,6 +52,7 @@ export interface DBBaseDocumentMetadata {
     documentKey: string;
   };
   createdAt: number;
+  title?: string;
   type: DBDocumentType;
   // previously in DBOtherDocument
   properties?: IDocumentProperties;
@@ -60,7 +61,10 @@ export interface DBBaseDocumentMetadata {
 
 export interface DBBaseProblemDocumentMetadata extends DBBaseDocumentMetadata {
   classHash: string;
+  investigation?: string;
   offeringId: string;
+  problem?: string;
+  unit?: string;
 }
 
 export interface DBSectionDocumentMetadataDEPRECATED extends DBBaseProblemDocumentMetadata {

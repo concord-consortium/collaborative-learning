@@ -8,7 +8,6 @@ let xyplot = new XYPlotToolTile;
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaMothPlotUnitStudent5")}&mouseSensor`;
-  cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
 }

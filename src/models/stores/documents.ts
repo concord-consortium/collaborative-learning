@@ -50,7 +50,6 @@ export const DocumentsModel = types
     getDocument(documentKey: string) {
       return self.all.find((document) => document.key === documentKey);
     },
-
     byType(type: DocumentType) {
       return self.all.filter((document) => document.type === type);
     },
@@ -152,6 +151,10 @@ export const DocumentsModel = types
           ? user1.lastName.localeCompare(user2.lastName)
           : user1.firstName.localeCompare(user2.firstName);
       });
+    },
+
+    get exemplarDocuments() {
+      return self.byType(ExemplarDocument);
     },
 
     get visibleExemplarDocuments() {
