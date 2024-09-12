@@ -26,10 +26,21 @@ function sharedSampleDataSet() {
   return SharedDataSet.create({ dataSet: sampleDataSet });
 }
 
-const TestableBarGraphContentModel = BarGraphContentModel
+// This is a testable version of the BarGraphContentModel that doesn't rely on the shared model manager
+// It just lets you set a SharedModel and returns that.
+const TestingBarGraphContentModel = BarGraphContentModel
+  .volatile(() => ({
+    storedSharedModel: undefined as SharedDataSetType | undefined
+  }))
   .actions(self => ({
-    setDataSet(ds: SharedDataSetType) {
-      // self.dataSet = ds;
+    setSharedModel(sharedModel: SharedDataSetType) {
+      self.storedSharedModel = sharedModel;
+      self.updateAfterSharedModelChanges(sharedModel);
+    }
+  }))
+  .views(self => ({
+    get sharedModel() {
+      return self.storedSharedModel;
     }
   }));
 
@@ -44,6 +55,7 @@ describe("Bar Graph Content", () => {
     expect(content.yAxisLabel).toBe("Counts");
     expect(getSnapshot(content)).toMatchInlineSnapshot(`
 Object {
+  "dataSetId": undefined,
   "primaryAttribute": undefined,
   "secondaryAttribute": undefined,
   "type": "BarGraph",
@@ -78,20 +90,21 @@ Object {
   });
 
   it("returns empty data array when there are no cases", () => {
-    const content = TestableBarGraphContentModel.create({ });
-    content.setDataSet(sharedEmptyDataSet());
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedEmptyDataSet());
     expect(content.dataArray).toEqual([]);
   });
 
   it("returns empty data array when there is no primary attribute", () => {
-    const content = TestableBarGraphContentModel.create({ });
-    content.setDataSet(sharedSampleDataSet());
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
+    content.setPrimaryAttribute(undefined);
     expect(content.dataArray).toEqual([]);
   });
 
   it("returns expected data array with primary attribute", () => {
-    const content = TestableBarGraphContentModel.create({ });
-    content.setDataSet(sharedSampleDataSet());
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
     content.setPrimaryAttribute("att-s");
     expect(content.dataArray).toEqual([
       { "att-s": "cat", "value": 2 },
@@ -105,9 +118,18 @@ Object {
     ]);
   });
 
+  it("sets first dataset attribute as the primary attribute by default", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
+    expect(content.dataArray).toEqual([
+      { "att-s": "cat", "value": 2 },
+      { "att-s": "owl","value": 2}
+    ]);
+  });
+
   it("returns expected data array with primary and secondary attributes", () => {
-    const content = TestableBarGraphContentModel.create({ });
-    content.setDataSet(sharedSampleDataSet());
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
     content.setPrimaryAttribute("att-s");
     content.setSecondaryAttribute("att-l");
     expect(content.dataArray).toEqual([
@@ -117,10 +139,10 @@ Object {
   });
 
   it("fills in missing values with (no value)", () => {
-    const content = TestableBarGraphContentModel.create({ });
+    const content = TestingBarGraphContentModel.create({ });
     const dataSet = sharedSampleDataSet();
     dataSet.dataSet?.attributes[1].setValue(3, undefined); // hide forest owl's location
-    content.setDataSet(dataSet);
+    content.setSharedModel(dataSet);
     content.setPrimaryAttribute("att-s");
     content.setSecondaryAttribute("att-l");
     expect(content.dataArray).toEqual([
@@ -138,23 +160,23 @@ Object {
   });
 
   it("extracts primary keys", () => {
-    const content = TestableBarGraphContentModel.create({ });
-    content.setDataSet(sharedSampleDataSet());
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
     content.setPrimaryAttribute("att-s");
     expect(content.primaryKeys).toEqual(["cat", "owl"]);
   });
 
   it("extracts secondary keys", () => {
-    const content = TestableBarGraphContentModel.create({ });
-    content.setDataSet(sharedSampleDataSet());
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
     content.setPrimaryAttribute("att-s");
     content.setSecondaryAttribute("att-l");
     expect(content.secondaryKeys).toEqual(["yard", "forest"]);
   });
 
   it("calculates the maximum data value", () => {
-    const content = TestableBarGraphContentModel.create({ });
-    content.setDataSet(sharedSampleDataSet());
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
     content.setPrimaryAttribute("att-s");
     expect(content.maxDataValue).toBe(2);
 
