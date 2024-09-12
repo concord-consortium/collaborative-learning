@@ -9,6 +9,7 @@ import { ToggleGroup } from "@concord-consortium/react-components";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
 import { CustomSelect } from "./custom-select";
 import { useStores } from "../../hooks/use-stores";
+import { getDevId } from "../../lib/root-id";
 
 // cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
 import styles from "./toggle-buttons.scss";
@@ -26,8 +27,17 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   const { showGroup } = props;
   const { appConfig, appMode, appVersion, db, user, problem, groups, investigation, ui, unit } = useStores();
   const myGroup = showGroup ? groups.getGroupById(user.currentGroupId) : undefined;
-  const userTitle = appMode !== "authed" && appMode !== "demo"
-                      ? `Firebase UID: ${db.firebase.userId}` : undefined;
+  const getUserTitle = () => {
+    switch(appMode){
+      case "dev":
+        return `Firebase Root: ${getDevId()}`;
+      case "qa":
+      case "test":
+        return `Firebase UID: ${db.firebase.userId}`;
+      default:
+        return undefined;
+    }
+  };
 
   const renderPanelButtons = () => {
     const { panels, onPanelChange, current} = props;
@@ -150,7 +160,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
         </div>
         <div className="right">
           <div className="version">Version {appVersion}</div>
-          <div className="user teacher" title={userTitle}>
+          <div className="user teacher" title={getUserTitle()}>
             <div className="class" data-test="user-class">
               <ClassMenuContainer />
             </div>
@@ -191,7 +201,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           <NetworkStatus user={user}/>
           <div className="version">Version {appVersion}</div>
           {myGroup ? renderGroup(myGroup) : null}
-          <div className="user" title={userTitle}>
+          <div className="user" title={getUserTitle()}>
             <div className="user-contents">
               <div className="name" data-test="user-name">{user.name}</div>
               <div className="class" data-test="user-class">{user.className}</div>

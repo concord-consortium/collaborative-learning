@@ -426,10 +426,9 @@ service cloud.firestore {
       allow read, write: if isAuthed();
     }
 
-    match /dev/{userId}/{restOfPath=**} {
-      allow read: if isAuthed();
-      // users can only write to their own folders
-      allow write: if matchFirebaseUserId(userId);
+    // Developers get a random unique key that their data is stored under
+    match /dev/{devId}/{restOfPath=**} {
+      allow read, write: if isAuthed();
     }
 
     match /qa/{userId}/{restOfPath=**} {
