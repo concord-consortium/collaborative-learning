@@ -18,7 +18,7 @@ export const CategoryPulldown = observer(function CategoryPulldown({setCategory,
   const readOnly = useReadOnlyContext();
   const model = useBarGraphModelContext();
 
-  const dataSet = model?.dataSet?.dataSet;
+  const dataSet = model?.sharedModel?.dataSet;
   const attributes = dataSet?.attributes || [];
   const current = (dataSet && model.primaryAttribute)
     ? dataSet.attrFromID(model.primaryAttribute)?.name

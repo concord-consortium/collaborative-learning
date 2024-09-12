@@ -26,11 +26,12 @@ export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
     }
   }
 
-  if (!model || !model.dataSet || !model.primaryAttribute) {
+  if (!model || !model.sharedModel || !model.primaryAttribute) {
     return null;
   }
 
-  const dataSet = model.dataSet.dataSet;
+  const dataSet = model.sharedModel.dataSet;
+  const dataSetName = model.sharedModel.name;
   const allAttributes = dataSet?.attributes || [];
   const availableAttributes = allAttributes.filter((a) => a.id !== model.primaryAttribute);
   const currentPrimary = dataSet?.attrFromID(model.primaryAttribute);
@@ -44,13 +45,13 @@ export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
       <div className="inner-container" ref={legendRef}>
         <div className="dataset-header">
           <div className="dataset-icon">
-            <a onClick={unlinkDataset} aria-label={`Unlink ${model.dataSet.name}`}>
+            <a onClick={unlinkDataset} aria-label={`Unlink ${dataSetName}`}>
               <RemoveDataIcon />
             </a>
           </div>
           <div className="dataset-label">
             <span className="dataset-label-text">Data from:</span>
-            <span className="dataset-name">{model.dataSet.name}</span>
+            <span className="dataset-name">{dataSetName}</span>
           </div>
         </div>
 
@@ -79,7 +80,7 @@ export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
         <div className="secondary-values">
           {currentSecondary
             ? secondaryKeys.map((key) => <LegendSecondaryRow key={key} attrValue={key} />)
-            : <LegendSecondaryRow attrValue={currentPrimary.name} />}
+            : <LegendSecondaryRow attrValue={currentPrimary?.name} />}
         </div>
       </div>
     </div>

@@ -29,7 +29,7 @@ function sharedSampleDataSet() {
 const TestableBarGraphContentModel = BarGraphContentModel
   .actions(self => ({
     setDataSet(ds: SharedDataSetType) {
-      self.dataSet = ds;
+      // self.dataSet = ds;
     }
   }));
 

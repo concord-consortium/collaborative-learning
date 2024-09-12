@@ -1,14 +1,12 @@
-import { reaction } from "mobx";
-import { types, Instance, addDisposer } from "mobx-state-tree";
+import { types, Instance } from "mobx-state-tree";
 import { isNumber } from "lodash";
-import { SharedModelType } from "../../models/shared/shared-model";
 import { ITileContentModel, TileContentModel } from "../../models/tiles/tile-content";
 import { kBarGraphTileType, kBarGraphContentType } from "./bar-graph-types";
 import { getSharedModelManager } from "../../models/tiles/tile-environment";
-import { isSharedDataSet, SharedDataSet, SharedDataSetType } from "../../models/shared/shared-data-set";
-import { ISharedModelManager } from "../../models/shared/shared-model-manager";
+import { SharedDataSet, SharedDataSetType } from "../../models/shared/shared-data-set";
 import { clueDataColorInfo } from "../../utilities/color-utils";
 import { displayValue } from "./bar-graph-utils";
+import { SharedModelType } from "../../models/shared/shared-model";
 
 export function defaultBarGraphContent(): BarGraphContentModelType {
   return BarGraphContentModel.create({yAxisLabel: "Counts"});
@@ -19,29 +17,26 @@ export const BarGraphContentModel = TileContentModel
   .props({
     type: types.optional(types.literal(kBarGraphTileType), kBarGraphTileType),
     yAxisLabel: "",
+    // Generally we fetch the dataset from SharedModelManager, but we track the ID here
+    // in persisted state as well so that remote read-only tiles will notice when it changes.
+    dataSetId: types.maybe(types.string),
     primaryAttribute: types.maybe(types.string),
     secondaryAttribute: types.maybe(types.string)
   })
-  .volatile(self => ({
-    dataSet: undefined as SharedDataSetType|undefined
-  }))
   .views(self => ({
+    get sharedModel() {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const firstSharedModel = sharedModelManager?.getTileSharedModelsByType(self, SharedDataSet)?.[0];
+      if (!firstSharedModel) return undefined;
+      return firstSharedModel as SharedDataSetType;
+    },
     get isUserResizable() {
       return true;
-    },
+    }
+  }))
+  .views(self => ({
     get cases() {
-      return self.dataSet?.dataSet.cases;
-    },
-    // Query the SharedModelManager to find a connected DataSet
-    // An argument is passed in to avoid the return value being cached.
-    sharedModelDataSet(smm: ISharedModelManager|undefined) {
-      if (!smm || !smm.isReady) return;
-      const sharedDataSets = smm.getTileSharedModelsByType(self, SharedDataSet);
-      if (sharedDataSets.length > 0 && isSharedDataSet(sharedDataSets[0])) {
-        return sharedDataSets[0];
-      } else {
-        return undefined;
-      }
+      return self.sharedModel?.dataSet.cases;
     }
   }))
   .views(self => ({
@@ -66,7 +61,7 @@ export const BarGraphContentModel = TileContentModel
      * Any empty values of attributes are replaced with "(no value)".
      */
     get dataArray() {
-      const dataSet = self.dataSet?.dataSet;
+      const dataSet = self.sharedModel?.dataSet;
       const primary = self.primaryAttribute;
       const secondary = self.secondaryAttribute;
       const cases = self.cases;
@@ -139,9 +134,6 @@ export const BarGraphContentModel = TileContentModel
     },
     setSecondaryAttribute(attrId: string|undefined) {
       self.secondaryAttribute = attrId;
-    },
-    setSharedDataSet() {
-      self.dataSet = self.sharedModelDataSet(getSharedModelManager(self));
     }
   }))
   .actions(self => ({
@@ -152,39 +144,26 @@ export const BarGraphContentModel = TileContentModel
       for (const sharedDataSet of sharedDataSets) {
         smm.removeTileSharedModel(self, sharedDataSet);
       }
-      self.dataSet = undefined;
     },
-    afterAttach() {
-      // After attached to document & SMM is ready, cache a reference to our dataset.
-      addDisposer(self, reaction(
-        () => {
-          return self.tileEnv?.sharedModelManager?.isReady;
-        },
-        (ready) => {
-          if (!ready) return;
-          self.setSharedDataSet();
-        }, { fireImmediately: true }
-      ));
-    },
+
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-      // When new dataset is attached, cache a reference to it and pick a category attribute.
-      const dataSet = self.sharedModelDataSet(getSharedModelManager(self));
-      if (self.dataSet !== dataSet) {
+      // When new dataset is attached, store its ID and pick a primary attribute to display.
+      const dataSetId = self.sharedModel?.dataSet?.id;
+      if (self.dataSetId !== dataSetId) {
+        self.dataSetId = dataSetId;
         self.setPrimaryAttribute(undefined);
         self.setSecondaryAttribute(undefined);
-        self.dataSet = dataSet;
-        if (dataSet) {
-          const atts = dataSet.dataSet.attributes;
+        if (dataSetId) {
+          const atts = self.sharedModel.dataSet.attributes;
           if (atts.length > 0) {
             self.setPrimaryAttribute(atts[0].id);
           }
         }
-      }
     }
-  }));
+  }
+}));
 
 export interface BarGraphContentModelType extends Instance<typeof BarGraphContentModel> {}
-
 
 export function isBarGraphModel(model?: ITileContentModel): model is BarGraphContentModelType {
   return model?.type === kBarGraphTileType;
