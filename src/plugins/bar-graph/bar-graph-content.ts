@@ -17,8 +17,9 @@ export const BarGraphContentModel = TileContentModel
   .props({
     type: types.optional(types.literal(kBarGraphTileType), kBarGraphTileType),
     yAxisLabel: "",
-    // Generally we fetch the dataset from SharedModelManager, but we track the ID here
-    // in persisted state as well so that remote read-only tiles will notice when it changes.
+    // ID of the dataset to which primaryAttribute and secondaryAttribute belong.
+    // The currently linked dataset is available from SharedModelManager, but we store the ID so
+    // that we can tell when it changes.
     dataSetId: types.maybe(types.string),
     primaryAttribute: types.maybe(types.string),
     secondaryAttribute: types.maybe(types.string)
@@ -131,6 +132,7 @@ export const BarGraphContentModel = TileContentModel
     },
     setPrimaryAttribute(attrId: string|undefined) {
       self.primaryAttribute = attrId;
+      self.secondaryAttribute = undefined;
     },
     setSecondaryAttribute(attrId: string|undefined) {
       self.secondaryAttribute = attrId;

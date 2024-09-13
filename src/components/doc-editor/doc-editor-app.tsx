@@ -228,13 +228,13 @@ export const DocEditorApp = observer(function DocEditorApp() {
           { showLocalReadOnly &&
             <>
               <div className="readonly-header">Read Only Local</div>
-              <ReadonlyCanvas document={document}/>
+              <ReadonlyCanvas document={document} className="read-only-local-workspace"/>
             </>
           }
           { showRemoteReadOnly &&
             <>
               <div className="readonly-header">Read Only Remote (emulated)</div>
-              <ReadonlyCanvas document={remoteDocument}/>
+              <ReadonlyCanvas document={remoteDocument} className="read-only-remote-workspace"/>
             </>
           }
         </div>
@@ -243,7 +243,7 @@ export const DocEditorApp = observer(function DocEditorApp() {
   );
 });
 
-const ReadonlyCanvas = ({document}:{document: DocumentModelType}) => {
+const ReadonlyCanvas = ({document, className}:{document: DocumentModelType, className: string}) => {
   const readOnlyScale = 0.5;
   const scaledStyle = {
     position: "absolute",
@@ -254,7 +254,7 @@ const ReadonlyCanvas = ({document}:{document: DocumentModelType}) => {
   } as const;
 
   return (
-    <div className="canvas-container">
+    <div className={`canvas-container ${className}`}>
       <div className="canvas-scaler" style={scaledStyle} >
         <CanvasComponent
           document={document}

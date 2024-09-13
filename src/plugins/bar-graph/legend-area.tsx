@@ -6,6 +6,7 @@ import { LegendSecondaryRow } from './legend-secondary-row';
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
+import { useReadOnlyContext } from '../../components/document/read-only-context';
 
 interface IProps {
   legendRef: React.RefObject<HTMLDivElement>;
@@ -13,9 +14,10 @@ interface IProps {
 
 export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
   const model = useBarGraphModelContext();
+  const readOnly = useReadOnlyContext();
 
   function unlinkDataset() {
-    if (model) {
+    if (!readOnly && model) {
       model.unlinkDataSet();
     }
   }
@@ -68,9 +70,11 @@ export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
             </MenuButton>
             <Portal>
               <MenuList>
-                <MenuItem onClick={() => setSecondaryAttribute(undefined)}>None</MenuItem>
+                <MenuItem isDisabled={readOnly} onClick={() => setSecondaryAttribute(undefined)}>None</MenuItem>
                 {availableAttributes.map((a) => (
-                  <MenuItem key={a.id} onClick={() => setSecondaryAttribute(a.id)}>{a.name}</MenuItem>
+                  <MenuItem key={a.id} isDisabled={readOnly} onClick={() => setSecondaryAttribute(a.id)}>
+                    {a.name}
+                  </MenuItem>
                 ))}
               </MenuList>
             </Portal>

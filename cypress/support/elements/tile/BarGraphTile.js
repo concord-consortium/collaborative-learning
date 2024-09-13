@@ -1,79 +1,79 @@
 class BarGraphTile {
 
   getTiles(workspaceClass) {
-    return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .bar-graph-tile`);
+    return cy.get(`${workspaceClass || ".primary-workspace"} .canvas .bar-graph-tile`);
   }
 
-  getTile(tileIndex = 0, workspaceClass) {
-    return this.getTiles().eq(tileIndex);
+  getTile(workspaceClass, tileIndex = 0) {
+    return this.getTiles(workspaceClass).eq(tileIndex);
   }
 
-  getTileTitle(tileIndex = 0, workspaceClass) {
-    return this.getTile(tileIndex, workspaceClass).find(`.editable-tile-title-text`);
+  getTileTitle(workspaceClass, tileIndex = 0) {
+    return this.getTile(workspaceClass, tileIndex).find(`.editable-tile-title-text`);
   }
 
-  getTileContent(tileIndex = 0, workspaceClass) {
-    return this.getTile(tileIndex, workspaceClass).find(`[data-testid="bar-graph-content"]`);
+  getTileContent(workspaceClass, tileIndex = 0) {
+    return this.getTile(workspaceClass, tileIndex).find(`[data-testid="bar-graph-content"]`);
   }
 
-  getChakraMenuItem(tileIndex = 0, workspaceClass) {
+  getChakraMenuItem(workspaceClass, tileIndex = 0) {
     return cy.get(`body .chakra-portal button`).filter(':visible');
   }
 
-  getChartArea(tileIndex = 0, workspaceClass) {
-    return this.getTile(tileIndex, workspaceClass).find(`svg.bar-graph-svg`);
+  getChartArea(workspaceClass, tileIndex = 0) {
+    return this.getTile(workspaceClass, tileIndex).find(`svg.bar-graph-svg`);
   }
 
-  getYAxisLabel(tileIndex = 0, workspaceClass) {
-    return this.getChartArea(tileIndex, workspaceClass).find(`.editable-axis-label`);
+  getYAxisLabel(workspaceClass, tileIndex = 0) {
+    return this.getChartArea(workspaceClass, tileIndex).find(`.editable-axis-label`);
   }
 
-  getYAxisLabelButton(tileIndex = 0, workspaceClass) {
-    return this.getChartArea(tileIndex, workspaceClass).find(`[data-testid="axis-label-button"]`);
+  getYAxisLabelButton(workspaceClass, tileIndex = 0) {
+    return this.getChartArea(workspaceClass, tileIndex).find(`[data-testid="axis-label-button"]`);
   }
 
-  getYAxisLabelEditor(tileIndex = 0, workspaceClass) {
-    return this.getChartArea(tileIndex, workspaceClass).find(`[data-testid="axis-label-editor"] input`);
+  getYAxisLabelEditor(workspaceClass, tileIndex = 0) {
+    return this.getChartArea(workspaceClass, tileIndex).find(`[data-testid="axis-label-editor"] input`);
   }
 
-  getXAxisPulldown(tileIndex = 0, workspaceClass) {
-    return this.getChartArea(tileIndex, workspaceClass).find(`[data-testid="category-pulldown"]`);
+  getXAxisPulldown(workspaceClass, tileIndex = 0) {
+    return this.getChartArea(workspaceClass, tileIndex).find(`[data-testid="category-pulldown"]`);
   }
 
-  getXAxisPulldownButton(tileIndex = 0, workspaceClass) {
-    return this.getXAxisPulldown(tileIndex, workspaceClass).find(`button`);
+  getXAxisPulldownButton(workspaceClass, tileIndex = 0) {
+    return this.getXAxisPulldown(workspaceClass, tileIndex).find(`button`);
   }
 
-  getYAxisTickLabel(tileIndex = 0, workspaceClass) {
-    return this.getChartArea(tileIndex, workspaceClass).find(`.visx-axis-left text`);
+  getYAxisTickLabel(workspaceClass, tileIndex = 0) {
+    return this.getChartArea(workspaceClass, tileIndex).find(`.visx-axis-left text`);
   }
 
-  getXAxisTickLabel(tileIndex = 0, workspaceClass) {
-    return this.getChartArea(tileIndex, workspaceClass).find(`.visx-axis-bottom text`);
+  getXAxisTickLabel(workspaceClass, tileIndex = 0) {
+    return this.getChartArea(workspaceClass, tileIndex).find(`.visx-axis-bottom text`);
   }
 
-  getBar(tileIndex = 0, workspaceClass) {
-    return this.getChartArea(tileIndex, workspaceClass).find(`.visx-bar`);
+  getBar(workspaceClass, tileIndex = 0) {
+    return this.getChartArea(workspaceClass, tileIndex).find(`.visx-bar`);
   }
 
-  getLegendArea(tileIndex = 0, workspaceClass) {
-    return this.getTile(tileIndex, workspaceClass).find(`.bar-graph-legend`);
+  getLegendArea(workspaceClass, tileIndex = 0) {
+    return this.getTile(workspaceClass, tileIndex).find(`.bar-graph-legend`);
   }
 
-  getDatasetLabel(tileIndex = 0, workspaceClass) {
-    return this.getLegendArea(tileIndex, workspaceClass).find(`.dataset-header .dataset-name`);
+  getDatasetLabel(workspaceClass, tileIndex = 0) {
+    return this.getLegendArea(workspaceClass, tileIndex).find(`.dataset-header .dataset-name`);
   }
 
-  getDatasetUnlinkButton(tileIndex = 0, workspaceClass) {
-    return this.getLegendArea(tileIndex, workspaceClass).find(`.dataset-header .dataset-icon a`);
+  getDatasetUnlinkButton(workspaceClass, tileIndex = 0) {
+    return this.getLegendArea(workspaceClass, tileIndex).find(`.dataset-header .dataset-icon a`);
   }
 
-  getSortByMenuButton(tileIndex = 0, workspaceClass) {
-    return this.getLegendArea(tileIndex, workspaceClass).find(`.sort-by button.chakra-menu__menu-button`);
+  getSortByMenuButton(workspaceClass, tileIndex = 0) {
+    return this.getLegendArea(workspaceClass, tileIndex).find(`.sort-by button.chakra-menu__menu-button`);
   }
 
-  getSecondaryValueName(tileIndex = 0, workspaceClass) {
-    return this.getLegendArea(tileIndex, workspaceClass).find(`.secondary-values .secondary-value-name`);
+  getSecondaryValueName(workspaceClass, tileIndex = 0) {
+    return this.getLegendArea(workspaceClass, tileIndex).find(`.secondary-values .secondary-value-name`);
   }
 
 }

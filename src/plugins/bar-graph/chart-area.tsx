@@ -38,7 +38,6 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
 
   function setPrimaryAttribute(id: string) {
     model?.setPrimaryAttribute(id);
-    model?.setSecondaryAttribute(undefined);
   }
 
   function barColor(key: string) {
@@ -179,8 +178,6 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
       <EditableAxisLabel
         x={20}
         y={margin.top + yMax/2}
-        text={model?.yAxisLabel}
-        setText={(text) => model?.setYAxisLabel(text)}
       />
       <CategoryPulldown
         setCategory={setPrimaryAttribute}
