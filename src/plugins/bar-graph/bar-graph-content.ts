@@ -161,9 +161,16 @@ export const BarGraphContentModel = TileContentModel
             self.setPrimaryAttribute(atts[0].id);
           }
         }
+      }
+      // Check if primary or secondary attribute has been deleted
+      if (self.primaryAttribute && !self.sharedModel?.dataSet.attrFromID(self.primaryAttribute)) {
+        self.setPrimaryAttribute(undefined); // this will also unset secondaryAttribute
+      }
+      if (self.secondaryAttribute && !self.sharedModel?.dataSet.attrFromID(self.secondaryAttribute)) {
+        self.setSecondaryAttribute(undefined);
+      }
     }
-  }
-}));
+  }));
 
 export interface BarGraphContentModelType extends Instance<typeof BarGraphContentModel> {}
 
