@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Text } from '@visx/text';
-import { getBBox } from './bar-graph-utils';
+import { getBBox, logBarGraphEvent } from './bar-graph-utils';
 import { useReadOnlyContext } from '../../components/document/read-only-context';
 import { useBarGraphModelContext } from './bar-graph-content-context';
 
@@ -36,11 +36,12 @@ const EditableAxisLabel: React.FC<IProps> = observer(function EditableAxisLabel(
     }
   };
 
-  const handleClose = (accept: boolean) => {
+  const handleEndEdit = (accept: boolean) => {
     setEditing(false);
-    if (accept && editText) {
+    if (model && accept && editText) {
       const trimmed = editText.trim();
-      model?.setYAxisLabel(trimmed);
+      model.setYAxisLabel(trimmed);
+      logBarGraphEvent(model, "setYAxisLabel", { text: trimmed });
     }
   };
 
@@ -48,11 +49,11 @@ const EditableAxisLabel: React.FC<IProps> = observer(function EditableAxisLabel(
     const { key } = e;
     switch (key) {
       case "Escape":
-        handleClose(false);
+        handleEndEdit(false);
         break;
       case "Enter":
       case "Tab":
-        handleClose(true);
+        handleEndEdit(true);
         break;
     }
   };
@@ -66,7 +67,7 @@ const EditableAxisLabel: React.FC<IProps> = observer(function EditableAxisLabel(
           value={editText}
           size={editText.length + 5}
           onKeyDown={handleKeyDown}
-          onBlur={() => handleClose(true)}
+          onBlur={() => handleEndEdit(true)}
           onChange={(e) => setEditText(e.target.value)}
         />
       </foreignObject>

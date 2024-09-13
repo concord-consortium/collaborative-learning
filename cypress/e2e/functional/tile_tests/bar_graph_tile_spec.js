@@ -3,6 +3,9 @@ import Canvas from '../../../support/elements/common/Canvas';
 import BarGraphTile from '../../../support/elements/tile/BarGraphTile';
 import TableToolTile
  from '../../../support/elements/tile/TableToolTile';
+import { LogEventName } from "../../../../src/lib/logger-types";
+
+
 let clueCanvas = new ClueCanvas,
   barGraph = new BarGraphTile,
   tableTile = new TableToolTile;
@@ -22,6 +25,9 @@ function textMatchesList(selector, expected) {
 function beforeTest() {
   const url = "/editor/?appMode=qa&unit=./demo/units/qa/content.json";
   cy.visit(url);
+  cy.window().then(win => {
+    cy.stub(win.ccLogger, "log").as("log");
+  });
 }
 
 context('Bar Graph Tile', function () {
@@ -43,6 +49,10 @@ context('Bar Graph Tile', function () {
     barGraph.getTile(workspaces[1]).should('have.class', 'readonly');
     barGraph.getTile(workspaces[2]).should('have.class', 'readonly');
 
+    cy.get("@log")
+      .should("have.been.been.calledWith", LogEventName.CREATE_TILE, Cypress.sinon.match.object)
+      .its("firstCall.args.1").should("deep.include", { objectType: "BarGraph" });
+
     // Undo/redo tile creation
     clueCanvas.getUndoTool().click();
     for (const workspace of workspaces) {
@@ -61,6 +71,9 @@ context('Bar Graph Tile', function () {
     for (const workspace of workspaces) {
       barGraph.getYAxisLabel(workspace).should('have.text', 'Counts of something');
     }
+
+    cy.get("@log").its("lastCall.args.0").should("equal", LogEventName.BARGRAPH_TOOL_CHANGE);
+    cy.get("@log").its("lastCall.args.1").should("deep.include", { operation: "setYAxisLabel", text: "Counts of something" });
 
     // Undo/redo label change
     clueCanvas.getUndoTool().click();
@@ -87,6 +100,9 @@ context('Bar Graph Tile', function () {
       barGraph.getXAxisPulldownButton(workspace, 1).should('have.text', 'Categories');
     }
 
+    cy.get("@log").its("lastCall.args.0").should("equal", LogEventName.COPY_TILE);
+    cy.get("@log").its("lastCall.args.1").should("deep.include", { objectType: "BarGraph" });
+
     // Undo/redo tile duplication
     clueCanvas.getUndoTool().click();
     for (const workspace of workspaces) {
@@ -103,6 +119,9 @@ context('Bar Graph Tile', function () {
     for (const workspace of workspaces) {
       barGraph.getTiles(workspace).should('have.length', 0);
     }
+
+    cy.get("@log").its("lastCall.args.0").should("equal", LogEventName.DELETE_TILE);
+    cy.get("@log").its("lastCall.args.1").should("deep.include", { objectType: "BarGraph" });
 
     // Undo/redo tile deletion
     clueCanvas.getUndoTool().click();
@@ -167,6 +186,9 @@ context('Bar Graph Tile', function () {
       barGraph.getSecondaryValueName(workspace).should('have.length', 1).and('have.text', 'x');
     }
 
+    cy.get("@log").its("lastCall.args.0").should("equal", LogEventName.TILE_LINK);
+    cy.get("@log").its("lastCall.args.1").should("nested.include", { "sourceTile.type": "BarGraph", "sharedModel.type": "SharedDataSet" });
+
     // Undo/redo linking
     clueCanvas.getUndoTool().click();
     for (const workspace of workspaces) {
@@ -210,6 +232,9 @@ context('Bar Graph Tile', function () {
       textMatchesList(barGraph.getSecondaryValueName(workspace), ['Y', 'YY']);
     }
 
+    cy.get("@log").its("lastCall.args.0").should("equal", LogEventName.BARGRAPH_TOOL_CHANGE);
+    cy.get("@log").its("lastCall.args.1").should("deep.include", { operation: "setSecondaryAttribute" });
+
     // Undo-redo sort by
     clueCanvas.getUndoTool().click();
     for (const workspace of workspaces) {
@@ -238,6 +263,9 @@ context('Bar Graph Tile', function () {
       barGraph.getSecondaryValueName(workspace).should('have.length', 1).and('have.text', 'y');
     }
 
+    cy.get("@log").its("lastCall.args.0").should("equal", LogEventName.BARGRAPH_TOOL_CHANGE);
+    cy.get("@log").its("lastCall.args.1").should("deep.include", { operation: "setPrimaryAttribute" });
+
     // Undo-redo category change
     clueCanvas.getUndoTool().click();
     for (const workspace of workspaces) {
@@ -259,6 +287,9 @@ context('Bar Graph Tile', function () {
       barGraph.getLegendArea(workspace).should('not.exist');
       barGraph.getBar(workspace).should('not.exist');
     }
+
+    cy.get("@log").its("lastCall.args.0").should("equal", LogEventName.TILE_UNLINK);
+    cy.get("@log").its("lastCall.args.1").should("nested.include", { "sourceTile.type": "BarGraph", "sharedModel.type": "SharedDataSet" });
 
     // Undo-redo unlink
     clueCanvas.getUndoTool().click();

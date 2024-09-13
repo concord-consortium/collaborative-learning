@@ -7,24 +7,36 @@ import { LegendSecondaryRow } from './legend-secondary-row';
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
 import { useReadOnlyContext } from '../../components/document/read-only-context';
+import { logBarGraphEvent } from './bar-graph-utils';
+import { logSharedModelDocEvent } from '../../models/document/log-shared-model-document-event';
+import { LogEventName } from '../../lib/logger-types';
+import { useTileModelContext } from '../../components/tiles/hooks/use-tile-model-context';
+import { getSharedModelManager } from '../../models/tiles/tile-environment';
 
 interface IProps {
   legendRef: React.RefObject<HTMLDivElement>;
 }
 
 export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
+  const { tile } = useTileModelContext();
   const model = useBarGraphModelContext();
   const readOnly = useReadOnlyContext();
 
   function unlinkDataset() {
-    if (!readOnly && model) {
+    const sharedModel = model?.sharedModel;
+    if (!readOnly && sharedModel) {
       model.unlinkDataSet();
+      if (tile) {
+        const sharedTiles = getSharedModelManager()?.getSharedModelProviders(sharedModel) || [];
+        logSharedModelDocEvent(LogEventName.TILE_UNLINK, tile, sharedTiles, sharedModel);
+      }
     }
   }
 
   function setSecondaryAttribute(attributeId: string|undefined) {
     if (model) {
       model.setSecondaryAttribute(attributeId);
+      logBarGraphEvent(model, "setSecondaryAttribute", { attributeId });
     }
   }
 
