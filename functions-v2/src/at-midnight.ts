@@ -8,7 +8,17 @@ import * as logger from "firebase-functions/logger";
 // type errors.
 import {cleanFirebaseRoots} from "../../shared/clean-firebase-roots";
 
-export const atMidnight = onSchedule("0 7 * * *", runAtMidnight);
+export const atMidnight = onSchedule(
+  {
+    // Let the function run for 30 minutes.
+    // From early testing it looks like the function can delete 500 qa roots
+    // every 5 minutes.
+    timeoutSeconds: 1800,
+    // Run the function at 7am UTC or 12am PDT
+    schedule: "0 7 * * *",
+  },
+  runAtMidnight
+);
 
 // This function is split out so it can be tested by Jest. The
 // firebase-functions-test library doesn't support wrapping onSchedule.
