@@ -89,7 +89,7 @@ class TableToolTile{
         this.getTableCell().eq(cell).type(num+'{enter}');
     }
     getTableIndexColumnCell(){
-        return cy.get('.canvas .rdg-cell.index-column');
+        return this.getTableTile().find('.rdg-cell.index-column');
     }
     // Fill in a table tile with the given data (a list of lists)
     // Table tile should in the default state (2 columns, no rows)
