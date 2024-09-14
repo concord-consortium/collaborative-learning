@@ -28,7 +28,6 @@ const queryParams4 = "?appMode=demo&demoName=BrokenDocs&fakeClass=1&fakeUser=stu
 const title = "QA 1.1 Solving a Mystery with Proportional Reasoning";
 
 function beforeTest(params) {
-  cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
 }

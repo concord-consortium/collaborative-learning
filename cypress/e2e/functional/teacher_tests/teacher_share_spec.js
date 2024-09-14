@@ -8,7 +8,6 @@ const teacherQueryParams = `${Cypress.config("qaConfigSubtabsUnitTeacher1")}`;
 const studentQueryParams = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
 
 function beforeTest(params) {
-  cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
   dashboard.switchView("Workspace & Resources");
@@ -23,48 +22,43 @@ function verifySwitch(publicOrPrivate) {
 function verifyStudentSeesAsPrivate() {
   cy.get('.tab-sort-work').click();
   cy.get('.section-header-arrow').click({multiple: true});
-  cy.get('.thumbnail-private').should('exist');
+  cy.contains('[data-test="sort-work-list-items"]','Teacher 1:')
+    .should('have.descendants', '.thumbnail-private');
 }
 
 function verifyStudentSeesAsPublic() {
   cy.get('.tab-sort-work').click();
   cy.get('.section-header-arrow').click({multiple: true});
-  cy.get('.thumbnail-public').should('not.exist');
+  cy.contains('[data-test="sort-work-list-items"]','Teacher 1:')
+    .should('not.have.descendants', '.thumbnail-private');
 }
 
 context('Teacher Sharing', function() {
-  describe('verify share functionality', function() {
-    it('loads teacher document as private', function() {
-      beforeTest(teacherQueryParams);
-      verifySwitch('private');
-    });
+  it('verify share functionality', function() {
+    cy.log('loads teacher document as private');
+    beforeTest(teacherQueryParams);
+    verifySwitch('private');
 
-    // TODO: Reinstate the tests below when all metadata documents have the new fields and are updated in real time.
-    it.skip('does not allow student to access private teacher document', function() {
-      cy.visit(studentQueryParams);
-      cy.waitForLoad();
-      verifyStudentSeesAsPrivate();
-    });
+    cy.log('does not allow student to access private teacher document');
+    cy.visit(studentQueryParams);
+    cy.waitForLoad();
+    verifyStudentSeesAsPrivate();
 
-    it('allows teacher to share a document', function() {
-      cy.visit(teacherQueryParams);
-      cy.waitForLoad();
-      clueCanvas.shareCanvas();
-      verifySwitch('public');
-    });
+    cy.log('allows teacher to share a document');
+    cy.visit(teacherQueryParams);
+    cy.waitForLoad();
+    clueCanvas.shareCanvas();
+    verifySwitch('public');
 
-    // TODO: Reinstate the tests below when all metadata documents have the new fields and are updated in real time.
-    it.skip('allows student to access public teacher document', function() {
-      cy.visit(studentQueryParams);
-      cy.waitForLoad();
-      verifyStudentSeesAsPublic();
-    });
+    cy.log('allows student to access public teacher document');
+    cy.visit(studentQueryParams);
+    cy.waitForLoad();
+    verifyStudentSeesAsPublic();
 
-    it('allows teacher to unshare a document', function() {
-      cy.visit(teacherQueryParams);
-      cy.waitForLoad();
-      clueCanvas.unshareCanvas();
-      verifySwitch('private');
-    });
+    cy.log('allows teacher to unshare a document');
+    cy.visit(teacherQueryParams);
+    cy.waitForLoad();
+    clueCanvas.unshareCanvas();
+    verifySwitch('private');
   });
 });

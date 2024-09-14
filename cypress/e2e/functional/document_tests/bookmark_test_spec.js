@@ -12,7 +12,6 @@ const queryParams1 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
 const queryParams2 = `${Cypress.config("qaConfigSubtabsUnitTeacher1")}`;
 
 function beforeTest(params) {
-  cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
 }
@@ -76,7 +75,7 @@ context('Bookmarks', function () {
     // resourcesPanel.getCanvasStarIcon('class-work', 'workspaces', copyDocumentTitle).should('have.class', 'starred');
     // cy.openSection('class-work', 'bookmarks');
     // resourcesPanel.getCanvasItemTitle('class-work', 'bookmarks').contains(copyDocumentTitle).should('exist');
-  })
+  });
   it('Test bookmarks for teacher', function () {
     beforeTest(queryParams1);
     let copyDocumentTitle = 'copy Investigation';
@@ -120,5 +119,5 @@ context('Bookmarks', function () {
     resourcesPanel.getCanvasStarIcon('class-work', 'workspaces', title).should('have.class', 'starred');
     cy.openSection('class-work', 'bookmarks');
     resourcesPanel.getCanvasItemTitle('class-work', 'bookmarks').contains(title).should('exist');
-  })
-})
+  });
+});

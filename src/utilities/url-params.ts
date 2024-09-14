@@ -1,6 +1,5 @@
 import { ParsedQuery, parse } from "query-string";
 import { AppMode, AppModes } from "../models/stores/store-types";
-import { DBClearLevel } from "../lib/db";
 
 export interface QueryParams {
   // appMode is "authed", "test" or "dev" with the default of dev
@@ -79,8 +78,6 @@ export interface QueryParams {
 
   // group id for qa
   qaGroup?: string;
-  // db level to clear for qa
-  qaClear?: DBClearLevel;
 
   // direct firebase realtime database access to the emulator
   firebase?: string; // "emulator" or host:port url

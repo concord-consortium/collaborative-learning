@@ -10,7 +10,6 @@ let copyTitle = 'Text Tile Workspace Copy';
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaUnitStudent5")}`;
-  cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
 }

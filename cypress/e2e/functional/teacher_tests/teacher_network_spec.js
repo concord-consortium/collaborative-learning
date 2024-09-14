@@ -8,7 +8,6 @@ let teacherNetwork = new TeacherNetwork;
 
 function beforeTest() {
   const queryParams = `${Cypress.config("clueTestqaUnitTeacher6")}`;
-  cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
   dashboard.switchView("Workspace & Resources");

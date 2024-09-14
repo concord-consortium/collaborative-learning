@@ -25,7 +25,6 @@ context('Test group functionalities', function () {
   it('4-up view read-only', function () {
 
     cy.log('students to check each others tiles in 4-up view read-only');
-    cy.clearQAData('all');
 
     setupTest(0);
     setupTest(1);
