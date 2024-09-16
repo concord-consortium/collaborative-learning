@@ -81,6 +81,18 @@ context('Bar Graph Tile', function () {
     clueCanvas.getRedoTool().click();
     barGraph.getYAxisLabel().should('have.text', 'Counts of something');
 
+    // ESC key should cancel the edit
+    barGraph.getYAxisLabelButton().click();
+    barGraph.getYAxisLabelEditor().should('be.visible').type(' abandon this{esc}');
+    barGraph.getYAxisLabelEditor().should('not.exist');
+    barGraph.getYAxisLabel().should('have.text', 'Counts of something');
+
+    // Should not be able to change Y axis label in read-only views
+    barGraph.getYAxisLabelButton(workspaces[1]).click();
+    barGraph.getYAxisLabelEditor(workspaces[1]).should('not.exist');
+    barGraph.getYAxisLabelButton(workspaces[2]).click();
+    barGraph.getYAxisLabelEditor(workspaces[2]).should('not.exist');
+
     cy.log('Duplicate tile');
     clueCanvas.getDuplicateTool().click();
     for (const workspace of workspaces) {
@@ -220,6 +232,16 @@ context('Bar Graph Tile', function () {
 
     cy.log('Change Sort By');
     barGraph.getSortByMenuButton().should('have.text', 'None');
+
+    // Cannot change sort by in read-only views
+    for (const workspace of workspaces.slice(1)) {
+      barGraph.getSortByMenuButton(workspace).click();
+      barGraph.getChakraMenuItem(workspace).should('have.length', 3);
+      barGraph.getChakraMenuItem(workspace).eq(1).should('have.text', 'y'); // menu exists
+      barGraph.getChakraMenuItem(workspace).should('be.disabled'); // all options disabled
+      barGraph.getSortByMenuButton(workspace).click(); // close menu
+    }
+
     barGraph.getSortByMenuButton().click();
     barGraph.getChakraMenuItem().should('have.length', 3);
     barGraph.getChakraMenuItem().eq(1).should('have.text', 'y').click();
@@ -250,6 +272,14 @@ context('Bar Graph Tile', function () {
     }
 
     cy.log('Change Category');
+
+    // Cannot change category in read-only views
+    for (const workspace of workspaces.slice(1)) {
+      barGraph.getXAxisPulldownButton(workspace).click();
+      barGraph.getChakraMenuItem(workspace).should('have.length', 3).and('be.disabled');
+      barGraph.getXAxisPulldownButton(workspace).click(); // close menu
+    }
+
     barGraph.getXAxisPulldownButton().click();
     barGraph.getChakraMenuItem().should('have.length', 3);
     barGraph.getChakraMenuItem().eq(1).should('have.text', 'y').click();
