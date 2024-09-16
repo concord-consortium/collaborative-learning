@@ -12,6 +12,10 @@ class BarGraphTile {
     return this.getTile(tileIndex, workspaceClass).find(`.editable-tile-title-text`);
   }
 
+  getTileContent(tileIndex = 0, workspaceClass) {
+    return this.getTile(tileIndex, workspaceClass).find(`[data-testid="bar-graph-content"]`);
+  }
+
   getChakraMenuItem(tileIndex = 0, workspaceClass) {
     return cy.get(`body .chakra-portal button`).filter(':visible');
   }

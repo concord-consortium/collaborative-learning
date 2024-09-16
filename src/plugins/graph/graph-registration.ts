@@ -5,10 +5,10 @@ import { GraphWrapperComponent } from "./components/graph-wrapper-component";
 import { createGraphModel, GraphModel } from "./models/graph-model";
 import { updateGraphContentWithNewSharedModelIds, updateGraphObjectWithNewSharedModelIds }
   from "./utilities/graph-utils";
+  import { AppConfigModelType } from "../../models/stores/app-config-model";
 
 import Icon from "./assets/graph-icon.svg";
 import HeaderIcon from "./assets/graph-tile-id.svg";
-import { AppConfigModelType } from "../../models/stores/app-config-model";
 
 function graphAllowsMultipleDataSets(appConfig: AppConfigModelType) {
   return !!appConfig.getSetting("defaultSeriesLegend", "graph");

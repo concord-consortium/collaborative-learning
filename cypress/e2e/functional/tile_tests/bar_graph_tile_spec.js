@@ -73,6 +73,15 @@ context('Bar Graph Tile', function () {
   it('Can link data ', function () {
     beforeTest();
 
+    clueCanvas.addTile('bargraph');
+    barGraph.getTiles().click();
+    barGraph.getYAxisLabel().should('have.text', 'Counts');
+    barGraph.getXAxisPulldown().should('have.text', 'Categories');
+    barGraph.getYAxisTickLabel().should('not.exist');
+    barGraph.getXAxisTickLabel().should('not.exist');
+    barGraph.getLegendArea().should('not.exist');
+    barGraph.getBar().should('not.exist');
+
     // Table dataset for testing:
     // 4 instances of X / Y / Z
     // 2 instances of XX / Y / Z
@@ -88,16 +97,8 @@ context('Bar Graph Tile', function () {
       ['X', 'Y', 'Z'],
     ]);
 
-    clueCanvas.addTile('bargraph');
-    barGraph.getTiles().click();
-    barGraph.getYAxisLabel().should('have.text', 'Counts');
-    barGraph.getXAxisPulldown().should('have.text', 'Categories');
-    barGraph.getYAxisTickLabel().should('not.exist');
-    barGraph.getXAxisTickLabel().should('not.exist');
-    barGraph.getLegendArea().should('not.exist');
-    barGraph.getBar().should('not.exist');
-
     cy.log('Link bar graph');
+    barGraph.getTile().click();
     clueCanvas.clickToolbarButton('bargraph', 'link-tile');
     cy.get('select').select('Table Data 1');
     cy.get('.modal-button').contains("Graph It!").click();
@@ -110,6 +111,16 @@ context('Bar Graph Tile', function () {
     barGraph.getDatasetLabel().should('have.text', 'Table Data 1');
     barGraph.getSortByMenuButton().should('have.text', 'None');
     barGraph.getSecondaryValueName().should('have.length', 1).and('have.text', 'x');
+
+    cy.log('Legend should move to bottom when tile is narrow');
+    barGraph.getTileContent().should('have.class', 'horizontal').and('not.have.class', 'vertical');
+    clueCanvas.addTileByDrag('table', 'right');
+    clueCanvas.addTileByDrag('table', 'right');
+    barGraph.getTileContent().should('have.class', 'vertical').and('not.have.class', 'horizontal');
+    clueCanvas.getUndoTool().click(); // undo add table
+    clueCanvas.getUndoTool().click(); // undo add table
+    tableTile.getTableTile().should('have.length', 1);
+    barGraph.getTileContent().should('have.class', 'horizontal').and('not.have.class', 'vertical');
 
     cy.log('Change Sort By');
     barGraph.getSortByMenuButton().click();
