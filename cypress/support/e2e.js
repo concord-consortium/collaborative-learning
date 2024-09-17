@@ -28,10 +28,6 @@ import './commands';
 import installLogsCollector from "cypress-terminal-report/src/installLogsCollector";
 installLogsCollector();
 
-// before(function(){ //Can't run this because full tests will not run due to website switching
-//     cy.clearQAData('all');
-// });
-
 Cypress.on('uncaught:exception', (err, runnable) => {
     // returning false here prevents Cypress from
     // failing the test
@@ -54,7 +50,3 @@ if (Cypress.config('hideXHRInCommandLog')) {
     app.document.head.appendChild(style);
   }
 }
-
-after(function(){
-  cy.clearQAData('all');
-});

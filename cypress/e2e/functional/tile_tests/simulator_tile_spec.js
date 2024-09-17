@@ -11,7 +11,6 @@ const queryParams2 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
 const queryParams3 = `${Cypress.config("qaUnitStudent7Investigation3")}`;
 
 function beforeTest(params) {
-  cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
 }

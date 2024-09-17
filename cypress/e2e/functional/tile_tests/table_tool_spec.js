@@ -19,7 +19,6 @@ let copyTitle = 'Table Tile Workspace Copy';
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaNoNavPanelUnitStudent5")}`;
-  cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
   cy.showOnlyDocumentWorkspace();

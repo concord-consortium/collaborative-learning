@@ -3,10 +3,7 @@ import ReactDOM from "react-dom";
 
 import { AppProvider, initializeApp } from "./initialize-app";
 import { AppComponent } from "./components/app";
-import { getAppMode } from "./lib/auth";
-import { urlParams } from "./utilities/url-params";
-import { QAClear } from "./components/qa-clear";
-import { getBearerToken, initializeAuthorization } from "./utilities/auth-utils";
+import { initializeAuthorization } from "./utilities/auth-utils";
 import { removeLoadingMessage, showLoadingMessage } from "./utilities/loading-utils";
 
 removeLoadingMessage("Loading the application");
@@ -14,24 +11,14 @@ showLoadingMessage("Initializing");
 
 const redirectingToAuthDomain = initializeAuthorization();
 if (!redirectingToAuthDomain) {
-  const host = window.location.host.split(":")[0];
-  const appMode = getAppMode(urlParams.appMode, getBearerToken(urlParams), host);
+  const stores = initializeApp(false);
+  stores.ui.setShowDemoCreator(!!stores.showDemoCreator);
 
-  if (appMode === "qa" && urlParams.qaClear === "all") {
-    ReactDOM.render(
-      <QAClear />,
-      document.getElementById("app")
-    );
-  } else {
-    const stores = initializeApp(appMode);
-    stores.ui.setShowDemoCreator(!!stores.showDemoCreator);
-
-    ReactDOM.render(
-      <AppProvider stores={stores} modalAppElement="#app">
-        <AppComponent />
-      </AppProvider>,
-      document.getElementById("app")
-    );
-    removeLoadingMessage("Initializing");
-  }
+  ReactDOM.render(
+    <AppProvider stores={stores} modalAppElement="#app">
+      <AppComponent />
+    </AppProvider>,
+    document.getElementById("app")
+  );
+  removeLoadingMessage("Initializing");
 }
