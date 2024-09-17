@@ -241,6 +241,11 @@
     "placeholderText": "",
     "stamps": [],
     "settings": {
+      "bargraph": {
+        "tools": [
+          "link-tile"
+        ]
+      },
       "dataset": {
         "cellsSelectCases": false
       },

@@ -1,39 +1,79 @@
 class BarGraphTile {
 
   getTiles(workspaceClass) {
-    return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .bar-graph-tile`);
+    return cy.get(`${workspaceClass || ".primary-workspace"} .canvas .bar-graph-tile`);
   }
 
-  getTile(tileIndex = 0, workspaceClass) {
-    return this.getTiles().eq(tileIndex);
+  getTile(workspaceClass, tileIndex = 0) {
+    return this.getTiles(workspaceClass).eq(tileIndex);
   }
 
-  getTileTitle(tileIndex = 0, workspaceClass) {
-    return this.getTile(tileIndex, workspaceClass).find(`.editable-tile-title-text`);
+  getTileTitle(workspaceClass, tileIndex = 0) {
+    return this.getTile(workspaceClass, tileIndex).find(`.editable-tile-title-text`);
   }
 
-  getYAxisLabel(tileIndex = 0, workspaceClass) {
-    return this.getTile(tileIndex, workspaceClass).find(`.editable-axis-label`);
+  getTileContent(workspaceClass, tileIndex = 0) {
+    return this.getTile(workspaceClass, tileIndex).find(`[data-testid="bar-graph-content"]`);
   }
 
-  getYAxisLabelButton(tileIndex = 0, workspaceClass) {
-    return this.getTile(tileIndex, workspaceClass).find(`[data-testid="axis-label-button"]`);
-  }
-
-  getYAxisLabelEditor(tileIndex = 0, workspaceClass) {
-    return this.getTile(tileIndex, workspaceClass).find(`[data-testid="axis-label-editor"] input`);
-  }
-
-  getXAxisPulldown(tileIndex = 0, workspaceClass) {
-    return this.getTile(tileIndex, workspaceClass).find(`[data-testid="category-pulldown"]`);
-  }
-
-  getXAxisPulldownButton(tileIndex = 0, workspaceClass) {
-    return this.getXAxisPulldown(tileIndex, workspaceClass).find(`button`);
-  }
-
-  getXAxisPulldownMenuItem(tileIndex = 0, workspaceClass) {
+  getChakraMenuItem(workspaceClass, tileIndex = 0) {
     return cy.get(`body .chakra-portal button`).filter(':visible');
+  }
+
+  getChartArea(workspaceClass, tileIndex = 0) {
+    return this.getTile(workspaceClass, tileIndex).find(`svg.bar-graph-svg`);
+  }
+
+  getYAxisLabel(workspaceClass, tileIndex = 0) {
+    return this.getChartArea(workspaceClass, tileIndex).find(`.editable-axis-label`);
+  }
+
+  getYAxisLabelButton(workspaceClass, tileIndex = 0) {
+    return this.getChartArea(workspaceClass, tileIndex).find(`[data-testid="axis-label-button"]`);
+  }
+
+  getYAxisLabelEditor(workspaceClass, tileIndex = 0) {
+    return this.getChartArea(workspaceClass, tileIndex).find(`[data-testid="axis-label-editor"] input`);
+  }
+
+  getXAxisPulldown(workspaceClass, tileIndex = 0) {
+    return this.getChartArea(workspaceClass, tileIndex).find(`[data-testid="category-pulldown"]`);
+  }
+
+  getXAxisPulldownButton(workspaceClass, tileIndex = 0) {
+    return this.getXAxisPulldown(workspaceClass, tileIndex).find(`button`);
+  }
+
+  getYAxisTickLabel(workspaceClass, tileIndex = 0) {
+    return this.getChartArea(workspaceClass, tileIndex).find(`.visx-axis-left text`);
+  }
+
+  getXAxisTickLabel(workspaceClass, tileIndex = 0) {
+    return this.getChartArea(workspaceClass, tileIndex).find(`.visx-axis-bottom text`);
+  }
+
+  getBar(workspaceClass, tileIndex = 0) {
+    return this.getChartArea(workspaceClass, tileIndex).find(`.visx-bar`);
+  }
+
+  getLegendArea(workspaceClass, tileIndex = 0) {
+    return this.getTile(workspaceClass, tileIndex).find(`.bar-graph-legend`);
+  }
+
+  getDatasetLabel(workspaceClass, tileIndex = 0) {
+    return this.getLegendArea(workspaceClass, tileIndex).find(`.dataset-header .dataset-name`);
+  }
+
+  getDatasetUnlinkButton(workspaceClass, tileIndex = 0) {
+    return this.getLegendArea(workspaceClass, tileIndex).find(`.dataset-header .dataset-icon a`);
+  }
+
+  getSortByMenuButton(workspaceClass, tileIndex = 0) {
+    return this.getLegendArea(workspaceClass, tileIndex).find(`.sort-by button.chakra-menu__menu-button`);
+  }
+
+  getSecondaryValueName(workspaceClass, tileIndex = 0) {
+    return this.getLegendArea(workspaceClass, tileIndex).find(`.secondary-values .secondary-value-name`);
   }
 
 }

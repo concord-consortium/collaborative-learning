@@ -1,4 +1,48 @@
+import { getSnapshot } from "mobx-state-tree";
+import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../models/data/data-set";
+import { ICaseCreation } from "../../models/data/data-set-types";
+import { SharedDataSet, SharedDataSetType } from "../../models/shared/shared-data-set";
 import { defaultBarGraphContent, BarGraphContentModel } from "./bar-graph-content";
+
+const mockCases: ICaseCreation[] = [
+  { species: "cat", location: "yard" },
+  { species: "cat", location: "yard" },
+  { species: "owl", location: "yard" },
+  { species: "owl", location: "forest" }
+];
+
+function sharedEmptyDataSet() {
+  const emptyDataSet = DataSet.create();
+  addAttributeToDataSet(emptyDataSet, { id: "att-s", name: "species" });
+  addAttributeToDataSet(emptyDataSet, { id: "att-l", name: "location" });
+  return SharedDataSet.create({ dataSet: emptyDataSet });
+}
+
+function sharedSampleDataSet() {
+  const sampleDataSet = DataSet.create();
+  addAttributeToDataSet(sampleDataSet, { id: "att-s", name: "species" });
+  addAttributeToDataSet(sampleDataSet, { id: "att-l", name: "location" });
+  addCasesToDataSet(sampleDataSet, mockCases);
+  return SharedDataSet.create({ dataSet: sampleDataSet });
+}
+
+// This is a testable version of the BarGraphContentModel that doesn't rely on the shared model manager
+// It just lets you set a SharedModel and returns that.
+const TestingBarGraphContentModel = BarGraphContentModel
+  .volatile(() => ({
+    storedSharedModel: undefined as SharedDataSetType | undefined
+  }))
+  .actions(self => ({
+    setSharedModel(sharedModel: SharedDataSetType) {
+      self.storedSharedModel = sharedModel;
+      self.updateAfterSharedModelChanges(sharedModel);
+    }
+  }))
+  .views(self => ({
+    get sharedModel() {
+      return self.storedSharedModel;
+    }
+  }));
 
 describe("Bar Graph Content", () => {
   it("is a Bar Graph model", () => {
@@ -6,9 +50,18 @@ describe("Bar Graph Content", () => {
     expect(content.type).toBe("BarGraph");
   });
 
-  it("yAxisLabel has default content of 'Counts'", () => {
+  it("yAxisLabel has expected default content", () => {
     const content = defaultBarGraphContent();
     expect(content.yAxisLabel).toBe("Counts");
+    expect(getSnapshot(content)).toMatchInlineSnapshot(`
+Object {
+  "dataSetId": undefined,
+  "primaryAttribute": undefined,
+  "secondaryAttribute": undefined,
+  "type": "BarGraph",
+  "yAxisLabel": "Counts",
+}
+`);
   });
 
   it("is always user resizable", () => {
@@ -34,6 +87,104 @@ describe("Bar Graph Content", () => {
     expect(content.secondaryAttribute).toBeUndefined();
     content.setSecondaryAttribute("attrId");
     expect(content.secondaryAttribute).toBe("attrId");
+  });
+
+  it("returns empty data array when there are no cases", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedEmptyDataSet());
+    expect(content.dataArray).toEqual([]);
+  });
+
+  it("returns empty data array when there is no primary attribute", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
+    content.setPrimaryAttribute(undefined);
+    expect(content.dataArray).toEqual([]);
+  });
+
+  it("returns expected data array with primary attribute", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
+    content.setPrimaryAttribute("att-s");
+    expect(content.dataArray).toEqual([
+      { "att-s": "cat", "value": 2 },
+      { "att-s": "owl","value": 2}
+    ]);
+
+    content.setPrimaryAttribute("att-l");
+    expect(content.dataArray).toEqual([
+      { "att-l": "yard", "value": 3 },
+      { "att-l": "forest", "value": 1 }
+    ]);
+  });
+
+  it("sets first dataset attribute as the primary attribute by default", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
+    expect(content.dataArray).toEqual([
+      { "att-s": "cat", "value": 2 },
+      { "att-s": "owl","value": 2}
+    ]);
+  });
+
+  it("returns expected data array with primary and secondary attributes", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
+    content.setPrimaryAttribute("att-s");
+    content.setSecondaryAttribute("att-l");
+    expect(content.dataArray).toEqual([
+      { "att-s": "cat", "yard": 2 },
+      { "att-s": "owl", "yard": 1, "forest": 1 }
+    ]);
+  });
+
+  it("fills in missing values with (no value)", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    const dataSet = sharedSampleDataSet();
+    dataSet.dataSet?.attributes[1].setValue(3, undefined); // hide forest owl's location
+    content.setSharedModel(dataSet);
+    content.setPrimaryAttribute("att-s");
+    content.setSecondaryAttribute("att-l");
+    expect(content.dataArray).toEqual([
+      { "att-s": "cat", "yard": 2 },
+      { "att-s": "owl", "yard": 1, "(no value)": 1 }
+    ]);
+
+    dataSet.dataSet?.attributes[0].setValue(3, undefined); // hide that owl entirely
+    expect(content.dataArray).toEqual([
+      { "att-s": "cat", "yard": 2 },
+      { "att-s": "owl", "yard": 1 },
+      { "att-s": "(no value)", "(no value)": 1 }
+    ]);
+
+  });
+
+  it("extracts primary keys", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
+    content.setPrimaryAttribute("att-s");
+    expect(content.primaryKeys).toEqual(["cat", "owl"]);
+  });
+
+  it("extracts secondary keys", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
+    content.setPrimaryAttribute("att-s");
+    content.setSecondaryAttribute("att-l");
+    expect(content.secondaryKeys).toEqual(["yard", "forest"]);
+  });
+
+  it("calculates the maximum data value", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
+    content.setPrimaryAttribute("att-s");
+    expect(content.maxDataValue).toBe(2);
+
+    content.setPrimaryAttribute("att-l");
+    expect(content.maxDataValue).toBe(3);
+
+    content.setSecondaryAttribute("att-s");
+    expect(content.maxDataValue).toBe(2);
   });
 
 });

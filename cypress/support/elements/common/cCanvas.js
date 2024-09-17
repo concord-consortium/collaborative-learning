@@ -11,6 +11,7 @@ import ExpressionToolTile from '../tile/ExpressionToolTile';
 import Canvas from './Canvas';
 import Dialog from './Dialog';
 import XYPlotToolTile from '../tile/XYPlotToolTile';
+import BarGraphTile from '../tile/BarGraphTile';
 
 let graphToolTile = new GeometryToolTile,
     imageToolTile = new ImageToolTile,
@@ -23,6 +24,7 @@ let graphToolTile = new GeometryToolTile,
     numberlineToolTile = new NumberlineToolTile,
     expressionToolTile = new ExpressionToolTile,
     xyPlotToolTile = new XYPlotToolTile,
+    barGraphTile = new BarGraphTile,
     canvas = new Canvas,
     dialog = new Dialog;
 
@@ -294,6 +296,9 @@ class ClueCanvas {
                 break;
             case 'xyplot':
                 tileElement = xyPlotToolTile.getTile().last().click({ force: true });
+                break;
+            case 'bargraph':
+                tileElement = barGraphTile.getTile().last().click({ force: true });
                 break;
         }
         tileElement.should('have.class','selected');
