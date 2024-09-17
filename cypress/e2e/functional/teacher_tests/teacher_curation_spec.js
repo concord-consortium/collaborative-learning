@@ -12,7 +12,6 @@ const defaultProblemDocTitle = "QA 1.1 Solving a Mystery with Proportional Reaso
 
 function beforeTest() {
     const queryParams = `${Cypress.config("clueTestqaUnitTeacher6")}`;
-    cy.clearQAData('all');
     cy.visit(queryParams);
     cy.waitForLoad();
     dashboard.switchView("Workspace & Resources");

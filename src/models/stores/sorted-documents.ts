@@ -43,7 +43,6 @@ export interface ISortedDocumentsStores {
 
 export class SortedDocuments {
   stores: ISortedDocumentsStores;
-  firestoreTagDocumentMap = new Map<string, Set<string>>();
   firestoreMetadataDocs: IObservableArray<IDocumentMetadata> = observable.array([]);
 
   constructor(stores: ISortedDocumentsStores) {
@@ -113,7 +112,7 @@ export class SortedDocuments {
 
   get byStrategy(): DocumentGroup[] {
     const commentTags = this.commentTags;
-    const tagsWithDocs = getTagsWithDocs(this.firestoreMetadataDocs, commentTags, this.firestoreTagDocumentMap);
+    const tagsWithDocs = getTagsWithDocs(this.firestoreMetadataDocs, commentTags);
 
     const sortedDocsArr: DocumentGroup[] = [];
     Object.entries(tagsWithDocs).forEach((tagKeyAndValObj) => {
@@ -208,20 +207,34 @@ export class SortedDocuments {
         tools.push("Sparrow");
       }
 
-      const metadata: IDocumentMetadata = {
-        uid: doc.uid,
-        type: doc.type,
-        key: doc.key,
-        createdAt: doc.createdAt,
-        title: doc.title,
-        properties: undefined,
-        tools,
-        strategies: exemplarStrategy ? [exemplarStrategy] : [],
-        investigation: doc.investigation,
-        problem: doc.problem,
-        unit: doc.unit
-      };
-      docsArray.push(metadata);
+      const authoredStrategies = exemplarStrategy ? [exemplarStrategy] : [];
+
+      const existingMetadataDoc = docsArray.find(metadataDoc => doc.key === metadataDoc.key);
+      if (existingMetadataDoc) {
+        // This will happen if a user comments on a exemplar
+        // That will create a metadata document in Firestore.
+        // So in this case we want to update this existing metadata document so we don't
+        // create a duplicate one
+        const userStrategies = existingMetadataDoc.strategies || [];
+        existingMetadataDoc.tools = tools;
+        existingMetadataDoc.strategies = [...new Set([...authoredStrategies, ...userStrategies])];
+      } else {
+        const metadata: IDocumentMetadata = {
+          uid: doc.uid,
+          type: doc.type,
+          key: doc.key,
+          createdAt: doc.createdAt,
+          title: doc.title,
+          properties: undefined,
+          tools,
+          strategies: exemplarStrategy ? [exemplarStrategy] : [],
+          investigation: doc.investigation,
+          problem: doc.problem,
+          unit: doc.unit
+        };
+        docsArray.push(metadata);
+      }
+
     });
 
     runInAction(() => {

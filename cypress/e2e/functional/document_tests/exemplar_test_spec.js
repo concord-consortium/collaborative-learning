@@ -18,7 +18,6 @@ const exemplarName = "First Exemplar";
 const exemplarInfo = "Ivan Idea: First Exemplar";
 
 function beforeTest(params) {
-  cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
 }

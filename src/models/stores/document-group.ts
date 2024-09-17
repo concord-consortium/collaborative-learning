@@ -45,7 +45,6 @@ export class DocumentGroup {
   stores: ISortedDocumentsStores;
   label: string;
   documents: IDocumentMetadata[];
-  firestoreTagDocumentMap = new Map<string, Set<string>>();
   icon?: FC<SVGProps<SVGSVGElement>>;
 
   constructor(props: IDocumentGroup) {
@@ -98,7 +97,7 @@ export class DocumentGroup {
 
   get byStrategy(): DocumentGroup[] {
     const commentTags = this.stores.appConfig.commentTags;
-    const tagsWithDocs = getTagsWithDocs(this.documents, commentTags, this.firestoreTagDocumentMap);
+    const tagsWithDocs = getTagsWithDocs(this.documents, commentTags);
 
     const sortedDocsArr: DocumentGroup[] = [];
     Object.entries(tagsWithDocs).forEach((tagKeyAndValObj) => {

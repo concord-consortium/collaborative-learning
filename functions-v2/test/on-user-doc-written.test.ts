@@ -1,24 +1,14 @@
-import initializeFFT from "firebase-functions-test";
 import {
   clearFirestoreData,
 } from "firebase-functions-test/lib/providers/firestore";
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
-
-// We cannot import the function here because we need to call
-// initializeFFT first in order to set things up before the
-// initializeApp is called in the function module.
-// import {updateClassDocNetworksOnUserChange} from "../src";
+import {initialize, projectConfig} from "./initialize";
+import {onUserDocWritten} from "../src/on-user-doc-written";
 
 jest.mock("firebase-functions/logger");
 
-process.env["FIRESTORE_EMULATOR_HOST"]="127.0.0.1:8088";
-const projectConfig = {projectId: "demo-test"};
-const fft = initializeFFT(projectConfig);
-
-// We can't initialize the firebase admin here because that
-// can only happen once and the function module needs to do it.
-// admin.initializeApp(projectConfig);
+const {fft, cleanup} = initialize();
 
 type CollectionRef = admin.firestore.CollectionReference<
   admin.firestore.DocumentData, admin.firestore.DocumentData
@@ -29,14 +19,14 @@ describe("functions", () => {
     await clearFirestoreData(projectConfig);
   });
 
-  describe("updateClassDocNetworksOnUserChange", () => {
+  describe("onUserDocWritten", () => {
     let classesCollection: CollectionRef;
     let usersCollection: CollectionRef;
 
-    function init() {
+    beforeEach(() => {
       classesCollection = admin.firestore().collection("demo/test/classes");
       usersCollection = admin.firestore().collection("demo/test/users");
-    }
+    });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function writeClassDocs(classDocs: any[]) {
@@ -57,17 +47,7 @@ describe("functions", () => {
     }
 
     test("add new network", async () => {
-      // The function module has to be imported after initializeFFT is called.
-      // The initializeFFT sets up environment vars so the
-      // admin.initializeApp() in index.ts will have the same project
-      // settings.
-      const {updateClassDocNetworksOnUserChange} = await import("../src");
-
-      // We can't use beforeEach because this needs to happen after the import.
-      // And we can't put the import in beforeEach because it would be hard to
-      // get the imported function typed properly.
-      init();
-      const wrapped = fft.wrap(updateClassDocNetworksOnUserChange);
+      const wrapped = fft.wrap(onUserDocWritten);
 
       const event = {
         params: {
@@ -144,9 +124,7 @@ describe("functions", () => {
     });
 
     test("remove network", async () => {
-      const {updateClassDocNetworksOnUserChange} = await import("../src");
-      init();
-      const wrapped = fft.wrap(updateClassDocNetworksOnUserChange);
+      const wrapped = fft.wrap(onUserDocWritten);
 
       const event = {
         params: {
@@ -225,9 +203,7 @@ describe("functions", () => {
     // If there is overlap between the networks of the co-teachers then removing
     // a network from one co-teacher might not change the networks of the class
     test("no network change in a class", async () => {
-      const {updateClassDocNetworksOnUserChange} = await import("../src");
-      init();
-      const wrapped = fft.wrap(updateClassDocNetworksOnUserChange);
+      const wrapped = fft.wrap(onUserDocWritten);
 
       const event = {
         params: {
@@ -304,7 +280,7 @@ describe("functions", () => {
     });
   });
 
-  afterAll(() => {
-    fft.cleanup();
+  afterAll(async () => {
+    await cleanup();
   });
 });

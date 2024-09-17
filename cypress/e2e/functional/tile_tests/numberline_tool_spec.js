@@ -6,7 +6,6 @@ let numberlineToolTile = new NumberlineToolTile;
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaNoNavPanelUnitStudent5")}`;
-  cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
 }

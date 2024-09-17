@@ -71,8 +71,10 @@ export const sortNameSectionLabels = (docMapKeys: string[]) => {
   });
 };
 
-export const getTagsWithDocs = (documents: IDocumentMetadata[], commentTags: Record<string, string>|undefined,
-  firestoreTagDocumentMap: Map<string, Set<string>>) => {
+export const getTagsWithDocs = (
+  documents: IDocumentMetadata[],
+  commentTags: Record<string, string>|undefined,
+) => {
   const tagsWithDocs: Record<string, TagWithDocs> = {};
   if (commentTags) {
     for (const key of Object.keys(commentTags)) {
@@ -93,18 +95,7 @@ export const getTagsWithDocs = (documents: IDocumentMetadata[], commentTags: Rec
   // in store to find "Documents with no comments" then place those doc keys to "Not Tagged"
   const uniqueDocKeysWithTags = new Set<string>();
 
-  // grouping documents based on firestore comment tags
-  firestoreTagDocumentMap.forEach((docKeysSet, tag) => {
-    const docKeysArray = Array.from(docKeysSet); // Convert the Set to an array
-    if (tagsWithDocs[tag]) {
-      docKeysSet.forEach((docKey: string) =>{
-        uniqueDocKeysWithTags.add(docKey);
-      });
-      tagsWithDocs[tag].docKeysFoundWithTag = docKeysArray;
-    }
-  });
-
-  // adding in (exemplar) documents with authored tags
+  // Sort documents into their groups
   documents.forEach(doc => {
     doc.strategies?.forEach(strategy => {
       if (tagsWithDocs[strategy]) {

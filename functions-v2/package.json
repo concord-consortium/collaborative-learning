@@ -5,8 +5,9 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "emulator": "firebase emulators:start --project demo-test",
+    "emulator:online": "firebase emulators:start",
     "serve": "npm run build && firebase emulators:start --only functions",
-    "shell": "npm run build && firebase functions:shell",
+    "shell": "npm run build && firebase functions:shell --project demo-test",
     "start": "npm run shell",
     "test": "jest",
     "test:emulator": "firebase emulators:start --project demo-test --only firestore,database",
@@ -16,10 +17,10 @@
   "engines": {
     "node": "20"
   },
-  "main": "lib/src/index.js",
+  "main": "lib/functions-v2/src/index.js",
   "dependencies": {
     "firebase-admin": "^12.1.0",
-    "firebase-functions": "^5.0.0"
+    "firebase-functions": "^5.1.1"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",

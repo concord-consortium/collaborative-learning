@@ -17,7 +17,6 @@ function moveSliderTo(percent) {
 }
 
 function beforeTest(params) {
-  cy.clearQAData('all');
   cy.visit(params);
   cy.waitForLoad();
   clueCanvas.getInvestigationCanvasTitle().text().then((investigationTitle) => {

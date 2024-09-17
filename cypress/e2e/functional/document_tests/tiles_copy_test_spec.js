@@ -54,7 +54,6 @@ const tiles2 = [
 ];
 
 function beforeTest(queryParams) {
-  cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
 }

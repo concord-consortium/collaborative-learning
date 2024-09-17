@@ -10,7 +10,6 @@ const diagramToolTile = new DiagramToolTile;
 
 function beforeTest() {
   const queryParam = `${Cypress.config("qaVariablesUnitStudent5")}`;
-  cy.clearQAData('all');
   cy.visit(queryParam);
   cy.waitForLoad();
 }

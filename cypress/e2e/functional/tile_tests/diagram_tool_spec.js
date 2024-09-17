@@ -14,7 +14,6 @@ const redoKeystroke = `{${cmdKey}}{shift}z`;
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaVariablesUnitStudent5")}&mouseSensor`;
-  cy.clearQAData('all');
   cy.visit(queryParams);
   cy.waitForLoad();
   cy.showOnlyDocumentWorkspace();
