@@ -97,7 +97,6 @@
     "test:coverage:watch": "jest --coverage --watchAll",
     "test:coverage:cypress:open": "cypress open --env coverage=true",
     "test:cypress": "cypress run --env testEnv=local",
-    "test:cypress:ci": "cypress run --env testEnv=local --record",
     "test:cypress:open": "cypress open --env testEnv=local",
     "test:cypress:open:disable-gpu": "cross-env ELECTRON_EXTRA_LAUNCH_ARGS=--disable-gpu cypress open --env testEnv=local",
     "test:cypress:smoke": "cypress run --spec 'cypress/e2e/smoke/single_student_canvas_test.js' --env testEnv=local",
