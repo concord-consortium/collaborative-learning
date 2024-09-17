@@ -4,10 +4,10 @@ function wsclass(workspaceClass) {
 
 class TableToolTile{
     getTableTile(workspaceClass) {
-        return cy.get(`${wsclass(workspaceClass)} .canvas-area .table-tool`);
+        return cy.get(`${wsclass(workspaceClass)} .canvas .table-tool`);
     }
     getTableTitle(workspaceClass){
-      return cy.get(`${wsclass(workspaceClass)} .canvas-area .table-title`);
+      return cy.get(`${wsclass(workspaceClass)} .canvas .table-title`);
     }
     getAddColumnButton(){
       return cy.get('.add-column-button');
@@ -39,7 +39,7 @@ class TableToolTile{
       this.getRemoveRowButton().click();
     }
     getTableRow(){
-      return cy.get('.canvas-area .rdg-row');
+      return cy.get('.canvas .rdg-row');
     }
     getColumnHeaderText(i){
       return cy.get('.column-header-cell .editable-header-cell .header-name').text();
@@ -89,7 +89,7 @@ class TableToolTile{
         this.getTableCell().eq(cell).type(num+'{enter}');
     }
     getTableIndexColumnCell(){
-        return cy.get('.canvas-area .rdg-cell.index-column');
+        return this.getTableTile().find('.rdg-cell.index-column');
     }
     // Fill in a table tile with the given data (a list of lists)
     // Table tile should in the default state (2 columns, no rows)

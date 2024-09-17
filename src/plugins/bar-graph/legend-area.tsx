@@ -6,31 +6,46 @@ import { LegendSecondaryRow } from './legend-secondary-row';
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
+import { useReadOnlyContext } from '../../components/document/read-only-context';
+import { logBarGraphEvent } from './bar-graph-utils';
+import { logSharedModelDocEvent } from '../../models/document/log-shared-model-document-event';
+import { LogEventName } from '../../lib/logger-types';
+import { useTileModelContext } from '../../components/tiles/hooks/use-tile-model-context';
+import { getSharedModelManager } from '../../models/tiles/tile-environment';
 
 interface IProps {
   legendRef: React.RefObject<HTMLDivElement>;
 }
 
 export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
+  const { tile } = useTileModelContext();
   const model = useBarGraphModelContext();
+  const readOnly = useReadOnlyContext();
 
   function unlinkDataset() {
-    if (model) {
+    const sharedModel = model?.sharedModel;
+    if (!readOnly && sharedModel) {
       model.unlinkDataSet();
+      if (tile) {
+        const sharedTiles = getSharedModelManager()?.getSharedModelProviders(sharedModel) || [];
+        logSharedModelDocEvent(LogEventName.TILE_UNLINK, tile, sharedTiles, sharedModel);
+      }
     }
   }
 
   function setSecondaryAttribute(attributeId: string|undefined) {
     if (model) {
       model.setSecondaryAttribute(attributeId);
+      logBarGraphEvent(model, "setSecondaryAttribute", { attributeId });
     }
   }
 
-  if (!model || !model.dataSet || !model.primaryAttribute) {
+  if (!model || !model.sharedModel || !model.primaryAttribute) {
     return null;
   }
 
-  const dataSet = model.dataSet.dataSet;
+  const dataSet = model.sharedModel.dataSet;
+  const dataSetName = model.sharedModel.name;
   const allAttributes = dataSet?.attributes || [];
   const availableAttributes = allAttributes.filter((a) => a.id !== model.primaryAttribute);
   const currentPrimary = dataSet?.attrFromID(model.primaryAttribute);
@@ -44,13 +59,13 @@ export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
       <div className="inner-container" ref={legendRef}>
         <div className="dataset-header">
           <div className="dataset-icon">
-            <a onClick={unlinkDataset} aria-label={`Unlink ${model.dataSet.name}`}>
+            <a onClick={unlinkDataset} aria-label={`Unlink ${dataSetName}`}>
               <RemoveDataIcon />
             </a>
           </div>
           <div className="dataset-label">
             <span className="dataset-label-text">Data from:</span>
-            <span className="dataset-name">{model.dataSet.name}</span>
+            <span className="dataset-name">{dataSetName}</span>
           </div>
         </div>
 
@@ -67,9 +82,11 @@ export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
             </MenuButton>
             <Portal>
               <MenuList>
-                <MenuItem onClick={() => setSecondaryAttribute(undefined)}>None</MenuItem>
+                <MenuItem isDisabled={readOnly} onClick={() => setSecondaryAttribute(undefined)}>None</MenuItem>
                 {availableAttributes.map((a) => (
-                  <MenuItem key={a.id} onClick={() => setSecondaryAttribute(a.id)}>{a.name}</MenuItem>
+                  <MenuItem key={a.id} isDisabled={readOnly} onClick={() => setSecondaryAttribute(a.id)}>
+                    {a.name}
+                  </MenuItem>
                 ))}
               </MenuList>
             </Portal>
@@ -79,7 +96,7 @@ export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
         <div className="secondary-values">
           {currentSecondary
             ? secondaryKeys.map((key) => <LegendSecondaryRow key={key} attrValue={key} />)
-            : <LegendSecondaryRow attrValue={currentPrimary.name} />}
+            : <LegendSecondaryRow attrValue={currentPrimary?.name} />}
         </div>
       </div>
     </div>

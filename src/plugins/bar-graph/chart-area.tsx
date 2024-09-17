@@ -8,7 +8,7 @@ import { Bar, BarGroup } from "@visx/shape";
 import { useBarGraphModelContext } from "./bar-graph-content-context";
 import { CategoryPulldown } from "./category-pulldown";
 import EditableAxisLabel from "./editable-axis-label";
-import { roundTo5 } from "./bar-graph-utils";
+import { logBarGraphEvent, roundTo5 } from "./bar-graph-utils";
 
 const margin = {
   top: 7,
@@ -37,8 +37,10 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
   const yMax = height - margin.top - margin.bottom;
 
   function setPrimaryAttribute(id: string) {
-    model?.setPrimaryAttribute(id);
-    model?.setSecondaryAttribute(undefined);
+    if (model) {
+      model.setPrimaryAttribute(id);
+      logBarGraphEvent(model, "setPrimaryAttribute", { attributeId: id });
+    }
   }
 
   function barColor(key: string) {
@@ -179,8 +181,6 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
       <EditableAxisLabel
         x={20}
         y={margin.top + yMax/2}
-        text={model?.yAxisLabel}
-        setText={(text) => model?.setYAxisLabel(text)}
       />
       <CategoryPulldown
         setCategory={setPrimaryAttribute}

@@ -70,7 +70,7 @@ export const BarGraphComponent: React.FC<ITileProps> = observer((props: ITilePro
       <TileToolbar tileType="bargraph" readOnly={!!readOnly} tileElement={props.tileElt} />
       <div
         ref={containerRef}
-        className={classNames("bar-graph-content", legendBelow ? "vertical" : "horizontal", { "read-only": readOnly })}
+        className={classNames("bar-graph-content", legendBelow ? "vertical" : "horizontal", { "readonly": readOnly })}
         data-testid="bar-graph-content"
       >
         <ChartArea width={svgWidth} height={svgHeight} />

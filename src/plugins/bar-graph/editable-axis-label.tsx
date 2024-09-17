@@ -1,25 +1,26 @@
 import React, { useEffect } from 'react';
+import { observer } from 'mobx-react';
 import { Text } from '@visx/text';
-import { getBBox } from './bar-graph-utils';
+import { getBBox, logBarGraphEvent } from './bar-graph-utils';
 import { useReadOnlyContext } from '../../components/document/read-only-context';
+import { useBarGraphModelContext } from './bar-graph-content-context';
 
 const paddingX = 5, paddingY = 10;
 
 interface IProps {
   x: number;
   y: number;
-  text?: string;
-  setText: (text: string) => void;
 }
 
-const EditableAxisLabel: React.FC<IProps> = ({text, x, y, setText}) => {
-
+const EditableAxisLabel: React.FC<IProps> = observer(function EditableAxisLabel({x, y}) {
+  const model = useBarGraphModelContext();
   const readOnly = useReadOnlyContext();
   const textRef = React.useRef<SVGGElement|null>(null);
   const [boundingBox, setBoundingBox] = React.useState<DOMRect | null>(null);
   const [editing, setEditing] = React.useState(false);
-  const [displayText, setDisplayText] = React.useState<string>(text || "Y axis");
-  const [editText, setEditText] = React.useState<string>(text || "Y axis");
+  const [editText, setEditText] = React.useState<string>("");
+
+  const displayText = model?.yAxisLabel || "";
 
   useEffect(() => {
     if (textRef.current) {
@@ -28,12 +29,19 @@ const EditableAxisLabel: React.FC<IProps> = ({text, x, y, setText}) => {
     }
   }, [x, y, displayText, textRef]);
 
-  const handleClose = (accept: boolean) => {
+  const handleStartEdit = () => {
+    if (!readOnly) {
+      setEditText(displayText);
+      setEditing(true);
+    }
+  };
+
+  const handleEndEdit = (accept: boolean) => {
     setEditing(false);
-    if (accept && editText) {
+    if (model && accept && editText) {
       const trimmed = editText.trim();
-      setDisplayText(trimmed);
-      setText(trimmed);
+      model.setYAxisLabel(trimmed);
+      logBarGraphEvent(model, "setYAxisLabel", { text: trimmed });
     }
   };
 
@@ -41,11 +49,11 @@ const EditableAxisLabel: React.FC<IProps> = ({text, x, y, setText}) => {
     const { key } = e;
     switch (key) {
       case "Escape":
-        handleClose(false);
+        handleEndEdit(false);
         break;
       case "Enter":
       case "Tab":
-        handleClose(true);
+        handleEndEdit(true);
         break;
     }
   };
@@ -59,7 +67,7 @@ const EditableAxisLabel: React.FC<IProps> = ({text, x, y, setText}) => {
           value={editText}
           size={editText.length + 5}
           onKeyDown={handleKeyDown}
-          onBlur={() => handleClose(true)}
+          onBlur={() => handleEndEdit(true)}
           onChange={(e) => setEditText(e.target.value)}
         />
       </foreignObject>
@@ -81,7 +89,7 @@ const EditableAxisLabel: React.FC<IProps> = ({text, x, y, setText}) => {
           strokeWidth={1.5}
           fill="none"
           pointerEvents={editing ? "none" : "all"}
-          onClick={() => { if (!readOnly) setEditing(true); }}
+          onClick={handleStartEdit}
         />}
       <g ref={textRef}>
         <Text
@@ -100,6 +108,6 @@ const EditableAxisLabel: React.FC<IProps> = ({text, x, y, setText}) => {
       </g>
     </g>
   );
-};
+});
 
 export default EditableAxisLabel;
