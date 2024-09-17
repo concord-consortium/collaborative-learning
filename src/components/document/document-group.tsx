@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { DocumentModelType, getDocumentContext } from "../../models/document/document";
+import { DocumentModelType } from "../../models/document/document";
 import { SimpleDocumentItem } from "../thumbnail/simple-document-item";
-import { DocumentContextReact } from "./document-context";
 import { IDocumentMetadata } from "../../../shared/shared";
 import { DocumentGroup } from "../../models/stores/document-group";
 
@@ -121,16 +120,14 @@ export const DocumentGroupComponent = observer(function DocumentGroupComponent(p
       {visibleCount < docCount && renderScrollButton("left", leftArrowDisabled)}
       <div ref={docListContainerRef} className="doc-group-list simple" data-testid="doc-group-list">
         {documentGroup.documents?.map((doc: any) => {
-          const documentContext = getDocumentContext(doc);
           return (
-            <DocumentContextReact.Provider key={doc.key} value={documentContext}>
-              <SimpleDocumentItem
-                document={doc}
-                investigationOrdinal={doc.investigation}
-                problemOrdinal={doc.problem}
-                onSelectDocument={onSelectDocument}
-              />
-            </DocumentContextReact.Provider>
+            <SimpleDocumentItem
+              key={doc.key}
+              document={doc}
+              investigationOrdinal={doc.investigation}
+              problemOrdinal={doc.problem}
+              onSelectDocument={onSelectDocument}
+            />
           );
         })}
       </div>

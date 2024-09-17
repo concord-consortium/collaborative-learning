@@ -1,6 +1,5 @@
 import { FC, SVGProps } from "react";
-import { IDocumentMetadata } from "../../../shared/shared";
-import { ISortedDocumentsStores, TagWithDocs } from "./sorted-documents";
+import { IDocumentMetadataModel, ISortedDocumentsStores, TagWithDocs } from "./sorted-documents";
 import { makeAutoObservable } from "mobx";
 import {
   createDocMapByBookmarks,
@@ -20,7 +19,7 @@ import SparrowHeaderIcon from "../../assets/icons/sort-by-tools/sparrow-id.svg";
 interface IDocumentGroup {
   icon?:FC<SVGProps<SVGSVGElement>>;
   label: string;
-  documents: IDocumentMetadata[];
+  documents: IDocumentMetadataModel[];
   stores: ISortedDocumentsStores;
 }
 
@@ -44,7 +43,7 @@ interface IDocumentGroup {
 export class DocumentGroup {
   stores: ISortedDocumentsStores;
   label: string;
-  documents: IDocumentMetadata[];
+  documents: IDocumentMetadataModel[];
   icon?: FC<SVGProps<SVGSVGElement>>;
 
   constructor(props: IDocumentGroup) {
@@ -56,7 +55,10 @@ export class DocumentGroup {
     this.icon = icon;
   }
 
-  buildDocumentCollection(sortedSectionLabels: string[], docMap: Map<string, IDocumentMetadata[]>): DocumentGroup[] {
+  buildDocumentCollection(
+    sortedSectionLabels: string[],
+    docMap: Map<string, IDocumentMetadataModel[]>
+  ): DocumentGroup[] {
     return sortedSectionLabels.map(label => {
       return new DocumentGroup({
         label,
@@ -104,7 +106,7 @@ export class DocumentGroup {
       const tagWithDocs = tagKeyAndValObj[1] as TagWithDocs;
       const label = tagWithDocs.tagValue;
       const docKeys = tagWithDocs.docKeysFoundWithTag;
-      const documents = this.documents.filter((doc: IDocumentMetadata) => docKeys.includes(doc.key));
+      const documents = this.documents.filter(doc => docKeys.includes(doc.key));
       sortedDocsArr.push(new DocumentGroup({
         label,
         documents,
