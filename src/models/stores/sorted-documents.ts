@@ -259,6 +259,10 @@ export class SortedDocuments {
 
   get exemplarMetadataDocs() {
     const docsMap = MetadataDocMapModel.create();
+    // We are just using this map for consistency with the other maps
+    // We don't need the benefits of MST's actions
+    unprotect(docsMap);
+
     // OPTIMIZE: this isn't efficient. Every time a new document is added to stores.documents
     // this exemplarDocuments will be recomputed even though its value will not have changed.
     // So then all of these exemplar docs will get recreated.
