@@ -92,6 +92,16 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
 
   const labelWidth = (xMax/primaryKeys.length)-10; // setting width will wrap lines when needed
 
+  function handleClick(primaryValue: string, secondaryValue?: string) {
+    if (!model || !model.primaryAttribute) return;
+    model.selectCasesByValues(primaryValue, secondaryValue);
+    logBarGraphEvent(model, "selectCases", {
+      attributeId:
+        model.secondaryAttribute ? [model.primaryAttribute, model.secondaryAttribute] : model.primaryAttribute,
+      attributeValue: secondaryValue ? [primaryValue, secondaryValue] : primaryValue
+    });
+  }
+
   function simpleBars() {
     const color = barColor(primary);
     return (
@@ -104,7 +114,8 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
           const w = primaryScale.bandwidth();
           const h = yMax - countScale(info.count);
           return (
-            <BarWithHighlight key={key} x={x} y={y} width={w} height={h} color={color} selected={info.selected} />
+            <BarWithHighlight key={key} x={x} y={y} width={w} height={h} color={color} selected={info.selected}
+              onClick={() => handleClick(key)} />
           );
         })}
       </Group>
@@ -123,29 +134,34 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
         x1Scale={secondaryScale}
         yScale={((info: BarInfo) => countScale(info?.count||0)) as PositionScale}
       >
-        {(barGroups) =>
-          <Group className="visx-bar-group">
-            {barGroups.map((barGroup) => (
-              <Group key={`bar-group-${barGroup.index}`} left={barGroup.x0}>
-                {barGroup.bars.map((bar) => {
-                  if (!bar.value) return null;
-                  // BarGroup really expects the values to be pure numeric, but we're using objects.
-                  // Alternatively, we could drop BarGroup and build the bars manually.
-                  const val = bar.value as unknown as BarInfo;
-                  return <BarWithHighlight
-                    key={`bar-group-bar-${barGroup.index}-${bar.index}`}
-                    x={bar.x}
-                    y={bar.y}
-                    width={bar.width}
-                    height={bar.height}
-                    color={bar.color}
-                    selected={val.selected}
-                  />;
+        {(barGroups) => {
+            return (
+              <Group className="visx-bar-group">
+                {barGroups.map((barGroup) => {
+                  const primaryValue = data[barGroup.index][primary] as string;
+                  return (
+                    <Group key={`bar-group-${barGroup.index}`} left={barGroup.x0}>
+                      {barGroup.bars.map((bar) => {
+                        if (!bar.value) return null;
+                        // BarGroup really expects the values to be pure numeric, but we're using objects.
+                        // Alternatively, we could drop BarGroup and build the bars manually.
+                        const val = bar.value as unknown as BarInfo;
+                        return <BarWithHighlight
+                          key={`bar-group-bar-${barGroup.index}-${bar.index}`}
+                          x={bar.x}
+                          y={bar.y}
+                          width={bar.width}
+                          height={bar.height}
+                          color={bar.color}
+                          selected={val.selected}
+                          onClick={() => handleClick(primaryValue, bar.key)} />;
+                      })}
+                    </Group>
+                  );
                 })}
               </Group>
-            ))}
-          </Group>
-        }
+            );
+        }}
       </BarGroup>
     );
   }
@@ -222,13 +238,14 @@ interface IBarWithHighlightProps {
   height: number;
   color: string;
   selected: boolean;
+  onClick: () => void;
 }
 
-function BarWithHighlight({ x, y, width, height, color, selected }: IBarWithHighlightProps) {
+function BarWithHighlight({ x, y, width, height, color, selected, onClick }: IBarWithHighlightProps) {
   return (
     <Group>
       {selected && <BarHighlight x={x} y={y} width={width} height={height} />}
-      <Bar x={x} y={y} width={width} height={height} fill={color} />
+      <Bar onClick={onClick} x={x} y={y} width={width} height={height} fill={color} />
     </Group>
   );
 }

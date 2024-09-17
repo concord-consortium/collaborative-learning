@@ -107,14 +107,14 @@ Object {
     content.setSharedModel(sharedSampleDataSet());
     content.setPrimaryAttribute("att-s");
     expect(content.dataArray).toEqual([
-      { "att-s": "cat", "value": 2 },
-      { "att-s": "owl","value": 2}
+      { "att-s": "cat", "value": { count: 2, selected: false }},
+      { "att-s": "owl","value": { count: 2, selected: false }}
     ]);
 
     content.setPrimaryAttribute("att-l");
     expect(content.dataArray).toEqual([
-      { "att-l": "yard", "value": 3 },
-      { "att-l": "forest", "value": 1 }
+      { "att-l": "yard", "value": { count: 3, selected: false }},
+      { "att-l": "forest", "value": { count: 1, selected: false }}
     ]);
   });
 
@@ -122,8 +122,8 @@ Object {
     const content = TestingBarGraphContentModel.create({ });
     content.setSharedModel(sharedSampleDataSet());
     expect(content.dataArray).toEqual([
-      { "att-s": "cat", "value": 2 },
-      { "att-s": "owl","value": 2}
+      { "att-s": "cat", "value": { count: 2, selected: false }},
+      { "att-s": "owl","value": { count: 2, selected: false }}
     ]);
   });
 
@@ -133,8 +133,8 @@ Object {
     content.setPrimaryAttribute("att-s");
     content.setSecondaryAttribute("att-l");
     expect(content.dataArray).toEqual([
-      { "att-s": "cat", "yard": 2 },
-      { "att-s": "owl", "yard": 1, "forest": 1 }
+      { "att-s": "cat", "yard": { count: 2, selected: false }},
+      { "att-s": "owl", "yard": { count: 1, selected: false }, "forest": { count: 1, selected: false }}
     ]);
   });
 
@@ -146,15 +146,15 @@ Object {
     content.setPrimaryAttribute("att-s");
     content.setSecondaryAttribute("att-l");
     expect(content.dataArray).toEqual([
-      { "att-s": "cat", "yard": 2 },
-      { "att-s": "owl", "yard": 1, "(no value)": 1 }
+      { "att-s": "cat", "yard": { count: 2, selected: false }},
+      { "att-s": "owl", "yard": { count: 1, selected: false}, "(no value)": { count: 1, selected: false }}
     ]);
 
     dataSet.dataSet?.attributes[0].setValue(3, undefined); // hide that owl entirely
     expect(content.dataArray).toEqual([
-      { "att-s": "cat", "yard": 2 },
-      { "att-s": "owl", "yard": 1 },
-      { "att-s": "(no value)", "(no value)": 1 }
+      { "att-s": "cat", "yard": { count: 2, selected: false }},
+      { "att-s": "owl", "yard": { count: 1, selected: false }},
+      { "att-s": "(no value)", "(no value)": { count: 1, selected: false }}
     ]);
 
   });

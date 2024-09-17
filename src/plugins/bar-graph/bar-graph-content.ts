@@ -145,6 +145,22 @@ export const BarGraphContentModel = TileContentModel
     },
     setSecondaryAttribute(attrId: string|undefined) {
       self.secondaryAttribute = attrId;
+    },
+    selectCasesByValues(primaryVal: string, secondaryVal?: string) {
+      const dataSet = self.sharedModel?.dataSet;
+      const cases = self.cases;
+      const primaryAttribute = self.primaryAttribute;
+      if (!dataSet || !cases || !primaryAttribute) return;
+      const secondaryAttribute = self.secondaryAttribute;
+      if (!secondaryAttribute && secondaryVal) return;
+      let matchingCases = cases
+        .filter(caseID => displayValue(dataSet.getStrValue(caseID.__id__, primaryAttribute)) === primaryVal);
+      if (secondaryAttribute && secondaryVal) {
+        matchingCases = matchingCases
+          .filter(caseID => displayValue(dataSet.getStrValue(caseID.__id__, secondaryAttribute)) === secondaryVal);
+      }
+      const caseIds = matchingCases.map(caseID => caseID.__id__);
+      dataSet.setSelectedCases(caseIds);
     }
   }))
   .actions(self => ({
