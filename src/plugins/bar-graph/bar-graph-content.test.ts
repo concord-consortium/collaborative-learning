@@ -118,6 +118,28 @@ Object {
     ]);
   });
 
+  it("returns expected array when a case is selected with primary attribute", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
+    content.setPrimaryAttribute("att-s");
+    content.sharedModel?.dataSet.setSelectedCases([content.sharedModel?.dataSet.cases[0].__id__]);
+    expect(content.dataArray).toEqual([
+      { "att-s": "cat", "value": { count: 2, selected: true }},
+      { "att-s": "owl", "value": { count: 2, selected: false }}
+    ]);
+    content.sharedModel?.dataSet.setSelectedCases([content.sharedModel?.dataSet.cases[2].__id__]);
+    expect(content.dataArray).toEqual([
+      { "att-s": "cat", "value": { count: 2, selected: false }},
+      { "att-s": "owl","value": { count: 2, selected: true }}
+    ]);
+    content.sharedModel?.dataSet.selectAllCases();
+    expect(content.dataArray).toEqual([
+      { "att-s": "cat", "value": { count: 2, selected: true }},
+      { "att-s": "owl","value": { count: 2, selected: true }}
+    ]);
+
+  });
+
   it("sets first dataset attribute as the primary attribute by default", () => {
     const content = TestingBarGraphContentModel.create({ });
     content.setSharedModel(sharedSampleDataSet());
@@ -136,6 +158,55 @@ Object {
       { "att-s": "cat", "yard": { count: 2, selected: false }},
       { "att-s": "owl", "yard": { count: 1, selected: false }, "forest": { count: 1, selected: false }}
     ]);
+  });
+
+  it("returns expected array when a case is selected with primary and secondary attributes", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
+    content.setPrimaryAttribute("att-s");
+    content.setSecondaryAttribute("att-l");
+    content.sharedModel?.dataSet.setSelectedCases([content.sharedModel?.dataSet.cases[0].__id__]);
+    expect(content.dataArray).toEqual([
+      { "att-s": "cat", "yard": { count: 2, selected: true }},
+      { "att-s": "owl", "yard": { count: 1, selected: false }, "forest": { count: 1, selected: false }}
+    ]);
+    content.sharedModel?.dataSet.setSelectedCases([content.sharedModel?.dataSet.cases[3].__id__]);
+    expect(content.dataArray).toEqual([
+      { "att-s": "cat", "yard": { count: 2, selected: false }},
+      { "att-s": "owl", "yard": { count: 1, selected: false }, "forest": { count: 1, selected: true }}
+    ]);
+    content.sharedModel?.dataSet.selectAllCases();
+    expect(content.dataArray).toEqual([
+      { "att-s": "cat", "yard": { count: 2, selected: true }},
+      { "att-s": "owl", "yard": { count: 1, selected: true }, "forest": { count: 1, selected: true }}
+    ]);
+  });
+
+  it("selects cases based on primary and secondary attributes", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSharedModel(sharedSampleDataSet());
+    const dataSet = content.sharedModel?.dataSet;
+    expect(dataSet).toBeDefined();
+    content.setPrimaryAttribute("att-s");
+    content.setSecondaryAttribute("att-l");
+
+    content.selectCasesByValues("cat", undefined);
+    expect(dataSet?.selectedCaseIds.map(c => dataSet?.caseIndexFromID(c))).toEqual([0, 1]);
+
+    content.selectCasesByValues("owl", undefined);
+    expect(dataSet?.selectedCaseIds.map(c => dataSet?.caseIndexFromID(c))).toEqual([2, 3]);
+
+    content.selectCasesByValues("cat", "yard");
+    expect(dataSet?.selectedCaseIds.map(c => dataSet?.caseIndexFromID(c))).toEqual([0, 1]);
+
+    content.selectCasesByValues("owl", "yard");
+    expect(dataSet?.selectedCaseIds.map(c => dataSet?.caseIndexFromID(c))).toEqual([2]);
+
+    content.selectCasesByValues("owl", "forest");
+    expect(dataSet?.selectedCaseIds.map(c => dataSet?.caseIndexFromID(c))).toEqual([3]);
+
+    content.selectCasesByValues("cat", "forest");
+    expect(dataSet?.selectedCaseIds.map(c => dataSet?.caseIndexFromID(c))).toEqual([]);
   });
 
   it("fills in missing values with (no value)", () => {

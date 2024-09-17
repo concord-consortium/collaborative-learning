@@ -227,6 +227,7 @@ function BarHighlight({ x, y, width, height }: IBarHighlightProps) {
       width={width + 8}
       height={height + 8}
       fill="#14F49E"
+      className="bar-highlight"
     />
   );
 }
