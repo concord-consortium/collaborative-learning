@@ -154,7 +154,7 @@ context('Bar Graph Tile', function () {
     }
   });
 
-  it('Can link data ', function () {
+  it('Linking data', function () {
     beforeTest();
 
     clueCanvas.addTile('bargraph');
@@ -335,7 +335,7 @@ context('Bar Graph Tile', function () {
     }
   });
 
-  it.only('Synchronizes selection', function () {
+  it('Synchronizing selection', function () {
     beforeTest();
 
     clueCanvas.addTile('bargraph');
