@@ -11,6 +11,10 @@ export class UserContextProvider {
     this.stores = stores;
   }
 
+  /**
+   * This user context is sent to the Firebase functions so they know the context of the
+   * request.
+   */
   get userContext() {
     const appMode = this.stores.appMode;
     const { name: demoName } = this.stores.demo;

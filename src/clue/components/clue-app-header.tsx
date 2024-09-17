@@ -9,7 +9,6 @@ import { ToggleGroup } from "@concord-consortium/react-components";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
 import { CustomSelect } from "./custom-select";
 import { useStores } from "../../hooks/use-stores";
-import { getDevId } from "../../lib/root-id";
 
 // cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
 import styles from "./toggle-buttons.scss";
@@ -30,7 +29,6 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   const getUserTitle = () => {
     switch(appMode){
       case "dev":
-        return `Firebase Root: ${getDevId()}`;
       case "qa":
       case "test":
         return `Firebase UID: ${db.firebase.userId}`;

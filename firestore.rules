@@ -426,7 +426,8 @@ service cloud.firestore {
       allow read, write: if isAuthed();
     }
 
-    // Developers get a random unique key that their data is stored under
+    // In the future, developers might use a random unique key instead of
+    // the firebase user id. So this rule is relaxed inorder to allow that.
     match /dev/{devId}/{restOfPath=**} {
       allow read, write: if isAuthed();
     }

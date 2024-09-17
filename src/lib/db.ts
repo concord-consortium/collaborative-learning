@@ -40,6 +40,7 @@ import { urlParams } from "../utilities/url-params";
 import { firebaseConfig } from "./firebase-config";
 import { UserModelType } from "../models/stores/user";
 import { logExemplarDocumentEvent } from "../models/document/log-exemplar-document-event";
+import { AppMode } from "../models/stores/store-types";
 import { DEBUG_FIRESTORE } from "./debug";
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
@@ -55,7 +56,7 @@ export interface IDBAuthConnectOptions extends IDBBaseConnectOptions {
   rawFirebaseJWT: string;
 }
 export interface IDBNonAuthConnectOptions extends IDBBaseConnectOptions {
-  appMode: "dev" | "test" | "demo" | "qa";
+  appMode: Exclude<AppMode, "authed">;
 }
 export interface UserGroupMap {
   [key: string]: {
