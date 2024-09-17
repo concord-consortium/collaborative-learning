@@ -195,6 +195,39 @@ export const BarGraphContentModel = TileContentModel
         self.setSecondaryAttribute(undefined);
       }
     }
+  }))
+  .actions(self => ({
+    unlinkDataSet() {
+      const smm = getSharedModelManager(self);
+      if (!smm || !smm.isReady) return;
+      const sharedDataSets = smm.getTileSharedModelsByType(self, SharedDataSet);
+      for (const sharedDataSet of sharedDataSets) {
+        smm.removeTileSharedModel(self, sharedDataSet);
+      }
+    },
+
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+      // When new dataset is attached, store its ID and pick a primary attribute to display.
+      const dataSetId = self.sharedModel?.dataSet?.id;
+      if (self.dataSetId !== dataSetId) {
+        self.dataSetId = dataSetId;
+        self.setPrimaryAttribute(undefined);
+        self.setSecondaryAttribute(undefined);
+        if (dataSetId) {
+          const atts = self.sharedModel.dataSet.attributes;
+          if (atts.length > 0) {
+            self.setPrimaryAttribute(atts[0].id);
+          }
+        }
+      }
+      // Check if primary or secondary attribute has been deleted
+      if (self.primaryAttribute && !self.sharedModel?.dataSet.attrFromID(self.primaryAttribute)) {
+        self.setPrimaryAttribute(undefined); // this will also unset secondaryAttribute
+      }
+      if (self.secondaryAttribute && !self.sharedModel?.dataSet.attrFromID(self.secondaryAttribute)) {
+        self.setSecondaryAttribute(undefined);
+      }
+    }
   }));
 
 export interface BarGraphContentModelType extends Instance<typeof BarGraphContentModel> {}

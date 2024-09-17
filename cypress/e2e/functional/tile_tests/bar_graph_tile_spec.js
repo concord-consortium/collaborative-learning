@@ -488,7 +488,6 @@ context('Bar Graph Tile', function () {
       barGraph.getBarHighlight(workspace).should('have.length', 0);
       tableTile.getSelectedRow(workspace).should('have.length', 0); // All "XX / Y" cases
     }
-
   });
 
 });
