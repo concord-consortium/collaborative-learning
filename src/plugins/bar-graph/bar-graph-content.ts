@@ -1,7 +1,7 @@
 import { types, Instance } from "mobx-state-tree";
-import { isNumber } from "lodash";
+import { isObject } from "lodash";
 import { ITileContentModel, TileContentModel } from "../../models/tiles/tile-content";
-import { kBarGraphTileType, kBarGraphContentType } from "./bar-graph-types";
+import { kBarGraphTileType, kBarGraphContentType, BarInfo } from "./bar-graph-types";
 import { getSharedModelManager } from "../../models/tiles/tile-environment";
 import { SharedDataSet, SharedDataSetType } from "../../models/shared/shared-data-set";
 import { clueDataColorInfo } from "../../utilities/color-utils";
@@ -72,30 +72,38 @@ export const BarGraphContentModel = TileContentModel
         return cases.reduce((acc, caseID) => {
           const cat = displayValue(dataSet.getStrValue(caseID.__id__, primary));
           const subCat = displayValue(dataSet.getStrValue(caseID.__id__, secondary));
+          const selected = dataSet.isCaseSelected(caseID.__id__);
           const index = acc.findIndex(r => r[primary] === cat);
           if (index >= 0) {
             const cur = acc[index][subCat];
-            acc[index][subCat] = (isNumber(cur) ? cur : 0) + 1;
+            if (isObject(cur)) {
+              acc[index][subCat] = { count: cur.count + 1, selected: cur.selected || selected };
+            } else {
+              acc[index][subCat] = { count: 1, selected };
+            }
           } else {
-            const newRow = { [primary]: cat, [subCat]: 1 };
+            const newRow = { [primary]: cat, [subCat]: { count: 1, selected } };
             acc.push(newRow);
           }
           return acc;
-        }, [] as { [key: string]: number | string }[]);
+        }, [] as { [key: string]: BarInfo | string }[]);
       } else {
         // One-dimensional data
         return cases.reduce((acc, caseID) => {
           const cat = displayValue(dataSet.getStrValue(caseID.__id__, primary));
+          const selected = dataSet.isCaseSelected(caseID.__id__);
           const index = acc.findIndex(r => r[primary] === cat);
           if (index >= 0) {
             const cur = acc[index].value;
-            acc[index].value = isNumber(cur) ? cur + 1 : 1;
+            if (isObject(cur)) {
+              acc[index].value = { count: cur.count + 1, selected: cur.selected || selected };
+            }
           } else {
-            const newRow = { [primary]: cat, value: 1 };
+            const newRow = { [primary]: cat, value: { count: 1, selected } };
             acc.push(newRow);
           }
           return acc;
-        }, [] as { [key: string]: number | string }[]);
+        }, [] as { [key: string]: BarInfo | string }[]);
       }
     }
   }))
@@ -106,13 +114,14 @@ export const BarGraphContentModel = TileContentModel
       return self.dataArray.map(d => d[primary] as string);
     },
     get secondaryKeys() {
-      const primary = self.primaryAttribute;
-      if (!primary) return [];
-      return Array.from(new Set(self.dataArray.flatMap(d => Object.keys(d)).filter(k => k !== primary)));
+      const dataSet = self.sharedModel?.dataSet;
+      const secondary = self.secondaryAttribute;
+      if (!secondary || !dataSet || !self.cases) return [];
+      return Array.from(new Set(self.cases.map(caseID => displayValue(dataSet.getStrValue(caseID.__id__, secondary)))));
     },
     get maxDataValue(): number {
       return self.dataArray.reduce((acc, row) => {
-        const rowValues = Object.values(row).filter(v => isNumber(v)) as number[];
+        const rowValues = Object.values(row).map(v => isObject(v) ? v.count : 0);
         const maxInRow = Math.max(...rowValues);
         return Math.max(maxInRow, acc);
       }, 0);

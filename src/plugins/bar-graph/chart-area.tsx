@@ -5,10 +5,12 @@ import { GridRows } from "@visx/grid";
 import { Group } from "@visx/group";
 import { scaleBand, scaleLinear } from "@visx/scale";
 import { Bar, BarGroup } from "@visx/shape";
+import { PositionScale } from "@visx/shape/lib/types";
 import { useBarGraphModelContext } from "./bar-graph-content-context";
 import { CategoryPulldown } from "./category-pulldown";
 import EditableAxisLabel from "./editable-axis-label";
 import { logBarGraphEvent, roundTo5 } from "./bar-graph-utils";
+import { BarInfo } from "./bar-graph-types";
 
 const margin = {
   top: 7,
@@ -96,16 +98,13 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
       <Group>
         {data.map((d) => {
           const key = d[primary] as string;
-          const val = d.value as number;
+          const info = d.value as BarInfo;
+          const x = primaryScale(key) || 0;
+          const y = countScale(info.count);
+          const w = primaryScale.bandwidth();
+          const h = yMax - countScale(info.count);
           return (
-            <Bar
-              key={key}
-              x={primaryScale(key) || 0}
-              y={countScale(val)}
-              width={primaryScale.bandwidth()}
-              height={yMax - countScale(val)}
-              fill={color}
-            />
+            <BarWithHighlight key={key} x={x} y={y} width={w} height={h} color={color} selected={info.selected} />
           );
         })}
       </Group>
@@ -122,21 +121,25 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
         x0={(d) => d[primary] as string}
         x0Scale={primaryScale}
         x1Scale={secondaryScale}
-        yScale={countScale}
+        yScale={((info: BarInfo) => countScale(info?.count||0)) as PositionScale}
       >
         {(barGroups) =>
           <Group className="visx-bar-group">
             {barGroups.map((barGroup) => (
-              <Group key={`bar-group-${barGroup.index}-${barGroup.x0}`} left={barGroup.x0}>
+              <Group key={`bar-group-${barGroup.index}`} left={barGroup.x0}>
                 {barGroup.bars.map((bar) => {
                   if (!bar.value) return null;
-                  return <Bar
-                    key={`bar-group-bar-${barGroup.index}-${bar.index}-${bar.value}-${bar.key}`}
+                  // BarGroup really expects the values to be pure numeric, but we're using objects.
+                  // Alternatively, we could drop BarGroup and build the bars manually.
+                  const val = bar.value as unknown as BarInfo;
+                  return <BarWithHighlight
+                    key={`bar-group-bar-${barGroup.index}-${bar.index}`}
                     x={bar.x}
                     y={bar.y}
                     width={bar.width}
                     height={bar.height}
-                    fill={bar.color}
+                    color={bar.color}
+                    selected={val.selected}
                   />;
                 })}
               </Group>
@@ -192,3 +195,40 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
     </svg>
   );
 });
+
+interface IBarHighlightProps {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+function BarHighlight({ x, y, width, height }: IBarHighlightProps) {
+  return(
+    <rect
+      x={x - 4}
+      y={y - 4}
+      width={width + 8}
+      height={height + 8}
+      fill="#14F49E"
+    />
+  );
+}
+
+interface IBarWithHighlightProps {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+  selected: boolean;
+}
+
+function BarWithHighlight({ x, y, width, height, color, selected }: IBarWithHighlightProps) {
+  return (
+    <Group>
+      {selected && <BarHighlight x={x} y={y} width={width} height={height} />}
+      <Bar x={x} y={y} width={width} height={height} fill={color} />
+    </Group>
+  );
+}
