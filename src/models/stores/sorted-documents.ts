@@ -201,10 +201,18 @@ export class SortedDocuments {
       typecheck(DocumentMetadataModel, data);
       const exemplarMetadata = this.exemplarMetadataDocs.get(data.key);
       if (exemplarMetadata) {
+        // If this metadata doc in Firestore is an exemplar in the same unit then the exemplar
+        // metadata will be found. This will happen when a teacher comments on a exemplar.
+        // So in this case we need to merge the strategies from the exemplar with the strategies from
+        // the teacher's comments.
         const authoredStrategies = exemplarMetadata.strategies || [];
         const userStrategies = data.strategies || [];
         data.strategies = union(authoredStrategies, userStrategies);
-        data.tools = exemplarMetadata.tools;
+        // We also update the tools incase the author has changed the exemplar content after
+        // the teacher commented on the document.
+        // We need a copy of the tools so the same array isn't attached to two MST trees at
+        // the same time.
+        data.tools = [...exemplarMetadata.tools];
       }
     });
     return mstSnapshot;
