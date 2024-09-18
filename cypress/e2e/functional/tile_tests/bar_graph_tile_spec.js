@@ -154,7 +154,7 @@ context('Bar Graph Tile', function () {
     }
   });
 
-  it('Can link data ', function () {
+  it('Linking data', function () {
     beforeTest();
 
     clueCanvas.addTile('bargraph');
@@ -332,6 +332,161 @@ context('Bar Graph Tile', function () {
     for (const workspace of workspaces) {
       barGraph.getXAxisPulldown(workspace).should('have.text', 'Categories');
       barGraph.getBar(workspace).should('not.exist');
+    }
+  });
+
+  it('Synchronizing selection', function () {
+    beforeTest();
+
+    clueCanvas.addTile('bargraph');
+
+    // Table dataset for testing:
+    // 4 instances of X / Y / Z
+    // 2 instances of XX / Y / Z
+    // 1 instance of X / YY / Z
+    clueCanvas.addTile('table');
+    tableTile.fillTable(tableTile.getTableTile(), [
+      ['X', 'Y', 'Z'],
+      ['XX', 'Y', 'Z'],
+      ['X', 'YY', 'Z'],
+      ['X', 'Y', 'Z'],
+      ['XX', 'Y', 'Z'],
+      ['X', 'Y', 'Z'],
+      ['X', 'Y', 'Z'],
+    ]);
+
+    barGraph.getTile().click();
+    clueCanvas.clickToolbarButton('bargraph', 'link-tile');
+    cy.get('select').select('Table Data 1');
+    cy.get('.modal-button').contains("Graph It!").click();
+
+    cy.log("Check synchronization of case selection with one attribute");
+
+    // Selecting cases in the table should highlight the corresponding bars in the bar graph
+    tableTile.getSelectedRow(workspaces[0]).should('have.length', 0);
+    for (const workspace of workspaces) {
+      barGraph.getBarHighlight(workspace).should('have.length', 0);
+    }
+    tableTile.getTableIndexColumnCell().eq(0).click(); // first X Y Z case, X bar selected
+    tableTile.getSelectedRow(workspaces[0]).should('have.length', 1);
+    barGraph.getBarHighlight(workspaces[0]).should('have.length', 1);
+    barGraph.getBarHighlight(workspaces[1]).should('have.length', 1);
+    // Selection is local, volatile state, so remote workspace should not be affected
+    barGraph.getBarHighlight(workspaces[2]).should('have.length', 0);
+    tableTile.getTableIndexColumnCell().eq(1).click({shiftKey: true}); // first XX Y Z case, X and XX bars selected
+    for (const workspace of workspaces.slice(0, 2)) {
+      barGraph.getBarHighlight(workspace).should('have.length', 2);
+    }
+    tableTile.getTableIndexColumnCell().eq(2).click({shiftKey: true}); // first X YY Z case, X and XX bars selected
+    for (const workspace of workspaces.slice(0, 2)) {
+      barGraph.getBarHighlight(workspace).should('have.length', 2);
+    }
+    tableTile.getTableIndexColumnCell().eq(0).click({shiftKey: true});
+    for (const workspace of workspaces.slice(0, 2)) {
+      barGraph.getBarHighlight(workspace).should('have.length', 2);
+    }
+    tableTile.getTableIndexColumnCell().eq(1).click({shiftKey: true});
+    for (const workspace of workspaces.slice(0, 2)) {
+      barGraph.getBarHighlight(workspace).should('have.length', 1);
+    }
+    tableTile.getTableIndexColumnCell().eq(2).click({shiftKey: true});
+    for (const workspace of workspaces.slice(0, 2)) {
+      barGraph.getBarHighlight(workspace).should('have.length', 0);
+    }
+
+    // Clicking on bars should select the corresponding cases in the table
+    tableTile.getSelectedRow(workspaces[0]).should('have.length', 0);
+    barGraph.getBar().eq(0).click();
+    for (const workspace of workspaces.slice(0, 2)) {
+      tableTile.getSelectedRow(workspace).should('have.length', 5); // All "X" cases
+    }
+    barGraph.getBar().eq(1).click();
+    for (const workspace of workspaces.slice(0, 2)) {
+      tableTile.getSelectedRow(workspace).should('have.length', 2); // All "XX" cases
+    }
+    // Unselect the two selected cases, which should be numbers 1 and 4
+    tableTile.getTableIndexColumnCell().eq(1).click({shiftKey: true});
+    tableTile.getTableIndexColumnCell().eq(4).click({shiftKey: true});
+    tableTile.getSelectedRow(workspaces[0]).should('have.length', 0);
+
+    cy.log("Check synchronization of case selection with two attributes");
+    barGraph.getSortByMenuButton().click();
+    barGraph.getChakraMenuItem().should('have.length', 3);
+    barGraph.getChakraMenuItem().eq(1).should('have.text', 'y').click();
+    barGraph.getBar().should("have.length", 3);
+
+    tableTile.getTableIndexColumnCell().eq(0).click(); // first X Y Z case, X Y bar selected
+    tableTile.getSelectedRow(workspaces[0]).should('have.length', 1);
+    barGraph.getBarHighlight(workspaces[0]).should('have.length', 1);
+    barGraph.getBarHighlight(workspaces[1]).should('have.length', 1);
+    // Selection is local, volatile state, so remote workspace should not be affected
+    barGraph.getBarHighlight(workspaces[2]).should('have.length', 0);
+
+    tableTile.getTableIndexColumnCell().eq(1).click({shiftKey: true}); // first XX Y Z case, X Y and XX Y bars selected
+    for (const workspace of workspaces.slice(0, 2)) {
+      barGraph.getBarHighlight(workspace).should('have.length', 2);
+    }
+    tableTile.getTableIndexColumnCell().eq(2).click({shiftKey: true}); // first X YY Z case, X Y, XX Y, and X YY bars selected
+    for (const workspace of workspaces.slice(0, 2)) {
+      barGraph.getBarHighlight(workspace).should('have.length', 3);
+    }
+    tableTile.getTableIndexColumnCell().eq(0).click({shiftKey: true});
+    for (const workspace of workspaces.slice(0, 2)) {
+      barGraph.getBarHighlight(workspace).should('have.length', 2);
+    }
+    tableTile.getTableIndexColumnCell().eq(1).click({shiftKey: true});
+    for (const workspace of workspaces.slice(0, 2)) {
+      barGraph.getBarHighlight(workspace).should('have.length', 1);
+    }
+    tableTile.getTableIndexColumnCell().eq(2).click({shiftKey: true});
+    for (const workspace of workspaces.slice(0, 2)) {
+      barGraph.getBarHighlight(workspace).should('have.length', 0);
+    }
+
+    // Clicking on bars should select the corresponding cases in the table
+    barGraph.getBar().eq(0).click();
+    for (const workspace of workspaces.slice(0, 2)) {
+      tableTile.getSelectedRow(workspace).should('have.length', 4); // All "X / Y" cases
+    }
+    barGraph.getBar().eq(1).click();
+    for (const workspace of workspaces.slice(0, 2)) {
+      tableTile.getSelectedRow(workspace).should('have.length', 1); // All "X / YY" cases
+    }
+    barGraph.getBar().eq(2).click();
+    for (const workspace of workspaces.slice(0, 2)) {
+      tableTile.getSelectedRow(workspace).should('have.length', 2); // All "XX / Y" cases
+    }
+
+    // Clicking bars in local read-only view also works and changes the main view, but not the remote view.
+    barGraph.getBar(workspaces[1]).eq(0).click();
+    for (const workspace of workspaces.slice(0, 2)) {
+      barGraph.getBarHighlight(workspace).should('have.length', 1);
+      tableTile.getSelectedRow(workspace).should('have.length', 4); // All "X / Y" cases
+    }
+    barGraph.getBar(workspaces[1]).eq(1).click();
+    for (const workspace of workspaces.slice(0, 2)) {
+      barGraph.getBarHighlight(workspace).should('have.length', 1);
+      tableTile.getSelectedRow(workspace).should('have.length', 1); // All "X / YY" cases
+    }
+    barGraph.getBar(workspaces[1]).eq(2).click();
+    for (const workspace of workspaces.slice(0, 2)) {
+      barGraph.getBarHighlight(workspace).should('have.length', 1);
+      tableTile.getSelectedRow(workspace).should('have.length', 2); // All "XX / Y" cases
+    }
+    // Unselect the two remaining selected cases
+    tableTile.getTableIndexColumnCell().eq(1).click({shiftKey: true});
+    tableTile.getTableIndexColumnCell().eq(4).click({shiftKey: true});
+    tableTile.getSelectedRow(workspaces[0]).should('have.length', 0);
+
+    // Clicking bars in remote read-only view does not change the main view, but does change itself.
+    barGraph.getBarHighlight(workspaces[2]).should('have.length', 0);
+    tableTile.getSelectedRow(workspaces[2]).should('have.length', 0);
+    barGraph.getBar(workspaces[2]).eq(0).click();
+    barGraph.getBarHighlight(workspaces[2]).should('have.length', 1);
+    tableTile.getSelectedRow(workspaces[2]).should('have.length', 4); // All "X / Y" cases
+    for (const workspace of workspaces.slice(0, 2)) {
+      barGraph.getBarHighlight(workspace).should('have.length', 0);
+      tableTile.getSelectedRow(workspace).should('have.length', 0); // All "XX / Y" cases
     }
   });
 

@@ -41,6 +41,9 @@ class TableToolTile{
     getTableRow(){
       return cy.get('.canvas .rdg-row');
     }
+    getSelectedRow(workspaceClass) {
+      return cy.get(`${wsclass(workspaceClass)} .canvas .rdg-row.highlighted`);
+    }
     getColumnHeaderText(i){
       return cy.get('.column-header-cell .editable-header-cell .header-name').text();
     }

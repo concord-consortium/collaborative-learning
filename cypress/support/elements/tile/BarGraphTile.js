@@ -56,6 +56,10 @@ class BarGraphTile {
     return this.getChartArea(workspaceClass, tileIndex).find(`.visx-bar`);
   }
 
+  getBarHighlight(workspaceClass, tileIndex = 0) {
+    return this.getChartArea(workspaceClass, tileIndex).find(`.bar-highlight`);
+  }
+
   getLegendArea(workspaceClass, tileIndex = 0) {
     return this.getTile(workspaceClass, tileIndex).find(`.bar-graph-legend`);
   }

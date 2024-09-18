@@ -37,9 +37,10 @@ export function updateBarGraphContentWithNewSharedModelIds(
 }
 
 // Define types here to document all possible values that this tile logs
-type LoggableOperation = "setPrimaryAttribute" | "setSecondaryAttribute" | "setYAxisLabel";
+type LoggableOperation = "setPrimaryAttribute" | "setSecondaryAttribute" | "setYAxisLabel" | "selectCases";
 type LoggableChange = {
-  attributeId?: string;
+  attributeId?: string | string[];
+  attributeValue?: string | string[];
   text?: string;
 };
 
