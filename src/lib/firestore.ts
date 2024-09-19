@@ -1,6 +1,7 @@
 import firebase from "firebase/app";
 import "firebase/firestore";
 import { DB } from "./db";
+import { getRootId } from "./root-id";
 import { escapeKey } from "./fire-utils";
 import { UserDocument } from "./firestore-schema";
 
@@ -40,25 +41,8 @@ export class Firestore {
   //
 
   public getRootFolder() {
-    const { appMode, demo: { name: demoName }, user: { portal } } = this.db.stores;
-    let rootDocId: string;
-    const escapedPortal = portal ? escapeKey(portal) : portal;
-
-    // `authed/${escapedPortalDomain}`
-    if (appMode === "authed") {
-      rootDocId = escapedPortal;
-    }
-    // `demo/${escapedDemoName}`
-    else if ((appMode === "demo") && (demoName?.length > 0)) {
-      const escapedDemoName = demoName ? escapeKey(demoName) : demoName;
-      rootDocId = escapedDemoName || escapedPortal || "demo";
-    }
-    // `${appMode}/${userId}`
-    else {  // (appMode === "dev") || (appMode === "test") || (appMode === "qa")
-      rootDocId = this.userId;
-    }
-
-    return `/${appMode}/${rootDocId}/`;
+    const { appMode } = this.db.stores;
+    return `/${appMode}/${getRootId(this.db.stores, this.userId)}/`;
   }
 
   public getFullPath(path = "") {

@@ -8,6 +8,7 @@ import { DB } from "./db";
 import { escapeKey } from "./fire-utils";
 import { urlParams } from "../utilities/url-params";
 import { DocumentModelType } from "src/models/document/document";
+import { getRootId } from "./root-id";
 
 // Set this during database testing in combination with the urlParam testMigration=true to
 // override the top-level Firebase key regardless of mode. For example, setting this to "authed-copy"
@@ -65,21 +66,15 @@ export class Firebase {
     // dev: /dev/<firebaseUserId>/portals/localhost <as portalDomain>
     // qa: /qa/<firebaseUserId>/portals/qa <as portalDomain>
     // test: /test/<firebaseUserId>/portals/<arbitraryString as portalDomain>
-    const { appMode, demo: { name: demoName }, user } = this.db.stores;
+    const { appMode, user } = this.db.stores;
 
     const parts = [];
     if (urlParams.testMigration === "true" && FIREBASE_ROOT_OVERRIDE) {
       parts.push(FIREBASE_ROOT_OVERRIDE);
     } else {
       parts.push(`${appMode}`);
-      if ((appMode === "dev") || (appMode === "test") || (appMode === "qa")) {
-        parts.push(this.userId);
-      }
-      else if (appMode === "demo") {
-        const slug = demoName && demoName.length > 0 ? escapeKey(demoName) : "";
-        if (slug.length > 0) {
-          parts.push(slug);
-        }
+      if (appMode !== "authed") {
+        parts.push(getRootId(this.db.stores, this.userId));
       }
     }
     parts.push("portals");

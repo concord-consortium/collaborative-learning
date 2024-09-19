@@ -30,7 +30,7 @@ export interface IOpenDocumentsGroupMetadata {
   secondaryLabel?: string;
 }
 
-export const SortedSection: React.FC<IProps> = observer(function SortedDocuments(props: IProps) {
+export const SortedSection: React.FC<IProps> = observer(function SortedSection(props: IProps) {
   const { docFilter, documentGroup, idx, secondarySort } = props;
   const { persistentUI, sortedDocuments } = useStores();
   const [showDocuments, setShowDocuments] = useState(false);
@@ -65,7 +65,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedDocuments
 
   const renderUngroupedDocument = (doc: IDocumentMetadata) => {
     const fullDocument = getDocument(doc.key);
-    if (!fullDocument) return <div className="loading-spinner"/>;
+    if (!fullDocument) return <div key={doc.key} className="loading-spinner"/>;
 
     return <DecoratedDocumentThumbnailItem
              key={doc.key}

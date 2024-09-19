@@ -4,10 +4,10 @@ function wsclass(workspaceClass) {
 
 class TableToolTile{
     getTableTile(workspaceClass) {
-        return cy.get(`${wsclass(workspaceClass)} .canvas-area .table-tool`);
+        return cy.get(`${wsclass(workspaceClass)} .canvas .table-tool`);
     }
     getTableTitle(workspaceClass){
-      return cy.get(`${wsclass(workspaceClass)} .canvas-area .table-title`);
+      return cy.get(`${wsclass(workspaceClass)} .canvas .table-title`);
     }
     getAddColumnButton(){
       return cy.get('.add-column-button');
@@ -39,7 +39,10 @@ class TableToolTile{
       this.getRemoveRowButton().click();
     }
     getTableRow(){
-      return cy.get('.canvas-area .rdg-row');
+      return cy.get('.canvas .rdg-row');
+    }
+    getSelectedRow(workspaceClass) {
+      return cy.get(`${wsclass(workspaceClass)} .canvas .rdg-row.highlighted`);
     }
     getColumnHeaderText(i){
       return cy.get('.column-header-cell .editable-header-cell .header-name').text();
@@ -89,8 +92,28 @@ class TableToolTile{
         this.getTableCell().eq(cell).type(num+'{enter}');
     }
     getTableIndexColumnCell(){
-        return cy.get('.canvas-area .rdg-cell.index-column');
+        return this.getTableTile().find('.rdg-cell.index-column');
     }
+    // Fill in a table tile with the given data (a list of lists)
+    // Table tile should in the default state (2 columns, no rows)
+    fillTable($tile, data) {
+      // at least two cols, or as many as the longest row in the data array
+      const cols = Math.max(2, ...data.map(row => row.length));
+      $tile.within((tile) => {
+        // tile will start with two columns; make more if desired
+        for (let i=2; i<cols; i++) {
+          this.getAddColumnButton().click();
+        }
+        for (let i=0; i<data.length; i++) {
+          for (let j=0; j<data[i].length; j++) {
+            const cellContent = data[i][j];
+            this.typeInTableCellXY(i, j, cellContent);
+            this.getTableCellXY(i, j).should('contain', cellContent);
+          }
+        }
+      });
+    }
+
     getLinkGraphButton(){
       return cy.get('.link-tile-button');
     }

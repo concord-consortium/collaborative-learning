@@ -56,7 +56,34 @@ describe("Firestore class", () => {
     it("should create a valid Firestore object", () => {
       const firestore = new Firestore(mockDB);
       expect(firestore).toBeDefined();
+    });
+  });
+
+  describe("getRootFolder", () => {
+    beforeEach(() => resetMocks());
+    it("should handle the authed appMode", () => {
+      const firestore = new Firestore(mockDB);
       expect(firestore.getRootFolder()).toBe("/authed/test-portal/");
+    });
+    describe("should handle the demo appMode", () => {
+      it("handles basic demo name", () => {
+        const stores = {...mockStores,
+          appMode: "demo", demo: { name: "test-demo" }};
+        const firestore = new Firestore({stores} as DB);
+        expect(firestore.getRootFolder()).toBe("/demo/test-demo/");
+      });
+      it("handles empty demo name", () => {
+        const stores = {...mockStores,
+          appMode: "demo", demo: { name: "" }};
+        const firestore = new Firestore({stores} as DB);
+        expect(firestore.getRootFolder()).toBe("/demo/test-portal/");
+      });
+      it("handles empty demo name and empty portal", () => {
+        const stores = {...mockStores,
+          appMode: "demo", demo: { name: "" }, user: { portal: ""}};
+        const firestore = new Firestore({stores} as DB);
+        expect(firestore.getRootFolder()).toBe("/demo/demo/");
+      });
     });
   });
 

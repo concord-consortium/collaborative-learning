@@ -139,6 +139,11 @@ export const usePostDocumentComment = (options?: PostDocumentCommentUseMutationO
         // FIXME: provide access to remoteContext here so we can update strategies on remote
         // documents. Alternatively move this into a firebase function instead of doing this
         // in the client.
+        // FIXME: in the case of exemplar documents, the metadata document won't exist
+        // until this mutation happens. That probably means metadataQuery.get() below
+        // will run before the document has been created so it will return an empty array of
+        // docs. This is another reason the firebase function approach to keep the strategies
+        // updated is a better way to go
         const metadataQuery = firestore.collection("documents")
           .where("key", "==", documentKey)
           .where("context_id", "==", context.classHash);
