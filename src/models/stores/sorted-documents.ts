@@ -340,23 +340,26 @@ export class SortedDocuments {
     const metadataDoc = this.firestoreMetadataDocs.find(doc => doc.key === docKey);
     if (!metadataDoc) return;
 
-    const unit = metadataDoc?.unit ?? undefined;
     const visibility = metadataDoc?.visibility === "public" || metadataDoc?.visibility === "private"
                          ? metadataDoc?.visibility as "public" | "private"
                          : undefined;
     const props = {
-      documentKey: metadataDoc?.key,
-      type: metadataDoc?.type as any,
-      title: metadataDoc?.title || undefined,
-      properties: metadataDoc?.properties.toJSON(),
-      userId: metadataDoc?.uid,
+      documentKey: metadataDoc.key,
+      type: metadataDoc.type as any,
+      properties: metadataDoc.properties.toJSON(),
+      userId: metadataDoc.uid,
       groupId: undefined,
       visibility,
       originDoc: undefined,
       pubVersion: undefined,
-      problem: metadataDoc?.problem || undefined,
-      investigation: metadataDoc?.investigation || undefined,
-      unit,
+
+      // The following props are sometimes null in Firestore on the metadata docs.
+      // For consistency we make them undefined which is what openDocument
+      // expects.
+      title: metadataDoc.title ?? undefined,
+      problem: metadataDoc.problem ?? undefined,
+      investigation: metadataDoc.investigation ?? undefined,
+      unit: metadataDoc.unit ?? undefined,
     };
 
     return  this.db.openDocument(props);

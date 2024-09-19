@@ -1,15 +1,16 @@
 import { observable } from "mobx";
+import { mock } from "ts-jest-mocker";
+import { DeepPartial } from "utility-types";
+import { SnapshotIn } from "mobx-state-tree";
+
 import { createDocumentModel, DocumentModelSnapshotType, DocumentModelType } from "../document/document";
 import { DocumentContentSnapshotType } from "../document/document-content";
 import { ProblemDocument } from '../document/document-types';
 import { ClassModel, ClassModelType, ClassUserModel } from "./class";
 import { GroupModel, GroupsModel, GroupsModelType, GroupUserModel } from "./groups";
-import { DeepPartial } from "utility-types";
 import { ISortedDocumentsStores, MetadataDocMapModel, SortedDocuments } from "./sorted-documents";
 import { DB } from "../../lib/db";
-import { mock } from "ts-jest-mocker";
 import { Bookmark, Bookmarks } from "./bookmarks";
-import { SnapshotIn } from "mobx-state-tree";
 
 
 //****************************************** Documents Mock ***************************************
