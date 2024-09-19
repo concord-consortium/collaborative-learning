@@ -427,7 +427,7 @@ service cloud.firestore {
     }
 
     // In the future, developers might use a random unique key instead of
-    // the firebase user id. So this rule is relaxed inorder to allow that.
+    // the firebase user id. So this rule is relaxed in order to allow that.
     match /dev/{devId}/{restOfPath=**} {
       allow read, write: if isAuthed();
     }
