@@ -17,7 +17,6 @@ import ToggleControl from "../utilities/toggle-control";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { DocumentAnnotationToolbar } from "./document-annotation-toolbar";
-import { PrimarySortType } from "../../models/stores/ui-types";
 
 import "./document.scss";
 
@@ -282,12 +281,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private openDocument(key: string) {
-    const primarySortBy = this.stores.persistentUI.primarySortBy as PrimarySortType;
-    const sortedDocumentGroups = this.stores.sortedDocuments.sortBy(primarySortBy);
-    const openGroup = sortedDocumentGroups.find(group => group.documents.some((d) => d.key === key));
-    const doc = this.stores.documents.getDocument(key);
+    const { documents, persistentUI, sortedDocuments, user } = this.stores;
+    const doc = documents.getDocument(key);
     if (doc) {
-      this.stores.persistentUI.openResourceDocument(doc, this.stores.user, openGroup?.label);
+      persistentUI.openResourceDocument(doc, user, sortedDocuments);
       logDocumentViewEvent(doc);
     }
   }

@@ -36,23 +36,26 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   };
 
   const handlePrimarySortBySelection = (sort: string) => {
-    const sortType = normalizeSortString(sort);
-    persistentUI.setPrimarySortBy(sortType);
-    if (sortType === secondarySortBy) {
+    persistentUI.setPrimarySortBy(sort);
+    if (sort === secondarySortBy) {
       persistentUI.setSecondarySortBy("None");
     }
   };
 
   const primarySortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
+    dataTest: normalizeSortString(option).toLowerCase(),
     disabled: false,
-    selected: option === primarySortBy,
+    id: normalizeSortString(option),
+    selected: normalizeSortString(option) === primarySortBy,
     text: option,
-    onClick: () => handlePrimarySortBySelection(option)
+    onClick: () => handlePrimarySortBySelection(normalizeSortString(option))
   }));
 
   const secondarySortOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
+    dataTest: normalizeSortString(option).toLowerCase(),
     disabled: option === primarySortBy,
-    selected: option === secondarySortBy,
+    id: normalizeSortString(option),
+    selected: normalizeSortString(option) === secondarySortBy,
     text: option,
     onClick: () => persistentUI.setSecondarySortBy(normalizeSortString(option))
   }));
@@ -116,9 +119,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
               key={`sort-work-header-${primarySortBy}`}
               docFilter={docFilter}
               docFilterItems={docFilterOptions}
-              primarySort={primarySortBy}
               primarySortItems={primarySortByOptions}
-              secondarySort={secondarySortBy}
               secondarySortItems={secondarySortOptions}
             />
             <div key={primarySortBy} className="tab-panel-documents-section">

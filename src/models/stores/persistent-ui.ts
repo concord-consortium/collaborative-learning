@@ -3,7 +3,8 @@ import { getSnapshot, applySnapshot, types,
 } from "mobx-state-tree";
 import { AppConfigModelType } from "./app-config-model";
 import { DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax,
-         kDividerMin } from "./ui-types";
+         kDividerMin,
+         PrimarySortType} from "./ui-types";
 import { isWorkspaceModelSnapshot, WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ENavTab } from "../view/nav-tabs";
@@ -16,6 +17,7 @@ import { DB } from "../../lib/db";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { urlParams } from "../../utilities/url-params";
 import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
+import { SortedDocuments } from "./sorted-documents";
 
 export const kPersistentUiStateVersion = "1.0.0";
 
@@ -214,7 +216,7 @@ export const PersistentUIModel = types
      *
      * @param doc a non curriculum document
      */
-    openResourceDocument(doc: DocumentModelType, user?: UserModelType, docGroupLabel?: string) {
+    openResourceDocument(doc: DocumentModelType, user?: UserModelType, sortedDocuments?: SortedDocuments) {
       const navTab = getNavTabOfDocument(doc, user)  || "";
       let subTab = "";
       if (navTab === ENavTab.kClassWork) {
@@ -240,7 +242,18 @@ export const PersistentUIModel = types
         }
       }
       if (navTab === ENavTab.kSortWork) {
-        subTab = JSON.stringify({"primaryLabel": docGroupLabel, "primaryType": self.primarySortBy});
+        if (doc.type === ExemplarDocument) {
+          const sortedDocumentGroups = sortedDocuments?.sortBy("Strategy");
+          const openGroup = sortedDocumentGroups?.find(group => group.documents.some((d) => d.key === doc.key));
+          subTab = JSON.stringify({primaryLabel: openGroup?.label, "primaryType": "Strategy"});
+          self.setPrimarySortBy("Strategy");
+          self.setSecondarySortBy("None");
+        } else {
+          const primarySortBy = self.primarySortBy as PrimarySortType;
+          const sortedDocumentGroups = sortedDocuments?.sortBy(primarySortBy);
+          const openGroup = sortedDocumentGroups?.find(group => group.documents.some((d) => d.key === doc.key));
+          subTab = JSON.stringify({"primaryLabel": openGroup?.label, "primaryType": self.primarySortBy});
+        }
       }
 
       if (!subTab) {
