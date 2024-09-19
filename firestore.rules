@@ -426,10 +426,10 @@ service cloud.firestore {
       allow read, write: if isAuthed();
     }
 
-    match /dev/{userId}/{restOfPath=**} {
-      allow read: if isAuthed();
-      // users can only write to their own folders
-      allow write: if matchFirebaseUserId(userId);
+    // In the future, developers might use a random unique key instead of
+    // the firebase user id. So this rule is relaxed in order to allow that.
+    match /dev/{devId}/{restOfPath=**} {
+      allow read, write: if isAuthed();
     }
 
     match /qa/{userId}/{restOfPath=**} {
