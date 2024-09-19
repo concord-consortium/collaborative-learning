@@ -43,18 +43,16 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   };
 
   const primarySortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
-    dataTest: normalizeSortString(option).toLowerCase(),
     disabled: false,
-    id: normalizeSortString(option),
+    id: normalizeSortString(option).toLowerCase(),
     selected: normalizeSortString(option) === primarySortBy,
     text: option,
     onClick: () => handlePrimarySortBySelection(normalizeSortString(option))
   }));
 
   const secondarySortOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
-    dataTest: normalizeSortString(option).toLowerCase(),
     disabled: option === primarySortBy,
-    id: normalizeSortString(option),
+    id: normalizeSortString(option).toLowerCase(),
     selected: normalizeSortString(option) === secondarySortBy,
     text: option,
     onClick: () => persistentUI.setSecondarySortBy(normalizeSortString(option))

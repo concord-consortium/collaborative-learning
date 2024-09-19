@@ -9,7 +9,7 @@ class SortedWork {
     return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-group"]');
   }
   getPrimarySortByTagOption(){
-    return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-identify-design approach"]');
+    return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-strategy"]');
   }
   getPrimarySortByBookmarkedOption(){
     return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-bookmarked"]');
@@ -43,7 +43,7 @@ class SortedWork {
     return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-group"]');
   }
   getSecondarySortByTagOption(){
-    return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-identify-design approach"]');
+    return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-strategy"]');
   }
   getSecondarySortByBookmarkedOption(){
     return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-bookmarked"]');
