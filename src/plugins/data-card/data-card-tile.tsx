@@ -50,10 +50,11 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const cardOf = `Card ${content.caseIndexNumber + 1 } of `;
 
   // When a highlighted case or cell is set, show it
-  const selectedCaseId = dataSet.firstSelectedCaseId ? dataSet.firstSelectedCaseId : dataSet.firstSelectedCell?.caseId;
+  const selectedCaseId = dataSet.firstSelectedCaseId !== undefined
+    ? dataSet.firstSelectedCaseId : dataSet.firstSelectedCell?.caseId;
   useEffect(() => {
     if (content.caseIndex === undefined) return;
-    if (selectedCaseId && dataSet.caseIndexFromID(selectedCaseId) !== content.caseIndex) {
+    if (selectedCaseId !== undefined && dataSet.caseIndexFromID(selectedCaseId) !== content.caseIndex) {
       content.setCaseIndex(dataSet.caseIndexFromID(selectedCaseId));
     }
   }, [content, dataSet, selectedCaseId]);

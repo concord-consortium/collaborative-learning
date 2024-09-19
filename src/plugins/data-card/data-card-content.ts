@@ -135,7 +135,7 @@ export const DataCardContentModel = TileContentModel
   }))
   .views(self => ({
     get caseId() {
-      return self.caseIndex ? self.dataSet.caseIDFromIndex(self.caseIndex) : undefined;
+      return self.caseIndex !== undefined ? self.dataSet.caseIDFromIndex(self.caseIndex) : undefined;
     }
   }))
   .views(self => ({
@@ -260,13 +260,16 @@ export const DataCardContentModel = TileContentModel
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       const dataSet = self.dataSet;
       if (!dataSet) return;
-      // Select the card of the first selected case
-      const selectedCaseId = dataSet.firstSelectedCaseId
-        ? dataSet.firstSelectedCaseId : dataSet.firstSelectedCell?.caseId;
-      if (selectedCaseId && dataSet.caseIndexFromID(selectedCaseId) !== self.caseIndex) {
-        self.setCaseIndex(dataSet.caseIndexFromID(selectedCaseId));
-      } else if (self.caseIndex === undefined) {
-        self.setCaseIndex(0);
+      // At initialization, caseIndex will be undefined.
+      // Set it to the first selected case, or the first card if there's no selection.
+      if (self.caseIndex === undefined) {
+        const selectedCaseId = dataSet.firstSelectedCaseId !== undefined
+          ? dataSet.firstSelectedCaseId : dataSet.firstSelectedCell?.caseId;
+        if (selectedCaseId !== undefined) {
+          self.setCaseIndex(dataSet.caseIndexFromID(selectedCaseId));
+        } else {
+          self.setCaseIndex(0);
+        }
       } else if (self.caseIndex >= self.totalCases && self.totalCases > 0) {
         // Make sure case index is in range if number of cases has changed
         self.setCaseIndex(self.totalCases - 1);
