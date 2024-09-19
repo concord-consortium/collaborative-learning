@@ -37,7 +37,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(function DataCardToolb
     onIsEnabled, setImageUrlToAdd,
     ...others }: IProps) {
   const content = model.content as DataCardContentModelType;
-  const { caseIndex, dataSet, totalCases } = content;
+  const { caseIndexNumber: caseIndex, dataSet, totalCases } = content;
   const currentCaseId = caseIndex >= 0 && caseIndex < totalCases ? dataSet.caseIDFromIndex(caseIndex) : undefined ;
   const enabled = onIsEnabled(); //"enabled" is the visibility of the toolbar at lower left
   const location = useFloatingToolbarLocation({

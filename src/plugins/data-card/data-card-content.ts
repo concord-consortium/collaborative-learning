@@ -36,7 +36,7 @@ export const DataCardContentModel = TileContentModel
   .named("DataCardTool")
   .props({
     type: types.optional(types.literal(kDataCardTileType), kDataCardTileType),
-    caseIndex: 0,
+    caseIndex: types.maybe(types.number),
     selectedSortAttributeId: types.maybe(types.string)
   })
   .volatile(self => ({
@@ -45,6 +45,9 @@ export const DataCardContentModel = TileContentModel
     emptyDataSet: DataSet.create()
   }))
   .views(self => ({
+    get caseIndexNumber() {
+      return self.caseIndex || 0;
+    },
     get sharedModel() {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       // Perhaps we should pass the type to getTileSharedModel, so it can return the right value
@@ -132,7 +135,7 @@ export const DataCardContentModel = TileContentModel
   }))
   .views(self => ({
     get caseId() {
-      return self.dataSet.caseIDFromIndex(self.caseIndex);
+      return self.caseIndex ? self.dataSet.caseIDFromIndex(self.caseIndex) : undefined;
     }
   }))
   .views(self => ({
@@ -207,11 +210,6 @@ export const DataCardContentModel = TileContentModel
       },
       {name: "sharedModelSetup", fireImmediately: true}));
     },
-    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-      if (self.caseIndex >= self.totalCases && self.totalCases > 0) {
-          this.setCaseIndex(self.totalCases - 1);
-      }
-    },
     setCaseIndex(caseIndex: number) {
       // current case is serialized, but navigation is not undoable
       withoutUndo();
@@ -259,8 +257,23 @@ export const DataCardContentModel = TileContentModel
     }
   }))
   .actions(self => ({
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+      const dataSet = self.dataSet;
+      if (!dataSet) return;
+      // Select the card of the first selected case
+      const selectedCaseId = dataSet.firstSelectedCaseId
+        ? dataSet.firstSelectedCaseId : dataSet.firstSelectedCell?.caseId;
+      if (selectedCaseId && dataSet.caseIndexFromID(selectedCaseId) !== self.caseIndex) {
+        self.setCaseIndex(dataSet.caseIndexFromID(selectedCaseId));
+      } else if (self.caseIndex === undefined) {
+        self.setCaseIndex(0);
+      } else if (self.caseIndex >= self.totalCases && self.totalCases > 0) {
+        // Make sure case index is in range if number of cases has changed
+        self.setCaseIndex(self.totalCases - 1);
+      }
+    },
     duplicateCard() {
-      const originalCaseIndex = self.caseIndex;
+      const originalCaseIndex = self.caseIndexNumber;
       const copyableCase = self.caseByIndex(originalCaseIndex);
       if (copyableCase) {
         // strip __id__ so a new id will be generated on insertion
