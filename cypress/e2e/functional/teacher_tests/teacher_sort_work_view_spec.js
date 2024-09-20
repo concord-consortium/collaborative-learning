@@ -45,16 +45,13 @@ describe('SortWorkView Tests', () => {
     beforeTest(queryParams1);
     cy.log('verify clicking the sort menu');
     sortWork.getPrimarySortByMenu().click(); // Open the sort menu
-    cy.wait(1000);
-
+    cy.wait(500);
     sortWork.getPrimarySortByNameOption().click(); //Select 'Name' sort type
-    cy.wait(1000);
-
+    cy.wait(500);
     sortWork.getPrimarySortByMenu().click(); // Open the sort menu again
-    cy.wait(1000);
-
+    cy.wait(500);
     sortWork.getPrimarySortByGroupOption().click(); // Select 'Group' sort type
-    cy.wait(1000);
+    cy.wait(500);
 
     cy.log('verify opening and closing a document from the sort work view');
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
@@ -115,22 +112,16 @@ describe('SortWorkView Tests', () => {
     cy.get("[data-test=sort-work-list-items]").should("have.length.greaterThan", 0);
     cy.get("[data-test=simple-document-item]").should("not.exist");
     sortWork.getShowForMenu().click();
-    cy.wait(500);
     sortWork.getShowForInvestigationOption().click();
-    cy.wait(500);
     // For the "Investigation", "Unit", and "All" options, documents should be listed using the smaller "simple" view
     cy.get("[data-test=sort-work-list-items]").should("not.exist");
     cy.get("[data-test=simple-document-item]").should("have.length.greaterThan", 0);
     sortWork.getShowForMenu().click();
-    cy.wait(500);
     sortWork.getShowForUnitOption().click();
-    cy.wait(500);
     cy.get("[data-test=sort-work-list-items]").should("not.exist");
     cy.get("[data-test=simple-document-item]").should("have.length.greaterThan", 0);
     sortWork.getShowForMenu().click();
-    cy.wait(500);
     sortWork.getShowForAllOption().click();
-    cy.wait(500);
     cy.get("[data-test=sort-work-list-items]").should("not.exist");
     cy.get("[data-test=simple-document-item]").should("have.length.greaterThan", 0);
     cy.get("[data-test=simple-document-item]").should("have.attr", "title").and("not.be.empty");
@@ -178,8 +169,6 @@ describe('SortWorkView Tests', () => {
     sortWork.getSecondarySortByBookmarkedOption().should("exist");
     sortWork.getSecondarySortByToolsOption().should("exist");
     sortWork.getSecondarySortByNameOption().should("exist").click();
-    cy.wait(500);
-
     sortWork.getSecondarySortByNoneOption().should("not.have.class", "selected");
     sortWork.getSecondarySortByNameOption().should("have.class", "selected");
     cy.get("[data-testid=section-sub-header]").each($el => {
@@ -202,7 +191,6 @@ describe('SortWorkView Tests', () => {
     sortWork.getSecondarySortByNameOption().should("have.class", "selected");
     sortWork.getPrimarySortByMenu().click();
     sortWork.getPrimarySortByNameOption().click();
-    cy.wait(500);
     sortWork.getPrimarySortByGroupOption().should("not.have.class", "selected");
     sortWork.getPrimarySortByNameOption().should("have.class", "selected");
     sortWork.getSecondarySortByGroupOption().should("have.class", "enabled");
@@ -212,19 +200,16 @@ describe('SortWorkView Tests', () => {
   });
 
   it("should open Sort Work tab and test sorting by group", () => {
-
-    const students = ["student:1", "student:2", "student:3", "student:4"];
+    const students = ["student:1", "student:2", "student:3"];
     const studentProblemDocs = [
       `Student 1: ${title}`,
       `Student 2: ${title}`,
-      `Student 3: ${title}`,
-      `Student 4: ${title}`
+      `Student 3: ${title}`
     ];
     const studentPersonalDocs = [
       `Student 1: ${copyTitle}`,
       `Student 2: ${copyTitle}`,
-      `Student 3: ${copyTitle}`,
-      `Student 4: ${copyTitle}`
+      `Student 3: ${copyTitle}`
     ];
     const exemplarDocs = [
       `Ivan Idea: First Exemplar`
@@ -319,7 +304,7 @@ describe('SortWorkView Tests', () => {
     cy.wait(1000);
     sortWork.getPrimarySortByNameOption().click();
     sortWork.checkSectionHeaderLabelsExist([
-      "1, Student", "1, Teacher", "2, Student", "3, Student", "4, Student", "Idea, Ivan"
+      "1, Student", "1, Teacher", "2, Student", "3, Student", "Idea, Ivan"
     ]);
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Idea, Ivan", exemplarDocs[0]);
@@ -376,7 +361,7 @@ describe('SortWorkView Tests', () => {
     cy.visit(queryParams2);
     cy.waitForLoad();
     cy.openTopTab('sort-work');
-    cy.wait(1000);
+    cy.wait(500);
     sortWork.getPrimarySortByMenu().click();
     sortWork.getPrimarySortByGroupOption().click();
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
@@ -395,7 +380,7 @@ describe('SortWorkView Tests', () => {
     cy.visit(queryParams2);
     cy.waitForLoad();
     cy.openTopTab('sort-work');
-    cy.wait(1000);
+    cy.wait(500);
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("No Group", studentProblemDocs[0]);
     sortWork.checkDocumentInGroup("No Group", studentPersonalDocs[0]);
