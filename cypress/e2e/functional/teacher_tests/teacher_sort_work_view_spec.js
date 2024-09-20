@@ -381,6 +381,8 @@ describe('SortWorkView Tests', () => {
     cy.waitForLoad();
     cy.openTopTab('sort-work');
     cy.wait(1000);
+    sortWork.getPrimarySortByMenu().click();
+    sortWork.getPrimarySortByGroupOption().click();
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Group 6", studentProblemDocs[0]);
     sortWork.checkDocumentInGroup("Group 6", studentPersonalDocs[0]);
