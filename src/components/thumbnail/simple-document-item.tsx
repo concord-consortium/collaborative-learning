@@ -1,3 +1,4 @@
+import { observer } from "mobx-react";
 import React from "react";
 import { IDocumentMetadata } from "../../../shared/shared";
 import { useStores } from "../../hooks/use-stores";
@@ -12,7 +13,9 @@ interface IProps {
   onSelectDocument: (document: IDocumentMetadata) => void;
 }
 
-export const SimpleDocumentItem = ({ document, investigationOrdinal, onSelectDocument, problemOrdinal }: IProps) => {
+export const SimpleDocumentItem = observer(function SimpleDocumentItem(
+  { document, investigationOrdinal, onSelectDocument, problemOrdinal }: IProps
+) {
   const { documents, class: classStore, unit, user } = useStores();
   const { uid } = document;
   const userName = classStore.getUserById(uid)?.displayName;
@@ -37,4 +40,4 @@ export const SimpleDocumentItem = ({ document, investigationOrdinal, onSelectDoc
     >
     </div>
   );
-};
+});

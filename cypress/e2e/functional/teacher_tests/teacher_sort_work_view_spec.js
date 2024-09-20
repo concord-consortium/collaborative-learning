@@ -209,6 +209,7 @@ describe('SortWorkView Tests', () => {
     cy.visit(queryParams2);
     cy.waitForLoad();
     cy.openTopTab('sort-work');
+    cy.get('.section-header-label').should("contain", "Group 5");
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     cy.wait(1000);
     studentProblemDocs.forEach(doc => {
@@ -307,11 +308,6 @@ describe('SortWorkView Tests', () => {
     cy.log("check that exemplar document is displayed in new tag");
     chatPanel.getChatCloseButton().click();
     cy.openTopTab('sort-work');
-    // at the moment this is required to refresh the sort
-    sortWork.getShowForMenu().click();
-    sortWork.getShowForInvestigationOption().click();
-    sortWork.getShowForMenu().click();
-    sortWork.getShowForProblemOption().click();
 
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Diverging Designs", exemplarDocs[0]);
