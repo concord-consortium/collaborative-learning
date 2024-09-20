@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { observer } from "mobx-react";
+import { isAlive } from "mobx-state-tree";
 import escapeStringRegexp from "escape-string-regexp";
 import { useCombobox } from "downshift";
 import { uniq } from "lodash";
 import { VisuallyHidden } from "@chakra-ui/react";
+import classNames from "classnames";
 import { gImageMap } from "../../../models/image-map";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
@@ -25,7 +27,6 @@ import NumberTypeIcon from "../assets/id-type-number.svg";
 import ExpandDownIcon from "../assets/expand-more-icon.svg";
 
 import './single-card-data-area.scss';
-import classNames from "classnames";
 
 const typeIcons = {
   "date": <DateTypeIcon />,
@@ -57,13 +58,16 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     model, caseId, attrKey, currEditAttrId, currEditFacet,
     setCurrEditFacet, setCurrEditAttrId, readOnly
   } = props;
+  if (!isAlive(model)) {
+    console.log("rendering unalive model", model);
+  }
   const content = model.content as DataCardContentModelType;
   const dataSet = content.dataSet;
   const cell = { attributeId: attrKey, caseId: caseId ?? "" };
   const isLinked = useIsLinked();
 
   const getName = useCallback(() => {
-    return content.dataSet.attrFromID(attrKey).name;
+    return content.dataSet.attrFromID(attrKey)?.name;
   }, [attrKey, content.dataSet]);
 
   const getValue = useCallback(() => {
@@ -92,7 +96,9 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   }, [editingValue, valueCandidate.length]);
 
   useEffect(() => {
-    const nameLines = measureTextLines(getName(), kFieldWidthFactor);
+    const name = getName();
+    if (!name) return;
+    const nameLines = measureTextLines(name, kFieldWidthFactor);
     const nameCandidateLines = measureTextLines(nameCandidate, kFieldWidthFactor);
     const nameLinesNeeded = Math.max(nameLines, nameCandidateLines);
     const valueLines = measureTextLines(valueStr, kFieldWidthFactor);

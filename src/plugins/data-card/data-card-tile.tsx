@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useRef, useState } from "react";
+import { isAlive } from "mobx-state-tree";
+import React, { useRef, useState, useEffect } from "react";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
 import { DataCardContentModelType } from "./data-card-content";
@@ -23,6 +24,11 @@ import "./data-card-tile.scss";
 export const DataCardToolComponent: React.FC<ITileProps> = observer(function DataCardToolComponent(props) {
   const { documentId, model, readOnly, documentContent, tileElt, onRegisterTileApi,
           scale, onUnregisterTileApi, height, onRequestRowHeight } = props;
+  // Doing this check lets mobx know that it shouldn't try to render a model that has been deleted
+  if (!isAlive(model)) {
+    console.log("rendering unalive model", model);
+  }
+
   const backgroundRef = useRef<HTMLDivElement | null>(null);
 
   const content = model.content as DataCardContentModelType;
@@ -41,12 +47,18 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const displaySingle = !content.selectedSortAttributeId;
   const shouldShowAddField = !readOnly && isTileSelected && displaySingle;
   const attrIdsNames = content.existingAttributesWithNames();
-  const cardOf = `Card ${content.caseIndex + 1 } of `;
+  const cardOf = `Card ${content.caseIndexNumber + 1 } of `;
 
   // When a highlighted case or cell is set, show it
-  const selectedCaseId = dataSet.firstSelectedCaseId ? dataSet.firstSelectedCaseId : dataSet.firstSelectedCell?.caseId;
+  const selectedCaseId = dataSet.firstSelectedCaseId !== undefined
+    ? dataSet.firstSelectedCaseId : dataSet.firstSelectedCell?.caseId;
   useEffect(() => {
-    if (selectedCaseId) {
+    // caseIndex is undefined when the tile is first created.
+    // The initial setting of this field must be handled `updateAfterSharedModelChanges`,
+    // so that it is part of the same history entry as the tile creation. Setting it here would mean
+    // creating a second history entry that might be out of order.
+    if (content.caseIndex === undefined) return;
+    if (selectedCaseId !== undefined && dataSet.caseIndexFromID(selectedCaseId) !== content.caseIndex) {
       content.setCaseIndex(dataSet.caseIndexFromID(selectedCaseId));
     }
   }, [content, dataSet, selectedCaseId]);
@@ -64,8 +76,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   });
 
   function nextCase() {
-    if (content.caseIndex < content.totalCases - 1) {
-      content.setCaseIndex(content.caseIndex + 1);
+    if (content.caseIndexNumber < content.totalCases - 1) {
+      content.setCaseIndex(content.caseIndexNumber + 1);
     }
   }
 
@@ -75,8 +87,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   };
 
   function previousCase() {
-    if (content.caseIndex > 0){
-      content.setCaseIndex(content.caseIndex - 1);
+    if (content.caseIndexNumber > 0){
+      content.setCaseIndex(content.caseIndexNumber - 1);
     }
   }
 
@@ -134,11 +146,11 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
 
   const previousButtonClasses = classNames(
     "card-nav", "previous",
-    content.caseIndex > 0 ? "active" : "disabled",
+    content.caseIndexNumber > 0 ? "active" : "disabled",
   );
   const nextButtonClasses = classNames(
     "card-nav", "next",
-    content.caseIndex < content.totalCases - 1 ? "active" : "disabled",
+    content.caseIndexNumber < content.totalCases - 1 ? "active" : "disabled",
   );
   const addCardClasses = classNames("add-card", "teal-bg", { hidden: !shouldShowAddCase });
   const removeCardClasses = classNames("remove-card", { hidden: !shouldShowDeleteCase });
@@ -234,7 +246,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
                 <div className="single-card-data-area">
                   { content.totalCases > 0 &&
                     <DataCardRows
-                      caseIndex={content.caseIndex}
+                      caseIndex={content.caseIndexNumber}
                       model={model}
                       totalCases={content.totalCases}
                       readOnly={readOnly}

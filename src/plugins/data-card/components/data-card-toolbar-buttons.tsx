@@ -53,7 +53,7 @@ export const DeleteAttrButton = () => {
   const isEditingValue = !!context?.currEditAttrId && context?.currEditFacet === "value";
 
   const handleClick = () => {
-    const thisCaseId = content?.dataSet.caseIDFromIndex(content.caseIndex);
+    const thisCaseId = content?.dataSet.caseIDFromIndex(content.caseIndexNumber);
     if (thisCaseId && context){
       content?.setAttValue(thisCaseId, context.currEditAttrId, "");
     }

@@ -220,6 +220,7 @@ export class TreeMonitor {
     // TODO: If there are multiple shared model changes, we might want
     // to send them all to the tree at the same time, that way it can
     // inform the tiles of all changes at the same time.
+    const exchangesToProcess: { id: string, path: string }[] = [];
     for (const [sharedModelPath, numModifications] of Object.entries(sharedModelModifications)) {
       if (numModifications > 0) {
         // If a shared model has been deleted, we can't run these callbacks without errors,
@@ -251,32 +252,7 @@ export class TreeMonitor {
         await this.manager.startExchange(historyEntryId, sharedModelChangesExchangeId,
           "recordAction.sharedModelChanges");
 
-        // Recursion: handleSharedModelChanges is an action on the
-        // tree, and we are currently in a middleware that is
-        // monitoring actions on that tree. At this point in the
-        // middleware we are finishing a different action. Calling
-        // handleSharedModelChanges starts a new top level action:
-        // an action with no parent actions. This is what we want so
-        // we can record any changes made to the tree as part of the
-        // undo entry. I don't know if calling an action from a
-        // middleware is an officially supported or tested approach.
-        // It is working now. If it stops working we could delay the
-        // call to handleSharedModelChanges with a setTimeout.
-        //
-        // It is recursive because we will end up back in this
-        // recordAction function. Because we are awaiting
-        // handleSharedModelChanges that second recursive
-        // recordAction will get kicked off before this call to
-        // handleSharedModelChanges returns. The tree's
-        // implementation of handleSharedModelChanges should not
-        // modify the shared model itself or we could get into an
-        // infinite loop.
-        //
-        // Within this recursive call to recordAction,
-        // addTreePatchRecord will be called. This is how the
-        // startExchange above is closed out.
-        await this.tree.handleSharedModelChanges(historyEntryId, sharedModelChangesExchangeId,
-          call, sharedModelPath, initialSharedModelMap);
+        exchangesToProcess.push({ id: sharedModelChangesExchangeId, path: sharedModelPath });
       }
     }
 
@@ -301,5 +277,36 @@ export class TreeMonitor {
       inversePatches,
     };
     this.manager.addTreePatchRecord(historyEntryId, exchangeId, record);
+
+    for (const exchange of exchangesToProcess) {
+      // Now that the patches have been recorded, we can process the shared model changes
+      // Recursion: handleSharedModelChanges is an action on the
+      // tree, and we are currently in a middleware that is
+      // monitoring actions on that tree. At this point in the
+      // middleware we are finishing a different action. Calling
+      // handleSharedModelChanges starts a new top level action:
+      // an action with no parent actions. This is what we want so
+      // we can record any changes made to the tree as part of the
+      // undo entry. I don't know if calling an action from a
+      // middleware is an officially supported or tested approach.
+      // It is working now. If it stops working we could delay the
+      // call to handleSharedModelChanges with a setTimeout.
+      //
+      // It is recursive because we will end up back in this
+      // recordAction function. Because we are awaiting
+      // handleSharedModelChanges that second recursive
+      // recordAction will get kicked off before this call to
+      // handleSharedModelChanges returns. The tree's
+      // implementation of handleSharedModelChanges should not
+      // modify the shared model itself or we could get into an
+      // infinite loop.
+      //
+      // Within this recursive call to recordAction,
+      // addTreePatchRecord will be called. This is how the
+      // startExchange above is closed out.
+      await this.tree.handleSharedModelChanges(historyEntryId, exchange.id,
+        call, exchange.path, initialSharedModelMap);
+    }
+
   }
 }
