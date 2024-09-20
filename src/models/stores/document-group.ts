@@ -1,6 +1,5 @@
 import { FC, SVGProps } from "react";
-import { IDocumentMetadata } from "../../../shared/shared";
-import { ISortedDocumentsStores, TagWithDocs } from "./sorted-documents";
+import { IDocumentMetadataModel, ISortedDocumentsStores, TagWithDocs } from "./sorted-documents";
 import { makeAutoObservable } from "mobx";
 import {
   createDocMapByBookmarks,
@@ -21,12 +20,12 @@ interface IDocumentGroup {
   icon?:FC<SVGProps<SVGSVGElement>>;
   label: string;
   sortType: SecondarySortType;
-  documents: IDocumentMetadata[];
+  documents: IDocumentMetadataModel[];
   stores: ISortedDocumentsStores;
 }
 
 interface IBuildDocumentCollectionProps {
-  docMap: Map<string, IDocumentMetadata[]>;
+  docMap: Map<string, IDocumentMetadataModel[]>;
   sortedSectionLabels: string[];
   sortType: SecondarySortType;
 }
@@ -52,7 +51,7 @@ export class DocumentGroup {
   stores: ISortedDocumentsStores;
   label: string;
   sortType: SecondarySortType;
-  documents: IDocumentMetadata[];
+  documents: IDocumentMetadataModel[];
   icon?: FC<SVGProps<SVGSVGElement>>;
 
   constructor(props: IDocumentGroup) {
@@ -115,7 +114,7 @@ export class DocumentGroup {
       const tagWithDocs = tagKeyAndValObj[1] as TagWithDocs;
       const label = tagWithDocs.tagValue;
       const docKeys = tagWithDocs.docKeysFoundWithTag;
-      const documents = this.documents.filter((doc: IDocumentMetadata) => docKeys.includes(doc.key));
+      const documents = this.documents.filter(doc => docKeys.includes(doc.key));
       sortedDocsArr.push(new DocumentGroup({label, sortType: "Strategy", documents, stores: this.stores }));
     });
     return sortedDocsArr;

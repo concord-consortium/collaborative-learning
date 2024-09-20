@@ -1,10 +1,10 @@
 import React from "react";
-import { IDocumentMetadata } from "../../../shared/shared";
+import { IDocumentMetadataModel } from "../../models/stores/sorted-documents";
 
 import "./doc-list-debug.scss";
 
 interface IProps {
-  docs: IDocumentMetadata[];
+  docs: IDocumentMetadataModel[];
 }
 
 export function DocListDebug(props: IProps) {

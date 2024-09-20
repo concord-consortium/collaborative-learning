@@ -104,7 +104,7 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const showSortWorkDocumentArea = !!openDocumentKey && openDocumentsGroup;
 
   useEffect(()=>{
-    sortedDocuments.updateMetaDataDocs(docFilter, unit.code, investigation.ordinal, problem.ordinal);
+    return sortedDocuments.watchFirestoreMetaDataDocs(docFilter, unit.code, investigation.ordinal, problem.ordinal);
   }, [docFilter, unit.code, investigation.ordinal, problem.ordinal, sortedDocuments]);
 
   return (

@@ -11,6 +11,7 @@ import { DocumentGroupComponent } from "./document-group";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DecoratedDocumentThumbnailItem } from "../thumbnail/decorated-document-thumbnail-item";
 import { ENavTab } from "../../models/view/nav-tabs";
+import { IDocumentMetadataModel } from "../../models/stores/sorted-documents";
 
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 
@@ -63,7 +64,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
     setShowDocuments(!showDocuments);
   };
 
-  const renderUngroupedDocument = (doc: IDocumentMetadata) => {
+  const renderUngroupedDocument = (doc: IDocumentMetadataModel) => {
     const fullDocument = getDocument(doc.key);
     if (!fullDocument) return <div key={doc.key} className="loading-spinner"/>;
 
