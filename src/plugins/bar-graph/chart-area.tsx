@@ -9,7 +9,7 @@ import { PositionScale } from "@visx/shape/lib/types";
 import { useBarGraphModelContext } from "./bar-graph-content-context";
 import { CategoryPulldown } from "./category-pulldown";
 import EditableAxisLabel from "./editable-axis-label";
-import { logBarGraphEvent, roundTo5 } from "./bar-graph-utils";
+import { displayValue, logBarGraphEvent, roundTo5 } from "./bar-graph-utils";
 import { BarInfo } from "./bar-graph-types";
 
 const margin = {
@@ -27,6 +27,8 @@ interface IProps {
 // Consider: rotating labels if needed
 // angle: -45, textAnchor: 'end'
 // https://github.com/airbnb/visx/discussions/1494
+// For full control over presentation (eg, showing images on axis), see example here:
+// https://github.com/airbnb/visx/pull/165
 
 
 export const ChartArea = observer(function BarGraphChart({ width, height }: IProps) {
@@ -184,6 +186,7 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
           tickLineProps={{ stroke: '#bfbfbf', strokeWidth: 1.5, height: 5 }}
           tickLabelProps={{ dy: -7, fontSize: 14, fontFamily: 'Lato', fill: '#3f3f3f',
             verticalAnchor: "start", width: labelWidth}}
+          tickFormat={(key) => displayValue(key)}
         />
         <AxisLeft
           left={0}

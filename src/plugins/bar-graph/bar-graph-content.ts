@@ -5,7 +5,7 @@ import { kBarGraphTileType, kBarGraphContentType, BarInfo } from "./bar-graph-ty
 import { getSharedModelManager } from "../../models/tiles/tile-environment";
 import { SharedDataSet, SharedDataSetType } from "../../models/shared/shared-data-set";
 import { clueDataColorInfo } from "../../utilities/color-utils";
-import { displayValue } from "./bar-graph-utils";
+import { keyForValue } from "./bar-graph-utils";
 import { SharedModelType } from "../../models/shared/shared-model";
 
 export function defaultBarGraphContent(): BarGraphContentModelType {
@@ -70,8 +70,8 @@ export const BarGraphContentModel = TileContentModel
       if (secondary) {
         // Two-dimensionsal data
         return cases.reduce((acc, caseID) => {
-          const cat = displayValue(dataSet.getStrValue(caseID.__id__, primary));
-          const subCat = displayValue(dataSet.getStrValue(caseID.__id__, secondary));
+          const cat = keyForValue(dataSet.getStrValue(caseID.__id__, primary));
+          const subCat = keyForValue(dataSet.getStrValue(caseID.__id__, secondary));
           const selected = dataSet.isCaseSelected(caseID.__id__);
           const index = acc.findIndex(r => r[primary] === cat);
           if (index >= 0) {
@@ -90,7 +90,7 @@ export const BarGraphContentModel = TileContentModel
       } else {
         // One-dimensional data
         return cases.reduce((acc, caseID) => {
-          const cat = displayValue(dataSet.getStrValue(caseID.__id__, primary));
+          const cat = keyForValue(dataSet.getStrValue(caseID.__id__, primary));
           const selected = dataSet.isCaseSelected(caseID.__id__);
           const index = acc.findIndex(r => r[primary] === cat);
           if (index >= 0) {
@@ -117,7 +117,7 @@ export const BarGraphContentModel = TileContentModel
       const dataSet = self.sharedModel?.dataSet;
       const secondary = self.secondaryAttribute;
       if (!secondary || !dataSet || !self.cases) return [];
-      return Array.from(new Set(self.cases.map(caseID => displayValue(dataSet.getStrValue(caseID.__id__, secondary)))));
+      return Array.from(new Set(self.cases.map(caseID => keyForValue(dataSet.getStrValue(caseID.__id__, secondary)))));
     },
     get maxDataValue(): number {
       return self.dataArray.reduce((acc, row) => {
@@ -154,10 +154,10 @@ export const BarGraphContentModel = TileContentModel
       const secondaryAttribute = self.secondaryAttribute;
       if (!secondaryAttribute && secondaryVal) return;
       let matchingCases = cases
-        .filter(caseID => displayValue(dataSet.getStrValue(caseID.__id__, primaryAttribute)) === primaryVal);
+        .filter(caseID => keyForValue(dataSet.getStrValue(caseID.__id__, primaryAttribute)) === primaryVal);
       if (secondaryAttribute && secondaryVal) {
         matchingCases = matchingCases
-          .filter(caseID => displayValue(dataSet.getStrValue(caseID.__id__, secondaryAttribute)) === secondaryVal);
+          .filter(caseID => keyForValue(dataSet.getStrValue(caseID.__id__, secondaryAttribute)) === secondaryVal);
       }
       const caseIds = matchingCases.map(caseID => caseID.__id__);
       dataSet.setSelectedCases(caseIds);
