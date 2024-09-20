@@ -238,7 +238,6 @@ export class SortedDocuments {
     }
 
     const disposeFilteredListener = filteredQuery.onSnapshot(snapshot => {
-      console.log("filteredQuery.onSnapshot", snapshot.size);
       const mstSnapshot = this.getMSTSnapshotFromFBSnapshot(snapshot);
       applySnapshot(this.metadataDocsFiltered, mstSnapshot);
     });
@@ -252,8 +251,7 @@ export class SortedDocuments {
         applySnapshot(this.metadataDocsWithoutUnit, mstSnapshot);
       });
     } else {
-      // If the filter is "All" then the metaDocsWithUnit will include everything.
-      // This is mixing MST and MobX
+      // If the filter is "All" then the metaDocsFiltered will include everything.
       this.metadataDocsWithoutUnit.clear();
     }
 
