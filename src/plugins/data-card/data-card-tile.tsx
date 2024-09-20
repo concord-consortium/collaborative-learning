@@ -53,6 +53,10 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer(function Dat
   const selectedCaseId = dataSet.firstSelectedCaseId !== undefined
     ? dataSet.firstSelectedCaseId : dataSet.firstSelectedCell?.caseId;
   useEffect(() => {
+    // caseIndex is undefined when the tile is first created.
+    // The initial setting of this field must be handled `updateAfterSharedModelChanges`,
+    // so that it is part of the same history entry as the tile creation. Setting it here would mean
+    // creating a second history entry that might be out of order.
     if (content.caseIndex === undefined) return;
     if (selectedCaseId !== undefined && dataSet.caseIndexFromID(selectedCaseId) !== content.caseIndex) {
       content.setCaseIndex(dataSet.caseIndexFromID(selectedCaseId));
