@@ -87,7 +87,7 @@ class SortedWork {
       : '[data-testid="doc-group-list"] [data-test="simple-document-item"]';
 
     // Assign the documents list to a variable to simplify the code
-    cy.get(".section-header-left").contains(groupName).parent().parent()
+    cy.get(".section-header").contains(groupName).parent().parent()
       .siblings('[data-testid="section-document-list"]')
       .within(() => {
         cy.get(docSelector).as("groupDocs");
