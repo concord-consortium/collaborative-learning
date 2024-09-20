@@ -149,6 +149,32 @@ Object {
     ]);
   });
 
+  it("skips attributes that contain images when setting primary attribute", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    const dataSet = sharedSampleDataSet();
+    dataSet.dataSet?.attributes[0].setValue(0, "ccimg://fbrtdb.concord.org/funny-cat-pic.png");
+    content.setSharedModel(dataSet);
+    expect(content.primaryAttribute).toBe("att-l");
+    expect(content.dataArray).toEqual([
+      { "att-l": "yard", "value": { count: 3, selected: false }},
+      { "att-l": "forest", "value": { count: 1, selected: false }}
+    ]);
+  });
+
+  it("uses first attribute anyway if all attributes contain images when setting primary attribute", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    const dataSet = sharedSampleDataSet();
+    dataSet.dataSet?.attributes[0].setValue(0, "ccimg://fbrtdb.concord.org/funny-cat-pic.png");
+    dataSet.dataSet?.attributes[1].setValue(3, "ccimg://fbrtdb.concord.org/forest.jpg");
+    content.setSharedModel(dataSet);
+    expect(content.primaryAttribute).toBe("att-s");
+    expect(content.dataArray).toEqual([
+      { "att-s": "ccimg://fbrtdb.concord.org/funny-cat-pic.png", "value": { count: 1, selected: false }},
+      { "att-s": "cat", "value": { count: 1, selected: false }},
+      { "att-s": "owl","value": { count: 2, selected: false }}
+    ]);
+  });
+
   it("returns expected data array with primary and secondary attributes", () => {
     const content = TestingBarGraphContentModel.create({ });
     content.setSharedModel(sharedSampleDataSet());

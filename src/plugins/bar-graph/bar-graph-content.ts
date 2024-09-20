@@ -214,9 +214,19 @@ export const BarGraphContentModel = TileContentModel
         self.setPrimaryAttribute(undefined);
         self.setSecondaryAttribute(undefined);
         if (dataSetId) {
+          // Set the primary attribute to the first non-image attribute
           const atts = self.sharedModel.dataSet.attributes;
           if (atts.length > 0) {
-            self.setPrimaryAttribute(atts[0].id);
+            for(const att of atts) {
+              if (!att.includesAnyImages) {
+                self.setPrimaryAttribute(att.id);
+                break;
+              }
+            }
+            // If all attributes were image-based, still pick the first.
+            if (!self.primaryAttribute) {
+              self.setPrimaryAttribute(atts[0].id);
+            }
           }
         }
       }

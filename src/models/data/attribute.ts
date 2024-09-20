@@ -116,6 +116,9 @@ export const Attribute = types.model("Attribute", {
     const map = new Map<AttributeType,number>(ordered);
     return map;
   },
+  get includesAnyImages() {
+    return self.values.some(isImageUrl);
+  },
   get format() {
     return self.precision != null ? `.${self.precision}~f` : kDefaultFormatStr;
   },
