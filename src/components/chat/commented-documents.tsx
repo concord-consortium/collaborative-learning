@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 
 import { useFirestore } from "../../hooks/firestore-hooks";
-import { useStores, usePersistentUIStore, useUserStore, useUIStore} from "../../hooks/use-stores";
+import { useStores } from "../../hooks/use-stores";
 import { useDocumentCaption } from "../../hooks/use-document-caption";
 import { UserModelType } from "../../models/stores/user";
 import { getNavTabOfDocument, getTabsOfCurriculumDoc, isStudentWorkspaceDoc } from "../../models/stores/persistent-ui";
@@ -21,8 +21,7 @@ interface IProps {
 export const CommentedDocuments: React.FC<IProps>
     = observer(function CommentedDocuments({user, handleDocView}) {
   const [db] = useFirestore();
-  const ui = useUIStore();
-  const persistentUI = usePersistentUIStore();
+  const { ui, persistentUI } = useStores();
   const store = useStores();
   const problem =  store.problemOrdinal;
   const unit = store.unit.code;
@@ -109,9 +108,7 @@ interface JProps {
 // This is rendering a single document item in the commented document list
 export const WorkDocumentItem: React.FC<JProps> = (props) => {
   const { doc, sectionOrNetworkDoc, isNetworkDoc, handleDocView } = props;
-  const ui = useUIStore();
-  const persistentUI = usePersistentUIStore();
-  const user = useUserStore();
+  const { persistentUI, sortedDocuments, ui, user } = useStores();
   // We need the navTab to style the item.
   const navTab = getNavTabOfDocument(doc, user);
   const title =  useDocumentCaption(sectionOrNetworkDoc, isStudentWorkspaceDoc(sectionOrNetworkDoc, user.id));
@@ -120,7 +117,7 @@ export const WorkDocumentItem: React.FC<JProps> = (props) => {
     <div
       className={`document-box my-work-document ${navTab}`}
       onClick={()=>{
-        persistentUI.openResourceDocument(sectionOrNetworkDoc, user);
+        persistentUI.openResourceDocument(sectionOrNetworkDoc, user, sortedDocuments);
         ui.setSelectedTile();
         if (handleDocView !== undefined){
           handleDocView();

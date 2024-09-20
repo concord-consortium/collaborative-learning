@@ -132,14 +132,24 @@ export class SortedDocuments {
     const documentMap = createDocMapByGroups(this.filteredDocsByType, this.groupsStore.groupForUser);
     const sortedSectionLabels = sortGroupSectionLabels(Array.from(documentMap.keys()));
     return sortedSectionLabels.map(label => {
-      return new DocumentGroup({stores: this.stores, label, documents: documentMap.get(label) ?? [] });
+      return new DocumentGroup({
+        stores: this.stores,
+        sortType: "Group",
+        label,
+        documents: documentMap.get(label) ?? []
+      });
     });
   }
   get byName(): DocumentGroup[] {
     const documentMap = createDocMapByNames(this.filteredDocsByType, this.class.getUserById);
     const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()));
     return sortedSectionLabels.map(label => {
-      return new DocumentGroup({ stores: this.stores, label, documents: documentMap.get(label) ?? [] });
+      return new DocumentGroup({
+        stores: this.stores,
+        sortType: "Name",
+        label,
+        documents: documentMap.get(label) ?? []
+      });
     });
   }
 
@@ -153,7 +163,7 @@ export class SortedDocuments {
       const label = tagWithDocs.tagValue;
       const docKeys = tagWithDocs.docKeysFoundWithTag;
       const documents = this.firestoreMetadataDocs.filter(doc => docKeys.includes(doc.key));
-      sortedDocsArr.push(new DocumentGroup({ stores: this.stores, label, documents }));
+      sortedDocsArr.push(new DocumentGroup({ stores: this.stores, sortType: "Strategy", label, documents }));
     });
     return sortedDocsArr;
   }
@@ -167,7 +177,7 @@ export class SortedDocuments {
       const label = contentInfo?.displayName || tileType;
       const documents = tileTypeToDocumentsMap.get(tileType)?.documents ?? [];
       const icon = tileTypeToDocumentsMap.get(tileType)?.icon;
-      const section = new DocumentGroup({ stores: this.stores, label, documents, icon });
+      const section = new DocumentGroup({ stores: this.stores, sortType: "Tools", label, documents, icon });
       return section;
     });
 
@@ -188,6 +198,7 @@ export class SortedDocuments {
     return sortedSectionLabels.filter(label => documentMap.has(label))
                               .map(label => new DocumentGroup({
                                 stores: this.stores,
+                                sortType: "Bookmarked",
                                 label,
                                 documents: documentMap.get(label) ?? []
                               }));

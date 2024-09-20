@@ -24,6 +24,13 @@ interface IProps {
   secondarySort: SecondarySortType;
 }
 
+export interface IOpenDocumentsGroupMetadata {
+  primaryType: string;
+  primaryLabel: string;
+  secondaryType?: string;
+  secondaryLabel?: string;
+}
+
 export const SortedSection: React.FC<IProps> = observer(function SortedSection(props: IProps) {
   const { docFilter, documentGroup, idx, secondarySort } = props;
   const { persistentUI, sortedDocuments } = useStores();
@@ -37,13 +44,20 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
     // Calling `fetchFullDocument` will update the `documents` store with the full document,
     // triggering a re-render of this component since it's an observer.
     sortedDocuments.fetchFullDocument(docKey);
-
-    return undefined;
   };
 
-  const handleSelectDocument = async (document: DocumentModelType | IDocumentMetadata) => {
-    persistentUI.openSubTabDocument(ENavTab.kSortWork, ENavTab.kSortWork, document.key);
-    logDocumentViewEvent(document);
+  const handleSelectDocument = (docGroup: DocumentGroup) => {
+    const { label, sortType } = docGroup;
+    const openSubTabMetadata: IOpenDocumentsGroupMetadata = secondarySort === "None"
+                               ? { primaryLabel: label, primaryType: sortType }
+                               : { primaryLabel: documentGroup.label, primaryType: documentGroup.sortType,
+                                   secondaryLabel: label, secondaryType: sortType };
+
+    return async (document: DocumentModelType | IDocumentMetadata) => {
+      const openSubTab = JSON.stringify(openSubTabMetadata);
+      persistentUI.openSubTabDocument(ENavTab.kSortWork, openSubTab, document.key);
+      logDocumentViewEvent(document);
+    };
   };
 
   const handleToggleShowDocuments = () => {
@@ -61,7 +75,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
              tab={ENavTab.kSortWork}
              shouldHandleStarClick
              allowDelete={false}
-             onSelectDocument={handleSelectDocument}
+             onSelectDocument={handleSelectDocument(documentGroup)}
            />;
   };
 
@@ -72,10 +86,10 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
 
     const renderDocumentGroup = (group: DocumentGroup) => (
       <DocumentGroupComponent
-        key={group.label}
+        key={`${group.label}-${group.sortType}`}
         documentGroup={group}
         secondarySort={secondarySort}
-        onSelectDocument={handleSelectDocument}
+        onSelectDocument={handleSelectDocument(group)}
       />
     );
 
@@ -107,7 +121,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
           {secondarySort}
         </div>
       }
-      <div className="list" data-testid="section-document-list">
+      <div className="documents-list" data-testid="section-document-list">
         {showDocuments && renderList()}
       </div>
     </div>

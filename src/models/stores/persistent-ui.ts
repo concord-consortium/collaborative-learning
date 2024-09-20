@@ -2,7 +2,9 @@ import { getSnapshot, applySnapshot, types,
   onSnapshot
 } from "mobx-state-tree";
 import { AppConfigModelType } from "./app-config-model";
-import { DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax, kDividerMin } from "./ui-types";
+import { DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax,
+         kDividerMin,
+         PrimarySortType} from "./ui-types";
 import { isWorkspaceModelSnapshot, WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ENavTab } from "../view/nav-tabs";
@@ -15,6 +17,7 @@ import { DB } from "../../lib/db";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { urlParams } from "../../utilities/url-params";
 import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
+import { SortedDocuments } from "./sorted-documents";
 
 export const kPersistentUiStateVersion = "1.0.0";
 
@@ -36,9 +39,12 @@ export const PersistentUIModel = types
     dividerPosition: kDividerHalf,
     activeNavTab: types.maybe(types.string),
     docFilter: types.optional(DocFilterTypeEnum, "Problem"),
+    primarySortBy: types.optional(types.string, "Group"),
+    secondarySortBy: types.optional(types.string, "None"),
     showAnnotations: true,
     showTeacherContent: true,
     showChatPanel: false,
+    showDocumentScroller: true,
     tabs: types.map(UITabModel),
     problemWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string),
@@ -108,8 +114,11 @@ export const PersistentUIModel = types
       toggleShowTeacherContent(show: boolean) {
         self.showTeacherContent = show;
       },
-      toggleShowChatPanel(show:boolean) {
+      toggleShowChatPanel(show: boolean) {
         self.showChatPanel = show;
+      },
+      toggleShowDocumentScroller(show: boolean) {
+        self.showDocumentScroller = show;
       },
       setActiveNavTab(tab: string) {
         self.activeNavTab = tab;
@@ -191,7 +200,13 @@ export const PersistentUIModel = types
       },
       setDocFilter(docFilter: DocFilterType) {
         self.docFilter = docFilter;
-      }
+      },
+      setPrimarySortBy(sort: string) {
+        self.primarySortBy = sort;
+      },
+      setSecondarySortBy(sort: string) {
+        self.secondarySortBy = sort;
+      },
     };
   })
   .actions(self => ({
@@ -201,7 +216,7 @@ export const PersistentUIModel = types
      *
      * @param doc a non curriculum document
      */
-    openResourceDocument(doc: DocumentModelType, user?: UserModelType) {
+    openResourceDocument(doc: DocumentModelType, user?: UserModelType, sortedDocuments?: SortedDocuments) {
       const navTab = getNavTabOfDocument(doc, user)  || "";
       let subTab = "";
       if (navTab === ENavTab.kClassWork) {
@@ -227,7 +242,18 @@ export const PersistentUIModel = types
         }
       }
       if (navTab === ENavTab.kSortWork) {
-        subTab = ENavTab.kSortWork;
+        if (doc.type === ExemplarDocument) {
+          const sortedDocumentGroups = sortedDocuments?.sortBy("Strategy");
+          const openGroup = sortedDocumentGroups?.find(group => group.documents.some((d) => d.key === doc.key));
+          subTab = JSON.stringify({primaryLabel: openGroup?.label, "primaryType": "Strategy"});
+          self.setPrimarySortBy("Strategy");
+          self.setSecondarySortBy("None");
+        } else {
+          const primarySortBy = self.primarySortBy as PrimarySortType;
+          const sortedDocumentGroups = sortedDocuments?.sortBy(primarySortBy);
+          const openGroup = sortedDocumentGroups?.find(group => group.documents.some((d) => d.key === doc.key));
+          subTab = JSON.stringify({"primaryLabel": openGroup?.label, "primaryType": self.primarySortBy});
+        }
       }
 
       if (!subTab) {

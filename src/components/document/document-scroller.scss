@@ -1,0 +1,116 @@
+@import "../vars";
+
+.document-thumbnail-scroller {
+  background: white;
+  border: solid 1.5px $classwork-purple;
+  border-bottom: none;
+  height: 156px;
+  position: relative;
+  width: 100%;
+
+  .document-thumbnail-list {
+    align-items: center;
+    display: flex;
+    flex-wrap: nowrap;
+    left: 0;
+    margin: 0;
+    overflow: hidden;
+    padding: 3px;
+    position: relative;
+    top: 0;
+
+    .document-thumbnail {
+      height: 146px;
+      padding: 10px;
+      width: 116px;
+
+      &:hover {
+        background: $classwork-purple-light-8;
+        border-radius: 5px;
+      }
+
+      &.selected {
+        background: $classwork-purple-light-6;
+        border-radius: 5px;
+      }
+    }
+
+    .list-item {
+      max-height: 126px;
+      min-height: 126px;
+      max-width: 96px;
+      min-width: 96px;
+      overflow: visible;
+      padding: 0;
+
+      .scaled-list-item-container {
+        flex-shrink: 0;
+        height: 74px;
+        overflow: hidden;
+        width: 96px;
+
+        .scaled-list-item {
+          height: 738px;
+          width: 958px;
+        }
+      }
+
+      .icon-holder {
+        left: 2px;
+        right: auto;
+        top: -5px;
+        width: 24px;
+      }
+      .icon-star {
+        right: 0;
+        top: 0;
+      }
+
+      .footer {
+        .info {
+          line-height: 1.2;
+          margin-top: 4px;
+          width: 96px;
+        }
+      }
+    }
+  }
+
+  .scroll-arrow {
+    align-items: center;
+    background: white;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    display: flex;
+    left: 7px;
+    justify-content: center;
+    margin-top: -16px;
+    position: absolute;
+    height: 32px;
+    top: 50%;
+    width: 32px;
+    z-index: 5;
+
+    &.right {
+      box-shadow: -2px -2px 4px 0 rgba(0, 0, 0, 0.35);
+      left: auto;
+      right: 7px;
+      transform: rotate(180deg);
+    }
+
+    &:hover {
+      background: $classwork-purple-light-5;
+    }
+    &:active {
+      background: $classwork-purple-light-4;
+    }
+
+    svg {
+      height: 24px;
+      stroke: $classwork-purple-dark-1;
+      width: 24px;
+    }
+  }
+}

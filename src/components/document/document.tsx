@@ -281,9 +281,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private openDocument(key: string) {
-    const doc = this.stores.documents.getDocument(key);
+    const { documents, persistentUI, sortedDocuments, user } = this.stores;
+    const doc = documents.getDocument(key);
     if (doc) {
-      this.stores.persistentUI.openResourceDocument(doc);
+      persistentUI.openResourceDocument(doc, user, sortedDocuments);
       logDocumentViewEvent(doc);
     }
   }

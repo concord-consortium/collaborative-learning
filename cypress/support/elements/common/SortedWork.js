@@ -9,7 +9,7 @@ class SortedWork {
     return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-group"]');
   }
   getPrimarySortByTagOption(){
-    return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-identify-design approach"]');
+    return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-strategy"]');
   }
   getPrimarySortByBookmarkedOption(){
     return cy.get('.custom-select.sort-work-sort-menu.primary-sort-menu [data-test="list-item-bookmarked"]');
@@ -43,7 +43,7 @@ class SortedWork {
     return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-group"]');
   }
   getSecondarySortByTagOption(){
-    return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-identify-design approach"]');
+    return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-strategy"]');
   }
   getSecondarySortByBookmarkedOption(){
     return cy.get('.custom-select.sort-work-sort-menu.secondary-sort-menu [data-test="list-item-bookmarked"]');
@@ -70,10 +70,10 @@ class SortedWork {
     return cy.get(".sort-work-view .sorted-sections .section-header-label").contains(sectionLabel).get(".section-header-right .section-header-arrow").click({multiple: true});
   }
   checkDocumentInGroup(groupName, doc) {
-    this.getSortWorkGroup(groupName).find(".list .list-item .footer .info").should("contain", doc);
+    this.getSortWorkGroup(groupName).find(".documents-list .list-item .footer .info").should("contain", doc);
   }
   checkDocumentNotInGroup(groupName, doc) {
-    this.getSortWorkGroup(groupName).find(".list .list-item .footer .info").should("not.contain", doc);
+    this.getSortWorkGroup(groupName).find(".documents-list .list-item .footer .info").should("not.contain", doc);
   }
   checkSimpleDocumentInGroup(groupName, doc) {
     this.getSortWorkGroup(groupName).find('[data-testid="section-document-list"] [data-test="simple-document-item"]').should("have.attr", "title", doc);
@@ -87,7 +87,7 @@ class SortedWork {
       : '[data-testid="doc-group-list"] [data-test="simple-document-item"]';
 
     // Assign the documents list to a variable to simplify the code
-    cy.get(".section-header-left").contains(groupName).parent().parent()
+    cy.get(".section-header").contains(groupName).parent().parent()
       .siblings('[data-testid="section-document-list"]')
       .within(() => {
         cy.get(docSelector).as("groupDocs");
@@ -103,7 +103,7 @@ class SortedWork {
   }
   checkGroupIsEmpty(groupName){
     cy.get(".sort-work-view .sorted-sections .section-header-label")
-      .contains(groupName).parent().parent().parent().find(".list").should('be.empty');
+      .contains(groupName).parent().parent().parent().find(".documents-list").should('be.empty');
   }
   checkGroupDoesNotExist(group) {
     cy.get(".sort-work-view .sorted-sections .section-header-label").should("not.contain", group);

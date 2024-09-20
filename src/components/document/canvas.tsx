@@ -119,6 +119,20 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     });
   };
 
+  componentDidUpdate(prevProps: IProps) {
+    if (prevProps.document !== this.props.document) {
+      this.setState((prevState, props) => {
+        return this.updateHistoryDocument(prevState, prevState.showPlaybackControls);
+      });
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.state.historyDocumentCopy) {
+      destroy(this.state.historyDocumentCopy);
+    }
+  }
+
   public render() {
     if (this.context && !this.props.readOnly) {
       // update the editable api interface used by the toolbar
@@ -308,22 +322,9 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   private handleTogglePlaybackControlComponent = () => {
     this.setState((prevState, props) => {
       const showPlaybackControls = !prevState.showPlaybackControls;
-      const historyDocumentCopy = showPlaybackControls ?
-        this.createHistoryDocumentCopy() : undefined;
-
-      if (DEBUG_HISTORY) {
-        (window as any).historyDocument = historyDocumentCopy;
-      }
-
-      if (prevState.historyDocumentCopy) {
-        destroy(prevState.historyDocumentCopy);
-      }
       logHistoryEvent({documentId: this.props.document?.key || '',
         action: showPlaybackControls ? "showControls": "hideControls" });
-      return {
-        showPlaybackControls,
-        historyDocumentCopy
-      };
+      return this.updateHistoryDocument(prevState, showPlaybackControls);
     });
   };
 
@@ -340,6 +341,23 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       treeManager.mirrorHistoryFromFirestore(user, firestore);
       return docCopy;
     }
+  };
+
+  private updateHistoryDocument = (prevState: IState, showPlaybackControls: boolean) => {
+    const historyDocumentCopy = showPlaybackControls ?
+      this.createHistoryDocumentCopy() : undefined;
+
+    if (DEBUG_HISTORY) {
+      (window as any).historyDocument = historyDocumentCopy;
+    }
+
+    if (prevState.historyDocumentCopy) {
+      destroy(prevState.historyDocumentCopy);
+    }
+    return {
+      showPlaybackControls,
+      historyDocumentCopy
+    };
   };
 
   private getDocumentToShow = () => {

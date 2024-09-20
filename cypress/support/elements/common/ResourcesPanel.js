@@ -32,11 +32,11 @@ class ResourcesPanel{
     // TODO: this is duplicated in commands.js, however in that case the tab
     // isn't passed in.
     getCanvasItemTitle(tab, section){
-        return cy.get('.document-tabs.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer');
+        return cy.get('.document-tabs.'+tab+' .documents-list.'+section+' [data-test='+section+'-list-items] .footer');
     }
 
     starCanvasItem(tab, section,title){
-        cy.get('.list.'+section+' .list-item[data-test='+section+'-list-items]').contains('.footer', title).siblings('.icon-holder').find('.icon-star').click();
+        cy.get('.documents-list.'+section+' .list-item[data-test='+section+'-list-items]').contains('.footer', title).siblings('.icon-holder').find('.icon-star').click();
     }
 
     getCanvasStarIcon(tab,section,title){
@@ -57,6 +57,30 @@ class ResourcesPanel{
 
     getEditableDocumentContent() {
       return cy.get('.resource-and-chat-panel .editable-document-content .document-content');
+    }
+
+    getDocumentScroller() {
+      return cy.get('[data-testid="document-thumbnail-scroller"]');
+    }
+
+    getDocumentScrollerLeftBtn() {
+      return cy.get('[data-testid="scroll-arrow-left"]');
+    }
+
+    getDocumentScrollerRightBtn() {
+      return cy.get('[data-testid="scroll-arrow-right"]');
+    }
+
+    getDocumentScrollerToggle() {
+      return cy.get('[data-testid="toggle-document-scroller"]');
+    }
+
+    getDocumentSwitchBtnPrev() {
+      return cy.get('[data-testid="switch-document-button-previous"]');
+    }
+
+    getDocumentSwitchBtnNext() {
+      return cy.get('[data-testid="switch-document-button-next"]');
     }
 
     closePrimaryWorkspaceTab(tab){

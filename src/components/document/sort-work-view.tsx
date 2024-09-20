@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { observer } from "mobx-react";
 import { SortWorkHeader } from "../navigation/sort-work-header";
 import { useStores } from "../../hooks/use-stores";
@@ -8,9 +8,8 @@ import { SortWorkDocumentArea } from "./sort-work-document-area";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { DocListDebug } from "./doc-list-debug";
 import { DocFilterType, PrimarySortType, SecondarySortType } from "../../models/stores/ui-types";
-import { SortedSection } from "./sorted-section";
+import { IOpenDocumentsGroupMetadata, SortedSection } from "./sorted-section";
 import { DocumentGroup } from "../../models/stores/document-group";
-
 
 import "../thumbnail/document-type-collection.scss";
 import "./sort-work-view.scss";
@@ -22,43 +21,47 @@ import "./sort-work-view.scss";
 export const SortWorkView: React.FC = observer(function SortWorkView() {
   const { appConfig, investigation, persistentUI, problem, sortedDocuments, unit } = useStores();
   const { tagPrompt } = appConfig;
-  const { docFilter: persistentUIDocFilter } = persistentUI;
+  const { docFilter: persistentUIDocFilter, primarySortBy, secondarySortBy } = persistentUI;
   const sortTagPrompt = tagPrompt || ""; //first dropdown choice for comment tags
   const sortOptions = ["Group", "Name", sortTagPrompt, "Bookmarked", "Tools"];
   const filterOptions: DocFilterType[] = ["Problem", "Investigation", "Unit", "All"];
-  const [primarySortBy, setPrimarySortBy] = useState("Group");
-  const [secondarySortBy, setSecondarySortBy] = useState("None");
   const docFilter = persistentUIDocFilter;
 
   const handleDocFilterSelection = (filter: DocFilterType) => {
     persistentUI.setDocFilter(filter);
   };
 
+  const normalizeSortString = (sort: string) => {
+    return sort === sortTagPrompt ? "Strategy" : sort;
+  };
+
   const handlePrimarySortBySelection = (sort: string) => {
-    setPrimarySortBy(sort);
+    persistentUI.setPrimarySortBy(sort);
     if (sort === secondarySortBy) {
-      setSecondarySortBy("None");
+      persistentUI.setSecondarySortBy("None");
     }
   };
 
   const primarySortByOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
     disabled: false,
-    selected: option === primarySortBy,
+    id: normalizeSortString(option).toLowerCase(),
+    selected: normalizeSortString(option) === primarySortBy,
     text: option,
-    onClick: () => handlePrimarySortBySelection(option)
+    onClick: () => handlePrimarySortBySelection(normalizeSortString(option))
   }));
 
   const secondarySortOptions: ICustomDropdownItem[] = sortOptions.map((option) => ({
     disabled: option === primarySortBy,
-    selected: option === secondarySortBy,
+    id: normalizeSortString(option).toLowerCase(),
+    selected: normalizeSortString(option) === secondarySortBy,
     text: option,
-    onClick: () => setSecondarySortBy(option)
+    onClick: () => persistentUI.setSecondarySortBy(normalizeSortString(option))
   }));
   secondarySortOptions.unshift({
     disabled: false,
     selected: secondarySortBy === "None",
     text: "None",
-    onClick: () => setSecondarySortBy("None")
+    onClick: () => persistentUI.setSecondarySortBy("None")
   });
 
   const docFilterOptions: ICustomDropdownItem[] = filterOptions.map((option) => ({
@@ -67,13 +70,38 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     onClick: () => handleDocFilterSelection(option)
   }));
 
-  const sortedDocumentGroups = sortedDocuments.sortBy(
-    primarySortBy === sortTagPrompt ? "Strategy" : primarySortBy as PrimarySortType
-  );
-  const secondarySearchTerm = secondarySortBy === sortTagPrompt ? "Strategy" : secondarySortBy as SecondarySortType;
+  const primarySearchTerm = normalizeSortString(primarySortBy) as PrimarySortType;
+  const sortedDocumentGroups = sortedDocuments.sortBy(primarySearchTerm);
+  const secondarySearchTerm = normalizeSortString(secondarySortBy) as SecondarySortType;
   const tabState = persistentUI.tabs.get(ENavTab.kSortWork);
-  const openDocumentKey = tabState?.openDocuments.get(ENavTab.kSortWork) || "";
-  const showSortWorkDocumentArea = !!openDocumentKey;
+  const openDocumentKey = tabState?.openSubTab && tabState?.openDocuments.get(tabState.openSubTab);
+
+  const getOpenDocumentsGroup = () => {
+    let openGroup;
+    if (tabState?.openSubTab && openDocumentKey) {
+      let openGroupMetadata: IOpenDocumentsGroupMetadata;
+      try {
+        openGroupMetadata = JSON.parse(tabState.openSubTab);
+      } catch (e) {
+        persistentUI.closeSubTabDocument(ENavTab.kSortWork);
+        return;
+      }
+
+      if (openGroupMetadata.primaryType !== primarySearchTerm) {
+        persistentUI.closeSubTabDocument(ENavTab.kSortWork);
+      } else {
+        openGroup = sortedDocumentGroups.find(group => group.label === openGroupMetadata.primaryLabel);
+        if (openGroupMetadata.secondaryType === secondarySearchTerm) {
+          const secondaryGroups = openGroup?.sortBy(secondarySearchTerm);
+          openGroup = secondaryGroups?.find(group => group.label === openGroupMetadata.secondaryLabel);
+        }
+      }
+    }
+    return openGroup;
+  };
+
+  const openDocumentsGroup = getOpenDocumentsGroup();
+  const showSortWorkDocumentArea = !!openDocumentKey && openDocumentsGroup;
 
   useEffect(()=>{
     return sortedDocuments.watchFirestoreMetaDataDocs(docFilter, unit.code, investigation.ordinal, problem.ordinal);
@@ -83,34 +111,32 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     <div key="sort-work-view" className="sort-work-view">
       {
         showSortWorkDocumentArea ?
-        <SortWorkDocumentArea openDocumentKey={openDocumentKey}/> :
-        <>
-          <SortWorkHeader
-            key={`sort-work-header-${primarySortBy}`}
-            docFilter={docFilter}
-            docFilterItems={docFilterOptions}
-            primarySort={primarySortBy}
-            primarySortItems={primarySortByOptions}
-            secondarySort={secondarySortBy}
-            secondarySortItems={secondarySortOptions}
-          />
-          <div key={primarySortBy} className="tab-panel-documents-section">
-            { sortedDocumentGroups &&
-              sortedDocumentGroups.map((documentGroup: DocumentGroup, idx: number) => {
-                return (
-                  <SortedSection
-                    key={`sortedDocuments-${documentGroup.label}`}
-                    docFilter={docFilter}
-                    documentGroup={documentGroup}
-                    idx={idx}
-                    secondarySort={secondarySearchTerm}
-                  />
-                );
-              })
-            }
-            {DEBUG_DOC_LIST && <DocListDebug docs={sortedDocuments.filteredDocsByType} />}
-          </div>
-        </>
+          <SortWorkDocumentArea openDocumentsGroup={openDocumentsGroup} /> :
+          <>
+            <SortWorkHeader
+              key={`sort-work-header-${primarySortBy}`}
+              docFilter={docFilter}
+              docFilterItems={docFilterOptions}
+              primarySortItems={primarySortByOptions}
+              secondarySortItems={secondarySortOptions}
+            />
+            <div key={primarySortBy} className="tab-panel-documents-section">
+              { sortedDocumentGroups &&
+                sortedDocumentGroups.map((documentGroup: DocumentGroup, idx: number) => {
+                  return (
+                    <SortedSection
+                      key={`sortedDocuments-${documentGroup.label}`}
+                      docFilter={docFilter}
+                      documentGroup={documentGroup}
+                      idx={idx}
+                      secondarySort={secondarySearchTerm}
+                    />
+                  );
+                })
+              }
+              {DEBUG_DOC_LIST && <DocListDebug docs={sortedDocuments.filteredDocsByType} />}
+            </div>
+          </>
       }
     </div>
   );
