@@ -16,6 +16,7 @@ const title = "1.1 Unit Toolbar Configuration";
 const copyTitle = "Personal Workspace";
 const queryParams1 = `${Cypress.config("clueTestqaConfigSubtabsUnitTeacher6")}`;
 const queryParams2 = `${Cypress.config("qaConfigSubtabsUnitTeacher1")}`;
+const queryParams3 = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
 
 function beforeTest(params) {
   cy.visit(params);
@@ -27,7 +28,7 @@ function beforeTest(params) {
 }
 
 function runClueAsStudent(student, group = 5) {
-  cy.visit(queryParams2.replace("teacher:1", student).replace("qaGroup=5", `qaGroup=${group}`));
+  cy.visit(queryParams3.replace("student:5", student).replace("qaGroup=5", `qaGroup=${group}`));
   cy.waitForLoad();
 }
 
