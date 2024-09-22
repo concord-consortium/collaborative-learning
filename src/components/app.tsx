@@ -22,7 +22,7 @@ function resolveAppMode(
   stores: IStores,
   rawFirebaseJWT: string | undefined
 ) {
-  const { appMode, db, ui} = stores;
+  const { appMode, db, ui, user} = stores;
   if (appMode === "authed")  {
     if (rawFirebaseJWT) {
       return db.connect({appMode, stores, rawFirebaseJWT}).catch(error => ui.setError(error));
@@ -34,7 +34,8 @@ function resolveAppMode(
   else {
     return db.connect({appMode, stores})
       .then(() => {
-        if (appMode === "qa") {
+        // Only students can be part of groups
+        if (appMode === "qa" && user.isStudent) {
           const {qaGroup} = urlParams;
           if (qaGroup) {
             db.leaveGroup().then(() => db.joinGroup(qaGroup));
