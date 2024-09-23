@@ -4,6 +4,7 @@ import ResourcesPanel from "../../../support/elements/common/ResourcesPanel";
 import Canvas from '../../../support/elements/common/Canvas';
 import ClueHeader from '../../../support/elements/common/cHeader';
 import ChatPanel from "../../../support/elements/common/ChatPanel";
+import { visitQaSubtabsUnit } from "../../../support/visit_params";
 
 let sortWork = new SortedWork;
 let resourcesPanel = new ResourcesPanel;
@@ -15,7 +16,6 @@ const canvas = new Canvas;
 const title = "1.1 Unit Toolbar Configuration";
 const copyTitle = "Personal Workspace";
 const queryParams1 = `${Cypress.config("clueTestqaConfigSubtabsUnitTeacher6")}`;
-const queryParams2 = `${Cypress.config("qaConfigSubtabsUnitTeacher1")}`;
 
 function beforeTest(params) {
   cy.visit(params);
@@ -24,11 +24,6 @@ function beforeTest(params) {
   cy.wait(2000);
   cy.openTopTab('sort-work');
   cy.wait(1000);
-}
-
-function runClueAsStudent(student, group = 5) {
-  cy.visit(queryParams2.replace("teacher:1", student).replace("qaGroup=5", `qaGroup=${group}`));
-  cy.waitForLoad();
 }
 
 //TODO: For QA (1/24)
@@ -200,7 +195,7 @@ describe('SortWorkView Tests', () => {
   });
 
   it("should open Sort Work tab and test sorting by group", () => {
-    const students = ["student:1", "student:2", "student:3"];
+    const students = [1,2,3];
     const studentProblemDocs = [
       `Student 1: ${title}`,
       `Student 2: ${title}`,
@@ -217,7 +212,7 @@ describe('SortWorkView Tests', () => {
 
     cy.log("run CLUE for various students creating their problem and personal documents");
     students.forEach(student => {
-      runClueAsStudent(student);
+      visitQaSubtabsUnit({student, group: 5});
       canvas.copyDocument(copyTitle);
       canvas.getPersonalDocTitle().find('span').text().should('contain', copyTitle);
       // Check that exemplar is not visible to student
@@ -227,8 +222,7 @@ describe('SortWorkView Tests', () => {
     });
 
     cy.log("run CLUE as teacher and check student problem, personal, and exemplar docs show in Sort Work");
-    cy.visit(queryParams2);
-    cy.waitForLoad();
+    visitQaSubtabsUnit({teacher: 1});
     cy.openTopTab('sort-work');
     cy.get('.section-header-label').should("contain", "Group 5");
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
@@ -276,7 +270,7 @@ describe('SortWorkView Tests', () => {
     });
 
     cy.log("run CLUE as student 1; they should now have access to exemplar");
-    runClueAsStudent(students[0]);
+    visitQaSubtabsUnit({student: 1, group: 5});
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItemByTitle(exemplarDocs[0]).parents('.list-item').should("not.have.class", "private");
 
@@ -284,8 +278,7 @@ describe('SortWorkView Tests', () => {
     header.leaveGroup();
 
     cy.log("check student:1 problem, exemplar, and personal docs show in No Group");
-    cy.visit(queryParams2);
-    cy.waitForLoad();
+    visitQaSubtabsUnit({teacher: 1});
     cy.openTopTab('sort-work');
     cy.wait(1000);
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
@@ -338,8 +331,7 @@ describe('SortWorkView Tests', () => {
     chatPanel.getChatPanelToggle().click();
     chatPanel.deleteTeacherComments();
     cy.wait(1000);
-    cy.visit(queryParams2);
-    cy.waitForLoad();
+    visitQaSubtabsUnit({teacher: 1});
     cy.openTopTab('sort-work');
 
     cy.log("check that exemplar document is still displayed in strategy tag sourced from CMS but not in teacher added tag");
@@ -355,11 +347,10 @@ describe('SortWorkView Tests', () => {
     sortWork.checkDocumentInGroup("Diverging Designs", exemplarDocs[0]);
 
     cy.log("run CLUE as a student:1 and join group 6");
-    runClueAsStudent(students[0], 6);
+    visitQaSubtabsUnit({student: 1, group: 6});
 
     cy.log("check student:1 problem and personal docs show in Group 6");
-    cy.visit(queryParams2);
-    cy.waitForLoad();
+    visitQaSubtabsUnit({teacher: 1});
     cy.openTopTab('sort-work');
     cy.wait(500);
     sortWork.getPrimarySortByMenu().click();
@@ -373,12 +364,11 @@ describe('SortWorkView Tests', () => {
     sortWork.checkDocumentNotInGroup("Group 6", studentPersonalDocs[1]);
 
     cy.log("run CLUE as a student:1 and leave the group");
-    runClueAsStudent(students[0], 6);
+    visitQaSubtabsUnit({student: 1, group: 6});
     header.leaveGroup();
 
     cy.log("check Group 6 no longer exists in Sort Work");
-    cy.visit(queryParams2);
-    cy.waitForLoad();
+    visitQaSubtabsUnit({teacher: 1});
     cy.openTopTab('sort-work');
     cy.wait(500);
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
@@ -387,29 +377,26 @@ describe('SortWorkView Tests', () => {
     sortWork.checkGroupDoesNotExist("Group 6");
   });
 
-  // The test below fails because the sort selections aren't persisting across page reloads for some
-  // unknown reason. Sort selection persistence occurs in other tests, though, and appears to work
-  // fine when tested manually in a web browser.
-  it.skip("should open Sort Work tab and test that sort selections persist", () => {
-    beforeTest(queryParams1);
+  it("should open Sort Work tab and test that sort selections persist", () => {
+    visitQaSubtabsUnit({teacher: 1});
+    cy.openTopTab('sort-work');
 
     cy.log("check initial state of primary and secondary sort selections and modify both");
     sortWork.getPrimarySortByMenu().click();
     sortWork.getPrimarySortByGroupOption().should("have.class", "selected");
     sortWork.getPrimarySortByNameOption().click();
-    cy.wait(1000);
     sortWork.getPrimarySortByNameOption().should("have.class", "selected");
     sortWork.getSecondarySortByMenu().click();
     sortWork.getSecondarySortByNoneOption().should("have.class", "selected");
     sortWork.getSecondarySortByGroupOption().click();
-    cy.wait(1000);
     sortWork.getSecondarySortByGroupOption().should("have.class", "selected");
+    // Give CLUE some time to save the changes
+    cy.wait(500);
 
     cy.log("reload page and check that modified sort selections persist");
-    cy.visit(queryParams1);
+    visitQaSubtabsUnit({teacher: 1});
     cy.waitForLoad();
     cy.openTopTab("sort-work");
-    cy.wait(1000);
     sortWork.getPrimarySortByNameOption().should("have.class", "selected");
     sortWork.getSecondarySortByGroupOption().should("have.class", "selected");
   });
