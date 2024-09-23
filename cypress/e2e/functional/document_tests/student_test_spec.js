@@ -1,11 +1,18 @@
 import Header from '../../../support/elements/common/Header';
 import ClueHeader from '../../../support/elements/common/cHeader';
 import SortedWork from "../../../support/elements/common/SortedWork";
+import Canvas from '../../../support/elements/common/Canvas';
+import ClueCanvas from '../../../support/elements/common/cCanvas';
+import { visitQaSubtabsUnit } from "../../../support/visit_params";
 
 
 const header = new Header;
 const clueHeader = new ClueHeader;
 const sortWork = new SortedWork;
+const canvas = new Canvas;
+const clueCanvas = new ClueCanvas;
+
+const copyTitle = "Personal Workspace";
 
 let student = '5',
   classroom = '5',
@@ -14,6 +21,14 @@ let student = '5',
 function beforeTest(queryParams) {
   cy.visit(queryParams);
   cy.waitForLoad();
+}
+
+function openAllGroupSections() {
+  cy.get('.section-header-label').should("contain", "Group 1");
+  cy.get('.section-header-label').should("contain", "Group 2");
+  cy.get('.section-header-label').should("contain", "Group 3");
+  cy.get('.section-header-label').should("contain", "No Group");
+  cy.get(".section-header-arrow").click({multiple: true});
 }
 
 context('Check header area for correctness', function () {
@@ -45,23 +60,63 @@ context('Check header area for correctness', function () {
 
 context("check public/private document access", function() {
   it("marks private documents as private and only shows public documents as accessible", function() {
-    const queryParams = (`${Cypress.config("clueTestNoUnitStudent5")}`);
-    beforeTest(queryParams);
+    [1,2,3].forEach(studentId => {
+      // Put each student in their own group
+      visitQaSubtabsUnit({student: studentId, group: studentId});
+      if (studentId === 2) {
+        // Share the student 2 problem document
+        cy.wait(500); // CLUE needs time to create the metadata doc
+        clueCanvas.shareCanvas();
+      }
+      canvas.copyDocument(copyTitle);
+      canvas.getPersonalDocTitle().find('span').text().should('contain', copyTitle);
+      if (studentId === 2) {
+        // Share the student 2 personal document
+        cy.wait(500); // CLUE needs time to create the metadata doc
+        clueCanvas.shareCanvas();
+
+        // Share the student 3 learning log
+        canvas.openDocumentWithTitleWithoutTabs("Learning Log");
+        cy.wait(500); // CLUE needs time to create the metadata doc
+        clueCanvas.shareCanvas();
+
+        // Give CLUE time to update the shared property in the metadata
+        cy.wait(500);
+      }
+    });
+
+    // Go back to student 1
+    visitQaSubtabsUnit({student: 1, group: 1});
 
     cy.openTopTab("sort-work");
-    cy.get(".section-header-arrow").click({multiple: true}); // Open all sections
-    cy.log("will verify if private documents are marked as private and are not accessible");
-    sortWork.checkGroupDocumentVisibility("No Group", true, true);
-    cy.log("will verify if user's own documents are not marked as private and are accessible");
+
+    cy.log("verify user's own documents are not marked as private and are accessible");
+    openAllGroupSections();
+    sortWork.checkGroupDocumentVisibility("Group 1", false, true);
+
+    cy.log("verify other user's shared documents are not marked as private and are accessible");
+    openAllGroupSections();
     sortWork.checkGroupDocumentVisibility("Group 2", false, true);
 
-    // Check the above for a view that contains compact document items
+    cy.log("verify private documents are marked as private and are not accessible");
+    openAllGroupSections();
+    sortWork.checkGroupDocumentVisibility("Group 3", true, true);
+
+    // Check the same conditions in a view that contains compact document items
     sortWork.getShowForMenu().click();
     sortWork.getShowForInvestigationOption().click();
-    cy.get(".section-header-arrow").click({multiple: true}); // Open all sections
-    cy.log("will verify if private documents are marked as private and are not accessible in the compact view");
-    sortWork.checkGroupDocumentVisibility("No Group", true);
-    cy.log("will verify if user's own documents are not marked as private and are accessible in the compact view");
+
+    cy.log("verify user's own documents are not marked as private and are accessible in the compact view");
+    // In this case the sections are still open from before
+    // openAllGroupSections();
+    sortWork.checkGroupDocumentVisibility("Group 1", false);
+
+    cy.log("verify other user's shared documents are not marked as private and are accessible in the compact view");
+    openAllGroupSections();
     sortWork.checkGroupDocumentVisibility("Group 2", false);
+
+    cy.log("verify private documents are marked as private and are not accessible in the compact view");
+    openAllGroupSections();
+    sortWork.checkGroupDocumentVisibility("Group 3", true);
   });
 });
