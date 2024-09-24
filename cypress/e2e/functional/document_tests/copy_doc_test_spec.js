@@ -12,10 +12,12 @@ import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import DataflowToolTile from '../../../support/elements/tile/DataflowToolTile';
 import SimulatorTile from '../../../support/elements/tile/SimulatorTile';
 import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
+import TileNavigator from '../../../support/elements/tile/TileNavigator';
 
 let tableTile = new TableToolTile;
 let textTile = new TextToolTile;
 let drawTile = new DrawToolTile;
+let tileNavigator = new TileNavigator;
 let imageTile = new ImageToolTile;
 let geometryTile = new GeometryToolTile;
 let expressionTile = new ExpressionToolTile;
@@ -62,6 +64,8 @@ context('Copy Document', () => {
 
     cy.log('Add drawing tile');
     clueCanvas.addTile("drawing");
+    // Hide tile navigator so it doesn't interfere with drawing element counts
+    tileNavigator.getTileNavigatorToolbarButton().click();
     drawTile.drawRectangle(250, 50, -150, 100);
     drawTile.getRectangleDrawing().should("exist").and("have.length", 1);
 

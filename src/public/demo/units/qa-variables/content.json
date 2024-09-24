@@ -60,7 +60,8 @@
           "new-variable",
           "insert-variable",
           "edit-variable",
-          "delete"
+          "delete",
+          "navigator"
         ]
       },
       "diagram": {

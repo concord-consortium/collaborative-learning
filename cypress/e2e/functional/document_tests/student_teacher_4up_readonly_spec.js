@@ -9,12 +9,14 @@ import NumberlineToolTile from '../../../support/elements/tile/NumberlineToolTil
 import DataCardToolTile from '../../../support/elements/tile/DataCardToolTile';
 import DataflowToolTile from '../../../support/elements/tile/DataflowToolTile';
 import SimulatorTile from '../../../support/elements/tile/SimulatorTile';
+import TileNavigator from '../../../support/elements/tile/TileNavigator';
 
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
 const tableToolTile = new TableToolTile;
 const geometryToolTile = new GeometryToolTile;
 const drawToolTile = new DrawToolTile;
+const tileNavigator = new TileNavigator;
 const exp = new ExpressionToolTile;
 const numberlineToolTile = new NumberlineToolTile;
 const dc = new DataCardToolTile;
@@ -89,6 +91,8 @@ function setupTest(studentIndex) {
   geometryToolTile.getGraphPoint().should('have.length', 3);
   geometryToolTile.getPhantomGraphPoint().should('exist');
   clueCanvas.addTile("drawing");
+  // Hide tile navigator so it doesn't interfere with drawing element counts
+  tileNavigator.getTileNavigatorToolbarButton().click();
   drawToolTile.drawRectangle(100, 100);
   drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
   clueCanvas.addTile("expression");

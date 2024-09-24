@@ -16,6 +16,7 @@ import { FillColorButton, StrokeColorButton } from "./toolbar-buttons/select-but
 import { DeleteButton, DuplicateButton, GroupButton, UngroupButton } from "./action-buttons";
 import { ImageUploadButton } from "./toolbar-buttons/image-upload-button";
 import { ZoomInButton, ZoomOutButton, FitAllButton } from "./toolbar-buttons/zoom-buttons";
+import { NavigatorButton } from "../drawing/toolbar-buttons/navigator-button";
 
 import Icon from "./assets/draw-tool.svg";
 import HeaderIcon from "./assets/sketch-tile-id.svg";
@@ -79,5 +80,6 @@ registerTileToolbarButtons("drawing", [
   { name: "zoom-in", component: ZoomInButton },
   { name: "zoom-out", component: ZoomOutButton },
   { name: "fit-all", component: FitAllButton },
+  { name: "navigator", component: NavigatorButton },
   { name: "delete", component: DeleteButton }
 ]);

@@ -1,0 +1,128 @@
+@import "../vars";
+
+.tile-navigator-container {
+  top: calc(100% - 117px);
+  height: 107px;
+  padding-top: 15px;
+  padding-bottom: 0;
+  position: absolute;
+  right: 10px;
+  transition: .2s position;
+  width: 100px;
+
+  &.top {
+    padding-bottom: 15px;
+    padding-top: 0;
+
+    &.animate {
+      animation: navigator-scroll-up .25s forwards;
+    }
+
+    .tile-navigator {
+      border-radius: 3px 3px 0 0;
+    }
+  }
+
+  &.animate {
+    animation: navigator-scroll-down .25s forwards;
+  }
+
+  .tile-navigator {
+    align-items: center;
+    background: $charcoal-light-4;
+    border-radius: 0 0 3px 3px;
+    display: flex;
+    flex-direction: column;
+    height: 92px;
+    overflow: hidden;
+
+    .tile-navigator-content-area {
+      align-items: center;
+      display: flex;
+      height: 79px;
+      justify-content: center;
+      margin: 0 5px;
+      overflow: hidden;
+
+      .tile-navigator-tile-content {
+        background: white;
+        overflow: hidden;
+        pointer-events: none;
+        transform-origin: top left;
+
+        .title-area-wrapper {
+          display: none;
+        }
+      }
+    }
+
+    .zoom-level {
+      align-items: center;
+      display: flex;
+      font-size: 11px;
+      height: 15px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .tile-navigator-placement-button {
+      all: unset;
+      background: $charcoal-light-4;
+      border-radius: 3px 3px 0 0;
+      cursor: pointer;
+      height: 15px;
+      left: 0;
+      position: absolute;
+      text-align: center;
+      top: 0;
+      width: 100%;
+      z-index: 1;
+
+      &:hover {
+        background: $charcoal-light-2;
+
+        svg {
+          display: inline-block;
+        }
+      }
+      &:active {
+        background: $charcoal-light-1;
+      }
+
+      &.top {
+        border-radius: 0 0 3px 3px;
+        bottom: 0;
+        top: auto;
+
+        svg {
+          transform: rotate(0deg);
+        }
+      }
+
+      svg {
+        display: none;
+        top: 0;
+        left: 50%;
+        transform: rotate(180deg);
+      }
+    }
+  }
+}
+
+@keyframes navigator-scroll-up {
+  0% {
+    top: calc(100% - 117px);
+  }
+  100% {
+    top: 10px;
+  }
+}
+
+@keyframes navigator-scroll-down {
+  0% {
+    top: 10px;
+  }
+  100% {
+    top: calc(100% - 117px);
+  }
+}

@@ -10,6 +10,7 @@ import DataflowToolTile from '../../../support/elements/tile/DataflowToolTile';
 import SimulatorTile from '../../../support/elements/tile/SimulatorTile';
 import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import XYPlotToolTile from "../../../support/elements/tile/XYPlotToolTile";
+import TileNavigator from '../../../support/elements/tile/TileNavigator';
 
 const student5 = `${Cypress.config("qaUnitStudent5")}`;
 const student6 = `${Cypress.config("qaUnitStudent6")}`;
@@ -18,6 +19,7 @@ let clueCanvas = new ClueCanvas,
   tableToolTile = new TableToolTile,
   geometryToolTile = new GeometryToolTile,
   drawToolTile = new DrawToolTile,
+  tileNavigator = new TileNavigator,
   exp = new ExpressionToolTile,
   numberlineToolTile = new NumberlineToolTile,
   dc = new DataCardToolTile,
@@ -150,6 +152,8 @@ context('Test copy tiles from one document to other document', function () {
 
     cy.log('Add drawing tile');
     clueCanvas.addTile("drawing");
+    // Hide tile navigator so it doesn't interfere with drawing element counts
+    tileNavigator.getTileNavigatorToolbarButton().click();
     drawToolTile.drawRectangle(250, 50, -150, 100);
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
 

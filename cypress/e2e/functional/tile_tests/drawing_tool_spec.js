@@ -1,11 +1,13 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import ImageToolTile from '../../../support/elements/tile/ImageToolTile';
+import TileNavigator from "../../../support/elements/tile/TileNavigator";
 import { LogEventName } from '../../../../src/lib/logger-types';
 
-let clueCanvas = new ClueCanvas,
-  drawToolTile = new DrawToolTile;
+const clueCanvas = new ClueCanvas;
+const drawToolTile = new DrawToolTile;
 const imageToolTile = new ImageToolTile;
+const tileNavigator = new TileNavigator;
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaUnitStudent5")}`;
@@ -132,6 +134,8 @@ context('Draw Tool Tile', function () {
     // Close panel
     drawToolTile.getDrawTileShowSortPanelCloseButton().click();
     drawToolTile.getDrawTileShowSortPanel().should("have.class", "closed");
+    // Hide tile navigator so it doesn't interfere with drawing element counts
+    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("verify draw a line");
     drawToolTile.getDrawToolFreehand().click();
@@ -204,6 +208,8 @@ context('Draw Tool Tile', function () {
   it("Vector", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
+    // Hide tile navigator so it doesn't interfere with drawing element counts
+    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("verify draw vector");
     drawToolTile.drawVector(250, 50, -150, 0);
@@ -285,6 +291,8 @@ context('Draw Tool Tile', function () {
   it("Rectangle", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
+    // Hide tile navigator so it doesn't interfere with drawing element counts
+    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("verify draw rectangle");
     drawToolTile.drawRectangle(250, 50, -150, 100);
@@ -459,6 +467,8 @@ context('Draw Tool Tile', function () {
   it("Ellipse", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
+    // Hide tile navigator so it doesn't interfere with drawing element counts
+    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("verify draw ellipse");
     drawToolTile.drawEllipse(250, 50, -150, 100);
@@ -495,6 +505,8 @@ context('Draw Tool Tile', function () {
   it("Stamp", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
+    // Hide tile navigator so it doesn't interfere with drawing element counts
+    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("verify draw stamp");
     drawToolTile.getDrawToolStamp().click();
@@ -542,6 +554,8 @@ context('Draw Tool Tile', function () {
   it("Text", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
+    // Hide tile navigator so it doesn't interfere with drawing element counts
+    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("adds text object");
     drawToolTile.getDrawToolText().click();
@@ -578,6 +592,8 @@ context('Draw Tool Tile', function () {
   it("Group", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
+    // Hide tile navigator so it doesn't interfere with drawing element counts
+    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("can group and ungroup");
     drawToolTile.getDrawToolRectangle().click();
@@ -615,6 +631,8 @@ context('Draw Tool Tile', function () {
   it("Image", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
+    // Hide tile navigator so it doesn't interfere with drawing element counts
+    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("drags images from image tiles");
     const imageFilePath1 = 'image.png';

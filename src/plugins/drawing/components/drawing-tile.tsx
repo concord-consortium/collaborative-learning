@@ -1,5 +1,6 @@
 import classNames from "classnames";
 import React, { useEffect, useState, useRef } from "react";
+import { observer } from "mobx-react";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { DrawingLayerView } from "./drawing-layer";
 import { DrawingContentModelType } from "../model/drawing-content";
@@ -14,14 +15,16 @@ import { ObjectListView } from "./object-list-view";
 import { useUIStore } from "../../../hooks/use-stores";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
+import { TileNavigator } from "../../../components/tiles/tile-navigator";
 
 import "./drawing-tile.scss";
 
 type IProps = ITileProps;
 
-const DrawingToolComponent: React.FC<IProps> = (props) => {
-  const { tileElt, model, readOnly, onRegisterTileApi } = props;
+const DrawingToolComponent: React.FC<IProps> = observer(function DrawingToolComponent(props) {
+  const { tileElt, model, readOnly, onRegisterTileApi, navigatorAllowed = true } = props;
   const contentRef = useCurrent(model.content as DrawingContentModelType);
+  const showNavigator = navigatorAllowed && contentRef.current.isNavigatorVisible ;
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
   const [objectListHoveredObject, setObjectListHoveredObject] = useState(null as string|null);
   const hotKeys = useRef(new HotKeys());
@@ -173,7 +176,13 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
           />
         </div>
       </div>
+      {!readOnly && showNavigator &&
+        <TileNavigator>
+          <DrawingToolComponent {...props} />
+        </TileNavigator>
+      }
     </DrawingContentModelContext.Provider>
   );
-};
+});
+
 export default DrawingToolComponent;

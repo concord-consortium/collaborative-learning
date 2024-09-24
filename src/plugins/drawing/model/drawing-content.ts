@@ -49,7 +49,8 @@ export const DrawingContentModel = TileContentModel
     vectorType: types.maybe(types.enumeration<VectorType>("VectorType", Object.values(VectorType))),
     // is type.maybe to avoid need for migration
     currentStampIndex: types.maybe(types.number),
-    zoom: types.optional(types.number, 1)
+    zoom: types.optional(types.number, 1),
+    isNavigatorVisible : types.optional(types.boolean, true),
   })
   .volatile(self => ({
     metadata: undefined as DrawingToolMetadataModelType | undefined,
@@ -184,6 +185,14 @@ export const DrawingContentModel = TileContentModel
 
     setZoom(zoom: number) {
       self.zoom = zoom;
+    },
+
+    showNavigator() {
+      self.isNavigatorVisible  = true;
+    },
+
+    hideNavigator() {
+      self.isNavigatorVisible  = false;
     },
 
     addObject(object: DrawingObjectSnapshotForAdd, addAtBack=false) {
