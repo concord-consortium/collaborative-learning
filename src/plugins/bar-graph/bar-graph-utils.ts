@@ -1,5 +1,6 @@
 import { SnapshotOut } from "mobx-state-tree";
 import { LogEventName } from "../../lib/logger-types";
+import { isImageUrl } from "../../models/data/data-types";
 import { SharedModelEntrySnapshotType } from "../../models/document/shared-model-entry";
 import { replaceJsonStringsWithUpdatedIds, UpdatedSharedDataSetIds } from "../../models/shared/shared-data-set";
 import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
@@ -7,9 +8,17 @@ import { getTileIdFromContent } from "../../models/tiles/tile-model";
 import { BarGraphContentModel, BarGraphContentModelType } from "./bar-graph-content";
 
 const kMissingValueString = "(no value)";
+const kImageValueString = "<image>";
 
-// Substitute "(no value)" for missing data
+// Convert the value to a user-friendly string to display.
+// Substitutes "(no value)" for missing data and "<image>" for image data
 export function displayValue(attrValue: string | undefined): string {
+  if (isImageUrl(attrValue)) return kImageValueString;
+  return attrValue ? attrValue : kMissingValueString;
+}
+
+// Just substitute "(no value)" for undefined so we have a string can be used as a key
+export function keyForValue(attrValue: string | undefined): string {
   return attrValue ? attrValue : kMissingValueString;
 }
 

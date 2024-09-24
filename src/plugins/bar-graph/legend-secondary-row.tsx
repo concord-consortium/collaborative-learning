@@ -1,7 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import { useBarGraphModelContext } from './bar-graph-content-context';
-import { isMissingData } from './bar-graph-utils';
+import { displayValue, isMissingData } from './bar-graph-utils';
 
 interface IProps {
   attrValue: string;
@@ -12,6 +12,7 @@ export function LegendSecondaryRow({attrValue}: IProps) {
   if (!model) return null;
 
   const missingData = isMissingData(attrValue);
+  const display = displayValue(attrValue);
 
   return (
     <div key={attrValue} className="secondary-value">
@@ -19,7 +20,7 @@ export function LegendSecondaryRow({attrValue}: IProps) {
         <div className="color-swatch" style={{ backgroundColor: model.getColorForSecondaryKey(attrValue) }} />
       </div>
       <div className={classNames("secondary-value-name", { missing: missingData })}>
-        {attrValue}
+        {display}
       </div>
     </div>
   );
