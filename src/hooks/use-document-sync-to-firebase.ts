@@ -67,7 +67,6 @@ export function useDocumentSyncToFirebase(
         // If an onDisconnect was set, remove it and set updated timestamp to now.
         if (disconnectHandler.current) {
           firebase.setLastEditedNow(user, key, uid, disconnectHandler.current);
-          console.log("Doc closed, setting last modified", key);
         }
       };
     }
@@ -205,7 +204,6 @@ export function useDocumentSyncToFirebase(
   const mutation = useMutation((snapshot: DocumentContentSnapshotType) => {
     if (!disconnectHandler.current) {
       disconnectHandler.current = firebase.setLastEditedOnDisconnect(user, key, uid);
-      console.log("Doc modified, tracking disconnect", key);
     }
 
     const tileMap = snapshot.tileMap || {};
