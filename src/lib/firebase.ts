@@ -180,6 +180,32 @@ export class Firebase {
     return `${this.getUserPath(user, userId)}/documentMetadata${suffix}`;
   }
 
+  public getLastEditedMetadataPath(user: UserModelType, documentKey: string, userId?: string) {
+    return `${this.getUserDocumentMetadataPath(user, documentKey, userId)}/lastEditedAt`;
+  }
+
+  /**
+   * Set up a Firebase onDisconnect handler to update the lastEditedAt timestamp when the user disconnects.
+   */
+  public setLastEditedOnDisconnect(user: UserModelType, documentKey: string, userId?: string) {
+    const ref = this.ref(this.getLastEditedMetadataPath(user, documentKey, userId));
+    const onDisconnect = ref.onDisconnect();
+    onDisconnect.set(firebase.database.ServerValue.TIMESTAMP);
+    return onDisconnect;
+  }
+
+  /**
+   * Set the lastEditedAt timestamp to the current time, optionally cancelling an onDisconnect handler.
+   */
+  public setLastEditedNow(user: UserModelType, documentKey: string, userId: string|undefined,
+      onDisconnect?: firebase.database.OnDisconnect) {
+    if (onDisconnect) {
+      onDisconnect.cancel();
+    }
+    return this.ref(this.getLastEditedMetadataPath(user, documentKey, userId))
+      .set(firebase.database.ServerValue.TIMESTAMP);
+  }
+
   // Unpublished personal document/learning log metadata
   public getOtherDocumentPath(user: UserModelType, documentType: OtherDocumentType, documentKey?: string) {
     const dir = documentType === PersonalDocument ? "personalDocs" : "learningLogs";

@@ -1,6 +1,7 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { throttle as _throttle } from "lodash";
 import { onSnapshot, SnapshotOut } from "mobx-state-tree";
+import { OnDisconnect } from "firebase-admin/database";
 import { useSyncMstNodeToFirebase } from "./use-sync-mst-node-to-firebase";
 import { useSyncMstPropToFirebase } from "./use-sync-mst-prop-to-firebase";
 import { DEBUG_DOCUMENT, DEBUG_SAVE } from "../lib/debug";
@@ -40,6 +41,7 @@ export function useDocumentSyncToFirebase(
 ) {
   const { key, type, uid, contentStatus } = document;
   const { content: contentPath, metadata, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
+  const disconnectHandler = useRef<OnDisconnect|undefined>(undefined);
 
   // TODO: when running in doc-editor this warning was printed constantly
   // Ideally we'd figure out how to separate the syncing from the document stuff so the doc-editor can use
@@ -62,9 +64,14 @@ export function useDocumentSyncToFirebase(
         if (document.treeMonitor) {
           document.treeMonitor.enabled = false;
         }
+        // If an onDisconnect was set, remove it and set updated timestamp to now.
+        if (disconnectHandler.current) {
+          firebase.setLastEditedNow(user, key, uid, disconnectHandler.current);
+          console.log("Doc closed, setting last modified", key);
+        }
       };
     }
-  }, [readOnly, contentStatus, document.treeMonitor]);
+  }, [readOnly, contentStatus, document.treeMonitor, firebase, user, key, uid]);
 
   if (!readOnly && DEBUG_DOCUMENT) {
     // provide the document to the console so developers can inspect its content
@@ -196,10 +203,13 @@ export function useDocumentSyncToFirebase(
     ({ changeCount: document.incChangeCount(), content: JSON.stringify(snapshot) });
 
   const mutation = useMutation((snapshot: DocumentContentSnapshotType) => {
+    if (!disconnectHandler.current) {
+      disconnectHandler.current = firebase.setLastEditedOnDisconnect(user, key, uid);
+      console.log("Doc modified, tracking disconnect", key);
+    }
+
     const tileMap = snapshot.tileMap || {};
-
     const tools: string[] = [];
-
     Object.keys(tileMap).forEach((tileKey) => {
       const tileInfo = tileMap[tileKey] as ITileMapEntry;
       const tileType = tileInfo.content.type;
