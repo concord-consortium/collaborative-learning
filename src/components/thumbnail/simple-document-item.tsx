@@ -1,30 +1,24 @@
 import { observer } from "mobx-react";
 import React from "react";
-import { IDocumentMetadata } from "../../../shared/shared";
+import { IDocumentMetadataModel } from "../../models/stores/sorted-documents";
 import { useStores } from "../../hooks/use-stores";
-import { isDocumentAccessibleToUser } from "../../models/document/document-utils";
+import { getDocumentDisplayTitle, isDocumentAccessibleToUser } from "../../models/document/document-utils";
 
 import "./simple-document-item.scss";
 
 interface IProps {
-  document: IDocumentMetadata;
-  investigationOrdinal: string;
-  problemOrdinal: string;
-  onSelectDocument: (document: IDocumentMetadata) => void;
+  document: IDocumentMetadataModel;
+  onSelectDocument: (document: IDocumentMetadataModel) => void;
 }
 
 export const SimpleDocumentItem = observer(function SimpleDocumentItem(
-  { document, investigationOrdinal, onSelectDocument, problemOrdinal }: IProps
+  { document, onSelectDocument }: IProps
 ) {
-  const { documents, class: classStore, unit, user } = useStores();
+  const { appConfig, documents, class: classStore, unit, user } = useStores();
   const { uid } = document;
   const userName = classStore.getUserById(uid)?.displayName;
-  // TODO: Make it so we don't have to convert investigationOrdinal and problemOrdinal to numbers here? We do so
-  // because the values originate as strings. Changing their types to numbers in the model would make this unnecessary,
-  // but doing that causes errors elsewhere when trying to load documents that aren't associated with a problem.
-  const investigation = unit.getInvestigation(Number(investigationOrdinal));
-  const problem = investigation?.getProblem(Number(problemOrdinal));
-  const title = document.title ? `${userName}: ${document.title}` : `${userName}: ${problem?.title ?? "unknown title"}`;
+  const title = getDocumentDisplayTitle(unit, document, appConfig);
+  const titleWithUser = `${userName}: ${title}`;
   const isPrivate = !isDocumentAccessibleToUser(document, user, documents);
 
   const handleClick = () => {
@@ -35,7 +29,7 @@ export const SimpleDocumentItem = observer(function SimpleDocumentItem(
     <div
       className={isPrivate ? "simple-document-item private" : "simple-document-item"}
       data-test="simple-document-item"
-      title={title}
+      title={titleWithUser}
       onClick={!isPrivate ? handleClick : undefined}
     >
     </div>

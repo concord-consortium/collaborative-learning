@@ -1,31 +1,70 @@
 import { getParent } from "mobx-state-tree";
-import { IDocumentMetadata } from "../../../shared/shared";
-import { ProblemModelType } from "../curriculum/problem";
+import { upperFirst } from "lodash";
+import { IDocumentMetadataBase } from "../../../shared/shared";
 import { SectionModelType } from "../curriculum/section";
-import { getSectionPath } from "../curriculum/unit";
+import { getSectionPath, UnitModelType } from "../curriculum/unit";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType, IExemplarVisibilityProvider } from "./document";
 import { DocumentContentModelType } from "./document-content";
-import { isExemplarType, isPlanningType, isProblemType, isPublishedType } from "./document-types";
+import { isExemplarType, isPlanningType, isProblemType, isPublishedType, isSupportType } from "./document-types";
+import { IDocumentMetadataModel } from "../stores/sorted-documents";
+import { getLocalTimeStamp } from "../../utilities/time";
+
+function getProblemFromDoc(unit: UnitModelType, document: DocumentModelType | IDocumentMetadataModel) {
+  if (unit.code !== document.unit) {
+    return undefined;
+  }
+  const investigation = unit.getInvestigation(Number(document.investigation));
+  const problem = investigation?.getProblem(Number(document.problem));
+  return problem;
+}
+
+function getDocumentTileFromProblem(currentUnit: UnitModelType, document: DocumentModelType | IDocumentMetadataModel) {
+  const {type, unit, investigation, problem} = document;
+  const problemModel = getProblemFromDoc(currentUnit, document);
+  if (problemModel) {
+    if (isPlanningType(type)) {
+      return `${problemModel.title}: Planning`;
+    }
+    return problemModel.title;
+  }
+
+  const upperType = upperFirst(document.type);
+  if (!unit) {
+    return `${upperType} doc without unit`;
+  }
+  return `${upperType} doc from ${unit}-${investigation}.${problem}`;
+}
+
+export function getDocumentTitleWithTimestamp(
+  document: DocumentModelType | IDocumentMetadataModel,
+  appConfig: AppConfigModelType
+) {
+  const timeStampPropName = appConfig.docTimeStampPropertyName || undefined;
+  const timeStampProp = timeStampPropName && document.getProperty(timeStampPropName);
+  const timeStamp = timeStampProp
+                      ? parseFloat(timeStampProp)
+                      : undefined;
+  const timeStampStr = timeStamp ? getLocalTimeStamp(timeStamp) : undefined;
+  return timeStampStr
+          ? `${document.title} (${timeStampStr})`
+          : document.title;
+}
 
 export function getDocumentDisplayTitle(
-  document: DocumentModelType, appConfig: AppConfigModelType, problem?: ProblemModelType,
-  unit?: string
+  unit: UnitModelType,
+  document: DocumentModelType | IDocumentMetadataModel,
+  appConfig: AppConfigModelType
 ) {
   const { type } = document;
-  const documentProblemOrdinal = `${document.investigation}.${document.problem}`;
-  const problemTitle = !(document.problem || document.investigation || document.unit) ||
-                       (documentProblemOrdinal === String(problem?.ordinal) && unit === document?.unit)
-                         ? problem?.title || "Unknown Problem"
-                         : "Unknown Problem";
-  return document.isSupport
-    ? document.getProperty("caption") || "Support"
-    : isProblemType(type)
-        ? problemTitle
-        : isPlanningType(type)
-            ? `${problem?.title || "Unkown"}: Planning`
-            : document.getDisplayTitle(appConfig);
+  if (isSupportType(type)) {
+    return document.getProperty("caption") || "Support";
+  } else if (isProblemType(type) || isPlanningType(type)) {
+    return getDocumentTileFromProblem(unit, document);
+  } else {
+    return getDocumentTitleWithTimestamp(document, appConfig);
+  }
 }
 
 /**
@@ -48,7 +87,7 @@ export function getDocumentIdentifier(document?: DocumentContentModelType) {
 }
 
 export const isDocumentAccessibleToUser = (
-  doc: IDocumentMetadata, user: UserModelType, documentStore: IExemplarVisibilityProvider
+  doc: IDocumentMetadataBase, user: UserModelType, documentStore: IExemplarVisibilityProvider
 ) => {
   const ownDocument = doc.uid === user.id;
   const isShared = doc.visibility === "public";

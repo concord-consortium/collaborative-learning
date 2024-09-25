@@ -11,6 +11,7 @@ import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/lo
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
+import { getDocumentTitleWithTimestamp } from "../../models/document/document-utils";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { IconButton } from "../utilities/icon-button";
 import ToggleControl from "../utilities/toggle-control";
@@ -384,7 +385,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
             </div>
           : <div className="title" data-test="personal-doc-title">
-              <TitleInfo docTitle={`${document.getDisplayTitle(appConfig)}`} onClick={this.handleDocumentRename} />
+              <TitleInfo
+                docTitle={`${getDocumentTitleWithTimestamp(document, appConfig)}`}
+                onClick={this.handleDocumentRename} />
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
             </div>
         }

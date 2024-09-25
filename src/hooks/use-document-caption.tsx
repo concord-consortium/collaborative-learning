@@ -1,14 +1,11 @@
 import { useFirestoreTeacher } from "./firestore-hooks";
-import { useAppConfig, useClassStore, useProblemStore, useUserStore } from "./use-stores";
 import { DocumentModelType } from "../models/document/document";
 import { ExemplarDocument, isPublishedType, isUnpublishedType } from "../models/document/document-types";
 import { getDocumentDisplayTitle } from "../models/document/document-utils";
+import { useStores } from "./use-stores";
 
 export function useDocumentCaption(document: DocumentModelType, isStudentWorkspaceDoc?: boolean) {
-  const appConfig = useAppConfig();
-  const problem = useProblemStore();
-  const classStore = useClassStore();
-  const user = useUserStore();
+  const {appConfig, class: classStore, unit, user} = useStores();
   const { type, uid } = document;
   const pubVersion = document.pubVersion;
   const teacher = useFirestoreTeacher(uid, user.network || "");
@@ -29,6 +26,6 @@ export function useDocumentCaption(document: DocumentModelType, isStudentWorkspa
                       : isPublishedType(type) && pubVersion
                           ? ` v${pubVersion}`
                           : "";
-  const title = getDocumentDisplayTitle(document, appConfig, problem);
+  const title = getDocumentDisplayTitle(unit, document, appConfig);
   return `${namePrefix}${title}${dateSuffix}`;
 }
