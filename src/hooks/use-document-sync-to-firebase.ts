@@ -43,6 +43,14 @@ export function useDocumentSyncToFirebase(
   const { content: contentPath, metadata, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
   const disconnectHandler = useRef<OnDisconnect|undefined>(undefined);
 
+  const handlePresenceChange = useMemo(() => (snapshot: any) => {
+    // When we come online after being offline, need to note that the onDisconnect event will have been fired.
+    // So the next time the document is modified, it needs to be set up again.
+    if (snapshot.val() === true) {
+      disconnectHandler.current = undefined;
+    }
+  }, []);
+
   // TODO: when running in doc-editor this warning was printed constantly
   // Ideally we'd figure out how to separate the syncing from the document stuff so the doc-editor can use
   // documents without also bringing in the syncing.
@@ -53,24 +61,31 @@ export function useDocumentSyncToFirebase(
     console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
   useEffect(() => {
-    // To handle errors this should be disabled if the document status is error
+    // Tree monitoring should be disabled if the document status is error
     if (!readOnly && contentStatus === ContentStatus.Valid) {
       // enable history tracking on this document
       if (document.treeMonitor) {
         document.treeMonitor.enabled = true;
       }
+      // Set up listener for online status
+      firebase.onlineStatusRef.off('value', handlePresenceChange);
+
       return () => {
         // disable history tracking on this document
         if (document.treeMonitor) {
           document.treeMonitor.enabled = false;
         }
-        // If an onDisconnect was set, remove it and set updated timestamp to now.
+        // Remove the online status listener
+        if (!readOnly && contentStatus === ContentStatus.Valid) {
+          firebase.onlineStatusRef.off('value', handlePresenceChange);
+        }
+        // If an onDisconnect is set, remove it and set the updated timestamp to now.
         if (disconnectHandler.current) {
           firebase.setLastEditedNow(user, key, uid, disconnectHandler.current);
         }
       };
     }
-  }, [readOnly, contentStatus, document.treeMonitor, firebase, user, key, uid]);
+  }, [readOnly, contentStatus, document.treeMonitor, firebase, user, key, uid, handlePresenceChange]);
 
   if (!readOnly && DEBUG_DOCUMENT) {
     // provide the document to the console so developers can inspect its content

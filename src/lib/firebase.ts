@@ -38,6 +38,10 @@ export class Firebase {
     return this.user !== null;
   }
 
+  public get onlineStatusRef() {
+    return firebase.database().ref(".info/connected");
+  }
+
   public ref(path = "") {
     if (!this.isConnected) {
       throw new Error("ref() requested before db connected!");
