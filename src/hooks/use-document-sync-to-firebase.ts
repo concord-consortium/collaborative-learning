@@ -60,6 +60,8 @@ export function useDocumentSyncToFirebase(
   !disableFirebaseSync && !readOnly && (user.id !== uid) &&
     console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
+  const commonSyncEnabled = !disableFirebaseSync && contentStatus === ContentStatus.Valid;
+
   useEffect(() => {
     // Tree monitoring should be disabled if the document status is error
     if (!readOnly && contentStatus === ContentStatus.Valid) {
@@ -68,7 +70,9 @@ export function useDocumentSyncToFirebase(
         document.treeMonitor.enabled = true;
       }
       // Set up listener for online status
-      firebase.onlineStatusRef.on('value', handlePresenceChange);
+      if (commonSyncEnabled) {
+        firebase.onlineStatusRef.on('value', handlePresenceChange);
+      }
 
       return () => {
         // disable history tracking on this document
@@ -76,7 +80,7 @@ export function useDocumentSyncToFirebase(
           document.treeMonitor.enabled = false;
         }
         // Remove the online status listener
-        if (!readOnly && contentStatus === ContentStatus.Valid) {
+        if (!readOnly && commonSyncEnabled) {
           firebase.onlineStatusRef.off('value', handlePresenceChange);
         }
         // If an onDisconnect is set, remove it and set the updated timestamp to now.
@@ -85,7 +89,8 @@ export function useDocumentSyncToFirebase(
         }
       };
     }
-  }, [readOnly, contentStatus, document.treeMonitor, firebase, user, key, uid, handlePresenceChange]);
+  }, [readOnly, contentStatus, document.treeMonitor, firebase, user, key, uid,
+      handlePresenceChange, commonSyncEnabled]);
 
   if (!readOnly && DEBUG_DOCUMENT) {
     // provide the document to the console so developers can inspect its content
@@ -94,8 +99,6 @@ export function useDocumentSyncToFirebase(
     // useDocumentSyncToFirebase is called with readOnly documents too
     (window as any).currentDocument = document;
   }
-
-  const commonSyncEnabled = !disableFirebaseSync && contentStatus === ContentStatus.Valid;
 
   /**
    * We currently have multiple firestore metadata docs for each real doc.
@@ -217,7 +220,7 @@ export function useDocumentSyncToFirebase(
     ({ changeCount: document.incChangeCount(), content: JSON.stringify(snapshot) });
 
   const mutation = useMutation((snapshot: DocumentContentSnapshotType) => {
-    if (!disconnectHandler.current) {
+    if (!disconnectHandler.current && commonSyncEnabled) {
       disconnectHandler.current = firebase.setLastEditedOnDisconnect(user, key, uid);
     }
 
