@@ -68,7 +68,7 @@ export function useDocumentSyncToFirebase(
         document.treeMonitor.enabled = true;
       }
       // Set up listener for online status
-      firebase.onlineStatusRef.off('value', handlePresenceChange);
+      firebase.onlineStatusRef.on('value', handlePresenceChange);
 
       return () => {
         // disable history tracking on this document
