@@ -14,7 +14,6 @@ import NewDocumentIcon from "../../assets/icons/new/add.svg";
 
 import "./document-type-collection.scss";
 
-
 interface IProps {
   topTab?: ENavTab;
   tab: string;
@@ -73,7 +72,7 @@ export const DocumentCollectionByType: React.FC<IProps> = observer(({
   const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName,
                                                   {"top-panel": isTopPanel, horizontal});
   const bottomPanel = isBottomPanel && !isSinglePanel && sectionDocs.length > 0;
-  const listClass = classNames("list", tabName, {"top-panel": isTopPanel, horizontal,
+  const listClass = classNames("documents-list", tabName, {"top-panel": isTopPanel, horizontal,
                                 "bottom-panel": bottomPanel});
   return (
     <div className={tabPanelDocumentSectionClass}

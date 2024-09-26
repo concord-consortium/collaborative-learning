@@ -3,15 +3,13 @@
 .bar-graph-content {
   width: 100%;
   height: 100%;
+  padding: 44px 0 12px 0;
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
   align-items: center;
   overflow: auto;
 
-  svg {
-    width: 100%;
-    height: 100%;
+  svg.bar-graph-svg {
 
     .visx-bar-group .visx-bar {
       stroke: black;
@@ -27,26 +25,145 @@
         padding: 3px;
       }
 
-      button {
-        font-family: Lato;
-        border: 1.5px solid #949494;
-        border-radius: 5px;
-        padding: 5px;
+    }
 
-        .button-content {
-          display: flex;
-          flex-direction: row;
-          justify-content: center;
-          align-items: center;
+  }
 
-          svg {
-            max-height: 1em;
-            max-width: 1em;
-            margin-left: 1em;
-            opacity: .35;
-          }
+  div.bar-graph-legend {
+    height: 100%;
+    width: 186px;
+    border-left: 1.5px solid #0592af;
+    padding: 0 10px 0 5px;
+    overflow: auto;
+    text-align: left;
+
+    .dataset-header {
+      display: flex;
+      align-items: top;
+
+      .dataset-icon {
+        margin-right: 7px;
+
+        &:hover {
+          background-color: $workspace-teal-light-6;
         }
+      }
 
+      .dataset-label {
+        .dataset-label-text {
+          display: block;
+        }
+        .dataset-name {
+          display: block;
+          font-weight: bold;
+        }
+      }
+    }
+
+    .sort-by {
+      margin: 10px 0 10px 5px;
+    }
+
+    button.chakra-menu__menu-button {
+      background-color: $workspace-teal-light-8;
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    .secondary-value {
+      display: flex;
+      margin: 5px 0 5px 5px;
+      align-items: center;
+
+      .color-button {
+        width: 26px;
+        height: 26px;
+        margin: 0 7px 0 0;
+        padding: 5px;
+        background-color: $workspace-teal-light-8;
+        border-radius: 5px;
+        border: solid 1.5px #949494;
+
+        .color-swatch {
+          border: 1px solid black;
+          width: 100%;
+          height: 100%;
+          margin: 0;
+        }
+      }
+
+      .secondary-value-name.missing {
+        font-style: italic;
+      }
+    }
+  }
+
+  // Overrides for vertical (legend underneath) layout
+  &.vertical {
+    flex-direction: column;
+
+    div.bar-graph-legend {
+      width: 100%;
+      height: auto;
+      border-top: 1.5px solid #0592af;
+      border-left: none;
+      padding: 8px 0 0 0;
+
+      .dataset-header {
+        margin-left: 5px;
+        align-items: center;
+
+        .dataset-label-text, .dataset-name {
+          display: inline-block;
+          margin-right: 5px;
+        }
+      }
+
+      .sort-by {
+        margin: 0 0 10px 20px;
+
+        button.chakra-menu__menu-button {
+          width: auto;
+          margin: 5px 0 0 5px;
+        }
+      }
+
+      .secondary-values {
+        display: flex;
+        flex-wrap: wrap;
+        margin-left: 8px;
+
+        .color-button {
+          margin: 0 7px 0 7px;
+        }
+      }
+    }
+  }
+
+  button.chakra-menu__menu-button {
+    font-family: Lato;
+    border: 1.5px solid #949494;
+    border-radius: 5px;
+    padding: 5px;
+
+    .button-content {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+
+      .button-text {
+        white-space: nowrap;
+      }
+
+      svg {
+        width: 100%;
+        height: 100%;
+        max-height: 1em;
+        max-width: 1em;
+        margin-left: .75em;
+        opacity: .35;
       }
     }
 

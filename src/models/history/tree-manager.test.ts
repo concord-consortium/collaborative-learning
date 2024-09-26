@@ -226,6 +226,54 @@ const action4 = {
   undoable: true
 };
 
+const sharedModelChange = {
+    "action": "/content/sharedModelMap/sm1/sharedModel/setValue",
+    "created": expect.any(Number),
+    "id": expect.any(String),
+    "records": [
+      {
+        "action": "/content/sharedModelMap/sm1/sharedModel/setValue",
+        "inversePatches": [
+          {
+            "op": "replace",
+            "path": "/content/sharedModelMap/sm1/sharedModel/value",
+            "value": undefined,
+          },
+        ],
+        "patches": [
+          {
+            "op": "replace",
+            "path": "/content/sharedModelMap/sm1/sharedModel/value",
+            "value": "shared value",
+          },
+        ],
+        "tree": "test",
+      },
+      {
+        "action": "/handleSharedModelChanges",
+        "inversePatches": [
+          {
+            "op": "replace",
+            "path": "/content/tileMap/t1/content/text",
+          },
+        ],
+        "patches": [
+           {
+            "op": "replace",
+            "path": "/content/tileMap/t1/content/text",
+            "value": "shared value-tile",
+          },
+        ],
+        "tree": "test",
+      }
+    ],
+    "state": "complete",
+    "tree": "test",
+    "undoable": true,
+  };
+
+
+
 /**
  * Remove the Jest `expect.any(Number)` on created, and provide a real id.
  * @param entry
@@ -293,6 +341,17 @@ it("can replay the history entries", async () => {
 
   // The history should not change after it is replayed
   expect(getSnapshot(manager.document.history)).toEqual(history);
+});
+
+it("records tile model changes in response to shared model changes", async () => {
+  const {tileContent, manager, sharedModel} = setupDocument();
+  sharedModel.setValue("shared value");
+  await expectEntryToBeComplete(manager, 1);
+  expect(tileContent.text).toBe("shared value-tile");
+  expect(tileContent.updateCount).toBe(1);
+
+  const changeDocument = manager.document as Instance<typeof CDocument>;
+  expect(getSnapshot(changeDocument.history)).toEqual([sharedModelChange]);
 });
 
 // TODO: it would nicer to use a custom Jest matcher here so we can

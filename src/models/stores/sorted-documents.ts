@@ -1,4 +1,7 @@
-import { makeAutoObservable, runInAction, IObservableArray, observable } from "mobx";
+import { makeAutoObservable } from "mobx";
+import { types, Instance, SnapshotIn, applySnapshot, typecheck, unprotect } from "mobx-state-tree";
+import { union } from "lodash";
+import firebase from "firebase";
 import { isSortableType } from "../document/document-types";
 import { DocumentsModelType } from "./documents";
 import { GroupsModelType } from "./groups";
@@ -41,14 +44,43 @@ export interface ISortedDocumentsStores {
   user: UserModelType;
 }
 
+/**
+ * This is the serializable version of IDocumentMetadata. It is almost the same. The one
+ * important difference is the `properties` property.
+ * In this MST model that property is an `observable.map<string, string>`.
+ * In the IDocumentMetadata it is a Record<string,string>.
+ */
+export const DocumentMetadataModel = types.model("DocumentMetadata", {
+  uid: types.string,
+  type: types.string,
+  key: types.identifier,
+  createdAt: types.maybe(types.number),
+  title: types.maybeNull(types.string),
+  originDoc: types.maybeNull(types.string),
+  properties: types.map(types.string),
+  tools: types.array(types.string),
+  strategies: types.array(types.string),
+  investigation: types.maybeNull(types.string),
+  problem: types.maybeNull(types.string),
+  unit: types.maybeNull(types.string),
+  visibility: types.maybe(types.string)
+});
+export interface IDocumentMetadataModel extends Instance<typeof DocumentMetadataModel> {}
+
+export const MetadataDocMapModel = types.map(DocumentMetadataModel);
+
 export class SortedDocuments {
   stores: ISortedDocumentsStores;
-  firestoreTagDocumentMap = new Map<string, Set<string>>();
-  firestoreMetadataDocs: IObservableArray<IDocumentMetadata> = observable.array([]);
+  metadataDocsFiltered = MetadataDocMapModel.create();
+  metadataDocsWithoutUnit = MetadataDocMapModel.create();
 
   constructor(stores: ISortedDocumentsStores) {
     makeAutoObservable(this);
     this.stores = stores;
+    // We don't need the benefits of MST's actions
+    // We only want the serialization support
+    unprotect(this.metadataDocsFiltered);
+    unprotect(this.metadataDocsWithoutUnit);
   }
 
   get bookmarksStore() {
@@ -66,8 +98,8 @@ export class SortedDocuments {
   get documents(): DocumentsModelType {
     return this.stores.documents;
   }
-  get filteredDocsByType(): IDocumentMetadata[] {
-    return this.firestoreMetadataDocs.filter((doc: IDocumentMetadata) => {
+  get filteredDocsByType(): IDocumentMetadataModel[] {
+    return this.firestoreMetadataDocs.filter((doc) => {
       return isSortableType(doc.type);
     });
   }
@@ -100,28 +132,38 @@ export class SortedDocuments {
     const documentMap = createDocMapByGroups(this.filteredDocsByType, this.groupsStore.groupForUser);
     const sortedSectionLabels = sortGroupSectionLabels(Array.from(documentMap.keys()));
     return sortedSectionLabels.map(label => {
-      return new DocumentGroup({stores: this.stores, label, documents: documentMap.get(label) ?? [] });
+      return new DocumentGroup({
+        stores: this.stores,
+        sortType: "Group",
+        label,
+        documents: documentMap.get(label) ?? []
+      });
     });
   }
   get byName(): DocumentGroup[] {
     const documentMap = createDocMapByNames(this.filteredDocsByType, this.class.getUserById);
     const sortedSectionLabels = sortNameSectionLabels(Array.from(documentMap.keys()));
     return sortedSectionLabels.map(label => {
-      return new DocumentGroup({ stores: this.stores, label, documents: documentMap.get(label) ?? [] });
+      return new DocumentGroup({
+        stores: this.stores,
+        sortType: "Name",
+        label,
+        documents: documentMap.get(label) ?? []
+      });
     });
   }
 
   get byStrategy(): DocumentGroup[] {
     const commentTags = this.commentTags;
-    const tagsWithDocs = getTagsWithDocs(this.firestoreMetadataDocs, commentTags, this.firestoreTagDocumentMap);
+    const tagsWithDocs = getTagsWithDocs(this.firestoreMetadataDocs, commentTags);
 
     const sortedDocsArr: DocumentGroup[] = [];
     Object.entries(tagsWithDocs).forEach((tagKeyAndValObj) => {
       const tagWithDocs = tagKeyAndValObj[1] as TagWithDocs;
       const label = tagWithDocs.tagValue;
       const docKeys = tagWithDocs.docKeysFoundWithTag;
-      const documents = this.firestoreMetadataDocs.filter((doc: IDocumentMetadata) => docKeys.includes(doc.key));
-      sortedDocsArr.push(new DocumentGroup({ stores: this.stores, label, documents }));
+      const documents = this.firestoreMetadataDocs.filter(doc => docKeys.includes(doc.key));
+      sortedDocsArr.push(new DocumentGroup({ stores: this.stores, sortType: "Strategy", label, documents }));
     });
     return sortedDocsArr;
   }
@@ -135,7 +177,7 @@ export class SortedDocuments {
       const label = contentInfo?.displayName || tileType;
       const documents = tileTypeToDocumentsMap.get(tileType)?.documents ?? [];
       const icon = tileTypeToDocumentsMap.get(tileType)?.icon;
-      const section = new DocumentGroup({ stores: this.stores, label, documents, icon });
+      const section = new DocumentGroup({ stores: this.stores, sortType: "Tools", label, documents, icon });
       return section;
     });
 
@@ -156,46 +198,93 @@ export class SortedDocuments {
     return sortedSectionLabels.filter(label => documentMap.has(label))
                               .map(label => new DocumentGroup({
                                 stores: this.stores,
+                                sortType: "Bookmarked",
                                 label,
                                 documents: documentMap.get(label) ?? []
                               }));
   }
 
-  async updateMetaDataDocs (filter: string, unit: string, investigation: number, problem: number) {
+  getMSTSnapshotFromFBSnapshot(snapshot: firebase.firestore.QuerySnapshot<IDocumentMetadata>) {
+    const mstSnapshot: SnapshotIn<typeof MetadataDocMapModel> = {};
+    snapshot.docs.forEach(doc => {
+      const data = doc.data();
+      mstSnapshot[data.key] = data;
+      typecheck(DocumentMetadataModel, data);
+      const exemplarMetadata = this.exemplarMetadataDocs.get(data.key);
+      if (exemplarMetadata) {
+        // If this metadata doc in Firestore is an exemplar in the same unit then the exemplar
+        // metadata will be found. This will happen when a teacher comments on a exemplar.
+        // So in this case we need to merge the strategies from the exemplar with the strategies from
+        // the teacher's comments.
+        const authoredStrategies = exemplarMetadata.strategies || [];
+        const userStrategies = data.strategies || [];
+        data.strategies = union(authoredStrategies, userStrategies);
+        // We also update the tools incase the author has changed the exemplar content after
+        // the teacher commented on the document.
+        // We need a copy of the tools so the same array isn't attached to two MST trees at
+        // the same time.
+        data.tools = [...exemplarMetadata.tools];
+      }
+    });
+    return mstSnapshot;
+  }
+
+  watchFirestoreMetaDataDocs (filter: string, unit: string, investigation: number, problem: number) {
     const db = this.db.firestore;
     const converter = typeConverter<IDocumentMetadata>();
-    let query = db.collection("documents").withConverter(converter).where("context_id", "==", this.user.classHash);
+    const baseQuery = db.collection("documents")
+      .withConverter(converter)
+      .where("context_id", "==", this.user.classHash);
+
+    let filteredQuery = baseQuery;
 
     if (filter !== "All") {
-      query = query.where("unit" , "==", unit);
+      filteredQuery = filteredQuery.where("unit" , "==", unit);
     }
     if (filter === "Investigation" || filter === "Problem") {
-      query = query.where("investigation", "==", String(investigation));
+      filteredQuery = filteredQuery.where("investigation", "==", String(investigation));
     }
     if (filter === "Problem") {
-      query = query.where("problem", "==", String(problem));
+      filteredQuery = filteredQuery.where("problem", "==", String(problem));
     }
-    const queryForUnitNull = db.collection("documents").withConverter(converter)
-                                                       .where("context_id", "==", this.user.classHash)
-                                                       .where("unit" , "==", null);
-    const [docsWithUnit, docsWithoutUnit] = await Promise.all([query.get(), queryForUnitNull.get()]);
-    const docsArray: IDocumentMetadata[] = [];
 
-    const matchedDocKeys = new Set<string>();
-    docsWithUnit.docs.forEach(doc => {
-      if (matchedDocKeys.has(doc.data().key)) return;
-      docsArray.push(doc.data());
-      matchedDocKeys.add(doc.data().key);
-    });
-    docsWithoutUnit.docs.forEach(doc => {
-      if (matchedDocKeys.has(doc.data().key)) return;
-      docsArray.push(doc.data());
-      matchedDocKeys.add(doc.data().key);
+    const disposeFilteredListener = filteredQuery.onSnapshot(snapshot => {
+      const mstSnapshot = this.getMSTSnapshotFromFBSnapshot(snapshot);
+      applySnapshot(this.metadataDocsFiltered, mstSnapshot);
     });
 
-    // Add Exemplar documents, which should have been loaded into the documents
-    // store but are not found in the firestore query -- they are authored as
-    // content, not found in the database.
+    let disposeDocsWithoutUnitListener: () => void | undefined;
+    if (filter !== "All") {
+      // We need to look for the unit-less documents like personal documents
+      const queryForUnitNull = baseQuery.where("unit" , "==", null);
+      disposeDocsWithoutUnitListener = queryForUnitNull.onSnapshot(snapshot => {
+        const mstSnapshot = this.getMSTSnapshotFromFBSnapshot(snapshot);
+        applySnapshot(this.metadataDocsWithoutUnit, mstSnapshot);
+      });
+    } else {
+      // If the filter is "All" then the metaDocsFiltered will include everything.
+      this.metadataDocsWithoutUnit.clear();
+    }
+
+    // A disposing function that calls the two disposers from the
+    // onSnapshot listeners.
+    return () => {
+      disposeFilteredListener();
+      disposeDocsWithoutUnitListener?.();
+    };
+  }
+
+  get exemplarMetadataDocs() {
+    const docsMap = MetadataDocMapModel.create();
+    // We are just using this map for consistency with the other maps
+    // We don't need the benefits of MST's actions
+    unprotect(docsMap);
+
+    // OPTIMIZE: this isn't efficient. Every time a new document is added to stores.documents
+    // this exemplarDocuments will be recomputed even though its value will not have changed.
+    // So then all of these exemplar docs will get recreated.
+    // This list of exemplars shouldn't change once the unit is loaded we should use a different
+    // mechanism to find the exemplars rather than stores.documents.
     this.stores.documents.exemplarDocuments.forEach(doc => {
       const exemplarStrategy = doc.properties.get('authoredCommentTag');
 
@@ -208,7 +297,7 @@ export class SortedDocuments {
         tools.push("Sparrow");
       }
 
-      const metadata: IDocumentMetadata = {
+      const metadata = DocumentMetadataModel.create({
         uid: doc.uid,
         type: doc.type,
         key: doc.key,
@@ -220,36 +309,66 @@ export class SortedDocuments {
         investigation: doc.investigation,
         problem: doc.problem,
         unit: doc.unit
-      };
-      docsArray.push(metadata);
+      });
+      docsMap.put(metadata);
+    });
+    return docsMap;
+  }
+
+  // What happens if the visibility changes on a metadata document?
+  // - FS onSnapshot listener is called
+  // - listener applies the snapshot to the map of objects
+  // - the keys of the objects don't change in the map
+  // - MobX should not re-run this view because it is only reading the key
+  //   of each document.
+  get firestoreMetadataDocs() {
+    const matchedDocKeys = new Set<string>();
+    const docsArray: IDocumentMetadataModel[] = [];
+    this.metadataDocsFiltered.forEach(doc => {
+      docsArray.push(doc);
+      matchedDocKeys.add(doc.key);
+    });
+    this.metadataDocsWithoutUnit.forEach(doc => {
+      // If there is a duplicate for some reason just ignore the unit-less one
+      if (matchedDocKeys.has(doc.key)) return;
+      docsArray.push(doc);
+      matchedDocKeys.add(doc.key);
+    });
+    this.exemplarMetadataDocs.forEach(doc => {
+      // If there is a duplicate, it will have been merged with one of the previous
+      // maps by the firestore snapshot listeners. So we ignore the duplicate here.
+      if (matchedDocKeys.has(doc.key)) return;
+      docsArray.push(doc);
+      matchedDocKeys.add(doc.key);
     });
 
-    runInAction(() => {
-      this.firestoreMetadataDocs.replace(docsArray);
-    });
+    return docsArray;
   }
 
   async fetchFullDocument(docKey: string) {
     const metadataDoc = this.firestoreMetadataDocs.find(doc => doc.key === docKey);
     if (!metadataDoc) return;
 
-    const unit = metadataDoc?.unit ?? undefined;
     const visibility = metadataDoc?.visibility === "public" || metadataDoc?.visibility === "private"
                          ? metadataDoc?.visibility as "public" | "private"
                          : undefined;
     const props = {
-      documentKey: metadataDoc?.key,
-      type: metadataDoc?.type as any,
-      title: metadataDoc?.title || undefined,
-      properties: metadataDoc?.properties,
-      userId: metadataDoc?.uid,
+      documentKey: metadataDoc.key,
+      type: metadataDoc.type as any,
+      properties: metadataDoc.properties.toJSON(),
+      userId: metadataDoc.uid,
       groupId: undefined,
       visibility,
       originDoc: undefined,
       pubVersion: undefined,
-      problem: metadataDoc?.problem,
-      investigation: metadataDoc?.investigation,
-      unit,
+
+      // The following props are sometimes null in Firestore on the metadata docs.
+      // For consistency we make them undefined which is what openDocument
+      // expects.
+      title: metadataDoc.title ?? undefined,
+      problem: metadataDoc.problem ?? undefined,
+      investigation: metadataDoc.investigation ?? undefined,
+      unit: metadataDoc.unit ?? undefined,
     };
 
     return  this.db.openDocument(props);

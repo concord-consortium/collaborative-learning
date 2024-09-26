@@ -4,6 +4,7 @@ import { Bookmarks } from "src/models/stores/bookmarks";
 import { getTileComponentInfo } from "../models/tiles/tile-component-info";
 
 import SparrowHeaderIcon from "../assets/icons/sort-by-tools/sparrow-id.svg";
+import { IDocumentMetadataModel } from "src/models/stores/sorted-documents";
 
 export type DocumentCollection = {
   label: string;
@@ -17,8 +18,8 @@ type TagWithDocs = {
   docKeysFoundWithTag: string[];
 };
 
-export const createDocMapByGroups = (documents: IDocumentMetadata[], groupForUser: (userId: string) => any) => {
-  const documentMap: Map<string, IDocumentMetadata[]> = new Map();
+export const createDocMapByGroups = (documents: IDocumentMetadataModel[], groupForUser: (userId: string) => any) => {
+  const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
   documents.forEach((doc) => {
     const userId = doc.uid;
     const group = groupForUser(userId);
@@ -40,8 +41,8 @@ export const sortGroupSectionLabels = (docMapKeys: string[]) => {
   });
 };
 
-export const createDocMapByNames = (documents: IDocumentMetadata[], getUserById: (uid: string) => any) => {
-  const documentMap: Map<string, IDocumentMetadata[]> = new Map();
+export const createDocMapByNames = (documents: IDocumentMetadataModel[], getUserById: (uid: string) => any) => {
+  const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
   documents.forEach((doc) => {
     const user = getUserById(doc.uid);
     const sectionLabel = user && `${user.lastName}, ${user.firstName}`;
@@ -71,8 +72,10 @@ export const sortNameSectionLabels = (docMapKeys: string[]) => {
   });
 };
 
-export const getTagsWithDocs = (documents: IDocumentMetadata[], commentTags: Record<string, string>|undefined,
-  firestoreTagDocumentMap: Map<string, Set<string>>) => {
+export const getTagsWithDocs = (
+  documents: IDocumentMetadataModel[],
+  commentTags: Record<string, string>|undefined,
+) => {
   const tagsWithDocs: Record<string, TagWithDocs> = {};
   if (commentTags) {
     for (const key of Object.keys(commentTags)) {
@@ -93,18 +96,7 @@ export const getTagsWithDocs = (documents: IDocumentMetadata[], commentTags: Rec
   // in store to find "Documents with no comments" then place those doc keys to "Not Tagged"
   const uniqueDocKeysWithTags = new Set<string>();
 
-  // grouping documents based on firestore comment tags
-  firestoreTagDocumentMap.forEach((docKeysSet, tag) => {
-    const docKeysArray = Array.from(docKeysSet); // Convert the Set to an array
-    if (tagsWithDocs[tag]) {
-      docKeysSet.forEach((docKey: string) =>{
-        uniqueDocKeysWithTags.add(docKey);
-      });
-      tagsWithDocs[tag].docKeysFoundWithTag = docKeysArray;
-    }
-  });
-
-  // adding in (exemplar) documents with authored tags
+  // Sort documents into their groups
   documents.forEach(doc => {
     doc.strategies?.forEach(strategy => {
       if (tagsWithDocs[strategy]) {
@@ -125,9 +117,9 @@ export const getTagsWithDocs = (documents: IDocumentMetadata[], commentTags: Rec
   return tagsWithDocs;
 };
 
-export const createTileTypeToDocumentsMap = (documents: IDocumentMetadata[]) => {
+export const createTileTypeToDocumentsMap = (documents: IDocumentMetadataModel[]) => {
   const toolToDocumentsMap = new Map<string, Record<string, any>>();
-  const addDocByType = (docToAdd: IDocumentMetadata, type: string) => {
+  const addDocByType = (docToAdd: IDocumentMetadataModel, type: string) => {
     if (!toolToDocumentsMap.get(type)) {
       let icon: FC<SVGProps<SVGSVGElement>> | undefined;
       if (type === "Sparrow") {
@@ -163,8 +155,8 @@ export const createTileTypeToDocumentsMap = (documents: IDocumentMetadata[]) => 
   return toolToDocumentsMap;
 };
 
-export const createDocMapByBookmarks = (documents: IDocumentMetadata[], bookmarks: Bookmarks) => {
-  const documentMap: Map<string, IDocumentMetadata[]> = new Map();
+export const createDocMapByBookmarks = (documents: IDocumentMetadataModel[], bookmarks: Bookmarks) => {
+  const documentMap: Map<string, IDocumentMetadataModel[]> = new Map();
   documents.forEach((doc) => {
     const sectionLabel = bookmarks.isDocumentBookmarked(doc.key) ? "Bookmarked" : "Not Bookmarked";
     if (!documentMap.has(sectionLabel)) {

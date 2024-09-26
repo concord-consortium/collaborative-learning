@@ -6,7 +6,7 @@ import classNames from "classnames";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import { IBaseNode, IBaseNodeModel } from "../base-node";
 
-import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
+import DropdownCaretIcon from "../../../../assets/dropdown-caret.svg";
 
 import "./dropdown-list-control.scss";
 

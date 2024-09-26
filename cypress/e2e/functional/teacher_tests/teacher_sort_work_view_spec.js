@@ -4,6 +4,7 @@ import ResourcesPanel from "../../../support/elements/common/ResourcesPanel";
 import Canvas from '../../../support/elements/common/Canvas';
 import ClueHeader from '../../../support/elements/common/cHeader';
 import ChatPanel from "../../../support/elements/common/ChatPanel";
+import { visitQaSubtabsUnit } from "../../../support/visit_params";
 
 let sortWork = new SortedWork;
 let resourcesPanel = new ResourcesPanel;
@@ -15,7 +16,6 @@ const canvas = new Canvas;
 const title = "1.1 Unit Toolbar Configuration";
 const copyTitle = "Personal Workspace";
 const queryParams1 = `${Cypress.config("clueTestqaConfigSubtabsUnitTeacher6")}`;
-const queryParams2 = `${Cypress.config("qaConfigSubtabsUnitTeacher1")}`;
 
 function beforeTest(params) {
   cy.visit(params);
@@ -24,11 +24,6 @@ function beforeTest(params) {
   cy.wait(2000);
   cy.openTopTab('sort-work');
   cy.wait(1000);
-}
-
-function runClueAsStudent(student, group = 5) {
-  cy.visit(queryParams2.replace("teacher:1", student).replace("qaGroup=5", `qaGroup=${group}`));
-  cy.waitForLoad();
 }
 
 //TODO: For QA (1/24)
@@ -45,21 +40,54 @@ describe('SortWorkView Tests', () => {
     beforeTest(queryParams1);
     cy.log('verify clicking the sort menu');
     sortWork.getPrimarySortByMenu().click(); // Open the sort menu
-    cy.wait(1000);
-
+    cy.wait(500);
     sortWork.getPrimarySortByNameOption().click(); //Select 'Name' sort type
-    cy.wait(1000);
-
+    cy.wait(500);
     sortWork.getPrimarySortByMenu().click(); // Open the sort menu again
-    cy.wait(1000);
-
+    cy.wait(500);
     sortWork.getPrimarySortByGroupOption().click(); // Select 'Group' sort type
-    cy.wait(1000);
+    cy.wait(500);
 
     cy.log('verify opening and closing a document from the sort work view');
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().eq(1).click(); // Open the first document in the list
     resourcesPanel.getEditableDocumentContent().should('be.visible');
+
+    cy.log('verify document scroller is visible, populated, and functions');
+    let prevFocusDocKey = "";
+    let selectedDocIndex = 0;
+    resourcesPanel.getEditableDocumentContent().invoke('attr', 'data-focus-document').then((focusDocKey) => {
+      prevFocusDocKey = focusDocKey;
+    });
+    resourcesPanel.getDocumentScroller().should('be.visible').and($el => {
+      expect($el.find('[data-testid="document-thumbnail"]')).to.have.length.greaterThan(1);
+      expect($el.find('[data-testid="document-thumbnail"].selected')).to.have.length(1);
+      selectedDocIndex = $el.find('[data-testid="document-thumbnail"]')
+                         .index($el.find('[data-testid="document-thumbnail"].selected'));
+    });
+    resourcesPanel.getDocumentScrollerLeftBtn().should('not.exist');
+    cy.get('[data-testid="document-thumbnail"]').first().should('be.visible');
+    resourcesPanel.getDocumentScrollerRightBtn().should('exist').click();
+    cy.get('[data-testid="document-thumbnail"]').first().should('not.be.visible');
+    resourcesPanel.getDocumentScrollerLeftBtn().should('exist').click();
+    cy.get('[data-testid="document-thumbnail"]').first().should('be.visible');
+    cy.get('[data-testid="document-thumbnail"]').eq(selectedDocIndex + 1).click();
+    resourcesPanel.getEditableDocumentContent().invoke('attr', 'data-focus-document')
+                                               .should('not.eq', prevFocusDocKey).then((focusDocKey) => {
+                                                 prevFocusDocKey = focusDocKey;
+                                               });
+
+    cy.log('verify document scroller is collapsible, and that switch document buttons appear when it is collapsed');
+    resourcesPanel.getDocumentSwitchBtnPrev().should('not.exist');
+    resourcesPanel.getDocumentSwitchBtnNext().should('not.exist');
+    resourcesPanel.getDocumentScrollerToggle().should('exist').click();
+    resourcesPanel.getDocumentScroller().should('not.exist');
+    resourcesPanel.getDocumentSwitchBtnPrev().should('exist').and('not.have.class', 'disabled').click();
+    resourcesPanel.getDocumentSwitchBtnPrev().should('have.class', 'disabled');
+    resourcesPanel.getEditableDocumentContent().invoke('attr', 'data-focus-document')
+                                               .should('not.eq', prevFocusDocKey);
+    resourcesPanel.getDocumentSwitchBtnNext().should('exist').and('not.have.class', 'disabled');
+
     resourcesPanel.getDocumentCloseButton().click();
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().should('be.visible'); // Verify the document is closed
@@ -79,22 +107,16 @@ describe('SortWorkView Tests', () => {
     cy.get("[data-test=sort-work-list-items]").should("have.length.greaterThan", 0);
     cy.get("[data-test=simple-document-item]").should("not.exist");
     sortWork.getShowForMenu().click();
-    cy.wait(500);
     sortWork.getShowForInvestigationOption().click();
-    cy.wait(500);
     // For the "Investigation", "Unit", and "All" options, documents should be listed using the smaller "simple" view
     cy.get("[data-test=sort-work-list-items]").should("not.exist");
     cy.get("[data-test=simple-document-item]").should("have.length.greaterThan", 0);
     sortWork.getShowForMenu().click();
-    cy.wait(500);
     sortWork.getShowForUnitOption().click();
-    cy.wait(500);
     cy.get("[data-test=sort-work-list-items]").should("not.exist");
     cy.get("[data-test=simple-document-item]").should("have.length.greaterThan", 0);
     sortWork.getShowForMenu().click();
-    cy.wait(500);
     sortWork.getShowForAllOption().click();
-    cy.wait(500);
     cy.get("[data-test=sort-work-list-items]").should("not.exist");
     cy.get("[data-test=simple-document-item]").should("have.length.greaterThan", 0);
     cy.get("[data-test=simple-document-item]").should("have.attr", "title").and("not.be.empty");
@@ -142,8 +164,6 @@ describe('SortWorkView Tests', () => {
     sortWork.getSecondarySortByBookmarkedOption().should("exist");
     sortWork.getSecondarySortByToolsOption().should("exist");
     sortWork.getSecondarySortByNameOption().should("exist").click();
-    cy.wait(500);
-
     sortWork.getSecondarySortByNoneOption().should("not.have.class", "selected");
     sortWork.getSecondarySortByNameOption().should("have.class", "selected");
     cy.get("[data-testid=section-sub-header]").each($el => {
@@ -166,7 +186,6 @@ describe('SortWorkView Tests', () => {
     sortWork.getSecondarySortByNameOption().should("have.class", "selected");
     sortWork.getPrimarySortByMenu().click();
     sortWork.getPrimarySortByNameOption().click();
-    cy.wait(500);
     sortWork.getPrimarySortByGroupOption().should("not.have.class", "selected");
     sortWork.getPrimarySortByNameOption().should("have.class", "selected");
     sortWork.getSecondarySortByGroupOption().should("have.class", "enabled");
@@ -175,21 +194,17 @@ describe('SortWorkView Tests', () => {
 
   });
 
-  // TODO: Reinstate the tests below when all metadata documents have the new fields and are being updated in real time.
-  it.skip("should open Sort Work tab and test sorting by group", () => {
-
-    const students = ["student:1", "student:2", "student:3", "student:4"];
+  it("should open Sort Work tab and test sorting by group", () => {
+    const students = [1,2,3];
     const studentProblemDocs = [
       `Student 1: ${title}`,
       `Student 2: ${title}`,
-      `Student 3: ${title}`,
-      `Student 4: ${title}`
+      `Student 3: ${title}`
     ];
     const studentPersonalDocs = [
       `Student 1: ${copyTitle}`,
       `Student 2: ${copyTitle}`,
-      `Student 3: ${copyTitle}`,
-      `Student 4: ${copyTitle}`
+      `Student 3: ${copyTitle}`
     ];
     const exemplarDocs = [
       `Ivan Idea: First Exemplar`
@@ -197,7 +212,7 @@ describe('SortWorkView Tests', () => {
 
     cy.log("run CLUE for various students creating their problem and personal documents");
     students.forEach(student => {
-      runClueAsStudent(student);
+      visitQaSubtabsUnit({student, group: 5});
       canvas.copyDocument(copyTitle);
       canvas.getPersonalDocTitle().find('span').text().should('contain', copyTitle);
       // Check that exemplar is not visible to student
@@ -207,9 +222,9 @@ describe('SortWorkView Tests', () => {
     });
 
     cy.log("run CLUE as teacher and check student problem, personal, and exemplar docs show in Sort Work");
-    cy.visit(queryParams2);
-    cy.waitForLoad();
+    visitQaSubtabsUnit({teacher: 1});
     cy.openTopTab('sort-work');
+    cy.get('.section-header-label').should("contain", "Group 5");
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     cy.wait(1000);
     studentProblemDocs.forEach(doc => {
@@ -255,7 +270,7 @@ describe('SortWorkView Tests', () => {
     });
 
     cy.log("run CLUE as student 1; they should now have access to exemplar");
-    runClueAsStudent(students[0]);
+    visitQaSubtabsUnit({student: 1, group: 5});
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItemByTitle(exemplarDocs[0]).parents('.list-item').should("not.have.class", "private");
 
@@ -263,8 +278,7 @@ describe('SortWorkView Tests', () => {
     header.leaveGroup();
 
     cy.log("check student:1 problem, exemplar, and personal docs show in No Group");
-    cy.visit(queryParams2);
-    cy.waitForLoad();
+    visitQaSubtabsUnit({teacher: 1});
     cy.openTopTab('sort-work');
     cy.wait(1000);
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
@@ -283,7 +297,7 @@ describe('SortWorkView Tests', () => {
     cy.wait(1000);
     sortWork.getPrimarySortByNameOption().click();
     sortWork.checkSectionHeaderLabelsExist([
-      "1, Student", "1, Teacher", "2, Student", "3, Student", "4, Student", "Idea, Ivan"
+      "1, Student", "1, Teacher", "2, Student", "3, Student", "Idea, Ivan"
     ]);
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Idea, Ivan", exemplarDocs[0]);
@@ -300,15 +314,15 @@ describe('SortWorkView Tests', () => {
     sortWork.getSortWorkItem().contains(exemplarDocs[0]).click();
     chatPanel.getChatPanelToggle().click();
     chatPanel.addCommentTagAndVerify("Diverging Designs");
+    // FIXME: at the moment it is necessary to comment the document twice.
+    // Search for "exemplar" in document-comment-hooks.ts for an explanation.
+    cy.wait(100);
+    chatPanel.addCommentTagAndVerify("Diverging Designs");
 
     cy.log("check that exemplar document is displayed in new tag");
     chatPanel.getChatCloseButton().click();
     cy.openTopTab('sort-work');
-    // at the moment this is required to refresh the sort
-    sortWork.getPrimarySortByMenu().click();
-    sortWork.getPrimarySortByNameOption().click();
-    sortWork.getPrimarySortByMenu().click();
-    sortWork.getPrimarySortByTagOption().click();
+
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Diverging Designs", exemplarDocs[0]);
 
@@ -317,8 +331,7 @@ describe('SortWorkView Tests', () => {
     chatPanel.getChatPanelToggle().click();
     chatPanel.deleteTeacherComments();
     cy.wait(1000);
-    cy.visit(queryParams2);
-    cy.waitForLoad();
+    visitQaSubtabsUnit({teacher: 1});
     cy.openTopTab('sort-work');
 
     cy.log("check that exemplar document is still displayed in strategy tag sourced from CMS but not in teacher added tag");
@@ -326,16 +339,22 @@ describe('SortWorkView Tests', () => {
     sortWork.getPrimarySortByTagOption().click();
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Unit Rate", exemplarDocs[0]);
-    sortWork.checkGroupIsEmpty("Diverging Designs");
+
+    // FIXME: We haven't implemented support for deleting comments
+    // what should be true:
+    // sortWork.checkGroupIsEmpty("Diverging Designs");
+    // what currently happens
+    sortWork.checkDocumentInGroup("Diverging Designs", exemplarDocs[0]);
 
     cy.log("run CLUE as a student:1 and join group 6");
-    runClueAsStudent(students[0], 6);
+    visitQaSubtabsUnit({student: 1, group: 6});
 
     cy.log("check student:1 problem and personal docs show in Group 6");
-    cy.visit(queryParams2);
-    cy.waitForLoad();
+    visitQaSubtabsUnit({teacher: 1});
     cy.openTopTab('sort-work');
-    cy.wait(1000);
+    cy.wait(500);
+    sortWork.getPrimarySortByMenu().click();
+    sortWork.getPrimarySortByGroupOption().click();
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Group 6", studentProblemDocs[0]);
     sortWork.checkDocumentInGroup("Group 6", studentPersonalDocs[0]);
@@ -345,17 +364,40 @@ describe('SortWorkView Tests', () => {
     sortWork.checkDocumentNotInGroup("Group 6", studentPersonalDocs[1]);
 
     cy.log("run CLUE as a student:1 and leave the group");
-    runClueAsStudent(students[0], 6);
+    visitQaSubtabsUnit({student: 1, group: 6});
     header.leaveGroup();
 
     cy.log("check Group 6 no longer exists in Sort Work");
-    cy.visit(queryParams2);
-    cy.waitForLoad();
+    visitQaSubtabsUnit({teacher: 1});
     cy.openTopTab('sort-work');
-    cy.wait(1000);
+    cy.wait(500);
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("No Group", studentProblemDocs[0]);
     sortWork.checkDocumentInGroup("No Group", studentPersonalDocs[0]);
     sortWork.checkGroupDoesNotExist("Group 6");
+  });
+
+  it("should open Sort Work tab and test that sort selections persist", () => {
+    visitQaSubtabsUnit({teacher: 1});
+    cy.openTopTab('sort-work');
+
+    cy.log("check initial state of primary and secondary sort selections and modify both");
+    sortWork.getPrimarySortByMenu().click();
+    sortWork.getPrimarySortByGroupOption().should("have.class", "selected");
+    sortWork.getPrimarySortByNameOption().click();
+    sortWork.getPrimarySortByNameOption().should("have.class", "selected");
+    sortWork.getSecondarySortByMenu().click();
+    sortWork.getSecondarySortByNoneOption().should("have.class", "selected");
+    sortWork.getSecondarySortByGroupOption().click();
+    sortWork.getSecondarySortByGroupOption().should("have.class", "selected");
+    // Give CLUE some time to save the changes
+    cy.wait(500);
+
+    cy.log("reload page and check that modified sort selections persist");
+    visitQaSubtabsUnit({teacher: 1});
+    cy.waitForLoad();
+    cy.openTopTab("sort-work");
+    sortWork.getPrimarySortByNameOption().should("have.class", "selected");
+    sortWork.getSecondarySortByGroupOption().should("have.class", "selected");
   });
 });

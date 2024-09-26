@@ -1,14 +1,15 @@
-import { IObservableArray, observable } from "mobx";
+import { observable } from "mobx";
+import { mock } from "ts-jest-mocker";
+import { DeepPartial } from "utility-types";
+import { SnapshotIn } from "mobx-state-tree";
+
 import { createDocumentModel, DocumentModelSnapshotType, DocumentModelType } from "../document/document";
 import { DocumentContentSnapshotType } from "../document/document-content";
 import { ProblemDocument } from '../document/document-types';
 import { ClassModel, ClassModelType, ClassUserModel } from "./class";
 import { GroupModel, GroupsModel, GroupsModelType, GroupUserModel } from "./groups";
-import { DeepPartial } from "utility-types";
-import { IDocumentMetadata } from "../../../shared/shared";
-import { ISortedDocumentsStores, SortedDocuments } from "./sorted-documents";
+import { ISortedDocumentsStores, MetadataDocMapModel, SortedDocuments } from "./sorted-documents";
 import { DB } from "../../lib/db";
-import { mock } from "ts-jest-mocker";
 import { Bookmark, Bookmarks } from "./bookmarks";
 
 
@@ -34,8 +35,8 @@ const mockDocumentsData: DocumentModelSnapshotType[] = [
   }
 ];
 
-const mockMetadataDocuments: IObservableArray<IDocumentMetadata> = observable.array([
-  {
+const mockMetadataDocuments: SnapshotIn<typeof MetadataDocMapModel> = {
+  "Student 1 Problem Doc Group 5": {
     uid: "1", //Joe
     type: ProblemDocument,
     key:"Student 1 Problem Doc Group 5",
@@ -43,23 +44,23 @@ const mockMetadataDocuments: IObservableArray<IDocumentMetadata> = observable.ar
     tools: [],
     strategies: ["foo", "bar"],
   },
-  {
+  "Student 2 Problem Doc Group 3": {
     uid: "2", //Scott
     type: ProblemDocument, key:"Student 2 Problem Doc Group 3", createdAt: 2,
     tools: ["Text"]
   },
-  {
+  "Student 3 Problem Doc Group 9": {
     uid: "3", //Dennis
     type: ProblemDocument, key:"Student 3 Problem Doc Group 9", createdAt: 3,
     tools: ["Drawing"]
   },
-  {
+  "Student 4 Problem Doc Group 3": {
     uid: "4", //Kirk
     type: ProblemDocument, key:"Student 4 Problem Doc Group 3", createdAt: 4,
     tools: [],
     strategies: ["bar"]
   }
-]);
+};
 
 const createMockDocuments = () => {
   return mockDocumentsData.map(createDocumentModel);
@@ -170,7 +171,7 @@ describe('DocumentGroup Model', () => {
     const mockStores: DeepPartial<ISortedDocumentsStores> = {
       //DeepPartial allows us to not need to mock the "dB" and "appConfig" stores
       //as well not needing to type the stores below
-      documents: { all: mockDocuments },
+      documents: { all: mockDocuments, exemplarDocuments: [] },
       groups: mockGroups,
       class: mockClass,
       appConfig: { commentTags: {"foo": "foo", "bar": "bar"} },
@@ -178,7 +179,7 @@ describe('DocumentGroup Model', () => {
     };
 
     sortedDocuments = new SortedDocuments(mockStores as ISortedDocumentsStores);
-    sortedDocuments.firestoreMetadataDocs = mockMetadataDocuments;
+    sortedDocuments.metadataDocsFiltered = MetadataDocMapModel.create(mockMetadataDocuments);
   });
 
   describe("byBookMarked Function", () => {

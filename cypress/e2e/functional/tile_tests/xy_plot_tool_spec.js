@@ -19,27 +19,6 @@ const queryParamsPlotVariables = `${Cypress.config("qaNoGroupShareUnitStudent5")
 
 const problemDoc = '1.1 Unit Toolbar Configuration';
 
-// Construct and fill in a table tile with the given data (a list of lists)
-function buildTable(data) {
-  // at least two cols, or as many as the longest row in the data array
-  const cols = Math.max(2, ...data.map(row => row.length));
-  clueCanvas.addTile('table');
-  tableToolTile.getTableTile().last().should('be.visible');
-  tableToolTile.getTableTile().last().within((tile) => {
-    // tile will start with two columns; make more if desired
-    for (let i=2; i<cols; i++) {
-      tile.getAddColumnButton().click();
-    }
-    for (let i=0; i<data.length; i++) {
-      for (let j=0; j<data[i].length; j++) {
-        const cellContent = data[i][j];
-        tableToolTile.typeInTableCellXY(i, j, cellContent);
-        tableToolTile.getTableCellXY(i, j).should('contain', cellContent);
-      }
-    }
-  });
-}
-
 // Parse `transform` attributes (used for point positioning)
 function xAttributeOfTransform(matcher) {
   return attributeOfTransform(matcher, 1);
@@ -262,7 +241,8 @@ context('XYPlot Tool Tile', function () {
       beforeTest(queryParamsMultiDataset);
       cy.collapseResourceTabs();
 
-      buildTable([[1, 2], [2, 4], [3, 9], [4, 16]]);
+      clueCanvas.addTile("table");
+      tableToolTile.fillTable(tableToolTile.getTableTile(), [[1, 2], [2, 4], [3, 9], [4, 16]]);
 
       clueCanvas.addTile("graph");
       xyTile.getTile().should("have.length", 1).should('be.visible');
@@ -438,8 +418,10 @@ context('XYPlot Tool Tile', function () {
       clueCanvas.addTile("graph");
       xyTile.getTile().should('be.visible');
 
-      buildTable([[1, 2], [2, 4], [3, 9]]);
-      buildTable([[1, 1], [2, 5], [3, 1], [4, 5]]);
+      clueCanvas.addTile("table");
+      tableToolTile.fillTable(tableToolTile.getTableTile().last(), [[1, 2], [2, 4], [3, 9]]);
+      clueCanvas.addTile("table");
+      tableToolTile.fillTable(tableToolTile.getTableTile().last(), [[1, 1], [2, 5], [3, 1], [4, 5]]);
 
       tableToolTile.getTableTile().should('have.length', 2);
 

@@ -28,7 +28,7 @@ export default defineConfig({
   qaUnitTeacher6Network: "/?appMode=qa&fakeClass=5&fakeUser=teacher:6&problem=1.1&unit=./demo/units/qa/content.json&network=foo",
   qaNoGroupShareUnitStudent5: "/?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&problem=1.1&unit=./demo/units/qa-no-group-share/content.json",
   qaConfigSubtabsUnitStudent5: "/?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&problem=1.1&unit=./demo/units/qa-config-subtabs/content.json",
-  qaConfigSubtabsUnitTeacher1: "/?appMode=qa&fakeClass=5&fakeUser=teacher:1&qaGroup=5&problem=1.1&unit=./demo/units/qa-config-subtabs/content.json",
+  qaConfigSubtabsUnitTeacher1: "/?appMode=qa&fakeClass=5&fakeUser=teacher:1&problem=1.1&unit=./demo/units/qa-config-subtabs/content.json",
   qaNoNavPanelUnitStudent5: "/?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&problem=1.1&unit=./demo/units/qa-no-nav-panel/content.json",
   qaVariablesUnitStudent5: "/?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&problem=1.1&unit=./demo/units/qa-variables/content.json",
   qaShowNavPanelUnitStudent5: "/?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&problem=1.1&unit=./demo/units/qa-show-nav-panel/content.json",

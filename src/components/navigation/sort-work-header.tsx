@@ -7,14 +7,12 @@ import "./sort-work-header.scss";
 interface ISortHeaderProps{
   docFilter: string;
   docFilterItems: ICustomDropdownItem[];
-  primarySort: string;
   primarySortItems: ICustomDropdownItem[];
-  secondarySort: string;
   secondarySortItems: ICustomDropdownItem[];
 }
 
 export const SortWorkHeader:React.FC<ISortHeaderProps>= observer(function SortWorkView(props){
-  const { docFilter, docFilterItems, primarySort, primarySortItems, secondarySort, secondarySortItems } = props;
+  const { docFilter, docFilterItems, primarySortItems, secondarySortItems } = props;
   return (
     <div className="sort-filter-menu-container">
       <div className="sort-work-header">
@@ -23,7 +21,6 @@ export const SortWorkHeader:React.FC<ISortHeaderProps>= observer(function SortWo
           <CustomSelect
             className="sort-work-sort-menu primary-sort-menu"
             dataTest="sort-work-sort-menu"
-            title={primarySort}
             items={primarySortItems}
             showItemChecks={true}
           />
@@ -33,7 +30,6 @@ export const SortWorkHeader:React.FC<ISortHeaderProps>= observer(function SortWo
           <CustomSelect
             className="sort-work-sort-menu secondary-sort-menu"
             dataTest="sort-work-sort-menu"
-            title={secondarySort}
             items={secondarySortItems}
             showItemChecks={true}
           />

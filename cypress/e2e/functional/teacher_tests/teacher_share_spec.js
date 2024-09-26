@@ -19,8 +19,14 @@ function verifySwitch(publicOrPrivate) {
   clueCanvas.getShareButton().should('have.class', publicOrPrivate);
 }
 
+function verifySectionsAreLoaded() {
+  cy.get('.section-header-label').should("contain", "Group 5");
+  cy.get('.section-header-label').should("contain", "No Group");
+}
+
 function verifyStudentSeesAsPrivate() {
   cy.get('.tab-sort-work').click();
+  verifySectionsAreLoaded();
   cy.get('.section-header-arrow').click({multiple: true});
   cy.contains('[data-test="sort-work-list-items"]','Teacher 1:')
     .should('have.descendants', '.thumbnail-private');
@@ -28,6 +34,7 @@ function verifyStudentSeesAsPrivate() {
 
 function verifyStudentSeesAsPublic() {
   cy.get('.tab-sort-work').click();
+  verifySectionsAreLoaded();
   cy.get('.section-header-arrow').click({multiple: true});
   cy.contains('[data-test="sort-work-list-items"]','Teacher 1:')
     .should('not.have.descendants', '.thumbnail-private');

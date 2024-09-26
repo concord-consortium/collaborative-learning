@@ -3,6 +3,7 @@ import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
 import { kBarGraphTileType, kBarGraphDefaultHeight } from "./bar-graph-types";
 import { BarGraphComponent } from "./bar-graph-tile";
 import { defaultBarGraphContent, BarGraphContentModel } from "./bar-graph-content";
+import { updateBarGraphContentWithNewSharedModelIds } from "./bar-graph-utils";
 
 import Icon from "./assets/bar-graph-icon.svg";
 
@@ -11,7 +12,8 @@ registerTileContentInfo({
   displayName: "Bar Graph",
   modelClass: BarGraphContentModel,
   defaultContent: defaultBarGraphContent,
-  defaultHeight: kBarGraphDefaultHeight
+  defaultHeight: kBarGraphDefaultHeight,
+  updateContentWithNewSharedModelIds: updateBarGraphContentWithNewSharedModelIds
 });
 
 registerTileComponentInfo({

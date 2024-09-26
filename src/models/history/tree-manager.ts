@@ -543,13 +543,17 @@ export const TreeManager = types
     const startingIndex = direction === 1 ? self.numHistoryEventsApplied : self.numHistoryEventsApplied - 1;
     const endingIndex = direction === 1 ? newHistoryPosition : newHistoryPosition - 1;
     for (let i=startingIndex; i !== endingIndex; i=i+direction) {
-      const entry = self.document.history.at(i);
-      for (const treeEntry of (entry?.records || [])) {
-        const patches = treePatches[treeEntry.tree];
+      const historyEntry = self.document.history.at(i);
+      let records = historyEntry ? [ ...historyEntry.records] : [];
+      if (direction === -1) {
+        records = records.reverse();
+      }
+      for (const entryRecord of records) {
+        const patches = treePatches[entryRecord.tree];
         if (newHistoryPosition > self.numHistoryEventsApplied) {
-          patches?.push(...treeEntry.getPatches(HistoryOperation.Redo));
+          patches?.push(...entryRecord.getPatches(HistoryOperation.Redo));
         } else {
-          patches?.push(...treeEntry.getPatches(HistoryOperation.Undo));
+          patches?.push(...entryRecord.getPatches(HistoryOperation.Undo));
         }
       }
     }
