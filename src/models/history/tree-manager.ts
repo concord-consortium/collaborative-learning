@@ -8,8 +8,7 @@ import { IUndoManager, UndoStore } from "./undo-store";
 import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
   HistoryOperation } from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
-import { getFirebaseFunction } from "../../hooks/use-firebase-function";
-import { getDocumentPath, ICommentableDocumentParams, IDocumentMetadata } from "../../../shared/shared";
+import { getDocumentPath, IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserModelType } from "../stores/user";
 import { UserContextProvider } from "../stores/user-context-provider";
@@ -625,16 +624,28 @@ async function prepareFirestoreHistoryInfo(
 
   const documentPath = getDocumentPath(userContext.uid, mainDocument.key, userContext.network);
   const documentRef = firestore.doc(documentPath);
-  const docSnapshot = await documentRef.get();
-  // create a document if necessary
-  if (!docSnapshot.exists) {
-    const validateCommentableDocument =
-      getFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
 
-
-    // FIXME-HISTORY: rename this function to validateFirestoreDocumentMetadata_v1
-    await validateCommentableDocument({context: userContext, document: mainDocument.metadata});
-  }
+  // The metadata documents are created by DB#createDocument however it does not wait for the metadata
+  // document to be created. So we might end up here before the metadata document has been created.
+  await new Promise<void>((resolve, reject) => {
+    let timeoutId: NodeJS.Timeout | undefined = undefined;
+    const disposer = documentRef.onSnapshot(doc => {
+      if (doc.exists) {
+        resolve();
+        if (timeoutId) {
+          disposer();
+          clearTimeout(timeoutId);
+        }
+      }
+    });
+    timeoutId = setTimeout(() => {
+      // If there isn't a firestore metadata document in 2 seconds then give up
+      disposer();
+      console.warn("Could not find metadata document to attach history to", documentPath);
+      resolve();
+      // TODO: how should we handle this error?
+    }, 2000);
+  });
 
   const lastHistoryEntry = await getLastHistoryEntry(firestore, documentPath);
 
