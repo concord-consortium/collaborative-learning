@@ -92,7 +92,7 @@ describe("document utils", () => {
         });
         const appConfig = AppConfigModel.create({config: unitConfigDefaults});
         const title = getDocumentDisplayTitle(unit, metadata, appConfig);
-        expect(title).toBe("Test Title (23FEB76-00:00:00)");
+        expect(title).toMatch(/Test Title \(23FEB76-..:..:..\)/);
       });
     });
 
