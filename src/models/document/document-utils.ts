@@ -20,7 +20,7 @@ function getProblemFromDoc(unit: UnitModelType, document: DocumentModelType | ID
   return problem;
 }
 
-function getDocumentTileFromProblem(currentUnit: UnitModelType, document: DocumentModelType | IDocumentMetadataModel) {
+function getDocumentTitleFromProblem(currentUnit: UnitModelType, document: DocumentModelType | IDocumentMetadataModel) {
   const {type, unit, investigation, problem} = document;
   const problemModel = getProblemFromDoc(currentUnit, document);
   if (problemModel) {
@@ -61,7 +61,7 @@ export function getDocumentDisplayTitle(
   if (isSupportType(type)) {
     return document.getProperty("caption") || "Support";
   } else if (isProblemType(type) || isPlanningType(type)) {
-    return getDocumentTileFromProblem(unit, document);
+    return getDocumentTitleFromProblem(unit, document);
   } else {
     return getDocumentTitleWithTimestamp(document, appConfig);
   }
