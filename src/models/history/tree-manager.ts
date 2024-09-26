@@ -639,12 +639,20 @@ async function prepareFirestoreHistoryInfo(
       }
     });
     timeoutId = setTimeout(() => {
-      // If there isn't a firestore metadata document in 2 seconds then give up
+      // If there isn't a firestore metadata document in 5 seconds then give up
       disposer();
       console.warn("Could not find metadata document to attach history to", documentPath);
-      resolve();
-      // TODO: how should we handle this error?
-    }, 2000);
+      // If there is an error here the history will not be saved for the duration
+      // of this CLUE session.
+      // This happens because the rejection will bubble up to completeHistoryEntry.
+      // That does not handle errors from this promise. The "then" function will
+      // not be called. The error should be printed as an unhandled promise error.
+      // The next time a history entry is "completed" this rejected promise
+      // will be "then'd" again which will again not run its function.
+      // TODO: consider updating this to create the metadata document itself by
+      // calling createFirestoreMetadataDocument.
+      reject(`Could not find metadata document to attach history to ${documentPath}`);
+    }, 5000);
   });
 
   const lastHistoryEntry = await getLastHistoryEntry(firestore, documentPath);
