@@ -1,6 +1,6 @@
 #!/usr/bin/node
 
-// This script uses the downloads documents to get a list of document ids and the network info
+// This script uses the downloaded documents to get a list of document ids and the network info
 // then creates or updates Firestore metadata documents
 
 // to run this script type the following in the terminal
@@ -36,7 +36,13 @@ const processComment = (
   commentSnapshot: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>,
   strategies: string[]
 ) => {
-  const commentTags = commentSnapshot.data().tags ?? [];
+  const commentSnapshotTags = commentSnapshot.data().tags;
+  if (commentSnapshotTags != null && !Array.isArray(commentSnapshotTags)) {
+    console.log("Found invalid comment tags", commentSnapshot.ref.path, commentSnapshotTags);
+    return;
+  }
+  const commentTags = commentSnapshotTags ?? [];
+
   commentTags.forEach(tag => {
     if (tag) {
       if (!strategies.includes(tag)) {
@@ -166,8 +172,6 @@ async function processFile(file: string) {
         if (!unitCode) unitCode = "sas";
         problem = stripLeadingZero(problem);
 
-        console.log({ unitCode, investigation, problem });
-
         unitFields = {
           problem,
           investigation,
@@ -260,7 +264,7 @@ async function processFile(file: string) {
           visibility
         };
         doc.ref.update(newMetadata as any);
-        console.log(processedFiles, documentId, doc.id, "Updated metadata with", newMetadata);
+        console.log(processedFiles, documentId, doc.id, "Updated metadata");
         metadataUpdated++;
       });
     }
