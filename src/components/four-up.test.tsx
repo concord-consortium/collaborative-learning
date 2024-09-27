@@ -105,8 +105,11 @@ describe("Four Up Component", () => {
     });
 
     const stores = specStores({ user, groups, documents });
+    // When the store is created the groups store is cloned so it can have the correct
+    // environment. Therefore we need to get the new groups store after specStores
+    const realGroup = stores.groups.allGroups[0];
 
-    const { container } = render(<FourUpComponent group={group} stores={stores}/>);
+    const { container } = render(<FourUpComponent group={realGroup} stores={stores}/>);
     // A canvas will be rendered unless an "unshared document" message is displayed.
     // User 2 has no document, so it will display an "unshared document" message.
     // User 1 has a shared document, User 3 is the main user, and there is no fourth user. All of those show canvases.
