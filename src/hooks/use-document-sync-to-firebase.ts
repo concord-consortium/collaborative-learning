@@ -1,6 +1,7 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { throttle as _throttle } from "lodash";
 import { onSnapshot, SnapshotOut } from "mobx-state-tree";
+import { OnDisconnect } from "firebase-admin/database";
 import { useSyncMstNodeToFirebase } from "./use-sync-mst-node-to-firebase";
 import { useSyncMstPropToFirebase } from "./use-sync-mst-prop-to-firebase";
 import { DEBUG_DOCUMENT, DEBUG_SAVE } from "../lib/debug";
@@ -40,6 +41,15 @@ export function useDocumentSyncToFirebase(
 ) {
   const { key, type, uid, contentStatus } = document;
   const { content: contentPath, metadata, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
+  const disconnectHandler = useRef<OnDisconnect|undefined>(undefined);
+
+  const handlePresenceChange = useMemo(() => (snapshot: any) => {
+    // When we come online after being offline, need to note that the onDisconnect event will have been fired.
+    // So the next time the document is modified, it needs to be set up again.
+    if (snapshot.val() === true) {
+      disconnectHandler.current = undefined;
+    }
+  }, []);
 
   // TODO: when running in doc-editor this warning was printed constantly
   // Ideally we'd figure out how to separate the syncing from the document stuff so the doc-editor can use
@@ -50,21 +60,37 @@ export function useDocumentSyncToFirebase(
   !disableFirebaseSync && !readOnly && (user.id !== uid) &&
     console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
+  const commonSyncEnabled = !disableFirebaseSync && contentStatus === ContentStatus.Valid;
+
   useEffect(() => {
-    // To handle errors this should be disabled if the document status is error
+    // Tree monitoring should be disabled if the document status is error
     if (!readOnly && contentStatus === ContentStatus.Valid) {
       // enable history tracking on this document
       if (document.treeMonitor) {
         document.treeMonitor.enabled = true;
       }
+      // Set up listener for online status
+      if (commonSyncEnabled) {
+        firebase.onlineStatusRef.on('value', handlePresenceChange);
+      }
+
       return () => {
         // disable history tracking on this document
         if (document.treeMonitor) {
           document.treeMonitor.enabled = false;
         }
+        // Remove the online status listener
+        if (!readOnly && commonSyncEnabled) {
+          firebase.onlineStatusRef.off('value', handlePresenceChange);
+        }
+        // If an onDisconnect is set, remove it and set the updated timestamp to now.
+        if (disconnectHandler.current) {
+          firebase.setLastEditedNow(user, key, uid, disconnectHandler.current);
+        }
       };
     }
-  }, [readOnly, contentStatus, document.treeMonitor]);
+  }, [readOnly, contentStatus, document.treeMonitor, firebase, user, key, uid,
+      handlePresenceChange, commonSyncEnabled]);
 
   if (!readOnly && DEBUG_DOCUMENT) {
     // provide the document to the console so developers can inspect its content
@@ -73,8 +99,6 @@ export function useDocumentSyncToFirebase(
     // useDocumentSyncToFirebase is called with readOnly documents too
     (window as any).currentDocument = document;
   }
-
-  const commonSyncEnabled = !disableFirebaseSync && contentStatus === ContentStatus.Valid;
 
   /**
    * We currently have multiple firestore metadata docs for each real doc.
@@ -196,10 +220,12 @@ export function useDocumentSyncToFirebase(
     ({ changeCount: document.incChangeCount(), content: JSON.stringify(snapshot) });
 
   const mutation = useMutation((snapshot: DocumentContentSnapshotType) => {
+    if (!disconnectHandler.current && commonSyncEnabled) {
+      disconnectHandler.current = firebase.setLastEditedOnDisconnect(user, key, uid);
+    }
+
     const tileMap = snapshot.tileMap || {};
-
     const tools: string[] = [];
-
     Object.keys(tileMap).forEach((tileKey) => {
       const tileInfo = tileMap[tileKey] as ITileMapEntry;
       const tileType = tileInfo.content.type;
