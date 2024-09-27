@@ -132,8 +132,6 @@ class Stores implements IStores{
     this.groups = params?.groups
       ? clone(params.groups, this)
       : GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing }, this);
-    this.groups = params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing });
-    this.groups.setEnvironment(this);
     this.class = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });
     this.db = params?.db || new DB();
     this.documents = params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes);

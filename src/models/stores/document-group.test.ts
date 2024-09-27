@@ -133,11 +133,11 @@ const createMockGroups = () => {
   const group9Users = createMockGroupUsers(group9UsersData);
 
   const mockGroups = GroupsModel.create({
-    allGroups: [
-      GroupModel.create({ id: "3", users: group3Users }),
-      GroupModel.create({ id: "5", users: group5Users }),
-      GroupModel.create({ id: "9", users: group9Users }),
-    ]
+    groupsMap: {
+      3: GroupModel.create({ id: "3", users: group3Users }),
+      5: GroupModel.create({ id: "5", users: group5Users }),
+      9: GroupModel.create({ id: "9", users: group9Users }),
+    }
   });
   return mockGroups;
 };
