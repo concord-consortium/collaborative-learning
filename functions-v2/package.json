@@ -21,7 +21,8 @@
   "dependencies": {
     "firebase-admin": "^12.1.0",
     "firebase-functions": "^5.1.1",
-    "openai": "^4.64.0"
+    "openai": "^4.64.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
