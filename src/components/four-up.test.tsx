@@ -59,7 +59,7 @@ describe("Four Up Component", () => {
       ]
     });
     const groups = GroupsModel.create({
-      allGroups: [group]
+      groupsMap: {1: group}
     });
 
     const stores = specStores({ groups, documents });
@@ -101,7 +101,7 @@ describe("Four Up Component", () => {
       ],
     });
     const groups = GroupsModel.create({
-      allGroups: [group]
+      groupsMap: {1: group}
     });
 
     const stores = specStores({ user, groups, documents });

@@ -1,4 +1,4 @@
-import { types, getEnv } from "mobx-state-tree";
+import { types, getEnv, SnapshotIn, applySnapshot } from "mobx-state-tree";
 import { DBOfferingGroupMap } from "../../lib/db-types";
 import { ClassModelType } from "./class";
 import { GroupVirtualDocument } from "../document/group-virtual-document";
@@ -73,23 +73,16 @@ export const GroupModel = types
 
 export const GroupsModel = types
   .model("Groups", {
-    allGroups: types.array(GroupModel),
+    groupsMap: types.map(GroupModel),
     acceptUnknownStudents: false
   })
   .actions((self) => ({
     updateFromDB(groups: DBOfferingGroupMap, clazz: ClassModelType) {
-      // FIXME: update this to be a syncing operation:
-      // - change self.allGroups to be a map of id to group
-      // - update existing groups with new data from the database
-      // - remove groups from self.allGroups which don't exist in the database anymore
-      // The reason to fix this is because the GroupUsers have references to documents
-      // which can be slow to recompute when there are lots of users and lots of documents
-      // Also some components can hold onto these objects, if we recreate them those
-      // old objects are now invalid and can cause unnecessary errors.
-      const allGroups = Object.keys(groups).map((groupId) => {
-        const group = groups[groupId];
+      const groupsMapSnapshot: SnapshotIn<typeof self.groupsMap> = {};
+      Object.entries(groups).forEach(([groupId, group]) => {
+        const groupUserSnapshots: SnapshotIn<typeof GroupUserModel>[] = [];
+
         const groupUsers = group.users || {};
-        const users: GroupUserModelType[] = [];
         Object.keys(groupUsers).forEach((groupUserId) => {
           const groupUser = groupUsers[groupUserId];
           const {connectedTimestamp, disconnectedTimestamp} = groupUser;
@@ -100,22 +93,32 @@ export const GroupsModel = types
             // skip students who are not recognized members of the class when authenticated
             // this actually occurred in the classroom causing great consternation
             // when previewing, however, we need to accept unknown students
+
+            // TODO: we need accept unknown student in the case where a student joins the class
+            // after another student has launched CLUE. If this new student joins the group
+            // they won't show up. What we want to do is show them as "Unknown" or "Loading"
+            // and then trigger a request to get the latest roster from the portal. When
+            // we get the roster we should update this group user with the correct name
+            // and initials.
             if (student || self.acceptUnknownStudents) {
-              const groupUserModel = GroupUserModel.create({
+              groupUserSnapshots.push({
                 id: groupUserId,
                 name: student?.fullName || "Unknown",
                 initials: student?.initials || "??",
                 connectedTimestamp,
                 disconnectedTimestamp
               });
-              users.push(groupUserModel);
             }
           }
         });
-        const groupModel = GroupModel.create({id: groupId, users});
-        return groupModel;
+        groupsMapSnapshot[groupId] = {id: groupId, users: groupUserSnapshots};
       });
-      self.allGroups.replace(allGroups);
+      applySnapshot(self.groupsMap, groupsMapSnapshot);
+    }
+  }))
+  .views(self => ({
+    get allGroups() {
+      return [...self.groupsMap.values()];
     }
   }))
   .views((self) => ({

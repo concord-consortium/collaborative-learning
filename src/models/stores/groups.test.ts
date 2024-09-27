@@ -41,7 +41,7 @@ describe("Groups model", () => {
       ],
     });
     const groups = GroupsModel.create({
-      allGroups: [group]
+      groupsMap: {1: group}
     });
     expect(group.getUserById("1")).toBeDefined();
     expect(group.getUserById("2")).toBeDefined();
