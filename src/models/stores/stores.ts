@@ -275,7 +275,6 @@ class Stores implements IStores{
         problem,
         documents: this.documents,
         user: this.user,
-        classStore: this.class,
         curriculumConfig,
         appConfig
       }).then(() => {

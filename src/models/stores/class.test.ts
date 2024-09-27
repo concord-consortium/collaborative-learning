@@ -57,6 +57,8 @@ describe("Class model", () => {
       teachers: []
     };
     clazz.updateFromPortal(classInfo);
-    expect(clazz.users.size).toEqual(1);
+
+    // There is always a exemplar user added to the class
+    expect(clazz.users.size).toEqual(2);
   });
 });
