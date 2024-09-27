@@ -1,4 +1,4 @@
-import { addDisposer, getSnapshot } from "mobx-state-tree";
+import { addDisposer, clone, getSnapshot } from "mobx-state-tree";
 import { makeAutoObservable, runInAction, when } from "mobx";
 import { AppConfigModel, AppConfigModelType } from "./app-config-model";
 import { UnitModel, UnitModelType } from "../curriculum/unit";
@@ -124,6 +124,14 @@ class Stores implements IStores{
     this.problem = params?.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" });
 
     this.user = params?.user || UserModel.create({ id: "0" });
+
+    // Groups need us (stores) as the MST environment.
+    // So if we are passed a groups we need to clone it so we can set the environment.
+    // If any code passes in a groups they need to use the returned one instead of their
+    // original
+    this.groups = params?.groups
+      ? clone(params.groups, this)
+      : GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing }, this);
     this.groups = params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing });
     this.groups.setEnvironment(this);
     this.class = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });

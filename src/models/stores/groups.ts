@@ -1,4 +1,4 @@
-import { types } from "mobx-state-tree";
+import { types, getEnv } from "mobx-state-tree";
 import { DBOfferingGroupMap } from "../../lib/db-types";
 import { ClassModelType } from "./class";
 import { GroupVirtualDocument } from "../document/group-virtual-document";
@@ -19,12 +19,9 @@ export const GroupUserModel = types
     connectedTimestamp: types.number,
     disconnectedTimestamp: types.maybe(types.number),
   })
-  .volatile(self => ({
-    environment: {} as IGroupsEnvironment
-  }))
-  .actions((self) => ({
-    setEnvironment(env: IGroupsEnvironment) {
-      self.environment = env;
+  .views(self => ({
+    get environment() {
+      return getEnv(self) as IGroupsEnvironment;
     }
   }))
   .views((self) => ({
@@ -49,14 +46,9 @@ export const GroupModel = types
     id: types.identifier,
     users: types.array(GroupUserModel)
   })
-  .volatile(self => ({
-    environment: {} as IGroupsEnvironment
-  }))
-  .actions((self) => ({
-    setEnvironment(env: IGroupsEnvironment) {
-      self.environment = env;
-      // update environment of any existing users
-      self.users.forEach(user => user.setEnvironment(env));
+  .views(self => ({
+    get environment() {
+      return getEnv(self) as IGroupsEnvironment;
     }
   }))
   .views((self) => ({
@@ -84,15 +76,7 @@ export const GroupsModel = types
     allGroups: types.array(GroupModel),
     acceptUnknownStudents: false
   })
-  .volatile(self => ({
-    environment: {} as IGroupsEnvironment
-  }))
   .actions((self) => ({
-    setEnvironment(env: IGroupsEnvironment) {
-      self.environment = env;
-      // update environment of any existing groups
-      self.allGroups.forEach(group => group.setEnvironment(env));
-    },
     updateFromDB(groups: DBOfferingGroupMap, clazz: ClassModelType) {
       // FIXME: update this to be a syncing operation:
       // - change self.allGroups to be a map of id to group
@@ -124,13 +108,11 @@ export const GroupsModel = types
                 connectedTimestamp,
                 disconnectedTimestamp
               });
-              groupUserModel.setEnvironment(self.environment);
               users.push(groupUserModel);
             }
           }
         });
         const groupModel = GroupModel.create({id: groupId, users});
-        groupModel.setEnvironment(self.environment);
         return groupModel;
       });
       self.allGroups.replace(allGroups);
