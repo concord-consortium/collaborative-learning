@@ -8,14 +8,13 @@ import { ProblemPublication } from "../document/document-types";
 
 export interface IGroupsEnvironment {
   user?: UserModelType,  // This is the current user of the application
+  class?: ClassModelType,
   documents?: DocumentsModelType, // These are the documents of the application
 }
 
 export const GroupUserModel = types
   .model("GroupUser", {
     id: types.string,
-    name: types.string,
-    initials: types.string,
     connectedTimestamp: types.number,
     disconnectedTimestamp: types.maybe(types.number),
   })
@@ -24,7 +23,18 @@ export const GroupUserModel = types
       return getEnv(self) as IGroupsEnvironment;
     }
   }))
-  .views((self) => ({
+  .views(self => ({
+    get user() {
+      return self.environment.class?.getUserById(self.id);
+    }
+  }))
+  .views(self => ({
+    get name() {
+      return self.user?.fullName || "Unknown";
+    },
+    get initials() {
+      return self.user?.initials || "??";
+    },
     get connected() {
       const {connectedTimestamp, disconnectedTimestamp} = self;
       return !disconnectedTimestamp || (connectedTimestamp > disconnectedTimestamp);
@@ -74,10 +84,10 @@ export const GroupModel = types
 export const GroupsModel = types
   .model("Groups", {
     groupsMap: types.map(GroupModel),
-    acceptUnknownStudents: false
   })
   .actions((self) => ({
     updateFromDB(groups: DBOfferingGroupMap, clazz: ClassModelType) {
+      let needToRefreshClass = false;
       const groupsMapSnapshot: SnapshotIn<typeof self.groupsMap> = {};
       Object.entries(groups).forEach(([groupId, group]) => {
         const groupUserSnapshots: SnapshotIn<typeof GroupUserModel>[] = [];
@@ -90,30 +100,45 @@ export const GroupsModel = types
           // causing the disconnectedAt timestamp to be set at the groupUser level
           if (groupUser.self) {
             const student = clazz.getUserById(groupUser.self.uid);
-            // skip students who are not recognized members of the class when authenticated
-            // this actually occurred in the classroom causing great consternation
-            // when previewing, however, we need to accept unknown students
 
-            // TODO: we need accept unknown student in the case where a student joins the class
-            // after another student has launched CLUE. If this new student joins the group
-            // they won't show up. What we want to do is show them as "Unknown" or "Loading"
-            // and then trigger a request to get the latest roster from the portal. When
-            // we get the roster we should update this group user with the correct name
-            // and initials.
-            if (student || self.acceptUnknownStudents) {
-              groupUserSnapshots.push({
-                id: groupUserId,
-                name: student?.fullName || "Unknown",
-                initials: student?.initials || "??",
-                connectedTimestamp,
-                disconnectedTimestamp
-              });
+            // If the student is not a recognized member of the class we show them
+            // as Unknown. This can happen if a user joins the class after the current
+            // user has started CLUE.
+            // However if users see Unknown and ?? in their group lists they can
+            // get confused. This happened before. A better approach would be to show
+            // some kind of loading indication, and then if it times out and no user
+            // is found then we hid the user or show an error instead of Unknown.
+            groupUserSnapshots.push({
+              id: groupUserId,
+              connectedTimestamp,
+              disconnectedTimestamp
+            });
+
+            if (!student) {
+              needToRefreshClass = true;
             }
           }
         });
         groupsMapSnapshot[groupId] = {id: groupId, users: groupUserSnapshots};
       });
       applySnapshot(self.groupsMap, groupsMapSnapshot);
+
+      if (needToRefreshClass) {
+        // TODO: Request classInfo from the portal then pass it to updateFromPortal.
+        // This might be better to move somewhere else.
+        // const classInfo = {} as ClassInfo;
+        // if (classInfo) {
+        //   clazz.updateFromPortal(classInfo);
+        // }
+        //
+        // TODO: if a student is removed from the class by the teacher what should
+        // happen to the groups? This is a legitimate reason to skip unknown users.
+        // However we won't know the difference between a student that is deleted
+        // and one we don't know about it.
+        //
+        // TODO: what was the previous "preview behavior"? Did it automatically add
+        // students to the group?
+      }
     }
   }))
   .views(self => ({

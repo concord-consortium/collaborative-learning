@@ -8,6 +8,7 @@ import { ProblemDocument } from "../models/document/document-types";
 import { DocumentsModelType, DocumentsModel } from "../models/stores/documents";
 import { specStores } from "../models/stores/spec-stores";
 import { UserModel } from "../models/stores/user";
+import { ClassModel } from "../models/stores/class";
 
 configure({testIdAttribute: "data-test"});
 
@@ -52,8 +53,6 @@ describe("Four Up Component", () => {
       users: [
         GroupUserModel.create({
           id: "1",
-          name: "User 1",
-          initials: "U1",
           connectedTimestamp: 1
         })
       ]
@@ -75,26 +74,51 @@ describe("Four Up Component", () => {
       name: "User 3"
     });
 
+    const clazz = ClassModel.create({
+      name: "Test Class",
+      classHash: "test",
+      users: {
+        1: {
+          type: "student",
+          id: "1",
+          firstName: "User",
+          lastName: "1",
+          fullName: "User 1",
+          initials: "U1"
+        },
+        2: {
+          type: "student",
+          id: "2",
+          firstName: "User",
+          lastName: "2",
+          fullName: "User 2",
+          initials: "U2"
+        },
+        3: {
+          type: "student",
+          id: "3",
+          firstName: "User",
+          lastName: "3",
+          fullName: "User 3",
+          initials: "U3"
+        }
+      }
+    });
+
     const group = GroupModel.create({
       id: "1",
       users: [
         GroupUserModel.create({
           id: "1",
-          name: "User 1",
-          initials: "U1",
           connectedTimestamp: 1,
         }),
         GroupUserModel.create({
           id: "2",
-          name: "User 2",
-          initials: "U2",
           connectedTimestamp: 1,
           disconnectedTimestamp: 2,
         }),
         GroupUserModel.create({
           id: "3",
-          name: "User 3",
-          initials: "U3",
           connectedTimestamp: 3,
           disconnectedTimestamp: 2,
         }),
@@ -102,9 +126,9 @@ describe("Four Up Component", () => {
     });
     const groups = GroupsModel.create({
       groupsMap: {1: group}
-    });
+    },);
 
-    const stores = specStores({ user, groups, documents });
+    const stores = specStores({ user, groups, documents, class: clazz });
     // When the store is created the groups store is cloned so it can have the correct
     // environment. Therefore we need to get the new groups store after specStores
     const realGroup = stores.groups.allGroups[0];
