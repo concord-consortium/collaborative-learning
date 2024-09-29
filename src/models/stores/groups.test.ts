@@ -20,21 +20,15 @@ describe("Groups model", () => {
       users: [
         GroupUserModel.create({
           id: "1",
-          name: "User 1",
-          initials: "U1",
           connectedTimestamp: 1,
         }),
         GroupUserModel.create({
           id: "2",
-          name: "User 2",
-          initials: "U2",
           connectedTimestamp: 1,
           disconnectedTimestamp: 2,
         }),
         GroupUserModel.create({
           id: "3",
-          name: "User 3",
-          initials: "U3",
           connectedTimestamp: 3,
           disconnectedTimestamp: 2,
         }),
@@ -61,7 +55,6 @@ describe("Groups model", () => {
   });
 
   it("updates from db", () => {
-    const groups = GroupsModel.create({});
     const dbGroupsWithoutUsers: DBOfferingGroupMap = {
       1: {
         version: "1.0",
@@ -127,13 +120,21 @@ describe("Groups model", () => {
       }
     });
 
+    const groups = GroupsModel.create({}, {class: clazz});
+
     groups.updateFromDB(dbGroupsWithoutUsers, clazz);
     expect(groups.allGroups.length).toEqual(1);
     expect(groups.allGroups[0].users.length).toEqual(0);
 
     groups.updateFromDB(dbGroupsWithUsers, clazz);
     expect(groups.allGroups.length).toEqual(1);
-    expect(groups.allGroups[0].users.length).toEqual(1);
-    expect(groups.allGroups[0].users[0].id).toEqual("1");
+    const group = groups.allGroups[0];
+    expect(group.users.length).toEqual(2);
+    expect(group.users[0].id).toEqual("1");
+    expect(group.users[0].name).toEqual("Test User");
+    expect(group.users[0].initials).toEqual("TU");
+    expect(group.users[1].id).toEqual("2");
+    expect(group.users[1].name).toEqual("Unknown");
+    expect(group.users[1].initials).toEqual("??");
   });
 });

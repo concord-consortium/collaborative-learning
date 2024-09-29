@@ -125,13 +125,14 @@ class Stores implements IStores{
 
     this.user = params?.user || UserModel.create({ id: "0" });
 
-    // Groups need us (stores) as the MST environment.
-    // So if we are passed a groups we need to clone it so we can set the environment.
-    // If any code passes in a groups they need to use the returned one instead of their
-    // original
+    // Groups need stores (this) as the MST environment.
+    // The environment of an MST object can't be changed once created. So if we are passed a
+    // groups object, we need to clone it so we can set the environment.
+    // Any code that passes in a groups object needs to use the returned one instead of their
+    // original.
     this.groups = params?.groups
       ? clone(params.groups, this)
-      : GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing }, this);
+      : GroupsModel.create({}, this);
     this.class = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });
     this.db = params?.db || new DB();
     this.documents = params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes);
