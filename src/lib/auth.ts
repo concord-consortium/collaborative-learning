@@ -1,21 +1,20 @@
-import initials from "initials";
 import jwt_decode from "jwt-decode";
 import superagent from "superagent";
 import { AppMode } from "../models/stores/store-types";
 import { QueryParams, urlParams as pageUrlParams } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
 import { AppConfigModelType } from "../models/stores/app-config-model";
-import { IUserPortalOffering } from "../models/stores/user";
 import { UserType } from "../models/stores/user-types";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
-import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser } from "./portal-api";
-import { PortalJWT, PortalFirebaseJWT, IPortalClassInfo } from "./portal-types";
+import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser,
+   } from "./portal-api";
+import { PortalJWT, PortalFirebaseJWT } from "./portal-types";
 import { Logger } from "../lib/logger";
 import { LogEventName } from "../lib/logger-types";
 import { uniqueId } from "../utilities/js-utils";
 import { getUnitCodeFromUnitParam } from "../utilities/url-utils";
-import { convertURLToOAuth2, getBearerToken } from "../utilities/auth-utils";
 import { ICurriculumConfig } from "../models/stores/curriculum-config";
+import { ClassInfo, Portal, StudentUser, TeacherUser } from "../models/stores/portal";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
@@ -57,43 +56,6 @@ export const DEV_CLASS_INFO: ClassInfo = {
 
 export type AuthenticatedUser = StudentUser | TeacherUser;
 export const isAuthenticatedTeacher = (u: AuthenticatedUser): u is TeacherUser => u.type === "teacher";
-
-interface User {
-  id: string;
-  portal: string;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  initials: string;
-  className: string;
-  classHash: string;
-  offeringId: string;
-  portalJWT?: PortalJWT;
-  rawPortalJWT?: string;
-  firebaseJWT?: PortalFirebaseJWT;
-  rawFirebaseJWT?: string;
-  portalClassOfferings?: IUserPortalOffering[];
-  demoClassHashes?: string[];
-}
-
-export interface StudentUser extends User {
-  type: "student";
-}
-
-export interface TeacherUser extends User {
-  type: "teacher";
-  network?: string;     // default network for teacher
-  networks?: string[];  // list of networks available to teacher
-}
-
-export interface ClassInfo {
-  name: string;
-  classHash: string;
-  students: StudentUser[];
-  teachers: TeacherUser[];
-  localTimestamp: number;
-  serverTimestamp?: number;
-}
 
 export interface AuthQueryParams {
   token?: string;
@@ -177,73 +139,6 @@ export const getFirebaseJWTWithBearerToken = (basePortalUrl: string, type: strin
   });
 };
 
-export interface GetClassInfoParams {
-  classInfoUrl: string;
-  rawPortalJWT: string;
-  portal: string;
-  offeringId: string;
-}
-
-export const getClassInfo = (params: GetClassInfoParams) => {
-  const {classInfoUrl, rawPortalJWT, portal, offeringId} = params;
-  return new Promise<ClassInfo>((resolve, reject) => {
-    superagent
-    .get(classInfoUrl)
-    .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
-    .end((err, res) => {
-      if (err) {
-        reject(getErrorMessage(err, res));
-      } else if (!res.body || !res.body.class_hash) {
-        reject("Invalid class info response");
-      } else {
-        const rawClassInfo: IPortalClassInfo = res.body;
-
-        const classInfo: ClassInfo = {
-          localTimestamp: Date.now(),
-          name: rawClassInfo.name,
-          classHash: rawClassInfo.class_hash,
-          students: rawClassInfo.students.map((rawStudent) => {
-            const fullName = `${rawStudent.first_name} ${rawStudent.last_name}`;
-            const id = rawStudent.id.split("/").pop() || "0";
-            const student: StudentUser = {
-              type: "student",
-              id,
-              portal,
-              firstName: rawStudent.first_name,
-              lastName: rawStudent.last_name,
-              fullName,
-              className: rawClassInfo.name,
-              initials: initials(fullName) as string,
-              classHash: rawClassInfo.class_hash,
-              offeringId,
-            };
-            return student;
-          }),
-          teachers: rawClassInfo.teachers.map((rawTeacher) => {
-            const fullName = `${rawTeacher.first_name} ${rawTeacher.last_name}`;
-            const id = rawTeacher.id.split("/").pop() || "0";
-            const teacher: TeacherUser = {
-              type: "teacher",
-              id,
-              portal,
-              firstName: rawTeacher.first_name,
-              lastName: rawTeacher.last_name,
-              fullName,
-              className: rawClassInfo.name,
-              initials: initials(fullName) as string,
-              classHash: rawClassInfo.class_hash,
-              offeringId,
-            };
-            return teacher;
-          }),
-        };
-
-        resolve(classInfo);
-      }
-    });
-  });
-};
-
 interface IAuthenticateResponse {
   appMode?: AppMode;
   authenticatedUser: AuthenticatedUser;
@@ -256,6 +151,7 @@ export const authenticate = async (
     appMode: AppMode,
     appConfig: AppConfigModelType,
     curriculumConfig: ICurriculumConfig,
+    portalService: Portal,
     urlParams?: QueryParams): Promise<IAuthenticateResponse> => {
   urlParams = urlParams || pageUrlParams;
   // TODO: we should be defaulting to appConfig.defaultUnit here rather than the empty string,
@@ -264,12 +160,10 @@ export const authenticate = async (
   const unitCode = urlParams.unit || "";
   // when launched as a report, the params will not contain the problemOrdinal
   const problemOrdinal = urlParams.problem || appConfig.defaultProblemOrdinal;
-  const bearerToken = getBearerToken(urlParams);
-  let basePortalUrl: string;
 
   let {fakeClass, fakeUser} = urlParams;
   // handle preview launch from portal
-  if (urlParams.domain && urlParams.domain_uid && !bearerToken) {
+  if (portalService.isPortalPreview) {
     appMode = "demo";
     fakeClass = `preview-${urlParams.domain_uid}`;
     fakeUser = `student:${urlParams.domain_uid}`;
@@ -316,61 +210,15 @@ export const authenticate = async (
     return generateDevAuthentication(unitCode || curriculumConfig.defaultUnit || "", problemOrdinal);
   }
 
-  if (!bearerToken) {
-    throw "No token provided for authentication (must launch from Portal)";
+  await portalService.initialize();
+  const { portalJWT, rawPortalJWT, basePortalUrl, bearerToken, portalHost } = portalService;
+
+  if (!basePortalUrl || !bearerToken) {
+    // Both of these cases should be caught by initialize with more useful error messages
+    throw "Invalid Portal Launch";
   }
 
-  if (urlParams.reportType) {
-    if (urlParams.reportType !== "offering") {
-      throw "Sorry, only external reports at the offering level are supported";
-    }
-    if (!urlParams.class) {
-      throw "Missing class parameter!";
-    }
-    if (!urlParams.offering) {
-      throw "Missing offering parameter!";
-    }
-    const {protocol, host} = parseUrl(urlParams.class);
-    basePortalUrl = `${protocol}//${host}/`;
-  }
-  else if (urlParams.domain) {
-    basePortalUrl = urlParams.domain;
-  }
-  else {
-    throw "Missing domain query parameter!";
-  }
-
-  const [rawPortalJWT, portalJWT] = await getPortalJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken);
-
-  if (!((portalJWT.user_type === "learner") || (portalJWT.user_type === "teacher"))) {
-    throw new Error(`Only student and teacher logins are currently supported! ` +
-      `Unsupported type: ${portalJWT.user_type}`);
-  }
-
-  const portal = parseUrl(basePortalUrl).host;
-  let classInfoUrl: string | undefined;
-  let offeringId: string | undefined;
-
-  if (portalJWT.user_type === "learner") {
-    classInfoUrl = portalJWT.class_info_url;
-    offeringId = `${portalJWT.offering_id}`;
-  }
-  else if (urlParams && urlParams.class && urlParams.offering) {
-    classInfoUrl = urlParams.class;
-    offeringId = urlParams.offering.split("/").pop() as string;
-  }
-
-  if (!classInfoUrl || !offeringId) {
-    throw new Error("Unable to get classInfoUrl or offeringId");
-  }
-
-  // Re-Write the URL with OAuth2 parameters
-  const oAuth2Url = convertURLToOAuth2(window.location.href, basePortalUrl, offeringId);
-  if (oAuth2Url) {
-    window.history.replaceState(null, "CLUE", oAuth2Url.toString());
-  }
-
-  const classInfo = await getClassInfo({classInfoUrl, rawPortalJWT, portal, offeringId});
+  const classInfo = await portalService.getClassInfo();
   const { user_type, uid, domain } = portalJWT;
   const { classHash } = classInfo;
   const uidAsString = `${portalJWT.uid}`;
@@ -396,11 +244,11 @@ export const authenticate = async (
   authenticatedUser.firebaseJWT = firebaseJWT;
   authenticatedUser.rawFirebaseJWT = rawFirebaseJWT;
   authenticatedUser.id = uidAsString;
-  authenticatedUser.portal = portal;
+  authenticatedUser.portal = portalHost;
   authenticatedUser.portalClassOfferings =
     getPortalClassOfferings(portalOfferingsResult, appConfig, curriculumConfig, urlParams);
 
-  Logger.log(LogEventName.INTERNAL_AUTHENTICATED, {id: authenticatedUser.id, portal});
+  Logger.log(LogEventName.INTERNAL_AUTHENTICATED, {id: authenticatedUser.id, portal: portalHost});
 
   return {
     authenticatedUser,
@@ -447,12 +295,6 @@ export const createFakeOfferingIdFromProblem = (unitParam: string, problemOrdina
   // yet, and it would complicate things to wait for it to load.
   const offeringPrefix = getUnitCodeFromUnitParam(unitParam);
   return `${offeringPrefix}${(toNumber(major, 1) * 100) + toNumber(minor, 0)}`;
-};
-
-export const parseUrl = (url: string) => {
-  const parser = document.createElement("a");
-  parser.href = url;
-  return parser;
 };
 
 export interface CreateFakeUserOptions {

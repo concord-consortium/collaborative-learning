@@ -133,11 +133,11 @@ describe("Groups model", () => {
 
     const groups = GroupsModel.create({}, {class: clazz});
 
-    groups.updateFromDB(dbGroupsWithoutUsers, clazz);
+    groups.updateFromDB(dbGroupsWithoutUsers);
     expect(groups.allGroups.length).toEqual(1);
     expect(groups.allGroups[0].users.length).toEqual(0);
 
-    groups.updateFromDB(dbGroupsWithUsers, clazz);
+    groups.updateFromDB(dbGroupsWithUsers);
     expect(groups.allGroups.length).toEqual(1);
     const group = groups.allGroups[0];
     expect(group.users.length).toEqual(3);

@@ -49,14 +49,14 @@ function resolveAppMode(
 }
 
 export const authAndConnect = async (stores: IStores) => {
-  const {appConfig, curriculumConfig, appMode, db, user, ui} = stores;
+  const {appConfig, appMode, curriculumConfig, db, portal, user, ui} = stores;
   let rawPortalJWT: string | undefined;
 
   showLoadingMessage("Connecting");
 
   try {
     const {appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode} =
-      await authenticate(appMode, appConfig, curriculumConfig, urlParams);
+      await authenticate(appMode, appConfig, curriculumConfig, portal, urlParams);
 
     // authentication can trigger appMode change (e.g. preview => demo)
     if (newAppMode && (newAppMode !== appMode)) {
@@ -180,7 +180,7 @@ export class AppComponent extends BaseComponent<IProps> {
 
     if (user.isStudent) {
       if (!user.currentGroupId) {
-        if (appConfig.autoAssignStudentsToIndividualGroups || this.stores.isPreviewing) {
+        if (appConfig.autoAssignStudentsToIndividualGroups || this.stores.portal.isPortalPreview) {
           // use userId as groupId
           db.joinGroup(user.id);
         }
