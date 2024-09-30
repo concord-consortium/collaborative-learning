@@ -54,6 +54,15 @@ export const onProcessingQueueWritten =
         //   },
         //   system_fingerprint: 'fp_1bb46167f9'
         // }
+
+        // In the case of a refusal, the message part would be like:
+        // message: {
+        //   role: 'assistant',
+        //   content: null,
+        //   refusal: "I'm sorry, I can't help with that."
+        //   tool_calls: [],
+        //   parsed: null
+        // }
       }
     });
 
