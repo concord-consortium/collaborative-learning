@@ -1,50 +1,13 @@
 import {onDocumentWritten} from "firebase-functions/v2/firestore";
-import OpenAI from "openai";
-import {zodResponseFormat} from "openai/helpers/zod";
-import {z} from "zod";
-import fs from "node:fs/promises";
 import * as logger from "firebase-functions/logger";
-// import * as admin from "firebase-admin";
+import categorizeDocument from "../lib/src/ai-categorize-document";
 
 // Ultimately this should take screenshots generated of user documents and pass them to the AI service for processing.
-// For now, we'll just use the OpenAI chat endpoint to test the concept.
-
-const prompt = `This is a picture of a student document.
-They are working on engineering task. Please tell me which of the following areas of their design they are focusing on:
-- user: who's it for?
-- environment: where's it used?
-- form: what's it look like?
-- function: what does it do?
-and why you chose that area.
-Or if the document doesn't include enough content to identify a focus area let me know.
-Your answer should be a JSON document in the given format.`;
-
-// const sample = `I designed a fancy rainbarrel for my backyard. It's a 3D printed barrel with a spigot at the bottom.
-// I chose this design because I wanted to collect rainwater for my garden. I also wanted it to look nice in my yard.`;
-
-// const sample = `I designed a rainbarrel for the town park. It's a large barrel with multiple inlets and several spigots.
-// This should allow it to collect rainwater from the roof of the park building and provide water for the park's gardens.`;
-
-// const sample = `I designed a rainbarrel specifically for the school garden. It's safe for kids, fits in with the landscaping,
-// and is just the right size for the garden on School Street.`;
-
-// const sample = "This is a rainbarrel";
+// We can't really do this until there's a screenshotting service implemented.
 
 // Load the image data from disk and base64 encode it
-const sampleImageFile = "./image0.png";
-const imageLoading = fs.readFile(sampleImageFile).then((data) => data.toString("base64"));
-
-// Require a specific JSON schema for the model output
-const CategorizationResponse = z.object({
-  success: z.boolean(
-    {description: "Whether a category could be determined from the input"}),
-  category: z.enum(["user", "environment", "form", "function", "unknown"],
-    {description: "The focus area of the document"}),
-  keyIndicators: z.array(z.string(),
-    {description: "List of main features or elements of the document that support this categorization"}),
-  discussion: z.string(
-    {description: "Any other relevant information."}),
-});
+// const sampleImageFile = "./image0.png";
+const sampleImageFile = "./2/1350683-problem--O1IJaBTDBU86PD-PKbS.png";
 
 // TODO - not yet sure what should trigger this function. It needs to run after a screenshot is generated.
 export const onProcessingQueueWritten =
@@ -53,37 +16,10 @@ export const onProcessingQueueWritten =
       const {docId} = event.params;
       logger.info("Document update noticed", event.document, docId);
 
-      const image = await imageLoading;
+      const completion = await categorizeDocument(sampleImageFile);
 
-      const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
-      try {
-        const completion = await openai.beta.chat.completions.parse({
-          model: "gpt-4o-mini", // "gpt-4o-2024-08-06", // or "gpt-4o-mini"
-          messages: [
-            {
-              role: "system",
-              content: "You are a teaching assistant in an engineering design course.",
-            },
-            {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: prompt,
-                },
-                {
-                  type: "image_url",
-                  image_url: {
-                    url: `data:image/png;base64,${image}`,
-                    detail: "auto", // auto, low, high
-                  },
-                },
-              ],
-            },
-          ],
-          response_format: zodResponseFormat(CategorizationResponse, "categorization-response"),
-        });
-        console.log("OpenAI completion object:", completion);
+      console.log("OpenAI completion object:", completion);
+      if (completion) {
         console.log("Message part:", completion.choices[0].message);
         console.log("Parsed:", completion.choices[0].message.parsed);
         console.log("Category:", completion.choices[0].message.parsed?.category);
@@ -118,9 +54,6 @@ export const onProcessingQueueWritten =
         //   },
         //   system_fingerprint: 'fp_1bb46167f9'
         // }
-      } catch (error) {
-        console.log("OpenAI error", error);
-        logger.error("OpenAI error", error);
       }
     });
 
