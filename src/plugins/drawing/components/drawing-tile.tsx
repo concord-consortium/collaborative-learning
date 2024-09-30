@@ -16,6 +16,7 @@ import { useUIStore } from "../../../hooks/use-stores";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 import { TileNavigator } from "../../../components/tiles/tile-navigator";
+import { NavigatorDirection } from "../../../models/tiles/navigatable-tile-model";
 
 import "./drawing-tile.scss";
 
@@ -29,12 +30,14 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   const { tileElt, model, readOnly, onRegisterTileApi, navigatorAllowed = true, overflowVisible,
           svgWidth, svgHeight } = props;
   const contentModel = model.content as DrawingContentModelType;
+  const svgOffset = {x: contentModel.offsetX, y: contentModel.offsetY};
   const contentRef = useCurrent(contentModel);
   const showNavigator = navigatorAllowed && contentRef.current.isNavigatorVisible;
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
   const [objectListHoveredObject, setObjectListHoveredObject] = useState(null as string|null);
   const hotKeys = useRef(new HotKeys());
   const drawingToolElement = useRef<HTMLDivElement>(null);
+  const drawingLayerViewRef = useRef<DrawingLayerView>(null);
 
   const ui = useUIStore();
 
@@ -154,6 +157,40 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
     };
   };
 
+  const handleNavigatorPan = (direction: NavigatorDirection) => {
+    const drawingContainer = drawingLayerViewRef.current?.viewRef.current;
+    const svgElement = drawingContainer?.firstChild as SVGSVGElement;
+    const drawingContainerWidth = tileElt?.getBoundingClientRect().width ?? 0;
+    const drawingContainerHeight = tileElt?.getBoundingClientRect().height ?? 0;
+    const svgElementWidth = svgElement?.getBoundingClientRect().width;
+    const svgElementHeight = svgElement?.getBoundingClientRect().height;
+    const currTranslateX = contentModel.offsetX;
+    const currTranslateY = contentModel.offsetY;
+    const moveStep = 50;
+    // the maximum allowed distance to move the svg element in each direction
+    const maxTranslateX = Math.max(0, (svgElementWidth - drawingContainerWidth) / 2);
+    const maxTranslateY = Math.max(0, (svgElementHeight - drawingContainerHeight) / 2);
+    let newX = currTranslateX;
+    let newY = currTranslateY;
+
+    switch (direction) {
+      case "up":
+        newY = Math.max(currTranslateY + moveStep, -maxTranslateY);
+        break;
+      case "down":
+        newY = Math.min(currTranslateY - moveStep, maxTranslateY);
+        break;
+      case "left":
+        newX = Math.max(currTranslateX + moveStep, -maxTranslateX);
+        break;
+      case "right":
+        newX = Math.min(currTranslateX - moveStep, maxTranslateX);
+        break;
+    }
+
+    contentModel.setOffset(newX, newY);
+  };
+
   return (
     <DrawingContentModelContext.Provider value={contentRef.current}>
       <BasicEditableTileTitle />
@@ -178,14 +215,21 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
             {...props}
             highlightObject={objectListHoveredObject}
             imageUrlToAdd={imageUrlToAdd}
+            ref={drawingLayerViewRef}
             setImageUrlToAdd={setImageUrlToAdd}
             svgHeight={svgHeight}
+            svgOffset={svgOffset}
             svgWidth={svgWidth}
           />
         </div>
       </div>
       {!readOnly && showNavigator &&
-          <TileNavigator tileProps={props} renderTile={(tileProps) => <DrawingToolComponent {...tileProps} />} />
+        <TileNavigator
+          objectListPanelWidth={getObjectListPanelWidth()}
+          onNavigatorPan={handleNavigatorPan}
+          tileProps={props}
+          renderTile={(tileProps) => <DrawingToolComponent {...tileProps} />}
+        />
       }
     </DrawingContentModelContext.Provider>
   );

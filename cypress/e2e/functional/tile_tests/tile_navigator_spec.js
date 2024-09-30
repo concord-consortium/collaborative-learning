@@ -70,4 +70,53 @@ context("Tile Navigator", () => {
     cy.wait(300);
     tileNavigator.getTileNavigatorContainer().should("not.have.class", "top");
   });
+  it("provides panning buttons when elements extend beyond the viewport boundaries", () => {
+    beforeTest();
+
+    clueCanvas.addTile("drawing");
+    tileNavigator.getTileNavigatorPanningButtons().should("not.exist");
+    drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(0, 0) scale(1)");
+
+    cy.log("Draw an ellipse that partially extends beyond the viewport's left boundary");
+    drawToolTile.drawEllipse(50, 55, 100, 50);
+    tileNavigator.getTileNavigatorPanningButtons().should("exist");
+    tileNavigator.getTileNavigatorPanningButtons().find('button').should("have.length", 4);
+
+    cy.log("Click the left panning button twice to shift the drawing canvas 100 pixels to the right");
+    tileNavigator.getTileNavigatorPanningButton("left").click().click();
+    tileNavigator.getTileNavigatorPanningButtons().should("not.exist");
+    drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(100, 0) scale(1)");
+
+    cy.log("Draw a rectangle that partially extends beyond the viewport's right boundary");
+    drawToolTile.drawEllipse(1200, 55, 100, 50);
+    tileNavigator.getTileNavigatorPanningButtons().should("exist");
+
+    cy.log("Click the right panning button twice to shift the drawing canvas 100 pixels to the left");
+    tileNavigator.getTileNavigatorPanningButton("right").click().click();
+    tileNavigator.getTileNavigatorPanningButtons().should("exist");
+    drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(0, 0) scale(1)");
+
+    cy.log("Click the up panning button once to shift the drawing canvas 50 pixels down");
+    tileNavigator.getTileNavigatorPanningButton("up").click();
+    drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(0, 50) scale(1)");
+
+    cy.log("Click the down panning button once to shift the drawing canvas 50 pixels up");
+    tileNavigator.getTileNavigatorPanningButton("down").click();
+    drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(0, 0) scale(1)");
+
+    cy.log("Delete the ellipses");
+    drawToolTile.getEllipseDrawing().first().click();
+    clueCanvas.clickToolbarButton("drawing", "delete");
+    drawToolTile.getEllipseDrawing().first().click();
+    clueCanvas.clickToolbarButton("drawing", "delete");
+    tileNavigator.getTileNavigatorPanningButtons().should("not.exist");
+
+    cy.log("Draw an ellipse that partially extends beyond the viewport's top boundary");
+    drawToolTile.drawEllipse(100, 50, 50, 75);
+    tileNavigator.getTileNavigatorPanningButtons().should("exist");
+
+    cy.log("Click the Fit All button to bring all content into view");
+    clueCanvas.clickToolbarButton("drawing", "fit-all");
+    tileNavigator.getTileNavigatorPanningButtons().should("not.exist");
+  });
 });

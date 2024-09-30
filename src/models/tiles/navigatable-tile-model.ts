@@ -21,6 +21,8 @@ export const NavigatableTileModel = TileContentModel
     type: types.optional(types.string, kUnknownTileType),
     isNavigatorVisible: types.optional(types.boolean, true),
     navigatorPosition: types.optional(types.string, "bottom"),
+    offsetX: types.optional(types.number, 0),
+    offsetY: types.optional(types.number, 0),
     zoom: types.optional(types.number, 1)
   })
   .views(() => ({
@@ -39,6 +41,10 @@ export const NavigatableTileModel = TileContentModel
     },
     setNavigatorPosition(position: NavigatorPosition) {
       self.navigatorPosition = position;
+    },
+    setOffset(x: number, y: number) {
+      self.offsetX = x;
+      self.offsetY = y;
     },
     setZoom(zoom: number) {
       self.zoom = zoom;
