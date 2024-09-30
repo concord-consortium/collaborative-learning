@@ -106,20 +106,23 @@ export function getDocumentPath(userId: string, documentKey: string, network?: s
   return documentPath;
 }
 
-export interface IDocumentMetadata {
+export interface IDocumentMetadataBase {
   uid: string;
   type: string;
   key: string;
+  title?: string|null;
+  visibility?: string;
+  investigation?: string|null;
+  problem?: string|null;
+  unit?: string|null;
+}
+
+export interface IDocumentMetadata extends IDocumentMetadataBase {
   createdAt?: number;
-  title?: string;
-  originDoc?: string;
+  originDoc?: string|null;
   properties?: Record<string, string>;
   tools?: string[];
   strategies?: string[];
-  investigation?: string;
-  problem?: string;
-  unit?: string|null;
-  visibility?: string;
 }
 export function isDocumentMetadata(o: any): o is IDocumentMetadata {
   return !!o.uid && !!o.type && !!o.key;

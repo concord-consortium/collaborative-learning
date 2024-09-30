@@ -426,6 +426,12 @@ export class DB {
 
     if (!docSnapshot.exists) {
       const { classHash, self, version, ...cleanedMetadata } = metadata as DBDocumentMetadata & { classHash: string };
+
+      let problemInfo: {unit:string|null, investigation?: string, problem?: string} = {unit: null};
+      if ("offeringId" in metadata && metadata.offeringId != null) {
+        problemInfo = this.currentProblemInfo;
+      }
+
       const firestoreMetadata: IDocumentMetadata & { contextId: string } = {
         ...cleanedMetadata,
         // The validateCommentableDocument firebase function currently deployed to production is out of date.
@@ -434,22 +440,22 @@ export class DB {
         key: documentKey,
         properties: {},
         uid: userContext.uid,
-        unit: null
+        ...problemInfo
       };
-      if ("offeringId" in metadata && metadata.offeringId != null) {
-        const { investigation, problem, unit } = this.stores;
-        const investigationOrdinal = String(investigation.ordinal);
-        const problemOrdinal = String(problem.ordinal);
-        const unitCode = unit.code;
-        firestoreMetadata.investigation = investigationOrdinal;
-        firestoreMetadata.problem = problemOrdinal;
-        firestoreMetadata.unit = unitCode;
-      }
       const validateCommentableDocument =
         getFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
       // FIXME-HISTORY: rename this function to validateFirestoreDocumentMetadata_v1
       validateCommentableDocument({context: userContext, document: firestoreMetadata});
     }
+  }
+
+  private get currentProblemInfo() {
+    const { investigation, problem, unit } = this.stores;
+    return {
+      investigation: String(investigation.ordinal),
+      problem: String(problem.ordinal),
+      unit: unit.code
+    };
   }
 
   public async createDocument(params: { type: DBDocumentType, content?: string, title?: string }) {
@@ -795,12 +801,14 @@ export class DB {
           metadata: DBOfferingUserProblemDocument) {
     const {documentKey} = metadata;
     const group = this.stores.groups.groupForUser(userId);
+    const problemInfo = this.currentProblemInfo;
     return this.openDocument({
       type,
       userId,
       groupId: group?.id,
       documentKey,
-      visibility: metadata.visibility
+      visibility: metadata.visibility,
+      ...problemInfo
     });
   }
 
@@ -836,6 +844,7 @@ export class DB {
         return allUsers;
       }, {} as DBGroupUserConnections);
 
+    const problemInfo = this.currentProblemInfo;
     return this.openDocument({
       documentKey,
       type: "publication",
@@ -843,7 +852,8 @@ export class DB {
       groupId,
       visibility: "public",
       groupUserConnections: groupUserConnectionsMap,
-      pubVersion
+      pubVersion,
+      ...problemInfo
     });
   }
 

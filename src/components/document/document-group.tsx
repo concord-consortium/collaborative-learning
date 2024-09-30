@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { DocumentModelType } from "../../models/document/document";
 import { SimpleDocumentItem } from "../thumbnail/simple-document-item";
-import { IDocumentMetadata } from "../../../shared/shared";
 import { DocumentGroup } from "../../models/stores/document-group";
+import { IDocumentMetadataModel } from "../../models/stores/sorted-documents";
 
 import ScrollArrowIcon from "../../assets/workspace-instance-scroll.svg";
 
@@ -12,7 +11,7 @@ import "./document-group.scss";
 interface IProps {
   documentGroup: DocumentGroup;
   secondarySort: string;
-  onSelectDocument: (document: DocumentModelType | IDocumentMetadata) => void;
+  onSelectDocument: (document: IDocumentMetadataModel) => void;
 }
 
 export const DocumentGroupComponent = observer(function DocumentGroupComponent(props: IProps) {
@@ -119,13 +118,11 @@ export const DocumentGroupComponent = observer(function DocumentGroupComponent(p
       }
       {visibleCount < docCount && renderScrollButton("left", leftArrowDisabled)}
       <div ref={docListContainerRef} className="doc-group-list simple" data-testid="doc-group-list">
-        {documentGroup.documents?.map((doc: any) => {
+        {documentGroup.documents?.map((doc) => {
           return (
             <SimpleDocumentItem
               key={doc.key}
               document={doc}
-              investigationOrdinal={doc.investigation}
-              problemOrdinal={doc.problem}
               onSelectDocument={onSelectDocument}
             />
           );
