@@ -16,7 +16,7 @@ import { FillColorButton, StrokeColorButton } from "./toolbar-buttons/select-but
 import { DeleteButton, DuplicateButton, GroupButton, UngroupButton } from "./action-buttons";
 import { ImageUploadButton } from "./toolbar-buttons/image-upload-button";
 import { ZoomInButton, ZoomOutButton, FitAllButton } from "./toolbar-buttons/zoom-buttons";
-import { NavigatorButton } from "../drawing/toolbar-buttons/navigator-button";
+import { NavigatorButton } from "../../components/toolbar/navigator-button";
 
 import Icon from "./assets/draw-tool.svg";
 import HeaderIcon from "./assets/sketch-tile-id.svg";
