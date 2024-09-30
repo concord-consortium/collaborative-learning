@@ -26,6 +26,7 @@ export const ClassModel = types
     name: types.string,
     classHash: types.string,
     users: types.map(ClassUserModel),
+    timestamp: types.optional(types.number, () => Date.now()),
   })
   .actions((self) => {
     return {
@@ -44,6 +45,7 @@ export const ClassModel = types
         applySnapshot(self.users, usersSnapshot);
         self.name = classInfo.name;
         self.classHash = classInfo.classHash;
+        self.timestamp = classInfo.serverTimestamp || classInfo.localTimestamp;
       },
     };
   })

@@ -64,9 +64,6 @@ export const authAndConnect = async (stores: IStores) => {
     }
     user.setAuthenticatedUser(authenticatedUser);
     rawPortalJWT = authenticatedUser.rawPortalJWT;
-    if (classInfo) {
-      stores.class.updateFromPortal(classInfo);
-    }
 
     // If the URL has a unit param or if the appMode is not "authed", then
     // `stores.loadUnitAndProblem` would have been called in initializeApp,
@@ -109,6 +106,12 @@ export const authAndConnect = async (stores: IStores) => {
     }
 
     await resolveAppMode(stores, authenticatedUser.rawFirebaseJWT);
+
+    if (classInfo) {
+      const timeOffset = await db.firebase.getServerTimeOffset();
+      classInfo.serverTimestamp = classInfo.localTimestamp + timeOffset;
+      stores.class.updateFromPortal(classInfo);
+    }
 
     const firestoreUser = user.isTeacher
               ? await db.firestore.getFirestoreUser(user.id)

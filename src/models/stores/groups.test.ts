@@ -84,7 +84,7 @@ describe("Groups model", () => {
             },
             connectedTimestamp: 1,
           },
-          2: {
+          2: { // Old user that doesn't exist in the class anymore
             version: "1.0",
             self: {
               classHash: "test",
@@ -99,7 +99,17 @@ describe("Groups model", () => {
             version: "1.0",
             connectedTimestamp: 1,
             disconnectedTimestamp: 2
-          } as any
+          } as any,
+          4: { // New user that doesn't exist in the class yet
+            version: "1.0",
+            connectedTimestamp: 2001,
+            self: {
+              classHash: "test",
+              offeringId: "1",
+              groupId: "1",
+              uid: "4",
+            },
+          }
         }
       }
     };
@@ -116,8 +126,9 @@ describe("Groups model", () => {
       classHash: "test",
       users: {
         1: user
-        // don't add student 2 so we can test missing students
-      }
+        // don't add student 2 and 4 so we can test missing students
+      },
+      timestamp: 2000, // Use a fixed timestamp so we can test the New verses Removed user behavior
     });
 
     const groups = GroupsModel.create({}, {class: clazz});
@@ -129,12 +140,15 @@ describe("Groups model", () => {
     groups.updateFromDB(dbGroupsWithUsers, clazz);
     expect(groups.allGroups.length).toEqual(1);
     const group = groups.allGroups[0];
-    expect(group.users.length).toEqual(2);
+    expect(group.users.length).toEqual(3);
     expect(group.users[0].id).toEqual("1");
     expect(group.users[0].name).toEqual("Test User");
     expect(group.users[0].initials).toEqual("TU");
     expect(group.users[1].id).toEqual("2");
     expect(group.users[1].name).toEqual("Unknown");
     expect(group.users[1].initials).toEqual("??");
+    expect(group.users[2].id).toEqual("4");
+    expect(group.users[2].name).toEqual("New User");
+    expect(group.users[2].initials).toEqual("**");
   });
 });
