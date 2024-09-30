@@ -35,6 +35,7 @@ import curriculumConfigJson from "../../clue/curriculum-config.json";
 import { gImageMap } from "../image-map";
 import { ExemplarControllerModel, ExemplarControllerModelType } from "./exemplar-controller";
 import { SectionDocuments } from "./section-docs-store";
+import { Portal } from "./portal";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -52,6 +53,7 @@ export interface IStores extends IBaseStores {
   sectionsLoadedPromise: Promise<void>;
   startedLoadingUnitAndProblem: boolean;
   exemplarController: ExemplarControllerModelType;
+  portal: Portal;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -67,7 +69,6 @@ export function createStores(params?: ICreateStores): IStores {
 
 class Stores implements IStores{
   appMode: AppMode;
-  isPreviewing?: boolean;
   appVersion: string;
   appConfig: AppConfigModelType;
   curriculumConfig: ICurriculumConfig;
@@ -97,6 +98,7 @@ class Stores implements IStores{
   sectionsLoadedPromise: Promise<void>;
   startedLoadingUnitAndProblem: boolean;
   exemplarController: ExemplarControllerModelType;
+  portal: Portal;
 
   constructor(params?: ICreateStores){
     // This will mark all properties as observable
@@ -107,7 +109,6 @@ class Stores implements IStores{
     // does seems to work without warnings.
     makeAutoObservable(this);
     this.appMode = params?.appMode || "dev";
-    this.isPreviewing = params?.isPreviewing || false;
     this.appVersion = params?.appVersion || "unknown";
     this.curriculumConfig = params?.curriculumConfig || CurriculumConfig.create(curriculumConfigJson, {urlParams});
     this.appConfig = params?.appConfig || AppConfigModel.create();
@@ -165,6 +166,7 @@ class Stores implements IStores{
     this.unitLoadedPromise = when(() => this.unit !== defaultUnit);
     this.sectionsLoadedPromise = when(() => this.problem.sections.length > 0);
     this.exemplarController = ExemplarControllerModel.create();
+    this.portal = new Portal();
   }
 
   get tabsToDisplay() {

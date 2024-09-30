@@ -1,5 +1,5 @@
 import { ClassModel, ClassUserModel } from "./class";
-import { ClassInfo } from "../../lib/auth";
+import { ClassInfo } from "./portal";
 
 describe("Class model", () => {
 

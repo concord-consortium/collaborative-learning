@@ -183,7 +183,7 @@ export const GroupsModel = types
     }
   }))
   .actions((self) => ({
-    updateFromDB(groups: DBOfferingGroupMap, clazz: ClassModelType) {
+    updateFromDB(groups: DBOfferingGroupMap) {
       const groupsMapSnapshot: SnapshotIn<typeof self.groupsMap> = {};
       Object.entries(groups).forEach(([groupId, group]) => {
         const groupUserSnapshots: SnapshotIn<typeof GroupUserModel>[] = [];

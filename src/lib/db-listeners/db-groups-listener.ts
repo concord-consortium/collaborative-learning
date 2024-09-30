@@ -1,7 +1,7 @@
 import firebase from "firebase/app";
+import { map } from "lodash";
 import { DB } from "../db";
 import { DBOfferingGroupMap } from "../db-types";
-import { map } from "lodash";
 import { BaseListener } from "./base-listener";
 
 export class DBGroupsListener extends BaseListener {
@@ -25,7 +25,7 @@ export class DBGroupsListener extends BaseListener {
           const dbGroups: DBOfferingGroupMap = snapshot.val() || {};
           this.debugLogSnapshot("#start", snapshot);
           // Groups may be invalid at this point, but the listener will resolve it once connection times are set
-          groups.updateFromDB(dbGroups, this.db.stores.class);
+          this.updateGroupsFromDb(dbGroups);
 
           const group = groups.groupForUser(user.id);
           if (group) {
@@ -100,10 +100,22 @@ export class DBGroupsListener extends BaseListener {
     }
     else {
       // otherwise set the groups
-      this.db.stores.groups.updateFromDB(groups, this.db.stores.class);
+      this.updateGroupsFromDb(groups);
 
       user.setCurrentGroupId(this.db.stores.groups.groupIdForUser(user.id));
 
     }
   };
+
+  private async updateGroupsFromDb(dbGroups: DBOfferingGroupMap) {
+    const {groups, class: clazz, portal} = this.db.stores;
+    groups.updateFromDB(dbGroups);
+    if (!groups.needToRefreshClass) return;
+
+    const classInfo = await portal.getClassInfo();
+    if (!classInfo) return;
+    const timeOffset = await this.db.firebase.getServerTimeOffset();
+    classInfo.serverTimestamp = classInfo.localTimestamp + timeOffset;
+    clazz.updateFromPortal(classInfo);
+  }
 }

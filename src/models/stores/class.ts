@@ -1,5 +1,5 @@
 import { applySnapshot, SnapshotIn, types } from "mobx-state-tree";
-import { ClassInfo } from "../../lib/auth";
+import { ClassInfo } from "./portal";
 import { kExemplarUserParams } from "./user-types";
 
 export const ClassUserModel = types
