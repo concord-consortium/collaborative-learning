@@ -12,6 +12,12 @@ export interface IGroupsEnvironment {
   documents?: DocumentsModelType, // These are the documents of the application
 }
 
+export enum GroupUserState {
+  Active,
+  New,
+  Removed,
+}
+
 export const GroupUserModel = types
   .model("GroupUser", {
     id: types.string,
@@ -24,16 +30,53 @@ export const GroupUserModel = types
     }
   }))
   .views(self => ({
-    get user() {
+    get classUser() {
       return self.environment.class?.getUserById(self.id);
-    }
+    },
+  }))
+  .views(self => ({
+    // If the student is not a recognized member of the class they might
+    // either be a new student in the class or a student that was removed
+    // from the class. Thew new student in the class can happen if the
+    // user joins the class after the current user has started CLUE.
+    get state(): GroupUserState {
+      if (self.classUser) {
+        return GroupUserState.Active;
+      }
+      // We add a little padding here. Perhaps the group user is being
+      // created right as the class info is downloaded. So maybe the connectedTimestamp is
+      // slightly older than the timestamp. If we decide the user is new, we'll be
+      // refreshing the class from the portal. So if the user actually has been removed
+      // then the refreshed class will have an newer timestamp. Which will change the state
+      // to be Removed.
+      // Also in the future we might support setting up the groups before the class is
+      // initialized. For the time being we list users as New in that case.
+      const clazz = self.environment.class;
+      if (!clazz || (self.connectedTimestamp + 1000) > clazz.timestamp) {
+        return GroupUserState.New;
+      }
+
+      // At this point the the user isn't found in the class, and the connected timestamp is
+      // older than the class update time. So we assume the user has been removed from the class.
+      return GroupUserState.Removed;
+    },
   }))
   .views(self => ({
     get name() {
-      return self.user?.fullName || "Unknown";
+      const {classUser} = self;
+      if (classUser) {
+        return classUser.fullName;
+      }
+
+      return self.state === GroupUserState.New ? "New User" : "Unknown";
     },
     get initials() {
-      return self.user?.initials || "??";
+      const {classUser} = self;
+      if (classUser) {
+        return classUser.initials;
+      }
+
+      return self.state === GroupUserState.New ? "**" : "??";
     },
     get connected() {
       const {connectedTimestamp, disconnectedTimestamp} = self;
@@ -85,62 +128,6 @@ export const GroupsModel = types
   .model("Groups", {
     groupsMap: types.map(GroupModel),
   })
-  .actions((self) => ({
-    updateFromDB(groups: DBOfferingGroupMap, clazz: ClassModelType) {
-      let needToRefreshClass = false;
-      const groupsMapSnapshot: SnapshotIn<typeof self.groupsMap> = {};
-      Object.entries(groups).forEach(([groupId, group]) => {
-        const groupUserSnapshots: SnapshotIn<typeof GroupUserModel>[] = [];
-
-        const groupUsers = group.users || {};
-        Object.keys(groupUsers).forEach((groupUserId) => {
-          const groupUser = groupUsers[groupUserId];
-          const {connectedTimestamp, disconnectedTimestamp} = groupUser;
-          // self may be undefined if the database was deleted while a tab remains open
-          // causing the disconnectedAt timestamp to be set at the groupUser level
-          if (groupUser.self) {
-            const student = clazz.getUserById(groupUser.self.uid);
-
-            // If the student is not a recognized member of the class we show them
-            // as Unknown. This can happen if a user joins the class after the current
-            // user has started CLUE.
-            // However if users see Unknown and ?? in their group lists they can
-            // get confused. This happened before. A better approach would be to show
-            // some kind of loading indication, and then if it times out and no user
-            // is found then we hid the user or show an error instead of Unknown.
-            groupUserSnapshots.push({
-              id: groupUserId,
-              connectedTimestamp,
-              disconnectedTimestamp
-            });
-
-            if (!student) {
-              needToRefreshClass = true;
-            }
-          }
-        });
-        groupsMapSnapshot[groupId] = {id: groupId, users: groupUserSnapshots};
-      });
-      applySnapshot(self.groupsMap, groupsMapSnapshot);
-
-      if (needToRefreshClass) {
-        // TODO: Request classInfo from the portal then pass it to updateFromPortal.
-        // This might be better to move somewhere else.
-        // const classInfo = {} as ClassInfo;
-        // if (classInfo) {
-        //   clazz.updateFromPortal(classInfo);
-        // }
-        //
-        // TODO: if a student is removed from the class by the teacher what should
-        // happen to the groups? This is a legitimate reason to skip unknown users.
-        // However we won't know the difference between a student that is deleted
-        // and one we don't know about it.
-        //
-        // TODO: what was the previous "preview behavior"? Did it automatically add
-        // students to the group?
-      }
-    }
-  }))
   .views(self => ({
     get allGroups() {
       return [...self.groupsMap.values()];
@@ -183,6 +170,50 @@ export const GroupsModel = types
     },
     virtualDocumentForGroup(documentKey: string) {
       return self.groupVirtualDocuments.find((g) => documentKey === g.key);
+    },
+    get needToRefreshClass() {
+      for (const group of self.allGroups) {
+        for (const user of group.users) {
+          if (user.state === GroupUserState.New) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+  }))
+  .actions((self) => ({
+    updateFromDB(groups: DBOfferingGroupMap, clazz: ClassModelType) {
+      const groupsMapSnapshot: SnapshotIn<typeof self.groupsMap> = {};
+      Object.entries(groups).forEach(([groupId, group]) => {
+        const groupUserSnapshots: SnapshotIn<typeof GroupUserModel>[] = [];
+
+        const groupUsers = group.users || {};
+        Object.keys(groupUsers).forEach((groupUserId) => {
+          const groupUser = groupUsers[groupUserId];
+          const {connectedTimestamp, disconnectedTimestamp} = groupUser;
+          // self may be undefined if the database was deleted while a tab remains open
+          // causing the disconnectedAt timestamp to be set at the groupUser level
+          if (groupUser.self) {
+            groupUserSnapshots.push({
+              id: groupUserId,
+              connectedTimestamp,
+              disconnectedTimestamp
+            });
+          }
+        });
+        groupsMapSnapshot[groupId] = {id: groupId, users: groupUserSnapshots};
+      });
+      applySnapshot(self.groupsMap, groupsMapSnapshot);
+
+      if (self.needToRefreshClass) {
+        // TODO: Request classInfo from the portal then pass it to updateFromPortal.
+        // This might be better to move somewhere else.
+        // const classInfo = {} as ClassInfo;
+        // if (classInfo) {
+        //   clazz.updateFromPortal(classInfo);
+        // }
+      }
     }
   }));
 

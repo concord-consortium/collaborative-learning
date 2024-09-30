@@ -15,7 +15,7 @@ import { LogEventName } from "../lib/logger-types";
 import { uniqueId } from "../utilities/js-utils";
 import { getUnitCodeFromUnitParam } from "../utilities/url-utils";
 import { convertURLToOAuth2, getBearerToken } from "../utilities/auth-utils";
-import { ICurriculumConfig } from "src/models/stores/curriculum-config";
+import { ICurriculumConfig } from "../models/stores/curriculum-config";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
@@ -51,7 +51,8 @@ export const DEV_CLASS_INFO: ClassInfo = {
   name: DEV_STUDENT.className,
   classHash: DEV_STUDENT.classHash,
   students: [DEV_STUDENT],
-  teachers: [DEV_TEACHER]
+  teachers: [DEV_TEACHER],
+  localTimestamp: Date.now()
 };
 
 export type AuthenticatedUser = StudentUser | TeacherUser;
@@ -90,6 +91,8 @@ export interface ClassInfo {
   classHash: string;
   students: StudentUser[];
   teachers: TeacherUser[];
+  localTimestamp: number;
+  serverTimestamp?: number;
 }
 
 export interface AuthQueryParams {
@@ -196,6 +199,7 @@ export const getClassInfo = (params: GetClassInfoParams) => {
         const rawClassInfo: IPortalClassInfo = res.body;
 
         const classInfo: ClassInfo = {
+          localTimestamp: Date.now(),
           name: rawClassInfo.name,
           classHash: rawClassInfo.class_hash,
           students: rawClassInfo.students.map((rawStudent) => {
@@ -536,6 +540,7 @@ export const createFakeAuthentication = (options: CreateFakeAuthenticationOption
     classHash: authenticatedUser.classHash,
     students: [],
     teachers: [],
+    localTimestamp: Date.now()
   };
   // Add the random student to the class first and then fill the class
   // FIXME: It looks like if the teacher id is not 1,2,3 then the teacher won't

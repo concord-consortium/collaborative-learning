@@ -54,7 +54,8 @@ describe("Class model", () => {
           initials: "FS",
         }
       ],
-      teachers: []
+      teachers: [],
+      localTimestamp: Date.now()
     };
     clazz.updateFromPortal(classInfo);
 
