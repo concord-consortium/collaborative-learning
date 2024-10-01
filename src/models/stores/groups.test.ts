@@ -141,6 +141,7 @@ describe("Groups model", () => {
     expect(groups.allGroups.length).toEqual(1);
     const group = groups.allGroups[0];
     expect(group.users.length).toEqual(3);
+    expect(group.activeUsers.length).toEqual(2);
     expect(group.users[0].id).toEqual("1");
     expect(group.users[0].name).toEqual("Test User");
     expect(group.users[0].initials).toEqual("TU");

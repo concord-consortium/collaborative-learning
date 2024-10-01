@@ -77,6 +77,7 @@ describe("Four Up Component", () => {
     const clazz = ClassModel.create({
       name: "Test Class",
       classHash: "test",
+      timestamp: 4000,
       users: {
         1: {
           type: "student",
@@ -85,14 +86,6 @@ describe("Four Up Component", () => {
           lastName: "1",
           fullName: "User 1",
           initials: "U1"
-        },
-        2: {
-          type: "student",
-          id: "2",
-          firstName: "User",
-          lastName: "2",
-          fullName: "User 2",
-          initials: "U2"
         },
         3: {
           type: "student",
@@ -105,6 +98,7 @@ describe("Four Up Component", () => {
       }
     });
 
+    // TODO: add a test of how removed users are not shown
     const group = GroupModel.create({
       id: "1",
       users: [
@@ -112,15 +106,28 @@ describe("Four Up Component", () => {
           id: "1",
           connectedTimestamp: 1,
         }),
+        // This user doesn't exist in the class and they their connectedTimestamp is
+        // after the timestamp of the class. The code treats this student as being
+        // added from the class. So it should be shown with the initials "**". At
+        // runtime this will trigger a refresh of the class so the "**" should
+        // quickly be replaced with the real initials.
         GroupUserModel.create({
           id: "2",
-          connectedTimestamp: 1,
-          disconnectedTimestamp: 2,
+          connectedTimestamp: 10000,
+          disconnectedTimestamp: 10001,
         }),
         GroupUserModel.create({
           id: "3",
           connectedTimestamp: 3,
           disconnectedTimestamp: 2,
+        }),
+        // This user doesn't exist in the class and they their connectedTimestamp is
+        // before the timestamp of the class. The code treats this student as being
+        // removed from the class. So it shouldn't be shown.
+        GroupUserModel.create({
+          id: "4",
+          connectedTimestamp: 4,
+          disconnectedTimestamp: 3,
         }),
       ],
     });
@@ -136,7 +143,8 @@ describe("Four Up Component", () => {
     const { container } = render(<FourUpComponent group={realGroup} stores={stores}/>);
     // A canvas will be rendered unless an "unshared document" message is displayed.
     // User 2 has no document, so it will display an "unshared document" message.
-    // User 1 has a shared document, User 3 is the main user, and there is no fourth user. All of those show canvases.
+    // User 1 has a shared document, User 3 is the main user, and there is no active fourth user.
+    // All of those show canvases.
     expect(screen.queryAllByTestId("canvas")).toHaveLength(3);
     // Users 1, 2 and 3 should be labelled
     const memberList = container.querySelectorAll(".member");
@@ -144,7 +152,7 @@ describe("Four Up Component", () => {
     // First member is the current user, followed by group members
     expect(memberList[0].textContent).toBe("U3");
     expect(memberList[1].textContent).toBe("U1");
-    expect(memberList[2].textContent).toBe("U2");
+    expect(memberList[2].textContent).toBe("**");
 
     // TODO: figure out how to add coverage for window mouse events setup by the splitter handlers
     userEvent.click(screen.getByTestId("4up-horizontal-splitter"));

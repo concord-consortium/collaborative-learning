@@ -80,7 +80,7 @@ export function getFocusedGroupUser(group: GroupModelType| undefined, openDocId:
     mode: DocumentViewMode | undefined) {
   if (!openDocId || !group) return undefined;
 
-  return group?.users.find(obj => {
+  return group?.activeUsers.find(obj => {
     const userDoc = getUserDocument(obj, mode);
     return userDoc?.key === openDocId;
   });
@@ -144,7 +144,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   private getFocusedGroupUser() {
     const {group} = this.props;
     const docKey = this.getFocusedUserDocKey();
-    return group.users.find(obj => docKey && this.getGroupUserDoc(obj)?.key === docKey);
+    return group.activeUsers.find(obj => docKey && this.getGroupUserDoc(obj)?.key === docKey);
   }
 
   private getGroupUserDoc(groupUser?: GroupUserModelType) {

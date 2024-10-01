@@ -13,7 +13,7 @@ export interface IGroupsEnvironment {
 }
 
 export enum GroupUserState {
-  Active,
+  Found,
   New,
   Removed,
 }
@@ -41,7 +41,7 @@ export const GroupUserModel = types
     // user joins the class after the current user has started CLUE.
     get state(): GroupUserState {
       if (self.classUser) {
-        return GroupUserState.Active;
+        return GroupUserState.Found;
       }
       // We add a little padding here. Perhaps the group user is being
       // created right as the class info is downloaded. So maybe the connectedTimestamp is
@@ -102,11 +102,14 @@ export const GroupModel = types
   .views(self => ({
     get environment() {
       return getEnv(self) as IGroupsEnvironment;
+    },
+    get activeUsers() {
+      return self.users.filter(user => user.state !== GroupUserState.Removed);
     }
   }))
   .views((self) => ({
     getUserById(id?: string) {
-      return self.users.find(user => user.id === id);
+      return self.activeUsers.find(user => user.id === id);
     },
     get displayId() {
       const maxChars = 3;
@@ -114,7 +117,7 @@ export const GroupModel = types
     },
     // This will put the current user first if they are in this group
     get sortedUsers() {
-      const sortedUsers = [...self.users];
+      const sortedUsers = [...self.activeUsers];
       const userId = self.environment.user?.id;
       return sortedUsers.sort((a, b) => {
         if (a.id === userId) return -1;
@@ -137,6 +140,8 @@ export const GroupsModel = types
     get groupsByUser() {
       const groupsByUser: Record<string, GroupModelType> = {};
       self.allGroups.forEach((group) => {
+        // We don't use activeUsers here incase some code is trying to
+        // track down more info about a removed user
         group.users.forEach((groupUser) => {
           groupsByUser[groupUser.id] = group;
         });
@@ -205,15 +210,6 @@ export const GroupsModel = types
         groupsMapSnapshot[groupId] = {id: groupId, users: groupUserSnapshots};
       });
       applySnapshot(self.groupsMap, groupsMapSnapshot);
-
-      if (self.needToRefreshClass) {
-        // TODO: Request classInfo from the portal then pass it to updateFromPortal.
-        // This might be better to move somewhere else.
-        // const classInfo = {} as ClassInfo;
-        // if (classInfo) {
-        //   clazz.updateFromPortal(classInfo);
-        // }
-      }
     }
   }));
 

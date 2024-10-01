@@ -74,7 +74,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
   private renderChooseExistingGroup() {
     const {groups} = this.stores;
     const groupElements = groups.allGroups.map((group) => {
-      const users = group.users.map((user) => {
+      const users = group.activeUsers.map((user) => {
         const className = `user ${user.connected ? "connected" : "disconnected"}`;
         const title = `${user.name}: ${user.connected ? "connected" : "disconnected"}`;
         return <span key={user.id} className={className} title={title}>{user.initials}</span>;
@@ -121,7 +121,7 @@ export class GroupChooserComponent extends BaseComponent<IProps, IState> {
   private handleChooseExistingGroup = (group: GroupModelType) => {
     return (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
-      if (group.users.length >= 4) {
+      if (group.activeUsers.length >= 4) {
         this.setState({error: "Sorry, that group is full with four students"});
       }
       else {
