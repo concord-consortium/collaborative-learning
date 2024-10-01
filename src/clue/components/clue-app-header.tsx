@@ -82,7 +82,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   };
 
   const renderGroup = (group: GroupModelType) => {
-    const groupUsers = group.users.slice();
+    const groupUsers = group.activeUsers.slice();
     const userIndex = groupUsers.findIndex((groupUser) => groupUser.id === user.id);
     // Put the main user first to match 4-up colors
     if (userIndex > -1) {
