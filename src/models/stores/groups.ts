@@ -1,5 +1,5 @@
 import { types, getEnv, SnapshotIn, applySnapshot } from "mobx-state-tree";
-import { DBOfferingGroupMap } from "../../lib/db-types";
+import { DBOfferingGroup, DBOfferingGroupMap } from "../../lib/db-types";
 import { ClassModelType } from "./class";
 import { GroupVirtualDocument } from "../document/group-virtual-document";
 import { UserModelType } from "./user";
@@ -127,6 +127,26 @@ export const GroupModel = types
     }
   }));
 
+export function getGroupSnapshot(groupId: string, groupFromDB: DBOfferingGroup) {
+  const groupUserSnapshots: SnapshotIn<typeof GroupUserModel>[] = [];
+
+  const groupUsers = groupFromDB.users || {};
+  Object.keys(groupUsers).forEach((groupUserId) => {
+    const groupUser = groupUsers[groupUserId];
+    const {connectedTimestamp, disconnectedTimestamp} = groupUser;
+    // self may be undefined if the database was deleted while a tab remains open
+    // causing the disconnectedAt timestamp to be set at the groupUser level
+    if (groupUser.self) {
+      groupUserSnapshots.push({
+        id: groupUserId,
+        connectedTimestamp,
+        disconnectedTimestamp
+      });
+    }
+  });
+  return {id: groupId, users: groupUserSnapshots};
+}
+
 export const GroupsModel = types
   .model("Groups", {
     groupsMap: types.map(GroupModel),
@@ -191,23 +211,7 @@ export const GroupsModel = types
     updateFromDB(groups: DBOfferingGroupMap) {
       const groupsMapSnapshot: SnapshotIn<typeof self.groupsMap> = {};
       Object.entries(groups).forEach(([groupId, group]) => {
-        const groupUserSnapshots: SnapshotIn<typeof GroupUserModel>[] = [];
-
-        const groupUsers = group.users || {};
-        Object.keys(groupUsers).forEach((groupUserId) => {
-          const groupUser = groupUsers[groupUserId];
-          const {connectedTimestamp, disconnectedTimestamp} = groupUser;
-          // self may be undefined if the database was deleted while a tab remains open
-          // causing the disconnectedAt timestamp to be set at the groupUser level
-          if (groupUser.self) {
-            groupUserSnapshots.push({
-              id: groupUserId,
-              connectedTimestamp,
-              disconnectedTimestamp
-            });
-          }
-        });
-        groupsMapSnapshot[groupId] = {id: groupId, users: groupUserSnapshots};
+        groupsMapSnapshot[groupId] = getGroupSnapshot(groupId, group);
       });
       applySnapshot(self.groupsMap, groupsMapSnapshot);
     }
@@ -216,3 +220,4 @@ export const GroupsModel = types
 export type GroupUserModelType = typeof GroupUserModel.Type;
 export type GroupModelType = typeof GroupModel.Type;
 export type GroupsModelType = typeof GroupsModel.Type;
+
