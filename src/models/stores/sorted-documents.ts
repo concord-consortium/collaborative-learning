@@ -64,7 +64,13 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
   problem: types.maybeNull(types.string),
   unit: types.maybeNull(types.string),
   visibility: types.maybe(types.string)
-});
+})
+.views((self) => ({
+  getProperty(key: string) {
+    return self.properties.get(key);
+  },
+}));
+
 export interface IDocumentMetadataModel extends Instance<typeof DocumentMetadataModel> {}
 
 export const MetadataDocMapModel = types.map(DocumentMetadataModel);

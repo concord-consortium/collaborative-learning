@@ -1,6 +1,7 @@
 import { IDocumentMetadata } from "../../../shared/shared";
 import { Logger } from "../../lib/logger";
 import { LogEventMethod, LogEventName } from "../../lib/logger-types";
+import { IDocumentMetadataModel } from "../stores/sorted-documents";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType } from "./document";
 import { ExemplarDocument } from "./document-types";
@@ -11,7 +12,7 @@ interface ITeacherNetworkInfo {
 }
 
 export interface IDocumentLogEvent extends Record<string, any> {
-  document: DocumentModelType | IDocumentMetadata;
+  document: DocumentModelType | IDocumentMetadata | IDocumentMetadataModel;
 }
 
 export function isDocumentLogEvent(params: Record<string, any>): params is IDocumentLogEvent {
@@ -59,7 +60,7 @@ export function logDocumentEvent(event: LogEventName, _params: IDocumentLogEvent
  * Convenience function to log the appropriate type of VIEW_SHOW_*_DOCUMENT event for the document.
  * @param document
  */
-export function logDocumentViewEvent(document: DocumentModelType | IDocumentMetadata) {
+export function logDocumentViewEvent(document: DocumentModelType | IDocumentMetadata | IDocumentMetadataModel) {
   const isRemote = "isRemote" in document ? document.isRemote : undefined;
   const event =
     document.type === ExemplarDocument
