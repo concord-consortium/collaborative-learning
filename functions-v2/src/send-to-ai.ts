@@ -2,14 +2,15 @@ import {onDocumentWritten} from "firebase-functions/v2/firestore";
 import * as logger from "firebase-functions/logger";
 import categorizeDocument from "../lib/src/ai-categorize-document";
 
-// Ultimately this should take screenshots generated of user documents and pass them to the AI service for processing.
-// We can't really do this until there's a screenshotting service implemented.
+// TODO this function will go away and the call to the AI service will be incorporated
+// into on-analysis-image-ready.ts.
+
+// As a proof of concept, this function just sends a sample image from the filesystem.
 
 // Load the image data from disk and base64 encode it
 // const sampleImageFile = "./image0.png";
 const sampleImageFile = "./2/1350683-problem--O1IJaBTDBU86PD-PKbS.png";
 
-// TODO - not yet sure what should trigger this function. It needs to run after a screenshot is generated.
 export const onProcessingQueueWritten =
   onDocumentWritten("demo/AI/portals/demo/aiProcessingQueue/{docId}",
     async (event) => {

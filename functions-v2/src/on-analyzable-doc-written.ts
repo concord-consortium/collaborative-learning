@@ -3,13 +3,13 @@ import {getDatabase} from "firebase-admin/database";
 import * as logger from "firebase-functions/logger";
 // import * as admin from "firebase-admin";
 
-// This is one of what will likely be multiple functions for AI analysis of documents:
+// This is one of three functions for AI analysis of documents:
 // 1. (This function) watch for changes to the lastUpdatedAt metadata field and write a queue of docs to process
 // 2. Create screenshots of those documents
 // 3. Send those screenshots to the AI service for processing, and create document comments with the results
 
 // For now, restrict processing to a particular root for testing.
-// TODO later this will be a parameter.
+// TODO later we will open this up to all documents, and {root} will be a parameter.
 const root = "demo/AI/portals/demo";
 
 // Location of the queue of documents to process, relative to the root
@@ -32,7 +32,7 @@ export const onAnalyzableDocWritten =
         [docId]: {
           metadataPath: `classes/${classId}/users/${userId}/documentMetadata/${docId}`,
           updated: timestamp,
-          status: "unanalyzed",
+          status: "updated",
         },
       });
     });
