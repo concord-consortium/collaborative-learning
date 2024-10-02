@@ -13,6 +13,7 @@
   &.top {
     padding-bottom: 15px;
     padding-top: 0;
+    top: 10px;
 
     &.animate {
       animation: navigator-scroll-up .25s forwards;

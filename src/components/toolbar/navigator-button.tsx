@@ -3,10 +3,10 @@ import { observer } from "mobx-react";
 
 import { TileToolbarButton } from "./tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "./toolbar-button-manager";
+import { TileModelContext } from "../tiles/tile-api";
 
 import HideNavigatorIcon from "../../assets/icons/hide-navigator-icon.svg";
 import ShowNavigatorIcon from "../../assets/icons/show-navigator-icon.svg";
-import { TileModelContext } from "../tiles/tile-api";
 
 const isNavigatorSupported = (
   model: any
@@ -19,6 +19,10 @@ const isNavigatorSupported = (
   );
 };
 
+/**
+ * The NavigatorButton component provides toolbar button for adding or removing the Tile Navigator
+ * to/from tiles that support it.
+ */
 export const NavigatorButton = observer(function NavigatorButton({ name }: IToolbarButtonComponentProps) {
   const tileContentModel = useContext(TileModelContext)?.content;
   if (!isNavigatorSupported(tileContentModel)) return null;

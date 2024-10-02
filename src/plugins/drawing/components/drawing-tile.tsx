@@ -177,9 +177,7 @@ const DrawingToolComponent: React.FC<IProps> = observer(function DrawingToolComp
         </div>
       </div>
       {!readOnly && showNavigator &&
-        <TileNavigator>
-          <DrawingToolComponent {...props} />
-        </TileNavigator>
+        <TileNavigator tileProps={props} renderTile={(tileProps) => <DrawingToolComponent {...tileProps} />} />
       }
     </DrawingContentModelContext.Provider>
   );

@@ -12,12 +12,12 @@ import { DrawingObjectSnapshotForAdd, DrawingObjectType,
 import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
-import { TileContentModel } from "../../../models/tiles/tile-content";
 import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tiles/tile-content-info";
 import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileContentAPIActions, tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { GroupObjectSnapshotForAdd, GroupObjectType, isGroupObject } from "../objects/group";
+import { NavigatableTileModel } from "../../../models/tiles/navigatable-tile-model";
 
 export const DrawingToolMetadataModel = TileMetadataModel
   .named("DrawingToolMetadata");
@@ -35,7 +35,7 @@ export interface DrawingObjectMove {
   destination: {x: number, y: number}
 }
 
-export const DrawingContentModel = TileContentModel
+export const DrawingContentModel = NavigatableTileModel
   .named("DrawingTool")
   .props({
     type: types.optional(types.literal(kDrawingTileType), kDrawingTileType),
@@ -50,7 +50,6 @@ export const DrawingContentModel = TileContentModel
     // is type.maybe to avoid need for migration
     currentStampIndex: types.maybe(types.number),
     zoom: types.optional(types.number, 1),
-    isNavigatorVisible : types.optional(types.boolean, true),
   })
   .volatile(self => ({
     metadata: undefined as DrawingToolMetadataModelType | undefined,
@@ -185,14 +184,6 @@ export const DrawingContentModel = TileContentModel
 
     setZoom(zoom: number) {
       self.zoom = zoom;
-    },
-
-    showNavigator() {
-      self.isNavigatorVisible  = true;
-    },
-
-    hideNavigator() {
-      self.isNavigatorVisible  = false;
     },
 
     addObject(object: DrawingObjectSnapshotForAdd, addAtBack=false) {
