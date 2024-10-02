@@ -78,7 +78,13 @@ export const initializeApp = (authoring: boolean): IStores => {
 
   // The Cypress docs say you can just check window.Cypress but after a page reload in
   // some cases you have to use window.parent.Cypress
-  const inCypress = aWindow.Cypress || aWindow.parent?.Cypress;
+  let inCypress = false;
+  try {
+    inCypress = aWindow.Cypress || aWindow.parent?.Cypress;
+  } catch (e) {
+    // If we are running in a cross origin iframe this will throw an exception
+  }
+
   if (DEBUG_STORES || inCypress) {
     aWindow.stores = stores;
   }
