@@ -26,15 +26,19 @@ const CategorizationResponse = z.object({
     {description: "Any other relevant information."}),
 });
 
-export default async function categorizeDocument(file: string) {
+export async function categorizeDocument(file: string) {
   const imageLoading = fs.readFile(file).then((data) => data.toString("base64"));
   const image = await imageLoading;
+  const url = `data:image/png;base64,${image}`;
+  return categorizeUrl(url);
+}
 
+export async function categorizeUrl(url: string) {
   const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
   try {
     return openai.beta.chat.completions.parse({
-      // model: "gpt-4o-mini",
-      model: "gpt-4o-2024-08-06",
+      model: "gpt-4o-mini",
+      // model: "gpt-4o-2024-08-06",
       messages: [
         {
           role: "system",
@@ -50,7 +54,7 @@ export default async function categorizeDocument(file: string) {
             {
               type: "image_url",
               image_url: {
-                url: `data:image/png;base64,${image}`,
+                url,
                 detail: "auto", // auto, low, high
               },
             },

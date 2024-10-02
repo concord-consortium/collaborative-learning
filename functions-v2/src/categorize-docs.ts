@@ -6,10 +6,9 @@
 // Usage:
 //   ts-node categorize-docs.ts source-directory  > output-file.csv
 
-
 import fs from "fs";
 import process from "node:process";
-import categorizeDocument from "../lib/src/ai-categorize-document";
+import {categorizeDocument} from "../lib/src/ai-categorize-document";
 
 // Read directory name from the command-line argument
 const sourceDirectory = process.argv[2];
