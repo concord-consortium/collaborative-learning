@@ -134,8 +134,6 @@ context('Draw Tool Tile', function () {
     // Close panel
     drawToolTile.getDrawTileShowSortPanelCloseButton().click();
     drawToolTile.getDrawTileShowSortPanel().should("have.class", "closed");
-    // Hide tile navigator so it doesn't interfere with drawing element counts
-    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("verify draw a line");
     drawToolTile.getDrawToolFreehand().click();
@@ -208,8 +206,6 @@ context('Draw Tool Tile', function () {
   it("Vector", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
-    // Hide tile navigator so it doesn't interfere with drawing element counts
-    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("verify draw vector");
     drawToolTile.drawVector(250, 50, -150, 0);
@@ -291,8 +287,6 @@ context('Draw Tool Tile', function () {
   it("Rectangle", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
-    // Hide tile navigator so it doesn't interfere with drawing element counts
-    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("verify draw rectangle");
     drawToolTile.drawRectangle(250, 50, -150, 100);
@@ -467,8 +461,6 @@ context('Draw Tool Tile', function () {
   it("Ellipse", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
-    // Hide tile navigator so it doesn't interfere with drawing element counts
-    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("verify draw ellipse");
     drawToolTile.drawEllipse(250, 50, -150, 100);
@@ -505,8 +497,6 @@ context('Draw Tool Tile', function () {
   it("Stamp", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
-    // Hide tile navigator so it doesn't interfere with drawing element counts
-    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("verify draw stamp");
     drawToolTile.getDrawToolStamp().click();
@@ -554,8 +544,6 @@ context('Draw Tool Tile', function () {
   it("Text", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
-    // Hide tile navigator so it doesn't interfere with drawing element counts
-    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("adds text object");
     drawToolTile.getDrawToolText().click();
@@ -577,8 +565,8 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawTile()
       .trigger("pointerdown", 150, 150)
       .trigger("pointerup", 150, 150);
-    drawToolTile.getTextDrawing().get('textarea').type("The five boxing wizards jump quickly.{enter}");
-    drawToolTile.getTextDrawing().get('text tspan').should("exist").and("have.length", 7);
+    drawToolTile.getTextDrawing().find('textarea').type("The five boxing wizards jump quickly.{enter}");
+    drawToolTile.getTextDrawing().find('text tspan').should("exist").and("have.length", 5);
 
     cy.log("deletes text object");
     drawToolTile.getDrawToolSelect().click();
@@ -592,8 +580,6 @@ context('Draw Tool Tile', function () {
   it("Group", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
-    // Hide tile navigator so it doesn't interfere with drawing element counts
-    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("can group and ungroup");
     drawToolTile.getDrawToolRectangle().click();
@@ -631,8 +617,6 @@ context('Draw Tool Tile', function () {
   it("Image", { scrollBehavior: false }, () => {
     beforeTest();
     clueCanvas.addTile("drawing");
-    // Hide tile navigator so it doesn't interfere with drawing element counts
-    tileNavigator.getTileNavigatorToolbarButton().click();
 
     cy.log("drags images from image tiles");
     const imageFilePath1 = 'image.png';

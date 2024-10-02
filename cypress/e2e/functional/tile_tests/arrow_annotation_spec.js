@@ -8,7 +8,6 @@ import NumberlineToolTile from '../../../support/elements/tile/NumberlineToolTil
 import SimulatorTile from '../../../support/elements/tile/SimulatorTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
 import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
-import TileNavigator from '../../../support/elements/tile/TileNavigator';
 
 const aa = new ArrowAnnotation;
 const clueCanvas = new ClueCanvas;
@@ -20,7 +19,6 @@ const numberlineToolTile = new NumberlineToolTile;
 const simulatorTile = new SimulatorTile;
 const tableToolTile = new TableToolTile;
 const xyTile = new XYPlotToolTile;
-const tileNavigator = new TileNavigator;
 
 const queryParams = `${Cypress.config("qaConfigSubtabsUnitStudent5")}`;
 const queryParamsQa = `${Cypress.config("qaUnitStudent7Investigation3")}`;
@@ -50,8 +48,6 @@ context('Arrow Annotations (Sparrows)', function () {
   it("can add arrows to draw tiles", () => {
     beforeTest(queryParams);
     clueCanvas.addTile("drawing");
-    // Hide tile navigator so it doesn't interfere with drawing element counts
-    tileNavigator.getTileNavigatorToolbarButton().click();
     drawToolTile.getDrawTile().should("exist");
     drawToolTile.getTileTitle().should("exist");
 
@@ -279,8 +275,6 @@ context('Arrow Annotations (Sparrows)', function () {
 
     cy.log("Can create sparrows across two tiles");
     clueCanvas.addTile("drawing");
-    // Hide tile navigator so it doesn't interfere with drawing element counts
-    tileNavigator.getTileNavigatorToolbarButton().click();
     drawToolTile.getDrawTile().should("have.length", 2);
     drawToolTile.drawVector(100, 50, 50, 100);
     aa.getAnnotationModeButton().click();

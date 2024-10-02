@@ -8,15 +8,6 @@ class TileNavigator {
   getTileNavigatorPlacementButton() {
     return cy.get('.primary-workspace [data-testid=tile-navigator-placement-button]');
   }
-  getTileNavigatorToolbarButton() {
-    return cy.get('.primary-workspace .drawing-toolbar .toolbar-button.navigator');
-  }
-  getTileNavigatorToolbarButtonToolTip() {
-    return cy.get('.primary-workspace .drawing-toolbar .toolbar-button.navigator').parent().filter('[data-tooltipped]');
-  }
-  getTileNavigatorToolbarButtonToolTipText() {
-    return this.getTileNavigatorToolbarButtonToolTip().invoke('attr', 'data-original-title');
-  }
   getRectangleDrawing(){
     return cy.get('.primary-workspace [data-testid=tile-navigator-container] .drawing-layer svg rect.rectangle');
   }

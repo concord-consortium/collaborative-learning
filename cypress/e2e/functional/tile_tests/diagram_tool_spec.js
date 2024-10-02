@@ -2,13 +2,11 @@ import ClueCanvas from '../../../support/elements/common/cCanvas';
 import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import TextToolTile from '../../../support/elements/tile/TextToolTile';
-import TileNavigator from '../../../support/elements/tile/TileNavigator';
 
 let clueCanvas = new ClueCanvas,
   diagramTile = new DiagramToolTile,
   drawTile = new DrawToolTile;
 const textTile = new TextToolTile;
-const tileNavigator = new TileNavigator;
 
 const cmdKey = Cypress.platform === "darwin" ? "cmd" : "ctrl";
 const undoKeystroke = `{${cmdKey}}z`;
@@ -195,8 +193,6 @@ context('Diagram Tool Tile', function () {
     // Draw tile and toolbar buttons render
     drawTile.getDrawTile().should("exist");
     drawTile.getDrawTile().first().click();
-    // Hide tile navigator so it doesn't interfere with checks
-    tileNavigator.getTileNavigatorToolbarButton().click();
     drawTile.getDrawToolNewVariable().should("exist").should("be.enabled");
     drawTile.getDrawToolEditVariable().should("exist").should("be.disabled");
     drawTile.getDrawToolInsertVariable().should("exist").should("be.disabled");

@@ -21,19 +21,13 @@ context("Tile Navigator", () => {
     clueCanvas.addTile("drawing");
     drawToolTile.getDrawTile().should("exist");
     tileNavigator.getTileNavigator().should("exist");
-    tileNavigator.getTileNavigatorToolbarButton().should("exist");
-    tileNavigator.getTileNavigatorToolbarButtonToolTip().should("exist");
-    tileNavigator.getTileNavigatorToolbarButtonToolTipText().should("eq", "Hide Navigator");
+
+    clueCanvas.toolbarButtonIsEnabled("drawing", "navigator");
+    clueCanvas.getToolbarButtonToolTip("drawing", "navigator").should("exist");
+    clueCanvas.getToolbarButtonToolTipText("drawing", "navigator").should("eq", "Hide Navigator");
 
     cy.log("Draw a rectangle");
-    drawToolTile.getDrawToolRectangle().click();
-    drawToolTile.getDrawTile()
-      .trigger("pointerdown", 100, 50, { altKey: true })
-      .trigger("pointermove", 100, 70, { altKey: true })
-      .trigger("pointerup", 100, 70);
-
-    // The rectangle will appear in both the draw tool tile and the tile navigator clone of the draw tool tile
-    drawToolTile.getRectangleDrawing().should("exist").and("have.length", 2);
+    drawToolTile.drawRectangle(100, 50, 20, 20);
     tileNavigator.getRectangleDrawing().should("exist").and("have.length", 1);
   });
   it("can be hidden and shown", () => {
@@ -45,17 +39,17 @@ context("Tile Navigator", () => {
 
     clueCanvas.addTile("drawing");
     cy.log("Hide tile navigator");
-    tileNavigator.getTileNavigatorToolbarButton().click();
+    clueCanvas.clickToolbarButton("drawing", "navigator");
+    clueCanvas.getToolbarButtonToolTipText("drawing", "navigator").should("eq", "Show Navigator");
     tileNavigator.getTileNavigator().should("not.exist");
-    tileNavigator.getTileNavigatorToolbarButtonToolTipText().should("eq", "Show Navigator");
     cy.get("@log")
       .should("have.been.been.calledWith", LogEventName.DRAWING_TOOL_CHANGE, Cypress.sinon.match.object)
       .its("lastCall.args.1").should("deep.include", { operation: "hideNavigator" });
 
     cy.log("Show tile navigator");
-    tileNavigator.getTileNavigatorToolbarButton().click();
+    clueCanvas.clickToolbarButton("drawing", "navigator");
+    clueCanvas.getToolbarButtonToolTipText("drawing", "navigator").should("eq", "Hide Navigator");
     tileNavigator.getTileNavigator().should("exist");
-    tileNavigator.getTileNavigatorToolbarButtonToolTipText().should("eq", "Hide Navigator");
     cy.get("@log")
       .should("have.been.been.calledWith", LogEventName.DRAWING_TOOL_CHANGE, Cypress.sinon.match.object)
       .its("lastCall.args.1").should("deep.include", { operation: "showNavigator" });
@@ -66,12 +60,14 @@ context("Tile Navigator", () => {
     clueCanvas.addTile("drawing");
     tileNavigator.getTileNavigator().should("exist").and("not.have.class", "top");
 
-    cy.log("Move tile navigator to the top of the drawing tile");
+    cy.log("Move tile navigator to the top of the drawing tile in a quick animation");
     tileNavigator.getTileNavigatorPlacementButton().click();
+    cy.wait(100);
     tileNavigator.getTileNavigatorContainer().should("have.class", "top");
 
-    cy.log("Move tile navigator to the bottom of the drawing tile");
+    cy.log("Move tile navigator to the bottom of the drawing tile in a quick animation");
     tileNavigator.getTileNavigatorPlacementButton().click();
+    cy.wait(100);
     tileNavigator.getTileNavigatorContainer().should("not.have.class", "top");
   });
 });

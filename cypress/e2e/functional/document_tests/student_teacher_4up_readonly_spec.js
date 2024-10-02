@@ -9,14 +9,12 @@ import NumberlineToolTile from '../../../support/elements/tile/NumberlineToolTil
 import DataCardToolTile from '../../../support/elements/tile/DataCardToolTile';
 import DataflowToolTile from '../../../support/elements/tile/DataflowToolTile';
 import SimulatorTile from '../../../support/elements/tile/SimulatorTile';
-import TileNavigator from '../../../support/elements/tile/TileNavigator';
 
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
 const tableToolTile = new TableToolTile;
 const geometryToolTile = new GeometryToolTile;
 const drawToolTile = new DrawToolTile;
-const tileNavigator = new TileNavigator;
 const exp = new ExpressionToolTile;
 const numberlineToolTile = new NumberlineToolTile;
 const dc = new DataCardToolTile;
@@ -31,7 +29,7 @@ function testTilesNotReadOnly(tab, position) {
   cy.get('.'+tab).find(position + ' .text-tool').should('not.have.class', 'read-only');
   cy.get('.'+tab).find(position + ' .table-tool-tile').should('not.have.class', 'readonly');
   cy.get('.'+tab).find(position + ' .geometry-tool-tile').should('not.have.class', 'readonly');
-  cy.get('.'+tab).find(position + ' .drawing-tool').should('not.have.class', 'read-only');
+  cy.get('.'+tab).find(position + ' .drawing-tool').not('[data-testid="tile-navigator"] .drawing-tool').should('not.have.class', 'read-only');
   cy.get('.'+tab).find(position + ' .image-tool').should('not.have.class', 'read-only');
   cy.get('.'+tab).find(position + ' .numberline-tool-tile').should('not.have.class', 'readonly');
   cy.get('.'+tab).find(position + ' .data-card-tool-tile').should('not.have.class', 'readonly');
@@ -48,7 +46,7 @@ function testTilesReadOnly(tab, position) {
   cy.get('.'+tab).find(position + ' .text-tool').should('have.class', 'read-only');
   cy.get('.'+tab).find(position + ' .table-tool-tile').should('have.class', 'readonly');
   cy.get('.'+tab).find(position + ' .geometry-tool-tile').should('have.class', 'readonly');
-  cy.get('.'+tab).find(position + ' .drawing-tool').should('have.class', 'read-only');
+  cy.get('.'+tab).find(position + ' .drawing-tool').not('[data-testid="tile-navigator"] .drawing-tool').should('have.class', 'read-only');
   cy.get('.'+tab).find(position + ' .image-tool').should('have.class', 'read-only');
   cy.get('.'+tab).find(position + ' .numberline-tool-tile').should('have.class', 'readonly');
   cy.get('.'+tab).find(position + ' .data-card-tool-tile').should('have.class', 'readonly');
@@ -91,8 +89,6 @@ function setupTest(studentIndex) {
   geometryToolTile.getGraphPoint().should('have.length', 3);
   geometryToolTile.getPhantomGraphPoint().should('exist');
   clueCanvas.addTile("drawing");
-  // Hide tile navigator so it doesn't interfere with drawing element counts
-  tileNavigator.getTileNavigatorToolbarButton().click();
   drawToolTile.drawRectangle(100, 100);
   drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
   clueCanvas.addTile("expression");

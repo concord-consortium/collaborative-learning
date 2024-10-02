@@ -4,7 +4,6 @@ import ImageToolTile from '../../../support/elements/tile/ImageToolTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
 import DataCardToolTile from '../../../support/elements/tile/DataCardToolTile';
 import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
-import TileNavigator from '../../../support/elements/tile/TileNavigator';
 
 let clueCanvas = new ClueCanvas,
   drawToolTile = new DrawToolTile,
@@ -12,7 +11,6 @@ let clueCanvas = new ClueCanvas,
   tableToolTile = new TableToolTile,
   dataCardToolTile = new DataCardToolTile,
   graphTile = new XYPlotToolTile;
-const tileNavigator = new TileNavigator;
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaUnitStudent5")}`;
@@ -42,8 +40,6 @@ context('Duplicate Tiles', function () {
     cy.log("copies multiple tiles, and only selected tiles");
     const customDrawingTitle = "Custom Drawing";
     clueCanvas.addTile("drawing");
-    // Hide tile navigator so it doesn't interfere with checks
-    tileNavigator.getTileNavigatorToolbarButton().click();
     drawToolTile.getDrawTileTitle().type(customDrawingTitle);
     imageToolTile.getImageTile().first().click();
     drawToolTile.getDrawTile().click({ shiftKey: true });
