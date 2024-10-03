@@ -1,8 +1,12 @@
 # Firestore database structure
 
+## Analysis queue
+
+Outside of the main collections for users and documents, there is a collection of information about the status of documents submitted for AI analysis.  The top-level collection for this is `analysis`. Within that there is a queue containing the various statuses: `pending`, `imaged`, `done`, `failedImaging`, and `failedAnalyzing`. These contain status documents keyed by documentIds.
+
 ## Top level collections
 
-These are similar to Firebase.
+Besides `analysis`, the rest of the top-level collections are similar to Firebase:
 
 `authed, demo, dev, qa, tests, users`
 

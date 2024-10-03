@@ -221,7 +221,7 @@ export function useDocumentSyncToFirebase(
 
   const mutation = useMutation((snapshot: DocumentContentSnapshotType) => {
     if (!disconnectHandlers.current && commonSyncEnabled) {
-      disconnectHandlers.current = firebase.setLastEditedOnDisconnects(user, key, uid);
+      disconnectHandlers.current = firebase.setLastEditedOnDisconnect(user, key, uid);
     }
 
     const tileMap = snapshot.tileMap || {};

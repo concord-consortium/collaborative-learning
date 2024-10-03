@@ -202,7 +202,7 @@ export class Firebase {
    * All documents get one to update the lastEditedAt timestamp when the user disconnects.
    * If the appConfig specifies an AI Evaluation to be run, a metadata field is added to request that as well.
    */
-  public setLastEditedOnDisconnects(user: UserModelType, documentKey: string, userId?: string):
+  public setLastEditedOnDisconnect(user: UserModelType, documentKey: string, userId?: string):
       firebase.database.OnDisconnect[] {
     const onDisconnects: firebase.database.OnDisconnect[] = [];
     const ref = this.ref(this.getLastEditedMetadataPath(user, documentKey, userId));
