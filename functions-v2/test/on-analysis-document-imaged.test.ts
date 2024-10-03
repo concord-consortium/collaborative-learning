@@ -4,12 +4,25 @@ import {
 import * as logger from "firebase-functions/logger";
 import {getDatabase} from "firebase-admin/database";
 import * as admin from "firebase-admin";
-// import {makeChange} from "firebase-functions-test/lib/v1";
 
 import {initialize, projectConfig} from "./initialize";
 import {onAnalysisDocumentImaged} from "../src/on-analysis-document-imaged";
 
 jest.mock("firebase-functions/logger");
+
+jest.mock("../lib/src/ai-categorize-document", () => ({
+  categorizeUrl: jest.fn().mockResolvedValue({
+    choices: [{
+      message: {
+        parsed: {
+          category: "category",
+          discussion: "Discussion.",
+          keyIndicators: ["key1", "key2"],
+        },
+      },
+    }],
+  }),
+}));
 
 const {fft, cleanup} = initialize();
 
@@ -29,6 +42,7 @@ describe("functions", () => {
           metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
           docUpdated: "1001",
           docImageUrl: "https://concord.org/wp-content/uploads/2024/05/capturing-moths-fig-2.png",
+          evaluator: "categorize-design",
         }, "analysis/queue/imaged/testdoc1"),
         params: {
           docId: "testdoc1",
@@ -38,6 +52,7 @@ describe("functions", () => {
       expect(logger.info)
         .toHaveBeenLastCalledWith("Creating comment for",
           "analysis/queue/imaged/testdoc1");
+      expect(logger.warn).not.toHaveBeenCalled();
 
       // Document should have been removed from "imaged" queue and added to "done"
 
@@ -55,6 +70,7 @@ describe("functions", () => {
           docUpdated: "1001",
           completedAt: expect.any(Object),
           docImageUrl: "https://concord.org/wp-content/uploads/2024/05/capturing-moths-fig-2.png",
+          evaluator: "categorize-design",
         });
       });
 
@@ -71,8 +87,8 @@ describe("functions", () => {
         expect(snapshot.size).toBe(1);
         const comment = snapshot.docs[0].data();
         expect(comment).toEqual({
-          content: expect.stringMatching(/Key Indicators:/),
-          tags: expect.any(Array),
+          content: "Discussion. Key Indicators: key1, key2",
+          tags: ["category"],
           createdAt: expect.any(Object),
           name: "Ada Insight",
           uid: "ada_insight_1",

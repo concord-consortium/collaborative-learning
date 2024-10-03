@@ -54,6 +54,7 @@ export const AppConfigModel = types
     get showCommentTag() { return self.configMgr.showCommentTag; },
     get commentTags() { return self.configMgr.commentTags; },
     get tagPrompt() { return self.configMgr.tagPrompt; },
+    get AIEvaluation() { return self.configMgr.AIEvaluation; },
     get documentLabelProperties() { return self.configMgr.documentLabelProperties; },
     get documentLabels() { return self.configMgr.documentLabels; },
     get disablePublish() { return self.configMgr.disablePublish; },

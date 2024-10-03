@@ -16,9 +16,10 @@ const commenterUid = "ada_insight_1";
 const imagedQueuePath = getAnalysisQueueFirestorePath("imaged", "{docId}");
 
 async function error(error: string, event: FirestoreEvent<QueryDocumentSnapshot | undefined, Record<string, string>>) {
+  logger.warn("Error processing document", event.document, error);
   const firestore = admin.firestore();
   await firestore.doc(getAnalysisQueueFirestorePath("failedAnalyzing", event.params.docId)).set({
-    ...event.data,
+    ...event.data?.data(),
     error,
   });
   await firestore.doc(event.document).delete();
@@ -28,6 +29,12 @@ export const onAnalysisDocumentImaged =
   onDocumentCreated(imagedQueuePath, async (event) => {
     const {docId} = event.params;
     const firestore = admin.firestore();
+    const queueDoc = event.data?.data();
+
+    if (queueDoc?.evaluator !== "categorize-design") {
+      await error(`Unexpected value for evaluator: ${queueDoc?.evaluator}`, event);
+      return;
+    }
 
     const docImageUrl = event.data?.get("docImageUrl");
 
@@ -35,7 +42,6 @@ export const onAnalysisDocumentImaged =
     const reply = completion?.choices[0].message;
 
     if (reply?.refusal) {
-      logger.info("AI refused to comment on", event.document, reply.refusal);
       await error(`AI refusal: ${reply.refusal}`, event);
       return;
     }
@@ -80,7 +86,7 @@ export const onAnalysisDocumentImaged =
 
     // Add to "done" queue
     await firestore.doc(getAnalysisQueueFirestorePath("done", event.params.docId)).set({
-      ...event.data?.data(),
+      ...queueDoc,
       "completedAt": admin.firestore.FieldValue.serverTimestamp(),
     });
 

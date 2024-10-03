@@ -26,9 +26,9 @@ describe("functions", () => {
       const wrapped = fft.wrap(onAnalyzableDocWritten);
 
       const before = makeDataSnapshot(null,
-        "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1/lastEditedAt");
+        "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1/evaluation/categorize-design");
       const after = makeDataSnapshot("1001",
-        "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1/lastEditedAt");
+        "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1/evaluation/categorize-design");
       const delta = makeChange(before, after);
 
       await wrapped({
@@ -37,12 +37,11 @@ describe("functions", () => {
           classId: "democlass1",
           userId: "1",
           docId: "testdoc1",
+          evaluator: "categorize-design",
         }});
 
       expect(logger.info)
-        .toHaveBeenCalledWith("Added document to analysis queue",
-          "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1");
-
+        .toHaveBeenCalledWith("Added document testdoc1 to queue for categorize-design");
 
       const pendingQueue = admin.firestore().collection("analysis/queue/pending");
       expect(await pendingQueue.count().get().then((result) => result.data().count)).toEqual(1);
@@ -50,6 +49,7 @@ describe("functions", () => {
         expect(result.data()).toEqual({
           metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
           docUpdated: "1001",
+          evaluator: "categorize-design",
         });
       });
     });

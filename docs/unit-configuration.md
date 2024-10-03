@@ -81,10 +81,17 @@ These properties are configurable at the application (built into the code) or th
   initiallyHideExemplars: boolean;
   // configuration of navigation tabs (document navigation UI)
   navTabs: SnapshotIn<typeof NavTabsConfigModel>;
-  // used for AI tagging
+
+  // must be true for any of the comment-tag functionality to be enabled
   showCommentTag?: boolean;
+  // prompt shown in the tagging pulldown menu when a comment is being made
   tagPrompt?: string;
+  // list of possible values for tagging in comments
   commentTags?: Record<string, string>;
+  // If set, enable the specified AI evaluation to run after document updates
+  // At the moment, there is only one evaluation pipeline defined.
+  AIEvaluation?: "categorize-design";
+
   // List of the types of annotations supported (eg "curved-sparrow") or "all" or "none"
   // Currently any value other than "none" will be treated as "all".
   annotations?: "all" | "none" | string[];
