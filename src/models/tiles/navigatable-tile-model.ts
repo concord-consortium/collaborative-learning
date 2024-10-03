@@ -1,4 +1,6 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
+
+import { BoundingBox } from "../../plugins/drawing/model/drawing-basic-types";
 import { TileContentModel } from "./tile-content";
 import { kUnknownTileType } from "./unknown-types";
 
@@ -6,9 +8,17 @@ export const NavigatableTileModel = TileContentModel
   .named("Navigatable Tile")
   .props({
     type: types.optional(types.string, kUnknownTileType),
-    isNavigatorVisible : types.optional(types.boolean, true),
-    navigatorPosition: types.optional(types.string, "bottom")
+    isNavigatorVisible: types.optional(types.boolean, true),
+    navigatorPosition: types.optional(types.string, "bottom"),
+    zoom: types.optional(types.number, 1)
   })
+  .views(() => ({
+    get objectsBoundingBox(): BoundingBox | undefined {
+      // derived models should override
+      console.warn("Derived models should override objectsBoundingBox.");
+      return undefined;
+    }
+  }))
   .actions(self => ({
     showNavigator() {
       self.isNavigatorVisible = true;
@@ -18,8 +28,15 @@ export const NavigatableTileModel = TileContentModel
     },
     setNavigatorPosition(position: "top" | "bottom") {
       self.navigatorPosition = position;
+    },
+    setZoom(zoom: number) {
+      self.zoom = zoom;
     }
 }));
 
 export type NavigatableTileModelType = Instance<typeof NavigatableTileModel>;
 export type NavigatableTileModelSnapshot = SnapshotIn<typeof NavigatableTileModel>;
+
+export const isNavigatableTileModel = (model: any): model is NavigatableTileModelType => {
+  return "isNavigatorVisible" in model && "navigatorPosition" in model;
+};

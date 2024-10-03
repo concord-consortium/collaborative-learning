@@ -30,7 +30,7 @@
 
   .tile-navigator {
     align-items: center;
-    background: $charcoal-light-4;
+    background: $charcoal-light-5;
     border-radius: 0 0 3px 3px;
     display: flex;
     flex-direction: column;
@@ -38,22 +38,44 @@
     overflow: hidden;
 
     .tile-navigator-content-area {
-      align-items: center;
-      display: flex;
+      background: #fff;
       height: 79px;
-      justify-content: center;
       margin: 0 5px;
       overflow: hidden;
+      position: relative;
+      width: 100%;
 
       .tile-navigator-tile-content {
-        background: white;
-        overflow: hidden;
+        left: 50%;
+        overflow: visible;
         pointer-events: none;
+        position: absolute;
+        top: 50%;
         transform-origin: top left;
+        z-index: 1;
 
         .title-area-wrapper {
           display: none;
         }
+      }
+      .tile-navigator-overlay {
+        background: $charcoal-light-4;
+        height: 100%;
+        left: 0;
+        opacity: .65;
+        position: absolute;
+        top: 0;
+        width: 100%;
+        z-index: 2;
+      }
+      .tile-navigator-viewport {
+        left: 50%;
+        overflow: hidden;
+        pointer-events: none;
+        position: absolute;
+        top: 50%;
+        transform-origin: top left;
+        z-index: 5;
       }
     }
 
@@ -68,7 +90,7 @@
 
     .tile-navigator-placement-button {
       all: unset;
-      background: $charcoal-light-4;
+      background: $charcoal-light-5;
       border-radius: 3px 3px 0 0;
       cursor: pointer;
       height: 15px;
@@ -80,14 +102,14 @@
       z-index: 1;
 
       &:hover {
-        background: $charcoal-light-2;
+        background: $charcoal-light-3;
 
         svg {
           display: inline-block;
         }
       }
       &:active {
-        background: $charcoal-light-1;
+        background: $charcoal-light-2;
       }
 
       &.top {

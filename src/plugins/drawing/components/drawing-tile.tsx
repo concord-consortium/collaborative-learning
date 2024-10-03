@@ -16,13 +16,20 @@ import { useUIStore } from "../../../hooks/use-stores";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 import { TileNavigator } from "../../../components/tiles/tile-navigator";
+import { Point } from "../model/drawing-basic-types";
 
 import "./drawing-tile.scss";
 
-type IProps = ITileProps;
+export interface IDrawingTileProps extends ITileProps {
+  svgOffset?: Point;
+  overflowVisible?: boolean;
+  svgWidth?: number;
+  svgHeight?: number;
+}
 
-const DrawingToolComponent: React.FC<IProps> = observer(function DrawingToolComponent(props) {
-  const { tileElt, model, readOnly, onRegisterTileApi, navigatorAllowed = true } = props;
+const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function DrawingToolComponent(props) {
+  const { tileElt, model, readOnly, onRegisterTileApi, navigatorAllowed = true, svgOffset, overflowVisible,
+          svgWidth, svgHeight } = props;
   const contentRef = useCurrent(model.content as DrawingContentModelType);
   const showNavigator = navigatorAllowed && contentRef.current.isNavigatorVisible ;
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
@@ -153,7 +160,7 @@ const DrawingToolComponent: React.FC<IProps> = observer(function DrawingToolComp
       <BasicEditableTileTitle />
       <div
         ref={drawingToolElement}
-        className={classNames("drawing-tool", { "read-only": readOnly })}
+        className={classNames("drawing-tool", { "read-only": readOnly, "overflow-visible": overflowVisible })}
         data-testid="drawing-tool"
         tabIndex={0}
         onKeyDown={(e) => hotKeys.current.dispatch(e)}
@@ -173,11 +180,14 @@ const DrawingToolComponent: React.FC<IProps> = observer(function DrawingToolComp
             highlightObject={objectListHoveredObject}
             imageUrlToAdd={imageUrlToAdd}
             setImageUrlToAdd={setImageUrlToAdd}
+            svgHeight={svgHeight}
+            svgOffset={svgOffset}
+            svgWidth={svgWidth}
           />
         </div>
       </div>
       {!readOnly && showNavigator &&
-        <TileNavigator tileProps={props} renderTile={(tileProps) => <DrawingToolComponent {...tileProps} />} />
+          <TileNavigator tileProps={props} renderTile={(tileProps) => <DrawingToolComponent {...tileProps} />} />
       }
     </DrawingContentModelContext.Provider>
   );
