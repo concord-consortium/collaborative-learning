@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { CmsDocumentEditor } from "./cms-document-editor";
+import { IframeDocumentEditor } from "./iframe-document-editor";
 import { DocumentModelType } from "../models/document/document";
 
 let initialValue = undefined as DocumentModelType | undefined;
@@ -25,7 +25,7 @@ const handleUpdateContent = (json: Record<string, any>) => {
 const renderEditor = () => {
   ReactDOM.render(
     <div id="app">
-      <CmsDocumentEditor initialValue={initialValue} handleUpdateContent={handleUpdateContent} />
+      <IframeDocumentEditor initialValue={initialValue} handleUpdateContent={handleUpdateContent} />
     </div>,
     document.getElementById("app")
   );

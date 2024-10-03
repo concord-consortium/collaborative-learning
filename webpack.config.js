@@ -61,7 +61,7 @@ module.exports = (env, argv) => {
     // on the devServer start up time
     entry: {
       index: './src/index.tsx',
-      'cms-editor': './src/cms/cms-editor.tsx',
+      iframe: './src/iframe/iframe.tsx',
       'doc-editor': './src/doc-editor.tsx'
     },
     mode: devMode ? 'development' : 'production',
@@ -264,10 +264,11 @@ module.exports = (env, argv) => {
       }),
       new HtmlWebpackPlugin({
         ...baseHtmlPluginConfig,
-        chunks: ['cms-editor'],
-        filename: 'cms-editor.html',
+        chunks: ['iframe'],
+        filename: 'iframe.html',
         publicPath: '.',
-        template: 'src/cms/cms-editor.html'
+        // Seems like we could just use the standard index.html here (it adds loading stuff but that should be harmless)
+        template: 'src/iframe/iframe.html'
       }),
       new CopyWebpackPlugin({
         patterns: [

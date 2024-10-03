@@ -110,7 +110,7 @@ To enable per component debugging set the "debug" localstorage key with one or m
 
 - `bookmarks` this will show a tiny text status above the bookmark indicating which users have bookmarked this document. It will also print information about the document bookmarks each time a bookmark is toggled.
 - `canvas` this will show the document key over the canvas, useful for looking up documents in Firebase
-- `cms` this will print info to the console as changes are made to authored content via the CMS
+- `iframe` this will print info to the console as document changes are sent from the iframe'd CLUE to the parent frame. This iframe'd CLUE is used by the CMS.
 - `docList` - this will print a table of information about a list of documents
 - `document` this will add the active document as `window.currentDocument`, you can use MST's hidden toJSON() like `currentDocument.toJSON()` to views its content.
 - `drop` console log the dataTransfer object from drop events on the document.

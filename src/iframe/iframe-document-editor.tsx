@@ -5,7 +5,7 @@ import { Map } from "immutable";
 import { defaultDocumentModelParts } from "../components/doc-editor/doc-editor-app-defaults";
 import { AppProvider, initializeApp } from "../initialize-app";
 import { createDocumentModelWithEnv, DocumentModelType } from "../models/document/document";
-import { DEBUG_CMS } from "../lib/debug";
+import { DEBUG_IFRAME } from "../lib/debug";
 import { EditableDocumentContent } from "../components/document/editable-document-content";
 import { DocumentAnnotationToolbar } from "../components/document/document-annotation-toolbar";
 
@@ -24,7 +24,7 @@ interface IState {
 
 const stores = initializeApp(true);
 
-export class CmsDocumentEditor extends React.Component<IProps, IState>  {
+export class IframeDocumentEditor extends React.Component<IProps, IState>  {
   disposer: IDisposer;
   constructor(props: any) {
     super(props);
@@ -75,9 +75,9 @@ export class CmsDocumentEditor extends React.Component<IProps, IState>  {
             // is a immutable object and sometimes it is a plain JS object.
             const immutableValue = Map(parsedJson);
             this.props.handleUpdateContent(immutableValue);
-            if (DEBUG_CMS) {
+            if (DEBUG_IFRAME) {
               // eslint-disable-next-line no-console
-              console.log("DEBUG: CMS ClueControl onChange called with new content value: ", parsedJson);
+              console.log("DEBUG: Iframe'd CLUE sending updateContent message with:", parsedJson);
             }
           }
         }
