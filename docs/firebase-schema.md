@@ -1,20 +1,20 @@
-# DB Schema
+# Realtime Database DB Schema
 
 The core design elements of the schema are:
 
-1. The top level keys are `test`, `dev`, `demo` and `authed` where `test` and `dev` use subkeys based on the user id to create unique environments per DB user.  Unit tests automatically delete any data added.
-2. Under the top level keys is the `portals` key with sub-keys under `portals` for each portal domain found during authentication.  There will be a special `localhost` domain used for portals when in dev mode.  All data except for user data will live under a portal domain.
-4. All objects will have a version property.
-5. Any objects that can be loaded as a list should contain the minimum amount of metadata to display the information on the UI with id references to larger objects.
-6. All read-only write-once data (such as "publications") will be stored using DB storage.
+1. The top level keys are `test`, `dev`, `qa`, `demo` and `authed` where `test` and `dev` use subkeys based on the user id to create unique environments per DB user.  Unit tests automatically delete any data added.
+2. Under the top level keys is the `portals` key with sub-keys under `portals` for each portal domain found during authentication.  Since qa, demo, and dev do not use the portal, it is just set to `qa`, `demo`, or `localhost` for these modes. All data except for user data will live under a portal domain.
+3. All objects will have a version property.
+4. Any object that can be loaded as a list should contain the minimum amount of metadata to display the information on the UI with id references to larger objects.
+5. All read-only write-once data (such as "publications") will be stored using DB storage.
 
 ## Hierarchy
 
-```
-/(dev|test|demo|authed)
-  [<firebaseUserId> if dev or test]
+```text
+/(dev|qa|test|demo|authed)
+  [<firebaseUserId> if dev or test, <demoId> for demo]
     /portals
-      /<escapedPortalDomain>
+      /<escapedPortalDomain> or "qa", "demo", "localhost"
         /users {key: uid => DBPortalUser}
           version: "1.0"
           /self
@@ -25,10 +25,13 @@ The core design elements of the schema are:
             /self
               uid: string
               documentKey: string
-            createdAt: number
+            createdAt: number (timestamp)
+            editedAt: number (timestamp)
             type: "section" | "learningLog"
             classHash?: string
             offeringId?: string
+            evaluation {key: AIEvaluation from config file}
+              number (timestamp)
             // TDB: serialized document model metadata
           /documents: {key: documentKey => DBDocument}
             version: "1.0"
