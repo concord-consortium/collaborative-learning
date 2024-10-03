@@ -1,19 +1,23 @@
 // Example executions:
 //
 // Generate image and print out the url of the image:
-// npx tsx shutterbug.ts /Users/scytacki/Development/ai/dataset1720819925834-mods/documents/document-NePawLNjq3wEjk58TiW.txt
+//   npx tsx shutterbug.ts /Users/scytacki/Development/ai/dataset1720819925834-mods/documents/document-NePawLNjq3wEjk58TiW.txt
 //
 // Generate shutterbug.html for checking page locally:
-// npx tsx shutterbug.ts /Users/scytacki/Development/ai/dataset1720819925834-mods/documents/document-NePawLNjq3wEjk58TiW.txt html
+//   npx tsx shutterbug.ts /Users/scytacki/Development/ai/dataset1720819925834-mods/documents/document-NePawLNjq3wEjk58TiW.txt html
 
 import fs from "fs";
+
+const clueCodebase = "https://collaborative-learning.concord.org/branch/shutterbug-support";
+// const clueCodebase = "http://localhost:8080";
 
 function generateHtml(clueDocument: any) {
   return `
     <script>const initialValue=${JSON.stringify(clueDocument)}</script>
-    <iframe id='clue-frame' width='100%' height='1500px' style='border:0px'
+    <!-- height will be updated when iframe sends updateHeight message -->
+    <iframe id='clue-frame' width='100%' height='500px' style='border:0px'
       allow='serial'
-      src='https://collaborative-learning.concord.org/branch/shutterbug-support/iframe.html'
+      src='${clueCodebase}/iframe.html?unwrapped&readOnly'
     ></iframe>
     <script>
       const clueFrame = document.getElementById('clue-frame')
@@ -21,6 +25,12 @@ function generateHtml(clueDocument: any) {
         if (!clueFrame.contentWindow) {
           console.warning("iframe doesn't have contentWindow");
         }
+
+        window.addEventListener("message", (event) => {
+          if (event.data.type === "updateHeight") {
+            document.getElementById("clue-frame").height = event.data.height + "px";
+          }
+        })
 
         clueFrame.contentWindow.postMessage(
           { initialValue: JSON.stringify(initialValue) },
@@ -52,9 +62,6 @@ const documentString = fs.readFileSync(fileName, "utf8");
 const docObject = JSON.parse(documentString);
 const html = generateHtml(docObject);
 
-// uncomment this line if you want to generate a local html file
-// this file can be opened in a web browser to see roughly what
-// shutterbug is seeing.
 if (outputHtml) {
   fs.writeFileSync("shutterbug.html", html);
 } else {
