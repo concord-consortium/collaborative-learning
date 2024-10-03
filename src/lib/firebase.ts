@@ -353,6 +353,18 @@ export class Firebase {
     this.groupOnDisconnect = null;
   }
 
+  /**
+   * Get an server time offset. This is useful to create an estimated server timestamp.
+   * See https://firebase.google.com/docs/database/web/offline-capabilities#clock-skew
+   *
+   * @returns
+   */
+  public async getServerTimeOffset() {
+    const offsetRef = firebase.database().ref(".info/serverTimeOffset");
+    const snap = await offsetRef.once("value");
+    return snap.val();
+  }
+
   //
   // Firebase Storage
   //

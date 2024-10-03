@@ -1,4 +1,4 @@
-import { addDisposer, getSnapshot } from "mobx-state-tree";
+import { addDisposer, clone, getSnapshot } from "mobx-state-tree";
 import { makeAutoObservable, runInAction, when } from "mobx";
 import { AppConfigModel, AppConfigModelType } from "./app-config-model";
 import { UnitModel, UnitModelType } from "../curriculum/unit";
@@ -35,6 +35,7 @@ import curriculumConfigJson from "../../clue/curriculum-config.json";
 import { gImageMap } from "../image-map";
 import { ExemplarControllerModel, ExemplarControllerModelType } from "./exemplar-controller";
 import { SectionDocuments } from "./section-docs-store";
+import { Portal } from "./portal";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -52,6 +53,7 @@ export interface IStores extends IBaseStores {
   sectionsLoadedPromise: Promise<void>;
   startedLoadingUnitAndProblem: boolean;
   exemplarController: ExemplarControllerModelType;
+  portal: Portal;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -67,7 +69,6 @@ export function createStores(params?: ICreateStores): IStores {
 
 class Stores implements IStores{
   appMode: AppMode;
-  isPreviewing?: boolean;
   appVersion: string;
   appConfig: AppConfigModelType;
   curriculumConfig: ICurriculumConfig;
@@ -97,6 +98,7 @@ class Stores implements IStores{
   sectionsLoadedPromise: Promise<void>;
   startedLoadingUnitAndProblem: boolean;
   exemplarController: ExemplarControllerModelType;
+  portal: Portal;
 
   constructor(params?: ICreateStores){
     // This will mark all properties as observable
@@ -107,7 +109,6 @@ class Stores implements IStores{
     // does seems to work without warnings.
     makeAutoObservable(this);
     this.appMode = params?.appMode || "dev";
-    this.isPreviewing = params?.isPreviewing || false;
     this.appVersion = params?.appVersion || "unknown";
     this.curriculumConfig = params?.curriculumConfig || CurriculumConfig.create(curriculumConfigJson, {urlParams});
     this.appConfig = params?.appConfig || AppConfigModel.create();
@@ -124,8 +125,15 @@ class Stores implements IStores{
     this.problem = params?.problem || ProblemModel.create({ ordinal: 0, title: "Null Problem" });
 
     this.user = params?.user || UserModel.create({ id: "0" });
-    this.groups = params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing });
-    this.groups.setEnvironment(this);
+
+    // Groups need stores (this) as the MST environment.
+    // The environment of an MST object can't be changed once created. So if we are passed a
+    // groups object, we need to clone it so we can set the environment.
+    // Any code that passes in a groups object needs to use the returned one instead of their
+    // original.
+    this.groups = params?.groups
+      ? clone(params.groups, this)
+      : GroupsModel.create({}, this);
     this.class = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });
     this.db = params?.db || new DB();
     this.documents = params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes);
@@ -158,6 +166,7 @@ class Stores implements IStores{
     this.unitLoadedPromise = when(() => this.unit !== defaultUnit);
     this.sectionsLoadedPromise = when(() => this.problem.sections.length > 0);
     this.exemplarController = ExemplarControllerModel.create();
+    this.portal = new Portal();
   }
 
   get tabsToDisplay() {
@@ -275,7 +284,6 @@ class Stores implements IStores{
         problem,
         documents: this.documents,
         user: this.user,
-        classStore: this.class,
         curriculumConfig,
         appConfig
       }).then(() => {

@@ -91,8 +91,6 @@ const createMockClassWithUsers = () => {
 
 type GroupUserData = {
   id: string;
-  name: string;
-  initials: string;
   connectedTimestamp: number;
   disconnectedTimestamp?: number;
 };
@@ -101,8 +99,6 @@ const createMockGroupUsers = (groupUsersData: GroupUserData[]) => {
   return groupUsersData.map(userData =>
     GroupUserModel.create({
       id: userData.id,
-      name: userData.name,
-      initials: userData.initials,
       connectedTimestamp: userData.connectedTimestamp,
       disconnectedTimestamp: userData.disconnectedTimestamp
     })
@@ -111,14 +107,14 @@ const createMockGroupUsers = (groupUsersData: GroupUserData[]) => {
 
 const createMockGroups = () => {
   const group3UsersData = [
-    { id: "2", name: "Scott Cytacki", initials: "SC", connectedTimestamp: 2 },
-    { id: "4", name: "Kirk Swenson", initials: "KS", connectedTimestamp: 4 },
+    { id: "2", connectedTimestamp: 2 },
+    { id: "4", connectedTimestamp: 4 },
   ];
   const group5UsersData = [
-    { id: "1", name: "Joe Bacal", initials: "JB", connectedTimestamp: 1 },
+    { id: "1", connectedTimestamp: 1 },
   ];
   const group9UsersData = [
-    { id: "3", name: "Dennis Cao", initials: "DC", connectedTimestamp: 3 },
+    { id: "3", connectedTimestamp: 3 },
   ];
 
   const group3Users = createMockGroupUsers(group3UsersData);
@@ -126,11 +122,11 @@ const createMockGroups = () => {
   const group9Users = createMockGroupUsers(group9UsersData);
 
   const mockGroups = GroupsModel.create({
-    allGroups: [
-      GroupModel.create({ id: "3", users: group3Users }),
-      GroupModel.create({ id: "5", users: group5Users }),
-      GroupModel.create({ id: "9", users: group9Users }),
-    ]
+    groupsMap: {
+      3: GroupModel.create({ id: "3", users: group3Users }),
+      5: GroupModel.create({ id: "5", users: group5Users }),
+      9: GroupModel.create({ id: "9", users: group9Users }),
+    }
   });
   return mockGroups;
 };

@@ -32,7 +32,7 @@ export class TeacherStudentTabComponent extends BaseComponent<IProps, IState> {
     const { groupId } = this.props;
     const group = groups.getGroupById(groupId);
     // TODO: if no group prop then get list of all users in class
-    const users = group ? group.users : [];
+    const users = group ? group.activeUsers : [];
     return (
       <div className="teacher-student-tab">
         {this.renderUsers(users)}

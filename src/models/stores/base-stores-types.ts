@@ -21,7 +21,6 @@ import { ICurriculumConfig } from "./curriculum-config";
 
 export interface IBaseStores {
   appMode: AppMode;
-  isPreviewing?: boolean;
   appVersion: string;
   appConfig: AppConfigModelType;
   curriculumConfig: ICurriculumConfig;
