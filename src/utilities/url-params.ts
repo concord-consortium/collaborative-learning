@@ -110,6 +110,8 @@ export interface QueryParams {
   document?: string;
   // Open new documents as readOnly this helps with testing readOnly views
   readOnly?: boolean
+  // Just display the document contents, no top toolbar or border
+  unwrapped?: boolean
   // Don't load or save the document from browser storage
   noStorage?: boolean
 }
@@ -122,7 +124,7 @@ type BooleanParamNames = Exclude<
 undefined>;
 
 const booleanParams: BooleanParamNames[] =
-  [ "demo", "mouseSensor", "localCMSBackend", "noPersistentUI", "readOnly", "noStorage" ];
+  [ "demo", "mouseSensor", "localCMSBackend", "noPersistentUI", "readOnly", "noStorage", "unwrapped" ];
 
 const processBooleanValue = (value: string | (string | null)[] | null | undefined) => {
   if (value === undefined || value === "false") {
