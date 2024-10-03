@@ -2,8 +2,8 @@ import React from "react";
 import { observer } from "mobx-react";
 import { useQueryClient } from "react-query";
 import classNames from "classnames";
-import { useAppConfig, useLocalDocuments, useProblemStore, useStores,
-  usePersistentUIStore, useUserStore, useClassStore, useUIStore } from "../../hooks/use-stores";
+import { useAppConfig, useLocalDocuments, useStores,
+  usePersistentUIStore } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
 import { ISubTabSpec, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
 import { DocumentType } from "../../models/document/document-types";
@@ -202,18 +202,14 @@ interface IDocumentAreaProps {
 }
 
 const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocument,
-    hasSecondaryDocument, hideLeftFlipper, hideRightFlipper, onChangeDocument}: IDocumentAreaProps) => {
-  const ui = useUIStore();
-  const persistentUI = usePersistentUIStore();
-  const user = useUserStore();
-  const appConfig = useAppConfig();
-  const classStore = useClassStore();
-  const problemStore = useProblemStore();
+    hasSecondaryDocument, hideLeftFlipper, hideRightFlipper, onChangeDocument}: IDocumentAreaProps
+) => {
+  const {appConfig, class: classStore, persistentUI, ui, unit, user} = useStores();
   const showPlayback = user.type && !openDocument?.isPublished
                           ? appConfig.enableHistoryRoles.includes(user.type) : false;
   const getDisplayTitle = (document: DocumentModelType) => {
     const documentOwner = classStore.users.get(document.uid);
-    const documentTitle = getDocumentDisplayTitle(document, appConfig, problemStore);
+    const documentTitle = getDocumentDisplayTitle(unit, document, appConfig);
     return {owner: documentOwner ? documentOwner.fullName : "", title: documentTitle};
   };
   const displayTitle = getDisplayTitle(openDocument);

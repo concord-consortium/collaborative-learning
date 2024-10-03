@@ -123,7 +123,7 @@ for (const key of Object.keys(classKeys)) {
         }
       }
 
-      const documentMetadata = user.documentMetadata[docId];
+      const documentMetadata = user.documentMetadata?.[docId];
       const offeringId = documentMetadata?.offeringId;
       const offering = offeringId && offerings[offeringId];
       const problemDocPublication = offeringId && problemDocPublications[offeringId]?.[docId];

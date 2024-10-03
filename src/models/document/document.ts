@@ -15,7 +15,6 @@ import {
 } from "../../../shared/shared";
 import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { IDocumentProperties } from "../../lib/db-types";
-import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { Tree } from "../history/tree";
 import { TreeMonitor } from "../history/tree-monitor";
@@ -130,17 +129,6 @@ export const DocumentModel = Tree.named("Document")
         docStr += self.getProperty(prop) ? `:${prop}` : `:!${prop}`;
       });
       return appConfig.getDocumentLabel(docStr, count, lowerCase);
-    },
-    getDisplayTitle(appConfig: AppConfigModelType) {
-      const timeStampPropName = appConfig.docTimeStampPropertyName || undefined;
-      const timeStampProp = timeStampPropName && self.getProperty(timeStampPropName);
-      const timeStamp = timeStampProp
-                          ? parseFloat(timeStampProp)
-                          : undefined;
-      const timeStampStr = timeStamp ? getLocalTimeStamp(timeStamp) : undefined;
-      return timeStampStr
-              ? `${self.title} (${timeStampStr})`
-              : self.title;
     },
     getDisplayId(appConfig: AppConfigModelType) {
       const { docDisplayIdPropertyName } = appConfig;
