@@ -13,17 +13,18 @@ function beforeTest() {
 context('Chat Panel Comment Tags', () => {
   it('verify chat panel comment tags', () => {
     const tags = [
-      "Select QA Strategy",
-      "Part-to-Part",
-      "Part-to-Whole",
-      "Unit Rate",
-      "Ratios of Same Variable"
+      "Diverging Designs",
+      "Who's it for?",
+      "Where's it used?",
+      "Converging Designs",
+      "What's it look like?",
+      "What's it do?"
     ];
     const tagComment = [
-      "This is Part-to-Part tag comment" + Math.random(),
-      "This is Part-to-Whole tag comment" + Math.random(),
-      "This is Unit Rate tag comment" + Math.random(),
-      "This is Ratios of Same Variable tag comment" + Math.random()
+      "This is one tag comment" + Math.random(),
+      "This is another tag comment" + Math.random(),
+      "This is a different tag comment" + Math.random(),
+      "This is the last tag comment" + Math.random()
     ];
     cy.log('verify chat panel comment tags are accessible if teacher is in network (via url params)');
     beforeTest();
@@ -39,7 +40,8 @@ context('Chat Panel Comment Tags', () => {
       .should("contain", tags[1])
       .should("contain", tags[2])
       .should("contain", tags[3])
-      .should("contain", tags[4]);
+      .should("contain", tags[4])
+      .should("contain", tags[5]);
 
     cy.log('verify user post only comment tags on document comment');
     cy.openTopTab("problems");
