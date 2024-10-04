@@ -30,7 +30,7 @@ The core design elements of the schema are:
             type: "section" | "learningLog"
             classHash?: string
             offeringId?: string
-            evaluation {key: AIEvaluation from config file}
+            evaluation {key: aiEvaluation from config file}
               number (timestamp)
             // TDB: serialized document model metadata
           /documents: {key: documentKey => DBDocument}

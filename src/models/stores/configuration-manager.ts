@@ -51,8 +51,8 @@ export class ConfigurationManager implements UnitConfiguration {
     return  (this.showCommentTag) ? this.getProp<UC["commentTags"]>("commentTags") : {};
   }
 
-  get AIEvaluation(){
-    return this.getProp<UC["AIEvaluation"]>("AIEvaluation");
+  get aiEvaluation(){
+    return this.getProp<UC["aiEvaluation"]>("aiEvaluation");
   }
 
   get autoAssignStudentsToIndividualGroups() {

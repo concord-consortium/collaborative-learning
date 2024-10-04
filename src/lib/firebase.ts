@@ -189,7 +189,7 @@ export class Firebase {
   }
 
   public getEvaluationMetadataPath(user: UserModelType, documentKey: string, userId?: string) {
-    const evaluation = this.db.stores.appConfig.AIEvaluation;
+    const evaluation = this.db.stores.appConfig.aiEvaluation;
     if (evaluation) {
       return `${this.getUserDocumentMetadataPath(user, documentKey, userId)}/evaluation/${evaluation}`;
     } else {

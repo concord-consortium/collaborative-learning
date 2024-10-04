@@ -98,7 +98,7 @@
       "function": "What's it do?"
     },
     "tagPrompt": "Select QA Strategy",
-    "AIEvaluation": "categorize-design"
+    "aiEvaluation": "categorize-design"
   },
   "sections": {
     "introduction": {"initials": "IN", "title": "Introduction", "placeholder": "Work area for\nIntroduction section"},

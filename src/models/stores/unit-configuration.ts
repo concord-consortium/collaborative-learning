@@ -88,7 +88,7 @@ export interface UnitConfiguration extends ProblemConfiguration {
   // list of possible values for tagging in comments
   commentTags?: Record<string, string>;
   // if set, enable the specified AI evaluation to run after document updates
-  AIEvaluation?: "categorize-design";
+  aiEvaluation?: "categorize-design";
   // List of the types of annotations supported (eg "curved-sparrow") or "all" or "none"
   annotations?: "all" | "none" | string[];
 }

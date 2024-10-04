@@ -90,7 +90,7 @@ These properties are configurable at the application (built into the code) or th
   commentTags?: Record<string, string>;
   // If set, enable the specified AI evaluation to run after document updates
   // At the moment, there is only one evaluation pipeline defined.
-  AIEvaluation?: "categorize-design";
+  aiEvaluation?: "categorize-design";
 
   // List of the types of annotations supported (eg "curved-sparrow") or "all" or "none"
   // Currently any value other than "none" will be treated as "all".
