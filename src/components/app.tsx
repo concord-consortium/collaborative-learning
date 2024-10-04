@@ -110,7 +110,8 @@ export const authAndConnect = async (stores: IStores) => {
     if (classInfo) {
       const timeOffset = await db.firebase.getServerTimeOffset();
       classInfo.serverTimestamp = classInfo.localTimestamp + timeOffset;
-      stores.class.updateFromPortal(classInfo);
+      const includeAIUser = appConfig.aiEvaluation !== undefined;
+      stores.class.updateFromPortal(classInfo, includeAIUser);
     }
 
     const firestoreUser = user.isTeacher

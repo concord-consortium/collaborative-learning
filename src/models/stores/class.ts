@@ -1,6 +1,6 @@
 import { applySnapshot, SnapshotIn, types } from "mobx-state-tree";
 import { ClassInfo } from "./portal";
-import { kExemplarUserParams } from "./user-types";
+import { kAnalyzerUserParams, kExemplarUserParams } from "./user-types";
 
 export const ClassUserModel = types
   .model("ClassUser", {
@@ -30,7 +30,7 @@ export const ClassModel = types
   })
   .actions((self) => {
     return {
-      updateFromPortal(classInfo: ClassInfo) {
+      updateFromPortal(classInfo: ClassInfo, includeAIUser: boolean) {
         const usersSnapshot: SnapshotIn<typeof self.users> = {
         };
         const users = [...classInfo.teachers, ...classInfo.students];
@@ -40,6 +40,11 @@ export const ClassModel = types
 
         // Add the fake exemplar user
         usersSnapshot[kExemplarUserParams.id] = kExemplarUserParams;
+
+        // Add AI user if the unit has AI analysis configured
+        if (includeAIUser) {
+          usersSnapshot[kAnalyzerUserParams.id] = kAnalyzerUserParams;
+        }
 
         // applySnapshot is used so the same user objects are updated
         applySnapshot(self.users, usersSnapshot);

@@ -57,7 +57,7 @@ describe("Class model", () => {
       teachers: [],
       localTimestamp: Date.now()
     };
-    clazz.updateFromPortal(classInfo);
+    clazz.updateFromPortal(classInfo, false);
 
     // There is always a exemplar user added to the class
     expect(clazz.users.size).toEqual(2);
