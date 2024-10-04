@@ -1,5 +1,6 @@
 import {FirestoreEvent, onDocumentCreated, QueryDocumentSnapshot} from "firebase-functions/v2/firestore";
 import {getAnalysisQueueFirestorePath} from "./utils";
+import {getDatabase} from "firebase-admin/database";
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 
@@ -8,7 +9,37 @@ import * as logger from "firebase-functions/logger";
 // 2. (This function) Create screenshots of those documents
 // 3. Send those screenshots to the AI service for processing, and create document comments with the results
 
-// TODO just a stub for now
+const clueURL = "https://collaborative-learning.concord.org/branch/shutterbug-support";
+const shutterbugURL = "https://api.concord.org/shutterbug-production";
+
+function generateHtml(clueDocument: any) {
+  return `
+    <script>const initialValue=${JSON.stringify(clueDocument)}</script>
+    <!-- height will be updated when iframe sends updateHeight message -->
+    <iframe id='clue-frame' width='100%' height='500px' style='border:0px'
+      allow='serial'
+      src='${clueURL}/iframe.html?unwrapped&readOnly'
+    ></iframe>
+    <script>
+      const clueFrame = document.getElementById('clue-frame')
+      function sendInitialValueToEditor() {
+        if (!clueFrame.contentWindow) {
+          console.warning("iframe doesn't have contentWindow");
+        }
+        window.addEventListener("message", (event) => {
+          if (event.data.type === "updateHeight") {
+            document.getElementById("clue-frame").height = event.data.height + "px";
+          }
+        })
+        clueFrame.contentWindow.postMessage(
+          { initialValue: JSON.stringify(initialValue) },
+          "*"
+        );
+      }
+      clueFrame.addEventListener('load', sendInitialValueToEditor);
+    </script>
+  `;
+}
 
 const pendingQueuePath = getAnalysisQueueFirestorePath("pending", "{docId}");
 
@@ -34,15 +65,54 @@ export const onAnalysisDocumentPending =
       return;
     }
 
-    // TODO: create screenshot of document
-    const imageUrl = "https://placehold.co/300x20?text=Wheelbarrow+design";
+    // Retrieve the document content
+
+    const metadataPathSegments = (queueDoc?.metadataPath as string).split("/");
+    // Metadata path will be something like "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1"
+    if (metadataPathSegments[metadataPathSegments.length - 2] !== "documentMetadata") {
+      await error(`Unexpected metadata path: ${queueDoc?.metadataPath}`, event);
+      return;
+    }
+    metadataPathSegments[metadataPathSegments.length - 2] = "documents";
+    const documentPath = metadataPathSegments.join("/");
+    let content = undefined;
+    try {
+      await (getDatabase().ref(documentPath).once("value", (snapshot) => {
+        content = snapshot.child("content").val() as string;
+      }));
+    } catch (err) {
+      await error(`Could not retrieve document ${documentPath}: ${err}`, event);
+      return;
+    }
+
+    if (!content) {
+      await error(`Could not retrieve document content ${documentPath}`, event);
+      return;
+    }
+
+    // Generate screenshot with Shutterbug service
+
+    let responseJSON;
+    try {
+      const html = generateHtml(JSON.parse(content));
+      const response = await fetch(shutterbugURL,
+        {
+          method: "POST",
+          body: JSON.stringify({content: html, height: 1500}),
+        }
+      );
+      responseJSON = await response.json();
+    } catch (err) {
+      await error(`Shutterbug error: ${err}`, event);
+      return;
+    }
 
     // Write to the "imaged" queue
     const nextQueuePath = getAnalysisQueueFirestorePath("imaged", docId);
-    firestore.doc(nextQueuePath).set({
+    await firestore.doc(nextQueuePath).set({
       ...queueDoc,
       docImaged: admin.firestore.FieldValue.serverTimestamp(),
-      docImageUrl: imageUrl,
+      docImageUrl: responseJSON.url,
     });
 
     // Remove from the "pending" queue

@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import {
   clearFirestoreData, makeDocumentSnapshot,
 } from "firebase-functions-test/lib/providers/firestore";
@@ -11,6 +12,30 @@ jest.mock("firebase-functions/logger");
 
 const {fft, cleanup} = initialize();
 
+const sampleDoc = `{
+  "rowMap": {
+    "YCdQvLvVf-rWZHvK": {
+      "id": "YCdQvLvVf-rWZHvK",
+      "isSectionHeader": false,
+      "tiles": [{"tileId": "3EkhEN1cWCZ6SQ9X"}]
+    }
+  },
+  "rowOrder": ["YCdQvLvVf-rWZHvK"],
+  "tileMap": {
+    "3EkhEN1cWCZ6SQ9X": {
+      "id": "3EkhEN1cWCZ6SQ9X",
+      "title": "Text 1",
+      "content": {
+        "type": "Text",
+        "text": "{\\"object\\":\\"value\\",\\"document\\":{\\"children\\":[{\\"type\\":\\"paragraph\\",\\"children\\":[{\\"text\\":\\"Text tile. Textile.\\"}]}]}}",
+        "format": "slate"
+      }
+    }
+  },
+  "sharedModelMap": {},
+  "annotations": {}
+}`;
+
 describe("functions", () => {
   beforeEach(async () => {
     await clearFirestoreData(projectConfig);
@@ -19,6 +44,11 @@ describe("functions", () => {
 
   describe("onAnalysisDocumentPending", () => {
     test("runs when queued document is pending", async () => {
+      // Set up document with some content to be imaged.
+      await getDatabase().ref("demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1").set({
+        content: sampleDoc,
+      });
+
       const wrapped = fft.wrap(onAnalysisDocumentPending);
 
       await wrapped({
@@ -49,7 +79,7 @@ describe("functions", () => {
           docUpdated: "1001",
           evaluator: "categorize-design",
           docImaged: expect.any(Object),
-          docImageUrl: "https://placehold.co/300x20?text=Wheelbarrow+design",
+          docImageUrl: expect.stringContaining("shutterbug"),
         });
       });
 
