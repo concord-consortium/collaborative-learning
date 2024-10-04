@@ -10,6 +10,7 @@ import * as logger from "firebase-functions/logger";
 // 3. Send those screenshots to the AI service for processing, and create document comments with the results
 
 const clueURL = "https://collaborative-learning.concord.org/branch/shutterbug-support";
+const clueUnit = "mods";
 const shutterbugURL = "https://api.concord.org/shutterbug-production";
 
 function generateHtml(clueDocument: any) {
@@ -18,7 +19,7 @@ function generateHtml(clueDocument: any) {
     <!-- height will be updated when iframe sends updateHeight message -->
     <iframe id='clue-frame' width='100%' height='500px' style='border:0px'
       allow='serial'
-      src='${clueURL}/iframe.html?unwrapped&readOnly'
+      src='${clueURL}/iframe.html?unit=${clueUnit}&unwrapped&readOnly'
     ></iframe>
     <script>
       const clueFrame = document.getElementById('clue-frame')
