@@ -62,12 +62,12 @@ context("Tile Navigator", () => {
 
     cy.log("Move tile navigator to the top of the drawing tile in a quick animation");
     tileNavigator.getTileNavigatorPlacementButton().click();
-    cy.wait(100);
+    cy.wait(300);
     tileNavigator.getTileNavigatorContainer().should("have.class", "top");
 
     cy.log("Move tile navigator to the bottom of the drawing tile in a quick animation");
     tileNavigator.getTileNavigatorPlacementButton().click();
-    cy.wait(100);
+    cy.wait(300);
     tileNavigator.getTileNavigatorContainer().should("not.have.class", "top");
   });
 });
