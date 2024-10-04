@@ -1,5 +1,6 @@
-import { types } from "mobx-state-tree";
-import { ClassInfo } from "../../lib/auth";
+import { applySnapshot, SnapshotIn, types } from "mobx-state-tree";
+import { ClassInfo } from "./portal";
+import { kExemplarUserParams } from "./user-types";
 
 export const ClassUserModel = types
   .model("ClassUser", {
@@ -25,28 +26,27 @@ export const ClassModel = types
     name: types.string,
     classHash: types.string,
     users: types.map(ClassUserModel),
+    timestamp: types.optional(types.number, () => Date.now()),
   })
   .actions((self) => {
     return {
       updateFromPortal(classInfo: ClassInfo) {
-        self.users.clear();
-        self.name = classInfo.name;
-        self.classHash = classInfo.classHash;
+        const usersSnapshot: SnapshotIn<typeof self.users> = {
+        };
         const users = [...classInfo.teachers, ...classInfo.students];
         users.forEach((user) => {
-          self.users.put(ClassUserModel.create({
-            type: user.type,
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            fullName: user.fullName,
-            initials: user.initials,
-          }));
+          usersSnapshot[user.id] = user;
         });
+
+        // Add the fake exemplar user
+        usersSnapshot[kExemplarUserParams.id] = kExemplarUserParams;
+
+        // applySnapshot is used so the same user objects are updated
+        applySnapshot(self.users, usersSnapshot);
+        self.name = classInfo.name;
+        self.classHash = classInfo.classHash;
+        self.timestamp = classInfo.serverTimestamp || classInfo.localTimestamp;
       },
-      addUser(user: any) {
-        self.users.put(user);
-      }
     };
   })
   .views((self) => {

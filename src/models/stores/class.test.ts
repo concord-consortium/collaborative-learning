@@ -1,5 +1,5 @@
 import { ClassModel, ClassUserModel } from "./class";
-import { ClassInfo } from "../../lib/auth";
+import { ClassInfo } from "./portal";
 
 describe("Class model", () => {
 
@@ -54,9 +54,12 @@ describe("Class model", () => {
           initials: "FS",
         }
       ],
-      teachers: []
+      teachers: [],
+      localTimestamp: Date.now()
     };
     clazz.updateFromPortal(classInfo);
-    expect(clazz.users.size).toEqual(1);
+
+    // There is always a exemplar user added to the class
+    expect(clazz.users.size).toEqual(2);
   });
 });

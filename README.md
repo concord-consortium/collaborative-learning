@@ -110,7 +110,7 @@ To enable per component debugging set the "debug" localstorage key with one or m
 
 - `bookmarks` this will show a tiny text status above the bookmark indicating which users have bookmarked this document. It will also print information about the document bookmarks each time a bookmark is toggled.
 - `canvas` this will show the document key over the canvas, useful for looking up documents in Firebase
-- `cms` this will print info to the console as changes are made to authored content via the CMS
+- `iframe` this will print info to the console as document changes are sent from the iframe'd CLUE to the parent frame. This iframe'd CLUE is used by the CMS.
 - `docList` - this will print a table of information about a list of documents
 - `document` this will add the active document as `window.currentDocument`, you can use MST's hidden toJSON() like `currentDocument.toJSON()` to views its content.
 - `drop` console log the dataTransfer object from drop events on the document.
@@ -174,11 +174,13 @@ The `firebase`, `firestore`, and `functions` params can take an `emulator` value
 
 There is an alternative entry point for CLUE available at `/editor/`. This can be used to save and open individual documents from the local file system. Remote documents can be loaded into this editor with the `document` URL parameter. The editor requires a `unit` parameter to configure the toolbar. It can load an exported document content which is typical for section documents. It can also load a raw document content which is the same format that is stored in Firebase. It will save in the same format that was loaded.
 
-By default the editor will save the current document to the browser's session storage. When editor is reloaded this same document will be loaded in. If you make a new tab and visit the editor this document won't be there anymore because it is in session storage. There is a "reset doc" button which clears the storage and reloads the page. You can also use the `noStorage` parameter to prevent it from loading or saving to session storage.
+The `noStorage` parameter can override the default behavior. By default the editor will save the current document to the browser's session storage. When editor is reloaded this same document will be loaded in. If you make a new tab and visit the editor this document won't be there anymore because it is in session storage. There is a "reset doc" button which clears the storage and reloads the page. The `noStorage` parameter will prevent it from loading or saving to session storage.
 
-The `document` parameter is useful if you want to work on something that requires a document in a specific state. You can just reload the page and get back to this state. You can use this locally by creating an initial document in doc-editor.html, and save the file to `src/public/[filename]`. Now you can load the document back with the parameter `document=[filename]`. This works because the document parameter will load URLs relative to the current page in the browser. This approach can also be used in Cypress tests. It would mean the test could just load in a document to test instead of having to setup the document first.
+The `document` parameter is useful if you want to work on something that requires a document in a specific state. You can just reload the page and get back to this state. You can use this locally by creating an initial document in `/editor/`, and save the file to `src/public/[filename]`. Now you can load the document back with the parameter `document=[filename]`. This works because the document parameter will load URLs relative to the current page in the browser. This approach can also be used in Cypress tests. It would mean the test could just load in a document to test instead of having to setup the document first.
 
-The Standalone Document Editor also supports a `readOnly` url param. If you specify this param the document you open will be opened in readOnly mode. This is useful for testing or debugging issues with tiles that have different displays when in readOnly model.
+The `readOnly` parameter will open the document in readOnly mode. This is useful for testing or debugging issues with tiles that have different displays when in readOnly model.
+
+The `unwrapped` parameter will open the document without any surrounding UI. This is useful for taking screenshots of documents.
 
 ### QA
 

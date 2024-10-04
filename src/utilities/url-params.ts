@@ -91,18 +91,6 @@ export interface QueryParams {
   mouseSensor?: boolean;
 
   //
-  // CMS options (admin.html)
-  //
-
-  // change the branch used in clue-curriculum repository default is author
-  curriculumBranch?: string;
-  // work with a local checkout of the curriculum instead of github
-  localCMSBackend?: boolean;
-  // change the location of the cms-editor.html used by iframe widget to edit
-  // CLUE documents.
-  cmsEditorBase?: string;
-
-  //
   // Standalone document editor options (doc-editor.html)
   //
 
@@ -110,6 +98,8 @@ export interface QueryParams {
   document?: string;
   // Open new documents as readOnly this helps with testing readOnly views
   readOnly?: boolean
+  // Just display the document contents, no top toolbar or border
+  unwrapped?: boolean
   // Don't load or save the document from browser storage
   noStorage?: boolean
 }
@@ -122,7 +112,7 @@ type BooleanParamNames = Exclude<
 undefined>;
 
 const booleanParams: BooleanParamNames[] =
-  [ "demo", "mouseSensor", "localCMSBackend", "noPersistentUI", "readOnly", "noStorage" ];
+  [ "demo", "mouseSensor", "noPersistentUI", "readOnly", "noStorage", "unwrapped" ];
 
 const processBooleanValue = (value: string | (string | null)[] | null | undefined) => {
   if (value === undefined || value === "false") {

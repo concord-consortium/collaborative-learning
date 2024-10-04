@@ -131,8 +131,8 @@ export const UIModel = types
       },
 
 
-      setError(error: string | Error, customMessage?: string) {
-        self.error = customMessage ?? error?.toString();
+      setError(error: unknown, customMessage?: string) {
+        self.error = customMessage ?? String(error);
         Logger.log(LogEventName.INTERNAL_ERROR_ENCOUNTERED, { message: self.error });
         if (error instanceof Error) {
           // In Chrome, passing an error instance to console.error() will print the

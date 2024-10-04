@@ -3,18 +3,18 @@ import { Map } from "immutable";
 import { CmsWidgetControlProps } from "decap-cms-core";
 
 import { urlParams } from "./cms-url-params";
-import { DEBUG_CMS } from "../../src/lib/debug";
+import { DEBUG_IFRAME } from "../../src/lib/debug";
 import { defaultCurriculumBranch } from "./cms-constants";
 
 import "./iframe-control.scss";
 
 (window as any).DISABLE_FIREBASE_SYNC = true;
 
-const cmsEditorBase = urlParams.cmsEditorBase ?? ".";
+const iframeBase = urlParams.iframeBase ?? ".";
 // the URL is relative to the current url of the CMS
-// If the cmsEditorBase is an absolute url then the current url will be ignored
-const cmsEditorBaseURL = new URL(cmsEditorBase, window.location.href);
-const validOrigin = cmsEditorBaseURL.origin;
+// If the iframeBase is an absolute url then the current url will be ignored
+const iframeBaseURL = new URL(iframeBase, window.location.href);
+const validOrigin = iframeBaseURL.origin;
 
 interface IState {
   initialValue?: string;
@@ -28,7 +28,7 @@ export class IframeControl extends React.Component<CmsWidgetControlProps, IState
   }
 
   componentDidMount = () => {
-    if (DEBUG_CMS) {
+    if (DEBUG_IFRAME) {
       // eslint-disable-next-line no-console
       console.log("DEBUG: CMS ClueControl initial content value is: ", this.state.initialValue);
     }
@@ -66,13 +66,13 @@ export class IframeControl extends React.Component<CmsWidgetControlProps, IState
 
   render() {
     const curriculumBranch = urlParams.curriculumBranch ?? defaultCurriculumBranch;
-    const iframeBaseUrl = `${cmsEditorBase}/cms-editor.html?curriculumBranch=${curriculumBranch}`;
+    const iframeBaseUrl = `${iframeBase}/iframe.html?curriculumBranch=${curriculumBranch}`;
     const iframeUrl = urlParams.unit
       ? `${iframeBaseUrl}&unit=${urlParams.unit}`
       : iframeBaseUrl;
     return (
       <div className="iframe-control custom-widget">
-        <iframe id="editor" src={iframeUrl} allow="clipboard-read; clipboard-write"
+        <iframe id="editor" src={iframeUrl} allow="clipboard-read; clipboard-write; serial"
           onLoad={this.sendInitialValueToEditor.bind(this)}>
         </iframe>
       </div>

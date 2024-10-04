@@ -524,7 +524,7 @@ export class DB {
       this.createDocument({ type: ProblemPublication, content }).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getProblemPublicationsPath(user)).push();
         const userGroup = groups.getGroupById(user.currentGroupId);
-        const groupUserConnections: DBGroupUserConnections | undefined = userGroup && userGroup.users
+        const groupUserConnections: DBGroupUserConnections | undefined = userGroup && userGroup.activeUsers
           .filter(groupUser => groupUser.id !== user.id)
           .reduce((allUsers: DBGroupUserConnections, groupUser) => {
             allUsers[groupUser.id] = groupUser.connected;

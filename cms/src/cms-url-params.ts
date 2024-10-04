@@ -17,9 +17,9 @@ export interface QueryParams {
   curriculumBranch?: string;
   // work with a local checkout of the curriculum instead of github
   localCMSBackend?: boolean;
-  // change the location of the cms-editor.html used by iframe widget to edit
+  // change the location of the iframe.html used by the iframe widget to edit
   // CLUE documents.
-  cmsEditorBase?: string;
+  iframeBase?: string;
 }
 
 export const processUrlParams = (): QueryParams => {
