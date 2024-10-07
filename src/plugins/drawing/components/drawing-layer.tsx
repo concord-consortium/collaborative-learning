@@ -36,7 +36,6 @@ interface DrawingLayerViewProps {
   imageUrlToAdd?: string;
   setImageUrlToAdd?: (url: string) => void;
   svgHeight?: number;
-  svgOffset?: Point;
   svgWidth?: number;
 }
 
@@ -454,14 +453,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
     const zoom = this.getContent().zoom;
 
-    // If an offset value for the SVG is provided, the `object-canvas` group will be translated to place
-    // the drawing objects appropriately.
-    const objectCanvasOffset = this.props.svgOffset
-                             ? `translate(${this.props.svgOffset.x * -1}, ${this.props.svgOffset.y * -1})`
-                             : "";
-    let objectCanvasTransform = objectCanvasOffset ? `${objectCanvasOffset} ` : "";
-    objectCanvasTransform += `scale(${zoom})`;
-
     return (
       // We don't propagate pointer events to the tile, since the drawing layer
       // already handles selecting the tile when necessary and we don't want to
@@ -480,9 +471,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           width={this.props.svgWidth ?? 1500}
           height={this.props.svgHeight ?? 1500}
           ref={this.setSvgRef}
-          transform={`translate(${this.props.svgOffset?.x ?? 0}, ${this.props.svgOffset?.y ?? 0})`}
         >
-          <g className="object-canvas" transform={objectCanvasTransform}>
+          <g className="object-canvas" transform={`scale(${zoom})`}>
             {this.renderObjects()}
             {!this.props.readOnly && this.renderSelectionBorders(this.getSelectedObjects(), true)}
             {highlightObject

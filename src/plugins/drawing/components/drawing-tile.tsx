@@ -16,22 +16,21 @@ import { useUIStore } from "../../../hooks/use-stores";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 import { TileNavigator } from "../../../components/tiles/tile-navigator";
-import { Point } from "../model/drawing-basic-types";
 
 import "./drawing-tile.scss";
 
 export interface IDrawingTileProps extends ITileProps {
-  svgOffset?: Point;
   overflowVisible?: boolean;
   svgWidth?: number;
   svgHeight?: number;
 }
 
 const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function DrawingToolComponent(props) {
-  const { tileElt, model, readOnly, onRegisterTileApi, navigatorAllowed = true, svgOffset, overflowVisible,
+  const { tileElt, model, readOnly, onRegisterTileApi, navigatorAllowed = true, overflowVisible,
           svgWidth, svgHeight } = props;
-  const contentRef = useCurrent(model.content as DrawingContentModelType);
-  const showNavigator = navigatorAllowed && contentRef.current.isNavigatorVisible ;
+  const contentModel = model.content as DrawingContentModelType;
+  const contentRef = useCurrent(contentModel);
+  const showNavigator = navigatorAllowed && contentRef.current.isNavigatorVisible;
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
   const [objectListHoveredObject, setObjectListHoveredObject] = useState(null as string|null);
   const hotKeys = useRef(new HotKeys());
@@ -181,7 +180,6 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
             imageUrlToAdd={imageUrlToAdd}
             setImageUrlToAdd={setImageUrlToAdd}
             svgHeight={svgHeight}
-            svgOffset={svgOffset}
             svgWidth={svgWidth}
           />
         </div>

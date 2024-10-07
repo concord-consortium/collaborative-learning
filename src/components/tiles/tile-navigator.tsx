@@ -49,19 +49,12 @@ export const TileNavigator = observer(function TileNavigator({renderTile, tilePr
   const placementButtonRef = useRef<HTMLButtonElement>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // We offset the SVG as needed to properly place the content in the navigator
-  const svgOffset = {
-    x: objectsBoundingBox?.nw.x ?? 0,
-    y: objectsBoundingBox?.nw.y ?? 0,
-  };
-
   // Adjust the props for the scaled down version of the tile.
   const renderTileProps: IDrawingTileProps = {
     ...tileProps,
     navigatorAllowed: false,
     readOnly: true,
     overflowVisible: true,
-    svgOffset,
     svgWidth: svgSize.width,
     svgHeight: svgSize.height,
   };
@@ -76,8 +69,8 @@ export const TileNavigator = observer(function TileNavigator({renderTile, tilePr
   const viewportWidth = tileWidth * scaleFactor;
   const viewportHeight = tileHeight * scaleFactor;
 
-  // Define a clip path for the overlay that will allow content within the viewport's bounds
-  // to show through the overlay.
+  // Define a clip path for the overlay that allows content within the viewport's bounds
+  // to show through without being covered by the semi-transparent overlay.
   const clipPath = useMemo(() => {
     const viewportXMargin = 5;
     const viewportYMargin = 7.5;

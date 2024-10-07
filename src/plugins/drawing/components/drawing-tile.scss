@@ -16,6 +16,7 @@
       border-radius: 0px 3px 3px 0px;
       display: flex;
       flex-direction: column;
+      z-index: 1;
 
       &.open {
         flex: 0 0 170px;
@@ -152,6 +153,8 @@
 
     .drawing-layer {
       svg {
+        overflow: visible;
+
         .ghost {
           opacity: 0.1;
         }

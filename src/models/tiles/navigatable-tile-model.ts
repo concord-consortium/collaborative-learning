@@ -4,6 +4,9 @@ import { BoundingBox } from "../../plugins/drawing/model/drawing-basic-types";
 import { TileContentModel } from "./tile-content";
 import { kUnknownTileType } from "./unknown-types";
 
+type NavigatorPosition = "top" | "bottom";
+export type NavigatorDirection = "up" | "right" | "down" | "left";
+
 export const NavigatableTileModel = TileContentModel
   .named("Navigatable Tile")
   .props({
@@ -26,7 +29,7 @@ export const NavigatableTileModel = TileContentModel
     hideNavigator() {
       self.isNavigatorVisible = false;
     },
-    setNavigatorPosition(position: "top" | "bottom") {
+    setNavigatorPosition(position: NavigatorPosition) {
       self.navigatorPosition = position;
     },
     setZoom(zoom: number) {

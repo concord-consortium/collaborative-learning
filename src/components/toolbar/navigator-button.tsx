@@ -4,20 +4,10 @@ import { observer } from "mobx-react";
 import { TileToolbarButton } from "./tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "./toolbar-button-manager";
 import { TileModelContext } from "../tiles/tile-api";
+import { isNavigatableTileModel } from "../../models/tiles/navigatable-tile-model";
 
 import HideNavigatorIcon from "../../assets/icons/hide-navigator-icon.svg";
 import ShowNavigatorIcon from "../../assets/icons/show-navigator-icon.svg";
-
-const isNavigatorSupported = (
-  model: any
-): model is { isNavigatorVisible: boolean; hideNavigator: () => void; showNavigator: () => void } => {
-  return (
-    model &&
-    typeof model.isNavigatorVisible === "boolean" &&
-    typeof model.hideNavigator === "function" &&
-    typeof model.showNavigator === "function"
-  );
-};
 
 /**
  * The NavigatorButton component provides toolbar button for adding or removing the Tile Navigator
@@ -25,7 +15,7 @@ const isNavigatorSupported = (
  */
 export const NavigatorButton = observer(function NavigatorButton({ name }: IToolbarButtonComponentProps) {
   const tileContentModel = useContext(TileModelContext)?.content;
-  if (!isNavigatorSupported(tileContentModel)) return null;
+  if (!isNavigatableTileModel(tileContentModel)) return null;
 
   const buttonTitle = tileContentModel?.isNavigatorVisible ? "Hide Navigator" : "Show Navigator";
   const ButtonIcon = tileContentModel?.isNavigatorVisible ? <HideNavigatorIcon/> : <ShowNavigatorIcon/>;
