@@ -32,6 +32,12 @@ jest.mock("../../hooks/document-comment-hooks", () => ({
     ],
     error: undefined
   }),
+  useDocumentCommentsAtSimplifiedPath: () => ({
+    isLoading: false,
+    isError: false,
+    data: [],
+    error: undefined
+  }),
   useUnreadDocumentComments: () => ({
     isLoading: false,
     isError: false,
