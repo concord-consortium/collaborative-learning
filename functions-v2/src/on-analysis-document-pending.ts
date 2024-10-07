@@ -47,8 +47,9 @@ const pendingQueuePath = getAnalysisQueueFirestorePath("pending", "{docId}");
 async function error(error: string, event: FirestoreEvent<QueryDocumentSnapshot | undefined, Record<string, string>>) {
   logger.warn("Error processing document", event.document, error);
   const firestore = admin.firestore();
-  await firestore.doc(getAnalysisQueueFirestorePath("failedImaging", event.params.docId)).set({
+  await firestore.collection(getAnalysisQueueFirestorePath("failedImaging")).add({
     ...event.data?.data(),
+    documentId: event.params.docId,
     error,
   });
   await firestore.doc(event.document).delete();

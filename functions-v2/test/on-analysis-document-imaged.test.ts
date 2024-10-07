@@ -64,13 +64,16 @@ describe("functions", () => {
 
       const doneQueue = firestore.collection("analysis/queue/done");
       expect(await doneQueue.count().get().then((result) => result.data().count)).toEqual(1);
-      await doneQueue.doc("testdoc1").get().then((result) => {
-        expect(result.data()).toEqual({
-          metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
-          docUpdated: "1001",
-          completedAt: expect.any(Object),
-          docImageUrl: "https://concord.org/wp-content/uploads/2024/05/capturing-moths-fig-2.png",
-          evaluator: "categorize-design",
+      await doneQueue.get().then((snapshot) => {
+        snapshot.forEach((doc) => {
+          expect(doc.data()).toEqual({
+            metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
+            documentId: "testdoc1",
+            docUpdated: "1001",
+            completedAt: expect.any(Object),
+            docImageUrl: "https://concord.org/wp-content/uploads/2024/05/capturing-moths-fig-2.png",
+            evaluator: "categorize-design",
+          });
         });
       });
 

@@ -129,12 +129,15 @@ describe("functions", () => {
       const failedImagingQueue = admin.firestore().collection("analysis/queue/failedImaging");
       expect(await failedImagingQueue.count().get().then((result) => result.data().count)).toEqual(1);
 
-      await failedImagingQueue.doc("testdoc1").get().then((result) => {
-        expect(result.data()).toEqual({
-          metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
-          docUpdated: "1001",
-          evaluator: "does-not-exist",
-          error: "Unexpected value for evaluator: does-not-exist",
+      await failedImagingQueue.get().then((snapshot) => {
+        snapshot.forEach((doc) => {
+          expect(doc.data()).toEqual({
+            metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
+            documentId: "testdoc1",
+            docUpdated: "1001",
+            evaluator: "does-not-exist",
+            error: "Unexpected value for evaluator: does-not-exist",
+          });
         });
       });
     });

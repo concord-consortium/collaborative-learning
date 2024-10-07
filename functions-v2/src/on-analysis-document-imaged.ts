@@ -18,8 +18,9 @@ const imagedQueuePath = getAnalysisQueueFirestorePath("imaged", "{docId}");
 async function error(error: string, event: FirestoreEvent<QueryDocumentSnapshot | undefined, Record<string, string>>) {
   logger.warn("Error processing document", event.document, error);
   const firestore = admin.firestore();
-  await firestore.doc(getAnalysisQueueFirestorePath("failedAnalyzing", event.params.docId)).set({
+  await firestore.collection(getAnalysisQueueFirestorePath("failedAnalyzing")).add({
     ...event.data?.data(),
+    documentId: event.params.docId,
     error,
   });
   await firestore.doc(event.document).delete();
@@ -85,9 +86,10 @@ export const onAnalysisDocumentImaged =
     }
 
     // Add to "done" queue
-    await firestore.doc(getAnalysisQueueFirestorePath("done", event.params.docId)).set({
+    await firestore.collection(getAnalysisQueueFirestorePath("done")).add({
       ...queueDoc,
-      "completedAt": admin.firestore.FieldValue.serverTimestamp(),
+      documentId: event.params.docId,
+      completedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     // Remove from the "imaged" queue
