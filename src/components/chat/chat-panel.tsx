@@ -30,7 +30,8 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const ordering = content?.getTilesInDocumentOrder();
   const { data: comments } = useDocumentComments(focusDocument);
   const { data: simplePathComments } = useDocumentCommentsAtSimplifiedPath(focusDocument);
-  const allComments = [...comments||[], ...simplePathComments||[]];
+  const allComments = [...comments||[], ...simplePathComments||[]]
+    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
   const documentComments = allComments?.filter(comment => comment.tileId == null);
   const allTileComments = allComments?.filter(comment=> comment.tileId != null);
