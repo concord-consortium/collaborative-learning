@@ -5,7 +5,8 @@ import { ChatPanelHeader } from "./chat-panel-header";
 import { ChatThread } from "./chat-thread";
 import { makeChatThreads} from "./chat-comment-thread";
 import {
-  useCommentsCollectionPath, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
+  useCommentsCollectionPath, useDocumentComments,
+  useDocumentCommentsAtSimplifiedPath, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
 import { useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
@@ -28,9 +29,11 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const content = useCurriculumOrDocumentContent(focusDocument);
   const ordering = content?.getTilesInDocumentOrder();
   const { data: comments } = useDocumentComments(focusDocument);
+  const { data: simplePathComments } = useDocumentCommentsAtSimplifiedPath(focusDocument);
+  const allComments = [...comments||[], ...simplePathComments||[]];
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
-  const documentComments = comments?.filter(comment => comment.tileId == null);
-  const allTileComments = comments?.filter(comment=> comment.tileId != null);
+  const documentComments = allComments?.filter(comment => comment.tileId == null);
+  const allTileComments = allComments?.filter(comment=> comment.tileId != null);
   const commentsInDocumentOrder = ordering && allTileComments
     ? allTileComments.sort((a: any, b: any) => ordering.indexOf(a.tileId) - ordering.indexOf(b.tileId))
     : [];
