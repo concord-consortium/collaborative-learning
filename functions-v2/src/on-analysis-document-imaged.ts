@@ -41,6 +41,8 @@ export const onAnalysisDocumentImaged =
 
     const completion = await categorizeUrl(docImageUrl);
     const reply = completion?.choices[0].message;
+    const promptTokens = completion?.usage?.prompt_tokens || 0;
+    const completionTokens = completion?.usage?.completion_tokens || 0;
 
     if (reply?.refusal) {
       await error(`AI refusal: ${reply.refusal}`, event);
@@ -91,6 +93,9 @@ export const onAnalysisDocumentImaged =
       ...queueDoc,
       documentId: event.params.docId,
       completedAt: admin.firestore.FieldValue.serverTimestamp(),
+      promptTokens,
+      completionTokens,
+      fullResponse: JSON.stringify(completion),
     });
 
     // Remove from the "imaged" queue

@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import {
   clearFirestoreData, makeDocumentSnapshot,
 } from "firebase-functions-test/lib/providers/firestore";
@@ -43,6 +44,10 @@ describe("functions", () => {
             },
           },
         }],
+        usage: {
+          prompt_tokens: 1,
+          completion_tokens: 2,
+        },
       });
       const wrapped = fft.wrap(onAnalysisDocumentImaged);
       const firestore = admin.firestore();
@@ -78,6 +83,9 @@ describe("functions", () => {
             completedAt: expect.any(Object),
             docImageUrl: "https://concord.org/wp-content/uploads/2024/05/capturing-moths-fig-2.png",
             evaluator: "categorize-design",
+            promptTokens: 1,
+            completionTokens: 2,
+            fullResponse: "{\"choices\":[{\"message\":{\"parsed\":{\"success\":true,\"category\":\"category\",\"discussion\":\"Discussion.\",\"keyIndicators\":[\"key1\",\"key2\"]}}}],\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":2}}",
           });
         });
       });
@@ -116,6 +124,10 @@ describe("functions", () => {
             },
           },
         }],
+        usage: {
+          prompt_tokens: 1,
+          completion_tokens: 2,
+        },
       });
       const wrapped = fft.wrap(onAnalysisDocumentImaged);
       const firestore = admin.firestore();
@@ -151,6 +163,9 @@ describe("functions", () => {
             completedAt: expect.any(Object),
             docImageUrl: "https://concord.org/wp-content/uploads/2024/05/capturing-moths-fig-2.png",
             evaluator: "categorize-design",
+            promptTokens: 1,
+            completionTokens: 2,
+            fullResponse: "{\"choices\":[{\"message\":{\"parsed\":{\"success\":false,\"category\":\"unknown\",\"discussion\":\"Discussion.\",\"keyIndicators\":[]}}}],\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":2}}",
           });
         });
       });
