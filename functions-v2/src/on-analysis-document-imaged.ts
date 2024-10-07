@@ -50,9 +50,10 @@ export const onAnalysisDocumentImaged =
       await error("No response from AI", event);
       return;
     }
-    const tags = [reply.parsed.category];
-    const message = reply.parsed.discussion +
-      ` Key Indicators: ${reply.parsed.keyIndicators.join(", ")}`;
+    const tags = reply.parsed.success && reply.parsed.category !== "unknown" ? [reply.parsed.category] : [];
+    const indicators = reply.parsed.keyIndicators.length ?
+      ` Key Indicators: ${reply.parsed.keyIndicators.join(", ")}` : "";
+    const message = reply.parsed.discussion + indicators;
 
     const commentsPath = `demo/AI/documents/${docId}/comments`;
 
