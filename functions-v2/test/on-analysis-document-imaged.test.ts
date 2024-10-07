@@ -5,7 +5,8 @@ import {
 import * as logger from "firebase-functions/logger";
 import {getDatabase} from "firebase-admin/database";
 import * as admin from "firebase-admin";
-
+import * as dotenv from "dotenv";
+import * as path from "path";
 import {initialize, projectConfig} from "./initialize";
 import {onAnalysisDocumentImaged} from "../src/on-analysis-document-imaged";
 
@@ -17,6 +18,15 @@ jest.mock("../lib/src/ai-categorize-document", () => ({
 }));
 
 const {fft, cleanup} = initialize();
+
+// The emulator should pick up a local value for the secret from this file, to avoid the local user needing
+// permissions to access the actual secret in the cloud.
+// firebase-functions-test doesn't support this, though, so we need this workaround which pulls it into the env.
+// See https://github.com/firebase/firebase-tools/issues/5520#issuecomment-1900545942
+// and https://github.com/firebase/firebase-functions-test/issues/196#issuecomment-1900541854
+dotenv.config({
+  path: path.resolve(__dirname, "../.secret.local"),
+});
 
 const sampleDoc = {
   metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",

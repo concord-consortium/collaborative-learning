@@ -26,15 +26,15 @@ const CategorizationResponse = z.object({
     {description: "Any other relevant information."}),
 });
 
-export async function categorizeDocument(file: string) {
+export async function categorizeDocument(file: string, apiKey: string) {
   const imageLoading = fs.readFile(file).then((data) => data.toString("base64"));
   const image = await imageLoading;
   const url = `data:image/png;base64,${image}`;
-  return categorizeUrl(url);
+  return categorizeUrl(url, apiKey);
 }
 
-export async function categorizeUrl(url: string) {
-  const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
+export async function categorizeUrl(url: string, apiKey: string) {
+  const openai = new OpenAI({apiKey});
   try {
     return openai.beta.chat.completions.parse({
       model: "gpt-4o-mini",

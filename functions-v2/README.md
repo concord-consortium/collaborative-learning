@@ -6,7 +6,14 @@ The functions are split into two folders `functions-v1` and `functions-v2`. This
 
 |Function|Purpose|
 |--------|-------|
-|_updateClassDocNetworksOnUserChange_|Monitors Firestore user documents for changes and updates the Firestore class documents with the networks of all of the teachers in these classes|
+|_onUserDocWritten_|Monitors Firestore user documents for changes and updates the Firestore class documents with the networks of all of the teachers in these classes|
+|_onAnalyzableDocWritten_|Monitors Firestore user metadata for updates to documents that request AI analysis, and puts them into the analysis queue.|
+|_onAnalysisDocumentPending_|Monitors the queue for documents to analyze, and sends them to Shutterbug to create a screenshot of the document|
+|_onAnalysisDocumentImaged_|Sends new screenshots to ChatGPT for analysis and creates a comment on the original document|
+|_atMidnight_|Clears old Firebase roots for dev and qa instances|
+
+
+## Operations
 
 Here are the basic development operations you can do after you cd into the `functions-v2` directory:
 
@@ -18,6 +25,8 @@ $ npm run lint    # lint the functions code
 $ npm run test    # runs jest (unit) tests for the functions code (requires emulator, see below)
 $ npm run build   # build the functions code (transpile TypeScript)
 ```
+
+There is also a script, `src/categorize-docs.ts`, that uses the same procedure as _onAnalysisDocumentImaged_ to categorize a directory full of screenshots using ChatGPT. In order to use this, you would need to set an environment variable with the API key, as described in the comment at the top of that script.
 
 ## Testing cloud functions
 
