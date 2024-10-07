@@ -29,7 +29,7 @@ export function debugLog(enabled: boolean, message: any, ...params: any[]) {
 
 export const DEBUG_BOOKMARKS = debugContains("bookmarks");
 export const DEBUG_CANVAS = debugContains("canvas");
-export const DEBUG_CMS = debugContains("cms");
+export const DEBUG_IFRAME = debugContains("iframe");
 export const DEBUG_DATAFLOW = debugContains("dataflow");
 export const DEBUG_DOC_LIST = debugContains("docList");
 export const DEBUG_DOCUMENT = debugContains("document");

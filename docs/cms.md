@@ -6,7 +6,7 @@ CLUE includes a CMS which can be accessed at `/admin.html` in a production build
 
 - **`curriculumBranch`** By default the CMS edits the `author` branch. You can change the branch by passing a different branch name to this parameter. The CMS will not create this branch for you. You'll need to create it yourself.
 - **`unit`** By default the CMS displays all of the units at the same time. It is better to work with a single unit at a time by using the `unit` param. It should be passed the unit code. This limits what is displayed in the CMS and it also configures the media library to show the images from that unit.
-- **`cmsEditorBase`** By default the CMS will use an iframe pointed at `./cms-editor.html` to edit the CLUE documents. You can use this param to replace `.` with something else. This is useful for local testing (see below)
+- **`iframeBase`** By default the CMS will use an iframe pointed at `./iframe.html` to edit the CLUE documents. You can use this param to replace `.` with something else. This is useful for local testing (see below)
 - **`localCMSBackend`** By default the CMS works with the `github` backend. This means even when doing local CLUE development the CMS will update the `clue-curriculum` repository directly. If you add the `localCMSBackend` parameter the CMS will attempt to work with a local git proxy running at localhost:8081. You can start this proxy with:
 
   `cd ../clue-curriculum; npx netlify-cms-proxy-server`
@@ -57,18 +57,18 @@ This document editor is located in `/src/cms/`
 
 To work on the CMS locally you'll need to start both CLUE and the CMS:
 
-- start CLUE by running `npm run start` in the top level folder
+- start CLUE by running `npm start` in the top level folder
 - if running the local Git proxy, start it next so it gets port 8081
 - in a new terminal, open the `/cms` folder
 - make sure its dependencies are installed: `npm i`
-- start the CMS by running `npm run start`
-- open the CMS with `http://localhost:[cms_port]/?cmsEditorBase=http://localhost:[clue_port]&unit=[clue_unit_code]&curriculumBranch=[your own branch]`
+- start the CMS by running `npm start`
+- open the CMS with `http://localhost:[cms_port]/?iframeBase=http://localhost:[clue_port]&unit=[clue_unit_code]&curriculumBranch=[your own branch]`
     (add `&localCMSBackend` if using it). Make sure there are no extra "#" or "/" characters in the URL.
 
 Typically CLUE will be running on portal 8080 and the CMS will be running on 8081, or CLUE on 8080, Git proxy on 8081, and CMS on 8082. In this case the url above would be:
 
-- No proxy: `http://localhost:8081/?cmsEditorBase=http://localhost:8080&unit=[clue_unit_code]&curriculumBranch=[your own branch]`
-- With proxy: `http://localhost:8082/?cmsEditorBase=http://localhost:8080&localCMSBackend&unit=[clue_unit_code]`
+- No proxy: `http://localhost:8081/?iframeBase=http://localhost:8080&unit=[clue_unit_code]&curriculumBranch=[your own branch]`
+- With proxy: `http://localhost:8082/?iframeBase=http://localhost:8080&localCMSBackend&unit=[clue_unit_code]`
 
 With this approach you'll be editing the content in the `clue-curriculum` repository directly. By default this will use the `author` branch in the `clue-curriculum` repository. So you aren't making changes to the same branch as other people, you should make your own branch in that repository and pass it to the `curriculumBranch` parameter. You have to make this branch using your own git tools, the CMS cannot create branches itself.
 
