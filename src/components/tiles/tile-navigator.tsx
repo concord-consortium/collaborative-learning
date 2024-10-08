@@ -179,6 +179,7 @@ export const TileNavigator = observer(function TileNavigator(props: INavigatorPr
             className="navigator-panning-button up"
             data-testid="navigator-panning-button-up"
             onClick={() => handleNavButtonClick("up")}
+            aria-label="Pan up"
           >
             <NavigatorScrollIcon />
           </button>
@@ -186,6 +187,7 @@ export const TileNavigator = observer(function TileNavigator(props: INavigatorPr
             className="navigator-panning-button right"
             data-testid="navigator-panning-button-right"
             onClick={() => handleNavButtonClick("right")}
+            aria-label="Pan right"
           >
             <NavigatorScrollIcon />
           </button>
@@ -193,6 +195,7 @@ export const TileNavigator = observer(function TileNavigator(props: INavigatorPr
             className="navigator-panning-button down"
             data-testid="navigator-panning-button-down"
             onClick={() => handleNavButtonClick("down")}
+            aria-label="Pan down"
           >
             <NavigatorScrollIcon />
           </button>
@@ -200,6 +203,7 @@ export const TileNavigator = observer(function TileNavigator(props: INavigatorPr
             className="navigator-panning-button left"
             data-testid="navigator-panning-button-left"
             onClick={() => handleNavButtonClick("left")}
+            aria-label="Pan left"
           >
             <NavigatorScrollIcon />
           </button>

@@ -87,7 +87,7 @@ context("Tile Navigator", () => {
     tileNavigator.getTileNavigatorPanningButtons().should("not.exist");
     drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(100, 0) scale(1)");
 
-    cy.log("Draw a rectangle that partially extends beyond the viewport's right boundary");
+    cy.log("Draw an ellipse that partially extends beyond the viewport's right boundary");
     drawToolTile.drawEllipse(1200, 55, 100, 50);
     tileNavigator.getTileNavigatorPanningButtons().should("exist");
 
