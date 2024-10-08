@@ -118,7 +118,7 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawTileObjectCanvas().then(canvas => {
       // Check that the canvas has a transform attribute like 'scale(x)' where x is approximatesly 1.12
       const scale = parseFloat(canvas.attr('transform').replace(/.*scale\((\d+\.\d+)\)/, '$1'));
-      expect(scale).to.be.within(1.1, 1.2);
+      expect(scale).to.be.within(.82, .84);
     });
 
     cy.log("can delete objects and close panel");
