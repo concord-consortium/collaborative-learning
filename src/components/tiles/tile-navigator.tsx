@@ -5,7 +5,6 @@ import classNames from "classnames";
 
 import { ITileProps } from "./tile-component";
 import { BoundingBox, NavigatableTileModelType } from "../../models/tiles/navigatable-tile-model";
-import { IDrawingTileProps } from "../../plugins/drawing/components/drawing-tile";
 
 import NavigatorMoveIcon from "../../assets/icons/navigator-move-icon.svg";
 
@@ -49,7 +48,7 @@ export const TileNavigator = observer(function TileNavigator({renderTile, tilePr
   const [isAnimating, setIsAnimating] = useState(false);
 
   // Adjust the props for the scaled down version of the tile.
-  const renderTileProps: IDrawingTileProps = {
+  const renderTileProps = {
     ...tileProps,
     navigatorAllowed: false,
     readOnly: true,
