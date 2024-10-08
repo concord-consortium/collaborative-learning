@@ -452,6 +452,25 @@ class ClueCanvas {
       });
     }
 
+    /**
+     * Locate a requested toolbar button's tooltip element.
+     * @param {*} tileType string name of the tile
+     * @param {*} buttonName string name of the button
+     */
+    getToolbarButtonToolTip(tileType, buttonName) {
+      return cy.root().find(`[data-test=canvas] .tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`)
+                      .parent()
+                      .filter('[data-tooltipped]');
+    }
+
+    /**
+     * Locate a requested toolbar button's tooltip element and return its text value
+     * @param {*} tileType string name of the tile
+     * @param {*} buttonName string name of the button
+     */
+    getToolbarButtonToolTipText(tileType, buttonName) {
+      return this.getToolbarButtonToolTip(tileType, buttonName).invoke('attr', 'data-original-title');
+    }
 }
 
 export default ClueCanvas;

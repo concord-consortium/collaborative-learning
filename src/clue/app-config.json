@@ -293,6 +293,7 @@
           "zoom-in",
           "zoom-out",
           "fit-all",
+          "navigator",
           "|",
           "duplicate",
           "delete"

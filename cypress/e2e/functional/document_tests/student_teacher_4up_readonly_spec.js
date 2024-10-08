@@ -29,7 +29,7 @@ function testTilesNotReadOnly(tab, position) {
   cy.get('.'+tab).find(position + ' .text-tool').should('not.have.class', 'read-only');
   cy.get('.'+tab).find(position + ' .table-tool-tile').should('not.have.class', 'readonly');
   cy.get('.'+tab).find(position + ' .geometry-tool-tile').should('not.have.class', 'readonly');
-  cy.get('.'+tab).find(position + ' .drawing-tool').should('not.have.class', 'read-only');
+  cy.get('.'+tab).find(position + ' .drawing-tool').not('[data-testid="tile-navigator"] .drawing-tool').should('not.have.class', 'read-only');
   cy.get('.'+tab).find(position + ' .image-tool').should('not.have.class', 'read-only');
   cy.get('.'+tab).find(position + ' .numberline-tool-tile').should('not.have.class', 'readonly');
   cy.get('.'+tab).find(position + ' .data-card-tool-tile').should('not.have.class', 'readonly');
@@ -46,7 +46,7 @@ function testTilesReadOnly(tab, position) {
   cy.get('.'+tab).find(position + ' .text-tool').should('have.class', 'read-only');
   cy.get('.'+tab).find(position + ' .table-tool-tile').should('have.class', 'readonly');
   cy.get('.'+tab).find(position + ' .geometry-tool-tile').should('have.class', 'readonly');
-  cy.get('.'+tab).find(position + ' .drawing-tool').should('have.class', 'read-only');
+  cy.get('.'+tab).find(position + ' .drawing-tool').not('[data-testid="tile-navigator"] .drawing-tool').should('have.class', 'read-only');
   cy.get('.'+tab).find(position + ' .image-tool').should('have.class', 'read-only');
   cy.get('.'+tab).find(position + ' .numberline-tool-tile').should('have.class', 'readonly');
   cy.get('.'+tab).find(position + ' .data-card-tool-tile').should('have.class', 'readonly');

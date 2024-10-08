@@ -6,10 +6,11 @@ class DrawToolTile{
       return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title-text`);
     }
     getDrawTileComponent(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool]');
+      return cy.get('.primary-workspace [data-testid=drawing-tool]')
+               .not('[data-testid=tile-navigator] [data-testid=drawing-tool]');
     }
     getDrawTileObjectCanvas(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .object-canvas');
+      return this.getDrawTileComponent().find('.object-canvas');
     }
     getDrawTileShowSortPanel(){
       return cy.get('.primary-workspace .drawing-tool .object-list');
@@ -79,37 +80,38 @@ class DrawToolTile{
     }
 
     getFreehandDrawing(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg path');
+      return this.getDrawTileComponent().find('.drawing-layer svg path');
     }
     getVectorDrawing(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg g.vector');
+      return this.getDrawTileComponent().find('.drawing-layer svg g.vector');
     }
     getRectangleDrawing(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg rect.rectangle');
+      return this.getDrawTileComponent().find('.drawing-layer svg rect.rectangle');
     }
     getEllipseDrawing(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg ellipse');
+      return this.getDrawTileComponent().find('.drawing-layer svg ellipse');
     }
     getImageDrawing(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg image');
+      return this.getDrawTileComponent().find('.drawing-layer svg image');
     }
     getTextDrawing(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg g.text');
+      return this.getDrawTileComponent().find('.drawing-layer svg g.text');
     }
     getSelectionBox(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg [data-testid=selection-box]');
+      return this.getDrawTileComponent().find('.drawing-layer svg [data-testid=selection-box]');
     }
     getHighlightBox(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg [data-testid=highlight-box]');
+      return this.getDrawTileComponent().find('.drawing-layer svg [data-testid=highlight-box]');
     }
     getVariableChip() {
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer .drawing-variable.variable-chip');
+      return this.getDrawTileComponent().find('.drawing-layer .drawing-variable.variable-chip');
     }
     getGhostGroup() {
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg g.ghost');
+      return this.getDrawTileComponent().find('.drawing-layer svg g.ghost');
     }
     getDrawTileTitle(workspaceClass){
-      return cy.get(`${workspaceClass || ".primary-workspace"} .drawing-tool-tile .editable-tile-title`);
+      return cy.get(`${workspaceClass || ".primary-workspace"} .drawing-tool-tile .editable-tile-title`)
+               .not('[data-testid=tile-navigator] .editable-tile-title');
     }
     drawRectangle(x, y, width=25, height=25) {
       this.getDrawToolRectangle().last().click();

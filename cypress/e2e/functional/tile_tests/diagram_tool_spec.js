@@ -192,7 +192,7 @@ context('Diagram Tool Tile', function () {
 
     // Draw tile and toolbar buttons render
     drawTile.getDrawTile().should("exist");
-    drawTile.getDrawTile().click();
+    drawTile.getDrawTile().first().click();
     drawTile.getDrawToolNewVariable().should("exist").should("be.enabled");
     drawTile.getDrawToolEditVariable().should("exist").should("be.disabled");
     drawTile.getDrawToolInsertVariable().should("exist").should("be.disabled");

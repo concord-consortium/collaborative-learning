@@ -35,6 +35,8 @@ interface DrawingLayerViewProps {
   onSetCanAcceptDrop: (tileId?: string) => void;
   imageUrlToAdd?: string;
   setImageUrlToAdd?: (url: string) => void;
+  svgHeight?: number;
+  svgWidth?: number;
 }
 
 interface DrawingLayerViewState {
@@ -464,7 +466,12 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           onDragLeave={this.handleDragLeave}
           onDrop={this.handleDrop} >
 
-        <svg xmlnsXlink="http://www.w3.org/1999/xlink" width={1500} height={1500} ref={this.setSvgRef}>
+        <svg
+          xmlnsXlink="http://www.w3.org/1999/xlink"
+          width={this.props.svgWidth ?? 1500}
+          height={this.props.svgHeight ?? 1500}
+          ref={this.setSvgRef}
+        >
           <g className="object-canvas" transform={`scale(${zoom})`}>
             {this.renderObjects()}
             {!this.props.readOnly && this.renderSelectionBorders(this.getSelectedObjects(), true)}

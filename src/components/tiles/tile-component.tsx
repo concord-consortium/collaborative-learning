@@ -78,6 +78,7 @@ export interface IRegisterTileApiProps {
 
 export interface ITileProps extends ITileBaseProps, IRegisterTileApiProps {
   tileElt: HTMLElement | null;
+  navigatorAllowed?: boolean;
 }
 
 interface IProps extends ITileBaseProps {

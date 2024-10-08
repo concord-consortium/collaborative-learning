@@ -1,11 +1,13 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import ImageToolTile from '../../../support/elements/tile/ImageToolTile';
+import TileNavigator from "../../../support/elements/tile/TileNavigator";
 import { LogEventName } from '../../../../src/lib/logger-types';
 
-let clueCanvas = new ClueCanvas,
-  drawToolTile = new DrawToolTile;
+const clueCanvas = new ClueCanvas;
+const drawToolTile = new DrawToolTile;
 const imageToolTile = new ImageToolTile;
+const tileNavigator = new TileNavigator;
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaUnitStudent5")}`;
@@ -563,8 +565,8 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawTile()
       .trigger("pointerdown", 150, 150)
       .trigger("pointerup", 150, 150);
-    drawToolTile.getTextDrawing().get('textarea').type("The five boxing wizards jump quickly.{enter}");
-    drawToolTile.getTextDrawing().get('text tspan').should("exist").and("have.length", 7);
+    drawToolTile.getTextDrawing().find('textarea').type("The five boxing wizards jump quickly.{enter}");
+    drawToolTile.getTextDrawing().find('text tspan').should("exist").and("have.length", 5);
 
     cy.log("deletes text object");
     drawToolTile.getDrawToolSelect().click();
