@@ -4,8 +4,7 @@ import useResizeObserver from "use-resize-observer";
 import classNames from "classnames";
 
 import { ITileProps } from "./tile-component";
-import { NavigatableTileModelType } from "../../models/tiles/navigatable-tile-model";
-import { BoundingBox } from "../../plugins/drawing/model/drawing-basic-types";
+import { BoundingBox, NavigatableTileModelType } from "../../models/tiles/navigatable-tile-model";
 import { IDrawingTileProps } from "../../plugins/drawing/components/drawing-tile";
 
 import NavigatorMoveIcon from "../../assets/icons/navigator-move-icon.svg";

@@ -1,11 +1,19 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 
-import { BoundingBox } from "../../plugins/drawing/model/drawing-basic-types";
 import { TileContentModel } from "./tile-content";
 import { kUnknownTileType } from "./unknown-types";
 
 type NavigatorPosition = "top" | "bottom";
 export type NavigatorDirection = "up" | "right" | "down" | "left";
+
+export interface Point { x: number; y: number; }
+
+export interface BoundingBox {
+  nw: Point;
+  se: Point;
+  start?: Point;
+  end?: Point;
+}
 
 export const NavigatableTileModel = TileContentModel
   .named("Navigatable Tile")

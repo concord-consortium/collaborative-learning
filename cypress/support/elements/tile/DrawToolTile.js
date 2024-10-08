@@ -7,7 +7,7 @@ class DrawToolTile{
     }
     getDrawTileComponent(){
       return cy.get('.primary-workspace [data-testid=drawing-tool]')
-               .not('[data-testid="tile-navigator"] [data-testid=drawing-tool]');
+               .not('[data-testid=tile-navigator] [data-testid=drawing-tool]');
     }
     getDrawTileObjectCanvas(){
       return this.getDrawTileComponent().find('.object-canvas');
@@ -111,7 +111,7 @@ class DrawToolTile{
     }
     getDrawTileTitle(workspaceClass){
       return cy.get(`${workspaceClass || ".primary-workspace"} .drawing-tool-tile .editable-tile-title`)
-               .not('[data-testid="tile-navigator"] .editable-tile-title');
+               .not('[data-testid=tile-navigator] .editable-tile-title');
     }
     drawRectangle(x, y, width=25, height=25) {
       this.getDrawToolRectangle().last().click();
