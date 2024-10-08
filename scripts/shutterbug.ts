@@ -10,6 +10,11 @@ import fs from "fs";
 
 const clueCodebase = "https://collaborative-learning.concord.org/branch/shutterbug-support";
 // const clueCodebase = "http://localhost:8080";
+// const clueCodebase = "https://reimagined-journey-v6q9774jwh6pr4-4000.app.github.dev/";
+
+// const shutterbugServer = "https://api.concord.org/shutterbug-production";
+// const shutterbugServer = "http://localhost:4000";
+const shutterbugServer = "https://api.concord.org/shutterbug-staging";
 
 function generateHtml(clueDocument: any) {
   return `
@@ -43,9 +48,7 @@ function generateHtml(clueDocument: any) {
 }
 
 export async function postToShutterbug(body: any) {
-  const fetchURL = "https://api.concord.org/shutterbug-production";
-  console.log("Fetching", fetchURL);
-  const response = await fetch(fetchURL,
+  const response = await fetch(shutterbugServer,
     {
       method: "POST",
       body: JSON.stringify(body)
@@ -65,7 +68,7 @@ const html = generateHtml(docObject);
 if (outputHtml) {
   fs.writeFileSync("shutterbug.html", html);
 } else {
-  postToShutterbug({content: html, height: 1500});
+  postToShutterbug({content: html, height: 500, fullPage: true});
 }
 //
 
