@@ -188,23 +188,47 @@ export class Firebase {
     return `${this.getUserDocumentMetadataPath(user, documentKey, userId)}/lastEditedAt`;
   }
 
-  /**
-   * Set up a Firebase onDisconnect handler to update the lastEditedAt timestamp when the user disconnects.
-   */
-  public setLastEditedOnDisconnect(user: UserModelType, documentKey: string, userId?: string) {
-    const ref = this.ref(this.getLastEditedMetadataPath(user, documentKey, userId));
-    const onDisconnect = ref.onDisconnect();
-    onDisconnect.set(firebase.database.ServerValue.TIMESTAMP);
-    return onDisconnect;
+  public getEvaluationMetadataPath(user: UserModelType, documentKey: string, userId?: string) {
+    const evaluation = this.db.stores.appConfig.aiEvaluation;
+    if (evaluation) {
+      return `${this.getUserDocumentMetadataPath(user, documentKey, userId)}/evaluation/${evaluation}`;
+    } else {
+      return undefined;
+    }
   }
 
   /**
-   * Set the lastEditedAt timestamp to the current time, optionally cancelling an onDisconnect handler.
+   * Set up Firebase onDisconnect handlers.
+   * All documents get one to update the lastEditedAt timestamp when the user disconnects.
+   * If the appConfig specifies an AI Evaluation to be run, a metadata field is added to request that as well.
+   */
+  public setLastEditedOnDisconnect(user: UserModelType, documentKey: string, userId?: string):
+      firebase.database.OnDisconnect[] {
+    const onDisconnects: firebase.database.OnDisconnect[] = [];
+    const ref = this.ref(this.getLastEditedMetadataPath(user, documentKey, userId));
+    const onDisconnect = ref.onDisconnect();
+    onDisconnect.set(firebase.database.ServerValue.TIMESTAMP);
+    onDisconnects.push(onDisconnect);
+
+    const evaluation = this.getEvaluationMetadataPath(user, documentKey, userId);
+    if (evaluation) {
+      const evaluationRef = this.ref(evaluation);
+      const evaluationOnDisconnect = evaluationRef.onDisconnect();
+      evaluationOnDisconnect.set(firebase.database.ServerValue.TIMESTAMP);
+      onDisconnects.push(evaluationOnDisconnect);
+    }
+    return onDisconnects;
+  }
+
+  /**
+   * Set the lastEditedAt timestamp to the current time, optionally cancelling any onDisconnect handlers.
    */
   public setLastEditedNow(user: UserModelType, documentKey: string, userId: string|undefined,
-      onDisconnect?: firebase.database.OnDisconnect) {
-    if (onDisconnect) {
-      onDisconnect.cancel();
+      onDisconnects?: firebase.database.OnDisconnect[]) {
+    if (onDisconnects) {
+      onDisconnects.forEach((onDisconnect) => {
+        onDisconnect.cancel();
+      });
     }
     return this.ref(this.getLastEditedMetadataPath(user, documentKey, userId))
       .set(firebase.database.ServerValue.TIMESTAMP);

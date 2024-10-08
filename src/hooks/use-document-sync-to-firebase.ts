@@ -41,13 +41,13 @@ export function useDocumentSyncToFirebase(
 ) {
   const { key, type, uid, contentStatus } = document;
   const { content: contentPath, metadata, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
-  const disconnectHandler = useRef<OnDisconnect|undefined>(undefined);
+  const disconnectHandlers = useRef<OnDisconnect[]|undefined>(undefined);
 
   const handlePresenceChange = useMemo(() => (snapshot: any) => {
-    // When we come online after being offline, need to note that the onDisconnect event will have been fired.
+    // When we come online after being offline, need to note that the onDisconnect events will have been fired.
     // So the next time the document is modified, it needs to be set up again.
     if (snapshot.val() === true) {
-      disconnectHandler.current = undefined;
+      disconnectHandlers.current = undefined;
     }
   }, []);
 
@@ -84,8 +84,8 @@ export function useDocumentSyncToFirebase(
           firebase.onlineStatusRef.off('value', handlePresenceChange);
         }
         // If an onDisconnect is set, remove it and set the updated timestamp to now.
-        if (disconnectHandler.current) {
-          firebase.setLastEditedNow(user, key, uid, disconnectHandler.current);
+        if (disconnectHandlers.current) {
+          firebase.setLastEditedNow(user, key, uid, disconnectHandlers.current);
         }
       };
     }
@@ -220,8 +220,8 @@ export function useDocumentSyncToFirebase(
     ({ changeCount: document.incChangeCount(), content: JSON.stringify(snapshot) });
 
   const mutation = useMutation((snapshot: DocumentContentSnapshotType) => {
-    if (!disconnectHandler.current && commonSyncEnabled) {
-      disconnectHandler.current = firebase.setLastEditedOnDisconnect(user, key, uid);
+    if (!disconnectHandlers.current && commonSyncEnabled) {
+      disconnectHandlers.current = firebase.setLastEditedOnDisconnect(user, key, uid);
     }
 
     const tileMap = snapshot.tileMap || {};

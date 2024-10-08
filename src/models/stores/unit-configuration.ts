@@ -81,10 +81,14 @@ export interface UnitConfiguration extends ProblemConfiguration {
   initiallyHideExemplars: boolean;
   // configuration of navigation tabs (document navigation UI)
   navTabs: SnapshotIn<typeof NavTabsConfigModel>;
-  // used for AI tagging
+  // must be true for any of the comment-tag functionality to be enabled
   showCommentTag?: boolean;
+  // prompt shown in the tagging pulldown menu when a comment is being made
   tagPrompt?: string;
+  // list of possible values for tagging in comments
   commentTags?: Record<string, string>;
+  // if set, enable the specified AI evaluation to run after document updates
+  aiEvaluation?: "categorize-design";
   // List of the types of annotations supported (eg "curved-sparrow") or "all" or "none"
   annotations?: "all" | "none" | string[];
 }

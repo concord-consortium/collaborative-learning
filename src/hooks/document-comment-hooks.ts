@@ -216,8 +216,29 @@ export const useDocumentComments = (documentKeyOrSectionPath?: string) => {
   const path = useCommentsCollectionPath(documentKeyOrSectionPath || "");
   const queryPath = isSuccess ? path : "";
   documentKeyOrSectionPath && queryPath && (commentsQueryKeyMap[documentKeyOrSectionPath] = queryPath);
+  return useCommentsAtPath(queryPath);
+};
+
+/**
+ * Sets up a Firestore real-time query which returns comments at the "simple" path for a document.
+ * The "simple" path omits any `uid:###` prefix that would normally be part of the document key.
+ * This allows finding comments that are stored by the system (eg, AI analysis) rather than by a teacher.
+ * @param documentKeyOrSectionPath
+ * @returns Query results, managed by React Query.
+ */
+export const useDocumentCommentsAtSimplifiedPath = (documentKeyOrSectionPath?: string) => {
+  const commentPath = isSectionPath(documentKeyOrSectionPath) ? "" : `documents/${documentKeyOrSectionPath}/comments`;
+  return useCommentsAtPath(commentPath);
+};
+
+/**
+ * Sets up a Firestore real-time query which returns comments at the specified path.
+ * @param path path to comments collection
+ * @returns Query results, managed by React Query.
+ */
+export const useCommentsAtPath = (path: string) => {
   const converter = commentConverter;
-  return useCollectionOrderedRealTimeQuery(queryPath, { converter, orderBy: "createdAt" });
+  return useCollectionOrderedRealTimeQuery(path, { converter, orderBy: "createdAt" });
 };
 
 /*
