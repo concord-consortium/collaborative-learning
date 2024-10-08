@@ -90,12 +90,15 @@
     "tools": ["Simulator"],
     "showCommentTag": true,
     "commentTags": {
-      "part-to-part": "Part-to-Part",
-      "part-to-whole": "Part-to-Whole",
-      "unit-rate": "Unit Rate",
-      "ratios": "Ratios of Same Variable"
+      "diverging": "Diverging Designs",
+      "converging": "Converging Designs",
+      "user": "Who's it for?",
+      "environment": "Where's it used?",
+      "form": "What's it look like?",
+      "function": "What's it do?"
     },
-    "tagPrompt": "Select QA Strategy"
+    "tagPrompt": "Select QA Strategy",
+    "aiEvaluation": "categorize-design"
   },
   "sections": {
     "introduction": {"initials": "IN", "title": "Introduction", "placeholder": "Work area for\nIntroduction section"},
