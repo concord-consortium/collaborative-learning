@@ -116,7 +116,7 @@ context('Draw Tool Tile', function () {
     clueCanvas.toolbarButtonIsEnabled('drawing', 'zoom-in');
     clueCanvas.toolbarButtonIsEnabled('drawing', 'zoom-out');
     drawToolTile.getDrawTileObjectCanvas().then(canvas => {
-      // Check that the canvas has a transform attribute like 'scale(x)' where x is approximatesly 1.12
+      // Check that the canvas has a transform attribute like 'scale(x)' where x is approximatesly .83
       const scale = parseFloat(canvas.attr('transform').replace(/.*scale\((\d+\.\d+)\)/, '$1'));
       expect(scale).to.be.within(.82, .84);
     });
