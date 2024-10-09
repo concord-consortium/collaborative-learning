@@ -54,10 +54,11 @@ export const ZoomOutButton = observer(function ZoomOutButton({ name }: IToolbarB
   );
 });
 
-export const FitAllButton = ({ name }: IToolbarButtonComponentProps) => {
+export const FitAllButton = observer(function FitAllButton({ name }: IToolbarButtonComponentProps) {
   const drawingModel = useContext(DrawingContentModelContext);
   const drawingAreaContext = useDrawingAreaContext();
   const padding = 10;
+  const disabled = !drawingModel.objects.length;
 
   function handleClick() {
     const canvasSize = drawingAreaContext?.getVisibleCanvasSize();
@@ -88,9 +89,9 @@ export const FitAllButton = ({ name }: IToolbarButtonComponentProps) => {
       name={name}
       title={"Fit all"}
       onClick={handleClick}
+      disabled={disabled}
     >
       <FitViewIcon/>
     </TileToolbarButton>
   );
-};
-
+});
