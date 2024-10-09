@@ -146,11 +146,15 @@
 
     button {
       all: unset;
+      align-items: center;
+      border: solid 1px transparent;
       border-radius: 50%;
       cursor: pointer;
-      height: 24px;
+      display: flex;
+      height: 28px;
+      justify-content: center;
       position: absolute;
-      width: 24px;
+      width: 28px;
 
       &:hover {
         background: $workspace-teal-light-4;
@@ -165,29 +169,29 @@
 
       &.up {
         left: 50%;
-        margin-left: -12px;
+        margin-left: -14px;
         top: 0;
         transform: rotate(180deg);
       }
       &.right {
-        margin-top: -12px;
+        margin-top: -14px;
         right: 0;
         top: 50%;
         transform: rotate(-90deg);
-        width: 24px;
+        width: 28px;
       }
       &.down {
         bottom: 0;
         left: 50%;
-        margin-left: -12px;
+        margin-left: -14px;
         transform: rotate(0deg);
       }
       &.left {
         left: 0;
-        margin-top: -12px;
+        margin-top: -14px;
         top: 50%;
         transform: rotate(90deg);
-        width: 24px;
+        width: 28px;
       }
 
       svg {
