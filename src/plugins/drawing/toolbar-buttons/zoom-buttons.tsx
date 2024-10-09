@@ -73,8 +73,8 @@ export const FitAllButton = ({ name }: IToolbarButtonComponentProps) => {
 
       // Get the lowest x and y coordinates of all the objects and adjust the offset accordingly
       // If the lowest coordinate is negative, adjust the offset. Otherwise, set it to 0.
-      const lowestYCoord = drawingModel.lowestYCoordinate;
-      const lowestXCoord = drawingModel.lowestXCoordinate;
+      const lowestYCoord = bb.nw.y;
+      const lowestXCoord = bb.nw.x;
       const offsetX = drawingModel.offsetX;
       const offsetY = drawingModel.offsetY;
       const newOffsetX = lowestXCoord < 0 ? (offsetX - lowestXCoord) * legalZoom : 0;
