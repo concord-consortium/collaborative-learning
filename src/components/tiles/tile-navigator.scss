@@ -130,6 +130,68 @@
       }
     }
   }
+
+  .navigator-panning-buttons {
+    height: 78px;
+    left: 0;
+    margin: 0 2px;
+    position: absolute;
+    top: 15px;
+    width: calc(100% - 4px);
+    z-index: 5;
+
+    button {
+      all: unset;
+      border-radius: 50%;
+      cursor: pointer;
+      height: 24px;
+      position: absolute;
+      width: 24px;
+
+      &:hover {
+        background: $workspace-teal-light-4;
+        border: solid 1px $workspace-teal;
+        opacity: .5;
+      }
+      &:active {
+        background: $workspace-teal-light-4;
+        border: solid 1px $workspace-teal;
+        opacity: 1;
+      }
+
+      &.up {
+        left: 50%;
+        margin-left: -12px;
+        top: 0;
+        transform: rotate(180deg);
+      }
+      &.right {
+        margin-top: -12px;
+        right: 0;
+        top: 50%;
+        transform: rotate(-90deg);
+        width: 24px;
+      }
+      &.down {
+        bottom: 0;
+        left: 50%;
+        margin-left: -12px;
+        transform: rotate(0deg);
+      }
+      &.left {
+        left: 0;
+        margin-top: -12px;
+        top: 50%;
+        transform: rotate(90deg);
+        width: 24px;
+      }
+
+      svg {
+        height: 24px;
+        width: 24px;
+      }
+    }
+  }
 }
 
 @keyframes navigator-scroll-up {

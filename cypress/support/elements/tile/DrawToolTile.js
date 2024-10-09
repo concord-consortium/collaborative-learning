@@ -10,7 +10,7 @@ class DrawToolTile{
                .not('[data-testid=tile-navigator] [data-testid=drawing-tool]');
     }
     getDrawTileObjectCanvas(){
-      return this.getDrawTileComponent().find('.object-canvas');
+      return this.getDrawTileComponent().find('[data-testid=drawing-layer-object-canvas]');
     }
     getDrawTileShowSortPanel(){
       return cy.get('.primary-workspace .drawing-tool .object-list');

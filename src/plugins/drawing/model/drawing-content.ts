@@ -18,6 +18,7 @@ import { tileContentAPIActions, tileContentAPIViews } from "../../../models/tile
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { GroupObjectSnapshotForAdd, GroupObjectType, isGroupObject } from "../objects/group";
 import { NavigatableTileModel } from "../../../models/tiles/navigatable-tile-model";
+import { isEllipseObject } from "../objects/ellipse";
 
 export const DrawingToolMetadataModel = TileMetadataModel
   .named("DrawingToolMetadata");
@@ -110,6 +111,20 @@ export const DrawingContentModel = NavigatableTileModel
         if (bb.se.y > se.y) se.y = bb.se.y;
       });
       return {nw, se};
+    },
+    get lowestYCoordinate() {
+      return Math.min(...self.objects.map(o => {
+        if (isEllipseObject(o)) return Number(o.y) - Number(o.ry);
+        if ("y" in o) return Number(o.y);
+        return 0;
+      })) || 0;
+    },
+    get lowestXCoordinate() {
+      return Math.min(...self.objects.map(o => {
+        if (isEllipseObject(o)) return Number(o.x) - Number(o.rx);
+        if ("x" in o) return Number(o.x);
+        return 0;
+      })) || 0;
     },
     exportJson(options?: ITileExportOptions) {
       // Translate image urls if necessary

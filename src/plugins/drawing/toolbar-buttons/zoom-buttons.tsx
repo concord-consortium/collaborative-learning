@@ -63,9 +63,23 @@ export const FitAllButton = ({ name }: IToolbarButtonComponentProps) => {
     const canvasSize = drawingAreaContext?.getVisibleCanvasSize();
     if (canvasSize) {
       const bb = drawingModel.objectsBoundingBox;
-      const optimalZoom = Math.min((canvasSize.x-padding) / bb.se.x, (canvasSize.y-padding) / bb.se.y);
+      // Calculate the full width and height of the drawing content bounding box.
+      const contentWidth = bb.se.x - bb.nw.x;
+      const contentHeight = bb.se.y - bb.nw.y;
+      // Find the optimal zoom level to fit the content inide the viewable area.
+      const optimalZoom = Math.min((canvasSize.x - padding) / contentWidth, (canvasSize.y - padding) / contentHeight);
       const legalZoom = Math.max(minZoom, Math.min(maxZoom, optimalZoom));
       drawingModel?.setZoom(legalZoom);
+
+      // Get the lowest x and y coordinates of all the objects and adjust the offset accordingly
+      // If the lowest coordinate is negative, adjust the offset. Otherwise, set it to 0.
+      const lowestYCoord = drawingModel.lowestYCoordinate;
+      const lowestXCoord = drawingModel.lowestXCoordinate;
+      const offsetX = drawingModel.offsetX;
+      const offsetY = drawingModel.offsetY;
+      const newOffsetX = lowestXCoord < 0 ? (offsetX - lowestXCoord) * legalZoom : 0;
+      const newOffsetY = lowestYCoord < 0 ? (offsetY - lowestYCoord) * legalZoom : 0;
+      drawingModel?.setOffset(newOffsetX, newOffsetY);
     }
   }
 
