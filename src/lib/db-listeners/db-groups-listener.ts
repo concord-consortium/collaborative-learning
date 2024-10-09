@@ -168,6 +168,7 @@ export class DBGroupsListener extends BaseListener {
     if (!classInfo) return;
     const timeOffset = await this.db.firebase.getServerTimeOffset();
     classInfo.serverTimestamp = classInfo.localTimestamp + timeOffset;
-    clazz.updateFromPortal(classInfo);
+    const includeAIUser = this.db.stores.appConfig.aiEvaluation !== undefined;
+    clazz.updateFromPortal(classInfo, includeAIUser);
   }
 }
