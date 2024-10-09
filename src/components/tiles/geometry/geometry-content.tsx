@@ -746,7 +746,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private destroyBoard() {
     const { board } = this.state;
-    board && JXG.JSXGraph.freeBoard(board);
+    try {
+      board && JXG.JSXGraph.freeBoard(board);
+    } catch (e) {
+      console.warn("Can't free the JSX Board", {cause: e});
+    }
   }
 
   private async initializeContent() {

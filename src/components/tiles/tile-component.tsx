@@ -254,7 +254,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     const tileId = this.props.model.id;
     return Component != null
             ? <Component
-                key={tileId} tileElt={this.domElement} {...this.props}
+                key={`tile-component-${tileId}`} tileElt={this.domElement} {...this.props}
                 onRegisterTileApi={this.handleRegisterTileApi}
                 onUnregisterTileApi={this.handleUnregisterTileApi} />
             : null;
@@ -265,9 +265,11 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     const tileApiInterface = this.context;
     const tileApi = tileApiInterface?.getTileApi(model.id);
     const clientTileLinks = tileApi?.getLinkedTiles?.();
-    return clientTileLinks
-            ? clientTileLinks.map((id, index) => {
-                return <LinkIndicatorComponent key={id} id={id} index={index} />;
+    // There are cases where the link ids are empty strings, so we skip those
+    const filteredLinks = clientTileLinks?.filter(id => !!id);
+    return filteredLinks
+            ? filteredLinks.map((id, index) => {
+                return <LinkIndicatorComponent key={`linked-tile-${id}`} id={id} index={index} />;
               })
             : null; // tables don't use the original link indicator any more
   }
