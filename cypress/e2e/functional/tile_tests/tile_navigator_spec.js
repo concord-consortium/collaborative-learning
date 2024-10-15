@@ -121,15 +121,28 @@ context("Tile Navigator", () => {
     cy.log("Click the right panning button twice to shift the drawing canvas 100 pixels to the left");
     tileNavigator.getTileNavigatorPanningButton("right").click().click();
     tileNavigator.getTileNavigatorPanningButtons().should("exist");
-    drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(-131.1, -17.6) scale(1.2)");
+    drawToolTile.getDrawTileObjectCanvas().then(canvas => {
+      const expectedTranslationValues = { x: -131, y: -17 };
+      const expectedScale = 1.2;
+      drawToolTile.verifyTransformValues(canvas.attr('transform'), expectedTranslationValues, expectedScale);
+    });
 
     cy.log("Click the up panning button once to shift the drawing canvas 50 pixels down");
     tileNavigator.getTileNavigatorPanningButton("up").click();
-    drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(-131.1, 32.4) scale(1.2)");
+    drawToolTile.getDrawTileObjectCanvas().then(canvas => {
+      const expectedTranslationValues = { x: -131, y: 32 };
+      const expectedScale = 1.2;
+      drawToolTile.verifyTransformValues(canvas.attr('transform'), expectedTranslationValues, expectedScale);
+    });
 
     cy.log("Click the down panning button once to shift the drawing canvas 50 pixels up");
     tileNavigator.getTileNavigatorPanningButton("down").click();
-    drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(-131.1, -17.6) scale(1.2)");
+    drawToolTile.getDrawTileObjectCanvas().then(canvas => {
+      const expectedTranslationValues = { x: -131, y: -17 };
+      const expectedScale = 1.2;
+      drawToolTile.verifyTransformValues(canvas.attr('transform'), expectedTranslationValues, expectedScale);
+    });
+
     tileNavigator.getTileNavigatorPanningButtons().should("exist");
 
     cy.log("Click the Fit All button to bring all content into view");
