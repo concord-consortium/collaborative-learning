@@ -40,7 +40,7 @@ context('Shared Variables', function () {
         const textTileVValue1 = "7";
         const textTileVUnit1 = "seconds";
         const textTileVName2 = "varB";
-        const textTileVValue2 = "1.234";
+        const textTileVValue2 = "1.23";
 
         cy.log('can add a variable chip to the text tool with appropriate spacing');
         clueCanvas.addTile('text');

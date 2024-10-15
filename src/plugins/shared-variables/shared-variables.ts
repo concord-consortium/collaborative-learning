@@ -1,5 +1,5 @@
 import { destroy, getType, Instance, types } from "mobx-state-tree";
-import { Variable, VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
+import { UnitsManager, Variable, VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
 import { SharedModel, SharedModelType } from "../../models/shared/shared-model";
 import { withoutUndo } from "../../models/history/without-undo";
 import { getSharedModelManager } from "../../models/tiles/tile-environment";
@@ -11,6 +11,9 @@ export const SharedVariables = SharedModel.named("SharedVariables")
   type: types.optional(types.literal(kSharedVariablesID), kSharedVariablesID),
   variables: types.array(Variable)
 })
+.volatile(self => ({
+  unitsManager: new UnitsManager()
+}))
 .actions(self => ({
   addVariable(variable: VariableType) {
     self.variables.push(variable);
