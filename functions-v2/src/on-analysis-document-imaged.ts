@@ -67,34 +67,15 @@ export const onAnalysisDocumentImaged =
 
       const commentsPath = `demo/AI/documents/${docId}/comments`;
 
-      // Look for existing comment
-      const existing = await firestore.collection(commentsPath)
-        .where("uid", "==", commenterUid).get().then((snapshot) => {
-          if (snapshot.size > 0) {
-            return snapshot.docs[0];
-          } else {
-            return undefined;
-          }
-        });
-
-      if (existing) {
-        logger.info("Updating existing comment for", event.document);
-        await existing.ref.update({
-          tags,
-          content: message,
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
-      } else {
-        logger.info("Creating comment for", event.document);
-        // NOTE we are leaving the "network" and "tileId" fields empty in the comment doc.
-        await firestore.collection(commentsPath).add({
-          tags,
-          content: message,
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          name: commenterName,
-          uid: commenterUid,
-        });
-      }
+      logger.info("Creating comment for", event.document);
+      // NOTE we are leaving the "network" and "tileId" fields empty in the comment doc.
+      await firestore.collection(commentsPath).add({
+        tags,
+        content: message,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        name: commenterName,
+        uid: commenterUid,
+      });
 
       // Add to "done" queue
       await firestore.collection(getAnalysisQueueFirestorePath("done")).add({

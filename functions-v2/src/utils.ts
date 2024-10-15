@@ -11,7 +11,3 @@ export function getAnalysisQueueFirestorePath(status: analysisQueueStatus, docId
     return `analysis/queue/${status}`;
   }
 }
-
-export function unitSupportsAnalysis(unit: string) {
-  return unit === "mods";
-}
