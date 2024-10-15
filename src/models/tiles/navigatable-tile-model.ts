@@ -32,6 +32,31 @@ export const NavigatableTileModel = TileContentModel
       return undefined;
     }
   }))
+  .views(self => ({
+    contentSize(): { width: number, height: number } {
+      // derived models should override
+      console.warn("Derived models should override contentSize.");
+      return { width: 0, height: 0 };
+    },
+    contentFitsViewport(tileWidth: number, tileHeight: number, unavailableSpace=0): boolean {
+      // derived models should override
+      console.warn("Derived models should override contentFitsViewport.");
+      return false;
+    }
+  }))
+  .views(self => ({
+    calculateOffset(canvasSize: {x: number, y: number}, targetZoom: number): Point {
+      // Calculate offset required to keep the content centered in the viewport.
+      const offsetXCentered = (canvasSize.x * (targetZoom / self.zoom - 1)) / 2;
+      const offsetYCentered = (canvasSize.y * (targetZoom / self.zoom - 1)) / 2;
+
+      // Add panning offsets.
+      const finalOffsetX = self.offsetX - offsetXCentered * self.zoom;
+      const finalOffsetY = self.offsetY - offsetYCentered * self.zoom;
+
+      return { x: finalOffsetX, y: finalOffsetY };
+    }
+  }))
   .actions(self => ({
     showNavigator() {
       self.isNavigatorVisible = true;
@@ -46,7 +71,15 @@ export const NavigatableTileModel = TileContentModel
       self.offsetX = x;
       self.offsetY = y;
     },
-    setZoom(zoom: number) {
+    setZoom(zoom: number, canvasSize?: {x: number, y: number}) {
+      // Adjust the offset to keep content centered in the viewport when zoom level changes.
+      if (canvasSize) {
+        const newOffsetX = self.calculateOffset(canvasSize, zoom).x;
+        const newOffsetY = self.calculateOffset(canvasSize, zoom).y;
+        self.offsetX = newOffsetX;
+        self.offsetY = newOffsetY;
+      }
+
       self.zoom = zoom;
     }
 }));

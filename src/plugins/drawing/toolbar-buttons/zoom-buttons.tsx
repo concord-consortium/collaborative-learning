@@ -17,10 +17,12 @@ const maxZoom = 2;
 export const ZoomInButton = observer(function ZoomInButton({ name }: IToolbarButtonComponentProps) {
   const drawingModel = useContext(DrawingContentModelContext);
   const disabled = drawingModel?.zoom >= maxZoom;
+  const drawingAreaContext = useDrawingAreaContext();
 
   function handleClick() {
     const roundedZoom = Math.round((drawingModel.zoom + zoomStep) * 10) / 10;
-    drawingModel?.setZoom(Math.min(maxZoom, roundedZoom));
+    const canvasSize = drawingAreaContext?.getVisibleCanvasSize();
+    drawingModel?.setZoom(Math.min(maxZoom, roundedZoom), canvasSize);
   }
 
   return (
@@ -38,10 +40,12 @@ export const ZoomInButton = observer(function ZoomInButton({ name }: IToolbarBut
 export const ZoomOutButton = observer(function ZoomOutButton({ name }: IToolbarButtonComponentProps) {
   const drawingModel = useContext(DrawingContentModelContext);
   const disabled = drawingModel?.zoom <= minZoom;
+  const drawingAreaContext = useDrawingAreaContext();
 
   function handleClick() {
     const roundedZoom = Math.round((drawingModel.zoom - zoomStep) * 10) / 10;
-    drawingModel?.setZoom(Math.max(minZoom, roundedZoom));
+    const canvasSize = drawingAreaContext?.getVisibleCanvasSize();
+    drawingModel?.setZoom(Math.max(minZoom, roundedZoom), canvasSize);
   }
 
   return (
@@ -68,13 +72,18 @@ export const FitAllButton = observer(function FitAllButton({ name }: IToolbarBut
       const bb = drawingModel.objectsBoundingBox;
       const contentWidth = bb.se.x - bb.nw.x;
       const contentHeight = bb.se.y - bb.nw.y;
-      const optimalZoom = Math.min((canvasSize.x - padding) / contentWidth, (canvasSize.y - padding) / contentHeight);
+      const optimalZoom = Math.min(
+        (canvasSize.x - padding) / contentWidth,
+        (canvasSize.y - padding) / contentHeight
+      );
       const legalZoom = Math.max(minZoom, Math.min(maxZoom, optimalZoom));
-      const requiredOffsetX = Math.abs(bb.nw.x * legalZoom);
-      const requiredOffsetY = Math.abs(bb.nw.y * legalZoom);
 
-      drawingModel?.setZoom(legalZoom);
-      drawingModel?.setOffset(requiredOffsetX, requiredOffsetY);
+      // Adjust the offset so the content is centered with the new zoom level.
+      const newOffsetX = (canvasSize.x / 2 - (bb.nw.x + contentWidth / 2) * legalZoom);
+      const newOffsetY = (canvasSize.y / 2 - (bb.nw.y + contentHeight / 2) * legalZoom);
+
+      drawingModel.setZoom(legalZoom, canvasSize);
+      drawingModel.setOffset(newOffsetX, newOffsetY);
     }
   }
 

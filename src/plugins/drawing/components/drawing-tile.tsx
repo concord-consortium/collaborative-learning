@@ -30,7 +30,6 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   const { tileElt, model, readOnly, onRegisterTileApi, navigatorAllowed = true, overflowVisible,
           svgWidth, svgHeight } = props;
   const contentModel = model.content as DrawingContentModelType;
-  const svgOffset = {x: contentModel.offsetX, y: contentModel.offsetY};
   const contentRef = useCurrent(contentModel);
   const showNavigator = navigatorAllowed && contentRef.current.isNavigatorVisible;
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
@@ -158,33 +157,25 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   };
 
   const handleNavigatorPan = (direction: NavigatorDirection) => {
-    const drawingContainer = drawingLayerViewRef.current?.viewRef.current;
-    const svgElement = drawingContainer?.firstChild as SVGSVGElement;
-    const drawingContainerWidth = tileElt?.getBoundingClientRect().width ?? 0;
-    const drawingContainerHeight = tileElt?.getBoundingClientRect().height ?? 0;
-    const svgElementWidth = svgElement?.getBoundingClientRect().width;
-    const svgElementHeight = svgElement?.getBoundingClientRect().height;
-    const currTranslateX = contentModel.offsetX;
-    const currTranslateY = contentModel.offsetY;
+    const currOffsetX = contentModel.offsetX;
+    const currOffsetY = contentModel.offsetY;
     const moveStep = 50;
-    // the maximum allowed distance to move the svg element in each direction
-    const maxTranslateX = Math.max(0, (svgElementWidth - drawingContainerWidth) / 2);
-    const maxTranslateY = Math.max(0, (svgElementHeight - drawingContainerHeight) / 2);
-    let newX = currTranslateX;
-    let newY = currTranslateY;
+    const { contentWidth, contentHeight } = contentModel.contentSize;
+    let newX = currOffsetX;
+    let newY = currOffsetY;
 
     switch (direction) {
       case "up":
-        newY = Math.max(currTranslateY + moveStep, -maxTranslateY);
+        newY = Math.min(currOffsetY + moveStep, contentHeight);
         break;
       case "down":
-        newY = Math.min(currTranslateY - moveStep, maxTranslateY);
+        newY = Math.max(currOffsetY - moveStep, -contentHeight);
         break;
       case "left":
-        newX = Math.max(currTranslateX + moveStep, -maxTranslateX);
+        newX = Math.min(currOffsetX + moveStep, contentWidth);
         break;
       case "right":
-        newX = Math.min(currTranslateX - moveStep, maxTranslateX);
+        newX = Math.max(currOffsetX - moveStep, -contentWidth);
         break;
     }
 
@@ -218,7 +209,6 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
             ref={drawingLayerViewRef}
             setImageUrlToAdd={setImageUrlToAdd}
             svgHeight={svgHeight}
-            svgOffset={svgOffset}
             svgWidth={svgWidth}
           />
         </div>

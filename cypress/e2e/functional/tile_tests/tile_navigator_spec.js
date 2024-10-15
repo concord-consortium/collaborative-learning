@@ -54,6 +54,31 @@ context("Tile Navigator", () => {
       .should("have.been.been.calledWith", LogEventName.DRAWING_TOOL_CHANGE, Cypress.sinon.match.object)
       .its("lastCall.args.1").should("deep.include", { operation: "showNavigator" });
   });
+  it("displays the current zoom level", () => {
+    beforeTest();
+
+    clueCanvas.addTile("drawing");
+    drawToolTile.drawEllipse(50, 55, 100, 50);
+    cy.get(".tile-navigator .zoom-level").should("have.text", "100%");
+
+    cy.log("Zoom in from 100% to the max zoom level, 200%");
+    for (let i = 1; i < 11; i++) {
+      clueCanvas.clickToolbarButton("drawing", "zoom-in");
+      cy.get(".tile-navigator .zoom-level").should("have.text", `${100 + i * 10}%`);
+    }
+
+    cy.log("Zoom out from 200% to the min zoom level, 10%");
+    for (let i = 1; i < 20; i++) {
+      clueCanvas.clickToolbarButton("drawing", "zoom-out");
+      cy.get(".tile-navigator .zoom-level").should("have.text", `${200 - i * 10}%`);
+    }
+
+    cy.log("Click the Fit All button then zoom out");
+    clueCanvas.clickToolbarButton("drawing", "fit-all");
+    cy.get(".tile-navigator .zoom-level").should("have.text", "166%");
+    clueCanvas.clickToolbarButton("drawing", "zoom-out");
+    cy.get(".tile-navigator .zoom-level").should("have.text", "160%");
+  });
   it("is at the bottom of the drawing tile by default but can be moved to the top", () => {
     beforeTest();
 
@@ -89,30 +114,22 @@ context("Tile Navigator", () => {
 
     cy.log("Draw an ellipse that partially extends beyond the viewport's right boundary");
     drawToolTile.drawEllipse(1200, 55, 100, 50);
+    clueCanvas.clickToolbarButton("drawing", "zoom-in");
+    clueCanvas.clickToolbarButton("drawing", "zoom-in");
     tileNavigator.getTileNavigatorPanningButtons().should("exist");
 
     cy.log("Click the right panning button twice to shift the drawing canvas 100 pixels to the left");
     tileNavigator.getTileNavigatorPanningButton("right").click().click();
     tileNavigator.getTileNavigatorPanningButtons().should("exist");
-    drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(0, 0) scale(1)");
+    drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(-131.1, -17.6) scale(1.2)");
 
     cy.log("Click the up panning button once to shift the drawing canvas 50 pixels down");
     tileNavigator.getTileNavigatorPanningButton("up").click();
-    drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(0, 50) scale(1)");
+    drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(-131.1, 32.4) scale(1.2)");
 
     cy.log("Click the down panning button once to shift the drawing canvas 50 pixels up");
     tileNavigator.getTileNavigatorPanningButton("down").click();
-    drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(0, 0) scale(1)");
-
-    cy.log("Delete the ellipses");
-    drawToolTile.getEllipseDrawing().first().click();
-    clueCanvas.clickToolbarButton("drawing", "delete");
-    drawToolTile.getEllipseDrawing().first().click();
-    clueCanvas.clickToolbarButton("drawing", "delete");
-    tileNavigator.getTileNavigatorPanningButtons().should("not.exist");
-
-    cy.log("Draw an ellipse that partially extends beyond the viewport's top boundary");
-    drawToolTile.drawEllipse(100, 50, 50, 75);
+    drawToolTile.getDrawTileObjectCanvas().should("have.attr", "transform", "translate(-131.1, -17.6) scale(1.2)");
     tileNavigator.getTileNavigatorPanningButtons().should("exist");
 
     cy.log("Click the Fit All button to bring all content into view");

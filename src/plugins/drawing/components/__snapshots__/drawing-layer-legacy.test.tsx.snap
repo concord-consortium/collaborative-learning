@@ -9,7 +9,7 @@ exports[`Drawing Layer Components Ellipse adds a ellipse 1`] = `
   <g
     class="object-canvas"
     data-testid="drawing-layer-object-canvas"
-    transform="scale(1)"
+    transform="translate(0, 0) scale(1)"
   >
     <ellipse
       cx="10"
@@ -35,7 +35,7 @@ exports[`Drawing Layer Components Ellipse deletes a ellipse 1`] = `
   <g
     class="object-canvas"
     data-testid="drawing-layer-object-canvas"
-    transform="scale(1)"
+    transform="translate(0, 0) scale(1)"
   />
 </svg>
 `;
@@ -49,7 +49,7 @@ exports[`Drawing Layer Components Ellipse moves a ellipse 1`] = `
   <g
     class="object-canvas"
     data-testid="drawing-layer-object-canvas"
-    transform="scale(1)"
+    transform="translate(0, 0) scale(1)"
   >
     <ellipse
       cx="5"
@@ -75,7 +75,7 @@ exports[`Drawing Layer Components Freehand Line adds a freehand line 1`] = `
   <g
     class="object-canvas"
     data-testid="drawing-layer-object-canvas"
-    transform="scale(1)"
+    transform="translate(0, 0) scale(1)"
   >
     <path
       d="M 10 10 l 1 1 l 2 2"
@@ -98,7 +98,7 @@ exports[`Drawing Layer Components Freehand Line deletes a freehand line 1`] = `
   <g
     class="object-canvas"
     data-testid="drawing-layer-object-canvas"
-    transform="scale(1)"
+    transform="translate(0, 0) scale(1)"
   />
 </svg>
 `;
@@ -112,7 +112,7 @@ exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
   <g
     class="object-canvas"
     data-testid="drawing-layer-object-canvas"
-    transform="scale(1)"
+    transform="translate(0, 0) scale(1)"
   >
     <path
       d="M 5 5 l 1 1 l 2 2"
@@ -135,7 +135,7 @@ exports[`Drawing Layer Components Image adds an image 1`] = `
   <g
     class="object-canvas"
     data-testid="drawing-layer-object-canvas"
-    transform="scale(1)"
+    transform="translate(0, 0) scale(1)"
   >
     <image
       height="10"
@@ -159,7 +159,7 @@ exports[`Drawing Layer Components Image deletes a image 1`] = `
   <g
     class="object-canvas"
     data-testid="drawing-layer-object-canvas"
-    transform="scale(1)"
+    transform="translate(0, 0) scale(1)"
   />
 </svg>
 `;
@@ -173,7 +173,7 @@ exports[`Drawing Layer Components Image moves a image 1`] = `
   <g
     class="object-canvas"
     data-testid="drawing-layer-object-canvas"
-    transform="scale(1)"
+    transform="translate(0, 0) scale(1)"
   >
     <image
       height="10"
@@ -197,7 +197,7 @@ exports[`Drawing Layer Components Rectangle adds a Rectangle 1`] = `
   <g
     class="object-canvas"
     data-testid="drawing-layer-object-canvas"
-    transform="scale(1)"
+    transform="translate(0, 0) scale(1)"
   >
     <rect
       class="rectangle"
@@ -224,7 +224,7 @@ exports[`Drawing Layer Components Rectangle deletes a rectangle 1`] = `
   <g
     class="object-canvas"
     data-testid="drawing-layer-object-canvas"
-    transform="scale(1)"
+    transform="translate(0, 0) scale(1)"
   />
 </svg>
 `;
@@ -238,7 +238,7 @@ exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
   <g
     class="object-canvas"
     data-testid="drawing-layer-object-canvas"
-    transform="scale(1)"
+    transform="translate(0, 0) scale(1)"
   >
     <rect
       class="rectangle"
@@ -265,7 +265,7 @@ exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
   <g
     class="object-canvas"
     data-testid="drawing-layer-object-canvas"
-    transform="scale(1)"
+    transform="translate(0, 0) scale(1)"
   >
     <g
       class="vector"
@@ -295,7 +295,7 @@ exports[`Drawing Layer Components Vector line deletes a vector line 1`] = `
   <g
     class="object-canvas"
     data-testid="drawing-layer-object-canvas"
-    transform="scale(1)"
+    transform="translate(0, 0) scale(1)"
   />
 </svg>
 `;
@@ -309,7 +309,7 @@ exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
   <g
     class="object-canvas"
     data-testid="drawing-layer-object-canvas"
-    transform="scale(1)"
+    transform="translate(0, 0) scale(1)"
   >
     <g
       class="vector"

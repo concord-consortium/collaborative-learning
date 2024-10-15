@@ -101,7 +101,12 @@ export const DrawingContentModel = NavigatableTileModel
     },
     /** Return a bounding box that contains all objects in the content */
     get objectsBoundingBox() {
-      const nw = {x: 0, y: 0}, se = {x: 0, y: 0};
+      if (self.objects.length === 0) return { nw: { x: 0, y: 0 }, se: { x: 0, y: 0 } };
+
+      const firstBB = self.objects[0].boundingBox;
+      const nw = { x: firstBB.nw.x, y: firstBB.nw.y };
+      const se = { x: firstBB.se.x, y: firstBB.se.y };
+
       self.objects.forEach((obj) => {
         const bb = obj.boundingBox;
         if (bb.nw.x < nw.x) nw.x = bb.nw.x;
@@ -109,7 +114,8 @@ export const DrawingContentModel = NavigatableTileModel
         if (bb.se.x > se.x) se.x = bb.se.x;
         if (bb.se.y > se.y) se.y = bb.se.y;
       });
-      return {nw, se};
+
+      return { nw, se };
     },
     exportJson(options?: ITileExportOptions) {
       // Translate image urls if necessary
@@ -135,6 +141,26 @@ export const DrawingContentModel = NavigatableTileModel
   .views(self => ({
     getSelectedObjects():DrawingObjectType[] {
       return self.selection.map((id) => self.objectMap[id]).filter((x)=>!!x) as DrawingObjectType[];
+    },
+    get contentSize(): { contentWidth: number, contentHeight: number } {
+      const contentBoundingBox = self.objectsBoundingBox;
+      const leftExtent = (contentBoundingBox.nw.x * self.zoom);
+      const rightExtent = (contentBoundingBox.se.x * self.zoom);
+      const topExtent = (contentBoundingBox.nw.y * self.zoom);
+      const bottomExtent = (contentBoundingBox.se.y * self.zoom);
+      const contentWidth = rightExtent - leftExtent;
+      const contentHeight = bottomExtent - topExtent;
+
+      return { contentWidth, contentHeight };
+    },
+    contentFitsViewport(tileWidth: number, tileHeight: number, unavailableSpace=0): boolean {
+      const bb = self.objectsBoundingBox;
+      const heightContained = bb.se.y * self.zoom + self.offsetY <= tileHeight &&
+                              bb.nw.y * self.zoom + self.offsetY >= 0;
+      const widthContained = bb.se.x * self.zoom + self.offsetX <= tileWidth + unavailableSpace &&
+                             bb.nw.x * self.zoom + self.offsetX >= 0;
+
+      return heightContained && widthContained;
     }
   }))
   .views(self => tileContentAPIViews({

@@ -41,6 +41,9 @@ export const TileNavigator = observer(function TileNavigator(props: INavigatorPr
   const { model, tileElt } = tileProps;
   const contentModel = model.content as NavigatableTileModelType;
   const { navigatorPosition, objectsBoundingBox, zoom } = contentModel;
+  const tileWidth = tileElt?.clientWidth || 0;
+  const tileHeight = tileElt?.clientHeight || 0;
+  const contentFitsViewport = contentModel.contentFitsViewport(tileWidth, tileHeight, objectListPanelWidth);
   const svgSize = getSvgSize(objectsBoundingBox);
   const displayZoomLevel = `${Math.round((zoom) * 100)}%`;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -59,11 +62,11 @@ export const TileNavigator = observer(function TileNavigator(props: INavigatorPr
 
   // Determine the width and height of the navigator viewport based on a scale factor
   // calculated from the parent tile's dimensions and navigator's dimensions.
-  const tileWidth = tileElt?.clientWidth || 0;
-  const tileHeight = tileElt?.clientHeight || 0;
   const scaleX = navigatorSize.width / tileWidth;
   const scaleY = navigatorSize.height / tileHeight;
-  const scaleFactor = Math.min(scaleX, scaleY);
+  const baseScaleFactor = Math.min(scaleX, scaleY);
+  // For zoom levels above 1, adjust the scale factor to maintain the correct relative size to the content.
+  const scaleFactor = zoom > 1 ? baseScaleFactor / zoom : baseScaleFactor;
   const viewportWidth = tileWidth * scaleFactor;
   const viewportHeight = tileHeight * scaleFactor;
 
@@ -121,18 +124,6 @@ export const TileNavigator = observer(function TileNavigator(props: INavigatorPr
     }
   };
 
-  const contentFitsViewport = () => {
-    const bb = contentModel.objectsBoundingBox;
-    if (!bb) return false;
-
-    const heightContained = bb.se.y * contentModel.zoom + contentModel.offsetY <= tileHeight &&
-                            bb.nw.y * contentModel.zoom + contentModel.offsetY >= 0;
-    const widthContained = bb.se.x * contentModel.zoom + contentModel.offsetX <= tileWidth + objectListPanelWidth &&
-                           bb.nw.x * contentModel.zoom + contentModel.offsetX >= 0;
-
-    return heightContained && widthContained;
-  };
-
   useResizeObserver({ref: tileElt});
 
   useEffect(() => {
@@ -173,7 +164,7 @@ export const TileNavigator = observer(function TileNavigator(props: INavigatorPr
           <NavigatorMoveIcon />
         </button>
       </div>
-      {!contentFitsViewport() && onNavigatorPan &&
+      {!contentFitsViewport && onNavigatorPan &&
         <div className="navigator-panning-buttons" data-testid="navigator-panning-buttons">
           <button
             className="navigator-panning-button up"
