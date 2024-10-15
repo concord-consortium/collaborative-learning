@@ -316,6 +316,7 @@
           "zoom-in",
           "zoom-out",
           "fit-all",
+          "navigator",
           "|",
           "delete"
         ]

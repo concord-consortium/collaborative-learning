@@ -11,6 +11,7 @@ import { GeometryTileMode } from "./geometry-types";
 import { ColorPalette } from "./color-palette";
 import { clueDataColorInfo } from "../../../utilities/color-utils";
 import { GeometryContentModelType } from "src/models/tiles/geometry/geometry-content";
+import { NavigatorButton } from "../../toolbar/navigator-button";
 
 import AddImageSvg from "../../../clue/assets/icons/geometry/add-image-icon.svg";
 import CommentSvg from "../../../assets/icons/comment/comment.svg";
@@ -358,6 +359,10 @@ registerTileToolbarButtons("geometry",
     {
       name: "fit-all",
       component: FitAllButton
-    }
+    },
+    {
+      name: "navigator",
+      component: NavigatorButton
+    },
   ]
 );

@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
+import { observer } from "mobx-react";
 import { GeometryContentWrapper } from "./geometry-content-wrapper";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import { GeometryContentModelType } from "../../../models/tiles/geometry/geometry-content";
@@ -10,23 +11,29 @@ import { HotKeys } from "../../../utilities/hot-keys";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { IGeometryTileContext, GeometryTileContext } from "./geometry-tile-context";
 import { GeometryTileMode } from "./geometry-types";
+import { TileNavigator } from "../tile-navigator";
+import { NavigatorDirection } from "../../../models/tiles/navigatable-tile-model";
 
 import "./geometry-toolbar-registration";
 
 import "./geometry-tile.scss";
 
-const _GeometryToolComponent: React.FC<IGeometryProps> = ({
-  model, readOnly, ...others
-}) => {
+const _GeometryToolComponent: React.FC<IGeometryProps> = observer(function _GeometryToolComponent(props) {
+  const { model, readOnly, navigatorAllowed = true, ...others } = props;
   const { tileElt } = others;
   const modelRef = useCurrent(model);
   const domElement = useRef<HTMLDivElement>(null);
   const content = model.content as GeometryContentModelType;
+  const showNavigator = navigatorAllowed && content.isNavigatorVisible;
   const [board, setBoard] = useState<JXG.Board>();
   const [actionHandlers, setActionHandlers] = useState<IActionHandlers>();
   const [mode, setMode] = useState<GeometryTileMode>("select");
   const hotKeys = useRef(new HotKeys());
   const forceUpdate = useForceUpdate();
+
+  const handleNavigatorPan = (direction: NavigatorDirection) => {
+    console.log("Navigator pan", direction);
+  };
 
   const handleSetHandlers = (handlers: IActionHandlers) => {
     hotKeys.current.register({
@@ -75,9 +82,16 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
           onContentChange={forceUpdate} />
         <TileToolbar tileType="geometry" readOnly={!!readOnly} tileElement={tileElt} />
       </div>
+      {!readOnly && showNavigator &&
+        <TileNavigator
+          onNavigatorPan={handleNavigatorPan}
+          tileProps={props}
+          renderTile={(tileProps) => <GeometryToolComponent {...tileProps} />}
+        />
+      }
     </GeometryTileContext.Provider>
   );
-};
+});
 
 const GeometryToolComponent = React.memo(_GeometryToolComponent);
 export default GeometryToolComponent;

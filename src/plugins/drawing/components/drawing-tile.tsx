@@ -215,7 +215,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
       </div>
       {!readOnly && showNavigator &&
         <TileNavigator
-          objectListPanelWidth={getObjectListPanelWidth()}
+          unavailableWidth={getObjectListPanelWidth()}
           onNavigatorPan={handleNavigatorPan}
           tileProps={props}
           renderTile={(tileProps) => <DrawingToolComponent {...tileProps} />}

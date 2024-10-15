@@ -12,7 +12,7 @@ import NavigatorScrollIcon from "../../assets/icons/navigator-scroll-icon.svg";
 import "./tile-navigator.scss";
 
 interface INavigatorProps {
-  objectListPanelWidth: number;
+  unavailableWidth?: number;
   renderTile: (tileProps: ITileProps) => JSX.Element;
   tileProps: ITileProps;
   onNavigatorPan?: (direction: NavigatorDirection) => void;
@@ -21,11 +21,7 @@ interface INavigatorProps {
 const navigatorSize = { width: 90, height: 62 };
 const defaultSvgDimension = 1500;
 
-const getSvgSize = (contentBoundingBox?: BoundingBox) => {
-  if (!contentBoundingBox) {
-    return { width: defaultSvgDimension, height: defaultSvgDimension };
-  }
-
+const getSvgSize = (contentBoundingBox: BoundingBox) => {
   const width = contentBoundingBox.se.x - contentBoundingBox.nw.x + defaultSvgDimension;
   const height = contentBoundingBox.se.y - contentBoundingBox.nw.y + defaultSvgDimension;
   return { width, height };
@@ -37,14 +33,16 @@ const getSvgSize = (contentBoundingBox?: BoundingBox) => {
  * when it is at a zoom level that makes it larger than the tile's content area.
  */
 export const TileNavigator = observer(function TileNavigator(props: INavigatorProps) {
-  const { objectListPanelWidth, onNavigatorPan, renderTile, tileProps } = props;
+  const { unavailableWidth, onNavigatorPan, renderTile, tileProps } = props;
   const { model, tileElt } = tileProps;
   const contentModel = model.content as NavigatableTileModelType;
   const { navigatorPosition, objectsBoundingBox, zoom } = contentModel;
   const tileWidth = tileElt?.clientWidth || 0;
   const tileHeight = tileElt?.clientHeight || 0;
-  const contentFitsViewport = contentModel.contentFitsViewport(tileWidth, tileHeight, objectListPanelWidth);
-  const svgSize = getSvgSize(objectsBoundingBox);
+  const contentFitsViewport = contentModel.contentFitsViewport(tileWidth, tileHeight, unavailableWidth);
+  const canvasSize = objectsBoundingBox
+                    ? getSvgSize(objectsBoundingBox)
+                    : { width: tileWidth, height: tileHeight };
   const displayZoomLevel = `${Math.round((zoom) * 100)}%`;
   const containerRef = useRef<HTMLDivElement>(null);
   const placementButtonRef = useRef<HTMLButtonElement>(null);
@@ -56,8 +54,8 @@ export const TileNavigator = observer(function TileNavigator(props: INavigatorPr
     navigatorAllowed: false,
     readOnly: true,
     overflowVisible: true,
-    svgWidth: svgSize.width,
-    svgHeight: svgSize.height,
+    svgWidth: canvasSize.width,
+    svgHeight: canvasSize.height,
   };
 
   // Determine the width and height of the navigator viewport based on a scale factor
@@ -97,12 +95,12 @@ export const TileNavigator = observer(function TileNavigator(props: INavigatorPr
   }), [clipPath]);
 
   const tileContentStyle: CSSProperties = useMemo(() => ({
-    height: `${svgSize.height}px`,
+    height: `${canvasSize.height}px`,
     marginTop: `-${viewportHeight / 2 - scaleFactor}px`,
     marginLeft: `-${viewportWidth / 2 - scaleFactor}px`,
     transform: `scale(${scaleFactor})`,
-    width: `${svgSize.width}px`,
-  }), [scaleFactor, svgSize.height, svgSize.width, viewportHeight, viewportWidth]);
+    width: `${canvasSize.width}px`,
+  }), [scaleFactor, canvasSize.height, canvasSize.width, viewportHeight, viewportWidth]);
 
   const tileViewportStyle: CSSProperties = useMemo(() => ({
     height: `${viewportHeight}px`,
