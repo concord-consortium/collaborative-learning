@@ -22,7 +22,7 @@ describe("functions", () => {
   });
 
   describe("onAnalyzableDocWritten", () => {
-    test("triggers on lastUpdateAt field creation", async () => {
+    test("triggers on evaluation field creation", async () => {
       const wrapped = fft.wrap(onAnalyzableDocWritten);
 
       const before = makeDataSnapshot(null,
@@ -34,6 +34,7 @@ describe("functions", () => {
       await wrapped({
         data: delta,
         params: {
+          root: "demo/AI/portals/demo",
           classId: "democlass1",
           userId: "1",
           docId: "testdoc1",
