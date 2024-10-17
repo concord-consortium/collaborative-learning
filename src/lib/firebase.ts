@@ -188,6 +188,7 @@ export class Firebase {
     return `${this.getUserDocumentMetadataPath(user, documentKey, userId)}/lastEditedAt`;
   }
 
+  // Returns the path to the evaluation type & timestamp for a document, if specified in the appConfig
   public getEvaluationMetadataPath(user: UserModelType, documentKey: string, userId?: string) {
     const evaluation = this.db.stores.appConfig.aiEvaluation;
     if (evaluation) {
@@ -222,6 +223,7 @@ export class Firebase {
 
   /**
    * Set the lastEditedAt timestamp to the current time, optionally cancelling any onDisconnect handlers.
+   * If the appConfig specifies an AI Evaluation to be run, that timestamp is set as well.
    */
   public setLastEditedNow(user: UserModelType, documentKey: string, userId: string|undefined,
       onDisconnects?: firebase.database.OnDisconnect[]) {
@@ -230,8 +232,14 @@ export class Firebase {
         onDisconnect.cancel();
       });
     }
-    return this.ref(this.getLastEditedMetadataPath(user, documentKey, userId))
-      .set(firebase.database.ServerValue.TIMESTAMP);
+    const promises: Promise<any>[] = [];
+    promises.push(this.ref(this.getLastEditedMetadataPath(user, documentKey, userId))
+      .set(firebase.database.ServerValue.TIMESTAMP));
+    const evaluation = this.getEvaluationMetadataPath(user, documentKey, userId);
+    if (evaluation) {
+      promises.push(this.ref(evaluation).set(firebase.database.ServerValue.TIMESTAMP));
+    }
+    return Promise.all(promises);
   }
 
   // Unpublished personal document/learning log metadata

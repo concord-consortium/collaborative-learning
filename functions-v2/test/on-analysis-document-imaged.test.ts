@@ -30,6 +30,8 @@ dotenv.config({
 
 const sampleDoc = {
   metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
+  documentPath: "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1",
+  commentsPath: "demo/AI/documents/testdoc1/comments",
   docUpdated: "1001",
   docImageUrl: "https://concord.org/wp-content/uploads/2024/05/capturing-moths-fig-2.png",
   evaluator: "categorize-design",
@@ -88,6 +90,8 @@ describe("functions", () => {
         snapshot.forEach((doc) => {
           expect(doc.data()).toEqual({
             metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
+            documentPath: "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1",
+            commentsPath: "demo/AI/documents/testdoc1/comments",
             documentId: "testdoc1",
             docUpdated: "1001",
             completedAt: expect.any(Object),
@@ -168,6 +172,8 @@ describe("functions", () => {
         snapshot.forEach((doc) => {
           expect(doc.data()).toEqual({
             metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
+            documentPath: "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1",
+            commentsPath: "demo/AI/documents/testdoc1/comments",
             documentId: "testdoc1",
             docUpdated: "1001",
             completedAt: expect.any(Object),
@@ -246,6 +252,8 @@ describe("functions", () => {
         snapshot.forEach((doc) => {
           expect(doc.data()).toEqual({
             metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
+            documentPath: "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1",
+            commentsPath: "demo/AI/documents/testdoc1/comments",
             documentId: "testdoc1",
             docUpdated: "1001",
             docImageUrl: "https://concord.org/wp-content/uploads/2024/05/capturing-moths-fig-2.png",

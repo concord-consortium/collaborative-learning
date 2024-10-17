@@ -68,15 +68,7 @@ export const onAnalysisDocumentPending =
     }
 
     // Retrieve the document content
-
-    const metadataPathSegments = (queueDoc?.metadataPath as string).split("/");
-    // Metadata path will be something like "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1"
-    if (metadataPathSegments[metadataPathSegments.length - 2] !== "documentMetadata") {
-      await error(`Unexpected metadata path: ${queueDoc?.metadataPath}`, event);
-      return;
-    }
-    metadataPathSegments[metadataPathSegments.length - 2] = "documents";
-    const documentPath = metadataPathSegments.join("/");
+    const documentPath = (queueDoc?.documentPath as string);
     let content = undefined;
     try {
       await (getDatabase().ref(documentPath).once("value", (snapshot) => {

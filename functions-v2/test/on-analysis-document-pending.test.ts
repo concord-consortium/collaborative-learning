@@ -54,6 +54,8 @@ describe("functions", () => {
       await wrapped({
         data: makeDocumentSnapshot({
           metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
+          documentPath: "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1",
+          commentsPath: "demo/AI/documents/testdoc1/comments",
           docUpdated: "1001",
           evaluator: "categorize-design",
         }, "analysis/queue/pending/testdoc1"),
@@ -76,6 +78,8 @@ describe("functions", () => {
       await imagedQueue.doc("testdoc1").get().then((result) => {
         expect(result.data()).toEqual({
           metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
+          documentPath: "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1",
+          commentsPath: "demo/AI/documents/testdoc1/comments",
           docUpdated: "1001",
           evaluator: "categorize-design",
           docImaged: expect.any(Object),
@@ -99,6 +103,8 @@ describe("functions", () => {
       await wrapped({
         data: makeDocumentSnapshot({
           metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
+          documentPath: "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1",
+          commentsPath: "demo/AI/documents/testdoc1/comments",
           docUpdated: "1001",
           evaluator: "does-not-exist",
         }, "analysis/queue/pending/testdoc1"),
@@ -133,6 +139,8 @@ describe("functions", () => {
         snapshot.forEach((doc) => {
           expect(doc.data()).toEqual({
             metadataPath: "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1",
+            documentPath: "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1",
+            commentsPath: "demo/AI/documents/testdoc1/comments",
             documentId: "testdoc1",
             docUpdated: "1001",
             evaluator: "does-not-exist",
