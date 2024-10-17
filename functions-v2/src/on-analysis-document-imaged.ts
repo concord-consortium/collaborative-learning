@@ -36,7 +36,6 @@ export const onAnalysisDocumentImaged =
       secrets: [openaiApiKey],
     },
     async (event) => {
-      const {docId} = event.params;
       const firestore = admin.firestore();
       const queueDoc = event.data?.data();
 
@@ -65,7 +64,7 @@ export const onAnalysisDocumentImaged =
         ` Key Indicators: ${reply.parsed.keyIndicators.join(", ")}` : "";
       const message = reply.parsed.discussion + indicators;
 
-      const commentsPath = `demo/AI/documents/${docId}/comments`;
+      const commentsPath = queueDoc.commentsPath;
 
       logger.info("Creating comment for", event.document);
       // NOTE we are leaving the "network" and "tileId" fields empty in the comment doc.
