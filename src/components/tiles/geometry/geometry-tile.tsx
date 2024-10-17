@@ -32,7 +32,22 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geom
   const forceUpdate = useForceUpdate();
 
   const handleNavigatorPan = (direction: NavigatorDirection) => {
-    console.log("Navigator pan", direction);
+    if (!content.board) return;
+    const panStep = 50; // number of pixels to move in whichever direction
+    switch (direction) {
+      case "left":
+        content.board.xAxis.panByPixels(-panStep);
+        break;
+      case "right":
+        content.board.xAxis.panByPixels(panStep);
+        break;
+      case "up":
+        content.board.yAxis.panByPixels(panStep);
+        break;
+      case "down":
+        content.board.yAxis.panByPixels(-panStep);
+        break;
+    }
   };
 
   const handleSetHandlers = (handlers: IActionHandlers) => {
