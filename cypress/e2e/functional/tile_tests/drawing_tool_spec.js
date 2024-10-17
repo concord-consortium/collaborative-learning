@@ -1,13 +1,11 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import DrawToolTile from '../../../support/elements/tile/DrawToolTile';
 import ImageToolTile from '../../../support/elements/tile/ImageToolTile';
-import TileNavigator from "../../../support/elements/tile/TileNavigator";
 import { LogEventName } from '../../../../src/lib/logger-types';
 
 const clueCanvas = new ClueCanvas;
 const drawToolTile = new DrawToolTile;
 const imageToolTile = new ImageToolTile;
-const tileNavigator = new TileNavigator;
 
 function beforeTest() {
   const queryParams = `${Cypress.config("qaUnitStudent5")}`;
@@ -45,10 +43,12 @@ context('Draw Tool Tile', function () {
 
     drawToolTile.getDrawTile().should("exist");
     drawToolTile.getTileTitle().should("exist");
+    clueCanvas.toolbarButtonIsDisabled("drawing", "fit-all");
 
     cy.log("can open show/sort panel and select objects");
     drawToolTile.drawRectangle(100, 50, 150, 100);
     drawToolTile.drawEllipse(300, 50, 100, 100);
+    clueCanvas.toolbarButtonIsEnabled("drawing", "fit-all");
     // Unselect all
     drawToolTile.getDrawTile()
       .trigger("pointerdown", 50, 50)
@@ -86,44 +86,64 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawTileShowSortPanel().get('li:last').should("contain.text", "Circle");
 
     cy.log("can zoom in, zoom out, and fit objects");
-    drawToolTile.getDrawTileObjectCanvas().should('have.attr', 'transform', 'scale(1)');
+    drawToolTile.getDrawTileObjectCanvas().should('have.attr', 'transform', 'translate(0, 0) scale(1)');
     clueCanvas.clickToolbarButton('drawing', 'zoom-in');
-    drawToolTile.getDrawTileObjectCanvas().should('have.attr', 'transform', 'scale(1.25)');
+    drawToolTile.getDrawTileObjectCanvas().then(canvas => {
+      const expectedTranslationValues = { x: -58, y: -8 };
+      const expectedScale = 1.1;
+      drawToolTile.verifyTransformValues(canvas.attr('transform'), expectedTranslationValues, expectedScale);
+    });
     cy.get("@log")
       .should("have.been.been.calledWith", LogEventName.DRAWING_TOOL_CHANGE, Cypress.sinon.match.object)
-      .its("lastCall.args.1").should("deep.include", { operation: "setZoom", args: [1.25] });
+      .its("lastCall.args.1").should("deep.include", { operation: "setZoom", args: [1.1, { x: 1170, y: 176 } ] });
 
     clueCanvas.clickToolbarButton('drawing', 'zoom-out');
-    drawToolTile.getDrawTileObjectCanvas().should('have.attr', 'transform', 'scale(1)');
+    drawToolTile.getDrawTileObjectCanvas().then(canvas => {
+      const expectedTranslationValues = { x: 0, y: 0 };
+      const expectedScale = 1;
+      const nearZeroTolerance = 1e-10;
+      drawToolTile.verifyTransformValues(canvas.attr('transform'), expectedTranslationValues, expectedScale, nearZeroTolerance);
+    });
     cy.get("@log")
       .should("have.been.been.calledWith", LogEventName.DRAWING_TOOL_CHANGE, Cypress.sinon.match.object)
-      .its("lastCall.args.1").should("deep.include", { operation: "setZoom", args: [1] });
+      .its("lastCall.args.1").should("deep.include", { operation: "setZoom", args: [1, { x: 1170, y: 176 }] });
 
     // Should not zoom out past zoom level .1
-    for (let z=0; z< 11; z++) {
+    for (let z=0; z< 9; z++) {
       clueCanvas.clickToolbarButton('drawing', 'zoom-out');
     }
     clueCanvas.toolbarButtonIsDisabled('drawing', 'zoom-out');
-    drawToolTile.getDrawTileObjectCanvas().should('have.attr', 'transform', 'scale(0.1)');
+    drawToolTile.getDrawTileObjectCanvas().then(canvas => {
+      const expectedTranslationValues = { x: 526, y: 79 };
+      const expectedScale = 0.1;
+      drawToolTile.verifyTransformValues(canvas.attr('transform'), expectedTranslationValues, expectedScale);
+    });
 
     // Should not zoom in past zoom level 2
-    for (let z=0; z< 14; z++) {
+    for (let z=0; z< 19; z++) {
       clueCanvas.clickToolbarButton('drawing', 'zoom-in');
     }
     clueCanvas.toolbarButtonIsDisabled('drawing', 'zoom-in');
-    drawToolTile.getDrawTileObjectCanvas().should('have.attr', 'transform', 'scale(2)');
+    drawToolTile.getDrawTileObjectCanvas().then(canvas => {
+      const expectedTranslationValues = { x: -585, y: -88 };
+      const expectedScale = 2;
+      drawToolTile.verifyTransformValues(canvas.attr('transform'), expectedTranslationValues, expectedScale);
+    });
 
     // Fit should return an appropriate zoom level for the objects drawn
     clueCanvas.clickToolbarButton('drawing', 'fit-all');
     clueCanvas.toolbarButtonIsEnabled('drawing', 'zoom-in');
     clueCanvas.toolbarButtonIsEnabled('drawing', 'zoom-out');
     drawToolTile.getDrawTileObjectCanvas().then(canvas => {
-      // Check that the canvas has a transform attribute like 'scale(x)' where x is approximatesly 1.12
-      const scale = parseFloat(canvas.attr('transform').replace(/scale\((\d+\.\d+)\)/, '$1'));
-      expect(scale).to.be.within(1.1, 1.2);
+      // Check that the canvas has a transform attribute like 'scale(x)' where x is approximatesly .83
+      const scale = parseFloat(canvas.attr('transform').replace(/.*scale\((\d+\.\d+)\)/, '$1'));
+      expect(scale).to.be.within(.82, .84);
     });
 
     cy.log("can delete objects and close panel");
+    // Reset zoom to 100%
+    clueCanvas.clickToolbarButton('drawing', 'zoom-in');
+    clueCanvas.clickToolbarButton('drawing', 'zoom-in');
     // Delete objects
     drawToolTile.getDrawTileShowSortPanel().get('li:first').should("contain.text", "Rectangle").click();
     drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click();

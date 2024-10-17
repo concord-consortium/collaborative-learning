@@ -22,6 +22,10 @@
     .tile-navigator {
       border-radius: 3px 3px 0 0;
     }
+
+    .navigator-panning-buttons {
+      top: 0;
+    }
   }
 
   &.animate {
@@ -127,6 +131,72 @@
         top: 0;
         left: 50%;
         transform: rotate(180deg);
+      }
+    }
+  }
+
+  .navigator-panning-buttons {
+    height: 78px;
+    left: 0;
+    margin: 0 2px;
+    position: absolute;
+    top: 15px;
+    width: calc(100% - 4px);
+    z-index: 5;
+
+    button {
+      all: unset;
+      align-items: center;
+      border: solid 1px transparent;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      height: 28px;
+      justify-content: center;
+      position: absolute;
+      width: 28px;
+
+      &:hover {
+        background: $workspace-teal-light-4;
+        border: solid 1px $workspace-teal;
+        opacity: .5;
+      }
+      &:active {
+        background: $workspace-teal-light-4;
+        border: solid 1px $workspace-teal;
+        opacity: 1;
+      }
+
+      &.up {
+        left: 50%;
+        margin-left: -14px;
+        top: 0;
+        transform: rotate(180deg);
+      }
+      &.right {
+        margin-top: -14px;
+        right: 0;
+        top: 50%;
+        transform: rotate(-90deg);
+        width: 28px;
+      }
+      &.down {
+        bottom: 0;
+        left: 50%;
+        margin-left: -14px;
+        transform: rotate(0deg);
+      }
+      &.left {
+        left: 0;
+        margin-top: -14px;
+        top: 50%;
+        transform: rotate(90deg);
+        width: 28px;
+      }
+
+      svg {
+        height: 24px;
+        width: 24px;
       }
     }
   }

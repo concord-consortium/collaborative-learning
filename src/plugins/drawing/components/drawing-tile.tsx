@@ -16,6 +16,7 @@ import { useUIStore } from "../../../hooks/use-stores";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 import { TileNavigator } from "../../../components/tiles/tile-navigator";
+import { NavigatorDirection } from "../../../models/tiles/navigatable-tile-model";
 
 import "./drawing-tile.scss";
 
@@ -35,6 +36,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
   const [objectListHoveredObject, setObjectListHoveredObject] = useState(null as string|null);
   const hotKeys = useRef(new HotKeys());
   const drawingToolElement = useRef<HTMLDivElement>(null);
+  const drawingLayerViewRef = useRef<DrawingLayerView>(null);
 
   const ui = useUIStore();
 
@@ -154,6 +156,32 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
     };
   };
 
+  const handleNavigatorPan = (direction: NavigatorDirection) => {
+    const currOffsetX = contentModel.offsetX;
+    const currOffsetY = contentModel.offsetY;
+    const moveStep = 50;
+    const { contentWidth, contentHeight } = contentModel.contentSize;
+    let newX = currOffsetX;
+    let newY = currOffsetY;
+
+    switch (direction) {
+      case "up":
+        newY = Math.min(currOffsetY + moveStep, contentHeight);
+        break;
+      case "down":
+        newY = Math.max(currOffsetY - moveStep, -contentHeight);
+        break;
+      case "left":
+        newX = Math.min(currOffsetX + moveStep, contentWidth);
+        break;
+      case "right":
+        newX = Math.max(currOffsetX - moveStep, -contentWidth);
+        break;
+    }
+
+    contentModel.setOffset(newX, newY);
+  };
+
   return (
     <DrawingContentModelContext.Provider value={contentRef.current}>
       <BasicEditableTileTitle />
@@ -178,6 +206,7 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
             {...props}
             highlightObject={objectListHoveredObject}
             imageUrlToAdd={imageUrlToAdd}
+            ref={drawingLayerViewRef}
             setImageUrlToAdd={setImageUrlToAdd}
             svgHeight={svgHeight}
             svgWidth={svgWidth}
@@ -185,7 +214,12 @@ const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function Draw
         </div>
       </div>
       {!readOnly && showNavigator &&
-          <TileNavigator tileProps={props} renderTile={(tileProps) => <DrawingToolComponent {...tileProps} />} />
+        <TileNavigator
+          objectListPanelWidth={getObjectListPanelWidth()}
+          onNavigatorPan={handleNavigatorPan}
+          tileProps={props}
+          renderTile={(tileProps) => <DrawingToolComponent {...tileProps} />}
+        />
       }
     </DrawingContentModelContext.Provider>
   );

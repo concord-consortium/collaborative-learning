@@ -10,7 +10,7 @@ class DrawToolTile{
                .not('[data-testid=tile-navigator] [data-testid=drawing-tool]');
     }
     getDrawTileObjectCanvas(){
-      return this.getDrawTileComponent().find('.object-canvas');
+      return this.getDrawTileComponent().find('[data-testid=drawing-layer-object-canvas]');
     }
     getDrawTileShowSortPanel(){
       return cy.get('.primary-workspace .drawing-tool .object-list');
@@ -146,6 +146,16 @@ class DrawToolTile{
         .trigger("pointerdown", x, y)
         .trigger("pointerup", x, y);
       this.getTextDrawing().last().get('textarea').type(text + "{enter}");
+    }
+
+    verifyTransformValues(transform, expectedTranslate, expectedScale, tolerance=1) {
+      const translate = transform.replace(/.*translate\(([^,]+), ([^)]+)\).*/, '$1,$2');
+      const translateX = parseFloat(translate.split(',')[0]);
+      const translateY = parseFloat(translate.split(',')[1]);
+      expect(translateX).to.be.closeTo(expectedTranslate.x, tolerance);
+      expect(translateY).to.be.closeTo(expectedTranslate.y, tolerance);
+      const scale = parseFloat(transform.replace(/.*scale\((\d+(\.\d+)?)\)/, '$1'));
+      expect(scale).to.equal(expectedScale);
     }
 
 }

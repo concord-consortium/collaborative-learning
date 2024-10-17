@@ -51,7 +51,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     implements IDrawingLayer {
   static contextType = MobXProviderContext;
   public tools: DrawingToolMap;
-  private viewRef: React.RefObject<HTMLDivElement>;
+  public viewRef: React.RefObject<HTMLDivElement>;
   private svgRef: React.RefObject<any>|null;
   private setSvgRef: (element: any) => void;
   private _isMounted: boolean;
@@ -428,12 +428,12 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public getWorkspacePoint = (e: PointerEvent|React.PointerEvent<any>): Point|null => {
     if (this.svgRef) {
-      const zoom = this.getContent().zoom;
+      const { offsetX=0, offsetY=0, zoom } = this.getContent();
       const scale = (this.props.scale || 1) * zoom;
       const rect = ((this.svgRef as unknown) as Element).getBoundingClientRect();
       return {
-        x: (e.clientX - rect.left) / scale,
-        y: (e.clientY - rect.top) / scale
+        x: (e.clientX - rect.left - offsetX) / scale,
+        y: (e.clientY - rect.top - offsetY) / scale
       };
     }
     return null;
@@ -451,7 +451,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       }
     }
 
-    const zoom = this.getContent().zoom;
+    const { offsetX=0, offsetY=0, zoom } = this.getContent();
+
+    // If an offset value for the drawing is provided, the `object-canvas` group will be translated to place
+    // the drawing objects appropriately.
+    const objectCanvasTransform = `translate(${offsetX}, ${offsetY}) scale(${zoom})`;
 
     return (
       // We don't propagate pointer events to the tile, since the drawing layer
@@ -472,7 +476,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           height={this.props.svgHeight ?? 1500}
           ref={this.setSvgRef}
         >
-          <g className="object-canvas" transform={`scale(${zoom})`}>
+          <g
+            className="object-canvas"
+            data-testid="drawing-layer-object-canvas"
+            transform={objectCanvasTransform}
+          >
             {this.renderObjects()}
             {!this.props.readOnly && this.renderSelectionBorders(this.getSelectedObjects(), true)}
             {highlightObject
