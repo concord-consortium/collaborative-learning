@@ -9,7 +9,7 @@ import { StampModel, StampModelType } from "./stamp";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { DrawingObjectSnapshotForAdd, DrawingObjectType,
   ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
-import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
+import { isImageObjectSnapshot } from "../objects/image";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tiles/tile-content-info";
@@ -179,8 +179,9 @@ export const DrawingContentModel = NavigatableTileModel
       const tileId = self.metadata?.id ?? "";
       const {name: operation, ...change} = call;
       // Ignore actions that don't need to be logged
-      const ignoredActions = ["setDisabledFeatures", "setDragPosition", "setDragBounds",
-        "setSelectedButton", "afterAttach"];
+      const ignoredActions = ["afterAttach", "afterCreate", "reset",
+        "setDisabledFeatures", "setDragPosition", "setDragBounds",
+        "setSelectedButton", "setSelectedIds", "setOpenPalette", "setEditing"];
       if (ignoredActions.includes(operation)) return;
 
       logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, { operation, change, tileId });
@@ -394,25 +395,6 @@ export const DrawingContentModel = NavigatableTileModel
             }
           });
           self.setSelectedIds(newIds);
-        },
-
-        moveObjects(moves: DrawingObjectMove[]) {
-          moves.forEach(move => {
-            const object = self.objectMap[move.id];
-            object?.setPosition(move.destination.x, move.destination.y);
-          });
-        },
-
-        updateImageUrl(oldUrl: string, newUrl: string) {
-          if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
-          // Modify all images with this url
-          self.objects.forEach(object => {
-            if (object.type !== "image") return;
-            const image = object as ImageObjectType;
-            if (image.url === oldUrl) {
-              image.setUrl(newUrl);
-            }
-          });
         },
 
         createGroup(objectIds: string[]) {

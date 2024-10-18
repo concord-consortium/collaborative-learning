@@ -242,11 +242,8 @@ describe("DrawingContentModel", () => {
       { operation: "deleteObjects", change: { args: [ [] ], path: ""}, tileId: "drawing-1" });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(4,
       LogEventName.DRAWING_TOOL_CHANGE,
-      { operation: "setSelectedIds", change: { args: [ ["a", "b"] ], path: ""}, tileId: "drawing-1" });
-    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(5,
-      LogEventName.DRAWING_TOOL_CHANGE,
       { operation: "deleteObjects", change: { args: [ ["a", "b"] ], path: ""}, tileId: "drawing-1" });
-    expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(5);
+    expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(4);
   });
 
   it("can update the properties of a set of selected drawing objects", () => {
@@ -278,44 +275,38 @@ describe("DrawingContentModel", () => {
 
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
       LogEventName.DRAWING_TOOL_CHANGE,
-      { operation: "setSelectedIds", change: { args: [["a", "b"]], path: "" }, tileId: "drawing-1" });
+      { operation: "setStroke", change: { args: ["#000000", ["a", "b"]], path: "" }, tileId: "drawing-1" });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(2,
       LogEventName.DRAWING_TOOL_CHANGE,
-      { operation: "setStroke", change: { args: ["#000000", ["a", "b"]], path: "" }, tileId: "drawing-1" });
+      { operation: "setStrokeWidth", change: { args: [2, ["a", "b"]], path: "" }, tileId: "drawing-1" });
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(3,
       LogEventName.DRAWING_TOOL_CHANGE,
-      { operation: "setStrokeWidth", change: { args: [2, ["a", "b"]], path: "" }, tileId: "drawing-1" });
-    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(4,
-      LogEventName.DRAWING_TOOL_CHANGE,
       { operation: "setStrokeDashArray", change: { args: ["3,3", ["a", "b"]], path: "" }, tileId: "drawing-1" });
-    expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(4);
-    });
+    expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(3);
+  });
 
   it("can move objects", () => {
     const model = createDrawingContentWithMetadata();
 
     const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a", x:0, y:0};
-    model.addObject(rectSnapshot1);
-
-    const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"b", x:10, y:10};
-    model.addObject(rectSnapshot2);
+    const rect1 = model.addObject(rectSnapshot1);
 
     mockLogTileChangeEvent.mockReset();
-    model.moveObjects([
-      {id: "a", destination: {x: 20, y: 20}},
-      {id: "b", destination: {x: 30, y: 30}}
-    ]);
+    rect1.setDragPosition(20, 20);
+    rect1.repositionObject();
     expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
       LogEventName.DRAWING_TOOL_CHANGE, {
-        operation: "moveObjects",
+        operation: "repositionObject",
         change: {
-          args: [[{id: "a", destination: {x: 20, y: 20}}, {id: "b", destination: {x: 30, y: 30}}]],
-          path: ""
+          args: [],
+          path: "/objects/0"
         },
         tileId: "drawing-1"
       });
     expect(mockLogTileChangeEvent).toHaveBeenCalledTimes(1);
-    });
+    expect(rect1.x).toBe(20);
+    expect(rect1.y).toBe(20);
+});
 
   it("can resize rectangle", () => {
     mockLogTileChangeEvent.mockClear();
@@ -623,29 +614,6 @@ describe("DrawingContentModel", () => {
     model.setSelectedStamp(1);
 
     expect(model.currentStamp!.url).toBe("b.png");
-  });
-
-  it("can update image urls", () => {
-    const originalUrl = "my/image/url";
-    const image = ImageObject.create({
-      url: originalUrl, x: 0, y: 0, width: 10, height: 10
-    });
-    const model = createDrawingContentWithMetadata({
-      objects: [image]
-    });
-
-    model.updateImageUrl("", "");
-    expect(image.url).toEqual(originalUrl);
-
-    // Updates to a empty string are ignored
-    model.updateImageUrl("my/image/url", "");
-    expect(image.url).toEqual(originalUrl);
-
-    model.updateImageUrl("", "my/image/newUrl");
-    expect(image.url).toEqual(originalUrl);
-
-    model.updateImageUrl("my/image/url", "my/image/newUrl");
-    expect(image.url).toBe("my/image/newUrl");
   });
 
   test("addObject throws when an instance is passed to it", () => {
