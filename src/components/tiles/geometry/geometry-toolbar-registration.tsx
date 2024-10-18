@@ -279,9 +279,10 @@ function ZoomOutButton({name}: IToolbarButtonComponentProps) {
   );
 }
 
-function FitAllButton({name}: IToolbarButtonComponentProps) {
+const FitAllButton = observer(function FitAllButton({name}: IToolbarButtonComponentProps) {
   const readOnly = useReadOnlyContext();
-  const { handlers } = useGeometryTileContext();
+  const { content, handlers } = useGeometryTileContext();
+  const disabled = !content || content.objects.size === 0;
 
   function handleClick() {
     if (readOnly) return;
@@ -293,11 +294,12 @@ function FitAllButton({name}: IToolbarButtonComponentProps) {
       name={name}
       title="Fit all"
       onClick={handleClick}
-      >
+      disabled={disabled}
+    >
       <FitAllSvg/>
     </TileToolbarButton>
   );
-}
+});
 
 registerTileToolbarButtons("geometry",
   [
