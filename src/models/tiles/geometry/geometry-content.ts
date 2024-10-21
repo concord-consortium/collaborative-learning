@@ -39,7 +39,7 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { gImageMap } from "../../image-map";
 import { IClueTileObject } from "../../annotations/clue-object";
 import { appendVertexId, getPoint, filterBoardObjects, forEachBoardObject, getBoardObject, getBoardObjectIds,
-  getPolygon, logGeometryEvent, removeClosingVertexId, getCircle } from "./geometry-utils";
+  getPolygon, logGeometryEvent, removeClosingVertexId, getCircle, getBoardObjectsExtents } from "./geometry-utils";
 import { getPointVisualProps } from "./jxg-point";
 import { getVertexAngle } from "./jxg-vertex-angle";
 import { GeometryTileMode } from "../../../components/tiles/geometry/geometry-types";
@@ -481,12 +481,15 @@ export const GeometryContentModel = GeometryBaseContentModel
       };
     }
 
-    function initializeBoard(domElementID: string,
+    function initializeBoard(domElementID: string, showAllContent: boolean|undefined,
         onCreate: onCreateCallback, syncLinked: (board:JXG.Board) => void): JXG.Board | undefined {
       let board: JXG.Board | undefined;
       const context = getDispatcherContext();
+
       // Create the board and axes
-      applyChanges(domElementID, [getGeometryBoardChange(self, { addBuffers: true, includeUnits: true })], context)
+      applyChanges(domElementID, [getGeometryBoardChange(self,
+        { addBuffers: true, includeUnits: true, showAllContent })],
+      context)
         .filter(result => result != null)
         .forEach(changeResult => {
           const changeElems = castArray(changeResult);
@@ -517,6 +520,15 @@ export const GeometryContentModel = GeometryBaseContentModel
           });
         });
 
+      if (showAllContent) {
+        const extents = getBoardObjectsExtents(board);
+        console.log("Resize to show all content", extents);
+        const params: IAxesParams = {
+          xMin: extents.xMin, xMax: extents.xMax, yMin: extents.yMin, yMax: extents.yMax
+        };
+        rescaleBoard(board, params, false);
+      }
+
       resumeBoardUpdates(board);
       return board;
     }
@@ -542,6 +554,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         xMax * widthMultiplier + xMaxBufferRange,
         yMin * heightMultiplier - yBufferRange
       ];
+      console.log("Resizing board", scaledWidth, scaledHeight, newBoundingBox);
       board.resizeContainer(scaledWidth, scaledHeight, false, true);
       board.setBoundingBox(newBoundingBox, false);
       board.update();
@@ -559,7 +572,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       self.zoom = newUnit/kGeometryDefaultPixelsPerUnit;
     }
 
-    function rescaleBoard(board: JXG.Board, params: IAxesParams) {
+    function rescaleBoard(board: JXG.Board, params: IAxesParams, writeToModel: boolean) {
       const { canvasWidth, canvasHeight } = board;
       const { xName, xAnnotation, xMin, xMax, yName, yAnnotation, yMin, yMax } = params;
       const width = canvasWidth - kXAxisTotalBuffer;
@@ -602,8 +615,9 @@ export const GeometryContentModel = GeometryBaseContentModel
           && curY.unit === yAxisProperties.unit && curY.range === yAxisProperties.range) {
         return undefined;
       }
-      self.zoom = calcUnit/kGeometryDefaultPixelsPerUnit;
-      if (self.board) {
+      console.log("Rescaling board", xAxisProperties, yAxisProperties);
+      if (self.board && writeToModel) {
+        self.zoom = calcUnit/kGeometryDefaultPixelsPerUnit;
         applySnapshot(self.board.xAxis, xAxisProperties);
         applySnapshot(self.board.yAxis, yAxisProperties);
       }

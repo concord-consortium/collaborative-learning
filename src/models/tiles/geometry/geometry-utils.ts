@@ -14,6 +14,7 @@ import { SharedModelEntrySnapshotType } from "../../document/shared-model-entry"
 import { replaceJsonStringsWithUpdatedIds, UpdatedSharedDataSetIds } from "../../shared/shared-data-set";
 import { IClueObjectSnapshot } from "../../annotations/clue-object";
 import { linkedPointId, splitLinkedPointId } from "../table-link-types";
+import { GeometryElement } from "jsxgraph";
 
 export function copyCoords(coords: JXG.Coords) {
   const usrCoords = coords.usrCoords;
@@ -67,6 +68,25 @@ export function getPolygon(board: JXG.Board, id: string): JXG.Polygon|undefined 
 export function getCircle(board: JXG.Board, id: string): JXG.Circle|undefined {
   const obj = board.objects[id];
   return isCircle(obj) ? obj : undefined;
+}
+
+export function getBoardObjectsExtents(board: JXG.Board) {
+  let xMax = 1;
+  let yMax = 1;
+  let xMin = -1;
+  let yMin = -1;
+
+  forEachBoardObject(board, (obj: GeometryElement) => {
+    // Don't need to consider polygons since the extent of their points will be enough.
+    if (isPoint(obj) || isCircle(obj)) {
+      const [left, top, right, bottom] = obj.bounds();
+      if (left < xMin) xMin = left - 1;
+      if (right > xMax) xMax = right + 1;
+      if (top > yMax) yMax = top + 1;
+      if (bottom < yMin) yMin = bottom - 1;
+    }
+  });
+  return { xMax, yMax, xMin, yMin };
 }
 
 /**

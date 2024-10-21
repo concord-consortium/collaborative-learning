@@ -5,7 +5,6 @@ import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
 import objectHash from "object-hash";
 import { SizeMeProps } from "react-sizeme";
-import { GeometryElement } from "jsxgraph";
 
 import { pointBoundingBoxSize, pointButtonRadius, segmentButtonWidth, zoomFactor } from "./geometry-constants";
 import { BaseComponent } from "../../base";
@@ -25,7 +24,7 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           getPoint,
           getBoardObject,
           findBoardObject,
-          forEachBoardObject} from "../../../models/tiles/geometry/geometry-utils";
+          getBoardObjectsExtents} from "../../../models/tiles/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
 import {
@@ -71,6 +70,7 @@ export interface IGeometryContentProps extends IGeometryProps {
 }
 export interface IProps extends IGeometryContentProps, SizeMeProps {
   measureText: (text: string) => number;
+  showAllContent?: boolean;
 }
 
 // cf. https://mariusschulz.com/blog/mapped-type-modifiers-in-typescript#removing-the-readonly-mapped-type-modifier
@@ -726,10 +726,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private async initializeBoard(): Promise<JXG.Board> {
+    console.log("initializeBoard", this.props.showAllContent);
     return new Promise((resolve, reject) => {
       isGeometryContentReady(this.getContent()).then(() => {
         const board = this.getContent()
-          .initializeBoard(this.elementId, this.handleCreateElements,
+          .initializeBoard(this.elementId, this.props.showAllContent, this.handleCreateElements,
             (b: JXG.Board) => this.syncLinkedGeometry(b));
         if (board) {
           this.handleCreateBoard(board);
@@ -787,30 +788,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     this.applyChange(() => {
       const content = this.getContent();
-      const axes = content.rescaleBoard(board, params);
+      const axes = content.rescaleBoard(board, params, true);
       if (axes) {
         axes.forEach(this.handleCreateAxis);
       }
     });
-  }
-
-  private getBoardObjectsExtents(board: JXG.Board) {
-    let xMax = 1;
-    let yMax = 1;
-    let xMin = -1;
-    let yMin = -1;
-
-    forEachBoardObject(board, (obj: GeometryElement) => {
-      // Don't need to consider polygons since the extent of their points will be enough.
-      if (isPoint(obj) || isCircle(obj)) {
-        const [left, top, right, bottom] = obj.bounds();
-        if (left < xMin) xMin = left - 1;
-        if (right > xMax) xMax = right + 1;
-        if (top > yMax) yMax = top + 1;
-        if (bottom < yMin) yMin = bottom - 1;
-      }
-    });
-    return { xMax, yMax, xMin, yMin };
   }
 
   syncLinkedGeometry(_board?: JXG.Board) {
@@ -911,7 +893,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private scaleToFit = () => {
     const { board } = this.state;
     if (!board || this.props.readOnly) return;
-    const extents = this.getBoardObjectsExtents(board);
+    const extents = getBoardObjectsExtents(board);
     this.rescaleBoardAndAxes(extents);
   };
 

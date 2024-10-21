@@ -135,7 +135,7 @@ describe("GeometryContent", () => {
     function onCreate(elt: JXG.GeometryElement) {
       // handle a point
     }
-    const board = content.initializeBoard(divId, onCreate, (b) => {}) as JXG.Board;
+    const board = content.initializeBoard(divId, false, onCreate, (b) => {}) as JXG.Board;
     content.resizeBoard(board, 200, 200);
     content.updateScale(board, 0.5);
     return board;
@@ -269,7 +269,7 @@ describe("GeometryContent", () => {
       yMax: 3
     };
 
-    content.rescaleBoard(board, params);
+    content.rescaleBoard(board, params, true);
     expect(content.board?.xAxis.name).toBe("xName");
     expect(content.board?.xAxis.label).toBe("xAnnotation");
     expect(content.board?.xAxis.min).toBe(-1);

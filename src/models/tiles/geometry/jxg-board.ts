@@ -287,12 +287,16 @@ function addAxes(board: JXG.Board, params: IAddAxesParams) {
 export const boardChangeAgent: JXGChangeAgent = {
   create: (boardOrDomId: JXG.Board|string, change: JXGChange) => {
     const props = change.properties as JXGProperties;
+    console.log("create board with props", props);
     const board = isBoard(boardOrDomId)
                     ? boardOrDomId
                     : createBoard(boardOrDomId, props);
     // If we created the board from a DOM element ID, then we need to add the axes.
     // If we are undoing an action, then the board already exists but its axes have
     // been removed, so we have to add the axes in that case as well.
+    if (props.showAllContent) {
+      props.boundingBox = [0, 100, 100, 0]; // xMin, yMax, xMax, yMin
+    }
     const boundingBox = scaleBoundingBoxToElement(board.containerObj.id, props);
     const scale = getCanvasScale(board ? board.container : boardOrDomId as string);
     const [xName, yName] = getAxisLabelsFromProps(props);
