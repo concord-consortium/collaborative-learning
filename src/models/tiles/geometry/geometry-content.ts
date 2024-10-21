@@ -556,6 +556,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       const oldUnit = (xAxis.unit + yAxis.unit) / 2;
       const newUnit = oldUnit * factor;
       xAxis.unit = yAxis.unit = newUnit;
+      self.zoom = newUnit/kGeometryDefaultPixelsPerUnit;
     }
 
     function rescaleBoard(board: JXG.Board, params: IAxesParams) {
@@ -601,6 +602,7 @@ export const GeometryContentModel = GeometryBaseContentModel
           && curY.unit === yAxisProperties.unit && curY.range === yAxisProperties.range) {
         return undefined;
       }
+      self.zoom = calcUnit/kGeometryDefaultPixelsPerUnit;
       if (self.board) {
         applySnapshot(self.board.xAxis, xAxisProperties);
         applySnapshot(self.board.yAxis, yAxisProperties);
