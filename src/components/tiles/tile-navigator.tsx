@@ -48,16 +48,6 @@ export const TileNavigator = observer(function TileNavigator(props: INavigatorPr
   const placementButtonRef = useRef<HTMLButtonElement>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // Adjust the props for the scaled down version of the tile.
-  const renderTileProps = {
-    ...tileProps,
-    navigatorAllowed: false,
-    readOnly: true,
-    overflowVisible: true,
-    svgWidth: canvasSize.width,
-    svgHeight: canvasSize.height,
-  };
-
   // Determine the width and height of the navigator viewport based on a scale factor
   // calculated from the parent tile's dimensions and navigator's dimensions.
   const scaleX = navigatorSize.width / tileWidth;
@@ -67,6 +57,18 @@ export const TileNavigator = observer(function TileNavigator(props: INavigatorPr
   const scaleFactor = zoom > 1 ? baseScaleFactor / zoom : baseScaleFactor;
   const viewportWidth = tileWidth * scaleFactor;
   const viewportHeight = tileHeight * scaleFactor;
+
+  // Adjust the props for the scaled down version of the tile.
+  const renderTileProps = {
+    ...tileProps,
+    navigatorAllowed: false,
+    showAllContent: true,
+    readOnly: true,
+    overflowVisible: true,
+    svgWidth: canvasSize.width,
+    svgHeight: canvasSize.height,
+    scale: scaleFactor,
+  };
 
   // Define a clip path for the overlay that allows content within the viewport's bounds
   // to show through without being covered by the semi-transparent overlay.

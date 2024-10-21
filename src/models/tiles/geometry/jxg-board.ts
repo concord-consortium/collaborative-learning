@@ -8,7 +8,8 @@ import {
 import { goodTickValue } from "../../../utilities/graph-utils";
 import { filterBoardObjects, findBoardObject, forEachBoardObject, getBoardObject } from "./geometry-utils";
 
-const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
+// Only elements with one of these classes will be checked for CSS scaling transforms
+const kScalerClasses = ["canvas-scaler", "scaled-list-item", "tile-navigator-tile-content"];
 
 export function suspendBoardUpdates(board: JXG.Board) {
   if (board.suspendCount) {
