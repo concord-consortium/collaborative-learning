@@ -1,6 +1,7 @@
 import { castArray, difference, each, every, size as _size, union } from "lodash";
 import { reaction } from "mobx";
 import { addDisposer, applySnapshot, detach, Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
+import { BoundingBox } from "jsxgraph";
 import stringify from "json-stringify-pretty-compact";
 import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
@@ -486,9 +487,12 @@ export const GeometryContentModel = GeometryBaseContentModel
       let board: JXG.Board | undefined;
       const context = getDispatcherContext();
 
+      const initialBoardParamters = getGeometryBoardChange(self,
+        { addBuffers: true, includeUnits: true, showAllContent });
+      const initialProperties: JXGProperties = initialBoardParamters.properties || {};
+
       // Create the board and axes
-      applyChanges(domElementID, [getGeometryBoardChange(self,
-        { addBuffers: true, includeUnits: true, showAllContent })],
+      applyChanges(domElementID, [initialBoardParamters],
       context)
         .filter(result => result != null)
         .forEach(changeResult => {
@@ -521,10 +525,19 @@ export const GeometryContentModel = GeometryBaseContentModel
         });
 
       if (showAllContent) {
+        // If we're showing all content, rescale to fit the extent of all objects.
+        // This is done after all objects are added to the board so that we can ask JSXGraph for the extents.
         const extents = getBoardObjectsExtents(board);
-        console.log("Resize to show all content", extents);
+        // The extents should only be used to show more, not less of the xy plane
+        const initialBB: BoundingBox = initialProperties.boundingBox;
+        const [xMin, yMax, xMax, yMin] = initialBB;
+
+        console.log("Resize to show all content", extents, initialBB);
         const params: IAxesParams = {
-          xMin: extents.xMin, xMax: extents.xMax, yMin: extents.yMin, yMax: extents.yMax
+          xMin: Math.min(xMin, extents.xMin),
+          xMax: Math.max(xMax, extents.xMax),
+          yMin: Math.min(yMin, extents.yMin),
+          yMax: Math.max(yMax, extents.yMax)
         };
         rescaleBoard(board, params, false);
       }

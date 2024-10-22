@@ -1,5 +1,6 @@
 import { values } from "lodash";
 import { Instance, SnapshotOut } from "mobx-state-tree";
+import { GeometryElement } from "jsxgraph";
 import { getAssociatedPolygon } from "./jxg-polygon";
 import { isCircle, isGeometryElement, isPoint, isPolygon } from "./jxg-types";
 import { JXGObjectType } from "./jxg-changes";
@@ -14,7 +15,6 @@ import { SharedModelEntrySnapshotType } from "../../document/shared-model-entry"
 import { replaceJsonStringsWithUpdatedIds, UpdatedSharedDataSetIds } from "../../shared/shared-data-set";
 import { IClueObjectSnapshot } from "../../annotations/clue-object";
 import { linkedPointId, splitLinkedPointId } from "../table-link-types";
-import { GeometryElement } from "jsxgraph";
 
 export function copyCoords(coords: JXG.Coords) {
   const usrCoords = coords.usrCoords;
