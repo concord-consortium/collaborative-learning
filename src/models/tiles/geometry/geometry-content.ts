@@ -532,7 +532,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         const initialBB: BoundingBox = initialProperties.boundingBox;
         const [xMin, yMax, xMax, yMin] = initialBB;
 
-        console.log("Resize to show all content", extents, initialBB);
         const params: IAxesParams = {
           xMin: Math.min(xMin, extents.xMin),
           xMax: Math.max(xMax, extents.xMax),
@@ -567,7 +566,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         xMax * widthMultiplier + xMaxBufferRange,
         yMin * heightMultiplier - yBufferRange
       ];
-      console.log("Resizing board", scaledWidth, scaledHeight, newBoundingBox);
       board.resizeContainer(scaledWidth, scaledHeight, false, true);
       board.setBoundingBox(newBoundingBox, false);
       board.update();
@@ -628,7 +626,6 @@ export const GeometryContentModel = GeometryBaseContentModel
           && curY.unit === yAxisProperties.unit && curY.range === yAxisProperties.range) {
         return undefined;
       }
-      console.log("Rescaling board", xAxisProperties, yAxisProperties);
       if (self.board && writeToModel) {
         self.zoom = calcUnit/kGeometryDefaultPixelsPerUnit;
         applySnapshot(self.board.xAxis, xAxisProperties);

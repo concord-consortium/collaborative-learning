@@ -15,6 +15,7 @@ import { SharedModelEntrySnapshotType } from "../../document/shared-model-entry"
 import { replaceJsonStringsWithUpdatedIds, UpdatedSharedDataSetIds } from "../../shared/shared-data-set";
 import { IClueObjectSnapshot } from "../../annotations/clue-object";
 import { linkedPointId, splitLinkedPointId } from "../table-link-types";
+import { BoundingBox } from "../navigatable-tile-model";
 
 export function copyCoords(coords: JXG.Coords) {
   const usrCoords = coords.usrCoords;
@@ -87,6 +88,24 @@ export function getBoardObjectsExtents(board: JXG.Board) {
     }
   });
   return { xMax, yMax, xMin, yMin };
+}
+
+/**
+ * Convert a JSXGraph-style BoundingBox to a CLUE-style BoundingBox.
+ */
+export function formatAsBoundingBox(coordinates: [number, number, number, number]): BoundingBox {
+  const [x1, y1, x2, y2] = coordinates;
+  return { nw: { x: x1, y: y1 }, se: { x: x2, y: y2 } };
+}
+
+/**
+ * Return a bounding box that includes the areas of both input bounding boxes.
+ */
+export function combineBoundingBoxes(b1: BoundingBox, b2: BoundingBox|undefined): BoundingBox {
+  return {
+    nw: { x: Math.min(b1.nw.x, b2?.nw.x ?? b1.nw.x), y: Math.min(b1.nw.y, b2?.nw.y ?? b1.nw.y) },
+    se: { x: Math.max(b1.se.x, b2?.se.x ?? b1.se.x), y: Math.max(b1.se.y, b2?.se.y ?? b1.se.y) }
+  };
 }
 
 /**

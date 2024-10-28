@@ -11,8 +11,6 @@ export interface Point { x: number; y: number; }
 export interface BoundingBox {
   nw: Point;
   se: Point;
-  start?: Point;
-  end?: Point;
 }
 
 export const NavigatableTileModel = TileContentModel

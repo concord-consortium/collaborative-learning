@@ -57,8 +57,18 @@ describe("DocumentContentModel", () => {
     expect(parsedContentExport()).toEqual({
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
-        { title: "Coordinate Grid 1", content: { type: "Geometry", objects: {},
-            linkedAttributeColors: {}, pointMetadata: {} } },
+        { title: "Coordinate Grid 1",
+          content: {
+            type: "Geometry",
+            objects: {},
+            linkedAttributeColors: {},
+            pointMetadata: {},
+            offsetX: 0,
+            offsetY: 0,
+            isNavigatorVisible: true,
+            navigatorPosition: "bottom",
+            zoom: 1
+          } },
         { title: "Table 1", content: { type: "Table", columnWidths } },
         { title: "Sketch 1", content: { type: "Drawing", objects: [] } }
       ]
@@ -470,7 +480,17 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
       { title: "Coordinate Grid 1",
-          content: { type: "Geometry", objects: {}, linkedAttributeColors: {}, pointMetadata: {} } },
+          content: {
+            type: "Geometry",
+            objects: {},
+            linkedAttributeColors: {},
+            pointMetadata: {},
+            isNavigatorVisible: true,
+            navigatorPosition: "bottom",
+            zoom: 1,
+            offsetX: 0,
+            offsetY: 0
+           } },
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);
@@ -482,8 +502,17 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Placeholder: "A" },
       { Header: "B"},
       [
-        { title: "Coordinate Grid 1", content: { type: "Geometry", objects: {},
-          linkedAttributeColors: {}, pointMetadata: {} } },
+        { title: "Coordinate Grid 1", content: {
+          type: "Geometry",
+          objects: {},
+          linkedAttributeColors: {},
+          pointMetadata: {},
+          isNavigatorVisible: true,
+          navigatorPosition: "bottom",
+          zoom: 1,
+          offsetX: 0,
+          offsetY: 0
+        } },
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ],
     ]);
@@ -491,8 +520,17 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     content.moveTile(geometryId, { rowDropIndex: 1, rowDropLocation: "left", rowInsertIndex: 1 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
-        { title: "Coordinate Grid 1", content: { type: "Geometry", objects: {},
-          linkedAttributeColors: {}, pointMetadata: {} } },
+        { title: "Coordinate Grid 1", content: {
+          type: "Geometry",
+          objects: {},
+          linkedAttributeColors: {},
+          pointMetadata: {},
+          isNavigatorVisible: true,
+          navigatorPosition: "bottom",
+          zoom: 1,
+          offsetX: 0,
+          offsetY: 0
+         } },
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);
@@ -508,8 +546,17 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "A"},
       [
         { content: { type: "Text", format: "html", text: ["<p></p>"] } },
-        { title: "Coordinate Grid 1", content: { type: "Geometry", objects: {},
-          linkedAttributeColors: {}, pointMetadata: {} } },
+        { title: "Coordinate Grid 1", content: {
+          type: "Geometry",
+          objects: {},
+          linkedAttributeColors: {},
+          pointMetadata: {},
+          isNavigatorVisible: true,
+          navigatorPosition: "bottom",
+          zoom: 1,
+          offsetX: 0,
+          offsetY: 0
+        } },
       ],
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
@@ -524,8 +571,17 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     content.deleteTile(tileId);
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
-      { title: "Coordinate Grid 1", content: { type: "Geometry", objects: {},
-        linkedAttributeColors: {}, pointMetadata: {} } },
+      { title: "Coordinate Grid 1", content: {
+        type: "Geometry",
+        objects: {},
+        linkedAttributeColors: {},
+        pointMetadata: {},
+        isNavigatorVisible: true,
+        navigatorPosition: "bottom",
+        zoom: 1,
+        offsetX: 0,
+        offsetY: 0
+      } },
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);
