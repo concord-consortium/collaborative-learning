@@ -5,6 +5,7 @@ import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
 import objectHash from "object-hash";
 import { SizeMeProps } from "react-sizeme";
+import classNames from "classnames";
 
 import { pointBoundingBoxSize, pointButtonRadius, segmentButtonWidth, zoomFactor } from "./geometry-constants";
 import { BaseComponent } from "../../base";
@@ -547,9 +548,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   public render() {
-    const editableClass = this.props.readOnly ? "read-only" : "editable";
-    const isLinkedClass = this.getContent().isLinked ? "is-linked" : "";
-    const classes = `geometry-content ${editableClass} ${isLinkedClass}`;
+    const classes = classNames("geometry-content",
+      this.props.readOnly ? "read-only" : "editable",
+      this.props.showAllContent ? "show-all" : "show-tile",
+      { "is-linked": this.getContent().isLinked }
+    );
     return (
       <>
         {this.renderCommentEditor()}
@@ -699,6 +702,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private renderTitleArea() {
+    if (this.props.showAllContent) return null;
     return (
       <TileTitleArea>
         {this.renderTitle()}

@@ -12,6 +12,7 @@ import { ColorPalette } from "./color-palette";
 import { clueDataColorInfo } from "../../../utilities/color-utils";
 import { GeometryContentModelType } from "src/models/tiles/geometry/geometry-content";
 import { NavigatorButton } from "../../toolbar/navigator-button";
+import { logGeometryEvent } from "../../../models/tiles/geometry/geometry-utils";
 
 import AddImageSvg from "../../../clue/assets/icons/geometry/add-image-icon.svg";
 import CommentSvg from "../../../assets/icons/comment/comment.svg";
@@ -301,6 +302,15 @@ const FitAllButton = observer(function FitAllButton({name}: IToolbarButtonCompon
   );
 });
 
+const GeometryNavigatorButton = ({name}: IToolbarButtonComponentProps) => {
+  const { content } = useGeometryTileContext();
+  const logChange = (visible: boolean) => {
+    if (!content) return;
+    logGeometryEvent(content, visible ? "showNavigator" : "hideNavigator", "board");
+  };
+  return (<NavigatorButton name={name} onChange={logChange} />);
+};
+
 registerTileToolbarButtons("geometry",
   [
     { name: "select",
@@ -364,7 +374,7 @@ registerTileToolbarButtons("geometry",
     },
     {
       name: "navigator",
-      component: NavigatorButton
+      component: GeometryNavigatorButton
     },
   ]
 );

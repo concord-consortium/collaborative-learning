@@ -60,7 +60,7 @@ context('Geometry Table Integration', function () {
     tableToolTile.getIndexNumberToggle().should('exist').click({ force: true });
     tableToolTile.getTableIndexColumnCell().first().should('contain', '1');
     geometryToolTile.getGeometryTile().click();
-    geometryToolTile.getGraphPointLabel().should('have.length', 2); // just x and y labels
+    geometryToolTile.getGraphPointLabel().should('have.length', 1); // just y label (x hidden by navigator)
     geometryToolTile.getGraphPointLabel().contains('A').should('not.exist');
 
     cy.log('verify points added to table are added to geometry');

@@ -342,13 +342,13 @@ context('Geometry Tool', function () {
     let origPointLabel2 = 5.0;
 
     // Verify that the first point label is close to 10.0
-    geometryToolTile.getGraphPointLabel().eq(2).invoke('text').then((text) => {
+    geometryToolTile.getGraphPointLabel().eq(1).invoke('text').then((text) => {
       const value = parseFloat(text);
       expect(value).to.be.closeTo(origPointLabel1, 0.1); // Allow tolerance for value close to 10.0
     });
 
     // Verify that the second point label is close to 5.0
-    geometryToolTile.getGraphPointLabel().eq(3).invoke('text').then((text) => {
+    geometryToolTile.getGraphPointLabel().eq(2).invoke('text').then((text) => {
       const value = parseFloat(text);
       expect(value).to.be.closeTo(origPointLabel2, 0.1); // Allow tolerance for value close to 5.0
     });
@@ -381,13 +381,13 @@ context('Geometry Tool', function () {
     });
 
     // Verify that the first line segment has changed to a value close to 10.4
-    geometryToolTile.getGraphPointLabel().eq(2).invoke('text').then((text) => {
+    geometryToolTile.getGraphPointLabel().eq(1).invoke('text').then((text) => {
       const lineSegment1 = parseFloat(text);
       expect(lineSegment1).to.be.closeTo(updatedValue1, 0.1); // Tolerance for value close to 10.4
     });
 
     // Verify that the second line segment has changed to a value close to 4.6
-    geometryToolTile.getGraphPointLabel().eq(3).invoke('text').then((text) => {
+    geometryToolTile.getGraphPointLabel().eq(2).invoke('text').then((text) => {
       const lineSegment2 = parseFloat(text);
       expect(lineSegment2).to.be.closeTo(updatedValue2, 0.1); // Tolerance for value close to 4.6
     });
@@ -413,13 +413,13 @@ context('Geometry Tool', function () {
     });
 
     // Verify that the first line segment has returned to a value close to 10.0
-    geometryToolTile.getGraphPointLabel().eq(2).invoke('text').then((text) => {
+    geometryToolTile.getGraphPointLabel().eq(1).invoke('text').then((text) => {
       const lineSegment1 = parseFloat(text);
       expect(lineSegment1).to.be.closeTo(origPointLabel1, 0.1); // Tolerance for value close to 10.0
     });
 
     // Verify that the second line segment has returned to a value close to 5.0
-    geometryToolTile.getGraphPointLabel().eq(3).invoke('text').then((text) => {
+    geometryToolTile.getGraphPointLabel().eq(2).invoke('text').then((text) => {
       const lineSegment2 = parseFloat(text);
       expect(lineSegment2).to.be.closeTo(origPointLabel2, 0.1); // Tolerance for value close to 5.0
     });

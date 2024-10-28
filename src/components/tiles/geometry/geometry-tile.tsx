@@ -97,7 +97,8 @@ const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geome
   // support pointer events.
   return (
     <GeometryTileContext.Provider value={context}>
-      <div className="geometry-tool" ref={domElement} tabIndex={0}
+      <div className="geometry-tool" data-testid="geometry-tool"
+        ref={domElement} tabIndex={0}
         onPointerDownCapture={handlePointerDown}
         onPointerUpCapture={handlePointerUp}
         onMouseDownCapture={handlePointerDown}
