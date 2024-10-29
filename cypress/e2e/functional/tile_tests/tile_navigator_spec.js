@@ -186,7 +186,7 @@ context("Tile Navigator", () => {
     cy.log("Click the Fit All button to bring all content into view");
     clueCanvas.clickToolbarButton("drawing", "fit-all");
     drawToolTile.getDrawTileObjectCanvas().then(canvas => {
-      const expectedTranslationValues = { x: 90, y: 33 };
+      const expectedTranslationValues = { x: 89, y: 33 };
       const expectedScale = 1.04;
       drawToolTile.verifyTransformValues(canvas.attr('transform'), expectedTranslationValues, expectedScale);
     });

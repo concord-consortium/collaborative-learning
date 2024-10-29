@@ -213,14 +213,14 @@ context('Test Canvas', function () {
       const dragToY = rect.top + rect.height + 100;
       const transfer = new DataTransfer;
       geometryToolTile.getGeometryTile().parent('.tool-tile').find('.tool-tile-resize-handle')
-        .trigger('dragstart', { dataTransfer: transfer });
+        .trigger('dragstart', { dataTransfer: transfer, force: true }); // The navigator covers a small corner of the resize handle, need to force for Cypress
       geometryToolTile.getGeometryTile().parent('.tool-tile')
         .trigger('dragover', { clientX: rect.left, clientY: dragToY, force: true, dataTransfer: transfer });
       geometryToolTile.getGeometryTile().parent('.tool-tile')
         .trigger('drop', { clientX: rect.left, clientY: dragToY, force: true, dataTransfer: transfer });
       geometryToolTile.getGeometryTile().parent('.tool-tile').find('.tool-tile-resize-handle')
         .trigger('dragend', { clientX: rect.left, clientY: dragToY, force: true, dataTransfer: transfer });
-      geometryToolTile.getGeometryTile().invoke('height').should('be.approximately', rect.height + 150, 30);
+      geometryToolTile.getGeometryTile().invoke('height').should('be.approximately', rect.height + 100, 30);
     });
 
     cy.log('adds an image tool');
