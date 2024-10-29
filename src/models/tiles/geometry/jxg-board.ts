@@ -197,7 +197,6 @@ function getAxisUnitsFromProps(props?: JXGProperties, scale = 1) {
 
 function createBoard(domElementId: string, properties?: JXGProperties) {
   if (document.getElementById(domElementId) == null) {
-    console.log("Cannot create board; element not found:", domElementId);
     return;
   }
   // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php

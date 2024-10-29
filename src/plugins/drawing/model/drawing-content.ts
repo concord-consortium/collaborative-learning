@@ -141,26 +141,6 @@ export const DrawingContentModel = NavigatableTileModel
   .views(self => ({
     getSelectedObjects():DrawingObjectType[] {
       return self.selection.map((id) => self.objectMap[id]).filter((x)=>!!x) as DrawingObjectType[];
-    },
-    get contentSize(): { contentWidth: number, contentHeight: number } {
-      const contentBoundingBox = self.objectsBoundingBox;
-      const leftExtent = (contentBoundingBox.nw.x * self.zoom);
-      const rightExtent = (contentBoundingBox.se.x * self.zoom);
-      const topExtent = (contentBoundingBox.nw.y * self.zoom);
-      const bottomExtent = (contentBoundingBox.se.y * self.zoom);
-      const contentWidth = rightExtent - leftExtent;
-      const contentHeight = bottomExtent - topExtent;
-
-      return { contentWidth, contentHeight };
-    },
-    contentFitsViewport(tileWidth: number, tileHeight: number, unavailableSpace=0): boolean {
-      const bb = self.objectsBoundingBox;
-      const heightContained = bb.se.y * self.zoom + self.offsetY <= tileHeight &&
-                              bb.nw.y * self.zoom + self.offsetY >= 0;
-      const widthContained = bb.se.x * self.zoom + self.offsetX <= tileWidth + unavailableSpace &&
-                             bb.nw.x * self.zoom + self.offsetX >= 0;
-
-      return heightContained && widthContained;
     }
   }))
   .views(self => tileContentAPIViews({

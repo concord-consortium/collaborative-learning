@@ -7,7 +7,7 @@ import { ELabelOption, JXGPositionProperty } from "./jxg-changes";
 import { kGeometryDefaultPixelsPerUnit } from "./jxg-types";
 import { findLeastUsedNumber } from "../../../utilities/math-utils";
 import { clueDataColorInfo } from "../../../utilities/color-utils";
-import { BoundingBox, NavigatableTileModel } from "../navigatable-tile-model";
+import { NavigatableTileModel } from "../navigatable-tile-model";
 
 export interface IDependsUponResult {
   depends: boolean;
@@ -455,17 +455,6 @@ export const GeometryBaseContentModel = NavigatableTileModel
     return { ...rest };
   })
   .views(self => ({
-    get objectsBoundingBox(): BoundingBox | undefined {
-      // TODO implement this to return the bounding box of all objects
-      // Compare to `getBoardObjectsExtents` in geometry-content.tsx which does the same thing
-      // but it uses the JXG board to get the bounding box of each object - which is not so obvious for circles
-      // Maybe the tile navigator could be changed to make this call to the component rather than to the model?
-      return undefined;
-    },
-    contentFitsViewport(tileWidth: number, tileHeight: number, unavailableSpace=0) {
-      // TODO implement this to check if the content fits the viewport
-      return false;
-    },
     getColorSchemeForAttributeId(id: string) {
       return self.linkedAttributeColors.get(id);
     },
