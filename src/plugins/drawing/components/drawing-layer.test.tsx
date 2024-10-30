@@ -9,6 +9,7 @@ import { VectorEndShape, VectorType, endShapesForVectorType } from "../model/dra
 import { RectangleObject, RectangleObjectSnapshotForAdd, RectangleObjectType } from "../objects/rectangle";
 import { EllipseObject, EllipseObjectType } from "../objects/ellipse";
 import { ImageObject, ImageObjectType } from "../objects/image";
+import { TileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
 
 // The drawing tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
@@ -25,7 +26,11 @@ const getDrawingObject = (objectContent: DrawingContentModelType) => {
       throw new Error("Function not implemented.");
     }
   };
-  render(<DrawingLayerView {...drawingLayerProps} />);
+  render(
+    <TileNavigatorContext.Provider value={{ reportVisibleBoundingBox: () => {}}}>
+      <DrawingLayerView {...drawingLayerProps} />
+    </TileNavigatorContext.Provider>
+  );
   drawingLayer = screen.getByTestId("drawing-layer");
   return drawingLayer.firstChild;
 };

@@ -9,6 +9,7 @@
   right: 10px;
   transition: .2s position;
   width: 100px;
+  z-index: 10;
 
   &.top {
     padding-bottom: 15px;
@@ -42,19 +43,19 @@
     overflow: hidden;
 
     .tile-navigator-content-area {
-      background: #fff;
       height: 79px;
-      margin: 0 5px;
       overflow: hidden;
       position: relative;
       width: 100%;
 
       .tile-navigator-tile-content {
-        left: 50%;
-        overflow: visible;
+        background: #fff;
         pointer-events: none;
         position: absolute;
-        top: 50%;
+        top: 7.5px;
+        left: 5px;
+        height: calc(100% - 15px);
+        width: calc(100% - 10px);
         transform-origin: top left;
         z-index: 1;
 
@@ -64,12 +65,12 @@
       }
       .tile-navigator-overlay {
         background: $charcoal-light-4;
-        height: 100%;
-        left: 0;
-        opacity: .65;
         position: absolute;
-        top: 0;
-        width: 100%;
+        top: 7.5px;
+        left: 5px;
+        height: calc(100% - 15px);
+        width: calc(100% - 10px);
+        opacity: .40;
         z-index: 2;
       }
       .tile-navigator-viewport {

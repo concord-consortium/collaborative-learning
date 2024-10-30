@@ -2,8 +2,6 @@
 
 exports[`Drawing Layer Components Ellipse adds a ellipse 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -28,8 +26,6 @@ exports[`Drawing Layer Components Ellipse adds a ellipse 1`] = `
 
 exports[`Drawing Layer Components Ellipse deletes a ellipse 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -42,8 +38,6 @@ exports[`Drawing Layer Components Ellipse deletes a ellipse 1`] = `
 
 exports[`Drawing Layer Components Ellipse moves a ellipse 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -68,8 +62,6 @@ exports[`Drawing Layer Components Ellipse moves a ellipse 1`] = `
 
 exports[`Drawing Layer Components Freehand Line adds a freehand line 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -91,8 +83,6 @@ exports[`Drawing Layer Components Freehand Line adds a freehand line 1`] = `
 
 exports[`Drawing Layer Components Freehand Line deletes a freehand line 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -105,8 +95,6 @@ exports[`Drawing Layer Components Freehand Line deletes a freehand line 1`] = `
 
 exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -128,8 +116,6 @@ exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
 
 exports[`Drawing Layer Components Group creates a group 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -241,8 +227,6 @@ exports[`Drawing Layer Components Group creates a group 1`] = `
 
 exports[`Drawing Layer Components Group deletes a group 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -255,8 +239,6 @@ exports[`Drawing Layer Components Group deletes a group 1`] = `
 
 exports[`Drawing Layer Components Group moves a group 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -368,8 +350,6 @@ exports[`Drawing Layer Components Group moves a group 1`] = `
 
 exports[`Drawing Layer Components Image adds an image 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -392,8 +372,6 @@ exports[`Drawing Layer Components Image adds an image 1`] = `
 
 exports[`Drawing Layer Components Image deletes a image 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -406,8 +384,6 @@ exports[`Drawing Layer Components Image deletes a image 1`] = `
 
 exports[`Drawing Layer Components Image moves a image 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -430,8 +406,6 @@ exports[`Drawing Layer Components Image moves a image 1`] = `
 
 exports[`Drawing Layer Components Rectangle adds a Rectangle 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -457,8 +431,6 @@ exports[`Drawing Layer Components Rectangle adds a Rectangle 1`] = `
 
 exports[`Drawing Layer Components Rectangle deletes a rectangle 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -471,8 +443,6 @@ exports[`Drawing Layer Components Rectangle deletes a rectangle 1`] = `
 
 exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -498,8 +468,6 @@ exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
 
 exports[`Drawing Layer Components Vector arrow adds a Vector arrow 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -542,8 +510,6 @@ exports[`Drawing Layer Components Vector arrow adds a Vector arrow 1`] = `
 
 exports[`Drawing Layer Components Vector arrow changes vector to double arrow 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -586,8 +552,6 @@ exports[`Drawing Layer Components Vector arrow changes vector to double arrow 1`
 
 exports[`Drawing Layer Components Vector arrow changes vector to single arrow 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -623,8 +587,6 @@ exports[`Drawing Layer Components Vector arrow changes vector to single arrow 1`
 
 exports[`Drawing Layer Components Vector arrow deletes a vector arrow 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -637,8 +599,6 @@ exports[`Drawing Layer Components Vector arrow deletes a vector arrow 1`] = `
 
 exports[`Drawing Layer Components Vector arrow moves a vector arrow 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -681,8 +641,6 @@ exports[`Drawing Layer Components Vector arrow moves a vector arrow 1`] = `
 
 exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -711,8 +669,6 @@ exports[`Drawing Layer Components Vector line adds a Vector line 1`] = `
 
 exports[`Drawing Layer Components Vector line deletes a vector line 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -725,8 +681,6 @@ exports[`Drawing Layer Components Vector line deletes a vector line 1`] = `
 
 exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -755,8 +709,6 @@ exports[`Drawing Layer Components Vector line moves a vector line 1`] = `
 
 exports[`Drawing Layer Zoom zooms in 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g
@@ -782,8 +734,6 @@ exports[`Drawing Layer Zoom zooms in 1`] = `
 
 exports[`Drawing Layer Zoom zooms out 1`] = `
 <svg
-  height="1500"
-  width="1500"
   xmlns:xlink="http://www.w3.org/1999/xlink"
 >
   <g

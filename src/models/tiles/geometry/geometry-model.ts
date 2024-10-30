@@ -3,11 +3,11 @@ import { applySnapshot, getSnapshot, Instance, SnapshotIn, types } from "mobx-st
 import { kDefaultBoardModelInputProps, kGeometryTileType } from "./geometry-types";
 import { uniqueId } from "../../../utilities/js-utils";
 import { typeField } from "../../../utilities/mst-utils";
-import { TileContentModel } from "../tile-content";
 import { ELabelOption, JXGPositionProperty } from "./jxg-changes";
 import { kGeometryDefaultPixelsPerUnit } from "./jxg-types";
 import { findLeastUsedNumber } from "../../../utilities/math-utils";
 import { clueDataColorInfo } from "../../../utilities/color-utils";
+import { NavigatableTileModel } from "../navigatable-tile-model";
 
 export interface IDependsUponResult {
   depends: boolean;
@@ -45,6 +45,9 @@ export const AxisModel = types.model("AxisModel", {
   },
   setRange(range: number) {
     self.range = range;
+  },
+  panByPixels(pixels: number) {
+    self.min += pixels / self.unit;
   }
 }));
 export interface AxisModelType extends Instance<typeof AxisModel> {}
@@ -414,7 +417,7 @@ export type GeometryObjectModelUnion = CircleModelType | CommentModelType | Imag
                                        PointModelType | PolygonModelType | VertexAngleModelType;
 
 // Define the shape of the geometry content without the views/actions, etc. to avoid circular references
-export const GeometryBaseContentModel = TileContentModel
+export const GeometryBaseContentModel = NavigatableTileModel
   .named("GeometryBaseContent")
   .props({
     type: types.optional(types.literal(kGeometryTileType), kGeometryTileType),

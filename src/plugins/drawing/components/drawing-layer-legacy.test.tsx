@@ -11,6 +11,7 @@ import { EllipseObjectSnapshot } from "../objects/ellipse";
 import { ImageObjectSnapshot } from "../objects/image";
 import { DrawingMigrator } from "../model/drawing-migrator";
 import { EntryStatus, gImageMap, ImageMapEntry } from "../../../models/image-map";
+import { TileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
 
 // The drawing tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
@@ -25,7 +26,11 @@ const getDrawingObject = (objectContent: DrawingContentModelType) => {
       throw new Error("Function not implemented.");
     }
   };
-  render(<DrawingLayerView {...drawingLayerProps} />);
+  render(
+    <TileNavigatorContext.Provider value={{ reportVisibleBoundingBox: () => {}}}>
+      <DrawingLayerView {...drawingLayerProps} />
+    </TileNavigatorContext.Provider>
+);
   drawingLayer = screen.getByTestId("drawing-layer");
   return drawingLayer.firstChild;
 };

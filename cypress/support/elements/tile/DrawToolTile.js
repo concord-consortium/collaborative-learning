@@ -148,14 +148,14 @@ class DrawToolTile{
       this.getTextDrawing().last().get('textarea').type(text + "{enter}");
     }
 
-    verifyTransformValues(transform, expectedTranslate, expectedScale, tolerance=1) {
+    verifyTransformValues(transform, expectedTranslate, expectedScale, tolerance=1, scaleTolerance=0.01) {
       const translate = transform.replace(/.*translate\(([^,]+), ([^)]+)\).*/, '$1,$2');
       const translateX = parseFloat(translate.split(',')[0]);
       const translateY = parseFloat(translate.split(',')[1]);
       expect(translateX).to.be.closeTo(expectedTranslate.x, tolerance);
       expect(translateY).to.be.closeTo(expectedTranslate.y, tolerance);
       const scale = parseFloat(transform.replace(/.*scale\((\d+(\.\d+)?)\)/, '$1'));
-      expect(scale).to.equal(expectedScale);
+      expect(scale).to.be.closeTo(expectedScale, scaleTolerance);
     }
 
 }

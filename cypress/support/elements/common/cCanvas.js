@@ -270,6 +270,7 @@ class ClueCanvas {
                 tileElement = imageToolTile.getImageTile().last().click({ force: true }).parent();
                 break;
             case 'draw':
+            case 'drawing':
                 // For some reason the getDrawTile returns the tool tile component
                 tileElement = drawToolTile.getDrawTile().last().click({ force: true });
                 break;

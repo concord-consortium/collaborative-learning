@@ -1,6 +1,7 @@
 import { castArray, difference, each, every, size as _size, union } from "lodash";
 import { reaction } from "mobx";
 import { addDisposer, applySnapshot, detach, Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
+import { BoundingBox } from "jsxgraph";
 import stringify from "json-stringify-pretty-compact";
 import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
@@ -39,7 +40,7 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { gImageMap } from "../../image-map";
 import { IClueTileObject } from "../../annotations/clue-object";
 import { appendVertexId, getPoint, filterBoardObjects, forEachBoardObject, getBoardObject, getBoardObjectIds,
-  getPolygon, logGeometryEvent, removeClosingVertexId, getCircle } from "./geometry-utils";
+  getPolygon, logGeometryEvent, removeClosingVertexId, getCircle, getBoardObjectsExtents } from "./geometry-utils";
 import { getPointVisualProps } from "./jxg-point";
 import { getVertexAngle } from "./jxg-vertex-angle";
 import { GeometryTileMode } from "../../../components/tiles/geometry/geometry-types";
@@ -481,12 +482,18 @@ export const GeometryContentModel = GeometryBaseContentModel
       };
     }
 
-    function initializeBoard(domElementID: string,
+    function initializeBoard(domElementID: string, showAllContent: boolean|undefined,
         onCreate: onCreateCallback, syncLinked: (board:JXG.Board) => void): JXG.Board | undefined {
       let board: JXG.Board | undefined;
       const context = getDispatcherContext();
+
+      const initialBoardParamters = getGeometryBoardChange(self,
+        { addBuffers: true, includeUnits: true, showAllContent });
+      const initialProperties: JXGProperties = initialBoardParamters.properties || {};
+
       // Create the board and axes
-      applyChanges(domElementID, [getGeometryBoardChange(self, { addBuffers: true, includeUnits: true })], context)
+      applyChanges(domElementID, [initialBoardParamters],
+      context)
         .filter(result => result != null)
         .forEach(changeResult => {
           const changeElems = castArray(changeResult);
@@ -516,6 +523,23 @@ export const GeometryContentModel = GeometryBaseContentModel
             }
           });
         });
+
+      if (showAllContent) {
+        // If we're showing all content, rescale to fit the extent of all objects.
+        // This is done after all objects are added to the board so that we can ask JSXGraph for the extents.
+        const extents = getBoardObjectsExtents(board);
+        // The extents should only be used to show more, not less of the xy plane
+        const initialBB: BoundingBox = initialProperties.boundingBox;
+        const [xMin, yMax, xMax, yMin] = initialBB;
+
+        const params: IAxesParams = {
+          xMin: Math.min(xMin, extents.xMin),
+          xMax: Math.max(xMax, extents.xMax),
+          yMin: Math.min(yMin, extents.yMin),
+          yMax: Math.max(yMax, extents.yMax)
+        };
+        rescaleBoard(board, params, false);
+      }
 
       resumeBoardUpdates(board);
       return board;
@@ -556,9 +580,10 @@ export const GeometryContentModel = GeometryBaseContentModel
       const oldUnit = (xAxis.unit + yAxis.unit) / 2;
       const newUnit = oldUnit * factor;
       xAxis.unit = yAxis.unit = newUnit;
+      self.zoom = newUnit/kGeometryDefaultPixelsPerUnit;
     }
 
-    function rescaleBoard(board: JXG.Board, params: IAxesParams) {
+    function rescaleBoard(board: JXG.Board, params: IAxesParams, writeToModel: boolean) {
       const { canvasWidth, canvasHeight } = board;
       const { xName, xAnnotation, xMin, xMax, yName, yAnnotation, yMin, yMax } = params;
       const width = canvasWidth - kXAxisTotalBuffer;
@@ -601,7 +626,8 @@ export const GeometryContentModel = GeometryBaseContentModel
           && curY.unit === yAxisProperties.unit && curY.range === yAxisProperties.range) {
         return undefined;
       }
-      if (self.board) {
+      if (self.board && writeToModel) {
+        self.zoom = calcUnit/kGeometryDefaultPixelsPerUnit;
         applySnapshot(self.board.xAxis, xAxisProperties);
         applySnapshot(self.board.yAxis, yAxisProperties);
       }

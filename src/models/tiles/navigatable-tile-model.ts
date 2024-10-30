@@ -11,8 +11,6 @@ export interface Point { x: number; y: number; }
 export interface BoundingBox {
   nw: Point;
   se: Point;
-  start?: Point;
-  end?: Point;
 }
 
 export const NavigatableTileModel = TileContentModel
@@ -25,25 +23,6 @@ export const NavigatableTileModel = TileContentModel
     offsetY: types.optional(types.number, 0),
     zoom: types.optional(types.number, 1)
   })
-  .views(() => ({
-    get objectsBoundingBox(): BoundingBox | undefined {
-      // derived models should override
-      console.warn("Derived models should override objectsBoundingBox.");
-      return undefined;
-    }
-  }))
-  .views(self => ({
-    contentSize(): { width: number, height: number } {
-      // derived models should override
-      console.warn("Derived models should override contentSize.");
-      return { width: 0, height: 0 };
-    },
-    contentFitsViewport(tileWidth: number, tileHeight: number, unavailableSpace=0): boolean {
-      // derived models should override
-      console.warn("Derived models should override contentFitsViewport.");
-      return false;
-    }
-  }))
   .views(self => ({
     calculateOffset(canvasSize: {x: number, y: number}, targetZoom: number): Point {
       // Calculate offset required to keep the content centered in the viewport.

@@ -11,6 +11,8 @@ import { GeometryTileMode } from "./geometry-types";
 import { ColorPalette } from "./color-palette";
 import { clueDataColorInfo } from "../../../utilities/color-utils";
 import { GeometryContentModelType } from "src/models/tiles/geometry/geometry-content";
+import { NavigatorButton } from "../../toolbar/navigator-button";
+import { logGeometryEvent } from "../../../models/tiles/geometry/geometry-utils";
 
 import AddImageSvg from "../../../clue/assets/icons/geometry/add-image-icon.svg";
 import CommentSvg from "../../../assets/icons/comment/comment.svg";
@@ -278,9 +280,10 @@ function ZoomOutButton({name}: IToolbarButtonComponentProps) {
   );
 }
 
-function FitAllButton({name}: IToolbarButtonComponentProps) {
+const FitAllButton = observer(function FitAllButton({name}: IToolbarButtonComponentProps) {
   const readOnly = useReadOnlyContext();
-  const { handlers } = useGeometryTileContext();
+  const { content, handlers } = useGeometryTileContext();
+  const disabled = !content || content.objects.size === 0;
 
   function handleClick() {
     if (readOnly) return;
@@ -292,11 +295,21 @@ function FitAllButton({name}: IToolbarButtonComponentProps) {
       name={name}
       title="Fit all"
       onClick={handleClick}
-      >
+      disabled={disabled}
+    >
       <FitAllSvg/>
     </TileToolbarButton>
   );
-}
+});
+
+const GeometryNavigatorButton = ({name}: IToolbarButtonComponentProps) => {
+  const { content } = useGeometryTileContext();
+  const logChange = (visible: boolean) => {
+    if (!content) return;
+    logGeometryEvent(content, visible ? "showNavigator" : "hideNavigator", "board");
+  };
+  return (<NavigatorButton name={name} onChange={logChange} />);
+};
 
 registerTileToolbarButtons("geometry",
   [
@@ -358,6 +371,10 @@ registerTileToolbarButtons("geometry",
     {
       name: "fit-all",
       component: FitAllButton
-    }
+    },
+    {
+      name: "navigator",
+      component: GeometryNavigatorButton
+    },
   ]
 );

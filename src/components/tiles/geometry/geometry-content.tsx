@@ -5,7 +5,7 @@ import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
 import objectHash from "object-hash";
 import { SizeMeProps } from "react-sizeme";
-import { GeometryElement } from "jsxgraph";
+import classNames from "classnames";
 
 import { pointBoundingBoxSize, pointButtonRadius, segmentButtonWidth, zoomFactor } from "./geometry-constants";
 import { BaseComponent } from "../../base";
@@ -25,7 +25,8 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           getPoint,
           getBoardObject,
           findBoardObject,
-          forEachBoardObject} from "../../../models/tiles/geometry/geometry-utils";
+          getBoardObjectsExtents,
+          formatAsBoundingBox} from "../../../models/tiles/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
 import {
@@ -63,14 +64,17 @@ import { TileTitleArea } from "../tile-title-area";
 import { GeometryTileContext } from "./geometry-tile-context";
 import LabelPointDialog from "./label-point-dialog";
 import LabelPolygonDialog from "./label-polygon-dialog";
+import { ITileNavigatorContext } from "../hooks/use-tile-navigator-context";
 
 export interface IGeometryContentProps extends IGeometryProps {
-  onSetBoard: (board: JXG.Board) => void;
-  onSetActionHandlers: (handlers: IActionHandlers) => void;
-  onContentChange: () => void;
+  onSetBoard?: (board: JXG.Board) => void;
+  onSetActionHandlers?: (handlers: IActionHandlers) => void;
+  onContentChange?: () => void;
 }
 export interface IProps extends IGeometryContentProps, SizeMeProps {
   measureText: (text: string) => number;
+  showAllContent?: boolean;
+  tileNavigatorContext: ITileNavigatorContext;
 }
 
 // cf. https://mariusschulz.com/blog/mapped-type-modifiers-in-typescript#removing-the-readonly-mapped-type-modifier
@@ -486,6 +490,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         // let JSXGraph know about the scale change
         geometryContent.updateScale(this.state.board, scale);
       }
+
+      const coordinates = this.state.board.getBoundingBox();
+      if (coordinates) {
+        if (this.props.tileNavigatorContext) {
+          this.props.tileNavigatorContext.reportVisibleBoundingBox(formatAsBoundingBox(coordinates));
+        }
+      }
     }
     runInAction(() => this.updateObservable.updateCount++);
   }
@@ -537,9 +548,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   public render() {
-    const editableClass = this.props.readOnly ? "read-only" : "editable";
-    const isLinkedClass = this.getContent().isLinked ? "is-linked" : "";
-    const classes = `geometry-content ${editableClass} ${isLinkedClass}`;
+    const classes = classNames("geometry-content",
+      this.props.readOnly ? "read-only" : "editable",
+      this.props.showAllContent ? "show-all" : "show-tile",
+      { "is-linked": this.getContent().isLinked }
+    );
     return (
       <>
         {this.renderCommentEditor()}
@@ -689,6 +702,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private renderTitleArea() {
+    if (this.props.showAllContent) return null;
     return (
       <TileTitleArea>
         {this.renderTitle()}
@@ -729,7 +743,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return new Promise((resolve, reject) => {
       isGeometryContentReady(this.getContent()).then(() => {
         const board = this.getContent()
-          .initializeBoard(this.elementId, this.handleCreateElements,
+          .initializeBoard(this.elementId, this.props.showAllContent, this.handleCreateElements,
             (b: JXG.Board) => this.syncLinkedGeometry(b));
         if (board) {
           this.handleCreateBoard(board);
@@ -738,6 +752,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             this.updateImageUrl(url, filename);
           }
           this.setState({ board });
+          const coordinates = board.getBoundingBox();
+          if (coordinates) {
+            if (this.props.tileNavigatorContext) {
+              this.props.tileNavigatorContext.reportVisibleBoundingBox(formatAsBoundingBox(coordinates));
+            }
+          }
           resolve(board);
         }
       });
@@ -787,30 +807,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     this.applyChange(() => {
       const content = this.getContent();
-      const axes = content.rescaleBoard(board, params);
+      const axes = content.rescaleBoard(board, params, true);
       if (axes) {
         axes.forEach(this.handleCreateAxis);
       }
     });
-  }
-
-  private getBoardObjectsExtents(board: JXG.Board) {
-    let xMax = 1;
-    let yMax = 1;
-    let xMin = -1;
-    let yMin = -1;
-
-    forEachBoardObject(board, (obj: GeometryElement) => {
-      // Don't need to consider polygons since the extent of their points will be enough.
-      if (isPoint(obj) || isCircle(obj)) {
-        const [left, top, right, bottom] = obj.bounds();
-        if (left < xMin) xMin = left - 1;
-        if (right > xMax) xMax = right + 1;
-        if (top > yMax) yMax = top + 1;
-        if (bottom < yMin) yMin = bottom - 1;
-      }
-    });
-    return { xMax, yMax, xMin, yMin };
   }
 
   syncLinkedGeometry(_board?: JXG.Board) {
@@ -911,7 +912,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private scaleToFit = () => {
     const { board } = this.state;
     if (!board || this.props.readOnly) return;
-    const extents = this.getBoardObjectsExtents(board);
+    const extents = getBoardObjectsExtents(board);
     this.rescaleBoardAndAxes(extents);
   };
 

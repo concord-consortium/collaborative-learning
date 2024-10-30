@@ -11,16 +11,20 @@ import { SelectionBox } from "./selection-box";
 import { DrawingObjectSnapshotForAdd, DrawingObjectType, DrawingTool,
   HandleObjectHover,
   IDrawingLayer} from "../objects/drawing-object";
-import { Point, ToolbarSettings } from "../model/drawing-basic-types";
+import { BoundingBox, Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
 import { ImageObject } from "../objects/image";
 import { debounce } from "lodash";
 import { isGroupObject } from "../objects/group";
+import { combineBoundingBoxes } from "../../../models/tiles/geometry/geometry-utils";
+import { useTileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
 
 const SELECTION_COLOR = "#777";
 const HOVER_COLOR = "#bbdd00";
 const SELECTION_BOX_PADDING = 10;
 const SELECTION_BOX_RESIZE_HANDLE_SIZE = 10;
+
+const navigatorSize = { width: 90, height: 62 };
 
 /**  ======= Drawing Layer ======= */
 interface DrawingToolMap {
@@ -35,8 +39,16 @@ interface DrawingLayerViewProps {
   onSetCanAcceptDrop: (tileId?: string) => void;
   imageUrlToAdd?: string;
   setImageUrlToAdd?: (url: string) => void;
-  svgHeight?: number;
-  svgWidth?: number;
+  showAllContent?: boolean;
+  tileVisibleBoundingBox?: BoundingBox;
+}
+
+interface InternalDrawingLayerViewProps extends DrawingLayerViewProps {
+  reportVisibleBoundingBox?: (boundingBox: BoundingBox) => void;
+  offsetX: number;
+  offsetY: number;
+  zoom: number;
+  objectsBoundingBox: BoundingBox;
 }
 
 interface DrawingLayerViewState {
@@ -46,8 +58,29 @@ interface DrawingLayerViewState {
   hoverObject: DrawingObjectType|null;
 }
 
+/**
+ * This wrapper has two purposes.
+ * - It passes the TileNavigatorContext as a prop, since the InternalDrawingLayerView is a class component and so can't
+ *   connect to two different Contexts.
+ * - It passes some content values as props so that they will cause the component to re-render even if they
+ *   are not directly referenced in the render method.
+ */
+export const DrawingLayerView = observer((props: DrawingLayerViewProps) => {
+  const navigator = useTileNavigatorContext();
+  const content = props.model.content as DrawingContentModelType;
+  return (
+    <InternalDrawingLayerView
+      reportVisibleBoundingBox={navigator.reportVisibleBoundingBox}
+      offsetX={content.offsetX}
+      offsetY={content.offsetY}
+      zoom={content.zoom}
+      objectsBoundingBox={content.objectsBoundingBox}
+      {...props}
+    />);
+});
+
 @observer
-export class DrawingLayerView extends React.Component<DrawingLayerViewProps, DrawingLayerViewState>
+export class InternalDrawingLayerView extends React.Component<InternalDrawingLayerViewProps, DrawingLayerViewState>
     implements IDrawingLayer {
   static contextType = MobXProviderContext;
   public tools: DrawingToolMap;
@@ -56,7 +89,14 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   private setSvgRef: (element: any) => void;
   private _isMounted: boolean;
 
-  constructor(props: DrawingLayerViewProps) {
+  // These hold the values currently in use.
+  // For regular tile view, they are same as the props passed in.
+  // For navigator view, different values are calculated in order to show all content.
+  private offsetX: number = this.props.offsetX;
+  private offsetY: number = this.props.offsetY;
+  private zoom: number = this.props.zoom;
+
+  constructor(props: InternalDrawingLayerViewProps) {
     super(props);
 
     this.state = {
@@ -92,6 +132,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     this.viewRef.current?.addEventListener("touchmove", (e) => {
       if (e.touches.length === 1) e.preventDefault(); }, { passive: false });
     this._isMounted = true;
+    this.calculateBounds();
   }
 
   public componentDidUpdate(prevProps: DrawingLayerViewProps, prevState: DrawingLayerViewState) {
@@ -99,10 +140,69 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       this.addImage(this.props.imageUrlToAdd);
       this.props.setImageUrlToAdd?.("");
     }
+    this.calculateBounds();
   }
 
   public componentWillUnmount() {
     this._isMounted = false;
+  }
+
+  private calculateBounds() {
+    if (this.props.showAllContent) {
+      // In "showAllContent" (Tile Navigator) mode, we determine offset/zoom values needed to show all the content
+      // and also make sure all areas visible in the main tile are also visible in the navigator.
+      const objectsBoundingBox = this.props.objectsBoundingBox;
+      const navigatorRequiredBoundingBox = combineBoundingBoxes(objectsBoundingBox, this.props.tileVisibleBoundingBox);
+      // We may show more than this in the navigator, but the above area is the minimum required.
+
+      const requiredWidth = navigatorRequiredBoundingBox.se.x - navigatorRequiredBoundingBox.nw.x;
+      const requiredHeight = navigatorRequiredBoundingBox.se.y - navigatorRequiredBoundingBox.nw.y;
+
+      // Determine zoom level needed to show the required area.
+      const scale = this.props.scale || 1;
+      this.zoom = Math.min(
+        navigatorSize.width / scale / requiredWidth,
+        navigatorSize.height / scale / requiredHeight);
+
+      // Determine how much extra room we have around the required area.
+      // One of these dimensions should be 0.
+      // The other dimension's extra will be split between the two sides so that the actual content is centered.
+      const extraRoom = {
+        x: navigatorSize.width / scale / this.zoom - requiredWidth,
+        y: navigatorSize.height / scale / this.zoom - requiredHeight
+      };
+
+      // Report the actual bounding box that will be shown in the navigator to our parent.
+      const actualBoundingBox = {
+        nw: { x: navigatorRequiredBoundingBox.nw.x - extraRoom.x/2,
+              y: navigatorRequiredBoundingBox.nw.y - extraRoom.y/2 },
+        se: { x: navigatorRequiredBoundingBox.se.x + extraRoom.x/2,
+              y: navigatorRequiredBoundingBox.se.y + extraRoom.y/2 }
+      };
+
+      this.offsetX = -actualBoundingBox.nw.x * this.zoom;
+      this.offsetY = -actualBoundingBox.nw.y * this.zoom;
+
+      this.props.reportVisibleBoundingBox?.(actualBoundingBox);
+    } else {
+      // In regular tile display, offset and zoom are the values stored in the model.
+      this.offsetX = this.props.offsetX;
+      this.offsetY = this.props.offsetY;
+      this.zoom = this.props.zoom;
+
+      // Determine what extent of the coordinate plane will be shown in the tile.
+      const visibleCanvasSize = {
+        x: this.viewRef.current?.clientWidth || 10,
+        y: this.viewRef.current?.clientHeight || 10 };
+      const visibleBoundingBox = {
+        nw: { x: -this.offsetX/this.zoom, y: -this.offsetY/this.zoom },
+        se: { x: (-this.offsetX + visibleCanvasSize.x)/this.zoom,
+          y: (-this.offsetY + visibleCanvasSize.y)/this.zoom }
+      };
+
+      // Report this to our parent, so that it can be shown in the navigator.
+      this.props.reportVisibleBoundingBox?.(visibleBoundingBox);
+    }
   }
 
   public selectTile(append: boolean) {
@@ -311,7 +411,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public renderSelectionBorders(selectedObjects: DrawingObjectType[], enableActions: boolean) {
-    const zoom = this.getContent().zoom;
+    const zoom = this.zoom;
     const strokeWidth = 1.5/zoom;
     const padding = SELECTION_BOX_PADDING/zoom;
     const dashArray = [10/zoom, 5/zoom];
@@ -355,7 +455,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public renderResizeHandle(object: DrawingObjectType, corner: string, x: number, y: number, color: string) {
-    const zoom = this.getContent().zoom;
+    const zoom = this.zoom;
     const handleSize = SELECTION_BOX_RESIZE_HANDLE_SIZE / zoom;
     const strokeWidth = 1/zoom;
     const resizeBoxOffset = handleSize/2;
@@ -419,7 +519,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     window.addEventListener("pointerup", handleResizecomplete);
   }
 
-
   //we want to populate our objectsBeingDragged state array
 
   public setCurrentDrawingObject(object: DrawingObjectType | null) {
@@ -428,12 +527,12 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public getWorkspacePoint = (e: PointerEvent|React.PointerEvent<any>): Point|null => {
     if (this.svgRef) {
-      const { offsetX=0, offsetY=0, zoom } = this.getContent();
+      const zoom = this.zoom;
       const scale = (this.props.scale || 1) * zoom;
       const rect = ((this.svgRef as unknown) as Element).getBoundingClientRect();
       return {
-        x: (e.clientX - rect.left - offsetX) / scale,
-        y: (e.clientY - rect.top - offsetY) / scale
+        x: (e.clientX - rect.left - this.offsetX) / scale,
+        y: (e.clientY - rect.top - this.offsetY) / scale
       };
     }
     return null;
@@ -451,11 +550,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       }
     }
 
-    const { offsetX=0, offsetY=0, zoom } = this.getContent();
-
     // If an offset value for the drawing is provided, the `object-canvas` group will be translated to place
     // the drawing objects appropriately.
-    const objectCanvasTransform = `translate(${offsetX}, ${offsetY}) scale(${zoom})`;
+    const objectCanvasTransform = `translate(${this.offsetX || 0}, ${this.offsetY || 0}) scale(${this.zoom || 1})`;
 
     return (
       // We don't propagate pointer events to the tile, since the drawing layer
@@ -472,8 +569,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
         <svg
           xmlnsXlink="http://www.w3.org/1999/xlink"
-          width={this.props.svgWidth ?? 1500}
-          height={this.props.svgHeight ?? 1500}
           ref={this.setSvgRef}
         >
           <g
@@ -489,7 +584,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
             {this.state.currentDrawingObject
               ? renderDrawingObject(this.state.currentDrawingObject)
               : null}
-            {this.state.selectionBox ? this.state.selectionBox.render(zoom) : null}
+            {this.state.selectionBox ? this.state.selectionBox.render(this.zoom) : null}
           </g>
         </svg>
       </div>
