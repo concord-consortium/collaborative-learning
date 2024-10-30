@@ -77,6 +77,7 @@ context("Tile Navigator", () => {
       clueCanvas.deleteTile(tileType);
     }
   });
+
   it("displays the current zoom level", () => {
     beforeTest();
 
@@ -118,7 +119,7 @@ context("Tile Navigator", () => {
     clueCanvas.deleteTile("geometry");
   });
 
-  it("is at the bottom of the drawing tile by default but can be moved to the top", () => {
+  it("is at the bottom of the tile by default but can be moved to the top", () => {
     beforeTest();
 
     for(let tileType of ["drawing", "geometry"]) {
