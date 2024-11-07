@@ -130,7 +130,7 @@ function dragTile() {
 }
 
 context('Test copy tiles from one document to other document', function () {
-  it.only('Verify table, geometry, drawing, expression, numberline and image tiles are copied correctly', function () {
+  it('Verify table, geometry, drawing, expression, numberline and image tiles are copied correctly', function () {
     beforeTest(student5);
     cy.log('Add table tile');
     clueCanvas.addTile('table');
