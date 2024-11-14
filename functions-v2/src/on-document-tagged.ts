@@ -13,10 +13,12 @@ export const onDocumentTagged = onDocumentWritten(
 
     const {root, space, documentId} = event.params;
     const firestore = admin.firestore();
-    const docKey = await firestore.collection(`${root}/${space}/documents`).doc(documentId).get().then((doc) => {
+    let docKey = await firestore.collection(`${root}/${space}/documents`).doc(documentId).get().then((doc) => {
       return doc.data()?.key;
     });
-    if (!docKey) return;
+    if (!docKey) {
+      docKey = documentId;
+    }
 
     const collectionPath = `${root}/${space}/documents`;
     const documentCollection = admin.firestore().collection(collectionPath);
@@ -43,6 +45,27 @@ export const onDocumentTagged = onDocumentWritten(
           }
         });
       }
+    }
+
+    // TODO: Make it so this second pass to pick up AI comments isn't needed.
+    // The AI system should be writing out metadata documents that get picked up by the query above.
+    const commentsUrl = `${root}/${space}/documents/${docKey}/comments`;
+    const commentCollection = admin.firestore().collection(commentsUrl);
+    const commentSnapshots = await commentCollection.get();
+
+    for (const _commentSnapshot of commentSnapshots.docs) {
+      const commentTags = _commentSnapshot.data()?.tags ?? [];
+
+      if (commentTags != null && !Array.isArray(commentTags)) {
+        console.warn("Found invalid comment tags", _commentSnapshot.ref.path, commentTags);
+        continue;
+      }
+
+      commentTags.forEach((tag: string) => {
+        if (tag && !strategies.includes(tag)) {
+          strategies.push(tag);
+        }
+      });
     }
 
     const metadataQuery = documentCollection.where("key", "==", docKey);
