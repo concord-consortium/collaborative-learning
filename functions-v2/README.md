@@ -11,6 +11,7 @@ The functions are split into two folders `functions-v1` and `functions-v2`. This
 |_onAnalysisDocumentPending_|Monitors the queue for documents to analyze, and sends them to Shutterbug to create a screenshot of the document|
 |_onAnalysisDocumentImaged_|Sends new screenshots to ChatGPT for analysis and creates a comment on the original document|
 |_atMidnight_|Clears old Firebase roots for dev and qa instances|
+|_onDocumentTagged_|Updates metadata documents with strategies as needed whenever a comment is made|
 
 
 ## Operations
@@ -57,6 +58,12 @@ npm run emulator
 ```
 
 This will load the built function code into the emulator. The only function we have so far is one that monitors Firestore docs for changes. So with the function running in the emulator you can manually change some docs and see if the function responds correctly.
+
+To persist state between emulator runs, `npm run emulator` loads data from `functions-v2/emulator-data` when it starts, and saves data to the same location when it stops. It does this using the `--import` and `--export-on-exit` flags like so:
+
+```
+firebase emulators:start --project demo-test --import=./emulator-data --export-on-exit=./emulator-data
+```
 
 ## To deploy firebase functions to production:
 
