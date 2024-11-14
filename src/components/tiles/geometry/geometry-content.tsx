@@ -842,7 +842,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const content = this.getContent();
       const data = content.getLinkedPointsData();
       const remainingIds = getAllLinkedPoints(board);
-      for (const [link, points] of data.entries()) {
+      for (const points of data.values()) {
         // Loop through points, adding new ones and updating any that need to be moved.
         for (let i=0; i<points.coords.length; i++) {
           const id = points.properties[i].id;
@@ -855,7 +855,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
               name: labelProperties.name,
               clientLabelOption: labelProperties.labelOption
             };
-            const pt = createLinkedPoint(board, points.coords[i], allProps, { tileIds: [link] });
+            const tileIds = allProps.linkedTableId ? { tileIds: [allProps.linkedTableId] } : undefined;
+            const pt = createLinkedPoint(board, points.coords[i], allProps, tileIds);
             this.handleCreatePoint(pt);
             pointsChanged = true;
           } else {

@@ -210,21 +210,22 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     /**
      * Compile a map of data for all points that are part of linked datasets.
-     * The returned Map has the providing tile's ID as the key, and an object
+     * The returned Map has the sharedDataSet's ID as the key, and an object
      * containing two parallel lists as its value:
      *
      * - coords: list of coordinate pairs
-     * - properties: list of point property objects (id and color)
+     * - properties: list of point property objects (id, color, linkedTableId)
      *
      * TODO: should we also look at the selections in the DataSet
      *
      * @returns the Map
      */
     getLinkedPointsData() {
-      const data: Map<string,{coords:JXGCoordPair[],properties:{id:string, colorScheme:number}[]}> = new Map();
+      const data: Map<string,
+        { coords:JXGCoordPair[], properties: { id:string, colorScheme:number, linkedTableId?:string }[] }> = new Map();
       self.linkedDataSets.forEach(link => {
         const coords: JXGCoordPair[] = [];
-        const properties: Array<{ id: string, colorScheme: number }> = [];
+        const properties: Array<{ id: string, colorScheme: number, linkedTableId?: string }> = [];
         for (let ci = 0; ci < link.dataSet.cases.length; ++ci) {
           const x = link.dataSet.attributes[0]?.numValue(ci);
           for (let ai = 1; ai < link.dataSet.attributes.length; ++ai) {
@@ -234,11 +235,15 @@ export const GeometryContentModel = GeometryBaseContentModel
             const y = attr.numValue(ci);
             if (isFinite(x) && isFinite(y)) {
               coords.push([x, y]);
-              properties.push({ id, colorScheme });
+              if (link.providerId) {
+                properties.push({ id, colorScheme, linkedTableId: link.providerId });
+              } else {
+                properties.push({ id, colorScheme });
+              }
             }
           }
         }
-        data.set(link.providerId, { coords, properties });
+        data.set(link.id, { coords, properties });
       });
       return data;
     }
