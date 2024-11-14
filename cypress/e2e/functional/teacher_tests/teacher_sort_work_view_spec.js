@@ -340,11 +340,7 @@ describe('SortWorkView Tests', () => {
     cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Unit Rate", exemplarDocs[0]);
 
-    // FIXME: We haven't implemented support for deleting comments
-    // what should be true:
-    // sortWork.checkGroupIsEmpty("Diverging Designs");
-    // what currently happens
-    sortWork.checkDocumentInGroup("Diverging Designs", exemplarDocs[0]);
+    sortWork.checkGroupIsEmpty("Diverging Designs");
 
     cy.log("run CLUE as a student:1 and join group 6");
     visitQaSubtabsUnit({student: 1, group: 6});
