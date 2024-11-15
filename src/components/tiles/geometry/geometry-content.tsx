@@ -269,131 +269,132 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     this.initializeContent();
 
-    this.props.onRegisterTileApi({
+    if (!this.props.showAllContent) {
+      this.props.onRegisterTileApi({
 
-      isLinked: () => {
-        return this.getContent().isLinked;
-      },
-      getLinkedTiles: () => {
-        return this.getContent().linkedTableIds;
-      },
-      exportContentAsTileJson: (options?: ITileExportOptions) => {
-        return this.getContent().exportJson(options);
-      },
-      getObjectBoundingBox: (objectId: string, objectType?: string) => {
-        // This gets updated when the JSX board needs to be rebuilt
-        // eslint-disable-next-line unused-imports/no-unused-vars -- need to observe
-        const {updateCount} = this.updateObservable;
+        isLinked: () => {
+          return this.getContent().isLinked;
+        },
+        getLinkedTiles: () => {
+          return this.getContent().linkedTableIds;
+        },
+        exportContentAsTileJson: (options?: ITileExportOptions) => {
+          return this.getContent().exportJson(options);
+        },
+        getObjectBoundingBox: (objectId: string, objectType?: string) => {
+          // This gets updated when the JSX board needs to be rebuilt
+          // eslint-disable-next-line unused-imports/no-unused-vars -- need to observe
+          const {updateCount} = this.updateObservable;
 
-        if (objectType === "point" || objectType === "linkedPoint") {
-          const coords = objectType === "point"
-            ? this.getLocalPointScreenCoords(objectId)
-            : this.getLinkedPointScreenCoords(objectId);
-          if (!coords) return undefined;
-          const [x, y] = coords;
-          const boundingBox = {
-            height: pointBoundingBoxSize,
-            left: x - pointBoundingBoxSize / 2,
-            top: y - pointBoundingBoxSize / 2,
-            width: pointBoundingBoxSize
-          };
-          return boundingBox;
-        } else if (objectType === "polygon") {
-          const content = this.getContent();
-          const polygon = content.getObject(objectId) as PolygonModelType;
-          if (!polygon) return;
-          let [bottom, left, right, top] = [Number.MIN_VALUE, Number.MAX_VALUE, Number.MIN_VALUE, Number.MAX_VALUE];
-          polygon.points.forEach(pointId => {
-            const coords = this.getPointScreenCoords(pointId);
+          if (objectType === "point" || objectType === "linkedPoint") {
+            const coords = objectType === "point"
+              ? this.getLocalPointScreenCoords(objectId)
+              : this.getLinkedPointScreenCoords(objectId);
             if (!coords) return undefined;
             const [x, y] = coords;
-            if (y > bottom) bottom = y;
-            if (x < left) left = x;
-            if (x > right) right = x;
-            if (y < top) top = y;
-          });
-          const boundingBox = {
-            height: bottom - top,
-            left,
-            top,
-            width: right - left
-          };
-          return boundingBox;
-        } else if (objectType === "segment") {
-          const [ point1Id, point2Id ] = pointIdsFromSegmentId(objectId);
-          const coords1 = this.getPointScreenCoords(point1Id);
-          const coords2 = this.getPointScreenCoords(point2Id);
-          if (!coords1 || !coords2) return undefined;
-          const [x1, y1] = coords1;
-          const [x2, y2] = coords2;
-          const bottom = Math.max(y1, y2);
-          const left = Math.min(x1, x2);
-          const right = Math.max(x1, x2);
-          const top = Math.min(y1, y2);
-          const boundingBox = {
-            height: bottom - top,
-            left,
-            top,
-            width: right - left
-          };
-          return boundingBox;
+            const boundingBox = {
+              height: pointBoundingBoxSize,
+              left: x - pointBoundingBoxSize / 2,
+              top: y - pointBoundingBoxSize / 2,
+              width: pointBoundingBoxSize
+            };
+            return boundingBox;
+          } else if (objectType === "polygon") {
+            const content = this.getContent();
+            const polygon = content.getObject(objectId) as PolygonModelType;
+            if (!polygon) return;
+            let [bottom, left, right, top] = [Number.MIN_VALUE, Number.MAX_VALUE, Number.MIN_VALUE, Number.MAX_VALUE];
+            polygon.points.forEach(pointId => {
+              const coords = this.getPointScreenCoords(pointId);
+              if (!coords) return undefined;
+              const [x, y] = coords;
+              if (y > bottom) bottom = y;
+              if (x < left) left = x;
+              if (x > right) right = x;
+              if (y < top) top = y;
+            });
+            const boundingBox = {
+              height: bottom - top,
+              left,
+              top,
+              width: right - left
+            };
+            return boundingBox;
+          } else if (objectType === "segment") {
+            const [ point1Id, point2Id ] = pointIdsFromSegmentId(objectId);
+            const coords1 = this.getPointScreenCoords(point1Id);
+            const coords2 = this.getPointScreenCoords(point2Id);
+            if (!coords1 || !coords2) return undefined;
+            const [x1, y1] = coords1;
+            const [x2, y2] = coords2;
+            const bottom = Math.max(y1, y2);
+            const left = Math.min(x1, x2);
+            const right = Math.max(x1, x2);
+            const top = Math.min(y1, y2);
+            const boundingBox = {
+              height: bottom - top,
+              left,
+              top,
+              width: right - left
+            };
+            return boundingBox;
+          }
+        },
+        getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
+          if (objectType === "point" || objectType === "linkedPoint") {
+            // Find the center point
+            const coords = objectType === "point"
+              ? this.getLocalPointScreenCoords(objectId)
+              : this.getLinkedPointScreenCoords(objectId);
+            if (!coords) return;
+
+            // Return a circle at the center point
+            const [x, y] = coords;
+            return (
+              <circle
+                className={classes}
+                cx={x}
+                cy={y}
+                onClick={handleClick}
+                r={pointButtonRadius}
+              />
+            );
+          } else if (objectType === "segment") {
+            // Find the end points of the segment
+            const [ point1Id, point2Id ] = pointIdsFromSegmentId(objectId);
+            const coords1 = this.getPointScreenCoords(point1Id);
+            const coords2 = this.getPointScreenCoords(point2Id);
+            if (!coords1 || !coords2) return;
+
+            // Find the angles perpendicular to the segment
+            const [x1, y1] = coords1;
+            const [x2, y2] = coords2;
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const segmentAngle = normalizeAngle(Math.atan2(-dy, dx));
+            const firstAngle = normalizeAngle(segmentAngle + halfPi);
+            const secondAngle = normalizeAngle(segmentAngle - halfPi);
+
+            // Determine the points and path of the rectangle containing the segment
+            const coords: Point[] = [
+              [x1 + Math.cos(firstAngle) * segmentButtonWidth, y1 - Math.sin(firstAngle) * segmentButtonWidth],
+              [x2 + Math.cos(firstAngle) * segmentButtonWidth, y2 - Math.sin(firstAngle) * segmentButtonWidth],
+              [x2 + Math.cos(secondAngle) * segmentButtonWidth, y2 - Math.sin(secondAngle) * segmentButtonWidth],
+              [x1 + Math.cos(secondAngle) * segmentButtonWidth, y1 - Math.sin(secondAngle) * segmentButtonWidth],
+            ];
+            return this.getButtonPath(coords, handleClick, classes);
+          } else if (objectType === "polygon") {
+            // Determine the path of the polygon based on its points
+            const content = this.getContent();
+            const polygon = content.getObject(objectId) as PolygonModelType;
+            if (!polygon) return;
+            return this.getButtonPath(
+              polygon.points.map(pointId => this.getPointScreenCoords(pointId)), handleClick, classes
+            );
+          }
         }
-      },
-      getObjectButtonSVG: ({ classes, handleClick, objectId, objectType }) => {
-        if (objectType === "point" || objectType === "linkedPoint") {
-          // Find the center point
-          const coords = objectType === "point"
-            ? this.getLocalPointScreenCoords(objectId)
-            : this.getLinkedPointScreenCoords(objectId);
-          if (!coords) return;
-
-          // Return a circle at the center point
-          const [x, y] = coords;
-          return (
-            <circle
-              className={classes}
-              cx={x}
-              cy={y}
-              onClick={handleClick}
-              r={pointButtonRadius}
-            />
-          );
-        } else if (objectType === "segment") {
-          // Find the end points of the segment
-          const [ point1Id, point2Id ] = pointIdsFromSegmentId(objectId);
-          const coords1 = this.getPointScreenCoords(point1Id);
-          const coords2 = this.getPointScreenCoords(point2Id);
-          if (!coords1 || !coords2) return;
-
-          // Find the angles perpendicular to the segment
-          const [x1, y1] = coords1;
-          const [x2, y2] = coords2;
-          const dx = x2 - x1;
-          const dy = y2 - y1;
-          const segmentAngle = normalizeAngle(Math.atan2(-dy, dx));
-          const firstAngle = normalizeAngle(segmentAngle + halfPi);
-          const secondAngle = normalizeAngle(segmentAngle - halfPi);
-
-          // Determine the points and path of the rectangle containing the segment
-          const coords: Point[] = [
-            [x1 + Math.cos(firstAngle) * segmentButtonWidth, y1 - Math.sin(firstAngle) * segmentButtonWidth],
-            [x2 + Math.cos(firstAngle) * segmentButtonWidth, y2 - Math.sin(firstAngle) * segmentButtonWidth],
-            [x2 + Math.cos(secondAngle) * segmentButtonWidth, y2 - Math.sin(secondAngle) * segmentButtonWidth],
-            [x1 + Math.cos(secondAngle) * segmentButtonWidth, y1 - Math.sin(secondAngle) * segmentButtonWidth],
-          ];
-          return this.getButtonPath(coords, handleClick, classes);
-        } else if (objectType === "polygon") {
-          // Determine the path of the polygon based on its points
-          const content = this.getContent();
-          const polygon = content.getObject(objectId) as PolygonModelType;
-          if (!polygon) return;
-          return this.getButtonPath(
-            polygon.points.map(pointId => this.getPointScreenCoords(pointId)), handleClick, classes
-          );
-        }
-      }
-    });
-
+      });
+    }
     // respond to linked table/shared model changes
     this.disposers.push(reaction(
       () => this.getContent().updateSharedModels,
