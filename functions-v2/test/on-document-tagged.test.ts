@@ -51,6 +51,33 @@ describe("onDocumentTagged", () => {
     });
   });
 
+  // Currently, the AI system writes to a comments collection under an empty document whose ID is the same as the
+  // document key. This test should be removed (or updated) when the AI system is modified to write to a comments
+  // collection under a complete metadata document like comments from human users are.
+  test("should add new values when a new AI-generated comment is made", async () => {
+    const wrapped = fft.wrap(onDocumentTagged);
+    const commentRef = documentCollection.doc("doc-key").collection("comments").doc("ai-comment-1");
+
+    await commentRef.set({tags: ["ai-tag-1", "ai-tag-2"]});
+    const event = {
+      params: {
+        root: "demo",
+        space: "test",
+        documentId: "doc-key",
+        commentId: "ai-comment-1",
+      },
+    };
+    await wrapped(event);
+
+    const docSnapshot = await documentCollection.doc("1234").get();
+    const docData = docSnapshot.data();
+
+    expect(docData).toEqual({
+      key: "doc-key",
+      strategies: ["ai-tag-1", "ai-tag-2"],
+    });
+  });
+
   test("should remove values from a document's strategies array when an existing comment is deleted", async () => {
     const wrapped = fft.wrap(onDocumentTagged);
     const commentRef1 = documentCollection.doc("1234").collection("comments").doc("5678");
