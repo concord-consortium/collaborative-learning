@@ -160,6 +160,7 @@ export const authenticate = async (
   const unitCode = urlParams.unit || "";
   // when launched as a report, the params will not contain the problemOrdinal
   const problemOrdinal = urlParams.problem || appConfig.defaultProblemOrdinal;
+  const offeringId = urlParams.resourceLinkId || undefined;
 
   let {fakeClass, fakeUser} = urlParams;
   // handle preview launch from portal
@@ -223,7 +224,7 @@ export const authenticate = async (
   const { classHash } = classInfo;
   const uidAsString = `${portalJWT.uid}`;
   const firebaseJWTPromise = getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classHash);
-  const portalOfferingsPromise = getPortalOfferings(user_type, uid, domain, rawPortalJWT);
+  const portalOfferingsPromise = getPortalOfferings(user_type, uid, domain, rawPortalJWT, offeringId);
   const problemIdPromise = getProblemIdForAuthenticatedUser(rawPortalJWT, curriculumConfig, urlParams);
 
   const [firebaseJWTResult, portalOfferingsResult, problemIdResult] =

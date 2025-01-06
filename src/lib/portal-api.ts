@@ -30,10 +30,9 @@ export const getPortalOfferings = (
   userType: string,
   userId: number,
   domain: string,
-  rawPortalJWT: any) => {
-
+  rawPortalJWT: any,
+  offeringId?: string) => {
   return new Promise<IPortalOffering[]> ((resolve, reject) => {
-    // TODO: For now isolate this to the teachers view
     if (userType === "teacher") {
       superagent
       .get(`${domain}api/v1/offerings/?user_id=${userId}`)
@@ -79,6 +78,19 @@ export const getPortalOfferings = (
             // class hashes are already present so no further work required
             resolve(clueOfferings);
           }
+        }
+      });
+    }
+    else if (userType === "learner" && offeringId) {
+      // For learner, just look up the single current offering
+      superagent
+      .get(`${domain}api/v1/offerings/${offeringId}`)
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          resolve([res.body]);
         }
       });
     }
