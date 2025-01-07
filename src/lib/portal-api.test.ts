@@ -16,13 +16,16 @@ describe("Portal Offerings", () => {
       .get(/\/api\/v1\/offerings\/\?user_id=22/)
       .reply(200, TeacherOfferings);
     nock(/superfake/)
+      .get(/\/api\/v1\/offerings\/1190/)
+      .reply(200, TeacherOfferings[0]);
+    nock(/superfake/)
       .get(/\/api\/v1\/classes\/mine/)
       .reply(200, TeacherMineClasses);
   });
 
   afterEach(() => nock.cleanAll());
 
-  describe("getPortalOfferings", () => {
+  describe("getPortalOfferings for teacher", () => {
     let fetchedOfferings: IPortalOffering[];
 
     beforeEach(async () => {
@@ -35,6 +38,20 @@ describe("Portal Offerings", () => {
 
     it("offerings should have class hashes", () => {
       expect(fetchedOfferings.every(o => o.clazz_hash));
+    });
+  });
+
+  describe("getPortalOfferings for learner or other", () => {
+    it("should return a single offering for learner", async () => {
+      const offerings = await getPortalOfferings("learner", userID, domain, fakeJWT, "1190");
+      expect(offerings.length).toEqual(1);
+      expect(offerings[0].id).toEqual(1190);
+      expect(offerings[0].activity_url).toEqual("https://collaborative-learning.concord.org/branch/master/?unit=sas&problem=1.2");
+    });
+
+
+    it("should not return anything for researcher", async () => {
+      expect(await getPortalOfferings("researcher", userID, domain, fakeJWT)).toEqual([]);
     });
   });
 
