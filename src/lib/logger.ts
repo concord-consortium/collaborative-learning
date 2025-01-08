@@ -26,6 +26,8 @@ export interface LogMessage {
   session: string;
   username: string;
 
+  parameters: any;
+
   // the rest of the properties are packaged into `extras` by the log-ingester
   role: string;
   classHash: string;
@@ -43,7 +45,7 @@ export interface LogMessage {
   tzOffset: string;
   method: string;
   disconnects?: string;
-  parameters: any;
+  offeringId: string;
 }
 
 // List of log messages that were generated before a Logger is initialized;
@@ -144,7 +146,9 @@ export class Logger {
       persistentUI: { activeNavTab, navTabContentShown, problemWorkspace, teacherPanelKey },
       user: { activityUrl, classHash, id, isStudent, isTeacher, portal, type, currentGroupId,
               loggingRemoteEndpoint, firebaseDisconnects, loggingDisconnects, networkStatusAlerts
-    }} = this.stores;
+      },
+      portal: { offeringId },
+  } = this.stores;
     // only log disconnect counts if there have been any disconnections
     const totalDisconnects = firebaseDisconnects + loggingDisconnects + networkStatusAlerts;
     const disconnects = totalDisconnects
@@ -154,6 +158,7 @@ export class Logger {
     const logMessage: LogMessage = {
       application: appName,
       activity: activityUrl,
+      offeringId,
       username: `${id}@${portal}`,
       role: type || "unknown",
       classHash,
