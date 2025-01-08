@@ -237,6 +237,7 @@ export const authenticate = async (
   const [rawFirebaseJWT, firebaseJWT] = firebaseJWTResult;
   const { unitCode: newUnitCode, problemOrdinal: newProblemOrdinal } = problemIdResult;
 
+  let fullName: string;
   let authenticatedUser: StudentUser | TeacherUser | ResearcherUser | undefined = undefined;
   switch (user_type) {
     case "learner":
@@ -246,21 +247,19 @@ export const authenticate = async (
       authenticatedUser = classInfo.teachers.find(teacher => teacher.id === uidAsString);
       break;
     case "researcher":
-      const {first_name, last_name} = portalJWT;
-      const fullName = `${first_name} ${last_name}`
-      const researcherUser: ResearcherUser = {
+      fullName = `${portalJWT.first_name} ${portalJWT.last_name}`;
+      authenticatedUser = {
         type: "researcher",
         id: uidAsString,
         portal: portalHost,
-        firstName: first_name,
-        lastName: last_name,
+        firstName: portalJWT.first_name,
+        lastName: portalJWT.last_name,
         fullName,
         className: classInfo.name,
         initials: initials(fullName) as string,
         classHash: classInfo.classHash,
         offeringId: portalService.offeringId
       };
-      authenticatedUser = researcherUser;
       break;
     default:
       throw new Error(`Unsupported user type: ${user_type ?? "(unknown user type)"}`);

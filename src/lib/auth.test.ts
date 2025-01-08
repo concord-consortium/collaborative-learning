@@ -8,7 +8,8 @@ import { authenticate,
         getFirebaseJWTParams,
         generateDevAuthentication,
         createFakeOfferingIdFromProblem} from "./auth";
-import { IPortalClassInfo, IPortalClassUser, PortalResearcherJWT, PortalStudentJWT, PortalTeacherJWT } from "./portal-types";
+import { IPortalClassInfo, IPortalClassUser, PortalResearcherJWT,
+         PortalStudentJWT, PortalTeacherJWT } from "./portal-types";
 import nock from "nock";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
 import { specAppConfig } from "../models/stores/spec-app-config";
@@ -706,7 +707,8 @@ describe("researcher authentication", () => {
   const portal = new Portal(urlParams);
 
   beforeEach(() => {
-    urlParams = {token: GOOD_RESEARCHER_TOKEN, reportType: "offering", class: CLASS_INFO_URL, offering: OFFERING_INFO_URL};
+    urlParams = {token: GOOD_RESEARCHER_TOKEN, reportType: "offering",
+                 class: CLASS_INFO_URL, offering: OFFERING_INFO_URL};
 
     nock(BASE_PORTAL_HOST, {
       reqheaders: {
@@ -764,14 +766,15 @@ describe("researcher authentication", () => {
     .reply(200, {classes: []});
 
     authenticate("authed", appConfig, curriculumConfig, portal, urlParams).then(({authenticatedUser, problemId}) => {
+      const {first_name, last_name} = RAW_CORRECT_RESEARCHER;
       expect(authenticatedUser.type).toEqual("researcher");
-      expect(authenticatedUser.id).toEqual(`${RESEARCHER_PORTAL_JWT.uid}`)
-      expect(authenticatedUser.portal).toEqual("learn.staging.concord.org")
-      expect(authenticatedUser.portalClassOfferings).toEqual([])
-      expect(authenticatedUser.firstName).toEqual(RAW_CORRECT_RESEARCHER.first_name)
-      expect(authenticatedUser.lastName).toEqual(RAW_CORRECT_RESEARCHER.last_name)
-      expect(authenticatedUser.fullName).toEqual(`${RAW_CORRECT_RESEARCHER.first_name} ${RAW_CORRECT_RESEARCHER.last_name}`)
-      expect(authenticatedUser.initials).toEqual("TR")
+      expect(authenticatedUser.id).toEqual(`${RESEARCHER_PORTAL_JWT.uid}`);
+      expect(authenticatedUser.portal).toEqual("learn.staging.concord.org");
+      expect(authenticatedUser.portalClassOfferings).toEqual([]);
+      expect(authenticatedUser.firstName).toEqual(first_name);
+      expect(authenticatedUser.lastName).toEqual(last_name);
+      expect(authenticatedUser.fullName).toEqual(`${first_name} ${last_name}`);
+      expect(authenticatedUser.initials).toEqual("TR");
 
       expect(problemId).toBe("3.2");
       done();
