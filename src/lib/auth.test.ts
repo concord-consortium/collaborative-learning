@@ -8,7 +8,7 @@ import { authenticate,
         getFirebaseJWTParams,
         generateDevAuthentication,
         createFakeOfferingIdFromProblem} from "./auth";
-import { IPortalClassInfo, IPortalClassUser, PortalStudentJWT, PortalTeacherJWT } from "./portal-types";
+import { IPortalClassInfo, IPortalClassUser, PortalResearcherJWT, PortalStudentJWT, PortalTeacherJWT } from "./portal-types";
 import nock from "nock";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
 import { specAppConfig } from "../models/stores/spec-app-config";
@@ -23,6 +23,9 @@ const RAW_STUDENT_FIREBASE_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhbGciO
 
 const RAW_TEACHER_PORTAL_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhbGciOiJIUzI1NiIsImlhdCI6MTUzODA1NTY2OSwiZXhwIjoxNTM4MDU5MjY5LCJ1aWQiOjIxNywiZG9tYWluIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnLyIsInVzZXJfdHlwZSI6InRlYWNoZXIiLCJ1c2VyX2lkIjoiaHR0cHM6Ly9sZWFybi5zdGFnaW5nLmNvbmNvcmQub3JnL3VzZXJzLzIxNyIsInRlYWNoZXJfaWQiOjg4fQ.lwFtD-UUXQOcOono0Q9fjBQFbOdP14rhZbJw9PN51vk";
 const RAW_TEACHER_FIREBASE_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhbGciOiJSUzI1NiIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWF4a2JsQGNvbGxhYm9yYXRpdmUtbGVhcm5pbmctZWMyMTUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1heGtibEBjb2xsYWJvcmF0aXZlLWxlYXJuaW5nLWVjMjE1LmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJpYXQiOjE1MzgwNTU2NzAsImV4cCI6MTUzODA1OTI3MCwidWlkIjoiMzU4MTYwYzk3M2Y0MmE0MzYxZjA5YzdlMjA2YjVmNGQiLCJkb21haW4iOiJodHRwczovL2xlYXJuLnN0YWdpbmcuY29uY29yZC5vcmcvIiwiZG9tYWluX3VpZCI6MjE3LCJjbGFpbXMiOnsidXNlcl90eXBlIjoidGVhY2hlciIsInVzZXJfaWQiOiJodHRwczovL2xlYXJuLnN0YWdpbmcuY29uY29yZC5vcmcvdXNlcnMvMjE3IiwiY2xhc3NfaGFzaCI6bnVsbH19.XQ_-MmbZUegnod789tKZgWt4r3QpecEoSASb572jDfQGEKupiWGcXn2MGeESuRsOFwD3eWbiQoC6B7F8cy6h0EiaXhIVFR_xrviqoXgayQsDQalrCVGjllLGak4vY7p-ZnLvSie6F9-KubPIfsF_0NdRSDTFOHbN3LGhpxGUYxc4GKandDgGTJwy5rgXLebU7ezzKyzE2YAYEGuVPge5Yf9PgXI__OsbiUD4tOK2dxSTytcL30maeYQ4x0CBWY96w8oOlusOHIsf96OkqKe272SXz2BgkhF6e1IHby_CIhl51FFxAqKr6P1sPlt8WnVpK7qwTDY8VSNCYNxNQMiaXw";
+
+const RAW_RESEARCHER_PORTAL_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhbGciOiJIUzI1NiIsImlhdCI6MTczNjM1MzA4MSwiZXhwIjoxNzM2MzU2NjgxLCJ1aWQiOjEsImRvbWFpbiI6Imh0dHBzOi8vbGVhcm4uc3RhZ2luZy5jb25jb3JkLm9yZy8iLCJ1c2VyX3R5cGUiOiJyZXNlYXJjaGVyIiwidXNlcl9pZCI6Imh0dHBzOi8vbGVhcm4uc3RhZ2luZy5jb25jb3JkLm9yZy91c2Vycy8xIiwiZmlyc3RfbmFtZSI6IlRlc3QiLCJsYXN0X25hbWUiOiJSZXNlYXJjaGVyIiwiYWRtaW4iOjEsInByb2plY3RfYWRtaW5zIjpbXX0.3fjKGohZ5RQPCHppLUuOwD_OGfDfrn0L1J3nBNOfV7I";
+const RAW_RESEARCHER_FIREBASE_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhbGciOiJSUzI1NiIsImlzcyI6InJlcG9ydC1zZXJ2aWNlLWRldkBhcHBzcG90LmdzZXJ2aWNlYWNjb3VudC5jb20iLCJzdWIiOiJyZXBvcnQtc2VydmljZS1kZXZAYXBwc3BvdC5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJpYXQiOjE3MzYzNDcxODgsImV4cCI6MTczNjM1MDc4OCwidWlkIjoiNmM4NzgxYzU3YzZjM2RmNDQ2M2M0ZjQyNzQ2YWVmZjEiLCJjbGFpbXMiOnsicGxhdGZvcm1faWQiOiJodHRwczovLy0zMDAwLnByZXZpZXcuYXBwLmdpdGh1Yi5kZXYiLCJwbGF0Zm9ybV91c2VyX2lkIjo3LCJ1c2VyX2lkIjoiaHR0cHM6Ly8tMzAwMC5wcmV2aWV3LmFwcC5naXRodWIuZGV2L3VzZXJzLzciLCJ1c2VyX3R5cGUiOiJyZXNlYXJjaGVyIiwiY2xhc3NfaGFzaCI6ImE4OGQxMzZjODFmOWNmNTE1YWM0OWFhMzMwZDdlMDM1ZGNhNzQ0YzllNTliNjY2NSJ9fQ.HPlRnaWECdgXEIoafk71p6WYSux91_11kmg-nEBH2XA625jNrgUOxRoEKsZOwI0Mq1yhz2Sti297fHILzJAregt-1U_ZBTuhgqEZ04Xyp-jB3uPKiKtd5_59bLrunczyAke3ywXUaswIKgVYJl_D5L0WeySfz8g7y1SE1q3QIEw24RDlnLHRdJjjdLgBjBawupfy4m4uVzK1hHSAyZYpqjOH5rvq7t5odILNzv_9rBL9NP5qU5Be0vqVIKx8DryyMFYu-hroT0CKXOCW3ns4xuspTvWHmBe-p7-Jdr7MIyDU77tN7WOvjJhHj_5UvbCVPLU-3EIZ0nitkH2CnTAjSw";
 /* eslint-enable max-len */
 
 const STUDENT_PORTAL_JWT: PortalStudentJWT = {
@@ -49,11 +52,26 @@ const TEACHER_PORTAL_JWT: PortalTeacherJWT = {
   teacher_id: 88,
 };
 
+const RESEARCHER_PORTAL_JWT: PortalResearcherJWT = {
+  alg: "HS256",
+  iat: 1538055669,
+  exp: 1538059269,
+  uid: 1,
+  domain: "https://learn.staging.concord.org/",
+  user_type: "researcher",
+  user_id: "https://learn.staging.concord.org/users/1",
+  first_name: "Test",
+  last_name: "Researcher"
+};
+
 const GOOD_STUDENT_TOKEN = "goodStudentToken";
 const BAD_STUDENT_TOKEN = "badStudentToken";
 
 const GOOD_TEACHER_TOKEN = "goodTeacherToken";
 const BAD_TEACHER_TOKEN = "badTeacherToken";
+
+const GOOD_RESEARCHER_TOKEN = "goodReacherToken";
+const BAD_RESEARCHER_TOKEN = "badTeacherToken";
 
 const CLASS_HASH = "testHash";
 
@@ -90,6 +108,13 @@ const RAW_CORRECT_TEACHER: IPortalClassUser = {
   user_id: TEACHER_PORTAL_JWT.uid,
   first_name: "GoodFirst",
   last_name: "GoodLast",
+};
+
+const RAW_CORRECT_RESEARCHER: IPortalClassUser = {
+  id: RESEARCHER_PORTAL_JWT.user_id,
+  user_id: RESEARCHER_PORTAL_JWT.uid,
+  first_name: "Test",
+  last_name: "Researcher",
 };
 
 const RAW_CLASS_INFO: IPortalClassInfo = {
@@ -626,6 +651,152 @@ describe("teacher authentication", () => {
     .reply(400);
 
     urlParams.token = BAD_TEACHER_TOKEN;
+    authenticate("authed", appConfig, curriculumConfig, portal, urlParams)
+      .then(() => {
+        done.fail();
+      })
+      .catch(() => done());
+  });
+
+  it("fails with no token", (done) => {
+    urlParams.token = undefined;
+    authenticate("authed", appConfig, curriculumConfig, portal, urlParams)
+      .then(() => {
+        done.fail();
+      })
+      .catch(() => done());
+  });
+
+  it("fails with a bad report type", (done) => {
+    urlParams.reportType = "unknown";
+    authenticate("authed", appConfig, curriculumConfig, portal, urlParams)
+      .then(() => {
+        done.fail();
+      })
+      .catch(() => done());
+  });
+
+  it("fails with no class", (done) => {
+    urlParams.class = undefined;
+    authenticate("authed", appConfig, curriculumConfig, portal, urlParams)
+      .then(() => {
+        done.fail();
+      })
+      .catch(() => done());
+  });
+
+  it("fails with no offering", (done) => {
+    urlParams.offering = undefined;
+    authenticate("authed", appConfig, curriculumConfig, portal, urlParams)
+      .then(() => {
+        done.fail();
+      })
+      .catch(() => done());
+  });
+});
+
+describe("researcher authentication", () => {
+  let urlParams: QueryParams = {
+    token: GOOD_RESEARCHER_TOKEN,
+    reportType: "offering",
+    class: CLASS_INFO_URL,
+    offering: OFFERING_INFO_URL
+  };
+  const appConfig = specAppConfig();
+  const portal = new Portal(urlParams);
+
+  beforeEach(() => {
+    urlParams = {token: GOOD_RESEARCHER_TOKEN, reportType: "offering", class: CLASS_INFO_URL, offering: OFFERING_INFO_URL};
+
+    nock(BASE_PORTAL_HOST, {
+      reqheaders: {
+        Authorization: `Bearer/JWT ${RAW_RESEARCHER_PORTAL_JWT}`
+      }
+    })
+    .get(CLASS_INFO_PATH)
+    .reply(200, RAW_CLASS_INFO);
+
+    nock(BASE_PORTAL_HOST, {
+      reqheaders: {
+        Authorization: `Bearer/JWT ${RAW_RESEARCHER_PORTAL_JWT}`
+      }
+    })
+    .get(OFFERING_INFO_PATH)
+    .reply(200, PARTIAL_RAW_OFFERING_INFO);
+
+    nock("https://learn.staging.concord.org/")
+    .get(/\/offerings\/\?user_id=.*/)
+    .reply(200, []);
+
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
+  });
+
+  it("works in authed mode", (done) => {
+    nock(BASE_PORTAL_HOST, {
+      reqheaders: {
+        Authorization: `Bearer ${GOOD_RESEARCHER_TOKEN}`
+      }
+    })
+    .get(PORTAL_JWT_PATH)
+    .reply(200, {
+      token: RAW_RESEARCHER_PORTAL_JWT,
+    });
+
+    nock(BASE_PORTAL_HOST, {
+      reqheaders: {
+        Authorization: `Bearer ${GOOD_RESEARCHER_TOKEN}`
+      }
+    })
+    .get(FIREBASE_JWT_PATH + getFirebaseJWTParams(CLASS_HASH))
+    .reply(200, {
+      token: RAW_RESEARCHER_FIREBASE_JWT,
+    });
+
+    nock(BASE_PORTAL_HOST, {
+      reqheaders: {
+        Authorization: `Bearer ${GOOD_RESEARCHER_TOKEN}`
+      }
+    })
+    .get(CLASSES_MINE_PATH)
+    .reply(200, {classes: []});
+
+    authenticate("authed", appConfig, curriculumConfig, portal, urlParams).then(({authenticatedUser, problemId}) => {
+      expect(authenticatedUser.type).toEqual("researcher");
+      expect(authenticatedUser.id).toEqual(`${RESEARCHER_PORTAL_JWT.uid}`)
+      expect(authenticatedUser.portal).toEqual("learn.staging.concord.org")
+      expect(authenticatedUser.portalClassOfferings).toEqual([])
+      expect(authenticatedUser.firstName).toEqual(RAW_CORRECT_RESEARCHER.first_name)
+      expect(authenticatedUser.lastName).toEqual(RAW_CORRECT_RESEARCHER.last_name)
+      expect(authenticatedUser.fullName).toEqual(`${RAW_CORRECT_RESEARCHER.first_name} ${RAW_CORRECT_RESEARCHER.last_name}`)
+      expect(authenticatedUser.initials).toEqual("TR")
+
+      expect(problemId).toBe("3.2");
+      done();
+    })
+    .catch(done);
+  });
+
+  it("fails with a bad token", (done) => {
+    nock(BASE_PORTAL_HOST, {
+      reqheaders: {
+        Authorization: `Bearer ${BAD_RESEARCHER_TOKEN}`
+      }
+    })
+    .get(PORTAL_JWT_PATH)
+    .reply(400);
+
+    nock(BASE_PORTAL_HOST, {
+      reqheaders: {
+        Authorization: `Bearer ${BAD_RESEARCHER_TOKEN}`
+      }
+    })
+    .get(FIREBASE_JWT_PATH + getFirebaseJWTParams())
+    .reply(400);
+
+    urlParams.token = BAD_RESEARCHER_TOKEN;
     authenticate("authed", appConfig, curriculumConfig, portal, urlParams)
       .then(() => {
         done.fail();

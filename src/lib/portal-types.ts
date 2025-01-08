@@ -76,6 +76,8 @@ export interface PortalResearcherJWT extends BasePortalJWT {
   domain: string;
   user_type: "researcher";
   user_id: string;
+  first_name: string;
+  last_name: string;
 }
 
 export interface PortalUserJWT extends BasePortalJWT {

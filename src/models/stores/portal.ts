@@ -43,6 +43,10 @@ export interface TeacherUser extends User {
   networks?: string[];  // list of networks available to teacher
 }
 
+export interface ResearcherUser extends User {
+  type: "researcher";
+}
+
 export interface ClassInfo {
   name: string;
   classHash: string;
