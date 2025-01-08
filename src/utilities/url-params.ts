@@ -44,6 +44,8 @@ export interface QueryParams {
   offering?: string;
   // type of report
   reportType?: string;
+  // set to string "true" to authenticate as a researcher
+  researcher?: string;
 
   //
   // demo features

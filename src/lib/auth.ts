@@ -107,6 +107,9 @@ export const getFirebaseJWTParams = (classHash?: string) => {
   if (pageUrlParams.resourceLinkId) {
     params.resource_link_id = pageUrlParams.resourceLinkId;
   }
+  if (pageUrlParams.researcher) {
+    params.researcher = pageUrlParams.researcher;
+  }
 
   return `?${(new URLSearchParams(params)).toString()}`;
 };

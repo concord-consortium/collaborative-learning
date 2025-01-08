@@ -94,9 +94,15 @@ export class Portal {
 
   requestPortalJWT() {
     return new Promise<void>((resolve, reject) => {
-      const resourceLinkIdSuffix =
-        pageUrlParams.resourceLinkId ? `?resource_link_id=${ pageUrlParams.resourceLinkId }` : "";
-      const url = `${this.basePortalUrl}${PORTAL_JWT_URL_SUFFIX}${resourceLinkIdSuffix}`;
+      const params = new URLSearchParams();
+      if (pageUrlParams.resourceLinkId) {
+        params.append("resource_link_id", pageUrlParams.resourceLinkId);
+      }
+      if (pageUrlParams.researcher) {
+        params.append("researcher", pageUrlParams.researcher);
+      }
+      const queryString = params.size > 0 ? `?${params.toString()}` : "";
+      const url = `${this.basePortalUrl}${PORTAL_JWT_URL_SUFFIX}${queryString}`;
       superagent
         .get(url)
         .set("Authorization", `Bearer ${this.bearerToken}`)
@@ -129,11 +135,12 @@ export class Portal {
 
     await this.requestPortalJWT();
 
-    const {basePortalUrl, portalJWT,urlParams} = this;
+    const {basePortalUrl, portalJWT, urlParams} = this;
 
-    if (!((portalJWT.user_type === "learner") || (portalJWT.user_type === "teacher"))) {
-      throw new Error(`Only student and teacher logins are currently supported! ` +
-        `Unsupported type: ${portalJWT.user_type}`);
+    const supportedUserTypes = ["learner", "teacher", "researcher"];
+    if (!supportedUserTypes.includes(portalJWT.user_type)) {
+      throw new Error(`Only ${supportedUserTypes.join(" or ")} logins are currently supported! ` +
+        `Unsupported type: ${portalJWT.user_type ?? "(unknown user type)"}`);
     }
 
     this.portalHost = parseUrl(basePortalUrl).host;
