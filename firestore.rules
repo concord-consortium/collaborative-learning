@@ -48,6 +48,10 @@ service cloud.firestore {
       return hasUserId() && hasRole("teacher");
     }
 
+    function isAuthedResearcher() {
+      return hasUserId() && hasRole("researcher");
+    }
+
     // uid of submitted document must match user's platform_user_id
     function userIsRequestUser() {
       return isAuthed() &&
@@ -116,7 +120,7 @@ service cloud.firestore {
     // portal-authenticated secure access rules
     //
     match /authed/{portal} {
-      allow read, write: if isAuthedTeacher();
+      allow read, write: if isAuthedTeacher() || isAuthedResearcher();
 
       // Check that the class given by the context_id exists and includes the logged-in teacher
       function teacherIsInClass(contextid) {
@@ -171,7 +175,7 @@ service cloud.firestore {
 
       match /users/{userId} {
         // teachers can read their own user documents or other teachers in the same network
-        allow read: if isAuthedTeacher() &&
+        allow read: if (isAuthedTeacher() || isAuthedResearcher()) &&
                         ((string(request.auth.token.platform_user_id) == userId) ||
                           teacherInRequestedTeacherNetworks());
         // currently, only admins can write user information
@@ -204,10 +208,12 @@ service cloud.firestore {
         // we don't support deleting classes at this time
         allow delete: if false;
         // teachers can read, non existing classes, their own classes, or any class in their network
-        allow read: if isAuthedTeacher() && (
-          resource == null ||
-          userInResourceTeachers() ||
-          resourceInTeacherNetworks());
+        // researchers only get to read the class that they specifically authenticated for
+        allow read: if (isAuthedTeacher() && (
+                      resource == null ||
+                      userInResourceTeachers() ||
+                      resourceInTeacherNetworks())) ||
+                    (isAuthedResearcher() && request.auth.token.class_hash == resource.data.context_id);
       }
 
       function isValidOfferingCreateRequest() {
@@ -239,7 +245,8 @@ service cloud.firestore {
         // we don't support deleting offerings at this time
         allow delete: if false;
         // teachers can read offerings in their network
-        allow read: if isAuthedTeacher() && resourceInTeacherNetworks();
+        allow read: if (isAuthedTeacher() && resourceInTeacherNetworks()) ||
+                       (isAuthedResearcher() && request.auth.token.class_hash == resource.data.context_id);
       }
 
       match /curriculum/{pathId} {
@@ -249,6 +256,7 @@ service cloud.firestore {
         allow update, delete: if false;
         // teachers can read their own curriculum documents or others in their network
         allow read: if isAuthedTeacher() && (userIsResourceUser() || resourceInTeacherNetworks());
+        // TODO: researcher
 
         // return the author/owner of the specified (curriculum) document
         function getCurriculumOwner() {
@@ -303,6 +311,7 @@ service cloud.firestore {
           allow delete: if teacherCanAccessCurriculum() && userIsResourceUser();
           // teachers with access to the curriculum document can read the comments
           allow read: if teacherCanAccessCurriculum();
+          // TODO: allow researcher
         }
       }
 
@@ -367,6 +376,13 @@ service cloud.firestore {
           return isAuthedTeacher() && (!exists(getDocumentPath()) || userCanAccessDocument());
         }
 
+        function researcherCanAccessDocument() {
+          return isAuthedResearcher() &&
+            (!exists(getDocumentPath()) ||
+              userOwnsDocument() ||
+              request.auth.token.class_hash == getDocumentData().context_id);
+        }
+
         function isValidCommentCreateRequest() {
           return userIsRequestUser() &&
                   // comment's network must match network of parent document
@@ -395,13 +411,13 @@ service cloud.firestore {
           // teachers can only delete their own comments
           allow delete: if teacherCanAccessDocument() && userIsResourceUser();
           // only teachers that "own" the document can read the comments (for now)
-          allow read: if teacherCanAccessDocument();
+          allow read: if teacherCanAccessDocument() || researcherCanAccessDocument();
         }
 
         // For writing individual history entries
         match /history/{entryId} {
           allow create: if isAuthed() && userOwnsDocument();
-          allow read: if (isAuthed() && userOwnsDocument()) || teacherCanAccessDocument();
+          allow read: if (isAuthed() && userOwnsDocument()) || teacherCanAccessDocument() || researcherCanAccessDocument();
           allow delete: if false;
           allow update: if false;
         }

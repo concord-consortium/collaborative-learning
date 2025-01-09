@@ -63,6 +63,16 @@ Fields:
 
 TODO
 
+Fields:
+
+- facet
+- network
+- path
+- unit
+- section
+- problem
+- uid: (string, user id of curriculum owner)
+
 ### Contents of `documents/{docId}`
 
 Fields:
@@ -94,6 +104,20 @@ Collection:
 - uid: (string)
 - tags: (array of strings)
 
-### images, mcimages, mcsupports, offerings, users
+### Contents of `offerings/{offeringId}`
+
+Note the `offeringId` here may be prefixed with a network name, eg `berkeley_12345`.
+
+- id (numeric string, matches the second part of `offeringId` )
+- context_id (string, uuid, should match context_id of a class)
+- name (string)
+- network (string)
+- unit (string)
+- problem (string)
+- problemPath (string)
+- uri (string)
+- teachers (array of user IDs)
+
+### images, mcimages, mcsupports, users
 
 TODO
