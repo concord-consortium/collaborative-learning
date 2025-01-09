@@ -56,13 +56,13 @@ describe("Firestore security rules", () => {
 
   const kClassDocPath = `authed/myPortal/classes`;
 
-  async function specClassDoc(classId: string, teacherId: string) {
+  async function specClassDoc(classId: string, tId: string) {
     await adminWriteDoc(`${kClassDocPath}/${classId}`,
         { id: classId,
           name: 'MyClass',
           context_id: classId,
           teacher: "Some Teacher",
-          teachers: [teacherId]
+          teachers: [tId]
         }
       );
   }
@@ -309,7 +309,6 @@ describe("Firestore security rules", () => {
   });
 
   describe("history entries", () => {
-    const kDocumentDocPath = "authed/myPortal/documents/myDocument";
     const kDocumentHistoryDocPath = `${kDocumentDocPath}/history/myHistoryEntry`;
     interface ISpecHisoryDoc {
       add?: Record<string, string | string[] | object>;
@@ -415,7 +414,7 @@ describe("Firestore security rules", () => {
       db = initFirestore(genericAuth);
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
       await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
-      expectReadToFail(db, kDocumentHistoryDocPath);
+      await expectReadToFail(db, kDocumentHistoryDocPath);
     });
 
     it("unauthed user cannot write. Parent doc does not exist", async () => {
