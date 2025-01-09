@@ -46,7 +46,7 @@ describe("Firestore security rules", () => {
     const _class = {
             id: thisClass, name: "My Class", uri: "https://concord.org/class", context_id: thisClass,
             teacher: "Teacher 1", teachers: [teacherId], network: network1, ...additions };
-    subtractions?.forEach(prop => delete (_class as any)[prop]);
+    subtractions?.forEach(prop => delete _class[prop]);
     return _class;
   }
 
