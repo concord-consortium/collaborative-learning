@@ -1,5 +1,6 @@
 import jwt_decode from "jwt-decode";
 import superagent from "superagent";
+import initials from "initials";
 import { AppMode } from "../models/stores/store-types";
 import { QueryParams, urlParams as pageUrlParams } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
@@ -14,7 +15,7 @@ import { LogEventName } from "../lib/logger-types";
 import { uniqueId } from "../utilities/js-utils";
 import { getUnitCodeFromUnitParam } from "../utilities/url-utils";
 import { ICurriculumConfig } from "../models/stores/curriculum-config";
-import { ClassInfo, Portal, StudentUser, TeacherUser } from "../models/stores/portal";
+import { ClassInfo, Portal, ResearcherUser, StudentUser, TeacherUser } from "../models/stores/portal";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
@@ -54,8 +55,9 @@ export const DEV_CLASS_INFO: ClassInfo = {
   localTimestamp: Date.now()
 };
 
-export type AuthenticatedUser = StudentUser | TeacherUser;
+export type AuthenticatedUser = StudentUser | TeacherUser | ResearcherUser;
 export const isAuthenticatedTeacher = (u: AuthenticatedUser): u is TeacherUser => u.type === "teacher";
+export const isAuthenticatedResearcher = (u: AuthenticatedUser): u is ResearcherUser => u.type === "researcher";
 
 export interface AuthQueryParams {
   token?: string;
@@ -106,6 +108,9 @@ export const getFirebaseJWTParams = (classHash?: string) => {
   }
   if (pageUrlParams.resourceLinkId) {
     params.resource_link_id = pageUrlParams.resourceLinkId;
+  }
+  if (pageUrlParams.researcher) {
+    params.researcher = pageUrlParams.researcher;
   }
 
   return `?${(new URLSearchParams(params)).toString()}`;
@@ -233,11 +238,36 @@ export const authenticate = async (
   const [rawFirebaseJWT, firebaseJWT] = firebaseJWTResult;
   const { unitCode: newUnitCode, problemOrdinal: newProblemOrdinal } = problemIdResult;
 
-  const authenticatedUser = user_type === "learner"
-                              ? classInfo.students.find(student => student.id === uidAsString)
-                              : classInfo.teachers.find(teacher => teacher.id === uidAsString);
+  let fullName: string;
+  let authenticatedUser: StudentUser | TeacherUser | ResearcherUser | undefined = undefined;
+  switch (user_type) {
+    case "learner":
+      authenticatedUser = classInfo.students.find(student => student.id === uidAsString);
+      break;
+    case "teacher":
+      authenticatedUser = classInfo.teachers.find(teacher => teacher.id === uidAsString);
+      break;
+    case "researcher":
+      fullName = `${portalJWT.first_name} ${portalJWT.last_name}`;
+      authenticatedUser = {
+        type: "researcher",
+        id: uidAsString,
+        portal: portalHost,
+        firstName: portalJWT.first_name,
+        lastName: portalJWT.last_name,
+        fullName,
+        className: classInfo.name,
+        initials: initials(fullName) as string,
+        classHash: classInfo.classHash,
+        offeringId: portalService.offeringId
+      };
+      break;
+    default:
+      throw new Error(`Unsupported user type: ${user_type ?? "(unknown user type)"}`);
+  }
+
   if (!authenticatedUser) {
-    throw new Error("Current user not found in class roster");
+    throw new Error("Current user not found in class roster or is not a researcher");
   }
 
   authenticatedUser.portalJWT = portalJWT;

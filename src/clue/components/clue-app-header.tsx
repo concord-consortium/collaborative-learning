@@ -136,7 +136,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
       });
   };
 
-  const renderTeacherHeader = () => {
+  const renderNonStudentHeader = ({showProblemMenu}: {showProblemMenu: boolean}) => {
     return (
       <div className="app-header">
         <div className="left">
@@ -148,10 +148,14 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
               {investigation.title}
             </div>
           </div>
-          <div className="separator"/>
-          <div className="problem-dropdown" data-test="user-class">
-            <ProblemMenuContainer />
-          </div>
+          {showProblemMenu &&
+          <>
+            <div className="separator"/>
+            <div className="problem-dropdown" data-test="user-class">
+              <ProblemMenuContainer />
+            </div>
+          </>
+          }
         </div>
         <div className="middle">
           {renderPanelButtons()}
@@ -171,8 +175,12 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     );
   };
 
+  if (user.isResearcher) {
+    return renderNonStudentHeader({showProblemMenu: false});
+  }
+
   if (user.isTeacher && appConfig.showClassSwitcher) {
-    return renderTeacherHeader();
+    return renderNonStudentHeader({showProblemMenu: true});
   }
 
   return (
