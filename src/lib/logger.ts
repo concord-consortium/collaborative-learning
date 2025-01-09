@@ -66,9 +66,9 @@ export class Logger {
 
   // `appContext` properties are logged with every event
   public static initializeLogger(stores: IStores, appContext?: Record<string, any>) {
-    const { appMode } = stores;
+    const { appMode, user } = stores;
     const logModes: Array<typeof appMode> = ["authed"];
-    this.isLoggingEnabled = logModes.includes(appMode) || DEBUG_LOGGER;
+    this.isLoggingEnabled = (logModes.includes(appMode) || DEBUG_LOGGER) && !user.isResearcher;
 
     debugLog(DEBUG_LOGGER, "Logger#initializeLogger called.");
 
