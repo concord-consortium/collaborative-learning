@@ -6,6 +6,7 @@ import { Group } from "@visx/group";
 import { scaleBand, scaleLinear } from "@visx/scale";
 import { Bar, BarGroup } from "@visx/shape";
 import { PositionScale } from "@visx/shape/lib/types";
+import { getSnapshot } from "@concord-consortium/mobx-state-tree";
 import { useBarGraphModelContext } from "./bar-graph-content-context";
 import { CategoryPulldown } from "./category-pulldown";
 import EditableAxisLabel from "./editable-axis-label";
@@ -49,7 +50,10 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
 
   function barColor(key: string) {
     if (!model) return "black";
-    return model.getColorForSecondaryKey(key);
+
+    return model.secondaryAttribute
+      ? model.getColorForSecondaryKey(key)
+      : model.primaryAttributeColor;
   }
 
   // Count cases and make the data array
@@ -125,10 +129,16 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
   }
 
   function groupedBars() {
+    // generate a unique value from the color map to force a re-render when the map changes
+    const colorMapKey = model?.secondaryAttributeColorMap?.size
+      ? JSON.stringify(getSnapshot(model.secondaryAttributeColorMap))
+      : "no-color-map";
+
     return (
       <BarGroup
         data={data}
         color={barColor}
+        key={colorMapKey}
         keys={secondaryKeys}
         height={yMax}
         x0={(d) => d[primary] as string}

@@ -114,6 +114,14 @@ class TableToolTile{
       });
     }
 
+    addRowToTable($tile, rowIndex, data) {
+      $tile.within(() => {
+        for (let j=0; j<data.length; j++) {
+          this.typeInTableCellXY(rowIndex, j, data[j]);
+        }
+      });
+    }
+
     getLinkGraphButton(){
       return cy.get('.link-tile-button');
     }

@@ -57,7 +57,9 @@ describe("Bar Graph Content", () => {
 Object {
   "dataSetId": undefined,
   "primaryAttribute": undefined,
+  "primaryAttributeColor": "black",
   "secondaryAttribute": undefined,
+  "secondaryAttributeColorMap": Object {},
   "type": "BarGraph",
   "yAxisLabel": "Counts",
 }
@@ -282,6 +284,20 @@ Object {
 
     content.setSecondaryAttribute("att-s");
     expect(content.maxDataValue).toBe(2);
+  });
+
+  it("sets the primary attribute color", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setPrimaryAttributeColor("cerulean");
+    expect(content.primaryAttributeColor).toBe("cerulean");
+  });
+
+  it("sets a secondary attribute key's color", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setSecondaryAttributeKeyColor("key1", "obsidian");
+    content.setSecondaryAttributeKeyColor("key2", "veridian");
+    expect(content.secondaryAttributeColorMap.get("key1")).toBe("obsidian");
+    expect(content.secondaryAttributeColorMap.get("key2")).toBe("veridian");
   });
 
 });

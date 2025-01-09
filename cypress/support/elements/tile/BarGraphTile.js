@@ -80,5 +80,17 @@ class BarGraphTile {
     return this.getLegendArea(workspaceClass, tileIndex).find(`.secondary-values .secondary-value-name`);
   }
 
+  getBarColorButton(workspaceClass, tileIndex = 0) {
+    return this.getLegendArea(workspaceClass, tileIndex).find(`[data-testid="color-menu-button"]`);
+  }
+
+  getBarColorMenu(workspaceClass, tileIndex = 0, menuIndex = 0) {
+    return this.getLegendArea(workspaceClass, tileIndex).find(`[data-testid="color-menu-list"]`).eq(menuIndex);
+  }
+
+  getBarColorMenuButtons(workspaceClass, tileIndex = 0, menuIndex = 0) {
+    return this.getBarColorMenu(workspaceClass, tileIndex, menuIndex).find(`[data-testid="color-menu-list-item"]`);
+  }
+
 }
 export default BarGraphTile;

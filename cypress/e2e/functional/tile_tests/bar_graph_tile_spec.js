@@ -490,4 +490,87 @@ context('Bar Graph Tile', function () {
     }
   });
 
+  it('Setting bar colors', function () {
+    beforeTest();
+
+    const workspace = workspaces[0];
+    const tileIndex = 0;
+    const barColors = [
+      '#0069ff', // blue
+      '#ff9617', // orange
+      '#19a90f', // green
+      '#ee0000', // red
+      '#cbd114', // yellow
+      '#d51eff', // purple
+      '#6b00d2', // indigo
+      '#ffffff', // white
+      '#f1d9ae', // peach
+      '#a5a5a5', // gray
+      '#915e3b', // brown
+      '#000000'  // black
+    ];
+
+    clueCanvas.addTile('bargraph');
+
+    // Table dataset for testing:
+    clueCanvas.addTile('table');
+    tableTile.fillTable(tableTile.getTableTile(), [
+      ['X', 'Y', 'Z'],
+      ['X', 'YY', 'Z'],
+      ['XX', 'YYY', 'Z'],
+    ]);
+
+    barGraph.getTile().click();
+    clueCanvas.clickToolbarButton('bargraph', 'link-tile');
+    cy.get('select').select('Table Data 1');
+    cy.get('.modal-button').contains("Graph It!").click();
+
+    cy.log('Check color change when there is no secondary attribute');
+    barGraph.getBar().should('have.length', 2).should('have.attr', 'fill', 'black');
+    barGraph.getBarColorMenu().should('not.be.visible');
+    barGraph.getBarColorButton().should('have.length', 1).click();
+    barGraph.getBarColorMenu(workspace, tileIndex, 0).should('be.visible');
+    barGraph.getBarColorMenuButtons(workspace, tileIndex, 0).should('have.length', 12);
+    barGraph.getBarColorMenuButtons(workspace, tileIndex, 0).eq(0).click({force: true});
+    barGraph.getBarColorMenu(workspace, tileIndex, 0).should('not.be.visible');
+    barGraph.getBar().eq(0).should('have.attr', 'fill', barColors[0]);
+    barGraph.getBar().eq(1).should('have.attr', 'fill', barColors[0]);
+
+    cy.log('Check color change when there is a secondary attribute');
+    barGraph.getSortByMenuButton(workspace).click();
+    barGraph.getChakraMenuItem().eq(1).click();
+    barGraph.getBar().should("have.length", 3);
+    barGraph.getBarColorButton().should('have.length', 3);
+    barGraph.getBar().eq(0).should('have.attr', 'fill', barColors[0]);
+    barGraph.getBar().eq(1).should('have.attr', 'fill', barColors[1]);
+    barGraph.getBar().eq(2).should('have.attr', 'fill', barColors[2]);
+    barGraph.getBarColorButton().eq(0).click();
+    barGraph.getBarColorMenu(workspace, tileIndex, 0).should('be.visible');
+    barGraph.getBarColorMenuButtons(workspace, tileIndex, 0).eq(1).click({force: true});
+    barGraph.getBar().eq(0).should('have.attr', 'fill', barColors[1]);
+    barGraph.getBarColorButton().eq(1).click();
+    barGraph.getBarColorMenu(workspace, tileIndex, 1).should('be.visible');
+    barGraph.getBarColorMenuButtons(workspace, tileIndex, 1).eq(2).click({force: true});
+    barGraph.getBar().eq(1).should('have.attr', 'fill', barColors[2]);
+    barGraph.getBarColorButton().eq(2).click();
+    barGraph.getBarColorMenu(workspace, tileIndex, 2).should('be.visible');
+    barGraph.getBarColorMenuButtons(workspace, tileIndex, 2).eq(3).click({force: true});
+    barGraph.getBar().eq(2).should('have.attr', 'fill', barColors[3]);
+
+    cy.log('Check undo/redo of color changes.');
+    clueCanvas.getUndoTool().click();
+    barGraph.getBar().eq(2).should('have.attr', 'fill', barColors[2]);
+    clueCanvas.getUndoTool().click();
+    barGraph.getBar().eq(1).should('have.attr', 'fill', barColors[1]);
+    clueCanvas.getRedoTool().click();
+    barGraph.getBar().eq(1).should('have.attr', 'fill', barColors[2]);
+    clueCanvas.getRedoTool().click();
+    barGraph.getBar().eq(2).should('have.attr', 'fill', barColors[3]);
+
+    cy.log('Check adding new value to secondary attribute.');
+    const newTableRowValues = ['XX', 'YYYY', 'Z'];
+    tableTile.addRowToTable(tableTile.getTableTile(), 3, newTableRowValues);
+    barGraph.getBarColorButton().should('have.length', 4);
+
+  });
 });

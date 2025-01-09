@@ -22,7 +22,9 @@ export const BarGraphContentModel = TileContentModel
     // that we can tell when it changes.
     dataSetId: types.maybe(types.string),
     primaryAttribute: types.maybe(types.string),
-    secondaryAttribute: types.maybe(types.string)
+    primaryAttributeColor: types.optional(types.string, "black"),
+    secondaryAttribute: types.maybe(types.string),
+    secondaryAttributeColorMap: types.optional(types.map(types.string), {}),
   })
   .views(self => ({
     get sharedModel() {
@@ -128,11 +130,32 @@ export const BarGraphContentModel = TileContentModel
     }
   }))
   .views(self => ({
-    // TODO this should track colors in a way that can be edited later
     getColorForSecondaryKey(key: string) {
-      let n = self.secondaryKeys.indexOf(key);
-      if (!n || n<0) n=0;
-      return clueDataColorInfo[n % clueDataColorInfo.length].color;
+      return self.secondaryAttributeColorMap?.get(key) ?? "black";
+    }
+  }))
+  .actions(self => ({
+    setPrimaryAttributeColor(color: string) {
+      self.primaryAttributeColor = color;
+    },
+    setSecondaryAttributeKeyColor(key: string, color: string) {
+      self.secondaryAttributeColorMap?.set(key, color);
+    },
+    updateSecondaryAttributeKeyColorMap() {
+      for (const key of self.secondaryKeys) {
+        // do not alter colors that have already been set
+        if (self.secondaryAttributeColorMap.has(key)) continue;
+
+        let n = self.secondaryKeys.indexOf(key);
+        if (!n || n<0) n=0;
+        // if possible, do not reuse an already-used color
+        const fallbackColor = clueDataColorInfo[n % clueDataColorInfo.length].color ?? "black";
+        const usedColors = new Set(self.secondaryAttributeColorMap.values());
+        const allColors = clueDataColorInfo.map(info => info.color);
+        const unusedColors = allColors.filter(c => !usedColors.has(c));
+        const color = unusedColors[0] ?? fallbackColor;
+        self.secondaryAttributeColorMap.set(key, color);
+      }
     }
   }))
   .actions(self => ({
@@ -145,6 +168,7 @@ export const BarGraphContentModel = TileContentModel
     },
     setSecondaryAttribute(attrId: string|undefined) {
       self.secondaryAttribute = attrId;
+      self.updateSecondaryAttributeKeyColorMap();
     },
     selectCasesByValues(primaryVal: string, secondaryVal?: string) {
       const dataSet = self.sharedModel?.dataSet;
@@ -161,39 +185,6 @@ export const BarGraphContentModel = TileContentModel
       }
       const caseIds = matchingCases.map(caseID => caseID.__id__);
       dataSet.setSelectedCases(caseIds);
-    }
-  }))
-  .actions(self => ({
-    unlinkDataSet() {
-      const smm = getSharedModelManager(self);
-      if (!smm || !smm.isReady) return;
-      const sharedDataSets = smm.getTileSharedModelsByType(self, SharedDataSet);
-      for (const sharedDataSet of sharedDataSets) {
-        smm.removeTileSharedModel(self, sharedDataSet);
-      }
-    },
-
-    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-      // When new dataset is attached, store its ID and pick a primary attribute to display.
-      const dataSetId = self.sharedModel?.dataSet?.id;
-      if (self.dataSetId !== dataSetId) {
-        self.dataSetId = dataSetId;
-        self.setPrimaryAttribute(undefined);
-        self.setSecondaryAttribute(undefined);
-        if (dataSetId) {
-          const atts = self.sharedModel.dataSet.attributes;
-          if (atts.length > 0) {
-            self.setPrimaryAttribute(atts[0].id);
-          }
-        }
-      }
-      // Check if primary or secondary attribute has been deleted
-      if (self.primaryAttribute && !self.sharedModel?.dataSet.attrFromID(self.primaryAttribute)) {
-        self.setPrimaryAttribute(undefined); // this will also unset secondaryAttribute
-      }
-      if (self.secondaryAttribute && !self.sharedModel?.dataSet.attrFromID(self.secondaryAttribute)) {
-        self.setSecondaryAttribute(undefined);
-      }
     }
   }))
   .actions(self => ({
@@ -236,6 +227,9 @@ export const BarGraphContentModel = TileContentModel
       }
       if (self.secondaryAttribute && !self.sharedModel?.dataSet.attrFromID(self.secondaryAttribute)) {
         self.setSecondaryAttribute(undefined);
+      }
+      if (self.secondaryAttribute) {
+        self.updateSecondaryAttributeKeyColorMap();
       }
     }
   }));
