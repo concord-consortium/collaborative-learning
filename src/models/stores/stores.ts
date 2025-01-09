@@ -172,10 +172,10 @@ class Stores implements IStores{
   get tabsToDisplay() {
     const { appConfig: { navTabs: navTabSpecs },
       teacherGuide,
-      user: { isTeacher }
+      user: { isTeacherOrResearcher }
     } = this;
 
-    return isTeacher
+    return (isTeacherOrResearcher)
       ? navTabSpecs.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide)
       : navTabSpecs.tabSpecs.filter(t => !t.teacherOnly);
   }
@@ -190,8 +190,8 @@ class Stores implements IStores{
   }
 
   get isShowingTeacherContent() {
-    const { persistentUI: { showTeacherContent }, user: { isTeacher } } = this;
-    return isTeacher && showTeacherContent;
+    const { persistentUI: { showTeacherContent }, user: { isTeacherOrResearcher } } = this;
+    return isTeacherOrResearcher && showTeacherContent;
   }
 
   /**
@@ -327,7 +327,7 @@ class Stores implements IStores{
     });
 
     addDisposer(this.unit, when(() => {
-        return this.user.isTeacher;
+        return this.user.isTeacherOrResearcher;
       },
       async () => {
         // Uncomment the next line to add a 5 second delay.

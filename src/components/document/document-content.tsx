@@ -137,7 +137,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   public render() {
     const { viaTeacherDashboard } = this.props;
     const { ui, persistentUI, user } = this.stores;
-    const isChatEnabled = user.isTeacher;
+    const isChatEnabled = user.isTeacherOrResearcher;
     const documentSelectedForComment = isChatEnabled && persistentUI.showChatPanel && ui.selectedTileIds.length === 0
                                           && persistentUI.focusDocument;
     const documentClass = classNames(
