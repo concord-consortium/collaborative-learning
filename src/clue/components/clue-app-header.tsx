@@ -171,7 +171,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     );
   };
 
-  if (user.isTeacher && appConfig.showClassSwitcher) {
+  if ((user.isTeacher || user.isResearcher) && appConfig.showClassSwitcher) {
     return renderTeacherHeader();
   }
 
