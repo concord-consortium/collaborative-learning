@@ -321,7 +321,7 @@ service cloud.firestore {
         // teachers can only update their own documents and only if they're valid
         allow update: if isValidDocumentUpdateRequest();
         // teachers can only delete their own documents
-        allow delete: if isAuthedTeacher() && userIsResourceUser();
+        allow delete: if (isAuthedTeacher() || isAuthedResearcher()) && userIsResourceUser();
         // teachers can read their own documents or other documents in their network
         allow read: if (isAuthed() && (resource == null || userOwnsDocument() || resourceInUserClass())) ||
           (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks()));
@@ -405,11 +405,11 @@ service cloud.firestore {
         }
         match /comments/{commentId} {
           // portal-authenticated teachers with access to the document can create valid comments
-          allow create: if teacherCanAccessDocument() && isValidCommentCreateRequest();
+          allow create: if (teacherCanAccessDocument() || researcherCanAccessDocument()) && isValidCommentCreateRequest();
           // teachers can only update their own comments and only if they're valid
-          allow update: if teacherCanAccessDocument() && isValidCommentUpdateRequest();
+          allow update: if (teacherCanAccessDocument() || researcherCanAccessDocument()) && isValidCommentUpdateRequest();
           // teachers can only delete their own comments
-          allow delete: if teacherCanAccessDocument() && userIsResourceUser();
+          allow delete: if (teacherCanAccessDocument() || researcherCanAccessDocument()) && userIsResourceUser();
           // only teachers that "own" the document can read the comments (for now)
           allow read: if teacherCanAccessDocument() || researcherCanAccessDocument();
         }

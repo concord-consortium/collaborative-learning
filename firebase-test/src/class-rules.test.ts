@@ -1,7 +1,7 @@
 import firebase from "firebase";
 import {
   adminWriteDoc, expectDeleteToFail, expectReadToFail, expectReadToSucceed, expectWriteToFail, expectWriteToSucceed,
-  genericAuth, initFirestore, network1, network2, prepareEachTest, studentAuth,
+  genericAuth, initFirestore, network1, network2, prepareEachTest, researcherAuth, studentAuth,
   teacher2Auth, teacher2Id, teacher2Name,
   teacher3Auth, teacher3Id, teacher3Name,
   teacher4Auth, teacher4Id, teacher4Name,
@@ -20,7 +20,7 @@ interface ClassDocument {
   network: string;            // network of teacher creating class
 }
 
-describe("Firestore security rules for offering (activity) documents", () => {
+describe("Firestore security rules", () => {
 
   let db: firebase.firestore.Firestore;
 
@@ -205,6 +205,35 @@ describe("Firestore security rules for offering (activity) documents", () => {
 
     it("authenticated teachers can't delete their own class documents", async () => {
       db = initFirestore(teacherAuth);
+      await adminWriteDoc(kClassDocPath, specClass());
+      await expectDeleteToFail(db, kClassDocPath);
+    });
+
+    it("authenticated researchers can read their own class documents", async () => {
+      db = initFirestore(researcherAuth);
+      await adminWriteDoc(kClassDocPath, specClass());
+      await expectReadToSucceed(db, kClassDocPath);
+    });
+
+    it("authenticated researchers can't read other class documents", async () => {
+      db = initFirestore(researcherAuth);
+      await adminWriteDoc(kClassDocPath, specClass({ context_id: "other-class" }));
+      await expectReadToFail(db, kClassDocPath);
+    });
+
+    it("authenticated researchers can't write class documents", async () => {
+      db = initFirestore(researcherAuth);
+      await expectWriteToFail(db, kClassDocPath, specClass());
+    });
+
+    it("authenticated researchers can't update class documents", async () => {
+      db = initFirestore(researcherAuth);
+      await adminWriteDoc(kClassDocPath, specClass());
+      await expectWriteToFail(db, kClassDocPath, specClass({ name: "Improved Class Name" }));
+    });
+
+    it("authenticated researchers can't delete class documents", async () => {
+      db = initFirestore(researcherAuth);
       await adminWriteDoc(kClassDocPath, specClass());
       await expectDeleteToFail(db, kClassDocPath);
     });
