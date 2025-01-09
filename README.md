@@ -159,6 +159,7 @@ There are a number of URL parameters that can aid in testing:
 |`firestore`     |`emulator\|<URL>`        |Target emulator for firestore database calls.|
 |`functions`     |`emulator\|<URL>`        |Target emulator-hosted firebase functions.|
 |`noPersistentUI`|none                     |Do not initialize persistent ui store.|
+|`researcher`    |`true`                   |When set to true the user authenticates as a researcher|
 
 The `unit` parameter can be in 3 forms:
 - a valid URL starting with `https:` or `http:` will be treated as an absolute URL.
