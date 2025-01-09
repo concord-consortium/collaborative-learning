@@ -3,7 +3,8 @@ import {
   adminWriteDoc, cPath, cProblem, cSection, cUnit, expectDeleteToFail, expectDeleteToSucceed,
   expectReadToFail, expectReadToSucceed, expectUpdateToFail, expectUpdateToSucceed,
   expectWriteToFail, expectWriteToSucceed, genericAuth, initFirestore, mockTimestamp, network1, network2, noNetwork,
-  prepareEachTest, studentAuth, teacher2Auth, teacher2Id, teacher2Name, teacherAuth, teacherId, teacherName, tearDownTests
+  prepareEachTest, researcherAuth, studentAuth, teacher2Auth, teacher2Id, teacher2Name, teacherAuth, teacherId, teacherName, tearDownTests,
+  thisClass
 } from "./setup-rules-tests";
 
 describe("Firestore security rules", () => {
@@ -38,6 +39,17 @@ describe("Firestore security rules", () => {
     return curriculumDoc;
   }
 
+  // const networkedClassKey = `${network1}_${thisClass}`;
+  const kClassDocPath = `authed/myPortal/classes/${thisClass}`;
+
+  function specClass(additions?: any, subtractions?: string[]) {
+    const _class = {
+            id: thisClass, name: "My Class", uri: "https://concord.org/class", context_id: thisClass,
+            teacher: "Teacher 1", teachers: [teacherId], network: network1, ...additions };
+    subtractions?.forEach(prop => delete (_class as any)[prop]);
+    return _class;
+  }
+
   describe("non-networked curriculum documents", () => {
     it("unauthenticated users can't read authenticated user curriculum documents", async () => {
       db = initFirestore();
@@ -49,17 +61,17 @@ describe("Firestore security rules", () => {
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc());
     });
 
-    it("authenticated generic users can't read authenticated user documents", async () => {
+    it("authenticated generic users can't read authenticated user curriculum documents", async () => {
       db = initFirestore(genericAuth);
       await expectReadToFail(db, kCurriculumDocPath);
     });
 
-    it("authenticated generic users can't write user documents", async () => {
+    it("authenticated generic users can't write user curriculum documents", async () => {
       db = initFirestore(genericAuth);
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc());
     });
 
-    it("authenticated teachers can read their own user documents", async () => {
+    it("authenticated teachers can read their own user curriculum documents", async () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kCurriculumDocPath, specCurriculumDoc());
       await expectReadToSucceed(db, kCurriculumDocPath);
@@ -77,43 +89,43 @@ describe("Firestore security rules", () => {
       await expectReadToFail(db, kCurriculumDocPath);
     });
 
-    it("authenticated teachers can't write user documents without required unit", async () => {
+    it("authenticated teachers can't write user curriculum documents without required unit", async () => {
       db = initFirestore(teacherAuth);
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc({ remove: ["unit"] }));
     });
 
-    it("authenticated teachers can't write user documents without required problem", async () => {
+    it("authenticated teachers can't write user curriculum documents without required problem", async () => {
       db = initFirestore(teacherAuth);
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc({ remove: ["problem"] }));
     });
 
-    it("authenticated teachers can't write user documents without required section", async () => {
+    it("authenticated teachers can't write user curriculum documents without required section", async () => {
       db = initFirestore(teacherAuth);
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc({ remove: ["section"] }));
     });
 
-    it("authenticated teachers can't write user documents without required path", async () => {
+    it("authenticated teachers can't write user curriculum documents without required path", async () => {
       db = initFirestore(teacherAuth);
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc({ remove: ["path"] }));
     });
 
-    it("authenticated teachers can't write user documents without required network", async () => {
+    it("authenticated teachers can't write user curriculum documents without required network", async () => {
       db = initFirestore(teacherAuth);
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc({ remove: ["network"] }));
     });
 
-    it("authenticated teachers can write user documents", async () => {
+    it("authenticated teachers can write user curriculum documents", async () => {
       db = initFirestore(teacherAuth);
       await expectWriteToSucceed(db, kCurriculumDocPath, specCurriculumDoc());
     });
 
-    it("authenticated teachers can't update user documents' read-only fields", async () => {
+    it("authenticated teachers can't update user curriculum documents' read-only fields", async () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kCurriculumDocPath, specCurriculumDoc());
       await expectUpdateToFail(db, kCurriculumDocPath, { unit: "new-unit" });
     });
 
-    it("authenticated teachers can't delete user documents", async () => {
+    it("authenticated teachers can't delete user curriculum documents", async () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kCurriculumDocPath, specCurriculumDoc());
       await expectDeleteToFail(db, kCurriculumDocPath);
@@ -125,13 +137,44 @@ describe("Firestore security rules", () => {
       await expectDeleteToFail(db, kCurriculumDocPath);
     });
 
-    it("authenticated students can't read user documents", async () => {
+    it("authenticated researchers can read user curriculum documents in their class", async () => {
+      db = initFirestore(researcherAuth);
+      await adminWriteDoc(kClassDocPath, specClass());
+      await adminWriteDoc(kCurriculumDocPath, specCurriculumDoc());
+      await expectReadToSucceed(db, kCurriculumDocPath);
+    });
+
+    it("authenticated researchers can't read user curriculum documents outside their class", async () => {
+      db = initFirestore(researcherAuth);
+      await adminWriteDoc(kClassDocPath, specClass());
+      await adminWriteDoc(kCurriculumDocPath, specCurriculumDoc({ add: { uid: teacher2Id }}));
+      await expectReadToFail(db, kCurriculumDocPath);
+    });
+
+    it("authenticated researchers can't write user curriculum documents", async () => {
+      db = initFirestore(researcherAuth);
+      await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc());
+    });
+
+    it("authenticated researchers can't update user curriculum documents", async () => {
+      db = initFirestore(researcherAuth);
+      await adminWriteDoc(kCurriculumDocPath, specCurriculumDoc());
+      await expectUpdateToFail(db, kCurriculumDocPath, { unit: "new-unit" });
+    });
+
+    it("authenticated researchers can't delete user curriculum documents", async () => {
+      db = initFirestore(researcherAuth);
+      await adminWriteDoc(kCurriculumDocPath, specCurriculumDoc());
+      await expectDeleteToFail(db, kCurriculumDocPath);
+    });
+
+    it("authenticated students can't read user curriculum documents", async () => {
       db = initFirestore(studentAuth);
       await adminWriteDoc(kCurriculumDocPath, specCurriculumDoc());
       await expectReadToFail(db, kCurriculumDocPath);
     });
 
-    it("authenticated students can't write user documents", async () => {
+    it("authenticated students can't write user curriculum documents", async () => {
       db = initFirestore(studentAuth);
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc());
     });
@@ -252,6 +295,41 @@ describe("Firestore security rules", () => {
       await expectDeleteToFail(db, kCurriculumCommentDocPath);
     });
 
+    it("authenticated researchers can read document comments from their class", async () => {
+      await initFirestoreWithUserDocument(researcherAuth);
+      await adminWriteDoc(kClassDocPath, specClass());
+      await adminWriteDoc(kCurriculumCommentDocPath, specCommentDoc());
+      await expectReadToSucceed(db, kCurriculumCommentDocPath);
+    });
+
+    it("authenticated researchers can't read document comments from other classes", async () => {
+      await initFirestore(researcherAuth);
+      await adminWriteDoc(kClassDocPath, specClass());
+      await adminWriteDoc(kCurriculumDocPath, specCurriculumDoc({ add: { uid: teacher2Id }}));
+      await adminWriteDoc(kCurriculumCommentDocPath, specCommentDoc());
+      await expectReadToFail(db, kCurriculumCommentDocPath);
+    });
+
+    it("authenticated researchers can't write document comments", async () => {
+      await initFirestoreWithUserDocument(researcherAuth);
+      await adminWriteDoc(kClassDocPath, specClass());
+      await expectWriteToFail(db, kCurriculumCommentDocPath, specCommentDoc());
+    });
+
+    it("authenticated researchers can't update document comments", async () => {
+      await initFirestoreWithUserDocument(researcherAuth);
+      await adminWriteDoc(kClassDocPath, specClass());
+      await adminWriteDoc(kCurriculumCommentDocPath, specCommentDoc());
+      await expectUpdateToFail(db, kCurriculumCommentDocPath, { content: "A new comment!" });
+    });
+
+    it("authenticated researchers can't delete document comments", async () => {
+      await initFirestoreWithUserDocument(researcherAuth);
+      await adminWriteDoc(kClassDocPath, specClass());
+      await adminWriteDoc(kCurriculumCommentDocPath, specCommentDoc());
+      await expectDeleteToFail(db, kCurriculumCommentDocPath);
+    });
+
     it("authenticated students can't read document comments", async () => {
       await initFirestoreWithUserDocument(studentAuth);
       await adminWriteDoc(kCurriculumCommentDocPath, specCommentDoc());
@@ -276,17 +354,17 @@ describe("Firestore security rules", () => {
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc({ add: { network: network1 } }));
     });
 
-    it("authenticated generic users can't read authenticated user documents", async () => {
+    it("authenticated generic users can't read authenticated user curriculum documents", async () => {
       db = initFirestore(genericAuth);
       await expectReadToFail(db, kCurriculumDocPath);
     });
 
-    it("authenticated generic users can't write user documents", async () => {
+    it("authenticated generic users can't write user curriculum documents", async () => {
       db = initFirestore(genericAuth);
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc({ add: { network: network1 } }));
     });
 
-    it("authenticated teachers can read their own user documents", async () => {
+    it("authenticated teachers can read their own user curriculum documents", async () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kCurriculumDocPath, specCurriculumDoc());
       await expectReadToSucceed(db, kCurriculumDocPath);
@@ -304,43 +382,43 @@ describe("Firestore security rules", () => {
       await expectReadToFail(db, kCurriculumDocPath);
     });
 
-    it("authenticated teachers can't write user documents without required unit", async () => {
+    it("authenticated teachers can't write user curriculum documents without required unit", async () => {
       db = initFirestore(teacherAuth);
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc({ add: { network: network1 }, remove: ["unit"] }));
     });
 
-    it("authenticated teachers can't write user documents without required problem", async () => {
+    it("authenticated teachers can't write user curriculum documents without required problem", async () => {
       db = initFirestore(teacherAuth);
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc({ add: { network: network1 }, remove: ["problem"] }));
     });
 
-    it("authenticated teachers can't write user documents without required section", async () => {
+    it("authenticated teachers can't write user curriculum documents without required section", async () => {
       db = initFirestore(teacherAuth);
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc({ add: { network: network1 }, remove: ["section"] }));
     });
 
-    it("authenticated teachers can't write user documents without required path", async () => {
+    it("authenticated teachers can't write user curriculum documents without required path", async () => {
       db = initFirestore(teacherAuth);
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc({ add: { network: network1 }, remove: ["path"] }));
     });
 
-    it("authenticated teachers can't write user documents without required network", async () => {
+    it("authenticated teachers can't write user curriculum documents without required network", async () => {
       db = initFirestore(teacherAuth);
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc({ remove: ["network"] }));
     });
 
-    it("authenticated teachers can write user documents", async () => {
+    it("authenticated teachers can write user curriculum documents", async () => {
       db = initFirestore(teacherAuth);
       await expectWriteToSucceed(db, kCurriculumDocPath, specCurriculumDoc({ add: { network: network1 } }));
     });
 
-    it("authenticated teachers can't update user documents' read-only fields", async () => {
+    it("authenticated teachers can't update user curriculum documents' read-only fields", async () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kCurriculumDocPath, specCurriculumDoc({ add: { network: network1 } }));
       await expectUpdateToFail(db, kCurriculumDocPath, { unit: "new-unit" });
     });
 
-    it("authenticated teachers can't delete user documents", async () => {
+    it("authenticated teachers can't delete user curriculum documents", async () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kCurriculumDocPath, specCurriculumDoc({ add: { network: network1 } }));
       await expectDeleteToFail(db, kCurriculumDocPath);
@@ -352,13 +430,13 @@ describe("Firestore security rules", () => {
       await expectDeleteToFail(db, kCurriculumDocPath);
     });
 
-    it("authenticated students can't read user documents", async () => {
+    it("authenticated students can't read user curriculum documents", async () => {
       db = initFirestore(studentAuth);
       await adminWriteDoc(kCurriculumDocPath, specCurriculumDoc({ add: { network: network1 } }));
       await expectReadToFail(db, kCurriculumDocPath);
     });
 
-    it("authenticated students can't write user documents", async () => {
+    it("authenticated students can't write user curriculum documents", async () => {
       db = initFirestore(studentAuth);
       await expectWriteToFail(db, kCurriculumDocPath, specCurriculumDoc({ add: { network: network1 } }));
     });

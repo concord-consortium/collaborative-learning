@@ -122,10 +122,15 @@ service cloud.firestore {
     match /authed/{portal} {
       allow read, write: if isAuthedTeacher() || isAuthedResearcher();
 
+      // Check that the class given by the context_id exists and includes the given teacher
+      function aTeacherIsInClass(uid, contextid) {
+        let class_doc = get(/databases/$(database)/documents/authed/$(portal)/classes/$(contextid));
+        return class_doc != null && string(uid) in class_doc.data.teachers;
+      }
+
       // Check that the class given by the context_id exists and includes the logged-in teacher
       function teacherIsInClass(contextid) {
-        let class_doc = get(/databases/$(database)/documents/authed/$(portal)/classes/$(contextid));
-        return class_doc != null && string(request.auth.token.platform_user_id) in class_doc.data.teachers;
+        return aTeacherIsInClass(request.auth.token.platform_user_id, contextid);
       }
 
       // user's platform_user_id must be listed in the class of the requested document
@@ -255,8 +260,8 @@ service cloud.firestore {
         // curriculum documents can't be updated or deleted
         allow update, delete: if false;
         // teachers can read their own curriculum documents or others in their network
-        allow read: if isAuthedTeacher() && (userIsResourceUser() || resourceInTeacherNetworks());
-        // TODO: researcher
+        allow read: if (isAuthedTeacher() && (userIsResourceUser() || resourceInTeacherNetworks())) ||
+          (isAuthedResearcher() && aTeacherIsInClass(resource.data.uid, request.auth.token.class_hash));
 
         // return the author/owner of the specified (curriculum) document
         function getCurriculumOwner() {
@@ -285,6 +290,10 @@ service cloud.firestore {
           return isAuthedTeacher() && (teacherIsCurriculumOwner() || curriculumInTeacherNetworks());
         }
 
+        function researcherCanAccessCurriculum() {
+          return isAuthedResearcher() && aTeacherIsInClass(getCurriculumOwner(), request.auth.token.class_hash);
+        }
+
         function isValidCommentCreateRequest() {
           return userIsRequestUser() &&
                   // comments network must match network of parent document
@@ -310,8 +319,7 @@ service cloud.firestore {
           // teachers can only delete their own comments
           allow delete: if teacherCanAccessCurriculum() && userIsResourceUser();
           // teachers with access to the curriculum document can read the comments
-          allow read: if teacherCanAccessCurriculum();
-          // TODO: allow researcher
+          allow read: if teacherCanAccessCurriculum() || researcherCanAccessCurriculum();
         }
       }
 
