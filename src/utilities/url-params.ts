@@ -46,6 +46,8 @@ export interface QueryParams {
   reportType?: string;
   // set to string "true" to authenticate as a researcher
   researcher?: string;
+  // display a certain student document
+  studentDocument?: string;
 
   //
   // demo features

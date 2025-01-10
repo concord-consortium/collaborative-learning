@@ -42,6 +42,7 @@ export interface IStores extends IBaseStores {
   problemOrdinal: string;
   userContextProvider: UserContextProvider;
   tabsToDisplay: NavTabModelType[];
+  documentToDisplay?: string;
   isShowingTeacherContent: boolean;
   studentWorkTabSelectedGroupId: string | undefined;
   setAppMode: (appMode: AppMode) => void;
@@ -162,6 +163,26 @@ class Stores implements IStores{
     this.bookmarks = new Bookmarks({db: this.db});
     this.sortedDocuments = new SortedDocuments(this);
     this.sectionDocuments = new SectionDocuments(this);
+
+    // If there is a `studentDocument` URL parameter, then display it
+    const docToDisplay = params?.documentToDisplay;
+    if (docToDisplay) {
+      // We need to wait for the document to be loaded before we can display it.
+      // TODO: we don't know what type of document it is -- should we wait for all types?
+      const documentLoading = this.documents.requiredDocuments[ProblemDocument];
+      if (documentLoading) {
+        documentLoading.promise.then(() => {
+          const doc = this.documents.getDocument(docToDisplay);
+          if (doc) {
+            this.persistentUI.openResourceDocument(doc, undefined, this.sortedDocuments);
+          } else {
+            console.log("Display document not found: ", params.documentToDisplay);
+          }
+        });
+      } else {
+        console.log("No document loading promise found for ProblemDocument");
+      }
+    }
 
     this.unitLoadedPromise = when(() => this.unit !== defaultUnit);
     this.sectionsLoadedPromise = when(() => this.problem.sections.length > 0);
