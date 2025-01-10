@@ -36,7 +36,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
             user } = this.stores;
     const tabs = this.stores.tabsToDisplay;
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
-    const isChatEnabled = user.isTeacher; //only enable chat for teachers
+    const isChatEnabled = user.isTeacherOrResearcher; //only enable chat for teachers or researchers
     const openChatPanel = isChatEnabled && showChatPanel;
     const focusTileId = selectedTileIds?.length === 1 ? selectedTileIds[0] : undefined;
 
@@ -125,19 +125,19 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private renderProblem = () => {
-    const { user: { isTeacher }, problem: { sections }} = this.stores;
+    const { user: { isTeacherOrResearcher }, problem: { sections }} = this.stores;
     return (
       <ProblemTabContent
         sections={sections}
-        showSolutionsSwitch={isTeacher}
+        showSolutionsSwitch={isTeacherOrResearcher}
       />
     );
   };
 
   private renderTeacherGuide = () => {
-    const { user: { isTeacher }, teacherGuide } = this.stores;
+    const { user: { isTeacherOrResearcher }, teacherGuide } = this.stores;
     const sections = teacherGuide?.sections;
-    return isTeacher && sections && (
+    return isTeacherOrResearcher && sections && (
       <ProblemTabContent
         context={ENavTab.kTeacherGuide}
         sections={sections}

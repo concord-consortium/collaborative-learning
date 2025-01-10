@@ -69,6 +69,7 @@ export class DBDocumentsContentListener extends BaseListener {
           return;
         }
 
+        // RESEARCHER-ACCESS: should this be changed to isTeacherOrResearcher?
         // teachers monitor all problem documents
         // students only monitor documents in their group to save bandwidth
         if (user.isTeacher || document.groupId === user.currentGroupId) {

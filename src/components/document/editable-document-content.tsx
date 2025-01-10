@@ -107,7 +107,7 @@ export function EditableDocumentContent({
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
   const isShowingToolbar = toolbar?.length && !isReadOnly;
   const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
-  const isChatEnabled = user.isTeacher;
+  const isChatEnabled = user.isTeacherOrResearcher;
   const documentSelectedForComment = isChatEnabled && persistentUI.showChatPanel
                                      && ui.selectedTileIds.length === 0 && !isPrimary;
   const editableDocContentClass = classNames("editable-document-content", showToolbarClass,

@@ -66,6 +66,10 @@ export const ClassModel = types
   })
   .views((self) => {
     return {
+      // RESEARCHER-ACCESS: we use this to gate access to certain features
+      // that are only available to teachers but may need to be available to
+      // researchers as well.  How do we want to handle this since the
+      // researcher is not in the class list?
       isTeacher(uid: string) {
         const user =  self.getUserById(uid);
         return user?.type === "teacher";

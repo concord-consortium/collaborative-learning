@@ -142,6 +142,9 @@ export const UserModel = types
     get isResearcher() {
       return self.type === "researcher";
     },
+    get isTeacherOrResearcher() {
+      return (self.type === "teacher") || (self.type === "researcher");
+    },
     get isNetworkedTeacher() {
       return (self.type === "teacher") && !!self.network;
     },
