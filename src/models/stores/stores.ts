@@ -164,24 +164,18 @@ class Stores implements IStores{
     this.sortedDocuments = new SortedDocuments(this);
     this.sectionDocuments = new SectionDocuments(this);
 
-    // If there is a `studentDocument` URL parameter, then display it
+    // If there is a `studentDocument` URL parameter, then tell the UI to display it
     const docToDisplay = params?.documentToDisplay;
     if (docToDisplay) {
-      // We need to wait for the document to be loaded before we can display it.
-      // TODO: we don't know what type of document it is -- should we wait for all types?
-      const documentLoading = this.documents.requiredDocuments[ProblemDocument];
-      if (documentLoading) {
-        documentLoading.promise.then(() => {
-          const doc = this.documents.getDocument(docToDisplay);
-          if (doc) {
-            this.persistentUI.openResourceDocument(doc, undefined, this.sortedDocuments);
-          } else {
-            console.log("Display document not found: ", params.documentToDisplay);
-          }
-        });
-      } else {
-        console.log("No document loading promise found for ProblemDocument");
-      }
+      // We need to ensure that the document is loaded first.
+      const docPromise = this.sortedDocuments.fetchFullDocument(docToDisplay);
+      docPromise.then((doc) => {
+        if (doc) {
+          this.persistentUI.openResourceDocument(doc, undefined, this.sortedDocuments);
+        } else {
+          console.log("Display document not found: ", params.documentToDisplay);
+        }
+      });
     }
 
     this.unitLoadedPromise = when(() => this.unit !== defaultUnit);
