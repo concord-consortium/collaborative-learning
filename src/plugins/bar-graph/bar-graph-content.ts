@@ -1,5 +1,6 @@
-import { types, Instance } from "mobx-state-tree";
+import { getSnapshot, types, Instance } from "mobx-state-tree";
 import { isObject } from "lodash";
+import stringify from "json-stringify-pretty-compact";
 import { ITileContentModel, TileContentModel } from "../../models/tiles/tile-content";
 import { kBarGraphTileType, kBarGraphContentType, BarInfo } from "./bar-graph-types";
 import { getSharedModelManager } from "../../models/tiles/tile-environment";
@@ -7,6 +8,7 @@ import { SharedDataSet, SharedDataSetType } from "../../models/shared/shared-dat
 import { clueDataColorInfo } from "../../utilities/color-utils";
 import { keyForValue } from "./bar-graph-utils";
 import { SharedModelType } from "../../models/shared/shared-model";
+import { ITileExportOptions } from "../../models/tiles/tile-content-info";
 
 export function defaultBarGraphContent(): BarGraphContentModelType {
   return BarGraphContentModel.create({yAxisLabel: "Counts"});
@@ -27,6 +29,10 @@ export const BarGraphContentModel = TileContentModel
     secondaryAttributeColorMap: types.optional(types.map(types.string), {}),
   })
   .views(self => ({
+    exportJson(options?: ITileExportOptions) {
+      const snapshot = getSnapshot(self);
+      return stringify(snapshot, {maxLength: 200});
+    },
     get sharedModel() {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       const firstSharedModel = sharedModelManager?.getTileSharedModelsByType(self, SharedDataSet)?.[0];

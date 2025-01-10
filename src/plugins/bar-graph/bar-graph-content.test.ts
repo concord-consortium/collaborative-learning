@@ -300,4 +300,18 @@ Object {
     expect(content.secondaryAttributeColorMap.get("key2")).toBe("veridian");
   });
 
+  it("can export content", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    const expected = {
+      type: "BarGraph",
+      yAxisLabel: "",
+      primaryAttributeColor: "black",
+      secondaryAttributeColorMap: {},
+      dataSetId: undefined,
+      primaryAttribute: undefined,
+      secondaryAttribute: undefined
+    };
+    expect(JSON.parse(content.exportJson())).toEqual(expected);
+  });
+
 });
