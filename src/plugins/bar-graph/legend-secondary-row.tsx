@@ -17,7 +17,7 @@ export const LegendSecondaryRow = observer(function LegendSecondaryRow ({attrVal
   const missingData = isMissingData(attrValue);
   const display = displayValue(attrValue);
   const backgroundColor = model.secondaryAttribute
-    ? model.getColorForSecondaryKey(attrValue)
+    ? model.colorForSecondaryKey(attrValue)
     : model.primaryAttributeColor;
 
   const handleColorSelect = (color: string) => {

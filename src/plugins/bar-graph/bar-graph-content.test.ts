@@ -11,6 +11,17 @@ const mockCases: ICaseCreation[] = [
   { species: "owl", location: "forest" }
 ];
 
+jest.mock("../../utilities/color-utils", () => ({
+  ...jest.requireActual("../../utilities/color-utils"),
+  clueDataColorInfo: [
+    { color: "red", name: "red" },
+    { color: "blue", name: "blue" },
+    { color: "green", name: "green" },
+    { color: "yellow", name: "yellow" },
+    { color: "purple", name: "purple" },
+  ]
+}));
+
 function sharedEmptyDataSet() {
   const emptyDataSet = DataSet.create();
   addAttributeToDataSet(emptyDataSet, { id: "att-s", name: "species" });
@@ -288,16 +299,19 @@ Object {
 
   it("sets the primary attribute color", () => {
     const content = TestingBarGraphContentModel.create({ });
+    content.setPrimaryAttribute("att-l");
     content.setPrimaryAttributeColor("cerulean");
     expect(content.primaryAttributeColor).toBe("cerulean");
   });
 
   it("sets a secondary attribute key's color", () => {
     const content = TestingBarGraphContentModel.create({ });
+    content.setPrimaryAttribute("att-l");
+    content.setSecondaryAttribute("att-s");
     content.setSecondaryAttributeKeyColor("key1", "obsidian");
     content.setSecondaryAttributeKeyColor("key2", "veridian");
-    expect(content.secondaryAttributeColorMap.get("key1")).toBe("obsidian");
-    expect(content.secondaryAttributeColorMap.get("key2")).toBe("veridian");
+    expect(content.colorForSecondaryKey("key1")).toBe("obsidian");
+    expect(content.colorForSecondaryKey("key2")).toBe("veridian");
   });
 
   it("can export content", () => {

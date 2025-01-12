@@ -516,8 +516,8 @@ context('Bar Graph Tile', function () {
     clueCanvas.addTile('table');
     tableTile.fillTable(tableTile.getTableTile(), [
       ['X', 'Y', 'Z'],
-      ['X', 'YY', 'Z'],
-      ['XX', 'YYY', 'Z'],
+      ['X', 'YY', 'ZZ'],
+      ['XX', 'YYY', 'ZZZ'],
     ]);
 
     barGraph.getTile().click();
@@ -568,9 +568,19 @@ context('Bar Graph Tile', function () {
     barGraph.getBar().eq(2).should('have.attr', 'fill', barColors[3]);
 
     cy.log('Check adding new value to secondary attribute.');
-    const newTableRowValues = ['XX', 'YYYY', 'Z'];
+    const newTableRowValues = ['XX', 'YYYY', 'ZZZZ'];
     tableTile.addRowToTable(tableTile.getTableTile(), 3, newTableRowValues);
     barGraph.getBarColorButton().should('have.length', 4);
+
+    cy.log("Check secondary attribute switch results in default color sequence for bars.");
+    barGraph.getSortByMenuButton().click();
+    barGraph.getChakraMenuItem().eq(2).click();
+    barGraph.getBar().should("have.length", 4);
+    barGraph.getBarColorButton().should('have.length', 4);
+    barGraph.getBar().eq(0).should('have.attr', 'fill', barColors[0]);
+    barGraph.getBar().eq(1).should('have.attr', 'fill', barColors[1]);
+    barGraph.getBar().eq(2).should('have.attr', 'fill', barColors[2]);
+    barGraph.getBar().eq(3).should('have.attr', 'fill', barColors[3]);
 
   });
 });

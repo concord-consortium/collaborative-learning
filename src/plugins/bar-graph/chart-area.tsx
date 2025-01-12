@@ -52,7 +52,7 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
     if (!model) return "black";
 
     return model.secondaryAttribute
-      ? model.getColorForSecondaryKey(key)
+      ? model.colorForSecondaryKey(key)
       : model.primaryAttributeColor;
   }
 

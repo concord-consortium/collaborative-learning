@@ -26,7 +26,7 @@ export const BarGraphContentModel = TileContentModel
     primaryAttribute: types.maybe(types.string),
     primaryAttributeColor: types.optional(types.string, "black"),
     secondaryAttribute: types.maybe(types.string),
-    secondaryAttributeColorMap: types.optional(types.map(types.string), {}),
+    secondaryAttributeColorMap: types.optional(types.map(types.map(types.string)), {}),
   })
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
@@ -133,11 +133,19 @@ export const BarGraphContentModel = TileContentModel
         const maxInRow = Math.max(...rowValues);
         return Math.max(maxInRow, acc);
       }, 0);
+    },
+    get currentSecondaryAttributeColorMap() {
+      return self.secondaryAttribute
+        ? self.secondaryAttributeColorMap.get(self.secondaryAttribute) || new Map<string, string>()
+        : new Map<string, string>();
     }
   }))
   .views(self => ({
-    getColorForSecondaryKey(key: string) {
-      return self.secondaryAttributeColorMap?.get(key) ?? "black";
+    colorForSecondaryKey(key: string) {
+      return self.currentSecondaryAttributeColorMap.get(key) ?? "black";
+    },
+    newEmptyColorMap() {
+      return getSnapshot(types.map(types.string).create());
     }
   }))
   .actions(self => ({
@@ -145,22 +153,33 @@ export const BarGraphContentModel = TileContentModel
       self.primaryAttributeColor = color;
     },
     setSecondaryAttributeKeyColor(key: string, color: string) {
-      self.secondaryAttributeColorMap?.set(key, color);
-    },
-    updateSecondaryAttributeKeyColorMap() {
-      for (const key of self.secondaryKeys) {
-        // do not alter colors that have already been set
-        if (self.secondaryAttributeColorMap.has(key)) continue;
+      if (!self.secondaryAttribute) return;
 
-        let n = self.secondaryKeys.indexOf(key);
-        if (!n || n<0) n=0;
-        // if possible, do not reuse an already-used color
-        const fallbackColor = clueDataColorInfo[n % clueDataColorInfo.length].color ?? "black";
-        const usedColors = new Set(self.secondaryAttributeColorMap.values());
-        const allColors = clueDataColorInfo.map(info => info.color);
-        const unusedColors = allColors.filter(c => !usedColors.has(c));
-        const color = unusedColors[0] ?? fallbackColor;
-        self.secondaryAttributeColorMap.set(key, color);
+      if (!self.secondaryAttributeColorMap.has(self.secondaryAttribute)) {
+        self.secondaryAttributeColorMap.set(self.secondaryAttribute, self.newEmptyColorMap());
+      }
+
+      self.secondaryAttributeColorMap.get(self.secondaryAttribute)?.set(key, color);
+    }
+  }))
+  .actions(self => ({
+    updateSecondaryAttributeKeyColorMap() {
+      if (!self.secondaryAttribute) return;
+
+      if (!self.secondaryAttributeColorMap.has(self.secondaryAttribute)) {
+        self.secondaryAttributeColorMap.set(self.secondaryAttribute, self.newEmptyColorMap());
+      }
+
+      const colorMap = self.secondaryAttributeColorMap.get(self.secondaryAttribute);
+      const usedColors = new Set(colorMap?.values());
+      const allColors = clueDataColorInfo.map(info => info.color);
+      const unusedColors = allColors.filter(c => !usedColors.has(c));
+
+      for (const key of self.secondaryKeys) {
+        if (!colorMap?.has(key)) {
+          const color = unusedColors.shift() || allColors[0];
+          self.setSecondaryAttributeKeyColor(key, color);
+        }
       }
     }
   }))
@@ -168,13 +187,15 @@ export const BarGraphContentModel = TileContentModel
     setYAxisLabel(text: string) {
       self.yAxisLabel = text;
     },
-    setPrimaryAttribute(attrId: string|undefined) {
+    setPrimaryAttribute(attrId?: string) {
       self.primaryAttribute = attrId;
       self.secondaryAttribute = undefined;
     },
-    setSecondaryAttribute(attrId: string|undefined) {
+    setSecondaryAttribute(attrId?: string) {
       self.secondaryAttribute = attrId;
-      self.updateSecondaryAttributeKeyColorMap();
+      if (attrId) {
+        self.updateSecondaryAttributeKeyColorMap();
+      }
     },
     selectCasesByValues(primaryVal: string, secondaryVal?: string) {
       const dataSet = self.sharedModel?.dataSet;
