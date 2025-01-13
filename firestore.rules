@@ -176,6 +176,15 @@ service cloud.firestore {
       // user's class_hash must be the requested document's context_id
       function resourceInUserClass() {
         return request.auth.token.class_hash == resource.data.context_id;
+        // I _think_ this is where the evaluation error is coming from.
+        // I also tried this but it didn't help:
+        // return ("context_id" in resource.data) && stringExists(resource.data.context_id) &&
+        //   ("class_hash" in request.auth.token) && stringExists(request.auth.token.class_hash) &&
+        //   (request.auth.token.class_hash == resource.data.context_id);
+      }
+
+      function resourceInResearcherClass() {
+        return isAuthedResearcher() && resourceInUserClass();
       }
 
       match /users/{userId} {
@@ -189,9 +198,11 @@ service cloud.firestore {
 
       function isValidClassCreateRequest() {
         let requiredFields = ["id", "name", "uri", "context_id", "teacher", "teachers"];
-        return userInRequestTeachers() &&
-          (!("network" in request.resource) || requestInTeacherNetworks()) &&
-          request.resource.data.keys().hasAll(requiredFields);
+        let validTeacher = isAuthedTeacher() && userInRequestTeachers() &&
+          (!("network" in request.resource) || requestInTeacherNetworks());
+        let validResearcher = resourceInResearcherClass();
+        let hasKeys = request.resource.data.keys().hasAll(requiredFields);
+        return (validTeacher || validResearcher) && hasKeys;
       }
 
       function preservesReadOnlyClassFields() {
@@ -201,15 +212,16 @@ service cloud.firestore {
       }
 
       function isValidClassUpdateRequest() {
-        return userInRequestTeachers() && userInResourceTeachers() &&
-                requestInTeacherNetworks() && preservesReadOnlyClassFields();
+        let validTeacher = userInRequestTeachers() && userInResourceTeachers() && requestInTeacherNetworks();
+        let validResearcher = resourceInResearcherClass();
+        return (validTeacher || validResearcher) && preservesReadOnlyClassFields();
       }
 
       match /classes/{classId} {
         // portal-authenticated teachers can create valid classes
-        allow create: if isAuthedTeacher() && isValidClassCreateRequest();
+        allow create: if (isAuthedTeacher() || isAuthedResearcher()) && isValidClassCreateRequest();
         // teachers can only update their own classes and only if they're valid
-        allow update: if isAuthedTeacher() && isValidClassUpdateRequest();
+        allow update: if (isAuthedTeacher() || isAuthedResearcher()) && isValidClassUpdateRequest();
         // we don't support deleting classes at this time
         allow delete: if false;
         // teachers can read, non existing classes, their own classes, or any class in their network
@@ -218,7 +230,7 @@ service cloud.firestore {
                       resource == null ||
                       userInResourceTeachers() ||
                       resourceInTeacherNetworks())) ||
-                    (isAuthedResearcher() && request.auth.token.class_hash == resource.data.context_id);
+                      resourceInResearcherClass();
       }
 
       function isValidOfferingCreateRequest() {

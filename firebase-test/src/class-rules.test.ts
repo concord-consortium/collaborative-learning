@@ -221,14 +221,25 @@ describe("Firestore security rules", () => {
       await expectReadToFail(db, kClassDocPath);
     });
 
-    it("authenticated researchers can't write class documents", async () => {
+    it("authenticated researchers can write their own class documents", async () => {
       db = initFirestore(researcherAuth);
-      await expectWriteToFail(db, kClassDocPath, specClass());
+      await expectWriteToSucceed(db, kClassDocPath, specClass());
     });
 
-    it("authenticated researchers can't update class documents", async () => {
+    it("authenticated researchers can't write other class documents", async () => {
+      db = initFirestore(researcherAuth);
+      await expectWriteToFail(db, kClassDocPath, specClass({ context_id: "other-class" }));
+    });
+
+    it("authenticated researchers can update their own class documents", async () => {
       db = initFirestore(researcherAuth);
       await adminWriteDoc(kClassDocPath, specClass());
+      await expectWriteToSucceed(db, kClassDocPath, specClass({ name: "Improved Class Name" }));
+    });
+
+    it("authenticated researchers can't update other class documents", async () => {
+      db = initFirestore(researcherAuth);
+      await adminWriteDoc(kClassDocPath, specClass({ context_id: "other-class" }));
       await expectWriteToFail(db, kClassDocPath, specClass({ name: "Improved Class Name" }));
     });
 

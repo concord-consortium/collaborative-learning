@@ -256,14 +256,25 @@ describe("Firestore security rules for offering (activity) documents", () => {
       await expectReadToFail(db, kOfferingDocPath);
     });
 
-    it("authenticated researchers can't write offering documents", async () => {
+    it("authenticated researchers can write their class's offering documents", async () => {
       db = initFirestore(researcherAuth);
-      await expectWriteToFail(db, kOfferingDocPath, specOffering());
+      await expectWriteToSucceed(db, kOfferingDocPath, specOffering());
     });
 
-    it("authenticated researchers can't update offering documents", async () => {
+    it("authenticated researchers can't write other class's offering documents", async () => {
+      db = initFirestore(researcherAuth);
+      await expectWriteToFail(db, kOfferingDocPath, specOffering({ context_id: "other-class" }));
+    });
+
+    it("authenticated researchers can update their class's offering documents", async () => {
       db = initFirestore(researcherAuth);
       await adminWriteDoc(kOfferingDocPath, specOffering());
+      await expectWriteToSucceed(db, kOfferingDocPath, specOffering({ name: "Improved Activity Offering" }));
+    });
+
+    it("authenticated researchers can't update other class's offering documents", async () => {
+      db = initFirestore(researcherAuth);
+      await adminWriteDoc(kOfferingDocPath, specOffering({ context_id: "other-class" }));
       await expectWriteToFail(db, kOfferingDocPath, specOffering({ name: "Improved Activity Offering" }));
     });
 
