@@ -12,6 +12,7 @@ import { CategoryPulldown } from "./category-pulldown";
 import EditableAxisLabel from "./editable-axis-label";
 import { displayValue, logBarGraphEvent, roundTo5 } from "./bar-graph-utils";
 import { BarInfo } from "./bar-graph-types";
+import { clueDataColorInfo } from "../../utilities/color-utils";
 
 const margin = {
   top: 7,
@@ -49,11 +50,11 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
   }
 
   function barColor(key: string) {
-    if (!model) return "black";
+    if (!model) return "blue";
 
     return model.secondaryAttribute
-      ? model.colorForSecondaryKey(key)
-      : model.primaryAttributeColor;
+      ? clueDataColorInfo[model.colorForSecondaryKey(key)].color
+      : clueDataColorInfo[model.primaryAttributeColor].color;
   }
 
   // Count cases and make the data array

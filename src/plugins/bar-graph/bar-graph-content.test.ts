@@ -11,16 +11,6 @@ const mockCases: ICaseCreation[] = [
   { species: "owl", location: "forest" }
 ];
 
-jest.mock("../../utilities/color-utils", () => ({
-  ...jest.requireActual("../../utilities/color-utils"),
-  clueDataColorInfo: [
-    { color: "red", name: "red" },
-    { color: "blue", name: "blue" },
-    { color: "green", name: "green" },
-    { color: "yellow", name: "yellow" },
-    { color: "purple", name: "purple" },
-  ]
-}));
 
 function sharedEmptyDataSet() {
   const emptyDataSet = DataSet.create();
@@ -68,7 +58,7 @@ describe("Bar Graph Content", () => {
 Object {
   "dataSetId": undefined,
   "primaryAttribute": undefined,
-  "primaryAttributeColor": "black",
+  "primaryAttributeColor": 0,
   "secondaryAttribute": undefined,
   "secondaryAttributeColorMap": Object {},
   "type": "BarGraph",
@@ -300,18 +290,18 @@ Object {
   it("sets the primary attribute color", () => {
     const content = TestingBarGraphContentModel.create({ });
     content.setPrimaryAttribute("att-l");
-    content.setPrimaryAttributeColor("cerulean");
-    expect(content.primaryAttributeColor).toBe("cerulean");
+    content.setPrimaryAttributeColor(1);
+    expect(content.primaryAttributeColor).toBe(1);
   });
 
   it("sets a secondary attribute key's color", () => {
     const content = TestingBarGraphContentModel.create({ });
     content.setPrimaryAttribute("att-l");
     content.setSecondaryAttribute("att-s");
-    content.setSecondaryAttributeKeyColor("key1", "obsidian");
-    content.setSecondaryAttributeKeyColor("key2", "veridian");
-    expect(content.colorForSecondaryKey("key1")).toBe("obsidian");
-    expect(content.colorForSecondaryKey("key2")).toBe("veridian");
+    content.setSecondaryAttributeKeyColor("key1", 2);
+    content.setSecondaryAttributeKeyColor("key2", 3);
+    expect(content.colorForSecondaryKey("key1")).toBe(2);
+    expect(content.colorForSecondaryKey("key2")).toBe(3);
   });
 
   it("can export content", () => {
@@ -319,7 +309,7 @@ Object {
     const expected = {
       type: "BarGraph",
       yAxisLabel: "",
-      primaryAttributeColor: "black",
+      primaryAttributeColor: 0,
       secondaryAttributeColorMap: {},
       dataSetId: undefined,
       primaryAttribute: undefined,

@@ -17,14 +17,14 @@ export const LegendSecondaryRow = observer(function LegendSecondaryRow ({attrVal
   const missingData = isMissingData(attrValue);
   const display = displayValue(attrValue);
   const backgroundColor = model.secondaryAttribute
-    ? model.colorForSecondaryKey(attrValue)
-    : model.primaryAttributeColor;
+    ? clueDataColorInfo[model.colorForSecondaryKey(attrValue)].color
+    : clueDataColorInfo[model.primaryAttributeColor].color;
 
-  const handleColorSelect = (color: string) => {
+  const handleColorSelect = (colorIndex: number) => {
     if (model.secondaryAttribute) {
-      model.setSecondaryAttributeKeyColor(attrValue, color);
+      model.setSecondaryAttributeKeyColor(attrValue, colorIndex);
     } else {
-      model.setPrimaryAttributeColor(color);
+      model.setPrimaryAttributeColor(colorIndex);
     }
   };
 
@@ -48,12 +48,12 @@ export const LegendSecondaryRow = observer(function LegendSecondaryRow ({attrVal
           gridTemplateColumns="repeat(2, 1fr)"
           zIndex={1}
         >
-          {Object.entries(clueDataColorInfo).map(([key, value]) => (
+          {Object.entries(clueDataColorInfo).map(([key, value], index) => (
             <MenuItem
               className="color-menu-list-item"
               data-testid="color-menu-list-item"
               key={key}
-              onClick={() => handleColorSelect(value.color)}
+              onClick={() => handleColorSelect(index)}
             >
               <div className="color-button">
                 <div className="color-swatch" style={{ backgroundColor: value.color }} />

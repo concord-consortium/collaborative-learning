@@ -9,6 +9,7 @@ import { clueDataColorInfo } from "../../utilities/color-utils";
 import { keyForValue } from "./bar-graph-utils";
 import { SharedModelType } from "../../models/shared/shared-model";
 import { ITileExportOptions } from "../../models/tiles/tile-content-info";
+import { findLeastUsedNumber } from "../../utilities/math-utils";
 
 export function defaultBarGraphContent(): BarGraphContentModelType {
   return BarGraphContentModel.create({yAxisLabel: "Counts"});
@@ -24,9 +25,10 @@ export const BarGraphContentModel = TileContentModel
     // that we can tell when it changes.
     dataSetId: types.maybe(types.string),
     primaryAttribute: types.maybe(types.string),
-    primaryAttributeColor: types.optional(types.string, "black"),
+    primaryAttributeColor: types.optional(types.number, 0),
     secondaryAttribute: types.maybe(types.string),
-    secondaryAttributeColorMap: types.optional(types.map(types.map(types.string)), {}),
+    // Map of secondary attribute keys to color indices. Each secondary attribute has its own map.
+    secondaryAttributeColorMap: types.optional(types.map(types.map(types.number)), {}),
   })
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
@@ -136,30 +138,30 @@ export const BarGraphContentModel = TileContentModel
     },
     get currentSecondaryAttributeColorMap() {
       return self.secondaryAttribute
-        ? self.secondaryAttributeColorMap.get(self.secondaryAttribute) || new Map<string, string>()
-        : new Map<string, string>();
+        ? self.secondaryAttributeColorMap.get(self.secondaryAttribute) || new Map<string, number>()
+        : new Map<string, number>();
     }
   }))
   .views(self => ({
     colorForSecondaryKey(key: string) {
-      return self.currentSecondaryAttributeColorMap.get(key) ?? "black";
+      return self.currentSecondaryAttributeColorMap.get(key) ?? 0;
     },
     newEmptyColorMap() {
-      return getSnapshot(types.map(types.string).create());
+      return getSnapshot(types.map(types.number).create());
     }
   }))
   .actions(self => ({
-    setPrimaryAttributeColor(color: string) {
-      self.primaryAttributeColor = color;
+    setPrimaryAttributeColor(colorIndex: number) {
+      self.primaryAttributeColor = colorIndex;
     },
-    setSecondaryAttributeKeyColor(key: string, color: string) {
+    setSecondaryAttributeKeyColor(key: string, colorIndex: number) {
       if (!self.secondaryAttribute) return;
 
       if (!self.secondaryAttributeColorMap.has(self.secondaryAttribute)) {
         self.secondaryAttributeColorMap.set(self.secondaryAttribute, self.newEmptyColorMap());
       }
 
-      self.secondaryAttributeColorMap.get(self.secondaryAttribute)?.set(key, color);
+      self.secondaryAttributeColorMap.get(self.secondaryAttribute)?.set(key, colorIndex);
     }
   }))
   .actions(self => ({
@@ -171,13 +173,10 @@ export const BarGraphContentModel = TileContentModel
       }
 
       const colorMap = self.secondaryAttributeColorMap.get(self.secondaryAttribute);
-      const usedColors = new Set(colorMap?.values());
-      const allColors = clueDataColorInfo.map(info => info.color);
-      const unusedColors = allColors.filter(c => !usedColors.has(c));
 
       for (const key of self.secondaryKeys) {
         if (!colorMap?.has(key)) {
-          const color = unusedColors.shift() || allColors[0];
+          const color = findLeastUsedNumber(clueDataColorInfo.length, colorMap?.values() ?? []);
           self.setSecondaryAttributeKeyColor(key, color);
         }
       }
