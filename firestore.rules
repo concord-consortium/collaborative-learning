@@ -200,7 +200,7 @@ service cloud.firestore {
         let requiredFields = ["id", "name", "uri", "context_id", "teacher", "teachers"];
         let validTeacher = isAuthedTeacher() && userInRequestTeachers() &&
           (!("network" in request.resource) || requestInTeacherNetworks());
-        let validResearcher = resourceInResearcherClass();
+        let validResearcher = isAuthedResearcher() && request.auth.token.class_hash == request.resource.data.context_id;
         let hasKeys = request.resource.data.keys().hasAll(requiredFields);
         return (validTeacher || validResearcher) && hasKeys;
       }
