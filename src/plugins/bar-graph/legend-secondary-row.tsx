@@ -46,6 +46,7 @@ export const LegendSecondaryRow = observer(function LegendSecondaryRow ({attrVal
           display="grid"
           gap={0}
           gridTemplateColumns="repeat(2, 1fr)"
+          zIndex={1}
         >
           {Object.entries(clueDataColorInfo).map(([key, value]) => (
             <MenuItem
