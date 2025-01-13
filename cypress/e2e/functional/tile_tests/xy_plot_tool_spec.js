@@ -5,6 +5,7 @@ import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import XYPlotToolTile from '../../../support/elements/tile/XYPlotToolTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
 import DataCardToolTile from '../../../support/elements/tile/DataCardToolTile';
+import { clueDataColors, hexToRgb } from '../../../support/utils/data-display';
 
 let clueCanvas = new ClueCanvas;
 let xyTile = new XYPlotToolTile;
@@ -192,6 +193,12 @@ context('XYPlot Tool Tile', function () {
       cy.openDocumentWithTitle('my-work', 'workspaces', problemDoc);
       xyTile.getGraphDot().should('have.length', 3);
       xyTile.getXYPlotTitle().should('contain', title);
+
+      // TODO: More thorough color checks.
+      cy.log("check colors of dots");
+      xyTile.getGraphDot().eq(0).find('.inner-circle').should('have.attr', 'style').and('contain', hexToRgb(clueDataColors[0]));
+      xyTile.selectYAttribute("y2");
+      xyTile.getGraphDot().eq(0).find('.inner-circle').should('have.attr', 'style').and('contain', hexToRgb(clueDataColors[1]));
 
        //XY Plot tile restore upon page reload
        cy.wait(2000);
