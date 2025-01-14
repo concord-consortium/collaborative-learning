@@ -176,11 +176,6 @@ service cloud.firestore {
       // user's class_hash must be the requested document's context_id
       function resourceInUserClass() {
         return request.auth.token.class_hash == resource.data.context_id;
-        // I _think_ this is where the evaluation error is coming from.
-        // I also tried this but it didn't help:
-        // return ("context_id" in resource.data) && stringExists(resource.data.context_id) &&
-        //   ("class_hash" in request.auth.token) && stringExists(request.auth.token.class_hash) &&
-        //   (request.auth.token.class_hash == resource.data.context_id);
       }
 
       function resourceInResearcherClass() {
@@ -200,7 +195,7 @@ service cloud.firestore {
         let requiredFields = ["id", "name", "uri", "context_id", "teacher", "teachers"];
         let validTeacher = isAuthedTeacher() && userInRequestTeachers() &&
           (!("network" in request.resource) || requestInTeacherNetworks());
-        let validResearcher = isAuthedResearcher() && request.auth.token.class_hash == request.resource.data.context_id;
+        let validResearcher = isAuthedResearcher() && classIsRequestContextId();
         let hasKeys = request.resource.data.keys().hasAll(requiredFields);
         return (validTeacher || validResearcher) && hasKeys;
       }
@@ -226,18 +221,18 @@ service cloud.firestore {
         allow delete: if false;
         // teachers can read, non existing classes, their own classes, or any class in their network
         // researchers only get to read the class that they specifically authenticated for
-        allow read: if (isAuthedTeacher() && (
-                      resource == null ||
-                      userInResourceTeachers() ||
-                      resourceInTeacherNetworks())) ||
-                      resourceInResearcherClass();
+        allow read: if (isAuthedTeacher() &&
+                          (resource == null || userInResourceTeachers() || resourceInTeacherNetworks())) ||
+                        resourceInResearcherClass();
       }
 
       function isValidOfferingCreateRequest() {
         let requiredFields = ["id", "name", "uri", "context_id", "teachers",
                               "unit", "problem", "problemPath", "network"];
-        return userInRequestTeachers() && requestInTeacherNetworks() &&
-                request.resource.data.keys().hasAll(requiredFields);
+        let validTeacher = isAuthedTeacher() && userInRequestTeachers() && requestInTeacherNetworks();
+        let validResearcher = isAuthedResearcher() && classIsRequestContextId();
+        let hasKeys = request.resource.data.keys().hasAll(requiredFields);
+        return (validTeacher || validResearcher) && hasKeys;
       }
 
       function preservesReadOnlyOfferingFields() {
@@ -250,15 +245,16 @@ service cloud.firestore {
       function isValidOfferingUpdateRequest() {
         // teachers can update the list of teachers for the offering,
         // but only if they were already a teacher and are still a teacher
-        return userInRequestTeachers() && userInResourceTeachers() &&
-                requestInTeacherNetworks() && preservesReadOnlyOfferingFields();
+        let validTeacher = userInRequestTeachers() && userInResourceTeachers() && requestInTeacherNetworks();
+        let validResearcher = resourceInResearcherClass();
+        return (validTeacher || validResearcher) && preservesReadOnlyOfferingFields();
       }
 
       match /offerings/{offeringId} {
         // portal-authenticated teachers can create valid offerings
-        allow create: if isAuthedTeacher() && isValidOfferingCreateRequest();
+        allow create: if (isAuthedTeacher() || isAuthedResearcher()) && isValidOfferingCreateRequest();
         // teachers can only update their own documents and only if they're valid
-        allow update: if isAuthedTeacher() && isValidOfferingUpdateRequest();
+        allow update: if (isAuthedTeacher() || isAuthedResearcher()) && isValidOfferingUpdateRequest();
         // we don't support deleting offerings at this time
         allow delete: if false;
         // teachers can read offerings in their network
