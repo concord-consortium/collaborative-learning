@@ -259,7 +259,7 @@ service cloud.firestore {
         allow delete: if false;
         // teachers can read offerings in their network
         allow read: if (isAuthedTeacher() && resourceInTeacherNetworks()) ||
-                       (isAuthedResearcher() && request.auth.token.class_hash == resource.data.context_id);
+                       resourceInResearcherClass();
       }
 
       match /curriculum/{pathId} {

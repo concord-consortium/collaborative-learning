@@ -72,17 +72,12 @@ describe("Firestore security rules for user documents", () => {
 
     it("authenticated teachers can read user documents of other teachers in their network", async () => {
       await initFirestoreWithOtherUser(teacherAuth, network1);
-      // not clear why reading the first teacher twice makes a difference,
-      // but I couldn't get it to work reliably without it ¯\_(ツ)_/¯
-      await expectReadToSucceed(db, kUserDocPath);
       await expectReadToSucceed(db, kUserDocPath);
       await expectReadToSucceed(db, kOtherUserDocPath);
     });
 
     it("authenticated teachers can't read user documents of teachers in other networks", async () => {
       await initFirestoreWithOtherUser(teacherAuth, network2);
-      // read first teacher twice for consistency with previous case
-      await expectReadToSucceed(db, kUserDocPath);
       await expectReadToSucceed(db, kUserDocPath);
       await expectReadToFail(db, kOtherUserDocPath);
     });
