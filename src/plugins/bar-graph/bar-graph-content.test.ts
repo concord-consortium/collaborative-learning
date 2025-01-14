@@ -11,6 +11,7 @@ const mockCases: ICaseCreation[] = [
   { species: "owl", location: "forest" }
 ];
 
+
 function sharedEmptyDataSet() {
   const emptyDataSet = DataSet.create();
   addAttributeToDataSet(emptyDataSet, { id: "att-s", name: "species" });
@@ -57,7 +58,9 @@ describe("Bar Graph Content", () => {
 Object {
   "dataSetId": undefined,
   "primaryAttribute": undefined,
+  "primaryAttributeColor": 0,
   "secondaryAttribute": undefined,
+  "secondaryAttributeColorMap": Object {},
   "type": "BarGraph",
   "yAxisLabel": "Counts",
 }
@@ -282,6 +285,37 @@ Object {
 
     content.setSecondaryAttribute("att-s");
     expect(content.maxDataValue).toBe(2);
+  });
+
+  it("sets the primary attribute color", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setPrimaryAttribute("att-l");
+    content.setPrimaryAttributeColor(1);
+    expect(content.primaryAttributeColor).toBe(1);
+  });
+
+  it("sets a secondary attribute key's color", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    content.setPrimaryAttribute("att-l");
+    content.setSecondaryAttribute("att-s");
+    content.setSecondaryAttributeKeyColor("key1", 2);
+    content.setSecondaryAttributeKeyColor("key2", 3);
+    expect(content.colorForSecondaryKey("key1")).toBe(2);
+    expect(content.colorForSecondaryKey("key2")).toBe(3);
+  });
+
+  it("can export content", () => {
+    const content = TestingBarGraphContentModel.create({ });
+    const expected = {
+      type: "BarGraph",
+      yAxisLabel: "",
+      primaryAttributeColor: 0,
+      secondaryAttributeColorMap: {},
+      dataSetId: undefined,
+      primaryAttribute: undefined,
+      secondaryAttribute: undefined
+    };
+    expect(JSON.parse(content.exportJson())).toEqual(expected);
   });
 
 });

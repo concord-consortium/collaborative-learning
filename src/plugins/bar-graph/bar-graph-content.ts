@@ -1,5 +1,6 @@
-import { types, Instance } from "mobx-state-tree";
+import { getSnapshot, types, Instance } from "mobx-state-tree";
 import { isObject } from "lodash";
+import stringify from "json-stringify-pretty-compact";
 import { ITileContentModel, TileContentModel } from "../../models/tiles/tile-content";
 import { kBarGraphTileType, kBarGraphContentType, BarInfo } from "./bar-graph-types";
 import { getSharedModelManager } from "../../models/tiles/tile-environment";
@@ -7,6 +8,8 @@ import { SharedDataSet, SharedDataSetType } from "../../models/shared/shared-dat
 import { clueDataColorInfo } from "../../utilities/color-utils";
 import { keyForValue } from "./bar-graph-utils";
 import { SharedModelType } from "../../models/shared/shared-model";
+import { ITileExportOptions } from "../../models/tiles/tile-content-info";
+import { findLeastUsedNumber } from "../../utilities/math-utils";
 
 export function defaultBarGraphContent(): BarGraphContentModelType {
   return BarGraphContentModel.create({yAxisLabel: "Counts"});
@@ -22,9 +25,16 @@ export const BarGraphContentModel = TileContentModel
     // that we can tell when it changes.
     dataSetId: types.maybe(types.string),
     primaryAttribute: types.maybe(types.string),
-    secondaryAttribute: types.maybe(types.string)
+    primaryAttributeColor: types.optional(types.number, 0),
+    secondaryAttribute: types.maybe(types.string),
+    // Map of secondary attribute keys to color indices. Each secondary attribute has its own map.
+    secondaryAttributeColorMap: types.optional(types.map(types.map(types.number)), {}),
   })
   .views(self => ({
+    exportJson(options?: ITileExportOptions) {
+      const snapshot = getSnapshot(self);
+      return stringify(snapshot, {maxLength: 200});
+    },
     get sharedModel() {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       const firstSharedModel = sharedModelManager?.getTileSharedModelsByType(self, SharedDataSet)?.[0];
@@ -125,26 +135,66 @@ export const BarGraphContentModel = TileContentModel
         const maxInRow = Math.max(...rowValues);
         return Math.max(maxInRow, acc);
       }, 0);
+    },
+    get currentSecondaryAttributeColorMap() {
+      return self.secondaryAttribute
+        ? self.secondaryAttributeColorMap.get(self.secondaryAttribute) || new Map<string, number>()
+        : new Map<string, number>();
     }
   }))
   .views(self => ({
-    // TODO this should track colors in a way that can be edited later
-    getColorForSecondaryKey(key: string) {
-      let n = self.secondaryKeys.indexOf(key);
-      if (!n || n<0) n=0;
-      return clueDataColorInfo[n % clueDataColorInfo.length].color;
+    colorForSecondaryKey(key: string) {
+      return self.currentSecondaryAttributeColorMap.get(key) ?? 0;
+    },
+    newEmptyColorMap() {
+      return getSnapshot(types.map(types.number).create());
+    }
+  }))
+  .actions(self => ({
+    setPrimaryAttributeColor(colorIndex: number) {
+      self.primaryAttributeColor = colorIndex;
+    },
+    setSecondaryAttributeKeyColor(key: string, colorIndex: number) {
+      if (!self.secondaryAttribute) return;
+
+      if (!self.secondaryAttributeColorMap.has(self.secondaryAttribute)) {
+        self.secondaryAttributeColorMap.set(self.secondaryAttribute, self.newEmptyColorMap());
+      }
+
+      self.secondaryAttributeColorMap.get(self.secondaryAttribute)?.set(key, colorIndex);
+    }
+  }))
+  .actions(self => ({
+    updateSecondaryAttributeKeyColorMap() {
+      if (!self.secondaryAttribute) return;
+
+      if (!self.secondaryAttributeColorMap.has(self.secondaryAttribute)) {
+        self.secondaryAttributeColorMap.set(self.secondaryAttribute, self.newEmptyColorMap());
+      }
+
+      const colorMap = self.secondaryAttributeColorMap.get(self.secondaryAttribute);
+
+      for (const key of self.secondaryKeys) {
+        if (!colorMap?.has(key)) {
+          const color = findLeastUsedNumber(clueDataColorInfo.length, colorMap?.values() ?? []);
+          self.setSecondaryAttributeKeyColor(key, color);
+        }
+      }
     }
   }))
   .actions(self => ({
     setYAxisLabel(text: string) {
       self.yAxisLabel = text;
     },
-    setPrimaryAttribute(attrId: string|undefined) {
+    setPrimaryAttribute(attrId?: string) {
       self.primaryAttribute = attrId;
       self.secondaryAttribute = undefined;
     },
-    setSecondaryAttribute(attrId: string|undefined) {
+    setSecondaryAttribute(attrId?: string) {
       self.secondaryAttribute = attrId;
+      if (attrId) {
+        self.updateSecondaryAttributeKeyColorMap();
+      }
     },
     selectCasesByValues(primaryVal: string, secondaryVal?: string) {
       const dataSet = self.sharedModel?.dataSet;
@@ -161,39 +211,6 @@ export const BarGraphContentModel = TileContentModel
       }
       const caseIds = matchingCases.map(caseID => caseID.__id__);
       dataSet.setSelectedCases(caseIds);
-    }
-  }))
-  .actions(self => ({
-    unlinkDataSet() {
-      const smm = getSharedModelManager(self);
-      if (!smm || !smm.isReady) return;
-      const sharedDataSets = smm.getTileSharedModelsByType(self, SharedDataSet);
-      for (const sharedDataSet of sharedDataSets) {
-        smm.removeTileSharedModel(self, sharedDataSet);
-      }
-    },
-
-    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-      // When new dataset is attached, store its ID and pick a primary attribute to display.
-      const dataSetId = self.sharedModel?.dataSet?.id;
-      if (self.dataSetId !== dataSetId) {
-        self.dataSetId = dataSetId;
-        self.setPrimaryAttribute(undefined);
-        self.setSecondaryAttribute(undefined);
-        if (dataSetId) {
-          const atts = self.sharedModel.dataSet.attributes;
-          if (atts.length > 0) {
-            self.setPrimaryAttribute(atts[0].id);
-          }
-        }
-      }
-      // Check if primary or secondary attribute has been deleted
-      if (self.primaryAttribute && !self.sharedModel?.dataSet.attrFromID(self.primaryAttribute)) {
-        self.setPrimaryAttribute(undefined); // this will also unset secondaryAttribute
-      }
-      if (self.secondaryAttribute && !self.sharedModel?.dataSet.attrFromID(self.secondaryAttribute)) {
-        self.setSecondaryAttribute(undefined);
-      }
     }
   }))
   .actions(self => ({
@@ -236,6 +253,9 @@ export const BarGraphContentModel = TileContentModel
       }
       if (self.secondaryAttribute && !self.sharedModel?.dataSet.attrFromID(self.secondaryAttribute)) {
         self.setSecondaryAttribute(undefined);
+      }
+      if (self.secondaryAttribute) {
+        self.updateSecondaryAttributeKeyColorMap();
       }
     }
   }));

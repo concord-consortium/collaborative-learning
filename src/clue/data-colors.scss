@@ -8,6 +8,10 @@ $data-red:    #ee0000;
 $data-yellow: #cbd114;
 $data-purple: #d51eff;
 $data-indigo: #6b00d2;
+$data-white: #ffffff;
+$data-peach: #f1d9ae;
+$data-gray: #a5a5a5;
+$data-brown: #915e3b;
 $data-black : #000000;
 
 :export {
@@ -18,5 +22,9 @@ $data-black : #000000;
   dataYellow: $data-yellow;
   dataPurple: $data-purple;
   dataIndigo: $data-indigo;
+  dataWhite:  $data-white;
+  dataPeach:  $data-peach;
+  dataGray:   $data-gray;
+  dataBrown:  $data-brown;
   dataBlack:  $data-black;
 }

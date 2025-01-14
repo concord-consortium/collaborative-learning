@@ -38,7 +38,12 @@ export const clueDataColorInfo: ClueColor[] = [
   { color: clueDataColors.dataRed, name: "red" },
   { color: clueDataColors.dataYellow, name: "yellow" },
   { color: clueDataColors.dataPurple, name: "purple" },
-  { color: clueDataColors.dataIndigo, name: "indigo" }
+  { color: clueDataColors.dataIndigo, name: "indigo" },
+  { color: clueDataColors.dataWhite, name: "white" },
+  { color: clueDataColors.dataPeach, name: "peach" },
+  { color: clueDataColors.dataGray, name: "gray" },
+  { color: clueDataColors.dataBrown, name: "brown" },
+  { color: clueDataColors.dataBlack, name: "black" }
 ];
 
 /*
