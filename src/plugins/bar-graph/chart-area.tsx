@@ -50,7 +50,7 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
   }
 
   function barColor(key: string) {
-    if (!model) return "blue";
+    if (!model) return clueDataColorInfo[0].color;
 
     return model.secondaryAttribute
       ? clueDataColorInfo[model.colorForSecondaryKey(key)].color
