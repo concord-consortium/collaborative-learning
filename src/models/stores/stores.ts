@@ -175,7 +175,7 @@ class Stores implements IStores{
         if (doc) {
           this.persistentUI.openResourceDocument(doc, this.user, this.sortedDocuments);
         } else {
-          console.log("Display document not found: ", params.documentToDisplay);
+          console.warn("Display document not found: ", params.documentToDisplay);
         }
       });
     }
