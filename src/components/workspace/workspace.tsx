@@ -67,9 +67,10 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
         </>
       }
       {showRightPanel &&
-      <ResizablePanel collapsed={!workspaceShown}>
-        <DocumentWorkspaceComponent />
-      </ResizablePanel>}
+        <ResizablePanel collapsed={!workspaceShown}>
+          <DocumentWorkspaceComponent />
+        </ResizablePanel>
+      }
     </div>
   );
 });

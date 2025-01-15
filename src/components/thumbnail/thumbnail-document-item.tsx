@@ -42,11 +42,15 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
     onDocumentDragStart?.(e, document);
   };
   const handleDocumentStarClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    onDocumentStarClick?.(document);
+    if (!user.isResearcher) {
+      onDocumentStarClick?.(document);
+    }
     e.stopPropagation();
   };
   const handleDocumentDeleteClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    onDocumentDeleteClick?.(document);
+    if (!user.isResearcher) {
+      onDocumentDeleteClick?.(document);
+    }
     e.stopPropagation();
   };
 
@@ -86,7 +90,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
         }
       </div>
       {
-        onDocumentStarClick && !user.isResearcher &&
+        onDocumentStarClick &&
         <DocumentBookmark isStarred={isStarred} onStarClick={handleDocumentStarClick} label={label}/>
       }
       <DocumentCaption
