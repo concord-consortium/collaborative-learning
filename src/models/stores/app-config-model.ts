@@ -25,14 +25,24 @@ export const AppConfigModel = types
     toolbar: ToolbarModel.create(self.config?.toolbar || []),
     authorTools: ToolbarModel.create(self.config?.authorTools || []),
     settings: self.config?.settings,
+    requireSortWorkTab: false
   }))
   .actions(self => ({
     setConfigs(configs: Partial<UnitConfiguration>[]) {
       self.configMgr = new ConfigurationManager(self.config, configs);
       self.navTabs = NavTabsConfigModel.create(self.configMgr.navTabs);
+      if (self.requireSortWorkTab) {
+        self.navTabs.addSortWorkTab();
+      }
       self.disabledFeatures = self.configMgr.disabledFeatures;
       self.toolbar = ToolbarModel.create(self.configMgr.toolbar);
       self.settings = self.configMgr.settings;
+    },
+    setRequireSortWorkTab(requireSortWorkTab: boolean) {
+      self.requireSortWorkTab = requireSortWorkTab;
+      if (requireSortWorkTab) {
+        self.navTabs.addSortWorkTab();
+      }
     }
   }))
   .views(self => ({

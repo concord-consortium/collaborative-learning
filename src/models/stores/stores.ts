@@ -167,11 +167,13 @@ class Stores implements IStores{
     // If there is a `studentDocument` URL parameter, then tell the UI to display it
     const docToDisplay = params?.documentToDisplay;
     if (docToDisplay) {
-      // We need to ensure that the document is loaded first.
+      // Make sure there is a Sort Work tab to display the document in.
+      this.appConfig.setRequireSortWorkTab(true);
+      // Wait until the document is loaded, then open it.
       const docPromise = this.sortedDocuments.fetchFullDocument(docToDisplay);
       docPromise.then((doc) => {
         if (doc) {
-          this.persistentUI.openResourceDocument(doc, undefined, this.sortedDocuments);
+          this.persistentUI.openResourceDocument(doc, this.user, this.sortedDocuments);
         } else {
           console.log("Display document not found: ", params.documentToDisplay);
         }
