@@ -86,7 +86,7 @@ export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) 
         }
       </div>
       {
-        onDocumentStarClick &&
+        onDocumentStarClick && !user.isResearcher &&
         <DocumentBookmark isStarred={isStarred} onStarClick={handleDocumentStarClick} label={label}/>
       }
       <DocumentCaption
