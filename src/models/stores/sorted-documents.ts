@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from "mobx";
+import { autorun, makeAutoObservable, runInAction } from "mobx";
 import { types, Instance, SnapshotIn, applySnapshot, typecheck, unprotect } from "mobx-state-tree";
 import { union } from "lodash";
 import firebase from "firebase";
@@ -79,6 +79,7 @@ export class SortedDocuments {
   stores: ISortedDocumentsStores;
   metadataDocsFiltered = MetadataDocMapModel.create();
   metadataDocsWithoutUnit = MetadataDocMapModel.create();
+  docsReceived = false;
 
   constructor(stores: ISortedDocumentsStores) {
     makeAutoObservable(this);
@@ -257,6 +258,7 @@ export class SortedDocuments {
     const disposeFilteredListener = filteredQuery.onSnapshot(snapshot => {
       const mstSnapshot = this.getMSTSnapshotFromFBSnapshot(snapshot);
       applySnapshot(this.metadataDocsFiltered, mstSnapshot);
+      this.docsReceived = true;
     });
 
     let disposeDocsWithoutUnitListener: () => void | undefined;
@@ -353,9 +355,22 @@ export class SortedDocuments {
   }
 
   async fetchFullDocument(docKey: string) {
+    if (!this.docsReceived) {
+      // Wait until the initial documents have been received before trying to open a document.
+      await new Promise<void>(resolve => {
+        const disposer = autorun(() => {
+          if (this.docsReceived) {
+            disposer();
+            resolve();
+          }
+        });
+      });
+    }
     const metadataDoc = this.firestoreMetadataDocs.find(doc => doc.key === docKey);
-    if (!metadataDoc) return;
-
+    if (!metadataDoc) {
+      console.warn("Could not find metadata doc with key", docKey, this.firestoreMetadataDocs);
+      return;
+    }
     const visibility = metadataDoc?.visibility === "public" || metadataDoc?.visibility === "private"
                          ? metadataDoc?.visibility as "public" | "private"
                          : undefined;

@@ -150,6 +150,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       <DocumentDndContext>
         <div className={documentClass}
           data-testid="document-content"
+          data-document-key={this.props.documentId}
           onScroll={this.handleScroll}
           onClick={this.handleClick}
           onDragOver={this.handleDragOver}

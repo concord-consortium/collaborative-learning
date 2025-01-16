@@ -42,6 +42,7 @@ export interface IStores extends IBaseStores {
   problemOrdinal: string;
   userContextProvider: UserContextProvider;
   tabsToDisplay: NavTabModelType[];
+  documentToDisplay?: string;
   isShowingTeacherContent: boolean;
   studentWorkTabSelectedGroupId: string | undefined;
   setAppMode: (appMode: AppMode) => void;
@@ -162,6 +163,22 @@ class Stores implements IStores{
     this.bookmarks = new Bookmarks({db: this.db});
     this.sortedDocuments = new SortedDocuments(this);
     this.sectionDocuments = new SectionDocuments(this);
+
+    // If there is a `studentDocument` URL parameter, then tell the UI to display it
+    const docToDisplay = params?.documentToDisplay;
+    if (docToDisplay) {
+      // Make sure there is a Sort Work tab to display the document in.
+      this.appConfig.setRequireSortWorkTab(true);
+      // Wait until the document is loaded, then open it.
+      const docPromise = this.sortedDocuments.fetchFullDocument(docToDisplay);
+      docPromise.then((doc) => {
+        if (doc) {
+          this.persistentUI.openResourceDocument(doc, this.user, this.sortedDocuments);
+        } else {
+          console.warn("Display document not found: ", params.documentToDisplay);
+        }
+      });
+    }
 
     this.unitLoadedPromise = when(() => this.unit !== defaultUnit);
     this.sectionsLoadedPromise = when(() => this.problem.sections.length > 0);

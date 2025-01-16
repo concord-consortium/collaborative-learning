@@ -70,7 +70,7 @@ export const initializeApp = (authoring: boolean): IStores => {
 
   const appConfig = AppConfigModel.create(appConfigSnapshot);
   const stores = createStores(
-    { appMode, appVersion, appConfig, user, showDemoCreator, demoName });
+    { appMode, appVersion, appConfig, user, showDemoCreator, demoName, documentToDisplay: urlParams.studentDocument });
 
   // Expose the stores if the debug flag is set or we are running in Cypress
   const aWindow = window as any;
