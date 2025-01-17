@@ -121,7 +121,6 @@ export class SortedDocuments {
 
   setDocumentHistoryViewRequest(docKey: string, historyId: string) {
     this.documentHistoryViewRequests[docKey] = historyId;
-    console.log("setDocumentHistoryViewRequest", docKey, historyId);
   }
   getDocumentHistoryViewRequest(docKey: string) {
     // We only want to move to this history entry once,
