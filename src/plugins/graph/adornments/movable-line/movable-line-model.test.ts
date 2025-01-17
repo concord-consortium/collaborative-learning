@@ -125,6 +125,12 @@ describe("MovableLineInstance", () => {
     const line = roundTripLine({intercept: 1, slope: "5" as unknown as number});
     expect(line.slope).toBe(5);
   });
+  it("can handle null slopes", () => {
+    // This isn't ideal but it is nice that old documents will not completely crash if loaded
+    // with a null slope
+    const line = roundTripLine({intercept: 1, slope: null as unknown as number});
+    expect(line.slope).toBe(NaN);
+  });
 });
 
 describe("MovableLineModel", () => {
