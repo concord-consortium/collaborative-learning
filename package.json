@@ -87,7 +87,7 @@
     "postinstall": "patch-package",
     "serve": "npx serve -c ../serve.json -l 8080 dist",
     "start": "webpack-dev-server --hot",
-    "start:secure": "webpack-dev-server --https --hot --cert ~/.localhost-ssl/localhost.pem --key ~/.localhost-ssl/localhost.key",
+    "start:secure": "webpack-dev-server --server-type https --hot --server-options-cert ~/.localhost-ssl/localhost.pem --server-options-key ~/.localhost-ssl/localhost.key",
     "stats": "webpack --profile --json --mode production > stats.json",
     "test": "jest",
     "test:all": "npm-run-all build test start",
