@@ -88,6 +88,10 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   }
 
   componentDidMount(): void {
+    this.checkForHistoryRequest();
+  }
+
+  private checkForHistoryRequest = () => {
     // If there is a request to show this document at a point in its history, show the history slider.
     if (this.props.showPlayback && this.props.document?.key) {
       const request = this.stores.sortedDocuments.getDocumentHistoryViewRequest(this.props.document?.key);
@@ -100,7 +104,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
         });
       }
     }
-  }
+  };
 
   private fallbackRender = ({ error, resetErrorBoundary }: FallbackProps) => {
     return (
@@ -142,6 +146,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
         return this.updateHistoryDocument(prevState, prevState.showPlaybackControls);
       });
     }
+    this.checkForHistoryRequest();
   }
 
   componentWillUnmount() {

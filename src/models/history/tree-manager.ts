@@ -98,6 +98,11 @@ export const TreeManager = types
     return self.document.history.findIndex(entry => entry.id === historyEntryId);
   },
 
+  get latestDocumentHistoryEntry() {
+    const history = self.document.history;
+    return history ? history[history.length - 1] : undefined;
+  },
+
   findActiveHistoryEntry(historyEntryId: string) {
     return self.activeHistoryEntries.find(entry => entry.id === historyEntryId);
   },

@@ -273,8 +273,10 @@ export class SortedDocuments {
 
     const disposeFilteredListener = filteredQuery.onSnapshot(snapshot => {
       const mstSnapshot = this.getMSTSnapshotFromFBSnapshot(snapshot);
-      applySnapshot(this.metadataDocsFiltered, mstSnapshot);
-      this.docsReceived = true;
+      runInAction(() => {
+        applySnapshot(this.metadataDocsFiltered, mstSnapshot);
+        this.docsReceived = true;
+      });
     });
 
     let disposeDocsWithoutUnitListener: () => void | undefined;
