@@ -75,6 +75,12 @@ Fields:
 
 ### Contents of `documents/{docId}`
 
+Holds metadata, history, and comments related to a user Document.
+(The actual current Document content is not stored here, it is in Firebase.)
+Note that there can be multiple Firestore records for a single Document,
+with different networks. These are needed to hold comments that can only
+be read by members of the network of their authors.
+
 Fields:
 
 - key: (string, the id of the document in firebase)

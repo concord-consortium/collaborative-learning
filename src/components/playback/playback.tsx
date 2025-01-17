@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Instance } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { usePersistentUIStore } from "../../hooks/use-stores";
-import { HistoryStatus, TreeManager } from "../../models/history//tree-manager";
+import { HistoryStatus, TreeManager } from "../../models/history/tree-manager";
 import { DocumentModelType } from "../../models/document/document";
 import { PlaybackControlComponent } from "./playback-control";
 import PlaybackIcon from "../../clue/assets/icons/playback/playback-icon.svg";
@@ -14,12 +14,19 @@ interface IProps {
   document: DocumentModelType | undefined;
   showPlaybackControls: boolean | undefined;
   onTogglePlaybackControls: (() => void) | undefined;
+  requestedHistoryId: string | undefined;
 }
 
 export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
   const { document, showPlaybackControls, onTogglePlaybackControls  } = props;
   const { activeNavTab } = usePersistentUIStore();
   const treeManager = document?.treeManagerAPI as Instance<typeof TreeManager>;
+
+  useEffect(() => {
+    if (props.requestedHistoryId) {
+      treeManager.moveToHistoryEntryAfterLoad(props.requestedHistoryId);
+    }
+  }, [props.requestedHistoryId, treeManager]);
 
   const renderPlaybackToolbarButton = () => {
     const playbackToolbarButtonComponentStyle =

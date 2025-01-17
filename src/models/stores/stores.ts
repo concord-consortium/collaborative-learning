@@ -43,6 +43,7 @@ export interface IStores extends IBaseStores {
   userContextProvider: UserContextProvider;
   tabsToDisplay: NavTabModelType[];
   documentToDisplay?: string;
+  documentHistoryId?: string;
   isShowingTeacherContent: boolean;
   studentWorkTabSelectedGroupId: string | undefined;
   setAppMode: (appMode: AppMode) => void;
@@ -169,6 +170,10 @@ class Stores implements IStores{
     if (docToDisplay) {
       // Make sure there is a Sort Work tab to display the document in.
       this.appConfig.setRequireSortWorkTab(true);
+      // Set request for viewing at the given history ID, if provided
+      if (params.documentHistoryId) {
+        this.sortedDocuments.setDocumentHistoryViewRequest(docToDisplay, params.documentHistoryId);
+      }
       // Wait until the document is loaded, then open it.
       const docPromise = this.sortedDocuments.fetchFullDocument(docToDisplay);
       docPromise.then((doc) => {

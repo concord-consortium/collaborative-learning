@@ -47,6 +47,7 @@ interface IState {
   documentScrollY: number;
   historyDocumentCopy?: DocumentModelType;
   showPlaybackControls: boolean;
+  requestedHistoryId: string | undefined;
 }
 
 @inject("stores")
@@ -80,9 +81,25 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       documentScrollX: 0,
       documentScrollY: 0,
       showPlaybackControls: false,
+      requestedHistoryId: undefined,
     };
 
     this.canvasMethods = { cacheObjectBoundingBox: this.cacheObjectBoundingBox };
+  }
+
+  componentDidMount(): void {
+    // If there is a request to show this document at a point in its history, show the history slider.
+    if (this.props.showPlayback && this.props.document?.key) {
+      const request = this.stores.sortedDocuments.getDocumentHistoryViewRequest(this.props.document?.key);
+      if (request) {
+        this.setState((prevState, props) => {
+          return {
+            ...this.updateHistoryDocument(prevState, true),
+            requestedHistoryId: request
+          };
+        });
+      }
+    }
   }
 
   private fallbackRender = ({ error, resetErrorBoundary }: FallbackProps) => {
@@ -205,6 +222,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
               document={documentToShow}
               showPlaybackControls={showPlaybackControls}
               onTogglePlaybackControls={this.handleTogglePlaybackControlComponent}
+              requestedHistoryId={this.state.requestedHistoryId}
             />
           )}
         </>

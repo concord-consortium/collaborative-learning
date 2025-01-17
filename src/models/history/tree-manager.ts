@@ -1,6 +1,7 @@
 import {
   types, Instance, flow, IJsonPatch, detach, destroy, getSnapshot, toGenerator, addDisposer
 } from "mobx-state-tree";
+import { when } from "mobx";
 import firebase from "firebase/app";
 import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
@@ -91,6 +92,10 @@ export const TreeManager = types
 
   findHistoryEntry(historyEntryId: string) {
     return self.document.history.find(entry => entry.id === historyEntryId);
+  },
+
+  findHistoryEntryIndex(historyEntryId: string) {
+    return self.document.history.findIndex(entry => entry.id === historyEntryId);
   },
 
   findActiveHistoryEntry(historyEntryId: string) {
@@ -585,6 +590,17 @@ export const TreeManager = types
     // after the finish call.
     self.numHistoryEventsApplied = newHistoryPosition;
   })
+}))
+.actions((self) => ({
+  async moveToHistoryEntryAfterLoad(historyId: string) {
+    await when(() => self.historyStatus === HistoryStatus.HISTORY_LOADED);
+    const entry = self.findHistoryEntryIndex(historyId);
+    if (entry >= 0) {
+      self.goToHistoryEntry(entry);
+    } else {
+      console.warn("Did not find history entry with id: ", historyId);
+    }
+  }
 }))
 .views(self => ({
   getHistoryEntry: (historyIndex: number) => {
