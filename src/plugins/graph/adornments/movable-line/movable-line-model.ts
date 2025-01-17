@@ -1,4 +1,4 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { AdornmentModel, IAdornmentModel, IUpdateCategoriesOptions, PointModel,
          kInfinitePoint } from "../adornment-models";
 import { Point } from "../../graph-types";
@@ -17,10 +17,43 @@ export function getAnnotationId(lineKey: string, type: "handle"|"equation", posi
   }
 }
 
+// This custom type handles NaN, Infinity, and -Infinity
+// When NaN, Infinity, or -Infinity are stored in a `types.number` field,
+// JSON.stringify(getSnapshot(obj)) will turn then into `null`.
+// This custom type turns those values into strings so they can be stored
+// in JSON.
+// Note: even though typescript will only allow the following strings in
+// snapshots, the code will correctly import a stringified number too.
+type SpecialNumbers = "NaN" | "Infinity" | "-Infinity"
+
+export const JsonNumber = types.custom<SpecialNumbers | number, number>({
+  name: "StringifiedNumber",
+  fromSnapshot(snapshot: SpecialNumbers | number, env?: any): number {
+    return Number(snapshot);
+  },
+  toSnapshot(value: number): SpecialNumbers | number {
+    if (!isFinite(value)) {
+      return value.toString() as SpecialNumbers;
+    }
+    return value;
+  },
+  isTargetType(value: string | number): boolean {
+    return typeof value === "number";
+  },
+  getValidationMessage(snapshot: number | string): string {
+    const parsed = Number(snapshot);
+    if (isNaN(parsed) && snapshot !== "NaN") {
+      return `'${snapshot}' can't be parsed as a number`;
+    } else {
+      return "";
+    }
+  }
+});
+
 export const MovableLineInstance = types.model("MovableLineInstance", {
   equationCoords: types.maybe(PointModel),
   intercept: types.number,
-  slope: types.number,
+  slope: JsonNumber,
 })
 .volatile(self => ({
   isSelected: false,
@@ -78,6 +111,7 @@ export const MovableLineInstance = types.model("MovableLineInstance", {
 }));
 
 export interface IMovableLineInstance extends Instance<typeof MovableLineInstance> {}
+export interface IMovableLineSnapshot extends SnapshotIn<typeof MovableLineInstance> {}
 
 export const MovableLineModel = AdornmentModel
 .named('MovableLineModel')

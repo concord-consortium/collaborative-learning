@@ -1,5 +1,6 @@
+import { getSnapshot } from "@concord-consortium/mobx-state-tree";
 import { AxisOrientation, IScaleType } from "../../imports/components/axis/axis-types";
-import { MovableLineModel, MovableLineInstance } from "./movable-line-model";
+import { MovableLineModel, MovableLineInstance, IMovableLineSnapshot } from "./movable-line-model";
 
 // Set up mock axes
 const hOrientation = "horizontal" as AxisOrientation;
@@ -35,6 +36,14 @@ const mockAxes = {
     type: "linear"
   }
 };
+
+function roundTripLine(initialSnapshot: IMovableLineSnapshot) {
+  const line = MovableLineInstance.create(initialSnapshot);
+  const savedSnapshot = getSnapshot(line);
+  const savedJson = JSON.stringify(savedSnapshot);
+  const loadedSnapshot = JSON.parse(savedJson);
+  return MovableLineInstance.create(loadedSnapshot);
+}
 
 describe("MovableLineInstance", () => {
   it("is created with intercept and slope properties", () => {
@@ -90,6 +99,31 @@ describe("MovableLineInstance", () => {
     lineParams.saveSlope();
     expect(lineParams.slope).toEqual(3);
     expect(lineParams.currentSlope).toEqual(3);
+  });
+  it("can serialize when vertical", () => {
+    const line1 = roundTripLine({intercept: 1, slope: Infinity});
+    expect(line1.slope).toBe(Infinity);
+
+    const line2 = roundTripLine({intercept: 1, slope: "Infinity"});
+    expect(line2.slope).toBe(Infinity);
+
+    const line3 = roundTripLine({intercept: 1, slope: -Infinity});
+    expect(line3.slope).toBe(-Infinity);
+
+    const line4 = roundTripLine({intercept: 1, slope: "-Infinity"});
+    expect(line4.slope).toBe(-Infinity);
+  });
+  it("saves finite slopes as numbers", () => {
+    const line = MovableLineInstance.create({intercept: 1, slope: 5});
+    const snapshot = getSnapshot(line);
+    expect(snapshot.slope).not.toBe("5");
+    expect(snapshot.slope).toBe(5);
+  });
+  it("can handle string slopes", () => {
+    // This isn't required but is nice incase a string number ends up in
+    // the JSON
+    const line = roundTripLine({intercept: 1, slope: "5" as unknown as number});
+    expect(line.slope).toBe(5);
   });
 });
 
