@@ -22,7 +22,7 @@ const portal = "learn.concord.org";
 const demo = false;
 
 // Limit number of documents returned from query; or set to false to include all documents
-const documentLimit = 10;
+const documentLimit = false;
 
 const dryRun = true;
 
@@ -54,7 +54,7 @@ if (documentLimit) {
   documentQuery = documentQuery.limit(documentLimit);
 }
 
-const singles = new Set();
+const singlesByType = { "problem": 0, "problemPublication": 0, "planning": 0 };
 const triplets = new Set();
 const pairs = new Set();
 const mismatchDocs = new Set();
@@ -71,7 +71,7 @@ documentSnapshots.forEach(doc => {
   const keyQuery = documentCollection.where("key", "==", key);
   const query = keyQuery.get().then(async snapshot => {
     if (snapshot.size === 1) {
-      singles.add(key);
+      singlesByType[snapshot.docs[0].data().type] += 1;
     } else if (snapshot.size > 2) {
       triplets.add(key);
     } else if (snapshot.size === 2) {
@@ -98,8 +98,8 @@ documentSnapshots.forEach(doc => {
           let match = true;
           should_match_fields.forEach(field => {
             // Treat undefined and null as equivalent
-            const f1 = goodDoc[field] || null;
-            const f2 = badDoc[field] || null;
+            const f1 = goodDoc[field] ?? null;
+            const f2 = badDoc[field] ?? null;
             if (f1 !== f2) {
               console.log(`      ${field} does not match: ${f1} != ${f2}`);
               match = false;
@@ -126,8 +126,12 @@ documentSnapshots.forEach(doc => {
               console.log(logMsg);
             } else {
               // Update the values in the bad document
-              await badRef.ref.set(updateDoc, { merge: true });
-              console.log(logMsg, "...done");
+              try {
+                await badRef.ref.set(updateDoc, { merge: true });
+                console.log(logMsg, "...done");
+              } catch (error) {
+                console.error(`Error updating document ${badRef.ref.path}: ${error}`);
+              }
             }
           } else {
             mismatchDocs.add(key);
@@ -147,6 +151,9 @@ Object.entries(fixableDocsByType).forEach(([type, count]) => {
   console.log(`  ${type}: ${count}`);
 });
 
-console.log(`Missing metadata but no other documents with the same key: ${singles.size}`);
+console.log(`Missing metadata but no other documents with the same key:`);
+Object.entries(singlesByType).forEach(([type, count]) => {
+  console.log(`  ${type}: ${count}`);
+});
 console.log(`Mismatched documents: ${mismatchDocs.size}`);
 console.log(`Triplets (or more): ${triplets.size}`);
