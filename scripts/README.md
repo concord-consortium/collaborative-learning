@@ -1,35 +1,40 @@
-# Local Setup
+# CLUE Offline Scripts
+
+## Local Setup
+
 For most scripts here you'll need Firebase credentials. You can get this by going to
-https://console.firebase.google.com/u/0/project/collaborative-learning-ec215/settings/serviceaccounts/adminsdk
+<https://console.firebase.google.com/u/0/project/collaborative-learning-ec215/settings/serviceaccounts/adminsdk>
 
 From that page if you click "Generate a new private key", it will download a json file. You should rename this file `serviceAccountKey.json` and move it to the the scripts folder.
 
 Most scripts can be run using `npx tsx <script filename>`
 
-# Running scripts that connect with the portal
+## Running scripts that connect with the portal
+
 You need to first get the portal admin api token.
 
 In 1Password you can find it in the Developer Admin vault under a "Learn Portal admin api user" entry.
 
 If the 1Password entry is out of date. You can also get it this way:
 You can follow these steps to get a console in the portal:
-https://docs.google.com/document/d/1dmAV4ojzwau2C-TANvoxw9jAnUN2F5FdOSSy6f42H84/edit#heading=h.l053izhapf0l
+<https://docs.google.com/document/d/1dmAV4ojzwau2C-TANvoxw9jAnUN2F5FdOSSy6f42H84/edit#heading=h.l053izhapf0l>
 Then look for the admin api user:
 `api_user = User.where(:login => "admin_api_user").first`
 `api_user.access_grants.first.access_token`
 
-This api user was probably created by this rake task: https://github.com/concord-consortium/rigse/blob/97a4bf3a2a911f88424b502361ae8dafd71d9823/rails/lib/tasks/api.rake#L18
+This api user was probably created by this rake task: <https://github.com/concord-consortium/rigse/blob/97a4bf3a2a911f88424b502361ae8dafd71d9823/rails/lib/tasks/api.rake#L18>
 
 This access token should be stored in a /scripts/.env file with:
-```
+
+```shell
 PORTAL_ACCESS_TOKEN=[token]
 ```
 
-# Running on Google Cloud Virtual Machine
+## Running on Google Cloud Virtual Machine
 
 It can be useful to offload the running of scripts to a virtual machine in Google Cloud. They will usually run faster there.
 
-1. Log in to Google Cloud at https://cloud.google.com/ and go to the Console.
+1. Log in to Google Cloud at <https://cloud.google.com/> and go to the Console.
 
 2. Click the Compute Engine option, then click "Create Instance".
 
@@ -57,7 +62,7 @@ It can be useful to offload the running of scripts to a virtual machine in Googl
 ## Possible Better Alternative
 
 It hasn't been tried, but it might be even better to use google cloud shell to run VSCode:
-- https://medium.com/google-cloud/how-to-run-visual-studio-code-in-google-cloud-shell-354d125d5748
+- <https://medium.com/google-cloud/how-to-run-visual-studio-code-in-google-cloud-shell-354d125d5748>
 
 The downside of doing that (I think) is any plugins you have in your local VSCode will have to be re-installed.
 It should also be possible to connect your local VSCode to the code-server described above. But I'm not sure if CloudShell will allow the external connection that your local VSCode will need.
