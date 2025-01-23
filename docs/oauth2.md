@@ -58,7 +58,7 @@ To enable researcher launches two additional parameters are sent to the portal w
 
 The `researcher=true` parameter causes the portal to skip the usual learner/teacher checks and instead checks if the user has access to the `target_user_id` user id as either an admin, project admin or researcher.  If the user does have access a JWT is generated with the `user_type` claim set to `researcher`.  CLUE then then uses the `researcher` user_type to alter the UI.
 
-Further requests to the portal for the class and offering information also pass the `researcher=true` parameter if it is set in the CLUE query params.  This overrides the portals anonymization check to alway anonymize the student info.  This is important as the user launching CLUE may have higher privileges like admin or project admin access to the user which normally would cause the student info to not be anonymized.
+Further requests to the portal for the class and offering information also pass the `researcher=true` parameter if it is set in the CLUE query params.  This overrides the portals anonymization check to always anonymize the student info.  This is important as the user launching CLUE may have higher privileges like admin or project admin access to the user which normally would cause the student info to not be anonymized.
 
 ## Tech Debt
 
