@@ -42,8 +42,6 @@ Localhost updated With OAuth2
 ## Future Work
 
 - update Portal with a new launch option for students and reports which includes the `authDomain` and `resourceLinkId` params.
-- add support for researcher access to CLUE student work. The portal already has a `target_user_id` param that is used for portal report researcher access to student data. There are special rules in the portal report firebase to allow this `target_user_id` claim to access the answers for students. CLUE doesn't have these rules, and the app will also fail because the user type in the JWT will not be student. See below for more details.
-- add support for researcher access to CLUE teacher dashboards. The researcher should only see students in the dashboard with permission forms. And most likely the student names should be replaced with ids so researchers can correlate the data with the log data without knowing the student name. The same `target_user_id` support in the portal can be used for this, but CLUE app code and the firebase rules will need to be updated to make it work.
 - when the URL includes a current user id, we should pass this to the portal during the OAuth2 flow. This way if a different user is signed into the portal, the portal can give them them the option to logout and login with the correct user. This can happen when testing different users, it can also happen when a computer is shared by multiple students. If the wrong user is logged in the current message is confusing: "Error: Unable to get classInfoUrl or offeringId"
 - add OAuth2 tests. We should be able to at least test that CLUE redirects to the authDomain and handles loading the parameters when it is loaded with the parameters after the user has logged in at the Portal.
 
@@ -53,38 +51,14 @@ It is tempting to use the existing `domain` url parameter, but that would cause 
 
 ## Handling Researcher Launches
 
-See above for short notes on a researcher launch of student or teacher versions of CLUE.
+To enable researcher launches two additional parameters are sent to the portal when requesting the portal JWT and Firebase JWT:
 
-Issues we'll have to address in CLUE:
+- `researcher=true`
+- `target_user_id=USER_ID`
 
-Currently CLUE requests a Portal JWT and then it checks the user type in this JWT. The user type will be set in the Portal JWT if a single use token is used to get the JWT. The user type will also be set if a resource_link_id is passed to the JWT api and the current user is a student or teacher in the class of the resourceLinkId.
+The `researcher=true` parameter causes the portal to skip the usual learner/teacher checks and instead checks if the user has access to the `target_user_id` user id as either an admin, project admin or researcher.  If the user does have access a JWT is generated with the `user_type` claim set to `researcher`.  CLUE then then uses the `researcher` user_type to alter the UI.
 
-If a researcher is launching CLUE they will likely not be a student or teacher in the class of the offering. So they will have a user type of "user" in the Portal JWT. Even when a `target_user_id` is passed along with the `resource_link_id` to the JWT API, and this target user is a student or teacher in the class, the portal will continue to set the user type to be "user".
-
-Here is where the `resource_link_id` and `target_user_id` are discussed when requesting portal JWTs:
-<https://github.com/concord-consortium/rigse/blob/18df1de769a9098101eb10b2fa92846de23d7b6e/rails/app/controllers/api/v1/jwt_controller.rb#L89>
-
-Currently in CLUE if the Portal JWT user type is not learner or teacher then CLUE will bail out. We probably want to change this to allow a type of "user".
-
-Then if the JWT is a learner:
-
-- CLUE gets the class_info_url and offering_id out of the JWT.
-
-Otherwise if the JWT user type is teacher (and user if we allow it above)
-
-- the classInfoUrl is taken from a class parameter in URL itself
-- the offeringId is taken from the offering parameter in the URL itself
-
-Currently when the portal generates a Portal JWT for a resource_link_id and a target_user_id it does not add the class_info_url or offering_id to the JWT. So without changes to Portal or CLUE we'd need to include the class and offering parameters in the links the researchers are using. This would be the same approach used when the Activity Player researcher reports have links to the portal-report to show the student work.
-
-To simplify these URLs we could update CLUE to get the offeringId from the resourceLinkId, and then make a API request to get the offering information and from that information it could construct the classInfoUrl. I'm not sure if the portal will allow a class or offering information request given the Portal JWT it currently generates for the researchers resource_link_id and target_user_id request.
-
-**Important**:  When working on this we should not expose the actual student names to researchers. So the portal will need to provide ids and perhaps fake names, or CLUE should be responsible for constructing a fake name that includes the id. This implies that both the class and offering portal APIs need to take into account that the current user is a not a real member of the class. The offering API includes a list of all students that have run the offering. This includes their name, first_name, last_name, and username. The class API includes a list of students in the class with the first_name, last_name, and email. All of these should be removed or replaced with fake information if the user requesting this isn't a real teacher or student in the class.
-
-In the case of a researcher the current user would not be found in the class. However we could use the target_user_id here and use that to find the target user in the class. Or perhaps we want the current user within CLUE to actually be the researcher. This could be useful so the researcher is not allowed to edit documents. Most document editing UI should be checking if the current user is the owner of the document before letting the current user edit the document.
-
-The JWT we would get as a researcher would not include the domain, just the uid. This happens because the domain is only added if the user is a learner or teacher: <https://github.com/concord-consortium/rigse/blob/18df1de769a9098101eb10b2fa92846de23d7b6e/rails/app/controllers/api/v1/jwt_controller.rb#L147-L165>
-CLUE uses this domain for somethings. It seems reasonable for the Portal to always add this domain into the JWT. When we change this we'd need to check if there is javascript code in other repositories that is counting on this domain not being there in some cases. Repositories to check are: activity-player, portal-report, and researcher-report. There might also be firebase rules that are using this domain. If we want to avoid these potential problems, we could have CLUE OAuth launches use the authDomain instead. This should fix any issues in CLUE. However there might be code in the firebase rules that is using the domain to figure out the path in firebase, so in that case we'll still need to deal with adding the domain to JWT.
+Further requests to the portal for the class and offering information also pass the `researcher=true` parameter if it is set in the CLUE query params.  This overrides the portals anonymization check to alway anonymize the student info.  This is important as the user launching CLUE may have higher privileges like admin or project admin access to the user which normally would cause the student info to not be anonymized.
 
 ## Tech Debt
 

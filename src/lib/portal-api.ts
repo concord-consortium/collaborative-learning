@@ -8,6 +8,7 @@ import { IUserPortalOffering, UserPortalOffering } from "../models/stores/user";
 import { IPortalOffering } from "./portal-types";
 import { getAuthParams } from "../utilities/auth-utils";
 import { ICurriculumConfig, getProblemOrdinal } from "../models/stores/curriculum-config";
+import { maybeAddResearcherParam } from "../utilities/researcher-param";
 
 const isClueAssignment = (offering: IPortalOffering) => {
   const clueActivityUrlRegex = /collaborative-learning/;
@@ -109,7 +110,7 @@ export const getProblemIdForAuthenticatedUser =
   return new Promise<IUnitAndProblem>((resolve, reject) => {
     if (urlParams && urlParams.offering) {
       superagent
-      .get(urlParams.offering)
+      .get(maybeAddResearcherParam(urlParams.offering))
       .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
       .end((err, res) => {
         if (err) {

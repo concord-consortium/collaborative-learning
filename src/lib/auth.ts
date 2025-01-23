@@ -16,6 +16,7 @@ import { uniqueId } from "../utilities/js-utils";
 import { getUnitCodeFromUnitParam } from "../utilities/url-utils";
 import { ICurriculumConfig } from "../models/stores/curriculum-config";
 import { ClassInfo, Portal, ResearcherUser, StudentUser, TeacherUser } from "../models/stores/portal";
+import { maybeAddResearcherParam } from "../utilities/researcher-param";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
@@ -79,7 +80,7 @@ export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string,
       pageUrlParams.resourceLinkId ? `?resource_link_id=${ pageUrlParams.resourceLinkId }` : "";
     const url = `${basePortalUrl}${PORTAL_JWT_URL_SUFFIX}${resourceLinkIdSuffix}`;
     superagent
-      .get(url)
+      .get(maybeAddResearcherParam(url))
       .set("Authorization", `${type} ${rawToken}`)
       .end((err, res) => {
         if (err) {
@@ -109,8 +110,8 @@ export const getFirebaseJWTParams = (classHash?: string) => {
   if (pageUrlParams.resourceLinkId) {
     params.resource_link_id = pageUrlParams.resourceLinkId;
   }
-  if (pageUrlParams.researcher) {
-    params.researcher = pageUrlParams.researcher;
+  if (pageUrlParams.targetUserId) {
+    params.target_user_id = pageUrlParams.targetUserId;
   }
 
   return `?${(new URLSearchParams(params)).toString()}`;
@@ -121,7 +122,7 @@ export const getFirebaseJWTWithBearerToken = (basePortalUrl: string, type: strin
   return new Promise<[string, PortalFirebaseJWT]>((resolve, reject) => {
     const url = `${basePortalUrl}${FIREBASE_JWT_URL_SUFFIX}${getFirebaseJWTParams(classHash)}`;
     superagent
-      .get(url)
+      .get(maybeAddResearcherParam(url))
       .set("Authorization", `${type} ${rawToken}`)
       .end((err, res) => {
         if (err) {

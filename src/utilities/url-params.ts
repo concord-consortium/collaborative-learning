@@ -50,6 +50,9 @@ export interface QueryParams {
   studentDocument?: string;
   studentDocumentHistoryId?: string
 
+  // set to user id to target a specific user when logging in as a researcher
+  targetUserId?: string;
+
   //
   // demo features
   //
