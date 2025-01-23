@@ -4,16 +4,20 @@
 // The sympom is metadata documents that are missing their unit, investigation, and problem fields.
 // In at least some cases, there is another document with the same document key (but different network)
 // that has the correct metadata. This script will identify those documents and copy the metadata
-// to the document where it is missing.
+// to the document where it is missing. If there is no second document, it will look up the offering
+// associated with the document and copy the metadata from the offering.
 
 // Set dryRun to false below to actually make changes to the database.
 
-// to run this script type the following in the terminal
+// To run this script type the following in the terminal
 // $ cd scripts
 // $ npx tsx find-documents-missing-metadata.ts
 
 import admin from "firebase-admin";
-import { getFirestoreBasePath, getScriptRootFilePath } from "./lib/script-utils.js";
+import { QueryDocumentSnapshot } from "firebase-admin/firestore";
+import { fetchPortalOffering } from "./lib/fetch-portal-entity.js";
+import { getFirebaseBasePath, getFirestoreBasePath, getProblemDetails, getScriptRootFilePath }
+  from "./lib/script-utils.js";
 
 // The portal to get documents from. For example, "learn.concord.org".
 const portal = "learn.concord.org";
@@ -39,61 +43,148 @@ admin.initializeApp({
   databaseURL
 });
 
-console.log(`*** Starting to Scan Documents ***`);
+const firebaseBasePath = getFirebaseBasePath(portal, demo);
+const documentsCollection = getFirestoreBasePath(portal, demo);
 
-const collectionUrl = getFirestoreBasePath(portal, demo);
+// Holds information on offerings that have been looked up previously
+const offeringInfo = {};
 
-const documentCollection = admin.firestore().collection(collectionUrl);
+async function updateBasedOnOffering(doc: QueryDocumentSnapshot) {
+  const docdata = doc.data();
+  if (docdata.context_id && docdata.uid && docdata.key) {
+    const offeringId = await getOfferingIdFromFirebaseMetadata(docdata.context_id, docdata.uid, docdata.key);
+    if (!offeringId) return false;
+    if (offeringId in offeringInfo) {
+      console.log("Already looked up offering info for", offeringId);
+    } else {
+      offeringInfo[offeringId] = await getOfferingInfo(offeringId);
+    }
+    const info = offeringInfo[offeringId];
+    if (info) {
+      if (updateMetadata(doc, info)) return true;
+    } else {
+      console.log("Failed to get offering info for", offeringId);
+    }
+  } else {
+    console.log("Document has insufficient metadata:", docdata);
+  }
+  return false;
+}
+
+async function getOfferingInfo(offeringId: string) {
+  const offering = await fetchPortalOffering(`https://${portal}`, offeringId);
+  if (!offering) return undefined;
+  const { activity_url } = offering;
+  return getProblemDetails(activity_url);
+}
+
+async function getOfferingIdFromFirebaseMetadata(context_id: string, user_id: string, key: string) {
+  // Path is like:
+  //  /authed/portals/portal_name/classes/context_id/users/user_id/documentMetadata/key
+  // and contains offeringId, etc.
+  const firebasePath = `${firebaseBasePath}/${context_id}/users/${user_id}/documentMetadata/${key}`;
+  try {
+    const mdDoc = await admin.database().ref(firebasePath).once("value");
+    if (mdDoc.exists() && mdDoc.val()) {
+      return mdDoc.val().offeringId;
+    } else {
+      console.log(`No metadata found at ${firebasePath}`);
+      return undefined;
+    }
+  } catch (error) {
+    console.error(`Error fetching metadata at ${firebasePath}: ${error}`);
+    return undefined;
+  }
+}
+
+async function updateMetadata(docRef: QueryDocumentSnapshot, metadata: any) {
+  let logMsg = ` Copy into: ${docRef.ref.path}: `;
+  const updateDoc = { };
+  fields_to_copy.forEach(field => {
+    if (!dryRun) {
+      updateDoc[field] = metadata[field];
+    }
+    logMsg += `${field}: ${metadata[field]} `;
+  });
+  if (dryRun) {
+    console.log(logMsg, "...dry run");
+  } else {
+    // Update the values in the bad document
+    try {
+      await docRef.ref.set(updateDoc, { merge: true });
+      console.log(logMsg, "...done");
+    } catch (error) {
+      console.error(`Error updating document ${docRef.ref.path}: ${error}`);
+    }
+  }
+}
+
+
+const documentCollection = admin.firestore().collection(documentsCollection);
 
 let documentQuery = documentCollection
   // Omit document types that are not expected to be associated with a unit, investigation, and problem
-  .where("type", "not-in", ["personal", "personalPublication", "learningLog", "learningLogPublication"])
-  .where("unit", "==", null);
+  // Note that due to how Firestore queries work, this will not return any documents that are missing the type field
+  .where("type", "not-in", ["personal", "personalPublication", "learningLog", "learningLogPublication", "exemplar"]);
 
 if (documentLimit) {
   documentQuery = documentQuery.limit(documentLimit);
 }
 
 const singlesByType = { "problem": 0, "problemPublication": 0, "planning": 0 };
-const triplets = new Set();
 const pairs = new Set();
-const mismatchDocs = new Set();
+const failedDocs = new Set();
 const fixableDocsByType = { "problem": 0, "problemPublication": 0, "planning": 0 };
+let missingContextId = 0;
 
 const promises = [];
 
+const needUpdateBasedOnOffering = [];
+
+console.log(`*** Starting to Scan Documents ***`);
 const documentSnapshots = await documentQuery.get();
-documentSnapshots.forEach(doc => {
-  const data = doc.data();
-  // console.log(`Document ${doc.ref.path}: ${data.type} unit: ${data.unit}`);
+documentSnapshots.forEach(mainDoc => {
+  const data = mainDoc.data();
+  if ("unit" in data && data.unit) {
+    return;
+  }
+
+  if (!data.context_id) {
+    console.log(`Missing context_id for ${data.type}: ${mainDoc.ref.path}`);
+    missingContextId++;
+    return;
+  }
+
   // Look for other documents with the same key
   const key = data.key;
   const keyQuery = documentCollection.where("key", "==", key);
   const query = keyQuery.get().then(async snapshot => {
     if (snapshot.size === 1) {
-      singlesByType[snapshot.docs[0].data().type] += 1;
+      needUpdateBasedOnOffering.push(mainDoc);
     } else if (snapshot.size > 2) {
-      triplets.add(key);
+      // Haven't seen the "triplet" case yet; don't attempt
+      failedDocs.add(key);
     } else if (snapshot.size === 2) {
       if (!pairs.has(key)) {
         pairs.add(key);
         console.log(`Found ${snapshot.size} documents with key ${key}`);
-        console.log(`  ${snapshot.docs[0].ref.path} and ${snapshot.docs[1].ref.path}`);
         let goodDoc, badDoc;
         let badRef: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>;
         if (snapshot.docs[0].data().unit) {
           goodDoc = snapshot.docs[0].data();
           badDoc = snapshot.docs[1].data();
           badRef = snapshot.docs[1];
+          console.log(`  ${snapshot.docs[0].ref.path} -> ${snapshot.docs[1].ref.path}`);
         } else if (snapshot.docs[1].data().unit) {
           goodDoc = snapshot.docs[1].data();
           badDoc = snapshot.docs[0].data();
           badRef = snapshot.docs[0];
+          console.log(`  ${snapshot.docs[1].ref.path} -> ${snapshot.docs[0].ref.path}`);
         } else {
           console.log(`   Neither document has metadata`);
+          needUpdateBasedOnOffering.push(mainDoc);
         }
         if (goodDoc) {
-          // console.log("good doc", goodDoc);
           // Make sure the main fields match in the two documents
           let match = true;
           should_match_fields.forEach(field => {
@@ -114,27 +205,9 @@ documentSnapshots.forEach(doc => {
           });
           if (match) {
             fixableDocsByType[goodDoc.type] += 1;
-            let logMsg = dryRun ? "    Would copy: " : "    Copy: ";
-            const updateDoc = { };
-            fields_to_copy.forEach(field => {
-              if (!dryRun) {
-                updateDoc[field] = goodDoc[field];
-              }
-              logMsg += ` ${field}: ${goodDoc[field]}  `;
-            });
-            if (dryRun) {
-              console.log(logMsg);
-            } else {
-              // Update the values in the bad document
-              try {
-                await badRef.ref.set(updateDoc, { merge: true });
-                console.log(logMsg, "...done");
-              } catch (error) {
-                console.error(`Error updating document ${badRef.ref.path}: ${error}`);
-              }
-            }
+            updateMetadata(badRef, goodDoc);
           } else {
-            mismatchDocs.add(key);
+            failedDocs.add(key);
           }
         }
       }
@@ -146,14 +219,28 @@ documentSnapshots.forEach(doc => {
 await Promise.all(promises);
 console.log(`*** Finished Scanning Documents ***`);
 
-console.log(`Fixable documents:`);
+console.log(`Updating ${needUpdateBasedOnOffering.length} documents based on offering info`);
+
+for(const doc of needUpdateBasedOnOffering) {
+  if (await updateBasedOnOffering(doc)) {
+    singlesByType[doc.data().type] += 1;
+  } else {
+    failedDocs.add(doc.data().key);
+  }
+}
+
+console.log(`Fixable from other doc with same key:`);
 Object.entries(fixableDocsByType).forEach(([type, count]) => {
   console.log(`  ${type}: ${count}`);
 });
 
-console.log(`Missing metadata but no other documents with the same key:`);
+console.log(`Fixable from offering:`);
 Object.entries(singlesByType).forEach(([type, count]) => {
   console.log(`  ${type}: ${count}`);
 });
-console.log(`Mismatched documents: ${mismatchDocs.size}`);
-console.log(`Triplets (or more): ${triplets.size}`);
+
+console.log(`Failed to fix: ${failedDocs.size}`);
+
+console.log(`Missing context_id: ${missingContextId}`);
+
+process.exit(0);
