@@ -175,6 +175,11 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     return renderTeacherHeader();
   }
 
+  // FIXME HTML/CSS
+  const modeIndicator = appMode === "dev"
+    ? <div className="mode"><strong>Preview Mode</strong><br/><span>Data will be deleted</span></div>
+    : null;
+
   return (
       <div className="app-header">
         <div className="left">
@@ -196,6 +201,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           {renderPanelButtons()}
         </div>
         <div className="right">
+          {modeIndicator}
           <NetworkStatus user={user}/>
           <div className="version">Version {appVersion}</div>
           {myGroup ? renderGroup(myGroup) : null}
