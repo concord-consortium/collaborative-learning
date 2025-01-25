@@ -20,7 +20,7 @@
       pointer-events: none;
 
       .annotation-layer.show-handles & {
-        pointer-events: visible;
+        pointer-events: visibleStroke;
       }
     }
 
