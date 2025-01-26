@@ -1,5 +1,6 @@
 import { DB } from "./db";
 import { Firebase } from "./firebase";
+import { kClueDevIDKey } from "./root-id";
 
 const mockStores = {
   appMode: "authed",
@@ -21,6 +22,12 @@ describe("Firebase class", () => {
     it("should handle authed mode", () => {
       const firebase = new Firebase(mockDB);
       expect(firebase.getRootFolder()).toBe("/authed/portals/test-portal/");
+    });
+    it("should handle the dev appMode", () => {
+      window.localStorage.setItem(kClueDevIDKey, "random-id");
+      const stores = {...mockStores, appMode: "dev"};
+      const firestore = new Firebase({stores} as DB);
+      expect(firestore.getRootFolder()).toBe("/dev/random-id/portals/test-portal/");
     });
     describe("should handle the demo appMode", () => {
       it("handles basic demo name", () => {
