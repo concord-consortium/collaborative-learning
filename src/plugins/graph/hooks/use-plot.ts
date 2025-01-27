@@ -1,5 +1,6 @@
 import React, {useCallback, useContext, useEffect, useRef} from "react";
 import {autorun, reaction} from "mobx";
+import { isAlive } from "mobx-state-tree";
 import { isAddCasesAction, isRemoveAttributeAction, isRemoveCasesAction, isSetCaseValuesAction }
   from "../../../models/data/data-set-actions";
 import {IDotsRef, GraphAttrRoles} from "../graph-types";
@@ -123,10 +124,12 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
   useEffect(() => {
     const disposer = reaction(
       () => {
-        const xNumeric = graphModel.getAxis('bottom') as INumericAxisModel;
-        const yNumeric = graphModel.getAxis('left') as INumericAxisModel;
-        const y2Numeric = graphModel.getAxis('rightNumeric') as INumericAxisModel;
-        return [xNumeric?.domain, yNumeric?.domain, y2Numeric?.domain];
+        if (isAlive(graphModel)) {
+          const xNumeric = graphModel.getAxis('bottom') as INumericAxisModel;
+          const yNumeric = graphModel.getAxis('left') as INumericAxisModel;
+          const y2Numeric = graphModel.getAxis('rightNumeric') as INumericAxisModel;
+          return [xNumeric?.domain, yNumeric?.domain, y2Numeric?.domain];
+        }
       },
       () => {
         callRefreshPointPositions(false);
@@ -194,11 +197,14 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
   // respond to color changes
   useEffect(() => {
     return reaction(() => {
-      const colors: Record<string, string> = {};
-      const layers = Array.from(graphModel.layers);
-      const descriptions = layers.map(l => l.config.yAttributeDescriptions);
-      descriptions.forEach(desc => desc.forEach(d => colors[d.attributeID] = graphModel.getColorForId(d.attributeID)));
-      return JSON.stringify(colors);
+      if (isAlive(graphModel)) {
+        const colors: Record<string, string> = {};
+        const layers = Array.from(graphModel.layers);
+        const descriptions = layers.map(l => l.config.yAttributeDescriptions);
+        descriptions.forEach(desc => desc.forEach(
+          d => colors[d.attributeID] = graphModel.getColorForId(d.attributeID)));
+        return JSON.stringify(colors);
+      }
     }, colorString => callRefreshPointPositions(false));
   }, [graphModel, callRefreshPointPositions]);
 
