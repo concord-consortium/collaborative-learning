@@ -38,9 +38,10 @@ function processDocumentEventParams(params: IDocumentLogEvent, { user, portal }:
   // Note that depending whether the call to write a log event is made
   // before or after the actual change to the document, this may be the history
   // entry that was current before the change, or the one that was created by the change.
-  // For the first change in a new document, it may be undefined.
+  // For the first change in a new document, it may be undefined, in which case we
+  // use the string "first" instead.
   const documentHistoryId = "treeManagerAPI" in document
-    ? (document.treeManagerAPI as TreeManagerType)?.latestDocumentHistoryEntry?.id
+    ? (document.treeManagerAPI as TreeManagerType)?.latestDocumentHistoryEntry?.id || "first"
     : undefined;
 
   const teacherNetworkInfo: ITeacherNetworkInfo | undefined = isRemote

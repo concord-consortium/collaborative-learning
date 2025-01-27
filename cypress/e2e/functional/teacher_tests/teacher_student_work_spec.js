@@ -29,10 +29,13 @@ context('Teacher can use studentDocument URL parameter', () => {
     clueCanvas.addTile('text');
 
     cy.get("@log")
-    .should("have.been.been.calledWith", LogEventName.CREATE_TILE, Cypress.sinon.match.object)
-    .its("lastCall.args.1")
-      .should("include", { objectType: "Text" })
-      .should("not.have.keys", "documentHistoryId");
+      .its("lastCall.args.0")
+        .should("eq", LogEventName.CREATE_TILE);
+
+    cy.get("@log")
+      .its("lastCall.args.1")
+        .should("include", { objectType: "Text" })
+        .should("have.a.property", "documentHistoryId", "first");
 
     textToolTile.enterText(initialText);
     textToolTile.getTextTile().last().should('contain', initialText);
