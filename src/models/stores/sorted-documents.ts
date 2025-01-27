@@ -231,6 +231,8 @@ export class SortedDocuments {
     snapshot.docs.forEach(doc => {
       const data = doc.data();
       mstSnapshot[data.key] = data;
+      // For some reason some docs arrive with visibility set to illegal "null" value.
+      if (data.visibility === null) data.visibility = undefined;
       typecheck(DocumentMetadataModel, data);
       const exemplarMetadata = this.exemplarMetadataDocs.get(data.key);
       if (exemplarMetadata) {
