@@ -3,6 +3,7 @@ import {autorun} from "mobx";
 import { observer } from "mobx-react-lite";
 import { drag, DragBehavior, select, Selection } from "d3";
 import classNames from "classnames";
+import { kebabCase } from "lodash";
 
 import {useAxisLayoutContext} from "../../imports/components/axis/models/axis-layout-context";
 import {ScaleNumericBaseType} from "../../imports/components/axis/axis-types";
@@ -24,6 +25,15 @@ function equationContainer(model: IMovableLineModel, subPlotKey: Record<string, 
   const classFromKey = model.classNameFromKey(subPlotKey),
     equationContainerClass = `movable-line-equation-container-${classFromKey}`;
   return { equationContainerClass };
+}
+
+// ensures class names do not include invalid characters like "{}"
+function lineClassName(lineKey: string) {
+  return `movable-line-${kebabCase(lineKey)}`;
+}
+
+function equationClassName(lineKey: string, instanceId: string) {
+  return `movable-line-equation-${kebabCase(lineKey)}-${instanceId}`;
 }
 
 interface IProps {
@@ -182,10 +192,11 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     function refreshEquation(
       slope: number, intercept: number, lineModel: IMovableLineInstance, index: number, lineKey: string
     ) {
+      const equationSelector = '.' + equationClassName(lineKey, instanceId);
       if (pointsOnAxes.current.length < 1) return;
-      const lineEquationContainer = select(`.${`movable-line-equation-${lineKey}-${instanceId}`}`);
+      const lineEquationContainer = select(equationSelector);
       const lineEquationElt =
-        select<HTMLElement,unknown>(`.${`movable-line-equation-${lineKey}-${instanceId}`} p`);
+        select<HTMLElement,unknown>(`${equationSelector} p`);
       const
         attrNames = {x: xAttrName, y: yAttrName},
         string = equationString(slope, intercept, attrNames);
@@ -374,7 +385,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
     ) => {
       if (event.dx !== 0 || event.dy !== 0) {
         const equation =
-          select<HTMLElement,unknown>(`.${`movable-line-equation-${lineKey}-${instanceId}`} p`),
+          select<HTMLElement,unknown>(`.${equationClassName(lineKey, instanceId)} p`),
           equationNode = equation.node() as Element,
           equationWidth = equationNode?.getBoundingClientRect().width || 0,
           equationHeight = equationNode?.getBoundingClientRect().height || 0,
@@ -447,7 +458,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         }
         const lineColor = graphModel.getColorForId(key);
         // Set up the line and its cover segments and handles
-        const lineClassNames = classNames("movable-line", `movable-line-${key}`, { selected: line.isSelected });
+        const lineClassNames = classNames("movable-line", lineClassName(key), { selected: line.isSelected });
         newLineObject.line = selection.append('line')
           .attr('class', lineClassNames)
           .attr('data-testid', `movable-line`)
@@ -478,7 +489,7 @@ export const MovableLine = observer(function MovableLine(props: IProps) {
         const equationDivClass = classNames(
           equationContainerClass,
           "movable-line-equation-container",
-          `movable-line-equation-${key}-${instanceId}`
+          equationClassName(key, instanceId)
         );
         const equationDiv = select(`#${containerId}`).append('div')
           .attr('class', equationDivClass)
