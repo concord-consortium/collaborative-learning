@@ -1,6 +1,6 @@
 import { observable } from "mobx";
 import {scaleQuantile, ScaleQuantile, schemeBlues} from "d3";
-import { getSnapshot, Instance, isAlive, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
+import { getSnapshot, Instance, ISerializedActionCall, SnapshotIn, types} from "mobx-state-tree";
 import {AttributeType, attributeTypes} from "../../../models/data/attribute";
 import { ICase } from "../../../models/data/data-set-types";
 import { DataSet, IDataSet } from "../../../models/data/data-set";
@@ -108,16 +108,12 @@ export const DataConfigurationModel = types
      * The rightNumeric attribute description is also not returned.
      */
     get attributeDescriptions() {
-      if (isAlive(self)) {
-        const descriptions = {...getSnapshot(self._attributeDescriptions)};
-        delete descriptions.rightNumeric;
-        if (self._yAttributeDescriptions.length > 0) {
-          descriptions.y = self._yAttributeDescriptions[0];
-        }
-        return descriptions;
-      } else {
-        return {};
+      const descriptions = {...getSnapshot(self._attributeDescriptions)};
+      delete descriptions.rightNumeric;
+      if (self._yAttributeDescriptions.length > 0) {
+        descriptions.y = self._yAttributeDescriptions[0];
       }
+      return descriptions;
     },
     get defaultCaptionAttributeID() {
       // In v2, the caption is the attribute left-most in the child-most collection among plotted attributes
