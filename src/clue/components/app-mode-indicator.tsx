@@ -4,6 +4,8 @@ import { Tooltip } from 'react-tippy';
 import { AppMode } from '../../models/stores/store-types';
 import { useTooltipOptions } from '../../hooks/use-tooltip-options';
 
+import WarningIcon from '../../assets/icons/warning.svg';
+
 import './app-mode-indicator.scss';
 
 interface AppModeIndicatorProps {
@@ -12,7 +14,7 @@ interface AppModeIndicatorProps {
 
 /**
  * An indicator for the top toolbar that displays a warning when you are in preview/dev mode.
- * 
+ *
  * @param appMode the current app mode
  */
 const AppModeIndicator: React.FC<AppModeIndicatorProps> = ({ appMode }) => {
@@ -21,7 +23,10 @@ const AppModeIndicator: React.FC<AppModeIndicatorProps> = ({ appMode }) => {
 
   const kPreviewTooltipHtml =
   <div>
-    <p><strong>You are in preview mode.</strong><br/>Any changes you make may be deleted after 24 hours.</p>
+    <p>
+      <strong>You are in preview mode.</strong><br/>
+      You can explore and try things out, but any changes will not be permanently saved.
+    </p>
     <p>To save your work or assign this activity, please sign in or create an account at <a href="https://learn.concord.org">learn.concord.org</a>.</p>
   </div>;
 
@@ -30,9 +35,8 @@ const AppModeIndicator: React.FC<AppModeIndicatorProps> = ({ appMode }) => {
   return (
     <Tooltip {...tipOptions} interactive={true} html={kPreviewTooltipHtml}>
       <div className="mode">
-        <strong>Preview Mode</strong>
-        <br />
-        <span>Data will be deleted</span>
+        <WarningIcon/>
+        Preview Mode
       </div>
     </Tooltip>
   );
