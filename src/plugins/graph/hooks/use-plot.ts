@@ -121,7 +121,7 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
 
   // respond to numeric axis domain changes (e.g. axis dragging)
   useEffect(() => {
-    const disposer = reaction(
+    const disposer = mstReaction(
       () => {
         const xNumeric = graphModel.getAxis('bottom') as INumericAxisModel;
         const yNumeric = graphModel.getAxis('left') as INumericAxisModel;
@@ -130,7 +130,9 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
       },
       () => {
         callRefreshPointPositions(false);
-      }, {fireImmediately: true}
+      },
+      {fireImmediately: true, name: "usePlot.domain reaction"},
+      graphModel
     );
     return () => disposer();
   }, [callRefreshPointPositions, graphModel]);
@@ -193,22 +195,30 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
 
   // respond to color changes
   useEffect(() => {
-    return reaction(() => {
-      const colors: Record<string, string> = {};
-      const layers = Array.from(graphModel.layers);
-      const descriptions = layers.map(l => l.config.yAttributeDescriptions);
-      descriptions.forEach(desc => desc.forEach(d => colors[d.attributeID] = graphModel.getColorForId(d.attributeID)));
-      return JSON.stringify(colors);
-    }, colorString => callRefreshPointPositions(false));
+    return mstReaction(
+      () => {
+        const colors: Record<string, string> = {};
+        const layers = Array.from(graphModel.layers);
+        const descriptions = layers.map(l => l.config.yAttributeDescriptions);
+        descriptions.forEach(desc => desc.forEach(
+          d => colors[d.attributeID] = graphModel.getColorForId(d.attributeID)));
+        return JSON.stringify(colors);
+      },
+      colorString => callRefreshPointPositions(false),
+      { name: "usePlot.color reaction" },
+      graphModel
+    );
   }, [graphModel, callRefreshPointPositions]);
 
   // respond to selection change
   useEffect(function respondToSelectionChange() {
-    return reaction(
+    return mstReaction(
       () => [dataset?.selectionIdString],
-      () => refreshPointSelection()
+      () => refreshPointSelection(),
+      { name: "usePlot.selection reaction" },
+      graphModel
     );
-  }, [dataset, refreshPointSelection]);
+  }, [graphModel, dataset, refreshPointSelection]);
 
   // respond to added or removed cases and change in attribute type
   useEffect(function handleAddRemoveCases() {
