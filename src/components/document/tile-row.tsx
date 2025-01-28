@@ -1,7 +1,6 @@
 import classNames from "classnames";
 import React from "react";
 import { observer, inject } from "mobx-react";
-import { isAlive } from "mobx-state-tree";
 import { BaseComponent } from "../base";
 import { TileLayoutModelType, TileRowModelType } from "../../models/document/tile-row";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
@@ -202,7 +201,6 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleRequestRowHeight = (tileId: string, height?: number, deltaHeight?: number) => {
-    if (!isAlive(this.props.model)) return;
     const { height: rowHeight, tileCount, setRowHeightWithoutUndo } = this.props.model;
     const newHeight = rowHeight != null && deltaHeight != null
                         ? rowHeight + deltaHeight

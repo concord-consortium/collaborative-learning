@@ -1,6 +1,5 @@
 import React, {useCallback, useContext, useEffect, useRef} from "react";
 import {autorun, reaction} from "mobx";
-import { isAlive } from "mobx-state-tree";
 import { isAddCasesAction, isRemoveAttributeAction, isRemoveCasesAction, isSetCaseValuesAction }
   from "../../../models/data/data-set-actions";
 import {IDotsRef, GraphAttrRoles} from "../graph-types";
@@ -122,18 +121,18 @@ export const usePlotResponders = (props: IPlotResponderProps) => {
 
   // respond to numeric axis domain changes (e.g. axis dragging)
   useEffect(() => {
-    const disposer = reaction(
+    const disposer = mstReaction(
       () => {
-        if (isAlive(graphModel)) {
-          const xNumeric = graphModel.getAxis('bottom') as INumericAxisModel;
-          const yNumeric = graphModel.getAxis('left') as INumericAxisModel;
-          const y2Numeric = graphModel.getAxis('rightNumeric') as INumericAxisModel;
-          return [xNumeric?.domain, yNumeric?.domain, y2Numeric?.domain];
-        }
+        const xNumeric = graphModel.getAxis('bottom') as INumericAxisModel;
+        const yNumeric = graphModel.getAxis('left') as INumericAxisModel;
+        const y2Numeric = graphModel.getAxis('rightNumeric') as INumericAxisModel;
+        return [xNumeric?.domain, yNumeric?.domain, y2Numeric?.domain];
       },
       () => {
         callRefreshPointPositions(false);
-      }, {fireImmediately: true}
+      },
+      {fireImmediately: true, name: "usePlot.domain reaction"},
+      graphModel
     );
     return () => disposer();
   }, [callRefreshPointPositions, graphModel]);
