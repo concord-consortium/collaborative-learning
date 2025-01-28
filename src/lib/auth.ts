@@ -24,12 +24,12 @@ export const DEV_STUDENT: StudentUser = {
   type: "student",
   id: "1",
   portal: "localhost",
-  firstName: "Dev",
+  firstName: "Preview",
   lastName: "Student",
-  fullName: "Dev Student",
-  initials: "SD",
-  className: "Dev Class",
-  classHash: "devclass",
+  fullName: "Preview Student",
+  initials: "PS",
+  className: "Preview Class",
+  classHash: "previewclass",
   offeringId: "1",
 };
 
@@ -37,12 +37,12 @@ export const DEV_TEACHER: TeacherUser = {
   type: "teacher",
   id: "1000",
   portal: "localhost",
-  firstName: "Dev",
+  firstName: "Preview",
   lastName: "Teacher",
-  fullName: "Dev Teacher",
-  initials: "DT",
-  className: "Dev Class",
-  classHash: "devclass",
+  fullName: "Preview Teacher",
+  initials: "PT",
+  className: "Preview Class",
+  classHash: "previewclass",
   offeringId: "1",
 };
 
@@ -62,13 +62,13 @@ export interface AuthQueryParams {
   domain?: string;
 }
 
-// An explicitly set appMode takes priority
-// Otherwise, assume that local users are devs, unless a token is specified,
-// in which authentication is likely being tested
+// An explicitly set appMode takes priority.
+// Otherwise, if a token is specified assume "authed" (authentication is likely being tested)
+// and otherwise default to "dev" (development mode, also used for anonymous portal preview)
 export const getAppMode = (appModeParam?: AppMode, token?: string, host?: string) => {
   return appModeParam != null
            ? appModeParam
-           : (token == null && (host === "localhost" || host === "127.0.0.1") ? "dev" : "authed");
+           : (token == null ? "dev" : "authed");
 };
 
 export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string, rawToken: string) => {

@@ -9,6 +9,7 @@ import { ToggleGroup } from "@concord-consortium/react-components";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
 import { CustomSelect } from "./custom-select";
 import { useStores } from "../../hooks/use-stores";
+import AppModeIndicator from "./app-mode-indicator";
 
 // cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
 import styles from "./toggle-buttons.scss";
@@ -196,6 +197,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           {renderPanelButtons()}
         </div>
         <div className="right">
+          <AppModeIndicator appMode={appMode}/>
           <NetworkStatus user={user}/>
           <div className="version">Version {appVersion}</div>
           {myGroup ? renderGroup(myGroup) : null}
