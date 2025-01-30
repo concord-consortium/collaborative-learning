@@ -58,7 +58,7 @@ export const EllipseObject = types.compose("EllipseObject", StrokedObject, Fille
 export interface EllipseObjectType extends Instance<typeof EllipseObject> {}
 export interface EllipseObjectSnapshot extends SnapshotIn<typeof EllipseObject> {}
 
-function isEllipseObject(model: DrawingObjectType): model is EllipseObjectType {
+export function isEllipseObject(model: DrawingObjectType): model is EllipseObjectType {
   return model.type === "ellipse";
 }
 

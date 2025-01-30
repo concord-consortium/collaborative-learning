@@ -1,0 +1,222 @@
+@import "../vars";
+
+.tile-navigator-container {
+  top: calc(100% - 117px);
+  height: 107px;
+  padding-top: 15px;
+  padding-bottom: 0;
+  position: absolute;
+  right: 10px;
+  transition: .2s position;
+  width: 100px;
+  z-index: 10;
+
+  &.top {
+    padding-bottom: 15px;
+    padding-top: 0;
+    top: 10px;
+
+    &.animate {
+      animation: navigator-scroll-up .25s forwards;
+    }
+
+    .tile-navigator {
+      border-radius: 3px 3px 0 0;
+    }
+
+    .navigator-panning-buttons {
+      top: 0;
+    }
+  }
+
+  &.animate {
+    animation: navigator-scroll-down .25s forwards;
+  }
+
+  .tile-navigator {
+    align-items: center;
+    background: $charcoal-light-5;
+    border-radius: 0 0 3px 3px;
+    display: flex;
+    flex-direction: column;
+    height: 92px;
+    overflow: hidden;
+
+    .tile-navigator-content-area {
+      height: 79px;
+      overflow: hidden;
+      position: relative;
+      width: 100%;
+
+      .tile-navigator-tile-content {
+        background: #fff;
+        pointer-events: none;
+        position: absolute;
+        top: 7.5px;
+        left: 5px;
+        height: calc(100% - 15px);
+        width: calc(100% - 10px);
+        transform-origin: top left;
+        z-index: 1;
+
+        .title-area-wrapper {
+          display: none;
+        }
+      }
+      .tile-navigator-overlay {
+        background: $charcoal-light-4;
+        position: absolute;
+        top: 7.5px;
+        left: 5px;
+        height: calc(100% - 15px);
+        width: calc(100% - 10px);
+        opacity: .40;
+        z-index: 2;
+      }
+      .tile-navigator-viewport {
+        left: 50%;
+        overflow: hidden;
+        pointer-events: none;
+        position: absolute;
+        top: 50%;
+        transform-origin: top left;
+        z-index: 5;
+      }
+    }
+
+    .zoom-level {
+      align-items: center;
+      display: flex;
+      font-size: 11px;
+      height: 15px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .tile-navigator-placement-button {
+      all: unset;
+      background: $charcoal-light-5;
+      border-radius: 3px 3px 0 0;
+      cursor: pointer;
+      height: 15px;
+      left: 0;
+      position: absolute;
+      text-align: center;
+      top: 0;
+      width: 100%;
+      z-index: 1;
+
+      &:hover {
+        background: $charcoal-light-3;
+
+        svg {
+          display: inline-block;
+        }
+      }
+      &:active {
+        background: $charcoal-light-2;
+      }
+
+      &.top {
+        border-radius: 0 0 3px 3px;
+        bottom: 0;
+        top: auto;
+
+        svg {
+          transform: rotate(0deg);
+        }
+      }
+
+      svg {
+        display: none;
+        top: 0;
+        left: 50%;
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .navigator-panning-buttons {
+    height: 78px;
+    left: 0;
+    margin: 0 2px;
+    position: absolute;
+    top: 15px;
+    width: calc(100% - 4px);
+    z-index: 5;
+
+    button {
+      all: unset;
+      align-items: center;
+      border: solid 1px transparent;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      height: 28px;
+      justify-content: center;
+      position: absolute;
+      width: 28px;
+
+      &:hover {
+        background: $workspace-teal-light-4;
+        border: solid 1px $workspace-teal;
+        opacity: .5;
+      }
+      &:active {
+        background: $workspace-teal-light-4;
+        border: solid 1px $workspace-teal;
+        opacity: 1;
+      }
+
+      &.up {
+        left: 50%;
+        margin-left: -14px;
+        top: 0;
+        transform: rotate(180deg);
+      }
+      &.right {
+        margin-top: -14px;
+        right: 0;
+        top: 50%;
+        transform: rotate(-90deg);
+        width: 28px;
+      }
+      &.down {
+        bottom: 0;
+        left: 50%;
+        margin-left: -14px;
+        transform: rotate(0deg);
+      }
+      &.left {
+        left: 0;
+        margin-top: -14px;
+        top: 50%;
+        transform: rotate(90deg);
+        width: 28px;
+      }
+
+      svg {
+        height: 24px;
+        width: 24px;
+      }
+    }
+  }
+}
+
+@keyframes navigator-scroll-up {
+  0% {
+    top: calc(100% - 117px);
+  }
+  100% {
+    top: 10px;
+  }
+}
+
+@keyframes navigator-scroll-down {
+  0% {
+    top: 10px;
+  }
+  100% {
+    top: calc(100% - 117px);
+  }
+}

@@ -80,6 +80,13 @@ jest.mock("firebase/app", () => {
 
 const mockUpdate = jest.fn();
 const mockRef = jest.fn();
+const mockSetLastEditedOnDisconnect = jest.fn();
+const mockOnlineStatusListenerOn = jest.fn();
+const mockOnlineStatusListenerOff = jest.fn();
+const mockOnlineStatusRef = {
+  on: mockOnlineStatusListenerOn,
+  off: mockOnlineStatusListenerOff
+};
 
 const specUser = (overrides?: Partial<SnapshotIn<typeof UserModel>>) => {
   return UserModel.create({ id: "1", ...overrides });
@@ -94,7 +101,9 @@ const specFirebase = (type: string, key: string) => {
         typedMetadata: `${user.id}/${type}/${key}`
       };
     },
-    ref: (path: string) => mockRef(path)
+    ref: (path: string) => mockRef(path),
+    setLastEditedOnDisconnect: mockSetLastEditedOnDisconnect,
+    onlineStatusRef: mockOnlineStatusRef,
   } as unknown as Firebase;
 };
 
@@ -127,6 +136,9 @@ describe("useDocumentSyncToFirebase hook", () => {
 
   beforeEach(() => {
     mockUpdate.mockReset();
+    mockSetLastEditedOnDisconnect.mockReset();
+    mockOnlineStatusListenerOff.mockReset();
+    mockOnlineStatusListenerOn.mockReset();
     mockRef.mockReset();
     mockRef.mockImplementation((path: string) => {
       return {
@@ -184,6 +196,7 @@ describe("useDocumentSyncToFirebase hook", () => {
     renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document, true));
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
+    expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(0);
 
     // doesn't respond to visibility change in read-only documents
     document.setVisibility("public");
@@ -204,6 +217,9 @@ describe("useDocumentSyncToFirebase hook", () => {
     document.setProperty("foo", "bar");
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
+
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
+    expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(0);
   });
 
   it("monitors problem documents", async () => {
@@ -211,28 +227,35 @@ describe("useDocumentSyncToFirebase hook", () => {
     renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
+    expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
 
     // updates public/private status on visibility change
     document.setVisibility("public");
     expect(mockRef).toBeCalledTimes(1);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/problem/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
 
     // saves when content changes
     document.content?.addTile("text");
     expect(mockRef).toHaveBeenCalledTimes(2);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(2);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
 
     // doesn't respond to title change (problem documents don't have user-settable titles)
     document.setTitle("New Title");
     expect(mockRef).toHaveBeenCalledTimes(2);
     expect(mockUpdate).toHaveBeenCalledTimes(2);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
 
     // doesn't respond to properties change (problem documents don't have user-settable properties)
     document.setProperty("foo", "bar");
     expect(mockRef).toHaveBeenCalledTimes(3);
     expect(mockUpdate).toHaveBeenCalledTimes(3);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
   });
 
   it("monitors planning documents", () => {
@@ -240,27 +263,34 @@ describe("useDocumentSyncToFirebase hook", () => {
     renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
+    expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
 
     // doesn't respond to visibility change (planning documents are always private)
     document.setVisibility("public");
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
 
     // saves when content changes
     document.content?.addTile("text");
     expect(mockRef).toHaveBeenCalledTimes(1);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
 
     // doesn't respond to title change (planning documents don't have user-settable titles)
     document.setTitle("New Title");
     expect(mockRef).toHaveBeenCalledTimes(1);
     expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
 
     // doesn't respond to properties change (planning documents don't have user-settable properties)
     document.setProperty("foo", "bar");
     expect(mockRef).toHaveBeenCalledTimes(1);
     expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
   });
 
   it("monitors personal documents", () => {
@@ -268,29 +298,36 @@ describe("useDocumentSyncToFirebase hook", () => {
     renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
+    expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
 
     // responds to visibility change
     document.setVisibility("public");
     expect(mockRef).toHaveBeenCalledTimes(1);
     expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
 
     // saves when content changes
     document.content?.addTile("text");
     expect(mockRef).toHaveBeenCalledTimes(2);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(2);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
 
     // updates title when it changes
     document.setTitle("New Title");
     expect(mockRef).toHaveBeenCalledTimes(3);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(3);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
 
     // updates properties when they change
     document.setProperty("foo", "bar");
     expect(mockRef).toHaveBeenCalledTimes(4);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(4);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
   });
 
   it("monitors learning log documents", () => {
@@ -298,29 +335,36 @@ describe("useDocumentSyncToFirebase hook", () => {
     renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
+    expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
 
     // responds to visibility change
     document.setVisibility("public");
     expect(mockRef).toHaveBeenCalledTimes(1);
     expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
 
     // saves when content changes
     document.content?.addTile("text");
     expect(mockRef).toHaveBeenCalledTimes(2);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(2);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
 
     // updates title when it changes
     document.setTitle("New Title");
     expect(mockRef).toHaveBeenCalledTimes(3);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/learningLog/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(3);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
 
     // updates properties when they change
     document.setProperty("foo", "bar");
     expect(mockRef).toHaveBeenCalledTimes(4);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/learningLog/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(4);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
   });
 
   it("monitors problem documents with additional logging when DEBUG_SAVE == true", async () => {

@@ -5,7 +5,6 @@ import classNames from "classnames";
 import { DocumentModelType } from "../../models/document/document";
 import { useStores } from "../../hooks/use-stores";
 import { DocFilterType, SecondarySortType } from "../../models/stores/ui-types";
-import { IDocumentMetadata } from "../../../shared/shared";
 import { DocumentGroup } from "../../models/stores/document-group";
 import { DocumentGroupComponent } from "./document-group";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
@@ -53,7 +52,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
                                : { primaryLabel: documentGroup.label, primaryType: documentGroup.sortType,
                                    secondaryLabel: label, secondaryType: sortType };
 
-    return async (document: DocumentModelType | IDocumentMetadata) => {
+    return async (document: DocumentModelType | IDocumentMetadataModel) => {
       const openSubTab = JSON.stringify(openSubTabMetadata);
       persistentUI.openSubTabDocument(ENavTab.kSortWork, openSubTab, document.key);
       logDocumentViewEvent(document);

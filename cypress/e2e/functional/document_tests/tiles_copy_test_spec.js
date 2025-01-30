@@ -10,6 +10,7 @@ import DataflowToolTile from '../../../support/elements/tile/DataflowToolTile';
 import SimulatorTile from '../../../support/elements/tile/SimulatorTile';
 import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import XYPlotToolTile from "../../../support/elements/tile/XYPlotToolTile";
+import ArrowAnnotation from "../../../support/elements/tile/ArrowAnnotation";
 
 const student5 = `${Cypress.config("qaUnitStudent5")}`;
 const student6 = `${Cypress.config("qaUnitStudent6")}`;
@@ -24,8 +25,9 @@ let clueCanvas = new ClueCanvas,
   dataflowToolTile = new DataflowToolTile,
   simulatorTile = new SimulatorTile,
   diagramTile = new DiagramToolTile,
-  graphTile = new XYPlotToolTile;
-let canvas = new Canvas;
+  graphTile = new XYPlotToolTile,
+  aa = new ArrowAnnotation,
+  canvas = new Canvas;
 
 const imageName = "Image Tile";
 const simName = "Test Simulation";
@@ -72,6 +74,8 @@ function testPrimaryWorkspace1() {
   cy.get('.primary-workspace .numberline-tool-container .point-inner-circle').not(".mouse-follow-point").should('have.length', 2);
   // Make sure the image tile were copied correctly
   cy.get('.primary-workspace .image-tool .editable-tile-title-text').should("contain", imageName);
+  // Make sure the annotations were copied correctly
+  aa.getAnnotationArrows().should("have.length", 2);
 
   canvas.deleteDocument();
 }
@@ -137,7 +141,25 @@ context('Test copy tiles from one document to other document', function () {
       tableToolTile.getTableCell().eq(2).should('contain', '2.5');
     });
 
-    cy.log('Add graph tile');
+    cy.log('Add Sparrows to table tile');
+    aa.getAnnotationModeButton().click(); // sparrow mode on
+    aa.getAnnotationLayer().should("have.class", "editing");
+    aa.getAnnotationButtons().should("have.length", 2);
+    // Curved sparrow between the two cells
+    aa.getAnnotationArrows().should("not.exist");
+    aa.getAnnotationButtons().eq(0).click();
+    aa.getAnnotationButtons().eq(1).click();
+    aa.getAnnotationArrows().should("have.length", 1);
+    // Straight sparrow from one of the cells
+    aa.getAnnotationMenuExpander().click();
+    aa.getStraightArrowToolbarButton().click();
+    aa.getAnnotationModeButton().should("have.attr", "title", "Sparrow: straight");
+    aa.getAnnotationButtons().eq(1).click({force: true});
+    aa.getAnnotationSvg().click(300, 100);
+    aa.getAnnotationArrows().should("have.length", 2);
+    aa.getAnnotationModeButton().click(); // sparrow mode off
+
+    cy.log('Add geometry tile');
     clueCanvas.addTile('geometry');
     cy.get('.spacer').click();
     geometryToolTile.getGeometryTile().last().click();

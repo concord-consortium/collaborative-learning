@@ -38,6 +38,10 @@ export class Firebase {
     return this.user !== null;
   }
 
+  public get onlineStatusRef() {
+    return firebase.database().ref(".info/connected");
+  }
+
   public ref(path = "") {
     if (!this.isConnected) {
       throw new Error("ref() requested before db connected!");
@@ -178,6 +182,64 @@ export class Firebase {
   public getUserDocumentMetadataPath(user: UserModelType, documentKey?: string, userId?: string) {
     const suffix = documentKey ? `/${documentKey}` : "";
     return `${this.getUserPath(user, userId)}/documentMetadata${suffix}`;
+  }
+
+  public getLastEditedMetadataPath(user: UserModelType, documentKey: string, userId?: string) {
+    return `${this.getUserDocumentMetadataPath(user, documentKey, userId)}/lastEditedAt`;
+  }
+
+  // Returns the path to the evaluation type & timestamp for a document, if specified in the appConfig
+  public getEvaluationMetadataPath(user: UserModelType, documentKey: string, userId?: string) {
+    const evaluation = this.db.stores.appConfig.aiEvaluation;
+    if (evaluation) {
+      return `${this.getUserDocumentMetadataPath(user, documentKey, userId)}/evaluation/${evaluation}`;
+    } else {
+      return undefined;
+    }
+  }
+
+  /**
+   * Set up Firebase onDisconnect handlers.
+   * All documents get one to update the lastEditedAt timestamp when the user disconnects.
+   * If the appConfig specifies an AI Evaluation to be run, a metadata field is added to request that as well.
+   */
+  public setLastEditedOnDisconnect(user: UserModelType, documentKey: string, userId?: string):
+      firebase.database.OnDisconnect[] {
+    const onDisconnects: firebase.database.OnDisconnect[] = [];
+    const ref = this.ref(this.getLastEditedMetadataPath(user, documentKey, userId));
+    const onDisconnect = ref.onDisconnect();
+    onDisconnect.set(firebase.database.ServerValue.TIMESTAMP);
+    onDisconnects.push(onDisconnect);
+
+    const evaluation = this.getEvaluationMetadataPath(user, documentKey, userId);
+    if (evaluation) {
+      const evaluationRef = this.ref(evaluation);
+      const evaluationOnDisconnect = evaluationRef.onDisconnect();
+      evaluationOnDisconnect.set(firebase.database.ServerValue.TIMESTAMP);
+      onDisconnects.push(evaluationOnDisconnect);
+    }
+    return onDisconnects;
+  }
+
+  /**
+   * Set the lastEditedAt timestamp to the current time, optionally cancelling any onDisconnect handlers.
+   * If the appConfig specifies an AI Evaluation to be run, that timestamp is set as well.
+   */
+  public setLastEditedNow(user: UserModelType, documentKey: string, userId: string|undefined,
+      onDisconnects?: firebase.database.OnDisconnect[]) {
+    if (onDisconnects) {
+      onDisconnects.forEach((onDisconnect) => {
+        onDisconnect.cancel();
+      });
+    }
+    const promises: Promise<any>[] = [];
+    promises.push(this.ref(this.getLastEditedMetadataPath(user, documentKey, userId))
+      .set(firebase.database.ServerValue.TIMESTAMP));
+    const evaluation = this.getEvaluationMetadataPath(user, documentKey, userId);
+    if (evaluation) {
+      promises.push(this.ref(evaluation).set(firebase.database.ServerValue.TIMESTAMP));
+    }
+    return Promise.all(promises);
   }
 
   // Unpublished personal document/learning log metadata
@@ -321,6 +383,18 @@ export class Firebase {
       this.groupOnDisconnect.cancel();
     }
     this.groupOnDisconnect = null;
+  }
+
+  /**
+   * Get an server time offset. This is useful to create an estimated server timestamp.
+   * See https://firebase.google.com/docs/database/web/offline-capabilities#clock-skew
+   *
+   * @returns
+   */
+  public async getServerTimeOffset() {
+    const offsetRef = firebase.database().ref(".info/serverTimeOffset");
+    const snap = await offsetRef.once("value");
+    return snap.val();
   }
 
   //

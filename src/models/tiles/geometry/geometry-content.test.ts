@@ -135,7 +135,7 @@ describe("GeometryContent", () => {
     function onCreate(elt: JXG.GeometryElement) {
       // handle a point
     }
-    const board = content.initializeBoard(divId, onCreate, (b) => {}) as JXG.Board;
+    const board = content.initializeBoard(divId, false, onCreate, (b) => {}) as JXG.Board;
     content.resizeBoard(board, 200, 200);
     content.updateScale(board, 0.5);
     return board;
@@ -189,7 +189,18 @@ describe("GeometryContent", () => {
   it("can create with default properties", () => {
     const content = GeometryContentModel.create();
     expect(getSnapshot(content)).toEqual(
-      { type: kGeometryTileType, board: defaultBoard(), objects: {}, linkedAttributeColors: {}, pointMetadata: {} });
+      {
+        type: kGeometryTileType,
+        board: defaultBoard(),
+        objects: {},
+        linkedAttributeColors: {},
+        pointMetadata: {},
+        isNavigatorVisible: true,
+        navigatorPosition: "bottom",
+        zoom: 1,
+        offsetX: 0,
+        offsetY: 0
+    });
 
     destroy(content);
   });
@@ -213,7 +224,12 @@ describe("GeometryContent", () => {
       },
       objects: {},
       linkedAttributeColors: {},
-      pointMetadata: {}
+      pointMetadata: {},
+      isNavigatorVisible: true,
+      navigatorPosition: "bottom",
+      zoom: 1,
+      offsetX: 0,
+      offsetY: 0
     });
 
     destroy(content);
@@ -269,7 +285,7 @@ describe("GeometryContent", () => {
       yMax: 3
     };
 
-    content.rescaleBoard(board, params);
+    content.rescaleBoard(board, params, true);
     expect(content.board?.xAxis.name).toBe("xName");
     expect(content.board?.xAxis.label).toBe("xAnnotation");
     expect(content.board?.xAxis.min).toBe(-1);
@@ -1237,6 +1253,11 @@ describe("GeometryContent", () => {
     expect(exportAndSimplifyIds(content)).toMatchInlineSnapshot(`
 "{
   \\"type\\": \\"Geometry\\",
+  \\"isNavigatorVisible\\": true,
+  \\"navigatorPosition\\": \\"bottom\\",
+  \\"offsetX\\": 0,
+  \\"offsetY\\": 0,
+  \\"zoom\\": 1,
   \\"board\\": {\\"xAxis\\": {\\"name\\": \\"x\\", \\"label\\": \\"x\\", \\"min\\": -2, \\"unit\\": 18.3, \\"range\\": 26.229508196721312}, \\"yAxis\\": {\\"name\\": \\"y\\", \\"label\\": \\"y\\", \\"min\\": -1, \\"unit\\": 18.3, \\"range\\": 17.486338797814206}},
   \\"objects\\": {
     \\"p1\\": {\\"type\\": \\"point\\", \\"id\\": \\"p1\\", \\"x\\": 1, \\"y\\": 1, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
@@ -1257,6 +1278,11 @@ describe("GeometryContent", () => {
 toMatchInlineSnapshot(`
 "{
   \\"type\\": \\"Geometry\\",
+  \\"isNavigatorVisible\\": true,
+  \\"navigatorPosition\\": \\"bottom\\",
+  \\"offsetX\\": 0,
+  \\"offsetY\\": 0,
+  \\"zoom\\": 1,
   \\"board\\": {\\"xAxis\\": {\\"name\\": \\"x\\", \\"label\\": \\"x\\", \\"min\\": -2, \\"unit\\": 18.3, \\"range\\": 26.229508196721312}, \\"yAxis\\": {\\"name\\": \\"y\\", \\"label\\": \\"y\\", \\"min\\": -1, \\"unit\\": 18.3, \\"range\\": 17.486338797814206}},
   \\"objects\\": {
     \\"testid\\": {\\"type\\": \\"point\\", \\"id\\": \\"testid\\", \\"x\\": 0, \\"y\\": 0, \\"snapToGrid\\": true, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
@@ -1288,6 +1314,11 @@ toMatchInlineSnapshot(`
 toMatchInlineSnapshot(`
 "{
   \\"type\\": \\"Geometry\\",
+  \\"isNavigatorVisible\\": true,
+  \\"navigatorPosition\\": \\"bottom\\",
+  \\"offsetX\\": 0,
+  \\"offsetY\\": 0,
+  \\"zoom\\": 1,
   \\"board\\": {\\"xAxis\\": {\\"name\\": \\"x\\", \\"label\\": \\"x\\", \\"min\\": -2, \\"unit\\": 18.3, \\"range\\": 26.229508196721312}, \\"yAxis\\": {\\"name\\": \\"y\\", \\"label\\": \\"y\\", \\"min\\": -1, \\"unit\\": 18.3, \\"range\\": 17.486338797814206}},
   \\"objects\\": {
     \\"ml\\": {
@@ -1314,6 +1345,11 @@ toMatchInlineSnapshot(`
     expect(exportAndSimplifyIds(content)).toMatchInlineSnapshot(`
 "{
   \\"type\\": \\"Geometry\\",
+  \\"isNavigatorVisible\\": true,
+  \\"navigatorPosition\\": \\"bottom\\",
+  \\"offsetX\\": 0,
+  \\"offsetY\\": 0,
+  \\"zoom\\": 1,
   \\"board\\": {\\"xAxis\\": {\\"name\\": \\"x\\", \\"label\\": \\"x\\", \\"min\\": -2, \\"unit\\": 18.3, \\"range\\": 26.229508196721312}, \\"yAxis\\": {\\"name\\": \\"y\\", \\"label\\": \\"y\\", \\"min\\": -1, \\"unit\\": 18.3, \\"range\\": 17.486338797814206}},
   \\"bgImage\\": {\\"type\\": \\"image\\", \\"id\\": \\"img\\", \\"x\\": 0, \\"y\\": 0, \\"url\\": \\"test-file-stub\\", \\"width\\": 5, \\"height\\": 5},
   \\"objects\\": {},

@@ -1,4 +1,4 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { AdornmentModel, IAdornmentModel, IUpdateCategoriesOptions, PointModel,
          kInfinitePoint } from "../adornment-models";
 import { Point } from "../../graph-types";
@@ -8,6 +8,7 @@ import { kMovableLineType } from "./movable-line-types";
 import { IGraphModel } from "../../models/graph-model";
 import { IClueTileObject } from "../../../../models/annotations/clue-object";
 import { uniqueId } from "../../../../utilities/js-utils";
+import { JsonNumber } from "../../../../models/json-number";
 
 export function getAnnotationId(lineKey: string, type: "handle"|"equation", position?: "lower"|"upper") {
   if (position) {
@@ -20,7 +21,7 @@ export function getAnnotationId(lineKey: string, type: "handle"|"equation", posi
 export const MovableLineInstance = types.model("MovableLineInstance", {
   equationCoords: types.maybe(PointModel),
   intercept: types.number,
-  slope: types.number,
+  slope: JsonNumber,
 })
 .volatile(self => ({
   isSelected: false,
@@ -78,6 +79,7 @@ export const MovableLineInstance = types.model("MovableLineInstance", {
 }));
 
 export interface IMovableLineInstance extends Instance<typeof MovableLineInstance> {}
+export interface IMovableLineSnapshot extends SnapshotIn<typeof MovableLineInstance> {}
 
 export const MovableLineModel = AdornmentModel
 .named('MovableLineModel')

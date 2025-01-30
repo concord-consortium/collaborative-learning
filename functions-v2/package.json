@@ -4,7 +4,7 @@
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "emulator": "firebase emulators:start --project demo-test",
+    "emulator": "firebase emulators:start --project demo-test --import=./emulator-data --export-on-exit=./emulator-data",
     "emulator:online": "firebase emulators:start",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell --project demo-test",
@@ -20,17 +20,20 @@
   "main": "lib/functions-v2/src/index.js",
   "dependencies": {
     "firebase-admin": "^12.1.0",
-    "firebase-functions": "^5.1.1"
+    "firebase-functions": "^5.1.1",
+    "openai": "^4.64.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.12",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.12.0",
+    "dotenv": "16.4.5",
     "eslint": "^8.22.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.25.4",
-    "firebase-functions-test": "^3.1.0",
+    "firebase-functions-test": "^3.3.0",
     "firebase-tools": "^13.15.1",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.4",

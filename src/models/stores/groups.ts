@@ -1,5 +1,5 @@
-import { types } from "mobx-state-tree";
-import { DBOfferingGroupMap } from "../../lib/db-types";
+import { types, getEnv, SnapshotIn, applySnapshot } from "mobx-state-tree";
+import { DBOfferingGroup, DBOfferingGroupMap } from "../../lib/db-types";
 import { ClassModelType } from "./class";
 import { GroupVirtualDocument } from "../document/group-virtual-document";
 import { UserModelType } from "./user";
@@ -8,26 +8,76 @@ import { ProblemPublication } from "../document/document-types";
 
 export interface IGroupsEnvironment {
   user?: UserModelType,  // This is the current user of the application
+  class?: ClassModelType,
   documents?: DocumentsModelType, // These are the documents of the application
+}
+
+export enum GroupUserState {
+  Found,
+  New,
+  Removed,
 }
 
 export const GroupUserModel = types
   .model("GroupUser", {
     id: types.string,
-    name: types.string,
-    initials: types.string,
     connectedTimestamp: types.number,
     disconnectedTimestamp: types.maybe(types.number),
   })
-  .volatile(self => ({
-    environment: {} as IGroupsEnvironment
-  }))
-  .actions((self) => ({
-    setEnvironment(env: IGroupsEnvironment) {
-      self.environment = env;
+  .views(self => ({
+    get environment() {
+      return getEnv(self) as IGroupsEnvironment;
     }
   }))
-  .views((self) => ({
+  .views(self => ({
+    get classUser() {
+      return self.environment.class?.getUserById(self.id);
+    },
+  }))
+  .views(self => ({
+    // If the student is not a recognized member of the class they might
+    // either be a new student in the class or a student that was removed
+    // from the class. Thew new student in the class can happen if the
+    // user joins the class after the current user has started CLUE.
+    get state(): GroupUserState {
+      if (self.classUser) {
+        return GroupUserState.Found;
+      }
+      // We add a little padding here. Perhaps the group user is being
+      // created right as the class info is downloaded. So maybe the connectedTimestamp is
+      // slightly older than the timestamp. If we decide the user is new, we'll be
+      // refreshing the class from the portal. So if the user actually has been removed
+      // then the refreshed class will have an newer timestamp. Which will change the state
+      // to be Removed.
+      // Also in the future we might support setting up the groups before the class is
+      // initialized. For the time being we list users as New in that case.
+      const clazz = self.environment.class;
+      if (!clazz || (self.connectedTimestamp + 1000) > clazz.timestamp) {
+        return GroupUserState.New;
+      }
+
+      // At this point the the user isn't found in the class, and the connected timestamp is
+      // older than the class update time. So we assume the user has been removed from the class.
+      return GroupUserState.Removed;
+    },
+  }))
+  .views(self => ({
+    get name() {
+      const {classUser} = self;
+      if (classUser) {
+        return classUser.fullName;
+      }
+
+      return self.state === GroupUserState.New ? "New User" : "Unknown";
+    },
+    get initials() {
+      const {classUser} = self;
+      if (classUser) {
+        return classUser.initials;
+      }
+
+      return self.state === GroupUserState.New ? "**" : "??";
+    },
     get connected() {
       const {connectedTimestamp, disconnectedTimestamp} = self;
       return !disconnectedTimestamp || (connectedTimestamp > disconnectedTimestamp);
@@ -49,19 +99,17 @@ export const GroupModel = types
     id: types.identifier,
     users: types.array(GroupUserModel)
   })
-  .volatile(self => ({
-    environment: {} as IGroupsEnvironment
-  }))
-  .actions((self) => ({
-    setEnvironment(env: IGroupsEnvironment) {
-      self.environment = env;
-      // update environment of any existing users
-      self.users.forEach(user => user.setEnvironment(env));
+  .views(self => ({
+    get environment() {
+      return getEnv(self) as IGroupsEnvironment;
+    },
+    get activeUsers() {
+      return self.users.filter(user => user.state !== GroupUserState.Removed);
     }
   }))
   .views((self) => ({
     getUserById(id?: string) {
-      return self.users.find(user => user.id === id);
+      return self.activeUsers.find(user => user.id === id);
     },
     get displayId() {
       const maxChars = 3;
@@ -69,7 +117,7 @@ export const GroupModel = types
     },
     // This will put the current user first if they are in this group
     get sortedUsers() {
-      const sortedUsers = [...self.users];
+      const sortedUsers = [...self.activeUsers];
       const userId = self.environment.user?.id;
       return sortedUsers.sort((a, b) => {
         if (a.id === userId) return -1;
@@ -79,67 +127,41 @@ export const GroupModel = types
     }
   }));
 
+export function getGroupSnapshot(groupId: string, groupFromDB: DBOfferingGroup) {
+  const groupUserSnapshots: SnapshotIn<typeof GroupUserModel>[] = [];
+
+  const groupUsers = groupFromDB.users || {};
+  Object.keys(groupUsers).forEach((groupUserId) => {
+    const groupUser = groupUsers[groupUserId];
+    const {connectedTimestamp, disconnectedTimestamp} = groupUser;
+    // self may be undefined if the database was deleted while a tab remains open
+    // causing the disconnectedAt timestamp to be set at the groupUser level
+    if (groupUser.self) {
+      groupUserSnapshots.push({
+        id: groupUserId,
+        connectedTimestamp,
+        disconnectedTimestamp
+      });
+    }
+  });
+  return {id: groupId, users: groupUserSnapshots};
+}
+
 export const GroupsModel = types
   .model("Groups", {
-    allGroups: types.array(GroupModel),
-    acceptUnknownStudents: false
+    groupsMap: types.map(GroupModel),
   })
-  .volatile(self => ({
-    environment: {} as IGroupsEnvironment
-  }))
-  .actions((self) => ({
-    setEnvironment(env: IGroupsEnvironment) {
-      self.environment = env;
-      // update environment of any existing groups
-      self.allGroups.forEach(group => group.setEnvironment(env));
-    },
-    updateFromDB(groups: DBOfferingGroupMap, clazz: ClassModelType) {
-      // FIXME: update this to be a syncing operation:
-      // - change self.allGroups to be a map of id to group
-      // - update existing groups with new data from the database
-      // - remove groups from self.allGroups which don't exist in the database anymore
-      // The reason to fix this is because the GroupUsers have references to documents
-      // which can be slow to recompute when there are lots of users and lots of documents
-      // Also some components can hold onto these objects, if we recreate them those
-      // old objects are now invalid and can cause unnecessary errors.
-      const allGroups = Object.keys(groups).map((groupId) => {
-        const group = groups[groupId];
-        const groupUsers = group.users || {};
-        const users: GroupUserModelType[] = [];
-        Object.keys(groupUsers).forEach((groupUserId) => {
-          const groupUser = groupUsers[groupUserId];
-          const {connectedTimestamp, disconnectedTimestamp} = groupUser;
-          // self may be undefined if the database was deleted while a tab remains open
-          // causing the disconnectedAt timestamp to be set at the groupUser level
-          if (groupUser.self) {
-            const student = clazz.getUserById(groupUser.self.uid);
-            // skip students who are not recognized members of the class when authenticated
-            // this actually occurred in the classroom causing great consternation
-            // when previewing, however, we need to accept unknown students
-            if (student || self.acceptUnknownStudents) {
-              const groupUserModel = GroupUserModel.create({
-                id: groupUserId,
-                name: student?.fullName || "Unknown",
-                initials: student?.initials || "??",
-                connectedTimestamp,
-                disconnectedTimestamp
-              });
-              groupUserModel.setEnvironment(self.environment);
-              users.push(groupUserModel);
-            }
-          }
-        });
-        const groupModel = GroupModel.create({id: groupId, users});
-        groupModel.setEnvironment(self.environment);
-        return groupModel;
-      });
-      self.allGroups.replace(allGroups);
+  .views(self => ({
+    get allGroups() {
+      return [...self.groupsMap.values()];
     }
   }))
   .views((self) => ({
     get groupsByUser() {
       const groupsByUser: Record<string, GroupModelType> = {};
       self.allGroups.forEach((group) => {
+        // We don't use activeUsers here incase some code is trying to
+        // track down more info about a removed user
         group.users.forEach((groupUser) => {
           groupsByUser[groupUser.id] = group;
         });
@@ -173,9 +195,29 @@ export const GroupsModel = types
     },
     virtualDocumentForGroup(documentKey: string) {
       return self.groupVirtualDocuments.find((g) => documentKey === g.key);
+    },
+    get needToRefreshClass() {
+      for (const group of self.allGroups) {
+        for (const user of group.users) {
+          if (user.state === GroupUserState.New) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+  }))
+  .actions((self) => ({
+    updateFromDB(groups: DBOfferingGroupMap) {
+      const groupsMapSnapshot: SnapshotIn<typeof self.groupsMap> = {};
+      Object.entries(groups).forEach(([groupId, group]) => {
+        groupsMapSnapshot[groupId] = getGroupSnapshot(groupId, group);
+      });
+      applySnapshot(self.groupsMap, groupsMapSnapshot);
     }
   }));
 
 export type GroupUserModelType = typeof GroupUserModel.Type;
 export type GroupModelType = typeof GroupModel.Type;
 export type GroupsModelType = typeof GroupsModel.Type;
+

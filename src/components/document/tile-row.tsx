@@ -216,7 +216,6 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     const { model, docId } = this.props;
     const { id } = model;
     e.dataTransfer.setDragImage(this.transparentPixel, 0, 0);
-    e.dataTransfer.effectAllowed = "none";
     e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
     e.dataTransfer.setData(kDragResizeRowId, id);
     e.dataTransfer.setData(dragResizeRowId(id), id);

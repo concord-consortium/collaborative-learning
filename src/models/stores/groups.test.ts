@@ -20,28 +20,22 @@ describe("Groups model", () => {
       users: [
         GroupUserModel.create({
           id: "1",
-          name: "User 1",
-          initials: "U1",
           connectedTimestamp: 1,
         }),
         GroupUserModel.create({
           id: "2",
-          name: "User 2",
-          initials: "U2",
           connectedTimestamp: 1,
           disconnectedTimestamp: 2,
         }),
         GroupUserModel.create({
           id: "3",
-          name: "User 3",
-          initials: "U3",
           connectedTimestamp: 3,
           disconnectedTimestamp: 2,
         }),
       ],
     });
     const groups = GroupsModel.create({
-      allGroups: [group]
+      groupsMap: {1: group}
     });
     expect(group.getUserById("1")).toBeDefined();
     expect(group.getUserById("2")).toBeDefined();
@@ -61,7 +55,6 @@ describe("Groups model", () => {
   });
 
   it("updates from db", () => {
-    const groups = GroupsModel.create({});
     const dbGroupsWithoutUsers: DBOfferingGroupMap = {
       1: {
         version: "1.0",
@@ -91,7 +84,7 @@ describe("Groups model", () => {
             },
             connectedTimestamp: 1,
           },
-          2: {
+          2: { // Old user that doesn't exist in the class anymore
             version: "1.0",
             self: {
               classHash: "test",
@@ -106,7 +99,17 @@ describe("Groups model", () => {
             version: "1.0",
             connectedTimestamp: 1,
             disconnectedTimestamp: 2
-          } as any
+          } as any,
+          4: { // New user that doesn't exist in the class yet
+            version: "1.0",
+            connectedTimestamp: 2001,
+            self: {
+              classHash: "test",
+              offeringId: "1",
+              groupId: "1",
+              uid: "4",
+            },
+          }
         }
       }
     };
@@ -123,17 +126,30 @@ describe("Groups model", () => {
       classHash: "test",
       users: {
         1: user
-        // don't add student 2 so we can test missing students
-      }
+        // don't add student 2 and 4 so we can test missing students
+      },
+      timestamp: 2000, // Use a fixed timestamp so we can test the New verses Removed user behavior
     });
 
-    groups.updateFromDB(dbGroupsWithoutUsers, clazz);
+    const groups = GroupsModel.create({}, {class: clazz});
+
+    groups.updateFromDB(dbGroupsWithoutUsers);
     expect(groups.allGroups.length).toEqual(1);
     expect(groups.allGroups[0].users.length).toEqual(0);
 
-    groups.updateFromDB(dbGroupsWithUsers, clazz);
+    groups.updateFromDB(dbGroupsWithUsers);
     expect(groups.allGroups.length).toEqual(1);
-    expect(groups.allGroups[0].users.length).toEqual(1);
-    expect(groups.allGroups[0].users[0].id).toEqual("1");
+    const group = groups.allGroups[0];
+    expect(group.users.length).toEqual(3);
+    expect(group.activeUsers.length).toEqual(2);
+    expect(group.users[0].id).toEqual("1");
+    expect(group.users[0].name).toEqual("Test User");
+    expect(group.users[0].initials).toEqual("TU");
+    expect(group.users[1].id).toEqual("2");
+    expect(group.users[1].name).toEqual("Unknown");
+    expect(group.users[1].initials).toEqual("??");
+    expect(group.users[2].id).toEqual("4");
+    expect(group.users[2].name).toEqual("New User");
+    expect(group.users[2].initials).toEqual("**");
   });
 });

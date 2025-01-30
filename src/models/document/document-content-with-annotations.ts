@@ -28,9 +28,11 @@ export const DocumentContentModelWithAnnotations = BaseDocumentContentModel
       // TODO Make generic to handle any type of annotation, not just arrow annotations
       const annotations: Record<string, IArrowAnnotation> = {};
       Array.from(self.annotations.values()).forEach(annotation => {
-        const includesSource = tileIds.includes(annotation.sourceObject?.tileId ?? "");
-        const includesTarget = tileIds.includes(annotation.targetObject?.tileId ?? "");
-        const include = anyReference ? includesSource || includesTarget : includesSource && includesTarget;
+        const tiles_connected
+          = [annotation.sourceObject?.tileId, annotation.targetObject?.tileId].filter(x => x);
+        const include = anyReference
+          ? tiles_connected.find(id => id && tileIds.includes(id))
+          : tiles_connected.every(id => id && tileIds.includes(id));
         if (include) {
           annotations[annotation.id] = annotation;
         }

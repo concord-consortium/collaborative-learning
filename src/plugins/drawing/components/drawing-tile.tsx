@@ -1,5 +1,8 @@
 import classNames from "classnames";
 import React, { useEffect, useState, useRef } from "react";
+import { observer } from "mobx-react";
+import { isEqual } from "lodash";
+
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { DrawingLayerView } from "./drawing-layer";
 import { DrawingContentModelType } from "../model/drawing-content";
@@ -14,18 +17,34 @@ import { ObjectListView } from "./object-list-view";
 import { useUIStore } from "../../../hooks/use-stores";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
+import { TileNavigator } from "../../../components/tiles/tile-navigator";
+import { NavigatorDirection } from "../../../models/tiles/navigatable-tile-model";
+import { BoundingBox } from "../model/drawing-basic-types";
+import { TileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
 
 import "./drawing-tile.scss";
 
-type IProps = ITileProps;
+export interface IDrawingTileProps extends ITileProps {
+  overflowVisible?: boolean;
+}
 
-const DrawingToolComponent: React.FC<IProps> = (props) => {
-  const { tileElt, model, readOnly, onRegisterTileApi } = props;
-  const contentRef = useCurrent(model.content as DrawingContentModelType);
+const DrawingToolComponent: React.FC<IDrawingTileProps> = observer(function DrawingToolComponent(props) {
+  const { tileElt, model, readOnly, onRegisterTileApi, navigatorAllowed = true, overflowVisible } = props;
+  const contentModel = model.content as DrawingContentModelType;
+  const contentRef = useCurrent(contentModel);
+  const showNavigator = navigatorAllowed && contentRef.current.isNavigatorVisible;
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
   const [objectListHoveredObject, setObjectListHoveredObject] = useState(null as string|null);
   const hotKeys = useRef(new HotKeys());
   const drawingToolElement = useRef<HTMLDivElement>(null);
+
+  const [tileVisibleBoundingBox, setTileVisibleBoundingBox] = useState<BoundingBox|undefined>(undefined);
+
+  const updateTileVisibleBoundingBox = (bb: BoundingBox) => {
+    if (!isEqual(bb, tileVisibleBoundingBox)) {
+      setTileVisibleBoundingBox(bb);
+    }
+  };
 
   const ui = useUIStore();
 
@@ -145,12 +164,37 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     };
   };
 
+  const handleNavigatorPan = (direction: NavigatorDirection) => {
+    const currOffsetX = contentModel.offsetX;
+    const currOffsetY = contentModel.offsetY;
+    const moveStep = 50;
+    let newX = currOffsetX;
+    let newY = currOffsetY;
+
+    switch (direction) {
+      case "up":
+        newY = currOffsetY + moveStep;
+        break;
+      case "down":
+        newY = currOffsetY - moveStep;
+        break;
+      case "left":
+        newX = currOffsetX + moveStep;
+        break;
+      case "right":
+        newX = currOffsetX - moveStep;
+        break;
+    }
+
+    contentModel.setOffset(newX, newY);
+  };
+
   return (
     <DrawingContentModelContext.Provider value={contentRef.current}>
       <BasicEditableTileTitle />
       <div
         ref={drawingToolElement}
-        className={classNames("drawing-tool", { "read-only": readOnly })}
+        className={classNames("drawing-tool", { "read-only": readOnly, "overflow-visible": overflowVisible })}
         data-testid="drawing-tool"
         tabIndex={0}
         onKeyDown={(e) => hotKeys.current.dispatch(e)}
@@ -165,15 +209,31 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         </DrawingAreaContext.Provider>
         <div className="drawing-container">
           {!readOnly && <ObjectListView model={model} setHoverObject={setObjectListHoveredObject} />}
-          <DrawingLayerView
-            {...props}
-            highlightObject={objectListHoveredObject}
-            imageUrlToAdd={imageUrlToAdd}
-            setImageUrlToAdd={setImageUrlToAdd}
-          />
+          <TileNavigatorContext.Provider value={{ reportVisibleBoundingBox: updateTileVisibleBoundingBox }}>
+            <DrawingLayerView
+              {...props}
+              highlightObject={objectListHoveredObject}
+              imageUrlToAdd={imageUrlToAdd}
+              setImageUrlToAdd={setImageUrlToAdd}
+            />
+          </TileNavigatorContext.Provider>
         </div>
       </div>
+      {!readOnly && showNavigator &&
+        <TileNavigator
+          tileVisibleBoundingBox={tileVisibleBoundingBox}
+          onNavigatorPan={handleNavigatorPan}
+          tileProps={props}
+          renderTile={(tileProps) =>
+            <div className="drawing-tool read-only">
+              <div className="drawing-container">
+                <DrawingLayerView {...tileProps} />
+              </div>
+            </div>}
+        />
+      }
     </DrawingContentModelContext.Provider>
   );
-};
+});
+
 export default DrawingToolComponent;

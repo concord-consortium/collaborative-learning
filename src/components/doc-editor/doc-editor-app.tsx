@@ -25,7 +25,7 @@ const kDocEditorDocKey = "clue-doc-editor-doc";
 // These are defined at the module level so the initialDoc can be used in two useState
 // initializers. The initialDoc should only change when the page is loaded so this is
 // safe.
-const {document: documentURL, readOnly, noStorage } = urlParams;
+const {document: documentURL, readOnly, noStorage, unwrapped } = urlParams;
 const savedDocString = noStorage ? undefined : window.sessionStorage.getItem(kDocEditorDocKey);
 const initialDoc = savedDocString ? JSON.parse(savedDocString) : defaultDocumentModel;
 
@@ -195,6 +195,19 @@ export const DocEditorApp = observer(function DocEditorApp() {
     });
   }, [loadDocument]);
 
+  if (unwrapped) {
+    // Let the window do the scrolling. If the body scrolls and shows the full content
+    // then puppeteer's screenshot function can capture the full content easily.
+    window.document.body.style.overflow = "visible";
+    return (
+      <CanvasComponent
+        document={document}
+        context="doc-editor-read-only"
+        readOnly={!!readOnly}
+      />
+    );
+  }
+
   // This is wrapped in a div.primary-workspace so it can be used with cypress
   // tests that are looking for stuff in a div like this
   return (
@@ -213,13 +226,13 @@ export const DocEditorApp = observer(function DocEditorApp() {
               </div>
             </div>
             <EditableDocumentContent
-                contained={false}
-                mode="1-up"
-                isPrimary={true}
-                readOnly={readOnly}
-                document={document}
-                toolbar={appConfig.authorToolbar}
-              />
+              contained={false}
+              mode="1-up"
+              isPrimary={true}
+              readOnly={readOnly}
+              document={document}
+              toolbar={appConfig.authorToolbar}
+            />
           </div>
         </div>
       </div>

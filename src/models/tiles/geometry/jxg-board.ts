@@ -8,7 +8,8 @@ import {
 import { goodTickValue } from "../../../utilities/graph-utils";
 import { filterBoardObjects, findBoardObject, forEachBoardObject, getBoardObject } from "./geometry-utils";
 
-const kScalerClasses = ["canvas-scaler", "scaled-list-item"];
+// Only elements with one of these classes will be checked for CSS scaling transforms
+const kScalerClasses = ["canvas-scaler", "scaled-list-item", "tile-navigator-tile-content"];
 
 export function suspendBoardUpdates(board: JXG.Board) {
   if (board.suspendCount) {
@@ -195,6 +196,9 @@ function getAxisUnitsFromProps(props?: JXGProperties, scale = 1) {
 }
 
 function createBoard(domElementId: string, properties?: JXGProperties) {
+  if (document.getElementById(domElementId) == null) {
+    return;
+  }
   // cf. https://www.intmath.com/cg3/jsxgraph-axes-ticks-grids.php
   const defaults: Partial<BoardAttributes> = {
     axis: false,
@@ -289,6 +293,7 @@ export const boardChangeAgent: JXGChangeAgent = {
     const board = isBoard(boardOrDomId)
                     ? boardOrDomId
                     : createBoard(boardOrDomId, props);
+    if (!board) return;
     // If we created the board from a DOM element ID, then we need to add the axes.
     // If we are undoing an action, then the board already exists but its axes have
     // been removed, so we have to add the axes in that case as well.

@@ -1,4 +1,7 @@
 import React, { useCallback, useRef, useState } from "react";
+import { observer } from "mobx-react";
+import { isEqual } from "lodash";
+
 import { GeometryContentWrapper } from "./geometry-content-wrapper";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
 import { GeometryContentModelType } from "../../../models/tiles/geometry/geometry-content";
@@ -10,23 +13,53 @@ import { HotKeys } from "../../../utilities/hot-keys";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { IGeometryTileContext, GeometryTileContext } from "./geometry-tile-context";
 import { GeometryTileMode } from "./geometry-types";
+import { BoundingBox, NavigatorDirection } from "../../../models/tiles/navigatable-tile-model";
+import { TileNavigatorContext } from "../hooks/use-tile-navigator-context";
+import { TileNavigator } from "../tile-navigator";
 
 import "./geometry-toolbar-registration";
 
 import "./geometry-tile.scss";
 
-const _GeometryToolComponent: React.FC<IGeometryProps> = ({
-  model, readOnly, ...others
-}) => {
+const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _GeometryToolComponent(props) {
+  const { model, readOnly, navigatorAllowed = true, ...others } = props;
   const { tileElt } = others;
   const modelRef = useCurrent(model);
   const domElement = useRef<HTMLDivElement>(null);
   const content = model.content as GeometryContentModelType;
+  const showNavigator = navigatorAllowed && content.isNavigatorVisible;
   const [board, setBoard] = useState<JXG.Board>();
   const [actionHandlers, setActionHandlers] = useState<IActionHandlers>();
   const [mode, setMode] = useState<GeometryTileMode>("select");
   const hotKeys = useRef(new HotKeys());
   const forceUpdate = useForceUpdate();
+
+  const [mainTileBoundingBox, setMainTileBoundingBox] = useState<BoundingBox|undefined>(undefined);
+
+  const updateMainTileBoundingBox = (bb: BoundingBox) => {
+    if (!isEqual(bb, mainTileBoundingBox)) {
+      setMainTileBoundingBox(bb);
+    }
+  };
+
+  const handleNavigatorPan = (direction: NavigatorDirection) => {
+    if (!content.board) return;
+    const panStep = 50; // number of pixels to move in whichever direction
+    switch (direction) {
+      case "left":
+        content.board.xAxis.panByPixels(-panStep);
+        break;
+      case "right":
+        content.board.xAxis.panByPixels(panStep);
+        break;
+      case "up":
+        content.board.yAxis.panByPixels(panStep);
+        break;
+      case "down":
+        content.board.yAxis.panByPixels(-panStep);
+        break;
+    }
+  };
 
   const handleSetHandlers = (handlers: IActionHandlers) => {
     hotKeys.current.register({
@@ -64,20 +97,32 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   // support pointer events.
   return (
     <GeometryTileContext.Provider value={context}>
-      <div className="geometry-tool" ref={domElement} tabIndex={0}
+      <div className="geometry-tool" data-testid="geometry-tool"
+        ref={domElement} tabIndex={0}
         onPointerDownCapture={handlePointerDown}
         onPointerUpCapture={handlePointerUp}
         onMouseDownCapture={handlePointerDown}
         onMouseUpCapture={handlePointerUp}
         onKeyDown={e => hotKeys.current.dispatch(e)} >
-        <GeometryContentWrapper model={model} readOnly={readOnly} {...others}
-          onSetBoard={setBoard} onSetActionHandlers={handleSetHandlers}
-          onContentChange={forceUpdate} />
+        <TileNavigatorContext.Provider value={{ reportVisibleBoundingBox: updateMainTileBoundingBox }}>
+          <GeometryContentWrapper model={model} readOnly={readOnly} showAllContent={false} {...others}
+            onSetBoard={setBoard} onSetActionHandlers={handleSetHandlers}
+            onContentChange={forceUpdate} />
+        </TileNavigatorContext.Provider>
         <TileToolbar tileType="geometry" readOnly={!!readOnly} tileElement={tileElt} />
       </div>
+      {!readOnly && showNavigator &&
+        <TileNavigator
+          tileVisibleBoundingBox={mainTileBoundingBox}
+          onNavigatorPan={handleNavigatorPan}
+          tileProps={props}
+          renderTile={(tileProps) =>
+            <div className="geometry-tool">
+              <GeometryContentWrapper readOnly={true} showAllContent={true} {...tileProps} />
+            </div>} />
+      }
     </GeometryTileContext.Provider>
   );
-};
+});
 
-const GeometryToolComponent = React.memo(_GeometryToolComponent);
 export default GeometryToolComponent;

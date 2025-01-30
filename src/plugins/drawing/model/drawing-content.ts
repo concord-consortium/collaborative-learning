@@ -9,15 +9,15 @@ import { StampModel, StampModelType } from "./stamp";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { DrawingObjectSnapshotForAdd, DrawingObjectType,
   ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
-import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
+import { isImageObjectSnapshot } from "../objects/image";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
-import { TileContentModel } from "../../../models/tiles/tile-content";
 import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tiles/tile-content-info";
 import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileContentAPIActions, tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { GroupObjectSnapshotForAdd, GroupObjectType, isGroupObject } from "../objects/group";
+import { NavigatableTileModel } from "../../../models/tiles/navigatable-tile-model";
 
 export const DrawingToolMetadataModel = TileMetadataModel
   .named("DrawingToolMetadata");
@@ -35,7 +35,7 @@ export interface DrawingObjectMove {
   destination: {x: number, y: number}
 }
 
-export const DrawingContentModel = TileContentModel
+export const DrawingContentModel = NavigatableTileModel
   .named("DrawingTool")
   .props({
     type: types.optional(types.literal(kDrawingTileType), kDrawingTileType),
@@ -49,7 +49,6 @@ export const DrawingContentModel = TileContentModel
     vectorType: types.maybe(types.enumeration<VectorType>("VectorType", Object.values(VectorType))),
     // is type.maybe to avoid need for migration
     currentStampIndex: types.maybe(types.number),
-    zoom: types.optional(types.number, 1)
   })
   .volatile(self => ({
     metadata: undefined as DrawingToolMetadataModelType | undefined,
@@ -102,7 +101,12 @@ export const DrawingContentModel = TileContentModel
     },
     /** Return a bounding box that contains all objects in the content */
     get objectsBoundingBox() {
-      const nw = {x: 0, y: 0}, se = {x: 0, y: 0};
+      if (self.objects.length === 0) return { nw: { x: 0, y: 0 }, se: { x: 0, y: 0 } };
+
+      const firstBB = self.objects[0].boundingBox;
+      const nw = { x: firstBB.nw.x, y: firstBB.nw.y };
+      const se = { x: firstBB.se.x, y: firstBB.se.y };
+
       self.objects.forEach((obj) => {
         const bb = obj.boundingBox;
         if (bb.nw.x < nw.x) nw.x = bb.nw.x;
@@ -110,7 +114,8 @@ export const DrawingContentModel = TileContentModel
         if (bb.se.x > se.x) se.x = bb.se.x;
         if (bb.se.y > se.y) se.y = bb.se.y;
       });
-      return {nw, se};
+
+      return { nw, se };
     },
     exportJson(options?: ITileExportOptions) {
       // Translate image urls if necessary
@@ -154,8 +159,9 @@ export const DrawingContentModel = TileContentModel
       const tileId = self.metadata?.id ?? "";
       const {name: operation, ...change} = call;
       // Ignore actions that don't need to be logged
-      const ignoredActions = ["setDisabledFeatures", "setDragPosition", "setDragBounds",
-        "setSelectedButton", "afterAttach"];
+      const ignoredActions = ["afterAttach", "afterCreate", "reset",
+        "setDisabledFeatures", "setDragPosition", "setDragBounds",
+        "setSelectedButton", "setSelectedIds", "setOpenPalette", "setEditing"];
       if (ignoredActions.includes(operation)) return;
 
       logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, { operation, change, tileId });
@@ -180,10 +186,6 @@ export const DrawingContentModel = TileContentModel
 
     setOpenPalette(pallette: OpenPaletteValues) {
       self.openPallette = pallette;
-    },
-
-    setZoom(zoom: number) {
-      self.zoom = zoom;
     },
 
     addObject(object: DrawingObjectSnapshotForAdd, addAtBack=false) {
@@ -373,25 +375,6 @@ export const DrawingContentModel = TileContentModel
             }
           });
           self.setSelectedIds(newIds);
-        },
-
-        moveObjects(moves: DrawingObjectMove[]) {
-          moves.forEach(move => {
-            const object = self.objectMap[move.id];
-            object?.setPosition(move.destination.x, move.destination.y);
-          });
-        },
-
-        updateImageUrl(oldUrl: string, newUrl: string) {
-          if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
-          // Modify all images with this url
-          self.objects.forEach(object => {
-            if (object.type !== "image") return;
-            const image = object as ImageObjectType;
-            if (image.url === oldUrl) {
-              image.setUrl(newUrl);
-            }
-          });
         },
 
         createGroup(objectIds: string[]) {

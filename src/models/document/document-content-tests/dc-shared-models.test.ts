@@ -68,7 +68,17 @@ describe("DocumentContentModel -- shared Models --", () => {
       tiles: [
         [
           { content: { type: "Table", columnWidths } },
-          { content: { type: "Geometry", objects: {}, linkedAttributeColors: {}, pointMetadata: {} } }
+          { content: {
+            type: "Geometry",
+            objects: {},
+            linkedAttributeColors: {},
+            pointMetadata: {},
+            isNavigatorVisible: true,
+            navigatorPosition: "bottom",
+            zoom: 1,
+            offsetX: 0,
+            offsetY: 0
+          } }
         ]
       ],
       sharedModels: [
@@ -242,10 +252,15 @@ Object {
             "unit": 18.3,
           },
         },
+        "isNavigatorVisible": true,
         "linkedAttributeColors": Object {},
+        "navigatorPosition": "bottom",
         "objects": Object {},
+        "offsetX": 0,
+        "offsetY": 0,
         "pointMetadata": Object {},
         "type": "Geometry",
+        "zoom": 1,
       },
       "display": undefined,
       "id": "graphTool",
@@ -693,10 +708,15 @@ Object {
             "unit": 18.3,
           },
         },
+        "isNavigatorVisible": true,
         "linkedAttributeColors": Object {},
+        "navigatorPosition": "bottom",
         "objects": Object {},
+        "offsetX": 0,
+        "offsetY": 0,
         "pointMetadata": Object {},
         "type": "Geometry",
+        "zoom": 1,
       },
       "display": undefined,
       "id": "testid-47",

@@ -48,89 +48,91 @@ function resolveAppMode(
   }
 }
 
-export const authAndConnect = (stores: IStores) => {
-  const {appConfig, curriculumConfig, appMode, db, user, ui} = stores;
+export const authAndConnect = async (stores: IStores) => {
+  const {appConfig, appMode, curriculumConfig, db, portal, user, ui} = stores;
   let rawPortalJWT: string | undefined;
 
   showLoadingMessage("Connecting");
 
-  authenticate(appMode, appConfig, curriculumConfig, urlParams)
-    .then(({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
-      // authentication can trigger appMode change (e.g. preview => demo)
-      if (newAppMode && (newAppMode !== appMode)) {
-        stores.setAppMode(newAppMode);
-      }
-      user.setAuthenticatedUser(authenticatedUser);
-      rawPortalJWT = authenticatedUser.rawPortalJWT;
-      if (classInfo) {
-        stores.class.updateFromPortal(classInfo);
-      }
+  try {
+    const {appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode} =
+      await authenticate(appMode, appConfig, curriculumConfig, portal, urlParams);
 
-      // If the URL has a unit param or if the appMode is not "authed", then
-      // `stores.loadUnitAndProblem` would have been called in initializeApp,
-      // and startedLoadingUnitAndProblem will be true.
+    // authentication can trigger appMode change (e.g. preview => demo)
+    if (newAppMode && (newAppMode !== appMode)) {
+      stores.setAppMode(newAppMode);
+    }
+    user.setAuthenticatedUser(authenticatedUser);
+    rawPortalJWT = authenticatedUser.rawPortalJWT;
+
+    // If the URL has a unit param or if the appMode is not "authed", then
+    // `stores.loadUnitAndProblem` would have been called in initializeApp,
+    // and startedLoadingUnitAndProblem will be true.
+    //
+    // In the case of a teacher launch from the portal, the window.location should
+    // not have a unit param. Instead the unit and problem is figured out by
+    // `authenticate` from the portal's resource information.
+    //
+    // Note: If the external report in the portal is misconfigured with a unit
+    // parameter, then window.location will have a unit param and the resource
+    // information will be incorrectly ignored here.
+    if (!stores.startedLoadingUnitAndProblem) {
+      // The unit and problem are required for portal resources so the behavior
+      // is more clear:
+      // - If the unit is optional for portal resources, then a student launch
+      // without a unit would not start loading the unit in initializeApp.
+      // - If the problem is optional, then the defaultProblemOrdinal might not
+      // exist in the specified unit.
+      // We don't enforce this requirement in initializeApp because during a
+      // teacher launch, we don't know the resource info.
       //
-      // In the case of a teacher launch from the portal, the window.location should
-      // not have a unit param. Instead the unit and problem is figured out by
-      // `authenticate` from the portal's resource information.
-      //
-      // Note: If the external report in the portal is misconfigured with a unit
-      // parameter, then window.location will have a unit param and the resource
-      // information will be incorrectly ignored here.
-      if (!stores.startedLoadingUnitAndProblem) {
-        // The unit and problem are required for portal resources so the behavior
-        // is more clear:
-        // - If the unit is optional for portal resources, then a student launch
-        // without a unit would not start loading the unit in initializeApp.
-        // - If the problem is optional, then the defaultProblemOrdinal might not
-        // exist in the specified unit.
-        // We don't enforce this requirement in initializeApp because during a
-        // teacher launch, we don't know the resource info.
-        //
-        // To test this you can make a CLUE resource in the portal that does not have
-        // a unit param. And then launch it
-        if (!unitCode || !problemId) {
-          // If we get here, CLUE will hang because unitLoadedPromise will never
-          // resolve so the listeners won't start and there will be no content
-          // for CLUE to render. The error message below indicates the most likely
-          // cause of this.
-          stores.ui.setError(
-            "This CLUE resource is incorrectly configured. The URL of the resource " +
-            "requires a unit and problem parameter. " +
-            "Contact the author of the resource to fix it. " +
-            `unitCode: ${unitCode}, problemId: ${problemId}`);
-        } else {
-          // loadUnitAndProblem is asynchronous.
-          // Code that requires the unit to be loaded should wait on `stores.unitLoadedPromise`
-          stores.loadUnitAndProblem(unitCode, problemId);
-        }
+      // To test this you can make a CLUE resource in the portal that does not have
+      // a unit param. And then launch it
+      if (!unitCode || !problemId) {
+        // If we get here, CLUE will hang because unitLoadedPromise will never
+        // resolve so the listeners won't start and there will be no content
+        // for CLUE to render. The error message below indicates the most likely
+        // cause of this.
+        stores.ui.setError(
+          "This CLUE resource is incorrectly configured. The URL of the resource " +
+          "requires a unit and problem parameter. " +
+          "Contact the author of the resource to fix it. " +
+          `unitCode: ${unitCode}, problemId: ${problemId}`);
+      } else {
+        // loadUnitAndProblem is asynchronous.
+        // Code that requires the unit to be loaded should wait on `stores.unitLoadedPromise`
+        stores.loadUnitAndProblem(unitCode, problemId);
       }
-      return resolveAppMode(stores, authenticatedUser.rawFirebaseJWT);
-    })
-    .then(() => {
-      return user.isTeacher
-              ? db.firestore.getFirestoreUser(user.id)
+    }
+
+    await resolveAppMode(stores, authenticatedUser.rawFirebaseJWT);
+
+    if (classInfo) {
+      const timeOffset = await db.firebase.getServerTimeOffset();
+      classInfo.serverTimestamp = classInfo.localTimestamp + timeOffset;
+      const includeAIUser = appConfig.aiEvaluation !== undefined;
+      stores.class.updateFromPortal(classInfo, includeAIUser);
+    }
+
+    const firestoreUser = user.isTeacher
+              ? await db.firestore.getFirestoreUser(user.id)
               : undefined;
-    })
-    .then(firestoreUser => {
-      if (firestoreUser?.network) {
-        user.setNetworks(firestoreUser.network, firestoreUser.networks);
-      }
-      syncTeacherClassesAndOfferings(db.firestore, user, stores.class, rawPortalJWT);
-    })
-    .then(() => {
-      removeLoadingMessage("Connecting");
-    })
-    .catch((error) => {
-      let customMessage = undefined;
-      const errorMessage = error.toString();
-      if ((errorMessage.indexOf("Cannot find AccessGrant") !== -1) ||
-          (errorMessage.indexOf("AccessGrant has expired") !== -1)) {
-        customMessage = "Your authorization has expired. Please return to the Concord site to re-run the activity.";
-      }
+    if (firestoreUser?.network) {
+      user.setNetworks(firestoreUser.network, firestoreUser.networks);
+    }
+    syncTeacherClassesAndOfferings(db.firestore, user, stores.class, rawPortalJWT);
 
-      ui.setError(error, customMessage);
-    });
+    removeLoadingMessage("Connecting");
+  } catch(error) {
+    let customMessage = undefined;
+    const errorMessage = String(error);
+    if ((errorMessage.indexOf("Cannot find AccessGrant") !== -1) ||
+        (errorMessage.indexOf("AccessGrant has expired") !== -1)) {
+      customMessage = "Your authorization has expired. Please return to the Concord site to re-run the activity.";
+    }
+
+    ui.setError(error, customMessage);
+  }
 };
 
 @inject("stores")
@@ -179,7 +181,7 @@ export class AppComponent extends BaseComponent<IProps> {
 
     if (user.isStudent) {
       if (!user.currentGroupId) {
-        if (appConfig.autoAssignStudentsToIndividualGroups || this.stores.isPreviewing) {
+        if (appConfig.autoAssignStudentsToIndividualGroups || this.stores.portal.isPortalPreview) {
           // use userId as groupId
           db.joinGroup(user.id);
         }

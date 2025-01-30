@@ -51,10 +51,12 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   const hotKeys = useMemoOne(() => new HotKeys(), []);
   const shape: ArrowShape = isArrowShape(ui.annotationMode) ? ui.annotationMode : ArrowShape.curved;
 
+  const editing = ui.annotationMode !== undefined;
+
   // Buttons are active unless a straight sparrow is being drawn from an object
   const showButtons = !(shape === ArrowShape.straight && sourceObjectId);
-  // Drag handles are active unless any sort of sparrow is being drawn
-  const showDragHandles = !(sourceObjectId || sourcePoint);
+  // Drag handles are active while editing, unless any sort of sparrow is being drawn
+  const showDragHandles = editing && !(sourceObjectId || sourcePoint);
 
   useEffect(() => {
     const deleteSelected = () => content?.deleteSelected();
@@ -383,7 +385,6 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   };
 
   const rowIds = content?.rowOrder || [];
-  const editing = ui.annotationMode !== undefined;
   const hidden = !persistentUI.showAnnotations;
   const classes = classNames("annotation-layer",
     { editing, hidden, 'show-buttons': showButtons, 'show-handles': showDragHandles });

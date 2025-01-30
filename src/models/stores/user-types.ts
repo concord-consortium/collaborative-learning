@@ -14,3 +14,13 @@ export const kExemplarUserParams = {
   fullName: "Ivan Idea",
   initials: "II",
 };
+
+// NOTE these constants should match what is written directly to the DB by the firebase function.
+export const kAnalyzerUserParams = {
+  type: "teacher",
+  id: "ada_insight_1",
+  firstName: "Ada",
+  lastName: "Insight",
+  fullName: "Ada Insight",
+  initials: "AI",
+};

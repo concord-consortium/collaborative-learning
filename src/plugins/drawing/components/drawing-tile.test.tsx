@@ -94,6 +94,7 @@ describe("DrawingToolComponent", () => {
     docId: "",
     documentContent,
     isUserResizable: true,
+    navigatorAllowed: false,
     readOnly: false,
     onResizeRow: (e: React.DragEvent<HTMLDivElement>): void => {
       throw new Error("Function not implemented.");

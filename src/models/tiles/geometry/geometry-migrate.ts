@@ -38,8 +38,9 @@ export const getGeometryBoardChange = (
   const { xAxis, yAxis } = model.board || BoardModel.create(kDefaultBoardModelOutputProps);
   const { name: xName, label: xAnnotation } = xAxis;
   const { name: yName, label: yAnnotation } = yAxis;
+  const overrides = { xName, yName, xAnnotation, yAnnotation };
   return (
-    defaultGeometryBoardChange(xAxis, yAxis, { xName, yName, xAnnotation, yAnnotation }, boardOptions )
+    defaultGeometryBoardChange(xAxis, yAxis, overrides, boardOptions )
   );
 };
 

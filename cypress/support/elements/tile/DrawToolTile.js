@@ -6,10 +6,11 @@ class DrawToolTile{
       return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title-text`);
     }
     getDrawTileComponent(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool]');
+      return cy.get('.primary-workspace [data-testid=drawing-tool]')
+               .not('[data-testid=tile-navigator] [data-testid=drawing-tool]');
     }
     getDrawTileObjectCanvas(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .object-canvas');
+      return this.getDrawTileComponent().find('[data-testid=drawing-layer-object-canvas]');
     }
     getDrawTileShowSortPanel(){
       return cy.get('.primary-workspace .drawing-tool .object-list');
@@ -79,37 +80,38 @@ class DrawToolTile{
     }
 
     getFreehandDrawing(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg path');
+      return this.getDrawTileComponent().find('.drawing-layer svg path');
     }
     getVectorDrawing(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg g.vector');
+      return this.getDrawTileComponent().find('.drawing-layer svg g.vector');
     }
     getRectangleDrawing(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg rect.rectangle');
+      return this.getDrawTileComponent().find('.drawing-layer svg rect.rectangle');
     }
     getEllipseDrawing(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg ellipse');
+      return this.getDrawTileComponent().find('.drawing-layer svg ellipse');
     }
     getImageDrawing(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg image');
+      return this.getDrawTileComponent().find('.drawing-layer svg image');
     }
     getTextDrawing(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg g.text');
+      return this.getDrawTileComponent().find('.drawing-layer svg g.text');
     }
     getSelectionBox(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg [data-testid=selection-box]');
+      return this.getDrawTileComponent().find('.drawing-layer svg [data-testid=selection-box]');
     }
     getHighlightBox(){
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg [data-testid=highlight-box]');
+      return this.getDrawTileComponent().find('.drawing-layer svg [data-testid=highlight-box]');
     }
     getVariableChip() {
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer .drawing-variable.variable-chip');
+      return this.getDrawTileComponent().find('.drawing-layer .drawing-variable.variable-chip');
     }
     getGhostGroup() {
-      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg g.ghost');
+      return this.getDrawTileComponent().find('.drawing-layer svg g.ghost');
     }
     getDrawTileTitle(workspaceClass){
-      return cy.get(`${workspaceClass || ".primary-workspace"} .drawing-tool-tile .editable-tile-title`);
+      return cy.get(`${workspaceClass || ".primary-workspace"} .drawing-tool-tile .editable-tile-title`)
+               .not('[data-testid=tile-navigator] .editable-tile-title');
     }
     drawRectangle(x, y, width=25, height=25) {
       this.getDrawToolRectangle().last().click();
@@ -144,6 +146,16 @@ class DrawToolTile{
         .trigger("pointerdown", x, y)
         .trigger("pointerup", x, y);
       this.getTextDrawing().last().get('textarea').type(text + "{enter}");
+    }
+
+    verifyTransformValues(transform, expectedTranslate, expectedScale, tolerance=1, scaleTolerance=0.01) {
+      const translate = transform.replace(/.*translate\(([^,]+), ([^)]+)\).*/, '$1,$2');
+      const translateX = parseFloat(translate.split(',')[0]);
+      const translateY = parseFloat(translate.split(',')[1]);
+      expect(translateX).to.be.closeTo(expectedTranslate.x, tolerance);
+      expect(translateY).to.be.closeTo(expectedTranslate.y, tolerance);
+      const scale = parseFloat(transform.replace(/.*scale\((\d+(\.\d+)?)\)/, '$1'));
+      expect(scale).to.be.closeTo(expectedScale, scaleTolerance);
     }
 
 }

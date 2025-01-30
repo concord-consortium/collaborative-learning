@@ -9,6 +9,7 @@ import { VectorEndShape, VectorType, endShapesForVectorType } from "../model/dra
 import { RectangleObject, RectangleObjectSnapshotForAdd, RectangleObjectType } from "../objects/rectangle";
 import { EllipseObject, EllipseObjectType } from "../objects/ellipse";
 import { ImageObject, ImageObjectType } from "../objects/image";
+import { TileNavigatorContext } from "../../../components/tiles/hooks/use-tile-navigator-context";
 
 // The drawing tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
@@ -25,7 +26,11 @@ const getDrawingObject = (objectContent: DrawingContentModelType) => {
       throw new Error("Function not implemented.");
     }
   };
-  render(<DrawingLayerView {...drawingLayerProps} />);
+  render(
+    <TileNavigatorContext.Provider value={{ reportVisibleBoundingBox: () => {}}}>
+      <DrawingLayerView {...drawingLayerProps} />
+    </TileNavigatorContext.Provider>
+  );
   drawingLayer = screen.getByTestId("drawing-layer");
   return drawingLayer.firstChild;
 };
@@ -49,7 +54,8 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a freehand line", () => {
-      line.setPosition(5, 5);
+      line.setDragPosition(5, 5);
+      line.repositionObject();
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a freehand line", () => {
@@ -75,7 +81,8 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a vector line", () => {
-      vector.setPosition(5,5);
+      vector.setDragPosition(5,5);
+      vector.repositionObject();
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a vector line", () => {
@@ -103,7 +110,8 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a vector arrow", () => {
-      vector.setPosition(5,5);
+      vector.setDragPosition(5,5);
+      vector.repositionObject();
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("changes vector to single arrow", () => {
@@ -138,7 +146,8 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a rectangle", () => {
-      rect.setPosition(5,5);
+      rect.setDragPosition(5,5);
+      rect.repositionObject();
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a rectangle", () => {
@@ -165,7 +174,8 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a ellipse", () => {
-      ellipse.setPosition(5,5);
+      ellipse.setDragPosition(5,5);
+      ellipse.repositionObject();
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a ellipse", () => {
@@ -252,7 +262,8 @@ describe("Drawing Layer Components", () => {
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("moves a image", () => {
-      image.setPosition(5,5);
+      image.setDragPosition(5,5);
+      image.repositionObject();
       expect(getDrawingObject(content)).toMatchSnapshot();
     });
     it("deletes a image", () => {

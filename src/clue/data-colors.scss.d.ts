@@ -10,6 +10,10 @@ export interface IClueDataColors {
   dataYellow: string;
   dataPurple: string;
   dataIndigo: string;
+  dataWhite: string;
+  dataPeach: string;
+  dataGray: string;
+  dataBrown: string;
   dataBlack: string;
 }
 

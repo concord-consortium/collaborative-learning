@@ -25,6 +25,9 @@ export function isPersonalType(type: string) {
 export function isLearningLogType(type: string) {
   return [LearningLogDocument, LearningLogPublication].indexOf(type) >= 0;
 }
+export function isSupportType(type: string) {
+  return type === SupportPublication;
+}
 export function isExemplarType(type: string) {
   return type === ExemplarDocument;
 }

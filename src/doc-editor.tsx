@@ -40,7 +40,7 @@ stores.unitLoadedPromise.then(() => {
       <AppProvider stores={stores} modalAppElement="#app">
         <DocEditorApp/>
         <DialogComponent/>
-      </AppProvider>,
+      </AppProvider>
     </ChakraProvider>,
     document.getElementById("app")
   );

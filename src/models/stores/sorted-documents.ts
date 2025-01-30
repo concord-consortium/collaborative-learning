@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { types, Instance, SnapshotIn, applySnapshot, typecheck, unprotect } from "mobx-state-tree";
 import { union } from "lodash";
 import firebase from "firebase";
@@ -64,7 +64,13 @@ export const DocumentMetadataModel = types.model("DocumentMetadata", {
   problem: types.maybeNull(types.string),
   unit: types.maybeNull(types.string),
   visibility: types.maybe(types.string)
-});
+})
+.views((self) => ({
+  getProperty(key: string) {
+    return self.properties.get(key);
+  },
+}));
+
 export interface IDocumentMetadataModel extends Instance<typeof DocumentMetadataModel> {}
 
 export const MetadataDocMapModel = types.map(DocumentMetadataModel);
@@ -310,7 +316,8 @@ export class SortedDocuments {
         problem: doc.problem,
         unit: doc.unit
       });
-      docsMap.put(metadata);
+      // MST's unprotect doesn't disable MobX's strict mode warnings
+      runInAction(() => docsMap.put(metadata));
     });
     return docsMap;
   }

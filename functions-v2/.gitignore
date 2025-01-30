@@ -1,3 +1,7 @@
+# Local storage for Firebase Emulator Suite
+emulator-data/*
+!emulator-data/.gitkeep
+
 # Compiled JavaScript files
 lib/**/*.js
 lib/**/*.js.map

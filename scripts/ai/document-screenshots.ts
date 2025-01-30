@@ -27,7 +27,8 @@ const fileBatchSize = 8;
 
 // The width of the browser window. The height is determined dynamically.
 const windowWidth = 1920 / 2;
-
+// The actual height is based on the content
+const windowHeight = 540;
 const publicRoot = "ai";
 const rootPath = `../../src/public/${publicRoot}`;
 const documentPath = `${rootPath}/${documentDirectory}`;
@@ -58,13 +59,13 @@ function newFileName(oldFileName: string) {
 
 // makeSnapshot loads document content at path in a CLUE standalone document editor, takes a snapshot of it,
 // then saves it in the output directory as fileName
-const urlRoot = `http://localhost:8080/editor/?appMode=dev&unit=example&document=`;
+const urlRoot = `http://localhost:8080/editor/?appMode=dev&unit=example&readOnly&unwrapped&document=`;
 async function makeSnapshot(path: string, fileName: string) {
   console.log(`*   Processing snapshot`, path);
   const targetFile = `${targetPath}/${fileName}`;
 
   // View the document in the document editor
-  const browser = await puppeteer.launch({ headless: "new" });
+  const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
   const url = `${urlRoot}${path}`;
   try {
@@ -80,14 +81,9 @@ async function makeSnapshot(path: string, fileName: string) {
     return;
   }
 
-  // Approximate the height of the document by adding up the heights of the rows and make the viewport that tall
-  let pageHeight = 30;
-  const rowElements = await page.$$(".tile-row");
-  for (const rowElement of rowElements) {
-    const boundingBox = await rowElement.boundingBox();
-    pageHeight += boundingBox?.height ?? 0;
-  }
-  await page.setViewport({ width: windowWidth, height: Math.round(pageHeight) });
+  // The actual height is based on the content because of the `fullPage` option
+  // passed to `page.screenshot`
+  await page.setViewport({ width: windowWidth, height: windowHeight });
 
   // Take a screenshot and save it to a file
   const buffer = await page.screenshot({ fullPage: true, type: 'png' });

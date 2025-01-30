@@ -5,9 +5,11 @@ import { Map } from "immutable";
 import { defaultDocumentModelParts } from "../components/doc-editor/doc-editor-app-defaults";
 import { AppProvider, initializeApp } from "../initialize-app";
 import { createDocumentModelWithEnv, DocumentModelType } from "../models/document/document";
-import { DEBUG_CMS } from "../lib/debug";
+import { DEBUG_IFRAME } from "../lib/debug";
 import { EditableDocumentContent } from "../components/document/editable-document-content";
 import { DocumentAnnotationToolbar } from "../components/document/document-annotation-toolbar";
+import { urlParams } from "../utilities/url-params";
+import { CanvasComponent } from "../components/document/canvas";
 
 import "../../cms/src/custom-control.scss";
 
@@ -23,8 +25,9 @@ interface IState {
 }
 
 const stores = initializeApp(true);
+const { unwrapped, readOnly } = urlParams;
 
-export class CmsDocumentEditor extends React.Component<IProps, IState>  {
+export class IframeDocumentEditor extends React.Component<IProps, IState>  {
   disposer: IDisposer;
   constructor(props: any) {
     super(props);
@@ -75,9 +78,9 @@ export class CmsDocumentEditor extends React.Component<IProps, IState>  {
             // is a immutable object and sometimes it is a plain JS object.
             const immutableValue = Map(parsedJson);
             this.props.handleUpdateContent(immutableValue);
-            if (DEBUG_CMS) {
+            if (DEBUG_IFRAME) {
               // eslint-disable-next-line no-console
-              console.log("DEBUG: CMS ClueControl onChange called with new content value: ", parsedJson);
+              console.log("DEBUG: Iframe'd CLUE sending updateContent message with:", parsedJson);
             }
           }
         }
@@ -93,35 +96,55 @@ export class CmsDocumentEditor extends React.Component<IProps, IState>  {
     this.disposer?.();
   }
 
+  renderDocumentComponent(document: DocumentModelType) {
+    if (unwrapped) {
+      // Let the window do the scrolling. This makes it possible for a resize observer
+      // to monitor the body and send height changes to the parent window. That way the
+      // parent window can resize the iframe to just fit its content.
+      window.document.body.style.overflow = "visible";
+      return (
+        <CanvasComponent
+          document={document}
+          context="doc-editor-read-only"
+          readOnly={!!readOnly}
+        />
+      );
+    }
+
+    return (
+      <div className="document">
+        { stores.appConfig.showAnnotationControls &&
+          <div className="titlebar">
+            <div className="actions left">
+              <DocumentAnnotationToolbar/>
+            </div>
+          </div>
+        }
+        <EditableDocumentContent
+          className="iframe-control"
+          contained={!stores.appConfig.showAnnotationControls}
+          mode="1-up"
+          isPrimary={true}
+          readOnly={!!readOnly}
+          document={document}
+          toolbar={stores.appConfig.authorToolbar}
+        />
+      </div>
+    );
+  }
+
   render() {
     const { document } = this.state;
-    if (document) {
-      return (
-        <AppProvider stores={stores} modalAppElement="#app">
-          <div className="document">
-            { stores.appConfig.showAnnotationControls &&
-              <div className="titlebar">
-                <div className="actions left">
-                   <DocumentAnnotationToolbar/>
-                </div>
-              </div>
-            }
-            <EditableDocumentContent
-              className="iframe-control"
-              contained={!stores.appConfig.showAnnotationControls}
-              mode="1-up"
-              isPrimary={true}
-              readOnly={false}
-              document={document}
-              toolbar={stores.appConfig.authorToolbar}
-            />
-          </div>
-        </AppProvider>
-      );
-    } else {
+    if (!document) {
       return (
         <div className="loading-box">Loading editor...</div>
       );
     }
+
+    return (
+      <AppProvider stores={stores} modalAppElement="#app">
+        { this.renderDocumentComponent(document) }
+      </AppProvider>
+    );
   }
 }

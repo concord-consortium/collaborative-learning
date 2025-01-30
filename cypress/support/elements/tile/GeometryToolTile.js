@@ -25,21 +25,21 @@ class GeometryToolTile {
         return coord === 0 ? 0 : coord; // convert -0 to 0
     }
     getGeometryTile(workspaceClass){
-        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-tool`);
+        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area [data-testid=geometry-tool]`);
     }
     getGraph(workspaceClass){
-        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-content`);
+        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area [data-testid=geometry-tool] .geometry-content.show-tile`);
     }
     // getGraphPoint(workspaceClass){
     //     return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-content svg g`);
     // }
 
     getGraphPointEclipse(workspaceClass){
-        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-content svg g ellipse`);
+        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-content.show-tile svg g ellipse`);
     }
 
     getGraphTitle(workspaceClass){
-      return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-tool .editable-tile-title-text`);
+      return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area [data-testid=geometry-tool] .editable-tile-title-text`);
     }
 
     getGraphTileTitle(workspaceClass){
@@ -55,15 +55,15 @@ class GeometryToolTile {
     }
     getGraphAxisLabel(axis){
         if (axis==='x') {
-            return cy.get('.canvas-area .geometry-content .JXGtext').contains('x');
+            return cy.get('.canvas-area .geometry-content.show-tile .JXGtext').contains('x');
         }
         if(axis==='y') {
-            return cy.get('.canvas-area .geometry-content .JXGtext').contains('y');
+            return cy.get('.canvas-area .geometry-content.show-tile .JXGtext').contains('y');
         }
     }
     // Returns all tick labels on both axes. The X-axis ones are first in the list.
     getGraphAxisTickLabels(axis) {
-      return cy.get('.canvas-area .geometry-content .tick-label');
+      return cy.get('.canvas-area .geometry-content.show-tile .tick-label');
     }
 
     getGraphPointCoordinates(index){ //This is the point coordinate text
@@ -77,17 +77,17 @@ class GeometryToolTile {
                 return '"(' + this.transformToCoordinate('x',x) + ', ' + this.transformToCoordinate('y',y) + ')"';
             });
     }
-    getGraphPointLabel(){ // This selects the letter labels for points as well as the x,y labels on the axes
-        return cy.get('.geometry-content.editable .JXGtext:visible');
+    getGraphPointLabel(workspaceClass){ // This selects the letter labels for points as well as the x,y labels on the axes
+      return this.getGeometryTile(workspaceClass).find('.geometry-content.show-tile .JXGtext:visible');
     }
-    getGraphPoint(){
-        return cy.get('.geometry-content.editable ellipse[display="inline"][fill-opacity="1"]');
+    getGraphPoint(workspaceClass){
+        return this.getGeometryTile(workspaceClass).find('.geometry-content.show-tile ellipse[display="inline"][fill-opacity="1"]');
     }
-    getPhantomGraphPoint(){
-        return cy.get('.geometry-content.editable ellipse[fill-opacity="0.5"]');
+    getPhantomGraphPoint(workspaceClass){
+      return this.getGeometryTile(workspaceClass).find('.geometry-content.show-tile ellipse[fill-opacity="0.5"]');
     }
-    getSelectedGraphPoint() {
-        return cy.get('.geometry-content.editable ellipse[fill-opacity="1"][stroke-opacity="0.25"]');
+    getSelectedGraphPoint(workspaceClass){
+      return this.getGeometryTile(workspaceClass).find('.geometry-content.show-tile ellipse[fill-opacity="1"][stroke-opacity="0.25"]');
     }
     hoverGraphPoint(x,y){
         let transX=this.transformFromCoordinate('x', x),
@@ -162,13 +162,13 @@ class GeometryToolTile {
         cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.angle-label.enabled').click();
     }
     getAngleAdornment(){
-        return cy.get('.single-workspace .geometry-content g polygon').siblings('path');
+        return cy.get('.single-workspace .geometry-content.show-tile g polygon').siblings('path');
     }
     copyGraphElement(){
         cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.duplicate.enabled').click();
     }
     addMovableLine(){
-        cy.get('.single-workspace .geometry-tool .button.movable-line.enabled').click();
+        cy.get('.single-workspace [data-testid=geometry-tool] .button.movable-line.enabled').click();
     }
     addComment(){
         cy.get('.single-workspace.primary-workspace .geometry-toolbar .button.comment.enabled').click();

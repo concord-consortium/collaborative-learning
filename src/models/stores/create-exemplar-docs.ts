@@ -2,8 +2,6 @@ import { ProblemModelType } from "../curriculum/problem";
 import { DocumentsModelType } from "./documents";
 import { DocumentModelSnapshotType, createDocumentModelWithEnv } from "../document/document";
 import { UserModelType } from "./user";
-import { ClassModelType, ClassUserModel } from "./class";
-import { kExemplarUserParams } from "./user-types";
 import { ICurriculumConfig } from "./curriculum-config";
 import { ExemplarDocument } from "../document/document-types";
 import { AppConfigModelType } from "./app-config-model";
@@ -16,7 +14,6 @@ interface ICreateExemplarDocsParams {
   investigation?: InvestigationModelType;
   problem: ProblemModelType;
   documents: DocumentsModelType;
-  classStore: ClassModelType;
   user: UserModelType;
   curriculumConfig: ICurriculumConfig;
   appConfig: AppConfigModelType;
@@ -38,13 +35,11 @@ export async function createAndLoadExemplarDocs({
   investigation,
   problem,
   documents,
-  classStore,
   curriculumConfig,
   appConfig
 }: ICreateExemplarDocsParams) {
   const { exemplars } = problem;
   const exemplarsData = await getExemplarsData(unitUrl, exemplars);
-  classStore.addUser(ClassUserModel.create(kExemplarUserParams));
   createExemplarDocs(unit, investigation, problem, documents, exemplarsData, curriculumConfig, appConfig);
 }
 

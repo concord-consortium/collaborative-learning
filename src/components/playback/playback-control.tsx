@@ -106,7 +106,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
                       6: "Jul", 7: "Aug", 8: "Sep", 9: "Oct", 10: "Nov", 11: "Dec"};
     const date = eventCreatedTime;
     const month = date?.getMonth();
-    const monthStr = month && monthMap[month];
+    const monthStr = month !== undefined ? monthMap[month] : "";
     const dateDay = date?.getDate();
     const year = date?.getFullYear();
     let hours = date?.getHours();
