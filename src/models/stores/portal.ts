@@ -6,6 +6,7 @@ import { convertURLToOAuth2, getBearerToken } from "../../utilities/auth-utils";
 import { QueryParams, urlParams as pageUrlParams } from "../../utilities/url-params";
 import initials from "initials";
 import { IUserPortalOffering } from "./user";
+import { maybeAddResearcherParam } from "../../utilities/researcher-param";
 
 export const parseUrl = (url: string) => {
   const parser = document.createElement("a");
@@ -41,6 +42,10 @@ export interface TeacherUser extends User {
   type: "teacher";
   network?: string;     // default network for teacher
   networks?: string[];  // list of networks available to teacher
+}
+
+export interface ResearcherUser extends User {
+  type: "researcher";
 }
 
 export interface ClassInfo {
@@ -94,11 +99,17 @@ export class Portal {
 
   requestPortalJWT() {
     return new Promise<void>((resolve, reject) => {
-      const resourceLinkIdSuffix =
-        pageUrlParams.resourceLinkId ? `?resource_link_id=${ pageUrlParams.resourceLinkId }` : "";
-      const url = `${this.basePortalUrl}${PORTAL_JWT_URL_SUFFIX}${resourceLinkIdSuffix}`;
+      const params = new URLSearchParams();
+      if (pageUrlParams.resourceLinkId) {
+        params.append("resource_link_id", pageUrlParams.resourceLinkId);
+      }
+      if (pageUrlParams.targetUserId) {
+        params.append("target_user_id", pageUrlParams.targetUserId);
+      }
+      const queryString = params.size > 0 ? `?${params.toString()}` : "";
+      const url = `${this.basePortalUrl}${PORTAL_JWT_URL_SUFFIX}${queryString}`;
       superagent
-        .get(url)
+        .get(maybeAddResearcherParam(url))
         .set("Authorization", `Bearer ${this.bearerToken}`)
         .end((err, res) => {
           if (err) {
@@ -129,11 +140,12 @@ export class Portal {
 
     await this.requestPortalJWT();
 
-    const {basePortalUrl, portalJWT,urlParams} = this;
+    const {basePortalUrl, portalJWT, urlParams} = this;
 
-    if (!((portalJWT.user_type === "learner") || (portalJWT.user_type === "teacher"))) {
-      throw new Error(`Only student and teacher logins are currently supported! ` +
-        `Unsupported type: ${portalJWT.user_type}`);
+    const supportedUserTypes = ["learner", "teacher", "researcher"];
+    if (!supportedUserTypes.includes(portalJWT.user_type)) {
+      throw new Error(`Only ${supportedUserTypes.join(" or ")} logins are currently supported! ` +
+        `Unsupported type: ${portalJWT.user_type ?? "(unknown user type)"}`);
     }
 
     this.portalHost = parseUrl(basePortalUrl).host;
@@ -166,7 +178,7 @@ export class Portal {
     const {classInfoUrl, rawPortalJWT, portalHost: portal, offeringId} = this;
     return new Promise<ClassInfo>((resolve, reject) => {
       superagent
-      .get(classInfoUrl)
+      .get(maybeAddResearcherParam(classInfoUrl))
       .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
       .end((err, res) => {
         if (err) {

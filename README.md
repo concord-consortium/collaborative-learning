@@ -51,10 +51,10 @@ To deploy a production release:
     - `ls -lhS *.js | awk '{print "|", $9, "|", $5, "|"}'`
     - `ls -lhS *.css | awk '{print "|", $9, "|", $5, "|"}'`
 1. Create `release-<version>` branch and commit changes, push to GitHub, create PR and merge
-1. Test the master build at: https://collaborative-learning.concord.org/index-master.html
-1. Push a version tag to GitHub and/or use https://github.com/concord-consortium/collaborative-learning/releases to create a new GitHub release
+1. Test the master build at: <https://collaborative-learning.concord.org/index-master.html>
+1. Push a version tag to GitHub and/or use <https://github.com/concord-consortium/collaborative-learning/releases> to create a new GitHub release
 1. Stage the release by running the [Release Staging Workflow](https://github.com/concord-consortium/collaborative-learning/actions/workflows/release-staging.yml) and entering the version tag you just pushed.
-1. Test the staged release at https://collaborative-learning.concord.org/index-staging.html
+1. Test the staged release at <https://collaborative-learning.concord.org/index-staging.html>
 1. Update production by running the [Release Workflow](https://github.com/concord-consortium/collaborative-learning/actions/workflows/release.yml) and entering the release version tag.
 
 ## Developing/deploying cloud functions
@@ -62,6 +62,7 @@ To deploy a production release:
 CLUE uses several Google cloud functions to implement certain features that would be difficult (or impossible) to implement entirely client-side. There are two folders of functions `functions-v1` and `functions-v2`. We are trying to incrementally migrate the v1 functions into the v2 folder.
 
 Each folder has its own readme:
+
 - [functions-v2](functions-v2/README.md)
 - [functions-v1](functions-v1/README.md)
 
@@ -124,16 +125,16 @@ To enable per component debugging set the "debug" localstorage key with one or m
 - `stores` this will set `window.stores` so you can monitor the stores global from the browser console.
 - `undo` this will print information about each action that is added to the undo stack.
 
-
 ## Testing
 
 CLUE has a fairly extensive set of jest (unit/integration) tests and cypress (integration/end-to-end) tests. To run them:
-```
-$ npm [run] test                # run all jest tests
-$ npm [run] test -- abc.test.ts # run a single jest test
-$ npm run test:coverage         # run all jest tests and report coverage
-$ npm run test:cypress          # run the cypress tests headless
-$ npm run test:cypress:open     # open the cypress app for running the cypress tests interactively
+
+```bash
+npm [run] test                # run all jest tests
+npm [run] test -- abc.test.ts # run a single jest test
+npm run test:coverage         # run all jest tests and report coverage
+npm run test:cypress          # run the cypress tests headless
+npm run test:cypress:open     # open the cypress app for running the cypress tests interactively
 ```
 
 The tests are run automatically on PRs and Codecov is configured to track coverage. Codecov will report on whether a given PR increases or decreases overall coverage to encourage good testing habits.
@@ -159,8 +160,12 @@ There are a number of URL parameters that can aid in testing:
 |`firestore`     |`emulator\|<URL>`        |Target emulator for firestore database calls.|
 |`functions`     |`emulator\|<URL>`        |Target emulator-hosted firebase functions.|
 |`noPersistentUI`|none                     |Do not initialize persistent ui store.|
+|`researcher`    |`true`                   |When set to true the user authenticates as a researcher|
+|`studentDocument`|string                  |If set to the ID of a document, this will be displayed as the left-side content.|
+|`studentDocumentHistoryId`|string         |Open the history slider and move to the specified revision in the `studentDocument`.|
 
 The `unit` parameter can be in 3 forms:
+
 - a valid URL starting with `https:` or `http:` will be treated as an absolute URL.
 - a string starting with `./` will be treated as a URL relative to the javascript files of CLUE.
 - Everything else is treated as a unit code, these codes are first looked up in a map to remap legacy codes. Then the URL of the unit is created by `${curriculumSiteUrl}/branch/${branchName}/${unitCode}/content.json`.
@@ -190,7 +195,8 @@ qaGroup - the group to automatically assign the fake user to after connecting to
 
 Additionally in `qa` mode the "root" in Firestore and the Realtime database is based on the Firebase user uid. This user is stored in session storage so each new tab will start a new root. In Cypress session storage is cleared between tests so each new test will have its own root.
 
-### To run Cypress integration tests:
+### To run Cypress integration tests
+
 - `npm run test:local`
 - `npm run test:dev`
 - `npm run test:branch` (requires change in environments.json to add the branch name)
@@ -200,7 +206,8 @@ Additionally in `qa` mode the "root" in Firestore and the Realtime database is b
 ### Additional notes about configuration
 
 You can also temporarily overwrite any configuration option using env variables with `CYPRESS_` prefix. E.g.:
-- `CYPRESS_baseUrl=https://collaborative-learning.concord.org/branch/fix-data-attributes npm run test:dev`
+
+`CYPRESS_baseUrl=https://collaborative-learning.concord.org/branch/fix-data-attributes npm run test:dev`
 
 ### Writing tests, workflow and patterns
 

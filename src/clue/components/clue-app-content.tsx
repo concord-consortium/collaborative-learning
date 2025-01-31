@@ -29,7 +29,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
                     label: "Workspace & Resources",
                     content: <WorkspaceComponent />
                   }];
-    if (user && user.isTeacher) {
+    if (user && user.isTeacherOrResearcher) {
       panels.unshift({
         panelId: EPanelId.dashboard,
         label: "Dashboard",

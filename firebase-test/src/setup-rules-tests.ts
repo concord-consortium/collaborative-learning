@@ -36,6 +36,11 @@ export const teacher4Id = `${teacher4IdNumeric}`;
 export const teacher4Name = "Joe Teacher";
 export const teacher4Auth = { uid: teacher4Id, platform_user_id: teacher4IdNumeric, user_type: "teacher", class_hash: thisClass };
 
+export const researcherIdNumeric = 21;
+export const researcherId = `${researcherIdNumeric}`;
+export const researcherName = "Rita Researcher";
+export const researcherAuth = { uid: researcherId, platform_user_id: researcherIdNumeric, user_type: "researcher", class_hash: thisClass };
+
 export const offeringIdNumeric = 2000;
 export const offeringId = `${offeringIdNumeric}`;
 export const noNetwork = null;

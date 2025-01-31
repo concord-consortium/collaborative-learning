@@ -80,7 +80,7 @@ export interface IUserContext {
   demoName?: string;
   portal?: string;
   uid?: string;                 // user id of caller; validated for authenticated users when provided
-  type?: "student" | "teacher"; // user's role
+  type?: "student" | "teacher" | "researcher"; // user's role
   name?: string;
   network?: string;             // current network for teachers
   classHash: string;

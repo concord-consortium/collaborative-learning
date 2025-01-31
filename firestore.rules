@@ -48,6 +48,10 @@ service cloud.firestore {
       return hasUserId() && hasRole("teacher");
     }
 
+    function isAuthedResearcher() {
+      return hasUserId() && hasRole("researcher");
+    }
+
     // uid of submitted document must match user's platform_user_id
     function userIsRequestUser() {
       return isAuthed() &&
@@ -116,12 +120,17 @@ service cloud.firestore {
     // portal-authenticated secure access rules
     //
     match /authed/{portal} {
-      allow read, write: if isAuthedTeacher();
+      allow read, write: if isAuthedTeacher() || isAuthedResearcher();
+
+      // Check that the class given by the context_id exists and includes the given teacher
+      function aTeacherIsInClass(uid, contextid) {
+        let class_doc = get(/databases/$(database)/documents/authed/$(portal)/classes/$(contextid));
+        return class_doc != null && string(uid) in class_doc.data.teachers;
+      }
 
       // Check that the class given by the context_id exists and includes the logged-in teacher
       function teacherIsInClass(contextid) {
-        let class_doc = get(/databases/$(database)/documents/authed/$(portal)/classes/$(contextid));
-        return class_doc != null && string(request.auth.token.platform_user_id) in class_doc.data.teachers;
+        return aTeacherIsInClass(request.auth.token.platform_user_id, contextid);
       }
 
       // user's platform_user_id must be listed in the class of the requested document
@@ -169,9 +178,13 @@ service cloud.firestore {
         return request.auth.token.class_hash == resource.data.context_id;
       }
 
+      function resourceInResearcherClass() {
+        return isAuthedResearcher() && resourceInUserClass();
+      }
+
       match /users/{userId} {
         // teachers can read their own user documents or other teachers in the same network
-        allow read: if isAuthedTeacher() &&
+        allow read: if (isAuthedTeacher() || isAuthedResearcher()) &&
                         ((string(request.auth.token.platform_user_id) == userId) ||
                           teacherInRequestedTeacherNetworks());
         // currently, only admins can write user information
@@ -180,9 +193,11 @@ service cloud.firestore {
 
       function isValidClassCreateRequest() {
         let requiredFields = ["id", "name", "uri", "context_id", "teacher", "teachers"];
-        return userInRequestTeachers() &&
-          (!("network" in request.resource) || requestInTeacherNetworks()) &&
-          request.resource.data.keys().hasAll(requiredFields);
+        let validTeacher = isAuthedTeacher() && userInRequestTeachers() &&
+          (!("network" in request.resource) || requestInTeacherNetworks());
+        let validResearcher = isAuthedResearcher() && classIsRequestContextId();
+        let hasKeys = request.resource.data.keys().hasAll(requiredFields);
+        return (validTeacher || validResearcher) && hasKeys;
       }
 
       function preservesReadOnlyClassFields() {
@@ -192,29 +207,32 @@ service cloud.firestore {
       }
 
       function isValidClassUpdateRequest() {
-        return userInRequestTeachers() && userInResourceTeachers() &&
-                requestInTeacherNetworks() && preservesReadOnlyClassFields();
+        let validTeacher = userInRequestTeachers() && userInResourceTeachers() && requestInTeacherNetworks();
+        let validResearcher = resourceInResearcherClass();
+        return (validTeacher || validResearcher) && preservesReadOnlyClassFields();
       }
 
       match /classes/{classId} {
         // portal-authenticated teachers can create valid classes
-        allow create: if isAuthedTeacher() && isValidClassCreateRequest();
+        allow create: if (isAuthedTeacher() || isAuthedResearcher()) && isValidClassCreateRequest();
         // teachers can only update their own classes and only if they're valid
-        allow update: if isAuthedTeacher() && isValidClassUpdateRequest();
+        allow update: if (isAuthedTeacher() || isAuthedResearcher()) && isValidClassUpdateRequest();
         // we don't support deleting classes at this time
         allow delete: if false;
         // teachers can read, non existing classes, their own classes, or any class in their network
-        allow read: if isAuthedTeacher() && (
-          resource == null ||
-          userInResourceTeachers() ||
-          resourceInTeacherNetworks());
+        // researchers only get to read the class that they specifically authenticated for
+        allow read: if (isAuthedTeacher() &&
+                          (resource == null || userInResourceTeachers() || resourceInTeacherNetworks())) ||
+                        resourceInResearcherClass();
       }
 
       function isValidOfferingCreateRequest() {
         let requiredFields = ["id", "name", "uri", "context_id", "teachers",
                               "unit", "problem", "problemPath", "network"];
-        return userInRequestTeachers() && requestInTeacherNetworks() &&
-                request.resource.data.keys().hasAll(requiredFields);
+        let validTeacher = isAuthedTeacher() && userInRequestTeachers() && requestInTeacherNetworks();
+        let validResearcher = isAuthedResearcher() && classIsRequestContextId();
+        let hasKeys = request.resource.data.keys().hasAll(requiredFields);
+        return (validTeacher || validResearcher) && hasKeys;
       }
 
       function preservesReadOnlyOfferingFields() {
@@ -227,19 +245,21 @@ service cloud.firestore {
       function isValidOfferingUpdateRequest() {
         // teachers can update the list of teachers for the offering,
         // but only if they were already a teacher and are still a teacher
-        return userInRequestTeachers() && userInResourceTeachers() &&
-                requestInTeacherNetworks() && preservesReadOnlyOfferingFields();
+        let validTeacher = userInRequestTeachers() && userInResourceTeachers() && requestInTeacherNetworks();
+        let validResearcher = resourceInResearcherClass();
+        return (validTeacher || validResearcher) && preservesReadOnlyOfferingFields();
       }
 
       match /offerings/{offeringId} {
         // portal-authenticated teachers can create valid offerings
-        allow create: if isAuthedTeacher() && isValidOfferingCreateRequest();
+        allow create: if (isAuthedTeacher() || isAuthedResearcher()) && isValidOfferingCreateRequest();
         // teachers can only update their own documents and only if they're valid
-        allow update: if isAuthedTeacher() && isValidOfferingUpdateRequest();
+        allow update: if (isAuthedTeacher() || isAuthedResearcher()) && isValidOfferingUpdateRequest();
         // we don't support deleting offerings at this time
         allow delete: if false;
         // teachers can read offerings in their network
-        allow read: if isAuthedTeacher() && resourceInTeacherNetworks();
+        allow read: if (isAuthedTeacher() && resourceInTeacherNetworks()) ||
+                       resourceInResearcherClass();
       }
 
       match /curriculum/{pathId} {
@@ -248,7 +268,8 @@ service cloud.firestore {
         // curriculum documents can't be updated or deleted
         allow update, delete: if false;
         // teachers can read their own curriculum documents or others in their network
-        allow read: if isAuthedTeacher() && (userIsResourceUser() || resourceInTeacherNetworks());
+        allow read: if (isAuthedTeacher() && (userIsResourceUser() || resourceInTeacherNetworks())) ||
+          (isAuthedResearcher() && aTeacherIsInClass(resource.data.uid, request.auth.token.class_hash));
 
         // return the author/owner of the specified (curriculum) document
         function getCurriculumOwner() {
@@ -277,6 +298,10 @@ service cloud.firestore {
           return isAuthedTeacher() && (teacherIsCurriculumOwner() || curriculumInTeacherNetworks());
         }
 
+        function researcherCanAccessCurriculum() {
+          return isAuthedResearcher() && aTeacherIsInClass(getCurriculumOwner(), request.auth.token.class_hash);
+        }
+
         function isValidCommentCreateRequest() {
           return userIsRequestUser() &&
                   // comments network must match network of parent document
@@ -302,7 +327,7 @@ service cloud.firestore {
           // teachers can only delete their own comments
           allow delete: if teacherCanAccessCurriculum() && userIsResourceUser();
           // teachers with access to the curriculum document can read the comments
-          allow read: if teacherCanAccessCurriculum();
+          allow read: if teacherCanAccessCurriculum() || researcherCanAccessCurriculum();
         }
       }
 
@@ -312,7 +337,7 @@ service cloud.firestore {
         // teachers can only update their own documents and only if they're valid
         allow update: if isValidDocumentUpdateRequest();
         // teachers can only delete their own documents
-        allow delete: if isAuthedTeacher() && userIsResourceUser();
+        allow delete: if (isAuthedTeacher() || isAuthedResearcher()) && userIsResourceUser();
         // teachers can read their own documents or other documents in their network
         allow read: if (isAuthed() && (resource == null || userOwnsDocument() || resourceInUserClass())) ||
           (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks()));
@@ -367,6 +392,13 @@ service cloud.firestore {
           return isAuthedTeacher() && (!exists(getDocumentPath()) || userCanAccessDocument());
         }
 
+        function researcherCanAccessDocument() {
+          return isAuthedResearcher() &&
+            (!exists(getDocumentPath()) ||
+              userOwnsDocument() ||
+              request.auth.token.class_hash == getDocumentData().context_id);
+        }
+
         function isValidCommentCreateRequest() {
           return userIsRequestUser() &&
                   // comment's network must match network of parent document
@@ -389,19 +421,19 @@ service cloud.firestore {
         }
         match /comments/{commentId} {
           // portal-authenticated teachers with access to the document can create valid comments
-          allow create: if teacherCanAccessDocument() && isValidCommentCreateRequest();
+          allow create: if (teacherCanAccessDocument() || researcherCanAccessDocument()) && isValidCommentCreateRequest();
           // teachers can only update their own comments and only if they're valid
-          allow update: if teacherCanAccessDocument() && isValidCommentUpdateRequest();
+          allow update: if (teacherCanAccessDocument() || researcherCanAccessDocument()) && isValidCommentUpdateRequest();
           // teachers can only delete their own comments
-          allow delete: if teacherCanAccessDocument() && userIsResourceUser();
+          allow delete: if (teacherCanAccessDocument() || researcherCanAccessDocument()) && userIsResourceUser();
           // only teachers that "own" the document can read the comments (for now)
-          allow read: if teacherCanAccessDocument();
+          allow read: if teacherCanAccessDocument() || researcherCanAccessDocument();
         }
 
         // For writing individual history entries
         match /history/{entryId} {
           allow create: if isAuthed() && userOwnsDocument();
-          allow read: if (isAuthed() && userOwnsDocument()) || teacherCanAccessDocument();
+          allow read: if (isAuthed() && userOwnsDocument()) || teacherCanAccessDocument() || researcherCanAccessDocument();
           allow delete: if false;
           allow update: if false;
         }

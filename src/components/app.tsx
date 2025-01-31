@@ -114,6 +114,7 @@ export const authAndConnect = async (stores: IStores) => {
       stores.class.updateFromPortal(classInfo, includeAIUser);
     }
 
+    // RESEARCHER-ACCESS: should this be changed to isTeacherOrResearcher?
     const firestoreUser = user.isTeacher
               ? await db.firestore.getFirestoreUser(user.id)
               : undefined;

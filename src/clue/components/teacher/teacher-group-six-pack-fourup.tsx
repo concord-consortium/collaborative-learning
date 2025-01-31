@@ -85,7 +85,7 @@ interface IGroupHeaderProps {
 
 const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function TeacherGroupHeader(
     {group, navTabName, documentViewMode}){
-  const { ui, persistentUI, db, groups }  = useStores();
+  const { ui, persistentUI, db, groups, user: { isResearcher } }  = useStores();
 
   const openDocId = persistentUI.tabs.get(navTabName)?.openDocuments.get(group.id);
   const groupModel = groups.getGroupById(group.id);
@@ -123,12 +123,12 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
     <div className="group-header">
       <div className="group-label">Group {String(group.id)}</div>
       <div className="actions">
-        <IconButton
+        {!isResearcher && <IconButton
           title={`Message ${focusedGroupUser ? focusedGroupUser.name : "Group"}`}
           className="icon"
           icon="sticky-note"
           key={`sticky-note-${focusedGroupUser ? `user-${focusedGroupUser.id}` : "group"}`}
-          onClickButton={messageClickHandler} />
+          onClickButton={messageClickHandler} />}
       </div>
     </div>
   );

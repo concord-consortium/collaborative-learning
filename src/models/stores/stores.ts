@@ -42,6 +42,8 @@ export interface IStores extends IBaseStores {
   problemOrdinal: string;
   userContextProvider: UserContextProvider;
   tabsToDisplay: NavTabModelType[];
+  documentToDisplay?: string;
+  documentHistoryId?: string;
   isShowingTeacherContent: boolean;
   studentWorkTabSelectedGroupId: string | undefined;
   setAppMode: (appMode: AppMode) => void;
@@ -163,6 +165,26 @@ class Stores implements IStores{
     this.sortedDocuments = new SortedDocuments(this);
     this.sectionDocuments = new SectionDocuments(this);
 
+    // If there is a `studentDocument` URL parameter, then tell the UI to display it
+    const docToDisplay = params?.documentToDisplay;
+    if (docToDisplay) {
+      // Make sure there is a Sort Work tab to display the document in.
+      this.appConfig.setRequireSortWorkTab(true);
+      // Set request for viewing at the given history ID, if provided
+      if (params.documentHistoryId) {
+        this.sortedDocuments.setDocumentHistoryViewRequest(docToDisplay, params.documentHistoryId);
+      }
+      // Wait until the document is loaded, then open it.
+      const docPromise = this.sortedDocuments.fetchFullDocument(docToDisplay);
+      docPromise.then((doc) => {
+        if (doc) {
+          this.persistentUI.openResourceDocument(doc, this.user, this.sortedDocuments);
+        } else {
+          console.warn("Display document not found: ", params.documentToDisplay);
+        }
+      });
+    }
+
     this.unitLoadedPromise = when(() => this.unit !== defaultUnit);
     this.sectionsLoadedPromise = when(() => this.problem.sections.length > 0);
     this.exemplarController = ExemplarControllerModel.create();
@@ -172,10 +194,10 @@ class Stores implements IStores{
   get tabsToDisplay() {
     const { appConfig: { navTabs: navTabSpecs },
       teacherGuide,
-      user: { isTeacher }
+      user: { isTeacherOrResearcher }
     } = this;
 
-    return isTeacher
+    return (isTeacherOrResearcher)
       ? navTabSpecs.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide)
       : navTabSpecs.tabSpecs.filter(t => !t.teacherOnly);
   }
@@ -190,8 +212,8 @@ class Stores implements IStores{
   }
 
   get isShowingTeacherContent() {
-    const { persistentUI: { showTeacherContent }, user: { isTeacher } } = this;
-    return isTeacher && showTeacherContent;
+    const { persistentUI: { showTeacherContent }, user: { isTeacherOrResearcher } } = this;
+    return isTeacherOrResearcher && showTeacherContent;
   }
 
   /**
@@ -327,7 +349,7 @@ class Stores implements IStores{
     });
 
     addDisposer(this.unit, when(() => {
-        return this.user.isTeacher;
+        return this.user.isTeacherOrResearcher;
       },
       async () => {
         // Uncomment the next line to add a 5 second delay.

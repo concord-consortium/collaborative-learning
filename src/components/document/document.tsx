@@ -211,13 +211,13 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderProblemTitleBar(type: string, hideButtons?: boolean) {
-    const {problem, appMode, clipboard, user: { isTeacher }} = this.stores;
+    const {problem, appMode, clipboard, user: { isTeacherOrResearcher }} = this.stores;
     const problemTitle = problem.title;
     const { document, workspace } = this.props;
     const isShared = document.visibility === "public";
     const showShareButton = type !== "planning";
     const showFileMenu = this.showFileMenu();
-    const show4up = !workspace.comparisonVisible && !isTeacher;
+    const show4up = !workspace.comparisonVisible && !isTeacherOrResearcher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
                             : undefined;
