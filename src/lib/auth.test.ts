@@ -155,9 +155,9 @@ describe("dev mode", () => {
     expect(mode).toBe("authed");
   });
 
-  it("should not be in dev mode by default in production", () => {
+  it("should be in dev mode by default in production", () => {
     const mode = getAppMode(undefined, undefined, "learning.concord.org");
-    expect(mode).toBe("authed");
+    expect(mode).toBe("dev");
   });
 
   it("should use the dev mode parameter if it's specified", () => {

@@ -6,11 +6,13 @@ import { Group } from "@visx/group";
 import { scaleBand, scaleLinear } from "@visx/scale";
 import { Bar, BarGroup } from "@visx/shape";
 import { PositionScale } from "@visx/shape/lib/types";
+import { getSnapshot } from "@concord-consortium/mobx-state-tree";
 import { useBarGraphModelContext } from "./bar-graph-content-context";
 import { CategoryPulldown } from "./category-pulldown";
 import EditableAxisLabel from "./editable-axis-label";
 import { displayValue, logBarGraphEvent, roundTo5 } from "./bar-graph-utils";
 import { BarInfo } from "./bar-graph-types";
+import { clueDataColorInfo } from "../../utilities/color-utils";
 
 const margin = {
   top: 7,
@@ -48,8 +50,11 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
   }
 
   function barColor(key: string) {
-    if (!model) return "black";
-    return model.getColorForSecondaryKey(key);
+    if (!model) return clueDataColorInfo[0].color;
+
+    return model.secondaryAttribute
+      ? clueDataColorInfo[model.colorForSecondaryKey(key)].color
+      : clueDataColorInfo[model.primaryAttributeColor].color;
   }
 
   // Count cases and make the data array
@@ -125,10 +130,16 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
   }
 
   function groupedBars() {
+    // generate a unique value from the color map to force a re-render when the map changes
+    const colorMapKey = model?.secondaryAttributeColorMap?.size
+      ? JSON.stringify(getSnapshot(model.secondaryAttributeColorMap))
+      : "no-color-map";
+
     return (
       <BarGroup
         data={data}
         color={barColor}
+        key={colorMapKey}
         keys={secondaryKeys}
         height={yMax}
         x0={(d) => d[primary] as string}
