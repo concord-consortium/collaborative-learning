@@ -64,7 +64,7 @@ These properties are configurable at the application (built into the code) or th
   // disables publishing documents of particular types or with particular properties
   disablePublish: Array<SnapshotIn<typeof DocumentSpecModel>> | boolean;
   // enable/disable showing the history-scrubbing controls for users in different roles
-  enableHistoryRoles: Array<"student" | "teacher">;
+  enableHistoryRoles: Array<"student" | "teacher" | "researcher">;
   // configures naming of copied documents
   copyPreferOriginTitle: boolean;
   // enable/disable dragging of tiles

@@ -1,6 +1,7 @@
 import { IDocumentMetadata } from "../../../shared/shared";
 import { Logger } from "../../lib/logger";
 import { LogEventMethod, LogEventName } from "../../lib/logger-types";
+import { TreeManagerType } from "../history/tree-manager";
 import { IDocumentMetadataModel } from "../stores/sorted-documents";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType } from "./document";
@@ -23,7 +24,7 @@ interface IContext extends Record<string, any> {
   user: UserModelType;
 }
 
-function processDocumentEventParams(params: IDocumentLogEvent, { user }: IContext) {
+function processDocumentEventParams(params: IDocumentLogEvent, { user, portal }: IContext) {
   const { document, ...others } = params;
   const isRemote = "isRemote" in document ? document.isRemote : undefined;
   const remoteContext = "remoteContext" in document ? document.remoteContext : undefined;
@@ -32,6 +33,16 @@ function processDocumentEventParams(params: IDocumentLogEvent, { user }: IContex
                                : {};
   const documentVisibility = "visibility" in document ? document.visibility : undefined;
   const documentChanges = "changeCount" in document ? document.changeCount : undefined;
+
+  // Log the ID of the last history entry for the document.
+  // Note that depending whether the call to write a log event is made
+  // before or after the actual change to the document, this may be the history
+  // entry that was current before the change, or the one that was created by the change.
+  // For the first change in a new document, it may be undefined, in which case we
+  // use the string "first" instead.
+  const documentHistoryId = "treeManagerAPI" in document
+    ? (document.treeManagerAPI as TreeManagerType)?.latestDocumentHistoryEntry?.id || "first"
+    : undefined;
 
   const teacherNetworkInfo: ITeacherNetworkInfo | undefined = isRemote
       ? { networkClassHash: remoteContext,
@@ -46,6 +57,7 @@ function processDocumentEventParams(params: IDocumentLogEvent, { user }: IContex
     documentProperties,
     documentVisibility,
     documentChanges,
+    documentHistoryId,
     ...others,
     ...teacherNetworkInfo
   };

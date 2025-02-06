@@ -63,7 +63,23 @@ Fields:
 
 TODO
 
+Fields:
+
+- facet
+- network
+- path
+- unit
+- section
+- problem
+- uid: (string, user id of curriculum owner)
+
 ### Contents of `documents/{docId}`
+
+Holds metadata, history, and comments related to a user Document.
+(The actual current Document content is not stored here, it is in Firebase.)
+Note that there can be multiple Firestore records for a single Document,
+with different networks. These are needed to hold comments that can only
+be read by members of the network of their authors.
 
 Fields:
 
@@ -94,6 +110,20 @@ Collection:
 - uid: (string)
 - tags: (array of strings)
 
-### images, mcimages, mcsupports, offerings, users
+### Contents of `offerings/{offeringId}`
+
+Note the `offeringId` here may be prefixed with a network name, eg `berkeley_12345`.
+
+- id (numeric string, matches the second part of `offeringId` )
+- context_id (string, uuid, should match context_id of a class)
+- name (string)
+- network (string)
+- unit (string)
+- problem (string)
+- problemPath (string)
+- uri (string)
+- teachers (array of user IDs)
+
+### images, mcimages, mcsupports, users
 
 TODO

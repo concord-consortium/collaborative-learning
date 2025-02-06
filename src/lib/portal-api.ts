@@ -8,6 +8,7 @@ import { IUserPortalOffering, UserPortalOffering } from "../models/stores/user";
 import { IPortalOffering } from "./portal-types";
 import { getAuthParams } from "../utilities/auth-utils";
 import { ICurriculumConfig, getProblemOrdinal } from "../models/stores/curriculum-config";
+import { maybeAddResearcherParam } from "../utilities/researcher-param";
 
 const isClueAssignment = (offering: IPortalOffering) => {
   const clueActivityUrlRegex = /collaborative-learning/;
@@ -30,10 +31,9 @@ export const getPortalOfferings = (
   userType: string,
   userId: number,
   domain: string,
-  rawPortalJWT: any) => {
-
+  rawPortalJWT: any,
+  offeringId?: string) => {
   return new Promise<IPortalOffering[]> ((resolve, reject) => {
-    // TODO: For now isolate this to the teachers view
     if (userType === "teacher") {
       superagent
       .get(`${domain}api/v1/offerings/?user_id=${userId}`)
@@ -82,6 +82,19 @@ export const getPortalOfferings = (
         }
       });
     }
+    else if (userType === "learner" && offeringId) {
+      // For learner, just look up the single current offering
+      superagent
+      .get(`${domain}api/v1/offerings/${offeringId}`)
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          resolve([res.body]);
+        }
+      });
+    }
     else {
       resolve([]);
     }
@@ -97,7 +110,7 @@ export const getProblemIdForAuthenticatedUser =
   return new Promise<IUnitAndProblem>((resolve, reject) => {
     if (urlParams && urlParams.offering) {
       superagent
-      .get(urlParams.offering)
+      .get(maybeAddResearcherParam(urlParams.offering))
       .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
       .end((err, res) => {
         if (err) {

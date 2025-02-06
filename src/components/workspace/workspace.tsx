@@ -18,7 +18,8 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   const stores = useStores();
   const { appConfig: { navTabs: navTabSpecs },
           persistentUI: { navTabContentShown, workspaceShown },
-          exemplarController
+          exemplarController,
+          user: { isResearcher }
         } = stores;
   const hotKeys = useRef(new HotKeys());
 
@@ -40,6 +41,12 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
     imageDragDrop?.dragOver(e);
   };
 
+  // RESEARCHER-ACCESS: this is a temporary solution to show only the the nav panel for researchers
+  // until we decide where to store researcher docs that are automatically created in the
+  // DocumentWorkspaceComponent component.
+  const showLeftPanel = isResearcher || navTabSpecs.showNavPanel;
+  const showRightPanel = !isResearcher;
+
   return (
     <div
       className="workspace"
@@ -49,19 +56,21 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
         onDragOver={handleDragOverWorkspace}
       />
 
-      {navTabSpecs.showNavPanel &&
+      {showLeftPanel &&
         <>
           <ResizablePanel collapsed={!navTabContentShown} >
             <NavTabPanel
               onDragOver={handleDragOverWorkspace}
             />
           </ResizablePanel>
-          <ResizePanelDivider />
+          {showRightPanel && <ResizePanelDivider />}
         </>
       }
-      <ResizablePanel collapsed={!workspaceShown}>
-        <DocumentWorkspaceComponent />
-      </ResizablePanel>
+      {showRightPanel &&
+        <ResizablePanel collapsed={!workspaceShown}>
+          <DocumentWorkspaceComponent />
+        </ResizablePanel>
+      }
     </div>
   );
 });

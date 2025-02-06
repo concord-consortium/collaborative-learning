@@ -47,7 +47,7 @@ export interface IPortalClassInfo {
   offerings: IPortalClassOffering[];
 }
 
-export type PortalJWT = PortalStudentJWT | PortalTeacherJWT | PortalUserJWT;
+export type PortalJWT = PortalStudentJWT | PortalTeacherJWT | PortalUserJWT | PortalResearcherJWT;
 
 export interface BasePortalJWT {
   alg: string;
@@ -70,6 +70,14 @@ export interface PortalTeacherJWT extends BasePortalJWT {
   user_type: "teacher";
   user_id: string;
   teacher_id: number;
+}
+
+export interface PortalResearcherJWT extends BasePortalJWT {
+  domain: string;
+  user_type: "researcher";
+  user_id: string;
+  first_name: string;
+  last_name: string;
 }
 
 export interface PortalUserJWT extends BasePortalJWT {

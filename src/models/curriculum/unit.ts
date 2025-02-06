@@ -14,8 +14,8 @@ import { UnitConfiguration } from "../stores/unit-configuration";
 
 const PlanningDocumentConfigModel = types
   .model("PlanningDocumentConfigModel", {
-    // boolean true to enable for all; "teacher" or "student" to enable for specific user roles
-    enable: types.union(types.boolean, types.enumeration("role", ["student", "teacher"])),
+    // boolean true to enable for all; "teacher" or "student" or "researcher" to enable for specific user roles
+    enable: types.union(types.boolean, types.enumeration("role", ["student", "teacher", "researcher"])),
     // whether to create a default planning document for each problem for each user
     default: true,
     // planning document section definitions
@@ -23,7 +23,7 @@ const PlanningDocumentConfigModel = types
     sections: types.array(SectionModel)
   })
   .views(self => ({
-    isEnabledForRole(role?: "student" | "teacher") {
+    isEnabledForRole(role?: "student" | "teacher" | "researcher") {
       return (self.enable === true) || (self.enable === role);
     }
   }));

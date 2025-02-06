@@ -169,10 +169,15 @@ function isPreferredClickableObject(current: JXG.GeometryElement | undefined, pr
   return (isFiniteNumber(proposed.visProp.layer) && proposed.visProp.layer >= current.visProp.layer);
 }
 
-// Note: Our layering logic is different from JSXGraph's. When clicks occur on overlapping objects,
-// we may select one object, but JSXGraph may drag another. For now this is preferable to adopting
-// the JSXGraph layering model in which all points are above all segments which are above all
-// polygons. Fixing the drag behavior would require internal changes to JSXGraph.
+// TODO: this may no longer be necessary, since JSXGraph now supports customizing the layering of objects.
+// There is a global seting for what layers different types of objects go into, and also a "layer" property
+// on all geometry objects, and JSXGraph's click and drag handlers should respect these.
+//
+// Here is the original comment for this function, which I believe is outdated as of 2024:
+//   Note: Our layering logic is different from JSXGraph's. When clicks occur on overlapping objects,
+//   we may select one object, but JSXGraph may drag another. For now this is preferable to adopting
+//   the JSXGraph layering model in which all points are above all segments which are above all
+//   polygons. Fixing the drag behavior would require internal changes to JSXGraph.
 export function getClickableObjectUnderMouse(board: JXG.Board, evt: any, draggable: boolean, scale?: number):
     JXG.GeometryElement|undefined {
   const coords = getEventCoords(board, evt, scale);

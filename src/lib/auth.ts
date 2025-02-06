@@ -1,5 +1,6 @@
 import jwt_decode from "jwt-decode";
 import superagent from "superagent";
+import initials from "initials";
 import { AppMode } from "../models/stores/store-types";
 import { QueryParams, urlParams as pageUrlParams } from "../utilities/url-params";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
@@ -14,7 +15,8 @@ import { LogEventName } from "../lib/logger-types";
 import { uniqueId } from "../utilities/js-utils";
 import { getUnitCodeFromUnitParam } from "../utilities/url-utils";
 import { ICurriculumConfig } from "../models/stores/curriculum-config";
-import { ClassInfo, Portal, StudentUser, TeacherUser } from "../models/stores/portal";
+import { ClassInfo, Portal, ResearcherUser, StudentUser, TeacherUser } from "../models/stores/portal";
+import { maybeAddResearcherParam } from "../utilities/researcher-param";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
@@ -54,8 +56,9 @@ export const DEV_CLASS_INFO: ClassInfo = {
   localTimestamp: Date.now()
 };
 
-export type AuthenticatedUser = StudentUser | TeacherUser;
+export type AuthenticatedUser = StudentUser | TeacherUser | ResearcherUser;
 export const isAuthenticatedTeacher = (u: AuthenticatedUser): u is TeacherUser => u.type === "teacher";
+export const isAuthenticatedResearcher = (u: AuthenticatedUser): u is ResearcherUser => u.type === "researcher";
 
 export interface AuthQueryParams {
   token?: string;
@@ -77,7 +80,7 @@ export const getPortalJWTWithBearerToken = (basePortalUrl: string, type: string,
       pageUrlParams.resourceLinkId ? `?resource_link_id=${ pageUrlParams.resourceLinkId }` : "";
     const url = `${basePortalUrl}${PORTAL_JWT_URL_SUFFIX}${resourceLinkIdSuffix}`;
     superagent
-      .get(url)
+      .get(maybeAddResearcherParam(url))
       .set("Authorization", `${type} ${rawToken}`)
       .end((err, res) => {
         if (err) {
@@ -107,6 +110,9 @@ export const getFirebaseJWTParams = (classHash?: string) => {
   if (pageUrlParams.resourceLinkId) {
     params.resource_link_id = pageUrlParams.resourceLinkId;
   }
+  if (pageUrlParams.targetUserId) {
+    params.target_user_id = pageUrlParams.targetUserId;
+  }
 
   return `?${(new URLSearchParams(params)).toString()}`;
 };
@@ -116,7 +122,7 @@ export const getFirebaseJWTWithBearerToken = (basePortalUrl: string, type: strin
   return new Promise<[string, PortalFirebaseJWT]>((resolve, reject) => {
     const url = `${basePortalUrl}${FIREBASE_JWT_URL_SUFFIX}${getFirebaseJWTParams(classHash)}`;
     superagent
-      .get(url)
+      .get(maybeAddResearcherParam(url))
       .set("Authorization", `${type} ${rawToken}`)
       .end((err, res) => {
         if (err) {
@@ -160,6 +166,7 @@ export const authenticate = async (
   const unitCode = urlParams.unit || "";
   // when launched as a report, the params will not contain the problemOrdinal
   const problemOrdinal = urlParams.problem || appConfig.defaultProblemOrdinal;
+  const offeringId = urlParams.resourceLinkId || undefined;
 
   let {fakeClass, fakeUser} = urlParams;
   // handle preview launch from portal
@@ -223,7 +230,7 @@ export const authenticate = async (
   const { classHash } = classInfo;
   const uidAsString = `${portalJWT.uid}`;
   const firebaseJWTPromise = getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classHash);
-  const portalOfferingsPromise = getPortalOfferings(user_type, uid, domain, rawPortalJWT);
+  const portalOfferingsPromise = getPortalOfferings(user_type, uid, domain, rawPortalJWT, offeringId);
   const problemIdPromise = getProblemIdForAuthenticatedUser(rawPortalJWT, curriculumConfig, urlParams);
 
   const [firebaseJWTResult, portalOfferingsResult, problemIdResult] =
@@ -232,11 +239,36 @@ export const authenticate = async (
   const [rawFirebaseJWT, firebaseJWT] = firebaseJWTResult;
   const { unitCode: newUnitCode, problemOrdinal: newProblemOrdinal } = problemIdResult;
 
-  const authenticatedUser = user_type === "learner"
-                              ? classInfo.students.find(student => student.id === uidAsString)
-                              : classInfo.teachers.find(teacher => teacher.id === uidAsString);
+  let fullName: string;
+  let authenticatedUser: StudentUser | TeacherUser | ResearcherUser | undefined = undefined;
+  switch (user_type) {
+    case "learner":
+      authenticatedUser = classInfo.students.find(student => student.id === uidAsString);
+      break;
+    case "teacher":
+      authenticatedUser = classInfo.teachers.find(teacher => teacher.id === uidAsString);
+      break;
+    case "researcher":
+      fullName = `${portalJWT.first_name} ${portalJWT.last_name}`;
+      authenticatedUser = {
+        type: "researcher",
+        id: uidAsString,
+        portal: portalHost,
+        firstName: portalJWT.first_name,
+        lastName: portalJWT.last_name,
+        fullName,
+        className: classInfo.name,
+        initials: initials(fullName) as string,
+        classHash: classInfo.classHash,
+        offeringId: portalService.offeringId
+      };
+      break;
+    default:
+      throw new Error(`Unsupported user type: ${user_type ?? "(unknown user type)"}`);
+  }
+
   if (!authenticatedUser) {
-    throw new Error("Current user not found in class roster");
+    throw new Error("Current user not found in class roster or is not a researcher");
   }
 
   authenticatedUser.portalJWT = portalJWT;

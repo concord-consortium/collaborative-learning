@@ -20,7 +20,7 @@ interface IProps {
 
 export const ProblemTabContent: React.FC<IProps>
   = observer(function ProblemTabContent({ context, sections, showSolutionsSwitch }: IProps) {
-  const { isTeacher } = useUserStore();
+  const { isTeacherOrResearcher } = useUserStore();
   const persistentUI = usePersistentUIStore();
   const ui = useUIStore();
   const { showTeacherContent } = persistentUI;
@@ -87,7 +87,7 @@ export const ProblemTabContent: React.FC<IProps>
             );
           })}
         </TabList>
-        {isTeacher && showSolutionsSwitch &&
+        {isTeacherOrResearcher && showSolutionsSwitch &&
           <SolutionsButton onClick={handleToggleSolutions} isToggled={showTeacherContent} />}
       </div>
       <div className="problem-panels-container">

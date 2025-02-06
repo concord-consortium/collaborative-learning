@@ -12,11 +12,22 @@ export const NavTabsConfigModel = types
   .views(self => ({
     getNavTabSpec(tabId: ENavTab) {
       return self.tabSpecs.find(tab => tabId === tab.tab);
+    },
+    hasSortWorkTab() {
+      return self.tabSpecs.some(tab => tab.tab === ENavTab.kSortWork);
     }
   }))
   .actions(self => ({
     toggleShowNavPanel() {
       self.showNavPanel = !self.showNavPanel;
+    },
+    addSortWorkTab() {
+      if (!self.hasSortWorkTab()) {
+        self.tabSpecs.push(NavTabModel.create({
+          tab: ENavTab.kSortWork,
+          label: "Sort Work"
+        }));
+      }
     }
   }));
 

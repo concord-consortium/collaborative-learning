@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable, runInAction, when } from "mobx";
 import { types, Instance, SnapshotIn, applySnapshot, typecheck, unprotect } from "mobx-state-tree";
 import { union } from "lodash";
 import firebase from "firebase";
@@ -79,6 +79,9 @@ export class SortedDocuments {
   stores: ISortedDocumentsStores;
   metadataDocsFiltered = MetadataDocMapModel.create();
   metadataDocsWithoutUnit = MetadataDocMapModel.create();
+  docsReceived = false;
+  // Maps from document ID to the history entry ID that the user requested to view.
+  documentHistoryViewRequests: Record<string,string> = {};
 
   constructor(stores: ISortedDocumentsStores) {
     makeAutoObservable(this);
@@ -114,6 +117,19 @@ export class SortedDocuments {
   }
   get user() {
     return this.stores.user;
+  }
+
+  setDocumentHistoryViewRequest(docKey: string, historyId: string) {
+    this.documentHistoryViewRequests[docKey] = historyId;
+  }
+  getDocumentHistoryViewRequest(docKey: string) {
+    // We only want to move to this history entry once,
+    // so we delete the request after it has been fulfilled.
+    const historyId = this.documentHistoryViewRequests[docKey];
+    if (historyId) {
+      delete this.documentHistoryViewRequests[docKey];
+    }
+    return historyId;
   }
 
   sortBy(sortType: PrimarySortType): DocumentGroup[] {
@@ -215,6 +231,8 @@ export class SortedDocuments {
     snapshot.docs.forEach(doc => {
       const data = doc.data();
       mstSnapshot[data.key] = data;
+      // For some reason some docs arrive with visibility set to illegal "null" value.
+      if (data.visibility === null) data.visibility = undefined;
       typecheck(DocumentMetadataModel, data);
       const exemplarMetadata = this.exemplarMetadataDocs.get(data.key);
       if (exemplarMetadata) {
@@ -256,7 +274,10 @@ export class SortedDocuments {
 
     const disposeFilteredListener = filteredQuery.onSnapshot(snapshot => {
       const mstSnapshot = this.getMSTSnapshotFromFBSnapshot(snapshot);
-      applySnapshot(this.metadataDocsFiltered, mstSnapshot);
+      runInAction(() => {
+        applySnapshot(this.metadataDocsFiltered, mstSnapshot);
+        this.docsReceived = true;
+      });
     });
 
     let disposeDocsWithoutUnitListener: () => void | undefined;
@@ -353,9 +374,15 @@ export class SortedDocuments {
   }
 
   async fetchFullDocument(docKey: string) {
+    if (!this.docsReceived) {
+      // Wait until the initial batch of documents has been received from Firestore.
+      await when(() => this.docsReceived);
+    }
     const metadataDoc = this.firestoreMetadataDocs.find(doc => doc.key === docKey);
-    if (!metadataDoc) return;
-
+    if (!metadataDoc) {
+      console.warn("Could not find metadata doc with key", docKey, this.firestoreMetadataDocs);
+      return;
+    }
     const visibility = metadataDoc?.visibility === "public" || metadataDoc?.visibility === "private"
                          ? metadataDoc?.visibility as "public" | "private"
                          : undefined;
