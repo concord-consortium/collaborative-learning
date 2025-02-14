@@ -1,0 +1,18 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "U1goHVmwUEUDYzUr",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Create any assignment you like in your Workspace, then publish it to the class. It will show up in under Class Work, on the Custom Activities tab. </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

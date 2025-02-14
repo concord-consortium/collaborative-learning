@@ -1,0 +1,18 @@
+{
+  "type": "1",
+  "content": {
+    "tiles": [
+      {
+        "id": "cjgGr04gU0RCeZXf",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Click the Class Work tab to get started.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

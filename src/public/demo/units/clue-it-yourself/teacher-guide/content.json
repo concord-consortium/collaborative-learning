@@ -1,0 +1,54 @@
+{
+  "code": "clue-basic",
+  "abbrevTitle": "CLUE",
+  "title": "Clue-it-Yourself Teacher Guide",
+  "subtitle": "",
+  "placeholderText": "Enter notes here",
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
+  "sections": {
+    "overview": {
+      "initials": "OV",
+      "title": "Overview",
+      "placeholder": "Work area for Overview section"
+    },
+    "teach": {
+      "initials": "ACT",
+      "title": "Teach",
+      "placeholder": "Work area for Launch section"
+    }
+  },
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "CLUE Custom Lessons",
+      "overview": {
+        "tiles": []
+      },
+      "problems": [
+        {
+          "description": "Activity 1.1",
+          "ordinal": 1,
+          "title": "Activity 1.1",
+          "subtitle": "",
+          "sections": [
+            "investigation-1/problem-1/overview/content.json"
+          ]
+        },
+        {
+          "description": "Activity 1.2",
+          "ordinal": 2,
+          "title": "Activity 1.2",
+          "subtitle": "",
+          "sections": [
+            "investigation-1/problem-2/overview/content.json"
+          ]
+        }
+      ]
+    }
+  ]
+}
