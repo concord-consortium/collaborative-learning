@@ -175,27 +175,6 @@
               "addDocument": true
             }
           ]
-        },
-        {
-          "tab": "problems",
-          "label": "Problem",
-          "sections": [
-            {
-              "initials": "1",
-              "title": "Section 1",
-              "type": "problem-documents"
-            },
-            {
-              "initials": "2",
-              "title": "Section 2",
-              "type": "problem-documents"
-            },
-            {
-              "initials": "3",
-              "title": "Section 3",
-              "type": "problem-documents"
-            }
-          ]
         }
       ]
     },
