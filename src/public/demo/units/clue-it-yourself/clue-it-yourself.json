@@ -102,7 +102,7 @@
         },
         {
           "tab": "class-work",
-          "label": "Class Work",
+          "label": "Custom Activities",
           "sections": [
             {
               "title": "Custom Activities",
@@ -117,7 +117,14 @@
                 "isTeacherDocument",
                 "!isDeleted"
               ]
-            },
+            }
+          ]
+        },
+        {
+          "_comment": "This duplicate class-work tab will likely cause issues, we could probably fix that if necessary though",
+          "tab": "class-work",
+          "label": "Student Published Work",
+          "sections": [
             {
               "title": "Student Published Work",
               "type": "published-problem-documents",
