@@ -33,14 +33,17 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const classStore = useClassStore();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const subTabs = tabSpec.subTabs;
-  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
-  const subTabIndex = Math.max(subTabs.findIndex((subTab) => tabState?.openSubTab === subTab.label), 0);
+  const maybeTabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
+  const subTabIndex = Math.max(
+    subTabs.findIndex((subTab) => maybeTabState?.currentDocumentGroupId === subTab.label),
+    0
+  );
   const selectedSubTab = subTabs[subTabIndex];
 
   useEffect(() => {
     // Set the default open subTab if a subTab isn't already set.
-    if (!persistentUI.tabs.get(tabSpec.tab)?.openSubTab) {
-      persistentUI.setOpenSubTab(tabSpec.tab, subTabs[0].label);
+    if (!persistentUI.tabs.get(tabSpec.tab)?.currentDocumentGroupId) {
+      persistentUI.setCurrentDocumentGroupId(tabSpec.tab, subTabs[0].label);
     }
   }, [subTabs, tabSpec.tab, persistentUI]);
 
@@ -49,12 +52,12 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const _selectedSubTab = subTabs[tabidx];
     const subTabType = _selectedSubTab.sections[0].type;
     const title = _selectedSubTab.label;
-    if (tabState?.openSubTab === title && tabState?.openDocuments.get(title)) {
+    if (maybeTabState?.currentDocumentGroupId === title && maybeTabState?.currentDocumentGroup?.primaryDocumentKey) {
       // If there is a document open then a click on the tab should close
       // the document
-      persistentUI.closeSubTabDocument(tabSpec.tab, title);
+      maybeTabState.getDocumentGroup(title)?.closePrimaryDocument();
     }
-    persistentUI.setOpenSubTab(tabSpec.tab, title);
+    persistentUI.setCurrentDocumentGroupId(tabSpec.tab, title);
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
       tab_section_name: title,
       // FIXME: this can be inaccurate, there can be multiple
@@ -81,7 +84,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const renderDocumentBrowserView = (subTab: ISubTabSpec) => {
-    const openDocumentKey = tabState?.openDocuments.get(subTab.label);
+    const openDocumentKey = maybeTabState?.getDocumentGroup(subTab.label)?.primaryDocumentKey;
     const classHash = classStore.classHash;
     return (
       <div className="document-browser vertical">
@@ -108,7 +111,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   };
 
   const renderDocumentView = (subTab: ISubTabSpec) => {
-    const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
+    const documentGroup = maybeTabState?.getDocumentGroup(subTab.label);
+    const openDocumentKey = documentGroup?.primaryDocumentKey || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
                             store.networkDocuments.getDocument(openDocumentKey);
     const isStarredTab = subTab.label === kBookmarksTabTitle;

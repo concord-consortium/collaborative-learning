@@ -73,15 +73,15 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const primarySearchTerm = normalizeSortString(primarySortBy) as PrimarySortType;
   const sortedDocumentGroups = sortedDocuments.sortBy(primarySearchTerm);
   const secondarySearchTerm = normalizeSortString(secondarySortBy) as SecondarySortType;
-  const tabState = persistentUI.tabs.get(ENavTab.kSortWork);
-  const openDocumentKey = tabState?.openSubTab && tabState?.openDocuments.get(tabState.openSubTab);
+  const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
+  const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
 
   const getOpenDocumentsGroup = () => {
     let openGroup;
-    if (tabState?.openSubTab && openDocumentKey) {
+    if (maybeTabState?.currentDocumentGroupId && openDocumentKey) {
       let openGroupMetadata: IOpenDocumentsGroupMetadata;
       try {
-        openGroupMetadata = JSON.parse(tabState.openSubTab);
+        openGroupMetadata = JSON.parse(maybeTabState.currentDocumentGroupId);
       } catch (e) {
         persistentUI.closeSubTabDocument(ENavTab.kSortWork);
         return;

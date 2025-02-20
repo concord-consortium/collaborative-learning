@@ -29,11 +29,11 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const queryClient = useQueryClient();
   const documents = useLocalDocuments();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
-  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
-  const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
+  const maybeTabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
+  const openDocumentKey = maybeTabState?.getPrimaryDocumentInDocumentGroup(subTab.label) || "";
   const openDocument = store.documents.getDocument(openDocumentKey) ||
     store.networkDocuments.getDocument(openDocumentKey);
-  const openSecondaryDocumentKey = tabState?.openSecondaryDocuments.get(subTab.label) || "";
+  const openSecondaryDocumentKey = maybeTabState?.getSecondaryDocumentInDocumentGroup(subTab.label) || "";
   const openSecondaryDocument = store.documents.getDocument(openSecondaryDocumentKey) ||
     store.networkDocuments.getDocument(openSecondaryDocumentKey);
   const isStarredTab = subTab.label === kBookmarksTabTitle;
@@ -87,7 +87,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
       } else {
         persistentUI.closeSubTabDocument(tabSpec.tab, subTab.label);
       }
-    } else if (tabState?.openDocuments.get(kBookmarksTabTitle)) {
+    } else if (maybeTabState?.getPrimaryDocumentInDocumentGroup(kBookmarksTabTitle)) {
       if (persistentUI.focusSecondaryDocument === document.key) {
         persistentUI.closeSubTabSecondaryDocument(tabSpec.tab, kBookmarksTabTitle);
       } else {

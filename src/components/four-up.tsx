@@ -131,14 +131,15 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
    *
    * @returns
    */
-  private getNavTabName() {
-    return getUIStudentWorkTab(this.props.documentViewMode);
+  private get tabUIModel() {
+    const {persistentUI} = this.stores;
+    const tabName = getUIStudentWorkTab(this.props.documentViewMode);
+    return persistentUI.tabs.get(tabName);
   }
 
   private getFocusedUserDocKey() {
-    const {persistentUI} = this.stores;
     const {group} = this.props;
-    return persistentUI.tabs.get(this.getNavTabName())?.openDocuments.get(group.id);
+    return this.tabUIModel?.getDocumentGroup(group.id)?.primaryDocumentKey;
   }
 
   private getFocusedGroupUser() {
@@ -400,13 +401,11 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleFourUpClick = () => {
-    const { persistentUI } = this.stores;
     const { group } = this.props;
-    persistentUI.closeSubTabDocument(this.getNavTabName(),  group.id);
+    this.tabUIModel?.getDocumentGroup(group.id)?.closePrimaryDocument();
   };
 
   private handleOverlayClick = (groupUser?: GroupUserModelType) => {
-    const { persistentUI } = this.stores;
     const { group } = this.props;
     const focusedUser = this.getFocusedGroupUser();
     const document = this.getGroupUserDoc(groupUser);
@@ -414,10 +413,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     if (groupUser && document) {
       const logInfo = {groupId: group.id, studentId: groupUser.id};
       if (focusedUser){
-        persistentUI.closeSubTabDocument(this.getNavTabName(), group.id);
+        this.tabUIModel?.getDocumentGroup(group.id)?.closePrimaryDocument();
         Logger.log(LogEventName.DASHBOARD_DESELECT_STUDENT, logInfo);
       } else {
-        persistentUI.setOpenSubTabDocument(this.getNavTabName(), group.id, document.key); //sets the focus document;
+        this.tabUIModel?.setPrimaryDocumentInDocumentGroup(group.id, document.key); //sets the focus document;
         Logger.log(LogEventName.DASHBOARD_SELECT_STUDENT, logInfo);
       }
     }

@@ -53,8 +53,10 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
                                    secondaryLabel: label, secondaryType: sortType };
 
     return async (document: DocumentModelType | IDocumentMetadataModel) => {
-      const openSubTab = JSON.stringify(openSubTabMetadata);
-      persistentUI.openSubTabDocument(ENavTab.kSortWork, openSubTab, document.key);
+      const documentGroupId = JSON.stringify(openSubTabMetadata);
+      const tabState = persistentUI.getOrCreateTabState(ENavTab.kSortWork);
+      tabState.openPrimaryDocumentInDocumentGroup(documentGroupId, document.key);
+
       logDocumentViewEvent(document);
     };
   };

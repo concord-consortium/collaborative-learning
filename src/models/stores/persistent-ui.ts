@@ -1,40 +1,232 @@
-import { getSnapshot, applySnapshot, types,
-  onSnapshot
+import {
+  getSnapshot, applySnapshot, types, onSnapshot,
+  SnapshotIn, Instance, cast
 } from "mobx-state-tree";
 import { AppConfigModelType } from "./app-config-model";
-import { DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax,
-         kDividerMin,
-         PrimarySortType} from "./ui-types";
+import {
+  DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax,
+  kDividerMin, PrimarySortType
+} from "./ui-types";
 import { isWorkspaceModelSnapshot, WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { ENavTab } from "../view/nav-tabs";
 import { buildSectionPath, getCurriculumMetadata } from "../../../shared/shared";
-import { ExemplarDocument, LearningLogDocument, LearningLogPublication, PersonalDocument,
+import {
+  ExemplarDocument, LearningLogDocument, LearningLogPublication, PersonalDocument,
   PersonalPublication, PlanningDocument, ProblemDocument,
-  ProblemPublication, SupportPublication } from "../document/document-types";
+  ProblemPublication, SupportPublication
+} from "../document/document-types";
 import { UserModelType } from "./user";
 import { DB } from "../../lib/db";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { urlParams } from "../../utilities/url-params";
 import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
 import { SortedDocuments } from "./sorted-documents";
+import { cloneDeep } from "lodash";
 
-export const kPersistentUiStateVersion = "1.0.0";
+export const kPersistentUiStateVersion2 = "2.0.0";
+export const kPersistentUiStateVersion1 = "1.0.0";
 
-// This generic model should work for both the problem tab, and the MyWork/ClassWork tabs
-// The StudentWorkspaces tab might work this way too. It has an open group which could be
-// stored in the openSubTab. And then it might have an open'd student document of the group
-// this would be the openDocument.
+export const UIDocumentGroup = types
+  .model("UIDocumentGroup", {
+    id: types.identifier,
+    /**
+     * Either undefined, an empty array, or an array of document ids.
+     * - Undefined means the user hasn't chosen anything yet so we can show a default view
+     *   in some cases this might be showing the first document of the listing.
+     * - Empty array means the user has explicitly chosen to close the documents and
+     *   this typically means they'll be viewing the listing of documents.
+     * - The array typically has a single document id, in some cases a second document
+     *   can be open at the same time.
+     *
+     * TODO: another approach for handling the "user hasn't chosen anything yet" case is
+     * to look to see if there is a document group at all. Currently the visitedDocumentGroup
+     * isn't created until a user actually opens a document. But before making that switch
+     * we need to have a working example of this "automaticallyOpenFirstDocument" setting.
+     */
+    currentDocumentKeys: types.maybe(types.array(types.string))
+  })
+  .views(self => ({
+    get primaryDocumentKey() {
+      if (!self.currentDocumentKeys || self.currentDocumentKeys.length < 1) {
+        return undefined;
+      }
+      return self.currentDocumentKeys[0];
+    },
+    get secondaryDocumentKey() {
+      if (!self.currentDocumentKeys || self.currentDocumentKeys.length < 2) {
+        return undefined;
+      }
+      return self.currentDocumentKeys[1];
+    }
+  }))
+  .actions(self => ({
+    setPrimaryDocumentKey(documentKey: string) {
+      let docKeys = self.currentDocumentKeys;
+      if (!docKeys) {
+        self.currentDocumentKeys = cast([]);
+        docKeys = self.currentDocumentKeys!;
+      }
+
+      if (docKeys.length === 0) {
+        docKeys.push(documentKey);
+      } else if (docKeys.length > 0) {
+        docKeys[0] = documentKey;
+      }
+    },
+    /**
+     * If there is no primary document we just set the documentKey as the primary document
+     * and print a warning in the console
+     * @param documentKey
+     */
+    setSecondaryDocumentKey(documentKey: string) {
+      let docKeys = self.currentDocumentKeys;
+      if (!docKeys) {
+        self.currentDocumentKeys = cast([]);
+        docKeys = self.currentDocumentKeys!;
+      }
+
+      if (docKeys.length === 0) {
+        console.warn("setting a secondary document when there is no primary document");
+        docKeys.push(documentKey);
+      } else if (docKeys.length === 1) {
+        docKeys.push(documentKey);
+      } else if (docKeys.length > 1) {
+        docKeys[1] = documentKey;
+      }
+    },
+    /**
+     * Close the current primary document. If there is a secondary document it will become
+     * the primary document.
+     * @returns
+     */
+    closePrimaryDocument() {
+      const docKeys = self.currentDocumentKeys;
+      if (!docKeys) {
+        // The user is taking the explicit action to close the document
+        // So we save that as an empty array.
+        self.currentDocumentKeys = cast([]);
+        return;
+      }
+
+      if (docKeys.length === 0) return;
+
+      docKeys.splice(0, 1);
+    },
+    /**
+     *
+     * @returns
+     */
+    closeSecondaryDocument() {
+      const docKeys = self.currentDocumentKeys;
+      if (!docKeys || docKeys.length < 2) return;
+
+      docKeys.splice(1, 1);
+    }
+  }));
+
+/**
+ * This model is used to track which document group of a tab is open, which documents are open in
+ * each document group, and which secondaryDocuments (comparison) documents are open in each
+ * document group.
+ * For the StudentGroupView the currentDocumentGroupId is the student group id.
+ * For the SortWorkView the currentDocumentGroupId in an encoding the filters for group documents
+ * that are currently open.
+ *
+ * TODO: Create different tab types so so the models can more clearly match the UI
+ */
 export const UITabModel = types
   .model("UITab", {
     id: types.identifier,
-    openSubTab: types.maybe(types.string),
-    // The key of this map is the sub tab label
-    openDocuments: types.map(types.string),
-    openSecondaryDocuments: types.map(types.string)
-  });
+    /**
+     * The currently open document group on this tab. This could be a subtab, a workgroup,
+     * or a collapsible section on the sort work tab.
+     */
+    currentDocumentGroupId: types.maybe(types.string),
+    /**
+     * Document groups that the user has visited.
+     */
+    visitedDocumentGroups: types.map(UIDocumentGroup),
+  })
+  .views(self => ({
+    /**
+     * Return the document group. Note: if there is no state saved about this document
+     * group then undefined will be returned. Use getOrCreateDocumentGroup if you need to save
+     * state.
+     * @param docGroupId
+     * @returns
+     */
+    getDocumentGroup(docGroupId: string) {
+      return self.visitedDocumentGroups.get(docGroupId);
+    },
+  }))
+  .views(self => ({
+    /**
+     * Note: If there hasn't been any state saved about the currentDocumentGroupId then
+     * this will return undefined. Use getOrCreateDocumentGroup if you need to save
+     * state.
+     */
+    get currentDocumentGroup() {
+      if (!self.currentDocumentGroupId) return undefined;
 
-export const PersistentUIModel = types
+      return self.getDocumentGroup(self.currentDocumentGroupId);
+    },
+    getPrimaryDocumentInDocumentGroup(docGroupId: string) {
+      return self.visitedDocumentGroups.get(docGroupId)?.primaryDocumentKey;
+    },
+    getSecondaryDocumentInDocumentGroup(docGroupId: string) {
+      return self.visitedDocumentGroups.get(docGroupId)?.secondaryDocumentKey;
+    }
+  }))
+  .actions(self => ({
+    /**
+     * This should not be used from view. Because this is an action the properties it reads
+     * will not be observed by that parent view. For example if the documentGroup is
+     * deleted, that would not trigger the parent view to be re-rendered.
+     * @param docGroupId
+     * @returns
+     */
+    getOrCreateDocumentGroup(docGroupId: string) {
+      let group = self.visitedDocumentGroups.get(docGroupId);
+      if (!group) {
+        group = UIDocumentGroup.create({id: docGroupId});
+        self.visitedDocumentGroups.put(group);
+      }
+      return group;
+    }
+  }))
+  .actions(self => ({
+    /**
+     * This will create or update the UIDocumentGroup in this tab.
+     * This will not change the currentDocumentGroup.
+     *
+     * @param docGroupId
+     * @param documentKey
+     */
+    setPrimaryDocumentInDocumentGroup(docGroupId: string, documentKey: string) {
+      const group = self.getOrCreateDocumentGroup(docGroupId);
+      group.setPrimaryDocumentKey(documentKey);
+    },
+    setSecondaryDocumentInDocumentGroup(docGroupId: string, documentKey: string) {
+      const group = self.getOrCreateDocumentGroup(docGroupId);
+      group.setSecondaryDocumentKey(documentKey);
+    }
+  }))
+  .actions(self => ({
+    openPrimaryDocumentInDocumentGroup(docGroupId: string, documentKey: string) {
+      self.setPrimaryDocumentInDocumentGroup(docGroupId, documentKey);
+      self.currentDocumentGroupId = docGroupId;
+    },
+  }));
+
+interface UITabModel_V1 {
+  id: string,
+  openSubTab?: string,
+  openDocuments: Record<string, string>,
+  openSecondaryDocuments: Record<string, string>
+}
+
+export const PersistentUIModelV2 = types
   .model("PersistentUI", {
     dividerPosition: kDividerHalf,
     activeNavTab: types.maybe(types.string),
@@ -48,7 +240,7 @@ export const PersistentUIModel = types
     tabs: types.map(UITabModel),
     problemWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string),
-    version: types.optional(types.literal(kPersistentUiStateVersion), kPersistentUiStateVersion),
+    version: types.optional(types.literal(kPersistentUiStateVersion2), kPersistentUiStateVersion2),
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
@@ -62,8 +254,12 @@ export const PersistentUIModel = types
       return self.dividerPosition < kDividerMax;
     },
     get openSubTab () {
-      return self.activeNavTab && self.tabs.get(self.activeNavTab)?.openSubTab;
+      return self.activeNavTab && self.tabs.get(self.activeNavTab)?.currentDocumentGroupId;
     },
+    get activeTabModel () {
+      if (!self.activeNavTab) return undefined;
+      return self.tabs.get(self.activeNavTab);
+    }
   }))
   .views((self) => ({
     // document key or section path for resource (left) document
@@ -72,12 +268,7 @@ export const PersistentUIModel = types
         const facet = self.activeNavTab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
         return buildSectionPath(self.problemPath, self.openSubTab, facet);
       } else {
-        if (self.activeNavTab && self.openSubTab) {
-          const activeTabState = self.tabs.get(self.activeNavTab);
-          return activeTabState?.openDocuments.get(self.openSubTab);
-        } else {
-          return undefined;
-        }
+        return self.activeTabModel?.currentDocumentGroup?.primaryDocumentKey;
       }
     },
     get focusSecondaryDocument () {
@@ -85,130 +276,127 @@ export const PersistentUIModel = types
         const facet = self.activeNavTab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
         return buildSectionPath(self.problemPath, self.openSubTab, facet);
       } else {
-        if (self.activeNavTab && self.openSubTab) {
-          const activeTabState = self.tabs.get(self.activeNavTab);
-          return activeTabState?.openSecondaryDocuments.get(self.openSubTab);
-        } else {
-          return undefined;
-        }
+        return self.activeTabModel?.currentDocumentGroup?.secondaryDocumentKey;
       }
     },
   }))
-  .actions((self) => {
-
-    const getTabState = (tab: string) => {
+  .actions(self => ({
+    getOrCreateTabState(tab: string) {
       let tabState = self.tabs.get(tab);
       if (!tabState) {
         tabState = UITabModel.create({id: tab});
         self.tabs.put(tabState);
       }
       return tabState;
-    };
-    return {
-      setDividerPosition(position: number) {
-        self.dividerPosition = position;
-      },
-      setShowAnnotations(show: boolean) {
-        self.showAnnotations = show;
-      },
-      toggleShowTeacherContent(show: boolean) {
-        self.showTeacherContent = show;
-      },
-      toggleShowChatPanel(show: boolean) {
-        self.showChatPanel = show;
-      },
-      toggleShowDocumentScroller(show: boolean) {
-        self.showDocumentScroller = show;
-      },
-      setActiveNavTab(tab: string) {
-        self.activeNavTab = tab;
-      },
-      rightNavDocumentSelected(appConfig: AppConfigModelType, document: DocumentModelType) {
-        if (!document.isPublished || appConfig.showPublishedDocsInPrimaryWorkspace) {
-          self.problemWorkspace.setAvailableDocument(document);
+    }
+  }))
+  .actions((self) => ({
+    setDividerPosition(position: number) {
+      self.dividerPosition = position;
+    },
+    setShowAnnotations(show: boolean) {
+      self.showAnnotations = show;
+    },
+    toggleShowTeacherContent(show: boolean) {
+      self.showTeacherContent = show;
+    },
+    toggleShowChatPanel(show: boolean) {
+      self.showChatPanel = show;
+    },
+    toggleShowDocumentScroller(show: boolean) {
+      self.showDocumentScroller = show;
+    },
+    setActiveNavTab(tab: string) {
+      self.activeNavTab = tab;
+    },
+    rightNavDocumentSelected(appConfig: AppConfigModelType, document: DocumentModelType) {
+      if (!document.isPublished || appConfig.showPublishedDocsInPrimaryWorkspace) {
+        self.problemWorkspace.setAvailableDocument(document);
+      }
+      else if (document.isPublished) {
+        if (self.problemWorkspace.primaryDocumentKey) {
+          self.problemWorkspace.setComparisonDocument(document);
+          self.problemWorkspace.toggleComparisonVisible({override: true});
         }
-        else if (document.isPublished) {
-          if (self.problemWorkspace.primaryDocumentKey) {
-            self.problemWorkspace.setComparisonDocument(document);
-            self.problemWorkspace.toggleComparisonVisible({override: true});
-          }
-          else {
-            alert("Please select a primary document first.");
-          }
+        else {
+          alert("Please select a primary document first.");
         }
-      },
-      setTeacherPanelKey(key: string) {
-        self.teacherPanelKey = key;
-      },
-
-      // We could switch this to openSubTab, however that would imply that the activeTab would be
-      // switched if this is called. When all of the tabs are initialized this is called to setup
-      // the default sub tab or each main tab, so we don't want to be switching the activeTab in
-      // that case.
-      setOpenSubTab(tab: string, subTab: string) {
-        const tabState = getTabState(tab);
-        tabState.openSubTab = subTab;
-      },
-      /**
-       * Set the open document in a sub tab. Do not actually open
-       * the navTab or subTab.
-       *
-       * @param tab
-       * @param subTab
-       * @param documentKey
-       */
-      setOpenSubTabDocument(tab: string, subTab: string, documentKey: string) {
-        const tabState = getTabState(tab);
-        tabState.openDocuments.set(subTab, documentKey);
-      },
-      setOpenSubTabSecondaryDocument(tab: string, subTab: string, documentKey: string) {
-        const tabState = getTabState(tab);
-        tabState.openDocuments.set(subTab, documentKey);
-      },
-      /**
-       * Open to the tab and subTab and open a document.
-       *
-       * @param tab
-       * @param subTab
-       * @param documentKey
-       */
-      openSubTabDocument(tab: string, subTab: string, documentKey: string) {
-        const tabState = getTabState(tab);
-        self.activeNavTab = tab;
-        tabState.openSubTab = subTab;
-        tabState.openDocuments.set(subTab, documentKey);
-      },
-      openSubTabSecondaryDocument(tab: string, subTab: string, documentKey: string) {
-        const tabState = getTabState(tab);
-        self.activeNavTab = tab;
-        tabState.openSubTab = subTab;
-        tabState.openSecondaryDocuments.set(subTab, documentKey);
-      },
-      // Defaults to the current tab and subtab
-      closeSubTabDocument(tab: string|undefined=self.activeNavTab, subTab: string|undefined=self.openSubTab) {
-        if (tab && subTab) {
-          const tabState = getTabState(tab);
-          tabState.openDocuments.delete(subTab);
-        }
-      },
-      closeSubTabSecondaryDocument(tab: string, subTab: string) {
-        const tabState = getTabState(tab);
-        tabState.openSecondaryDocuments.delete(subTab);
-      },
-      setProblemPath(problemPath: string) {
-        self.problemPath = problemPath;
-      },
-      setDocFilter(docFilter: DocFilterType) {
-        self.docFilter = docFilter;
-      },
-      setPrimarySortBy(sort: string) {
-        self.primarySortBy = sort;
-      },
-      setSecondarySortBy(sort: string) {
-        self.secondarySortBy = sort;
-      },
-    };
-  })
+      }
+    },
+    setTeacherPanelKey(key: string) {
+      self.teacherPanelKey = key;
+    },
+    /**
+     * Set this document group of tab to be open. It does **not** open the tab, just the document group.
+     * So it will **not** necessarily show this document group to the user. This is useful so code can
+     * initialize a default document group without changing what the user is currently seeing.
+     *
+     * @param tab
+     * @param docGroupId
+     */
+    setCurrentDocumentGroupId(tab: string, docGroupId: string) {
+      const tabState = self.getOrCreateTabState(tab);
+      tabState.currentDocumentGroupId = docGroupId;
+    },
+    /**
+     * Set the open document in a sub tab. Do not actually open
+     * the navTab or subTab.
+     *
+     * @param tab
+     * @param subTab
+     * @param documentKey
+     */
+    setOpenSubTabDocument(tab: string, subTab: string, documentKey: string) {
+      const tabState = self.getOrCreateTabState(tab);
+      tabState.setPrimaryDocumentInDocumentGroup(subTab, documentKey);
+    },
+    /**
+     * Open to the tab and subTab and open a document.
+     *
+     * @param tab
+     * @param subTab
+     * @param documentKey
+     */
+    openSubTabDocument(tab: string, subTab: string, documentKey: string) {
+      const tabState = self.getOrCreateTabState(tab);
+      self.activeNavTab = tab;
+      tabState.openPrimaryDocumentInDocumentGroup(subTab, documentKey);
+    },
+    openSubTabSecondaryDocument(tab: string, subTab: string, documentKey: string) {
+      const tabState = self.getOrCreateTabState(tab);
+      self.activeNavTab = tab;
+      tabState.setSecondaryDocumentInDocumentGroup(subTab, documentKey);
+      tabState.currentDocumentGroupId = subTab;
+    },
+    // Defaults to the current tab and subtab
+    closeSubTabDocument(tab: string|undefined=self.activeNavTab, subTab: string|undefined=self.openSubTab) {
+      if (tab && subTab) {
+        const tabState = self.getOrCreateTabState(tab);
+        const group = tabState.visitedDocumentGroups.get(subTab);
+        // TODO: we probably want to create the group here if it doesn't exist. This way we can record
+        // this user action of closing a document. However before doing that we need to implement the
+        // default behavior to see if this close action will be called when a document is open by default.
+        group?.closePrimaryDocument();
+      }
+    },
+    closeSubTabSecondaryDocument(tab: string, subTab: string) {
+      const tabState = self.getOrCreateTabState(tab);
+      const group = tabState.visitedDocumentGroups.get(subTab);
+      group?.closeSecondaryDocument();
+    },
+    setProblemPath(problemPath: string) {
+      self.problemPath = problemPath;
+    },
+    setDocFilter(docFilter: DocFilterType) {
+      self.docFilter = docFilter;
+    },
+    setPrimarySortBy(sort: string) {
+      self.primarySortBy = sort;
+    },
+    setSecondarySortBy(sort: string) {
+      self.secondarySortBy = sort;
+    },
+  }))
   .actions(self => ({
     /**
      * Update the top level tab in the resources panel (left side), and guess a sub tab to open to view
@@ -269,7 +457,7 @@ export const PersistentUIModel = types
         return;
       }
       self.setActiveNavTab(navTab);
-      self.setOpenSubTab(navTab, subTab);
+      self.setCurrentDocumentGroupId(navTab, subTab);
     },
     async initializePersistentUISync(user: UserModelType, db: DB) {
       if (urlParams.noPersistentUI) return;
@@ -301,7 +489,59 @@ export const PersistentUIModel = types
     }
 }));
 
-export type PersistentUIModelType = typeof PersistentUIModel.Type;
+export interface PersistentUIModelV1Snapshot extends
+  Omit<SnapshotIn<typeof PersistentUIModelV2>, "version" | "tabs">
+  {
+    version: typeof kPersistentUiStateVersion1,
+    tabs: Record<string, UITabModel_V1>
+  }
+
+export interface PersistenUIModelV2Snapshot extends SnapshotIn<typeof PersistentUIModelV2> {}
+
+export const PersistentUIModel = types.snapshotProcessor(PersistentUIModelV2, {
+  preProcessor(_snapshot) {
+    const snapshot = _snapshot as unknown as PersistentUIModelV1Snapshot | PersistenUIModelV2Snapshot;
+    if (snapshot.version === kPersistentUiStateVersion1) {
+      const migrated = cloneDeep(snapshot) as unknown as PersistenUIModelV2Snapshot;
+      migrated.version = kPersistentUiStateVersion2;
+      const migratedTabs: NonNullable<PersistenUIModelV2Snapshot["tabs"]> = {};
+      migrated.tabs = migratedTabs;
+      Object.keys(snapshot.tabs).forEach(tabKey => {
+        const snapshotTab = snapshot.tabs[tabKey];
+
+        const visitedDocumentGroups: NonNullable<SnapshotIn<typeof UITabModel>["visitedDocumentGroups"]> = {};
+        Object.keys(snapshotTab.openDocuments).forEach(docGroupId => {
+          visitedDocumentGroups[docGroupId] = {
+            id: docGroupId,
+            currentDocumentKeys: [snapshotTab.openDocuments[docGroupId]]
+          };
+        });
+        Object.keys(snapshotTab.openSecondaryDocuments).forEach(docGroupId => {
+          const documentKey = snapshotTab.openSecondaryDocuments[docGroupId];
+          const existingGroup = visitedDocumentGroups[docGroupId];
+          if (existingGroup && existingGroup.currentDocumentKeys) {
+            (existingGroup.currentDocumentKeys as string[]).push(documentKey);
+            return;
+          }
+          visitedDocumentGroups[docGroupId] = {
+            id: docGroupId,
+            currentDocumentKeys: [snapshotTab.openSecondaryDocuments[docGroupId]]
+          };
+        });
+        migratedTabs[tabKey] = {
+          id: tabKey,
+          currentDocumentGroupId: snapshotTab.openSubTab,
+          visitedDocumentGroups
+        };
+      });
+      return migrated;
+    } else {
+      return snapshot as unknown as SnapshotIn<typeof PersistentUIModelV2>;
+    }
+  }
+});
+
+export interface PersistentUIModelType extends Instance<typeof PersistentUIModel> {}
 
 
 // Maybe this should return the navTab and subTab

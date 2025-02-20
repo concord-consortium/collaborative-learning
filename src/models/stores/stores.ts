@@ -221,7 +221,7 @@ class Stores implements IStores{
    */
   get studentWorkTabSelectedGroupId() {
     const { persistentUI, groups } = this;
-    return persistentUI.tabs.get("student-work")?.openSubTab
+    return persistentUI.tabs.get("student-work")?.currentDocumentGroupId
         || (groups.nonEmptyGroups.length ? groups.nonEmptyGroups[0].id : "");
   }
 
@@ -237,7 +237,7 @@ class Stores implements IStores{
     // waiting
     when(
       () => this.studentWorkTabSelectedGroupId !== "",
-      () => this.persistentUI.setOpenSubTab("student-work", this.studentWorkTabSelectedGroupId)
+      () => this.persistentUI.setCurrentDocumentGroupId("student-work", this.studentWorkTabSelectedGroupId)
     );
   }
 
