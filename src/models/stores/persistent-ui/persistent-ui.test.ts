@@ -1,6 +1,7 @@
-import { getSnapshot } from "@concord-consortium/mobx-state-tree";
+import { applySnapshot, getSnapshot } from "@concord-consortium/mobx-state-tree";
 import {
-  PersistentUIModel, PersistentUIModelV1Snapshot, PersistenUIModelV2Snapshot} from "./persistent-ui";
+  PersistentUIModel, PersistentUIModelV1Snapshot, persistentUIModelPreProcessor, PersistentUIModelV2Snapshot
+} from "./persistent-ui";
 import { UITabModel } from "./ui-tab-model";
 import { UIDocumentGroup } from "./ui-document-group";
 
@@ -205,10 +206,12 @@ describe("PersistentUI", () => {
         problemWorkspace: {
           type: "problem",
           mode: "1-up"
-        }
+        },
+        showChatPanel: true
       };
-      const ui = PersistentUIModel.create(snapshot as unknown as PersistenUIModelV2Snapshot);
+      const ui = PersistentUIModel.create(snapshot as unknown as PersistentUIModelV2Snapshot);
       expect(ui.version).toBe("2.0.0");
+      expect(ui.showChatPanel).toBe(true);
     });
     it("converts the openSubTab from the snapshot", () => {
       const snapshot: PersistentUIModelV1Snapshot = {
@@ -227,7 +230,7 @@ describe("PersistentUI", () => {
           mode: "1-up"
         }
       };
-      const ui = PersistentUIModel.create(snapshot as unknown as PersistenUIModelV2Snapshot);
+      const ui = PersistentUIModel.create(snapshot as unknown as PersistentUIModelV2Snapshot);
       expect(ui.version).toBe("2.0.0");
       expect(ui.tabs.get("test")?.currentDocumentGroupId).toBe("testSubTab");
       expect(ui.currentDocumentGroupId).toBe("testSubTab");
@@ -252,7 +255,7 @@ describe("PersistentUI", () => {
           mode: "1-up"
         }
       };
-      const ui = PersistentUIModel.create(snapshot as unknown as PersistenUIModelV2Snapshot);
+      const ui = PersistentUIModel.create(snapshot as unknown as PersistentUIModelV2Snapshot);
       const migrated = getSnapshot(ui);
       expect(migrated).toMatchObject({
         version: "2.0.0",
@@ -312,7 +315,7 @@ describe("PersistentUI", () => {
           mode: "1-up"
         }
       };
-      const ui = PersistentUIModel.create(snapshot as unknown as PersistenUIModelV2Snapshot);
+      const ui = PersistentUIModel.create(snapshot as unknown as PersistentUIModelV2Snapshot);
       const migrated = getSnapshot(ui);
       expect(migrated).toMatchObject({
         version: "2.0.0",
@@ -353,6 +356,64 @@ describe("PersistentUI", () => {
       expect(tabModel.currentDocumentGroup?.secondaryDocumentKey).toBe("doc3");
       expect(tabModel.getPrimaryDocumentInDocumentGroup("testSubTab2")).toBe("doc2");
       expect([...tabModel.visitedDocumentGroups.keys()]).toEqual(["testSubTab1", "testSubTab2", "testSubTab3"]);
+    });
+    it("converts real version 1 state", () => {
+      const realV1State: PersistentUIModelV1Snapshot = {
+        "dividerPosition": 50,
+        "activeNavTab": "problems",
+        "docFilter": "Problem",
+        "primarySortBy": "Group",
+        "secondarySortBy": "None",
+        "showAnnotations": true,
+        "showTeacherContent": true,
+        "showChatPanel": true,
+        "showDocumentScroller": true,
+        "tabs": {
+            "problems": {
+                "id": "problems",
+                "openSubTab": "introduction",
+                "openDocuments": {},
+                "openSecondaryDocuments": {}
+            },
+            "teacher-guide": {
+                "id": "teacher-guide",
+                "openSubTab": "launch",
+                "openDocuments": {},
+                "openSecondaryDocuments": {}
+            },
+            "my-work": {
+                "id": "my-work",
+                "openSubTab": "Workspaces",
+                "openDocuments": {},
+                "openSecondaryDocuments": {}
+            }
+        },
+        "problemWorkspace": {
+            "type": "problem",
+            "mode": "1-up",
+            "primaryDocumentKey": "-OJdBCDm6Pq-zdpzVTPP",
+            "comparisonVisible": false,
+            "hidePrimaryForCompare": false
+        },
+        "version": "1.0.0"
+      };
+      const ui = PersistentUIModel.create({
+        version: "2.0.0",
+        tabs: {},
+        problemWorkspace: {
+          type: "problem",
+          mode: "1-up"
+        }
+      });
+      // This behavior is currently broken in MST, if that gets fixed
+      // this test should be updated
+      expect(() => applySnapshot(ui, realV1State as unknown)).toThrow();
+
+      const migratedSnapshot = persistentUIModelPreProcessor(realV1State as unknown);
+      applySnapshot(ui, migratedSnapshot);
+
+
+      expect(ui.version).toBe("2.0.0");
     });
   });
 });

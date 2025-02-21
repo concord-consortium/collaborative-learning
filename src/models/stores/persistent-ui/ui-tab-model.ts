@@ -95,6 +95,7 @@ export const UITabModel = types
       self.currentDocumentGroupId = docGroupId;
     },
   }));
+
 export interface UITabModel_V1 {
   id: string;
   openSubTab?: string;

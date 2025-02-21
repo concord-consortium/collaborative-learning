@@ -279,7 +279,8 @@ export const PersistentUIModelV2 = types
           problemWorkspace.comparisonDocumentKey = undefined;
           problemWorkspace.comparisonVisible = false;
         }
-        applySnapshot(self, asObj);
+        const migratedSnapshot = persistentUIModelPreProcessor(asObj);
+        applySnapshot(self, migratedSnapshot);
       }
       removeLoadingMessage("Loading current activity");
 
@@ -298,49 +299,51 @@ export interface PersistentUIModelV1Snapshot extends
     tabs: Record<string, UITabModel_V1>
   }
 
-export interface PersistenUIModelV2Snapshot extends SnapshotIn<typeof PersistentUIModelV2> {}
+export interface PersistentUIModelV2Snapshot extends SnapshotIn<typeof PersistentUIModelV2> {}
 
-export const PersistentUIModel = types.snapshotProcessor(PersistentUIModelV2, {
-  preProcessor(_snapshot) {
-    const snapshot = _snapshot as unknown as PersistentUIModelV1Snapshot | PersistenUIModelV2Snapshot;
-    if (snapshot.version === kPersistentUiStateVersion1) {
-      const migrated = cloneDeep(snapshot) as unknown as PersistenUIModelV2Snapshot;
-      migrated.version = kPersistentUiStateVersion2;
-      const migratedTabs: NonNullable<PersistenUIModelV2Snapshot["tabs"]> = {};
-      migrated.tabs = migratedTabs;
-      Object.keys(snapshot.tabs).forEach(tabKey => {
-        const snapshotTab = snapshot.tabs[tabKey];
+export function persistentUIModelPreProcessor(_snapshot: unknown) {
+  const snapshot = _snapshot as PersistentUIModelV1Snapshot | PersistentUIModelV2Snapshot;
+  if (snapshot.version === kPersistentUiStateVersion1) {
+    const migrated = cloneDeep(snapshot) as unknown as PersistentUIModelV2Snapshot;
+    migrated.version = kPersistentUiStateVersion2;
+    const migratedTabs: NonNullable<PersistentUIModelV2Snapshot["tabs"]> = {};
+    migrated.tabs = migratedTabs;
+    Object.keys(snapshot.tabs).forEach(tabKey => {
+      const snapshotTab = snapshot.tabs[tabKey];
 
-        const visitedDocumentGroups: NonNullable<SnapshotIn<typeof UITabModel>["visitedDocumentGroups"]> = {};
-        Object.keys(snapshotTab.openDocuments).forEach(docGroupId => {
-          visitedDocumentGroups[docGroupId] = {
-            id: docGroupId,
-            currentDocumentKeys: [snapshotTab.openDocuments[docGroupId]]
-          };
-        });
-        Object.keys(snapshotTab.openSecondaryDocuments).forEach(docGroupId => {
-          const documentKey = snapshotTab.openSecondaryDocuments[docGroupId];
-          const existingGroup = visitedDocumentGroups[docGroupId];
-          if (existingGroup && existingGroup.currentDocumentKeys) {
-            (existingGroup.currentDocumentKeys as string[]).push(documentKey);
-            return;
-          }
-          visitedDocumentGroups[docGroupId] = {
-            id: docGroupId,
-            currentDocumentKeys: [snapshotTab.openSecondaryDocuments[docGroupId]]
-          };
-        });
-        migratedTabs[tabKey] = {
-          id: tabKey,
-          currentDocumentGroupId: snapshotTab.openSubTab,
-          visitedDocumentGroups
+      const visitedDocumentGroups: NonNullable<SnapshotIn<typeof UITabModel>["visitedDocumentGroups"]> = {};
+      Object.keys(snapshotTab.openDocuments).forEach(docGroupId => {
+        visitedDocumentGroups[docGroupId] = {
+          id: docGroupId,
+          currentDocumentKeys: [snapshotTab.openDocuments[docGroupId]]
         };
       });
-      return migrated;
-    } else {
-      return snapshot as unknown as SnapshotIn<typeof PersistentUIModelV2>;
-    }
+      Object.keys(snapshotTab.openSecondaryDocuments).forEach(docGroupId => {
+        const documentKey = snapshotTab.openSecondaryDocuments[docGroupId];
+        const existingGroup = visitedDocumentGroups[docGroupId];
+        if (existingGroup && existingGroup.currentDocumentKeys) {
+          (existingGroup.currentDocumentKeys as string[]).push(documentKey);
+          return;
+        }
+        visitedDocumentGroups[docGroupId] = {
+          id: docGroupId,
+          currentDocumentKeys: [snapshotTab.openSecondaryDocuments[docGroupId]]
+        };
+      });
+      migratedTabs[tabKey] = {
+        id: tabKey,
+        currentDocumentGroupId: snapshotTab.openSubTab,
+        visitedDocumentGroups
+      };
+    });
+    return migrated;
+  } else {
+    return snapshot as unknown as SnapshotIn<typeof PersistentUIModelV2>;
   }
+}
+
+export const PersistentUIModel = types.snapshotProcessor(PersistentUIModelV2, {
+  preProcessor: persistentUIModelPreProcessor
 });
 
 export interface PersistentUIModelType extends Instance<typeof PersistentUIModel> {}
