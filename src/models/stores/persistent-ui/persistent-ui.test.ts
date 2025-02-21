@@ -1,7 +1,8 @@
 import { getSnapshot } from "@concord-consortium/mobx-state-tree";
 import {
-  PersistentUIModel, PersistentUIModelV1Snapshot, PersistenUIModelV2Snapshot, UIDocumentGroup, UITabModel
-} from "./persistent-ui";
+  PersistentUIModel, PersistentUIModelV1Snapshot, PersistenUIModelV2Snapshot} from "./persistent-ui";
+import { UITabModel } from "./ui-tab-model";
+import { UIDocumentGroup } from "./ui-document-group";
 
 describe("PersistentUI", () => {
   describe("UIDocumentGroup", () => {
