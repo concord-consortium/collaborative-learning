@@ -110,7 +110,8 @@
               "properties": [
                 "isTeacherDocument",
                 "!isDeleted"
-              ]
+              ],
+              "openFirstDocumentAutomatically": true
             }
           ]
         },
