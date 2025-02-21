@@ -59,7 +59,7 @@ const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function Grou
 
   const handleSelectGroup = (id: string) => {
     persistentUI.setCurrentDocumentGroupId("student-work", id);
-    persistentUI.closeSubTabDocument("student-work", id);
+    persistentUI.closeDocumentGroupPrimaryDocument("student-work", id);
     Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
   };
 

@@ -83,12 +83,12 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
       try {
         openGroupMetadata = JSON.parse(maybeTabState.currentDocumentGroupId);
       } catch (e) {
-        persistentUI.closeSubTabDocument(ENavTab.kSortWork);
+        persistentUI.closeDocumentGroupPrimaryDocument(ENavTab.kSortWork);
         return;
       }
 
       if (openGroupMetadata.primaryType !== primarySearchTerm) {
-        persistentUI.closeSubTabDocument(ENavTab.kSortWork);
+        persistentUI.closeDocumentGroupPrimaryDocument(ENavTab.kSortWork);
       } else {
         openGroup = sortedDocumentGroups.find(group => group.label === openGroupMetadata.primaryLabel);
         if (openGroupMetadata.secondaryType === secondarySearchTerm) {

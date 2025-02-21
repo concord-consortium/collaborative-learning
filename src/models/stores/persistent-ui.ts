@@ -58,6 +58,9 @@ export const UIDocumentGroup = types
         return undefined;
       }
       return self.currentDocumentKeys[1];
+    },
+    get userExplicitlyClosedDocument() {
+      return self.currentDocumentKeys?.length === 0;
     }
   }))
   .actions(self => ({
@@ -253,7 +256,7 @@ export const PersistentUIModelV2 = types
     get workspaceShown () {
       return self.dividerPosition < kDividerMax;
     },
-    get openSubTab () {
+    get currentDocumentGroupId () {
       return self.activeNavTab && self.tabs.get(self.activeNavTab)?.currentDocumentGroupId;
     },
     get activeTabModel () {
@@ -266,7 +269,7 @@ export const PersistentUIModelV2 = types
     get focusDocument () {
       if (self.activeNavTab === ENavTab.kProblems || self.activeNavTab === ENavTab.kTeacherGuide) {
         const facet = self.activeNavTab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
-        return buildSectionPath(self.problemPath, self.openSubTab, facet);
+        return buildSectionPath(self.problemPath, self.currentDocumentGroupId, facet);
       } else {
         return self.activeTabModel?.currentDocumentGroup?.primaryDocumentKey;
       }
@@ -274,7 +277,7 @@ export const PersistentUIModelV2 = types
     get focusSecondaryDocument () {
       if (self.activeNavTab === ENavTab.kProblems || self.activeNavTab === ENavTab.kTeacherGuide) {
         const facet = self.activeNavTab === ENavTab.kTeacherGuide ? ENavTab.kTeacherGuide : undefined;
-        return buildSectionPath(self.problemPath, self.openSubTab, facet);
+        return buildSectionPath(self.problemPath, self.currentDocumentGroupId, facet);
       } else {
         return self.activeTabModel?.currentDocumentGroup?.secondaryDocumentKey;
       }
@@ -368,20 +371,21 @@ export const PersistentUIModelV2 = types
       tabState.setSecondaryDocumentInDocumentGroup(subTab, documentKey);
       tabState.currentDocumentGroupId = subTab;
     },
-    // Defaults to the current tab and subtab
-    closeSubTabDocument(tab: string|undefined=self.activeNavTab, subTab: string|undefined=self.openSubTab) {
-      if (tab && subTab) {
+    // Defaults to the current tab and document group
+    closeDocumentGroupPrimaryDocument(
+      tab: string|undefined=self.activeNavTab, documentGroupId: string|undefined=self.currentDocumentGroupId
+    ) {
+      if (tab && documentGroupId) {
         const tabState = self.getOrCreateTabState(tab);
-        const group = tabState.visitedDocumentGroups.get(subTab);
-        // TODO: we probably want to create the group here if it doesn't exist. This way we can record
-        // this user action of closing a document. However before doing that we need to implement the
-        // default behavior to see if this close action will be called when a document is open by default.
-        group?.closePrimaryDocument();
+        // We create the group if it doesn't exist, so we can save the state indicating the user
+        // explicitly closed the document
+        const group = tabState.getOrCreateDocumentGroup(documentGroupId);
+        group.closePrimaryDocument();
       }
     },
-    closeSubTabSecondaryDocument(tab: string, subTab: string) {
+    closeDocumentGroupSecondaryDocument(tab: string, documentGroupId: string) {
       const tabState = self.getOrCreateTabState(tab);
-      const group = tabState.visitedDocumentGroups.get(subTab);
+      const group = tabState.visitedDocumentGroups.get(documentGroupId);
       group?.closeSecondaryDocument();
     },
     setProblemPath(problemPath: string) {

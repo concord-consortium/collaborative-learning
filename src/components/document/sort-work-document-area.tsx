@@ -83,7 +83,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   };
 
   const handleCloseButtonClick = () => {
-    persistentUI.closeSubTabDocument();
+    persistentUI.closeDocumentGroupPrimaryDocument();
   };
 
   const handleToggleScroller = () => {

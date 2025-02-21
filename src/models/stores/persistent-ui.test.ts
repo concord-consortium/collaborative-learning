@@ -109,6 +109,27 @@ describe("PersistentUI", () => {
       });
 
     });
+    describe("userExplicitlyClosedDocument", () => {
+      it("works properly", () => {
+        const group1 = UIDocumentGroup.create({
+          id: "student-work",
+          currentDocumentKeys: undefined
+        });
+        expect(group1.userExplicitlyClosedDocument).toBe(false);
+
+        const group2 = UIDocumentGroup.create({
+          id: "student-work",
+          currentDocumentKeys: []
+        });
+        expect(group2.userExplicitlyClosedDocument).toBe(true);
+
+        const group3 = UIDocumentGroup.create({
+          id: "student-work",
+          currentDocumentKeys: ["primaryDoc"]
+        });
+        expect(group3.userExplicitlyClosedDocument).toBe(false);
+      });
+    });
   });
 
   describe("UITabModel", () => {
@@ -153,6 +174,28 @@ describe("PersistentUI", () => {
     });
   });
 
+  describe("closeDocumentGroupPrimaryDocument", () => {
+    it("saves the users intention", () => {
+      const ui = PersistentUIModel.create({
+        version: "2.0.0",
+        tabs: {
+          test: {
+            id: "test",
+            currentDocumentGroupId: "testSubTab"
+          }
+        },
+        activeNavTab: "test",
+        problemWorkspace: {
+          type: "problem",
+          mode: "1-up"
+        }
+      });
+      expect(ui.tabs.get("test")?.currentDocumentGroup?.userExplicitlyClosedDocument).toBeFalsy();
+      ui.closeDocumentGroupPrimaryDocument();
+      expect(ui.tabs.get("test")?.currentDocumentGroup?.userExplicitlyClosedDocument).toBe(true);
+    });
+  });
+
   describe("migration from V1", () => {
     it("can load a basic V1 snapshot", () => {
       const snapshot: PersistentUIModelV1Snapshot = {
@@ -186,7 +229,7 @@ describe("PersistentUI", () => {
       const ui = PersistentUIModel.create(snapshot as unknown as PersistenUIModelV2Snapshot);
       expect(ui.version).toBe("2.0.0");
       expect(ui.tabs.get("test")?.currentDocumentGroupId).toBe("testSubTab");
-      expect(ui.openSubTab).toBe("testSubTab");
+      expect(ui.currentDocumentGroupId).toBe("testSubTab");
     });
     it("converts the openDocuments from the snapshot", () => {
       const snapshot: PersistentUIModelV1Snapshot = {
@@ -234,7 +277,7 @@ describe("PersistentUI", () => {
           mode: "1-up"
         }
       });
-      expect(ui.openSubTab).toBe("testSubTab1");
+      expect(ui.currentDocumentGroupId).toBe("testSubTab1");
 
       const tabModel = ui.activeTabModel;
       expect(tabModel).toBeDefined();
@@ -298,7 +341,7 @@ describe("PersistentUI", () => {
           mode: "1-up"
         }
       });
-      expect(ui.openSubTab).toBe("testSubTab1");
+      expect(ui.currentDocumentGroupId).toBe("testSubTab1");
 
       const tabModel = ui.activeTabModel;
       expect(tabModel).toBeDefined();

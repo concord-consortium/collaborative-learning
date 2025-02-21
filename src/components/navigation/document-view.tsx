@@ -11,13 +11,23 @@ import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DocumentModelType } from "../../models/document/document";
 import { EditableDocumentContent } from "../document/editable-document-content";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
+import { SectionDocuments } from "../../models/stores/section-docs-store";
 import { DocumentBrowserScroller, ScrollButton } from "./document-browser-scroller";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
-import CloseIcon from "../../../src/assets/icons/close/close.svg";
+import CloseIcon from "../../assets/icons/close/close.svg";
 
 interface IProps {
   tabSpec: NavTabModelType;
   subTab: ISubTabModel;
+}
+
+function getFirstDocumentKey(subTab: ISubTabModel, sectionDocuments: SectionDocuments) {
+  for (const section of subTab.sections) {
+    const sectionDocs = sectionDocuments.getSectionDocs(section);
+    if (sectionDocs.length > 0) {
+      return sectionDocs[0].key;
+    }
+  }
 }
 
 //TODO: Need to refactor this if we want to deploy to all tabs
@@ -30,7 +40,11 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const documents = useLocalDocuments();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const maybeTabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
-  const openDocumentKey = maybeTabState?.getPrimaryDocumentInDocumentGroup(subTab.label) || "";
+  const { sectionDocuments } = useStores();
+  const openDocumentKey =
+    maybeTabState?.getPrimaryDocumentInDocumentGroup(subTab.label) ||
+    getFirstDocumentKey(subTab, sectionDocuments) ||
+    "";
   const openDocument = store.documents.getDocument(openDocumentKey) ||
     store.networkDocuments.getDocument(openDocumentKey);
   const openSecondaryDocumentKey = maybeTabState?.getSecondaryDocumentInDocumentGroup(subTab.label) || "";
@@ -83,13 +97,13 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
     if (persistentUI.focusDocument === document.key) {
       if (persistentUI.focusSecondaryDocument) {
         persistentUI.openSubTabDocument(tabSpec.tab, subTab.label, persistentUI.focusSecondaryDocument);
-        persistentUI.closeSubTabSecondaryDocument(tabSpec.tab, subTab.label);
+        persistentUI.closeDocumentGroupSecondaryDocument(tabSpec.tab, subTab.label);
       } else {
-        persistentUI.closeSubTabDocument(tabSpec.tab, subTab.label);
+        persistentUI.closeDocumentGroupPrimaryDocument(tabSpec.tab, subTab.label);
       }
     } else if (maybeTabState?.getPrimaryDocumentInDocumentGroup(kBookmarksTabTitle)) {
       if (persistentUI.focusSecondaryDocument === document.key) {
-        persistentUI.closeSubTabSecondaryDocument(tabSpec.tab, kBookmarksTabTitle);
+        persistentUI.closeDocumentGroupSecondaryDocument(tabSpec.tab, kBookmarksTabTitle);
       } else {
         persistentUI.openSubTabSecondaryDocument(tabSpec.tab, kBookmarksTabTitle, document.key);
       }
@@ -219,7 +233,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   }
 
   function handleCloseButtonClick() {
-    persistentUI.closeSubTabDocument();
+    persistentUI.closeDocumentGroupPrimaryDocument();
   }
 
   // TODO: this edit button is confusing when the history is being viewed. It

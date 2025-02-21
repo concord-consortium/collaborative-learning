@@ -69,7 +69,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
 
   const handleSelectDocument = (document: DocumentModelType) => {
     if (persistentUI.focusDocument === document.key) {
-      persistentUI.closeSubTabDocument(tabSpec.tab, selectedSubTab.label);
+      persistentUI.closeDocumentGroupPrimaryDocument(tabSpec.tab, selectedSubTab.label);
     } else {
       if (!document.hasContent && document.isRemote) {
         loadDocumentContent(document);
@@ -115,11 +115,22 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const openDocumentKey = documentGroup?.primaryDocumentKey || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
                             store.networkDocuments.getDocument(openDocumentKey);
+    const openFirstDoc = subTab.sections.length > 0 && subTab.sections[0].openFirstDocumentAutomatically;
     const isStarredTab = subTab.label === kBookmarksTabTitle;
-    if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
-    return (
-      <DocumentView tabSpec={tabSpec} subTab={subTab} />
-    );
+    if (
+      // The Bookmarks tab always shows the DocumentView
+      isStarredTab ||
+      // If there is an explicitly opened document then we show the DocumentView
+      (openDocument && !openDocument.getProperty("isDeleted")) ||
+      // If the user has not explicitly closed a document then we show the Document view
+      (openFirstDoc && !documentGroup?.userExplicitlyClosedDocument)
+    ) {
+      return (
+        <DocumentView tabSpec={tabSpec} subTab={subTab} />
+      );
+    }
+    // Otherwise render the document browser
+    return false;
   };
 
   return (

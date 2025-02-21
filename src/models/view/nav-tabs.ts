@@ -53,7 +53,8 @@ export const NavTabSectionModel =
     properties: types.array(types.string),
     showStars: types.array(UserTypeEnum),
     showGroupWorkspaces: false,
-    addDocument: false
+    addDocument: false,
+    openFirstDocumentAutomatically: types.maybe(types.boolean)
   })
   .views(self => ({
     showStarsForUser(user: UserModelType) {
