@@ -123,6 +123,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     this.resizeObserver.disconnect();
   }
 
+  private get tabName() {
+    return getUIStudentWorkTab(this.props.documentViewMode);
+  }
+
   /**
    * When the four-up is used in the dashboard it can be showing published
    * documents. In that case we use a fake tab called student-work-published
@@ -133,8 +137,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
    */
   private get tabUIModel() {
     const {persistentUI} = this.stores;
-    const tabName = getUIStudentWorkTab(this.props.documentViewMode);
-    return persistentUI.tabs.get(tabName);
+    return persistentUI.tabs.get(this.tabName);
   }
 
   private getFocusedUserDocKey() {
@@ -409,14 +412,17 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const { group } = this.props;
     const focusedUser = this.getFocusedGroupUser();
     const document = this.getGroupUserDoc(groupUser);
+    const {persistentUI} = this.stores;
 
     if (groupUser && document) {
       const logInfo = {groupId: group.id, studentId: groupUser.id};
       if (focusedUser){
-        this.tabUIModel?.getDocumentGroup(group.id)?.closePrimaryDocument();
+        // This needs to create the tabModel if it doesn't exist so we can use this.tabModel
+        persistentUI.closeDocumentGroupPrimaryDocument(this.tabName, group.id);
         Logger.log(LogEventName.DASHBOARD_DESELECT_STUDENT, logInfo);
       } else {
-        this.tabUIModel?.setPrimaryDocumentInDocumentGroup(group.id, document.key); //sets the focus document;
+        // This needs to create the tabModel if it doesn't exist so we can use this.tabModel
+        persistentUI.setOpenSubTabDocument(this.tabName, group.id, document.key); //sets the focus document;
         Logger.log(LogEventName.DASHBOARD_SELECT_STUDENT, logInfo);
       }
     }
