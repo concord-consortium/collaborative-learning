@@ -76,6 +76,42 @@ describe("PersistentUI", () => {
         expect(group.secondaryDocumentKey).toBeUndefined();
       });
     });
+    describe("setSecodaryDocumentKEY", () => {
+      it("will create the currentDocumentKeys", () => {
+        const group = UIDocumentGroup.create({id: "student-work"});
+        group.setSecondaryDocumentKey("1234");
+        // This is the current error handling approach where it just puts this as the
+        // first document
+        expect(group.currentDocumentKeys).toEqual(["1234"]);
+      });
+      it("will just make a primary document if there isn't one", () => {
+        const group = UIDocumentGroup.create({
+          id: "student-work",
+          currentDocumentKeys: []
+        });
+        group.setSecondaryDocumentKey("1234");
+        // This is the current error handling approach where it just puts this as the
+        // first document
+        expect(group.currentDocumentKeys).toEqual(["1234"]);
+      });
+      it("will add the secondary document if there is only a primary document", () => {
+        const group = UIDocumentGroup.create({
+          id: "student-work",
+          currentDocumentKeys: ["primary"]
+        });
+        group.setSecondaryDocumentKey("1234");
+        expect(group.currentDocumentKeys).toEqual(["primary", "1234"]);
+      });
+      it("will update the secondary document if it exists", () => {
+        const group = UIDocumentGroup.create({
+          id: "student-work",
+          currentDocumentKeys: ["primary", "secondary"]
+        });
+        group.setSecondaryDocumentKey("1234");
+        expect(group.currentDocumentKeys).toEqual(["primary", "1234"]);
+      });
+
+    });
     describe("closeSecondaryDocument", () => {
       it("handles the case when currentDocumentKeys is undefined", () => {
         const group = UIDocumentGroup.create({
@@ -173,6 +209,44 @@ describe("PersistentUI", () => {
         expect([...tab.visitedDocumentGroups.keys()]).toEqual(["testGroup"]);
         expect(visitedGroup.primaryDocumentKey).toBe("1234");
       });
+    });
+    describe("setSecondaryDocumentInDocumentGroup", () => {
+      it("will create a new document group", () => {
+        const tab = UITabModel.create({id: "test"});
+        expect([...tab.visitedDocumentGroups.keys()]).toEqual([]);
+        expect(tab.currentDocumentGroup).toBeUndefined();
+        tab.setSecondaryDocumentInDocumentGroup("testGroup", "1234");
+
+        // Error handling: just put the document as the primary document
+        expect([...tab.visitedDocumentGroups.keys()]).toEqual(["testGroup"]);
+        const visitedGroup = tab.visitedDocumentGroups.get("testGroup");
+        expect(visitedGroup).toBeDefined();
+        if (!visitedGroup) throw "Visited group undefined";
+        const group = tab.currentDocumentGroup;
+        expect(group).toBeUndefined();
+        expect(visitedGroup.id).toBe("testGroup");
+      });
+      it("will update a existing document group", () => {
+        const tab = UITabModel.create({
+          id: "test",
+          visitedDocumentGroups: {
+            testGroup: {
+              id: "testGroup",
+              currentDocumentKeys: ["primary"]
+            }
+          }
+        });
+        const visitedGroup = tab.visitedDocumentGroups.get("testGroup");
+        expect(visitedGroup).toBeDefined();
+        if (!visitedGroup) throw "Visited group undefined";
+        expect(visitedGroup.id).toBe("testGroup");
+
+        tab.setSecondaryDocumentInDocumentGroup("testGroup", "1234");
+
+        expect([...tab.visitedDocumentGroups.keys()]).toEqual(["testGroup"]);
+        expect(visitedGroup.secondaryDocumentKey).toBe("1234");
+      });
+
     });
   });
 
