@@ -2,26 +2,26 @@ import {
   getSnapshot, applySnapshot, types, onSnapshot,
   SnapshotIn, Instance, cast
 } from "mobx-state-tree";
-import { AppConfigModelType } from "./app-config-model";
+import { AppConfigModelType } from "../app-config-model";
 import {
   DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax,
   kDividerMin, PrimarySortType
-} from "./ui-types";
-import { isWorkspaceModelSnapshot, WorkspaceModel } from "./workspace";
-import { DocumentModelType } from "../document/document";
-import { ENavTab } from "../view/nav-tabs";
-import { buildSectionPath, getCurriculumMetadata } from "../../../shared/shared";
+} from "../ui-types";
+import { isWorkspaceModelSnapshot, WorkspaceModel } from "../workspace";
+import { DocumentModelType } from "../../document/document";
+import { ENavTab } from "../../view/nav-tabs";
+import { buildSectionPath, getCurriculumMetadata } from "../../../../shared/shared";
 import {
   ExemplarDocument, LearningLogDocument, LearningLogPublication, PersonalDocument,
   PersonalPublication, PlanningDocument, ProblemDocument,
   ProblemPublication, SupportPublication
-} from "../document/document-types";
-import { UserModelType } from "./user";
-import { DB } from "../../lib/db";
-import { safeJsonParse } from "../../utilities/js-utils";
-import { urlParams } from "../../utilities/url-params";
-import { removeLoadingMessage, showLoadingMessage } from "../../utilities/loading-utils";
-import { SortedDocuments } from "./sorted-documents";
+} from "../../document/document-types";
+import { UserModelType } from "../user";
+import { DB } from "../../../lib/db";
+import { safeJsonParse } from "../../../utilities/js-utils";
+import { urlParams } from "../../../utilities/url-params";
+import { removeLoadingMessage, showLoadingMessage } from "../../../utilities/loading-utils";
+import { SortedDocuments } from "../sorted-documents";
 import { cloneDeep } from "lodash";
 
 export const kPersistentUiStateVersion2 = "2.0.0";

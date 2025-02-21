@@ -5,7 +5,7 @@ import { UnitModel, UnitModelType } from "../curriculum/unit";
 import { getGuideJson, getUnitJson } from "../curriculum/unit-utils";
 import { InvestigationModel, InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
-import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui";
+import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui/persistent-ui";
 import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
