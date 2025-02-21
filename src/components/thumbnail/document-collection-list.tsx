@@ -2,13 +2,13 @@ import { observer } from "mobx-react";
 import React from "react";
 import classNames from "classnames";
 import { useAppConfig, useUserStore } from "../../hooks/use-stores";
-import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
+import { ISubTabModel, NavTabModelType } from "../../models/view/nav-tabs";
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentCollectionByType } from "./documents-type-collection";
 
 interface IProps {
   setCollectionElement?: (element: HTMLDivElement) => void;
-  subTab: ISubTabSpec;
+  subTab: ISubTabModel;
   tabSpec: NavTabModelType;
   selectedDocument?: string;
   selectedSecondaryDocument?: string;
@@ -32,7 +32,7 @@ export const DocumentCollectionList: React.FC<IProps> = observer(function Docume
     <div className={classNames("doc-collection-list", {horizontal, collapsed})}
         ref={element => element && setCollectionElement?.(element)}>
       {
-        subTab.sections.map((section: any, index: any) => {
+        subTab.sections.map((section, index) => {
           const shouldHandleStarClick = section.showStarsForUser(user);
 
           return (

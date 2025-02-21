@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import classNames from "classnames";
 import { clamp } from "lodash";
 import { DocumentModelType } from "../../models/document/document";
-import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
+import { ISubTabModel, NavTabModelType } from "../../models/view/nav-tabs";
 import { DocumentCollectionList } from "../thumbnail/document-collection-list";
 import ScrollArrowIcon from "../../assets/scroll-arrow-icon.svg";
 import CollapseScrollerIcon from "../../assets/show-hide-document-view-icon.svg";
@@ -10,7 +10,7 @@ import CollapseScrollerIcon from "../../assets/show-hide-document-view-icon.svg"
 import "./document-browser-scroller.scss";
 
 interface DocumentBrowserScrollerProps {
-  subTab: ISubTabSpec;
+  subTab: ISubTabModel;
   tabSpec: NavTabModelType;
   openDocumentKey: string;
   openSecondaryDocumentKey: string;

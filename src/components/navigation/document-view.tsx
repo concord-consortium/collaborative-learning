@@ -5,7 +5,7 @@ import classNames from "classnames";
 import { useAppConfig, useLocalDocuments, useStores,
   usePersistentUIStore } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
-import { ISubTabSpec, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
+import { ISubTabModel, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
 import { DocumentType } from "../../models/document/document-types";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DocumentModelType } from "../../models/document/document";
@@ -17,7 +17,7 @@ import CloseIcon from "../../../src/assets/icons/close/close.svg";
 
 interface IProps {
   tabSpec: NavTabModelType;
-  subTab: ISubTabSpec;
+  subTab: ISubTabModel;
 }
 
 //TODO: Need to refactor this if we want to deploy to all tabs
@@ -191,7 +191,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
 
 interface IDocumentAreaProps {
   openDocument: DocumentModelType;
-  subTab: ISubTabSpec;
+  subTab: ISubTabModel;
   tab: string;
   sectionClass: string;
   isSecondaryDocument?: boolean;

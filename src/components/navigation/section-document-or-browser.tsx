@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import { useQueryClient } from 'react-query';
 import { DocumentModelType } from "../../models/document/document";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
-import { ISubTabSpec, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
+import { ISubTabModel, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
 import { useAppConfig, useClassStore, useProblemStore, useStores,
          useUserStore, usePersistentUIStore } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
@@ -83,7 +83,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     await document.fetchRemoteContent(queryClient, context);
   };
 
-  const renderDocumentBrowserView = (subTab: ISubTabSpec) => {
+  const renderDocumentBrowserView = (subTab: ISubTabModel) => {
     const openDocumentKey = maybeTabState?.getDocumentGroup(subTab.label)?.primaryDocumentKey;
     const classHash = classStore.classHash;
     return (
@@ -110,7 +110,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     );
   };
 
-  const renderDocumentView = (subTab: ISubTabSpec) => {
+  const renderDocumentView = (subTab: ISubTabModel) => {
     const documentGroup = maybeTabState?.getDocumentGroup(subTab.label);
     const openDocumentKey = documentGroup?.primaryDocumentKey || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
