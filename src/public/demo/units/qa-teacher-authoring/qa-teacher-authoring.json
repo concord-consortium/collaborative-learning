@@ -176,16 +176,6 @@
       "initials": "1",
       "title": "Section 1",
       "placeholder": "Do your Section 1 work here."
-    },
-    "2": {
-      "initials": "2",
-      "title": "Section 2",
-      "placeholder": "Do your Section 2 work here."
-    },
-    "3": {
-      "initials": "3",
-      "title": "Section 3",
-      "placeholder": "Do your Section 3 work here."
     }
   },
   "planningDocument": {
@@ -211,7 +201,9 @@
           "title": "CLUE-It-Yourself",
           "subtitle": "",
           "disabled": [],
-          "sections": []
+          "sections": [
+            "investigation-1/problem-1/1/content.json"
+          ]
         }
       ]
     }
