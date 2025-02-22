@@ -74,7 +74,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
       if (!document.hasContent && document.isRemote) {
         loadDocumentContent(document);
       }
-      persistentUI.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
+      persistentUI.openDocumentGroupPrimaryDocument(tabSpec.tab, selectedSubTab.label, document.key);
       logDocumentViewEvent(document);
     }
   };

@@ -42,12 +42,12 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const maybeTabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
   const { sectionDocuments } = useStores();
   const openDocumentKey =
-    maybeTabState?.getPrimaryDocumentInDocumentGroup(subTab.label) ||
+    maybeTabState?.getDocumentGroupPrimaryDocument(subTab.label) ||
     getFirstDocumentKey(subTab, sectionDocuments) ||
     "";
   const openDocument = store.documents.getDocument(openDocumentKey) ||
     store.networkDocuments.getDocument(openDocumentKey);
-  const openSecondaryDocumentKey = maybeTabState?.getSecondaryDocumentInDocumentGroup(subTab.label) || "";
+  const openSecondaryDocumentKey = maybeTabState?.getDocumentGroupSecondaryDocument(subTab.label) || "";
   const openSecondaryDocument = store.documents.getDocument(openSecondaryDocumentKey) ||
     store.networkDocuments.getDocument(openSecondaryDocumentKey);
   const isStarredTab = subTab.label === kBookmarksTabTitle;
@@ -96,22 +96,22 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
     // we close the secondary document, and make the open the third document as the secondary document.
     if (persistentUI.focusDocument === document.key) {
       if (persistentUI.focusSecondaryDocument) {
-        persistentUI.openSubTabDocument(tabSpec.tab, subTab.label, persistentUI.focusSecondaryDocument);
+        persistentUI.openDocumentGroupPrimaryDocument(tabSpec.tab, subTab.label, persistentUI.focusSecondaryDocument);
         persistentUI.closeDocumentGroupSecondaryDocument(tabSpec.tab, subTab.label);
       } else {
         persistentUI.closeDocumentGroupPrimaryDocument(tabSpec.tab, subTab.label);
       }
-    } else if (maybeTabState?.getPrimaryDocumentInDocumentGroup(kBookmarksTabTitle)) {
+    } else if (maybeTabState?.getDocumentGroupPrimaryDocument(kBookmarksTabTitle)) {
       if (persistentUI.focusSecondaryDocument === document.key) {
         persistentUI.closeDocumentGroupSecondaryDocument(tabSpec.tab, kBookmarksTabTitle);
       } else {
-        persistentUI.openSubTabSecondaryDocument(tabSpec.tab, kBookmarksTabTitle, document.key);
+        persistentUI.openDocumentGroupSecondaryDocument(tabSpec.tab, kBookmarksTabTitle, document.key);
       }
     } else {
       if (!document.hasContent && document.isRemote) {
         loadDocumentContent(document);
       }
-      persistentUI.openSubTabDocument(tabSpec.tab, subTab.label, document.key);
+      persistentUI.openDocumentGroupPrimaryDocument(tabSpec.tab, subTab.label, document.key);
       logDocumentViewEvent(document);
     }
   };
@@ -139,9 +139,9 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
       const newDocKey = starredDocuments.at(newDocIndex)?.key;
 
       if (secondary) {
-        newDocKey && persistentUI.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, newDocKey);
+        newDocKey && persistentUI.openDocumentGroupSecondaryDocument(tabSpec.tab, subTab.label, newDocKey);
       } else {
-        newDocKey && persistentUI.openSubTabDocument(tabSpec.tab, subTab.label, newDocKey);
+        newDocKey && persistentUI.openDocumentGroupPrimaryDocument(tabSpec.tab, subTab.label, newDocKey);
       }
     }
   };

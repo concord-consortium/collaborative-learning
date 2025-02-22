@@ -422,7 +422,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         Logger.log(LogEventName.DASHBOARD_DESELECT_STUDENT, logInfo);
       } else {
         // This needs to create the tabModel if it doesn't exist so we can use this.tabModel
-        persistentUI.setOpenSubTabDocument(this.tabName, group.id, document.key); //sets the focus document;
+        persistentUI.setDocumentGroupPrimaryDocument(this.tabName, group.id, document.key); //sets the focus document;
         Logger.log(LogEventName.DASHBOARD_SELECT_STUDENT, logInfo);
       }
     }

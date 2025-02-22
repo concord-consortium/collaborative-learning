@@ -54,7 +54,7 @@ const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function Grou
 
   const handleFocusedUserChange = (selectedUser: GroupUserModelType) => {
     group?.id && selectedUser.problemDocument &&
-      persistentUI.openSubTabDocument("student-work", group.id, selectedUser.problemDocument.key);
+      persistentUI.openDocumentGroupPrimaryDocument("student-work", group.id, selectedUser.problemDocument.key);
   };
 
   const handleSelectGroup = (id: string) => {

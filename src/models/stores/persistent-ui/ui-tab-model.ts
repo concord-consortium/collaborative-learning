@@ -48,10 +48,10 @@ export const UITabModel = types
 
       return self.getDocumentGroup(self.currentDocumentGroupId);
     },
-    getPrimaryDocumentInDocumentGroup(docGroupId: string) {
+    getDocumentGroupPrimaryDocument(docGroupId: string) {
       return self.visitedDocumentGroups.get(docGroupId)?.primaryDocumentKey;
     },
-    getSecondaryDocumentInDocumentGroup(docGroupId: string) {
+    getDocumentGroupSecondaryDocument(docGroupId: string) {
       return self.visitedDocumentGroups.get(docGroupId)?.secondaryDocumentKey;
     }
   }))
@@ -80,18 +80,18 @@ export const UITabModel = types
      * @param docGroupId
      * @param documentKey
      */
-    setPrimaryDocumentInDocumentGroup(docGroupId: string, documentKey: string) {
+    setDocumentGroupPrimaryDocument(docGroupId: string, documentKey: string) {
       const group = self.getOrCreateDocumentGroup(docGroupId);
       group.setPrimaryDocumentKey(documentKey);
     },
-    setSecondaryDocumentInDocumentGroup(docGroupId: string, documentKey: string) {
+    setDocumentGroupSecondaryDocument(docGroupId: string, documentKey: string) {
       const group = self.getOrCreateDocumentGroup(docGroupId);
       group.setSecondaryDocumentKey(documentKey);
     }
   }))
   .actions(self => ({
-    openPrimaryDocumentInDocumentGroup(docGroupId: string, documentKey: string) {
-      self.setPrimaryDocumentInDocumentGroup(docGroupId, documentKey);
+    openDocumentGroupPrimaryDocument(docGroupId: string, documentKey: string) {
+      self.setDocumentGroupPrimaryDocument(docGroupId, documentKey);
       self.currentDocumentGroupId = docGroupId;
     },
   }));

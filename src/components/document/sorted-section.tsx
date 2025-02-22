@@ -55,7 +55,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
     return async (document: DocumentModelType | IDocumentMetadataModel) => {
       const documentGroupId = JSON.stringify(openSubTabMetadata);
       const tabState = persistentUI.getOrCreateTabState(ENavTab.kSortWork);
-      tabState.openPrimaryDocumentInDocumentGroup(documentGroupId, document.key);
+      tabState.openDocumentGroupPrimaryDocument(documentGroupId, document.key);
 
       logDocumentViewEvent(document);
     };

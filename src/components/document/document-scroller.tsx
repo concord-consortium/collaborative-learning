@@ -36,7 +36,7 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
       console.error("No currentDocumentGroupId found in persistentUI");
       return;
     }
-    tabState.openPrimaryDocumentInDocumentGroup(tabState.currentDocumentGroupId, document.key);
+    tabState.openDocumentGroupPrimaryDocument(tabState.currentDocumentGroupId, document.key);
     logDocumentViewEvent(document);
   };
 

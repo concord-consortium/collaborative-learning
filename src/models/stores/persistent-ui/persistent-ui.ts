@@ -140,50 +140,50 @@ export const PersistentUIModelV2 = types
       tabState.currentDocumentGroupId = docGroupId;
     },
     /**
-     * Set the open document in a sub tab. Do not actually open
-     * the navTab or subTab.
+     * Set the open document in a document group. Do not actually open
+     * the navTab or document group.
      *
      * @param tab
-     * @param subTab
+     * @param docGroupId
      * @param documentKey
      */
-    setOpenSubTabDocument(tab: string, subTab: string, documentKey: string) {
+    setDocumentGroupPrimaryDocument(tab: string, docGroupId: string, documentKey: string) {
       const tabState = self.getOrCreateTabState(tab);
-      tabState.setPrimaryDocumentInDocumentGroup(subTab, documentKey);
+      tabState.setDocumentGroupPrimaryDocument(docGroupId, documentKey);
     },
     /**
-     * Open to the tab and subTab and open a document.
+     * Open to the tab and document group and open a document.
      *
      * @param tab
-     * @param subTab
+     * @param docGroupId
      * @param documentKey
      */
-    openSubTabDocument(tab: string, subTab: string, documentKey: string) {
+    openDocumentGroupPrimaryDocument(tab: string, docGroupId: string, documentKey: string) {
       const tabState = self.getOrCreateTabState(tab);
       self.activeNavTab = tab;
-      tabState.openPrimaryDocumentInDocumentGroup(subTab, documentKey);
+      tabState.openDocumentGroupPrimaryDocument(docGroupId, documentKey);
     },
-    openSubTabSecondaryDocument(tab: string, subTab: string, documentKey: string) {
+    openDocumentGroupSecondaryDocument(tab: string, docGroupId: string, documentKey: string) {
       const tabState = self.getOrCreateTabState(tab);
       self.activeNavTab = tab;
-      tabState.setSecondaryDocumentInDocumentGroup(subTab, documentKey);
-      tabState.currentDocumentGroupId = subTab;
+      tabState.setDocumentGroupSecondaryDocument(docGroupId, documentKey);
+      tabState.currentDocumentGroupId = docGroupId;
     },
     // Defaults to the current tab and document group
     closeDocumentGroupPrimaryDocument(
-      tab: string|undefined=self.activeNavTab, documentGroupId: string|undefined=self.currentDocumentGroupId
+      tab: string|undefined=self.activeNavTab, docGroupId: string|undefined=self.currentDocumentGroupId
     ) {
-      if (tab && documentGroupId) {
+      if (tab && docGroupId) {
         const tabState = self.getOrCreateTabState(tab);
         // We create the group if it doesn't exist, so we can save the state indicating the user
         // explicitly closed the document
-        const group = tabState.getOrCreateDocumentGroup(documentGroupId);
+        const group = tabState.getOrCreateDocumentGroup(docGroupId);
         group.closePrimaryDocument();
       }
     },
-    closeDocumentGroupSecondaryDocument(tab: string, documentGroupId: string) {
+    closeDocumentGroupSecondaryDocument(tab: string, docGroupId: string) {
       const tabState = self.getOrCreateTabState(tab);
-      const group = tabState.visitedDocumentGroups.get(documentGroupId);
+      const group = tabState.visitedDocumentGroups.get(docGroupId);
       group?.closeSecondaryDocument();
     },
     setProblemPath(problemPath: string) {
@@ -208,49 +208,49 @@ export const PersistentUIModelV2 = types
      */
     openResourceDocument(doc: DocumentModelType, user?: UserModelType, sortedDocuments?: SortedDocuments) {
       const navTab = getNavTabOfDocument(doc, user)  || "";
-      let subTab = "";
+      let docGroupId = "";
       if (navTab === ENavTab.kClassWork) {
         if (doc.type === LearningLogPublication) {
           // FIXME: if the subTabs are renamed in the unit then this won't
           // work
-          subTab = "Learning Logs";
+          docGroupId = "Learning Logs";
         } else {
-          subTab = "Workspaces";
+          docGroupId = "Workspaces";
         }
       }
       if (navTab === ENavTab.kMyWork) {
         if (doc.type === LearningLogDocument) {
-          subTab = "Learning Log";
+          docGroupId = "Learning Log";
         } else {
-          subTab = "Workspaces";
+          docGroupId = "Workspaces";
         }
       }
       if (navTab === ENavTab.kStudentWork){
         const groupId = doc.groupId;
         if (groupId) {
-          subTab = groupId;
+          docGroupId = groupId;
         }
       }
       if (navTab === ENavTab.kSortWork) {
         if (doc.type === ExemplarDocument) {
           const sortedDocumentGroups = sortedDocuments?.sortBy("Strategy");
           const openGroup = sortedDocumentGroups?.find(group => group.documents.some((d) => d.key === doc.key));
-          subTab = JSON.stringify({primaryLabel: openGroup?.label, "primaryType": "Strategy"});
+          docGroupId = JSON.stringify({primaryLabel: openGroup?.label, "primaryType": "Strategy"});
           self.setPrimarySortBy("Strategy");
           self.setSecondarySortBy("None");
         } else {
           const primarySortBy = self.primarySortBy as PrimarySortType;
           const sortedDocumentGroups = sortedDocuments?.sortBy(primarySortBy);
           const openGroup = sortedDocumentGroups?.find(group => group.documents.some((d) => d.key === doc.key));
-          subTab = JSON.stringify({"primaryLabel": openGroup?.label, "primaryType": self.primarySortBy});
+          docGroupId = JSON.stringify({"primaryLabel": openGroup?.label, "primaryType": self.primarySortBy});
         }
       }
 
-      if (!subTab) {
-        console.warn("Can't find subTab for doc", getSnapshot(doc));
+      if (!docGroupId) {
+        console.warn("Can't find document group for doc", getSnapshot(doc));
         return;
       }
-      self.openSubTabDocument(navTab, subTab, doc.key);
+      self.openDocumentGroupPrimaryDocument(navTab, docGroupId, doc.key);
     },
     openCurriculumDocument(docPath: string) {
       const {navTab, subTab} = getTabsOfCurriculumDoc(docPath);

@@ -104,7 +104,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
       return;
     }
     if (newKey) {
-      persistentUI.openSubTabDocument(ENavTab.kSortWork, openSubTab, newKey);
+      persistentUI.openDocumentGroupPrimaryDocument(ENavTab.kSortWork, openSubTab, newKey);
     }
     setPrevBtnEnabled(newIndex !== 0);
     setNextBtnEnabled(newIndex !== docKeys.length - 1);

@@ -176,7 +176,7 @@ describe("PersistentUI", () => {
         const tab = UITabModel.create({id: "test"});
         expect([...tab.visitedDocumentGroups.keys()]).toEqual([]);
         expect(tab.currentDocumentGroup).toBeUndefined();
-        tab.setPrimaryDocumentInDocumentGroup("testGroup", "1234");
+        tab.setDocumentGroupPrimaryDocument("testGroup", "1234");
 
         expect([...tab.visitedDocumentGroups.keys()]).toEqual(["testGroup"]);
         const visitedGroup = tab.visitedDocumentGroups.get("testGroup");
@@ -204,7 +204,7 @@ describe("PersistentUI", () => {
         expect(visitedGroup.id).toBe("testGroup");
         expect(visitedGroup.primaryDocumentKey).toBeUndefined();
 
-        tab.setPrimaryDocumentInDocumentGroup("testGroup", "1234");
+        tab.setDocumentGroupPrimaryDocument("testGroup", "1234");
 
         expect([...tab.visitedDocumentGroups.keys()]).toEqual(["testGroup"]);
         expect(visitedGroup.primaryDocumentKey).toBe("1234");
@@ -215,7 +215,7 @@ describe("PersistentUI", () => {
         const tab = UITabModel.create({id: "test"});
         expect([...tab.visitedDocumentGroups.keys()]).toEqual([]);
         expect(tab.currentDocumentGroup).toBeUndefined();
-        tab.setSecondaryDocumentInDocumentGroup("testGroup", "1234");
+        tab.setDocumentGroupSecondaryDocument("testGroup", "1234");
 
         // Error handling: just put the document as the primary document
         expect([...tab.visitedDocumentGroups.keys()]).toEqual(["testGroup"]);
@@ -241,7 +241,7 @@ describe("PersistentUI", () => {
         if (!visitedGroup) throw "Visited group undefined";
         expect(visitedGroup.id).toBe("testGroup");
 
-        tab.setSecondaryDocumentInDocumentGroup("testGroup", "1234");
+        tab.setDocumentGroupSecondaryDocument("testGroup", "1234");
 
         expect([...tab.visitedDocumentGroups.keys()]).toEqual(["testGroup"]);
         expect(visitedGroup.secondaryDocumentKey).toBe("1234");
@@ -363,7 +363,7 @@ describe("PersistentUI", () => {
 
       expect(tabModel.currentDocumentGroup).toBeDefined();
       expect(tabModel.currentDocumentGroup?.primaryDocumentKey).toBe("doc1");
-      expect(tabModel.getPrimaryDocumentInDocumentGroup("testSubTab2")).toBe("doc2");
+      expect(tabModel.getDocumentGroupPrimaryDocument("testSubTab2")).toBe("doc2");
       expect([...tabModel.visitedDocumentGroups.keys()]).toEqual(["testSubTab1", "testSubTab2"]);
     });
     it("converts the openSecondaryDocuments from the snapshot", () => {
@@ -428,7 +428,7 @@ describe("PersistentUI", () => {
       expect(tabModel.currentDocumentGroup).toBeDefined();
       expect(tabModel.currentDocumentGroup?.primaryDocumentKey).toBe("doc1");
       expect(tabModel.currentDocumentGroup?.secondaryDocumentKey).toBe("doc3");
-      expect(tabModel.getPrimaryDocumentInDocumentGroup("testSubTab2")).toBe("doc2");
+      expect(tabModel.getDocumentGroupPrimaryDocument("testSubTab2")).toBe("doc2");
       expect([...tabModel.visitedDocumentGroups.keys()]).toEqual(["testSubTab1", "testSubTab2", "testSubTab3"]);
     });
     it("converts real version 1 state", () => {
