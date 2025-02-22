@@ -1,9 +1,11 @@
 import { applySnapshot, getSnapshot } from "@concord-consortium/mobx-state-tree";
 import {
-  PersistentUIModel, PersistentUIModelV1Snapshot, persistentUIModelPreProcessor, PersistentUIModelV2Snapshot
+  PersistentUIModel, PersistentUIModelV1Snapshot, persistentUIModelPreProcessor,
+  PersistentUIModelV2Snapshot, PersistentUIModelType
 } from "./persistent-ui";
 import { UITabModel } from "./ui-tab-model";
 import { UIDocumentGroup } from "./ui-document-group";
+import { ENavTab, NavTabModel, NavTabModelType } from "../../../models/view/nav-tabs";
 
 describe("PersistentUI", () => {
   describe("UIDocumentGroup", () => {
@@ -269,6 +271,51 @@ describe("PersistentUI", () => {
       expect(ui.tabs.get("test")?.currentDocumentGroup?.userExplicitlyClosedDocument).toBeFalsy();
       ui.closeDocumentGroupPrimaryDocument();
       expect(ui.tabs.get("test")?.currentDocumentGroup?.userExplicitlyClosedDocument).toBe(true);
+    });
+  });
+
+  describe("initializeActiveNavTab", () => {
+    let ui: PersistentUIModelType;
+    let tabSpecs: NavTabModelType[];
+    beforeEach(() => {
+      ui = PersistentUIModel.create({
+        version: "2.0.0",
+        tabs: {
+          test: {
+            id: "test",
+          }
+        },
+        problemWorkspace: {
+          type: "problem",
+          mode: "1-up"
+        }
+      });
+      tabSpecs = [
+        NavTabModel.create({
+          tab: ENavTab.kProblems,
+          label: "Problems"
+        }),
+        NavTabModel.create({
+          tab: ENavTab.kClassWork,
+          label: "ClassWork"
+        })
+      ];
+    });
+
+    it("sets the active tab to the first tab", () => {
+      expect(ui.activeNavTab).toBeUndefined();
+      ui.initializeActiveNavTab(tabSpecs);
+      expect(ui.activeNavTab).toBe(ENavTab.kProblems);
+    });
+    it("doesn't change the active tab if it is already set", () => {
+      ui.setActiveNavTab(ENavTab.kClassWork);
+      ui.initializeActiveNavTab(tabSpecs);
+      expect(ui.activeNavTab).toBe(ENavTab.kClassWork);
+    });
+    it("sets the active tab to the first tab if the current active tab doesn't exist", () => {
+      ui.setActiveNavTab("foo");
+      ui.initializeActiveNavTab(tabSpecs);
+      expect(ui.activeNavTab).toBe(ENavTab.kProblems);
     });
   });
 

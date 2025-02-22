@@ -338,13 +338,7 @@ class Stores implements IStores{
 
       persistentUI.setProblemPath(this.problemPath);
 
-      // Set the active tab to be the first tab (unless active tab is already set by persistent UI)
-      const tabs = this.tabsToDisplay;
-      if (tabs.length > 0) {
-        if (!persistentUI.activeNavTab) {
-          persistentUI.setActiveNavTab(tabs[0].tab);
-        }
-      }
+      persistentUI.initializeActiveNavTab(this.tabsToDisplay);
       removeLoadingMessage("Setting up curriculum content");
     });
 

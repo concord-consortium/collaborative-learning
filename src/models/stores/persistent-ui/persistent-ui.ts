@@ -1,6 +1,8 @@
 import {
   getSnapshot, applySnapshot, types, onSnapshot,
-  SnapshotIn, Instance} from "mobx-state-tree";
+  SnapshotIn, Instance
+} from "mobx-state-tree";
+import { cloneDeep } from "lodash";
 import { AppConfigModelType } from "../app-config-model";
 import {
   DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax,
@@ -8,7 +10,7 @@ import {
 } from "../ui-types";
 import { isWorkspaceModelSnapshot, WorkspaceModel } from "../workspace";
 import { DocumentModelType } from "../../document/document";
-import { ENavTab } from "../../view/nav-tabs";
+import { ENavTab, NavTabModelType } from "../../view/nav-tabs";
 import { buildSectionPath, getCurriculumMetadata } from "../../../../shared/shared";
 import {
   ExemplarDocument, LearningLogDocument, LearningLogPublication, PersonalDocument,
@@ -21,7 +23,6 @@ import { safeJsonParse } from "../../../utilities/js-utils";
 import { urlParams } from "../../../utilities/url-params";
 import { removeLoadingMessage, showLoadingMessage } from "../../../utilities/loading-utils";
 import { SortedDocuments } from "../sorted-documents";
-import { cloneDeep } from "lodash";
 import { UITabModel, UITabModel_V1 } from "./ui-tab-model";
 
 export const kPersistentUiStateVersion2 = "2.0.0";
@@ -82,16 +83,6 @@ export const PersistentUIModelV2 = types
     },
   }))
   .actions(self => ({
-    getOrCreateTabState(tab: string) {
-      let tabState = self.tabs.get(tab);
-      if (!tabState) {
-        tabState = UITabModel.create({id: tab});
-        self.tabs.put(tabState);
-      }
-      return tabState;
-    }
-  }))
-  .actions((self) => ({
     setDividerPosition(position: number) {
       self.dividerPosition = position;
     },
@@ -109,6 +100,31 @@ export const PersistentUIModelV2 = types
     },
     setActiveNavTab(tab: string) {
       self.activeNavTab = tab;
+    },
+    getOrCreateTabState(tab: string) {
+      let tabState = self.tabs.get(tab);
+      if (!tabState) {
+        tabState = UITabModel.create({id: tab});
+        self.tabs.put(tabState);
+      }
+      return tabState;
+    }
+  }))
+  .actions((self) => ({
+    /**
+     * Set the active tab to the first tab if:
+     * - the active tab is not already set
+     * - the active tab no longer exists in the list of tabs
+     * @param tabSpecs
+     */
+    initializeActiveNavTab(tabSpecs: NavTabModelType[]) {
+      if (tabSpecs.length > 0) {
+        // An author might remove or rename a tab, so we check that the activeNavTab actually exists
+        const validActiveNavTab = tabSpecs.find(tab => tab.tab === self.activeNavTab);
+        if (!validActiveNavTab) {
+          self.setActiveNavTab(tabSpecs[0].tab);
+        }
+      }
     },
     rightNavDocumentSelected(appConfig: AppConfigModelType, document: DocumentModelType) {
       if (!document.isPublished || appConfig.showPublishedDocsInPrimaryWorkspace) {
