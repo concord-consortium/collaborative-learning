@@ -7,7 +7,7 @@ import { IStores } from "../../models/stores/stores";
 import ArrowIcon from "../../assets/icons/arrow/arrow.svg";
 import { useNetworkDocuments, useUserStore } from "../../hooks/use-stores";
 import { DecoratedDocumentThumbnailItem } from "./decorated-document-thumbnail-item";
-import { ISubTabSpec, NavTabSectionModelType } from "../../models/view/nav-tabs";
+import { ISubTabModel, NavTabSectionModelType } from "../../models/view/nav-tabs";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 
@@ -23,7 +23,7 @@ interface IProps {
   scale: number;
   selectedDocument?: string;
   onSelectDocument?: (document: DocumentModelType) => void;
-  subTab: ISubTabSpec;
+  subTab: ISubTabModel;
   networkResource: INetworkResourceClassResponse;
   problemTitle: string;
 }

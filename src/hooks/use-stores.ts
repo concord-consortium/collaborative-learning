@@ -13,7 +13,7 @@ import { GroupsModelType } from "../models/stores/groups";
 import { SelectionStoreModelType } from "../models/stores/selection";
 import { IStores } from "../models/stores/stores";
 import { UserModelType } from "../models/stores/user";
-import { PersistentUIModelType } from "../models/stores/persistent-ui";
+import { PersistentUIModelType } from "../models/stores/persistent-ui/persistent-ui";
 import { UIModelType } from "src/models/stores/ui";
 
 // https://mobx-react.js.org/recipes-migration

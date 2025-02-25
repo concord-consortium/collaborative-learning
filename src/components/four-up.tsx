@@ -123,6 +123,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     this.resizeObserver.disconnect();
   }
 
+  private get tabName() {
+    return getUIStudentWorkTab(this.props.documentViewMode);
+  }
+
   /**
    * When the four-up is used in the dashboard it can be showing published
    * documents. In that case we use a fake tab called student-work-published
@@ -131,14 +135,14 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
    *
    * @returns
    */
-  private getNavTabName() {
-    return getUIStudentWorkTab(this.props.documentViewMode);
+  private get tabUIModel() {
+    const {persistentUI} = this.stores;
+    return persistentUI.tabs.get(this.tabName);
   }
 
   private getFocusedUserDocKey() {
-    const {persistentUI} = this.stores;
     const {group} = this.props;
-    return persistentUI.tabs.get(this.getNavTabName())?.openDocuments.get(group.id);
+    return this.tabUIModel?.getDocumentGroup(group.id)?.primaryDocumentKey;
   }
 
   private getFocusedGroupUser() {
@@ -400,24 +404,25 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleFourUpClick = () => {
-    const { persistentUI } = this.stores;
     const { group } = this.props;
-    persistentUI.closeSubTabDocument(this.getNavTabName(),  group.id);
+    this.tabUIModel?.getDocumentGroup(group.id)?.closePrimaryDocument();
   };
 
   private handleOverlayClick = (groupUser?: GroupUserModelType) => {
-    const { persistentUI } = this.stores;
     const { group } = this.props;
     const focusedUser = this.getFocusedGroupUser();
     const document = this.getGroupUserDoc(groupUser);
+    const {persistentUI} = this.stores;
 
     if (groupUser && document) {
       const logInfo = {groupId: group.id, studentId: groupUser.id};
       if (focusedUser){
-        persistentUI.closeSubTabDocument(this.getNavTabName(), group.id);
+        // This needs to create the tabModel if it doesn't exist so we can use this.tabModel
+        persistentUI.closeDocumentGroupPrimaryDocument(this.tabName, group.id);
         Logger.log(LogEventName.DASHBOARD_DESELECT_STUDENT, logInfo);
       } else {
-        persistentUI.setOpenSubTabDocument(this.getNavTabName(), group.id, document.key); //sets the focus document;
+        // This needs to create the tabModel if it doesn't exist so we can use this.tabModel
+        persistentUI.setDocumentGroupPrimaryDocument(this.tabName, group.id, document.key); //sets the focus document;
         Logger.log(LogEventName.DASHBOARD_SELECT_STUDENT, logInfo);
       }
     }

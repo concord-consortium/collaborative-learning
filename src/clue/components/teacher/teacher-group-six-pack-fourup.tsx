@@ -87,7 +87,7 @@ const TeacherGroupHeader: React.FC<IGroupHeaderProps> = observer(function Teache
     {group, navTabName, documentViewMode}){
   const { ui, persistentUI, db, groups, user: { isResearcher } }  = useStores();
 
-  const openDocId = persistentUI.tabs.get(navTabName)?.openDocuments.get(group.id);
+  const openDocId = persistentUI.tabs.get(navTabName)?.getDocumentGroup(group.id)?.primaryDocumentKey;
   const groupModel = groups.getGroupById(group.id);
   const focusedGroupUser = getFocusedGroupUser(groupModel, openDocId, documentViewMode);
 

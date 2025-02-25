@@ -31,8 +31,8 @@ export const ProblemTabContent: React.FC<IProps>
 
   useEffect(() => {
     // Set the default subTab if a subtab isn't already set
-    if (hasSubTabs && !persistentUI.tabs.get(tabId)?.openSubTab) {
-      persistentUI.setOpenSubTab(tabId, sections[0].type);
+    if (hasSubTabs && !persistentUI.tabs.get(tabId)?.currentDocumentGroupId) {
+      persistentUI.setCurrentDocumentGroupId(tabId, sections[0].type);
     }
   }, [hasSubTabs, sections, tabId, persistentUI]);
 
@@ -40,7 +40,7 @@ export const ProblemTabContent: React.FC<IProps>
     const section = sections?.[index];
     if (!section) return;
 
-    persistentUI.setOpenSubTab(tabId, section.type);
+    persistentUI.setCurrentDocumentGroupId(tabId, section.type);
 
     // TODO: The log event properties have been reversed for quite a while now.
     // We don't want to introduce a breaking change in the log event stream, so
@@ -61,7 +61,7 @@ export const ProblemTabContent: React.FC<IProps>
     Logger.log(showTeacherContent ? LogEventName.HIDE_SOLUTIONS : LogEventName.SHOW_SOLUTIONS);
   };
 
-  const openSubTab = persistentUI.tabs.get(tabId)?.openSubTab;
+  const openSubTab = persistentUI.tabs.get(tabId)?.currentDocumentGroupId;
   const sectionIndex = sections.findIndex((section: any) => section.type === openSubTab);
   // activeIndex might be -1 in an error condition
   const activeIndex = sectionIndex < 0 ? 0 : sectionIndex;

@@ -5,7 +5,9 @@ import { useFirestore } from "../../hooks/firestore-hooks";
 import { useStores } from "../../hooks/use-stores";
 import { useDocumentCaption } from "../../hooks/use-document-caption";
 import { UserModelType } from "../../models/stores/user";
-import { getNavTabOfDocument, getTabsOfCurriculumDoc, isStudentWorkspaceDoc } from "../../models/stores/persistent-ui";
+import {
+  getNavTabOfDocument, getTabsOfCurriculumDoc, isStudentWorkspaceDoc
+} from "../../models/stores/persistent-ui/persistent-ui";
 import { DocumentModelType } from "../../models/document/document";
 import { CommentedDocumentsQuery } from "../../models/commented-documents";
 

@@ -5,19 +5,29 @@ import classNames from "classnames";
 import { useAppConfig, useLocalDocuments, useStores,
   usePersistentUIStore } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
-import { ISubTabSpec, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
+import { ISubTabModel, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
 import { DocumentType } from "../../models/document/document-types";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
 import { DocumentModelType } from "../../models/document/document";
 import { EditableDocumentContent } from "../document/editable-document-content";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
+import { SectionDocuments } from "../../models/stores/section-docs-store";
 import { DocumentBrowserScroller, ScrollButton } from "./document-browser-scroller";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
-import CloseIcon from "../../../src/assets/icons/close/close.svg";
+import CloseIcon from "../../assets/icons/close/close.svg";
 
 interface IProps {
   tabSpec: NavTabModelType;
-  subTab: ISubTabSpec;
+  subTab: ISubTabModel;
+}
+
+function getFirstDocumentKey(subTab: ISubTabModel, sectionDocuments: SectionDocuments) {
+  for (const section of subTab.sections) {
+    const sectionDocs = sectionDocuments.getSectionDocs(section);
+    if (sectionDocs.length > 0) {
+      return sectionDocs[0].key;
+    }
+  }
 }
 
 //TODO: Need to refactor this if we want to deploy to all tabs
@@ -29,11 +39,15 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
   const queryClient = useQueryClient();
   const documents = useLocalDocuments();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
-  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
-  const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
+  const maybeTabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
+  const { sectionDocuments } = useStores();
+  const openDocumentKey =
+    maybeTabState?.getDocumentGroupPrimaryDocument(subTab.label) ||
+    getFirstDocumentKey(subTab, sectionDocuments) ||
+    "";
   const openDocument = store.documents.getDocument(openDocumentKey) ||
     store.networkDocuments.getDocument(openDocumentKey);
-  const openSecondaryDocumentKey = tabState?.openSecondaryDocuments.get(subTab.label) || "";
+  const openSecondaryDocumentKey = maybeTabState?.getDocumentGroupSecondaryDocument(subTab.label) || "";
   const openSecondaryDocument = store.documents.getDocument(openSecondaryDocumentKey) ||
     store.networkDocuments.getDocument(openSecondaryDocumentKey);
   const isStarredTab = subTab.label === kBookmarksTabTitle;
@@ -82,22 +96,22 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
     // we close the secondary document, and make the open the third document as the secondary document.
     if (persistentUI.focusDocument === document.key) {
       if (persistentUI.focusSecondaryDocument) {
-        persistentUI.openSubTabDocument(tabSpec.tab, subTab.label, persistentUI.focusSecondaryDocument);
-        persistentUI.closeSubTabSecondaryDocument(tabSpec.tab, subTab.label);
+        persistentUI.openDocumentGroupPrimaryDocument(tabSpec.tab, subTab.label, persistentUI.focusSecondaryDocument);
+        persistentUI.closeDocumentGroupSecondaryDocument(tabSpec.tab, subTab.label);
       } else {
-        persistentUI.closeSubTabDocument(tabSpec.tab, subTab.label);
+        persistentUI.closeDocumentGroupPrimaryDocument(tabSpec.tab, subTab.label);
       }
-    } else if (tabState?.openDocuments.get(kBookmarksTabTitle)) {
+    } else if (maybeTabState?.getDocumentGroupPrimaryDocument(kBookmarksTabTitle)) {
       if (persistentUI.focusSecondaryDocument === document.key) {
-        persistentUI.closeSubTabSecondaryDocument(tabSpec.tab, kBookmarksTabTitle);
+        persistentUI.closeDocumentGroupSecondaryDocument(tabSpec.tab, kBookmarksTabTitle);
       } else {
-        persistentUI.openSubTabSecondaryDocument(tabSpec.tab, kBookmarksTabTitle, document.key);
+        persistentUI.openDocumentGroupSecondaryDocument(tabSpec.tab, kBookmarksTabTitle, document.key);
       }
     } else {
       if (!document.hasContent && document.isRemote) {
         loadDocumentContent(document);
       }
-      persistentUI.openSubTabDocument(tabSpec.tab, subTab.label, document.key);
+      persistentUI.openDocumentGroupPrimaryDocument(tabSpec.tab, subTab.label, document.key);
       logDocumentViewEvent(document);
     }
   };
@@ -125,9 +139,9 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
       const newDocKey = starredDocuments.at(newDocIndex)?.key;
 
       if (secondary) {
-        newDocKey && persistentUI.openSubTabSecondaryDocument(tabSpec.tab, subTab.label, newDocKey);
+        newDocKey && persistentUI.openDocumentGroupSecondaryDocument(tabSpec.tab, subTab.label, newDocKey);
       } else {
-        newDocKey && persistentUI.openSubTabDocument(tabSpec.tab, subTab.label, newDocKey);
+        newDocKey && persistentUI.openDocumentGroupPrimaryDocument(tabSpec.tab, subTab.label, newDocKey);
       }
     }
   };
@@ -191,7 +205,7 @@ export const DocumentView = observer(function DocumentView({tabSpec, subTab}: IP
 
 interface IDocumentAreaProps {
   openDocument: DocumentModelType;
-  subTab: ISubTabSpec;
+  subTab: ISubTabModel;
   tab: string;
   sectionClass: string;
   isSecondaryDocument?: boolean;
@@ -219,7 +233,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   }
 
   function handleCloseButtonClick() {
-    persistentUI.closeSubTabDocument();
+    persistentUI.closeDocumentGroupPrimaryDocument();
   }
 
   // TODO: this edit button is confusing when the history is being viewed. It

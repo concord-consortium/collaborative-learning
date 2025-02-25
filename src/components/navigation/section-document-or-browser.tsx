@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import { useQueryClient } from 'react-query';
 import { DocumentModelType } from "../../models/document/document";
 import { logDocumentViewEvent } from "../../models/document/log-document-event";
-import { ISubTabSpec, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
+import { ISubTabModel, NavTabModelType, kBookmarksTabTitle } from "../../models/view/nav-tabs";
 import { useAppConfig, useClassStore, useProblemStore, useStores,
          useUserStore, usePersistentUIStore } from "../../hooks/use-stores";
 import { Logger } from "../../lib/logger";
@@ -33,14 +33,17 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
   const classStore = useClassStore();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
   const subTabs = tabSpec.subTabs;
-  const tabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
-  const subTabIndex = Math.max(subTabs.findIndex((subTab) => tabState?.openSubTab === subTab.label), 0);
+  const maybeTabState = navTabSpec && persistentUI.tabs.get(navTabSpec?.tab);
+  const subTabIndex = Math.max(
+    subTabs.findIndex((subTab) => maybeTabState?.currentDocumentGroupId === subTab.label),
+    0
+  );
   const selectedSubTab = subTabs[subTabIndex];
 
   useEffect(() => {
     // Set the default open subTab if a subTab isn't already set.
-    if (!persistentUI.tabs.get(tabSpec.tab)?.openSubTab) {
-      persistentUI.setOpenSubTab(tabSpec.tab, subTabs[0].label);
+    if (!persistentUI.tabs.get(tabSpec.tab)?.currentDocumentGroupId) {
+      persistentUI.setCurrentDocumentGroupId(tabSpec.tab, subTabs[0].label);
     }
   }, [subTabs, tabSpec.tab, persistentUI]);
 
@@ -49,12 +52,12 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     const _selectedSubTab = subTabs[tabidx];
     const subTabType = _selectedSubTab.sections[0].type;
     const title = _selectedSubTab.label;
-    if (tabState?.openSubTab === title && tabState?.openDocuments.get(title)) {
+    if (maybeTabState?.currentDocumentGroupId === title && maybeTabState?.currentDocumentGroup?.primaryDocumentKey) {
       // If there is a document open then a click on the tab should close
       // the document
-      persistentUI.closeSubTabDocument(tabSpec.tab, title);
+      maybeTabState.getDocumentGroup(title)?.closePrimaryDocument();
     }
-    persistentUI.setOpenSubTab(tabSpec.tab, title);
+    persistentUI.setCurrentDocumentGroupId(tabSpec.tab, title);
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
       tab_section_name: title,
       // FIXME: this can be inaccurate, there can be multiple
@@ -66,12 +69,12 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
 
   const handleSelectDocument = (document: DocumentModelType) => {
     if (persistentUI.focusDocument === document.key) {
-      persistentUI.closeSubTabDocument(tabSpec.tab, selectedSubTab.label);
+      persistentUI.closeDocumentGroupPrimaryDocument(tabSpec.tab, selectedSubTab.label);
     } else {
       if (!document.hasContent && document.isRemote) {
         loadDocumentContent(document);
       }
-      persistentUI.openSubTabDocument(tabSpec.tab, selectedSubTab.label, document.key);
+      persistentUI.openDocumentGroupPrimaryDocument(tabSpec.tab, selectedSubTab.label, document.key);
       logDocumentViewEvent(document);
     }
   };
@@ -80,8 +83,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     await document.fetchRemoteContent(queryClient, context);
   };
 
-  const renderDocumentBrowserView = (subTab: ISubTabSpec) => {
-    const openDocumentKey = tabState?.openDocuments.get(subTab.label);
+  const renderDocumentBrowserView = (subTab: ISubTabModel) => {
+    const openDocumentKey = maybeTabState?.getDocumentGroup(subTab.label)?.primaryDocumentKey;
     const classHash = classStore.classHash;
     return (
       <div className="document-browser vertical">
@@ -107,15 +110,28 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
     );
   };
 
-  const renderDocumentView = (subTab: ISubTabSpec) => {
-    const openDocumentKey = tabState?.openDocuments.get(subTab.label) || "";
+  const renderDocumentView = (subTab: ISubTabModel) => {
+    const documentGroup = maybeTabState?.getDocumentGroup(subTab.label);
+    const openDocumentKey = documentGroup?.primaryDocumentKey || "";
     const openDocument = store.documents.getDocument(openDocumentKey) ||
                             store.networkDocuments.getDocument(openDocumentKey);
+    const openFirstDoc = subTab.sections.length > 0 && subTab.sections[0].openFirstDocumentAutomatically;
     const isStarredTab = subTab.label === kBookmarksTabTitle;
-    if (!isStarredTab && (!openDocument || openDocument.getProperty("isDeleted"))) return false;
-    return (
-      <DocumentView tabSpec={tabSpec} subTab={subTab} />
-    );
+    if (
+      // The Bookmarks tab always shows the DocumentView
+      isStarredTab ||
+      // If there is an explicitly opened document then we show the DocumentView
+      (openDocument && !openDocument.getProperty("isDeleted")) ||
+      // If "openFirstDocumentAutomatically" and the user has not explicitly closed a document
+      // then we show the Document view
+      (openFirstDoc && !documentGroup?.userExplicitlyClosedDocument)
+    ) {
+      return (
+        <DocumentView tabSpec={tabSpec} subTab={subTab} />
+      );
+    }
+    // Otherwise render the document browser
+    return false;
   };
 
   return (

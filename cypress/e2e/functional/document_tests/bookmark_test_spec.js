@@ -47,6 +47,19 @@ context('Bookmarks', function () {
     resourcesPanel.getCanvasItemTitle('my-work', 'bookmarks').contains(copyDocumentTitle).should('exist');
     resourcesPanel.getCanvasItemTitle('my-work', 'bookmarks').contains(title).should('exist');
 
+    cy.log('verify second document can be opened in bookmarks panel');
+    resourcesPanel.getFocusDocumentTitle().contains(title);
+    resourcesPanel.getCanvasItemTitle('my-work', 'bookmarks').contains(copyDocumentTitle).click();
+    // There is confusing behavior here where the first click on another document doesn't open this as the
+    // the second document, instead it toggles the primary document to be this one. This happens
+    // because there is no explicit primary document initially. So this first click tries to set this
+    // secondary document but because there is no primary the persistent ui stores it as the primary doc.
+    resourcesPanel.getFocusDocumentTitle().contains(copyDocumentTitle);
+    // Now clicking back on the first document in the list should open it as the "secondary" document.
+    resourcesPanel.getCanvasItemTitle('my-work', 'bookmarks').contains(title).click();
+    resourcesPanel.getPrimaryFocusDocumentTitle().contains(copyDocumentTitle);
+    resourcesPanel.getSecondaryFocusDocumentTitle().contains(title);
+
     cy.log('verify publish personal document');
     canvas.publishCanvas("personal");
     resourcesPanel.openTopTab('class-work');

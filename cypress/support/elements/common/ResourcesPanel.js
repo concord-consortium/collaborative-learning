@@ -99,5 +99,27 @@ class ResourcesPanel{
         // but the top level (navTab) of this sub tab is not active/selected.
         return cy.get('.nav-tab-panel .react-tabs__tab-panel--selected .react-tabs__tab-panel--selected .edit-button');
     }
+
+    getFocusDocument() {
+      return cy.get('.focus-document');
+    }
+
+    getFocusDocumentTitle() {
+      return this.getFocusDocument().find('.document-title');
+    }
+
+    // The Primary and Secondary documents are used in the bookmarks tab
+    getPrimaryFocusDocument() {
+      return cy.get('.focus-document.primary');
+    }
+    getPrimaryFocusDocumentTitle() {
+      return this.getFocusDocument().find('.document-title');
+    }
+    getSecondaryFocusDocument() {
+      return cy.get('.focus-document.secondary');
+    }
+    getSecondaryFocusDocumentTitle() {
+      return this.getFocusDocument().find('.document-title');
+    }
 }
 export default ResourcesPanel;

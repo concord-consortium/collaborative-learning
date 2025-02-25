@@ -3,7 +3,7 @@ import { INetworkResourceClassResponse } from "../../../shared/shared";
 import { useNetworkResources } from "../../hooks/network-resources";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentModelType } from "../../models/document/document";
-import { ISubTabSpec } from "../../models/view/nav-tabs";
+import { ISubTabModel } from "../../models/view/nav-tabs";
 import { CollapsibleDocumentsSection } from "../thumbnail/collapsible-document-section";
 
 import "./network-documents-section.scss";
@@ -12,7 +12,7 @@ interface IProps {
   currentClassHash: string;
   currentTeacherId: string;
   currentTeacherName: string;
-  subTab: ISubTabSpec;
+  subTab: ISubTabModel;
   problemTitle: string;
   scale: number;
   onSelectDocument?: (document: DocumentModelType) => void;

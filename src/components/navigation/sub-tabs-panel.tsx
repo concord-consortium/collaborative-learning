@@ -3,13 +3,13 @@ import { observer } from "mobx-react";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import classNames from "classnames";
 import { useAppConfig } from "../../hooks/use-stores";
-import { ISubTabSpec, NavTabModelType } from "../../models/view/nav-tabs";
+import { ISubTabModel, NavTabModelType } from "../../models/view/nav-tabs";
 
 import "./sub-tabs-panel.sass";
 
 interface IProps {
   tabSpec: NavTabModelType;
-  renderSubTabPanel: (subTab: ISubTabSpec) => JSX.Element;
+  renderSubTabPanel: (subTab: ISubTabModel) => JSX.Element;
   tabsExtraClassNames?: classNames.Argument,
   onSelect?: (tabIdx: number) => void,
   // This will make the tabs a controlled component
