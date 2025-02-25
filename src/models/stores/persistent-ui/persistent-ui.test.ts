@@ -78,7 +78,7 @@ describe("PersistentUI", () => {
         expect(group.secondaryDocumentKey).toBeUndefined();
       });
     });
-    describe("setSecodaryDocumentKEY", () => {
+    describe("setSecondaryDocumentKey", () => {
       it("will create the currentDocumentKeys", () => {
         const group = UIDocumentGroup.create({id: "student-work"});
         group.setSecondaryDocumentKey("1234");
@@ -526,8 +526,14 @@ describe("PersistentUI", () => {
           mode: "1-up"
         }
       });
-      // This behavior is currently broken in MST, if that gets fixed
-      // this test should be updated
+      // Below is a test for broken MST behavior: applySnapshot does not run the snapshot
+      // preprocessor when types.snapshotProcessor is used:
+      // https://github.com/mobxjs/mobx-state-tree/issues/1317
+      // So the test expects applySnapshot to throw an exception.
+      // The runtime code works around this by explicitly migrating the snapshot before
+      // calling applySnapshot. This behavior is emulated on the next line.
+      // If the MST bug is fixed, then we should remove the explicit migration of the
+      // snapshot.
       expect(() => applySnapshot(ui, realV1State as unknown)).toThrow();
 
       const migratedSnapshot = persistentUIModelPreProcessor(realV1State as unknown);

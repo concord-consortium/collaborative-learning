@@ -47,13 +47,18 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
 
   const handleSelectDocument = (docGroup: DocumentGroup) => {
     const { label, sortType } = docGroup;
-    const openSubTabMetadata: IOpenDocumentsGroupMetadata = secondarySort === "None"
+    const openDocGroupMetadata: IOpenDocumentsGroupMetadata = secondarySort === "None"
                                ? { primaryLabel: label, primaryType: sortType }
                                : { primaryLabel: documentGroup.label, primaryType: documentGroup.sortType,
                                    secondaryLabel: label, secondaryType: sortType };
 
     return async (document: DocumentModelType | IDocumentMetadataModel) => {
-      const documentGroupId = JSON.stringify(openSubTabMetadata);
+      // The sort work tab stores the group metadata as the document group id.
+      // This way it can record both the primary and secondary filter values
+      // associated with the group.
+      // TODO: create different tabState and/or document group types so these
+      // values can be stored as fields in the document group
+      const documentGroupId = JSON.stringify(openDocGroupMetadata);
       const tabState = persistentUI.getOrCreateTabState(ENavTab.kSortWork);
       tabState.openDocumentGroupPrimaryDocument(documentGroupId, document.key);
 

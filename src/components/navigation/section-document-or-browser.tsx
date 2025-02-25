@@ -122,7 +122,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(function Sect
       isStarredTab ||
       // If there is an explicitly opened document then we show the DocumentView
       (openDocument && !openDocument.getProperty("isDeleted")) ||
-      // If the user has not explicitly closed a document then we show the Document view
+      // If "openFirstDocumentAutomatically" and the user has not explicitly closed a document
+      // then we show the Document view
       (openFirstDoc && !documentGroup?.userExplicitlyClosedDocument)
     ) {
       return (

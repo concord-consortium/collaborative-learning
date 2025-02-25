@@ -6,6 +6,7 @@
   "subtitle": "CLUE Basic",
   "config": {
     "placeholderText": "Do your Section work here.",
+    "annotations": "all",
     "autoSectionProblemDocuments": true,
     "defaultDocumentType": "problem",
     "toolbar": [
@@ -46,18 +47,6 @@
         "title": "XY Plot",
         "iconId": "icon-plot-tool",
         "isTileTool": true
-      },
-      {
-        "id": "sparrow",
-        "title": "Sparrow",
-        "iconId": "icon-sparrow-tool",
-        "isTileTool": false
-      },
-      {
-        "id": "hide-annotations",
-        "title": "Hide Annotations",
-        "iconId": "icon-hide-annotations-tool",
-        "isTileTool": false
       },
       {
         "id": "duplicate",

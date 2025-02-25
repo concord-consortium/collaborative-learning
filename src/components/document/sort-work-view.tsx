@@ -81,6 +81,11 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
     if (maybeTabState?.currentDocumentGroupId && openDocumentKey) {
       let openGroupMetadata: IOpenDocumentsGroupMetadata;
       try {
+        // The sort work tab stores the group metadata as the document group id.
+        // This way it can record both the primary and secondary filter values
+        // associated with the group.
+        // TODO: create different tabState and/or document group types so these
+        // values can be stored as fields in the document group
         openGroupMetadata = JSON.parse(maybeTabState.currentDocumentGroupId);
       } catch (e) {
         persistentUI.closeDocumentGroupPrimaryDocument(ENavTab.kSortWork);
