@@ -141,3 +141,71 @@ jxg-image (a part of the geometry tile) is getting a size from the internal obje
 drawing-layer.tsx (old version) assumes the image has a width and height. MST will throw an error in this code if there is an error and an image is returned without width and height. FIXME: This issue should be fixed in the new version.
 
 drawing-tool/objects/image.tsx this handles the case when the map entry doesn't have a width or height. It only updates its own image object width and height if they are set. So otherwise the width and height of the saved entry should be used.
+
+# Update
+
+TODO:
+- x check that I can test image upload in the image tile
+- add new action to uploadFile, it should return the imageMapEntry as well as the promise
+- switch the image tile to use the new approach
+- look for cypress tests of the image tile
+
+Notes:
+There isn't a good approach for using the observer approach and also updating the contentUrl stored in model state. Since this contentUrl can change after the initial image load for example on a file upload or when accessing an old image that needs to migrated to the newer URL style. The drawing tool seems to ignore this all together. Other tiles wait for the entry to finish loading and then they update their URLs.
+
+Here are some options for this:
+- models support image map entries in places of URLs for their images. Then when they are serialized (getSnapshot) the URL, filename, and dimensions would be written out. This requires more refactoring since we can't put an image map entry in two trees at the same time. So if the entries were converted to basic MobX objects instead of MST objects this would work with a custom serializer.
+- a postSnapshot handler. The initial URL is left in the model until it is serialized. This handler would look up the entry given the stored url, and then write out the contentUrl. Downside of this is that that the conversion would have to happen each time, and if the object was never accessed by a component the image map might not have the updated contentURL, so getting this contentURL could slow down the serialization. Probably in this case we'd want to not trigger a image fetch.
+- the model has an action for updating the image, and this action adds a MobX `when` observer to monitor when the entry is ready. At that point it updates the stored URL.
+
+The first option might cause problems for undo redo, it would depend on what is stored when the image map entry is first set.
+The 2nd option might also have problems with undo redo. If the url put in the model is a blob URL and that is changed when the model is serialized, this blob URL would be stored in the undo history. So now when replaying the history in a new session this blob URL would be invalid.
+The 3rd option would cause an async undo/history action. We could use without undo, but that would cause the history to store the blob URL again. What we want is a flow. If it used a flow and waited for the `when` to finish (or we provided additional ways to add listeners to entries), then there would just be a single history entry that contained the final URL. So this 3rd option seems best.
+
+New Notes:
+If we move the entry to the content model, then we have to deal with the initial load and undo/redo state changes. Some options parts of this:
+1. store the entry in volatile and have an action for updating the entry. This action can be a flow which monitors the entry with a `when` and then updates the url stored in state when the entry is ready. To handle the next cases this volatile entry should be cleared when it is ready.
+2. When the model is first loaded we need to update this entry. One way around this is to use a view to get the entry. If there is an entry in volatile then we use that. If not then we get the entry from gImageMap using the url stored in state. This has the following nuances:
+  1. when the url is set after the entry is ready, that will invalidate this view. Both the volatile entry will be gone, and the url will be changed. The view should then lookup the entry from the gImageMap and get the same entry that used to be volatile. Because it is same exact entry this should prevent further recalculation of observables. So it won't cause a re-render.
+  2. when the url is set because of an undo/redo, that will invalidate the view. If there is an in-progress entry being loaded, it won't be clear which of these two things the view should return. What we need to know is which one was "set" last. We have the "set" action for the volatile entry, as far as I know we don't have a "set" action when the undo/redo is replayed. That will just patch the model's snapshot. We'd have to watch the object with an onSnapshot or onPatch to know when an undo/redo or snapshot changed the url. Or we could add a reaction that is observing the url.
+
+### Volatile entry
+It seems like the best approach is to store the entry in volatile. And have an autorun monitoring the url. Whenever the url changes we set the volatile entry to be what is returned by gImageMap. This is kind of like a view, except that it makes sure the volatile entry always represents the most recently set item (url or entry). When the url is updated after a entry is ready (like an uploaded entry going from a blob to firestore url), this would trigger the autorun, but the entry returned by gImageMap should be the same entry so it would be a no-op when setting the volatile entry.
+
+### entry view
+An alternative is to always use a view which gets the entry from the url. This would mean that the temporary url for an uploaded image would have to be set as the url in model. This might be a blob URL which would not work after reload. The setUrl would need to be a flow action so that there wouldn't be two entries in the history one for the blob url and one for the final url.
+
+Another case to walk through is when an upload is canceled. Here are some ways this could happen:
+1. the user hits undo after uploading before the upload finishes.
+2. the user uploads a second image while the first is still uploading.
+3. the user pastes an external image url, then pastes another one before the first is done uploading.
+
+#### Volatile entry
+1. The url would get changed by the undo. This will trigger the autorun. The autorun will update the volatile entry based on the newly set url. The autorun should identify that old volatile entry is in-progress and cancel it. This canceling of the entry progress, should cause the `when` in the original `setVolatileEntry` to also get canceled. This `when` is how the url is updated after the entry is finished loading.  Maybe it would be easier to move this `when` logic in the same autorun. The autorun could be monitoring both the volatile entry's state and the url. The problem is that the autorun would no longer know which one was triggered first, or would it? If a reaction was used I think the second function of the reaction can be passed the previous value of the parameter.
+
+## Canceling
+if an undo/redo happens or a snapshot is applied, then we need to cancel in progress entry monitoring. Otherwise the image might finish uploading after the url was changed and get changed back to what it was before. This has to be handled whether we store something in volatile or not. There could be another way around this, by hooking into external changes to the url that weren't triggered by an action. And then we record the time of this change and when the url update finishes then we compare this change. Another way would be if we save the volatile entry, we check to make sure the entry at the current url matches the entry we're resolving. If it doesn't match then we know that something changed it out from under us. The code doing the resolving would have access to the entry it was resolving so we don't need volatile for this comparison. This approach works as long as we set the temporary url when a entry is first uploaded. This means if the model is saved before the entry is resolved the url in the model might be invalid. Sometimes these temporary URLs are still valid but we want to change them. Like an external image URL that we upload to the students firebase account. So if that external url was saved, when it gets loaded again by applySnapshot, ideally we'd want to resolve it again. This would mean that we want a onSnapshot or onPatch handler to be the one that monitors the URL resolving.
+
+Alternatively if we did save the in-progress entry in volatile and we could clear it out when the url is updated. Then the in-progress entry monitoring could know if its entry is still the one in-progress and hasn't been overridden. It might work if an onPatch handler clears out of the volatile when the url is set to something other than undefined. And when an action set the entry it would save it in volatile and set the url to undefined. So now the view returns the volatile entry if there is one otherwise it returns the gImageMap of the url.  Now when entry is resolved and the url is set to something valid the volatile entry would be cleared. If the snapshot is applied or an undo/redo handler sets the url to something else then it then the volatile entry would get cleared.
+
+A minor tweak on this would be to set the url to a special "in-progress" value instead of undefined. This way undefined could still be used to clear the url and clear volatile.
+
+## Another version
+- set the url to undefined when it is in progress and set the image entry in volatile
+- the view for the entry would return the url's gImageMap entry if the url is set otherwise it returns the volatile entry
+- if an undo/redo happens or a snapshot is applied, then we need to cancel the in progress entry.
+
+## Current recommendation
+
+When the entry is "in-progress" have the model store a url like `ccimgmap:in-progress:[url]`. The `get imageMapEntry` view can extract the url from this send it to gImageMap to get the entry. The entry is initially set using an action `setImageMapEntry(entry)` or the caller can set the url directly with `loadUrl(url)`. In both cases an image map entry is created from the URL. And the model's url is set to the `ccimgmap:in-progress:[url]` form. Then the entry is observed with a MobX `when` to find when the state of the entry changes. At this point the original in-progress url is compared with the model's url. If this url doesn't match it means something changed it in the meantime. So we bailout. If the url is the same then the entries final URL is retrieved and the models url is updated to this url. The actions are implemented as `flow` actions. This way the setting of the URL only results in a single undoable action.  The two settings of the URL will result in two onSnapshot calls, so the document on the server will have the `ccimgmap:in-progress:[url]` in it. If the loading fails then the url could be changed `ccimgmap:error:[url]`.
+
+A variation of this is for the monitoring of the entry to be triggered via a onPatch or MobX autorun. This way the entry would be monitored even if the the url came from a remote document or an undo/redo. However this approach has a few issues:
+- it is harder to group this into a single history entry. In the new cases it covers we don't want a history entry. In the main case, this would be triggered outside of the initial action so we'd need to add a mechanism outside of actions to group things.
+- we probably don't really want url's set by undo/redo to be monitored and update the model
+
+The problem cases without the variation happen when the document is closed before the url is loaded.
+- If this is a file upload, the url will be a blob url which will not be valid anymore. There isn't anything we can do about this any case. We could in theory not update the url in the state until the file has been uploaded, but this would introduce complexity both in the UI and state management.- If this is an external url that is being uploaded to the student's firebase the url will valid and could be recovered. The state would store `ccimgmap:in-progress:[external url]`. The `get imageMapEntry` would actually return a valid entry which would start uploading the image to firebase again. But because this happened outside of an action it would not be monitored. So the url in the model state would not get updated.
+
+This external url issue could be handled by an afterCreate. If this hooks sees an `ccimgmap:in-progress:[external url]` they could add a listener (mobx `when`) to the image map entry. This would be the same as one added by the normal action, but it would result in a new history entry. It seems like it should be marked as no undoable though. Another issue is that the user might not be setup yet when the afterCreate is called, so then there would be no where to upload the image to. However that might be impossible in practice. If this is a document the user can save to then it is a document that should have been loaded from the user's space in firebase. But an edge case to check is a template setup for a problem document, if this initial problem document is created before the user is configured, then the user won't be set so then the image map entry won't have anywhere to save. This seems like such an edge case of a edge case that we can ignore it.
+
+Another issue with read-only documents. If an external url is in a read only document CLUE will uploading it each time the document is opened. This is the case currently and would continue to be the case with this update. That is because it can't save the URL to the uploaded. If the document environment indicated that it was a read only document, then this info could be passed from the model to gImageMap so it would just not bother trying to store the URL.
