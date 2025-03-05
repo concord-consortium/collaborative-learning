@@ -11,4 +11,6 @@ jobs:
     with:
       version: ${{ inputs.version }}
       dest-file: staging.html
+      environment: staging
+      url: https://collaborative-learning.concord.org/staging.html
     secrets: inherit

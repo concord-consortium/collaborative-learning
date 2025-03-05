@@ -11,4 +11,6 @@ jobs:
     with:
       version: ${{ inputs.version }}
       dest-file: index.html
+      environment: production
+      url: https://collaborative-learning.concord.org
     secrets: inherit

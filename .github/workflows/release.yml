@@ -10,6 +10,14 @@ on:
         type: string
         description: The released file name for each index-top that is copied
         required: true
+      environment:
+        type: string
+        description: GitHub environment to send the deployment to
+        required: true
+      url:
+        type: string
+        description: URL to use for environment-url and log-url
+        required: true
 env:
   BUCKET: models-resources
   PREFIX: collaborative-learning
@@ -22,6 +30,14 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: us-east-1
     steps:
+      - uses: chrnorm/deployment-action@v2
+        name: Create GitHub deployment
+        id: deployment
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ inputs.url }}
+          environment: ${{ inputs.environment }}
+          ref: ${{ inputs.version }}
       - run: >
           aws s3 cp
           s3://${{ env.BUCKET }}/${{ env.PREFIX }}/version/${{ inputs.version }}/${{ env.SRC_FILE }}
@@ -30,4 +46,21 @@ jobs:
           aws s3 cp
           s3://${{ env.BUCKET }}/${{ env.PREFIX }}/version/${{ inputs.version }}/editor/${{ env.SRC_FILE }}
           s3://${{ env.BUCKET }}/${{ env.PREFIX }}/editor/${{ inputs.dest-file }}
-
+      - name: Update deployment status (success)
+        if: success()
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ inputs.url }}
+          log-url: ${{ inputs.url }}
+          state: 'success'
+          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+      - name: Update deployment status (failure)
+        if: failure()
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          environment-url: ${{ inputs.url }}
+          log-url: ${{ inputs.url }}
+          state: 'failure'
+          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
