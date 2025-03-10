@@ -159,12 +159,12 @@ Cypress.Commands.add("openDocumentThumbnail", (navTab,section,title) => { //open
 Cypress.Commands.add("openDocumentWithTitle", (tab, section, title) => {
   cy.openSection(tab,section);
   cy.get('.document-tabs.'+tab+' .documents-list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
-  cy.get('.document-tabs.'+tab+' [data-test=subtab-'+section+'] .edit-button').click();
+  cy.get('.document-tabs.'+tab+' [data-test=subtab-'+section+'] .toolbar .tool.edit').click();
 });
 Cypress.Commands.add("openDocumentWithIndex", (tab, section, docIndex) => {
   cy.openSection(tab,section);
   cy.get('.document-list.'+section+' [data-test='+section+'-list-items] .footer').eq(docIndex).siblings('.scaled-list-item-container').click({force:true});
-  cy.get('.edit-button').click();
+  cy.get('.toolbar .tool.edit').click();
 });
 Cypress.Commands.add("clickProblemResourceTile", (subsection, tileIndex = 0) => {
   cy.get('[data-focus-section='+subsection+'] .problem-panel .document-content .tile-row').eq(tileIndex).then($tileRow => {

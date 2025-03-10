@@ -7,49 +7,67 @@
     position: relative;
     height: 100%;
 
-    .canvas {
-      overflow: auto;
-      height: 100%;
+    .canvas-separator {
+      position: absolute;
+      top: 0;
+      left: $workspace-toolbar-width + $canvas-separator-offset;
+      width: $canvas-separator-width;
+      bottom: 0;
+      background-color: $problem-orange-light-7;
+    }
 
-      .document-content {
-        background-color: #fff;
-        padding: $padding;
-        &.comment-select {
-          background-color: $comment-select-background;
-          .tool-tile.readonly {
-            border: 2px solid $comment-select-background;
-            &.selected {
-              border: 2px solid white;
+    .canvas-area {
+      position: absolute;
+      height: 100%;
+      left: $workspace-toolbar-width + $canvas-separator-offset + $canvas-separator-width;
+      width: calc(100% - ($workspace-toolbar-width + $canvas-separator-offset + $canvas-separator-width));
+      top: 0px;
+      border-top: $document-border-width solid white;
+
+      .canvas {
+        overflow: auto;
+        height: 100%;
+
+        .document-content {
+          background-color: #fff;
+          padding: $padding;
+          &.comment-select {
+            background-color: $comment-select-background;
+            .tool-tile.readonly {
+              border: 2px solid $comment-select-background;
+              &.selected {
+                border: 2px solid white;
+              }
             }
           }
         }
-      }
 
-      .buttons {
-        margin: $margin;
-        text-align: right;
+        .buttons {
+          margin: $margin;
+          text-align: right;
 
-        button {
-          padding: $half-padding $padding;
-          background-color: $color1-3;
-          border: $border-width solid $border-color;
-          color: $color1-7;
-          cursor: pointer;
-          border-radius: $border-radius;
-          font-family: 'Lato', sans-serif;
-          box-shadow: 3px 3px;
-          height: 70px;
-          outline: 0;
-          font-size: 14px;
+          button {
+            padding: $half-padding $padding;
+            background-color: $color1-3;
+            border: $border-width solid $border-color;
+            color: $color1-7;
+            cursor: pointer;
+            border-radius: $border-radius;
+            font-family: 'Lato', sans-serif;
+            box-shadow: 3px 3px;
+            height: 70px;
+            outline: 0;
+            font-size: 14px;
 
-          &:hover, &:focus {
-            background-color: $color1-5;
-            color: $border-color;
-          }
+            &:hover, &:focus {
+              background-color: $color1-5;
+              color: $border-color;
+            }
 
-          &:active {
-            background-color: $color1-6;
-            color: $border-color;
+            &:active {
+              background-color: $color1-6;
+              color: $border-color;
+            }
           }
         }
       }

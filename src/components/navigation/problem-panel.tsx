@@ -4,6 +4,7 @@ import { BaseComponent, IBaseProps } from "../base";
 import { CanvasComponent } from "../document/canvas";
 import { SectionModelType } from "../../models/curriculum/section";
 import { DocumentContentModelType } from "../../models/document/document-content";
+import { SectionToolbar } from "../document/section-toolbar";
 
 import "./problem-panel.scss";
 
@@ -36,11 +37,18 @@ export class ProblemPanelComponent extends BaseComponent<IProps> {
 
   private renderContent(content: DocumentContentModelType) {
     return (
-      <CanvasComponent
-        content={content}
-        context="left-nav"
-        readOnly={true}
-      />
+        <div key="problem-panel">
+          {/* NOTE: the toolbar is empty for now.  It will be populated in future stories. */}
+          <SectionToolbar section={this.props.section!} toolbar={this.stores.appConfig.myResourcesToolbar({})} />
+          <div className="canvas-separator"/>
+          <div className="canvas-area">
+            <CanvasComponent
+              content={content}
+              context="left-nav"
+              readOnly={true}
+            />
+          </div>
+        </div>
     );
   }
 

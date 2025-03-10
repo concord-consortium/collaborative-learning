@@ -167,6 +167,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["authorTools"]>("authorTools");
   }
 
+  get myResourcesToolbar() {
+    return this.getProp<UC["myResourcesToolbar"]>("myResourcesToolbar");
+  }
+
   get tools() {
     return this.getProp<UC["tools"]>("tools");
   }

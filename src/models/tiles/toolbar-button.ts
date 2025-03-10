@@ -6,6 +6,7 @@ const BaseToolbarButtonModel = types.model("BaseToolbarButton", {
   id: types.string, // tile type in the case of tile buttons
   title: types.maybe(types.string),
   isDefault: false,
+  isPrimary: types.maybe(types.boolean),
 })
 .volatile(self => ({
   Icon: undefined as any
@@ -28,7 +29,7 @@ const AppToolbarButtonModel = BaseToolbarButtonModel.named("AppToolbarButtonMode
   .props({
     iconId: types.string,
     title: types.string, // Titles are required on app toolbar buttons
-    isTileTool: types.literal(false)
+    isTileTool: types.literal(false),
   })
   .actions(self => ({
     initialize() {

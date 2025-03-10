@@ -13,7 +13,6 @@ import { EditableDocumentContent } from "../document/editable-document-content";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { SectionDocuments } from "../../models/stores/section-docs-store";
 import { DocumentBrowserScroller, ScrollButton } from "./document-browser-scroller";
-import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 import CloseIcon from "../../assets/icons/close/close.svg";
 
 interface IProps {
@@ -221,6 +220,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   const {appConfig, class: classStore, persistentUI, ui, unit, user} = useStores();
   const showPlayback = user.type && !openDocument?.isPublished
                           ? appConfig.enableHistoryRoles.includes(user.type) : false;
+  const showEdit = !openDocument.isRemote && ((tab === "my-work") || (tab === "learningLog"));
   const getDisplayTitle = (document: DocumentModelType) => {
     const documentOwner = classStore.users.get(document.uid);
     const documentTitle = getDocumentDisplayTitle(unit, document, appConfig);
@@ -228,35 +228,9 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
   };
   const displayTitle = getDisplayTitle(openDocument);
 
-  function handleEditClick(document: DocumentModelType) {
-    persistentUI.problemWorkspace.setPrimaryDocument(document);
-  }
-
   function handleCloseButtonClick() {
     persistentUI.closeDocumentGroupPrimaryDocument();
   }
-
-  // TODO: this edit button is confusing when the history is being viewed. It
-  // opens the original document for editing, not some old version of the
-  // document they might be looking at. Previously this edit button was disabled
-  // when the history document was being shown because SectionDocumentOrBrowser
-  // knew the state of playback controls. It no longer knows that state, so now
-  // the edit button is shown all of the time.
-  // PT Story: https://www.pivotaltracker.com/story/show/183416176
-  const editButton = (type: string, sClass: {secondary: boolean | undefined; primary: boolean | undefined} | string,
-                      document: DocumentModelType) => {
-
-    return (
-      (type === "my-work") || (type === "learningLog")
-        ?
-          <div className={classNames("edit-button", sClass)}
-                onClick={() => handleEditClick(document)}>
-            <EditIcon className={`edit-icon ${sClass}`} />
-            <div>Edit</div>
-          </div>
-        : null
-    );
-  };
 
   const sideClasses = { secondary: isSecondaryDocument, primary: hasSecondaryDocument && !isSecondaryDocument };
 
@@ -272,10 +246,7 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
           </span>
         </div>
         <div className="document-buttons">
-          {(!openDocument.isRemote) &&
-            editButton(tab, sectionClass || sideClasses, openDocument)
-          }
-          <button className={`close-doc-button ${tab}`} onClick={handleCloseButtonClick}>
+          <button className={`close-doc-button ${tab} ${sectionClass}`} onClick={handleCloseButtonClick}>
             <CloseIcon className="close-icon" />
           </button>
         </div>
@@ -291,6 +262,8 @@ const DocumentArea = ({openDocument, subTab, tab, sectionClass, isSecondaryDocum
         readOnly={true}
         showPlayback={showPlayback}
         fullHeight={subTab.label !== kBookmarksTabTitle }
+        toolbar={appConfig.myResourcesToolbar({showPlayback, showEdit})}
+        sectionClass={sectionClass}
       />
       {onChangeDocument && !hideRightFlipper &&
         <ScrollButton side="right" theme={tab} className="document-flipper"
