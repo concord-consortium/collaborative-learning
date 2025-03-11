@@ -47,10 +47,6 @@ class ResourcesPanel{
       return cy.get('.document-buttons .close-doc-button');
     }
 
-    getDocumentEditButton() {
-      return cy.get('.document-buttons .edit-button');
-    }
-
     getExemplarShareCheckbox() {
       return cy.get('.focus-document .document-status input[type=checkbox]');
     }
@@ -93,11 +89,11 @@ class ResourcesPanel{
     }
 
     getActiveTabEditButton(){
-        // This looks for the edit button in the active tab and active sub tab
+        // This looks for the edit button in the toolbar in the active tab and active sub tab
         // both .react-tabs__tab-panel--selected classes are needed. Otherwise it
         // can find edit buttons inside of sub tabs which are active/selected,
         // but the top level (navTab) of this sub tab is not active/selected.
-        return cy.get('.nav-tab-panel .react-tabs__tab-panel--selected .react-tabs__tab-panel--selected .edit-button');
+        return cy.get('.nav-tab-panel .react-tabs__tab-panel--selected .react-tabs__tab-panel--selected .toolbar .tool.edit');
     }
 
     getFocusDocument() {

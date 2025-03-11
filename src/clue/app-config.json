@@ -238,6 +238,21 @@
         "isTileTool": false
       }
     ],
+    "myResourcesToolbar": [
+      {
+        "id": "edit",
+        "title": "Edit",
+        "iconId": "icon-edit-tool",
+        "isTileTool": false,
+        "isPrimary": true
+      },
+      {
+        "id": "playback",
+        "title": "Playback",
+        "iconId": "icon-playback-tool",
+        "isTileTool": false
+      }
+    ],
     "placeholderText": "",
     "stamps": [],
     "settings": {

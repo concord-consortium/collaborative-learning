@@ -12,7 +12,6 @@ import { DocumentLoadingSpinner } from "./document-loading-spinner";
 import { DocumentScroller } from "./document-scroller";
 import { DocumentGroup } from "../../models/stores/document-group";
 
-import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 import CloseIcon from "../../../src/assets/icons/close/close.svg";
 import ToggleDocumentScrollerIcon from "../../../src/assets/show-hide-thumbnail-view-small-icon.svg";
 import SwitchDocumentIcon from "../../assets/scroll-arrow-small-icon.svg";
@@ -51,6 +50,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   const openDocument = getOpenDocument();
   const isVisible = openDocument?.isAccessibleToUser(user, documents);
   const showPlayback = user.isResearcher || (user.type && appConfig.enableHistoryRoles.includes(user.type));
+  const showEdit = openDocument?.uid === user.id; //only show if doc is owned by the user who opened it
   const showExemplarShare = user.type === "teacher" && openDocument && isExemplarType(openDocument.type);
   const getDisplayTitle = (document: DocumentModelType) => {
     const documentOwner = classStore.users.get(document.uid);
@@ -59,28 +59,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   };
   const displayTitle = openDocument && getDisplayTitle(openDocument);
 
-  function handleEditClick(document: DocumentModelType) {
-    persistentUI.problemWorkspace.setPrimaryDocument(document);
-  }
-
   const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
-
-  const editButton = (type: string, sClass: {secondary: boolean | undefined; primary: boolean | undefined} | string,
-                      document: DocumentModelType) => {
-    const showEditButton = document.uid === user.id; //only show if doc is owned by the user who opened it
-    return (
-      showEditButton ?
-      <div
-        className={classNames("edit-button", sClass)}
-        onClick={() => handleEditClick(document)}
-      >
-        <EditIcon className={`edit-icon ${sClass}`} />
-        <div>Edit</div>
-      </div>
-      :
-      null
-    );
-  };
 
   const handleCloseButtonClick = () => {
     persistentUI.closeDocumentGroupPrimaryDocument();
@@ -152,9 +131,6 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
             </button>
           }
           <div className="document-buttons">
-            { openDocument &&
-              editButton(ENavTab.kSortWork, sectionClass || sideClasses, openDocument)
-            }
             <button className="close-doc-button" onClick={handleCloseButtonClick}>
               <CloseIcon />
             </button>
@@ -169,6 +145,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
             readOnly={true}
             showPlayback={showPlayback}
             fullHeight={true}
+            toolbar={appConfig.myResourcesToolbar({showPlayback, showEdit})}
           />
       }
       {

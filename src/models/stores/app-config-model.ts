@@ -7,6 +7,11 @@ import { ToolbarModel } from "./problem-configuration";
 import { SettingsGroupMstType } from "./settings";
 import { DocumentLabelModel, UnitConfiguration } from "./unit-configuration";
 
+interface IMyResourcesToolbarOptions {
+  showEdit?: boolean;
+  showPlayback?: boolean;
+}
+
 export const UnitSpecModel = types
   .model("UnitSpec", {
     content: types.string,
@@ -24,6 +29,7 @@ export const AppConfigModel = types
     disabledFeatures: self.config?.disabledFeatures || [],
     toolbar: ToolbarModel.create(self.config?.toolbar || []),
     authorTools: ToolbarModel.create(self.config?.authorTools || []),
+    myResourcesToolBar: ToolbarModel.create(self.config?.myResourcesToolbar || []),
     settings: self.config?.settings,
     requireSortWorkTab: false
   }))
@@ -84,6 +90,21 @@ export const AppConfigModel = types
       return ToolbarModel.create([
         ...self.toolbar.map(button => ToolbarButtonModel.create(getSnapshot(button))),
         ...self.authorTools.map(button => ToolbarButtonModel.create(getSnapshot(button)))
+      ]);
+    },
+    myResourcesToolbar({showPlayback, showEdit}: IMyResourcesToolbarOptions) {
+      return ToolbarModel.create([
+        ...self.myResourcesToolBar
+          .filter(button => {
+            if (button.id === "edit") {
+              return showEdit;
+            }
+            if (button.id === "playback") {
+              return false && showPlayback; // playback disabled for now
+            }
+            return true;
+          })
+          .map(button => ToolbarButtonModel.create(getSnapshot(button))),
       ]);
     },
     /**

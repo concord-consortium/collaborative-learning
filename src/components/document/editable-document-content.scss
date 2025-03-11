@@ -48,4 +48,48 @@
       width: calc(100% - ($workspace-toolbar-width + $canvas-separator-offset + $canvas-separator-width));
     }
   }
+
+  .toolbar {
+    .tool.primary {
+      background-color: $workspace-teal-light-4;
+
+      svg {
+        path {
+          fill: $workspace-teal-dark-1;
+        }
+      }
+
+      &:hover {
+        background-color: $workspace-teal-light-3;
+      }
+      &.active {
+        background-color: $workspace-teal-light-2;
+      }
+    }
+  }
+
+  &.learning-log {
+    .canvas-separator {
+      background-color: $learninglog-green-light-5;
+    }
+
+    .toolbar {
+      .tool.primary {
+        background-color: $learninglog-green-light-5;
+
+        svg {
+          path {
+            fill: $learninglog-green-dark-1;
+          }
+        }
+
+        &:hover {
+          background-color: $learninglog-green-light-4;
+        }
+        &.active {
+          background-color: $learninglog-green-light-2;
+        }
+      }
+    }
+  }
 }

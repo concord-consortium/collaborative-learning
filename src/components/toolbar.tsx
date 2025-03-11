@@ -11,6 +11,7 @@ import { DeleteButton } from "./delete-button";
 import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
+import { SectionModelType } from "../models/curriculum/section";
 
 import "./toolbar.scss";
 
@@ -19,9 +20,14 @@ import "./toolbar.scss";
 // (See `annotation-toolbar.tsx`)
 const ignoredButtons = [ "sparrow", "hide-annotations" ];
 
+// This toolbar works with both the document and section models.
+// Since many of the tools are shared between the two, each model is
+// passed as an optional prop instead of using two separate components.
 interface IProps extends IBaseProps {
-  document: DocumentModelType;
+  document?: DocumentModelType;
+  section?: SectionModelType;
   toolbarModel: IToolbarModel;
+  disabledToolIds?: string[];
 }
 
 interface IState {
@@ -68,6 +74,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "solution":
           this.handleToggleSelectedTilesSolution();
           break;
+        case "edit":
+          this.handleEdit();
+          break;
         default:
           this.handleAddTile(tool);
           break;
@@ -91,6 +100,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           toolButton,
           isActive: this.isButtonActive(toolButton),
           isDisabled: this.isButtonDisabled(toolButton),
+          isPrimary: this.isButtonPrimary(toolButton),
           onSetToolActive: handleSetActiveTool,
           onClick: handleClickTool,
           onDragStart: handleDragTool,
@@ -121,26 +131,26 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private showDefaultDropRowHighlight = () => {
     const { document } = this.props;
-    document.content?.showPendingInsertHighlight(true);
+    document?.content?.showPendingInsertHighlight(true);
   };
 
   private showDropRowHighlightAfterSelectedTiles = () => {
     const { document } = this.props;
     const { ui: { selectedTileIds } } = this.stores;
-    const tilePositions = document.content?.getTilePositions(Array.from(selectedTileIds)) || [];
-    const rowIndex = document.content?.getRowAfterTiles(tilePositions);
-    document.content?.showPendingInsertHighlight(true, rowIndex);
+    const tilePositions = document?.content?.getTilePositions(Array.from(selectedTileIds)) || [];
+    const rowIndex = document?.content?.getRowAfterTiles(tilePositions);
+    document?.content?.showPendingInsertHighlight(true, rowIndex);
   };
 
   private removeDropRowHighlight = () => {
     const { document } = this.props;
-    document.content?.showPendingInsertHighlight(false);
+    document?.content?.showPendingInsertHighlight(false);
   };
 
   private getUniqueTitle(tileContentInfo: ITileContentInfo) {
     const { document } = this.props;
     const { type } = tileContentInfo;
-    return document.getUniqueTitleForType(type);
+    return document?.getUniqueTitleForType(type);
   }
 
   private isButtonActive(toolButton: IToolbarButtonModel) {
@@ -151,11 +161,15 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private isButtonPrimary(toolButton: IToolbarButtonModel) {
+    return !!toolButton.isPrimary;
+  }
+
   private isButtonDisabled(toolButton: IToolbarButtonModel) {
-    const { document: { content } } = this.props;
+    const { document } = this.props;
     const { appConfig: { settings }, ui: { selectedTileIds } } = this.stores;
 
-    const undoManager = this.props.document.treeManagerAPI?.undoManager;
+    const undoManager = document?.treeManagerAPI?.undoManager;
     if (toolButton.id === "undo" && !undoManager?.canUndo) return true;
     if (toolButton.id === "redo" && !undoManager?.canRedo) return true;
 
@@ -165,10 +179,14 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     if (toolButton.isTileTool && settings) {
       // If a limit on the number of tiles of a certain type has been specified in settings,
       // disable the related tile button when that limit is reached.
-      const tilesOfTypeCount = content?.getTilesOfType(toolButton.id).length || 0;
+      const tilesOfTypeCount = document?.content?.getTilesOfType(toolButton.id).length || 0;
       const tileSettings = settings[toolButton.id.toLowerCase()] as Record<string, any>;
       const maxTilesOfType = tileSettings ? tileSettings.maxTiles : undefined;
       if (maxTilesOfType && tilesOfTypeCount >= maxTilesOfType) return true;
+    }
+
+    if (this.props.disabledToolIds?.includes(toolButton.id)) {
+      return true;
     }
 
     return false;
@@ -187,10 +205,10 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     }
 
     const newTileOptions: IDocumentContentAddTileOptions = {
-            insertRowInfo: { rowInsertIndex: document.content?.defaultInsertRow ?? 0 }
+            insertRowInfo: { rowInsertIndex: document?.content?.defaultInsertRow ?? 0 }
           };
-    const rowTile = document.addTile(tool.id, newTileOptions);
-    if (rowTile && rowTile.tileId) {
+    const rowTile = document?.addTile(tool.id, newTileOptions);
+    if (document && rowTile && rowTile.tileId) {
       ui.setSelectedTileId(rowTile.tileId);
       this.setState(state => ({ activeTool: state.defaultTool }));
       // Scroll to the new tile once it has been added to the correct location
@@ -205,11 +223,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleUndo() {
-    this.props.document.undoLastAction();
+    this.props.document?.undoLastAction();
   }
 
   private handleRedo() {
-    this.props.document.redoLastAction();
+    this.props.document?.redoLastAction();
   }
 
   private handleDelete() {
@@ -223,11 +241,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const selectedTileIds = ui.selectedTileIds;
 
     // Sort the selected tile ids in top->bottom, left->right order so they duplicate in the correct formation
-    const tilePositions = document.content?.getTilePositions(Array.from(selectedTileIds)) || [];
+    const tilePositions = document?.content?.getTilePositions(Array.from(selectedTileIds)) || [];
     const sortedTileIds = orderTilePositions(tilePositions).map(info => info.tileId);
-    const dragTileItems = document.content?.getDragTileItems(sortedTileIds) || [];
+    const dragTileItems = document?.content?.getDragTileItems(sortedTileIds) || [];
 
-    document.content?.duplicateTiles(dragTileItems);
+    document?.content?.duplicateTiles(dragTileItems);
     ui.clearSelectedTiles();
     this.removeDropRowHighlight();
   }
@@ -241,7 +259,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const { document } = this.props;
     ui.selectedTileIds.forEach(tileId => {
       ui.removeTileIdFromSelection(tileId);
-      document.deleteTile(tileId);
+      document?.deleteTile(tileId);
     });
   };
 
@@ -249,7 +267,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   private selectedTilesIncludeTeacher = () => {
     const { ui } = this.stores;
     const { document } = this.props;
-    const documentContent = document.content;
+    const documentContent = document?.content;
     let includesTeacher = false;
     if (documentContent) {
       ui.selectedTileIds.forEach(tileId => {
@@ -265,7 +283,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   private handleToggleSelectedTilesSolution = () => {
     const { ui } = this.stores;
     const { document } = this.props;
-    const documentContent = document.content;
+    const documentContent = document?.content;
     if (documentContent) {
       const display = this.selectedTilesIncludeTeacher() ? undefined : "teacher";
       ui.selectedTileIds.forEach(tileId => {
@@ -283,6 +301,13 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       const dragInfo: IDragToolCreateInfo =
         { toolId: tool.id, title: this.getUniqueTitle(tileContentInfo) };
       e.dataTransfer.setData(kDragTileCreate, JSON.stringify(dragInfo));
+    }
+  };
+
+  private handleEdit = () => {
+    const { document } = this.props;
+    if (document) {
+      this.stores.persistentUI.problemWorkspace.setPrimaryDocument(document);
     }
   };
 }

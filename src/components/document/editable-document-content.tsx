@@ -1,42 +1,19 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useRef } from "react";
 import classNames from "classnames";
-import { clone } from "mobx-state-tree";
-import { AppConfigContext } from "../../app-config-context";
 import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
 import { FourUpComponent } from "../four-up";
 import { useDocumentContext } from "../../hooks/use-document-context";
 import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
 import { useGroupsStore, useStores } from "../../hooks/use-stores";
-import { ToolbarComponent } from "../toolbar";
 import { EditableTileApiInterfaceRef, EditableTileApiInterfaceRefContext } from "../tiles/tile-api";
 import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { WorkspaceMode } from "../../models/stores/workspace";
+import { DocumentToolbar } from "./document-toolbar";
 
 import "./editable-document-content.scss";
-
-interface IToolbarProps {
-  document: DocumentModelType;
-  toolbar: IToolbarModel;
-}
-
-const DocumentToolbar: React.FC<IToolbarProps> = ({ toolbar, ...others }) => {
-  const appConfig = useContext(AppConfigContext);
-
-  // The toolbar prop represents the app's configuration of the toolbar
-  // It is cloned here in the document so changes to one document's toolbar
-  // do not affect another document's toolbar.
-  // Currently the toolbar model is not modified, but it seems safer to do this.
-  // The cloned model is stored in state so it isn't recreated on each render
-  const [toolbarModel] = useState<IToolbarModel>(() => {
-      // The new model is passed the appIcons as its environment, so the model
-      // can lookup an app level Icon if needed.
-      return clone(toolbar, { appIcons: appConfig.appIcons });
-  });
-  return <ToolbarComponent key="toolbar" toolbarModel={toolbarModel} {...others} />;
-};
 
 interface IOneUpCanvasProps {
   document: DocumentModelType;
@@ -96,21 +73,22 @@ export interface IProps {
   toolbar?: IToolbarModel;
   readOnly?: boolean;
   fullHeight?: boolean
+  sectionClass?: string;
 }
 export function EditableDocumentContent({
-  className, contained, mode, isPrimary, document, toolbar, readOnly, showPlayback, fullHeight
+  className, contained, mode, isPrimary, document, toolbar, readOnly, showPlayback, fullHeight, sectionClass
 }: IProps) {
   const documentContext = useDocumentContext(document);
   const { db: { firebase, firestore }, ui, persistentUI, user } = useStores();
   // set by the canvas and used by the toolbar
   const editableTileApiInterfaceRef: EditableTileApiInterfaceRef = useRef(null);
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
-  const isShowingToolbar = toolbar?.length && !isReadOnly;
+  const isShowingToolbar = toolbar?.length;
   const showToolbarClass = isShowingToolbar ? "show-toolbar" : "hide-toolbar";
   const isChatEnabled = user.isTeacherOrResearcher;
   const documentSelectedForComment = isChatEnabled && persistentUI.showChatPanel
                                      && ui.selectedTileIds.length === 0 && !isPrimary;
-  const editableDocContentClass = classNames("editable-document-content", showToolbarClass,
+  const editableDocContentClass = classNames("editable-document-content", showToolbarClass, sectionClass,
     contained ? "contained-editable-document-content" : "full-screen-editable-document-content",
     {"comment-select" : documentSelectedForComment, "full-height": fullHeight}, className);
 

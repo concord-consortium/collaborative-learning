@@ -197,6 +197,22 @@ $title-margin: 2px;
                   }
                 }
               }
+              &.learning-log {
+                background-color: $learninglog-green-light-5;
+                .x-shape {
+                  fill: $learninglog-green-dark-1;
+                }
+                &:hover {
+                  background-color: $learninglog-green-light-3;
+                }
+                &:active {
+                  background-color: $learninglog-green-light-1;
+                  color: white;
+                  .x-shape {
+                    fill: white;
+                  }
+                }
+              }
             }
           }
         }
@@ -218,10 +234,11 @@ $title-margin: 2px;
   .editable-document-content {
     top: $nav-tab-height;
     flex: 1;
+    background-color: white;
+
     .canvas-area {
       // Not sure why - 4px is necessary here, but the document would always scroll otherwise
       height: calc(100% - 4px);
-      width: 100%;
 
       .comment-select {
         .tool-tile.readonly {

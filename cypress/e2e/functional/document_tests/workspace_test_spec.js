@@ -28,10 +28,10 @@ context('Test the overall workspace', function () {
     cy.log('verify click on document thumbnail opens document in nav panel');
     cy.openDocumentWithTitle('my-work', 'learning-log', 'My First Learning Log');
     cy.get('.editable-document-content [data-test=canvas]').should('be.visible');
-    cy.get('.edit-button.learning-log').should('be.visible');
+    cy.get('.document-header.learning-log').should('be.visible');
 
     cy.log('verify click on Edit button opens document in main workspace');
-    cy.get('.edit-button.learning-log').click();
+    cy.get('.toolbar .tool.edit').click();
     cy.get('.primary-workspace [data-test=learning-log-title]').should('contain', "Learning Log: My First Learning Log");
 
     cy.log('verify close of nav tabs');

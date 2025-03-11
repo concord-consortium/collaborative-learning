@@ -63,7 +63,7 @@ describe("DeleteButton", () => {
         <ModalProvider>
           <DeleteButton
             toolButton={toolButton}
-            isActive={false} isDisabled={false}
+            isActive={false} isDisabled={false} isPrimary={false}
             onSetToolActive={onSetToolActive}
             onClick={onClick}
             onSetShowDeleteTilesConfirmationAlert={onSetShowDeleteTilesConfirmationAlert}
@@ -99,7 +99,7 @@ describe("DeleteButton", () => {
         <ModalProvider>
           <DeleteButton
             toolButton={toolButton}
-            isActive={false} isDisabled={false}
+            isActive={false} isDisabled={false} isPrimary={false}
             onSetToolActive={onSetToolActive}
             onClick={handleClick}
             onSetShowDeleteTilesConfirmationAlert={setShowAlert}

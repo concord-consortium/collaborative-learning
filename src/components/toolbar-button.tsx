@@ -6,6 +6,7 @@ export interface IButtonProps {
   toolButton: IToolbarButtonModel;
   isActive: boolean;
   isDisabled: boolean;
+  isPrimary?: boolean;
   onSetToolActive: (tool: IToolbarButtonModel, isActive: boolean) => void;
   onClick: (e: React.MouseEvent<HTMLDivElement>, tool: IToolbarButtonModel) => void;
 }
@@ -17,7 +18,7 @@ export interface IToolbarButtonProps extends IButtonProps {
 }
 
 export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
-  ({ toolButton, isActive, isDisabled, onSetToolActive, onClick, onDragStart,
+  ({ toolButton, isActive, isDisabled, isPrimary, onSetToolActive, onClick, onDragStart,
       onShowDropHighlight, onHideDropHighlight }) => {
 
   const { id, title, isTileTool, Icon } = toolButton;
@@ -48,8 +49,10 @@ export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
 
   const showDropHighlight = (isTileTool || id === "duplicate") && !isDisabled;
   const tileEltClass = id.toLowerCase();
+  const className = classNames("tool", tileEltClass,
+    { active: isActive, primary: isPrimary }, isDisabled ? "disabled" : "enabled");
   return (
-    <div className={classNames("tool", tileEltClass, { active: isActive }, isDisabled ? "disabled" : "enabled")}
+    <div className={className}
         data-testid={`tool-${tileEltClass}`}
         key={id}
         title={title}
