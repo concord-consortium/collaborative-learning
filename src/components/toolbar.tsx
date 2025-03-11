@@ -11,7 +11,7 @@ import { DeleteButton } from "./delete-button";
 import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
-import { SectionModelType } from "src/models/curriculum/section";
+import { SectionModelType } from "../models/curriculum/section";
 
 import "./toolbar.scss";
 

@@ -12,6 +12,10 @@ interface IToolbarProps {
   toolbar: IToolbarModel;
 }
 
+// This component is used to render the toolbar for a document.
+// It is a wrapper around the ToolbarComponent that sets the toolbar model and document for the toolbar.
+// It also listens for changes to the primary document key and disables the edit button
+// if the document is the primary document.
 export const DocumentToolbar: React.FC<IToolbarProps> = ({ document, toolbar, ...others }) => {
   const appConfig = useContext(AppConfigContext);
   const { persistentUI } = useStores();

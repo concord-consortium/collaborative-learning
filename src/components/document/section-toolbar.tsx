@@ -10,6 +10,9 @@ interface IToolbarProps {
   toolbar: IToolbarModel;
 }
 
+// This component is used to render the toolbar for a section.
+// It is a wrapper around the ToolbarComponent that sets the toolbar model and section for the toolbar.
+// In the future, it will look at elements in the section and update the toolbar model accordingly.
 export const SectionToolbar: React.FC<IToolbarProps> = ({ toolbar, ...others }) => {
   const appConfig = useContext(AppConfigContext);
 
