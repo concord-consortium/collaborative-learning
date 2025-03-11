@@ -120,6 +120,10 @@ export const UIModel = types
       }
     };
 
+    const selectAllTiles = (tileIds: string[]) => {
+      self.selectedTileIds.replace(tileIds);
+    };
+
     return {
       alert,
       prompt,
@@ -172,7 +176,9 @@ export const UIModel = types
 
       setDraggingId(dragId?: string) {
         self.dragId = dragId;
-      }
+      },
+
+      selectAllTiles
     };
   })
   .actions(self => ({

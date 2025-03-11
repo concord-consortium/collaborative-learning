@@ -199,6 +199,9 @@ export const BaseDocumentContentModel = types
           });
         });
         return sharedModels;
+      },
+      getAllTileIds() {
+        return Array.from(self.tileMap.keys());
       }
     };
   })
