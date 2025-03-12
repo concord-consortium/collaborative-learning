@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="36px" height="34px" viewBox="0 0 36 34" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>69C62E90-2038-4657-838F-26D210361AC3</title>
+    <g id="CLUE-UI-+-MothEd" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Copy-and-Question-Container-Tile-Features" transform="translate(-3094, -104)" fill-rule="nonzero">
+            <g id="Exportable-Assets" transform="translate(2900, 67)">
+                <g id="4-up-View-Tool" transform="translate(194, 37)">
+                    <rect id="Rectangle" x="0" y="0" width="36" height="34"></rect>
+                    <g id="4-up--View-Tool" transform="translate(5.5, 5.5)">
+                        <path d="M0,0 L20,0 C22.7614237,-5.07265313e-16 25,2.23857625 25,5 L25,18 C25,20.7614237 22.7614237,23 20,23 L5,23 C2.23857625,23 1.69088438e-16,20.7614237 0,18 L0,0 L0,0 Z" id="Frame-Back" fill="#707070"></path>
+                        <path d="M1.5,1.5 L20,1.5 C21.9329966,1.5 23.5,3.06700338 23.5,5 L23.5,18 C23.5,19.9329966 21.9329966,21.5 20,21.5 L5,21.5 C3.06700338,21.5 1.5,19.9329966 1.5,18 L1.5,1.5 L1.5,1.5 Z" id="White-Back" fill="#FFFFFF"></path>
+                        <path d="M13.25,12.25 L23.5,12.25 L23.5,18 C23.5,19.9329966 21.9329966,21.5 20,21.5 L13.25,21.5 L13.25,21.5 L13.25,12.25 Z" id="Student-4-Back" fill="#91E7A2"></path>
+                        <path d="M1.5,12.25 L11.75,12.25 L11.75,21.5 L5,21.5 C3.06700338,21.5 1.5,19.9329966 1.5,18 L1.5,12.25 L1.5,12.25 Z" id="Student-3-Back" fill="#FFC1EB"></path>
+                        <path d="M13.25,1.5 L20,1.5 C21.9329966,1.5 23.5,3.06700338 23.5,5 L23.5,10.75 L23.5,10.75 L13.25,10.75 L13.25,1.5 Z" id="Student-2-Back" fill="#FFC89C"></path>
+                        <rect id="Student-1-Back" fill="#80E0FF" x="1.5" y="1.5" width="10.25" height="9.25"></rect>
+                        <path d="M10,9 L13.445946,9 C14.3042263,9 15,9.69577369 15,10.554054 L15,12.445946 C15,13.3042263 14.3042263,14 13.445946,14 L11.554054,14 C10.6957737,14 10,13.3042263 10,12.445946 L10,9 L10,9 Z" id="Center-Overlay" fill="#FFFFFF"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
