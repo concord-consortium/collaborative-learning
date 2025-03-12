@@ -200,8 +200,21 @@ export const BaseDocumentContentModel = types
         });
         return sharedModels;
       },
-      getAllTileIds() {
-        return Array.from(self.tileMap.keys());
+      getAllTileIds(includeTeacherContent: boolean) {
+        // returns all tile ids in document order filtered by includeTeacherContent
+        return self.rowOrder.reduce((tileIds: string[], rowId) => {
+          const row = self.rowMap.get(rowId);
+          if (row) {
+            const publicTileIds = row.tiles
+              .filter(tile => {
+                const display = self.tileMap.get(tile.tileId)?.display;
+                return display !== "teacher" || includeTeacherContent;
+              })
+              .map(tile => tile.tileId);
+            tileIds.push(...publicTileIds);
+          }
+          return tileIds;
+        }, []);
       }
     };
   })

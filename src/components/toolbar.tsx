@@ -315,12 +315,12 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleSelectAll = () => {
-    const { ui } = this.stores;
+    const { ui, isShowingTeacherContent } = this.stores;
     const { document, section } = this.props;
 
     const content = document?.content ?? section?.content;
     if (content) {
-      ui.selectAllTiles(content.getAllTileIds());
+      ui.selectAllTiles(content.getAllTileIds(isShowingTeacherContent));
     }
   };
 }
