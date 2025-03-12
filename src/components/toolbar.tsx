@@ -77,6 +77,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "edit":
           this.handleEdit();
           break;
+        case "selectAll":
+          this.handleSelectAll();
+          break;
         default:
           this.handleAddTile(tool);
           break;
@@ -308,6 +311,16 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const { document } = this.props;
     if (document) {
       this.stores.persistentUI.problemWorkspace.setPrimaryDocument(document);
+    }
+  };
+
+  private handleSelectAll = () => {
+    const { ui, isShowingTeacherContent } = this.stores;
+    const { document, section } = this.props;
+
+    const content = document?.content ?? section?.content;
+    if (content) {
+      ui.selectAllTiles(content.getAllTileIds(isShowingTeacherContent));
     }
   };
 }

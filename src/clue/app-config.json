@@ -247,6 +247,12 @@
         "isPrimary": true
       },
       {
+        "id": "selectAll",
+        "title": "Select All",
+        "iconId": "icon-select-all-tool",
+        "isTileTool": false
+      },
+      {
         "id": "playback",
         "title": "Playback",
         "iconId": "icon-playback-tool",
