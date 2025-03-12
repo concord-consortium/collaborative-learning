@@ -20,6 +20,8 @@ import "./toolbar.scss";
 // (See `annotation-toolbar.tsx`)
 const ignoredButtons = [ "sparrow", "hide-annotations" ];
 
+export type OnToolClickedHandler = (tool: IToolbarButtonModel) => boolean|void;
+
 // This toolbar works with both the document and section models.
 // Since many of the tools are shared between the two, each model is
 // passed as an optional prop instead of using two separate components.
@@ -28,6 +30,7 @@ interface IProps extends IBaseProps {
   section?: SectionModelType;
   toolbarModel: IToolbarModel;
   disabledToolIds?: string[];
+  onToolClicked?: OnToolClickedHandler;
 }
 
 interface IState {
@@ -55,6 +58,12 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const handleClickTool = (e: React.MouseEvent<HTMLDivElement>, tool: IToolbarButtonModel) => {
+      // this allows the parent component to handle the click event
+      // if it returns true, the default action is prevented
+      if (this.props.onToolClicked?.(tool)) {
+        return;
+      }
+
       switch (tool.id) {
         case "select":
           this.handleSelect();

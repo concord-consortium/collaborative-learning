@@ -10,6 +10,7 @@ import { DocumentLabelModel, UnitConfiguration } from "./unit-configuration";
 interface IMyResourcesToolbarOptions {
   showEdit?: boolean;
   showPlayback?: boolean;
+  show4Up?: boolean;
 }
 
 export const UnitSpecModel = types
@@ -92,12 +93,15 @@ export const AppConfigModel = types
         ...self.authorTools.map(button => ToolbarButtonModel.create(getSnapshot(button)))
       ]);
     },
-    myResourcesToolbar({showPlayback, showEdit}: IMyResourcesToolbarOptions) {
+    myResourcesToolbar({showPlayback, showEdit, show4Up}: IMyResourcesToolbarOptions) {
       return ToolbarModel.create([
         ...self.myResourcesToolBar
           .filter(button => {
             if (button.id === "edit") {
               return showEdit;
+            }
+            if (button.id === "fourUp") {
+              return show4Up;
             }
             if (button.id === "playback") {
               return false && showPlayback; // playback disabled for now

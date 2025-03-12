@@ -8,12 +8,14 @@ import { CanvasComponent } from "./document/canvas";
 import { DocumentViewMode } from "./document/document";
 import { DocumentModelType } from "../models/document/document";
 import { GroupModelType, GroupUserModelType } from "../models/stores/groups";
-import { CellPositions, FourUpGridCellModelType, FourUpGridModel, FourUpGridModelType
-      } from "../models/view/four-up-grid";
+import {
+  CellPositions, FourUpGridCellModelType, FourUpGridModel, FourUpGridModelType
+} from "../models/view/four-up-grid";
 import { Logger } from "../lib/logger";
 import { LogEventName } from "../lib/logger-types";
-import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
 import ThumbnailBookmark from "../assets/thumbnail-bookmark-icon.svg";
+import { DocumentToolbar } from "./document/document-toolbar";
+import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
 
 import "./four-up.sass";
 
@@ -76,8 +78,8 @@ export function getUserDocument(groupUser: GroupUserModelType | undefined, mode:
   }
 }
 
-export function getFocusedGroupUser(group: GroupModelType| undefined, openDocId: string | undefined,
-    mode: DocumentViewMode | undefined) {
+export function getFocusedGroupUser(group: GroupModelType | undefined, openDocId: string | undefined,
+  mode: DocumentViewMode | undefined) {
   if (!openDocId || !group) return undefined;
 
   return group?.activeUsers.find(obj => {
@@ -136,40 +138,40 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
    * @returns
    */
   private get tabUIModel() {
-    const {persistentUI} = this.stores;
+    const { persistentUI } = this.stores;
     return persistentUI.tabs.get(this.tabName);
   }
 
   private getFocusedUserDocKey() {
-    const {group} = this.props;
+    const { group } = this.props;
     return this.tabUIModel?.getDocumentGroup(group.id)?.primaryDocumentKey;
   }
 
   private getFocusedGroupUser() {
-    const {group} = this.props;
+    const { group } = this.props;
     const docKey = this.getFocusedUserDocKey();
     return group.activeUsers.find(obj => docKey && this.getGroupUserDoc(obj)?.key === docKey);
   }
 
   private getGroupUserDoc(groupUser?: GroupUserModelType) {
-    const {documentViewMode} = this.props;
+    const { documentViewMode } = this.props;
     return getUserDocument(groupUser, documentViewMode);
   }
 
   public render() {
-    const {documentViewMode, viaStudentGroupView,
-        group, isGhostUser, ...others} = this.props;
+    const { documentViewMode, viaStudentGroupView,
+      group, isGhostUser, ...others } = this.props;
 
-    const {width, height} = this.grid;
+    const { width, height } = this.grid;
     const nwCell = this.grid.cells[CellPositions.NorthWest];
     const neCell = this.grid.cells[CellPositions.NorthEast];
     const seCell = this.grid.cells[CellPositions.SouthEast];
     const swCell = this.grid.cells[CellPositions.SouthWest];
-    const toggledStyle = {top: 0, left: 0, width, height};
+    const toggledStyle = { top: 0, left: 0, width, height };
 
     const scaleStyle = (cell: FourUpGridCellModelType) => {
       const transform = `scale(${focusedGroupUser ? 1 : cell.scale})`;
-      return {width, height, transform, transformOrigin: "0 0"};
+      return { width, height, transform, transformOrigin: "0 0" };
     };
 
     // We are using this as a lookup table, so its possible the index being looked
@@ -179,10 +181,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const focusedGroupUser = this.getFocusedGroupUser();
 
     const indexToStyle = [
-      focusedGroupUser ? toggledStyle : {top: 0, left: 0, width: nwCell.width, height: nwCell.height},
-      focusedGroupUser ? toggledStyle : {top: 0, left: neCell.left, right: 0, height: neCell.height},
-      focusedGroupUser ? toggledStyle : {top: seCell.top, left: seCell.left, right: 0, bottom: 0},
-      focusedGroupUser ? toggledStyle : {top: swCell.top, left: 0, width: swCell.width, bottom: 0}
+      focusedGroupUser ? toggledStyle : { top: 0, left: 0, width: nwCell.width, height: nwCell.height },
+      focusedGroupUser ? toggledStyle : { top: 0, left: neCell.left, right: 0, height: neCell.height },
+      focusedGroupUser ? toggledStyle : { top: seCell.top, left: seCell.left, right: 0, bottom: 0 },
+      focusedGroupUser ? toggledStyle : { top: swCell.top, left: 0, width: swCell.width, bottom: 0 }
     ];
 
     const isFocused = (groupUser?: GroupUserModelType) => focusedGroupUser && focusedGroupUser === groupUser;
@@ -236,22 +238,17 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
     const memberName = (groupUser?: GroupUserModelType) => {
       const userFocused = isFocused(groupUser);
-      if (groupUser) {
-        const { name: fullName, initials } = groupUser;
-        const className = classNames("member", {"member-centered": userFocused && !viaStudentGroupView},
-                                     {"in-student-group-view": userFocused && viaStudentGroupView});
-
-        const name = userFocused ? fullName : initials;
-        return (
-          userFocused && viaStudentGroupView
-            ? <button className="restore-fourup-button" onClick={()=>this.handleFourUpClick()}>
-                <FourUpIcon /> 4-Up
-              </button>
-            : <div className={className} title={fullName} onClick={()=>this.handleOverlayClick(groupUser)}>
-                  {name}
-              </div>
-        );
+      if (userFocused || !groupUser) {
+        return null;
       }
+
+      const { name: fullName, initials } = groupUser;
+
+      return (
+        <div className="member" title={fullName} onClick={() => this.handleOverlayClick(groupUser)}>
+          {initials}
+        </div>
+      );
     };
 
     const renderStar = (document?: DocumentModelType) => {
@@ -272,7 +269,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       return (
         <div className="icon-holder" onClick={handleStarClick}>
           <svg className={"icon-star " + (isStarred ? "starred" : "")} >
-            <ThumbnailBookmark/>
+            <ThumbnailBookmark />
           </svg>
         </div>
       );
@@ -285,7 +282,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
       return !focusedGroupUser || isFocused(groupUser)
         ? <div key={cornerIndex} className={classNames("canvas-container", indexToCornerClass[cornerIndex])}
-              style={indexToStyle[cornerIndex]}>
+            style={indexToStyle[cornerIndex]}>
             <div className="canvas-scaler" style={scaleStyle(cell)}>
               {hideCanvas(cornerIndex)
                 ? this.renderUnshownMessage(groupUser, indexToLocation[cornerIndex])
@@ -297,10 +294,30 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         : null;
     };
 
+    const toolbarDoc = this.getGroupUserDoc(focusedGroupUser);
+    const disabledToolIds: string[] = [];
+    if (!toolbarDoc) {
+      disabledToolIds.push("selectAll");
+    }
+    if (!focusedGroupUser) {
+      disabledToolIds.push("fourUp");
+    }
+
     return (
-      <div className="four-up" ref={(el) => this.container = el}>
-        { [0,1,2,3].map(cornerIndex => renderCorner(cornerIndex)) }
-        {!focusedGroupUser ? this.renderSplitters() : null}
+      <div className="four-up">
+        <div className="left-side-container">
+          <DocumentToolbar
+            document={toolbarDoc}
+            toolbar={this.stores.appConfig.myResourcesToolbar({ show4Up: true })}
+            disabledToolIds={disabledToolIds}
+            onToolClicked={this.handleToolClicked}
+            />
+          <div className="canvas-separator" />
+        </div>
+        <div className="inner-canvas-area" ref={(el) => this.container = el}>
+          {[0, 1, 2, 3].map(cornerIndex => renderCorner(cornerIndex))}
+          {!focusedGroupUser ? this.renderSplitters() : null}
+        </div>
       </div>
     );
   }
@@ -310,12 +327,12 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       <>
         <div
           className="horizontal splitter" data-test="4up-horizontal-splitter"
-          style={{top: this.grid.hSplitter, height: this.grid.splitterSize}}
+          style={{ top: this.grid.hSplitter, height: this.grid.splitterSize }}
           onMouseDown={this.handleHSplitter}
         />
         <div
           className="vertical splitter" data-test="4up-vertical-splitter"
-          style={{left: this.grid.vSplitter, width: this.grid.splitterSize}}
+          style={{ left: this.grid.vSplitter, width: this.grid.splitterSize }}
           onMouseDown={this.handleVSplitter}
         />
         <div
@@ -333,7 +350,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderUnshownMessage = (groupUser: GroupUserModelType | undefined,
-      location: "nw" | "ne" | "se" | "sw") => {
+    location: "nw" | "ne" | "se" | "sw") => {
     const groupUserName = groupUser ? groupUser.name : "User";
     return (
       <div className={`unshared ${location}`}>
@@ -348,7 +365,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleResizeDebounced = debounce((entry: ResizeObserverEntry) => {
-    const {width, height} = entry.contentRect;
+    const { width, height } = entry.contentRect;
     if (width > 0 && height > 0) {
       this.grid.update({
         height: height - BORDER_SIZE,
@@ -403,20 +420,25 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     window.addEventListener("mouseup", handleMouseUp);
   };
 
-  private handleFourUpClick = () => {
-    const { group } = this.props;
-    this.tabUIModel?.getDocumentGroup(group.id)?.closePrimaryDocument();
+  private handleToolClicked = (tool: IToolbarButtonModel) => {
+    if (tool.id === "fourUp") {
+      const { group } = this.props;
+      this.tabUIModel?.getDocumentGroup(group.id)?.closePrimaryDocument();
+
+      // prevent the default tool action
+      return true;
+    }
   };
 
   private handleOverlayClick = (groupUser?: GroupUserModelType) => {
     const { group } = this.props;
     const focusedUser = this.getFocusedGroupUser();
     const document = this.getGroupUserDoc(groupUser);
-    const {persistentUI} = this.stores;
+    const { persistentUI } = this.stores;
 
     if (groupUser && document) {
-      const logInfo = {groupId: group.id, studentId: groupUser.id};
-      if (focusedUser){
+      const logInfo = { groupId: group.id, studentId: groupUser.id };
+      if (focusedUser) {
         // This needs to create the tabModel if it doesn't exist so we can use this.tabModel
         persistentUI.closeDocumentGroupPrimaryDocument(this.tabName, group.id);
         Logger.log(LogEventName.DASHBOARD_DESELECT_STUDENT, logInfo);

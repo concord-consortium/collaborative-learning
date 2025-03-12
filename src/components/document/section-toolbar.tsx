@@ -2,12 +2,13 @@ import React, { useContext, useState } from "react";
 import { clone } from "mobx-state-tree";
 import { AppConfigContext } from "../../app-config-context";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
-import { ToolbarComponent } from "../toolbar";
+import { OnToolClickedHandler, ToolbarComponent } from "../toolbar";
 import { SectionModelType } from "src/models/curriculum/section";
 
 interface IToolbarProps {
   section: SectionModelType;
   toolbar: IToolbarModel;
+  onToolClicked?: OnToolClickedHandler;
 }
 
 // This component is used to render the toolbar for a section.

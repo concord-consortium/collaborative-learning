@@ -247,6 +247,12 @@
         "isPrimary": true
       },
       {
+        "id": "fourUp",
+        "title": "Four Up",
+        "iconId": "icon-4up-view-tool",
+        "isTileTool": false
+      },
+      {
         "id": "selectAll",
         "title": "Select All",
         "iconId": "icon-select-all-tool",
