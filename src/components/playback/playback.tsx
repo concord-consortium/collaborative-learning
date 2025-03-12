@@ -6,19 +6,16 @@ import { usePersistentUIStore } from "../../hooks/use-stores";
 import { HistoryStatus, TreeManager } from "../../models/history/tree-manager";
 import { DocumentModelType } from "../../models/document/document";
 import { PlaybackControlComponent } from "./playback-control";
-import PlaybackIcon from "../../clue/assets/icons/playback/playback-icon.svg";
 
 import "./playback.scss";
 
 interface IProps {
   document: DocumentModelType | undefined;
-  showPlaybackControls: boolean | undefined;
-  onTogglePlaybackControls: (() => void) | undefined;
   requestedHistoryId: string | undefined;
 }
 
 export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
-  const { document, showPlaybackControls, onTogglePlaybackControls  } = props;
+  const { document } = props;
   const { activeNavTab } = usePersistentUIStore();
   const treeManager = document?.treeManagerAPI as Instance<typeof TreeManager>;
 
@@ -28,37 +25,18 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
     }
   }, [props.requestedHistoryId, treeManager]);
 
-  const renderPlaybackToolbarButton = () => {
-    const playbackToolbarButtonComponentStyle =
-      classNames("playback-toolbar-button-component", {"disabled" : false},
-                  {"show-control": showPlaybackControls});
-    const playbackToolbarButtonStyle =
-      classNames("playback-toolbar-button", "themed", activeNavTab,
-                {"show-control": showPlaybackControls});
-    return (
-      <div className={playbackToolbarButtonComponentStyle} onClick={onTogglePlaybackControls}
-          data-testid="playback-component-button">
-        <PlaybackIcon className={playbackToolbarButtonStyle}/>
-      </div>
-    );
-  };
-
   const disablePlayback = false;
-  const playbackComponentClass = classNames("playback-component", activeNavTab,
-                                            {"show-control" : showPlaybackControls,
-                                              "disabled" : disablePlayback});
+  const playbackComponentClass = classNames("playback-component show-control", activeNavTab,
+                                            {"disabled" : disablePlayback});
 
-  let playbackControls = null;
-  if (showPlaybackControls) {
-    playbackControls = treeManager.historyStatus === HistoryStatus.HISTORY_LOADED
-      ? <PlaybackControlComponent treeManager={treeManager} />
-      : <div className="playback-controls loading">
-          {treeManager.historyStatusString}
-        </div>;
-  }
-  return (
+  const playbackControls = treeManager.historyStatus === HistoryStatus.HISTORY_LOADED
+    ? <PlaybackControlComponent treeManager={treeManager} />
+    : <div className="playback-controls loading">
+        {treeManager.historyStatusString}
+      </div>;
+
+return (
     <div className={playbackComponentClass} data-testid="playback-component">
-      {renderPlaybackToolbarButton()}
       {playbackControls}
     </div>
   );

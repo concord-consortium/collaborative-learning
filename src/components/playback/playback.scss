@@ -6,16 +6,17 @@
   align-items: center;
   justify-content: center;
   width: 44px;
-  height: 50px;
+  height: 49px;
   position: absolute;
-  bottom: -3px;
-  left: -1px;
+  bottom: 0;
+  left: 0;
+  right: 0;
   border: 1.5px solid;
   border-top-right-radius: 5px;
   background-color: white;
   box-sizing: border-box;
   &.show-control {
-    width: calc(100% - 2px);
+    width: 100%;
     //border-right: none;
     border-top-right-radius: 0px;
   }
@@ -38,6 +39,22 @@
   }
   &.problems {
     border-color: $problem-orange;
+  }
+
+  &.my-work {
+    background-color: $workspace-teal-light-8;
+  }
+  &.class-work {
+    background-color: $classwork-purple-light-8;
+  }
+  &.sort-work, &.student-work {
+    background-color: $charcoal-light-8;
+  }
+  &.learning-log {
+    background-color: $learninglog-green-light-8;
+  }
+  &.problems {
+    background-color: $problem-orange-light-8;
   }
 
   .playback-toolbar-button-component {

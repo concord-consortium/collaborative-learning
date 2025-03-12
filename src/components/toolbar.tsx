@@ -12,6 +12,7 @@ import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
 import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
 import { SectionModelType } from "../models/curriculum/section";
+import { logHistoryEvent } from "../models/history/log-history-event";
 
 import "./toolbar.scss";
 
@@ -89,6 +90,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "selectAll":
           this.handleSelectAll();
           break;
+        case "togglePlayback":
+          this.handleTogglePlayback();
+          break;
         default:
           this.handleAddTile(tool);
           break;
@@ -104,8 +108,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const updateToolButton = (toolButton: IToolbarButtonModel) => {
       // Currently no-op; no buttons need updates.
     };
-    const renderToolButtons = (toolbarModel: IToolbarModel) => {
-      return toolbarModel.map(toolButton => {
+    const renderToolButtons = (buttons: IToolbarModel) => {
+      return buttons.map(toolButton => {
         if (ignoredButtons.includes(toolButton.id)) return null;
         updateToolButton(toolButton);
         const buttonProps: IToolbarButtonProps = {
@@ -113,6 +117,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           isActive: this.isButtonActive(toolButton),
           isDisabled: this.isButtonDisabled(toolButton),
           isPrimary: this.isButtonPrimary(toolButton),
+          height: toolButton.height,
           onSetToolActive: handleSetActiveTool,
           onClick: handleClickTool,
           onDragStart: handleDragTool,
@@ -128,9 +133,16 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
                                 {...buttonProps} />;
       });
     };
+    const upperButtons = this.props.toolbarModel.filter(button => !button.isBottom) as IToolbarModel;
+    const lowerButtons = this.props.toolbarModel.filter(button => button.isBottom) as IToolbarModel;
     return (
       <div className="toolbar" data-testid="toolbar">
-        {renderToolButtons(this.props.toolbarModel)}
+        <div className="toolbar-upper">
+          {renderToolButtons(upperButtons)}
+        </div>
+        <div className="toolbar-lower">
+          {renderToolButtons(lowerButtons)}
+        </div>
       </div>
     );
   }
@@ -330,6 +342,16 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const content = document?.content ?? section?.content;
     if (content) {
       ui.selectAllTiles(content.getAllTileIds(isShowingTeacherContent));
+    }
+  };
+
+  private handleTogglePlayback = () => {
+    const { document } = this.props;
+    if (document) {
+      const prevShowPlaybackControls = document.showPlaybackControls;
+      logHistoryEvent({documentId: document.key || '',
+        action: prevShowPlaybackControls ? "hideControls" : "showControls"});
+      document.toggleShowPlaybackControls();
     }
   };
 }

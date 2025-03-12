@@ -64,6 +64,7 @@ export const DocumentModel = Tree.named("Document")
     contentStatus: ContentStatus.Valid,
     invalidContent: undefined as object | undefined,
     contentErrorMessage: undefined as string | undefined,
+    showPlaybackControls: false,
   }))
   .views(self => ({
     // This is needed for the tree monitor and manager
@@ -213,7 +214,15 @@ export const DocumentModel = Tree.named("Document")
 
     setGroupId(groupId?: string) {
       self.groupId = groupId;
-    }
+    },
+
+    setShowPlaybackControls(newValue: boolean) {
+      self.showPlaybackControls = newValue;
+    },
+
+    toggleShowPlaybackControls() {
+      self.showPlaybackControls = !self.showPlaybackControls;
+    },
   }))
   .actions(self => ({
     fetchRemoteContent(queryClient: QueryClient, context: IUserContext) {
