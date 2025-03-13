@@ -103,8 +103,8 @@ export const AppConfigModel = types
             if (button.id === "fourUp") {
               return show4Up;
             }
-            if (button.id === "playback") {
-              return false && showPlayback; // playback disabled for now
+            if (button.id === "togglePlayback") {
+              return showPlayback;
             }
             return true;
           })

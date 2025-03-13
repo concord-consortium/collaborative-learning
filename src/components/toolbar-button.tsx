@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React from "react";
+import React, { CSSProperties } from "react";
 import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
 
 export interface IButtonProps {
@@ -7,6 +7,7 @@ export interface IButtonProps {
   isActive: boolean;
   isDisabled: boolean;
   isPrimary?: boolean;
+  height?: number;
   onSetToolActive: (tool: IToolbarButtonModel, isActive: boolean) => void;
   onClick: (e: React.MouseEvent<HTMLDivElement>, tool: IToolbarButtonModel) => void;
 }
@@ -18,7 +19,7 @@ export interface IToolbarButtonProps extends IButtonProps {
 }
 
 export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
-  ({ toolButton, isActive, isDisabled, isPrimary, onSetToolActive, onClick, onDragStart,
+  ({ toolButton, isActive, isDisabled, isPrimary, height, onSetToolActive, onClick, onDragStart,
       onShowDropHighlight, onHideDropHighlight }) => {
 
   const { id, title, isTileTool, Icon } = toolButton;
@@ -51,8 +52,10 @@ export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
   const tileEltClass = id.toLowerCase();
   const className = classNames("tool", tileEltClass,
     { active: isActive, primary: isPrimary }, isDisabled ? "disabled" : "enabled");
+  const style: CSSProperties =  height ? {height} : {};
   return (
     <div className={className}
+        style={style}
         data-testid={`tool-${tileEltClass}`}
         key={id}
         title={title}

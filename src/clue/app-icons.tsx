@@ -15,7 +15,7 @@ import SolutionToolIcon from "./assets/icons/solution-tool.svg";
 import SparrowToolIcon from "./assets/icons/sparrow-tool.svg";
 import UndoToolIcon from "./assets/icons/undo-tool.svg";
 import EditToolIcon from "./assets/icons/edit-right-icon.svg";
-import PlaybackToolIcon from "./assets/icons/playback/playback-icon.svg";
+import PlaybackToolIcon from "./assets/icons/playback-tool.svg";
 import SelectAllToolIcon from "./assets/icons/select-all-tool.svg";
 import FourUpToolIcon from "./assets/icons/4-up-view-tool.svg";
 

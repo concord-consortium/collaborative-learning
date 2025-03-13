@@ -259,10 +259,13 @@
         "isTileTool": false
       },
       {
-        "id": "playback",
+        "id": "togglePlayback",
         "title": "Playback",
         "iconId": "icon-playback-tool",
-        "isTileTool": false
+        "isTileTool": false,
+        "isPrimary": true,
+        "isBottom": true,
+        "height": 46
       }
     ],
     "placeholderText": "",
