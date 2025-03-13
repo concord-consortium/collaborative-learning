@@ -259,6 +259,12 @@
         "isTileTool": false
       },
       {
+        "id": "copyToWorkspace",
+        "title": "Copy to Workspace",
+        "iconId": "icon-copy-to-workspace-tool",
+        "isTileTool": false
+      },
+      {
         "id": "togglePlayback",
         "title": "Playback",
         "iconId": "icon-playback-tool",

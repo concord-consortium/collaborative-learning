@@ -38,7 +38,6 @@ export class ProblemPanelComponent extends BaseComponent<IProps> {
   private renderContent(content: DocumentContentModelType) {
     return (
         <div key="problem-panel">
-          {/* NOTE: the toolbar is empty for now.  It will be populated in future stories. */}
           <SectionToolbar section={this.props.section!} toolbar={this.stores.appConfig.myResourcesToolbar({})} />
           <div className="canvas-separator"/>
           <div className="canvas-area">
@@ -51,5 +50,4 @@ export class ProblemPanelComponent extends BaseComponent<IProps> {
         </div>
     );
   }
-
 }
