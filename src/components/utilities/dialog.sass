@@ -42,8 +42,11 @@
       .dialog-input
         margin: $margin 0
 
-        input, textarea
+        input, textarea, select
           width: 100%
+
+        select:invalid
+          font-style: italic
 
       .dialog-buttons
         margin-top: $margin
