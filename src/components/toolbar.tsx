@@ -97,6 +97,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "copyToWorkspace":
           this.handleCopyToWorkspace();
           break;
+        case "copyToDocument":
+          this.handleCopyToDocument();
+          break;
         default:
           this.handleAddTile(tool);
           break;
@@ -207,7 +210,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     if (toolButton.id === "redo" && !undoManager?.canRedo) return true;
 
     // If no tiles are selected, disable the tools that require selected tiles
-    const needsSelectedTilesTools = ["delete", "duplicate", "solution", "copyToWorkspace"];
+    const needsSelectedTilesTools = ["delete", "duplicate", "solution", "copyToWorkspace", "copyToDocument"];
     if (needsSelectedTilesTools.includes(toolButton.id) && !selectedTileIds.length) {
       return true;
     }
@@ -406,6 +409,24 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       const sectionId = document ? undefined : section?.type;
       const copySpecs = content.getCopySpecs(ui.selectedTileIds, sectionId);
       primaryDocument.content.applyCopySpecs(copySpecs);
+    }
+  };
+
+  private handleCopyToDocument = () => {
+    const { ui, documents } = this.stores;
+    const { document, section } = this.props;
+    const content = document?.content ?? section?.content;
+
+    if (content) {
+      ui.getCopyToDocumentKey(document?.key ?? "")
+        .then(copyToDocumentKey => {
+          const copyToDocument = documents.getDocument(copyToDocumentKey);
+          if (copyToDocument?.content) {
+            const sectionId = document ? undefined : section?.type;
+            const copySpecs = content.getCopySpecs(ui.selectedTileIds, sectionId);
+            copyToDocument.content.applyCopySpecs(copySpecs);
+          }
+        });
     }
   };
 }
