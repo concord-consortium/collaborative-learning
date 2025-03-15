@@ -2,7 +2,7 @@ import { inject, observer } from "mobx-react";
 import { getSnapshot, destroy } from "mobx-state-tree";
 import React from "react";
 import _ from "lodash";
-import { ObservableMap, runInAction } from "mobx";
+import { IReactionDisposer, ObservableMap, reaction, runInAction } from "mobx";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import stringify from "json-stringify-pretty-compact";
 
@@ -13,7 +13,6 @@ import { DocumentContentComponent } from "./document-content";
 import { ContentStatus, DocumentModelType, createDocumentModelWithEnv } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
-import { logHistoryEvent } from "../../models/history/log-history-event";
 import { TreeManagerType } from "../../models/history/tree-manager";
 import { PlaybackComponent } from "../playback/playback";
 import {
@@ -46,7 +45,6 @@ interface IState {
   documentScrollX: number;
   documentScrollY: number;
   historyDocumentCopy?: DocumentModelType;
-  showPlaybackControls: boolean;
   requestedHistoryId: string | undefined;
 }
 
@@ -62,6 +60,8 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   // Maps tileId and objectId to a bounding box spec.
   private boundingBoxCache: ObservableMap<string,ObservableMap<string,ObjectBoundingBox>> = new ObservableMap();
   private canvasMethods: ICanvasMethods;
+
+  private showPlaybackControlsDisposer: IReactionDisposer;
 
   constructor(props: IProps) {
     super(props);
@@ -80,7 +80,6 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     this.state = {
       documentScrollX: 0,
       documentScrollY: 0,
-      showPlaybackControls: false,
       requestedHistoryId: undefined,
     };
 
@@ -89,16 +88,30 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
 
   componentDidMount(): void {
     this.checkForHistoryRequest();
+
+    this.showPlaybackControlsDisposer = reaction(
+      () => this.props.document?.showPlaybackControls,
+      () => {
+        this.setState((prevState, props) => {
+          return this.updateHistoryDocument(prevState);
+        });
+      }
+    );
   }
 
   private checkForHistoryRequest = () => {
+    if (!this.props.document || !this.props.document.key) {
+      return;
+    }
+
     // If there is a request to show this document at a point in its history, show the history slider.
-    if (this.props.showPlayback && this.props.document?.key) {
-      const request = this.stores.sortedDocuments.getDocumentHistoryViewRequest(this.props.document?.key);
+    if (this.props.showPlayback) {
+      const request = this.stores.sortedDocuments.getDocumentHistoryViewRequest(this.props.document.key);
       if (request) {
+        this.props.document.setShowPlaybackControls(true);
         this.setState((prevState, props) => {
           return {
-            ...this.updateHistoryDocument(prevState, true),
+            ...this.updateHistoryDocument(prevState),
             requestedHistoryId: request
           };
         });
@@ -143,7 +156,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   componentDidUpdate(prevProps: IProps) {
     if (prevProps.document !== this.props.document) {
       this.setState((prevState, props) => {
-        return this.updateHistoryDocument(prevState, prevState.showPlaybackControls);
+        return this.updateHistoryDocument(prevState);
       });
     }
     this.checkForHistoryRequest();
@@ -153,6 +166,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     if (this.state.historyDocumentCopy) {
       destroy(this.state.historyDocumentCopy);
     }
+    this.showPlaybackControlsDisposer();
   }
 
   public render() {
@@ -197,7 +211,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
 
   private renderContent() {
     const {content, document, showPlayback, viaTeacherDashboard, ...others} = this.props;
-    const {showPlaybackControls} = this.state;
+    const showPlaybackControls = this.props.document?.showPlaybackControls;
     const documentToShow = this.getDocumentToShow();
     const documentContent = content || documentToShow?.content; // we only pass in content if it is a problem panel
     const typeClass = document?.type === "planning" ? "planning-doc" : "";
@@ -222,11 +236,9 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
             onScroll={(x: number, y: number) => this.setState({ documentScrollX: x, documentScrollY: y })}
             {...{typeClass, viaTeacherDashboard, ...others}}
           />
-          {showPlayback && (
+          {showPlayback && showPlaybackControls && (
             <PlaybackComponent
               document={documentToShow}
-              showPlaybackControls={showPlaybackControls}
-              onTogglePlaybackControls={this.handleTogglePlaybackControlComponent}
               requestedHistoryId={this.state.requestedHistoryId}
             />
           )}
@@ -342,15 +354,6 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     return true;
   };
 
-  private handleTogglePlaybackControlComponent = () => {
-    this.setState((prevState, props) => {
-      const showPlaybackControls = !prevState.showPlaybackControls;
-      logHistoryEvent({documentId: this.props.document?.key || '',
-        action: showPlaybackControls ? "showControls": "hideControls" });
-      return this.updateHistoryDocument(prevState, showPlaybackControls);
-    });
-  };
-
   private createHistoryDocumentCopy = () => {
     if (this.props.document) {
       const docCopy = createDocumentModelWithEnv(this.stores.appConfig, getSnapshot(this.props.document));
@@ -366,7 +369,8 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     }
   };
 
-  private updateHistoryDocument = (prevState: IState, showPlaybackControls: boolean) => {
+  private updateHistoryDocument = (prevState: IState) => {
+    const showPlaybackControls = this.props.document?.showPlaybackControls;
     const historyDocumentCopy = showPlaybackControls ?
       this.createHistoryDocumentCopy() : undefined;
 
@@ -378,13 +382,13 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       destroy(prevState.historyDocumentCopy);
     }
     return {
-      showPlaybackControls,
       historyDocumentCopy
     };
   };
 
   private getDocumentToShow = () => {
-    const {showPlaybackControls, historyDocumentCopy: documentToShow} = this.state;
+    const {historyDocumentCopy: documentToShow} = this.state;
+    const showPlaybackControls = this.props.document?.showPlaybackControls;
     if (showPlaybackControls && documentToShow) {
       return documentToShow;
     } else {

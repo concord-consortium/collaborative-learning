@@ -7,6 +7,8 @@ const BaseToolbarButtonModel = types.model("BaseToolbarButton", {
   title: types.maybe(types.string),
   isDefault: false,
   isPrimary: types.maybe(types.boolean),
+  isBottom: types.maybe(types.boolean),
+  height: types.maybe(types.number),
 })
 .volatile(self => ({
   Icon: undefined as any

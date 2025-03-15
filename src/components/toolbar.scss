@@ -4,10 +4,12 @@
   position: absolute;
   top: 0;
   left: 0;
+  bottom: 2px;
   width: $workspace-toolbar-width;
 
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 
   .tool {
     width: 36px;
