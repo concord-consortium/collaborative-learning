@@ -301,6 +301,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     }
     if (!focusedGroupUser) {
       disabledToolIds.push("fourUp");
+      disabledToolIds.push("togglePlayback");
     }
 
     return (
@@ -308,7 +309,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
         <div className="left-side-container">
           <DocumentToolbar
             document={toolbarDoc}
-            toolbar={this.stores.appConfig.myResourcesToolbar({ show4Up: true })}
+            toolbar={this.stores.appConfig.myResourcesToolbar({ show4Up: true, showPlayback: true })}
             disabledToolIds={disabledToolIds}
             onToolClicked={this.handleToolClicked}
             />
