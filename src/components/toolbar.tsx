@@ -231,10 +231,12 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private getSelectedTileIdsInDocument = () => {
-    const { document } = this.props;
+    const { document, section } = this.props;
     const { ui: { selectedTileIds } } = this.stores;
+
+    const content = document?.content ?? section?.content;
     return selectedTileIds.reduce((acc, tileId) => {
-      if (document?.content?.getTile(tileId)) {
+      if (content?.getTile(tileId)) {
         acc.push(tileId);
       }
       return acc;
