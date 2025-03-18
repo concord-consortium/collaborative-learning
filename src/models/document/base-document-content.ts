@@ -573,22 +573,26 @@ export const BaseDocumentContentModel = types
         let insertedRowIndex = self.defaultInsertRow;
         const insertingRow = !targetRow;
 
+        if (sectionId) {
+          const sectionRows = self.getRowsInSection(sectionId);
+          if (sectionRows.length > 0) {
+            // this may seem redundant, but it's not.
+            // the row index to insert is the index of the document
+            // row order, not the index of the section rows.
+            // the +1 is to add the new row after the last row in the section.
+            const lastRow = sectionRows[sectionRows.length - 1];
+            insertedRowIndex = self.getRowIndex(lastRow.id) + 1;
+          }
+        }
+
         if (insertingRow) {
           targetRow = TileRowModel.create({ sectionId });
-          if (sectionId) {
-            const sectionRows = self.getRowsInSection(sectionId);
-            if (sectionRows.length > 0) {
-              const lastRow = sectionRows[sectionRows.length - 1];
-              insertedRowIndex = self.getRowIndex(lastRow.id);
-            }
-          }
           self.insertRow(targetRow, insertedRowIndex);
+          targetRowMap.set(rowId, targetRow);
         }
 
         // copy the tile
         if (targetRow) {
-          targetRowMap.set(rowId, targetRow);
-
           // copy the tile into the row
           const newTile = cloneTileSnapshotWithNewId(tile);
           const tileModel = self.tileMap.put(newTile);
