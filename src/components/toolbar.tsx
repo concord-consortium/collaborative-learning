@@ -197,9 +197,10 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const { document } = this.props;
     const {
       appConfig: { settings },
-      ui: { selectedTileIds },
       persistentUI: {problemWorkspace: { primaryDocumentKey } }
     } = this.stores;
+
+    const selectedTileIds = this.getSelectedTileIdsInDocument();
 
     const undoManager = document?.treeManagerAPI?.undoManager;
     if (toolButton.id === "undo" && !undoManager?.canUndo) return true;
