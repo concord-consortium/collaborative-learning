@@ -40,7 +40,7 @@ export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isTileTool && isDisabled) return;
+    if (isDisabled) return;
     onClick(e, toolButton);
   };
 
