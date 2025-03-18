@@ -191,14 +191,34 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private isButtonDisabled(toolButton: IToolbarButtonModel) {
     const { document } = this.props;
-    const { appConfig: { settings }, ui: { selectedTileIds } } = this.stores;
+    const {
+      appConfig: { settings },
+      ui: { selectedTileIds },
+      persistentUI: {problemWorkspace: { primaryDocumentKey } }
+    } = this.stores;
+
+    const selectedTileIdsInDocument = selectedTileIds.reduce((acc, tileId) => {
+      if (document?.content?.getTile(tileId)) {
+        acc.push(tileId);
+      }
+      return acc;
+    }, [] as string[]);
 
     const undoManager = document?.treeManagerAPI?.undoManager;
     if (toolButton.id === "undo" && !undoManager?.canUndo) return true;
     if (toolButton.id === "redo" && !undoManager?.canRedo) return true;
 
-    // If no tiles are selected, disable the delete, duplicate, and solution buttons.
-    if (["delete", "duplicate", "solution"].includes(toolButton.id) && !selectedTileIds.length) return true;
+    // If no tiles are selected, disable the tools that require selected tiles
+    const needsSelectedTilesTools = ["delete", "duplicate", "solution"];
+    if (needsSelectedTilesTools.includes(toolButton.id) && !selectedTileIdsInDocument.length) {
+      return true;
+    }
+
+    // don't allow the following tools when the document is the primary document
+    const disallowedPrimaryDocumentTools = ["edit"];
+    if (disallowedPrimaryDocumentTools.includes(toolButton.id) && document?.key === primaryDocumentKey) {
+      return true;
+    }
 
     if (toolButton.isTileTool && settings) {
       // If a limit on the number of tiles of a certain type has been specified in settings,
