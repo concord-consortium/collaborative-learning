@@ -1,7 +1,0 @@
-<svg width="36" height="34" viewBox="0 0 36 34" xmlns="http://www.w3.org/2000/svg">
-    <!-- Background Circle -->
-    <circle cx="18" cy="17" r="13" fill="#0592af" />
-
-    <!-- Question Mark -->
-    <text x="50%" y="52%" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">?</text>
-</svg>

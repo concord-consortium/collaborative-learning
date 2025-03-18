@@ -5,7 +5,8 @@ import { UIDialogModelType } from "../../models/stores/ui";
 
 import CloseIcon from "../../assets/icons/close/close.svg";
 import CopyToDocumentIcon from "../../clue/assets/icons/copy-to-document-tool.svg";
-import QuestionMarkIcon from "../../clue/assets/icons/question-mark-icon.svg";
+import AlertIcon from "../../assets/alert-icon.svg";
+import ConfirmIcon from "../../assets/confirm-icon.svg";
 
 import "./dialog.sass";
 
@@ -34,7 +35,8 @@ export class DialogComponent extends BaseComponent<IProps> {
 
   public render() {
     const {dialog} = this.stores.ui;
-    let Icon: React.ElementType = QuestionMarkIcon;
+    // use confirm icon as the default icon
+    let Icon: React.ElementType = ConfirmIcon;
 
     if (dialog) {
       let title = dialog.title;
@@ -57,6 +59,7 @@ export class DialogComponent extends BaseComponent<IProps> {
         case "alert":
           title = title || "Alert";
           contents = this.renderAlertContents(dialog);
+          Icon = AlertIcon;
           break;
       }
 
