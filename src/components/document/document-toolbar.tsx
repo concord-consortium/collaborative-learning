@@ -1,11 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
-import { reaction } from "mobx";
+import React, { useContext, useState } from "react";
 import { clone } from "mobx-state-tree";
 import { AppConfigContext } from "../../app-config-context";
 import { DocumentModelType } from "../../models/document/document";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { OnToolClickedHandler, ToolbarComponent } from "../toolbar";
-import { useStores } from "../../hooks/use-stores";
 
 interface IToolbarProps {
   disabledToolIds?: string[];
@@ -21,30 +19,6 @@ interface IToolbarProps {
 // if the document is the primary document.
 export const DocumentToolbar: React.FC<IToolbarProps> = ({ document, toolbar, disabledToolIds, ...others }) => {
   const appConfig = useContext(AppConfigContext);
-  const { persistentUI } = useStores();
-  const [primaryDocumentKey, setPrimaryDocumentKey] =
-    useState<string | undefined>(persistentUI.problemWorkspace.primaryDocumentKey);
-  const [locallyDisabledToolIds, setLocallyDisabledToolIds] = useState<string[]>([]);
-
-  // listen for changes to the primary document key
-  useEffect(() => {
-    const dispose = reaction(
-      () => persistentUI.problemWorkspace.primaryDocumentKey,
-      (docKey) => setPrimaryDocumentKey(docKey),
-    );
-    return () => dispose();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // disable the edit button if this document is the current primary document
-  useEffect(() => {
-    setLocallyDisabledToolIds(() => {
-      if (document?.key === primaryDocumentKey) {
-        return ["edit"];
-      }
-      return [];
-    });
-  }, [document?.key, primaryDocumentKey]);
 
   // The toolbar prop represents the app's configuration of the toolbar
   // It is cloned here in the document so changes to one document's toolbar
@@ -62,7 +36,7 @@ export const DocumentToolbar: React.FC<IToolbarProps> = ({ document, toolbar, di
       key="toolbar"
       toolbarModel={toolbarModel}
       document={document}
-      disabledToolIds={[...locallyDisabledToolIds, ...(disabledToolIds ?? [])]}
+      disabledToolIds={disabledToolIds}
       {...others}
     />
   );
