@@ -193,16 +193,10 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const { document } = this.props;
     const {
       appConfig: { settings },
-      ui: { selectedTileIds },
       persistentUI: {problemWorkspace: { primaryDocumentKey } }
     } = this.stores;
 
-    const selectedTileIdsInDocument = selectedTileIds.reduce((acc, tileId) => {
-      if (document?.content?.getTile(tileId)) {
-        acc.push(tileId);
-      }
-      return acc;
-    }, [] as string[]);
+    const selectedTileIdsInDocument = this.getSelectedTileIdsInDocument();
 
     const undoManager = document?.treeManagerAPI?.undoManager;
     if (toolButton.id === "undo" && !undoManager?.canUndo) return true;
@@ -235,6 +229,17 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
     return false;
   }
+
+  private getSelectedTileIdsInDocument = () => {
+    const { document } = this.props;
+    const { ui: { selectedTileIds } } = this.stores;
+    return selectedTileIds.reduce((acc, tileId) => {
+      if (document?.content?.getTile(tileId)) {
+        acc.push(tileId);
+      }
+      return acc;
+    }, [] as string[]);
+  };
 
   private handleAddTile(tool: IToolbarButtonModel) {
     const { document } = this.props;
@@ -361,7 +366,17 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
     const content = document?.content ?? section?.content;
     if (content) {
-      ui.selectAllTiles(content.getAllTileIds(isShowingTeacherContent));
+      const allTileIds = content.getAllTileIds(isShowingTeacherContent);
+      const selectedTileIds = this.getSelectedTileIdsInDocument();
+
+      // If there are no selected tiles, or the number of selected tiles is not equal to the number of all tiles,
+      // then select all tiles. Otherwise, clear the selection.
+      const selectAllTiles = selectedTileIds.length === 0 || selectedTileIds.length !== allTileIds.length;
+      if (selectAllTiles) {
+        ui.selectAllTiles(allTileIds);
+      } else {
+        ui.selectAllTiles([]);
+      }
     }
   };
 
