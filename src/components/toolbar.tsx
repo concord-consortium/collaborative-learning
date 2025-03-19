@@ -31,6 +31,7 @@ interface IProps extends IBaseProps {
   section?: SectionModelType;
   toolbarModel: IToolbarModel;
   disabledToolIds?: string[];
+  defaultSectionId?: string;
   onToolClicked?: OnToolClickedHandler;
 }
 
@@ -92,6 +93,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           break;
         case "togglePlayback":
           this.handleTogglePlayback();
+          break;
+        case "copyToWorkspace":
+          this.handleCopyToWorkspace();
           break;
         default:
           this.handleAddTile(tool);
@@ -196,20 +200,20 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       persistentUI: {problemWorkspace: { primaryDocumentKey } }
     } = this.stores;
 
-    const selectedTileIdsInDocument = this.getSelectedTileIdsInDocument();
+    const selectedTileIds = this.getSelectedTileIdsInDocument();
 
     const undoManager = document?.treeManagerAPI?.undoManager;
     if (toolButton.id === "undo" && !undoManager?.canUndo) return true;
     if (toolButton.id === "redo" && !undoManager?.canRedo) return true;
 
     // If no tiles are selected, disable the tools that require selected tiles
-    const needsSelectedTilesTools = ["delete", "duplicate", "solution"];
-    if (needsSelectedTilesTools.includes(toolButton.id) && !selectedTileIdsInDocument.length) {
+    const needsSelectedTilesTools = ["delete", "duplicate", "solution", "copyToWorkspace"];
+    if (needsSelectedTilesTools.includes(toolButton.id) && !selectedTileIds.length) {
       return true;
     }
 
     // don't allow the following tools when the document is the primary document
-    const disallowedPrimaryDocumentTools = ["edit"];
+    const disallowedPrimaryDocumentTools = ["edit", "copyToWorkspace"];
     if (disallowedPrimaryDocumentTools.includes(toolButton.id) && document?.key === primaryDocumentKey) {
       return true;
     }
@@ -389,6 +393,19 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       logHistoryEvent({documentId: document.key || '',
         action: prevShowPlaybackControls ? "hideControls" : "showControls"});
       document.toggleShowPlaybackControls();
+    }
+  };
+
+  private handleCopyToWorkspace = () => {
+    const { documents, ui, persistentUI: { problemWorkspace: { primaryDocumentKey } } } = this.stores;
+    const { document, section } = this.props;
+    const content = document?.content ?? section?.content;
+    const primaryDocument = documents.getDocument(primaryDocumentKey ?? "");
+
+    if (content && primaryDocument?.content && (document?.key !== primaryDocument.key)) {
+      const sectionId = document ? undefined : section?.type;
+      const copySpecs = content.getCopySpecs(ui.selectedTileIds, sectionId);
+      primaryDocument.content.applyCopySpecs(copySpecs);
     }
   };
 }
