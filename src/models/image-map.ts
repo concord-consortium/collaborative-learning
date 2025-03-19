@@ -11,6 +11,7 @@ import placeholderImage from "../assets/image_placeholder.png";
 import { getAssetUrl } from "../utilities/asset-utils";
 
 export const kExternalUrlHandlerName = "externalUrl";
+export const kBlobUrlHandlerName = "blobUrl";
 export const kLocalAssetsHandlerName = "localAssets";
 export const kFirebaseStorageHandlerName = "firebaseStorage";
 export const kFirebaseRealTimeDBHandlerName = "firebaseRealTimeDB";
@@ -115,6 +116,7 @@ export class ImageMap {
     this.registerHandler(firebaseStorageImagesHandler);
     this.registerHandler(localAssetsImagesHandler);
     this.registerHandler(externalUrlImagesHandler);
+    this.registerHandler(blobUrlImagesHandler);
   }
 
   isImageUrl(url: string) {
@@ -421,6 +423,15 @@ export class ImageMap {
     this.getImage(url, options);
     return this.getCachedImage(url);
   }
+
+  @action
+  addFileImage2(file: File): {promise: Promise<ImageMapEntry>, entry?: ImageMapEntry} {
+    const url = URL.createObjectURL(file);
+    const promise = this.getImage(url, {filename: file.name});
+    const entry = this.getCachedImage(url);
+    promise.then((result) => URL.revokeObjectURL(url));
+    return {promise, entry};
+  }
 }
 
 /*
@@ -481,12 +492,68 @@ export const externalUrlImagesHandler: IImageHandler = {
   imageMap: {}
 };
 
+// The contentUrl is not set here.
+// This means any content that is referencing an image that cannot be downloaded
+// will not be updated. Modifying content like this seems kind of dangerous because
+// this could be a temporary network error.
+// By not setting the contentUrl, it also means that the default placeholder image
+// entry will not be modified by syncContentUrl. That is a good thing.
+const kErrorStorageResult: IImageHandlerStoreResult = {
+  displayUrl: placeholderImage, success: false
+};
+
+/**
+ * This can be used to upload Files
+ * You should get a url for the file with
+ * const url = URL.createObjectURL(file)
+ * After the image is ready the object url should be revoked
+ * URLrevokeObjectURL(url)
+ */
+export const blobUrlImagesHandler: IImageHandler = {
+  name: kBlobUrlHandlerName,
+  priority: 2,
+
+  match(url: string) {
+    return url ? /^blob:/.test(url) : false;
+  },
+
+  async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
+    const { db, filename } = options || {};
+
+    // Only upload if we have a place to put the image
+    if (db?.stores.user.id) {
+      try {
+        const simpleImage = await storeImage(db, url, filename);
+        // At this point it means we've successfully stored the image
+        // so we could revoke the blob/object url at this point.
+        // However it seems better for the caller that passed blob/object url
+        // to revoke it.
+        const { normalized } = parseFauxFirebaseRTDBUrl(simpleImage.imageUrl);
+        const entry: IImageHandlerStoreResult = {
+          filename,
+          contentUrl: normalized,
+          displayUrl: simpleImage.imageData,
+          success: true
+        };
+        return entry;
+      } catch (error) {
+        return kErrorStorageResult;
+      }
+    } else {
+      // If there is no db or user, we don't want the user to think they successfully uploaded the image
+      // so we run an error
+      return kErrorStorageResult;
+    }
+  },
+  imageMap: {}
+};
+
 /*
  * localAssetsImagesHandler
  */
 export const localAssetsImagesHandler: IImageHandler = {
   name: kLocalAssetsHandlerName,
-  priority: 2,
+  priority: 3,
 
   match(url: string) {
            // don't match values with a protocol or port specified
@@ -531,19 +598,9 @@ export const localAssetsImagesHandler: IImageHandler = {
  */
 const kFirebaseStorageUrlPrefix = "https://firebasestorage.googleapis.com";
 
-// The contentUrl is not set here.
-// This means any content that is referencing an image that cannot be downloaded
-// will not be updated. Modifying content like this seems kind of dangerous because
-// this could be a temporary network error.
-// By not setting the contentUrl, it also means that the default placeholder image
-// entry will not be modified by syncContentUrl. That is a good thing.
-const kErrorStorageResult: IImageHandlerStoreResult = {
-  displayUrl: placeholderImage, success: false
-};
-
 export const firebaseStorageImagesHandler: IImageHandler = {
   name: kFirebaseStorageHandlerName,
-  priority: 3,
+  priority: 4,
 
   match(url: string) {
     return url.startsWith(kFirebaseStorageUrlPrefix) ||
