@@ -265,6 +265,12 @@
         "isTileTool": false
       },
       {
+        "id": "copyToDocument",
+        "title": "Copy to Document",
+        "iconId": "icon-copy-to-document-tool",
+        "isTileTool": false
+      },
+      {
         "id": "togglePlayback",
         "title": "Playback",
         "iconId": "icon-playback-tool",

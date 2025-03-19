@@ -1,5 +1,5 @@
 import { inject, observer } from "mobx-react";
-import React from "react";
+import React, { CSSProperties } from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { UIDialogModelType } from "../../models/stores/ui";
 
@@ -42,6 +42,10 @@ export class DialogComponent extends BaseComponent<IProps> {
           title = title || "Prompt";
           contents = this.renderPromptContents(dialog);
           break;
+        case "getCopyToDocument":
+          title = title || "Copy to Document";
+          contents = this.renderCopyToDocumentContents(dialog);
+          break;
         default:
         case "alert":
           title = title || "Alert";
@@ -62,6 +66,41 @@ export class DialogComponent extends BaseComponent<IProps> {
     else {
       return null;
     }
+  }
+
+  private renderCopyToDocumentContents(dialog: UIDialogModelType) {
+    const { documents } = this.stores;
+    const otherDocuments = documents.all.filter((d) => {
+      return (d.title ?? "").trim() !== "" && d.key !== dialog.copyFromDocumentKey;
+    });
+    const italic: CSSProperties = {fontStyle: "italic"};
+    const normal: CSSProperties = {fontStyle: "normal"};
+    const hasValue = (dialog.copyToDocumentKey ?? "").trim() !== "";
+
+    return (
+      <div className="dialog-contents">
+        <div className="dialog-text">{dialog.text}</div>
+        <div className="dialog-input">
+          <select
+            placeholder="Choose a document"
+            defaultValue={dialog.copyToDocumentKey /* set so default option is selected at start */}
+            value={dialog.copyToDocumentKey}
+            style={hasValue ? normal : italic}
+            onChange={this.handleCopyToDocumentKeyChanged}
+            autoFocus
+          >
+            <option disabled={hasValue} value="" style={italic}>Choose a document</option>
+            {otherDocuments.map((d) => (
+              <option key={d.key} value={d.key} style={normal}>{d.title}</option>
+            ))}
+          </select>
+        </div>
+        <div className="dialog-buttons" data-test="dialog-buttons">
+          <button id="okButton" onClick={this.handleCopyToDocumentDialogOk}>Ok</button>
+          <button id="cancelButton" onClick={this.handleCancelDialog}>Cancel</button>
+        </div>
+      </div>
+    );
   }
 
   private renderAlertContents(dialog: UIDialogModelType) {
@@ -159,6 +198,17 @@ export class DialogComponent extends BaseComponent<IProps> {
     // listen for escape key when dialog is visible
     if (this.stores.ui.dialog && (e.keyCode === 27)) {
       this.handleCancelDialog();
+    }
+  };
+
+  private handleCopyToDocumentKeyChanged = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    this.stores.ui.dialog?.setCopyToDocumentKey(e.target.value);
+  };
+
+  private handleCopyToDocumentDialogOk = () => {
+    const dialog = this.stores.ui.dialog;
+    if (dialog?.copyToDocumentKey) {
+      this.stores.ui.resolveDialog(dialog.copyToDocumentKey);
     }
   };
 
