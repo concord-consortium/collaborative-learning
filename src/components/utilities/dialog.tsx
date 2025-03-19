@@ -3,6 +3,11 @@ import React, { CSSProperties } from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { UIDialogModelType } from "../../models/stores/ui";
 
+import CloseIcon from "../../assets/icons/close/close.svg";
+import CopyToDocumentIcon from "../../clue/assets/icons/copy-to-document-tool.svg";
+import AlertIcon from "../../assets/alert-icon.svg";
+import ConfirmIcon from "../../assets/confirm-icon.svg";
+
 import "./dialog.sass";
 
 interface IProps extends IBaseProps {
@@ -30,6 +35,9 @@ export class DialogComponent extends BaseComponent<IProps> {
 
   public render() {
     const {dialog} = this.stores.ui;
+    // use confirm icon as the default icon
+    let Icon: React.ElementType = ConfirmIcon;
+
     if (dialog) {
       let title = dialog.title;
       let contents: JSX.Element;
@@ -45,11 +53,13 @@ export class DialogComponent extends BaseComponent<IProps> {
         case "getCopyToDocument":
           title = title || "Copy to Document";
           contents = this.renderCopyToDocumentContents(dialog);
+          Icon = CopyToDocumentIcon;
           break;
         default:
         case "alert":
           title = title || "Alert";
           contents = this.renderAlertContents(dialog);
+          Icon = AlertIcon;
           break;
       }
 
@@ -57,7 +67,13 @@ export class DialogComponent extends BaseComponent<IProps> {
         <div className={`dialog ${dialog.className}`}>
           <div className="dialog-background" />
           <div className="dialog-container">
-            <div className="dialog-title" data-test="dialog-title">{title}</div>
+            <div className="dialog-title" data-test="dialog-title">
+              <div className="dialog-title-icon">
+                {Icon && <Icon />}
+              </div>
+              <div className="dialog-title-text">{title}</div>
+              <button onClick={this.handleCancelDialog}><CloseIcon /></button>
+            </div>
             {contents}
           </div>
         </div>
@@ -96,8 +112,8 @@ export class DialogComponent extends BaseComponent<IProps> {
           </select>
         </div>
         <div className="dialog-buttons" data-test="dialog-buttons">
-          <button id="okButton" onClick={this.handleCopyToDocumentDialogOk}>Ok</button>
-          <button id="cancelButton" onClick={this.handleCancelDialog}>Cancel</button>
+          <button id="cancelButton" className="cancel" onClick={this.handleCancelDialog}>Cancel</button>
+          <button id="okButton" disabled={!hasValue} onClick={this.handleCopyToDocumentDialogOk}>OK</button>
         </div>
       </div>
     );
@@ -119,8 +135,8 @@ export class DialogComponent extends BaseComponent<IProps> {
       <div className="dialog-contents">
         <div className="dialog-text">{dialog.text}</div>
         <div className="dialog-buttons" data-test="dialog-buttons">
+          <button id="cancelButton" className="cancel" onClick={this.handleConfirmDialogNo}>No</button>
           <button id="okButton" onClick={this.handleConfirmDialogYes}>Yes</button>
-          <button id="cancelButton" onClick={this.handleConfirmDialogNo}>No</button>
         </div>
       </div>
     );
@@ -151,8 +167,8 @@ export class DialogComponent extends BaseComponent<IProps> {
           {input}
         </div>
         <div className="dialog-buttons" data-test="dialog-buttons">
+          <button id="cancelButton" className="cancel" onClick={this.handleCancelDialog}>Cancel</button>
           <button id="okButton" onClick={this.handlePromptDialogOk} disabled={this.promptValue.length === 0}>Ok</button>
-          <button id="cancelButton" onClick={this.handleCancelDialog}>Cancel</button>
         </div>
       </div>
     );
