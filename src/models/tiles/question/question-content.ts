@@ -1,5 +1,6 @@
-import { types, Instance, SnapshotIn } from "mobx-state-tree";
-import { TileContentModel } from "../tile-content";
+import stringify from "json-stringify-pretty-compact";
+import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
+import { ITileContentModel, TileContentModel } from "../tile-content";
 import { ITileExportOptions } from "../tile-content-info";
 
 export const kQuestionTileType = "Question";
@@ -16,16 +17,16 @@ export const QuestionContentModel = TileContentModel
   })
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
-      return [
-        `{`,
-        `  "type": "${kQuestionTileType}",`,
-        `  "version": ${self.version}`,
-        `}`
-      ].join("\n");
-    }
+      const snapshot = getSnapshot(self);
+      return stringify(snapshot, {maxLength: 200});
+    },
   }));
 
 export type QuestionContentModelType = Instance<typeof QuestionContentModel>;
+
+export function isQuestionModel(model?: ITileContentModel): model is QuestionContentModelType {
+  return model?.type === kQuestionTileType;
+}
 
 export function createQuestionContent(snapshot?: SnapshotIn<typeof QuestionContentModel>) {
   return QuestionContentModel.create({
