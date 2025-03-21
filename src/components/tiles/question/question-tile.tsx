@@ -3,6 +3,7 @@ import { observer } from "mobx-react";
 import { ITileProps } from "../tile-component";
 import { QuestionContentModelType } from "../../../models/tiles/question/question-content";
 import { BasicEditableTileTitle } from "../basic-editable-tile-title";
+import { ReadOnlyTileTitle } from "../read-only-tile-title";
 import QuestionBadge from "../../../assets/icons/question-badge.svg";
 
 import "./question-tile.scss";
@@ -11,12 +12,15 @@ export const QuestionTileComponent: React.FC<ITileProps> = observer(function Que
   const content = props.model.content as QuestionContentModelType;
 
   return (
-    <div className="question-tile" data-testid="question-tile">
+    <div className="question-tile-content" data-testid="question-tile">
       <div className="question-badge">
         <QuestionBadge />
       </div>
-      <BasicEditableTileTitle readOnly={content.locked} />
-      Question Tile
+      {content.locked ? (
+        <ReadOnlyTileTitle />
+      ) : (
+        <BasicEditableTileTitle />
+      )}
     </div>
   );
 });

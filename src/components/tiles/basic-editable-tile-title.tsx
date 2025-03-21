@@ -7,14 +7,12 @@ import { defaultTileTitleFont } from "../constants";
 
 interface IBasicEditableTileTitleProps {
   titleKey?: string;
-  readOnly?: boolean;
 }
-export function BasicEditableTileTitle({ titleKey, readOnly }: IBasicEditableTileTitleProps) {
+export function BasicEditableTileTitle({ titleKey }: IBasicEditableTileTitleProps) {
   return (
     <TileTitleArea>
       <EditableTileTitle
         key={titleKey}
-        readOnly={readOnly}
         measureText={(text) => measureText(text, defaultTileTitleFont)}
       />
     </TileTitleArea>

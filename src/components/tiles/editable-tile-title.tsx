@@ -17,13 +17,11 @@ interface IProps {
   measureText: (text: string) => number;
   onBeginEdit?: () => void;
   onEndEdit?: (title?: string) => void;
-  readOnly?: boolean;
 }
 export const EditableTileTitle: React.FC<IProps> = observer(({
-  className, measureText, onBeginEdit, onEndEdit, readOnly: propReadOnly
+  className, measureText, onBeginEdit, onEndEdit
 }) => {
-  const contextReadOnly = useReadOnlyContext();
-  const isReadOnly = propReadOnly ?? contextReadOnly;
+  const readOnly = useReadOnlyContext();
   // model and observer() allow this component to re-render
   // when the title changes without re-rendering the entire tile
   const model = useContext(TileModelContext);
@@ -34,7 +32,7 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
   const [editingTitle, setEditingTitle] = useState(title);
 
   const handleClick = () => {
-    if (!isReadOnly && !isEditing) {
+    if (!readOnly && !isEditing) {
       onBeginEdit?.();
       setEditingTitle(title);
       setIsEditing(true);
