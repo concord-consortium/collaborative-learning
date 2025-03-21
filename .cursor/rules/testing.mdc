@@ -4,3 +4,4 @@ globs:
 alwaysApply: true
 ---
 To run a specific Cypress test, use use `npm run test:cypress` instead of `cypress:run`.
+To start the Cypress UI, use `pm run test:cypress:open`.

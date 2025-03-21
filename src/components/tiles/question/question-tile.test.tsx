@@ -51,7 +51,7 @@ describe("QuestionTileComponent", () => {
     const props = createTileProps(defaultQuestionContent());
     renderWithContext(props);
     expect(screen.getByTestId("question-tile")).toBeInTheDocument();
-    expect(screen.getByText("Question Tile")).toBeInTheDocument();
+    expect(screen.getByText("Tile Title")).toBeInTheDocument();
   });
 
   it("renders with default title", () => {

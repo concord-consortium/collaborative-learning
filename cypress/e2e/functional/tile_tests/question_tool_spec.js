@@ -1,6 +1,7 @@
 import Canvas from '../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import QuestionToolTile from '../../../support/elements/tile/QuestionToolTile';
+import { dragTile } from '../../../support/helpers/drag-drop';
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
@@ -87,11 +88,11 @@ context('Question tool tile functionalities', function () {
     questionToolTile.getTileTitle().first().should("contain", "Question 1");
 
     // Click the title to start editing
-    questionToolTile.getQuestionTileTitle().first().click();
+    questionToolTile.getEditableTileTitle().first().click();
     // Wait for the editing class to be added
-    questionToolTile.getQuestionTileTitle().first().should('have.class', 'editable-tile-title-editing');
+    questionToolTile.getEditableTileTitle().first().should('have.class', 'editable-tile-title-editing');
     // Type the new title
-    questionToolTile.getQuestionTileTitle().first().type(newName + '{enter}');
+    questionToolTile.getEditableTileTitle().first().type(newName + '{enter}');
     // Verify the new title is displayed
     questionToolTile.getTileTitle().should("contain", newName);
 
@@ -100,5 +101,46 @@ context('Question tool tile functionalities', function () {
     questionToolTile.getTileTitle().first().should("contain", "Question 1");
     clueCanvas.getRedoTool().click();
     questionToolTile.getTileTitle().should("contain", newName);
+  });
+
+  it('verifies question tile is locked when copied between documents', function () {
+    beforeTest();
+
+    cy.log('adds question tile to source document');
+    clueCanvas.addTile('question');
+    questionToolTile.getQuestionTile().should('exist');
+
+    // Verify initial unlocked state
+    questionToolTile.getEditableTileTitle().should('exist');
+    questionToolTile.getTileTitle().first().should("contain", "Question 1");
+
+    cy.log('creates new document and copies tile');
+    // Open My Work tab and source document
+    cy.openTopTab('my-work');
+    cy.openSection("my-work", "workspaces");
+    cy.openDocumentThumbnail('my-work', 'workspaces', title);
+
+    // Create new document
+    const newDocTitle = "Question Tile Copy Test";
+    canvas.createNewExtraDocumentFromFileMenu(newDocTitle, "my-work");
+    cy.wait(5000);
+
+    // Copy the tile using drag and drop
+    cy.get('.nav-tab-panel .my-work .tool-tile')
+      .first()
+      .within(dragTile);
+
+    cy.log('verifies copied tile is locked');
+    // Verify tile exists in new document
+    questionToolTile.getQuestionTile().should('exist');
+
+    // Verify it's locked (no editable title)
+    questionToolTile.getEditableTileTitle().should('not.exist');
+
+    // Verify read-only title is shown instead
+    cy.get('.question-tile-content .read-only-title').should('exist');
+
+    // Clean up
+    canvas.deleteDocument();
   });
 });
