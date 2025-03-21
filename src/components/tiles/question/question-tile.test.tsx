@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { QuestionTileComponent } from "./question-tile";
 import { defaultQuestionContent } from "../../../models/tiles/question/question-content";
 import { TileModel } from "../../../models/tiles/tile-model";
@@ -9,9 +9,14 @@ import { TileModelContext } from "../tile-api";
 import "../../../models/tiles/question/question-registration";
 
 // Mock canvas operations since we're running in jsdom
-const mockMeasureText = jest.fn().mockReturnValue({ width: 100, height: 20 });
+const mockMeasureText = jest.fn().mockReturnValue(100);
 jest.mock("../hooks/use-measure-text", () => ({
   measureText: () => mockMeasureText()
+}));
+
+// Mock document context
+jest.mock("../../../models/tiles/log/log-tile-document-event", () => ({
+  logTileDocumentEvent: jest.fn()
 }));
 
 describe("QuestionTileComponent", () => {
@@ -65,5 +70,45 @@ describe("QuestionTileComponent", () => {
     const titleElement = screen.getByText("My Custom Title");
     expect(titleElement).toBeInTheDocument();
     expect(titleElement.closest(".editable-tile-title-text")).toBeInTheDocument();
+  });
+
+  it("allows title editing when not locked", () => {
+    const content = defaultQuestionContent();
+    const props = createTileProps(content, "Editable Title");
+    renderWithContext(props);
+    const titleElement = screen.getByText("Editable Title");
+    fireEvent.click(titleElement);
+    expect(screen.getByRole("textbox")).toBeInTheDocument();
+  });
+
+  it("prevents title editing when locked", () => {
+    const content = defaultQuestionContent();
+    content.setLocked(true);
+    const props = createTileProps(content, "Locked Title");
+    renderWithContext(props);
+    const titleElement = screen.getByText("Locked Title");
+    fireEvent.click(titleElement);
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
+  it("toggles title editing based on locked state", () => {
+    const content = defaultQuestionContent();
+    const props = createTileProps(content, "Toggle Test Title");
+    renderWithContext(props);
+
+    // Initially unlocked - should allow editing
+    const titleElement = screen.getByText("Toggle Test Title");
+    fireEvent.click(titleElement);
+    expect(screen.getByRole("textbox")).toBeInTheDocument();
+
+    // Cancel edit
+    fireEvent.keyDown(screen.getByRole("textbox"), { key: "Escape" });
+
+    // Lock the title
+    content.setLocked(true);
+
+    // Try to edit again - should not enter edit mode
+    fireEvent.click(screen.getByText("Toggle Test Title"));
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
 });

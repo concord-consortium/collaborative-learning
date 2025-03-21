@@ -13,13 +13,19 @@ export const QuestionContentModel = TileContentModel
   .named("QuestionContent")
   .props({
     type: types.optional(types.literal(kQuestionTileType), kQuestionTileType),
-    version: types.optional(types.number, 1)
+    version: types.optional(types.number, 1),
+    locked: types.optional(types.boolean, false)
   })
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
       return stringify(snapshot, {maxLength: 200});
     },
+  }))
+  .actions(self => ({
+    setLocked(locked: boolean) {
+      self.locked = locked;
+    }
   }));
 
 export type QuestionContentModelType = Instance<typeof QuestionContentModel>;
