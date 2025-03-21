@@ -77,4 +77,28 @@ context('Question tool tile functionalities', function () {
     clueCanvas.getRedoTool().click();
     questionToolTile.getQuestionTile().should('not.exist');
   });
+
+  it('Question tile title edit and undo/redo', function () {
+    beforeTest();
+
+    cy.log('edit tile title');
+    const newName = "Test updated title";
+    clueCanvas.addTile('question');
+    questionToolTile.getTileTitle().first().should("contain", "Question 1");
+
+    // Click the title to start editing
+    questionToolTile.getQuestionTileTitle().first().click();
+    // Wait for the editing class to be added
+    questionToolTile.getQuestionTileTitle().first().should('have.class', 'editable-tile-title-editing');
+    // Type the new title
+    questionToolTile.getQuestionTileTitle().first().type(newName + '{enter}');
+    // Verify the new title is displayed
+    questionToolTile.getTileTitle().should("contain", newName);
+
+    cy.log('undo redo title edit');
+    clueCanvas.getUndoTool().click();
+    questionToolTile.getTileTitle().first().should("contain", "Question 1");
+    clueCanvas.getRedoTool().click();
+    questionToolTile.getTileTitle().should("contain", newName);
+  });
 });
