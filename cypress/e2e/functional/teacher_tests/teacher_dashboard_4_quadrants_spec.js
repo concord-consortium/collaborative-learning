@@ -53,13 +53,13 @@ context('Teacher Dashboard View 4 Quadrants', () => {
       dashboard.getGroups().eq(0).within(() => {
         cy.get('.canvas-container').should("have.length", 1);
       });
-      dashboard.getPlaybackToolBar().should("exist");
+      dashboard.getPlaybackToolBarButton().should("exist");
       dashboard.getGroups().eq(0).within(() => {
         dashboard.getStudentCanvas(".north-east").should("not.exist");
         dashboard.getStudentCanvas(".south-east").should("not.exist");
         dashboard.getStudentCanvas(".south-west").should("not.exist");
       });
-      dashboard.getZoomedStudentID().click();
+      dashboard.toggleFourUpViewToolbarButton();
       dashboard.getGroups().eq(0).within(() => {
         cy.get('.canvas-container').should("have.length", 4);
       });
@@ -72,13 +72,13 @@ context('Teacher Dashboard View 4 Quadrants', () => {
       dashboard.getGroups().eq(0).within(() => {
         cy.get('.canvas-container').should("have.length", 1);
       });
-      dashboard.getPlaybackToolBar().should("exist");
+      dashboard.getPlaybackToolBarButton().should("exist");
       dashboard.getGroups().eq(0).within(() => {
         dashboard.getStudentCanvas(".north-west").should("not.exist");
         dashboard.getStudentCanvas(".south-east").should("not.exist");
         dashboard.getStudentCanvas(".south-west").should("not.exist");
       });
-      dashboard.getZoomedStudentID().click();
+      dashboard.toggleFourUpViewToolbarButton();
       dashboard.getGroups().eq(0).within(() => {
         cy.get('.canvas-container').should("have.length", 4);
       });
@@ -91,13 +91,13 @@ context('Teacher Dashboard View 4 Quadrants', () => {
       dashboard.getGroups().eq(0).within(() => {
         cy.get('.canvas-container').should("have.length", 1);
       });
-      dashboard.getPlaybackToolBar().should("exist");
+      dashboard.getPlaybackToolBarButton().should("exist");
       dashboard.getGroups().eq(0).within(() => {
         dashboard.getStudentCanvas(".north-west").should("not.exist");
         dashboard.getStudentCanvas(".north-east").should("not.exist");
         dashboard.getStudentCanvas(".south-west").should("not.exist");
       });
-      dashboard.getZoomedStudentID().click();
+      dashboard.toggleFourUpViewToolbarButton();
       dashboard.getGroups().eq(0).within(() => {
         cy.get('.canvas-container').should("have.length", 4);
       });
@@ -110,13 +110,13 @@ context('Teacher Dashboard View 4 Quadrants', () => {
       dashboard.getGroups().eq(0).within(() => {
         cy.get('.canvas-container').should("have.length", 1);
       });
-      dashboard.getPlaybackToolBar().should("exist");
+      dashboard.getPlaybackToolBarButton().should("exist");
       dashboard.getGroups().eq(0).within(() => {
         dashboard.getStudentCanvas(".north-west").should("not.exist");
         dashboard.getStudentCanvas(".north-east").should("not.exist");
         dashboard.getStudentCanvas(".south-east").should("not.exist");
       });
-      dashboard.getZoomedStudentID().click();
+      dashboard.toggleFourUpViewToolbarButton();
       dashboard.getGroups().eq(0).within(() => {
         cy.get('.canvas-container').should("have.length", 4);
       });

@@ -1,5 +1,4 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
-import TeacherDashboard from "../../../support/elements/common/TeacherDashboard";
 import TextToolTile from '../../../support/elements/tile/TextToolTile';
 import TableToolTile from '../../../support/elements/tile/TableToolTile';
 import GeometryToolTile from '../../../support/elements/tile/GeometryToolTile';
@@ -20,7 +19,6 @@ const numberlineToolTile = new NumberlineToolTile;
 const dc = new DataCardToolTile;
 const dataflowToolTile = new DataflowToolTile;
 const simulatorTile = new SimulatorTile;
-let dashboard = new TeacherDashboard();
 let students = [15, 16];
 
 const teacherUrl = `${Cypress.config("qaUnitTeacher6")}&mouseSensor`;
@@ -131,6 +129,7 @@ function setupTestBrain(studentIndex) {
   simulatorTile.getTileTitle().should("contain", "Simulation 1");
   simulatorTile.getSimulatorTileTitle().click();
   simulatorTile.getSimulatorTileTitle().type(newName + '{enter}');
+  cy.wait(1000);
   simulatorTile.getTileTitle().should("contain", newName);
 
   clueCanvas.addTile("graph");
@@ -150,10 +149,10 @@ context('Test 4-up and 1-up views tiles read only functionalities', function () 
     clueCanvas.openFourUpView();
     clueCanvas.getSingleWorkspace().find('.member').eq(0).click();
     testTilesNotReadOnly("primary-workspace", "");
-    dashboard.getZoomedStudentID().click();
+    clueCanvas.toggleFourUpViewToolbarButton();
     clueCanvas.getSingleWorkspace().find('.member').eq(1).click();
     testTilesReadOnly("primary-workspace", "");
-    dashboard.getZoomedStudentID().click();
+    clueCanvas.toggleFourUpViewToolbarButton();
     testTilesNotReadOnly("primary-workspace", ".north-west");
     testTilesReadOnly("primary-workspace", ".north-east");
 
@@ -163,10 +162,10 @@ context('Test 4-up and 1-up views tiles read only functionalities', function () 
 
     cy.get('.four-up .north-west .member').should('contain', "S15").click();
     testTilesReadOnly("student-group-view", "");
-    cy.get('.student-group-view .restore-fourup-button').click();
+    clueCanvas.toggleFourUpViewToolbarButton();
     testTilesReadOnly("student-group-view", "");
     cy.get('.four-up .north-east .member').should('contain', "S16").click();
-    cy.get('.student-group-view .restore-fourup-button').click();
+    clueCanvas.toggleFourUpViewToolbarButton();
     testTilesReadOnly("student-group-view", ".north-west");
     testTilesReadOnly("student-group-view", ".north-east");
   });
@@ -178,10 +177,10 @@ context('Test 4-up and 1-up views tiles read only functionalities', function () 
     clueCanvas.openFourUpView();
     clueCanvas.getSingleWorkspace().find('.member').eq(0).click();
     testTilesNotReadOnlyBrain("primary-workspace", "");
-    dashboard.getZoomedStudentID().click();
+    clueCanvas.toggleFourUpViewToolbarButton();
     clueCanvas.getSingleWorkspace().find('.member').eq(1).click();
     testTilesReadOnlyBrain("primary-workspace", "");
-    dashboard.getZoomedStudentID().click();
+    clueCanvas.toggleFourUpViewToolbarButton();
     testTilesNotReadOnlyBrain("primary-workspace", ".north-west");
     testTilesReadOnlyBrain("primary-workspace", ".north-east");
 
@@ -191,10 +190,10 @@ context('Test 4-up and 1-up views tiles read only functionalities', function () 
 
     cy.get('.four-up .north-west .member').should('contain', "S15").click();
     testTilesReadOnlyBrain("student-group-view", "");
-    cy.get('.student-group-view .restore-fourup-button').click();
+    clueCanvas.toggleFourUpViewToolbarButton();
     testTilesReadOnlyBrain("student-group-view", "");
     cy.get('.four-up .north-east .member').should('contain', "S16").click();
-    cy.get('.student-group-view .restore-fourup-button').click();
+    clueCanvas.toggleFourUpViewToolbarButton();
     testTilesReadOnlyBrain("student-group-view", ".north-west");
     testTilesReadOnlyBrain("student-group-view", ".north-east");
   });

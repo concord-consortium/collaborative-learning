@@ -238,15 +238,17 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
     const memberName = (groupUser?: GroupUserModelType) => {
       const userFocused = isFocused(groupUser);
-      if (userFocused || !groupUser) {
+      if ((userFocused && viaStudentGroupView) || !groupUser) {
         return null;
       }
 
       const { name: fullName, initials } = groupUser;
+      const className = classNames("member", {"member-centered": userFocused && !viaStudentGroupView});
+      const name = userFocused ? fullName : initials;
 
       return (
-        <div className="member" title={fullName} onClick={() => this.handleOverlayClick(groupUser)}>
-          {initials}
+        <div className={className} title={fullName} onClick={() => this.handleOverlayClick(groupUser)}>
+          {name}
         </div>
       );
     };
