@@ -47,6 +47,10 @@ class ResourcesPanel{
       return cy.get('.document-buttons .close-doc-button');
     }
 
+    getDocumentEditButton() {
+      return cy.get('.toolbar .tool.edit');
+    }
+
     getExemplarShareCheckbox() {
       return cy.get('.focus-document .document-status input[type=checkbox]');
     }
