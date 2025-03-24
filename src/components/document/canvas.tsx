@@ -92,9 +92,11 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     this.showPlaybackControlsDisposer = reaction(
       () => this.props.document?.showPlaybackControls,
       () => {
-        this.setState((prevState, props) => {
-          return this.updateHistoryDocument(prevState);
-        });
+        if (this.props.showPlayback) {
+          this.setState((prevState, props) => {
+            return this.updateHistoryDocument(prevState);
+          });
+        }
       }
     );
   }
@@ -154,7 +156,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   };
 
   componentDidUpdate(prevProps: IProps) {
-    if (prevProps.document !== this.props.document) {
+    if (prevProps.document !== this.props.document && this.props.showPlayback) {
       this.setState((prevState, props) => {
         return this.updateHistoryDocument(prevState);
       });
