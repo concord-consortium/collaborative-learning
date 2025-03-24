@@ -30,9 +30,9 @@ context('History Playback', () => {
     beforeTest(queryParams);
 
     cy.log('verify playback shows no history if there is no history');
-    cy.get('[data-testid="playback-component-button"]').click();
+    cy.get('.toolbar .tool.toggleplayback').click();
     cy.get('.playback-controls').contains("This document has no history");
-    cy.get('[data-testid="playback-component-button"]').click();
+    cy.get('.toolbar .tool.toggleplayback').click();
 
     cy.log('verify playback controls open with slider when there is history');
     clueCanvas.addTile('drawing');
@@ -42,7 +42,7 @@ context('History Playback', () => {
     // opens the history controls. The code should know what the history entry is that
     // matches the document that it is displaying
     cy.wait(4000);
-    cy.get('[data-testid="playback-component-button"]').click();
+    cy.get('.toolbar .tool.toggleplayback').click();
     cy.get('[data-testid="playback-slider"]').should('be.visible');
     cy.get('[data-testid="playback-time-info"]').should('be.visible');
 
@@ -69,8 +69,8 @@ context('History Playback', () => {
     cy.get('[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content .drawing-tool .drawing-layer line').should('not.exist');
 
     cy.log('verify playback document is updated when playback controls is closed and reopened');
-    cy.get('[data-testid="playback-component-button"]').click(); //close playback controls
-    cy.get('[data-testid="playback-component-button"]').click(); //open playback controls
+    cy.get('.toolbar .tool.toggleplayback').click(); //close playback controls
+    cy.get('.toolbar .tool.toggleplayback').click(); //open playback controls
     cy.get('[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content .drawing-tool .drawing-layer line').should('be.visible');
 
     cy.log('verify playback of history');
@@ -102,7 +102,7 @@ context('History Playback', () => {
 
     cy.log('verify table shows up in history doc on the left');
     // Open playback controls
-    cy.get('[data-testid="playback-component-button"]').click(); //open playback controls
+    cy.get('.toolbar .tool.toggleplayback').click(); //open playback controls
     // wait for it to load
     cy.get('.rc-slider-horizontal').should('exist');
     tableToolTile.getTableTile('[data-test="subtab-workspaces"] .editable-document-content').should('exist');
@@ -174,29 +174,30 @@ context('History Playback', () => {
     });
 
     cy.log('verify playback icon in class work & learning logs & icon background color');
-    cy.get('[data-testid="playback-component-button"]').click();
-    cy.get('.playback-toolbar-button.themed.my-work').should('have.css', 'background-color', 'rgb(183, 226, 236)');
+    // playback is already open here...
+    cy.get('.playback-component.my-work').should('have.css', 'background-color', 'rgb(240, 249, 251)');
     clueCanvas.publishDoc("This Class");
     cy.openSection('my-work', "learning-log");
     cy.openDocumentWithTitle('my-work', 'learning-log', 'My First Learning Log');
-    cy.get('[data-testid="playback-component-button"]').should('be.visible');
-    cy.get('.playback-toolbar-button.themed.my-work').should('have.css', 'background-color', 'rgb(183, 226, 236)');
+    cy.get('.toolbar .tool.toggleplayback').eq(1).click();
+    cy.get('.toolbar .tool.toggleplayback').eq(1).should('be.visible');
+    cy.get('.playback-component.my-work').should('have.css', 'background-color', 'rgb(240, 249, 251)');
     clueCanvas.publishDoc("This Class");
     //removed palyback button in published documents
     // cy.openTopTab('class-work');
     // cy.openSection('class-work', "workspaces");
     // cy.openDocumentThumbnail('class-work','workspaces','Network User');
-    // cy.get('[data-testid="playback-component-button"]').should('be.visible');
+    // cy.get('.toolbar .tool.toggleplayback').should('be.visible');
     // cy.get('.playback-toolbar-button.themed.class-work').should('have.css', 'background-color', 'rgb(236, 201, 255)');
     // cy.openSection('class-work', "learning-logs");
     // cy.openDocumentThumbnail('class-work','learning-logs','Network User');
-    // cy.get('[data-testid="playback-component-button"]').should('be.visible');
+    // cy.get('.toolbar .tool.toggleplayback').should('be.visible');
     // cy.get('.playback-toolbar-button.themed.class-work').should('have.css', 'background-color', 'rgb(236, 201, 255)');
   });
 
   it('verify playback icon not displayed for student', function() {
     beforeTest(studentQueryParams);
 
-    cy.get('[data-testid="playback-component-button"]').should("not.exist");
+    cy.get('.toolbar .tool.toggleplayback').should("not.exist");
   });
 });
