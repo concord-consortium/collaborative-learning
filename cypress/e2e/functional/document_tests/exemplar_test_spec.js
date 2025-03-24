@@ -162,7 +162,7 @@ context('Exemplar Documents', function () {
       .should("contain.text", exemplarName);
   });
 
-  it.only('Exemplar and sticky note work for personal docs', function () {
+  it('Exemplar and sticky note work for personal docs', function () {
     beforeTest(queryParams1);
     cy.openTopTab('sort-work');
     sortWork.openSortWorkSection("No Group");
