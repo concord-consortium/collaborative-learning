@@ -6,11 +6,13 @@ module.exports = {
       "plugin:cypress/recommended",
       "plugin:chai-friendly/recommended"
     ],
+    plugins: ["no-only-tests"],
     rules: {
       "@typescript-eslint/no-non-null-assertion": "off",
       "cypress/no-unnecessary-waiting": "off",
       "max-len": "off",
-      "prefer-const": "off"
+      "prefer-const": "off",
+      "no-only-tests/no-only-tests": "error"
     },
     overrides: [
       {

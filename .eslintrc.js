@@ -6,7 +6,7 @@ module.exports = {
       ecmaVersion: 2018,
       sourceType: "module",
     },
-    plugins: ["@typescript-eslint", "json", "react", "react-hooks", "unused-imports"],
+    plugins: ["@typescript-eslint", "json", "react", "react-hooks", "unused-imports", "no-only-tests"],
     env: {
       browser: true,
       es6: true
@@ -78,6 +78,7 @@ module.exports = {
       "unused-imports/no-unused-imports": "warn",
       "unused-imports/no-unused-vars": ["warn",
         { args: "none", ignoreRestSiblings: true, "destructuredArrayIgnorePattern": "^_" }],
+      "no-only-tests/no-only-tests": "error",
     },
     overrides: [
       { // test files

@@ -180,6 +180,7 @@
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-jest": "^27.4.0",
     "eslint-plugin-json": "^3.1.0",
+    "eslint-plugin-no-only-tests": "^3.3.0",
     "eslint-plugin-react": "^7.31.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-unused-imports": "^3.0.0",
