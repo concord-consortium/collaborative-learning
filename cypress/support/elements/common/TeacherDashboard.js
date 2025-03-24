@@ -199,5 +199,13 @@ class TeacherDashboard {
         return cy.get('[data-testid="playback-component"]');
     }
 
+    toggleFourUpViewToolbarButton() {
+        return cy.get('.toolbar .tool.fourup').first().click();
+    }
+
+    getPlaybackToolBarButton() {
+      return cy.get('.toolbar .tool.toggleplayback').first();
+    }
+
 }
 export default TeacherDashboard;
