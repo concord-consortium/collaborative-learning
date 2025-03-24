@@ -9,7 +9,6 @@ import { ITileContentModel, ITileEnvironment, TileContentModel } from "../tiles/
 import { ILinkableTiles, ITypedTileLinkMetadata } from "../tiles/tile-link-types";
 import {
   IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITilePosition, IDropTileItem,
-  cloneTileSnapshotWithNewId
 } from "../tiles/tile-model";
 import {
   IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileLayoutModelType
@@ -31,11 +30,6 @@ import {
   SharedModelEntry, SharedModelEntrySnapshotType, SharedModelEntryType, SharedModelMap
 } from "./shared-model-entry";
 
-export interface ICopySpec {
-  tile: ITileModel;
-  rowId: string;
-  sectionId?: string;
-}
 
 /**
  * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
@@ -226,16 +220,6 @@ export const BaseDocumentContentModel = types
           return tileIds;
         }, []);
       },
-      getCopySpecs(tileIds: string[], sectionId?: string): ICopySpec[] {
-        return tileIds.reduce<ICopySpec[]>((acc, tileId) => {
-          const tile = this.getTile(tileId);
-          const rowId = this.findRowContainingTile(tileId);
-          if (tile && rowId) {
-            acc.push({ tile, rowId, sectionId: sectionId ?? this.getSectionIdForTile(tileId) });
-          }
-          return acc;
-        }, []);
-      }
     };
   })
   .views(self => ({
@@ -564,46 +548,6 @@ export const BaseDocumentContentModel = types
     }
   }))
   .actions(self => ({
-    applyCopySpecs(copySpecs: ICopySpec[]) {
-      const targetRowMap = new Map<string, TileRowModelType>();
-
-      copySpecs.forEach(({tile, rowId, sectionId}) => {
-        // find or create the row to copy into
-        let targetRow = targetRowMap.get(rowId);
-        let insertedRowIndex = self.defaultInsertRow;
-        const insertingRow = !targetRow;
-
-        if (sectionId) {
-          const sectionRows = self.getRowsInSection(sectionId);
-          if (sectionRows.length > 0) {
-            // this may seem redundant, but it's not.
-            // the row index to insert is the index of the document
-            // row order, not the index of the section rows.
-            // the +1 is to add the new row after the last row in the section.
-            const lastRow = sectionRows[sectionRows.length - 1];
-            insertedRowIndex = self.getRowIndex(lastRow.id) + 1;
-          }
-        }
-
-        if (insertingRow) {
-          targetRow = TileRowModel.create({ sectionId });
-          self.insertRow(targetRow, insertedRowIndex);
-          targetRowMap.set(rowId, targetRow);
-        }
-
-        // copy the tile
-        if (targetRow) {
-          // copy the tile into the row
-          const newTile = cloneTileSnapshotWithNewId(tile);
-          const tileModel = self.tileMap.put(newTile);
-          targetRow.insertTileInRow(tileModel);
-
-          if (insertingRow) {
-            self.removeNeighboringPlaceholderRows(insertedRowIndex);
-          }
-        }
-      });
-    },
     addTileContentInNewRow(content: SnapshotIn<typeof TileContentModel>,
         options?: INewTileOptions): INewRowTile {
       // We can assume content.type is always defined. If content is an instance

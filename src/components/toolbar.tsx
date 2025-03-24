@@ -407,8 +407,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
     if (content && primaryDocument?.content && (document?.key !== primaryDocument.key)) {
       const sectionId = document ? undefined : section?.type;
-      const copySpecs = content.getCopySpecs(ui.selectedTileIds, sectionId);
-      primaryDocument.content.applyCopySpecs(copySpecs);
+      const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);
+      primaryDocument.content.applyCopySpec(copySpec);
     }
   };
 
@@ -423,8 +423,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           const copyToDocument = documents.getDocument(copyToDocumentKey);
           if (copyToDocument?.content) {
             const sectionId = document ? undefined : section?.type;
-            const copySpecs = content.getCopySpecs(ui.selectedTileIds, sectionId);
-            copyToDocument.content.applyCopySpecs(copySpecs);
+            const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);
+            copyToDocument.content.applyCopySpec(copySpec);
           }
         });
     }
