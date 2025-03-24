@@ -55,7 +55,7 @@
 
       svg {
         path {
-          fill: $workspace-teal-dark-1;
+          fill: $workspace-teal-dark-1 !important;
         }
       }
 
@@ -79,7 +79,7 @@
 
         svg {
           path {
-            fill: $learninglog-green-dark-1;
+            fill: $learninglog-green-dark-1 !important;
           }
         }
 
