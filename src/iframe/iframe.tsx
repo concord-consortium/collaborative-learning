@@ -7,7 +7,6 @@ import { DocumentModelType } from "../models/document/document";
 let initialValue = undefined as DocumentModelType | undefined;
 
 const resizeObserver = new ResizeObserver((elements) => {
-  console.log("updateHeight", document.body.scrollHeight, elements);
   window.parent.postMessage({ type: "updateHeight", height: document.body.scrollHeight}, "*");
 });
 
