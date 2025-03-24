@@ -1,10 +1,8 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
-import TeacherDashboard from "../../../support/elements/common/TeacherDashboard";
 import TextToolTile from '../../../support/elements/tile/TextToolTile';
 
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
-let dashboard = new TeacherDashboard();
 let students = [15, 16, 17, 18];
 
 function getUrl(studentIndex) {
@@ -34,13 +32,13 @@ context('Test group functionalities', function () {
     clueCanvas.openFourUpView();
     clueCanvas.getSingleWorkspace().find('.member').eq(0).click();
     clueCanvas.getSingleWorkspace().find('.text-tool').should('not.have.class', 'read-only');
-    dashboard.getZoomedStudentID().click();
+    clueCanvas.toggleFourUpViewToolbarButton();
     clueCanvas.getSingleWorkspace().find('.member').eq(1).click();
     clueCanvas.getSingleWorkspace().find('.text-tool').should('have.class', 'read-only');
-    dashboard.getZoomedStudentID().click();
+    clueCanvas.toggleFourUpViewToolbarButton();
     clueCanvas.getSingleWorkspace().find('.member').eq(2).click();
     clueCanvas.getSingleWorkspace().find('.text-tool').should('have.class', 'read-only');
-    dashboard.getZoomedStudentID().click();
+    clueCanvas.toggleFourUpViewToolbarButton();
     clueCanvas.getSingleWorkspace().find('.member').eq(3).click();
     clueCanvas.getSingleWorkspace().find('.text-tool').should('have.class', 'read-only');
   });

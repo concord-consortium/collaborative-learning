@@ -77,9 +77,22 @@ class ClueCanvas {
         return cy.get('[data-test=document-titlebar-actions] .up1');
     }
 
+    getFourUpToolbarButton() {
+      return cy.get('.toolbar .tool.fourup');
+    }
+
     openFourUpView() {
         this.getFourUpViewToggle().click();
+        this.getFourUpToolbarButton().click();
         this.getFourUpView().should('be.visible');
+    }
+
+    toggleFourUpViewToolbarButton() {
+      this.getFourUpToolbarButton().click();
+    }
+
+    getPlaybackToolBarButton() {
+      return cy.get('.toolbar .tool.toggleplayback');
     }
 
     getFourToOneUpViewToggle() {
