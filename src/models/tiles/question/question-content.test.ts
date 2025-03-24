@@ -15,8 +15,10 @@ describe("QuestionContentModel", () => {
       version: 2
     });
     const json = content.exportJson();
-    expect(json).toBe(
-      `{\n  "type": "Question",\n  "version": 2\n}`
-    );
+    const expected = {
+      type: "Question",
+      version: 2
+    };
+    expect(JSON.parse(json)).toEqual(expected);
   });
 });
