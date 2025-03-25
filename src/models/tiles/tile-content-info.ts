@@ -69,6 +69,13 @@ export interface ITileContentInfo {
   contentSnapshotPostProcessor?: TileContentSnapshotPostProcessor;
   updateContentWithNewSharedModelIds?: TileContentNewSharedModelIdUpdater;
   updateObjectReferenceWithNewSharedModelIds?: ClueObjectNewSharedModelIdUpdater;
+  /**
+   * Called when a tile is being copied to a new document.
+   * This allows tiles to handle any special logic needed when their content is moved to a new document.
+   * For example, the Question tile uses this to ensure it's locked when copied.
+   * Returns the updated content.
+   */
+  updateContentForNewDocument?: (content: any) => any;
 }
 
 const gTileContentInfoMap: Record<string, ITileContentInfo> = {};

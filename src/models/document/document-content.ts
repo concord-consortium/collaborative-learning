@@ -294,10 +294,9 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         tileContent.content = updateFunction(oldContent.content, tileSharedModelEntries, updatedSharedModelMap);
       }
 
-      // If this is a cross-document copy and it's a question tile, ensure it's locked
-      // TODO: Consider moving this to a hook on the tile content model
-      if (isCrossingDocuments && tileContent.content.type === "Question") {
-        tileContent.content.locked = true;
+      // Handle any special logic needed when copying to a new document
+      if (isCrossingDocuments && typeInfo?.updateContentForNewDocument) {
+        tileContent.content = typeInfo.updateContentForNewDocument(tileContent.content);
       }
 
       // Save the updated tile so we can add it to the document
