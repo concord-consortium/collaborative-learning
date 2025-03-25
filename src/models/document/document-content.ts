@@ -515,7 +515,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       return acc;
     }, {});
     const sharedModelEntries = Object.values(self.getSharedModelsUsedByTiles(tileIds)).map(sme => getSnapshot(sme));
-    const annotations = Object.values(self.getAnnotationsUsedByTiles(tileIds, true));
+    const annotations = Object.values(self.getAnnotationsUsedByTiles(tileIds));
 
     return {
       tiles,
