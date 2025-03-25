@@ -411,7 +411,56 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         self.addArrow(ArrowAnnotation.create(newAnnotationSnapshot));
       }
     });
-  }
+  },
+  // Returns all tile ids that are linked to the selected tiles, including
+  // shared models and annotations.  This keeps looping until no more tiles
+  // are added to the set to ensure that all "chained" tiles are included.
+  getAllLinkedTileIds(selectedTileIds: string[]) {
+    const uniqueTileIds = new Set<string>([...selectedTileIds]);
+    let startingTileIds = selectedTileIds;
+    let endingTileIds = selectedTileIds;
+    do {
+      startingTileIds = Array.from(uniqueTileIds);
+      const sharedModelEntries = Object.values(self.getSharedModelsUsedByTiles(startingTileIds));
+      const annotations = Object.values(self.getAnnotationsUsedByTiles(startingTileIds, true));
+
+      sharedModelEntries.forEach(entry => {
+        entry.tiles.map(tile => uniqueTileIds.add(tile.id));
+      });
+      annotations.forEach(annotation => {
+        if (annotation.sourceObject?.tileId) {
+          uniqueTileIds.add(annotation.sourceObject.tileId);
+        }
+        if (annotation.targetObject?.tileId) {
+          uniqueTileIds.add(annotation.targetObject.tileId);
+        }
+      });
+
+      endingTileIds = Array.from(uniqueTileIds);
+    } while (endingTileIds.length > startingTileIds.length);
+
+    return endingTileIds;
+  },
+  // orders tileIds by the order of the rows they are in and the order of the tiles within each row
+  orderTileIds(tileIds: string[]) {
+    const sortInfo =
+      tileIds.map(tileId => {
+        const rowId = self.findRowContainingTile(tileId);
+        const row = rowId ? self.rowMap.get(rowId) : undefined;
+        return row
+          ? { tileId, rowIndex: self.getRowIndex(row.id), tileIndex: row.tiles.findIndex(t => t.tileId === tileId) }
+          : undefined;
+      }).filter(info => !!info) as {tileId: string; rowIndex: number; tileIndex: number;}[];
+
+    sortInfo.sort((a, b) => {
+      if (a.rowIndex !== b.rowIndex) {
+        return a.rowIndex - b.rowIndex;
+      }
+      return a.tileIndex - b.tileIndex;
+    });
+
+    return sortInfo.map(info => info.tileId);
+  },
 }))
 .actions(self => ({
   handleDragCopyTiles(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {
@@ -507,7 +556,9 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       entry.tiles.push(newTileId);
     });
   },
-  getCopySpec(tileIds: string[], sectionId?: string): ICopySpec {
+  getCopySpec(selectedTileIds: string[], sectionId?: string): ICopySpec {
+    const linkedTileIds = self.getAllLinkedTileIds(selectedTileIds);
+    const tileIds = self.orderTileIds(linkedTileIds);
     const tiles = self.getDragTileItems(tileIds);
     const tilePositions = tileIds.reduce<Record<string, ITileCopyPosition>>((acc, tileId) => {
       const rowId = self.findRowContainingTile(tileId)!;
