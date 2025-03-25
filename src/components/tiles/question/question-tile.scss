@@ -1,5 +1,20 @@
 @import "../../vars";
 
+.question-tile {
+  border: 1px solid #BFBFBF;
+  padding: 1px;
+  padding-left: 0;
+  border-left: 4px solid #0592AF;
+
+  &.hovered, &.hovered.readonly {
+    border-left: 4px solid #0592AF;
+  }
+
+  &.selected, &.selected.readonly {
+    border-left: 4px solid #0592AF;
+  }
+}
+
 .question-tile-content {
   background: white;
   min-height: 100px;
