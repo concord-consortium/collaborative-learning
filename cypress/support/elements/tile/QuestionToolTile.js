@@ -1,6 +1,14 @@
 class QuestionToolTile {
     getQuestionTile(workspaceClass) {
-        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .question-tile`);
+        return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .question-tile-content`);
+    }
+
+    getTileTitle(workspaceClass) {
+        return this.getQuestionTile(workspaceClass).find(".title-area");
+    }
+
+    getEditableTileTitle(workspaceClass) {
+        return this.getQuestionTile(workspaceClass).find(".title-area .editable-tile-title");
     }
 
     deleteQuestionTile() {
