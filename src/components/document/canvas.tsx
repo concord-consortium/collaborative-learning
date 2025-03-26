@@ -89,16 +89,14 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   componentDidMount(): void {
     this.checkForHistoryRequest();
 
+    // update the history when the playback controls are toggled
     this.showPlaybackControlsDisposer = reaction(
       () => this.props.document?.showPlaybackControls,
-      () => {
-        if (this.props.showPlayback) {
-          this.setState((prevState, props) => {
-            return this.updateHistoryDocument(prevState);
-          });
-        }
-      }
+      () => this.maybeUpdateHistoryDocument()
     );
+
+    // update the history on mount
+    this.maybeUpdateHistoryDocument();
   }
 
   private checkForHistoryRequest = () => {
@@ -156,10 +154,8 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   };
 
   componentDidUpdate(prevProps: IProps) {
-    if (prevProps.document !== this.props.document && this.props.showPlayback) {
-      this.setState((prevState, props) => {
-        return this.updateHistoryDocument(prevState);
-      });
+    if (prevProps.document !== this.props.document) {
+      this.maybeUpdateHistoryDocument();
     }
     this.checkForHistoryRequest();
   }
@@ -368,6 +364,14 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       const user = this.stores.user;
       treeManager.mirrorHistoryFromFirestore(user, firestore);
       return docCopy;
+    }
+  };
+
+  private maybeUpdateHistoryDocument = () => {
+    if (this.props.showPlayback && this.props.document?.showPlaybackControls) {
+      this.setState((prevState, props) => {
+        return this.updateHistoryDocument(prevState);
+      });
     }
   };
 
