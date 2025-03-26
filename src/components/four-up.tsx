@@ -428,6 +428,8 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const { group } = this.props;
       this.tabUIModel?.getDocumentGroup(group.id)?.closePrimaryDocument();
 
+      Logger.log(LogEventName.TOOLBAR_FOUR_UP_TOOL);
+
       // prevent the default tool action
       return true;
     }
