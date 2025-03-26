@@ -99,7 +99,7 @@ class StarredTab {
             this.getTopPanelCanvasItemWithIndex(tab, section, j).invoke("attr", "class").should("contain", "starred");
           }      
         }
-      }))
+      }));
     this.getCanvasItem(tab, section).then(((value) => {
       totalCount = Cypress.$(value).length;
       expect(value).to.have.length(totalCount);
@@ -112,7 +112,7 @@ class StarredTab {
           }  
         }
       })
-    )  
+    );  
   }
   starMultipleCanvasItemClassWork(tab, section) {
     let i;
@@ -129,7 +129,7 @@ class StarredTab {
           }      
         }
       })
-    )  
+    );  
   }
   verifyThumbnailFlipper(tab) {
     this.getThumbnailRightDocumentFlipper(tab).should("exist");
