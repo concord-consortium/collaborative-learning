@@ -15,6 +15,7 @@ import { SectionModelType } from "../models/curriculum/section";
 import { logHistoryEvent } from "../models/history/log-history-event";
 import { Logger } from "../lib/logger"
 import { LogEventName } from "../lib/logger-types";
+import { IToolbarEventProps, logToolbarEvent } from "../models/tiles/log/log-toolbar-event";
 
 import "./toolbar.scss";
 
@@ -364,21 +365,17 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     }
   };
 
-  private getLoggerParameters = (otherParams: Record<string, any> = {}) => {
+  private logDocumentOrSectionEvent = (event: LogEventName, otherParams: Record<string, any> = {}, targetDocument?: DocumentModelType) => {
     const { document, section } = this.props;
-    if (document) {
-      return {documentId: document.key, ...otherParams};
-    } else if (section) {
-      return {sectionType: section.type, ...otherParams};
-    }
-    return otherParams;
+    const eventProps: IToolbarEventProps = { document, section, targetDocument };
+    logToolbarEvent(event, eventProps, otherParams);
   }
 
   private handleEdit = () => {
     const { document } = this.props;
     if (document) {
       this.stores.persistentUI.problemWorkspace.setPrimaryDocument(document);
-      Logger.log(LogEventName.TOOLBAR_EDIT_TOOL, this.getLoggerParameters());
+      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_EDIT_TOOL);
     }
   };
 
@@ -400,7 +397,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         ui.selectAllTiles([]);
       }
 
-      Logger.log(LogEventName.TOOLBAR_SELECT_ALL_TOOL, this.getLoggerParameters({selectAllTiles}));
+      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_SELECT_ALL_TOOL, {selectAllTiles});
     }
   };
 
@@ -412,7 +409,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         action: prevShowPlaybackControls ? "hideControls" : "showControls"});
       document.toggleShowPlaybackControls();
 
-      Logger.log(LogEventName.TOOLBAR_PLAYBACK_TOOL, this.getLoggerParameters({showPlaybackControls: document.showPlaybackControls}));
+      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_PLAYBACK_TOOL, {showPlaybackControls: document.showPlaybackControls});
     }
   };
 
@@ -427,7 +424,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);
       primaryDocument.content.applyCopySpec(copySpec);
 
-      Logger.log(LogEventName.TOOLBAR_COPY_TO_WORKSPACE, this.getLoggerParameters({targetDocumentId: primaryDocument.key}));
+      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_COPY_TO_WORKSPACE, {}, primaryDocument);
     }
   };
 
@@ -445,7 +442,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
             const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);
             copyToDocument.content.applyCopySpec(copySpec);
 
-            Logger.log(LogEventName.TOOLBAR_COPY_TO_DOCUMENT, this.getLoggerParameters({targetDocumentId: copyToDocument.key}));
+            this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_COPY_TO_DOCUMENT, {}, copyToDocument);
           }
         });
     }
