@@ -4,14 +4,15 @@ import { cloneDeep, each } from "lodash";
 import { IDragTilesData,
          IDocumentContentAddTileOptions } from "./document-content-types";
 import { DocumentContentModelWithTileDragging } from "./drag-tiles";
-import { IDropRowInfo, TileRowModelType, TileRowSnapshotOutType } from "./tile-row";
+import { IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotOutType } from "./tile-row";
 import {
   ArrowAnnotation, IArrowAnnotationSnapshot, isArrowAnnotationSnapshot, updateArrowAnnotationTileIds
 } from "../annotations/arrow-annotation";
 import { sharedModelFactory, UnknownSharedModel } from "../shared/shared-model-manager";
 import { SharedModelType } from "../shared/shared-model";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
-import { IDragTileItem, IDropTileItem, ITileModel, ITileModelSnapshotOut } from "../tiles/tile-model";
+import { IDragTileItem, IDropTileItem, ITileModel,
+         ITileModelSnapshotOut } from "../tiles/tile-model";
 import { uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
 import { SharedModelEntrySnapshotType } from "./shared-model-entry";
@@ -22,6 +23,18 @@ import {
   UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
 } from "../shared/shared-data-set";
 import { IClueObjectSnapshot } from "../annotations/clue-object";
+
+
+export interface ITileCopyPosition {
+  rowId: string;
+  sectionId?: string;
+}
+export interface ICopySpec {
+  tiles: IDragTileItem[]
+  tilePositions: Record<string, ITileCopyPosition>,
+  sharedModelEntries: SharedModelEntrySnapshotType[],
+  annotations: IArrowAnnotationSnapshot[],
+}
 
 /**
  * The DocumentContentModel builds on the combination of 3 other parts:
@@ -189,6 +202,43 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
   publish() {
     return JSON.stringify(self.snapshotWithUniqueIds());
   },
+  copyTilesWithSpec(updatedTiles: IDropTileItem[], copySpec: ICopySpec) {
+    const targetRowMap = new Map<string, TileRowModelType>();
+
+    updatedTiles.forEach(tile => {
+      const {rowId, sectionId} = copySpec.tilePositions[tile.tileId];
+      let targetRow = targetRowMap.get(rowId);
+      let insertedRowIndex = self.defaultInsertRow;
+      const insertingRow = !targetRow;
+
+      if (sectionId) {
+        const sectionRows = self.getRowsInSection(sectionId);
+        if (sectionRows.length > 0) {
+          // this may seem redundant, but it's not.
+          // the row index to insert is the index of the document
+          // row order, not the index of the section rows.
+          // the +1 is to add the new row after the last row in the section.
+          const lastRow = sectionRows[sectionRows.length - 1];
+          insertedRowIndex = self.getRowIndex(lastRow.id) + 1;
+        }
+      }
+
+      if (insertingRow) {
+        targetRow = TileRowModel.create({ sectionId });
+        self.insertRow(targetRow, insertedRowIndex);
+        targetRowMap.set(rowId, targetRow);
+      }
+
+      if (targetRow) {
+        const rowIndex = self.getRowIndex(targetRow.id);
+        self.copyTilesIntoExistingRow([tile], {
+          rowInsertIndex: 0, // this is ignored
+          rowDropIndex: rowIndex,
+          rowDropLocation: "right"
+        });
+      }
+    });
+  },
 }))
 .views(self => ({
   exportAsJson(options?: IDocumentExportOptions) {
@@ -234,7 +284,8 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     tiles: IDragTileItem[],
     sharedModelEntries: SharedModelEntrySnapshotType[],
     annotations: IArrowAnnotationSnapshot[],
-    rowInfo: IDropRowInfo
+    rowInfo?: IDropRowInfo,
+    copySpec?: ICopySpec
   ) {
     // Update shared models with new names and ids
     const updatedSharedModelMap: Record<string, UpdatedSharedDataSetIds> = {};
@@ -298,7 +349,11 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     });
 
     // Add copied tiles to document
-    self.userCopyTiles(updatedTiles, rowInfo);
+    if (copySpec) {
+      self.copyTilesWithSpec(updatedTiles, copySpec);
+    } else if (rowInfo) {
+      self.userCopyTiles(updatedTiles, rowInfo);
+    }
 
     // Update tile ids for shared models and add those references to document.
     // The shared datasets have already been added above.
@@ -451,7 +506,29 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       // and SharedModelEntry.addTile
       entry.tiles.push(newTileId);
     });
-  }
+  },
+  getCopySpec(tileIds: string[], sectionId?: string): ICopySpec {
+    const tiles = self.getDragTileItems(tileIds);
+    const tilePositions = tileIds.reduce<Record<string, ITileCopyPosition>>((acc, tileId) => {
+      const rowId = self.findRowContainingTile(tileId)!;
+      acc[tileId] = { rowId, sectionId: sectionId ?? self.getSectionIdForTile(tileId) };
+      return acc;
+    }, {});
+    const sharedModelEntries = Object.values(self.getSharedModelsUsedByTiles(tileIds)).map(sme => getSnapshot(sme));
+    const annotations = Object.values(self.getAnnotationsUsedByTiles(tileIds));
+
+    return {
+      tiles,
+      tilePositions,
+      sharedModelEntries,
+      annotations,
+    };
+  },
+  applyCopySpec(copySpec: ICopySpec) {
+    self.copyTiles(
+      copySpec.tiles, copySpec.sharedModelEntries, copySpec.annotations, undefined, copySpec
+    );
+  },
 }));
 
 export type DocumentContentModelType = Instance<typeof DocumentContentModel>;

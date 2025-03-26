@@ -299,7 +299,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const toolbarDoc = this.getGroupUserDoc(focusedGroupUser);
     const disabledToolIds: string[] = [];
     if (!toolbarDoc) {
-      disabledToolIds.push("selectAll");
+      disabledToolIds.push(...["selectAll", "copyToDocument", "copyToWorkspace"]);
     }
     if (!focusedGroupUser) {
       disabledToolIds.push("fourUp");

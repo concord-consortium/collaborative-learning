@@ -8,7 +8,7 @@ import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-conten
 import { ITileContentModel, ITileEnvironment, TileContentModel } from "../tiles/tile-content";
 import { ILinkableTiles, ITypedTileLinkMetadata } from "../tiles/tile-link-types";
 import {
-  IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITilePosition, IDropTileItem
+  IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITilePosition, IDropTileItem,
 } from "../tiles/tile-model";
 import {
   IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileLayoutModelType
@@ -29,6 +29,7 @@ import { IDocumentContentAddTileOptions, INewRowTile, INewTileOptions,
 import {
   SharedModelEntry, SharedModelEntrySnapshotType, SharedModelEntryType, SharedModelMap
 } from "./shared-model-entry";
+
 
 /**
  * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
@@ -218,7 +219,7 @@ export const BaseDocumentContentModel = types
           }
           return tileIds;
         }, []);
-      }
+      },
     };
   })
   .views(self => ({
