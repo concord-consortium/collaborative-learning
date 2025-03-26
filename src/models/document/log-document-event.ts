@@ -25,7 +25,9 @@ interface IContext extends Record<string, any> {
   user: UserModelType;
 }
 
-export function getAllDocumentProperties(document: DocumentModelType | IDocumentMetadata | IDocumentMetadataModel, user?: UserModelType) {
+export function getAllDocumentProperties(
+  document: DocumentModelType | IDocumentMetadata | IDocumentMetadataModel, user?: UserModelType
+) {
   // Basic properties
   const basicProps = {
     uid: document.uid,
@@ -68,7 +70,9 @@ export function getAllDocumentProperties(document: DocumentModelType | IDocument
   };
 }
 
-export function setTargetDocumentProperties(result: Record<string, any>, targetDocument: DocumentModelType | IDocumentMetadata | IDocumentMetadataModel) {
+export function setTargetDocumentProperties(
+  result: Record<string, any>, targetDocument: DocumentModelType | IDocumentMetadata | IDocumentMetadataModel
+) {
   const targetProps = getAllDocumentProperties(targetDocument);
   result.targetDocumentUid = targetProps.uid;
   result.targetDocumentKey = targetProps.key;
@@ -120,9 +124,11 @@ function processDocumentEventParams(params: IDocumentLogEvent, { user }: IContex
   return result;
 }
 
-export function logDocumentEvent(event: LogEventName, _params: IDocumentLogEvent, method?: LogEventMethod) {
+export function logDocumentEvent(
+  event: LogEventName, _params: IDocumentLogEvent, method?: LogEventMethod, otherParams: Record<string, any> = {}
+) {
   const params = processDocumentEventParams(_params, Logger.stores);
-  Logger.log(event, params, method);
+  Logger.log(event, {...params, ...otherParams}, method);
 }
 
 /**

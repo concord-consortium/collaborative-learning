@@ -13,7 +13,6 @@ import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
 import { SectionModelType } from "../models/curriculum/section";
 import { logHistoryEvent } from "../models/history/log-history-event";
-import { Logger } from "../lib/logger"
 import { LogEventName } from "../lib/logger-types";
 import { IToolbarEventProps, logToolbarEvent } from "../models/tiles/log/log-toolbar-event";
 
@@ -365,11 +364,13 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     }
   };
 
-  private logDocumentOrSectionEvent = (event: LogEventName, otherParams: Record<string, any> = {}, targetDocument?: DocumentModelType) => {
+  private logDocumentOrSectionEvent = (
+    event: LogEventName, otherParams: Record<string, any> = {}, targetDocument?: DocumentModelType
+  ) => {
     const { document, section } = this.props;
     const eventProps: IToolbarEventProps = { document, section, targetDocument };
     logToolbarEvent(event, eventProps, otherParams);
-  }
+  };
 
   private handleEdit = () => {
     const { document } = this.props;
@@ -409,7 +410,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         action: prevShowPlaybackControls ? "hideControls" : "showControls"});
       document.toggleShowPlaybackControls();
 
-      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_PLAYBACK_TOOL, {showPlaybackControls: document.showPlaybackControls});
+      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_PLAYBACK_TOOL, {
+        showPlaybackControls: document.showPlaybackControls
+      });
     }
   };
 

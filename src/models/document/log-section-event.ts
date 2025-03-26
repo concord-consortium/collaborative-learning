@@ -3,17 +3,12 @@ import { Logger } from "../../lib/logger";
 import { LogEventMethod, LogEventName } from "../../lib/logger-types";
 import { SectionModelType } from "../curriculum/section";
 import { IDocumentMetadataModel } from "../stores/sorted-documents";
-import { UserModelType } from "../stores/user";
 import { DocumentModelType } from "./document";
 import { setTargetDocumentProperties } from "./log-document-event";
 
 export interface ISectionLogEvent extends Record<string, any> {
   section: SectionModelType;
   targetDocument?: DocumentModelType | IDocumentMetadata | IDocumentMetadataModel;
-}
-
-interface IContext extends Record<string, any> {
-  user: UserModelType;
 }
 
 function processSectionEventParams(params: ISectionLogEvent) {
@@ -30,7 +25,9 @@ function processSectionEventParams(params: ISectionLogEvent) {
   return result;
 }
 
-export function logSectionEvent(event: LogEventName, _params: ISectionLogEvent, method?: LogEventMethod) {
+export function logSectionEvent(
+  event: LogEventName, _params: ISectionLogEvent, method?: LogEventMethod, otherParams: Record<string, any> = {}
+) {
   const params = processSectionEventParams(_params);
-  Logger.log(event, params, method);
+  Logger.log(event, {...params, ...otherParams}, method);
 }
