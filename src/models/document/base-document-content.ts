@@ -2,13 +2,13 @@ import { each } from "lodash";
 import { types, getType, getEnv, SnapshotIn } from "mobx-state-tree";
 import { kPlaceholderTileDefaultHeight } from "../tiles/placeholder/placeholder-constants";
 import {
-  getPlaceholderSectionId, isPlaceholderTile, PlaceholderContentModel
+  getPlaceholderSectionId, isPlaceholderTile, kPlaceholderTileType, PlaceholderContentModel
 } from "../tiles/placeholder/placeholder-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
 import { ITileContentModel, ITileEnvironment, TileContentModel } from "../tiles/tile-content";
 import { ILinkableTiles, ITypedTileLinkMetadata } from "../tiles/tile-link-types";
 import {
-  IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITilePosition, IDropTileItem
+  IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITilePosition, IDropTileItem,
 } from "../tiles/tile-model";
 import {
   IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileLayoutModelType
@@ -29,6 +29,7 @@ import { IDocumentContentAddTileOptions, INewRowTile, INewTileOptions,
 import {
   SharedModelEntry, SharedModelEntrySnapshotType, SharedModelEntryType, SharedModelMap
 } from "./shared-model-entry";
+
 
 /**
  * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
@@ -199,7 +200,26 @@ export const BaseDocumentContentModel = types
           });
         });
         return sharedModels;
-      }
+      },
+      getAllTileIds(includeTeacherContent: boolean) {
+        // returns all non-placeholder tile ids in document order filtered by includeTeacherContent
+        return self.rowOrder.reduce((tileIds: string[], rowId) => {
+          const row = self.rowMap.get(rowId);
+          if (row) {
+            const publicTileIds = row.tiles
+              .filter(tile => {
+                const tileInfo = self.tileMap.get(tile.tileId);
+                if (!tileInfo) return false;
+                const {display, content} = tileInfo;
+                const isPlaceholder = content?.type === kPlaceholderTileType;
+                return !isPlaceholder && (display !== "teacher" || includeTeacherContent);
+              })
+              .map(tile => tile.tileId);
+            tileIds.push(...publicTileIds);
+          }
+          return tileIds;
+        }, []);
+      },
     };
   })
   .views(self => ({

@@ -1,11 +1,13 @@
 import classNames from "classnames";
-import React from "react";
+import React, { CSSProperties } from "react";
 import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
 
 export interface IButtonProps {
   toolButton: IToolbarButtonModel;
   isActive: boolean;
   isDisabled: boolean;
+  isPrimary?: boolean;
+  height?: number;
   onSetToolActive: (tool: IToolbarButtonModel, isActive: boolean) => void;
   onClick: (e: React.MouseEvent<HTMLDivElement>, tool: IToolbarButtonModel) => void;
 }
@@ -17,7 +19,7 @@ export interface IToolbarButtonProps extends IButtonProps {
 }
 
 export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
-  ({ toolButton, isActive, isDisabled, onSetToolActive, onClick, onDragStart,
+  ({ toolButton, isActive, isDisabled, isPrimary, height, onSetToolActive, onClick, onDragStart,
       onShowDropHighlight, onHideDropHighlight }) => {
 
   const { id, title, isTileTool, Icon } = toolButton;
@@ -38,7 +40,7 @@ export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isTileTool && isDisabled) return;
+    if (isDisabled) return;
     onClick(e, toolButton);
   };
 
@@ -48,8 +50,12 @@ export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
 
   const showDropHighlight = (isTileTool || id === "duplicate") && !isDisabled;
   const tileEltClass = id.toLowerCase();
+  const className = classNames("tool", tileEltClass,
+    { active: isActive, primary: isPrimary }, isDisabled ? "disabled" : "enabled");
+  const style: CSSProperties =  height ? {height} : {};
   return (
-    <div className={classNames("tool", tileEltClass, { active: isActive }, isDisabled ? "disabled" : "enabled")}
+    <div className={className}
+        style={style}
         data-testid={`tool-${tileEltClass}`}
         key={id}
         title={title}

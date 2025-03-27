@@ -4,10 +4,12 @@
   position: absolute;
   top: 0;
   left: 0;
+  bottom: 2px;
   width: $workspace-toolbar-width;
 
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 
   .tool {
     width: 36px;
@@ -24,29 +26,32 @@
     border: 0;
     cursor: pointer;
 
-    svg path {
-      fill: $charcoal-dark-1;
-      pointer-events: none;
+    // the :not() here is for tools that shouldn't have their svg updated
+    &:not(.fourup) {
+      svg path {
+        fill: $charcoal-dark-1;
+        pointer-events: none;
 
-      &.annotation-path {
-        fill: $annotation-blue;
-      }
-    }
-
-    &.enabled {
-      &:hover {
-        background-color: $charcoal-light-4;
+        &.annotation-path {
+          fill: $annotation-blue;
+        }
       }
 
-      &:active, &.active {
-        background-color: $charcoal-light-3;
+      &.enabled {
+        &:hover {
+          background-color: $charcoal-light-4;
+        }
 
-        svg path {
-          fill: $charcoal-dark-2;
-          pointer-events: none;
+        &:active, &.active {
+          background-color: $charcoal-light-3;
 
-          &.annotation-path {
-            fill: $annotation-blue-dark;
+          svg path {
+            fill: $charcoal-dark-2;
+            pointer-events: none;
+
+            &.annotation-path {
+              fill: $annotation-blue-dark;
+            }
           }
         }
       }

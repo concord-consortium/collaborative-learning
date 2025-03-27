@@ -1,5 +1,5 @@
 import { ESupportMode, ESupportType } from "../models/curriculum/support";
-import { PersistentUIModelType } from "../models/stores/persistent-ui";
+import { PersistentUIModelType } from "../models/stores/persistent-ui/persistent-ui";
 import { AudienceEnum, SectionTarget } from "../models/stores/supports";
 
 export type DatabaseType = "firebase" | "firestore";

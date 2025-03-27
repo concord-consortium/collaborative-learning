@@ -159,11 +159,11 @@ export class NavTabPanel extends BaseComponent<IProps> {
         const logEvent = () => { Logger.log(LogEventName.SHOW_TAB, logParameters); };
         logEvent();
       } else {
-        if (persistentUI.openSubTab) {
+        if (persistentUI.currentDocumentGroupId) {
           // If there is a document open then a click on the active top level tab
           // closes the document. Also a click on the active sub tab closes the
           // document, this is handled in section-document-or-browser
-          persistentUI.closeSubTabDocument(tabSpec.tab, persistentUI.openSubTab);
+          persistentUI.closeDocumentGroupPrimaryDocument(tabSpec.tab, persistentUI.currentDocumentGroupId);
         }
       }
     }

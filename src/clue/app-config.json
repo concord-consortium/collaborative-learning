@@ -238,6 +238,48 @@
         "isTileTool": false
       }
     ],
+    "myResourcesToolbar": [
+      {
+        "id": "edit",
+        "title": "Edit",
+        "iconId": "icon-edit-tool",
+        "isTileTool": false,
+        "isPrimary": true
+      },
+      {
+        "id": "fourUp",
+        "title": "Four Up",
+        "iconId": "icon-4up-view-tool",
+        "isTileTool": false
+      },
+      {
+        "id": "selectAll",
+        "title": "Select All",
+        "iconId": "icon-select-all-tool",
+        "isTileTool": false
+      },
+      {
+        "id": "copyToWorkspace",
+        "title": "Copy to Workspace",
+        "iconId": "icon-copy-to-workspace-tool",
+        "isTileTool": false
+      },
+      {
+        "id": "copyToDocument",
+        "title": "Copy to Document",
+        "iconId": "icon-copy-to-document-tool",
+        "isTileTool": false
+      },
+      {
+        "id": "togglePlayback",
+        "title": "Playback",
+        "iconId": "icon-playback-tool",
+        "isTileTool": false,
+        "isPrimary": true,
+        "isBottom": true,
+        "height": 46
+      }
+    ],
     "placeholderText": "",
     "stamps": [],
     "settings": {

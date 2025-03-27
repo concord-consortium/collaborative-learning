@@ -230,10 +230,33 @@ $title-margin: 0;
     .editable-document-content {
       top: $nav-tab-height;
       flex: 1;
+
+      .toolbar {
+        .tool.primary {
+          background-color: $classwork-purple-light-5;
+
+          svg {
+            path {
+              fill: $classwork-purple-dark-1 !important;
+            }
+          }
+
+          &:hover {
+            background-color: $classwork-purple-light-4;
+          }
+          &.active {
+            background-color: $classwork-purple-light-2;
+          }
+        }
+      }
+
+      .canvas-separator {
+        background-color: $classwork-purple-light-5;
+      }
+
       .canvas-area {
         // Not sure why - 4px is necessary here, but the document would always scroll otherwise
         height: calc(100% - 4px);
-        width: 100%;
 
         .comment-select {
           .tool-tile.readonly {
@@ -246,7 +269,7 @@ $title-margin: 0;
 
         .playback-component {
           // This is to compensate for the - 4px above
-          bottom: -5px;
+          bottom: -4px;
         }
       }
     }

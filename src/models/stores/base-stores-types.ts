@@ -3,7 +3,7 @@ import { UnitModelType } from "../curriculum/unit";
 import { InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModelType } from "../curriculum/problem";
 import { UIModelType } from "./ui";
-import { PersistentUIModelType } from "./persistent-ui";
+import { PersistentUIModelType } from "./persistent-ui/persistent-ui";
 import { UserModelType } from "./user";
 import { GroupsModelType } from "./groups";
 import { ClassModelType } from "./class";

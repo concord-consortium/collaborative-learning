@@ -48,7 +48,7 @@ class ResourcesPanel{
     }
 
     getDocumentEditButton() {
-      return cy.get('.document-buttons .edit-button');
+      return cy.get('.toolbar .tool.edit');
     }
 
     getExemplarShareCheckbox() {
@@ -93,11 +93,33 @@ class ResourcesPanel{
     }
 
     getActiveTabEditButton(){
-        // This looks for the edit button in the active tab and active sub tab
+        // This looks for the edit button in the toolbar in the active tab and active sub tab
         // both .react-tabs__tab-panel--selected classes are needed. Otherwise it
         // can find edit buttons inside of sub tabs which are active/selected,
         // but the top level (navTab) of this sub tab is not active/selected.
-        return cy.get('.nav-tab-panel .react-tabs__tab-panel--selected .react-tabs__tab-panel--selected .edit-button');
+        return cy.get('.nav-tab-panel .react-tabs__tab-panel--selected .react-tabs__tab-panel--selected .toolbar .tool.edit');
+    }
+
+    getFocusDocument() {
+      return cy.get('.focus-document');
+    }
+
+    getFocusDocumentTitle() {
+      return this.getFocusDocument().find('.document-title');
+    }
+
+    // The Primary and Secondary documents are used in the bookmarks tab
+    getPrimaryFocusDocument() {
+      return cy.get('.focus-document.primary');
+    }
+    getPrimaryFocusDocumentTitle() {
+      return this.getFocusDocument().find('.document-title');
+    }
+    getSecondaryFocusDocument() {
+      return cy.get('.focus-document.secondary');
+    }
+    getSecondaryFocusDocumentTitle() {
+      return this.getFocusDocument().find('.document-title');
     }
 }
 export default ResourcesPanel;

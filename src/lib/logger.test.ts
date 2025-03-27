@@ -9,7 +9,7 @@ import { InvestigationModel } from "../models/curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../models/curriculum/problem";
 import { specAppConfig } from "../models/stores/spec-app-config";
 import { IStores, createStores } from "../models/stores/stores";
-import { PersistentUIModel } from "../models/stores/persistent-ui";
+import { PersistentUIModel } from "../models/stores/persistent-ui/persistent-ui";
 import { UIModel } from "../models/stores/ui";
 import { UserModel } from "../models/stores/user";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType, LearningLogWorkspace } from "../models/stores/workspace";

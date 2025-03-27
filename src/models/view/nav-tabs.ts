@@ -53,7 +53,8 @@ export const NavTabSectionModel =
     properties: types.array(types.string),
     showStars: types.array(UserTypeEnum),
     showGroupWorkspaces: false,
-    addDocument: false
+    addDocument: false,
+    openFirstDocumentAutomatically: types.maybe(types.boolean)
   })
   .views(self => ({
     showStarsForUser(user: UserModelType) {
@@ -71,9 +72,9 @@ export const NavTabSectionModel =
 export type NavTabSectionSpec = SnapshotIn<typeof NavTabSectionModel>;
 export type NavTabSectionModelType  = Instance<typeof NavTabSectionModel>;
 
-export interface ISubTabSpec {
+export interface ISubTabModel {
   label: string;
-  sections: NavTabSectionSpec[];
+  sections: NavTabSectionModelType[];
 }
 
 export const NavTabModel =
@@ -86,7 +87,7 @@ export const NavTabModel =
   .views(self => ({
     // combine sections with matching titles into a single tab with sub-sections
     get subTabs() {
-      const _subTabs: ISubTabSpec[] = [];
+      const _subTabs: ISubTabModel[] = [];
       self.sections?.forEach(section => {
         const found = _subTabs.find(tab => tab.label === section.title);
         if (found) {

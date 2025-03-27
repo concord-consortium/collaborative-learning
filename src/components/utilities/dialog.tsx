@@ -1,7 +1,12 @@
 import { inject, observer } from "mobx-react";
-import React from "react";
+import React, { CSSProperties } from "react";
 import { BaseComponent, IBaseProps } from "../base";
 import { UIDialogModelType } from "../../models/stores/ui";
+
+import CloseIcon from "../../assets/icons/close/close.svg";
+import CopyToDocumentIcon from "../../clue/assets/icons/copy-to-document-tool.svg";
+import AlertIcon from "../../assets/alert-icon.svg";
+import ConfirmIcon from "../../assets/confirm-icon.svg";
 
 import "./dialog.sass";
 
@@ -30,6 +35,9 @@ export class DialogComponent extends BaseComponent<IProps> {
 
   public render() {
     const {dialog} = this.stores.ui;
+    // use confirm icon as the default icon
+    let Icon: React.ElementType = ConfirmIcon;
+
     if (dialog) {
       let title = dialog.title;
       let contents: JSX.Element;
@@ -42,10 +50,16 @@ export class DialogComponent extends BaseComponent<IProps> {
           title = title || "Prompt";
           contents = this.renderPromptContents(dialog);
           break;
+        case "getCopyToDocument":
+          title = title || "Copy to Document";
+          contents = this.renderCopyToDocumentContents(dialog);
+          Icon = CopyToDocumentIcon;
+          break;
         default:
         case "alert":
           title = title || "Alert";
           contents = this.renderAlertContents(dialog);
+          Icon = AlertIcon;
           break;
       }
 
@@ -53,7 +67,13 @@ export class DialogComponent extends BaseComponent<IProps> {
         <div className={`dialog ${dialog.className}`}>
           <div className="dialog-background" />
           <div className="dialog-container">
-            <div className="dialog-title" data-test="dialog-title">{title}</div>
+            <div className="dialog-title" data-test="dialog-title">
+              <div className="dialog-title-icon">
+                {Icon && <Icon />}
+              </div>
+              <div className="dialog-title-text">{title}</div>
+              <button onClick={this.handleCancelDialog}><CloseIcon /></button>
+            </div>
             {contents}
           </div>
         </div>
@@ -62,6 +82,41 @@ export class DialogComponent extends BaseComponent<IProps> {
     else {
       return null;
     }
+  }
+
+  private renderCopyToDocumentContents(dialog: UIDialogModelType) {
+    const { documents } = this.stores;
+    const otherDocuments = documents.all.filter((d) => {
+      return (d.title ?? "").trim() !== "" && d.key !== dialog.copyFromDocumentKey;
+    });
+    const italic: CSSProperties = {fontStyle: "italic"};
+    const normal: CSSProperties = {fontStyle: "normal"};
+    const hasValue = (dialog.copyToDocumentKey ?? "").trim() !== "";
+
+    return (
+      <div className="dialog-contents">
+        <div className="dialog-text">{dialog.text}</div>
+        <div className="dialog-input">
+          <select
+            placeholder="Choose a document"
+            defaultValue={dialog.copyToDocumentKey /* set so default option is selected at start */}
+            value={dialog.copyToDocumentKey}
+            style={hasValue ? normal : italic}
+            onChange={this.handleCopyToDocumentKeyChanged}
+            autoFocus
+          >
+            <option disabled={hasValue} value="" style={italic}>Choose a document</option>
+            {otherDocuments.map((d) => (
+              <option key={d.key} value={d.key} style={normal}>{d.title}</option>
+            ))}
+          </select>
+        </div>
+        <div className="dialog-buttons" data-test="dialog-buttons">
+          <button id="cancelButton" className="cancel" onClick={this.handleCancelDialog}>Cancel</button>
+          <button id="okButton" disabled={!hasValue} onClick={this.handleCopyToDocumentDialogOk}>OK</button>
+        </div>
+      </div>
+    );
   }
 
   private renderAlertContents(dialog: UIDialogModelType) {
@@ -80,8 +135,8 @@ export class DialogComponent extends BaseComponent<IProps> {
       <div className="dialog-contents">
         <div className="dialog-text">{dialog.text}</div>
         <div className="dialog-buttons" data-test="dialog-buttons">
+          <button id="cancelButton" className="cancel" onClick={this.handleConfirmDialogNo}>No</button>
           <button id="okButton" onClick={this.handleConfirmDialogYes}>Yes</button>
-          <button id="cancelButton" onClick={this.handleConfirmDialogNo}>No</button>
         </div>
       </div>
     );
@@ -112,8 +167,8 @@ export class DialogComponent extends BaseComponent<IProps> {
           {input}
         </div>
         <div className="dialog-buttons" data-test="dialog-buttons">
+          <button id="cancelButton" className="cancel" onClick={this.handleCancelDialog}>Cancel</button>
           <button id="okButton" onClick={this.handlePromptDialogOk} disabled={this.promptValue.length === 0}>Ok</button>
-          <button id="cancelButton" onClick={this.handleCancelDialog}>Cancel</button>
         </div>
       </div>
     );
@@ -159,6 +214,17 @@ export class DialogComponent extends BaseComponent<IProps> {
     // listen for escape key when dialog is visible
     if (this.stores.ui.dialog && (e.keyCode === 27)) {
       this.handleCancelDialog();
+    }
+  };
+
+  private handleCopyToDocumentKeyChanged = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    this.stores.ui.dialog?.setCopyToDocumentKey(e.target.value);
+  };
+
+  private handleCopyToDocumentDialogOk = () => {
+    const dialog = this.stores.ui.dialog;
+    if (dialog?.copyToDocumentKey) {
+      this.stores.ui.resolveDialog(dialog.copyToDocumentKey);
     }
   };
 

@@ -21,8 +21,8 @@ interface IProps {
 export const DocumentScroller: React.FC<IProps> = observer(function DocumentThumbnailCarousel(props: IProps) {
   const { documentGroup } = props;
   const { documents, networkDocuments, persistentUI, sortedDocuments } = useStores();
-  const tabState = persistentUI.tabs.get(ENavTab.kSortWork);
-  const openDocumentKey = tabState?.openSubTab && tabState?.openDocuments.get(tabState.openSubTab);
+  const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
+  const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
   const documentScrollerRef = useRef<HTMLDivElement>(null);
   const documentListRef = useRef<HTMLDivElement>(null);
   const [scrollToLocation, setScrollToLocation] = useState(0);
@@ -31,11 +31,12 @@ export const DocumentScroller: React.FC<IProps> = observer(function DocumentThum
   const maxScrollTo = scrollWidth - panelWidth;
 
   const handleSelectDocument = async (document: DocumentModelType) => {
-    if (!tabState?.openSubTab) {
-      console.error("No openSubTab found in persistentUI");
+    const tabState = persistentUI.getOrCreateTabState(ENavTab.kSortWork);
+    if (!tabState.currentDocumentGroupId) {
+      console.error("No currentDocumentGroupId found in persistentUI");
       return;
     }
-    persistentUI.openSubTabDocument(ENavTab.kSortWork, tabState?.openSubTab, document.key);
+    tabState.openDocumentGroupPrimaryDocument(tabState.currentDocumentGroupId, document.key);
     logDocumentViewEvent(document);
   };
 

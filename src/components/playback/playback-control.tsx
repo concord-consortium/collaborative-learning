@@ -109,12 +109,12 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     const monthStr = month !== undefined ? monthMap[month] : "";
     const dateDay = date?.getDate();
     const year = date?.getFullYear();
-    let hours = date?.getHours();
-    const minutes = date?.getMinutes();
-    const ampm = hours && hours >= 12 ? 'pm' : 'am';
-    hours = hours && hours % 12;
+    let hours = date?.getHours() ?? 0;
+    const minutes = date?.getMinutes() ?? 0;
+    const ampm = hours >= 12 ? 'pm' : 'am';
+    hours = hours % 12;
     hours = date && (hours !== 0) ? hours : 12; // the hour '0' should be '12'
-    const minutesStr = minutes && minutes < 10 ? "0" + minutes : minutes;
+    const minutesStr = minutes < 10 ? "0" + minutes : minutes;
     const strTime = date ? hours + ":" + minutesStr + " " + ampm : "";
 
     return (
@@ -190,7 +190,6 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
 
   return (
     <div className={playbackControlsClass}>
-      <div className={`control-separator ${activeNavTab}`}/>
       {renderPlayPauseButton()}
       {/* <PlaybackMarkerToolbar selectedMarkers={selectedMarkers} markerSelected={markerSelected}
           addMarkerSelected={addMarkerButtonSelected} onAddMarkerSelected={handleAddMarkerButtonSelected}/> */}

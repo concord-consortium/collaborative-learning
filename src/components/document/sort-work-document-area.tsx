@@ -12,7 +12,6 @@ import { DocumentLoadingSpinner } from "./document-loading-spinner";
 import { DocumentScroller } from "./document-scroller";
 import { DocumentGroup } from "../../models/stores/document-group";
 
-import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 import CloseIcon from "../../../src/assets/icons/close/close.svg";
 import ToggleDocumentScrollerIcon from "../../../src/assets/show-hide-thumbnail-view-small-icon.svg";
 import SwitchDocumentIcon from "../../assets/scroll-arrow-small-icon.svg";
@@ -25,8 +24,8 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   const { openDocumentsGroup } = props;
   const {appConfig, class: classStore, documents, networkDocuments,
     persistentUI, sortedDocuments, ui, unit, user} = useStores();
-  const tabState = persistentUI.tabs.get(ENavTab.kSortWork);
-  const openDocumentKey = tabState?.openSubTab && tabState?.openDocuments.get(tabState.openSubTab);
+  const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
+  const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
   const showScroller = persistentUI.showDocumentScroller;
   const [prevBtnEnabled, setPrevBtnEnabled] = useState(openDocumentKey !== openDocumentsGroup.documents.at(0)?.key);
   const [nextBtnEnabled, setNextBtnEnabled] = useState(openDocumentKey !== openDocumentsGroup.documents.at(-1)?.key);
@@ -51,6 +50,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   const openDocument = getOpenDocument();
   const isVisible = openDocument?.isAccessibleToUser(user, documents);
   const showPlayback = user.isResearcher || (user.type && appConfig.enableHistoryRoles.includes(user.type));
+  const showEdit = openDocument?.uid === user.id; //only show if doc is owned by the user who opened it
   const showExemplarShare = user.type === "teacher" && openDocument && isExemplarType(openDocument.type);
   const getDisplayTitle = (document: DocumentModelType) => {
     const documentOwner = classStore.users.get(document.uid);
@@ -59,31 +59,10 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
   };
   const displayTitle = openDocument && getDisplayTitle(openDocument);
 
-  function handleEditClick(document: DocumentModelType) {
-    persistentUI.problemWorkspace.setPrimaryDocument(document);
-  }
-
   const sectionClass = openDocument?.type === "learningLog" ? "learning-log" : "";
 
-  const editButton = (type: string, sClass: {secondary: boolean | undefined; primary: boolean | undefined} | string,
-                      document: DocumentModelType) => {
-    const showEditButton = document.uid === user.id; //only show if doc is owned by the user who opened it
-    return (
-      showEditButton ?
-      <div
-        className={classNames("edit-button", sClass)}
-        onClick={() => handleEditClick(document)}
-      >
-        <EditIcon className={`edit-icon ${sClass}`} />
-        <div>Edit</div>
-      </div>
-      :
-      null
-    );
-  };
-
   const handleCloseButtonClick = () => {
-    persistentUI.closeSubTabDocument();
+    persistentUI.closeDocumentGroupPrimaryDocument();
   };
 
   const handleToggleScroller = () => {
@@ -95,13 +74,16 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
     const currentIndex = docKeys.indexOf(openDocumentKey);
     const newIndex = direction === "previous" ? currentIndex - 1 : currentIndex + 1;
     const newKey = docKeys[newIndex];
-    const openSubTab = persistentUI.tabs.get(ENavTab.kSortWork)?.openSubTab;
+    // When the document was opened by the SortedSection, the tab state should have been
+    // created, and currentDocumentGroupId set represent the group that the document was
+    // opened from.
+    const openSubTab = maybeTabState?.currentDocumentGroupId;
     if (!openSubTab) {
-      console.error("No openSubTab found in persistentUI");
+      console.error("No currentDocumentGroupId found in persistentUI");
       return;
     }
     if (newKey) {
-      persistentUI.openSubTabDocument(ENavTab.kSortWork, openSubTab, newKey);
+      persistentUI.openDocumentGroupPrimaryDocument(ENavTab.kSortWork, openSubTab, newKey);
     }
     setPrevBtnEnabled(newIndex !== 0);
     setNextBtnEnabled(newIndex !== docKeys.length - 1);
@@ -149,9 +131,6 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
             </button>
           }
           <div className="document-buttons">
-            { openDocument &&
-              editButton(ENavTab.kSortWork, sectionClass || sideClasses, openDocument)
-            }
             <button className="close-doc-button" onClick={handleCloseButtonClick}>
               <CloseIcon />
             </button>
@@ -166,6 +145,7 @@ export const SortWorkDocumentArea: React.FC<IProps> = observer(function SortWork
             readOnly={true}
             showPlayback={showPlayback}
             fullHeight={true}
+            toolbar={appConfig.myResourcesToolbar({showPlayback, showEdit})}
           />
       }
       {

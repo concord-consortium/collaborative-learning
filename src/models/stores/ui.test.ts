@@ -1,5 +1,5 @@
 import { UIModel, UIModelType, UIDialogModelType } from "./ui";
-import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui";
+import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui/persistent-ui";
 import { ProblemWorkspace, LearningLogWorkspace } from "./workspace";
 import { TileModel } from "../tiles/tile-model";
 import { TextContentModel } from "../tiles/text/text-content";

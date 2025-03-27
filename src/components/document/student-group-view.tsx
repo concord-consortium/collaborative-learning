@@ -16,9 +16,10 @@ export const StudentGroupView:React.FC = observer(function StudentGroupView(){
 
   useEffect(() => stores.initializeStudentWorkTab(), [stores]);
 
-  const selectedGroupId = persistentUI.tabs.get("student-work")?.openSubTab || "";
+  const maybeTabUIModel = persistentUI.tabs.get("student-work");
+  const selectedGroupId = maybeTabUIModel?.currentDocumentGroupId || "";
   const group = groups.getGroupById(selectedGroupId);
-  const openDocId = persistentUI.tabs.get("student-work")?.openDocuments.get(selectedGroupId);
+  const openDocId = maybeTabUIModel?.getDocumentGroup(selectedGroupId)?.primaryDocumentKey;
   const focusedGroupUser = getFocusedGroupUser(group, openDocId, DocumentViewMode.Live);
   const isChatPanelShown = persistentUI.showChatPanel;
   const documentSelectedForComment = persistentUI.showChatPanel && (ui.selectedTileIds.length === 0)
@@ -53,12 +54,12 @@ const GroupViewTitlebar: React.FC<IGroupComponentProps> = observer(function Grou
 
   const handleFocusedUserChange = (selectedUser: GroupUserModelType) => {
     group?.id && selectedUser.problemDocument &&
-      persistentUI.openSubTabDocument("student-work", group.id, selectedUser.problemDocument.key);
+      persistentUI.openDocumentGroupPrimaryDocument("student-work", group.id, selectedUser.problemDocument.key);
   };
 
   const handleSelectGroup = (id: string) => {
-    persistentUI.setOpenSubTab("student-work", id);
-    persistentUI.closeSubTabDocument("student-work", id);
+    persistentUI.setCurrentDocumentGroupId("student-work", id);
+    persistentUI.closeDocumentGroupPrimaryDocument("student-work", id);
     Logger.log(LogEventName.VIEW_GROUP, {group: id, via: "group-document-titlebar"});
   };
 

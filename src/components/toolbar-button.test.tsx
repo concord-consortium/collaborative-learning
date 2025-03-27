@@ -45,11 +45,34 @@ describe("ToolButtonComponent", () => {
         />
     );
     expect(screen.getByTestId("tool-select")).toBeInTheDocument();
-    act(() => {
-      userEvent.click(screen.getByTestId("tool-select"));
-    });
     expect(onSetToolActive).not.toHaveBeenCalled();
-    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not call click handler on disabled tool", () => {
+    const toolButton = ToolbarButtonModel.create({
+      id: "delete",
+      title: "Delete",
+      iconId: "icon-delete-tool",
+      isTileTool: false
+    });
+
+    render(
+      <ToolbarButtonComponent
+        toolButton={toolButton}
+        isActive={false}
+        isDisabled={true}
+        onSetToolActive={onSetToolActive}
+        onClick={onClick}
+        onDragStart={onDragStart}
+        onShowDropHighlight={onShowDropHighlight}
+        onHideDropHighlight={onHideDropHighlight}
+        />
+    );
+    expect(screen.getByTestId("tool-delete")).toBeInTheDocument();
+    act(() => {
+      userEvent.click(screen.getByTestId("tool-delete"));
+    });
+    expect(onClick).toHaveBeenCalledTimes(0);
   });
 
   it("renders enabled text tool", () => {

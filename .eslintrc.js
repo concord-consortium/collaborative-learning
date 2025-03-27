@@ -6,7 +6,7 @@ module.exports = {
       ecmaVersion: 2018,
       sourceType: "module",
     },
-    plugins: ["@typescript-eslint", "json", "react", "react-hooks", "unused-imports"],
+    plugins: ["@typescript-eslint", "json", "react", "react-hooks", "unused-imports", "mocha"],
     env: {
       browser: true,
       es6: true
@@ -38,6 +38,7 @@ module.exports = {
       "@typescript-eslint/no-shadow": ["error", { builtinGlobals: false, hoist: "all", allow: ["resolve", "reject"] }],
       "@typescript-eslint/no-unused-vars": "off", // moved to unused-imports
       "@typescript-eslint/prefer-optional-chain": "off",  // 300 as of 2020-09-13
+      "mocha/no-exclusive-tests": "warn", // error in .eslintrc.build.js
       curly: ["error", "multi-line", "consistent"],
       "dot-notation": "error",
       "eol-last": "warn",

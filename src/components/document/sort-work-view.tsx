@@ -73,22 +73,27 @@ export const SortWorkView: React.FC = observer(function SortWorkView() {
   const primarySearchTerm = normalizeSortString(primarySortBy) as PrimarySortType;
   const sortedDocumentGroups = sortedDocuments.sortBy(primarySearchTerm);
   const secondarySearchTerm = normalizeSortString(secondarySortBy) as SecondarySortType;
-  const tabState = persistentUI.tabs.get(ENavTab.kSortWork);
-  const openDocumentKey = tabState?.openSubTab && tabState?.openDocuments.get(tabState.openSubTab);
+  const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
+  const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
 
   const getOpenDocumentsGroup = () => {
     let openGroup;
-    if (tabState?.openSubTab && openDocumentKey) {
+    if (maybeTabState?.currentDocumentGroupId && openDocumentKey) {
       let openGroupMetadata: IOpenDocumentsGroupMetadata;
       try {
-        openGroupMetadata = JSON.parse(tabState.openSubTab);
+        // The sort work tab stores the group metadata as the document group id.
+        // This way it can record both the primary and secondary filter values
+        // associated with the group.
+        // TODO: create different tabState and/or document group types so these
+        // values can be stored as fields in the document group
+        openGroupMetadata = JSON.parse(maybeTabState.currentDocumentGroupId);
       } catch (e) {
-        persistentUI.closeSubTabDocument(ENavTab.kSortWork);
+        persistentUI.closeDocumentGroupPrimaryDocument(ENavTab.kSortWork);
         return;
       }
 
       if (openGroupMetadata.primaryType !== primarySearchTerm) {
-        persistentUI.closeSubTabDocument(ENavTab.kSortWork);
+        persistentUI.closeDocumentGroupPrimaryDocument(ENavTab.kSortWork);
       } else {
         openGroup = sortedDocumentGroups.find(group => group.label === openGroupMetadata.primaryLabel);
         if (openGroupMetadata.secondaryType === secondarySearchTerm) {

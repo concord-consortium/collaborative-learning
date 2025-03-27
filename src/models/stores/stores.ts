@@ -5,7 +5,7 @@ import { UnitModel, UnitModelType } from "../curriculum/unit";
 import { getGuideJson, getUnitJson } from "../curriculum/unit-utils";
 import { InvestigationModel, InvestigationModelType } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
-import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui";
+import { PersistentUIModel, PersistentUIModelType } from "./persistent-ui/persistent-ui";
 import { UIModel, UIModelType } from "./ui";
 import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
@@ -221,7 +221,7 @@ class Stores implements IStores{
    */
   get studentWorkTabSelectedGroupId() {
     const { persistentUI, groups } = this;
-    return persistentUI.tabs.get("student-work")?.openSubTab
+    return persistentUI.tabs.get("student-work")?.currentDocumentGroupId
         || (groups.nonEmptyGroups.length ? groups.nonEmptyGroups[0].id : "");
   }
 
@@ -237,7 +237,7 @@ class Stores implements IStores{
     // waiting
     when(
       () => this.studentWorkTabSelectedGroupId !== "",
-      () => this.persistentUI.setOpenSubTab("student-work", this.studentWorkTabSelectedGroupId)
+      () => this.persistentUI.setCurrentDocumentGroupId("student-work", this.studentWorkTabSelectedGroupId)
     );
   }
 
@@ -338,13 +338,7 @@ class Stores implements IStores{
 
       persistentUI.setProblemPath(this.problemPath);
 
-      // Set the active tab to be the first tab (unless active tab is already set by persistent UI)
-      const tabs = this.tabsToDisplay;
-      if (tabs.length > 0) {
-        if (!persistentUI.activeNavTab) {
-          persistentUI.setActiveNavTab(tabs[0].tab);
-        }
-      }
+      persistentUI.initializeActiveNavTab(this.tabsToDisplay);
       removeLoadingMessage("Setting up curriculum content");
     });
 

@@ -1,6 +1,7 @@
 import { configure, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
+import { Provider } from "mobx-react";
 import { FourUpComponent } from "./four-up";
 import { GroupsModel, GroupModel, GroupUserModel } from "../models/stores/groups";
 import { createDocumentModel, DocumentModelType } from "../models/document/document";
@@ -9,6 +10,10 @@ import { DocumentsModelType, DocumentsModel } from "../models/stores/documents";
 import { specStores } from "../models/stores/spec-stores";
 import { UserModel } from "../models/stores/user";
 import { ClassModel } from "../models/stores/class";
+import { PersistentUIModel } from "../models/stores/persistent-ui/persistent-ui";
+import { ProblemWorkspace, WorkspaceModel } from "../models/stores/workspace";
+import { AppConfigModel } from "../models/stores/app-config-model";
+import { unitConfigDefaults } from "../test-fixtures/sample-unit-configurations";
 
 configure({testIdAttribute: "data-test"});
 
@@ -22,9 +27,14 @@ jest.mock("../hooks/use-stores", () => ({
   useStores: () => ({
     ui: {
       setDraggingId: (id?: string) => undefined
-    }
+    },
+    persistentUI: {
+      problemWorkspace: {
+        primaryDocumentKey: "1"
+      }
+    },
   }),
-  // TODO: Audit similar tests for instantiations of properites that are not required
+  // TODO: Audit similar tests for instantiations of properties that are not required
   useUIStore: () => ({}),
   usePersistentUIStore: () => ({})
 }));
@@ -60,10 +70,14 @@ describe("Four Up Component", () => {
     const groups = GroupsModel.create({
       groupsMap: {1: group}
     });
+    const persistentUI = PersistentUIModel.create({
+      problemWorkspace: WorkspaceModel.create({ type: ProblemWorkspace, mode: "4-up" })
+    });
+    const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
 
-    const stores = specStores({ groups, documents });
+    const stores = specStores({ groups, documents, persistentUI, appConfig });
 
-    const { container } = render(<FourUpComponent group={group} stores={stores}/>);
+    const { container } = render(<Provider stores={stores}><FourUpComponent group={group} stores={stores}/></Provider>);
     expect(screen.queryAllByTestId("canvas")).toHaveLength(4);
     expect(container.querySelectorAll(".member")).toHaveLength(1);
   });
@@ -134,13 +148,18 @@ describe("Four Up Component", () => {
     const groups = GroupsModel.create({
       groupsMap: {1: group}
     },);
+    const persistentUI = PersistentUIModel.create({
+      problemWorkspace: WorkspaceModel.create({ type: ProblemWorkspace, mode: "4-up" })
+    });
 
-    const stores = specStores({ user, groups, documents, class: clazz });
+    const stores = specStores({ user, groups, documents, class: clazz, persistentUI });
     // When the store is created the groups store is cloned so it can have the correct
     // environment. Therefore we need to get the new groups store after specStores
     const realGroup = stores.groups.allGroups[0];
 
-    const { container } = render(<FourUpComponent group={realGroup} stores={stores}/>);
+    const { container } = render(
+      <Provider stores={stores}><FourUpComponent group={realGroup} stores={stores}/></Provider>
+    );
     // A canvas will be rendered unless an "unshared document" message is displayed.
     // User 2 has no document, so it will display an "unshared document" message.
     // User 1 has a shared document, User 3 is the main user, and there is no active fourth user.

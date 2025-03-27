@@ -151,6 +151,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   public render() {
     const { workspace, document, toolbar, side, readOnly } = this.props;
+
+    // set learning log class for styling the toolbar separator
+    const sectionClass = document.type === "learningLog" ? "learning-log" : "";
+
     return (
       <div key="document" className="document" ref={(el) => this.documentContainer = el}>
         {this.renderTitleBar(document.type)}
@@ -162,7 +166,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           isPrimary={side === "primary"}
           document={document}
           toolbar={toolbar}
-          readOnly={readOnly} />
+          readOnly={readOnly}
+          sectionClass={sectionClass}
+        />
         {this.renderStickyNotesPopup()}
       </div>
     );
@@ -383,12 +389,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           ? <div className="title" data-test="learning-log-title">
               <TitleInfo docTitle={`Learning Log: ${document.title}`} onClick={this.handleDocumentRename} />
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
+              {this.renderStickyNotes()}
             </div>
           : <div className="title" data-test="personal-doc-title">
               <TitleInfo
                 docTitle={`${getDocumentTitleWithTimestamp(document, appConfig)}`}
                 onClick={this.handleDocumentRename} />
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
+              {this.renderStickyNotes()}
             </div>
         }
         {hasDisplayId && <div className="display-id">{displayId}</div>}

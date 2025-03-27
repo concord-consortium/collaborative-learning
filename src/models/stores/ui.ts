@@ -25,14 +25,19 @@ export const UIDialogModel = types
     title: types.maybe(types.string),
     className: "",
     defaultValue: types.maybe(types.string),
+    copyFromDocumentKey: types.maybe(types.string),
     rows: types.maybe(types.number)
   })
   .volatile(self => ({
-    promptValue: self.defaultValue
+    promptValue: self.defaultValue,
+    copyToDocumentKey: self.defaultValue
   }))
   .actions(self => ({
     setPromptValue(value: string) {
       self.promptValue = value;
+    },
+    setCopyToDocumentKey(value: string) {
+      self.copyToDocumentKey = value;
     }
   }));
 type UIDialogModelSnapshot = SnapshotIn<typeof UIDialogModel>;
@@ -86,6 +91,18 @@ export const UIModel = types
       });
     };
 
+    const getCopyToDocumentKey = (copyFromDocumentKey: string) => {
+      self.dialog = UIDialogModel.create({
+        type: "getCopyToDocument",
+        title: "Copy to Document",
+        text: "Choose a document to copy the selected tiles to:",
+        copyFromDocumentKey,
+      });
+      return new Promise<string>((resolve, reject) => {
+        dialogResolver = resolve;
+      });
+    };
+
     const resolveDialog = (value: string | boolean) => {
       if (dialogResolver) {
         dialogResolver(value as any);
@@ -118,6 +135,10 @@ export const UIModel = types
       } else {
         self.selectedTileIds.clear();
       }
+    };
+
+    const selectAllTiles = (tileIds: string[]) => {
+      self.selectedTileIds.replace(tileIds);
     };
 
     return {
@@ -172,7 +193,11 @@ export const UIModel = types
 
       setDraggingId(dragId?: string) {
         self.dragId = dragId;
-      }
+      },
+
+      selectAllTiles,
+
+      getCopyToDocumentKey
     };
   })
   .actions(self => ({
