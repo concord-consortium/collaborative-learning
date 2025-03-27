@@ -13,6 +13,8 @@ import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
 import { SectionModelType } from "../models/curriculum/section";
 import { logHistoryEvent } from "../models/history/log-history-event";
+import { LogEventName } from "../lib/logger-types";
+import { IToolbarEventProps, logToolbarEvent } from "../models/tiles/log/log-toolbar-event";
 
 import "./toolbar.scss";
 
@@ -362,10 +364,19 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     }
   };
 
+  private logDocumentOrSectionEvent = (
+    event: LogEventName, otherParams: Record<string, any> = {}, targetDocument?: DocumentModelType
+  ) => {
+    const { document, section } = this.props;
+    const eventProps: IToolbarEventProps = { document, section, targetDocument };
+    logToolbarEvent(event, eventProps, otherParams);
+  };
+
   private handleEdit = () => {
     const { document } = this.props;
     if (document) {
       this.stores.persistentUI.problemWorkspace.setPrimaryDocument(document);
+      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_EDIT_TOOL);
     }
   };
 
@@ -386,6 +397,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       } else {
         ui.selectAllTiles([]);
       }
+
+      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_SELECT_ALL_TOOL, {selectAllTiles});
     }
   };
 
@@ -396,6 +409,10 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       logHistoryEvent({documentId: document.key || '',
         action: prevShowPlaybackControls ? "hideControls" : "showControls"});
       document.toggleShowPlaybackControls();
+
+      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_PLAYBACK_TOOL, {
+        showPlaybackControls: document.showPlaybackControls
+      });
     }
   };
 
@@ -409,6 +426,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       const sectionId = document ? undefined : section?.type;
       const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);
       primaryDocument.content.applyCopySpec(copySpec);
+
+      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_COPY_TO_WORKSPACE, {}, primaryDocument);
     }
   };
 
@@ -425,6 +444,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
             const sectionId = document ? undefined : section?.type;
             const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);
             copyToDocument.content.applyCopySpec(copySpec);
+
+            this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_COPY_TO_DOCUMENT, {}, copyToDocument);
           }
         });
     }
