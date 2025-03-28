@@ -2,8 +2,10 @@ import { types, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { ITileModel } from "../tiles/tile-model";
 import { uniqueId } from "../../utilities/js-utils";
 import { withoutUndo } from "../history/without-undo";
+import { RowListType } from "./row-list";
 
 export interface IDropRowInfo {
+  rowList?: RowListType;
   rowInsertIndex: number;
   rowDropIndex?: number;
   rowDropLocation?: string;
@@ -47,8 +49,11 @@ export const TileRowModel = types
     get isUserResizable() {
       return !self.isSectionHeader && self.tiles.some(tileRef => tileRef.isUserResizable);
     },
+    get allTileIds() {
+      return self.tiles.map(tile => tile.tileId);
+    },
     get tileIds() {
-      return self.tiles.map(tile => tile.tileId).join(", ");
+      return this.allTileIds.join(", ");
     },
     acceptTileDrop(rowInfo: IDropRowInfo) {
       const rowDropLocation = rowInfo.rowDropLocation;

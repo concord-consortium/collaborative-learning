@@ -16,6 +16,7 @@ import { logDataTransfer } from "../../models/document/drag-tiles";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tiles/tile-component";
 import { safeJsonParse } from "../../utilities/js-utils";
+import { RowListComponent } from "./row-list";
 
 import "./document-content.sass";
 
@@ -59,6 +60,12 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private rowRefs: Array<TileRowComponent | null>;
   private mutationObserver: MutationObserver;
   private scrollDisposer: IReactionDisposer;
+
+  constructor(props: IProps) {
+    super(props);
+    this.rowRefs = [];
+    this.domElement = null;
+  }
 
   public componentDidMount() {
     if (this.domElement) {
@@ -146,6 +153,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       this.props.readOnly ? "read-only" : "read-write"
     );
 
+    // Reset rowRefs array before rendering
+    this.rowRefs = [];
+
     return (
       <DocumentDndContext>
         <div className={documentClass}
@@ -208,35 +218,23 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderRows() {
-    const { content, ...others } = this.props;
+    const { content } = this.props;
     if (!content) { return null; }
-    const { rowMap, rowOrder, tileMap, highlightPendingDropLocation } = content;
-    const { dropRowInfo } = this.state;
-    this.rowRefs = [];
-    return rowOrder.map((rowId, index) => {
-      const row = rowMap.get(rowId);
-      const rowHeight = this.getRowHeight(rowId);
-      let dropHighlight = dropRowInfo && (dropRowInfo.rowDropIndex != null) &&
-                            (dropRowInfo.rowDropIndex === index) &&
-                            dropRowInfo.rowDropLocation
-                              ? dropRowInfo.rowDropLocation
-                              : undefined;
-      if (!dropHighlight) {
-        if (index === highlightPendingDropLocation) {
-          dropHighlight = "top";
-        }
-        else if ((index === rowOrder.length - 1) && (index + 1 === highlightPendingDropLocation)) {
-          dropHighlight = "bottom";
-        }
-      }
-      return row
-              ? <TileRowComponent key={row.id} docId={content.contentId} model={row}
-                                  documentContent={this.domElement}
-                                  rowIndex={index} height={rowHeight} tileMap={tileMap}
-                                  dropHighlight={dropHighlight}
-                                  ref={(elt) => this.rowRefs.push(elt)} {...others} />
-              : null;
-    });
+    return (
+      <RowListComponent
+        documentContentModel={content}
+        rowListModel={content}
+        documentContent={this.domElement}
+        rowRefs={this.rowRefs}
+        context={this.props.context}
+        documentId={this.props.documentId}
+        typeClass={this.props.typeClass}
+        scale={this.props.scale}
+        readOnly={this.props.readOnly}
+        dropRowInfo={this.state.dropRowInfo}
+        highlightPendingDropLocation={content.highlightPendingDropLocation}
+      />
+    );
   }
 
   private renderSpacer = () => {

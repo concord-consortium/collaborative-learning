@@ -79,7 +79,7 @@ describe("DocumentContentModel", () => {
     documentContent.addTile("text", { title: "Text 1"});
     const textTile2 = documentContent.addTile("text", { title: "Text 2" });
 
-    let textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
+    let textTile2RowId = documentContent.findRowIdContainingTile(textTile2!.tileId);
     let textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(1);
@@ -94,13 +94,13 @@ describe("DocumentContentModel", () => {
       }
     });
 
-    const imageTile1rowId = documentContent.findRowContainingTile(imageTile1!.tileId);
+    const imageTile1rowId = documentContent.findRowIdContainingTile(imageTile1!.tileId);
     const imageTile1rowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === imageTile1rowId);
 
     expect(imageTile1rowIndex1).toBe(1);
 
     // text tile should have shifted down
-    textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
+    textTile2RowId = documentContent.findRowIdContainingTile(textTile2!.tileId);
     textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(2);
@@ -115,7 +115,7 @@ describe("DocumentContentModel", () => {
       }
     });
 
-    const rowId2 = documentContent.findRowContainingTile(imageTile2!.tileId);
+    const rowId2 = documentContent.findRowIdContainingTile(imageTile2!.tileId);
     const rowIndex2 = documentContent.rowOrder.findIndex((id: string) => id === rowId2);
 
     expect(rowIndex2).toBe(3);
@@ -134,7 +134,7 @@ describe("DocumentContentModel", () => {
     documentContent.addTile("text", { title: "Text 1"} );
     const textTile2 = documentContent.addTile("text", { title: "Text 2" });
 
-    let textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
+    let textTile2RowId = documentContent.findRowIdContainingTile(textTile2!.tileId);
     let textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(1);
@@ -148,13 +148,13 @@ describe("DocumentContentModel", () => {
       }
     });
 
-    const imageTile1rowId = documentContent.findRowContainingTile(imageTile1!.tileId);
+    const imageTile1rowId = documentContent.findRowIdContainingTile(imageTile1!.tileId);
     const imageTile1rowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === imageTile1rowId);
 
     expect(imageTile1rowIndex1).toBe(1);
 
     // text tile should still be on 1 as well
-    textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
+    textTile2RowId = documentContent.findRowIdContainingTile(textTile2!.tileId);
     textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(1);

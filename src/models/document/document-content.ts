@@ -389,11 +389,15 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     self.copyTiles(tiles, sharedModelEntries, annotations, rowInfo, sourceDocId !== self.contentId);
   },
   duplicateTiles(tiles: IDragTileItem[]) {
+    // Find the RowList that contains all the tiles being duplicated.
+    // Might be the whole document or a Question tile.
+    const tileIds = tiles.map(tile => tile.tileId);
+    const rowList = self.getRowListContainingTileIds(tileIds);
+
     // New tiles go into a row after the last copied tile
     const rowIndex = self.getRowAfterTiles(tiles);
 
     // Find shared models used by tiles being duplicated
-    const tileIds = tiles.map(tile => tile.tileId);
     const sharedModelEntries = Object.values(self.getSharedModelsUsedByTiles(tileIds));
     const annotations = Object.values(self.getAnnotationsUsedByTiles(tileIds, true));
 
@@ -406,7 +410,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       tiles,
       snapshots,
       annotations,
-      { rowInsertIndex: rowIndex },
+      { rowList, rowInsertIndex: rowIndex },
       false // duplicating within same document
     );
   },
@@ -419,7 +423,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
    */
   addTileAfter(tileType: string, target: ITileModel, sharedModels?: SharedModelType[],
     options?: IDocumentContentAddTileOptions) {
-    const targetRowId = self.findRowContainingTile(target.id);
+    const targetRowId = self.findRowIdContainingTile(target.id);
     if (!targetRowId) {
       console.warn("Can't find row to add tile after");
       return;

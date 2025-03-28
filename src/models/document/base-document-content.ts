@@ -1,8 +1,7 @@
-import { each } from "lodash";
-import { types, getType, getEnv, SnapshotIn } from "mobx-state-tree";
+import { types, getType, getEnv, SnapshotIn, Instance, isAlive } from "mobx-state-tree";
 import { kPlaceholderTileDefaultHeight } from "../tiles/placeholder/placeholder-constants";
 import {
-  getPlaceholderSectionId, isPlaceholderTile, kPlaceholderTileType, PlaceholderContentModel
+  getPlaceholderSectionId, isPlaceholderTile, PlaceholderContentModel
 } from "../tiles/placeholder/placeholder-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
 import { ITileContentModel, ITileEnvironment, TileContentModel } from "../tiles/tile-content";
@@ -29,6 +28,7 @@ import { IDocumentContentAddTileOptions, INewRowTile, INewTileOptions,
 import {
   SharedModelEntry, SharedModelEntrySnapshotType, SharedModelEntryType, SharedModelMap
 } from "./shared-model-entry";
+import { RowList, isRowListContainer, RowListType } from "./row-list";
 
 /**
  * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
@@ -39,10 +39,8 @@ import {
  *
  * This file contains the most fundamental views and actions.
  */
-export const BaseDocumentContentModel = types
-  .model("BaseDocumentContent", {
-    rowMap: types.map(TileRowModel),
-    rowOrder: types.array(types.string),
+export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
+  .props({
     tileMap: types.map(TileModel),
     // The keys to this map should be the id of the shared model
     sharedModelMap: SharedModelMap
@@ -51,19 +49,11 @@ export const BaseDocumentContentModel = types
     return isImportDocument(snapshot) ? migrateSnapshot(snapshot) : snapshot;
   })
   .volatile(self => ({
-    visibleRows: [] as string[],
     highlightPendingDropLocation: -1,
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
     const contentId = uniqueId();
-
-    function rowContainsTile(rowId: string, tileId: string) {
-      const row = self.rowMap.get(rowId);
-      return row
-              ? row.tiles.findIndex(tile => tile.tileId === tileId) >= 0
-              : false;
-    }
 
     return {
       get tileEnv() {
@@ -74,6 +64,117 @@ export const BaseDocumentContentModel = types
       },
       get contentId() {
         return contentId;
+      },
+      /**
+       * Returns all tiles in the document, including nested tiles from RowList containers.
+       * @returns An array of all tiles, in document order.
+       */
+      get allTiles(): ITileModel[] {
+        const tiles: ITileModel[] = [];
+
+        // Get all tiles from the main document rows
+        self.rowOrder.forEach(rowId => {
+          const row = self.getRow(rowId);
+          if (row) {
+            row.tiles.forEach(tileLayout => {
+              const tile = self.tileMap.get(tileLayout.tileId);
+              if (tile) {
+                tiles.push(tile);
+
+                // If this tile's content is a RowList container, get its nested tiles
+                const tileContent = tile.content;
+                if (isRowListContainer(tileContent)) {
+                  tileContent.rowOrder.forEach((nestedRowId: string) => {
+                    const nestedRow = tileContent.getRow(nestedRowId);
+                    if (nestedRow) {
+                      nestedRow.tiles.forEach((nestedTileLayout: TileLayoutModelType) => {
+                        const nestedTile = self.tileMap.get(nestedTileLayout.tileId);
+                        if (nestedTile) {
+                          tiles.push(nestedTile);
+                        }
+                      });
+                    }
+                  });
+                }
+              }
+            });
+          }
+        });
+
+        return tiles;
+      },
+      getTilesInDocumentOrder(): string[] {
+        // Returns list of tile ids in the document from top to bottom, left to right
+        return this.allTiles.map(tile => tile.id);
+      },
+      /**
+       * Returns all tile ids in a RowList container, including nested RowList containers.
+       * @param rowList - The RowList container to get the tile ids from.
+       * @returns An array of all tile ids in the RowList container, in document order.
+       */
+      getAllTileIdsInRowList(rowList: RowListType): string[] {
+        const ids: string[] = [];
+        rowList.rowOrder.forEach(rowId => {
+          const row = rowList.getRow(rowId);
+          if (row) {
+            row.tiles.forEach(tileLayout => {
+              ids.push(tileLayout.tileId);
+              const tileContent = self.tileMap.get(tileLayout.tileId)?.content;
+              if (isRowListContainer(tileContent)) {
+                this.getAllTileIdsInRowList(tileContent).forEach(id => ids.push(id));
+              }
+            });
+          }
+        });
+        return ids;
+      },
+
+      /**
+       * Returns all rows in the document, including nested rows from RowList containers.
+       * @returns An array of all rows, in document order.
+       */
+      get allRows(): TileRowModelType[] {
+        const rows: TileRowModelType[] = [];
+
+        // Get all rows from the main document
+        self.rowOrder.forEach(rowId => {
+          const row = self.rowMap.get(rowId);
+          if (row) {
+            rows.push(row);
+
+            // Check each tile in the row for nested RowList containers
+            row.tiles.forEach(tileLayout => {
+              const tileContent = self.tileMap.get(tileLayout.tileId)?.content;
+              if (tileContent && isRowListContainer(tileContent)) {
+                // Add all rows from the nested RowList
+                tileContent.rowOrder.forEach(nestedRowId => {
+                  const nestedRow = tileContent.getRow(nestedRowId);
+                  if (nestedRow) {
+                    rows.push(nestedRow);
+                  }
+                });
+              }
+            });
+          }
+        });
+
+        return rows;
+      },
+      getRowRecursive(rowId: string) {
+        return this.allRows.find(row => row.id === rowId);
+      },
+      get allRowLists(): RowListType[] {
+        const rowLists: RowListType[] = [];
+        this.allTiles.forEach(tile => {
+          const tileContent = tile.content;
+          if (isRowListContainer(tileContent)) {
+            rowLists.push(tileContent);
+          }
+        });
+        return rowLists;
+      },
+      getRowListForRow(rowId: string) {
+        return this.allRowLists.find(rowList => rowList.rowOrder.includes(rowId));
       },
       get firstTile(): ITileModel | undefined {
         for (const rowId of self.rowOrder) {
@@ -92,25 +193,6 @@ export const BaseDocumentContentModel = types
       getTileType(tileId: string) {
         return self.tileMap.get(tileId)?.content.type;
       },
-      get rowCount() {
-        return self.rowOrder.length;
-      },
-      getRow(rowId: string): TileRowModelType | undefined {
-        return self.rowMap.get(rowId);
-      },
-      getRowByIndex(index: number): TileRowModelType | undefined {
-        return self.rowMap.get(self.rowOrder[index]);
-      },
-      getRowIndex(rowId: string) {
-        return self.rowOrder.findIndex(_rowId => _rowId === rowId);
-      },
-      findRowContainingTile(tileId: string) {
-        return self.rowOrder.find(rowId => rowContainsTile(rowId, tileId));
-      },
-      numTilesInRow(rowId: string) {
-        const row = self.rowMap.get(rowId);
-        return row ? row.tiles.length : 0;
-      },
       isPlaceholderRow(row: TileRowModelType) {
         // Note that more than one placeholder tile in a row shouldn't happen
         // in theory, but it has been known to happen as a result of bugs.
@@ -123,17 +205,15 @@ export const BaseDocumentContentModel = types
       },
       getSectionIdForTile(tileId: string) {
         let sectionId = "";
-        const foundRow = self.rowOrder.find((rowId, i) => {
-          const row = self.rowMap.get(rowId);
-          // TODO: Figure out why linting is failing
-          // row?.sectionId && (sectionId = row?.sectionId);
-          if (row?.sectionId) {
+        const foundRow = this.allRows.find((row) => {
+          if (row.sectionId) {
             sectionId = row.sectionId;
           }
-          return row?.hasTile(tileId);
+          return row.hasTile(tileId);
         });
         return foundRow ? sectionId : undefined;
       },
+      // TODO does this need to be recursive?
       getRowsInSection(sectionId: string): TileRowModelType[] {
         let sectionRowIndex: number | undefined;
         let nextSectionRowIndex: number | undefined;
@@ -151,14 +231,6 @@ export const BaseDocumentContentModel = types
         const rows = self.rowOrder.map(rowId => self.rowMap.get(rowId));
         const rowsInSection = rows.filter((row, i) => !!row && (i > sectionRowIndex!) && (i < nextSectionRowIndex!));
         return rowsInSection as TileRowModelType[];
-      },
-      get indexOfLastVisibleRow() {
-        // returns last visible row or last row
-        if (!self.rowOrder.length) return -1;
-        const lastVisibleRowId = self.visibleRows.length
-                                  ? self.visibleRows[self.visibleRows.length - 1]
-                                  : self.rowOrder[self.rowOrder.length - 1];
-        return  self.rowOrder.indexOf(lastVisibleRowId);
       },
       // TODO: Split this into two functions:
       // - getFirstDocumentSharedModelByType
@@ -186,7 +258,7 @@ export const BaseDocumentContentModel = types
       getSharedModelsInUseByAnyTiles(): SharedModelType[] {
         const sharedModelEntries = Array.from(self.sharedModelMap.values());
         return sharedModelEntries
-          .filter(entry => { return entry.tiles.length > 0; })
+          .filter(entry => entry.tiles.length > 0)
           .map(entry => entry.sharedModel);
       },
       getSharedModelsUsedByTiles(tileIds: string[]) {
@@ -202,28 +274,16 @@ export const BaseDocumentContentModel = types
       },
       getAllTileIds(includeTeacherContent: boolean) {
         // returns all non-placeholder tile ids in document order filtered by includeTeacherContent
-        return self.rowOrder.reduce((tileIds: string[], rowId) => {
-          const row = self.rowMap.get(rowId);
-          if (row) {
-            const publicTileIds = row.tiles
-              .filter(tile => {
-                const tileInfo = self.tileMap.get(tile.tileId);
-                if (!tileInfo) return false;
-                const {display, content} = tileInfo;
-                const isPlaceholder = content?.type === kPlaceholderTileType;
-                return !isPlaceholder && (display !== "teacher" || includeTeacherContent);
-              })
-              .map(tile => tile.tileId);
-            tileIds.push(...publicTileIds);
-          }
-          return tileIds;
-        }, []);
+        return this.allTiles.filter((tile: ITileModel) => {
+          const { display } = tile;
+          return !isPlaceholderTile(tile) && (display !== "teacher" || includeTeacherContent);
+        }).map(tile => tile.id);
       }
     };
   })
   .views(self => ({
     getRowHeight(rowId: string) {
-      const row = self.getRow(rowId);
+      const row = self.getRowRecursive(rowId);
       if (!row) return 0;
       if (row.isSectionHeader) return kSectionHeaderHeight;
       if (self.isPlaceholderRow(row)) return kPlaceholderTileDefaultHeight;
@@ -253,20 +313,18 @@ export const BaseDocumentContentModel = types
       // if all else fails, revert to last visible row
       return self.indexOfLastVisibleRow + 1;
     },
+    // Find the smallest RowList container that contains all the given tile ids.
+    // Returns the whole document if no smaller container is found.
+    getRowListContainingTileIds(tileIds: string[]): RowListType | undefined {
+      const found = self.allRowLists.find(rowList => {
+        return tileIds.every(id => rowList.tileIds.includes(id));
+      });
+      return found ?? self;
+    },
     getRowAfterTiles(tiles: ITilePosition[]) {
       return Math.max(...tiles.map(tile => tile.rowIndex)) + 1;
     },
-    getTilesInDocumentOrder(): string[] {
-      // Returns list of tile ids in the document from top to bottom, left to right
-      const tiles: string[] = [];
-      self.rowOrder.forEach(rowId => {
-        const row = self.getRow(rowId);
-        if (row) {
-          tiles.push(...row.tiles.map(tile=>tile.tileId));
-        }
-      });
-      return tiles;
-    },
+    // TODO: does this need to be recursive?
     getTilesInSection(sectionId: string) {
       const tiles: ITileModel[] = [];
       const rows = self.getRowsInSection(sectionId);
@@ -281,17 +339,10 @@ export const BaseDocumentContentModel = types
       return new Set(Array.from(self.tileMap.values()).map(tile => tile.content.type));
     },
     getTilesOfType(type: string) {
-      const tiles: string[] = [];
       const lcType = type.toLowerCase();
-      self.rowOrder.forEach(rowId => {
-        const row = self.getRow(rowId);
-        each(row?.tiles, tileEntry => {
-          if (self.getTileType(tileEntry.tileId)?.toLowerCase() === lcType) {
-            tiles.push(tileEntry.tileId);
-          }
-        });
-      });
-      return tiles;
+      return self.allTiles
+        .filter(tile => tile.content.type.toLowerCase() === lcType)
+        .map(tile => tile.id);
     },
     getAllTilesByType() {
       const tilesByType: Record<string, string[]> = {};
@@ -307,15 +358,12 @@ export const BaseDocumentContentModel = types
     getLinkableTiles(): ILinkableTiles {
       const providers: ITypedTileLinkMetadata[] = [];
       const consumers: ITypedTileLinkMetadata[] = [];
-      self.rowOrder.forEach(rowId => {
-        const row = self.getRow(rowId);
-        each(row?.tiles, tileEntry => {
-          const tileType = self.getTileType(tileEntry.tileId);
+      self.allTiles.forEach(tile => {
+          const tileType = tile.content.type;
           const titleBase = getTileContentInfo(tileType)?.titleBase || tileType;
           if (tileType) {
-            const tile = self.getTile(tileEntry.tileId);
             const typedTileLinkMetadata: ITypedTileLinkMetadata = {
-              id: tileEntry.tileId, type: tileType, title: tile?.computedTitle, titleBase
+              id: tile.id, type: tileType, title: tile?.computedTitle, titleBase
             };
             if (getTileContentInfo(tileType)?.isDataProvider) {
               providers.push(typedTileLinkMetadata);
@@ -324,7 +372,6 @@ export const BaseDocumentContentModel = types
               consumers.push(typedTileLinkMetadata);
             }
           }
-        });
       });
       return { providers, consumers };
     },
@@ -447,21 +494,19 @@ export const BaseDocumentContentModel = types
       });
       return counts;
     },
+    findRowContainingTile(tileId: string) {
+      return self.allRows.find(row => row.hasTile(tileId));
+    },
+    findRowIdContainingTile(tileId: string) {
+      const row = this.findRowContainingTile(tileId);
+      return row?.id;
+    },
+    numTilesInRow(rowId: string) {
+      const row = self.rowMap.get(rowId);
+      return row ? row.tiles.length : 0;
+    },
   }))
   .actions(self => ({
-    insertRow(row: TileRowModelType, index?: number) {
-      self.rowMap.put(row);
-      if ((index != null) && (index < self.rowOrder.length)) {
-        self.rowOrder.splice(index, 0, row.id);
-      }
-      else {
-        self.rowOrder.push(row.id);
-      }
-    },
-    deleteRow(rowId: string) {
-      self.rowOrder.remove(rowId);
-      self.rowMap.delete(rowId);
-    },
     insertNewTileInRow(tile: ITileModel, row: TileRowModelType, tileIndexInRow?: number) {
       const insertedTile = self.tileMap.put(tile);
       row.insertTileInRow(insertedTile, tileIndexInRow);
@@ -473,9 +518,6 @@ export const BaseDocumentContentModel = types
           row.removeTileFromRow(tileId);
           self.tileMap.delete(tileId);
         });
-    },
-    setVisibleRows(rows: string[]) {
-      self.visibleRows = rows;
     }
   }))
   .actions(self => ({
@@ -556,12 +598,13 @@ export const BaseDocumentContentModel = types
         console.warn("addTileContentInNewRow requires the content to have a type");
       }
       const o = options || {};
+      const rowList = o.rowList ?? self;
       if (o.rowIndex === undefined) {
         // by default, insert new tiles after last visible on screen
         o.rowIndex = self.defaultInsertRow;
       }
       const row = TileRowModel.create({});
-      self.insertRow(row, o.rowIndex);
+      rowList.insertRow(row, o.rowIndex);
 
       const id = o.tileId;
       const tileModel = self.tileMap.put({id, content, title: o.title});
@@ -575,11 +618,12 @@ export const BaseDocumentContentModel = types
     },
     addTileSnapshotInExistingRow(snapshot: ITileModelSnapshotIn, options: INewTileOptions): INewRowTile | undefined {
       const o = options || {};
+      const rowList = o.rowList ?? self;
       if (o.rowIndex === undefined) {
-        // by default, insert new tiles after last visible on screen
+        // by default, insert new tiles after last visible on screen.
         o.rowIndex = self.defaultInsertRow;
       }
-      const row = o.rowId ? self.getRow(o.rowId) : self.getRowByIndex(o.rowIndex);
+      const row = o.rowId ? rowList.getRow(o.rowId) : rowList.getRowByIndex(o.rowIndex);
       if (row) {
         const indexInRow = o.locationInRow === "left" ? 0 : undefined;
         const tileModel = self.tileMap.put(snapshot);
@@ -634,7 +678,7 @@ export const BaseDocumentContentModel = types
       }
       return results;
     },
-    copyTilesIntoNewRows(tiles: IDropTileItem[], rowIndex: number) {
+    copyTilesIntoNewRows(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
         let rowDelta = -1;
@@ -651,8 +695,9 @@ export const BaseDocumentContentModel = types
               rowDelta++;
             }
             const tileOptions: INewTileOptions = {
+              rowList: rowInfo.rowList,
               rowId: lastRowId,
-              rowIndex: rowIndex + rowDelta,
+              rowIndex: rowInfo.rowInsertIndex + rowDelta,
               tileId: tile.newTileId,
               title: uniqueTitle
             };
@@ -702,7 +747,7 @@ export const BaseDocumentContentModel = types
       self.removeNeighboringPlaceholderRows(self.getRowIndex(rowId));
     },
     moveTileToRow(tileId: string, rowIndex: number, tileIndex?: number) {
-      const srcRowId = self.findRowContainingTile(tileId);
+      const srcRowId = self.findRowIdContainingTile(tileId);
       const srcRow = srcRowId && self.rowMap.get(srcRowId);
       const dstRowId = self.rowOrder[rowIndex];
       const dstRow = dstRowId && self.rowMap.get(dstRowId);
@@ -732,7 +777,7 @@ export const BaseDocumentContentModel = types
       }
     },
     moveTileToNewRow(tileId: string, rowIndex: number) {
-      const srcRowId = self.findRowContainingTile(tileId);
+      const srcRowId = self.findRowIdContainingTile(tileId);
       const srcRow = srcRowId && self.rowMap.get(srcRowId);
       const tile = self.getTile(tileId);
       if (!srcRowId || !srcRow || !tile) return;
@@ -757,17 +802,40 @@ export const BaseDocumentContentModel = types
           srcRow.height = undefined;
         }
       }
+    },
+    createTileContent(tileType: string, title?: string, url?: string): ITileContentModel {
+      const contentInfo = getTileContentInfo(tileType);
+      if (!contentInfo) {
+        throw new Error(`Invalid tile type: ${tileType}`);
+      }
+      const appConfig = getAppConfig(self);
+      return contentInfo.defaultContent({ title, url, appConfig, tileFactory: this.createTile });
+    },
+    createTile(tileType: string, title?: string): ITileModel {
+      const content = this.createTileContent(tileType);
+      return self.tileMap.put({content, title});
     }
   }))
   .actions(self => {
     const actions = {
-      deleteTile(tileId: string) {
+      deleteTile(tileId: string, createPlaceholdersIfNeeded = true) {
         const rowsToDelete: TileRowModelType[] = [];
-        self.rowMap.forEach(row => {
+        self.allRows.forEach(row => {
+          if (!isAlive(row)) {
+            // Skip any rows that have already been deleted.
+            return;
+          }
           // remove from row
           if (row.hasTile(tileId)) {
             const tile = self.getTile(tileId);
             tile && tile.willRemoveFromDocument();
+            // Remove any embedded tiles/rows
+            const tileContent = tile?.content;
+            if (tileContent && isRowListContainer(tileContent)) {
+              tileContent.tileIds.forEach(embeddedTileId => {
+                this.deleteTile(embeddedTileId, false);
+              });
+            }
             row.removeTileFromRow(tileId);
           }
           // track empty rows
@@ -777,13 +845,17 @@ export const BaseDocumentContentModel = types
         });
         // remove empty rows
         rowsToDelete.forEach(row => {
-          self.deleteRowAddingPlaceholderRowIfAppropriate(row.id);
+          if (createPlaceholdersIfNeeded) {
+            self.deleteRowAddingPlaceholderRowIfAppropriate(row.id);
+          } else {
+            self.getRowListForRow(row.id)?.deleteRow(row.id);
+          }
         });
         // delete tile
         self.tileMap.delete(tileId);
       },
       moveTile(tileId: string, rowInfo: IDropRowInfo, tileIndex = 0) {
-        const srcRowId = self.findRowContainingTile(tileId);
+        const srcRowId = self.findRowIdContainingTile(tileId);
         if (!srcRowId) return;
         const srcRowIndex = self.getRowIndex(srcRowId);
         const { rowInsertIndex, rowDropIndex, rowDropLocation } = rowInfo;
@@ -823,13 +895,12 @@ export const BaseDocumentContentModel = types
         const contentInfo = getTileContentInfo(toolId);
         if (!contentInfo) return;
 
-        const appConfig = getAppConfig(self);
 
         // TODO: The table tile is the only tile that uses the title property
         // here the title gets set as the name of the dataSet that is created by
         // the table's defaultContent. We should find a way for the table tile
         // to work without needing this title.
-        const newContent = contentInfo?.defaultContent({ title, url, appConfig });
+        const newContent = self.createTileContent(toolId, title, url);
         const addTileOptions = { rowHeight: contentInfo.defaultHeight, rowIndex: self.rowCount, title: options?.title };
         const tileInfo = self.addTileContentInNewRow(
                               newContent,
@@ -857,7 +928,7 @@ export const BaseDocumentContentModel = types
             }
             else {
               if (moveSubsequentTilesRight) {
-                const newRowId = firstTileId && self.findRowContainingTile(firstTileId);
+                const newRowId = firstTileId && self.findRowIdContainingTile(firstTileId);
                 const newRowIndex = newRowId ? self.getRowIndex(newRowId) : undefined;
                 insertRowInfo.rowDropLocation = "right";
                 if (newRowIndex != null) {
@@ -984,11 +1055,14 @@ export const BaseDocumentContentModel = types
       self.moveTiles(tiles, rowInfo);
     },
     userCopyTiles(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
-      const dropRow = (rowInfo.rowDropIndex != null) ? self.getRowByIndex(rowInfo.rowDropIndex) : undefined;
+      const rowList = rowInfo.rowList ?? self;
+      const dropRow = (rowInfo.rowDropIndex != null) ? rowList.getRowByIndex(rowInfo.rowDropIndex) : undefined;
       const results = dropRow?.acceptTileDrop(rowInfo)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
-                      : self.copyTilesIntoNewRows(tiles, rowInfo.rowInsertIndex);
+                      : self.copyTilesIntoNewRows(tiles, rowInfo);
       self.logCopyTileResults(tiles, results);
       return results;
     }
   }));
+
+  export type BaseDocumentContentModelType = Instance<typeof BaseDocumentContentModel>;

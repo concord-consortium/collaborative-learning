@@ -1,20 +1,34 @@
 import stringify from "json-stringify-pretty-compact";
 import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
 import { ITileContentModel, TileContentModel } from "../tile-content";
-import { ITileExportOptions } from "../tile-content-info";
+import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
+import { RowList } from "../../document/row-list";
+import { kTextTileType } from "../text/text-content";
 
 export const kQuestionTileType = "Question";
 
-export function defaultQuestionContent() {
-  return QuestionContentModel.create();
+export function defaultQuestionContent(options?: IDefaultContentOptions) {
+  // Create a placeholder tile
+  // const placeholderTile = options?.tileFactory?.(kPlaceholderTileType);
+  const placeholderTile = options?.tileFactory?.(kTextTileType);
+  const textTile = options?.tileFactory?.(kTextTileType);
+  if (!placeholderTile || !textTile) {
+    throw new Error("Placeholder tile could not be created");
+  }
+  const tile = QuestionContentModel.create({});
+  tile.addRowWithTiles([placeholderTile, textTile]);
+
+  return tile;
 }
 
-export const QuestionContentModel = TileContentModel
-  .named("QuestionContent")
+export const QuestionContentModel = types.compose(
+    "QuestionContent",
+    TileContentModel,
+    RowList)
   .props({
     type: types.optional(types.literal(kQuestionTileType), kQuestionTileType),
     version: types.optional(types.number, 1),
-    locked: types.optional(types.boolean, false)
+    locked: types.optional(types.boolean, false),
   })
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
@@ -25,7 +39,7 @@ export const QuestionContentModel = TileContentModel
   .actions(self => ({
     setLocked(locked: boolean) {
       self.locked = locked;
-    }
+    },
   }));
 
 export type QuestionContentModelType = Instance<typeof QuestionContentModel>;
