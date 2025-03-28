@@ -231,6 +231,7 @@
       ]
     },
     "toolbar": [
+      {"id": "Question", "title": "Question", "isTileTool": true},
       {"id": "Text", "title": "Text", "isTileTool": true},
       {"id": "Table", "title": "Table", "isTileTool": true},
       {"id": "DataCard", "title": "Data Card", "isTileTool": true},
