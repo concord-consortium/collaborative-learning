@@ -14,6 +14,7 @@ interface ITeacherNetworkInfo {
 
 export interface IDocumentLogEvent extends Record<string, any> {
   document: DocumentModelType | IDocumentMetadata | IDocumentMetadataModel;
+  targetDocument?: DocumentModelType | IDocumentMetadata | IDocumentMetadataModel;
 }
 
 export function isDocumentLogEvent(params: Record<string, any>): params is IDocumentLogEvent {
@@ -24,15 +25,23 @@ interface IContext extends Record<string, any> {
   user: UserModelType;
 }
 
-function processDocumentEventParams(params: IDocumentLogEvent, { user, portal }: IContext) {
-  const { document, ...others } = params;
+export function getAllDocumentProperties(
+  document: DocumentModelType | IDocumentMetadata | IDocumentMetadataModel, user?: UserModelType
+) {
+  // Basic properties
+  const basicProps = {
+    uid: document.uid,
+    key: document.key,
+    type: document.type,
+    title: document.title || ""
+  };
   const isRemote = "isRemote" in document ? document.isRemote : undefined;
   const remoteContext = "remoteContext" in document ? document.remoteContext : undefined;
-  const documentProperties = document.properties && typeof document.properties.toJSON === "function"
-                               ? document.properties.toJSON()
-                               : {};
-  const documentVisibility = "visibility" in document ? document.visibility : undefined;
-  const documentChanges = "changeCount" in document ? document.changeCount : undefined;
+  const properties = document.properties && typeof document.properties.toJSON === "function"
+    ? document.properties.toJSON()
+    : {};
+  const visibility = "visibility" in document ? document.visibility : undefined;
+  const changes = "changeCount" in document ? document.changeCount : undefined;
 
   // Log the ID of the last history entry for the document.
   // Note that depending whether the call to write a log event is made
@@ -40,32 +49,86 @@ function processDocumentEventParams(params: IDocumentLogEvent, { user, portal }:
   // entry that was current before the change, or the one that was created by the change.
   // For the first change in a new document, it may be undefined, in which case we
   // use the string "first" instead.
-  const documentHistoryId = "treeManagerAPI" in document
+  const historyId = "treeManagerAPI" in document
     ? (document.treeManagerAPI as TreeManagerType)?.latestDocumentHistoryEntry?.id || "first"
     : undefined;
 
-  const teacherNetworkInfo: ITeacherNetworkInfo | undefined = isRemote
-      ? { networkClassHash: remoteContext,
-          networkUsername: `${document.uid}@${user.portal}` }
-      : undefined;
+  const teacherNetworkInfo: ITeacherNetworkInfo | undefined = isRemote && user
+    ? { networkClassHash: remoteContext,
+        networkUsername: `${basicProps.uid}@${user.portal}` }
+    : undefined;
 
   return {
-    documentUid: document.uid,
-    documentKey: document.key,
-    documentType: document.type,
-    documentTitle: document.title || "",
+    ...basicProps,
+    properties,
+    visibility,
+    changes,
+    historyId,
+    isRemote,
+    remoteContext,
+    teacherNetworkInfo
+  };
+}
+
+export function setTargetDocumentProperties(
+  result: Record<string, any>, targetDocument: DocumentModelType | IDocumentMetadata | IDocumentMetadataModel
+) {
+  const targetProps = getAllDocumentProperties(targetDocument);
+  result.targetDocumentUid = targetProps.uid;
+  result.targetDocumentKey = targetProps.key;
+  result.targetDocumentType = targetProps.type;
+  result.targetDocumentTitle = targetProps.title;
+  result.targetDocumentProperties = targetProps.properties;
+  result.targetDocumentVisibility = targetProps.visibility;
+  result.targetDocumentChanges = targetProps.changes;
+  result.targetDocumentHistoryId = targetProps.historyId;
+
+  if (targetProps.teacherNetworkInfo) {
+    result.targetDocumentNetworkClassHash = targetProps.teacherNetworkInfo.networkClassHash;
+    result.targetDocumentNetworkUsername = targetProps.teacherNetworkInfo.networkUsername;
+  }
+}
+
+function processDocumentEventParams(params: IDocumentLogEvent, { user }: IContext) {
+  const { document, targetDocument, ...others } = params;
+  const documentProps = getAllDocumentProperties(document, user);
+
+  const {
+    uid: documentUid,
+    key: documentKey,
+    type: documentType,
+    title: documentTitle,
+    properties: documentProperties,
+    visibility: documentVisibility,
+    changes: documentChanges,
+    historyId: documentHistoryId,
+    teacherNetworkInfo
+  } = documentProps;
+
+  const result = {
+    documentUid,
+    documentKey,
+    documentType,
+    documentTitle,
     documentProperties,
     documentVisibility,
     documentChanges,
     documentHistoryId,
     ...others,
     ...teacherNetworkInfo
-  };
+  } as Record<string, any>;
+
+  if (targetDocument) {
+    setTargetDocumentProperties(result, targetDocument);
+  }
+  return result;
 }
 
-export function logDocumentEvent(event: LogEventName, _params: IDocumentLogEvent, method?: LogEventMethod) {
+export function logDocumentEvent(
+  event: LogEventName, _params: IDocumentLogEvent, method?: LogEventMethod, otherParams: Record<string, any> = {}
+) {
   const params = processDocumentEventParams(_params, Logger.stores);
-  Logger.log(event, params, method);
+  Logger.log(event, {...params, ...otherParams}, method);
 }
 
 /**

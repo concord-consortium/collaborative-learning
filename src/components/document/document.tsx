@@ -389,12 +389,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           ? <div className="title" data-test="learning-log-title">
               <TitleInfo docTitle={`Learning Log: ${document.title}`} onClick={this.handleDocumentRename} />
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
+              {this.renderStickyNotes()}
             </div>
           : <div className="title" data-test="personal-doc-title">
               <TitleInfo
                 docTitle={`${getDocumentTitleWithTimestamp(document, appConfig)}`}
                 onClick={this.handleDocumentRename} />
               { !hideButtons && <EditButton onClick={this.handleDocumentRename} /> }
+              {this.renderStickyNotes()}
             </div>
         }
         {hasDisplayId && <div className="display-id">{displayId}</div>}

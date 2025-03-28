@@ -5,7 +5,8 @@ module.exports = {
     rules: {
       "eslint-comments/no-unused-disable": "warn",
       "no-console": ["warn", { allow: ["warn", "error"] }],
-      "no-debugger": "error"
+      "no-debugger": "error",
+      "mocha/no-exclusive-tests": "error",
     },
     overrides: [
       { // plugins (temporary)
