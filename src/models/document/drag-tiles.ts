@@ -24,7 +24,7 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
 .views(self => ({
   getTilePositions(tileIds: string[]) {
     return tileIds.map(tileId => {
-      const rowId = self.findRowContainingTile(tileId);
+      const rowId = self.findRowIdContainingTile(tileId);
       const rowIndex = rowId && self.getRowIndex(rowId) || 0;
       const row = rowId ? self.getRow(rowId) : undefined;
       const tileIndex = row?.tiles.findIndex(t => t.tileId === tileId) || 0;

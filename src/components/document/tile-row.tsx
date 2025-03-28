@@ -156,6 +156,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     return tiles.map((tileRef, index) => {
       const tileModel = this.getTile(tileRef.tileId);
       const tileWidthPct = this.getTileWidth(tileRef.tileId, tiles);
+
       return tileModel
               ? <TileComponent
                   key={tileModel.id}
@@ -182,13 +183,13 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     const showBottomHighlight = (highlight === "bottom");
     return [
       <div key="top-drop-feedback"
-          className={`drop-feedback ${showTopHighlight ? "show top" : ""}`} />,
+          className={`drop-feedback top ${showTopHighlight ? "show" : ""}`} />,
       <div key="left-drop-feedback"
-          className={`drop-feedback ${showLeftHighlight ? "show left" : ""}`} />,
+          className={`drop-feedback left ${showLeftHighlight ? "show" : ""}`} />,
       <div key="right-drop-feedback"
-          className={`drop-feedback ${showRightHighlight ? "show right" : ""}`} />,
+          className={`drop-feedback right ${showRightHighlight ? "show" : ""}`} />,
       <div key="bottom-drop-feedback"
-          className={`drop-feedback ${showBottomHighlight ? "show bottom" : ""}`} />,
+          className={`drop-feedback bottom ${showBottomHighlight ? "show" : ""}`} />,
       <div key="bottom-resize-handle"
         className={`bottom-resize-handle ${isUserResizable ? "enable" : "disable"}`}
         draggable={isUserResizable}

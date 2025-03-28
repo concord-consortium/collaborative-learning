@@ -284,8 +284,8 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     tiles: IDragTileItem[],
     sharedModelEntries: SharedModelEntrySnapshotType[],
     annotations: IArrowAnnotationSnapshot[],
-    rowInfo?: IDropRowInfo,
     isCrossingDocuments: boolean,
+    rowInfo?: IDropRowInfo,
     copySpec?: ICopySpec
   ) {
     // Update shared models with new names and ids
@@ -441,7 +441,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       }
     });
 
-    self.copyTiles(tiles, sharedModelEntries, annotations, rowInfo, sourceDocId !== self.contentId);
+    self.copyTiles(tiles, sharedModelEntries, annotations, sourceDocId !== self.contentId, rowInfo);
   },
   duplicateTiles(tiles: IDragTileItem[]) {
     // Find the RowList that contains all the tiles being duplicated.
@@ -465,8 +465,8 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       tiles,
       snapshots,
       annotations,
-      { rowList, rowInsertIndex: rowIndex },
-      false // duplicating within same document
+      false, // duplicating within same document
+      { rowList, rowInsertIndex: rowIndex }
     );
   },
   /**
@@ -521,7 +521,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
   getCopySpec(tileIds: string[], sectionId?: string): ICopySpec {
     const tiles = self.getDragTileItems(tileIds);
     const tilePositions = tileIds.reduce<Record<string, ITileCopyPosition>>((acc, tileId) => {
-      const rowId = self.findRowContainingTile(tileId)!;
+      const rowId = self.findRowIdContainingTile(tileId)!;
       acc[tileId] = { rowId, sectionId: sectionId ?? self.getSectionIdForTile(tileId) };
       return acc;
     }, {});
@@ -535,9 +535,9 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       annotations,
     };
   },
-  applyCopySpec(copySpec: ICopySpec) {
+  applyCopySpec(copySpec: ICopySpec, isCrossingDocuments: boolean) {
     self.copyTiles(
-      copySpec.tiles, copySpec.sharedModelEntries, copySpec.annotations, undefined, copySpec
+      copySpec.tiles, copySpec.sharedModelEntries, copySpec.annotations, isCrossingDocuments, undefined, copySpec
     );
   },
 }));
