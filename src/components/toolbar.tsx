@@ -15,6 +15,7 @@ import { SectionModelType } from "../models/curriculum/section";
 import { logHistoryEvent } from "../models/history/log-history-event";
 import { LogEventName } from "../lib/logger-types";
 import { IToolbarEventProps, logToolbarEvent } from "../models/tiles/log/log-toolbar-event";
+import { IDropTileItem } from "src/models/tiles/tile-model";
 
 import "./toolbar.scss";
 
@@ -425,9 +426,10 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     if (content && primaryDocument?.content && (document?.key !== primaryDocument.key)) {
       const sectionId = document ? undefined : section?.type;
       const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);
-      primaryDocument.content.applyCopySpec(copySpec);
+      const copiedTiles = primaryDocument.content.applyCopySpec(copySpec);
 
       this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_COPY_TO_WORKSPACE, {}, primaryDocument);
+      this.selectCopiedTiles(copiedTiles);
     }
   };
 
@@ -443,11 +445,18 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           if (copyToDocument?.content) {
             const sectionId = document ? undefined : section?.type;
             const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);
-            copyToDocument.content.applyCopySpec(copySpec);
+            const copiedTiles = copyToDocument.content.applyCopySpec(copySpec);
 
             this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_COPY_TO_DOCUMENT, {}, copyToDocument);
+            this.selectCopiedTiles(copiedTiles);
           }
         });
     }
+  };
+
+  private selectCopiedTiles = (copiedTiles: IDropTileItem[]) => {
+    const { ui } = this.stores;
+    const copiedTileIds = copiedTiles.map(tile => tile.newTileId);
+    ui.selectAllTiles(copiedTileIds);
   };
 }

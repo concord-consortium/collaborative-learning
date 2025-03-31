@@ -86,7 +86,8 @@ const GeometryToolComponent: React.FC<IGeometryProps> = observer(function _Geome
 
   const ui = useUIStore();
   const [handlePointerDown, handlePointerUp] = useTileSelectionPointerEvents(
-    useCallback(() => ui.isSelectedTile(modelRef.current), [modelRef, ui]),
+    useCallback(() => modelRef.current.id, [modelRef]),
+    useCallback(() => ui.selectedTileIds, [ui]),
     useCallback((append: boolean) => ui.setSelectedTile(modelRef.current, { append }), [modelRef, ui]),
     domElement
   );
