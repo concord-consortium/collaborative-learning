@@ -2,7 +2,8 @@ import React, { useCallback, useRef } from "react";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 
 export const useTileSelectionPointerEvents = (
-              isTileSelected: () => boolean,
+              getTileId: () => string,
+              getSelectedTileIds: () => string[],
               setSelectedTile: (append: boolean) => void,
               focusableElement: React.RefObject<HTMLDivElement>) => {
   const didLastMouseDownSelectTile = useRef(false);
@@ -20,15 +21,19 @@ export const useTileSelectionPointerEvents = (
       focusableElement.current.focus();
     }
 
-    // first click selects the tile
-    if (!isTileSelected()) {
+    // first click or subsequent clicks when the tile is one of many selected
+    // tiles selects the tile and prevents the click from taking effect
+    const selectedTileIds = getSelectedTileIds();
+    const isTileSelected = selectedTileIds.includes(getTileId());
+    const otherTilesSelected = selectedTileIds.length > 1;
+    if (!isTileSelected || otherTilesSelected) {
       setSelectedTile(hasSelectionModifier(e));
       didLastMouseDownSelectTile.current = true;
       // prevent the click from taking effect, e.g. creating a point
       e.preventDefault();
       e.stopPropagation();
     }
-  }, [focusableElement, isTileSelected, setSelectedTile]);
+  }, [focusableElement, getSelectedTileIds, getTileId, setSelectedTile]);
 
   const handlePointerUp = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (didLastMouseDownSelectTile.current) {

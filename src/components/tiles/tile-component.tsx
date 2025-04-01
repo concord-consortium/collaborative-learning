@@ -386,7 +386,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     const { ui } = this.stores;
 
     // dragging a tile selects it first
-    ui.setSelectedTile(model, { append: hasSelectionModifier(e) });
+    ui.setSelectedTile(model, { append: hasSelectionModifier(e), dragging: true });
 
     const documentContent = getDocumentContentFromNode(model);
     if (!documentContent) {
