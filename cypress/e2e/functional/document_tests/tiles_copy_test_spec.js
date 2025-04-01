@@ -65,7 +65,10 @@ function testPrimaryWorkspace1() {
   cy.get('.primary-workspace .rdg-row .rdg-cell').eq(1).should('contain', '3');
   cy.get('.primary-workspace .rdg-row .rdg-cell').eq(2).should('contain', '2.5');
   // Make sure the geometry tile were copied correctly
-  cy.get('.primary-workspace .geometry-content.editable ellipse[display="inline"]').should('have.length', 3);
+  // This could be 3 or more depending if a geometry tile was already selected before dragging as the drag
+  // select behavior changed to include the previously selected tiles in the drag if the user selects tile(s)
+  // and then clicks directly on the drag handle on another tile to drag.
+  cy.get('.primary-workspace .geometry-content.editable ellipse[display="inline"]').should('have.length.gte', 3);
   // Make sure the drawing tile were copied correctly
   drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
   // Make sure the expression tile were copied correctly
