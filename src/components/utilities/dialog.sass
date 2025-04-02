@@ -48,9 +48,21 @@
         flex-grow: 1
         text-align: center
 
-      button
-        border: none
-        margin-top: 3px
+      .dialog-title-cancel
+        height: 34px
+        border-top-right-radius: 5px
+        overflow: hidden
+
+        &:hover
+          background-color: $charcoal-light-4
+        &:active
+          background-color: $charcoal-light-2
+
+        button
+          border: none
+          background-color: inherit
+          svg
+            margin-top: 3px
 
     .dialog-contents
       padding: $double-padding
