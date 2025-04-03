@@ -174,7 +174,8 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         return rowLists;
       },
       getRowListForRow(rowId: string) {
-        return this.allRowLists.find(rowList => rowList.rowOrder.includes(rowId));
+        const found = this.allRowLists.find(rowList => rowList.rowOrder.includes(rowId));
+        return found ?? self;
       },
       get firstTile(): ITileModel | undefined {
         for (const rowId of self.rowOrder) {
@@ -202,6 +203,12 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
                   const tile = tileId ? self.tileMap.get(tileId) : undefined;
                   return isPlaceholderTile(tile);
                 });
+      },
+      getRowForTile(tileId: string) {
+        return this.allRows.find(r => r.hasTile(tileId));
+      },
+      getRowIdForTile(tileId: string) {
+        return this.getRowForTile(tileId)?.id;
       },
       getSectionIdForTile(tileId: string) {
         let sectionId = "";
@@ -502,7 +509,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       return row?.id;
     },
     numTilesInRow(rowId: string) {
-      const row = self.rowMap.get(rowId);
+      const row = self.getRowRecursive(rowId);
       return row ? row.tiles.length : 0;
     },
   }))
@@ -521,39 +528,37 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     }
   }))
   .actions(self => ({
-    addNewTileInNewRowAtIndex(tile: ITileModel, rowIndex: number) {
-      const row = TileRowModel.create({});
-      self.insertRow(row, rowIndex);
-      self.insertNewTileInRow(tile, row);
-      return row;
-    }
-  }))
-  .actions(self => ({
-    removeNeighboringPlaceholderRows(rowIndex: number) {
-      const beforeRow = rowIndex > 0 ? self.getRowByIndex(rowIndex - 1) : undefined;
-      const afterRow = rowIndex < self.rowCount - 1 ? self.getRowByIndex(rowIndex + 1) : undefined;
+    removeNeighboringPlaceholderRows(rowId: string) {
+      const rowList = self.getRowListForRow(rowId);
+      if (!rowList) {
+        console.warn("Row is missing", rowId);
+        return;
+      }
+      const rowIndex = rowList.getRowIndex(rowId);
+      const beforeRow = rowIndex > 0 ? rowList.getRowByIndex(rowIndex - 1) : undefined;
+      const afterRow = rowIndex < rowList.rowCount - 1 ? rowList.getRowByIndex(rowIndex + 1) : undefined;
       if (afterRow && self.isPlaceholderRow(afterRow)) {
-        self.deleteRow(afterRow.id);
+        rowList.deleteRow(afterRow.id);
       }
       if (beforeRow && self.isPlaceholderRow(beforeRow)) {
-        self.deleteRow(beforeRow.id);
+        rowList.deleteRow(beforeRow.id);
       }
     },
-    addPlaceholderRowIfAppropriate(rowIndex: number) {
-      const beforeRow = (rowIndex > 0) && self.getRowByIndex(rowIndex - 1);
-      const afterRow = (rowIndex < self.rowCount) && self.getRowByIndex(rowIndex);
+    addPlaceholderRowIfAppropriate(rowList: RowListType, rowIndex: number) {
+      const beforeRow = (rowIndex > 0) && rowList.getRowByIndex(rowIndex - 1);
+      const afterRow = (rowIndex < rowList.rowCount) && rowList.getRowByIndex(rowIndex);
       if ((beforeRow && beforeRow.isSectionHeader) && (!afterRow || afterRow.isSectionHeader)) {
         const beforeSectionId = beforeRow.sectionId;
         const content = PlaceholderContentModel.create({sectionId: beforeSectionId});
         const tile = TileModel.create({ content });
-        self.addNewTileInNewRowAtIndex(tile, rowIndex);
+        self.tileMap.put(tile);
+        rowList.addNewTileInNewRowAtIndex(tile, rowIndex);
       }
     },
-    removePlaceholderTilesFromRow(rowIndex: number) {
+    removePlaceholderTilesFromRow(row: TileRowModelType) {
       const isPlaceholderTileId = (tileId: string) => {
         return self.getTileType(tileId) === "Placeholder";
       };
-      const row = self.getRowByIndex(rowIndex);
       row?.removeTilesFromRow(isPlaceholderTileId);
     }
   }))
@@ -563,9 +568,11 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         row.updateLayout(self.tileMap);
       });
       // fix any "collapsed" sections
-      for (let i = 1; i < self.rowCount; ++i) {
-        self.addPlaceholderRowIfAppropriate(i);
-      }
+      self.allRowLists.forEach(rowList => {
+        for (let i = 1; i < rowList.rowCount; ++i) {
+          self.addPlaceholderRowIfAppropriate(rowList, i);
+        }
+      });
 
       // Find and fix any tiles that have a title incorrectly set on the tile, rather than on the content.
       // We iterate through the tiles in reverse order, so that if there is more than one tile
@@ -610,7 +617,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       const tileModel = self.tileMap.put({id, content, title: o.title});
       row.insertTileInRow(tileModel);
 
-      self.removeNeighboringPlaceholderRows(o.rowIndex);
+      self.removeNeighboringPlaceholderRows(row.id);
       if (o.rowHeight) {
         row.setRowHeight(o.rowHeight);
       }
@@ -628,8 +635,8 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         const indexInRow = o.locationInRow === "left" ? 0 : undefined;
         const tileModel = self.tileMap.put(snapshot);
         row.insertTileInRow(tileModel, indexInRow);
-        self.removePlaceholderTilesFromRow(o.rowIndex);
-        self.removeNeighboringPlaceholderRows(o.rowIndex);
+        self.removePlaceholderTilesFromRow(row);
+        self.removeNeighboringPlaceholderRows(row.id);
         if (o.rowHeight) {
           row.setRowHeight(Math.max((row.height || 0), o.rowHeight));
         }
@@ -637,19 +644,17 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       }
     },
     deleteRowAddingPlaceholderRowIfAppropriate(rowId: string) {
-      const rowIndex = self.getRowIndex(rowId);
-      self.deleteRow(rowId);
-      self.addPlaceholderRowIfAppropriate(rowIndex);
+      const rowList = self.getRowListForRow(rowId);
+      const rowIndex = rowList.getRowIndex(rowId);
+      const row = rowList.deleteRow(rowId);
+      self.addPlaceholderRowIfAppropriate(rowList, rowIndex);
+      return row;
     },
     showPendingInsertHighlight(show: boolean, insertRowIndex?: number) {
       self.highlightPendingDropLocation = show ? insertRowIndex ?? self.defaultInsertRow : -1;
     }
   }))
   .actions((self) => ({
-    addPlaceholderTile(sectionId?: string) {
-      const content = PlaceholderContentModel.create({ sectionId });
-      return self.addTileContentInNewRow(content, { rowIndex: self.rowCount });
-    },
     copyTilesIntoExistingRow(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
@@ -660,7 +665,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
           const uniqueTitle = title && self.getUniqueTitle(title);
           if (parsedContent?.content) {
             const rowOptions: INewTileOptions = {
-              rowIndex: rowInfo.rowDropIndex,
+              rowIndex: rowInfo.rowInsertIndex,
               locationInRow: rowInfo.rowDropLocation
             };
             if (tile.rowHeight) {
@@ -695,7 +700,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
               rowDelta++;
             }
             const tileOptions: INewTileOptions = {
-              rowList: rowInfo.rowList,
+              rowList: (rowInfo.rowDropId && self.getRowListForRow(rowInfo.rowDropId)) || self,
               rowId: lastRowId,
               rowIndex: rowInfo.rowInsertIndex + rowDelta,
               tileId: tile.newTileId,
@@ -732,25 +737,38 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         }
       });
     },
-    moveRowToIndex(rowIndex: number, newRowIndex: number) {
-      if (newRowIndex === 0) {
-        const dstRowId = self.rowOrder[0];
-        const dstRow = dstRowId && self.rowMap.get(dstRowId);
-        if (dstRow && dstRow.isSectionHeader) {
-          return;
-        }
+    moveRow(srcRowId: string, destRowId: string, position: "top" | "bottom") {
+      const srcRowList = self.getRowListForRow(srcRowId);
+      const srcRow = srcRowList.getRow(srcRowId);
+      if (!srcRow || !srcRowList) {
+        console.warn("Source row is missing", srcRowId);
+        return;
       }
-      const rowId = self.rowOrder[rowIndex];
-      self.rowOrder.splice(rowIndex, 1);
-      self.rowOrder.splice(newRowIndex <= rowIndex ? newRowIndex : newRowIndex - 1, 0, rowId);
-      self.addPlaceholderRowIfAppropriate(newRowIndex <= rowIndex ? rowIndex + 1 : rowIndex);
-      self.removeNeighboringPlaceholderRows(self.getRowIndex(rowId));
+      const dstRowList = self.getRowListForRow(destRowId);
+      const dstRow = dstRowList.getRow(destRowId);
+      const dstRowIndex = dstRowList.getRowIndex(destRowId);
+      if (!dstRow || !dstRowList) {
+        console.warn("Destination row is missing", destRowId);
+        return;
+      }
+      // Cannot move a row above a top section header.
+      if (position === "top" && dstRow.isSectionHeader && dstRowIndex === 0) {
+        return;
+      }
+
+      const row = self.deleteRowAddingPlaceholderRowIfAppropriate(srcRowId);
+      if (!row) {
+        console.warn("Failed to remove row to move it", srcRowId);
+        return;
+      }
+      const insertIndex = dstRowIndex + (position === "top" ? 0 : 1);
+      dstRowList.insertRow(row, insertIndex);
+
+      self.removeNeighboringPlaceholderRows(row.id);
     },
-    moveTileToRow(tileId: string, rowIndex: number, tileIndex?: number) {
-      const srcRowId = self.findRowIdContainingTile(tileId);
-      const srcRow = srcRowId && self.rowMap.get(srcRowId);
-      const dstRowId = self.rowOrder[rowIndex];
-      const dstRow = dstRowId && self.rowMap.get(dstRowId);
+    moveTileToRow(tileId: string, rowId: string, tileIndex?: number) {
+      const srcRow = self.getRowForTile(tileId);
+      const dstRow = rowId && self.getRowRecursive(rowId);
       const tile = self.getTile(tileId);
       if (srcRow && dstRow && tile && !dstRow.isSectionHeader) {
         if (srcRow === dstRow) {
@@ -776,32 +794,53 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         }
       }
     },
-    moveTileToNewRow(tileId: string, rowIndex: number) {
-      const srcRowId = self.findRowIdContainingTile(tileId);
-      const srcRow = srcRowId && self.rowMap.get(srcRowId);
+    createRowRelativeToRow(rowInfo: IDropRowInfo, rowSpec: TileRowSnapshotType) {
+      const { rowDropId, rowDropLocation } = rowInfo;
+      if (!rowDropId || !rowDropLocation) {
+        console.warn("Source row is missing", rowDropId);
+        return;
+      }
+      const rowList = self.getRowListForRow(rowDropId);
+      const row = self.getRowRecursive(rowDropId);
+      if (!rowList || !row) {
+        console.warn("Source row is missing", rowDropId);
+        return;
+      }
+      const insertIndex = rowList.getRowIndex(rowDropId) + (rowDropLocation === "top" ? 0 : 1);
+      const newRow = TileRowModel.create(rowSpec);
+      rowList.insertRow(newRow, insertIndex);
+      return newRow;
+    },
+    moveTileToNewRow(tileId: string, rowInfo: IDropRowInfo) {
+      const srcRow = self.findRowContainingTile(tileId);
       const tile = self.getTile(tileId);
-      if (!srcRowId || !srcRow || !tile) return;
+      if (!srcRow || !tile) return;
 
       // create tile, insert tile, insert row
       const rowSpec: TileRowSnapshotType = {};
       if (tile.isUserResizable) {
         rowSpec.height = srcRow.height;
       }
-      const dstRow = TileRowModel.create(rowSpec);
+      const dstRow = this.createRowRelativeToRow(rowInfo, rowSpec);
+      if (!dstRow) {
+        console.warn("Failed to create destination row", rowInfo);
+        return;
+      }
       dstRow.insertTileInRow(tile);
-      self.insertRow(dstRow, rowIndex);
-      self.removeNeighboringPlaceholderRows(rowIndex);
+      self.removeNeighboringPlaceholderRows(dstRow.id);
 
       // remove tile from source row
       srcRow.removeTileFromRow(tileId);
       if (!srcRow.tiles.length) {
-        self.deleteRowAddingPlaceholderRowIfAppropriate(srcRowId);
+        self.deleteRowAddingPlaceholderRowIfAppropriate(srcRow.id);
       }
       else {
         if (!srcRow.isUserResizable) {
           srcRow.height = undefined;
         }
       }
+      // Return the new row
+      return dstRow;
     },
     createTileContent(tileType: string, title?: string, url?: string): ITileContentModel {
       const contentInfo = getTileContentInfo(tileType);
@@ -857,25 +896,25 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       moveTile(tileId: string, rowInfo: IDropRowInfo, tileIndex = 0) {
         const srcRowId = self.findRowIdContainingTile(tileId);
         if (!srcRowId) return;
-        const srcRowIndex = self.getRowIndex(srcRowId);
-        const { rowInsertIndex, rowDropIndex, rowDropLocation } = rowInfo;
-        if ((rowDropIndex != null) && (rowDropLocation === "left")) {
-          self.moveTileToRow(tileId, rowDropIndex, tileIndex);
+
+        const { rowDropId, rowDropLocation } = rowInfo;
+        if (rowDropId && (rowDropLocation === "left")) {
+          self.moveTileToRow(tileId, rowDropId, tileIndex);
           return;
         }
-        if ((rowDropIndex != null) && (rowDropLocation === "right")) {
-          self.moveTileToRow(tileId, rowDropIndex);
+        if (rowDropId && (rowDropLocation === "right")) {
+          self.moveTileToRow(tileId, rowDropId);
           return;
         }
-        if ((srcRowIndex >= 0)) {
+        if (rowDropLocation === "top" || rowDropLocation === "bottom") {
           // if only one tile in source row, move the entire row
           if (self.numTilesInRow(srcRowId) === 1) {
-            if (rowInsertIndex !== srcRowIndex) {
-              self.moveRowToIndex(srcRowIndex, rowInsertIndex);
+            if (rowDropId) {
+              self.moveRow(srcRowId, rowDropId, rowDropLocation);
             }
           }
           else {
-            self.moveTileToNewRow(tileId, rowInsertIndex);
+            self.moveTileToNewRow(tileId, rowInfo);
           }
         }
       },
@@ -932,7 +971,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
                 const newRowIndex = newRowId ? self.getRowIndex(newRowId) : undefined;
                 insertRowInfo.rowDropLocation = "right";
                 if (newRowIndex != null) {
-                  insertRowInfo.rowInsertIndex = insertRowInfo.rowDropIndex = newRowIndex;
+                  insertRowInfo.rowInsertIndex = newRowIndex;
                 }
               }
             }
@@ -946,23 +985,28 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
   })
   .actions(self => ({
     mergeRow(srcRow: TileRowModelType, rowInfo: IDropRowInfo) {
-      const rowId = srcRow.id;
       srcRow.tiles.forEach((tile, index) => {
         self.moveTile(tile.tileId, rowInfo, index);
       });
-      self.deleteRow(rowId);
+      // MoveTile will delete the row when it's empty.
     },
-    moveTilesToNewRowAtIndex(rowTiles: IDragTileItem[], rowIndex: number) {
+    moveTilesToNewRow(rowTiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+      const { rowDropId } = rowInfo;
+      if (!rowDropId) {
+        console.warn("Missing rowDropId in rowInfo", rowInfo);
+        return;
+      }
+      let dstRow: TileRowModelType | undefined = undefined;
       rowTiles.forEach((tile, index) => {
         if (index === 0) {
-          self.moveTileToNewRow(tile.tileId, rowIndex);
+          dstRow = self.moveTileToNewRow(tile.tileId, rowInfo);
         }
         else {
-          self.moveTileToRow(tile.tileId, rowIndex);
+          self.moveTileToRow(tile.tileId, dstRow!.id, index);
         }
       });
     },
-    moveTilesToExistingRowAtIndex(rowTiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+    moveTilesToExistingRow(rowTiles: IDragTileItem[], rowInfo: IDropRowInfo) {
       rowTiles.forEach((tile, index) => {
         self.moveTile(tile.tileId, rowInfo, index);
       });
@@ -972,40 +1016,54 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     moveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
       if (tiles.length > 0) {
         // organize tiles by row
-        const tileRows: {[index: number]: IDragTileItem[]} = {};
+        const tileRows: {[id: string]: IDragTileItem[]} = {};
         tiles.forEach(tile => {
-          tileRows[tile.rowIndex] = tileRows[tile.rowIndex] || [];
-          tileRows[tile.rowIndex].push(tile);
+          const rowId = self.getRowIdForTile(tile.tileId);
+          if (rowId) {
+            tileRows[rowId] = tileRows[rowId] || [];
+            tileRows[rowId].push(tile);
+          }
         });
 
         // move each row
-        const { rowInsertIndex, rowDropLocation } = rowInfo;
+        const { rowDropId, rowDropLocation } = rowInfo;
+        const dstRow = rowInfo.rowDropId ? self.getRowRecursive(rowInfo.rowDropId) : undefined;
+        if (!rowDropId || !dstRow) {
+          console.warn("Drop row is missing", rowDropId);
+          return;
+        }
         Object.values(tileRows).forEach(rowTiles => {
-          const rowIndex = rowTiles[0].rowIndex;
-          const row = self.getRowByIndex(rowIndex);
+          const row = self.getRowForTile(rowTiles[0].tileId);
           if (row?.tiles.length === rowTiles.length) {
             if ((rowDropLocation === "left") || (rowDropLocation === "right")) {
               // entire row is being merged with an existing row
-              const dstRow = rowInfo.rowDropIndex ? self.getRowByIndex(rowInfo.rowDropIndex) : undefined;
-              if ((rowIndex !== rowInfo.rowDropIndex) && (dstRow && !dstRow.isSectionHeader)) {
+              if (dstRow && row.id !== dstRow?.id && !dstRow.isSectionHeader) {
                 self.mergeRow(row, rowInfo);
+              } else {
+                console.warn("Failed to merge row", row.id, "into", rowDropId,
+                  "Destination same as source, or is a section header");
+              }
+            }
+            else if (rowDropLocation === "top" || rowDropLocation === "bottom") {
+              // entire row is being moved to a new row
+              if (row.id !== dstRow.id) {
+                self.moveRow(row.id, rowDropId, rowDropLocation);
+              } else {
+                console.warn("Cannot move row", row.id, "onto itself");
               }
             }
             else {
-              // entire row is being moved to a new row
-              if ((rowInsertIndex < rowIndex) || (rowInsertIndex > rowIndex + 1)) {
-                self.moveRowToIndex(rowIndex, rowInsertIndex);
-              }
+              console.warn("Unknown row drop location", rowDropLocation);
             }
           }
           else {
             if ((rowDropLocation === "left") || (rowDropLocation === "right")) {
-              // part of row is being moved to an existing row
-              self.moveTilesToExistingRowAtIndex(rowTiles, rowInfo);
+              // part of row is being moved into an existing row
+              self.moveTilesToExistingRow(rowTiles, rowInfo);
             }
             else {
               // part of row is being moved to a new row
-              self.moveTilesToNewRowAtIndex(rowTiles, rowInsertIndex);
+              self.moveTilesToNewRow(rowTiles, rowInfo);
             }
           }
         });
@@ -1048,6 +1106,9 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       }
     },
     userMoveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+      // console.log("Document before moveTiles");
+      // console.log(self.debugDescribeThis(self.tileMap, "  "));
+      // console.log("moving tiles", tiles.map(t => t.tileId), "into", rowInfo);
       tiles.forEach(tileItem => {
         const tile = self.getTile(tileItem.tileId);
         tile && logTileDocumentEvent(LogEventName.MOVE_TILE, { tile });
@@ -1055,8 +1116,8 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       self.moveTiles(tiles, rowInfo);
     },
     userCopyTiles(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
-      const rowList = rowInfo.rowList ?? self;
-      const dropRow = (rowInfo.rowDropIndex != null) ? rowList.getRowByIndex(rowInfo.rowDropIndex) : undefined;
+      const rowList = (rowInfo.rowDropId && self.getRowListForRow(rowInfo.rowDropId)) || self;
+      const dropRow = (rowInfo.rowInsertIndex != null) ? rowList.getRowByIndex(rowInfo.rowInsertIndex) : undefined;
       const results = dropRow?.acceptTileDrop(rowInfo)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
                       : self.copyTilesIntoNewRows(tiles, rowInfo);

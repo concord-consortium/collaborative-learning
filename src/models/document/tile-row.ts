@@ -2,12 +2,10 @@ import { types, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { ITileModel } from "../tiles/tile-model";
 import { uniqueId } from "../../utilities/js-utils";
 import { withoutUndo } from "../history/without-undo";
-import { RowListType } from "./row-list";
 
 export interface IDropRowInfo {
-  rowList?: RowListType;
   rowInsertIndex: number;
-  rowDropIndex?: number;
+  rowDropId?: string;
   rowDropLocation?: string;
   updateTimestamp?: number;
 }

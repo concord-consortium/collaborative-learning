@@ -28,7 +28,9 @@ describe("QuestionContentModel", () => {
     expect(JSON.parse(json)).toEqual({
       type: "Question",
       version: 2,
-      locked: true
+      locked: true,
+      rowMap: {},
+      rowOrder: []
     });
   });
 });

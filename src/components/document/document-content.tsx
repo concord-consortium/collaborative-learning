@@ -1,13 +1,12 @@
 import React from "react";
 import { inject, observer } from "mobx-react";
 import { IReactionDisposer, reaction } from "mobx";
-import { findDOMNode } from "react-dom";
 import { throttle } from "lodash";
 import classNames from "classnames";
 import { DocumentDndContext } from "./document-dnd-context";
 import { BaseComponent, IBaseProps } from "../base";
-import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
-        extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
+import { kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
+        extractDragResizeModelHeight, extractDragResizeDomHeight, TileRowHandle } from "../document/tile-row";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { IDragToolCreateInfo, IDragTilesData } from "../../models/document/document-content-types";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
@@ -17,6 +16,8 @@ import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tiles/tile-component";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { RowListComponent } from "./row-list";
+import { DropRowContext } from "./drop-row-context";
+import { RowRefsContext } from "./row-refs-context";
 
 import "./document-content.sass";
 
@@ -57,7 +58,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   public state: IState = {};
 
   private domElement: HTMLElement | null;
-  private rowRefs: Array<TileRowComponent | null>;
+  private rowRefs: Array<TileRowHandle>;
   private mutationObserver: MutationObserver;
   private scrollDisposer: IReactionDisposer;
 
@@ -66,6 +67,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     this.rowRefs = [];
     this.domElement = null;
   }
+
+  private addRowRef = (ref: TileRowHandle) => {
+    this.rowRefs.push(ref);
+  };
 
   public componentDidMount() {
     if (this.domElement) {
@@ -91,7 +96,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         },
         (scrollToTileId: string | undefined) => {
           if (scrollToTileId) {
-            this.rowRefs.forEach((row: TileRowComponent | null) => {
+            this.rowRefs.forEach((row: TileRowHandle | null) => {
               if (row?.tileRowDiv && row.hasTile(scrollToTileId)) {
                 // Javascript struggles to scroll multiple elements at the same time,
                 // so we delay scrolling any document on the left and only animate the left document
@@ -158,19 +163,23 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     return (
       <DocumentDndContext>
-        <div className={documentClass}
-          data-testid="document-content"
-          data-document-key={this.props.documentId}
-          onScroll={this.handleScroll}
-          onClick={this.handleClick}
-          onDragOver={this.handleDragOver}
-          onDragLeave={this.handleDragLeave}
-          onDrop={this.handleDrop}
-          ref={(elt) => this.domElement = elt}
-        >
-          {this.renderRows()}
-          {this.renderSpacer()}
-        </div>
+        <DropRowContext.Provider value={this.state.dropRowInfo}>
+          <RowRefsContext.Provider value={{ addRowRef: this.addRowRef }}>
+            <div className={documentClass}
+              data-testid="document-content"
+              data-document-key={this.props.documentId}
+              onScroll={this.handleScroll}
+              onClick={this.handleClick}
+              onDragOver={this.handleDragOver}
+              onDragLeave={this.handleDragLeave}
+              onDrop={this.handleDrop}
+              ref={(elt) => this.domElement = elt}
+            >
+              {this.renderRows()}
+              {this.renderSpacer()}
+            </div>
+          </RowRefsContext.Provider>
+        </DropRowContext.Provider>
       </DocumentDndContext>
     );
   }
@@ -191,11 +200,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     const visibleRowIds: string[] = [];
     this.rowRefs.forEach((ref) => {
-      if (ref) {
-        // eslint-disable-next-line react/no-find-dom-node
-        const rowNode = findDOMNode(ref);
-        if (rowNode && isElementInViewport(rowNode as Element)) {
-          visibleRowIds.push(ref.props.model.id);
+      if (ref?.tileRowDiv) {
+        if (isElementInViewport(ref.tileRowDiv)) {
+          visibleRowIds.push(ref.id);
         }
       }
     });
@@ -222,16 +229,14 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (!content) { return null; }
     return (
       <RowListComponent
-        documentContentModel={content}
         rowListModel={content}
         documentContent={this.domElement}
-        rowRefs={this.rowRefs}
         context={this.props.context}
         documentId={this.props.documentId}
+        docId={content.contentId}
         typeClass={this.props.typeClass}
         scale={this.props.scale}
         readOnly={this.props.readOnly}
-        dropRowInfo={this.state.dropRowInfo}
         highlightPendingDropLocation={content.highlightPendingDropLocation}
       />
     );
@@ -329,13 +334,22 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     return ((x >= rect.left) && (x <= rect.right) && (y >= rect.top) && (y <= rect.bottom));
   }
 
+  // Given the index of an HTML .tile-row on the page, return the info for the row content object
+  private getDropInfoForGlobalRowIndex(globalRowIndex: number): IDropRowInfo {
+    const { content } = this.props;
+    const row = content?.allRows[globalRowIndex];
+    const rowList = row && content?.getRowListForRow(row.id);
+    const rowIndex = row && rowList?.getRowIndex(row.id);
+    if (!row || rowIndex === undefined || rowIndex === -1) return { rowInsertIndex: 0 };
+    return { rowDropId: row.id, rowInsertIndex: rowIndex };
+  }
+
+  // Determine whether the drag event is over a drop zone, and if so, which one
   private getDropRowInfo = (e: React.DragEvent<HTMLDivElement>) => {
     const { content } = this.props;
     if (!this.domElement) return { rowInsertIndex: content ? content.rowOrder.length : 0 };
 
-    const dropInfo: IDropRowInfo = {
-      rowInsertIndex: 0
-    };
+    let dropInfo: IDropRowInfo = { rowInsertIndex: 0 };
     const rowElements = this.domElement.getElementsByClassName("tile-row");
     const dropY = e.clientY;
     let dropDistance = Infinity;
@@ -345,18 +359,16 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       const rowBounds = rowElt.getBoundingClientRect();
       if (i === 0) {
         dist = Math.abs(dropY - rowBounds.top);
-        dropInfo.rowInsertIndex = i;
         dropDistance = dist;
       }
       dist = Math.abs(dropY - rowBounds.bottom);
       if (dist < dropDistance) {
-        dropInfo.rowInsertIndex = i + 1;
         dropDistance = dist;
       }
       if (this.isPointInRect(e.clientX, e.clientY, rowBounds) ||
           // below the last row - highlight bottom of last row
           ((i === rowElements.length - 1) && (e.clientY > rowBounds.bottom))) {
-        dropInfo.rowDropIndex = i;
+        dropInfo = this.getDropInfoForGlobalRowIndex(i);
 
         const dropOffsetLeft = Math.abs(e.clientX - rowBounds.left);
         const dropOffsetTop = Math.abs(e.clientY - rowBounds.top);
@@ -377,6 +389,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         }
         else {
           dropInfo.rowDropLocation = "bottom";
+          dropInfo.rowInsertIndex = i + 1;
         }
       }
     }

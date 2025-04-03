@@ -1,13 +1,15 @@
 import classNames from "classnames";
-import React from "react";
-import { observer, inject } from "mobx-react";
-import { BaseComponent } from "../base";
+import React, { useContext, useRef, useState, forwardRef, useCallback, useImperativeHandle } from "react";
+import { getParentOfType } from "mobx-state-tree";
+import { observer } from "mobx-react";
 import { TileLayoutModelType, TileRowModelType } from "../../models/document/tile-row";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { SectionHeader } from "../tiles/section-header";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { TileComponent, dragTileSrcDocId } from "../tiles/tile-component";
+import { useStores } from "../../hooks/use-stores";
+import { DocumentContentModel } from "../../models/document/document-content";
 
 import "./tile-row.sass";
 
@@ -64,7 +66,6 @@ interface IProps {
   model: TileRowModelType;
   rowIndex: number;
   height?: number;
-  tileMap: any;
   readOnly?: boolean;
   dropHighlight?: string;
 }
@@ -73,114 +74,141 @@ interface IState {
   tileAcceptDrop?: string;
 }
 
-@inject("stores")
-@observer
-export class TileRowComponent extends BaseComponent<IProps, IState> {
+export interface TileRowHandle {
+  id: string;
+  tileRowDiv: HTMLDivElement | null;
+  hasTile: (tileId?: string) => boolean;
+}
 
-  static contextType = TileApiInterfaceContext;
-  declare context: React.ContextType<typeof TileApiInterfaceContext>;
-  public state: IState = {};
+const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
+  const { model, typeClass, height: propHeight, readOnly, dropHighlight } = props;
+  const stores = useStores();
+  const [state, setState] = useState<IState>({});
+  const tileRowDiv = useRef<HTMLDivElement | null>(null);
+  const tileApiInterface = useContext(TileApiInterfaceContext);
+  const isSectionHeader = model.isSectionHeader;
 
-  public tileRowDiv: HTMLElement | null;
-  private transparentPixel: HTMLImageElement;
+  const documentContentModel = getParentOfType(model, DocumentContentModel);
+  const tileMap = documentContentModel?.tileMap;
 
-  constructor(props: IProps) {
-    super(props);
-    // When dragging to resize, we don't want to show any drag image.
-    // The API gives us no simple way to say 'no drag image', so we use a transparent pixel.
-    // See https://stackoverflow.com/questions/7680285/how-do-you-turn-off-setdragimage
-    this.transparentPixel = document.createElement("img");
-    this.transparentPixel.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+  if (!tileMap) {
+    throw new Error("Tile map not found");
   }
 
-  public render() {
-    const { model, typeClass } = this.props;
-    const { isSectionHeader, sectionId, tiles } = model;
-    // ignore height setting for section header rows
-    const height = !isSectionHeader
-                      ? this.props.height || model.height || this.getContentHeight()
-                      : undefined;
-    const style = height ? { height } : undefined;
-    const renderableTiles = tiles?.filter(tile => this.isTileRenderable(tile.tileId));
-    const hasTeacherTiles = tiles.some(tile => this.getTile(tile.tileId)?.display === "teacher");
-    const classes = classNames("tile-row", { "has-teacher-tiles": hasTeacherTiles });
-    if (!isSectionHeader && !renderableTiles.length) return null;
-    return (
-      <div className={classes} data-row-id={model.id}
-          style={style} ref={elt => this.tileRowDiv = elt}>
-        { isSectionHeader && sectionId
-          ? <SectionHeader type={sectionId} typeClass={typeClass}/>
-          : this.renderTiles(renderableTiles, height)
-        }
-        {!this.props.readOnly && this.renderDragDropHandles()}
-      </div>
-    );
-  }
+  // Expose the required methods and properties to the parent component
+  useImperativeHandle(ref, () => ({
+    id: model.id,
+    get tileRowDiv() {
+      return tileRowDiv.current;
+    },
+    hasTile(tileId?: string) {
+      return tileId ? model.hasTile(tileId) : false;
+    }
+  }), [model]);
 
-  private getTile(tileId: string) {
-    return this.props.tileMap.get(tileId) as ITileModel | undefined;
-  }
+  // Create transparent pixel for drag image
+  // When dragging to resize, we don't want to show any drag image.
+  // The API gives us no simple way to say 'no drag image', so we use a transparent pixel.
+  // See https://stackoverflow.com/questions/7680285/how-do-you-turn-off-setdragimage
+  const transparentPixel = React.useMemo(() => {
+    const img = document.createElement("img");
+    img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+    return img;
+  }, []);
 
-  public hasTile(tileId?: string) {
-    return tileId && this.props.model.hasTile(tileId);
-  }
+  const getTile = useCallback((tileId: string) => {
+    return tileMap.get(tileId) as ITileModel | undefined;
+  }, [tileMap]);
 
-  private isTileRenderable(tileId: string) {
-    const tile = this.getTile(tileId);
-    return !!tile && (!tile.display || this.stores.isShowingTeacherContent);
-  }
+  const isTileRenderable = useCallback((tileId: string) => {
+    const tile = getTile(tileId);
+    return !!tile && (!tile.display || stores.isShowingTeacherContent);
+  }, [getTile, stores.isShowingTeacherContent]);
 
-  private getTileWidth(tileId: string, tiles: TileLayoutModelType[]) {
-    // for now, distribute tiles evenly
+  const getTileWidth = useCallback((tileId: string, tiles: TileLayoutModelType[]) => {
     return 100 / (tiles.length || 1);
-  }
+  }, []);
 
-  private getContentHeight() {
-    return this.props.model.getContentHeight((tileId: string) => {
-      // if the tile has a specific content height, use it
-      const tileApiInterface = this.context;
+  const getContentHeight = useCallback(() => {
+    return model.getContentHeight((tileId: string) => {
       const tileApi = tileApiInterface?.getTileApi(tileId);
       const contentHeight = tileApi?.getContentHeight?.();
       if (contentHeight) return contentHeight;
       // otherwise, use the default height for this type of tile
-      const tile = this.getTile(tileId);
+      const tile = getTile(tileId);
       const tileType = tile?.content.type;
       const contentInfo = getTileContentInfo(tileType);
       if (contentInfo?.defaultHeight) return contentInfo.defaultHeight;
     });
-  }
+  }, [model, tileApiInterface, getTile]);
 
-  private renderTiles(tiles: TileLayoutModelType[], rowHeight?: number) {
-    const { model, tileMap, ...others } = this.props;
+  const handleSetCanAcceptDrop = useCallback((tileId?: string) => {
+    setState({ tileAcceptDrop: tileId });
+  }, []);
 
-    return tiles.map((tileRef, index) => {
-      const tileModel = this.getTile(tileRef.tileId);
-      const tileWidthPct = this.getTileWidth(tileRef.tileId, tiles);
+  const handleRequestRowHeight = useCallback((tileId: string, ht?: number, deltaHeight?: number) => {
+    const { height, tileCount, setRowHeightWithoutUndo } = model;
+    const newHeight = ht != null && deltaHeight != null
+                        ? ht + deltaHeight
+                        : ht;
+    // don't shrink the height of a multi-tile row based on a request from a single tile
+    if ((tileCount > 1) && (height != null) && (newHeight != null) && (newHeight < height)) return;
+    (newHeight != null) && setRowHeightWithoutUndo(newHeight);
+  }, [model]);
 
+  const handleStartResizeRow = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    const { docId } = props;
+    const { id } = model;
+    e.dataTransfer.setDragImage(transparentPixel, 0, 0);
+    e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
+    e.dataTransfer.setData(kDragResizeRowId, id);
+    e.dataTransfer.setData(dragResizeRowId(id), id);
+    e.dataTransfer.setData(dragResizeRowY(e.clientY), String(e.clientY));
+    if (model.height) {
+      e.dataTransfer.setData(dragResizeRowModelHeight(model.height), String(model.height));
+    }
+    if (tileRowDiv.current) {
+      const boundingBox = tileRowDiv.current.getBoundingClientRect();
+      e.dataTransfer.setData(dragResizeRowDomHeight(boundingBox.height), String(boundingBox.height));
+    }
+  }, [props, model, transparentPixel]);
+
+  const renderTiles = useCallback((tileRefs: TileLayoutModelType[], tileHeight?: number) => {
+    const { docId, documentContent, scale, documentId } = props;
+    return tileRefs.map((tileRef, index) => {
+      const tileModel = getTile(tileRef.tileId);
+      const tileWidthPct = getTileWidth(tileRef.tileId, tileRefs);
       return tileModel
               ? <TileComponent
                   key={tileModel.id}
                   model={tileModel}
                   widthPct={tileWidthPct}
-                  height={rowHeight}
+                  height={tileHeight}
                   isUserResizable={model.isUserResizable}
-                  onResizeRow={this.handleStartResizeRow}
-                  onSetCanAcceptDrop={this.handleSetCanAcceptDrop}
-                  onRequestRowHeight={this.handleRequestRowHeight}
-                  {...others}
+                  onResizeRow={handleStartResizeRow}
+                  onSetCanAcceptDrop={handleSetCanAcceptDrop}
+                  onRequestRowHeight={handleRequestRowHeight}
+                  documentId={documentId}
+                  docId={docId}
+                  documentContent={documentContent}
+                  scale={scale}
+                  readOnly={readOnly}
+                  context={props.context}
                 />
               : null;
     });
-  }
+  }, [props, getTile, getTileWidth, model.isUserResizable, handleStartResizeRow, handleSetCanAcceptDrop,
+    handleRequestRowHeight, readOnly]);
 
-  private renderDragDropHandles() {
-    const { model: { isUserResizable }, rowIndex, dropHighlight } = this.props;
-    const highlight = this.state.tileAcceptDrop ? undefined : dropHighlight;
-    const { isSectionHeader } = this.props.model;
+  const renderDragDropHandles = useCallback(() => {
+    const { isUserResizable } = model;
+    const { rowIndex } = props;
+    const highlight = state.tileAcceptDrop ? undefined : dropHighlight;
     const showTopHighlight = (highlight === "top") && (!isSectionHeader || (rowIndex > 0));
     const showLeftHighlight = (highlight === "left") && !isSectionHeader;
     const showRightHighlight = (highlight === "right") && !isSectionHeader;
     const showBottomHighlight = (highlight === "bottom");
+
     return [
       <div key="top-drop-feedback"
           className={`drop-feedback top ${showTopHighlight ? "show" : ""}`} />,
@@ -193,40 +221,32 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
       <div key="bottom-resize-handle"
         className={`bottom-resize-handle ${isUserResizable ? "enable" : "disable"}`}
         draggable={isUserResizable}
-        onDragStart={isUserResizable ? this.handleStartResizeRow : undefined} />
+        onDragStart={isUserResizable ? handleStartResizeRow : undefined} />
     ];
-  }
+  }, [model, props, state.tileAcceptDrop, dropHighlight, isSectionHeader, handleStartResizeRow]);
 
-  private handleSetCanAcceptDrop = (tileId?: string) => {
-    this.setState({ tileAcceptDrop: tileId });
-  };
+  const { sectionId, tiles: modelTiles } = model;
+  const rowHeight = !isSectionHeader
+                    ? propHeight || model.height || getContentHeight()
+                    : undefined;
+  const style = rowHeight ? { height: rowHeight } : undefined;
+  const renderableTiles = modelTiles?.filter(tile => isTileRenderable(tile.tileId));
+  const hasTeacherTiles = modelTiles.some(tile => getTile(tile.tileId)?.display === "teacher");
+  const classes = classNames("tile-row", { "has-teacher-tiles": hasTeacherTiles });
+  if (!isSectionHeader && !renderableTiles.length) return null;
 
-  private handleRequestRowHeight = (tileId: string, height?: number, deltaHeight?: number) => {
-    const { height: rowHeight, tileCount, setRowHeightWithoutUndo } = this.props.model;
-    const newHeight = rowHeight != null && deltaHeight != null
-                        ? rowHeight + deltaHeight
-                        : height;
-    // don't shrink the height of a multi-tile row based on a request from a single tile
-    if ((tileCount > 1) && (rowHeight != null) && (newHeight != null) && (newHeight < rowHeight)) return;
-    (newHeight != null) && setRowHeightWithoutUndo(newHeight);
-  };
+  return (
+    <div className={classes} data-row-id={model.id}
+        style={style} ref={tileRowDiv}>
+      { isSectionHeader && sectionId
+        ? <SectionHeader type={sectionId} typeClass={typeClass}/>
+        : renderTiles(renderableTiles, rowHeight)
+      }
+      {!readOnly && renderDragDropHandles()}
+    </div>
+  );
+});
 
-  // Starts a resize operation.
-  // The handlers for drag, dragover etc are in the DocumentContentComponent
-  private handleStartResizeRow = (e: React.DragEvent<HTMLDivElement>) => {
-    const { model, docId } = this.props;
-    const { id } = model;
-    e.dataTransfer.setDragImage(this.transparentPixel, 0, 0);
-    e.dataTransfer.setData(dragTileSrcDocId(docId), docId);
-    e.dataTransfer.setData(kDragResizeRowId, id);
-    e.dataTransfer.setData(dragResizeRowId(id), id);
-    e.dataTransfer.setData(dragResizeRowY(e.clientY), String(e.clientY));
-    if (model.height) {
-      e.dataTransfer.setData(dragResizeRowModelHeight(model.height), String(model.height));
-    }
-    if (this.tileRowDiv) {
-      const boundingBox = this.tileRowDiv.getBoundingClientRect();
-      e.dataTransfer.setData(dragResizeRowDomHeight(boundingBox.height), String(boundingBox.height));
-    }
-  };
-}
+TileRowComponent.displayName = "TileRowComponent";
+
+export default observer(TileRowComponent);

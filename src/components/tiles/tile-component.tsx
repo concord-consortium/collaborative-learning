@@ -174,7 +174,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     this.domElement?.addEventListener("mousedown", this.handlePointerDown, options);
   }
 
-  public componentDidUpdate() {
+  public componentDidUpdate(prevProps: IProps) {
     if (this.domElement && !this.resizeObserver) {
       this.resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
         for (const entry of entries) {

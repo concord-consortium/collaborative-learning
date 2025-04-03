@@ -89,8 +89,8 @@ describe("DocumentContentModel", () => {
       title: "Image 1",
       insertRowInfo: {
         rowInsertIndex: 1,
-        rowDropIndex: 1,
-        rowDropLocation: "bottom"
+        rowDropId: textTile2RowId,
+        rowDropLocation: "top"
       }
     });
 
@@ -110,7 +110,7 @@ describe("DocumentContentModel", () => {
       title: "Image 2",
       insertRowInfo: {
         rowInsertIndex: 3,
-        rowDropIndex: 3,
+        rowDropId: textTile2RowId,
         rowDropLocation: "bottom"
       }
     });
@@ -143,7 +143,7 @@ describe("DocumentContentModel", () => {
       title: "Image 1",
       insertRowInfo: {
         rowInsertIndex: 1,
-        rowDropIndex: 1,
+        rowDropId: textTile2RowId,
         rowDropLocation: "left"
       }
     });
@@ -318,10 +318,10 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     );
     content.addTile("text", { title: "Text 1" });
     // [Header:A, Placeholder, Header:B, Text]
-    content.moveRowToIndex(3, 1);
+    content.moveRow(content.rowOrder[3], content.rowOrder[1], "bottom");
     // [Header:A, Text, Header:B, Placeholder]
     // moving to row 0 when row 0 is a section header is a no-op
-    content.moveRowToIndex(1, 0);
+    content.moveRow(content.rowOrder[1], content.rowOrder[0], "top");
 
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
@@ -336,7 +336,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     const content = createDocumentContent(
       "[Header:A, Text, Header:B, Placeholder]"
     );
-    content.moveRowToIndex(1, 3);
+    content.moveRow(content.rowOrder[1], content.rowOrder[3], "bottom");
 
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
@@ -352,7 +352,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       "[Header:A, Placeholder, Header:B, Text]"
     );
     const tileId = content.getRowByIndex(3)!.tiles[0].tileId;
-    content.moveTileToNewRow(tileId, 2);
+    const rowInfo = { rowInsertIndex: 2, rowDropId: content.getRowByIndex(2)!.id, rowDropLocation: "top" };
+    content.moveTileToNewRow(tileId, rowInfo);
 
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
@@ -368,7 +369,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       "[Header:A, Text, Header:B, Placeholder]"
     );
     const tileId = content.getRowByIndex(1)!.tiles[0].tileId;
-    content.moveTileToNewRow(tileId, 4);
+    const rowInfo = { rowInsertIndex: 4, rowDropId: content.getRowByIndex(3)!.id, rowDropLocation: "bottom" };
+    content.moveTileToNewRow(tileId, rowInfo);
 
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
@@ -384,7 +386,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       "[Header:A, Placeholder, Header:B, Text]"
     );
     const tileId = content.getRowByIndex(3)!.tiles[0].tileId;
-    content.moveTileToRow(tileId, 1);
+    content.moveTileToRow(tileId, content.getRowByIndex(1)!.id);
 
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
@@ -400,7 +402,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       "[Header:A, Text, Header:B, Placeholder]"
     );
     const tileId = content.getRowByIndex(1)!.tiles[0].tileId;
-    content.moveTileToRow(tileId, 3, 0);
+    content.moveTileToRow(tileId, content.getRowByIndex(3)!.id, 0);
 
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
@@ -444,7 +446,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       "[Header:A, Placeholder, Header:B, Text]"
     );
     const tileId = content.getRowByIndex(3)!.tiles[0].tileId;
-    content.moveTile(tileId, { rowDropIndex: 1, rowDropLocation: "right", rowInsertIndex: 1 });
+    content.moveTile(tileId, { rowDropId: content.getRowByIndex(1)!.id, rowDropLocation: "right", rowInsertIndex: 1 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
@@ -452,7 +454,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Placeholder: "B" }
     ]);
 
-    content.moveTile(tileId, { rowDropIndex: 3, rowDropLocation: "left", rowInsertIndex: 3 });
+    content.moveTile(tileId, { rowDropId: content.getRowByIndex(3)!.id, rowDropLocation: "left", rowInsertIndex: 3 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
       { Placeholder: "A" },
@@ -460,7 +462,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);
 
-    content.moveTile(tileId, { rowInsertIndex: 1 });
+    content.moveTile(tileId, { rowDropId: content.getRowByIndex(1)!.id, rowDropLocation: "top", rowInsertIndex: 1 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
@@ -468,7 +470,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Placeholder: "B" }
     ]);
 
-    content.moveTile(tileId, { rowInsertIndex: 3 });
+    content.moveTile(tileId, { rowDropId: content.getRowByIndex(3)!.id, rowDropLocation: "bottom", rowInsertIndex: 3 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
       { Placeholder: "A" },
@@ -476,7 +478,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);
 
-    content.addTile("geometry", { title: "Coordinate Grid 1", insertRowInfo: { rowInsertIndex: 2 } });
+    content.addTile("geometry", { title: "Coordinate Grid 1",
+      insertRowInfo: { rowDropId: content.getRowByIndex(1)!.id, rowDropLocation: "bottom", rowInsertIndex: 2 } });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
       { title: "Coordinate Grid 1",
@@ -496,7 +499,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     ]);
 
     const geometryId = content.getRowByIndex(1)!.tiles[0].tileId;
-    content.moveTile(geometryId, { rowDropIndex: 3, rowDropLocation: "left", rowInsertIndex: 3 });
+    content.moveTile(geometryId,
+      { rowDropId: content.getRowByIndex(3)!.id, rowDropLocation: "left", rowInsertIndex: 3 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
       { Placeholder: "A" },
@@ -517,7 +521,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       ],
     ]);
 
-    content.moveTile(geometryId, { rowDropIndex: 1, rowDropLocation: "left", rowInsertIndex: 1 });
+    content.moveTile(geometryId,
+      { rowDropId: content.getRowByIndex(1)!.id, rowDropLocation: "left", rowInsertIndex: 1 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
         { title: "Coordinate Grid 1", content: {
@@ -541,7 +546,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       "[Header:A, [Geometry, Text], Header:B, Text]"
     );
     const tileId = content.getRowByIndex(1)!.tiles[1].tileId;
-    content.moveTileToRow(tileId, 1, 0);
+    content.moveTileToRow(tileId, content.getRowByIndex(1)!.id, 0);
+
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
       [

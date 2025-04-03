@@ -24,11 +24,11 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
 .views(self => ({
   getTilePositions(tileIds: string[]) {
     return tileIds.map(tileId => {
-      const rowId = self.findRowIdContainingTile(tileId);
-      const rowIndex = rowId && self.getRowIndex(rowId) || 0;
-      const row = rowId ? self.getRow(rowId) : undefined;
-      const tileIndex = row?.tiles.findIndex(t => t.tileId === tileId) || 0;
-      return { tileId, rowIndex, row, tileIndex };
+      const rowList = self.getRowListContainingTileIds([tileId])!;
+      const row = self.findRowContainingTile(tileId);
+      const rowIndex = row && rowList.getRowIndex(row.id) || 0;
+      const tileIndex = row?.indexOfTile(tileId) || 0;
+      return { tileId, rowList, rowIndex, row, tileIndex };
     });
   }
 }))
@@ -41,7 +41,10 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
 
     const tilePositions = self.getTilePositions(tileIds);
 
-    tilePositions.forEach(({ tileId, rowIndex, row, tileIndex }) => {
+    tilePositions.forEach((tilePosition) => {
+      if (!tilePosition) return;
+      // TODO rowList should be handled.
+      const { tileId, rowIndex, row, tileIndex } = tilePosition;
       // Note: previously this function would be passed the tileModel being
       // dragged. It would accept a tileId if it matched the tileModel.id even if
       // `documentContent.getTile(tileId)` did not return a tile model. This seems

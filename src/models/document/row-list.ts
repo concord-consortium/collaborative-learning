@@ -1,4 +1,4 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, types, detach } from "mobx-state-tree";
 import { ITileModel } from "../tiles/tile-model";
 import { TileRowModel, TileRowModelType } from "./tile-row";
 
@@ -42,6 +42,30 @@ export const RowList = types
     get tileIds() {
       return self.rowOrder.flatMap(rowId => this.getRow(rowId)?.allTileIds ?? []);
     },
+    // Returns a string that describes the row list and its contents.
+    // For testing/debugging purposes only, but may be useful to keep.
+    debugDescribeThis(tileMap: Map<string, ITileModel>, indent: string): string {
+      return self.rowOrder.map(rowId => {
+        const row = self.rowMap.get(rowId);
+        const embedded: RowListType[] = [];
+        if (row) {
+          return indent + row.id + ": " +
+            row?.tiles.map(tileLayout => {
+              const tile = tileMap.get(tileLayout.tileId);
+              if (tile?.content && isRowListContainer(tile.content)) {
+                embedded.push(tile.content);
+              }
+              return "[" + (tile?.content.type || "No type") + ": " + tile?.id + "]";
+            }).join(" ") +
+            embedded.map(rowList => {
+              return "\n" + indent + "Contents of embedded row list:\n"
+              + rowList.debugDescribeThis(tileMap, indent + "  ");
+            }).join("\n");
+        } else {
+          return indent + "[" + rowId + " (nonexistent)]";
+        }
+      }).join("\n");
+    },
   }))
   .actions(self => ({
     insertRow(row: TileRowModelType, index?: number) {
@@ -53,19 +77,31 @@ export const RowList = types
         self.rowOrder.push(row.id);
       }
     },
+    // Deletes the row, and returns its content as a detached object.
     deleteRow(rowId: string) {
-      self.rowOrder.remove(rowId);
-      self.rowMap.delete(rowId);
+      const existingRow = self.rowMap.get(rowId);
+      if (existingRow) {
+        const row = detach(existingRow);
+        self.rowOrder.remove(rowId);
+        self.rowMap.delete(rowId);
+        return row;
+      }
     },
     setVisibleRows(rows: string[]) {
       self.visibleRows = rows;
-    }
+    },
   }))
   .actions(self => ({
     addRowWithTiles(tiles: ITileModel[]) {
       const row = TileRowModel.create({});
       tiles.forEach(tile => row.insertTileInRow(tile));
       self.insertRow(row);
+    },
+    addNewTileInNewRowAtIndex(tile: ITileModel, rowIndex: number) {
+      const row = TileRowModel.create({});
+      self.insertRow(row, rowIndex);
+      row.insertTileInRow(tile);
+      return row;
     }
   }));
 

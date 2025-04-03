@@ -171,7 +171,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
       const dragTiles = getDocumentDragTileItems(["textTool1"]);
       const dropRowInfo: IDropRowInfo = {
         rowInsertIndex: 0,
-        rowDropIndex: documentContent.getRowIndex("introductionRow2"),
+        rowDropId: documentContent.rowOrder[2],
         rowDropLocation: "left"
       };
       documentContent.moveTiles(dragTiles, dropRowInfo);
@@ -193,7 +193,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
       const dragTiles = getDocumentDragTileItems(["textTool1"]);
       const dropRowInfo: IDropRowInfo = {
         rowInsertIndex: 0,
-        rowDropIndex: documentContent.getRowIndex("introductionRow2"),
+        rowDropId: "introductionRow2",
         rowDropLocation: "right"
       };
       documentContent.moveTiles(dragTiles, dropRowInfo);
@@ -214,7 +214,8 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
       // move textTool1 after the row with drawingTool1
       const dragTiles = getDocumentDragTileItems(["textTool1"]);
       const dropRowInfo: IDropRowInfo = {
-        rowInsertIndex: documentContent.getRowIndex("introductionRow2") + 1
+        rowInsertIndex: documentContent.getRowIndex("introductionRow2") + 1,
+        rowDropId: "introductionRow2"
       };
       documentContent.moveTiles(dragTiles, dropRowInfo);
       expect(getRowLayout()).toEqual({
@@ -235,7 +236,8 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
       // move drawingTool1 before the row with textTool1
       const dragTiles = getDocumentDragTileItems(["drawingTool1"]);
       const dropRowInfo: IDropRowInfo = {
-        rowInsertIndex: documentContent.getRowIndex("introductionRow1")
+        rowInsertIndex: documentContent.getRowIndex("introductionRow1"),
+        rowDropId: "introductionRow1"
       };
       documentContent.moveTiles(dragTiles, dropRowInfo);
       expect(getRowLayout()).toEqual({
@@ -258,7 +260,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
       const whatIfRowIndex = documentContent.getRowIndex("whatIfRow1");
       const dropRowInfo: IDropRowInfo = {
         rowInsertIndex: whatIfRowIndex,
-        rowDropIndex: whatIfRowIndex
+        rowDropId: "whatIfRow1"
       };
       documentContent.copyTilesIntoExistingRow(dragTiles, dropRowInfo);
       expect(getRowLayout()).toEqual({
@@ -283,7 +285,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         const dragTiles = getDocumentDragTileItems(["graphTool", "textTool2"]);
         const dropRowInfo: IDropRowInfo = {
           rowInsertIndex: 0,
-          rowDropIndex: documentContent.getRowIndex("introductionRow1"),
+          rowDropId: "introductionRow1",
           rowDropLocation: "left"
         };
         documentContent.moveTiles(dragTiles, dropRowInfo);
@@ -306,7 +308,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         const dragTiles = getDocumentDragTileItems(["graphTool", "textTool2"]);
         const dropRowInfo: IDropRowInfo = {
           rowInsertIndex: 0,
-          rowDropIndex: documentContent.getRowIndex("introductionRow1"),
+          rowDropId: "introductionRow1",
           rowDropLocation: "right"
         };
         documentContent.moveTiles(dragTiles, dropRowInfo);
@@ -328,7 +330,9 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         // move graphTool and textTool2 to a new row before introductionRow1
         const dragTiles = getDocumentDragTileItems(["graphTool", "textTool2"]);
         const dropRowInfo: IDropRowInfo = {
-          rowInsertIndex: documentContent.getRowIndex("introductionRow1")
+          rowInsertIndex: documentContent.getRowIndex("introductionRow1"),
+          rowDropId: "introductionRow1",
+          rowDropLocation: "top"
         };
         documentContent.moveTiles(dragTiles, dropRowInfo);
         expect(getRowLayout()).toEqual({
@@ -349,7 +353,9 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
       it("can move after another row", () => {
         const dragTiles = getDocumentDragTileItems(["graphTool", "textTool2"]);
         const dropRowInfo: IDropRowInfo = {
-          rowInsertIndex: documentContent.getRowIndex("introductionRow1") + 1
+          rowInsertIndex: documentContent.getRowIndex("introductionRow1") + 1,
+          rowDropId: "introductionRow1",
+          rowDropLocation: "bottom"
         };
         documentContent.moveTiles(dragTiles, dropRowInfo);
         expect(getRowLayout()).toEqual({
@@ -374,7 +380,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         const dragTiles = getDocumentDragTileItems(["tableTool", "imageTool"]);
         const dropRowInfo: IDropRowInfo = {
           rowInsertIndex: 0,
-          rowDropIndex: documentContent.getRowIndex("introductionRow1"),
+          rowDropId: "introductionRow1",
           rowDropLocation: "left"
         };
         documentContent.moveTiles(dragTiles, dropRowInfo);
@@ -396,7 +402,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         const dragTiles = getDocumentDragTileItems(["tableTool", "imageTool"]);
         const dropRowInfo: IDropRowInfo = {
           rowInsertIndex: 0,
-          rowDropIndex: documentContent.getRowIndex("introductionRow1"),
+          rowDropId: "introductionRow1",
           rowDropLocation: "right"
         };
         documentContent.moveTiles(dragTiles, dropRowInfo);
@@ -417,7 +423,8 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         // move tableTool and imageTool to before introductionRow1
         const dragTiles = getDocumentDragTileItems(["tableTool", "imageTool"]);
         const dropRowInfo: IDropRowInfo = {
-          rowInsertIndex: documentContent.getRowIndex("introductionRow1")
+          rowInsertIndex: documentContent.getRowIndex("introductionRow1"),
+          rowDropId: "introductionRow1"
         };
         documentContent.moveTiles(dragTiles, dropRowInfo);
         expect(getRowLayout()).toEqual({
@@ -438,7 +445,8 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         // move tableTool and imageTool to after introductionRow1
         const dragTiles = getDocumentDragTileItems(["tableTool", "imageTool"]);
         const dropRowInfo: IDropRowInfo = {
-          rowInsertIndex: documentContent.getRowIndex("introductionRow1") + 1
+          rowInsertIndex: documentContent.getRowIndex("introductionRow1") + 1,
+          rowDropId: "introductionRow1"
         };
         documentContent.moveTiles(dragTiles, dropRowInfo);
         expect(getRowLayout()).toEqual({

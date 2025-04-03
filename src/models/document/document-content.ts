@@ -230,10 +230,9 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       }
 
       if (targetRow) {
-        const rowIndex = self.getRowIndex(targetRow.id);
         self.copyTilesIntoExistingRow([tile], {
           rowInsertIndex: 0, // this is ignored
-          rowDropIndex: rowIndex,
+          rowDropId: targetRow.id,
           rowDropLocation: "right"
         });
       }
@@ -448,7 +447,9 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     // Might be the whole document or a Question tile.
     const tileIds = tiles.map(tile => tile.tileId);
     const rowList = self.getRowListContainingTileIds(tileIds);
-
+    if (!rowList) {
+      return;
+    }
     // New tiles go into a row after the last copied tile
     const rowIndex = self.getRowAfterTiles(tiles);
 
@@ -466,7 +467,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       snapshots,
       annotations,
       false, // duplicating within same document
-      { rowList, rowInsertIndex: rowIndex }
+      { rowDropId: rowList.rowOrder[rowIndex-1], rowInsertIndex: rowIndex }
     );
   },
   /**
