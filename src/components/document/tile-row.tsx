@@ -174,7 +174,7 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
   }, [props, model, transparentPixel]);
 
   const renderTiles = useCallback((tileRefs: TileLayoutModelType[], tileHeight?: number) => {
-    const { docId, documentContent, scale, documentId } = props;
+      const { docId, documentContent, scale, documentId } = props;
     return tileRefs.map((tileRef, index) => {
       const tileModel = getTile(tileRef.tileId);
       const tileWidthPct = getTileWidth(tileRef.tileId, tileRefs);
@@ -184,7 +184,7 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
                   model={tileModel}
                   widthPct={tileWidthPct}
                   height={tileHeight}
-                  isUserResizable={model.isUserResizable}
+                  isUserResizable={!readOnly && model.isUserResizable}
                   onResizeRow={handleStartResizeRow}
                   onSetCanAcceptDrop={handleSetCanAcceptDrop}
                   onRequestRowHeight={handleRequestRowHeight}

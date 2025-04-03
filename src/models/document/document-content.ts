@@ -416,6 +416,8 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         self.addArrow(ArrowAnnotation.create(newAnnotationSnapshot));
       }
     });
+
+    return updatedTiles;
   }
 }))
 .actions(self => ({
@@ -537,7 +539,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     };
   },
   applyCopySpec(copySpec: ICopySpec, isCrossingDocuments: boolean) {
-    self.copyTiles(
+    return self.copyTiles(
       copySpec.tiles, copySpec.sharedModelEntries, copySpec.annotations, isCrossingDocuments, undefined, copySpec
     );
   },

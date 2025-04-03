@@ -115,7 +115,7 @@ export const UIModel = types
       dialogResolver = undefined;
     };
 
-    const setOrAppendTileIdToSelection = (tileId?: string, options?: {append: boolean}) => {
+    const setOrAppendTileIdToSelection = (tileId?: string, options?: {append: boolean, dragging?: boolean}) => {
       if (tileId) {
         const tileIdIndex = self.selectedTileIds.indexOf(tileId);
         const isCurrentlySelected = tileIdIndex >= 0;
@@ -128,7 +128,12 @@ export const UIModel = types
           else {
             self.selectedTileIds.push(tileId);
           }
-        } else if (!isCurrentlySelected) {
+        } else if (options?.dragging) {
+          // dragging a tile adds it to the selection
+          if (!isCurrentlySelected) {
+            self.selectedTileIds.push(tileId);
+          }
+        } else if (!options?.dragging) {
           self.selectedTileIds.replace([tileId]);
         }
         // clicking on an already-selected tile doesn't change selection
@@ -174,10 +179,10 @@ export const UIModel = types
         self.error = null;
       },
 
-      setSelectedTile(tile?: ITileModel, options?: {append: boolean}) {
+      setSelectedTile(tile?: ITileModel, options?: {append: boolean, dragging?: boolean}) {
         setOrAppendTileIdToSelection(tile && tile.id, options);
       },
-      setSelectedTileId(tileId: string, options?: {append: boolean}) {
+      setSelectedTileId(tileId: string, options?: {append: boolean, dragging?: boolean}) {
         setOrAppendTileIdToSelection(tileId, options);
       },
       removeTileIdFromSelection(tileId: string) {
