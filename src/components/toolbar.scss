@@ -27,7 +27,7 @@
     cursor: pointer;
 
     // the :not() here is for tools that shouldn't have their svg updated
-    &:not(.fourup) {
+    &:not(.fourup):not(.copytoworkspace):not(.copytodocument) {
       svg path {
         fill: $charcoal-dark-1;
         pointer-events: none;

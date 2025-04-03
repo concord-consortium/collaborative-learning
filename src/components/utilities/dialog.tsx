@@ -72,7 +72,9 @@ export class DialogComponent extends BaseComponent<IProps> {
                 {Icon && <Icon />}
               </div>
               <div className="dialog-title-text">{title}</div>
-              <button onClick={this.handleCancelDialog}><CloseIcon /></button>
+              <div className="dialog-title-cancel">
+                <button onClick={this.handleCancelDialog}><CloseIcon /></button>
+              </div>
             </div>
             {contents}
           </div>
