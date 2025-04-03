@@ -53,6 +53,7 @@ export const UserModel = types
     lastStickyNoteViewTimestamp: types.maybe(types.number)
   })
   .volatile(self => ({
+    waitingForStandaloneAuth: false,
     isFirebaseConnected: false,
     // number of firebase disconnects encountered during the current session
     firebaseDisconnects: 0,
@@ -113,6 +114,9 @@ export const UserModel = types
       if (user.demoClassHashes?.length) {
         self.demoClassHashes.replace(user.demoClassHashes);
       }
+    },
+    setWaitingForStandaloneAuth(waiting: boolean) {
+      self.waitingForStandaloneAuth = waiting;
     },
     setIsFirebaseConnected(connected: boolean) {
       if (self.isFirebaseConnected && !connected) ++self.firebaseDisconnects;

@@ -5,6 +5,7 @@ import { CanvasComponent } from "../document/canvas";
 import { SectionModelType } from "../../models/curriculum/section";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { SectionToolbar } from "../document/section-toolbar";
+import clsx from "clsx";
 
 import "./problem-panel.scss";
 
@@ -36,11 +37,18 @@ export class ProblemPanelComponent extends BaseComponent<IProps> {
   }
 
   private renderContent(content: DocumentContentModelType) {
+    // STANDALONE FIXME: this will eventually probably be a ui boolean but for now we will do this here
+    const hideToolbar = this.stores.ui.standalone && this.stores.user.waitingForStandaloneAuth;
+
     return (
         <div key="problem-panel">
-          <SectionToolbar section={this.props.section!} toolbar={this.stores.appConfig.myResourcesToolbar({})} />
-          <div className="canvas-separator"/>
-          <div className="canvas-area">
+          {!hideToolbar &&
+          <>
+            <SectionToolbar section={this.props.section!} toolbar={this.stores.appConfig.myResourcesToolbar({})} />
+            <div className="canvas-separator"/>
+          </>
+          }
+          <div className={clsx("canvas-area", {"hide-toolbar": hideToolbar})}>
             <CanvasComponent
               content={content}
               context="left-nav"
