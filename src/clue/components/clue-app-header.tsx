@@ -188,6 +188,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   // ui elements
   const showUserInfo = !(ui.standalone && user.waitingForStandaloneAuth);
   const showProblemInfo = showUserInfo;
+  const showAppMode = showUserInfo;
   const showUnitInfo = unit.title !== "Null Unit";
 
   return (
@@ -217,7 +218,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           {renderPanelButtons()}
         </div>
         <div className="right">
-          <AppModeIndicator appMode={appMode}/>
+          {showAppMode && <AppModeIndicator appMode={appMode}/>}
           <NetworkStatus user={user}/>
           <div className="version">Version {appVersion}</div>
           {myGroup ? renderGroup(myGroup) : null}
