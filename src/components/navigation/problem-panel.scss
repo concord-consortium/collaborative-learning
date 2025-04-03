@@ -24,6 +24,11 @@
       top: 0px;
       border-top: $document-border-width solid white;
 
+      &.hide-toolbar {
+        left: 0;
+        width: 100%;
+      }
+
       .canvas {
         overflow: auto;
         height: 100%;

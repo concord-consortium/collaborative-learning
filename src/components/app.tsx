@@ -164,6 +164,10 @@ export class AppComponent extends BaseComponent<IProps> {
   public render() {
     const {appConfig, user, ui, db} = this.stores;
 
+    if (ui.standalone) {
+      return this.renderApp(<AppContentContainerComponent />);
+    }
+
     if (ui.showDemoCreator) {
       return this.renderApp(<DemoCreatorComponent />);
     }

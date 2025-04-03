@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { CSSProperties, useCallback, useEffect, useRef } from "react";
 import { IBaseProps } from "../base";
 import { useStores } from "../../hooks/use-stores";
 import { DocumentWorkspaceComponent } from "../document/document-workspace";
@@ -19,7 +19,8 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   const { appConfig: { navTabs: navTabSpecs },
           persistentUI: { navTabContentShown, workspaceShown },
           exemplarController,
-          user: { isResearcher }
+          user: { isResearcher },
+          ui: { standalone }
         } = stores;
   const hotKeys = useRef(new HotKeys());
 
@@ -47,6 +48,24 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
   const showLeftPanel = isResearcher || navTabSpecs.showNavPanel;
   const showRightPanel = !isResearcher;
 
+  // this will be removed in a follow on story
+  const renderStandalonePlaceholder = () => {
+    const style: CSSProperties = {
+      display: "flex",
+      height: "100%",
+      alignContent: "flex-start",
+      justifyContent: "center",
+      alignItems: "center"
+    };
+    return (
+      <div style={style} data-test="standalone-placeholder">
+        <div>
+          TBD: Standalone
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div
       className="workspace"
@@ -68,7 +87,7 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
       }
       {showRightPanel &&
         <ResizablePanel collapsed={!workspaceShown}>
-          <DocumentWorkspaceComponent />
+          {standalone ? renderStandalonePlaceholder() : <DocumentWorkspaceComponent />}
         </ResizablePanel>
       }
     </div>

@@ -57,7 +57,8 @@ export const UIModel = types
     dragId: types.maybe(types.string) // The id of the object being dragged. Used with dnd-kit dragging.
   })
   .volatile(self => ({
-    defaultLeftNavExpanded: false
+    defaultLeftNavExpanded: false,
+    standalone: false,
   }))
   .views((self) => ({
     isSelectedTile(tile: ITileModel) {
@@ -202,7 +203,11 @@ export const UIModel = types
 
       selectAllTiles,
 
-      getCopyToDocumentKey
+      getCopyToDocumentKey,
+
+      setStandalone(standalone: boolean) {
+        self.standalone = standalone;
+      }
     };
   })
   .actions(self => ({

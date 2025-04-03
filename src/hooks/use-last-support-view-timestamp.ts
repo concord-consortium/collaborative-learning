@@ -11,10 +11,12 @@ export function useLastSupportViewTimestamp(isEnabled = true) {
   const shouldMutate = useRef(true);
 
   // initialize last support view timestamp from firebase
-  const path = firebase.getLastSupportViewTimestampPath();
-  const ref = firebase.ref(path);
+  // note: we may not yet be connected to firebase if we are in
+  // standalone mode and the user has not yet logged in
+  const path = firebase.isConnected ? firebase.getLastSupportViewTimestampPath() : "";
+  const ref = firebase.isConnected ? firebase.ref(path) : undefined;
   useQuery<typeof user.lastSupportViewTimestamp>(path,
-    () => ref.get().then(snap => snap.val()).catch(() => undefined), {
+    () => ref?.get().then(snap => snap.val()).catch(() => undefined), {
     enabled: isEnabled && !isInitialized,
     retry: false,
     staleTime: Infinity,
@@ -27,8 +29,9 @@ export function useLastSupportViewTimestamp(isEnabled = true) {
   });
 
   // sync user's last support view time stamp to firebase
+  const syncMstPath = firebase.isConnected ? firebase.getUserPath(user) : "";
   useSyncMstPropToFirebase<typeof user.lastSupportViewTimestamp>({
-    firebase, model: user, prop: "lastSupportViewTimestamp", path: firebase.getUserPath(user),
+    firebase, model: user, prop: "lastSupportViewTimestamp", path: syncMstPath,
     enabled: isEnabled,
     shouldMutate: () => shouldMutate.current,
     options: {
