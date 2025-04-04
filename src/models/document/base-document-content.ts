@@ -3,7 +3,7 @@ import { kPlaceholderTileDefaultHeight } from "../tiles/placeholder/placeholder-
 import {
   getPlaceholderSectionId, isPlaceholderTile, PlaceholderContentModel
 } from "../tiles/placeholder/placeholder-content";
-import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
+import { getTileContentInfo } from "../tiles/tile-content-info";
 import { ITileContentModel, ITileEnvironment, TileContentModel } from "../tiles/tile-content";
 import { ILinkableTiles, ITypedTileLinkMetadata } from "../tiles/tile-link-types";
 import {
@@ -381,15 +381,6 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
           }
       });
       return { providers, consumers };
-    },
-    exportTileAsJson(tileInfo: TileLayoutModelType, options?: IDocumentExportOptions) {
-      const { includeTileIds, ...otherOptions } = options || {};
-      const tileOptions = { includeId: includeTileIds, ...otherOptions};
-      const tile = self.getTile(tileInfo.tileId);
-      const json = tile?.exportJson(tileOptions);
-      if (json) {
-        return json;
-      }
     }
   }))
   .views(self => ({
@@ -397,16 +388,6 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       return self.rowOrder.reduce((totalHeight: number, rowId: string) => {
         return totalHeight + (self.getRowHeight(rowId) ?? 0);
       }, 0) ?? 0;
-    },
-    rowHeightToExport(row: TileRowModelType, tileId: string) {
-      if (!row?.height) return;
-      // we only export heights for specific tiles configured to do so
-      const tileType = self.getTileType(tileId);
-      const tileContentInfo = getTileContentInfo(tileType);
-      if (!tileContentInfo?.exportNonDefaultHeight) return;
-      // we only export heights when they differ from the default height for the tile
-      const defaultHeight = tileContentInfo.defaultHeight;
-      return defaultHeight && (row.height !== defaultHeight) ? row.height : undefined;
     },
     /**
      * Find the largest title suffix number matching the given title base

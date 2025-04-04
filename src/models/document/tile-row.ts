@@ -2,6 +2,7 @@ import { types, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { ITileModel } from "../tiles/tile-model";
 import { uniqueId } from "../../utilities/js-utils";
 import { withoutUndo } from "../history/without-undo";
+import { isPlaceholderTile } from "../tiles/placeholder/placeholder-content";
 
 export interface IDropRowInfo {
   rowInsertIndex: number;
@@ -63,6 +64,13 @@ export const TileRowModel = types
     },
     hasTile(tileId: string) {
       return self.tiles.findIndex(tileRef => tileRef.tileId === tileId) >= 0;
+    },
+    isPlaceholderRow(tileMap: Map<string, ITileModel>) {
+      return (this.tileCount > 0) &&
+        self.tiles.every((entry) => {
+          const tile = entry.tileId ? tileMap.get(entry.tileId) : undefined;
+          return isPlaceholderTile(tile);
+        });
     },
     indexOfTile(tileId: string) {
       return self.tiles.findIndex(tileRef => tileRef.tileId === tileId);

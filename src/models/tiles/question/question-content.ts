@@ -1,9 +1,10 @@
-import stringify from "json-stringify-pretty-compact";
-import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
+import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { ITileContentModel, TileContentModel } from "../tile-content";
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { RowList } from "../../document/row-list";
 import { kPlaceholderTileType } from "../placeholder/placeholder-content";
+import { StringBuilder } from "../../../utilities/string-builder";
+import { ITileModel } from "../tile-model";
 
 export const kQuestionTileType = "Question";
 
@@ -29,9 +30,16 @@ export const QuestionContentModel = types.compose(
     locked: types.optional(types.boolean, false),
   })
   .views(self => ({
-    exportJson(options?: ITileExportOptions) {
-      const snapshot = getSnapshot(self);
-      return stringify(snapshot, {maxLength: 200});
+    exportJson(options: ITileExportOptions, tileMap: Map<string, ITileModel>) {
+      const builder = new StringBuilder();
+      builder.pushLine("{");
+      builder.pushLine(`"type": "${self.type}",`, 2);
+      builder.pushLine(`"version": ${self.version},`, 2);
+      builder.pushLine(`"locked": ${self.locked},`, 2);
+      builder.pushBlock(self.exportRowsAsJson(self.exportableRows(tileMap), tileMap,
+        { ...options, appendComma: false }), 2);
+      builder.pushLine("}");
+      return builder.build();
     },
   }))
   .actions(self => ({

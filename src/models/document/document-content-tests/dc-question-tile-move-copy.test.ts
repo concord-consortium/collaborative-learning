@@ -1,0 +1,119 @@
+// This import needs to be first so the jest.mock calls in it
+// are run before the next import statements
+import { mockUniqueId, resetMockUniqueId } from "./dc-test-utils";
+
+import { DocumentContentModel, DocumentContentModelType, DocumentContentSnapshotType } from "../document-content";
+import { IDropRowInfo } from "../tile-row";
+import { registerTileTypes } from "../../../register-tile-types";
+
+registerTileTypes(["Question", "Text", "Expression", "Table", "Drawing"]);
+
+import questionTileExample from "./question-tile-example.json";
+
+/*
+    This is the starting layout of the document before each test:
+    {
+        row1: [ "textTool1" ],
+        row2: [ "tableTool", "imageTool" ],
+        row3: [ "questionTile"[ ] ]
+    }
+ */
+
+describe("Question tile operations", () => {
+  let documentContent: DocumentContentModelType;
+
+  const srcContent: DocumentContentSnapshotType = questionTileExample.content;
+
+  function getDocumentDragTileItems(tileIds: string[]) {
+    return documentContent.getDragTileItems(tileIds).map(tile => ({...tile, newTileId: mockUniqueId()}));
+  }
+
+  beforeEach(() => {
+    resetMockUniqueId();
+    documentContent = DocumentContentModel.create(srcContent);
+  });
+
+  describe("Question tiles", () => {
+    it("Can restore content from JSON", () => {
+      expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
+        .toEqual("testid-6: [Text: text-1]\n" +
+                 "testid-7: [Table: table-1] [Expression: expression-1]\n" +
+                 "testid-8: [Question: question-1]" +
+                 "\nContents of embedded row list:\n" +
+                 "  testid-9: [Text: text-2]\n" +
+                 "  testid-10: [Table: table-2] [Drawing: sketch-1]");
+    });
+
+    it("can move a tile into a question tile", () => {
+      // move text-1 into the question tile
+      const dragTiles = getDocumentDragTileItems(["text-1"]);
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 0,
+        rowDropId: "testid-9",
+        rowDropLocation: "left"
+      };
+      documentContent.moveTiles(dragTiles, dropRowInfo);
+      expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
+        .toEqual("testid-7: [Table: table-1] [Expression: expression-1]\n" +
+                 "testid-8: [Question: question-1]" +
+                 "\nContents of embedded row list:\n" +
+                 "  testid-9: [Text: text-1] [Text: text-2]\n" +
+                 "  testid-10: [Table: table-2] [Drawing: sketch-1]");
+    });
+
+    it("can move multiple tiles into a question tile", () => {
+      // move text-1, table-1, expression-1 into the question tile
+      const dragTiles = getDocumentDragTileItems(["text-1", "table-1", "expression-1"]);
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 2,
+        rowDropId: "testid-10",
+        rowDropLocation: "top"
+      };
+      documentContent.moveTiles(dragTiles, dropRowInfo);
+      expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
+        .toEqual("testid-8: [Question: question-1]\n" +
+                 "Contents of embedded row list:\n" +
+                 "  testid-9: [Text: text-2]\n" +
+                 "  testid-6: [Text: text-1]\n" +
+                 "  testid-7: [Table: table-1] [Expression: expression-1]\n" +
+                 "  testid-10: [Table: table-2] [Drawing: sketch-1]");
+    });
+  });
+
+  describe("moving tiles out of question tiles", () => {
+    it("can move a tile out of a question tile", () => {
+      const dragTiles = getDocumentDragTileItems(["sketch-1"]);
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 0,
+        rowDropId: "testid-6",
+        rowDropLocation: "right"
+      };
+      documentContent.moveTiles(dragTiles, dropRowInfo);
+      expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
+      .toEqual("testid-6: [Text: text-1] [Drawing: sketch-1]\n" +
+        "testid-7: [Table: table-1] [Expression: expression-1]\n" +
+        "testid-8: [Question: question-1]" +
+        "\nContents of embedded row list:\n" +
+        "  testid-9: [Text: text-2]\n" +
+        "  testid-10: [Table: table-2]");
+    });
+
+    it("can move multiple tiles out of a question tile", () => {
+      const dragTiles = getDocumentDragTileItems(["sketch-1", "text-2"]);
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 0,
+        rowDropId: "testid-6",
+        rowDropLocation: "right"
+      };
+      documentContent.moveTiles(dragTiles, dropRowInfo);
+      expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
+      .toEqual("testid-6: [Text: text-1] [Drawing: sketch-1] [Text: text-2]\n" +
+        "testid-7: [Table: table-1] [Expression: expression-1]\n" +
+        "testid-8: [Question: question-1]" +
+        "\nContents of embedded row list:\n" +
+        "  testid-10: [Table: table-2]");
+    });
+  });
+
+
+});

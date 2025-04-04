@@ -1,6 +1,8 @@
 import { Instance, types, detach } from "mobx-state-tree";
+import { StringBuilder, comma } from "../../utilities/string-builder";
+import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
 import { ITileModel } from "../tiles/tile-model";
-import { TileRowModel, TileRowModelType } from "./tile-row";
+import { TileLayoutModelType, TileRowModel, TileRowModelType } from "./tile-row";
 
 /**
  * Base model for managing a list of rows.
@@ -41,6 +43,68 @@ export const RowList = types
      */
     get tileIds() {
       return self.rowOrder.flatMap(rowId => this.getRow(rowId)?.allTileIds ?? []);
+    },
+    rowHeightToExport(row: TileRowModelType, tileId: string, tileMap: Map<string, ITileModel>) {
+      if (!row?.height) return;
+      // we only export heights for specific tiles configured to do so
+      const tileType = tileMap.get(tileId)?.content.type;
+      const tileContentInfo = getTileContentInfo(tileType);
+      if (!tileContentInfo?.exportNonDefaultHeight) return;
+      // we only export heights when they differ from the default height for the tile
+      const defaultHeight = tileContentInfo.defaultHeight;
+      return defaultHeight && (row.height !== defaultHeight) ? row.height : undefined;
+    },
+    exportTileAsJson(tileInfo: TileLayoutModelType, tileMap: Map<string, ITileModel>,
+        options?: IDocumentExportOptions) {
+      const { includeTileIds, ...otherOptions } = options || {};
+      const tileOptions = { includeId: includeTileIds, ...otherOptions};
+      const tile = tileMap.get(tileInfo.tileId);
+      const json = tile?.exportJson(tileOptions, tileMap);
+      if (json) {
+        return json;
+      }
+    },
+    exportableRows(tileMap: Map<string, ITileModel>) {
+      // identify rows with exportable tiles
+      return self.rowOrder.map(rowId => {
+        const row = this.getRow(rowId);
+        return row && !row.isSectionHeader && !row.isEmpty && !row.isPlaceholderRow(tileMap) ? row : undefined;
+      }).filter(row => !!row);
+    },
+    exportRowsAsJson(rows: (TileRowModelType | undefined)[], tileMap: Map<string, ITileModel>,
+        options?: IDocumentExportOptions) {
+      const builder = new StringBuilder();
+      builder.pushLine(`"tiles": [`);
+
+      const exportRowCount = rows.length;
+      rows.forEach((row, rowIndex) => {
+        const isLastRow = rowIndex === exportRowCount - 1;
+        // export each exportable tile
+        const tileExports = row?.tiles.map((tileInfo, tileIndex) => {
+          const isLastTile = tileIndex === row.tiles.length - 1;
+          const showComma = row.tiles.length > 1 ? !isLastTile : !isLastRow;
+          const rowHeight = this.rowHeightToExport(row, tileInfo.tileId, tileMap);
+          const rowHeightOption = rowHeight ? { rowHeight } : undefined;
+          return this.exportTileAsJson(tileInfo, tileMap, { ...options, appendComma: showComma, ...rowHeightOption });
+        }).filter(json => !!json);
+        console.log("tileExports", tileExports);
+        if (tileExports?.length) {
+          // multiple tiles in a row are exported in an array
+          if (tileExports.length > 1) {
+            builder.pushLine("[", 2);
+            tileExports.forEach(tileExport => {
+              tileExport && builder.pushBlock(tileExport, 4);
+            });
+            builder.pushLine(`]${comma(!isLastRow)}`, 2);
+          }
+          // single tile rows are exported directly
+          else if (tileExports[0]) {
+            builder.pushBlock(tileExports[0], 2);
+          }
+        }
+      });
+      builder.pushLine(`]${comma(options?.appendComma ?? false)}`, 0);
+      return builder.build();
     },
     // Returns a string that describes the row list and its contents.
     // For testing/debugging purposes only, but may be useful to keep.
