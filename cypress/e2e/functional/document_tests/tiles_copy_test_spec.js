@@ -11,7 +11,6 @@ import SimulatorTile from '../../../support/elements/tile/SimulatorTile';
 import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import XYPlotToolTile from "../../../support/elements/tile/XYPlotToolTile";
 import ArrowAnnotation from "../../../support/elements/tile/ArrowAnnotation";
-import TextToolTile from '../../../support/elements/tile/TextToolTile';
 
 const student5 = `${Cypress.config("qaUnitStudent5")}`;
 const student6 = `${Cypress.config("qaUnitStudent6")}`;
@@ -28,8 +27,7 @@ let clueCanvas = new ClueCanvas,
   diagramTile = new DiagramToolTile,
   graphTile = new XYPlotToolTile,
   aa = new ArrowAnnotation,
-  canvas = new Canvas,
-  textToolTile = new TextToolTile;
+  canvas = new Canvas;
 
 const imageName = "Image Tile";
 const simName = "Test Simulation";
@@ -439,7 +437,7 @@ describe('Copy to Workspace', () => {
     cy.wait(1000); // Give time for content to load
 
     // Store the first tile's content for later verification
-    cy.get('.problem-panel .document-content .tile-row').first()
+    cy.get('[data-focus-section="Initial Challenge"] .problem-panel .document-content .tile-row').first()
       .invoke('text')
       .as('tileContent');
 
