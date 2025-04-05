@@ -338,10 +338,6 @@ context('Test copy tiles from one document to other document', function () {
     cy.get('[data-testid="tool-copytoworkspace"], [data-testid="tool-copytodocument"]')
       .should('have.class', 'enabled');
 
-    // Verify Copy to Document button is enabled when all tiles are selected
-    cy.get('[data-testid="tool-copytodocument"]')
-      .should('have.class', 'enabled');
-
     // Click Select All button again to deselect all tiles
     cy.log('Click Select All button again to deselect all tiles');
     cy.get('[data-testid="tool-selectall"]').click();
@@ -353,19 +349,14 @@ context('Test copy tiles from one document to other document', function () {
     cy.get('[data-testid="tool-copytoworkspace"], [data-testid="tool-copytodocument"]')
       .should('have.class', 'enabled');
 
-    // Verify both copy buttons are enabled when a single tile is selected
-    cy.get('[data-testid="tool-copytoworkspace"]').should('have.class', 'enabled');
-    cy.get('[data-testid="tool-copytodocument"]').should('have.class', 'enabled');
-
     // Click Select All button when less than all tiles are selected
     cy.log('Click Select All button when less than all tiles are selected');
     cy.get('[data-testid="tool-selectall"]').click();
 
-    // Verify all drag handles have the selected class
+    // Verify all drag handles have the selected class and copy buttons remain enabled
     cy.get('[data-testid="tool-tile-drag-handle"] .tool-tile-drag-handle').should('have.class', 'selected');
-
-    // Verify Copy to Workspace button remains enabled when all tiles are selected
-    cy.get('[data-testid="tool-copytoworkspace"]').should('have.class', 'enabled');
+    cy.get('[data-testid="tool-copytoworkspace"], [data-testid="tool-copytodocument"]')
+      .should('have.class', 'enabled');
   });
 });
 
