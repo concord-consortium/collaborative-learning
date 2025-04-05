@@ -53,23 +53,30 @@ class Canvas {
   getEditTitleIcon() {
     return cy.get('[data-test=personal-doc-title] [data-test=edit-icon]');
   }
-
+  // the force:true assertions on lines 63-68 are likely needed because of the
+  // Jira ticket:https://concord-consortium.atlassian.net/browse/CLUE-81
+  // Once that's fixed we can remove the force:true assertions
   createNewExtraDocumentFromFileMenu(title, type) {
     this.openFileMenu();
     cy.get('[data-test=list-item-icon-open-workspace]').click();
     cy.get('.primary-workspace .doc-tab.my-work.workspaces').click();
     cy.get('[data-test=' + type + '-section-workspaces-documents] [data-test=my-work-new-document]').click();
     dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
-    dialog.getDialogTextInput().click().clear().type(title);
+    dialog.getDialogTextInput()
+      .click({force: true})
+      .wait(100)
+      .type('{selectall}{backspace}' + title, {force: true});
     dialog.getDialogOKButton().click();
   }
-
+  // the force:true assertions on line 76-79 are likely needed because of the
+  // Jira ticket:https://concord-consortium.atlassian.net/browse/CLUE-81
+  // Once that's fixed we can remove the force:true assertions
   createNewExtraDocumentFromFileMenuWithoutTabs(title, type) {
     this.openFileMenu();
     cy.get('[data-test=list-item-icon-open-workspace]').click();
     cy.get('[data-test=' + type + '-section-workspaces-documents] [data-test=my-work-new-document]').click();
     dialog.getDialogTitle().should('exist');
-    dialog.getDialogTextInput().click().clear().type(title);
+    dialog.getDialogTextInput().click({force: true}).clear().type(title);
     dialog.getDialogOKButton().click();
   }
 

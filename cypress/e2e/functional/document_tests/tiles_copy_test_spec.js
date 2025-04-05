@@ -433,17 +433,21 @@ describe('Copy to Workspace', () => {
 
     // Open the Initial Challenge section
     cy.openProblemSection('Initial Challenge');
-    cy.clickProblemResourceTile('Initial Challenge', 0);
-    cy.wait(1000); // Give time for content to load
 
-    // Store the first tile's content for later verification
-    cy.get('[data-focus-section="Initial Challenge"] .problem-panel .document-content .tile-row').first()
-      .invoke('text')
-      .as('tileContent');
+    // Ensure no tiles are selected
+    cy.get('[data-testid="tool-selectall"]').click().click();
 
-    // Initially, the copy button should be disabled
+    // Initially, the copy button should be disabled when no tiles are selected
     cy.get('[data-testid="tool-copytoworkspace"]')
       .should('have.class', 'disabled');
+
+    // Click the tile to select it
+    cy.clickProblemResourceTile('initialChallenge', 0);
+
+    // Store the first tile's content for later verification
+    cy.get('[data-focus-section="initialChallenge"] .problem-panel .document-content .tile-row').first()
+      .invoke('text')
+      .as('tileContent');
 
     // Now the copy button should be enabled
     cy.get('[data-testid="tool-copytoworkspace"]')
