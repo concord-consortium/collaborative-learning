@@ -11,6 +11,7 @@ import SimulatorTile from '../../../support/elements/tile/SimulatorTile';
 import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import XYPlotToolTile from "../../../support/elements/tile/XYPlotToolTile";
 import ArrowAnnotation from "../../../support/elements/tile/ArrowAnnotation";
+import TextToolTile from '../../../support/elements/tile/TextToolTile';
 
 const student5 = `${Cypress.config("qaUnitStudent5")}`;
 const student6 = `${Cypress.config("qaUnitStudent6")}`;
@@ -27,7 +28,8 @@ let clueCanvas = new ClueCanvas,
   diagramTile = new DiagramToolTile,
   graphTile = new XYPlotToolTile,
   aa = new ArrowAnnotation,
-  canvas = new Canvas;
+  canvas = new Canvas,
+  textToolTile = new TextToolTile;
 
 const imageName = "Image Tile";
 const simName = "Test Simulation";
@@ -324,6 +326,58 @@ context('Test copy tiles from one document to other document', function () {
     testPrimaryWorkspace2();
 
   });
+  it('checks for Select/Deselect all and Copy to Workspace', function () {
+    beforeTest(student5);
+
+    // Navigate to Problem tab where content already exists
+    cy.openTopTab('problems');
+    cy.openProblemSection('Initial Challenge');
+
+    // Initially verify Copy to Workspace button is disabled when no tiles are selected
+    cy.log('Verify Copy to Workspace button is disabled when no tiles are selected');
+    cy.get('[data-testid="tool-copytoworkspace"]').should('have.class', 'disabled');
+
+    // Click Select All button to select all tiles
+    cy.log('Click Select All button to select all tiles');
+    cy.get('[data-testid="tool-selectall"]').click();
+
+    // Verify Copy to Workspace button is enabled when all tiles are selected
+    cy.get('[data-testid="tool-copytoworkspace"]')
+      .should('have.class', 'enabled');
+
+    // Verify Copy to Document button is enabled when all tiles are selected
+    cy.get('[data-testid="tool-copytodocument"]')
+      .should('have.class', 'enabled');
+
+    // Click Select All button again to deselect all tiles since all tiles are currently selected
+    cy.log('Click Select All button again to deselect all tiles');
+    cy.get('[data-testid="tool-selectall"]').click();
+
+    // Verify Copy to Workspace button is disabled again
+    cy.get('[data-testid="tool-copytoworkspace"]')
+      .should('have.class', 'disabled');
+
+    // Verify Copy to Document button is disabled again
+    cy.get('[data-testid="tool-copytodocument"]')
+      .should('have.class', 'disabled');
+
+    // Select a single tile
+    cy.log('Select a single tile');
+    cy.get('[data-testid="tool-tile-drag-handle"]').first().click({force: true});
+
+    // Verify Copy to Workspace button remains disabled when only a single tile is selected
+    cy.get('[data-testid="tool-copytoworkspace"]').should('have.class', 'disabled');
+
+    // Click Select All button when less than all tiles are selected
+    cy.log('Click Select All button when less than all tiles are selected');
+    cy.get('[data-testid="tool-selectall"]').click();
+
+    // Verify all drag handles have the selected class
+    cy.get('[data-testid="tool-tile-drag-handle"] .tool-tile-drag-handle').should('have.class', 'selected');
+
+    // Verify Copy to Workspace button is enabled when all tiles are selected
+    cy.get('[data-testid="tool-copytoworkspace"]').should('have.class', 'enabled');
+  });
 });
 
 context("Test copy tile within a document", function () {
@@ -366,5 +420,42 @@ context("Test copy tile within a document", function () {
       cy.wrap($g).should("have.attr", "transform").should("not.be.empty");
     });
 
+  });
+});
+
+describe('Copy to Workspace', () => {
+  it('copies tiles from Problem tab to workspace', () => {
+    // Visit the test document
+    cy.visit('/?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&problem=1.1&unit=./demo/units/qa/content.json');
+    cy.waitForLoad();
+
+    // Open the Problems tab
+    cy.get('.top-tab.tab-problems').click();
+    cy.get('.top-tab.tab-problems').invoke('attr', 'class').should('contain', 'selected');
+
+    // Open the Initial Challenge section
+    cy.openProblemSection('Initial Challenge');
+    cy.clickProblemResourceTile('Initial Challenge', 0);
+    cy.wait(1000); // Give time for content to load
+
+    // Store the first tile's content for later verification
+    cy.get('.problem-panel .document-content .tile-row').first()
+      .invoke('text')
+      .as('tileContent');
+
+    // Initially, the copy button should be disabled
+    cy.get('[data-testid="tool-copytoworkspace"]')
+      .should('have.class', 'disabled');
+
+    // Now the copy button should be enabled
+    cy.get('[data-testid="tool-copytoworkspace"]')
+      .should('not.have.class', 'disabled')
+      .click();
+
+    // Verify the tile was copied to the workspace
+    cy.get('@tileContent').then((content) => {
+      cy.get('.canvas-area .document-content .tile-row')
+        .should('contain', content);
+    });
   });
 });
