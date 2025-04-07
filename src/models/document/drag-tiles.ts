@@ -43,7 +43,7 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
 
     tilePositions.forEach((tilePosition) => {
       if (!tilePosition) return;
-      // TODO rowList should be handled.
+      // TODO rowList is ignored here. Downstream code doesn't need it, but this should be cleaned up in CLUE-80.
       const { tileId, rowIndex, row, tileIndex } = tilePosition;
       // Note: previously this function would be passed the tileModel being
       // dragged. It would accept a tileId if it matched the tileModel.id even if
