@@ -284,7 +284,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     tiles: IDragTileItem[],
     sharedModelEntries: SharedModelEntrySnapshotType[],
     annotations: IArrowAnnotationSnapshot[],
-    rowInfo: IDropRowInfo,
+    rowInfo: IDropRowInfo|undefined,
     isCrossingDocuments: boolean,
     copySpec?: ICopySpec
   ) {
@@ -535,7 +535,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
   },
   applyCopySpec(copySpec: ICopySpec) {
     return self.copyTiles(
-      copySpec.tiles, copySpec.sharedModelEntries, copySpec.annotations, undefined, copySpec
+      copySpec.tiles, copySpec.sharedModelEntries, copySpec.annotations, undefined, false, copySpec
     );
   },
 }));
