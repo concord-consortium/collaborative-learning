@@ -350,24 +350,26 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     if (!this.domElement) return { rowInsertIndex: content ? content.rowOrder.length : 0 };
 
     let dropInfo: IDropRowInfo = { rowInsertIndex: 0 };
+    // This includes both "main" rows and rows nested inside question tiles
     const rowElements = this.domElement.getElementsByClassName("tile-row");
-    const dropY = e.clientY;
-    let dropDistance = Infinity;
-    let dist;
+
+    // Find the last "main" row
+    let lastRowIndex = -1, lastRowBottom = 0;
     for (let i = 0; i < rowElements.length; ++i) {
       const rowElt = rowElements[i];
       const rowBounds = rowElt.getBoundingClientRect();
-      if (i === 0) {
-        dist = Math.abs(dropY - rowBounds.top);
-        dropDistance = dist;
+      if (rowBounds.bottom > lastRowBottom) {
+        lastRowIndex = i;
+        lastRowBottom = rowBounds.bottom;
       }
-      dist = Math.abs(dropY - rowBounds.bottom);
-      if (dist < dropDistance) {
-        dropDistance = dist;
-      }
+    }
+
+    for (let i = 0; i < rowElements.length; ++i) {
+      const rowElt = rowElements[i];
+      const rowBounds = rowElt.getBoundingClientRect();
       if (this.isPointInRect(e.clientX, e.clientY, rowBounds) ||
           // below the last row - highlight bottom of last row
-          ((i === rowElements.length - 1) && (e.clientY > rowBounds.bottom))) {
+          ((i === lastRowIndex) && (e.clientY > rowBounds.bottom))) {
         dropInfo = this.getDropInfoForGlobalRowIndex(i);
 
         const dropOffsetLeft = Math.abs(e.clientX - rowBounds.left);

@@ -98,6 +98,24 @@ describe("Question tile operations", () => {
         "  testid-10: [Table: table-2]");
     });
 
+    it("can move a tile out of a question tile to below it", () => {
+      const dragTiles = getDocumentDragTileItems(["sketch-1"]);
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 0,
+        rowDropId: "testid-8",
+        rowDropLocation: "bottom"
+      };
+      documentContent.moveTiles(dragTiles, dropRowInfo);
+      expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
+      .toEqual("testid-6: [Text: text-1]\n" +
+        "testid-7: [Table: table-1] [Expression: expression-1]\n" +
+        "testid-8: [Question: question-1]" +
+        "\nContents of embedded row list:\n" +
+        "  testid-9: [Text: text-2]\n" +
+        "  testid-10: [Table: table-2]\n" +
+        "testid-16: [Drawing: sketch-1]");
+    });
+
     it("can move multiple tiles out of a question tile", () => {
       const dragTiles = getDocumentDragTileItems(["sketch-1", "text-2"]);
       const dropRowInfo: IDropRowInfo = {
