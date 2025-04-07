@@ -1,6 +1,19 @@
 import React, { useCallback, useRef } from "react";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 
+/**
+ * Handle pointer events that may select a tile in a standard way.
+ * This hook returns a pair of functions that can be used as onMouseDown and onMouseUp handlers.
+ * In some cases you may also want to attach them to `onPointerDownCapture` and `onPointerUpCapture`.
+ * Note that to use this hook you will need to set `tileHandlesOwnSelection` to true when registering
+ * the tile with `registerTileComponentInfo`.
+ *
+ * @param getTileId - a function that returns the id of the current tile
+ * @param getSelectedTileIds - a function that returns the ids of the currently selected tiles
+ * @param setSelectedTile - a function that selects or deselects the current tile
+ * @param focusableElement - a ref to the tile's element that should get keyboard focus when the tile is clicked
+ * @returns a pair of functions that can be used as onMouseDown and onMouseUp handlers
+ */
 export const useTileSelectionPointerEvents = (
               getTileId: () => string,
               getSelectedTileIds: () => string[],
@@ -10,10 +23,12 @@ export const useTileSelectionPointerEvents = (
 
   const handlePointerDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
 
-    // if the clicked element is focusable, let it handle the event
-    const target = e.target as HTMLElement;
-    const classList = target.classList;
-    if (classList?.contains("focusable")) return;
+    // if the clicked element or its ancestor is focusable, let it handle the event
+    let ancestor = e.target as HTMLElement|null;
+    while (ancestor && !ancestor.classList.contains("focusable")) {
+      ancestor = ancestor.parentElement;
+    }
+    if (ancestor) return;
 
     // clicked tile gets keyboard focus
     if (focusableElement.current) {
