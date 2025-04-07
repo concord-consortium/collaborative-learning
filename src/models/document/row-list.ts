@@ -87,7 +87,6 @@ export const RowList = types
           const rowHeightOption = rowHeight ? { rowHeight } : undefined;
           return this.exportTileAsJson(tileInfo, tileMap, { ...options, appendComma: showComma, ...rowHeightOption });
         }).filter(json => !!json);
-        console.log("tileExports", tileExports);
         if (tileExports?.length) {
           // multiple tiles in a row are exported in an array
           if (tileExports.length > 1) {

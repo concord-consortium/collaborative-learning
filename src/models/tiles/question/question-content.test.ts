@@ -59,7 +59,6 @@ describe("QuestionContentModel", () => {
     documentContent.allTiles[3].setTitle("Text 3");
 
     const json = documentContent.exportAsJson();
-    console.log(json);
     expect(JSON.parse(json)).toEqual({
       tiles: [
         {

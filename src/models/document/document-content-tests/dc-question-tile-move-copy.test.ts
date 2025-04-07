@@ -10,15 +10,6 @@ registerTileTypes(["Question", "Text", "Expression", "Table", "Drawing"]);
 
 import questionTileExample from "./question-tile-example.json";
 
-/*
-    This is the starting layout of the document before each test:
-    {
-        row1: [ "textTool1" ],
-        row2: [ "tableTool", "imageTool" ],
-        row3: [ "questionTile"[ ] ]
-    }
- */
-
 describe("Question tile operations", () => {
   let documentContent: DocumentContentModelType;
 
@@ -36,6 +27,7 @@ describe("Question tile operations", () => {
   describe("Question tiles", () => {
     it("Can restore content from JSON", () => {
       expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
+        // NOTE: The layout below is the starting layout of the document before each subsequent test.
         .toEqual("testid-6: [Text: text-1]\n" +
                  "testid-7: [Table: table-1] [Expression: expression-1]\n" +
                  "testid-8: [Question: question-1]" +

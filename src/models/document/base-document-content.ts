@@ -107,27 +107,6 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         // Returns list of tile ids in the document from top to bottom, left to right
         return this.allTiles.map(tile => tile.id);
       },
-      /**
-       * Returns all tile ids in a RowList container, including nested RowList containers.
-       * @param rowList - The RowList container to get the tile ids from.
-       * @returns An array of all tile ids in the RowList container, in document order.
-       */
-      getAllTileIdsInRowList(rowList: RowListType): string[] {
-        const ids: string[] = [];
-        rowList.rowOrder.forEach(rowId => {
-          const row = rowList.getRow(rowId);
-          if (row) {
-            row.tiles.forEach(tileLayout => {
-              ids.push(tileLayout.tileId);
-              const tileContent = self.tileMap.get(tileLayout.tileId)?.content;
-              if (isRowListContainer(tileContent)) {
-                this.getAllTileIdsInRowList(tileContent).forEach(id => ids.push(id));
-              }
-            });
-          }
-        });
-        return ids;
-      },
 
       /**
        * Returns all rows in the document, including nested rows from RowList containers.
@@ -220,7 +199,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         });
         return foundRow ? sectionId : undefined;
       },
-      // TODO does this need to be recursive?
+      // TODO does this need to be recursive? - affects copy behavior.
       getRowsInSection(sectionId: string): TileRowModelType[] {
         let sectionRowIndex: number | undefined;
         let nextSectionRowIndex: number | undefined;
