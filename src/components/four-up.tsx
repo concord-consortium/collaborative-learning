@@ -299,7 +299,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const toolbarDoc = this.getGroupUserDoc(focusedGroupUser);
     const disabledToolIds: string[] = [];
     if (!toolbarDoc) {
-      disabledToolIds.push("selectAll");
+      disabledToolIds.push(...["selectAll", "copyToDocument", "copyToWorkspace"]);
     }
     if (!focusedGroupUser) {
       disabledToolIds.push("fourUp");
@@ -427,6 +427,8 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     if (tool.id === "fourUp") {
       const { group } = this.props;
       this.tabUIModel?.getDocumentGroup(group.id)?.closePrimaryDocument();
+
+      Logger.log(LogEventName.TOOLBAR_FOUR_UP_TOOL);
 
       // prevent the default tool action
       return true;

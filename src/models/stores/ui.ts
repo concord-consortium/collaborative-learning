@@ -25,14 +25,19 @@ export const UIDialogModel = types
     title: types.maybe(types.string),
     className: "",
     defaultValue: types.maybe(types.string),
+    copyFromDocumentKey: types.maybe(types.string),
     rows: types.maybe(types.number)
   })
   .volatile(self => ({
-    promptValue: self.defaultValue
+    promptValue: self.defaultValue,
+    copyToDocumentKey: self.defaultValue
   }))
   .actions(self => ({
     setPromptValue(value: string) {
       self.promptValue = value;
+    },
+    setCopyToDocumentKey(value: string) {
+      self.copyToDocumentKey = value;
     }
   }));
 type UIDialogModelSnapshot = SnapshotIn<typeof UIDialogModel>;
@@ -86,6 +91,18 @@ export const UIModel = types
       });
     };
 
+    const getCopyToDocumentKey = (copyFromDocumentKey: string) => {
+      self.dialog = UIDialogModel.create({
+        type: "getCopyToDocument",
+        title: "Copy to Document",
+        text: "Choose a document to copy the selected tiles to:",
+        copyFromDocumentKey,
+      });
+      return new Promise<string>((resolve, reject) => {
+        dialogResolver = resolve;
+      });
+    };
+
     const resolveDialog = (value: string | boolean) => {
       if (dialogResolver) {
         dialogResolver(value as any);
@@ -98,7 +115,7 @@ export const UIModel = types
       dialogResolver = undefined;
     };
 
-    const setOrAppendTileIdToSelection = (tileId?: string, options?: {append: boolean}) => {
+    const setOrAppendTileIdToSelection = (tileId?: string, options?: {append: boolean, dragging?: boolean}) => {
       if (tileId) {
         const tileIdIndex = self.selectedTileIds.indexOf(tileId);
         const isCurrentlySelected = tileIdIndex >= 0;
@@ -111,7 +128,12 @@ export const UIModel = types
           else {
             self.selectedTileIds.push(tileId);
           }
-        } else if (!isCurrentlySelected) {
+        } else if (options?.dragging) {
+          // dragging a tile adds it to the selection
+          if (!isCurrentlySelected) {
+            self.selectedTileIds.push(tileId);
+          }
+        } else if (!options?.dragging) {
           self.selectedTileIds.replace([tileId]);
         }
         // clicking on an already-selected tile doesn't change selection
@@ -157,10 +179,10 @@ export const UIModel = types
         self.error = null;
       },
 
-      setSelectedTile(tile?: ITileModel, options?: {append: boolean}) {
+      setSelectedTile(tile?: ITileModel, options?: {append: boolean, dragging?: boolean}) {
         setOrAppendTileIdToSelection(tile && tile.id, options);
       },
-      setSelectedTileId(tileId: string, options?: {append: boolean}) {
+      setSelectedTileId(tileId: string, options?: {append: boolean, dragging?: boolean}) {
         setOrAppendTileIdToSelection(tileId, options);
       },
       removeTileIdFromSelection(tileId: string) {
@@ -178,7 +200,9 @@ export const UIModel = types
         self.dragId = dragId;
       },
 
-      selectAllTiles
+      selectAllTiles,
+
+      getCopyToDocumentKey
     };
   })
   .actions(self => ({

@@ -13,6 +13,9 @@ import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
 import { SectionModelType } from "../models/curriculum/section";
 import { logHistoryEvent } from "../models/history/log-history-event";
+import { LogEventName } from "../lib/logger-types";
+import { IToolbarEventProps, logToolbarEvent } from "../models/tiles/log/log-toolbar-event";
+import { IDropTileItem } from "src/models/tiles/tile-model";
 
 import "./toolbar.scss";
 
@@ -31,6 +34,7 @@ interface IProps extends IBaseProps {
   section?: SectionModelType;
   toolbarModel: IToolbarModel;
   disabledToolIds?: string[];
+  defaultSectionId?: string;
   onToolClicked?: OnToolClickedHandler;
 }
 
@@ -92,6 +96,12 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           break;
         case "togglePlayback":
           this.handleTogglePlayback();
+          break;
+        case "copyToWorkspace":
+          this.handleCopyToWorkspace();
+          break;
+        case "copyToDocument":
+          this.handleCopyToDocument();
           break;
         default:
           this.handleAddTile(tool);
@@ -196,20 +206,20 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       persistentUI: {problemWorkspace: { primaryDocumentKey } }
     } = this.stores;
 
-    const selectedTileIdsInDocument = this.getSelectedTileIdsInDocument();
+    const selectedTileIds = this.getSelectedTileIdsInDocument();
 
     const undoManager = document?.treeManagerAPI?.undoManager;
     if (toolButton.id === "undo" && !undoManager?.canUndo) return true;
     if (toolButton.id === "redo" && !undoManager?.canRedo) return true;
 
     // If no tiles are selected, disable the tools that require selected tiles
-    const needsSelectedTilesTools = ["delete", "duplicate", "solution"];
-    if (needsSelectedTilesTools.includes(toolButton.id) && !selectedTileIdsInDocument.length) {
+    const needsSelectedTilesTools = ["delete", "duplicate", "solution", "copyToWorkspace", "copyToDocument"];
+    if (needsSelectedTilesTools.includes(toolButton.id) && !selectedTileIds.length) {
       return true;
     }
 
     // don't allow the following tools when the document is the primary document
-    const disallowedPrimaryDocumentTools = ["edit"];
+    const disallowedPrimaryDocumentTools = ["edit", "copyToWorkspace"];
     if (disallowedPrimaryDocumentTools.includes(toolButton.id) && document?.key === primaryDocumentKey) {
       return true;
     }
@@ -355,10 +365,19 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     }
   };
 
+  private logDocumentOrSectionEvent = (
+    event: LogEventName, otherParams: Record<string, any> = {}, targetDocument?: DocumentModelType
+  ) => {
+    const { document, section } = this.props;
+    const eventProps: IToolbarEventProps = { document, section, targetDocument };
+    logToolbarEvent(event, eventProps, otherParams);
+  };
+
   private handleEdit = () => {
     const { document } = this.props;
     if (document) {
       this.stores.persistentUI.problemWorkspace.setPrimaryDocument(document);
+      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_EDIT_TOOL);
     }
   };
 
@@ -379,6 +398,8 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       } else {
         ui.selectAllTiles([]);
       }
+
+      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_SELECT_ALL_TOOL, {selectAllTiles});
     }
   };
 
@@ -389,6 +410,53 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       logHistoryEvent({documentId: document.key || '',
         action: prevShowPlaybackControls ? "hideControls" : "showControls"});
       document.toggleShowPlaybackControls();
+
+      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_PLAYBACK_TOOL, {
+        showPlaybackControls: document.showPlaybackControls
+      });
     }
+  };
+
+  private handleCopyToWorkspace = () => {
+    const { documents, ui, persistentUI: { problemWorkspace: { primaryDocumentKey } } } = this.stores;
+    const { document, section } = this.props;
+    const content = document?.content ?? section?.content;
+    const primaryDocument = documents.getDocument(primaryDocumentKey ?? "");
+
+    if (content && primaryDocument?.content && (document?.key !== primaryDocument.key)) {
+      const sectionId = document ? undefined : section?.type;
+      const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);
+      const copiedTiles = primaryDocument.content.applyCopySpec(copySpec);
+
+      this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_COPY_TO_WORKSPACE, {}, primaryDocument);
+      this.selectCopiedTiles(copiedTiles);
+    }
+  };
+
+  private handleCopyToDocument = () => {
+    const { ui, documents } = this.stores;
+    const { document, section } = this.props;
+    const content = document?.content ?? section?.content;
+
+    if (content) {
+      ui.getCopyToDocumentKey(document?.key ?? "")
+        .then(copyToDocumentKey => {
+          const copyToDocument = documents.getDocument(copyToDocumentKey);
+          if (copyToDocument?.content) {
+            const sectionId = document ? undefined : section?.type;
+            const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);
+            const copiedTiles = copyToDocument.content.applyCopySpec(copySpec);
+
+            this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_COPY_TO_DOCUMENT, {}, copyToDocument);
+            this.selectCopiedTiles(copiedTiles);
+          }
+        });
+    }
+  };
+
+  private selectCopiedTiles = (copiedTiles: IDropTileItem[]) => {
+    const { ui } = this.stores;
+    const copiedTileIds = copiedTiles.map(tile => tile.newTileId);
+    ui.selectAllTiles(copiedTileIds);
   };
 }

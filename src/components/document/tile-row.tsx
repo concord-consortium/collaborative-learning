@@ -151,7 +151,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderTiles(tiles: TileLayoutModelType[], rowHeight?: number) {
-    const { model, tileMap, ...others } = this.props;
+    const { model, tileMap, readOnly, ...others } = this.props;
 
     return tiles.map((tileRef, index) => {
       const tileModel = this.getTile(tileRef.tileId);
@@ -162,10 +162,11 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
                   model={tileModel}
                   widthPct={tileWidthPct}
                   height={rowHeight}
-                  isUserResizable={model.isUserResizable}
+                  isUserResizable={!readOnly && model.isUserResizable}
                   onResizeRow={this.handleStartResizeRow}
                   onSetCanAcceptDrop={this.handleSetCanAcceptDrop}
                   onRequestRowHeight={this.handleRequestRowHeight}
+                  readOnly={readOnly}
                   {...others}
                 />
               : null;

@@ -25,6 +25,20 @@ function beforeTest(params) {
 //https://www.pivotaltracker.com/n/projects/2441242/stories/186891632
 
 context('Nav Panel', function () {
+  it('Nav tiles', function () {
+    beforeTest(queryParams1);
+
+    cy.log('Tiles in nav panel should not show resize handle');
+    cy.openTopTab("problems");
+    for (const section of problemSubTabTitles) {
+      cy.openProblemSection(section);
+      cy.get('.problem-panel .tool-tile').each(($tile) => {
+        cy.wrap($tile).click();
+        cy.wrap($tile).find('.resize-handle').should('not.exist');
+      });
+    }
+  });
+
   it('Test nav panel tabs', function () {
     beforeTest(queryParams1);
     let copyDocumentTitle = 'copy Investigation';

@@ -10,7 +10,7 @@ module.exports = {
       "@typescript-eslint/no-non-null-assertion": "off",
       "cypress/no-unnecessary-waiting": "off",
       "max-len": "off",
-      "prefer-const": "off"
+      "prefer-const": "off",
     },
     overrides: [
       {
