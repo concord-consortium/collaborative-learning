@@ -6,7 +6,7 @@ import { defaultBarGraphContent, BarGraphContentModel } from "./bar-graph-conten
 import { updateBarGraphContentWithNewSharedModelIds } from "./bar-graph-utils";
 
 import Icon from "./assets/bar-graph-icon.svg";
-import HeaderIcon from "./assets/bar-graph-header-icon.svg";
+import HeaderIcon from "../../assets/icons/sort-by-tools/bar-graph-tile-id.svg";
 
 registerTileContentInfo({
   type: kBarGraphTileType,
