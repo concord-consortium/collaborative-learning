@@ -3,6 +3,7 @@ import { ITileModel } from "../tiles/tile-model";
 import { uniqueId } from "../../utilities/js-utils";
 import { withoutUndo } from "../history/without-undo";
 import { isPlaceholderTile } from "../tiles/placeholder/placeholder-content";
+import { getParentWithTypeName } from "../../utilities/mst-utils";
 
 export interface IDropRowInfo {
   rowInsertIndex: number;
@@ -71,6 +72,10 @@ export const TileRowModel = types
           const tile = entry.tileId ? tileMap.get(entry.tileId) : undefined;
           return isPlaceholderTile(tile);
         });
+    },
+    /** Check if this row is embedded in a tile. */
+    isEmbeddedRow(): boolean {
+      return getParentWithTypeName(self, "TileModel") !== undefined;
     },
     indexOfTile(tileId: string) {
       return self.tiles.findIndex(tileRef => tileRef.tileId === tileId);

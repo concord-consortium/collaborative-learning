@@ -139,7 +139,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
 
         return rows;
       },
-      getRowRecursive(rowId: string) {
+      getRowRecursive(rowId: string): TileRowModelType | undefined {
         return this.allRows.find(row => row.id === rowId);
       },
       get allRowLists(): RowListType[] {
@@ -985,14 +985,28 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
           }
         });
 
-        // move each row
         const { rowDropId, rowDropLocation } = rowInfo;
         const dstRow = rowInfo.rowDropId ? self.getRowRecursive(rowInfo.rowDropId) : undefined;
         if (!rowDropId || !dstRow) {
           console.warn("Drop row is missing", rowDropId);
           return;
         }
+
+        // Is the destination row embedded in a tile (presumably a Question tile)?
+        // Question tiles cannot nest, so we filter them out.
+        const destIsEmbeddedRow = dstRow.isEmbeddedRow();
+
+        // Move each set of tiles that share a row.
         Object.values(tileRows).forEach(rowTiles => {
+          if (destIsEmbeddedRow) {
+            const filteredTiles = rowTiles.filter(tile => !isRowListContainer(self.getTile(tile.tileId)?.content));
+            if (filteredTiles.length < rowTiles.length) {
+              // console.log("Filtered out question tiles"); // should we have some sort of warning here?
+              rowTiles = filteredTiles;
+            }
+          }
+          if (rowTiles.length === 0) return;
+
           const row = self.getRowForTile(rowTiles[0].tileId);
           if (row?.tiles.length === rowTiles.length) {
             if ((rowDropLocation === "left") || (rowDropLocation === "right")) {
