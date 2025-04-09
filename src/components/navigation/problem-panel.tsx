@@ -1,11 +1,11 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
+import clsx from "clsx";
 import { BaseComponent, IBaseProps } from "../base";
 import { CanvasComponent } from "../document/canvas";
 import { SectionModelType } from "../../models/curriculum/section";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { SectionToolbar } from "../document/section-toolbar";
-import clsx from "clsx";
 
 import "./problem-panel.scss";
 
