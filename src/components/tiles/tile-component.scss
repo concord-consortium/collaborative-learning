@@ -83,7 +83,8 @@
   }
 
   &.hovered {
-    border: $half-border-width solid $workspace-teal-light-3;
+    border: $half-border-width solid #82C8D7;
+    padding: 0;
 
     &.readonly {
       border: $half-border-width solid $charcoal-light-4;
@@ -91,7 +92,8 @@
   }
 
   &.selected {
-    border: $half-border-width solid $workspace-teal;
+    border: $half-border-width solid #0592AF;
+    padding: 0;
 
     &.readonly {
       border: $half-border-width solid $charcoal-light-2;

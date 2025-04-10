@@ -284,7 +284,8 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     tiles: IDragTileItem[],
     sharedModelEntries: SharedModelEntrySnapshotType[],
     annotations: IArrowAnnotationSnapshot[],
-    rowInfo?: IDropRowInfo,
+    rowInfo: IDropRowInfo|undefined,
+    isCrossingDocuments: boolean,
     copySpec?: ICopySpec
   ) {
     // Update shared models with new names and ids
@@ -342,6 +343,11 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       const updateFunction = typeInfo?.updateContentWithNewSharedModelIds;
       if (updateFunction) {
         tileContent.content = updateFunction(oldContent.content, tileSharedModelEntries, updatedSharedModelMap);
+      }
+
+      // Handle any special logic needed when copying to a new document
+      if (isCrossingDocuments && typeInfo?.updateContentForNewDocument) {
+        tileContent.content = typeInfo.updateContentForNewDocument(tileContent.content);
       }
 
       // Save the updated tile so we can add it to the document
@@ -417,7 +423,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
 }))
 .actions(self => ({
   handleDragCopyTiles(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {
-    const { tiles, sharedModels, annotations } = dragTiles;
+    const { tiles, sharedModels, annotations, sourceDocId } = dragTiles;
 
     // Convert IDragSharedModelItems to partial SharedModelEnries
     const sharedModelEntries: SharedModelEntrySnapshotType[] = [];
@@ -437,7 +443,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       }
     });
 
-    self.copyTiles(tiles, sharedModelEntries, annotations, rowInfo);
+    self.copyTiles(tiles, sharedModelEntries, annotations, rowInfo, sourceDocId !== self.contentId);
   },
   duplicateTiles(tiles: IDragTileItem[]) {
     // New tiles go into a row after the last copied tile
@@ -457,7 +463,8 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       tiles,
       snapshots,
       annotations,
-      { rowInsertIndex: rowIndex }
+      { rowInsertIndex: rowIndex },
+      false // duplicating within same document
     );
   },
   /**
@@ -528,7 +535,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
   },
   applyCopySpec(copySpec: ICopySpec) {
     return self.copyTiles(
-      copySpec.tiles, copySpec.sharedModelEntries, copySpec.annotations, undefined, copySpec
+      copySpec.tiles, copySpec.sharedModelEntries, copySpec.annotations, undefined, false, copySpec
     );
   },
 }));
