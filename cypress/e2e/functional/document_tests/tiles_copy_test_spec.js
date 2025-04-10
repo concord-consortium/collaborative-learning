@@ -329,34 +329,32 @@ context('Test copy tiles from one document to other document', function () {
     cy.openTopTab('problems');
     cy.openProblemSection('Initial Challenge');
 
-    // Verify initial disabled state
-    cy.get('[data-testid="tool-copytoworkspace"], [data-testid="tool-copytodocument"]')
-      .should('have.class', 'disabled');
+    // Verify initial disabled state and no tiles selected
+    canvas.getCopyButtons().should('have.class', 'disabled');
+    canvas.verifyNoTilesSelected();
 
-    // Select all tiles and verify enabled state
-    cy.get('[data-testid="tool-selectall"]').click();
-    cy.get('[data-testid="tool-copytoworkspace"], [data-testid="tool-copytodocument"]')
-      .should('have.class', 'enabled');
+    // Select all tiles and verify enabled state and all tiles selected
+    canvas.getSelectAllButton().click();
+    canvas.getCopyButtons().should('have.class', 'enabled');
+    canvas.verifyAllTilesSelected();
 
     // Click Select All button again to deselect all tiles
     cy.log('Click Select All button again to deselect all tiles');
-    cy.get('[data-testid="tool-selectall"]').click();
-    cy.get('[data-testid="tool-copytoworkspace"], [data-testid="tool-copytodocument"]')
-      .should('have.class', 'disabled');
+    canvas.getSelectAllButton().click();
+    canvas.getCopyButtons().should('have.class', 'disabled');
+    canvas.verifyNoTilesSelected();
 
     // Select single tile and verify enabled state
     cy.clickProblemResourceTile('initialChallenge', 0);
-    cy.get('[data-testid="tool-copytoworkspace"], [data-testid="tool-copytodocument"]')
-      .should('have.class', 'enabled');
+    canvas.getCopyButtons().should('have.class', 'enabled');
 
     // Click Select All button when less than all tiles are selected
     cy.log('Click Select All button when less than all tiles are selected');
-    cy.get('[data-testid="tool-selectall"]').click();
+    canvas.getSelectAllButton().click();
 
     // Verify all drag handles have the selected class and copy buttons remain enabled
-    cy.get('[data-testid="tool-tile-drag-handle"] .tool-tile-drag-handle').should('have.class', 'selected');
-    cy.get('[data-testid="tool-copytoworkspace"], [data-testid="tool-copytodocument"]')
-      .should('have.class', 'enabled');
+    canvas.verifyAllTilesSelected();
+    canvas.getCopyButtons().should('have.class', 'enabled');
   });
 });
 

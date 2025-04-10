@@ -68,7 +68,7 @@ class Canvas {
       .type('{selectall}{backspace}' + title, {force: true});
     dialog.getDialogOKButton().click();
   }
-  // the force:true assertions on line 76-79 are likely needed because of the
+  // the force:true assertion on line 79 is likely needed because of the
   // Jira ticket:https://concord-consortium.atlassian.net/browse/CLUE-81
   // Once that's fixed we can remove the force:true assertions
   createNewExtraDocumentFromFileMenuWithoutTabs(title, type) {
@@ -150,6 +150,31 @@ class Canvas {
 
   scrollToTop(element) {
     element.scrollTo('top');
+  }
+
+  // Toolbar selectors and methods
+  getCopyButtons() {
+    return cy.get('[data-testid="tool-copytoworkspace"], [data-testid="tool-copytodocument"]');
+  }
+
+  getSelectAllButton() {
+    return cy.get('[data-testid="tool-selectall"]');
+  }
+
+  getTileDragHandles() {
+    return cy.get('[data-testid="tool-tile-drag-handle"] .tool-tile-drag-handle');
+  }
+
+  verifyAllTilesSelected() {
+    this.getTileDragHandles().each(($handle) => {
+      cy.wrap($handle).should('have.class', 'selected');
+    });
+  }
+
+  verifyNoTilesSelected() {
+    this.getTileDragHandles().each(($handle) => {
+      cy.wrap($handle).should('not.have.class', 'selected');
+    });
   }
 }
 
