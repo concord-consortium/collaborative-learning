@@ -157,6 +157,10 @@ class Canvas {
     return cy.get('[data-testid="tool-copytoworkspace"], [data-testid="tool-copytodocument"]');
   }
 
+  getCopyToWorkspaceButton() {
+    return cy.get('[data-testid="tool-copytoworkspace"]');
+  }
+
   getSelectAllButton() {
     return cy.get('[data-testid="tool-selectall"]');
   }

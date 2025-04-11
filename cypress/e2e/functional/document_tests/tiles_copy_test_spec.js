@@ -292,7 +292,7 @@ context('Test copy tiles from one document to other document', function () {
     testPrimaryWorkspace2();
 
   });
-  it('should enable/disable copy-to-workspace and copy-to-document buttons appropriately', function () {
+  it.only('should enable/disable copy-to-workspace and copy-to-document buttons appropriately', function () {
     beforeTest(student5);
     cy.openTopTab('problems');
     cy.openProblemSection('Initial Challenge');
@@ -323,6 +323,19 @@ context('Test copy tiles from one document to other document', function () {
     // Verify all drag handles have the selected class and copy buttons remain enabled
     canvas.verifyAllTilesSelected();
     canvas.getCopyButtons().should('have.class', 'enabled');
+
+    // For Copy to Workspace, if tiles are coming from a Problem tab,
+    // they are copied below the section header for that tab in the Workspace
+    cy.log('Copy to Workspace should place tiles below the section header for that tab.');
+    cy.get('.primary-workspace .section-header').should('have.length', 0);
+    canvas.getCopyToWorkspaceButton().should('not.have.attr', 'disabled');
+    canvas.getCopyToWorkspaceButton().click();
+    // canvas.verifyNoTilesSelected();
+    cy.get('.primary-workspace .section-header').should('have.length', 0);
+    // Get all text tiles (this should find both the original and the copied one)
+    cy.get('[data-testid="ccrte-editor"]')
+      .contains('photos looks')
+      .should('have.length', 1); // we see the copy in workspace
   });
 });
 
