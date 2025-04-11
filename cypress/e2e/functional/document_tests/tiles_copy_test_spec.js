@@ -292,7 +292,7 @@ context('Test copy tiles from one document to other document', function () {
     testPrimaryWorkspace2();
 
   });
-  it.only('should enable/disable copy-to-workspace and copy-to-document buttons appropriately', function () {
+  it('should enable/disable copy-to-workspace and copy-to-document buttons appropriately', function () {
     beforeTest(student5);
     cy.openTopTab('problems');
     cy.openProblemSection('Initial Challenge');
@@ -327,15 +327,23 @@ context('Test copy tiles from one document to other document', function () {
     // For Copy to Workspace, if tiles are coming from a Problem tab,
     // they are copied below the section header for that tab in the Workspace
     cy.log('Copy to Workspace should place tiles below the section header for that tab.');
-    cy.get('.primary-workspace .section-header').should('have.length', 0);
     canvas.getCopyToWorkspaceButton().should('not.have.attr', 'disabled');
     canvas.getCopyToWorkspaceButton().click();
-    // canvas.verifyNoTilesSelected();
-    cy.get('.primary-workspace .section-header').should('have.length', 0);
-    // Get all text tiles (this should find both the original and the copied one)
-    cy.get('[data-testid="ccrte-editor"]')
-      .contains('photos looks')
-      .should('have.length', 1); // we see the copy in workspace
+
+    // Confirm the Initial Challenge section header
+    cy.get('[data-test="section-header"] .title')
+      .contains('Initial Challenge')
+      .parents('.tile-row')
+      .as('initialChallengeSection');
+
+    // Confirm that the number of tile-rows is 32
+    cy.get('.tile-row').should('have.length', 32);
+
+    // Check that a tile with the expected text appears after the Initial Challenge header
+    cy.get('@initialChallengeSection')
+      .nextAll('.tile-row')
+      .contains('[data-testid="ccrte-editor"]', 'photos looks')
+      .should('exist');
   });
 });
 
