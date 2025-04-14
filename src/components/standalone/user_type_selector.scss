@@ -1,0 +1,31 @@
+.user-type-selector {
+  margin: 10px 0 30px;
+  text-align: center;
+
+  .user-type-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    gap: 10px;
+  }
+
+  button {
+    display: inline-block;
+    font-size: 22px;
+    font-weight: 300;
+    padding: 15px 20px;
+    background: #eb8723;
+    border: none;
+    cursor: pointer;
+
+    strong {
+      font-weight: 900;
+    }
+  }
+
+  .login-option {
+    margin-top: 20px;
+    font-size: 18px;
+  }
+}
