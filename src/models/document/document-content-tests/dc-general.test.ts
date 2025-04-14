@@ -37,7 +37,7 @@ describe("DocumentContentModel", () => {
     expect(documentContent.firstTile).toBeUndefined();
     expect(documentContent.rowCount).toBe(0);
     expect(documentContent.indexOfLastVisibleRow).toBe(-1);
-    expect(documentContent.defaultInsertRow).toBe(0);
+    expect(documentContent.defaultInsertRowIndex).toBe(0);
     expect(parsedContentExport()).toEqual({ tiles: [] });
     expect(documentContent.getTilesInDocumentOrder()).toEqual([]);
   });
@@ -48,7 +48,7 @@ describe("DocumentContentModel", () => {
     expect(documentContent.tileMap.size).toBe(1);
     documentContent.addTile("geometry", { title: "Coordinate Grid 1" });
     expect(documentContent.tileMap.size).toBe(2);
-    expect(documentContent.defaultInsertRow).toBe(2);
+    expect(documentContent.defaultInsertRowIndex).toBe(2);
     const newRowTile = documentContent.addTile("table", { title: "Table 1" });
     const columnWidths = getColumnWidths(documentContent, newRowTile?.tileId);
     expect(documentContent.tileMap.size).toBe(3);
@@ -235,7 +235,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "A"},
       { Placeholder: "A" }
     ]);
-    expect(content1.defaultInsertRow).toBe(1);
+    expect(content1.defaultInsertRowIndex).toBe(1);
 
     const content2 = createDocumentContent(
       "[Header:A, Placeholder, Header:B, Placeholder]"
@@ -246,7 +246,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { Placeholder: "B" }
     ]);
-    expect(content2.defaultInsertRow).toBe(1);
+    expect(content2.defaultInsertRowIndex).toBe(1);
     expect(parsedExport(content2)).toEqual({ tiles: [] });
   });
 
@@ -262,7 +262,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] }}
     ]);
-    expect(content.defaultInsertRow).toBe(4);
+    expect(content.defaultInsertRowIndex).toBe(4);
   });
 
   it("will remove placeholder tiles when adding a new tile in an interior section", () => {
@@ -277,7 +277,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] }}
     ]);
-    expect(content.defaultInsertRow).toBe(4);
+    expect(content.defaultInsertRowIndex).toBe(4);
   });
 
   it("will restore placeholder tiles when deleting the last row in an interior section", () => {
@@ -293,7 +293,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] }}
     ]);
-    expect(content.defaultInsertRow).toBe(4);
+    expect(content.defaultInsertRowIndex).toBe(4);
   });
 
   it("will restore placeholder tiles when deleting the last row in the last section", () => {
@@ -309,7 +309,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { Placeholder: "B" }
     ]);
-    expect(content.defaultInsertRow).toBe(1);
+    expect(content.defaultInsertRowIndex).toBe(1);
   });
 
   it("will add/remove placeholder rows when moving entire rows (3 => 1)", () => {
@@ -329,7 +329,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { Placeholder: "B" }
     ]);
-    expect(content.defaultInsertRow).toBe(2);
+    expect(content.defaultInsertRowIndex).toBe(2);
   });
 
   it("will add/remove placeholder rows when moving entire rows (1 => 3)", () => {
@@ -344,7 +344,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);
-    expect(content.defaultInsertRow).toBe(4);
+    expect(content.defaultInsertRowIndex).toBe(4);
   });
 
   it("will add/remove placeholder rows when moving a tile back to a new row", () => {
@@ -361,7 +361,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { Placeholder: "B" }
     ]);
-    expect(content.defaultInsertRow).toBe(2);
+    expect(content.defaultInsertRowIndex).toBe(2);
   });
 
   it("will add/remove placeholder rows when moving a tile forward to a new row", () => {
@@ -378,7 +378,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);
-    expect(content.defaultInsertRow).toBe(4);
+    expect(content.defaultInsertRowIndex).toBe(4);
   });
 
   it("will add/remove placeholder rows when moving a tile back to an existing row", () => {
@@ -394,7 +394,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { Placeholder: "B" }
     ]);
-    expect(content.defaultInsertRow).toBe(2);
+    expect(content.defaultInsertRowIndex).toBe(2);
   });
 
   it("will add/remove placeholder rows when moving a tile forward to an existing row", () => {

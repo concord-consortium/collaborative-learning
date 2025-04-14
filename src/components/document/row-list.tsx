@@ -15,7 +15,7 @@ interface IProps extends IBaseProps {
   typeClass?: string;
   scale?: number;
   readOnly?: boolean;
-  highlightPendingDropLocation?: number;
+  highlightPendingDropLocation?: string;
 }
 
 export const RowListComponent = observer((props: IProps) => {
@@ -33,11 +33,8 @@ export const RowListComponent = observer((props: IProps) => {
                             dropRowInfo.rowDropLocation
                               ? dropRowInfo.rowDropLocation
                               : undefined;
-        if (!dropHighlight) {
-          if (index === highlightPendingDropLocation) {
-            dropHighlight = "top";
-          }
-          else if ((index === rowOrder.length - 1) && (index + 1 === highlightPendingDropLocation)) {
+        if (!dropHighlight) { //  TODO do we need a "top" option?
+          if (rowId === highlightPendingDropLocation) {
             dropHighlight = "bottom";
           }
         }

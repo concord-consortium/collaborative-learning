@@ -163,7 +163,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     return (
       <DocumentDndContext>
-        <DropRowContext.Provider value={this.state.dropRowInfo}>
+        <DropRowContext.Provider value={this.state.dropRowInfo || this.getDropRowInfoForPendingDropLocation()}>
           <RowRefsContext.Provider value={{ addRowRef: this.addRowRef }}>
             <div className={documentClass}
               data-testid="document-content"
@@ -198,9 +198,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
               rect.bottom < contentBounds.bottom);
     }
 
+    // Find the list of top-level rows that are currently visible on the screen
     const visibleRowIds: string[] = [];
     this.rowRefs.forEach((ref) => {
-      if (ref?.tileRowDiv) {
+      if (ref?.tileRowDiv && content.rowMap.get(ref.id)) {
         if (isElementInViewport(ref.tileRowDiv)) {
           visibleRowIds.push(ref.id);
         }
@@ -237,6 +238,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         typeClass={this.props.typeClass}
         scale={this.props.scale}
         readOnly={this.props.readOnly}
+        // FIXME: this is redundant now.
         highlightPendingDropLocation={content.highlightPendingDropLocation}
       />
     );
@@ -482,6 +484,19 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     this.clearDropRowInfo();
   };
+
+  private getDropRowInfoForPendingDropLocation(): IDropRowInfo | undefined {
+    const { content } = this.props;
+    if (!content?.highlightPendingDropLocation) return;
+    const rowId = content.highlightPendingDropLocation;
+    const rowIndex = content.getRowListForRow(rowId)?.getRowIndex(rowId);
+    if (!rowIndex) return;
+    return {
+      rowDropId: rowId,
+      rowDropLocation: "bottom",
+      rowInsertIndex: rowIndex + 1
+    };
+  }
 
   private scrollToSection(sectionId: string | null | undefined ) {
     if (!sectionId || !this.domElement) {

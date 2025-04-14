@@ -14,6 +14,7 @@ export const RowList = types
     rowOrder: types.array(types.string),
   })
   .volatile(self => ({
+    // IDs of top-level rows that are currently visible on the screen
     visibleRows: [] as string[],
   }))
   .views(self => ({
@@ -30,7 +31,7 @@ export const RowList = types
       return self.rowOrder.findIndex(_rowId => _rowId === rowId);
     },
     get indexOfLastVisibleRow() {
-      // returns last visible row or last row
+      // returns last visible row or last row FIXME
       if (!self.rowOrder.length) return -1;
       const lastVisibleRowId = self.visibleRows.length
                                 ? self.visibleRows[self.visibleRows.length - 1]
@@ -42,7 +43,7 @@ export const RowList = types
      * Does not include tile ids from nested RowList containers.
      */
     get tileIds() {
-      return self.rowOrder.flatMap(rowId => this.getRow(rowId)?.allTileIds ?? []);
+      return self.rowOrder.flatMap(rowId => this.getRow(rowId)?.tileIds ?? []);
     },
     rowHeightToExport(row: TileRowModelType, tileId: string, tileMap: Map<string, ITileModel>) {
       if (!row?.height) return;

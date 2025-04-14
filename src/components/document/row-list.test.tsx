@@ -179,7 +179,7 @@ describe("RowListComponent", () => {
                 context="test"
                 documentId="test-doc"
                 docId={documentContent.contentId}
-                highlightPendingDropLocation={0}
+                highlightPendingDropLocation={documentContent.defaultInsertRowId}
               />
             </RowRefsContext.Provider>
           </DropRowContext.Provider>
