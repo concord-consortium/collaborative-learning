@@ -167,11 +167,10 @@ Cypress.Commands.add("openDocumentWithIndex", (tab, section, docIndex) => {
   cy.get('.toolbar .tool.edit').click();
 });
 Cypress.Commands.add("clickProblemResourceTile", (subsection, tileIndex = 0) => {
-  cy.get('[data-focus-section='+subsection+'] .problem-panel .document-content .tile-row').eq(tileIndex).then($tileRow => {
+  cy.get('[data-focus-section="'+subsection+'"] .problem-panel .document-content .tile-row').eq(tileIndex).then($tileRow => {
     cy.wrap($tileRow).click();
     cy.wrap($tileRow).find(".tool-tile").invoke("attr", "class").should("contain", "selected");
   });
-
 });
 Cypress.Commands.add("getToolTile", (tileIndex = 0) => {
   cy.get('.problem-panel .document-content .tile-row .tool-tile').eq(tileIndex);

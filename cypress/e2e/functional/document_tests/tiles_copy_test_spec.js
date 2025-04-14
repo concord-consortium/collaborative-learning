@@ -292,6 +292,38 @@ context('Test copy tiles from one document to other document', function () {
     testPrimaryWorkspace2();
 
   });
+  it('should enable/disable copy-to-workspace and copy-to-document buttons appropriately', function () {
+    beforeTest(student5);
+    cy.openTopTab('problems');
+    cy.openProblemSection('Initial Challenge');
+
+    // Verify initial disabled state and no tiles selected
+    canvas.getCopyButtons().should('have.class', 'disabled');
+    canvas.verifyNoTilesSelected();
+
+    // Select all tiles and verify enabled state and all tiles selected
+    canvas.getSelectAllButton().click();
+    canvas.getCopyButtons().should('have.class', 'enabled');
+    canvas.verifyAllTilesSelected();
+
+    // Click Select All button again to deselect all tiles
+    cy.log('Click Select All button again to deselect all tiles');
+    canvas.getSelectAllButton().click();
+    canvas.getCopyButtons().should('have.class', 'disabled');
+    canvas.verifyNoTilesSelected();
+
+    // Select single tile and verify enabled state
+    cy.clickProblemResourceTile('initialChallenge', 0);
+    canvas.getCopyButtons().should('have.class', 'enabled');
+
+    // Click Select All button when less than all tiles are selected
+    cy.log('Click Select All button when less than all tiles are selected');
+    canvas.getSelectAllButton().click();
+
+    // Verify all drag handles have the selected class and copy buttons remain enabled
+    canvas.verifyAllTilesSelected();
+    canvas.getCopyButtons().should('have.class', 'enabled');
+  });
 });
 
 context("Test copy tile within a document", function () {

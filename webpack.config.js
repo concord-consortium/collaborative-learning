@@ -62,7 +62,8 @@ module.exports = (env, argv) => {
     entry: {
       index: './src/index.tsx',
       iframe: './src/iframe/iframe.tsx',
-      'doc-editor': './src/doc-editor.tsx'
+      'doc-editor': './src/doc-editor.tsx',
+      standalone: './src/standalone.tsx',
     },
     mode: devMode ? 'development' : 'production',
     output: {
@@ -261,6 +262,10 @@ module.exports = (env, argv) => {
       ...configHtmlPlugins({
         chunks: ['doc-editor'],
         filename: 'editor/index.html',
+      }),
+      ...configHtmlPlugins({
+        chunks: ['standalone'],
+        filename: 'standalone/index.html',
       }),
       new HtmlWebpackPlugin({
         ...baseHtmlPluginConfig,
