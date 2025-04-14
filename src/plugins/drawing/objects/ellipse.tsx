@@ -113,7 +113,7 @@ export class EllipseDrawingTool extends DrawingTool {
 
     const handlePointerMove = (e2: PointerEvent) => {
       e2.preventDefault();
-      if (!e.isPrimary) return;
+      if (!e2.isPrimary) return;
 
       const end = this.drawingLayer.getWorkspacePoint(e2);
       if (!end) return;
