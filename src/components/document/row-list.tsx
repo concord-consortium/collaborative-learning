@@ -15,12 +15,11 @@ interface IProps extends IBaseProps {
   typeClass?: string;
   scale?: number;
   readOnly?: boolean;
-  highlightPendingDropLocation?: string;
 }
 
 export const RowListComponent = observer((props: IProps) => {
   const { rowListModel, documentContent, context, documentId, docId, typeClass,
-    scale, readOnly, highlightPendingDropLocation } = props;
+    scale, readOnly } = props;
   const { rowMap, rowOrder } = rowListModel;
   const dropRowInfo = useContext(DropRowContext);
   const rowRefs = useContext(RowRefsContext);
@@ -29,15 +28,10 @@ export const RowListComponent = observer((props: IProps) => {
     <>
       {rowOrder.map((rowId, index) => {
         const row = rowMap.get(rowId);
-        let dropHighlight = dropRowInfo && (dropRowInfo.rowDropId === rowId) &&
+        const dropHighlight = dropRowInfo && (dropRowInfo.rowDropId === rowId) &&
                             dropRowInfo.rowDropLocation
                               ? dropRowInfo.rowDropLocation
                               : undefined;
-        if (!dropHighlight) { //  TODO do we need a "top" option?
-          if (rowId === highlightPendingDropLocation) {
-            dropHighlight = "bottom";
-          }
-        }
 
         return row
                 ? <TileRowComponent

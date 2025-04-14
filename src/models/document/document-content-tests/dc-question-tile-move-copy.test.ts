@@ -131,9 +131,11 @@ describe("Question tile operations", () => {
         rowDropId: "testid-6",
         rowDropLocation: "right"
       };
+      // Note, text-2 should be inserted before sketch-1, since it's earlier in the document order,
+      // despite the different order in the argument to getDocumentDragTileItems.
       documentContent.moveTiles(dragTiles, dropRowInfo);
       expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
-      .toEqual("testid-6: [Text: text-1] [Drawing: sketch-1] [Text: text-2]\n" +
+      .toEqual("testid-6: [Text: text-1] [Text: text-2] [Drawing: sketch-1]\n" +
         "testid-7: [Table: table-1] [Expression: expression-1]\n" +
         "testid-8: [Question: question-1]" +
         "\nContents of embedded row list:\n" +

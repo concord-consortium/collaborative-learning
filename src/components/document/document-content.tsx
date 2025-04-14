@@ -238,8 +238,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         typeClass={this.props.typeClass}
         scale={this.props.scale}
         readOnly={this.props.readOnly}
-        // FIXME: this is redundant now.
-        highlightPendingDropLocation={content.highlightPendingDropLocation}
       />
     );
   }
