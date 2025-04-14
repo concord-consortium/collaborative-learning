@@ -100,6 +100,7 @@ const DragTileButton = (
       onDragStart={handleTileDragStart}
       onDragEnd={triggerResizeHandler}
       draggable={true}
+      data-testid="tool-tile-drag-handle"
       aria-label="Drag to move tile"
     >
       <TileDragHandle className={classes} />

@@ -67,6 +67,8 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       },
       /**
        * Returns all tiles in the document, including nested tiles from RowList containers.
+       * In the case of nested tiles, the container tile is listed first, then
+       * the tiles that are nested inside it.
        * @returns An array of all tiles, in document order.
        */
       get allTiles(): ITileModel[] {
@@ -105,13 +107,20 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
           }
         return tiles;
       },
+      /**
+       * Returns list of tile ids in the document from top to bottom, left to right.
+       * In the case of nested tiles, the container tile is listed first, then
+       * the tiles that are nested inside it.
+       * @returns An array of tile ids, in document order.
+       */
       getTilesInDocumentOrder(): string[] {
-        // Returns list of tile ids in the document from top to bottom, left to right
         return this.allTiles.map(tile => tile.id);
       },
 
       /**
        * Returns all rows in the document, including nested rows from RowList containers.
+       * In the case of nested rows, the row that includes the container tile is listed first, then
+       * the rows that are nested inside it.
        * @returns An array of all rows, in document order.
        */
       get allRows(): TileRowModelType[] {
@@ -154,6 +163,13 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         });
         return rowLists;
       },
+      /**
+       * Returns the (smallest)RowList that contains the given row.
+       * A RowList can be a tile that is also a container (eg, Question tile), or the DocumentContentModel itself
+       * if the row is not in any smaller container.
+       * @param rowId The ID of the row to find.
+       * @returns The RowList that directly contains the given row.
+       */
       getRowListForRow(rowId: string) {
         const found = this.allRowLists.find(rowList => rowList.rowOrder.includes(rowId));
         return found ?? self;
@@ -308,8 +324,12 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       if (insertIndex <= 0) return;
       return self.rowOrder[insertIndex-1];
     },
-    // Find the smallest RowList container that contains all the given tile ids.
-    // Returns the whole document if no smaller container is found.
+    /**
+     * Find the smallest RowList container that contains all the given tile ids.
+     * Returns the whole document if no smaller container is found.
+     * @param tileIds The IDs of the tiles to find.
+     * @returns This DocumentContentModel, or a smaller RowList that contains all the given tile ids.
+     */
     getRowListContainingTileIds(tileIds: string[]): RowListType | undefined {
       const found = self.allRowLists.find(rowList => {
         return tileIds.every(id => rowList.tileIds.includes(id));
