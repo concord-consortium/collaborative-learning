@@ -36,7 +36,7 @@ describe("DocumentContentModel", () => {
     expect(documentContent.isEmpty).toBe(true);
     expect(documentContent.firstTile).toBeUndefined();
     expect(documentContent.rowCount).toBe(0);
-    expect(documentContent.indexOfLastVisibleRow).toBe(-1);
+    expect(documentContent.getIndexOfLastVisibleRow(documentContent.visibleRows)).toBe(-1);
     expect(documentContent.defaultInsertRowIndex).toBe(0);
     expect(parsedContentExport()).toEqual({ tiles: [] });
     expect(documentContent.getTilesInDocumentOrder()).toEqual([]);

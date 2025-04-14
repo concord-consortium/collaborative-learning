@@ -49,7 +49,10 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     return isImportDocument(snapshot) ? migrateSnapshot(snapshot) : snapshot;
   })
   .volatile(self => ({
-    highlightPendingDropLocation: undefined as string | undefined
+    // ID of the row to highlight as the drop location for newly-created or duplicated tiles.
+    highlightPendingDropLocation: undefined as string | undefined,
+    // IDs of top-level rows that are currently visible on the screen
+    visibleRows: [] as string[],
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
@@ -302,7 +305,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     /** Return the index of the row after which new content is inserted by default. */
     get defaultInsertRowIndex() {
       // by default new tiles are inserted after the last visible row with content
-      for (let i = self.indexOfLastVisibleRow; i >= 0; --i) {
+      for (let i = self.getIndexOfLastVisibleRow(self.visibleRows); i >= 0; --i) {
         const row = self.getRowByIndex(i);
         if (row && !row.isSectionHeader && !self.isPlaceholderRow(row)) {
           return i + 1;
@@ -316,7 +319,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         }
       }
       // if all else fails, revert to last visible row
-      return self.indexOfLastVisibleRow + 1;
+      return self.getIndexOfLastVisibleRow(self.visibleRows) + 1;
     },
     /** Return the ID of the row after which new content is inserted by default. */
     get defaultInsertRowId() {
@@ -350,7 +353,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       const lastTileId = tiles[tiles.length - 1].tileId;
       return rowList?.rowOrder.find(rowId => this.rowHasTileId(rowId, lastTileId));
     },
-    // TODO: does this need to be recursive?
+    // TODO: does this need to be recursive? Affects dashboard ProgressWidget.
     getTilesInSection(sectionId: string) {
       const tiles: ITileModel[] = [];
       const rows = self.getRowsInSection(sectionId);
@@ -514,6 +517,9 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     },
   }))
   .actions(self => ({
+    setVisibleRows(rows: string[]) {
+      self.visibleRows = rows;
+    },
     insertNewTileInRow(tile: ITileModel, row: TileRowModelType, tileIndexInRow?: number) {
       const insertedTile = self.tileMap.put(tile);
       row.insertTileInRow(insertedTile, tileIndexInRow);

@@ -161,9 +161,13 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     // Reset rowRefs array before rendering
     this.rowRefs = [];
 
+    // We can highlight either the drop location for the current drag/drop operation (in state),
+    // or the one set by the toolbar (in the content model).
+    const dropRow = this.state.dropRowInfo || this.getDropRowInfoForPendingDropLocation();
+
     return (
       <DocumentDndContext>
-        <DropRowContext.Provider value={this.state.dropRowInfo || this.getDropRowInfoForPendingDropLocation()}>
+        <DropRowContext.Provider value={dropRow}>
           <RowRefsContext.Provider value={{ addRowRef: this.addRowRef }}>
             <div className={documentClass}
               data-testid="document-content"
@@ -485,10 +489,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private getDropRowInfoForPendingDropLocation(): IDropRowInfo | undefined {
     const { content } = this.props;
-    if (!content?.highlightPendingDropLocation) return;
-    const rowId = content.highlightPendingDropLocation;
+    const rowId = content?.highlightPendingDropLocation;
+    if (!rowId) return;
     const rowIndex = content.getRowListForRow(rowId)?.getRowIndex(rowId);
-    if (!rowIndex) return;
+    if (rowIndex < 0) return;
     return {
       rowDropId: rowId,
       rowDropLocation: "bottom",
