@@ -553,9 +553,11 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     addPlaceholderRowIfAppropriate(rowList: RowListType, rowIndex: number) {
       const beforeRow = (rowIndex > 0) && rowList.getRowByIndex(rowIndex - 1);
       const afterRow = (rowIndex < rowList.rowCount) && rowList.getRowByIndex(rowIndex);
-      if ((beforeRow && beforeRow.isSectionHeader) && (!afterRow || afterRow.isSectionHeader)) {
+      const beforeRowIsHeader = beforeRow && (beforeRow.isSectionHeader || beforeRow.isFixedPositionRow(self.tileMap));
+      if (beforeRowIsHeader && (!afterRow || afterRow.isSectionHeader)) {
         const beforeSectionId = beforeRow.sectionId;
-        const content = PlaceholderContentModel.create({sectionId: beforeSectionId});
+        const containerType = getType(self.getRowListForRow(beforeRow.id)).name;
+        const content = PlaceholderContentModel.create({sectionId: beforeSectionId, containerType});
         const tile = TileModel.create({ content });
         self.tileMap.put(tile);
         rowList.addNewTileInNewRowAtIndex(tile, rowIndex);

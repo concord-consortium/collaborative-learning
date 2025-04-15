@@ -2,7 +2,7 @@ import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { ITileContentModel, TileContentModel } from "../tile-content";
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { RowList } from "../../document/row-list";
-import { kPlaceholderTileType } from "../placeholder/placeholder-content";
+import { isPlaceholderContent, kPlaceholderTileType } from "../placeholder/placeholder-content";
 import { StringBuilder } from "../../../utilities/string-builder";
 import { ITileModel } from "../tile-model";
 import { kTextTileType } from "../text/text-content";
@@ -20,9 +20,10 @@ export function defaultQuestionContent(options?: IDefaultContentOptions) {
 
   // Create a placeholder tile
   const placeholderTile = options?.tileFactory?.(kPlaceholderTileType);
-  if (!placeholderTile) {
+  if (!placeholderTile || !isPlaceholderContent(placeholderTile.content)) {
     throw new Error("Placeholder tile could not be created");
   }
+  placeholderTile.content.setContainerType("QuestionContent");
   const tile = QuestionContentModel.create({});
   tile.addRowWithTiles([promptTile]);
   tile.addRowWithTiles([placeholderTile]);

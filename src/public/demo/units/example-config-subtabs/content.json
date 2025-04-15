@@ -3,7 +3,6 @@
   "abbrevTitle": "EXCS",
   "title": "Example Curriculum Configured SubTabs",
   "subtitle": "Some Subtabs",
-  "placeholderText": "Type in me!",
   "config": {
     "placeholderText": "This is where users can type text",
     "defaultDocumentType": "problem",

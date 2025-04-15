@@ -1,37 +1,48 @@
 import React from "react";
-import { BaseComponent } from "../../base";
+import { useAppConfig, useUIStore } from "../../../hooks/use-stores";
 import { getSectionPlaceholder } from "../../../models/curriculum/section";
 import { PlaceholderContentModelType } from "../../../models/tiles/placeholder/placeholder-content";
 import { ITileProps } from "../tile-component";
 
 import "./placeholder-tile.scss";
 
-export default class PlaceholderTileComponent extends BaseComponent<ITileProps> {
-  public render() {
-    return (
-      <div className="placeholder-tool" onMouseDown={this.handleMouseDown} >
-        {this.renderPlaceholderText()}
-      </div>
-    );
-  }
+export const kDefaultPlaceholder = "No placeholder content is configured.";
 
-  private renderPlaceholderText() {
-    const content = this.props.model.content as PlaceholderContentModelType;
-    const { sectionId } = content;
-    const placeholder = getSectionPlaceholder(sectionId);
-    const placeholderLines = placeholder.split("\n");
+const PlaceholderTileComponent: React.FC<ITileProps> = (props) => {
+  const ui = useUIStore();
+  const appConfig = useAppConfig();
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    ui.setSelectedTile();
+  };
+
+  const renderPlaceholderText = () => {
+    const content = props.model.content as PlaceholderContentModelType;
+    const { sectionId, containerType } = content;
+    let placeholderText = undefined;
+    // First see if there is a section-specific placeholder
+    if (containerType === "DocumentContent") {
+      placeholderText = getSectionPlaceholder(sectionId);
+    }
+    // If there is no section-specific placeholder, use the app-config placeholder
+    if (!placeholderText) {
+      placeholderText = appConfig.getPlaceholder(containerType) || kDefaultPlaceholder;
+    }
+    const placeholderLines = placeholderText.split("\n");
     return (
       <div>
-        {placeholderLines.map((line, index) => {
-          return (
-            <div key={index}>{line}</div>
-          );
-        })}
+        {placeholderLines.map((line, index) => (
+          <div key={index}>{line}</div>
+        ))}
       </div>
     );
-  }
-
-  private handleMouseDown = (e: React.MouseEvent) => {
-    this.stores.ui.setSelectedTile();
   };
-}
+
+  return (
+    <div className="placeholder-tool" onMouseDown={handleMouseDown}>
+      {renderPlaceholderText()}
+    </div>
+  );
+};
+
+export default PlaceholderTileComponent;
