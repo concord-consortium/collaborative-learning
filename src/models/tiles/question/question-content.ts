@@ -5,16 +5,26 @@ import { RowList } from "../../document/row-list";
 import { kPlaceholderTileType } from "../placeholder/placeholder-content";
 import { StringBuilder } from "../../../utilities/string-builder";
 import { ITileModel } from "../tile-model";
+import { kTextTileType } from "../text/text-content";
 
 export const kQuestionTileType = "Question";
 
 export function defaultQuestionContent(options?: IDefaultContentOptions) {
+  // Create prompt
+  const promptTile = options?.tileFactory?.(kTextTileType);
+  if (!promptTile) {
+    throw new Error("Prompt tile could not be created");
+  }
+  promptTile.setTitle("Question Prompt");
+  promptTile.setFixedPosition(true);
+
   // Create a placeholder tile
   const placeholderTile = options?.tileFactory?.(kPlaceholderTileType);
   if (!placeholderTile) {
     throw new Error("Placeholder tile could not be created");
   }
   const tile = QuestionContentModel.create({});
+  tile.addRowWithTiles([promptTile]);
   tile.addRowWithTiles([placeholderTile]);
 
   return tile;
