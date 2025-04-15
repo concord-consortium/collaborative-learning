@@ -116,35 +116,35 @@ class DrawToolTile{
     drawRectangle(x, y, width=25, height=25) {
       this.getDrawToolRectangle().last().click();
       this.getDrawTile().last()
-        .trigger("pointerdown", x, y)
-        .trigger("pointermove", x+width, y+height)
-        .trigger("pointerup", x+width, y+height);
+        .trigger("pointerdown", x, y, { isPrimary: true })
+        .trigger("pointermove", x+width, y+height, { isPrimary: true })
+        .trigger("pointerup", x+width, y+height, { isPrimary: true });
     }
 
     drawEllipse(x, y, width=25, height=25) {
       this.getDrawToolEllipse().click();
       this.getDrawTile().last()
-        .trigger("pointerdown", x, y)
-        .trigger("pointermove", x+width, y+height)
-        .trigger("pointerup", x+width, y+height);
+        .trigger("pointerdown", x, y, { isPrimary: true })
+        .trigger("pointermove", x+width, y+height, { isPrimary: true })
+        .trigger("pointerup", x+width, y+height, { isPrimary: true });
     }
 
     drawVector(x, y, width=25, height=25) {
       this.getDrawToolVector().click();
       this.getDrawTile().last()
-        .trigger("pointerdown", x, y)
-        .trigger("pointermove", x+width, y+height)
-        .trigger("pointerup", x+width, y+height);
+        .trigger("pointerdown", x, y, { isPrimary: true })
+        .trigger("pointermove", x+width, y+height, { isPrimary: true })
+        .trigger("pointerup", x+width, y+height, { isPrimary: true });
     }
 
     addText(x, y, text) {
       this.getDrawToolText().click();
       this.getDrawTile().last()
-        .trigger("pointerdown", x, y)
-        .trigger("pointerup", x, y);
+        .trigger("pointerdown", x, y, { isPrimary: true })
+        .trigger("pointerup", x, y, { isPrimary: true });
       this.getDrawTile().last()
-        .trigger("pointerdown", x, y)
-        .trigger("pointerup", x, y);
+        .trigger("pointerdown", x, y, { isPrimary: true })
+        .trigger("pointerup", x, y, { isPrimary: true });
       this.getTextDrawing().last().get('textarea').type(text + "{enter}");
     }
 
