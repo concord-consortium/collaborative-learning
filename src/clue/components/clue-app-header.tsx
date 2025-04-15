@@ -184,9 +184,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     return renderNonStudentHeader({showProblemMenu: true});
   }
 
-  // STANDALONE FIXME: once standalone auth is added there will probably be a UI flag for showing these
-  // ui elements
-  const showUserInfo = !(ui.standalone && user.waitingForStandaloneAuth);
+  const showUserInfo = !(ui.standalone && user.standaloneAuth);
   const showProblemInfo = showUserInfo;
   const showAppMode = showUserInfo;
   const showGroupInfo = showUserInfo;
