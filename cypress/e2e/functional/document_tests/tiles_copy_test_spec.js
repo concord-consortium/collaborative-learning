@@ -12,6 +12,7 @@ import DiagramToolTile from '../../../support/elements/tile/DiagramToolTile';
 import XYPlotToolTile from "../../../support/elements/tile/XYPlotToolTile";
 import ArrowAnnotation from "../../../support/elements/tile/ArrowAnnotation";
 import { dragTile } from '../../../support/helpers/drag-drop';
+import Dialog from '../../../support/elements/common/Dialog';
 
 const student5 = `${Cypress.config("qaUnitStudent5")}`;
 const student6 = `${Cypress.config("qaUnitStudent6")}`;
@@ -28,7 +29,8 @@ let clueCanvas = new ClueCanvas,
   diagramTile = new DiagramToolTile,
   graphTile = new XYPlotToolTile,
   aa = new ArrowAnnotation,
-  canvas = new Canvas;
+  canvas = new Canvas,
+  dialog = new Dialog;
 
 const imageName = "Image Tile";
 const simName = "Test Simulation";
@@ -292,7 +294,7 @@ context('Test copy tiles from one document to other document', function () {
     testPrimaryWorkspace2();
 
   });
-  it('should enable/disable copy-to-workspace and copy-to-document buttons appropriately', function () {
+  it('Verifies copy button states based on tile selection', function () {
     beforeTest(student5);
     cy.openTopTab('problems');
     cy.openProblemSection('Initial Challenge');
@@ -344,6 +346,38 @@ context('Test copy tiles from one document to other document', function () {
       .nextAll('.tile-row')
       .contains('[data-testid="ccrte-editor"]', 'photos looks')
       .should('exist');
+
+    // Test Copy to Document with dialog functionality
+    cy.log('Test Copy to Document with dialog functionality');
+    canvas.createNewExtraDocumentFromFileMenu("Copy to Document Test", "my-work");
+    cy.wait(1000);
+
+    cy.openTopTab('problems');
+    cy.openProblemSection('Initial Challenge');
+    cy.clickProblemResourceTile('initialChallenge', 0);
+    canvas.getCopyToDocumentButton().should('have.class', 'enabled');
+    canvas.getCopyToDocumentButton().click();
+
+    dialog.getDialogTitle().should('exist').contains('Copy to Document');
+
+    // Select the document from the dropdown
+    // Using force: true because the select element may be temporarily covered by other UI elements
+    // during the dialog animation, causing Cypress to fail to interact with it
+    cy.get('.dialog-input select').select('Copy to Document Test', { force: true });
+    dialog.getDialogOKButton().click();
+
+    cy.openTopTab('my-work');
+    cy.openSection("my-work", "workspaces");
+    cy.openDocumentThumbnail('my-work', 'workspaces', "Copy to Document Test");
+
+    // Verify tiles were copied correctly
+    canvas.verifyTilesCopiedToDocument();
+
+    // Check that a tile with the expected text appears in the document
+    cy.get('.primary-workspace [data-testid="ccrte-editor"]').should('contain', 'photos looks');
+
+    // Clean up by deleting the test document
+    canvas.deleteDocument();
   });
 });
 
@@ -386,6 +420,5 @@ context("Test copy tile within a document", function () {
     graphTile.getTile().eq(1).find("g.graph-dot").should("have.length", 2).each(($g) => {
       cy.wrap($g).should("have.attr", "transform").should("not.be.empty");
     });
-
   });
 });
