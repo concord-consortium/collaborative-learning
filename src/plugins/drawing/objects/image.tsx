@@ -120,6 +120,9 @@ export class StampDrawingTool extends DrawingTool {
     this.drawingLayer.selectTile(false);
     e.stopPropagation();
 
+    // Stamp tool only responds to one finger at a time.
+    if (!e.isPrimary) return;
+
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
     const stamp = this.drawingLayer.getCurrentStamp();

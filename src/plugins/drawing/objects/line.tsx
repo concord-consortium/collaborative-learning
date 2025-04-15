@@ -158,6 +158,9 @@ export class LineDrawingTool extends DrawingTool {
     this.drawingLayer.selectTile(false);
     e.stopPropagation();
 
+    // Line tool only responds to one finger at a time.
+    if (!e.isPrimary) return;
+
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
     const {stroke, strokeWidth, strokeDashArray} = this.drawingLayer.toolbarSettings();
@@ -176,10 +179,13 @@ export class LineDrawingTool extends DrawingTool {
 
     const handlePointerMove = (e2: PointerEvent) => {
       e2.preventDefault();
+      if (!e2.isPrimary) return;
       addPoint(e2);
     };
     const handlePointerUp = (e2: PointerEvent) => {
       e2.preventDefault();
+      if (!e2.isPrimary) return;
+
       if (line.deltaPoints.length > 0) {
         addPoint(e2);
         this.drawingLayer.addNewDrawingObject(getSnapshot(line), { keepToolActive: true });
