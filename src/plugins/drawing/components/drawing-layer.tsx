@@ -274,6 +274,9 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
 
   // Handles click/drag of selected/hovered objects
   public handleSelectedObjectPointerDown = (e: React.PointerEvent<any>, obj: DrawingObjectType) => {
+    // Only respond to primary pointer events.
+    if (!e.isPrimary) return;
+
     // Only the select tool does anything special when an object is clicked.
     // Other tools just let the click pass through to the canvas layer.
     if (this.props.readOnly || !this.getContent().isSelectedButton('select')) return;
@@ -318,6 +321,9 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
       e2.preventDefault();
       e2.stopPropagation();
 
+      // Only respond to primary pointer events.
+      if (!e2.isPrimary) return;
+
       const current = this.getWorkspacePoint(e2);
       if (!current) return;
       const dx = current.x - starting.x;
@@ -343,6 +349,10 @@ export class InternalDrawingLayerView extends React.Component<InternalDrawingLay
     const handlePointerUp = (e2: PointerEvent) => {
       e2.preventDefault();
       e2.stopPropagation();
+
+      // Only respond to primary pointer events.
+      if (!e2.isPrimary) return;
+
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
       if (moved) {

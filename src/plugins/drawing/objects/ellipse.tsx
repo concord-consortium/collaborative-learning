@@ -97,6 +97,9 @@ export class EllipseDrawingTool extends DrawingTool {
     this.drawingLayer.selectTile(false);
     e.stopPropagation();
 
+    // Ellipse tool only responds to one finger at a time.
+    if (!e.isPrimary) return;
+
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
     const {stroke, fill, strokeWidth, strokeDashArray} = this.drawingLayer.toolbarSettings();
@@ -110,6 +113,8 @@ export class EllipseDrawingTool extends DrawingTool {
 
     const handlePointerMove = (e2: PointerEvent) => {
       e2.preventDefault();
+      if (!e2.isPrimary) return;
+
       const end = this.drawingLayer.getWorkspacePoint(e2);
       if (!end) return;
       const makeCircle = e2.ctrlKey || e2.altKey || e2.shiftKey;

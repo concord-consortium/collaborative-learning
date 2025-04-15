@@ -51,8 +51,8 @@ context('Draw Tool Tile', function () {
     clueCanvas.toolbarButtonIsEnabled("drawing", "fit-all");
     // Unselect all
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 50, 50)
-      .trigger("pointerup", 50, 50);
+      .trigger("pointerdown", 50, 50, { isPrimary: true })
+      .trigger("pointerup", 50, 50, { isPrimary: true });
     drawToolTile.getSelectionBox().should("not.exist");
 
     // Open panel
@@ -155,13 +155,13 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawTileShowSortPanelCloseButton().click();
     drawToolTile.getDrawTileShowSortPanel().should("have.class", "closed");
 
-    cy.log("verify draw a line");
+    cy.log("verify draw a freehand line");
     drawToolTile.getDrawToolFreehand().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 350, 50)
-      .trigger("pointermove", 350, 100)
-      .trigger("pointermove", 450, 100)
-      .trigger("pointerup", 450, 100);
+      .trigger("pointerdown", 350, 50, { isPrimary: true })
+      .trigger("pointermove", 350, 100, { isPrimary: true })
+      .trigger("pointermove", 450, 100, { isPrimary: true })
+      .trigger("pointerup", 450, 100, { isPrimary: true });
     drawToolTile.getFreehandDrawing().should("exist").and("have.length", 1);
     // Freehand tool should still be active
     drawToolTile.getDrawToolFreehand().should("have.class", "selected");
@@ -177,15 +177,15 @@ context('Draw Tool Tile', function () {
     // First make sure we don't select it even if we are inside of its
     // bounding box
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 370, 50)
-      .trigger("pointermove", 450, 80)
-      .trigger("pointerup", 450, 80);
+      .trigger("pointerdown", 370, 50, { isPrimary: true })
+      .trigger("pointermove", 450, 80, { isPrimary: true })
+      .trigger("pointerup", 450, 80, { isPrimary: true });
     drawToolTile.getDrawToolDelete().should("have.class", "disabled");
 
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 340, 90)
-      .trigger("pointermove", 360, 110)
-      .trigger("pointerup", 360, 110);
+      .trigger("pointerdown", 340, 90, { isPrimary: true })
+      .trigger("pointermove", 360, 110, { isPrimary: true })
+      .trigger("pointerup", 360, 110, { isPrimary: true });
     drawToolTile.getDrawToolDelete().should("not.have.class", "disabled");
 
     cy.log("verify change outline color");
@@ -267,18 +267,18 @@ context('Draw Tool Tile', function () {
     // re-select the object using a selection rectangle.
     drawToolTile.getDrawToolSelect().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 90, 40)
-      .trigger("pointermove", 260, 60)
-      .trigger("pointerup", 260, 60);
+      .trigger("pointerdown", 90, 40, { isPrimary: true })
+      .trigger("pointermove", 260, 60, { isPrimary: true })
+      .trigger("pointerup", 260, 60, { isPrimary: true });
     drawToolTile.getDrawToolDelete().click();
     drawToolTile.getVectorDrawing().should("not.exist");
 
     cy.log("draws vector constrained to horizontal or vertical");
     drawToolTile.getDrawToolVector().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 100, 100, { shiftKey: true })
-      .trigger("pointermove", 200, 110, { shiftKey: true }) // Y value is different, but should be constrained to horizontal
-      .trigger("pointerup",   200, 110, { shiftKey: true });
+      .trigger("pointerdown", 100, 100, { shiftKey: true, isPrimary: true })
+      .trigger("pointermove", 200, 110, { shiftKey: true, isPrimary: true }) // Y value is different, but should be constrained to horizontal
+      .trigger("pointerup",   200, 110, { shiftKey: true, isPrimary: true });
     drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
     drawToolTile.getVectorDrawing().get('line').invoke('attr', 'y1')
       .then(y1 => {
@@ -291,9 +291,9 @@ context('Draw Tool Tile', function () {
     // Same for vertical vector
     drawToolTile.getDrawToolVector().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 100, 25, { shiftKey: true })
-      .trigger("pointermove", 110, 125, { shiftKey: true }) // X value is different, but should be constrained to vertical
-      .trigger("pointerup",   110, 125, { shiftKey: true });
+      .trigger("pointerdown", 100, 25, { shiftKey: true, isPrimary: true })
+      .trigger("pointermove", 110, 125, { shiftKey: true, isPrimary: true }) // X value is different, but should be constrained to vertical
+      .trigger("pointerup",   110, 125, { shiftKey: true, isPrimary: true });
     drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
     drawToolTile.getVectorDrawing().get('line').invoke('attr', 'x1')
       .then(x1 => {
@@ -338,17 +338,17 @@ context('Draw Tool Tile', function () {
     cy.log("verify moving pre-selected object");
     drawToolTile.getDrawToolSelect().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 100, 100)
-      .trigger("pointermove", 200, 100)
-      .trigger("pointerup", 200, 100);
+      .trigger("pointerdown", 100, 100, { isPrimary: true })
+      .trigger("pointermove", 200, 100, { isPrimary: true })
+      .trigger("pointerup", 200, 100, { isPrimary: true });
     // For some reason the move isn't very accurate in cypress so often the final location off
     drawToolTile.getRectangleDrawing().first().should("have.attr", "x").then(parseInt).and("within", 160, 220);
 
     cy.log("verify hovering objects");
     drawToolTile.getDrawTile()
       // Un-select the rectangle
-      .trigger("pointerdown", 500, 100)
-      .trigger("pointerup", 500, 100);
+      .trigger("pointerdown", 500, 100, { isPrimary: true })
+      .trigger("pointerup", 500, 100, { isPrimary: true });
 
     drawToolTile.getRectangleDrawing().first()
       // Get the rectangle to be hovered. In the code we are listening to
@@ -372,8 +372,8 @@ context('Draw Tool Tile', function () {
     // Unselect the rectangle just drawn
     drawToolTile.getDrawTile()
       // Un-select the rectangle
-      .trigger("pointerdown", 500, 100)
-      .trigger("pointerup", 500, 100);
+      .trigger("pointerdown", 500, 100, { isPrimary: true })
+      .trigger("pointerup", 500, 100, { isPrimary: true });
     drawToolTile.getSelectionBox().should("not.exist");
 
     // Get the rectangle to be hovered, see above for more info.
@@ -382,9 +382,9 @@ context('Draw Tool Tile', function () {
     drawToolTile.getHighlightBox().should("exist").should("have.attr", "stroke").and("eq", "#bbdd00");
 
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 100, 135)
-      .trigger("pointermove", 200, 135)
-      .trigger("pointerup", 200, 135);
+      .trigger("pointerdown", 100, 135, { isPrimary: true })
+      .trigger("pointermove", 200, 135, { isPrimary: true })
+      .trigger("pointerup", 200, 135, { isPrimary: true });
 
     drawToolTile.getRectangleDrawing().first().should("have.attr", "x").then(parseInt).and("within", 150, 250);
 
@@ -398,9 +398,9 @@ context('Draw Tool Tile', function () {
     // starting from top edge
     drawToolTile.getDrawToolRectangle().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 100, 50, { altKey: true })
-      .trigger("pointermove", 100, 70, { altKey: true })
-      .trigger("pointerup", 100, 70);
+      .trigger("pointerdown", 100, 50, { altKey: true, isPrimary: true })
+      .trigger("pointermove", 100, 70, { altKey: true, isPrimary: true })
+      .trigger("pointerup", 100, 70, { isPrimary: true });
 
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 1);
     drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "20");
@@ -409,9 +409,9 @@ context('Draw Tool Tile', function () {
     // starting from the left edge
     drawToolTile.getDrawToolRectangle().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 200, 50, { altKey: true })
-      .trigger("pointermove", 230, 50, { altKey: true })
-      .trigger("pointerup", 230, 50);
+      .trigger("pointerdown", 200, 50, { altKey: true, isPrimary: true })
+      .trigger("pointermove", 230, 50, { altKey: true, isPrimary: true })
+      .trigger("pointerup", 230, 50, { isPrimary: true });
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 2);
     drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "30");
     drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "30");
@@ -419,9 +419,9 @@ context('Draw Tool Tile', function () {
     // draw a square starting at the bottom edge
     drawToolTile.getDrawToolRectangle().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 300, 90, { altKey: true })
-      .trigger("pointermove", 300, 50, { altKey: true })
-      .trigger("pointerup", 300, 50);
+      .trigger("pointerdown", 300, 90, { altKey: true, isPrimary: true })
+      .trigger("pointermove", 300, 50, { altKey: true, isPrimary: true })
+      .trigger("pointerup", 300, 50, { isPrimary: true });
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 3);
     drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "40");
     drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "40");
@@ -429,9 +429,9 @@ context('Draw Tool Tile', function () {
     // draw a square starting at the right edge
     drawToolTile.getDrawToolRectangle().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 450, 50, { altKey: true })
-      .trigger("pointermove", 400, 50, { altKey: true })
-      .trigger("pointerup", 400, 50);
+      .trigger("pointerdown", 450, 50, { altKey: true, isPrimary: true })
+      .trigger("pointermove", 400, 50, { altKey: true, isPrimary: true })
+      .trigger("pointerup", 400, 50, { isPrimary: true });
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 4);
     drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "50");
     drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "50");
@@ -439,9 +439,9 @@ context('Draw Tool Tile', function () {
     // Diagonal from top right to bottom left with the width 60 and height 50
     drawToolTile.getDrawToolRectangle().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 560, 50, { altKey: true })
-      .trigger("pointermove", 500, 100, { altKey: true })
-      .trigger("pointerup", 500, 100);
+      .trigger("pointerdown", 560, 50, { altKey: true, isPrimary: true })
+      .trigger("pointermove", 500, 100, { altKey: true, isPrimary: true })
+      .trigger("pointerup", 500, 100, { isPrimary: true });
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 5);
     drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "60");
     drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "60");
@@ -449,9 +449,9 @@ context('Draw Tool Tile', function () {
     // Diagonal from bottom right to top left with the width 50 and the height 70
     drawToolTile.getDrawToolRectangle().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 650, 120, { altKey: true })
-      .trigger("pointermove", 600, 50, { altKey: true })
-      .trigger("pointerup", 600, 50);
+      .trigger("pointerdown", 650, 120, { altKey: true, isPrimary: true })
+      .trigger("pointermove", 600, 50, { altKey: true, isPrimary: true })
+      .trigger("pointerup", 600, 50, { isPrimary: true });
     drawToolTile.getRectangleDrawing().should("exist").and("have.length", 6);
     drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "70");
     drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "70");
@@ -497,9 +497,9 @@ context('Draw Tool Tile', function () {
     cy.log("verify draw circle");
     drawToolTile.getDrawToolEllipse().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 450, 50, { altKey: true })
-      .trigger("pointermove", 450, 150, { altKey: true })
-      .trigger("pointerup", 450, 150);
+      .trigger("pointerdown", 450, 50, { altKey: true, isPrimary: true })
+      .trigger("pointermove", 450, 150, { altKey: true, isPrimary: true })
+      .trigger("pointerup", 450, 150, { isPrimary: true });
     drawToolTile.getEllipseDrawing().should("exist").and("have.length", 2);
     drawToolTile.getEllipseDrawing().last().should("have.attr", "rx").and("eq", "100");
     drawToolTile.getEllipseDrawing().last().should("have.attr", "ry").and("eq", "100");
@@ -521,8 +521,8 @@ context('Draw Tool Tile', function () {
     cy.log("verify draw stamp");
     drawToolTile.getDrawToolStamp().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 250, 50)
-      .trigger("pointerup");
+      .trigger("pointerdown", 250, 50, { isPrimary: true })
+      .trigger("pointerup", { isPrimary: true });
     drawToolTile.getImageDrawing().should("exist").and("have.length", 1);
     // Stamp tool should still be active
     drawToolTile.getDrawToolStamp().should("have.class", "selected");
@@ -538,15 +538,15 @@ context('Draw Tool Tile', function () {
     drawToolTile.getDrawToolStampExpand().click();
     cy.get(".toolbar-palette.stamps .palette-buttons .stamp-button").eq(1).click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 250, 100)
-      .trigger("pointerup");
+      .trigger("pointerdown", 250, 100, { isPrimary: true })
+      .trigger("pointerup", { isPrimary: true });
     drawToolTile.getImageDrawing().should("exist").and("have.length", 2);
     drawToolTile.getImageDrawing().eq(1).should("have.attr", "href").and("contain", "equals.png");
     drawToolTile.getDrawToolStampExpand().click();
     cy.get(".toolbar-palette.stamps .palette-buttons .stamp-button").eq(2).click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 250, 150)
-      .trigger("pointerup");
+      .trigger("pointerdown", 250, 150, { isPrimary: true })
+      .trigger("pointerup", { isPrimary: true });
     drawToolTile.getImageDrawing().should("exist").and("have.length", 3);
     drawToolTile.getImageDrawing().eq(2).should("have.attr", "href").and("contain", "lparen.png");
 
@@ -568,8 +568,8 @@ context('Draw Tool Tile', function () {
     cy.log("adds text object");
     drawToolTile.getDrawToolText().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 100, 100)
-      .trigger("pointerup", 100, 100);
+      .trigger("pointerdown", 100, 100, { isPrimary: true })
+      .trigger("pointerup", 100, 100, { isPrimary: true });
     drawToolTile.getTextDrawing().should("exist").and("have.length", 1);
     // Select tool should be selected after object created
     drawToolTile.getDrawToolSelect().should("have.class", "selected");
@@ -583,16 +583,16 @@ context('Draw Tool Tile', function () {
     cy.log("edits text content of object");
     // Click inside drawing box to enter edit mode
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 150, 150)
-      .trigger("pointerup", 150, 150);
+      .trigger("pointerdown", 150, 150, { isPrimary: true })
+      .trigger("pointerup", 150, 150, { isPrimary: true });
     drawToolTile.getTextDrawing().find('textarea').type("The five boxing wizards jump quickly.{enter}");
     drawToolTile.getTextDrawing().find('text tspan').should("exist").and("have.length", 5);
 
     cy.log("deletes text object");
     drawToolTile.getDrawToolSelect().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 150, 150)
-      .trigger("pointerup", 150, 150);
+      .trigger("pointerdown", 150, 150, { isPrimary: true })
+      .trigger("pointerup", 150, 150, { isPrimary: true });
     drawToolTile.getSelectionBox().should("exist");
     drawToolTile.getDrawToolDelete().should("not.have.class", "disabled").click();
     drawToolTile.getTextDrawing().should("not.exist");
@@ -604,26 +604,26 @@ context('Draw Tool Tile', function () {
     cy.log("can group and ungroup");
     drawToolTile.getDrawToolRectangle().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 250, 50)
-      .trigger("pointermove", 100, 150)
-      .trigger("pointerup", 100, 150);
+      .trigger("pointerdown", 250, 50, { isPrimary: true })
+      .trigger("pointermove", 100, 150, { isPrimary: true })
+      .trigger("pointerup", 100, 150, { isPrimary: true });
     drawToolTile.getDrawToolEllipse().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 50, 100)
-      .trigger("pointermove", 100, 150)
-      .trigger("pointerup", 100, 150);
+      .trigger("pointerdown", 50, 100, { isPrimary: true })
+      .trigger("pointermove", 100, 150, { isPrimary: true })
+      .trigger("pointerup", 100, 150, { isPrimary: true });
     drawToolTile.getDrawToolFreehand().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 150, 50)
-      .trigger("pointermove", 200, 150)
-      .trigger("pointerup", 200, 150);
+      .trigger("pointerdown", 150, 50, { isPrimary: true })
+      .trigger("pointermove", 200, 150, { isPrimary: true })
+      .trigger("pointerup", 200, 150, { isPrimary: true });
 
     // Select all 3
     drawToolTile.getDrawToolSelect().click();
     drawToolTile.getDrawTile()
-      .trigger("pointerdown", 40, 40)
-      .trigger("pointermove", 250, 150)
-      .trigger("pointerup", 250, 150);
+      .trigger("pointerdown", 40, 40, { isPrimary: true })
+      .trigger("pointermove", 250, 150, { isPrimary: true })
+      .trigger("pointerup", 250, 150, { isPrimary: true });
     cy.wait(1000);
     drawToolTile.getSelectionBox().should("have.length", 3);
 
@@ -680,6 +680,92 @@ context('Draw Tool Tile', function () {
     //   drawToolTile.getImageDrawing().last().should("exist").invoke("attr", "href").should("contain", "sas/images/survey.png");
     // });
   });
+  it("rejects non-primary pointer events", { scrollBehavior: false }, () => {
+    beforeTest();
+    clueCanvas.addTile("drawing");
+
+    cy.log("verify rectangle tool rejects non-primary events");
+    drawToolTile.getDrawToolRectangle().click();
+    drawToolTile.getDrawTile()
+      .trigger("pointerdown", 100, 50, { isPrimary: false })
+      .trigger("pointermove", 200, 150, { isPrimary: false })
+      .trigger("pointerup", 200, 150, { isPrimary: false });
+    drawToolTile.getRectangleDrawing().should("not.exist");
+
+    cy.log("verify ellipse tool rejects non-primary events");
+    drawToolTile.getDrawToolEllipse().click();
+    drawToolTile.getDrawTile()
+      .trigger("pointerdown", 100, 50, { isPrimary: false })
+      .trigger("pointermove", 200, 150, { isPrimary: false })
+      .trigger("pointerup", 200, 150, { isPrimary: false });
+    drawToolTile.getEllipseDrawing().should("not.exist");
+
+    cy.log("verify freehand tool rejects non-primary events");
+    drawToolTile.getDrawToolFreehand().click();
+    drawToolTile.getDrawTile()
+      .trigger("pointerdown", 100, 50, { isPrimary: false })
+      .trigger("pointermove", 200, 150, { isPrimary: false })
+      .trigger("pointerup", 200, 150, { isPrimary: false });
+    drawToolTile.getFreehandDrawing().should("not.exist");
+
+    cy.log("verify vector tool rejects non-primary events");
+    drawToolTile.getDrawToolVector().click();
+    drawToolTile.getDrawTile()
+      .trigger("pointerdown", 100, 50, { isPrimary: false })
+      .trigger("pointermove", 200, 150, { isPrimary: false })
+      .trigger("pointerup", 200, 150, { isPrimary: false });
+    drawToolTile.getVectorDrawing().should("not.exist");
+
+    cy.log("verify text tool rejects non-primary events");
+    drawToolTile.getDrawToolText().click();
+    drawToolTile.getDrawTile()
+      .trigger("pointerdown", 100, 50, { isPrimary: false })
+      .trigger("pointerup", 100, 50, { isPrimary: false });
+    drawToolTile.getTextDrawing().should("not.exist");
+
+    cy.log("verify stamp tool rejects non-primary events");
+    drawToolTile.getDrawToolStamp().click();
+    drawToolTile.getDrawTile()
+      .trigger("pointerdown", 100, 50, { isPrimary: false })
+      .trigger("pointerup", { isPrimary: false });
+    drawToolTile.getImageDrawing().should("not.exist");
+
+    cy.log("verify selection tool rejects non-primary events");
+    // First create something to try to select
+    drawToolTile.drawRectangle(100, 50, 100, 100);
+    // Deselect the rectangle
+    drawToolTile.getDrawTile().click(50, 50);
+
+    drawToolTile.getDrawToolSelect().click();
+    drawToolTile.getSelectionBox().should("not.exist");
+    drawToolTile.getDrawTile()
+      .trigger("pointerdown", 90, 40, { isPrimary: false })
+      .trigger("pointermove", 210, 160, { isPrimary: false })
+      .trigger("pointerup", 210, 160, { isPrimary: false });
+    drawToolTile.getSelectionBox().should("not.exist");
+
+    cy.log("verify moving objects rejects non-primary events");
+    // First select the rectangle normally
+    drawToolTile.getDrawTile()
+      .trigger("pointerdown", 90, 40, { isPrimary: true })
+      .trigger("pointermove", 210, 160, { isPrimary: true })
+      .trigger("pointerup", 210, 160, { isPrimary: true });
+    drawToolTile.getSelectionBox().should("exist");
+
+    // Try to move with non-primary events
+    drawToolTile.getRectangleDrawing().invoke('attr', 'x').then(x => {
+      const originalX = parseInt(x, 10);
+      drawToolTile.getDrawTile()
+        .trigger("pointerdown", 150, 100, { isPrimary: false })
+        .trigger("pointermove", 250, 100, { isPrimary: false })
+        .trigger("pointerup", 250, 100, { isPrimary: false });
+
+      drawToolTile.getRectangleDrawing().invoke('attr', 'x').then(newX => {
+        expect(parseInt(newX, 10)).to.equal(originalX);
+      });
+    });
+  });
+
   it('Draw Tool Tile Undo Redo', function () {
     beforeTest();
     cy.log('will undo redo drawing tile creation/deletion');
