@@ -36,6 +36,7 @@ export const QuestionTileComponent: React.FC<ITileProps> = observer(function Que
       <div className="question-badge">
         <QuestionBadge />
       </div>
+      <div className="question-tile-spacer" />
       {content.locked ? (
         <ReadOnlyTileTitle />
       ) : (
