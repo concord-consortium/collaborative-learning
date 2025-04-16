@@ -1,0 +1,125 @@
+{
+  "content": {
+    "tiles": [
+      {
+        "id": "text-1",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Outside text tile</p>"
+          ]
+        }
+      },
+      [
+        {
+          "id": "table-1",
+          "content": {
+            "type": "Table",
+            "columnWidths": {
+              "wzwTVZnNcH8cbioB": 80,
+              "pw-6wybn1VyWM7Bs": 80
+            }
+          }
+        },
+        {
+          "id": "expression-1",
+          "title": "Eq. 1",
+          "content": {
+            "type": "Expression",
+            "latexStr": "a=\\pi r^2"
+          }
+        }
+      ],
+      {
+        "id": "question-1",
+        "title": "Question 1",
+        "content": {
+          "type": "Question",
+          "version": 1,
+          "locked": false,
+          "tiles": [
+            {
+              "id": "text-2",
+              "title": "Text 2",
+              "content": {
+                "type": "Text",
+                "format": "html",
+                "text": [
+                  "<p>Inside text tile</p>"
+                ]
+              }
+            },
+            [
+              {
+                "id": "table-2",
+                "content": {
+                  "type": "Table",
+                  "columnWidths": {
+                    "X2Gg-_K7sXcC9_k1": 80,
+                    "aLoVZgA9JnXd-LR5": 80
+                  }
+                }
+              },
+              {
+                "id": "sketch-1",
+                "title": "Sketch 1",
+                "content": {
+                  "type": "Drawing",
+                  "objects": []
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "sharedModels": [
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "HG6DJv4O2B4vWy1L",
+          "providerId": "table-1",
+          "dataSet": {
+            "id": "zVuFyoxDoyCDety7",
+            "attributes": [
+              {
+                "id": "wzwTVZnNcH8cbioB",
+                "clientKey": "",
+                "name": "x",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "4"
+                ],
+                "title": ""
+              },
+              {
+                "id": "pw-6wybn1VyWM7Bs",
+                "clientKey": "",
+                "name": "y",
+                "hidden": false,
+                "units": "",
+                "formula": {},
+                "values": [
+                  "5"
+                ],
+                "title": ""
+              }
+            ],
+            "cases": [
+              {
+                "__id__": "YLq93azvX6h18c-U"
+              }
+            ]
+          }
+        },
+        "tiles": [
+          "table-1"
+        ]
+      }
+    ]
+  }
+}

@@ -132,7 +132,7 @@ describe("DocumentContentModel -- shared Models --", () => {
       const dragTiles = getDocumentDragTileItems(["tableTool"]);
       const dropRowInfo: IDropRowInfo = {
         rowInsertIndex: 0,
-        rowDropIndex: 0,
+        rowDropId: documentContent.getRowByIndex(0)!.id,
         rowDropLocation: "right"
       };
       documentContent.moveTiles(dragTiles, dropRowInfo);
@@ -429,7 +429,7 @@ Object {
       });
       const dropRowInfo: IDropRowInfo = {
         rowInsertIndex: 0,
-        rowDropIndex: 0,
+        rowDropId: documentContent.getRowByIndex(0)!.id,
         rowDropLocation: "right"
       };
       targetDocument.handleDragCopyTiles(dragTileInfo, dropRowInfo);

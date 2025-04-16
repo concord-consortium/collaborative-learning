@@ -2,6 +2,7 @@ import { IArrowAnnotation } from "../annotations/arrow-annotation";
 import { IDragSharedModelItem } from "../shared/shared-model-manager";
 import { IDragTileItem } from "../tiles/tile-model";
 import { IDropRowInfo } from "./tile-row";
+import { RowListType } from "./row-list";
 
 export interface IDocumentAddTileOptions {
   title?: string;
@@ -9,6 +10,7 @@ export interface IDocumentAddTileOptions {
 }
 
 export interface INewTileOptions {
+  rowList?: RowListType;
   locationInRow?: string;
   rowHeight?: number;
   rowId?: string; // The id of the row to add the tile to

@@ -6,6 +6,7 @@ import { QuestionTileComponent } from "../../../components/tiles/question/questi
 import { updateQuestionContentForNewDocument } from "./question-utils";
 
 import Icon from "../../../clue/assets/icons/question-tool.svg";
+import HeaderIcon from "../../../assets/icons/sort-by-tools/question-tile-id.svg";
 
 registerTileContentInfo({
   type: kQuestionTileType,
@@ -20,5 +21,7 @@ registerTileComponentInfo({
   type: kQuestionTileType,
   Component: QuestionTileComponent,
   tileEltClass: "question-tile",
-  Icon
+  tileHandlesOwnSelection: true,
+  Icon,
+  HeaderIcon
 });
