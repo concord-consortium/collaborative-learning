@@ -333,7 +333,7 @@ context('Test copy tiles from one document to other document', function () {
     canvas.getCopyToWorkspaceButton().click();
 
     // Confirm the Initial Challenge section header
-    cy.get('[data-test="section-header"] .title')
+    cy.get('.primary-workspace [data-test="section-header"] .title')
       .contains('Initial Challenge')
       .parents('.tile-row')
       .as('initialChallengeSection');
