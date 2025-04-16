@@ -426,7 +426,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     if (content && primaryDocument?.content && (document?.key !== primaryDocument.key)) {
       const sectionId = document ? undefined : section?.type;
       const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);
-      const copiedTiles = primaryDocument.content.applyCopySpec(copySpec);
+      const copiedTiles = primaryDocument.content.applyCopySpec(copySpec, true);
 
       this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_COPY_TO_WORKSPACE, {}, primaryDocument);
       this.selectCopiedTiles(copiedTiles);
@@ -445,7 +445,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           if (copyToDocument?.content) {
             const sectionId = document ? undefined : section?.type;
             const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);
-            const copiedTiles = copyToDocument.content.applyCopySpec(copySpec);
+            const copiedTiles = copyToDocument.content.applyCopySpec(copySpec, true);
 
             this.logDocumentOrSectionEvent(LogEventName.TOOLBAR_COPY_TO_DOCUMENT, {}, copyToDocument);
             this.selectCopiedTiles(copiedTiles);

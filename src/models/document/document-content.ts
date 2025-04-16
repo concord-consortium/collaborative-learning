@@ -14,7 +14,7 @@ import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-conten
 import { IDragTileItem, IDropTileItem, ITileModel,
          ITileModelSnapshotOut } from "../tiles/tile-model";
 import { uniqueId } from "../../utilities/js-utils";
-import { comma, StringBuilder } from "../../utilities/string-builder";
+import { StringBuilder } from "../../utilities/string-builder";
 import { SharedModelEntrySnapshotType } from "./shared-model-entry";
 
 // Imports related to hard coding shared model duplication
@@ -126,46 +126,18 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
   }
 }))
 .views(self => ({
-  exportRowsAsJson(rows: (TileRowModelType | undefined)[], options?: IDocumentExportOptions) {
+  exportRowsModelsAndAnnotationsAsJson(rows: (TileRowModelType | undefined)[], options?: IDocumentExportOptions) {
     const builder = new StringBuilder();
     builder.pushLine("{");
-    builder.pushLine(`"tiles": [`, 2);
 
-    const includedTileIds: string[] = [];
-    const exportRowCount = rows.length;
-    rows.forEach((row, rowIndex) => {
-      const isLastRow = rowIndex === exportRowCount - 1;
-      // export each exportable tile
-      const tileExports = row?.tiles.map((tileInfo, tileIndex) => {
-        const isLastTile = tileIndex === row.tiles.length - 1;
-        const showComma = row.tiles.length > 1 ? !isLastTile : !isLastRow;
-        const rowHeight = self.rowHeightToExport(row, tileInfo.tileId);
-        const rowHeightOption = rowHeight ? { rowHeight } : undefined;
-        includedTileIds.push(tileInfo.tileId);
-        return self.exportTileAsJson(tileInfo, { ...options, appendComma: showComma, ...rowHeightOption });
-      }).filter(json => !!json);
-      if (tileExports?.length) {
-        // multiple tiles in a row are exported in an array
-        if (tileExports.length > 1) {
-          builder.pushLine("[", 4);
-          tileExports.forEach(tileExport => {
-            tileExport && builder.pushBlock(tileExport, 6);
-          });
-          builder.pushLine(`]${comma(!isLastRow)}`, 4);
-        }
-        // single tile rows are exported directly
-        else if (tileExports[0]) {
-          builder.pushBlock(tileExports[0], 4);
-        }
-      }
-    });
+    const includedTileIds = rows.flatMap(row => row?.allTileIds ?? []);
     const sharedModels = Object.values(self.getSharedModelsUsedByTiles(includedTileIds));
     const hasSharedModels = sharedModels.length > 0;
     const annotations = Object.values(self.getAnnotationsUsedByTiles(includedTileIds));
     const hasAnnotations = annotations.length > 0;
 
-    const tilesComma = hasSharedModels || hasAnnotations ? "," : "";
-    builder.pushLine(`]${tilesComma}`, 2);
+    const tilesComma = hasSharedModels || hasAnnotations;
+    builder.pushBlock(self.exportRowsAsJson(rows, self.tileMap, { ...options, appendComma: tilesComma }), 2);
 
     if (hasSharedModels) {
       builder.pushLine(`"sharedModels": [`, 2);
@@ -230,10 +202,9 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       }
 
       if (targetRow) {
-        const rowIndex = self.getRowIndex(targetRow.id);
         self.copyTilesIntoExistingRow([tile], {
           rowInsertIndex: 0, // this is ignored
-          rowDropIndex: rowIndex,
+          rowDropId: targetRow.id,
           rowDropLocation: "right"
         });
       }
@@ -242,13 +213,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
 }))
 .views(self => ({
   exportAsJson(options?: IDocumentExportOptions) {
-    // identify rows with exportable tiles
-    const rowsToExport = self.rowOrder.map(rowId => {
-      const row = self.getRow(rowId);
-      return row && !row.isSectionHeader && !row.isEmpty && !self.isPlaceholderRow(row) ? row : undefined;
-    }).filter(row => !!row);
-
-    return self.exportRowsAsJson(rowsToExport, options);
+    return self.exportRowsModelsAndAnnotationsAsJson(self.exportableRows(self.tileMap), options);
   },
   exportSectionsAsJson(options?: IDocumentExportOptions) {
     const sections: Record<string, string> = {};
@@ -261,7 +226,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         if (row.isSectionHeader) {
           if (section !== "") {
             // We've finished the last section
-            sections[section] = self.exportRowsAsJson(rows.filter(r => !!r), options);
+            sections[section] = self.exportRowsModelsAndAnnotationsAsJson(rows.filter(r => !!r), options);
           }
           section = row.sectionId ?? "unknown";
           rows = [];
@@ -272,7 +237,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     });
     if (section !== "") {
       // Save the final section
-      sections[section] = self.exportRowsAsJson(rows.filter(r => !!r), options);
+      sections[section] = self.exportRowsModelsAndAnnotationsAsJson(rows.filter(r => !!r), options);
     }
 
     return sections;
@@ -284,8 +249,8 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     tiles: IDragTileItem[],
     sharedModelEntries: SharedModelEntrySnapshotType[],
     annotations: IArrowAnnotationSnapshot[],
-    rowInfo: IDropRowInfo|undefined,
     isCrossingDocuments: boolean,
+    rowInfo?: IDropRowInfo,
     copySpec?: ICopySpec
   ) {
     // Update shared models with new names and ids
@@ -443,14 +408,20 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       }
     });
 
-    self.copyTiles(tiles, sharedModelEntries, annotations, rowInfo, sourceDocId !== self.contentId);
+    self.copyTiles(tiles, sharedModelEntries, annotations, sourceDocId !== self.contentId, rowInfo);
   },
   duplicateTiles(tiles: IDragTileItem[]) {
+    // Find the RowList that contains all the tiles being duplicated.
+    // Might be the whole document or a Question tile.
+    const tileIds = tiles.map(tile => tile.tileId);
+    const rowList = self.getRowListContainingTileIds(tileIds);
+    if (!rowList) {
+      return;
+    }
     // New tiles go into a row after the last copied tile
     const rowIndex = self.getRowAfterTiles(tiles);
 
     // Find shared models used by tiles being duplicated
-    const tileIds = tiles.map(tile => tile.tileId);
     const sharedModelEntries = Object.values(self.getSharedModelsUsedByTiles(tileIds));
     const annotations = Object.values(self.getAnnotationsUsedByTiles(tileIds, true));
 
@@ -463,8 +434,8 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       tiles,
       snapshots,
       annotations,
-      { rowInsertIndex: rowIndex },
-      false // duplicating within same document
+      false, // duplicating within same document
+      { rowDropId: rowList.rowOrder[rowIndex-1], rowInsertIndex: rowIndex }
     );
   },
   /**
@@ -476,7 +447,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
    */
   addTileAfter(tileType: string, target: ITileModel, sharedModels?: SharedModelType[],
     options?: IDocumentContentAddTileOptions) {
-    const targetRowId = self.findRowContainingTile(target.id);
+    const targetRowId = self.findRowIdContainingTile(target.id);
     if (!targetRowId) {
       console.warn("Can't find row to add tile after");
       return;
@@ -519,7 +490,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
   getCopySpec(tileIds: string[], sectionId?: string): ICopySpec {
     const tiles = self.getDragTileItems(tileIds);
     const tilePositions = tileIds.reduce<Record<string, ITileCopyPosition>>((acc, tileId) => {
-      const rowId = self.findRowContainingTile(tileId)!;
+      const rowId = self.findRowIdContainingTile(tileId)!;
       acc[tileId] = { rowId, sectionId: sectionId ?? self.getSectionIdForTile(tileId) };
       return acc;
     }, {});
@@ -533,9 +504,9 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       annotations,
     };
   },
-  applyCopySpec(copySpec: ICopySpec) {
+  applyCopySpec(copySpec: ICopySpec, isCrossingDocuments: boolean) {
     return self.copyTiles(
-      copySpec.tiles, copySpec.sharedModelEntries, copySpec.annotations, undefined, false, copySpec
+      copySpec.tiles, copySpec.sharedModelEntries, copySpec.annotations, isCrossingDocuments, undefined, copySpec
     );
   },
 }));

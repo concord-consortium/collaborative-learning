@@ -92,8 +92,9 @@ export const TileToolbar = observer(
         <div
           ref={toolbarRefs.setFloating}
           data-testid="tile-toolbar"
-          style={{visibility: hide ? 'hidden' : 'visible', ...toolbarStyles}}
-          className={classNames("tile-toolbar",
+          style={{ visibility: hide ? 'hidden' : 'visible', ...toolbarStyles}}
+          // "focusable" here so that useTileSelectionPointerEvents won't absorb toolbar clicks
+          className={classNames("tile-toolbar", "focusable",
             `${tileType}-toolbar`,
             toolbarPlacement,
             { "disabled": !enabled })}

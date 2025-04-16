@@ -62,10 +62,15 @@ class Canvas {
     cy.get('.primary-workspace .doc-tab.my-work.workspaces').click();
     cy.get('[data-test=' + type + '-section-workspaces-documents] [data-test=my-work-new-document]').click();
     dialog.getDialogTitle().should('exist').contains('Create Extra Workspace');
+
+    // Wait for dialog to be ready and visible
     dialog.getDialogTextInput()
+      .should('be.visible')
+      .should('not.be.disabled')
       .click({force: true})
-      .wait(100)
-      .type('{selectall}{backspace}' + title, {force: true});
+      .clear({force: true})
+      .type(title, {force: true});
+
     dialog.getDialogOKButton().click();
   }
   // the force:true assertion on line 79 is likely needed because of the
@@ -104,7 +109,11 @@ class Canvas {
     this.getEditTitleIcon().click()
       .then(function () {
         dialog.getDialogTitle().should('exist').contains('Rename Extra Workspace');
-        dialog.getDialogTextInput().click().type('{selectall}{backspace}' + title);
+        dialog.getDialogTextInput()
+          .should('be.visible')
+          .should('not.be.disabled')
+          .click({force: true})
+          .type('{selectall}{backspace}' + title, {force: true});
         dialog.getDialogOKButton().click();
       });
   }
@@ -113,7 +122,11 @@ class Canvas {
     this.getPersonalDocTitle().find('#titlebar-title').click()
       .then(function () {
         dialog.getDialogTitle().should('exist').contains('Rename Extra Workspace');
-        dialog.getDialogTextInput().click().type('{selectall}{backspace}' + title);
+        dialog.getDialogTextInput()
+          .should('be.visible')
+          .should('not.be.disabled')
+          .click({force: true})
+          .type('{selectall}{backspace}' + title, {force: true});
         dialog.getDialogOKButton().click();
       });
   }
@@ -123,7 +136,15 @@ class Canvas {
     cy.get('[data-test=list-item-icon-copy-workspace]').click();
     dialog.getDialogTitle().should('exist').contains('Copy');
     dialog.getDialogTextInput().invoke('val').should('match', /^Copy of.*/);
-    dialog.getDialogTextInput().click().clear().type(title);
+
+    // Wait for dialog to be ready and visible
+    dialog.getDialogTextInput()
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click({force: true})
+      .clear({force: true})
+      .type(title, {force: true});
+
     dialog.getDialogOKButton().click();
   }
 

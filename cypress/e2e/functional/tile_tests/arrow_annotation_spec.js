@@ -249,7 +249,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationDeleteButtons().eq(0).click();
     aa.getAnnotationDeleteButtons().eq(0).click();
 
-    aa.getAnnotationSvg().click(200, 200); // Both ends free should not create an arrow
+    aa.getAnnotationSvg().click(200, 300); // Both ends free should not create an arrow
     aa.getAnnotationSvg().click(300, 100);
     aa.getAnnotationArrows().should("have.length", 0);
 

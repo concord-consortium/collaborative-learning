@@ -213,7 +213,7 @@ export const AnnotationLayer = observer(function AnnotationLayer({
   ) {
     if (!content) return undefined;
 
-    const rowId = content.findRowContainingTile(tileId);
+    const rowId = content.findRowIdContainingTile(tileId);
     return getTileAdjustedBoundingBox(rowId ?? "", tileId, objectId, objectType);
   }
 

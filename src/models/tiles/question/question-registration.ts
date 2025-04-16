@@ -20,5 +20,6 @@ registerTileComponentInfo({
   type: kQuestionTileType,
   Component: QuestionTileComponent,
   tileEltClass: "question-tile",
+  tileHandlesOwnSelection: true,
   Icon
 });
