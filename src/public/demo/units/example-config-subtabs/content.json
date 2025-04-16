@@ -238,6 +238,7 @@
       {"id": "Drawing", "title": "Drawing", "isTileTool": true},
       {"id": "Expression", "title": "Expression", "isTileTool": true},
       {"id": "Graph", "title": "XY Plot", "isTileTool": true},
+      {"id": "BarGraph", "title": "Bar Graph", "isTileTool": true},
       {"id": "Geometry", "title": "Graph", "isTileTool": true},
       {"id": "Numberline", "title": "Numberline", "isTileTool": true},
       {"id": "Dataflow", "title": "Dataflow", "isTileTool": true},
