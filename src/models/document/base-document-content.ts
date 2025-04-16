@@ -1,10 +1,9 @@
-import { each } from "lodash";
-import { types, getType, getEnv, SnapshotIn } from "mobx-state-tree";
+import { types, getType, getEnv, SnapshotIn, Instance, isAlive } from "mobx-state-tree";
 import { kPlaceholderTileDefaultHeight } from "../tiles/placeholder/placeholder-constants";
 import {
-  getPlaceholderSectionId, isPlaceholderTile, kPlaceholderTileType, PlaceholderContentModel
+  getPlaceholderSectionId, isPlaceholderTile, PlaceholderContentModel
 } from "../tiles/placeholder/placeholder-content";
-import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
+import { getTileContentInfo } from "../tiles/tile-content-info";
 import { ITileContentModel, ITileEnvironment, TileContentModel } from "../tiles/tile-content";
 import { ILinkableTiles, ITypedTileLinkMetadata } from "../tiles/tile-link-types";
 import {
@@ -29,7 +28,7 @@ import { IDocumentContentAddTileOptions, INewRowTile, INewTileOptions,
 import {
   SharedModelEntry, SharedModelEntrySnapshotType, SharedModelEntryType, SharedModelMap
 } from "./shared-model-entry";
-
+import { RowList, isRowListContainer, RowListType } from "./row-list";
 
 /**
  * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
@@ -40,10 +39,8 @@ import {
  *
  * This file contains the most fundamental views and actions.
  */
-export const BaseDocumentContentModel = types
-  .model("BaseDocumentContent", {
-    rowMap: types.map(TileRowModel),
-    rowOrder: types.array(types.string),
+export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
+  .props({
     tileMap: types.map(TileModel),
     // The keys to this map should be the id of the shared model
     sharedModelMap: SharedModelMap
@@ -52,19 +49,11 @@ export const BaseDocumentContentModel = types
     return isImportDocument(snapshot) ? migrateSnapshot(snapshot) : snapshot;
   })
   .volatile(self => ({
-    visibleRows: [] as string[],
     highlightPendingDropLocation: -1,
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
     const contentId = uniqueId();
-
-    function rowContainsTile(rowId: string, tileId: string) {
-      const row = self.rowMap.get(rowId);
-      return row
-              ? row.tiles.findIndex(tile => tile.tileId === tileId) >= 0
-              : false;
-    }
 
     return {
       get tileEnv() {
@@ -75,6 +64,113 @@ export const BaseDocumentContentModel = types
       },
       get contentId() {
         return contentId;
+      },
+      /**
+       * Returns all tiles in the document, including nested tiles from RowList containers.
+       * In the case of nested tiles, the container tile is listed first, then
+       * the tiles that are nested inside it.
+       * @returns An array of all tiles, in document order.
+       */
+      get allTiles(): ITileModel[] {
+        const tiles: ITileModel[] = [];
+
+        // Get all tiles from the main document rows
+        self.rowOrder.forEach(rowId => {
+          const row = self.getRow(rowId);
+          if (row) {
+            row.tiles.forEach(tileLayout => {
+              const tile = self.tileMap.get(tileLayout.tileId);
+              if (tile) {
+                tiles.push(tile);
+
+                // If this tile's content is a RowList container, get its nested tiles
+                const tileContent = tile.content;
+                if (isRowListContainer(tileContent)) {
+                  tileContent.rowOrder.forEach((nestedRowId: string) => {
+                    const nestedRow = tileContent.getRow(nestedRowId);
+                    if (nestedRow) {
+                      nestedRow.tiles.forEach((nestedTileLayout: TileLayoutModelType) => {
+                        const nestedTile = self.tileMap.get(nestedTileLayout.tileId);
+                        if (nestedTile) {
+                          tiles.push(nestedTile);
+                        }
+                      });
+                    }
+                  });
+                }
+              }
+            });
+          }
+        });
+
+        return tiles;
+      },
+      /**
+       * Returns list of tile ids in the document from top to bottom, left to right.
+       * In the case of nested tiles, the container tile is listed first, then
+       * the tiles that are nested inside it.
+       * @returns An array of tile ids, in document order.
+       */
+      getTilesInDocumentOrder(): string[] {
+        return this.allTiles.map(tile => tile.id);
+      },
+
+      /**
+       * Returns all rows in the document, including nested rows from RowList containers.
+       * In the case of nested rows, the row that includes the container tile is listed first, then
+       * the rows that are nested inside it.
+       * @returns An array of all rows, in document order.
+       */
+      get allRows(): TileRowModelType[] {
+        const rows: TileRowModelType[] = [];
+
+        // Get all rows from the main document
+        self.rowOrder.forEach(rowId => {
+          const row = self.rowMap.get(rowId);
+          if (row) {
+            rows.push(row);
+
+            // Check each tile in the row for nested RowList containers
+            row.tiles.forEach(tileLayout => {
+              const tileContent = self.tileMap.get(tileLayout.tileId)?.content;
+              if (tileContent && isRowListContainer(tileContent)) {
+                // Add all rows from the nested RowList
+                tileContent.rowOrder.forEach(nestedRowId => {
+                  const nestedRow = tileContent.getRow(nestedRowId);
+                  if (nestedRow) {
+                    rows.push(nestedRow);
+                  }
+                });
+              }
+            });
+          }
+        });
+
+        return rows;
+      },
+      getRowRecursive(rowId: string): TileRowModelType | undefined {
+        return this.allRows.find(row => row.id === rowId);
+      },
+      get allRowLists(): RowListType[] {
+        const rowLists: RowListType[] = [];
+        this.allTiles.forEach(tile => {
+          const tileContent = tile.content;
+          if (isRowListContainer(tileContent)) {
+            rowLists.push(tileContent);
+          }
+        });
+        return rowLists;
+      },
+      /**
+       * Returns the (smallest)RowList that contains the given row.
+       * A RowList can be a tile that is also a container (eg, Question tile), or the DocumentContentModel itself
+       * if the row is not in any smaller container.
+       * @param rowId The ID of the row to find.
+       * @returns The RowList that directly contains the given row.
+       */
+      getRowListForRow(rowId: string) {
+        const found = this.allRowLists.find(rowList => rowList.rowOrder.includes(rowId));
+        return found ?? self;
       },
       get firstTile(): ITileModel | undefined {
         for (const rowId of self.rowOrder) {
@@ -93,25 +189,6 @@ export const BaseDocumentContentModel = types
       getTileType(tileId: string) {
         return self.tileMap.get(tileId)?.content.type;
       },
-      get rowCount() {
-        return self.rowOrder.length;
-      },
-      getRow(rowId: string): TileRowModelType | undefined {
-        return self.rowMap.get(rowId);
-      },
-      getRowByIndex(index: number): TileRowModelType | undefined {
-        return self.rowMap.get(self.rowOrder[index]);
-      },
-      getRowIndex(rowId: string) {
-        return self.rowOrder.findIndex(_rowId => _rowId === rowId);
-      },
-      findRowContainingTile(tileId: string) {
-        return self.rowOrder.find(rowId => rowContainsTile(rowId, tileId));
-      },
-      numTilesInRow(rowId: string) {
-        const row = self.rowMap.get(rowId);
-        return row ? row.tiles.length : 0;
-      },
       isPlaceholderRow(row: TileRowModelType) {
         // Note that more than one placeholder tile in a row shouldn't happen
         // in theory, but it has been known to happen as a result of bugs.
@@ -122,19 +199,23 @@ export const BaseDocumentContentModel = types
                   return isPlaceholderTile(tile);
                 });
       },
+      getRowForTile(tileId: string) {
+        return this.allRows.find(r => r.hasTile(tileId));
+      },
+      getRowIdForTile(tileId: string) {
+        return this.getRowForTile(tileId)?.id;
+      },
       getSectionIdForTile(tileId: string) {
         let sectionId = "";
-        const foundRow = self.rowOrder.find((rowId, i) => {
-          const row = self.rowMap.get(rowId);
-          // TODO: Figure out why linting is failing
-          // row?.sectionId && (sectionId = row?.sectionId);
-          if (row?.sectionId) {
+        const foundRow = this.allRows.find((row) => {
+          if (row.sectionId) {
             sectionId = row.sectionId;
           }
-          return row?.hasTile(tileId);
+          return row.hasTile(tileId);
         });
         return foundRow ? sectionId : undefined;
       },
+      // TODO does this need to be recursive? - affects copy behavior.
       getRowsInSection(sectionId: string): TileRowModelType[] {
         let sectionRowIndex: number | undefined;
         let nextSectionRowIndex: number | undefined;
@@ -152,14 +233,6 @@ export const BaseDocumentContentModel = types
         const rows = self.rowOrder.map(rowId => self.rowMap.get(rowId));
         const rowsInSection = rows.filter((row, i) => !!row && (i > sectionRowIndex!) && (i < nextSectionRowIndex!));
         return rowsInSection as TileRowModelType[];
-      },
-      get indexOfLastVisibleRow() {
-        // returns last visible row or last row
-        if (!self.rowOrder.length) return -1;
-        const lastVisibleRowId = self.visibleRows.length
-                                  ? self.visibleRows[self.visibleRows.length - 1]
-                                  : self.rowOrder[self.rowOrder.length - 1];
-        return  self.rowOrder.indexOf(lastVisibleRowId);
       },
       // TODO: Split this into two functions:
       // - getFirstDocumentSharedModelByType
@@ -187,7 +260,7 @@ export const BaseDocumentContentModel = types
       getSharedModelsInUseByAnyTiles(): SharedModelType[] {
         const sharedModelEntries = Array.from(self.sharedModelMap.values());
         return sharedModelEntries
-          .filter(entry => { return entry.tiles.length > 0; })
+          .filter(entry => entry.tiles.length > 0)
           .map(entry => entry.sharedModel);
       },
       getSharedModelsUsedByTiles(tileIds: string[]) {
@@ -203,28 +276,16 @@ export const BaseDocumentContentModel = types
       },
       getAllTileIds(includeTeacherContent: boolean) {
         // returns all non-placeholder tile ids in document order filtered by includeTeacherContent
-        return self.rowOrder.reduce((tileIds: string[], rowId) => {
-          const row = self.rowMap.get(rowId);
-          if (row) {
-            const publicTileIds = row.tiles
-              .filter(tile => {
-                const tileInfo = self.tileMap.get(tile.tileId);
-                if (!tileInfo) return false;
-                const {display, content} = tileInfo;
-                const isPlaceholder = content?.type === kPlaceholderTileType;
-                return !isPlaceholder && (display !== "teacher" || includeTeacherContent);
-              })
-              .map(tile => tile.tileId);
-            tileIds.push(...publicTileIds);
-          }
-          return tileIds;
-        }, []);
-      },
+        return this.allTiles.filter((tile: ITileModel) => {
+          const { display } = tile;
+          return !isPlaceholderTile(tile) && (display !== "teacher" || includeTeacherContent);
+        }).map(tile => tile.id);
+      }
     };
   })
   .views(self => ({
     getRowHeight(rowId: string) {
-      const row = self.getRow(rowId);
+      const row = self.getRowRecursive(rowId);
       if (!row) return 0;
       if (row.isSectionHeader) return kSectionHeaderHeight;
       if (self.isPlaceholderRow(row)) return kPlaceholderTileDefaultHeight;
@@ -254,20 +315,22 @@ export const BaseDocumentContentModel = types
       // if all else fails, revert to last visible row
       return self.indexOfLastVisibleRow + 1;
     },
+    /**
+     * Find the smallest RowList container that contains all the given tile ids.
+     * Returns the whole document if no smaller container is found.
+     * @param tileIds The IDs of the tiles to find.
+     * @returns This DocumentContentModel, or a smaller RowList that contains all the given tile ids.
+     */
+    getRowListContainingTileIds(tileIds: string[]): RowListType | undefined {
+      const found = self.allRowLists.find(rowList => {
+        return tileIds.every(id => rowList.tileIds.includes(id));
+      });
+      return found ?? self;
+    },
     getRowAfterTiles(tiles: ITilePosition[]) {
       return Math.max(...tiles.map(tile => tile.rowIndex)) + 1;
     },
-    getTilesInDocumentOrder(): string[] {
-      // Returns list of tile ids in the document from top to bottom, left to right
-      const tiles: string[] = [];
-      self.rowOrder.forEach(rowId => {
-        const row = self.getRow(rowId);
-        if (row) {
-          tiles.push(...row.tiles.map(tile=>tile.tileId));
-        }
-      });
-      return tiles;
-    },
+    // TODO: does this need to be recursive?
     getTilesInSection(sectionId: string) {
       const tiles: ITileModel[] = [];
       const rows = self.getRowsInSection(sectionId);
@@ -282,17 +345,10 @@ export const BaseDocumentContentModel = types
       return new Set(Array.from(self.tileMap.values()).map(tile => tile.content.type));
     },
     getTilesOfType(type: string) {
-      const tiles: string[] = [];
       const lcType = type.toLowerCase();
-      self.rowOrder.forEach(rowId => {
-        const row = self.getRow(rowId);
-        each(row?.tiles, tileEntry => {
-          if (self.getTileType(tileEntry.tileId)?.toLowerCase() === lcType) {
-            tiles.push(tileEntry.tileId);
-          }
-        });
-      });
-      return tiles;
+      return self.allTiles
+        .filter(tile => tile.content.type.toLowerCase() === lcType)
+        .map(tile => tile.id);
     },
     getAllTilesByType() {
       const tilesByType: Record<string, string[]> = {};
@@ -308,15 +364,12 @@ export const BaseDocumentContentModel = types
     getLinkableTiles(): ILinkableTiles {
       const providers: ITypedTileLinkMetadata[] = [];
       const consumers: ITypedTileLinkMetadata[] = [];
-      self.rowOrder.forEach(rowId => {
-        const row = self.getRow(rowId);
-        each(row?.tiles, tileEntry => {
-          const tileType = self.getTileType(tileEntry.tileId);
+      self.allTiles.forEach(tile => {
+          const tileType = tile.content.type;
           const titleBase = getTileContentInfo(tileType)?.titleBase || tileType;
           if (tileType) {
-            const tile = self.getTile(tileEntry.tileId);
             const typedTileLinkMetadata: ITypedTileLinkMetadata = {
-              id: tileEntry.tileId, type: tileType, title: tile?.computedTitle, titleBase
+              id: tile.id, type: tileType, title: tile?.computedTitle, titleBase
             };
             if (getTileContentInfo(tileType)?.isDataProvider) {
               providers.push(typedTileLinkMetadata);
@@ -325,18 +378,8 @@ export const BaseDocumentContentModel = types
               consumers.push(typedTileLinkMetadata);
             }
           }
-        });
       });
       return { providers, consumers };
-    },
-    exportTileAsJson(tileInfo: TileLayoutModelType, options?: IDocumentExportOptions) {
-      const { includeTileIds, ...otherOptions } = options || {};
-      const tileOptions = { includeId: includeTileIds, ...otherOptions};
-      const tile = self.getTile(tileInfo.tileId);
-      const json = tile?.exportJson(tileOptions);
-      if (json) {
-        return json;
-      }
     }
   }))
   .views(self => ({
@@ -344,16 +387,6 @@ export const BaseDocumentContentModel = types
       return self.rowOrder.reduce((totalHeight: number, rowId: string) => {
         return totalHeight + (self.getRowHeight(rowId) ?? 0);
       }, 0) ?? 0;
-    },
-    rowHeightToExport(row: TileRowModelType, tileId: string) {
-      if (!row?.height) return;
-      // we only export heights for specific tiles configured to do so
-      const tileType = self.getTileType(tileId);
-      const tileContentInfo = getTileContentInfo(tileType);
-      if (!tileContentInfo?.exportNonDefaultHeight) return;
-      // we only export heights when they differ from the default height for the tile
-      const defaultHeight = tileContentInfo.defaultHeight;
-      return defaultHeight && (row.height !== defaultHeight) ? row.height : undefined;
     },
     /**
      * Find the largest title suffix number matching the given title base
@@ -448,21 +481,19 @@ export const BaseDocumentContentModel = types
       });
       return counts;
     },
+    findRowContainingTile(tileId: string) {
+      return self.allRows.find(row => row.hasTile(tileId));
+    },
+    findRowIdContainingTile(tileId: string) {
+      const row = this.findRowContainingTile(tileId);
+      return row?.id;
+    },
+    numTilesInRow(rowId: string) {
+      const row = self.getRowRecursive(rowId);
+      return row ? row.tiles.length : 0;
+    },
   }))
   .actions(self => ({
-    insertRow(row: TileRowModelType, index?: number) {
-      self.rowMap.put(row);
-      if ((index != null) && (index < self.rowOrder.length)) {
-        self.rowOrder.splice(index, 0, row.id);
-      }
-      else {
-        self.rowOrder.push(row.id);
-      }
-    },
-    deleteRow(rowId: string) {
-      self.rowOrder.remove(rowId);
-      self.rowMap.delete(rowId);
-    },
     insertNewTileInRow(tile: ITileModel, row: TileRowModelType, tileIndexInRow?: number) {
       const insertedTile = self.tileMap.put(tile);
       row.insertTileInRow(insertedTile, tileIndexInRow);
@@ -474,45 +505,40 @@ export const BaseDocumentContentModel = types
           row.removeTileFromRow(tileId);
           self.tileMap.delete(tileId);
         });
-    },
-    setVisibleRows(rows: string[]) {
-      self.visibleRows = rows;
     }
   }))
   .actions(self => ({
-    addNewTileInNewRowAtIndex(tile: ITileModel, rowIndex: number) {
-      const row = TileRowModel.create({});
-      self.insertRow(row, rowIndex);
-      self.insertNewTileInRow(tile, row);
-      return row;
-    }
-  }))
-  .actions(self => ({
-    removeNeighboringPlaceholderRows(rowIndex: number) {
-      const beforeRow = rowIndex > 0 ? self.getRowByIndex(rowIndex - 1) : undefined;
-      const afterRow = rowIndex < self.rowCount - 1 ? self.getRowByIndex(rowIndex + 1) : undefined;
+    removeNeighboringPlaceholderRows(rowId: string) {
+      const rowList = self.getRowListForRow(rowId);
+      if (!rowList) {
+        console.warn("Row is missing", rowId);
+        return;
+      }
+      const rowIndex = rowList.getRowIndex(rowId);
+      const beforeRow = rowIndex > 0 ? rowList.getRowByIndex(rowIndex - 1) : undefined;
+      const afterRow = rowIndex < rowList.rowCount - 1 ? rowList.getRowByIndex(rowIndex + 1) : undefined;
       if (afterRow && self.isPlaceholderRow(afterRow)) {
-        self.deleteRow(afterRow.id);
+        rowList.deleteRow(afterRow.id);
       }
       if (beforeRow && self.isPlaceholderRow(beforeRow)) {
-        self.deleteRow(beforeRow.id);
+        rowList.deleteRow(beforeRow.id);
       }
     },
-    addPlaceholderRowIfAppropriate(rowIndex: number) {
-      const beforeRow = (rowIndex > 0) && self.getRowByIndex(rowIndex - 1);
-      const afterRow = (rowIndex < self.rowCount) && self.getRowByIndex(rowIndex);
+    addPlaceholderRowIfAppropriate(rowList: RowListType, rowIndex: number) {
+      const beforeRow = (rowIndex > 0) && rowList.getRowByIndex(rowIndex - 1);
+      const afterRow = (rowIndex < rowList.rowCount) && rowList.getRowByIndex(rowIndex);
       if ((beforeRow && beforeRow.isSectionHeader) && (!afterRow || afterRow.isSectionHeader)) {
         const beforeSectionId = beforeRow.sectionId;
         const content = PlaceholderContentModel.create({sectionId: beforeSectionId});
         const tile = TileModel.create({ content });
-        self.addNewTileInNewRowAtIndex(tile, rowIndex);
+        self.tileMap.put(tile);
+        rowList.addNewTileInNewRowAtIndex(tile, rowIndex);
       }
     },
-    removePlaceholderTilesFromRow(rowIndex: number) {
+    removePlaceholderTilesFromRow(row: TileRowModelType) {
       const isPlaceholderTileId = (tileId: string) => {
         return self.getTileType(tileId) === "Placeholder";
       };
-      const row = self.getRowByIndex(rowIndex);
       row?.removeTilesFromRow(isPlaceholderTileId);
     }
   }))
@@ -522,9 +548,11 @@ export const BaseDocumentContentModel = types
         row.updateLayout(self.tileMap);
       });
       // fix any "collapsed" sections
-      for (let i = 1; i < self.rowCount; ++i) {
-        self.addPlaceholderRowIfAppropriate(i);
-      }
+      self.allRowLists.forEach(rowList => {
+        for (let i = 1; i < rowList.rowCount; ++i) {
+          self.addPlaceholderRowIfAppropriate(rowList, i);
+        }
+      });
 
       // Find and fix any tiles that have a title incorrectly set on the tile, rather than on the content.
       // We iterate through the tiles in reverse order, so that if there is more than one tile
@@ -557,18 +585,19 @@ export const BaseDocumentContentModel = types
         console.warn("addTileContentInNewRow requires the content to have a type");
       }
       const o = options || {};
+      const rowList = o.rowList ?? self;
       if (o.rowIndex === undefined) {
         // by default, insert new tiles after last visible on screen
         o.rowIndex = self.defaultInsertRow;
       }
       const row = TileRowModel.create({});
-      self.insertRow(row, o.rowIndex);
+      rowList.insertRow(row, o.rowIndex);
 
       const id = o.tileId;
       const tileModel = self.tileMap.put({id, content, title: o.title});
       row.insertTileInRow(tileModel);
 
-      self.removeNeighboringPlaceholderRows(o.rowIndex);
+      self.removeNeighboringPlaceholderRows(row.id);
       if (o.rowHeight) {
         row.setRowHeight(o.rowHeight);
       }
@@ -576,17 +605,18 @@ export const BaseDocumentContentModel = types
     },
     addTileSnapshotInExistingRow(snapshot: ITileModelSnapshotIn, options: INewTileOptions): INewRowTile | undefined {
       const o = options || {};
+      const rowList = o.rowList ?? self;
       if (o.rowIndex === undefined) {
-        // by default, insert new tiles after last visible on screen
+        // by default, insert new tiles after last visible on screen.
         o.rowIndex = self.defaultInsertRow;
       }
-      const row = o.rowId ? self.getRow(o.rowId) : self.getRowByIndex(o.rowIndex);
+      const row = o.rowId ? rowList.getRow(o.rowId) : rowList.getRowByIndex(o.rowIndex);
       if (row) {
         const indexInRow = o.locationInRow === "left" ? 0 : undefined;
         const tileModel = self.tileMap.put(snapshot);
         row.insertTileInRow(tileModel, indexInRow);
-        self.removePlaceholderTilesFromRow(o.rowIndex);
-        self.removeNeighboringPlaceholderRows(o.rowIndex);
+        self.removePlaceholderTilesFromRow(row);
+        self.removeNeighboringPlaceholderRows(row.id);
         if (o.rowHeight) {
           row.setRowHeight(Math.max((row.height || 0), o.rowHeight));
         }
@@ -594,19 +624,17 @@ export const BaseDocumentContentModel = types
       }
     },
     deleteRowAddingPlaceholderRowIfAppropriate(rowId: string) {
-      const rowIndex = self.getRowIndex(rowId);
-      self.deleteRow(rowId);
-      self.addPlaceholderRowIfAppropriate(rowIndex);
+      const rowList = self.getRowListForRow(rowId);
+      const rowIndex = rowList.getRowIndex(rowId);
+      const row = rowList.deleteRow(rowId);
+      self.addPlaceholderRowIfAppropriate(rowList, rowIndex);
+      return row;
     },
     showPendingInsertHighlight(show: boolean, insertRowIndex?: number) {
       self.highlightPendingDropLocation = show ? insertRowIndex ?? self.defaultInsertRow : -1;
     }
   }))
   .actions((self) => ({
-    addPlaceholderTile(sectionId?: string) {
-      const content = PlaceholderContentModel.create({ sectionId });
-      return self.addTileContentInNewRow(content, { rowIndex: self.rowCount });
-    },
     copyTilesIntoExistingRow(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
@@ -617,7 +645,7 @@ export const BaseDocumentContentModel = types
           const uniqueTitle = title && self.getUniqueTitle(title);
           if (parsedContent?.content) {
             const rowOptions: INewTileOptions = {
-              rowIndex: rowInfo.rowDropIndex,
+              rowIndex: rowInfo.rowInsertIndex,
               locationInRow: rowInfo.rowDropLocation
             };
             if (tile.rowHeight) {
@@ -635,7 +663,7 @@ export const BaseDocumentContentModel = types
       }
       return results;
     },
-    copyTilesIntoNewRows(tiles: IDropTileItem[], rowIndex: number) {
+    copyTilesIntoNewRows(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
         let rowDelta = -1;
@@ -652,8 +680,9 @@ export const BaseDocumentContentModel = types
               rowDelta++;
             }
             const tileOptions: INewTileOptions = {
+              rowList: (rowInfo.rowDropId && self.getRowListForRow(rowInfo.rowDropId)) || self,
               rowId: lastRowId,
-              rowIndex: rowIndex + rowDelta,
+              rowIndex: rowInfo.rowInsertIndex + rowDelta,
               tileId: tile.newTileId,
               title: uniqueTitle
             };
@@ -688,25 +717,38 @@ export const BaseDocumentContentModel = types
         }
       });
     },
-    moveRowToIndex(rowIndex: number, newRowIndex: number) {
-      if (newRowIndex === 0) {
-        const dstRowId = self.rowOrder[0];
-        const dstRow = dstRowId && self.rowMap.get(dstRowId);
-        if (dstRow && dstRow.isSectionHeader) {
-          return;
-        }
+    moveRow(srcRowId: string, destRowId: string, position: "top" | "bottom") {
+      const srcRowList = self.getRowListForRow(srcRowId);
+      const srcRow = srcRowList.getRow(srcRowId);
+      if (!srcRow || !srcRowList) {
+        console.warn("Source row is missing", srcRowId);
+        return;
       }
-      const rowId = self.rowOrder[rowIndex];
-      self.rowOrder.splice(rowIndex, 1);
-      self.rowOrder.splice(newRowIndex <= rowIndex ? newRowIndex : newRowIndex - 1, 0, rowId);
-      self.addPlaceholderRowIfAppropriate(newRowIndex <= rowIndex ? rowIndex + 1 : rowIndex);
-      self.removeNeighboringPlaceholderRows(self.getRowIndex(rowId));
+      const dstRowList = self.getRowListForRow(destRowId);
+      const dstRow = dstRowList.getRow(destRowId);
+      const dstRowIndex = dstRowList.getRowIndex(destRowId);
+      if (!dstRow || !dstRowList) {
+        console.warn("Destination row is missing", destRowId);
+        return;
+      }
+      // Cannot move a row above a top section header.
+      if (position === "top" && dstRow.isSectionHeader && dstRowIndex === 0) {
+        return;
+      }
+
+      const row = self.deleteRowAddingPlaceholderRowIfAppropriate(srcRowId);
+      if (!row) {
+        console.warn("Failed to remove row to move it", srcRowId);
+        return;
+      }
+      const insertIndex = dstRowIndex + (position === "top" ? 0 : 1);
+      dstRowList.insertRow(row, insertIndex);
+
+      self.removeNeighboringPlaceholderRows(row.id);
     },
-    moveTileToRow(tileId: string, rowIndex: number, tileIndex?: number) {
-      const srcRowId = self.findRowContainingTile(tileId);
-      const srcRow = srcRowId && self.rowMap.get(srcRowId);
-      const dstRowId = self.rowOrder[rowIndex];
-      const dstRow = dstRowId && self.rowMap.get(dstRowId);
+    moveTileToRow(tileId: string, rowId: string, tileIndex?: number) {
+      const srcRow = self.getRowForTile(tileId);
+      const dstRow = rowId && self.getRowRecursive(rowId);
       const tile = self.getTile(tileId);
       if (srcRow && dstRow && tile && !dstRow.isSectionHeader) {
         if (srcRow === dstRow) {
@@ -732,43 +774,87 @@ export const BaseDocumentContentModel = types
         }
       }
     },
-    moveTileToNewRow(tileId: string, rowIndex: number) {
-      const srcRowId = self.findRowContainingTile(tileId);
-      const srcRow = srcRowId && self.rowMap.get(srcRowId);
+    createRowRelativeToRow(rowInfo: IDropRowInfo, rowSpec: TileRowSnapshotType) {
+      const { rowDropId, rowDropLocation } = rowInfo;
+      if (!rowDropId || !rowDropLocation) {
+        console.warn("Source row is missing", rowDropId);
+        return;
+      }
+      const rowList = self.getRowListForRow(rowDropId);
+      const row = self.getRowRecursive(rowDropId);
+      if (!rowList || !row) {
+        console.warn("Source row is missing", rowDropId);
+        return;
+      }
+      const insertIndex = rowList.getRowIndex(rowDropId) + (rowDropLocation === "top" ? 0 : 1);
+      const newRow = TileRowModel.create(rowSpec);
+      rowList.insertRow(newRow, insertIndex);
+      return newRow;
+    },
+    moveTileToNewRow(tileId: string, rowInfo: IDropRowInfo) {
+      const srcRow = self.findRowContainingTile(tileId);
       const tile = self.getTile(tileId);
-      if (!srcRowId || !srcRow || !tile) return;
+      if (!srcRow || !tile) return;
 
       // create tile, insert tile, insert row
       const rowSpec: TileRowSnapshotType = {};
       if (tile.isUserResizable) {
         rowSpec.height = srcRow.height;
       }
-      const dstRow = TileRowModel.create(rowSpec);
+      const dstRow = this.createRowRelativeToRow(rowInfo, rowSpec);
+      if (!dstRow) {
+        console.warn("Failed to create destination row", rowInfo);
+        return;
+      }
       dstRow.insertTileInRow(tile);
-      self.insertRow(dstRow, rowIndex);
-      self.removeNeighboringPlaceholderRows(rowIndex);
+      self.removeNeighboringPlaceholderRows(dstRow.id);
 
       // remove tile from source row
       srcRow.removeTileFromRow(tileId);
       if (!srcRow.tiles.length) {
-        self.deleteRowAddingPlaceholderRowIfAppropriate(srcRowId);
+        self.deleteRowAddingPlaceholderRowIfAppropriate(srcRow.id);
       }
       else {
         if (!srcRow.isUserResizable) {
           srcRow.height = undefined;
         }
       }
+      // Return the new row
+      return dstRow;
+    },
+    createTileContent(tileType: string, title?: string, url?: string): ITileContentModel {
+      const contentInfo = getTileContentInfo(tileType);
+      if (!contentInfo) {
+        throw new Error(`Invalid tile type: ${tileType}`);
+      }
+      const appConfig = getAppConfig(self);
+      return contentInfo.defaultContent({ title, url, appConfig, tileFactory: this.createTile });
+    },
+    createTile(tileType: string, title?: string): ITileModel {
+      const content = this.createTileContent(tileType);
+      return self.tileMap.put({content, title});
     }
   }))
   .actions(self => {
     const actions = {
-      deleteTile(tileId: string) {
+      deleteTile(tileId: string, createPlaceholdersIfNeeded = true) {
         const rowsToDelete: TileRowModelType[] = [];
-        self.rowMap.forEach(row => {
+        self.allRows.forEach(row => {
+          if (!isAlive(row)) {
+            // Skip any rows that have already been deleted.
+            return;
+          }
           // remove from row
           if (row.hasTile(tileId)) {
             const tile = self.getTile(tileId);
             tile && tile.willRemoveFromDocument();
+            // Remove any embedded tiles/rows
+            const tileContent = tile?.content;
+            if (tileContent && isRowListContainer(tileContent)) {
+              tileContent.tileIds.forEach(embeddedTileId => {
+                this.deleteTile(embeddedTileId, false);
+              });
+            }
             row.removeTileFromRow(tileId);
           }
           // track empty rows
@@ -778,33 +864,37 @@ export const BaseDocumentContentModel = types
         });
         // remove empty rows
         rowsToDelete.forEach(row => {
-          self.deleteRowAddingPlaceholderRowIfAppropriate(row.id);
+          if (createPlaceholdersIfNeeded) {
+            self.deleteRowAddingPlaceholderRowIfAppropriate(row.id);
+          } else {
+            self.getRowListForRow(row.id)?.deleteRow(row.id);
+          }
         });
         // delete tile
         self.tileMap.delete(tileId);
       },
       moveTile(tileId: string, rowInfo: IDropRowInfo, tileIndex = 0) {
-        const srcRowId = self.findRowContainingTile(tileId);
+        const srcRowId = self.findRowIdContainingTile(tileId);
         if (!srcRowId) return;
-        const srcRowIndex = self.getRowIndex(srcRowId);
-        const { rowInsertIndex, rowDropIndex, rowDropLocation } = rowInfo;
-        if ((rowDropIndex != null) && (rowDropLocation === "left")) {
-          self.moveTileToRow(tileId, rowDropIndex, tileIndex);
+
+        const { rowDropId, rowDropLocation } = rowInfo;
+        if (rowDropId && (rowDropLocation === "left")) {
+          self.moveTileToRow(tileId, rowDropId, tileIndex);
           return;
         }
-        if ((rowDropIndex != null) && (rowDropLocation === "right")) {
-          self.moveTileToRow(tileId, rowDropIndex);
+        if (rowDropId && (rowDropLocation === "right")) {
+          self.moveTileToRow(tileId, rowDropId);
           return;
         }
-        if ((srcRowIndex >= 0)) {
+        if (rowDropLocation === "top" || rowDropLocation === "bottom") {
           // if only one tile in source row, move the entire row
           if (self.numTilesInRow(srcRowId) === 1) {
-            if (rowInsertIndex !== srcRowIndex) {
-              self.moveRowToIndex(srcRowIndex, rowInsertIndex);
+            if (rowDropId) {
+              self.moveRow(srcRowId, rowDropId, rowDropLocation);
             }
           }
           else {
-            self.moveTileToNewRow(tileId, rowInsertIndex);
+            self.moveTileToNewRow(tileId, rowInfo);
           }
         }
       },
@@ -824,13 +914,12 @@ export const BaseDocumentContentModel = types
         const contentInfo = getTileContentInfo(toolId);
         if (!contentInfo) return;
 
-        const appConfig = getAppConfig(self);
 
         // TODO: The table tile is the only tile that uses the title property
         // here the title gets set as the name of the dataSet that is created by
         // the table's defaultContent. We should find a way for the table tile
         // to work without needing this title.
-        const newContent = contentInfo?.defaultContent({ title, url, appConfig });
+        const newContent = self.createTileContent(toolId, title, url);
         const addTileOptions = { rowHeight: contentInfo.defaultHeight, rowIndex: self.rowCount, title: options?.title };
         const tileInfo = self.addTileContentInNewRow(
                               newContent,
@@ -858,11 +947,11 @@ export const BaseDocumentContentModel = types
             }
             else {
               if (moveSubsequentTilesRight) {
-                const newRowId = firstTileId && self.findRowContainingTile(firstTileId);
+                const newRowId = firstTileId && self.findRowIdContainingTile(firstTileId);
                 const newRowIndex = newRowId ? self.getRowIndex(newRowId) : undefined;
                 insertRowInfo.rowDropLocation = "right";
                 if (newRowIndex != null) {
-                  insertRowInfo.rowInsertIndex = insertRowInfo.rowDropIndex = newRowIndex;
+                  insertRowInfo.rowInsertIndex = newRowIndex;
                 }
               }
             }
@@ -876,23 +965,28 @@ export const BaseDocumentContentModel = types
   })
   .actions(self => ({
     mergeRow(srcRow: TileRowModelType, rowInfo: IDropRowInfo) {
-      const rowId = srcRow.id;
       srcRow.tiles.forEach((tile, index) => {
         self.moveTile(tile.tileId, rowInfo, index);
       });
-      self.deleteRow(rowId);
+      // MoveTile will delete the row when it's empty.
     },
-    moveTilesToNewRowAtIndex(rowTiles: IDragTileItem[], rowIndex: number) {
+    moveTilesToNewRow(rowTiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+      const { rowDropId } = rowInfo;
+      if (!rowDropId) {
+        console.warn("Missing rowDropId in rowInfo", rowInfo);
+        return;
+      }
+      let dstRow: TileRowModelType | undefined = undefined;
       rowTiles.forEach((tile, index) => {
         if (index === 0) {
-          self.moveTileToNewRow(tile.tileId, rowIndex);
+          dstRow = self.moveTileToNewRow(tile.tileId, rowInfo);
         }
         else {
-          self.moveTileToRow(tile.tileId, rowIndex);
+          self.moveTileToRow(tile.tileId, dstRow!.id, index);
         }
       });
     },
-    moveTilesToExistingRowAtIndex(rowTiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+    moveTilesToExistingRow(rowTiles: IDragTileItem[], rowInfo: IDropRowInfo) {
       rowTiles.forEach((tile, index) => {
         self.moveTile(tile.tileId, rowInfo, index);
       });
@@ -902,40 +996,68 @@ export const BaseDocumentContentModel = types
     moveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
       if (tiles.length > 0) {
         // organize tiles by row
-        const tileRows: {[index: number]: IDragTileItem[]} = {};
+        const tileRows: {[id: string]: IDragTileItem[]} = {};
         tiles.forEach(tile => {
-          tileRows[tile.rowIndex] = tileRows[tile.rowIndex] || [];
-          tileRows[tile.rowIndex].push(tile);
+          const rowId = self.getRowIdForTile(tile.tileId);
+          if (rowId) {
+            tileRows[rowId] = tileRows[rowId] || [];
+            tileRows[rowId].push(tile);
+          }
         });
 
-        // move each row
-        const { rowInsertIndex, rowDropLocation } = rowInfo;
+        const { rowDropId, rowDropLocation } = rowInfo;
+        const dstRow = rowInfo.rowDropId ? self.getRowRecursive(rowInfo.rowDropId) : undefined;
+        if (!rowDropId || !dstRow) {
+          console.warn("Drop row is missing", rowDropId);
+          return;
+        }
+
+        // Is the destination row embedded in a tile (presumably a Question tile)?
+        // Question tiles cannot nest, so we filter them out.
+        const destIsEmbeddedRow = dstRow.isEmbeddedRow();
+
+        // Move each set of tiles that share a row.
         Object.values(tileRows).forEach(rowTiles => {
-          const rowIndex = rowTiles[0].rowIndex;
-          const row = self.getRowByIndex(rowIndex);
+          if (destIsEmbeddedRow) {
+            const filteredTiles = rowTiles.filter(tile => !isRowListContainer(self.getTile(tile.tileId)?.content));
+            if (filteredTiles.length < rowTiles.length) {
+              // console.log("Filtered out question tiles"); // should we have some sort of warning here?
+              rowTiles = filteredTiles;
+            }
+          }
+          if (rowTiles.length === 0) return;
+
+          const row = self.getRowForTile(rowTiles[0].tileId);
           if (row?.tiles.length === rowTiles.length) {
             if ((rowDropLocation === "left") || (rowDropLocation === "right")) {
               // entire row is being merged with an existing row
-              const dstRow = rowInfo.rowDropIndex ? self.getRowByIndex(rowInfo.rowDropIndex) : undefined;
-              if ((rowIndex !== rowInfo.rowDropIndex) && (dstRow && !dstRow.isSectionHeader)) {
+              if (dstRow && row.id !== dstRow?.id && !dstRow.isSectionHeader) {
                 self.mergeRow(row, rowInfo);
+              } else {
+                console.warn("Failed to merge row", row.id, "into", rowDropId,
+                  "Destination same as source, or is a section header");
+              }
+            }
+            else if (rowDropLocation === "top" || rowDropLocation === "bottom") {
+              // entire row is being moved to a new row
+              if (row.id !== dstRow.id) {
+                self.moveRow(row.id, rowDropId, rowDropLocation);
+              } else {
+                console.warn("Cannot move row", row.id, "onto itself");
               }
             }
             else {
-              // entire row is being moved to a new row
-              if ((rowInsertIndex < rowIndex) || (rowInsertIndex > rowIndex + 1)) {
-                self.moveRowToIndex(rowIndex, rowInsertIndex);
-              }
+              console.warn("Unknown row drop location", rowDropLocation);
             }
           }
           else {
             if ((rowDropLocation === "left") || (rowDropLocation === "right")) {
-              // part of row is being moved to an existing row
-              self.moveTilesToExistingRowAtIndex(rowTiles, rowInfo);
+              // part of row is being moved into an existing row
+              self.moveTilesToExistingRow(rowTiles, rowInfo);
             }
             else {
               // part of row is being moved to a new row
-              self.moveTilesToNewRowAtIndex(rowTiles, rowInsertIndex);
+              self.moveTilesToNewRow(rowTiles, rowInfo);
             }
           }
         });
@@ -978,6 +1100,9 @@ export const BaseDocumentContentModel = types
       }
     },
     userMoveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+      // console.log("Document before moveTiles");
+      // console.log(self.debugDescribeThis(self.tileMap, "  "));
+      // console.log("moving tiles", tiles.map(t => t.tileId), "into", rowInfo);
       tiles.forEach(tileItem => {
         const tile = self.getTile(tileItem.tileId);
         tile && logTileDocumentEvent(LogEventName.MOVE_TILE, { tile });
@@ -985,11 +1110,14 @@ export const BaseDocumentContentModel = types
       self.moveTiles(tiles, rowInfo);
     },
     userCopyTiles(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
-      const dropRow = (rowInfo.rowDropIndex != null) ? self.getRowByIndex(rowInfo.rowDropIndex) : undefined;
+      const rowList = (rowInfo.rowDropId && self.getRowListForRow(rowInfo.rowDropId)) || self;
+      const dropRow = (rowInfo.rowInsertIndex != null) ? rowList.getRowByIndex(rowInfo.rowInsertIndex) : undefined;
       const results = dropRow?.acceptTileDrop(rowInfo)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
-                      : self.copyTilesIntoNewRows(tiles, rowInfo.rowInsertIndex);
+                      : self.copyTilesIntoNewRows(tiles, rowInfo);
       self.logCopyTileResults(tiles, results);
       return results;
     }
   }));
+
+  export type BaseDocumentContentModelType = Instance<typeof BaseDocumentContentModel>;

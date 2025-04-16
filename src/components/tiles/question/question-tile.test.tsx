@@ -1,12 +1,16 @@
 import React from "react";
+import { getParentOfType, getParent } from "mobx-state-tree";
+import { Provider } from "mobx-react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { QuestionTileComponent } from "./question-tile";
-import { defaultQuestionContent } from "../../../models/tiles/question/question-content";
-import { TileModel } from "../../../models/tiles/tile-model";
 import { TileModelContext } from "../tile-api";
+import { DocumentContentModel, DocumentContentModelType } from "../../../models/document/document-content";
+import { registerTileTypes } from "../../../register-tile-types";
+import { ITileModel } from "../../../models/tiles/tile-model";
+import { QuestionContentModelType } from "../../../models/tiles/question/question-content";
+import { specStores } from "../../../models/stores/spec-stores";
 
-// Register the tile type
-import "../../../models/tiles/question/question-registration";
+registerTileTypes(["Question", "Text"]);
 
 // Mock canvas operations since we're running in jsdom
 const mockMeasureText = jest.fn().mockReturnValue(100);
@@ -20,14 +24,26 @@ jest.mock("../../../models/tiles/log/log-tile-document-event", () => ({
 }));
 
 describe("QuestionTileComponent", () => {
-  const createTileProps = (content: any, title?: string) => {
-    const model = TileModel.create({ content, title });
+  let documentContent: DocumentContentModelType;
+  let model: ITileModel;
+  let stores: ReturnType<typeof specStores>;
+
+  beforeEach(() => {
+    stores = specStores();
+    documentContent = DocumentContentModel.create({});
+  });
+
+  const createQuestionTile = (title: string) => {
+    const newRowTile = documentContent.addTile("Question", { title })!;
+    model = documentContent.getTile(newRowTile.tileId)!;
+    documentContent = getParentOfType(model, DocumentContentModel) as DocumentContentModelType;
+  };
+
+  const createTileProps = () => {
     return {
       model,
-      tileElt: document.createElement("div"),
       context: "test",
       docId: "doc1",
-      documentContent: document.createElement("div"),
       isUserResizable: true,
       onRegisterTileApi: () => {},
       onUnregisterTileApi: () => {},
@@ -41,30 +57,36 @@ describe("QuestionTileComponent", () => {
 
   const renderWithContext = (props: any) => {
     return render(
-      <TileModelContext.Provider value={props.model}>
-        <QuestionTileComponent {...props} />
-      </TileModelContext.Provider>
+      <Provider stores={stores}>
+        <TileModelContext.Provider value={props.model}>
+          <QuestionTileComponent {...props} />
+        </TileModelContext.Provider>
+      </Provider>
     );
   };
 
   it("renders without crashing", () => {
-    const props = createTileProps(defaultQuestionContent());
+    createQuestionTile("Test Question");
+    assertIsDefined(getParent(model));
+    const props = createTileProps();
     renderWithContext(props);
     expect(screen.getByTestId("question-tile")).toBeInTheDocument();
-    expect(screen.getByText("Tile Title")).toBeInTheDocument();
+    expect(screen.getByText("Test Question")).toBeInTheDocument();
   });
 
   it("renders with default title", () => {
-    const props = createTileProps(defaultQuestionContent());
+    createQuestionTile("Test Question");
+    const props = createTileProps();
     renderWithContext(props);
     expect(screen.getByTestId("question-tile")).toBeInTheDocument();
-    const titleElement = screen.getByText("Tile Title");
+    const titleElement = screen.getByText("Test Question");
     expect(titleElement).toBeInTheDocument();
     expect(titleElement.closest(".editable-tile-title-text")).toBeInTheDocument();
   });
 
   it("renders with custom title", () => {
-    const props = createTileProps(defaultQuestionContent(), "My Custom Title");
+    createQuestionTile("My Custom Title");
+    const props = createTileProps();
     renderWithContext(props);
     expect(screen.getByTestId("question-tile")).toBeInTheDocument();
     const titleElement = screen.getByText("My Custom Title");
@@ -73,8 +95,8 @@ describe("QuestionTileComponent", () => {
   });
 
   it("allows title editing when not locked", () => {
-    const content = defaultQuestionContent();
-    const props = createTileProps(content, "Editable Title");
+    createQuestionTile("Editable Title");
+    const props = createTileProps();
     renderWithContext(props);
     const titleElement = screen.getByText("Editable Title");
     fireEvent.click(titleElement);
@@ -82,9 +104,9 @@ describe("QuestionTileComponent", () => {
   });
 
   it("prevents title editing when locked", () => {
-    const content = defaultQuestionContent();
-    content.setLocked(true);
-    const props = createTileProps(content, "Locked Title");
+    createQuestionTile("Locked Title");
+    (model.content as QuestionContentModelType).setLocked(true);
+    const props = createTileProps();
     renderWithContext(props);
     const titleElement = screen.getByText("Locked Title");
     fireEvent.click(titleElement);
@@ -92,12 +114,12 @@ describe("QuestionTileComponent", () => {
   });
 
   it("toggles title editing based on locked state", () => {
-    const content = defaultQuestionContent();
-    const props = createTileProps(content, "Toggle Test Title");
+    createQuestionTile("Question Title");
+    const props = createTileProps();
     renderWithContext(props);
 
     // Initially unlocked - should allow editing
-    const titleElement = screen.getByText("Toggle Test Title");
+    const titleElement = screen.getByText("Question Title");
     fireEvent.click(titleElement);
     expect(screen.getByRole("textbox")).toBeInTheDocument();
 
@@ -105,10 +127,10 @@ describe("QuestionTileComponent", () => {
     fireEvent.keyDown(screen.getByRole("textbox"), { key: "Escape" });
 
     // Lock the title
-    content.setLocked(true);
+    (model.content as QuestionContentModelType).setLocked(true);
 
     // Try to edit again - should not enter edit mode
-    fireEvent.click(screen.getByText("Toggle Test Title"));
+    fireEvent.click(screen.getByText("Question Title"));
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
 });

@@ -4,6 +4,7 @@ import { IClueObjectSnapshot } from "../annotations/clue-object";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { UpdatedSharedDataSetIds } from "../shared/shared-data-set";
 import { SharedModelEntrySnapshotType } from "../document/shared-model-entry";
+import { ITileModel } from "./tile-model";
 
 export interface IDefaultContentOptions {
   // title is only currently used by the Geometry and Table tiles
@@ -13,6 +14,8 @@ export interface IDefaultContentOptions {
   url?: string;
   // appConfig contains stamps (for drawing tool), placeholderText (for text tool), etc.
   appConfig?: AppConfigModelType;
+  // a factory method for creating additional tiles needed
+  tileFactory?: (toolId: string) => ITileModel;
 }
 
 type TileModelSnapshotPreProcessor = (tile: any) => any

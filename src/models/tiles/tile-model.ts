@@ -92,9 +92,9 @@ export const TileModel = types
     get isUserResizable() {
       return !!(self.content as any).isUserResizable;
     },
-    exportJson(options?: ITileExportOptions): string | undefined {
+    exportJson(options?: ITileExportOptions, tileMap?: Map<string, ITileModel>): string | undefined {
       const { includeId, excludeTitle, ...otherOptions } = options || {};
-      let contentJson = (self.content as any).exportJson?.(otherOptions);
+      let contentJson = (self.content as any).exportJson?.(otherOptions, tileMap);
       if (!contentJson) return;
       if (options?.rowHeight) {
         // add comma before layout/height entry
