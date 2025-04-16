@@ -204,7 +204,7 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
   const renderDragDropHandles = useCallback(() => {
     const { isUserResizable } = model;
     const { rowIndex } = props;
-    const highlight = (state.tileAcceptDrop || isFixedPosition) ? undefined : dropHighlight;
+    const highlight = state.tileAcceptDrop ? undefined : dropHighlight;
     const showTopHighlight = (highlight === "top") && (!isSectionHeader || (rowIndex > 0));
     const showLeftHighlight = (highlight === "left") && !isSectionHeader;
     const showRightHighlight = (highlight === "right") && !isSectionHeader;
@@ -224,7 +224,7 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
         draggable={isUserResizable}
         onDragStart={isUserResizable ? handleStartResizeRow : undefined} />
     ];
-  }, [model, props, state.tileAcceptDrop, dropHighlight, isSectionHeader, handleStartResizeRow, isFixedPosition]);
+  }, [model, props, state.tileAcceptDrop, dropHighlight, isSectionHeader, handleStartResizeRow]);
 
   const { sectionId, tiles: modelTiles } = model;
   const rowHeight = !isSectionHeader
