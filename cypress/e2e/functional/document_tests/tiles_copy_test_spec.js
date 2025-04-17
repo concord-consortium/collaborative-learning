@@ -323,6 +323,27 @@ context('Test copy tiles from one document to other document', function () {
     // Verify all drag handles have the selected class and copy buttons remain enabled
     canvas.verifyAllTilesSelected();
     canvas.getCopyButtons().should('have.class', 'enabled');
+
+    // For Copy to Workspace, if tiles are coming from a Problem tab,
+    // they are copied below the section header for that tab in the Workspace
+    cy.log('Copy to Workspace should place tiles below the section header for that tab.');
+    canvas.getCopyToWorkspaceButton().should('not.have.attr', 'disabled');
+    canvas.getCopyToWorkspaceButton().click();
+
+    // Confirm the Initial Challenge section header
+    cy.get('.primary-workspace [data-test="section-header"] .title')
+      .contains('Initial Challenge')
+      .parents('.tile-row')
+      .as('initialChallengeSection');
+
+    // Confirm that the number of tile-rows is 32
+    cy.get('.tile-row').should('have.length', 32);
+
+    // Check that a tile with the expected text appears after the Initial Challenge header
+    cy.get('@initialChallengeSection')
+      .nextAll('.tile-row')
+      .contains('[data-testid="ccrte-editor"]', 'photos looks')
+      .should('exist');
   });
 });
 
