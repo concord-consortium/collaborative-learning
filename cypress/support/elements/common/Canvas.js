@@ -206,16 +206,6 @@ class Canvas {
     });
   }
 
-  verifyTilesCopiedToDocument() {
-    // Wait for the document to be created and tiles to be copied
-    cy.get('.primary-workspace', { timeout: 10000 }).should('exist');
-    cy.get('.primary-workspace .document-content', { timeout: 10000 }).should('exist');
-    cy.get('.primary-workspace .document-content .tile-row', { timeout: 10000 }).should('exist');
-
-    // Verify that at least one tile with text content exists
-    cy.get('.primary-workspace .document-content [data-testid="ccrte-editor"]', { timeout: 10000 }).should('exist');
-  }
-
   getFourUpToolbarButton() {
     return cy.get('[data-testid="tool-fourup"]');
   }
