@@ -126,7 +126,7 @@ context('Question tool tile functionalities', function () {
     cy.wait(5000);
 
     // Copy the tile using drag and drop
-    cy.get('.nav-tab-panel .my-work .tool-tile')
+    cy.get('.nav-tab-panel .my-work .question-tile')
       .first()
       .within(dragTile);
 
