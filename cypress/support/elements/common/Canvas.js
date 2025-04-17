@@ -215,6 +215,26 @@ class Canvas {
     // Verify that at least one tile with text content exists
     cy.get('.primary-workspace .document-content [data-testid="ccrte-editor"]', { timeout: 10000 }).should('exist');
   }
+
+  getFourUpToolbarButton() {
+    return cy.get('[data-testid="tool-fourup"]');
+  }
+
+  getFourUpToolbarButtonState() {
+    return this.getFourUpToolbarButton().invoke('attr', 'class');
+  }
+
+  isFourUpToolbarButtonDisabled() {
+    return this.getFourUpToolbarButtonState().should('contain', 'disabled');
+  }
+
+  isFourUpToolbarButtonEnabled() {
+    return this.getFourUpToolbarButtonState().should('not.contain', 'disabled');
+  }
+
+  clickFourUpToolbarButton() {
+    return this.getFourUpToolbarButton().click();
+  }
 }
 
 export default Canvas;
