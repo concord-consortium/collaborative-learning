@@ -429,7 +429,7 @@ Object {
       });
       const dropRowInfo: IDropRowInfo = {
         rowInsertIndex: 0,
-        rowDropId: documentContent.getRowByIndex(0)!.id,
+        rowDropId: targetDocument.getRowByIndex(0)!.id,
         rowDropLocation: "right"
       };
       targetDocument.handleDragCopyTiles(dragTileInfo, dropRowInfo);
