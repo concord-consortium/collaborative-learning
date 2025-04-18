@@ -100,7 +100,7 @@ describe("QuestionTileComponent", () => {
     renderWithContext(props);
     const titleElement = screen.getByText("Editable Title");
     fireEvent.click(titleElement);
-    expect(screen.getByRole("textbox")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Editable Title")).toBeInTheDocument();
   });
 
   it("prevents title editing when locked", () => {
@@ -110,7 +110,7 @@ describe("QuestionTileComponent", () => {
     renderWithContext(props);
     const titleElement = screen.getByText("Locked Title");
     fireEvent.click(titleElement);
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.queryByDisplayValue("Locked Title")).not.toBeInTheDocument();
   });
 
   it("toggles title editing based on locked state", () => {
@@ -121,16 +121,16 @@ describe("QuestionTileComponent", () => {
     // Initially unlocked - should allow editing
     const titleElement = screen.getByText("Question Title");
     fireEvent.click(titleElement);
-    expect(screen.getByRole("textbox")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Question Title")).toBeInTheDocument();
 
     // Cancel edit
-    fireEvent.keyDown(screen.getByRole("textbox"), { key: "Escape" });
+    fireEvent.keyDown(screen.getByDisplayValue("Question Title"), { key: "Escape" });
 
     // Lock the title
     (model.content as QuestionContentModelType).setLocked(true);
 
     // Try to edit again - should not enter edit mode
     fireEvent.click(screen.getByText("Question Title"));
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.queryByDisplayValue("Question Title")).not.toBeInTheDocument();
   });
 });

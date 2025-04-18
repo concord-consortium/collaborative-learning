@@ -82,6 +82,7 @@ export const AppConfigModel = types
     get supportStackedTwoUpView() { return self.configMgr.supportStackedTwoUpView; },
     get showPublishedDocsInPrimaryWorkspace() { return self.configMgr.showPublishedDocsInPrimaryWorkspace; },
     get comparisonPlaceholderContent() { return self.configMgr.comparisonPlaceholderContent; },
+    get placeholder() { return self.configMgr.placeholder; },
     get placeholderText() { return self.configMgr.placeholderText; },
     get stamps() { return self.configMgr.stamps; },
     get tools() { return self.configMgr.tools; },
@@ -156,7 +157,12 @@ export const AppConfigModel = types
         // we also enable it, for back-compatibility, if the toolbar has a 'hide-annotations' button specified
         !!self.toolbar.find(item => item.id === 'hide-annotations')
       );
+    },
+    getPlaceholder(containerType: string) {
+      const key = (containerType === undefined || containerType === "DocumentContent") ? "default" : containerType;
+      return self.placeholder?.[key];
     }
+
   }));
 export interface AppConfigModelType extends Instance<typeof AppConfigModel> {}
 export interface AppConfigModelSnapshot extends SnapshotIn<typeof AppConfigModel> {}

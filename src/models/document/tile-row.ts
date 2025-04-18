@@ -53,9 +53,11 @@ export const TileRowModel = types
     get tileIds() {
       return self.tiles.map(tile => tile.tileId);
     },
-    acceptTileDrop(rowInfo: IDropRowInfo) {
+    acceptTileDrop(rowInfo: IDropRowInfo, tileMap: Map<string, ITileModel>) {
       const rowDropLocation = rowInfo.rowDropLocation;
-      return !self.isSectionHeader && ((rowDropLocation === "left") || (rowDropLocation === "right"));
+      return !self.isSectionHeader
+        && !this.isFixedPositionRow(tileMap)
+        && ((rowDropLocation === "left") || (rowDropLocation === "right"));
     },
     getTileIdAtIndex(index: number) {
       const layout = (index >= 0) && (index < self.tiles.length) ? self.tiles[index] : undefined;
@@ -74,6 +76,9 @@ export const TileRowModel = types
     /** Check if this row is embedded in a tile. */
     isEmbeddedRow(): boolean {
       return getParentWithTypeName(self, "TileModel") !== undefined;
+    },
+    isFixedPositionRow(tileMap: Map<string, ITileModel>) {
+      return self.tiles.every(tileRef => tileMap.get(tileRef.tileId)?.isFixedPosition ?? false);
     },
     indexOfTile(tileId: string) {
       return self.tiles.findIndex(tileRef => tileRef.tileId === tileId);

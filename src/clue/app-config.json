@@ -280,6 +280,10 @@
         "height": 46
       }
     ],
+    "placeholder": {
+      "default": "Create or drag tiles here",
+      "QuestionContent": "Create or drag tiles here to answer the question"
+    },
     "placeholderText": "",
     "stamps": [],
     "settings": {

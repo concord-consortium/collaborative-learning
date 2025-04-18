@@ -18,6 +18,13 @@ export interface ProblemConfiguration {
   tools?: string[]; // legacy use of `tools` preserved to avoid content changes
   defaultDocumentTemplate?: IAuthoredDocumentContent;
   planningTemplate?: Record<string, IAuthoredDocumentContent>;
+  // text shown in "placeholder" tiles.
+  // key is the container type, value is the text.
+  // currently supported container types are "QuestionContent" for placeholder tiles inside Question tiles,
+  // and "default" for placeholder tiles in other contexts.
+  // Note that the "placeholder" property of sections will override the default placeholder text.
+  placeholder?: Record<string, string>;
+  // This is the placeholder content shown in Text tiles.
   placeholderText: string;
   stamps: SnapshotIn<typeof StampModel>[];
   settings: SnapshotIn<typeof SettingsMstType>;
