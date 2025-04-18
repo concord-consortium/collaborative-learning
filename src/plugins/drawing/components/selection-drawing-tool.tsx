@@ -8,6 +8,9 @@ export class SelectionDrawingTool extends DrawingTool {
   }
 
   public handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    // Selection tool only responds to one finger at a time.
+    if (!e.isPrimary) return;
+
     const drawingLayerView = this.drawingLayer;
     const addToSelectedObjects = e.ctrlKey || e.metaKey || e.shiftKey;
     const start = this.drawingLayer.getWorkspacePoint(e);
@@ -21,6 +24,7 @@ export class SelectionDrawingTool extends DrawingTool {
 
     const handlePointerMove = (e2: PointerEvent) => {
       e2.preventDefault();
+      if (!e2.isPrimary) return;
       if (!moved) {
         // User started to drag. Make sure tile is selected.
         moved = true;
@@ -33,6 +37,7 @@ export class SelectionDrawingTool extends DrawingTool {
 
     const handlePointerUp = (e2: PointerEvent) => {
       e2.preventDefault();
+      if (!e2.isPrimary) return;
       drawingLayerView.endSelectionBox(addToSelectedObjects);
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
