@@ -80,7 +80,7 @@ class ClueCanvas {
     }
 
     getFourUpToolbarButton() {
-      return cy.get('.toolbar .tool.fourup');
+      return cy.get('[data-testid="tool-fourup"]');
     }
 
     openFourUpView() {

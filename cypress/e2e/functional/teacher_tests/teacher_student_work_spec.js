@@ -1,6 +1,7 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import TextToolTile from '../../../support/elements/tile/TextToolTile';
 import ResourcesPanel from '../../../support/elements/common/ResourcesPanel';
+import Canvas from '../../../support/elements/common/Canvas';
 import { LogEventName } from "../../../../src/lib/logger-types";
 
 const studentQueryParams = `${Cypress.config("qaUnitStudent5")}`;
@@ -9,6 +10,7 @@ const teacherQueryParams = `${Cypress.config("qaUnitTeacher6")}`;
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
 const resourcesPanel = new ResourcesPanel;
+const canvas = new Canvas;
 
 function beforeTest(params) {
   cy.visit(params);
@@ -79,6 +81,30 @@ context('Teacher can use studentDocument URL parameter', () => {
         .should('have.class', 'read-only')
         .should('contain', initialText)
         .should('contain', additionalText);
+
+      // Verify the 4-up button is visible and enabled in the toolbar when student tab is in view
+      cy.log('Verify the 4-up button is visible and enabled in the toolbar when student tab is in view');
+      clueCanvas.getFourUpToolbarButton().should('be.visible').should('have.class', 'enabled');
+
+      // Verify other toolbar buttons are still visible and functional
+      cy.get('[data-testid="toolbar"]').should('be.visible');
+
+      // Click the 4-up button to enter 4-up view
+      clueCanvas.getFourUpToolbarButton().click();
+
+      // Verify the 4-up view contains the student document in the Northwest quadrant
+      clueCanvas.getNorthWestCanvas().should('be.visible');
+      clueCanvas.getNorthWestCanvas().should('contain', initialText);
+
+      // Verify the 4-up button is still visible in 4-up view
+      clueCanvas.getFourUpToolbarButton().should('be.visible');
+
+      // Click the 4-up button to exit 4-up view
+      clueCanvas.getFourUpToolbarButton().click();
+
+      // Verify we're back to single view
+      canvas.getSingleCanvas().should('be.visible');
+
     });
 
     cy.log('Log in as teacher with history ID');
@@ -98,5 +124,4 @@ context('Teacher can use studentDocument URL parameter', () => {
       });
     });
   });
-
 });
