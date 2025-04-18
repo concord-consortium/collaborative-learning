@@ -13,6 +13,7 @@ import XYPlotToolTile from "../../../support/elements/tile/XYPlotToolTile";
 import ArrowAnnotation from "../../../support/elements/tile/ArrowAnnotation";
 import { dragTile } from '../../../support/helpers/drag-drop';
 import Dialog from '../../../support/elements/common/Dialog';
+import TextToolTile from '../../../support/elements/tile/TextToolTile';
 
 const student5 = `${Cypress.config("qaUnitStudent5")}`;
 const student6 = `${Cypress.config("qaUnitStudent6")}`;
@@ -30,7 +31,8 @@ let clueCanvas = new ClueCanvas,
   graphTile = new XYPlotToolTile,
   aa = new ArrowAnnotation,
   canvas = new Canvas,
-  dialog = new Dialog;
+  dialog = new Dialog,
+  textToolTile = new TextToolTile;
 
 const imageName = "Image Tile";
 const simName = "Test Simulation";
@@ -371,7 +373,7 @@ context('Test copy tiles from one document to other document', function () {
     cy.openDocumentThumbnail('my-work', 'workspaces', "Copy to Document Test");
 
     // Verify tiles were copied correctly
-    canvas.verifyTilesCopiedToDocument();
+    textToolTile.getTextTile().should('have.length', 1);
 
     // Check that a tile with the expected text appears in the document
     cy.get('.primary-workspace [data-testid="ccrte-editor"]').should('contain', 'photos looks');
