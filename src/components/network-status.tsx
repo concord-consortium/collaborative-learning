@@ -10,7 +10,7 @@ interface IProps {
   user: UserModelType;
 }
 export const NetworkStatus = observer(({ user }: IProps) => {
-  const { isFirebaseConnected, waitingForStandaloneAuth } = user;
+  const { isFirebaseConnected, standaloneAuth } = user;
   const maxAlertDelay = 60;
   const alertDelaysSec = [1, 5, 10, 30, maxAlertDelay];
   const [alertDelay, setAlertDelay] = useState(alertDelaysSec[0]);
@@ -41,7 +41,7 @@ export const NetworkStatus = observer(({ user }: IProps) => {
     }
   }
 
-  if (!isFirebaseConnected && !waitingForStandaloneAuth && !isShowingAlert && !timer) {
+  if (!isFirebaseConnected && !standaloneAuth && !isShowingAlert && !timer) {
     // first detection of a network issue; wait a bit to see if it's for real
     setTimer(window.setTimeout(() => {
       if (!user.isFirebaseConnected) {
@@ -63,7 +63,7 @@ export const NetworkStatus = observer(({ user }: IProps) => {
 
   // don't show the status if we're waiting for standalone auth as we don't
   // connect to Firebase until we have the user info
-  if (waitingForStandaloneAuth) {
+  if (standaloneAuth) {
     return null;
   }
 

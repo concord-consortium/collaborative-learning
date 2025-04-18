@@ -56,7 +56,7 @@ export const authAndConnect = async (stores: IStores) => {
 
   try {
     const {appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode} =
-      await authenticate(appMode, appConfig, curriculumConfig, portal, urlParams);
+      await authenticate(appMode, appConfig, curriculumConfig, portal, urlParams, user);
 
     // authentication can trigger appMode change (e.g. preview => demo)
     if (newAppMode && (newAppMode !== appMode)) {
@@ -164,16 +164,18 @@ export class AppComponent extends BaseComponent<IProps> {
   public render() {
     const {appConfig, user, ui, db} = this.stores;
 
-    if (ui.standalone) {
-      return this.renderApp(<AppContentContainerComponent />);
-    }
-
     if (ui.showDemoCreator) {
       return this.renderApp(<DemoCreatorComponent />);
     }
 
     if (ui.error) {
       return this.renderApp(this.renderError(ui.error));
+    }
+
+    // if we're in standalone mode and the user is not authenticated
+    // then we need to show the "Get Started" button
+    if (ui.standalone && user.standaloneAuth) {
+      return this.renderApp(<AppContentContainerComponent />);
     }
 
     // `db.listeners.isListening` is often the slowest requirement to be true.

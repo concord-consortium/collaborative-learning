@@ -74,6 +74,13 @@ export class Portal {
     this.isPortalPreview = !!this.urlParams.domain && !!this.urlParams.domain_uid && !this.bearerToken;
   }
 
+  ensureTrailingSlash(url: string) {
+    if (url.endsWith("/")) {
+      return url;
+    }
+    return `${url}/`;
+  }
+
   getBasePortalUrl() {
     const {urlParams} = this;
     if (urlParams.reportType) {
@@ -90,15 +97,19 @@ export class Portal {
       return `${protocol}//${host}/`;
     }
     else if (urlParams.domain) {
-      return urlParams.domain;
+      return this.ensureTrailingSlash(urlParams.domain);
+    }
+    else if (urlParams.authDomain) {
+      // TODO: check if this change is still needed (added during development)
+      return this.ensureTrailingSlash(urlParams.authDomain);
     }
     else {
       throw "Missing domain query parameter!";
     }
   }
 
-  requestPortalJWT() {
-    return new Promise<void>((resolve, reject) => {
+  requestPortalJWT({basePortalUrl, bearerToken}: {basePortalUrl?: string, bearerToken?: string} = {}) {
+    return new Promise<PortalJWT>((resolve, reject) => {
       const params = new URLSearchParams();
       if (pageUrlParams.resourceLinkId) {
         params.append("resource_link_id", pageUrlParams.resourceLinkId);
@@ -107,10 +118,11 @@ export class Portal {
         params.append("target_user_id", pageUrlParams.targetUserId);
       }
       const queryString = params.size > 0 ? `?${params.toString()}` : "";
-      const url = `${this.basePortalUrl}${PORTAL_JWT_URL_SUFFIX}${queryString}`;
+      // eslint-disable-next-line max-len
+      const url = `${this.ensureTrailingSlash(basePortalUrl ?? this.basePortalUrl ?? "")}${PORTAL_JWT_URL_SUFFIX}${queryString}`;
       superagent
         .get(maybeAddResearcherParam(url))
-        .set("Authorization", `Bearer ${this.bearerToken}`)
+        .set("Authorization", `Bearer ${bearerToken ?? this.bearerToken}`)
         .end((err, res) => {
           if (err) {
             reject(getErrorMessage(err, res));
@@ -122,7 +134,7 @@ export class Portal {
             if (portalJWT) {
               this.portalJWT = portalJWT as PortalJWT;
               this.rawPortalJWT = rawJWT;
-              resolve();
+              resolve(this.portalJWT);
             } else {
               reject("Invalid portal token");
             }
@@ -145,7 +157,7 @@ export class Portal {
     const supportedUserTypes = ["learner", "teacher", "researcher"];
     if (!supportedUserTypes.includes(portalJWT.user_type)) {
       throw new Error(`Only ${supportedUserTypes.join(" or ")} logins are currently supported! ` +
-        `Unsupported type: ${portalJWT.user_type ?? "(unknown user type)"}`);
+      `Unsupported type: ${portalJWT.user_type ?? "(unknown user type)"}`);
     }
 
     this.portalHost = parseUrl(basePortalUrl).host;

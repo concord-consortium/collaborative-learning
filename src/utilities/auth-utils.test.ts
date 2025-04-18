@@ -1,4 +1,5 @@
-import { convertURLToOAuth2 } from "./auth-utils";
+import { convertURLToOAuth2, getPortalStandaloneSignInOrRegisterUrl } from "./auth-utils";
+import { reprocessUrlParams } from "./url-params";
 
 describe("auth-utils", () => {
   describe("convertURLToOAuth2", () => {
@@ -21,6 +22,67 @@ describe("auth-utils", () => {
       const studentURL = "https://collaborative-learning.concord.org/branch/master/?unit=msa&problem=1.4&domain=https%3A%2F%2Flearn.portal.staging.concord.org%2F&domain_uid=114&authDomain=https%3A%2F%2Fexample.com&resourceLinkId=123";
       const newURL = convertURLToOAuth2(studentURL, "https://example.com", "123");
       expect(newURL?.toString()).toBeUndefined();
+    });
+  });
+
+  describe("getPortalStandaloneSignInOrRegisterUrl", () => {
+    // functions to mock and reset window.location and url params
+    const originalLocation = window.location;
+    const mockWindowLocation = (newLocation: Location | URL) => {
+      delete (window as any).location;
+      (window as any).location = newLocation as Location;
+      reprocessUrlParams();
+    };
+    const setLocation = (url: string) => mockWindowLocation(new URL(url));
+    afterEach(() => mockWindowLocation(originalLocation));
+
+    it("uses the authDomain param if present", () => {
+      setLocation("https://collaborative-learning.concord.org/standalone/?authDomain=https://example.com");
+      const expectedURL = "https://learn.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3FauthDomain%3Dhttps%253A%252F%252Flearn.concord.org";
+      const actualURL = getPortalStandaloneSignInOrRegisterUrl();
+      expect(actualURL).toBe(expectedURL);
+    });
+
+    it("returns the learn production URL for production", () => {
+      setLocation("https://collaborative-learning.concord.org/standalone/");
+      const expectedURL = "https://learn.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3FauthDomain%3Dhttps%253A%252F%252Flearn.concord.org";
+      const actualURL = getPortalStandaloneSignInOrRegisterUrl();
+      expect(actualURL).toBe(expectedURL);
+    });
+
+    it("returns the learn staging URL for branches", () => {
+      setLocation("https://collaborative-learning.concord.org/branch/master/standalone/");
+      const expectedURL = "https://learn.portal.staging.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fbranch%2Fmaster%2Fstandalone%2F%3FauthDomain%3Dhttps%253A%252F%252Flearn.portal.staging.concord.org";
+      const actualURL = getPortalStandaloneSignInOrRegisterUrl();
+      expect(actualURL).toBe(expectedURL);
+    });
+
+    it("returns the learn staging URL for localhost", () => {
+      setLocation("http://localhost:8080/standalone/");
+      const expectedURL = "https://learn.portal.staging.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=http%3A%2F%2Flocalhost%3A8080%2Fstandalone%2F%3FauthDomain%3Dhttps%253A%252F%252Flearn.portal.staging.concord.org";
+      const actualURL = getPortalStandaloneSignInOrRegisterUrl();
+      expect(actualURL).toBe(expectedURL);
+    });
+
+    it("returns the learn staging URL for anything but production", () => {
+      setLocation("https://example.com/standalone/");
+      const expectedURL = "https://learn.portal.staging.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fexample.com%2Fstandalone%2F%3FauthDomain%3Dhttps%253A%252F%252Flearn.portal.staging.concord.org";
+      const actualURL = getPortalStandaloneSignInOrRegisterUrl();
+      expect(actualURL).toBe(expectedURL);
+    });
+
+    it("adds the class and offering params to the redirect URL if present", () => {
+      setLocation("https://collaborative-learning.concord.org/standalone/?offering=test&class=m2studio");
+      const expectedURL = "https://learn.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3FauthDomain%3Dhttps%253A%252F%252Flearn.concord.org%26offering%3Dtest%26class%3Dm2studio&class_word=m2studio";
+      const actualURL = getPortalStandaloneSignInOrRegisterUrl();
+      expect(actualURL).toBe(expectedURL);
+    });
+
+    it("adds the classWord param to the auth URL if class is present", () => {
+      setLocation("https://collaborative-learning.concord.org/standalone/?class=m2studio");
+      const expectedURL = "https://learn.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3FauthDomain%3Dhttps%253A%252F%252Flearn.concord.org%26class%3Dm2studio&class_word=m2studio";
+      const actualURL = getPortalStandaloneSignInOrRegisterUrl();
+      expect(actualURL).toBe(expectedURL);
     });
   });
 });

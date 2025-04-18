@@ -12,7 +12,7 @@ import { appConfigSnapshot, appIcons, createStores } from "./app-config";
 import { AppConfigContext } from "./app-config-context";
 import { AppConfigModel } from "./models/stores/app-config-model";
 import { IStores } from "./models/stores/stores";
-import { UserModel } from "./models/stores/user";
+import { IStandaloneAuth, UserModel } from "./models/stores/user";
 import { urlParams } from "./utilities/url-params";
 import { getBearerToken } from "./utilities/auth-utils";
 import { getAppMode } from "./lib/auth";
@@ -38,15 +38,16 @@ const kEnableLivelinessChecking = false;
  * @param appMode
  * @returns
  */
-export const initializeApp = (authoring: boolean): IStores => {
+type IInitializeAppOptions = {authoring?: boolean, standalone?: boolean, authDomain?: string};
+export const initializeApp = ({authoring, standalone, authDomain}: IInitializeAppOptions = {}): IStores => {
   const appVersion = PackageJson.version;
   const bearerToken = getBearerToken(urlParams);
 
   const user = UserModel.create();
 
-
   let appMode: AppMode;
   let showDemoCreator = false;
+  let standaloneAuth: IStandaloneAuth = standalone ? {state: "waiting"} : undefined;
   if (authoring) {
     // Support appMode=qa even when authoring so we can test some features that only show
     // up in the qa appMode
@@ -54,6 +55,21 @@ export const initializeApp = (authoring: boolean): IStores => {
   } else {
     const host = window.location.host.split(":")[0];
     appMode = getAppMode(urlParams.appMode, bearerToken, host);
+
+    // if we are waiting for a standalone auth, we need to set the appMode back to dev
+    // and update the standaloneAuth state
+    if (appMode === "authed" && standalone) {
+      appMode = "dev";
+      if (bearerToken && authDomain) {
+        standaloneAuth = {state: "haveBearerToken", bearerToken, authDomain};
+      } else if (!bearerToken){
+        standaloneAuth = {state: "error", message: "No bearer token found in URL"};
+      } else {
+        standaloneAuth = {state: "error", message: "No authDomain provided"};
+      }
+    }
+
+    user.setStandaloneAuth(standaloneAuth);
 
     showDemoCreator = !!urlParams.demo;
     if (showDemoCreator) {
@@ -72,6 +88,10 @@ export const initializeApp = (authoring: boolean): IStores => {
   const stores = createStores(
     { appMode, appVersion, appConfig, user, showDemoCreator, demoName,
       documentToDisplay: urlParams.studentDocument, documentHistoryId: urlParams.studentDocumentHistoryId });
+
+  if (standalone) {
+    stores.ui.setStandalone(true);
+  }
 
   // Expose the stores if the debug flag is set or we are running in Cypress
   const aWindow = window as any;

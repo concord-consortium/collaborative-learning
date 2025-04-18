@@ -12,6 +12,18 @@ This diagram describes how OAuth2 works:
   - including links in the researcher log reports
   - updating the portal to use links like this to launch CLUE, this way the user can reload CLUE and be re-authenticated with the Portal and continue working where they left off.
 
+## OAuth in Standalone Mode
+
+The standalone mode uses oauth to ensure the user is logged in and then it uses the bearer token returned in the oauth response to get the user's portal JWT to allow for further portal api calls.  TBD: update which calls are used during future story work.
+
+The `standaloneAuth` volatile member of the user model holds the standalone oauth state which is a sum type of different states (shown below) that can also be undefined.  When it is defined, and the ui store has the standalone boolean set, CLUE can be considered in a new "pre real user auth" mode. The (current) states are:
+
+- **waiting**: this shows the "Get Started" button in the right pane.  Clicking the button redirects the page to the portal `/users/sign_in_or_register` page along with a `loginUrl` parameter that the portal uses to redirect back when the "Login" button is pressed on that page or when registration is completed.  During development you can add a `portalDomain` parameter to override which portal is used for authentication.
+- **haveBearerToken**: this shows "Authenticating..." in the right pane when CLUE completes the oauth dance and is handed a bearer token.  It continues to show while the system obtains the portal JWT.
+- **authenticated**": this currently shows a TDB message along with a debug output of the portal JWT to use in the next story to check for the offering in the user's classes.  This step in the document along with other steps will be added as part of that story.
+- **error**: This shows an error message in the right pane for any issue with the standalone oauth.
+
+
 ## Example URLS
 
 ### Teacher Launch

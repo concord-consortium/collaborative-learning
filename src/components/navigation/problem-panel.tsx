@@ -37,8 +37,9 @@ export class ProblemPanelComponent extends BaseComponent<IProps> {
   }
 
   private renderContent(content: DocumentContentModelType) {
-    // STANDALONE FIXME: this will eventually probably be a ui boolean but for now we will do this here
-    const hideToolbar = this.stores.ui.standalone && this.stores.user.waitingForStandaloneAuth;
+    // STANDALONE TODO: in the future standalone add user docs story this should be
+    // changed to hide until there is a workspace after the user docs are created
+    const hideToolbar = this.stores.ui.standalone && this.stores.user.standaloneAuth;
 
     return (
         <div key="problem-panel">

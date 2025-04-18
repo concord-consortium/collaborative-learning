@@ -12,6 +12,7 @@ import { hashValue } from "./url-utils";
 // - "client type" needs to be configured as 'public', to allow browser requests
 const OAUTH_CLIENT_NAME = "clue";
 const PORTAL_AUTH_PATH = "/auth/oauth_authorize";
+const PORTAL_SIGNIN_OR_REGISTER_PATH = "/users/sign_in_or_register";
 
 let accessToken: string | undefined;
 
@@ -74,7 +75,8 @@ export const getAuthParams = (sourceUrlParams: QueryParams) => {
  *
  * @returns true if it is redirecting to the authDomain
  */
-export const initializeAuthorization = () => {
+type IInitializeAuthorizationResult = {redirectingToAuthDomain?: boolean, authDomain?: string};
+export const initializeAuthorization = ({standAlone}: {standAlone?: boolean} = {}): IInitializeAuthorizationResult => {
   // Hash params are used here by the OAuth2 flow instead of query parameters.
   // This is to increase security. Browsers do not send hash params to the server when making
   // the http request. So in this case when the Portal does a browser based redirect back
@@ -85,22 +87,37 @@ export const initializeAuthorization = () => {
   const state = hashValue("state");
   accessToken = hashValue("access_token");
 
+  let authDomain: string|undefined;
+
   if (accessToken && state) {
-    const savedParamString = sessionStorage.getItem(state);
+    let savedParamString = sessionStorage.getItem(state);
+
+    // in standalone mode, we need to remove the authDomain param from the savedParamString
+    // once the standalone login is successful.  The authDomain param is used to "kick off"
+    // the initial user authentication. We return it so that it can be set in the standalone
+    // auth state
+    if (savedParamString && standAlone) {
+      const savedParams = new URLSearchParams(savedParamString || "");
+      authDomain = savedParams.get("authDomain") ?? undefined;
+      savedParams.delete("authDomain");
+      savedParamString = `?${savedParams.toString()}`;
+    }
+
     window.history.replaceState(null, "CLUE", savedParamString);
     reprocessUrlParams();
   }
   else {
-    const authDomain = queryValue("authDomain");
+    authDomain = queryValue("authDomain");
 
     if (authDomain) {
       const key = Math.random().toString(36).substring(2,15);
       sessionStorage.setItem(key, window.location.search);
       authorizeInPortal(authDomain, OAUTH_CLIENT_NAME, key);
-      return true;
+      return {redirectingToAuthDomain: true, authDomain};
     }
   }
-  return false;
+
+  return {redirectingToAuthDomain: false, authDomain};
 };
 
 export const authorizeInPortal = (portalUrl: string, oauthClientName: string, state: string) => {
@@ -136,3 +153,53 @@ export const convertURLToOAuth2 = (urlString: string, basePortalUrl: string, off
     return undefined;
   }
 };
+
+export const getPortalStandaloneSignInOrRegisterUrl = () => {
+  // the default portal URL is the staging portal
+  let basePortalUrl = "https://learn.portal.staging.concord.org";
+
+  if (urlParams.portalDomain) {
+    // allow the portal root URL to be passed in as a query param for dev/test
+    basePortalUrl = urlParams.portalDomain.replace(/\/+$/, "");
+  } else {
+    const isProduction = window.location.hostname === "collaborative-learning.concord.org";
+    const isBranchUrl = window.location.pathname.includes("/branch/");
+
+    if (isProduction && !isBranchUrl) {
+      // for production use the production portal
+      basePortalUrl = "https://learn.concord.org";
+    }
+  }
+
+  // in standalone mode we need to keep the offering and class params (if present)
+  const loginUrlParams = new URLSearchParams({
+    authDomain: basePortalUrl
+  });
+  if (urlParams.portalDomain) {
+    // the portalDomain is passed so that is kept in the return url during development
+    // so the developer doesn't have to keep adding it back after the login to retest
+    loginUrlParams.append("portalDomain", urlParams.portalDomain);
+  }
+  if (urlParams.offering) {
+    loginUrlParams.append("offering", urlParams.offering);
+  }
+  if (urlParams.class) {
+    loginUrlParams.append("class", urlParams.class);
+  }
+  const loginUrlQueryString = loginUrlParams.toString();
+  const loginUrl = `${window.location.origin}${window.location.pathname}${
+    loginUrlQueryString.length > 0 ? `?${loginUrlQueryString}` : ""}`;
+
+  const authParams: URLSearchParams = new URLSearchParams({
+    app_name: "CLUE",
+    login_url: loginUrl
+  });
+  if (urlParams.class) {
+    // if a class word is passed in (as class), add it to the params so
+    // that it can be pre-filled in the student registration
+    authParams.append("class_word", urlParams.class);
+  }
+
+  return `${basePortalUrl}${PORTAL_SIGNIN_OR_REGISTER_PATH}?${authParams.toString()}`;
+};
+

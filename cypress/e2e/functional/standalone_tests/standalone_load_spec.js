@@ -8,8 +8,8 @@ context('Standalone', () => {
   it('verify standalone page loads', function () {
     beforeTest();
 
-    cy.log("verify placeholder");
-    cy.get("[data-test=standalone-placeholder]").should("exist");
+    cy.log("verify welcome message is visible");
+    cy.get("[data-testid=standalone-welcome]").should("exist");
 
     cy.log("verify only problems tab is visible");
     cy.get(".tab-problems").should("exist");
@@ -24,4 +24,6 @@ context('Standalone', () => {
     cy.log("verify user info is not visible");
     cy.get(".app-header .user").should("not.exist");
   });
+
+  // TODO: at end of epic add tests for the full authentication flow
 });

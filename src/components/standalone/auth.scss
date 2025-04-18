@@ -1,0 +1,62 @@
+@import "../../components/vars";
+.standalone-auth {
+  color: #000;
+  background-color: #fff;
+  border: 2px solid #0592af;
+  border-top-left-radius: 6px;
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  align-content: flex-start;
+  justify-content: center;
+  align-items: center;
+
+  font-family: Lato;
+  color: $charcoal-dark-2;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    align-content: flex-start;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .debug {
+    // when showing debug output add a gap for readability
+    gap: 10px;
+  }
+
+  .welcome {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .instructions {
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+
+  .button {
+    width: 200px;
+    height: 60px;
+    border-radius: 5px;
+    border: solid 1.5px $charcoal-light-1;
+    background-color: $workspace-teal-light-4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    text-decoration: none;
+    color: $charcoal-dark-2;
+
+    &:hover {
+      background-color: $workspace-teal-light-3;
+    }
+  }
+
+}
