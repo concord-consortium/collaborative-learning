@@ -4,6 +4,7 @@ import { IDragTilesData } from "./document-content-types";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { DEBUG_DROP } from "../../lib/debug";
 import { DocumentContentModelWithAnnotations } from "./document-content-with-annotations";
+import { isRowListContainer } from "./row-list";
 
 /**
  * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
@@ -83,15 +84,21 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
     });
 
     return dragTileItems;
+  },
+  addEmbeddedTilesToDragTiles(tiles: IDragTileItem[]) {
+    const allTiles = [...tiles];
+    tiles.forEach(dragTile => {
+      const tileContent = self.getTile(dragTile.tileId)?.content;
+      if (tileContent && isRowListContainer(tileContent)) {
+        const tileIdsToAdd = tileContent.tileIds.filter(tileId => !allTiles.find(t => t.tileId === tileId));
+        allTiles.push(...this.getDragTileItems(tileIdsToAdd));
+      }
+    });
+    return allTiles;
   }
 }))
 .views(self => ({
-  /**
-   *
-   * @param documentContent
-   * @param tileIds
-   * @returns
-   */
+
   getDragTiles(tileIds: string[]): IDragTilesData {
 
     const sharedManager = self.tileEnv?.sharedModelManager;
@@ -103,11 +110,12 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
 
     const dragTiles: IDragTilesData = {
       sourceDocId,
-      tiles: self.getDragTileItems(tileIds),
+      tiles: self.addEmbeddedTilesToDragTiles(self.getDragTileItems(tileIds)),
       sharedModels: sharedManager?.getSharedModelDragDataForTiles(tileIds) ?? [],
       annotations: Object.values(self.getAnnotationsUsedByTiles(tileIds))
     };
 
+    console.log("dragTiles", dragTiles.tiles.map(t => `${t.tileId} ${t.tileType}`));
     return dragTiles;
   }
 }));
