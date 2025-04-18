@@ -673,7 +673,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
           const uniqueTitle = title && self.getUniqueTitle(title);
           if (parsedContent?.content) {
             const rowOptions: INewTileOptions = {
-              rowIndex: rowInfo.rowInsertIndex,
+              rowId: rowInfo.rowDropId,
               locationInRow: rowInfo.rowDropLocation
             };
             if (tile.rowHeight) {
