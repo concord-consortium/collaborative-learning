@@ -90,7 +90,6 @@ const TileRowComponent = forwardRef<TileRowHandle, IProps>((props, ref) => {
 
   const documentContentModel = getParentOfType(model, DocumentContentModel);
   const tileMap = documentContentModel?.tileMap;
-  const isFixedPosition = model.isFixedPositionRow(tileMap);
 
   if (!tileMap) {
     throw new Error("Tile map not found");
