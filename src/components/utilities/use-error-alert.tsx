@@ -27,14 +27,14 @@ export const useErrorAlert = ({
 
   const [showAlert, hideAlert] = useCustomModal({
     className: `error-alert ${className || ""}`,
-    title: title || "",
+    title: title || "Uh oh!",
     Icon: ErrorSvg,
     Content,
     contentProps: {},
     canCancel,
-    buttons: [
+    buttons: onClick ? [
       { label: buttonLabel || "OK", isDefault: true, onClick }
-    ],
+    ] : [],
     onClose
   });
 
