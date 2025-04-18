@@ -22,14 +22,24 @@ import { DocumentContentModelWithAnnotations } from "./document-content-with-ann
 export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnnotations
 .named("DocumentContentModelWithTileDragging")
 .views(self => ({
-  getTilePositions(tileIds: string[]) {
-    return tileIds.map(tileId => {
+  /** Return an array of ITilePosition objects for the given tile ids.
+   * These are sorted into document order, regardless of the order of the tileIds.
+   */
+  getTilePositions(tileIds: string[]): ITilePosition[] {
+    const positions = tileIds.map(tileId => {
       const rowList = self.getRowListContainingTileIds([tileId])!;
       const row = self.findRowContainingTile(tileId);
       const rowIndex = row && rowList.getRowIndex(row.id) || 0;
       const tileIndex = row?.indexOfTile(tileId) || 0;
-      return { tileId, rowList, rowIndex, row, tileIndex };
+      return { tileId, rowList, rowIndex, tileIndex };
     });
+    const allTileIds = self.getAllTileIds(true);
+    positions.sort((a, b) => {
+      const aIndex = allTileIds.indexOf(a.tileId);
+      const bIndex = allTileIds.indexOf(b.tileId);
+      return aIndex - bIndex;
+    });
+    return positions;
   }
 }))
 .views(self => ({
@@ -43,8 +53,7 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
 
     tilePositions.forEach((tilePosition) => {
       if (!tilePosition) return;
-      // TODO rowList is ignored here. Downstream code doesn't need it, but this should be cleaned up in CLUE-80.
-      const { tileId, rowIndex, row, tileIndex } = tilePosition;
+      const { tileId, rowList, rowIndex, tileIndex } = tilePosition;
       // Note: previously this function would be passed the tileModel being
       // dragged. It would accept a tileId if it matched the tileModel.id even if
       // `documentContent.getTile(tileId)` did not return a tile model. This seems
@@ -61,10 +70,11 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
       // `contentId`. Because srcTile is found via `documentContent.getTile` this
       // should guarantee that the contentId return by `getContentIdFromNode`
       // always matches the dragSrcContentId.
-      const rowHeight = row?.height;
+      const rowHeight = rowList.getRowByIndex(rowIndex)?.height;
       const clonedTile = cloneTileSnapshotWithNewId(srcTile, idMap[srcTile.id]);
       getTileContentInfo(clonedTile.content.type)?.contentSnapshotPostProcessor?.(clonedTile.content, idMap);
       dragTileItems.push({
+        rowList,
         rowIndex, rowHeight, tileIndex,
         tileId: srcTile.id,
         tileContent: JSON.stringify(clonedTile),
@@ -98,25 +108,9 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
       annotations: Object.values(self.getAnnotationsUsedByTiles(tileIds))
     };
 
-    // create a sorted array of selected tiles
-    orderTilePositions(dragTiles.tiles);
-
     return dragTiles;
   }
 }));
-
-
-// Sorts the given tile positions in top->bottom, left->right order IN PLACE!
-export function orderTilePositions(tilePositions: ITilePosition[]) {
-  tilePositions.sort((a, b) => {
-    if (a.rowIndex < b.rowIndex) return -1;
-    if (a.rowIndex > b.rowIndex) return 1;
-    if (a.tileIndex < b.tileIndex) return -1;
-    if (a.tileIndex > b.tileIndex) return 1;
-    return 0;
-  });
-  return tilePositions;
-}
 
 /* istanbul ignore next: this only used for debugging */
 export function logDataTransfer(_dataTransfer: DataTransfer) {

@@ -2,7 +2,6 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType } from "../models/document/document";
-import { orderTilePositions } from "../models/document/drag-tiles";
 import { IToolbarModel } from "../models/stores/problem-configuration";
 import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
 import { getTileContentInfo, ITileContentInfo } from "../models/tiles/tile-content-info";
@@ -170,10 +169,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
   private showDropRowHighlightAfterSelectedTiles = () => {
     const { document } = this.props;
+    if (!document?.content) return;
     const { ui: { selectedTileIds } } = this.stores;
-    const tilePositions = document?.content?.getTilePositions(Array.from(selectedTileIds)) || [];
-    const rowIndex = document?.content?.getRowAfterTiles(tilePositions);
-    document?.content?.showPendingInsertHighlight(true, rowIndex);
+    const tilePositions = document.content.getTilePositions(Array.from(selectedTileIds)) || [];
+    const rowId = document.content.getLastRowForTiles(tilePositions);
+    document.content.showPendingInsertHighlight(true, rowId);
   };
 
   private removeDropRowHighlight = () => {
@@ -266,7 +266,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     }
 
     const newTileOptions: IDocumentContentAddTileOptions = {
-            insertRowInfo: { rowInsertIndex: document?.content?.defaultInsertRow ?? 0 }
+            insertRowInfo: {
+              rowDropId: document?.content?.defaultInsertRowId,
+              rowInsertIndex: document?.content?.defaultInsertRowIndex || 0,
+              rowDropLocation: "bottom"
+            }
           };
     const rowTile = document?.addTile(tool.id, newTileOptions);
     if (document && rowTile && rowTile.tileId) {
@@ -303,8 +307,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
     // Sort the selected tile ids in top->bottom, left->right order so they duplicate in the correct formation
     const tilePositions = document?.content?.getTilePositions(Array.from(selectedTileIds)) || [];
-    const sortedTileIds = orderTilePositions(tilePositions).map(info => info.tileId);
-    const dragTileItems = document?.content?.getDragTileItems(sortedTileIds) || [];
+    const dragTileItems = document?.content?.getDragTileItems(tilePositions.map(info => info.tileId)) || [];
 
     document?.content?.duplicateTiles(dragTileItems);
     ui.clearSelectedTiles();

@@ -9,11 +9,13 @@ import { uniqueId } from "../../utilities/js-utils";
 import { StringBuilder } from "../../utilities/string-builder";
 import { logTileDocumentEvent } from "./log/log-tile-document-event";
 import { LogEventName } from "../../lib/logger-types";
+import { RowListType } from "../document/row-list";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
 
 export interface ITilePosition {
+  rowList: RowListType;
   rowIndex: number;
   tileIndex: number;
   tileId: string;

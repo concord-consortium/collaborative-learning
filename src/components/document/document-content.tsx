@@ -161,9 +161,13 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     // Reset rowRefs array before rendering
     this.rowRefs = [];
 
+    // We can highlight either the drop location for the current drag/drop operation (in state),
+    // or the one set by the toolbar (in the content model).
+    const dropRow = this.state.dropRowInfo || this.getDropRowInfoForPendingDropLocation();
+
     return (
       <DocumentDndContext>
-        <DropRowContext.Provider value={this.state.dropRowInfo}>
+        <DropRowContext.Provider value={dropRow}>
           <RowRefsContext.Provider value={{ addRowRef: this.addRowRef }}>
             <div className={documentClass}
               data-testid="document-content"
@@ -198,9 +202,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
               rect.bottom < contentBounds.bottom);
     }
 
+    // Find the list of top-level rows that are currently visible on the screen
     const visibleRowIds: string[] = [];
     this.rowRefs.forEach((ref) => {
-      if (ref?.tileRowDiv) {
+      if (ref?.tileRowDiv && content.rowMap.get(ref.id)) {
         if (isElementInViewport(ref.tileRowDiv)) {
           visibleRowIds.push(ref.id);
         }
@@ -237,7 +242,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         typeClass={this.props.typeClass}
         scale={this.props.scale}
         readOnly={this.props.readOnly}
-        highlightPendingDropLocation={content.highlightPendingDropLocation}
       />
     );
   }
@@ -482,6 +486,19 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     this.clearDropRowInfo();
   };
+
+  private getDropRowInfoForPendingDropLocation(): IDropRowInfo | undefined {
+    const { content } = this.props;
+    const rowId = content?.highlightPendingDropLocation;
+    if (!rowId) return;
+    const rowIndex = content.getRowListForRow(rowId)?.getRowIndex(rowId);
+    if (rowIndex < 0) return;
+    return {
+      rowDropId: rowId,
+      rowDropLocation: "bottom",
+      rowInsertIndex: rowIndex + 1
+    };
+  }
 
   private scrollToSection(sectionId: string | null | undefined ) {
     if (!sectionId || !this.domElement) {

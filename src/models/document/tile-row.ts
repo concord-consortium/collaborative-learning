@@ -49,11 +49,9 @@ export const TileRowModel = types
     get isUserResizable() {
       return !self.isSectionHeader && self.tiles.some(tileRef => tileRef.isUserResizable);
     },
-    get allTileIds() {
-      return self.tiles.map(tile => tile.tileId);
-    },
+    /** Returns tileIds of tiles directly in this row */
     get tileIds() {
-      return this.allTileIds.join(", ");
+      return self.tiles.map(tile => tile.tileId);
     },
     acceptTileDrop(rowInfo: IDropRowInfo) {
       const rowDropLocation = rowInfo.rowDropLocation;
