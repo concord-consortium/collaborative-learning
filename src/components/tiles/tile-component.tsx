@@ -339,9 +339,9 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     }
 
     // If the tile is fixed, don't allow selection
-    if (model.isFixedPosition) {
-      return;
-    }
+    // if (model.isFixedPosition) {
+    //   return;
+    // }
 
     // Select the tile if the tool doesn't handle the selection itself
     if (!getTileComponentInfo(model.content.type)?.tileHandlesOwnSelection) {
