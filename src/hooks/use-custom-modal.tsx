@@ -102,18 +102,20 @@ export const useCustomModal = <IContentProps,>({
           { /* TODO Fix type cast */ }
           <Content as any {...(contentProps)}/>
         </div>
-        <div className="modal-footer">
-          {buttons.map((b, i) => {
-            const classes = classNames("modal-button", b.className, { default: b.isDefault, disabled: b.isDisabled });
-            const key = `${i}-${b.className}`;
-            const handleClick = () => invokeButton(b, handleClose);
-            return (
-              <button type="button" className={classes} key={key} onClick={handleClick}>
-                {b.label}
-              </button>
-            );
-          })}
-        </div>
+        {buttons.length > 0 &&
+          <div className="modal-footer">
+            {buttons.map((b, i) => {
+              const classes = classNames("modal-button", b.className, { default: b.isDefault, disabled: b.isDisabled });
+              const key = `${i}-${b.className}`;
+              const handleClick = () => invokeButton(b, handleClose);
+              return (
+                <button type="button" className={classes} key={key} onClick={handleClick}>
+                  {b.label}
+                </button>
+              );
+            })}
+          </div>
+        }
       </Modal>
     );
   }, dependencies);

@@ -3,7 +3,7 @@
 $modal-header-height: 34px;
 $modal-header-icon-width: 36px;
 $modal-header-border-radius: 6px;
-$modal-padding: 0 20px;
+$modal-padding: 20px;
 $modal-control-height: 30px;
 $modal-control-border: solid 1.5px $charcoal-light-1;
 $modal-control-border-radius: 5px;
@@ -86,12 +86,11 @@ $modal-footer-height: 45px;
 
   .modal-footer {
     width: 100%;
-    height: $modal-footer-height;
     flex: 0 0 auto;
     display: flex;
     justify-content: flex-end;
     align-items: flex-start;
-    padding: $modal-padding;
+    padding: 0 $modal-padding $modal-padding $modal-padding;
 
     .modal-button {
       cursor: pointer;
