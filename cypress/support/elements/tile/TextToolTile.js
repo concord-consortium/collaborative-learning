@@ -7,7 +7,8 @@ class TextToolTile {
     }
     enterText(text){
         this.getTextTile().last().focus();
-        this.getTextEditor().last().click().type(text);
+        this.getTextEditor().last().click();
+        this.getTextEditor().last().type(text);
         // This doesn't guarantee the text has been saved to firebase. It would be best
         // if there was a way to tell if it has been saved perhaps by some saving indicator
         // in the UI. Or reaching into app to find some saving state.
