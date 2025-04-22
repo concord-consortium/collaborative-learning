@@ -109,7 +109,7 @@ export class Portal {
   }
 
   requestPortalJWT({basePortalUrl, bearerToken}: {basePortalUrl?: string, bearerToken?: string} = {}) {
-    return new Promise<PortalJWT>((resolve, reject) => {
+    return new Promise<{rawPortalJWT: string, portalJWT: PortalJWT}>((resolve, reject) => {
       const params = new URLSearchParams();
       if (pageUrlParams.resourceLinkId) {
         params.append("resource_link_id", pageUrlParams.resourceLinkId);
@@ -134,7 +134,7 @@ export class Portal {
             if (portalJWT) {
               this.portalJWT = portalJWT as PortalJWT;
               this.rawPortalJWT = rawJWT;
-              resolve(this.portalJWT);
+              resolve({rawPortalJWT: rawJWT, portalJWT: this.portalJWT});
             } else {
               reject("Invalid portal token");
             }
