@@ -174,6 +174,27 @@
           background-color: $color1-5;
         }
       }
+      .idea-button {
+        box-sizing: border-box;
+        height: 26px;
+        margin-left: 8px;
+        padding: 1px 6px 1px 0;
+        border-radius: 5px;
+        border: solid 1.5px $charcoal-light-1;
+        background-color: $workspace-teal-light-4;
+        display: flex;
+        align-items: center;
+        &:hover {
+          background-color: $workspace-teal-light-3;
+          cursor: pointer;
+        }
+        &:active {
+          background-color: $workspace-teal-dark-1;
+          color: white;
+          cursor: pointer;
+          border-color: white;
+        }
+      }
       .icon-button {
         background-color: $color1-3;
         position: relative;

@@ -19,6 +19,8 @@ import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { DocumentAnnotationToolbar } from "./document-annotation-toolbar";
 
+import IdeaIcon from "../../assets/idea-icon.svg";
+
 import "./document.scss";
 
 export enum DocumentViewMode {
@@ -113,6 +115,19 @@ const StickyNoteButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="sticky-note" key="sticky-note" className="action icon-sticky-note"
                 onClickButton={onClick} title="View Notes" />
+  );
+};
+
+const IdeasButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <button
+      title={"Request Idea"}
+      onClick={onClick}
+      className="idea-button"
+    >
+      <IdeaIcon/>
+      Ideas?
+    </button>
   );
 };
 
@@ -238,6 +253,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                 isDeleteDisabled={true}
                 onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
             <DocumentAnnotationToolbar />
+            <IdeasButton onClick={() => console.log("ideas")} />
           </div>
         }
         <div className="title" data-test="document-title">
