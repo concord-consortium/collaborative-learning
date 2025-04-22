@@ -24,7 +24,7 @@ import {
   UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
 } from "../shared/shared-data-set";
 import { IClueObjectSnapshot } from "../annotations/clue-object";
-import { isRowListContainer, isRowListSnapshotIn, isRowListSnapshotOut } from "./row-list";
+import { isRowListSnapshotIn, isRowListSnapshotOut } from "./row-list";
 import { kQuestionTileType } from "../tiles/question/question-content";
 
 
@@ -336,7 +336,6 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       if (isRowListSnapshotOut(oldContent) && isRowListSnapshotIn(newContent)) {
         // These should exist for RowLists, but need to assert it to make Typescript happy
         if (!("rowOrder" in newContent && "rowMap" in newContent)) return;
-        console.log("looking for embedded tiles");
         const newRowMap = {} as Record<string, TileRowSnapshotType>;
         const newRowOrder = [] as string[];
         // Iterate through rows in the oldContent.
@@ -347,17 +346,13 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
             id: newRowId,
             tiles: oldContent.rowMap[rowId]?.tiles.flatMap(tileLayout => {
               if (tileIdMap[tileLayout.tileId]) {
-                console.log("  Embedded tile", tileLayout, "->", tileIdMap[tileLayout.tileId]);
                 // mark the tile as embedded
                 const tileInfo = updatedTiles.find(t => t.tileId === tileLayout.tileId);
                 if (tileInfo) {
                   tileInfo.embedded = true;
-                } else {
-                  console.warn("  Embedded tile not found in updatedTiles", tileLayout, updatedTiles);
                 }
                 return { ...tileLayout, tileId: tileIdMap[tileLayout.tileId] };
               } else {
-                console.log("  Ignoring non-copied embedded tile", tileLayout);
                 return [];
               }
             }) ?? []
@@ -369,14 +364,12 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         });
         newContent.rowMap = newRowMap;
         newContent.rowOrder = newRowOrder;
-      } else {
-        console.log("Non-container tile", tile.tileId);
       }
       newTile.content = newContent;
 
-      // Handle any special logic needed when copying to a new document
-      if (isCrossingDocuments && typeInfo?.updateContentForNewDocument) {
-        newTile.content = typeInfo.updateContentForNewDocument(newTile.content);
+      // Handle any special logic needed when copying
+      if (typeInfo?.updateContentForCopy) {
+        newTile.content = typeInfo.updateContentForCopy(newTile.content, isCrossingDocuments);
       }
 
       // Save the updated tile so we can add it to the document
@@ -475,14 +468,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     self.copyTiles(tiles, sharedModelEntries, annotations, sourceDocId !== self.contentId, rowInfo);
   },
   duplicateTiles(tiles: IDragTileItem[]) {
-    // If you duplicate a Question tile, all of its embedded tiles should be duplicated as well.
-    tiles.forEach(dragTile => {
-        const tileContent = self.getTile(dragTile.tileId)?.content;
-        if (tileContent && isRowListContainer(tileContent)) {
-          const tileIdsToAdd = tileContent.tileIds.filter(tileId => !tiles.find(t => t.tileId === tileId));
-          tiles.push(...self.getDragTileItems(tileIdsToAdd));
-        }
-    });
+    tiles = self.addEmbeddedTilesToDragTiles(tiles);
 
     // Find the RowList that contains all the tiles being duplicated.
     // Might be the whole document or a Question tile.
