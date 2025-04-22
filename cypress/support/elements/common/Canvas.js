@@ -205,6 +205,26 @@ class Canvas {
       cy.wrap($handle).should('not.have.class', 'selected');
     });
   }
+
+  getFourUpToolbarButton() {
+    return cy.get('[data-testid="tool-fourup"]');
+  }
+
+  getFourUpToolbarButtonState() {
+    return this.getFourUpToolbarButton().invoke('attr', 'class');
+  }
+
+  isFourUpToolbarButtonDisabled() {
+    return this.getFourUpToolbarButtonState().should('contain', 'disabled');
+  }
+
+  isFourUpToolbarButtonEnabled() {
+    return this.getFourUpToolbarButtonState().should('not.contain', 'disabled');
+  }
+
+  clickFourUpToolbarButton() {
+    return this.getFourUpToolbarButton().click();
+  }
 }
 
 export default Canvas;

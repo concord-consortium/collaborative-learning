@@ -158,6 +158,9 @@ context('Test Canvas', function () {
     canvas.getSingleCanvas().should('be.visible');
     clueCanvas.getFourUpView().should('not.exist');
     clueCanvas.openFourUpView();
+    // toolbar is visible and 4up button is visible
+    cy.get('[data-testid="toolbar"]').should('be.visible');
+    clueCanvas.getFourUpToolbarButton().should('be.visible');
     //4-up view is visible and 1-up button is visible
     clueCanvas.getFourToOneUpViewToggle().should('be.visible');
     clueCanvas.getNorthEastCanvas().should('be.visible');
