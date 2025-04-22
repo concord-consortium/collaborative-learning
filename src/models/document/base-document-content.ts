@@ -520,9 +520,17 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     setVisibleRows(rows: string[]) {
       self.visibleRows = rows;
     },
-    insertNewTileInRow(tile: ITileModel, row: TileRowModelType, tileIndexInRow?: number) {
-      const insertedTile = self.tileMap.put(tile);
-      row.insertTileInRow(insertedTile, tileIndexInRow);
+    /**
+     * Add a tile to the tileMap. If idOverride or titleOverride are provided,
+     * they will override the current value of the tile's id and title.
+     * @param tile
+     * @param idOverride
+     * @param titleOverride
+     */
+    addToTileMap(tile: ITileModelSnapshotIn, idOverride?: string, titleOverride?: string) {
+      const id = idOverride ?? tile.id;
+      const title = titleOverride ?? tile.title;
+      return self.tileMap.put({...tile, id, title});
     },
     deleteTilesFromRow(row: TileRowModelType) {
       row.tiles
@@ -622,7 +630,8 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       rowList.insertRow(row, o.rowIndex);
 
       const id = o.tileId;
-      const tileModel = self.tileMap.put({id, content, title: o.title});
+      const tileContent: ITileModelSnapshotIn = { id, title: o.title, content };
+      const tileModel = self.addToTileMap(tileContent);
       row.insertTileInRow(tileModel);
 
       self.removeNeighboringPlaceholderRows(row.id);
@@ -641,7 +650,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       const row = o.rowId ? rowList.getRow(o.rowId) : rowList.getRowByIndex(o.rowIndex);
       if (row) {
         const indexInRow = o.locationInRow === "left" ? 0 : undefined;
-        const tileModel = self.tileMap.put(snapshot);
+        const tileModel = self.addToTileMap(snapshot);
         row.insertTileInRow(tileModel, indexInRow);
         self.removePlaceholderTilesFromRow(row);
         self.removeNeighboringPlaceholderRows(row.id);
@@ -678,14 +687,13 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
           if (content) {
             if (tile.embedded) {
               // already is part of another tile, so we don't need to add it to any rows, just the tileMap.
-              self.tileMap.put({id: tile.newTileId, content, title: uniqueTitle});
+              self.addToTileMap(parsedContent, tile.newTileId, uniqueTitle);
               result = { rowId: "", tileId: tile.newTileId };
             } else {
               const rowOptions: INewTileOptions = {
                 rowId: rowInfo.rowDropId,
                 locationInRow: rowInfo.rowDropLocation
               };
-              console.log("adding tile", tile.tileId, "at", rowInfo.rowDropId, rowInfo.rowDropLocation);
               if (tile.rowHeight) {
                 rowOptions.rowHeight = tile.rowHeight;
               }
@@ -717,11 +725,9 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
           if (content) {
             if (tile.embedded) {
               // already is part of another tile, so we don't need to add it to any rows, just the tileMap.
-              console.log("embedded tile", tile.tileId);
-              self.tileMap.put({id: tile.newTileId, content, title: uniqueTitle});
+              self.addToTileMap(parsedContent, tile.newTileId, uniqueTitle);
               result = { rowId: "", tileId: tile.newTileId };
             } else {
-              console.log("non-embedded tile", tile.tileId);
               if (tile.rowIndex !== lastRowIndex) {
                 rowDelta++;
               }

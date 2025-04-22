@@ -85,6 +85,13 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
 
     return dragTileItems;
   },
+  /**
+   * If any of the tiles being dragged are RowListContainer tiles,
+   * this adds drag items for all of the tiles contained within them.
+   * Used for copying where we need to copy all the contents as well as the containers.
+   * @param tiles list of drag items
+   * @returns the same list with any embedded tiles added to the end
+   */
   addEmbeddedTilesToDragTiles(tiles: IDragTileItem[]) {
     const allTiles = [...tiles];
     tiles.forEach(dragTile => {
@@ -95,6 +102,21 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
       }
     });
     return allTiles;
+  },
+  /**
+   * If the list of drag items contains both containers and tiles embedded within them,
+   * this removes the embedded tiles so that only the containers are included.
+   * This is used for moving tiles, where the embedded tiles will automatically get moved
+   * as part of their containers without our having to do anything to them.
+   * @param tiles list of drag items
+   * @returns the same list with the embedded tiles removed
+   */
+  removeEmbeddedTilesFromDragTiles(tiles: IDragTileItem[]) {
+    const tilesToRemove = tiles.flatMap(tile => {
+      const tileContent = self.getTile(tile.tileId)?.content;
+      return tileContent && isRowListContainer(tileContent) ? tileContent.tileIds : [];
+    });
+    return tiles.filter(tile => !tilesToRemove.includes(tile.tileId));
   }
 }))
 .views(self => ({

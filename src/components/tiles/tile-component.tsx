@@ -259,8 +259,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
                 key={`tile-component-${tileId}`}
                 tileElt={this.domElement}
                 {...this.props}
-                readOnly={this.props.readOnly ||
-                  (this.props.model.isFixedPosition && this.props.model.isInsideLockedTile)}
+                readOnly={this.props.readOnly}
                 onRegisterTileApi={this.handleRegisterTileApi}
                 onUnregisterTileApi={this.handleUnregisterTileApi} />
             : null;

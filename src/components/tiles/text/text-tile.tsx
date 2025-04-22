@@ -17,6 +17,7 @@ import { LogEventName } from "../../../lib/logger-types";
 import { TextPluginsContext } from "./text-plugins-context";
 import { TileToolbar } from "../../toolbar/tile-toolbar";
 import { countWords } from "../../../utilities/string-utils";
+import { LockedContainerContext } from "../../document/locked-container-context";
 
 import "./toolbar/text-toolbar-registration";
 import "./text-tile.scss";
@@ -97,6 +98,9 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private textOnFocus: string | string [] | undefined;
   private isHandlingUserChange = false;
 
+  static contextType = LockedContainerContext;
+  declare context: React.ContextType<typeof LockedContainerContext>;
+
   // plugins are exposed to making testing easier
   plugins: Record<string, ITextPlugin|undefined>;
 
@@ -173,8 +177,12 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   }
 
   public render() {
-    const { readOnly } = this.props;
     const { appConfig: { placeholderText } } = this.stores;
+    const inLockedContainer = this.context;
+
+    // A fixed position text tile is a prompt, which should be read-only if it's in a locked question tile.
+    const readOnly = this.props.readOnly || (this.props.model.fixedPosition && inLockedContainer);
+
     const editableClass = readOnly ? "read-only" : "editable";
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
     // used here for a while now and cypress tests depend on it. Should transition
@@ -234,7 +242,12 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
     const { ui } = this.stores;
     const { model, readOnly } = this.props;
-    // if (model.isFixedPosition) return; TODO check read-only
+    const inLockedContainer = this.context;
+
+    // Don't select a locked prompt
+    if (this.props.model.fixedPosition && inLockedContainer) {
+      return;
+    }
 
     const isExtendingSelection = hasSelectionModifier(e);
     const isWrapperClick = e.target === this.textTileDiv;
