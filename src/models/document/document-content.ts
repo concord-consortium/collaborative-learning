@@ -11,7 +11,7 @@ import {
 import { sharedModelFactory, UnknownSharedModel } from "../shared/shared-model-manager";
 import { SharedModelType } from "../shared/shared-model";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
-import { IDragTileItem, IDropTileItem, ITileModel,
+import { IDragTileItem, IDropTileItem, isContainerTile, ITileModel,
          ITileModelSnapshotIn,
          ITileModelSnapshotOut } from "../tiles/tile-model";
 import { uniqueId } from "../../utilities/js-utils";
@@ -25,7 +25,6 @@ import {
 } from "../shared/shared-data-set";
 import { IClueObjectSnapshot } from "../annotations/clue-object";
 import { isRowListSnapshotIn, isRowListSnapshotOut } from "./row-list";
-import { kQuestionTileType } from "../tiles/question/question-content";
 
 
 export interface ITileCopyPosition {
@@ -305,8 +304,8 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     // We have to process container tiles last, so that we can update them with the
     // references to their new embedded tiles.
     const reorderedTiles: IDragTileItem[] = [
-      ...tiles.filter(tile => tile.tileType !== kQuestionTileType),
-      ...tiles.filter(tile => tile.tileType === kQuestionTileType)
+      ...tiles.filter(tile => !isContainerTile(tile)),
+      ...tiles.filter(tile => isContainerTile(tile))
     ];
     reorderedTiles.forEach(tile => {
       const oldTile: ITileModelSnapshotIn = JSON.parse(tile.tileContent);
@@ -564,8 +563,6 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     };
   },
   applyCopySpec(copySpec: ICopySpec, isCrossingDocuments: boolean) {
-        // FIXME needs to include any embedded tiles
-
     return self.copyTiles(
       copySpec.tiles, copySpec.sharedModelEntries, copySpec.annotations, isCrossingDocuments, undefined, copySpec
     );

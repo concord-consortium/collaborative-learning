@@ -137,7 +137,6 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
       annotations: Object.values(self.getAnnotationsUsedByTiles(tileIds))
     };
 
-    console.log("dragTiles", dragTiles.tiles.map(t => `${t.tileId} ${t.tileType}`));
     return dragTiles;
   }
 }));
