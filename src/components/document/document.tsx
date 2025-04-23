@@ -253,7 +253,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                 isDeleteDisabled={true}
                 onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
             <DocumentAnnotationToolbar />
-            <IdeasButton onClick={() => console.log("ideas")} />
+            <IdeasButton onClick={this.handleIdeasButtonClick} />
           </div>
         }
         <div className="title" data-test="document-title">
@@ -442,6 +442,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       </div>
     );
   }
+
+  private handleIdeasButtonClick = () => {
+    const document = this.props.document;
+    logDocumentEvent(LogEventName.REQUEST_IDEA, { document });
+  };
 
   private handleToggleWorkspaceMode = () => {
     this.props.workspace.toggleMode();
