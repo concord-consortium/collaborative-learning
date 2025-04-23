@@ -351,7 +351,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   // Determine whether the drag event is over a drop zone, and if so, which one
   private getDropRowInfo = (e: React.DragEvent<HTMLDivElement>) => {
     const { content } = this.props;
-    if (!this.domElement) return { rowInsertIndex: content ? content.rowOrder.length : 0 };
+    if (!this.domElement || !content) {
+      return { rowInsertIndex: content ? content.rowOrder.length : 0 };
+    }
 
     let dropInfo: IDropRowInfo = { rowInsertIndex: 0 };
     // This includes both "main" rows and rows nested inside question tiles
@@ -372,30 +374,37 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       const rowElt = rowElements[i];
       const rowBounds = rowElt.getBoundingClientRect();
       if (this.isPointInRect(e.clientX, e.clientY, rowBounds) ||
-          // below the last row - highlight bottom of last row
+          // below the last row - pretend we are in the last row
           ((i === lastRowIndex) && (e.clientY > rowBounds.bottom))) {
         dropInfo = this.getDropInfoForGlobalRowIndex(i);
-
-        const dropOffsetLeft = Math.abs(e.clientX - rowBounds.left);
-        const dropOffsetTop = Math.abs(e.clientY - rowBounds.top);
-        const dropOffsetRight = Math.abs(rowBounds.right - e.clientX);
-        const dropOffsetBottom = Math.abs(rowBounds.bottom - e.clientY);
-
-        const kSideDropThreshold = rowBounds.width * 0.25;
-        if ((dropOffsetLeft < kSideDropThreshold) &&
-            (dropOffsetLeft < dropOffsetRight)) {
-          dropInfo.rowDropLocation = "left";
-        }
-        else if ((dropOffsetRight < kSideDropThreshold) &&
-                (dropOffsetRight <= dropOffsetLeft)) {
-          dropInfo.rowDropLocation = "right";
-        }
-        else if (dropOffsetTop < dropOffsetBottom) {
-          dropInfo.rowDropLocation = "top";
-        }
-        else {
+        if (!dropInfo.rowDropId) return;
+        const row = content?.getRowRecursive(dropInfo.rowDropId);
+        if (row?.isFixedPositionRow(content?.tileMap)) {
+          // Cannot drop alongside or above a fixed position row
           dropInfo.rowDropLocation = "bottom";
           dropInfo.rowInsertIndex = i + 1;
+        } else {
+          const dropOffsetLeft = Math.abs(e.clientX - rowBounds.left);
+          const dropOffsetTop = Math.abs(e.clientY - rowBounds.top);
+          const dropOffsetRight = Math.abs(rowBounds.right - e.clientX);
+          const dropOffsetBottom = Math.abs(rowBounds.bottom - e.clientY);
+
+          const kSideDropThreshold = rowBounds.width * 0.25;
+          if ((dropOffsetLeft < kSideDropThreshold) &&
+              (dropOffsetLeft < dropOffsetRight)) {
+            dropInfo.rowDropLocation = "left";
+          }
+          else if ((dropOffsetRight < kSideDropThreshold) &&
+                  (dropOffsetRight <= dropOffsetLeft)) {
+            dropInfo.rowDropLocation = "right";
+          }
+          else if (dropOffsetTop < dropOffsetBottom) {
+            dropInfo.rowDropLocation = "top";
+          }
+          else {
+            dropInfo.rowDropLocation = "bottom";
+            dropInfo.rowInsertIndex = i + 1;
+          }
         }
       }
     }
@@ -420,11 +429,15 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleMoveTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTilesData: IDragTilesData) => {
-    this.props.content?.userMoveTiles(dragTilesData.tiles, this.getDropRowInfo(e));
+    const dropRowInfo = this.getDropRowInfo(e);
+    if (!dropRowInfo) return;
+    this.props.content?.userMoveTiles(dragTilesData.tiles, dropRowInfo);
   };
 
   private handleCopyTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTiles: IDragTilesData) => {
-    this.props.content?.handleDragCopyTiles(dragTiles, this.getDropRowInfo(e));
+    const dropRowInfo = this.getDropRowInfo(e);
+    if (!dropRowInfo) return;
+    this.props.content?.handleDragCopyTiles(dragTiles, dropRowInfo);
   };
 
   private handleInsertNewTile = (e: React.DragEvent<HTMLDivElement>) => {

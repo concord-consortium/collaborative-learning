@@ -207,11 +207,12 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     const classes = classNames("tool-tile", model.display, tileEltClass, {
                       placeholder: isPlaceholderTile,
                       readonly: readOnly,
+                      fixed: model.isFixedPosition,
                       hovered: this.state.hoverTile,
                       selected: isTileSelected,
                       annotatable: ui.annotationMode !== undefined && model.content.annotatableObjects.length > 0,
                       "selected-for-comment": tileSelectedForComment});
-    const isDraggable = !isPlaceholderTile && !appConfig.disableTileDrags;
+    const isDraggable = !isPlaceholderTile && !model.isFixedPosition && !appConfig.disableTileDrags;
     const dragTileButton = isDraggable &&
                             <DragTileButton
                               divRef={elt => this.dragElement = elt}
@@ -255,7 +256,11 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     const tileId = this.props.model.id;
     return Component != null
             ? <Component
-                key={`tile-component-${tileId}`} tileElt={this.domElement} {...this.props}
+                key={`tile-component-${tileId}`}
+                tileElt={this.domElement}
+                {...this.props}
+                readOnly={this.props.readOnly ||
+                  (this.props.model.isFixedPosition && this.props.model.isInsideLockedTile)}
                 onRegisterTileApi={this.handleRegisterTileApi}
                 onUnregisterTileApi={this.handleUnregisterTileApi} />
             : null;

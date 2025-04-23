@@ -553,9 +553,11 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     addPlaceholderRowIfAppropriate(rowList: RowListType, rowIndex: number) {
       const beforeRow = (rowIndex > 0) && rowList.getRowByIndex(rowIndex - 1);
       const afterRow = (rowIndex < rowList.rowCount) && rowList.getRowByIndex(rowIndex);
-      if ((beforeRow && beforeRow.isSectionHeader) && (!afterRow || afterRow.isSectionHeader)) {
+      const beforeRowIsHeader = beforeRow && (beforeRow.isSectionHeader || beforeRow.isFixedPositionRow(self.tileMap));
+      if (beforeRowIsHeader && (!afterRow || afterRow.isSectionHeader)) {
         const beforeSectionId = beforeRow.sectionId;
-        const content = PlaceholderContentModel.create({sectionId: beforeSectionId});
+        const containerType = getType(self.getRowListForRow(beforeRow.id)).name;
+        const content = PlaceholderContentModel.create({sectionId: beforeSectionId, containerType});
         const tile = TileModel.create({ content });
         self.tileMap.put(tile);
         rowList.addNewTileInNewRowAtIndex(tile, rowIndex);
@@ -1126,9 +1128,6 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       }
     },
     userMoveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
-      // console.log("Document before moveTiles");
-      // console.log(self.debugDescribeThis(self.tileMap, "  "));
-      // console.log("moving tiles", tiles.map(t => t.tileId), "into", rowInfo);
       tiles.forEach(tileItem => {
         const tile = self.getTile(tileItem.tileId);
         tile && logTileDocumentEvent(LogEventName.MOVE_TILE, { tile });
@@ -1138,7 +1137,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     userCopyTiles(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
       const rowList = (rowInfo.rowDropId && self.getRowListForRow(rowInfo.rowDropId)) || self;
       const dropRow = (rowInfo.rowInsertIndex != null) ? rowList.getRowByIndex(rowInfo.rowInsertIndex) : undefined;
-      const results = dropRow?.acceptTileDrop(rowInfo)
+      const results = dropRow?.acceptTileDrop(rowInfo, self.tileMap)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
                       : self.copyTilesIntoNewRows(tiles, rowInfo);
       self.logCopyTileResults(tiles, results);

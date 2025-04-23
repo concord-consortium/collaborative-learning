@@ -30,12 +30,37 @@
     z-index: 1;
   }
 
+  .question-tile-spacer {
+    border: 2px solid white;
+    border-bottom: none;
+    height: 40px;
+    width: 100%;
+    background-color: #e2f4f8;
+  }
+
   .question-tile-rows {
     width: 100%;
-    margin-top: 40px;
 
     .tile-row {
       width: 100%;
+
+      // The prompt element should blend in seamlessly with the spacer unless selected.
+      .tool-tile.fixed {
+
+        &:not(.selected) {
+          border-top: none;
+        }
+
+        .text-tool-wrapper {
+          &:not(.selected) {
+            border: none;
+          }
+
+          .text-tool {
+            margin-top: 0;
+          }
+        }
+      }
     }
   }
 }
