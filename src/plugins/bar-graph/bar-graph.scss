@@ -73,7 +73,7 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
       margin-top: 5px;
     }
 
-    .secondary-value {
+    .attribute-color-value {
       display: flex;
       margin: 5px 0 5px 5px;
       align-items: center;
@@ -149,7 +149,7 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
         }
       }
 
-      .secondary-value-name.missing {
+      .attribute-color-value-name.missing {
         font-style: italic;
       }
     }
@@ -185,12 +185,12 @@ $color-button-active: rgba(20, 244, 158, .5); // 50% #14f49e
         }
       }
 
-      .secondary-values {
+      .attribute-color-values {
         display: flex;
         flex-wrap: wrap;
         margin-left: 8px;
 
-        .secondary-value {
+        .attribute-color-value {
           button.chakra-menu__menu-button {
             margin-right: 14px;
           }

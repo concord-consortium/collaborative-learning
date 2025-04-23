@@ -77,7 +77,7 @@ class BarGraphTile {
   }
 
   getSecondaryValueName(workspaceClass, tileIndex = 0) {
-    return this.getLegendArea(workspaceClass, tileIndex).find(`.secondary-values .secondary-value-name`);
+    return this.getLegendArea(workspaceClass, tileIndex).find(`.attribute-color-values .attribute-color-value-name`);
   }
 
   getBarColorButton(workspaceClass, tileIndex = 0) {

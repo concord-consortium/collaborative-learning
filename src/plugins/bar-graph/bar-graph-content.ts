@@ -25,7 +25,8 @@ export const BarGraphContentModel = TileContentModel
     // that we can tell when it changes.
     dataSetId: types.maybe(types.string),
     primaryAttribute: types.maybe(types.string),
-    primaryAttributeColor: types.optional(types.number, 0),
+    // Map of primary attribute keys to color indices.
+    primaryAttributeColorMap: types.optional(types.map(types.map(types.number)), {}),
     secondaryAttribute: types.maybe(types.string),
     // Map of secondary attribute keys to color indices. Each secondary attribute has its own map.
     secondaryAttributeColorMap: types.optional(types.map(types.map(types.number)), {}),
@@ -119,9 +120,10 @@ export const BarGraphContentModel = TileContentModel
   }))
   .views(self => ({
     get primaryKeys() {
+      const dataSet = self.sharedModel?.dataSet;
       const primary = self.primaryAttribute;
-      if (!primary) return [];
-      return self.dataArray.map(d => d[primary] as string);
+      if (!primary || !dataSet || !self.cases) return [];
+      return Array.from(new Set(self.cases.map(caseID => keyForValue(dataSet.getStrValue(caseID.__id__, primary)))));
     },
     get secondaryKeys() {
       const dataSet = self.sharedModel?.dataSet;
@@ -136,6 +138,11 @@ export const BarGraphContentModel = TileContentModel
         return Math.max(maxInRow, acc);
       }, 0);
     },
+    get currentPrimaryAttributeColorMap() {
+      return self.primaryAttribute
+        ? self.primaryAttributeColorMap.get(self.primaryAttribute) || new Map<string, number>()
+        : new Map<string, number>();
+    },
     get currentSecondaryAttributeColorMap() {
       return self.secondaryAttribute
         ? self.secondaryAttributeColorMap.get(self.secondaryAttribute) || new Map<string, number>()
@@ -143,6 +150,9 @@ export const BarGraphContentModel = TileContentModel
     }
   }))
   .views(self => ({
+    colorForPrimaryKey(key: string) {
+      return self.currentPrimaryAttributeColorMap.get(key) ?? 0;
+    },
     colorForSecondaryKey(key: string) {
       return self.currentSecondaryAttributeColorMap.get(key) ?? 0;
     },
@@ -151,17 +161,24 @@ export const BarGraphContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    setPrimaryAttributeColor(colorIndex: number) {
-      self.primaryAttributeColor = colorIndex;
-    },
-    setSecondaryAttributeKeyColor(key: string, colorIndex: number) {
-      if (!self.secondaryAttribute) return;
+    setAttributeKeyColor(key: string, colorIndex: number, attr: "primary" | "secondary") {
+      const attribute = attr === "primary" ? self.primaryAttribute : self.secondaryAttribute;
+      const colorMap = attr === "primary" ? self.primaryAttributeColorMap : self.secondaryAttributeColorMap;
+      if (!attribute) return;
 
-      if (!self.secondaryAttributeColorMap.has(self.secondaryAttribute)) {
-        self.secondaryAttributeColorMap.set(self.secondaryAttribute, self.newEmptyColorMap());
+      if (!colorMap.has(attribute)) {
+        colorMap.set(attribute, self.newEmptyColorMap());
       }
 
-      self.secondaryAttributeColorMap.get(self.secondaryAttribute)?.set(key, colorIndex);
+      colorMap.get(attribute)?.set(key, colorIndex);
+    }
+  }))
+  .actions(self => ({
+    setPrimaryAttributeKeyColor(key: string, colorIndex: number) {
+      self.setAttributeKeyColor(key, colorIndex, "primary");
+    },
+    setSecondaryAttributeKeyColor(key: string, colorIndex: number) {
+      self.setAttributeKeyColor(key, colorIndex, "secondary");
     }
   }))
   .actions(self => ({
@@ -254,6 +271,9 @@ export const BarGraphContentModel = TileContentModel
       if (self.secondaryAttribute && !self.sharedModel?.dataSet.attrFromID(self.secondaryAttribute)) {
         self.setSecondaryAttribute(undefined);
       }
+
+      // We only update colors for secondary attributes because primary attribute colors are a user
+      // preference and should only be set by the user.
       if (self.secondaryAttribute) {
         self.updateSecondaryAttributeKeyColorMap();
       }

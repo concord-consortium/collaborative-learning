@@ -18,18 +18,18 @@ export const LegendSecondaryRow = observer(function LegendSecondaryRow ({attrVal
   const display = displayValue(attrValue);
   const backgroundColor = model.secondaryAttribute
     ? clueDataColorInfo[model.colorForSecondaryKey(attrValue)].color
-    : clueDataColorInfo[model.primaryAttributeColor].color;
+    : clueDataColorInfo[model.colorForPrimaryKey(attrValue)].color;
 
   const handleColorSelect = (colorIndex: number) => {
     if (model.secondaryAttribute) {
       model.setSecondaryAttributeKeyColor(attrValue, colorIndex);
     } else {
-      model.setPrimaryAttributeColor(colorIndex);
+      model.setPrimaryAttributeKeyColor(attrValue, colorIndex);
     }
   };
 
   return (
-    <div key={attrValue} className="secondary-value">
+    <div key={attrValue} className="attribute-color-value">
       <Menu placement="auto">
         <MenuButton as={Button} unstyle="true" data-testid="color-menu-button">
           <div className="color-button">
@@ -62,7 +62,7 @@ export const LegendSecondaryRow = observer(function LegendSecondaryRow ({attrVal
           ))}
         </MenuList>
       </Menu>
-      <div className={classNames("secondary-value-name", { missing: missingData })}>
+      <div className={classNames("attribute-color-value-name", { missing: missingData })}>
         {display}
       </div>
     </div>

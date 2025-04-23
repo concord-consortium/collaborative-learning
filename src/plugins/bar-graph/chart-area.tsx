@@ -54,7 +54,7 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
 
     return model.secondaryAttribute
       ? clueDataColorInfo[model.colorForSecondaryKey(key)].color
-      : clueDataColorInfo[model.primaryAttributeColor].color;
+      : clueDataColorInfo[model.colorForPrimaryKey(key)].color;
   }
 
   // Count cases and make the data array
@@ -110,7 +110,6 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
   }
 
   function simpleBars() {
-    const color = barColor(primary);
     return (
       <Group>
         {data.map((d) => {
@@ -121,7 +120,7 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
           const w = primaryScale.bandwidth();
           const h = yMax - countScale(info.count);
           return (
-            <BarWithHighlight key={key} x={x} y={y} width={w} height={h} color={color} selected={info.selected}
+            <BarWithHighlight key={key} x={x} y={y} width={w} height={h} color={barColor(key)} selected={info.selected}
               onClick={() => handleClick(key)} />
           );
         })}

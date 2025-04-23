@@ -58,7 +58,7 @@ describe("Bar Graph Content", () => {
 Object {
   "dataSetId": undefined,
   "primaryAttribute": undefined,
-  "primaryAttributeColor": 0,
+  "primaryAttributeColorMap": Object {},
   "secondaryAttribute": undefined,
   "secondaryAttributeColorMap": Object {},
   "type": "BarGraph",
@@ -290,8 +290,8 @@ Object {
   it("sets the primary attribute color", () => {
     const content = TestingBarGraphContentModel.create({ });
     content.setPrimaryAttribute("att-l");
-    content.setPrimaryAttributeColor(1);
-    expect(content.primaryAttributeColor).toBe(1);
+    content.setPrimaryAttributeKeyColor("key1", 1);
+    expect(content.colorForPrimaryKey("key1")).toBe(1);
   });
 
   it("sets a secondary attribute key's color", () => {
@@ -309,7 +309,7 @@ Object {
     const expected = {
       type: "BarGraph",
       yAxisLabel: "",
-      primaryAttributeColor: 0,
+      primaryAttributeColorMap: {},
       secondaryAttributeColorMap: {},
       dataSetId: undefined,
       primaryAttribute: undefined,
