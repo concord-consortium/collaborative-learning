@@ -10,7 +10,7 @@ interface IProps {
   attrValue: string;
 }
 
-export const LegendSecondaryRow = observer(function LegendSecondaryRow ({attrValue}: IProps) {
+export const LegendColorRow = observer(function LegendColorRow ({attrValue}: IProps) {
   const model = useBarGraphModelContext();
   if (!model) return null;
 
@@ -29,7 +29,7 @@ export const LegendSecondaryRow = observer(function LegendSecondaryRow ({attrVal
   };
 
   return (
-    <div key={attrValue} className="attribute-color-value">
+    <div key={attrValue} className="attribute-value">
       <Menu placement="auto">
         <MenuButton as={Button} unstyle="true" data-testid="color-menu-button">
           <div className="color-button">
@@ -62,11 +62,11 @@ export const LegendSecondaryRow = observer(function LegendSecondaryRow ({attrVal
           ))}
         </MenuList>
       </Menu>
-      <div className={classNames("attribute-color-value-name", { missing: missingData })}>
+      <div className={classNames("attribute-value-name", { missing: missingData })}>
         {display}
       </div>
     </div>
   );
 });
 
-export default LegendSecondaryRow;
+export default LegendColorRow;

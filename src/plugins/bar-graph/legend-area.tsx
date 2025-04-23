@@ -2,7 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { Menu, MenuButton, MenuItem, MenuList, Portal } from '@chakra-ui/react';
 import { useBarGraphModelContext } from './bar-graph-content-context';
-import { LegendSecondaryRow } from './legend-secondary-row';
+import { LegendColorRow } from './legend-color-row';
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
@@ -105,8 +105,8 @@ export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
 
         <div className="attribute-color-values">
           {currentSecondary
-            ? secondaryKeys.map((key) => <LegendSecondaryRow key={key} attrValue={key} />)
-            : primaryKeys.map((key) => <LegendSecondaryRow key={key} attrValue={key} />)}
+            ? secondaryKeys.map((key) => <LegendColorRow key={key} attrValue={key} />)
+            : primaryKeys.map((key) => <LegendColorRow key={key} attrValue={key} />)}
         </div>
       </div>
     </div>
