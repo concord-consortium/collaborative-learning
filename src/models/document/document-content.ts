@@ -130,7 +130,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     const builder = new StringBuilder();
     builder.pushLine("{");
 
-    const includedTileIds = rows.flatMap(row => row?.allTileIds ?? []);
+    const includedTileIds = rows.flatMap(row => row?.tileIds ?? []);
     const sharedModels = Object.values(self.getSharedModelsUsedByTiles(includedTileIds));
     const hasSharedModels = sharedModels.length > 0;
     const annotations = Object.values(self.getAnnotationsUsedByTiles(includedTileIds));
@@ -180,7 +180,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     updatedTiles.forEach(tile => {
       const {rowId, sectionId} = copySpec.tilePositions[tile.tileId];
       let targetRow = targetRowMap.get(rowId);
-      let insertedRowIndex = self.defaultInsertRow;
+      let insertedRowIndex = self.defaultInsertRowIndex;
       const insertingRow = !targetRow;
 
       if (sectionId) {
@@ -419,7 +419,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       return;
     }
     // New tiles go into a row after the last copied tile
-    const rowIndex = self.getRowAfterTiles(tiles);
+    const rowId = self.getLastRowForTiles(tiles) || rowList.rowOrder[rowList.rowOrder.length - 1];
 
     // Find shared models used by tiles being duplicated
     const sharedModelEntries = Object.values(self.getSharedModelsUsedByTiles(tileIds));
@@ -435,7 +435,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       snapshots,
       annotations,
       false, // duplicating within same document
-      { rowDropId: rowList.rowOrder[rowIndex-1], rowInsertIndex: rowIndex }
+      { rowDropId: rowId, rowInsertIndex: rowList.getRowIndex(rowId) + 1, rowDropLocation: "bottom" }
     );
   },
   /**

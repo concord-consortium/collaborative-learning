@@ -13,9 +13,6 @@ export const RowList = types
     rowMap: types.map(TileRowModel),
     rowOrder: types.array(types.string),
   })
-  .volatile(self => ({
-    visibleRows: [] as string[],
-  }))
   .views(self => ({
     get rowCount() {
       return self.rowOrder.length;
@@ -29,20 +26,28 @@ export const RowList = types
     getRowIndex(rowId: string) {
       return self.rowOrder.findIndex(_rowId => _rowId === rowId);
     },
-    get indexOfLastVisibleRow() {
-      // returns last visible row or last row
+    /**
+     * Returns the index of the last visible row in this RowList.
+     * If no visible rows are found, returns the index of the last row.
+     */
+    getIndexOfLastVisibleRow(visibleRows: string[]) {
       if (!self.rowOrder.length) return -1;
-      const lastVisibleRowId = self.visibleRows.length
-                                ? self.visibleRows[self.visibleRows.length - 1]
-                                : self.rowOrder[self.rowOrder.length - 1];
-      return self.rowOrder.indexOf(lastVisibleRowId);
+      // Iterate over the visible rows in reverse order to find the last one
+      for (let i = visibleRows.length - 1; i >= 0; i--) {
+        const rowId = visibleRows[i];
+        if (self.rowOrder.includes(rowId)) {
+          return self.rowOrder.indexOf(rowId);
+        }
+      }
+      // If no visible rows are found, return the last row in the rowOrder
+      return self.rowOrder.length - 1;
     },
     /**
      * Returns all tile ids directly in this RowList container.
      * Does not include tile ids from nested RowList containers.
      */
     get tileIds() {
-      return self.rowOrder.flatMap(rowId => this.getRow(rowId)?.allTileIds ?? []);
+      return self.rowOrder.flatMap(rowId => this.getRow(rowId)?.tileIds ?? []);
     },
     rowHeightToExport(row: TileRowModelType, tileId: string, tileMap: Map<string, ITileModel>) {
       if (!row?.height) return;
@@ -149,9 +154,6 @@ export const RowList = types
         self.rowMap.delete(rowId);
         return row;
       }
-    },
-    setVisibleRows(rows: string[]) {
-      self.visibleRows = rows;
     },
   }))
   .actions(self => ({

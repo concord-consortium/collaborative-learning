@@ -49,7 +49,10 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     return isImportDocument(snapshot) ? migrateSnapshot(snapshot) : snapshot;
   })
   .volatile(self => ({
-    highlightPendingDropLocation: -1,
+    // ID of the row to highlight as the drop location for newly-created or duplicated tiles.
+    highlightPendingDropLocation: undefined as string | undefined,
+    // IDs of top-level rows that are currently visible on the screen
+    visibleRows: [] as string[],
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
@@ -72,11 +75,15 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
        * @returns An array of all tiles, in document order.
        */
       get allTiles(): ITileModel[] {
+        return self.rowOrder.flatMap(rowId => this.getAllTilesInRow(rowId));
+      },
+      /**
+       * Returns all tiles in the given row, including nested tiles from RowList containers.
+       * @returns An array of all tiles, in document order.
+       */
+      getAllTilesInRow(rowId: string) {
         const tiles: ITileModel[] = [];
-
-        // Get all tiles from the main document rows
-        self.rowOrder.forEach(rowId => {
-          const row = self.getRow(rowId);
+        const row = this.getRowRecursive(rowId);
           if (row) {
             row.tiles.forEach(tileLayout => {
               const tile = self.tileMap.get(tileLayout.tileId);
@@ -101,8 +108,6 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
               }
             });
           }
-        });
-
         return tiles;
       },
       /**
@@ -297,9 +302,10 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       const tile = self.getTile(row.tiles[0].tileId);
       return getPlaceholderSectionId(tile);
     },
-    get defaultInsertRow() {
-      // next tile comes after the last visible row with content
-      for (let i = self.indexOfLastVisibleRow; i >= 0; --i) {
+    /** Return the index of the row after which new content is inserted by default. */
+    get defaultInsertRowIndex() {
+      // by default new tiles are inserted after the last visible row with content
+      for (let i = self.getIndexOfLastVisibleRow(self.visibleRows); i >= 0; --i) {
         const row = self.getRowByIndex(i);
         if (row && !row.isSectionHeader && !self.isPlaceholderRow(row)) {
           return i + 1;
@@ -313,7 +319,13 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         }
       }
       // if all else fails, revert to last visible row
-      return self.indexOfLastVisibleRow + 1;
+      return self.getIndexOfLastVisibleRow(self.visibleRows) + 1;
+    },
+    /** Return the ID of the row after which new content is inserted by default. */
+    get defaultInsertRowId() {
+      const insertIndex = this.defaultInsertRowIndex;
+      if (insertIndex <= 0) return;
+      return self.rowOrder[insertIndex-1];
     },
     /**
      * Find the smallest RowList container that contains all the given tile ids.
@@ -327,10 +339,21 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       });
       return found ?? self;
     },
-    getRowAfterTiles(tiles: ITilePosition[]) {
-      return Math.max(...tiles.map(tile => tile.rowIndex)) + 1;
+    rowHasTileId(rowId: string, tileId: string) {
+      return self.getAllTilesInRow(rowId).some(tile => tile.id === tileId);
     },
-    // TODO: does this need to be recursive?
+    /**
+     * Given a sorted list of tile positions, return the last row of them.
+     * This will be a row in the smallest rowList that contains all the tiles.
+     * @param tiles
+     * @returns a rowId, or undefined if there are no tiles in the list.
+     */
+    getLastRowForTiles(tiles: ITilePosition[]): string | undefined {
+      const rowList = this.getRowListContainingTileIds(tiles.map(tile => tile.tileId));
+      const lastTileId = tiles[tiles.length - 1].tileId;
+      return rowList?.rowOrder.find(rowId => this.rowHasTileId(rowId, lastTileId));
+    },
+    // TODO: does this need to be recursive? Affects dashboard ProgressWidget.
     getTilesInSection(sectionId: string) {
       const tiles: ITileModel[] = [];
       const rows = self.getRowsInSection(sectionId);
@@ -494,6 +517,9 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     },
   }))
   .actions(self => ({
+    setVisibleRows(rows: string[]) {
+      self.visibleRows = rows;
+    },
     insertNewTileInRow(tile: ITileModel, row: TileRowModelType, tileIndexInRow?: number) {
       const insertedTile = self.tileMap.put(tile);
       row.insertTileInRow(insertedTile, tileIndexInRow);
@@ -588,7 +614,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       const rowList = o.rowList ?? self;
       if (o.rowIndex === undefined) {
         // by default, insert new tiles after last visible on screen
-        o.rowIndex = self.defaultInsertRow;
+        o.rowIndex = self.defaultInsertRowIndex;
       }
       const row = TileRowModel.create({});
       rowList.insertRow(row, o.rowIndex);
@@ -608,7 +634,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       const rowList = o.rowList ?? self;
       if (o.rowIndex === undefined) {
         // by default, insert new tiles after last visible on screen.
-        o.rowIndex = self.defaultInsertRow;
+        o.rowIndex = self.defaultInsertRowIndex;
       }
       const row = o.rowId ? rowList.getRow(o.rowId) : rowList.getRowByIndex(o.rowIndex);
       if (row) {
@@ -630,8 +656,8 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       self.addPlaceholderRowIfAppropriate(rowList, rowIndex);
       return row;
     },
-    showPendingInsertHighlight(show: boolean, insertRowIndex?: number) {
-      self.highlightPendingDropLocation = show ? insertRowIndex ?? self.defaultInsertRow : -1;
+    showPendingInsertHighlight(show: boolean, rowId?: string) {
+      self.highlightPendingDropLocation = show ? rowId ?? self.defaultInsertRowId : undefined;
     }
   }))
   .actions((self) => ({
