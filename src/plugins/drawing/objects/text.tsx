@@ -184,6 +184,7 @@ export class TextDrawingTool extends DrawingTool {
     // Select the drawing tile, but don't propagate event to do normal Cmd-click procesing.
     this.drawingLayer.selectTile(false);
     e.stopPropagation();
+    if (!e.isPrimary) return;
 
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;

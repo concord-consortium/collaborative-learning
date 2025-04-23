@@ -4,6 +4,7 @@ import { IClueObjectSnapshot } from "../annotations/clue-object";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { UpdatedSharedDataSetIds } from "../shared/shared-data-set";
 import { SharedModelEntrySnapshotType } from "../document/shared-model-entry";
+import { ITileModel } from "./tile-model";
 
 export interface IDefaultContentOptions {
   // title is only currently used by the Geometry and Table tiles
@@ -13,6 +14,8 @@ export interface IDefaultContentOptions {
   url?: string;
   // appConfig contains stamps (for drawing tool), placeholderText (for text tool), etc.
   appConfig?: AppConfigModelType;
+  // a factory method for creating additional tiles needed
+  tileFactory?: (toolId: string) => ITileModel;
 }
 
 type TileModelSnapshotPreProcessor = (tile: any) => any
@@ -69,6 +72,13 @@ export interface ITileContentInfo {
   contentSnapshotPostProcessor?: TileContentSnapshotPostProcessor;
   updateContentWithNewSharedModelIds?: TileContentNewSharedModelIdUpdater;
   updateObjectReferenceWithNewSharedModelIds?: ClueObjectNewSharedModelIdUpdater;
+  /**
+   * If supplied, this function is called when a tile is being copied.
+   * This allows tiles to handle any special logic needed beyond the standard updates of IDs.
+   * For example, the Question tile uses this to ensure it's locked when copied across documents.
+   * Returns the updated content.
+   */
+  updateContentForCopy?: (content: any, acrossDocuments: boolean) => any;
 }
 
 const gTileContentInfoMap: Record<string, ITileContentInfo> = {};

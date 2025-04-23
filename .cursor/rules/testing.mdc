@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+To run a Jest test, use `npm test` as usual.
+
+To run a specific Cypress test, use use `npm run test:cypress` instead of `cypress:run`.
+
+To start the Cypress UI, use `npm run test:cypress:open`.

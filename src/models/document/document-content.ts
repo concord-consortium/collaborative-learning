@@ -4,17 +4,18 @@ import { cloneDeep, each } from "lodash";
 import { IDragTilesData,
          IDocumentContentAddTileOptions } from "./document-content-types";
 import { DocumentContentModelWithTileDragging } from "./drag-tiles";
-import { IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotOutType } from "./tile-row";
+import { IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotOutType, TileRowSnapshotType } from "./tile-row";
 import {
   ArrowAnnotation, IArrowAnnotationSnapshot, isArrowAnnotationSnapshot, updateArrowAnnotationTileIds
 } from "../annotations/arrow-annotation";
 import { sharedModelFactory, UnknownSharedModel } from "../shared/shared-model-manager";
 import { SharedModelType } from "../shared/shared-model";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
-import { IDragTileItem, IDropTileItem, ITileModel,
+import { IDragTileItem, IDropTileItem, isContainerTile, ITileModel,
+         ITileModelSnapshotIn,
          ITileModelSnapshotOut } from "../tiles/tile-model";
 import { uniqueId } from "../../utilities/js-utils";
-import { comma, StringBuilder } from "../../utilities/string-builder";
+import { StringBuilder } from "../../utilities/string-builder";
 import { SharedModelEntrySnapshotType } from "./shared-model-entry";
 
 // Imports related to hard coding shared model duplication
@@ -23,6 +24,7 @@ import {
   UpdatedSharedDataSetIds, updateSharedDataSetSnapshotWithNewTileIds
 } from "../shared/shared-data-set";
 import { IClueObjectSnapshot } from "../annotations/clue-object";
+import { isRowListSnapshotIn, isRowListSnapshotOut } from "./row-list";
 
 
 export interface ITileCopyPosition {
@@ -126,46 +128,18 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
   }
 }))
 .views(self => ({
-  exportRowsAsJson(rows: (TileRowModelType | undefined)[], options?: IDocumentExportOptions) {
+  exportRowsModelsAndAnnotationsAsJson(rows: (TileRowModelType | undefined)[], options?: IDocumentExportOptions) {
     const builder = new StringBuilder();
     builder.pushLine("{");
-    builder.pushLine(`"tiles": [`, 2);
 
-    const includedTileIds: string[] = [];
-    const exportRowCount = rows.length;
-    rows.forEach((row, rowIndex) => {
-      const isLastRow = rowIndex === exportRowCount - 1;
-      // export each exportable tile
-      const tileExports = row?.tiles.map((tileInfo, tileIndex) => {
-        const isLastTile = tileIndex === row.tiles.length - 1;
-        const showComma = row.tiles.length > 1 ? !isLastTile : !isLastRow;
-        const rowHeight = self.rowHeightToExport(row, tileInfo.tileId);
-        const rowHeightOption = rowHeight ? { rowHeight } : undefined;
-        includedTileIds.push(tileInfo.tileId);
-        return self.exportTileAsJson(tileInfo, { ...options, appendComma: showComma, ...rowHeightOption });
-      }).filter(json => !!json);
-      if (tileExports?.length) {
-        // multiple tiles in a row are exported in an array
-        if (tileExports.length > 1) {
-          builder.pushLine("[", 4);
-          tileExports.forEach(tileExport => {
-            tileExport && builder.pushBlock(tileExport, 6);
-          });
-          builder.pushLine(`]${comma(!isLastRow)}`, 4);
-        }
-        // single tile rows are exported directly
-        else if (tileExports[0]) {
-          builder.pushBlock(tileExports[0], 4);
-        }
-      }
-    });
+    const includedTileIds = rows.flatMap(row => row?.tileIds ?? []);
     const sharedModels = Object.values(self.getSharedModelsUsedByTiles(includedTileIds));
     const hasSharedModels = sharedModels.length > 0;
     const annotations = Object.values(self.getAnnotationsUsedByTiles(includedTileIds));
     const hasAnnotations = annotations.length > 0;
 
-    const tilesComma = hasSharedModels || hasAnnotations ? "," : "";
-    builder.pushLine(`]${tilesComma}`, 2);
+    const tilesComma = hasSharedModels || hasAnnotations;
+    builder.pushBlock(self.exportRowsAsJson(rows, self.tileMap, { ...options, appendComma: tilesComma }), 2);
 
     if (hasSharedModels) {
       builder.pushLine(`"sharedModels": [`, 2);
@@ -208,7 +182,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     updatedTiles.forEach(tile => {
       const {rowId, sectionId} = copySpec.tilePositions[tile.tileId];
       let targetRow = targetRowMap.get(rowId);
-      let insertedRowIndex = self.defaultInsertRow;
+      let insertedRowIndex = self.defaultInsertRowIndex;
       const insertingRow = !targetRow;
 
       if (sectionId) {
@@ -230,10 +204,9 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       }
 
       if (targetRow) {
-        const rowIndex = self.getRowIndex(targetRow.id);
         self.copyTilesIntoExistingRow([tile], {
           rowInsertIndex: 0, // this is ignored
-          rowDropIndex: rowIndex,
+          rowDropId: targetRow.id,
           rowDropLocation: "right"
         });
       }
@@ -242,13 +215,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
 }))
 .views(self => ({
   exportAsJson(options?: IDocumentExportOptions) {
-    // identify rows with exportable tiles
-    const rowsToExport = self.rowOrder.map(rowId => {
-      const row = self.getRow(rowId);
-      return row && !row.isSectionHeader && !row.isEmpty && !self.isPlaceholderRow(row) ? row : undefined;
-    }).filter(row => !!row);
-
-    return self.exportRowsAsJson(rowsToExport, options);
+    return self.exportRowsModelsAndAnnotationsAsJson(self.exportableRows(self.tileMap), options);
   },
   exportSectionsAsJson(options?: IDocumentExportOptions) {
     const sections: Record<string, string> = {};
@@ -261,7 +228,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         if (row.isSectionHeader) {
           if (section !== "") {
             // We've finished the last section
-            sections[section] = self.exportRowsAsJson(rows.filter(r => !!r), options);
+            sections[section] = self.exportRowsModelsAndAnnotationsAsJson(rows.filter(r => !!r), options);
           }
           section = row.sectionId ?? "unknown";
           rows = [];
@@ -272,18 +239,28 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
     });
     if (section !== "") {
       // Save the final section
-      sections[section] = self.exportRowsAsJson(rows.filter(r => !!r), options);
+      sections[section] = self.exportRowsModelsAndAnnotationsAsJson(rows.filter(r => !!r), options);
     }
 
     return sections;
   }
 }))
 .actions(self => ({
-  // Copies tiles and shared models into the specified row, giving them all new ids
+  /**
+   * Copies tiles and associated objects into the specified row, giving the tiles all new ids.
+
+   * @param tiles - tiles to copy
+   * @param sharedModelEntries - shared models to copy
+   * @param annotations - annotations to copy
+   * @param isCrossingDocuments - whether the tiles are being copied across documents
+   * @param rowInfo - row to copy the tiles into
+   * @param copySpec - copy specification
+   */
   copyTiles(
     tiles: IDragTileItem[],
     sharedModelEntries: SharedModelEntrySnapshotType[],
     annotations: IArrowAnnotationSnapshot[],
+    isCrossingDocuments: boolean,
     rowInfo?: IDropRowInfo,
     copySpec?: ICopySpec
   ) {
@@ -321,18 +298,24 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       return sharedModelEntries.filter(entry => entry.tiles?.includes(tileId));
     };
 
-    // Update tile content with new shared model ids
+    // Clone the tile content and update it with the new shared model ids
     const tileIdMap: Record<string, string> = {};
     const updatedTiles: IDropTileItem[] = [];
-    tiles.forEach(tile => {
-      const oldContent = JSON.parse(tile.tileContent);
-      const tileContent = cloneDeep(oldContent);
+    // We have to process container tiles last, so that we can update them with the
+    // references to their new embedded tiles.
+    const reorderedTiles: IDragTileItem[] = [
+      ...tiles.filter(tile => !isContainerTile(tile)),
+      ...tiles.filter(tile => isContainerTile(tile))
+    ];
+    reorderedTiles.forEach(tile => {
+      const oldTile: ITileModelSnapshotIn = JSON.parse(tile.tileContent);
+      const newTile: ITileModelSnapshotIn = cloneDeep(oldTile);
       tileIdMap[tile.tileId] = uniqueId();
 
       // Remove any title that shouldn't be there (eg, copying from legacy curriculum)
       const typeInfo = getTileContentInfo(tile.tileType);
-      if (tileContent.title && typeInfo?.useContentTitle) {
-        tileContent.title = undefined;
+      if (newTile.title && typeInfo?.useContentTitle) {
+        newTile.title = undefined;
       }
 
       // Find the shared models for this tile
@@ -341,11 +324,55 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       // Update the tile's references to its shared models
       const updateFunction = typeInfo?.updateContentWithNewSharedModelIds;
       if (updateFunction) {
-        tileContent.content = updateFunction(oldContent.content, tileSharedModelEntries, updatedSharedModelMap);
+        newTile.content = updateFunction(oldTile.content, tileSharedModelEntries, updatedSharedModelMap);
+      }
+
+      // If this is a container tile, update the references to its embedded tiles
+      // Any embedded tiles that were not in our list of tiles to copy are removed.
+      const oldContent = oldTile.content;
+      const newContent = newTile.content;
+
+      if (isRowListSnapshotOut(oldContent) && isRowListSnapshotIn(newContent)) {
+        // These should exist for RowLists, but need to assert it to make Typescript happy
+        if (!("rowOrder" in newContent && "rowMap" in newContent)) return;
+        const newRowMap = {} as Record<string, TileRowSnapshotType>;
+        const newRowOrder = [] as string[];
+        // Iterate through rows in the oldContent.
+        // Give the rows new IDs and update the tile references in the rows.
+        oldContent.rowOrder.forEach(rowId => {
+          const newRowId = uniqueId();
+          const newRowContent: TileRowSnapshotType = {
+            id: newRowId,
+            tiles: oldContent.rowMap[rowId]?.tiles.flatMap(tileLayout => {
+              if (tileIdMap[tileLayout.tileId]) {
+                // mark the tile as embedded
+                const tileInfo = updatedTiles.find(t => t.tileId === tileLayout.tileId);
+                if (tileInfo) {
+                  tileInfo.embedded = true;
+                }
+                return { ...tileLayout, tileId: tileIdMap[tileLayout.tileId] };
+              } else {
+                return [];
+              }
+            }) ?? []
+          };
+          if (newRowContent.tiles && newRowContent.tiles.length > 0) {
+            newRowMap[newRowId] = newRowContent;
+            newRowOrder.push(newRowId);
+          }
+        });
+        newContent.rowMap = newRowMap;
+        newContent.rowOrder = newRowOrder;
+      }
+      newTile.content = newContent;
+
+      // Handle any special logic needed when copying
+      if (typeInfo?.updateContentForCopy) {
+        newTile.content = typeInfo.updateContentForCopy(newTile.content, isCrossingDocuments);
       }
 
       // Save the updated tile so we can add it to the document
-      updatedTiles.push({ ...tile, newTileId: tileIdMap[tile.tileId], tileContent: JSON.stringify(tileContent) });
+      updatedTiles.push({ ...tile, newTileId: tileIdMap[tile.tileId], tileContent: JSON.stringify(newTile) });
     });
 
     // Add copied tiles to document
@@ -417,7 +444,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
 }))
 .actions(self => ({
   handleDragCopyTiles(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {
-    const { tiles, sharedModels, annotations } = dragTiles;
+    const { tiles, sharedModels, annotations, sourceDocId } = dragTiles;
 
     // Convert IDragSharedModelItems to partial SharedModelEnries
     const sharedModelEntries: SharedModelEntrySnapshotType[] = [];
@@ -437,14 +464,22 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       }
     });
 
-    self.copyTiles(tiles, sharedModelEntries, annotations, rowInfo);
+    self.copyTiles(tiles, sharedModelEntries, annotations, sourceDocId !== self.contentId, rowInfo);
   },
   duplicateTiles(tiles: IDragTileItem[]) {
+    tiles = self.addEmbeddedTilesToDragTiles(tiles);
+
+    // Find the RowList that contains all the tiles being duplicated.
+    // Might be the whole document or a Question tile.
+    const tileIds = tiles.map(tile => tile.tileId);
+    const rowList = self.getRowListContainingTileIds(tileIds);
+    if (!rowList) {
+      return;
+    }
     // New tiles go into a row after the last copied tile
-    const rowIndex = self.getRowAfterTiles(tiles);
+    const rowId = self.getLastRowForTiles(tiles) || rowList.rowOrder[rowList.rowOrder.length - 1];
 
     // Find shared models used by tiles being duplicated
-    const tileIds = tiles.map(tile => tile.tileId);
     const sharedModelEntries = Object.values(self.getSharedModelsUsedByTiles(tileIds));
     const annotations = Object.values(self.getAnnotationsUsedByTiles(tileIds, true));
 
@@ -457,7 +492,8 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       tiles,
       snapshots,
       annotations,
-      { rowInsertIndex: rowIndex }
+      false, // duplicating within same document
+      { rowDropId: rowId, rowInsertIndex: rowList.getRowIndex(rowId) + 1, rowDropLocation: "bottom" }
     );
   },
   /**
@@ -469,7 +505,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
    */
   addTileAfter(tileType: string, target: ITileModel, sharedModels?: SharedModelType[],
     options?: IDocumentContentAddTileOptions) {
-    const targetRowId = self.findRowContainingTile(target.id);
+    const targetRowId = self.findRowIdContainingTile(target.id);
     if (!targetRowId) {
       console.warn("Can't find row to add tile after");
       return;
@@ -512,7 +548,7 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
   getCopySpec(tileIds: string[], sectionId?: string): ICopySpec {
     const tiles = self.getDragTileItems(tileIds);
     const tilePositions = tileIds.reduce<Record<string, ITileCopyPosition>>((acc, tileId) => {
-      const rowId = self.findRowContainingTile(tileId)!;
+      const rowId = self.findRowIdContainingTile(tileId)!;
       acc[tileId] = { rowId, sectionId: sectionId ?? self.getSectionIdForTile(tileId) };
       return acc;
     }, {});
@@ -526,9 +562,9 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
       annotations,
     };
   },
-  applyCopySpec(copySpec: ICopySpec) {
+  applyCopySpec(copySpec: ICopySpec, isCrossingDocuments: boolean) {
     return self.copyTiles(
-      copySpec.tiles, copySpec.sharedModelEntries, copySpec.annotations, undefined, copySpec
+      copySpec.tiles, copySpec.sharedModelEntries, copySpec.annotations, isCrossingDocuments, undefined, copySpec
     );
   },
 }));

@@ -2,10 +2,12 @@ import { types, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { ITileModel } from "../tiles/tile-model";
 import { uniqueId } from "../../utilities/js-utils";
 import { withoutUndo } from "../history/without-undo";
+import { isPlaceholderTile } from "../tiles/placeholder/placeholder-content";
+import { getParentWithTypeName } from "../../utilities/mst-utils";
 
 export interface IDropRowInfo {
   rowInsertIndex: number;
-  rowDropIndex?: number;
+  rowDropId?: string;
   rowDropLocation?: string;
   updateTimestamp?: number;
 }
@@ -47,12 +49,15 @@ export const TileRowModel = types
     get isUserResizable() {
       return !self.isSectionHeader && self.tiles.some(tileRef => tileRef.isUserResizable);
     },
+    /** Returns tileIds of tiles directly in this row */
     get tileIds() {
-      return self.tiles.map(tile => tile.tileId).join(", ");
+      return self.tiles.map(tile => tile.tileId);
     },
-    acceptTileDrop(rowInfo: IDropRowInfo) {
+    acceptTileDrop(rowInfo: IDropRowInfo, tileMap: Map<string, ITileModel>) {
       const rowDropLocation = rowInfo.rowDropLocation;
-      return !self.isSectionHeader && ((rowDropLocation === "left") || (rowDropLocation === "right"));
+      return !self.isSectionHeader
+        && !this.isFixedPositionRow(tileMap)
+        && ((rowDropLocation === "left") || (rowDropLocation === "right"));
     },
     getTileIdAtIndex(index: number) {
       const layout = (index >= 0) && (index < self.tiles.length) ? self.tiles[index] : undefined;
@@ -60,6 +65,20 @@ export const TileRowModel = types
     },
     hasTile(tileId: string) {
       return self.tiles.findIndex(tileRef => tileRef.tileId === tileId) >= 0;
+    },
+    isPlaceholderRow(tileMap: Map<string, ITileModel>) {
+      return (this.tileCount > 0) &&
+        self.tiles.every((entry) => {
+          const tile = entry.tileId ? tileMap.get(entry.tileId) : undefined;
+          return isPlaceholderTile(tile);
+        });
+    },
+    /** Check if this row is embedded in a tile. */
+    isEmbeddedRow(): boolean {
+      return getParentWithTypeName(self, "TileModel") !== undefined;
+    },
+    isFixedPositionRow(tileMap: Map<string, ITileModel>) {
+      return self.tiles.every(tileRef => tileMap.get(tileRef.tileId)?.isFixedPosition ?? false);
     },
     indexOfTile(tileId: string) {
       return self.tiles.findIndex(tileRef => tileRef.tileId === tileId);

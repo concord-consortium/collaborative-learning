@@ -6,6 +6,9 @@ import { IDocumentImportSnapshot } from "./document-content-import-types";
 import { SharedDataSetSnapshotType } from "../shared/shared-data-set";
 import { SharedModelDocumentManager } from "./shared-model-document-manager";
 import { ITileEnvironment } from "../tiles/tile-content";
+import { IDragTileItem } from "../tiles/tile-model";
+import { IDragTilesData } from "./document-content-types";
+
 registerTileTypes(["Text"]);
 
 // mock uniqueId so auto-generated IDs are consistent
@@ -25,6 +28,24 @@ function createDocumentContentModel(snapshot: IDocumentImportSnapshot) {
   const content = DocumentContentModel.create(snapshot as DocumentContentSnapshotType, environment);
   sharedModelManager.setDocument(content);
   return content;
+}
+
+// For simplicify of comparing to a snapshot, replace the complex rowList object
+// with a simpler object that just has the rowOrder.
+function cleanDragTileItems(items: IDragTileItem[]) {
+  return items.map((item: { rowList: { rowOrder: any; }; }) => {
+    return {
+      ...item,
+      rowList: { rowOrder: item.rowList.rowOrder }
+    };
+  });
+}
+
+function cleanDragTiles(tiles: IDragTilesData) {
+  return {
+    ...tiles,
+    tiles: cleanDragTileItems(tiles.tiles)
+  };
 }
 
 describe("tile dragging", () => {
@@ -116,8 +137,7 @@ describe("tile dragging", () => {
     });
     describe("when one tile is selected", () => {
       it("returns an array of one IDragTileItem object", () => {
-        const items = documentContent.getDragTileItems(["tile1"]);
-
+        const items = cleanDragTileItems(documentContent.getDragTileItems(["tile1"]));
         // Jest messes up the indentation when it writes out the snapshots with
         // --updateSnapshot (see https://jestjs.io/docs/snapshot-testing)
         // But having them inline seems more valuable than consistent indentation
@@ -127,7 +147,14 @@ Array [
   Object {
     "rowHeight": undefined,
     "rowIndex": 0,
-    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 1\\",\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
+    "rowList": Object {
+      "rowOrder": Array [
+        "testid-3",
+        "testid-4",
+        "testid-5",
+      ],
+    },
+    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 1\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
     "tileId": "tile1",
     "tileIndex": 0,
     "tileType": "Text",
@@ -139,7 +166,7 @@ Array [
     });
     describe("when two tiles are selected", () => {
       it("returns an array of both IDragTileItem objects", () => {
-        const items = documentContent.getDragTileItems(["tile1", "tile2"]);
+        const items = cleanDragTileItems(documentContent.getDragTileItems(["tile1", "tile2"]));
 
         /*eslint-disable max-len*/
         expect(items).toMatchInlineSnapshot(`
@@ -147,7 +174,14 @@ Array [
   Object {
     "rowHeight": undefined,
     "rowIndex": 0,
-    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 1\\",\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
+    "rowList": Object {
+      "rowOrder": Array [
+        "testid-3",
+        "testid-4",
+        "testid-5",
+      ],
+    },
+    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 1\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
     "tileId": "tile1",
     "tileIndex": 0,
     "tileType": "Text",
@@ -155,7 +189,14 @@ Array [
   Object {
     "rowHeight": undefined,
     "rowIndex": 1,
-    "tileContent": "{\\"id\\":\\"testid-1001\\",\\"title\\":\\"tile 2\\",\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
+    "rowList": Object {
+      "rowOrder": Array [
+        "testid-3",
+        "testid-4",
+        "testid-5",
+      ],
+    },
+    "tileContent": "{\\"id\\":\\"testid-1001\\",\\"title\\":\\"tile 2\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
     "tileId": "tile2",
     "tileIndex": 0,
     "tileType": "Text",
@@ -168,7 +209,7 @@ Array [
 
     describe("when a table using a shared dataset is selected", () => {
       it("returns the table IDragTileItem object", () => {
-        const items = documentContent.getDragTileItems(["tile3"]);
+        const items = cleanDragTileItems(documentContent.getDragTileItems(["tile3"]));
 
         // TODO: The exported table here includes importedDataSet property.
         // Since we are going to include the actual shared dataset too, the
@@ -180,7 +221,14 @@ Array [
   Object {
     "rowHeight": undefined,
     "rowIndex": 2,
-    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-6\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
+    "rowList": Object {
+      "rowOrder": Array [
+        "testid-3",
+        "testid-4",
+        "testid-5",
+      ],
+    },
+    "tileContent": "{\\"id\\":\\"testid-1000\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-6\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
     "tileId": "tile3",
     "tileIndex": 0,
     "tileType": "Table",
@@ -195,7 +243,7 @@ Array [
   describe("getDragTiles", () => {
     describe("when one tile is selected", () => {
       it("returns that tile and an the other IDragTiles properties", () => {
-        const dragTiles = documentContent.getDragTiles(["tile1"]);
+        const dragTiles = cleanDragTiles(documentContent.getDragTiles(["tile1"]));
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`
 Object {
@@ -206,7 +254,14 @@ Object {
     Object {
       "rowHeight": undefined,
       "rowIndex": 0,
-      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 1\\",\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
+      "rowList": Object {
+        "rowOrder": Array [
+          "testid-3",
+          "testid-4",
+          "testid-5",
+        ],
+      },
+      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 1\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
       "tileId": "tile1",
       "tileIndex": 0,
       "tileType": "Text",
@@ -220,7 +275,7 @@ Object {
     });
     describe("with two tiles selected", () => {
       it("returns both tiles in document order", () => {
-        const dragTiles = documentContent.getDragTiles(["tile2", "tile1"]);
+        const dragTiles = cleanDragTiles(documentContent.getDragTiles(["tile2", "tile1"]));
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`
 Object {
@@ -231,7 +286,14 @@ Object {
     Object {
       "rowHeight": undefined,
       "rowIndex": 0,
-      "tileContent": "{\\"id\\":\\"testid-1001\\",\\"title\\":\\"tile 1\\",\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
+      "rowList": Object {
+        "rowOrder": Array [
+          "testid-3",
+          "testid-4",
+          "testid-5",
+        ],
+      },
+      "tileContent": "{\\"id\\":\\"testid-1001\\",\\"title\\":\\"tile 1\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
       "tileId": "tile1",
       "tileIndex": 0,
       "tileType": "Text",
@@ -239,7 +301,14 @@ Object {
     Object {
       "rowHeight": undefined,
       "rowIndex": 1,
-      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 2\\",\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
+      "rowList": Object {
+        "rowOrder": Array [
+          "testid-3",
+          "testid-4",
+          "testid-5",
+        ],
+      },
+      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"title\\":\\"tile 2\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Text\\",\\"text\\":\\"\\"}}",
       "tileId": "tile2",
       "tileIndex": 0,
       "tileType": "Text",
@@ -253,7 +322,7 @@ Object {
     });
     describe("with a tile using a shared model", () => {
       it("returns the tile and the shared model", () => {
-        const dragTiles = documentContent.getDragTiles(["tile3"]);
+        const dragTiles = cleanDragTiles(documentContent.getDragTiles(["tile3"]));
 
         /*eslint-disable max-len*/
         expect(dragTiles).toMatchInlineSnapshot(`
@@ -274,7 +343,14 @@ Object {
     Object {
       "rowHeight": undefined,
       "rowIndex": 2,
-      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-6\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
+      "rowList": Object {
+        "rowOrder": Array [
+          "testid-3",
+          "testid-4",
+          "testid-5",
+        ],
+      },
+      "tileContent": "{\\"id\\":\\"testid-1000\\",\\"fixedPosition\\":false,\\"content\\":{\\"type\\":\\"Table\\",\\"isImported\\":false,\\"importedDataSet\\":{\\"id\\":\\"testid-6\\",\\"attributes\\":[],\\"cases\\":[]},\\"columnWidths\\":{}}}",
       "tileId": "tile3",
       "tileIndex": 0,
       "tileType": "Table",

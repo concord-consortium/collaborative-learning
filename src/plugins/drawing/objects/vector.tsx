@@ -145,6 +145,9 @@ export class VectorDrawingTool extends DrawingTool {
     this.drawingLayer.selectTile(false);
     e.stopPropagation();
 
+    // Vector tool only responds to one finger at a time.
+    if (!e.isPrimary) return;
+
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
     const {stroke, strokeWidth, strokeDashArray, vectorType} = this.drawingLayer.toolbarSettings();
@@ -158,6 +161,9 @@ export class VectorDrawingTool extends DrawingTool {
 
     const handlePointerMove = (e2: PointerEvent) => {
       e2.preventDefault();
+
+      if (!e2.isPrimary) return;
+
       const end = this.drawingLayer.getWorkspacePoint(e2);
       if (!end) return;
       let dx = end.x - start.x;
@@ -174,6 +180,9 @@ export class VectorDrawingTool extends DrawingTool {
     };
     const handlePointerUp = (e2: PointerEvent) => {
       e2.preventDefault();
+
+      if (!e2.isPrimary) return;
+
       if ((vector.dx !== 0) || (vector.dy !== 0)) {
         this.drawingLayer.addNewDrawingObject(getSnapshot(vector));
       }

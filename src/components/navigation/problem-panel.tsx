@@ -1,5 +1,6 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
+import clsx from "clsx";
 import { BaseComponent, IBaseProps } from "../base";
 import { CanvasComponent } from "../document/canvas";
 import { SectionModelType } from "../../models/curriculum/section";
@@ -36,11 +37,18 @@ export class ProblemPanelComponent extends BaseComponent<IProps> {
   }
 
   private renderContent(content: DocumentContentModelType) {
+    // STANDALONE FIXME: this will eventually probably be a ui boolean but for now we will do this here
+    const hideToolbar = this.stores.ui.standalone && this.stores.user.waitingForStandaloneAuth;
+
     return (
         <div key="problem-panel">
-          <SectionToolbar section={this.props.section!} toolbar={this.stores.appConfig.myResourcesToolbar({})} />
-          <div className="canvas-separator"/>
-          <div className="canvas-area">
+          {!hideToolbar &&
+          <>
+            <SectionToolbar section={this.props.section!} toolbar={this.stores.appConfig.myResourcesToolbar({})} />
+            <div className="canvas-separator"/>
+          </>
+          }
+          <div className={clsx("canvas-area", {"hide-toolbar": hideToolbar})}>
             <CanvasComponent
               content={content}
               context="left-nav"

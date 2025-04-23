@@ -36,8 +36,8 @@ describe("DocumentContentModel", () => {
     expect(documentContent.isEmpty).toBe(true);
     expect(documentContent.firstTile).toBeUndefined();
     expect(documentContent.rowCount).toBe(0);
-    expect(documentContent.indexOfLastVisibleRow).toBe(-1);
-    expect(documentContent.defaultInsertRow).toBe(0);
+    expect(documentContent.getIndexOfLastVisibleRow(documentContent.visibleRows)).toBe(-1);
+    expect(documentContent.defaultInsertRowIndex).toBe(0);
     expect(parsedContentExport()).toEqual({ tiles: [] });
     expect(documentContent.getTilesInDocumentOrder()).toEqual([]);
   });
@@ -48,7 +48,7 @@ describe("DocumentContentModel", () => {
     expect(documentContent.tileMap.size).toBe(1);
     documentContent.addTile("geometry", { title: "Coordinate Grid 1" });
     expect(documentContent.tileMap.size).toBe(2);
-    expect(documentContent.defaultInsertRow).toBe(2);
+    expect(documentContent.defaultInsertRowIndex).toBe(2);
     const newRowTile = documentContent.addTile("table", { title: "Table 1" });
     const columnWidths = getColumnWidths(documentContent, newRowTile?.tileId);
     expect(documentContent.tileMap.size).toBe(3);
@@ -79,7 +79,7 @@ describe("DocumentContentModel", () => {
     documentContent.addTile("text", { title: "Text 1"});
     const textTile2 = documentContent.addTile("text", { title: "Text 2" });
 
-    let textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
+    let textTile2RowId = documentContent.findRowIdContainingTile(textTile2!.tileId);
     let textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(1);
@@ -89,18 +89,18 @@ describe("DocumentContentModel", () => {
       title: "Image 1",
       insertRowInfo: {
         rowInsertIndex: 1,
-        rowDropIndex: 1,
-        rowDropLocation: "bottom"
+        rowDropId: textTile2RowId,
+        rowDropLocation: "top"
       }
     });
 
-    const imageTile1rowId = documentContent.findRowContainingTile(imageTile1!.tileId);
+    const imageTile1rowId = documentContent.findRowIdContainingTile(imageTile1!.tileId);
     const imageTile1rowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === imageTile1rowId);
 
     expect(imageTile1rowIndex1).toBe(1);
 
     // text tile should have shifted down
-    textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
+    textTile2RowId = documentContent.findRowIdContainingTile(textTile2!.tileId);
     textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(2);
@@ -110,12 +110,12 @@ describe("DocumentContentModel", () => {
       title: "Image 2",
       insertRowInfo: {
         rowInsertIndex: 3,
-        rowDropIndex: 3,
+        rowDropId: textTile2RowId,
         rowDropLocation: "bottom"
       }
     });
 
-    const rowId2 = documentContent.findRowContainingTile(imageTile2!.tileId);
+    const rowId2 = documentContent.findRowIdContainingTile(imageTile2!.tileId);
     const rowIndex2 = documentContent.rowOrder.findIndex((id: string) => id === rowId2);
 
     expect(rowIndex2).toBe(3);
@@ -134,7 +134,7 @@ describe("DocumentContentModel", () => {
     documentContent.addTile("text", { title: "Text 1"} );
     const textTile2 = documentContent.addTile("text", { title: "Text 2" });
 
-    let textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
+    let textTile2RowId = documentContent.findRowIdContainingTile(textTile2!.tileId);
     let textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(1);
@@ -143,18 +143,18 @@ describe("DocumentContentModel", () => {
       title: "Image 1",
       insertRowInfo: {
         rowInsertIndex: 1,
-        rowDropIndex: 1,
+        rowDropId: textTile2RowId,
         rowDropLocation: "left"
       }
     });
 
-    const imageTile1rowId = documentContent.findRowContainingTile(imageTile1!.tileId);
+    const imageTile1rowId = documentContent.findRowIdContainingTile(imageTile1!.tileId);
     const imageTile1rowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === imageTile1rowId);
 
     expect(imageTile1rowIndex1).toBe(1);
 
     // text tile should still be on 1 as well
-    textTile2RowId = documentContent.findRowContainingTile(textTile2!.tileId);
+    textTile2RowId = documentContent.findRowIdContainingTile(textTile2!.tileId);
     textTile2RowIndex1 = documentContent.rowOrder.findIndex((id: string) => id === textTile2RowId);
 
     expect(textTile2RowIndex1).toBe(1);
@@ -235,7 +235,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "A"},
       { Placeholder: "A" }
     ]);
-    expect(content1.defaultInsertRow).toBe(1);
+    expect(content1.defaultInsertRowIndex).toBe(1);
 
     const content2 = createDocumentContent(
       "[Header:A, Placeholder, Header:B, Placeholder]"
@@ -246,7 +246,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { Placeholder: "B" }
     ]);
-    expect(content2.defaultInsertRow).toBe(1);
+    expect(content2.defaultInsertRowIndex).toBe(1);
     expect(parsedExport(content2)).toEqual({ tiles: [] });
   });
 
@@ -262,7 +262,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] }}
     ]);
-    expect(content.defaultInsertRow).toBe(4);
+    expect(content.defaultInsertRowIndex).toBe(4);
   });
 
   it("will remove placeholder tiles when adding a new tile in an interior section", () => {
@@ -277,7 +277,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] }}
     ]);
-    expect(content.defaultInsertRow).toBe(4);
+    expect(content.defaultInsertRowIndex).toBe(4);
   });
 
   it("will restore placeholder tiles when deleting the last row in an interior section", () => {
@@ -293,7 +293,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] }}
     ]);
-    expect(content.defaultInsertRow).toBe(4);
+    expect(content.defaultInsertRowIndex).toBe(4);
   });
 
   it("will restore placeholder tiles when deleting the last row in the last section", () => {
@@ -309,7 +309,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { Placeholder: "B" }
     ]);
-    expect(content.defaultInsertRow).toBe(1);
+    expect(content.defaultInsertRowIndex).toBe(1);
   });
 
   it("will add/remove placeholder rows when moving entire rows (3 => 1)", () => {
@@ -318,10 +318,10 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     );
     content.addTile("text", { title: "Text 1" });
     // [Header:A, Placeholder, Header:B, Text]
-    content.moveRowToIndex(3, 1);
+    content.moveRow(content.rowOrder[3], content.rowOrder[1], "bottom");
     // [Header:A, Text, Header:B, Placeholder]
     // moving to row 0 when row 0 is a section header is a no-op
-    content.moveRowToIndex(1, 0);
+    content.moveRow(content.rowOrder[1], content.rowOrder[0], "top");
 
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
@@ -329,14 +329,14 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { Placeholder: "B" }
     ]);
-    expect(content.defaultInsertRow).toBe(2);
+    expect(content.defaultInsertRowIndex).toBe(2);
   });
 
   it("will add/remove placeholder rows when moving entire rows (1 => 3)", () => {
     const content = createDocumentContent(
       "[Header:A, Text, Header:B, Placeholder]"
     );
-    content.moveRowToIndex(1, 3);
+    content.moveRow(content.rowOrder[1], content.rowOrder[3], "bottom");
 
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
@@ -344,7 +344,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);
-    expect(content.defaultInsertRow).toBe(4);
+    expect(content.defaultInsertRowIndex).toBe(4);
   });
 
   it("will add/remove placeholder rows when moving a tile back to a new row", () => {
@@ -352,7 +352,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       "[Header:A, Placeholder, Header:B, Text]"
     );
     const tileId = content.getRowByIndex(3)!.tiles[0].tileId;
-    content.moveTileToNewRow(tileId, 2);
+    const rowInfo = { rowInsertIndex: 2, rowDropId: content.getRowByIndex(2)!.id, rowDropLocation: "top" };
+    content.moveTileToNewRow(tileId, rowInfo);
 
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
@@ -360,7 +361,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { Placeholder: "B" }
     ]);
-    expect(content.defaultInsertRow).toBe(2);
+    expect(content.defaultInsertRowIndex).toBe(2);
   });
 
   it("will add/remove placeholder rows when moving a tile forward to a new row", () => {
@@ -368,7 +369,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       "[Header:A, Text, Header:B, Placeholder]"
     );
     const tileId = content.getRowByIndex(1)!.tiles[0].tileId;
-    content.moveTileToNewRow(tileId, 4);
+    const rowInfo = { rowInsertIndex: 4, rowDropId: content.getRowByIndex(3)!.id, rowDropLocation: "bottom" };
+    content.moveTileToNewRow(tileId, rowInfo);
 
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
@@ -376,7 +378,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);
-    expect(content.defaultInsertRow).toBe(4);
+    expect(content.defaultInsertRowIndex).toBe(4);
   });
 
   it("will add/remove placeholder rows when moving a tile back to an existing row", () => {
@@ -384,7 +386,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       "[Header:A, Placeholder, Header:B, Text]"
     );
     const tileId = content.getRowByIndex(3)!.tiles[0].tileId;
-    content.moveTileToRow(tileId, 1);
+    content.moveTileToRow(tileId, content.getRowByIndex(1)!.id);
 
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
@@ -392,7 +394,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Header: "B"},
       { Placeholder: "B" }
     ]);
-    expect(content.defaultInsertRow).toBe(2);
+    expect(content.defaultInsertRowIndex).toBe(2);
   });
 
   it("will add/remove placeholder rows when moving a tile forward to an existing row", () => {
@@ -400,7 +402,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       "[Header:A, Text, Header:B, Placeholder]"
     );
     const tileId = content.getRowByIndex(1)!.tiles[0].tileId;
-    content.moveTileToRow(tileId, 3, 0);
+    content.moveTileToRow(tileId, content.getRowByIndex(3)!.id, 0);
 
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
@@ -444,7 +446,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       "[Header:A, Placeholder, Header:B, Text]"
     );
     const tileId = content.getRowByIndex(3)!.tiles[0].tileId;
-    content.moveTile(tileId, { rowDropIndex: 1, rowDropLocation: "right", rowInsertIndex: 1 });
+    content.moveTile(tileId, { rowDropId: content.getRowByIndex(1)!.id, rowDropLocation: "right", rowInsertIndex: 1 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
@@ -452,7 +454,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Placeholder: "B" }
     ]);
 
-    content.moveTile(tileId, { rowDropIndex: 3, rowDropLocation: "left", rowInsertIndex: 3 });
+    content.moveTile(tileId, { rowDropId: content.getRowByIndex(3)!.id, rowDropLocation: "left", rowInsertIndex: 3 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
       { Placeholder: "A" },
@@ -460,7 +462,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);
 
-    content.moveTile(tileId, { rowInsertIndex: 1 });
+    content.moveTile(tileId, { rowDropId: content.getRowByIndex(1)!.id, rowDropLocation: "top", rowInsertIndex: 1 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
@@ -468,7 +470,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { Placeholder: "B" }
     ]);
 
-    content.moveTile(tileId, { rowInsertIndex: 3 });
+    content.moveTile(tileId, { rowDropId: content.getRowByIndex(3)!.id, rowDropLocation: "bottom", rowInsertIndex: 3 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
       { Placeholder: "A" },
@@ -476,7 +478,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
     ]);
 
-    content.addTile("geometry", { title: "Coordinate Grid 1", insertRowInfo: { rowInsertIndex: 2 } });
+    content.addTile("geometry", { title: "Coordinate Grid 1",
+      insertRowInfo: { rowDropId: content.getRowByIndex(1)!.id, rowDropLocation: "bottom", rowInsertIndex: 2 } });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
       { title: "Coordinate Grid 1",
@@ -496,7 +499,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     ]);
 
     const geometryId = content.getRowByIndex(1)!.tiles[0].tileId;
-    content.moveTile(geometryId, { rowDropIndex: 3, rowDropLocation: "left", rowInsertIndex: 3 });
+    content.moveTile(geometryId,
+      { rowDropId: content.getRowByIndex(3)!.id, rowDropLocation: "left", rowInsertIndex: 3 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
       { Placeholder: "A" },
@@ -517,7 +521,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       ],
     ]);
 
-    content.moveTile(geometryId, { rowDropIndex: 1, rowDropLocation: "left", rowInsertIndex: 1 });
+    content.moveTile(geometryId,
+      { rowDropId: content.getRowByIndex(1)!.id, rowDropLocation: "left", rowInsertIndex: 1 });
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
         { title: "Coordinate Grid 1", content: {
@@ -541,7 +546,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       "[Header:A, [Geometry, Text], Header:B, Text]"
     );
     const tileId = content.getRowByIndex(1)!.tiles[1].tileId;
-    content.moveTileToRow(tileId, 1, 0);
+    content.moveTileToRow(tileId, content.getRowByIndex(1)!.id, 0);
+
     expect(getAllRows(content)).toEqual([
       { Header: "A"},
       [

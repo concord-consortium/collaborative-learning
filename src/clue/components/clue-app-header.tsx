@@ -184,31 +184,46 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     return renderNonStudentHeader({showProblemMenu: true});
   }
 
+  // STANDALONE FIXME: once standalone auth is added there will probably be a UI flag for showing these
+  // ui elements
+  const showUserInfo = !(ui.standalone && user.waitingForStandaloneAuth);
+  const showProblemInfo = showUserInfo;
+  const showAppMode = showUserInfo;
+  const showGroupInfo = showUserInfo;
+  const showUnitInfo = unit.title !== "Null Unit";
+
   return (
       <div className="app-header">
         <div className="left">
-          <div className="unit">
-            <div className="title" data-test="unit-title">
-              {unit.title}
+          {showUnitInfo &&
+          <>
+            <div className="unit">
+              <div className="title" data-test="unit-title">
+                {unit.title}
+              </div>
+              <div className="investigation" data-test="investigation">
+                {investigation.title}
+              </div>
             </div>
-            <div className="investigation" data-test="investigation">
-              {investigation.title}
-            </div>
-          </div>
-          <div className="separator"/>
+            <div className="separator"/>
+          </>
+          }
+          {showProblemInfo &&
           <CustomSelect
             items={[{text: `${problem.title}${problem.subtitle ? `: ${problem.subtitle}`: ""}`}]}
             isDisabled={true}
           />
+          }
         </div>
         <div className="middle student">
           {renderPanelButtons()}
         </div>
         <div className="right">
-          <AppModeIndicator appMode={appMode}/>
+          {showAppMode && <AppModeIndicator appMode={appMode}/>}
           <NetworkStatus user={user}/>
           <div className="version">Version {appVersion}</div>
-          {myGroup ? renderGroup(myGroup) : null}
+          {showGroupInfo && myGroup ? renderGroup(myGroup) : null}
+          {showUserInfo &&
           <div className="user" title={getUserTitle()}>
             <div className="user-contents">
               <div className="name" data-test="user-name">{user.name}</div>
@@ -218,6 +233,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
               <div className="profile-icon-inner"/>
             </div>
           </div>
+          }
         </div>
       </div>
     );

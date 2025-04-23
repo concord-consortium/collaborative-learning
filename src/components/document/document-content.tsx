@@ -1,13 +1,12 @@
 import React from "react";
 import { inject, observer } from "mobx-react";
 import { IReactionDisposer, reaction } from "mobx";
-import { findDOMNode } from "react-dom";
 import { throttle } from "lodash";
 import classNames from "classnames";
 import { DocumentDndContext } from "./document-dnd-context";
 import { BaseComponent, IBaseProps } from "../base";
-import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
-        extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
+import { kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
+        extractDragResizeModelHeight, extractDragResizeDomHeight, TileRowHandle } from "../document/tile-row";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { IDragToolCreateInfo, IDragTilesData } from "../../models/document/document-content-types";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
@@ -16,6 +15,10 @@ import { logDataTransfer } from "../../models/document/drag-tiles";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tiles/tile-component";
 import { safeJsonParse } from "../../utilities/js-utils";
+import { RowListComponent } from "./row-list";
+import { DropRowContext } from "./drop-row-context";
+import { RowRefsContext } from "./row-refs-context";
+import { LockedContainerContext } from "./locked-container-context";
 
 import "./document-content.sass";
 
@@ -56,9 +59,19 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   public state: IState = {};
 
   private domElement: HTMLElement | null;
-  private rowRefs: Array<TileRowComponent | null>;
+  private rowRefs: Array<TileRowHandle>;
   private mutationObserver: MutationObserver;
   private scrollDisposer: IReactionDisposer;
+
+  constructor(props: IProps) {
+    super(props);
+    this.rowRefs = [];
+    this.domElement = null;
+  }
+
+  private addRowRef = (ref: TileRowHandle) => {
+    this.rowRefs.push(ref);
+  };
 
   public componentDidMount() {
     if (this.domElement) {
@@ -84,7 +97,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         },
         (scrollToTileId: string | undefined) => {
           if (scrollToTileId) {
-            this.rowRefs.forEach((row: TileRowComponent | null) => {
+            this.rowRefs.forEach((row: TileRowHandle | null) => {
               if (row?.tileRowDiv && row.hasTile(scrollToTileId)) {
                 // Javascript struggles to scroll multiple elements at the same time,
                 // so we delay scrolling any document on the left and only animate the left document
@@ -146,21 +159,34 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       this.props.readOnly ? "read-only" : "read-write"
     );
 
+    // Reset rowRefs array before rendering
+    this.rowRefs = [];
+
+    // We can highlight either the drop location for the current drag/drop operation (in state),
+    // or the one set by the toolbar (in the content model).
+    const dropRow = this.state.dropRowInfo || this.getDropRowInfoForPendingDropLocation();
+
     return (
       <DocumentDndContext>
-        <div className={documentClass}
-          data-testid="document-content"
-          data-document-key={this.props.documentId}
-          onScroll={this.handleScroll}
-          onClick={this.handleClick}
-          onDragOver={this.handleDragOver}
-          onDragLeave={this.handleDragLeave}
-          onDrop={this.handleDrop}
-          ref={(elt) => this.domElement = elt}
-        >
-          {this.renderRows()}
-          {this.renderSpacer()}
-        </div>
+        <DropRowContext.Provider value={dropRow}>
+          <LockedContainerContext.Provider value={false}>
+            <RowRefsContext.Provider value={{ addRowRef: this.addRowRef }}>
+              <div className={documentClass}
+                data-testid="document-content"
+                data-document-key={this.props.documentId}
+                onScroll={this.handleScroll}
+                onClick={this.handleClick}
+                onDragOver={this.handleDragOver}
+              onDragLeave={this.handleDragLeave}
+              onDrop={this.handleDrop}
+              ref={(elt) => this.domElement = elt}
+              >
+                {this.renderRows()}
+                {this.renderSpacer()}
+              </div>
+            </RowRefsContext.Provider>
+          </LockedContainerContext.Provider>
+        </DropRowContext.Provider>
       </DocumentDndContext>
     );
   }
@@ -179,13 +205,12 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
               rect.bottom < contentBounds.bottom);
     }
 
+    // Find the list of top-level rows that are currently visible on the screen
     const visibleRowIds: string[] = [];
     this.rowRefs.forEach((ref) => {
-      if (ref) {
-        // eslint-disable-next-line react/no-find-dom-node
-        const rowNode = findDOMNode(ref);
-        if (rowNode && isElementInViewport(rowNode as Element)) {
-          visibleRowIds.push(ref.props.model.id);
+      if (ref?.tileRowDiv && content.rowMap.get(ref.id)) {
+        if (isElementInViewport(ref.tileRowDiv)) {
+          visibleRowIds.push(ref.id);
         }
       }
     });
@@ -208,35 +233,20 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderRows() {
-    const { content, ...others } = this.props;
+    const { content } = this.props;
     if (!content) { return null; }
-    const { rowMap, rowOrder, tileMap, highlightPendingDropLocation } = content;
-    const { dropRowInfo } = this.state;
-    this.rowRefs = [];
-    return rowOrder.map((rowId, index) => {
-      const row = rowMap.get(rowId);
-      const rowHeight = this.getRowHeight(rowId);
-      let dropHighlight = dropRowInfo && (dropRowInfo.rowDropIndex != null) &&
-                            (dropRowInfo.rowDropIndex === index) &&
-                            dropRowInfo.rowDropLocation
-                              ? dropRowInfo.rowDropLocation
-                              : undefined;
-      if (!dropHighlight) {
-        if (index === highlightPendingDropLocation) {
-          dropHighlight = "top";
-        }
-        else if ((index === rowOrder.length - 1) && (index + 1 === highlightPendingDropLocation)) {
-          dropHighlight = "bottom";
-        }
-      }
-      return row
-              ? <TileRowComponent key={row.id} docId={content.contentId} model={row}
-                                  documentContent={this.domElement}
-                                  rowIndex={index} height={rowHeight} tileMap={tileMap}
-                                  dropHighlight={dropHighlight}
-                                  ref={(elt) => this.rowRefs.push(elt)} {...others} />
-              : null;
-    });
+    return (
+      <RowListComponent
+        rowListModel={content}
+        documentContent={this.domElement}
+        context={this.props.context}
+        documentId={this.props.documentId}
+        docId={content.contentId}
+        typeClass={this.props.typeClass}
+        scale={this.props.scale}
+        readOnly={this.props.readOnly}
+      />
+    );
   }
 
   private renderSpacer = () => {
@@ -331,54 +341,73 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     return ((x >= rect.left) && (x <= rect.right) && (y >= rect.top) && (y <= rect.bottom));
   }
 
+  // Given the index of an HTML .tile-row on the page, return the info for the row content object
+  private getDropInfoForGlobalRowIndex(globalRowIndex: number): IDropRowInfo {
+    const { content } = this.props;
+    const row = content?.allRows[globalRowIndex];
+    const rowList = row && content?.getRowListForRow(row.id);
+    const rowIndex = row && rowList?.getRowIndex(row.id);
+    if (!row || rowIndex === undefined || rowIndex === -1) return { rowInsertIndex: 0 };
+    return { rowDropId: row.id, rowInsertIndex: rowIndex };
+  }
+
+  // Determine whether the drag event is over a drop zone, and if so, which one
   private getDropRowInfo = (e: React.DragEvent<HTMLDivElement>) => {
     const { content } = this.props;
-    if (!this.domElement) return { rowInsertIndex: content ? content.rowOrder.length : 0 };
+    if (!this.domElement || !content) {
+      return { rowInsertIndex: content ? content.rowOrder.length : 0 };
+    }
 
-    const dropInfo: IDropRowInfo = {
-      rowInsertIndex: 0
-    };
+    let dropInfo: IDropRowInfo = { rowInsertIndex: 0 };
+    // This includes both "main" rows and rows nested inside question tiles
     const rowElements = this.domElement.getElementsByClassName("tile-row");
-    const dropY = e.clientY;
-    let dropDistance = Infinity;
-    let dist;
+
+    // Find the last "main" row
+    let lastRowIndex = -1, lastRowBottom = 0;
     for (let i = 0; i < rowElements.length; ++i) {
       const rowElt = rowElements[i];
       const rowBounds = rowElt.getBoundingClientRect();
-      if (i === 0) {
-        dist = Math.abs(dropY - rowBounds.top);
-        dropInfo.rowInsertIndex = i;
-        dropDistance = dist;
+      if (rowBounds.bottom > lastRowBottom) {
+        lastRowIndex = i;
+        lastRowBottom = rowBounds.bottom;
       }
-      dist = Math.abs(dropY - rowBounds.bottom);
-      if (dist < dropDistance) {
-        dropInfo.rowInsertIndex = i + 1;
-        dropDistance = dist;
-      }
+    }
+
+    for (let i = 0; i < rowElements.length; ++i) {
+      const rowElt = rowElements[i];
+      const rowBounds = rowElt.getBoundingClientRect();
       if (this.isPointInRect(e.clientX, e.clientY, rowBounds) ||
-          // below the last row - highlight bottom of last row
-          ((i === rowElements.length - 1) && (e.clientY > rowBounds.bottom))) {
-        dropInfo.rowDropIndex = i;
-
-        const dropOffsetLeft = Math.abs(e.clientX - rowBounds.left);
-        const dropOffsetTop = Math.abs(e.clientY - rowBounds.top);
-        const dropOffsetRight = Math.abs(rowBounds.right - e.clientX);
-        const dropOffsetBottom = Math.abs(rowBounds.bottom - e.clientY);
-
-        const kSideDropThreshold = rowBounds.width * 0.25;
-        if ((dropOffsetLeft < kSideDropThreshold) &&
-            (dropOffsetLeft < dropOffsetRight)) {
-          dropInfo.rowDropLocation = "left";
-        }
-        else if ((dropOffsetRight < kSideDropThreshold) &&
-                (dropOffsetRight <= dropOffsetLeft)) {
-          dropInfo.rowDropLocation = "right";
-        }
-        else if (dropOffsetTop < dropOffsetBottom) {
-          dropInfo.rowDropLocation = "top";
-        }
-        else {
+          // below the last row - pretend we are in the last row
+          ((i === lastRowIndex) && (e.clientY > rowBounds.bottom))) {
+        dropInfo = this.getDropInfoForGlobalRowIndex(i);
+        if (!dropInfo.rowDropId) return;
+        const row = content?.getRowRecursive(dropInfo.rowDropId);
+        if (row?.isFixedPositionRow(content?.tileMap)) {
+          // Cannot drop alongside or above a fixed position row
           dropInfo.rowDropLocation = "bottom";
+          dropInfo.rowInsertIndex = i + 1;
+        } else {
+          const dropOffsetLeft = Math.abs(e.clientX - rowBounds.left);
+          const dropOffsetTop = Math.abs(e.clientY - rowBounds.top);
+          const dropOffsetRight = Math.abs(rowBounds.right - e.clientX);
+          const dropOffsetBottom = Math.abs(rowBounds.bottom - e.clientY);
+
+          const kSideDropThreshold = rowBounds.width * 0.25;
+          if ((dropOffsetLeft < kSideDropThreshold) &&
+              (dropOffsetLeft < dropOffsetRight)) {
+            dropInfo.rowDropLocation = "left";
+          }
+          else if ((dropOffsetRight < kSideDropThreshold) &&
+                  (dropOffsetRight <= dropOffsetLeft)) {
+            dropInfo.rowDropLocation = "right";
+          }
+          else if (dropOffsetTop < dropOffsetBottom) {
+            dropInfo.rowDropLocation = "top";
+          }
+          else {
+            dropInfo.rowDropLocation = "bottom";
+            dropInfo.rowInsertIndex = i + 1;
+          }
         }
       }
     }
@@ -403,11 +432,16 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleMoveTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTilesData: IDragTilesData) => {
-    this.props.content?.userMoveTiles(dragTilesData.tiles, this.getDropRowInfo(e));
+    const dropRowInfo = this.getDropRowInfo(e);
+    const content = this.props.content;
+    if (!dropRowInfo || !content) return;
+    content.userMoveTiles(content.removeEmbeddedTilesFromDragTiles(dragTilesData.tiles), dropRowInfo);
   };
 
   private handleCopyTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTiles: IDragTilesData) => {
-    this.props.content?.handleDragCopyTiles(dragTiles, this.getDropRowInfo(e));
+    const dropRowInfo = this.getDropRowInfo(e);
+    if (!dropRowInfo) return;
+    this.props.content?.handleDragCopyTiles(dragTiles, dropRowInfo);
   };
 
   private handleInsertNewTile = (e: React.DragEvent<HTMLDivElement>) => {
@@ -469,6 +503,19 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
     this.clearDropRowInfo();
   };
+
+  private getDropRowInfoForPendingDropLocation(): IDropRowInfo | undefined {
+    const { content } = this.props;
+    const rowId = content?.highlightPendingDropLocation;
+    if (!rowId) return;
+    const rowIndex = content.getRowListForRow(rowId)?.getRowIndex(rowId);
+    if (rowIndex < 0) return;
+    return {
+      rowDropId: rowId,
+      rowDropLocation: "bottom",
+      rowInsertIndex: rowIndex + 1
+    };
+  }
 
   private scrollToSection(sectionId: string | null | undefined ) {
     if (!sectionId || !this.domElement) {

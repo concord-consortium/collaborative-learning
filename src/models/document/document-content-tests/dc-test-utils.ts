@@ -26,6 +26,10 @@ jest.mock("../../../utilities/js-utils", () => {
   };
 });
 
+export function resetMockUniqueId() {
+  idCount = 0;
+}
+
 export function prepareTileForMatch(tile: any) {
   if (tile?.content?.type === "Geometry") {
     // eliminate board properties to make matching more robust for tests
@@ -123,14 +127,14 @@ export function getAllRows(doc: DocumentContentModelType) {
 
   return rows.map((row, rowIndex) => {
     const tileExports = row?.tiles.map((tileInfo, tileIndex) => {
-      const rowHeight = doc.rowHeightToExport(row, tileInfo.tileId);
+      const rowHeight = doc.rowHeightToExport(row, tileInfo.tileId, doc.tileMap);
       const rowHeightOption = rowHeight ? { rowHeight } : undefined;
       const tile = doc.getTile(tileInfo.tileId);
       const content = tile?.content;
       if (isPlaceholderContent(content)) {
         return { Placeholder: content.sectionId };
       } else {
-        const tileExport = doc.exportTileAsJson(tileInfo, { ...rowHeightOption });
+        const tileExport = doc.exportTileAsJson(tileInfo, doc.tileMap, { ...rowHeightOption });
         return tileExport && prepareTileForMatch(JSON.parse(tileExport));
       }
     });

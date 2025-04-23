@@ -12,6 +12,7 @@ import Canvas from './Canvas';
 import Dialog from './Dialog';
 import XYPlotToolTile from '../tile/XYPlotToolTile';
 import BarGraphTile from '../tile/BarGraphTile';
+import QuestionToolTile from '../tile/QuestionToolTile';
 
 let graphToolTile = new GeometryToolTile,
     imageToolTile = new ImageToolTile,
@@ -25,6 +26,7 @@ let graphToolTile = new GeometryToolTile,
     expressionToolTile = new ExpressionToolTile,
     xyPlotToolTile = new XYPlotToolTile,
     barGraphTile = new BarGraphTile,
+    questionToolTile = new QuestionToolTile,
     canvas = new Canvas,
     dialog = new Dialog;
 
@@ -78,7 +80,7 @@ class ClueCanvas {
     }
 
     getFourUpToolbarButton() {
-      return cy.get('.toolbar .tool.fourup');
+      return cy.get('[data-testid="tool-fourup"]');
     }
 
     openFourUpView() {
@@ -272,6 +274,9 @@ class ClueCanvas {
     selectLastTileOfType(tileType) {
         let tileElement = null;
         switch (tileType) {
+            case 'question':
+                tileElement = questionToolTile.getQuestionTile().last().click({ force: true }).parent();
+                break;
             case 'text':
                 textToolTile.getTextTile().last().focus();
                 tileElement = cy.get('.text-tool-wrapper').last().click({ force: true }).parent();
