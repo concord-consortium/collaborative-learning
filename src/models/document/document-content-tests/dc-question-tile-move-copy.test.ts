@@ -30,10 +30,43 @@ describe("Question tile operations", () => {
         // NOTE: The layout below is the starting layout of the document before each subsequent test.
         .toEqual("testid-6: [Text: text-1]\n" +
                  "testid-7: [Table: table-1] [Expression: expression-1]\n" +
-                 "testid-8: [Question: question-1]" +
-                 "\nContents of embedded row list:\n" +
+                 "testid-8: [Question: question-1]\n" +
+                 "Contents of embedded row list:\n" +
                  "  testid-9: [Text: text-2]\n" +
                  "  testid-10: [Table: table-2] [Drawing: sketch-1]");
+    });
+
+    it("can move a question tile to new row", () => {
+      const dragTiles = getDocumentDragTileItems(["question-1"]);
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 0,
+        rowDropId: "testid-6",
+        rowDropLocation: "bottom"
+      };
+      documentContent.moveTiles(dragTiles, dropRowInfo);
+      expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
+        .toEqual("testid-6: [Text: text-1]\n" +
+                 "testid-8: [Question: question-1]\n" +
+                 "Contents of embedded row list:\n" +
+                 "  testid-9: [Text: text-2]\n" +
+                 "  testid-10: [Table: table-2] [Drawing: sketch-1]\n" +
+                 "testid-7: [Table: table-1] [Expression: expression-1]");
+    });
+
+    it("can move a question tile to existing row", () => {
+      const dragTiles = getDocumentDragTileItems(["question-1"]);
+      const dropRowInfo: IDropRowInfo = {
+        rowInsertIndex: 0,
+        rowDropId: "testid-6",
+        rowDropLocation: "left"
+      };
+      documentContent.moveTiles(dragTiles, dropRowInfo);
+      expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
+        .toEqual("testid-6: [Question: question-1] [Text: text-1]\n" +
+                 "Contents of embedded row list:\n" +
+                 "  testid-9: [Text: text-2]\n" +
+                 "  testid-10: [Table: table-2] [Drawing: sketch-1]\n" +
+                 "testid-7: [Table: table-1] [Expression: expression-1]");
     });
 
     it("can move a tile into a question tile", () => {
@@ -47,8 +80,8 @@ describe("Question tile operations", () => {
       documentContent.moveTiles(dragTiles, dropRowInfo);
       expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
         .toEqual("testid-7: [Table: table-1] [Expression: expression-1]\n" +
-                 "testid-8: [Question: question-1]" +
-                 "\nContents of embedded row list:\n" +
+                 "testid-8: [Question: question-1]\n" +
+                 "Contents of embedded row list:\n" +
                  "  testid-9: [Text: text-1] [Text: text-2]\n" +
                  "  testid-10: [Table: table-2] [Drawing: sketch-1]");
     });
@@ -82,11 +115,11 @@ describe("Question tile operations", () => {
       documentContent.moveTiles(dragTiles, dropRowInfo);
       expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
         .toEqual("testid-7: [Table: table-1] [Expression: expression-1]\n" +
-          "testid-8: [Question: question-1]" +
-          "\nContents of embedded row list:\n" +
-          "  testid-9: [Text: text-2]\n" +
-          "  testid-6: [Text: text-1]\n" +
-          "  testid-10: [Table: table-2] [Drawing: sketch-1]");
+                 "testid-8: [Question: question-1]\n" +
+                 "Contents of embedded row list:\n" +
+                 "  testid-9: [Text: text-2]\n" +
+                 "  testid-6: [Text: text-1]\n" +
+                 "  testid-10: [Table: table-2] [Drawing: sketch-1]");
       });
 
     it("can move a tile out of a question tile", () => {
@@ -100,8 +133,8 @@ describe("Question tile operations", () => {
       expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
       .toEqual("testid-6: [Text: text-1] [Drawing: sketch-1]\n" +
         "testid-7: [Table: table-1] [Expression: expression-1]\n" +
-        "testid-8: [Question: question-1]" +
-        "\nContents of embedded row list:\n" +
+        "testid-8: [Question: question-1]\n" +
+        "Contents of embedded row list:\n" +
         "  testid-9: [Text: text-2]\n" +
         "  testid-10: [Table: table-2]");
     });
@@ -117,8 +150,8 @@ describe("Question tile operations", () => {
       expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
       .toEqual("testid-6: [Text: text-1]\n" +
         "testid-7: [Table: table-1] [Expression: expression-1]\n" +
-        "testid-8: [Question: question-1]" +
-        "\nContents of embedded row list:\n" +
+        "testid-8: [Question: question-1]\n" +
+        "Contents of embedded row list:\n" +
         "  testid-9: [Text: text-2]\n" +
         "  testid-10: [Table: table-2]\n" +
         "testid-16: [Drawing: sketch-1]");
@@ -131,12 +164,14 @@ describe("Question tile operations", () => {
         rowDropId: "testid-6",
         rowDropLocation: "right"
       };
+      // Note, text-2 should be inserted before sketch-1, since it's earlier in the document order,
+      // despite the different order in the argument to getDocumentDragTileItems.
       documentContent.moveTiles(dragTiles, dropRowInfo);
       expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
-      .toEqual("testid-6: [Text: text-1] [Drawing: sketch-1] [Text: text-2]\n" +
+      .toEqual("testid-6: [Text: text-1] [Text: text-2] [Drawing: sketch-1]\n" +
         "testid-7: [Table: table-1] [Expression: expression-1]\n" +
-        "testid-8: [Question: question-1]" +
-        "\nContents of embedded row list:\n" +
+        "testid-8: [Question: question-1]\n" +
+        "Contents of embedded row list:\n" +
         "  testid-10: [Table: table-2]");
     });
 
@@ -151,8 +186,8 @@ describe("Question tile operations", () => {
       expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
         .toEqual("testid-6: [Text: text-1]\n" +
                  "testid-7: [Table: table-1] [Expression: expression-1]\n" +
-                 "testid-8: [Question: question-1]" +
-                 "\nContents of embedded row list:\n" +
+                 "testid-8: [Question: question-1]\n" +
+                 "Contents of embedded row list:\n" +
                  "  testid-10: [Table: table-2] [Drawing: sketch-1]\n" +
                  "  testid-9: [Text: text-2]");
     });
@@ -168,8 +203,8 @@ describe("Question tile operations", () => {
       expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
         .toEqual("testid-6: [Text: text-1]\n" +
                  "testid-7: [Table: table-1] [Expression: expression-1]\n" +
-                 "testid-8: [Question: question-1]" +
-                 "\nContents of embedded row list:\n" +
+                 "testid-8: [Question: question-1]\n" +
+                 "Contents of embedded row list:\n" +
                  "  testid-9: [Text: text-2]\n" +
                  "  testid-10: [Drawing: sketch-1] [Table: table-2]");
     });
@@ -185,8 +220,8 @@ describe("Question tile operations", () => {
       expect(documentContent.debugDescribeThis(documentContent.tileMap, ""))
         .toEqual("testid-6: [Text: text-1]\n" +
                  "testid-7: [Table: table-1] [Expression: expression-1]\n" +
-                 "testid-8: [Question: question-1]" +
-                 "\nContents of embedded row list:\n" +
+                 "testid-8: [Question: question-1]\n" +
+                 "Contents of embedded row list:\n" +
                  "  testid-9: [Text: text-2]\n" +
                  "  testid-10: [Drawing: sketch-1] [Table: table-2]");
     });

@@ -1,4 +1,4 @@
-import { Instance, types, detach } from "mobx-state-tree";
+import { Instance, types, detach, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { StringBuilder, comma } from "../../utilities/string-builder";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
 import { ITileModel } from "../tiles/tile-model";
@@ -13,9 +13,6 @@ export const RowList = types
     rowMap: types.map(TileRowModel),
     rowOrder: types.array(types.string),
   })
-  .volatile(self => ({
-    visibleRows: [] as string[],
-  }))
   .views(self => ({
     get rowCount() {
       return self.rowOrder.length;
@@ -24,25 +21,33 @@ export const RowList = types
       return self.rowMap.get(rowId);
     },
     getRowByIndex(index: number): TileRowModelType | undefined {
-      return self.rowMap.get(self.rowOrder[index]);
+      return self.rowOrder.length > index ? self.rowMap.get(self.rowOrder[index]) : undefined;
     },
     getRowIndex(rowId: string) {
       return self.rowOrder.findIndex(_rowId => _rowId === rowId);
     },
-    get indexOfLastVisibleRow() {
-      // returns last visible row or last row
+    /**
+     * Returns the index of the last visible row in this RowList.
+     * If no visible rows are found, returns the index of the last row.
+     */
+    getIndexOfLastVisibleRow(visibleRows: string[]) {
       if (!self.rowOrder.length) return -1;
-      const lastVisibleRowId = self.visibleRows.length
-                                ? self.visibleRows[self.visibleRows.length - 1]
-                                : self.rowOrder[self.rowOrder.length - 1];
-      return self.rowOrder.indexOf(lastVisibleRowId);
+      // Iterate over the visible rows in reverse order to find the last one
+      for (let i = visibleRows.length - 1; i >= 0; i--) {
+        const rowId = visibleRows[i];
+        if (self.rowOrder.includes(rowId)) {
+          return self.rowOrder.indexOf(rowId);
+        }
+      }
+      // If no visible rows are found, return the last row in the rowOrder
+      return self.rowOrder.length - 1;
     },
     /**
      * Returns all tile ids directly in this RowList container.
      * Does not include tile ids from nested RowList containers.
      */
     get tileIds() {
-      return self.rowOrder.flatMap(rowId => this.getRow(rowId)?.allTileIds ?? []);
+      return self.rowOrder.flatMap(rowId => this.getRow(rowId)?.tileIds ?? []);
     },
     rowHeightToExport(row: TileRowModelType, tileId: string, tileMap: Map<string, ITileModel>) {
       if (!row?.height) return;
@@ -150,9 +155,6 @@ export const RowList = types
         return row;
       }
     },
-    setVisibleRows(rows: string[]) {
-      self.visibleRows = rows;
-    },
   }))
   .actions(self => ({
     addRowWithTiles(tiles: ITileModel[]) {
@@ -169,10 +171,24 @@ export const RowList = types
   }));
 
 export type RowListType = Instance<typeof RowList>;
+export type RowListSnapshotIn = SnapshotIn<typeof RowList>
+export type RowListSnapshotOut = SnapshotOut<typeof RowList>
 
 export function isRowListContainer(model: any): model is RowListType {
   if (!model) return false;
   // Check if the model has the required RowList properties
+  return typeof model.rowMap !== 'undefined' &&
+         typeof model.rowOrder !== 'undefined' &&
+         Array.isArray(model.rowOrder);
+}
+
+export function isRowListSnapshotIn(model: any): model is RowListSnapshotIn {
+  return typeof model.rowMap !== 'undefined' &&
+         typeof model.rowOrder !== 'undefined' &&
+         Array.isArray(model.rowOrder);
+}
+
+export function isRowListSnapshotOut(model: any): model is RowListSnapshotOut {
   return typeof model.rowMap !== 'undefined' &&
          typeof model.rowOrder !== 'undefined' &&
          Array.isArray(model.rowOrder);
