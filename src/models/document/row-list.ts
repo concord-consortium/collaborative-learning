@@ -1,4 +1,4 @@
-import { Instance, types, detach } from "mobx-state-tree";
+import { Instance, types, detach, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { StringBuilder, comma } from "../../utilities/string-builder";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
 import { ITileModel } from "../tiles/tile-model";
@@ -21,7 +21,7 @@ export const RowList = types
       return self.rowMap.get(rowId);
     },
     getRowByIndex(index: number): TileRowModelType | undefined {
-      return self.rowMap.get(self.rowOrder[index]);
+      return self.rowOrder.length > index ? self.rowMap.get(self.rowOrder[index]) : undefined;
     },
     getRowIndex(rowId: string) {
       return self.rowOrder.findIndex(_rowId => _rowId === rowId);
@@ -171,10 +171,24 @@ export const RowList = types
   }));
 
 export type RowListType = Instance<typeof RowList>;
+export type RowListSnapshotIn = SnapshotIn<typeof RowList>
+export type RowListSnapshotOut = SnapshotOut<typeof RowList>
 
 export function isRowListContainer(model: any): model is RowListType {
   if (!model) return false;
   // Check if the model has the required RowList properties
+  return typeof model.rowMap !== 'undefined' &&
+         typeof model.rowOrder !== 'undefined' &&
+         Array.isArray(model.rowOrder);
+}
+
+export function isRowListSnapshotIn(model: any): model is RowListSnapshotIn {
+  return typeof model.rowMap !== 'undefined' &&
+         typeof model.rowOrder !== 'undefined' &&
+         Array.isArray(model.rowOrder);
+}
+
+export function isRowListSnapshotOut(model: any): model is RowListSnapshotOut {
   return typeof model.rowMap !== 'undefined' &&
          typeof model.rowOrder !== 'undefined' &&
          Array.isArray(model.rowOrder);

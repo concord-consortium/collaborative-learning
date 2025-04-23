@@ -520,9 +520,17 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     setVisibleRows(rows: string[]) {
       self.visibleRows = rows;
     },
-    insertNewTileInRow(tile: ITileModel, row: TileRowModelType, tileIndexInRow?: number) {
-      const insertedTile = self.tileMap.put(tile);
-      row.insertTileInRow(insertedTile, tileIndexInRow);
+    /**
+     * Add a tile to the tileMap. If idOverride or titleOverride are provided,
+     * they will override the current value of the tile's id and title.
+     * @param tile
+     * @param idOverride
+     * @param titleOverride
+     */
+    addToTileMap(tile: ITileModelSnapshotIn, idOverride?: string, titleOverride?: string) {
+      const id = idOverride ?? tile.id;
+      const title = titleOverride ?? tile.title;
+      return self.tileMap.put({...tile, id, title});
     },
     deleteTilesFromRow(row: TileRowModelType) {
       row.tiles
@@ -622,7 +630,8 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       rowList.insertRow(row, o.rowIndex);
 
       const id = o.tileId;
-      const tileModel = self.tileMap.put({id, content, title: o.title});
+      const tileContent: ITileModelSnapshotIn = { id, title: o.title, content };
+      const tileModel = self.addToTileMap(tileContent);
       row.insertTileInRow(tileModel);
 
       self.removeNeighboringPlaceholderRows(row.id);
@@ -641,7 +650,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       const row = o.rowId ? rowList.getRow(o.rowId) : rowList.getRowByIndex(o.rowIndex);
       if (row) {
         const indexInRow = o.locationInRow === "left" ? 0 : undefined;
-        const tileModel = self.tileMap.put(snapshot);
+        const tileModel = self.addToTileMap(snapshot);
         row.insertTileInRow(tileModel, indexInRow);
         self.removePlaceholderTilesFromRow(row);
         self.removeNeighboringPlaceholderRows(row.id);
@@ -666,25 +675,35 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     copyTilesIntoExistingRow(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
-        tiles.forEach(tile => {
+        // If inserting to the left, reverse the order of the tiles so that
+        // the first tile is the one that ends up at the beginning of the row.
+        const orderedTiles = rowInfo.rowDropLocation === "left" ? tiles.reverse() : tiles;
+        orderedTiles.forEach(tile => {
           let result: INewRowTile | undefined;
           const parsedContent = safeJsonParse<ITileModelSnapshotIn>(tile.tileContent);
           const title = parsedContent?.title;
           const uniqueTitle = title && self.getUniqueTitle(title);
-          if (parsedContent?.content) {
-            const rowOptions: INewTileOptions = {
-              rowId: rowInfo.rowDropId,
-              locationInRow: rowInfo.rowDropLocation
-            };
-            if (tile.rowHeight) {
-              rowOptions.rowHeight = tile.rowHeight;
+          const content = parsedContent?.content;
+          if (content) {
+            if (tile.embedded) {
+              // already is part of another tile, so we don't need to add it to any rows, just the tileMap.
+              self.addToTileMap(parsedContent, tile.newTileId, uniqueTitle);
+              result = { rowId: "", tileId: tile.newTileId };
+            } else {
+              const rowOptions: INewTileOptions = {
+                rowId: rowInfo.rowDropId,
+                locationInRow: rowInfo.rowDropLocation
+              };
+              if (tile.rowHeight) {
+                rowOptions.rowHeight = tile.rowHeight;
+              }
+              const adjustedSnapshot = {
+                  ...parsedContent,
+                  id: tile.newTileId,
+                  title: uniqueTitle
+                };
+              result = self.addTileSnapshotInExistingRow(adjustedSnapshot, rowOptions);
             }
-            const adjustedSnapshot = {
-              ...parsedContent,
-              id: tile.newTileId,
-              title: uniqueTitle
-            };
-            result = self.addTileSnapshotInExistingRow(adjustedSnapshot, rowOptions);
           }
           results.push(result);
         });
@@ -704,31 +723,37 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
           const uniqueTitle = title && self.getUniqueTitle(title);
           const content = parsedContent?.content;
           if (content) {
-            if (tile.rowIndex !== lastRowIndex) {
-              rowDelta++;
-            }
-            const tileOptions: INewTileOptions = {
-              rowList: (rowInfo.rowDropId && self.getRowListForRow(rowInfo.rowDropId)) || self,
-              rowId: lastRowId,
-              rowIndex: rowInfo.rowInsertIndex + rowDelta,
-              tileId: tile.newTileId,
-              title: uniqueTitle
-            };
-            if (tile.rowHeight) {
-              tileOptions.rowHeight = tile.rowHeight;
-            }
-            if (tile.rowIndex !== lastRowIndex) {
-              result = self.addTileContentInNewRow(content, tileOptions);
-              lastRowIndex = tile.rowIndex;
-              lastRowId = result.rowId;
-            }
-            else {
-              // This code path happens when there are two or more tiles which
-              // were in the same row in the source document. `tile.rowIndex` is
-              // the rowIndex of the tile in the source document. `lastRowIndex`
-              // is the source row index of the last tile.
-              const tileSnapshot: ITileModelSnapshotIn = { id: tile.newTileId, title: parsedContent.title, content };
-              result = self.addTileSnapshotInExistingRow(tileSnapshot, tileOptions);
+            if (tile.embedded) {
+              // already is part of another tile, so we don't need to add it to any rows, just the tileMap.
+              self.addToTileMap(parsedContent, tile.newTileId, uniqueTitle);
+              result = { rowId: "", tileId: tile.newTileId };
+            } else {
+              if (tile.rowIndex !== lastRowIndex) {
+                rowDelta++;
+              }
+              const tileOptions: INewTileOptions = {
+                rowList: (rowInfo.rowDropId && self.getRowListForRow(rowInfo.rowDropId)) || self,
+                rowId: lastRowId,
+                rowIndex: rowInfo.rowInsertIndex + rowDelta,
+                tileId: tile.newTileId,
+                title: uniqueTitle
+              };
+              if (tile.rowHeight) {
+                tileOptions.rowHeight = tile.rowHeight;
+              }
+              if (tile.rowIndex !== lastRowIndex) {
+                result = self.addTileContentInNewRow(content, tileOptions);
+                lastRowIndex = tile.rowIndex;
+                lastRowId = result.rowId;
+              }
+              else {
+                // This code path happens when there are two or more tiles which
+                // were in the same row in the source document. `tile.rowIndex` is
+                // the rowIndex of the tile in the source document. `lastRowIndex`
+                // is the source row index of the last tile.
+                const tileSnapshot: ITileModelSnapshotIn = { id: tile.newTileId, title: parsedContent.title, content };
+                result = self.addTileSnapshotInExistingRow(tileSnapshot, tileOptions);
+              }
             }
           }
           results.push(result);

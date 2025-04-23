@@ -9,6 +9,7 @@ import QuestionBadge from "../../../assets/icons/question-badge.svg";
 import { useCurrent } from "../../../hooks/use-current";
 import { useUIStore } from "../../../hooks/use-stores";
 import { useTileSelectionPointerEvents } from "../geometry/use-tile-selection-pointer-events";
+import { LockedContainerContext } from "../../document/locked-container-context";
 
 import "./question-tile.scss";
 
@@ -27,32 +28,34 @@ export const QuestionTileComponent: React.FC<ITileProps> = observer(function Que
   );
 
   return (
-    <div className="question-tile-content"
+    <LockedContainerContext.Provider value={content.locked}>
+      <div className="question-tile-content"
           data-testid="question-tile"
           ref={domElement}
           onMouseDown={handlePointerDown}
           onMouseUp={handlePointerUp}
       >
-      <div className="question-badge">
-        <QuestionBadge />
+        <div className="question-badge">
+          <QuestionBadge />
+        </div>
+        <div className="question-tile-spacer" />
+        {content.locked ? (
+          <ReadOnlyTileTitle />
+        ) : (
+          <BasicEditableTileTitle />
+        )}
+        <div className="question-tile-rows focusable">
+          <RowListComponent
+            rowListModel={content}
+            documentContent={props.documentContent}
+            context={props.context}
+            documentId={props.documentId}
+            docId={props.docId}
+            scale={props.scale}
+            readOnly={props.readOnly}
+          />
+        </div>
       </div>
-      <div className="question-tile-spacer" />
-      {content.locked ? (
-        <ReadOnlyTileTitle />
-      ) : (
-        <BasicEditableTileTitle />
-      )}
-      <div className="question-tile-rows focusable">
-        <RowListComponent
-          rowListModel={content}
-          documentContent={props.documentContent}
-          context={props.context}
-          documentId={props.documentId}
-          docId={props.docId}
-          scale={props.scale}
-          readOnly={props.readOnly}
-        />
-      </div>
-    </div>
+    </LockedContainerContext.Provider>
   );
 });

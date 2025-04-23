@@ -304,12 +304,14 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const { document } = this.props;
     const { ui } = this.stores;
     const selectedTileIds = ui.selectedTileIds;
+    if (!document?.content) return;
 
     // Sort the selected tile ids in top->bottom, left->right order so they duplicate in the correct formation
-    const tilePositions = document?.content?.getTilePositions(Array.from(selectedTileIds)) || [];
-    const dragTileItems = document?.content?.getDragTileItems(tilePositions.map(info => info.tileId)) || [];
+    const tilePositions = document.content.getTilePositions(Array.from(selectedTileIds)) || [];
+    const selectedDragTileItems = document.content.getDragTileItems(tilePositions.map(info => info.tileId)) || [];
+    const dragTileItems = document.content.addEmbeddedTilesToDragTiles(selectedDragTileItems);
 
-    document?.content?.duplicateTiles(dragTileItems);
+    document.content.duplicateTiles(dragTileItems);
     ui.clearSelectedTiles();
     this.removeDropRowHighlight();
   }

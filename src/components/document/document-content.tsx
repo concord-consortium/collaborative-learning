@@ -18,6 +18,7 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import { RowListComponent } from "./row-list";
 import { DropRowContext } from "./drop-row-context";
 import { RowRefsContext } from "./row-refs-context";
+import { LockedContainerContext } from "./locked-container-context";
 
 import "./document-content.sass";
 
@@ -168,21 +169,23 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     return (
       <DocumentDndContext>
         <DropRowContext.Provider value={dropRow}>
-          <RowRefsContext.Provider value={{ addRowRef: this.addRowRef }}>
-            <div className={documentClass}
-              data-testid="document-content"
-              data-document-key={this.props.documentId}
-              onScroll={this.handleScroll}
-              onClick={this.handleClick}
-              onDragOver={this.handleDragOver}
+          <LockedContainerContext.Provider value={false}>
+            <RowRefsContext.Provider value={{ addRowRef: this.addRowRef }}>
+              <div className={documentClass}
+                data-testid="document-content"
+                data-document-key={this.props.documentId}
+                onScroll={this.handleScroll}
+                onClick={this.handleClick}
+                onDragOver={this.handleDragOver}
               onDragLeave={this.handleDragLeave}
               onDrop={this.handleDrop}
               ref={(elt) => this.domElement = elt}
-            >
-              {this.renderRows()}
-              {this.renderSpacer()}
-            </div>
-          </RowRefsContext.Provider>
+              >
+                {this.renderRows()}
+                {this.renderSpacer()}
+              </div>
+            </RowRefsContext.Provider>
+          </LockedContainerContext.Provider>
         </DropRowContext.Provider>
       </DocumentDndContext>
     );
@@ -430,8 +433,9 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
   private handleMoveTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTilesData: IDragTilesData) => {
     const dropRowInfo = this.getDropRowInfo(e);
-    if (!dropRowInfo) return;
-    this.props.content?.userMoveTiles(dragTilesData.tiles, dropRowInfo);
+    const content = this.props.content;
+    if (!dropRowInfo || !content) return;
+    content.userMoveTiles(content.removeEmbeddedTilesFromDragTiles(dragTilesData.tiles), dropRowInfo);
   };
 
   private handleCopyTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTiles: IDragTilesData) => {
