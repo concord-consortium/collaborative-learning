@@ -263,6 +263,7 @@ Object {
         "zoom": 1,
       },
       "display": undefined,
+      "fixedPosition": false,
       "id": "graphTool",
       "title": undefined,
     },
@@ -280,6 +281,7 @@ Object {
         "type": "Table",
       },
       "display": undefined,
+      "fixedPosition": false,
       "id": "tableTool",
       "title": undefined,
     },
@@ -412,6 +414,7 @@ Object {
         "type": "Table",
       },
       "display": undefined,
+      "fixedPosition": false,
       "id": "testid-20",
       "title": undefined,
     },
@@ -429,7 +432,7 @@ Object {
       });
       const dropRowInfo: IDropRowInfo = {
         rowInsertIndex: 0,
-        rowDropId: documentContent.getRowByIndex(0)!.id,
+        rowDropId: targetDocument.getRowByIndex(0)!.id,
         rowDropLocation: "right"
       };
       targetDocument.handleDragCopyTiles(dragTileInfo, dropRowInfo);
@@ -545,6 +548,7 @@ Object {
         "type": "Table",
       },
       "display": undefined,
+      "fixedPosition": false,
       "id": "testid-34",
       "title": undefined,
     },
@@ -555,6 +559,7 @@ Object {
         "type": "Text",
       },
       "display": undefined,
+      "fixedPosition": false,
       "id": "textTool",
       "title": undefined,
     },
@@ -686,6 +691,7 @@ Object {
         "type": "Table",
       },
       "display": undefined,
+      "fixedPosition": false,
       "id": "testid-46",
       "title": undefined,
     },
@@ -719,6 +725,7 @@ Object {
         "zoom": 1,
       },
       "display": undefined,
+      "fixedPosition": false,
       "id": "testid-47",
       "title": undefined,
     },

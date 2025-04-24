@@ -4,6 +4,7 @@ import { IDragTilesData } from "./document-content-types";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { DEBUG_DROP } from "../../lib/debug";
 import { DocumentContentModelWithAnnotations } from "./document-content-with-annotations";
+import { isRowListContainer } from "./row-list";
 
 /**
  * This is one part of the DocumentContentModel, which is split into four parts of more manageable size:
@@ -22,14 +23,24 @@ import { DocumentContentModelWithAnnotations } from "./document-content-with-ann
 export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnnotations
 .named("DocumentContentModelWithTileDragging")
 .views(self => ({
-  getTilePositions(tileIds: string[]) {
-    return tileIds.map(tileId => {
+  /** Return an array of ITilePosition objects for the given tile ids.
+   * These are sorted into document order, regardless of the order of the tileIds.
+   */
+  getTilePositions(tileIds: string[]): ITilePosition[] {
+    const positions = tileIds.map(tileId => {
       const rowList = self.getRowListContainingTileIds([tileId])!;
       const row = self.findRowContainingTile(tileId);
       const rowIndex = row && rowList.getRowIndex(row.id) || 0;
       const tileIndex = row?.indexOfTile(tileId) || 0;
-      return { tileId, rowList, rowIndex, row, tileIndex };
+      return { tileId, rowList, rowIndex, tileIndex };
     });
+    const allTileIds = self.getAllTileIds(true);
+    positions.sort((a, b) => {
+      const aIndex = allTileIds.indexOf(a.tileId);
+      const bIndex = allTileIds.indexOf(b.tileId);
+      return aIndex - bIndex;
+    });
+    return positions;
   }
 }))
 .views(self => ({
@@ -43,8 +54,7 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
 
     tilePositions.forEach((tilePosition) => {
       if (!tilePosition) return;
-      // TODO rowList is ignored here. Downstream code doesn't need it, but this should be cleaned up in CLUE-80.
-      const { tileId, rowIndex, row, tileIndex } = tilePosition;
+      const { tileId, rowList, rowIndex, tileIndex } = tilePosition;
       // Note: previously this function would be passed the tileModel being
       // dragged. It would accept a tileId if it matched the tileModel.id even if
       // `documentContent.getTile(tileId)` did not return a tile model. This seems
@@ -61,10 +71,11 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
       // `contentId`. Because srcTile is found via `documentContent.getTile` this
       // should guarantee that the contentId return by `getContentIdFromNode`
       // always matches the dragSrcContentId.
-      const rowHeight = row?.height;
+      const rowHeight = rowList.getRowByIndex(rowIndex)?.height;
       const clonedTile = cloneTileSnapshotWithNewId(srcTile, idMap[srcTile.id]);
       getTileContentInfo(clonedTile.content.type)?.contentSnapshotPostProcessor?.(clonedTile.content, idMap);
       dragTileItems.push({
+        rowList,
         rowIndex, rowHeight, tileIndex,
         tileId: srcTile.id,
         tileContent: JSON.stringify(clonedTile),
@@ -73,15 +84,43 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
     });
 
     return dragTileItems;
+  },
+  /**
+   * If any of the tiles being dragged are RowListContainer tiles,
+   * this adds drag items for all of the tiles contained within them.
+   * Used for copying where we need to copy all the contents as well as the containers.
+   * @param tiles list of drag items
+   * @returns the same list with any embedded tiles added to the end
+   */
+  addEmbeddedTilesToDragTiles(tiles: IDragTileItem[]) {
+    const allTiles = [...tiles];
+    tiles.forEach(dragTile => {
+      const tileContent = self.getTile(dragTile.tileId)?.content;
+      if (tileContent && isRowListContainer(tileContent)) {
+        const tileIdsToAdd = tileContent.tileIds.filter(tileId => !allTiles.find(t => t.tileId === tileId));
+        allTiles.push(...this.getDragTileItems(tileIdsToAdd));
+      }
+    });
+    return allTiles;
+  },
+  /**
+   * If the list of drag items contains both containers and tiles embedded within them,
+   * this removes the embedded tiles so that only the containers are included.
+   * This is used for moving tiles, where the embedded tiles will automatically get moved
+   * as part of their containers without our having to do anything to them.
+   * @param tiles list of drag items
+   * @returns the same list with the embedded tiles removed
+   */
+  removeEmbeddedTilesFromDragTiles(tiles: IDragTileItem[]) {
+    const tilesToRemove = tiles.flatMap(tile => {
+      const tileContent = self.getTile(tile.tileId)?.content;
+      return tileContent && isRowListContainer(tileContent) ? tileContent.tileIds : [];
+    });
+    return tiles.filter(tile => !tilesToRemove.includes(tile.tileId));
   }
 }))
 .views(self => ({
-  /**
-   *
-   * @param documentContent
-   * @param tileIds
-   * @returns
-   */
+
   getDragTiles(tileIds: string[]): IDragTilesData {
 
     const sharedManager = self.tileEnv?.sharedModelManager;
@@ -93,30 +132,14 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
 
     const dragTiles: IDragTilesData = {
       sourceDocId,
-      tiles: self.getDragTileItems(tileIds),
+      tiles: self.addEmbeddedTilesToDragTiles(self.getDragTileItems(tileIds)),
       sharedModels: sharedManager?.getSharedModelDragDataForTiles(tileIds) ?? [],
       annotations: Object.values(self.getAnnotationsUsedByTiles(tileIds))
     };
 
-    // create a sorted array of selected tiles
-    orderTilePositions(dragTiles.tiles);
-
     return dragTiles;
   }
 }));
-
-
-// Sorts the given tile positions in top->bottom, left->right order IN PLACE!
-export function orderTilePositions(tilePositions: ITilePosition[]) {
-  tilePositions.sort((a, b) => {
-    if (a.rowIndex < b.rowIndex) return -1;
-    if (a.rowIndex > b.rowIndex) return 1;
-    if (a.tileIndex < b.tileIndex) return -1;
-    if (a.tileIndex > b.tileIndex) return 1;
-    return 0;
-  });
-  return tilePositions;
-}
 
 /* istanbul ignore next: this only used for debugging */
 export function logDataTransfer(_dataTransfer: DataTransfer) {

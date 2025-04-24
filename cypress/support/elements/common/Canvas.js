@@ -178,6 +178,14 @@ class Canvas {
     return cy.get('[data-testid="tool-copytoworkspace"], [data-testid="tool-copytodocument"]');
   }
 
+  getCopyToWorkspaceButton() {
+    return cy.get('[data-testid="tool-copytoworkspace"]');
+  }
+
+  getCopyToDocumentButton() {
+    return cy.get('[data-testid="tool-copytodocument"]');
+  }
+
   getSelectAllButton() {
     return cy.get('[data-testid="tool-selectall"]');
   }
@@ -196,6 +204,26 @@ class Canvas {
     this.getTileDragHandles().each(($handle) => {
       cy.wrap($handle).should('not.have.class', 'selected');
     });
+  }
+
+  getFourUpToolbarButton() {
+    return cy.get('[data-testid="tool-fourup"]');
+  }
+
+  getFourUpToolbarButtonState() {
+    return this.getFourUpToolbarButton().invoke('attr', 'class');
+  }
+
+  isFourUpToolbarButtonDisabled() {
+    return this.getFourUpToolbarButtonState().should('contain', 'disabled');
+  }
+
+  isFourUpToolbarButtonEnabled() {
+    return this.getFourUpToolbarButtonState().should('not.contain', 'disabled');
+  }
+
+  clickFourUpToolbarButton() {
+    return this.getFourUpToolbarButton().click();
   }
 }
 

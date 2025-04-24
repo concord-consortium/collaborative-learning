@@ -53,6 +53,8 @@ context('Test group functionalities', function () {
 
     cy.log('verify 4-up view comes up correctly with students');
     clueCanvas.openFourUpView();
+    canvas.getCopyButtons().should('have.class', 'disabled');
+    clueCanvas.getFourUpToolbarButton().should('have.class', 'disabled');
     clueCanvas.getFourToOneUpViewToggle().should('be.visible');
     clueCanvas.getNorthEastCanvas().should('be.visible').and('contain', 'S' + students[0]);
     clueCanvas.getSouthEastCanvas().should('be.visible').and('contain', 'S' + students[1]);

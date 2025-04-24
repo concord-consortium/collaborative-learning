@@ -73,12 +73,12 @@ export interface ITileContentInfo {
   updateContentWithNewSharedModelIds?: TileContentNewSharedModelIdUpdater;
   updateObjectReferenceWithNewSharedModelIds?: ClueObjectNewSharedModelIdUpdater;
   /**
-   * Called when a tile is being copied to a new document.
-   * This allows tiles to handle any special logic needed when their content is moved to a new document.
-   * For example, the Question tile uses this to ensure it's locked when copied.
+   * If supplied, this function is called when a tile is being copied.
+   * This allows tiles to handle any special logic needed beyond the standard updates of IDs.
+   * For example, the Question tile uses this to ensure it's locked when copied across documents.
    * Returns the updated content.
    */
-  updateContentForNewDocument?: (content: any) => any;
+  updateContentForCopy?: (content: any, acrossDocuments: boolean) => any;
 }
 
 const gTileContentInfoMap: Record<string, ITileContentInfo> = {};

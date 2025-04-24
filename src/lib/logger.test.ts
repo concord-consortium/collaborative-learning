@@ -355,6 +355,7 @@ describe("authed logger", () => {
       const tileToCopy = sourceDocument.content!.firstTile!;
 
       const copyTileInfo: IDropTileItem = {
+        rowList: sourceDocument.content!,
         rowIndex: 0,
         tileIndex: 0,
         tileId: tileToCopy.id,

@@ -49,7 +49,10 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     return isImportDocument(snapshot) ? migrateSnapshot(snapshot) : snapshot;
   })
   .volatile(self => ({
-    highlightPendingDropLocation: -1,
+    // ID of the row to highlight as the drop location for newly-created or duplicated tiles.
+    highlightPendingDropLocation: undefined as string | undefined,
+    // IDs of top-level rows that are currently visible on the screen
+    visibleRows: [] as string[],
   }))
   .views(self => {
     // used for drag/drop self-drop detection, for instance
@@ -72,11 +75,15 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
        * @returns An array of all tiles, in document order.
        */
       get allTiles(): ITileModel[] {
+        return self.rowOrder.flatMap(rowId => this.getAllTilesInRow(rowId));
+      },
+      /**
+       * Returns all tiles in the given row, including nested tiles from RowList containers.
+       * @returns An array of all tiles, in document order.
+       */
+      getAllTilesInRow(rowId: string) {
         const tiles: ITileModel[] = [];
-
-        // Get all tiles from the main document rows
-        self.rowOrder.forEach(rowId => {
-          const row = self.getRow(rowId);
+        const row = this.getRowRecursive(rowId);
           if (row) {
             row.tiles.forEach(tileLayout => {
               const tile = self.tileMap.get(tileLayout.tileId);
@@ -101,8 +108,6 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
               }
             });
           }
-        });
-
         return tiles;
       },
       /**
@@ -297,9 +302,10 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       const tile = self.getTile(row.tiles[0].tileId);
       return getPlaceholderSectionId(tile);
     },
-    get defaultInsertRow() {
-      // next tile comes after the last visible row with content
-      for (let i = self.indexOfLastVisibleRow; i >= 0; --i) {
+    /** Return the index of the row after which new content is inserted by default. */
+    get defaultInsertRowIndex() {
+      // by default new tiles are inserted after the last visible row with content
+      for (let i = self.getIndexOfLastVisibleRow(self.visibleRows); i >= 0; --i) {
         const row = self.getRowByIndex(i);
         if (row && !row.isSectionHeader && !self.isPlaceholderRow(row)) {
           return i + 1;
@@ -313,7 +319,13 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         }
       }
       // if all else fails, revert to last visible row
-      return self.indexOfLastVisibleRow + 1;
+      return self.getIndexOfLastVisibleRow(self.visibleRows) + 1;
+    },
+    /** Return the ID of the row after which new content is inserted by default. */
+    get defaultInsertRowId() {
+      const insertIndex = this.defaultInsertRowIndex;
+      if (insertIndex <= 0) return;
+      return self.rowOrder[insertIndex-1];
     },
     /**
      * Find the smallest RowList container that contains all the given tile ids.
@@ -327,10 +339,21 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       });
       return found ?? self;
     },
-    getRowAfterTiles(tiles: ITilePosition[]) {
-      return Math.max(...tiles.map(tile => tile.rowIndex)) + 1;
+    rowHasTileId(rowId: string, tileId: string) {
+      return self.getAllTilesInRow(rowId).some(tile => tile.id === tileId);
     },
-    // TODO: does this need to be recursive?
+    /**
+     * Given a sorted list of tile positions, return the last row of them.
+     * This will be a row in the smallest rowList that contains all the tiles.
+     * @param tiles
+     * @returns a rowId, or undefined if there are no tiles in the list.
+     */
+    getLastRowForTiles(tiles: ITilePosition[]): string | undefined {
+      const rowList = this.getRowListContainingTileIds(tiles.map(tile => tile.tileId));
+      const lastTileId = tiles[tiles.length - 1].tileId;
+      return rowList?.rowOrder.find(rowId => this.rowHasTileId(rowId, lastTileId));
+    },
+    // TODO: does this need to be recursive? Affects dashboard ProgressWidget.
     getTilesInSection(sectionId: string) {
       const tiles: ITileModel[] = [];
       const rows = self.getRowsInSection(sectionId);
@@ -494,9 +517,20 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     },
   }))
   .actions(self => ({
-    insertNewTileInRow(tile: ITileModel, row: TileRowModelType, tileIndexInRow?: number) {
-      const insertedTile = self.tileMap.put(tile);
-      row.insertTileInRow(insertedTile, tileIndexInRow);
+    setVisibleRows(rows: string[]) {
+      self.visibleRows = rows;
+    },
+    /**
+     * Add a tile to the tileMap. If idOverride or titleOverride are provided,
+     * they will override the current value of the tile's id and title.
+     * @param tile
+     * @param idOverride
+     * @param titleOverride
+     */
+    addToTileMap(tile: ITileModelSnapshotIn, idOverride?: string, titleOverride?: string) {
+      const id = idOverride ?? tile.id;
+      const title = titleOverride ?? tile.title;
+      return self.tileMap.put({...tile, id, title});
     },
     deleteTilesFromRow(row: TileRowModelType) {
       row.tiles
@@ -527,9 +561,11 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     addPlaceholderRowIfAppropriate(rowList: RowListType, rowIndex: number) {
       const beforeRow = (rowIndex > 0) && rowList.getRowByIndex(rowIndex - 1);
       const afterRow = (rowIndex < rowList.rowCount) && rowList.getRowByIndex(rowIndex);
-      if ((beforeRow && beforeRow.isSectionHeader) && (!afterRow || afterRow.isSectionHeader)) {
+      const beforeRowIsHeader = beforeRow && (beforeRow.isSectionHeader || beforeRow.isFixedPositionRow(self.tileMap));
+      if (beforeRowIsHeader && (!afterRow || afterRow.isSectionHeader)) {
         const beforeSectionId = beforeRow.sectionId;
-        const content = PlaceholderContentModel.create({sectionId: beforeSectionId});
+        const containerType = getType(self.getRowListForRow(beforeRow.id)).name;
+        const content = PlaceholderContentModel.create({sectionId: beforeSectionId, containerType});
         const tile = TileModel.create({ content });
         self.tileMap.put(tile);
         rowList.addNewTileInNewRowAtIndex(tile, rowIndex);
@@ -588,13 +624,14 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       const rowList = o.rowList ?? self;
       if (o.rowIndex === undefined) {
         // by default, insert new tiles after last visible on screen
-        o.rowIndex = self.defaultInsertRow;
+        o.rowIndex = self.defaultInsertRowIndex;
       }
       const row = TileRowModel.create({});
       rowList.insertRow(row, o.rowIndex);
 
       const id = o.tileId;
-      const tileModel = self.tileMap.put({id, content, title: o.title});
+      const tileContent: ITileModelSnapshotIn = { id, title: o.title, content };
+      const tileModel = self.addToTileMap(tileContent);
       row.insertTileInRow(tileModel);
 
       self.removeNeighboringPlaceholderRows(row.id);
@@ -608,12 +645,12 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       const rowList = o.rowList ?? self;
       if (o.rowIndex === undefined) {
         // by default, insert new tiles after last visible on screen.
-        o.rowIndex = self.defaultInsertRow;
+        o.rowIndex = self.defaultInsertRowIndex;
       }
       const row = o.rowId ? rowList.getRow(o.rowId) : rowList.getRowByIndex(o.rowIndex);
       if (row) {
         const indexInRow = o.locationInRow === "left" ? 0 : undefined;
-        const tileModel = self.tileMap.put(snapshot);
+        const tileModel = self.addToTileMap(snapshot);
         row.insertTileInRow(tileModel, indexInRow);
         self.removePlaceholderTilesFromRow(row);
         self.removeNeighboringPlaceholderRows(row.id);
@@ -630,33 +667,43 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       self.addPlaceholderRowIfAppropriate(rowList, rowIndex);
       return row;
     },
-    showPendingInsertHighlight(show: boolean, insertRowIndex?: number) {
-      self.highlightPendingDropLocation = show ? insertRowIndex ?? self.defaultInsertRow : -1;
+    showPendingInsertHighlight(show: boolean, rowId?: string) {
+      self.highlightPendingDropLocation = show ? rowId ?? self.defaultInsertRowId : undefined;
     }
   }))
   .actions((self) => ({
     copyTilesIntoExistingRow(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
-        tiles.forEach(tile => {
+        // If inserting to the left, reverse the order of the tiles so that
+        // the first tile is the one that ends up at the beginning of the row.
+        const orderedTiles = rowInfo.rowDropLocation === "left" ? tiles.reverse() : tiles;
+        orderedTiles.forEach(tile => {
           let result: INewRowTile | undefined;
           const parsedContent = safeJsonParse<ITileModelSnapshotIn>(tile.tileContent);
           const title = parsedContent?.title;
           const uniqueTitle = title && self.getUniqueTitle(title);
-          if (parsedContent?.content) {
-            const rowOptions: INewTileOptions = {
-              rowIndex: rowInfo.rowInsertIndex,
-              locationInRow: rowInfo.rowDropLocation
-            };
-            if (tile.rowHeight) {
-              rowOptions.rowHeight = tile.rowHeight;
+          const content = parsedContent?.content;
+          if (content) {
+            if (tile.embedded) {
+              // already is part of another tile, so we don't need to add it to any rows, just the tileMap.
+              self.addToTileMap(parsedContent, tile.newTileId, uniqueTitle);
+              result = { rowId: "", tileId: tile.newTileId };
+            } else {
+              const rowOptions: INewTileOptions = {
+                rowId: rowInfo.rowDropId,
+                locationInRow: rowInfo.rowDropLocation
+              };
+              if (tile.rowHeight) {
+                rowOptions.rowHeight = tile.rowHeight;
+              }
+              const adjustedSnapshot = {
+                  ...parsedContent,
+                  id: tile.newTileId,
+                  title: uniqueTitle
+                };
+              result = self.addTileSnapshotInExistingRow(adjustedSnapshot, rowOptions);
             }
-            const adjustedSnapshot = {
-              ...parsedContent,
-              id: tile.newTileId,
-              title: uniqueTitle
-            };
-            result = self.addTileSnapshotInExistingRow(adjustedSnapshot, rowOptions);
           }
           results.push(result);
         });
@@ -676,31 +723,37 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
           const uniqueTitle = title && self.getUniqueTitle(title);
           const content = parsedContent?.content;
           if (content) {
-            if (tile.rowIndex !== lastRowIndex) {
-              rowDelta++;
-            }
-            const tileOptions: INewTileOptions = {
-              rowList: (rowInfo.rowDropId && self.getRowListForRow(rowInfo.rowDropId)) || self,
-              rowId: lastRowId,
-              rowIndex: rowInfo.rowInsertIndex + rowDelta,
-              tileId: tile.newTileId,
-              title: uniqueTitle
-            };
-            if (tile.rowHeight) {
-              tileOptions.rowHeight = tile.rowHeight;
-            }
-            if (tile.rowIndex !== lastRowIndex) {
-              result = self.addTileContentInNewRow(content, tileOptions);
-              lastRowIndex = tile.rowIndex;
-              lastRowId = result.rowId;
-            }
-            else {
-              // This code path happens when there are two or more tiles which
-              // were in the same row in the source document. `tile.rowIndex` is
-              // the rowIndex of the tile in the source document. `lastRowIndex`
-              // is the source row index of the last tile.
-              const tileSnapshot: ITileModelSnapshotIn = { id: tile.newTileId, title: parsedContent.title, content };
-              result = self.addTileSnapshotInExistingRow(tileSnapshot, tileOptions);
+            if (tile.embedded) {
+              // already is part of another tile, so we don't need to add it to any rows, just the tileMap.
+              self.addToTileMap(parsedContent, tile.newTileId, uniqueTitle);
+              result = { rowId: "", tileId: tile.newTileId };
+            } else {
+              if (tile.rowIndex !== lastRowIndex) {
+                rowDelta++;
+              }
+              const tileOptions: INewTileOptions = {
+                rowList: (rowInfo.rowDropId && self.getRowListForRow(rowInfo.rowDropId)) || self,
+                rowId: lastRowId,
+                rowIndex: rowInfo.rowInsertIndex + rowDelta,
+                tileId: tile.newTileId,
+                title: uniqueTitle
+              };
+              if (tile.rowHeight) {
+                tileOptions.rowHeight = tile.rowHeight;
+              }
+              if (tile.rowIndex !== lastRowIndex) {
+                result = self.addTileContentInNewRow(content, tileOptions);
+                lastRowIndex = tile.rowIndex;
+                lastRowId = result.rowId;
+              }
+              else {
+                // This code path happens when there are two or more tiles which
+                // were in the same row in the source document. `tile.rowIndex` is
+                // the rowIndex of the tile in the source document. `lastRowIndex`
+                // is the source row index of the last tile.
+                const tileSnapshot: ITileModelSnapshotIn = { id: tile.newTileId, title: parsedContent.title, content };
+                result = self.addTileSnapshotInExistingRow(tileSnapshot, tileOptions);
+              }
             }
           }
           results.push(result);
@@ -1100,9 +1153,6 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       }
     },
     userMoveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
-      // console.log("Document before moveTiles");
-      // console.log(self.debugDescribeThis(self.tileMap, "  "));
-      // console.log("moving tiles", tiles.map(t => t.tileId), "into", rowInfo);
       tiles.forEach(tileItem => {
         const tile = self.getTile(tileItem.tileId);
         tile && logTileDocumentEvent(LogEventName.MOVE_TILE, { tile });
@@ -1112,7 +1162,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     userCopyTiles(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
       const rowList = (rowInfo.rowDropId && self.getRowListForRow(rowInfo.rowDropId)) || self;
       const dropRow = (rowInfo.rowInsertIndex != null) ? rowList.getRowByIndex(rowInfo.rowInsertIndex) : undefined;
-      const results = dropRow?.acceptTileDrop(rowInfo)
+      const results = dropRow?.acceptTileDrop(rowInfo, self.tileMap)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
                       : self.copyTilesIntoNewRows(tiles, rowInfo);
       self.logCopyTileResults(tiles, results);
