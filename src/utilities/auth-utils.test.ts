@@ -36,9 +36,9 @@ describe("auth-utils", () => {
     const setLocation = (url: string) => mockWindowLocation(new URL(url));
     afterEach(() => mockWindowLocation(originalLocation));
 
-    it("uses the authDomain param if present", () => {
-      setLocation("https://collaborative-learning.concord.org/standalone/?authDomain=https://example.com");
-      const expectedURL = "https://learn.concord.org/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3FauthDomain%3Dhttps%253A%252F%252Flearn.concord.org";
+    it("uses the portalDomain param if present", () => {
+      setLocation("https://collaborative-learning.concord.org/standalone/?portalDomain=https://example.com");
+      const expectedURL = "https://example.com/users/sign_in_or_register?app_name=CLUE&login_url=https%3A%2F%2Fcollaborative-learning.concord.org%2Fstandalone%2F%3FauthDomain%3Dhttps%253A%252F%252Fexample.com%26portalDomain%3Dhttps%253A%252F%252Fexample.com";
       const actualURL = getPortalStandaloneSignInOrRegisterUrl();
       expect(actualURL).toBe(expectedURL);
     });
