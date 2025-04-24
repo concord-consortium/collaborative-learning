@@ -10,7 +10,7 @@ import { StringBuilder } from "../../utilities/string-builder";
 import { logTileDocumentEvent } from "./log/log-tile-document-event";
 import { LogEventName } from "../../lib/logger-types";
 import { RowListType } from "../document/row-list";
-import { kQuestionTileType, QuestionContentModel } from "./question/question-content";
+import { QuestionContentModel } from "./question/question-content";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -38,7 +38,7 @@ export interface IDropTileItem extends IDragTileItem {
  * see if the model is a RowList.
  */
 export function isContainerTile(item: IDragTileItem) {
-  return item.tileType === kQuestionTileType;
+  return !!getTileContentInfo(item.tileType)?.isContainer;
 }
 
 export function cloneTileSnapshotWithoutId(tile: ITileModel) {
