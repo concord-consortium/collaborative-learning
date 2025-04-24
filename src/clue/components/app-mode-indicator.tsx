@@ -35,7 +35,7 @@ const AppModeIndicator: React.FC<AppModeIndicatorProps> = ({ appMode }) => {
   return (
     <Tooltip {...tipOptions} interactive={true} html={kPreviewTooltipHtml}>
       <div className="mode">
-       <WarningIcon />
+        <WarningIcon />
         Preview Mode
       </div>
     </Tooltip>
