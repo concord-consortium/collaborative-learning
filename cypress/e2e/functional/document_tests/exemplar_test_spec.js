@@ -30,27 +30,24 @@ context('Exemplar Documents', function () {
     cy.openTopTab('sort-work');
     sortWork.openSortWorkSection("No Group");
     sortWork.checkDocumentInGroup("No Group", exemplarName);
-    sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
+    sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
     clueCanvas.getStickyNotePopup().should("not.exist");
 
-    cy.log("Create 3 drawing tiles with 3 events and a label");
+    cy.log("Create 3 drawing tiles with 1 events and a label");
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
+    drawToolTile.addText(300, 50, "one two three four five six seven eight nine ten");
+
+    clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(200, 50);
     drawToolTile.addText(300, 50, "one two three four five six seven eight nine ten");
 
     clueCanvas.addTile("drawing");
-    drawToolTile.drawRectangle(100, 50);
-    drawToolTile.drawRectangle(200, 50);
-    drawToolTile.addText(300, 50, "one two three four five six seven eight nine ten");
-
-    clueCanvas.addTile("drawing");
-    drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);
     drawToolTile.addText(300, 50, "one two three four five six seven eight nine ten");
 
     // No change, no sticky note
-    sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
+    sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
     clueCanvas.getStickyNotePopup().should("not.exist");
   });
 
@@ -89,7 +86,7 @@ context('Exemplar Documents', function () {
     sortWork.checkSimpleDocumentInSubgroup("Text", "Idea, Ivan", exemplarInfo);
   });
 
-  it('Unit with exemplars hidden initially, revealed after 2 drawings and 2 text tiles', function () {
+  it('Unit with exemplars hidden initially, revealed after 1 drawing with three shapes and 1 text tiles', function () {
     beforeTest(queryParams1);
     cy.openTopTab('sort-work');
     sortWork.openSortWorkSection("No Group");
@@ -97,21 +94,13 @@ context('Exemplar Documents', function () {
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
     clueCanvas.getStickyNotePopup().should("not.exist");
 
-    cy.log("Create 2 drawing tiles with 3 events");
+    cy.log("Create 1 drawing tiles with 3 events");
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);
     drawToolTile.drawRectangle(300, 50);
 
-    clueCanvas.addTile("drawing");
-    drawToolTile.drawRectangle(100, 50);
-    drawToolTile.drawRectangle(200, 50);
-    drawToolTile.drawRectangle(300, 50);
-
-    cy.log("Create 2 text tiles and put 5 words in them");
-    clueCanvas.addTile("text");
-    textToolTile.enterText("one two three four five");
-
+    cy.log("Create 1 text tiles and put 5 words in them");
     clueCanvas.addTile("text");
     textToolTile.enterText("one two three four");
 
@@ -135,19 +124,34 @@ context('Exemplar Documents', function () {
     sortWork.getFocusDocumentTitle().should("contain.text", exemplarName);
   });
 
-  it('Exemplar revealed by 2 drawings that include labels', function () {
+  it('Unit with exemplars hidden initially, allows user to click Ideas button to make random exemplar visible', function () {
+    beforeTest(queryParams2);
+    cy.openTopTab('sort-work');
+    sortWork.openSortWorkSection("No Group");
+    sortWork.checkDocumentInGroup("No Group", exemplarName);
+    sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
+    clueCanvas.getStickyNotePopup().should("not.exist");
+
+    canvas.getIdeasButton().should("be.visible").click();
+
+    // Now the exemplar should be revealed
+    sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
+
+    clueCanvas.getStickyNotePopup().should("exist").should("be.visible")
+      .should("contain.text", "Nice work, you can now see a new example for this lesson")
+      .should("contain.text", exemplarName);
+
+    canvas.getIdeasButton().should("not.exist");
+  });
+
+  it('Exemplar revealed by 1 drawings that include labels', function () {
     beforeTest(queryParams1);
     cy.openTopTab('sort-work');
     sortWork.openSortWorkSection("No Group");
     sortWork.checkDocumentInGroup("No Group", exemplarName);
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
 
-    cy.log("Create 2 drawing tiles with 2 events and a label");
-    clueCanvas.addTile("drawing");
-    drawToolTile.drawRectangle(100, 50);
-    drawToolTile.drawRectangle(200, 50);
-    drawToolTile.addText(300, 50, "one two three four five");
-
+    cy.log("Create 1 drawing tiles with 2 events and a label");
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);

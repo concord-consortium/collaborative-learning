@@ -123,7 +123,8 @@ const IdeasButton = ({ onClick }: { onClick: () => void }) => {
     <button
       title={"Request Idea"}
       onClick={onClick}
-      className="idea-button"
+      className="ideas-button"
+      data-test="ideas-button"
     >
       <IdeaIcon/>
       Ideas?
@@ -253,7 +254,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                 isDeleteDisabled={true}
                 onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
             <DocumentAnnotationToolbar />
-            <IdeasButton onClick={this.handleIdeasButtonClick} />
+            {this.renderIdeasButton()}
           </div>
         }
         <div className="title" data-test="document-title">
@@ -287,7 +288,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const hasNotes = stickyNotes.length > 0;
     const hasNewStickyNotes = supports.hasNewStickyNotes(user.lastStickyNoteViewTimestamp);
     const showNotes = hasNotes && (stickyNotesVisible || hasNewStickyNotes);
-    return {stickyNotes, hasNotes, showNotes};
+    return {stickyNotes, hasNotes, showNotes, hasNewStickyNotes};
   }
 
   private renderStickyNotes() {
@@ -301,6 +302,15 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <StickyNoteButton onClick={onClick} />
       </div>
     );
+  }
+
+  private renderIdeasButton() {
+    const { documents } = this.stores;
+    if (documents.invisibleExemplarDocuments.length > 0) {
+      return (
+        <IdeasButton onClick={this.handleIdeasButtonClick} />
+      );
+    }
   }
 
   private openDocument(key: string) {
