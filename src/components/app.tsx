@@ -136,6 +136,27 @@ export const authAndConnect = async (stores: IStores) => {
   }
 };
 
+const checkStandaloneUnitParam = ({ui}: IStores) => {
+  if (!ui.standalone || urlParams.unit) {
+    return true;
+  }
+
+  const error = new Error("Using CLUE in Standalone Mode requires a unit.");
+  ui.setError(error, undefined, () => {
+    return (
+      <div>
+        <p>
+          Using CLUE in Standalone Mode requires a unit. Please adjust your URL and try again.
+        </p>
+        <p>
+          Need assistance? Contact us at <a href="mailto:help@concord.org">help@concord.org</a>.
+        </p>
+      </div>
+    );
+  });
+  return false;
+};
+
 @inject("stores")
 @observer
 export class AppComponent extends BaseComponent<IProps> {
@@ -143,7 +164,9 @@ export class AppComponent extends BaseComponent<IProps> {
   constructor(props: IProps) {
     super(props);
 
-    authAndConnect(this.stores);
+    if (checkStandaloneUnitParam(this.stores)) {
+      authAndConnect(this.stores);
+    }
   }
 
   public componentWillUnmount() {
@@ -169,7 +192,7 @@ export class AppComponent extends BaseComponent<IProps> {
     }
 
     if (ui.error) {
-      return this.renderApp(this.renderError(ui.error));
+      return this.renderApp(this.renderError(ui.errorContent ?? ui.error));
     }
 
     // if we're in standalone mode and the user is not authenticated
@@ -217,14 +240,16 @@ export class AppComponent extends BaseComponent<IProps> {
     );
   }
 
-  private renderError(error: string) {
+  private renderError(error: string | React.FC<any>) {
+    const showButton = !this.stores.ui.errorContent;
+
     return (
       <div className="error">
         <ErrorAlert
           content={error}
           canCancel={false}
-          buttonLabel="Proceed"
-          onClick={this.handlePortalLoginRedirect}
+          buttonLabel={showButton ? "Proceed" : undefined}
+          onClick={showButton ? this.handlePortalLoginRedirect : undefined}
         />
       </div>
     );

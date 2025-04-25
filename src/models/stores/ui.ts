@@ -59,6 +59,7 @@ export const UIModel = types
   .volatile(self => ({
     defaultLeftNavExpanded: false,
     standalone: false,
+    errorContent: undefined as React.FC<any> | undefined,
   }))
   .views((self) => ({
     isSelectedTile(tile: ITileModel) {
@@ -158,8 +159,9 @@ export const UIModel = types
       },
 
 
-      setError(error: unknown, customMessage?: string) {
+      setError(error: unknown, customMessage?: string, content?: React.FC<any>) {
         self.error = customMessage ?? String(error);
+        self.errorContent = content;
         Logger.log(LogEventName.INTERNAL_ERROR_ENCOUNTERED, { message: self.error });
         if (error instanceof Error) {
           // In Chrome, passing an error instance to console.error() will print the
@@ -178,6 +180,7 @@ export const UIModel = types
       },
       clearError() {
         self.error = null;
+        self.errorContent = undefined;
       },
 
       setSelectedTile(tile?: ITileModel, options?: {append: boolean, dragging?: boolean}) {
