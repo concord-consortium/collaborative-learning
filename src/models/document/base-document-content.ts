@@ -585,7 +585,7 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
       });
       // fix any "collapsed" sections
       self.allRowLists.forEach(rowList => {
-        for (let i = 1; i < rowList.rowCount; ++i) {
+        for (let i = 1; i <= rowList.rowCount; ++i) {
           self.addPlaceholderRowIfAppropriate(rowList, i);
         }
       });
