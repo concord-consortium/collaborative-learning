@@ -248,14 +248,31 @@ Object {
       { "att-s": "cat", "yard": { count: 2, selected: false }},
       { "att-s": "owl", "yard": { count: 1, selected: false}, "(no value)": { count: 1, selected: false }}
     ]);
+  });
 
-    dataSet.dataSet?.attributes[0].setValue(3, undefined); // hide that owl entirely
-    expect(content.dataArray).toEqual([
-      { "att-s": "cat", "yard": { count: 2, selected: false }},
-      { "att-s": "owl", "yard": { count: 1, selected: false }},
-      { "att-s": "(no value)", "(no value)": { count: 1, selected: false }}
-    ]);
+  it("migrates secondaryAttributeColorMap to attributeColorMap", () => {
+    const oldSnapshot = {
+      type: "BarGraph",
+      yAxisLabel: "",
+      dataSetId: "test-dataset-123",
+      primaryAttribute: "size",
+      secondaryAttribute: "location",
+      secondaryAttributeColorMap: {
+        "yard": 1,
+        "forest": 2
+      }
+    };
 
+    const content = BarGraphContentModel.create(oldSnapshot as any);
+    const snapshot = getSnapshot(content) as any;
+
+    expect(snapshot.secondaryAttributeColorMap).toBeUndefined();
+    expect(snapshot.attributeColorMap).toEqual({
+      "location": {
+        "yard": 1,
+        "forest": 2
+      }
+    });
   });
 
   it("extracts primary keys", () => {

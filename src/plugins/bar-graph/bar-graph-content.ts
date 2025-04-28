@@ -29,6 +29,22 @@ export const BarGraphContentModel = TileContentModel
     // Map of attribute keys to color indices. Each attribute has its own map.
     attributeColorMap: types.optional(types.map(types.map(types.number)), {}),
   })
+  .preProcessSnapshot((snapshot: any) => {
+    // If the snapshot has the old secondaryAttributeColorMap, migrate it to attributeColorMap
+    if (snapshot.secondaryAttributeColorMap && snapshot.secondaryAttribute) {
+      const migratedSnapshot = {
+        ...snapshot,
+        attributeColorMap: {
+          [snapshot.secondaryAttribute]: snapshot.secondaryAttributeColorMap
+        }
+      };
+      delete migratedSnapshot.secondaryAttributeColorMap;
+
+      return migratedSnapshot;
+    }
+
+    return snapshot;
+  })
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
       const snapshot = getSnapshot(self);
