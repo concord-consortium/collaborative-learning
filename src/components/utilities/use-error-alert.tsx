@@ -35,7 +35,8 @@ export const useErrorAlert = ({
     buttons: onClick ? [
       { label: buttonLabel || "OK", isDefault: true, onClick }
     ] : [],
-    onClose
+    onClose,
+    dataTestId: "error-alert"
   });
 
   return [showAlert, hideAlert];
