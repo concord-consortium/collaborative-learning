@@ -1,13 +1,14 @@
+@import './vars';
+
 .network-status {
   height: 100%;
-  margin-right: 15px;
   display: flex;
   justify-content: space-around;
   align-items: center;
 
   .status {
     width: 70px;
-    height: 40px;
+    height: 20px;
     border-radius: 5px;
     display: flex;
     justify-content: center;
@@ -15,10 +16,11 @@
     background-color: #D50103;
     color: white;
     font-weight: bold;
+    font-size: 13px;
 
     &.connected {
       background-color: #00d700;
-      color: black;
+      color: $charcoal-dark-2;
       font-weight: normal;
     }
   }

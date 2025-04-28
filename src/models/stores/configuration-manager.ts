@@ -183,6 +183,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["planningTemplate"]>("planningTemplate");
   }
 
+  get placeholder() {
+    return this.getProp<UC["placeholder"]>("placeholder");
+  }
+
   get placeholderText() {
     return this.getProp<UC["placeholderText"]>("placeholderText");
   }

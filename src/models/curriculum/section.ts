@@ -17,8 +17,7 @@ export interface ISectionInfo {
 export const kAllSectionType = "all";
 const kAllSectionInfo = { initials: "*", title: "All" };
 export const kUnknownSectionType = "unknown";
-export const kDefaultPlaceholder = "Create or drag tiles here";
-const kUnknownSectionInfo = { initials: "?", title: "Unknown", placeholder: kDefaultPlaceholder };
+const kUnknownSectionInfo = { initials: "?", title: "Unknown" };
 
 /*
  * SectionInfoMap
@@ -65,7 +64,7 @@ export function getSectionTitle(type: SectionType) {
 }
 
 export function getSectionPlaceholder(type: SectionType) {
-  return getSectionInfo(type).placeholder || kDefaultPlaceholder;
+  return getSectionInfo(type).placeholder;
 }
 
 export const SectionModel = types

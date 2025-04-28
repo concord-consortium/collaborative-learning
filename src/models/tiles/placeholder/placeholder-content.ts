@@ -8,11 +8,15 @@ export const PlaceholderContentModel = TileContentModel
   .named("PlaceholderContent")
   .props({
     type: types.optional(types.literal(kPlaceholderTileType), kPlaceholderTileType),
-    sectionId: ""
+    sectionId: "",
+    containerType: ""
   })
   .actions(self => ({
     setSectionId(sectionId = "") {
       self.sectionId = sectionId;
+    },
+    setContainerType(containerType = "") {
+      self.containerType = containerType;
     }
   }));
 

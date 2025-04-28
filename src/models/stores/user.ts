@@ -1,7 +1,7 @@
 import initials from "initials";
 import { Instance, types } from "mobx-state-tree";
 import { AuthenticatedUser, isAuthenticatedTeacher } from "../../lib/auth";
-import { PortalFirebaseStudentJWT } from "../../lib/portal-types";
+import { PortalFirebaseStudentJWT, PortalJWT } from "../../lib/portal-types";
 import { UserType, UserTypeEnum } from "./user-types";
 
 export const UserPortalOffering = types
@@ -24,6 +24,13 @@ export const UserPortalOffering = types
       return `${self.unitCode}${separator}${self.problemOrdinal.replace(".", "/")}`;
     }
   }));
+
+export type IStandaloneAuth = undefined |
+  {state: "waiting"} |
+  {state: "haveBearerToken", bearerToken: string, authDomain: string} |
+  {state: "authenticated", portalJWT: PortalJWT} |
+  {state: "error", message: string}
+const undefinedStandaloneAuth: IStandaloneAuth = undefined;
 
 export type IUserPortalOffering = Instance<typeof UserPortalOffering>;
 
@@ -53,8 +60,8 @@ export const UserModel = types
     lastStickyNoteViewTimestamp: types.maybe(types.number)
   })
   .volatile(self => ({
-    // STANDALONE TODO: replace this boolean with a state machine enum
-    waitingForStandaloneAuth: false,
+    // in standalone mode, this is defined with a state value
+    standaloneAuth: undefinedStandaloneAuth as IStandaloneAuth,
     isFirebaseConnected: false,
     // number of firebase disconnects encountered during the current session
     firebaseDisconnects: 0,
@@ -116,8 +123,8 @@ export const UserModel = types
         self.demoClassHashes.replace(user.demoClassHashes);
       }
     },
-    setWaitingForStandaloneAuth(waiting: boolean) {
-      self.waitingForStandaloneAuth = waiting;
+    setStandaloneAuth(value: IStandaloneAuth) {
+      self.standaloneAuth = value;
     },
     setIsFirebaseConnected(connected: boolean) {
       if (self.isFirebaseConnected && !connected) ++self.firebaseDisconnects;

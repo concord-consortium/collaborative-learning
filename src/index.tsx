@@ -9,9 +9,9 @@ import { removeLoadingMessage, showLoadingMessage } from "./utilities/loading-ut
 removeLoadingMessage("Loading the application");
 showLoadingMessage("Initializing");
 
-const redirectingToAuthDomain = initializeAuthorization();
+const {redirectingToAuthDomain} = initializeAuthorization();
 if (!redirectingToAuthDomain) {
-  const stores = initializeApp(false);
+  const stores = initializeApp();
   stores.ui.setShowDemoCreator(!!stores.showDemoCreator);
 
   ReactDOM.render(
