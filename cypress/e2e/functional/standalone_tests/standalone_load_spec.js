@@ -1,4 +1,4 @@
-const url = "/standalone/";
+const url = "/standalone/?unit=msa";
 
 function beforeTest() {
   cy.visit(url);
