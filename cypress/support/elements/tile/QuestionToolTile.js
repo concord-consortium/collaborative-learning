@@ -16,6 +16,10 @@ class QuestionToolTile {
         cy.get('.tool.delete').click();
         cy.get('.ReactModalPortal .modal-footer .modal-button.default').click();
     }
+
+    getQuestionTileEmbeddedTiles(workspaceClass) {
+      return this.getQuestionTile().find('.tool-tile');
+    }
 }
 
 export default QuestionToolTile;
