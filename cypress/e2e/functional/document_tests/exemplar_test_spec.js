@@ -30,10 +30,10 @@ context('Exemplar Documents', function () {
     cy.openTopTab('sort-work');
     sortWork.openSortWorkSection("No Group");
     sortWork.checkDocumentInGroup("No Group", exemplarName);
-    sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
+    sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
     clueCanvas.getStickyNotePopup().should("not.exist");
 
-    cy.log("Create 3 drawing tiles with 1 events and a label");
+    cy.log("Create 3 drawing tiles with 1 event and a label");
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.addText(300, 50, "one two three four five six seven eight nine ten");
@@ -47,7 +47,7 @@ context('Exemplar Documents', function () {
     drawToolTile.addText(300, 50, "one two three four five six seven eight nine ten");
 
     // No change, no sticky note
-    sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
+    sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
     clueCanvas.getStickyNotePopup().should("not.exist");
   });
 
@@ -94,13 +94,13 @@ context('Exemplar Documents', function () {
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
     clueCanvas.getStickyNotePopup().should("not.exist");
 
-    cy.log("Create 1 drawing tiles with 3 events");
+    cy.log("Create 1 drawing tile with 3 events");
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);
     drawToolTile.drawRectangle(300, 50);
 
-    cy.log("Create 1 text tiles and put 5 words in them");
+    cy.log("Create 1 text tile and put 5 words in it");
     clueCanvas.addTile("text");
     textToolTile.enterText("one two three four");
 
@@ -125,7 +125,7 @@ context('Exemplar Documents', function () {
   });
 
   it('Unit with exemplars hidden initially, allows user to click Ideas button to make random exemplar visible', function () {
-    beforeTest(queryParams2);
+    beforeTest(queryParams1);
     cy.openTopTab('sort-work');
     sortWork.openSortWorkSection("No Group");
     sortWork.checkDocumentInGroup("No Group", exemplarName);
@@ -144,17 +144,18 @@ context('Exemplar Documents', function () {
     canvas.getIdeasButton().should("not.exist");
   });
 
-  it('Exemplar revealed by 1 drawings that include labels', function () {
+  it('Exemplar revealed by 1 drawing that includes a label', function () {
     beforeTest(queryParams1);
     cy.openTopTab('sort-work');
     sortWork.openSortWorkSection("No Group");
     sortWork.checkDocumentInGroup("No Group", exemplarName);
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
 
-    cy.log("Create 1 drawing tiles with 2 events and a label");
+    cy.log("Create 1 drawing tile with 3 events and a label");
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);
+    drawToolTile.drawRectangle(300, 50);
 
     // Still private?
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
@@ -176,18 +177,14 @@ context('Exemplar Documents', function () {
     cy.log("Create a personal document");
     canvas.createNewExtraDocumentFromFileMenu("Personal Document", "my-work");
 
-    cy.log("Create 2 drawing tiles with 2 events and a label");
-    clueCanvas.addTile("drawing");
-    drawToolTile.drawRectangle(100, 50);
-    drawToolTile.drawRectangle(200, 50);
-    drawToolTile.addText(300, 50, "one two three four five");
-
+    cy.log("Create 1 drawing tile with 2 events and no label");
     clueCanvas.addTile("drawing");
     drawToolTile.drawRectangle(100, 50);
     drawToolTile.drawRectangle(200, 50);
 
     // Still private?
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
+    cy.log("Add a label");
     drawToolTile.addText(300, 50, "one two three four five");
     // Now the exemplar should be revealed
     sortWork.getSortWorkItemByTitle(exemplarInfo).parents('.list-item').should("not.have.class", "private");
