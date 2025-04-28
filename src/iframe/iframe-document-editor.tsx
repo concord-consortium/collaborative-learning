@@ -24,7 +24,7 @@ interface IState {
   document?: DocumentModelType;
 }
 
-const stores = initializeApp(true);
+const stores = initializeApp({authoring: true});
 const { unwrapped, readOnly } = urlParams;
 
 export class IframeDocumentEditor extends React.Component<IProps, IState>  {

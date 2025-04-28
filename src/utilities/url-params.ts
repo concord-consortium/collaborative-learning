@@ -110,6 +110,11 @@ export interface QueryParams {
   unwrapped?: boolean
   // Don't load or save the document from browser storage
   noStorage?: boolean
+
+  //
+  // Standalone auth options
+  //
+  portalDomain?: string;
 }
 
 // Make a union of all of the boolean params from the QueryParams

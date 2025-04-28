@@ -17,6 +17,7 @@ import { getUnitCodeFromUnitParam } from "../utilities/url-utils";
 import { ICurriculumConfig } from "../models/stores/curriculum-config";
 import { ClassInfo, Portal, ResearcherUser, StudentUser, TeacherUser } from "../models/stores/portal";
 import { maybeAddResearcherParam } from "../utilities/researcher-param";
+import { UserModelType } from "../models/stores/user";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";
 export const FIREBASE_JWT_URL_SUFFIX = "api/v1/jwt/firebase";
@@ -158,7 +159,9 @@ export const authenticate = async (
     appConfig: AppConfigModelType,
     curriculumConfig: ICurriculumConfig,
     portalService: Portal,
-    urlParams?: QueryParams): Promise<IAuthenticateResponse> => {
+    urlParams?: QueryParams,
+    user?: UserModelType
+  ): Promise<IAuthenticateResponse> => {
   urlParams = urlParams || pageUrlParams;
   // TODO: we should be defaulting to appConfig.defaultUnit here rather than the empty string,
   // but some cypress tests rely on the fact that in demo mode the offeringId is prefixed with
@@ -213,7 +216,15 @@ export const authenticate = async (
     };
   }
 
-  if (appMode !== "authed") {
+  if (user?.standaloneAuth?.state === "haveBearerToken") {
+    const result = await portalService.requestPortalJWT({
+      bearerToken: user.standaloneAuth.bearerToken,
+      basePortalUrl: user.standaloneAuth.authDomain
+    });
+    user.setStandaloneAuth({state: "authenticated", portalJWT: result});
+  }
+
+  if (user?.standaloneAuth || appMode !== "authed") {
     return generateDevAuthentication(unitCode || curriculumConfig.defaultUnit || "", problemOrdinal);
   }
 
