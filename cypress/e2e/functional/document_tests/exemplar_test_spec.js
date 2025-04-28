@@ -86,7 +86,7 @@ context('Exemplar Documents', function () {
     sortWork.checkSimpleDocumentInSubgroup("Text", "Idea, Ivan", exemplarInfo);
   });
 
-  it('Unit with exemplars hidden initially, revealed after 1 drawing with three shapes and 1 text tiles', function () {
+  it('Unit with exemplars hidden initially, revealed after 1 drawing with three shapes and 1 text tile', function () {
     beforeTest(queryParams1);
     cy.openTopTab('sort-work');
     sortWork.openSortWorkSection("No Group");
@@ -103,12 +103,12 @@ context('Exemplar Documents', function () {
     cy.log("Create 1 text tile and put 5 words in it");
     clueCanvas.addTile("text");
     textToolTile.enterText("one two three four");
+    textToolTile.getTextTile().eq(0).blur(); // text is saved in onBlur
 
-    drawToolTile.getDrawTile().eq(0).click(); // text is saved in onBlur
     // Still private?
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("have.class", "private");
     textToolTile.enterText(" five");
-    drawToolTile.getDrawTile().eq(0).click();
+    textToolTile.getTextTile().eq(0).blur();
 
     // Now the exemplar should be revealed
     sortWork.getSortWorkItemByTitle(exemplarName).parents('.list-item').should("not.have.class", "private");
