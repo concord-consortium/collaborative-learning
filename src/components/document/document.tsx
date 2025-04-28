@@ -453,6 +453,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+  // The exemplar controller listens to log messages and then decides when to show
+  // the ideas button based on rules defined in exemplar-controller-rules. So we just
+  // need to log the click. See: exemplar-controller.ts, and exemplar-controller-rules.ts
   private handleIdeasButtonClick = () => {
     const document = this.props.document;
     logDocumentEvent(LogEventName.REQUEST_IDEA, { document });
