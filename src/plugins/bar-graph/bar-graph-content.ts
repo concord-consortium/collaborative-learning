@@ -161,14 +161,13 @@ export const BarGraphContentModel = TileContentModel
   .actions(self => ({
     setAttributeKeyColor(key: string, colorIndex: number, attr: "primary" | "secondary") {
       const attribute = attr === "primary" ? self.primaryAttribute : self.secondaryAttribute;
-      const colorMap = attr === "primary" ? self.attributeColorMap : self.attributeColorMap;
       if (!attribute) return;
 
-      if (!colorMap.has(attribute)) {
-        colorMap.set(attribute, self.newEmptyColorMap());
+      if (!self.attributeColorMap.has(attribute)) {
+        self.attributeColorMap.set(attribute, self.newEmptyColorMap());
       }
 
-      colorMap.get(attribute)?.set(key, colorIndex);
+      self.attributeColorMap.get(attribute)?.set(key, colorIndex);
     }
   }))
   .actions(self => ({
