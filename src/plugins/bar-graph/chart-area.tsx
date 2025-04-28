@@ -130,8 +130,8 @@ export const ChartArea = observer(function BarGraphChart({ width, height }: IPro
 
   function groupedBars() {
     // generate a unique value from the color map to force a re-render when the map changes
-    const colorMapKey = model?.secondaryAttributeColorMap?.size
-      ? JSON.stringify(getSnapshot(model.secondaryAttributeColorMap))
+    const colorMapKey = model?.attributeColorMap?.size
+      ? JSON.stringify(getSnapshot(model.attributeColorMap))
       : "no-color-map";
 
     return (

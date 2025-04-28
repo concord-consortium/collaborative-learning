@@ -56,11 +56,10 @@ describe("Bar Graph Content", () => {
     expect(content.yAxisLabel).toBe("Counts");
     expect(getSnapshot(content)).toMatchInlineSnapshot(`
 Object {
+  "attributeColorMap": Object {},
   "dataSetId": undefined,
   "primaryAttribute": undefined,
-  "primaryAttributeColorMap": Object {},
   "secondaryAttribute": undefined,
-  "secondaryAttributeColorMap": Object {},
   "type": "BarGraph",
   "yAxisLabel": "Counts",
 }
@@ -309,8 +308,7 @@ Object {
     const expected = {
       type: "BarGraph",
       yAxisLabel: "",
-      primaryAttributeColorMap: {},
-      secondaryAttributeColorMap: {},
+      attributeColorMap: {},
       dataSetId: undefined,
       primaryAttribute: undefined,
       secondaryAttribute: undefined

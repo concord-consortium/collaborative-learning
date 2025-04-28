@@ -25,11 +25,9 @@ export const BarGraphContentModel = TileContentModel
     // that we can tell when it changes.
     dataSetId: types.maybe(types.string),
     primaryAttribute: types.maybe(types.string),
-    // Map of primary attribute keys to color indices.
-    primaryAttributeColorMap: types.optional(types.map(types.map(types.number)), {}),
     secondaryAttribute: types.maybe(types.string),
-    // Map of secondary attribute keys to color indices. Each secondary attribute has its own map.
-    secondaryAttributeColorMap: types.optional(types.map(types.map(types.number)), {}),
+    // Map of attribute keys to color indices. Each attribute has its own map.
+    attributeColorMap: types.optional(types.map(types.map(types.number)), {}),
   })
   .views(self => ({
     exportJson(options?: ITileExportOptions) {
@@ -140,12 +138,12 @@ export const BarGraphContentModel = TileContentModel
     },
     get currentPrimaryAttributeColorMap() {
       return self.primaryAttribute
-        ? self.primaryAttributeColorMap.get(self.primaryAttribute) || new Map<string, number>()
+        ? self.attributeColorMap.get(self.primaryAttribute) || new Map<string, number>()
         : new Map<string, number>();
     },
     get currentSecondaryAttributeColorMap() {
       return self.secondaryAttribute
-        ? self.secondaryAttributeColorMap.get(self.secondaryAttribute) || new Map<string, number>()
+        ? self.attributeColorMap.get(self.secondaryAttribute) || new Map<string, number>()
         : new Map<string, number>();
     }
   }))
@@ -163,7 +161,7 @@ export const BarGraphContentModel = TileContentModel
   .actions(self => ({
     setAttributeKeyColor(key: string, colorIndex: number, attr: "primary" | "secondary") {
       const attribute = attr === "primary" ? self.primaryAttribute : self.secondaryAttribute;
-      const colorMap = attr === "primary" ? self.primaryAttributeColorMap : self.secondaryAttributeColorMap;
+      const colorMap = attr === "primary" ? self.attributeColorMap : self.attributeColorMap;
       if (!attribute) return;
 
       if (!colorMap.has(attribute)) {
@@ -185,11 +183,11 @@ export const BarGraphContentModel = TileContentModel
     updateSecondaryAttributeKeyColorMap() {
       if (!self.secondaryAttribute) return;
 
-      if (!self.secondaryAttributeColorMap.has(self.secondaryAttribute)) {
-        self.secondaryAttributeColorMap.set(self.secondaryAttribute, self.newEmptyColorMap());
+      if (!self.attributeColorMap.has(self.secondaryAttribute)) {
+        self.attributeColorMap.set(self.secondaryAttribute, self.newEmptyColorMap());
       }
 
-      const colorMap = self.secondaryAttributeColorMap.get(self.secondaryAttribute);
+      const colorMap = self.attributeColorMap.get(self.secondaryAttribute);
 
       for (const key of self.secondaryKeys) {
         if (!colorMap?.has(key)) {
