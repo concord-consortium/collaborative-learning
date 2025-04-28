@@ -1,12 +1,20 @@
-const url = "/standalone/?unit=msa";
+const urlWithUnit = "/standalone/?unit=msa";
+const urlWithNoUnit = "/standalone/";
 
-function beforeTest() {
+function beforeTest(url) {
   cy.visit(url);
 }
 
 context('Standalone', () => {
+  it('verify standalone page shows error with no unit in parameters', function () {
+    beforeTest(urlWithNoUnit);
+
+    cy.log("verify no unit error message is visible");
+    cy.get("[data-testid=error-alert-content]").should("contain", "Using CLUE in Standalone Mode requires a unit");
+  });
+
   it('verify standalone page loads', function () {
-    beforeTest();
+    beforeTest(urlWithUnit);
 
     cy.log("verify welcome message is visible");
     cy.get("[data-testid=standalone-welcome]").should("exist");
