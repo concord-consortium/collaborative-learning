@@ -88,12 +88,6 @@ context('XYPlot Tool Tile', function () {
       cy.log("verify graph dot is displayed");
       xyTile.getGraphDot().should('have.length', 1);
 
-      cy.log("resize horizontal and vertical axes");
-      cy.get(".editable-border-box").eq(4).click().type('-10', '{enter}');
-      cy.get(".editable-border-box").eq(5).click().type('50', '{enter}');
-      cy.get(".editable-border-box").eq(6).click().type('-10', '{enter}');
-      cy.get(".editable-border-box").eq(7).click().type('50', '{enter}');
-
       cy.log("Add Second Row Table Cell");
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.typeInTableCell(5, '7');
