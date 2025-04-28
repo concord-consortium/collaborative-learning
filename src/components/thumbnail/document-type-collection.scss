@@ -86,6 +86,10 @@ $section-padding: 6px;
     overflow: hidden;
     cursor: pointer;
 
+    &.selected {
+      background-color: $classwork-purple-light-6;
+    }
+
     .scaled-list-item-container {
       border-radius: 5px;
       border: solid 1.5px $charcoal-light-1;

@@ -5,7 +5,7 @@ import { ThumbnailDocumentItem } from "./thumbnail-document-item";
 import { useDocumentCaption } from "../../hooks/use-document-caption";
 import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
 import { DocumentModelType } from "../../models/document/document";
-import { useDBStore, useStores, useUIStore, useUserStore } from "../../hooks/use-stores";
+import { useStores } from "../../hooks/use-stores";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { LogEventName } from "../../lib/logger-types";
@@ -19,6 +19,7 @@ interface IProps {
   document: DocumentModelType;
   selectedDocument?: string;
   selectedSecondaryDocument?: string;
+  usePersistentUI?: boolean;
   allowDelete: boolean;
   tab: string;
 }
@@ -26,14 +27,13 @@ interface IProps {
 // observes teacher names via useDocumentCaption()
 export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
   document, tab, scale, selectedDocument, selectedSecondaryDocument, allowDelete,
-  onSelectDocument, shouldHandleStarClick
+  onSelectDocument, shouldHandleStarClick, usePersistentUI,
 }: IProps) => {
-    const user = useUserStore();
-    const dbStore = useDBStore();
+    const { user, db: dbStore, bookmarks, ui, persistentUI } = useStores();
     const tabName = tab.toLowerCase().replace(' ', '-');
     const caption = useDocumentCaption(document);
-    const ui = useUIStore();
-    const { bookmarks } = useStores();
+    const selectedDocumentKey = usePersistentUI ?
+      persistentUI.selectedDocumentKey : selectedDocument;
 
     // sync delete a publication to firebase
     useDocumentSyncToFirebase(user, dbStore.firebase, dbStore.firestore, document, true);
@@ -78,7 +78,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
         canvasContext={tab}
         document={document}
         scale={scale}
-        isSelected={document.key === selectedDocument}
+        isSelected={document.key === selectedDocumentKey}
         isSecondarySelected={document.key === selectedSecondaryDocument}
         captionText={caption}
         onDocumentClick={handleDocumentClick}

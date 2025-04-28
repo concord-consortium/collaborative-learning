@@ -122,7 +122,10 @@ export const PersistentUIModelV2 = types
     },
     removeOpenDocumentGroup(docGroupLabel: string) {
       remove(self.openDocumentGroups, (docGroup) => docGroup === docGroupLabel);
-    }
+    },
+    setSelectedDocumentKey(key: string) {
+      self.selectedDocumentKey = key;
+    },
   }))
   .actions((self) => ({
     /**
@@ -191,13 +194,12 @@ export const PersistentUIModelV2 = types
     openDocumentGroupPrimaryDocument(tab: string, docGroupId: string, documentKey: string) {
       const tabState = self.getOrCreateTabState(tab);
       self.activeNavTab = tab;
-      self.selectedDocumentKey = documentKey;
+      self.setSelectedDocumentKey(documentKey);
       tabState.openDocumentGroupPrimaryDocument(docGroupId, documentKey);
     },
     openDocumentGroupSecondaryDocument(tab: string, docGroupId: string, documentKey: string) {
       const tabState = self.getOrCreateTabState(tab);
       self.activeNavTab = tab;
-      self.selectedDocumentKey = documentKey;
       tabState.setDocumentGroupSecondaryDocument(docGroupId, documentKey);
       tabState.currentDocumentGroupId = docGroupId;
     },

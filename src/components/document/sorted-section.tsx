@@ -62,7 +62,7 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
       const documentGroupId = JSON.stringify(openDocGroupMetadata);
       const tabState = persistentUI.getOrCreateTabState(ENavTab.kSortWork);
       tabState.openDocumentGroupPrimaryDocument(documentGroupId, document.key);
-
+      persistentUI.setSelectedDocumentKey(document.key);
       logDocumentViewEvent(document);
     };
   };
@@ -78,8 +78,6 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
   const renderUngroupedDocument = (doc: IDocumentMetadataModel) => {
     const fullDocument = getDocument(doc.key);
     if (!fullDocument) return <div key={doc.key} className="loading-spinner"/>;
-    const maybeTabState = persistentUI.tabs.get(ENavTab.kSortWork);
-    const openDocumentKey = maybeTabState?.currentDocumentGroup?.primaryDocumentKey;
     return <DecoratedDocumentThumbnailItem
              key={doc.key}
              scale={0.1}
@@ -87,8 +85,8 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
              tab={ENavTab.kSortWork}
              shouldHandleStarClick
              allowDelete={false}
-             selectedDocument={openDocumentKey}
              onSelectDocument={handleSelectDocument(documentGroup)}
+             usePersistentUI={true}
            />;
   };
 
