@@ -9,7 +9,7 @@ import { AppProvider, initializeApp } from "./initialize-app";
 
 (window as any).DISABLE_FIREBASE_SYNC = true;
 
-const stores = initializeApp(true);
+const stores = initializeApp({authoring: true});
 
 // By default Chakra adds some global styles which break some of the
 // CLUE styles. But removing these styles then breaks the Chakra

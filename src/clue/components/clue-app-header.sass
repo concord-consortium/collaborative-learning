@@ -70,9 +70,14 @@ $member-size: 18px
     align-items: center
     justify-content: flex-end
 
-    .version
-      padding-right: $padding
-      font-size: 0.9em
+    .network-status-and-version
+      display: flex
+      flex-direction: column
+      justify-content: space-between
+      gap: 5px
+
+      .version
+        font-size: 12px
 
     .group
       height: 40px

@@ -194,11 +194,11 @@ class Stores implements IStores{
   get tabsToDisplay() {
     const { appConfig: { navTabs: navTabSpecs },
       teacherGuide,
-      user: { isTeacherOrResearcher, waitingForStandaloneAuth },
+      user: { isTeacherOrResearcher, standaloneAuth },
       ui: { standalone },
     } = this;
 
-    const removeNonCurriculumTabs = standalone && waitingForStandaloneAuth;
+    const removeNonCurriculumTabs = standalone && standaloneAuth;
 
     const tabs = (isTeacherOrResearcher)
       ? navTabSpecs.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide)

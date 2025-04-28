@@ -56,7 +56,7 @@ export const authAndConnect = async (stores: IStores) => {
 
   try {
     const {appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode} =
-      await authenticate(appMode, appConfig, curriculumConfig, portal, urlParams);
+      await authenticate(appMode, appConfig, curriculumConfig, portal, urlParams, user);
 
     // authentication can trigger appMode change (e.g. preview => demo)
     if (newAppMode && (newAppMode !== appMode)) {
@@ -136,6 +136,27 @@ export const authAndConnect = async (stores: IStores) => {
   }
 };
 
+const checkStandaloneUnitParam = ({ui}: IStores) => {
+  if (!ui.standalone || urlParams.unit) {
+    return true;
+  }
+
+  const error = new Error("Using CLUE in Standalone Mode requires a unit.");
+  ui.setError(error, undefined, () => {
+    return (
+      <div>
+        <p>
+          Using CLUE in Standalone Mode requires a unit. Please adjust your URL and try again.
+        </p>
+        <p>
+          Need assistance? Contact us at <a href="mailto:help@concord.org">help@concord.org</a>.
+        </p>
+      </div>
+    );
+  });
+  return false;
+};
+
 @inject("stores")
 @observer
 export class AppComponent extends BaseComponent<IProps> {
@@ -143,7 +164,9 @@ export class AppComponent extends BaseComponent<IProps> {
   constructor(props: IProps) {
     super(props);
 
-    authAndConnect(this.stores);
+    if (checkStandaloneUnitParam(this.stores)) {
+      authAndConnect(this.stores);
+    }
   }
 
   public componentWillUnmount() {
@@ -164,16 +187,18 @@ export class AppComponent extends BaseComponent<IProps> {
   public render() {
     const {appConfig, user, ui, db} = this.stores;
 
-    if (ui.standalone) {
-      return this.renderApp(<AppContentContainerComponent />);
-    }
-
     if (ui.showDemoCreator) {
       return this.renderApp(<DemoCreatorComponent />);
     }
 
     if (ui.error) {
-      return this.renderApp(this.renderError(ui.error));
+      return this.renderApp(this.renderError(ui.errorContent ?? ui.error));
+    }
+
+    // if we're in standalone mode and the user is not authenticated
+    // then we need to show the "Get Started" button
+    if (ui.standalone && user.standaloneAuth) {
+      return this.renderApp(<AppContentContainerComponent />);
     }
 
     // `db.listeners.isListening` is often the slowest requirement to be true.
@@ -215,14 +240,16 @@ export class AppComponent extends BaseComponent<IProps> {
     );
   }
 
-  private renderError(error: string) {
+  private renderError(error: string | React.FC<any>) {
+    const showButton = !this.stores.ui.errorContent;
+
     return (
       <div className="error">
         <ErrorAlert
           content={error}
           canCancel={false}
-          buttonLabel="Proceed"
-          onClick={this.handlePortalLoginRedirect}
+          buttonLabel={showButton ? "Proceed" : undefined}
+          onClick={showButton ? this.handlePortalLoginRedirect : undefined}
         />
       </div>
     );

@@ -33,10 +33,11 @@ interface IProps<IContentProps> {
   // defined left-to-right, e.g. Extra Button, Cancel, OK
   buttons: IModalButton[];
   onClose?: () => void;
+  dataTestId?: string;
 }
 export const useCustomModal = <IContentProps,>({
   className, Icon, title, Content, contentProps, focusElement, canCancel, buttons,
-  onClose
+  onClose, dataTestId
 }: IProps<IContentProps>, dependencies?: any[]) => {
 
   const [contentElt, setContentElt] = useState<HTMLDivElement>();
@@ -82,13 +83,16 @@ export const useCustomModal = <IContentProps,>({
   handleCloseRef.current = handleClose;
 
   const [showModal, hideModal] = useModal(() => {
+    // NOTE: the data-testid attribute is not passed to the modal element
+    // because it is not a valid attribute for ReactModal and instead
+    // is passed to the modal header and content elements to allow for testing
     return (
       <Modal className={`custom-modal ${className || ""}`} isOpen
               shouldCloseOnEsc={canCancel}
               shouldCloseOnOverlayClick={false}
               onAfterOpen={handleAfterOpen as any}
               onRequestClose={handleClose} onAfterClose={onClose}>
-        <div className="modal-header">
+        <div className="modal-header" data-testid={dataTestId && `${dataTestId}-header`}>
           <div className="modal-icon">
             {Icon && <Icon/>}
           </div>
@@ -98,22 +102,24 @@ export const useCustomModal = <IContentProps,>({
               <CloseIconSvg />
             </button>}
         </div>
-        <div className="modal-content">
+        <div className="modal-content" data-testid={dataTestId && `${dataTestId}-content`}>
           { /* TODO Fix type cast */ }
           <Content as any {...(contentProps)}/>
         </div>
-        <div className="modal-footer">
-          {buttons.map((b, i) => {
-            const classes = classNames("modal-button", b.className, { default: b.isDefault, disabled: b.isDisabled });
-            const key = `${i}-${b.className}`;
-            const handleClick = () => invokeButton(b, handleClose);
-            return (
-              <button type="button" className={classes} key={key} onClick={handleClick}>
-                {b.label}
-              </button>
-            );
-          })}
-        </div>
+        {buttons.length > 0 &&
+          <div className="modal-footer">
+            {buttons.map((b, i) => {
+              const classes = classNames("modal-button", b.className, { default: b.isDefault, disabled: b.isDisabled });
+              const key = `${i}-${b.className}`;
+              const handleClick = () => invokeButton(b, handleClose);
+              return (
+                <button type="button" className={classes} key={key} onClick={handleClick}>
+                  {b.label}
+                </button>
+              );
+            })}
+          </div>
+        }
       </Modal>
     );
   }, dependencies);
