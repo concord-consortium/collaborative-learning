@@ -1,66 +1,79 @@
 # Tile creation
 
-How do tiles get into the document? There are several ways.
+How do tiles get into the document? Let me count the ways.
 
 ```mermaid
 flowchart TD
 %%{init: {"flowchart": {"defaultRenderer": "elk"}} }%%
 
 toolbarClick{{"Toolbar button clicked"}}
-TBhandleAddTile("handleAddTile\n(toolbar.tsx)")
-DaddTile("addTile\n(document.ts)\nsets unique title")
-BDCuserAddTile[["userAddTile\n(base-document-content.ts)\nLogs CREATE_TILE event"]]
-BDCaddTile("addTile\n(base-document-content.ts)")
+TBhandleAddTile("handleAddTile<br/>(toolbar.tsx)")
+DaddTile("addTile<br/>(document.ts)<br/>sets unique title")
+BDCuserAddTile[["userAddTile<br/>(base-document-content.ts)<br/>Calls createTileContent<br/>Logs CREATE_TILE event"]]
+BDCaddTile("addTile<br/>(base-document-content.ts)")
 
-toolbarClick --> TBhandleAddTile --> DaddTile --> BDCuserAddTile --> BDCaddTile --> BDCaddTileContentInNewRow
+toolbarClick --> TBhandleAddTile --> DaddTile --> BDCuserAddTile
+
+BDCuserAddTile --> BDCaddTile --> BDCaddTileContentInNewRow
 
 toolbarDrag{{"Toolbar button drag & drop"}}
-ThandleDragNewTile("handleDragNewTile\n(toolbar.tsx)\nsets unique title")
-DChandleDrop("handleDrop\n(document-content.tsx)")
-DChandleInsertNewTile("handleInsertNewTile\n(document-content.tsx)")
+ThandleDragNewTile("handleDragNewTile<br/>(toolbar.tsx)<br/>sets unique title")
+DChandleDrop("handleDrop<br/>(document-content.tsx)")
+DChandleInsertNewTile("handleInsertNewTile<br/>(document-content.tsx)")
 
 toolbarDrag -- (drag) --> ThandleDragNewTile
-toolbarDrag -- (drop) --> DChandleDrop -- (new) --> DChandleInsertNewTile --> BDCuserAddTile
+toolbarDrag -- (drop) --> DChandleDrop -- (create new) --> DChandleInsertNewTile --> BDCuserAddTile
 
 toolbarDuplicate{{Toolbar duplicate button}}
-ThandleDuplicate("handleDuplicate\n(toolbar.tsx)")
-DCduplicateTiles("duplicateTiles\n(document-content.ts)")
-DCcopyTiles("copyTiles\n(document-content.ts)\nCopies shared models\nUpdates titles for uniqueness")
-BDCcopyTilesIntoNewRows("copyTilesIntoNewRows\n(base-document-content.ts)")
+ThandleDuplicate("handleDuplicate<br/>(toolbar.tsx)")
+DCduplicateTiles("duplicateTiles<br/>(document-content.ts)")
+DCcopyTiles("copyTiles<br/>(document-content.ts)<br/>Copies shared models<br/>Updates titles for uniqueness")
+BDCcopyTilesIntoNewRows("copyTilesIntoNewRows<br/>(base-document-content.ts)")
 
 toolbarDuplicate --> ThandleDuplicate --> DCduplicateTiles --> DCcopyTiles
-BDCcopyTilesIntoNewRows --> BDCaddTileContentInNewRow
+BDCcopyTilesIntoNewRows --> |first tile|BDCaddTileContentInNewRow
+BDCcopyTilesIntoNewRows --> |subsequent tiles| BDCaddTileSnapshotInExistingRow
+BDCcopyTilesIntoNewRows --> |embedded| BDCaddToTileMap
 
-tableIt{{"Table It! and other\nview-as buttons"}}
+tableIt{{"Table It! and other<br/>view-as buttons"}}
 useConsumerTileLinking("useConsumerTileLinking")
-DCaddTileAfter("addTileAfter\n(document-content.ts)\nSets title if needed")
+DCaddTileAfter("addTileAfter<br/>(document-content.ts)<br/>Sets title if needed")
 
 tableIt --> useConsumerTileLinking --> DCaddTileAfter --> BDCuserAddTile
 
-placeholder{{"Create placeholder tile"}}
-BDCaddPlaceholderTile("addPlaceholderTile\n(base-document-content.ts)")
-placeholder --> BDCaddPlaceholderTile --> BDCaddTileContentInNewRow
+placeholder{{"Create placeholder tile"}} -->
+BDCaddPlaceholderRowIfAppropriate("addPlaceholderRowIfAppropriate<br/>(base-document-content.ts)")
+BDCaddPlaceholderRowIfAppropriate --> insert
 
 dragImage{{"Drag & Drop image"}}
-DWhandleImageDrop("handleImageDrop\n(document-workspace.tsx)\nSets unique title")
+DWhandleImageDrop("handleImageDrop<br/>(document-workspace.tsx)<br/>Sets unique title")
 dragImage --> DWhandleImageDrop --> BDCuserAddTile
 
 dragTile{{"Drag & Drop copy tile"}}
-DChandleDrop("handleDrop\n(document-content.tsx)")
-DChandleCopyTilesDrop("handleCopyTilesDrop\n(document-content.tsx)")
-DChandleDragCopyTiles("handleDragCopyTiles\n(document-content.ts)")
-BDCuserCopyTiles[["userCopyTiles\n(base-document-content.ts)\nLogs COPY_TILE event"]]
-BDCcopyTilesIntoExistingRow("copyTilesIntoExistingRow\n(base-document-content.ts)")
+DChandleDrop("handleDrop<br/>(document-content.tsx)")
+DChandleCopyTilesDrop("handleCopyTilesDrop<br/>(document-content.tsx)")
+DChandleDragCopyTiles("handleDragCopyTiles<br/>(document-content.ts)")
+BDCuserCopyTiles[["userCopyTiles<br/>(base-document-content.ts)<br/>Logs COPY_TILE event"]]
+BDCcopyTilesIntoExistingRow("copyTilesIntoExistingRow<br/>(base-document-content.ts)")
+BDCcopyTilesIntoExistingRow --> |embedded| BDCaddToTileMap
+BDCcopyTilesIntoExistingRow --> |top-level| BDCaddTileSnapshotInExistingRow
 
-dragTile --> DChandleDrop -- (existing) --> DChandleCopyTilesDrop --> DChandleDragCopyTiles --> DCcopyTiles --> BDCuserCopyTiles --> BDCcopyTilesIntoNewRows & BDCcopyTilesIntoExistingRow --> BDCaddTileSnapshotInExistingRow
+dragTile --> DChandleDrop -- (copy existing) --> DChandleCopyTilesDrop --> DChandleDragCopyTiles --> DCcopyTiles --> BDCuserCopyTiles --> BDCcopyTilesIntoNewRows & BDCcopyTilesIntoExistingRow
 
-BDCaddTileContentInNewRow("addTileContentInNewRow\n(base-document-content.ts)")
-BDCaddTileSnapshotInExistingRow("addTileSnapshotInExistingRow\n(base-document-content.ts)")
-insert([add to tileMap and row])
 
-BDCaddTileContentInNewRow & BDCaddTileSnapshotInExistingRow --> insert
+BDCaddTileContentInNewRow("addTileContentInNewRow<br/>(base-document-content.ts)")
+BDCaddTileSnapshotInExistingRow("addTileSnapshotInExistingRow<br/>(base-document-content.ts)")
+
+BDCaddToTileMap["addToTileMap<br/>(base-document-content.ts)"] --> insert
+
+BDCaddTileContentInNewRow & BDCaddTileSnapshotInExistingRow --> BDCaddToTileMap
+BDCaddTileContentInNewRow & BDCaddTileSnapshotInExistingRow & BDCaddPlaceholderRowIfAppropriate --> rowinsert
+
+insert([insert into tileMap])
+rowinsert([insert into rows structure])
 
 style insert fill:#8A8
+style rowinsert fill:#8A8
 
 style toolbarClick fill:#88F
 style toolbarDrag fill:#88F
@@ -72,7 +85,7 @@ style placeholder fill:#88F
 
 ```
 
-This should display version of mermaid:
+<!-- This should display version of mermaid:
 ```mermaid
 info
-```
+``` -->
