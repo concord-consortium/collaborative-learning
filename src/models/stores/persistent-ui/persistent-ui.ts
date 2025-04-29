@@ -2,7 +2,7 @@ import {
   getSnapshot, applySnapshot, types, onSnapshot,
   SnapshotIn, Instance
 } from "mobx-state-tree";
-import { cloneDeep, remove } from "lodash";
+import { cloneDeep } from "lodash";
 import { AppConfigModelType } from "../app-config-model";
 import {
   DocFilterType, DocFilterTypeEnum, kDividerHalf, kDividerMax,
@@ -33,10 +33,8 @@ export const PersistentUIModelV2 = types
     dividerPosition: kDividerHalf,
     activeNavTab: types.maybe(types.string),
     docFilter: types.optional(DocFilterTypeEnum, "Problem"),
-    openDocumentGroups: types.optional(types.array(types.string), []),
     primarySortBy: types.optional(types.string, "Group"),
     secondarySortBy: types.optional(types.string, "None"),
-    selectedDocumentKey: types.maybe(types.string),
     selectedSecondaryDocumentKey: types.maybe(types.string),
     showAnnotations: true,
     showTeacherContent: true,
@@ -64,9 +62,6 @@ export const PersistentUIModelV2 = types
     get activeTabModel () {
       if (!self.activeNavTab) return undefined;
       return self.tabs.get(self.activeNavTab);
-    },
-    isDocumentGroupOpen(docGroupLabel: string) {
-      return self.openDocumentGroups.includes(docGroupLabel);
     }
   }))
   .views((self) => ({
@@ -114,18 +109,7 @@ export const PersistentUIModelV2 = types
         self.tabs.put(tabState);
       }
       return tabState;
-    },
-    addOpenDocumentGroup(docGroupLabel: string) {
-      if (!self.openDocumentGroups.includes(docGroupLabel)) {
-        self.openDocumentGroups.push(docGroupLabel);
-      }
-    },
-    removeOpenDocumentGroup(docGroupLabel: string) {
-      remove(self.openDocumentGroups, (docGroup) => docGroup === docGroupLabel);
-    },
-    setSelectedDocumentKey(key: string) {
-      self.selectedDocumentKey = key;
-    },
+    }
   }))
   .actions((self) => ({
     /**
@@ -194,7 +178,6 @@ export const PersistentUIModelV2 = types
     openDocumentGroupPrimaryDocument(tab: string, docGroupId: string, documentKey: string) {
       const tabState = self.getOrCreateTabState(tab);
       self.activeNavTab = tab;
-      self.setSelectedDocumentKey(documentKey);
       tabState.openDocumentGroupPrimaryDocument(docGroupId, documentKey);
     },
     openDocumentGroupSecondaryDocument(tab: string, docGroupId: string, documentKey: string) {

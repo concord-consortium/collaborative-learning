@@ -32,9 +32,9 @@ export interface IOpenDocumentsGroupMetadata {
 
 export const SortedSection: React.FC<IProps> = observer(function SortedSection(props: IProps) {
   const { docFilter, documentGroup, idx, secondarySort } = props;
-  const { persistentUI, sortedDocuments } = useStores();
-  const { isDocumentGroupOpen, addOpenDocumentGroup, removeOpenDocumentGroup } = persistentUI;
-  const showDocuments = isDocumentGroupOpen(documentGroup.label);
+  const { persistentUI, sortedDocuments, ui } = useStores();
+  const { expandedSortWorkSections, setExpandedSortWorkSections, setHighlightedSortWorkDocument } = ui;
+  const showDocuments = expandedSortWorkSections.includes(documentGroup.label);
   const documentCount = documentGroup.documents?.length || 0;
 
   const getDocument = (docKey: string) => {
@@ -62,17 +62,13 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
       const documentGroupId = JSON.stringify(openDocGroupMetadata);
       const tabState = persistentUI.getOrCreateTabState(ENavTab.kSortWork);
       tabState.openDocumentGroupPrimaryDocument(documentGroupId, document.key);
-      persistentUI.setSelectedDocumentKey(document.key);
+      setHighlightedSortWorkDocument(document.key);
       logDocumentViewEvent(document);
     };
   };
 
   const handleToggleShowDocuments = () => {
-    if (showDocuments) {
-      removeOpenDocumentGroup(documentGroup.label);
-    } else {
-      addOpenDocumentGroup(documentGroup.label);
-    }
+    setExpandedSortWorkSections(documentGroup.label, !showDocuments);
   };
 
   const renderUngroupedDocument = (doc: IDocumentMetadataModel) => {
@@ -85,8 +81,8 @@ export const SortedSection: React.FC<IProps> = observer(function SortedSection(p
              tab={ENavTab.kSortWork}
              shouldHandleStarClick
              allowDelete={false}
+             selectedDocument={ui.highlightedSortWorkDocument}
              onSelectDocument={handleSelectDocument(documentGroup)}
-             usePersistentUI={true}
            />;
   };
 

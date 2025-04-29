@@ -19,7 +19,6 @@ interface IProps {
   document: DocumentModelType;
   selectedDocument?: string;
   selectedSecondaryDocument?: string;
-  usePersistentUI?: boolean;
   allowDelete: boolean;
   tab: string;
 }
@@ -27,13 +26,11 @@ interface IProps {
 // observes teacher names via useDocumentCaption()
 export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
   document, tab, scale, selectedDocument, selectedSecondaryDocument, allowDelete,
-  onSelectDocument, shouldHandleStarClick, usePersistentUI,
+  onSelectDocument, shouldHandleStarClick,
 }: IProps) => {
-    const { user, db: dbStore, bookmarks, ui, persistentUI } = useStores();
+    const { user, db: dbStore, bookmarks, ui } = useStores();
     const tabName = tab.toLowerCase().replace(' ', '-');
     const caption = useDocumentCaption(document);
-    const selectedDocumentKey = usePersistentUI ?
-      persistentUI.selectedDocumentKey : selectedDocument;
 
     // sync delete a publication to firebase
     useDocumentSyncToFirebase(user, dbStore.firebase, dbStore.firestore, document, true);
@@ -78,7 +75,7 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
         canvasContext={tab}
         document={document}
         scale={scale}
-        isSelected={document.key === selectedDocumentKey}
+        isSelected={document.key === selectedDocument}
         isSecondarySelected={document.key === selectedSecondaryDocument}
         captionText={caption}
         onDocumentClick={handleDocumentClick}

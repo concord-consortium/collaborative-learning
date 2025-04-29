@@ -15,13 +15,13 @@ interface IProps {
 export const SimpleDocumentItem = observer(function SimpleDocumentItem(
   { document, onSelectDocument }: IProps
 ) {
-  const { appConfig, documents, class: classStore, unit, user, persistentUI } = useStores();
+  const { appConfig, documents, class: classStore, unit, user, ui } = useStores();
   const { uid } = document;
   const userName = classStore.getUserById(uid)?.displayName;
   const title = getDocumentDisplayTitle(unit, document, appConfig);
   const titleWithUser = `${userName}: ${title}`;
   const isPrivate = !isDocumentAccessibleToUser(document, user, documents);
-  const isSelected = persistentUI.selectedDocumentKey === document.key;
+  const isSelected = ui.highlightedSortWorkDocument === document.key;
 
   const handleClick = () => {
     onSelectDocument(document);
