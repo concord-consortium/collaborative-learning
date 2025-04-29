@@ -558,6 +558,12 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
         rowList.deleteRow(beforeRow.id);
       }
     },
+    /**
+     * Inserts a row with a placeholder tile if needed at the given index in the rowList.
+     * The index can be 0 (top of the rowList) up to the full rowCount (the position after the last existing row).
+     * @param rowList
+     * @param rowIndex
+     */
     addPlaceholderRowIfAppropriate(rowList: RowListType, rowIndex: number) {
       const beforeRow = (rowIndex > 0) && rowList.getRowByIndex(rowIndex - 1);
       const afterRow = (rowIndex < rowList.rowCount) && rowList.getRowByIndex(rowIndex);
