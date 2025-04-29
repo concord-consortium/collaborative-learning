@@ -21,7 +21,7 @@ type PortalInfo = {
 type PortalInfoItem = {portalInfo: PortalInfo};
 type UnitJsonItem = {unitJson: PartialUnitJson};
 
-type AuthenticatedState =
+export type AuthenticatedState =
   {state: "start"} |
   {state: "loadingClasses"} & PortalInfoItem |
   {state: "loadedClasses",
