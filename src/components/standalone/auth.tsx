@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { observer } from "mobx-react";
-import { getPortalStandaloneSignInOrRegisterUrl, removeAuthParamsAndClass } from "../../utilities/auth-utils";
+import { getPortalStandaloneSignInOrRegisterUrl, removeAuthParams } from "../../utilities/auth-utils";
 import { useStores } from "../../hooks/use-stores";
 import { urlParams } from "../../utilities/url-params";
 import { createPortalClass, createPortalOffering, getPortalClasses } from "../../lib/portal-api";
@@ -69,7 +69,7 @@ export const startCLUE = (classWord: string): AuthenticatedState => {
 
   // TODO: in next JIRA story update the url with the class and offering and start the normal CLUE user auth
   // by setting the user.standaloneAuth to undefined and setting appMode to "authed" and then rerunning authAndConnect()
-  // const url = removeAuthParamsAndClass(window.location.href);
+  // const url = removeAuthParams(window.location.href);
 
   return {
     state: "startingCLUE",
@@ -82,7 +82,9 @@ export const createPortalOfferingForUnit = async (
 ) => {
   const { domain, rawPortalJWT } = portalInfo;
   const name = unitJson.title;
-  const url = removeAuthParamsAndClass(window.location.href);
+  // the class is removed from the URL so that it doesn't get passed to the offering
+  // as the url is used to create a single external activity for the unit
+  const url = removeAuthParams(window.location.href, {removeClass: true});
 
   return createPortalOffering(domain, rawPortalJWT, classId, url, name );
 };

@@ -172,7 +172,7 @@ export const getPortalStandaloneSignInOrRegisterUrl = () => {
   }
 
   // pass all the current parameters to the login URL, minus any current auth params
-  const cleanedUrl = new URL(removeAuthParamsAndClass(window.location.href));
+  const cleanedUrl = new URL(removeAuthParams(window.location.href));
   const loginUrlParams = cleanedUrl.searchParams;
 
   // update the authDomain to be the portal URL
@@ -200,7 +200,10 @@ export const getPortalStandaloneSignInOrRegisterUrl = () => {
   return `${basePortalUrl}${PORTAL_SIGNIN_OR_REGISTER_PATH}?${authParams.toString()}`;
 };
 
-export const removeAuthParamsAndClass = (url: string) => {
+type RemoveAutParamsOptions = {
+  removeClass?: boolean;
+}
+export const removeAuthParams = (url: string, options?: RemoveAutParamsOptions) => {
   const newUrl = new URL(url);
   const searchParams = newUrl.searchParams;
   searchParams.delete("authDomain");
@@ -208,7 +211,9 @@ export const removeAuthParamsAndClass = (url: string) => {
   searchParams.delete("domain");
   searchParams.delete("domain_uid");
   searchParams.delete("token");
-  searchParams.delete("class");
+  if (options?.removeClass) {
+    searchParams.delete("class");
+  }
   newUrl.search = searchParams.toString();
   return newUrl.toString();
 };
