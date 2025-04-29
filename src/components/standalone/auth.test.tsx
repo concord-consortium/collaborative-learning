@@ -51,7 +51,7 @@ describe("Standalone Auth helpers", () => {
         }
       ] as any;
       const result = findMatchingClassAndOfferingIds(classes, "test-class", "test-unit");
-      expect(result).toEqual({ matchingClassId: 1, matchingOfferingId: 1 });
+      expect(result).toEqual({ matchingClassId: 1, matchingClassWord: "test-class", matchingOfferingId: 1 });
     });
 
     it("should return undefined if no matching class or offering is found", () => {

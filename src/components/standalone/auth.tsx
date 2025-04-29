@@ -61,8 +61,9 @@ export const findMatchingClassAndOfferingIds = (classes: IPortalClassInfo[], cla
     matchingClass = classes.find((clazz) => !!findMatchingOffering(clazz, unit));
   }
   const matchingOfferingId = matchingClass && unit ? findMatchingOffering(matchingClass, unit)?.id : undefined;
+  const matchingClassWord = matchingClass ? matchingClass.class_word : undefined;
 
-  return {matchingClassId: matchingClass?.id, matchingOfferingId};
+  return {matchingClassId: matchingClass?.id, matchingClassWord, matchingOfferingId};
 };
 
 export const startCLUE = (classWord: string): AuthenticatedState => {
@@ -165,14 +166,15 @@ export const StandAloneAuthComponent: React.FC = observer(() => {
           setAuthenticatedState({state: "loadingClasses", portalInfo});
 
           const classes = await getPortalClasses(domain, standaloneAuth.rawPortalJWT);
-          const {matchingClassId, matchingOfferingId} = findMatchingClassAndOfferingIds(classes, classWord, unit);
+          const result = findMatchingClassAndOfferingIds(classes, classWord, unit);
+          const {matchingClassId, matchingClassWord, matchingOfferingId} = result;
 
           const unitJson = await getUnitJson(unit, curriculumConfig);
 
           const loadedClassState: AuthenticatedState = {
             state: "loadedClasses",
             classes,
-            classWord,
+            classWord: matchingClassWord,
             classId: matchingClassId,
             offeringId: matchingOfferingId,
             unitJson,
