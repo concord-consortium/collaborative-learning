@@ -195,8 +195,10 @@ context('Bar Graph Tile', function () {
       textMatchesList(barGraph.getYAxisTickLabel(workspace), ['0', '1', '2', '3', '4', '5']);
       barGraph.getBar(workspace).should('have.length', 2);
       barGraph.getDatasetLabel(workspace).should('have.text', 'Table Data 1');
-      barGraph.getSortByMenuButton(workspace).should('have.text', 'None');
-      barGraph.getSecondaryValueName(workspace).should('have.length', 1).and('have.text', 'x');
+      barGraph.getSortByMenuButton(workspace).should('have.text', 'x');
+      barGraph.getSecondaryValueName(workspace).should('have.length', 2);
+      barGraph.getSecondaryValueName(workspace).eq(0).should('have.text', 'X');
+      barGraph.getSecondaryValueName(workspace).eq(1).should('have.text', 'XX');
     }
 
     cy.get("@log").its("lastCall.args.0").should("equal", LogEventName.TILE_LINK);
@@ -232,7 +234,7 @@ context('Bar Graph Tile', function () {
     }
 
     cy.log('Change Sort By');
-    barGraph.getSortByMenuButton().should('have.text', 'None');
+    barGraph.getSortByMenuButton().should('have.text', 'x');
 
     // Cannot change sort by in read-only views
     for (const workspace of workspaces.slice(1)) {
@@ -261,9 +263,9 @@ context('Bar Graph Tile', function () {
     // Undo-redo sort by
     clueCanvas.getUndoTool().click();
     for (const workspace of workspaces) {
-      barGraph.getSortByMenuButton(workspace).should('have.text', 'None');
+      barGraph.getSortByMenuButton(workspace).should('have.text', 'x');
       barGraph.getBar(workspace).should('have.length', 2);
-      barGraph.getSecondaryValueName(workspace).should('have.text', 'x');
+      barGraph.getSecondaryValueName(workspace).should('have.text', 'XXX');
     }
     clueCanvas.getRedoTool().click();
     for (const workspace of workspaces) {
@@ -290,8 +292,10 @@ context('Bar Graph Tile', function () {
       textMatchesList(barGraph.getYAxisTickLabel(workspace), ['0', '2', '4', '6', '8', '10']); // there are 6 Ys in this view so scale expands.
       barGraph.getBar(workspace).should('have.length', 2);
       barGraph.getDatasetLabel(workspace).should('have.text', 'Table Data 1');
-      barGraph.getSortByMenuButton(workspace).should('have.text', 'None');
-      barGraph.getSecondaryValueName(workspace).should('have.length', 1).and('have.text', 'y');
+      barGraph.getSortByMenuButton(workspace).should('have.text', 'y');
+      barGraph.getSecondaryValueName(workspace).should('have.length', 2);
+      barGraph.getSecondaryValueName(workspace).eq(0).should('have.text', 'Y');
+      barGraph.getSecondaryValueName(workspace).eq(1).should('have.text', 'YY');
     }
 
     cy.get("@log").its("lastCall.args.0").should("equal", LogEventName.BARGRAPH_TOOL_CHANGE);
@@ -515,13 +519,19 @@ context('Bar Graph Tile', function () {
     cy.log('Check color change when there is no secondary attribute');
     barGraph.getBar().should('have.length', 2).should('have.attr', 'fill', clueDataColors[0]);
     barGraph.getBarColorMenu().should('not.be.visible');
-    barGraph.getBarColorButton().should('have.length', 1).click();
+    barGraph.getBarColorButton().should('have.length', 2);
+    barGraph.getBarColorButton().eq(0).click();
     barGraph.getBarColorMenu(workspace, tileIndex, 0).should('be.visible');
     barGraph.getBarColorMenuButtons(workspace, tileIndex, 0).should('have.length', 12);
-    barGraph.getBarColorMenuButtons(workspace, tileIndex, 0).eq(0).click({force: true});
+    barGraph.getBarColorMenuButtons(workspace, tileIndex, 0).eq(1).click({force: true});
     barGraph.getBarColorMenu(workspace, tileIndex, 0).should('not.be.visible');
-    barGraph.getBar().eq(0).should('have.attr', 'fill', clueDataColors[0]);
+    barGraph.getBar().eq(0).should('have.attr', 'fill', clueDataColors[1]);
     barGraph.getBar().eq(1).should('have.attr', 'fill', clueDataColors[0]);
+    barGraph.getBarColorButton().eq(1).click();
+    barGraph.getBarColorMenu(workspace, tileIndex, 1).should('be.visible');
+    barGraph.getBarColorMenuButtons(workspace, tileIndex, 1).eq(2).click({force: true});
+    barGraph.getBar().eq(0).should('have.attr', 'fill', clueDataColors[1]);
+    barGraph.getBar().eq(1).should('have.attr', 'fill', clueDataColors[2]);
 
     cy.log('Check color change when there is a secondary attribute');
     barGraph.getSortByMenuButton(workspace).click();
@@ -569,5 +579,12 @@ context('Bar Graph Tile', function () {
     barGraph.getBar().eq(2).should('have.attr', 'fill', clueDataColors[2]);
     barGraph.getBar().eq(3).should('have.attr', 'fill', clueDataColors[3]);
 
+    cy.log("Check secondary attribute removal reverts bars to previously selected colors.");
+    barGraph.getSortByMenuButton().click();
+    barGraph.getChakraMenuItem().eq(0).click();
+    barGraph.getBar().should("have.length", 2);
+    barGraph.getBarColorButton().should('have.length', 2);
+    barGraph.getBar().eq(0).should('have.attr', 'fill', clueDataColors[1]);
+    barGraph.getBar().eq(1).should('have.attr', 'fill', clueDataColors[2]);
   });
 });

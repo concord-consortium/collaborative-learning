@@ -2,7 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { Menu, MenuButton, MenuItem, MenuList, Portal } from '@chakra-ui/react';
 import { useBarGraphModelContext } from './bar-graph-content-context';
-import { LegendSecondaryRow } from './legend-secondary-row';
+import { LegendColorRow } from './legend-color-row';
 
 import RemoveDataIcon from "../../assets/remove-data-icon.svg";
 import DropdownCaretIcon from "../../assets/dropdown-caret.svg";
@@ -47,11 +47,12 @@ export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
   const dataSet = model.sharedModel.dataSet;
   const dataSetName = model.sharedModel.name;
   const allAttributes = dataSet?.attributes || [];
-  const availableAttributes = allAttributes.filter((a) => a.id !== model.primaryAttribute);
-  const currentPrimary = dataSet?.attrFromID(model.primaryAttribute);
+  const availableSecondaryAttributes = allAttributes.filter((a) => a.id !== model.primaryAttribute);
+  const currentPrimary = model.primaryAttribute ? dataSet?.attrFromID(model.primaryAttribute) : undefined;
   const currentSecondary = model.secondaryAttribute ? dataSet?.attrFromID(model.secondaryAttribute) : undefined;
-  const currentLabel = currentSecondary?.name || "None";
+  const currentLabel = currentSecondary?.name || currentPrimary?.name || "None";
 
+  const primaryKeys = model.primaryKeys;
   const secondaryKeys = model.secondaryKeys;
 
   return (
@@ -82,9 +83,18 @@ export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
             </MenuButton>
             <Portal>
               <MenuList>
-                <MenuItem isDisabled={readOnly} onClick={() => setSecondaryAttribute(undefined)}>None</MenuItem>
-                {availableAttributes.map((a) => (
-                  <MenuItem key={a.id} isDisabled={readOnly} onClick={() => setSecondaryAttribute(a.id)}>
+                <MenuItem
+                  isDisabled={readOnly || !currentSecondary}
+                  onClick={() => setSecondaryAttribute(undefined)}
+                >
+                  {currentPrimary?.name}
+                </MenuItem>
+                {availableSecondaryAttributes.map((a) => (
+                  <MenuItem
+                    key={a.id}
+                    isDisabled={readOnly || currentSecondary?.id === a.id}
+                    onClick={() => setSecondaryAttribute(a.id)}
+                  >
                     {a.name}
                   </MenuItem>
                 ))}
@@ -93,10 +103,10 @@ export const LegendArea = observer(function LegendArea ({legendRef}: IProps) {
           </Menu>
         </div>
 
-        <div className="secondary-values">
+        <div className="attribute-color-values">
           {currentSecondary
-            ? secondaryKeys.map((key) => <LegendSecondaryRow key={key} attrValue={key} />)
-            : <LegendSecondaryRow attrValue={currentPrimary?.name} />}
+            ? secondaryKeys.map((key) => <LegendColorRow key={key} attrValue={key} />)
+            : primaryKeys.map((key) => <LegendColorRow key={key} attrValue={key} />)}
         </div>
       </div>
     </div>
