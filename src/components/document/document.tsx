@@ -19,6 +19,8 @@ import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { DocumentAnnotationToolbar } from "./document-annotation-toolbar";
 
+import IdeaIcon from "../../assets/idea-icon.svg";
+
 import "./document.scss";
 
 export enum DocumentViewMode {
@@ -113,6 +115,20 @@ const StickyNoteButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <IconButton icon="sticky-note" key="sticky-note" className="action icon-sticky-note"
                 onClickButton={onClick} title="View Notes" />
+  );
+};
+
+const IdeasButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <button
+      title={"Request Idea"}
+      onClick={onClick}
+      className="ideas-button"
+      data-test="ideas-button"
+    >
+      <IdeaIcon/>
+      Ideas?
+    </button>
   );
 };
 
@@ -238,6 +254,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
                 isDeleteDisabled={true}
                 onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
             <DocumentAnnotationToolbar />
+            {this.renderIdeasButton()}
           </div>
         }
         <div className="title" data-test="document-title">
@@ -271,7 +288,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const hasNotes = stickyNotes.length > 0;
     const hasNewStickyNotes = supports.hasNewStickyNotes(user.lastStickyNoteViewTimestamp);
     const showNotes = hasNotes && (stickyNotesVisible || hasNewStickyNotes);
-    return {stickyNotes, hasNotes, showNotes};
+    return {stickyNotes, hasNotes, showNotes, hasNewStickyNotes};
   }
 
   private renderStickyNotes() {
@@ -285,6 +302,15 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         <StickyNoteButton onClick={onClick} />
       </div>
     );
+  }
+
+  private renderIdeasButton() {
+    const { documents } = this.stores;
+    if (documents.invisibleExemplarDocuments.length > 0) {
+      return (
+        <IdeasButton onClick={this.handleIdeasButtonClick} />
+      );
+    }
   }
 
   private openDocument(key: string) {
@@ -426,6 +452,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       </div>
     );
   }
+
+  // The exemplar controller listens to log messages and then decides when to show
+  // the ideas button based on rules defined in exemplar-controller-rules. So we just
+  // need to log the click. See: exemplar-controller.ts, and exemplar-controller-rules.ts
+  private handleIdeasButtonClick = () => {
+    const document = this.props.document;
+    logDocumentEvent(LogEventName.REQUEST_IDEA, { document });
+  };
 
   private handleToggleWorkspaceMode = () => {
     this.props.workspace.toggleMode();

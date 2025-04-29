@@ -225,6 +225,10 @@ class Canvas {
   clickFourUpToolbarButton() {
     return this.getFourUpToolbarButton().click();
   }
+
+  getIdeasButton() {
+    return cy.get('[data-test=ideas-button]');
+  }
 }
 
 export default Canvas;
