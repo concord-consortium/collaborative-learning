@@ -34,9 +34,7 @@ export const BarGraphContentModel = TileContentModel
     if (snapshot.secondaryAttributeColorMap && snapshot.secondaryAttribute) {
       const migratedSnapshot = {
         ...snapshot,
-        attributeColorMap: {
-          [snapshot.secondaryAttribute]: snapshot.secondaryAttributeColorMap
-        }
+        attributeColorMap: snapshot.secondaryAttributeColorMap
       };
       delete migratedSnapshot.secondaryAttributeColorMap;
 

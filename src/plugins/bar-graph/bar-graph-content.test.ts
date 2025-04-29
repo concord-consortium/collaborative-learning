@@ -258,8 +258,10 @@ Object {
       primaryAttribute: "size",
       secondaryAttribute: "location",
       secondaryAttributeColorMap: {
-        "yard": 1,
-        "forest": 2
+        "location": {
+          "yard": 1,
+          "forest": 2
+        }
       }
     };
 
