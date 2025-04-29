@@ -38,6 +38,20 @@ export interface ICopySpec {
   annotations: IArrowAnnotationSnapshot[],
 }
 
+// Replace IDs found in the rowMap with new IDs, stored in an id map.
+const updateRowMap = (rowMap: Record<string, TileRowSnapshotOutType>, tileIdMap: Record<string, string>) => {
+  const updatedRowMap: { [id: string]: TileRowSnapshotOutType; } = {};
+  each(rowMap, (row, id) => {
+    tileIdMap[id] = row.id = uniqueId();
+    row.tiles = row.tiles.map(tileLayout => {
+      tileLayout.tileId = tileIdMap[tileLayout.tileId];
+      return tileLayout;
+    });
+    updatedRowMap[row.id] = row;
+  });
+  return updatedRowMap;
+};
+
 /**
  * The DocumentContentModel builds on the combination of 3 other parts:
  * - BaseDocumentContentModel
@@ -109,20 +123,16 @@ export const DocumentContentModel = DocumentContentModelWithTileDragging.named("
         ?.contentSnapshotPostProcessor?.(tile.content, tileIdMap, asTemplate);
     });
 
-    snapshot.rowMap = (rowMap => {
-      const _rowMap: { [id: string]: TileRowSnapshotOutType } = {};
-      each(rowMap, (row, id) => {
-        tileIdMap[id] = row.id = uniqueId();
-        row.tiles = row.tiles.map(tileLayout => {
-          tileLayout.tileId = tileIdMap[tileLayout.tileId];
-          return tileLayout;
-        });
-        _rowMap[row.id] = row;
-      });
-      return _rowMap;
-    })(snapshot.rowMap);
-
+    snapshot.rowMap = updateRowMap(snapshot.rowMap, tileIdMap);
     snapshot.rowOrder = snapshot.rowOrder.map(rowId => tileIdMap[rowId]);
+    // Also update any rowMaps found nested inside tile content
+    each(snapshot.tileMap, tile => {
+      const tileContent = tile.content;
+      if (isRowListSnapshotOut(tileContent)) {
+        tileContent.rowMap = updateRowMap(tileContent.rowMap, tileIdMap);
+        tileContent.rowOrder = tileContent.rowOrder.map(rowId => tileIdMap[rowId]);
+      }
+    });
 
     return snapshot;
   }

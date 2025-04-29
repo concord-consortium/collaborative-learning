@@ -130,11 +130,14 @@ export const DocumentContentModelWithTileDragging = DocumentContentModelWithAnno
     // will change on each load of the document
     const sourceDocId = self.contentId;
 
+    const allTiles = self.addEmbeddedTilesToDragTiles(self.getDragTileItems(tileIds));
+    const allTileIds = allTiles.map(tile => tile.tileId);
+
     const dragTiles: IDragTilesData = {
       sourceDocId,
-      tiles: self.addEmbeddedTilesToDragTiles(self.getDragTileItems(tileIds)),
-      sharedModels: sharedManager?.getSharedModelDragDataForTiles(tileIds) ?? [],
-      annotations: Object.values(self.getAnnotationsUsedByTiles(tileIds))
+      tiles: allTiles,
+      sharedModels: sharedManager?.getSharedModelDragDataForTiles(allTileIds) ?? [],
+      annotations: Object.values(self.getAnnotationsUsedByTiles(allTileIds))
     };
 
     return dragTiles;
