@@ -64,6 +64,10 @@ export interface ITileContentInfo {
   metadataClass?: typeof TileMetadataModel;
   defaultHeight?: number;
   exportNonDefaultHeight?: boolean;
+  /**
+   * If true, the tile can contain other tiles.
+   */
+  isContainer?: boolean;
   isDataConsumer?: boolean;
   isDataProvider?: boolean;
   isVariableProvider?: boolean;

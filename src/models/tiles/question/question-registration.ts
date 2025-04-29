@@ -13,6 +13,7 @@ registerTileContentInfo({
   displayName: "Question",
   modelClass: QuestionContentModel,
   metadataClass: TileMetadataModel,
+  isContainer: true,
   defaultContent: defaultQuestionContent,
   updateContentForCopy: updateQuestionContentForCopy
 });

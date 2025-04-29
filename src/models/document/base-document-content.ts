@@ -1138,6 +1138,12 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
   }))
   .actions(self => ({
     userAddTile(toolId: string, options?: IDocumentContentAddTileOptions) {
+      if (options?.insertRowInfo?.rowDropId
+        && self.getRowRecursive(options.insertRowInfo.rowDropId)?.isEmbeddedRow()
+        && getTileContentInfo(toolId)?.isContainer) {
+        console.warn("Container tiles cannot be nested");
+        return;
+      }
       const result = self.addTile(toolId, options);
       const newTile = result?.tileId && self.getTile(result.tileId);
       if (newTile) {
@@ -1161,7 +1167,16 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
     },
     userCopyTiles(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
       const rowList = (rowInfo.rowDropId && self.getRowListForRow(rowInfo.rowDropId)) || self;
-      const dropRow = (rowInfo.rowInsertIndex != null) ? rowList.getRowByIndex(rowInfo.rowInsertIndex) : undefined;
+      const dropRow = rowInfo.rowDropId
+        ? self.getRowRecursive(rowInfo.rowDropId)
+        : (rowInfo.rowInsertIndex != null) ? rowList.getRowByIndex(rowInfo.rowInsertIndex) : undefined;
+      // Refuse the drop if there are any container tiles that would create improper nesting.
+      if (dropRow?.isEmbeddedRow()) {
+        if (tiles.find(tile => getTileContentInfo(tile.tileType)?.isContainer)) {
+          console.warn("Container tiles cannot be nested");
+          return;
+        }
+      }
       const results = dropRow?.acceptTileDrop(rowInfo, self.tileMap)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
                       : self.copyTilesIntoNewRows(tiles, rowInfo);
