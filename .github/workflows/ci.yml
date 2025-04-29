@@ -148,7 +148,7 @@ jobs:
         with:
           name: build
           path: dist
-      - uses: concord-consortium/s3-deploy-action@v1
+      - uses: concord-consortium/s3-deploy-action@v1.7.0
         id: s3-deploy
         with:
           build: echo no build
