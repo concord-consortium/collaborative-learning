@@ -35,7 +35,6 @@ export const PersistentUIModelV2 = types
     docFilter: types.optional(DocFilterTypeEnum, "Problem"),
     primarySortBy: types.optional(types.string, "Group"),
     secondarySortBy: types.optional(types.string, "None"),
-    selectedSecondaryDocumentKey: types.maybe(types.string),
     showAnnotations: true,
     showTeacherContent: true,
     showChatPanel: false,
