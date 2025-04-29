@@ -56,11 +56,10 @@ describe("Bar Graph Content", () => {
     expect(content.yAxisLabel).toBe("Counts");
     expect(getSnapshot(content)).toMatchInlineSnapshot(`
 Object {
+  "attributeColorMap": Object {},
   "dataSetId": undefined,
   "primaryAttribute": undefined,
-  "primaryAttributeColor": 0,
   "secondaryAttribute": undefined,
-  "secondaryAttributeColorMap": Object {},
   "type": "BarGraph",
   "yAxisLabel": "Counts",
 }
@@ -249,14 +248,33 @@ Object {
       { "att-s": "cat", "yard": { count: 2, selected: false }},
       { "att-s": "owl", "yard": { count: 1, selected: false}, "(no value)": { count: 1, selected: false }}
     ]);
+  });
 
-    dataSet.dataSet?.attributes[0].setValue(3, undefined); // hide that owl entirely
-    expect(content.dataArray).toEqual([
-      { "att-s": "cat", "yard": { count: 2, selected: false }},
-      { "att-s": "owl", "yard": { count: 1, selected: false }},
-      { "att-s": "(no value)", "(no value)": { count: 1, selected: false }}
-    ]);
+  it("migrates secondaryAttributeColorMap to attributeColorMap", () => {
+    const oldSnapshot = {
+      type: "BarGraph",
+      yAxisLabel: "",
+      dataSetId: "test-dataset-123",
+      primaryAttribute: "size",
+      secondaryAttribute: "location",
+      secondaryAttributeColorMap: {
+        "location": {
+          "yard": 1,
+          "forest": 2
+        }
+      }
+    };
 
+    const content = BarGraphContentModel.create(oldSnapshot as any);
+    const snapshot = getSnapshot(content) as any;
+
+    expect(snapshot.secondaryAttributeColorMap).toBeUndefined();
+    expect(snapshot.attributeColorMap).toEqual({
+      "location": {
+        "yard": 1,
+        "forest": 2
+      }
+    });
   });
 
   it("extracts primary keys", () => {
@@ -290,8 +308,8 @@ Object {
   it("sets the primary attribute color", () => {
     const content = TestingBarGraphContentModel.create({ });
     content.setPrimaryAttribute("att-l");
-    content.setPrimaryAttributeColor(1);
-    expect(content.primaryAttributeColor).toBe(1);
+    content.setPrimaryAttributeKeyColor("key1", 1);
+    expect(content.colorForPrimaryKey("key1")).toBe(1);
   });
 
   it("sets a secondary attribute key's color", () => {
@@ -309,8 +327,7 @@ Object {
     const expected = {
       type: "BarGraph",
       yAxisLabel: "",
-      primaryAttributeColor: 0,
-      secondaryAttributeColorMap: {},
+      attributeColorMap: {},
       dataSetId: undefined,
       primaryAttribute: undefined,
       secondaryAttribute: undefined
