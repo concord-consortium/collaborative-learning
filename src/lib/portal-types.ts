@@ -25,6 +25,7 @@ export interface IPortalClassOffering {
   id: number;
   name: string;
   url: string;
+  external_url: string;
   active: boolean;
   locked: boolean;
 }

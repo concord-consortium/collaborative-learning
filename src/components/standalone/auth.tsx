@@ -44,7 +44,7 @@ type AuthenticatedState =
 export const findMatchingOffering = (clazz: IPortalClassInfo, unit: string) => {
   return clazz.offerings.find((offering) => {
     // match both localhost for development and the domain for staging/production
-    const url = new URL(offering.url);
+    const url = new URL(offering.external_url ?? "");
     const domainMatches = ["localhost", "collaborative-learning.concord.org"].includes(url.hostname);
     const unitMatches = url.searchParams.get("unit") === unit;
     return domainMatches && unitMatches;
@@ -64,8 +64,6 @@ export const findMatchingClassAndOfferingIds = (classes: IPortalClassInfo[], cla
 
   return {matchingClassId: matchingClass?.id, matchingOfferingId};
 };
-
-
 
 export const startCLUE = (classWord: string): AuthenticatedState => {
 
