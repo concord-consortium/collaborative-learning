@@ -89,7 +89,6 @@ describe('SortWorkView Tests', () => {
     resourcesPanel.getDocumentSwitchBtnNext().should('exist').and('not.have.class', 'disabled');
 
     resourcesPanel.getDocumentCloseButton().click();
-    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().should('be.visible'); // Verify the document is closed
   });
 
@@ -243,13 +242,11 @@ describe('SortWorkView Tests', () => {
     resourcesPanel.getDocumentCloseButton().should("exist").click();
 
     cy.log("open personal doc and make sure Edit button doesn't show and Close button shows");
-    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().contains(studentPersonalDocs[0]).click();
     resourcesPanel.getDocumentEditButton().should("not.exist");
     resourcesPanel.getDocumentCloseButton().should("exist").click();
 
     cy.log("open exemplar doc and make sure Edit button doesn't show and Close button shows");
-    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.getSortWorkItem().contains(exemplarDocs[0]).click();
     resourcesPanel.getDocumentEditButton().should("not.exist");
     resourcesPanel.getDocumentCloseButton().should("exist");
@@ -261,7 +258,6 @@ describe('SortWorkView Tests', () => {
     resourcesPanel.getDocumentCloseButton().click();
 
     cy.log("check all problem and personal docs show in the correct group");
-    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     studentProblemDocs.forEach(doc => {
       sortWork.checkDocumentInGroup("Group 5", doc);
     });
@@ -323,7 +319,6 @@ describe('SortWorkView Tests', () => {
     chatPanel.getChatCloseButton().click();
     cy.openTopTab('sort-work');
 
-    cy.get('.section-header-arrow').click({multiple: true}); // Open the sections
     sortWork.checkDocumentInGroup("Diverging Designs", exemplarDocs[0]);
 
     cy.log("remove the teacher added tag and reload");
