@@ -1,5 +1,5 @@
 import { updateQuestionContentForCopy } from "./question-utils";
-import { kQuestionTileType } from "./question-content";
+import { kQuestionTileType } from "./question-types";
 
 describe("question-utils", () => {
   describe("updateQuestionContentForCopy", () => {
@@ -7,13 +7,15 @@ describe("question-utils", () => {
       const content = {
         type: kQuestionTileType,
         version: 1,
-        locked: false
+        locked: false,
+        questionId: "123456"
       };
       const updatedContent = updateQuestionContentForCopy(content, true);
       expect(updatedContent).toEqual({
         type: kQuestionTileType,
         version: 1,
-        locked: true
+        locked: true,
+        questionId: "123456"
       });
     });
 
@@ -21,14 +23,18 @@ describe("question-utils", () => {
       const content = {
         type: kQuestionTileType,
         version: 1,
-        locked: true
+        locked: true,
+        questionId: "123456"
       };
       const updatedContent = updateQuestionContentForCopy(content, false);
       expect(updatedContent).toEqual({
         type: kQuestionTileType,
         version: 1,
-        locked: false
+        locked: false,
+        questionId: expect.stringMatching(/^.{6}$/)
       });
+      // Ensure the new questionId is different from the original
+      expect(updatedContent.questionId).not.toBe(content.questionId);
     });
 
     it("returns unchanged content for non-question tiles", () => {

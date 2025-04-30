@@ -1,3 +1,4 @@
+import { resetMockUniqueId } from "../../document/document-content-tests/dc-test-utils";
 import { getSnapshot } from "mobx-state-tree";
 import { omitUndefined } from "../../../utilities/test-utils";
 import { preprocessImportFormat } from "./geometry-import";
@@ -10,16 +11,6 @@ jest.mock("../../image-map", () => ({
     getImage: (...args: any[]) => getImageMock(...args)
   }
 }));
-
-// mock uniqueId so we can recognize auto-generated IDs
-let idCount = 0;
-jest.mock("../../../utilities/js-utils", () => {
-  const { uniqueId, ...others } = jest.requireActual("../../../utilities/js-utils");
-  return {
-    uniqueId: () => `testid-${++idCount}`,
-    ...others
-  };
-});
 
 const kDefaultTestGeometryModel = {
   type: kGeometryTileType,
@@ -47,7 +38,7 @@ const testRoundTrip = (input: any) => {
 describe("Geometry import", () => {
 
   beforeEach(() => {
-    idCount = 0;
+    resetMockUniqueId();
   });
 
   it("ignores non-importable content", () => {

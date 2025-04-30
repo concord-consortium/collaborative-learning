@@ -1,3 +1,4 @@
+import { resetMockUniqueId } from "../../document/document-content-tests/dc-test-utils";
 import { clone, isEqualWith } from "lodash";
 import { destroy, getSnapshot } from "mobx-state-tree";
 import {
@@ -35,15 +36,6 @@ jest.mock( "../../../utilities/image-utils", () => ({
 const mockLogTileChangeEvent = jest.fn();
 jest.mock("../log/log-tile-change-event", () => ({
   logTileChangeEvent: (...args: any[]) => mockLogTileChangeEvent()
-}));
-
-// mock uniqueId so we can recognize auto-generated IDs
-const { uniqueId, castArrayCopy, safeJsonParse, notEmpty } = jest.requireActual("../../../utilities/js-utils");
-jest.mock("../../../utilities/js-utils", () => ({
-  uniqueId: () => `testid-${uniqueId()}`,
-  castArrayCopy: (itemOrArray: any) => castArrayCopy(itemOrArray),
-  safeJsonParse: (json: string) => safeJsonParse(json),
-  notEmpty: (value:any) => notEmpty(value)
 }));
 
 let message = () => "";
@@ -126,6 +118,10 @@ function exportAndSimplifyIds(content: GeometryContentModelType) {
 }
 
 describe("GeometryContent", () => {
+
+  beforeEach(() => {
+    resetMockUniqueId();
+  });
 
   const divId = "1234";
   const divStyle = "width:200px;height:200px";
@@ -1286,13 +1282,7 @@ toMatchInlineSnapshot(`
   \\"board\\": {\\"xAxis\\": {\\"name\\": \\"x\\", \\"label\\": \\"x\\", \\"min\\": -2, \\"unit\\": 18.3, \\"range\\": 26.229508196721312}, \\"yAxis\\": {\\"name\\": \\"y\\", \\"label\\": \\"y\\", \\"min\\": -1, \\"unit\\": 18.3, \\"range\\": 17.486338797814206}},
   \\"objects\\": {
     \\"testid\\": {\\"type\\": \\"point\\", \\"id\\": \\"testid\\", \\"x\\": 0, \\"y\\": 0, \\"snapToGrid\\": true, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
-    \\"jxgid\\": {
-      \\"type\\": \\"polygon\\",
-      \\"id\\": \\"jxgid\\",
-      \\"points\\": [\\"testid\\", \\"testid\\", \\"testid\\"],
-      \\"labelOption\\": \\"none\\",
-      \\"colorScheme\\": 0
-    },
+    \\"jxgid\\": {\\"type\\": \\"polygon\\", \\"id\\": \\"jxgid\\", \\"points\\": [\\"testid\\", \\"testid\\", \\"testid\\"], \\"labelOption\\": \\"none\\", \\"colorScheme\\": 0},
     \\"testid\\": {\\"type\\": \\"point\\", \\"id\\": \\"testid\\", \\"x\\": 1, \\"y\\": 0, \\"snapToGrid\\": true, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
     \\"testid\\": {\\"type\\": \\"point\\", \\"id\\": \\"testid\\", \\"x\\": 0, \\"y\\": 1, \\"snapToGrid\\": true, \\"colorScheme\\": 0, \\"labelOption\\": \\"none\\"},
     \\"testid\\": {\\"type\\": \\"vertexAngle\\", \\"id\\": \\"testid\\", \\"points\\": [\\"testid\\", \\"testid\\", \\"testid\\"]}
