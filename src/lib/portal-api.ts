@@ -101,6 +101,22 @@ export const getPortalOfferings = (
   });
 };
 
+export const joinClass = (domain: string, rawPortalJWT: any, classWord: string) => {
+  return new Promise<void> ((resolve, reject) => {
+    superagent
+      .post(`${domain}api/v1/students/join_class`)
+      .send({class_word: classWord})
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          resolve();
+        }
+      });
+    });
+};
+
 export const getPortalClasses = (domain: string, rawPortalJWT: any) => {
   return new Promise<IPortalClassInfo[]> ((resolve, reject) => {
     superagent
@@ -121,7 +137,12 @@ export const createPortalOffering = (domain: string, rawPortalJWT: any, classId:
   return new Promise<number>((resolve, reject) => {
     superagent
       .post(`${domain}api/v1/offerings/create_for_external_activity`)
-      .send({class_id: classId, name, url })
+      .send({
+        class_id: classId,
+        name,
+        url,
+        append_auth_token: true
+      })
       .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
       .end((err, res) => {
         if (err) {
@@ -250,3 +271,36 @@ function numericOrdinal(offering: IUserPortalOffering) {
   const ord = offering.problemOrdinal.split(".");
   return parseInt(ord[0], 10) * 1000 + parseInt(ord[1], 10);
 }
+
+export const getTeacherJWT = (domain: string, rawPortalJWT: string) => {
+  return new Promise<string>((resolve, reject) => {
+    superagent
+      .get(`${domain}api/v1/jwt/portal?as_teacher=true`)
+      .send({
+        as_teacher: true
+      })
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          resolve(res.body.token);
+        }
+      });
+  });
+};
+
+export const getLearnerJWT = (domain: string, rawPortalJWT: string, offeringId: number) => {
+  return new Promise<string>((resolve, reject) => {
+    superagent
+      .get(`${domain}api/v1/jwt/portal?as_learner=true&offering_id=${offeringId}`)
+      .set("Authorization", `Bearer/JWT ${rawPortalJWT}`)
+      .end((err, res) => {
+        if (err) {
+          reject(getErrorMessage(err, res));
+        } else {
+          resolve(res.body.token);
+        }
+      });
+  });
+};

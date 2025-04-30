@@ -163,6 +163,12 @@ export const authenticate = async (
     user?: UserModelType
   ): Promise<IAuthenticateResponse> => {
   urlParams = urlParams || pageUrlParams;
+
+  // if there is an existing JWT (from standalone auth), we are authed
+  if (user?.standaloneAuthUser?.jwt) {
+    appMode = "authed";
+  }
+
   // TODO: we should be defaulting to appConfig.defaultUnit here rather than the empty string,
   // but some cypress tests rely on the fact that in demo mode the offeringId is prefixed with
   // the unit code, which results in an offeringId of `101` instead of `sas101`.
@@ -232,7 +238,7 @@ export const authenticate = async (
     return generateDevAuthentication(unitCode || curriculumConfig.defaultUnit || "", problemOrdinal);
   }
 
-  await portalService.initialize();
+  await portalService.initialize(user?.standaloneAuthUser);
   const { portalJWT, rawPortalJWT, basePortalUrl, bearerToken, portalHost } = portalService;
 
   if (!basePortalUrl || !bearerToken) {
@@ -244,7 +250,11 @@ export const authenticate = async (
   const { user_type, uid, domain } = portalJWT;
   const { classHash } = classInfo;
   const uidAsString = `${portalJWT.uid}`;
-  const firebaseJWTPromise = getFirebaseJWTWithBearerToken(basePortalUrl, "Bearer", bearerToken, classHash);
+  // TODO: figure out why we need to use bearer tokens here in normal mode
+  // when we already have the portalJWT in all cases
+  const tokenType = user?.standaloneAuthUser ? "Bearer/JWT" : "Bearer";
+  const rawToken = user?.standaloneAuthUser?.rawJWT ?? bearerToken;
+  const firebaseJWTPromise = getFirebaseJWTWithBearerToken(basePortalUrl, tokenType, rawToken, classHash);
   const portalOfferingsPromise = getPortalOfferings(user_type, uid, domain, rawPortalJWT, offeringId);
   const problemIdPromise = getProblemIdForAuthenticatedUser(rawPortalJWT, curriculumConfig, urlParams);
 
@@ -298,6 +308,7 @@ export const authenticate = async (
   Logger.log(LogEventName.INTERNAL_AUTHENTICATED, {id: authenticatedUser.id, portal: portalHost});
 
   return {
+    appMode,
     authenticatedUser,
     classInfo,
     unitCode: newUnitCode,
